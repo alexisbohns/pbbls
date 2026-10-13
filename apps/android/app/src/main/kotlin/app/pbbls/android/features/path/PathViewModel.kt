@@ -11,6 +11,8 @@ import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.PebbleDraftsServicing
+import app.pbbls.android.core.data.delete
+import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.core.model.WeekRollEntry
@@ -290,20 +292,22 @@ class PathViewModel
         fun dismissDeleteError() = _covers.update { it.copy(didDeleteFail = false) }
 
         /**
-         * Confirmed delete of the whole moment (`delete_moment`, its pebble with
-         * it; Part 4 adds the keep-the-moment choice). In `viewModelScope`, not the composition's: the row is
-         * gone server-side the moment the request lands, and a cancelled coroutine
-         * would skip the reload and leave it on screen.
+         * Confirmed delete (R8): the whole moment (`delete_moment`, its pebble
+         * with it) or, for a completed moment, only its pebble (`delete_pebble`,
+         * the row stays as a blank stone). In `viewModelScope`, not the
+         * composition's: the row changes server-side the moment the request
+         * lands, and a cancelled coroutine would skip the reload and leave it
+         * stale on screen.
          */
-        fun confirmDelete() {
+        fun confirmDelete(choice: MomentDeleteChoice) {
             val target = _covers.value.pendingDeletion ?: return
             _covers.update { it.copy(pendingDeletion = null) }
             viewModelScope.launch {
-                runCatchingCancellable { writes.deleteMoment(target.id) }
+                runCatchingCancellable { writes.delete(target.id, target.pebble?.id, choice) }
                     .fold(
                         onSuccess = { reload() },
                         onFailure = {
-                            Log.e(TAG, "delete moment failed", it)
+                            Log.e(TAG, "delete ($choice) failed", it)
                             _covers.update { covers -> covers.copy(didDeleteFail = true) }
                         },
                     )

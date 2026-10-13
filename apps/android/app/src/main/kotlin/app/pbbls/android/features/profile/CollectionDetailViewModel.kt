@@ -10,7 +10,9 @@ import app.pbbls.android.core.data.CollectionsServicing
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.ReferenceDataServicing
+import app.pbbls.android.core.data.delete
 import app.pbbls.android.core.model.Collection
+import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -182,18 +184,19 @@ class CollectionDetailViewModel
 
         fun dismissDeleteError() = _covers.update { it.copy(didDeleteFail = false) }
 
-        fun confirmDelete() {
+        /** R8: the whole moment, or only its pebble; either way the row leaves this list. */
+        fun confirmDelete(choice: MomentDeleteChoice) {
             val target = _covers.value.pendingDeletion ?: return
             _covers.update { it.copy(pendingDeletion = null) }
             viewModelScope.launch {
                 withContext(NonCancellable) {
                     runCatchingCancellable {
-                        writes.deleteMoment(target.id)
+                        writes.delete(target.id, target.pebble?.id, choice)
                         refs.refreshCollections()
                     }.fold(
                         onSuccess = { reload() },
                         onFailure = {
-                            Log.e(TAG, "delete moment failed", it)
+                            Log.e(TAG, "delete ($choice) failed", it)
                             _covers.update { covers -> covers.copy(didDeleteFail = true) }
                         },
                     )

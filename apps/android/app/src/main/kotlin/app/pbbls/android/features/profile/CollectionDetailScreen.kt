@@ -32,7 +32,6 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
-import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
@@ -42,6 +41,7 @@ import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PathMoment
+import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.core.ui.PebbleRow
 import app.pbbls.android.features.profile.components.CollectionModeBadge
 import java.time.format.DateTimeFormatter
@@ -51,9 +51,8 @@ import java.util.Locale
  * Pushed detail for one collection — ports iOS `CollectionDetailView.swift`:
  * a subheader row (mode badge + live pebble count), the moments whose pebble is
  * in the collection, grouped by calendar month with locale-formatted headers
- * (D14), tap → the moment's read page (R9), long-press → `delete_moment` with
- * confirm, and an
- * Edit top-bar action opening [CollectionFormScreen] as a cover (D9 surface
+ * (D14), tap → the moment's read page (R9), long-press → the R8 delete
+ * choice, and an Edit top-bar action opening [CollectionFormScreen] as a cover (D9 surface
  * swap). The NavHost passes only the collection id, so
  * [CollectionDetailViewModel] fetches the collection itself (same named
  * deviation as the soul detail), and it owns the month grouping — only the
@@ -102,9 +101,8 @@ fun CollectionDetailScreen(
     )
 
     covers.pendingDeletion?.let { target ->
-        ConfirmDeleteDialog(
-            title = stringResource(R.string.pebble_delete_confirm_title, target.name ?: stringResource(R.string.moment_untitled)),
-            message = stringResource(R.string.pebble_delete_confirm_message),
+        MomentDeleteDialog(
+            hasPebble = target.isCompleted,
             onConfirm = viewModel::confirmDelete,
             onDismiss = viewModel::cancelDelete,
         )

@@ -2,6 +2,7 @@ package app.pbbls.android.features.profile
 
 import app.pbbls.android.R
 import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.MomentDetail
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.testing.FakeMomentReadService
@@ -128,13 +129,35 @@ class SoulDetailViewModelTest {
             advanceUntilIdle()
 
             viewModel.requestDelete(moment("m1").toPathMoment())
-            viewModel.confirmDelete()
+            viewModel.confirmDelete(MomentDeleteChoice.MOMENT)
             advanceUntilIdle()
 
             assertEquals(listOf("m1"), writes.deletedMoments)
             assertEquals(1, refs.refreshSoulsCount)
             assertEquals(2, service.loadSoulCount)
             assertNull(viewModel.covers.value.pendingDeletion)
+        }
+
+    /** R8: keeping the moment sends the PEBBLE id to `delete_pebble`; the row leaves the list on reload. */
+    @Test
+    fun `deleting only the pebble keeps the moment`() =
+        runTest {
+            val service = FakeSoulsService(soul = soul("a"))
+            val writes = FakeMomentWriteService()
+            val refs = FakeReferenceDataService()
+            val moments = FakeMomentReadService(withSoul = listOf(moment("m1")))
+            val viewModel = viewModel(souls = service, moments = moments, writes = writes, refs = refs)
+            viewModel.start("a")
+            advanceUntilIdle()
+
+            viewModel.requestDelete(moment("m1").toPathMoment())
+            viewModel.confirmDelete(MomentDeleteChoice.PEBBLE_ONLY)
+            advanceUntilIdle()
+
+            assertEquals(listOf("pebble-1"), writes.deletedPebbles)
+            assertTrue(writes.deletedMoments.isEmpty())
+            assertEquals(1, refs.refreshSoulsCount)
+            assertEquals(2, service.loadSoulCount)
         }
 
     @Test
@@ -148,7 +171,7 @@ class SoulDetailViewModelTest {
 
             writes.failNext = IOException("offline")
             viewModel.requestDelete(moment("m1").toPathMoment())
-            viewModel.confirmDelete()
+            viewModel.confirmDelete(MomentDeleteChoice.MOMENT)
             advanceUntilIdle()
 
             assertTrue(viewModel.covers.value.didDeleteFail)

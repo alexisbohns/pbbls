@@ -1,18 +1,22 @@
 package app.pbbls.android.features.path
 
+import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.testing.FakeMomentReadService
+import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
+import app.pbbls.android.testing.recordEffects
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
 
-/** The moment read page's load and resume-refresh contract (#849, #852, #1048). */
+/** The moment read page's load, resume-refresh and delete contract (#849, #852, #1048). */
 class PebbleDetailViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -22,7 +26,7 @@ class PebbleDetailViewModelTest {
         runTest {
             val moment = UiFixtures.momentDetail()
             val service = FakeMomentReadService(moments = mapOf("moment-1" to moment))
-            val viewModel = PebbleDetailViewModel(service)
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
 
             viewModel.start("moment-1")
             assertEquals(PebbleDetailUiState.Loading, viewModel.uiState.value)
@@ -37,7 +41,7 @@ class PebbleDetailViewModelTest {
         runTest {
             val bare = UiFixtures.momentDetail(pebble = null, name = null)
             val service = FakeMomentReadService(moments = mapOf("moment-1" to bare))
-            val viewModel = PebbleDetailViewModel(service)
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
 
             viewModel.start("moment-1")
             advanceUntilIdle()
@@ -52,7 +56,7 @@ class PebbleDetailViewModelTest {
         runTest {
             val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail()))
             service.failNext = IOException("offline")
-            val viewModel = PebbleDetailViewModel(service)
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
 
             viewModel.start("moment-1")
             advanceUntilIdle()
@@ -69,7 +73,7 @@ class PebbleDetailViewModelTest {
     fun `starting with the same id does not refetch`() =
         runTest {
             val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail()))
-            val viewModel = PebbleDetailViewModel(service)
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
 
             viewModel.start("moment-1")
             advanceUntilIdle()
@@ -87,7 +91,7 @@ class PebbleDetailViewModelTest {
     fun `resuming after the first time refetches the same moment`() =
         runTest {
             val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail(name = "A walk")))
-            val viewModel = PebbleDetailViewModel(service)
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
             viewModel.start("moment-1")
             advanceUntilIdle()
 
@@ -118,7 +122,7 @@ class PebbleDetailViewModelTest {
                             "moment-2" to UiFixtures.momentDetail(id = "moment-2", name = "Another"),
                         ),
                 )
-            val viewModel = PebbleDetailViewModel(service)
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
             viewModel.start("moment-1")
             advanceUntilIdle()
 
@@ -126,5 +130,93 @@ class PebbleDetailViewModelTest {
             advanceUntilIdle()
 
             assertEquals(listOf("moment-1", "moment-2"), service.loadedMomentIds)
+        }
+
+    // MARK: - Delete (R7, R8)
+
+    @Test
+    fun `deleting the moment from the read page closes it`() =
+        runTest {
+            val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
+            val write = FakeMomentWriteService()
+            val vm = PebbleDetailViewModel(read, write)
+            val effects = recordEffects(vm.effects)
+            vm.start("m-1")
+            advanceUntilIdle()
+
+            vm.requestDelete()
+            assertTrue(vm.pendingDelete.value)
+            vm.confirmDelete(MomentDeleteChoice.MOMENT)
+            advanceUntilIdle()
+
+            assertEquals(listOf("m-1"), write.deletedMoments)
+            assertFalse(vm.pendingDelete.value)
+            assertEquals(listOf(PebbleDetailEffect.MomentDeleted), effects.values)
+            effects.stop()
+        }
+
+    @Test
+    fun `deleting only the pebble reloads the page as a bare moment`() =
+        runTest {
+            val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
+            val write = FakeMomentWriteService()
+            val vm = PebbleDetailViewModel(read, write)
+            val effects = recordEffects(vm.effects)
+            vm.start("m-1")
+            advanceUntilIdle()
+
+            read.moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1", pebble = null))
+            vm.requestDelete()
+            vm.confirmDelete(MomentDeleteChoice.PEBBLE_ONLY)
+            advanceUntilIdle()
+
+            assertEquals(listOf("pebble-1"), write.deletedPebbles)
+            assertTrue(write.deletedMoments.isEmpty())
+            assertNull((vm.uiState.value as PebbleDetailUiState.Content).detail.pebble)
+            assertTrue(effects.values.isEmpty())
+            effects.stop()
+        }
+
+    /** R15: a failed delete keeps the page and says "Couldn't delete". */
+    @Test
+    fun `a failed delete keeps the page and reports`() =
+        runTest {
+            val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
+            val write = FakeMomentWriteService()
+            val vm = PebbleDetailViewModel(read, write)
+            val effects = recordEffects(vm.effects)
+            vm.start("m-1")
+            advanceUntilIdle()
+
+            write.failNext = IOException("offline")
+            vm.requestDelete()
+            vm.confirmDelete(MomentDeleteChoice.MOMENT)
+            advanceUntilIdle()
+
+            assertTrue(vm.didDeleteFail.value)
+            assertTrue(vm.uiState.value is PebbleDetailUiState.Content)
+            assertTrue(effects.values.isEmpty())
+
+            vm.dismissDeleteError()
+            assertFalse(vm.didDeleteFail.value)
+            effects.stop()
+        }
+
+    @Test
+    fun `cancelling a delete writes nothing`() =
+        runTest {
+            val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
+            val write = FakeMomentWriteService()
+            val vm = PebbleDetailViewModel(read, write)
+            vm.start("m-1")
+            advanceUntilIdle()
+
+            vm.requestDelete()
+            vm.cancelDelete()
+            advanceUntilIdle()
+
+            assertFalse(vm.pendingDelete.value)
+            assertTrue(write.deletedMoments.isEmpty())
+            assertTrue(write.deletedPebbles.isEmpty())
         }
 }

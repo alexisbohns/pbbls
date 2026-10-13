@@ -392,6 +392,12 @@
     <string name="moment_untitled">Sans titre</string>
     <string name="moment_blank_a11y">Pas encore un galet</string>
     <string name="moment_delete_error">Impossible de supprimer</string>
+    <string name="delete_moment_title">Supprimer ce moment ?</string>
+    <string name="delete_pebble_title">Supprimer ce galet ?</string>
+    <string name="delete_pebble_message">Garder le moment le laisse sur ton chemin comme une pierre vierge. Supprimer le moment retire aussi sa photo. Cette action est irréversible.</string>
+    <string name="delete_pebble_keep_moment">Supprimer le galet, garder le moment</string>
+    <string name="delete_moment_too">Supprimer aussi le moment</string>
+    <string name="delete_moment">Supprimer le moment</string>
 
     <!-- ==== Atelier de glyphes (M43 · Android Glyph Studio &amp; Store) ==== -->
     <string name="carve_title">Nouveau glyphe</string>

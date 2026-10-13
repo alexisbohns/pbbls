@@ -33,11 +33,14 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.LocalEmotionPaletteService
+import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.SharedPebbleLink
 import app.pbbls.android.core.model.Visibility
+import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.read.PebblePrivacyBadge
 import app.pbbls.android.features.path.read.PebbleReadView
 
@@ -47,12 +50,15 @@ import app.pbbls.android.features.path.read.PebbleReadView
  * decides which, and owns dismissal. Loads a `MomentDetail` through
  * [PebbleDetailViewModel], owns its loading/error/retry state, hosts the top
  * bar, and delegates the body to the pure [PebbleReadView]. System back is
- * the scene's own (the sheet's window, or `NavDisplay` beside Path) — this
- * screen has no in-flight write to protect, so it needs no `BackHandler`.
+ * the scene's own (the sheet's window, or `NavDisplay` beside Path) — its one
+ * write, the delete, runs uncancellable in the ViewModel, so it needs no
+ * `BackHandler`.
  *
  * The ⋮ menu (R7) opens Edit moment ([onEditMoment]) and, when the moment
  * carries your pebble, Edit pebble ([onEditPebble]); returning from either is
- * picked up by [PebbleDetailViewModel.onResumed] rather than a callback.
+ * picked up by [PebbleDetailViewModel.onResumed] rather than a callback. Its
+ * last item, Delete, asks what to delete (R8): the moment closes the page
+ * ([onMomentDeleted]), only the pebble leaves it open as a bare moment.
  */
 @Composable
 fun PebbleDetailScreen(
@@ -60,13 +66,22 @@ fun PebbleDetailScreen(
     modifier: Modifier = Modifier,
     onEditMoment: () -> Unit = {},
     onEditPebble: () -> Unit = {},
+    onMomentDeleted: () -> Unit = {},
     viewModel: PebbleDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val pendingDelete by viewModel.pendingDelete.collectAsStateWithLifecycle()
+    val didDeleteFail by viewModel.didDeleteFail.collectAsStateWithLifecycle()
     val palettes = LocalEmotionPaletteService.current
     val context = LocalContext.current
 
     LaunchedEffect(momentId) { viewModel.start(momentId) }
+
+    ObserveUiEffects(viewModel.effects) { effect ->
+        when (effect) {
+            PebbleDetailEffect.MomentDeleted -> onMomentDeleted()
+        }
+    }
 
     // Returning from an edit entry must re-read the moment: the ViewModel is
     // scoped to the back stack entry, which survives that round trip.
@@ -102,10 +117,22 @@ fun PebbleDetailScreen(
         palette = palette,
         onEditMoment = onEditMoment,
         onEditPebble = onEditPebble,
+        onDelete = viewModel::requestDelete,
         onShare = onShare,
         onRetry = viewModel::retry,
         modifier = modifier,
     )
+
+    if (pendingDelete && detail != null) {
+        MomentDeleteDialog(
+            hasPebble = pebble != null,
+            onConfirm = viewModel::confirmDelete,
+            onDismiss = viewModel::cancelDelete,
+        )
+    }
+    if (didDeleteFail) {
+        DeleteErrorDialog(message = stringResource(R.string.moment_delete_error), onDismiss = viewModel::dismissDeleteError)
+    }
 }
 
 /**
@@ -125,6 +152,7 @@ fun PebbleDetailContent(
     palette: EmotionPalette?,
     onEditMoment: () -> Unit,
     onEditPebble: () -> Unit,
+    onDelete: () -> Unit,
     onShare: (() -> Unit)?,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
@@ -144,6 +172,7 @@ fun PebbleDetailContent(
             hasPebble = detail?.pebble != null,
             onEditMoment = onEditMoment,
             onEditPebble = onEditPebble,
+            onDelete = onDelete,
             onShare = onShare,
             initialMenuOpen = initialMenuOpen,
         )
@@ -168,8 +197,8 @@ fun PebbleDetailContent(
 /**
  * Detail top bar: an optional privacy badge once the pebble is loaded, an
  * optional share button (public pebbles only, M51), and a trailing ⋮ menu
- * (enabled only after load) with Edit moment and, with a pebble, Edit pebble
- * (R7). No back arrow (#940): on a phone it is a sheet,
+ * (enabled only after load) with Edit moment, with a pebble Edit pebble, and
+ * Delete (R7) — no standalone trash button. No back arrow (#940): on a phone it is a sheet,
  * dismissed by drag, scrim or system back; on a large screen Path is beside it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -180,6 +209,7 @@ private fun DetailTopBar(
     hasPebble: Boolean,
     onEditMoment: () -> Unit,
     onEditPebble: () -> Unit,
+    onDelete: () -> Unit,
     onShare: (() -> Unit)?,
     initialMenuOpen: Boolean,
 ) {
@@ -222,7 +252,13 @@ private fun DetailTopBar(
                             },
                         )
                     }
-                    // Part 4 adds Delete here.
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) },
+                        onClick = {
+                            menuOpen = false
+                            onDelete()
+                        },
+                    )
                 }
             }
         },
