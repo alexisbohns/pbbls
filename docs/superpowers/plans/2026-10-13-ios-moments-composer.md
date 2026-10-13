@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Move the iOS app (`apps/ios`) onto the moments/pebbles split: every read and write goes to the new contract (`path_moments`, `v_moments_full`, `save_moment`, `complete_pebble`, `delete_moment`, `delete_moment_media`, `resolve_pebble_glyph`), the stone carves the *derived* glyph from its strokes, and the eleven-step record flow is replaced by a three-step **Capture** flow and a six-step **Complete** flow.
+**Goal:** Move the iOS app (`apps/ios`) onto the moments/pebbles split: every read and write goes to the new contract (`path_moments`, `v_moments_full`, `save_moment`, `complete_pebble`, `delete_pebble`, `delete_moment`, `resolve_pebble_glyph`), the stone carves the *derived* glyph from its strokes, and the eleven-step record flow is replaced by a three-step **Capture** flow and a six-step **Complete** flow.
 
 **Architecture:** One `MomentsService` owns every Supabase name the split introduced, so the contract appears once in the app. Read models (`MomentSummary`, `MomentDetail`, `PebbleGlyph`) decode timestamps as strings through `ISO8601Flexible`, so they never depend on the ambient decoder. The stone renderer takes a `StoneCarving` (`.sample`, `.pebble(PebbleGlyph?)`, `.blank`) instead of a server SVG. Capture and Complete reuse the M58 scaffold (`RecordStepScaffold`, `RecordFlowChrome`, `TapHaptics`, `SnapUploadCoordinator`), each with its own `@Observable` model that fires every haptic, and Complete keeps a device-local autosave keyed by moment id.
 
@@ -44,7 +44,7 @@ To run one suite: `xcodebuild test-without-building -scheme Pebbles -destination
 
 Wherever a step says **"Build & test"**, it means the four commands above (`xcodegen`, `rm -rf …/Build`, `build-for-testing`, `test-without-building`) plus `swiftlint --quiet`.
 
-**Localization.** Every new user-facing literal lands in `Pebbles/Resources/Localizable.xcstrings` with an `en` and a `fr` value. The catalog is formatting-sensitive: insert entries as text at the right alphabetical anchor, never re-serialize the whole file with a JSON tool. The build auto-extracts new literals (`SWIFT_EMIT_LOC_STRINGS=YES`); after the build, open the catalog in Xcode and confirm no entry is `New` or `Stale` and every new row has its `fr` value from the copy table in **Parity decisions §P4**.
+**Localization.** Every new user-facing literal lands in `Pebbles/Resources/Localizable.xcstrings` with an `en` and a `fr` value. The catalog is formatting-sensitive: insert entries as text at the right alphabetical anchor, never re-serialize the whole file with a JSON tool. The build auto-extracts new literals (`SWIFT_EMIT_LOC_STRINGS=YES`); after the build, open the catalog in Xcode and confirm no entry is `New` or `Stale` and every new row has its `fr` value from the **copy catalog** in Parity decisions.
 
 **Errors in red.** The app still renders inline errors with `.red` everywhere; issue #921 swaps them for the orange error token. New code follows the existing pattern (`.foregroundStyle(.red)` with a `// #921` comment) rather than inventing a token here.
 
@@ -54,7 +54,7 @@ Wherever a step says **"Build & test"**, it means the four commands above (`xcod
 
 | # | Branch | What it ships | Stands alone because |
 |---|---|---|---|
-| 1 | `feat/1047-ios-moments-data` | Read models, payloads, `MomentsService`, error mapping, decoder tests; every read moves to `path_moments` / `v_moments_full`; deletes go to `delete_moment` / `delete_moment_media`. **Unbreaks the installed app's reads.** | The old composers still write through `compose-pebble` (live compat), so nothing regresses |
+| 1 | `feat/1047-ios-moments-data` | Read models, payloads, `MomentsService`, error mapping, decoder tests; every read moves to `path_moments` / `v_moments_full`; deletes go to `delete_moment`; photo removal detaches and saves the whole snap set (R6). **Unbreaks the installed app's reads.** | The old composers still write through `compose-pebble` (live compat), so nothing regresses |
 | 2 | `feat/1047-ios-moments-stone` | The stone carves `PebbleGlyph` strokes; `StoneCarving`; blank stone in the neutral ramp | Pure rendering over Part 1's models |
 | 3 | `feat/1047-ios-moments-path` | Untitled names, the bare-moment read page, the two-option delete UX on every surface, soul/collection rows open the read page | Uses Parts 1–2 only |
 | 4 | `feat/1047-ios-moments-complete` | The Complete flow, per-moment autosave, success screen, `check_achievements`, the read page's "Make it a pebble" call to action | Entry point is Part 3's read page |
@@ -88,8 +88,8 @@ grep -rnE 'path_pebbles|v_pebbles_full|pebble_drafts|delete_pebble_media|compose
 |---|---|---|---|---|---|---|
 | 1 | `Features/PebbleMedia/PebbleSnapRepository.swift:48` | storage `pebbles-media` | upload original + thumb | ok | unchanged (paths are `{user}/{snap}`, keyed by snap id, untouched by the split) | — |
 | 2 | `…/PebbleSnapRepository.swift:67` | storage | remove by snap id | ok | unchanged | — |
-| 3 | `…/PebbleSnapRepository.swift:82` | storage | remove by prefix | ok | unchanged; also called for every path `delete_moment` returns | 1 |
-| 4 | `…/PebbleSnapRepository.swift:96` | rpc `delete_pebble_media` | `p_snap_id` | **dropped function** | rpc `delete_moment_media(p_snap_id)` → `storage_path`; method renamed `deleteMomentMedia(snapId:)` | 1 |
+| 3 | `…/PebbleSnapRepository.swift:82` | storage | remove by prefix | ok | unchanged; also called for every path `delete_moment` returns and for detached photos after a save | 1 |
+| 4 | `…/PebbleSnapRepository.swift:96` | rpc `delete_pebble_media` | `p_snap_id` | **dropped function** | removed: no RPC. Removing a photo detaches it in the coordinator; the save sends the whole `snaps` set (`[]`), and the detached files are deleted after a successful save (R6). `delete_moment_media` is never called | 1 |
 | 5 | `…/PebbleSnapRepository.swift:124` | storage | `createSignedURLs` | ok | unchanged | — |
 | 6 | `Features/Path/PebblePublisher.swift:33` | edge fn `compose-pebble` | create | compat (wraps `create_pebble`, `render_svg: null`) | deleted with the old composer; Capture → `save_moment`, Complete → `complete_pebble` | 6 (replacement in 4, 5) |
 | 7 | `Features/Path/PebbleDetailSheet.swift:88` | table `pebbles` | `id, name, description, happened_at, …, render_svg, render_version, glyph_id, emotion:…, pebble_domains(…), pebble_souls(…), collection_pebbles(…), snaps(…)` | **dropped columns** | `MomentsService.moment(id:)` → `v_moments_full` `.eq("id", momentId).single()` | 1 |
@@ -107,7 +107,7 @@ grep -rnE 'path_pebbles|v_pebbles_full|pebble_drafts|delete_pebble_media|compose
 | 22–24 | `…/LogsService.swift:90,106,122` | table `log_reactions` | select / insert / delete | ok | unchanged | — |
 | 25 | `Features/Profile/ProfileView.swift:106` | table `profiles` | `display_name, created_at, glyph_id, handle, public_profile` | ok (`glyph_id` is the profile's) | unchanged | — |
 | 26 | `Features/Profile/ProfileView.swift:128` | table `glyphs` | `strokes` | ok | unchanged | — |
-| 27 | `Features/Profile/Sheets/CreateCollectionSheet.swift:93` | table `collections` | insert `user_id, name, mode` | ok | unchanged (no glyph on create, see P10) | — |
+| 27 | `Features/Profile/Sheets/CreateCollectionSheet.swift:93` | table `collections` | insert `user_id, name, mode` | ok | insert `user_id, name, mode, glyph_id` (R11) | 7 |
 | 28 | `Features/Profile/Sheets/CreateSoulSheet.swift:91` | table `glyphs` | `id, name, strokes, view_box` | ok | unchanged | — |
 | 29 | `Features/Profile/Sheets/CreateSoulSheet.swift:123` | table `souls` | insert + select | ok | unchanged | — |
 | 30 | `Features/Profile/Sheets/SettingsSheet.swift:500` | edge fn `delete-account` | — | ok | unchanged | — |
@@ -134,9 +134,9 @@ grep -rnE 'path_pebbles|v_pebbles_full|pebble_drafts|delete_pebble_media|compose
 | 53 | `…/GlyphMarketService.swift:56` | rpc `buy_glyph` | — | ok | unchanged | — |
 | 54 | `Services/AchievementsService.swift:129` | table `achievements` | — | ok | unchanged | — |
 | 55 | `Services/AchievementsService.swift:140` | table `achievement_unlocks` | — | ok | unchanged | — |
-| 56 | `Services/AchievementsService.swift:151` | rpc `check_achievements` | — | ok (still counts `pebbles`) | unchanged; called once after every successful `complete_pebble` (P8) | 4, 6 |
+| 56 | `Services/AchievementsService.swift:151` | rpc `check_achievements` | — | ok (still counts `pebbles`) | unchanged; called once after every successful `complete_pebble` (A4) | 4, 6 |
 | 57 | `Services/ReferenceDataService.swift:61` | view `v_domains_with_glyph` | `id, slug, name, label, strokes, view_box` | ok | unchanged | — |
-| 58 | `…/ReferenceDataService.swift:67` | table `souls` | `id, name, glyph_id, glyphs(…)` | ok | unchanged (also the read page's soul-glyph source, P6) | — |
+| 58 | `…/ReferenceDataService.swift:67` | table `souls` | `id, name, glyph_id, glyphs(…)` | ok | unchanged (also the read page's soul-glyph source, R4) | — |
 | 59 | `…/ReferenceDataService.swift:73` | table `collections` | `id, name` | ok | unchanged | — |
 | 60 | `…/ReferenceDataService.swift:127` | table `souls` | refresh | ok | unchanged | — |
 | 61 | `…/ReferenceDataService.swift:145` | table `collections` | refresh | ok | unchanged | — |
@@ -145,7 +145,7 @@ grep -rnE 'path_pebbles|v_pebbles_full|pebble_drafts|delete_pebble_media|compose
 | 68–72 | `Services/ConnectionsService.swift:32,42,51,61,70` | rpcs `get_connections`, `create_connection_invite`, `preview_connection_invite`, `accept_connection_invite`, `remove_connection` | — | ok | unchanged | — |
 | 73–74 | `Services/SupabaseService.swift:231,239` | table `profiles` | display-name patch | ok | unchanged | — |
 
-**New touchpoints, all inside `Pebbles/Services/MomentsService.swift`:** rpc `path_moments`; view `v_moments_full`; table `pebble_souls` (`pebble_id` by `soul_id`); table `collection_pebbles` (`pebble_id` by `collection_id`); rpc `resolve_pebble_glyph`; table `karma_events` (`delta` by `ref_id`, owner-readable via `karma_events_select`); rpcs `save_moment`, `complete_pebble`, `delete_pebble`, `delete_moment`. Plus `delete_moment_media` in `PebbleSnapRepository`. Not used by iOS: `set_collection_glyph` (P10), `get_shared_pebble` (iOS only builds the `/p/<pebble id>` link).
+**New touchpoints, all inside `Pebbles/Services/MomentsService.swift`:** rpc `path_moments`; view `v_moments_full`; table `pebble_souls` (`pebble_id` by `soul_id`); table `collection_pebbles` (`pebble_id` by `collection_id`); rpc `resolve_pebble_glyph`; table `karma_events` (`delta` by `ref_id`, owner-readable via `karma_events_select`); rpcs `save_moment`, `complete_pebble`, `delete_pebble`, `delete_moment`. Not used by iOS: `delete_moment_media` (R6), `set_collection_glyph` (R11), `get_shared_pebble` (iOS only builds the `/p/<pebble id>` link).
 
 Every row is mapped; none were left undecided.
 
@@ -153,7 +153,7 @@ Every row is mapped; none were left undecided.
 
 ```bash
 cd apps/ios
-grep -rnE 'path_pebbles|v_pebbles_full|pebble_drafts|delete_pebble_media|compose-pebble|render_svg|render_version|"create_pebble"|"update_pebble"|can_use_glyph|from\("pebbles"\)' Pebbles PebblesTests | grep -vE '^[^:]+:[0-9]+:\s*///?'
+grep -rnE 'path_pebbles|v_pebbles_full|pebble_drafts|delete_pebble_media|delete_moment_media|compose-pebble|render_svg|render_version|"create_pebble"|"update_pebble"|can_use_glyph|from\("pebbles"\)' Pebbles PebblesTests | grep -vE '^[^:]+:[0-9]+:\s*///?'
 ```
 
 (Comment-only mentions exist today in `GlyphPickerContent.swift:18`, `Render/PebbleAnimationTimings.swift:4`, `ISO8601Flexible.swift:6`, `Valence.swift:48`; the filter skips them.)
@@ -178,26 +178,148 @@ Today the glyph reaches the screen one way: `pebbles.render_svg` (the server's c
 Old SVG render stack (`Features/Path/Render/PebbleAnimatedRenderView`, `PebbleStaticRenderView`, `PebbleSVGModel`, `PebbleRenderView`): after Part 2 nothing on a pebble surface reaches it. Removing it is out of scope (spec §9, "cleanup of the old iOS renderers"); leave it compiled.
 
 ---
-## Parity decisions (the Android plan must match every line)
+## Parity decisions (reconciled with the Android plan #1048)
 
-Where the spec and brief are silent, these are decided here. Android adopts them verbatim; a deviation is a parity bug, not a style choice.
+R1–R13 below are pasted verbatim from the controller's reconciliation (`scratchpad/parity-reconciliation.md`, 2026-10-13), which both plans adopt line for line. Where they are silent, the A-items that follow keep the decisions the two plans already shared. The copy catalog lists every new string iOS adds. Task text cites these ids.
 
-**P1 — Flows and step order.**
-- **Capture**: `photo · when · name` (3 progress dots, no success screen). Photo is optional (`Skip`/`Done`, no auto-advance on pick). When is EXIF-seeded from the picked photo, else now, with a `Continue` button. Name is clamped to 40 characters as you type and is **optional when a photo is attached**. The name step carries a primary **Save moment** and a secondary text button **Make it a pebble now**; both are enabled when there is a photo or a non-blank name, and the photo is not uploading or failed.
-- **Save moment** → `save_moment` → the cover closes, the Path reloads and focuses the moment's week. **Make it a pebble now** → `save_moment` → the same full-screen cover swaps to the Complete flow for the new moment (no second presentation).
-- **Complete**: `valence · emotion · domain · souls · collection · privacy` (6 dots) then a success screen. Valence arrives parked on neutral-medium, commits in place and advances on `Continue`. Emotion, domain and collection commit and advance on tap. Domain is single-select. Collection is single-select and optional (`Skip`/`Done`), with no inline creation. Souls is multi-select and optional (`Skip`/`Done`), with the existing create-soul tile. Privacy selects without advancing and defaults to `secret`; its button is **Make it a pebble**. There is no glyph step anywhere.
-- Complete's entry step is the first unanswered mandatory step of the restored draft (`valence` for a fresh one).
-- **Closing.** Capture's ✕ asks "Keep this moment?" with **Save moment** (only when savable and the photo is not blocking), **Discard** (destructive: deletes the uploaded photo's files), and **Keep going**. When nothing was entered, ✕ closes immediately. Complete's ✕ never asks: it flushes the autosave and closes.
-- **Haptics**: the M58 model, unchanged. `selection` on a tile pick or soul toggle; `advance` on step change; `success` when `save_moment` or `complete_pebble` succeeds; `warning` on a blocked advance, a failed save, or a delete confirmation.
+R1. **Capture name step copy.** Primary "Save moment" / "Garder le moment"
+    (`capture_save`). Secondary "Make it a pebble now" / "En faire un galet
+    maintenant" (`capture_make_pebble_now`). Subtitle "A name, a photo, or both." /
+    "Un nom, une photo, ou les deux." (`capture_name_subtitle`).
 
-**P2 — Payload rules.**
-- UUIDs in every payload are **lowercase** strings. Timestamps are emitted at **whole seconds**, UTC, `yyyy-MM-dd'T'HH:mm:ss'Z'`.
-- `save_moment` on create: no `id`; `name` omitted when blank (trimmed); `description` omitted; `happened_at` always sent; `snaps` omitted when there is no photo, else `[{id, storage_path, sort_order: 0}]` with `storage_path = "{user_id}/{snap_id}"`, lowercase.
-- `save_moment` on edit: `id`, plus `name`, `description` and `happened_at` always sent. **A blank name or description is sent as `""`**, which clears it: the server reads JSON `null` as "keep", so null can never clear. `snaps` always carries the full current set (`[]` removes the photo).
-- `complete_pebble` from the Complete flow and from Edit pebble: `moment_id`, `emotion_id`, `intensity`, `positiveness`, `visibility`, `domain_ids: [one]`, `soul_ids: [...]` (an empty array clears souls), `collection_ids: [] | [one]`. Never `new_souls` or `new_collections` (souls are created through the existing sheet first), never `cards`.
-- A failed save **keeps the uploaded photo** so the user can retry. Its files are deleted only on **Discard**. Unlike the old composer, the client does not call `handleSaveFailure` on a failed save.
+R2. **Capture close.** ✕ (and Android back on the photo step) with nothing
+    entered closes silently. Otherwise one dialog: title "Keep this moment?" /
+    "Tu gardes ce moment ?" (`capture_close_title`), actions **Save moment** (only
+    when savable and the photo is not uploading/failed), **Discard** (destructive,
+    deletes the uploaded photo files), **Keep going**. (iOS P1 wins.)
 
-**P3 — Errors.** Writers raise slugs in the PostgREST error `message`. The client maps the first slug it finds in the message (`MomentWriteError`); anything else falls back to the generic line. Image pipeline errors keep their existing copy.
+R3. **Untitled.** "Untitled" / "Sans titre" (`moment_untitled`), rendered italic
+    in the secondary text colour, everywhere a null name shows: Path row,
+    soul/collection rows, read page title, delete dialog, success screen.
+
+R4. **Blank stone.** Medium size, neutral silhouette, outline stroke only:
+    nothing carved inside (no glyph, no veins, no fossil, no shape detail strokes).
+    Colours fixed, not theme roles: the web `BLANK_PALETTE` ramp (primary
+    `#868686`, secondary `#B9B9B9`, light `#F3F3F3`, shaded `#5E5E5E`, dark
+    `#1B1B1B`, surface `#8686861A`). Accessibility label "Not a pebble yet" /
+    "Pas encore un galet". The photo shows as on a completed row. Android Path row:
+    intensity-2 metrics, meta line weekday · time (iOS matches).
+
+R5. **Editing is two screens, one write each.** **Edit moment** (when, name
+    clamped to 40, description, photo) → `save_moment` only. **Edit pebble**
+    (emotion, domain, valence, souls, collection, privacy) → `complete_pebble` only.
+    Never two writes behind one Save. (iOS P9 wins over Android PD-14.)
+
+R6. **Photo removal goes through `save_moment`.** In Edit moment, removing the
+    photo detaches it in the form; Save sends the whole `snaps` set (`[]` when
+    removed), so the server enforces "a name or a photo" (`moment_empty`) in the
+    same write. Old files are deleted best-effort after a successful save. Neither
+    app calls `delete_moment_media`. Save is enabled when the trimmed name is
+    non-empty or a photo is attached; hint `edit_moment_needs_content` "A moment
+    needs a name or a photo." / "Un moment a besoin d'un nom ou d'une photo."
+    (Android PD-15 wins over iOS's eager delete.)
+
+R7. **Read page actions.** A toolbar overflow menu on both (iOS `…`, Android ⋮):
+    **Edit moment**, **Edit pebble** (only when your pebble exists), **Delete**.
+    No standalone trash button. Share stays as today, public pebbles only, URL with
+    the pebble id.
+
+R8. **Delete dialog.** Bare moment: title "Delete this moment?" / "Supprimer ce
+    moment ?", message "This can't be undone.", action **Delete moment** →
+    `delete_moment`. Moment with your pebble: title "Delete this pebble?" /
+    "Supprimer ce galet ?", message `delete_pebble_message` (iOS text), actions
+    **Delete the pebble, keep the moment** → `delete_pebble` and **Delete the
+    moment too** → `delete_moment`, plus Cancel. Entry points: Path row long-press,
+    soul/collection detail row long-press, read page overflow **Delete**. After
+    `delete_moment`: remove returned storage paths best-effort, close the read page;
+    after `delete_pebble`: the read page stays as a bare moment, lists drop the row.
+    (iOS P5 copy wins.)
+
+R9. **Soul and collection detail rows open the moment read page** (iOS P11), not
+    the edit form. Which query feeds the list is each platform's choice; the
+    behaviour is: moments carrying your pebble tagged with that soul/collection,
+    newest `happened_at` first, drawn like Path rows.
+
+R10. **Error copy** is iOS P3's table, verbatim (EN/FR per slug, generic
+    "Couldn't save. Please try again." / "Impossible d'enregistrer. Réessaie."
+    for everything else). Android maps P0002 → `moment_not_found`. Existing
+    image-pipeline and sign-in copy is kept. Delete failures keep "Couldn't delete".
+
+R11. **Collection glyph.** Edit **and** create forms get the glyph row (shared
+    picker, **Remove glyph**), written as `glyph_id` in the same insert/update as
+    name and mode; `set_collection_glyph` is not called. Footer "Pebbles in this
+    collection carry its glyph." / "Les galets de cette collection portent son
+    glyphe." (Android PD-19 scope, iOS P10 copy.)
+
+R12. **Success screen.** Name or "Untitled", stone with the derived glyph (bare
+    stone when none), "+N karma" only when N > 0, "Back to my path". iOS keeps its
+    draw-on; Android is static (accepted capability gap, not a parity bug).
+
+R13. **Karma read after a write.** Either method is fine (iOS sum-after minus
+    sum-before; Android newest event row for the reason), as long as the shown N is
+    the delta of that write and absence/error shows nothing.
+
+### Already aligned (kept from the iOS plan; the reconciliation's "unchanged" list)
+
+**A1 — Steps and advancing.** Capture: `photo · when · name` (3 dots, no success screen). The photo is optional (`Skip`/`Done`, no auto-advance on pick). When is seeded from the photo's EXIF, else now, with `Continue`. The name is clamped to 40 characters and optional when a photo is attached. **Save moment** closes the cover and the Path focuses the moment's week. **Make it a pebble now** saves, then swaps the same cover to Complete. Complete: `valence · emotion · domain · souls · collection · privacy` (6 dots), then the success screen.
+- **Valence** arrives on neutral-medium, commits in place, and advances on `Continue`.
+- **Emotion, domain and collection** commit and advance on tap.
+- **Domain** is single-select.
+- **Collection** is single-select and optional, with no inline creation.
+- **Souls** is multi-select and optional, with the existing create tile.
+- **Privacy** selects without advancing, defaults to `secret`, and its button is **Make it a pebble**.
+- **Entry** is the first unanswered mandatory step of the restored draft.
+- Complete's ✕ never asks: it flushes the autosave and closes.
+
+There is no glyph step anywhere. Haptics follow M58: `selection` on a tile or soul toggle, `advance` on a step change, `success` on a successful write, `warning` on a blocked advance, a failed save, or a delete confirmation.
+
+**A2 — Payloads.**
+- **Format:** lowercase UUID strings and whole-second UTC timestamps (`yyyy-MM-dd'T'HH:mm:ss'Z'`). Absent keys are omitted, never sent as null.
+- **`save_moment` create:** no `id`; `name` only when non-blank; no `description`; `happened_at` always; `snaps` only with a photo (`[{id, storage_path: "{user}/{snap}", sort_order: 0}]`).
+- **`save_moment` edit:** `id`, `name`, `description`, `happened_at` and the whole `snaps` set, always. Blanks are sent as `""` to clear (null means keep), and `snaps: []` removes the photo (R6).
+- **`complete_pebble`:** always `moment_id`, `emotion_id`, `intensity`, `positiveness`, `visibility`, `domain_ids: [one]`, `soul_ids` and `collection_ids: [] | [one]`. Never `new_souls`, `new_collections` or `cards`.
+- **Failed saves** keep the uploaded photo so the user can retry. Only Discard deletes its files.
+
+**A3 — Autosave.** Device-local, per moment, Complete flow only.
+- **Timing:** debounced 800 ms; flushed on background and on ✕.
+- **Restore:** silent and sanitized, once reference data has loaded, landing on the first gap.
+- **Clearing:** on a successful completion, on `delete_moment`, and on any signed-out state. A file owned by another account is deleted on read.
+- **iOS storage:** `Caches/complete-drafts/<moment id lowercase>.json`, with `complete_pebble`'s key names plus `owner_id` and `moment_id`. The storage format is platform-native.
+
+**A4 — Achievements.** `check_achievements` runs once after every successful `complete_pebble` (completion and Edit pebble), after the karma read, and never otherwise. Completion suppresses the karma capsule (the success screen shows `+N`). Edit pebble shows the capsule with reason `pebbleEnriched`. The success stone carves `resolve_pebble_glyph(pebble_id)`, fetched after the write.
+
+**A5 — Path.** "Active today" counts only completed moments created today. After a capture or a completion, the Path focuses the moment's week. Share URLs use the pebble id.
+
+**A6 — iOS implementation notes (no parity weight).**
+- **Soul glyphs on the read page** come from `ReferenceDataService.souls`, because `v_moments_full` souls are `{id, name}`.
+- **Soul and collection lists** are `pebble_souls` / `collection_pebbles` ids intersected with `path_moments`.
+- **Missing glyph:** a completed pebble with a null glyph draws veins and fossil with no glyph (R12's "bare stone when none"), never the sample glyph.
+- **Edit pebble** keeps the first domain and the first collection, as before the split.
+
+### Copy catalog (iOS adds these to `Localizable.xcstrings`, en + fr)
+
+| Id | EN | FR | From |
+|---|---|---|---|
+| `moment_untitled` | Untitled | Sans titre | R3 |
+| `blank_stone_a11y` | Not a pebble yet | Pas encore un galet | R4 |
+| `capture_name_subtitle` | A name, a photo, or both. | Un nom, une photo, ou les deux. | R1 |
+| `capture_save` | Save moment | Garder le moment | R1, R2 |
+| `capture_make_pebble_now` | Make it a pebble now | En faire un galet maintenant | R1 |
+| `capture_close_title` | Keep this moment? | Tu gardes ce moment ? | R2 |
+| `complete_cta` | Make it a pebble | En faire un galet | A1 |
+| `delete_pebble_title` | Delete this pebble? | Supprimer ce galet ? | R8 |
+| `delete_moment_title` | Delete this moment? | Supprimer ce moment ? | R8 |
+| `delete_pebble_keep_moment` | Delete the pebble, keep the moment | Supprimer le galet, garder le moment | R8 |
+| `delete_moment_too` | Delete the moment too | Supprimer aussi le moment | R8 |
+| `delete_moment` | Delete moment | Supprimer le moment | R8 |
+| `delete_pebble_message` | Keeping the moment leaves it on your path as a blank stone. Deleting the moment removes its photo too. This can't be undone. | Garder le moment le laisse sur ton chemin comme une pierre vierge. Supprimer le moment retire aussi sa photo. Cette action est irréversible. | R8 |
+| `edit_moment` | Edit moment | Modifier le moment | R5, R7 |
+| `edit_moment_needs_content` | A moment needs a name or a photo. | Un moment a besoin d'un nom ou d'une photo. | R6 |
+| `collection_glyph_footer` | Pebbles in this collection carry its glyph. | Les galets de cette collection portent son glyphe. | R11 |
+| `remove_glyph` | Remove glyph | Retirer le glyphe | R11 |
+| `more` (overflow a11y) | More | Plus | R7 |
+
+The error lines (R10, with EN/FR per slug):
 
 | Slug | EN | FR |
 |---|---|---|
@@ -212,62 +334,10 @@ Where the spec and brief are silent, these are decided here. Android adopts them
 | `not_authenticated` | You must be signed in to save. | Tu dois être connecté pour enregistrer. |
 | `invalid_payload`, `invalid_snap`, anything else | Couldn't save. Please try again. | Impossible d'enregistrer. Réessaie. |
 
-**P4 — New UX copy** (EN / FR; the id is the Android resource name, iOS keys by the EN literal):
-
-| Id | EN | FR |
-|---|---|---|
-| `moment_untitled` | Untitled | Sans titre |
-| `capture_name_subtitle` | A name, a photo, or both. | Un nom, une photo, ou les deux. |
-| `capture_save` | Save moment | Garder le moment |
-| `capture_make_pebble_now` | Make it a pebble now | En faire un galet maintenant |
-| `capture_close_title` | Keep this moment? | Tu gardes ce moment ? |
-| `complete_cta` (read page + privacy button) | Make it a pebble | En faire un galet |
-| `delete_pebble_title` | Delete this pebble? | Supprimer ce galet ? |
-| `delete_moment_title` | Delete this moment? | Supprimer ce moment ? |
-| `delete_pebble_keep_moment` | Delete the pebble, keep the moment | Supprimer le galet, garder le moment |
-| `delete_moment_too` | Delete the moment too | Supprimer aussi le moment |
-| `delete_moment` | Delete moment | Supprimer le moment |
-| `delete_pebble_message` | Keeping the moment leaves it on your path as a blank stone. Deleting the moment removes its photo too. This can't be undone. | Garder le moment le laisse sur ton chemin comme une pierre vierge. Supprimer le moment retire aussi sa photo. Cette action est irréversible. |
-| `edit_moment` | Edit moment | Modifier le moment |
-| `edit_moment_needs_content` | A moment needs a name or a photo. | Un moment a besoin d'un nom ou d'une photo. |
-| `collection_glyph_footer` | Pebbles in this collection carry its glyph. | Les galets de cette collection portent son glyphe. |
-| `remove_glyph` | Remove glyph | Retirer le glyphe |
-
-Reused as they are (existing keys): the step titles and subtitles of the old flow for the matching steps, `Skip`, `Done`, `Continue`, `Discard`, `Keep going`, `Back to my path`, `+%lld karma`, `Edit pebble`, `Delete`, `Cancel`, `Couldn't delete`, `This can't be undone.`, `Who can see it?` and the three privacy explanations. The success screen's title line is the moment's name, or **Untitled**.
-
-**P5 — Delete UX.** One **Delete** entry everywhere a moment can be deleted: the Path row's long-press, the soul/collection detail rows' long-press, and the read page's `…` menu. It opens one confirmation:
-- **Completed moment**: title "Delete this pebble?", message `delete_pebble_message`, two destructive buttons **Delete the pebble, keep the moment** (`delete_pebble(pebble_id)`) and **Delete the moment too** (`delete_moment(moment_id)`, then the client removes every returned `storage_paths` prefix's `original.jpg` and `thumb.jpg`, best-effort), plus Cancel.
-- **Uncompleted moment**: title "Delete this moment?", message "This can't be undone.", one destructive **Delete moment**, plus Cancel.
-- After either: the Path and stats reload. The read page closes after **Delete the moment too** / **Delete moment**, and stays open (now a bare moment) after **Delete the pebble, keep the moment**.
-
-**P6 — The bare moment.**
-- **Path row**: a blank stone. Medium size and neutral polarity (the `neutralMedium` outline), the body only, with **nothing carved** (no veins, fossil or glyph), coloured from `StonePalette.blank` = the web `BLANK_PALETTE` ramp: primary `#868686`, secondary `#B9B9B9`, light `#F3F3F3`, shaded `#5E5E5E`, dark `#1B1B1B`, and surface `#8686861A` (the primary at 10% alpha, the same rule the emotion palettes use). Its photo shows exactly as a completed row's does. Its name renders in the default name colour, or "Untitled" in italic in the secondary colour when null.
-- **Read page**: the photo banner (or the blank stone as the heading when there is no photo, with the blank stone overlapping the photo when there is one), the title (name or italic "Untitled"), the date, the description, and one full-width primary **Make it a pebble** button. No privacy chip, no share, no emotion/domain/collection tiles, no souls. Toolbar `…` menu: **Edit moment**, **Delete**.
-- **Completed read page**: as today, plus a toolbar `…` menu: **Edit moment**, **Edit pebble**, **Delete**. Share (public pebbles only) uses the **pebble id** (`/p/<pebble id>`), not the moment id. Soul glyphs on the read page come from the client's cached soul list (`v_moments_full.souls` carries only `{id, name}`); an unknown soul draws an empty glyph.
-- A completed pebble whose `glyph` is null draws veins and fossil without a glyph (never the sample glyph).
-
-**P7 — Autosave.** Device-local and **per moment**, for a half-finished Complete flow only (Capture has no autosave: it is three short steps and its result is the save itself).
-- Storage: one JSON file per moment in the caches directory, `complete-drafts/<moment id lowercase>.json`.
-- Body: `{"owner_id", "moment_id", "intensity", "positiveness", "emotion_id", "domain_ids", "soul_ids", "collection_ids", "visibility"}`. Unset keys are omitted. The names are `complete_pebble`'s.
-- Writes are debounced 800 ms, flushed when the app leaves the foreground and on ✕. A draft with no answer (visibility alone does not count) deletes the file.
-- **Restore is silent**: opening Complete on a moment with a saved draft hydrates it (once reference data has loaded), drops souls and collections that no longer exist, and lands on the first unanswered mandatory step. There is no "Pick up where you left off?" prompt.
-- Cleared on a successful completion, on **Delete the moment too** / **Delete moment**, and for every moment on any signed-out state. A file owned by another account is deleted on read.
-
-**P8 — Karma and achievements.**
-- Karma shown after a write is measured, not guessed: `sum(karma_events.delta where ref_id = pebble_id)` **after** the write, minus the same sum read **before** it (zero for a first completion, where the pebble id does not exist yet).
-- Completion: the success screen shows `+N karma`; the karma capsule is suppressed (`presentsCapsule: false`), while the sound and haptic still fire. Edit pebble: the capsule shows (reason `pebbleEnriched`). `save_moment` grants nothing and shows nothing.
-- `check_achievements` is called **once, after every successful `complete_pebble`** (completion and Edit pebble), after the karma read and before the success screen or dismissal. It is never called after `save_moment` or a delete.
-- The success screen's stone carves `resolve_pebble_glyph(pebble_id)`, fetched after the write. A null glyph or a failed fetch draws the stone without a glyph.
-
-**P9 — Editing.** **Edit moment** is a form sheet (when, name clamped to 40, description, photo) saving through `save_moment`. **Save** is disabled while the name is blank and there is no photo, with the hint `edit_moment_needs_content`. Removing an existing photo is eager (`delete_moment_media` then file cleanup) and is disabled while the name field is blank. **Edit pebble** is a form sheet (emotion, domain, valence, souls, collection, privacy) saving through `complete_pebble`. Editing a pebble with several domains or collections keeps only the first of each, which is the pre-split behaviour, kept unchanged.
-
-**P10 — Collections and glyphs.** The collection editor gains a glyph row (tap → the existing glyph picker, plus **Remove glyph** when one is set) with the footer `collection_glyph_footer`. The glyph is written **in the same `collections` update as name and mode** (`glyph_id`, explicit `null` to clear; the `collections_glyph_usable` trigger guards it), mirroring how souls save their glyph. `set_collection_glyph` is **not** used: two writes for one row would not be atomic. **This deviates from the brief's parenthetical; Android must make the same choice.** Create-collection gets no glyph field. The glyph library has **no pebble tab and no "use on pebble" affordance on iOS** today (its tabs are Mine / Owned / Commu): nothing to remove. Android verifies its own.
-
-**P11 — Soul and collection detail.** Their lists are the caller's moments whose pebble is linked (`pebble_souls` / `collection_pebbles` ids ∩ `path_moments`), newest first, drawn like Path rows. Tapping a row opens the moment read page (as the Path does), not the edit sheet.
-
-**P12 — Path details.** "Active today" (the local ripple override) counts only **completed** moments created today. After a capture or a completion, the Path focuses the week holding the moment.
+Reused existing keys: the old flow's step titles and subtitles, `Skip`, `Done`, `Continue`, `Discard`, `Keep going`, `Back to my path`, `+%lld karma`, `Edit pebble`, `Delete`, `Cancel`, `Couldn't delete`, `This can't be undone.`, `Who can see it?` and its three explanations.
 
 ---
+
 ## Part 1 — data layer and reads (`feat/1047-ios-moments-data`)
 
 **Outcome:** every read the app makes is on the new contract, and every delete uses the new writers. `MomentsService` exists with all reads and writes, tested at the decoding/encoding boundary against verbatim payloads. The old composers are untouched and still publish through compat.
@@ -276,7 +346,7 @@ Reused as they are (existing keys): the step titles and subtitles of the old flo
 - Create: `Pebbles/Features/Path/Models/ReferenceRefs.swift`, `FlexibleDateDecoding.swift`, `MomentName.swift`, `PebbleGlyph.swift`, `MomentSummary.swift`, `MomentDetail.swift`, `SaveMomentPayload.swift`, `CompletePebblePayload.swift` (all in `Pebbles/Features/Path/Models/`); `Pebbles/Services/MomentsService.swift`, `Pebbles/Services/MomentWriteError.swift`, `Pebbles/Services/MomentDeletion.swift`
 - Create tests: `PebblesTests/Moments/MomentFixtures.swift`, `PebbleGlyphTests.swift`, `MomentSummaryDecodingTests.swift`, `MomentDetailDecodingTests.swift`, `SaveMomentPayloadEncodingTests.swift`, `CompletePebblePayloadEncodingTests.swift`, `MomentWriteErrorTests.swift`, `MomentsServiceTests.swift`, `PebbleDraftFromMomentDetailTests.swift`
 - Move: `Pebbles/Features/Path/Models/PebbleDetail+Localized.swift` → `ReferenceRefs+Localized.swift`
-- Modify: `Features/Path/Models/Valence.swift`, `Features/PebbleMedia/PebbleSnapRepository.swift`, `Features/PebbleMedia/SnapUploadCoordinator.swift`, `Features/Path/PathView.swift`, `Features/Path/Services/WeekRollBuilder.swift`, `Features/Path/Models/WeekRollEntry.swift`, `Features/Path/Components/WeekPathView.swift`, `Features/Path/Components/PathPebbleRow.swift`, `Features/Path/Components/WeekRollCairnCell.swift`, `Features/Path/GroupPebblesByISOWeek.swift`, `Features/Profile/Views/GroupPebblesByMonth.swift`, `Components/PebbleRow.swift`, `Features/Path/PebbleDetailSheet.swift`, `Features/Path/Read/PebbleReadView.swift`, `Features/Path/Read/PebbleReadBanner.swift`, `Features/Path/Read/PebbleSnapFrame.swift` (previews only), `Features/Path/EditPebbleSheet.swift`, `Features/Path/Models/PebbleDraft.swift`, `Features/Profile/Views/SoulDetailView.swift`, `Features/Profile/Views/CollectionDetailView.swift`, `Resources/Localizable.xcstrings`
+- Modify: `Features/Path/Models/Valence.swift`, `Features/PebbleMedia/PebbleSnapRepository.swift`, `Features/PebbleMedia/SnapUploadCoordinator.swift`, `Features/PebbleMedia/ExistingSnapRow.swift` (comment), `Features/PebbleMedia/Models/FormSnap.swift` (comment), `Features/Path/PebbleFormView.swift` (comment), `Features/Path/Models/PebbleUpdatePayload.swift` (comment), `Features/Path/PathView.swift`, `Features/Path/Services/WeekRollBuilder.swift`, `Features/Path/Models/WeekRollEntry.swift`, `Features/Path/Components/WeekPathView.swift`, `Features/Path/Components/PathPebbleRow.swift`, `Features/Path/Components/WeekRollCairnCell.swift`, `Features/Path/GroupPebblesByISOWeek.swift`, `Features/Profile/Views/GroupPebblesByMonth.swift`, `Components/PebbleRow.swift`, `Features/Path/PebbleDetailSheet.swift`, `Features/Path/Read/PebbleReadView.swift`, `Features/Path/Read/PebbleReadBanner.swift`, `Features/Path/Read/PebbleSnapFrame.swift` (previews only), `Features/Path/EditPebbleSheet.swift`, `Features/Path/Models/PebbleDraft.swift`, `Features/Profile/Views/SoulDetailView.swift`, `Features/Profile/Views/CollectionDetailView.swift`, `Resources/Localizable.xcstrings`
 - Modify tests: `PebblesTests/SnapUploadCoordinatorTests.swift`, `WeekRollBuilderTests.swift`, `GroupPebblesByISOWeekTests.swift`, `GroupPebblesByMonthTests.swift`
 - Delete: `Features/Path/Models/Pebble.swift`, `Features/Path/Models/PebbleDetail.swift`; tests `PebbleDecodingTests.swift`, `PebbleDetailDecodingTests.swift`, `PebbleDetailSoulGlyphDecodingTests.swift`, `PebbleDraftFromDetailTests.swift`
 
@@ -963,7 +1033,7 @@ struct MomentDetail: Identifiable, Decodable, Hashable {
     }
 
     /// `v_moments_full.pebble.souls[]` is `{id, name}` only. The read page
-    /// takes each soul's glyph from `ReferenceDataService.souls` (P6).
+    /// takes each soul's glyph from `ReferenceDataService.souls` (A6).
     struct SoulRef: Identifiable, Decodable, Hashable {
         let id: UUID
         let name: String
@@ -1188,7 +1258,7 @@ import Foundation
 ///
 /// Every key is optional and **omitted** when nil: the server reads an
 /// explicit JSON null as "absent" (keep), so null can never clear a field.
-/// To clear `name` or `description`, send `""` (P2). `snaps` replaces the
+/// To clear `name` or `description`, send `""` (A2). `snaps` replaces the
 /// whole set when present; `[]` removes the photo.
 struct SaveMomentPayload: Encodable, Equatable {
 
@@ -1257,7 +1327,7 @@ import Foundation
 /// The `payload` of `complete_pebble(payload jsonb)` (spec §3): the caller's
 /// one pebble on `momentId`, inserted or updated. Keys other than
 /// `moment_id` are omitted when nil (null means "keep"). iOS never sends
-/// `new_souls`, `new_collections` or `cards` (P2).
+/// `new_souls`, `new_collections` or `cards` (A2).
 struct CompletePebblePayload: Encodable, Equatable {
     let momentId: UUID
     var emotionId: UUID?
@@ -1336,7 +1406,7 @@ struct MomentWriteErrorTests {
 
 - [ ] **Step 2: Run to verify it fails.**
 
-- [ ] **Step 3: Implement `MomentWriteError.swift`** (copy from **P3**):
+- [ ] **Step 3: Implement `MomentWriteError.swift`** (copy from **R10**):
 
 ```swift
 import Foundation
@@ -1383,7 +1453,7 @@ func userMessageForMomentWriteMessage(_ message: String) -> String {
     MomentWriteError.slug(in: message)?.userMessage ?? String(localized: "Couldn't save. Please try again.")
 }
 
-/// Any thrown error from a moment write → copy (P3). Image pipeline errors
+/// Any thrown error from a moment write → copy (R10). Image pipeline errors
 /// keep the copy the old composer used.
 func userMessageForMomentWriteError(_ error: Error) -> String {
     if let postgrest = error as? PostgrestError {
@@ -1401,7 +1471,7 @@ func userMessageForMomentWriteError(_ error: Error) -> String {
 }
 ```
 
-- [ ] **Step 4:** Add the ten **P3** lines to `Localizable.xcstrings` (en + fr), inserted as text at their alphabetical anchors. Add `Untitled` / `Sans titre` now too (used by Task 1.9).
+- [ ] **Step 4:** Add the ten **R10** lines to `Localizable.xcstrings` (en + fr), inserted as text at their alphabetical anchors. Add `Untitled` / `Sans titre` now too (used by Task 1.9).
 - [ ] **Step 5:** Build the test target; the suite compiles.
 - [ ] **Step 6:** Commit: `git commit -m "feat(ios): map moment writer slugs to copy"`
 
@@ -1485,7 +1555,7 @@ struct MomentsService {
             .value
     }
 
-    /// Moments whose pebble carries this soul (P11). Two reads, no write:
+    /// Moments whose pebble carries this soul (R9). Two reads, no write:
     /// the link ids, intersected with the Path the caller already reads.
     func moments(taggedWithSoul soulId: UUID) async throws -> [MomentSummary] {
         async let links: [PebbleLink] = client
@@ -1527,7 +1597,7 @@ struct MomentsService {
         return try JSONDecoder().decode(PebbleGlyph?.self, from: data)
     }
 
-    /// Sum of the caller's karma events for one pebble (P8). Read before and
+    /// Sum of the caller's karma events for one pebble (A4). Read before and
     /// after a write; the difference is what the write earned.
     func karmaTotal(refId: UUID) async throws -> Int {
         let rows: [KarmaDeltaRow] = try await client
@@ -1597,7 +1667,7 @@ private struct KarmaDeltaRow: Decodable {
 import Foundation
 import Supabase
 
-/// The two deletes (P5), with the client's half of each: `delete_moment`
+/// The two deletes (R8), with the client's half of each: `delete_moment`
 /// hands back the snap prefixes and the client removes their files,
 /// best-effort (the orphan sweep is the backstop).
 @MainActor
@@ -1619,27 +1689,103 @@ enum MomentDeletion {
 - [ ] **Step 5: Build & test.** Expected: the new suites (`PebbleGlyphTests`, `MomentSummaryDecodingTests`, `MomentDetailDecodingTests`, both payload suites, `MomentWriteErrorTests`, `MomentsServiceTests`) pass; the rest of the app is still on `Pebble` and builds.
 - [ ] **Step 6:** Commit: `git commit -m "feat(ios): add MomentsService over the split readers and writers"`
 
-### Task 1.8: `delete_pebble_media` → `delete_moment_media`
+### Task 1.8: Remove a photo by detaching it, not through an RPC (R6)
 
-**Files:** Modify `PebbleSnapRepository.swift:19-24,77,91-98`, `SnapUploadCoordinator.swift:197-203`, `ExistingSnapRow.swift:12` (comment), `Models/FormSnap.swift:8` (comment), `EditPebbleSheet.swift:155` (log text), `PebblesTests/SnapUploadCoordinatorTests.swift:11,31,50-52,225,236,245`.
+`delete_pebble_media` is gone, and R6 says neither app calls its successor `delete_moment_media`. Removing a saved photo becomes a form-local detach. The save sends the whole snap set (`snaps: []`), and the server deletes the row in the same write that enforces `moment_empty`. Only after a successful save does the client delete the detached files, best-effort. Until Part 6, the old `EditPebbleSheet` saves through `compose-pebble-update`. It already sends `snaps: []` when no photo is attached (`PebbleUpdatePayload` always sends `snaps`), and the compat `update_pebble` passes that set to `save_moment`, so the interim follows R6 too.
 
-- [ ] **Step 1:** In the protocol and the struct, rename `deletePebbleMedia(snapId:)` → `deleteMomentMedia(snapId:)`, and the RPC:
+**Files:** Modify `PebbleSnapRepository.swift:19-24,77,91-98`, `SnapUploadCoordinator.swift:155-170,197-207`, `ExistingSnapRow.swift:12` (comment), `Models/FormSnap.swift:8` (comment), `EditPebbleSheet.swift:146-158` (`removeExisting`) and its save success paths, `PebbleFormView.swift:42` (comment), `Models/PebbleUpdatePayload.swift:16` (comment), `PebblesTests/SnapUploadCoordinatorTests.swift:11,31,50-56,220-260`.
+
+- [ ] **Step 1: Rewrite the failing tests.** In `SnapUploadCoordinatorTests.swift`, drop `case deletePebbleMedia` from `FakeRepoCall`, `deletePebbleMediaResult` and the fake's `deletePebbleMedia(snapId:)`. Replace the two `removeExisting` tests with:
 
 ```swift
-    /// Wraps the `delete_moment_media` RPC (replaces `delete_pebble_media`,
-    /// same body). Returns the row's `storage_path` so the caller can run
-    /// fire-and-forget Storage cleanup using `deleteFiles(storagePrefix:)`.
-    func deleteMomentMedia(snapId: UUID) async throws -> String {
-        try await client
-            .rpc("delete_moment_media", params: ["p_snap_id": snapId.uuidString.lowercased()])
-            .execute()
-            .value
+    @Test("detachExisting: clears the photo, calls nothing, remembers its files")
+    func detachExistingIsLocal() {
+        let repo = FakeRepo()
+        let coordinator = SnapUploadCoordinator(
+            repo: repo,
+            initialSnap: .existing(id: UUID(), storagePath: "uid/sid"),
+            retryDelay: .milliseconds(1)
+        )
+
+        coordinator.detachExisting()
+
+        #expect(coordinator.formSnap == nil)
+        #expect(coordinator.detachedStoragePaths == ["uid/sid"])
+        #expect(repo.calls.isEmpty)
+    }
+
+    @Test("purgeDetached: deletes the detached files once, after a save")
+    func purgeDetachedDeletesFiles() async {
+        let repo = FakeRepo()
+        let coordinator = SnapUploadCoordinator(
+            repo: repo,
+            initialSnap: .existing(id: UUID(), storagePath: "uid/sid"),
+            retryDelay: .milliseconds(1)
+        )
+        coordinator.detachExisting()
+
+        await coordinator.purgeDetached()
+        await coordinator.purgeDetached()
+
+        #expect(repo.calls == [.deleteFilesByPrefix(prefix: "uid/sid")])
+        #expect(coordinator.detachedStoragePaths.isEmpty)
+    }
+
+    @Test("detachExisting is a no-op without an existing photo")
+    func detachWithoutExisting() {
+        let repo = FakeRepo()
+        let coordinator = SnapUploadCoordinator(repo: repo, initialSnap: nil, retryDelay: .milliseconds(1))
+        coordinator.detachExisting()
+        #expect(coordinator.detachedStoragePaths.isEmpty)
     }
 ```
 
-- [ ] **Step 2:** `SnapUploadCoordinator.removeExisting()` calls `repo.deleteMomentMedia(snapId: id)`; update its doc comment. Rename the fake in `SnapUploadCoordinatorTests` (`case deleteMomentMedia(snapId:)`, `deleteMomentMediaResult`, the method). Update the three comments that name the old RPC.
-- [ ] **Step 3:** Build & test. Expected: `SnapUploadCoordinatorTests` green.
-- [ ] **Step 4:** Commit: `git commit -m "fix(ios): remove a photo through delete_moment_media"`
+  Replacing an existing photo with a new pick must also remember the old files. Add a test beside the existing "replace" tests that seeds `.existing(id:storagePath: "uid/old")`, picks through the same helper the suite's pick tests use, and expects `detachedStoragePaths == ["uid/old"]` with no `deleteFilesByPrefix` call yet.
+- [ ] **Step 2:** Run to verify they fail (`detachExisting` missing).
+- [ ] **Step 3: Repository.** Delete `deletePebbleMedia(snapId:)` from `PebbleSnapRepositoryProtocol` and from `PebbleSnapRepository` (and their doc comments). `deleteFiles(storagePrefix:)` stays; update its comment to "callers that already have the `storage_path` (a `delete_moment` result, or a photo detached in Edit moment)".
+- [ ] **Step 4: Coordinator.** Replace `removeExisting()` in `SnapUploadCoordinator.swift` with:
+
+```swift
+    /// Storage prefixes of saved photos the user removed or replaced in this
+    /// form. Their rows go when the save sends the whole `snaps` set (R6);
+    /// their files go in `purgeDetached()`, after that save succeeds.
+    private(set) var detachedStoragePaths: [String] = []
+
+    /// Remove the current `.existing` photo from the form. No RPC: the next
+    /// `save_moment` sends `snaps: []` and the server enforces "a name or a
+    /// photo" in that same write. No-op unless the current snap is `.existing`.
+    func detachExisting() {
+        guard case .existing(_, let storagePath) = formSnap else { return }
+        detachedStoragePaths.append(storagePath)
+        formSnap = nil
+    }
+
+    /// Best-effort file cleanup for detached photos. Call only after the save
+    /// that dropped their rows has succeeded; the orphan sweep is the backstop.
+    func purgeDetached() async {
+        let paths = detachedStoragePaths
+        detachedStoragePaths = []
+        for path in paths {
+            await repo.deleteFiles(storagePrefix: path)
+        }
+    }
+```
+
+  In `ingest(_:uti:userId:)`, just before the existing `if case .pending(let replaced) = formSnap` block, add:
+
+```swift
+        // A saved photo replaced by a new pick: its row goes with the next
+        // save's whole-set `snaps`, its files after that save (R6).
+        if case .existing(_, let storagePath) = formSnap {
+            detachedStoragePaths.append(storagePath)
+        }
+```
+
+  `cancelAndCleanup(userId:)` also sets `detachedStoragePaths = []`: a cancelled form keeps its saved photo.
+- [ ] **Step 5: The interim edit sheet.** In `EditPebbleSheet.swift`, `removeExisting()` becomes `snaps?.detachExisting()`. Drop `isRemovingExistingSnap` and pass `isRemovingExistingSnap: false`. After a successful `compose-pebble-update` (both the 2xx path and the 5xx soft-success path), call `await snaps?.purgeDetached()` before `onSaved()`.
+- [ ] **Step 6:** Update the comments that name the old RPC (`ExistingSnapRow.swift:12`, `FormSnap.swift:8`, `PebbleFormView.swift:42`, `PebbleUpdatePayload.swift:16`): removal now detaches, and the save's whole snap set deletes the row.
+- [ ] **Step 7:** Build & test. Expected: `SnapUploadCoordinatorTests` green.
+- [ ] **Step 8:** Commit: `git commit -m "fix(ios): remove a photo by saving the whole snap set"`
 
 ### Task 1.9: The Path reads `path_moments`
 
@@ -1696,7 +1842,7 @@ name line: `Text(verbatim: MomentName.display(moment.name) ?? String(localized: 
 Update the `#Preview` to build a `MomentSummary` (pebble nil).
 - [ ] **Step 6: `PathView.swift`:**
   - `@State private var moments: [MomentSummary] = []` replaces `pebbles`; `selectedPebbleId` → `selectedMomentId`; `pendingDeletion: MomentSummary?`.
-  - `rippleWithLocalActiveToday`: `let activeToday = moments.contains { $0.isCompleted && Calendar.current.isDateInToday($0.createdAt) }` (P12).
+  - `rippleWithLocalActiveToday`: `let activeToday = moments.contains { $0.isCompleted && Calendar.current.isDateInToday($0.createdAt) }` (A5).
   - `load()`:
 
 ```swift
@@ -1761,7 +1907,7 @@ Update the `#Preview` to build a `MomentSummary` (pebble nil).
                     }
                     ToolbarItem(placement: .topBarTrailing) {
                         HStack(spacing: 8) {
-                            // Shares the PEBBLE, whose id differs from the moment's (P6).
+                            // Shares the PEBBLE, whose id differs from the moment's (R4).
                             if let pebble = detail?.pebble, pebble.visibility == .public {
                                 ShareLink(item: SharedPebbleLink.url(for: pebble.id)) {
                                     Image(systemName: "square.and.arrow.up")
@@ -1820,7 +1966,7 @@ title: `.pebblesToolbarTitle(MomentName.display(detail?.name) ?? "")`; edit shee
                 DetailSoulCell(
                     name: soul.name,
                     // v_moments_full carries {id, name}; the glyph comes from
-                    // the cached soul list (P6). Unknown → empty glyph.
+                    // the cached soul list (A6). Unknown → empty glyph.
                     strokes: refs.souls.first { $0.id == soul.id }?.glyph.strokes ?? [],
                     glyphColor: pageColors?.soulGlyph,
                     nameColor: pageColors?.soulName
@@ -1914,7 +2060,7 @@ extension PebbleDraft {
             self.isLoading = false
 ```
 
-  `save()` builds `ComposePebbleUpdateRequest(pebbleId: pebbleId, payload: payload)` after `guard let pebbleId else { return }`; drop `self.renderSvg = response.renderSvg ?? self.renderSvg`. The `delete_pebble_media failed` log string becomes `delete_moment_media failed`. Preview: `EditPebbleSheet(momentId: UUID(), onSaved: {})`.
+  `save()` builds `ComposePebbleUpdateRequest(pebbleId: pebbleId, payload: payload)` after `guard let pebbleId else { return }`; drop `self.renderSvg = response.renderSvg ?? self.renderSvg`. Photo removal is the detach from Task 1.8. Preview: `EditPebbleSheet(momentId: UUID(), onSaved: {})`.
 - [ ] **Step 5:** Delete `PebbleDetail.swift` and the three old test files. Update `Valence.swift`'s comment that names `PebbleDetail.valence` to name `Valence.resolved`.
 - [ ] **Step 6:** Commit after Task 1.12 builds.
 
@@ -1958,14 +2104,14 @@ git commit -m "fix(ios): list a soul's and a collection's moments from path_mome
 
 ### Task 1.13: Verify and open the PR
 
-- [ ] **Step 1:** Run the final-gate grep (Inventory 1). Expected remaining hits, all owned by Part 6: `PebblePublisher.swift` (`compose-pebble`), `EditPebbleSheet.swift` (`compose-pebble-update`), `ComposerDraftCoordinator.swift` (`can_use_glyph`), `PebbleDraftsService.swift` (`pebble_drafts`), `DraftsListSheet.swift`, `PebbleDraftPayload.swift`, `ComposePebbleResponse.swift`, `PebbleUpdatePayload.swift` (comments/keys), `PebbleFormView.swift`, `ExistingSnapRow`/`FormSnap` comments if any were missed. **No `from("pebbles")`, `path_pebbles` or `delete_pebble_media`.**
+- [ ] **Step 1:** Run the final-gate grep (Inventory 1). Expected remaining hits, all owned by Part 6: `PebblePublisher.swift` (`compose-pebble`), `EditPebbleSheet.swift` (`compose-pebble-update`), `ComposerDraftCoordinator.swift` (`can_use_glyph`), `PebbleDraftsService.swift` (`pebble_drafts`), `DraftsListSheet.swift`, `PebbleDraftPayload.swift`, `ComposePebbleResponse.swift`, `PebbleUpdatePayload.swift` (comments/keys), `PebbleFormView.swift`, `ExistingSnapRow`/`FormSnap` comments if any were missed. **No `from("pebbles")`, `path_pebbles`, `delete_pebble_media` or `delete_moment_media`.**
 - [ ] **Step 2:** Run the app on the simulator against the linked project with the test account: the Path lists bare moments (sample-glyph stones until Part 2), a tap opens the read page, delete works, a soul's and a collection's lists load. Capture the two raw payloads for the fixture diff (Task 1.3 note).
 - [ ] **Step 3:** Push and open the PR (`gh stack` bottom layer), title `fix(ios): read moments and pebbles from the split contract`, body: `Part 1 of the #1047 stack.` + what moved, the interim notes, key files. Labels `fix`, `ios`; milestone from #1047. No Lab Note: nothing new is user-visible beyond repair. Add `no-lab-note`.
 
 ---
 ## Part 2 — the stone carves the derived glyph (`feat/1047-ios-moments-stone`)
 
-**Outcome:** every pebble surface carves `PebbleGlyph.strokes` into its lit stone, placed in the engine's glyph slot for the valence, the way the sample glyph is placed today. A completed pebble with no glyph shows veins and fossil only. An uncompleted moment is a blank stone (P6). `render_svg` disappears from the stone code.
+**Outcome:** every pebble surface carves `PebbleGlyph.strokes` into its lit stone, placed in the engine's glyph slot for the valence, the way the sample glyph is placed today. A completed pebble with no glyph shows veins and fossil only. An uncompleted moment is a blank stone: the neutral-medium silhouette in the fixed grey ramp with the engine outline only, labelled "Not a pebble yet" (R4). `render_svg` disappears from the stone code.
 
 **Files**
 - Create: `Pebbles/Features/Path/Stone/StoneCarving.swift`, `PebblesTests/Stone/StonePaletteBlankTests.swift`
@@ -1994,7 +2140,7 @@ struct StonePaletteBlankTests {
         return String(format: "#%02X%02X%02X", byte(resolved.red), byte(resolved.green), byte(resolved.blue))
     }
 
-    @Test("the web BLANK_PALETTE grey ramp, slot for slot (P6)")
+    @Test("the web BLANK_PALETTE grey ramp, slot for slot (R4)")
     func ramp() {
         let blank = StonePalette.blank
         #expect(hex(blank.primary) == "#868686")
@@ -2012,7 +2158,7 @@ struct StonePaletteBlankTests {
 - [ ] **Step 3:** Add to `StonePalette.swift`, under `brand`:
 
 ```swift
-    /// An uncompleted moment's stone (P6): the web `BLANK_PALETTE` grey ramp
+    /// An uncompleted moment's stone (R4): the web `BLANK_PALETTE` grey ramp
     /// (`apps/web/lib/config/stone-tones.ts`), the same in both schemes.
     /// `surface` is the primary at 10% alpha, the rule the emotion palettes follow.
     static let blank = StonePalette(
@@ -2102,6 +2248,15 @@ struct PebbleStoneCarvingTests {
         #expect(first === second)
     }
 
+    @Test("the blank stone: the engine outline only, nothing carved inside (R4)")
+    func blank() throws {
+        let seed = try #require(StoneCarvingArt.art(for: .neutralMedium))
+        let blank = try #require(StoneCarvingArt.blankArt(for: .neutralMedium))
+        #expect(blank.ink.boundingBoxOfPath == seed.outline.boundingBoxOfPath)
+        #expect(blank.veins.isEmpty)
+        #expect(blank.fossil == nil)
+    }
+
     // emotionPalette() — unchanged from the current file.
 }
 ```
@@ -2121,7 +2276,8 @@ enum StoneCarving: Hashable {
     /// A real pebble: the seed's veins and fossil, plus its derived glyph
     /// when it has one (spec D5). Nil draws no glyph, never the sample.
     case pebble(PebbleGlyph?)
-    /// An uncompleted moment (P6): nothing carved at all.
+    /// An uncompleted moment (R4): the engine outline only, nothing carved
+    /// inside (no glyph, veins or fossil).
     case blank
 }
 ```
@@ -2187,6 +2343,18 @@ enum StoneCarving: Hashable {
 ```
 
     and make `build(_:)` call it with the sample: `placedGlyphInk(strokes: glyph.strokes.map { GlyphStroke(d: $0.d, width: $0.width) }, viewBoxSide: glyph.viewBox, size: valence.sizeGroup, polarity: valence.polarity)` where `glyph` is the decoded `stone-glyph.json` (guard it non-nil first). Delete the old two-argument `placedGlyphInk(size:polarity:)`.
+
+    Add the blank carving (R4), which inks the engine outline and nothing else:
+
+```swift
+    /// An uncompleted moment (R4): the seed's engine outline as the only ink.
+    /// No veins, no fossil, no glyph. Built from the cached seed, so it is free.
+    static func blankArt(for valence: Valence) -> Art? {
+        guard let seed = art(for: valence) else { return nil }
+        return Art(viewBox: seed.viewBox, ink: seed.outline, veins: CGMutablePath(),
+                   outline: seed.outline, fossil: nil)
+    }
+```
 - [ ] **Step 5:** Run the suite. Expected: PASS.
 - [ ] **Step 6:** Commit: `git commit -m "feat(ios): carve the derived glyph's strokes into the stone"`
 
@@ -2206,7 +2374,7 @@ enum StoneCarving: Hashable {
         switch carving {
         case .sample: return StoneCarvingArt.art(for: valence)
         case .pebble(let glyph): return StoneCarvingArt.art(for: valence, glyph: glyph)
-        case .blank: return nil
+        case .blank: return StoneCarvingArt.blankArt(for: valence)
         }
     }
 
@@ -2236,8 +2404,8 @@ enum StoneCarving: Hashable {
         self.followsTilt = followsTilt
     }
 
-    /// An uncompleted moment (P6): neutral-medium outline, nothing carved,
-    /// the grey ramp.
+    /// An uncompleted moment (R4): neutral-medium silhouette, outline only,
+    /// the fixed grey ramp, labelled "Not a pebble yet" for VoiceOver.
     static func blank(followsTilt: Bool = false) -> PebbleStoneView {
         PebbleStoneView(valence: .neutralMedium, carving: .blank, stonePalette: .blank, followsTilt: followsTilt)
     }
@@ -2250,7 +2418,15 @@ enum StoneCarving: Hashable {
     }
 ```
 
-  Delete the computed `stonePalette`; pass `palette: stonePalette, … carving: carving` to `StoneView` (drop `pebbleSvg:`). Update the doc comment ("its own glyph carved from its derived glyph's strokes").
+  Delete the computed `stonePalette`; pass `palette: stonePalette, … carving: carving` to `StoneView` (drop `pebbleSvg:`). Update the doc comment ("its own glyph carved from its derived glyph's strokes"). The blank stone carries its VoiceOver label (R4); on the `GeometryReader` in `body` add:
+
+```swift
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(carving == .blank ? Text("Not a pebble yet") : Text(verbatim: ""))
+        .accessibilityHidden(carving != .blank)
+```
+
+  (A completed pebble's stone stays decorative, as today; the row's text carries it.) Add `Not a pebble yet` / `Pas encore un galet` to the catalog.
 - [ ] **Step 3: `PebbleReadPetroglyph.swift`:** replace its four properties (`renderSvg`, `renderVersion`, `valence`, `palette`) with the pebble and its palette:
 
 ```swift
@@ -2295,7 +2471,7 @@ struct PebbleReadPetroglyph: View {
 ---
 ## Part 3 — Path, read page and delete UX (`feat/1047-ios-moments-path`)
 
-**Outcome:** a bare moment reads as one everywhere (P6). Null names render "Untitled". The read page shows a bare moment without pebble chrome and gains a `…` menu. One two-option delete confirmation is shared by the Path, the soul and collection lists, and the read page (P5). Soul and collection rows open the read page (P11).
+**Outcome:** a bare moment reads as one everywhere (R4). Null names render "Untitled". The read page shows a bare moment without pebble chrome and gains a `…` menu. One two-option delete confirmation is shared by the Path, the soul and collection lists, and the read page (R8). Soul and collection rows open the read page (R9).
 
 **Files**
 - Create: `Pebbles/Features/Path/MomentNameText.swift`, `Pebbles/Features/Path/MomentDeleteDialog.swift`, `PebblesTests/Moments/MomentDeleteTargetTests.swift`
@@ -2314,7 +2490,7 @@ import SwiftUI
 
 /// A moment's name, or an italic "Untitled" when it has none (spec D3: a
 /// photo is enough). Callers set the font; the colour differs per case so an
-/// untitled moment never reads as a title (P6).
+/// untitled moment never reads as a title (R4).
 struct MomentNameText: View {
     let name: String?
     var color: Color = Color.system.foreground
@@ -2380,7 +2556,7 @@ struct MomentDeleteTargetTests {
 ```swift
 import SwiftUI
 
-/// What a delete acts on (P5): the moment, and its pebble when completed.
+/// What a delete acts on (R8): the moment, and its pebble when completed.
 struct MomentDeleteTarget: Identifiable, Equatable {
     let momentId: UUID
     let pebbleId: UUID?
@@ -2453,7 +2629,7 @@ extension MomentDeletion {
 }
 
 extension View {
-    /// The one delete confirmation (P5). `perform` runs on a destructive tap,
+    /// The one delete confirmation (R8). `perform` runs on a destructive tap,
     /// after the warning haptic.
     func momentDeleteDialog(
         target: Binding<MomentDeleteTarget?>,
@@ -2486,7 +2662,7 @@ extension View {
 ```
 
   Add `import Supabase` at the top (for `SupabaseClient` in the extension).
-- [ ] **Step 4:** Add the six **P4** delete strings to the catalog (en + fr).
+- [ ] **Step 4:** Add the six **copy catalog** delete strings to the catalog (en + fr).
 - [ ] **Step 5:** Run the suite: PASS. Commit `feat(ios): one delete confirmation for pebbles and moments`.
 
 ### Task 3.3: Wire the dialog everywhere
@@ -2514,7 +2690,7 @@ extension View {
 ```
 
   `WeekPathView(onDelete: { moment in pendingDeletion = MomentDeleteTarget(summary: moment) })`. The `Couldn't delete` alert stays.
-- [ ] **Step 2: `SoulDetailView` / `CollectionDetailView`:** the same `pendingDeletion: MomentDeleteTarget?`, `.momentDeleteDialog`, `delete(_:on:)` reloading the list (and calling `onChanged()` so counts refresh). Row tap opens the read page (P11):
+- [ ] **Step 2: `SoulDetailView` / `CollectionDetailView`:** the same `pendingDeletion: MomentDeleteTarget?`, `.momentDeleteDialog`, `delete(_:on:)` reloading the list (and calling `onChanged()` so counts refresh). Row tap opens the read page (R9):
 
 ```swift
             .sheet(item: $selectedMomentId) { id in
@@ -2579,7 +2755,7 @@ extension View {
 ---
 ## Part 4 — the Complete flow (`feat/1047-ios-moments-complete`)
 
-**Outcome:** a bare moment's read page carries **Make it a pebble**, which opens a full-screen six-step flow (`valence · emotion · domain · souls · collection · privacy`) ending in `complete_pebble`, a success screen with the lit stone carving the resolved glyph and `+N karma`, and `check_achievements`. A half-finished flow autosaves per moment and restores silently (P7).
+**Outcome:** a bare moment's read page carries **Make it a pebble**, which opens a full-screen six-step flow (`valence · emotion · domain · souls · collection · privacy`) ending in `complete_pebble`, a success screen with the lit stone carving the resolved glyph and `+N karma`, and `check_achievements`. A half-finished flow autosaves per moment and restores silently (A3).
 
 **Files**
 - Create: `Pebbles/Features/Complete/CompleteStep.swift`, `CompleteStep+Copy.swift`, `CompleteDraft.swift`, `CompleteFlowModel.swift`, `CompleteFlowView.swift`, `CompleteStepContent.swift`, `Steps/CompleteValenceStep.swift`, `Steps/CompleteEmotionStep.swift`, `Steps/CompleteDomainStep.swift`, `Steps/CompleteSoulsStep.swift`, `Steps/CompleteCollectionStep.swift`, `Steps/CompletePrivacyStep.swift`, `Steps/CompleteSuccessStep.swift`; `Pebbles/Services/CompleteDraftStore.swift`
@@ -2633,7 +2809,7 @@ struct CompleteStepTests {
 ```swift
 import Foundation
 
-/// The Complete flow's screens (spec §6, P1). No glyph step: a pebble's glyph
+/// The Complete flow's screens (spec §6, A1). No glyph step: a pebble's glyph
 /// is derived from its collection or domain (D5).
 enum CompleteStep: Int, CaseIterable, Identifiable, Hashable {
     case valence
@@ -2716,7 +2892,7 @@ struct CompletePebblePayloadFromDraftTests {
         #expect(CompletePebblePayload(momentId: momentId, draft: draft) == nil)
     }
 
-    @Test("a complete draft sends every key the flow owns (P2)")
+    @Test("a complete draft sends every key the flow owns (A2)")
     func complete() throws {
         var draft = CompleteDraft()
         draft.valence = .lowlightLarge
@@ -2761,7 +2937,7 @@ import Foundation
 
 /// The Complete flow's answers (spec §6). Complete = valence + emotion +
 /// domain (D2); souls and collection are optional; visibility defaults to
-/// secret. One domain and one collection at most (P1).
+/// secret. One domain and one collection at most (A1).
 struct CompleteDraft: Equatable {
     var valence: Valence?
     var emotionId: UUID?
@@ -2797,7 +2973,7 @@ struct CompleteDraft: Equatable {
 
 ```swift
 extension CompletePebblePayload {
-    /// A full completion from the flow or Edit pebble (P2). Nil until the
+    /// A full completion from the flow or Edit pebble (A2). Nil until the
     /// draft is complete, so a caller cannot send a half pebble.
     init?(momentId: UUID, draft: CompleteDraft) {
         guard draft.isComplete, let valence = draft.valence,
@@ -2862,7 +3038,7 @@ struct CompleteDraftStoreTests {
         #expect(store.load(momentId: moment, ownerId: UUID()) == nil)
     }
 
-    @Test("the file body uses complete_pebble's keys (P7)")
+    @Test("the file body uses complete_pebble's keys (A3)")
     func wireKeys() throws {
         let (store, dir) = store()
         let moment = UUID()
@@ -2927,7 +3103,7 @@ import Observation
 import os
 
 /// Device-local autosave for a half-finished Complete flow, one file per
-/// moment (P7, spec D7). Not offline support: no sync, no merge. The file
+/// moment (A3, spec D7). Not offline support: no sync, no merge. The file
 /// carries its owner; another account's file is deleted on read, and
 /// `SignedOutPurge` clears them all.
 @Observable
@@ -3039,7 +3215,7 @@ final class CompleteAutosave {
     }
 }
 
-/// The file body (P7): `complete_pebble`'s key names, unset keys omitted.
+/// The file body (A3): `complete_pebble`'s key names, unset keys omitted.
 struct CompleteDraftSnapshot: Codable, Equatable {
     let ownerId: UUID
     let momentId: UUID
@@ -3212,7 +3388,7 @@ struct CompleteFlowModelTests {
 import Foundation
 import Observation
 
-/// What a completion produced, for the success screen (P8).
+/// What a completion produced, for the success screen (A4).
 struct CompletionResult: Equatable {
     let pebbleId: UUID
     let karmaDelta: Int?
@@ -3316,7 +3492,7 @@ final class CompleteFlowModel {
         draft.visibility = visibility
     }
 
-    // MARK: Restore (P7)
+    // MARK: Restore (A3)
 
     func firstGap() -> CompleteStep {
         for candidate in CompleteStep.counted where !candidate.isOptional {
@@ -3452,7 +3628,7 @@ struct CompleteSoulsStep: View {
 import SwiftUI
 
 /// The pebble, lit: its derived glyph carved into the stone (fetched after
-/// the write, P8), its name or "Untitled", and what it earned.
+/// the write, A4), its name or "Untitled", and what it earned.
 struct CompleteSuccessStep: View {
     let name: String?
     let result: CompletionResult
@@ -3646,7 +3822,7 @@ struct CompleteFlowView: View {
         }
     }
 
-    /// Silent restore (P7), once, after reference data has loaded.
+    /// Silent restore (A3), once, after reference data has loaded.
     private func restoreIfReady() {
         guard !hasRestored, refs.hasLoaded else { return }
         hasRestored = true
@@ -3658,7 +3834,7 @@ struct CompleteFlowView: View {
         ))
     }
 
-    /// ✕ never asks (P1): the answers are already on disk.
+    /// ✕ never asks (A1): the answers are already on disk.
     private func close() {
         autosave?.flush()
         dismiss()
@@ -3673,7 +3849,7 @@ struct CompleteFlowView: View {
         let service = MomentsService(client: supabase.client)
         do {
             let pebbleId = try await service.completePebble(payload)
-            // First completion: no events existed for this pebble id (P8).
+            // First completion: no events existed for this pebble id (A4).
             async let glyph = try? service.resolveGlyph(pebbleId: pebbleId)
             async let earned = try? service.karmaTotal(refId: pebbleId)
             let (resolved, karmaDelta) = await (glyph, earned)
@@ -3697,7 +3873,7 @@ struct CompleteFlowView: View {
 
 - [ ] **Step 1: Environment.** `PebblesApp.swift`: `@State private var completeDrafts: CompleteDraftStore` initialised `CompleteDraftStore()`, injected with `.environment(completeDrafts)` beside `snapshots`. `RootView.swift`: read it from the environment, pass it to `SignedOutPurge(…, completeDrafts: completeDrafts, …)`, and add `.environment(CompleteDraftStore())` to its preview.
 - [ ] **Step 2: `SignedOutPurge`:** add `let completeDrafts: CompleteDraftStore` and `completeDrafts.clearAll()` in `run()`. In `SignedOutPurgeTests.swift`, construct it with a temp-dir store, save a draft, run, and assert `load` returns nil.
-- [ ] **Step 3: Clear on delete (P7).** `MomentDeletion.deleteMoment(_:client:drafts:)` gains `drafts: CompleteDraftStore? = nil` and calls `drafts?.clear(momentId: momentId)` after the RPC succeeds; `perform(_:on:client:drafts:)` threads it through. Every host (`PathView`, `SoulDetailView`, `CollectionDetailView`, `PebbleDetailSheet`) reads `@Environment(CompleteDraftStore.self) private var completeDrafts` and passes it.
+- [ ] **Step 3: Clear on delete (A3).** `MomentDeletion.deleteMoment(_:client:drafts:)` gains `drafts: CompleteDraftStore? = nil` and calls `drafts?.clear(momentId: momentId)` after the RPC succeeds; `perform(_:on:client:drafts:)` threads it through. Every host (`PathView`, `SoulDetailView`, `CollectionDetailView`, `PebbleDetailSheet`) reads `@Environment(CompleteDraftStore.self) private var completeDrafts` and passes it.
 - [ ] **Step 4: Read page call to action.** `PebbleReadView` gains `var onComplete: (() -> Void)? = nil` and, under the description, for a bare moment:
 
 ```swift
@@ -3734,7 +3910,7 @@ struct CompleteFlowView: View {
 ---
 ## Part 5 — the Capture flow (`feat/1047-ios-moments-capture`)
 
-**Outcome:** `+` opens a three-step Capture (`photo · when · name`) that saves a moment with `save_moment` and returns to the Path, or, with **Make it a pebble now**, swaps the same cover to the Complete flow for the new moment (P1). The long-press escape hatch to the old sheet is removed.
+**Outcome:** `+` opens a three-step Capture (`photo · when · name`) that saves a moment with `save_moment` and returns to the Path, or, with **Make it a pebble now**, swaps the same cover to the Complete flow for the new moment (A1). The long-press escape hatch to the old sheet is removed.
 
 **Files**
 - Create: `Pebbles/Features/Capture/CaptureStep.swift`, `CaptureStep+Copy.swift`, `CaptureDraft.swift`, `CaptureFlowModel.swift`, `CaptureFlowView.swift`
@@ -3813,7 +3989,7 @@ struct SaveMomentPayloadCaptureTests {
 ```swift
 import Foundation
 
-/// The Capture flow's screens (spec §6, P1). No success screen: saving
+/// The Capture flow's screens (spec §6, A1). No success screen: saving
 /// returns to the Path, or chains into Complete.
 enum CaptureStep: Int, CaseIterable, Identifiable, Hashable {
     case photo
@@ -3869,7 +4045,7 @@ struct CaptureDraft: Equatable {
 
 ```swift
 extension SaveMomentPayload {
-    /// A new moment from Capture (P2): no id, the name only when non-blank,
+    /// A new moment from Capture (A2): no id, the name only when non-blank,
     /// no description, the photo only when there is one.
     init(capture draft: CaptureDraft, formSnap: FormSnap?, userId: UUID) {
         self.init()
@@ -4050,7 +4226,7 @@ final class CaptureFlowModel {
 
 ```swift
 /// A quieter text button under the primary one. Capture's name step uses it
-/// for "Make it a pebble now" (P1).
+/// for "Make it a pebble now" (A1).
 struct RecordStepSecondaryAction {
     let label: LocalizedStringResource
     let enabled: Bool
@@ -4093,12 +4269,12 @@ import PhotosUI
 import SwiftUI
 import os
 
-/// The Capture flow (spec §6, P1): photo · when · name → `save_moment`.
+/// The Capture flow (spec §6, A1): photo · when · name → `save_moment`.
 /// "Make it a pebble now" saves, then swaps this same cover to the Complete
 /// flow for the new moment, so there is never a second presentation.
 struct CaptureFlowView: View {
     /// Fired after the moment is saved and again after it is completed, so
-    /// the Path reloads and focuses its week (P12).
+    /// the Path reloads and focuses its week (A5).
     let onMomentChanged: (UUID) -> Void
 
     @Environment(SupabaseService.self) private var supabase
@@ -4254,7 +4430,7 @@ struct CaptureFlowView: View {
         }
     }
 
-    /// Only asks when there is something to keep (P1).
+    /// Only asks when there is something to keep (A1).
     private func handleClose() {
         if model.canSave {
             isCloseConfirmPresented = true
@@ -4291,7 +4467,7 @@ struct CaptureFlowView: View {
                 dismiss()
             }
         } catch {
-            // P2: the uploaded photo stays so a retry can use it.
+            // A2: the uploaded photo stays so a retry can use it.
             logger.error("save_moment failed: \(error.localizedDescription, privacy: .private)")
             model.fail(userMessageForMomentWriteError(error))
         }
@@ -4300,7 +4476,7 @@ struct CaptureFlowView: View {
 ```
 
   `RecordStepScaffold`'s memberwise init takes `secondaryAction:` after `contentFillsHeight:` (declaration order).
-- [ ] **Step 2:** Add the **P4** capture strings (`A name, a photo, or both.`, `Save moment`, `Make it a pebble now`, `Keep this moment?`) to the catalog.
+- [ ] **Step 2:** Add the **copy catalog** capture strings (`A name, a photo, or both.`, `Save moment`, `Make it a pebble now`, `Keep this moment?`) to the catalog.
 - [ ] **Step 3:** Build & test. Commit `feat(ios): capture a moment in three steps`.
 
 ### Task 5.5: `+` opens Capture
@@ -4330,7 +4506,7 @@ struct CaptureFlowView: View {
 ---
 ## Part 6 — retire the old composer, server drafts and compat writers; split editing (`feat/1047-ios-moments-retire-composer`)
 
-**Outcome:** no compat object is named anywhere in the app. Editing splits in two (P9): **Edit moment** (form → `save_moment`) and **Edit pebble** (form → `complete_pebble`), both from the read page's `…` menu.
+**Outcome:** no compat object is named anywhere in the app. Editing splits in two (R5): **Edit moment** (form → `save_moment`) and **Edit pebble** (form → `complete_pebble`), both from the read page's `…` menu.
 
 **Files**
 - Create: `Pebbles/Features/Path/EditMomentSheet.swift`, `Pebbles/Features/Path/Models/EditMomentDraft.swift`, `PebblesTests/Moments/EditMomentDraftTests.swift`, `PebblesTests/Moments/CompleteDraftFromPebbleTests.swift`
@@ -4356,7 +4532,7 @@ import Testing
 @Suite("CompleteDraft init(from: MomentDetail.Pebble)")
 struct CompleteDraftFromPebbleTests {
 
-    @Test("prefills every pebble field, first domain and first collection (P9)")
+    @Test("prefills every pebble field, first domain and first collection (R5)")
     func prefill() throws {
         let detail = try JSONDecoder().decode(MomentDetail.self, from: MomentFixtures.completedMoment)
         let pebble = try #require(detail.pebble)
@@ -4385,7 +4561,7 @@ struct CompleteDraftFromPebbleTests {
 
 ```swift
 extension CompleteDraft {
-    /// Prefill Edit pebble from the caller's pebble (P9). Keeps the first
+    /// Prefill Edit pebble from the caller's pebble (R5). Keeps the first
     /// domain and collection, as the pre-split edit did.
     init(from pebble: MomentDetail.Pebble) {
         self.init()
@@ -4406,7 +4582,7 @@ extension CompleteDraft {
 import SwiftUI
 import os
 
-/// Edit pebble (P9): the caller's pebble on a moment, saved through
+/// Edit pebble (R5): the caller's pebble on a moment, saved through
 /// `complete_pebble`. The moment's fields edit in `EditMomentSheet`.
 struct EditPebbleSheet: View {
     let momentId: UUID
@@ -4469,7 +4645,7 @@ struct EditPebbleSheet: View {
         saveError = nil
         let service = MomentsService(client: supabase.client)
         do {
-            // P8: what this edit earned = total after − total before.
+            // A4: what this edit earned = total after − total before.
             let before = (try? await service.karmaTotal(refId: pebble.id)) ?? 0
             _ = try await service.completePebble(payload)
             let after = (try? await service.karmaTotal(refId: pebble.id)) ?? before
@@ -4521,7 +4697,7 @@ struct EditMomentDraftTests {
         #expect(draft.canSave(hasSnap: false))
     }
 
-    @Test("blank name and description are sent as \"\" to clear (P2); snaps always sent")
+    @Test("blank name and description are sent as \"\" to clear (A2); snaps always sent")
     func payload() {
         let momentId = UUID()
         let draft = EditMomentDraft(happenedAt: Date(timeIntervalSince1970: 1_791_793_800), name: "  ", description: " \n")
@@ -4548,7 +4724,7 @@ struct EditMomentDraftTests {
 ```swift
 import Foundation
 
-/// Edit moment's form state (P9). The photo lives on the coordinator.
+/// Edit moment's form state (R5). The photo lives on the coordinator.
 struct EditMomentDraft: Equatable {
     var happenedAt: Date
     var name: String
@@ -4574,7 +4750,7 @@ struct EditMomentDraft: Equatable {
 }
 
 extension SaveMomentPayload {
-    /// An edit (P2): every moment field sent, blanks as "" (null cannot
+    /// An edit (A2): every moment field sent, blanks as "" (null cannot
     /// clear), and the full snap set (`[]` removes the photo).
     init(edit draft: EditMomentDraft, momentId: UUID, formSnap: FormSnap?, userId: UUID) {
         self.init()
@@ -4593,7 +4769,7 @@ extension SaveMomentPayload {
 import SwiftUI
 import os
 
-/// Edit moment (P9): when, name, description, photo → `save_moment`.
+/// Edit moment (R5): when, name, description, photo → `save_moment`.
 struct EditMomentSheet: View {
     let detail: MomentDetail
     let onSaved: () -> Void
@@ -4604,7 +4780,6 @@ struct EditMomentSheet: View {
     @State private var draft: EditMomentDraft
     @State private var snaps: SnapUploadCoordinator?
     @State private var isPhotoPickerPresented = false
-    @State private var isRemovingExistingSnap = false
     @State private var isSaving = false
     @State private var saveError: String?
 
@@ -4698,13 +4873,13 @@ struct EditMomentSheet: View {
             }
             .pebblesListRow(position: .only)
         case .existing(_, let storagePath):
+            // R6: removal only detaches; Save (enabled by the name-or-photo
+            // rule) sends `snaps: []`, and the server checks `moment_empty`.
             ExistingSnapRow(
                 storagePath: storagePath,
-                isRemoving: isRemovingExistingSnap,
-                onRemove: { Task { await removeExisting() } }
+                isRemoving: false,
+                onRemove: { snaps?.detachExisting() }
             )
-            // P9: removing the only content would leave an empty moment.
-            .disabled(MomentName.display(draft.name) == nil)
             .pebblesListRow(position: .only)
         case .pending(let snap):
             AttachedPhotoView(
@@ -4713,18 +4888,6 @@ struct EditMomentSheet: View {
                 onRemove: { if let userId = currentUserId, let snaps { Task { await snaps.removePending(userId: userId) } } }
             )
             .pebblesListRow(position: .only)
-        }
-    }
-
-    private func removeExisting() async {
-        guard let snaps else { return }
-        isRemovingExistingSnap = true
-        defer { isRemovingExistingSnap = false }
-        do {
-            try await snaps.removeExisting()
-        } catch {
-            logger.error("delete_moment_media failed: \(error.localizedDescription, privacy: .private)")
-            saveError = String(localized: "Couldn't remove the photo. Please try again.")
         }
     }
 
@@ -4745,6 +4908,8 @@ struct EditMomentSheet: View {
         let payload = SaveMomentPayload(edit: draft, momentId: detail.id, formSnap: snaps?.formSnap, userId: userId)
         do {
             _ = try await MomentsService(client: supabase.client).saveMoment(payload)
+            // R6: the rows are gone; now the detached (or replaced) files.
+            await snaps?.purgeDetached()
             onSaved()
             dismiss()
         } catch {
@@ -4756,7 +4921,7 @@ struct EditMomentSheet: View {
 }
 ```
 
-  `SnapUploadCoordinator.cancelAndCleanup` only deletes a *pending* snap's files, so Cancel never touches the saved photo.
+  `SnapUploadCoordinator.cancelAndCleanup` only deletes a *pending* snap's files and forgets detached ones (Task 1.8), so Cancel never touches the saved photo. A failed save keeps the detached list, so a retry still cleans up.
 - [ ] **Step 5:** Add `Edit moment` / `Modifier le moment` and `A moment needs a name or a photo.` / `Un moment a besoin d'un nom ou d'une photo.` to the catalog.
 
 ### Task 6.3: Delete the old composer, server drafts and the compat writers
@@ -4798,17 +4963,18 @@ struct EditMomentSheet: View {
 
   (replacing the single `isPresentingEdit`).
 - [ ] **Step 7: Build & test.** Then the gate grep (Inventory 1): expected **no non-comment hit**.
-- [ ] **Step 8: Look at it.** Simulator: Edit moment on a photo-only moment. Save is enabled because there is a photo, and photo removal is disabled because the name is blank. Type a name: removal enables. Remove the photo and save: the moment is now name-only. Clear the name of a name-only moment: Save disables and the footer hint shows. Edit pebble: change the emotion → the read page retints, the capsule shows the karma delta if any. Confirm the Path's drafts button is gone and long-press `+` does nothing.
+- [ ] **Step 8: Look at it.** Simulator: Edit moment on a photo-only moment. Save is enabled because there is a photo. Remove the photo: the row clears, Save disables and the footer hint shows (no RPC has run). Type a name: Save enables. Save: the moment is now name-only, and the old photo's files are gone from Storage. Remove the photo, then Cancel: the photo is still there on reopening. Edit pebble: change the emotion → the read page retints, the capsule shows the karma delta if any. Confirm the Path's drafts button is gone and long-press `+` does nothing.
 - [ ] **Step 9:** Commits, one per logical change: `feat(ios): edit a pebble through complete_pebble`, `feat(ios): edit a moment through save_moment`, `chore(ios): retire the eleven-step composer and server drafts`. Push; PR `feat(ios): retire the old composer and split moment and pebble editing`, `Part 6 of the #1047 stack.`, labels `feat`, `ios`, `ui`, `no-lab-note`.
 
 ---
 ## Part 7 — collection glyph picker, final gate, Arkaik (`feat/1047-ios-moments-collection-glyph`)
 
-**Outcome:** a collection can carry a glyph (P10), which is what pebbles in it inherit (D5). The compat grep gate is clean. The hosted Arkaik map describes the new views.
+**Outcome:** a collection can carry a glyph, set from both the create and the edit form (R11), which is what pebbles in it inherit (D5). The compat grep gate is clean. The hosted Arkaik map describes the new views.
 
 **Files**
-- Modify: `Features/Profile/Models/Collection.swift`, `Features/Profile/Sheets/EditCollectionSheet.swift`, `Features/Profile/Lists/CollectionsListView.swift:121`, `Features/Profile/Components/ProfileCollectionsCard.swift:81`, `Features/Profile/Views/CollectionDetailView.swift` (reload select), `Resources/Localizable.xcstrings`
-- Modify tests: `PebblesTests/CollectionDecodingTests.swift`, `PebblesTests/CollectionUpdatePayloadEncodingTests.swift`
+- Create: `Pebbles/Features/Profile/Components/CollectionGlyphSection.swift`
+- Modify: `Features/Profile/Models/Collection.swift`, `Features/Profile/Sheets/EditCollectionSheet.swift`, `Features/Profile/Sheets/CreateCollectionSheet.swift`, `Features/Profile/Lists/CollectionsListView.swift:121`, `Features/Profile/Components/ProfileCollectionsCard.swift:81`, `Features/Profile/Views/CollectionDetailView.swift` (reload select), `Resources/Localizable.xcstrings`
+- Modify tests: `PebblesTests/CollectionDecodingTests.swift`, `PebblesTests/CollectionUpdatePayloadEncodingTests.swift`, `PebblesTests/CollectionInsertPayloadEncodingTests.swift`
 
 ### Task 7.0: Branch
 
@@ -4847,7 +5013,7 @@ struct EditMomentSheet: View {
   and to `CollectionUpdatePayloadEncodingTests.swift`:
 
 ```swift
-    @Test("glyph_id is always sent: a lowercase id, or an explicit null that clears it (P10)")
+    @Test("glyph_id is always sent: a lowercase id, or an explicit null that clears it (R11)")
     func glyphId() throws {
         let id = UUID(uuidString: "66666666-6666-4666-8666-666666666666")!
         let set = try JSONSerialization.jsonObject(with: JSONEncoder().encode(
@@ -4866,46 +5032,84 @@ struct EditMomentSheet: View {
 - [ ] **Step 4:** Select strings (`CollectionsListView.swift:121`, `ProfileCollectionsCard.swift:81`, `CollectionDetailView.reloadCollection`): `"id, name, mode, glyph_id, glyph:glyphs(id, name, strokes, view_box, user_id), pebble_count:collection_pebbles(count)"`.
 - [ ] **Step 5:** Run: PASS. Commit `feat(ios): read a collection's glyph`.
 
-### Task 7.2: The glyph row in the collection editor
+### Task 7.2: The glyph row in the create and edit collection forms (R11)
 
-- [ ] **Step 1: `EditCollectionSheet`:** add state `@State private var glyph: Glyph?` (initial `collection.glyph`), `@State private var isPresentingPicker = false`; `canSave` also true when `glyph?.id != collection.glyphId`. Add a section between Name and Mode:
+- [ ] **Step 1: Write the failing test.** In `CollectionInsertPayloadEncodingTests.swift`, existing `CollectionInsertPayload(userId:name:mode:)` calls gain `glyphId: nil`, and add:
 
 ```swift
-                Section {
-                    Button { isPresentingPicker = true } label: {
-                        HStack(spacing: 12) {
-                            if let glyph {
-                                GlyphView(case: .default, strokes: glyph.strokes, side: 32)
-                                    .accessibilityHidden(true)
-                            } else {
-                                RoundedRectangle(cornerRadius: 6)
-                                    .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
-                                    .frame(width: 32, height: 32)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Text("Tap to choose").foregroundStyle(.primary)
-                            Spacer()
-                            Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .pebblesListRow(position: glyph == nil ? .only : .top)
-                    if glyph != nil {
-                        Button("Remove glyph", role: .destructive) { glyph = nil }
-                            .pebblesListRow(position: .bottom)
-                    }
-                } header: {
-                    Text("Glyph").pebblesSectionHeader()
-                } footer: {
-                    Text("Pebbles in this collection carry its glyph.")
-                }
+    @Test("glyph_id is always sent on insert: a lowercase id, or an explicit null (R11)")
+    func glyphId() throws {
+        let id = UUID(uuidString: "66666666-6666-4666-8666-666666666666")!
+        let set = try encode(CollectionInsertPayload(userId: userId, name: "A", mode: nil, glyphId: id))
+        #expect(set["glyph_id"] as? String == "66666666-6666-4666-8666-666666666666")
+        let none = try encode(CollectionInsertPayload(userId: userId, name: "A", mode: nil, glyphId: nil))
+        #expect(none.keys.contains("glyph_id"))
+        #expect(none["glyph_id"] is NSNull)
+    }
 ```
 
-  `.sheet(isPresented: $isPresentingPicker) { GlyphPickerSheet(currentGlyphId: glyph?.id, onSelected: { glyph = $0 }) }`. `save()` sends `CollectionUpdatePayload(name: trimmedName, mode: mode?.rawValue, glyphId: glyph?.id)`. A 42501 from the `collections_glyph_usable` trigger lands in the existing generic save error.
-- [ ] **Step 2:** Add `Remove glyph` / `Retirer le glyphe` (if not already in the catalog) and `Pebbles in this collection carry its glyph.` / `Les galets de cette collection portent son glyphe.`.
-- [ ] **Step 3: Glyph library check (P10):** `grep -rni "pebble" apps/ios/Pebbles/Features/Glyph` shows only `pebbles*` modifiers and toolbar helpers, no pebble tab or "use on pebble" action (the tabs are Mine / Owned / Commu). Nothing to remove; record it in the PR body.
-- [ ] **Step 4: Look at it.** Set a glyph on a collection, open a pebble in that collection: its stone now carves the collection's glyph (the resolver prefers a collection over the domain). Remove it: the stone falls back to the domain default.
-- [ ] **Step 5:** Build & test; commit `feat(ios): give a collection a glyph its pebbles inherit`.
+- [ ] **Step 2:** Run to verify it fails.
+- [ ] **Step 3: `CreateCollectionSheet.swift`:** `CollectionInsertPayload` gains `let glyphId: UUID?`, key `glyph_id`, encoded explicitly (`try container.encode(glyphId?.uuidString.lowercased(), forKey: .glyphId)`). The `collections_glyph_usable` trigger guards inserts as well as updates.
+- [ ] **Step 4: Create the shared row** `Pebbles/Features/Profile/Components/CollectionGlyphSection.swift`. Both sheets use it, so the row, its picker and its copy exist once:
+
+```swift
+import SwiftUI
+
+/// The collection's glyph row (R11), shared by create and edit: tap to pick
+/// through the shared glyph picker, **Remove glyph** when one is set, and the
+/// footer saying what the glyph does. Pebbles in the collection inherit it (D5).
+struct CollectionGlyphSection: View {
+    @Binding var glyph: Glyph?
+    @State private var isPresentingPicker = false
+
+    var body: some View {
+        Section {
+            Button { isPresentingPicker = true } label: {
+                HStack(spacing: 12) {
+                    if let glyph {
+                        GlyphView(case: .default, strokes: glyph.strokes, side: 32)
+                            .accessibilityHidden(true)
+                    } else {
+                        RoundedRectangle(cornerRadius: 6)
+                            .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
+                            .frame(width: 32, height: 32)
+                            .foregroundStyle(.secondary)
+                    }
+                    Text("Tap to choose").foregroundStyle(.primary)
+                    Spacer()
+                    Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                }
+            }
+            .buttonStyle(.plain)
+            .pebblesListRow(position: glyph == nil ? .only : .top)
+            if glyph != nil {
+                Button("Remove glyph", role: .destructive) { glyph = nil }
+                    .pebblesListRow(position: .bottom)
+            }
+        } header: {
+            Text("Glyph").pebblesSectionHeader()
+        } footer: {
+            Text("Pebbles in this collection carry its glyph.")
+        }
+        .sheet(isPresented: $isPresentingPicker) {
+            GlyphPickerSheet(currentGlyphId: glyph?.id, onSelected: { glyph = $0 })
+        }
+    }
+}
+```
+
+- [ ] **Step 5: Use it in both sheets,** between the Name and Mode sections:
+  - `CreateCollectionSheet`: add `@State private var glyph: Glyph?` and `CollectionGlyphSection(glyph: $glyph)`. Its insert sends `CollectionInsertPayload(userId: userId, name: trimmedName, mode: mode?.rawValue, glyphId: glyph?.id)`.
+  - `EditCollectionSheet`: add `@State private var glyph: Glyph?`, initialised to `collection.glyph`, and `CollectionGlyphSection(glyph: $glyph)`. `canSave` is also true when `glyph?.id != collection.glyphId`. `save()` sends `CollectionUpdatePayload(name: trimmedName, mode: mode?.rawValue, glyphId: glyph?.id)`.
+
+  A 42501 from the trigger lands in each sheet's existing generic save error. Neither sheet calls `set_collection_glyph` (R11).
+- [ ] **Step 6:** Add `Remove glyph` / `Retirer le glyphe` (if not already in the catalog) and `Pebbles in this collection carry its glyph.` / `Les galets de cette collection portent son glyphe.`.
+- [ ] **Step 7: Glyph library check:** `grep -rni "pebble" apps/ios/Pebbles/Features/Glyph` shows only `pebbles*` modifiers and toolbar helpers. There is no pebble tab and no "use on pebble" action (the tabs are Mine / Owned / Commu), so nothing needs removing. Record this in the PR body.
+- [ ] **Step 8: Look at it.**
+  - Create a collection with a glyph.
+  - Set a glyph on an existing collection, then open a pebble in it: its stone now carves the collection's glyph (the resolver prefers a collection over the domain).
+  - Remove the glyph: the stone falls back to the domain default.
+- [ ] **Step 9:** Build & test; commit `feat(ios): give a collection a glyph its pebbles inherit`.
 
 ### Task 7.3: Final gate
 
@@ -4921,12 +5125,12 @@ If the `arkaik-mcp` tools are not available, say so and stop. Never edit `docs/a
 - [ ] **Create** (`create_node`, species `view`, platforms `ios` + `android`, status `development`; the Android plan creates the same nodes or adds its platform, so coordinate on ids):
   - `V-moment-capture`: "Capture a moment". Photo · when · name → `save_moment`; "Make it a pebble now" chains into Complete. Edges: `V-timeline` → it; it → `API-rpc-save-moment`; it → `V-pebble-complete`.
   - `V-pebble-complete`: "Complete a pebble". Valence · emotion · domain · souls · collection · privacy → `complete_pebble`, then the success screen (lit stone, karma), then `check_achievements`. Edges: `V-pebble-detail` → it; it → `API-rpc-complete-pebble`; it → `V-record-success`; it → `V-achievement-unlock-moment`.
-  - `V-moment-edit`: "Edit Moment". Form → `save_moment`. Edges: `V-pebble-detail` → it; it → `API-rpc-save-moment`; it → `API-rpc-delete-moment-media`.
+  - `V-moment-edit`: "Edit Moment". Form → `save_moment`. Edges: `V-pebble-detail` → it; it → `API-rpc-save-moment` (photo removal rides the whole-set `snaps`, R6; no edge to `API-rpc-delete-moment-media`).
 - [ ] **Update** (`update_node`):
   - `V-timeline` (Path): bare moments draw as blank stones, `+` opens Capture, the two-option delete, reads `API-rpc-path-moments` (add the edge).
   - `V-pebble-detail`: rename in its description to "Moment read page": bare-moment layout with "Make it a pebble", the `…` menu (Edit moment, Edit pebble, Delete), reads `DM-v-moments-full` (edge), `API-rpc-delete-moment` (edge).
   - `V-pebble-edit`: pebble-only form, now through `API-rpc-complete-pebble` (replace the `API-compose-pebble-update` edge for ios).
-  - `V-collection-edit`: gains the glyph row (P10).
+  - `V-collection-edit` and `V-collection-create`: both gain the glyph row (R11).
   - `V-record-success`: now the Complete flow's success screen, with the stone carving the resolved glyph.
 - [ ] **Retire for iOS** (status stays as the other platforms need; remove the `ios` platform or edges as the node model allows, or file a request with `file_request` if a platform cannot be removed by update): `V-pebble-record` (the eleven-step flow), `V-quick-pebble-editor` (the long-press sheet), `V-pebble-drafts`, `V-glyph-attach` for pebbles. The `ios` edges to `API-compose-pebble`, `API-compose-pebble-update`, `API-delete-pebble-media`, `API-get-pebbles` go.
 - [ ] Acceptance `AC-glyph-on-pebble` ("Mark a moment with your own glyph") is superseded by D5 on iOS: do not mark anything `live`. Leave a note on the node via `update_node` description, or `propose_idea` if the maintainer should decide its fate.
@@ -4935,13 +5139,13 @@ If the `arkaik-mcp` tools are not available, say so and stop. Never edit `docs/a
 
 - [ ] PR `feat(ios): give collections a glyph and finish the moments split`, body starting `Resolves #1047` then `Part 7 of the #1047 stack`, the list of the seven parts, the Parity decisions link (this plan), the touchpoint inventory result. Labels `feat`, `ios`, `ui`; milestone from #1047.
 - [ ] **Lab Note.** The stack is user-facing (`feat`, new views). The repo `CLAUDE.md` asks for a `## Lab Note (EN/FR)` written with the `lab-note` skill. The maintainer's standing preference is that Arkaik coverage replaces it, with the `no-lab-note` label. Ask which applies when opening this PR. If a note is wanted, write one note for the whole stack here.
-- [ ] **Decision log:** none needed. The split's decision is already logged (2026-10-12), and P10's choice not to use `set_collection_glyph` is a client detail recorded in this plan. If the maintainer disagrees with P10, append a superseding entry rather than editing.
+- [ ] **Decision log:** none needed. The split's decision is already logged (2026-10-12), and the R1–R13 reconciliation (incl. R6: no `delete_moment_media`, R11: no `set_collection_glyph`) is a client-side parity record kept in both plans. If the maintainer reverses one of them, append a superseding log entry rather than editing.
 
 ---
 
 ## Self-review (run once the plan was written)
 
-- **Spec coverage.** §6 Capture flow, Part 5. Complete flow, Part 4. Path blank stone, Parts 2–3. Read page CTA, Part 4. Collection glyph picker, Part 7. Glyph library pebble tab, Part 7 (none on iOS). Per-moment autosave, Part 4. Drafts list and service removed, Part 6. Decoder tests with null pebble, explicit null name, photo-only, whole-second and fractional timestamps, Part 1 fixtures. Brief: every compat object removed (Inventory 1, final gate in Part 7); `check_achievements` after completion (P8, Parts 4 and 6); delete UX decided (P5, Part 3); edit split (P9, Part 6).
-- **Type consistency.** `MomentSummary` / `.PebbleSummary`, `MomentDetail` / `.Pebble` / `.Snap` / `.SoulRef` / `.CollectionRef`, `PebbleGlyph`, `SaveMomentPayload` (+ `capture:`, `edit:`), `CompletePebblePayload` (+ `init?(momentId:draft:)`), `MomentsService`, `MomentDeletion` (`deleteMoment`, `deletePebble`, `perform`, with `drafts:` from Part 4), `MomentDeleteTarget`, `MomentDeleteOption`, `StoneCarving`, `StonePalette.blank`, `PebbleStoneView(valence:glyph:palette:followsTilt:)` and `.blank(followsTilt:)`, `CompleteStep`, `CompleteDraft`, `CompleteDraftStore`, `CompleteAutosave`, `CompleteDraftSnapshot`, `CompleteFlowModel`, `CompletionResult`, `CompleteFlowView(momentId:momentName:onCompleted:)`, `CaptureStep`, `CaptureDraft`, `CaptureFlowModel`, `CaptureFlowView(onMomentChanged:)`, `RecordFlowChrome(dotCount:dotIndex:canGoBack:onBack:onClose:)`, `RecordStepSecondaryAction`, `EditMomentDraft`, `EditMomentSheet(detail:onSaved:)`, `EditPebbleSheet(momentId:pebble:onSaved:)`, `MomentNameText`, `MomentName.display`. Each one is introduced in an earlier task than its first use.
-- **Existing types relied on (checked on main):** `ISO8601Flexible`, `Valence.from(positiveness:intensity:)`, `Visibility`, `GlyphStroke`, `Glyph`, `SoulWithGlyph.glyph`, `FormSnap`, `AttachedSnap.storagePrefix(userId:)`, `SnapUploadCoordinator` (`handlePicked`, `retryCurrent`, `removePending`, `removeExisting`, `cancelAndCleanup`, `seedExisting`, `isUploading`, `hasFailed`, `isBlocking`, `pickedCaptureDate`, `formSnap`), `PebbleSnapRepository.deleteFiles(storagePrefix:)`, `TapHaptic` / `TapHaptics`, `RecordStepScaffold`, `RecordStepAction.primary`, `RecordPhotoStep` / `RecordWhenStep` / `RecordNameStep`, `ValencePickerContent`, `EmotionPickerContent`, `DomainPickerContent`, `SoulPickerContent`, `CreateSoulSheet`, `GlyphPickerSheet`, `GlyphView`, `PhotoPickerView`, `ExistingSnapRow`, `AttachedPhotoView`, `SelectedSoulsRow`, `VisibilityChip`, `KarmaNotificationService.notifyEarned(amount:reason:presentsCapsule:)`, `AchievementsService.fireCheck()`, `ReferenceDataService` (`souls`, `collections`, `domains`, `hasLoaded`, `refreshSouls`), `EmotionPaletteService.palette(for:)`, `StoneCarvingArt.glyphTransform`, `WobbleRenderer.glyphInk(d:width:)`, `PebblesPrimaryButtonStyle`, `SharedPebbleLink.url(for:)`.
+- **Spec coverage.** §6 Capture flow, Part 5. Complete flow, Part 4. Path blank stone, Parts 2–3. Read page CTA, Part 4. Collection glyph picker, Part 7. Glyph library pebble tab, Part 7 (none on iOS). Per-moment autosave, Part 4. Drafts list and service removed, Part 6. Decoder tests with null pebble, explicit null name, photo-only, whole-second and fractional timestamps, Part 1 fixtures. Brief: every compat object removed (Inventory 1, final gate in Part 7); `check_achievements` after completion (A4, Parts 4 and 6); delete UX decided (R8, Part 3); edit split (R5, Part 6). Reconciliation R1–R13 with the Android plan: copy (R1, R3, R10, copy catalog), capture close (R2, Part 5), blank stone outline + label (R4, Part 2), photo removal through `save_moment` with no `delete_moment_media` (R6, Tasks 1.8 and 6.2), read page overflow menu (R7, Parts 3 and 6), detail rows open the read page (R9, Part 3), collection glyph on create and edit (R11, Part 7), success screen (R12, Part 4), karma delta (R13, Parts 4 and 6).
+- **Type consistency.** `MomentSummary` / `.PebbleSummary`, `MomentDetail` / `.Pebble` / `.Snap` / `.SoulRef` / `.CollectionRef`, `PebbleGlyph`, `SaveMomentPayload` (+ `capture:`, `edit:`), `CompletePebblePayload` (+ `init?(momentId:draft:)`), `MomentsService`, `MomentDeletion` (`deleteMoment`, `deletePebble`, `perform`, with `drafts:` from Part 4), `MomentDeleteTarget`, `MomentDeleteOption`, `StoneCarving`, `StoneCarvingArt.art(for:glyph:)` / `.blankArt(for:)` / `.placedGlyphInk(strokes:viewBoxSide:size:polarity:)`, `StonePalette.blank`, `SnapUploadCoordinator.detachExisting()` / `.purgeDetached()` / `.detachedStoragePaths` (Task 1.8), `CollectionGlyphSection`, `CollectionInsertPayload.glyphId`, `CollectionUpdatePayload.glyphId`, `PebbleStoneView(valence:glyph:palette:followsTilt:)` and `.blank(followsTilt:)`, `CompleteStep`, `CompleteDraft`, `CompleteDraftStore`, `CompleteAutosave`, `CompleteDraftSnapshot`, `CompleteFlowModel`, `CompletionResult`, `CompleteFlowView(momentId:momentName:onCompleted:)`, `CaptureStep`, `CaptureDraft`, `CaptureFlowModel`, `CaptureFlowView(onMomentChanged:)`, `RecordFlowChrome(dotCount:dotIndex:canGoBack:onBack:onClose:)`, `RecordStepSecondaryAction`, `EditMomentDraft`, `EditMomentSheet(detail:onSaved:)`, `EditPebbleSheet(momentId:pebble:onSaved:)`, `MomentNameText`, `MomentName.display`. Each one is introduced in an earlier task than its first use.
+- **Existing types relied on (checked on main):** `ISO8601Flexible`, `Valence.from(positiveness:intensity:)`, `Visibility`, `GlyphStroke`, `Glyph`, `SoulWithGlyph.glyph`, `FormSnap`, `AttachedSnap.storagePrefix(userId:)`, `SnapUploadCoordinator` (`handlePicked`, `retryCurrent`, `removePending`, `cancelAndCleanup`, `seedExisting`, `isUploading`, `hasFailed`, `isBlocking`, `pickedCaptureDate`, `formSnap`), `PebbleSnapRepository.deleteFiles(storagePrefix:)`, `TapHaptic` / `TapHaptics`, `RecordStepScaffold`, `RecordStepAction.primary`, `RecordPhotoStep` / `RecordWhenStep` / `RecordNameStep`, `ValencePickerContent`, `EmotionPickerContent`, `DomainPickerContent`, `SoulPickerContent`, `CreateSoulSheet`, `GlyphPickerSheet`, `GlyphView`, `PhotoPickerView`, `ExistingSnapRow`, `AttachedPhotoView`, `SelectedSoulsRow`, `VisibilityChip`, `KarmaNotificationService.notifyEarned(amount:reason:presentsCapsule:)`, `AchievementsService.fireCheck()`, `ReferenceDataService` (`souls`, `collections`, `domains`, `hasLoaded`, `refreshSouls`), `EmotionPaletteService.palette(for:)`, `StoneCarvingArt.glyphTransform`, `WobbleRenderer.glyphInk(d:width:)`, `PebblesPrimaryButtonStyle`, `SharedPebbleLink.url(for:)`.
 - **Known risk to watch in review.** `PebbleRow`'s palette expression and `PathPebbleRow`'s preview need a hand-built `MomentSummary`. `MomentSummary.PebbleSummary` has a synthesized memberwise init because it declares no custom one; `MomentDetail.Pebble` does not, which is why no test constructs it by hand.
