@@ -58,34 +58,6 @@ enum StoneCarvingArt {
     }
 
     /// The carving of a real pebble: the seed's veins and fossil for its
-    /// valence, plus the glyph (and any extra fossil layer) taken from the
-    /// pebble's own composed SVG, wobbled by the same renderer the Path uses.
-    /// The engine outline in that SVG is left out, as the seed's is. Nil when
-    /// the seed is missing; a pebble whose SVG will not parse keeps the seed
-    /// carving with no glyph, logged.
-    static func art(for valence: Valence, pebbleSvg svg: String) -> Art? {
-        let key = "\(valence.rawValue)|\(svg)" as NSString
-        if let cached = pebbleCache.object(forKey: key) { return cached }
-        guard let seed = art(for: valence) else { return nil }
-        let ink = CGMutablePath()
-        ink.addPath(seed.veins)
-        if let model = PebbleSVGModel(svg: svg) {
-            let wobbled = WobbleRenderer.pebbleArt(svg: svg, model: model)
-            for (index, layer) in model.layers.enumerated() where layer.kind != .shape {
-                var transform = layer.transform
-                let layerInk = wobbled.layers[index].ink
-                ink.addPath(layerInk.copy(using: &transform) ?? layerInk)
-            }
-        } else {
-            logger.error("stone: pebble svg did not parse; carving without its glyph")
-        }
-        let built = Art(viewBox: seed.viewBox, ink: ink.copy() ?? ink, veins: seed.veins,
-                        outline: seed.outline, fossil: seed.fossil)
-        pebbleCache.setObject(built, forKey: key)
-        return built
-    }
-
-    /// The carving of a real pebble: the seed's veins and fossil for its
     /// valence, plus its derived glyph's strokes, wobbled and placed in the
     /// engine's slot exactly as the sample glyph is. Nil glyph → veins only.
     /// Strokes that do not wobble are skipped and logged. Cached per

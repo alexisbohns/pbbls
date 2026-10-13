@@ -16,9 +16,8 @@ import UIKit
 struct PebbleSnapFrame: View {
     let image: UIImage
     let aspect: BannerAspect
-    let renderSvg: String?
-    let renderVersion: String?
-    let valence: Valence
+    /// Nil for an uncompleted moment: the blank stone.
+    let pebble: MomentDetail.Pebble?
     let palette: EmotionPalette?
 
     private static let photoMinor: CGFloat = 150
@@ -51,12 +50,7 @@ struct PebbleSnapFrame: View {
                 .padding(.trailing, Self.pokeEnd)
                 .accessibilityHidden(true)
 
-            PebbleReadPetroglyph(
-                renderSvg: renderSvg,
-                renderVersion: renderVersion,
-                valence: valence,
-                palette: palette
-            )
+            PebbleReadPetroglyph(pebble: pebble, palette: palette)
             .frame(width: Self.overlayPetroglyph, height: Self.overlayPetroglyph)
             .rotationEffect(.degrees(Self.petroglyphTilt))
         }
@@ -93,19 +87,11 @@ private let previewSnapPalette = EmotionPalette(
     shadedHex: "#4A3A5CFF"
 )
 
-private let previewSnapSvg = """
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="3"/>
-</svg>
-"""
-
 #Preview("Snap frame · square") {
     PebbleSnapFrame(
         image: previewSnapImage(),
         aspect: .square,
-        renderSvg: previewSnapSvg,
-        renderVersion: "0.1.0",
-        valence: .neutralMedium,
+        pebble: nil,
         palette: previewSnapPalette
     )
     .padding(.vertical, 24)
@@ -117,9 +103,7 @@ private let previewSnapSvg = """
     PebbleSnapFrame(
         image: previewSnapImage(),
         aspect: .fourThree,
-        renderSvg: previewSnapSvg,
-        renderVersion: "0.1.0",
-        valence: .neutralMedium,
+        pebble: nil,
         palette: previewSnapPalette
     )
     .padding(.vertical, 24)
@@ -131,9 +115,7 @@ private let previewSnapSvg = """
     PebbleSnapFrame(
         image: previewSnapImage(),
         aspect: .threeFour,
-        renderSvg: previewSnapSvg,
-        renderVersion: "0.1.0",
-        valence: .highlightLarge,
+        pebble: nil,
         palette: previewSnapPalette
     )
     .padding(.vertical, 24)

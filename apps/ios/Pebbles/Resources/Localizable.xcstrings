@@ -5665,6 +5665,23 @@
         }
       }
     },
+    "Not a pebble yet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not a pebble yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore un galet"
+          }
+        }
+      }
+    },
     "Not enough karma" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -17,11 +17,9 @@ import os
 /// the decode itself.
 struct PebbleReadBanner: View {
     let snapStoragePath: String?
-    let renderSvg: String?
-    let renderVersion: String?
-    /// Nil for a bare moment: the banner falls back to the system chrome.
-    let emotionId: UUID?
-    let valence: Valence
+    /// Nil for a bare moment: the blank stone, and the banner falls back to
+    /// the system chrome.
+    let pebble: MomentDetail.Pebble?
 
     @Environment(SnapURLCache.self) private var snapURLs
     @Environment(EmotionPaletteService.self) private var palettes
@@ -39,18 +37,11 @@ struct PebbleReadBanner: View {
                 PebbleSnapFrame(
                     image: image,
                     aspect: BannerAspect.nearest(to: image.size.width / max(image.size.height, 1)),
-                    renderSvg: renderSvg,
-                    renderVersion: renderVersion,
-                    valence: valence,
+                    pebble: pebble,
                     palette: palette
                 )
             } else {
-                PebbleReadPetroglyph(
-                    renderSvg: renderSvg,
-                    renderVersion: renderVersion,
-                    valence: valence,
-                    palette: palette
-                )
+                PebbleReadPetroglyph(pebble: pebble, palette: palette)
                 .frame(width: headingPetroglyph, height: headingPetroglyph)
                 .frame(maxWidth: .infinity)
             }
@@ -61,7 +52,7 @@ struct PebbleReadBanner: View {
     }
 
     private var palette: EmotionPalette? {
-        emotionId.flatMap { palettes.palette(for: $0) }
+        pebble.flatMap { palettes.palette(for: $0.emotion.id) }
     }
 
     private func loadPhotoIfNeeded() async {
@@ -91,14 +82,7 @@ struct PebbleReadBanner: View {
     let supabase = SupabaseService()
     return PebbleReadBanner(
         snapStoragePath: nil,
-        renderSvg: """
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="3"/>
-            </svg>
-            """,
-        renderVersion: "0.1.0",
-        emotionId: nil,
-        valence: .neutralMedium
+        pebble: nil
     )
     .padding()
     .background(Color.system.background)
@@ -107,18 +91,11 @@ struct PebbleReadBanner: View {
     .environment(SnapURLCache(client: supabase.client))
 }
 
-#Preview("Without photo · large") {
+#Preview("Without photo · bare moment") {
     let supabase = SupabaseService()
     return PebbleReadBanner(
         snapStoragePath: nil,
-        renderSvg: """
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="3"/>
-            </svg>
-            """,
-        renderVersion: "0.1.0",
-        emotionId: nil,
-        valence: .highlightLarge
+        pebble: nil
     )
     .padding()
     .background(Color.system.background)
@@ -134,14 +111,7 @@ struct PebbleReadBanner: View {
     let supabase = SupabaseService()
     return PebbleReadBanner(
         snapStoragePath: nil,
-        renderSvg: """
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="3"/>
-            </svg>
-            """,
-        renderVersion: "0.1.0",
-        emotionId: nil,
-        valence: .neutralMedium
+        pebble: nil
     )
     .padding()
     .background(Color.system.background)
