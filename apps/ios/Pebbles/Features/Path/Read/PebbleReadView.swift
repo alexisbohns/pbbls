@@ -33,7 +33,7 @@ struct PebbleReadView: View {
                 )
 
                 PebbleReadTitle(
-                    name: MomentName.display(detail.name) ?? "",
+                    name: detail.name,
                     happenedAt: detail.happenedAt,
                     nameColor: pageColors?.title,
                     dateColor: pageColors?.date

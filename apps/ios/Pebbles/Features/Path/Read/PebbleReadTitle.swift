@@ -7,17 +7,20 @@ import SwiftUI
 /// `nameColor` / `dateColor` override the default chrome colors — the read page
 /// tints them to the emotion palette (#605). `nil` keeps the system chrome.
 struct PebbleReadTitle: View {
-    let name: String
+    let name: String?
     let happenedAt: Date
     var nameColor: Color? = nil
     var dateColor: Color? = nil
 
     var body: some View {
         VStack(spacing: 6) {
-            Text(name)
-                .font(.custom("Ysabeau-SemiBold", size: 24))
-                .multilineTextAlignment(.center)
-                .foregroundStyle(nameColor ?? Color.system.foreground)
+            MomentNameText(
+                name: name,
+                color: nameColor ?? Color.system.foreground,
+                untitledColor: dateColor ?? Color.system.secondary
+            )
+            .font(.custom("Ysabeau-SemiBold", size: 24))
+            .multilineTextAlignment(.center)
             Text(formattedDate)
                 .font(.caption)
                 .tracking(1.2)
@@ -50,6 +53,7 @@ struct PebbleReadTitle: View {
             name: "A much longer pebble title that needs to wrap onto two lines comfortably",
             happenedAt: .now
         )
+        PebbleReadTitle(name: nil, happenedAt: .now)
     }
     .padding()
     .background(Color.system.background)
