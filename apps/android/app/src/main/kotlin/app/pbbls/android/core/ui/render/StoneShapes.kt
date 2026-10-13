@@ -39,8 +39,6 @@ private val parsedShapes = ConcurrentHashMap<Int, PebbleSvgModel>()
 internal fun rememberStoneModel(
     valence: Valence,
     glyph: PebbleGlyph?,
-    /** The blank stone: the silhouette outline only (R4). */
-    outlineOnly: Boolean = false,
 ): PebbleSvgModel? {
     val resources = LocalResources.current
     val resId = StoneShapeAssets.resId(valence.sizeGroup, valence.polarity)
@@ -55,9 +53,7 @@ internal fun rememberStoneModel(
                     ?.also { parsedShapes[resId] = it }
                     .also { if (it == null) Log.e("stone", "shape seed $resId did not parse") }
         }
-    return remember(shape, glyph, valence, outlineOnly) {
-        shape?.let {
-            if (outlineOnly) StoneComposer.outlineOnly(it) else StoneComposer.compose(it, valence.sizeGroup, valence.polarity, glyph)
-        }
+    return remember(shape, glyph, valence) {
+        shape?.let { StoneComposer.compose(it, valence.sizeGroup, valence.polarity, glyph) }
     }
 }

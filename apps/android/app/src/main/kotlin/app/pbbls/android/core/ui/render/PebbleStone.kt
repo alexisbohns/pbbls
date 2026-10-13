@@ -30,16 +30,24 @@ fun PebbleStone(
 ) {
     StoneLayers(
         valence = valence,
-        model = rememberStoneModel(valence, glyph),
-        cacheKey = StoneComposer.cacheKey(valence.sizeGroup, valence.polarity, glyph),
         colors = colors,
         modifier = modifier,
-    )
+    ) { scale ->
+        val model = rememberStoneModel(valence, glyph) ?: return@StoneLayers
+        PebbleStaticRender(
+            model = model,
+            cacheKey = StoneComposer.cacheKey(valence.sizeGroup, valence.polarity, glyph),
+            strokeHex = colors.strokeHex,
+            modifier = Modifier.fillMaxSize().scale(scale),
+        )
+    }
 }
 
 /**
- * An uncompleted moment (R4): the medium neutral silhouette and its outline,
- * nothing carved inside, in the fixed blank greys. [colors] defaults to the
+ * An uncompleted moment (R4): the medium neutral silhouette in the fixed blank
+ * greys, with nothing carved: no glyph, no veins, and no outline stroke on top
+ * (an extra outline reads as a heavy, offset double contour; iOS and the web
+ * `LitStone` blank branch draw the silhouette alone). [colors] defaults to the
  * Path-row mapping; the read page passes its Petroglyph mapping of the same ramp.
  */
 @Composable
@@ -50,20 +58,18 @@ fun BlankStone(
     val label = stringResource(R.string.moment_blank_a11y)
     StoneLayers(
         valence = Valence.NEUTRAL_MEDIUM,
-        model = rememberStoneModel(Valence.NEUTRAL_MEDIUM, glyph = null, outlineOnly = true),
-        cacheKey = StoneComposer.BLANK_CACHE_KEY,
         colors = colors,
         modifier = modifier.semantics { contentDescription = label },
     )
 }
 
+/** The filled silhouette, with [carving] traced on top when there is one. */
 @Composable
 private fun StoneLayers(
     valence: Valence,
-    model: PebbleSvgModel?,
-    cacheKey: String,
     colors: PebbleFrameColors,
     modifier: Modifier,
+    carving: (@Composable (scale: Float) -> Unit)? = null,
 ) {
     val sizeGroup = valence.sizeGroup
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
@@ -78,14 +84,7 @@ private fun StoneLayers(
                 fillOpacity = colors.fillOpacity,
                 modifier = Modifier.fillMaxSize(),
             )
-            if (model != null) {
-                PebbleStaticRender(
-                    model = model,
-                    cacheKey = cacheKey,
-                    strokeHex = colors.strokeHex,
-                    modifier = Modifier.fillMaxSize().scale(PebbleOutlineGeometry.pebbleScale(sizeGroup)),
-                )
-            }
+            carving?.invoke(PebbleOutlineGeometry.pebbleScale(sizeGroup))
         }
     }
 }

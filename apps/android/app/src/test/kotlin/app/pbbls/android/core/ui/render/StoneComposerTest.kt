@@ -8,7 +8,6 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertSame
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
@@ -113,25 +112,5 @@ class StoneComposerTest {
         assertNotEquals(a, b)
         // Same glyph id, carving edited in place: a new key, so no stale wobble art.
         assertNotEquals(a, StoneComposer.cacheKey(ValenceSizeGroup.SMALL, ValencePolarity.LOWLIGHT, glyph("0 0 100 100")))
-        assertNotEquals(StoneComposer.BLANK_CACHE_KEY, StoneComposer.cacheKey(ValenceSizeGroup.MEDIUM, ValencePolarity.NEUTRAL, null))
-    }
-
-    @Test
-    fun `the blank stone keeps only the closed silhouette outline`() {
-        val shape = StoneComposer.shapeModel(seed(ValenceSizeGroup.MEDIUM, ValencePolarity.NEUTRAL).readText())!!
-        val paths =
-            StoneComposer
-                .outlineOnly(shape)
-                .layers
-                .single()
-                .paths
-        assertEquals(1, paths.size)
-        assertTrue(
-            paths
-                .single()
-                .d
-                .trimEnd()
-                .endsWith("Z"),
-        )
     }
 }

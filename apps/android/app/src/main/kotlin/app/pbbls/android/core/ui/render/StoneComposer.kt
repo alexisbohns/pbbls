@@ -39,8 +39,6 @@ internal object StoneComposer {
     private val anyFill = Regex("fill=\"[^\"]*\"")
     private val svgOpen = Regex("<svg[^>]*>")
 
-    const val BLANK_CACHE_KEY = "stone:blank"
-
     fun glyphSlot(
         size: ValenceSizeGroup,
         polarity: ValencePolarity,
@@ -79,14 +77,6 @@ internal object StoneComposer {
         polarity: ValencePolarity,
         glyph: PebbleGlyph?,
     ): String = "stone:${size.key}:${polarity.key}:${glyph?.let { "${it.id}:${(it.viewBox to it.strokes).hashCode()}" } ?: "-"}"
-
-    /**
-     * The blank stone (R4): the silhouette's outline only, nothing carved
-     * inside. A seed's first stroked path is its closed outline; the rest are
-     * the detail strokes the blank stone must not draw.
-     */
-    fun outlineOnly(shape: PebbleSvgModel): PebbleSvgModel =
-        shape.copy(layers = shape.layers.map { layer -> layer.copy(paths = layer.paths.take(1)) })
 
     private fun glyphLayer(
         glyph: PebbleGlyph,
