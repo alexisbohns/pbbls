@@ -655,23 +655,6 @@
         }
       }
     },
-    "A little mark, just for this one." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A little mark, just for this one."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une petite marque, rien que pour lui."
-          }
-        }
-      }
-    },
     "A moment needs a name or a photo." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3423,23 +3406,6 @@
         }
       }
     },
-    "Drafts" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drafts"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brouillons"
-          }
-        }
-      }
-    },
     "Drawing canvas" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4505,23 +4471,6 @@
         }
       }
     },
-    "Give it a glyph" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Give it a glyph"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Donne-lui un glyphe"
-          }
-        }
-      }
-    },
     "Glyph" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4918,23 +4867,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu gardes ce moment ?"
-          }
-        }
-      }
-    },
-    "Keep this pebble?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep this pebble?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu gardes ce galet ?"
           }
         }
       }
@@ -5767,23 +5699,6 @@
         }
       }
     },
-    "No drafts yet. Anything you start keeping shows up here." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No drafts yet. Anything you start keeping shows up here."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun brouillon. Tout ce que tu commences à garder apparaît ici."
-          }
-        }
-      }
-    },
     "No glyphs yet" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5797,23 +5712,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun glyphe pour l'instant"
-          }
-        }
-      }
-    },
-    "No name yet" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No name yet"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Encore sans nom"
           }
         }
       }
@@ -6341,23 +6239,6 @@
         }
       }
     },
-    "Pick up where you left off?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pick up where you left off?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On reprend où tu t'étais arrêté ?"
-          }
-        }
-      }
-    },
     "Please sign in again." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6519,23 +6400,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Profil public"
-          }
-        }
-      }
-    },
-    "Publish" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Publish"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Publier"
           }
         }
       }
@@ -6792,23 +6656,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Revoir l'introduction"
-          }
-        }
-      }
-    },
-    "Restore it" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restore it"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reprendre"
           }
         }
       }
@@ -7259,23 +7106,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stack"
-          }
-        }
-      }
-    },
-    "Start fresh" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start fresh"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repartir de zéro"
           }
         }
       }
@@ -7935,23 +7765,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible de supprimer votre compte. Rien n'a été supprimé. Veuillez réessayer."
-          }
-        }
-      }
-    },
-    "We kept what you were writing here. Add your photo again when you're ready." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "We kept what you were writing here. Add your photo again when you're ready."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On a gardé ce que tu écrivais ici. Remets ta photo quand tu veux."
           }
         }
       }
