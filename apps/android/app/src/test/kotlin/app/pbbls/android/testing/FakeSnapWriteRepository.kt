@@ -2,6 +2,7 @@ package app.pbbls.android.testing
 
 import app.pbbls.android.core.data.ProcessedImage
 import app.pbbls.android.core.data.SnapWriteRepositing
+import kotlinx.coroutines.CompletableDeferred
 
 /**
  * In-memory [SnapWriteRepositing] (#849).
@@ -25,11 +26,15 @@ class FakeSnapWriteRepository : SnapWriteRepositing {
             armed.next = value
         }
 
+    /** Holds an upload in flight until completed, for "still uploading" cases. */
+    var uploadGate: CompletableDeferred<Unit>? = null
+
     override suspend fun uploadProcessed(
         processed: ProcessedImage,
         snapId: String,
         userId: String,
     ) {
+        uploadGate?.await()
         uploaded += snapId
         armed.fire()
     }

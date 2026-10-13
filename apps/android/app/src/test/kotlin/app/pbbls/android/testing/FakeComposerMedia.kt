@@ -19,11 +19,14 @@ class FakeComposerMedia : ComposerMedia {
     var prewarmCount = 0
         private set
 
-    override suspend fun captureDate(uri: Uri): OffsetDateTime? =
-        error("the photo path needs a real Uri — cover it under Robolectric (#857)")
-
     /** What [process] returns once armed; unarmed, it throws as above. */
     var processed: ProcessedImage? = null
+
+    /** What [captureDate] returns once [processed] is armed: the pick's EXIF date, or none. */
+    var captureDateResult: OffsetDateTime? = null
+
+    override suspend fun captureDate(uri: Uri): OffsetDateTime? =
+        if (processed != null) captureDateResult else error("the photo path needs a real Uri — cover it under Robolectric (#857)")
 
     override suspend fun process(uri: Uri): ProcessedImage =
         processed ?: error("the photo path needs a real Uri — cover it under Robolectric (#857)")
