@@ -38,11 +38,10 @@ import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.readableWidth
-import app.pbbls.android.core.ui.GlyphPickerSlot
 
 /**
  * The create-pebble surface (D5) — ports iOS `CreatePebbleSheet`. Owns the
- * [PebbleDraft] (D4) plus the picked glyph, save-in-flight, and inline
+ * [PebbleDraft] (D4) plus save-in-flight, and inline
  * save-error state, and reads the write / reference / karma / palette services
  * here so the hosted [PebbleForm] stays pure and previewable. `save()` branches
  * on [ComposeResult]: `Success` flashes karma (`karma_delta`, `PEBBLE_CREATED`)
@@ -76,7 +75,6 @@ import app.pbbls.android.core.ui.GlyphPickerSlot
 fun CreatePebbleScreen(
     onCreated: (String) -> Unit,
     onCancel: () -> Unit,
-    glyphPicker: GlyphPickerSlot,
     modifier: Modifier = Modifier,
     resumeDraftId: String? = null,
     onDraftSaved: () -> Unit = onCancel,
@@ -133,10 +131,7 @@ fun CreatePebbleScreen(
             souls = refs.souls,
             collections = refs.collections,
             selectedEmotion = selectedEmotion,
-            selectedGlyph = uiState.selectedGlyph,
-            onGlyphPicked = viewModel::onGlyphPicked,
             saveError = saveError,
-            glyphPicker = glyphPicker,
             modifier = Modifier.weight(1f),
             formSnap = uiState.snap,
             onAddPhoto = {

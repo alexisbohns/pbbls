@@ -2,6 +2,7 @@ package app.pbbls.android.core.data
 
 import app.pbbls.android.core.model.AttachedSnap
 import app.pbbls.android.core.model.FormSnap
+import app.pbbls.android.testing.FakeSnapWriteRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
@@ -31,9 +32,6 @@ class SnapUploadCoordinatorTest {
         var uploadGate: CompletableDeferred<Unit>? = null
         val deletedSnapIds = mutableListOf<String>()
         val deletedPrefixes = mutableListOf<String>()
-        var deletePebbleMediaCalls = 0
-        var deletePebbleMediaError: Exception? = null
-        var deletePebbleMediaResult = "user/snap"
 
         override suspend fun uploadProcessed(
             processed: ProcessedImage,
@@ -57,12 +55,6 @@ class SnapUploadCoordinatorTest {
 
         override suspend fun deleteFiles(storagePrefix: String) {
             deletedPrefixes += storagePrefix
-        }
-
-        override suspend fun deletePebbleMedia(snapId: String): String {
-            deletePebbleMediaCalls += 1
-            deletePebbleMediaError?.let { throw it }
-            return deletePebbleMediaResult
         }
     }
 
@@ -166,33 +158,20 @@ class SnapUploadCoordinatorTest {
         }
 
     @Test
-    fun `removeExisting calls the RPC then cleans storage by returned path`() =
+    fun `detaching a saved photo writes nothing and hands the snap back`() =
         runTest {
-            val repo = FakeRepo()
-            repo.deletePebbleMediaResult = "uid/snapid"
-            val coordinator = coordinator(repo, initial = FormSnap.Existing(id = "snapid", storagePath = "uid/snapid"))
-            coordinator.removeExisting()
-            assertEquals(1, repo.deletePebbleMediaCalls)
-            assertEquals(listOf("uid/snapid"), repo.deletedPrefixes)
+            val repo = FakeSnapWriteRepository()
+            val coordinator = SnapUploadCoordinator(repo = repo, initialSnap = FormSnap.Existing("snap-1", "user-1/snap-1"))
+            assertEquals(FormSnap.Existing("snap-1", "user-1/snap-1"), coordinator.detachExisting())
             assertNull(coordinator.formSnap)
+            assertTrue(repo.deletedPrefixes.isEmpty())
+            assertTrue(repo.deletedSnapIds.isEmpty())
         }
 
     @Test
-    fun `removeExisting RPC failure propagates and keeps the snap`() =
-        runTest {
-            val repo = FakeRepo()
-            repo.deletePebbleMediaError = IOException("rpc down")
-            val coordinator = coordinator(repo, initial = FormSnap.Existing(id = "snapid", storagePath = "uid/snapid"))
-            var thrown = false
-            try {
-                coordinator.removeExisting()
-            } catch (_: IOException) {
-                thrown = true
-            }
-            assertTrue(thrown)
-            assertNotNull(coordinator.formSnap)
-            assertTrue(repo.deletedPrefixes.isEmpty())
-        }
+    fun `detaching with nothing saved is a no-op`() {
+        assertNull(SnapUploadCoordinator(repo = FakeSnapWriteRepository()).detachExisting())
+    }
 
     @Test
     fun `a removal mid-upload is not resurrected by the late completion`() =

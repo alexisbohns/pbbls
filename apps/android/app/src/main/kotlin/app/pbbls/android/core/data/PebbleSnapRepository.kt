@@ -2,13 +2,10 @@ package app.pbbls.android.core.data
 
 import android.util.Log
 import app.pbbls.android.AppEnvironment
-import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.storage.storage
 import io.ktor.http.ContentType
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -33,13 +30,10 @@ interface SnapWriteRepositing {
 
     /** Best-effort Storage cleanup for callers already holding the `storage_path` prefix. */
     suspend fun deleteFiles(storagePrefix: String)
-
-    /** `delete_pebble_media` RPC; returns the row's `storage_path` for Storage cleanup. Throws. */
-    suspend fun deletePebbleMedia(snapId: String): String
 }
 
 /**
- * Storage + RPC operations for the private `pebbles-media` bucket — ports
+ * Storage operations for the private `pebbles-media` bucket — ports
  * `apps/ios/Pebbles/Features/PebbleMedia/PebbleSnapRepository.swift`, now both
  * halves: M39's signed-URL read path and M42's upload/delete write path.
  * `storage_path` rows hold the prefix `{user_id}/{snap_id}`; the two renditions
@@ -107,13 +101,6 @@ class PebbleSnapRepository(
             Log.e(TAG, "snap delete failed for prefix $storagePrefix", e)
         }
     }
-
-    override suspend fun deletePebbleMedia(snapId: String): String =
-        supabase.client.postgrest
-            .rpc(
-                "delete_pebble_media",
-                buildJsonObject { put("p_snap_id", snapId) },
-            ).decodeAs()
 
     companion object {
         private const val TAG = "snap-repo"

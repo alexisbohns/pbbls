@@ -127,15 +127,15 @@ class SnapUploadCoordinator(
     }
 
     /**
-     * Remove the current existing snap: `delete_pebble_media` (throws to the
-     * screen on failure — the form surfaces it), then fire-and-forget Storage
-     * cleanup of the returned path. No-op when not existing.
+     * Detach the saved photo from the form. Nothing is written here: Edit
+     * moment's `save_moment` drops the row through its whole-set `snaps`, which
+     * is also where "a moment needs a name or a photo" is enforced, and the
+     * caller deletes the returned snap's files once that save succeeds (R6).
      */
-    suspend fun removeExisting() {
-        val existing = formSnap as? FormSnap.Existing ?: return
-        val storagePath = repo.deletePebbleMedia(snapId = existing.id)
-        repo.deleteFiles(storagePrefix = storagePath)
+    fun detachExisting(): FormSnap.Existing? {
+        val existing = formSnap as? FormSnap.Existing ?: return null
         formSnap = null
+        return existing
     }
 
     /**
