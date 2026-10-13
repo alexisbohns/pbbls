@@ -12,5 +12,6 @@ export const stoneHatchId = (size: Size) => `stone-hatch-${size}`
 export const stoneBlurId = (name: "near" | "far" | "ao", size: Size) => `stone-${name}-${size}`
 export const STONE_SOFT_ID = "stone-soft"
 export const STONE_GLOW_ID = "stone-glow"
+export const STONE_GRAIN_ID = "stone-grain"
 export const STONE_GLINT_SWEEP_ID = "stone-glint-sweep"
 export const STONE_GLINT_SHEEN_ID = "stone-glint-sheen"

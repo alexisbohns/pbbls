@@ -34,6 +34,7 @@ import {
   STONE_GLINT_SHEEN_ID,
   STONE_GLINT_SWEEP_ID,
   STONE_GLOW_ID,
+  STONE_GRAIN_ID,
   STONE_SOFT_ID,
   stoneBlurId,
   stoneBodyId,
@@ -209,6 +210,9 @@ export function LitStone({ size, polarity: cut, palette, glyph, seed, touched = 
               </g>
             )}
             {recipe.material !== "gem" && <SoftLight light={recipe.light} transform={canvas} />}
+            {recipe.material === "lava" && (
+              <Grain width={outline.width} height={outline.height} upx={upx} seed={seed} opacity={0.32} />
+            )}
 
             <use
               href={body}
@@ -224,13 +228,23 @@ export function LitStone({ size, polarity: cut, palette, glyph, seed, touched = 
                 <g transform={`translate(${LIP_PX.x * upx} ${LIP_PX.y * upx})`}>
                   <g transform={carve}>
                     <g transform={glyphTransform(size, polarity, glyphSide(glyph.viewBox))}>
-                      <StoneGlyph strokes={glyph.strokes} stroke={lip.color} strokeOpacity={lip.opacity} />
+                      <StoneGlyph
+                        strokes={glyph.strokes}
+                        stroke={lip.color}
+                        strokeOpacity={lip.opacity}
+                        wobbleSide={glyphSide(glyph.viewBox)}
+                      />
                     </g>
                   </g>
                 </g>
                 <g transform={carve}>
                   <g transform={glyphTransform(size, polarity, glyphSide(glyph.viewBox))}>
-                    <StoneGlyph strokes={glyph.strokes} stroke={ink.color} strokeOpacity={ink.opacity} />
+                    <StoneGlyph
+                      strokes={glyph.strokes}
+                      stroke={ink.color}
+                      strokeOpacity={ink.opacity}
+                      wobbleSide={glyphSide(glyph.viewBox)}
+                    />
                   </g>
                 </g>
               </>
@@ -301,6 +315,39 @@ function Fossil({ carving, paints }: { carving: StoneCarving["fossil"]; paints: 
       transform={offset(paint)}
     />
   ))
+}
+
+/**
+ * The surface's grain, over the whole box in screen px so every size reads
+ * alike. The seed shifts where the noise is sampled, so no two stones share a
+ * surface.
+ */
+function Grain({
+  width,
+  height,
+  upx,
+  seed,
+  opacity,
+}: {
+  width: number
+  height: number
+  upx: number
+  seed: number
+  opacity: number
+}) {
+  const shift = seed % 97
+  return (
+    <g transform={`scale(${upx}) translate(${-shift} ${-shift})`}>
+      <rect
+        x={shift}
+        y={shift}
+        width={width / upx}
+        height={height / upx}
+        filter={`url(#${STONE_GRAIN_ID})`}
+        opacity={opacity}
+      />
+    </g>
+  )
 }
 
 function SoftLight({ light, transform }: { light: Ellipse; transform: string }) {

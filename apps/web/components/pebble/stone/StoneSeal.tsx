@@ -45,7 +45,11 @@ export function StoneSeal({ size, polarity: cut, palette, glyph: carved, variant
   const body = `#${stoneBodyId(size, polarity)}`
   const weight = WEIGHT[variant]
   const glyphPlace = glyph
-    ? { carve: carveTransform(size, polarity), zone: glyphTransform(size, polarity, glyphSide(glyph.viewBox)) }
+    ? {
+        carve: carveTransform(size, polarity),
+        zone: glyphTransform(size, polarity, glyphSide(glyph.viewBox)),
+        side: glyphSide(glyph.viewBox),
+      }
     : null
   const style = stonePaletteVars(palette ?? BLANK_PALETTE) as CSSProperties
 
@@ -67,7 +71,7 @@ export function StoneSeal({ size, polarity: cut, palette, glyph: carved, variant
           {glyph && glyphPlace && (
             <g transform={glyphPlace.carve}>
               <g transform={glyphPlace.zone}>
-                <StoneGlyph strokes={glyph.strokes} weight={weight.glyph} stroke={KO} />
+                <StoneGlyph strokes={glyph.strokes} wobbleSide={glyphPlace.side} weight={weight.glyph} stroke={KO} />
               </g>
             </g>
           )}
@@ -80,7 +84,7 @@ export function StoneSeal({ size, polarity: cut, palette, glyph: carved, variant
           {glyph && glyphPlace && (
             <g transform={glyphPlace.carve}>
               <g transform={glyphPlace.zone}>
-                <StoneGlyph strokes={glyph.strokes} weight={weight.glyph} stroke="currentColor" />
+                <StoneGlyph strokes={glyph.strokes} wobbleSide={glyphPlace.side} weight={weight.glyph} stroke="currentColor" />
               </g>
             </g>
           )}
@@ -98,8 +102,8 @@ export function StoneSeal({ size, polarity: cut, palette, glyph: carved, variant
           {glyph && glyphPlace && (
             <g transform={glyphPlace.carve}>
               <g transform={glyphPlace.zone}>
-                <StoneGlyph strokes={glyph.strokes} weight={weight.halo} stroke={KO} />
-                <StoneGlyph strokes={glyph.strokes} weight={weight.glyph} stroke="currentColor" />
+                <StoneGlyph strokes={glyph.strokes} wobbleSide={glyphPlace.side} weight={weight.halo} stroke={KO} />
+                <StoneGlyph strokes={glyph.strokes} wobbleSide={glyphPlace.side} weight={weight.glyph} stroke="currentColor" />
               </g>
             </g>
           )}
