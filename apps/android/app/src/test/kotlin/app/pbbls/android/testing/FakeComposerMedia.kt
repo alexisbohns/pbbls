@@ -12,7 +12,8 @@ import java.time.OffsetDateTime
  * take a `Uri`, which cannot be constructed off device, so any test reaching
  * them has wandered into territory only Robolectric can cover (#857). Failing
  * loudly is the point — a fake that quietly returned null here would let such a
- * test pass while asserting nothing.
+ * test pass while asserting nothing. A Robolectric test that does build a `Uri`
+ * arms [processed] to get a pick through [process].
  */
 class FakeComposerMedia : ComposerMedia {
     var prewarmCount = 0
@@ -21,7 +22,11 @@ class FakeComposerMedia : ComposerMedia {
     override suspend fun captureDate(uri: Uri): OffsetDateTime? =
         error("the photo path needs a real Uri — cover it under Robolectric (#857)")
 
-    override suspend fun process(uri: Uri): ProcessedImage = error("the photo path needs a real Uri — cover it under Robolectric (#857)")
+    /** What [process] returns once armed; unarmed, it throws as above. */
+    var processed: ProcessedImage? = null
+
+    override suspend fun process(uri: Uri): ProcessedImage =
+        processed ?: error("the photo path needs a real Uri — cover it under Robolectric (#857)")
 
     override suspend fun prewarmValence() {
         prewarmCount += 1

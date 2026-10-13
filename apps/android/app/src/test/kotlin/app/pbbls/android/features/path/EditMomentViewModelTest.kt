@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path
 
+import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
 import app.pbbls.android.core.model.MomentSavePayload
 import app.pbbls.android.core.model.MomentSnap
@@ -14,7 +15,9 @@ import app.pbbls.android.testing.UiFixtures
 import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
 import app.pbbls.android.testing.testSession
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -147,6 +150,52 @@ class EditMomentViewModelTest {
                     .snaps,
             )
             assertEquals(listOf("user-1/snap-1"), h.snapRepo.deletedPrefixes)
+        }
+
+    /** The form holds still while it saves: the in-flight payload and the files it points to stay as sent. */
+    @Test
+    fun `removing the saved photo during a save changes neither the payload nor its files`() =
+        runTest {
+            val h = Harness()
+            h.read.moments =
+                mapOf("moment-1" to UiFixtures.momentDetail(snaps = listOf(MomentSnap("snap-1", "user-1/snap-1", 0))))
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            val gate = CompletableDeferred<Unit>()
+            h.writes.gate = gate
+            h.viewModel.save()
+            runCurrent()
+
+            h.viewModel.onRemoveExistingSnap()
+            gate.complete(Unit)
+            advanceUntilIdle()
+            Snapshot.sendApplyNotifications()
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf(PebbleSnapPayload("snap-1", "user-1/snap-1", 0)),
+                h.writes.saved
+                    .single()
+                    .snaps,
+            )
+            assertTrue(h.snapRepo.deletedPrefixes.isEmpty())
+        }
+
+    @Test
+    fun `edits made during a save are ignored`() =
+        runTest {
+            val h = Harness()
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail())
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            h.writes.gate = CompletableDeferred()
+            h.viewModel.save()
+            runCurrent()
+
+            val state = h.viewModel.uiState.value as EditMomentUiState.Content
+            h.viewModel.onDraftChange(state.draft.copy(name = "Changed mid-save"))
+
+            assertEquals("Morning walk", (h.viewModel.uiState.value as EditMomentUiState.Content).draft.name)
         }
 
     @Test

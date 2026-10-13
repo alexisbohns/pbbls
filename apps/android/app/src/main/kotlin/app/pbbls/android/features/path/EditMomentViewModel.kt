@@ -119,10 +119,21 @@ class EditMomentViewModel
             }
         }
 
-        fun onDraftChange(draft: PebbleDraft) =
+        /**
+         * True while a save is in flight. The form holds still until it lands: the
+         * payload is already sent, and a photo change now would delete files the
+         * server row may point to.
+         */
+        private val isSaving: Boolean
+            get() = content?.isSaving == true
+
+        fun onDraftChange(draft: PebbleDraft) {
+            if (isSaving) return
             updateContent { it.copy(draft = draft.copy(name = draft.name.take(NAME_LIMIT)), saveErrorRes = null) }
+        }
 
         fun onPhotoPicked(uri: Uri) {
+            if (isSaving) return
             val id = userId ?: return
             viewModelScope.launch {
                 runCatchingCancellable { snaps.attach(media.process(uri), id) }
@@ -136,12 +147,14 @@ class EditMomentViewModel
         }
 
         fun onRemovePhoto() {
+            if (isSaving) return
             val id = userId ?: return
             viewModelScope.launch { snaps.removePending(id) }
         }
 
         /** Detaches only; the save removes the row and then the files (R6). */
         fun onRemoveExistingSnap() {
+            if (isSaving) return
             detachedSnap = snaps.detachExisting() ?: detachedSnap
             updateContent { it.copy(snap = snaps.formSnap) }
         }
@@ -166,19 +179,21 @@ class EditMomentViewModel
                 return
             }
             val momentId = loadedMomentId ?: return
+            val id = userId
+            // The whole set: existing echoed, a fresh upload as its pair, [] when removed.
+            val snapPayload =
+                when (val formSnap = snaps.formSnap) {
+                    is FormSnap.Existing -> listOf(PebbleSnapPayload(formSnap.id, formSnap.storagePath, 0))
+                    is FormSnap.Pending ->
+                        snaps.pendingSnapForPayload()?.let { snap ->
+                            id?.let { listOf(PebbleSnapPayload(snap.id, snap.storagePrefix(it), 0)) }
+                        } ?: emptyList()
+                    null -> emptyList()
+                }
+            // Captured with the payload: only the files this save drops are deleted after it.
+            val dropped = detachedSnap
             updateContent { it.copy(isSaving = true, saveErrorRes = null) }
             viewModelScope.launch {
-                val id = userId
-                // The whole set: existing echoed, a fresh upload as its pair, [] when removed.
-                val snapPayload =
-                    when (val formSnap = snaps.formSnap) {
-                        is FormSnap.Existing -> listOf(PebbleSnapPayload(formSnap.id, formSnap.storagePath, 0))
-                        is FormSnap.Pending ->
-                            snaps.pendingSnapForPayload()?.let { snap ->
-                                id?.let { listOf(PebbleSnapPayload(snap.id, snap.storagePrefix(it), 0)) }
-                            } ?: emptyList()
-                        null -> emptyList()
-                    }
                 // Popping the entry must not abort a write the server may have accepted (#852).
                 withContext(NonCancellable) {
                     runCatchingCancellable {
@@ -193,9 +208,10 @@ class EditMomentViewModel
                         )
                     }.fold(
                         onSuccess = {
-                            detachedSnap?.let { snapFiles.deleteFiles(storagePrefix = it.storagePath) }
-                            detachedSnap = null
+                            if (detachedSnap == dropped) detachedSnap = null
                             effectsOut.emit(EditMomentEffect.Saved)
+                            // Best-effort, after the pop: the row is gone, the orphan sweep is the backstop.
+                            dropped?.let { snapFiles.deleteFiles(storagePrefix = it.storagePath) }
                         },
                         onFailure = { failure ->
                             Log.e(TAG, "save_moment failed", failure)
