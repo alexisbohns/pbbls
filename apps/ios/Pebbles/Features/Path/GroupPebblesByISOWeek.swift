@@ -15,19 +15,19 @@ import Foundation
 ///   2025-12-29 and 2026-01-02 both land in ISO week 1 of 2026) bucket
 ///   together.
 func groupPebblesByISOWeek(
-    _ pebbles: [Pebble],
+    _ moments: [MomentSummary],
     calendar: Calendar
-) -> [(key: Date, value: [Pebble])] {
-    let buckets = Dictionary(grouping: pebbles) { pebble -> Date in
+) -> [(key: Date, value: [MomentSummary])] {
+    let buckets = Dictionary(grouping: moments) { moment -> Date in
         let comps = calendar.dateComponents(
             [.yearForWeekOfYear, .weekOfYear],
-            from: pebble.happenedAt
+            from: moment.happenedAt
         )
         var weekStart = DateComponents()
         weekStart.yearForWeekOfYear = comps.yearForWeekOfYear
         weekStart.weekOfYear = comps.weekOfYear
         weekStart.weekday = 2 // Monday in ISO 8601
-        return calendar.date(from: weekStart) ?? pebble.happenedAt
+        return calendar.date(from: weekStart) ?? moment.happenedAt
     }
     return buckets
         .map { (key: $0.key, value: $0.value) }

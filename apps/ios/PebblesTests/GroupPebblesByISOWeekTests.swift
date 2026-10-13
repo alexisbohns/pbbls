@@ -19,19 +19,12 @@ struct GroupPebblesByISOWeekTests {
         return formatter.date(from: iso)!
     }
 
-    private func pebble(_ happened: String) throws -> Pebble {
+    private func pebble(_ happened: String) throws -> MomentSummary {
         let json = Data("""
-        { "id": "\(UUID().uuidString)", "name": "p", "happened_at": "\(happened)", "created_at": "\(happened)", "intensity": 1, "positiveness": 0 }
+        {"id":"\(UUID().uuidString.lowercased())","name":"p","happened_at":"\(happened)",
+         "created_at":"\(happened)","first_snap_path":null,"pebble":null}
         """.utf8)
-        let decoder = JSONDecoder()
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        decoder.dateDecodingStrategy = .custom { dec in
-            let container = try dec.singleValueContainer()
-            let iso = try container.decode(String.self)
-            return formatter.date(from: iso)!
-        }
-        return try decoder.decode(Pebble.self, from: json)
+        return try JSONDecoder().decode(MomentSummary.self, from: json)
     }
 
     @Test("empty input → empty output")

@@ -8,8 +8,8 @@ import SwiftUI
 /// gradient mask (opaque 0% → opaque 85% → transparent 100%).
 struct WeekPathView: View {
     let entry: WeekRollEntry
-    let onTap: (Pebble) -> Void
-    let onDelete: (Pebble) -> Void
+    let onTap: (MomentSummary) -> Void
+    let onDelete: (MomentSummary) -> Void
     let onCreate: () -> Void
 
     @State private var revealedCount = 0
@@ -18,26 +18,26 @@ struct WeekPathView: View {
     private static let revealStagger: Duration = .milliseconds(80)
 
     /// `cascadeKey` keys the reveal `.task`. Combining `weekStart` with
-    /// `pebbles.count` guarantees the cascade replays both on week swap
+    /// `moments.count` guarantees the cascade replays both on week swap
     /// and on a same-week pebble create/delete.
     private var cascadeKey: String {
-        "\(entry.weekStart.timeIntervalSince1970)-\(entry.pebbles.count)"
+        "\(entry.weekStart.timeIntervalSince1970)-\(entry.moments.count)"
     }
 
     var body: some View {
         Group {
-            if entry.pebbles.isEmpty {
+            if entry.moments.isEmpty {
                 emptyState
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        ForEach(Array(entry.pebbles.enumerated()), id: \.element.id) { index, pebble in
+                        ForEach(Array(entry.moments.enumerated()), id: \.element.id) { index, moment in
                             if index < revealedCount {
                                 PathPebbleRow(
-                                    pebble: pebble,
+                                    moment: moment,
                                     positionIndex: index,
-                                    onTap: { onTap(pebble) },
-                                    onDelete: { onDelete(pebble) }
+                                    onTap: { onTap(moment) },
+                                    onDelete: { onDelete(moment) }
                                 )
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.vertical, 8)
@@ -63,7 +63,7 @@ struct WeekPathView: View {
         }
         .task(id: cascadeKey) {
             revealedCount = 0
-            for index in 0..<entry.pebbles.count {
+            for index in 0..<entry.moments.count {
                 try? await Task.sleep(for: Self.revealStagger)
                 withAnimation(.easeOut(duration: 0.25)) {
                     revealedCount = index + 1

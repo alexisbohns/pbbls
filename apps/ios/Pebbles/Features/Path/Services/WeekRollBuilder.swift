@@ -17,18 +17,18 @@ import Foundation
 enum WeekRollBuilder {
 
     static func build(
-        pebbles: [Pebble],
+        moments: [MomentSummary],
         calendar: Calendar,
         today: Date
     ) -> [WeekRollEntry] {
         let currentStart = weekStart(for: today, calendar: calendar)
 
-        // Bucket pebbles by their week's Monday.
-        let grouped: [Date: [Pebble]] = Dictionary(grouping: pebbles) { pebble in
-            weekStart(for: pebble.happenedAt, calendar: calendar)
+        // Bucket moments by their week's Monday.
+        let grouped: [Date: [MomentSummary]] = Dictionary(grouping: moments) { moment in
+            weekStart(for: moment.happenedAt, calendar: calendar)
         }
 
-        // Union: every week with pebbles, plus current. No empty future weeks.
+        // Union: every week with moments, plus current. No empty future weeks.
         let weekStarts = Set(grouped.keys).union([currentStart])
 
         return weekStarts
@@ -38,7 +38,7 @@ enum WeekRollBuilder {
                 let sorted = ws < currentStart
                     ? raw.sorted { $0.happenedAt < $1.happenedAt }
                     : raw.sorted { $0.happenedAt > $1.happenedAt }
-                return WeekRollEntry(weekStart: ws, pebbles: sorted)
+                return WeekRollEntry(weekStart: ws, moments: sorted)
             }
     }
 

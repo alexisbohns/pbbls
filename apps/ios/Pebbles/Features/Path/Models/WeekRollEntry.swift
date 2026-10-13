@@ -3,7 +3,7 @@ import Foundation
 /// One slot in the iOS Path's horizontal weeks roll.
 ///
 /// `weekStart` is the ISO Monday 00:00 of the week, in the calendar passed
-/// to `WeekRollBuilder.build(...)`. `pebbles` is already sorted per the
+/// to `WeekRollBuilder.build(...)`. `moments` is already sorted per the
 /// past-vs-current rule (past = oldest first, current/future = newest first).
 ///
 /// Identity is `weekStart` so SwiftUI's `ForEach` keys correctly across
@@ -11,6 +11,6 @@ import Foundation
 /// are populated).
 struct WeekRollEntry: Identifiable, Hashable {
     let weekStart: Date
-    let pebbles: [Pebble]
+    let moments: [MomentSummary]
     var id: Date { weekStart }
 }

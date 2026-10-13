@@ -9,12 +9,12 @@ import Foundation
 /// - `calendar` is injectable to keep tests deterministic; production
 ///   callers should pass `Calendar.current`.
 func groupPebblesByMonth(
-    _ pebbles: [Pebble],
+    _ moments: [MomentSummary],
     calendar: Calendar
-) -> [(key: Date, value: [Pebble])] {
-    let buckets = Dictionary(grouping: pebbles) { pebble -> Date in
-        let comps = calendar.dateComponents([.year, .month], from: pebble.happenedAt)
-        return calendar.date(from: comps) ?? pebble.happenedAt
+) -> [(key: Date, value: [MomentSummary])] {
+    let buckets = Dictionary(grouping: moments) { moment -> Date in
+        let comps = calendar.dateComponents([.year, .month], from: moment.happenedAt)
+        return calendar.date(from: comps) ?? moment.happenedAt
     }
     return buckets
         .map { (key: $0.key, value: $0.value) }
