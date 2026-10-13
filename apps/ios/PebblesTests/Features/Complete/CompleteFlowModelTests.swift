@@ -88,6 +88,45 @@ struct CompleteFlowModelTests {
         #expect(model.step == .privacy)
     }
 
+    @Test("an unconfirmed seed is not autosaved; Continue or a pick confirms it")
+    func seedNotAutosaved() {
+        let (model, _) = model()
+        model.seedValenceIfNeeded()
+        #expect(!model.isValenceConfirmed)
+        #expect(model.draftToAutosave.isEmpty)
+        #expect(model.draft.valence == .neutralMedium)
+        model.advance()
+        #expect(model.isValenceConfirmed)
+        #expect(model.draftToAutosave.valence == .neutralMedium)
+
+        let (picked, _) = self.model()
+        picked.seedValenceIfNeeded()
+        picked.select(valence: .lowlightSmall)
+        #expect(picked.isValenceConfirmed)
+        #expect(picked.draftToAutosave.valence == .lowlightSmall)
+    }
+
+    @Test("a restored valence counts as confirmed; a restore without one re-seeds")
+    func restoreConfirmation() {
+        let (model, _) = model()
+        var saved = CompleteDraft()
+        saved.valence = .neutralSmall
+        model.restore(saved, known: .init(soulIds: [], collectionIds: []))
+        #expect(model.isValenceConfirmed)
+        #expect(model.draftToAutosave.valence == .neutralSmall)
+
+        let (unseeded, _) = self.model()
+        var noValence = CompleteDraft()
+        noValence.soulIds = [UUID()]
+        let soul = noValence.soulIds[0]
+        unseeded.restore(noValence, known: .init(soulIds: [soul], collectionIds: []))
+        #expect(unseeded.step == .valence)
+        #expect(unseeded.draft.valence == .neutralMedium)
+        #expect(!unseeded.isValenceConfirmed)
+        #expect(unseeded.draftToAutosave.valence == nil)
+        #expect(unseeded.draftToAutosave.soulIds == [soul])
+    }
+
     @Test("success goes to the success step with a success haptic; failure stays put")
     func outcomes() {
         let (model, recorder) = model()

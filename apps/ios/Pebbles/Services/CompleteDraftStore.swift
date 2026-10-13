@@ -34,13 +34,24 @@ final class CompleteDraftStore {
             clear(momentId: momentId)
             return nil
         }
-        guard snapshot.ownerId == ownerId, snapshot.momentId == momentId else {
+        guard snapshot.ownerId == ownerId else {
             logger.info("discarding a draft owned by another account")
             clear(momentId: momentId)
             return nil
         }
+        guard snapshot.momentId == momentId else {
+            logger.info("discarding a draft filed under another moment")
+            clear(momentId: momentId)
+            return nil
+        }
         let draft = snapshot.draft
-        return draft.isEmpty ? nil : draft
+        guard !draft.isEmpty else {
+            // Decodes but carries nothing we read: drift, not a draft.
+            logger.info("discarding an empty draft")
+            clear(momentId: momentId)
+            return nil
+        }
+        return draft
     }
 
     func save(_ draft: CompleteDraft, momentId: UUID, ownerId: UUID) {
@@ -79,6 +90,8 @@ final class CompleteAutosave {
     private let ownerId: () -> UUID?
     private var task: Task<Void, Never>?
     private var pending: CompleteDraft?
+    /// The account the pending edit was made under, captured at `schedule()`.
+    private var pendingOwner: UUID?
 
     init(store: CompleteDraftStore, momentId: UUID, debounce: Duration = .milliseconds(800), ownerId: @escaping () -> UUID?) {
         self.store = store
@@ -89,12 +102,15 @@ final class CompleteAutosave {
 
     func schedule(_ draft: CompleteDraft) {
         pending = draft
+        pendingOwner = ownerId()
         task?.cancel()
-        task = Task { [weak self] in
-            guard let self else { return }
-            try? await Task.sleep(for: debounce)
+        // Holds `self` strongly on purpose: the debounce keeps the autosave
+        // alive until it fires, so a cover dismissed mid-debounce still
+        // writes its last edit.
+        task = Task {
+            try? await Task.sleep(for: self.debounce)
             guard !Task.isCancelled else { return }
-            flush()
+            self.flush()
         }
     }
 
@@ -102,8 +118,11 @@ final class CompleteAutosave {
         task?.cancel()
         task = nil
         guard let draft = pending else { return }
+        let owner = pendingOwner
         pending = nil
-        guard let owner = ownerId() else { return }
+        pendingOwner = nil
+        // An edit made under one account never lands in another's file.
+        guard let owner, ownerId() == owner else { return }
         store.save(draft, momentId: momentId, ownerId: owner)
     }
 
@@ -111,6 +130,7 @@ final class CompleteAutosave {
         task?.cancel()
         task = nil
         pending = nil
+        pendingOwner = nil
         store.clear(momentId: momentId)
     }
 }

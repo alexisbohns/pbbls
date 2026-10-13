@@ -65,7 +65,7 @@ struct CompleteFlowView: View {
         }
         // `.task` may run before the reference fetch settles (#647).
         .onChange(of: refs.hasLoaded) { _, _ in restoreIfReady() }
-        .onChange(of: model.draft) { _, draft in
+        .onChange(of: model.draftToAutosave) { _, draft in
             guard hasRestored, model.step != .success else { return }
             autosave?.schedule(draft)
         }
@@ -131,6 +131,8 @@ struct CompleteFlowView: View {
     private func restoreIfReady() {
         guard !hasRestored, refs.hasLoaded else { return }
         hasRestored = true
+        // Never restore over a flow the user has already started.
+        guard !model.isValenceConfirmed, model.step == .valence else { return }
         guard let owner = supabase.session?.user.id,
               let saved = drafts.load(momentId: momentId, ownerId: owner) else { return }
         model.restore(saved, known: .init(
