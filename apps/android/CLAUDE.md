@@ -425,11 +425,12 @@ Do not bring it back for a single asset.
 
 ### Path rendering
 
-- **`render_svg` renders through `PebbleSvg`** (`core/ui/render/`):
-  AndroidSVG parses the RPC string after a literal `currentColor` →
-  palette-hex substitution (D10, mirrors iOS `PebbleRenderView`). Injected
-  hex must be **6-digit**: `EmotionPalette` truncates the DB's 8-digit
-  `#RRGGBBAA` before anything reaches SVG markup (8-digit misparses).
+- **The stone is composed on device** (`core/ui/render/StoneComposer.kt`):
+  the shape seed for the valence (`res/raw/shape_{size}_{polarity}.svg`,
+  byte-identical copies of `docs/seeds/shape-seeds/`, guarded by
+  `StoneComposerTest`) plus the pebble's derived glyph strokes in the deleted
+  engine's glyph slot, traced at one weight by `PebbleStaticRender`. There is
+  no `render_svg` (spec D6).
 - **Outline silhouettes** (the row backdrop) are byte-identical copies of the
   iOS assets, renamed on copy (Android resource names are `[a-z0-9_]`):
 
@@ -442,7 +443,7 @@ Do not bring it back for a single asset.
 - **The collapsed form row's valence imagery** is res/raw SVGs normalized from
   the web line art and tinted via `currentColor` injection
   (`ValenceGlyph`/`ValenceAssets`), not the iOS PDF assets. The Path row never
-  uses them; the row is outline + `render_svg`.
+  uses them; the row is outline + composed stone.
 - **The valence fan's artworks** (`features/path/valence/`) are byte-identical
   copies of the iOS files, generated from the source PDFs by
   `apps/ios/Scripts/valence-art-to-svg.mjs` and renamed on copy like the
@@ -460,9 +461,6 @@ Do not bring it back for a single asset.
 - **The week-roll cairn is a static drawable** (`res/drawable/cairn_static.xml`).
   The iOS Rive state machine (`pbbls-cairn-states.riv`) is a known fast-follow,
   in Compose, since Android has no Rive runtime.
-- **Engine-composed SVG fixtures** for screenshot tests regenerate via
-  `npx tsx apps/android/scripts/gen-pebble-svg-fixtures.ts` (uses the real
-  compositor sources in `packages/supabase`). Rerun when the engine changes.
 
 ## Behavior that mirrors iOS on purpose
 
