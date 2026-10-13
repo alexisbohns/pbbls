@@ -261,6 +261,9 @@ final class SnapUploadCoordinator {
 
     /// True while a save is in flight or done: the photo it sent can be
     /// neither removed nor detached.
+    /// True once a save succeeded (the sheet's `onDisappear` skips cleanup).
+    var isCommitted: Bool { lifecycle == .committed }
+
     private var isCommitLocked: Bool { lifecycle == .committing || lifecycle == .committed }
 
     /// A cleanup delete that must run even when its caller's task was
@@ -290,6 +293,7 @@ final class SnapUploadCoordinator {
         formSnap = nil
         processedForRetry = nil
         pickedCaptureDate = nil
+        guard snapId != committedSnapId else { return }
         await repo.deleteFiles(snapId: snapId, userId: userId)
     }
 
@@ -327,6 +331,8 @@ final class SnapUploadCoordinator {
     /// Storage delete. Storage-delete failures are logged but do not throw —
     /// Cancel must not be un-cancellable.
     func cancelAndCleanup(userId: UUID) async {
+        // A save that started owns the photo: never delete a committed snap.
+        guard !isCommitLocked else { return }
         // A pick still loading must not land on a closed form.
         lifecycle = .closed
         // A cancelled form keeps its saved photo.
@@ -342,6 +348,7 @@ final class SnapUploadCoordinator {
         formSnap = nil
         processedForRetry = nil
         pickedCaptureDate = nil
+        guard snapId != committedSnapId else { return }
         await repo.deleteFiles(snapId: snapId, userId: userId)
     }
 

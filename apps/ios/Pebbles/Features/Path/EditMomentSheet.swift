@@ -32,6 +32,11 @@ struct EditMomentSheet: View {
 
     private var currentUserId: UUID? { supabase.session?.user.id }
     private var hasSnap: Bool { snaps?.formSnap != nil }
+    /// A newly picked photo, not yet saved: swipe-dismiss would skip its cleanup.
+    private var hasPendingSnap: Bool {
+        if case .pending = snaps?.formSnap { return true }
+        return false
+    }
     private var canSave: Bool { draft.canSave(hasSnap: hasSnap) && snaps?.isBlocking != true }
 
     /// Non-nil while the attached photo blocks saving.
@@ -45,7 +50,7 @@ struct EditMomentSheet: View {
         NavigationStack {
             EditMomentForm(
                 draft: $draft,
-                hasSnap: hasSnap,
+                hasSnap: hasSnap || snaps?.isProcessingPick == true,
                 isSaving: isSaving,
                 saveError: saveError
             ) {
@@ -68,9 +73,17 @@ struct EditMomentSheet: View {
             }
             .pebblesScreen()
         }
-        .interactiveDismissDisabled(isSaving)
+        .interactiveDismissDisabled(isSaving || hasPendingSnap || snaps?.isProcessingPick == true)
+        .onDisappear {
+            // Safety net for any dismissal that skipped Cancel. Idempotent:
+            // deletes only a pending photo, never the saved or committed one.
+            guard let snaps, !snaps.isCommitted, let userId = currentUserId else { return }
+            Task { await snaps.cancelAndCleanup(userId: userId) }
+        }
         .task {
             guard snaps == nil else { return }
+            // Single-photo assumption: iOS shows one photo per moment, so only
+            // the first is seeded; save sends the whole set.
             let existing = detail.snaps.first.map { FormSnap.existing(id: $0.id, storagePath: $0.storagePath) }
             snaps = SnapUploadCoordinator(
                 repo: PebbleSnapRepository(client: supabase.client),
@@ -186,7 +199,13 @@ struct EditMomentForm<PhotoRow: View>: View {
                 DatePicker("When", selection: $draft.happenedAt, displayedComponents: [.date, .hourAndMinute])
                     .tint(Color.accent.primary)
                     .pebblesListRow(position: .top)
-                TextField("Name", text: Binding(get: { draft.name }, set: { draft.setName($0) }))
+                TextField("Name", text: $draft.name)
+                    // Clamp on screen like RecordNameStep: a binding setter
+                    // leaves the extra characters in the field's buffer.
+                    .onChange(of: draft.name) { _, newValue in
+                        let clamped = String(newValue.prefix(CaptureFlowModel.nameLimit))
+                        if clamped != newValue { draft.name = clamped }
+                    }
                     .pebblesListRow(position: .middle)
                 TextField("Description (optional)", text: $draft.description, axis: .vertical)
                     .lineLimit(1...5)

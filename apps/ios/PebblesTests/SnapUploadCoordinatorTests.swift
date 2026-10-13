@@ -181,6 +181,19 @@ struct SnapUploadCoordinatorTests {
         #expect(repo.calls == [.deleteFilesBySnapId(snapId: snapId, userId: userId)])
     }
 
+    @Test("cancelAndCleanup never deletes a committed snap")
+    func cancelAndCleanupSparesCommitted() async throws {
+        let repo = FakeRepo()
+        let snapId = UUID()
+        let (coordinator, _) = makeCoordinatorWithUploadedPending(repo: repo, snapId: snapId)
+        coordinator.beginCommit()
+        coordinator.markCommitted()
+
+        await coordinator.cancelAndCleanup(userId: UUID())
+
+        #expect(repo.calls.isEmpty)
+    }
+
     @Test("cancelAndCleanup with no pending snap is a no-op")
     func cancelAndCleanupNoOpWhenEmpty() async throws {
         let repo = FakeRepo()

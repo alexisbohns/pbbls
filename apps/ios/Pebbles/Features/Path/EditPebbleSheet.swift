@@ -77,10 +77,10 @@ struct EditPebbleSheet: View {
         let service = MomentsService(client: supabase.client)
         // A4 / R13: what this edit earned = total after − total before. An
         // unreadable total shows nothing rather than a wrong number.
-        let before = await karmaTotal(service)
+        let before = await karmaTotal(service, refId: pebble.id)
         do {
-            _ = try await service.completePebble(payload)
-            let after = await karmaTotal(service)
+            let completedId = try await service.completePebble(payload)
+            let after = await karmaTotal(service, refId: completedId)
             if let before, let after {
                 karma.notifyEarned(amount: after - before, reason: .pebbleEnriched)
             }
@@ -96,9 +96,9 @@ struct EditPebbleSheet: View {
         }
     }
 
-    private func karmaTotal(_ service: MomentsService) async -> Int? {
+    private func karmaTotal(_ service: MomentsService, refId: UUID) async -> Int? {
         do {
-            return try await service.karmaTotal(refId: pebble.id)
+            return try await service.karmaTotal(refId: refId)
         } catch {
             logger.warning("karma read failed: \(error.localizedDescription, privacy: .private)")
             return nil
