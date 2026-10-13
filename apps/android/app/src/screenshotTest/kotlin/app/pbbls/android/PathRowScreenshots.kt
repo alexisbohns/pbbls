@@ -20,8 +20,8 @@ import com.android.tools.screenshot.PreviewTest
 /**
  * Row-level previews for the Path timeline (#531, #1048): every intensity as
  * its composed stone with the derived glyph, the missing-palette accent
- * fallback, and a photo-only moment with no name and no pebble yet (R3) —
- * light and dark.
+ * fallback, a photo-only moment with no name and no pebble yet (R3), and a
+ * named moment without its pebble as the blank stone (R4) — light and dark.
  */
 private val previewPalette: EmotionPalette =
     requireNotNull(
@@ -127,4 +127,43 @@ fun PathRow_UntitledPhotoOnly() {
 @Composable
 fun PathRow_UntitledPhotoOnlyDark() {
     PebblesTheme { UntitledPhotoOnlyRow() }
+}
+
+/** An uncompleted moment (R4): the blank stone, named, with and without its photo. */
+@Composable
+private fun BlankStoneRow(firstSnapPath: String?) {
+    Column(
+        modifier =
+            Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(24.dp),
+    ) {
+        PathPebbleRow(
+            moment = MomentPreviewFixtures.pathMoment(name = "Bus stop sunset", pebble = null, firstSnapPath = firstSnapPath),
+            positionIndex = 0,
+            palette = null,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun PathRow_BlankStoneNoPhoto() {
+    PebblesTheme { BlankStoneRow(firstSnapPath = null) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PathRow_BlankStoneNoPhotoDark() {
+    PebblesTheme { BlankStoneRow(firstSnapPath = null) }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun PathRow_BlankStoneWithPhoto() {
+    PebblesTheme { BlankStoneRow(firstSnapPath = "user-1/snap-1") }
 }

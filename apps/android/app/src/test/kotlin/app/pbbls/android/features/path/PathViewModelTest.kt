@@ -3,6 +3,7 @@ package app.pbbls.android.features.path
 import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
 import app.pbbls.android.core.data.PebbleDraftRecord
+import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.PebbleDraftPayload
 import app.pbbls.android.core.model.RippleSummary
@@ -337,7 +338,7 @@ class PathViewModelTest {
             )
 
             path.path = emptyList()
-            viewModel.confirmDelete()
+            viewModel.confirmDelete(MomentDeleteChoice.MOMENT)
             advanceUntilIdle()
 
             assertEquals(listOf("a"), writes.deletedMoments)
@@ -355,7 +356,7 @@ class PathViewModelTest {
             advanceUntilIdle()
 
             viewModel.requestDelete(moment("a"))
-            viewModel.confirmDelete()
+            viewModel.confirmDelete(MomentDeleteChoice.MOMENT)
             advanceUntilIdle()
 
             assertTrue(viewModel.covers.value.didDeleteFail)
@@ -377,5 +378,42 @@ class PathViewModelTest {
 
             assertTrue(writes.deletedMoments.isEmpty())
             assertNull(viewModel.covers.value.pendingDeletion)
+        }
+
+    /** R8: "Delete the pebble, keep the moment" sends the PEBBLE id to `delete_pebble`. */
+    @Test
+    fun `deleting only the pebble keeps the moment`() =
+        runTest {
+            val target = UiFixtures.pathMoment(id = "m-1", happenedAt = now, pebble = UiFixtures.pathPebble(id = "p-1"))
+            val path = FakeMomentReadService(path = listOf(target))
+            val writes = FakeMomentWriteService()
+            val viewModel = viewModel(path, writes = writes)
+            advanceUntilIdle()
+            val loadsBefore = path.loadPathCount
+
+            viewModel.requestDelete(target)
+            viewModel.confirmDelete(MomentDeleteChoice.PEBBLE_ONLY)
+            advanceUntilIdle()
+
+            assertEquals(listOf("p-1"), writes.deletedPebbles)
+            assertTrue(writes.deletedMoments.isEmpty())
+            assertEquals(loadsBefore + 1, path.loadPathCount)
+        }
+
+    @Test
+    fun `deleting the moment deletes the moment`() =
+        runTest {
+            val target = UiFixtures.pathMoment(id = "m-1", happenedAt = now)
+            val path = FakeMomentReadService(path = listOf(target))
+            val writes = FakeMomentWriteService()
+            val viewModel = viewModel(path, writes = writes)
+            advanceUntilIdle()
+
+            viewModel.requestDelete(target)
+            viewModel.confirmDelete(MomentDeleteChoice.MOMENT)
+            advanceUntilIdle()
+
+            assertEquals(listOf("m-1"), writes.deletedMoments)
+            assertTrue(writes.deletedPebbles.isEmpty())
         }
 }

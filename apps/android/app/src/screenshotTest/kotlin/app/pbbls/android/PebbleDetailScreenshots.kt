@@ -31,7 +31,7 @@ import app.pbbls.android.core.model.SoulRef
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.Visibility
-import app.pbbls.android.features.path.DeleteConfirmDialog
+import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.PebbleDetailContent
 import app.pbbls.android.features.path.PebbleDetailUiState
 import app.pbbls.android.features.path.read.BannerAspect
@@ -44,7 +44,8 @@ import java.time.OffsetDateTime
  * Previews for the moment read surface (#540, #1048): the pure [PebbleReadView]
  * across its variants — full (description + souls + domain + collection), glyph
  * souls, minimal, the no-domain fallback, and a bare moment with no pebble —
- * plus the open ⋮ menu and the destructive [DeleteConfirmDialog]. Light and
+ * plus the open ⋮ menu and the R8 [MomentDeleteDialog] with and without a
+ * pebble. Light and
  * dark, driven with fixture [MomentDetail]s and a fixed souls cache so no
  * services are needed. The stateful `PebbleDetailScreen` (service-backed) is
  * deliberately not previewed.
@@ -175,7 +176,7 @@ private val noDomainDetail: MomentDetail =
         valence = Valence.LOWLIGHT_MEDIUM,
     )
 
-/** A capture without its pebble yet: no tiles, no souls, no privacy badge, no share (A-8). */
+/** A capture without its pebble yet: the blank stone heading, no tiles, no souls, no privacy badge, no share (A-8). */
 private val bareMoment: MomentDetail =
     MomentPreviewFixtures.momentDetail(
         name = null,
@@ -282,6 +283,7 @@ private fun SheetPreview(
                     palette = if (detail.pebble != null) previewPalette else null,
                     onEditMoment = {},
                     onEditPebble = {},
+                    onDelete = {},
                     onShare = null,
                     onRetry = {},
                     initialMenuOpen = initialMenuOpen,
@@ -320,39 +322,38 @@ fun PebbleDetail_BareMomentDark() {
     PebblesTheme { SheetPreview(detail = bareMoment) }
 }
 
-/** The ⋮ menu (R7): Edit moment, and Edit pebble because this moment has one. */
+/** The ⋮ menu (R7): Edit moment, Edit pebble because this moment has one, and Delete. */
 @PreviewTest
 @Preview(showBackground = true)
 @PreviewFrench
 @Composable
-fun PebbleDetail_MenuOpen() {
+fun PebbleDetail_MenuOpenWithDelete() {
     PebblesTheme { SheetPreview(initialMenuOpen = true) }
 }
 
+/** R8 with your pebble: keep the moment, or delete it too. */
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewFrench
 @Composable
-fun PebbleDeleteDialogLight() {
-    PebblesTheme {
-        DeleteConfirmDialog(
-            pebbleName = "Morning walk",
-            onConfirm = {},
-            onDismiss = {},
-        )
-    }
+fun MomentDeleteDialog_WithPebble() {
+    PebblesTheme { MomentDeleteDialog(hasPebble = true, onConfirm = {}, onDismiss = {}) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun PebbleDeleteDialogDark() {
-    PebblesTheme {
-        DeleteConfirmDialog(
-            pebbleName = "Morning walk",
-            onConfirm = {},
-            onDismiss = {},
-        )
-    }
+fun MomentDeleteDialog_WithPebbleDark() {
+    PebblesTheme { MomentDeleteDialog(hasPebble = true, onConfirm = {}, onDismiss = {}) }
+}
+
+/** R8 for a bare moment: one destructive action. */
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun MomentDeleteDialog_BareMoment() {
+    PebblesTheme { MomentDeleteDialog(hasPebble = false, onConfirm = {}, onDismiss = {}) }
 }
 
 // A neutral fill stands in for the decoded snap — the screenshot renderer has no
@@ -362,7 +363,7 @@ private val previewSnap = ColorPainter(Color(0xFF6B7A8F))
 @Composable
 private fun SnapFramePreview(
     aspect: BannerAspect,
-    valence: Valence,
+    valence: Valence?,
 ) {
     PebbleSnapFrame(
         photo = previewSnap,
@@ -411,4 +412,12 @@ fun PebbleSnapPortraitLargeLight() {
 @Composable
 fun PebbleSnapPortraitLargeDark() {
     PebblesTheme { SnapFramePreview(BannerAspect.THREE_FOUR, Valence.HIGHLIGHT_LARGE) }
+}
+
+/** A moment without its pebble over its photo: the blank stone pokes out of the corner (A-8). */
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun PebbleSnap_BlankStone() {
+    PebblesTheme { SnapFramePreview(BannerAspect.FOUR_THREE, valence = null) }
 }

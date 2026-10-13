@@ -3,6 +3,7 @@ package app.pbbls.android.features.profile
 import app.pbbls.android.R
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
+import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.MomentDetail
 import app.pbbls.android.testing.FakeCollectionsService
 import app.pbbls.android.testing.FakeMomentReadService
@@ -161,13 +162,35 @@ class CollectionDetailViewModelTest {
             advanceUntilIdle()
 
             viewModel.requestDelete(moment("p1", "2026-09-19T12:00:00Z").toPathMoment())
-            viewModel.confirmDelete()
+            viewModel.confirmDelete(MomentDeleteChoice.MOMENT)
             advanceUntilIdle()
 
             assertEquals(listOf("p1"), writes.deletedMoments)
             assertEquals(1, refs.refreshCollectionsCount)
             assertEquals(2, service.loadCollectionCount)
             assertNull(viewModel.covers.value.pendingDeletion)
+        }
+
+    /** R8: keeping the moment sends the PEBBLE id to `delete_pebble`; the row leaves the list on reload. */
+    @Test
+    fun `deleting only the pebble keeps the moment`() =
+        runTest {
+            val service = FakeCollectionsService(collection = collection("a"))
+            val moments = FakeMomentReadService(inCollection = listOf(moment("p1", "2026-09-19T12:00:00Z")))
+            val writes = FakeMomentWriteService()
+            val refs = FakeReferenceDataService()
+            val viewModel = viewModel(collections = service, moments = moments, writes = writes, refs = refs)
+            viewModel.start("a")
+            advanceUntilIdle()
+
+            viewModel.requestDelete(moment("p1", "2026-09-19T12:00:00Z").toPathMoment())
+            viewModel.confirmDelete(MomentDeleteChoice.PEBBLE_ONLY)
+            advanceUntilIdle()
+
+            assertEquals(listOf("pebble-1"), writes.deletedPebbles)
+            assertTrue(writes.deletedMoments.isEmpty())
+            assertEquals(1, refs.refreshCollectionsCount)
+            assertEquals(2, service.loadCollectionCount)
         }
 
     @Test
@@ -183,7 +206,7 @@ class CollectionDetailViewModelTest {
 
             writes.failNext = IOException("offline")
             viewModel.requestDelete(moment("p1", "2026-09-19T12:00:00Z").toPathMoment())
-            viewModel.confirmDelete()
+            viewModel.confirmDelete(MomentDeleteChoice.MOMENT)
             advanceUntilIdle()
 
             assertTrue(viewModel.covers.value.didDeleteFail)

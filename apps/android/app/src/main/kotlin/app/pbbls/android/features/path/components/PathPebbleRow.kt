@@ -37,13 +37,14 @@ import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.ui.MomentNameText
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
+import app.pbbls.android.core.ui.render.BlankStone
 import app.pbbls.android.core.ui.render.PebbleThumbnail
 import app.pbbls.android.features.path.PathRowFormatting
 import java.time.ZoneId
 
 /**
  * Path-specific moment row — ports iOS `PathPebbleRow.swift`. An uncompleted
- * moment (no pebble) draws the neutral medium stone with no palette, and a
+ * moment (no pebble) draws the [BlankStone] (R4), and a
  * photo-only moment's null name reads "Untitled" (R3). A tap opens the
  * detail sheet ([onTap]); a long-press opens a destructive-delete menu
  * ([onRequestDelete]) — the `combinedClickable` + `contextMenu` analog
@@ -111,12 +112,17 @@ fun PathPebbleRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PebbleThumbnail(
-                valence = valence,
-                glyph = moment.pebble?.glyph,
-                palette = palette,
-                modifier = Modifier.size(if (isLarge) 96.dp else 56.dp),
-            )
+            val stoneSize = if (isLarge) 96.dp else 56.dp
+            if (moment.isCompleted) {
+                PebbleThumbnail(
+                    valence = valence,
+                    glyph = moment.pebble?.glyph,
+                    palette = palette,
+                    modifier = Modifier.size(stoneSize),
+                )
+            } else {
+                BlankStone(modifier = Modifier.size(stoneSize))
+            }
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.weight(1f),

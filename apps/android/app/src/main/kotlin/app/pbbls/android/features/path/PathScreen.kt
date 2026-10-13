@@ -35,8 +35,10 @@ import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.WeekRollEntry
+import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.components.NewPebbleFab
 import app.pbbls.android.features.path.components.WeekHeader
 import app.pbbls.android.features.path.components.WeekPebbleList
@@ -60,7 +62,8 @@ import kotlin.math.abs
  * (`PebblesEntryProvider`) ever touches a `Navigator`.
  *
  * @param onDeleteConfirmed Called with the deleted moment's id once the user
- *   confirms, so a detail open beside Path can close (#940). It runs on
+ *   confirms deleting the moment (not only its pebble), so a detail open
+ *   beside Path can close (#940). It runs on
  *   confirm, not on success: if the delete fails, the error dialog says so and
  *   the pebble can be reopened.
  */
@@ -163,12 +166,14 @@ fun PathScreen(
         }
 
         covers.pendingDeletion?.let { target ->
-            DeleteConfirmDialog(
-                pebbleName = target.name ?: stringResource(R.string.moment_untitled),
-                onConfirm = {
+            MomentDeleteDialog(
+                hasPebble = target.isCompleted,
+                onConfirm = { choice ->
                     // `target` was captured before confirmDelete clears it.
-                    viewModel.confirmDelete()
-                    onDeleteConfirmed(target.id)
+                    viewModel.confirmDelete(choice)
+                    // Only a deleted moment closes its read page; without just
+                    // its pebble it stays, as a bare moment (R8).
+                    if (choice == MomentDeleteChoice.MOMENT) onDeleteConfirmed(target.id)
                 },
                 onDismiss = viewModel::cancelDelete,
             )
@@ -293,57 +298,6 @@ internal fun refocusedWeekStart(
     entries.firstOrNull { it.weekStart == currentStart }?.let { return it.weekStart }
     val anchor = focused ?: currentStart
     return entries.minByOrNull { abs(it.weekStart.toEpochDay() - anchor.toEpochDay()) }?.weekStart
-}
-
-/**
- * Destructive-delete confirmation — the `PathView.confirmationDialog` analog
- * (D8): "Delete <name>? This can't be undone." with a destructive Delete and a
- * Cancel. `internal` (not `private`) so the screenshot preview can drive it.
- */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-internal fun DeleteConfirmDialog(
-    pebbleName: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val colors = MaterialTheme.colorScheme
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = colors.surfaceContainerHigh,
-        title = {
-            Text(
-                text = stringResource(R.string.pebble_delete_confirm_title, pebbleName),
-                style = MaterialTheme.typography.titleMediumEmphasized,
-                color = colors.onSurface,
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(R.string.pebble_delete_confirm_message),
-                style = MaterialTheme.typography.bodyLarge,
-                color = colors.onSurfaceVariant,
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(
-                    text = stringResource(R.string.pebble_delete),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = colors.error,
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(
-                    text = stringResource(R.string.action_cancel),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = colors.primary,
-                )
-            }
-        },
-    )
 }
 
 /** Delete-failure notice — a single-action AlertDialog dismissing back to the timeline. Copy shared with iOS (R15). */

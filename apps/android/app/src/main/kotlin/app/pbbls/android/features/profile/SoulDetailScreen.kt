@@ -30,7 +30,6 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
-import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
@@ -43,13 +42,14 @@ import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
+import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.core.ui.PebbleRow
 
 /**
  * Pushed detail for one soul — ports iOS `SoulDetailView.swift`: compact
  * header (56dp glyph + name + live pebble count), the moments whose pebble is
  * tagged with the soul on the shared [PebbleRow] (tap → the moment's read page,
- * R9; long-press → `delete_moment` with confirm), and an Edit top-bar action opening
+ * R9; long-press → the R8 delete choice), and an Edit top-bar action opening
  * [SoulFormScreen] as a cover (D9 surface swap). The NavHost passes only the
  * soul id, so [SoulDetailViewModel] fetches the soul itself (iOS receives the
  * row from the list; deviation noted in the plan).
@@ -97,9 +97,8 @@ fun SoulDetailScreen(
     )
 
     covers.pendingDeletion?.let { target ->
-        ConfirmDeleteDialog(
-            title = stringResource(R.string.pebble_delete_confirm_title, target.name ?: stringResource(R.string.moment_untitled)),
-            message = stringResource(R.string.pebble_delete_confirm_message),
+        MomentDeleteDialog(
+            hasPebble = target.isCompleted,
             onConfirm = viewModel::confirmDelete,
             onDismiss = viewModel::cancelDelete,
         )

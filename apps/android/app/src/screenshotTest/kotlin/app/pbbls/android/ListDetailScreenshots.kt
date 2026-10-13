@@ -371,6 +371,7 @@ private fun PathPebblePair() {
                     palette = previewPalette,
                     onEditMoment = {},
                     onEditPebble = {},
+                    onDelete = {},
                     onShare = null,
                     onRetry = {},
                 )

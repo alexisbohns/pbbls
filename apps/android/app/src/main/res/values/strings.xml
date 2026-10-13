@@ -411,6 +411,12 @@
     <string name="moment_untitled">Untitled</string>
     <string name="moment_blank_a11y">Not a pebble yet</string>
     <string name="moment_delete_error">Couldn\'t delete</string>
+    <string name="delete_moment_title">Delete this moment?</string>
+    <string name="delete_pebble_title">Delete this pebble?</string>
+    <string name="delete_pebble_message">Keeping the moment leaves it on your path as a blank stone. Deleting the moment removes its photo too. This can\'t be undone.</string>
+    <string name="delete_pebble_keep_moment">Delete the pebble, keep the moment</string>
+    <string name="delete_moment_too">Delete the moment too</string>
+    <string name="delete_moment">Delete moment</string>
 
     <!-- ==== Glyph carve studio (M43 · Android Glyph Studio &amp; Store) ==== -->
     <string name="carve_title">New glyph</string>
