@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import UIKit
 @testable import Pebbles
 
 /// Recorded calls on `FakeRepo`. Top-level so the suite type stays at nesting
@@ -8,7 +9,6 @@ enum FakeRepoCall: Equatable {
     case upload(snapId: UUID, userId: UUID)
     case deleteFilesBySnapId(snapId: UUID, userId: UUID)
     case deleteFilesByPrefix(prefix: String)
-    case deletePebbleMedia(snapId: UUID)
 }
 
 @MainActor
@@ -28,7 +28,6 @@ struct SnapUploadCoordinatorTests {
 
         // Stubs — set before invoking the method under test.
         var uploadResults: [Result<Void, Error>] = []
-        var deletePebbleMediaResult: Result<String, Error> = .success("uid/sid")
 
         func uploadProcessed(_ processed: ProcessedImage, snapId: UUID, userId: UUID) async throws {
             calls.append(.upload(snapId: snapId, userId: userId))
@@ -45,14 +44,6 @@ struct SnapUploadCoordinatorTests {
 
         func deleteFiles(storagePrefix: String) async {
             calls.append(.deleteFilesByPrefix(prefix: storagePrefix))
-        }
-
-        func deletePebbleMedia(snapId: UUID) async throws -> String {
-            calls.append(.deletePebbleMedia(snapId: snapId))
-            switch deletePebbleMediaResult {
-            case .success(let path): return path
-            case .failure(let error): throw error
-            }
         }
     }
 
@@ -218,45 +209,80 @@ struct SnapUploadCoordinatorTests {
         }
     }
 
-    @Test("removeExisting: happy path calls RPC, fires storage cleanup, clears state")
-    func removeExistingHappyPath() async throws {
+    @Test("detachExisting: clears the photo, calls nothing, remembers its files")
+    func detachExistingIsLocal() {
         let repo = FakeRepo()
-        let snapId = UUID()
-        repo.deletePebbleMediaResult = .success("uid/sid")
         let coordinator = SnapUploadCoordinator(
             repo: repo,
-            initialSnap: .existing(id: snapId, storagePath: "uid/sid"),
+            initialSnap: .existing(id: UUID(), storagePath: "uid/sid"),
             retryDelay: .milliseconds(1)
         )
 
-        try await coordinator.removeExisting()
+        coordinator.detachExisting()
 
         #expect(coordinator.formSnap == nil)
-        #expect(repo.calls == [
-            .deletePebbleMedia(snapId: snapId),
-            .deleteFilesByPrefix(prefix: "uid/sid")
-        ])
+        #expect(coordinator.detachedStoragePaths == ["uid/sid"])
+        #expect(repo.calls.isEmpty)
     }
 
-    @Test("removeExisting: RPC failure throws and retains state")
-    func removeExistingRPCFailureRetainsState() async throws {
+    @Test("purgeDetached: deletes the detached files once, after a save")
+    func purgeDetachedDeletesFiles() async {
         let repo = FakeRepo()
-        let snapId = UUID()
-        repo.deletePebbleMediaResult = .failure(StubError(tag: "rpc"))
         let coordinator = SnapUploadCoordinator(
             repo: repo,
-            initialSnap: .existing(id: snapId, storagePath: "uid/sid"),
+            initialSnap: .existing(id: UUID(), storagePath: "uid/sid"),
             retryDelay: .milliseconds(1)
         )
+        coordinator.detachExisting()
 
-        await #expect(throws: StubError.self) {
-            try await coordinator.removeExisting()
+        await coordinator.purgeDetached()
+        await coordinator.purgeDetached()
+
+        #expect(repo.calls == [.deleteFilesByPrefix(prefix: "uid/sid")])
+        #expect(coordinator.detachedStoragePaths.isEmpty)
+    }
+
+    @Test("detachExisting is a no-op without an existing photo")
+    func detachWithoutExisting() {
+        let repo = FakeRepo()
+        let coordinator = SnapUploadCoordinator(repo: repo, initialSnap: nil, retryDelay: .milliseconds(1))
+        coordinator.detachExisting()
+        #expect(coordinator.detachedStoragePaths.isEmpty)
+    }
+
+    @Test("replacing a saved photo with a new pick remembers the old files, deletes nothing yet")
+    func replacingExistingRemembersFiles() async throws {
+        let repo = FakeRepo()
+        let coordinator = SnapUploadCoordinator(
+            repo: repo,
+            initialSnap: .existing(id: UUID(), storagePath: "uid/old"),
+            retryDelay: .milliseconds(1)
+        )
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 8, height: 8))
+        let jpeg = renderer.jpegData(withCompressionQuality: 0.8) { context in
+            UIColor.red.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 8, height: 8))
         }
 
-        if case .existing(let id, _) = coordinator.formSnap {
-            #expect(id == snapId)
-        } else {
-            Issue.record("expected formSnap to remain .existing")
-        }
+        await coordinator.ingest(jpeg, uti: "public.jpeg", userId: UUID())
+
+        #expect(coordinator.detachedStoragePaths == ["uid/old"])
+        #expect(!repo.calls.contains(.deleteFilesByPrefix(prefix: "uid/old")))
+    }
+
+    @Test("cancelAndCleanup forgets detached photos: a cancelled form keeps its saved photo")
+    func cancelForgetsDetached() async {
+        let repo = FakeRepo()
+        let coordinator = SnapUploadCoordinator(
+            repo: repo,
+            initialSnap: .existing(id: UUID(), storagePath: "uid/sid"),
+            retryDelay: .milliseconds(1)
+        )
+        coordinator.detachExisting()
+
+        await coordinator.cancelAndCleanup(userId: UUID())
+
+        #expect(coordinator.detachedStoragePaths.isEmpty)
+        #expect(repo.calls.isEmpty)
     }
 }

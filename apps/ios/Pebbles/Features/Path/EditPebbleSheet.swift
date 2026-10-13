@@ -35,7 +35,6 @@ struct EditPebbleSheet: View {
     @State private var saveError: String?
 
     @State private var isPhotoPickerPresented = false
-    @State private var isRemovingExistingSnap = false
 
     /// Lazily constructed in `.task` so we have access to `supabase.client`.
     /// Seeded with the loaded snap (if any) after `load()` succeeds.
@@ -116,9 +115,9 @@ struct EditPebbleSheet: View {
                 onGlyphPicked: { picked in selectedGlyph = picked },
                 showsPhotoSection: true,
                 photoPickerPresented: $isPhotoPickerPresented,
-                isRemovingExistingSnap: isRemovingExistingSnap,
+                isRemovingExistingSnap: false,
                 onRemoveExistingSnap: {
-                    Task { await removeExisting() }
+                    snaps?.detachExisting()
                 },
                 formSnap: snaps?.formSnap,
                 onRetryPending: {
@@ -143,18 +142,6 @@ struct EditPebbleSheet: View {
             await snaps.cancelAndCleanup(userId: userId)
         }
         dismiss()
-    }
-
-    private func removeExisting() async {
-        guard let snaps else { return }
-        isRemovingExistingSnap = true
-        defer { isRemovingExistingSnap = false }
-        do {
-            try await snaps.removeExisting()
-        } catch {
-            logger.error("delete_pebble_media failed: \(error.localizedDescription, privacy: .private)")
-            saveError = "Couldn't remove the photo. Please try again."
-        }
     }
 
     private func load() async {
@@ -236,6 +223,7 @@ struct EditPebbleSheet: View {
             // An edit can change the pebble's emotion, newly qualifying an
             // emotion_first badge.
             achievements.fireCheck()
+            await snaps?.purgeDetached()
             onSaved()
             dismiss()
         } catch let functionsError as FunctionsError {
@@ -246,6 +234,7 @@ struct EditPebbleSheet: View {
                 let bodyString = String(data: data, encoding: .utf8) ?? "<non-utf8 body>"
                 logger.warning("compose-pebble-update returned \(status, privacy: .public) — advancing on soft-success. body=\(bodyString, privacy: .private)")
                 achievements.fireCheck()
+                await snaps?.purgeDetached()
                 onSaved()
                 dismiss()
             } else {

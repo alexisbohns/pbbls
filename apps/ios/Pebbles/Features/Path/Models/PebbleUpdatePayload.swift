@@ -13,8 +13,8 @@ import Foundation
 /// `snaps` is always sent (possibly empty) so `update_pebble`'s replace block
 /// fires every save: an unchanged snap round-trips with the same `id` and
 /// `storage_path`; a removed-then-not-replaced photo sends `[]` so any stale
-/// row is wiped server-side as defense in depth (the eager `delete_pebble_media`
-/// path should already have removed it).
+/// row is deleted by that same save (R6): removal is a form-local detach, not an
+/// RPC.
 struct PebbleUpdatePayload: Encodable {
     let name: String
     let description: String?

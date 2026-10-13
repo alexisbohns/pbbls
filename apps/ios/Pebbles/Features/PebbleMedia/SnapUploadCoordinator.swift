@@ -141,7 +141,7 @@ final class SnapUploadCoordinator {
 
     /// Shared pick path: capture date → re-encode → replace → upload.
     /// `uti` has already passed `ImageFormatValidator`.
-    private func ingest(_ data: Data, uti: String, userId: UUID) async {
+    func ingest(_ data: Data, uti: String, userId: UUID) async {
         // Read the capture date before the pipeline strips metadata (D7).
         pickedCaptureDate = ExifCaptureDate.from(data)
 
@@ -153,6 +153,12 @@ final class SnapUploadCoordinator {
         } catch {
             Self.logger.error("image pipeline failed: \(String(describing: error), privacy: .public)")
             return
+        }
+
+        // A saved photo replaced by a new pick: its row goes with the next
+        // save's whole-set `snaps`, its files after that save (R6).
+        if case .existing(_, let storagePath) = formSnap {
+            detachedStoragePaths.append(storagePath)
         }
 
         // The inline picker makes "actually, that one" a single tap, so the
@@ -194,16 +200,28 @@ final class SnapUploadCoordinator {
         await repo.deleteFiles(snapId: snapId, userId: userId)
     }
 
-    /// Remove the current `.existing` snap. Calls `delete_pebble_media` and
-    /// then fires fire-and-forget Storage cleanup. Throws on RPC failure so
-    /// the sheet can surface a user-facing error. No-op (returns normally)
-    /// when the current `formSnap` is not `.existing`.
-    func removeExisting() async throws {
-        guard case .existing(let id, _) = formSnap else { return }
-        let storagePath = try await repo.deletePebbleMedia(snapId: id)
-        // Fire-and-forget Storage cleanup. The live repo logs on failure.
-        await repo.deleteFiles(storagePrefix: storagePath)
+    /// Storage prefixes of saved photos the user removed or replaced in this
+    /// form. Their rows go when the save sends the whole `snaps` set (R6);
+    /// their files go in `purgeDetached()`, after that save succeeds.
+    private(set) var detachedStoragePaths: [String] = []
+
+    /// Remove the current `.existing` photo from the form. No RPC: the next
+    /// `save_moment` sends `snaps: []` and the server enforces "a name or a
+    /// photo" in that same write. No-op unless the current snap is `.existing`.
+    func detachExisting() {
+        guard case .existing(_, let storagePath) = formSnap else { return }
+        detachedStoragePaths.append(storagePath)
         formSnap = nil
+    }
+
+    /// Best-effort file cleanup for detached photos. Call only after the save
+    /// that dropped their rows has succeeded; the orphan sweep is the backstop.
+    func purgeDetached() async {
+        let paths = detachedStoragePaths
+        detachedStoragePaths = []
+        for path in paths {
+            await repo.deleteFiles(storagePrefix: path)
+        }
     }
 
     // MARK: - Sheet lifecycle
@@ -213,6 +231,8 @@ final class SnapUploadCoordinator {
     /// Storage delete. Storage-delete failures are logged but do not throw —
     /// Cancel must not be un-cancellable.
     func cancelAndCleanup(userId: UUID) async {
+        // A cancelled form keeps its saved photo.
+        detachedStoragePaths = []
         // Capture id before clearing so the delete still has the address.
         guard case .pending(let snap) = formSnap else {
             formSnap = nil
