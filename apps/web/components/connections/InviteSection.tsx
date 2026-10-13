@@ -37,7 +37,7 @@ export function InviteSection({ ready, createInvite }: InviteSectionProps) {
     let cancelled = false
 
     // `await Promise.resolve()` defers state updates past the synchronous
-    // render boundary (react-hooks/set-state-in-effect, usePebbleDrafts style).
+    // render boundary (react-hooks/set-state-in-effect).
     void (async () => {
       await Promise.resolve()
       if (cancelled) return

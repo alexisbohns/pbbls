@@ -12,7 +12,6 @@ import {
   type CreateMarkInput,
   type UpdateMarkInput,
   type WalletHistoryPage,
-  type PebbleDraftRecord,
   type ConnectionInvite,
   type AcceptConnectionInviteResult,
   type AchievementUnlockResult,
@@ -486,47 +485,6 @@ export class SupabaseProvider implements DataProvider {
       }
     }
     await this.loadFromSupabase()
-  }
-
-  // ---------------------------------------------------------------------------
-  // Drafts (M47) — direct single-table CRUD on `pebble_drafts`, owner-scoped by
-  // RLS. Deliberately outside the eager store and outside `createPebble`: a
-  // draft must never reach `create_pebble`, the schema's only karma emitter.
-  // ---------------------------------------------------------------------------
-
-  // `pebble_drafts` was retired by #1046: a quick capture is now a moment
-  // (`save_moment`), which the web composer adopts in #1050. Until then the
-  // drafts surface is empty and saving a draft explains why, instead of every
-  // call failing on a missing table.
-  async listPebbleDrafts(): Promise<PebbleDraftRecord[]> {
-    return []
-  }
-
-  async countPebbleDrafts(): Promise<number> {
-    return 0
-  }
-
-  async getPebbleDraft(): Promise<PebbleDraftRecord | undefined> {
-    return undefined
-  }
-
-  async savePebbleDraft(): Promise<PebbleDraftRecord> {
-    throw new Error("Drafts are retired. Record the pebble now, or keep it open: your progress is saved on this device.")
-  }
-
-  async deletePebbleDraft(): Promise<void> {
-    return
-  }
-
-  async getDraftSnapUrl(storagePath: string): Promise<string | undefined> {
-    const { data, error } = await this.supabase.storage
-      .from(PEBBLE_MEDIA_BUCKET)
-      .createSignedUrl(`${storagePath}/original.jpg`, SNAP_URL_TTL_SECONDS)
-    if (error) {
-      console.warn("[pebbles] failed to sign draft snap URL", error)
-      return undefined
-    }
-    return data?.signedUrl
   }
 
   // ---------------------------------------------------------------------------

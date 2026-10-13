@@ -32,7 +32,7 @@ const FIXTURE_AUTH: AuthContextValue = {
 /**
  * Shadows the root AuthProvider and DataProvider for everything the design
  * page renders. `provider: null` makes the data hooks read the fixture store;
- * their provider-backed reads (achievements, ripple, draft count) fall back to
+ * their provider-backed reads (achievements, ripple) fall back to
  * their empty values.
  *
  * Renders nothing on the server: the fixtures are dated from `now` and the

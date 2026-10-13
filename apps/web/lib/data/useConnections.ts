@@ -33,8 +33,7 @@ export function useConnections() {
     let cancelled = false
 
     // `await Promise.resolve()` defers the state updates past the synchronous
-    // render boundary (mirrors usePebbleDrafts) to satisfy
-    // react-hooks/set-state-in-effect.
+    // render boundary to satisfy react-hooks/set-state-in-effect.
     void (async () => {
       await Promise.resolve()
       if (cancelled) return

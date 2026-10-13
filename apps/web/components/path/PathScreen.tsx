@@ -9,7 +9,6 @@ import { WeekRoll } from "@/components/path/WeekRoll"
 import { WeekPager } from "@/components/path/WeekPager"
 import { PathBottomDock } from "@/components/path/PathBottomDock"
 import { PebblePeek } from "@/components/path/PebblePeek"
-import { DraftsEntry } from "@/components/drafts/DraftsEntry"
 import { cn } from "@/lib/utils"
 import {
   buildWeekRollEntries,
@@ -108,9 +107,6 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
         onFocus={setFocusedFromDate}
         className="shrink-0 spread:spine-paper spread:absolute spread:top-(--safe-area-top) spread:left-(--spine-verso-x) spread:z-20 spread:w-(--spine-verso-w) spread:pr-12 spread:pl-9"
       />
-      <div className="flex justify-center px-4 pt-2 empty:hidden">
-        <DraftsEntry />
-      </div>
       <p aria-live="polite" className="sr-only">
         {t("weekLabel", { week: focusedEntry?.isoWeek ?? isoWeekNumber(focusedWeekStart) })}
       </p>

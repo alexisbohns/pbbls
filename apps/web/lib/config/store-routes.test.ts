@@ -10,7 +10,6 @@ describe("isStoreBackedRoute", () => {
       "/souls/abc",
       "/wallet",
       "/achievements",
-      "/drafts",
       "/settings",
       "/record",
       "/collections/xyz",

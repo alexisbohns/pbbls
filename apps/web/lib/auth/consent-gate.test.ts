@@ -440,7 +440,6 @@ describe("gate cache and routes", () => {
       "/settings",
       "/onboarding",
       "/achievements",
-      "/drafts",
       "/wallet",
       // Prefix lookalikes and unknown routes are held by default.
       "/users",

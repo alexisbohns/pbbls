@@ -97,12 +97,12 @@ export type AchievementUnlockResult = {
 }
 
 // ---------------------------------------------------------------------------
-// Drafts (M47) — a draft is a PARTIAL compose-pebble wire payload, stored as
-// jsonb in `pebble_drafts.payload`. Deliberately keyed like the wire and not
-// like `CreatePebbleInput` (note `snaps` shaped as the payload wants them):
-// publishing is then a pass-through, and the same shape is what iOS/Android
-// persist. Unset keys are OMITTED, never nulled — `description` is the only key
-// where `null` is meaningful. No glyph: it is derived since #1046 (D5).
+// The composer's device-local autosave (M47) — a PARTIAL compose-pebble wire
+// payload. Deliberately keyed like the wire and not like `CreatePebbleInput`
+// (note `snaps` shaped as the payload wants them). Unset keys are OMITTED,
+// never nulled — `description` is the only key where `null` is meaningful.
+// No glyph: it is derived since #1046 (D5). Server drafts (`pebble_drafts`)
+// were retired by the same split (D7); only the local snapshot remains.
 // See docs/superpowers/specs/2026-07-29-drafts-and-autosave-design.md (D2).
 // ---------------------------------------------------------------------------
 
@@ -124,13 +124,6 @@ export type PebbleDraftPayload = {
   soul_ids?: string[]
   collection_ids?: string[]
   snaps?: DraftSnapPayload[]
-}
-
-export type PebbleDraftRecord = {
-  id: string
-  payload: PebbleDraftPayload
-  created_at: string
-  updated_at: string
 }
 
 // ---------------------------------------------------------------------------
@@ -201,20 +194,6 @@ export interface DataProvider {
   // eager-cleanup variant for existing snaps (file delete + DB row).
   uploadSnap(file: File): Promise<PebbleSnap>
   deletePebbleMedia(snapId: string): Promise<void>
-
-  // Drafts: owner-scoped single-table CRUD, deliberately outside the eager
-  // `Store` (their own surface, fetched on demand). `savePebbleDraft` upserts —
-  // omit `id` to create, pass it to replace that draft's payload wholesale.
-  // None of these touch karma: `create_pebble` is the only emitter and a draft
-  // never reaches it.
-  listPebbleDrafts(): Promise<PebbleDraftRecord[]>
-  /** Cheap count for the Path entry badge — selects `id` only, no payloads. */
-  countPebbleDrafts(): Promise<number>
-  getPebbleDraft(id: string): Promise<PebbleDraftRecord | undefined>
-  savePebbleDraft(payload: PebbleDraftPayload, id?: string): Promise<PebbleDraftRecord>
-  deletePebbleDraft(id: string): Promise<void>
-  /** Signed read URL for a draft snap's thumb (drafts have no `instants`). */
-  getDraftSnapUrl(storagePath: string): Promise<string | undefined>
 
   // Connections (M49): definer-RPC-only — every write is multi-table validated
   // logic (accept touches invites, blocks and connections), so there are no

@@ -40,13 +40,8 @@ import { useRecordStepCopy } from "./step-copy"
 import type { PhotoUploadState } from "./steps/RecordPhotoStep"
 
 type RecordFlowProps = {
-  /** Resumed server draft (M47): its payload enters the flow at the first gap. */
-  draftId?: string
-  initialPayload?: PebbleDraftPayload
   /** Leave the composer for the Path — after success, discard, or a bare close. */
   onExit: () => void
-  /** Leave for /drafts after a deliberate "save as draft". */
-  onDraftSaved: () => void
 }
 
 type PublishedPebble = { pebble: Pebble; karmaDelta: number }
@@ -56,7 +51,7 @@ type PublishedPebble = { pebble: Pebble; karmaDelta: number }
  * on web, aligned with the iOS flow shipped in #724. `QuickPebbleEditor`
  * remains reachable at `/record?composer=form`.
  *
- * Owns the orchestration — photo upload, drafts, publish — while everything
+ * Owns the orchestration — photo upload, local autosave, publish — while everything
  * about *the flow itself* (gating, back, skip labels, resume) lives in the pure
  * reducer in `lib/record/flow.ts`, where it is unit tested without rendering.
  *
@@ -65,12 +60,12 @@ type PublishedPebble = { pebble: Pebble; karmaDelta: number }
  * is an iOS and Android pillar with no honest web equivalent — and substituting
  * an animation for it would be pretending. The web flow is the quiet one.
  */
-export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: RecordFlowProps) {
+export function RecordFlow({ onExit }: RecordFlowProps) {
   const t = useTranslations("record.flow")
   const tDraft = useTranslations("record.draft")
   const tPhoto = useTranslations("record.flow.photo")
 
-  const { provider, loading: storeLoading } = useDataProvider()
+  const { loading: storeLoading } = useDataProvider()
   const { addPebble, uploadSnap } = usePebbles()
   const { souls } = useSouls()
   const { collections } = useCollections()
@@ -87,8 +82,6 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
   const [publishError, setPublishError] = useState<string | null>(null)
   const [published, setPublished] = useState<PublishedPebble | null>(null)
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false)
-  const [savingDraft, setSavingDraft] = useState(false)
-  const [draftError, setDraftError] = useState<string | null>(null)
 
   const goTo = useCallback(
     (step: RecordStep) => {
@@ -112,7 +105,7 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
   useEffect(() => prewarmValenceArt(), [])
 
   // ---------------------------------------------------------------------------
-  // Drafts (M47) — the same coordinator the single-screen composer uses.
+  // Local autosave (M47) — the same coordinator the single-screen composer uses.
   // ---------------------------------------------------------------------------
 
   const applyPayload = useCallback(
@@ -137,11 +130,8 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
     setRestorePromptOpen,
     restore,
     discardSnapshot,
-    saveAsDraft,
     consumeAfterPublish,
   } = useComposerDrafts({
-    draftId,
-    initialPayload,
     state: flow.draft,
     applyPayload,
     ready: !storeLoading,
@@ -151,37 +141,13 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
   // Photo
   // ---------------------------------------------------------------------------
 
-  // Revoke any outstanding object URL on replace and on unmount. A signed URL
-  // for a resumed draft's photo is not a blob and is left alone.
+  // Revoke any outstanding object URL on replace and on unmount. (A restored
+  // snapshot never carries a photo: autosave excludes media, D3.)
   useEffect(() => {
     return () => {
       if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl)
     }
   }, [previewUrl])
-
-  // A resumed draft's photo is already in Storage but has no `blob:` preview —
-  // mint a signed URL so the photo step shows it (mirrors the edit screen).
-  const resumedSnap = flow.draft.pendingSnap
-  useEffect(() => {
-    if (!provider || !resumedSnap || previewUrl) return
-    let cancelled = false
-    void (async () => {
-      // Deferred past the synchronous render boundary (mirrors
-      // usePebbleDrafts.ts) to satisfy react-hooks/set-state-in-effect.
-      await Promise.resolve()
-      if (cancelled) return
-      // Say "uploaded" before the round trip, not after: the bytes are already
-      // in Storage, and an empty-looking photo step in the meantime invites the
-      // user to pick again and orphan the snap the draft still references.
-      setPhotoState("uploaded")
-      const url = await provider.getDraftSnapUrl(resumedSnap.storage_path)
-      if (cancelled || !url) return
-      setPreviewUrl(url)
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [provider, resumedSnap, previewUrl])
 
   const upload = useCallback(
     async (file: File) => {
@@ -289,7 +255,7 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
       dispatch({ type: "published" })
     } catch (err) {
       // A hard failure never reaches the success step: the flow stays put, so
-      // the draft — and the way out via ✕ → Save as draft — is untouched.
+      // the draft and its local snapshot are untouched.
       console.error("[record-flow] publish failed", err)
       setPublishError(tDraft(publishErrorMessageKey(err)))
     } finally {
@@ -307,26 +273,8 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
       onExit()
       return
     }
-    setDraftError(null)
     setCloseConfirmOpen(true)
   }, [isEmpty, onExit])
-
-  const handleSaveAsDraft = useCallback(async () => {
-    if (savingDraft) return
-    setSavingDraft(true)
-    setDraftError(null)
-    const saved = await saveAsDraft()
-    setSavingDraft(false)
-    if (saved) {
-      setCloseConfirmOpen(false)
-      onDraftSaved()
-      return
-    }
-    // Stay in the dialog: the failure has nowhere else to be read from — the
-    // publish error slot lives on the privacy step, and the user leaving from
-    // step 2 would never see it.
-    setDraftError(tDraft("saveFailed"))
-  }, [savingDraft, saveAsDraft, onDraftSaved, tDraft])
 
   const handleDiscard = useCallback(() => {
     // The uploaded snap is left to the server-side sweep, exactly as the
@@ -427,8 +375,7 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
         )}
       </section>
 
-      {/* Crash-insurance restore. Only offered when not already resuming a
-          server draft, and only once per mount. */}
+      {/* Crash-insurance restore, offered once per mount. */}
       <AlertDialog open={restorePromptOpen} onOpenChange={setRestorePromptOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -444,27 +391,18 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* The moment a user wants to keep a half-finished pebble is precisely the
-          moment they try to leave, so the choice lives here rather than in a
-          permanent toolbar button. */}
+      {/* Server drafts are retired (#1046, D7): leaving with something typed
+          means discarding it or staying to finish. */}
       <AlertDialog open={closeConfirmOpen} onOpenChange={setCloseConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("keepTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("keepDescription")}</AlertDialogDescription>
+            <AlertDialogTitle>{t("leaveTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("leaveDescription")}</AlertDialogDescription>
           </AlertDialogHeader>
-          {draftError && (
-            <p role="alert" className="text-sm text-destructive">
-              {draftError}
-            </p>
-          )}
           <AlertDialogFooter>
             <AlertDialogCancel>{t("keepGoing")}</AlertDialogCancel>
             <Button variant="ghost" onClick={handleDiscard} className="text-destructive">
               {t("discard")}
-            </Button>
-            <Button disabled={savingDraft} onClick={() => void handleSaveAsDraft()}>
-              {tDraft("save")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
