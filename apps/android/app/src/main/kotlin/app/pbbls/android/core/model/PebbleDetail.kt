@@ -4,14 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime
 
-/** 3-field embedded domain ref — the detail select omits `label`. Mirrors iOS DomainRef. */
-@Serializable
-data class DomainRef(
-    val id: String,
-    val slug: String,
-    val name: String,
-)
-
 /**
  * Read model for the pebble detail sheet (D7) — mirrors iOS `PebbleDetail.swift`.
  * Decodes one pebble row with embedded relations from the direct PostgREST

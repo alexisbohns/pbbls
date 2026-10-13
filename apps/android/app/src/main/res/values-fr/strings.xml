@@ -380,6 +380,15 @@
     <string name="photo_remove_error">Impossible de retirer la photo. Veuillez réessayer.</string>
     <string name="pebble_save_error_photo_uploading">La photo est encore en cours d\'envoi.</string>
     <string name="pebble_save_error_photo_failed">L\'envoi de la photo a échoué. Réessayez ou retirez-la.</string>
+    <string name="moment_save_error_generic">Impossible d\'enregistrer. Réessaie.</string>
+    <string name="moment_error_empty">Ajoute d\'abord un nom ou une photo.</string>
+    <string name="moment_error_media_quota">Limite de photos atteinte pour ce moment.</string>
+    <string name="moment_error_not_found">Ce moment n\'existe plus.</string>
+    <string name="pebble_error_needs_emotion">Choisis d\'abord une émotion.</string>
+    <string name="pebble_error_needs_valence">Choisis d\'abord ce que ça t\'a fait.</string>
+    <string name="pebble_error_needs_domain">Choisis d\'abord un domaine de ta vie.</string>
+    <string name="pebble_error_soul_gone">Une de ces âmes n\'existe plus. Retire-la et réessaie.</string>
+    <string name="pebble_error_collection_gone">Cette collection n\'existe plus. Choisis-en une autre.</string>
 
     <!-- ==== Atelier de glyphes (M43 · Android Glyph Studio &amp; Store) ==== -->
     <string name="carve_title">Nouveau glyphe</string>

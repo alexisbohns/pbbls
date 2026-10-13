@@ -399,6 +399,15 @@
     <string name="photo_remove_error">Couldn\'t remove the photo. Please try again.</string>
     <string name="pebble_save_error_photo_uploading">Photo is still uploading.</string>
     <string name="pebble_save_error_photo_failed">Photo upload failed. Retry or remove it.</string>
+    <string name="moment_save_error_generic">Couldn\'t save. Please try again.</string>
+    <string name="moment_error_empty">Add a name or a photo first.</string>
+    <string name="moment_error_media_quota">Photo limit reached on this moment.</string>
+    <string name="moment_error_not_found">This moment no longer exists.</string>
+    <string name="pebble_error_needs_emotion">Pick an emotion first.</string>
+    <string name="pebble_error_needs_valence">Pick how it landed first.</string>
+    <string name="pebble_error_needs_domain">Pick a part of life first.</string>
+    <string name="pebble_error_soul_gone">One of those souls is gone. Remove it and try again.</string>
+    <string name="pebble_error_collection_gone">That collection is gone. Pick another one.</string>
 
     <!-- ==== Glyph carve studio (M43 · Android Glyph Studio &amp; Store) ==== -->
     <string name="carve_title">New glyph</string>

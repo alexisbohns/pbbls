@@ -114,4 +114,22 @@ class DataErrorTest {
     fun `a CancellationException is rethrown, never classified`() {
         CancellationException("left the screen").toDataError()
     }
+
+    @Test
+    fun `the two ownership conditions keep their name despite 42501`() {
+        assertEquals(DataError.Conflict("soul_not_owned"), dataErrorOf(403, "soul_not_owned", "42501"))
+        assertEquals(DataError.Conflict("collection_not_owned"), dataErrorOf(403, "collection_not_owned", "42501"))
+    }
+
+    @Test
+    fun `any other 42501 is still a refusal`() {
+        assertEquals(DataError.Unauthorized, dataErrorOf(403, "not_authenticated", "42501"))
+        assertEquals(DataError.Unauthorized, dataErrorOf(403, "insufficient_privilege", "42501"))
+    }
+
+    @Test
+    fun `P0002 is not found whatever the status`() {
+        assertEquals(DataError.NotFound, dataErrorOf(500, "moment_not_found", "P0002"))
+        assertEquals(DataError.NotFound, dataErrorOf(400, "collection_not_found", "P0002"))
+    }
 }
