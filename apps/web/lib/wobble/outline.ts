@@ -120,6 +120,27 @@ function closedPolygonToD(points: Point[]): string {
 }
 
 /**
+ * Displaced stroke centerlines, still to be stroked: the wobble without the
+ * ink, so the caller keeps its own line weight. Closed subpaths stay closed.
+ * Returns "" when nothing renders.
+ */
+export function displaceCenterlines(
+  polylines: Polyline[],
+  noise: SVGTurbulence,
+  params: WobbleParams,
+): string {
+  let d = ""
+  for (const polyline of polylines) {
+    if (polyline.points.length < 2) continue
+    const [first, ...rest] = polyline.points.map((p) => displace(p, noise, params))
+    d += `M${fmt(first.x)} ${fmt(first.y)}`
+    for (const p of rest) d += `L${fmt(p.x)} ${fmt(p.y)}`
+    if (polyline.isClosed) d += "Z"
+  }
+  return d
+}
+
+/**
  * The leaky filled ink for a set of stroke centerlines: build outline contours,
  * displace every point independently, emit as closed subpaths. Returns "" when
  * nothing renders.

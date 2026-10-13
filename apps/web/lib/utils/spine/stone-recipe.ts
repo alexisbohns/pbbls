@@ -9,7 +9,7 @@ import type { Slot } from "@/lib/config/stone-tones"
 // - gem (highlight): five facets around a pentagon plus its face, ten glitter
 //   dots, two sparkles at the light;
 // - river pebble (neutral): fourteen grain specks, mostly lit, and a soft
-//   highlight;
+//   diffuse light (matte, unlike the gem's shine);
 // - lava (lowlight): nine pits and a faint highlight.
 
 export type Dot = { cx: number; cy: number; r: number; opacity: number; slot: Slot }
@@ -123,7 +123,8 @@ export function stoneRecipe(size: Size, polarity: Polarity, seed: number): Stone
     return {
       material: "pebble",
       dots,
-      light: { cx: 0.36 * W, cy: 0.27 * H, rx: 0.24 * W, ry: 0.12 * H, rotate: -16, opacity: 0.45 },
+      // Matte: a broad, dim wash on the lit side rather than a specular spot.
+      light: { cx: 0.38 * W, cy: 0.3 * H, rx: 0.34 * W, ry: 0.2 * H, rotate: -16, opacity: 0.16 },
     }
   }
   if (polarity === "lowlight") {

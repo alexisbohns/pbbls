@@ -4,4 +4,4 @@
 // and reverting the three flag-gated call sites.
 
 export { WOBBLE_ENABLED } from "./flags"
-export { wobblePebbleSvg, wobbleGlyphInk, wobbleBackdrop } from "./renderer"
+export { wobblePebbleSvg, wobbleGlyphInk, wobbleGlyphLine, wobbleBackdrop } from "./renderer"

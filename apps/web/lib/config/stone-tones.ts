@@ -17,9 +17,10 @@ export const BODY_RAMP: Record<Polarity, ToneStop[]> = {
     { offset: 0.4, color: "var(--p)" },
     { offset: 1, color: "color-mix(in srgb, var(--sh) 70%, var(--d))" },
   ],
+  // Flatter than the mock's: a matte pebble has no hot spot.
   neutral: [
-    { offset: 0, color: "color-mix(in srgb, var(--s) 45%, var(--l))" },
-    { offset: 0.48, color: "var(--s)" },
+    { offset: 0, color: "color-mix(in srgb, var(--s) 72%, var(--l))" },
+    { offset: 0.5, color: "var(--s)" },
     { offset: 1, color: "color-mix(in srgb, var(--p) 72%, var(--s))" },
   ],
   lowlight: [
@@ -63,7 +64,7 @@ export const GLYPH_TONES: Record<Polarity, { lip: Paint; ink: Paint }> = {
 export const VEIN_TONES: Record<Polarity, Paint[]> = {
   highlight: [{ color: "var(--l)", opacity: 0.3, width: 3 }],
   neutral: [
-    { color: "var(--l)", opacity: 0.45, width: 9 },
+    { color: "var(--l)", opacity: 0.14, width: 9 },
     { color: "var(--sh)", opacity: 0.2, width: 2.4, dx: 1.5, dy: 3.5 },
   ],
   lowlight: [
@@ -85,15 +86,25 @@ export const FOSSIL_TONES: Record<Polarity, Paint[]> = {
 /** The inner shade along the edge (stroke width in px), blurred by `ao`. */
 export const EDGE_SHADE: Record<Polarity, Paint> = {
   highlight: { color: "var(--d)", opacity: 0.5, width: 5 },
-  neutral: { color: "var(--d)", opacity: 0.4, width: 5 },
+  neutral: { color: "var(--d)", opacity: 0.26, width: 6 },
   lowlight: { color: "var(--d)", opacity: 0.8, width: 6 },
 }
 
-/** How strongly a press glints: gem, pebble, lava. */
+/** How strongly a press glints: gem, pebble, lava. A matte pebble barely does. */
 export const GLINT_STRENGTH: Record<Polarity, number> = {
   highlight: 1,
-  neutral: 0.62,
+  neutral: 0.3,
   lowlight: 0.34,
+}
+
+/**
+ * The surface's grain, by material: lava harsh and pitted, the river pebble a
+ * faint tooth that keeps it matte, the gem polished clean.
+ */
+export const GRAIN_STRENGTH: Record<Polarity, number> = {
+  highlight: 0,
+  neutral: 0.14,
+  lowlight: 0.32,
 }
 
 /** Names the palette slots a recipe dot or facet paints with. */

@@ -1,5 +1,6 @@
 import type { MarkStroke } from "@/lib/types"
 import { CARVE_STROKE_PX } from "@/lib/config/stone-geometry"
+import { WOBBLE_ENABLED, wobbleGlyphLine } from "@/lib/wobble"
 
 type StoneGlyphProps = {
   strokes: MarkStroke[]
@@ -7,6 +8,12 @@ type StoneGlyphProps = {
   weight?: number
   stroke?: string
   strokeOpacity?: number
+  /**
+   * The glyph's own viewBox side, to hand-cut its lines (the petroglyph
+   * wobble). The stone's glyph is where the wobble lives: the drawn glyph is
+   * all straight geometry, while the river and gem bodies stay soft.
+   */
+  wobbleSide?: number
   className?: string
 }
 
@@ -15,7 +22,14 @@ type StoneGlyphProps = {
  * (`non-scaling-stroke`). The engine draws strokes at width 6; a stroke drawn
  * thinner keeps its proportion.
  */
-export function StoneGlyph({ strokes, weight = CARVE_STROKE_PX, stroke, strokeOpacity, className }: StoneGlyphProps) {
+export function StoneGlyph({
+  strokes,
+  weight = CARVE_STROKE_PX,
+  stroke,
+  strokeOpacity,
+  wobbleSide,
+  className,
+}: StoneGlyphProps) {
   return (
     <g
       fill="none"
@@ -26,7 +40,12 @@ export function StoneGlyph({ strokes, weight = CARVE_STROKE_PX, stroke, strokeOp
       className={className}
     >
       {strokes.map((s, i) => (
-        <path key={i} d={s.d} strokeWidth={`${(weight * s.width) / 6}px`} vectorEffect="non-scaling-stroke" />
+        <path
+          key={i}
+          d={(WOBBLE_ENABLED && wobbleSide && wobbleGlyphLine(s.d, wobbleSide)) || s.d}
+          strokeWidth={`${(weight * s.width) / 6}px`}
+          vectorEffect="non-scaling-stroke"
+        />
       ))}
     </g>
   )

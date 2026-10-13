@@ -5,7 +5,7 @@
 // (no DOM): the SVG rewrite is regex/string surgery, mirroring the iOS
 // `WobbleRenderer`'s minimal asset scanning rather than a DOM parser.
 
-import { buildInk, displaceFilledContours } from "./outline"
+import { buildInk, displaceCenterlines, displaceFilledContours } from "./outline"
 import { flatten } from "./flatten"
 import { parsePath } from "./path-parser"
 import { CANONICAL, SEED, scaledParams, type WobbleParams } from "./params"
@@ -95,6 +95,27 @@ export function wobbleGlyphInk(d: string, width: number): string | null {
   }
   glyphCache.set(key, ink)
   return ink
+}
+
+/**
+ * A raw glyph stroke's wobbled centerline, still a stroke: for the lit stone,
+ * which draws its glyph at one constant on-screen weight. `side` is the glyph's
+ * own viewBox side, so the wobble reads the same whatever the glyph's space.
+ * Returns null when the `d` doesn't parse (caller falls back to the plain d).
+ */
+export function wobbleGlyphLine(d: string, side: number): string | null {
+  const key = `line|${side}|${d}`
+  const cached = glyphCache.get(key)
+  if (cached !== undefined) return cached
+
+  let line: string | null = null
+  const elements = parsePath(d)
+  if (elements) {
+    const params = scaledParams(side, side)
+    line = displaceCenterlines(flatten(elements, params.flattenStep), noise, params) || null
+  }
+  glyphCache.set(key, line)
+  return line
 }
 
 // ── Backdrop silhouettes (pebble-outlines.ts) ───────────────────────
