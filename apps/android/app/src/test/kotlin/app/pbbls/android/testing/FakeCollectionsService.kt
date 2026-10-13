@@ -3,7 +3,6 @@ package app.pbbls.android.testing
 import app.pbbls.android.core.data.CollectionsServicing
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
-import app.pbbls.android.core.model.Pebble
 import kotlinx.coroutines.CompletableDeferred
 
 /**
@@ -16,8 +15,6 @@ class FakeCollectionsService(
     var collections: List<Collection> = emptyList(),
     /** What [loadCollection] returns on a successful call. */
     var collection: Collection? = null,
-    /** What [loadPebbles] returns on a successful call. */
-    var pebbles: List<Pebble> = emptyList(),
 ) : CollectionsServicing {
     var listCount = 0
         private set
@@ -60,11 +57,6 @@ class FakeCollectionsService(
         loadCollectionCount += 1
         armed.fire()
         return collection ?: collections.first { it.id == collectionId }
-    }
-
-    override suspend fun loadPebbles(collectionId: String): List<Pebble> {
-        armed.fire()
-        return pebbles
     }
 
     override suspend fun create(

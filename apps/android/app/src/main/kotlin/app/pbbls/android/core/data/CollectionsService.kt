@@ -3,7 +3,6 @@ package app.pbbls.android.core.data
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.core.model.CollectionRow
-import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.collectionInsertPayload
 import app.pbbls.android.core.model.collectionUpdatePayload
 import io.github.jan.supabase.postgrest.from
@@ -22,8 +21,6 @@ interface CollectionsServicing {
     suspend fun list(): List<Collection>
 
     suspend fun loadCollection(collectionId: String): Collection
-
-    suspend fun loadPebbles(collectionId: String): List<Pebble>
 
     suspend fun create(
         name: String,
@@ -70,24 +67,6 @@ class CollectionsService
                     filter { eq("id", collectionId) }
                 }.decodeSingle<CollectionRow>()
                 .toCollection()
-
-        /**
-         * Pebbles in the collection, newest first — mirrors
-         * `CollectionDetailView.load()`'s `collection_pebbles!inner` embedded
-         * filter (note the junction's word order, opposite of `pebble_souls`).
-         */
-        override suspend fun loadPebbles(collectionId: String): List<Pebble> =
-            supabase.client
-                .from("pebbles")
-                .select(
-                    Columns.raw(
-                        "id, name, happened_at, created_at, intensity, positiveness, render_svg, " +
-                            "emotion:emotions(id, slug, name), collection_pebbles!inner(collection_id)",
-                    ),
-                ) {
-                    filter { eq("collection_pebbles.collection_id", collectionId) }
-                    order("happened_at", Order.DESCENDING)
-                }.decodeList<Pebble>()
 
         /** Create with optional mode — no select-back; callers reload (iOS parity). */
         override suspend fun create(

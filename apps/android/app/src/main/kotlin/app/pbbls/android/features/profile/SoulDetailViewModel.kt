@@ -6,10 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.runCatchingCancellable
-import app.pbbls.android.core.data.PebbleWriteServicing
+import app.pbbls.android.core.data.MomentReadServicing
+import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SoulsServicing
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -25,7 +26,7 @@ import javax.inject.Inject
 private const val TAG = "soul-detail"
 
 /**
- * One soul and the pebbles tagged with it (#849).
+ * One soul and the moments whose pebble is tagged with it, newest first (#849, R9).
  *
  * The header and the list load together and fail together — a soul without its
  * pebbles is not a screen this surface can render — so they are one [Content],
@@ -40,13 +41,13 @@ sealed interface SoulDetailUiState {
 
     data class Content(
         val soul: SoulWithGlyph,
-        val pebbles: List<Pebble>,
+        val moments: List<PathMoment>,
     ) : SoulDetailUiState
 }
 
 /** The delete dialogs. */
 data class SoulDetailCovers(
-    val pendingDeletion: Pebble? = null,
+    val pendingDeletion: PathMoment? = null,
     val didDeleteFail: Boolean = false,
 )
 
@@ -72,12 +73,13 @@ class SoulDetailViewModel
     @Inject
     constructor(
         private val soulsService: SoulsServicing,
-        private val writeService: PebbleWriteServicing,
+        private val moments: MomentReadServicing,
+        private val writes: MomentWriteServicing,
         private val refs: ReferenceDataServicing,
     ) : ViewModel() {
         private var soulId: String? = null
         private var soul: SoulWithGlyph? = null
-        private var pebbles: List<Pebble> = emptyList()
+        private var loadedMoments: List<PathMoment> = emptyList()
         private var hasFailed = false
         private var isLoaded = false
 
@@ -139,11 +141,11 @@ class SoulDetailViewModel
 
         private suspend fun fetch(id: String) {
             runCatchingCancellable {
-                soulsService.loadSoul(id) to soulsService.loadPebbles(id)
+                soulsService.loadSoul(id) to moments.loadMomentsWithSoul(id).map { it.toPathMoment() }
             }.fold(
-                onSuccess = { (loadedSoul, loadedPebbles) ->
+                onSuccess = { (loadedSoul, fetchedMoments) ->
                     soul = loadedSoul
-                    pebbles = loadedPebbles
+                    loadedMoments = fetchedMoments
                     hasFailed = false
                     isLoaded = true
                 },
@@ -163,13 +165,13 @@ class SoulDetailViewModel
                 when {
                     hasFailed -> SoulDetailUiState.Error(R.string.soul_detail_load_error)
                     !isLoaded || current == null -> SoulDetailUiState.Loading
-                    else -> SoulDetailUiState.Content(soul = current, pebbles = pebbles)
+                    else -> SoulDetailUiState.Content(soul = current, moments = loadedMoments)
                 }
         }
 
         // MARK: - Delete
 
-        fun requestDelete(pebble: Pebble) = _covers.update { it.copy(pendingDeletion = pebble) }
+        fun requestDelete(moment: PathMoment) = _covers.update { it.copy(pendingDeletion = moment) }
 
         fun cancelDelete() = _covers.update { it.copy(pendingDeletion = null) }
 
@@ -181,12 +183,12 @@ class SoulDetailViewModel
             viewModelScope.launch {
                 withContext(NonCancellable) {
                     runCatchingCancellable {
-                        writeService.delete(target.id)
+                        writes.deleteMoment(target.id)
                         refs.refreshSouls()
                     }.fold(
                         onSuccess = { reload() },
                         onFailure = {
-                            Log.e(TAG, "delete pebble failed", it)
+                            Log.e(TAG, "delete moment failed", it)
                             _covers.update { covers -> covers.copy(didDeleteFail = true) }
                         },
                     )

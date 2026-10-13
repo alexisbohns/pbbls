@@ -1,6 +1,7 @@
 package app.pbbls.android.features.profile
 
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
+import app.pbbls.android.testing.UiFixtures
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -15,17 +16,8 @@ import java.time.ZoneId
 class GroupPebblesByMonthTest {
     private val utc = ZoneId.of("UTC")
 
-    private fun pebble(happened: String): Pebble {
-        val instant = OffsetDateTime.parse(happened)
-        return Pebble(
-            id = happened,
-            name = "p",
-            happenedAt = instant,
-            createdAt = instant,
-            intensity = 1,
-            positiveness = 0,
-        )
-    }
+    private fun pebble(happened: String): PathMoment =
+        UiFixtures.pathMoment(id = happened, name = "p", happenedAt = OffsetDateTime.parse(happened))
 
     @Test
     fun `empty input yields empty output`() {

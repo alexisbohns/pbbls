@@ -3,11 +3,13 @@ package app.pbbls.android.features.profile
 import app.pbbls.android.R
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.MomentDetail
 import app.pbbls.android.testing.FakeCollectionsService
-import app.pbbls.android.testing.FakePebbleWriteService
+import app.pbbls.android.testing.FakeMomentReadService
+import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.UiFixtures
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -21,40 +23,35 @@ import java.io.IOException
 import java.time.OffsetDateTime
 import java.time.YearMonth
 
-/** The collection detail's load, grouping and pebble-delete contract (#849). */
+/** The collection detail's load, grouping and moment-delete contract (#849, #1048). */
 class CollectionDetailViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
     private fun collection(id: String) = Collection(id = id, name = "Collection $id", mode = CollectionMode.STACK, pebbleCount = 2)
 
-    private fun pebble(
+    private fun moment(
         id: String,
         happenedAt: String,
-    ) = Pebble(
-        id = id,
-        name = "Pebble $id",
-        happenedAt = OffsetDateTime.parse(happenedAt),
-        createdAt = OffsetDateTime.parse(happenedAt),
-        intensity = 2,
-        positiveness = 1,
-    )
+    ): MomentDetail =
+        UiFixtures
+            .momentDetail(id = id, name = "Moment $id")
+            .copy(happenedAt = OffsetDateTime.parse(happenedAt), createdAt = OffsetDateTime.parse(happenedAt))
 
     private fun viewModel(
         collections: FakeCollectionsService = FakeCollectionsService(),
-        writes: FakePebbleWriteService = FakePebbleWriteService(),
+        moments: FakeMomentReadService = FakeMomentReadService(),
+        writes: FakeMomentWriteService = FakeMomentWriteService(),
         refs: FakeReferenceDataService = FakeReferenceDataService(),
-    ) = CollectionDetailViewModel(collections, writes, refs)
+    ) = CollectionDetailViewModel(collections, moments, writes, refs)
 
     @Test
     fun `starts Loading and resolves to Content`() =
         runTest {
             val service =
-                FakeCollectionsService(
-                    collection = collection("a"),
-                    pebbles = listOf(pebble("p1", "2026-09-19T12:00:00Z")),
-                )
-            val viewModel = viewModel(collections = service)
+                FakeCollectionsService(collection = collection("a"))
+            val moments = FakeMomentReadService(inCollection = listOf(moment("p1", "2026-09-19T12:00:00Z")))
+            val viewModel = viewModel(collections = service, moments = moments)
 
             viewModel.start("a")
             assertEquals(CollectionDetailUiState.Loading, viewModel.uiState.value)
@@ -62,7 +59,7 @@ class CollectionDetailViewModelTest {
 
             val state = viewModel.uiState.value as CollectionDetailUiState.Content
             assertEquals("a", state.collection.id)
-            assertEquals(listOf("p1"), state.pebbles.map { it.id })
+            assertEquals(moments.inCollection.map { it.toPathMoment() }, state.moments)
         }
 
     @Test
@@ -105,19 +102,20 @@ class CollectionDetailViewModelTest {
      * property of the state value now.
      */
     @Test
-    fun `Content groups the pebbles by month, newest first`() =
+    fun `Content groups the moments by month, newest first`() =
         runTest {
             val service =
-                FakeCollectionsService(
-                    collection = collection("a"),
-                    pebbles =
+                FakeCollectionsService(collection = collection("a"))
+            val moments =
+                FakeMomentReadService(
+                    inCollection =
                         listOf(
-                            pebble("sep", "2026-09-19T12:00:00Z"),
-                            pebble("aug", "2026-08-02T12:00:00Z"),
-                            pebble("aug2", "2026-08-01T12:00:00Z"),
+                            moment("sep", "2026-09-19T12:00:00Z"),
+                            moment("aug", "2026-08-02T12:00:00Z"),
+                            moment("aug2", "2026-08-01T12:00:00Z"),
                         ),
                 )
-            val viewModel = viewModel(collections = service)
+            val viewModel = viewModel(collections = service, moments = moments)
             viewModel.start("a")
             advanceUntilIdle()
 
@@ -138,11 +136,9 @@ class CollectionDetailViewModelTest {
     fun `the derived groups are the same instance on every read`() =
         runTest {
             val service =
-                FakeCollectionsService(
-                    collection = collection("a"),
-                    pebbles = listOf(pebble("p1", "2026-09-19T12:00:00Z")),
-                )
-            val viewModel = viewModel(collections = service)
+                FakeCollectionsService(collection = collection("a"))
+            val moments = FakeMomentReadService(inCollection = listOf(moment("p1", "2026-09-19T12:00:00Z")))
+            val viewModel = viewModel(collections = service, moments = moments)
             viewModel.start("a")
             advanceUntilIdle()
 
@@ -150,27 +146,25 @@ class CollectionDetailViewModelTest {
             assertSame(state.groups, state.groups)
         }
 
-    // MARK: - Pebble delete
+    // MARK: - Delete
 
     @Test
-    fun `confirmDelete deletes the pebble and reloads`() =
+    fun `confirmDelete deletes the moment and reloads`() =
         runTest {
             val service =
-                FakeCollectionsService(
-                    collection = collection("a"),
-                    pebbles = listOf(pebble("p1", "2026-09-19T12:00:00Z")),
-                )
-            val writes = FakePebbleWriteService()
+                FakeCollectionsService(collection = collection("a"))
+            val moments = FakeMomentReadService(inCollection = listOf(moment("p1", "2026-09-19T12:00:00Z")))
+            val writes = FakeMomentWriteService()
             val refs = FakeReferenceDataService()
-            val viewModel = viewModel(collections = service, writes = writes, refs = refs)
+            val viewModel = viewModel(collections = service, moments = moments, writes = writes, refs = refs)
             viewModel.start("a")
             advanceUntilIdle()
 
-            viewModel.requestDelete(pebble("p1", "2026-09-19T12:00:00Z"))
+            viewModel.requestDelete(moment("p1", "2026-09-19T12:00:00Z").toPathMoment())
             viewModel.confirmDelete()
             advanceUntilIdle()
 
-            assertEquals(listOf("p1"), writes.deletedPebbleIds)
+            assertEquals(listOf("p1"), writes.deletedMoments)
             assertEquals(1, refs.refreshCollectionsCount)
             assertEquals(2, service.loadCollectionCount)
             assertNull(viewModel.covers.value.pendingDeletion)
@@ -180,17 +174,15 @@ class CollectionDetailViewModelTest {
     fun `a failed delete reports and leaves the list alone`() =
         runTest {
             val service =
-                FakeCollectionsService(
-                    collection = collection("a"),
-                    pebbles = listOf(pebble("p1", "2026-09-19T12:00:00Z")),
-                )
-            val writes = FakePebbleWriteService()
-            val viewModel = viewModel(collections = service, writes = writes)
+                FakeCollectionsService(collection = collection("a"))
+            val moments = FakeMomentReadService(inCollection = listOf(moment("p1", "2026-09-19T12:00:00Z")))
+            val writes = FakeMomentWriteService()
+            val viewModel = viewModel(collections = service, moments = moments, writes = writes)
             viewModel.start("a")
             advanceUntilIdle()
 
             writes.failNext = IOException("offline")
-            viewModel.requestDelete(pebble("p1", "2026-09-19T12:00:00Z"))
+            viewModel.requestDelete(moment("p1", "2026-09-19T12:00:00Z").toPathMoment())
             viewModel.confirmDelete()
             advanceUntilIdle()
 

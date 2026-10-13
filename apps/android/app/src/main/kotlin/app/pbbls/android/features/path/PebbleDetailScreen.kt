@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -18,6 +20,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,31 +42,33 @@ import app.pbbls.android.features.path.read.PebblePrivacyBadge
 import app.pbbls.android.features.path.read.PebbleReadView
 
 /**
- * Pebble detail (#852, ports iOS `PebbleDetailSheet`, D7): a docked sheet on
- * phones and a pane beside Path on large screens (#940). The scene decides
- * which, and owns dismissal. Loads a [PebbleDetail] via
- * [LocalPebbleDetailService], owns its loading/error/retry state, hosts the
- * top bar, and delegates the body to the pure [PebbleReadView]. System back is
+ * The moment read page (#852, ports iOS `PebbleDetailSheet`, D7): a docked
+ * sheet on phones and a pane beside Path on large screens (#940). The scene
+ * decides which, and owns dismissal. Loads a `MomentDetail` through
+ * [PebbleDetailViewModel], owns its loading/error/retry state, hosts the top
+ * bar, and delegates the body to the pure [PebbleReadView]. System back is
  * the scene's own (the sheet's window, or `NavDisplay` beside Path) — this
  * screen has no in-flight write to protect, so it needs no `BackHandler`.
  *
- * [onEditRequested] opens the `EditPebble` entry; returning from it is picked
- * up by [PebbleDetailViewModel.onResumed] rather than a callback.
+ * The ⋮ menu (R7) opens Edit moment ([onEditMoment]) and, when the moment
+ * carries your pebble, Edit pebble ([onEditPebble]); returning from either is
+ * picked up by [PebbleDetailViewModel.onResumed] rather than a callback.
  */
 @Composable
 fun PebbleDetailScreen(
-    pebbleId: String,
+    momentId: String,
     modifier: Modifier = Modifier,
-    onEditRequested: () -> Unit = {},
+    onEditMoment: () -> Unit = {},
+    onEditPebble: () -> Unit = {},
     viewModel: PebbleDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val palettes = LocalEmotionPaletteService.current
     val context = LocalContext.current
 
-    LaunchedEffect(pebbleId) { viewModel.start(pebbleId) }
+    LaunchedEffect(momentId) { viewModel.start(momentId) }
 
-    // Returning from EditPebble must re-read the pebble: the ViewModel is
+    // Returning from an edit entry must re-read the moment: the ViewModel is
     // scoped to the back stack entry, which survives that round trip.
     LifecycleResumeEffect(viewModel) {
         viewModel.onResumed()
@@ -69,18 +76,20 @@ fun PebbleDetailScreen(
     }
 
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
-    val palette = detail?.let { palettes.palette(it.emotion.id) }
+    val pebble = detail?.pebble
+    val palette = pebble?.emotion?.id?.let(palettes::palette)
 
     // Share is only offered for public pebbles (M51) — anyone with the /p
     // link can open a public pebble, so sharing a secret/connections one
-    // would leak it past its intended audience.
+    // would leak it past its intended audience. The link carries the PEBBLE
+    // id: since the split a moment id is not its pebble's id (A-9).
     val onShare: (() -> Unit)? =
-        if (detail?.visibility == Visibility.PUBLIC) {
+        if (pebble?.visibility == Visibility.PUBLIC) {
             {
                 val send =
                     Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, SharedPebbleLink.url(pebbleId))
+                        putExtra(Intent.EXTRA_TEXT, SharedPebbleLink.url(pebble.id))
                     }
                 context.startActivity(Intent.createChooser(send, null))
             }
@@ -91,7 +100,8 @@ fun PebbleDetailScreen(
     PebbleDetailContent(
         uiState = uiState,
         palette = palette,
-        onEdit = onEditRequested,
+        onEditMoment = onEditMoment,
+        onEditPebble = onEditPebble,
         onShare = onShare,
         onRetry = viewModel::retry,
         modifier = modifier,
@@ -99,7 +109,7 @@ fun PebbleDetailScreen(
 }
 
 /**
- * One pebble without its ViewModel (#940): the top bar and the three states.
+ * One moment without its ViewModel (#940): the top bar and the three states.
  * [PebbleDetailScreen] wires it; screenshots drive it.
  *
  * It draws no page background, so it takes the sheet's container colour on a
@@ -113,10 +123,13 @@ fun PebbleDetailScreen(
 fun PebbleDetailContent(
     uiState: PebbleDetailUiState,
     palette: EmotionPalette?,
-    onEdit: () -> Unit,
+    onEditMoment: () -> Unit,
+    onEditPebble: () -> Unit,
     onShare: (() -> Unit)?,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Opens the ⋮ menu on first composition; for previews of the open menu only. */
+    initialMenuOpen: Boolean = false,
 ) {
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
 
@@ -126,10 +139,13 @@ fun PebbleDetailContent(
             .readableWidth(),
     ) {
         DetailTopBar(
-            visibility = detail?.visibility,
-            editEnabled = detail != null,
-            onEdit = onEdit,
+            visibility = detail?.pebble?.visibility,
+            menuEnabled = detail != null,
+            hasPebble = detail?.pebble != null,
+            onEditMoment = onEditMoment,
+            onEditPebble = onEditPebble,
             onShare = onShare,
+            initialMenuOpen = initialMenuOpen,
         )
         // Exhaustive with no `else`: a new PebbleDetailUiState case must render.
         when (val state = uiState) {
@@ -151,17 +167,21 @@ fun PebbleDetailContent(
 
 /**
  * Detail top bar: an optional privacy badge once the pebble is loaded, an
- * optional share button (public pebbles only, M51), and a trailing Edit button
- * (enabled only after load). No back arrow (#940): on a phone it is a sheet,
+ * optional share button (public pebbles only, M51), and a trailing ⋮ menu
+ * (enabled only after load) with Edit moment and, with a pebble, Edit pebble
+ * (R7). No back arrow (#940): on a phone it is a sheet,
  * dismissed by drag, scrim or system back; on a large screen Path is beside it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DetailTopBar(
     visibility: Visibility?,
-    editEnabled: Boolean,
-    onEdit: () -> Unit,
+    menuEnabled: Boolean,
+    hasPebble: Boolean,
+    onEditMoment: () -> Unit,
+    onEditPebble: () -> Unit,
     onShare: (() -> Unit)?,
+    initialMenuOpen: Boolean,
 ) {
     // A stock top app bar (#854) on a clear container, so it sits on whatever
     // hosts the page (the sheet's container, or surface in the pane) with no seam.
@@ -176,8 +196,33 @@ private fun DetailTopBar(
                     )
                 }
             }
-            TextButton(onClick = onEdit, enabled = editEnabled) {
-                Text(stringResource(R.string.pebble_detail_edit))
+            var menuOpen by remember { mutableStateOf(initialMenuOpen) }
+            Box {
+                IconButton(onClick = { menuOpen = true }, enabled = menuEnabled) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_more_vert),
+                        contentDescription = stringResource(R.string.more_actions_a11y),
+                    )
+                }
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.edit_moment)) },
+                        onClick = {
+                            menuOpen = false
+                            onEditMoment()
+                        },
+                    )
+                    if (hasPebble) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.edit_pebble_title)) },
+                            onClick = {
+                                menuOpen = false
+                                onEditPebble()
+                            },
+                        )
+                    }
+                    // Part 4 adds Delete here.
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),

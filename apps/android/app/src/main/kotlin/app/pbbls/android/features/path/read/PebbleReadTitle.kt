@@ -11,12 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.ui.MomentNameText
 import app.pbbls.android.features.path.PebbleReadDateFormat
 import java.time.OffsetDateTime
 import java.time.ZoneId
 
 /**
- * Detail title block — ports iOS `PebbleReadTitle.swift`: a centered name in
+ * Detail title block — ports iOS `PebbleReadTitle.swift`: a centered name (or
+ * "Untitled" in italic for a photo-only moment, R3) in
  * `headlineSmall` (Ysabeau, 24 sp) over a localized date/time line in
  * `labelSmall`, sentence case (#853 dropped the iOS uppercase transform).
  *
@@ -26,7 +28,7 @@ import java.time.ZoneId
  */
 @Composable
 fun PebbleReadTitle(
-    name: String,
+    name: String?,
     happenedAt: OffsetDateTime,
     modifier: Modifier = Modifier,
 ) {
@@ -37,8 +39,8 @@ fun PebbleReadTitle(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Text(
-            name,
+        MomentNameText(
+            name = name,
             style = MaterialTheme.typography.headlineSmall,
             color = colors.onSurface,
             textAlign = TextAlign.Center,

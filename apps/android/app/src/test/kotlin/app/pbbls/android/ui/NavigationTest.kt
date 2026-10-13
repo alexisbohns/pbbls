@@ -23,13 +23,13 @@ import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeCollectionsService
 import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.FakeLogsService
-import app.pbbls.android.testing.FakePathService
-import app.pbbls.android.testing.FakePebbleDetailService
+import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakePebbleDraftsService
 import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.UiFixtures
 import dagger.hilt.android.testing.HiltAndroidTest
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.OffsetDateTime
 import javax.inject.Inject
@@ -48,9 +48,7 @@ import javax.inject.Inject
  */
 @HiltAndroidTest
 class NavigationTest : AppUiTest() {
-    @Inject lateinit var path: FakePathService
-
-    @Inject lateinit var pebbleDetail: FakePebbleDetailService
+    @Inject lateinit var moments: FakeMomentReadService
 
     @Inject lateinit var drafts: FakePebbleDraftsService
 
@@ -89,15 +87,37 @@ class NavigationTest : AppUiTest() {
     // ---- Path ----
 
     @Test
-    fun `Path opens a pebble's detail, and the detail opens its edit form`() {
-        path.pebbles = listOf(UiFixtures.pebble())
-        pebbleDetail.detail = UiFixtures.pebbleDetail()
+    fun `Path opens a moment, and its menu opens Edit moment and Edit pebble`() {
+        moments.path = listOf(UiFixtures.pathMoment(happenedAt = OffsetDateTime.now()))
+        moments.moments = mapOf("moment-1" to UiFixtures.momentDetail())
         signedIn()
 
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performClick()
-        onText(R.string.pebble_detail_edit).assertIsDisplayed().performClick()
+        onDescription(R.string.more_actions_a11y).assertIsDisplayed().performClick()
+        onText(R.string.edit_moment).performClick()
+        onText(R.string.edit_moment).assertIsDisplayed()
+        onText(R.string.create_name_placeholder).assertIsDisplayed()
 
+        pressBack()
+
+        onDescription(R.string.more_actions_a11y).performClick()
+        onText(R.string.edit_pebble_title).performClick()
         onText(R.string.edit_pebble_title).assertIsDisplayed()
+        onText(R.string.create_mood_header).assertIsDisplayed()
+    }
+
+    /** A moment without your pebble has nothing for Edit pebble to open (R7). */
+    @Test
+    fun `a bare moment's menu offers Edit moment only`() {
+        moments.path = listOf(UiFixtures.pathMoment(pebble = null, happenedAt = OffsetDateTime.now()))
+        moments.moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = null))
+        signedIn()
+
+        compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performClick()
+        onDescription(R.string.more_actions_a11y).performClick()
+
+        onText(R.string.edit_moment).assertIsDisplayed()
+        onText(R.string.edit_pebble_title).assertDoesNotExist()
     }
 
     @Test
@@ -111,8 +131,8 @@ class NavigationTest : AppUiTest() {
 
     @Test
     fun `long-pressing new pebble opens the all-at-once composer`() {
-        // A pebble this week, so the empty week's own "New pebble" button is not on screen too.
-        path.pebbles = listOf(UiFixtures.pebble())
+        // A moment this week, so the empty week's own "New pebble" button is not on screen too.
+        moments.path = listOf(UiFixtures.pathMoment(happenedAt = OffsetDateTime.now()))
         signedIn()
 
         compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).performTouchInput { longClick() }
@@ -226,6 +246,22 @@ class NavigationTest : AppUiTest() {
         onText(R.string.soul_edit_title).assertIsDisplayed()
     }
 
+    /** Soul rows open the moment's read page, not the edit form (R9). */
+    @Test
+    fun `a soul's moment row opens the read page`() {
+        souls.souls = listOf(UiFixtures.soul(name = "Mo"))
+        moments.withSoul = listOf(UiFixtures.momentDetail(name = "Coffee with Mo"))
+        moments.moments = mapOf("moment-1" to UiFixtures.momentDetail(name = "Coffee with Mo"))
+        signedIn()
+        onTab(R.string.tab_people).performClick()
+        compose.onNodeWithText("Mo").performClick()
+
+        compose.onNodeWithText("Coffee with Mo").performClick()
+
+        onDescription(R.string.more_actions_a11y).assertIsDisplayed()
+        assertEquals(listOf("moment-1"), moments.loadedMomentIds)
+    }
+
     @Test
     fun `People opens the soul form`() {
         signedIn()
@@ -249,6 +285,22 @@ class NavigationTest : AppUiTest() {
         onText(R.string.pebble_detail_edit).performClick()
 
         onText(R.string.collection_edit_title).assertIsDisplayed()
+    }
+
+    /** Collection rows open the moment's read page, not the edit form (R9). */
+    @Test
+    fun `a collection's moment row opens the read page`() {
+        collections.collections = listOf(UiFixtures.collection(name = "Summer"))
+        moments.inCollection = listOf(UiFixtures.momentDetail(name = "Beach day"))
+        moments.moments = mapOf("moment-1" to UiFixtures.momentDetail(name = "Beach day"))
+        signedIn()
+        onTab(R.string.tab_collections).performClick()
+        compose.onNodeWithText("Summer").performClick()
+
+        compose.onNodeWithText("Beach day").performClick()
+
+        onDescription(R.string.more_actions_a11y).assertIsDisplayed()
+        assertEquals(listOf("moment-1"), moments.loadedMomentIds)
     }
 
     @Test

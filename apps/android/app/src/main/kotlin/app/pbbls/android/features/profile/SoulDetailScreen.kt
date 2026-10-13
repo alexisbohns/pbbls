@@ -39,7 +39,7 @@ import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
@@ -47,16 +47,16 @@ import app.pbbls.android.core.ui.PebbleRow
 
 /**
  * Pushed detail for one soul — ports iOS `SoulDetailView.swift`: compact
- * header (56dp glyph + name + live pebble count), the pebbles tagged with the
- * soul on the shared [PebbleRow] (tap → the `EditPebble` entry, long-press →
- * `delete_pebble` with confirm), and an Edit top-bar action opening
+ * header (56dp glyph + name + live pebble count), the moments whose pebble is
+ * tagged with the soul on the shared [PebbleRow] (tap → the moment's read page,
+ * R9; long-press → `delete_moment` with confirm), and an Edit top-bar action opening
  * [SoulFormScreen] as a cover (D9 surface swap). The NavHost passes only the
  * soul id, so [SoulDetailViewModel] fetches the soul itself (iOS receives the
  * row from the list; deviation noted in the plan).
  *
- * @param onOpenPebble Opens the pebble editor. It is path's screen, so it is
- *   reached through navigation rather than composed here (#914); this screen's
- *   resume refresh re-reads the pebbles when it pops.
+ * @param onOpenMoment Opens the moment's read page (R9). It is path's screen,
+ *   so it is reached through navigation rather than composed here (#914); this
+ *   screen's resume refresh re-reads the list when it pops.
  * @param showBack False beside its list on a large screen (#940): the list is
  *   the way back, and system back still pops.
  */
@@ -65,7 +65,7 @@ fun SoulDetailScreen(
     soulId: String,
     onBack: () -> Unit,
     onEditSoul: () -> Unit,
-    onOpenPebble: (String) -> Unit,
+    onOpenMoment: (String) -> Unit,
     modifier: Modifier = Modifier,
     showBack: Boolean = true,
     viewModel: SoulDetailViewModel = hiltViewModel(),
@@ -90,21 +90,23 @@ fun SoulDetailScreen(
         onEditSoul = onEditSoul,
         showBack = showBack,
         onRetry = viewModel::retry,
-        onOpenPebble = onOpenPebble,
+        onOpenMoment = onOpenMoment,
         onDeletePebble = viewModel::requestDelete,
-        paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
+        paletteFor = { moment -> moment.pebble?.emotion?.let { palettes.palette(it.id) } },
         modifier = modifier,
     )
 
     covers.pendingDeletion?.let { target ->
         ConfirmDeleteDialog(
-            title = stringResource(R.string.pebble_delete_confirm_title, target.name),
+            title = stringResource(R.string.pebble_delete_confirm_title, target.name ?: stringResource(R.string.moment_untitled)),
             message = stringResource(R.string.pebble_delete_confirm_message),
             onConfirm = viewModel::confirmDelete,
             onDismiss = viewModel::cancelDelete,
         )
     }
-    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
+    if (covers.didDeleteFail) {
+        DeleteErrorDialog(message = stringResource(R.string.moment_delete_error), onDismiss = viewModel::dismissDeleteError)
+    }
 }
 
 /**
@@ -121,9 +123,9 @@ fun SoulDetailContent(
     onBack: () -> Unit,
     onEditSoul: () -> Unit,
     onRetry: () -> Unit,
-    onOpenPebble: (String) -> Unit,
-    onDeletePebble: (Pebble) -> Unit,
-    paletteFor: (Pebble) -> EmotionPalette?,
+    onOpenMoment: (String) -> Unit,
+    onDeletePebble: (PathMoment) -> Unit,
+    paletteFor: (PathMoment) -> EmotionPalette?,
     modifier: Modifier = Modifier,
     showBack: Boolean = true,
 ) {
@@ -186,8 +188,8 @@ fun SoulDetailContent(
 
             is SoulDetailUiState.Content ->
                 Column(Modifier.fillMaxSize()) {
-                    SoulHeader(soul = state.soul, pebbleCount = state.pebbles.size)
-                    if (state.pebbles.isEmpty()) {
+                    SoulHeader(soul = state.soul, pebbleCount = state.moments.size)
+                    if (state.moments.isEmpty()) {
                         ProfileEmptyState(
                             title = stringResource(R.string.soul_detail_empty_title),
                             message = stringResource(R.string.soul_detail_empty_message),
@@ -203,13 +205,13 @@ fun SoulDetailContent(
                         ) {
                             PebblesListSection(
                                 rows =
-                                    state.pebbles.map { pebble ->
+                                    state.moments.map { moment ->
                                         {
                                             PebbleRow(
-                                                pebble = pebble,
-                                                palette = paletteFor(pebble),
-                                                onTap = { onOpenPebble(pebble.id) },
-                                                onDelete = { onDeletePebble(pebble) },
+                                                moment = moment,
+                                                palette = paletteFor(moment),
+                                                onTap = { onOpenMoment(moment.id) },
+                                                onDelete = { onDeletePebble(moment) },
                                             )
                                         }
                                     },

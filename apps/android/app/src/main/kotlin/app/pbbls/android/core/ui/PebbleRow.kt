@@ -28,7 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.ui.render.PebbleThumbnail
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -36,23 +36,22 @@ import java.time.format.FormatStyle
 import java.util.Locale
 
 /**
- * Shared list row for a pebble — ports iOS `Components/PebbleRow.swift`, the
+ * Shared list row for a moment — ports iOS `Components/PebbleRow.swift`, the
  * thumbnail + name + date treatment the souls/collections detail lists share
  * (the timeline keeps its richer [app.pbbls.android.features.path.components.PathPebbleRow]).
  *
  * The row owns the long-press Delete menu (M39 D8 idiom) so every list using
  * it gets the affordance for free; the parent owns the destructive flow —
- * confirmation dialog, error alert, the `delete_pebble` RPC, and the reload.
+ * confirmation dialog, error alert, the `delete_moment` RPC, and the reload.
  *
  * [palette] is a parameter (not a service read) so screenshot previews can
- * drive the row. When `render_svg` is null the thumbnail falls back to the
- * outline silhouette (Android's established no-render treatment, richer than
- * iOS's neutral rounded rectangle — deviation noted in the port).
+ * drive the row. The thumbnail is the outline silhouette for the pebble's
+ * valence; a null name reads "Untitled" (R3).
  */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PebbleRow(
-    pebble: Pebble,
+    moment: PathMoment,
     palette: EmotionPalette?,
     onTap: () -> Unit,
     onDelete: () -> Unit,
@@ -62,8 +61,8 @@ fun PebbleRow(
     var menuExpanded by remember { mutableStateOf(false) }
     val locale = Locale.getDefault()
     val dateText =
-        remember(pebble.happenedAt, locale) {
-            pebble.happenedAt
+        remember(moment.happenedAt, locale) {
+            moment.happenedAt
                 .atZoneSameInstant(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale))
         }
@@ -80,15 +79,16 @@ fun PebbleRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             PebbleThumbnail(
-                pebble = pebble,
+                valence = moment.valence,
                 palette = palette,
                 modifier = Modifier.size(40.dp),
             )
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = pebble.name,
+                MomentNameText(
+                    name = moment.name,
                     style = MaterialTheme.typography.bodyLarge,
                     color = colors.onSurface,
+                    maxLines = 1,
                 )
                 Text(
                     text = dateText,

@@ -41,7 +41,7 @@ import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.ui.PebbleRow
 import app.pbbls.android.features.profile.components.CollectionModeBadge
 import java.time.format.DateTimeFormatter
@@ -49,9 +49,10 @@ import java.util.Locale
 
 /**
  * Pushed detail for one collection — ports iOS `CollectionDetailView.swift`:
- * a subheader row (mode badge + live pebble count), the collection's pebbles
- * grouped by calendar month with locale-formatted headers (D14), tap →
- * the `EditPebble` entry, long-press → `delete_pebble` with confirm, and an
+ * a subheader row (mode badge + live pebble count), the moments whose pebble is
+ * in the collection, grouped by calendar month with locale-formatted headers
+ * (D14), tap → the moment's read page (R9), long-press → `delete_moment` with
+ * confirm, and an
  * Edit top-bar action opening [CollectionFormScreen] as a cover (D9 surface
  * swap). The NavHost passes only the collection id, so
  * [CollectionDetailViewModel] fetches the collection itself (same named
@@ -59,8 +60,8 @@ import java.util.Locale
  * locale-dependent header formatting lives in [CollectionDetailContent],
  * because only the view knows the active locale.
  *
- * @param onOpenPebble Opens the pebble editor through navigation, as on the
- *   soul detail (#914).
+ * @param onOpenMoment Opens the moment's read page through navigation, as on
+ *   the soul detail (#914, R9).
  * @param showBack False beside its list on a large screen (#940): the list is
  *   the way back, and system back still pops.
  */
@@ -69,7 +70,7 @@ fun CollectionDetailScreen(
     collectionId: String,
     onBack: () -> Unit,
     onEditCollection: () -> Unit,
-    onOpenPebble: (String) -> Unit,
+    onOpenMoment: (String) -> Unit,
     modifier: Modifier = Modifier,
     showBack: Boolean = true,
     viewModel: CollectionDetailViewModel = hiltViewModel(),
@@ -94,21 +95,23 @@ fun CollectionDetailScreen(
         onEditCollection = onEditCollection,
         showBack = showBack,
         onRetry = viewModel::retry,
-        onOpenPebble = onOpenPebble,
+        onOpenMoment = onOpenMoment,
         onDeletePebble = viewModel::requestDelete,
-        paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
+        paletteFor = { moment -> moment.pebble?.emotion?.let { palettes.palette(it.id) } },
         modifier = modifier,
     )
 
     covers.pendingDeletion?.let { target ->
         ConfirmDeleteDialog(
-            title = stringResource(R.string.pebble_delete_confirm_title, target.name),
+            title = stringResource(R.string.pebble_delete_confirm_title, target.name ?: stringResource(R.string.moment_untitled)),
             message = stringResource(R.string.pebble_delete_confirm_message),
             onConfirm = viewModel::confirmDelete,
             onDismiss = viewModel::cancelDelete,
         )
     }
-    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
+    if (covers.didDeleteFail) {
+        DeleteErrorDialog(message = stringResource(R.string.moment_delete_error), onDismiss = viewModel::dismissDeleteError)
+    }
 }
 
 /**
@@ -125,9 +128,9 @@ fun CollectionDetailContent(
     onBack: () -> Unit,
     onEditCollection: () -> Unit,
     onRetry: () -> Unit,
-    onOpenPebble: (String) -> Unit,
-    onDeletePebble: (Pebble) -> Unit,
-    paletteFor: (Pebble) -> EmotionPalette?,
+    onOpenMoment: (String) -> Unit,
+    onDeletePebble: (PathMoment) -> Unit,
+    paletteFor: (PathMoment) -> EmotionPalette?,
     modifier: Modifier = Modifier,
     showBack: Boolean = true,
 ) {
@@ -191,7 +194,7 @@ fun CollectionDetailContent(
                 }
 
             is CollectionDetailUiState.Content ->
-                if (state.pebbles.isEmpty()) {
+                if (state.moments.isEmpty()) {
                     ProfileEmptyState(
                         title = stringResource(R.string.soul_detail_empty_title),
                         message = stringResource(R.string.collection_detail_empty_message),
@@ -217,7 +220,7 @@ fun CollectionDetailContent(
                                             CollectionModeBadge(mode = state.collection.mode)
                                             Spacer(Modifier.weight(1f))
                                             Text(
-                                                text = pebbleCountLabel(state.pebbles.size),
+                                                text = pebbleCountLabel(state.moments.size),
                                                 style = MaterialTheme.typography.labelMediumEmphasized,
                                                 color = colors.onSurfaceVariant,
                                             )
@@ -229,13 +232,13 @@ fun CollectionDetailContent(
                             PebblesListSection(
                                 header = month.format(monthFormatter),
                                 rows =
-                                    monthPebbles.map { pebble ->
+                                    monthPebbles.map { moment ->
                                         {
                                             PebbleRow(
-                                                pebble = pebble,
-                                                palette = paletteFor(pebble),
-                                                onTap = { onOpenPebble(pebble.id) },
-                                                onDelete = { onDeletePebble(pebble) },
+                                                moment = moment,
+                                                palette = paletteFor(moment),
+                                                onTap = { onOpenMoment(moment.id) },
+                                                onDelete = { onDeletePebble(moment) },
                                             )
                                         }
                                     },
