@@ -46,7 +46,11 @@ struct PathPebbleRow: View {
             HStack(spacing: 12) {
                 thumbnail
                 VStack(alignment: .leading, spacing: 4) {
-                    MomentNameText(name: moment.name, color: nameColor, slantsUntitled: true)
+                    MomentNameText(
+                        name: moment.name,
+                        color: nameColor,
+                        untitledFont: .ysabeauSemiboldItalic(17)
+                    )
                         .font(.ysabeauSemibold(17))
                     Text(formattedWeekdayTime)
                         .font(.caption)

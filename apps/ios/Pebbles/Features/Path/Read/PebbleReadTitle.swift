@@ -18,7 +18,7 @@ struct PebbleReadTitle: View {
                 name: name,
                 color: nameColor ?? Color.system.foreground,
                 untitledColor: dateColor ?? Color.system.secondary,
-                slantsUntitled: true
+                untitledFont: .ysabeauSemiboldItalic(24)
             )
             .font(.custom("Ysabeau-SemiBold", size: 24))
             .multilineTextAlignment(.center)
