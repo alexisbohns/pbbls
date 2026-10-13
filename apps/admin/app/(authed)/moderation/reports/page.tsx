@@ -42,7 +42,7 @@ export default async function ContentReportsPage({
       <div>
         <h1 className="text-lg font-semibold">Content reports</h1>
         <p className="text-sm text-muted-foreground">
-          What people flagged on public pebbles, public profiles and Market glyphs.
+          What people flagged on shared moments, public profiles and Market glyphs.
         </p>
       </div>
 

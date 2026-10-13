@@ -29,7 +29,7 @@ function messageFor(code: string): string {
 /**
  * Close a report. `actioned` also performs the takedown, in the same
  * transaction as the verdict — so "the status says actioned" and "the content
- * is down" cannot drift apart. Since #833 the takedown is reversible: a pebble
+ * is down" cannot drift apart. Since #833 the takedown is reversible: a moment
  * or profile is hidden rather than having its own settings overwritten.
  */
 export async function resolveReport(
@@ -53,7 +53,7 @@ export async function resolveReport(
 
 /**
  * Hide or un-hide content directly, independent of any report — the appeal
- * path. Un-hiding is how a wrongly-removed pebble or profile comes back.
+ * path. Un-hiding is how a wrongly-removed moment or profile comes back.
  */
 export async function setContentHidden(
   targetKind: ReportTargetKind,

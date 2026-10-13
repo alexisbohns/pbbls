@@ -1,7 +1,11 @@
 // apps/admin/lib/moderation/types.ts
 
-/** Target kinds a report can point at — mirrors the SQL CHECK on content_reports. */
-export type ReportTargetKind = "pebble" | "profile" | "glyph"
+/**
+ * Target kinds a report can point at — mirrors the SQL CHECK on content_reports.
+ * Since the moments/pebbles split (#1046) a report targets the moment, what
+ * happened, not one person's pebble on it.
+ */
+export type ReportTargetKind = "moment" | "profile" | "glyph"
 
 export type ReportStatus = "open" | "actioned" | "dismissed"
 
@@ -41,12 +45,16 @@ export type TargetSnapshot = {
   display_name?: string | null
 }
 
-/** Live content beside the snapshot. The two disagreeing is the evidence. */
+/**
+ * Live content beside the snapshot. The two disagreeing is the evidence.
+ * A moment carries `hidden` (moderation flag) and `visibility` (the widest
+ * grade of any pebble on it, since the moment itself has none).
+ */
 export type TargetLive = TargetSnapshot & {
   visibility?: string | null
+  hidden?: boolean | null
   public_profile?: boolean | null
   listed?: boolean | null
-  hidden_at?: string | null
 }
 
 /**
@@ -68,7 +76,7 @@ export type ContentReport = {
   target_live: TargetLive | null
   /** The owner deleted the reported content themselves — self-remediation. */
   target_missing: boolean
-  /** Separates one bad pebble from a bad account. */
+  /** Separates one bad moment from a bad account. */
   open_reports_against_target: number
   status: ReportStatus
   resolution_note: string | null
