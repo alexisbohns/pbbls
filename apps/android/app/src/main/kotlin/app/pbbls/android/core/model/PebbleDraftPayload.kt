@@ -130,20 +130,6 @@ data class PebbleDraftPayload(
 }
 
 /**
- * Ids the composer can verify synchronously from `ReferenceDataService`. Souls
- * and collections are user-owned and deletable, so a draft can outlive them;
- * emotions and domains are seeded reference rows and pass through untouched.
- *
- * Glyphs are deliberately absent: usability is `can_use_glyph(id, user)` (own ∪
- * system ∪ entitled), the same predicate `create_pebble` enforces, and only the
- * server can answer it. `CreatePebbleScreen` verifies it after hydrating.
- */
-data class KnownDraftIds(
-    val soulIds: Set<String>,
-    val collectionIds: Set<String>,
-)
-
-/**
  * Draft payload → composer state, dropping references that no longer resolve
  * (design D7). Sanitizing here rather than at publish means a deleted soul costs
  * the user a chip, not an opaque foreign-key error at the worst possible moment.
