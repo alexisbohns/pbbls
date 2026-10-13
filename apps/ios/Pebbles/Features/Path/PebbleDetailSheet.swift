@@ -18,12 +18,14 @@ struct PebbleDetailSheet: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
+    @Environment(CompleteDraftStore.self) private var completeDrafts
     @Environment(\.dismiss) private var dismiss
 
     @State private var detail: MomentDetail?
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var isPresentingEdit = false
+    @State private var isPresentingComplete = false
     @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
     @State private var isDeleting = false
@@ -82,6 +84,17 @@ struct PebbleDetailSheet: View {
                 onPebbleUpdated?()
             })
         }
+        .fullScreenCover(isPresented: $isPresentingComplete) {
+            CompleteFlowView(
+                momentId: momentId,
+                momentName: detail?.name,
+                onCompleted: { _ in
+                    // In place, behind the success screen.
+                    Task { await load(showsSpinner: false) }
+                    onPebbleUpdated?()
+                }
+            )
+        }
         .momentDeleteDialog(target: $pendingDeletion) { target, option in
             Task { await delete(option, on: target) }
         }
@@ -104,7 +117,9 @@ struct PebbleDetailSheet: View {
         isDeleting = true
         defer { isDeleting = false }
         do {
-            try await MomentDeletion.perform(option, on: target, client: supabase.client)
+            try await MomentDeletion.perform(
+                option, on: target, client: supabase.client, drafts: completeDrafts
+            )
             onPebbleUpdated?()
             if target.closesReadPage(after: option) {
                 dismiss()
@@ -131,7 +146,11 @@ struct PebbleDetailSheet: View {
         } else if let detail {
             // Look up the pebble's emotion palette so the whole read page tints
             // to it (#605). A cache miss (nil) leaves the page on system chrome.
-            PebbleReadView(detail: detail, palette: detail.pebble.flatMap { palettes.palette(for: $0.emotion.id) })
+            PebbleReadView(
+                detail: detail,
+                palette: detail.pebble.flatMap { palettes.palette(for: $0.emotion.id) },
+                onComplete: { isPresentingComplete = true }
+            )
         }
     }
 
@@ -158,4 +177,5 @@ struct PebbleDetailSheet: View {
         .environment(ReferenceDataService(client: supabase.client))
         .environment(EmotionPaletteService(client: supabase.client))
         .environment(SnapURLCache(client: supabase.client))
+        .environment(CompleteDraftStore())
 }

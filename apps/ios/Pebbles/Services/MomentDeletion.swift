@@ -6,8 +6,14 @@ import Supabase
 /// best-effort (the orphan sweep is the backstop).
 @MainActor
 enum MomentDeletion {
-    static func deleteMoment(_ momentId: UUID, client: SupabaseClient) async throws {
+    /// Also forgets the moment's half-finished Complete flow (A3).
+    static func deleteMoment(
+        _ momentId: UUID,
+        client: SupabaseClient,
+        drafts: CompleteDraftStore? = nil
+    ) async throws {
         let paths = try await MomentsService(client: client).deleteMoment(id: momentId)
+        drafts?.clear(momentId: momentId)
         let repo = PebbleSnapRepository(client: client)
         for path in paths {
             await repo.deleteFiles(storagePrefix: path)

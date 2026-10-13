@@ -61,14 +61,15 @@ extension MomentDeletion {
     static func perform(
         _ option: MomentDeleteOption,
         on target: MomentDeleteTarget,
-        client: SupabaseClient
+        client: SupabaseClient,
+        drafts: CompleteDraftStore? = nil
     ) async throws {
         switch option {
         case .pebbleKeepMoment:
             guard let pebbleId = target.pebbleId else { return }
             try await deletePebble(pebbleId, client: client)
         case .moment:
-            try await deleteMoment(target.momentId, client: client)
+            try await deleteMoment(target.momentId, client: client, drafts: drafts)
         }
     }
 }
