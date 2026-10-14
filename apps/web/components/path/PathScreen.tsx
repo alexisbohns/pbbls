@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Moment, Soul } from "@/lib/types"
@@ -12,6 +13,7 @@ import { PebblePeek } from "@/components/path/PebblePeek"
 import { cn } from "@/lib/utils"
 import {
   buildWeekRollEntries,
+  focusKeyFor,
   isoWeekKey,
   isoWeekNumber,
   isoWeekStart,
@@ -23,6 +25,11 @@ type PathScreenProps = {
   moments: Moment[]
   souls: Soul[]
   loading: boolean
+  /**
+   * `?focus=<momentId>` (R14): open on the week of that moment once the store
+   * holds it, then drop the parameter. Null or absent: today's week.
+   */
+  focusMomentId?: string | null
 }
 
 /**
@@ -39,8 +46,9 @@ function closestEntry(entries: WeekRollEntry[], preferred: Date): WeekRollEntry 
   }, entries[0])
 }
 
-export function PathScreen({ moments, souls, loading }: PathScreenProps) {
+export function PathScreen({ moments, souls, loading, focusMomentId = null }: PathScreenProps) {
   const t = useTranslations("path")
+  const router = useRouter()
   // today is frozen at mount; the failure mode (user leaves the tab open past
   // midnight) is acceptable — navigation back to /path remounts the component.
   const today = useMemo(() => new Date(), [])
@@ -53,6 +61,25 @@ export function PathScreen({ moments, souls, loading }: PathScreenProps) {
   const [focusedKey, setFocusedKey] = useState<string>(() => isoWeekKey(today))
   // The read page in the peek, by MOMENT id (#1050).
   const [selectedMomentId, setSelectedMomentId] = useState<string | null>(null)
+
+  // R14: a `?focus=` moment pages to its week once, as soon as the store holds
+  // it (a capture's reload may land after the first render). Adjusted during
+  // render rather than in an effect, as the focused key above is; nothing
+  // happens while the moment is absent. The URL is cleaned in the effect
+  // below, which re-arms the focus for the next `?focus=`.
+  const [appliedFocus, setAppliedFocus] = useState<string | null>(null)
+  if (focusMomentId === null && appliedFocus !== null) {
+    setAppliedFocus(null)
+  } else if (focusMomentId !== null && focusMomentId !== appliedFocus) {
+    const key = focusKeyFor(moments, focusMomentId)
+    if (key !== null) {
+      setAppliedFocus(focusMomentId)
+      setFocusedKey(key)
+    }
+  }
+  useEffect(() => {
+    if (focusMomentId !== null && focusMomentId === appliedFocus) router.replace("/path")
+  }, [focusMomentId, appliedFocus, router])
 
   const focusedEntry = entries.find((e) => e.weekStartIso === focusedKey)
     ?? (entries.length > 0 ? closestEntry(entries, isoWeekStart(today)) : undefined)

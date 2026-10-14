@@ -56,6 +56,19 @@ export function weekIndex(entries: WeekRollEntry[], weekStart: Date): number {
 }
 
 /**
+ * The week to open the Path on for `?focus=<momentId>` (R14): the ISO key of
+ * the week the moment happened in, or null while it is not in `moments` (the
+ * store has not caught up yet, or the moment is gone).
+ */
+export function focusKeyFor(moments: readonly Moment[], id: string): string | null {
+  const target = id.toLowerCase()
+  const moment = moments.find((m) => m.id.toLowerCase() === target)
+  if (!moment) return null
+  const at = new Date(moment.happened_at)
+  return Number.isNaN(at.getTime()) ? null : isoWeekKey(at)
+}
+
+/**
  * Build the weeks roll: union of weeks that contain moments (bare or
  * completed) with the current week, sorted ascending by `weekStart`. Past
  * weeks have their moments sorted oldest-first; current and future weeks (if
