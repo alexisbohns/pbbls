@@ -749,20 +749,10 @@
       "picture": "Photo",
       "editSoulAria": "Modifier les âmes — {name}"
     },
-    "add": {
-      "soul": "Âme",
-      "soulAria": "Ajouter une âme",
-      "stack": "Pile",
-      "stackAria": "Ajouter à une collection",
-      "picture": "Photo",
-      "pictureAria": "Ajouter une photo"
-    },
     "editIntensityAria": "Modifier l'intensité et la valence",
-    "editAria": "Modifier le galet",
     "shareAria": "Partager ce galet",
     "shareCopied": "Lien copié",
     "edit": {
-      "toolbarTitle": "ÉDITION",
       "cancel": "Annuler",
       "save": "Enregistrer",
       "saving": "Enregistrement…",
@@ -787,7 +777,6 @@
       "pictureFilledAria": "Remplacer ou retirer la photo",
       "replacePhoto": "Remplacer",
       "removePhoto": "Retirer",
-      "errorToast": "Impossible d'enregistrer. Réessayez.",
       "uploading": "Envoi de la photo…",
       "uploadFailed": "Échec de l'envoi de la photo. Réessayez."
     }

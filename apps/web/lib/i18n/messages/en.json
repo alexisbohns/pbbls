@@ -749,20 +749,10 @@
       "picture": "Picture",
       "editSoulAria": "Edit souls — {name}"
     },
-    "add": {
-      "soul": "Soul",
-      "soulAria": "Add a soul",
-      "stack": "Stack",
-      "stackAria": "Add to a collection",
-      "picture": "Picture",
-      "pictureAria": "Add a picture"
-    },
     "editIntensityAria": "Edit intensity and valence",
-    "editAria": "Edit pebble",
     "shareAria": "Share this pebble",
     "shareCopied": "Link copied",
     "edit": {
-      "toolbarTitle": "EDITION",
       "cancel": "Cancel",
       "save": "Save",
       "saving": "Saving…",
@@ -787,7 +777,6 @@
       "pictureFilledAria": "Replace or remove the picture",
       "replacePhoto": "Replace",
       "removePhoto": "Remove",
-      "errorToast": "Couldn't save your edits. Try again.",
       "uploading": "Uploading picture…",
       "uploadFailed": "Picture upload failed. Try again."
     }
