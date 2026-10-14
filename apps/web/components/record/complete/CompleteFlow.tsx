@@ -69,13 +69,12 @@ export function CompleteFlow({ momentId, from }: CompleteFlowProps) {
 
   const alreadyCompleted = !loading && moment?.pebble != null && completion === null && !submitting
 
-  // A moment that already carries the caller's pebble has nothing to complete.
-  // The current read page is keyed by the pebble id; Part 3 points this at
-  // Edit pebble.
-  const existingPebbleId = alreadyCompleted ? moment?.pebble?.id : undefined
+  // A moment that already carries the caller's pebble has nothing to complete:
+  // its answers are edited in Edit pebble.
+  const completedMomentId = alreadyCompleted ? moment?.id : undefined
   useEffect(() => {
-    if (existingPebbleId) router.replace(`/pebble/${existingPebbleId}`)
-  }, [existingPebbleId, router])
+    if (completedMomentId) router.replace(`/pebble/${completedMomentId}/edit-pebble`)
+  }, [completedMomentId, router])
 
   // The valence fan wobbles nine artworks on first sight.
   useEffect(() => prewarmValenceArt(), [])
