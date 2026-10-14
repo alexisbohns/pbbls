@@ -283,13 +283,6 @@ export type Database = {
             referencedRelation: "pebbles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "collection_pebbles_pebble_id_fkey"
-            columns: ["pebble_id"]
-            isOneToOne: false
-            referencedRelation: "v_pebbles_full"
-            referencedColumns: ["id"]
-          },
         ]
       }
       collections: {
@@ -1315,13 +1308,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "pebble_cards_pebble_id_fkey"
-            columns: ["pebble_id"]
-            isOneToOne: false
-            referencedRelation: "v_pebbles_full"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "pebble_cards_species_id_fkey"
             columns: ["species_id"]
             isOneToOne: false
@@ -1372,13 +1358,6 @@ export type Database = {
             referencedRelation: "pebbles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "pebble_domains_pebble_id_fkey"
-            columns: ["pebble_id"]
-            isOneToOne: false
-            referencedRelation: "v_pebbles_full"
-            referencedColumns: ["id"]
-          },
         ]
       }
       pebble_souls: {
@@ -1400,13 +1379,6 @@ export type Database = {
             columns: ["pebble_id"]
             isOneToOne: false
             referencedRelation: "pebbles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pebble_souls_pebble_id_fkey"
-            columns: ["pebble_id"]
-            isOneToOne: false
-            referencedRelation: "v_pebbles_full"
             referencedColumns: ["id"]
           },
           {
@@ -2173,73 +2145,6 @@ export type Database = {
           },
         ]
       }
-      v_pebbles_full: {
-        Row: {
-          cards: Json | null
-          collections: Json | null
-          created_at: string | null
-          description: string | null
-          domains: Json | null
-          emotion: Json | null
-          emotion_id: string | null
-          glyph: Json | null
-          glyph_id: string | null
-          happened_at: string | null
-          id: string | null
-          intensity: number | null
-          name: string | null
-          positiveness: number | null
-          snaps: Json | null
-          souls: Json | null
-          updated_at: string | null
-          user_id: string | null
-          visibility: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pebbles_emotion_id_fkey"
-            columns: ["emotion_id"]
-            isOneToOne: false
-            referencedRelation: "emotions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pebbles_emotion_id_fkey"
-            columns: ["emotion_id"]
-            isOneToOne: false
-            referencedRelation: "v_analytics_emotion_share_weekly"
-            referencedColumns: ["emotion_id"]
-          },
-          {
-            foreignKeyName: "pebbles_emotion_id_fkey"
-            columns: ["emotion_id"]
-            isOneToOne: false
-            referencedRelation: "v_emotions_with_palette"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pebbles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "pebbles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "pebbles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
       v_ripple: {
         Row: {
           active_today: boolean | null
@@ -2471,7 +2376,6 @@ export type Database = {
         Returns: number
       }
       create_connection_invite: { Args: { p_rotate?: boolean }; Returns: Json }
-      create_pebble: { Args: { payload: Json }; Returns: string }
       delete_moment: { Args: { p_moment_id: string }; Returns: Json }
       delete_moment_media: { Args: { p_snap_id: string }; Returns: string }
       delete_pebble: { Args: { p_pebble_id: string }; Returns: undefined }
@@ -2675,20 +2579,6 @@ export type Database = {
           pebble: Json
         }[]
       }
-      path_pebbles: {
-        Args: never
-        Returns: {
-          created_at: string
-          emotion: Json
-          first_snap_path: string
-          happened_at: string
-          id: string
-          intensity: number
-          name: string
-          positiveness: number
-          render_svg: string
-        }[]
-      }
       preview_connection_invite: { Args: { p_token: string }; Returns: Json }
       publish_admin_glyph: {
         Args: {
@@ -2755,10 +2645,6 @@ export type Database = {
       }
       submit_glyph: { Args: { p_glyph_id: string }; Returns: Json }
       sync_achievement_catalog: { Args: never; Returns: undefined }
-      update_pebble: {
-        Args: { p_pebble_id: string; payload: Json }
-        Returns: undefined
-      }
       update_profile: {
         Args: { p_display_name?: string; p_glyph_id?: string }
         Returns: {
