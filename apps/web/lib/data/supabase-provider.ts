@@ -691,6 +691,14 @@ export class SupabaseProvider implements DataProvider {
     await this.reloadAfter("delete_moment")
   }
 
+  async removeSnapFiles(storagePaths: string[]): Promise<void> {
+    if (storagePaths.length === 0) return
+    const { error } = await this.supabase.storage
+      .from(PEBBLE_MEDIA_BUCKET)
+      .remove(storagePaths.flatMap((p) => [`${p}/original.jpg`, `${p}/thumb.jpg`]))
+    if (error) console.warn("[moments] snap file cleanup failed (orphan sweep is the backstop)", error)
+  }
+
   async deletePebble(pebbleId: string): Promise<void> {
     const result = await this.supabase.rpc("delete_pebble", { p_pebble_id: pebbleId })
     this.unwrap(result)

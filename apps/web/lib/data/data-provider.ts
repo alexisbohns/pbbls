@@ -211,6 +211,11 @@ export interface DataProvider {
   deleteMoment(momentId: string): Promise<void>
   /** Deletes the pebble only, keyed by the PEBBLE id; the moment stays, bare. */
   deletePebble(pebbleId: string): Promise<void>
+  /**
+   * Removes the files of snaps no row holds any more (a photo an edit detached,
+   * an upload a cancel discarded), best-effort: a failure is logged, never thrown.
+   */
+  removeSnapFiles(storagePaths: string[]): Promise<void>
 
   // Snap media: upload processes the file client-side (mirrors iOS
   // ImagePipeline) and writes original + thumb JPEGs to `pebbles-media`.

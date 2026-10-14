@@ -81,6 +81,12 @@ export function useMoments() {
     return provider.uploadSnap(file)
   }
 
+  /** Best-effort; never throws (see `DataProvider.removeSnapFiles`). */
+  const removeSnapFiles = async (storagePaths: string[]): Promise<void> => {
+    if (!provider) return
+    await provider.removeSnapFiles(storagePaths)
+  }
+
   return {
     moments: store.moments,
     loading,
@@ -89,5 +95,6 @@ export function useMoments() {
     deleteMoment,
     deletePebble,
     uploadSnap,
+    removeSnapFiles,
   }
 }
