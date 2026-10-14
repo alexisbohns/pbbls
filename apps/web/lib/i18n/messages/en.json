@@ -829,19 +829,14 @@
   },
   "record": {
     "flow": {
-      "aria": "Record a pebble, one question at a time",
       "back": "Back",
       "close": "Close",
       "stepOf": "Step {current} of {total}",
       "stepDone": "Done",
       "loading": "Loading…",
       "continue": "Continue",
-      "publish": "Publish",
       "skip": "Skip",
       "done": "Done",
-      "leaveTitle": "Leave this pebble?",
-      "leaveDescription": "It isn't recorded yet. Discard it, or keep going to finish it.",
-      "keepGoing": "Keep going",
       "discard": "Discard",
       "step": {
         "photoTitle": "Start with a picture",
@@ -872,7 +867,6 @@
         "fromPhoto": "Taken from your photo"
       },
       "name": {
-        "label": "Pebble name",
         "placeholder": "Name it"
       },
       "privacy": {
@@ -902,22 +896,9 @@
       "keepGoing": "Keep going",
       "charactersLeft": "{count} characters left"
     },
-    "draft": {
-      "publishFailed": "Couldn't save that pebble. Please try again.",
-      "needsDomain": "A pebble needs a part of life. Pick one, then try again.",
-      "restoreTitle": "Pick up where you left off?",
-      "restoreDescription": "We kept what you were writing on this device. Your photo isn't part of it, so you'll want to add that again.",
-      "restoreConfirm": "Restore it",
-      "restoreDiscard": "Start fresh"
-    },
     "srTitle": "Record a pebble",
     "back": "Back to Path",
-    "editorAria": "Pebble editor",
     "triggerAria": "What happened?",
-    "namePlaceholder": "What happened?",
-    "descriptionPlaceholder": "What was that awesome?",
-    "now": "Now",
-    "save": "Save pebble",
     "domain": {
       "label": "Domain",
       "pickerLabel": "Domains",
@@ -953,8 +934,6 @@
       "label": "Souls",
       "title": "Souls",
       "close": "Close",
-      "addAria": "Add souls",
-      "selectedAria": "{count, plural, one {# soul selected} other {# souls selected}}",
       "selectedListAria": "Selected souls",
       "removeAria": "Remove {name}",
       "searchPlaceholder": "Search souls…",
@@ -976,11 +955,6 @@
       "emptyMine": "No glyphs yet. Carve one from the Glyphs page.",
       "emptyOwned": "You haven't bought any glyphs yet.",
       "emptyCommunity": "No community glyphs available to buy right now."
-    },
-    "photo": {
-      "addAria": "Add photo",
-      "removeAria": "Remove photo",
-      "alt": "Uploaded photo"
     },
     "visibility": {
       "secret": "Secret",
