@@ -56,6 +56,9 @@ export function CollectionFormDialog({
   const [glyphId, setGlyphId] = useState<string | null>(initialGlyphId)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  // The modal aria-hides the in-tree Toaster, so a refused save is also
+  // announced inside the dialog; cleared on the next submit or edit.
+  const [saveFailed, setSaveFailed] = useState(false)
   const { glyphs } = useUsableGlyphs()
   const t = useTranslations("collections.form")
   const tModes = useTranslations("collections.modes")
@@ -67,6 +70,7 @@ export function CollectionFormDialog({
     setName(initialName)
     setMode(initialMode)
     setGlyphId(initialGlyphId)
+    setSaveFailed(false)
   }, [initialName, initialMode, initialGlyphId])
 
   const handleOpenChange = useCallback(
@@ -82,6 +86,7 @@ export function CollectionFormDialog({
     const trimmed = name.trim()
     if (!trimmed || submitting) return
     setSubmitting(true)
+    setSaveFailed(false)
     try {
       await onSubmit({ name: trimmed, mode, glyph_id: glyphId })
       setOpen(false)
@@ -90,6 +95,7 @@ export function CollectionFormDialog({
       // (42501); that and any other refusal read as the generic copy.
       console.error("[collections] save failed", err)
       toast.error(tErrors("generic"))
+      setSaveFailed(true)
     } finally {
       setSubmitting(false)
     }
@@ -114,7 +120,10 @@ export function CollectionFormDialog({
               id="collection-name"
               placeholder={t("namePlaceholder")}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value)
+                setSaveFailed(false)
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && canSubmit) void handleSubmit()
               }}
@@ -131,7 +140,10 @@ export function CollectionFormDialog({
                   type="button"
                   variant={mode === key ? "secondary" : "outline"}
                   size="sm"
-                  onClick={() => setMode(mode === key ? undefined : key)}
+                  onClick={() => {
+                    setMode(mode === key ? undefined : key)
+                    setSaveFailed(false)
+                  }}
                   aria-pressed={mode === key}
                 >
                   <span aria-hidden="true">{MODE_EMOJI[key]}</span> {tModes(key)}
@@ -148,7 +160,10 @@ export function CollectionFormDialog({
                 {t("glyphChoose")}
               </Button>
               {glyphId && (
-                <Button type="button" variant="ghost" onClick={() => setGlyphId(null)}>
+                <Button type="button" variant="ghost" onClick={() => {
+                  setGlyphId(null)
+                  setSaveFailed(false)
+                }}>
                   {t("removeGlyph")}
                 </Button>
               )}
@@ -158,6 +173,12 @@ export function CollectionFormDialog({
             </p>
           </fieldset>
         </div>
+
+        {saveFailed && (
+          <p role="alert" className="text-sm text-muted-foreground">
+            {tErrors("generic")}
+          </p>
+        )}
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={submitting}>{t("cancel")}</AlertDialogCancel>
@@ -170,7 +191,10 @@ export function CollectionFormDialog({
           open={pickerOpen}
           onOpenChange={setPickerOpen}
           selectedMarkId={glyphId ?? undefined}
-          onSave={(markId) => setGlyphId(markId ?? null)}
+          onSave={(markId) => {
+            setGlyphId(markId ?? null)
+            setSaveFailed(false)
+          }}
         />
       </AlertDialogContent>
     </AlertDialog>
