@@ -44,7 +44,6 @@ export function MomentRead({
   onDeleted,
 }: MomentReadProps) {
   const t = useTranslations("moment.read")
-  const tPebble = useTranslations("pebble")
   const tVisibility = useTranslations("record.visibility")
   const formatPeekDate = useFormatPeekDate()
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -81,7 +80,7 @@ export function MomentRead({
         {photo ? (
           <div className="relative mx-auto w-[240px]">
             {/* eslint-disable-next-line @next/next/no-img-element -- signed storage URL, next/image optimization not applicable */}
-            <img src={photo} alt={tPebble("photoAlt")} className="aspect-square w-full scale-90 -rotate-4 rounded-2xl object-cover" />
+            <img src={photo} alt={t("photoAlt")} className="aspect-square w-full scale-90 -rotate-4 rounded-2xl object-cover" />
             {stone("absolute -right-4 -top-4 size-[100px] rotate-7", true)}
           </div>
         ) : (

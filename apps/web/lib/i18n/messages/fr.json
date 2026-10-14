@@ -731,7 +731,6 @@
     "back": "Retour au chemin",
     "cardAria": "{name}, {time}",
     "instantAlt": "Photo de l'instant pour {name}",
-    "photoAlt": "Photo du galet",
     "visualAria": "Galet : {name}, {emotion}, intensité {intensity}",
     "withPrefix": "Avec : ",
     "intensity": {
@@ -784,6 +783,7 @@
     "notAPebble": "Pas encore un galet",
     "read": {
       "makeItAPebble": "En faire un galet",
+      "photoAlt": "Photo du moment",
       "more": "Plus",
       "editMoment": "Modifier le moment",
       "editPebble": "Modifier le galet",

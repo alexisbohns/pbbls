@@ -731,7 +731,6 @@
     "back": "Back to Path",
     "cardAria": "{name}, {time}",
     "instantAlt": "Instant photo for {name}",
-    "photoAlt": "Pebble photo",
     "visualAria": "Pebble: {name}, {emotion}, intensity {intensity}",
     "withPrefix": "With: ",
     "intensity": {
@@ -784,6 +783,7 @@
     "notAPebble": "Not a pebble yet",
     "read": {
       "makeItAPebble": "Make it a pebble",
+      "photoAlt": "Moment photo",
       "more": "More",
       "editMoment": "Edit moment",
       "editPebble": "Edit pebble",
