@@ -674,7 +674,7 @@
     "weekHeader": {
       "previous": "Semaine précédente",
       "next": "Semaine suivante",
-      "weekAria": "Semaine {iso}, {count} pebbles"
+      "weekAria": "Semaine {iso}, {count, plural, one {# galet} other {# galets}}"
     },
     "bottomBar": {
       "label": "Profil et statistiques",
@@ -710,6 +710,7 @@
       "withNames": "Avec {names}.",
       "stoneAria": "{name}. {date}, {time}. {stone}, {emotion}. {with} Ouvre le galet.",
       "cardAria": "{name}. {date}, {time}. {stone}, {emotion}. {with} Ouvre le galet.",
+      "blankAria": "{name}. {date}, {time}. Pas encore un galet. {with} Ouvre le moment.",
       "stone": {
         "small": { "lowlight": "Petite pierre de lave", "neutral": "Petit galet de rivière", "highlight": "Petite gemme" },
         "medium": { "lowlight": "Pierre de lave moyenne", "neutral": "Galet de rivière moyen", "highlight": "Gemme moyenne" },
