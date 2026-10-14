@@ -57,6 +57,9 @@ export function RecordNameStep({
         value={name}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
+          // Enter that confirms an IME composition (Japanese, Chinese, …) is
+          // not a submit; Safari reports it as keyCode 229 without isComposing.
+          if (e.nativeEvent.isComposing || e.keyCode === 229) return
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
             onSubmit()
