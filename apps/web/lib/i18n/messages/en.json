@@ -572,7 +572,11 @@
       "cancel": "Cancel",
       "nameLabel": "Name",
       "namePlaceholder": "e.g. Morning gratitudes",
-      "modeLegend": "Mode (optional)"
+      "modeLegend": "Mode (optional)",
+      "glyphLabel": "Glyph",
+      "glyphChoose": "Choose a glyph",
+      "removeGlyph": "Remove glyph",
+      "glyphFooter": "Pebbles in this collection carry its glyph."
     },
     "pebbleCount": "{count, plural, one {# pebble} other {# pebbles}}",
     "modes": {
