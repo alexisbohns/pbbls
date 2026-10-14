@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import type { Collection } from "@/lib/types"
@@ -55,6 +55,8 @@ export function CollectionFormDialog({
   // until the user changes or removes it.
   const [glyphId, setGlyphId] = useState<string | null>(initialGlyphId)
   const [pickerOpen, setPickerOpen] = useState(false)
+  // "Remove glyph" unmounts itself; focus lands back on the choose button.
+  const chooseGlyphRef = useRef<HTMLButtonElement>(null)
   const [submitting, setSubmitting] = useState(false)
   // The modal aria-hides the in-tree Toaster, so a refused save is also
   // announced inside the dialog; cleared on the next submit or edit.
@@ -155,7 +157,12 @@ export function CollectionFormDialog({
           <fieldset className="grid gap-1.5" aria-describedby="collection-glyph-footer">
             <legend className="text-sm font-medium">{t("glyphLabel")}</legend>
             <div className="flex flex-wrap items-center gap-2">
-              <Button type="button" variant="outline" onClick={() => setPickerOpen(true)}>
+              <Button
+                ref={chooseGlyphRef}
+                type="button"
+                variant="outline"
+                onClick={() => setPickerOpen(true)}
+              >
                 <SoulGlyphThumbnail mark={glyph} className="size-5" />
                 {glyphId ? t("glyphChange") : t("glyphChoose")}
                 {glyph?.name && (
@@ -166,6 +173,7 @@ export function CollectionFormDialog({
                 <Button type="button" variant="ghost" onClick={() => {
                   setGlyphId(null)
                   setSaveFailed(false)
+                  chooseGlyphRef.current?.focus()
                 }}>
                   {t("removeGlyph")}
                 </Button>
