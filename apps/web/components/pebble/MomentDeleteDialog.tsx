@@ -47,7 +47,19 @@ export function MomentDeleteDialog({
   const tErrors = useTranslations("moment.errors")
   const { deleteMoment, deletePebble } = useMoments()
   const [pending, setPendingState] = useState<Pending>(null)
-  const pebble = moment.pebble
+  // Which variant the dialog shows is decided when it opens and held until it
+  // opens again: once "Delete the pebble, keep the moment" succeeds the moment
+  // turns bare, and the closing dialog must not re-render as the bare variant
+  // during its fade.
+  const [shown, setShown] = useState<{ open: boolean; pebbleId: string | null }>({
+    open,
+    pebbleId: moment.pebble?.id ?? null,
+  })
+  if (shown.open !== open) {
+    setShown({ open, pebbleId: open ? (moment.pebble?.id ?? null) : shown.pebbleId })
+  }
+  const pebbleId = shown.pebbleId
+  const hasPebble = pebbleId !== null
 
   const setPending = (next: Pending) => {
     setPendingState(next)
@@ -60,8 +72,8 @@ export function MomentDeleteDialog({
     try {
       if (which === "pebble") {
         // Never fall through to deleting the moment when the pebble is gone.
-        if (!pebble) return
-        await deletePebble(pebble.id)
+        if (!pebbleId) return
+        await deletePebble(pebbleId)
         onOpenChange(false)
       } else {
         await deleteMoment(moment.id)
@@ -82,10 +94,10 @@ export function MomentDeleteDialog({
     <AlertDialog open={open} onOpenChange={(next) => !pending && onOpenChange(next)}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{pebble ? t("pebbleTitle") : t("bareTitle")}</AlertDialogTitle>
-          <AlertDialogDescription>{pebble ? t("pebbleMessage") : t("bareMessage")}</AlertDialogDescription>
+          <AlertDialogTitle>{hasPebble ? t("pebbleTitle") : t("bareTitle")}</AlertDialogTitle>
+          <AlertDialogDescription>{hasPebble ? t("pebbleMessage") : t("bareMessage")}</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className={pebble ? "sm:flex-col-reverse sm:justify-start" : undefined}>
+        <AlertDialogFooter className={hasPebble ? "sm:flex-col-reverse sm:justify-start" : undefined}>
           <AlertDialogCancel disabled={pending !== null}>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
@@ -94,9 +106,9 @@ export function MomentDeleteDialog({
             onClick={() => void run("moment")}
           >
             {pending === "moment" && spinner}
-            {pebble ? t("deleteMomentToo") : t("deleteMoment")}
+            {hasPebble ? t("deleteMomentToo") : t("deleteMoment")}
           </AlertDialogAction>
-          {pebble && (
+          {hasPebble && (
             <AlertDialogAction
               variant="destructive"
               disabled={pending !== null}
