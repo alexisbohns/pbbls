@@ -894,7 +894,7 @@
       "nameLabel": "Name",
       "closeTitle": "Keep this moment?",
       "keepGoing": "Keep going",
-      "charactersLeft": "{count} characters left"
+      "charactersLeft": "{count, plural, one {# character left} other {# characters left}}"
     },
     "srTitle": "Record a pebble",
     "back": "Back to Path",

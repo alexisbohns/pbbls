@@ -894,7 +894,7 @@
       "nameLabel": "Nom",
       "closeTitle": "Tu gardes ce moment ?",
       "keepGoing": "Continuer l'édition",
-      "charactersLeft": "{count} caractères restants"
+      "charactersLeft": "{count, plural, one {# caractère restant} other {# caractères restants}}"
     },
     "srTitle": "Capturer l'instant",
     "back": "Retour au chemin",
