@@ -102,12 +102,10 @@ export function MomentRead({
       {pebble && VisibilityIcon ? (
         <>
           <p className="mt-4 flex justify-center">
-            <span
-              className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-medium text-muted-foreground"
-              aria-label={tVisibility("aria", { grade: tVisibility(pebble.visibility) })}
-            >
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-medium text-muted-foreground">
               <VisibilityIcon className="size-3.5" aria-hidden />
               <span aria-hidden>{tVisibility(pebble.visibility)}</span>
+              <span className="sr-only">{tVisibility("aria", { grade: tVisibility(pebble.visibility) })}</span>
             </span>
           </p>
           <div className="mt-6">
