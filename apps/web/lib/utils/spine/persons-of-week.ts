@@ -1,9 +1,11 @@
-import type { Pebble, Soul } from "@/lib/types"
+import type { Moment, Soul } from "@/lib/types"
 import { dayIndexInWeek } from "./local-day"
 
 /**
  * The persons of the week (#1052, spec §Persons of the week): every soul that
  * appears in the week, with the days they appear on.
+ *
+ * Only a pebble names people: a bare moment (#1050) brings no one.
  *
  * Order — days present desc, then pebbles desc, then name by locale collation —
  * is the one rule every surface uses, so the most present people come first
@@ -21,17 +23,17 @@ export type PersonOfWeek = {
 export const PERSONS_CAP = 8
 
 export function personsOfWeek(
-  pebbles: readonly Pebble[],
+  moments: readonly Moment[],
   weekStart: Date,
   soulsById: ReadonlyMap<string, Soul>,
   locale: string,
 ): PersonOfWeek[] {
   const rows = new Map<string, PersonOfWeek>()
-  for (const pebble of pebbles) {
-    const day = dayIndexInWeek(weekStart, new Date(pebble.happened_at))
+  for (const moment of moments) {
+    const day = dayIndexInWeek(weekStart, new Date(moment.happened_at))
     if (day < 0 || day > 6) continue
     // A pebble can list a soul twice only through a data bug; count it once.
-    for (const soulId of new Set(pebble.soul_ids)) {
+    for (const soulId of new Set(moment.pebble?.soul_ids ?? [])) {
       const soul = soulsById.get(soulId)
       // A soul the user deleted can linger on a pebble; it has no name to set.
       if (!soul) continue

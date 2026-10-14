@@ -6,7 +6,7 @@ import {
   isoWeekStart,
   weekIndex,
 } from "../lib/utils/week-roll-entries"
-import type { Pebble } from "../lib/types"
+import type { Moment } from "../lib/types"
 
 let failures = 0
 function eq<T>(name: string, actual: T, expected: T) {
@@ -21,15 +21,15 @@ function eq<T>(name: string, actual: T, expected: T) {
   }
 }
 
-function pebble(id: string, isoDateLocal: string): Pebble {
+function pebble(id: string, isoDateLocal: string): Moment {
   // Caller passes "YYYY-MM-DDTHH:mm:ss" without a tz so Date treats it as local.
+  // Placement reads only `happened_at`, so a bare moment stands in for a pebble.
+  const happened_at = new Date(isoDateLocal).toISOString()
   return {
-    id, name: id, description: "",
-    happened_at: new Date(isoDateLocal).toISOString(),
-    intensity: 2, positiveness: 0, visibility: "private",
-    emotion_id: "serenity", soul_ids: [], domain_ids: [],
-    mark_id: undefined, collection_ids: [], snaps: [], instants: [], cards: [],
-  } as unknown as Pebble
+    id, name: id, description: null, happened_at,
+    snaps: [], instants: [], cover: null,
+    created_at: happened_at, updated_at: happened_at, pebble: null,
+  }
 }
 
 // --- isoWeekStart / isoWeekKey / isoWeekNumber ----------------------------
@@ -70,7 +70,7 @@ eq("empty pebbles → [currentWeek]", entries.map((e) => e.weekStartIso), [
 entries = buildWeekRollEntries([pebble("p1", "2026-05-14T09:00:00")], today)
 eq(
   "single current-week pebble → [W20 (1)]",
-  entries.map((e) => `${e.weekStartIso}:${e.pebbles.length}`),
+  entries.map((e) => `${e.weekStartIso}:${e.moments.length}`),
   ["2026-W20:1"],
 )
 
@@ -98,7 +98,7 @@ entries = buildWeekRollEntries(
 )
 eq(
   "past week sorts ascending (oldest-first)",
-  entries.find((e) => e.weekStartIso === "2026-W17")!.pebbles.map((p) => p.id),
+  entries.find((e) => e.weekStartIso === "2026-W17")!.moments.map((p) => p.id),
   ["b", "a", "c"],
 )
 
@@ -112,7 +112,7 @@ entries = buildWeekRollEntries(
 )
 eq(
   "current week sorts descending (newest-first)",
-  entries.find((e) => e.weekStartIso === "2026-W20")!.pebbles.map((p) => p.id),
+  entries.find((e) => e.weekStartIso === "2026-W20")!.moments.map((p) => p.id),
   ["b", "c", "a"],
 )
 

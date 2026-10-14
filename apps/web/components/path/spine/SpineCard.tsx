@@ -117,8 +117,13 @@ export function SpineCard({
           className="absolute top-[calc(var(--u)*4.7)] right-[calc(var(--u)*3.7)] flex items-center font-spine-office text-[length:calc(var(--u)*1.95)] leading-none font-[560] tracking-[.07em] whitespace-nowrap text-(--spine-ink-2) tabular-nums [writing-mode:vertical-rl]"
         >
           {time}
-          <span className="my-[calc(var(--u)*1.2)] block h-[calc(var(--u)*2.4)] w-px bg-current opacity-50" />
-          <span className="font-spine-sc lowercase font-[650] tracking-[.15em] text-(--spine-spot)">{emotion}</span>
+          {/* A moment that is not a pebble yet has no emotion: the time alone (R4). */}
+          {emotion && (
+            <>
+              <span className="my-[calc(var(--u)*1.2)] block h-[calc(var(--u)*2.4)] w-px bg-current opacity-50" />
+              <span className="font-spine-sc lowercase font-[650] tracking-[.15em] text-(--spine-spot)">{emotion}</span>
+            </>
+          )}
         </p>
 
         <figure
@@ -160,7 +165,8 @@ export function SpineCard({
             {name || untitled}
           </h3>
           <p className="sr-only">
-            <time dateTime={dateTime}>{time}</time>, {emotion}
+            <time dateTime={dateTime}>{time}</time>
+            {emotion && `, ${emotion}`}
           </p>
           {people}
         </div>

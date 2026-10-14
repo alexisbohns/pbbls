@@ -1,4 +1,4 @@
-import type { Mark, Pebble, PebbleCover, Soul } from "@/lib/types"
+import type { Intensity, Mark, Moment, PebbleCover, Positiveness, Soul } from "@/lib/types"
 import { emotionId } from "./sandbox-palettes"
 
 // ---------------------------------------------------------------------------
@@ -9,7 +9,9 @@ import { emotionId } from "./sandbox-palettes"
 // - Friday is left empty, its one pebble moved to Saturday morning: a *still* day;
 // - Bruno's Sunday pebble has no glyph: an uncarved stone;
 // - a fourteen-person picnic on Thursday: the people line's overflow;
-// - an untitled photo on Saturday: a moment from the split with no name.
+// - an untitled photo on Saturday: a moment from the split with no name;
+// - two moments that are not pebbles yet (#1050): a named one on Wednesday,
+//   set as type, and an untitled photo on Sunday morning: blank stones.
 //
 // Times are Paris local (summer time). Photos are the committed
 // `public/sandbox/` files, signed URL and thumb alike, so the card's ratio probe
@@ -160,64 +162,82 @@ function cover(file: string): PebbleCover {
   return { snapId: `snap-${file}`, url, thumbUrl: url }
 }
 
+type PebbleSpec = {
+  intensity: Intensity
+  positiveness: Positiveness
+  emotion: string
+  souls: string[]
+  glyph: string | null
+}
+
 type Spec = {
   n: number
   name: string
   at: string
-  intensity: Pebble["intensity"]
-  positiveness: Pebble["positiveness"]
-  emotion: string
-  souls: string[]
-  glyph: string | null
   photo?: string
+  /** Absent for a moment that is not a pebble yet. */
+  pebble?: PebbleSpec
 }
 
-function pebble(spec: Spec): Pebble {
-  const mark = spec.glyph ? MARKS.get(`glyph-${spec.glyph}`) : undefined
+function moment(spec: Spec): Moment {
+  const id = `spine-fixture-${String(spec.n).padStart(2, "0")}`
   const happened = `2026-10-${spec.at}:00+02:00`
   const media = spec.photo ? cover(spec.photo) : null
+  const p = spec.pebble
+  const mark = p?.glyph ? MARKS.get(`glyph-${p.glyph}`) : undefined
   return {
-    id: `spine-fixture-${String(spec.n).padStart(2, "0")}`,
-    moment_id: `spine-fixture-${String(spec.n).padStart(2, "0")}`,
-    name: spec.name,
+    id,
+    name: spec.name || null,
+    description: null,
     happened_at: happened,
-    intensity: spec.intensity,
-    positiveness: spec.positiveness,
-    visibility: "private",
-    emotion_id: emotionId(spec.emotion),
-    soul_ids: spec.souls.map((s) => `soul-${s}`),
-    domain_ids: [],
-    collection_ids: [],
-    mark_id: mark?.id,
     instants: media?.url ? [media.url] : [],
     snaps: media ? [{ id: media.snapId, storage_path: `fixture/${media.snapId}`, sort_order: 0 }] : [],
-    cards: [],
-    glyph: mark ? { id: mark.id, name: mark.name, strokes: mark.strokes, viewBox: mark.viewBox } : null,
     cover: media,
     created_at: happened,
     updated_at: happened,
+    pebble: p
+      ? {
+          // The backfilled shape (D9): the pebble keeps its moment's id, so the
+          // stones' grain is what it was before the split.
+          id,
+          intensity: p.intensity,
+          positiveness: p.positiveness,
+          visibility: "private",
+          emotion_id: emotionId(p.emotion),
+          soul_ids: p.souls.map((s) => `soul-${s}`),
+          domain_ids: [],
+          collection_ids: [],
+          cards: [],
+          glyph: mark ? { id: mark.id, name: mark.name, strokes: mark.strokes, viewBox: mark.viewBox } : null,
+          created_at: happened,
+          updated_at: happened,
+        }
+      : null,
   }
 }
 
 const NEIGHBOUR_IDS = NEIGHBOURS.map((s) => s.id.replace("soul-", ""))
 
 const SPECS: Spec[] = [
-  { n: 1, name: "Flag march with Nadia", at: "05T10:15", intensity: 3, positiveness: 1, emotion: "proud", souls: ["nadia"], glyph: "friends", photo: "flag-march.jpg" },
-  { n: 2, name: "Elio lost his first tooth", at: "05T19:40", intensity: 2, positiveness: 1, emotion: "joyful", souls: ["elio", "mara"], glyph: "family" },
-  { n: 3, name: "Rent went up again", at: "06T08:02", intensity: 2, positiveness: -1, emotion: "angry", souls: [], glyph: "identity" },
-  { n: 4, name: "Forest walk, all of us", at: "06T16:30", intensity: 3, positiveness: 1, emotion: "peaceful", souls: ["mara", "elio", "bruno"], glyph: "travel", photo: "forest-crew.jpg" },
-  { n: 5, name: "Couldn’t sleep", at: "07T03:10", intensity: 1, positiveness: -1, emotion: "scared", souls: [], glyph: "identity" },
-  { n: 6, name: "Coffee by the fountain", at: "07T12:05", intensity: 1, positiveness: 0, emotion: "peaceful", souls: ["jules"], glyph: "friends", photo: "fountain.jpg" },
-  { n: 7, name: "Rooftop birthday", at: "08T21:00", intensity: 3, positiveness: 1, emotion: "joyful", souls: ["nadia", "jules", "mara"], glyph: "hobbies", photo: "rooftop-group.jpg" },
-  { n: 12, name: "Picnic on the square, the whole street", at: "08T13:10", intensity: 2, positiveness: 1, emotion: "joyful", souls: ["mara", "elio", "nadia", "jules", "bruno", ...NEIGHBOUR_IDS], glyph: "friends" },
-  { n: 8, name: "Said no to the extra project", at: "10T09:20", intensity: 2, positiveness: 0, emotion: "proud", souls: [], glyph: "identity" },
-  { n: 9, name: "Mara on the seawall", at: "10T17:45", intensity: 2, positiveness: 1, emotion: "joyful", souls: ["mara"], glyph: "partner", photo: "seawall-portrait.jpg" },
-  { n: 13, name: "", at: "10T19:05", intensity: 1, positiveness: 0, emotion: "peaceful", souls: ["mara"], glyph: "partner", photo: "fountain.jpg" },
-  { n: 10, name: "Grandma’s call went quiet", at: "11T14:00", intensity: 2, positiveness: -1, emotion: "sad", souls: [], glyph: "family" },
-  { n: 11, name: "Bruno asleep on my feet", at: "11T22:30", intensity: 1, positiveness: 0, emotion: "peaceful", souls: ["bruno"], glyph: null },
+  { n: 1, name: "Flag march with Nadia", at: "05T10:15", photo: "flag-march.jpg", pebble: { intensity: 3, positiveness: 1, emotion: "proud", souls: ["nadia"], glyph: "friends" } },
+  { n: 2, name: "Elio lost his first tooth", at: "05T19:40", pebble: { intensity: 2, positiveness: 1, emotion: "joyful", souls: ["elio", "mara"], glyph: "family" } },
+  { n: 3, name: "Rent went up again", at: "06T08:02", pebble: { intensity: 2, positiveness: -1, emotion: "angry", souls: [], glyph: "identity" } },
+  { n: 4, name: "Forest walk, all of us", at: "06T16:30", photo: "forest-crew.jpg", pebble: { intensity: 3, positiveness: 1, emotion: "peaceful", souls: ["mara", "elio", "bruno"], glyph: "travel" } },
+  { n: 5, name: "Couldn’t sleep", at: "07T03:10", pebble: { intensity: 1, positiveness: -1, emotion: "scared", souls: [], glyph: "identity" } },
+  { n: 6, name: "Coffee by the fountain", at: "07T12:05", photo: "fountain.jpg", pebble: { intensity: 1, positiveness: 0, emotion: "peaceful", souls: ["jules"], glyph: "friends" } },
+  { n: 7, name: "Rooftop birthday", at: "08T21:00", photo: "rooftop-group.jpg", pebble: { intensity: 3, positiveness: 1, emotion: "joyful", souls: ["nadia", "jules", "mara"], glyph: "hobbies" } },
+  { n: 12, name: "Picnic on the square, the whole street", at: "08T13:10", pebble: { intensity: 2, positiveness: 1, emotion: "joyful", souls: ["mara", "elio", "nadia", "jules", "bruno", ...NEIGHBOUR_IDS], glyph: "friends" } },
+  { n: 8, name: "Said no to the extra project", at: "10T09:20", pebble: { intensity: 2, positiveness: 0, emotion: "proud", souls: [], glyph: "identity" } },
+  { n: 9, name: "Mara on the seawall", at: "10T17:45", photo: "seawall-portrait.jpg", pebble: { intensity: 2, positiveness: 1, emotion: "joyful", souls: ["mara"], glyph: "partner" } },
+  { n: 13, name: "", at: "10T19:05", photo: "fountain.jpg", pebble: { intensity: 1, positiveness: 0, emotion: "peaceful", souls: ["mara"], glyph: "partner" } },
+  { n: 10, name: "Grandma’s call went quiet", at: "11T14:00", pebble: { intensity: 2, positiveness: -1, emotion: "sad", souls: [], glyph: "family" } },
+  { n: 11, name: "Bruno asleep on my feet", at: "11T22:30", pebble: { intensity: 1, positiveness: 0, emotion: "peaceful", souls: ["bruno"], glyph: null } },
+  // Not pebbles yet (#1050): blank stones, one set as type, one on a card.
+  { n: 14, name: "Bread from the corner bakery", at: "07T18:20" },
+  { n: 15, name: "", at: "11T09:10", photo: "forest-crew.jpg" },
 ]
 
-export const SPINE_FIXTURE_PEBBLES: Pebble[] = SPECS.map(pebble)
+export const SPINE_FIXTURE_MOMENTS: Moment[] = SPECS.map(moment)
 
 /** A Sunday evening of the fixture week: every day of it is in the past but today. */
 export const SPINE_FIXTURE_TODAY = new Date(2026, 9, 11, 23, 0)

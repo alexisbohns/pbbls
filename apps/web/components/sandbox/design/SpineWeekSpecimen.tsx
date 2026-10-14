@@ -5,7 +5,7 @@ import { SpineWeek } from "@/components/path/spine/SpineWeek"
 import { Button } from "@/components/ui/button"
 import {
   SPINE_FIXTURE_MARKS,
-  SPINE_FIXTURE_PEBBLES,
+  SPINE_FIXTURE_MOMENTS,
   SPINE_FIXTURE_SOULS,
   SPINE_FIXTURE_TODAY,
 } from "@/lib/seed/spine-fixture-week"
@@ -29,17 +29,17 @@ export function SpineWeekSpecimen() {
   const today = current ? SPINE_FIXTURE_TODAY : A_WEEK_LATER
 
   const entry = useMemo(() => {
-    const found = buildWeekRollEntries(SPINE_FIXTURE_PEBBLES, today).find((e) => e.weekStartIso === "2026-W41")
+    const found = buildWeekRollEntries(SPINE_FIXTURE_MOMENTS, today).find((e) => e.weekStartIso === "2026-W41")
     if (!found) throw new Error("[spine fixture] week 41 is missing")
     return found
   }, [today])
 
-  const open = (id: string) => setSaid(`Opens: ${SPINE_FIXTURE_PEBBLES.find((p) => p.id === id)?.name || "(untitled)"}`)
+  const open = (id: string) => setSaid(`Opens: ${SPINE_FIXTURE_MOMENTS.find((m) => m.id === id)?.name ?? "(untitled)"}`)
 
   return (
     <Specimen
       id="spine-week"
-      note="The brief's week of 5–11 October, plus a still Friday, an uncarved stone, a fourteen-person picnic and an untitled photo. The persons and the contents follow the day being read; a contents link ripples its stone without opening it. Below 900 px the verso sits above the recto; from 900 px they form a spread with a sticky verso (wider from 1240 px)."
+      note="The brief's week of 5–11 October, plus a still Friday, an uncarved stone, a fourteen-person picnic, an untitled photo and two moments that are not pebbles yet (blank stones). The persons and the contents follow the day being read; a contents link ripples its stone without opening it. Below 900 px the verso sits above the recto; from 900 px they form a spread with a sticky verso (wider from 1240 px)."
       className="block p-0"
     >
       <div className="flex gap-2 p-3">

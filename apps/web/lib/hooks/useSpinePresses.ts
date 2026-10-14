@@ -6,7 +6,7 @@ import { createContext, useContext, useEffect, useMemo, useRef } from "react"
  * The stones of one week, pressable by id (#1052, spec D8). A contents link
  * scrolls to its stone and ripples it without opening the pebble, so it needs
  * the stone's own press rather than a click. `SpineWeek` owns the registry;
- * each `SpinePebble` registers its press under its pebble id.
+ * each `SpinePebble` registers its press under its MOMENT id (#1050).
  */
 export type SpinePresses = {
   register: (id: string, press: () => void) => () => void

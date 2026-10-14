@@ -1,16 +1,21 @@
 import { describe, expect, it } from "vitest"
-import type { Pebble } from "@/lib/types"
+import { momentFromViewRow } from "@/lib/data/moment-row"
+import {
+  ANDROID_DETAIL_BARE_NAMED,
+  ANDROID_DETAIL_COMPLETED,
+  IOS_DETAIL_COMPLETED,
+  IOS_DETAIL_PHOTO,
+} from "@/lib/data/__fixtures__/moments-captured"
+import type { Moment, MomentPebble } from "@/lib/types"
 import { buildWeekRollEntries, isoWeekKey } from "@/lib/utils/week-roll-entries"
 import { readingOrder, spineWeek } from "./spine-week"
 
 // TZ is Europe/Paris (vitest.config.ts). Week of Monday 5 Oct 2026, the
 // brief's fixture week.
-function pebble(id: string, happened_at: string): Pebble {
-  return {
-    id,
-    moment_id: id,
-    name: id,
-    happened_at,
+function momentFixture(overrides: Partial<Moment> & Pick<Moment, "id" | "happened_at">): Moment {
+  const { id, happened_at } = overrides
+  const pebble: MomentPebble = {
+    id: `pebble-${id}`,
     intensity: 2,
     positiveness: 0,
     visibility: "private",
@@ -18,21 +23,40 @@ function pebble(id: string, happened_at: string): Pebble {
     soul_ids: [],
     domain_ids: [],
     collection_ids: [],
-    instants: [],
-    snaps: [],
     cards: [],
     glyph: null,
-    cover: null,
     created_at: happened_at,
     updated_at: happened_at,
   }
+  return {
+    name: id,
+    description: null,
+    snaps: [],
+    instants: [],
+    cover: null,
+    created_at: happened_at,
+    updated_at: happened_at,
+    pebble,
+    ...overrides,
+  }
 }
 
-function weekOf(pebbles: Pebble[], today: Date, key = "2026-W41") {
-  const entry = buildWeekRollEntries(pebbles, today).find((e) => e.weekStartIso === key)
+/** A completed moment. */
+const pebble = (id: string, happened_at: string) => momentFixture({ id, happened_at })
+/** A moment that is not a pebble yet. */
+const bare = (id: string, happened_at: string) => momentFixture({ id, happened_at, pebble: null })
+
+function entryOf(moments: Moment[], today: Date, key = "2026-W41") {
+  const entry = buildWeekRollEntries(moments, today).find((e) => e.weekStartIso === key)
   if (!entry) throw new Error(`no entry ${key}`)
-  return spineWeek(entry, today)
+  return entry
 }
+
+function weekOf(moments: Moment[], today: Date, key = "2026-W41") {
+  return spineWeek(entryOf(moments, today, key), today)
+}
+
+const row = (json: string): Record<string, unknown> => JSON.parse(json)
 
 // Deliberately out of order, two on Tuesday, whole-second and fractional.
 const WEEK = [
@@ -60,7 +84,7 @@ describe("spineWeek", () => {
     const today = new Date(2026, 9, 11, 23, 59, 30)
     const entry = buildWeekRollEntries(WEEK, today).find((e) => e.weekStartIso === "2026-W41")
     // The roll keeps its newest-first current week for its other consumers...
-    expect(entry?.pebbles[0].id).toBe("sun")
+    expect(entry?.moments[0].id).toBe("sun")
     // ...and the Spine re-sorts it as a book.
     expect(readingOrder(weekOf(WEEK, today)).map((p) => p.id)).toEqual([
       "mon",
@@ -74,7 +98,7 @@ describe("spineWeek", () => {
   it("marks past days with no pebble still", () => {
     const week = weekOf(WEEK, new Date(2026, 9, 20))
     expect(week.days.filter((d) => d.still).map((d) => d.index)).toEqual([2, 3, 4])
-    expect(week.days.filter((d) => d.still).every((d) => d.pebbles.length === 0)).toBe(true)
+    expect(week.days.filter((d) => d.still).every((d) => d.moments.length === 0)).toBe(true)
   })
 
   it("omits the current week's future days, and keeps today", () => {
@@ -82,7 +106,7 @@ describe("spineWeek", () => {
     const week = weekOf(WEEK.filter((p) => ["mon", "tue-early"].includes(p.id)), today)
     expect(week.days.map((d) => d.index)).toEqual([0, 1, 2])
     const wednesday = week.days[2]
-    expect(wednesday).toMatchObject({ isToday: true, still: true, pebbles: [] })
+    expect(wednesday).toMatchObject({ isToday: true, still: true, moments: [] })
     expect(week.days.filter((d) => d.isToday)).toHaveLength(1)
   })
 
@@ -96,7 +120,7 @@ describe("spineWeek", () => {
   it("keeps a Sunday 23:59 pebble on the Sunday the clocks go back", () => {
     const sunday = pebble("dst", "2026-10-25T22:59:00Z") // Sun 25 Oct 23:59 Paris, UTC+1
     const week = weekOf([sunday], new Date(2026, 10, 2), "2026-W43")
-    expect(week.days[6].pebbles.map((p) => p.id)).toEqual(["dst"])
+    expect(week.days[6].moments.map((p) => p.id)).toEqual(["dst"])
     expect(week.days.map((d) => d.date.getDate())).toEqual([19, 20, 21, 22, 23, 24, 25])
   })
 
@@ -110,5 +134,61 @@ describe("spineWeek", () => {
     )
     expect(read).toEqual(chronological)
     expect(isoWeekKey(new Date(read[0].happened_at))).toBe("2026-W41")
+  })
+
+  it("gives a bare moment its day: the day is not still", () => {
+    // Wednesday 7 Oct is still in the fixture week; a bare moment fills it.
+    const week = weekOf([...WEEK, bare("wed-bare", "2026-10-07T12:00:00Z")], new Date(2026, 9, 20))
+    const wednesday = week.days[2]
+    expect(wednesday).toMatchObject({ still: false })
+    expect(wednesday.moments.map((m) => m.id)).toEqual(["wed-bare"])
+    expect(week.days.filter((d) => d.still).map((d) => d.index)).toEqual([3, 4])
+  })
+
+  it("reads a bare moment in its place among the pebbles", () => {
+    const between = bare("tue-noon", "2026-10-06T10:00:00Z")
+    const read = readingOrder(weekOf([...WEEK, between], new Date(2026, 9, 20)))
+    expect(read.map((m) => m.id)).toEqual(["mon", "tue-early", "tue-noon", "tue-late", "sat", "sun"])
+  })
+
+  it("counts only pebbles in a week of bare moments, and draws its days anyway", () => {
+    const today = new Date(2026, 9, 20)
+    const moments = [bare("mon", "2026-10-05T08:15:00Z"), bare("thu", "2026-10-08T18:00:00Z")]
+    const entry = entryOf(moments, today)
+    expect(entry.moments).toHaveLength(2)
+    expect(entry.pebbleCount).toBe(0)
+    const week = spineWeek(entry, today)
+    expect(week.days.filter((d) => !d.still).map((d) => d.index)).toEqual([0, 3])
+  })
+
+  it("counts the completed moments of a mixed week", () => {
+    const entry = entryOf([...WEEK, bare("wed-bare", "2026-10-07T12:00:00Z")], new Date(2026, 9, 20))
+    expect(entry.moments).toHaveLength(6)
+    expect(entry.pebbleCount).toBe(5)
+  })
+
+  it("lays out what iOS and Android wrote, verbatim", () => {
+    // Sunday 11 Oct 21:04 Paris (iOS photo-only, bare), then Monday 12 Oct:
+    // 08:40 (Android bare, named), 10:30 (iOS completed), 20:05 (Android completed).
+    const moments = [
+      momentFromViewRow(row(IOS_DETAIL_PHOTO), new Map()),
+      momentFromViewRow(row(IOS_DETAIL_COMPLETED), new Map()),
+      ...[ANDROID_DETAIL_BARE_NAMED, ANDROID_DETAIL_COMPLETED].map((json) =>
+        momentFromViewRow(JSON.parse(json)[0], new Map()),
+      ),
+    ]
+    const today = new Date(2026, 9, 14, 9)
+    const w41 = entryOf(moments, today, "2026-W41")
+    expect(w41.moments.map((m) => m.name)).toEqual([null])
+    expect(w41.pebbleCount).toBe(0)
+    expect(spineWeek(w41, today).days[6].moments).toHaveLength(1)
+
+    const w42 = spineWeek(entryOf(moments, today, "2026-W42"), today)
+    expect(w42.days[0].moments.map((m) => m.name)).toEqual([
+      "Morning coffee on the balcony",
+      "Coffee",
+      "Evening walk with Maya",
+    ])
+    expect(entryOf(moments, today, "2026-W42").pebbleCount).toBe(2)
   })
 })

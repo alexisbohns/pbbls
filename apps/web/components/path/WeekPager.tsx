@@ -19,7 +19,8 @@ type WeekPagerProps = {
   today: Date
   souls: Soul[]
   onFocusChange: (weekStart: Date) => void
-  onSelectPebble: (id: string) => void
+  /** Opens the read page, with the MOMENT id (#1050). */
+  onOpen: (momentId: string) => void
 }
 
 export function WeekPager({
@@ -28,7 +29,7 @@ export function WeekPager({
   today,
   souls,
   onFocusChange,
-  onSelectPebble,
+  onOpen,
 }: WeekPagerProps) {
   const focusedIndex = weekIndex(entries, focused)
   const { marks } = useMarks()
@@ -105,7 +106,7 @@ export function WeekPager({
                   today={today}
                   soulMap={soulMap}
                   markMap={markMap}
-                  onOpen={onSelectPebble}
+                  onOpen={onOpen}
                   onPreviousWeek={previous ? () => onFocusChange(previous.weekStart) : undefined}
                   onNextWeek={next ? () => onFocusChange(next.weekStart) : undefined}
                 />

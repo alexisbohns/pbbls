@@ -3,7 +3,7 @@ import type { EntryType } from "@/lib/utils/spine/entry-type"
 
 type SpineEntryProps = {
   titleId: string
-  /** The pebble's name; empty for a moment with none (shown as `untitled`). */
+  /** The moment's name; empty for a moment with none (shown as `untitled`). */
   name: string
   untitled: string
   type: Pick<EntryType, "fontWeight" | "italic" | "letterSpacing">
@@ -57,10 +57,15 @@ export function SpineEntry({
         >
           {time}
         </time>
-        <span aria-hidden className="text-(--spine-ink-3)">
-          {" · "}
-        </span>
-        <span className="lowercase text-(--spine-spot)">{emotion}</span>
+        {/* A moment that is not a pebble yet has no emotion: the time alone (R4). */}
+        {emotion && (
+          <>
+            <span aria-hidden className="text-(--spine-ink-3)">
+              {" · "}
+            </span>
+            <span className="lowercase text-(--spine-spot)">{emotion}</span>
+          </>
+        )}
       </p>
       {people}
       {/* The whole entry opens the pebble. An overlay rather than a wrapping

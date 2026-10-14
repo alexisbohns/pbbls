@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import type { Pebble, Soul } from "@/lib/types"
+import type { Moment, Soul } from "@/lib/types"
 import { isoWeekStart } from "@/lib/utils/week-roll-entries"
 import { PERSONS_CAP, personsOfWeek, splitPersons } from "./persons-of-week"
 
@@ -11,26 +11,32 @@ function soul(id: string, name = id): Soul {
   return { id, name, glyph_id: "g", created_at: "", updated_at: "" }
 }
 
-function pebble(id: string, happened_at: string, soul_ids: string[]): Pebble {
+/** A completed moment naming `soul_ids`. */
+function pebble(id: string, happened_at: string, soul_ids: string[]): Moment {
   return {
     id,
-    moment_id: id,
     name: id,
+    description: null,
     happened_at,
-    intensity: 2,
-    positiveness: 0,
-    visibility: "private",
-    emotion_id: "e",
-    soul_ids,
-    domain_ids: [],
-    collection_ids: [],
-    instants: [],
     snaps: [],
-    cards: [],
-    glyph: null,
+    instants: [],
     cover: null,
     created_at: happened_at,
     updated_at: happened_at,
+    pebble: {
+      id: `pebble-${id}`,
+      intensity: 2,
+      positiveness: 0,
+      visibility: "private",
+      emotion_id: "e",
+      soul_ids,
+      domain_ids: [],
+      collection_ids: [],
+      cards: [],
+      glyph: null,
+      created_at: happened_at,
+      updated_at: happened_at,
+    },
   }
 }
 
@@ -62,6 +68,19 @@ describe("personsOfWeek", () => {
       const [row] = personsOfWeek([pebble("a", at, ["mara"])], DST_WEEK, souls(soul("mara")), "en")
       expect(row.days).toEqual([false, false, false, false, false, false, true])
     }
+  })
+
+  it("counts no one for a bare moment", () => {
+    const bare: Moment = { ...pebble("b", "2026-10-20T08:00:00Z", []), pebble: null }
+    const rows = personsOfWeek(
+      [bare, pebble("a", "2026-10-19T08:00:00Z", ["mara"])],
+      DST_WEEK,
+      souls(soul("mara")),
+      "en",
+    )
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({ dayCount: 1, pebbleCount: 1 })
+    expect(rows[0].days).toEqual([true, false, false, false, false, false, false])
   })
 
   it("leaves out pebbles of the week before or after", () => {
