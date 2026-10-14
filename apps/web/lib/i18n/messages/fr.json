@@ -892,6 +892,16 @@
       "noCollection": "Aucune",
       "karmaAria": "{count} karma gagnés"
     },
+    "capture": {
+      "aria": "Capturer un moment, une question à la fois",
+      "save": "Garder le moment",
+      "makePebbleNow": "En faire un galet maintenant",
+      "nameSubtitle": "Un nom, une photo, ou les deux.",
+      "nameLabel": "Nom",
+      "closeTitle": "Tu gardes ce moment ?",
+      "keepGoing": "Continuer l'édition",
+      "charactersLeft": "{count} caractères restants"
+    },
     "draft": {
       "publishFailed": "Impossible d'enregistrer ce galet. Réessaie.",
       "needsDomain": "Un galet a besoin d'un pan de ta vie. Choisis-en un, puis réessaie.",

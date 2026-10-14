@@ -892,6 +892,16 @@
       "noCollection": "None",
       "karmaAria": "Earned {count} karma"
     },
+    "capture": {
+      "aria": "Capture a moment, one question at a time",
+      "save": "Save moment",
+      "makePebbleNow": "Make it a pebble now",
+      "nameSubtitle": "A name, a photo, or both.",
+      "nameLabel": "Name",
+      "closeTitle": "Keep this moment?",
+      "keepGoing": "Keep going",
+      "charactersLeft": "{count} characters left"
+    },
     "draft": {
       "publishFailed": "Couldn't save that pebble. Please try again.",
       "needsDomain": "A pebble needs a part of life. Pick one, then try again.",
