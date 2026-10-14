@@ -14,10 +14,10 @@ import { cn } from "@/lib/utils"
 //   - cleanup of orphaned uploads on Replace/Remove/Discard.
 //
 // The hook does NOT persist anything — committing the staged snap happens in
-// the Save flow via `compose-pebble-update`. It only handles the in-edit
+// Edit moment's Save via `save_moment` (R6). It only handles the in-edit
 // lifecycle: any snap uploaded during the edit session that is not the
-// pebble's original is "uncommitted" and must be removed from Storage if the
-// user cancels/replaces it.
+// moment's original is "uncommitted", has no row, and its files must be
+// removed from Storage if the user cancels/replaces it.
 // ---------------------------------------------------------------------------
 
 type SnapStagingOptions = {
@@ -26,7 +26,8 @@ type SnapStagingOptions = {
   draftSnap: PebbleSnap | null
   setDraftSnap: (snap: PebbleSnap | null) => void
   uploadSnap: (file: File) => Promise<PebbleSnap>
-  deletePebbleMedia: (snapId: string) => Promise<void>
+  /** Removes an uncommitted upload's files (storage only: it has no row). */
+  discardFiles: (storagePaths: string[]) => Promise<void>
 }
 
 export type SnapStagingResult = {
@@ -44,7 +45,7 @@ export function useSnapStaging({
   draftSnap,
   setDraftSnap,
   uploadSnap,
-  deletePebbleMedia,
+  discardFiles,
 }: SnapStagingOptions): SnapStagingResult {
   const [uploading, setUploading] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -79,16 +80,13 @@ export function useSnapStaging({
   const removeFromStorage = useCallback(
     async (snap: PebbleSnap) => {
       try {
-        await deletePebbleMedia(snap.id)
+        await discardFiles([snap.storage_path])
       } catch (err) {
-        // The snap row may not exist if upload completed but the row was
-        // never persisted (never happens with our flow today — uploadSnap
-        // only writes to Storage, not to the DB). Either way, swallow the
-        // RPC error so the user-visible cancel/replace path doesn't fail.
-        console.warn("[pebble-edit] staged snap cleanup failed", err)
+        // Best-effort: the user-visible cancel/replace path never fails on it.
+        console.warn("[moment-edit] staged snap cleanup failed", err)
       }
     },
-    [deletePebbleMedia],
+    [discardFiles],
   )
 
   const pickFile = useCallback(

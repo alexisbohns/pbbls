@@ -2,52 +2,31 @@
 
 import { use } from "react"
 import { useTranslations } from "next-intl"
-import { usePebble } from "@/lib/data/usePebble"
-import { useSouls } from "@/lib/data/useSouls"
-import { useCollections } from "@/lib/data/useCollections"
-import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
-import { PebbleEdit } from "@/components/pebble/PebbleEdit"
+import { useMomentRoute } from "@/lib/data/useMomentRoute"
+import { MomentEdit } from "@/components/pebble/MomentEdit"
 import { PebbleNotFound } from "@/components/pebble/PebbleNotFound"
 import { PageLayout } from "@/components/layout/PageLayout"
 
-export default function PebbleEditPage({
+/** Edit moment (#1050, R5). The id is a moment id; a pebble id redirects. */
+export default function MomentEditPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
   const t = useTranslations("pebble")
-  const {
-    pebble,
-    loading: pebbleLoading,
-    updatePebble,
-    uploadSnap,
-    deletePebbleMedia,
-  } = usePebble(id)
-  const { souls, loading: soulsLoading, addSoul } = useSouls()
-  const { collections, loading: collectionsLoading } = useCollections()
-  const { glyphs: marks, loading: marksLoading } = useUsableGlyphs()
-
-  const loading = pebbleLoading || soulsLoading || collectionsLoading || marksLoading
+  const tErrors = useTranslations("moment.errors")
+  const { moment, loading, redirecting } = useMomentRoute(id, "/edit")
 
   return (
     <PageLayout>
       <section>
-        {loading ? (
+        {loading || redirecting ? (
           <p className="text-sm text-muted-foreground">{t("loading")}</p>
-        ) : pebble ? (
-          <PebbleEdit
-            pebble={pebble}
-            souls={souls}
-            collections={collections}
-            marks={marks}
-            onUpdatePebble={(input) => updatePebble(input)}
-            onUploadSnap={uploadSnap}
-            onDeletePebbleMedia={deletePebbleMedia}
-            onAddSoul={(name) => addSoul({ name })}
-          />
+        ) : moment ? (
+          <MomentEdit moment={moment} />
         ) : (
-          <PebbleNotFound />
+          <PebbleNotFound description={tErrors("momentNotFound")} />
         )}
       </section>
     </PageLayout>

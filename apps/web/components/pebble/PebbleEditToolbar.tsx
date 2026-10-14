@@ -5,16 +5,19 @@ import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 
 type PebbleEditToolbarProps = {
+  /** The screen's name, shown between the two actions. */
+  title: string
   isSaving: boolean
   canSave: boolean
   onCancel: () => void
   onSave: () => void
 }
 
-// Cancel · EDITION · Save — sticky top bar for the Edit screen.
+// Cancel · title · Save — the top bar of Edit moment and Edit pebble.
 // Save is disabled when pristine, saving, or while a picture upload hasn't
 // resolved (`canSave` carries the combined gate from the parent).
 export function PebbleEditToolbar({
+  title,
   isSaving,
   canSave,
   onCancel,
@@ -39,7 +42,7 @@ export function PebbleEditToolbar({
         </button>
       </div>
       <p className="justify-self-center text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">
-        {isSaving ? t("saving") : t("toolbarTitle")}
+        {isSaving ? t("saving") : title}
       </p>
       <div className="justify-self-end">
         <button
