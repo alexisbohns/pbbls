@@ -1,17 +1,21 @@
 "use client"
 
-import { use, useCallback } from "react"
+import { use, useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { usePebble } from "@/lib/data/usePebble"
+import { useMomentRoute } from "@/lib/data/useMomentRoute"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
-import { PebbleDetail } from "@/components/pebble/PebbleDetail"
+import { MomentRead } from "@/components/pebble/MomentRead"
 import { PebbleNotFound } from "@/components/pebble/PebbleNotFound"
 import { PageLayout } from "@/components/layout/PageLayout"
 
-export default function PebbleDetailPage({
+/**
+ * A moment's read page (#1050). The id is a MOMENT id; a link minted with a
+ * pebble id redirects to its moment's page.
+ */
+export default function MomentReadPage({
   params,
 }: {
   params: Promise<{ id: string }>
@@ -19,40 +23,34 @@ export default function PebbleDetailPage({
   const { id } = use(params)
   const router = useRouter()
   const t = useTranslations("pebble")
-  const { pebble, loading: pebbleLoading, updatePebble, uploadSnap } = usePebble(id)
-  const { souls, loading: soulsLoading, addSoul } = useSouls()
+  const { moment, loading: momentLoading, redirecting } = useMomentRoute(id)
+  const { souls, loading: soulsLoading } = useSouls()
   const { collections, loading: collectionsLoading } = useCollections()
   const { glyphs: marks, loading: marksLoading } = useUsableGlyphs()
+  // Set once the moment is deleted, so the page leaves without flashing "not found".
+  const [leaving, setLeaving] = useState(false)
 
-  const loading = pebbleLoading || soulsLoading || collectionsLoading || marksLoading
+  const loading = momentLoading || soulsLoading || collectionsLoading || marksLoading
 
-
-  const handleAddSoul = useCallback(
-    async (name: string) => {
-      const soul = await addSoul({ name })
-      if (pebble) {
-        await updatePebble({ soul_ids: [...pebble.soul_ids, soul.id] })
-      }
-    },
-    [addSoul, updatePebble, pebble],
-  )
+  const handleDeleted = useCallback(() => {
+    setLeaving(true)
+    router.replace("/path")
+  }, [router])
 
   return (
     <PageLayout>
       <section>
-        {loading ? (
+        {loading || redirecting || leaving ? (
           <p className="text-sm text-muted-foreground">{t("loading")}</p>
-        ) : pebble ? (
-          <PebbleDetail
-            pebble={pebble}
+        ) : moment ? (
+          <MomentRead
+            moment={moment}
             souls={souls}
             collections={collections}
             marks={marks}
-            onUpdatePebble={updatePebble}
-            onUploadSnap={uploadSnap}
-            onAddSoul={handleAddSoul}
+            onNavigate={(href) => router.push(href)}
             onClose={() => router.back()}
-            onEdit={() => router.push(`/pebble/${id}/edit`)}
+            onDeleted={handleDeleted}
           />
         ) : (
           <PebbleNotFound />

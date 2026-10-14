@@ -50,7 +50,8 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
   // disappears (e.g. last pebble of a past, non-current week deleted) —
   // no setState-during-render, no useEffect setState ping-pong.
   const [focusedKey, setFocusedKey] = useState<string>(() => isoWeekKey(today))
-  const [selectedPebbleId, setSelectedPebbleId] = useState<string | null>(null)
+  // The read page in the peek, by MOMENT id (#1050).
+  const [selectedMomentId, setSelectedMomentId] = useState<string | null>(null)
 
   const focusedEntry = entries.find((e) => e.weekStartIso === focusedKey)
     ?? (entries.length > 0 ? closestEntry(entries, isoWeekStart(today)) : undefined)
@@ -82,7 +83,7 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
     setFocusedKey(isoWeekKey(date))
   }, [])
 
-  const handleClosePeek = useCallback(() => setSelectedPebbleId(null), [])
+  const handleClosePeek = useCallback(() => setSelectedMomentId(null), [])
 
   if (loading && pebbles.length === 0) {
     return (
@@ -117,14 +118,14 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
           today={today}
           souls={souls}
           onFocusChange={setFocusedFromDate}
-          onSelectPebble={setSelectedPebbleId}
+          onSelectPebble={setSelectedMomentId}
         />
       </div>
       {/* The stones' shared shapes and filters, once for every week the pager holds. */}
       <StoneSprite />
       <PathBottomDock className="spread:right-auto spread:left-(--spine-verso-x) spread:w-(--spine-verso-w)" />
       <PebblePeek
-        pebbleId={selectedPebbleId}
+        momentId={selectedMomentId}
         onClose={handleClosePeek}
       />
     </div>

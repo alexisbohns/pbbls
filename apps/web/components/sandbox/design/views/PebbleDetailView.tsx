@@ -1,32 +1,33 @@
 "use client"
 
 import { PageLayout } from "@/components/layout/PageLayout"
-import { PebbleDetail } from "@/components/pebble/PebbleDetail"
+import { MomentRead } from "@/components/pebble/MomentRead"
 import { useCollections } from "@/lib/data/useCollections"
-import { usePebbles } from "@/lib/data/usePebbles"
+import { useMoments } from "@/lib/data/useMoments"
 import { useSouls } from "@/lib/data/useSouls"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 
-/** app/pebble/[id]/page.tsx for the newest fixture pebble. Every write is a no-op. */
+const noop = () => {}
+
+/** app/pebble/[id]/page.tsx for the newest fixture moment. Navigation and delete are no-ops. */
 export function PebbleDetailView() {
-  const { pebbles } = usePebbles()
+  const { moments } = useMoments()
   const { souls } = useSouls()
   const { collections } = useCollections()
   const { glyphs: marks } = useUsableGlyphs()
-  const pebble = pebbles[0]
-  if (!pebble) return null
+  const moment = moments[0]
+  if (!moment) return null
 
   return (
     <PageLayout>
       <section>
-        <PebbleDetail
-          pebble={pebble}
+        <MomentRead
+          moment={moment}
           souls={souls}
           collections={collections}
           marks={marks}
-          onUpdatePebble={async () => pebble}
-          onUploadSnap={async () => ({ id: "design-snap", storage_path: "", sort_order: 0 })}
-          onAddSoul={async () => {}}
+          onNavigate={noop}
+          onDeleted={noop}
         />
       </section>
     </PageLayout>
