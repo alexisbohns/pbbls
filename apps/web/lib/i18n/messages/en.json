@@ -745,8 +745,6 @@
     },
     "peek": {
       "close": "Close",
-      "souls": "Souls",
-      "picture": "Picture",
       "editSoulAria": "Edit souls — {name}"
     },
     "editIntensityAria": "Edit intensity and valence",
@@ -811,7 +809,6 @@
       "mood": "Mood",
       "souls": "Souls",
       "optional": "Optional",
-      "collection": "Collection",
       "none": "None",
       "privacy": "Who can see it?"
     },

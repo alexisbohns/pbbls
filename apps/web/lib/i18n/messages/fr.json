@@ -745,8 +745,6 @@
     },
     "peek": {
       "close": "Fermer",
-      "souls": "Âmes",
-      "picture": "Photo",
       "editSoulAria": "Modifier les âmes — {name}"
     },
     "editIntensityAria": "Modifier l'intensité et la valence",
@@ -811,7 +809,6 @@
       "mood": "Humeur",
       "souls": "Âmes",
       "optional": "Facultatif",
-      "collection": "Collection",
       "none": "Aucune",
       "privacy": "Qui peut le voir ?"
     },
