@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef } from "react"
-import { stepIndex, RECORD_STEPS, type RecordStep } from "@/lib/record/steps"
+import { stepIndexIn } from "@/lib/record/steps"
 
 /** Marker on `history.state` identifying an entry this flow pushed. */
 const STEP_KEY = "pbblsRecordStep"
@@ -20,10 +20,15 @@ const STEP_KEY = "pbblsRecordStep"
  * here as a `popstate`. Entries carry no URL change: a `?step=` in the address
  * bar would be stale the moment the page is reloaded, since the draft itself
  * lives in the autosave snapshot rather than in the URL.
+ *
+ * Generic over the step list so the record and Complete flows share it.
+ * `steps` must be a stable (module-level) array: an entry stores an index
+ * into it.
  */
-export function useRecordFlowHistory(
-  step: RecordStep,
-  onPopTo: (step: RecordStep) => void,
+export function useRecordFlowHistory<S extends string>(
+  steps: readonly S[],
+  step: S,
+  onPopTo: (step: S) => void,
 ) {
   const syncedRef = useRef<number | null>(null)
 
@@ -32,19 +37,19 @@ export function useRecordFlowHistory(
       const state = event.state as Record<string, unknown> | null
       const index = state?.[STEP_KEY]
       // No marker means we popped past the flow's first entry, onto whatever
-      // preceded /record. That is a route change and Next's router owns it.
+      // preceded the flow. That is a route change and Next's router owns it.
       if (typeof index !== "number") return
-      const popped = RECORD_STEPS[index]
+      const popped = steps[index]
       if (!popped) return
       syncedRef.current = index
       onPopTo(popped)
     }
     window.addEventListener("popstate", onPopState)
     return () => window.removeEventListener("popstate", onPopState)
-  }, [onPopTo])
+  }, [steps, onPopTo])
 
   useEffect(() => {
-    const index = stepIndex(step)
+    const index = stepIndexIn(steps, step)
 
     // Claim the entry the flow opened on, so popping back to it is recognised
     // as step 0 rather than as leaving. Spread the existing state: Next's
@@ -65,7 +70,7 @@ export function useRecordFlowHistory(
       window.history.pushState({ ...window.history.state, [STEP_KEY]: next }, "")
     }
     syncedRef.current = index
-  }, [step])
+  }, [steps, step])
 
   /**
    * The in-flow back gesture. Routed through history rather than straight into
