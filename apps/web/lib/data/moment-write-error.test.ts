@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { MomentWriteError, momentErrorKey } from "./moment-write-error"
+import { MOMENT_WRITE_SLUGS, MomentWriteError, momentErrorKey } from "./moment-write-error"
+import en from "@/lib/i18n/messages/en.json"
+import fr from "@/lib/i18n/messages/fr.json"
 import { IOS_ERR_MOMENT_EMPTY, IOS_ERR_NEEDS_DOMAIN } from "./__fixtures__/moments-captured"
 
 // PostgREST error bodies: the two captured ones verbatim, the rest shaped from
@@ -41,5 +43,15 @@ describe("momentErrorKey", () => {
     const err = new MomentWriteError("save_moment", JSON.parse(IOS_ERR_MOMENT_EMPTY))
     expect(err.code).toBe("P0001")
     expect(err.message).toBe("save_moment failed: moment_empty")
+  })
+})
+
+describe("moment.errors copy", () => {
+  it("exists in both catalogs for every key", () => {
+    const keys = [...Object.values(MOMENT_WRITE_SLUGS), "generic" as const]
+    for (const key of keys) {
+      expect(en.moment.errors[key]).toBeTruthy()
+      expect(fr.moment.errors[key]).toBeTruthy()
+    }
   })
 })
