@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl"
 import type { Pebble, Emotion } from "@/lib/types"
 import { useFormatTime } from "@/lib/i18n"
 import { PebbleFramed } from "@/components/pebble/PebbleFramed"
+import { stoneLookOfPebble } from "@/lib/data/moment-row"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
 import { EmotionBadge } from "@/components/ui/EmotionBadge"
 
@@ -52,7 +53,7 @@ export function PebbleCard({ pebble, emotion, soulNames, onSelect }: PebbleCardP
         {isLarge ? (
           <>
             <PebbleFramed
-              pebble={pebble}
+              look={stoneLookOfPebble(pebble)}
               className="size-16 shrink-0"
             />
 
@@ -88,7 +89,7 @@ export function PebbleCard({ pebble, emotion, soulNames, onSelect }: PebbleCardP
         ) : (
           <>
             <PebbleFramed
-              pebble={pebble}
+              look={stoneLookOfPebble(pebble)}
               className="size-10 shrink-0"
             />
 

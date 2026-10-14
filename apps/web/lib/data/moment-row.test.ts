@@ -7,6 +7,7 @@ import {
   momentDisplayName,
   momentFromViewRow,
   momentPebbleFromRow,
+  stoneLookOf,
 } from "./moment-row"
 import {
   ANDROID_DETAIL_BARE_NAMED,
@@ -155,6 +156,26 @@ describe("legacyPebbleFromMoment", () => {
     const pebble = legacyPebbleFromMoment({ ...m, name: null, updated_at: "2026-10-14T09:00:00Z" })
     expect(pebble.name).toBe("")
     expect(pebble.updated_at).toBe("2026-10-14T09:00:00Z")
+  })
+})
+
+describe("stoneLookOf", () => {
+  it("draws a completed moment from its pebble, with the pebble's record date", () => {
+    const look = stoneLookOf(momentFromViewRow(row(IOS_DETAIL_COMPLETED), new Map()))
+    expect(look).toMatchObject({
+      intensity: 2,
+      positiveness: 1,
+      emotion_id: "332cabe9-c76d-d737-bba6-f2d7024de808",
+      happened_at: "2026-10-12T08:30:00+00:00",
+      created_at: "2026-10-13T00:12:41.550659+00:00",
+      name: "Coffee",
+    })
+    expect(look?.glyph?.id).toBe("f738661b-6f49-448e-916c-443fed751475")
+  })
+
+  it("is null for a bare moment: the blank stone", () => {
+    expect(stoneLookOf(momentFromViewRow(row(IOS_DETAIL_PHOTO), new Map()))).toBeNull()
+    expect(stoneLookOf(momentFromViewRow(firstRow(ANDROID_DETAIL_BARE_NAMED), new Map()))).toBeNull()
   })
 })
 

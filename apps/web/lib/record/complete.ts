@@ -1,6 +1,6 @@
 import type { CompleteDraft } from "@/lib/data/moment-payloads"
-import { isCompleted, legacyPebbleFromMoment } from "@/lib/data/moment-row"
-import type { Intensity, Moment, Pebble, Positiveness, Visibility } from "@/lib/types"
+import { isCompleted, stoneLookOf } from "@/lib/data/moment-row"
+import type { Intensity, Moment, Positiveness, StoneLook, Visibility } from "@/lib/types"
 import { nextIn, previousIn, COMPLETE_STEPS, type CompleteStep } from "./steps"
 
 /**
@@ -196,40 +196,26 @@ export function completeFlowReducer(
  * the reload failed the store is stale (no pebble, or the moment gone): draw
  * the draft's look on the moment as it was before the write, with no glyph,
  * and say `reloaded: false` so no karma is claimed.
- *
- * The flat `Pebble` is what `PebbleFramed` takes until Part 4's `StoneLook`.
  */
-export function successPebble(
+export function successLook(
   current: Moment | undefined,
   before: Moment,
   draft: CompleteDraft,
-): { pebble: Pebble; reloaded: boolean } {
+): { look: StoneLook; reloaded: boolean } {
   if (current && isCompleted(current)) {
-    return { pebble: legacyPebbleFromMoment(current), reloaded: true }
+    return { look: stoneLookOf(current), reloaded: true }
   }
   const m = current ?? before
   return {
     reloaded: false,
-    pebble: {
-      id: m.id,
-      moment_id: m.id,
-      name: m.name ?? "",
-      description: m.description ?? undefined,
-      happened_at: m.happened_at,
+    look: {
       intensity: draft.intensity,
       positiveness: draft.positiveness,
-      visibility: draft.visibility,
       emotion_id: draft.emotionId ?? "",
-      soul_ids: draft.soulIds,
-      domain_ids: draft.domainIds,
-      collection_ids: draft.collectionIds,
-      instants: m.instants,
-      snaps: m.snaps,
-      cards: [],
       glyph: null,
-      cover: m.cover,
+      happened_at: m.happened_at,
       created_at: m.created_at,
-      updated_at: m.updated_at,
+      name: m.name,
     },
   }
 }

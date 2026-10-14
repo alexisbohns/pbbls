@@ -3,11 +3,11 @@
 import { useCallback, useState, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import type { CompletedMoment, Mark, Pebble } from "@/lib/types"
+import type { CompletedMoment, Mark, StoneLook } from "@/lib/types"
 import { useMoments } from "@/lib/data/useMoments"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
-import { legacyPebbleFromMoment } from "@/lib/data/moment-row"
+import { stoneLookOf } from "@/lib/data/moment-row"
 import { completePebblePayload } from "@/lib/data/moment-payloads"
 import { momentErrorKey } from "@/lib/data/moment-write-error"
 import { usePebbleEnrichDraft } from "@/lib/hooks/usePebbleEnrichDraft"
@@ -114,8 +114,8 @@ export function PebbleEnrich({ moment, marks }: PebbleEnrichProps) {
 
   // The stone reflects the staged look; its glyph is the server's and follows
   // a domain or collection change once saved.
-  const draftPebble: Pebble = {
-    ...legacyPebbleFromMoment(moment),
+  const draftLook: StoneLook = {
+    ...stoneLookOf(moment),
     intensity: draft.intensity,
     positiveness: draft.positiveness,
     emotion_id: draft.emotionId ?? moment.pebble.emotion_id,
@@ -143,7 +143,7 @@ export function PebbleEnrich({ moment, marks }: PebbleEnrichProps) {
               aria-label={tPebble("editIntensityAria")}
               className="mx-auto mb-4 block cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <PebbleFramed pebble={draftPebble} className="mx-auto size-24" />
+              <PebbleFramed look={draftLook} className="mx-auto size-24" />
             </SheetTrigger>
           }
         >

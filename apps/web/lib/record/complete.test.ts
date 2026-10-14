@@ -6,7 +6,7 @@ import {
   initialCompleteState,
   isDraftComplete,
   optionalButtonIsSkip,
-  successPebble,
+  successLook,
   type CompleteDraft,
   type CompleteFlowAction,
   type CompleteFlowState,
@@ -175,7 +175,7 @@ describe("firstGap", () => {
   })
 })
 
-describe("successPebble", () => {
+describe("successLook", () => {
   const bare: Moment = {
     id: "492238c2-e6c2-4cea-943b-26ea8e16b961",
     name: null,
@@ -205,24 +205,23 @@ describe("successPebble", () => {
   const draft = answered({ intensity: 1, positiveness: -1, emotionId: "e-draft" })
 
   it("draws the reloaded pebble, with its derived glyph", () => {
-    const { pebble: drawn, reloaded } = successPebble({ ...bare, pebble }, bare, draft)
+    const { look, reloaded } = successLook({ ...bare, pebble }, bare, draft)
     expect(reloaded).toBe(true)
-    expect(drawn.id).toBe(pebble.id)
-    expect(drawn.moment_id).toBe(bare.id)
-    expect(drawn.glyph).toEqual(pebble.glyph)
-    expect(drawn.emotion_id).toBe("e-server")
+    expect(look.glyph).toEqual(pebble.glyph)
+    expect(look).toMatchObject({ intensity: 3, positiveness: 1, emotion_id: "e-server", created_at: pebble.created_at })
   })
 
   it("falls back to the draft's look with no glyph when the store is stale", () => {
-    const { pebble: drawn, reloaded } = successPebble(bare, bare, draft)
+    const { look, reloaded } = successLook(bare, bare, draft)
     expect(reloaded).toBe(false)
-    expect(drawn).toMatchObject({ intensity: 1, positiveness: -1, emotion_id: "e-draft", glyph: null })
-    expect(drawn.happened_at).toBe(bare.happened_at)
+    expect(look).toMatchObject({ intensity: 1, positiveness: -1, emotion_id: "e-draft", glyph: null })
+    expect(look.happened_at).toBe(bare.happened_at)
   })
 
   it("falls back to the moment as it was when it has gone from the store", () => {
-    const { pebble: drawn, reloaded } = successPebble(undefined, bare, draft)
+    const renamed = { ...bare, name: "Before the write" }
+    const { look, reloaded } = successLook(undefined, renamed, draft)
     expect(reloaded).toBe(false)
-    expect(drawn.moment_id).toBe(bare.id)
+    expect(look).toMatchObject({ name: "Before the write", happened_at: bare.happened_at })
   })
 })

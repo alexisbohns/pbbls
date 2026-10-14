@@ -6,6 +6,7 @@ import type {
   Pebble,
   PebbleCard,
   Positiveness,
+  StoneLook,
   Visibility,
 } from "@/lib/types"
 import { pebbleCover, pebbleGlyphFromRow, snapOriginalPath, sortedSnaps } from "@/lib/data/pebble-row"
@@ -158,6 +159,40 @@ export function legacyPebbleFromMoment(m: CompletedMoment): Pebble {
 
 export function isCompleted(m: Moment): m is CompletedMoment {
   return m.pebble !== null
+}
+
+/**
+ * The look a moment's stone is drawn from, or null for a bare moment (the
+ * blank stone, R4). The fossil reads the PEBBLE's `created_at`, as the flat
+ * pebble did: the record date is when it was made a pebble.
+ */
+export function stoneLookOf(m: CompletedMoment): StoneLook
+export function stoneLookOf(m: Moment): StoneLook | null
+export function stoneLookOf(m: Moment): StoneLook | null {
+  const p = m.pebble
+  if (!p) return null
+  return {
+    intensity: p.intensity,
+    positiveness: p.positiveness,
+    emotion_id: p.emotion_id,
+    glyph: p.glyph,
+    happened_at: m.happened_at,
+    created_at: p.created_at,
+    name: m.name,
+  }
+}
+
+/** @deprecated The flat pebble's look, for consumers not yet on `Moment`; removed in #1050 Part 6. */
+export function stoneLookOfPebble(p: Pebble): StoneLook {
+  return {
+    intensity: p.intensity,
+    positiveness: p.positiveness,
+    emotion_id: p.emotion_id,
+    glyph: p.glyph,
+    happened_at: p.happened_at,
+    created_at: p.created_at,
+    name: p.name,
+  }
 }
 
 /** The name to show: trimmed, and null when blank (the caller says "Untitled"). */

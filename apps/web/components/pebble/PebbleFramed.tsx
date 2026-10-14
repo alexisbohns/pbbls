@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 
-import type { Pebble } from "@/lib/types"
+import type { StoneLook } from "@/lib/types"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import {
   SIZE_BY_INTENSITY,
@@ -12,12 +12,14 @@ import {
   outlineAspectRatio,
 } from "@/lib/config/pebble-geometry"
 import { pebbleFrameColors } from "@/lib/utils/pebble-frame-colors"
+import { BlankStone } from "./BlankStone"
 import { PebbleOutlineBackdrop } from "./PebbleOutlineBackdrop"
 import { PebbleVisual } from "./PebbleVisual"
 import { cn } from "@/lib/utils"
 
 type PebbleFramedProps = {
-  pebble: Pebble
+  /** Null is a bare moment: the blank stone (R4). */
+  look: StoneLook | null
   className?: string
   // When true, the backdrop springs in and the pebble fades on top (used by the
   // detail view). Respects prefers-reduced-motion. Defaults off (static rows).
@@ -33,25 +35,29 @@ type PebbleFramedProps = {
  * the box, the pebble is scaled down (~0.74, per-size) and centered so it sits
  * inside the silhouette with ~13% margin. Frame fill + pebble stroke come from
  * the intensity-driven `pebbleFrameColors` rule (theme-neutral, matching iOS).
+ *
+ * A null look (a moment that is not a pebble yet) draws `BlankStone`.
  */
 export function PebbleFramed({
-  pebble,
+  look,
   className,
   animateIn = false,
 }: PebbleFramedProps) {
   const prefersReducedMotion = useReducedMotion()
   const { paletteByEmotionId } = useEmotionPalettes()
-  const palette = paletteByEmotionId.get(pebble.emotion_id)
+  const palette = look ? paletteByEmotionId.get(look.emotion_id) : undefined
+
+  if (!look) return <BlankStone className={className} />
 
   // No palette (unauthenticated previews, legacy rows) → render the bare
   // pebble, matching PebbleVisual's existing fallback behaviour.
   if (!palette) {
-    return <PebbleVisual pebble={pebble} className={className} />
+    return <PebbleVisual look={look} className={className} />
   }
 
-  const size = SIZE_BY_INTENSITY[pebble.intensity]
-  const polarity = POLARITY_BY_VALENCE[pebble.positiveness]
-  const { fillColor, fillOpacity, strokeColor } = pebbleFrameColors(palette, pebble.intensity)
+  const size = SIZE_BY_INTENSITY[look.intensity]
+  const polarity = POLARITY_BY_VALENCE[look.positiveness]
+  const { fillColor, fillOpacity, strokeColor } = pebbleFrameColors(palette, look.intensity)
   const shouldAnimate = animateIn && !prefersReducedMotion
 
   const scaleStyle: CSSProperties = {
@@ -94,7 +100,7 @@ export function PebbleFramed({
         >
           <div className="size-full" style={scaleStyle}>
             <PebbleVisual
-              pebble={pebble}
+              look={look}
               strokeOverride={strokeColor}
               className="size-full"
             />

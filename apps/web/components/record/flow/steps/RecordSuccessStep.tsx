@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 import type { Pebble } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { PebbleFramed } from "@/components/pebble/PebbleFramed"
+import { stoneLookOfPebble } from "@/lib/data/moment-row"
 
 type RecordSuccessStepProps = {
   pebble: Pebble
@@ -27,7 +28,7 @@ export function RecordSuccessStep({ pebble, karmaDelta, onExit }: RecordSuccessS
 
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 py-8">
-      <PebbleFramed pebble={pebble} animateIn className="w-56" />
+      <PebbleFramed look={stoneLookOfPebble(pebble)} animateIn className="w-56" />
 
       <div className="flex flex-col items-center gap-2 text-center">
         {/* User-authored, so never localized. */}

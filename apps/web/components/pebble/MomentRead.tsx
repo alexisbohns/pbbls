@@ -3,11 +3,10 @@
 import { useState, type ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import type { Collection, Mark, Moment, Soul } from "@/lib/types"
-import { isCompleted, legacyPebbleFromMoment } from "@/lib/data/moment-row"
+import { stoneLookOf } from "@/lib/data/moment-row"
 import { useFormatPeekDate } from "@/lib/i18n"
 import { Button } from "@/components/ui/button"
 import { VISIBILITY_ICONS } from "@/components/record/VisibilityMenu"
-import { BlankStone } from "@/components/pebble/BlankStone"
 import { MomentDeleteDialog } from "@/components/pebble/MomentDeleteDialog"
 import { MomentName } from "@/components/pebble/MomentName"
 import { MomentReadTiles } from "@/components/pebble/MomentReadTiles"
@@ -59,12 +58,9 @@ export function MomentRead({
     .map((id) => souls.find((s) => s.id === id))
     .filter((s): s is Soul => s !== undefined)
 
-  const stone = (className: string, animateIn: boolean): ReactNode =>
-    isCompleted(moment) ? (
-      <PebbleFramed pebble={legacyPebbleFromMoment(moment)} className={className} animateIn={animateIn} />
-    ) : (
-      <BlankStone className={className} />
-    )
+  const stone = (className: string, animateIn: boolean): ReactNode => (
+    <PebbleFramed look={stoneLookOf(moment)} className={className} animateIn={animateIn} />
+  )
 
   const VisibilityIcon = pebble ? VISIBILITY_ICONS[pebble.visibility] : null
 
