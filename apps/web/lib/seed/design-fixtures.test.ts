@@ -38,6 +38,16 @@ describe("design fixtures", () => {
     for (const c of collections) for (const id of c.pebble_ids) expect(pebbleIds).toContain(id)
   })
 
+  it("puts bare moments on the path among the pebbles, newest first", () => {
+    const bare = store.moments.filter((m) => m.pebble === null)
+    expect(bare.map((m) => m.id)).toEqual(["design-bare-named", "design-bare-photo"])
+    expect(store.moments).toHaveLength(store.pebbles.length + bare.length)
+    // The read page's view opens the first moment: still a pebble.
+    expect(store.moments[0].pebble).not.toBeNull()
+    const times = store.moments.map((m) => Date.parse(m.happened_at))
+    expect([...times].sort((a, b) => b - a)).toEqual(times)
+  })
+
   it("has 28 days of assiduity", () => {
     expect(DESIGN_ASSIDUITY).toHaveLength(28)
   })
