@@ -725,9 +725,6 @@
   },
   "pebble": {
     "loading": "Loading…",
-    "notFoundTitle": "Pebble not found",
-    "notFoundInline": "Pebble not found.",
-    "notFoundDescription": "This pebble doesn't exist or may have been removed.",
     "back": "Back to Path",
     "cardAria": "{name}, {time}",
     "instantAlt": "Instant photo for {name}",
@@ -781,6 +778,8 @@
   "moment": {
     "untitled": "Untitled",
     "notAPebble": "Not a pebble yet",
+    "notFoundTitle": "Moment not found",
+    "notFoundInline": "Moment not found.",
     "read": {
       "makeItAPebble": "Make it a pebble",
       "photoAlt": "Moment photo",

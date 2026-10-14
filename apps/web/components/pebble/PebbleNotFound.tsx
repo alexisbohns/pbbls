@@ -8,12 +8,14 @@ type PebbleNotFoundProps = {
   description?: string
 }
 
+/** Not found on a moment route (#1050): the read page, its edits, Complete. */
 export function PebbleNotFound({ description }: PebbleNotFoundProps = {}) {
   const t = useTranslations("pebble")
+  const tMoment = useTranslations("moment")
   return (
     <NotFoundCard
-      title={t("notFoundTitle")}
-      description={description ?? t("notFoundDescription")}
+      title={tMoment("notFoundTitle")}
+      description={description ?? tMoment("errors.momentNotFound")}
       href="/path"
       linkText={t("back")}
     />

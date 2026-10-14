@@ -25,6 +25,7 @@ const SWIPE_VELOCITY_THRESHOLD = 0.5 // px per ms
 export function PebblePeek({ momentId, onClose }: PebblePeekProps) {
   const open = momentId !== null
   const t = useTranslations("pebble")
+  const tMoment = useTranslations("moment")
   const router = useRouter()
 
   const { moment, loading: momentLoading } = useMoment(momentId ?? "")
@@ -121,7 +122,7 @@ export function PebblePeek({ momentId, onClose }: PebblePeekProps) {
               onDeleted={onClose}
             />
           ) : (
-            <p className="text-sm text-muted-foreground">{t("notFoundInline")}</p>
+            <p className="text-sm text-muted-foreground">{tMoment("notFoundInline")}</p>
           )}
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>

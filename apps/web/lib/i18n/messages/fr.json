@@ -725,9 +725,6 @@
   },
   "pebble": {
     "loading": "Chargement…",
-    "notFoundTitle": "Galet introuvable",
-    "notFoundInline": "Galet introuvable.",
-    "notFoundDescription": "Ce galet n'existe pas ou a été supprimé.",
     "back": "Retour au chemin",
     "cardAria": "{name}, {time}",
     "instantAlt": "Photo de l'instant pour {name}",
@@ -781,6 +778,8 @@
   "moment": {
     "untitled": "Sans titre",
     "notAPebble": "Pas encore un galet",
+    "notFoundTitle": "Moment introuvable",
+    "notFoundInline": "Moment introuvable.",
     "read": {
       "makeItAPebble": "En faire un galet",
       "photoAlt": "Photo du moment",
