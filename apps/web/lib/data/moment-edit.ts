@@ -54,6 +54,11 @@ export function momentEditHasContent(draft: MomentEditDraft): boolean {
  * The whole snap set a save sends (R6). An untouched photo keeps the moment's
  * set as it is; a removed photo sends `[]`; a replaced one sends just the new
  * upload, as iOS does with its single form snap.
+ *
+ * The form edits `snaps[0]` only, and `save_moment` replaces the whole set, so
+ * replacing or removing the photo drops every other snap the moment carries.
+ * That matches iOS (R6) and only matters once `max_media_per_pebble` allows
+ * more than one snap; an untouched photo keeps the extras.
  */
 export function snapsAfterEdit(original: readonly PebbleSnap[], staged: PebbleSnap | null): PebbleSnap[] {
   if (staged === null) return []
