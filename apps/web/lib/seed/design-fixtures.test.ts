@@ -41,6 +41,18 @@ describe("design fixtures", () => {
     for (const c of collections) if (c.glyph_id) expect(markIds).toContain(c.glyph_id)
   })
 
+  it("gives a glyphed collection's pebbles its glyph (D5)", () => {
+    const collections = designCollections(completed)
+    const glyphed = collections.filter((c) => c.glyph_id)
+    expect(glyphed.length).toBeGreaterThan(0)
+    for (const c of glyphed) {
+      for (const id of c.pebble_ids) {
+        const member = completed.find((m) => m.pebble.id === id)
+        expect(member?.pebble.glyph?.id).toBe(c.glyph_id)
+      }
+    }
+  })
+
   it("puts bare moments on the path among the pebbles, newest first", () => {
     const bare = store.moments.filter((m) => m.pebble === null)
     expect(bare.map((m) => m.id)).toEqual(["design-bare-named", "design-bare-photo"])

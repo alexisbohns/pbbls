@@ -13,21 +13,29 @@ import { SANDBOX_MARKS, SANDBOX_SCENARIOS, SANDBOX_SOULS } from "./sandbox-pebbl
 const HOUR = 3_600_000
 const SIGNED_UP = "2025-11-02T09:00:00Z"
 
+/** The stack collection: the newest pebbles, under one glyph. */
+const STACK_SIZE = 3
+const STACK_GLYPH = SANDBOX_MARKS[2]
+
 /**
  * The sandbox "mixed" pebbles, re-dated to the hours before `now` (newest
- * first) so the Path view opens on a filled current week.
+ * first) so the Path view opens on a filled current week. The stack
+ * collection's pebbles carry its glyph, as the view derives it (D5).
  */
 export function designPebbles(now: Date): CompletedMoment[] {
   const mixed = SANDBOX_SCENARIOS.find((s) => s.key === "mixed")
   if (!mixed) throw new Error("[design-fixtures] the sandbox 'mixed' scenario is missing")
   return mixed.moments.map((moment, i) => {
     const at = new Date(now.getTime() - (i + 1) * 5 * HOUR).toISOString()
+    const glyph = i < STACK_SIZE
+      ? { id: STACK_GLYPH.id, name: STACK_GLYPH.name, strokes: STACK_GLYPH.strokes, viewBox: STACK_GLYPH.viewBox }
+      : moment.pebble.glyph
     return {
       ...moment,
       happened_at: at,
       created_at: at,
       updated_at: at,
-      pebble: { ...moment.pebble, created_at: at, updated_at: at },
+      pebble: { ...moment.pebble, glyph, created_at: at, updated_at: at },
     }
   })
 }
@@ -36,8 +44,8 @@ export function designPebbles(now: Date): CompletedMoment[] {
 export function designCollections(pebbles: CompletedMoment[]): Collection[] {
   const ids = pebbles.map((m) => m.pebble.id)
   return [
-    { id: "design-col-stack", name: "Summer by the canal", mode: "stack", glyph_id: SANDBOX_MARKS[2].id, pebble_ids: ids.slice(0, 3), created_at: SIGNED_UP, updated_at: SIGNED_UP },
-    { id: "design-col-pack", name: "Little wins", mode: "pack", glyph_id: null, pebble_ids: ids.slice(3, 5), created_at: SIGNED_UP, updated_at: SIGNED_UP },
+    { id: "design-col-stack", name: "Summer by the canal", mode: "stack", glyph_id: STACK_GLYPH.id, pebble_ids: ids.slice(0, STACK_SIZE), created_at: SIGNED_UP, updated_at: SIGNED_UP },
+    { id: "design-col-pack", name: "Little wins", mode: "pack", glyph_id: null, pebble_ids: ids.slice(STACK_SIZE, STACK_SIZE + 2), created_at: SIGNED_UP, updated_at: SIGNED_UP },
     { id: "design-col-track", name: "Morning runs", mode: "track", glyph_id: null, pebble_ids: [], created_at: SIGNED_UP, updated_at: SIGNED_UP },
   ]
 }
