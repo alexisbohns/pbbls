@@ -157,7 +157,10 @@ export function CollectionFormDialog({
             <div className="flex flex-wrap items-center gap-2">
               <Button type="button" variant="outline" onClick={() => setPickerOpen(true)}>
                 <SoulGlyphThumbnail mark={glyph} className="size-5" />
-                {t("glyphChoose")}
+                {glyphId ? t("glyphChange") : t("glyphChoose")}
+                {glyph?.name && (
+                  <span className="sr-only">, {t("glyphCurrent", { name: glyph.name })}</span>
+                )}
               </Button>
               {glyphId && (
                 <Button type="button" variant="ghost" onClick={() => {

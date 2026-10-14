@@ -575,6 +575,8 @@
       "modeLegend": "Mode (optional)",
       "glyphLabel": "Glyph",
       "glyphChoose": "Choose a glyph",
+      "glyphChange": "Change glyph",
+      "glyphCurrent": "current glyph: {name}",
       "removeGlyph": "Remove glyph",
       "glyphFooter": "Pebbles in this collection carry its glyph."
     },

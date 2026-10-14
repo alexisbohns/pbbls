@@ -575,6 +575,8 @@
       "modeLegend": "Mode (facultatif)",
       "glyphLabel": "Glyphe",
       "glyphChoose": "Choisir un glyphe",
+      "glyphChange": "Changer de glyphe",
+      "glyphCurrent": "glyphe actuel : {name}",
       "removeGlyph": "Retirer le glyphe",
       "glyphFooter": "Les galets de cette collection portent son glyphe."
     },
