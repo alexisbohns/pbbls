@@ -8,7 +8,7 @@ The main Pebbles web application — a local-first PWA built with Next.js (App R
 
 ## Data layer
 
-- **Data hooks** live in `lib/data/` — they wrap the `DataProvider` interface: `usePebbles`, `useSouls`, `useCollections`, `useMarks`, `useKarma`, `useBounce`, `useLookupMaps`, `useSupabaseAuth`, `useReset`.
+- **Data hooks** live in `lib/data/` — they wrap the `DataProvider` interface: `useMoments`, `useSouls`, `useCollections`, `useMarks`, `useKarma`, `useBounce`, `useLookupMaps`, `useSupabaseAuth`, `useReset`.
 - **Non-data hooks** live in `lib/hooks/` — UI logic with no data dependency: `useStepNavigation`, `useHaptics`, `useComboboxFilter`, `usePebbleVisual`, etc.
 - Components never call the provider directly — always go through hooks.
 - **Static configs** (emotions, domains, card types, color worlds, pebble shapes, positiveness, navigation) live in `lib/config/` and are imported directly — they do not go through the provider.

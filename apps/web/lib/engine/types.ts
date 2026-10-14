@@ -1,4 +1,4 @@
-import type { Pebble } from "@/lib/types"
+import type { Intensity, Positiveness } from "@/lib/types"
 
 // ── Geometry primitives ────────────────────────────────────────────
 
@@ -35,8 +35,8 @@ export type EngineOutput = {
 // ── PebbleParams (engine input contract) ──────────────────────────
 
 export type PebbleParams = {
-  intensity: Pebble["intensity"]
-  positiveness: Pebble["positiveness"]
+  intensity: Intensity
+  positiveness: Positiveness
   emotionColor: string
   retroactive: boolean
 }

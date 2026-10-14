@@ -16,7 +16,6 @@ import {
 } from "@/lib/data/data-provider"
 import type {
   Moment,
-  Pebble,
   PebbleSnap,
   Soul,
   Collection,
@@ -43,8 +42,6 @@ import {
 import {
   compareMomentsNewestFirst,
   deleteMomentPaths,
-  isCompleted,
-  legacyPebbleFromMoment,
   momentFromViewRow,
 } from "@/lib/data/moment-row"
 import {
@@ -58,11 +55,6 @@ import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment
 
 const PEBBLE_MEDIA_BUCKET = "pebbles-media"
 const SNAP_URL_TTL_SECONDS = 3600
-
-/** The deprecated flat list (#1050 Part 6 removes it): completed moments only. */
-function derivePebbles(moments: readonly Moment[]): Pebble[] {
-  return moments.filter(isCompleted).map(legacyPebbleFromMoment)
-}
 
 export class SupabaseProvider implements DataProvider {
   private store: Store
@@ -168,7 +160,6 @@ export class SupabaseProvider implements DataProvider {
     const moments: Moment[] = momentRows
       .map((row) => momentFromViewRow(row, signedUrlByPath))
       .sort(compareMomentsNewestFirst)
-    const pebbles = derivePebbles(moments)
 
     const souls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
@@ -210,7 +201,6 @@ export class SupabaseProvider implements DataProvider {
 
     const newStore: Store = {
       moments,
-      pebbles,
       souls,
       collections,
       marks,
@@ -384,8 +374,6 @@ export class SupabaseProvider implements DataProvider {
     if (error) throw new Error(`spend_karma failed: ${error.message}`)
     return data as string
   }
-  async listPebbles(): Promise<Pebble[]> { return this.store.pebbles }
-  async getPebble(id: string): Promise<Pebble | undefined> { return this.store.pebbles.find((p) => p.id === id) }
   async listSouls(): Promise<Soul[]> { return this.store.souls }
   async getSoul(id: string): Promise<Soul | undefined> { return this.store.souls.find((s) => s.id === id) }
   async listCollections(): Promise<Collection[]> { return this.store.collections }
@@ -648,7 +636,7 @@ export class SupabaseProvider implements DataProvider {
         ? { ...m, pebble: { ...m.pebble, soul_ids: m.pebble.soul_ids.filter((sid) => sid !== id) } }
         : m,
     )
-    this.mutate({ ...this.store, souls, moments, pebbles: derivePebbles(moments) })
+    this.mutate({ ...this.store, souls, moments })
   }
 
   // ---------------------------------------------------------------------------

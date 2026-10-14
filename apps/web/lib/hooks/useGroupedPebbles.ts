@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 import { useTranslations } from "next-intl"
 import { useFormatDate } from "@/lib/i18n"
-import type { Pebble } from "@/lib/types"
+import type { CompletedMoment } from "@/lib/types"
 import { groupPebblesByDate, type DateGroup } from "@/lib/utils/group-pebbles-by-date"
 
 /**
@@ -11,7 +11,7 @@ import { groupPebblesByDate, type DateGroup } from "@/lib/utils/group-pebbles-by
  * Today/Yesterday detection. The label format mirrors the original UX
  * ("Today — Monday, April 5, 2026") with each piece localized.
  */
-export function useGroupedPebbles(pebbles: Pebble[]): DateGroup[] {
+export function useGroupedPebbles(pebbles: CompletedMoment[]): DateGroup[] {
   const t = useTranslations("path")
   const formatDate = useFormatDate()
 

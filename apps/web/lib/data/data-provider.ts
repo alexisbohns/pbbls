@@ -1,6 +1,5 @@
 import type {
   Moment,
-  Pebble,
   PebbleSnap,
   Soul,
   Collection,
@@ -27,8 +26,6 @@ import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment
 export type Store = {
   /** The source of truth (#1050): every own moment from `v_moments_full`, newest first. */
   moments: Moment[]
-  /** @deprecated Derived from `moments` (completed only) for unported consumers; removed in #1050 Part 6. */
-  pebbles: Pebble[]
   souls: Soul[]
   collections: Collection[]
   marks: Mark[]
@@ -42,7 +39,6 @@ export type Store = {
 
 export const EMPTY_STORE: Store = {
   moments: [],
-  pebbles: [],
   souls: [],
   collections: [],
   marks: [],
@@ -141,9 +137,6 @@ export interface DataProvider {
   getAchievements(): Promise<Achievement[]>
   getAchievementUnlocks(): Promise<AchievementUnlock[]>
   checkAchievements(): Promise<AchievementUnlockResult[]>
-
-  listPebbles(): Promise<Pebble[]>
-  getPebble(id: string): Promise<Pebble | undefined>
 
   // Moments (#1050): the four definer RPCs, called directly, one per user
   // action (R5). Each returns once its RPC succeeded, then reloads the store

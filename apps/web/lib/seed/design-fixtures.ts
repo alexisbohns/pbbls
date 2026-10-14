@@ -1,7 +1,7 @@
 import type { Store } from "@/lib/data/data-provider"
 import type { ConsentRow } from "@/lib/data/consent"
 import { compareMomentsNewestFirst } from "@/lib/data/moment-row"
-import type { Account, Collection, CompletedMoment, Moment, Pebble, Profile, RippleSummary } from "@/lib/types"
+import type { Account, Collection, CompletedMoment, Moment, Profile, RippleSummary } from "@/lib/types"
 import { SANDBOX_MARKS, SANDBOX_SCENARIOS, SANDBOX_SOULS } from "./sandbox-pebbles"
 
 // ---------------------------------------------------------------------------
@@ -17,51 +17,29 @@ const SIGNED_UP = "2025-11-02T09:00:00Z"
  * The sandbox "mixed" pebbles, re-dated to the hours before `now` (newest
  * first) so the Path view opens on a filled current week.
  */
-export function designPebbles(now: Date): Pebble[] {
+export function designPebbles(now: Date): CompletedMoment[] {
   const mixed = SANDBOX_SCENARIOS.find((s) => s.key === "mixed")
   if (!mixed) throw new Error("[design-fixtures] the sandbox 'mixed' scenario is missing")
-  return mixed.pebbles.map((pebble, i) => {
+  return mixed.moments.map((moment, i) => {
     const at = new Date(now.getTime() - (i + 1) * 5 * HOUR).toISOString()
-    return { ...pebble, happened_at: at, created_at: at, updated_at: at }
+    return {
+      ...moment,
+      happened_at: at,
+      created_at: at,
+      updated_at: at,
+      pebble: { ...moment.pebble, created_at: at, updated_at: at },
+    }
   })
 }
 
-export function designCollections(pebbles: Pebble[]): Collection[] {
-  const ids = pebbles.map((p) => p.id)
+/** `pebble_ids` hold PEBBLE ids, as `collection_pebbles` does. */
+export function designCollections(pebbles: CompletedMoment[]): Collection[] {
+  const ids = pebbles.map((m) => m.pebble.id)
   return [
     { id: "design-col-stack", name: "Summer by the canal", mode: "stack", glyph_id: SANDBOX_MARKS[2].id, pebble_ids: ids.slice(0, 3), created_at: SIGNED_UP, updated_at: SIGNED_UP },
     { id: "design-col-pack", name: "Little wins", mode: "pack", glyph_id: null, pebble_ids: ids.slice(3, 5), created_at: SIGNED_UP, updated_at: SIGNED_UP },
     { id: "design-col-track", name: "Morning runs", mode: "track", glyph_id: null, pebble_ids: [], created_at: SIGNED_UP, updated_at: SIGNED_UP },
   ]
-}
-
-/** The moment a fixture pebble completes, for the screens already on `Moment` (#1050). */
-export function designMomentFromPebble(p: Pebble): CompletedMoment {
-  return {
-    id: p.moment_id,
-    name: p.name || null,
-    description: p.description ?? null,
-    happened_at: p.happened_at,
-    snaps: p.snaps,
-    instants: p.instants,
-    cover: p.cover,
-    created_at: p.created_at,
-    updated_at: p.updated_at,
-    pebble: {
-      id: p.id,
-      intensity: p.intensity,
-      positiveness: p.positiveness,
-      visibility: p.visibility,
-      emotion_id: p.emotion_id,
-      soul_ids: p.soul_ids,
-      domain_ids: p.domain_ids,
-      collection_ids: p.collection_ids,
-      cards: p.cards,
-      glyph: p.glyph,
-      created_at: p.created_at,
-      updated_at: p.updated_at,
-    },
-  }
 }
 
 /**
@@ -103,10 +81,8 @@ export function designBareMoments(now: Date): Moment[] {
 export function designStore(now: Date): Store {
   const pebbles = designPebbles(now)
   return {
-    // Newest first, as the provider loads them; the flat pebbles stay the
-    // completed ones for the screens not yet on moments.
-    moments: [...pebbles.map(designMomentFromPebble), ...designBareMoments(now)].sort(compareMomentsNewestFirst),
-    pebbles,
+    // Newest first, as the provider loads them.
+    moments: [...pebbles, ...designBareMoments(now)].sort(compareMomentsNewestFirst),
     souls: SANDBOX_SOULS,
     collections: designCollections(pebbles),
     marks: SANDBOX_MARKS,

@@ -6,6 +6,7 @@ import {
   designPebbles,
   designStore,
 } from "./design-fixtures"
+import { isCompleted } from "@/lib/data/moment-row"
 
 const NOW = new Date("2026-09-28T12:00:00Z")
 
@@ -13,7 +14,8 @@ describe("design fixtures", () => {
   const store = designStore(NOW)
   const soulIds = store.souls.map((s) => s.id)
   const markIds = store.marks.map((m) => m.id)
-  const pebbleIds = store.pebbles.map((p) => p.id)
+  const completed = store.moments.filter(isCompleted)
+  const pebbleIds = completed.map((m) => m.pebble.id)
 
   it("dates every pebble within the week before now, newest first", () => {
     const times = designPebbles(NOW).map((p) => Date.parse(p.happened_at))
@@ -25,23 +27,24 @@ describe("design fixtures", () => {
   })
 
   it("only references souls and marks that are in the store", () => {
-    for (const pebble of store.pebbles) {
-      for (const id of pebble.soul_ids) expect(soulIds).toContain(id)
-      if (pebble.mark_id) expect(markIds).toContain(pebble.mark_id)
+    for (const m of completed) {
+      for (const id of m.pebble.soul_ids) expect(soulIds).toContain(id)
+      if (m.pebble.glyph) expect(markIds).toContain(m.pebble.glyph.id)
     }
     expect(markIds).toContain(DESIGN_PROFILE.glyph_id)
   })
 
   it("fills collections with pebbles from the store, one per mode", () => {
-    const collections = designCollections(store.pebbles)
+    const collections = designCollections(completed)
     expect(collections.map((c) => c.mode)).toEqual(["stack", "pack", "track"])
     for (const c of collections) for (const id of c.pebble_ids) expect(pebbleIds).toContain(id)
+    for (const c of collections) if (c.glyph_id) expect(markIds).toContain(c.glyph_id)
   })
 
   it("puts bare moments on the path among the pebbles, newest first", () => {
     const bare = store.moments.filter((m) => m.pebble === null)
     expect(bare.map((m) => m.id)).toEqual(["design-bare-named", "design-bare-photo"])
-    expect(store.moments).toHaveLength(store.pebbles.length + bare.length)
+    expect(store.moments).toHaveLength(completed.length + bare.length)
     // The read page's view opens the first moment: still a pebble.
     expect(store.moments[0].pebble).not.toBeNull()
     const times = store.moments.map((m) => Date.parse(m.happened_at))

@@ -4,10 +4,12 @@
 // Must stay pure for future PostgreSQL port.
 // ---------------------------------------------------------------------------
 
-import type { Pebble } from "@/lib/types"
+import type { CompletedMoment } from "@/lib/types"
 
 /**
- * Compute the karma delta for a pebble based on enrichment depth.
+ * Compute the karma delta for a completed moment based on enrichment depth.
+ * The description and snaps are the moment's; cards, souls and domains are
+ * its pebble's.
  *
  * Mirrors the SQL `compute_karma_delta` RPC (packages/supabase/supabase/migrations/
  * 20260411000005_security_hardening.sql) — keep the two in sync:
@@ -23,14 +25,15 @@ import type { Pebble } from "@/lib/types"
  * No glyph bonus since the moments split (20261012090100): a pebble's glyph is
  * derived from its collection or domain, not chosen.
  */
-export function computeKarmaDelta(pebble: Pebble): number {
+export function computeKarmaDelta(moment: CompletedMoment): number {
+  const { pebble } = moment
   let delta = 1
 
-  if (pebble.description?.trim()) delta += 1
-  if (pebble.cards?.length) delta += Math.min(pebble.cards.filter((c) => c.value.trim()).length, 4)
+  if (moment.description?.trim()) delta += 1
+  if (pebble.cards.length) delta += Math.min(pebble.cards.filter((c) => c.value.trim()).length, 4)
   if (pebble.soul_ids.length > 0) delta += 1
   if (pebble.domain_ids.length > 0) delta += 1
-  if (pebble.snaps.length > 0) delta += 1
+  if (moment.snaps.length > 0) delta += 1
 
   return Math.min(delta, 10)
 }

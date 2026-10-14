@@ -1,4 +1,4 @@
-import type { Pebble } from "@/lib/types"
+import type { CompletedMoment } from "@/lib/types"
 
 export type WeekGroup = {
   /** ISO 8601 year for the week (per ISO `yearForWeekOfYear`). */
@@ -9,7 +9,7 @@ export type WeekGroup = {
   weekKey: string
   /** Localized label, e.g. `Week 19` / `Semaine 19`. */
   label: string
-  pebbles: Pebble[]
+  pebbles: CompletedMoment[]
 }
 
 export type WeekLabelFormatter = (weekNumber: number) => string
@@ -27,7 +27,7 @@ export type WeekLabelFormatter = (weekNumber: number) => string
  * already sorted descending by `happened_at`.
  */
 export function groupPebblesByISOWeek(
-  pebbles: Pebble[],
+  pebbles: CompletedMoment[],
   formatLabel: WeekLabelFormatter,
 ): WeekGroup[] {
   const sorted = [...pebbles].sort(
