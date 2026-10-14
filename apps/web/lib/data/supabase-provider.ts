@@ -39,7 +39,6 @@ import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 import {
   pebbleGlyphFromRow,
-  pebbleNameFromRow,
   snapOriginalPath,
   snapThumbPath,
   sortedSnaps,
@@ -50,6 +49,10 @@ import {
   legacyPebbleFromMoment,
   momentFromViewRow,
 } from "@/lib/data/moment-row"
+import {
+  compareSharedNewestFirst,
+  sharedConnectionPebbleFromRow,
+} from "@/lib/data/connection-pebble-row"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 import { ComposeError, readEdgeErrorBody } from "@/lib/data/compose-error"
 
@@ -542,49 +545,46 @@ export class SupabaseProvider implements DataProvider {
     if (!peerId) return null
 
     // The widened pebbles_select (M51) trims this to 'private' + 'public'
-    // rows; emotions is reference data (RLS `using (true)`), so the embed
-    // cannot blank rows.
-    // name and happened_at moved to `moments` (#1046); the compat view joins
-    // them back under the same pebbles_select / moments_select rules.
+    // rows; emotions is reference data (RLS `using (true)`), so that embed
+    // cannot blank rows. name and happened_at live on `moments` (#1046);
+    // moments_select opens a connection's moment exactly when one of its
+    // pebbles is readable, and `!inner` drops a row whose moment is not.
+    // v_moments_full cannot serve this: it nests only the CALLER's pebble.
     const { data, error } = await this.supabase
-      .from("v_pebbles_full")
-      .select("id, name, happened_at, visibility, intensity, positiveness, emotion, glyph")
+      .from("pebbles")
+      .select(
+        "id, visibility, intensity, positiveness, emotion:emotions(id, slug, name, color), moment:moments!inner(name, happened_at)",
+      )
       .eq("user_id", peerId)
-      .order("happened_at", { ascending: false })
     if (error) throw new Error(`shared pebbles fetch failed: ${error.message}`)
 
-    return (data ?? []).flatMap((row: Record<string, unknown>) => {
-      // PostgREST returns a to-one FK embed as an object; drop rows with a
-      // broken embed rather than rendering an empty emotion.
-      const emotion = row.emotion as Record<string, unknown> | null
-      if (
-        !emotion ||
-        typeof emotion.id !== "string" ||
-        typeof emotion.slug !== "string" ||
-        typeof emotion.name !== "string" ||
-        typeof emotion.color !== "string"
-      ) {
-        console.warn("[supabase-provider] dropped shared pebble with broken emotion embed", row.id)
-        return []
-      }
-      return [
-        {
-          id: row.id as string,
-          name: pebbleNameFromRow(row.name),
-          happened_at: row.happened_at as string,
-          visibility: (row.visibility as string) as SharedConnectionPebble["visibility"],
-          intensity: row.intensity as number,
-          positiveness: row.positiveness as number,
-          emotion: {
-            id: emotion.id,
-            slug: emotion.slug,
-            name: emotion.name,
-            color: emotion.color,
-          },
-          glyph: pebbleGlyphFromRow(row.glyph),
-        },
-      ]
-    })
+    const rows: Record<string, unknown>[] = data ?? []
+    // The derived glyph (D5), one resolve per row in parallel. The resolver is
+    // gated by pebble readability, so it answers for exactly these rows. A
+    // failed call draws that pebble without a glyph.
+    const glyphs = await Promise.all(
+      rows.map(async (r) => {
+        const { data: g, error: gErr } = await this.supabase.rpc("resolve_pebble_glyph", {
+          p_pebble_id: r.id,
+        })
+        if (gErr) {
+          console.warn("[connections] resolve_pebble_glyph failed", r.id, gErr)
+          return null
+        }
+        return pebbleGlyphFromRow(g)
+      }),
+    )
+
+    return rows
+      .flatMap((row, i) => {
+        const shared = sharedConnectionPebbleFromRow(row, glyphs[i] ?? null)
+        if (!shared) {
+          console.warn("[supabase-provider] dropped shared pebble with a broken embed", row.id)
+          return []
+        }
+        return [shared]
+      })
+      .sort(compareSharedNewestFirst)
   }
 
   async createConnectionInvite(rotate = false): Promise<ConnectionInvite> {
