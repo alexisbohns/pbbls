@@ -4,7 +4,6 @@
 // Must stay pure for future PostgreSQL port.
 // ---------------------------------------------------------------------------
 
-import type { CreatePebbleInput } from "@/lib/data/data-provider"
 import type { Pebble } from "@/lib/types"
 
 /**
@@ -24,7 +23,7 @@ import type { Pebble } from "@/lib/types"
  * No glyph bonus since the moments split (20261012090100): a pebble's glyph is
  * derived from its collection or domain, not chosen.
  */
-export function computeKarmaDelta(pebble: CreatePebbleInput | Pebble): number {
+export function computeKarmaDelta(pebble: Pebble): number {
   let delta = 1
 
   if (pebble.description?.trim()) delta += 1

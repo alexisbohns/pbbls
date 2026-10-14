@@ -48,8 +48,8 @@ import { ValenceSpan, ValenceWord } from "./ValenceHeadline"
  *   it is why this handles raw pointer events rather than a drag gesture that
  *   would negotiate with the page.
  *
- * No haptic at the detents: `RecordFlow` documents why the web flow is the
- * quiet one (the Vibration API is unsupported in Safari/iOS and inconsistent
+ * No haptic at the detents (PD-W16): the web flows are the quiet ones (the
+ * Vibration API is unsupported in Safari/iOS and inconsistent
  * elsewhere), and a substitute animation would be pretending.
  *
  * Hidden from assistive tech on purpose — the fan above is a real radiogroup

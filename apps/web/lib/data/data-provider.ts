@@ -58,21 +58,6 @@ export const EMPTY_STORE: Store = {
 // Input types — omit server-generated fields so callers never touch them.
 // ---------------------------------------------------------------------------
 
-// `instants` is the read-path projection (signed URLs); writes use `snaps`.
-type ServerOwnedPebbleFields =
-  | "id"
-  | "moment_id"
-  | "created_at"
-  | "updated_at"
-  | "instants"
-  // The glyph is derived from a collection or a domain (#1046 D5): `glyph` and
-  // its id `mark_id` are read projections, never written.
-  | "mark_id"
-  | "glyph"
-  | "cover"
-
-export type CreatePebbleInput = Omit<Pebble, ServerOwnedPebbleFields>
-
 // glyph_id is optional on create — providers default it to the system glyph
 // (matches the DB column default in `20260426000000_add_glyph_to_souls.sql`).
 export type CreateSoulInput = Omit<Soul, "id" | "glyph_id" | "created_at" | "updated_at"> & {
@@ -100,36 +85,6 @@ export type WalletHistoryPage = {
 export type AchievementUnlockResult = {
   slug: string
   karmaGranted: number
-}
-
-// ---------------------------------------------------------------------------
-// The composer's device-local autosave (M47) — a PARTIAL compose-pebble wire
-// payload. Deliberately keyed like the wire and not like `CreatePebbleInput`
-// (note `snaps` shaped as the payload wants them). Unset keys are OMITTED,
-// never nulled — `description` is the only key where `null` is meaningful.
-// No glyph: it is derived since #1046 (D5). Server drafts (`pebble_drafts`)
-// were retired by the same split (D7); only the local snapshot remains.
-// See docs/superpowers/specs/2026-07-29-drafts-and-autosave-design.md (D2).
-// ---------------------------------------------------------------------------
-
-export type DraftSnapPayload = {
-  id: string
-  storage_path: string
-  sort_order: number
-}
-
-export type PebbleDraftPayload = {
-  name?: string
-  description?: string | null
-  happened_at?: string
-  intensity?: Pebble["intensity"]
-  positiveness?: Pebble["positiveness"]
-  visibility?: Pebble["visibility"]
-  emotion_id?: string
-  domain_ids?: string[]
-  soul_ids?: string[]
-  collection_ids?: string[]
-  snaps?: DraftSnapPayload[]
 }
 
 // ---------------------------------------------------------------------------
@@ -189,7 +144,6 @@ export interface DataProvider {
 
   listPebbles(): Promise<Pebble[]>
   getPebble(id: string): Promise<Pebble | undefined>
-  createPebble(input: CreatePebbleInput): Promise<Pebble>
 
   // Moments (#1050): the four definer RPCs, called directly, one per user
   // action (R5). Each returns once its RPC succeeded, then reloads the store
@@ -217,9 +171,9 @@ export interface DataProvider {
 
   // Snap media: upload processes the file client-side (mirrors iOS
   // ImagePipeline) and writes original + thumb JPEGs to `pebbles-media`. The
-  // returned `PebbleSnap` is what a `save_moment` payload carries in `snaps`
-  // (and the old composer's `createPebble`). A photo is detached by saving
-  // the moment without it (R6), never by a separate call.
+  // returned `PebbleSnap` is what a `save_moment` payload carries in `snaps`.
+  // A photo is detached by saving the moment without it (R6), never by a
+  // separate call.
   uploadSnap(file: File): Promise<PebbleSnap>
 
   // Connections (M49): definer-RPC-only — every write is multi-table validated
