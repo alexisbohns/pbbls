@@ -68,6 +68,32 @@ export function focusKeyFor(moments: readonly Moment[], id: string): string | nu
   return Number.isNaN(at.getTime()) ? null : isoWeekKey(at)
 }
 
+/** What a `?focus=` does on this render: the id it consumes and the week it opens, if any. */
+export type FocusStep = { consumed: string | null; key: string | null }
+
+/**
+ * The `?focus=<momentId>` state machine (R14), run during render. `consumed`
+ * is the focus already handled; null means "no change this render".
+ *
+ * - A new focus whose moment is in the store opens its week and is consumed.
+ * - A new focus whose moment is missing waits while the store loads, and is
+ *   consumed without paging once loading settles: a focus left armed would
+ *   page the Path mid-browse on a later refresh.
+ * - A consumed focus is never re-applied; clearing the URL re-arms it.
+ */
+export function nextFocusStep(
+  moments: readonly Moment[],
+  focusId: string | null,
+  consumed: string | null,
+  loading: boolean,
+): FocusStep | null {
+  if (focusId === null) return consumed === null ? null : { consumed: null, key: null }
+  if (focusId === consumed) return null
+  const key = focusKeyFor(moments, focusId)
+  if (key !== null) return { consumed: focusId, key }
+  return loading ? null : { consumed: focusId, key: null }
+}
+
 /**
  * Build the weeks roll: union of weeks that contain moments (bare or
  * completed) with the current week, sorted ascending by `weekStart`. Past

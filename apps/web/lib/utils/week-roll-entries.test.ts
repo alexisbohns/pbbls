@@ -5,7 +5,7 @@ import {
   IOS_DETAIL_COMPLETED,
   IOS_DETAIL_PHOTO,
 } from "@/lib/data/__fixtures__/moments-captured"
-import { focusKeyFor } from "./week-roll-entries"
+import { focusKeyFor, nextFocusStep } from "./week-roll-entries"
 
 // TZ is Europe/Paris (vitest.config.ts). The moments are what iOS and Android
 // wrote, verbatim.
@@ -33,5 +33,67 @@ describe("focusKeyFor", () => {
   it("is null for a moment the store does not hold (yet)", () => {
     expect(focusKeyFor(MOMENTS, "00000000-0000-4000-8000-000000000000")).toBeNull()
     expect(focusKeyFor([], "daa2a992-16d1-459a-90d0-e3d42fb863a9")).toBeNull()
+  })
+})
+
+describe("nextFocusStep", () => {
+  const ID = "daa2a992-16d1-459a-90d0-e3d42fb863a9"
+  const OTHER = "492238c2-e6c2-4cea-943b-26ea8e16b961" // the Sunday one, week 41
+  const MISSING = "00000000-0000-4000-8000-000000000000"
+
+  /** Renders PathScreen's state machine: every week it pages to, in order. */
+  function run(renders: { moments: typeof MOMENTS; focus: string | null; loading: boolean }[]) {
+    let consumed: string | null = null
+    const paged: string[] = []
+    for (const r of renders) {
+      const step = nextFocusStep(r.moments, r.focus, consumed, r.loading)
+      if (step === null) continue
+      consumed = step.consumed
+      if (step.key !== null) paged.push(step.key)
+    }
+    return { consumed, paged }
+  }
+
+  it("applies a present focus once", () => {
+    const { consumed, paged } = run([
+      { moments: [], focus: ID, loading: true },
+      { moments: MOMENTS, focus: ID, loading: true },
+      { moments: MOMENTS, focus: ID, loading: false },
+    ])
+    expect(paged).toEqual(["2026-W42"])
+    expect(consumed).toBe(ID)
+  })
+
+  it("consumes a focus that is still missing once loading settles", () => {
+    expect(nextFocusStep(MOMENTS, MISSING, null, true)).toBeNull()
+    expect(nextFocusStep(MOMENTS, MISSING, null, false)).toEqual({ consumed: MISSING, key: null })
+  })
+
+  it("does not re-apply a consumed focus on a store refresh", () => {
+    // The capture's reload failed: the moment only arrives on a later refresh.
+    const { paged } = run([
+      { moments: [], focus: ID, loading: true },
+      { moments: [], focus: ID, loading: false },
+      { moments: MOMENTS, focus: ID, loading: true },
+      { moments: MOMENTS, focus: ID, loading: false },
+    ])
+    expect(paged).toEqual([])
+    expect(nextFocusStep(MOMENTS, ID, ID, false)).toBeNull()
+  })
+
+  it("re-arms after the URL is cleaned and applies the next focus", () => {
+    const { consumed, paged } = run([
+      { moments: MOMENTS, focus: ID, loading: false },
+      { moments: MOMENTS, focus: null, loading: false },
+      { moments: MOMENTS, focus: OTHER, loading: false },
+    ])
+    expect(paged).toEqual(["2026-W42", "2026-W41"])
+    expect(consumed).toBe(OTHER)
+  })
+
+  it("re-arms the same id after the URL is cleaned", () => {
+    expect(nextFocusStep(MOMENTS, null, ID, false)).toEqual({ consumed: null, key: null })
+    expect(nextFocusStep(MOMENTS, null, null, false)).toBeNull()
+    expect(nextFocusStep(MOMENTS, ID, null, false)).toEqual({ consumed: ID, key: "2026-W42" })
   })
 })

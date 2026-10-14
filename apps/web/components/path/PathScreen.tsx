@@ -13,10 +13,10 @@ import { PebblePeek } from "@/components/path/PebblePeek"
 import { cn } from "@/lib/utils"
 import {
   buildWeekRollEntries,
-  focusKeyFor,
   isoWeekKey,
   isoWeekNumber,
   isoWeekStart,
+  nextFocusStep,
   type WeekRollEntry,
 } from "@/lib/utils/week-roll-entries"
 
@@ -64,18 +64,15 @@ export function PathScreen({ moments, souls, loading, focusMomentId = null }: Pa
 
   // R14: a `?focus=` moment pages to its week once, as soon as the store holds
   // it (a capture's reload may land after the first render). Adjusted during
-  // render rather than in an effect, as the focused key above is; nothing
-  // happens while the moment is absent. The URL is cleaned in the effect
+  // render rather than in an effect, as the focused key above is. Once loading
+  // settles the focus is consumed even if its moment never arrived, so a later
+  // refresh cannot page the Path mid-browse. The URL is cleaned in the effect
   // below, which re-arms the focus for the next `?focus=`.
   const [appliedFocus, setAppliedFocus] = useState<string | null>(null)
-  if (focusMomentId === null && appliedFocus !== null) {
-    setAppliedFocus(null)
-  } else if (focusMomentId !== null && focusMomentId !== appliedFocus) {
-    const key = focusKeyFor(moments, focusMomentId)
-    if (key !== null) {
-      setAppliedFocus(focusMomentId)
-      setFocusedKey(key)
-    }
+  const focusStep = nextFocusStep(moments, focusMomentId, appliedFocus, loading)
+  if (focusStep !== null) {
+    setAppliedFocus(focusStep.consumed)
+    if (focusStep.key !== null) setFocusedKey(focusStep.key)
   }
   useEffect(() => {
     if (focusMomentId !== null && focusMomentId === appliedFocus) router.replace("/path")
