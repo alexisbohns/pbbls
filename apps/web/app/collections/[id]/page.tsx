@@ -35,7 +35,7 @@ export default function CollectionDetailPage({
   )
 
   const handleEdit = useCallback(
-    async (data: { name: string; mode?: Collection["mode"] }) => {
+    async (data: { name: string; mode?: Collection["mode"]; glyph_id: string | null }) => {
       await updateCollection(id, data)
     },
     [id, updateCollection],

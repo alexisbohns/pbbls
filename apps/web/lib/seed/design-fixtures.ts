@@ -29,9 +29,9 @@ export function designPebbles(now: Date): Pebble[] {
 export function designCollections(pebbles: Pebble[]): Collection[] {
   const ids = pebbles.map((p) => p.id)
   return [
-    { id: "design-col-stack", name: "Summer by the canal", mode: "stack", pebble_ids: ids.slice(0, 3), created_at: SIGNED_UP, updated_at: SIGNED_UP },
-    { id: "design-col-pack", name: "Little wins", mode: "pack", pebble_ids: ids.slice(3, 5), created_at: SIGNED_UP, updated_at: SIGNED_UP },
-    { id: "design-col-track", name: "Morning runs", mode: "track", pebble_ids: [], created_at: SIGNED_UP, updated_at: SIGNED_UP },
+    { id: "design-col-stack", name: "Summer by the canal", mode: "stack", glyph_id: SANDBOX_MARKS[2].id, pebble_ids: ids.slice(0, 3), created_at: SIGNED_UP, updated_at: SIGNED_UP },
+    { id: "design-col-pack", name: "Little wins", mode: "pack", glyph_id: null, pebble_ids: ids.slice(3, 5), created_at: SIGNED_UP, updated_at: SIGNED_UP },
+    { id: "design-col-track", name: "Morning runs", mode: "track", glyph_id: null, pebble_ids: [], created_at: SIGNED_UP, updated_at: SIGNED_UP },
   ]
 }
 

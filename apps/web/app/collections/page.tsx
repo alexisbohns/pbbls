@@ -18,8 +18,8 @@ export default function CollectionsPage() {
   const tForm = useTranslations("collections.form")
 
   const handleCreate = useCallback(
-    async (data: { name: string; mode?: Collection["mode"] }) => {
-      await addCollection({ name: data.name, mode: data.mode, pebble_ids: [] })
+    async (data: { name: string; mode?: Collection["mode"]; glyph_id: string | null }) => {
+      await addCollection({ name: data.name, mode: data.mode, glyph_id: data.glyph_id, pebble_ids: [] })
     },
     [addCollection],
   )

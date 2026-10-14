@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 type CollectionDetailHeaderProps = {
   collection: Collection
   pebbleCount: number
-  onEdit: (data: { name: string; mode?: Collection["mode"] }) => void
+  onEdit: (data: { name: string; mode?: Collection["mode"]; glyph_id: string | null }) => Promise<void>
 }
 
 export function CollectionDetailHeader({
@@ -40,6 +40,7 @@ export function CollectionDetailHeader({
           submitLabel={tForm("submitSave")}
           initialName={collection.name}
           initialMode={collection.mode}
+          initialGlyphId={collection.glyph_id}
           onSubmit={onEdit}
         />
       </div>

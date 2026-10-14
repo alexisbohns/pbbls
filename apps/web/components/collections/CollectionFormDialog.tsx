@@ -2,7 +2,9 @@
 
 import { useState, useCallback } from "react"
 import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 import type { Collection } from "@/lib/types"
+import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -16,6 +18,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { MODE_EMOJI, MODE_KEYS } from "@/components/collections/ModeBadge"
+import { GlyphPickerDialog } from "@/components/record/GlyphPickerDialog"
+import { SoulGlyphThumbnail } from "@/components/souls/SoulGlyphThumbnail"
+
+type CollectionFormValues = {
+  name: string
+  mode?: Collection["mode"]
+  /** Null for none; written in the same insert/update as name and mode (R11). */
+  glyph_id: string | null
+}
 
 type CollectionFormDialogProps = {
   trigger: React.ReactElement
@@ -23,7 +34,9 @@ type CollectionFormDialogProps = {
   submitLabel: string
   initialName?: string
   initialMode?: Collection["mode"]
-  onSubmit: (data: { name: string; mode?: Collection["mode"] }) => void
+  initialGlyphId?: string | null
+  /** Rejects on a refused write; the dialog then stays open and says so. */
+  onSubmit: (data: CollectionFormValues) => Promise<void>
 }
 
 export function CollectionFormDialog({
@@ -32,35 +45,57 @@ export function CollectionFormDialog({
   submitLabel,
   initialName = "",
   initialMode,
+  initialGlyphId = null,
   onSubmit,
 }: CollectionFormDialogProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(initialName)
   const [mode, setMode] = useState<Collection["mode"]>(initialMode)
+  // Held as the id, not the glyph: a glyph the picker no longer lists is kept
+  // until the user changes or removes it.
+  const [glyphId, setGlyphId] = useState<string | null>(initialGlyphId)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const { glyphs } = useUsableGlyphs()
   const t = useTranslations("collections.form")
   const tModes = useTranslations("collections.modes")
+  const tErrors = useTranslations("moment.errors")
+
+  const glyph = glyphId ? glyphs.find((g) => g.id === glyphId) : undefined
 
   const resetForm = useCallback(() => {
     setName(initialName)
     setMode(initialMode)
-  }, [initialName, initialMode])
+    setGlyphId(initialGlyphId)
+  }, [initialName, initialMode, initialGlyphId])
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
+      if (submitting) return
       setOpen(nextOpen)
       if (nextOpen) resetForm()
     },
-    [resetForm],
+    [resetForm, submitting],
   )
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     const trimmed = name.trim()
-    if (!trimmed) return
-    onSubmit({ name: trimmed, mode })
-    setOpen(false)
-  }, [name, mode, onSubmit])
+    if (!trimmed || submitting) return
+    setSubmitting(true)
+    try {
+      await onSubmit({ name: trimmed, mode, glyph_id: glyphId })
+      setOpen(false)
+    } catch (err) {
+      // A glyph the owner cannot use is refused by the usability trigger
+      // (42501); that and any other refusal read as the generic copy.
+      console.error("[collections] save failed", err)
+      toast.error(tErrors("generic"))
+    } finally {
+      setSubmitting(false)
+    }
+  }, [name, mode, glyphId, submitting, onSubmit, tErrors])
 
-  const canSubmit = name.trim().length > 0
+  const canSubmit = name.trim().length > 0 && !submitting
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
@@ -81,7 +116,7 @@ export function CollectionFormDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && canSubmit) handleSubmit()
+                if (e.key === "Enter" && canSubmit) void handleSubmit()
               }}
               autoFocus
             />
@@ -104,14 +139,39 @@ export function CollectionFormDialog({
               ))}
             </div>
           </fieldset>
+
+          <fieldset className="grid gap-1.5" aria-describedby="collection-glyph-footer">
+            <legend className="text-sm font-medium">{t("glyphLabel")}</legend>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button type="button" variant="outline" onClick={() => setPickerOpen(true)}>
+                <SoulGlyphThumbnail mark={glyph} className="size-5" />
+                {t("glyphChoose")}
+              </Button>
+              {glyphId && (
+                <Button type="button" variant="ghost" onClick={() => setGlyphId(null)}>
+                  {t("removeGlyph")}
+                </Button>
+              )}
+            </div>
+            <p id="collection-glyph-footer" className="text-xs text-muted-foreground">
+              {t("glyphFooter")}
+            </p>
+          </fieldset>
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-          <AlertDialogAction disabled={!canSubmit} onClick={handleSubmit}>
+          <AlertDialogCancel disabled={submitting}>{t("cancel")}</AlertDialogCancel>
+          <AlertDialogAction disabled={!canSubmit} onClick={() => void handleSubmit()}>
             {submitLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
+
+        <GlyphPickerDialog
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          selectedMarkId={glyphId ?? undefined}
+          onSave={(markId) => setGlyphId(markId ?? null)}
+        />
       </AlertDialogContent>
     </AlertDialog>
   )

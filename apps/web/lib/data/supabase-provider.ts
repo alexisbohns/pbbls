@@ -51,6 +51,7 @@ import {
   compareSharedNewestFirst,
   sharedConnectionPebbleFromRow,
 } from "@/lib/data/connection-pebble-row"
+import { collectionFromRow, collectionInsertRow, collectionUpdateRow } from "@/lib/data/collection-row"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 import { MomentWriteError } from "@/lib/data/moment-write-error"
 import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment-payloads"
@@ -186,14 +187,9 @@ export class SupabaseProvider implements DataProvider {
       cpMap.set(cid, arr)
     }
 
-    const collections: Collection[] = (collectionsRes.data ?? []).map((row: Record<string, unknown>) => ({
-      id: row.id as string,
-      name: row.name as string,
-      mode: (row.mode as "stack" | "pack" | "track") ?? undefined,
-      pebble_ids: cpMap.get(row.id as string) ?? [],
-      created_at: row.created_at as string,
-      updated_at: row.updated_at as string,
-    }))
+    const collections: Collection[] = (collectionsRes.data ?? []).map((row: Record<string, unknown>) =>
+      collectionFromRow(row, cpMap.get(row.id as string) ?? []),
+    )
 
     const marks: Mark[] = (glyphsRes.data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
@@ -662,7 +658,7 @@ export class SupabaseProvider implements DataProvider {
   async createCollection(input: CreateCollectionInput): Promise<Collection> {
     const result = await this.supabase
       .from("collections")
-      .insert({ user_id: this.userId, name: input.name, mode: input.mode ?? null })
+      .insert(collectionInsertRow(this.userId, input))
       .select()
       .single()
     const col = this.unwrap(result) as Record<string, unknown>
@@ -673,23 +669,16 @@ export class SupabaseProvider implements DataProvider {
       ))
     }
 
-    const created: Collection = {
-      id: col.id as string,
-      name: col.name as string,
-      mode: (col.mode as "stack" | "pack" | "track") ?? undefined,
-      pebble_ids: input.pebble_ids,
-      created_at: col.created_at as string,
-      updated_at: col.updated_at as string,
-    }
+    const created = collectionFromRow(col, input.pebble_ids)
     this.mutate({ ...this.store, collections: [...this.store.collections, created] })
     return created
   }
 
   async updateCollection(id: string, input: UpdateCollectionInput): Promise<Collection> {
-    const updates: Record<string, unknown> = {}
-    if (input.name !== undefined) updates.name = input.name
-    if (input.mode !== undefined) updates.mode = input.mode
-    if (Object.keys(updates).length > 0) {
+    const prev = this.store.collections.find((c) => c.id === id)
+    if (!prev) throw new Error(`Collection not found: ${id}`)
+    const updates = collectionUpdateRow(input)
+    if (updates) {
       this.unwrap(await this.supabase.from("collections").update(updates).eq("id", id).select().single())
     }
     if (input.pebble_ids !== undefined) {
@@ -701,8 +690,6 @@ export class SupabaseProvider implements DataProvider {
       }
     }
 
-    const prev = this.store.collections.find((c) => c.id === id)
-    if (!prev) throw new Error(`Collection not found: ${id}`)
     const updated: Collection = {
       ...prev,
       ...input,
@@ -710,6 +697,12 @@ export class SupabaseProvider implements DataProvider {
     }
     const collections = this.store.collections.map((c) => (c.id === id ? updated : c))
     this.mutate({ ...this.store, collections })
+    // Its pebbles' stones draw the derived glyph (D5), which only the view
+    // resolves: reload so they redraw with the new one.
+    if (input.glyph_id !== undefined && input.glyph_id !== prev.glyph_id && prev.pebble_ids.length > 0) {
+      await this.reloadAfter("collections update")
+      return this.store.collections.find((c) => c.id === id) ?? updated
+    }
     return updated
   }
 

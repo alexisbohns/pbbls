@@ -33,18 +33,21 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
     id: "col-gratitudes",
     name: "Morning gratitudes",
     mode: "track",
+    glyph_id: null,
     pebble_ids: ["pbl-sunrise", "pbl-luna-purr", "pbl-bread"],
   },
   {
     id: "col-career",
     name: "Career milestones",
     mode: "stack",
+    glyph_id: null,
     pebble_ids: ["pbl-promo", "pbl-launch"],
   },
   {
     id: "col-march",
     name: "March 2026",
     mode: "pack",
+    glyph_id: null,
     pebble_ids: [
       "pbl-sunrise", "pbl-argument", "pbl-luna-purr",
       "pbl-promo", "pbl-anxiety", "pbl-bread",

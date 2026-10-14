@@ -143,6 +143,8 @@ export type Collection = {
   id: string
   name: string
   mode?: "stack" | "pack" | "track"
+  /** The collection's glyph (R11): its pebbles carry it (D5). Null for none. */
+  glyph_id: string | null
   pebble_ids: string[]
   created_at: string
   updated_at: string
