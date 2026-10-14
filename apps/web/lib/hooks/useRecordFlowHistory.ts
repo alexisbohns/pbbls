@@ -24,13 +24,24 @@ const STEP_KEY = "pbblsRecordStep"
  * Generic over the step list so the record and Complete flows share it.
  * `steps` must be a stable (module-level) array: an entry stores an index
  * into it.
+ *
+ * `locked` (e.g. a save in flight) holds the flow on its step: a Back that
+ * pops one of the flow's own entries is undone by pushing the current step's
+ * entry again. A Back past the flow's first entry is a route change and is
+ * not held.
  */
 export function useRecordFlowHistory<S extends string>(
   steps: readonly S[],
   step: S,
   onPopTo: (step: S) => void,
+  { locked = false }: { locked?: boolean } = {},
 ) {
   const syncedRef = useRef<number | null>(null)
+  const lockedRef = useRef(locked)
+
+  useEffect(() => {
+    lockedRef.current = locked
+  }, [locked])
 
   useEffect(() => {
     const onPopState = (event: PopStateEvent) => {
@@ -41,6 +52,13 @@ export function useRecordFlowHistory<S extends string>(
       if (typeof index !== "number") return
       const popped = steps[index]
       if (!popped) return
+      if (lockedRef.current && syncedRef.current !== null) {
+        window.history.pushState(
+          { ...window.history.state, [STEP_KEY]: syncedRef.current },
+          "",
+        )
+        return
+      }
       syncedRef.current = index
       onPopTo(popped)
     }

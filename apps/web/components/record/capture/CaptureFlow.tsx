@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useMemo, useReducer, useState } from "react"
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useMoments } from "@/lib/data/useMoments"
@@ -65,6 +65,17 @@ export function CaptureFlow() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false)
 
+  // A save outlives the page when the user leaves mid-flight (browser Back
+  // past the flow, a tab link): its resolution must not then yank them off
+  // wherever they went.
+  const mountedRef = useRef(true)
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
+
   useRetiredComposerDraftCleanup()
 
   const photo = useCapturePhoto({
@@ -76,7 +87,9 @@ export function CaptureFlow() {
   })
 
   const goTo = useCallback((step: CaptureStep) => dispatch({ type: "goTo", step }), [])
-  const { goBack } = useRecordFlowHistory(CAPTURE_STEPS, state.step, goTo)
+  const { goBack } = useRecordFlowHistory(CAPTURE_STEPS, state.step, goTo, {
+    locked: saving !== null,
+  })
 
   const savable = canSave(state, saving !== null)
 
@@ -113,6 +126,7 @@ export function CaptureFlow() {
       // The photo is the moment's now. `saving` stays set while the page
       // leaves, so nothing can be pressed twice.
       photo.commit()
+      if (!mountedRef.current) return
       const id = momentId.toLowerCase()
       if (then === "complete") router.replace(`/record/complete/${id}?from=capture`)
       else router.push(`/path?focus=${id}`)
@@ -200,6 +214,7 @@ export function CaptureFlow() {
           step={state.step}
           onBack={goBack}
           onClose={handleClose}
+          backDisabled={saving !== null}
         />
 
         <RecordStepScaffold

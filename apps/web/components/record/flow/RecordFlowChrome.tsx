@@ -13,6 +13,8 @@ type RecordFlowChromeProps<S extends string> = {
   step: S
   onBack: () => void
   onClose: () => void
+  /** Keeps the chevron in place but inert, e.g. while a save is in flight. */
+  backDisabled?: boolean
 }
 
 /**
@@ -30,6 +32,7 @@ export function RecordFlowChrome<S extends string>({
   step,
   onBack,
   onClose,
+  backDisabled = false,
 }: RecordFlowChromeProps<S>) {
   const t = useTranslations("record.flow")
   const currentIndex = counted.indexOf(step)
@@ -43,10 +46,10 @@ export function RecordFlowChrome<S extends string>({
         onClick={onBack}
         aria-label={t("back")}
         aria-hidden={!canGoBack}
-        disabled={!canGoBack}
+        disabled={!canGoBack || backDisabled}
         tabIndex={canGoBack ? undefined : -1}
         className={cn(
-          "-ml-2 inline-flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "-ml-2 inline-flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
           !canGoBack && "invisible",
         )}
       >
