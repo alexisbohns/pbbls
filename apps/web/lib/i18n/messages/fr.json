@@ -794,6 +794,38 @@
   },
   "moment": {
     "untitled": "Sans titre",
+    "notAPebble": "Pas encore un galet",
+    "read": {
+      "makeItAPebble": "En faire un galet",
+      "more": "Plus",
+      "editMoment": "Modifier le moment",
+      "editPebble": "Modifier le galet",
+      "delete": "Supprimer",
+      "noDomain": "Aucun domaine"
+    },
+    "delete": {
+      "bareTitle": "Supprimer ce moment ?",
+      "bareMessage": "Cette action est irréversible.",
+      "deleteMoment": "Supprimer le moment",
+      "pebbleTitle": "Supprimer ce galet ?",
+      "pebbleMessage": "Garder le moment le laisse sur ton chemin comme une pierre vierge. Supprimer le moment retire aussi sa photo. Cette action est irréversible.",
+      "deletePebbleKeepMoment": "Supprimer le galet, garder le moment",
+      "deleteMomentToo": "Supprimer aussi le moment",
+      "cancel": "Annuler"
+    },
+    "editMoment": {
+      "title": "Modifier le moment",
+      "needsContent": "Un moment a besoin d'un nom ou d'une photo."
+    },
+    "editPebble": {
+      "title": "Modifier le galet",
+      "mood": "Humeur",
+      "souls": "Âmes",
+      "optional": "Facultatif",
+      "collection": "Collection",
+      "none": "Aucune",
+      "privacy": "Qui peut le voir ?"
+    },
     "errors": {
       "momentEmpty": "Ajoute d'abord un nom ou une photo.",
       "mediaQuotaExceeded": "Limite de photos atteinte pour ce moment.",

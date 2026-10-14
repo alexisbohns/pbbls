@@ -794,6 +794,38 @@
   },
   "moment": {
     "untitled": "Untitled",
+    "notAPebble": "Not a pebble yet",
+    "read": {
+      "makeItAPebble": "Make it a pebble",
+      "more": "More",
+      "editMoment": "Edit moment",
+      "editPebble": "Edit pebble",
+      "delete": "Delete",
+      "noDomain": "No domain"
+    },
+    "delete": {
+      "bareTitle": "Delete this moment?",
+      "bareMessage": "This can't be undone.",
+      "deleteMoment": "Delete moment",
+      "pebbleTitle": "Delete this pebble?",
+      "pebbleMessage": "Keeping the moment leaves it on your path as a blank stone. Deleting the moment removes its photo too. This can't be undone.",
+      "deletePebbleKeepMoment": "Delete the pebble, keep the moment",
+      "deleteMomentToo": "Delete the moment too",
+      "cancel": "Cancel"
+    },
+    "editMoment": {
+      "title": "Edit moment",
+      "needsContent": "A moment needs a name or a photo."
+    },
+    "editPebble": {
+      "title": "Edit pebble",
+      "mood": "Mood",
+      "souls": "Souls",
+      "optional": "Optional",
+      "collection": "Collection",
+      "none": "None",
+      "privacy": "Who can see it?"
+    },
     "errors": {
       "momentEmpty": "Add a name or a photo first.",
       "mediaQuotaExceeded": "Photo limit reached on this moment.",
