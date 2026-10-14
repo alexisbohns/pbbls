@@ -1,4 +1,5 @@
 import type {
+  Moment,
   Pebble,
   PebbleSnap,
   Soul,
@@ -23,6 +24,9 @@ import type {
 // ---------------------------------------------------------------------------
 
 export type Store = {
+  /** The source of truth (#1050): every own moment from `v_moments_full`, newest first. */
+  moments: Moment[]
+  /** @deprecated Derived from `moments` (completed only) for unported consumers; removed in #1050 Part 6. */
   pebbles: Pebble[]
   souls: Soul[]
   collections: Collection[]
@@ -36,6 +40,7 @@ export type Store = {
 }
 
 export const EMPTY_STORE: Store = {
+  moments: [],
   pebbles: [],
   souls: [],
   collections: [],
@@ -55,6 +60,7 @@ export const EMPTY_STORE: Store = {
 // `instants` is the read-path projection (signed URLs); writes use `snaps`.
 type ServerOwnedPebbleFields =
   | "id"
+  | "moment_id"
   | "created_at"
   | "updated_at"
   | "instants"

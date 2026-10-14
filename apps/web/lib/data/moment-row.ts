@@ -3,6 +3,7 @@ import type {
   Intensity,
   Moment,
   MomentPebble,
+  Pebble,
   PebbleCard,
   Positiveness,
   Visibility,
@@ -119,6 +120,39 @@ export function momentFromViewRow(
     created_at: createdAt,
     updated_at: stringOr(row.updated_at, createdAt),
     pebble: momentPebbleFromRow(row.pebble),
+  }
+}
+
+/**
+ * The deprecated flat `Pebble` for consumers not yet ported to `Moment`
+ * (removed in #1050 Part 6). `id` is the PEBBLE id, as before, so the
+ * pebble-id joins (`collection.pebble_ids`, share links, karma `ref_id`) keep
+ * working; `moment_id` is the read page's key. `updated_at` is the later of the
+ * two rows, as the old compat view computed it, so a moment edit still moves it.
+ */
+export function legacyPebbleFromMoment(m: CompletedMoment): Pebble {
+  const p = m.pebble
+  return {
+    id: p.id,
+    moment_id: m.id,
+    name: m.name ?? "",
+    description: m.description ?? undefined,
+    happened_at: m.happened_at,
+    intensity: p.intensity,
+    positiveness: p.positiveness,
+    visibility: p.visibility,
+    emotion_id: p.emotion_id,
+    soul_ids: p.soul_ids,
+    domain_ids: p.domain_ids,
+    collection_ids: p.collection_ids,
+    mark_id: p.glyph?.id,
+    instants: m.instants,
+    snaps: m.snaps,
+    cards: p.cards,
+    glyph: p.glyph,
+    cover: m.cover,
+    created_at: p.created_at,
+    updated_at: Date.parse(m.updated_at) > Date.parse(p.updated_at) ? m.updated_at : p.updated_at,
   }
 }
 

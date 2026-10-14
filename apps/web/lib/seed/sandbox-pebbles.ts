@@ -102,6 +102,7 @@ function build(specs: Spec[], scenario: string): Pebble[] {
     const mark = SANDBOX_MARKS[i % SANDBOX_MARKS.length]
     return {
       id: `${scenario}-${i}`,
+      moment_id: `${scenario}-${i}`,
       name: spec.name,
       happened_at: iso,
       intensity: spec.intensity,

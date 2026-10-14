@@ -37,6 +37,9 @@ export function designCollections(pebbles: Pebble[]): Collection[] {
 export function designStore(now: Date): Store {
   const pebbles = designPebbles(now)
   return {
+    // The design sandbox still draws the flat pebbles; it gains moments when
+    // the Path reads them (#1050 Part 4).
+    moments: [],
     pebbles,
     souls: SANDBOX_SOULS,
     collections: designCollections(pebbles),

@@ -86,8 +86,11 @@ export type Moment = {
 
 export type CompletedMoment = Moment & { pebble: MomentPebble }
 
+/** @deprecated Derived from Moment for unported consumers; removed in #1050 Part 6. id is the PEBBLE id. */
 export type Pebble = {
   id: string
+  /** The moment this pebble completes: the read page's route key. */
+  moment_id: string
   name: string
   description?: string
   happened_at: string
@@ -103,7 +106,7 @@ export type Pebble = {
   instants: string[]
   snaps: PebbleSnap[]
   cards: PebbleCard[]
-  // The pebble's resolved glyph, from `v_pebbles_full.glyph`: its oldest
+  // The pebble's resolved glyph, from `v_moments_full.pebble.glyph`: its oldest
   // collection's glyph, else its first domain's default (#1046 D5). The server
   // no longer renders pebbles (D6), so every surface draws these strokes; null
   // when neither carries a glyph.

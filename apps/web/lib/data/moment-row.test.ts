@@ -3,6 +3,7 @@ import {
   compareMomentsNewestFirst,
   deleteMomentPaths,
   isCompleted,
+  legacyPebbleFromMoment,
   momentDisplayName,
   momentFromViewRow,
   momentPebbleFromRow,
@@ -130,6 +131,30 @@ describe("momentPebbleFromRow", () => {
     expect(momentPebbleFromRow("pebble")).toBeNull()
     expect(momentPebbleFromRow({ ...completed, id: undefined })).toBeNull()
     expect(momentPebbleFromRow({ ...completed, emotion_id: null })).toBeNull()
+  })
+})
+
+describe("legacyPebbleFromMoment", () => {
+  it("keeps the pebble id as the id and carries the moment id", () => {
+    const m = momentFromViewRow(row(IOS_DETAIL_COMPLETED), new Map())
+    if (!isCompleted(m)) throw new Error("fixture is completed")
+    const pebble = legacyPebbleFromMoment(m)
+    expect(pebble.id).toBe("bdbc0b70-f8db-46ef-873f-f93a1ccd72dc")
+    expect(pebble.moment_id).toBe("daa2a992-16d1-459a-90d0-e3d42fb863a9")
+    expect(pebble.name).toBe("Coffee")
+    expect(pebble.description).toBeUndefined()
+    expect(pebble.mark_id).toBe("f738661b-6f49-448e-916c-443fed751475")
+    expect(pebble.collection_ids).toHaveLength(2)
+    // The pebble row is newer than the moment row here.
+    expect(pebble.updated_at).toBe("2026-10-13T00:12:41.550659+00:00")
+  })
+
+  it("names an untitled moment with an empty string", () => {
+    const m = momentFromViewRow(row(IOS_DETAIL_COMPLETED), new Map())
+    if (!isCompleted(m)) throw new Error("fixture is completed")
+    const pebble = legacyPebbleFromMoment({ ...m, name: null, updated_at: "2026-10-14T09:00:00Z" })
+    expect(pebble.name).toBe("")
+    expect(pebble.updated_at).toBe("2026-10-14T09:00:00Z")
   })
 })
 

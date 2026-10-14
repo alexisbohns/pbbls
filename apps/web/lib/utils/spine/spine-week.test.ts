@@ -8,6 +8,7 @@ import { readingOrder, spineWeek } from "./spine-week"
 function pebble(id: string, happened_at: string): Pebble {
   return {
     id,
+    moment_id: id,
     name: id,
     happened_at,
     intensity: 2,

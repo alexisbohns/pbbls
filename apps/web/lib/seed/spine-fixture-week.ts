@@ -178,6 +178,7 @@ function pebble(spec: Spec): Pebble {
   const media = spec.photo ? cover(spec.photo) : null
   return {
     id: `spine-fixture-${String(spec.n).padStart(2, "0")}`,
+    moment_id: `spine-fixture-${String(spec.n).padStart(2, "0")}`,
     name: spec.name,
     happened_at: happened,
     intensity: spec.intensity,

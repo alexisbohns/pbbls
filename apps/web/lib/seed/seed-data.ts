@@ -12,7 +12,7 @@ import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 type SeedSoul = Omit<Soul, "created_at" | "updated_at">
 type SeedPebble = Omit<
   Pebble,
-  "created_at" | "updated_at" | "glyph" | "cover"
+  "created_at" | "updated_at" | "glyph" | "cover" | "moment_id"
 >
 type SeedCollection = Omit<Collection, "created_at" | "updated_at">
 

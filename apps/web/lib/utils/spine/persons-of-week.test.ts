@@ -14,6 +14,7 @@ function soul(id: string, name = id): Soul {
 function pebble(id: string, happened_at: string, soul_ids: string[]): Pebble {
   return {
     id,
+    moment_id: id,
     name: id,
     happened_at,
     intensity: 2,

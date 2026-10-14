@@ -17,6 +17,7 @@ import {
   type AchievementUnlockResult,
 } from "@/lib/data/data-provider"
 import type {
+  Moment,
   Pebble,
   PebbleSnap,
   Soul,
@@ -37,18 +38,28 @@ import { toConnectionPeer } from "@/lib/data/invite-api"
 import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 import {
-  pebbleFromViewRow,
   pebbleGlyphFromRow,
   pebbleNameFromRow,
   snapOriginalPath,
   snapThumbPath,
   sortedSnaps,
 } from "@/lib/data/pebble-row"
+import {
+  compareMomentsNewestFirst,
+  isCompleted,
+  legacyPebbleFromMoment,
+  momentFromViewRow,
+} from "@/lib/data/moment-row"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 import { ComposeError, readEdgeErrorBody } from "@/lib/data/compose-error"
 
 const PEBBLE_MEDIA_BUCKET = "pebbles-media"
 const SNAP_URL_TTL_SECONDS = 3600
+
+/** The deprecated flat list (#1050 Part 6 removes it): completed moments only. */
+function derivePebbles(moments: readonly Moment[]): Pebble[] {
+  return moments.filter(isCompleted).map(legacyPebbleFromMoment)
+}
 
 export class SupabaseProvider implements DataProvider {
   private store: Store
@@ -83,7 +94,7 @@ export class SupabaseProvider implements DataProvider {
 
   async loadFromSupabase(): Promise<Store> {
     const [
-      pebblesRes,
+      momentsRes,
       soulsRes,
       collectionsRes,
       collectionPebblesRes,
@@ -92,7 +103,12 @@ export class SupabaseProvider implements DataProvider {
       karmaRes,
       bounceRes,
     ] = await Promise.all([
-      this.supabase.from("v_pebbles_full").select("*").eq("user_id", this.userId),
+      // The user_id filter is load-bearing: moments_select also opens the
+      // connections' moments, which are not this user's path.
+      this.supabase
+        .from("v_moments_full")
+        .select("id, user_id, name, description, happened_at, created_at, updated_at, snaps, pebble")
+        .eq("user_id", this.userId),
       this.supabase.from("souls").select("*").eq("user_id", this.userId),
       this.supabase.from("collections").select("*").eq("user_id", this.userId),
       this.supabase.from("collection_pebbles").select("*, collections!inner(user_id)").eq("collections.user_id", this.userId),
@@ -102,7 +118,7 @@ export class SupabaseProvider implements DataProvider {
       this.supabase.from("v_bounce").select("*").eq("user_id", this.userId).maybeSingle(),
     ])
 
-    if (pebblesRes.error) throw new Error(`Failed to load pebbles: ${pebblesRes.error.message}`)
+    if (momentsRes.error) throw new Error(`Failed to load moments: ${momentsRes.error.message}`)
     if (soulsRes.error) throw new Error(`Failed to load souls: ${soulsRes.error.message}`)
     if (collectionsRes.error) throw new Error(`Failed to load collections: ${collectionsRes.error.message}`)
     if (glyphsRes.error) throw new Error(`Failed to load glyphs: ${glyphsRes.error.message}`)
@@ -110,23 +126,23 @@ export class SupabaseProvider implements DataProvider {
 
     // Snaps are stored in the private `pebbles-media` bucket as
     // `{storage_path}/original.jpg` (+ `…/thumb.jpg`); the view only carries
-    // the prefix. Collect every original.jpg path across all pebbles, mint
+    // the prefix. Collect every original.jpg path across all moments, mint
     // signed URLs in a single round-trip (mirrors iOS's 1 h TTL in
-    // PebbleSnapRepository), and hand the resulting URLs back to each pebble
+    // PebbleSnapRepository), and hand the resulting URLs back to each moment
     // in `sort_order`.
-    const rawSnapsByPebble = new Map<string, PebbleSnap[]>()
-    for (const row of pebblesRes.data ?? []) {
-      const r = row as Record<string, unknown>
-      const snaps = (r.snaps as PebbleSnap[] | undefined) ?? []
-      if (snaps.length > 0) rawSnapsByPebble.set(r.id as string, snaps)
+    const momentRows: Record<string, unknown>[] = momentsRes.data ?? []
+    const rawSnapsByMoment = new Map<string, PebbleSnap[]>()
+    for (const r of momentRows) {
+      const snaps = sortedSnaps(r.snaps)
+      if (snaps.length > 0) rawSnapsByMoment.set(r.id as string, snaps)
     }
 
     // Every original, plus the first snap's thumb: the Spine's card probes the
     // thumb for the photo's ratio. One batch either way.
     const signPaths: string[] = []
-    for (const snaps of rawSnapsByPebble.values()) {
+    for (const snaps of rawSnapsByMoment.values()) {
       for (const s of snaps) signPaths.push(snapOriginalPath(s))
-      const first = sortedSnaps(snaps)[0]
+      const first = snaps[0]
       if (first) signPaths.push(snapThumbPath(first))
     }
 
@@ -136,7 +152,7 @@ export class SupabaseProvider implements DataProvider {
         .from(PEBBLE_MEDIA_BUCKET)
         .createSignedUrls(signPaths, SNAP_URL_TTL_SECONDS)
       if (error) {
-        console.warn("[pebbles] failed to sign snap URLs", error)
+        console.warn("[moments] failed to sign snap URLs", error)
       } else {
         for (const entry of data ?? []) {
           if (entry.signedUrl && entry.path) {
@@ -146,9 +162,10 @@ export class SupabaseProvider implements DataProvider {
       }
     }
 
-    const pebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) =>
-      pebbleFromViewRow(row, signedUrlByPath),
-    )
+    const moments: Moment[] = momentRows
+      .map((row) => momentFromViewRow(row, signedUrlByPath))
+      .sort(compareMomentsNewestFirst)
+    const pebbles = derivePebbles(moments)
 
     const souls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
@@ -194,6 +211,7 @@ export class SupabaseProvider implements DataProvider {
     const bounce = (bounceRes.data as Record<string, unknown>)?.bounce_level as number ?? 0
 
     const newStore: Store = {
+      moments,
       pebbles,
       souls,
       collections,
@@ -689,11 +707,12 @@ export class SupabaseProvider implements DataProvider {
   async deleteSoul(id: string): Promise<void> {
     this.unwrap(await this.supabase.from("souls").delete().eq("id", id))
     const souls = this.store.souls.filter((s) => s.id !== id)
-    const pebbles = this.store.pebbles.map((p) => ({
-      ...p,
-      soul_ids: p.soul_ids.filter((sid) => sid !== id),
-    }))
-    this.mutate({ ...this.store, souls, pebbles })
+    const moments = this.store.moments.map((m) =>
+      m.pebble && m.pebble.soul_ids.includes(id)
+        ? { ...m, pebble: { ...m.pebble, soul_ids: m.pebble.soul_ids.filter((sid) => sid !== id) } }
+        : m,
+    )
+    this.mutate({ ...this.store, souls, moments, pebbles: derivePebbles(moments) })
   }
 
   // ---------------------------------------------------------------------------
