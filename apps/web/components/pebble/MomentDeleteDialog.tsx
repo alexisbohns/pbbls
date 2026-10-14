@@ -58,7 +58,9 @@ export function MomentDeleteDialog({
     if (pending) return
     setPending(which)
     try {
-      if (which === "pebble" && pebble) {
+      if (which === "pebble") {
+        // Never fall through to deleting the moment when the pebble is gone.
+        if (!pebble) return
         await deletePebble(pebble.id)
         onOpenChange(false)
       } else {
