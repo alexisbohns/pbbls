@@ -6,12 +6,15 @@ import { useTranslations } from "next-intl"
 import type { PebbleSnap } from "@/lib/types"
 import { Sheet, SheetContent, SheetClose } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
+import { createLatestRequest } from "@/lib/utils/latest-request"
 
 // ---------------------------------------------------------------------------
 // Snap staging hook — mirrors iOS `SnapUploadCoordinator`. Owns:
 //   - the local blob preview URL while an upload is in flight,
 //   - the uploading/failed states (so the parent can gate Save),
-//   - cleanup of orphaned uploads on Replace/Remove/Discard.
+//   - cleanup of orphaned uploads on Replace/Remove/Discard,
+//   - overlapping picks: only the latest pick's upload is staged; an earlier
+//     one that lands late has its files discarded, never staged.
 //
 // The hook does NOT persist anything — committing the staged snap happens in
 // Edit moment's Save via `save_moment` (R6). It only handles the in-edit
@@ -58,8 +61,15 @@ export function useSnapStaging({
   const previewUrlRef = useRef<string | null>(null)
   previewUrlRef.current = previewUrl
 
+  // One token per pick. A second pick while the first uploads makes the
+  // first stale, so its result can't stage a photo the preview no longer
+  // shows; Remove, Discard and unmount make every pick in flight stale.
+  const requestsRef = useRef(createLatestRequest())
+
   useEffect(() => {
+    const requests = requestsRef.current
     return () => {
+      requests.invalidate()
       if (previewUrlRef.current) {
         URL.revokeObjectURL(previewUrlRef.current)
       }
@@ -91,6 +101,7 @@ export function useSnapStaging({
 
   const pickFile = useCallback(
     async (file: File) => {
+      const token = requestsRef.current.begin()
       // Tear down any previously staged-but-uncommitted snap before
       // replacing — prevents storage orphans across multiple Replace cycles.
       if (isStagedUncommitted(draftSnap) && draftSnap) {
@@ -104,18 +115,27 @@ export function useSnapStaging({
       setFailed(false)
       try {
         const snap = await uploadSnap(file)
+        if (!requestsRef.current.isLatest(token)) {
+          // A newer pick, a Remove or a Discard superseded this one: its
+          // upload has no row and will never be saved.
+          void removeFromStorage(snap)
+          return
+        }
         setDraftSnap(snap)
       } catch (err) {
+        if (!requestsRef.current.isLatest(token)) return
         console.error("[pebble-edit] snap upload failed", err)
         setFailed(true)
       } finally {
-        setUploading(false)
+        if (requestsRef.current.isLatest(token)) setUploading(false)
       }
     },
     [draftSnap, isStagedUncommitted, previewUrl, removeFromStorage, setDraftSnap, uploadSnap],
   )
 
   const remove = useCallback(async () => {
+    requestsRef.current.invalidate()
+    setUploading(false)
     if (isStagedUncommitted(draftSnap) && draftSnap) {
       void removeFromStorage(draftSnap)
     }
@@ -128,6 +148,7 @@ export function useSnapStaging({
   }, [draftSnap, isStagedUncommitted, previewUrl, removeFromStorage, setDraftSnap])
 
   const cleanup = useCallback(async () => {
+    requestsRef.current.invalidate()
     if (isStagedUncommitted(draftSnap) && draftSnap) {
       void removeFromStorage(draftSnap)
     }
@@ -241,6 +262,7 @@ export function PebbleEditPicture({
                   variant="ghost"
                   size="lg"
                   className="justify-start"
+                  disabled={uploading}
                   onClick={() => {
                     setSheetOpen(false)
                     triggerPick()
@@ -252,6 +274,7 @@ export function PebbleEditPicture({
                   variant="ghost"
                   size="lg"
                   className="justify-start text-destructive"
+                  disabled={uploading}
                   onClick={() => {
                     setSheetOpen(false)
                     onRemove()
