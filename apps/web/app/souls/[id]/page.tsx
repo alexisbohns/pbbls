@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation"
 import { Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useSoul } from "@/lib/data/useSoul"
-import { usePebbles } from "@/lib/data/usePebbles"
+import { useMoments } from "@/lib/data/useMoments"
+import { momentsWithSoul } from "@/lib/data/moment-lists"
 import { useSouls } from "@/lib/data/useSouls"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { SoulDetailHeader } from "@/components/souls/SoulDetailHeader"
@@ -26,16 +27,13 @@ export default function SoulDetailPage({
   const tSouls = useTranslations("souls")
   const router = useRouter()
   const { soul, loading: soulLoading, updateSoul } = useSoul(id)
-  const { pebbles, loading: pebblesLoading } = usePebbles()
+  const { moments, loading: momentsLoading } = useMoments()
   const { souls, loading: soulsLoading, removeSoul } = useSouls()
   const { glyphs: marks } = useUsableGlyphs()
 
-  const loading = soulLoading || pebblesLoading || soulsLoading
+  const loading = soulLoading || momentsLoading || soulsLoading
 
-  const relatedPebbles = useMemo(
-    () => pebbles.filter((p) => p.soul_ids.includes(id)),
-    [pebbles, id],
-  )
+  const relatedMoments = useMemo(() => momentsWithSoul(moments, id), [moments, id])
 
   const handleUpdateName = async (name: string) => {
     await updateSoul({ name })
@@ -68,17 +66,17 @@ export default function SoulDetailPage({
         <>
           <SoulDetailHeader
             soul={soul}
-            pebbleCount={relatedPebbles.length}
+            pebbleCount={relatedMoments.length}
             marks={marks}
             onUpdateName={handleUpdateName}
             onUpdateGlyph={handleUpdateGlyph}
           />
-          {relatedPebbles.length === 0 ? (
+          {relatedMoments.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">
               {t("noPebbles")}
             </p>
           ) : (
-            <SoulPebbleList pebbles={relatedPebbles} souls={souls} />
+            <SoulPebbleList moments={relatedMoments} souls={souls} />
           )}
 
           <div className="mt-8 flex justify-center">
