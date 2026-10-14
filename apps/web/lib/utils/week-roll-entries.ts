@@ -1,4 +1,3 @@
-import { isCompleted } from "@/lib/data/moment-row"
 import type { Moment } from "@/lib/types"
 
 export type WeekRollEntry = {
@@ -136,7 +135,7 @@ export function buildWeekRollEntries(
       weekStartIso: isoWeekKey(weekStart),
       isoWeek: isoWeekNumber(weekStart),
       moments: sorted,
-      pebbleCount: sorted.filter(isCompleted).length,
+      pebbleCount: sorted.filter((m) => m.pebble !== null).length,
     })
   }
 
