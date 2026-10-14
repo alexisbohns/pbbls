@@ -867,6 +867,13 @@
         "exit": "Back to my path"
       }
     },
+    "complete": {
+      "aria": "Make it a pebble, one question at a time",
+      "submit": "Make it a pebble",
+      "noCollections": "You don't have any collections yet.",
+      "noCollection": "None",
+      "karmaAria": "Earned {count} karma"
+    },
     "draft": {
       "publishFailed": "Couldn't save that pebble. Please try again.",
       "needsDomain": "A pebble needs a part of life. Pick one, then try again.",
