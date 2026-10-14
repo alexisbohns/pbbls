@@ -6,10 +6,12 @@ import {
   initialCompleteState,
   isDraftComplete,
   optionalButtonIsSkip,
+  successPebble,
   type CompleteDraft,
   type CompleteFlowAction,
   type CompleteFlowState,
 } from "./complete"
+import type { Moment, MomentPebble } from "@/lib/types"
 import { COMPLETE_COUNTED_STEPS, COMPLETE_STEPS, type CompleteStep } from "./steps"
 
 function run(state: CompleteFlowState, ...actions: CompleteFlowAction[]): CompleteFlowState {
@@ -170,5 +172,57 @@ describe("firstGap", () => {
     expect(firstGap(at("privacy", { valenceConfirmed: true }))).toBe("emotion")
     expect(firstGap(at("privacy", { valenceConfirmed: true, emotionId: "e1" }))).toBe("domain")
     expect(firstGap(at("valence", answered()))).toBe("privacy")
+  })
+})
+
+describe("successPebble", () => {
+  const bare: Moment = {
+    id: "492238c2-e6c2-4cea-943b-26ea8e16b961",
+    name: null,
+    description: null,
+    happened_at: "2026-10-11T19:04:51+00:00",
+    snaps: [],
+    instants: [],
+    cover: null,
+    created_at: "2026-10-13T00:12:41+00:00",
+    updated_at: "2026-10-13T00:12:41+00:00",
+    pebble: null,
+  }
+  const pebble: MomentPebble = {
+    id: "bdbc0b70-f8db-46ef-873f-f93a1ccd72dc",
+    intensity: 3,
+    positiveness: 1,
+    visibility: "private",
+    emotion_id: "e-server",
+    soul_ids: [],
+    domain_ids: ["d1"],
+    collection_ids: [],
+    cards: [],
+    glyph: { id: "g1", name: "domain:hobbies", viewBox: "0 0 200 200", strokes: [] },
+    created_at: "2026-10-14T00:00:00+00:00",
+    updated_at: "2026-10-14T00:00:00+00:00",
+  }
+  const draft = answered({ intensity: 1, positiveness: -1, emotionId: "e-draft" })
+
+  it("draws the reloaded pebble, with its derived glyph", () => {
+    const { pebble: drawn, reloaded } = successPebble({ ...bare, pebble }, bare, draft)
+    expect(reloaded).toBe(true)
+    expect(drawn.id).toBe(pebble.id)
+    expect(drawn.moment_id).toBe(bare.id)
+    expect(drawn.glyph).toEqual(pebble.glyph)
+    expect(drawn.emotion_id).toBe("e-server")
+  })
+
+  it("falls back to the draft's look with no glyph when the store is stale", () => {
+    const { pebble: drawn, reloaded } = successPebble(bare, bare, draft)
+    expect(reloaded).toBe(false)
+    expect(drawn).toMatchObject({ intensity: 1, positiveness: -1, emotion_id: "e-draft", glyph: null })
+    expect(drawn.happened_at).toBe(bare.happened_at)
+  })
+
+  it("falls back to the moment as it was when it has gone from the store", () => {
+    const { pebble: drawn, reloaded } = successPebble(undefined, bare, draft)
+    expect(reloaded).toBe(false)
+    expect(drawn.moment_id).toBe(bare.id)
   })
 })
