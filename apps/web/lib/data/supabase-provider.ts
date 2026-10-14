@@ -686,8 +686,12 @@ export class SupabaseProvider implements DataProvider {
     const collections = this.store.collections.map((c) => (c.id === id ? updated : c))
     this.mutate({ ...this.store, collections })
     // Its pebbles' stones draw the derived glyph (D5), which only the view
-    // resolves: reload so they redraw with the new one.
-    if (input.glyph_id !== undefined && input.glyph_id !== prev.glyph_id && prev.pebble_ids.length > 0) {
+    // resolves: reload so they redraw when the glyph changes, or when pebbles
+    // join or leave a collection that has one.
+    const glyphChanged = input.glyph_id !== undefined && input.glyph_id !== prev.glyph_id
+    const glyphedMembersChanged = input.pebble_ids !== undefined && (prev.glyph_id !== null || updated.glyph_id !== null)
+    const touchesPebbles = prev.pebble_ids.length > 0 || (input.pebble_ids?.length ?? 0) > 0
+    if ((glyphChanged || glyphedMembersChanged) && touchesPebbles) {
       await this.reloadAfter("collections update")
       return this.store.collections.find((c) => c.id === id) ?? updated
     }
@@ -695,9 +699,14 @@ export class SupabaseProvider implements DataProvider {
   }
 
   async deleteCollection(id: string): Promise<void> {
+    const prev = this.store.collections.find((c) => c.id === id)
     this.unwrap(await this.supabase.from("collections").delete().eq("id", id))
     const collections = this.store.collections.filter((c) => c.id !== id)
     this.mutate({ ...this.store, collections })
+    // Its pebbles lose the derived glyph (D5): reload so their stones redraw.
+    if (prev && prev.glyph_id !== null && prev.pebble_ids.length > 0) {
+      await this.reloadAfter("collections delete")
+    }
   }
 
   // ---------------------------------------------------------------------------
