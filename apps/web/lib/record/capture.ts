@@ -113,8 +113,11 @@ export function captureReducer(state: CaptureState, action: CaptureAction): Capt
       return { ...state, happenedAt: action.value, hasEditedDate: true, seededFromPhoto: false }
 
     case "applyCaptureDate":
-      // No readable capture date keeps "now"; a date the user chose wins.
-      if (!action.value || state.hasEditedDate) return state
+      // A date the user chose wins.
+      if (state.hasEditedDate) return state
+      // A re-pick without a readable capture date keeps the date on screen
+      // (iOS) but stops crediting the photo, which no longer supplied it.
+      if (!action.value) return state.seededFromPhoto ? { ...state, seededFromPhoto: false } : state
       return { ...state, happenedAt: action.value, seededFromPhoto: true }
 
     case "photo":
@@ -122,6 +125,8 @@ export function captureReducer(state: CaptureState, action: CaptureAction): Capt
         ...state,
         photo: action.state,
         snap: action.state === "uploaded" ? action.snap : undefined,
+        // Removing the photo keeps its date (iOS) but not the credit for it.
+        seededFromPhoto: action.state === "none" ? false : state.seededFromPhoto,
       }
   }
 }

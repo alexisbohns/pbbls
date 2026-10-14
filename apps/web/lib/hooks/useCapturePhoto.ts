@@ -122,6 +122,8 @@ export function useCapturePhoto(options: UseCapturePhotoOptions) {
           }
         } catch (err) {
           console.warn("[capture] could not read the photo's capture date", err)
+          // An unreadable file has no date to credit, like one without EXIF.
+          if (requestsRef.current.isLatest(token)) optionsRef.current.onCaptureDate(null)
         }
       })()
 

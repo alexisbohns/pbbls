@@ -105,6 +105,29 @@ describe("when", () => {
     expect(state.seededFromPhoto).toBe(false)
   })
 
+  it("keeps the photo's date but drops the credit when the photo is removed", () => {
+    const state = run(
+      initial(),
+      { type: "photo", state: "uploading" },
+      { type: "applyCaptureDate", value: exif },
+      { type: "photo", state: "uploaded", snap: SNAP },
+      { type: "photo", state: "none" },
+    )
+    expect(state.happenedAt).toBe(exif)
+    expect(state.seededFromPhoto).toBe(false)
+  })
+
+  it("keeps the previous photo's date but drops the credit on a re-pick without one", () => {
+    const state = run(
+      initial(),
+      { type: "applyCaptureDate", value: exif },
+      { type: "photo", state: "uploading" },
+      { type: "applyCaptureDate", value: null },
+    )
+    expect(state.happenedAt).toBe(exif)
+    expect(state.seededFromPhoto).toBe(false)
+  })
+
   it("stops crediting the photo once the user edits the date", () => {
     const state = run(
       initial(),
