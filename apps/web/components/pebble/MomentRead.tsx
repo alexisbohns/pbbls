@@ -26,6 +26,8 @@ type MomentReadProps = {
   onClose?: () => void
   /** The moment was deleted: the page leaves for the Path, the peek closes. */
   onDeleted: () => void
+  /** The id of the moment's name heading, for a host that names itself after it. */
+  titleId?: string
 }
 
 /**
@@ -42,6 +44,7 @@ export function MomentRead({
   onNavigate,
   onClose,
   onDeleted,
+  titleId,
 }: MomentReadProps) {
   const t = useTranslations("moment.read")
   const tVisibility = useTranslations("record.visibility")
@@ -90,6 +93,7 @@ export function MomentRead({
 
       <MomentName
         as="h1"
+        id={titleId}
         name={moment.name}
         className="block text-center font-heading text-2xl font-semibold text-foreground"
       />

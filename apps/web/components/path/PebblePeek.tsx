@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useId, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
@@ -27,6 +27,8 @@ export function PebblePeek({ momentId, onClose }: PebblePeekProps) {
   const t = useTranslations("pebble")
   const tMoment = useTranslations("moment")
   const router = useRouter()
+  // Names the dialog: the moment's heading, or the loading / not-found line.
+  const titleId = useId()
 
   const { moment, loading: momentLoading } = useMoment(momentId ?? "")
   const { souls, loading: soulsLoading } = useSouls()
@@ -91,6 +93,7 @@ export function PebblePeek({ momentId, onClose }: PebblePeekProps) {
         />
         <DialogPrimitive.Popup
           ref={popupRef}
+          aria-labelledby={titleId}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -110,7 +113,7 @@ export function PebblePeek({ momentId, onClose }: PebblePeekProps) {
           )}
         >
           {loading ? (
-            <p className="text-sm text-muted-foreground">{t("loading")}</p>
+            <p id={titleId} className="text-sm text-muted-foreground">{t("loading")}</p>
           ) : moment ? (
             <MomentRead
               moment={moment}
@@ -120,9 +123,10 @@ export function PebblePeek({ momentId, onClose }: PebblePeekProps) {
               onNavigate={handleNavigate}
               onClose={onClose}
               onDeleted={onClose}
+              titleId={titleId}
             />
           ) : (
-            <p className="text-sm text-muted-foreground">{tMoment("notFoundInline")}</p>
+            <p id={titleId} className="text-sm text-muted-foreground">{tMoment("notFoundInline")}</p>
           )}
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>
