@@ -25,7 +25,7 @@ type VisibilityMenuProps = {
 
 /**
  * The three-grade option list (M51), shared by the composer chip
- * (VisibilityPicker) and the detail badge popover (PebbleDetail) so the two
+ * (VisibilityPicker) and Edit pebble's privacy popover (PebbleEnrich) so the two
  * pickers can never drift. Render inside a PopoverContent.
  */
 export function VisibilityMenu({ value, onChange }: VisibilityMenuProps) {

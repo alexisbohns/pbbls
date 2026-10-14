@@ -17,7 +17,7 @@ type PebbleVisualProps = {
   pebble: Pebble
   className?: string
   // Force a single stroke color regardless of theme. Used by the snap+pebble
-  // bundle in PebbleDetail where the palette-tinted box would otherwise blend
+  // bundle on the read page where the palette-tinted box would otherwise blend
   // with the dark-mode stroke (`secondary_color`).
   strokeOverride?: string
 }

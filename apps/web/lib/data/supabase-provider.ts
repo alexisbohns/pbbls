@@ -4,7 +4,6 @@ import {
   type DataProvider,
   type Store,
   type CreatePebbleInput,
-  type UpdatePebbleInput,
   type CreateSoulInput,
   type UpdateSoulInput,
   type CreateCollectionInput,
@@ -434,45 +433,8 @@ export class SupabaseProvider implements DataProvider {
     return created
   }
 
-  async updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble> {
-    const payload = {
-      ...(input.name !== undefined && { name: input.name }),
-      ...(input.description !== undefined && { description: input.description }),
-      ...(input.happened_at !== undefined && { happened_at: input.happened_at }),
-      ...(input.intensity !== undefined && { intensity: input.intensity }),
-      ...(input.positiveness !== undefined && { positiveness: input.positiveness }),
-      ...(input.visibility !== undefined && { visibility: input.visibility }),
-      ...(input.emotion_id !== undefined && { emotion_id: input.emotion_id }),
-      // An empty `domain_ids` is dropped by the compat wrapper, which keeps the
-      // pebble's domains: removing the last one is impossible until #1050.
-      ...(input.soul_ids !== undefined && { soul_ids: input.soul_ids }),
-      ...(input.domain_ids !== undefined && { domain_ids: input.domain_ids }),
-      ...(input.collection_ids !== undefined && { collection_ids: input.collection_ids }),
-      ...(input.snaps !== undefined && {
-        snaps: input.snaps.map((s, i) => ({
-          id: s.id,
-          storage_path: s.storage_path,
-          sort_order: i,
-        })),
-      }),
-      ...(input.cards !== undefined && {
-        cards: input.cards.map((c, i) => ({
-          species_id: c.species_id,
-          value: c.value,
-          sort_order: i,
-        })),
-      }),
-    }
-    await this.invokeCompose("compose-pebble-update", { pebble_id: id, payload })
-    await this.loadFromSupabase()
-    const updated = this.store.pebbles.find((p) => p.id === id)
-    if (!updated) throw new Error(`Pebble not found after update: ${id}`)
-    return updated
-  }
-
   // ---------------------------------------------------------------------------
-  // Snap media — mirror of iOS PebbleSnapRepository.uploadProcessed +
-  // delete_pebble_media RPC.
+  // Snap media — mirror of iOS PebbleSnapRepository.uploadProcessed.
   // ---------------------------------------------------------------------------
 
   async uploadSnap(file: File): Promise<PebbleSnap> {
@@ -488,26 +450,6 @@ export class SupabaseProvider implements DataProvider {
     if (originalRes.error) throw new Error(`Snap original upload failed: ${originalRes.error.message}`)
     if (thumbRes.error) throw new Error(`Snap thumb upload failed: ${thumbRes.error.message}`)
     return { id: snapId, storage_path: storagePath, sort_order: 0 }
-  }
-
-  async deletePebbleMedia(snapId: string): Promise<void> {
-    // The RPC deletes the DB row and returns the snap's `storage_path` as
-    // text; we then remove the two files. Mirrors iOS
-    // EditPebbleSheet.removeExistingSnap.
-    const { data, error } = await this.supabase.rpc("delete_moment_media", {
-      p_snap_id: snapId,
-    })
-    if (error) throw new Error(`delete_moment_media failed: ${error.message}`)
-    const prefix = typeof data === "string" ? data : null
-    if (prefix) {
-      const { error: removeError } = await this.supabase.storage
-        .from(PEBBLE_MEDIA_BUCKET)
-        .remove([`${prefix}/original.jpg`, `${prefix}/thumb.jpg`])
-      if (removeError) {
-        console.warn("[pebbles] snap storage cleanup failed", removeError)
-      }
-    }
-    await this.loadFromSupabase()
   }
 
   // ---------------------------------------------------------------------------
@@ -609,14 +551,14 @@ export class SupabaseProvider implements DataProvider {
   }
 
   /**
-   * Invoke the compose-pebble or compose-pebble-update edge function and
-   * return the resulting pebble id. A failure is a failure: since the moments
+   * Invoke the compose-pebble edge function (the old composer's create, until
+   * Capture replaces it) and return the resulting pebble id. A failure is a failure: since the moments
    * split (#1046) nothing runs after the write that could fail on its own, so
    * there is no soft success. A refusal throws a `ComposeError` carrying the
    * server's slug (`pebble_needs_domain`, …) for the composer to explain.
    */
   private async invokeCompose(
-    name: "compose-pebble" | "compose-pebble-update",
+    name: "compose-pebble",
     body: Record<string, unknown>,
   ): Promise<string> {
     const { data, error } = await this.supabase.functions.invoke<{ pebble_id?: string }>(name, {

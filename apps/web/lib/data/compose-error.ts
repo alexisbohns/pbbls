@@ -1,7 +1,8 @@
 /**
- * A refusal from the `compose-pebble` / `compose-pebble-update` edge functions.
+ * A refusal from the `compose-pebble` edge function (the old composer's
+ * create; deleted with it in #1050 Part 5).
  *
- * Both answer a failed RPC with `400 { error: "<RPC message>" }`, and since the
+ * It answers a failed RPC with `400 { error: "<RPC message>" }`, and since the
  * moments split (#1046) the RPC messages are slugs (`pebble_needs_domain`,
  * `moment_empty`, `soul_not_owned`, …). The slug is what a composer branches on
  * to say something better than "try again".
