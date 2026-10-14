@@ -9,7 +9,12 @@ import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 
 const noop = () => {}
 
-/** app/pebble/[id]/page.tsx for the newest fixture moment. Navigation and delete are no-ops. */
+/**
+ * app/pebble/[id]/page.tsx for the newest fixture moment. Navigation is a
+ * no-op. Delete is not: the sandbox has no provider, so `deleteMoment` and
+ * `deletePebble` throw "Not authenticated" and the dialog shows its
+ * "Couldn't delete" toast.
+ */
 export function PebbleDetailView() {
   const { moments } = useMoments()
   const { souls } = useSouls()
