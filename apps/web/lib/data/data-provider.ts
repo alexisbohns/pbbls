@@ -17,6 +17,7 @@ import type {
   AchievementUnlock,
   SharedConnectionPebble,
 } from "@/lib/types"
+import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment-payloads"
 
 // ---------------------------------------------------------------------------
 // Store snapshot — the in-memory representation of all persisted data.
@@ -191,7 +192,20 @@ export interface DataProvider {
   getPebble(id: string): Promise<Pebble | undefined>
   createPebble(input: CreatePebbleInput): Promise<Pebble>
   updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble>
-  deletePebble(id: string): Promise<void>
+
+  // Moments (#1050): the four definer RPCs, called directly, one per user
+  // action (R5). Each returns once its RPC succeeded, then reloads the store
+  // best-effort: a failed reload is logged and leaves the store stale, and the
+  // write still counts (retrying a `save_moment` create would duplicate the
+  // moment). A refused save or completion throws a `MomentWriteError`.
+  /** Creates (no id) or edits a moment; returns the moment id. */
+  saveMoment(payload: SaveMomentPayload): Promise<string>
+  /** Creates or updates the caller's pebble on a moment; returns the pebble id. */
+  completePebble(payload: CompletePebblePayload): Promise<string>
+  /** Deletes the moment, its pebbles and snaps, then removes the snap files best-effort. */
+  deleteMoment(momentId: string): Promise<void>
+  /** Deletes the pebble only, keyed by the PEBBLE id; the moment stays, bare. */
+  deletePebble(pebbleId: string): Promise<void>
 
   // Snap media: upload processes the file client-side (mirrors iOS
   // ImagePipeline) and writes original + thumb JPEGs to `pebbles-media`.

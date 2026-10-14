@@ -45,6 +45,7 @@ import {
 } from "@/lib/data/pebble-row"
 import {
   compareMomentsNewestFirst,
+  deleteMomentPaths,
   isCompleted,
   legacyPebbleFromMoment,
   momentFromViewRow,
@@ -55,6 +56,8 @@ import {
 } from "@/lib/data/connection-pebble-row"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 import { ComposeError, readEdgeErrorBody } from "@/lib/data/compose-error"
+import { MomentWriteError } from "@/lib/data/moment-write-error"
+import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment-payloads"
 
 const PEBBLE_MEDIA_BUCKET = "pebbles-media"
 const SNAP_URL_TTL_SECONDS = 3600
@@ -649,10 +652,64 @@ export class SupabaseProvider implements DataProvider {
     return pebbleId
   }
 
-  async deletePebble(id: string): Promise<void> {
-    const result = await this.supabase.rpc("delete_pebble", { p_pebble_id: id })
+  // ---------------------------------------------------------------------------
+  // Moment writes (#1050) — save_moment / complete_pebble / delete_moment /
+  // delete_pebble, no edge function. Reload is not the write: see reloadAfter.
+  // ---------------------------------------------------------------------------
+
+  async saveMoment(payload: SaveMomentPayload): Promise<string> {
+    const { data, error } = await this.supabase.rpc("save_moment", { payload })
+    if (error || typeof data !== "string") {
+      console.error("[moments] save_moment failed", error ?? data)
+      throw new MomentWriteError("save_moment", error)
+    }
+    await this.reloadAfter("save_moment")
+    return data
+  }
+
+  async completePebble(payload: CompletePebblePayload): Promise<string> {
+    const { data, error } = await this.supabase.rpc("complete_pebble", { payload })
+    if (error || typeof data !== "string") {
+      console.error("[moments] complete_pebble failed", error ?? data)
+      throw new MomentWriteError("complete_pebble", error)
+    }
+    await this.reloadAfter("complete_pebble")
+    return data
+  }
+
+  async deleteMoment(momentId: string): Promise<void> {
+    const { data, error } = await this.supabase.rpc("delete_moment", { p_moment_id: momentId })
+    if (error) {
+      console.error("[moments] delete_moment failed", error)
+      throw new Error(`delete_moment failed: ${error.message}`)
+    }
+    const paths = deleteMomentPaths(data)
+    if (paths.length > 0) {
+      const { error: rmErr } = await this.supabase.storage
+        .from(PEBBLE_MEDIA_BUCKET)
+        .remove(paths.flatMap((p) => [`${p}/original.jpg`, `${p}/thumb.jpg`]))
+      if (rmErr) console.warn("[moments] snap file cleanup failed (orphan sweep is the backstop)", rmErr)
+    }
+    await this.reloadAfter("delete_moment")
+  }
+
+  async deletePebble(pebbleId: string): Promise<void> {
+    const result = await this.supabase.rpc("delete_pebble", { p_pebble_id: pebbleId })
     this.unwrap(result)
-    await this.loadFromSupabase()
+    await this.reloadAfter("delete_pebble")
+  }
+
+  /**
+   * Reload after a write that already succeeded. A failure is logged and the
+   * store stays stale; it never turns the write into an error, because the
+   * caller would retry it (and a `save_moment` create is not idempotent).
+   */
+  private async reloadAfter(fn: string): Promise<void> {
+    try {
+      await this.loadFromSupabase()
+    } catch (err) {
+      console.warn(`[moments] reload after ${fn} failed`, err)
+    }
   }
 
   // ---------------------------------------------------------------------------
