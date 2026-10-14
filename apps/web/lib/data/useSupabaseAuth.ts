@@ -7,6 +7,7 @@ import { withTimeout } from "@/lib/utils/with-timeout"
 import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
 import { signupConsentMetadata } from "@/lib/auth/signup-metadata"
 import { isRecentSignIn, REAUTH_REQUIRED } from "@/lib/auth/recent-auth"
+import { clearAllCompleteDrafts } from "@/lib/record/complete-draft-store"
 
 import type {
   Account,
@@ -23,6 +24,19 @@ function getSupabase() {
   if (typeof window === "undefined") return null
   if (!supabaseInstance) supabaseInstance = createClient()
   return supabaseInstance
+}
+
+/**
+ * Complete-flow autosaves are per account (#1050); none outlives the session
+ * that wrote it. Best-effort: storage can be unavailable, and that must never
+ * fail a sign-out.
+ */
+function clearDeviceDrafts() {
+  try {
+    clearAllCompleteDrafts(window.localStorage)
+  } catch (err) {
+    console.warn("[auth] could not clear complete drafts", err)
+  }
 }
 
 /**
@@ -194,6 +208,7 @@ export function useSupabaseAuth(): AuthContextValue {
     if (!supabase) throw new Error("Supabase client not available")
     const { error } = await supabase.auth.signOut()
     if (error) throw new Error(error.message)
+    clearDeviceDrafts()
   }, [])
 
   const deleteAccount = useCallback(async () => {
@@ -218,6 +233,7 @@ export function useSupabaseAuth(): AuthContextValue {
     // local session remains. A global sign-out would round-trip to a revoke
     // endpoint that no longer knows the user, so clear locally.
     await supabase.auth.signOut({ scope: "local" })
+    clearDeviceDrafts()
   }, [])
 
   const setHandle = useCallback(
