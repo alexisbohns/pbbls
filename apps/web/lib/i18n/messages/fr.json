@@ -367,7 +367,7 @@
     "buy": "Acheter",
     "owned": "Acquis",
     "buyTitle": "Acheter ce glyphe ?",
-    "buyDescription": "Cela dépense {amount} karma. Vous pourrez l'utiliser sur vos cailloux et vos âmes.",
+    "buyDescription": "Cela dépense {amount} karma. Vous pourrez l'utiliser sur vos galets et vos âmes.",
     "buyConfirm": "Acheter pour {amount} karma",
     "cancel": "Annuler",
     "favourite": "Ajouter aux favoris",
@@ -811,7 +811,7 @@
   },
   "record": {
     "flow": {
-      "aria": "Capturer un caillou, une question à la fois",
+      "aria": "Capturer un galet, une question à la fois",
       "back": "Retour",
       "close": "Fermer",
       "stepOf": "Étape {current} sur {total}",
@@ -821,7 +821,7 @@
       "publish": "Publier",
       "skip": "Passer",
       "done": "Terminé",
-      "leaveTitle": "Tu quittes ce caillou ?",
+      "leaveTitle": "Tu quittes ce galet ?",
       "leaveDescription": "Il n'est pas encore enregistré. Abandonne-le, ou continue pour le terminer.",
       "keepGoing": "Je continue",
       "discard": "Abandonner",
@@ -837,7 +837,7 @@
         "soulsTitle": "Quelqu'un dans ce moment ?",
         "collectionTitle": "Dans une collection ?",
         "privacyTitle": "Qui peut le voir ?",
-        "successTitle": "Ton caillou"
+        "successTitle": "Ton galet"
       },
       "photo": {
         "add": "Ajouter une photo",
@@ -854,7 +854,7 @@
         "fromPhoto": "Récupéré de ta photo"
       },
       "name": {
-        "label": "Nom du caillou",
+        "label": "Nom du galet",
         "placeholder": "Donne-lui un nom"
       },
       "privacy": {
@@ -867,9 +867,16 @@
         "exit": "Retour à mon chemin"
       }
     },
+    "complete": {
+      "aria": "En faire un galet, une question à la fois",
+      "submit": "En faire un galet",
+      "noCollections": "Tu n'as pas encore de collection.",
+      "noCollection": "Aucune",
+      "karmaAria": "{count} karma gagnés"
+    },
     "draft": {
-      "publishFailed": "Impossible d'enregistrer ce caillou. Réessaie.",
-      "needsDomain": "Un caillou a besoin d'un pan de ta vie. Choisis-en un, puis réessaie.",
+      "publishFailed": "Impossible d'enregistrer ce galet. Réessaie.",
+      "needsDomain": "Un galet a besoin d'un pan de ta vie. Choisis-en un, puis réessaie.",
       "restoreTitle": "On reprend où tu t'étais arrêté ?",
       "restoreDescription": "Ce que tu écrivais est resté sur cet appareil. La photo n'en fait pas partie, pense à la remettre.",
       "restoreConfirm": "Reprendre",

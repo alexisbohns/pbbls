@@ -20,7 +20,7 @@ import {
   recordFlowReducer,
 } from "@/lib/record/flow"
 import { exifCaptureDate } from "@/lib/record/exif-capture-date"
-import type { RecordStep } from "@/lib/record/steps"
+import { COUNTED_STEPS, RECORD_STEPS, type RecordStep } from "@/lib/record/steps"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -96,7 +96,7 @@ export function RecordFlow({ onExit }: RecordFlowProps) {
     },
     [published, onExit],
   )
-  const { goBack } = useRecordFlowHistory(flow.step, goTo)
+  const { goBack } = useRecordFlowHistory(RECORD_STEPS, flow.step, goTo)
 
   // The valence fan wobbles nine artworks on first sight, which is a visible
   // hitch if it lands the moment step 3 appears. Three steps of runway is
@@ -338,7 +338,13 @@ export function RecordFlow({ onExit }: RecordFlowProps) {
         className="mx-auto flex min-h-[calc(100dvh-4rem-var(--safe-area-top)-var(--safe-area-bottom))] w-full max-w-lg flex-col gap-4"
       >
         {flow.step !== "success" && (
-          <RecordFlowChrome step={flow.step} onBack={goBack} onClose={handleClose} />
+          <RecordFlowChrome
+            steps={RECORD_STEPS}
+            counted={COUNTED_STEPS}
+            step={flow.step}
+            onBack={goBack}
+            onClose={handleClose}
+          />
         )}
 
         {flow.step === "success" && published ? (

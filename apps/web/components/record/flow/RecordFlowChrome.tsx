@@ -2,11 +2,15 @@
 
 import { ChevronLeft, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { COUNTED_STEPS, dotIndex, previousStep, type RecordStep } from "@/lib/record/steps"
+import { previousIn } from "@/lib/record/steps"
 import { cn } from "@/lib/utils"
 
-type RecordFlowChromeProps = {
-  step: RecordStep
+type RecordFlowChromeProps<S extends string> = {
+  /** The flow's whole step list, in order. */
+  steps: readonly S[]
+  /** The steps that get a dot — everything but the terminal one. */
+  counted: readonly S[]
+  step: S
   onBack: () => void
   onClose: () => void
 }
@@ -17,11 +21,20 @@ type RecordFlowChromeProps = {
  * Minimal by design — picking is the advance, so there is no Next button
  * competing with the dots, and "Save as draft" lives in the close confirmation
  * rather than taking permanent residence here.
+ *
+ * Generic over the step list: the record and Complete flows share it.
  */
-export function RecordFlowChrome({ step, onBack, onClose }: RecordFlowChromeProps) {
+export function RecordFlowChrome<S extends string>({
+  steps,
+  counted,
+  step,
+  onBack,
+  onClose,
+}: RecordFlowChromeProps<S>) {
   const t = useTranslations("record.flow")
-  const current = dotIndex(step)
-  const canGoBack = previousStep(step) !== null
+  const currentIndex = counted.indexOf(step)
+  const current = currentIndex === -1 ? null : currentIndex
+  const canGoBack = previousIn(steps, step) !== null
 
   return (
     <div className="flex items-center justify-between">
@@ -40,20 +53,19 @@ export function RecordFlowChrome({ step, onBack, onClose }: RecordFlowChromeProp
         <ChevronLeft className="size-5" aria-hidden />
       </button>
 
-      {/* One element to a screen reader, not ten: "Step 4 of 10" is the useful
+      {/* One element to a screen reader, not one per dot: "Step 4 of 9" is the useful
           reading, and ten unlabeled dots is not. */}
       <div
         role="img"
         aria-label={
           current === null
             ? t("stepDone")
-            : t("stepOf", { current: current + 1, total: COUNTED_STEPS.length })
+            : t("stepOf", { current: current + 1, total: counted.length })
         }
         className="flex items-center gap-1.5"
       >
-        {COUNTED_STEPS.map((candidate) => {
-          const index = dotIndex(candidate)
-          const filled = current !== null && index !== null && index <= current
+        {counted.map((candidate, index) => {
+          const filled = current !== null && index <= current
           return (
             <span
               key={candidate}
