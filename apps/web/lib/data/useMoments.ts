@@ -4,6 +4,7 @@ import { notifyKarma } from "@/lib/activity/karma-activity"
 import { fireAchievementCheck } from "@/lib/activity/fire-achievement-check"
 import { useDataProvider } from "@/lib/data/provider-context"
 import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment-payloads"
+import { clearCompleteDraft } from "@/lib/record/complete-draft-store"
 import type { PebbleSnap } from "@/lib/types"
 import { karmaDelta } from "@/lib/data/moment-karma"
 
@@ -56,9 +57,15 @@ export function useMoments() {
     return pebbleId
   }
 
+  /** Also drops the moment's Complete autosave on this device: nothing is left to complete. */
   const deleteMoment = async (momentId: string): Promise<void> => {
     if (!provider) throw new Error("Not authenticated")
     await provider.deleteMoment(momentId)
+    try {
+      clearCompleteDraft(window.localStorage, momentId)
+    } catch (err) {
+      console.warn("[moments] could not clear the complete draft", err)
+    }
     setStore(provider.getStore())
   }
 
@@ -74,6 +81,12 @@ export function useMoments() {
     return provider.uploadSnap(file)
   }
 
+  /** Best-effort; never throws (see `DataProvider.removeSnapFiles`). */
+  const removeSnapFiles = async (storagePaths: string[]): Promise<void> => {
+    if (!provider) return
+    await provider.removeSnapFiles(storagePaths)
+  }
+
   return {
     moments: store.moments,
     loading,
@@ -82,5 +95,6 @@ export function useMoments() {
     deleteMoment,
     deletePebble,
     uploadSnap,
+    removeSnapFiles,
   }
 }

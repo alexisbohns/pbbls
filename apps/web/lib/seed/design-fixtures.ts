@@ -1,6 +1,6 @@
 import type { Store } from "@/lib/data/data-provider"
 import type { ConsentRow } from "@/lib/data/consent"
-import type { Account, Collection, Pebble, Profile, RippleSummary } from "@/lib/types"
+import type { Account, Collection, CompletedMoment, Pebble, Profile, RippleSummary } from "@/lib/types"
 import { SANDBOX_MARKS, SANDBOX_SCENARIOS, SANDBOX_SOULS } from "./sandbox-pebbles"
 
 // ---------------------------------------------------------------------------
@@ -34,12 +34,41 @@ export function designCollections(pebbles: Pebble[]): Collection[] {
   ]
 }
 
+/** The moment a fixture pebble completes, for the screens already on `Moment` (#1050). */
+export function designMomentFromPebble(p: Pebble): CompletedMoment {
+  return {
+    id: p.moment_id,
+    name: p.name || null,
+    description: p.description ?? null,
+    happened_at: p.happened_at,
+    snaps: p.snaps,
+    instants: p.instants,
+    cover: p.cover,
+    created_at: p.created_at,
+    updated_at: p.updated_at,
+    pebble: {
+      id: p.id,
+      intensity: p.intensity,
+      positiveness: p.positiveness,
+      visibility: p.visibility,
+      emotion_id: p.emotion_id,
+      soul_ids: p.soul_ids,
+      domain_ids: p.domain_ids,
+      collection_ids: p.collection_ids,
+      cards: p.cards,
+      glyph: p.glyph,
+      created_at: p.created_at,
+      updated_at: p.updated_at,
+    },
+  }
+}
+
 export function designStore(now: Date): Store {
   const pebbles = designPebbles(now)
   return {
-    // The design sandbox still draws the flat pebbles; it gains moments when
-    // the Path reads them (#1050 Part 4).
-    moments: [],
+    // The Path still draws the flat pebbles until #1050 Part 4; the read page
+    // already reads the moments they complete.
+    moments: pebbles.map(designMomentFromPebble),
     pebbles,
     souls: SANDBOX_SOULS,
     collections: designCollections(pebbles),

@@ -119,7 +119,7 @@ type ValenceGridProps = {
  * The 3 rows × 3 cells valence/intensity grid body. Rendered inside a
  * `PickerSheet` — either via the self-contained `ValenceIntensityGrid` chip
  * trigger, or hosted directly by callers with a different trigger surface
- * (e.g. PebbleDetail opens it from the pebble visual itself).
+ * (e.g. Edit pebble opens it from the pebble visual itself).
  */
 export function ValenceGrid({
   intensity,

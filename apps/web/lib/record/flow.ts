@@ -10,6 +10,7 @@ import {
   RECORD_STEPS,
   type RecordStep,
 } from "./steps"
+import { clampName, NAME_LIMIT } from "./name"
 
 /**
  * The record flow's state machine — the draft under construction, the step the
@@ -27,11 +28,8 @@ import {
  * the whole M47 draft contract — are shared rather than reimplemented.
  */
 
-/**
- * Longest name the flow accepts. Front-end only: neither `pebbles.name` nor the
- * create payload constrains length, and nothing server-side enforces it.
- */
-export const NAME_LIMIT = 40
+// The name clamp is shared with Edit moment (#1050); re-exported for the flow's callers.
+export { NAME_LIMIT, clampName }
 
 export type RecordFlowState = {
   draft: ComposerState
@@ -131,10 +129,6 @@ export function firstGap(state: RecordFlowState): RecordStep {
     if (!hasAnswer(candidate, state)) return candidate
   }
   return "privacy"
-}
-
-export function clampName(raw: string): string {
-  return raw.slice(0, NAME_LIMIT)
 }
 
 /** A tile pick: commit the value and move on in one gesture. */

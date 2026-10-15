@@ -725,13 +725,9 @@
   },
   "pebble": {
     "loading": "Loading…",
-    "notFoundTitle": "Pebble not found",
-    "notFoundInline": "Pebble not found.",
-    "notFoundDescription": "This pebble doesn't exist or may have been removed.",
     "back": "Back to Path",
     "cardAria": "{name}, {time}",
     "instantAlt": "Instant photo for {name}",
-    "photoAlt": "Pebble photo",
     "visualAria": "Pebble: {name}, {emotion}, intensity {intensity}",
     "withPrefix": "With: ",
     "intensity": {
@@ -745,24 +741,12 @@
     },
     "peek": {
       "close": "Close",
-      "souls": "Souls",
-      "picture": "Picture",
       "editSoulAria": "Edit souls — {name}"
     },
-    "add": {
-      "soul": "Soul",
-      "soulAria": "Add a soul",
-      "stack": "Stack",
-      "stackAria": "Add to a collection",
-      "picture": "Picture",
-      "pictureAria": "Add a picture"
-    },
     "editIntensityAria": "Edit intensity and valence",
-    "editAria": "Edit pebble",
     "shareAria": "Share this pebble",
     "shareCopied": "Link copied",
     "edit": {
-      "toolbarTitle": "EDITION",
       "cancel": "Cancel",
       "save": "Save",
       "saving": "Saving…",
@@ -787,13 +771,46 @@
       "pictureFilledAria": "Replace or remove the picture",
       "replacePhoto": "Replace",
       "removePhoto": "Remove",
-      "errorToast": "Couldn't save your edits. Try again.",
       "uploading": "Uploading picture…",
       "uploadFailed": "Picture upload failed. Try again."
     }
   },
   "moment": {
     "untitled": "Untitled",
+    "notAPebble": "Not a pebble yet",
+    "notFoundTitle": "Moment not found",
+    "notFoundInline": "Moment not found.",
+    "read": {
+      "makeItAPebble": "Make it a pebble",
+      "photoAlt": "Moment photo",
+      "more": "More",
+      "editMoment": "Edit moment",
+      "editPebble": "Edit pebble",
+      "delete": "Delete",
+      "noDomain": "No domain"
+    },
+    "delete": {
+      "bareTitle": "Delete this moment?",
+      "bareMessage": "This can't be undone.",
+      "deleteMoment": "Delete moment",
+      "pebbleTitle": "Delete this pebble?",
+      "pebbleMessage": "Keeping the moment leaves it on your path as a blank stone. Deleting the moment removes its photo too. This can't be undone.",
+      "deletePebbleKeepMoment": "Delete the pebble, keep the moment",
+      "deleteMomentToo": "Delete the moment too",
+      "cancel": "Cancel"
+    },
+    "editMoment": {
+      "title": "Edit moment",
+      "needsContent": "A moment needs a name or a photo."
+    },
+    "editPebble": {
+      "title": "Edit pebble",
+      "mood": "Mood",
+      "souls": "Souls",
+      "optional": "Optional",
+      "none": "None",
+      "privacy": "Who can see it?"
+    },
     "errors": {
       "momentEmpty": "Add a name or a photo first.",
       "mediaQuotaExceeded": "Photo limit reached on this moment.",

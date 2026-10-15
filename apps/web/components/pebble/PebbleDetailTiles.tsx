@@ -17,6 +17,7 @@ import {
 } from "@/components/record/EmotionPicker"
 import { cn } from "@/lib/utils"
 import { useDomains, type DomainRow } from "@/lib/data/useDomains"
+import { singleSelect } from "@/lib/data/moment-edit"
 import { DomainGlyph } from "@/components/record/DomainGlyph"
 
 // Vertical tile shared by emotion / domain / collection triggers in the
@@ -124,6 +125,11 @@ type DomainTileProps = {
   value: string[]
   onChange: (ids: string[]) => void
   editing?: boolean
+  /**
+   * Exactly one domain (R13, PD-W11): a pick yields `[id]`, collapsing a
+   * legacy multi-set, and the one domain cannot be unpicked.
+   */
+  single?: boolean
   className?: string
 }
 
@@ -167,7 +173,7 @@ function useLocalizedDomainMap(rows: DomainRow[]): Map<string, string> {
   }, [rows, t])
 }
 
-export function DomainTile({ value, onChange, editing, className }: DomainTileProps) {
+export function DomainTile({ value, onChange, editing, single, className }: DomainTileProps) {
   const t = useTranslations("record.domain")
   const { rows } = useDomains()
   const localizedNames = useLocalizedDomainMap(rows)
@@ -185,6 +191,10 @@ export function DomainTile({ value, onChange, editing, className }: DomainTilePr
         : selectedNames.join(", ")
 
   const toggle = (id: string) => {
+    if (single) {
+      onChange(singleSelect(value, id, false))
+      return
+    }
     onChange(value.includes(id) ? value.filter((d) => d !== id) : [...value, id])
   }
 
@@ -224,6 +234,11 @@ type CollectionTileProps = {
   onChange: (ids: string[]) => void
   collections: Collection[]
   editing?: boolean
+  /**
+   * Zero or one collection (R13, PD-W11): a pick yields `[id]`, collapsing a
+   * legacy multi-set; picking the selected one, or the "None" row, yields `[]`.
+   */
+  single?: boolean
   className?: string
 }
 
@@ -232,9 +247,11 @@ export function CollectionTile({
   onChange,
   collections,
   editing,
+  single,
   className,
 }: CollectionTileProps) {
   const t = useTranslations("record.collection")
+  const tEdit = useTranslations("moment.editPebble")
   const selected = collections.filter((c) => value.includes(c.id))
   const selectedNames = selected.map((c) => c.name)
 
@@ -246,6 +263,10 @@ export function CollectionTile({
         : selectedNames.join(", ")
 
   const toggle = (id: string) => {
+    if (single) {
+      onChange(singleSelect(value, id, true))
+      return
+    }
     onChange(value.includes(id) ? value.filter((c) => c !== id) : [...value, id])
   }
 
@@ -268,15 +289,26 @@ export function CollectionTile({
             {t("empty")}
           </p>
         ) : (
-          collections.map((coll) => (
-            <SelectableItem
-              key={coll.id}
-              selected={value.includes(coll.id)}
-              onSelect={() => toggle(coll.id)}
-            >
-              {coll.name}
-            </SelectableItem>
-          ))
+          <>
+            {single && (
+              <SelectableItem
+                selected={value.length === 0}
+                onSelect={() => onChange([])}
+                className="text-muted-foreground"
+              >
+                {tEdit("none")}
+              </SelectableItem>
+            )}
+            {collections.map((coll) => (
+              <SelectableItem
+                key={coll.id}
+                selected={value.includes(coll.id)}
+                onSelect={() => toggle(coll.id)}
+              >
+                {coll.name}
+              </SelectableItem>
+            ))}
+          </>
         )}
       </PopoverContent>
     </Popover>

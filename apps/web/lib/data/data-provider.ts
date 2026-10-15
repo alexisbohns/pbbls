@@ -72,7 +72,6 @@ type ServerOwnedPebbleFields =
   | "cover"
 
 export type CreatePebbleInput = Omit<Pebble, ServerOwnedPebbleFields>
-export type UpdatePebbleInput = Partial<Omit<Pebble, ServerOwnedPebbleFields>>
 
 // glyph_id is optional on create — providers default it to the system glyph
 // (matches the DB column default in `20260426000000_add_glyph_to_souls.sql`).
@@ -191,7 +190,6 @@ export interface DataProvider {
   listPebbles(): Promise<Pebble[]>
   getPebble(id: string): Promise<Pebble | undefined>
   createPebble(input: CreatePebbleInput): Promise<Pebble>
-  updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble>
 
   // Moments (#1050): the four definer RPCs, called directly, one per user
   // action (R5). Each returns once its RPC succeeded, then reloads the store
@@ -211,14 +209,18 @@ export interface DataProvider {
   deleteMoment(momentId: string): Promise<void>
   /** Deletes the pebble only, keyed by the PEBBLE id; the moment stays, bare. */
   deletePebble(pebbleId: string): Promise<void>
+  /**
+   * Removes the files of snaps no row holds any more (a photo an edit detached,
+   * an upload a cancel discarded), best-effort: a failure is logged, never thrown.
+   */
+  removeSnapFiles(storagePaths: string[]): Promise<void>
 
   // Snap media: upload processes the file client-side (mirrors iOS
-  // ImagePipeline) and writes original + thumb JPEGs to `pebbles-media`.
-  // The returned `PebbleSnap` is what callers pass to `createPebble`/
-  // `updatePebble` via the `snaps` field. `deletePebbleMedia` is the
-  // eager-cleanup variant for existing snaps (file delete + DB row).
+  // ImagePipeline) and writes original + thumb JPEGs to `pebbles-media`. The
+  // returned `PebbleSnap` is what a `save_moment` payload carries in `snaps`
+  // (and the old composer's `createPebble`). A photo is detached by saving
+  // the moment without it (R6), never by a separate call.
   uploadSnap(file: File): Promise<PebbleSnap>
-  deletePebbleMedia(snapId: string): Promise<void>
 
   // Connections (M49): definer-RPC-only — every write is multi-table validated
   // logic (accept touches invites, blocks and connections), so there are no

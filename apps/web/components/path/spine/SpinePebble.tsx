@@ -28,7 +28,8 @@ type SpinePebbleProps = {
   order: readonly string[]
   soulMap: ReadonlyMap<string, Soul>
   markMap: ReadonlyMap<string, Mark>
-  onOpen: (id: string) => void
+  /** Opens the read page: called with the MOMENT id (#1050). */
+  onOpen: (momentId: string) => void
 }
 
 const NO_EMOTION = { slug: "", name: "", label: "" }
@@ -82,13 +83,13 @@ export function SpinePebble({ pebble, palette, order, soulMap, markMap, onOpen }
   const pressStone = useCallback(() => {
     press()
     if (openTimer.current) clearTimeout(openTimer.current)
-    openTimer.current = setTimeout(() => onOpen(pebble.id), reducedMotion() ? 0 : OPEN_DELAY_MS)
-  }, [press, onOpen, pebble.id])
+    openTimer.current = setTimeout(() => onOpen(pebble.moment_id), reducedMotion() ? 0 : OPEN_DELAY_MS)
+  }, [press, onOpen, pebble.moment_id])
 
   const openNow = useCallback(() => {
     press()
-    onOpen(pebble.id)
-  }, [press, onOpen, pebble.id])
+    onOpen(pebble.moment_id)
+  }, [press, onOpen, pebble.moment_id])
 
   const people = (
     <PeopleLine

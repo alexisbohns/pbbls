@@ -53,7 +53,7 @@ const SELECTED_SCALE = 1.14
  * name, so a screen reader hears "Week event, Highlight" as before.
  *
  * Ported from iOS #728 (`ValencePickerContent`). The nine-tile `ValenceGrid`
- * stays where it is: the edit sheets behind `PebbleDetail`, `PebbleEdit` and
+ * stays where it is: the edit sheets behind `PebbleEnrich` and
  * `QuickPebbleEditor` still host it, because a sheet that commits and closes on
  * pick cannot host a roll that changes the value at every detent — that is the
  * same wall iOS hit, and unpicking it is its own change.

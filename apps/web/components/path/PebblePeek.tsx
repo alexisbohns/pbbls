@@ -1,18 +1,19 @@
 "use client"
 
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useId, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
-import { usePebble } from "@/lib/data/usePebble"
+import { useMoment } from "@/lib/data/useMoment"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
-import { PebbleDetail } from "@/components/pebble/PebbleDetail"
+import { MomentRead } from "@/components/pebble/MomentRead"
 
 type PebblePeekProps = {
-  pebbleId: string | null
+  /** The moment to read (#1050), null when the peek is closed. */
+  momentId: string | null
   onClose: () => void
 }
 
@@ -21,28 +22,28 @@ type PebblePeekProps = {
 const SWIPE_CLOSE_DISTANCE = 100
 const SWIPE_VELOCITY_THRESHOLD = 0.5 // px per ms
 
-export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
-  const open = pebbleId !== null
-  const id = pebbleId ?? ""
+export function PebblePeek({ momentId, onClose }: PebblePeekProps) {
+  const open = momentId !== null
   const t = useTranslations("pebble")
+  const tMoment = useTranslations("moment")
   const router = useRouter()
+  // Names the dialog: the moment's heading, or the loading / not-found line.
+  const titleId = useId()
 
-  const { pebble, loading: pebbleLoading, updatePebble, uploadSnap } = usePebble(id)
-  const { souls, loading: soulsLoading, addSoul } = useSouls()
+  const { moment, loading: momentLoading } = useMoment(momentId ?? "")
+  const { souls, loading: soulsLoading } = useSouls()
   const { collections, loading: collectionsLoading } = useCollections()
   const { glyphs: marks, loading: marksLoading } = useUsableGlyphs()
 
-  const loading = pebbleLoading || soulsLoading || collectionsLoading || marksLoading
+  const loading = momentLoading || soulsLoading || collectionsLoading || marksLoading
 
-
-  const handleAddSoul = useCallback(
-    async (name: string) => {
-      const soul = await addSoul({ name })
-      if (pebble) {
-        await updatePebble({ soul_ids: [...pebble.soul_ids, soul.id] })
-      }
+  // Leaving for another screen closes the peek first.
+  const handleNavigate = useCallback(
+    (href: string) => {
+      onClose()
+      router.push(href)
     },
-    [addSoul, updatePebble, pebble],
+    [onClose, router],
   )
 
   // Swipe-down-to-close: only intercepts when the popup is scrolled to its
@@ -92,6 +93,7 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
         />
         <DialogPrimitive.Popup
           ref={popupRef}
+          aria-labelledby={titleId}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -111,24 +113,20 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
           )}
         >
           {loading ? (
-            <p className="text-sm text-muted-foreground">{t("loading")}</p>
-          ) : pebble ? (
-            <PebbleDetail
-              pebble={pebble}
+            <p id={titleId} className="text-sm text-muted-foreground">{t("loading")}</p>
+          ) : moment ? (
+            <MomentRead
+              moment={moment}
               souls={souls}
               collections={collections}
               marks={marks}
-              onUpdatePebble={updatePebble}
-              onUploadSnap={uploadSnap}
-              onAddSoul={handleAddSoul}
+              onNavigate={handleNavigate}
               onClose={onClose}
-              onEdit={() => {
-                onClose()
-                router.push(`/pebble/${id}/edit`)
-              }}
+              onDeleted={onClose}
+              titleId={titleId}
             />
           ) : (
-            <p className="text-sm text-muted-foreground">{t("notFoundInline")}</p>
+            <p id={titleId} className="text-sm text-muted-foreground">{tMoment("notFoundInline")}</p>
           )}
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>

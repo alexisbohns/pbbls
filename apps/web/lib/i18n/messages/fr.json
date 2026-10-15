@@ -725,13 +725,9 @@
   },
   "pebble": {
     "loading": "Chargement…",
-    "notFoundTitle": "Galet introuvable",
-    "notFoundInline": "Galet introuvable.",
-    "notFoundDescription": "Ce galet n'existe pas ou a été supprimé.",
     "back": "Retour au chemin",
     "cardAria": "{name}, {time}",
     "instantAlt": "Photo de l'instant pour {name}",
-    "photoAlt": "Photo du galet",
     "visualAria": "Galet : {name}, {emotion}, intensité {intensity}",
     "withPrefix": "Avec : ",
     "intensity": {
@@ -745,24 +741,12 @@
     },
     "peek": {
       "close": "Fermer",
-      "souls": "Âmes",
-      "picture": "Photo",
       "editSoulAria": "Modifier les âmes — {name}"
     },
-    "add": {
-      "soul": "Âme",
-      "soulAria": "Ajouter une âme",
-      "stack": "Pile",
-      "stackAria": "Ajouter à une collection",
-      "picture": "Photo",
-      "pictureAria": "Ajouter une photo"
-    },
     "editIntensityAria": "Modifier l'intensité et la valence",
-    "editAria": "Modifier le galet",
     "shareAria": "Partager ce galet",
     "shareCopied": "Lien copié",
     "edit": {
-      "toolbarTitle": "ÉDITION",
       "cancel": "Annuler",
       "save": "Enregistrer",
       "saving": "Enregistrement…",
@@ -787,13 +771,46 @@
       "pictureFilledAria": "Remplacer ou retirer la photo",
       "replacePhoto": "Remplacer",
       "removePhoto": "Retirer",
-      "errorToast": "Impossible d'enregistrer. Réessayez.",
       "uploading": "Envoi de la photo…",
       "uploadFailed": "Échec de l'envoi de la photo. Réessayez."
     }
   },
   "moment": {
     "untitled": "Sans titre",
+    "notAPebble": "Pas encore un galet",
+    "notFoundTitle": "Moment introuvable",
+    "notFoundInline": "Moment introuvable.",
+    "read": {
+      "makeItAPebble": "En faire un galet",
+      "photoAlt": "Photo du moment",
+      "more": "Plus",
+      "editMoment": "Modifier le moment",
+      "editPebble": "Modifier le galet",
+      "delete": "Supprimer",
+      "noDomain": "Aucun domaine"
+    },
+    "delete": {
+      "bareTitle": "Supprimer ce moment ?",
+      "bareMessage": "Cette action est irréversible.",
+      "deleteMoment": "Supprimer le moment",
+      "pebbleTitle": "Supprimer ce galet ?",
+      "pebbleMessage": "Garder le moment le laisse sur ton chemin comme une pierre vierge. Supprimer le moment retire aussi sa photo. Cette action est irréversible.",
+      "deletePebbleKeepMoment": "Supprimer le galet, garder le moment",
+      "deleteMomentToo": "Supprimer aussi le moment",
+      "cancel": "Annuler"
+    },
+    "editMoment": {
+      "title": "Modifier le moment",
+      "needsContent": "Un moment a besoin d'un nom ou d'une photo."
+    },
+    "editPebble": {
+      "title": "Modifier le galet",
+      "mood": "Humeur",
+      "souls": "Âmes",
+      "optional": "Facultatif",
+      "none": "Aucune",
+      "privacy": "Qui peut le voir ?"
+    },
     "errors": {
       "momentEmpty": "Ajoute d'abord un nom ou une photo.",
       "mediaQuotaExceeded": "Limite de photos atteinte pour ce moment.",
