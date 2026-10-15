@@ -9,12 +9,11 @@
  *   4. Readers: path_moments shows a null pebble for an uncompleted moment;
  *      v_moments_full nests only the caller's pebble; a second user reads
  *      nothing until the pebble is public, and never the sharer's pebble body.
- *   5. Compat: create_pebble + v_pebbles_full + path_pebbles + the compose-pebble edge function still answer.
- *   6. happened_at is truncated to whole seconds by save_moment (direct and via create_pebble).
- *   7. delete_pebble keeps the moment; delete_moment removes all and reverses karma.
+ *   5. happened_at is truncated to whole seconds by save_moment.
+ *   6. delete_pebble keeps the moment; delete_moment removes all and reverses karma.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:moments --workspace=packages/supabase
- * Expected: `Summary: passed=36 failed=0` (36 executed checks, each if/else pair counting once — recount if you add one).
+ * Expected: `Summary: passed=29 failed=0` (29 executed checks, each if/else pair counting once — recount if you add one).
  * A founding write that fails (first save_moment, first complete_pebble, the
  * collection insert) aborts the run with one `✗ aborted:` line instead of a
  * cascade of dependent reds.
@@ -196,63 +195,7 @@ try {
     !shared.error && shared.data?.name === `coffee ${runId}` && !!shared.data?.glyph?.id,
     shared.error?.message ?? JSON.stringify(shared.data));
 
-  // 5. compat (web, until #1050) ----------------------------------------------------
-  const compat = await a.rpc("create_pebble", {
-    payload: {
-      name: `compat ${runId}`, happened_at: "2026-10-11T11:00:00.456Z",
-      emotion_id: emotion.id, intensity: 1, positiveness: 0, domain_ids: [domain.id], glyph_id: null,
-    },
-  });
-  check("create_pebble wrapper still returns a pebble id", !compat.error && typeof compat.data === "string", compat.error?.message);
-  const compatId = compat.data as string;
-  const { data: vpf } = await a.from("v_pebbles_full").select("id, name, glyph_id, happened_at").eq("id", compatId).single();
-  check("v_pebbles_full compat row carries name and resolved glyph_id",
-    vpf?.name === `compat ${runId}` && vpf?.glyph_id === domain.default_glyph_id, JSON.stringify(vpf));
-  check("the compat row's happened_at is at whole seconds",
-    !!vpf?.happened_at && new Date(vpf.happened_at).getMilliseconds() === 0 &&
-      new Date(vpf.happened_at).toISOString().startsWith("2026-10-11T11:00:00"), vpf?.happened_at);
-  const { data: pp } = await a.rpc("path_pebbles");
-  check("path_pebbles compat answers with render_svg null",
-    Array.isArray(pp) && pp.length >= 2 && pp.every((r: { render_svg: unknown }) => r.render_svg === null),
-    JSON.stringify(pp));
-  // The edge function web still writes through (#1050): same wrapper, null render keys.
-  const composeRes = await fetch(`${SUPABASE_URL}/functions/v1/compose-pebble`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${alice.token}`, apikey: ANON_KEY!, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      payload: {
-        name: `composed ${runId}`, happened_at: "2026-10-11T12:00:00Z",
-        emotion_id: emotion.id, intensity: 1, positiveness: 0, domain_ids: [domain.id],
-      },
-    }),
-  });
-  const composed = await composeRes.json().catch(() => null) as
-    | { pebble_id?: string; render_svg?: unknown; render_version?: unknown; karma_delta?: unknown; error?: string }
-    | null;
-  check("compose-pebble answers 200 with a pebble id and null render keys",
-    composeRes.status === 200 && typeof composed?.pebble_id === "string" &&
-      composed?.render_svg === null && composed?.render_version === null &&
-      typeof composed?.karma_delta === "number",
-    `status=${composeRes.status} ${JSON.stringify(composed)}`);
-  if (composed?.pebble_id) {
-    const { data: composedPebble } = await a.from("pebbles").select("moment_id").eq("id", composed.pebble_id).single();
-    const delComposed = composedPebble?.moment_id
-      ? await a.rpc("delete_moment", { p_moment_id: composedPebble.moment_id })
-      : { error: { message: "no composed pebble row" } };
-    check("delete_moment removes the composed moment", !delComposed.error, delComposed.error?.message);
-  } else {
-    check("delete_moment removes the composed moment", false, "compose-pebble returned no pebble id");
-  }
-  const { data: compatPebble } = await a.from("pebbles").select("moment_id").eq("id", compatId).single();
-  // A broken compat layer must not abort the delete section below.
-  if (compatPebble?.moment_id) {
-    const delCompat = await a.rpc("delete_moment", { p_moment_id: compatPebble.moment_id });
-    check("delete_moment removes the compat moment", !delCompat.error, delCompat.error?.message);
-  } else {
-    check("delete_moment removes the compat moment", false, "no compat pebble row to delete");
-  }
-
-  // 6/7. deletes ---------------------------------------------------------------------
+  // 6. deletes -------------------------------------------------------------------------
   const delP = await a.rpc("delete_pebble", { p_pebble_id: pebbleId });
   check("delete_pebble removes the pebble", !delP.error, delP.error?.message);
   const { data: stillThere } = await a.from("moments").select("id").eq("id", momentId);

@@ -24,7 +24,7 @@ The database is the contract between four clients, and these Deno scripts are th
 
 | Command | Harness | Proves | Needs |
 |---|---|---|---|
-| `npm run db:verify:moments` | `verify-moments.ts` | the moments / pebbles split contract (save_moment, complete_pebble, derived glyph, v_moments_full / path_moments RLS, web compat wrappers, deletes) | anon |
+| `npm run db:verify:moments` | `verify-moments.ts` | the moments / pebbles split contract (save_moment, complete_pebble, derived glyph, v_moments_full / path_moments RLS, deletes) | anon |
 | `npm run db:verify:visibility` | `verify-pebble-visibility.ts` | grade RLS on pebbles | anon |
 | `npm run db:verify:public-profile` | `verify-public-profile.ts` | `get_public_profile` jsonb allowlist | anon |
 | `npm run db:verify:guard` | `verify-profiles-privileged-guard.ts` | `profiles_privileged_guard` (#739) | anon |
@@ -53,7 +53,7 @@ A new harness added to `scripts/` gains a `db:verify:*` script and a workflow st
 | `schema` | Does the schema build from zero, and do the types match it? | `npm run db:reset` then `npm run db:types`, needs Docker |
 | `verify` | Does the contract still hold? | `set -a; . ./.env; set +a; npm run db:verify --workspace=packages/supabase` |
 
-**`lint` is `deno check` over the four edge-function entrypoints and the scripts** — `_shared/` comes along transitively. It is not `deno lint`: the only thing that rule set has to say about this tree is 13 × `no-import-prefix`, and inline `https://esm.sh/…` specifiers are how Supabase edge functions are written. A new file under `scripts/` or a new edge function is covered automatically by the globs; a new *directory* of shared code is covered only if something imports it.
+**`lint` is `deno check` over the two edge-function entrypoints and the scripts** — `_shared/` comes along transitively. It is not `deno lint`: the only thing that rule set has to say about this tree is 13 × `no-import-prefix`, and inline `https://esm.sh/…` specifiers are how Supabase edge functions are written. A new file under `scripts/` or a new edge function is covered automatically by the globs; a new *directory* of shared code is covered only if something imports it.
 
 **The `schema` job is the only thing that reads `types/database.ts` as an assertion.** It generates types from the local stack into a temp file and diffs — never over the committed file, because `db:types` redirects stdout into it and a failed generation would truncate it (the TS1434 failure mode above). If that job goes red, the fix is `npm run db:types` and a commit, not an edit to the workflow.
 

@@ -275,7 +275,7 @@ jobs:
         if: '!cancelled()'
         run: npm run build --workspace=packages/supabase
 
-      # Covers the four function entrypoints and the scripts; `_shared/` comes
+      # Covers the two function entrypoints and the scripts; `_shared/` comes
       # along transitively through their imports.
       # `deno check`, not `deno lint`: the only thing `deno lint` has to say
       # about this tree is 13 × no-import-prefix, and inline `https://esm.sh/…`

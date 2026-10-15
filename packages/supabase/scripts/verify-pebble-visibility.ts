@@ -13,10 +13,9 @@
  *   3. Read matrix — owner sees all grades; a mutual connection sees
  *      'private' + 'public' but never 'secret'; a stranger sees 'public'
  *      only; anon sees nothing through the table.
- *   4. Enrichment fence — v_pebbles_full (compat) shows a connection the
- *      shared row with EMPTY cards/souls/snaps (enrichment RLS stays
- *      owner-only), and v_moments_full shows them the moment with NO pebble
- *      body (only the caller's own pebble is ever nested).
+ *   4. Enrichment fence — a connection reads the pebble row and its moment's
+ *      name (through web's connection reader) but none of the enrichments;
+ *      v_moments_full shows them the moment with no pebble body.
  *   5. Writes stay owner-only — a viewer cannot re-grade someone else's
  *      pebble.
  *   6. get_shared_pebble — anon gets the projection for 'public' (no user_id,
@@ -41,8 +40,7 @@
  * runnable by anyone who can run the app. Cleanup runs even on failure.
  * Exits non-zero if any assertion fails.
  *
- * Seeds go through save_moment + complete_pebble (the split's two writes),
- * not the deprecated create_pebble wrapper, so this harness outlives #1050.
+ * Seeds go through save_moment + complete_pebble (the split's two writes).
  */
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -206,8 +204,12 @@ try {
   const gradeOf = (rows: { id: string }[] | null, id: string) =>
     (rows ?? []).some((r) => r.id === id);
 
+  // Membership, not a row count: the public arm also returns other users'
+  // public rows, so a count breaks when a parallel run seeds one.
   const { data: ownRows } = await o.from("pebbles").select("id");
-  check("owner sees all three grades", ownRows?.length === 3, `${ownRows?.length}`);
+  check("owner sees all three grades",
+    [secretId, privateId, publicId].every((id) => gradeOf(ownRows, id)),
+    JSON.stringify(ownRows));
 
   const { data: friendRows } = await f.from("pebbles").select("id");
   check("connection sees the private pebble", gradeOf(friendRows, privateId));
@@ -229,15 +231,26 @@ try {
   // ---------------------------------------------------------------------------
   // 3. Enrichment fence: the connection gets the row, never the trimmings.
   // ---------------------------------------------------------------------------
-  const { data: fullRow } = await f
-    .from("v_pebbles_full").select("id, name, cards, souls, snaps")
+  // The select is web's listConnectionSharedPebbles, verbatim, so the fence
+  // and the reader web ships are proven together. The private pebble was
+  // seeded with a card, a soul and a snap, so the empty reads are not vacuous.
+  const { data: sharedRow } = await f
+    .from("pebbles")
+    .select(
+      "id, visibility, intensity, positiveness, emotion:emotions(id, slug, name, color), moment:moments!inner(name, happened_at), glyph",
+    )
     .eq("id", privateId).maybeSingle();
-  check("v_pebbles_full returns the shared row to a connection", !!fullRow, "row missing");
-  check("…with empty enrichments (cards/souls/snaps RLS stays owner-only)",
-    (fullRow?.cards as unknown[])?.length === 0 &&
-    (fullRow?.souls as unknown[])?.length === 0 &&
-    (fullRow?.snaps as unknown[])?.length === 0,
-    JSON.stringify({ cards: fullRow?.cards, souls: fullRow?.souls, snaps: fullRow?.snaps }));
+  check("a connection reads the shared pebble with its moment's name (web's connection reader)",
+    !!sharedRow && (sharedRow.moment as { name?: string } | null)?.name === `private ${runId}`,
+    JSON.stringify(sharedRow));
+  const [{ data: cards }, { data: souls }, { data: snaps }] = await Promise.all([
+    f.from("pebble_cards").select("id").eq("pebble_id", privateId),
+    f.from("pebble_souls").select("soul_id").eq("pebble_id", privateId),
+    f.from("snaps").select("id").eq("moment_id", priv.momentId),
+  ]);
+  check("…with no enrichments (cards/souls/snaps RLS stays owner-only)",
+    (cards ?? []).length === 0 && (souls ?? []).length === 0 && (snaps ?? []).length === 0,
+    JSON.stringify({ cards, souls, snaps }));
 
   // The split's reader: the moment opens to the connection (moments_select
   // follows the readable pebble), but `pebble` is the CALLER's pebble on it —
