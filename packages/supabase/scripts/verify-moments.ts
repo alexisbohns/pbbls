@@ -14,7 +14,7 @@
  *   7. delete_pebble keeps the moment; delete_moment removes all and reverses karma.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:moments --workspace=packages/supabase
- * Expected: `Summary: passed=35 failed=0` (35 executed checks, each if/else pair counting once — recount if you add one).
+ * Expected: `Summary: passed=36 failed=0` (36 executed checks, each if/else pair counting once — recount if you add one).
  * A founding write that fails (first save_moment, first complete_pebble, the
  * collection insert) aborts the run with one `✗ aborted:` line instead of a
  * cascade of dependent reds.
