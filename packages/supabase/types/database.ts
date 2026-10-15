@@ -2651,6 +2651,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      glyph: {
+        Args: { p: Database["public"]["Tables"]["pebbles"]["Row"] }
+        Returns: Json
+      }
       is_admin: { Args: { p_user_id: string }; Returns: boolean }
       list_orphan_snap_files: {
         Args: { p_min_age_seconds?: number; p_owner?: string }
