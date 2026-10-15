@@ -204,8 +204,12 @@ try {
   const gradeOf = (rows: { id: string }[] | null, id: string) =>
     (rows ?? []).some((r) => r.id === id);
 
+  // Membership, not a row count: the public arm also returns other users'
+  // public rows, so a count breaks when a parallel run seeds one.
   const { data: ownRows } = await o.from("pebbles").select("id");
-  check("owner sees all three grades", ownRows?.length === 3, `${ownRows?.length}`);
+  check("owner sees all three grades",
+    [secretId, privateId, publicId].every((id) => gradeOf(ownRows, id)),
+    JSON.stringify(ownRows));
 
   const { data: friendRows } = await f.from("pebbles").select("id");
   check("connection sees the private pebble", gradeOf(friendRows, privateId));
