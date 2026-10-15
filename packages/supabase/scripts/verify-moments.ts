@@ -176,6 +176,11 @@ try {
   const { data: bobPebbles } = await b.from("pebbles").select("id").eq("moment_id", momentId);
   check("pebbles_select still shows the public pebble row", (bobPebbles ?? []).length === 1);
 
+  // The computed field (#1050) answers the same as the resolver, in the same select.
+  const { data: viaField, error: viaFieldErr } = await b.from("pebbles").select("id, glyph").eq("id", pebbleId).single();
+  check("the pebbles.glyph computed field resolves for another user",
+    !viaFieldErr && viaField?.glyph?.id === domain.default_glyph_id,
+    viaFieldErr?.message ?? JSON.stringify(viaField));
   // The collection carries the same glyph as the domain, so the id is the same either way.
   const probePublic = await b.rpc("resolve_pebble_glyph", { p_pebble_id: pebbleId });
   check("a public pebble's glyph resolves for another user",
