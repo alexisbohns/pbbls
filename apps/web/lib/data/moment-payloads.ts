@@ -54,6 +54,7 @@ function snapPayload(snap: PebbleSnap, sortOrder: number): SnapPayload {
   return { id: snap.id.toLowerCase(), storage_path: snap.storage_path, sort_order: sortOrder }
 }
 
+/** `happenedAt` must parse as a date (an ISO string from a picker); an invalid one throws a RangeError. */
 function whenPayload(happenedAt: string): string {
   return wholeSecondIso(new Date(happenedAt))
 }

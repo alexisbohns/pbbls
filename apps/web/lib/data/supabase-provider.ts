@@ -38,7 +38,6 @@ import { toConnectionPeer } from "@/lib/data/invite-api"
 import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 import {
-  pebbleGlyphFromRow,
   snapOriginalPath,
   snapThumbPath,
   sortedSnaps,
@@ -137,16 +136,16 @@ export class SupabaseProvider implements DataProvider {
     // PebbleSnapRepository), and hand the resulting URLs back to each moment
     // in `sort_order`.
     const momentRows: Record<string, unknown>[] = momentsRes.data ?? []
-    const rawSnapsByMoment = new Map<string, PebbleSnap[]>()
+    const snapSets: PebbleSnap[][] = []
     for (const r of momentRows) {
       const snaps = sortedSnaps(r.snaps)
-      if (snaps.length > 0) rawSnapsByMoment.set(r.id as string, snaps)
+      if (snaps.length > 0) snapSets.push(snaps)
     }
 
     // Every original, plus the first snap's thumb: the Spine's card probes the
     // thumb for the photo's ratio. One batch either way.
     const signPaths: string[] = []
-    for (const snaps of rawSnapsByMoment.values()) {
+    for (const snaps of snapSets) {
       for (const s of snaps) signPaths.push(snapOriginalPath(s))
       const first = snaps[0]
       if (first) signPaths.push(snapThumbPath(first))
@@ -553,34 +552,20 @@ export class SupabaseProvider implements DataProvider {
     // moments_select opens a connection's moment exactly when one of its
     // pebbles is readable, and `!inner` drops a row whose moment is not.
     // v_moments_full cannot serve this: it nests only the CALLER's pebble.
+    // `glyph` is the pebbles.glyph computed field (#1050): the derived glyph,
+    // gated like resolve_pebble_glyph, in this one request.
     const { data, error } = await this.supabase
       .from("pebbles")
       .select(
-        "id, visibility, intensity, positiveness, emotion:emotions(id, slug, name, color), moment:moments!inner(name, happened_at)",
+        "id, visibility, intensity, positiveness, emotion:emotions(id, slug, name, color), moment:moments!inner(name, happened_at), glyph",
       )
       .eq("user_id", peerId)
     if (error) throw new Error(`shared pebbles fetch failed: ${error.message}`)
 
     const rows: Record<string, unknown>[] = data ?? []
-    // The derived glyph (D5), one resolve per row in parallel. The resolver is
-    // gated by pebble readability, so it answers for exactly these rows. A
-    // failed call draws that pebble without a glyph.
-    const glyphs = await Promise.all(
-      rows.map(async (r) => {
-        const { data: g, error: gErr } = await this.supabase.rpc("resolve_pebble_glyph", {
-          p_pebble_id: r.id,
-        })
-        if (gErr) {
-          console.warn("[connections] resolve_pebble_glyph failed", r.id, gErr)
-          return null
-        }
-        return pebbleGlyphFromRow(g)
-      }),
-    )
-
     return rows
-      .flatMap((row, i) => {
-        const shared = sharedConnectionPebbleFromRow(row, glyphs[i] ?? null)
+      .flatMap((row) => {
+        const shared = sharedConnectionPebbleFromRow(row)
         if (!shared) {
           console.warn("[supabase-provider] dropped shared pebble with a broken embed", row.id)
           return []
@@ -675,6 +660,19 @@ export class SupabaseProvider implements DataProvider {
     }
     await this.reloadAfter("complete_pebble")
     return data
+  }
+
+  async pebbleKarma(pebbleId: string): Promise<number | null> {
+    const { data, error } = await this.supabase
+      .from("karma_events")
+      .select("delta")
+      .eq("user_id", this.userId)
+      .eq("ref_id", pebbleId)
+    if (error) {
+      console.warn("[moments] pebble karma read failed", error)
+      return null
+    }
+    return (data ?? []).reduce((sum, r) => sum + (typeof r.delta === "number" ? r.delta : 0), 0)
   }
 
   async deleteMoment(momentId: string): Promise<void> {
