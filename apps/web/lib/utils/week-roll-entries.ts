@@ -1,10 +1,13 @@
-import type { Pebble } from "@/lib/types"
+import type { Moment } from "@/lib/types"
 
 export type WeekRollEntry = {
   weekStart: Date           // ISO Monday 00:00 local
   weekStartIso: string      // "YYYY-Www" stable key (e.g. "2026-W19")
   isoWeek: number           // 1..53
-  pebbles: Pebble[]
+  /** Every moment of the week, bare ones included: they are on the path too (#1050). */
+  moments: Moment[]
+  /** Completed moments only: a bare moment is on the path but is not a pebble (PD-W12). */
+  pebbleCount: number
 }
 
 /** ISO 8601 week start (Monday 00:00 local) for the given date. */
@@ -52,38 +55,77 @@ export function weekIndex(entries: WeekRollEntry[], weekStart: Date): number {
 }
 
 /**
- * Build the weeks roll: union of weeks that contain pebbles with the
- * current week, sorted ascending by `weekStart`. Past weeks have their
- * pebbles sorted oldest-first; current and future weeks (if a retro
- * pebble lives there) sort newest-first. Pivot is strict
+ * The week to open the Path on for `?focus=<momentId>` (R14): the ISO key of
+ * the week the moment happened in, or null while it is not in `moments` (the
+ * store has not caught up yet, or the moment is gone).
+ */
+export function focusKeyFor(moments: readonly Moment[], id: string): string | null {
+  const target = id.toLowerCase()
+  const moment = moments.find((m) => m.id.toLowerCase() === target)
+  if (!moment) return null
+  const at = new Date(moment.happened_at)
+  return Number.isNaN(at.getTime()) ? null : isoWeekKey(at)
+}
+
+/** What a `?focus=` does on this render: the id it consumes and the week it opens, if any. */
+export type FocusStep = { consumed: string | null; key: string | null }
+
+/**
+ * The `?focus=<momentId>` state machine (R14), run during render. `consumed`
+ * is the focus already handled; null means "no change this render".
+ *
+ * - A new focus whose moment is in the store opens its week and is consumed.
+ * - A new focus whose moment is missing waits while the store loads, and is
+ *   consumed without paging once loading settles: a focus left armed would
+ *   page the Path mid-browse on a later refresh.
+ * - A consumed focus is never re-applied; clearing the URL re-arms it.
+ */
+export function nextFocusStep(
+  moments: readonly Moment[],
+  focusId: string | null,
+  consumed: string | null,
+  loading: boolean,
+): FocusStep | null {
+  if (focusId === null) return consumed === null ? null : { consumed: null, key: null }
+  if (focusId === consumed) return null
+  const key = focusKeyFor(moments, focusId)
+  if (key !== null) return { consumed: focusId, key }
+  return loading ? null : { consumed: focusId, key: null }
+}
+
+/**
+ * Build the weeks roll: union of weeks that contain moments (bare or
+ * completed) with the current week, sorted ascending by `weekStart`. Past
+ * weeks have their moments sorted oldest-first; current and future weeks (if
+ * a retro moment lives there) sort newest-first. Pivot is strict
  * `weekStart < currentWeekStart`.
  */
 export function buildWeekRollEntries(
-  pebbles: Pebble[],
+  moments: readonly Moment[],
   today: Date,
 ): WeekRollEntry[] {
   const currentStart = isoWeekStart(today)
 
-  const bucket = new Map<string, { weekStart: Date; pebbles: Pebble[] }>()
+  const bucket = new Map<string, { weekStart: Date; moments: Moment[] }>()
   const seed = (date: Date) => {
     const key = isoWeekKey(date)
     if (!bucket.has(key)) {
-      bucket.set(key, { weekStart: isoWeekStart(date), pebbles: [] })
+      bucket.set(key, { weekStart: isoWeekStart(date), moments: [] })
     }
     return bucket.get(key)!
   }
 
   seed(currentStart)
 
-  for (const p of pebbles) {
-    const happened = new Date(p.happened_at)
-    seed(happened).pebbles.push(p)
+  for (const m of moments) {
+    const happened = new Date(m.happened_at)
+    seed(happened).moments.push(m)
   }
 
   const entries: WeekRollEntry[] = []
-  for (const { weekStart, pebbles: bucketPebbles } of bucket.values()) {
+  for (const { weekStart, moments: bucketMoments } of bucket.values()) {
     const isPast = weekStart.getTime() < currentStart.getTime()
-    const sorted = [...bucketPebbles].sort((a, b) => {
+    const sorted = [...bucketMoments].sort((a, b) => {
       const aT = new Date(a.happened_at).getTime()
       const bT = new Date(b.happened_at).getTime()
       return isPast ? aT - bT : bT - aT
@@ -92,7 +134,8 @@ export function buildWeekRollEntries(
       weekStart,
       weekStartIso: isoWeekKey(weekStart),
       isoWeek: isoWeekNumber(weekStart),
-      pebbles: sorted,
+      moments: sorted,
+      pebbleCount: sorted.filter((m) => m.pebble !== null).length,
     })
   }
 

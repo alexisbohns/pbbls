@@ -1,9 +1,10 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { Pebble, Soul } from "@/lib/types"
+import type { Moment, Soul } from "@/lib/types"
 import { StoneSprite } from "@/components/pebble/stone/StoneSprite"
 import { WeekRoll } from "@/components/path/WeekRoll"
 import { WeekPager } from "@/components/path/WeekPager"
@@ -15,13 +16,20 @@ import {
   isoWeekKey,
   isoWeekNumber,
   isoWeekStart,
+  nextFocusStep,
   type WeekRollEntry,
 } from "@/lib/utils/week-roll-entries"
 
 type PathScreenProps = {
-  pebbles: Pebble[]
+  /** Bare and completed (#1050): a bare moment is a blank stone on the path. */
+  moments: Moment[]
   souls: Soul[]
   loading: boolean
+  /**
+   * `?focus=<momentId>` (R14): open on the week of that moment once the store
+   * holds it, then drop the parameter. Null or absent: today's week.
+   */
+  focusMomentId?: string | null
 }
 
 /**
@@ -38,20 +46,37 @@ function closestEntry(entries: WeekRollEntry[], preferred: Date): WeekRollEntry 
   }, entries[0])
 }
 
-export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
+export function PathScreen({ moments, souls, loading, focusMomentId = null }: PathScreenProps) {
   const t = useTranslations("path")
+  const router = useRouter()
   // today is frozen at mount; the failure mode (user leaves the tab open past
   // midnight) is acceptable — navigation back to /path remounts the component.
   const today = useMemo(() => new Date(), [])
-  const entries = useMemo(() => buildWeekRollEntries(pebbles, today), [pebbles, today])
+  const entries = useMemo(() => buildWeekRollEntries(moments, today), [moments, today])
 
   // Source of truth is the ISO key (e.g. "2026-W19"). Resolving to a real
   // entry at render time lets us fall back gracefully when a focused week
-  // disappears (e.g. last pebble of a past, non-current week deleted) —
+  // disappears (e.g. last moment of a past, non-current week deleted) —
   // no setState-during-render, no useEffect setState ping-pong.
   const [focusedKey, setFocusedKey] = useState<string>(() => isoWeekKey(today))
   // The read page in the peek, by MOMENT id (#1050).
   const [selectedMomentId, setSelectedMomentId] = useState<string | null>(null)
+
+  // R14: a `?focus=` moment pages to its week once, as soon as the store holds
+  // it (a capture's reload may land after the first render). Adjusted during
+  // render rather than in an effect, as the focused key above is. Once loading
+  // settles the focus is consumed even if its moment never arrived, so a later
+  // refresh cannot page the Path mid-browse. The URL is cleaned in the effect
+  // below, which re-arms the focus for the next `?focus=`.
+  const [appliedFocus, setAppliedFocus] = useState<string | null>(null)
+  const focusStep = nextFocusStep(moments, focusMomentId, appliedFocus, loading)
+  if (focusStep !== null) {
+    setAppliedFocus(focusStep.consumed)
+    if (focusStep.key !== null) setFocusedKey(focusStep.key)
+  }
+  useEffect(() => {
+    if (focusMomentId !== null && focusMomentId === appliedFocus) router.replace("/path")
+  }, [focusMomentId, appliedFocus, router])
 
   const focusedEntry = entries.find((e) => e.weekStartIso === focusedKey)
     ?? (entries.length > 0 ? closestEntry(entries, isoWeekStart(today)) : undefined)
@@ -85,7 +110,7 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
 
   const handleClosePeek = useCallback(() => setSelectedMomentId(null), [])
 
-  if (loading && pebbles.length === 0) {
+  if (loading && moments.length === 0) {
     return (
       <div className="flex min-h-[60dvh] items-center justify-center">
         <Loader2 className="size-6 animate-spin text-muted-foreground" aria-label={t("loading")} />
@@ -118,7 +143,7 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
           today={today}
           souls={souls}
           onFocusChange={setFocusedFromDate}
-          onSelectPebble={setSelectedMomentId}
+          onOpen={setSelectedMomentId}
         />
       </div>
       {/* The stones' shared shapes and filters, once for every week the pager holds. */}

@@ -1,12 +1,12 @@
 "use client"
 
 import { PathScreen } from "@/components/path/PathScreen"
-import { usePebbles } from "@/lib/data/usePebbles"
+import { useMoments } from "@/lib/data/useMoments"
 import { useSouls } from "@/lib/data/useSouls"
 
 /** app/path/page.tsx, fed by the fixture store. */
 export function PathView() {
-  const { pebbles } = usePebbles()
+  const { moments } = useMoments()
   const { souls } = useSouls()
-  return <PathScreen pebbles={pebbles} souls={souls} loading={false} />
+  return <PathScreen moments={moments} souls={souls} loading={false} />
 }

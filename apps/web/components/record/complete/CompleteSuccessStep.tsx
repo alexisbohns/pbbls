@@ -4,7 +4,7 @@ import { Sparkle } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { CompleteDraft } from "@/lib/data/moment-payloads"
 import { momentDisplayName } from "@/lib/data/moment-row"
-import { successPebble } from "@/lib/record/complete"
+import { successLook } from "@/lib/record/complete"
 import type { Moment } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { PebbleFramed } from "@/components/pebble/PebbleFramed"
@@ -35,13 +35,13 @@ export function CompleteSuccessStep({
   const tComplete = useTranslations("record.complete")
   const tMoment = useTranslations("moment")
 
-  const { pebble, reloaded } = successPebble(moment, before, draft)
+  const { look, reloaded } = successLook(moment, before, draft)
   const name = momentDisplayName((moment ?? before).name)
   const karma = reloaded ? karmaDelta : 0
 
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 py-8">
-      <PebbleFramed pebble={pebble} animateIn className="w-56" />
+      <PebbleFramed look={look} animateIn className="w-56" />
 
       <div className="flex flex-col items-center gap-2 text-center">
         {name ? (

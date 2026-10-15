@@ -23,6 +23,7 @@ import { SettingsGroup } from "@/components/settings/SettingsGroup"
 import { SettingsRow } from "@/components/settings/SettingsRow"
 import { EMOTIONS } from "@/lib/config/emotions"
 import { useCollections } from "@/lib/data/useCollections"
+import { stoneLookOfPebble } from "@/lib/data/moment-row"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { DESIGN_ASSIDUITY, DESIGN_PROFILE, DESIGN_RIPPLE } from "@/lib/seed/design-fixtures"
 import { SANDBOX_MARK_MAP, SANDBOX_SOULS } from "@/lib/seed/sandbox-pebbles"
@@ -87,7 +88,7 @@ export function ComponentsSection() {
       <Specimen id="pebble-visual">
         {pebbles.slice(0, 4).map((pebble) => (
           <div key={pebble.id} className="size-24">
-            <PebbleVisual pebble={pebble} />
+            <PebbleVisual look={stoneLookOfPebble(pebble)} />
           </div>
         ))}
       </Specimen>

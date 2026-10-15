@@ -674,7 +674,7 @@
     "weekHeader": {
       "previous": "Previous week",
       "next": "Next week",
-      "weekAria": "Week {iso}, {count} pebbles"
+      "weekAria": "Week {iso}, {count, plural, one {# pebble} other {# pebbles}}"
     },
     "bottomBar": {
       "label": "Profile and stats",
@@ -710,6 +710,7 @@
       "withNames": "With {names}.",
       "stoneAria": "{name}. {date}, {time}. {stone}, {emotion}. {with} Opens the pebble.",
       "cardAria": "{name}. {date}, {time}. {stone}, {emotion}. {with} Opens the pebble.",
+      "blankAria": "{name}. {date}, {time}. Not a pebble yet. {with} Opens the moment.",
       "stone": {
         "small": { "lowlight": "Small lava stone", "neutral": "Small river pebble", "highlight": "Small gem" },
         "medium": { "lowlight": "Medium lava stone", "neutral": "Medium river pebble", "highlight": "Medium gem" },

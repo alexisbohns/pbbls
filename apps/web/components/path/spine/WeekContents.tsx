@@ -5,9 +5,10 @@ import { useTranslations } from "next-intl"
 import { StoneSeal } from "@/components/pebble/stone/StoneSeal"
 import { POLARITY_BY_VALENCE, SIZE_BY_INTENSITY, type Size } from "@/lib/config/pebble-geometry"
 import type { StonePalette } from "@/lib/config/stone-tones"
+import { momentDisplayName } from "@/lib/data/moment-row"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import { useFormatTime, useLocale } from "@/lib/i18n"
-import type { Pebble } from "@/lib/types"
+import type { Moment } from "@/lib/types"
 import { contentsNameType } from "@/lib/utils/spine/entry-type"
 import { shortWeekday } from "@/lib/utils/spine/spine-dates"
 import type { SpineWeek } from "@/lib/utils/spine/spine-week"
@@ -17,22 +18,23 @@ type WeekContentsProps = {
   week: SpineWeek
   /** The day being read, 0 = Monday: its rows get the reading dot. */
   readingDay: number | undefined
-  /** Go to the pebble's stone and press it, without opening the pebble. */
-  onGo: (id: string) => void
+  /** Go to the moment's stone and press it, without opening it. Called with the MOMENT id. */
+  onGo: (momentId: string) => void
 }
 
 const SEAL_WIDTH: Record<Size, string> = { small: "w-5", medium: "w-6", large: "w-[27px]" }
 
 /**
- * The week's contents (#1052, spec §Contents): one row per pebble, oldest
+ * The week's contents (#1052, spec §Contents): one row per moment, oldest
  * first, each a real link to its stone. The stone is printed here as a flat
- * seal, never lit (spec D7). The weekday heads the first row of each day.
+ * seal, never lit (spec D7); a moment that is not a pebble yet prints as a
+ * blank medium seal (#1050, R4). The weekday heads the first row of each day.
  */
 export function WeekContents({ week, readingDay, onGo }: WeekContentsProps) {
   const t = useTranslations("path.spine")
   const headingId = useId()
   const { paletteByEmotionId } = useEmotionPalettes()
-  if (week.days.every((day) => day.pebbles.length === 0)) return null
+  if (week.days.every((day) => day.moments.length === 0)) return null
 
   return (
     <section aria-labelledby={headingId} className="mt-10 spread:mt-9">
@@ -41,11 +43,11 @@ export function WeekContents({ week, readingDay, onGo }: WeekContentsProps) {
       </h2>
       <ol className="mt-2.5">
         {week.days.flatMap((day) =>
-          day.pebbles.map((pebble, i) => (
+          day.moments.map((moment, i) => (
             <ContentsRow
-              key={pebble.id}
-              pebble={pebble}
-              palette={paletteByEmotionId.get(pebble.emotion_id) ?? null}
+              key={moment.id}
+              moment={moment}
+              palette={moment.pebble ? (paletteByEmotionId.get(moment.pebble.emotion_id) ?? null) : null}
               date={day.date}
               first={i === 0}
               here={day.index === readingDay}
@@ -59,14 +61,14 @@ export function WeekContents({ week, readingDay, onGo }: WeekContentsProps) {
 }
 
 function ContentsRow({
-  pebble,
+  moment,
   palette,
   date,
   first,
   here,
   onGo,
 }: {
-  pebble: Pebble
+  moment: Moment
   palette: StonePalette | null
   date: Date
   first: boolean
@@ -76,20 +78,22 @@ function ContentsRow({
   const t = useTranslations("path.spine")
   const { locale } = useLocale()
   const formatTime = useFormatTime()
-  const size = SIZE_BY_INTENSITY[pebble.intensity]
-  const phone = contentsNameType(pebble.intensity, pebble.positiveness, false)
+  const pebble = moment.pebble
+  const size: Size = pebble ? SIZE_BY_INTENSITY[pebble.intensity] : "medium"
+  const phone = contentsNameType(pebble?.intensity ?? 2, pebble?.positiveness ?? 0, false)
+  const name = momentDisplayName(moment.name)
 
   const go = (e: MouseEvent<HTMLAnchorElement>) => {
     // A modified click keeps the link's own behaviour (a new tab, a copy).
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
     e.preventDefault()
-    onGo(pebble.id)
+    onGo(moment.id)
   }
 
   return (
     <li className={cn(first && "not-first:border-t not-first:border-(--spine-rule)")}>
       <a
-        href={`#pebble-${pebble.id}`}
+        href={`#pebble-${moment.id}`}
         onClick={go}
         className="group grid min-h-[42px] grid-cols-[40px_36px_1fr_auto] items-center py-0.5 spread:min-h-9"
       >
@@ -108,26 +112,26 @@ function ContentsRow({
         <span className="flex items-center">
           <StoneSeal
             size={size}
-            polarity={POLARITY_BY_VALENCE[pebble.positiveness]}
+            polarity={pebble ? POLARITY_BY_VALENCE[pebble.positiveness] : "neutral"}
             palette={palette}
-            glyph={pebble.glyph}
+            glyph={pebble?.glyph ?? null}
             className={SEAL_WIDTH[size]}
           />
         </span>
         <span
           className={cn(
             "py-1.5 pr-2.5 font-spine text-[16.5px] leading-[1.2] text-pretty decoration-(--spine-rule) decoration-1 underline-offset-4 group-hover:underline spread:py-[5px] spread:text-[15.5px]",
-            !pebble.name && "text-(--spine-ink-3)",
+            !name && "text-(--spine-ink-3)",
           )}
-          style={{ fontWeight: phone.fontWeight, fontStyle: phone.italic || !pebble.name ? "italic" : undefined }}
+          style={{ fontWeight: phone.fontWeight, fontStyle: phone.italic || !name ? "italic" : undefined }}
         >
-          {pebble.name || t("untitled")}
+          {name ?? t("untitled")}
         </span>
         <time
-          dateTime={pebble.happened_at}
+          dateTime={moment.happened_at}
           className="font-spine-office text-[12.5px] tracking-[.04em] text-(--spine-ink-3) [font-variant-numeric:lining-nums_tabular-nums]"
         >
-          {formatTime(new Date(pebble.happened_at))}
+          {formatTime(new Date(moment.happened_at))}
         </time>
       </a>
     </li>

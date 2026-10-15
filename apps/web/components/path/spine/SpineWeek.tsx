@@ -23,7 +23,8 @@ type SpineWeekProps = {
   today: Date
   soulMap: ReadonlyMap<string, Soul>
   markMap: ReadonlyMap<string, Mark>
-  onOpen: (id: string) => void
+  /** Opens the read page, with the MOMENT id. */
+  onOpen: (momentId: string) => void
   /** Absent on the first week there is. */
   onPreviousWeek?: () => void
   /** Absent on the last week there is. */
@@ -79,7 +80,7 @@ export function SpineWeek({
 
   const week = useMemo(() => spineWeek(entry, today), [entry, today])
   const persons = useMemo(
-    () => personsOfWeek(entry.pebbles, entry.weekStart, soulMap, locale),
+    () => personsOfWeek(entry.moments, entry.weekStart, soulMap, locale),
     [entry, soulMap, locale],
   )
   const order = useMemo(() => persons.map((p) => p.soul.id), [persons])
@@ -134,16 +135,16 @@ export function SpineWeek({
           <WeekOpening
             words={words}
             titleId={titleId}
-            pebbleCount={entry.pebbles.length}
+            pebbleCount={entry.pebbleCount}
             peopleCount={persons.length}
             onPreviousWeek={onPreviousWeek}
           />
           <PersonsOfWeek persons={persons} weekStart={entry.weekStart} markMap={markMap} readingDay={readingDay} />
           <WeekContents week={week} readingDay={readingDay} onGo={go} />
         </aside>
-        {entry.pebbles.length === 0 ? (
+        {entry.moments.length === 0 ? (
           // Only the current week can be empty (the roll lists weeks with
-          // pebbles, plus this one): the recto is the fresh-week invitation.
+          // moments, plus this one): the recto is the fresh-week invitation.
           <section className="spread:pt-[34px]">
             <PathEmptyState />
           </section>

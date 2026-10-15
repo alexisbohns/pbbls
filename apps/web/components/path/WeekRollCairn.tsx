@@ -22,7 +22,8 @@ export function WeekRollCairn({ entry, isFocused, onClick }: WeekRollCairnProps)
         aria-pressed={isFocused}
         aria-label={t("weekHeader.weekAria", {
           iso: entry.isoWeek,
-          count: entry.pebbles.length,
+          // Completed moments only (PD-W12).
+          count: entry.pebbleCount,
         })}
         className={cn(
           "flex w-12 shrink-0 cursor-pointer flex-col items-center py-2.5 font-spine-sc text-[13px] font-semibold tracking-[.12em] [font-variant-numeric:lining-nums_tabular-nums]",

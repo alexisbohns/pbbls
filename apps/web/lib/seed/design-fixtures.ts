@@ -1,6 +1,7 @@
 import type { Store } from "@/lib/data/data-provider"
 import type { ConsentRow } from "@/lib/data/consent"
-import type { Account, Collection, CompletedMoment, Pebble, Profile, RippleSummary } from "@/lib/types"
+import { compareMomentsNewestFirst } from "@/lib/data/moment-row"
+import type { Account, Collection, CompletedMoment, Moment, Pebble, Profile, RippleSummary } from "@/lib/types"
 import { SANDBOX_MARKS, SANDBOX_SCENARIOS, SANDBOX_SOULS } from "./sandbox-pebbles"
 
 // ---------------------------------------------------------------------------
@@ -63,12 +64,48 @@ export function designMomentFromPebble(p: Pebble): CompletedMoment {
   }
 }
 
+/**
+ * Two moments that are not pebbles yet (#1050), set between the first fixture
+ * pebbles so the Path's opening week draws them as blank stones: one named,
+ * set as type, and one untitled photo, on a card.
+ */
+export function designBareMoments(now: Date): Moment[] {
+  const at = (hours: number) => new Date(now.getTime() - hours * HOUR).toISOString()
+  const photo = "/sandbox/fountain.jpg"
+  return [
+    {
+      id: "design-bare-named",
+      name: "Bread from the corner bakery",
+      description: null,
+      happened_at: at(7),
+      snaps: [],
+      instants: [],
+      cover: null,
+      created_at: at(7),
+      updated_at: at(7),
+      pebble: null,
+    },
+    {
+      id: "design-bare-photo",
+      name: null,
+      description: null,
+      happened_at: at(12),
+      snaps: [{ id: "design-bare-snap", storage_path: "fixture/design-bare-snap", sort_order: 0 }],
+      instants: [photo],
+      cover: { snapId: "design-bare-snap", url: photo, thumbUrl: photo },
+      created_at: at(12),
+      updated_at: at(12),
+      pebble: null,
+    },
+  ]
+}
+
 export function designStore(now: Date): Store {
   const pebbles = designPebbles(now)
   return {
-    // The Path still draws the flat pebbles until #1050 Part 4; the read page
-    // already reads the moments they complete.
-    moments: pebbles.map(designMomentFromPebble),
+    // Newest first, as the provider loads them; the flat pebbles stay the
+    // completed ones for the screens not yet on moments.
+    moments: [...pebbles.map(designMomentFromPebble), ...designBareMoments(now)].sort(compareMomentsNewestFirst),
     pebbles,
     souls: SANDBOX_SOULS,
     collections: designCollections(pebbles),

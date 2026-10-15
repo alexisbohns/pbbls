@@ -3,10 +3,11 @@
 import type { CSSProperties } from "react"
 import { useTranslations } from "next-intl"
 
-import type { Pebble } from "@/lib/types"
+import type { StoneLook } from "@/lib/types"
 import { EMOTIONS } from "@/lib/config/emotions"
 import { useEmotionLocalized } from "@/lib/i18n"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
+import { momentDisplayName } from "@/lib/data/moment-row"
 import { usePebbleVisual } from "@/lib/hooks/usePebbleVisual"
 import { PebbleArtwork } from "./PebbleArtwork"
 
@@ -14,7 +15,7 @@ import { PebbleArtwork } from "./PebbleArtwork"
 const NEUTRAL_GRAY = "#9CA3AF"
 
 type PebbleVisualProps = {
-  pebble: Pebble
+  look: StoneLook
   className?: string
   // Force a single stroke color regardless of theme. Used by the snap+pebble
   // bundle on the read page where the palette-tinted box would otherwise blend
@@ -24,14 +25,15 @@ type PebbleVisualProps = {
 
 /**
  * The owner's pebble: the client-drawn body and the glyph the server resolved
- * for it (`pebble.glyph`, its collection's else its domain's, #1046 D5).
+ * for it (`look.glyph`, its collection's else its domain's, #1046 D5).
  */
-export function PebbleVisual({ pebble, className, strokeOverride }: PebbleVisualProps) {
-  const body = usePebbleVisual(pebble)
+export function PebbleVisual({ look, className, strokeOverride }: PebbleVisualProps) {
+  const body = usePebbleVisual(look)
 
   const t = useTranslations("pebble")
   const tCommon = useTranslations("common")
-  const matched = EMOTIONS.find((e) => e.id === pebble.emotion_id)
+  const tMoment = useTranslations("moment")
+  const matched = EMOTIONS.find((e) => e.id === look.emotion_id)
   const fallbackEmotion = matched ?? { slug: "", name: tCommon("unknown"), label: "" }
   const { name: emotionName } = useEmotionLocalized(fallbackEmotion)
 
@@ -41,7 +43,7 @@ export function PebbleVisual({ pebble, className, strokeOverride }: PebbleVisual
   // subscription, no hydration mismatch). Without a category palette both
   // take the flat emotion colour.
   const { paletteByEmotionId } = useEmotionPalettes()
-  const palette = paletteByEmotionId.get(pebble.emotion_id)
+  const palette = paletteByEmotionId.get(look.emotion_id)
   const flat = matched?.color ?? NEUTRAL_GRAY
   const [light, dark] = strokeOverride
     ? [strokeOverride, strokeOverride]
@@ -56,12 +58,12 @@ export function PebbleVisual({ pebble, className, strokeOverride }: PebbleVisual
   return (
     <PebbleArtwork
       body={body}
-      glyph={pebble.glyph}
+      glyph={look.glyph}
       role="img"
       aria-label={t("visualAria", {
-        name: pebble.name,
+        name: momentDisplayName(look.name) ?? tMoment("untitled"),
         emotion: emotionName,
-        intensity: pebble.intensity,
+        intensity: look.intensity,
       })}
       className={className}
       style={wrapperStyle}

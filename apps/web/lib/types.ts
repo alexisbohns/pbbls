@@ -86,6 +86,19 @@ export type Moment = {
 
 export type CompletedMoment = Moment & { pebble: MomentPebble }
 
+/**
+ * What a stone is drawn from (#1050): the pebble's look, never a whole entity,
+ * so success, the read page, lists and the sandbox share one input. Where a
+ * stone takes `StoneLook | null`, null is a bare moment: the blank stone (R4).
+ */
+export type StoneLook = Pick<MomentPebble, "intensity" | "positiveness" | "emotion_id" | "glyph"> & {
+  /** With `created_at`, whether the engine draws the retro fossil (recorded 28+ days later). */
+  happened_at: string
+  created_at?: string
+  /** For the stone's accessible label; null = untitled. */
+  name: string | null
+}
+
 /** @deprecated Derived from Moment for unported consumers; removed in #1050 Part 6. id is the PEBBLE id. */
 export type Pebble = {
   id: string

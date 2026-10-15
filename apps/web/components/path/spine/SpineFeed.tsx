@@ -25,7 +25,8 @@ type SpineFeedProps = {
 
 /**
  * The recto of a week (#1052): raked paper behind one line down the margin,
- * each day opened by its seam, oldest first. Needs `StoneSprite` once on the
+ * each day opened by its seam, oldest first. Bare moments sit among the
+ * pebbles as blank stones (#1050). Needs `StoneSprite` once on the
  * page (the Path renders it, not each week, so the pager's neighbours share it).
  */
 export function SpineFeed({ week, order, soulMap, markMap, onOpen, footer, className }: SpineFeedProps) {
@@ -81,11 +82,11 @@ function SpineDaySection({
       <DaySeam date={day.date} headingId={headingId} still={day.still} />
       {!day.still && (
         <div className="flex flex-col gap-[38px] spread:gap-12">
-          {day.pebbles.map((pebble) => (
+          {day.moments.map((moment) => (
             <SpinePebble
-              key={pebble.id}
-              pebble={pebble}
-              palette={paletteByEmotionId.get(pebble.emotion_id) ?? null}
+              key={moment.id}
+              moment={moment}
+              palette={moment.pebble ? (paletteByEmotionId.get(moment.pebble.emotion_id) ?? null) : null}
               order={order}
               soulMap={soulMap}
               markMap={markMap}
