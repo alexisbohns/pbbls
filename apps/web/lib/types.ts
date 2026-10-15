@@ -99,38 +99,6 @@ export type StoneLook = Pick<MomentPebble, "intensity" | "positiveness" | "emoti
   name: string | null
 }
 
-/** @deprecated Derived from Moment for unported consumers; removed in #1050 Part 6. id is the PEBBLE id. */
-export type Pebble = {
-  id: string
-  /** The moment this pebble completes: the read page's route key. */
-  moment_id: string
-  name: string
-  description?: string
-  happened_at: string
-  intensity: 1 | 2 | 3
-  positiveness: -1 | 0 | 1
-  visibility: Visibility
-  emotion_id: string
-  soul_ids: string[]
-  domain_ids: string[]
-  collection_ids: string[]
-  mark_id?: string
-  // Signed `original.jpg` URLs derived from `snaps` at load time. Display-only.
-  instants: string[]
-  snaps: PebbleSnap[]
-  cards: PebbleCard[]
-  // The pebble's resolved glyph, from `v_moments_full.pebble.glyph`: its oldest
-  // collection's glyph, else its first domain's default (#1046 D5). The server
-  // no longer renders pebbles (D6), so every surface draws these strokes; null
-  // when neither carries a glyph.
-  glyph: PebbleGlyph | null
-  // The first snap (sort_order 0), the one the Spine's card shows. Null when the
-  // pebble has no snap.
-  cover: PebbleCover | null
-  created_at: string
-  updated_at: string
-}
-
 export type Soul = {
   id: string
   name: string
@@ -143,6 +111,8 @@ export type Collection = {
   id: string
   name: string
   mode?: "stack" | "pack" | "track"
+  /** The collection's glyph (R11): its pebbles carry it (D5). Null for none. */
+  glyph_id: string | null
   pebble_ids: string[]
   created_at: string
   updated_at: string

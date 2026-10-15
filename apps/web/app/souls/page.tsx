@@ -3,7 +3,8 @@
 import { useMemo } from "react"
 import { useTranslations } from "next-intl"
 import { useSouls } from "@/lib/data/useSouls"
-import { usePebbles } from "@/lib/data/usePebbles"
+import { useMoments } from "@/lib/data/useMoments"
+import { soulPebbleCounts } from "@/lib/data/moment-lists"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { AddSoulForm } from "@/components/souls/AddSoulForm"
 import { SoulList } from "@/components/souls/SoulList"
@@ -13,21 +14,13 @@ import { PageHeader } from "@/components/layout/PageHeader"
 
 export default function SoulsPage() {
   const { souls, loading: soulsLoading, addSoul } = useSouls()
-  const { pebbles, loading: pebblesLoading } = usePebbles()
+  const { moments, loading: momentsLoading } = useMoments()
   const { glyphs: marks } = useUsableGlyphs()
   const t = useTranslations("souls")
 
-  const loading = soulsLoading || pebblesLoading
+  const loading = soulsLoading || momentsLoading
 
-  const pebbleCounts = useMemo(() => {
-    const counts = new Map<string, number>()
-    for (const pebble of pebbles) {
-      for (const soulId of pebble.soul_ids) {
-        counts.set(soulId, (counts.get(soulId) ?? 0) + 1)
-      }
-    }
-    return counts
-  }, [pebbles])
+  const pebbleCounts = useMemo(() => soulPebbleCounts(moments), [moments])
 
   const handleAdd = async (input: { name: string; glyph_id: string }) => {
     await addSoul(input)

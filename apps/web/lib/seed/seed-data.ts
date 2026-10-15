@@ -1,4 +1,4 @@
-import type { Pebble, Soul, Collection } from "@/lib/types"
+import type { Collection, Moment, MomentPebble, Soul } from "@/lib/types"
 import { EMOTIONS } from "@/lib/config/emotions"
 import { DOMAINS } from "@/lib/config/domains"
 import { CARD_TYPES } from "@/lib/config/card-types"
@@ -10,10 +10,12 @@ import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 // ---------------------------------------------------------------------------
 
 type SeedSoul = Omit<Soul, "created_at" | "updated_at">
-type SeedPebble = Omit<
-  Pebble,
-  "created_at" | "updated_at" | "glyph" | "cover" | "moment_id"
->
+// A completed moment, flattened: the moment's fields beside its pebble's.
+type SeedPebble = Omit<MomentPebble, "created_at" | "updated_at" | "glyph"> &
+  Pick<Moment, "happened_at" | "instants" | "snaps"> & {
+    name: string
+    description?: string
+  }
 type SeedCollection = Omit<Collection, "created_at" | "updated_at">
 
 // ---------------------------------------------------------------------------
@@ -33,18 +35,21 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
     id: "col-gratitudes",
     name: "Morning gratitudes",
     mode: "track",
+    glyph_id: null,
     pebble_ids: ["pbl-sunrise", "pbl-luna-purr", "pbl-bread"],
   },
   {
     id: "col-career",
     name: "Career milestones",
     mode: "stack",
+    glyph_id: null,
     pebble_ids: ["pbl-promo", "pbl-launch"],
   },
   {
     id: "col-march",
     name: "March 2026",
     mode: "pack",
+    glyph_id: null,
     pebble_ids: [
       "pbl-sunrise", "pbl-argument", "pbl-luna-purr",
       "pbl-promo", "pbl-anxiety", "pbl-bread",

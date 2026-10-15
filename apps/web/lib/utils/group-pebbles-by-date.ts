@@ -1,9 +1,9 @@
-import type { Pebble } from "@/lib/types"
+import type { CompletedMoment } from "@/lib/types"
 
 export type DateGroup = {
   dateKey: string
   label: string
-  pebbles: Pebble[]
+  pebbles: CompletedMoment[]
 }
 
 export type GroupLabelFormatters = {
@@ -41,14 +41,14 @@ function buildLabel(dateKey: string, args: GroupLabelFormatters): string {
 }
 
 export function groupPebblesByDate(
-  pebbles: Pebble[],
+  pebbles: CompletedMoment[],
   formatters: GroupLabelFormatters,
 ): DateGroup[] {
   const sorted = [...pebbles].sort(
     (a, b) => new Date(b.happened_at).getTime() - new Date(a.happened_at).getTime(),
   )
 
-  const groupMap = new Map<string, Pebble[]>()
+  const groupMap = new Map<string, CompletedMoment[]>()
   const groupOrder: string[] = []
 
   for (const pebble of sorted) {

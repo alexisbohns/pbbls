@@ -3,7 +3,6 @@ import type {
   Intensity,
   Moment,
   MomentPebble,
-  Pebble,
   PebbleCard,
   Positiveness,
   StoneLook,
@@ -124,39 +123,6 @@ export function momentFromViewRow(
   }
 }
 
-/**
- * The deprecated flat `Pebble` for consumers not yet ported to `Moment`
- * (removed in #1050 Part 6). `id` is the PEBBLE id, as before, so the
- * pebble-id joins (`collection.pebble_ids`, share links, karma `ref_id`) keep
- * working; `moment_id` is the read page's key. `updated_at` is the later of the
- * two rows, as the old compat view computed it, so a moment edit still moves it.
- */
-export function legacyPebbleFromMoment(m: CompletedMoment): Pebble {
-  const p = m.pebble
-  return {
-    id: p.id,
-    moment_id: m.id,
-    name: m.name ?? "",
-    description: m.description ?? undefined,
-    happened_at: m.happened_at,
-    intensity: p.intensity,
-    positiveness: p.positiveness,
-    visibility: p.visibility,
-    emotion_id: p.emotion_id,
-    soul_ids: p.soul_ids,
-    domain_ids: p.domain_ids,
-    collection_ids: p.collection_ids,
-    mark_id: p.glyph?.id,
-    instants: m.instants,
-    snaps: m.snaps,
-    cards: p.cards,
-    glyph: p.glyph,
-    cover: m.cover,
-    created_at: p.created_at,
-    updated_at: Date.parse(m.updated_at) > Date.parse(p.updated_at) ? m.updated_at : p.updated_at,
-  }
-}
-
 export function isCompleted(m: Moment): m is CompletedMoment {
   return m.pebble !== null
 }
@@ -179,19 +145,6 @@ export function stoneLookOf(m: Moment): StoneLook | null {
     happened_at: m.happened_at,
     created_at: p.created_at,
     name: m.name,
-  }
-}
-
-/** @deprecated The flat pebble's look, for consumers not yet on `Moment`; removed in #1050 Part 6. */
-export function stoneLookOfPebble(p: Pebble): StoneLook {
-  return {
-    intensity: p.intensity,
-    positiveness: p.positiveness,
-    emotion_id: p.emotion_id,
-    glyph: p.glyph,
-    happened_at: p.happened_at,
-    created_at: p.created_at,
-    name: p.name,
   }
 }
 

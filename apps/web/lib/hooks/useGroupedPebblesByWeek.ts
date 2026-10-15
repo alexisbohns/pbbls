@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { useTranslations } from "next-intl"
-import type { Pebble } from "@/lib/types"
+import type { CompletedMoment } from "@/lib/types"
 import {
   groupPebblesByISOWeek,
   type WeekGroup,
@@ -13,7 +13,7 @@ import {
  * label. Mirrors the iOS Path screen, which groups by ISO week and
  * renders each group under its own card.
  */
-export function useGroupedPebblesByWeek(pebbles: Pebble[]): WeekGroup[] {
+export function useGroupedPebblesByWeek(pebbles: CompletedMoment[]): WeekGroup[] {
   const t = useTranslations("path")
 
   return useMemo(

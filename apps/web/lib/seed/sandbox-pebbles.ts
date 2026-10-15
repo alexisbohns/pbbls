@@ -1,4 +1,4 @@
-import type { Mark, Pebble, Soul } from "@/lib/types"
+import type { CompletedMoment, Mark, Soul } from "@/lib/types"
 import { GLYPH_VIEWBOX } from "@/lib/config/glyphs"
 import { emotionId } from "./sandbox-palettes"
 
@@ -92,8 +92,12 @@ type Spec = {
   at?: number
 }
 
-/** Times run forward across a scenario so the layout order is a real timeline. */
-function build(specs: Spec[], scenario: string): Pebble[] {
+/**
+ * Times run forward across a scenario so the layout order is a real timeline.
+ * The pebble id differs from the moment id, as it does for every pebble made
+ * since the moments split, so nothing can confuse the two keys.
+ */
+function build(specs: Spec[], scenario: string): CompletedMoment[] {
   return specs.map((spec, i) => {
     const minutes = spec.at ?? i * 97
     const when = new Date(Date.UTC(2026, 7, 17, 8, 0, 0))
@@ -102,24 +106,28 @@ function build(specs: Spec[], scenario: string): Pebble[] {
     const mark = SANDBOX_MARKS[i % SANDBOX_MARKS.length]
     return {
       id: `${scenario}-${i}`,
-      moment_id: `${scenario}-${i}`,
       name: spec.name,
+      description: null,
       happened_at: iso,
-      intensity: spec.intensity,
-      positiveness: spec.positiveness ?? 0,
-      visibility: "private",
-      emotion_id: emotionId(spec.emotion),
-      soul_ids: spec.souls ?? [],
-      domain_ids: [],
-      collection_ids: [],
-      mark_id: mark.id,
-      instants: spec.snap ? [spec.snap] : [],
       snaps: [],
-      cards: [],
-      glyph: { id: mark.id, name: mark.name, strokes: mark.strokes, viewBox: mark.viewBox },
+      instants: spec.snap ? [spec.snap] : [],
       cover: null,
       created_at: iso,
       updated_at: iso,
+      pebble: {
+        id: `${scenario}-${i}-pebble`,
+        intensity: spec.intensity,
+        positiveness: spec.positiveness ?? 0,
+        visibility: "private",
+        emotion_id: emotionId(spec.emotion),
+        soul_ids: spec.souls ?? [],
+        domain_ids: [],
+        collection_ids: [],
+        cards: [],
+        glyph: { id: mark.id, name: mark.name, strokes: mark.strokes, viewBox: mark.viewBox },
+        created_at: iso,
+        updated_at: iso,
+      },
     }
   })
 }
@@ -129,7 +137,7 @@ export type SandboxScenario = {
   label: string
   /** What this scenario is meant to expose — shown under the toolbar. */
   note: string
-  pebbles: Pebble[]
+  moments: CompletedMoment[]
 }
 
 export const SANDBOX_SCENARIOS: SandboxScenario[] = [
@@ -137,7 +145,7 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
     key: "mixed",
     label: "Mixed ladder",
     note: "small ×2, medium ×2, small, large, medium ×3 — the full progressive ladder in one week.",
-    pebbles: build(
+    moments: build(
       [
         { name: "Coffee before anyone woke up", intensity: 1, emotion: "calm", positiveness: 1 },
         { name: "Inbox already ugly", intensity: 1, emotion: "annoyed", positiveness: -1 },
@@ -156,7 +164,7 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
     key: "oddMediums",
     label: "Odd medium runs",
     note: "runs of 1, 3 and 5 mediums, split by smalls — the centering rule for an odd trailing card.",
-    pebbles: build(
+    moments: build(
       [
         { name: "One on its own", intensity: 2, emotion: "hopeful", positiveness: 1, snap: SNAPS.forest },
         { name: "Quick note", intensity: 1, emotion: "calm" },
@@ -177,7 +185,7 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
     key: "allMedium",
     label: "Pure grid",
     note: "eight mediums, nothing else — the 2-col grid with no interruptions.",
-    pebbles: build(
+    moments: build(
       [
         { name: "Market at eight", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.fountain },
         { name: "Bread still warm", intensity: 2, emotion: "grateful", positiveness: 1, snap: SNAPS.seawall, souls: ["soul-mia"] },
@@ -195,7 +203,7 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
     key: "noPhotos",
     label: "No pictures",
     note: "every size, zero pictures — the case the glyph variants exist to answer.",
-    pebbles: build(
+    moments: build(
       [
         { name: "Woke up before the alarm", intensity: 1, emotion: "calm", positiveness: 1 },
         { name: "Said the thing I'd been avoiding", intensity: 2, emotion: "brave", positiveness: 1, souls: ["soul-mia"] },
@@ -211,7 +219,7 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
     key: "photosOnly",
     label: "All pictures",
     note: "every card carries a picture, in mixed aspect ratios — 16:9, 2:3, 3:2 and square.",
-    pebbles: build(
+    moments: build(
       [
         { name: "First light", intensity: 2, emotion: "peaceful", positiveness: 1, snap: SNAPS.forest },
         { name: "The canal", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.rooftop },
@@ -227,7 +235,7 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
     key: "manySouls",
     label: "Soul overflow",
     note: "0, 1, 2 and 5 souls on otherwise identical cards — same picture throughout, so the avatar stack is the only variable.",
-    pebbles: build(
+    moments: build(
       [
         { name: "Alone", intensity: 2, emotion: "calm", positiveness: 1, snap: SNAPS.march, souls: [] },
         { name: "Just Mia", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.march, souls: ["soul-mia"] },
@@ -243,7 +251,7 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
     key: "longTitles",
     label: "Long titles",
     note: "title wrapping in Caveat, at half width, full width and in a compact row.",
-    pebbles: build(
+    moments: build(
       [
         { name: "A short one", intensity: 2, emotion: "calm", positiveness: 1, snap: SNAPS.rooftop },
         { name: "The afternoon where absolutely nothing happened and that turned out to be the entire point of it", intensity: 2, emotion: "peaceful", positiveness: 1 },

@@ -5,87 +5,91 @@
 import { describe, expect, it } from "vitest"
 
 import { computeKarmaDelta } from "./karma"
-import type { Pebble } from "@/lib/types"
+import type { CompletedMoment, Moment, MomentPebble } from "@/lib/types"
 
-function makePebble(overrides: Partial<Pebble> = {}): Pebble {
+function makeMoment(
+  moment: Partial<Omit<Moment, "pebble">> = {},
+  pebble: Partial<MomentPebble> = {},
+): CompletedMoment {
   return {
-    id: "pebble-1",
-    moment_id: "moment-1",
+    id: "moment-1",
     name: "Test pebble",
-    description: undefined,
+    description: null,
     happened_at: "2026-07-29T00:00:00Z",
-    intensity: 2,
-    positiveness: 0,
-    visibility: "private",
-    emotion_id: "emotion-1",
-    soul_ids: [],
-    domain_ids: [],
-    collection_ids: [],
-    mark_id: undefined,
-    instants: [],
     snaps: [],
-    cards: [],
-    glyph: null,
+    instants: [],
     cover: null,
     created_at: "2026-07-29T00:00:00Z",
     updated_at: "2026-07-29T00:00:00Z",
-    ...overrides,
+    ...moment,
+    pebble: {
+      id: "pebble-1",
+      intensity: 2,
+      positiveness: 0,
+      visibility: "private",
+      emotion_id: "emotion-1",
+      soul_ids: [],
+      domain_ids: [],
+      collection_ids: [],
+      cards: [],
+      glyph: null,
+      created_at: "2026-07-29T00:00:00Z",
+      updated_at: "2026-07-29T00:00:00Z",
+      ...pebble,
+    },
   }
 }
 
-function cards(count: number): Pebble["cards"] {
+function cards(count: number): MomentPebble["cards"] {
   return Array.from({ length: count }, (_, i) => ({ species_id: `card-${i}`, value: `value-${i}` }))
 }
 
 describe("computeKarmaDelta", () => {
   it("returns the base karma for a bare pebble", () => {
-    expect(computeKarmaDelta(makePebble())).toBe(1)
+    expect(computeKarmaDelta(makeMoment())).toBe(1)
   })
 
   it("adds 1 for a non-empty description", () => {
-    expect(computeKarmaDelta(makePebble({ description: "a memory" }))).toBe(2)
+    expect(computeKarmaDelta(makeMoment({ description: "a memory" }))).toBe(2)
   })
 
   it("ignores a whitespace-only description", () => {
-    expect(computeKarmaDelta(makePebble({ description: "   " }))).toBe(1)
+    expect(computeKarmaDelta(makeMoment({ description: "   " }))).toBe(1)
   })
 
   it("adds 1 per non-empty card up to 4", () => {
-    expect(computeKarmaDelta(makePebble({ cards: cards(1) }))).toBe(2)
-    expect(computeKarmaDelta(makePebble({ cards: cards(4) }))).toBe(5)
+    expect(computeKarmaDelta(makeMoment({}, { cards: cards(1) }))).toBe(2)
+    expect(computeKarmaDelta(makeMoment({}, { cards: cards(4) }))).toBe(5)
   })
 
   it("caps the card bonus at 4 even with 5+ cards", () => {
-    expect(computeKarmaDelta(makePebble({ cards: cards(5) }))).toBe(5)
-    expect(computeKarmaDelta(makePebble({ cards: cards(8) }))).toBe(5)
+    expect(computeKarmaDelta(makeMoment({}, { cards: cards(5) }))).toBe(5)
+    expect(computeKarmaDelta(makeMoment({}, { cards: cards(8) }))).toBe(5)
   })
 
   it("ignores whitespace-only card values when counting", () => {
-    expect(computeKarmaDelta(makePebble({ cards: [{ species_id: "c", value: "   " }] }))).toBe(1)
+    expect(computeKarmaDelta(makeMoment({}, { cards: [{ species_id: "c", value: "   " }] }))).toBe(1)
   })
 
   it("adds 1 for at least one soul, domain, or snap", () => {
-    expect(computeKarmaDelta(makePebble({ soul_ids: ["s1"] }))).toBe(2)
-    expect(computeKarmaDelta(makePebble({ domain_ids: ["d1"] }))).toBe(2)
-    expect(computeKarmaDelta(makePebble({ snaps: [{ id: "snap-1", storage_path: "u/snap-1", sort_order: 0 }] }))).toBe(
+    expect(computeKarmaDelta(makeMoment({}, { soul_ids: ["s1"] }))).toBe(2)
+    expect(computeKarmaDelta(makeMoment({}, { domain_ids: ["d1"] }))).toBe(2)
+    expect(computeKarmaDelta(makeMoment({ snaps: [{ id: "snap-1", storage_path: "u/snap-1", sort_order: 0 }] }))).toBe(
       2,
     )
   })
 
   it("sums every bonus for maximal enrichment (6 cards + everything)", () => {
-    const pebble = makePebble({
-      description: "a memory",
-      cards: cards(6),
-      soul_ids: ["s1"],
-      domain_ids: ["d1"],
-      snaps: [{ id: "snap-1", storage_path: "u/snap-1", sort_order: 0 }],
-    })
+    const pebble = makeMoment(
+      { description: "a memory", snaps: [{ id: "snap-1", storage_path: "u/snap-1", sort_order: 0 }] },
+      { cards: cards(6), soul_ids: ["s1"], domain_ids: ["d1"] },
+    )
     // 1 base + 1 description + 4 cards (capped) + 1 soul + 1 domain + 1 snap = 9.
     // Without the glyph bonus the 10 cap is no longer reachable.
     expect(computeKarmaDelta(pebble)).toBe(9)
   })
 
   it("gives no glyph bonus: the glyph is derived, not chosen (#1046)", () => {
-    expect(computeKarmaDelta(makePebble({ mark_id: "glyph-1" }))).toBe(1)
+    expect(computeKarmaDelta(makeMoment({}, { glyph: { id: "glyph-1", strokes: [], viewBox: "0 0 200 200" } }))).toBe(1)
   })
 })

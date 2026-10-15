@@ -23,8 +23,9 @@ import { SettingsGroup } from "@/components/settings/SettingsGroup"
 import { SettingsRow } from "@/components/settings/SettingsRow"
 import { EMOTIONS } from "@/lib/config/emotions"
 import { useCollections } from "@/lib/data/useCollections"
-import { stoneLookOfPebble } from "@/lib/data/moment-row"
-import { usePebbles } from "@/lib/data/usePebbles"
+import { isCompleted, stoneLookOf } from "@/lib/data/moment-row"
+import { soulPebbleCounts } from "@/lib/data/moment-lists"
+import { useMoments } from "@/lib/data/useMoments"
 import { DESIGN_ASSIDUITY, DESIGN_PROFILE, DESIGN_RIPPLE } from "@/lib/seed/design-fixtures"
 import { SANDBOX_MARK_MAP, SANDBOX_SOULS } from "@/lib/seed/sandbox-pebbles"
 import { DesignSection } from "./DesignSection"
@@ -41,7 +42,9 @@ function soulNames(ids: string[]): string[] {
 }
 
 export function ComponentsSection() {
-  const { pebbles } = usePebbles()
+  const { moments } = useMoments()
+  const completed = moments.filter(isCompleted)
+  const soulCounts = soulPebbleCounts(moments)
   const { collections } = useCollections()
 
   return (
@@ -51,12 +54,12 @@ export function ComponentsSection() {
       description="The most-used feature components, fed by the fixture store. Links are inert on this page."
     >
       <Specimen id="pebble-card">
-        {pebbles.slice(0, 2).map((pebble) => (
-          <div key={pebble.id} className="w-80">
+        {completed.slice(0, 2).map((moment) => (
+          <div key={moment.id} className="w-80">
             <PebbleCard
-              pebble={pebble}
-              emotion={EMOTIONS.find((e) => e.id === pebble.emotion_id)}
-              soulNames={soulNames(pebble.soul_ids)}
+              moment={moment}
+              emotion={EMOTIONS.find((e) => e.id === moment.pebble.emotion_id)}
+              soulNames={soulNames(moment.pebble.soul_ids)}
             />
           </div>
         ))}
@@ -86,9 +89,9 @@ export function ComponentsSection() {
       </Specimen>
 
       <Specimen id="pebble-visual">
-        {pebbles.slice(0, 4).map((pebble) => (
-          <div key={pebble.id} className="size-24">
-            <PebbleVisual look={stoneLookOfPebble(pebble)} />
+        {completed.slice(0, 4).map((moment) => (
+          <div key={moment.id} className="size-24">
+            <PebbleVisual look={stoneLookOf(moment)} />
           </div>
         ))}
       </Specimen>
@@ -112,7 +115,7 @@ export function ComponentsSection() {
             <SoulCard
               soul={soul}
               mark={markOf(soul.glyph_id)}
-              pebbleCount={pebbles.filter((p) => p.soul_ids.includes(soul.id)).length}
+              pebbleCount={soulCounts.get(soul.id) ?? 0}
             />
           </div>
         ))}
@@ -154,7 +157,7 @@ export function ComponentsSection() {
             ripple={DESIGN_RIPPLE}
             assiduity={DESIGN_ASSIDUITY}
             daysPracticed={19}
-            pebbles={pebbles.length}
+            pebbles={completed.length}
             karma={42}
           />
         </div>

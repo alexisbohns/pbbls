@@ -23,11 +23,13 @@ export function CollectionsCard() {
   const handleCreate = async ({
     name,
     mode,
+    glyph_id,
   }: {
     name: string
     mode?: Collection["mode"]
+    glyph_id: string | null
   }) => {
-    await addCollection({ name, mode, pebble_ids: [] })
+    await addCollection({ name, mode, glyph_id, pebble_ids: [] })
   }
 
   return (

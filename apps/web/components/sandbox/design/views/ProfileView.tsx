@@ -13,7 +13,7 @@ import { LogoutButton } from "@/components/profile/LogoutButton"
 import { ProfileBanner } from "@/components/profile/ProfileBanner"
 import { ShortcutsRow } from "@/components/profile/ShortcutsRow"
 import { StatsCard } from "@/components/profile/StatsCard"
-import { usePebbles } from "@/lib/data/usePebbles"
+import { usePebblesCount } from "@/lib/data/usePebblesCount"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { useFormatDate } from "@/lib/i18n"
 import {
@@ -28,7 +28,7 @@ export function ProfileView() {
   const t = useTranslations("profile")
   const formatDate = useFormatDate()
   const { glyphs } = useUsableGlyphs()
-  const { pebbles } = usePebbles()
+  const { pebblesCount } = usePebblesCount()
   const glyph = glyphs.find((g) => g.id === DESIGN_PROFILE.glyph_id) ?? null
 
   return (
@@ -54,7 +54,7 @@ export function ProfileView() {
             ripple={DESIGN_RIPPLE}
             assiduity={DESIGN_ASSIDUITY}
             daysPracticed={19}
-            pebbles={pebbles.length}
+            pebbles={pebblesCount}
             karma={42}
           />
           <AchievementsShelf />

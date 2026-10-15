@@ -3,10 +3,11 @@
 import { use, useMemo, useCallback } from "react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import type { Pebble, Collection } from "@/lib/types"
+import type { Collection } from "@/lib/types"
 import { useCollection } from "@/lib/data/useCollection"
 import { useCollections } from "@/lib/data/useCollections"
-import { usePebbles } from "@/lib/data/usePebbles"
+import { useMoments } from "@/lib/data/useMoments"
+import { momentsInCollection } from "@/lib/data/moment-lists"
 import { useSouls } from "@/lib/data/useSouls"
 import { CollectionDetailHeader } from "@/components/collections/CollectionDetailHeader"
 import { CollectionPebbleList } from "@/components/collections/CollectionPebbleList"
@@ -23,21 +24,18 @@ export default function CollectionDetailPage({
   const tDetail = useTranslations("collections.detail")
   const { collection, loading: collectionLoading } = useCollection(id)
   const { updateCollection } = useCollections()
-  const { pebbles, loading: pebblesLoading } = usePebbles()
+  const { moments, loading: momentsLoading } = useMoments()
   const { souls, loading: soulsLoading } = useSouls()
 
-  const loading = collectionLoading || pebblesLoading || soulsLoading
+  const loading = collectionLoading || momentsLoading || soulsLoading
 
-  const resolvedPebbles = useMemo(() => {
-    if (!collection) return []
-    const pebbleMap = new Map(pebbles.map((p) => [p.id, p]))
-    return collection.pebble_ids
-      .map((pid) => pebbleMap.get(pid))
-      .filter((p): p is Pebble => p != null)
-  }, [collection, pebbles])
+  const collectionMoments = useMemo(
+    () => (collection ? momentsInCollection(moments, collection) : []),
+    [collection, moments],
+  )
 
   const handleEdit = useCallback(
-    async (data: { name: string; mode?: Collection["mode"] }) => {
+    async (data: { name: string; mode?: Collection["mode"]; glyph_id: string | null }) => {
       await updateCollection(id, data)
     },
     [id, updateCollection],
@@ -71,16 +69,16 @@ export default function CollectionDetailPage({
         <>
           <CollectionDetailHeader
             collection={collection}
-            pebbleCount={resolvedPebbles.length}
+            pebbleCount={collectionMoments.length}
             onEdit={handleEdit}
           />
-          {resolvedPebbles.length === 0 ? (
+          {collectionMoments.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">
               {tDetail("noPebbles")}
             </p>
           ) : (
             <CollectionPebbleList
-              pebbles={resolvedPebbles}
+              moments={collectionMoments}
               souls={souls}
               onRemove={handleRemovePebble}
             />
