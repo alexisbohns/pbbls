@@ -7,8 +7,12 @@ import { cn } from "@/lib/utils"
 type RecordNameStepProps = {
   name: string
   limit: number
+  /** The field's accessible name, supplied by the flow ("Name" in Capture). */
+  label: string
+  /** The countdown's accessible reading, e.g. "12 characters left". */
+  charactersLeft: (count: number) => string
   onChange: (value: string) => void
-  /** Advances the flow, so Enter commits the way the Continue button does. */
+  /** Enter commits the way the step's primary button does. */
   onSubmit: () => void
 }
 
@@ -16,7 +20,7 @@ type RecordNameStepProps = {
 const COUNTDOWN_FROM = 15
 
 /**
- * Step 2 — what to call it. Clamped to the limit as you type, so the counter
+ * Capture's last step — what to call it. Clamped to the limit as you type, so the counter
  * can never show an over-limit value and there is no error state to design.
  * The limit is front-end only.
  *
@@ -28,7 +32,14 @@ const COUNTDOWN_FROM = 15
  * step was written around, where the field kept its own buffer and the user
  * watched a name get silently shortened at the end.
  */
-export function RecordNameStep({ name, limit, onChange, onSubmit }: RecordNameStepProps) {
+export function RecordNameStep({
+  name,
+  limit,
+  label,
+  charactersLeft,
+  onChange,
+  onSubmit,
+}: RecordNameStepProps) {
   const t = useTranslations("record.flow.name")
   const ref = useRef<HTMLTextAreaElement>(null)
 
@@ -46,6 +57,9 @@ export function RecordNameStep({ name, limit, onChange, onSubmit }: RecordNameSt
         value={name}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
+          // Enter that confirms an IME composition (Japanese, Chinese, …) is
+          // not a submit; Safari reports it as keyCode 229 without isComposing.
+          if (e.nativeEvent.isComposing || e.keyCode === 229) return
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
             onSubmit()
@@ -57,24 +71,25 @@ export function RecordNameStep({ name, limit, onChange, onSubmit }: RecordNameSt
         // tells assistive tech the field has a limit, and the clamp is what
         // catches the paths it does not cover (paste, IME composition).
         maxLength={limit}
-        aria-label={t("label")}
+        aria-label={label}
         className="w-full resize-none border-none bg-transparent text-center font-hand text-3xl font-bold text-balance text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/40"
       />
 
       {/* Always laid out, only faded — otherwise the field jumps when the
           counter appears mid-typing. */}
-      {/* Decorative: the limit itself reaches assistive tech through the
-          field's `maxLength`, and announcing a new count on every keystroke
-          would be noise rather than help. */}
+      {/* Readable only while shown, and never live: the limit reaches
+          assistive tech through the field's `maxLength`, and announcing a new
+          count on every keystroke would be noise rather than help. */}
       <span
-        aria-hidden
+        aria-hidden={!showsCountdown}
         className={cn(
           "text-sm tabular-nums transition-opacity duration-200",
           remaining === 0 ? "text-primary" : "text-muted-foreground",
           showsCountdown ? "opacity-100" : "opacity-0",
         )}
       >
-        {remaining}
+        <span aria-hidden>{remaining}</span>
+        <span className="sr-only">{charactersLeft(remaining)}</span>
       </span>
     </div>
   )

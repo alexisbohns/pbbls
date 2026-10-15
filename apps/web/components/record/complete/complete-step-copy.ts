@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import type { CompleteStep } from "@/lib/record/steps"
-import type { RecordStepCopy } from "@/components/record/flow/step-copy"
+import type { RecordStepCopy } from "@/components/record/flow/RecordStepScaffold"
 
 /**
  * The Complete flow's per-step copy. Reuses the record flow's step titles

@@ -3,7 +3,6 @@ import {
   EMPTY_STORE,
   type DataProvider,
   type Store,
-  type CreatePebbleInput,
   type CreateSoulInput,
   type UpdateSoulInput,
   type CreateCollectionInput,
@@ -53,7 +52,6 @@ import {
   sharedConnectionPebbleFromRow,
 } from "@/lib/data/connection-pebble-row"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
-import { ComposeError, readEdgeErrorBody } from "@/lib/data/compose-error"
 import { MomentWriteError } from "@/lib/data/moment-write-error"
 import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment-payloads"
 
@@ -400,40 +398,6 @@ export class SupabaseProvider implements DataProvider {
   async getMark(id: string): Promise<Mark | undefined> { return this.store.marks.find((m) => m.id === id) }
 
   // ---------------------------------------------------------------------------
-  // Pebble mutations — Supabase first, then reload full store
-  // ---------------------------------------------------------------------------
-
-  async createPebble(input: CreatePebbleInput): Promise<Pebble> {
-    const payload = {
-      name: input.name,
-      description: input.description ?? null,
-      happened_at: input.happened_at,
-      intensity: input.intensity,
-      positiveness: input.positiveness,
-      visibility: input.visibility,
-      emotion_id: input.emotion_id,
-      soul_ids: input.soul_ids,
-      domain_ids: input.domain_ids,
-      collection_ids: input.collection_ids,
-      snaps: input.snaps.map((s, i) => ({
-        id: s.id,
-        storage_path: s.storage_path,
-        sort_order: i,
-      })),
-      cards: input.cards.map((c, i) => ({
-        species_id: c.species_id,
-        value: c.value,
-        sort_order: i,
-      })),
-    }
-    const pebbleId = await this.invokeCompose("compose-pebble", { payload })
-    await this.loadFromSupabase()
-    const created = this.store.pebbles.find((p) => p.id === pebbleId)
-    if (!created) throw new Error(`Pebble not found after create: ${pebbleId}`)
-    return created
-  }
-
-  // ---------------------------------------------------------------------------
   // Snap media — mirror of iOS PebbleSnapRepository.uploadProcessed.
   // ---------------------------------------------------------------------------
 
@@ -548,35 +512,6 @@ export class SupabaseProvider implements DataProvider {
       p_block: block,
     })
     if (error) throw new Error(`remove_connection failed: ${error.message}`)
-  }
-
-  /**
-   * Invoke the compose-pebble edge function (the old composer's create, until
-   * Capture replaces it) and return the resulting pebble id. A failure is a failure: since the moments
-   * split (#1046) nothing runs after the write that could fail on its own, so
-   * there is no soft success. A refusal throws a `ComposeError` carrying the
-   * server's slug (`pebble_needs_domain`, …) for the composer to explain.
-   */
-  private async invokeCompose(
-    name: "compose-pebble",
-    body: Record<string, unknown>,
-  ): Promise<string> {
-    const { data, error } = await this.supabase.functions.invoke<{ pebble_id?: string }>(name, {
-      body,
-    })
-
-    if (error) {
-      const slug = await readEdgeErrorBody((error as { context?: unknown }).context)
-      console.error(`[${name}] edge function failed`, slug ?? error)
-      throw new ComposeError(name, slug ?? error.message ?? "unknown")
-    }
-
-    const pebbleId = data?.pebble_id
-    if (!pebbleId) {
-      console.error(`[${name}] edge function returned no pebble_id`, data)
-      throw new Error(`${name} returned no pebble_id`)
-    }
-    return pebbleId
   }
 
   // ---------------------------------------------------------------------------

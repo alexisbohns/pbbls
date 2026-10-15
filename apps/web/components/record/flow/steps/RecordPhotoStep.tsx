@@ -52,9 +52,14 @@ export function RecordPhotoStep({
             </p>
           )}
           {state === "uploaded" && (
-            <Button variant="ghost" onClick={() => inputRef.current?.click()}>
-              {t("chooseAnother")}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={() => inputRef.current?.click()}>
+                {t("chooseAnother")}
+              </Button>
+              <Button variant="ghost" onClick={onRemove} className="text-muted-foreground">
+                {t("remove")}
+              </Button>
+            </div>
           )}
           {state === "failed" && (
             <div className="flex flex-col items-center gap-2">
