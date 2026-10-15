@@ -5,6 +5,7 @@ import { fireAchievementCheck } from "@/lib/activity/fire-achievement-check"
 import { useDataProvider } from "@/lib/data/provider-context"
 import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment-payloads"
 import type { PebbleSnap } from "@/lib/types"
+import { karmaDelta } from "@/lib/data/moment-karma"
 
 type CompleteOptions = {
   /** `pebble_created` from the Complete flow, `pebble_enriched` from Edit pebble. */
@@ -33,17 +34,20 @@ export function useMoments() {
   }
 
   /**
-   * Karma is "total after minus total before" (R13). When the reload after the
-   * write failed, the store is stale, the delta is 0 and nothing is shown.
+   * Karma is this pebble's own events after the write minus before (R13, the
+   * iOS method): `complete_pebble` writes its karma with `ref_id` = the pebble
+   * id, so achievement grants and other writes never leak into the amount.
+   * Before is 0 for a bare moment. Either read failing shows nothing.
    * Achievements are evaluated after every completion, never after a save.
    */
   const completePebble = async (payload: CompletePebblePayload, options: CompleteOptions): Promise<string> => {
     if (!provider) throw new Error("Not authenticated")
-    const before = provider.getStore().karma
+    const existingPebbleId = provider.getStore().moments.find((m) => m.id === payload.moment_id)?.pebble?.id
+    const before = existingPebbleId ? await provider.pebbleKarma(existingPebbleId) : 0
     const pebbleId = await provider.completePebble(payload)
-    const after = provider.getStore()
-    setStore(after)
-    const delta = after.karma - before
+    setStore(provider.getStore())
+    const after = await provider.pebbleKarma(pebbleId)
+    const delta = karmaDelta(before, after)
     if (delta > 0) {
       if (options.onKarmaEarned) options.onKarmaEarned(delta)
       else notifyKarma(delta, options.reason)

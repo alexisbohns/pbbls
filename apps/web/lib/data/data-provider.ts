@@ -202,6 +202,11 @@ export interface DataProvider {
   saveMoment(payload: SaveMomentPayload): Promise<string>
   /** Creates or updates the caller's pebble on a moment; returns the pebble id. */
   completePebble(payload: CompletePebblePayload): Promise<string>
+  /**
+   * The karma one pebble has earned the caller so far: the sum of its
+   * `karma_events` (`ref_id` = the pebble id). Null when the read fails.
+   */
+  pebbleKarma(pebbleId: string): Promise<number | null>
   /** Deletes the moment, its pebbles and snaps, then removes the snap files best-effort. */
   deleteMoment(momentId: string): Promise<void>
   /** Deletes the pebble only, keyed by the PEBBLE id; the moment stays, bare. */
