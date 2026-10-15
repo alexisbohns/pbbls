@@ -17,6 +17,7 @@ import {
   type AchievementUnlockResult,
 } from "@/lib/data/data-provider"
 import type {
+  Moment,
   Pebble,
   PebbleSnap,
   Soul,
@@ -37,18 +38,33 @@ import { toConnectionPeer } from "@/lib/data/invite-api"
 import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 import {
-  pebbleFromViewRow,
-  pebbleGlyphFromRow,
-  pebbleNameFromRow,
   snapOriginalPath,
   snapThumbPath,
   sortedSnaps,
 } from "@/lib/data/pebble-row"
+import {
+  compareMomentsNewestFirst,
+  deleteMomentPaths,
+  isCompleted,
+  legacyPebbleFromMoment,
+  momentFromViewRow,
+} from "@/lib/data/moment-row"
+import {
+  compareSharedNewestFirst,
+  sharedConnectionPebbleFromRow,
+} from "@/lib/data/connection-pebble-row"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 import { ComposeError, readEdgeErrorBody } from "@/lib/data/compose-error"
+import { MomentWriteError } from "@/lib/data/moment-write-error"
+import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment-payloads"
 
 const PEBBLE_MEDIA_BUCKET = "pebbles-media"
 const SNAP_URL_TTL_SECONDS = 3600
+
+/** The deprecated flat list (#1050 Part 6 removes it): completed moments only. */
+function derivePebbles(moments: readonly Moment[]): Pebble[] {
+  return moments.filter(isCompleted).map(legacyPebbleFromMoment)
+}
 
 export class SupabaseProvider implements DataProvider {
   private store: Store
@@ -83,7 +99,7 @@ export class SupabaseProvider implements DataProvider {
 
   async loadFromSupabase(): Promise<Store> {
     const [
-      pebblesRes,
+      momentsRes,
       soulsRes,
       collectionsRes,
       collectionPebblesRes,
@@ -92,7 +108,12 @@ export class SupabaseProvider implements DataProvider {
       karmaRes,
       bounceRes,
     ] = await Promise.all([
-      this.supabase.from("v_pebbles_full").select("*").eq("user_id", this.userId),
+      // The user_id filter is load-bearing: moments_select also opens the
+      // connections' moments, which are not this user's path.
+      this.supabase
+        .from("v_moments_full")
+        .select("id, user_id, name, description, happened_at, created_at, updated_at, snaps, pebble")
+        .eq("user_id", this.userId),
       this.supabase.from("souls").select("*").eq("user_id", this.userId),
       this.supabase.from("collections").select("*").eq("user_id", this.userId),
       this.supabase.from("collection_pebbles").select("*, collections!inner(user_id)").eq("collections.user_id", this.userId),
@@ -102,7 +123,7 @@ export class SupabaseProvider implements DataProvider {
       this.supabase.from("v_bounce").select("*").eq("user_id", this.userId).maybeSingle(),
     ])
 
-    if (pebblesRes.error) throw new Error(`Failed to load pebbles: ${pebblesRes.error.message}`)
+    if (momentsRes.error) throw new Error(`Failed to load moments: ${momentsRes.error.message}`)
     if (soulsRes.error) throw new Error(`Failed to load souls: ${soulsRes.error.message}`)
     if (collectionsRes.error) throw new Error(`Failed to load collections: ${collectionsRes.error.message}`)
     if (glyphsRes.error) throw new Error(`Failed to load glyphs: ${glyphsRes.error.message}`)
@@ -110,23 +131,23 @@ export class SupabaseProvider implements DataProvider {
 
     // Snaps are stored in the private `pebbles-media` bucket as
     // `{storage_path}/original.jpg` (+ `…/thumb.jpg`); the view only carries
-    // the prefix. Collect every original.jpg path across all pebbles, mint
+    // the prefix. Collect every original.jpg path across all moments, mint
     // signed URLs in a single round-trip (mirrors iOS's 1 h TTL in
-    // PebbleSnapRepository), and hand the resulting URLs back to each pebble
+    // PebbleSnapRepository), and hand the resulting URLs back to each moment
     // in `sort_order`.
-    const rawSnapsByPebble = new Map<string, PebbleSnap[]>()
-    for (const row of pebblesRes.data ?? []) {
-      const r = row as Record<string, unknown>
-      const snaps = (r.snaps as PebbleSnap[] | undefined) ?? []
-      if (snaps.length > 0) rawSnapsByPebble.set(r.id as string, snaps)
+    const momentRows: Record<string, unknown>[] = momentsRes.data ?? []
+    const snapSets: PebbleSnap[][] = []
+    for (const r of momentRows) {
+      const snaps = sortedSnaps(r.snaps)
+      if (snaps.length > 0) snapSets.push(snaps)
     }
 
     // Every original, plus the first snap's thumb: the Spine's card probes the
     // thumb for the photo's ratio. One batch either way.
     const signPaths: string[] = []
-    for (const snaps of rawSnapsByPebble.values()) {
+    for (const snaps of snapSets) {
       for (const s of snaps) signPaths.push(snapOriginalPath(s))
-      const first = sortedSnaps(snaps)[0]
+      const first = snaps[0]
       if (first) signPaths.push(snapThumbPath(first))
     }
 
@@ -136,7 +157,7 @@ export class SupabaseProvider implements DataProvider {
         .from(PEBBLE_MEDIA_BUCKET)
         .createSignedUrls(signPaths, SNAP_URL_TTL_SECONDS)
       if (error) {
-        console.warn("[pebbles] failed to sign snap URLs", error)
+        console.warn("[moments] failed to sign snap URLs", error)
       } else {
         for (const entry of data ?? []) {
           if (entry.signedUrl && entry.path) {
@@ -146,9 +167,10 @@ export class SupabaseProvider implements DataProvider {
       }
     }
 
-    const pebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) =>
-      pebbleFromViewRow(row, signedUrlByPath),
-    )
+    const moments: Moment[] = momentRows
+      .map((row) => momentFromViewRow(row, signedUrlByPath))
+      .sort(compareMomentsNewestFirst)
+    const pebbles = derivePebbles(moments)
 
     const souls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
@@ -194,6 +216,7 @@ export class SupabaseProvider implements DataProvider {
     const bounce = (bounceRes.data as Record<string, unknown>)?.bounce_level as number ?? 0
 
     const newStore: Store = {
+      moments,
       pebbles,
       souls,
       collections,
@@ -524,49 +547,32 @@ export class SupabaseProvider implements DataProvider {
     if (!peerId) return null
 
     // The widened pebbles_select (M51) trims this to 'private' + 'public'
-    // rows; emotions is reference data (RLS `using (true)`), so the embed
-    // cannot blank rows.
-    // name and happened_at moved to `moments` (#1046); the compat view joins
-    // them back under the same pebbles_select / moments_select rules.
+    // rows; emotions is reference data (RLS `using (true)`), so that embed
+    // cannot blank rows. name and happened_at live on `moments` (#1046);
+    // moments_select opens a connection's moment exactly when one of its
+    // pebbles is readable, and `!inner` drops a row whose moment is not.
+    // v_moments_full cannot serve this: it nests only the CALLER's pebble.
+    // `glyph` is the pebbles.glyph computed field (#1050): the derived glyph,
+    // gated like resolve_pebble_glyph, in this one request.
     const { data, error } = await this.supabase
-      .from("v_pebbles_full")
-      .select("id, name, happened_at, visibility, intensity, positiveness, emotion, glyph")
+      .from("pebbles")
+      .select(
+        "id, visibility, intensity, positiveness, emotion:emotions(id, slug, name, color), moment:moments!inner(name, happened_at), glyph",
+      )
       .eq("user_id", peerId)
-      .order("happened_at", { ascending: false })
     if (error) throw new Error(`shared pebbles fetch failed: ${error.message}`)
 
-    return (data ?? []).flatMap((row: Record<string, unknown>) => {
-      // PostgREST returns a to-one FK embed as an object; drop rows with a
-      // broken embed rather than rendering an empty emotion.
-      const emotion = row.emotion as Record<string, unknown> | null
-      if (
-        !emotion ||
-        typeof emotion.id !== "string" ||
-        typeof emotion.slug !== "string" ||
-        typeof emotion.name !== "string" ||
-        typeof emotion.color !== "string"
-      ) {
-        console.warn("[supabase-provider] dropped shared pebble with broken emotion embed", row.id)
-        return []
-      }
-      return [
-        {
-          id: row.id as string,
-          name: pebbleNameFromRow(row.name),
-          happened_at: row.happened_at as string,
-          visibility: (row.visibility as string) as SharedConnectionPebble["visibility"],
-          intensity: row.intensity as number,
-          positiveness: row.positiveness as number,
-          emotion: {
-            id: emotion.id,
-            slug: emotion.slug,
-            name: emotion.name,
-            color: emotion.color,
-          },
-          glyph: pebbleGlyphFromRow(row.glyph),
-        },
-      ]
-    })
+    const rows: Record<string, unknown>[] = data ?? []
+    return rows
+      .flatMap((row) => {
+        const shared = sharedConnectionPebbleFromRow(row)
+        if (!shared) {
+          console.warn("[supabase-provider] dropped shared pebble with a broken embed", row.id)
+          return []
+        }
+        return [shared]
+      })
+      .sort(compareSharedNewestFirst)
   }
 
   async createConnectionInvite(rotate = false): Promise<ConnectionInvite> {
@@ -631,10 +637,77 @@ export class SupabaseProvider implements DataProvider {
     return pebbleId
   }
 
-  async deletePebble(id: string): Promise<void> {
-    const result = await this.supabase.rpc("delete_pebble", { p_pebble_id: id })
+  // ---------------------------------------------------------------------------
+  // Moment writes (#1050) — save_moment / complete_pebble / delete_moment /
+  // delete_pebble, no edge function. Reload is not the write: see reloadAfter.
+  // ---------------------------------------------------------------------------
+
+  async saveMoment(payload: SaveMomentPayload): Promise<string> {
+    const { data, error } = await this.supabase.rpc("save_moment", { payload })
+    if (error || typeof data !== "string") {
+      console.error("[moments] save_moment failed", error ?? data)
+      throw new MomentWriteError("save_moment", error)
+    }
+    await this.reloadAfter("save_moment")
+    return data
+  }
+
+  async completePebble(payload: CompletePebblePayload): Promise<string> {
+    const { data, error } = await this.supabase.rpc("complete_pebble", { payload })
+    if (error || typeof data !== "string") {
+      console.error("[moments] complete_pebble failed", error ?? data)
+      throw new MomentWriteError("complete_pebble", error)
+    }
+    await this.reloadAfter("complete_pebble")
+    return data
+  }
+
+  async pebbleKarma(pebbleId: string): Promise<number | null> {
+    const { data, error } = await this.supabase
+      .from("karma_events")
+      .select("delta")
+      .eq("user_id", this.userId)
+      .eq("ref_id", pebbleId)
+    if (error) {
+      console.warn("[moments] pebble karma read failed", error)
+      return null
+    }
+    return (data ?? []).reduce((sum, r) => sum + (typeof r.delta === "number" ? r.delta : 0), 0)
+  }
+
+  async deleteMoment(momentId: string): Promise<void> {
+    const { data, error } = await this.supabase.rpc("delete_moment", { p_moment_id: momentId })
+    if (error) {
+      console.error("[moments] delete_moment failed", error)
+      throw new Error(`delete_moment failed: ${error.message}`)
+    }
+    const paths = deleteMomentPaths(data)
+    if (paths.length > 0) {
+      const { error: rmErr } = await this.supabase.storage
+        .from(PEBBLE_MEDIA_BUCKET)
+        .remove(paths.flatMap((p) => [`${p}/original.jpg`, `${p}/thumb.jpg`]))
+      if (rmErr) console.warn("[moments] snap file cleanup failed (orphan sweep is the backstop)", rmErr)
+    }
+    await this.reloadAfter("delete_moment")
+  }
+
+  async deletePebble(pebbleId: string): Promise<void> {
+    const result = await this.supabase.rpc("delete_pebble", { p_pebble_id: pebbleId })
     this.unwrap(result)
-    await this.loadFromSupabase()
+    await this.reloadAfter("delete_pebble")
+  }
+
+  /**
+   * Reload after a write that already succeeded. A failure is logged and the
+   * store stays stale; it never turns the write into an error, because the
+   * caller would retry it (and a `save_moment` create is not idempotent).
+   */
+  private async reloadAfter(fn: string): Promise<void> {
+    try {
+      await this.loadFromSupabase()
+    } catch (err) {
+      console.warn(`[moments] reload after ${fn} failed`, err)
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -689,11 +762,12 @@ export class SupabaseProvider implements DataProvider {
   async deleteSoul(id: string): Promise<void> {
     this.unwrap(await this.supabase.from("souls").delete().eq("id", id))
     const souls = this.store.souls.filter((s) => s.id !== id)
-    const pebbles = this.store.pebbles.map((p) => ({
-      ...p,
-      soul_ids: p.soul_ids.filter((sid) => sid !== id),
-    }))
-    this.mutate({ ...this.store, souls, pebbles })
+    const moments = this.store.moments.map((m) =>
+      m.pebble && m.pebble.soul_ids.includes(id)
+        ? { ...m, pebble: { ...m.pebble, soul_ids: m.pebble.soul_ids.filter((sid) => sid !== id) } }
+        : m,
+    )
+    this.mutate({ ...this.store, souls, moments, pebbles: derivePebbles(moments) })
   }
 
   // ---------------------------------------------------------------------------

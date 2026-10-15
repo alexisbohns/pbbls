@@ -10,6 +10,7 @@ import type { Pebble } from "@/lib/types"
 function makePebble(overrides: Partial<Pebble> = {}): Pebble {
   return {
     id: "pebble-1",
+    moment_id: "moment-1",
     name: "Test pebble",
     description: undefined,
     happened_at: "2026-07-29T00:00:00Z",

@@ -792,6 +792,23 @@
       "uploadFailed": "Échec de l'envoi de la photo. Réessayez."
     }
   },
+  "moment": {
+    "untitled": "Sans titre",
+    "errors": {
+      "momentEmpty": "Ajoute d'abord un nom ou une photo.",
+      "mediaQuotaExceeded": "Limite de photos atteinte pour ce moment.",
+      "pebbleNeedsEmotion": "Choisis d'abord une émotion.",
+      "pebbleNeedsValence": "Choisis d'abord ce que ça t'a fait.",
+      "pebbleNeedsDomain": "Choisis d'abord un domaine de ta vie.",
+      "soulNotOwned": "Une de ces âmes n'existe plus. Retire-la et réessaie.",
+      "collectionNotOwned": "Cette collection n'existe plus. Choisis-en une autre.",
+      "momentNotFound": "Ce moment n'existe plus.",
+      "notAuthenticated": "Tu dois être connecté pour enregistrer.",
+      "generic": "Impossible d'enregistrer. Réessaie.",
+      "deleteTitle": "Impossible de supprimer",
+      "deleteMessage": "Quelque chose n'a pas fonctionné. Réessaie."
+    }
+  },
   "record": {
     "flow": {
       "aria": "Capturer un caillou, une question à la fois",

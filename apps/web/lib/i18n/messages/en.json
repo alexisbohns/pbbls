@@ -792,6 +792,23 @@
       "uploadFailed": "Picture upload failed. Try again."
     }
   },
+  "moment": {
+    "untitled": "Untitled",
+    "errors": {
+      "momentEmpty": "Add a name or a photo first.",
+      "mediaQuotaExceeded": "Photo limit reached on this moment.",
+      "pebbleNeedsEmotion": "Pick an emotion first.",
+      "pebbleNeedsValence": "Pick how it landed first.",
+      "pebbleNeedsDomain": "Pick a part of life first.",
+      "soulNotOwned": "One of those souls is gone. Remove it and try again.",
+      "collectionNotOwned": "That collection is gone. Pick another one.",
+      "momentNotFound": "This moment no longer exists.",
+      "notAuthenticated": "You must be signed in to save.",
+      "generic": "Couldn't save. Please try again.",
+      "deleteTitle": "Couldn't delete",
+      "deleteMessage": "Something went wrong. Please try again."
+    }
+  },
   "record": {
     "flow": {
       "aria": "Record a pebble, one question at a time",

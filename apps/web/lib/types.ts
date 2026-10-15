@@ -38,8 +38,59 @@ export type PebbleCover = {
  */
 export type Visibility = "secret" | "private" | "public"
 
+export type Intensity = 1 | 2 | 3
+export type Positiveness = -1 | 0 | 1
+
+/**
+ * The caller's pebble on a moment, as `v_moments_full.pebble` nests it. It
+ * exists only once the moment is completed (#1046 D2), so a bare moment has no
+ * intensity, emotion or domain to pretend about.
+ */
+export type MomentPebble = {
+  /** pebbles.id: the share URL (/p/[id]), collection_pebbles, karma ref_id. */
+  id: string
+  intensity: Intensity
+  positiveness: Positiveness
+  visibility: Visibility
+  emotion_id: string
+  soul_ids: string[]
+  domain_ids: string[]
+  collection_ids: string[]
+  cards: PebbleCard[]
+  /** Derived: the oldest collection's glyph, else the first domain's default (D5). */
+  glyph: PebbleGlyph | null
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * What happened (#1046 D1): one row of `v_moments_full`. Its id is the route
+ * key everywhere (/pebble/[id] is a MOMENT id).
+ */
+export type Moment = {
+  id: string
+  /** Null = untitled (a photo-only moment); never coerced to "". */
+  name: string | null
+  description: string | null
+  happened_at: string
+  /** sort_order ascending. */
+  snaps: PebbleSnap[]
+  /** Signed `original.jpg` URLs, display only. */
+  instants: string[]
+  /** The first snap, original and thumb signed. */
+  cover: PebbleCover | null
+  created_at: string
+  updated_at: string
+  pebble: MomentPebble | null
+}
+
+export type CompletedMoment = Moment & { pebble: MomentPebble }
+
+/** @deprecated Derived from Moment for unported consumers; removed in #1050 Part 6. id is the PEBBLE id. */
 export type Pebble = {
   id: string
+  /** The moment this pebble completes: the read page's route key. */
+  moment_id: string
   name: string
   description?: string
   happened_at: string
@@ -55,7 +106,7 @@ export type Pebble = {
   instants: string[]
   snaps: PebbleSnap[]
   cards: PebbleCard[]
-  // The pebble's resolved glyph, from `v_pebbles_full.glyph`: its oldest
+  // The pebble's resolved glyph, from `v_moments_full.pebble.glyph`: its oldest
   // collection's glyph, else its first domain's default (#1046 D5). The server
   // no longer renders pebbles (D6), so every surface draws these strokes; null
   // when neither carries a glyph.
@@ -198,7 +249,7 @@ export type Mark = {
   updated_at: string
 }
 
-// A glyph as `v_pebbles_full.glyph` embeds it: geometry only, no timestamps.
+// A glyph as `v_moments_full.pebble.glyph` embeds it: geometry only, no timestamps.
 export type PebbleGlyph = Pick<Mark, "id" | "name" | "strokes" | "viewBox">
 
 export type GlyphSubmissionStatus = "pending" | "approved" | "rejected"

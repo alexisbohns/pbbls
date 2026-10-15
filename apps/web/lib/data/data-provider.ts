@@ -1,4 +1,5 @@
 import type {
+  Moment,
   Pebble,
   PebbleSnap,
   Soul,
@@ -16,6 +17,7 @@ import type {
   AchievementUnlock,
   SharedConnectionPebble,
 } from "@/lib/types"
+import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment-payloads"
 
 // ---------------------------------------------------------------------------
 // Store snapshot — the in-memory representation of all persisted data.
@@ -23,6 +25,9 @@ import type {
 // ---------------------------------------------------------------------------
 
 export type Store = {
+  /** The source of truth (#1050): every own moment from `v_moments_full`, newest first. */
+  moments: Moment[]
+  /** @deprecated Derived from `moments` (completed only) for unported consumers; removed in #1050 Part 6. */
   pebbles: Pebble[]
   souls: Soul[]
   collections: Collection[]
@@ -36,6 +41,7 @@ export type Store = {
 }
 
 export const EMPTY_STORE: Store = {
+  moments: [],
   pebbles: [],
   souls: [],
   collections: [],
@@ -55,6 +61,7 @@ export const EMPTY_STORE: Store = {
 // `instants` is the read-path projection (signed URLs); writes use `snaps`.
 type ServerOwnedPebbleFields =
   | "id"
+  | "moment_id"
   | "created_at"
   | "updated_at"
   | "instants"
@@ -185,7 +192,25 @@ export interface DataProvider {
   getPebble(id: string): Promise<Pebble | undefined>
   createPebble(input: CreatePebbleInput): Promise<Pebble>
   updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble>
-  deletePebble(id: string): Promise<void>
+
+  // Moments (#1050): the four definer RPCs, called directly, one per user
+  // action (R5). Each returns once its RPC succeeded, then reloads the store
+  // best-effort: a failed reload is logged and leaves the store stale, and the
+  // write still counts (retrying a `save_moment` create would duplicate the
+  // moment). A refused save or completion throws a `MomentWriteError`.
+  /** Creates (no id) or edits a moment; returns the moment id. */
+  saveMoment(payload: SaveMomentPayload): Promise<string>
+  /** Creates or updates the caller's pebble on a moment; returns the pebble id. */
+  completePebble(payload: CompletePebblePayload): Promise<string>
+  /**
+   * The karma one pebble has earned the caller so far: the sum of its
+   * `karma_events` (`ref_id` = the pebble id). Null when the read fails.
+   */
+  pebbleKarma(pebbleId: string): Promise<number | null>
+  /** Deletes the moment, its pebbles and snaps, then removes the snap files best-effort. */
+  deleteMoment(momentId: string): Promise<void>
+  /** Deletes the pebble only, keyed by the PEBBLE id; the moment stays, bare. */
+  deletePebble(pebbleId: string): Promise<void>
 
   // Snap media: upload processes the file client-side (mirrors iOS
   // ImagePipeline) and writes original + thumb JPEGs to `pebbles-media`.
