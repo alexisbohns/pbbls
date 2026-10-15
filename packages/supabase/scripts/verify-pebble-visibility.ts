@@ -233,7 +233,7 @@ try {
   const { data: sharedRow } = await f
     .from("pebbles")
     .select(
-      "id, visibility, intensity, positiveness, emotion:emotions(id, slug, name, color), moment:moments!inner(name, happened_at)",
+      "id, visibility, intensity, positiveness, emotion:emotions(id, slug, name, color), moment:moments!inner(name, happened_at), glyph",
     )
     .eq("id", privateId).maybeSingle();
   check("a connection reads the shared pebble with its moment's name (web's connection reader)",
