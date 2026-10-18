@@ -107,4 +107,33 @@ class PathMomentDecodingTest {
         assertNull(moment.firstSnapPath)
         assertNull(moment.pebble)
     }
+
+    // Verbatim path_moments() rows with and without the #1121 souls key (the foreign-payload rule).
+    private val withSouls =
+        """
+        {"id":"m1","name":"Flag march","happened_at":"2026-10-05T08:15:00+00:00","created_at":"2026-10-05T08:16:02.123456+00:00",
+         "first_snap_path":"u1/s1","pebble":{"id":"p1","intensity":3,"positiveness":1,"visibility":"secret",
+         "emotion":{"id":"e1","slug":"pride","name":"Pride"},"glyph":null,
+         "souls":[{"id":"s-elio","name":"Elio","glyph_id":"g2"},{"id":"s-mara","name":"Mara","glyph_id":"g1"}]}}
+        """.trimIndent()
+
+    private val beforeSouls =
+        """
+        {"id":"m2","name":null,"happened_at":"2026-10-05T08:15:00Z","created_at":"2026-10-05T08:16:02Z",
+         "first_snap_path":null,"pebble":{"id":"p2","intensity":1,"positiveness":0,"visibility":"secret","emotion":null,"glyph":null}}
+        """.trimIndent()
+
+    @Test
+    fun `decodes souls in server order`() {
+        val m = json.decodeFromString<PathMoment>(withSouls)
+        assertEquals(listOf("Elio", "Mara"), m.pebble!!.souls.map { it.name })
+        assertEquals("g1", m.pebble!!.souls[1].glyphId)
+    }
+
+    @Test
+    fun `a row from before the key decodes with no souls`() {
+        val m = json.decodeFromString<PathMoment>(beforeSouls)
+        assertTrue(m.pebble!!.souls.isEmpty())
+        assertNull(m.name)
+    }
 }
