@@ -87,15 +87,15 @@ private val LINE_WIDTH = 1.dp
  * viewport and presses it without opening (spec D8).
  *
  * The day geometry is the web's, hairline to content: 58 dp above a day's first pebble, 38
- * between pebbles, 34 below its last; a still day is 48 dp long with *still* 14 dp under
- * its hairline. The seam is [SEAM_LABEL_OVERHANG] taller than its hairline sits, for the
+ * between pebbles, 34 below its last; a still day is at least 48 dp long with *still* 14 dp
+ * under its hairline. The seam is [SEAM_LABEL_OVERHANG] taller than its hairline sits, for the
  * label hung above it, and that overhang comes off the previous day's bottom padding —
  * never off the day's own top — so the first day's seam follows the verso by [FEED_TOP]
  * minus the overhang, and the last day keeps its full 34 before the mouth. The day's top
  * padding rides on the seam row, so on a day with moments the 52 dp label (which the seam
  * never measures) overflows into that padding and nothing drawn later covers it; a still
- * day is shorter than its label by 4 dp, and the next seam's ground paints over that much
- * of the label's foot, as the web's 48 has it.
+ * day measures its label instead and grows with it, so nothing is ever cut at a large font
+ * (52 rather than the web's 48 at the default one).
  *
  * The Spine is left-to-right whatever the locale: the line, the leaders and the cairn sit
  * at an absolute [SPINE_X], no RTL locale ships, and mirroring the page is a later task.
@@ -193,10 +193,11 @@ fun SpineWeek(
                                 .then(SpineGroundElement(tile, if (row.first) FEED_TOP else 0.dp, row.ground, heights, colors.line))
                                 .padding(top = if (row.first) FEED_TOP - SEAM_LABEL_OVERHANG else 0.dp)
                         if (row.day.still) {
-                            // Box top to the next box top, or to the mouth when nothing follows.
+                            // The seam measures its own 48 and its label; the last day has no next
+                            // seam to hand the overhang to, so it keeps its full 48 to the mouth.
                             DaySeam(
                                 day = row.day,
-                                modifier = seam.heightIn(min = STILL_MIN_HEIGHT + if (row.last) SEAM_LABEL_OVERHANG else 0.dp),
+                                modifier = if (row.last) seam.heightIn(min = STILL_MIN_HEIGHT + SEAM_LABEL_OVERHANG) else seam,
                             )
                         } else {
                             DaySeam(day = row.day, modifier = seam.padding(bottom = DAY_PAD_TOP - SEAM_HEIGHT))

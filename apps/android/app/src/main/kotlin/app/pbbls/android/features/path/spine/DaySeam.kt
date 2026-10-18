@@ -21,12 +21,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -35,6 +37,7 @@ import app.pbbls.android.features.path.spine.SpineLayout.LABEL_WIDTH
 import app.pbbls.android.features.path.spine.SpineLayout.SEAM_HEIGHT
 import app.pbbls.android.features.path.spine.SpineLayout.SEAM_LABEL_OVERHANG
 import app.pbbls.android.features.path.spine.SpineLayout.SPINE_X
+import app.pbbls.android.features.path.spine.SpineLayout.STILL_MIN_HEIGHT
 import app.pbbls.android.features.path.spine.SpineLayout.STILL_PAD_TOP
 import app.pbbls.android.features.path.spine.logic.SpineDay
 import java.time.format.DateTimeFormatter
@@ -55,9 +58,14 @@ private val LABEL_LEFT = SPINE_X - LABEL_WIDTH / 2
 /**
  * A day's start: the hairline seam with its riffle teeth and the date set in the margin;
  * *still* under it when the day has no moment. The hairline sits [SEAM_LABEL_OVERHANG] below
- * the top, leaving the label its room above; the label runs on below the seam, over the day's
- * top padding, so the seam's slot never measures it. *Still* sits [STILL_PAD_TOP] under the
- * hairline, as on web; the caller gives a still day its minimum length.
+ * the top, leaving the label its room above.
+ *
+ * On a day with moments the seam is a fixed [SEAM_LABEL_OVERHANG] + [SEAM_HEIGHT] slot and the
+ * label runs on below it, over the day's top padding, unmeasured. A still day has no padding
+ * to run into: it measures its label and is never shorter than it, nor than
+ * [STILL_MIN_HEIGHT], nor than the caller's minimum — 52 dp at the default font where the
+ * web's 48 lets the label's last 4 px go under the next seam, and as tall as the label needs
+ * at the accessibility font sizes. *Still* sits [STILL_PAD_TOP] under the hairline, as on web.
  */
 @Composable
 internal fun DaySeam(
@@ -72,60 +80,99 @@ internal fun DaySeam(
         remember(day.date, locale) {
             day.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale))
         }
-    val labelShape = MaterialTheme.shapes.medium.copy(topStart = ZeroCornerSize, topEnd = ZeroCornerSize)
 
-    Column(modifier) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(SEAM_LABEL_OVERHANG + SEAM_HEIGHT)
-                    .semantics(mergeDescendants = true) {
-                        heading()
-                        contentDescription = fullDate
-                    }.drawBehind {
-                        val top = SEAM_LABEL_OVERHANG.toPx()
-                        val hairline = HAIRLINE.toPx()
-                        drawRect(colors.seam, topLeft = Offset(0f, top), size = Size(size.width, hairline))
-                        val teethTop = top + hairline
-                        teeth(colors.teeth, TEETH_OFFSET.toPx(), TEETH_PERIOD.toPx(), teethTop, TEETH_HEIGHT.toPx())
-                        teeth(colors.teeth, RIFFLE_OFFSET.toPx(), RIFFLE_PERIOD.toPx(), teethTop, RIFFLE_HEIGHT.toPx())
-                    },
-        ) {
-            Column(
-                modifier =
-                    Modifier
-                        .offset(x = LABEL_LEFT)
-                        .width(LABEL_WIDTH)
-                        .wrapContentHeight(align = Alignment.Top, unbounded = true)
-                        .background(colors.ground, labelShape)
-                        .padding(bottom = 5.dp)
-                        .clearAndSetSemantics {},
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+    if (day.still) {
+        Layout(
+            content = {
+                Seam(fullDate)
                 Text(
-                    text = day.date.dayOfMonth.toString(),
-                    style = type.dayNumeral,
-                    color = colors.ink,
-                    modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 1.dp),
+                    text = stringResource(R.string.path_spine_still),
+                    style = type.still,
+                    color = colors.ink3,
+                    modifier = Modifier.padding(start = COL_X, top = STILL_PAD_TOP - SEAM_HEIGHT),
                 )
-                // The start padding balances the small caps' tracking, as the web's `pl-[.2em]` does.
-                Text(
-                    text = weekday,
-                    style = type.dayWeekday,
-                    color = colors.ink2,
-                    modifier = Modifier.padding(start = 2.dp, top = 3.dp),
-                )
+                DayLabel(day, weekday)
+            },
+            modifier = modifier,
+        ) { measurables, constraints ->
+            val width = constraints.maxWidth
+            val loose = constraints.copy(minWidth = 0, minHeight = 0)
+            val seam = measurables[0].measure(Constraints.fixedWidth(width))
+            val still = measurables[1].measure(loose)
+            val label = measurables[2].measure(loose.copy(maxHeight = Constraints.Infinity))
+            val height = maxOf(constraints.minHeight, STILL_MIN_HEIGHT.roundToPx(), label.height, seam.height + still.height)
+            layout(width, height) {
+                seam.place(0, 0)
+                still.place(0, seam.height)
+                // Last, so it draws over the hairline and the line.
+                label.place(LABEL_LEFT.roundToPx(), 0)
             }
         }
-        if (day.still) {
-            Text(
-                text = stringResource(R.string.path_spine_still),
-                style = type.still,
-                color = colors.ink3,
-                modifier = Modifier.padding(start = COL_X, top = STILL_PAD_TOP - SEAM_HEIGHT),
-            )
+    } else {
+        Box(modifier.fillMaxWidth().height(SEAM_LABEL_OVERHANG + SEAM_HEIGHT)) {
+            Seam(fullDate, Modifier.matchParentSize())
+            DayLabel(day, weekday, Modifier.offset(x = LABEL_LEFT).wrapContentHeight(align = Alignment.Top, unbounded = true))
         }
+    }
+}
+
+/** The seam proper, [SEAM_LABEL_OVERHANG] + [SEAM_HEIGHT] tall: the hairline and its teeth, read as the day's heading. */
+@Composable
+private fun Seam(
+    fullDate: String,
+    modifier: Modifier = Modifier,
+) {
+    val colors = PebblesTheme.spine.colors
+    Box(
+        modifier
+            .fillMaxWidth()
+            .height(SEAM_LABEL_OVERHANG + SEAM_HEIGHT)
+            .semantics(mergeDescendants = true) {
+                heading()
+                contentDescription = fullDate
+            }.drawBehind {
+                val top = SEAM_LABEL_OVERHANG.toPx()
+                val hairline = HAIRLINE.toPx()
+                drawRect(colors.seam, topLeft = Offset(0f, top), size = Size(size.width, hairline))
+                val teethTop = top + hairline
+                teeth(colors.teeth, TEETH_OFFSET.toPx(), TEETH_PERIOD.toPx(), teethTop, TEETH_HEIGHT.toPx())
+                teeth(colors.teeth, RIFFLE_OFFSET.toPx(), RIFFLE_PERIOD.toPx(), teethTop, RIFFLE_HEIGHT.toPx())
+            },
+    )
+}
+
+/** The date in the margin: the numeral over the weekday, on a tab of ground [LABEL_WIDTH] wide. */
+@Composable
+private fun DayLabel(
+    day: SpineDay,
+    weekday: String,
+    modifier: Modifier = Modifier,
+) {
+    val colors = PebblesTheme.spine.colors
+    val type = PebblesTheme.spine.type
+    val labelShape = MaterialTheme.shapes.medium.copy(topStart = ZeroCornerSize, topEnd = ZeroCornerSize)
+    Column(
+        modifier =
+            modifier
+                .width(LABEL_WIDTH)
+                .background(colors.ground, labelShape)
+                .padding(bottom = 5.dp)
+                .clearAndSetSemantics {},
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = day.date.dayOfMonth.toString(),
+            style = type.dayNumeral,
+            color = colors.ink,
+            modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 1.dp),
+        )
+        // The start padding balances the small caps' tracking, as the web's `pl-[.2em]` does.
+        Text(
+            text = weekday,
+            style = type.dayWeekday,
+            color = colors.ink2,
+            modifier = Modifier.padding(start = 2.dp, top = 3.dp),
+        )
     }
 }
 

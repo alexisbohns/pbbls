@@ -980,3 +980,7 @@ Branch `feat/1122-path-becomes-spine` on Part 5. PR `feat(android): the path bec
 - **The web sprite's body path carries `vector-effect: non-scaling-stroke`**, so rings, rim, edge shade, hairlines and the glyph are CSS px (dp on Android); only veins stay in seed units.
 - **Still days** on web are `min-h-[48px] pt-3.5`, not the 58/34 padding of a day with moments; `SpineWeek` (Task 5.3) must lay a still day out that way.
 - Dead data after the dashed-mark change: `StripItem.Named.glyph` and `peopleStripItems`'s `hasGlyph` (cleanup owed on the Part 4 branch).
+
+## Lessons learned (execution, Part 5, 2026-10-18)
+
+- **The rake re-phases after a far jump.** Each day item's ground phase is the sum of the recorded heights of the items above it; a `scrollToItem` that skips items leaves theirs unrecorded, so the tile's rows restart there. Accepted: the seam hairline hides most cuts. If it ever shows, restart the phase at each seam instead of summing across the week.
