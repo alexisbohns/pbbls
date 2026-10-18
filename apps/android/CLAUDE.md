@@ -139,7 +139,7 @@ next preference added is where the migration happens. Route it then.
   CompositionLocal.** Exactly three locals exist and they are permanent:
   `LocalEmotionPaletteService`, `LocalReferenceDataService` and
   `LocalSnapURLCache`. They carry ambient reference data that *leaf* components
-  read where they render (`PebbleRow`, `ValenceGlyph`, `WeekHeader`, the
+  read where they render (`PebbleRow`, `ValenceGlyph`, `SpineWeek`, the
   pickers), which is what a `CompositionLocal` is for. `MainActivity` provides
   those three and nothing else. Do not add a `Local…Service` for anything a
   screen *calls*. (Decision log 2026-09-20 and 2026-09-21.)
@@ -450,16 +450,21 @@ Do not bring it back for a single asset.
   The press/ripple/glint timings are the web's WAAPI tables (`StoneMotion`),
   one tween mapped through `piecewise()`, never per-segment easing.
 - **The flat stone is still composed on device** for the surfaces that are not
-  the Spine (`core/ui/render/StoneComposer.kt`, `PebbleStaticRender`,
-  `PebbleOutlineBackdrop`): the same outline silhouette plus the derived glyph
-  strokes traced at one weight; the backdrop's `#FF00FF` sentinel fill is
-  string-replaced with the palette hex, fill alpha rides as view alpha. There is
+  the Spine (`core/ui/render/StoneComposer.kt`, `PebbleStaticRender`): the shape
+  seed for the valence (`res/raw/shape_{size}_{polarity}.svg`, byte-identical
+  copies of `docs/seeds/shape-seeds/`, guarded by `StoneComposerTest`) plus the
+  derived glyph strokes traced at one weight. The outline backdrop
+  (`PebbleOutlineBackdrop`, the iOS `{size}-{polarity}.svg` renamed
+  `outline_{size}_{polarity}.svg` on copy) string-replaces its `#FF00FF`
+  sentinel fill with the palette hex; fill alpha rides as view alpha. There is
   no `render_svg`.
 - **Tokens live in `core/designsystem`**: `SpineTypography` (every rank on
   `ysabeauAt(weight)`, because `YsabeauFamily` snaps weights to its four cuts;
   small caps and lining figures are Ysabeau's own `smcp`/`lnum`/`tnum`) and
   `SpineColors` (`SpineColors.from(scheme, night)`, read through
-  `PebblesTheme.spine`). `features/path` names no size, colour or corner.
+  `PebblesTheme.spine`). `features/path` names no colour, corner radius or
+  font size (`ThemeLiteralsTest`); its geometry, in dp from the web rule set,
+  lives in `SpineLayout`.
 - **Two Compose facts the layout relies on.** Compose hit-tests a child past an
   unclipped parent's edge, so the stone overhangs its row exactly as on web: the
   row and the day column must never take a `clip`. HWUI ignored a `DstIn` draw
