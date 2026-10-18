@@ -1087,3 +1087,17 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The retired composer's device snapshot (`composerSnapshot` in `pebbles_prefs`) is removed by the sign-out sweep that clears the Complete autosaves.
 - **Supersedes / Superseded-by:** Supersedes, for Android, the "two composers coexist" rule (M58, #725) in `apps/android/CLAUDE.md`.
 - **Refs:** #1047, #1048, `docs/superpowers/plans/2026-10-13-android-moments-composer.md` (Parity decisions), `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md` §6.
+
+## 2026-10-14 — The web compat layer is gone; every surface is on moments (#1050)
+
+- **Status:** taken
+- **Scope:** db, api, webapp
+- **Context:** The moments split (2026-10-12, #1046) kept `v_pebbles_full`, `path_pebbles`, `create_pebble`, `update_pebble` and the `compose-pebble` / `compose-pebble-update` edge functions alive as deprecated compat (spec §5) until web shipped Capture and Complete. Web now reads `v_moments_full` / `path_moments` and writes through `save_moment` / `complete_pebble` (#1050 Parts 1–6).
+- **Decision:** Migration `20261014100000_drop_web_compat.sql` drops exactly the four objects `20261012090400` created, without `cascade`; the two edge functions and `_shared/karma-delta.ts` are deleted and undeployed with it.
+- **Why:** Nothing calls them any more, and a reader of spec §5 would otherwise look for objects that no longer exist, or build on a wrapper that hides the two-write model.
+- **Consequences:**
+  - Every client reads moments and writes through `save_moment` / `complete_pebble`; there is no single-call create or update of a whole pebble.
+  - `verify-moments` lost its compat section (28 checks); `verify-pebble-visibility` fences web's connection reader (`pebbles` + `moments!inner`) instead of `v_pebbles_full`.
+  - Rollback is a new migration re-applying `20261012090400`'s bodies plus a redeploy of the two functions from git history.
+- **Supersedes / Superseded-by:** Supersedes the 2026-10-12 consequence that these objects "are deprecated compat for web only and die with the web composer", and the deprecation status in the split spec §5.
+- **Refs:** #1050, #1046, `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md` §5, `packages/supabase/supabase/migrations/20261014100000_drop_web_compat.sql`.
