@@ -1,0 +1,94 @@
+package app.pbbls.android.core.ui.render.stone
+
+import androidx.compose.animation.core.CubicBezierEasing
+import app.pbbls.android.core.model.ValenceSizeGroup
+
+/**
+ * The press, from the final mock — the web's `stone-motion.ts` and the spec's
+ * timing table (§Press, ripple, glint) transcribed verbatim (#1122). Every
+ * animation is finite; nothing runs unless a stone is pressed. Durations and
+ * delays are milliseconds; the `*_AT` constants are keyframe offsets as
+ * fractions of the duration.
+ */
+internal object StoneMotion {
+    /** How far the waves travel, in stone widths, so every ripple covers about the same ground. */
+    val RIPPLE_REACH: Map<ValenceSizeGroup, Float> =
+        mapOf(
+            ValenceSizeGroup.SMALL to 7.2f,
+            ValenceSizeGroup.MEDIUM to 5.6f,
+            ValenceSizeGroup.LARGE to 4.4f,
+        )
+
+    /**
+     * Three waves of the flat outline, `k = 0, 1, 2`: scale [WAVE_START_SCALE] at
+     * alpha 0 → [WAVE_RISE_SCALE] at alpha [WAVE_RISE_ALPHA] at [WAVE_RISE_AT] →
+     * `RIPPLE_REACH[size] − WAVE_REACH_STEP × k` at alpha 0.
+     */
+    object Wave {
+        const val DURATION = 1650
+        const val DURATION_STEP = 170
+        const val DELAY = 120
+        const val DELAY_STEP = 230
+        val EASING = CubicBezierEasing(.12f, .55f, .3f, 1f)
+
+        const val WAVE_START_SCALE = 1.15f
+        const val WAVE_RISE_SCALE = 1.45f
+        const val WAVE_RISE_AT = .07f
+        const val WAVE_RISE_ALPHA = .85f
+        const val WAVE_REACH_STEP = .5f
+
+        fun duration(k: Int): Int = DURATION + DURATION_STEP * k
+
+        fun delay(k: Int): Int = DELAY + DELAY_STEP * k
+
+        fun reach(
+            size: ValenceSizeGroup,
+            k: Int,
+        ): Float = RIPPLE_REACH.getValue(size) - WAVE_REACH_STEP * k
+    }
+
+    /** The stone dips under the finger and springs back: 1 → .9 at 26 % → 1.03 at 60 % → 1. */
+    object Dip {
+        const val DURATION = 520
+        val EASING = CubicBezierEasing(.3f, .7f, .2f, 1f)
+        const val DIP_AT = .26f
+        const val DIP_SCALE = .9f
+        const val OVERSHOOT_AT = .6f
+        const val OVERSHOOT_SCALE = 1.03f
+    }
+
+    /** The raked rings swell once: 1 → 1.08 at 35 % → 1. */
+    object Rings {
+        const val DURATION = 1150
+        const val DELAY = 110
+        val EASING = CubicBezierEasing(.2f, .7f, .2f, 1f)
+        const val SWELL_AT = .35f
+        const val SWELL_SCALE = 1.08f
+    }
+
+    /** A sheen band crosses the stone from the light, over `GlintGeometry.travel`. */
+    object Sweep {
+        const val DURATION = 900
+        const val DELAY = 140
+        val EASING = CubicBezierEasing(.37f, 0f, .63f, 1f)
+    }
+
+    /** A four-point spark lands where the light is: scale 0 / 0° → 1 / 40° / alpha 1 at 35 % → 0 / 90°. */
+    object Spark {
+        const val DURATION = 760
+        const val DELAY = 300
+        val EASING = CubicBezierEasing(.3f, .6f, .3f, 1f)
+        const val PEAK_AT = .35f
+        const val PEAK_ROTATION = 40f
+        const val END_ROTATION = 90f
+    }
+
+    /** With reduced motion: the rings darken and a still sheen holds this long. */
+    const val STILL_TOUCH_MS = 900L
+
+    /** A pressed stone opens its pebble once the dip has landed (spec D8). */
+    const val OPEN_DELAY_MS = 360L
+
+    /** The contents row scrolls to its stone, then presses it after this without opening. */
+    const val GO_PRESS_DELAY_MS = 620L
+}
