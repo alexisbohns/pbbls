@@ -20,7 +20,6 @@ object SpineTypography {
     private const val LINING = "lnum, pnum"
     private const val TABULAR = "lnum, tnum"
 
-    @Suppress("LongParameterList")
     private fun ysabeau(
         size: TextUnit,
         weight: Int,
