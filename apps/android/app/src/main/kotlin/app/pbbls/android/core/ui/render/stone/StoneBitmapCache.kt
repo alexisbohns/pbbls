@@ -1,12 +1,12 @@
 package app.pbbls.android.core.ui.render.stone
 
 import android.content.res.Resources
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.LruCache
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.graphics.createBitmap
 
 /**
  * The painted stones, one bitmap per key: a still week does no drawing after
@@ -18,10 +18,16 @@ internal object StoneBitmapCache {
 
     private val lru = LruCache<String, ImageBitmap>(CAPACITY)
 
+    /**
+     * [density] is part of the key beside the pixel size: the painter reads it
+     * for the glyph's constant-px line, so the same `w × h` draws differently
+     * on a 2× and a 3× screen.
+     */
     fun key(
         spec: StoneSpec,
         w: Int,
         h: Int,
+        density: Float,
     ): String {
         val palette = spec.palette?.let { p -> listOf(p.primary, p.secondary, p.light, p.shaded, p.dark).map { it.toArgb() } }
         val glyph = spec.glyph?.let { "${it.id}:${it.strokes.hashCode()}" }
@@ -35,6 +41,7 @@ internal object StoneBitmapCache {
             spec.shadowAlpha,
             spec.night,
             "${w}x$h",
+            density,
         ).joinToString("|")
     }
 
@@ -42,11 +49,12 @@ internal object StoneBitmapCache {
         spec: StoneSpec,
         w: Int,
         h: Int,
+        density: Float,
         resources: Resources,
     ): ImageBitmap {
-        val key = key(spec, w, h)
+        val key = key(spec, w, h, density)
         lru.get(key)?.let { return it }
-        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(w, h)
         StonePainter.paint(spec, Canvas(bitmap), w, h, resources)
         return bitmap.asImageBitmap().also { lru.put(key, it) }
     }

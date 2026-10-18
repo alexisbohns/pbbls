@@ -136,17 +136,26 @@ class StonePainterTest {
 
     @Test
     fun `the cache hands back the same bitmap for the same spec and another for another seed`() {
-        val first = StoneBitmapCache.get(spec(), SIDE, SIDE, resources)
-        val again = StoneBitmapCache.get(spec(), SIDE, SIDE, resources)
-        val other = StoneBitmapCache.get(spec(seed = 0xBEEFL), SIDE, SIDE, resources)
+        val first = StoneBitmapCache.get(spec(), SIDE, SIDE, DENSITY, resources)
+        val again = StoneBitmapCache.get(spec(), SIDE, SIDE, DENSITY, resources)
+        val other = StoneBitmapCache.get(spec(seed = 0xBEEFL), SIDE, SIDE, DENSITY, resources)
 
         assertSame(first, again)
         assertNotSame(first, other)
-        assertNotEquals(StoneBitmapCache.key(spec(), SIDE, SIDE), StoneBitmapCache.key(spec(seed = 0xBEEFL), SIDE, SIDE))
+        assertNotEquals(
+            StoneBitmapCache.key(spec(), SIDE, SIDE, DENSITY),
+            StoneBitmapCache.key(spec(seed = 0xBEEFL), SIDE, SIDE, DENSITY),
+        )
+    }
+
+    @Test
+    fun `the same pixel size at another density is another key`() {
+        assertNotEquals(StoneBitmapCache.key(spec(), SIDE, SIDE, DENSITY), StoneBitmapCache.key(spec(), SIDE, SIDE, 2f))
     }
 
     private companion object {
         /** 44 dp medium stone at 3× density. */
         const val SIDE = 132
+        const val DENSITY = 3f
     }
 }

@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.PathParser
+import androidx.core.graphics.withClip
+import androidx.core.graphics.withTranslation
 import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
@@ -114,23 +116,22 @@ internal object StonePainter {
         drawShadows(scene, canvas)
         drawBody(scene, canvas)
 
-        canvas.save()
-        canvas.clipPath(scene.body)
-        val recipe = scene.recipe
-        if (recipe is StoneRecipe.Gem) drawFacets(scene, canvas, recipe.facets)
-        if (recipe is StoneRecipe.Lava) drawDots(scene, canvas, recipe.dots)
-        if (!scene.blank) drawCarving(scene, canvas, resources)
-        if (recipe !is StoneRecipe.Lava) drawDots(scene, canvas, recipe.dots)
-        if (recipe is StoneRecipe.Gem) drawSparkles(scene, canvas, recipe.sparkles)
-        when (recipe) {
-            is StoneRecipe.Pebble -> drawSoftLight(scene, canvas, recipe.light)
-            is StoneRecipe.Lava -> drawSoftLight(scene, canvas, recipe.light)
-            is StoneRecipe.Gem -> Unit
+        canvas.withClip(scene.body) {
+            val recipe = scene.recipe
+            if (recipe is StoneRecipe.Gem) drawFacets(scene, this, recipe.facets)
+            if (recipe is StoneRecipe.Lava) drawDots(scene, this, recipe.dots)
+            if (!scene.blank) drawCarving(scene, this, resources)
+            if (recipe !is StoneRecipe.Lava) drawDots(scene, this, recipe.dots)
+            if (recipe is StoneRecipe.Gem) drawSparkles(scene, this, recipe.sparkles)
+            when (recipe) {
+                is StoneRecipe.Pebble -> drawSoftLight(scene, this, recipe.light)
+                is StoneRecipe.Lava -> drawSoftLight(scene, this, recipe.light)
+                is StoneRecipe.Gem -> Unit
+            }
+            drawGrain(scene, this, widthPx, heightPx)
+            drawEdgeShade(scene, this)
+            if (!scene.blank) scene.glyph?.let { drawGlyph(scene, this, it) }
         }
-        drawGrain(scene, canvas, widthPx, heightPx)
-        drawEdgeShade(scene, canvas)
-        if (!scene.blank) scene.glyph?.let { drawGlyph(scene, canvas, it) }
-        canvas.restore()
 
         canvas.restoreToCount(layer)
     }
@@ -158,10 +159,9 @@ internal object StonePainter {
             fill(scene.shadow, opacity).apply {
                 maskFilter = blurFilter(blur * scene.canvasScalePx)
             }
-        canvas.save()
-        canvas.translate(offsetPx.first * unitPx, offsetPx.second * unitPx)
-        canvas.drawPath(scene.body, paint)
-        canvas.restore()
+        canvas.withTranslation(offsetPx.first * unitPx, offsetPx.second * unitPx) {
+            drawPath(scene.body, paint)
+        }
     }
 
     private fun drawBody(
@@ -366,9 +366,10 @@ internal object StonePainter {
     /**
      * A glyph stroke hand-cut as the web's `wobbleGlyphLine`: flattened in its
      * own box and every point displaced by the canonical noise. The straight
-     * path stands in when the displacement has nothing to work on.
+     * path stands in when the displacement has nothing to work on. Shared with
+     * `StoneSeal`, which prints the same cut line flat.
      */
-    private fun glyphLine(
+    internal fun glyphLine(
         d: String,
         side: Float,
     ): Path? {
