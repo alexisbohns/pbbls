@@ -15,7 +15,7 @@ class SpineStoneDescriptionTest {
 
     private fun describe(
         name: String? = "Flag march with Nadia",
-        names: List<String> = listOf("Nadia"),
+        names: String = "Nadia",
         blank: Boolean = false,
     ) = stoneDescription(
         name = name,
@@ -37,10 +37,10 @@ class SpineStoneDescriptionTest {
     }
 
     @Test
-    fun `several people are listed in order`() {
+    fun `the listed people are set as given`() {
         assertEquals(
-            "Flag march with Nadia. 5 October 2026, 10:15. Large gem, Pride. With Mara, Elio, Bruno. Opens the pebble.",
-            describe(names = listOf("Mara", "Elio", "Bruno")),
+            "Flag march with Nadia. 5 October 2026, 10:15. Large gem, Pride. With Mara, Elio and Bruno. Opens the pebble.",
+            describe(names = "Mara, Elio and Bruno"),
         )
     }
 
@@ -48,7 +48,15 @@ class SpineStoneDescriptionTest {
     fun `a solitary pebble names nobody and leaves no double space`() {
         assertEquals(
             "Flag march with Nadia. 5 October 2026, 10:15. Large gem, Pride. Opens the pebble.",
-            describe(names = emptyList()),
+            describe(names = ""),
+        )
+    }
+
+    @Test
+    fun `a double space inside the name is the name's own`() {
+        assertEquals(
+            "Two  spaces. 5 October 2026, 10:15. Large gem, Pride. Opens the pebble.",
+            describe(name = "Two  spaces", names = ""),
         )
     }
 
@@ -68,7 +76,7 @@ class SpineStoneDescriptionTest {
     fun `a moment that is not a pebble yet says so instead of a kind and an emotion`() {
         assertEquals(
             "Bread from the corner bakery. 5 October 2026, 10:15. Not a pebble yet. Opens the moment.",
-            describe(name = "Bread from the corner bakery", names = emptyList(), blank = true),
+            describe(name = "Bread from the corner bakery", names = "", blank = true),
         )
     }
 
@@ -76,7 +84,7 @@ class SpineStoneDescriptionTest {
     fun `a blank stone keeps its people`() {
         assertEquals(
             "untitled. 5 October 2026, 10:15. Not a pebble yet. With Mara. Opens the moment.",
-            describe(name = null, names = listOf("Mara"), blank = true),
+            describe(name = null, names = "Mara", blank = true),
         )
     }
 }

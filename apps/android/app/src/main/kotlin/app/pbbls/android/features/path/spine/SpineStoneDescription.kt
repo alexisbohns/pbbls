@@ -27,7 +27,8 @@ internal data class StoneDescriptionStrings(
  * Pride. With Nadia. Opens the pebble." A moment that is not a pebble yet says so
  * instead of a kind and an emotion; a solitary pebble names nobody.
  *
- * @param names who was there, already in the people line's order; empty when solitary.
+ * @param names who was there as the locale lists them ("Mara, Elio and Bruno"), in
+ *   the server's order; empty when solitary.
  */
 internal fun stoneDescription(
     name: String?,
@@ -35,21 +36,25 @@ internal fun stoneDescription(
     time: String,
     kind: String,
     emotion: String,
-    names: List<String>,
+    names: String,
     blank: Boolean,
     strings: StoneDescriptionStrings,
 ): String {
     val title = name?.takeIf { it.isNotBlank() } ?: strings.untitled
-    val with = if (names.isEmpty()) "" else strings.withNames.format(names.joinToString(", "))
-    val text =
+    val with = if (names.isEmpty()) "" else strings.withNames.format(names)
+    // The sentence is set around a stand-in for the name, so the double space an
+    // empty with-names slot leaves is closed without touching the name itself.
+    val sentence =
         if (blank) {
-            strings.blank.format(title, date, time, with)
+            strings.blank.format(NAME_SLOT, date, time, with)
         } else {
-            strings.stone.format(title, date, time, kind, emotion, with)
+            strings.stone.format(NAME_SLOT, date, time, kind, emotion, with)
         }
-    // An empty with-names leaves two spaces around its slot.
-    return text.replace("  ", " ")
+    return sentence.replace("  ", " ").replace(NAME_SLOT, title)
 }
+
+/** A character no template or value carries, standing in for the name while the sentence is tidied. */
+private const val NAME_SLOT = "\u0000"
 
 /** The nine stone kinds, "Small lava stone" to "Large gem", by the stone's own size and polarity. */
 @StringRes

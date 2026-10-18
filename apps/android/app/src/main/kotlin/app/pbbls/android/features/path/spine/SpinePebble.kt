@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path.spine
 
+import android.icu.text.ListFormatter
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -19,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -33,7 +33,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.onLongClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -66,6 +70,7 @@ import app.pbbls.android.features.path.spine.SpineLayout.PAD_R
 import app.pbbls.android.features.path.spine.SpineLayout.SPINE_X
 import app.pbbls.android.features.path.spine.logic.EntryTypes
 import app.pbbls.android.features.path.spine.logic.PeopleLines
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -153,9 +158,10 @@ fun SpinePebble(
     val souls = pebble?.souls ?: emptyList()
     val line = remember(souls, personsOrder, locale) { PeopleLines.of(souls.map { it.id }, personsOrder, locale) }
     val namesById = remember(souls) { souls.associate { it.id to it.name } }
-    // Everyone, as the web's `withNames` does, in the server's order.
-    val names = remember(souls) { souls.map { it.name } }
+    // Everyone, as the web's `withNames` does, in the server's order, as the locale lists.
+    val names = remember(souls, locale) { if (souls.isEmpty()) "" else ListFormatter.getInstance(locale).format(souls.map { it.name }) }
 
+    val deleteLabel = stringResource(R.string.pebble_delete)
     val description =
         stoneDescription(
             name = moment.name,
@@ -174,30 +180,37 @@ fun SpinePebble(
                 ),
         )
 
-    // The photo: signed once per prefix through the ambient cache, unless a preview hands the URLs in.
+    // The photo: signed once per prefix through the ambient cache, unless a preview
+    // hands the URLs in. Keyed on the prefix, so a recycled row never shows the last
+    // moment's cover while this one signs.
     val urls = LocalSnapURLCache.current
-    val photo by produceState(photoOverride, prefix, urls) {
-        if (value == null && urls != null && prefix != null) {
-            value =
+    var photo by remember(prefix) { mutableStateOf(photoOverride) }
+    LaunchedEffect(prefix, urls) {
+        if (photo == null && urls != null && prefix != null) {
+            photo =
                 runCatchingCancellable { urls.signedUrls(prefix).let { it.original to it.thumb } }
                     .onFailure { Log.e(TAG, "snap sign failed for $prefix", it) }
                     .getOrNull()
         }
     }
-    val ratio by produceState(ratioOverride ?: prefix?.let { aspect?.cached(it) }, prefix, aspect) {
-        if (value == null && aspect != null && prefix != null) value = aspect.ratio(prefix)
+    var ratio by remember(prefix) { mutableStateOf(ratioOverride ?: prefix?.let { aspect?.cached(it) }) }
+    LaunchedEffect(prefix, aspect) {
+        if (ratio == null && aspect != null && prefix != null) ratio = aspect.ratio(prefix)
     }
 
     // The press choreography (spec §Press, ripple, glint): the stone opens once the dip
     // has landed; the card or entry opens at once and plays the press all the same.
+    // One open at a time: a second tap on the stone replaces the pending open.
+    var openJob by remember { mutableStateOf<Job?>(null) }
     val pressStone = {
         haptics(TapHaptic.SELECTION)
-        scope.launch {
-            launch { press.press(reduceMotion) }
-            delay(if (reduceMotion) 0L else StoneMotion.OPEN_DELAY_MS)
-            onOpen(moment)
-        }
-        Unit
+        scope.launch { press.press(reduceMotion) }
+        openJob?.cancel()
+        openJob =
+            scope.launch {
+                delay(if (reduceMotion) 0L else StoneMotion.OPEN_DELAY_MS)
+                onOpen(moment)
+            }
     }
     val openNow = {
         haptics(TapHaptic.SELECTION)
@@ -207,36 +220,62 @@ fun SpinePebble(
     }
     LaunchedEffect(pressRequests, moment.id) {
         pressRequests.collect { id ->
-            if (id == moment.id) launch { press.press(reduceMotion) }
+            if (id == moment.id) {
+                haptics(TapHaptic.SELECTION)
+                launch { press.press(reduceMotion) }
+            }
         }
     }
 
+    /*
+     * Geometry, in the row's own coordinates so nothing lies outside it (a child
+     * placed past its parent's edge is not hit-tested). The stone's centre is the
+     * anchor; the stone is 27.2 / 44 / 64.5 dp tall by size, so on a card (anchor
+     * 31) only the large stone overhangs the top, by 1.2 dp, while on an entry
+     * (anchor 0.6 × 19 / 24 / 31 sp = 11.4 / 14.4 / 18.6 dp) every stone does, by
+     * 2.2 / 7.6 / 13.6 dp. That overhang becomes a top inset of the row that shifts
+     * the content and the stone together, so the stone's box starts at or below the
+     * row's top. The hit box (the stone plus 10 dp, at least 48 dp) is then clamped
+     * to the row's top and keeps its height by extending downward; the row is at
+     * least as tall as the hit box, so it is wholly inside.
+     */
     var menu by remember { mutableStateOf(false) }
-    val stoneX = SPINE_X - COL_X - stoneWidth / 2
-    val stoneY = anchor - stoneHeight / 2
+    val topInset = max(0.dp, stoneHeight / 2 - anchor)
+    val stoneTop = topInset + anchor - stoneHeight / 2
     val hitWidth = max(stoneWidth + HIT_INSET * 2, MIN_TARGET)
     val hitHeight = max(stoneHeight + HIT_INSET * 2, MIN_TARGET)
+    val hitTop = max(0.dp, stoneTop - (hitHeight - stoneHeight) / 2)
+    val minHeight = max(topInset + anchor + stoneHeight / 2 + STONE_CLEARANCE, hitTop + hitHeight)
 
     Box(
         modifier
             .fillMaxWidth()
-            .padding(start = COL_X, end = PAD_R)
-            .heightIn(min = anchor + stoneHeight / 2 + STONE_CLEARANCE)
+            .heightIn(min = minHeight)
             .testTag(JourneyTags.PATH_PEBBLE_ROW)
             .drawBehind {
                 // A card hangs off its stone by a leader, from the line to the column's edge.
                 if (hasCard) {
-                    val y = anchor.toPx()
-                    drawLine(colors.line, Offset(-(COL_X - SPINE_X).toPx(), y), Offset(0f, y), LEADER.toPx())
+                    val y = (topInset + anchor).toPx()
+                    drawLine(colors.line, Offset(SPINE_X.toPx(), y), Offset(COL_X.toPx(), y), LEADER.toPx())
                 }
             },
     ) {
+        // The card or the entry: one button read once, with the delete as its long-press action.
         Box(
             Modifier
-                .semantics(mergeDescendants = true) { contentDescription = description }
-                .combinedClickable(
-                    interactionSource = null,
-                    indication = null,
+                .padding(start = COL_X, top = topInset, end = PAD_R)
+                .clearAndSetSemantics {
+                    contentDescription = description
+                    role = Role.Button
+                    onClick {
+                        openNow()
+                        true
+                    }
+                    onLongClick(label = deleteLabel) {
+                        menu = true
+                        true
+                    }
+                }.combinedClickable(
                     role = Role.Button,
                     onLongClick = { menu = true },
                     onClick = openNow,
@@ -297,7 +336,7 @@ fun SpinePebble(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = stringResource(R.string.pebble_delete),
+                            text = deleteLabel,
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.error,
                         )
@@ -319,13 +358,14 @@ fun SpinePebble(
 
         // The stone, centred on the line at the anchor: the ripple under it, overflowing
         // freely, then the lit stone in its exact box. Neither carries a click.
+        val stoneLeft = SPINE_X - stoneWidth / 2
         press.rippleToken?.let { token ->
             StoneRipple(
                 valence = valence,
                 blank = blank,
                 token = token,
                 onDone = press::rippleDone,
-                modifier = Modifier.offset(stoneX, stoneY),
+                modifier = Modifier.offset(stoneLeft, stoneTop),
             )
         }
         LitStone(
@@ -334,13 +374,14 @@ fun SpinePebble(
             glyph = pebble?.glyph,
             seed = seed,
             press = press,
-            modifier = Modifier.offset(stoneX, stoneY),
+            modifier = Modifier.offset(stoneLeft, stoneTop),
         )
         // The hit box over it, invisible and wider than the stone: the box the stone
-        // draws in stays exact, so growing the target never moves it off the line.
+        // draws in stays exact, so growing the target never moves it off the line. The
+        // stone is its own touch feedback, so no indication here.
         Box(
             Modifier
-                .offset(stoneX - (hitWidth - stoneWidth) / 2, stoneY - (hitHeight - stoneHeight) / 2)
+                .offset(SPINE_X - hitWidth / 2, hitTop)
                 .size(hitWidth, hitHeight)
                 .semantics { contentDescription = description }
                 .clickable(interactionSource = null, indication = null, role = Role.Button, onClick = pressStone),
