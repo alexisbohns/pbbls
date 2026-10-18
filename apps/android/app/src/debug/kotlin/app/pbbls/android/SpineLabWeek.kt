@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.features.path.spine.SpinePebble
 import app.pbbls.android.features.path.spine.SpineWeek
-import kotlinx.coroutines.flow.MutableSharedFlow
+import app.pbbls.android.features.path.spine.StonePressRequests
 
 /*
  * The fixture week on the Spine (#1122), for the Spine lab's Week tab and the
@@ -40,7 +40,7 @@ internal fun FixturePebble(
     moment: PathMoment,
     modifier: Modifier = Modifier,
 ) {
-    val requests = remember { MutableSharedFlow<String>() }
+    val requests = remember { StonePressRequests() }
     SpinePebble(
         moment = moment,
         palette = SpineFixtureWeek.palettes(moment),

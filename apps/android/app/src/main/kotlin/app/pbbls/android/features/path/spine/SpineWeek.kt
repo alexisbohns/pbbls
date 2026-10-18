@@ -9,23 +9,34 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.LayoutAwareModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.invalidateDraw
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -54,19 +65,9 @@ import app.pbbls.android.features.path.spine.logic.SpineWeekBuilder
 import app.pbbls.android.features.path.spine.logic.WeekWordsBuilder
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
-
-private const val KEY_MASTHEAD = "masthead"
-private const val KEY_OPENING = "opening"
-private const val KEY_PERSONS = "persons"
-private const val KEY_CONTENTS = "contents"
-private const val KEY_EMPTY = "empty"
-private const val KEY_MOUTH = "mouth"
-
-private fun seamKey(day: SpineDay) = "day-${day.index}"
 
 /** The line down the margin, the length of every day. */
 private val LINE_WIDTH = 1.dp
@@ -78,11 +79,12 @@ private val LINE_WIDTH = 1.dp
  * pebble a lit stone on the line, and the mouth where the week ends. Only the current week
  * can be empty; its recto is then the fresh-week invitation.
  *
- * One `LazyColumn`, every day item on the shared ground (the rake's phase runs over the
- * items' heights, so it crosses them without a seam) and on the line. The persons and the
- * contents follow the reading: the day crossing a line 35 % down the viewport turns ink in
- * both. A contents row scrolls its stone to the middle of the viewport and presses it
- * without opening (spec D8).
+ * One `LazyColumn` over the rows `WeekItems` lays out, every day row on the shared ground
+ * (the rake's phase runs over the rows' heights, so it crosses them without a seam) and on
+ * the line. The persons and the contents follow the reading: the day crossing a line 35 %
+ * down the viewport turns ink in both, read inside the letters and the rows so the list
+ * itself never recomposes for it. A contents row scrolls its stone to the middle of the
+ * viewport and presses it without opening (spec D8).
  *
  * The day geometry is the web's, hairline to content: 58 dp above a day's first pebble, 38
  * between pebbles, 34 below its last; a still day is 48 dp long with *still* 14 dp under
@@ -90,13 +92,19 @@ private val LINE_WIDTH = 1.dp
  * label hung above it, and that overhang comes off the previous day's bottom padding —
  * never off the day's own top — so the first day's seam follows the verso by [FEED_TOP]
  * minus the overhang, and the last day keeps its full 34 before the mouth. The day's top
- * padding rides on the seam item, so the label (which the seam never measures) overflows
- * into that padding and nothing drawn later covers it.
+ * padding rides on the seam row, so on a day with moments the 52 dp label (which the seam
+ * never measures) overflows into that padding and nothing drawn later covers it; a still
+ * day is shorter than its label by 4 dp, and the next seam's ground paints over that much
+ * of the label's foot, as the web's 48 has it.
+ *
+ * The Spine is left-to-right whatever the locale: the line, the leaders and the cairn sit
+ * at an absolute [SPINE_X], no RTL locale ships, and mirroring the page is a later task.
  *
  * @param today the local date, for which days exist and whether this is the current week.
  * @param paletteFor the pebble's emotion palette; null for a blank stone.
  * @param aspect the session's photo-ratio cache; null in previews and the lab.
  * @param onPreviousWeek absent on the first week there is; [onNextWeek] on the last.
+ * @param listState hoisted so a preview can open the page at a row.
  * @param ratioOverride a primed photo ratio by snap prefix, for previews with no cache.
  */
 @Composable
@@ -112,6 +120,7 @@ fun SpineWeek(
     onNextWeek: (() -> Unit)?,
     onCreatePebble: () -> Unit,
     modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
     ratioOverride: ((String) -> Float?)? = null,
 ) {
     val colors = PebblesTheme.spine.colors
@@ -129,147 +138,120 @@ fun SpineWeek(
     val empty = entry.moments.isEmpty()
     val items = remember(week, persons, empty) { WeekItems(week, hasPersons = persons.isNotEmpty(), empty = empty) }
 
-    val listState = rememberLazyListState()
-    val readingDay by rememberReadingDay(listState) { key -> key?.let(items.dayOfKey::get) }
-    val dayRead = readingDay ?: week.days.firstOrNull()?.index
+    val readingDay = rememberReadingDay(listState) { key -> key?.let(items.dayOfKey::get) }
+    val firstDay = week.days.firstOrNull()?.index
+    val dayRead = remember(readingDay, firstDay) { { readingDay.value ?: firstDay } }
 
-    // The ground's phase: each day item records its height, and the item after it starts
+    // The ground's phase: each day row records its height, and the row after it starts
     // the rake where it left off. Draw-time reads, so a card settling to its photo's ratio
-    // redraws the items under it and recomposes nothing.
+    // redraws the rows under it and recomposes nothing.
     val tile = rememberRakeTile()
     val heights = remember(items) { mutableStateMapOf<Int, Int>() }
 
-    // The contents → press: scroll the stone to the middle, then press it (never open).
-    val pressRequests = remember { MutableSharedFlow<String>() }
-    var goJob by remember { mutableStateOf<Job?>(null) }
+    // The contents → press: scroll the stone to the middle, then ask it to press (never open).
+    val pressRequests = remember { StonePressRequests() }
+    val goJob = remember { JobHolder() }
+    DisposableEffect(items) { onDispose { goJob.job?.cancel() } }
     val go: (PathMoment) -> Unit = { moment ->
         val index = items.indexOf(moment.id)
         if (index >= 0) {
-            goJob?.cancel()
-            goJob =
+            val row = items.rows[index] as WeekRow.Pebble
+            goJob.job?.cancel()
+            goJob.job =
                 scope.launch {
-                    val offset = stoneScrollOffset(listState, density, moment, items.placeInDay.getValue(moment.id))
+                    val offset = stoneScrollOffset(listState, density, moment, row.place)
                     if (reduceMotion) {
                         listState.scrollToItem(index, offset)
+                        // The stone composes on the frame the scroll lands; ask it after.
+                        withFrameNanos {}
                     } else {
                         listState.animateScrollToItem(index, offset)
                         delay(StoneMotion.GO_PRESS_DELAY_MS)
                     }
-                    pressRequests.emit(moment.id)
+                    pressRequests.request(moment.id)
                 }
         }
     }
 
-    LazyColumn(
-        state = listState,
-        modifier = modifier,
-        contentPadding = PaddingValues(bottom = FEED_BOTTOM),
-    ) {
-        item(key = KEY_MASTHEAD) { WeekMasthead(words = words, onPreviousWeek = onPreviousWeek) }
-        item(key = KEY_OPENING) { WeekOpening(words = words, pebbleCount = week.pebbleCount, peopleCount = persons.size) }
-        if (persons.isNotEmpty()) {
-            item(key = KEY_PERSONS) {
-                PersonsOfWeek(persons = persons, weekStart = entry.weekStart, soulsById = soulsById, readingDay = dayRead)
-            }
-        }
-        if (week.readingOrder.isNotEmpty()) {
-            item(key = KEY_CONTENTS) { WeekContents(week = week, paletteFor = paletteFor, readingDay = dayRead, onGo = go) }
-        }
-        if (empty) {
-            item(key = KEY_EMPTY) { SpineEmptyWeek(onCreatePebble = onCreatePebble) }
-            return@LazyColumn
-        }
-
-        val lastDay = week.days.lastIndex
-        week.days.forEachIndexed { position, day ->
-            val first = position == 0
-            val last = position == lastDay
-            item(key = seamKey(day)) {
-                val seam =
-                    Modifier
-                        .onGround(items, seamKey(day), tile, heights, colors.line, topInset = if (first) FEED_TOP else 0.dp)
-                        .padding(top = if (first) FEED_TOP - SEAM_LABEL_OVERHANG else 0.dp)
-                if (day.still) {
-                    // Box top to the next box top, or to the mouth when nothing follows.
-                    DaySeam(day = day, modifier = seam.heightIn(min = STILL_MIN_HEIGHT + if (last) SEAM_LABEL_OVERHANG else 0.dp))
-                } else {
-                    DaySeam(day = day, modifier = seam.padding(bottom = DAY_PAD_TOP - SEAM_HEIGHT))
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        LazyColumn(
+            state = listState,
+            modifier = modifier,
+            contentPadding = PaddingValues(bottom = FEED_BOTTOM),
+        ) {
+            items(items.rows, key = { it.key }, contentType = { it::class }) { row ->
+                when (row) {
+                    WeekRow.Masthead -> WeekMasthead(words = words, onPreviousWeek = onPreviousWeek)
+                    WeekRow.Opening -> WeekOpening(words = words, pebbleCount = week.pebbleCount, peopleCount = persons.size)
+                    WeekRow.Persons ->
+                        PersonsOfWeek(persons = persons, weekStart = entry.weekStart, soulsById = soulsById, readingDay = dayRead)
+                    WeekRow.Contents -> WeekContents(week = week, zone = zone, paletteFor = paletteFor, readingDay = dayRead, onGo = go)
+                    WeekRow.Empty -> SpineEmptyWeek(onCreatePebble = onCreatePebble)
+                    is WeekRow.Seam -> {
+                        val seam =
+                            Modifier
+                                .then(SpineGroundElement(tile, if (row.first) FEED_TOP else 0.dp, row.ground, heights, colors.line))
+                                .padding(top = if (row.first) FEED_TOP - SEAM_LABEL_OVERHANG else 0.dp)
+                        if (row.day.still) {
+                            // Box top to the next box top, or to the mouth when nothing follows.
+                            DaySeam(
+                                day = row.day,
+                                modifier = seam.heightIn(min = STILL_MIN_HEIGHT + if (row.last) SEAM_LABEL_OVERHANG else 0.dp),
+                            )
+                        } else {
+                            DaySeam(day = row.day, modifier = seam.padding(bottom = DAY_PAD_TOP - SEAM_HEIGHT))
+                        }
+                    }
+                    is WeekRow.Pebble ->
+                        SpinePebble(
+                            moment = row.moment,
+                            palette = paletteFor(row.moment),
+                            soulsById = soulsById,
+                            personsOrder = personsOrder,
+                            aspect = aspect,
+                            pressRequests = pressRequests,
+                            onOpen = onOpen,
+                            onRequestDelete = onRequestDelete,
+                            modifier =
+                                Modifier
+                                    .then(SpineGroundElement(tile, 0.dp, row.ground, heights, colors.line))
+                                    .padding(
+                                        top = pebbleTopPadding(row.place),
+                                        bottom =
+                                            when {
+                                                !row.lastOfDay -> 0.dp
+                                                row.lastDay -> DAY_PAD_BOTTOM
+                                                else -> DAY_PAD_BOTTOM - SEAM_LABEL_OVERHANG
+                                            },
+                                    ),
+                            ratioOverride = row.moment.firstSnapPath?.let { prefix -> ratioOverride?.invoke(prefix) },
+                        )
+                    is WeekRow.Mouth ->
+                        WeekMouth(
+                            words = words,
+                            current = current,
+                            onNextWeek = onNextWeek,
+                            // The mouth draws its own last run of the line.
+                            modifier = Modifier.then(SpineGroundElement(tile, 0.dp, row.ground, heights, line = null)),
+                        )
                 }
             }
-            items(day.moments, key = { it.id }) { moment ->
-                val place = items.placeInDay.getValue(moment.id)
-                val lastOfDay = place == day.moments.lastIndex
-                SpinePebble(
-                    moment = moment,
-                    palette = paletteFor(moment),
-                    soulsById = soulsById,
-                    personsOrder = personsOrder,
-                    aspect = aspect,
-                    pressRequests = pressRequests,
-                    onOpen = onOpen,
-                    onRequestDelete = onRequestDelete,
-                    modifier =
-                        Modifier
-                            .onGround(items, moment.id, tile, heights, colors.line)
-                            .padding(
-                                top = pebbleTopPadding(place),
-                                bottom =
-                                    when {
-                                        !lastOfDay -> 0.dp
-                                        last -> DAY_PAD_BOTTOM
-                                        else -> DAY_PAD_BOTTOM - SEAM_LABEL_OVERHANG
-                                    },
-                            ),
-                    ratioOverride = moment.firstSnapPath?.let { prefix -> ratioOverride?.invoke(prefix) },
-                )
-            }
-        }
-        item(key = KEY_MOUTH) {
-            WeekMouth(
-                words = words,
-                current = current,
-                onNextWeek = onNextWeek,
-                // The mouth draws its own last run of the line.
-                modifier = Modifier.onGround(items, KEY_MOUTH, tile, heights, line = null),
-            )
         }
     }
+}
+
+/** The one in-flight contents → press, cancelled by the next and when the week changes. */
+private class JobHolder {
+    var job: Job? = null
 }
 
 /** Between two pebbles of a day; the day's first follows its seam's padding instead. */
 private fun pebbleTopPadding(placeInDay: Int): Dp = if (placeInDay == 0) 0.dp else PEBBLE_GAP
 
 /**
- * A day item: records its height for the items below, draws the rake at the phase the
- * items above left, and the line down the margin, both from [topInset].
- */
-private fun Modifier.onGround(
-    items: WeekItems,
-    key: Any,
-    tile: Bitmap,
-    heights: SnapshotStateMap<Int, Int>,
-    line: Color?,
-    topInset: Dp = 0.dp,
-): Modifier {
-    val ground = items.groundIndex.getValue(key)
-    return onSizeChanged { heights[ground] = it.height }
-        .spineGround(tile, topInset) { (0 until ground).sumOf { heights[it] ?: 0 }.toFloat() }
-        .then(
-            if (line == null) {
-                Modifier
-            } else {
-                Modifier.drawBehind {
-                    val x = SPINE_X.toPx()
-                    drawLine(line, Offset(x, topInset.toPx()), Offset(x, size.height), LINE_WIDTH.toPx())
-                }
-            },
-        )
-}
-
-/**
- * The `scrollOffset` that puts [moment]'s stone in the middle of the viewport: the item's
+ * The `scrollOffset` that puts [moment]'s stone in the middle of the viewport: the row's
  * top lands half a viewport up from the stone's centre, which sits its top padding plus the
- * anchor into the item. Negative, as `LazyListState` counts an offset from the item's top.
+ * anchor into the row. Negative, as `LazyListState` counts an offset from the item's top.
  */
 private fun stoneScrollOffset(
     listState: LazyListState,
@@ -288,48 +270,181 @@ private fun stoneScrollOffset(
     return -(viewport / 2 - centre)
 }
 
-/** Where everything sits in the list, computed once per week. */
+/** One row of the week's list; [key] is the lazy key, and the class the content type. */
+private sealed interface WeekRow {
+    val key: Any
+
+    data object Masthead : WeekRow {
+        override val key = "masthead"
+    }
+
+    data object Opening : WeekRow {
+        override val key = "opening"
+    }
+
+    data object Persons : WeekRow {
+        override val key = "persons"
+    }
+
+    data object Contents : WeekRow {
+        override val key = "contents"
+    }
+
+    data object Empty : WeekRow {
+        override val key = "empty"
+    }
+
+    /** A day's seam; [ground] is its place among the rows on the ground. */
+    data class Seam(
+        val day: SpineDay,
+        val first: Boolean,
+        val last: Boolean,
+        val ground: Int,
+    ) : WeekRow {
+        override val key = "day-${day.index}"
+    }
+
+    /** A moment; [place] is 0 for its day's first. */
+    data class Pebble(
+        val moment: PathMoment,
+        val place: Int,
+        val lastOfDay: Boolean,
+        val lastDay: Boolean,
+        val ground: Int,
+    ) : WeekRow {
+        override val key = moment.id
+    }
+
+    data class Mouth(
+        val ground: Int,
+    ) : WeekRow {
+        override val key = "mouth"
+    }
+}
+
+/** The rows of the list in order, computed once per week: the one place the order lives. */
 private class WeekItems(
     week: SpineWeek,
     hasPersons: Boolean,
     empty: Boolean,
 ) {
-    private val keys = ArrayList<Any>()
+    val rows: List<WeekRow>
 
-    /** The day an item belongs to — its seam and its moments — for the reading day. */
-    val dayOfKey = HashMap<Any, Int>()
-
-    /** The items on the ground, in order: the rake's phase accumulates over them. */
-    val groundIndex = HashMap<Any, Int>()
-
-    /** A moment's place in its day: 0 is the day's first pebble. */
-    val placeInDay = HashMap<String, Int>()
+    /** The day a row belongs to — a seam and its moments — for the reading day. */
+    val dayOfKey: Map<Any, Int>
 
     init {
-        keys += KEY_MASTHEAD
-        keys += KEY_OPENING
-        if (hasPersons) keys += KEY_PERSONS
-        if (week.readingOrder.isNotEmpty()) keys += KEY_CONTENTS
+        val rows = ArrayList<WeekRow>()
+        val dayOfKey = HashMap<Any, Int>()
+        rows += WeekRow.Masthead
+        rows += WeekRow.Opening
+        if (hasPersons) rows += WeekRow.Persons
+        if (week.readingOrder.isNotEmpty()) rows += WeekRow.Contents
         if (empty) {
-            keys += KEY_EMPTY
+            rows += WeekRow.Empty
         } else {
-            for (day in week.days) {
-                val seam = seamKey(day)
-                keys += seam
-                dayOfKey[seam] = day.index
-                groundIndex[seam] = groundIndex.size
+            var ground = 0
+            week.days.forEachIndexed { position, day ->
+                val seam = WeekRow.Seam(day, first = position == 0, last = position == week.days.lastIndex, ground = ground++)
+                rows += seam
+                dayOfKey[seam.key] = day.index
                 day.moments.forEachIndexed { place, moment ->
-                    keys += moment.id
+                    rows +=
+                        WeekRow.Pebble(
+                            moment = moment,
+                            place = place,
+                            lastOfDay = place == day.moments.lastIndex,
+                            lastDay = position == week.days.lastIndex,
+                            ground = ground++,
+                        )
                     dayOfKey[moment.id] = day.index
-                    groundIndex[moment.id] = groundIndex.size
-                    placeInDay[moment.id] = place
                 }
             }
-            keys += KEY_MOUTH
-            groundIndex[KEY_MOUTH] = groundIndex.size
+            rows += WeekRow.Mouth(ground)
         }
+        this.rows = rows
+        this.dayOfKey = dayOfKey
     }
 
-    /** The item's index in the list, or −1. */
-    fun indexOf(key: Any): Int = keys.indexOf(key)
+    /** The moment's row index in the list, or −1. */
+    fun indexOf(momentId: String): Int = rows.indexOfFirst { it is WeekRow.Pebble && it.moment.id == momentId }
+}
+
+/**
+ * A row on the ground: records its height for the rows below, draws the rake at the phase
+ * the rows above left and the line down the margin, both from [topInset]. A node, not a
+ * lambda chain, so the modifier compares equal across recompositions and the row keeps
+ * its brush.
+ */
+private data class SpineGroundElement(
+    val tile: Bitmap,
+    val topInset: Dp,
+    val ground: Int,
+    val heights: SnapshotStateMap<Int, Int>,
+    val line: Color?,
+) : ModifierNodeElement<SpineGroundNode>() {
+    override fun create() = SpineGroundNode(tile, topInset, ground, heights, line)
+
+    override fun update(node: SpineGroundNode) = node.update(tile, topInset, ground, heights, line)
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "spineGround"
+        properties["ground"] = ground
+    }
+}
+
+private class SpineGroundNode(
+    private var tile: Bitmap,
+    private var topInset: Dp,
+    private var ground: Int,
+    private var heights: SnapshotStateMap<Int, Int>,
+    private var line: Color?,
+) : Modifier.Node(),
+    DrawModifierNode,
+    LayoutAwareModifierNode {
+    private var brush: ShaderBrush? = null
+    private var brushWidth = 0f
+
+    fun update(
+        tile: Bitmap,
+        topInset: Dp,
+        ground: Int,
+        heights: SnapshotStateMap<Int, Int>,
+        line: Color?,
+    ) {
+        if (tile !== this.tile) brush = null
+        this.tile = tile
+        this.topInset = topInset
+        this.ground = ground
+        this.heights = heights
+        this.line = line
+        invalidateDraw()
+    }
+
+    override fun onRemeasured(size: IntSize) {
+        heights[ground] = size.height
+    }
+
+    override fun ContentDrawScope.draw() {
+        val inset = topInset.toPx()
+        if (size.width > 0f && size.height > inset) {
+            val rake =
+                brush?.takeIf { brushWidth == size.width }
+                    ?: rakeBrush(tile, size.width, this).also {
+                        brush = it
+                        brushWidth = size.width
+                    }
+            // The shader sits in canvas space: shifting the canvas up by the phase and the
+            // rect down by it keeps the rect in place while the tile's rows move on.
+            val shift = (0 until ground).sumOf { heights[it] ?: 0 }.toFloat().mod(tile.height.toFloat())
+            translate(top = -shift) {
+                drawRect(rake, topLeft = Offset(0f, inset + shift), size = Size(size.width, size.height - inset))
+            }
+            line?.let { ink ->
+                val x = SPINE_X.toPx()
+                drawLine(ink, Offset(x, inset), Offset(x, size.height), LINE_WIDTH.toPx())
+            }
+        }
+        drawContent()
+    }
 }

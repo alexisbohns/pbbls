@@ -72,14 +72,14 @@ private const val EMPTY_DOT_ALPHA = 0.7f
  *
  * @param persons in `PersonsOfWeek.of` order.
  * @param soulsById the glyphs; a soul missing here keeps the dashed placeholder.
- * @param readingDay 0 = Monday: its letter in the header turns ink.
+ * @param readingDay 0 = Monday: its letter in the header turns ink; read by the letters alone.
  */
 @Composable
-fun PersonsOfWeek(
+internal fun PersonsOfWeek(
     persons: List<PersonOfWeek>,
     weekStart: LocalDate,
     soulsById: Map<String, SoulWithGlyph>,
-    readingDay: Int?,
+    readingDay: () -> Int?,
     modifier: Modifier = Modifier,
 ) {
     if (persons.isEmpty()) return
@@ -98,24 +98,7 @@ fun PersonsOfWeek(
                 color = colors.ink2,
                 modifier = Modifier.alignByBaseline().semantics { heading() },
             )
-            // The letters are decorative: each row's dots say their days in words.
-            Row(
-                modifier = Modifier.alignByBaseline().clearAndSetSemantics {},
-                horizontalArrangement = Arrangement.spacedBy(DOT_GAP),
-            ) {
-                letters.forEachIndexed { index, letter ->
-                    Text(
-                        text = letter,
-                        style = type.dayLetter,
-                        color = readingInk(index == readingDay, colors.ink, colors.ink3),
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = TextOverflow.Visible,
-                        modifier = Modifier.width(DOT),
-                    )
-                }
-            }
+            DayLetters(letters, readingDay, Modifier.alignByBaseline())
         }
         Column(Modifier.padding(top = PERSONS_HEADER_GAP).rule(colors.rule, above = true)) {
             shown.forEach { person -> PersonRow(person, weekStart, soulsById) }
@@ -153,6 +136,35 @@ fun PersonsOfWeek(
             if (expanded) {
                 rest.forEach { person -> PersonRow(person, weekStart, soulsById) }
             }
+        }
+    }
+}
+
+/** The weekday letters over the dots, decorative (each row's dots say their days in words); the reading day's in ink. */
+@Composable
+private fun DayLetters(
+    letters: List<String>,
+    readingDay: () -> Int?,
+    modifier: Modifier = Modifier,
+) {
+    val colors = PebblesTheme.spine.colors
+    val type = PebblesTheme.spine.type
+    val read = readingDay()
+    Row(
+        modifier = modifier.clearAndSetSemantics {},
+        horizontalArrangement = Arrangement.spacedBy(DOT_GAP),
+    ) {
+        letters.forEachIndexed { index, letter ->
+            Text(
+                text = letter,
+                style = type.dayLetter,
+                color = readingInk(index == read, colors.ink, colors.ink3),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Visible,
+                modifier = Modifier.width(DOT),
+            )
         }
     }
 }

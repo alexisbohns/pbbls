@@ -57,15 +57,17 @@ import java.time.format.TextStyle
  * heads the first row of each day, with a rule above it; the day being read turns ink
  * and gets the dot in the margin. Nothing when the week holds no moment.
  *
+ * @param zone the zone the week's days were cut in; the times print in it.
  * @param paletteFor the pebble's emotion palette; null for a blank seal.
- * @param readingDay 0 = Monday.
+ * @param readingDay 0 = Monday; read inside each row, so a change recomposes the rows alone.
  * @param onGo called with the moment whose row was pressed.
  */
 @Composable
-fun WeekContents(
+internal fun WeekContents(
     week: SpineWeek,
+    zone: ZoneId,
     paletteFor: (PathMoment) -> EmotionPalette?,
-    readingDay: Int?,
+    readingDay: () -> Int?,
     onGo: (PathMoment) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -87,10 +89,11 @@ fun WeekContents(
                     ContentsRow(
                         moment = moment,
                         day = day,
+                        zone = zone,
                         palette = paletteFor(moment),
                         first = index == 0,
                         ruleAbove = index == 0 && !firstOfList,
-                        here = day.index == readingDay,
+                        readingDay = readingDay,
                         onGo = onGo,
                     )
                     firstOfList = false
@@ -104,12 +107,14 @@ fun WeekContents(
 private fun ContentsRow(
     moment: PathMoment,
     day: SpineDay,
+    zone: ZoneId,
     palette: EmotionPalette?,
     first: Boolean,
     ruleAbove: Boolean,
-    here: Boolean,
+    readingDay: () -> Int?,
     onGo: (PathMoment) -> Unit,
 ) {
+    val here = readingDay() == day.index
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val locale = LocalConfiguration.current.locales[0]
@@ -120,7 +125,7 @@ private fun ContentsRow(
     val time =
         remember(moment.happenedAt, locale) {
             moment.happenedAt
-                .atZoneSameInstant(ZoneId.systemDefault())
+                .atZoneSameInstant(zone)
                 .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale))
         }
     val weekday = remember(day.date, locale) { shortWeekday(day.date.dayOfWeek, locale) }
@@ -135,11 +140,8 @@ private fun ContentsRow(
             Modifier
                 .fillMaxWidth()
                 .heightIn(min = CONTENTS_ROW_MIN)
+                .then(if (ruleAbove) Modifier.rule(colors.rule, above = true) else Modifier)
                 .drawBehind {
-                    if (ruleAbove) {
-                        val y = SpineLayout.RULE.toPx() / 2
-                        drawLine(colors.rule, Offset(0f, y), Offset(size.width, y), SpineLayout.RULE.toPx())
-                    }
                     // The reading dot, in the margin beside the day's first row.
                     if (here && first) {
                         val radius = READING_DOT.toPx() / 2

@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.features.path.spine.SpineLayout.COL_X
@@ -46,7 +45,7 @@ private const val MASK_FADED_ALPHA = 0.22f
  * feed draws its items with [spineGround] instead, so the rake runs on across them.
  */
 @Composable
-fun SpineGround(modifier: Modifier = Modifier) {
+internal fun SpineGround(modifier: Modifier = Modifier) {
     val tile = rememberRakeTile()
     Spacer(modifier.spineGround(tile) { 0f })
 }
@@ -75,23 +74,7 @@ internal fun Modifier.spineGround(
     drawWithCache {
         val inset = topInset.toPx()
         if (size.width <= 0f || size.height <= inset) return@drawWithCache onDrawBehind {}
-        // The mask rides in the paint, not on the canvas: a `DstIn` draw inside an offscreen
-        // layer went unmasked on device (Pixel 8) while Robolectric honoured it.
-        val rake = BitmapShader(tile, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
-        val fullUntil = (COL_X - MASK_FULL_UNTIL).toPx()
-        val fadedFrom = (COL_X + MASK_FADED_FROM).toPx()
-        val rtl = layoutDirection == LayoutDirection.Rtl
-        val mask =
-            LinearGradient(
-                if (rtl) size.width else 0f,
-                0f,
-                if (rtl) size.width - fadedFrom else fadedFrom,
-                0f,
-                intArrayOf(Color.Black.toArgb(), Color.Black.toArgb(), Color.Black.copy(alpha = MASK_FADED_ALPHA).toArgb()),
-                floatArrayOf(0f, fullUntil / fadedFrom, 1f),
-                Shader.TileMode.CLAMP,
-            )
-        val brush = ShaderBrush(ComposeShader(rake, mask, PorterDuff.Mode.DST_IN))
+        val brush = rakeBrush(tile, size.width, this)
         val ground = Size(size.width, size.height - inset)
         onDrawBehind {
             // The shader sits in canvas space: shifting the canvas up by the phase and the
@@ -100,6 +83,33 @@ internal fun Modifier.spineGround(
             translate(top = -shift) { drawRect(brush, topLeft = Offset(0f, inset + shift), size = ground) }
         }
     }
+
+/**
+ * The rake over [width], masked from full at `COL_X − 6` to [MASK_FADED_ALPHA] at `COL_X +
+ * 110`. The mask rides in the paint, not on the canvas: a `DstIn` draw inside an offscreen
+ * layer went unmasked on device (Pixel 8) while Robolectric honoured it. Left-to-right
+ * only: the Spine pins its layout direction (see `SpineWeek`).
+ */
+internal fun rakeBrush(
+    tile: Bitmap,
+    width: Float,
+    density: Density,
+): ShaderBrush {
+    val rake = BitmapShader(tile, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+    val fullUntil = with(density) { (COL_X - MASK_FULL_UNTIL).toPx() }
+    val fadedFrom = with(density) { (COL_X + MASK_FADED_FROM).toPx() }
+    val mask =
+        LinearGradient(
+            0f,
+            0f,
+            fadedFrom,
+            0f,
+            intArrayOf(Color.Black.toArgb(), Color.Black.toArgb(), Color.Black.copy(alpha = MASK_FADED_ALPHA).toArgb()),
+            floatArrayOf(0f, fullUntil / fadedFrom, 1f),
+            Shader.TileMode.CLAMP,
+        )
+    return ShaderBrush(ComposeShader(rake, mask, PorterDuff.Mode.DST_IN))
+}
 
 /** The 36 × 240 tile at this density, both path sets stroked in their colours, butt-capped as the SVG is. */
 private fun rakeTile(
