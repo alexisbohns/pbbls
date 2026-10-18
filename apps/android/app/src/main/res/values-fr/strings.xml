@@ -611,22 +611,26 @@
     <plurals name="path_spine_summary_pebbles" tools:ignore="UnusedResources">
         <item quantity="one">%1$s galet</item>
         <item quantity="other">%1$s galets</item>
+        <item quantity="many">%1$s galets</item>
     </plurals>
     <string name="path_spine_summary_no_pebbles" tools:ignore="UnusedResources">aucun galet</string>
     <plurals name="path_spine_summary_people" tools:ignore="UnusedResources">
         <item quantity="one">, %1$s personne</item>
         <item quantity="other">, %1$s personnes</item>
+        <item quantity="many">, %1$s personnes</item>
     </plurals>
     <string name="path_spine_persons" tools:ignore="UnusedResources">les personnes de la semaine</string>
     <plurals name="path_spine_persons_more" tools:ignore="UnusedResources">
         <item quantity="one">et %1$s autre</item>
         <item quantity="other">et %1$s autres</item>
+        <item quantity="many">et %1$s autres</item>
     </plurals>
     <string name="path_spine_contents" tools:ignore="UnusedResources">sommaire</string>
     <string name="path_spine_with" tools:ignore="UnusedResources">avec</string>
     <plurals name="path_spine_others" tools:ignore="UnusedResources">
         <item quantity="one">&amp; %1$s autre</item>
         <item quantity="other">&amp; %1$s autres</item>
+        <item quantity="many">&amp; %1$s autres</item>
     </plurals>
     <string name="path_spine_still" tools:ignore="UnusedResources">calme</string>
     <string name="path_spine_untitled" tools:ignore="UnusedResources">sans titre</string>
@@ -637,6 +641,7 @@
     <plurals name="path_spine_day_dots_a11y" tools:ignore="UnusedResources">
         <item quantity="one">Un jour : %2$s</item>
         <item quantity="other">%1$d jours : %2$s</item>
+        <item quantity="many">%1$d jours : %2$s</item>
     </plurals>
     <string name="path_spine_stone_a11y" tools:ignore="UnusedResources">%1$s. %2$s, %3$s. %4$s, %5$s. %6$s Ouvre le galet.</string>
     <string name="path_spine_blank_a11y" tools:ignore="UnusedResources">%1$s. %2$s, %3$s. Pas encore un galet. %4$s Ouvre le moment.</string>
