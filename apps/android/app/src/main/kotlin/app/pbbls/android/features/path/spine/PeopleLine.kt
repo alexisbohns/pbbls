@@ -153,8 +153,8 @@ private fun PeopleStrip(
     val colors = PebblesTheme.spine.colors
     val glyphDp = with(LocalDensity.current) { glyphSize.toDp() }
     val items =
-        remember(line, namesById, soulsById, others) {
-            peopleStripItems(line, namesById, { soulsById.containsKey(it) }, others)
+        remember(line, namesById, others) {
+            peopleStripItems(line, namesById, others)
         }
 
     FlowRow(

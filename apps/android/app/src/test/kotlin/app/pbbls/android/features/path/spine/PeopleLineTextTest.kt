@@ -83,11 +83,11 @@ class PeopleLineTextTest {
     @Test
     fun `the card strip lists named souls, the others, then the marks with the overflow`() {
         val ids = listOf("mara", "elio", "bruno") + (1..11).map { "s$it" }
-        val items = peopleStripItems(PeopleLines.of(ids, ids, Locale.ENGLISH), names, { it != "bruno" }, "& twelve others")
+        val items = peopleStripItems(PeopleLines.of(ids, ids, Locale.ENGLISH), names, "& twelve others")
         assertEquals(
             listOf(
-                StripItem.Named("mara", "Mara", glyph = true),
-                StripItem.Named("elio", "Elio", glyph = true),
+                StripItem.Named("mara", "Mara"),
+                StripItem.Named("elio", "Elio"),
                 StripItem.Others("& twelve others"),
                 // Bruno is the first of the others and has no glyph: his mark stays, as the placeholder.
                 StripItem.Marks(listOf("bruno", "s1", "s2", "s3", "s4"), overflow = 7),
@@ -95,8 +95,8 @@ class PeopleLineTextTest {
             items,
         )
         assertEquals(
-            listOf(StripItem.Named("mara", "Mara", glyph = true), StripItem.Named("bruno", "Bruno", glyph = false)),
-            peopleStripItems(PeopleLines.of(listOf("mara", "bruno"), emptyList(), Locale.ENGLISH), names, { it != "bruno" }, ""),
+            listOf(StripItem.Named("mara", "Mara"), StripItem.Named("bruno", "Bruno")),
+            peopleStripItems(PeopleLines.of(listOf("mara", "bruno"), emptyList(), Locale.ENGLISH), names, ""),
         )
     }
 }

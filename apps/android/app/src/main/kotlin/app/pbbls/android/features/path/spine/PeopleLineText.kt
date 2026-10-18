@@ -81,7 +81,6 @@ internal sealed interface StripItem {
     data class Named(
         val id: String,
         val name: String,
-        val glyph: Boolean,
     ) : StripItem
 
     /** "& twelve others", in the quiet italic. */
@@ -104,11 +103,10 @@ internal sealed interface StripItem {
 internal fun peopleStripItems(
     line: PeopleLine,
     namesById: Map<String, String>,
-    hasGlyph: (String) -> Boolean,
     others: String,
 ): List<StripItem> =
     buildList {
-        line.named.forEach { add(StripItem.Named(it, namesById[it].orEmpty(), hasGlyph(it))) }
+        line.named.forEach { add(StripItem.Named(it, namesById[it].orEmpty())) }
         if (line.others > 0) add(StripItem.Others(others))
         if (line.marks.isNotEmpty() || line.overflow > 0) add(StripItem.Marks(line.marks, line.overflow))
     }
