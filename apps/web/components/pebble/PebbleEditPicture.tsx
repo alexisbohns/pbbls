@@ -59,7 +59,9 @@ export function useSnapStaging({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   const previewUrlRef = useRef<string | null>(null)
-  previewUrlRef.current = previewUrl
+  useEffect(() => {
+    previewUrlRef.current = previewUrl
+  }, [previewUrl])
 
   // One token per pick. A second pick while the first uploads makes the
   // first stale, so its result can't stage a photo the preview no longer

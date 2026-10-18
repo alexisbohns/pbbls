@@ -77,7 +77,11 @@ export default function SettingsPage() {
   // Back from a provider re-auth (#977): restore what was staged and reopen
   // the step, never run it. Runs once, as soon as the account is known. The
   // stash is always taken, so one left by an abandoned redirect is discarded.
+  // Setting state here is a one-shot sync from the URL and the sessionStorage
+  // stash, which only mean something once the account has loaded; it is not
+  // a value derivable during render.
   const resumeChecked = useRef(false)
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (resumeChecked.current || !user || !profile) return
     resumeChecked.current = true
@@ -105,6 +109,7 @@ export default function SettingsPage() {
     setStagedPublic(form.isPublic)
     toast(t("reauthResumeSave"))
   }, [user, profile, router, logout, t])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (isLoading) {
     return (
