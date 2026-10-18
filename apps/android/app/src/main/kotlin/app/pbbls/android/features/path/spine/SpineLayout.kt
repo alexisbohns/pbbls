@@ -26,11 +26,18 @@ internal object SpineLayout {
     /** The stone's centre below the top of a card; an entry anchors at 0.6 × its name size. */
     val CARD_ANCHOR = 31.dp
 
+    /** The seam proper: the hairline and its teeth. */
     val SEAM_HEIGHT = 8.dp
 
-    /** The day label in the margin: this wide, centred on the line, hung this far above the seam. */
+    /**
+     * The day label hangs this far above the hairline, so `DaySeam` is `SEAM_LABEL_OVERHANG +
+     * SEAM_HEIGHT` tall with its hairline this far down; a caller that wants the hairline at the
+     * day's top takes this off the padding above the seam.
+     */
+    val SEAM_LABEL_OVERHANG = 14.dp
+
+    /** The day label in the margin: this wide, centred on the line. */
     val LABEL_WIDTH = 46.dp
-    val LABEL_TOP = (-14).dp
 
     /** The rake tile; the ground repeats it. */
     val RAKE_TILE = DpSize(36.dp, 240.dp)

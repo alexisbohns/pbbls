@@ -38,7 +38,7 @@ private fun OnGround(content: @Composable () -> Unit) {
     Surface(color = PebblesTheme.spine.colors.ground) {
         Box(Modifier.width(PHONE_WIDTH)) {
             SpineGround(Modifier.matchParentSize())
-            Column(Modifier.padding(top = SPINE_LAB_LABEL_ROOM)) { content() }
+            Column { content() }
         }
     }
 }

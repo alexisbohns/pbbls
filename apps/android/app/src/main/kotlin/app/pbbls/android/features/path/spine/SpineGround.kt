@@ -1,22 +1,24 @@
 package app.pbbls.android.features.path.spine
 
-import androidx.compose.foundation.Canvas
+import android.graphics.BitmapShader
+import android.graphics.ComposeShader
+import android.graphics.LinearGradient
+import android.graphics.PorterDuff
+import android.graphics.Shader
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.ImageShader
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
@@ -41,33 +43,33 @@ private const val MASK_FADED_ALPHA = 0.22f
 fun SpineGround(modifier: Modifier = Modifier) {
     val colors = PebblesTheme.spine.colors
     val density = LocalDensity.current
-    val brush =
+    val tile =
         remember(density, colors.rakeShadow, colors.rakeLight) {
-            val tile = rakeTile(density, colors.rakeShadow, colors.rakeLight)
-            ShaderBrush(ImageShader(tile, TileMode.Repeated, TileMode.Repeated))
+            rakeTile(density, colors.rakeShadow, colors.rakeLight).asAndroidBitmap()
         }
-    // Offscreen, so the DstIn mask eats the rake and nothing drawn beneath this layer.
-    Canvas(modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
-        if (size.height <= 0f || size.width <= 0f) return@Canvas
-        drawRect(brush)
-        val fullUntil = (COL_X - MASK_FULL_UNTIL).toPx()
-        val fadedFrom = (COL_X + MASK_FADED_FROM).toPx()
-        val rtl = layoutDirection == LayoutDirection.Rtl
-        val start = if (rtl) size.width else 0f
-        val end = if (rtl) size.width - fadedFrom else fadedFrom
-        drawRect(
-            brush =
-                Brush.horizontalGradient(
-                    0f to Color.Black,
-                    fullUntil / fadedFrom to Color.Black,
-                    1f to Color.Black.copy(alpha = MASK_FADED_ALPHA),
-                    startX = start,
-                    endX = end,
-                    tileMode = TileMode.Clamp,
-                ),
-            blendMode = BlendMode.DstIn,
-        )
-    }
+    Spacer(
+        modifier.drawWithCache {
+            if (size.width <= 0f || size.height <= 0f) return@drawWithCache onDrawBehind {}
+            // The mask rides in the paint, not on the canvas: a `DstIn` draw inside an offscreen
+            // layer went unmasked on device (Pixel 8) while Robolectric honoured it.
+            val rake = BitmapShader(tile, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+            val fullUntil = (COL_X - MASK_FULL_UNTIL).toPx()
+            val fadedFrom = (COL_X + MASK_FADED_FROM).toPx()
+            val rtl = layoutDirection == LayoutDirection.Rtl
+            val mask =
+                LinearGradient(
+                    if (rtl) size.width else 0f,
+                    0f,
+                    if (rtl) size.width - fadedFrom else fadedFrom,
+                    0f,
+                    intArrayOf(Color.Black.toArgb(), Color.Black.toArgb(), Color.Black.copy(alpha = MASK_FADED_ALPHA).toArgb()),
+                    floatArrayOf(0f, fullUntil / fadedFrom, 1f),
+                    Shader.TileMode.CLAMP,
+                )
+            val brush = ShaderBrush(ComposeShader(rake, mask, PorterDuff.Mode.DST_IN))
+            onDrawBehind { drawRect(brush) }
+        },
+    )
 }
 
 /** The 36 × 240 tile at this density, both path sets stroked in their colours, butt-capped as the SVG is. */

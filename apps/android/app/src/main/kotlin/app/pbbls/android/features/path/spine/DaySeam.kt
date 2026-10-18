@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,9 +31,9 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.features.path.spine.SpineLayout.COL_X
-import app.pbbls.android.features.path.spine.SpineLayout.LABEL_TOP
 import app.pbbls.android.features.path.spine.SpineLayout.LABEL_WIDTH
 import app.pbbls.android.features.path.spine.SpineLayout.SEAM_HEIGHT
+import app.pbbls.android.features.path.spine.SpineLayout.SEAM_LABEL_OVERHANG
 import app.pbbls.android.features.path.spine.SpineLayout.SPINE_X
 import app.pbbls.android.features.path.spine.logic.SpineDay
 import java.time.DayOfWeek
@@ -55,7 +56,9 @@ private val LABEL_LEFT = SPINE_X - LABEL_WIDTH / 2
 
 /**
  * A day's start: the hairline seam with its riffle teeth and the date set in the margin;
- * *still* under it when the day has no moment.
+ * *still* under it when the day has no moment. The hairline sits [SEAM_LABEL_OVERHANG] below
+ * the top, leaving the label its room above; the label runs on below the seam, over the day's
+ * top padding, so the seam's slot never measures it.
  */
 @Composable
 fun DaySeam(
@@ -77,22 +80,25 @@ fun DaySeam(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(SEAM_HEIGHT)
+                    .height(SEAM_LABEL_OVERHANG + SEAM_HEIGHT)
                     .semantics(mergeDescendants = true) {
                         heading()
                         contentDescription = fullDate
                     }.drawBehind {
+                        val top = SEAM_LABEL_OVERHANG.toPx()
                         val hairline = HAIRLINE.toPx()
-                        drawRect(colors.seam, size = Size(size.width, hairline))
-                        teeth(colors.teeth, TEETH_OFFSET.toPx(), TEETH_PERIOD.toPx(), hairline, TEETH_HEIGHT.toPx())
-                        teeth(colors.teeth, RIFFLE_OFFSET.toPx(), RIFFLE_PERIOD.toPx(), hairline, RIFFLE_HEIGHT.toPx())
+                        drawRect(colors.seam, topLeft = Offset(0f, top), size = Size(size.width, hairline))
+                        val teethTop = top + hairline
+                        teeth(colors.teeth, TEETH_OFFSET.toPx(), TEETH_PERIOD.toPx(), teethTop, TEETH_HEIGHT.toPx())
+                        teeth(colors.teeth, RIFFLE_OFFSET.toPx(), RIFFLE_PERIOD.toPx(), teethTop, RIFFLE_HEIGHT.toPx())
                     },
         ) {
             Column(
                 modifier =
                     Modifier
-                        .offset(x = LABEL_LEFT, y = LABEL_TOP)
+                        .offset(x = LABEL_LEFT)
                         .width(LABEL_WIDTH)
+                        .wrapContentHeight(align = Alignment.Top, unbounded = true)
                         .background(colors.ground, labelShape)
                         .padding(bottom = 5.dp)
                         .clearAndSetSemantics {},

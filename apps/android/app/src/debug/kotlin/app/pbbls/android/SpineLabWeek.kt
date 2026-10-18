@@ -30,14 +30,16 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 /*
  * The fixture week laid out as the Spine will lay it out (#1122 Part 4), for the
  * feed previews and the Spine lab: each day a seam with its pebbles 58 dp below
- * it and 38 dp apart, a hairline at `SPINE_X`, the raked ground behind. Part 5's
+ * it and 38 dp apart, a hairline at `SPINE_X`, the raked ground behind. The
+ * seam carries its label's overhang, so the day's bottom padding gives it back. Part 5's
  * `SpineWeek` owns the real layout; this stands in until then. No network: the
  * ratios are primed and the photo URLs withheld, so the cards show their fields.
  */
 
-/** Room above the first seam for its hung label (`SpineLayout.LABEL_TOP`). */
-internal val SPINE_LAB_LABEL_ROOM = 16.dp
 private val HAIRLINE = 1.dp
+
+/** Below a day's content: the seam's overhang already holds the next label, so it comes off the 34 dp. */
+private val DAY_GAP = SpineLayout.DAY_PAD_BOTTOM - SpineLayout.SEAM_LABEL_OVERHANG
 
 /** One fixture pebble: no cache, no photo, the ratio primed. */
 @Composable
@@ -76,13 +78,13 @@ internal fun FixtureDay(day: SpineDay) {
         DaySeam(day = day)
         if (!day.still) {
             Column(
-                Modifier.padding(top = SpineLayout.DAY_PAD_TOP - SpineLayout.SEAM_HEIGHT, bottom = SpineLayout.DAY_PAD_BOTTOM),
+                Modifier.padding(top = SpineLayout.DAY_PAD_TOP - SpineLayout.SEAM_HEIGHT, bottom = DAY_GAP),
                 verticalArrangement = Arrangement.spacedBy(SpineLayout.PEBBLE_GAP),
             ) {
                 day.moments.forEach { moment -> FixturePebble(moment) }
             }
         } else {
-            Spacer(Modifier.height(SpineLayout.DAY_PAD_BOTTOM))
+            Spacer(Modifier.height(DAY_GAP))
         }
     }
 }
@@ -98,7 +100,7 @@ internal fun SpineLabWeek(modifier: Modifier = Modifier) {
         SpineGround(Modifier.fillMaxSize())
         LazyColumn(
             Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = SPINE_LAB_LABEL_ROOM, bottom = 48.dp),
+            contentPadding = PaddingValues(bottom = 48.dp),
         ) {
             items(days, key = { it.index }) { day -> FixtureDay(day) }
         }
