@@ -9,10 +9,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -229,20 +229,22 @@ fun LitStone(
         }
     val key = remember(spec, widthPx, heightPx, density.density) { StoneBitmapCache.key(spec, widthPx, heightPx, density.density) }
     // A preview has one frame: paint it there and then. On a device the first
-    // paint leaves the main thread and the placeholder holds the frame.
+    // paint leaves the main thread and the placeholder holds the frame. The
+    // state is keyed, so a new key starts from its cache hit or the placeholder,
+    // never from the previous stone.
     val inspection = LocalInspectionMode.current
-    val initial =
+    val bitmap =
         remember(key) {
-            StoneBitmapCache.peek(key)
-                ?: if (inspection) StoneBitmapCache.get(spec, widthPx, heightPx, density.density, resources) else null
+            mutableStateOf(
+                StoneBitmapCache.peek(key)
+                    ?: if (inspection) StoneBitmapCache.get(spec, widthPx, heightPx, density.density, resources) else null,
+            )
         }
-    val bitmap by produceState(initial, key, resources) {
-        val hit = StoneBitmapCache.peek(key)
-        value = hit
-        if (hit == null) {
-            // CPU-bound rasterisation with no injectable dispatcher in a composable: the
-            // one place outside DispatchersModule that names one (Part 3 review).
-            value = withContext(Dispatchers.Default) { StoneBitmapCache.get(spec, widthPx, heightPx, density.density, resources) }
+    LaunchedEffect(key) {
+        if (bitmap.value == null) {
+            // CPU-bound rasterisation with nothing injectable in a composable: one of the
+            // two call-site dispatchers DispatchersModule's KDoc allows.
+            bitmap.value = withContext(Dispatchers.Default) { StoneBitmapCache.get(spec, widthPx, heightPx, density.density, resources) }
         }
     }
     val placeholder =
@@ -265,7 +267,7 @@ fun LitStone(
                 scaleX = press.dipScale
                 scaleY = press.dipScale
             }
-        val painted = bitmap
+        val painted = bitmap.value
         if (painted != null) {
             Image(
                 bitmap = painted,
