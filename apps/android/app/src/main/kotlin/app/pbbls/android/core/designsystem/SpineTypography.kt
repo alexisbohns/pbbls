@@ -88,4 +88,7 @@ object SpineTypography {
     fun cardSoul(u: Float) = ysabeau((2.5f * u).sp, 650, 0.12f.em, features = SMALL_CAPS)
 
     fun cardMore(u: Float) = ysabeau((2.5f * u).sp, 560, features = TABULAR)
+
+    /** The strip's "& twelve others": the base `2.6u` in the quiet italic. */
+    fun cardOthers(u: Float) = ysabeau((2.6f * u).sp, 380, italic = true)
 }

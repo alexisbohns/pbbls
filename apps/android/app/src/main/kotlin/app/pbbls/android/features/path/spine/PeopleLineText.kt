@@ -34,15 +34,15 @@ internal class PeopleLineLabels(
 
 /**
  * "with [g] MARA, [g] ELIO & twelve others [g][g][g][g][g] +7", the web's
- * `PeopleLine` as one `AnnotatedString` (rule set §Many people). Glyphs are
- * inline content keyed [GLYPH_INLINE_PREFIX] + id, only for souls [hasGlyph]
- * knows; the composable supplies the drawings. Pure, so the shape is tested
- * without a Compose runtime.
+ * `PeopleLine` as one `AnnotatedString` (rule set §Many people). Every named soul
+ * and every mark is inline content keyed [GLYPH_INLINE_PREFIX] + id; the composable
+ * supplies the drawing, a glyph or the dashed placeholder of a soul without one,
+ * as the web's `SoulMark` does. Pure, so the shape is tested without a Compose
+ * runtime.
  */
 internal fun peopleLineText(
     line: PeopleLine,
     namesById: Map<String, String>,
-    hasGlyph: (String) -> Boolean,
     labels: PeopleLineLabels,
     spans: PeopleLineSpans,
 ): AnnotatedString =
@@ -57,20 +57,17 @@ internal fun peopleLineText(
             if (index > 0) {
                 if (index == ampersandAt) withStyle(spans.aside) { append(" & ") } else append(", ")
             }
-            if (hasGlyph(id)) {
-                appendInlineContent(GLYPH_INLINE_PREFIX + id, GLYPH_ALTERNATE)
-                append(' ')
-            }
+            appendInlineContent(GLYPH_INLINE_PREFIX + id, GLYPH_ALTERNATE)
+            append(' ')
             withStyle(spans.name) { append(namesById[id].orEmpty()) }
         }
         if (line.others > 0) {
             append(' ')
             withStyle(spans.aside) { append(labels.others) }
         }
-        val marks = line.marks.filter(hasGlyph)
-        if (marks.isNotEmpty()) {
+        if (line.marks.isNotEmpty()) {
             append(' ')
-            marks.forEach { appendInlineContent(GLYPH_INLINE_PREFIX + it, GLYPH_ALTERNATE) }
+            line.marks.forEach { appendInlineContent(GLYPH_INLINE_PREFIX + it, GLYPH_ALTERNATE) }
         }
         if (line.overflow > 0) {
             append(' ')
@@ -80,7 +77,7 @@ internal fun peopleLineText(
 
 /** One item of a card's souls strip: the web's `.sl` flex children. */
 internal sealed interface StripItem {
-    /** A named soul: its glyph (when it has one) and its name. */
+    /** A named soul: its mark (a glyph, or the placeholder when it has none) and its name. */
     data class Named(
         val id: String,
         val name: String,
@@ -92,7 +89,7 @@ internal sealed interface StripItem {
         val text: String,
     ) : StripItem
 
-    /** The marks of the others, then "+N" when some are left. */
+    /** The marks of the others (placeholders for those without a glyph), then "+N" when some are left. */
     data class Marks(
         val ids: List<String>,
         val overflow: Int,
@@ -101,8 +98,8 @@ internal sealed interface StripItem {
 
 /**
  * The card's strip (web `PeopleLine` card variant): the same line as items of a
- * wrapping row, no commas, no "&", "with" unspoken. Marks a soul has no glyph for
- * are dropped; the "+N" is kept even when every mark is.
+ * wrapping row, no commas, no "&", "with" unspoken. A soul without a glyph keeps
+ * its slot as a placeholder, named or marked, as the web's `SoulMark` does.
  */
 internal fun peopleStripItems(
     line: PeopleLine,
@@ -113,6 +110,5 @@ internal fun peopleStripItems(
     buildList {
         line.named.forEach { add(StripItem.Named(it, namesById[it].orEmpty(), hasGlyph(it))) }
         if (line.others > 0) add(StripItem.Others(others))
-        val marks = line.marks.filter(hasGlyph)
-        if (marks.isNotEmpty() || line.overflow > 0) add(StripItem.Marks(marks, line.overflow))
+        if (line.marks.isNotEmpty() || line.overflow > 0) add(StripItem.Marks(line.marks, line.overflow))
     }

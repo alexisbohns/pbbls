@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path.spine
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -13,7 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -22,6 +28,7 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -41,6 +48,12 @@ private const val STRIP_GAP_PER_GLYPH = 2.2f / 4f
 private const val STRIP_ROW_GAP_PER_GLYPH = 0.6f / 4f
 private const val STRIP_MORE_GAP_PER_GLYPH = 0.25f * 2.6f / 4f
 
+// The placeholder of a soul without a glyph: the web's `SoulMark`, a dashed 1 px square with 3 px corners.
+private val PLACEHOLDER_STROKE = 1.dp
+private val PLACEHOLDER_RADIUS = 3.dp
+private val PLACEHOLDER_DASH = 3.dp
+private val PLACEHOLDER_GAP = 2.dp
+
 /**
  * Who was there (rule set §Many people). Nothing when the pebble is solitary.
  *
@@ -50,9 +63,10 @@ private const val STRIP_MORE_GAP_PER_GLYPH = 0.25f * 2.6f / 4f
  * the card's own description says it.
  *
  * @param namesById soul id → name, from the pebble's own souls.
- * @param soulsById the glyphs; a soul missing here is named without one.
+ * @param soulsById the glyphs; a soul missing here keeps its slot as a dashed placeholder.
  * @param style the line's base type: `type.people` for an entry, the card's `2.6u` for a card.
  * @param glyphSize [ENTRY_GLYPH_SIZE] for an entry, `4u` for a card; the strip's gaps follow it.
+ * @param othersStyle the strip's "& twelve others"; the sentence sets it in the base style's italic.
  */
 @Composable
 fun PeopleLine(
@@ -66,11 +80,12 @@ fun PeopleLine(
     nameStyle: TextStyle = PebblesTheme.spine.type.soulName,
     moreStyle: TextStyle = PebblesTheme.spine.type.entryTime,
     glyphInk: Color = PebblesTheme.spine.colors.ink2,
+    othersStyle: TextStyle = style.copy(fontStyle = FontStyle.Italic),
 ) {
     if (line.named.isEmpty()) return
     val others = if (line.others > 0) pluralStringResource(R.plurals.path_spine_others, line.others, line.othersWords) else ""
     if (asStrip) {
-        PeopleStrip(line, namesById, soulsById, others, style, nameStyle, moreStyle, glyphSize, glyphInk, modifier)
+        PeopleStrip(line, namesById, soulsById, others, othersStyle, nameStyle, moreStyle, glyphSize, glyphInk, modifier)
     } else {
         PeopleSentence(line, namesById, soulsById, others, style, nameStyle, moreStyle, glyphSize, glyphInk, modifier)
     }
@@ -101,18 +116,16 @@ private fun PeopleSentence(
         }
     val text =
         remember(line, namesById, soulsById, with, others, spans) {
-            peopleLineText(line, namesById, { soulsById.containsKey(it) }, PeopleLineLabels(with, others), spans)
+            peopleLineText(line, namesById, PeopleLineLabels(with, others), spans)
         }
     val inlineContent =
         remember(line, soulsById, glyphSize, glyphInk) {
-            (line.named + line.marks)
-                .mapNotNull { id -> soulsById[id]?.let { id to it } }
-                .associate { (id, soul) ->
-                    GLYPH_INLINE_PREFIX + id to
-                        InlineTextContent(Placeholder(glyphSize, glyphSize, PlaceholderVerticalAlign.TextCenter)) {
-                            SoulGlyph(soul.glyph, glyphInk, Modifier.fillMaxSize())
-                        }
-                }
+            (line.named + line.marks).associate { id ->
+                GLYPH_INLINE_PREFIX + id to
+                    InlineTextContent(Placeholder(glyphSize, glyphSize, PlaceholderVerticalAlign.TextCenter)) {
+                        SoulMark(soulsById[id]?.glyph, glyphInk, Modifier.fillMaxSize())
+                    }
+            }
         }
 
     Text(
@@ -130,7 +143,7 @@ private fun PeopleStrip(
     namesById: Map<String, String>,
     soulsById: Map<String, SoulWithGlyph>,
     others: String,
-    style: TextStyle,
+    othersStyle: TextStyle,
     nameStyle: TextStyle,
     moreStyle: TextStyle,
     glyphSize: TextUnit,
@@ -154,14 +167,14 @@ private fun PeopleStrip(
             when (item) {
                 is StripItem.Named ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        soulsById[item.id]?.let { SoulGlyph(it.glyph, glyphInk, Modifier.size(glyphDp)) }
+                        SoulMark(soulsById[item.id]?.glyph, glyphInk, Modifier.size(glyphDp))
                         Text(text = item.name, style = nameStyle, color = colors.ink, maxLines = 1)
                     }
                 is StripItem.Others ->
-                    Text(text = item.text, style = style.copy(fontStyle = FontStyle.Italic), color = colors.ink2)
+                    Text(text = item.text, style = othersStyle, color = colors.ink2)
                 is StripItem.Marks ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        item.ids.forEach { id -> soulsById[id]?.let { SoulGlyph(it.glyph, glyphInk, Modifier.size(glyphDp)) } }
+                        item.ids.forEach { id -> SoulMark(soulsById[id]?.glyph, glyphInk, Modifier.size(glyphDp)) }
                         if (item.overflow > 0) {
                             Text(
                                 text = "+${item.overflow}",
@@ -176,11 +189,31 @@ private fun PeopleStrip(
     }
 }
 
+/** A soul's glyph as a thin line, or, without one, the dashed placeholder square (web `SoulMark`). */
 @Composable
-private fun SoulGlyph(
-    glyph: Glyph,
+private fun SoulMark(
+    glyph: Glyph?,
     ink: Color,
     modifier: Modifier,
 ) {
-    GlyphImage(strokes = glyph.strokes, viewBox = glyph.viewBox, strokeColor = ink, modifier = modifier)
+    if (glyph != null) {
+        GlyphImage(strokes = glyph.strokes, viewBox = glyph.viewBox, strokeColor = ink, modifier = modifier)
+    } else {
+        val placeholder = PebblesTheme.spine.colors.ink3
+        Canvas(modifier) {
+            val stroke = PLACEHOLDER_STROKE.toPx()
+            val inset = stroke / 2
+            drawRoundRect(
+                color = placeholder,
+                topLeft = Offset(inset, inset),
+                size = Size(size.width - stroke, size.height - stroke),
+                cornerRadius = CornerRadius(PLACEHOLDER_RADIUS.toPx()),
+                style =
+                    Stroke(
+                        width = stroke,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(PLACEHOLDER_DASH.toPx(), PLACEHOLDER_GAP.toPx())),
+                    ),
+            )
+        }
+    }
 }

@@ -41,7 +41,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.common.UuidHash
@@ -80,13 +79,8 @@ import java.time.format.FormatStyle
 
 private const val TAG = "spine-pebble"
 
-/** The leader from the line to a card, and the pebble's room below its stone. */
+/** The leader from the line to a card. */
 private val LEADER = 1.dp
-private val STONE_CLEARANCE = 14.dp
-
-/** The stone's hit area: the stone plus this all round, never under 48 dp (spec §Accessibility). */
-private val HIT_INSET = 10.dp
-private val MIN_TARGET = 48.dp
 
 /** The card's people strip: glyphs of `4u`, type in card units. */
 private const val CARD_GLYPH_UNITS = 4f
@@ -214,6 +208,9 @@ fun SpinePebble(
     }
     val openNow = {
         haptics(TapHaptic.SELECTION)
+        // A stone tap followed by a card tap within the delay opens once.
+        openJob?.cancel()
+        openJob = null
         onOpen(moment)
         scope.launch { press.press(reduceMotion) }
         Unit
@@ -227,35 +224,20 @@ fun SpinePebble(
         }
     }
 
-    /*
-     * Geometry, in the row's own coordinates so nothing lies outside it (a child
-     * placed past its parent's edge is not hit-tested). The stone's centre is the
-     * anchor; the stone is 27.2 / 44 / 64.5 dp tall by size, so on a card (anchor
-     * 31) only the large stone overhangs the top, by 1.2 dp, while on an entry
-     * (anchor 0.6 × 19 / 24 / 31 sp = 11.4 / 14.4 / 18.6 dp) every stone does, by
-     * 2.2 / 7.6 / 13.6 dp. That overhang becomes a top inset of the row that shifts
-     * the content and the stone together, so the stone's box starts at or below the
-     * row's top. The hit box (the stone plus 10 dp, at least 48 dp) is then clamped
-     * to the row's top and keeps its height by extending downward; the row is at
-     * least as tall as the hit box, so it is wholly inside.
-     */
+    // Where the stone and its hit box sit: the web's geometry, overhang and all (see
+    // StoneRowGeometry for why nothing here may clip).
+    val geometry = remember(anchor, stoneWidth, stoneHeight) { stoneRowGeometry(anchor, stoneWidth, stoneHeight) }
     var menu by remember { mutableStateOf(false) }
-    val topInset = max(0.dp, stoneHeight / 2 - anchor)
-    val stoneTop = topInset + anchor - stoneHeight / 2
-    val hitWidth = max(stoneWidth + HIT_INSET * 2, MIN_TARGET)
-    val hitHeight = max(stoneHeight + HIT_INSET * 2, MIN_TARGET)
-    val hitTop = max(0.dp, stoneTop - (hitHeight - stoneHeight) / 2)
-    val minHeight = max(topInset + anchor + stoneHeight / 2 + STONE_CLEARANCE, hitTop + hitHeight)
 
     Box(
         modifier
             .fillMaxWidth()
-            .heightIn(min = minHeight)
+            .heightIn(min = geometry.minHeight)
             .testTag(JourneyTags.PATH_PEBBLE_ROW)
             .drawBehind {
                 // A card hangs off its stone by a leader, from the line to the column's edge.
                 if (hasCard) {
-                    val y = (topInset + anchor).toPx()
+                    val y = anchor.toPx()
                     drawLine(colors.line, Offset(SPINE_X.toPx(), y), Offset(COL_X.toPx(), y), LEADER.toPx())
                 }
             },
@@ -263,7 +245,7 @@ fun SpinePebble(
         // The card or the entry: one button read once, with the delete as its long-press action.
         Box(
             Modifier
-                .padding(start = COL_X, top = topInset, end = PAD_R)
+                .padding(start = COL_X, end = PAD_R)
                 .clearAndSetSemantics {
                     contentDescription = description
                     role = Role.Button
@@ -306,6 +288,7 @@ fun SpinePebble(
                                     asStrip = true,
                                     nameStyle = type.cardSoul(uSp),
                                     moreStyle = type.cardMore(uSp),
+                                    othersStyle = type.cardOthers(uSp),
                                     glyphInk = colors.ink,
                                 )
                             }
@@ -358,14 +341,13 @@ fun SpinePebble(
 
         // The stone, centred on the line at the anchor: the ripple under it, overflowing
         // freely, then the lit stone in its exact box. Neither carries a click.
-        val stoneLeft = SPINE_X - stoneWidth / 2
         press.rippleToken?.let { token ->
             StoneRipple(
                 valence = valence,
                 blank = blank,
                 token = token,
                 onDone = press::rippleDone,
-                modifier = Modifier.offset(stoneLeft, stoneTop),
+                modifier = Modifier.offset(geometry.stoneLeft, geometry.stoneTop),
             )
         }
         LitStone(
@@ -374,15 +356,15 @@ fun SpinePebble(
             glyph = pebble?.glyph,
             seed = seed,
             press = press,
-            modifier = Modifier.offset(stoneLeft, stoneTop),
+            modifier = Modifier.offset(geometry.stoneLeft, geometry.stoneTop),
         )
         // The hit box over it, invisible and wider than the stone: the box the stone
         // draws in stays exact, so growing the target never moves it off the line. The
         // stone is its own touch feedback, so no indication here.
         Box(
             Modifier
-                .offset(SPINE_X - hitWidth / 2, hitTop)
-                .size(hitWidth, hitHeight)
+                .offset(geometry.hitLeft, geometry.hitTop)
+                .size(geometry.hitWidth, geometry.hitHeight)
                 .semantics { contentDescription = description }
                 .clickable(interactionSource = null, indication = null, role = Role.Button, onClick = pressStone),
         )

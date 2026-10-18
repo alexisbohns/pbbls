@@ -32,7 +32,6 @@ class PeopleLineTextTest {
         return peopleLineText(
             line = line,
             namesById = names + ids.filterNot { it in names }.associateWith { "" },
-            hasGlyph = { it != "bruno" },
             labels = PeopleLineLabels(with = if (with) "with" else null, others = others),
             spans = spans,
         )
@@ -60,8 +59,8 @@ class PeopleLineTextTest {
     fun `three souls, a comma then an ampersand`() {
         val text = line("mara", "elio", "bruno")
         assertEquals("with Mara, Elio & Bruno", text.words())
-        // Bruno has no glyph: named, but no inline mark.
-        assertEquals(listOf("mara", "elio"), text.glyphs())
+        // Bruno has no glyph: his mark is still there, drawn as the placeholder.
+        assertEquals(listOf("mara", "elio", "bruno"), text.glyphs())
     }
 
     @Test
@@ -90,8 +89,8 @@ class PeopleLineTextTest {
                 StripItem.Named("mara", "Mara", glyph = true),
                 StripItem.Named("elio", "Elio", glyph = true),
                 StripItem.Others("& twelve others"),
-                // Bruno is the first of the others and has no glyph: his mark is dropped, the count is not.
-                StripItem.Marks(listOf("s1", "s2", "s3", "s4"), overflow = 7),
+                // Bruno is the first of the others and has no glyph: his mark stays, as the placeholder.
+                StripItem.Marks(listOf("bruno", "s1", "s2", "s3", "s4"), overflow = 7),
             ),
             items,
         )
