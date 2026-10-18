@@ -18,5 +18,5 @@
     <!-- LightScheme.surface — matches the first Compose frame under the brand
          scheme. With wallpaper colours on the first frame differs; the splash
          cannot know the wallpaper scheme before Compose runs. -->
-    <color name="splash_background">#FFF8F7</color>
+    <color name="splash_background">#FEF9EF</color>
 </resources>
