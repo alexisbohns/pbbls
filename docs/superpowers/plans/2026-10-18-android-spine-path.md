@@ -969,3 +969,14 @@ Branch `feat/1122-path-becomes-spine` on Part 5. PR `feat(android): the path bec
 - **Deviations from the spec, all kept:** `prev_week`/`next_week` merged into `path_spine_week_link` and `card_a11y` folded into `stone_a11y` (identical texts on web); `dotDays` hand-joins lists (Oxford comma for every non-French locale, where `Intl.ListFormat("en-GB")` would not) because `android.icu` is unusable in plain JVM tests; `SpineWeekBuilder.build` takes an explicit `zone`, no ambient default; the "skips souls it cannot name" case has no Android counterpart because the row carries its souls.
 - **`MomentDetail.toPathMoment()` yields no souls**, so a `PathMoment` from a detail must never feed a people line.
 - **Two hand-backs arrived as the word "placeholder"**; the work was done both times. Check `git log` before asking for a resend.
+
+## Lessons learned (execution, Parts 3–4, 2026-10-18)
+
+- **WAAPI, not CSS keyframes.** The web animates the press with `element.animate(keyframes, { easing })`: one timing function over the whole run, linear between keyframes. Easing every segment (Compose `keyframes { … using }`) moved the dip from ~65 ms to 135 ms. Android now tweens a progress 0→1 and maps it through `piecewise()` tables (`StoneMotion`).
+- **Compose hit-tests past an unclipped parent.** `NodeCoordinator.withinLayerBounds` prunes only through a clipping layer, so the stone may overhang its row exactly as on web; the top-inset workaround briefly introduced shifted every entry down and was reverted. The row and the day column must never take a `clip`. Proven on the Pixel 8 by tapping above the row's edge.
+- **HWUI ignored a `DstIn` draw inside a `CompositingStrategy.Offscreen` layer** on the Pixel 8 while Robolectric honoured it; the ground's fade now rides in the paint (`ComposeShader(BitmapShader, LinearGradient, DST_IN)`) so software and hardware agree. Pixel tests on Robolectric NATIVE are a guard, not a proof of what HWUI does.
+- **A label hung above a seam needs its own room.** Inside an 8 dp box the label measured to 3 dp. `DaySeam` is 22 dp with the hairline at `SEAM_LABEL_OVERHANG` (14 dp); callers take the overhang off the previous day's bottom padding, never off the day's own top padding.
+- **First paint off the main thread** behind a mid-tone placeholder, with the one recorded dispatcher exception in `DispatchersModule`'s KDoc; `BLUR_K` (σ → `BlurMaskFilter` radius) is 2.5 against Skia's σ-exact 1.73, to tune down against the gallery.
+- **The web sprite's body path carries `vector-effect: non-scaling-stroke`**, so rings, rim, edge shade, hairlines and the glyph are CSS px (dp on Android); only veins stay in seed units.
+- **Still days** on web are `min-h-[48px] pt-3.5`, not the 58/34 padding of a day with moments; `SpineWeek` (Task 5.3) must lay a still day out that way.
+- Dead data after the dashed-mark change: `StripItem.Named.glyph` and `peopleStripItems`'s `hasGlyph` (cleanup owed on the Part 4 branch).
