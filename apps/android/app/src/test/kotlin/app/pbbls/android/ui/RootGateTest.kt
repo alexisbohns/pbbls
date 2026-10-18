@@ -1,11 +1,13 @@
 package app.pbbls.android.ui
 
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.features.consent.CONSENT_GATE_CONTINUE
@@ -230,7 +232,9 @@ class RootGateTest : AppUiTest() {
     }
 
     private fun acceptEveryConsent() {
-        ConsentGateLogic.REQUIRED.forEach { compose.onNodeWithTag(consentRowTag(it)).performScrollTo().performClick() }
+        // The row's toggle, not a tap at its centre: with real text metrics (NATIVE graphics)
+        // the centre of a linked row lands on the link, which opens the document instead.
+        ConsentGateLogic.REQUIRED.forEach { compose.onNodeWithTag(consentRowTag(it)).performSemanticsAction(SemanticsActions.OnClick) }
         compose.onNodeWithTag(CONSENT_GATE_CONTINUE).performScrollTo().performClick()
         compose.waitForIdle()
     }

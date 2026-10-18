@@ -10,6 +10,7 @@ import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsServicing
+import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.data.SoulsServicing
 import app.pbbls.android.core.data.delete
 import app.pbbls.android.core.model.MomentDeleteChoice
@@ -129,6 +130,12 @@ class PathViewModel
         private val writes: MomentWriteServicing,
         private val focusRequests: PathFocusRequests,
         private val souls: SoulsServicing,
+        /**
+         * The photo-ratio probe the Spine's cards read (#1122). Process-wide and
+         * injected here rather than through a `Local…`: the screen takes its
+         * dependencies through the ViewModel (decision log 2026-09-20).
+         */
+        val snapAspect: SnapAspectCache,
     ) : ViewModel() {
         private val today = LocalDate.now()
 

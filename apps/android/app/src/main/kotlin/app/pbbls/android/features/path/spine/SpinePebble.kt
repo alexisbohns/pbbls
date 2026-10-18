@@ -251,9 +251,12 @@ internal fun SpinePebble(
             },
     ) {
         // The card or the entry: one button read once, with the delete as its long-press action.
+        // The button spans the column, as the web's does over its block: a short name is
+        // not a small target.
         Box(
             Modifier
                 .padding(start = COL_X, end = PAD_R)
+                .fillMaxWidth()
                 .clearAndSetSemantics {
                     contentDescription = description
                     role = Role.Button

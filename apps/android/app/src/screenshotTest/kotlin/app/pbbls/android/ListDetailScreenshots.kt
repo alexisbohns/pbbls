@@ -354,8 +354,10 @@ private fun PathPebblePair() {
                 initialWeekStart = focused,
                 focusedWeekStart = focused,
                 today = pathPreviewToday,
+                soulsById = SpineFixtureWeek.soulsById,
                 onFocusChange = {},
-                paletteFor = { previewPalette },
+                paletteFor = SpineFixtureWeek.palettes,
+                ratioOverride = SpineFixtureWeek.ratios::get,
                 // Mirrors PathScreen: the timeline is the readable column.
                 modifier =
                     Modifier

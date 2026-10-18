@@ -1,7 +1,7 @@
 <!--
   Delete-action trash can. Standard Material path data; tinted at the call site
   by Icon, so fillColor is a placeholder. Used by the long-press delete menu
-  item (PathPebbleRow, sub-project B) and reused by C's "Remove glyph".
+  item (the Spine's pebble, the souls and collections rows) and by "Remove glyph".
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"

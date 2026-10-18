@@ -11,8 +11,7 @@ import java.util.Locale
  * "weekday-abbrev, month-abbrev day, year · localized time" line and that
  * `atZoneSameInstant` moves the wall clock into the supplied zone. Parts are
  * asserted separately rather than as one exact string: CLDR on JDK 21 separates
- * the time and day-period with a narrow no-break space, the same caveat
- * [PathRowFormattingTest] documents.
+ * the time and day-period with a narrow no-break space.
  */
 class PebbleReadDateFormatTest {
     private val happenedAt = OffsetDateTime.parse("2026-07-08T14:23:45+00:00")

@@ -2,6 +2,11 @@ package app.pbbls.android.features.path
 
 import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
+import app.pbbls.android.core.data.SignedUrlProviding
+import app.pbbls.android.core.data.SnapAspectCache
+import app.pbbls.android.core.data.SnapBoundsDecoder
+import app.pbbls.android.core.data.SnapURLCache
+import app.pbbls.android.core.data.SnapUrls
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.RippleSummary
@@ -11,6 +16,8 @@ import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -46,7 +53,21 @@ class PathViewModelTest {
         writes: FakeMomentWriteService = FakeMomentWriteService(),
         focusRequests: PathFocusRequests = PathFocusRequests(),
         souls: FakeSoulsService = FakeSoulsService(),
-    ) = PathViewModel(path, stats, writes, focusRequests, souls)
+    ) = PathViewModel(path, stats, writes, focusRequests, souls, snapAspect())
+
+    /** Never reached from a ViewModel test: the ratio probe belongs to the cards. */
+    private fun snapAspect(): SnapAspectCache {
+        val scope = CoroutineScope(SupervisorJob())
+        val provider =
+            object : SignedUrlProviding {
+                override suspend fun signedUrls(storagePrefix: String) = SnapUrls(original = "", thumb = "")
+            }
+        return SnapAspectCache(
+            urls = SnapURLCache(provider, scope, nowMillis = { 0L }),
+            scope = scope,
+            decoder = SnapBoundsDecoder { null },
+        )
+    }
 
     // MARK: - Focus requests (R14)
 

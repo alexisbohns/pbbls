@@ -2,6 +2,8 @@ package app.pbbls.android.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -34,6 +36,10 @@ class PebbleDeleteTest : AppUiTest() {
     @Inject lateinit var writes: FakeMomentWriteService
 
     private val completed = UiFixtures.pathMoment(id = "moment-1", name = "Coffee with Mo", happenedAt = OffsetDateTime.now())
+
+    /** How the Spine's blank stone ends its sentence ("Opens the moment."); a pebble's says "Opens the pebble." (R4). */
+    private val blankStoneSentence: String
+        get() = string(R.string.path_spine_blank_a11y, "", "", "", "").substringAfterLast(". ").trim()
 
     private fun askToDelete(moment: PathMoment = completed) {
         path.path = listOf(moment)
@@ -72,7 +78,8 @@ class PebbleDeleteTest : AppUiTest() {
         assertEquals(listOf("pebble-1"), writes.deletedPebbles)
         assertTrue(writes.deletedMoments.isEmpty())
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).assertIsDisplayed()
-        compose.onNodeWithContentDescription(string(R.string.moment_blank_a11y)).assertIsDisplayed()
+        // The stone and its row both read the blank sentence; either proves the pebble is gone.
+        compose.onAllNodesWithContentDescription(blankStoneSentence, substring = true).onFirst().assertIsDisplayed()
     }
 
     @Test

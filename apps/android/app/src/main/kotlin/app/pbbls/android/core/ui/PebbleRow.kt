@@ -38,7 +38,7 @@ import java.util.Locale
 /**
  * Shared list row for a moment — ports iOS `Components/PebbleRow.swift`, the
  * thumbnail + name + date treatment the souls/collections detail lists share
- * (the timeline keeps its richer [app.pbbls.android.features.path.components.PathPebbleRow]).
+ * (the timeline sets its moments on the Spine instead, `features/path/spine/`).
  *
  * The row owns the long-press Delete menu (M39 D8 idiom) so every list using
  * it gets the affordance for free; the parent owns the destructive flow —

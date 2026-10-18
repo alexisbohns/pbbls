@@ -24,24 +24,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.data.LocalEmotionPaletteService
+import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
+import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.components.NewPebbleFab
-import app.pbbls.android.features.path.components.WeekHeader
-import app.pbbls.android.features.path.components.WeekPebbleList
 import app.pbbls.android.features.path.components.WeekRoll
+import app.pbbls.android.features.path.spine.SpineWeek
 import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
 import kotlin.math.abs
@@ -124,8 +124,10 @@ fun PathScreen(
                         initialWeekStart = content.focusedWeekStart,
                         focusedWeekStart = content.focusedWeekStart,
                         today = content.today,
+                        soulsById = content.soulsById,
                         onFocusChange = viewModel::onFocusWeek,
                         paletteFor = { moment -> moment.pebble?.emotion?.let { palettes.palette(it.id) } },
+                        aspect = viewModel.snapAspect,
                         onPebbleTap = { moment -> onOpenDetail(moment.id) },
                         onPebbleDelete = viewModel::requestDelete,
                         onCreatePebble = onCreatePebble,
@@ -180,11 +182,20 @@ fun PathScreen(
  * Stateless timeline layout — separated from [PathScreen] so screenshot
  * previews can drive it with fixture data (no services, no network).
  *
- * Week-focus has a single source of truth (the caller's `focusedWeekStart`);
- * the pager and the roll/header both follow it: a swipe reports the new page
- * through [onFocusChange], a chevron/cairn tap changes focus and the pager
- * animates to it. Scrolling to the already-current page is a no-op, so the
- * two effects settle.
+ * The roll, then the pager; each page is the week on the Spine (#1122, spec
+ * §Chrome D5): the masthead and the mouth carry the week links the old header
+ * held, so there is no header between the two. Week-focus has a single source
+ * of truth (the caller's `focusedWeekStart`); the pager and the roll both
+ * follow it: a swipe reports the new page through [onFocusChange], a roll tap
+ * or a week link changes focus and the pager animates to it. Scrolling to the
+ * already-current page is a no-op, so the two effects settle.
+ *
+ * @param soulsById the souls the persons rows and people lines draw glyphs
+ *   from; a soul absent from it is skipped.
+ * @param aspect the photo-ratio probe the cards read; null (previews) keeps
+ *   every field square unless [ratioOverride] answers.
+ * @param ratioOverride preview-only: a primed ratio by storage prefix, so a
+ *   render never waits on a probe. Production passes nothing.
  */
 @Composable
 fun PathContent(
@@ -192,12 +203,15 @@ fun PathContent(
     initialWeekStart: LocalDate,
     focusedWeekStart: LocalDate,
     today: LocalDate,
+    soulsById: Map<String, SoulWithGlyph>,
     onFocusChange: (LocalDate) -> Unit,
     paletteFor: (PathMoment) -> EmotionPalette?,
+    modifier: Modifier = Modifier,
+    aspect: SnapAspectCache? = null,
     onPebbleTap: (PathMoment) -> Unit = {},
     onPebbleDelete: (PathMoment) -> Unit = {},
     onCreatePebble: () -> Unit = {},
-    modifier: Modifier = Modifier,
+    ratioOverride: ((String) -> Float?)? = null,
 ) {
     val initialIndex =
         entries.indexOfFirst { it.weekStart == initialWeekStart }.coerceAtLeast(0)
@@ -219,7 +233,7 @@ fun PathContent(
             entries.getOrNull(page)?.let { onFocusChange(it.weekStart) }
         }
     }
-    // Focus (chevron / cairn tap, R14 request) → pager.
+    // Focus (roll tap, week link, R14 request) → pager.
     LaunchedEffect(focusedWeekStart) {
         val index = entries.indexOfFirst { it.weekStart == focusedWeekStart }
         if (index >= 0 && index != pagerState.currentPage) {
@@ -239,17 +253,6 @@ fun PathContent(
             onFocusChange = onFocusChange,
             modifier = Modifier.fillMaxWidth(),
         )
-        WeekHeader(
-            entries = entries,
-            focusedWeekStart = focusedWeekStart,
-            today = today,
-            onFocusChange = onFocusChange,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-                    .padding(horizontal = 16.dp),
-        )
         HorizontalPager(
             state = pagerState,
             key = { entries[it].weekStart.toEpochDay() },
@@ -257,16 +260,25 @@ fun PathContent(
                 Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(top = 16.dp)
                     .testTag(JourneyTags.PATH_WEEK_PAGER),
         ) { page ->
-            WeekPebbleList(
+            // Entries sort ascending, so the neighbours are the pages either side;
+            // the first week has no way back and the last no way on.
+            val previous = entries.getOrNull(page - 1)
+            val next = entries.getOrNull(page + 1)
+            SpineWeek(
                 entry = entries[page],
+                today = today,
+                soulsById = soulsById,
                 paletteFor = paletteFor,
-                onPebbleTap = onPebbleTap,
-                onPebbleDelete = onPebbleDelete,
+                aspect = aspect,
+                onOpen = onPebbleTap,
+                onRequestDelete = onPebbleDelete,
+                onPreviousWeek = previous?.let { { onFocusChange(it.weekStart) } },
+                onNextWeek = next?.let { { onFocusChange(it.weekStart) } },
                 onCreatePebble = onCreatePebble,
                 modifier = Modifier.fillMaxSize(),
+                ratioOverride = ratioOverride,
             )
         }
     }

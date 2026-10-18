@@ -10,6 +10,7 @@ import app.pbbls.android.core.model.MomentPebble
 import app.pbbls.android.core.model.MomentSnap
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.PathPebble
+import app.pbbls.android.core.model.PathSoul
 import app.pbbls.android.core.model.PebbleCollection
 import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.SoulRef
@@ -45,7 +46,8 @@ internal object MomentPreviewFixtures {
         visibility: Visibility = Visibility.SECRET,
         emotion: EmotionRef? = joy,
         glyph: PebbleGlyph? = pebbleGlyph(),
-    ) = PathPebble(id, valence.intensity, valence.positiveness, visibility, emotion, glyph)
+        souls: List<PathSoul> = emptyList(),
+    ) = PathPebble(id, valence.intensity, valence.positiveness, visibility, emotion, glyph, souls)
 
     fun pathMoment(
         id: String = "moment-1",

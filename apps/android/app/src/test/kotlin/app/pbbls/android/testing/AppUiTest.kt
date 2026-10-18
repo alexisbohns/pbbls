@@ -24,6 +24,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.android.controller.ActivityController
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import java.time.Duration
 import javax.inject.Inject
 
@@ -35,7 +36,9 @@ import javax.inject.Inject
  * A subclass must carry `@HiltAndroidTest` itself: Hilt's processor reads it off
  * the concrete class to generate that class's test component. The runner and
  * the Robolectric config are inherited from here (`@RunWith` is `@Inherited`,
- * and Robolectric merges `@Config` down the class hierarchy).
+ * and Robolectric merges `@Config` down the class hierarchy). Graphics run
+ * NATIVE: the Path lands on the Spine (#1122), whose ground tile and stones are
+ * bitmaps and shaders the legacy shadows hand back as null.
  *
  * The screen is a Pixel 7 in portrait — the maintainer's device and the AVD the
  * app is smoke-tested on. Robolectric's own default (320×470 dp, mdpi) is
@@ -55,6 +58,7 @@ import javax.inject.Inject
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = HiltTestApplication::class, qualifiers = "w412dp-h915dp-port-420dpi")
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 abstract class AppUiTest {
     @get:Rule(order = 0)
     val hilt = HiltAndroidRule(this)
