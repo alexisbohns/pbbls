@@ -43,6 +43,9 @@ object SpineTypography {
     val summary = ysabeau(18.sp, 380, italic = true)
     val sectionLabel = ysabeau(11.5.sp, 600, 0.2f.em, features = SMALL_CAPS)
     val masthead = ysabeau(11.5.sp, 600, 0.18f.em, features = SMALL_CAPS)
+
+    /** The masthead's week number: the web's `<b>` at 650, a cut of its own since the axis is pinned per family. */
+    val mastheadNumber = ysabeau(11.5.sp, 650, 0.18f.em, features = SMALL_CAPS)
     val personName = ysabeau(15.sp, 600, 0.1f.em, features = SMALL_CAPS)
     val dayLetter = ysabeau(9.5.sp, 600, features = SMALL_CAPS)
     val contentsDay = ysabeau(10.5.sp, 600, 0.18f.em, features = SMALL_CAPS)

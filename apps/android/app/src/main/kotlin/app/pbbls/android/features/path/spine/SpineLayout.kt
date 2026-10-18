@@ -41,4 +41,31 @@ internal object SpineLayout {
 
     /** The rake tile; the ground repeats it. */
     val RAKE_TILE = DpSize(36.dp, 240.dp)
+
+    /** The verso's side padding: the masthead, the opening and the empty week sit in it. */
+    val VERSO_PAD_X = 20.dp
+
+    /** From the masthead to the kicker. */
+    val OPENING_TOP = 46.dp
+
+    /** From the kicker to the title. */
+    val OPENING_TITLE_GAP = 16.dp
+
+    /** From the title to the summary; the empty week's title to its line. */
+    val OPENING_SUMMARY_GAP = 12.dp
+
+    /** The line's last run into the mouth; the mouth's text starts under it. */
+    val MOUTH_LINE = 26.dp
+
+    /** From the mouth's label to the line that says when the next week begins. */
+    val MOUTH_LINE_GAP = 4.dp
+
+    /** The empty week's padding above and below. */
+    val EMPTY_PAD_Y = 48.dp
+
+    /** From the empty week's line to its button. */
+    val EMPTY_BUTTON_GAP = 24.dp
+
+    /** The empty week's button, inset from the page's sides. */
+    val EMPTY_BUTTON_INSET = 48.dp
 }
