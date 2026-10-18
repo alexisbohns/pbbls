@@ -27,7 +27,7 @@ import app.pbbls.android.features.path.spine.SpineLayout.VERSO_PAD_X
  * Path too, but the empty page keeps its own door, as the week list's `EmptyWeek` did.
  */
 @Composable
-fun SpineEmptyWeek(
+internal fun SpineEmptyWeek(
     onCreatePebble: () -> Unit,
     modifier: Modifier = Modifier,
 ) {

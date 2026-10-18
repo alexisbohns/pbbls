@@ -44,7 +44,7 @@ private const val UNTITLED_WEIGHT = 340
  * @param emotionInk the pebble's spot ink, or `ink2` with no palette.
  */
 @Composable
-fun SpineEntry(
+internal fun SpineEntry(
     moment: PathMoment,
     emotionName: String,
     emotionInk: Color,

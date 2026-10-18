@@ -193,7 +193,7 @@ private val NIGHT_PHOTO_FILTER: ColorFilter =
  * @param people the souls strip, handed the card unit `u` so its type and glyphs scale with the card.
  */
 @Composable
-fun SpineCard(
+internal fun SpineCard(
     moment: PathMoment,
     palette: EmotionPalette?,
     ratio: Float?,

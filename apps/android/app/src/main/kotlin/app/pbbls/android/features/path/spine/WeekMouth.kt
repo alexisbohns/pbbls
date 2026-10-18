@@ -72,7 +72,7 @@ private fun CairnStone.height(): Dp = StoneGeometry.outlineBox(size).let { width
  * @param onNextWeek absent on the last week there is.
  */
 @Composable
-fun WeekMouth(
+internal fun WeekMouth(
     words: WeekWords,
     current: Boolean,
     onNextWeek: (() -> Unit)?,

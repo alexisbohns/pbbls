@@ -37,11 +37,8 @@ import app.pbbls.android.features.path.spine.SpineLayout.SEAM_LABEL_OVERHANG
 import app.pbbls.android.features.path.spine.SpineLayout.SPINE_X
 import app.pbbls.android.features.path.spine.SpineLayout.STILL_PAD_TOP
 import app.pbbls.android.features.path.spine.logic.SpineDay
-import java.time.DayOfWeek
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.time.format.TextStyle
-import java.util.Locale
 
 private val HAIRLINE = 1.dp
 private val TOOTH_WIDTH = 1.dp
@@ -63,7 +60,7 @@ private val LABEL_LEFT = SPINE_X - LABEL_WIDTH / 2
  * hairline, as on web; the caller gives a still day its minimum length.
  */
 @Composable
-fun DaySeam(
+internal fun DaySeam(
     day: SpineDay,
     modifier: Modifier = Modifier,
 ) {
@@ -147,13 +144,3 @@ private fun DrawScope.teeth(
         x += period
     }
 }
-
-/** "mon", "lun": the locale's short weekday, lowercase, without the abbreviation point. */
-internal fun shortWeekday(
-    dayOfWeek: DayOfWeek,
-    locale: Locale,
-): String =
-    dayOfWeek
-        .getDisplayName(TextStyle.SHORT, locale)
-        .lowercase(locale)
-        .trimEnd('.')

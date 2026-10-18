@@ -28,7 +28,7 @@ import app.pbbls.android.features.path.spine.logic.WeekWords
  * @param onPreviousWeek absent on the first week there is: the start side stays empty.
  */
 @Composable
-fun WeekMasthead(
+internal fun WeekMasthead(
     words: WeekWords,
     onPreviousWeek: (() -> Unit)?,
     modifier: Modifier = Modifier,

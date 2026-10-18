@@ -57,7 +57,7 @@ internal fun readingDay(
  *   or null for the opening, the mouth and the rest.
  */
 @Composable
-fun rememberReadingDay(
+internal fun rememberReadingDay(
     listState: LazyListState,
     dayOfKey: (Any?) -> Int?,
 ): State<Int?> {

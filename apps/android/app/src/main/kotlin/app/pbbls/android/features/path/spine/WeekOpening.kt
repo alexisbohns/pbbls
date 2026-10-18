@@ -31,7 +31,7 @@ import app.pbbls.android.features.path.spine.logic.WeekWordsBuilder
  * @param peopleCount the persons of the week, as `PersonsOfWeek` counts them.
  */
 @Composable
-fun WeekOpening(
+internal fun WeekOpening(
     words: WeekWords,
     pebbleCount: Int,
     peopleCount: Int,

@@ -626,7 +626,7 @@
         <item quantity="many">et %1$s autres</item>
     </plurals>
     <string name="path_spine_contents" tools:ignore="UnusedResources">sommaire</string>
-    <string name="path_spine_contents_go">fait défiler et presse</string>
+    <string name="path_spine_contents_go">faire défiler et presser</string>
     <string name="path_spine_persons_expanded">déplié</string>
     <string name="path_spine_persons_collapsed">replié</string>
     <string name="path_spine_with" tools:ignore="UnusedResources">avec</string>

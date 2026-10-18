@@ -4,8 +4,10 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -13,26 +15,36 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.features.path.spine.SpineWeek
+import app.pbbls.android.features.path.spine.logic.SpineWeekBuilder
 import com.android.tools.screenshot.PreviewTest
 
 /**
- * The whole fixture week as `SpineWeek` lays it out (#1122 Part 5), at phone width,
- * Paper and Night, large font and French: the masthead, the opening, the fourteen
- * persons behind their fold, the contents, the seven days on the ground — Friday still,
- * blank stones among the pebbles — and the mouth. Then the empty current week: the
- * invitation in place of the feed. The week is a lazy list, so the page is given a
- * height tall enough to lay every item out; no network, ratios primed.
+ * The fixture week as `SpineWeek` lays it out (#1122 Part 5), at phone width, in three
+ * windows of a tall page so no reference grows past the feed's: the verso (masthead,
+ * opening, the fourteen persons behind their fold, the contents) in Paper and Night, large
+ * font and French; the days from the first seam in Night (Monday's card and entry, Tuesday,
+ * Wednesday with the named moment that is not a pebble yet); the last day and the mouth in
+ * Night (Sunday's blank photo, Bruno's uncarved stone, the cairn). Then the empty current
+ * week: the invitation in place of the feed. No network, ratios primed.
  */
 private val PHONE_WIDTH = 390.dp
-private val WEEK_HEIGHT = 5200.dp
+private val WINDOW_HEIGHT = 1800.dp
 private val EMPTY_HEIGHT = 720.dp
 
 private val emptyWeek = WeekRollEntry(weekStart = SpineFixtureWeek.weekStart, moments = emptyList())
+
+/** The list's rows before the first seam: masthead, opening, persons, contents — the fixture has people and moments. */
+private const val VERSO_ROWS = 4
+
+private val week by lazy { SpineWeekBuilder.build(SpineFixtureWeek.entry, SpineFixtureWeek.zone, SpineFixtureWeek.today) }
+private val firstSeamRow: Int get() = VERSO_ROWS
+private val lastSeamRow: Int get() = VERSO_ROWS + week.days.dropLast(1).sumOf { 1 + it.moments.size }
 
 @Composable
 private fun WeekPage(
     entry: WeekRollEntry,
     height: Dp,
+    firstRow: Int = 0,
 ) {
     Surface(color = PebblesTheme.spine.colors.ground) {
         Box(Modifier.width(PHONE_WIDTH).height(height)) {
@@ -47,6 +59,7 @@ private fun WeekPage(
                 onPreviousWeek = {},
                 onNextWeek = {},
                 onCreatePebble = {},
+                listState = remember(firstRow) { LazyListState(firstVisibleItemIndex = firstRow) },
                 ratioOverride = SpineFixtureWeek.ratios::get,
             )
         }
@@ -58,15 +71,29 @@ private fun WeekPage(
 @PreviewFrench
 @Preview(showBackground = true)
 @Composable
-fun SpineWeekLight() {
-    PebblesTheme { WeekPage(SpineFixtureWeek.entry, WEEK_HEIGHT) }
+fun SpineWeekVersoLight() {
+    PebblesTheme { WeekPage(SpineFixtureWeek.entry, WINDOW_HEIGHT) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun SpineWeekDark() {
-    PebblesTheme { WeekPage(SpineFixtureWeek.entry, WEEK_HEIGHT) }
+fun SpineWeekVersoDark() {
+    PebblesTheme { WeekPage(SpineFixtureWeek.entry, WINDOW_HEIGHT) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun SpineWeekDaysDark() {
+    PebblesTheme { WeekPage(SpineFixtureWeek.entry, WINDOW_HEIGHT, firstRow = firstSeamRow) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun SpineWeekMouthDark() {
+    PebblesTheme { WeekPage(SpineFixtureWeek.entry, WINDOW_HEIGHT, firstRow = lastSeamRow) }
 }
 
 @PreviewTest
