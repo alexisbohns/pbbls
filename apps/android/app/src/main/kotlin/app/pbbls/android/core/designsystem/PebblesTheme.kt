@@ -21,7 +21,7 @@ val LocalSpineTokens =
 /**
  * Pebbles' own tokens beside Material's (#853). Colour, type and shape are
  * `MaterialTheme.*`; this object keeps only what M3 has no slot for —
- * [spacing], the custom colours ([colors], #990) and the handwritten faces
+ * [spacing], the custom colours ([colors], #990), the handwritten faces
  * ([hand]) and the Spine's type ranks and paper ([spine]).
  */
 object PebblesTheme {
