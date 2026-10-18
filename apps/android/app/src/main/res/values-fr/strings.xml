@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- ==== Entry funnel (sub-project C) — Welcome ==== -->
     <string name="welcome_step_record_title">Notez en quelques secondes.</string>
     <string name="welcome_step_record_description">Capturez les moments quand ils arrivent — pas de page blanche, sans pression.</string>
@@ -603,4 +603,53 @@
     <string name="tab_people">Proches</string>
     <string name="tab_collections">Collections</string>
     <string name="tab_you">Toi</string>
+
+    <!-- Path · Spine (#1122). Read by the Spine week (Parts 3–6); the tools:ignore attributes go when it lands. -->
+    <string name="path_spine_kicker" tools:ignore="UnusedResources">la %1$s semaine · %2$d</string>
+    <string name="path_spine_title_same_month" tools:ignore="UnusedResources">Du %1$s au %2$s %3$s</string>
+    <string name="path_spine_title_cross_month" tools:ignore="UnusedResources">Du %1$s %2$s au %3$s %4$s</string>
+    <plurals name="path_spine_summary_pebbles" tools:ignore="UnusedResources">
+        <item quantity="one">%1$s galet</item>
+        <item quantity="other">%1$s galets</item>
+    </plurals>
+    <string name="path_spine_summary_no_pebbles" tools:ignore="UnusedResources">aucun galet</string>
+    <plurals name="path_spine_summary_people" tools:ignore="UnusedResources">
+        <item quantity="one">, %1$s personne</item>
+        <item quantity="other">, %1$s personnes</item>
+    </plurals>
+    <string name="path_spine_persons" tools:ignore="UnusedResources">les personnes de la semaine</string>
+    <plurals name="path_spine_persons_more" tools:ignore="UnusedResources">
+        <item quantity="one">et %1$s autre</item>
+        <item quantity="other">et %1$s autres</item>
+    </plurals>
+    <string name="path_spine_contents" tools:ignore="UnusedResources">sommaire</string>
+    <string name="path_spine_with" tools:ignore="UnusedResources">avec</string>
+    <plurals name="path_spine_others" tools:ignore="UnusedResources">
+        <item quantity="one">&amp; %1$s autre</item>
+        <item quantity="other">&amp; %1$s autres</item>
+    </plurals>
+    <string name="path_spine_still" tools:ignore="UnusedResources">calme</string>
+    <string name="path_spine_untitled" tools:ignore="UnusedResources">sans titre</string>
+    <string name="path_spine_photo_unavailable" tools:ignore="UnusedResources">photo indisponible</string>
+    <string name="path_spine_week_ends" tools:ignore="UnusedResources">la %1$s semaine s\'arrête ici</string>
+    <string name="path_spine_next_begins" tools:ignore="UnusedResources">La %1$s commence le lundi %2$s.</string>
+    <string name="path_spine_week_link" tools:ignore="UnusedResources">semaine %1$d</string>
+    <plurals name="path_spine_day_dots_a11y" tools:ignore="UnusedResources">
+        <item quantity="one">Un jour : %2$s</item>
+        <item quantity="other">%1$d jours : %2$s</item>
+    </plurals>
+    <string name="path_spine_stone_a11y" tools:ignore="UnusedResources">%1$s. %2$s, %3$s. %4$s, %5$s. %6$s Ouvre le galet.</string>
+    <string name="path_spine_blank_a11y" tools:ignore="UnusedResources">%1$s. %2$s, %3$s. Pas encore un galet. %4$s Ouvre le moment.</string>
+    <string name="path_spine_with_names" tools:ignore="UnusedResources">Avec %1$s.</string>
+    <string name="path_spine_glance_a11y" tools:ignore="UnusedResources">La semaine en un coup d\'œil</string>
+    <string name="path_spine_feed_a11y" tools:ignore="UnusedResources">La semaine, %1$s</string>
+    <string name="path_spine_stone_small_lowlight" tools:ignore="UnusedResources">Petite pierre de lave</string>
+    <string name="path_spine_stone_small_neutral" tools:ignore="UnusedResources">Petit galet de rivière</string>
+    <string name="path_spine_stone_small_highlight" tools:ignore="UnusedResources">Petite gemme</string>
+    <string name="path_spine_stone_medium_lowlight" tools:ignore="UnusedResources">Pierre de lave moyenne</string>
+    <string name="path_spine_stone_medium_neutral" tools:ignore="UnusedResources">Galet de rivière moyen</string>
+    <string name="path_spine_stone_medium_highlight" tools:ignore="UnusedResources">Gemme moyenne</string>
+    <string name="path_spine_stone_large_lowlight" tools:ignore="UnusedResources">Grande pierre de lave</string>
+    <string name="path_spine_stone_large_neutral" tools:ignore="UnusedResources">Grand galet de rivière</string>
+    <string name="path_spine_stone_large_highlight" tools:ignore="UnusedResources">Grande gemme</string>
 </resources>
