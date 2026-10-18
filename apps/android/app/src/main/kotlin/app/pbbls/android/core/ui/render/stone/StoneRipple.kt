@@ -26,16 +26,19 @@ import kotlinx.coroutines.launch
  * while `StonePressState.rippleToken` is set and let it overflow; it calls
  * [onDone] with [token] after the last wave, and a still week holds none of
  * it. Under reduced motion the press sets no token, so this never mounts.
+ * [blank] is the stone's own rule (no palette): the waves take the river
+ * pebble's silhouette, as the stone did.
  */
 @Composable
 fun StoneRipple(
     valence: Valence,
+    blank: Boolean,
     token: Long,
     onDone: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val size = valence.sizeGroup
-    val outline = rememberStoneOutline(size, valence.polarity)
+    val outline = rememberStoneOutline(size, stonePolarity(valence.polarity, blank))
     val ripple = PebblesTheme.spine.colors.ripple
     val waves = remember { List(WAVES) { WaveState() } }
     val scaleFrames = remember(size) { List(WAVES) { k -> Wave.scaleFrames(size, k) } }
