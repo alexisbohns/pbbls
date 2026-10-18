@@ -266,15 +266,10 @@ fun PathContent(
             // Entries sort ascending, so the neighbours are the pages either side; the
             // first week has no way back and the last no way on. Each link is named by
             // the week it reaches, as the roll names it.
-            val previous =
-                entries.getOrNull(page - 1)?.let {
+            fun neighbour(index: Int): WeekNeighbour? =
+                entries.getOrNull(index)?.let {
                     WeekNeighbour(WeekRollBuilder.isoWeekNumber(it.weekStart)) { onFocusChange(it.weekStart) }
                 }
-            val next =
-                entries
-                    .getOrNull(
-                        page + 1,
-                    )?.let { WeekNeighbour(WeekRollBuilder.isoWeekNumber(it.weekStart)) { onFocusChange(it.weekStart) } }
             SpineWeek(
                 entry = entries[page],
                 today = today,
@@ -283,8 +278,8 @@ fun PathContent(
                 aspect = aspect,
                 onOpen = onPebbleTap,
                 onRequestDelete = onPebbleDelete,
-                previousWeek = previous,
-                nextWeek = next,
+                previousWeek = neighbour(page - 1),
+                nextWeek = neighbour(page + 1),
                 onCreatePebble = onCreatePebble,
                 modifier = Modifier.fillMaxSize(),
                 ratioOverride = ratioOverride,

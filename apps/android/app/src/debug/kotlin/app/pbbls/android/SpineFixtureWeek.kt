@@ -10,6 +10,7 @@ import app.pbbls.android.core.model.PathSoul
 import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
+import app.pbbls.android.features.path.WeekRollBuilder
 import app.pbbls.android.features.path.spine.logic.PersonsOfWeek
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -40,8 +41,8 @@ internal object SpineFixtureWeek {
     val today: LocalDate = LocalDate.of(2026, 10, 11)
 
     /** The weeks the fixture's links turn to, as the roll would name them: the calendar's neighbours here. */
-    val previousNumber = 40
-    val nextNumber = 42
+    val previousNumber: Int = WeekRollBuilder.isoWeekNumber(weekStart.minusWeeks(1))
+    val nextNumber: Int = WeekRollBuilder.isoWeekNumber(weekStart.plusWeeks(1))
 
     private const val VIEW_BOX = "0 0 200 200"
 

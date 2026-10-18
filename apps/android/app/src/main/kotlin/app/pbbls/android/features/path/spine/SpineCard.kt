@@ -204,6 +204,7 @@ internal fun SpineCard(
     emotionName: String,
     people: (@Composable (u: Dp) -> Unit)?,
     modifier: Modifier = Modifier,
+    button: Modifier = Modifier,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
@@ -254,6 +255,9 @@ internal fun SpineCard(
                     }
                 }.background(colors.stock, shape)
                 .clip(shape)
+                // The click sits inside the clip so its ripple ends at the corners; the shadow
+                // above is drawn outside it, as the card's own frame.
+                .then(button)
                 .drawBehind {
                     val inset = (u * 1.6f).toPx()
                     drawRoundRect(

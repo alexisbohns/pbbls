@@ -5,7 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -18,6 +19,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
@@ -88,9 +90,14 @@ private fun WeekRollCell(
     Box(
         modifier =
             Modifier
-                .size(CELL_WIDTH, CELL_HEIGHT)
+                .width(CELL_WIDTH)
+                // A minimum, not a fixed height: a large font grows the cell rather than clipping the numeral.
+                .heightIn(min = CELL_HEIGHT)
                 .clickable(onClick = onTap)
-                .semantics { contentDescription = cellLabel },
+                .semantics {
+                    contentDescription = cellLabel
+                    selected = isFocused
+                },
         contentAlignment = Alignment.Center,
     ) {
         Text(
