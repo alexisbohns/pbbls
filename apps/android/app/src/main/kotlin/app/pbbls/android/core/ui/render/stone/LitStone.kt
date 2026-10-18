@@ -63,11 +63,15 @@ import kotlin.math.roundToInt
  * through [rippleDone].
  */
 @Stable
-class StonePressState {
+class StonePressState internal constructor(
+    stillTouched: Boolean,
+) {
+    constructor() : this(stillTouched = false)
+
     val dipProgress = Animatable(0f)
     val ringsProgress = Animatable(0f)
     val sparkProgress = Animatable(0f)
-    val sheen = Animatable(0f)
+    val sheen = Animatable(if (stillTouched) STILL_SHEEN else 0f)
 
     /** 0 parked off the stone, 1 travelled the glint's `travel`. */
     val sweep = Animatable(0f)
@@ -88,8 +92,11 @@ class StonePressState {
         get() = StoneMotion.piecewise(sparkProgress.value, Spark.ALPHA_FRAMES)
 
     /** A press under reduced motion: the rings darken and a still sheen holds. */
-    var touchedStill by mutableStateOf(false)
+    var touchedStill by mutableStateOf(stillTouched)
         private set
+
+    /** Which still touch owns the hold: a second press extends it rather than cutting it. */
+    private var stillGeneration = 0
 
     /** The live ripple, if any; a new press replaces it. */
     var rippleToken by mutableStateOf<Long?>(null)
@@ -133,14 +140,15 @@ class StonePressState {
     }
 
     private suspend fun pressStill() {
+        val mine = ++stillGeneration
         touchedStill = true
+        sheen.snapTo(STILL_SHEEN)
         try {
-            sheen.snapTo(STILL_SHEEN)
             delay(StoneMotion.STILL_TOUCH_MS)
-            sheen.snapTo(0f)
         } finally {
-            touchedStill = false
+            if (mine == stillGeneration) touchedStill = false
         }
+        if (mine == stillGeneration) sheen.snapTo(0f)
     }
 
     /** The ripple for [token] has finished; a newer token stays. */
@@ -148,11 +156,15 @@ class StonePressState {
         if (rippleToken == token) rippleToken = null
     }
 
-    private companion object {
-        const val STILL_SHEEN = 0.9f
+    companion object {
+        /** The sheen at its own opacity (`StoneRecipes.glint(size).sheen.opacity`, the same for every size). */
+        private val STILL_SHEEN: Float = StoneRecipes.glint(ValenceSizeGroup.MEDIUM).sheen.opacity
+
+        /** A stone held under reduced motion, for previews: the rings dark, the sheen still. */
+        internal fun stillTouched(): StonePressState = StonePressState(stillTouched = true)
 
         /** One WAAPI iteration: from 0, eased over the whole [duration] to 1. */
-        suspend fun Animatable<Float, AnimationVector1D>.run(
+        private suspend fun Animatable<Float, AnimationVector1D>.run(
             duration: Int,
             easing: Easing,
         ) {

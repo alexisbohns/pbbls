@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,6 +18,7 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.ui.render.stone.LitStone
+import app.pbbls.android.core.ui.render.stone.StonePressState
 import app.pbbls.android.core.ui.render.stone.StoneSeal
 import app.pbbls.android.core.ui.render.stone.rememberStonePressState
 import com.android.tools.screenshot.PreviewTest
@@ -24,10 +26,9 @@ import com.android.tools.screenshot.PreviewTest
 /**
  * The lit stone and its seal (#1122 Part 3): every valence in the pride
  * palette with the fixture glyph, each beside its seal, the blank moment, and
- * the same medium gem under four seeds. At rest: nothing is pressed, so the
- * glint and the ripple draw nothing. A press under reduced motion
- * (`touchedStill`) is not reachable from outside `StonePressState`, so it has
- * no reference here.
+ * the same medium gem under four seeds, and one gem held under reduced motion
+ * (dark rings, a still sheen). At rest otherwise: nothing is pressed, so the
+ * glint and the ripple draw nothing.
  */
 private val pridePalette: EmotionPalette =
     requireNotNull(
@@ -94,6 +95,13 @@ private fun LitStoneGallery() {
             }
         }
         StoneAndSeal(valence = Valence.NEUTRAL_MEDIUM, palette = null, seed = fixtureSeed)
+        LitStone(
+            valence = Valence.HIGHLIGHT_MEDIUM,
+            palette = pridePalette,
+            glyph = MomentPreviewFixtures.pebbleGlyph(),
+            seed = fixtureSeed,
+            press = remember { StonePressState.stillTouched() },
+        )
     }
 }
 

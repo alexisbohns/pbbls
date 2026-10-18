@@ -17,14 +17,12 @@ import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.core.ui.render.Affine
 import app.pbbls.android.core.ui.render.OutlineAssets
 
-/*
- * What the live Compose layers of a stone share (#1122): the flat outline as a
- * Compose Path in outline units, the box every stone layer fills, and the
- * Affine → Compose Matrix bridge. The painter keeps its own `android.graphics`
- * copies; these are for `Canvas` draws.
+/**
+ * The flat outline a stone's live Compose layers share (#1122): the asset's
+ * text, its path data and the parsed path, all in outline units. The painter
+ * keeps its own `android.graphics` copy of the body; this one is for `Canvas`
+ * draws (rings, glint clip, ripple, seal).
  */
-
-/** The flat outline: the asset's text, its path data and the parsed path (outline units). */
 internal data class StoneOutline(
     val raw: String,
     val d: String,

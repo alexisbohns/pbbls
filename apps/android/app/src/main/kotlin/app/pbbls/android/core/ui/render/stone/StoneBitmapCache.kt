@@ -10,13 +10,21 @@ import androidx.core.graphics.createBitmap
 
 /**
  * The painted stones, one bitmap per key: a still week does no drawing after
- * its first frame (spec §Performance). 64 entries hold a week and its
- * neighbours; at 54 dp × 3 density that is under 2 MB.
+ * its first frame (spec §Performance). Sized in bytes: a large stone at 3×
+ * density is ~125 KB (162 × 193 px), a medium one ~70 KB, so the budget holds
+ * some forty stones — a week and its neighbours.
  */
 internal object StoneBitmapCache {
-    private const val CAPACITY = 64
+    private const val BUDGET_BYTES = 4 * 1024 * 1024
+    private const val BYTES_PER_PIXEL = 4
 
-    private val lru = LruCache<String, ImageBitmap>(CAPACITY)
+    private val lru =
+        object : LruCache<String, ImageBitmap>(BUDGET_BYTES) {
+            override fun sizeOf(
+                key: String,
+                value: ImageBitmap,
+            ): Int = value.width * value.height * BYTES_PER_PIXEL
+        }
 
     /**
      * [density] is part of the key beside the pixel size: the painter reads it

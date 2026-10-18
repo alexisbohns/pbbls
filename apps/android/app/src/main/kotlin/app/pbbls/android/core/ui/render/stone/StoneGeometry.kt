@@ -49,10 +49,11 @@ internal object StoneGeometry {
         val height: Float,
     )
 
-    /** One transform per ring, innermost first, then the halo's. */
+    /** One transform per ring, innermost first, then the halo's; [frame] is the silhouette they scale about. */
     data class RingGeometry(
         val rings: List<Affine>,
         val halo: Affine,
+        val frame: Frame,
     )
 
     /** The sprite's blurs in canvas units, as the mock declared them. */
@@ -128,13 +129,14 @@ internal object StoneGeometry {
         return min(outline.width / seed.width, outline.height / seed.height)
     }
 
+    /** Every polarity shares the canvas; [polarity] is kept for parity with the web signature. */
     @Suppress("UNUSED_PARAMETER")
     fun canvasTransform(
         size: ValenceSizeGroup,
         polarity: ValencePolarity,
     ): Affine = centred(size, canvasScale(size))
 
-    /** Seed units → outline units, with iOS's carving inset (`pebbleScale × 1.22`). */
+    /** Seed units → outline units, with iOS's carving inset (`pebbleScale × 1.22`); [polarity] as in [canvasTransform]. */
     @Suppress("UNUSED_PARAMETER")
     fun carveTransform(
         size: ValenceSizeGroup,
@@ -190,6 +192,7 @@ internal object StoneGeometry {
         return RingGeometry(
             rings = List(count) { at((it + 1).toDouble()) },
             halo = at(count + HALO_STEP),
+            frame = frame,
         )
     }
 

@@ -61,7 +61,11 @@ internal data class StoneSpec(
  * device px whatever Skia does with the CTM.
  */
 internal object StonePainter {
-    /** feGaussianBlur σ → BlurMaskFilter radius. Tuned once on the gallery (spec §Risks). */
+    /**
+     * feGaussianBlur σ → BlurMaskFilter radius. Tuned once on the gallery (spec
+     * §Risks). Skia reads a radius as `σ = 0.57735 × radius + 0.5`, so the
+     * σ-exact factor is ≈ 1.73: a tuner moving toward web-exact goes down.
+     */
     const val BLUR_K = 2.5f
 
     /** The web's `vector-effect: non-scaling-stroke` hairline on a gem facet, in CSS px. */
@@ -168,6 +172,8 @@ internal object StonePainter {
         canvas: Canvas,
     ) {
         val ramp = StoneTones.bodyRamp(scene.polarity, scene.palette)
+        // The ramp is placed on the outline box; the web's `objectBoundingBox` is the
+        // body's own bbox, a hair tighter than the box on every side.
         val paint =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 shader =

@@ -38,7 +38,9 @@ fun StoneRipple(
     modifier: Modifier = Modifier,
 ) {
     val size = valence.sizeGroup
-    val outline = rememberStoneOutline(size, stonePolarity(valence.polarity, blank))
+    val polarity = stonePolarity(valence.polarity, blank)
+    val outline = rememberStoneOutline(size, polarity)
+    val frame = remember(outline, size, polarity) { StoneGeometry.ringGeometry(size, polarity, outline.d).frame }
     val ripple = PebblesTheme.spine.colors.ripple
     val waves = remember { List(WAVES) { WaveState() } }
     val scaleFrames = remember(size) { List(WAVES) { k -> Wave.scaleFrames(size, k) } }
@@ -61,14 +63,15 @@ fun StoneRipple(
     val box = StoneGeometry.outlineBox(size)
     Canvas(modifier.stoneBox(size)) {
         val pxPerUnit = this.size.width / box.width
-        val centre = this.center
+        // The rings' own origin, the silhouette's centroid, so waves and rings share it.
+        val centre = Offset(frame.cx * pxPerUnit, frame.cy * pxPerUnit)
         val strokePx = WAVE_STROKE.toPx()
         waves.forEachIndexed { k, wave ->
             val progress = wave.progress.value
             val alpha = StoneMotion.piecewise(progress, Wave.ALPHA_FRAMES)
             if (alpha <= 0f) return@forEachIndexed
             val scale = StoneMotion.piecewise(progress, scaleFrames[k])
-            // Scaled about the box centre; the stroke is divided back to one screen dp.
+            // The stroke is divided back to one screen dp.
             withTransform({
                 scale(scale, scale, centre)
                 scale(pxPerUnit, pxPerUnit, Offset.Zero)
