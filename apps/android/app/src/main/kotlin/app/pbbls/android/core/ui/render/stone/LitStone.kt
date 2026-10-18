@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -40,9 +42,11 @@ import app.pbbls.android.core.ui.render.stone.StoneMotion.Dip
 import app.pbbls.android.core.ui.render.stone.StoneMotion.Rings
 import app.pbbls.android.core.ui.render.stone.StoneMotion.Spark
 import app.pbbls.android.core.ui.render.stone.StoneMotion.Sweep
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 /**
@@ -211,9 +215,27 @@ fun LitStone(
                 night = colors.isNight,
             )
         }
-    val bitmap =
-        remember(spec, widthPx, heightPx, density.density) {
-            StoneBitmapCache.get(spec, widthPx, heightPx, density.density, resources)
+    val key = remember(spec, widthPx, heightPx, density.density) { StoneBitmapCache.key(spec, widthPx, heightPx, density.density) }
+    // A preview has one frame: paint it there and then. On a device the first
+    // paint leaves the main thread and the placeholder holds the frame.
+    val inspection = LocalInspectionMode.current
+    val initial =
+        remember(key) {
+            StoneBitmapCache.peek(key)
+                ?: if (inspection) StoneBitmapCache.get(spec, widthPx, heightPx, density.density, resources) else null
+        }
+    val bitmap by produceState(initial, key, resources) {
+        val hit = StoneBitmapCache.peek(key)
+        value = hit
+        if (hit == null) {
+            // CPU-bound rasterisation with no injectable dispatcher in a composable: the
+            // one place outside DispatchersModule that names one (Part 3 review).
+            value = withContext(Dispatchers.Default) { StoneBitmapCache.get(spec, widthPx, heightPx, density.density, resources) }
+        }
+    }
+    val placeholder =
+        remember(polarity, palette) {
+            StoneTones.bodyRamp(polarity, palette?.toStonePalette() ?: BLANK_STONE_PALETTE)[1].color
         }
 
     Box(modifier.stoneBox(size)) {
@@ -226,16 +248,22 @@ fun LitStone(
             scale = { press.ringsScale },
             modifier = Modifier.fillMaxSize(),
         )
-        Image(
-            bitmap = bitmap,
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier =
-                Modifier.fillMaxSize().graphicsLayer {
-                    scaleX = press.dipScale
-                    scaleY = press.dipScale
-                },
-        )
+        val stoneLayer =
+            Modifier.fillMaxSize().graphicsLayer {
+                scaleX = press.dipScale
+                scaleY = press.dipScale
+            }
+        val painted = bitmap
+        if (painted != null) {
+            Image(
+                bitmap = painted,
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = stoneLayer,
+            )
+        } else {
+            StonePlaceholder(outline = outline, size = size, color = placeholder, modifier = stoneLayer)
+        }
         StoneGlint(
             outline = outline,
             size = size,
@@ -243,6 +271,23 @@ fun LitStone(
             press = press,
             modifier = Modifier.fillMaxSize(),
         )
+    }
+}
+
+/** The body filled flat in the ramp's middle tone, until the painted bitmap arrives. */
+@Composable
+private fun StonePlaceholder(
+    outline: StoneOutline,
+    size: ValenceSizeGroup,
+    color: Color,
+    modifier: Modifier,
+) {
+    val box = StoneGeometry.outlineBox(size)
+    Canvas(modifier) {
+        val pxPerUnit = this.size.width / box.width
+        withTransform({ scale(pxPerUnit, pxPerUnit, Offset.Zero) }) {
+            drawPath(outline.path, color)
+        }
     }
 }
 

@@ -45,6 +45,9 @@ internal object StoneBitmapCache {
         ).joinToString("|")
     }
 
+    /** The bitmap for [key] if it is already painted; nothing is drawn. */
+    fun peek(key: String): ImageBitmap? = lru.get(key)
+
     fun get(
         spec: StoneSpec,
         w: Int,

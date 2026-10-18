@@ -24,8 +24,9 @@ import app.pbbls.android.core.ui.render.OutlineAssets
  * copies; these are for `Canvas` draws.
  */
 
-/** The flat outline: its path data and the parsed path, both in outline units. */
+/** The flat outline: the asset's text, its path data and the parsed path (outline units). */
 internal data class StoneOutline(
+    val raw: String,
     val d: String,
     val path: Path,
 )
@@ -56,7 +57,7 @@ internal object StoneOutlines {
                 Path()
             }
         if (raw.contains("fill-rule=\"evenodd\"")) path.fillType = PathFillType.EvenOdd
-        return StoneOutline(d, path)
+        return StoneOutline(raw, d, path)
     }
 }
 

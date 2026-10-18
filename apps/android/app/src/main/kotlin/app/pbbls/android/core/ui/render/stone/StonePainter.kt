@@ -22,7 +22,6 @@ import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.core.ui.render.Affine
-import app.pbbls.android.core.ui.render.OutlineAssets
 import app.pbbls.android.core.ui.render.stone.StoneGeometry.Blur
 import app.pbbls.android.core.ui.render.wobble.SVGTurbulence
 import app.pbbls.android.core.ui.render.wobble.WobbleParams
@@ -555,11 +554,7 @@ internal object StonePainter {
                 val polarity = if (blank) ValencePolarity.NEUTRAL else spec.polarity
                 val box = StoneGeometry.outlineBox(spec.size)
                 val pxPerUnit = widthPx / box.width
-                val raw =
-                    resources
-                        .openRawResource(OutlineAssets.resId(spec.size, polarity))
-                        .bufferedReader()
-                        .use { it.readText() }
+                val raw = StoneOutlines.of(spec.size, polarity, resources).raw
                 val canvasAffine = StoneGeometry.canvasTransform(spec.size, polarity)
                 val carveAffine = StoneGeometry.carveTransform(spec.size, polarity)
                 return Scene(
