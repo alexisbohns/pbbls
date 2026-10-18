@@ -129,7 +129,8 @@ d.description = [
   "Neutral palette hue 100 / chroma 4 (dark surface tiers: hue 275 / chroma 3, which the single palettes.neutral below cannot express), neutral-variant hue 92 / chroma 8;",
   "primary, secondary, tertiary, error and Sand are v2 verbatim; palettes.neutral and palettes.neutral-variant follow the recipe.",
   "A Theme Builder re-export resets the error roles to the seed's and drops Sand: redo those by hand first, as #990 did, then run",
-  "apps/android/scripts/generate-theme-export.mjs (@material/material-color-utilities 0.3.0), or the neutrals revert to the seed's.",
+  "apps/android/scripts/generate-theme-export.mjs (@material/material-color-utilities 0.3.0), or the neutrals revert to the seed's;",
+  "then scripts/generate-color-schemes.py and, from the repo root, npm run generate:m3 --workspace=apps/web.",
   `export v3 ${DATE}, generated with material-color-utilities (${ISSUE})`,
 ].join("\n");
 
