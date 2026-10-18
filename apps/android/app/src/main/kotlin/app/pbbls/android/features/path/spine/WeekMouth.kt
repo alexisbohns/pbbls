@@ -33,6 +33,7 @@ import app.pbbls.android.core.ui.render.stone.rememberStoneOutline
 import app.pbbls.android.features.path.spine.SpineLayout.COL_X
 import app.pbbls.android.features.path.spine.SpineLayout.MOUTH_LINE
 import app.pbbls.android.features.path.spine.SpineLayout.MOUTH_LINE_GAP
+import app.pbbls.android.features.path.spine.SpineLayout.MOUTH_LINK_GAP
 import app.pbbls.android.features.path.spine.SpineLayout.PAD_R
 import app.pbbls.android.features.path.spine.SpineLayout.SPINE_X
 import app.pbbls.android.features.path.spine.logic.WeekWords
@@ -88,12 +89,13 @@ fun WeekMouth(
             .heightIn(min = cairnBottom)
             .drawBehind {
                 val x = SPINE_X.toPx()
-                drawLine(colors.line, Offset(x, 0f), Offset(x, MOUTH_LINE.toPx()), LINE_WIDTH.toPx())
                 var top = CAIRN_TOP.toPx()
                 CAIRN.forEachIndexed { i, stone ->
                     cairnStone(outlines[i], stone, x, top, colors.ground, colors.ink2)
                     top += (stone.height() - stone.overlap).toPx()
                 }
+                // The line runs over the cairn's top stone, as the web's `z-1` has it.
+                drawLine(colors.line, Offset(x, 0f), Offset(x, MOUTH_LINE.toPx()), LINE_WIDTH.toPx())
             },
     ) {
         if (!current) {
@@ -110,8 +112,7 @@ fun WeekMouth(
                     modifier = Modifier.padding(top = MOUTH_LINE_GAP),
                 )
                 if (onNextWeek != null) {
-                    // The arrow is drawn, not read: the description names the action. The 48 dp
-                    // target centres the text, which sets it about where the web's margin does.
+                    // The arrow is drawn, not read: the description names the action.
                     val next = stringResource(R.string.path_week_next)
                     Text(
                         text = stringResource(R.string.path_spine_week_link, words.nextNumber) + " →",
@@ -119,6 +120,7 @@ fun WeekMouth(
                         color = colors.ink2,
                         modifier =
                             Modifier
+                                .padding(top = MOUTH_LINK_GAP)
                                 .semantics { contentDescription = next }
                                 .clickable(interactionSource = null, indication = null, role = Role.Button, onClick = onNextWeek)
                                 .minimumInteractiveComponentSize(),

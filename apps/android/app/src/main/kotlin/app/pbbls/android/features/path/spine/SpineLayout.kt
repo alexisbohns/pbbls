@@ -108,6 +108,9 @@ internal object SpineLayout {
     /** From the mouth's label to the line that says when the next week begins. */
     val MOUTH_LINE_GAP = 4.dp
 
+    /** From the "begins" line to the next-week link's box (the web's `mt-2.5`). */
+    val MOUTH_LINK_GAP = 10.dp
+
     /** The empty week's padding above and below. */
     val EMPTY_PAD_Y = 48.dp
 

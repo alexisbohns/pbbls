@@ -56,11 +56,13 @@ fun WeekMasthead(
         } else {
             Spacer(Modifier.weight(1f))
         }
+        // Read as "week 41", not "41".
+        val weekName = stringResource(R.string.path_spine_week_link, words.number)
         Text(
             text = words.number.toString(),
             style = type.mastheadNumber,
             color = colors.ink,
-            modifier = Modifier.alignByBaseline(),
+            modifier = Modifier.alignByBaseline().semantics { contentDescription = weekName },
         )
     }
 }
