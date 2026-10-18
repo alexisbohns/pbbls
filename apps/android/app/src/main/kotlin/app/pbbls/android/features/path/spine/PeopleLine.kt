@@ -191,7 +191,7 @@ private fun PeopleStrip(
 
 /** A soul's glyph as a thin line, or, without one, the dashed placeholder square (web `SoulMark`). */
 @Composable
-private fun SoulMark(
+internal fun SoulMark(
     glyph: Glyph?,
     ink: Color,
     modifier: Modifier,
