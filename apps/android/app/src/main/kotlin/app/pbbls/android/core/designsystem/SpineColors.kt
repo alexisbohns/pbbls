@@ -1,11 +1,8 @@
 package app.pbbls.android.core.designsystem
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 
 /**
@@ -73,10 +70,6 @@ data class SpineTokens(
     val colors: SpineColors,
 )
 
-/** For previews that bypass `PebblesTheme`; agrees with the value it provides. */
+/** For previews: the same object the theme provides (the default one outside `PebblesTheme`). */
 @Composable
-fun rememberSpineColors(): SpineColors {
-    val scheme = MaterialTheme.colorScheme
-    val night = isSystemInDarkTheme()
-    return remember(scheme, night) { SpineColors.from(scheme, night) }
-}
+fun rememberSpineColors(): SpineColors = LocalSpineTokens.current.colors

@@ -65,7 +65,7 @@ class SpineWeekBuilderTest {
         today: LocalDate,
         zone: ZoneId = utc,
         weekStart: LocalDate = w41,
-    ): SpineWeek = SpineWeekBuilder.build(entryOf(moments, today, zone, weekStart), today, zone)
+    ): SpineWeek = SpineWeekBuilder.build(entryOf(moments, today, zone, weekStart), zone, today)
 
     // Deliberately out of order, two on Tuesday, whole-second and fractional.
     private val week =
@@ -101,7 +101,7 @@ class SpineWeekBuilderTest {
         // ...and the Spine re-sorts it as a book.
         assertEquals(
             listOf("mon", "tue-early", "tue-late", "sat", "sun"),
-            ids(SpineWeekBuilder.build(entry, today, utc).readingOrder),
+            ids(SpineWeekBuilder.build(entry, utc, today).readingOrder),
         )
     }
 
@@ -175,7 +175,7 @@ class SpineWeekBuilderTest {
         val moments = listOf(bare("mon", "2026-10-05T08:15:00Z"), bare("thu", "2026-10-08T18:00:00Z"))
         val entry = entryOf(moments, today)
         assertEquals(2, entry.moments.size)
-        val week = SpineWeekBuilder.build(entry, today, utc)
+        val week = SpineWeekBuilder.build(entry, utc, today)
         assertEquals(0, week.pebbleCount)
         assertEquals(listOf(0, 3), week.days.filter { !it.still }.map { it.index })
     }

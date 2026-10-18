@@ -42,8 +42,8 @@ object SpineWeekBuilder {
 
     fun build(
         entry: WeekRollEntry,
-        today: LocalDate,
         zone: ZoneId,
+        today: LocalDate,
     ): SpineWeek {
         val byDay = List(DAYS_IN_WEEK) { mutableListOf<PathMoment>() }
         for (moment in entry.moments) {

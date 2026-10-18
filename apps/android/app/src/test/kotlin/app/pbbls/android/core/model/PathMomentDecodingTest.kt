@@ -108,7 +108,7 @@ class PathMomentDecodingTest {
         assertNull(moment.pebble)
     }
 
-    // Verbatim path_moments() rows with and without the #1121 souls key (the foreign-payload rule).
+    // Rows in the exact shape path_moments() returns, with and without the #1121 souls key.
     private val withSouls =
         """
         {"id":"m1","name":"Flag march","happened_at":"2026-10-05T08:15:00+00:00","created_at":"2026-10-05T08:16:02.123456+00:00",
