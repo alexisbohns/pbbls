@@ -187,6 +187,7 @@ private val NIGHT_PHOTO_FILTER: ColorFilter =
  * @param thumbUrl the signed thumb, Coil's placeholder key while the original loads.
  * @param weekday the locale's short weekday, lowercase, without the point.
  * @param emotionName already localised; empty for a moment that is not a pebble yet.
+ * @param people the souls strip, handed the card unit `u` so its type and glyphs scale with the card.
  */
 @Composable
 fun SpineCard(
@@ -198,7 +199,7 @@ fun SpineCard(
     weekday: String,
     time: String,
     emotionName: String,
-    people: @Composable (() -> Unit)?,
+    people: (@Composable (u: Dp) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val colors = PebblesTheme.spine.colors
@@ -297,7 +298,7 @@ fun SpineCard(
                         )
                     }
                     if (people != null) {
-                        Box(Modifier.fillMaxWidth().padding(top = u * 1.8f), contentAlignment = Alignment.Center) { people() }
+                        Box(Modifier.fillMaxWidth().padding(top = u * 1.8f), contentAlignment = Alignment.Center) { people(u) }
                     }
                 }
             }

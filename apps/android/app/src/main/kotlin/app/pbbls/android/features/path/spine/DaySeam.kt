@@ -35,6 +35,7 @@ import app.pbbls.android.features.path.spine.SpineLayout.LABEL_WIDTH
 import app.pbbls.android.features.path.spine.SpineLayout.SEAM_HEIGHT
 import app.pbbls.android.features.path.spine.SpineLayout.SPINE_X
 import app.pbbls.android.features.path.spine.logic.SpineDay
+import java.time.DayOfWeek
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
@@ -64,7 +65,7 @@ fun DaySeam(
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val locale = LocalConfiguration.current.locales[0]
-    val weekday = remember(day.date, locale) { shortWeekday(day, locale) }
+    val weekday = remember(day.date, locale) { shortWeekday(day.date.dayOfWeek, locale) }
     val fullDate =
         remember(day.date, locale) {
             day.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale))
@@ -140,11 +141,11 @@ private fun DrawScope.teeth(
 }
 
 /** "mon", "lun": the locale's short weekday, lowercase, without the abbreviation point. */
-private fun shortWeekday(
-    day: SpineDay,
+internal fun shortWeekday(
+    dayOfWeek: DayOfWeek,
     locale: Locale,
 ): String =
-    day.date.dayOfWeek
+    dayOfWeek
         .getDisplayName(TextStyle.SHORT, locale)
         .lowercase(locale)
         .trimEnd('.')
