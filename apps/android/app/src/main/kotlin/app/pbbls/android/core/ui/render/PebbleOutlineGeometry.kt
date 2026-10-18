@@ -10,7 +10,7 @@ import app.pbbls.android.core.model.ValenceSizeGroup
  * explicitly to land at the correct relative size inside the backdrop.
  */
 object PebbleOutlineGeometry {
-    private data class Dimensions(
+    internal data class Dimensions(
         val width: Float,
         val height: Float,
     )
@@ -37,6 +37,9 @@ object PebbleOutlineGeometry {
             ValenceSizeGroup.MEDIUM to Dimensions(260f, 260f),
             ValenceSizeGroup.LARGE to Dimensions(260f, 310f),
         )
+
+    /** The outline viewBox for a size; the lit stone's `StoneGeometry` reads it as its outline box. */
+    internal fun outlineDimensions(size: ValenceSizeGroup): Dimensions = outlineSizes.getValue(size)
 
     /**
      * Linear scale factor applied to the pebble render so it fits inside the
