@@ -43,11 +43,14 @@ jobs:
 
       # No `npm ci`: audit reads the lockfile, and installing first would only
       # add a few minutes and a second way for the job to go red.
-      - name: npm audit (high and critical)
-        run: npm audit --audit-level=high
+      # Production dependencies only. Dev tooling (eslint-config-next, the
+      # shadcn CLI) never ships, and a dev advisory with no patched release
+      # (braces, 2026-09) would otherwise hold the weekly run red for weeks.
+      - name: npm audit (production, high and critical)
+        run: npm audit --omit=dev --audit-level=high
 
-      # The high gate is what fails the build; the full report is for whoever
-      # opens the run, so moderate advisories are visible without blocking.
+      # The production gate is what fails the build; the full report, dev
+      # dependencies and moderates included, is for whoever opens the run.
       - name: Full advisory report
         if: always()
         run: npm audit || true
