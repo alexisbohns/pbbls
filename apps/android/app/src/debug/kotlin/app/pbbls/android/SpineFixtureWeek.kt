@@ -39,6 +39,10 @@ internal object SpineFixtureWeek {
     /** A Sunday evening of the fixture week: every day of it is in the past but today. */
     val today: LocalDate = LocalDate.of(2026, 10, 11)
 
+    /** The weeks the fixture's links turn to, as the roll would name them: the calendar's neighbours here. */
+    val previousNumber = 40
+    val nextNumber = 42
+
     private const val VIEW_BOX = "0 0 200 200"
 
     private fun stroke(

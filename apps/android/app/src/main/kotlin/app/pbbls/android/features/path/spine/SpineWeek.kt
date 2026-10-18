@@ -84,7 +84,8 @@ import java.time.ZoneId
  * @param today the local date, for which days exist and whether this is the current week.
  * @param paletteFor the pebble's emotion palette; null for a blank stone.
  * @param aspect the session's photo-ratio cache; null in previews and the lab.
- * @param onPreviousWeek absent on the first week there is; [onNextWeek] on the last.
+ * @param previousWeek the week the masthead turns back to, named by its own number; absent on
+ *   the first week there is. [nextWeek] likewise for the mouth, absent on the last.
  * @param listState hoisted so a preview can open the page at a row.
  * @param zone the zone the days are cut in and the times print in; the device's by default.
  * @param ratioOverride a primed photo ratio by snap prefix, for previews with no cache.
@@ -98,8 +99,8 @@ fun SpineWeek(
     aspect: SnapAspectCache?,
     onOpen: (PathMoment) -> Unit,
     onRequestDelete: (PathMoment) -> Unit,
-    onPreviousWeek: (() -> Unit)?,
-    onNextWeek: (() -> Unit)?,
+    previousWeek: WeekNeighbour?,
+    nextWeek: WeekNeighbour?,
     onCreatePebble: () -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
@@ -167,7 +168,7 @@ fun SpineWeek(
         ) {
             items(items.rows, key = { it.key }, contentType = { it::class }) { row ->
                 when (row) {
-                    WeekRow.Masthead -> WeekMasthead(words = words, onPreviousWeek = onPreviousWeek)
+                    WeekRow.Masthead -> WeekMasthead(words = words, previousWeek = previousWeek)
                     WeekRow.Opening -> WeekOpening(words = words, pebbleCount = week.pebbleCount, peopleCount = persons.size)
                     WeekRow.Persons ->
                         PersonsOfWeek(persons = persons, weekStart = entry.weekStart, soulsById = soulsById, readingDay = dayRead)
@@ -218,7 +219,7 @@ fun SpineWeek(
                         WeekMouth(
                             words = words,
                             current = current,
-                            onNextWeek = onNextWeek,
+                            nextWeek = nextWeek,
                             // The mouth draws its own last run of the line.
                             modifier = Modifier.then(SpineGroundElement(tile, 0.dp, row.ground, heights, line = null)),
                         )

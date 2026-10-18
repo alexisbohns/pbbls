@@ -25,12 +25,15 @@ import app.pbbls.android.features.path.spine.logic.WeekWords
  * number in ink on the end side. The web's masthead (`WeekOpening.tsx`) sets the brand
  * name where the number sits; on Android the tab bar already says where you are.
  *
- * @param onPreviousWeek absent on the first week there is: the start side stays empty.
+ * The link names the week it reaches (the pager's neighbour), not the calendar's previous
+ * week: the two differ when weeks are skipped.
+ *
+ * @param previousWeek absent on the first week there is: the start side stays empty.
  */
 @Composable
 internal fun WeekMasthead(
     words: WeekWords,
-    onPreviousWeek: (() -> Unit)?,
+    previousWeek: WeekNeighbour?,
     modifier: Modifier = Modifier,
 ) {
     val colors = PebblesTheme.spine.colors
@@ -39,18 +42,18 @@ internal fun WeekMasthead(
         modifier = modifier.fillMaxWidth().padding(horizontal = VERSO_PAD_X),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        if (onPreviousWeek != null) {
+        if (previousWeek != null) {
             // The arrow is drawn, not read: the description names the action.
             val previous = stringResource(R.string.path_week_previous)
             Text(
-                text = "← " + stringResource(R.string.path_spine_week_link, words.previousNumber),
+                text = "← " + stringResource(R.string.path_spine_week_link, previousWeek.number),
                 style = type.masthead,
                 color = colors.ink2,
                 modifier =
                     Modifier
                         .alignByBaseline()
                         .semantics { contentDescription = previous }
-                        .clickable(interactionSource = null, indication = null, role = Role.Button, onClick = onPreviousWeek)
+                        .clickable(interactionSource = null, indication = null, role = Role.Button, onClick = previousWeek.go)
                         .minimumInteractiveComponentSize(),
             )
         } else {

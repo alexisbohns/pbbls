@@ -7,6 +7,7 @@ import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.features.path.spine.SpinePebble
 import app.pbbls.android.features.path.spine.SpineWeek
 import app.pbbls.android.features.path.spine.StonePressRequests
+import app.pbbls.android.features.path.spine.WeekNeighbour
 
 /*
  * The fixture week on the Spine (#1122), for the Spine lab's Week tab and the
@@ -26,8 +27,8 @@ internal fun SpineLabWeek(modifier: Modifier = Modifier) {
         aspect = null,
         onOpen = {},
         onRequestDelete = {},
-        onPreviousWeek = {},
-        onNextWeek = {},
+        previousWeek = WeekNeighbour(SpineFixtureWeek.previousNumber) {},
+        nextWeek = WeekNeighbour(SpineFixtureWeek.nextNumber) {},
         onCreatePebble = {},
         modifier = modifier,
         zone = SpineFixtureWeek.zone,

@@ -69,13 +69,16 @@ private fun CairnStone.height(): Dp = StoneGeometry.outlineBox(size).let { width
  * ending yet: the web asks for a pebble there, and on Android the FAB does (D5), so the
  * mouth is the cairn alone. Sits last in the feed, on the line and the ground.
  *
- * @param onNextWeek absent on the last week there is.
+ * The sentence about when the next week begins is the calendar's; the link names the week
+ * it reaches (the pager's neighbour), which differs when weeks are skipped.
+ *
+ * @param nextWeek absent on the last week there is.
  */
 @Composable
 internal fun WeekMouth(
     words: WeekWords,
     current: Boolean,
-    onNextWeek: (() -> Unit)?,
+    nextWeek: WeekNeighbour?,
     modifier: Modifier = Modifier,
 ) {
     val colors = PebblesTheme.spine.colors
@@ -111,18 +114,18 @@ internal fun WeekMouth(
                     color = colors.ink2,
                     modifier = Modifier.padding(top = MOUTH_LINE_GAP),
                 )
-                if (onNextWeek != null) {
+                if (nextWeek != null) {
                     // The arrow is drawn, not read: the description names the action.
                     val next = stringResource(R.string.path_week_next)
                     Text(
-                        text = stringResource(R.string.path_spine_week_link, words.nextNumber) + " →",
+                        text = stringResource(R.string.path_spine_week_link, nextWeek.number) + " →",
                         style = type.mouthLabel,
                         color = colors.ink2,
                         modifier =
                             Modifier
                                 .padding(top = MOUTH_LINK_GAP)
                                 .semantics { contentDescription = next }
-                                .clickable(interactionSource = null, indication = null, role = Role.Button, onClick = onNextWeek)
+                                .clickable(interactionSource = null, indication = null, role = Role.Button, onClick = nextWeek.go)
                                 .minimumInteractiveComponentSize(),
                     )
                 }

@@ -42,6 +42,7 @@ import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.components.NewPebbleFab
 import app.pbbls.android.features.path.components.WeekRoll
 import app.pbbls.android.features.path.spine.SpineWeek
+import app.pbbls.android.features.path.spine.WeekNeighbour
 import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
 import kotlin.math.abs
@@ -262,10 +263,18 @@ fun PathContent(
                     .weight(1f)
                     .testTag(JourneyTags.PATH_WEEK_PAGER),
         ) { page ->
-            // Entries sort ascending, so the neighbours are the pages either side;
-            // the first week has no way back and the last no way on.
-            val previous = entries.getOrNull(page - 1)
-            val next = entries.getOrNull(page + 1)
+            // Entries sort ascending, so the neighbours are the pages either side; the
+            // first week has no way back and the last no way on. Each link is named by
+            // the week it reaches, as the roll names it.
+            val previous =
+                entries.getOrNull(page - 1)?.let {
+                    WeekNeighbour(WeekRollBuilder.isoWeekNumber(it.weekStart)) { onFocusChange(it.weekStart) }
+                }
+            val next =
+                entries
+                    .getOrNull(
+                        page + 1,
+                    )?.let { WeekNeighbour(WeekRollBuilder.isoWeekNumber(it.weekStart)) { onFocusChange(it.weekStart) } }
             SpineWeek(
                 entry = entries[page],
                 today = today,
@@ -274,8 +283,8 @@ fun PathContent(
                 aspect = aspect,
                 onOpen = onPebbleTap,
                 onRequestDelete = onPebbleDelete,
-                onPreviousWeek = previous?.let { { onFocusChange(it.weekStart) } },
-                onNextWeek = next?.let { { onFocusChange(it.weekStart) } },
+                previousWeek = previous,
+                nextWeek = next,
                 onCreatePebble = onCreatePebble,
                 modifier = Modifier.fillMaxSize(),
                 ratioOverride = ratioOverride,

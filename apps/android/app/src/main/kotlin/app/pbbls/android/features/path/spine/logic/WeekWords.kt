@@ -33,6 +33,11 @@ data class WeekWords(
     /** "forty-first", "quarante et unième". */
     val ordinal: String,
     val title: WeekTitle,
+    /**
+     * The calendar's neighbours, as the web's `words.previous.number` / `words.next.number`.
+     * Kept against the web vectors; the Spine's links name the pager's neighbour instead
+     * ([app.pbbls.android.features.path.spine.WeekNeighbour]).
+     */
     val previousNumber: Int,
     val nextNumber: Int,
     val nextOrdinal: String,
