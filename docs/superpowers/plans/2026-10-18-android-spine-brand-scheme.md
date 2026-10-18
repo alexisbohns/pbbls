@@ -344,7 +344,7 @@ npm run generate:m3 --workspace=apps/web
 git diff --stat apps/web/app/m3-theme.css
 ```
 
-Expected: `[generate:m3] wrote 6 schemes × 48 roles to app/m3-theme.css` (the role count is whatever it prints today; it must not change), and a diff in `m3-theme.css` only.
+Expected: `[generate:m3] wrote 6 schemes × 52 roles to app/m3-theme.css` (the role count is whatever it prints today; it must not change), and a diff in `m3-theme.css` only.
 
 - [ ] **Step 3: Run the drift gate again**
 
