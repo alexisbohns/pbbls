@@ -8,6 +8,7 @@ import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakePathStatsService
+import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -44,7 +45,8 @@ class PathViewModelTest {
         stats: FakePathStatsService = FakePathStatsService(),
         writes: FakeMomentWriteService = FakeMomentWriteService(),
         focusRequests: PathFocusRequests = PathFocusRequests(),
-    ) = PathViewModel(path, stats, writes, focusRequests)
+        souls: FakeSoulsService = FakeSoulsService(),
+    ) = PathViewModel(path, stats, writes, focusRequests, souls)
 
     // MARK: - Focus requests (R14)
 
@@ -202,6 +204,33 @@ class PathViewModelTest {
             repeat(5) { viewModel.uiState.value }
 
             assertEquals(1, path.loadPathCount)
+        }
+
+    // MARK: - Souls
+
+    @Test
+    fun `content carries the souls by id`() =
+        runTest {
+            val souls = FakeSoulsService(souls = listOf(UiFixtures.soul(id = "s1", name = "Ana"), UiFixtures.soul(id = "s2", name = "Bo")))
+            val viewModel = viewModel(souls = souls)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as PathUiState.Content
+            assertEquals(setOf("s1", "s2"), state.soulsById.keys)
+            assertEquals("Ana", state.soulsById["s1"]?.name)
+        }
+
+    @Test
+    fun `a souls failure leaves an empty map, not an error`() =
+        runTest {
+            val souls = FakeSoulsService()
+            souls.failNext = IllegalStateException("souls down")
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(moment("a"))), souls = souls)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as PathUiState.Content
+            assertTrue(state.soulsById.isEmpty())
+            assertTrue(state.entries.any { entry -> entry.moments.any { it.id == "a" } })
         }
 
     // MARK: - Stats and the local active-today override
