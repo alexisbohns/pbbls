@@ -1,7 +1,7 @@
 package app.pbbls.android.core.ui.render.stone
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,7 +19,6 @@ import app.pbbls.android.core.ui.render.stone.StoneMotion.Wave
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 /**
  * Three stone-shaped waves travelling out across the ground from a pressed
@@ -39,41 +38,17 @@ fun StoneRipple(
     val outline = rememberStoneOutline(size, valence.polarity)
     val ripple = PebblesTheme.spine.colors.ripple
     val waves = remember { List(WAVES) { WaveState() } }
+    val scaleFrames = remember(size) { List(WAVES) { k -> Wave.scaleFrames(size, k) } }
     val done by rememberUpdatedState(onDone)
 
     LaunchedEffect(token) {
         coroutineScope {
             waves.forEachIndexed { k, wave ->
                 launch {
-                    wave.scale.snapTo(Wave.WAVE_START_SCALE)
-                    wave.alpha.snapTo(0f)
+                    wave.progress.snapTo(0f)
                     delay(Wave.delay(k).toLong())
-                    val duration = Wave.duration(k)
-                    val rise = (duration * Wave.WAVE_RISE_AT).roundToInt()
-                    coroutineScope {
-                        launch {
-                            wave.scale.animateTo(
-                                Wave.reach(size, k),
-                                keyframes {
-                                    durationMillis = duration
-                                    Wave.WAVE_START_SCALE at 0 using Wave.EASING
-                                    Wave.WAVE_RISE_SCALE at rise using Wave.EASING
-                                    Wave.reach(size, k) at duration
-                                },
-                            )
-                        }
-                        launch {
-                            wave.alpha.animateTo(
-                                0f,
-                                keyframes {
-                                    durationMillis = duration
-                                    0f at 0 using Wave.EASING
-                                    Wave.WAVE_RISE_ALPHA at rise using Wave.EASING
-                                    0f at duration
-                                },
-                            )
-                        }
-                    }
+                    // One WAAPI iteration: eased over the whole run, the keyframes linear in it.
+                    wave.progress.animateTo(1f, tween(Wave.duration(k), easing = Wave.EASING))
                 }
             }
         }
@@ -85,10 +60,11 @@ fun StoneRipple(
         val pxPerUnit = this.size.width / box.width
         val centre = this.center
         val strokePx = WAVE_STROKE.toPx()
-        waves.forEach { wave ->
-            val alpha = wave.alpha.value
-            if (alpha <= 0f) return@forEach
-            val scale = wave.scale.value
+        waves.forEachIndexed { k, wave ->
+            val progress = wave.progress.value
+            val alpha = StoneMotion.piecewise(progress, Wave.ALPHA_FRAMES)
+            if (alpha <= 0f) return@forEachIndexed
+            val scale = StoneMotion.piecewise(progress, scaleFrames[k])
             // Scaled about the box centre; the stroke is divided back to one screen dp.
             withTransform({
                 scale(scale, scale, centre)
@@ -101,8 +77,7 @@ fun StoneRipple(
 }
 
 private class WaveState {
-    val scale = Animatable(Wave.WAVE_START_SCALE)
-    val alpha = Animatable(0f)
+    val progress = Animatable(0f)
 }
 
 private const val WAVES = 3

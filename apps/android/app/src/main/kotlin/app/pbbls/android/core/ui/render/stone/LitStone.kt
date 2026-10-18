@@ -1,8 +1,8 @@
 package app.pbbls.android.core.ui.render.stone
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.KeyframesSpec
-import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -46,24 +46,42 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /**
- * One stone's press, as the web's `data-stone-*` hooks (#1122, spec §Press,
+ * One stone's press, as the web's `useStonePress` plays it (#1122, spec §Press,
  * ripple, glint): the dip of the stone layer, the swell of the rings, the
- * sheen, sweep and spark of the glint. Every value rests where a still stone
- * draws nothing — scale 1, alpha 0, the sweep parked — and every animation is
- * finite. The ripple is the caller's: it mounts `StoneRipple` while
- * [rippleToken] is set and hands the token back through [rippleDone].
+ * sheen, sweep and spark of the glint. Each element is one progress
+ * `Animatable` eased over its whole run — WAAPI's `element.animate(keyframes,
+ * { duration, delay, easing })` eases the iteration, not each segment — and
+ * the keyframe tables in [StoneMotion] map that progress to what the layers
+ * read ([dipScale], [ringsScale], [sparkScale], [sparkRotation], [sparkAlpha]).
+ * Every value rests where a still stone draws nothing — scale 1, alpha 0, the
+ * sweep parked — and every animation is finite. The ripple is the caller's:
+ * it mounts `StoneRipple` while [rippleToken] is set and hands the token back
+ * through [rippleDone].
  */
 @Stable
 class StonePressState {
-    val dip = Animatable(1f)
-    val rings = Animatable(1f)
+    val dipProgress = Animatable(0f)
+    val ringsProgress = Animatable(0f)
+    val sparkProgress = Animatable(0f)
     val sheen = Animatable(0f)
 
     /** 0 parked off the stone, 1 travelled the glint's `travel`. */
     val sweep = Animatable(0f)
-    val sparkScale = Animatable(0f)
-    val sparkRotation = Animatable(0f)
-    val sparkAlpha = Animatable(0f)
+
+    val dipScale: Float
+        get() = StoneMotion.piecewise(dipProgress.value, Dip.SCALE_FRAMES)
+
+    val ringsScale: Float
+        get() = StoneMotion.piecewise(ringsProgress.value, Rings.SCALE_FRAMES)
+
+    val sparkScale: Float
+        get() = StoneMotion.piecewise(sparkProgress.value, Spark.SCALE_FRAMES)
+
+    val sparkRotation: Float
+        get() = StoneMotion.piecewise(sparkProgress.value, Spark.ROTATION_FRAMES)
+
+    val sparkAlpha: Float
+        get() = StoneMotion.piecewise(sparkProgress.value, Spark.ALPHA_FRAMES)
 
     /** A press under reduced motion: the rings darken and a still sheen holds. */
     var touchedStill by mutableStateOf(false)
@@ -75,16 +93,14 @@ class StonePressState {
 
     val isPressing: Boolean
         get() =
-            dip.isRunning ||
-                rings.isRunning ||
+            dipProgress.isRunning ||
+                ringsProgress.isRunning ||
+                sparkProgress.isRunning ||
                 sheen.isRunning ||
-                sweep.isRunning ||
-                sparkScale.isRunning ||
-                sparkRotation.isRunning ||
-                sparkAlpha.isRunning
+                sweep.isRunning
 
     /**
-     * Plays the press. A second press while one runs restarts each animation
+     * Plays the press. A second press while one runs restarts each element
      * (an `Animatable` cancels its previous `animateTo`). Under [reduceMotion]
      * nothing moves: the rings darken and the sheen holds, with no ripple.
      */
@@ -95,24 +111,19 @@ class StonePressState {
         }
         rippleToken = System.nanoTime()
         coroutineScope {
-            launch { dip.animateTo(1f, DIP_SPEC) }
+            launch { dipProgress.run(Dip.DURATION, Dip.EASING) }
             launch {
                 delay(Rings.DELAY.toLong())
-                rings.animateTo(1f, RINGS_SPEC)
+                ringsProgress.run(Rings.DURATION, Rings.EASING)
             }
             launch {
                 delay(Sweep.DELAY.toLong())
-                sweep.snapTo(0f)
-                sweep.animateTo(1f, tween(Sweep.DURATION, easing = Sweep.EASING))
+                sweep.run(Sweep.DURATION, Sweep.EASING)
                 sweep.snapTo(0f)
             }
             launch {
                 delay(Spark.DELAY.toLong())
-                coroutineScope {
-                    launch { sparkScale.animateTo(0f, SPARK_SCALE_SPEC) }
-                    launch { sparkRotation.animateTo(Spark.END_ROTATION, SPARK_ROTATION_SPEC) }
-                    launch { sparkAlpha.animateTo(0f, SPARK_ALPHA_SPEC) }
-                }
+                sparkProgress.run(Spark.DURATION, Spark.EASING)
             }
         }
     }
@@ -136,52 +147,14 @@ class StonePressState {
     private companion object {
         const val STILL_SHEEN = 0.9f
 
-        fun offsetAt(
+        /** One WAAPI iteration: from 0, eased over the whole [duration] to 1. */
+        suspend fun Animatable<Float, AnimationVector1D>.run(
             duration: Int,
-            fraction: Float,
-        ): Int = (duration * fraction).roundToInt()
-
-        // CSS applies its timing function to every keyframe interval; so does `using` here.
-        val DIP_SPEC: KeyframesSpec<Float> =
-            keyframes {
-                durationMillis = Dip.DURATION
-                1f at 0 using Dip.EASING
-                Dip.DIP_SCALE at offsetAt(Dip.DURATION, Dip.DIP_AT) using Dip.EASING
-                Dip.OVERSHOOT_SCALE at offsetAt(Dip.DURATION, Dip.OVERSHOOT_AT) using Dip.EASING
-                1f at Dip.DURATION
-            }
-
-        val RINGS_SPEC: KeyframesSpec<Float> =
-            keyframes {
-                durationMillis = Rings.DURATION
-                1f at 0 using Rings.EASING
-                Rings.SWELL_SCALE at offsetAt(Rings.DURATION, Rings.SWELL_AT) using Rings.EASING
-                1f at Rings.DURATION
-            }
-
-        val SPARK_SCALE_SPEC: KeyframesSpec<Float> =
-            keyframes {
-                durationMillis = Spark.DURATION
-                0f at 0 using Spark.EASING
-                1f at offsetAt(Spark.DURATION, Spark.PEAK_AT) using Spark.EASING
-                0f at Spark.DURATION
-            }
-
-        val SPARK_ROTATION_SPEC: KeyframesSpec<Float> =
-            keyframes {
-                durationMillis = Spark.DURATION
-                0f at 0 using Spark.EASING
-                Spark.PEAK_ROTATION at offsetAt(Spark.DURATION, Spark.PEAK_AT) using Spark.EASING
-                Spark.END_ROTATION at Spark.DURATION
-            }
-
-        val SPARK_ALPHA_SPEC: KeyframesSpec<Float> =
-            keyframes {
-                durationMillis = Spark.DURATION
-                0f at 0 using Spark.EASING
-                1f at offsetAt(Spark.DURATION, Spark.PEAK_AT) using Spark.EASING
-                0f at Spark.DURATION
-            }
+            easing: Easing,
+        ) {
+            snapTo(0f)
+            animateTo(1f, tween(duration, easing = easing))
+        }
     }
 }
 
@@ -250,7 +223,7 @@ fun LitStone(
             polarity = polarity,
             color = if (press.touchedStill) colors.ink2 else colors.ring,
             halo = colors.halo,
-            scale = { press.rings.value },
+            scale = { press.ringsScale },
             modifier = Modifier.fillMaxSize(),
         )
         Image(
@@ -259,8 +232,8 @@ fun LitStone(
             contentScale = ContentScale.FillBounds,
             modifier =
                 Modifier.fillMaxSize().graphicsLayer {
-                    scaleX = press.dip.value
-                    scaleY = press.dip.value
+                    scaleX = press.dipScale
+                    scaleY = press.dipScale
                 },
         )
         StoneGlint(
@@ -368,9 +341,9 @@ private fun StoneGlint(
         val pxPerUnit = this.size.width / box.width
         val sheenAlpha = press.sheen.value
         val sweepAt = press.sweep.value
-        val sparkAlpha = press.sparkAlpha.value
-        val sparkScale = press.sparkScale.value
-        val sparkRotation = press.sparkRotation.value
+        val sparkAlpha = press.sparkAlpha
+        val sparkScale = press.sparkScale
+        val sparkRotation = press.sparkRotation
         withTransform({ scale(pxPerUnit, pxPerUnit, Offset.Zero) }) {
             clipPath(outline.path) {
                 withTransform({ transform(canvasAffine.toComposeMatrix()) }) {
