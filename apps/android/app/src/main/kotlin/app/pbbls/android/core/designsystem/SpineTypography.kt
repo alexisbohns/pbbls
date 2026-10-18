@@ -28,7 +28,7 @@ object SpineTypography {
         features: String? = null,
         lineHeight: TextUnit = TextUnit.Unspecified,
     ) = TextStyle(
-        fontFamily = YsabeauFamily,
+        fontFamily = ysabeauAt(weight),
         fontSize = size,
         fontWeight = FontWeight(weight),
         letterSpacing = tracking,

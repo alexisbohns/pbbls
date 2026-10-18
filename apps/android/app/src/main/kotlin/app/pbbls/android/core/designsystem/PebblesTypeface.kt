@@ -53,3 +53,24 @@ internal val YsabeauFamily = variableFamily(R.font.ysabeau, R.font.ysabeau_itali
  * height in Ysabeau, whose default figures are old-style.
  */
 internal const val YSABEAU_NUMBER_FEATURES = "pnum, lnum"
+
+private val ysabeauByWeight = HashMap<Int, FontFamily>()
+
+/**
+ * Ysabeau at one exact weight (the Spine's type ranks sit between M3's
+ * four cuts: 300, 380, 460, 620 ...). A family pinned at the requested wght
+ * axis value, upright and italic, memoised per weight; [YsabeauFamily]
+ * keeps serving the M3 scale at its four cuts.
+ */
+@OptIn(ExperimentalTextApi::class)
+internal fun ysabeauAt(weight: Int): FontFamily =
+    synchronized(ysabeauByWeight) {
+        ysabeauByWeight.getOrPut(weight) {
+            val w = FontWeight(weight)
+            val settings = FontVariation.Settings(FontVariation.weight(weight))
+            FontFamily(
+                Font(R.font.ysabeau, weight = w, style = FontStyle.Normal, variationSettings = settings),
+                Font(R.font.ysabeau_italic, weight = w, style = FontStyle.Italic, variationSettings = settings),
+            )
+        }
+    }
