@@ -365,15 +365,16 @@ ceremony. The trigger to revisit is a **second regular contributor** or a
   brand's error roles (`withErrorFrom`), because the OS derives its error from
   Material's red. `PebblesTheme(dynamicColor = false)` is the default so every
   preview renders the brand scheme; only `MainActivity` passes the setting.
-- **Colours are generated:** `npm run generate:theme` (the Spine-paper
-  recipe over the Theme Builder export, `scripts/generate-theme-export.mjs`,
-  #1118) → `design/pbbls-m3_evo-theme.json` →
+- **Colours are generated:** `npm run generate:theme --workspace=apps/android`
+  (the Spine-paper recipe over the Theme Builder export,
+  `scripts/generate-theme-export.mjs`, #1118) → `design/pbbls-m3_evo-theme.json` →
   `python3 scripts/generate-color-schemes.py` → `ColorSchemes.kt` →
   `npm run generate:m3 --workspace=apps/web` → `apps/web/app/m3-theme.css`.
   Run the whole chain in the same PR, or web CI's drift gate fails. The
   brand's neutrals are the Spine paper (warm in light; in dark a cool ground
-  with warm ink): a Theme Builder re-export must go through the recipe or
-  the neutrals revert to the seed's.
+  with warm ink): a Theme Builder re-export resets the error roles and drops
+  Sand, so redo those by hand first (as #990 did), then run it through the
+  recipe, or the neutrals revert to the seed's.
 - **material3 is pinned to `1.5.0-alpha27`** in `libs.versions.toml` for the
   Expressive API. Drop the pin when 1.5.0 stable is in the BOM, and do not
   move to an alpha that drags Compose ui/foundation off the BOM's stable line.
