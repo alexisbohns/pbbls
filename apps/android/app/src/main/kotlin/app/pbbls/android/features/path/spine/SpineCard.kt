@@ -53,6 +53,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
@@ -134,6 +135,8 @@ private val NIGHT_SHADOW =
         ShadowLayer(1.dp, 2.dp, 0.dp, 0.5f),
         ShadowLayer(18.dp, 30.dp, (-18).dp, 0.9f),
     )
+private val NIGHT_RING = 0.5.dp
+private const val NIGHT_RING_ALPHA = 0.06f
 
 /** Skia reads a `BlurMaskFilter` radius as `σ = 0.57735 × radius + 0.5`; CSS blur `b` is `σ = b / 2`. */
 private const val SKIA_SIGMA_PER_RADIUS = 0.57735f
@@ -219,8 +222,10 @@ fun SpineCard(
     // A moment with no emotion has no painted edge (the web's --edge is unset).
     val edge = palette?.let { StoneTones.edge(stone, polarity, night) }
     val shape = MaterialTheme.shapes.medium
-    val shadowLayers = if (night) NIGHT_SHADOW else PAPER_SHADOW
-    val shadowPaint = remember { android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG) }
+    val shadowPaints =
+        remember(density, night, colors.shadow) {
+            (if (night) NIGHT_SHADOW else PAPER_SHADOW).map { layer -> layer to layer.paint(density, colors.shadow) }
+        }
     val reduceMotion = rememberReduceMotion()
     val animatedRatio by animateFloatAsState(
         targetValue = ratio ?: CardSizes.PENDING_RATIO,
@@ -242,7 +247,8 @@ fun SpineCard(
                 .width(cardWidth)
                 .drawBehind {
                     val radius = shape.topStart.toPx(size, this)
-                    drawCardShadow(shadowLayers, colors.shadow, radius, shadowPaint)
+                    drawCardShadow(shadowPaints, radius)
+                    if (night) drawNightRing(radius)
                     if (edge != null) {
                         drawRoundRect(edge, topLeft = Offset(0f, edgeThickness.toPx()), size = size, cornerRadius = CornerRadius(radius))
                     }
@@ -431,7 +437,7 @@ private fun BoxScope.Rail(
             Box(
                 Modifier
                     .padding(horizontal = u * 1.2f)
-                    .size(RULE, u * 2.4f)
+                    .size(width = u * 2.4f, height = RULE)
                     .background(rule),
             )
             Text(text = emotionName, style = emotionStyle, color = emotionInk, maxLines = 1, softWrap = false)
@@ -455,19 +461,25 @@ private fun Modifier.vertical(): Modifier =
         }
     }.rotate(90f)
 
-private fun DrawScope.drawCardShadow(
-    layers: List<ShadowLayer>,
+/** The layer's paint, its colour and blur set once: `BlurMaskFilter` is not free to build per frame. */
+private fun ShadowLayer.paint(
+    density: Density,
     shadow: Color,
+): android.graphics.Paint =
+    android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).also { paint ->
+        paint.color = shadow.copy(alpha = alpha).toArgb()
+        val blurPx = with(density) { blur.toPx() }
+        if (blurPx > 0f) paint.maskFilter = BlurMaskFilter(blurRadius(blurPx), BlurMaskFilter.Blur.NORMAL)
+    }
+
+private fun DrawScope.drawCardShadow(
+    layers: List<Pair<ShadowLayer, android.graphics.Paint>>,
     radius: Float,
-    paint: android.graphics.Paint,
 ) {
     drawIntoCanvas { canvas ->
-        layers.forEach { layer ->
+        layers.forEach { (layer, paint) ->
             val spread = layer.spread.toPx()
             val dy = layer.dy.toPx()
-            val blur = layer.blur.toPx()
-            paint.color = shadow.copy(alpha = layer.alpha).toArgb()
-            paint.maskFilter = if (blur > 0f) BlurMaskFilter(blurRadius(blur), BlurMaskFilter.Blur.NORMAL) else null
             canvas.nativeCanvas.drawRoundRect(
                 -spread,
                 dy - spread,
@@ -479,6 +491,23 @@ private fun DrawScope.drawCardShadow(
             )
         }
     }
+}
+
+/**
+ * The web's Night `0 0 0 .5px rgba(255,245,225,.06)`: a faint warm hairline just outside
+ * the card. `features/` writes no hex, and at .06 white is indistinguishable from that warm
+ * white, so it is `Color.White` here.
+ */
+private fun DrawScope.drawNightRing(radius: Float) {
+    val width = NIGHT_RING.toPx()
+    val half = width / 2f
+    drawRoundRect(
+        Color.White.copy(alpha = NIGHT_RING_ALPHA),
+        topLeft = Offset(-half, -half),
+        size = Size(size.width + width, size.height + width),
+        cornerRadius = CornerRadius(radius + half),
+        style = Stroke(width),
+    )
 }
 
 /** A CSS blur radius, in px, as the `BlurMaskFilter` radius giving the same σ. */

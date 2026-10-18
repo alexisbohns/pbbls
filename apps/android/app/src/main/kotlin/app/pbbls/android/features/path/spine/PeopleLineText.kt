@@ -77,3 +77,42 @@ internal fun peopleLineText(
             withStyle(spans.more) { append("+${line.overflow}") }
         }
     }
+
+/** One item of a card's souls strip: the web's `.sl` flex children. */
+internal sealed interface StripItem {
+    /** A named soul: its glyph (when it has one) and its name. */
+    data class Named(
+        val id: String,
+        val name: String,
+        val glyph: Boolean,
+    ) : StripItem
+
+    /** "& twelve others", in the quiet italic. */
+    data class Others(
+        val text: String,
+    ) : StripItem
+
+    /** The marks of the others, then "+N" when some are left. */
+    data class Marks(
+        val ids: List<String>,
+        val overflow: Int,
+    ) : StripItem
+}
+
+/**
+ * The card's strip (web `PeopleLine` card variant): the same line as items of a
+ * wrapping row, no commas, no "&", "with" unspoken. Marks a soul has no glyph for
+ * are dropped; the "+N" is kept even when every mark is.
+ */
+internal fun peopleStripItems(
+    line: PeopleLine,
+    namesById: Map<String, String>,
+    hasGlyph: (String) -> Boolean,
+    others: String,
+): List<StripItem> =
+    buildList {
+        line.named.forEach { add(StripItem.Named(it, namesById[it].orEmpty(), hasGlyph(it))) }
+        if (line.others > 0) add(StripItem.Others(others))
+        val marks = line.marks.filter(hasGlyph)
+        if (marks.isNotEmpty() || line.overflow > 0) add(StripItem.Marks(marks, line.overflow))
+    }

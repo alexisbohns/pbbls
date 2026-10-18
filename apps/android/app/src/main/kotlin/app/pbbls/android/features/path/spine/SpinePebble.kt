@@ -264,7 +264,7 @@ fun SpinePebble(
                                     soulsById = soulsById,
                                     style = type.cardMore(uSp),
                                     glyphSize = with(density) { (u * CARD_GLYPH_UNITS).toSp() },
-                                    withLabel = false,
+                                    asStrip = true,
                                     nameStyle = type.cardSoul(uSp),
                                     moreStyle = type.cardMore(uSp),
                                     glyphInk = colors.ink,

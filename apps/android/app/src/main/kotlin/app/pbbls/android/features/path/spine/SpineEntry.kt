@@ -67,7 +67,7 @@ fun SpineEntry(
         if (name != null) {
             type.entryName(entry.name.fontSizeSp, entry.name.fontWeight, entry.name.italic, entry.name.letterSpacingEm)
         } else {
-            type.entryName(entry.name.fontSizeSp, UNTITLED_WEIGHT, italic = true, trackingEm = entry.name.letterSpacingEm)
+            type.entryName(entry.name.fontSizeSp, UNTITLED_WEIGHT, italic = true, trackingEm = 0f)
         }
     val nameMaxWidth = with(LocalDensity.current) { (entry.name.fontSizeSp * CH_PER_EM * NAME_MAX_CH).sp.toDp() }
 
