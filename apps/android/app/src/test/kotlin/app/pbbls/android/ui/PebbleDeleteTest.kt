@@ -20,7 +20,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.IOException
-import java.time.OffsetDateTime
 import javax.inject.Inject
 
 /**
@@ -35,7 +34,7 @@ class PebbleDeleteTest : AppUiTest() {
 
     @Inject lateinit var writes: FakeMomentWriteService
 
-    private val completed = UiFixtures.pathMoment(id = "moment-1", name = "Coffee with Mo", happenedAt = OffsetDateTime.now())
+    private val completed = UiFixtures.pathMoment(id = "moment-1", name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek())
 
     /** How the Spine's blank stone ends its sentence ("Opens the moment."); a pebble's says "Opens the pebble." (R4). */
     private val blankStoneSentence: String

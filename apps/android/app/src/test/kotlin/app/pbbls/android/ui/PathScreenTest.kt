@@ -54,7 +54,7 @@ class PathScreenTest : AppUiTest() {
 
     @Test
     fun `a loaded timeline shows this week's moments`() {
-        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = OffsetDateTime.now()))
+        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek()))
 
         signedIn()
 
@@ -65,7 +65,7 @@ class PathScreenTest : AppUiTest() {
     /** A photo-only capture has no name and no pebble yet; it is still on the timeline (R3). */
     @Test
     fun `an untitled moment reads Untitled`() {
-        path.path = listOf(UiFixtures.pathMoment(name = null, pebble = null, happenedAt = OffsetDateTime.now()))
+        path.path = listOf(UiFixtures.pathMoment(name = null, pebble = null, happenedAt = UiFixtures.thisWeek()))
 
         signedIn()
 
@@ -85,7 +85,7 @@ class PathScreenTest : AppUiTest() {
     @Test
     fun `coming back to the app after a failed load recovers the timeline`() {
         path.failNext = IOException("offline")
-        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = OffsetDateTime.now()))
+        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek()))
         signedIn()
         onText(R.string.path_load_error).assertIsDisplayed()
 
@@ -98,7 +98,7 @@ class PathScreenTest : AppUiTest() {
 
     @Test
     fun `a failed refresh keeps the timeline already on screen`() {
-        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = OffsetDateTime.now()))
+        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek()))
         signedIn()
 
         path.failNext = IOException("offline")
@@ -115,13 +115,13 @@ class PathScreenTest : AppUiTest() {
      */
     @Test
     fun `a focus request pages the path to that moment's week on the next load`() {
-        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = OffsetDateTime.now())
+        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek())
         path.path = listOf(thisWeek)
         signedIn()
         onMoment("Coffee with Mo").assertIsDisplayed()
 
         val threeWeeksBack =
-            UiFixtures.pathMoment(id = "moment-old", name = "Lake swim", happenedAt = OffsetDateTime.now().minusWeeks(3))
+            UiFixtures.pathMoment(id = "moment-old", name = "Lake swim", happenedAt = UiFixtures.thisWeek(3))
         path.path = listOf(threeWeeksBack, thisWeek)
         focusRequests.request(threeWeeksBack.id)
         backgroundAndReturn()
@@ -137,14 +137,14 @@ class PathScreenTest : AppUiTest() {
      */
     @Test
     fun `a focus request pages past the weeks in between`() {
-        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = OffsetDateTime.now())
-        val between = UiFixtures.pathMoment(id = "moment-mid", name = "Book club", happenedAt = OffsetDateTime.now().minusWeeks(2))
+        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek())
+        val between = UiFixtures.pathMoment(id = "moment-mid", name = "Book club", happenedAt = UiFixtures.thisWeek(2))
         path.path = listOf(between, thisWeek)
         signedIn()
         onMoment("Coffee with Mo").assertIsDisplayed()
 
         val farBack =
-            UiFixtures.pathMoment(id = "moment-far", name = "Lake swim", happenedAt = OffsetDateTime.now().minusWeeks(5))
+            UiFixtures.pathMoment(id = "moment-far", name = "Lake swim", happenedAt = UiFixtures.thisWeek(5))
         path.path = listOf(farBack, between, thisWeek)
         focusRequests.request(farBack.id)
         backgroundAndReturn()
@@ -157,8 +157,8 @@ class PathScreenTest : AppUiTest() {
     @Test
     fun `swiping the pager back moves the focus to the previous week`() {
         val lastWeek =
-            UiFixtures.pathMoment(id = "moment-old", name = "Lake swim", happenedAt = OffsetDateTime.now().minusWeeks(1))
-        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = OffsetDateTime.now())
+            UiFixtures.pathMoment(id = "moment-old", name = "Lake swim", happenedAt = UiFixtures.thisWeek(1))
+        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek())
         path.path = listOf(lastWeek, thisWeek)
         signedIn()
         compose.onNodeWithText(weekHeader(thisWeek.happenedAt)).assertIsDisplayed()

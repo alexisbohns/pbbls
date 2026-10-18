@@ -18,7 +18,6 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.time.OffsetDateTime
 import javax.inject.Inject
 
 /**
@@ -55,7 +54,7 @@ class CompleteFlowTest : AppUiTest() {
               "dark_color":"#2F4A34FF","shaded_color":"#4F6B54FF"}]
             """.trimIndent()
         refs.domains = listOf(Domain(id = "domain-1", slug = "test-domain", name = "Testworld", label = "Where tests live"))
-        moments.path = listOf(UiFixtures.pathMoment(id = "moment-1", name = "Swim", pebble = null, happenedAt = OffsetDateTime.now()))
+        moments.path = listOf(UiFixtures.pathMoment(id = "moment-1", name = "Swim", pebble = null, happenedAt = UiFixtures.thisWeek()))
         moments.moments = mapOf("moment-1" to UiFixtures.momentDetail(id = "moment-1", name = "Swim", pebble = null))
         skipOnboarding()
         launch()

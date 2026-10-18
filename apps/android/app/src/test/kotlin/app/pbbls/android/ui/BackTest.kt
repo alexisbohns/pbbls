@@ -15,7 +15,6 @@ import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.UiFixtures
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Test
-import java.time.OffsetDateTime
 import javax.inject.Inject
 
 /**
@@ -97,7 +96,7 @@ class BackTest : AppUiTest() {
 
     @Test
     fun `back on the edit cover dismisses it to the detail beneath`() {
-        moments.path = listOf(UiFixtures.pathMoment(happenedAt = OffsetDateTime.now()))
+        moments.path = listOf(UiFixtures.pathMoment(happenedAt = UiFixtures.thisWeek()))
         moments.moments = mapOf("moment-1" to UiFixtures.momentDetail())
         onPath()
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performClick()
