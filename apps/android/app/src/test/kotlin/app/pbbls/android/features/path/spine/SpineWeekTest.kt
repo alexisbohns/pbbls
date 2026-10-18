@@ -9,8 +9,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
@@ -38,6 +38,9 @@ private const val SUNDAY_NAME = "Grandma’s call went quiet"
 
 /** Pixels that must differ between a stone touched still and the same stone released. */
 private const val MIN_CHANGED_PIXELS = 20
+
+private const val SETTLE_TIMEOUT_MS = 5_000L
+private const val SETTLE_POLL_MS = 50L
 
 /**
  * The contents → press under reduced motion (spec D8): a row's stone is composed by the
@@ -74,6 +77,7 @@ class SpineWeekTest {
                             onPreviousWeek = null,
                             onNextWeek = null,
                             onCreatePebble = {},
+                            zone = SpineFixtureWeek.zone,
                             ratioOverride = SpineFixtureWeek.ratios::get,
                         )
                     }
@@ -89,31 +93,41 @@ class SpineWeekTest {
             .performClick()
         settle()
 
-        val row =
-            compose.onNode(
-                hasTestTag(JourneyTags.PATH_PEBBLE_ROW) and hasAnyDescendant(hasContentDescription(SUNDAY_NAME, substring = true)),
-            )
-        row.assertExists()
-        val touched = row.captureToImage()
-        val touchedAgain = row.captureToImage()
-        assertEquals("the stone should have finished painting before it is read", 0, changedPixels(touched, touchedAgain))
+        // The stone's hit box alone, so a shift of the ground under the row cannot stand in for the press.
+        val stone = compose.onNode(hasTestTag(JourneyTags.PATH_PEBBLE_STONE) and hasContentDescription(SUNDAY_NAME, substring = true))
+        stone.assertExists()
+        val touched = settledCapture(stone)
 
         // The hold runs on the composition's clock, not the looper's.
         compose.mainClock.advanceTimeBy(StoneMotion.STILL_TOUCH_MS + 100)
-        settle()
-        val released = row.captureToImage()
+        val released = settledCapture(stone)
 
         val changed = changedPixels(touched, released)
         assertTrue("the still touch should show on the stone and release ($changed px changed)", changed >= MIN_CHANGED_PIXELS)
     }
 
-    /** Frames, the main looper, and the stone's off-main paint. */
+    /** Frames and the main looper. */
     private fun settle() {
         compose.waitForIdle()
         shadowOf(Looper.getMainLooper()).idle()
-        Thread.sleep(400)
-        compose.waitForIdle()
-        shadowOf(Looper.getMainLooper()).idle()
+    }
+
+    /**
+     * The node once it stops changing: the stone paints off the main thread, so capture until two
+     * consecutive reads agree, within [SETTLE_TIMEOUT_MS].
+     */
+    private fun settledCapture(node: SemanticsNodeInteraction): ImageBitmap {
+        val deadline = System.currentTimeMillis() + SETTLE_TIMEOUT_MS
+        settle()
+        var last = node.captureToImage()
+        while (System.currentTimeMillis() < deadline) {
+            Thread.sleep(SETTLE_POLL_MS)
+            settle()
+            val next = node.captureToImage()
+            if (changedPixels(last, next) == 0) return next
+            last = next
+        }
+        throw AssertionError("the stone kept changing for $SETTLE_TIMEOUT_MS ms")
     }
 
     private fun changedPixels(

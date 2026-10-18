@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path.spine
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -16,26 +15,12 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.drawscope.ContentDrawScope
-import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.node.DrawModifierNode
-import androidx.compose.ui.node.LayoutAwareModifierNode
-import androidx.compose.ui.node.ModifierNodeElement
-import androidx.compose.ui.node.invalidateDraw
-import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.data.SnapAspectCache
@@ -55,7 +40,6 @@ import app.pbbls.android.features.path.spine.SpineLayout.FEED_TOP
 import app.pbbls.android.features.path.spine.SpineLayout.PEBBLE_GAP
 import app.pbbls.android.features.path.spine.SpineLayout.SEAM_HEIGHT
 import app.pbbls.android.features.path.spine.SpineLayout.SEAM_LABEL_OVERHANG
-import app.pbbls.android.features.path.spine.SpineLayout.SPINE_X
 import app.pbbls.android.features.path.spine.SpineLayout.STILL_MIN_HEIGHT
 import app.pbbls.android.features.path.spine.logic.EntryTypes
 import app.pbbls.android.features.path.spine.logic.PersonsOfWeek
@@ -68,9 +52,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
-
-/** The line down the margin, the length of every day. */
-private val LINE_WIDTH = 1.dp
 
 /**
  * One week of the Path as a book (#1122, spec §Architecture; the web's `SpineWeek.tsx`):
@@ -105,6 +86,7 @@ private val LINE_WIDTH = 1.dp
  * @param aspect the session's photo-ratio cache; null in previews and the lab.
  * @param onPreviousWeek absent on the first week there is; [onNextWeek] on the last.
  * @param listState hoisted so a preview can open the page at a row.
+ * @param zone the zone the days are cut in and the times print in; the device's by default.
  * @param ratioOverride a primed photo ratio by snap prefix, for previews with no cache.
  */
 @Composable
@@ -121,12 +103,12 @@ fun SpineWeek(
     onCreatePebble: () -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
+    zone: ZoneId = ZoneId.systemDefault(),
     ratioOverride: ((String) -> Float?)? = null,
 ) {
     val colors = PebblesTheme.spine.colors
     val density = LocalDensity.current
     val locale = LocalConfiguration.current.locales[0]
-    val zone = remember { ZoneId.systemDefault() }
     val scope = rememberCoroutineScope()
     val reduceMotion by rememberUpdatedState(rememberReduceMotion())
 
@@ -151,7 +133,12 @@ fun SpineWeek(
     // The contents → press: scroll the stone to the middle, then ask it to press (never open).
     val pressRequests = remember { StonePressRequests() }
     val goJob = remember { JobHolder() }
-    DisposableEffect(items) { onDispose { goJob.job?.cancel() } }
+    DisposableEffect(items) {
+        onDispose {
+            goJob.job?.cancel()
+            pressRequests.cancel()
+        }
+    }
     val go: (PathMoment) -> Unit = { moment ->
         val index = items.indexOf(moment.id)
         if (index >= 0) {
@@ -162,13 +149,12 @@ fun SpineWeek(
                     val offset = stoneScrollOffset(listState, density, moment, row.place)
                     if (reduceMotion) {
                         listState.scrollToItem(index, offset)
-                        // The stone composes on the frame the scroll lands; ask it after.
-                        withFrameNanos {}
                     } else {
                         listState.animateScrollToItem(index, offset)
                         delay(StoneMotion.GO_PRESS_DELAY_MS)
                     }
-                    pressRequests.request(moment.id)
+                    // A fling during the delay may have carried the stone off; ask only what is there.
+                    if (listState.layoutInfo.visibleItemsInfo.any { it.key == moment.id }) pressRequests.request(moment.id)
                 }
         }
     }
@@ -210,6 +196,7 @@ fun SpineWeek(
                             soulsById = soulsById,
                             personsOrder = personsOrder,
                             aspect = aspect,
+                            zone = zone,
                             pressRequests = pressRequests,
                             onOpen = onOpen,
                             onRequestDelete = onRequestDelete,
@@ -369,83 +356,4 @@ private class WeekItems(
 
     /** The moment's row index in the list, or −1. */
     fun indexOf(momentId: String): Int = rows.indexOfFirst { it is WeekRow.Pebble && it.moment.id == momentId }
-}
-
-/**
- * A row on the ground: records its height for the rows below, draws the rake at the phase
- * the rows above left and the line down the margin, both from [topInset]. A node, not a
- * lambda chain, so the modifier compares equal across recompositions and the row keeps
- * its brush.
- */
-private data class SpineGroundElement(
-    val tile: Bitmap,
-    val topInset: Dp,
-    val ground: Int,
-    val heights: SnapshotStateMap<Int, Int>,
-    val line: Color?,
-) : ModifierNodeElement<SpineGroundNode>() {
-    override fun create() = SpineGroundNode(tile, topInset, ground, heights, line)
-
-    override fun update(node: SpineGroundNode) = node.update(tile, topInset, ground, heights, line)
-
-    override fun InspectorInfo.inspectableProperties() {
-        name = "spineGround"
-        properties["ground"] = ground
-    }
-}
-
-private class SpineGroundNode(
-    private var tile: Bitmap,
-    private var topInset: Dp,
-    private var ground: Int,
-    private var heights: SnapshotStateMap<Int, Int>,
-    private var line: Color?,
-) : Modifier.Node(),
-    DrawModifierNode,
-    LayoutAwareModifierNode {
-    private var brush: ShaderBrush? = null
-    private var brushWidth = 0f
-
-    fun update(
-        tile: Bitmap,
-        topInset: Dp,
-        ground: Int,
-        heights: SnapshotStateMap<Int, Int>,
-        line: Color?,
-    ) {
-        if (tile !== this.tile) brush = null
-        this.tile = tile
-        this.topInset = topInset
-        this.ground = ground
-        this.heights = heights
-        this.line = line
-        invalidateDraw()
-    }
-
-    override fun onRemeasured(size: IntSize) {
-        heights[ground] = size.height
-    }
-
-    override fun ContentDrawScope.draw() {
-        val inset = topInset.toPx()
-        if (size.width > 0f && size.height > inset) {
-            val rake =
-                brush?.takeIf { brushWidth == size.width }
-                    ?: rakeBrush(tile, size.width, this).also {
-                        brush = it
-                        brushWidth = size.width
-                    }
-            // The shader sits in canvas space: shifting the canvas up by the phase and the
-            // rect down by it keeps the rect in place while the tile's rows move on.
-            val shift = (0 until ground).sumOf { heights[it] ?: 0 }.toFloat().mod(tile.height.toFloat())
-            translate(top = -shift) {
-                drawRect(rake, topLeft = Offset(0f, inset + shift), size = Size(size.width, size.height - inset))
-            }
-            line?.let { ink ->
-                val x = SPINE_X.toPx()
-                drawLine(ink, Offset(x, inset), Offset(x, size.height), LINE_WIDTH.toPx())
-            }
-        }
-        drawContent()
-    }
 }

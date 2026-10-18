@@ -95,12 +95,15 @@ internal fun DaySeam(
             },
             modifier = modifier,
         ) { measurables, constraints ->
-            val width = constraints.maxWidth
             val loose = constraints.copy(minWidth = 0, minHeight = 0)
+            val label = measurables[2].measure(loose.copy(maxHeight = Constraints.Infinity))
+            // The page's width, or, unbounded (a wrap-content preview), the label's own.
+            val width = if (constraints.hasBoundedWidth) constraints.maxWidth else LABEL_LEFT.roundToPx() + label.width
             val seam = measurables[0].measure(Constraints.fixedWidth(width))
             val still = measurables[1].measure(loose)
-            val label = measurables[2].measure(loose.copy(maxHeight = Constraints.Infinity))
-            val height = maxOf(constraints.minHeight, STILL_MIN_HEIGHT.roundToPx(), label.height, seam.height + still.height)
+            val height =
+                maxOf(constraints.minHeight, STILL_MIN_HEIGHT.roundToPx(), label.height, seam.height + still.height)
+                    .coerceAtMost(constraints.maxHeight)
             layout(width, height) {
                 seam.place(0, 0)
                 still.place(0, seam.height)

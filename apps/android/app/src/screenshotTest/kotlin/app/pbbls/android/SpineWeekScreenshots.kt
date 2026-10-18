@@ -33,7 +33,10 @@ private val EMPTY_HEIGHT = 720.dp
 
 private val emptyWeek = WeekRollEntry(weekStart = SpineFixtureWeek.weekStart, moments = emptyList())
 
-/** The list's rows before the first seam: masthead, opening, persons, contents — the fixture has people and moments. */
+/**
+ * The list's rows before the first seam: masthead, opening, persons, contents — the fixture has people and
+ * moments. Coupled to `SpineWeek`'s private `WeekItems` order; a row added to the verso moves these windows.
+ */
 private const val VERSO_ROWS = 4
 
 private val week by lazy { SpineWeekBuilder.build(SpineFixtureWeek.entry, SpineFixtureWeek.zone, SpineFixtureWeek.today) }
@@ -60,6 +63,7 @@ private fun WeekPage(
                 onNextWeek = {},
                 onCreatePebble = {},
                 listState = remember(firstRow) { LazyListState(firstVisibleItemIndex = firstRow) },
+                zone = SpineFixtureWeek.zone,
                 ratioOverride = SpineFixtureWeek.ratios::get,
             )
         }

@@ -123,7 +123,7 @@ private fun ContentsRow(
     val name = moment.name?.takeIf { it.isNotBlank() }
     val untitled = stringResource(R.string.path_spine_untitled)
     val time =
-        remember(moment.happenedAt, locale) {
+        remember(moment.happenedAt, zone, locale) {
             moment.happenedAt
                 .atZoneSameInstant(zone)
                 .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale))

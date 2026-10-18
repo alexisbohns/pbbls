@@ -29,7 +29,7 @@ import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.features.path.spine.logic.PeopleLine
 
 /** The glyph's box in an entry's line, relative to the line's type. */
-val ENTRY_GLYPH_SIZE: TextUnit = 1.25f.em
+internal val ENTRY_GLYPH_SIZE: TextUnit = 1.25f.em
 
 /*
  * The card strip's gaps, as fractions of its 4u glyph: the web's `gap-x-[2.2u]`,

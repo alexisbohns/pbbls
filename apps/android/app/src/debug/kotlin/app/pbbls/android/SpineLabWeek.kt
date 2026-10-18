@@ -30,6 +30,7 @@ internal fun SpineLabWeek(modifier: Modifier = Modifier) {
         onNextWeek = {},
         onCreatePebble = {},
         modifier = modifier,
+        zone = SpineFixtureWeek.zone,
         ratioOverride = SpineFixtureWeek.ratios::get,
     )
 }
@@ -47,6 +48,7 @@ internal fun FixturePebble(
         soulsById = SpineFixtureWeek.soulsById,
         personsOrder = SpineFixtureWeek.personsOrder,
         aspect = null,
+        zone = SpineFixtureWeek.zone,
         pressRequests = requests,
         onOpen = {},
         onRequestDelete = {},

@@ -101,6 +101,7 @@ private const val CARD_GLYPH_UNITS = 4f
  * @param palette the pebble's emotion palette; null for a blank stone.
  * @param personsOrder soul ids in persons-of-the-week order, for the people line.
  * @param aspect the session's ratio cache; null in previews.
+ * @param zone the zone the date and time print in: the week's.
  * @param pressRequests the week's asks to press a stone without opening it; this stone
  *   claims the one that names it.
  * @param ratioOverride a primed photo ratio, for previews with no cache.
@@ -115,6 +116,7 @@ internal fun SpinePebble(
     soulsById: Map<String, SoulWithGlyph>,
     personsOrder: List<String>,
     aspect: SnapAspectCache?,
+    zone: ZoneId,
     pressRequests: StonePressRequests,
     onOpen: (PathMoment) -> Unit,
     onRequestDelete: (PathMoment) -> Unit,
@@ -143,7 +145,7 @@ internal fun SpinePebble(
     val stoneHeight = StoneGeometry.outlineBox(size).let { stoneWidth * (it.height / it.width) }
     val seed = remember(pebble?.id, moment.id) { UuidHash.fnv1a(pebble?.id ?: moment.id) }
 
-    val zoned = remember(moment.happenedAt) { moment.happenedAt.atZoneSameInstant(ZoneId.systemDefault()) }
+    val zoned = remember(moment.happenedAt, zone) { moment.happenedAt.atZoneSameInstant(zone) }
     val date = remember(zoned, locale) { zoned.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)) }
     val time = remember(zoned, locale) { zoned.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)) }
     val weekday = remember(zoned, locale) { shortWeekday(zoned.dayOfWeek, locale) }
@@ -371,6 +373,7 @@ internal fun SpinePebble(
             Modifier
                 .offset(geometry.hitLeft, geometry.hitTop)
                 .size(geometry.hitWidth, geometry.hitHeight)
+                .testTag(JourneyTags.PATH_PEBBLE_STONE)
                 .semantics { contentDescription = description }
                 .clickable(interactionSource = null, indication = null, role = Role.Button, onClick = pressStone),
         )
@@ -401,5 +404,10 @@ internal class StonePressRequests {
     /** Takes [request] if it is still the pending one. */
     fun claim(request: PressRequest) {
         if (pending == request) pending = null
+    }
+
+    /** Drops a pending ask: the week it belonged to is gone. */
+    fun cancel() {
+        pending = null
     }
 }
