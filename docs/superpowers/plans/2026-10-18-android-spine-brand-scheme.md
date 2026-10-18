@@ -255,7 +255,7 @@ python3 scripts/generate-color-schemes.py
 git diff --stat
 ```
 
-Expected: `[generate:theme] 91 of 102 …`; the Python script prints its literal count (289 literals, unchanged from today); `git diff --stat` lists exactly the JSON and `ColorSchemes.kt`.
+Expected: `[generate:theme] 91 of 102 …`; the Python script prints its literal count (313 literals, unchanged from today: 48 roles × 6 + 24 Sand + the capsule ink); `git diff --stat` lists exactly the JSON and `ColorSchemes.kt`.
 
 - [ ] **Step 2: Check the generated Kotlin header and two anchor values**
 
@@ -528,3 +528,13 @@ Give the PR URL, the gate results, and the two follow-ups owed: approving the he
 - **Spec coverage.** Recipe and palettes (Task 1–2); pipeline incl. splash colours (Task 2) and web regen (Task 3); docs and decision log (Task 4); tests and gates (Tasks 2, 3, 5); delivery, Lab Note label, Arkaik check, re-baseline (Task 6). The rule set needs no code in this PR by design.
 - **Placeholders.** None: every code step carries its content, every command its expected output.
 - **Consistency.** The script name `generate-theme-export.mjs` and npm script `generate:theme` are the same in Tasks 1, 2, 4 and 6; the anchor hexes in Task 2 Step 2 match Task 1 Step 3's expected output and the spec's table.
+
+---
+
+## Lessons learned (execution, 2026-10-18)
+
+- **The export has a `palettes` block** (`primary`, `secondary`, `tertiary`, `neutral`, `neutral-variant`, `error`, 18 tone keys each) that the plan did not account for. Nothing reads it, but v2 kept it consistent with the roles, so the Task 1 code review had the recipe recompute `palettes.neutral` and `palettes["neutral-variant"]` at the existing tone keys (the dark surface tiers' cool palette has no slot there; the description says so). The guard still owns only `schemes`.
+- **The description is the record of the recipe**, so it now also says what a Theme Builder re-export undoes (error roles reset to the seed's, Sand dropped: redo by hand first, as #990 did) before running the script. Seven lines; the last one is unchanged and is what the Kotlin header quotes.
+- Two small hardenings from the same review: a loud failure on a missing `seed`, and a comment on why `DATE` is a constant (idempotence).
+- The literal count the Python generator prints is 313, not the 289 of the #853 plan: Sand (#990) added 24.
+- **Not done, worth an issue:** CI never runs the recipe, so the committed JSON is not proven to be the script's output the way `m3-theme.css` is proven against `ColorSchemes.kt`. A `--check` mode or a `generate:theme && git diff --exit-code` step in `android.yml` would close that.
