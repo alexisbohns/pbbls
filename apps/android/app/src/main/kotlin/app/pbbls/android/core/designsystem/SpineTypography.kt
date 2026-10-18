@@ -51,7 +51,7 @@ object SpineTypography {
     val personName = ysabeau(15.sp, 600, 0.1f.em, features = SMALL_CAPS)
     val dayLetter = ysabeau(9.5.sp, 600, features = SMALL_CAPS, lineHeight = 12.sp)
     val contentsDay = ysabeau(10.5.sp, 600, 0.18f.em, features = SMALL_CAPS)
-    val contentsTime = ysabeau(12.5.sp, 500, 0.04f.em, features = TABULAR)
+    val contentsTime = ysabeau(12.5.sp, 400, 0.04f.em, features = TABULAR)
 
     /** The persons' fold, "and *N* others": the web's `text-base font-[380] italic`. */
     val personsFold = ysabeau(16.sp, 380, italic = true)

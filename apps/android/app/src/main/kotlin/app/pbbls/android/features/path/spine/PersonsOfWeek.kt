@@ -29,9 +29,12 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.collapse
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.expand
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import app.pbbls.android.R
@@ -119,6 +122,8 @@ fun PersonsOfWeek(
         }
         if (rest.isNotEmpty()) {
             val words = remember(rest.size, locale) { NumberWords.cardinal(rest.size, locale, NumberWords.Gender.FEMININE) }
+            // The web's <details>: a button that says whether it is open, with the matching action.
+            val state = stringResource(if (expanded) R.string.path_spine_persons_expanded else R.string.path_spine_persons_collapsed)
             Text(
                 text = pluralStringResource(R.plurals.path_spine_persons_more, rest.size, words),
                 style = type.personsFold,
@@ -128,7 +133,20 @@ fun PersonsOfWeek(
                         .fillMaxWidth()
                         .heightIn(min = PERSON_ROW_MIN)
                         .rule(colors.rule, above = false)
-                        .clickable(role = Role.Button) { expanded = !expanded }
+                        .semantics {
+                            stateDescription = state
+                            if (expanded) {
+                                collapse {
+                                    expanded = false
+                                    true
+                                }
+                            } else {
+                                expand {
+                                    expanded = true
+                                    true
+                                }
+                            }
+                        }.clickable(role = Role.Button) { expanded = !expanded }
                         .padding(start = FOLD_INDENT)
                         .wrapContentHeight(Alignment.CenterVertically),
             )

@@ -642,6 +642,9 @@
         <item quantity="other">and %1$s others</item>
     </plurals>
     <string name="path_spine_contents" tools:ignore="UnusedResources">contents</string>
+    <string name="path_spine_contents_go">scrolls to and presses</string>
+    <string name="path_spine_persons_expanded">expanded</string>
+    <string name="path_spine_persons_collapsed">collapsed</string>
     <string name="path_spine_with" tools:ignore="UnusedResources">with</string>
     <plurals name="path_spine_others" tools:ignore="UnusedResources">
         <item quantity="one">&amp; %1$s other</item>

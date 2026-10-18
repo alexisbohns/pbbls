@@ -22,15 +22,31 @@ private const val READING_INK_MS = 300
 
 /**
  * The day being read (#1122, spec §Reading day; the web's `useReadingDay`): of the
- * visible items that belong to a day, as `(day index, offset in px)` in list order, the
- * day of the last one at or above [lineY]; null while none has reached it. A day's seam
- * and its pebbles all count, so a day whose seam has scrolled off the top is still read
- * through the pebble under the line.
+ * visible items that belong to a day, in list order, the day of the last one at or above
+ * [lineY]; null while none has reached it. A day's seam and its pebbles all count, so a
+ * day whose seam has scrolled off the top is still read through the pebble under the line.
+ *
+ * Inline, so the scroll-time caller walks `visibleItemsInfo` without building a list.
  */
+internal inline fun <T> readingDay(
+    items: List<T>,
+    lineY: Int,
+    day: (T) -> Int?,
+    offset: (T) -> Int,
+): Int? {
+    var read: Int? = null
+    for (item in items) {
+        val itemDay = day(item) ?: continue
+        if (offset(item) <= lineY) read = itemDay else break
+    }
+    return read
+}
+
+/** [readingDay] over `(day index, offset in px)` pairs: the test's shape. */
 internal fun readingDay(
     dayItems: List<Pair<Int, Int>>,
     lineY: Int,
-): Int? = dayItems.lastOrNull { (_, offset) -> offset <= lineY }?.first
+): Int? = readingDay(dayItems, lineY, { it.first }, { it.second })
 
 /**
  * [readingDay] over a `LazyListState`, derived so the week recomposes only when the day
@@ -49,11 +65,9 @@ fun rememberReadingDay(
     return remember(listState) {
         derivedStateOf {
             val info = listState.layoutInfo
-            val lineY = (info.viewportSize.height * READING_LINE).roundToInt()
-            readingDay(
-                info.visibleItemsInfo.mapNotNull { item -> dayOf(item.key)?.let { day -> day to item.offset } },
-                lineY,
-            )
+            // From the viewport's own start, so a top content padding never moves the line.
+            val lineY = info.viewportStartOffset + (info.viewportSize.height * READING_LINE).roundToInt()
+            readingDay(info.visibleItemsInfo, lineY, { dayOf(it.key) }, { it.offset })
         }
     }
 }

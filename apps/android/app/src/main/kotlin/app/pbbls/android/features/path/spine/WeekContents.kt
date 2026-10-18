@@ -127,6 +127,7 @@ private fun ContentsRow(
     // "Monday 5", as the persons' dots name a day.
     val dayLong = remember(day.date, locale) { "${day.date.dayOfWeek.getDisplayName(TextStyle.FULL, locale)} ${day.date.dayOfMonth}" }
     val description = "${name ?: untitled}, $dayLong, $time"
+    val goLabel = stringResource(R.string.path_spine_contents_go)
     val dayInk = readingInk(here, colors.ink, colors.ink2)
 
     Row(
@@ -147,7 +148,7 @@ private fun ContentsRow(
                 }.clearAndSetSemantics {
                     contentDescription = description
                     role = Role.Button
-                    onClick {
+                    onClick(label = goLabel) {
                         onGo(moment)
                         true
                     }
