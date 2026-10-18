@@ -35,6 +35,7 @@ import app.pbbls.android.features.path.spine.SpineLayout.LABEL_WIDTH
 import app.pbbls.android.features.path.spine.SpineLayout.SEAM_HEIGHT
 import app.pbbls.android.features.path.spine.SpineLayout.SEAM_LABEL_OVERHANG
 import app.pbbls.android.features.path.spine.SpineLayout.SPINE_X
+import app.pbbls.android.features.path.spine.SpineLayout.STILL_PAD_TOP
 import app.pbbls.android.features.path.spine.logic.SpineDay
 import java.time.DayOfWeek
 import java.time.format.DateTimeFormatter
@@ -58,7 +59,8 @@ private val LABEL_LEFT = SPINE_X - LABEL_WIDTH / 2
  * A day's start: the hairline seam with its riffle teeth and the date set in the margin;
  * *still* under it when the day has no moment. The hairline sits [SEAM_LABEL_OVERHANG] below
  * the top, leaving the label its room above; the label runs on below the seam, over the day's
- * top padding, so the seam's slot never measures it.
+ * top padding, so the seam's slot never measures it. *Still* sits [STILL_PAD_TOP] under the
+ * hairline, as on web; the caller gives a still day its minimum length.
  */
 @Composable
 fun DaySeam(
@@ -124,7 +126,7 @@ fun DaySeam(
                 text = stringResource(R.string.path_spine_still),
                 style = type.still,
                 color = colors.ink3,
-                modifier = Modifier.padding(start = COL_X),
+                modifier = Modifier.padding(start = COL_X, top = STILL_PAD_TOP - SEAM_HEIGHT),
             )
         }
     }

@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path.spine
 
+import android.graphics.Bitmap
 import android.graphics.BitmapShader
 import android.graphics.ComposeShader
 import android.graphics.LinearGradient
@@ -10,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Matrix
@@ -18,10 +21,12 @@ import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -37,40 +42,64 @@ private const val MASK_FADED_ALPHA = 0.22f
 
 /**
  * The raked paper behind the days: the mock's six grooves, tiled, fading past the content
- * column. Draw it behind the feed, never on its own.
+ * column. Draw it behind the feed, never on its own. One block of ground, phase 0; a lazy
+ * feed draws its items with [spineGround] instead, so the rake runs on across them.
  */
 @Composable
 fun SpineGround(modifier: Modifier = Modifier) {
+    val tile = rememberRakeTile()
+    Spacer(modifier.spineGround(tile) { 0f })
+}
+
+/** The rake tile at this density and scheme, painted once. */
+@Composable
+internal fun rememberRakeTile(): Bitmap {
     val colors = PebblesTheme.spine.colors
     val density = LocalDensity.current
-    val tile =
-        remember(density, colors.rakeShadow, colors.rakeLight) {
-            rakeTile(density, colors.rakeShadow, colors.rakeLight).asAndroidBitmap()
-        }
-    Spacer(
-        modifier.drawWithCache {
-            if (size.width <= 0f || size.height <= 0f) return@drawWithCache onDrawBehind {}
-            // The mask rides in the paint, not on the canvas: a `DstIn` draw inside an offscreen
-            // layer went unmasked on device (Pixel 8) while Robolectric honoured it.
-            val rake = BitmapShader(tile, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
-            val fullUntil = (COL_X - MASK_FULL_UNTIL).toPx()
-            val fadedFrom = (COL_X + MASK_FADED_FROM).toPx()
-            val rtl = layoutDirection == LayoutDirection.Rtl
-            val mask =
-                LinearGradient(
-                    if (rtl) size.width else 0f,
-                    0f,
-                    if (rtl) size.width - fadedFrom else fadedFrom,
-                    0f,
-                    intArrayOf(Color.Black.toArgb(), Color.Black.toArgb(), Color.Black.copy(alpha = MASK_FADED_ALPHA).toArgb()),
-                    floatArrayOf(0f, fullUntil / fadedFrom, 1f),
-                    Shader.TileMode.CLAMP,
-                )
-            val brush = ShaderBrush(ComposeShader(rake, mask, PorterDuff.Mode.DST_IN))
-            onDrawBehind { drawRect(brush) }
-        },
-    )
+    return remember(density, colors.rakeShadow, colors.rakeLight) {
+        rakeTile(density, colors.rakeShadow, colors.rakeLight).asAndroidBitmap()
+    }
 }
+
+/**
+ * Draws the rake behind this element, from [topInset] down, with the tile's rows starting
+ * at [phase] pixels: an element that follows another on the same ground passes the sum of
+ * the heights above it, and the grooves cross the boundary without a seam. [phase] is read
+ * at draw time, so a change only redraws.
+ */
+internal fun Modifier.spineGround(
+    tile: Bitmap,
+    topInset: Dp = 0.dp,
+    phase: () -> Float,
+): Modifier =
+    drawWithCache {
+        val inset = topInset.toPx()
+        if (size.width <= 0f || size.height <= inset) return@drawWithCache onDrawBehind {}
+        // The mask rides in the paint, not on the canvas: a `DstIn` draw inside an offscreen
+        // layer went unmasked on device (Pixel 8) while Robolectric honoured it.
+        val rake = BitmapShader(tile, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+        val fullUntil = (COL_X - MASK_FULL_UNTIL).toPx()
+        val fadedFrom = (COL_X + MASK_FADED_FROM).toPx()
+        val rtl = layoutDirection == LayoutDirection.Rtl
+        val mask =
+            LinearGradient(
+                if (rtl) size.width else 0f,
+                0f,
+                if (rtl) size.width - fadedFrom else fadedFrom,
+                0f,
+                intArrayOf(Color.Black.toArgb(), Color.Black.toArgb(), Color.Black.copy(alpha = MASK_FADED_ALPHA).toArgb()),
+                floatArrayOf(0f, fullUntil / fadedFrom, 1f),
+                Shader.TileMode.CLAMP,
+            )
+        val brush = ShaderBrush(ComposeShader(rake, mask, PorterDuff.Mode.DST_IN))
+        val ground = Size(size.width, size.height - inset)
+        onDrawBehind {
+            // The shader sits in canvas space: shifting the canvas up by the phase and the
+            // rect down by it keeps the rect in place while the tile's rows move on.
+            val shift = phase().mod(tile.height.toFloat())
+            translate(top = -shift) { drawRect(brush, topLeft = Offset(0f, inset + shift), size = ground) }
+        }
+    }
 
 /** The 36 × 240 tile at this density, both path sets stroked in their colours, butt-capped as the SVG is. */
 private fun rakeTile(

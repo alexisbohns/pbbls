@@ -44,6 +44,19 @@ internal object SpineLayout {
     /** The rake tile; the ground repeats it. */
     val RAKE_TILE = DpSize(36.dp, 240.dp)
 
+    /**
+     * A still day (web `min-h-[48px] pt-3.5`): *still* sits this far under the hairline and
+     * the day runs at least this long, hairline to hairline.
+     */
+    val STILL_PAD_TOP = 14.dp
+    val STILL_MIN_HEIGHT = 48.dp
+
+    /** From the verso's last row to the first day's hairline: the web's aside `pb-2` + feed `mt-10`. */
+    val FEED_TOP = 48.dp
+
+    /** Under the mouth, so the last pebble clears the FAB: the web's feed `pb-24`. */
+    val FEED_BOTTOM = 96.dp
+
     /** The verso's side padding: the masthead, the opening and the empty week sit in it. */
     val VERSO_PAD_X = 20.dp
 
