@@ -5,6 +5,10 @@
   "scripts": {
     "build": "scripts/gradle-if-sdk.sh assembleDebug",
     "lint": "scripts/gradle-if-sdk.sh ktlintCheck",
-    "test": "scripts/gradle-if-sdk.sh testDebugUnitTest"
+    "test": "scripts/gradle-if-sdk.sh testDebugUnitTest",
+    "generate:theme": "node scripts/generate-theme-export.mjs"
+  },
+  "devDependencies": {
+    "@material/material-color-utilities": "0.3.0"
   }
 }
