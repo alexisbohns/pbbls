@@ -191,6 +191,8 @@ private val NIGHT_PHOTO_FILTER: ColorFilter =
  * @param weekday the locale's short weekday, lowercase, without the point.
  * @param emotionName already localised; empty for a moment that is not a pebble yet.
  * @param people the souls strip, handed the card unit `u` so its type and glyphs scale with the card.
+ * @param width the held card's width; null sizes the card by intensity and ratio, as the Spine does.
+ * @param uMax the card unit's cap; the held card raises it.
  */
 @Composable
 internal fun SpineCard(
@@ -205,6 +207,109 @@ internal fun SpineCard(
     people: (@Composable (u: Dp) -> Unit)?,
     modifier: Modifier = Modifier,
     button: Modifier = Modifier,
+    width: Dp? = null,
+    uMax: Dp = U_MAX,
+) {
+    val valence = moment.valence
+    val intensity = valence.intensity
+    val reduceMotion = rememberReduceMotion()
+    val animatedRatio by animateFloatAsState(
+        targetValue = ratio ?: CardSizes.PENDING_RATIO,
+        animationSpec = if (reduceMotion) snap() else tween(ASPECT_MS, easing = EaseOut),
+        label = "spine-card-aspect",
+    )
+
+    BoxWithConstraints(modifier) {
+        val cardWidth = width ?: CardSizes.size(intensity, animatedRatio, maxWidth.value).width.dp
+        val u = min(cardWidth / U_DIVISOR, uMax)
+
+        SpineCardShell(
+            palette = palette,
+            polarity = valence.polarity,
+            intensity = intensity,
+            modifier = Modifier.width(cardWidth),
+            button = button,
+        ) {
+            SpineCardFace(
+                moment = moment,
+                palette = palette,
+                u = u,
+                ratio = animatedRatio,
+                photoUrl = photoUrl,
+                thumbUrl = thumbUrl,
+                weekday = weekday,
+                time = time,
+                emotionName = emotionName,
+                people = people,
+            )
+        }
+    }
+}
+
+/**
+ * The card's body without its print: shadow, Night ring, painted edge, stock, clip.
+ * [content] lays out inside the clip. The Spine wraps one [SpineCardFace]; the held
+ * card wraps a turning face and its still footer (pebble card spec §The card).
+ */
+@Composable
+internal fun SpineCardShell(
+    palette: EmotionPalette?,
+    polarity: ValencePolarity,
+    intensity: Int,
+    modifier: Modifier = Modifier,
+    button: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val colors = PebblesTheme.spine.colors
+    val density = LocalDensity.current
+    val night = colors.isNight
+    val stone = remember(palette) { palette?.toStonePalette() ?: BLANK_STONE_PALETTE }
+    // A moment with no emotion has no painted edge (the web's --edge is unset).
+    val edge = palette?.let { StoneTones.edge(stone, polarity, night) }
+    val shape = MaterialTheme.shapes.medium
+    val shadowPaints =
+        remember(density, night, colors.shadow) {
+            (if (night) NIGHT_SHADOW else PAPER_SHADOW).map { layer -> layer to layer.paint(density, colors.shadow) }
+        }
+    val edgeThickness = CardSizes.edge(intensity).dp
+
+    Box(
+        modifier
+            .drawBehind {
+                val radius = shape.topStart.toPx(size, this)
+                drawCardShadow(shadowPaints, radius)
+                if (night) drawNightRing(radius)
+                if (edge != null) {
+                    drawRoundRect(edge, topLeft = Offset(0f, edgeThickness.toPx()), size = size, cornerRadius = CornerRadius(radius))
+                }
+            }.background(colors.stock, shape)
+            .clip(shape)
+            // The click sits inside the clip so its ripple ends at the corners; the shadow
+            // above is drawn outside it, as the card's own frame.
+            .then(button),
+    ) {
+        content()
+    }
+}
+
+/**
+ * The card's print: the inset border, the field, the legend, the index and the rail,
+ * in card units [u]. [leaf] lays out under the legend (the held card's words).
+ */
+@Composable
+internal fun SpineCardFace(
+    moment: PathMoment,
+    palette: EmotionPalette?,
+    u: Dp,
+    ratio: Float,
+    photoUrl: String?,
+    thumbUrl: String?,
+    weekday: String,
+    time: String,
+    emotionName: String,
+    people: (@Composable (u: Dp) -> Unit)?,
+    modifier: Modifier = Modifier,
+    leaf: (@Composable (u: Dp) -> Unit)? = null,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
@@ -220,133 +325,103 @@ internal fun SpineCard(
     val bed = remember(spot, colors) { StoneTones.mixOklab(spot, PHOTO_BED, colors.stock) }
     val pattern = spot.copy(alpha = colors.patK)
     val ring = spot.copy(alpha = RING_ALPHA)
-    // A moment with no emotion has no painted edge (the web's --edge is unset).
-    val edge = palette?.let { StoneTones.edge(stone, polarity, night) }
-    val shape = MaterialTheme.shapes.medium
-    val shadowPaints =
-        remember(density, night, colors.shadow) {
-            (if (night) NIGHT_SHADOW else PAPER_SHADOW).map { layer -> layer to layer.paint(density, colors.shadow) }
-        }
-    val reduceMotion = rememberReduceMotion()
-    val animatedRatio by animateFloatAsState(
-        targetValue = ratio ?: CardSizes.PENDING_RATIO,
-        animationSpec = if (reduceMotion) snap() else tween(ASPECT_MS, easing = EaseOut),
-        label = "spine-card-aspect",
-    )
     val day = remember(moment.happenedAt) { moment.happenedAt.atZoneSameInstant(ZoneId.systemDefault()).dayOfMonth }
     val cut = EntryTypes.cardTitleCut(polarity)
     val hasEmotion = moment.pebble != null && emotionName.isNotEmpty()
+    val uSp = with(density) { u.toSp().value }
 
-    BoxWithConstraints(modifier) {
-        val cardWidth = CardSizes.size(intensity, animatedRatio, maxWidth.value).width.dp
-        val u = min(cardWidth / U_DIVISOR, U_MAX)
-        val uSp = with(density) { u.toSp().value }
-        val edgeThickness = CardSizes.edge(intensity).dp
-
-        Box(
+    Box(
+        modifier.drawBehind {
+            val inset = (u * 1.6f).toPx()
+            drawRoundRect(
+                colors.cardRule,
+                topLeft = Offset(inset, inset),
+                size = Size(size.width - 2 * inset, size.height - 2 * inset),
+                cornerRadius = CornerRadius((u * 1.3f).toPx()),
+                style = Stroke(RULE.toPx()),
+            )
+        },
+    ) {
+        Column(
             Modifier
-                .width(cardWidth)
-                .drawBehind {
-                    val radius = shape.topStart.toPx(size, this)
-                    drawCardShadow(shadowPaints, radius)
-                    if (night) drawNightRing(radius)
-                    if (edge != null) {
-                        drawRoundRect(edge, topLeft = Offset(0f, edgeThickness.toPx()), size = size, cornerRadius = CornerRadius(radius))
-                    }
-                }.background(colors.stock, shape)
-                .clip(shape)
-                // The click sits inside the clip so its ripple ends at the corners; the shadow
-                // above is drawn outside it, as the card's own frame.
-                .then(button)
-                .drawBehind {
-                    val inset = (u * 1.6f).toPx()
-                    drawRoundRect(
-                        colors.cardRule,
-                        topLeft = Offset(inset, inset),
-                        size = Size(size.width - 2 * inset, size.height - 2 * inset),
-                        cornerRadius = CornerRadius((u * 1.3f).toPx()),
-                        style = Stroke(RULE.toPx()),
-                    )
-                },
+                .fillMaxWidth()
+                .padding(top = u * 4.6f, start = u * 9f, end = u * 9f, bottom = u * 6.2f),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            Field(
+                u = u,
+                ratio = ratio,
+                polarity = polarity,
+                tint = tint,
+                bed = bed,
+                pattern = pattern,
+                ring = ring,
+                photoUrl = photoUrl,
+                thumbUrl = thumbUrl,
+                night = night,
+                unavailableStyle = type.cardSoul(uSp),
+            )
             Column(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = u * 4.6f, start = u * 9f, end = u * 9f, bottom = u * 6.2f),
+                Modifier.fillMaxWidth().padding(top = u * 3.3f),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Field(
-                    u = u,
-                    ratio = animatedRatio,
-                    polarity = polarity,
-                    tint = tint,
-                    bed = bed,
-                    pattern = pattern,
-                    ring = ring,
-                    photoUrl = photoUrl,
-                    thumbUrl = thumbUrl,
-                    night = night,
-                    unavailableStyle = type.cardSoul(uSp),
-                )
-                Column(
-                    Modifier.fillMaxWidth().padding(top = u * 3.3f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    // A photo-only moment shows no title: the photo is the moment (spec D3).
-                    moment.name?.let { name ->
-                        Text(
-                            text = name,
-                            style =
-                                type
-                                    .cardTitle(
-                                        uSp,
-                                        cut.first,
-                                        cut.second,
-                                    ).copy(lineBreak = LineBreak.Heading, textAlign = TextAlign.Center),
-                            color = colors.ink,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                    if (people != null) {
-                        Box(Modifier.fillMaxWidth().padding(top = u * 1.8f), contentAlignment = Alignment.Center) { people(u) }
-                    }
+                // A photo-only moment shows no title: the photo is the moment (spec D3).
+                moment.name?.let { name ->
+                    Text(
+                        text = name,
+                        style =
+                            type
+                                .cardTitle(
+                                    uSp,
+                                    cut.first,
+                                    cut.second,
+                                ).copy(lineBreak = LineBreak.Heading, textAlign = TextAlign.Center),
+                        color = colors.ink,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                if (people != null) {
+                    Box(Modifier.fillMaxWidth().padding(top = u * 1.8f), contentAlignment = Alignment.Center) { people(u) }
                 }
             }
-            Column(
-                Modifier
-                    .offset(x = u * 2.1f, y = u * 4.3f)
-                    .width(u * 6.6f)
-                    .clearAndSetSemantics {},
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(text = day.toString(), style = type.cardIndexNumeral(uSp), color = colors.ink)
-                // The start padding balances the small caps' tracking, as the web's `pl-[.14em]` does.
-                Text(
-                    text = weekday,
-                    style = type.cardIndexDay(uSp),
-                    color = colors.ink,
-                    modifier = Modifier.padding(top = u * 1.1f, start = u * 0.25f),
-                )
-                StoneSeal(
-                    valence = valence,
-                    palette = palette,
-                    glyph = moment.pebble?.glyph,
-                    knockout = colors.stock,
-                    modifier = Modifier.padding(top = u * 1.4f).width(u * SEAL_UNITS.getValue(intensity)),
-                )
+            if (leaf != null) {
+                Box(Modifier.fillMaxWidth()) { leaf(u) }
             }
-            Rail(
-                u = u,
-                time = time,
-                emotionName = if (hasEmotion) emotionName else null,
-                emotionInk = emotionInk,
-                timeStyle = type.cardRail(uSp),
-                emotionStyle = type.cardRailEmotion(uSp),
-                rule = colors.ink2.copy(alpha = RAIL_RULE_ALPHA),
-                ink = colors.ink2,
-                modifier = Modifier.align(Alignment.TopEnd).offset(x = -(u * 3.7f), y = u * 4.7f),
+        }
+        Column(
+            Modifier
+                .offset(x = u * 2.1f, y = u * 4.3f)
+                .width(u * 6.6f)
+                .clearAndSetSemantics {},
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(text = day.toString(), style = type.cardIndexNumeral(uSp), color = colors.ink)
+            // The start padding balances the small caps' tracking, as the web's `pl-[.14em]` does.
+            Text(
+                text = weekday,
+                style = type.cardIndexDay(uSp),
+                color = colors.ink,
+                modifier = Modifier.padding(top = u * 1.1f, start = u * 0.25f),
+            )
+            StoneSeal(
+                valence = valence,
+                palette = palette,
+                glyph = moment.pebble?.glyph,
+                knockout = colors.stock,
+                modifier = Modifier.padding(top = u * 1.4f).width(u * SEAL_UNITS.getValue(intensity)),
             )
         }
+        Rail(
+            u = u,
+            time = time,
+            emotionName = if (hasEmotion) emotionName else null,
+            emotionInk = emotionInk,
+            timeStyle = type.cardRail(uSp),
+            emotionStyle = type.cardRailEmotion(uSp),
+            rule = colors.ink2.copy(alpha = RAIL_RULE_ALPHA),
+            ink = colors.ink2,
+            modifier = Modifier.align(Alignment.TopEnd).offset(x = -(u * 3.7f), y = u * 4.7f),
+        )
     }
 }
 
