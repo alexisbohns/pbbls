@@ -78,9 +78,13 @@ annotation class IoApplicationScope
  * grep -rn "Dispatchers\." app/src/main/kotlin | grep -v '^\S*: *\*'
  * ```
  *
- * should return this file's three providers and nothing else. The `grep -v`
- * strips comment lines and is not optional — [SnapProcessor]'s KDoc names
- * `Dispatchers.IO` in prose to record what it replaced, and prose is not policy.
+ * should return this file's three providers and two composable call sites,
+ * nothing else: `RootScreen.kt` (`withContext(Dispatchers.IO)` around a disk
+ * cache clear, pre-existing) and `LitStone.kt` (`Dispatchers.Default` for the
+ * CPU-bound stone rasterisation inside a `LaunchedEffect`, where nothing is
+ * injectable). Anything else is a regression. The `grep -v` strips comment
+ * lines and is not optional — [SnapProcessor]'s KDoc names `Dispatchers.IO`
+ * in prose to record what it replaced, and prose is not policy.
  */
 @Module
 @InstallIn(SingletonComponent::class)
