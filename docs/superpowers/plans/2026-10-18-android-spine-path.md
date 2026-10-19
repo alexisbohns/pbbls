@@ -984,3 +984,9 @@ Branch `feat/1122-path-becomes-spine` on Part 5. PR `feat(android): the path bec
 ## Lessons learned (execution, Part 5, 2026-10-18)
 
 - **The rake re-phases after a far jump.** Each day item's ground phase is the sum of the recorded heights of the items above it; a `scrollToItem` that skips items leaves theirs unrecorded, so the tile's rows restart there. Accepted: the seam hairline hides most cuts. If it ever shows, restart the phase at each seam instead of summing across the week.
+
+## Lessons learned (execution, Part 6, 2026-10-19)
+
+- **The week links must name the pager's neighbour, not the calendar's.** Android's roll holds only the weeks with moments plus the current one, so `WeekWords.previousNumber`/`nextNumber` (the web's `words.previous.number`, calendar-based) read "week 42" on a link that turned to week 35. `SpineWeek` now takes `WeekNeighbour(number, go)` built from the pager's entries; the mouth's "the N-th begins on Monday the …" stays the calendar's, being about time.
+- **`@GraphicsMode(NATIVE)` suite-wide breaks centre taps on linked text.** The Spine's ground tile and stones are bitmaps the legacy shadows hand back as null, so the whole-app suite had to go NATIVE; with real text metrics the centre of a consent row with an inline link lands on the link, which opens the document instead of toggling. Drive such rows through their semantics action (`performSemanticsAction(OnClick)`), never a centre tap.
+- **A tag-centre `performClick` needs the entry button to span the column.** The journeys and `PebblesJourney.clickFresh` tap the centre of `PATH_PEBBLE_ROW`; a wrap-content entry button for a four-letter name is 38 dp wide and the tap hits nothing. The entry's button is full width (the web's block is too); the card's button is the card, inside its clip, so its ripple keeps the corners.

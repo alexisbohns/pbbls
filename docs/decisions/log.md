@@ -1117,3 +1117,26 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The Android Spine Path (own issue) builds on the rule set; iOS is still #921's question.
 - **Supersedes / Superseded-by:** Extends **2026-09-24 — Android adopts the M3-evo Material 3 Expressive theme** (#853) and **2026-09-28 — The error colour is orange, never red** (#990). Supersedes nothing.
 - **Refs:** #1118, #1052, #853, #990, `docs/superpowers/specs/2026-10-18-android-spine-brand-scheme-design.md`, `apps/android/scripts/generate-theme-export.mjs`, `apps/android/design/pbbls-m3_evo-theme.json`.
+
+## 2026-10-18 — The Android Path becomes the Spine: a Compose port of the web stone over the iOS geometry, souls on `path_moments`, one column with the detail pane (#1122, #1121)
+
+- **Status:** taken
+- **Scope:** android, ui, db
+- **Context:** The web Path became the Spine (#1052, 2026-10-13) and the Android brand scheme became the Spine paper (#1118). Android still drew the M37 row list (outline + composed stone, date-range header, static-cairn roll). The Spine needs the lit stone, the people line and the week's opening, none of which the row list could carry, and `path_moments` carried no souls.
+- **Decision:**
+  - **D1** The margin stone is a Compose port of the web SVG construction (`core/ui/render/stone/`): the iOS outline silhouette is the body, the engine seed scaled by `pebbleScale × 1.22` is the carving, tones are the web's sRGB/OKLab mixes, blur is a native `BlurMaskFilter`, and the result is bitmap-cached (`StoneBitmapCache`) and painted off the main thread. Not the flat stone, not the AGSL render of #979, which stays open as a later renderer behind the same interface.
+  - **D2** Souls come from `path_moments`: the pebble jsonb gains an additive `souls: [{id, name, glyph_id}]` (migration `20261018120000_path_moments_souls.sql`, harness `verify-moments.ts` §2b). Glyphs come from the souls list the app already loads. iOS gets the field for free.
+  - **D3** The snap ratio is probed on device (`SnapAspectCache`, once per snap per session, sticky failures); a card starts square and eases to the ratio. No `snaps.width/height`.
+  - **D4** One column everywhere at the readable width; from 840 dp the existing list-detail pane shows the pressed pebble beside the Spine. No spread.
+  - **D5** Chrome: the week roll is restyled to the Spine's numerals (the static cairn drawable is gone), the date pill goes, the masthead and the mouth carry the week links and name the pager neighbour, the FAB stays, no dock, no "carve a pebble" link.
+  - **D6** The page grain is dropped; the rake ground stays, masked in the paint.
+  - Tokens live in `core/designsystem` (`SpineTypography` on `ysabeauAt(weight)`, `SpineColors` from the M3 roles); pure logic is tested against the web's own Vitest vectors.
+- **Why:** Same stone as web at feed size with static light and no GPU work at rest; a timeline should read one RPC; the pane is already Android's second page; the four-tab bar and the FAB are the Android idiom (#852, #854).
+- **Consequences:**
+  - `PathPebbleRow`, `WeekPebbleList`, `WeekHeader`, `PathSnapThumb` and their formatting helpers are deleted; `JourneyTags.PATH_PEBBLE_ROW` lives on `SpinePebble`.
+  - The whole-app Robolectric suite runs `@GraphicsMode(NATIVE)` (the rake tile needs a real bitmap).
+  - Two lessons are hardened in the plan: Compose hit-tests past an unclipped parent (the stone overhangs its row as on web); HWUI ignores a `DstIn` draw inside an offscreen layer, so masks ride in the paint.
+  - #979 (AGSL stone) stays open; the rake re-phases after a far jump (accepted); the logic types `SpineWeek`/`PersonsOfWeek` shadow the composables by name (rename owed); baseline profiles list deleted classes until regenerated.
+  - iOS still shows the row list; its Spine is a separate issue.
+- **Supersedes / Superseded-by:** Extends **2026-10-13 — The web Path becomes the Spine** (#1052) and **2026-10-18 — Android's brand neutrals are the Spine paper** (#1118). Supersedes the M37 Path rendering notes for Android (row list, static cairn).
+- **Refs:** #1122, #1121, #1118, #1052, #979, `docs/superpowers/specs/2026-10-18-android-spine-path-design.md`, `docs/superpowers/plans/2026-10-18-android-spine-path.md`, `docs/superpowers/specs/2026-10-11-web-path-spine-design.md`.

@@ -139,7 +139,7 @@ next preference added is where the migration happens. Route it then.
   CompositionLocal.** Exactly three locals exist and they are permanent:
   `LocalEmotionPaletteService`, `LocalReferenceDataService` and
   `LocalSnapURLCache`. They carry ambient reference data that *leaf* components
-  read where they render (`PebbleRow`, `ValenceGlyph`, `WeekHeader`, the
+  read where they render (`PebbleRow`, `ValenceGlyph`, `SpineWeek`, the
   pickers), which is what a `CompositionLocal` is for. `MainActivity` provides
   those three and nothing else. Do not add a `Local…Service` for anything a
   screen *calls*. (Decision log 2026-09-20 and 2026-09-21.)
@@ -431,25 +431,61 @@ Do not bring it back for a single asset.
 
 ### Path rendering
 
-- **The stone is composed on device** (`core/ui/render/StoneComposer.kt`):
-  the shape seed for the valence (`res/raw/shape_{size}_{polarity}.svg`,
-  byte-identical copies of `docs/seeds/shape-seeds/`, guarded by
-  `StoneComposerTest`) plus the pebble's derived glyph strokes in the deleted
-  engine's glyph slot, traced at one weight by `PebbleStaticRender`. There is
-  no `render_svg` (spec D6).
-- **Outline silhouettes** (the row backdrop) are byte-identical copies of the
-  iOS assets, renamed on copy (Android resource names are `[a-z0-9_]`):
-
-| iOS source (`apps/ios/Pebbles/Resources/Outlines/`) | Android (`res/raw/`) |
-| --- | --- |
-| `{size}-{polarity}.svg` (9 files) | `outline_{size}_{polarity}.svg` |
-
-  Their `#FF00FF` sentinel fill is string-replaced with the palette fill hex
-  (`PebbleOutlineBackdrop`); fill alpha rides separately as view alpha.
+- **The Path is the Spine** (`features/path/spine/`, #1122): `SpineWeek` is the
+  one public composable; `PathContent` renders it per pager page. The web rule
+  set (`docs/superpowers/specs/2026-10-11-web-path-spine-design.md`) is the
+  source of every number, in dp; the Android spec
+  (`docs/superpowers/specs/2026-10-18-android-spine-path-design.md`) holds the
+  token → M3 role mapping and the decisions D1–D8. Pure logic
+  (`features/path/spine/logic/`) is tested against the web's own Vitest
+  vectors; a same-surface round-trip is not a port test.
+- **The lit stone is composed on device** (`core/ui/render/stone/`): the iOS
+  outline silhouette (`res/raw/outline_{size}_{polarity}.svg`, byte-identical
+  copies of `apps/ios/Pebbles/Resources/Outlines/`) is the body, the engine
+  seed scaled by `pebbleScale × 1.22` is the carving with the seed's veins and
+  fossil, tones are the web's sRGB/OKLab mixes, blur is a native
+  `BlurMaskFilter`. `StonePainter` paints into a byte-sized `StoneBitmapCache`
+  off the main thread (the one recorded `Dispatchers.Default` exception, see
+  `DispatchersModule`); `LitStone` shows a mid-tone placeholder until then.
+  The press/ripple/glint timings are the web's WAAPI tables (`StoneMotion`),
+  one tween mapped through `piecewise()`, never per-segment easing.
+- **The flat stone is still composed on device** for the surfaces that are not
+  the Spine (`core/ui/render/StoneComposer.kt`, `PebbleStaticRender`): the shape
+  seed for the valence (`res/raw/shape_{size}_{polarity}.svg`, byte-identical
+  copies of `docs/seeds/shape-seeds/`, guarded by `StoneComposerTest`) plus the
+  derived glyph strokes traced at one weight. The outline backdrop
+  (`PebbleOutlineBackdrop`, the iOS `{size}-{polarity}.svg` renamed
+  `outline_{size}_{polarity}.svg` on copy) string-replaces its `#FF00FF`
+  sentinel fill with the palette hex; fill alpha rides as view alpha. There is
+  no `render_svg`.
+- **Tokens live in `core/designsystem`**: `SpineTypography` (every rank on
+  `ysabeauAt(weight)`, because `YsabeauFamily` snaps weights to its four cuts;
+  small caps and lining figures are Ysabeau's own `smcp`/`lnum`/`tnum`) and
+  `SpineColors` (`SpineColors.from(scheme, night)`, read through
+  `PebblesTheme.spine`). `features/path` names no colour, corner radius or
+  font size (`ThemeLiteralsTest`); its geometry, in dp from the web rule set,
+  lives in `SpineLayout`.
+- **Two Compose facts the layout relies on.** Compose hit-tests a child past an
+  unclipped parent's edge, so the stone overhangs its row exactly as on web: the
+  row and the day column must never take a `clip`. HWUI ignored a `DstIn` draw
+  inside a `CompositingStrategy.Offscreen` layer on a Pixel 8 while Robolectric
+  honoured it: masks ride in the paint (`ComposeShader(…, DST_IN)`), and a
+  Robolectric NATIVE pixel test is a guard, not a proof of HWUI.
+- **The ground scrolls with the feed.** Each day item carries a
+  `SpineGroundElement` drawing the shared rake tile at a phase that continues
+  across items; a day's hung label needs its own room (`DaySeam` is 22 dp with
+  the hairline at `SEAM_LABEL_OVERHANG`; the overhang comes off the previous
+  day's bottom padding).
+- **The week roll is numerals** (`WeekRoll`, 56 × 44 dp cells, `rollNumeral`,
+  underline on focus). The masthead and the mouth name the pager neighbour, not
+  the calendar one, because the roll holds only weeks with moments plus the
+  current one.
+- **The whole-app Robolectric suite runs `@GraphicsMode(NATIVE)`**: the rake
+  tile is a real bitmap, and LEGACY graphics returned null from
+  `Bitmap.createBitmap`.
 - **The collapsed form row's valence imagery** is res/raw SVGs normalized from
   the web line art and tinted via `currentColor` injection
-  (`ValenceGlyph`/`ValenceAssets`), not the iOS PDF assets. The Path row never
-  uses them; the row is outline + composed stone.
+  (`ValenceGlyph`/`ValenceAssets`), not the iOS PDF assets.
 - **The valence fan's artworks** (`features/path/valence/`) are byte-identical
   copies of the iOS files, generated from the source PDFs by
   `apps/ios/Scripts/valence-art-to-svg.mjs` and renamed on copy like the
@@ -464,9 +500,9 @@ Do not bring it back for a single asset.
   fossil's spiral, which goes through `backdropArt` instead. Tracing a filled
   spiral as a centreline fills it in solid, so the split is load-bearing and
   `ValenceArtTest` asserts it. Do not re-derive these from the web line art.
-- **The week-roll cairn is a static drawable** (`res/drawable/cairn_static.xml`).
-  The iOS Rive state machine (`pbbls-cairn-states.riv`) is a known fast-follow,
-  in Compose, since Android has no Rive runtime.
+- **A debug-only Spine Lab** (`src/debug/…/SpineLabActivity`, a second
+  launcher icon) renders the stone gallery and the fixture week; use it to
+  check a change on a device before touching the real Path.
 
 ## Behavior that mirrors iOS on purpose
 

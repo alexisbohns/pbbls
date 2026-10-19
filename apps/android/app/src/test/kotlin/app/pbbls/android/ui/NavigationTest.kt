@@ -26,7 +26,6 @@ import app.pbbls.android.testing.UiFixtures
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.time.OffsetDateTime
 import javax.inject.Inject
 
 /**
@@ -81,7 +80,7 @@ class NavigationTest : AppUiTest() {
 
     @Test
     fun `Path opens a moment, and its menu opens Edit moment and Edit pebble`() {
-        moments.path = listOf(UiFixtures.pathMoment(happenedAt = OffsetDateTime.now()))
+        moments.path = listOf(UiFixtures.pathMoment(happenedAt = UiFixtures.thisWeek()))
         moments.moments = mapOf("moment-1" to UiFixtures.momentDetail())
         signedIn()
 
@@ -102,7 +101,7 @@ class NavigationTest : AppUiTest() {
     /** A moment without your pebble has nothing for Edit pebble to open (R7). */
     @Test
     fun `a bare moment's menu offers Edit moment only`() {
-        moments.path = listOf(UiFixtures.pathMoment(pebble = null, happenedAt = OffsetDateTime.now()))
+        moments.path = listOf(UiFixtures.pathMoment(pebble = null, happenedAt = UiFixtures.thisWeek()))
         moments.moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = null))
         signedIn()
 

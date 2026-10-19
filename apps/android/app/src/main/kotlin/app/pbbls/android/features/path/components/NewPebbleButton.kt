@@ -23,7 +23,7 @@ import app.pbbls.android.R
  * Formerly also pinned at the bottom of the Path timeline; #852 moved that
  * spot to [app.pbbls.android.features.path.components.NewPebbleFab] (the bar
  * now occupies the space it used), so this component is left only in the
- * empty-week affordance ([WeekPebbleList]'s `EmptyWeek`), which the FAB does
+ * empty-week affordance ([app.pbbls.android.features.path.spine.SpineEmptyWeek]), which the FAB does
  * not cover since it is not scoped to a single page.
  *
  * A tap opens Capture (#1048). The long press to the all-at-once composer

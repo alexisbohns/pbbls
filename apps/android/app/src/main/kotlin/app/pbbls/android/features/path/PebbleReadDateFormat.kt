@@ -11,8 +11,7 @@ import java.util.Locale
  * `PebbleReadTitle.formattedDate`: weekday-abbrev, month-abbrev, day, year, then
  * a localized short time joined by a middot. Output is mixed-case and the read
  * title renders it as-is (#853 dropped the iOS `.textCase(.uppercase)`
- * transform). Sits next to [PathRowFormatting] and mirrors its style so both
- * stay JVM-testable.
+ * transform). Pure Kotlin so it stays JVM-testable.
  */
 object PebbleReadDateFormat {
     fun format(

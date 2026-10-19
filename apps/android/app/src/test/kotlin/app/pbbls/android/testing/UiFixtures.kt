@@ -22,14 +22,17 @@ import app.pbbls.android.core.model.SoulRef
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.Visibility
+import app.pbbls.android.features.path.WeekRollBuilder
+import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneId
 
 /**
  * Minimal, valid domain values for the Robolectric UI tests (#857). Each takes
  * only what a test asserts on; the rest is the least a screen needs to render.
  *
  * The moment builders default to a fixed date for the decoder and ViewModel
- * tests; a Robolectric Path journey passes `happenedAt = OffsetDateTime.now()`,
+ * tests; a Robolectric Path journey passes `happenedAt = UiFixtures.thisWeek()`,
  * because the pager opens on the current week and a moment outside it is not
  * on screen to tap.
  */
@@ -93,6 +96,21 @@ object UiFixtures {
         viewBox = "0 0 200 200",
         source = source,
     )
+
+    /**
+     * Monday of the current week at ten, in the device zone, [weeksBack] weeks ago: when a
+     * Path journey wants a moment on the timeline. Not `OffsetDateTime.now()`: on the Spine
+     * a moment sits under its day's seam, so a Sunday-night "now" lands after six still days
+     * and below the fold of a phone-sized screen — which is what "now" is in UTC while it is
+     * already Monday in Paris. The first day of the week is at the top in every zone.
+     */
+    fun thisWeek(weeksBack: Long = 0): OffsetDateTime =
+        WeekRollBuilder
+            .weekStart(LocalDate.now())
+            .minusWeeks(weeksBack)
+            .atTime(10, 0)
+            .atZone(ZoneId.systemDefault())
+            .toOffsetDateTime()
 
     fun pathMoment(
         id: String = "moment-1",

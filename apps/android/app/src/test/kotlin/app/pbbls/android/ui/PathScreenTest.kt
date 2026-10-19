@@ -1,6 +1,10 @@
 package app.pbbls.android.ui
 
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
@@ -8,8 +12,8 @@ import androidx.compose.ui.test.swipeRight
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.features.path.PathFocusRequests
-import app.pbbls.android.features.path.WeekHeaderFormatting
 import app.pbbls.android.features.path.WeekRollBuilder
+import app.pbbls.android.features.path.spine.logic.WeekWordsBuilder
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.UiFixtures
@@ -17,7 +21,6 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.IOException
-import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.util.Locale
@@ -36,6 +39,13 @@ class PathScreenTest : AppUiTest() {
 
     @Inject lateinit var focusRequests: PathFocusRequests
 
+    /**
+     * A moment's row on the Spine. The entry reads as one button whose description opens
+     * with the name, so there is no text node to find; the row is the tagged ancestor.
+     */
+    private fun onMoment(name: String): SemanticsNodeInteraction =
+        compose.onNode(hasTestTag(JourneyTags.PATH_PEBBLE_ROW) and hasAnyDescendant(hasContentDescription(name, substring = true)))
+
     private fun signedIn() {
         skipOnboarding()
         launch()
@@ -44,22 +54,22 @@ class PathScreenTest : AppUiTest() {
 
     @Test
     fun `a loaded timeline shows this week's moments`() {
-        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = OffsetDateTime.now()))
+        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek()))
 
         signedIn()
 
-        compose.onNodeWithText("Coffee with Mo").assertIsDisplayed()
+        onMoment("Coffee with Mo").assertIsDisplayed()
         onText(R.string.path_load_error).assertDoesNotExist()
     }
 
     /** A photo-only capture has no name and no pebble yet; it is still on the timeline (R3). */
     @Test
     fun `an untitled moment reads Untitled`() {
-        path.path = listOf(UiFixtures.pathMoment(name = null, pebble = null, happenedAt = OffsetDateTime.now()))
+        path.path = listOf(UiFixtures.pathMoment(name = null, pebble = null, happenedAt = UiFixtures.thisWeek()))
 
         signedIn()
 
-        onText(R.string.moment_untitled).assertIsDisplayed()
+        onMoment(string(R.string.path_spine_untitled)).assertIsDisplayed()
     }
 
     @Test
@@ -75,26 +85,26 @@ class PathScreenTest : AppUiTest() {
     @Test
     fun `coming back to the app after a failed load recovers the timeline`() {
         path.failNext = IOException("offline")
-        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = OffsetDateTime.now()))
+        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek()))
         signedIn()
         onText(R.string.path_load_error).assertIsDisplayed()
 
         backgroundAndReturn()
 
         onText(R.string.path_load_error).assertDoesNotExist()
-        compose.onNodeWithText("Coffee with Mo").assertIsDisplayed()
+        onMoment("Coffee with Mo").assertIsDisplayed()
         assertEquals(2, path.loadPathCount)
     }
 
     @Test
     fun `a failed refresh keeps the timeline already on screen`() {
-        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = OffsetDateTime.now()))
+        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek()))
         signedIn()
 
         path.failNext = IOException("offline")
         backgroundAndReturn()
 
-        compose.onNodeWithText("Coffee with Mo").assertIsDisplayed()
+        onMoment("Coffee with Mo").assertIsDisplayed()
         onText(R.string.path_load_error).assertDoesNotExist()
     }
 
@@ -105,20 +115,20 @@ class PathScreenTest : AppUiTest() {
      */
     @Test
     fun `a focus request pages the path to that moment's week on the next load`() {
-        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = OffsetDateTime.now())
+        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek())
         path.path = listOf(thisWeek)
         signedIn()
-        compose.onNodeWithText("Coffee with Mo").assertIsDisplayed()
+        onMoment("Coffee with Mo").assertIsDisplayed()
 
         val threeWeeksBack =
-            UiFixtures.pathMoment(id = "moment-old", name = "Lake swim", happenedAt = OffsetDateTime.now().minusWeeks(3))
+            UiFixtures.pathMoment(id = "moment-old", name = "Lake swim", happenedAt = UiFixtures.thisWeek(3))
         path.path = listOf(threeWeeksBack, thisWeek)
         focusRequests.request(threeWeeksBack.id)
         backgroundAndReturn()
 
         compose.onNodeWithText(weekHeader(threeWeeksBack.happenedAt)).assertIsDisplayed()
-        compose.onNodeWithText("Lake swim").assertIsDisplayed()
-        compose.onNodeWithText("Coffee with Mo").assertDoesNotExist()
+        onMoment("Lake swim").assertIsDisplayed()
+        onMoment("Coffee with Mo").assertDoesNotExist()
     }
 
     /**
@@ -127,28 +137,28 @@ class PathScreenTest : AppUiTest() {
      */
     @Test
     fun `a focus request pages past the weeks in between`() {
-        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = OffsetDateTime.now())
-        val between = UiFixtures.pathMoment(id = "moment-mid", name = "Book club", happenedAt = OffsetDateTime.now().minusWeeks(2))
+        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek())
+        val between = UiFixtures.pathMoment(id = "moment-mid", name = "Book club", happenedAt = UiFixtures.thisWeek(2))
         path.path = listOf(between, thisWeek)
         signedIn()
-        compose.onNodeWithText("Coffee with Mo").assertIsDisplayed()
+        onMoment("Coffee with Mo").assertIsDisplayed()
 
         val farBack =
-            UiFixtures.pathMoment(id = "moment-far", name = "Lake swim", happenedAt = OffsetDateTime.now().minusWeeks(5))
+            UiFixtures.pathMoment(id = "moment-far", name = "Lake swim", happenedAt = UiFixtures.thisWeek(5))
         path.path = listOf(farBack, between, thisWeek)
         focusRequests.request(farBack.id)
         backgroundAndReturn()
 
         compose.onNodeWithText(weekHeader(farBack.happenedAt)).assertIsDisplayed()
-        compose.onNodeWithText("Lake swim").assertIsDisplayed()
+        onMoment("Lake swim").assertIsDisplayed()
     }
 
     /** The reload guard above must not swallow a real page change: a swipe still moves the focus. */
     @Test
     fun `swiping the pager back moves the focus to the previous week`() {
         val lastWeek =
-            UiFixtures.pathMoment(id = "moment-old", name = "Lake swim", happenedAt = OffsetDateTime.now().minusWeeks(1))
-        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = OffsetDateTime.now())
+            UiFixtures.pathMoment(id = "moment-old", name = "Lake swim", happenedAt = UiFixtures.thisWeek(1))
+        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = UiFixtures.thisWeek())
         path.path = listOf(lastWeek, thisWeek)
         signedIn()
         compose.onNodeWithText(weekHeader(thisWeek.happenedAt)).assertIsDisplayed()
@@ -157,14 +167,14 @@ class PathScreenTest : AppUiTest() {
         compose.waitForIdle()
 
         compose.onNodeWithText(weekHeader(lastWeek.happenedAt)).assertIsDisplayed()
-        compose.onNodeWithText("Lake swim").assertIsDisplayed()
+        onMoment("Lake swim").assertIsDisplayed()
     }
 
+    /** The week's kicker on the Spine's opening ("the forty-first week · 2026"): what names the page a moment is on. */
     private fun weekHeader(happenedAt: OffsetDateTime): String {
         val locale = Locale.getDefault()
         val day = happenedAt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDate()
-        return WeekHeaderFormatting
-            .formatRange(WeekRollBuilder.weekStart(day), LocalDate.now(), locale)
-            .uppercase(locale)
+        val words = WeekWordsBuilder.of(WeekRollBuilder.weekStart(day), locale)
+        return string(R.string.path_spine_kicker, words.ordinal, words.year)
     }
 }

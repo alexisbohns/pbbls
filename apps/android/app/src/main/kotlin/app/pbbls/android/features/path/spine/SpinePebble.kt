@@ -251,9 +251,19 @@ internal fun SpinePebble(
             },
     ) {
         // The card or the entry: one button read once, with the delete as its long-press action.
+        // The entry's button spans the column, as the web's does over its block (a short
+        // name is not a small target); the card's button is the card, inside its shape, so
+        // the ripple keeps the corners and the blank beside a narrow card opens nothing.
+        val button =
+            Modifier.combinedClickable(
+                role = Role.Button,
+                onLongClick = { menu = true },
+                onClick = openNow,
+            )
         Box(
             Modifier
                 .padding(start = COL_X, end = PAD_R)
+                .then(if (hasCard) Modifier else Modifier.fillMaxWidth())
                 .clearAndSetSemantics {
                     contentDescription = description
                     role = Role.Button
@@ -265,14 +275,11 @@ internal fun SpinePebble(
                         menu = true
                         true
                     }
-                }.combinedClickable(
-                    role = Role.Button,
-                    onLongClick = { menu = true },
-                    onClick = openNow,
-                ),
+                }.then(if (hasCard) Modifier else button),
         ) {
             if (hasCard) {
                 SpineCard(
+                    button = button,
                     moment = moment,
                     palette = palette,
                     ratio = ratio,

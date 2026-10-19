@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.features.path.spine.SpineWeek
+import app.pbbls.android.features.path.spine.WeekNeighbour
 import app.pbbls.android.features.path.spine.logic.SpineWeekBuilder
 import com.android.tools.screenshot.PreviewTest
 
@@ -59,8 +60,8 @@ private fun WeekPage(
                 aspect = null,
                 onOpen = {},
                 onRequestDelete = {},
-                onPreviousWeek = {},
-                onNextWeek = {},
+                previousWeek = WeekNeighbour(SpineFixtureWeek.previousNumber) {},
+                nextWeek = WeekNeighbour(SpineFixtureWeek.nextNumber) {},
                 onCreatePebble = {},
                 listState = remember(firstRow) { LazyListState(firstVisibleItemIndex = firstRow) },
                 zone = SpineFixtureWeek.zone,
