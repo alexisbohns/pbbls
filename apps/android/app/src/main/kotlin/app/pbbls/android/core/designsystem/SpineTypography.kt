@@ -99,4 +99,19 @@ object SpineTypography {
 
     /** The strip's "& twelve others": the base `2.6u` in the quiet italic. */
     fun cardOthers(u: Float) = ysabeau((2.6f * u).sp, 380, italic = true)
+
+    // The held card (pebble card spec): fixed sizes, not card units.
+    val cardFooterGrade = ysabeau(10.5.sp, 650, 0.16f.em, features = SMALL_CAPS)
+    val cardFooterNote = ysabeau(12.5.sp, 380, italic = true)
+    val cardTurnTarget = ysabeau(13.sp, 380, italic = true)
+    val cardLeafDateline = ysabeau(10.5.sp, 600, 0.18f.em, features = SMALL_CAPS + ", " + LINING)
+    val cardLeafBody = ysabeau(17.sp, 380, lineHeight = 27.sp)
+    val cardLockupSpan = ysabeau(10.sp, 650, 0.22f.em, features = SMALL_CAPS)
+    val cardEmotion = ysabeau(20.sp, 400)
+    val cardBandName = ysabeau(14.sp, 400, italic = true)
+    val bareTitle = ysabeau(34.sp, 300, (-0.02f).em, lineHeight = 38.sp)
+    val placeBody = ysabeau(16.sp, 380, lineHeight = 24.sp)
+
+    /** The postmark ring: capitals (not small caps, too small at 4 px), sized by [RingFit]. */
+    fun postmarkRing(sizeSp: Float) = ysabeau(sizeSp.sp, 650, features = LINING)
 }

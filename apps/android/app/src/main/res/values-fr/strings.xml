@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- ==== Entry funnel (sub-project C) — Welcome ==== -->
     <string name="welcome_step_record_title">Notez en quelques secondes.</string>
     <string name="welcome_step_record_description">Capturez les moments quand ils arrivent — pas de page blanche, sans pression.</string>
@@ -358,6 +358,17 @@
     <string name="valence_span_day">DE MA JOURNÉE</string>
     <string name="valence_span_week">DE MA SEMAINE</string>
     <string name="valence_span_month">DE MON MOIS</string>
+    <!-- The held card (#1135) -->
+    <string name="card_turn">Retourner</string>
+    <string name="card_turn_to_pebble">Galet</string>
+    <string name="card_turn_to_moment">Moment</string>
+    <string name="card_turn_action_to_pebble">Retourner vers ton galet</string>
+    <string name="card_turn_action_to_moment">Retourner vers le moment</string>
+    <string name="card_verso_heading">Ton galet</string>
+    <string name="card_domains_a11y">Domaines de vie</string>
+    <string name="card_collections_a11y">Collections</string>
+    <string name="bare_place_kicker" tools:ignore="UnusedResources">Pas encore un galet</string>
+    <string name="bare_place_body" tools:ignore="UnusedResources">Sa carte s\'imprimera ici quand tu diras ce qu\'il a compté : un sentiment et son poids, les parts de ta vie qu\'il a touchées, qui était là.</string>
     <!-- Karma-earned flash (D9). -->
     <string name="karma_flash_amount">+%1$d karma</string>
     <string name="karma_flash_a11y">%1$d karma gagné, %2$s</string>
