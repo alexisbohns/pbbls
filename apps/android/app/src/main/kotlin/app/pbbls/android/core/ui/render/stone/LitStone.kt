@@ -188,7 +188,10 @@ fun rememberStonePressState(): StonePressState = remember { StonePressState() }
  * A null [palette] is a moment with no emotion yet: a blank river pebble in
  * grey, uncarved, whatever its polarity. [seed] is `UuidHash.fnv1a(pebble.id)`.
  * [width] defaults to the phone width for the stone's size; the card's verso paints
- * it larger. The rings and halo scale with the box, their strokes stay hairlines.
+ * it larger. The rings and halo scale with the box, their strokes stay hairlines;
+ * the carved glyph line scales with [width], so a larger stone carves heavier.
+ * `StoneRipple` still sizes from the default `stoneBox(size)`, so a stone at
+ * another [width] has no matching ripple; the verso stone has none.
  */
 @Composable
 fun LitStone(

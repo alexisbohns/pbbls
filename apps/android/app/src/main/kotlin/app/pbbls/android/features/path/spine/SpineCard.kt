@@ -192,6 +192,7 @@ private val NIGHT_PHOTO_FILTER: ColorFilter =
  * @param emotionName already localised; empty for a moment that is not a pebble yet.
  * @param people the souls strip, handed the card unit `u` so its type and glyphs scale with the card.
  * @param width the held card's width; null sizes the card by intensity and ratio, as the Spine does.
+ *   A [width] without a raised [uMax] keeps the Spine's 4.4 dp cap on the chrome.
  * @param uMax the card unit's cap; the held card raises it.
  */
 @Composable

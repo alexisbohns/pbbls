@@ -91,7 +91,7 @@ private val versoFearPalette: EmotionPalette =
     )
 
 /**
- * The lit stone at the card verso's width (pebble card Task 1.7): the largest
+ * The lit stone at the card verso's width (pebble card spec §Verso 3): the largest
  * highlight in joy and the smallest lowlight in fear, both painted 150 dp wide.
  */
 @Composable

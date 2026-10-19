@@ -450,7 +450,7 @@ internal object StonePainter {
         for ((tone, matrix) in listOf(lip to lipMatrix, ink to inkMatrix)) {
             lines.forEach { (line, width) ->
                 val path = Path(line).apply { transform(matrix) }
-                val widthPx = StoneGeometry.CARVE_STROKE_PX * scene.density * (width / ENGINE_STROKE_WIDTH).toFloat()
+                val widthPx = StoneGeometry.CARVE_STROKE_PX * scene.density * scene.carveGain * (width / ENGINE_STROKE_WIDTH).toFloat()
                 val paint =
                     stroke(tone.color, tone.opacity, widthPx).apply {
                         strokeCap = Paint.Cap.ROUND
@@ -637,6 +637,7 @@ internal object StonePainter {
         val canvasMatrix: Matrix,
         val canvasScalePx: Float,
         val carveScalePx: Float,
+        val carveGain: Float,
         private val carveAffine: Affine,
         val recipe: StoneRecipe,
     ) {
@@ -647,6 +648,20 @@ internal object StonePainter {
         ): Matrix = carveAffine.concat(Affine.translate(dx, dy)).toMatrix(pxPerUnit)
 
         companion object {
+            /**
+             * The carved line's weight against the phone stone: 1 at the size's
+             * default width (rounded to px as `Dp.roundToPx` does, so a default
+             * stone is byte-identical), heavier in proportion on a wider one.
+             */
+            private fun carveGain(
+                size: ValenceSizeGroup,
+                widthPx: Int,
+                density: Float,
+            ): Float {
+                val defaultWidthPx = (StoneGeometry.STONE_WIDTH_DP.getValue(size) * density).roundToInt()
+                return if (defaultWidthPx > 0) widthPx.toFloat() / defaultWidthPx else 1f
+            }
+
             fun of(
                 spec: StoneSpec,
                 widthPx: Int,
@@ -678,6 +693,7 @@ internal object StonePainter {
                     canvasMatrix = canvasAffine.toMatrix(pxPerUnit),
                     canvasScalePx = canvasAffine.a * pxPerUnit,
                     carveScalePx = carveAffine.a * pxPerUnit,
+                    carveGain = carveGain(spec.size, widthPx, resources.displayMetrics.density),
                     carveAffine = carveAffine,
                     recipe = StoneRecipes.of(spec.size, polarity, spec.seed),
                 )
