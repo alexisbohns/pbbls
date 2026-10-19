@@ -5,7 +5,6 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -27,11 +26,12 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.PathParser
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.EmotionPalette
@@ -267,12 +267,7 @@ fun LitStone(
             }
         val painted = bitmap.value
         if (painted != null) {
-            Image(
-                bitmap = painted,
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                modifier = stoneLayer,
-            )
+            PaintedStoneImage(painted, widthPx, heightPx, stoneLayer)
         } else {
             StonePlaceholder(outline = outline, size = size, color = placeholder, modifier = stoneLayer)
         }
@@ -282,6 +277,31 @@ fun LitStone(
             polarity = polarity,
             press = press,
             modifier = Modifier.fillMaxSize(),
+        )
+    }
+}
+
+/**
+ * The painted bitmap drawn with its box on this one, so its margin (the
+ * shadow) paints past the box on every side. Not an `Image`: that clips to its
+ * bounds, the hard edge the margin exists to remove. The layout box is the
+ * stone's [widthPx] × [heightPx]; any other size scales the whole bitmap.
+ */
+@Composable
+private fun PaintedStoneImage(
+    painted: PaintedStone,
+    widthPx: Int,
+    heightPx: Int,
+    modifier: Modifier,
+) {
+    Canvas(modifier) {
+        val sx = size.width / widthPx
+        val sy = size.height / heightPx
+        val margin = painted.margin
+        drawImage(
+            image = painted.image,
+            dstOffset = IntOffset((-margin.left * sx).roundToInt(), (-margin.top * sy).roundToInt()),
+            dstSize = IntSize((painted.image.width * sx).roundToInt(), (painted.image.height * sy).roundToInt()),
         )
     }
 }
