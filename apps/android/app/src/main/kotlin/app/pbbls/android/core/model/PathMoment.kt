@@ -30,7 +30,10 @@ data class PathMoment(
     val valence: Valence get() = pebble?.valence ?: Valence.NEUTRAL_MEDIUM
 }
 
-/** The caller's pebble on a Path row. Palette colours come from `EmotionPaletteService` by [emotion] id. */
+/**
+ * The caller's pebble on a Path row. Palette colours come from `EmotionPaletteService` by [emotion] id.
+ * [souls] (#1121) are in server order and default empty for pre-key payloads.
+ */
 @Serializable
 data class PathPebble(
     val id: String,
@@ -39,6 +42,16 @@ data class PathPebble(
     val visibility: Visibility = Visibility.SECRET,
     val emotion: EmotionRef? = null,
     val glyph: PebbleGlyph? = null,
+    val souls: List<PathSoul> = emptyList(),
 ) {
     val valence: Valence get() = Valence.fromOrDefault(positiveness, intensity)
 }
+
+/** A soul on a Path pebble (#1121): enough to name it and find its glyph in the souls list. */
+@Serializable
+data class PathSoul(
+    val id: String,
+    val name: String,
+    @SerialName("glyph_id")
+    val glyphId: String,
+)

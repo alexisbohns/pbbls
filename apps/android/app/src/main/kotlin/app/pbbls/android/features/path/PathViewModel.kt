@@ -10,13 +10,17 @@ import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsServicing
+import app.pbbls.android.core.data.SoulsServicing
 import app.pbbls.android.core.data.delete
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.RippleSummary
+import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,6 +54,7 @@ sealed interface PathUiState {
         val today: LocalDate,
         val karma: Int?,
         val serverRipple: RippleSummary?,
+        val soulsById: Map<String, SoulWithGlyph>,
     ) : PathUiState {
         /**
          * The server's `active_today` compares against UTC `current_date`, so a
@@ -123,10 +128,12 @@ class PathViewModel
         private val stats: PathStatsServicing,
         private val writes: MomentWriteServicing,
         private val focusRequests: PathFocusRequests,
+        private val souls: SoulsServicing,
     ) : ViewModel() {
         private val today = LocalDate.now()
 
         private var entries: List<WeekRollEntry> = emptyList()
+        private var soulsById: Map<String, SoulWithGlyph> = emptyMap()
         private var focusedWeekStart: LocalDate? = null
         private var hasFailed = false
         private var isLoaded = false
@@ -208,10 +215,23 @@ class PathViewModel
 
         private suspend fun fetch() {
             runCatchingCancellable {
-                WeekRollBuilder.build(moments.loadPath(), ZoneId.systemDefault(), today)
+                coroutineScope {
+                    // A souls failure must not fail the timeline: the Spine only
+                    // loses its glyphs.
+                    val loadedSouls =
+                        async {
+                            runCatchingCancellable { souls.list() }.getOrElse {
+                                Log.e(TAG, "souls list failed", it)
+                                emptyList()
+                            }
+                        }
+                    val built = WeekRollBuilder.build(moments.loadPath(), ZoneId.systemDefault(), today)
+                    built to loadedSouls.await().associateBy { it.id }
+                }
             }.fold(
-                onSuccess = { built ->
+                onSuccess = { (built, loadedSouls) ->
                     entries = built
+                    soulsById = loadedSouls
                     // A flow that just wrote a moment wins over the kept focus (R14).
                     val requested =
                         focusRequests.consume()?.let { id ->
@@ -253,6 +273,7 @@ class PathViewModel
                             today = today,
                             karma = stats.karma,
                             serverRipple = stats.ripple,
+                            soulsById = soulsById,
                         )
                 }
         }

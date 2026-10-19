@@ -25,6 +25,7 @@ data class MomentDetail(
 ) {
     val sortedSnaps: List<MomentSnap> get() = snaps.sortedBy { it.sortOrder }
 
+    /** Carries no `souls` (`SoulRef` has no `glyph_id`): never feed the Spine's people line with it. */
     fun toPathMoment(): PathMoment =
         PathMoment(
             id = id,
