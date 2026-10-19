@@ -31,6 +31,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.EmotionPalette
@@ -186,6 +187,8 @@ fun rememberStonePressState(): StonePressState = remember { StonePressState() }
  *
  * A null [palette] is a moment with no emotion yet: a blank river pebble in
  * grey, uncarved, whatever its polarity. [seed] is `UuidHash.fnv1a(pebble.id)`.
+ * [width] defaults to the phone width for the stone's size; the card's verso paints
+ * it larger. The rings and halo scale with the box, their strokes stay hairlines.
  */
 @Composable
 fun LitStone(
@@ -195,6 +198,7 @@ fun LitStone(
     seed: Long,
     press: StonePressState,
     modifier: Modifier = Modifier,
+    width: Dp = StoneGeometry.STONE_WIDTH_DP.getValue(valence.sizeGroup).dp,
 ) {
     val colors = PebblesTheme.spine.colors
     val size = valence.sizeGroup
@@ -206,13 +210,7 @@ fun LitStone(
     // The box is a fixed dp width, so its pixel size follows from the density
     // alone: the bitmap is ready on the first frame, with no layout round trip.
     val box = StoneGeometry.outlineBox(size)
-    val widthPx =
-        with(density) {
-            StoneGeometry.STONE_WIDTH_DP
-                .getValue(size)
-                .dp
-                .roundToPx()
-        }
+    val widthPx = with(density) { width.roundToPx() }
     val heightPx = (widthPx * box.height / box.width).roundToInt()
     val spec =
         remember(size, valence.polarity, palette, glyph, seed, colors) {
@@ -252,7 +250,7 @@ fun LitStone(
             StoneTones.bodyRamp(polarity, palette?.toStonePalette() ?: BLANK_STONE_PALETTE)[1].color
         }
 
-    Box(modifier.stoneBox(size)) {
+    Box(modifier.stoneBox(size, width)) {
         StoneRings(
             outline = outline,
             size = size,

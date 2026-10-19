@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
@@ -74,10 +75,13 @@ internal fun stonePolarity(
     blank: Boolean,
 ): ValencePolarity = if (blank) ValencePolarity.NEUTRAL else polarity
 
-/** The stone's box: the phone width for its size, the height by the silhouette's aspect. */
-internal fun Modifier.stoneBox(size: ValenceSizeGroup): Modifier {
+/** The stone's box: [width] (the phone width for its size by default), the height by the silhouette's aspect. */
+internal fun Modifier.stoneBox(
+    size: ValenceSizeGroup,
+    width: Dp = StoneGeometry.STONE_WIDTH_DP.getValue(size).dp,
+): Modifier {
     val box = StoneGeometry.outlineBox(size)
-    return width(StoneGeometry.STONE_WIDTH_DP.getValue(size).dp).aspectRatio(box.width / box.height)
+    return this.width(width).aspectRatio(box.width / box.height)
 }
 
 /** `scale × this` as a Compose matrix: the affine first, then a uniform scale (outline units → px). */
