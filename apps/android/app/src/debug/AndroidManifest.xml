@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      Debug builds only (#1122, plan Task 4.5): a second launcher entry showing the
+      Spine's stones and the fixture week on a device before Part 6 wires the feed
+      into the Path. Nothing here reaches a release build; src/debug is merged into
+      the debug variant alone.
+    -->
+    <application>
+        <activity
+            android:name=".SpineLabActivity"
+            android:exported="true"
+            android:label="Spine Lab"
+            android:theme="@style/Theme.Pebbles">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

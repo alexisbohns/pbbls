@@ -24,6 +24,10 @@ data class SpineColors(
     val line: Color,
     val seam: Color,
     val teeth: Color,
+    /** The rake's groove shadow (`SpineGround`): the one Spine tone not riding on `onSurface` at Night. */
+    val rakeShadow: Color,
+    /** The rake's lit line: white on Paper, a cool `#DCE2EA` at Night — the one hex the Spine writes. */
+    val rakeLight: Color,
     val ring: Color,
     val ripple: Color,
     val shadow: Color,
@@ -51,6 +55,8 @@ data class SpineColors(
                 line = ink.copy(alpha = if (night) 0.30f else 0.34f),
                 seam = ink.copy(alpha = if (night) 0.24f else 0.30f),
                 teeth = ink.copy(alpha = if (night) 0.14f else 0.20f),
+                rakeShadow = if (night) Color.Black.copy(alpha = 0.34f) else ink.copy(alpha = 0.20f),
+                rakeLight = if (night) Color(0xFFDCE2EA).copy(alpha = 0.075f) else Color.White.copy(alpha = 0.55f),
                 ring = if (night) ink.copy(alpha = 0.17f) else scheme.onSurfaceVariant.copy(alpha = 0.30f),
                 ripple = ink.copy(alpha = if (night) 0.50f else 0.55f),
                 shadow = if (night) Color.Black else ink,

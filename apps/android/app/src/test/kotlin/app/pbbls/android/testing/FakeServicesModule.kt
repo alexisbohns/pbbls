@@ -14,6 +14,7 @@ import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SignedUrlProviding
+import app.pbbls.android.core.data.SnapBoundsDecoder
 import app.pbbls.android.core.data.SnapURLCache
 import app.pbbls.android.core.data.SnapUrls
 import app.pbbls.android.core.data.SnapWriteRepositing
@@ -236,4 +237,9 @@ object FakeServicesModule {
             scope = scope,
             nowMillis = { 0L },
         )
+
+    /** No thumb is ever fetched in a UI test, so no ratio is ever known; the card stays square. */
+    @Provides
+    @Singleton
+    fun snapBoundsDecoder(): SnapBoundsDecoder = SnapBoundsDecoder { null }
 }

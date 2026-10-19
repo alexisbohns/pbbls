@@ -872,6 +872,20 @@ Layout: a `Box` padded `start = colX, end = padR`; the stone absolutely placed a
 
 ---
 
+### Task 4.5: The Spine lab (debug-only, on device before Part 6)
+
+Added during execution at the maintainer's request ("build it on the Pixel"): Parts 2–5 are preview-only, so nothing of the Spine reaches a device until Part 6. A debug-only activity makes the stone gallery and the fixture week visible on the phone now.
+
+**Files:**
+- Create: `apps/android/app/src/debug/AndroidManifest.xml` (a second launcher activity, label "Spine Lab", `exported="true"`, debug builds only)
+- Create: `apps/android/app/src/debug/kotlin/app/pbbls/android/SpineLabActivity.kt` (`ComponentActivity`, no Hilt; `PebblesTheme()` brand scheme following system dark mode; two tabs: Stones (the gallery grid with pressable `LitStone`s and their ripples, the seals, the blank and touched stones, four seeds) and Week (the fixture week's days as `DaySeam` + `SpinePebble` over `SpineGround`, `aspect = null`, no photo URLs))
+- Move: `SpineFixtureWeek.kt` from `src/screenshotTest/` to `src/debug/kotlin/app/pbbls/android/` (same package; the screenshot source set of the debug variant compiles against debug sources; verify with `compileDebugScreenshotTestKotlin`; if it cannot see it, keep the file in `debug` and say so)
+- No change to `main/`: the lab must not leak into release (`src/debug` only), and `ArchitectureBoundaryTest` is unaffected (debug sources are outside its scan; check).
+
+- [ ] **Step 1:** Create the manifest and the activity; move the fixture; `./gradlew assembleDebug compileDebugScreenshotTestKotlin`.
+- [ ] **Step 2:** `adb -s 39141FDJH006H4 install -r app/build/outputs/apk/debug/app-debug.apk && adb shell am start -n app.pbbls.android/.SpineLabActivity`, screenshot both tabs in Paper and Night.
+- [ ] **Step 3:** Commit `chore(android): debug-only spine lab activity` and record the device observations in the Part 4 PR body.
+
 # Part 5 — The opening and the week
 
 Branch `feat/1122-spine-opening` on Part 4. PR `feat(android): spine week, opening, persons and contents`, `Part of #1122`, `no-lab-note`, re-baseline label.

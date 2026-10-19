@@ -61,7 +61,8 @@ annotation class ApplicationScope
  *
  * It lives here rather than at its use site so that "what long-lived scopes does
  * this app have?" has exactly one answer: this file. [SnapURLCache]'s
- * coalescing sign-and-cache is the only consumer today.
+ * coalescing sign-and-cache and `SnapAspectCache`'s shared thumb probe are the
+ * consumers today.
  */
 @Qualifier
 @Retention(AnnotationRetention.BINARY)

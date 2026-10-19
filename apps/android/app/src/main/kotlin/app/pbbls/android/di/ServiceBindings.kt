@@ -2,6 +2,7 @@ package app.pbbls.android.di
 
 import app.pbbls.android.core.data.AchievementsService
 import app.pbbls.android.core.data.AchievementsServicing
+import app.pbbls.android.core.data.CoilSnapBoundsDecoder
 import app.pbbls.android.core.data.CollectionsService
 import app.pbbls.android.core.data.CollectionsServicing
 import app.pbbls.android.core.data.CompleteSnapshotStore
@@ -26,6 +27,7 @@ import app.pbbls.android.core.data.ProfileService
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReferenceDataService
 import app.pbbls.android.core.data.ReferenceDataServicing
+import app.pbbls.android.core.data.SnapBoundsDecoder
 import app.pbbls.android.core.data.SoulsService
 import app.pbbls.android.core.data.SoulsServicing
 import app.pbbls.android.core.data.SupabaseService
@@ -114,4 +116,8 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindConsentServicing(impl: ConsentService): ConsentServicing
+
+    @Binds
+    @Singleton
+    fun bindSnapBoundsDecoder(impl: CoilSnapBoundsDecoder): SnapBoundsDecoder
 }
