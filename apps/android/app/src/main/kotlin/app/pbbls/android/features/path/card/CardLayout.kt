@@ -25,8 +25,14 @@ internal object CardLayout {
     val POSTMARK_OUTER_RING = 1.6.dp
     val POSTMARK_INNER_RING = 0.8.dp
 
-    /** From the outer ring to the ring text's centre line. */
-    val POSTMARK_TEXT_INSET = 9.dp
+    /**
+     * Insets from the stamp's edge at [POSTMARK_DIAMETER], from the mock's 72-unit
+     * SVG (outer ring r 34.6, text baseline r 26, inner ring r 23.6); a shrunk stamp
+     * scales them with its diameter.
+     */
+    val POSTMARK_OUTER_RING_INSET = 1.4.dp
+    val POSTMARK_TEXT_INSET = 10.dp
+    val POSTMARK_INNER_RING_INSET = 12.4.dp
     val POSTMARK_ROW_TO_BAND = 18.dp
     val BAND_MIN_HEIGHT = 40.dp
     const val NOISE_SIZE_PX = 128
