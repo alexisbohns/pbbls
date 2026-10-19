@@ -3,8 +3,8 @@ package app.pbbls.android.features.path.card.logic
 import androidx.annotation.StringRes
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValencePolarity
-import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.features.path.valence.valenceSpanRes
+import app.pbbls.android.features.path.valence.valenceWordLowercase
 import app.pbbls.android.features.path.valence.valenceWordRes
 import app.pbbls.android.features.path.valence.valenceWordScale
 
@@ -24,7 +24,7 @@ object ValenceLockups {
     fun of(valence: Valence): ValenceLockup =
         ValenceLockup(
             wordRes = valenceWordRes(valence.polarity),
-            lowercase = valence.sizeGroup == ValenceSizeGroup.SMALL,
+            lowercase = valenceWordLowercase(valence.sizeGroup),
             scale = valenceWordScale(valence.sizeGroup),
             spanRes = valenceSpanRes(valence.sizeGroup),
             ink =

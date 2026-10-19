@@ -36,6 +36,9 @@ internal fun valenceWordScale(size: ValenceSizeGroup): Float =
         ValenceSizeGroup.LARGE -> 1f
     }
 
+/** Small (day) events drop the word to lowercase: the one rule, for the record flow and the card's verso. */
+internal fun valenceWordLowercase(size: ValenceSizeGroup): Boolean = size == ValenceSizeGroup.SMALL
+
 /**
  * The top line of the lockup under the fan: the polarity word in the hand font,
  * coloured by polarity — ports the word half of iOS `ValenceHeadlineView`.
@@ -56,7 +59,7 @@ internal fun ValenceWord(
     scale: Float,
     modifier: Modifier = Modifier,
     brush: Brush? = null,
-    lowercase: Boolean = valence.sizeGroup == ValenceSizeGroup.SMALL,
+    lowercase: Boolean = valenceWordLowercase(valence.sizeGroup),
 ) {
     val scheme = MaterialTheme.colorScheme
     val token = PebblesTheme.hand.valenceWord

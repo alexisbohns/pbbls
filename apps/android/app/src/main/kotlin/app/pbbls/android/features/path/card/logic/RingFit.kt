@@ -24,8 +24,9 @@ object RingFits {
 
     /**
      * @param circumferencePx the circle the text's baseline-centre runs on.
-     * @param measure the advance of a string at a size in sp, in px: a
-     *   `TextMeasurer` on device, a fake in tests.
+     * @param measure the advance of a string at a size in sp, in px: on device
+     *   the sum of the per-character advances the draw loop steps by, so the
+     *   ring closes exactly; a fake in tests.
      */
     fun fit(
         name: String,
@@ -35,8 +36,13 @@ object RingFits {
     ): RingFit {
         val unit = name.uppercase(locale) + SEPARATOR
         for (size in SIZES_SP) {
-            val width = measure(unit, size)
-            val repetitions = floor(circumferencePx / width).toInt()
+            var repetitions = floor(circumferencePx / measure(unit, size)).toInt()
+            // A real measure is not additive (kerning, rounding up), so the
+            // repeated text can overrun where the unit's multiple did not: step
+            // down until it fits, so the tracking can never go negative.
+            while (repetitions >= MIN_REPETITIONS && measure(unit.repeat(repetitions), size) > circumferencePx) {
+                repetitions--
+            }
             if (repetitions >= MIN_REPETITIONS) {
                 val text = unit.repeat(repetitions)
                 return RingFit(text, repetitions, size, (circumferencePx - measure(text, size)) / text.length)

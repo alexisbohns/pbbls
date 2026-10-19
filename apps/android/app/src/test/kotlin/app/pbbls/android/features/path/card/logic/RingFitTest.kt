@@ -49,6 +49,21 @@ class RingFitTest {
     }
 
     @Test
+    fun `a measure that grows faster than its parts steps the repetitions down`() {
+        // +1 px for every repetition after the first: three units overrun a circle
+        // their single unit's multiple fits with half a pixel to spare.
+        val superAdditive: (String, Float) -> Float = { text, sizeSp ->
+            text.length * sizeSp * 0.6f + (text.count { it == '·' } - 1).coerceAtLeast(0)
+        }
+        val fit = RingFits.fit("Friends", circumferencePx = 153.5f, locale = Locale.ENGLISH, measure = superAdditive)
+        assertEquals(2, fit.repetitions)
+        assertEquals(8.5f, fit.sizeSp)
+        assertTrue("tracking ${fit.trackingPx}", fit.trackingPx >= 0f)
+        val closed = superAdditive(fit.text, fit.sizeSp) + fit.trackingPx * fit.text.length
+        assertEquals(153.5f, closed, 0.01f)
+    }
+
+    @Test
     fun `the name is set in the locale's capitals`() {
         val fit = RingFits.fit("Bien-être", circumferencePx = 200f, locale = Locale.FRENCH, measure = measure)
         assertTrue(fit.text.startsWith("BIEN-ÊTRE · "))
