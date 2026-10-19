@@ -3,10 +3,13 @@ package app.pbbls.android
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -17,6 +20,7 @@ import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
 import app.pbbls.android.features.path.card.CardLayout
+import app.pbbls.android.features.path.card.CollectionBand
 import app.pbbls.android.features.path.card.DomainPostmark
 import com.android.tools.screenshot.PreviewTest
 
@@ -84,5 +88,56 @@ private fun PostmarkRow(
                 diameter = diameter,
             )
         }
+    }
+}
+
+/** One collection across a 328 dp card (a 360 dp phone). */
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun CollectionBandOneLight() {
+    PebblesTheme { BandOnStock(listOf("Birthdays"), PebbleCardFixtures.joyPalette) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun CollectionBandOneNight() {
+    PebblesTheme { BandOnStock(listOf("Birthdays"), PebbleCardFixtures.joyPalette) }
+}
+
+/** Two long French names: they wrap inside the band, centred. */
+@PreviewTest
+@Preview(showBackground = true, locale = "fr")
+@Composable
+fun CollectionBandTwoFrenchLight() {
+    PebblesTheme { BandOnStock(twoFrenchCollections, PebbleCardFixtures.gratitudePalette) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, locale = "fr", uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun CollectionBandTwoFrenchNight() {
+    PebblesTheme { BandOnStock(twoFrenchCollections, PebbleCardFixtures.gratitudePalette) }
+}
+
+private val twoFrenchCollections = listOf("Les étés chez Mamie à Pornichet", "Ce qu’Élio a dit pendant le voyage")
+
+/** The band as the verso tints it (the mock's `--band`): the emotion's spot mixed into the stock, its rule in the spot. */
+@Composable
+private fun BandOnStock(
+    names: List<String>,
+    palette: EmotionPalette,
+) {
+    val colors = PebblesTheme.spine.colors
+    val spot = if (colors.isNight) palette.secondary else palette.primary
+    Box(Modifier.background(colors.ground).padding(vertical = 16.dp)) {
+        CollectionBand(
+            names = names,
+            paper = lerp(colors.stock, spot, if (colors.isNight) 0.24f else 0.19f),
+            ink = colors.ink,
+            edge = spot,
+            modifier = Modifier.width(328.dp),
+        )
     }
 }
