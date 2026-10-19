@@ -5,6 +5,8 @@
  *   1. A moment needs a date plus a name or a photo; saving one costs no karma.
  *   2. A pebble needs emotion, valence and a domain; the first completion is the
  *      reward (one pebble_created event), later edits are enrichment deltas.
+ *   2b. Souls (#1121): created inline via new_souls; path_moments carries them
+ *      ordered by name with glyph_id, and [] on a soulless pebble.
  *   3. The glyph is derived: domain default first, a collection glyph wins once set.
  *   4. Readers: path_moments shows a null pebble for an uncompleted moment;
  *      v_moments_full nests only the caller's pebble; a second user reads
@@ -13,7 +15,7 @@
  *   6. delete_pebble keeps the moment; delete_moment removes all and reverses karma.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:moments --workspace=packages/supabase
- * Expected: `Summary: passed=29 failed=0` (29 executed checks, each if/else pair counting once — recount if you add one).
+ * Expected: `Summary: passed=33 failed=0` (33 executed checks, each if/else pair counting once — recount if you add one).
  * A founding write that fails (first save_moment, first complete_pebble, the
  * collection insert) aborts the run with one `✗ aborted:` line instead of a
  * cascade of dependent reds.
@@ -135,6 +137,15 @@ try {
   const { count: pebbleCount } = await a.from("pebbles").select("*", { count: "exact", head: true }).eq("moment_id", momentId);
   check("one pebble per (moment, user)", pebbleCount === 1, `count=${pebbleCount}`);
 
+  // 2b. souls on the pebble (#1121) ----------------------------------------------
+  // Created inline through new_souls (souls.user_id has no default, so a client
+  // insert is not the path); an update-shaped payload so no other rule fires.
+  const addSouls = await a.rpc("complete_pebble", {
+    payload: { moment_id: momentId, new_souls: [{ name: "Mara" }, { name: "Elio" }] },
+  });
+  if (addSouls.error) throw new Error(`complete_pebble (new_souls): ${addSouls.error.message}`);
+  check("a pebble can be completed with inline-created souls", addSouls.data === pebbleId);
+
   // 3. glyph --------------------------------------------------------------------
   const { data: full1 } = await a.from("v_moments_full").select("pebble").eq("id", momentId).single();
   check("the glyph resolves from the domain default",
@@ -154,6 +165,30 @@ try {
   check("a collection glyph wins over the domain",
     !addColl.error && full2?.pebble?.glyph?.source === "collection",
     addColl.error?.message ?? JSON.stringify(full2?.pebble?.glyph));
+
+  // A second, soulless pebble so the empty-array case has a row to find.
+  const bareId = must<string>("save_moment (bare)", await a.rpc("save_moment", { payload: { name: `bare ${runId}`, happened_at: "2026-10-10T10:00:00Z" } }));
+  must<string>("complete_pebble (bare)", await a.rpc("complete_pebble", {
+    payload: { moment_id: bareId, emotion_id: emotion.id, intensity: 2, positiveness: 1, domain_ids: [domain.id] },
+  }));
+  const { data: pathWithSouls } = await a.rpc("path_moments");
+  type SoulRow = { id: string; name: string; glyph_id: string };
+  type PathRow = { id: string; pebble: { souls?: SoulRow[] } | null };
+  const rows = (pathWithSouls ?? []) as PathRow[];
+  const pathSouls = rows.find((r) => r.id === momentId)?.pebble?.souls;
+  check("path_moments pebble.souls lists the pebble's souls", !!pathSouls && pathSouls.length === 2);
+  check(
+    "path_moments pebble.souls is ordered by name and carries glyph_id",
+    !!pathSouls &&
+      pathSouls.map((x) => x.name).join(",") === "Elio,Mara" &&
+      pathSouls.every((x) => typeof x.glyph_id === "string" && x.glyph_id.length > 0),
+  );
+  const bareRow = rows.find((r) => r.id === bareId);
+  check("path_moments pebble.souls is [] on a pebble with no souls",
+    Array.isArray(bareRow?.pebble?.souls) && bareRow!.pebble!.souls!.length === 0);
+  // Its karma would break the zero-sum check in section 6.
+  const delBare = await a.rpc("delete_moment", { p_moment_id: bareId });
+  if (delBare.error) throw new Error(`delete_moment (bare): ${delBare.error.message}`);
 
   // 4. readers and RLS ------------------------------------------------------------
   const probeSecret = await b.rpc("resolve_pebble_glyph", { p_pebble_id: pebbleId });
