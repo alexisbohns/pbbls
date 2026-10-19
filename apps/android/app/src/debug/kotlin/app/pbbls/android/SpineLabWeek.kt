@@ -1,59 +1,54 @@
 package app.pbbls.android
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.PathMoment
-import app.pbbls.android.features.path.spine.DaySeam
-import app.pbbls.android.features.path.spine.SpineGround
-import app.pbbls.android.features.path.spine.SpineLayout
 import app.pbbls.android.features.path.spine.SpinePebble
-import app.pbbls.android.features.path.spine.logic.SpineDay
-import app.pbbls.android.features.path.spine.logic.SpineWeekBuilder
-import kotlinx.coroutines.flow.MutableSharedFlow
+import app.pbbls.android.features.path.spine.SpineWeek
+import app.pbbls.android.features.path.spine.StonePressRequests
 
 /*
- * The fixture week laid out as the Spine will lay it out (#1122 Part 4), for the
- * feed previews and the Spine lab: each day a seam with its pebbles 58 dp below
- * it and 38 dp apart, a hairline at `SPINE_X`, the raked ground behind. The
- * seam carries its label's overhang, so the day's bottom padding gives it back. Part 5's
- * `SpineWeek` owns the real layout; this stands in until then. No network: the
- * ratios are primed and the photo URLs withheld, so the cards show their fields.
+ * The fixture week on the Spine (#1122), for the Spine lab's Week tab and the
+ * previews. No network: the ratios are primed and the photo URLs withheld, so the
+ * cards show their fields. Both week links are live so the masthead and the mouth
+ * render them; they go nowhere.
  */
 
-private val HAIRLINE = 1.dp
+/** The whole fixture week as `SpineWeek` lays it out: the lab's Week tab. */
+@Composable
+internal fun SpineLabWeek(modifier: Modifier = Modifier) {
+    SpineWeek(
+        entry = SpineFixtureWeek.entry,
+        today = SpineFixtureWeek.today,
+        soulsById = SpineFixtureWeek.soulsById,
+        paletteFor = SpineFixtureWeek.palettes,
+        aspect = null,
+        onOpen = {},
+        onRequestDelete = {},
+        onPreviousWeek = {},
+        onNextWeek = {},
+        onCreatePebble = {},
+        modifier = modifier,
+        zone = SpineFixtureWeek.zone,
+        ratioOverride = SpineFixtureWeek.ratios::get,
+    )
+}
 
-/** Below a day's content: the seam's overhang already holds the next label, so it comes off the 34 dp. */
-private val DAY_GAP = SpineLayout.DAY_PAD_BOTTOM - SpineLayout.SEAM_LABEL_OVERHANG
-
-/** One fixture pebble: no cache, no photo, the ratio primed. */
+/** One fixture pebble on its own: no cache, no photo, the ratio primed. */
 @Composable
 internal fun FixturePebble(
     moment: PathMoment,
     modifier: Modifier = Modifier,
 ) {
-    val requests = remember { MutableSharedFlow<String>() }
+    val requests = remember { StonePressRequests() }
     SpinePebble(
         moment = moment,
         palette = SpineFixtureWeek.palettes(moment),
         soulsById = SpineFixtureWeek.soulsById,
         personsOrder = SpineFixtureWeek.personsOrder,
         aspect = null,
+        zone = SpineFixtureWeek.zone,
         pressRequests = requests,
         onOpen = {},
         onRequestDelete = {},
@@ -61,48 +56,4 @@ internal fun FixturePebble(
         ratioOverride = moment.firstSnapPath?.let { SpineFixtureWeek.ratios[it] },
         photoOverride = null to null,
     )
-}
-
-/** One day as the week lays it out: the seam, then the pebbles 58 dp below it, 38 dp apart. */
-@Composable
-internal fun FixtureDay(day: SpineDay) {
-    val line = PebblesTheme.spine.colors.line
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .drawBehind {
-                val x = SpineLayout.SPINE_X.toPx()
-                drawLine(line, Offset(x, 0f), Offset(x, size.height), HAIRLINE.toPx())
-            },
-    ) {
-        DaySeam(day = day)
-        if (!day.still) {
-            Column(
-                Modifier.padding(top = SpineLayout.DAY_PAD_TOP - SpineLayout.SEAM_HEIGHT, bottom = DAY_GAP),
-                verticalArrangement = Arrangement.spacedBy(SpineLayout.PEBBLE_GAP),
-            ) {
-                day.moments.forEach { moment -> FixturePebble(moment) }
-            }
-        } else {
-            Spacer(Modifier.height(DAY_GAP))
-        }
-    }
-}
-
-/** The whole fixture week, scrolling, on the ground: the lab's Week tab. */
-@Composable
-internal fun SpineLabWeek(modifier: Modifier = Modifier) {
-    val days =
-        remember {
-            SpineWeekBuilder.build(SpineFixtureWeek.entry, SpineFixtureWeek.zone, SpineFixtureWeek.today).days
-        }
-    Box(modifier.fillMaxSize()) {
-        SpineGround(Modifier.fillMaxSize())
-        LazyColumn(
-            Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 48.dp),
-        ) {
-            items(days, key = { it.index }) { day -> FixtureDay(day) }
-        }
-    }
 }

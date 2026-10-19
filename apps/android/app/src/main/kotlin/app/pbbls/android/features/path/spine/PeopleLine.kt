@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path.spine
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -14,12 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -28,17 +22,14 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.SoulWithGlyph
-import app.pbbls.android.core.ui.render.GlyphImage
 import app.pbbls.android.features.path.spine.logic.PeopleLine
 
 /** The glyph's box in an entry's line, relative to the line's type. */
-val ENTRY_GLYPH_SIZE: TextUnit = 1.25f.em
+internal val ENTRY_GLYPH_SIZE: TextUnit = 1.25f.em
 
 /*
  * The card strip's gaps, as fractions of its 4u glyph: the web's `gap-x-[2.2u]`,
@@ -47,12 +38,6 @@ val ENTRY_GLYPH_SIZE: TextUnit = 1.25f.em
 private const val STRIP_GAP_PER_GLYPH = 2.2f / 4f
 private const val STRIP_ROW_GAP_PER_GLYPH = 0.6f / 4f
 private const val STRIP_MORE_GAP_PER_GLYPH = 0.25f * 2.6f / 4f
-
-// The placeholder of a soul without a glyph: the web's `SoulMark`, a dashed 1 px square with 3 px corners.
-private val PLACEHOLDER_STROKE = 1.dp
-private val PLACEHOLDER_RADIUS = 3.dp
-private val PLACEHOLDER_DASH = 3.dp
-private val PLACEHOLDER_GAP = 2.dp
 
 /**
  * Who was there (rule set §Many people). Nothing when the pebble is solitary.
@@ -69,7 +54,7 @@ private val PLACEHOLDER_GAP = 2.dp
  * @param othersStyle the strip's "& twelve others"; the sentence sets it in the base style's italic.
  */
 @Composable
-fun PeopleLine(
+internal fun PeopleLine(
     line: PeopleLine,
     namesById: Map<String, String>,
     soulsById: Map<String, SoulWithGlyph>,
@@ -185,35 +170,6 @@ private fun PeopleStrip(
                         }
                     }
             }
-        }
-    }
-}
-
-/** A soul's glyph as a thin line, or, without one, the dashed placeholder square (web `SoulMark`). */
-@Composable
-private fun SoulMark(
-    glyph: Glyph?,
-    ink: Color,
-    modifier: Modifier,
-) {
-    if (glyph != null) {
-        GlyphImage(strokes = glyph.strokes, viewBox = glyph.viewBox, strokeColor = ink, modifier = modifier)
-    } else {
-        val placeholder = PebblesTheme.spine.colors.ink3
-        Canvas(modifier) {
-            val stroke = PLACEHOLDER_STROKE.toPx()
-            val inset = stroke / 2
-            drawRoundRect(
-                color = placeholder,
-                topLeft = Offset(inset, inset),
-                size = Size(size.width - stroke, size.height - stroke),
-                cornerRadius = CornerRadius(PLACEHOLDER_RADIUS.toPx()),
-                style =
-                    Stroke(
-                        width = stroke,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(PLACEHOLDER_DASH.toPx(), PLACEHOLDER_GAP.toPx())),
-                    ),
-            )
         }
     }
 }

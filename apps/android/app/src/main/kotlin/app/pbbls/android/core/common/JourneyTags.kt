@@ -18,5 +18,6 @@ object JourneyTags {
     const val PATH_WEEK_PAGER = "path_week_pager"
     const val PATH_WEEK_LIST = "path_week_list"
     const val PATH_PEBBLE_ROW = "path_pebble_row"
+    const val PATH_PEBBLE_STONE = "path_pebble_stone"
     const val NEW_PEBBLE = "new_pebble"
 }

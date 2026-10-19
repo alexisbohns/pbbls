@@ -61,7 +61,7 @@ private fun SpineLab() {
                     LitStoneGallery(pressable = true)
                     LitStoneSeeds(pressable = true)
                 }
-            else -> SpineLabWeek()
+            else -> SpineLabWeek(Modifier.fillMaxSize())
         }
     }
 }

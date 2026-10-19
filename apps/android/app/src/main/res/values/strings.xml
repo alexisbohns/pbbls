@@ -624,15 +624,15 @@
     <string name="tab_you">You</string>
 
     <!-- Path · Spine (#1122). Read by the Spine week (Parts 3–6); the tools:ignore attributes go when it lands. -->
-    <string name="path_spine_kicker" tools:ignore="UnusedResources">the %1$s week · %2$d</string>
-    <string name="path_spine_title_same_month" tools:ignore="UnusedResources">The %1$s to the %2$s of %3$s</string>
-    <string name="path_spine_title_cross_month" tools:ignore="UnusedResources">The %1$s of %2$s to the %3$s of %4$s</string>
-    <plurals name="path_spine_summary_pebbles" tools:ignore="UnusedResources">
+    <string name="path_spine_kicker">the %1$s week · %2$d</string>
+    <string name="path_spine_title_same_month">The %1$s to the %2$s of %3$s</string>
+    <string name="path_spine_title_cross_month">The %1$s of %2$s to the %3$s of %4$s</string>
+    <plurals name="path_spine_summary_pebbles">
         <item quantity="one">%1$s pebble</item>
         <item quantity="other">%1$s pebbles</item>
     </plurals>
-    <string name="path_spine_summary_no_pebbles" tools:ignore="UnusedResources">no pebbles</string>
-    <plurals name="path_spine_summary_people" tools:ignore="UnusedResources">
+    <string name="path_spine_summary_no_pebbles">no pebbles</string>
+    <plurals name="path_spine_summary_people">
         <item quantity="one">, %1$s person</item>
         <item quantity="other">, %1$s people</item>
     </plurals>
@@ -642,6 +642,9 @@
         <item quantity="other">and %1$s others</item>
     </plurals>
     <string name="path_spine_contents" tools:ignore="UnusedResources">contents</string>
+    <string name="path_spine_contents_go">scroll to and press</string>
+    <string name="path_spine_persons_expanded">expanded</string>
+    <string name="path_spine_persons_collapsed">collapsed</string>
     <string name="path_spine_with" tools:ignore="UnusedResources">with</string>
     <plurals name="path_spine_others" tools:ignore="UnusedResources">
         <item quantity="one">&amp; %1$s other</item>
@@ -650,9 +653,9 @@
     <string name="path_spine_still" tools:ignore="UnusedResources">still</string>
     <string name="path_spine_untitled" tools:ignore="UnusedResources">untitled</string>
     <string name="path_spine_photo_unavailable" tools:ignore="UnusedResources">photo unavailable</string>
-    <string name="path_spine_week_ends" tools:ignore="UnusedResources">the %1$s week ends here</string>
-    <string name="path_spine_next_begins" tools:ignore="UnusedResources">The %1$s begins on Monday the %2$s.</string>
-    <string name="path_spine_week_link" tools:ignore="UnusedResources">week %1$d</string>
+    <string name="path_spine_week_ends">the %1$s week ends here</string>
+    <string name="path_spine_next_begins">The %1$s begins on Monday the %2$s.</string>
+    <string name="path_spine_week_link">week %1$d</string>
     <plurals name="path_spine_day_dots_a11y" tools:ignore="UnusedResources">
         <item quantity="one">On one day: %2$s</item>
         <item quantity="other">On %1$d days: %2$s</item>

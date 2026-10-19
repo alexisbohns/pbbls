@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -71,7 +72,7 @@ import app.pbbls.android.features.path.spine.logic.EntryTypes
 import app.pbbls.android.features.path.spine.logic.PeopleLines
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -100,20 +101,23 @@ private const val CARD_GLYPH_UNITS = 4f
  * @param palette the pebble's emotion palette; null for a blank stone.
  * @param personsOrder soul ids in persons-of-the-week order, for the people line.
  * @param aspect the session's ratio cache; null in previews.
- * @param pressRequests moment ids the week's contents ask to press (without opening).
+ * @param zone the zone the date and time print in: the week's.
+ * @param pressRequests the week's asks to press a stone without opening it; this stone
+ *   claims the one that names it.
  * @param ratioOverride a primed photo ratio, for previews with no cache.
  * @param photoOverride `(original, thumb)` URLs for previews; `null to null`
  *   shows the tinted field and never signs.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SpinePebble(
+internal fun SpinePebble(
     moment: PathMoment,
     palette: EmotionPalette?,
     soulsById: Map<String, SoulWithGlyph>,
     personsOrder: List<String>,
     aspect: SnapAspectCache?,
-    pressRequests: SharedFlow<String>,
+    zone: ZoneId,
+    pressRequests: StonePressRequests,
     onOpen: (PathMoment) -> Unit,
     onRequestDelete: (PathMoment) -> Unit,
     modifier: Modifier = Modifier,
@@ -141,7 +145,7 @@ fun SpinePebble(
     val stoneHeight = StoneGeometry.outlineBox(size).let { stoneWidth * (it.height / it.width) }
     val seed = remember(pebble?.id, moment.id) { UuidHash.fnv1a(pebble?.id ?: moment.id) }
 
-    val zoned = remember(moment.happenedAt) { moment.happenedAt.atZoneSameInstant(ZoneId.systemDefault()) }
+    val zoned = remember(moment.happenedAt, zone) { moment.happenedAt.atZoneSameInstant(zone) }
     val date = remember(zoned, locale) { zoned.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)) }
     val time = remember(zoned, locale) { zoned.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)) }
     val weekday = remember(zoned, locale) { shortWeekday(zoned.dayOfWeek, locale) }
@@ -215,13 +219,17 @@ fun SpinePebble(
         scope.launch { press.press(reduceMotion) }
         Unit
     }
+    // The ask is state, not a flow: a stone the scroll has just composed reads it on its
+    // first frame, where a flow emitted before its collector started would be lost. Claimed
+    // once, so a stone scrolled away and back does not press again on the same ask.
     LaunchedEffect(pressRequests, moment.id) {
-        pressRequests.collect { id ->
-            if (id == moment.id) {
+        snapshotFlow { pressRequests.pending?.takeIf { it.momentId == moment.id } }
+            .filterNotNull()
+            .collect { request ->
+                pressRequests.claim(request)
                 haptics(TapHaptic.SELECTION)
                 launch { press.press(reduceMotion) }
             }
-        }
     }
 
     // Where the stone and its hit box sit: the web's geometry, overhang and all (see
@@ -365,8 +373,41 @@ fun SpinePebble(
             Modifier
                 .offset(geometry.hitLeft, geometry.hitTop)
                 .size(geometry.hitWidth, geometry.hitHeight)
+                .testTag(JourneyTags.PATH_PEBBLE_STONE)
                 .semantics { contentDescription = description }
                 .clickable(interactionSource = null, indication = null, role = Role.Button, onClick = pressStone),
         )
+    }
+}
+
+/** One ask from the week's contents to press a stone without opening it; [seq] tells two asks for one stone apart. */
+internal data class PressRequest(
+    val momentId: String,
+    val seq: Int,
+)
+
+/**
+ * The contents' asks (spec D8): the week sets one, the stone it names claims it. State
+ * rather than a `SharedFlow`, so a stone composed by the scroll that precedes the ask
+ * still sees it; claimed, so it is pressed once.
+ */
+internal class StonePressRequests {
+    private var seq = 0
+
+    var pending by mutableStateOf<PressRequest?>(null)
+        private set
+
+    fun request(momentId: String) {
+        pending = PressRequest(momentId, ++seq)
+    }
+
+    /** Takes [request] if it is still the pending one. */
+    fun claim(request: PressRequest) {
+        if (pending == request) pending = null
+    }
+
+    /** Drops a pending ask: the week it belonged to is gone. */
+    fun cancel() {
+        pending = null
     }
 }
