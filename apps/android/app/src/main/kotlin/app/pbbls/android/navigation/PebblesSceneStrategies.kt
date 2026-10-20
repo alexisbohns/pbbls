@@ -64,8 +64,9 @@ fun pebblesListDetailStrategy(directive: PaneScaffoldDirective): SceneStrategy<N
 
 /**
  * The strategies `RootScreen`'s `NavDisplay` tries, in order (#940). List-detail
- * comes first, so on two panes a pebble sits beside Path; only when it declines
- * (one pane) does the same entry fall to the sheet.
+ * comes first, so on two panes a pebble sits beside Path and a glyph beside the
+ * store; only when it declines (one pane) does a glyph fall to the sheet. A
+ * pebble is a page of its own on one pane (#1135).
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -132,7 +133,7 @@ object PanePairs {
             PebblesKey.Collections::class -> list(PanePair.COLLECTIONS) { CollectionsPlaceholder() }
             PebblesKey.CollectionDetail::class -> detail(PanePair.COLLECTIONS)
             PebblesKey.Path::class -> fullWidthList(PanePair.PEBBLES)
-            PebblesKey.PebbleDetail::class -> detail(PanePair.PEBBLES, sheetWhenCompact = true)
+            PebblesKey.PebbleDetail::class -> detail(PanePair.PEBBLES)
             PebblesKey.Glyphs::class -> list(PanePair.GLYPHS) { GlyphsPlaceholder() }
             PebblesKey.GlyphDetail::class -> detail(PanePair.GLYPHS, sheetWhenCompact = true)
             else -> emptyMap()

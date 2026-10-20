@@ -84,10 +84,10 @@ sealed interface PebblesKey : NavKey {
         BarKey
 
     /**
-     * A docked sheet on phones and a pane beside Path on large screens (#940),
-     * never a full-screen modal — so the bar stays: under the sheet's scrim on
-     * a phone, beside the panes on a tablet. D6 still holds because this is no
-     * longer a modal; [EditPebble], opened from it, still is.
+     * A page on phones (#1135, the held card needs the height and the container
+     * transform), a pane beside Path on large screens (#940); never a modal, so
+     * the bar stays. D6 still holds because this is no longer a modal;
+     * [EditPebble], opened from it, still is.
      */
     @Serializable
     data class PebbleDetail(
