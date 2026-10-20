@@ -5,6 +5,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
@@ -35,6 +36,9 @@ internal fun valenceWordScale(size: ValenceSizeGroup): Float =
         ValenceSizeGroup.LARGE -> 1f
     }
 
+/** Small (day) events drop the word to lowercase: the one rule, for the record flow and the card's verso. */
+internal fun valenceWordLowercase(size: ValenceSizeGroup): Boolean = size == ValenceSizeGroup.SMALL
+
 /**
  * The top line of the lockup under the fan: the polarity word in the hand font,
  * coloured by polarity — ports the word half of iOS `ValenceHeadlineView`.
@@ -45,12 +49,17 @@ internal fun valenceWordScale(size: ValenceSizeGroup): Float =
  *
  * [scale] is applied about the row's **bottom** edge, so the word grows upward
  * into space the row already occupies rather than pushing what is under it.
+ *
+ * [brush] and [lowercase] default to the record flow's own choice (the polarity's
+ * ink, lowercase for small events); the card's verso passes its own (spec §Verso 1).
  */
 @Composable
 internal fun ValenceWord(
     valence: Valence,
     scale: Float,
     modifier: Modifier = Modifier,
+    brush: Brush? = null,
+    lowercase: Boolean = valenceWordLowercase(valence.sizeGroup),
 ) {
     val scheme = MaterialTheme.colorScheme
     val token = PebblesTheme.hand.valenceWord
@@ -60,7 +69,7 @@ internal fun ValenceWord(
     // live in — see `PebblesHandTypography.needsInkPadding`. A space is what
     // survives: it is part of the line the glyphs are clipped to, where a
     // layout box's padding is not.
-    val cased = if (valence.sizeGroup == ValenceSizeGroup.SMALL) raw.lowercase(Locale.getDefault()) else raw
+    val cased = if (lowercase) raw.lowercase(Locale.getDefault()) else raw
     val word = if (PebblesHandTypography.needsInkPadding(token)) " $cased " else cased
 
     // `BasicText` rather than Material's `Text`: the highlight word is painted
@@ -71,7 +80,7 @@ internal fun ValenceWord(
         text = word,
         style =
             token.copy(
-                brush = ValenceStoneStyles.headlineInk(valence.polarity, scheme),
+                brush = brush ?: ValenceStoneStyles.headlineInk(valence.polarity, scheme),
                 textAlign = TextAlign.Center,
             ),
         modifier =
@@ -89,7 +98,7 @@ internal fun ValenceWord(
  * and nobody calls their afternoon a neutral. The other two reuse the polarity
  * labels, which are already the words the lockup wants.
  */
-private fun valenceWordRes(polarity: ValencePolarity): Int =
+internal fun valenceWordRes(polarity: ValencePolarity): Int =
     when (polarity) {
         ValencePolarity.LOWLIGHT -> R.string.valence_lowlight
         ValencePolarity.NEUTRAL -> R.string.valence_headline_neutral

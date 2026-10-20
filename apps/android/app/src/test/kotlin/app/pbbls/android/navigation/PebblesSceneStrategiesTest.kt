@@ -119,7 +119,7 @@ class PebblesSceneStrategiesTest {
     }
 
     @Test
-    fun `an open pebble on one pane is left to the sheet`() {
+    fun `an open pebble on one pane is left to the next strategy`() {
         assertNull(pebblesListDetailStrategy(directive(1)).sceneFor(PebblesKey.Path, PebblesKey.PebbleDetail("p1")))
     }
 

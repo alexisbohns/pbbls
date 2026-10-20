@@ -233,7 +233,8 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     entry<PebblesKey.PebbleDetail>(
         // Fade-through, not the push BarKeys get: beside Path this is a scene
-        // change, not a lateral move (#940).
+        // change, not a lateral move (#940). It also covers the phone page
+        // (#1135) until Part 4's container transform from the Spine.
         metadata = NavTransitions.split + PanePairs.metadataFor<PebblesKey.PebbleDetail>(),
     ) { key ->
         PebbleDetailScreen(
@@ -242,6 +243,8 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onEditPebble = { navigator.navigate(PebblesKey.EditPebble(key.momentId)) },
             onMomentDeleted = { navigator.closeDetail(PebblesKey.PebbleDetail(key.momentId)) },
             onCompleteRequested = { navigator.navigate(PebblesKey.CompletePebble(key.momentId)) },
+            showBack = !isInListDetailPane(),
+            onBack = navigator::goBack,
         )
     }
 

@@ -84,7 +84,7 @@ private const val TAG = "spine-pebble"
 private val LEADER = 1.dp
 
 /** The card's people strip: glyphs of `4u`, type in card units. */
-private const val CARD_GLYPH_UNITS = 4f
+internal const val CARD_GLYPH_UNITS = 4f
 
 /**
  * One moment on the Spine (#1122, spec §The feed): its lit stone on the margin

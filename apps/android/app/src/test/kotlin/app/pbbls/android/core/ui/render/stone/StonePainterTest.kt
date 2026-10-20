@@ -9,6 +9,7 @@ import android.graphics.Color.blue
 import android.graphics.Color.green
 import android.graphics.Color.red
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.test.core.app.ApplicationProvider
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.GlyphStroke
@@ -146,6 +147,38 @@ class StonePainterTest {
             StoneBitmapCache.key(spec(), SIDE, SIDE, DENSITY),
             StoneBitmapCache.key(spec(seed = 0xBEEFL), SIDE, SIDE, DENSITY),
         )
+    }
+
+    @Test
+    fun `the shadow fades out inside the bitmap, which grows past the box`() {
+        ValenceSizeGroup.entries.forEach { size ->
+            ValencePolarity.entries.forEach { polarity ->
+                listOf(false, true).forEach { night ->
+                    val painted = StonePainter.render(spec(size = size, polarity = polarity, night = night), SIDE, SIDE, resources)
+                    val bitmap = painted.image.asAndroidBitmap()
+                    val margin = painted.margin
+                    val label = "$size $polarity night=$night $margin"
+
+                    assertEquals(label, SIDE + margin.left + margin.right, bitmap.width)
+                    assertEquals(label, SIDE + margin.top + margin.bottom, bitmap.height)
+                    // The light is top-left: the shadow reaches further right and down.
+                    assertTrue(label, margin.right > margin.left && margin.bottom > margin.top)
+                    val edge =
+                        (0 until bitmap.width).flatMap { x -> listOf(bitmap.getPixel(x, 0), bitmap.getPixel(x, bitmap.height - 1)) } +
+                            (0 until bitmap.height).flatMap { y -> listOf(bitmap.getPixel(0, y), bitmap.getPixel(bitmap.width - 1, y)) }
+                    assertTrue("$label edge alpha ${edge.maxOf { alpha(it) }}", edge.all { alpha(it) <= 1 })
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `the padded bitmap holds the box where the plain paint draws it`() {
+        val plain = paint(spec())
+        val painted = StonePainter.render(spec(), SIDE, SIDE, resources)
+        val bitmap = painted.image.asAndroidBitmap()
+
+        assertEquals(plain.centre(), bitmap.getPixel(painted.margin.left + SIDE / 2, painted.margin.top + SIDE / 2))
     }
 
     @Test

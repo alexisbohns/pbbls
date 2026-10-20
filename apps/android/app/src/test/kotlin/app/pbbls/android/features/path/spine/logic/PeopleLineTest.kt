@@ -76,4 +76,20 @@ class PeopleLineTest {
     fun `counts a duplicated soul once`() {
         assertEquals(listOf("a", "b"), PeopleLines.of(listOf("a", "a", "b"), listOf("a", "b"), en).named)
     }
+
+    @Test
+    fun `the held card names everyone up to eight`() {
+        val line = PeopleLines.of(ids(8), ids(8), en, namedInFull = PeopleLines.NAMED_ON_CARD)
+        assertEquals(ids(8), line.named)
+        assertEquals(0, line.others)
+    }
+
+    @Test
+    fun `past eight the card falls back to the counting rule`() {
+        val line = PeopleLines.of(ids(9), ids(9), en, namedInFull = PeopleLines.NAMED_ON_CARD)
+        assertEquals(ids(2), line.named)
+        assertEquals(7, line.others)
+        assertEquals(5, line.marks.size)
+        assertEquals(2, line.overflow)
+    }
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Brand name — never translated (D3/D9). -->
     <string name="app_name" translatable="false">Pebbles</string>
 
@@ -377,6 +377,21 @@
     <string name="valence_span_day">OF MY DAY</string>
     <string name="valence_span_week">OF MY WEEK</string>
     <string name="valence_span_month">OF MY MONTH</string>
+    <!-- The held card (#1135) -->
+    <string name="card_turn">Turn</string>
+    <string name="card_turn_to_pebble">Pebble</string>
+    <string name="card_turn_to_moment">Moment</string>
+    <string name="card_turn_action_to_pebble">Turn over to your pebble</string>
+    <string name="card_turn_action_to_moment">Turn over to the moment</string>
+    <string name="card_verso_heading">Your pebble</string>
+    <!-- The verso's lockup, read once: the heading, the valence word, its span ("Your pebble. Highlight of my month"). -->
+    <string name="card_verso_heading_a11y">%1$s. %2$s %3$s</string>
+    <!-- The recto's dateline read with the emotion, so the emotion follows the date. -->
+    <string name="card_dateline_emotion_a11y">%1$s. %2$s</string>
+    <string name="card_domains_a11y">Life domains: %1$s</string>
+    <string name="card_collections_a11y">Collections: %1$s</string>
+    <string name="bare_place_kicker" tools:ignore="UnusedResources">Not a pebble yet</string>
+    <string name="bare_place_body" tools:ignore="UnusedResources">Its card prints here once you say what it meant: a feeling and its weight, the parts of your life it touched, who was there.</string>
     <!-- Karma-earned flash (D9). -->
     <string name="karma_flash_amount">+%1$d karma</string>
     <string name="karma_flash_a11y">Earned %1$d karma, %2$s</string>

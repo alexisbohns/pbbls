@@ -1,11 +1,18 @@
 package app.pbbls.android.features.path
 
+import app.pbbls.android.core.data.SignedUrlProviding
+import app.pbbls.android.core.data.SnapAspectCache
+import app.pbbls.android.core.data.SnapBoundsDecoder
+import app.pbbls.android.core.data.SnapURLCache
+import app.pbbls.android.core.data.SnapUrls
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
 import app.pbbls.android.testing.recordEffects
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -21,12 +28,26 @@ class PebbleDetailViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
+    /** Never reached from a ViewModel test: the ratio probe belongs to the card. */
+    private fun snapAspect(): SnapAspectCache {
+        val scope = CoroutineScope(SupervisorJob())
+        val provider =
+            object : SignedUrlProviding {
+                override suspend fun signedUrls(storagePrefix: String) = SnapUrls(original = "", thumb = "")
+            }
+        return SnapAspectCache(
+            urls = SnapURLCache(provider, scope, nowMillis = { 0L }),
+            scope = scope,
+            decoder = SnapBoundsDecoder { null },
+        )
+    }
+
     @Test
     fun `loads the moment`() =
         runTest {
             val moment = UiFixtures.momentDetail()
             val service = FakeMomentReadService(moments = mapOf("moment-1" to moment))
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
 
             viewModel.start("moment-1")
             assertEquals(PebbleDetailUiState.Loading, viewModel.uiState.value)
@@ -41,7 +62,7 @@ class PebbleDetailViewModelTest {
         runTest {
             val bare = UiFixtures.momentDetail(pebble = null, name = null)
             val service = FakeMomentReadService(moments = mapOf("moment-1" to bare))
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
 
             viewModel.start("moment-1")
             advanceUntilIdle()
@@ -56,7 +77,7 @@ class PebbleDetailViewModelTest {
         runTest {
             val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail()))
             service.failNext = IOException("offline")
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
 
             viewModel.start("moment-1")
             advanceUntilIdle()
@@ -73,7 +94,7 @@ class PebbleDetailViewModelTest {
     fun `starting with the same id does not refetch`() =
         runTest {
             val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail()))
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
 
             viewModel.start("moment-1")
             advanceUntilIdle()
@@ -91,7 +112,7 @@ class PebbleDetailViewModelTest {
     fun `resuming after the first time refetches the same moment`() =
         runTest {
             val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail(name = "A walk")))
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
             viewModel.start("moment-1")
             advanceUntilIdle()
 
@@ -122,7 +143,7 @@ class PebbleDetailViewModelTest {
                             "moment-2" to UiFixtures.momentDetail(id = "moment-2", name = "Another"),
                         ),
                 )
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService())
+            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
             viewModel.start("moment-1")
             advanceUntilIdle()
 
@@ -139,7 +160,7 @@ class PebbleDetailViewModelTest {
         runTest {
             val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
             val write = FakeMomentWriteService()
-            val vm = PebbleDetailViewModel(read, write)
+            val vm = PebbleDetailViewModel(read, write, snapAspect())
             val effects = recordEffects(vm.effects)
             vm.start("m-1")
             advanceUntilIdle()
@@ -160,7 +181,7 @@ class PebbleDetailViewModelTest {
         runTest {
             val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
             val write = FakeMomentWriteService()
-            val vm = PebbleDetailViewModel(read, write)
+            val vm = PebbleDetailViewModel(read, write, snapAspect())
             val effects = recordEffects(vm.effects)
             vm.start("m-1")
             advanceUntilIdle()
@@ -183,7 +204,7 @@ class PebbleDetailViewModelTest {
         runTest {
             val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
             val write = FakeMomentWriteService()
-            val vm = PebbleDetailViewModel(read, write)
+            val vm = PebbleDetailViewModel(read, write, snapAspect())
             val effects = recordEffects(vm.effects)
             vm.start("m-1")
             advanceUntilIdle()
@@ -207,7 +228,7 @@ class PebbleDetailViewModelTest {
         runTest {
             val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
             val write = FakeMomentWriteService()
-            val vm = PebbleDetailViewModel(read, write)
+            val vm = PebbleDetailViewModel(read, write, snapAspect())
             vm.start("m-1")
             advanceUntilIdle()
 

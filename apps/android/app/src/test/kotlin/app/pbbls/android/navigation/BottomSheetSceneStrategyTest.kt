@@ -4,6 +4,8 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.OverlayScene
 import androidx.navigation3.scene.SceneStrategyScope
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphGridItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -12,6 +14,18 @@ import org.junit.Test
 /** The docked sheet on compact windows (#940). */
 class BottomSheetSceneStrategyTest {
     private val strategy = BottomSheetSceneStrategy<NavKey>()
+
+    // The glyph detail is the sheet's one user since the pebble detail became a page (#1135).
+    private val glyph =
+        PebblesKey.GlyphDetail(
+            GlyphGridItem(
+                glyph = Glyph(id = "g1", strokes = emptyList(), viewBox = "0 0 200 200"),
+                price = 10,
+                owned = false,
+                createdAt = null,
+                acquiredAt = null,
+            ),
+        )
 
     private fun entry(
         key: PebblesKey,
@@ -23,8 +37,8 @@ class BottomSheetSceneStrategyTest {
 
     @Test
     fun `a sheet entry on top becomes an overlay over what is below`() {
-        val below = entry(PebblesKey.Path, sheet = false)
-        val sheet = entry(PebblesKey.PebbleDetail("p1"), sheet = true)
+        val below = entry(PebblesKey.Glyphs, sheet = false)
+        val sheet = entry(glyph, sheet = true)
 
         val scene = sceneFor(listOf(below, sheet))
 
@@ -39,7 +53,7 @@ class BottomSheetSceneStrategyTest {
     fun `the same entries give an equal scene`() {
         // NavDisplay keeps an overlay's composition, and so the sheet's state,
         // across recalculations only while the scenes compare equal.
-        val entries = listOf(entry(PebblesKey.Path, sheet = false), entry(PebblesKey.PebbleDetail("p1"), sheet = true))
+        val entries = listOf(entry(PebblesKey.Glyphs, sheet = false), entry(glyph, sheet = true))
 
         val first = sceneFor(entries)
         val second = sceneFor(entries)
@@ -50,7 +64,7 @@ class BottomSheetSceneStrategyTest {
 
     @Test
     fun `anything else is left to the next strategy`() {
-        assertNull(sceneFor(listOf(entry(PebblesKey.Path, sheet = false))))
+        assertNull(sceneFor(listOf(entry(PebblesKey.Glyphs, sheet = false))))
     }
 
     @Test
@@ -58,9 +72,9 @@ class BottomSheetSceneStrategyTest {
         val scene =
             sceneFor(
                 listOf(
-                    entry(PebblesKey.Path, sheet = false),
-                    entry(PebblesKey.PebbleDetail("p1"), sheet = true),
-                    entry(PebblesKey.EditPebble("p1"), sheet = false),
+                    entry(PebblesKey.Glyphs, sheet = false),
+                    entry(glyph, sheet = true),
+                    entry(PebblesKey.Settings, sheet = false),
                 ),
             )
         assertNull(scene)

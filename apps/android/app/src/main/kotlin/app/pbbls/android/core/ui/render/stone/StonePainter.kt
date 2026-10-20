@@ -13,9 +13,12 @@ import android.graphics.RadialGradient
 import android.graphics.RectF
 import android.graphics.Shader
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.PathParser
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.withClip
 import androidx.core.graphics.withTranslation
 import app.pbbls.android.core.model.PebbleGlyph
@@ -28,6 +31,8 @@ import app.pbbls.android.core.ui.render.wobble.WobbleParams
 import app.pbbls.android.core.ui.render.wobble.WobblePathFlattener
 import app.pbbls.android.core.ui.render.wobble.WobblePoint
 import app.pbbls.android.core.ui.render.wobble.WobbleRenderer
+import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
@@ -45,6 +50,28 @@ internal data class StoneSpec(
     val shadow: Color,
     val shadowAlpha: Float,
     val night: Boolean,
+)
+
+/**
+ * How far, in device px, a painted stone reaches past each side of its box:
+ * its shadows fall below and right of the body and blur out on every side.
+ */
+internal data class StoneMargin(
+    val left: Int,
+    val top: Int,
+    val right: Int,
+    val bottom: Int,
+)
+
+/**
+ * A stone's bitmap and where its box sits in it: the box's top-left is at
+ * ([margin] left, [margin] top), and the bitmap is the box grown by [margin].
+ * `LitStone` draws it at minus that offset, so the box keeps its layout size
+ * and the shadow paints past it.
+ */
+internal class PaintedStone(
+    val image: ImageBitmap,
+    val margin: StoneMargin,
 )
 
 /**
@@ -79,6 +106,26 @@ internal object StonePainter {
 
     private const val NEAR_SHADOW_GAIN = 1.35f
 
+    /** Skia's `ConvertRadiusToSigma`: the σ a `BlurMaskFilter` radius blurs with. */
+    private const val SKIA_SIGMA_PER_RADIUS = 0.57735f
+    private const val SKIA_SIGMA_BIAS = 0.5f
+
+    /** Skia sizes a blur's mask at 3σ past the shape (`SkBlurMask::ComputeBlurRadius`); nothing it draws reaches further. */
+    private const val BLUR_EXTENT_SIGMAS = 3f
+
+    /** The web's two blurred copies under the stone, far then near: offset in phone px, blur in canvas units, opacity gain. */
+    private class ShadowLayer(
+        val offsetPx: Pair<Float, Float>,
+        val blur: Float,
+        val gain: Float,
+    )
+
+    private val SHADOWS =
+        listOf(
+            ShadowLayer(StoneGeometry.SHADOW_FAR_PX, Blur.FAR, 1f),
+            ShadowLayer(StoneGeometry.SHADOW_NEAR_PX, Blur.NEAR, NEAR_SHADOW_GAIN),
+        )
+
     // The web's radial ramp has a focal point (fx .34, fy .24) off its centre
     // (.38, .3); android has none, so the centre is nudged toward the focus.
     private const val RAMP_CX = 0.36f
@@ -101,18 +148,46 @@ internal object StonePainter {
     /** The petroglyph wobble's one noise field, the static look's seed (as `WobbleRenderer`). */
     private val wobbleNoise by lazy { SVGTurbulence(WobbleParams.SEED) }
 
+    /**
+     * The stone in a bitmap of its own, grown by the [StoneMargin] its shadows
+     * need: the box alone cuts the blur off in a hard rectangle.
+     */
+    fun render(
+        spec: StoneSpec,
+        widthPx: Int,
+        heightPx: Int,
+        resources: Resources,
+    ): PaintedStone {
+        val scene = Scene.of(spec, widthPx, resources)
+        val margin = margin(scene, widthPx, heightPx)
+        val bitmap = createBitmap(widthPx + margin.left + margin.right, heightPx + margin.top + margin.bottom)
+        val canvas = Canvas(bitmap).apply { translate(margin.left.toFloat(), margin.top.toFloat()) }
+        paint(scene, spec.night, canvas, widthPx, heightPx, resources)
+        return PaintedStone(bitmap.asImageBitmap(), margin)
+    }
+
+    /** The stone with its box at the canvas origin; whatever falls past the canvas is cut off. */
     fun paint(
         spec: StoneSpec,
         canvas: Canvas,
         widthPx: Int,
         heightPx: Int,
         resources: Resources,
+    ) = paint(Scene.of(spec, widthPx, resources), spec.night, canvas, widthPx, heightPx, resources)
+
+    private fun paint(
+        scene: Scene,
+        night: Boolean,
+        canvas: Canvas,
+        widthPx: Int,
+        heightPx: Int,
+        resources: Resources,
     ) {
-        val scene = Scene.of(spec, widthPx, resources)
         val layer =
-            if (spec.night) {
+            if (night) {
                 val filter = Paint().apply { colorFilter = ColorMatrixColorFilter(StoneTones.nightMatrix(scene.polarity).values) }
-                canvas.saveLayer(0f, 0f, widthPx.toFloat(), heightPx.toFloat(), filter)
+                // The whole canvas, margin included: the night filter tints the shadow too.
+                canvas.saveLayer(null, filter)
             } else {
                 canvas.save()
             }
@@ -145,26 +220,47 @@ internal object StonePainter {
         scene: Scene,
         canvas: Canvas,
     ) {
-        val unitPx = StoneGeometry.unitsPerPx(scene.size) * scene.pxPerUnit
-        shadow(scene, canvas, StoneGeometry.SHADOW_FAR_PX, Blur.FAR, scene.shadowAlpha, unitPx)
-        shadow(scene, canvas, StoneGeometry.SHADOW_NEAR_PX, Blur.NEAR, scene.shadowAlpha * NEAR_SHADOW_GAIN, unitPx)
+        SHADOWS.forEach { layer ->
+            val paint =
+                fill(scene.shadow, scene.shadowAlpha * layer.gain).apply {
+                    maskFilter = blurFilter(layer.blur * scene.canvasScalePx)
+                }
+            canvas.withTranslation(layer.offsetPx.first * scene.unitPx, layer.offsetPx.second * scene.unitPx) {
+                drawPath(scene.body, paint)
+            }
+        }
     }
 
-    private fun shadow(
+    /**
+     * What the body and its shadows cover past the box: each shadow is the
+     * body's bounds moved by its offset and grown by its blur's reach, from
+     * the same radius [blurFilter] hands Skia. The near shadow sits inside the
+     * far one today; both are measured so a retuned recipe stays covered.
+     */
+    private fun margin(
         scene: Scene,
-        canvas: Canvas,
-        offsetPx: Pair<Float, Float>,
-        blur: Float,
-        opacity: Float,
-        unitPx: Float,
-    ) {
-        val paint =
-            fill(scene.shadow, opacity).apply {
-                maskFilter = blurFilter(blur * scene.canvasScalePx)
-            }
-        canvas.withTranslation(offsetPx.first * unitPx, offsetPx.second * unitPx) {
-            drawPath(scene.body, paint)
+        widthPx: Int,
+        heightPx: Int,
+    ): StoneMargin {
+        val body = RectF().also { scene.body.computeBounds(it, true) }
+        val reach = RectF(body)
+        SHADOWS.forEach { layer ->
+            val extent = BLUR_EXTENT_SIGMAS * (SKIA_SIGMA_PER_RADIUS * blurRadius(layer.blur * scene.canvasScalePx) + SKIA_SIGMA_BIAS)
+            val shadow =
+                RectF(body).apply {
+                    offset(layer.offsetPx.first * scene.unitPx, layer.offsetPx.second * scene.unitPx)
+                    inset(-extent, -extent)
+                }
+            reach.union(shadow)
         }
+
+        fun past(overflow: Float): Int = max(0, ceil(overflow).toInt())
+        return StoneMargin(
+            left = past(-reach.left),
+            top = past(-reach.top),
+            right = past(reach.right - widthPx),
+            bottom = past(reach.bottom - heightPx),
+        )
     }
 
     private fun drawBody(
@@ -345,17 +441,16 @@ internal object StonePainter {
                 .carveTransform(scene.size, scene.polarity)
                 .concat(StoneGeometry.glyphTransform(scene.size, scene.polarity, side))
         val inkMatrix = glyphAffine.toMatrix(scene.pxPerUnit)
-        val unitPx = StoneGeometry.unitsPerPx(scene.size) * scene.pxPerUnit
         val lipMatrix =
             Matrix(inkMatrix).apply {
-                postTranslate(StoneGeometry.LIP_PX.first * unitPx, StoneGeometry.LIP_PX.second * unitPx)
+                postTranslate(StoneGeometry.LIP_PX.first * scene.unitPx, StoneGeometry.LIP_PX.second * scene.unitPx)
             }
         val (lip, ink) = StoneTones.glyphTones(scene.polarity, scene.palette)
         val lines = glyph.strokes.mapNotNull { stroke -> glyphLine(stroke.d, side)?.let { it to stroke.width } }
         for ((tone, matrix) in listOf(lip to lipMatrix, ink to inkMatrix)) {
             lines.forEach { (line, width) ->
                 val path = Path(line).apply { transform(matrix) }
-                val widthPx = StoneGeometry.CARVE_STROKE_PX * scene.density * (width / ENGINE_STROKE_WIDTH).toFloat()
+                val widthPx = StoneGeometry.CARVE_STROKE_PX * scene.density * scene.carveGain * (width / ENGINE_STROKE_WIDTH).toFloat()
                 val paint =
                     stroke(tone.color, tone.opacity, widthPx).apply {
                         strokeCap = Paint.Cap.ROUND
@@ -471,8 +566,9 @@ internal object StonePainter {
             strokeWidth = widthPx
         }
 
-    private fun blurFilter(sigmaPx: Float): BlurMaskFilter =
-        BlurMaskFilter((sigmaPx * BLUR_K).coerceAtLeast(MIN_BLUR_RADIUS_PX), BlurMaskFilter.Blur.NORMAL)
+    private fun blurFilter(sigmaPx: Float): BlurMaskFilter = BlurMaskFilter(blurRadius(sigmaPx), BlurMaskFilter.Blur.NORMAL)
+
+    private fun blurRadius(sigmaPx: Float): Float = (sigmaPx * BLUR_K).coerceAtLeast(MIN_BLUR_RADIUS_PX)
 
     /**
      * The web's grain filter rasterised once per (strength, density): the
@@ -533,6 +629,7 @@ internal object StonePainter {
         val shadow: Color,
         val shadowAlpha: Float,
         val pxPerUnit: Float,
+        val unitPx: Float,
         val density: Float,
         val widthPx: Float,
         val heightPx: Float,
@@ -540,6 +637,7 @@ internal object StonePainter {
         val canvasMatrix: Matrix,
         val canvasScalePx: Float,
         val carveScalePx: Float,
+        val carveGain: Float,
         private val carveAffine: Affine,
         val recipe: StoneRecipe,
     ) {
@@ -550,6 +648,20 @@ internal object StonePainter {
         ): Matrix = carveAffine.concat(Affine.translate(dx, dy)).toMatrix(pxPerUnit)
 
         companion object {
+            /**
+             * The carved line's weight against the phone stone: 1 at the size's
+             * default width (rounded to px as `Dp.roundToPx` does, so a default
+             * stone is byte-identical), heavier in proportion on a wider one.
+             */
+            private fun carveGain(
+                size: ValenceSizeGroup,
+                widthPx: Int,
+                density: Float,
+            ): Float {
+                val defaultWidthPx = (StoneGeometry.STONE_WIDTH_DP.getValue(size) * density).roundToInt()
+                return if (defaultWidthPx > 0) widthPx.toFloat() / defaultWidthPx else 1f
+            }
+
             fun of(
                 spec: StoneSpec,
                 widthPx: Int,
@@ -573,6 +685,7 @@ internal object StonePainter {
                     shadow = spec.shadow,
                     shadowAlpha = spec.shadowAlpha,
                     pxPerUnit = pxPerUnit,
+                    unitPx = StoneGeometry.unitsPerPx(spec.size) * pxPerUnit,
                     density = resources.displayMetrics.density,
                     widthPx = box.width * pxPerUnit,
                     heightPx = box.height * pxPerUnit,
@@ -580,6 +693,7 @@ internal object StonePainter {
                     canvasMatrix = canvasAffine.toMatrix(pxPerUnit),
                     canvasScalePx = canvasAffine.a * pxPerUnit,
                     carveScalePx = carveAffine.a * pxPerUnit,
+                    carveGain = carveGain(spec.size, widthPx, resources.displayMetrics.density),
                     carveAffine = carveAffine,
                     recipe = StoneRecipes.of(spec.size, polarity, spec.seed),
                 )

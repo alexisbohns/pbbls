@@ -31,17 +31,23 @@ object PeopleLines {
     const val MARKS = 5
 
     /** Named in full up to this many souls. */
-    private const val NAMED_IN_FULL = 3
+    const val NAMED_IN_FULL = 3
+
+    /** The held card has room to name more (pebble card spec §Recto). */
+    const val NAMED_ON_CARD = 8
 
     /**
      * @param soulIds the pebble's souls.
      * @param order soul ids in persons-of-the-week order; ids missing from it
      *   keep their relative order after the ranked ones.
+     * @param namedInFull everyone is named up to this many souls; the Spine keeps
+     *   [NAMED_IN_FULL], the held card passes [NAMED_ON_CARD].
      */
     fun of(
         soulIds: List<String>,
         order: List<String>,
         locale: Locale,
+        namedInFull: Int = NAMED_IN_FULL,
     ): PeopleLine {
         val rank = order.withIndex().associate { (index, id) -> id to index }
         val ranked =
@@ -51,7 +57,7 @@ object PeopleLines {
                 .sortedWith(compareBy({ rank[it.value] ?: Int.MAX_VALUE }, { it.index }))
                 .map { it.value }
 
-        if (ranked.size <= NAMED_IN_FULL) {
+        if (ranked.size <= namedInFull) {
             return PeopleLine(named = ranked, others = 0, othersWords = "", marks = emptyList(), overflow = 0)
         }
 

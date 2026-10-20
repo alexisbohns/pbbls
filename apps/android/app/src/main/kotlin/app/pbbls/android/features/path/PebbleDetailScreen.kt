@@ -1,14 +1,25 @@
 package app.pbbls.android.features.path
 
 import android.content.Intent
+import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
@@ -29,30 +40,40 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
+import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.LocalEmotionPaletteService
+import app.pbbls.android.core.data.LocalReferenceDataService
+import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.readableWidth
+import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.SharedPebbleLink
+import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.MomentDeleteDialog
-import app.pbbls.android.features.path.read.PebblePrivacyBadge
+import app.pbbls.android.features.path.card.PebbleCard
 import app.pbbls.android.features.path.read.PebbleReadView
+import java.time.ZoneId
 
 /**
- * The moment read page (#852, ports iOS `PebbleDetailSheet`, D7): a docked
- * sheet on phones and a pane beside Path on large screens (#940). The scene
- * decides which, and owns dismissal. Loads a `MomentDetail` through
- * [PebbleDetailViewModel], owns its loading/error/retry state, hosts the top
- * bar, and delegates the body to the pure [PebbleReadView]. System back is
- * the scene's own (the sheet's window, or `NavDisplay` beside Path) — its one
- * write, the delete, runs uncancellable in the ViewModel, so it needs no
- * `BackHandler`.
+ * The moment read page (#852, ports iOS `PebbleDetailSheet`, D7): a page on
+ * phones (#1135) and a pane beside Path on large screens (#940). The scene
+ * decides which. Loads a `MomentDetail` through [PebbleDetailViewModel], owns
+ * its loading/error/retry state, hosts the top bar, and shows a pebble as the
+ * held [PebbleCard]; a bare moment still renders the pure [PebbleReadView].
+ * System back is `NavDisplay`'s own — its one write, the delete, runs
+ * uncancellable in the ViewModel, so it needs no back handler.
+ *
+ * The card's photo is signed through the ambient `LocalSnapURLCache` and its
+ * ratio read from the Spine's own probe ([PebbleDetailViewModel.snapAspect]),
+ * so a card opened from the Spine finds both already known.
  *
  * The ⋮ menu (R7) opens Edit moment ([onEditMoment]) and, when the moment
  * carries your pebble, Edit pebble ([onEditPebble]); returning from either is
@@ -62,6 +83,9 @@ import app.pbbls.android.features.path.read.PebbleReadView
  *
  * A bare moment offers "Make it a pebble" under its title
  * ([onCompleteRequested], A-8); the resume refresh shows the pebble on return.
+ *
+ * @param showBack False beside Path on a large screen (#940): the list is the
+ *   way back, and system back still pops.
  */
 @Composable
 fun PebbleDetailScreen(
@@ -71,6 +95,8 @@ fun PebbleDetailScreen(
     onEditPebble: () -> Unit = {},
     onMomentDeleted: () -> Unit = {},
     onCompleteRequested: () -> Unit = {},
+    showBack: Boolean = true,
+    onBack: () -> Unit = {},
     viewModel: PebbleDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -98,6 +124,34 @@ fun PebbleDetailScreen(
     val pebble = detail?.pebble
     val palette = pebble?.emotion?.id?.let(palettes::palette)
 
+    // The cover photo: signed once per prefix, as the Spine's cards do, and its
+    // ratio from the same process-wide probe. Keyed on the prefix, so an edit
+    // that swaps the photo never shows the last one while the new one signs.
+    // Only a pebble has a card: the bare moment's read view signs its own.
+    val prefix =
+        detail
+            ?.takeIf { it.pebble != null }
+            ?.sortedSnaps
+            ?.firstOrNull()
+            ?.storagePath
+    val urls = LocalSnapURLCache.current
+    var photo by remember(prefix) { mutableStateOf<Pair<String, String>?>(null) }
+    LaunchedEffect(prefix, urls) {
+        if (photo == null && urls != null && prefix != null) {
+            photo =
+                runCatchingCancellable { urls.signedUrls(prefix).let { it.original to it.thumb } }
+                    .onFailure { Log.e(TAG, "snap sign failed for $prefix", it) }
+                    .getOrNull()
+        }
+    }
+    var ratio by remember(prefix) { mutableStateOf(prefix?.let(viewModel.snapAspect::cached)) }
+    LaunchedEffect(prefix) {
+        if (ratio == null && prefix != null) ratio = viewModel.snapAspect.ratio(prefix)
+    }
+    val reference = LocalReferenceDataService.current
+    val souls = reference.souls
+    val soulsById = remember(souls) { souls.associateBy { it.id } }
+
     // Share is only offered for public pebbles (M51) — anyone with the /p
     // link can open a public pebble, so sharing a secret/connections one
     // would leak it past its intended audience. The link carries the PEBBLE
@@ -124,6 +178,12 @@ fun PebbleDetailScreen(
         onDelete = viewModel::requestDelete,
         onShare = onShare,
         onRetry = viewModel::retry,
+        photo = photo,
+        ratio = ratio,
+        soulsById = soulsById,
+        domains = reference.domains,
+        showBack = showBack,
+        onBack = onBack,
         modifier = modifier,
         onComplete = onCompleteRequested,
     )
@@ -144,11 +204,16 @@ fun PebbleDetailScreen(
  * One moment without its ViewModel (#940): the top bar and the three states.
  * [PebbleDetailScreen] wires it; screenshots drive it.
  *
- * It draws no page background, so it takes the sheet's container colour on a
- * phone and `surface` in the pane. The read page uses theme roles; only the
- * pebble visual carries the emotion palette (#940, maintainer decision), which
- * is all [palette] is passed down for. It is null while loading or on a
- * palette-cache miss.
+ * It is a page on `surface`, as on a phone it is no longer a sheet (#1135). A
+ * pebble shows as the held [PebbleCard], which caps its own width, so the page
+ * column is not [readableWidth]; a bare moment keeps the read view at it.
+ * [palette] is the emotion's, null while loading or on a palette-cache miss.
+ *
+ * @param photo the cover's signed original and thumb; null until signed, or with no photo.
+ * @param ratio the cover's width / height; null until probed.
+ * @param soulsById the souls cache, for the recto's marks.
+ * @param domains the reference domains, for the verso's postmarks.
+ * @param showBack False beside Path on a large screen (#940).
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -160,21 +225,30 @@ fun PebbleDetailContent(
     onDelete: () -> Unit,
     onShare: (() -> Unit)?,
     onRetry: () -> Unit,
+    photo: Pair<String, String>?,
+    ratio: Float?,
+    soulsById: Map<String, SoulWithGlyph>,
+    domains: List<Domain>,
+    showBack: Boolean,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     /** "Make it a pebble" on a bare moment; null offers no call to action. */
     onComplete: (() -> Unit)? = null,
     /** Opens the ⋮ menu on first composition; for previews of the open menu only. */
     initialMenuOpen: Boolean = false,
+    /** Where the card's day, time and dateline fall; previews pin it. */
+    zone: ZoneId = ZoneId.systemDefault(),
 ) {
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
 
     Column(
         modifier
             .fillMaxSize()
-            .readableWidth(),
+            .background(MaterialTheme.colorScheme.surface),
     ) {
         DetailTopBar(
-            visibility = detail?.pebble?.visibility,
+            showBack = showBack,
+            onBack = onBack,
             menuEnabled = detail != null,
             hasPebble = detail?.pebble != null,
             onEditMoment = onEditMoment,
@@ -192,27 +266,51 @@ fun PebbleDetailContent(
             PebbleDetailUiState.Error ->
                 DetailLoadError(onRetry = onRetry)
             is PebbleDetailUiState.Content ->
-                PebbleReadView(
-                    detail = state.detail,
-                    palette = palette,
-                    modifier = Modifier.fillMaxSize(),
-                    onComplete = onComplete,
-                )
+                if (state.detail.pebble != null) {
+                    Column(
+                        Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+                            .padding(vertical = 8.dp),
+                    ) {
+                        PebbleCard(
+                            detail = state.detail,
+                            palette = palette,
+                            ratio = ratio,
+                            photoUrl = photo?.first,
+                            thumbUrl = photo?.second,
+                            soulsById = soulsById,
+                            domains = domains,
+                            zone = zone,
+                        )
+                    }
+                } else {
+                    // Part 3 of #1135 replaces the bare moment's read view.
+                    PebbleReadView(
+                        detail = state.detail,
+                        palette = palette,
+                        modifier = Modifier.fillMaxSize().readableWidth(),
+                        onComplete = onComplete,
+                    )
+                }
         }
     }
 }
 
 /**
- * Detail top bar: an optional privacy badge once the pebble is loaded, an
- * optional share button (public pebbles only, M51), and a trailing ⋮ menu
- * (enabled only after load) with Edit moment, with a pebble Edit pebble, and
- * Delete (R7) — no standalone trash button. No back arrow (#940): on a phone it is a sheet,
- * dismissed by drag, scrim or system back; on a large screen Path is beside it.
+ * Detail top bar: a back arrow when it is a page of its own ([showBack]; beside
+ * Path on a large screen the list is the way back, #940), an optional share
+ * button (public pebbles only, M51), and a trailing ⋮ menu (enabled only after
+ * load) with Edit moment, with a pebble Edit pebble, a divider, and Delete (R7)
+ * — no standalone trash button. The title slot is empty: privacy lives in the
+ * card's footer (#1135).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DetailTopBar(
-    visibility: Visibility?,
+    showBack: Boolean,
+    onBack: () -> Unit,
     menuEnabled: Boolean,
     hasPebble: Boolean,
     onEditMoment: () -> Unit,
@@ -222,9 +320,19 @@ private fun DetailTopBar(
     initialMenuOpen: Boolean,
 ) {
     // A stock top app bar (#854) on a clear container, so it sits on whatever
-    // hosts the page (the sheet's container, or surface in the pane) with no seam.
+    // hosts the page (the page's or the pane's surface) with no seam.
     TopAppBar(
-        title = { if (visibility != null) PebblePrivacyBadge(visibility = visibility) },
+        title = {},
+        navigationIcon = {
+            if (showBack) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_arrow_back),
+                        contentDescription = stringResource(R.string.profile_back_a11y),
+                    )
+                }
+            }
+        },
         actions = {
             if (onShare != null) {
                 IconButton(onClick = onShare) {
@@ -260,6 +368,7 @@ private fun DetailTopBar(
                             },
                         )
                     }
+                    HorizontalDivider()
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) },
                         onClick = {

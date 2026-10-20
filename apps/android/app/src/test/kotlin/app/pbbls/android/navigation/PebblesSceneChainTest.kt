@@ -50,14 +50,12 @@ class PebblesSceneChainTest {
             with(strategy) { with(SceneStrategyScope<NavKey>()) { calculateScene(entries) } }
         }
 
+    /** The held card needs the whole height (#1135): on one pane a pebble is a page, not a sheet. */
     @Test
-    fun `an open pebble on one pane is a sheet`() {
+    fun `an open pebble on one pane is the default single pane`() {
         val entries = listOf(PebblesKey.Path, PebblesKey.PebbleDetail("p1")).map(::entry)
-        val scene = resolve(1, entries)
 
-        assertTrue(scene is OverlayScene<*>)
-        assertEquals(entries.takeLast(1), scene!!.entries)
-        assertEquals(entries.take(1), (scene as OverlayScene<NavKey>).overlaidEntries)
+        assertNull(resolve(1, entries))
     }
 
     @Test
@@ -81,17 +79,14 @@ class PebblesSceneChainTest {
     /**
      * Soul and collection rows open the read page (R9). Its pane pair is Path's,
      * so beside a soul it must not pose as that soul's detail pane: on either
-     * width it is the docked sheet over the soul.
+     * width it is a page of its own over the soul (#1135; it was a sheet).
      */
     @Test
-    fun `a moment opened from a soul is a sheet over the soul on either width`() {
+    fun `a moment opened from a soul is its own page on either width`() {
         val entries = listOf(PebblesKey.People, PebblesKey.SoulDetail("s1"), PebblesKey.PebbleDetail("m1")).map(::entry)
 
         for (partitions in listOf(1, 2)) {
-            val scene = resolve(partitions, entries)
-            assertTrue("partitions=$partitions", scene is OverlayScene<*>)
-            assertEquals(entries.takeLast(1), scene!!.entries)
-            assertEquals(entries.take(2), (scene as OverlayScene<NavKey>).overlaidEntries)
+            assertNull("partitions=$partitions", resolve(partitions, entries))
         }
     }
 
