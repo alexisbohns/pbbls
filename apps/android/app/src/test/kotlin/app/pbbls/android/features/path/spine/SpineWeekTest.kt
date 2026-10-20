@@ -23,6 +23,7 @@ import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.ui.render.stone.StoneMotion
+import app.pbbls.android.testing.PIXEL_TEST_SDK
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -51,7 +52,7 @@ private const val SETTLE_POLL_MS = 50L
  * (Robolectric's native graphics) and the test reads it twice: touched, then released.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(application = Application::class, qualifiers = "w390dp-h800dp-xhdpi")
+@Config(application = Application::class, qualifiers = "w390dp-h800dp-xhdpi", sdk = [PIXEL_TEST_SDK])
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class SpineWeekTest {
     @get:Rule
