@@ -51,18 +51,18 @@ struct StoneMaterial: Equatable, Codable {
          Float(rimWidth), Float(rimStrength)]
     }
 
-    /// The maintainer's picks on the phone (2026-09-27, second round),
-    /// pasted from the lab's Copy button.
+    /// Starting values for #1097 (spec §B3.3), replaced by the lab's Copy
+    /// output in the next commit.
     static func starting(for polarity: ValencePolarity) -> StoneMaterial {
         switch polarity {
         case .lowlight:
-            return StoneMaterial(kind: .lava, scale: 0.05, relief: 3, contrast: 1, sheen: 0.05,
+            return StoneMaterial(kind: .lava, scale: 0.07, relief: 3.6, contrast: 1, sheen: 0.05,
                                  facetDensity: 1, glitter: 0, pits: 1, banding: 0,
                                  lipWidth: 0.5, lipOpacity: 0.84)
         case .neutral:
-            return StoneMaterial(kind: .river, scale: 0.2, relief: 1.28, contrast: 0.64, sheen: 0.18,
-                                 facetDensity: 1, glitter: 0, pits: 0, banding: 0.5,
-                                 lipWidth: 1.2, lipOpacity: 0.7)
+            return StoneMaterial(kind: .river, scale: 0.2, relief: 1.28, contrast: 0.5, sheen: 0.06,
+                                 facetDensity: 1, glitter: 0, pits: 0.14, banding: 0.5,
+                                 lipWidth: 1.2, lipOpacity: 0.46)
         case .highlight:
             return StoneMaterial(kind: .gem, scale: 0.11, relief: 1.94, contrast: 0.59, sheen: 0.35,
                                  facetDensity: 3, glitter: 1, pits: 0, banding: 0,

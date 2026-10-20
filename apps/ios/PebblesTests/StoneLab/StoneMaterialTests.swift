@@ -51,4 +51,17 @@ struct StoneMaterialTests {
         #expect(abs(light.direction.dy + 0.8) < 0.001)
         #expect(StoneLight(pointingTo: .zero, elevationDegrees: 40).direction == StoneLight.rest.direction)
     }
+
+    @Test("starting tables are the lab's picks (#1097)")
+    func startingTables() {
+        #expect(StoneMaterial.starting(for: .lowlight) == StoneMaterial(
+            kind: .lava, scale: 0.07, relief: 3.6, contrast: 1, sheen: 0.05,
+            facetDensity: 1, glitter: 0, pits: 1, banding: 0, lipWidth: 0.5, lipOpacity: 0.84))
+        #expect(StoneMaterial.starting(for: .neutral) == StoneMaterial(
+            kind: .river, scale: 0.2, relief: 1.28, contrast: 0.5, sheen: 0.06,
+            facetDensity: 1, glitter: 0, pits: 0.14, banding: 0.5, lipWidth: 1.2, lipOpacity: 0.46))
+        #expect(StoneMaterial.starting(for: .highlight) == StoneMaterial(
+            kind: .gem, scale: 0.11, relief: 1.94, contrast: 0.59, sheen: 0.35,
+            facetDensity: 3, glitter: 1, pits: 0, banding: 0, lipWidth: 1.47, lipOpacity: 0.94))
+    }
 }
