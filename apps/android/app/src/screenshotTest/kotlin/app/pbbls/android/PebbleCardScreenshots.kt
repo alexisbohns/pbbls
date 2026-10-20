@@ -17,8 +17,11 @@ import app.pbbls.android.core.common.UuidHash
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
+import app.pbbls.android.features.path.card.CardFaceTarget
+import app.pbbls.android.features.path.card.CardFooter
 import app.pbbls.android.features.path.card.CardLayout
 import app.pbbls.android.features.path.card.CollectionBand
 import app.pbbls.android.features.path.card.DomainPostmark
@@ -138,6 +141,70 @@ private fun BandOnStock(
             ink = colors.ink,
             edge = spot,
             modifier = Modifier.width(328.dp),
+        )
+    }
+}
+
+/** The recto's footer: shared with connections, turning to the pebble. */
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun CardFooterRectoConnectionsLight() {
+    PebblesTheme { FooterOnStock(Visibility.PRIVATE, CardFaceTarget.PEBBLE) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun CardFooterRectoConnectionsNight() {
+    PebblesTheme { FooterOnStock(Visibility.PRIVATE, CardFaceTarget.PEBBLE) }
+}
+
+/** The verso's footer: public, turning to the moment. */
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun CardFooterVersoPublicLight() {
+    PebblesTheme { FooterOnStock(Visibility.PUBLIC, CardFaceTarget.MOMENT) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun CardFooterVersoPublicNight() {
+    PebblesTheme { FooterOnStock(Visibility.PUBLIC, CardFaceTarget.MOMENT) }
+}
+
+/** French, secret, on the recto: "RETOURNER" over "Galet". */
+@PreviewTest
+@Preview(showBackground = true, locale = "fr")
+@Composable
+fun CardFooterSecretFrenchLight() {
+    PebblesTheme { FooterOnStock(Visibility.SECRET, CardFaceTarget.PEBBLE) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, locale = "fr", uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun CardFooterSecretFrenchNight() {
+    PebblesTheme { FooterOnStock(Visibility.SECRET, CardFaceTarget.PEBBLE) }
+}
+
+/** The footer across a 328 dp card's stock; the miniature's stone is the joy spot. */
+@Composable
+private fun FooterOnStock(
+    visibility: Visibility,
+    turnTo: CardFaceTarget,
+) {
+    val colors = PebblesTheme.spine.colors
+    val palette = PebbleCardFixtures.joyPalette
+    Box(Modifier.background(colors.ground).padding(16.dp)) {
+        CardFooter(
+            visibility = visibility,
+            turnTo = turnTo,
+            stone = if (colors.isNight) palette.secondary else palette.primary,
+            onTurn = {},
+            modifier = Modifier.width(328.dp).background(colors.stock),
         )
     }
 }
