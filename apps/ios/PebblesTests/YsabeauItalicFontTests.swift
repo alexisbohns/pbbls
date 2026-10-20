@@ -1,6 +1,7 @@
 import Testing
 import Foundation
 import UIKit
+@testable import Pebbles
 
 /// Guards the Ysabeau italic face used for an untitled moment (R3). A wrong
 /// PostScript name or an unbundled file falls back silently to an upright
@@ -34,5 +35,12 @@ struct YsabeauItalicFontTests {
         let font = UIFont(name: "Ysabeau-Bold", size: 17)
         #expect(font?.fontName == "Ysabeau-Bold")
         #expect(font?.fontDescriptor.symbolicTraits.contains(.traitItalic) == false)
+    }
+
+    @Test("the italic at 380 stays italic and reads 380 on the wght axis")
+    func italicTakesTheAxis() {
+        let font = YsabeauFace.uiFont(size: 17, weight: 380, italic: true, features: [])
+        #expect(font.fontDescriptor.symbolicTraits.contains(.traitItalic))
+        #expect(wght(font) == 380)
     }
 }
