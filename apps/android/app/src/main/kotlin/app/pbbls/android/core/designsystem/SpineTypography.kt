@@ -100,6 +100,13 @@ object SpineTypography {
     /** The strip's "& twelve others": the base `2.6u` in the quiet italic. */
     fun cardOthers(u: Float) = ysabeau((2.6f * u).sp, 380, italic = true)
 
+    /** The photo-less recto's slip: the entry's cut at 6.4 card units (the mock's `.plate .pname`). */
+    fun cardSlipName(
+        u: Float,
+        weight: Int,
+        italic: Boolean,
+    ) = ysabeau((6.4f * u).sp, weight, (-0.014f).em, italic = italic, lineHeight = (6.4f * u * 1.08f).sp)
+
     // The held card (pebble card spec): fixed sizes, not card units.
     val cardFooterGrade = ysabeau(10.5.sp, 650, 0.16f.em, features = SMALL_CAPS)
     val cardFooterNote = ysabeau(12.5.sp, 380, italic = true)

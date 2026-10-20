@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path.card
 
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /** The held card's geometry, in dp from the final mocks (pebble card spec). */
@@ -35,5 +36,20 @@ internal object CardLayout {
     val POSTMARK_INNER_RING_INSET = 12.4.dp
     val POSTMARK_ROW_TO_BAND = 18.dp
     val BAND_MIN_HEIGHT = 40.dp
+
+    /**
+     * The verso's frame, in card units (back-token3 `.back .panel`, `.vpanel`): the mat
+     * sits where the recto's printed border does, the stock panel [VERSO_MAT_PADDING_UNITS]
+     * inside it. The band's foot rests on the panel's foot line, the mat's padding showing under it.
+     */
+    const val VERSO_MAT_UNITS = 1.6f
+    const val VERSO_MAT_PADDING_UNITS = 2.2f
+
+    /** How far the band reaches up over the stock panel's foot (the mock's `margin-top: -20px`). */
+    val BAND_OVER_PANEL = 20.dp
+
+    /** From the face's foot to the band's. */
+    fun bandFoot(u: Dp): Dp = u * (VERSO_MAT_UNITS + VERSO_MAT_PADDING_UNITS)
+
     const val NOISE_SIZE_PX = 128
 }

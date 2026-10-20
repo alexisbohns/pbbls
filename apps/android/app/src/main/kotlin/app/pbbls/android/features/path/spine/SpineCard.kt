@@ -49,6 +49,8 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
@@ -89,6 +91,12 @@ private val RULE = 1.dp
 private const val ASPECT_MS = 240
 private const val RING_ALPHA = 0.30f
 private const val RAIL_RULE_ALPHA = 0.5f
+
+/** The legend's foot over a leaf: the score's head room (the mock's `.cf` bottom). */
+private const val LEGEND_TO_LEAF_UNITS = 4.4f
+
+/** The mat round a slip, wider than round a photo (the mock's `.field.plate`). */
+private const val SLIP_MAT_UNITS = 2.6f
 
 /** The photo's bed while it loads: the spot mixed into the stock. */
 private const val PHOTO_BED = 0.18f
@@ -295,7 +303,10 @@ internal fun SpineCardShell(
 
 /**
  * The card's print: the inset border, the field, the legend, the index and the rail,
- * in card units [u]. [leaf] lays out under the legend (the held card's words).
+ * in card units [u]. [leaf] lays out under the legend, across the border's width
+ * rather than the legend's column (the held card's words). [slip] stands in the
+ * field's mat in place of the photo (the held card's photo-less recto), and then
+ * carries the name, so the legend does not repeat it.
  */
 @Composable
 internal fun SpineCardFace(
@@ -311,6 +322,63 @@ internal fun SpineCardFace(
     people: (@Composable (u: Dp) -> Unit)?,
     modifier: Modifier = Modifier,
     leaf: (@Composable (u: Dp) -> Unit)? = null,
+    slip: (@Composable (u: Dp) -> Unit)? = null,
+) {
+    val colors = PebblesTheme.spine.colors
+
+    Box(
+        modifier.drawBehind {
+            val inset = (u * 1.6f).toPx()
+            drawRoundRect(
+                colors.cardRule,
+                topLeft = Offset(inset, inset),
+                size = Size(size.width - 2 * inset, size.height - 2 * inset),
+                cornerRadius = CornerRadius((u * 1.3f).toPx()),
+                style = Stroke(RULE.toPx()),
+            )
+        },
+    ) {
+        Column(Modifier.fillMaxWidth()) {
+            Box {
+                Print(
+                    moment = moment,
+                    palette = palette,
+                    u = u,
+                    ratio = ratio,
+                    photoUrl = photoUrl,
+                    thumbUrl = thumbUrl,
+                    weekday = weekday,
+                    time = time,
+                    emotionName = emotionName,
+                    people = people,
+                    // Over a leaf, the legend's foot is the score's head room (the mock's `.cf` 4.4u).
+                    bottom = if (leaf != null) u * LEGEND_TO_LEAF_UNITS else u * 6.2f,
+                    slip = slip,
+                )
+            }
+            if (leaf != null) {
+                // Inside the printed border, 1.6u in, so the score runs from rule to rule.
+                Box(Modifier.fillMaxWidth().padding(horizontal = u * 1.6f)) { leaf(u) }
+            }
+        }
+    }
+}
+
+/** The face's main block: the field, the legend, the index and the rail. */
+@Composable
+private fun BoxScope.Print(
+    moment: PathMoment,
+    palette: EmotionPalette?,
+    u: Dp,
+    ratio: Float,
+    photoUrl: String?,
+    thumbUrl: String?,
+    weekday: String,
+    time: String,
+    emotionName: String,
+    people: (@Composable (u: Dp) -> Unit)?,
+    bottom: Dp,
+    slip: (@Composable (u: Dp) -> Unit)?,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
@@ -331,99 +399,86 @@ internal fun SpineCardFace(
     val hasEmotion = moment.pebble != null && emotionName.isNotEmpty()
     val uSp = with(density) { u.toSp().value }
 
-    Box(
-        modifier.drawBehind {
-            val inset = (u * 1.6f).toPx()
-            drawRoundRect(
-                colors.cardRule,
-                topLeft = Offset(inset, inset),
-                size = Size(size.width - 2 * inset, size.height - 2 * inset),
-                cornerRadius = CornerRadius((u * 1.3f).toPx()),
-                style = Stroke(RULE.toPx()),
-            )
-        },
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = u * 4.6f, start = u * 9f, end = u * 9f, bottom = bottom),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(top = u * 4.6f, start = u * 9f, end = u * 9f, bottom = u * 6.2f),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Field(
-                u = u,
-                ratio = ratio,
-                polarity = polarity,
-                tint = tint,
-                bed = bed,
-                pattern = pattern,
-                ring = ring,
-                photoUrl = photoUrl,
-                thumbUrl = thumbUrl,
-                night = night,
-                unavailableStyle = type.cardSoul(uSp),
-            )
-            Column(
-                Modifier.fillMaxWidth().padding(top = u * 3.3f),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                // A photo-only moment shows no title: the photo is the moment (spec D3).
-                moment.name?.let { name ->
-                    Text(
-                        text = name,
-                        style =
-                            type
-                                .cardTitle(
-                                    uSp,
-                                    cut.first,
-                                    cut.second,
-                                ).copy(lineBreak = LineBreak.Heading, textAlign = TextAlign.Center),
-                        color = colors.ink,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-                if (people != null) {
-                    Box(Modifier.fillMaxWidth().padding(top = u * 1.8f), contentAlignment = Alignment.Center) { people(u) }
-                }
-            }
-            if (leaf != null) {
-                Box(Modifier.fillMaxWidth()) { leaf(u) }
-            }
-        }
-        Column(
-            Modifier
-                .offset(x = u * 2.1f, y = u * 4.3f)
-                .width(u * 6.6f)
-                .clearAndSetSemantics {},
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(text = day.toString(), style = type.cardIndexNumeral(uSp), color = colors.ink)
-            // The start padding balances the small caps' tracking, as the web's `pl-[.14em]` does.
-            Text(
-                text = weekday,
-                style = type.cardIndexDay(uSp),
-                color = colors.ink,
-                modifier = Modifier.padding(top = u * 1.1f, start = u * 0.25f),
-            )
-            StoneSeal(
-                valence = valence,
-                palette = palette,
-                glyph = moment.pebble?.glyph,
-                knockout = colors.stock,
-                modifier = Modifier.padding(top = u * 1.4f).width(u * SEAL_UNITS.getValue(intensity)),
-            )
-        }
-        Rail(
+        Field(
             u = u,
-            time = time,
-            emotionName = if (hasEmotion) emotionName else null,
-            emotionInk = emotionInk,
-            timeStyle = type.cardRail(uSp),
-            emotionStyle = type.cardRailEmotion(uSp),
-            rule = colors.ink2.copy(alpha = RAIL_RULE_ALPHA),
-            ink = colors.ink2,
-            modifier = Modifier.align(Alignment.TopEnd).offset(x = -(u * 3.7f), y = u * 4.7f),
+            ratio = ratio,
+            polarity = polarity,
+            tint = tint,
+            bed = bed,
+            pattern = pattern,
+            ring = ring,
+            photoUrl = photoUrl,
+            thumbUrl = thumbUrl,
+            night = night,
+            unavailableStyle = type.cardSoul(uSp),
+            slip = slip?.let { { it(u) } },
+        )
+        Column(
+            Modifier.fillMaxWidth().padding(top = u * 3.3f),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            // A photo-only moment shows no title: the photo is the moment (spec D3). A slip
+            // already carries the name.
+            moment.name?.takeIf { slip == null }?.let { name ->
+                Text(
+                    text = name,
+                    style =
+                        type
+                            .cardTitle(
+                                uSp,
+                                cut.first,
+                                cut.second,
+                            ).copy(lineBreak = LineBreak.Heading, textAlign = TextAlign.Center),
+                    color = colors.ink,
+                    // The held card's first stop for TalkBack; the Spine clears it into its button.
+                    modifier = Modifier.fillMaxWidth().semantics { heading() },
+                )
+            }
+            if (people != null) {
+                Box(Modifier.fillMaxWidth().padding(top = u * 1.8f), contentAlignment = Alignment.Center) { people(u) }
+            }
+        }
+    }
+    Column(
+        Modifier
+            .offset(x = u * 2.1f, y = u * 4.3f)
+            .width(u * 6.6f)
+            .clearAndSetSemantics {},
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(text = day.toString(), style = type.cardIndexNumeral(uSp), color = colors.ink)
+        // The start padding balances the small caps' tracking, as the web's `pl-[.14em]` does.
+        Text(
+            text = weekday,
+            style = type.cardIndexDay(uSp),
+            color = colors.ink,
+            modifier = Modifier.padding(top = u * 1.1f, start = u * 0.25f),
+        )
+        StoneSeal(
+            valence = valence,
+            palette = palette,
+            glyph = moment.pebble?.glyph,
+            knockout = colors.stock,
+            modifier = Modifier.padding(top = u * 1.4f).width(u * SEAL_UNITS.getValue(intensity)),
         )
     }
+    Rail(
+        u = u,
+        time = time,
+        emotionName = if (hasEmotion) emotionName else null,
+        emotionInk = emotionInk,
+        timeStyle = type.cardRail(uSp),
+        emotionStyle = type.cardRailEmotion(uSp),
+        rule = colors.ink2.copy(alpha = RAIL_RULE_ALPHA),
+        ink = colors.ink2,
+        modifier = Modifier.align(Alignment.TopEnd).offset(x = -(u * 3.7f), y = u * 4.7f),
+    )
 }
 
 /** The tinted mat and the photo in it, at the photo's ratio; "photo unavailable" when it fails. */
@@ -440,6 +495,7 @@ private fun Field(
     thumbUrl: String?,
     night: Boolean,
     unavailableStyle: TextStyle,
+    slip: (@Composable () -> Unit)? = null,
 ) {
     val colors = PebblesTheme.spine.colors
     val context = LocalPlatformContext.current
@@ -465,31 +521,35 @@ private fun Field(
             .background(tint)
             .drawBehind { drawFieldPattern(polarity, pattern) }
             .border(RULE, ring, fieldShape)
-            .padding(u * 1.8f),
+            .padding(if (slip != null) u * SLIP_MAT_UNITS else u * 1.8f),
     ) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .aspectRatio(ratio)
-                .background(bed),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (failed) {
-                Text(
-                    text = stringResource(R.string.path_spine_photo_unavailable),
-                    style = unavailableStyle.copy(textAlign = TextAlign.Center),
-                    color = colors.error,
-                    modifier = Modifier.padding(horizontal = u * 2f),
-                )
-            } else if (request != null) {
-                AsyncImage(
-                    model = request,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    colorFilter = if (night) NIGHT_PHOTO_FILTER else null,
-                    onError = { failed = true },
-                    modifier = Modifier.fillMaxSize(),
-                )
+        if (slip != null) {
+            slip()
+        } else {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(ratio)
+                    .background(bed),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (failed) {
+                    Text(
+                        text = stringResource(R.string.path_spine_photo_unavailable),
+                        style = unavailableStyle.copy(textAlign = TextAlign.Center),
+                        color = colors.error,
+                        modifier = Modifier.padding(horizontal = u * 2f),
+                    )
+                } else if (request != null) {
+                    AsyncImage(
+                        model = request,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        colorFilter = if (night) NIGHT_PHOTO_FILTER else null,
+                        onError = { failed = true },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
         }
     }
@@ -596,8 +656,8 @@ private fun blurRadius(cssBlurPx: Float): Float {
     return ((sigma - SKIA_SIGMA_OFFSET) / SKIA_SIGMA_PER_RADIUS).coerceAtLeast(MIN_BLUR_RADIUS_PX)
 }
 
-/** The field's pattern by valence, clipped by the caller to the field. */
-private fun DrawScope.drawFieldPattern(
+/** The field's pattern by valence, clipped by the caller to the field; the held card's verso prints its mat with it. */
+internal fun DrawScope.drawFieldPattern(
     polarity: ValencePolarity,
     color: Color,
 ) {
