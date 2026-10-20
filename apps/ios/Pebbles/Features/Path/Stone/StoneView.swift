@@ -3,8 +3,8 @@ import SwiftUI
 /// One stone under the lab's light. Bottom to top: the backdrop silhouette
 /// (wobbled for lava, soft for gem and river) filled with the body tone and
 /// painted by the `stone` shader, the carving (outline, veins, fossil, glyph)
-/// shaded by `carve`, and a sheen pool masked by the silhouette. `isFlat` draws the feed rendering instead:
-/// body tone and ink, no shader, no sheen.
+/// shaded by `carve`, and a sheen pool masked by the silhouette. `isFlat`
+/// draws the feed rendering instead: body tone and ink, no shader, no sheen.
 ///
 /// Nothing here reads time. The view redraws when a parameter changes.
 struct StoneView: View {

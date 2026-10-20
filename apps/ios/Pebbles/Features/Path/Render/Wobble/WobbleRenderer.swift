@@ -122,7 +122,7 @@ enum WobbleRenderer {
     static func backdropArt(size: ValenceSizeGroup, polarity: ValencePolarity) -> WobbleBackdropArt? {
         let name = "\(size.rawValue)-\(polarity.rawValue)"
         return memoized(backdropCache, key: name as NSString) {
-            outlineAsset(named: name).flatMap { backdropArt(named: name, fromAsset: $0, wobble: true) }
+            outlineAsset(named: name).flatMap { parsedBackdropArt(named: name, raw: $0, wobble: true) }
         }
     }
 
@@ -131,7 +131,7 @@ enum WobbleRenderer {
     static func softBackdropArt(size: ValenceSizeGroup, polarity: ValencePolarity) -> WobbleBackdropArt? {
         let name = "\(size.rawValue)-\(polarity.rawValue)"
         return memoized(backdropCache, key: "\(name)-soft" as NSString) {
-            outlineAsset(named: name).flatMap { backdropArt(named: name, fromAsset: $0, wobble: false) }
+            outlineAsset(named: name).flatMap { parsedBackdropArt(named: name, raw: $0, wobble: false) }
         }
     }
 
@@ -144,7 +144,7 @@ enum WobbleRenderer {
         return raw
     }
 
-    private static func backdropArt(named name: String, fromAsset raw: String, wobble: Bool) -> WobbleBackdropArt? {
+    private static func parsedBackdropArt(named name: String, raw: String, wobble: Bool) -> WobbleBackdropArt? {
         guard let art = backdropArt(fromAsset: raw, wobble: wobble) else {
             logger.error("wobble backdrop: could not parse outline asset \(name, privacy: .public).svg")
             return nil
@@ -214,7 +214,7 @@ enum WobbleRenderer {
 
     /// First `name="…"` attribute value in `svg`. The word boundary keeps
     /// `d=` from matching `id=`.
-    private static func attribute(_ name: String, in svg: String) -> String? {
+    static func attribute(_ name: String, in svg: String) -> String? {
         guard
             let regex = try? NSRegularExpression(pattern: "(?<![\\w-])\(name)=\"([^\"]*)\""),
             let match = regex.firstMatch(in: svg, range: NSRange(svg.startIndex..., in: svg)),

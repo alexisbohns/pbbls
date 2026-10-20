@@ -52,7 +52,7 @@ struct StoneMaterialTests {
         #expect(StoneLight(pointingTo: .zero, elevationDegrees: 40).direction == StoneLight.rest.direction)
     }
 
-    @Test("starting tables are the lab's picks (#1097)")
+    @Test("starting tables match spec §B3.3")
     func startingTables() {
         #expect(StoneMaterial.starting(for: .lowlight) == StoneMaterial(
             kind: .lava, scale: 0.07, relief: 3.6, contrast: 1, sheen: 0.05,

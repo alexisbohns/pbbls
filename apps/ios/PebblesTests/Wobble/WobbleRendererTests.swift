@@ -124,7 +124,7 @@ struct WobbleRendererTests {
         let soft = try #require(WobbleRenderer.softBackdropArt(size: .medium, polarity: .neutral))
         let wobbled = try #require(WobbleRenderer.backdropArt(size: .medium, polarity: .neutral))
 
-        let d = try #require(Self.attribute("d", in: raw))
+        let d = try #require(WobbleRenderer.attribute("d", in: raw))
         let parsed = try #require(SVGPathParser.parse(d))
         let step = WobbleParams.scaled(for: soft.viewBox.size).flattenStep
         let expected = WobblePathFlattener.flatten(parsed, step: step)
@@ -143,13 +143,6 @@ struct WobbleRendererTests {
         let second = try #require(WobbleRenderer.softBackdropArt(size: .large, polarity: .highlight))
         #expect(first === second)
         #expect(first !== WobbleRenderer.backdropArt(size: .large, polarity: .highlight))
-    }
-
-    private static func attribute(_ name: String, in svg: String) -> String? {
-        guard let regex = try? NSRegularExpression(pattern: "(?<![\\w-])\(name)=\"([^\"]*)\""),
-              let match = regex.firstMatch(in: svg, range: NSRange(svg.startIndex..., in: svg)),
-              let range = Range(match.range(at: 1), in: svg) else { return nil }
-        return String(svg[range])
     }
 
     private static func points(of path: CGPath) -> [CGPoint] {

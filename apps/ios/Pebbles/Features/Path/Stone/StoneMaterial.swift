@@ -51,8 +51,7 @@ struct StoneMaterial: Equatable, Codable {
          Float(rimWidth), Float(rimStrength)]
     }
 
-    /// Starting values for #1097 (spec §B3.3), replaced by the lab's Copy
-    /// output in the next commit.
+    /// Spec §B3.3 starting values, 2026-10-21 (#1097).
     static func starting(for polarity: ValencePolarity) -> StoneMaterial {
         switch polarity {
         case .lowlight:
