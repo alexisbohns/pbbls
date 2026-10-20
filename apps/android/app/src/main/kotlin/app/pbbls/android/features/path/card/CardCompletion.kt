@@ -49,7 +49,10 @@ import app.pbbls.android.core.ui.render.stone.Frames
 import app.pbbls.android.core.ui.render.stone.StoneGeometry
 import app.pbbls.android.core.ui.render.stone.StoneMotion
 import app.pbbls.android.core.ui.render.stone.rememberStoneOutline
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
 
 /**
@@ -243,7 +246,15 @@ internal class CardCompletionState(
         val box = inBox(box) ?: return
         val view = inBox(view) ?: return
         val covered = (box.bottom - view.bottom).coerceAtLeast(0f)
-        placeRequester.bringIntoView(Rect(0f, 0f, place.size.width.toFloat(), place.size.height + covered))
+        try {
+            placeRequester.bringIntoView(Rect(0f, 0f, place.size.width.toFloat(), place.size.height + covered))
+        } catch (e: CancellationException) {
+            // Only our own cancellation may end the print here. A bring-into-view interrupted
+            // by another scroll is swallowed by Compose today; were a later version to let it
+            // escape, the print's effect would end with the card unprinted and the overlay
+            // still eating input. The check after it decides, print or crossfade.
+            currentCoroutineContext().ensureActive()
+        }
     }
 
     /** The card's offset from its resting bounds at [rise]: at the place through the print, home over the rise. */
@@ -290,7 +301,8 @@ internal class CardCompletionState(
  * nothing to TalkBack and takes no focus, so nothing on it can be pressed under the card. The card lays out at rest the whole time and is drawn
  * away from it, so its resting bounds are always known and the page's place is read
  * in the same box: no frame shows the card at rest before the print, and the place's
- * bounds live as long as the page does. Input is held for the print's length.
+ * bounds live as long as the page does. Input is held for the print's length, and for the
+ * scroll that first brings the place into view.
  *
  * Shaped as a host over a state object rather than an overlay taking the place's bounds:
  * the bounds are the place's live coordinates, the timeline is the caller's to play (and

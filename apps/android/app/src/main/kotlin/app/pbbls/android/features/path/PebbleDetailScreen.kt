@@ -40,6 +40,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -445,25 +446,36 @@ private fun PageColumn(content: @Composable ColumnScope.() -> Unit) {
  * left: at its top when it was scarcely taller than the screen, and with a bare moment's
  * place half under the bar when the card prints into it.
  *
- * So the reader's position is held apart from the value, and is what is saved: a clamp
- * (the value pinned at a reach that shrank below the position) leaves it as it was, and
- * any other change (a scroll, a smaller reach above the value) takes it. While the value is
- * pinned, a reach growing back (the bar returning, a page that lays out short for a frame)
- * returns the value to the position.
+ * So the reader's position is held apart from the value, and is what is saved. A clamp
+ * that comes with a grown viewport (the bar going, or the first layout of a restored page,
+ * grown from nothing) pins the value and leaves the position as it was; while pinned, a
+ * reach growing back (the bar returning, a restored page laid out short for a frame)
+ * returns the value toward the position, frame by frame as the transition resizes the
+ * page, until it is reached. Any other change takes the position: a scroll, and a
+ * clamp by content that really got shorter (text edited away, a photo removed), so a later
+ * longer page never moves the reader without a touch.
  */
 @Composable
-private fun rememberHeldScrollState(): ScrollState {
+internal fun rememberHeldScrollState(): ScrollState {
     var held by rememberSaveable { mutableIntStateOf(0) }
-    val scroll = remember { ScrollState(held) }
+    val scroll = remember { ScrollState(Snapshot.withoutReadObservation { held }) }
     LaunchedEffect(scroll) {
         var pinnedAt = NOT_PINNED
-        snapshotFlow { scroll.value to scroll.maxValue }.collect { (value, reach) ->
+        var lastViewport = 0
+        snapshotFlow { Triple(scroll.value, scroll.maxValue, scroll.viewportSize) }.collect { (value, reach, viewport) ->
+            val viewportGrew = viewport > lastViewport
+            lastViewport = viewport
             when {
-                value == reach && value < held -> pinnedAt = value
-                value == pinnedAt && reach > value -> {
-                    pinnedAt = NOT_PINNED
-                    scroll.dispatchRawDelta((min(held, reach) - value).toFloat())
+                // Pinned and untouched: follow the reach back toward the position. Pinned still
+                // until it is reached, as the viewport shrinks back over a transition's frames.
+                pinnedAt != NOT_PINNED && value == pinnedAt -> {
+                    if (reach > value) {
+                        val to = min(held, reach)
+                        scroll.dispatchRawDelta((to - value).toFloat())
+                        pinnedAt = if (to < held) to else NOT_PINNED
+                    }
                 }
+                value == reach && value < held && viewportGrew -> pinnedAt = value
                 else -> {
                     pinnedAt = NOT_PINNED
                     held = value

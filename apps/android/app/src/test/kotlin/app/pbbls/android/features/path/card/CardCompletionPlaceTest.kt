@@ -84,6 +84,9 @@ class CardCompletionPlaceTest {
 
         assertFalse(completion.crossfade)
         assertTrue(completion.placeShown())
+        // Scrolled no further than that: the place's foot at the view's foot.
+        val placeFoot = with(compose.density) { (600.dp + 400.dp).toPx() }
+        assertEquals("minimal scroll", placeFoot - scroll.viewportSize, scroll.value.toFloat(), 1f)
     }
 
     @Test
