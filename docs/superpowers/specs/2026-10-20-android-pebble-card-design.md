@@ -132,15 +132,20 @@ inner stock panel. From top to bottom:
      equal tracking after every character, so the seam is an ordinary gap.
      Never squash glyphs. If 2 do not fit at 8.5 sp, step down to 8, then 7.5;
      if 2 still do not fit at 7.5, set the name once plus a dot.
-   - **Ink:** the emotion's dark tone on paper and its light tone at Night,
-     multiplied into the panel. Its restrained texture is a pre-baked tileable
-     noise image (≤ 256 px, in `res/drawable-nodpi`) that gives fine pits and
-     density drifting 0.83–1. The mask rides **in the paint**
-     (`ComposeShader(ink, noise BitmapShader, DST_IN)`), never as a `DstIn`
-     draw inside an offscreen layer: HWUI ignored that on a Pixel 8 while
-     Robolectric honoured it (see `apps/android/CLAUDE.md`, Path rendering).
-     Each stamp offsets the noise by a hash of its domain id, so no two stamps
-     share a pattern.
+   - **Ink:** the emotion's dark tone on paper and its light tone at Night.
+     Its restrained texture (fine pits, density drifting 0.83–1) is a
+     deterministic alpha mask generated in code (`PostmarkNoise`). It is
+     drawn **over** the stamp as paper-coloured speckles, stretched to the
+     disc and clipped to it, in plain SrcOver. Over ink it reads as pits and
+     thinning; over the bare panel it is invisible, because it is the panel's
+     own colour. There is no `DstIn` anywhere: HWUI ignored one inside an
+     offscreen layer on a Pixel 8 while Robolectric honoured it (see
+     `apps/android/CLAUDE.md`, Path rendering). Each stamp seeds the noise
+     with a hash of its domain id, so no two stamps share a pattern.
+   - **Ring type and font scale:** the ring is measured at font scale 1. It is
+     decoration inside a fixed stamp, and the domain names are also read by
+     TalkBack from the verso's list. This is a deliberate exception to
+     resizable text.
    - There is no rotation, no shadow and no click.
    - Contrast stays WCAG AA at the faintest density (the mocks estimate 5.5:1
      on paper; this must be measured on a device).
