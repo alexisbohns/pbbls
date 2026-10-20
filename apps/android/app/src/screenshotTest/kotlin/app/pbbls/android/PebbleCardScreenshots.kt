@@ -266,6 +266,14 @@ fun PebbleCardF1VersoNight() {
     PebblesTheme { CardOnGround(PebbleCardFixtures.f1, CardFaceTarget.PEBBLE, PebbleCardFixtures.ROOFTOP_RATIO) }
 }
 
+/** F1's recto in French: the locale's full dateline, "jeudi 8 octobre 2026 · 21:00". */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, locale = "fr")
+@Composable
+fun PebbleCardF1RectoFrenchLight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f1, CardFaceTarget.MOMENT, PebbleCardFixtures.ROOFTOP_RATIO) }
+}
+
 /** F1's verso in French: "Temps fort de mon mois", "Retourner". */
 @PreviewTest
 @Preview(showBackground = true, widthDp = 412, locale = "fr")
@@ -363,6 +371,7 @@ private fun CardOnGround(
             soulsById = PebbleCardFixtures.soulsById,
             domains = PebbleCardFixtures.domains,
             initialFace = face,
+            zone = PebbleCardFixtures.zone,
         )
     }
 }

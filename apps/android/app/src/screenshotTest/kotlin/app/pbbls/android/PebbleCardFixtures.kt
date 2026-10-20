@@ -14,6 +14,7 @@ import app.pbbls.android.core.model.SoulRef
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Visibility
 import java.time.OffsetDateTime
+import java.time.ZoneId
 
 /**
  * The pebble card's preview data: the 18 life domains with their real seed glyphs
@@ -900,6 +901,9 @@ internal object PebbleCardFixtures {
 
     /** A fake id: the gratitude palette has no seeded emotion row in the Spine fixture. */
     private val GRATITUDE = EmotionRef(id = "c5d2a1f0-5f0e-4b8e-9a51-6f1f2f6b7a10", slug = "grateful", name = "Gratitude")
+
+    /** The fixtures' zone: their times are written at +02:00, so CI renders 9:00 PM wherever it runs. */
+    val zone: ZoneId = ZoneId.of("Europe/Paris")
 
     /** The photo ratios the previews prime: the rooftop is 16 : 9, the seawall 2 : 3. */
     const val ROOFTOP_RATIO = 1200f / 675f

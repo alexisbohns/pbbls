@@ -309,7 +309,8 @@ internal fun SpineCardShell(
  * in card units [u]. [leaf] lays out under the legend, across the border's width
  * rather than the legend's column (the held card's words). [slip] stands in the
  * field's mat in place of the photo (the held card's photo-less recto), and then
- * carries the name, so the legend does not repeat it.
+ * carries the name, so the legend does not repeat it. [zone] is where the index's day
+ * falls; the held card passes its own.
  */
 @Composable
 internal fun SpineCardFace(
@@ -326,6 +327,7 @@ internal fun SpineCardFace(
     modifier: Modifier = Modifier,
     leaf: (@Composable (u: Dp) -> Unit)? = null,
     slip: (@Composable (u: Dp) -> Unit)? = null,
+    zone: ZoneId = ZoneId.systemDefault(),
 ) {
     val colors = PebblesTheme.spine.colors
 
@@ -357,6 +359,7 @@ internal fun SpineCardFace(
                     // Over a leaf, the legend's foot is the score's head room (the mock's `.cf` 4.4u).
                     bottom = if (leaf != null) u * LEGEND_TO_LEAF_UNITS else u * 6.2f,
                     slip = slip,
+                    zone = zone,
                 )
             }
             if (leaf != null) {
@@ -382,6 +385,7 @@ private fun BoxScope.Print(
     people: (@Composable (u: Dp) -> Unit)?,
     bottom: Dp,
     slip: (@Composable (u: Dp) -> Unit)?,
+    zone: ZoneId,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
@@ -397,7 +401,7 @@ private fun BoxScope.Print(
     val bed = remember(spot, colors) { StoneTones.mixOklab(spot, PHOTO_BED, colors.stock) }
     val pattern = spot.copy(alpha = colors.patK)
     val ring = spot.copy(alpha = RING_ALPHA)
-    val day = remember(moment.happenedAt) { moment.happenedAt.atZoneSameInstant(ZoneId.systemDefault()).dayOfMonth }
+    val day = remember(moment.happenedAt, zone) { moment.happenedAt.atZoneSameInstant(zone).dayOfMonth }
     val cut = EntryTypes.cardTitleCut(polarity)
     val hasEmotion = moment.pebble != null && emotionName.isNotEmpty()
     val uSp = with(density) { u.toSp().value }

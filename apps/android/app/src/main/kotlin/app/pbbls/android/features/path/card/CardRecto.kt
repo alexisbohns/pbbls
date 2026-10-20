@@ -67,6 +67,7 @@ private val SLIP_FOOT = 1.dp
  *
  * @param u the card unit, `width / 70`.
  * @param ratio the photo's width / height; null until probed (the field is square).
+ * @param zone where the day, the time and the dateline fall.
  */
 @Composable
 internal fun CardRecto(
@@ -78,12 +79,12 @@ internal fun CardRecto(
     thumbUrl: String?,
     soulsById: Map<String, SoulWithGlyph>,
     modifier: Modifier = Modifier,
+    zone: ZoneId = ZoneId.systemDefault(),
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val density = LocalDensity.current
     val locale = LocalConfiguration.current.locales[0]
-    val zone = ZoneId.systemDefault()
     val moment = remember(detail) { detail.toPathMoment() }
     val pebble = detail.pebble
 
@@ -122,6 +123,7 @@ internal fun CardRecto(
         weekday = weekday,
         time = time,
         emotionName = emotionName,
+        zone = zone,
         modifier = modifier.semantics { isTraversalGroup = true },
         people =
             if (line.named.isEmpty()) {

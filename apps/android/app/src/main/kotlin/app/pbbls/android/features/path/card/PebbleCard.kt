@@ -27,6 +27,7 @@ import app.pbbls.android.core.ui.render.stone.BLANK_STONE_PALETTE
 import app.pbbls.android.core.ui.render.stone.StoneTones
 import app.pbbls.android.core.ui.render.stone.toStonePalette
 import app.pbbls.android.features.path.spine.SpineCardShell
+import java.time.ZoneId
 
 /** The band's paper: the spot into the stock, 19 % on paper and 24 % at Night (back-token3 `--band`). */
 private const val BAND_PAPER = 0.19f
@@ -50,6 +51,7 @@ private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
  * @param soulsById the souls cache, for the recto's marks.
  * @param domains the reference domains, for the postmarks' glyphs.
  * @param initialFace the face showing first: [CardFaceTarget.MOMENT] is the recto.
+ * @param zone where the recto's day, time and dateline fall, as `SpineWeek` takes its own.
  */
 @Composable
 internal fun PebbleCard(
@@ -62,6 +64,7 @@ internal fun PebbleCard(
     domains: List<Domain>,
     modifier: Modifier = Modifier,
     initialFace: CardFaceTarget = CardFaceTarget.MOMENT,
+    zone: ZoneId = ZoneId.systemDefault(),
 ) {
     val pebble = requireNotNull(detail.pebble) { "only a pebble has a card" }
     var face by rememberSaveable { mutableStateOf(initialFace) }
@@ -82,7 +85,7 @@ internal fun PebbleCard(
                 FaceArea(
                     face = face,
                     u = u,
-                    recto = { CardRecto(detail, palette, u, ratio, photoUrl, thumbUrl, soulsById) },
+                    recto = { CardRecto(detail, palette, u, ratio, photoUrl, thumbUrl, soulsById, zone = zone) },
                     verso = { bandHeight, measureOnly -> CardVerso(pebble, palette, u, domains, bandHeight, measureOnly = measureOnly) },
                     band = {
                         CollectionBand(
