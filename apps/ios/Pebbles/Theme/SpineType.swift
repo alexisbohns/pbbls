@@ -102,13 +102,13 @@ extension SpineType.Style {
 
     static let kicker = Self(size: 12, weight: 600, trackingEm: 0.2, features: [.smallCaps], scaling: .text(.caption))
     static let title = Self(size: 40, weight: 300, trackingEm: -0.026, features: [.lining], lineHeight: 40.8,
-                             scaling: .text(.largeTitle))
+                            scaling: .text(.largeTitle))
     static let summary = Self(size: 18, weight: 380, italic: true, scaling: .text(.body))
     static let sectionLabel = Self(size: 11.5, weight: 600, trackingEm: 0.2, features: [.smallCaps], scaling: .text(.caption2))
     /// The masthead's way back a week: the body's 400; only the number is bold.
     static let masthead = Self(size: 11.5, weight: 400, trackingEm: 0.18, features: [.smallCaps], scaling: .text(.caption2))
     static let mastheadNumber = Self(size: 11.5, weight: 650, trackingEm: 0.18, features: [.smallCaps],
-                                      scaling: .text(.caption2))
+                                     scaling: .text(.caption2))
     static let personName = Self(size: 15, weight: 600, trackingEm: 0.1, features: [.smallCaps], scaling: .text(.subheadline))
     static let dayLetter = Self(size: 9.5, weight: 600, features: [.smallCaps], lineHeight: 12, scaling: .text(.caption2))
     static let contentsDay = Self(size: 10.5, weight: 600, trackingEm: 0.18, features: [.smallCaps], scaling: .text(.caption2))
@@ -124,7 +124,7 @@ extension SpineType.Style {
     static let mouthLabel = Self(size: 12, weight: 600, trackingEm: 0.18, features: [.smallCaps], scaling: .text(.caption))
     static let mouthLine = Self(size: 16, weight: 380, italic: true, scaling: .text(.body))
     static let rollNumeral = Self(size: 14, weight: 600, trackingEm: 0.1, features: [.smallCaps, .lining],
-                                   scaling: .text(.footnote))
+                                  scaling: .text(.footnote))
     static let still = Self(size: 15, weight: 380, italic: true, scaling: .text(.subheadline))
 
     // MARK: - Ranks that take a name's cut
@@ -187,7 +187,7 @@ extension SpineType.Style {
     static let cardFooterNote = Self(size: 12.5, weight: 380, italic: true, scaling: .text(.caption))
     static let cardTurnTarget = Self(size: 13, weight: 380, italic: true, scaling: .text(.footnote))
     static let cardLeafDateline = Self(size: 10.5, weight: 600, trackingEm: 0.18, features: [.smallCaps, .lining],
-                                        scaling: .text(.caption2))
+                                       scaling: .text(.caption2))
     static let cardLeafBody = Self(size: 17, weight: 380, lineHeight: 27, scaling: .text(.body))
     static let cardLockupSpan = Self(size: 10, weight: 650, trackingEm: 0.22, features: [.smallCaps], scaling: .text(.caption2))
     static let cardEmotion = Self(size: 20, weight: 400, scaling: .text(.title3))
