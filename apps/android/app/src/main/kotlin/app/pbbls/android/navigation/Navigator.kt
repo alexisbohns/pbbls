@@ -38,11 +38,21 @@ class Navigator(
      * make back walk through every soul looked at. On a phone the detail covers
      * its list, so only the push branch is reachable there. A tab root is
      * never replaced, whatever its type.
+     *
+     * The open moment pressed again is a new [PebblesKey.PebbleDetail.request]
+     * (#1135): the key would otherwise equal the one on top, and the card,
+     * turned by hand since, would not turn back to the face pressed.
      */
     fun navigateToDetail(key: PebblesKey) {
         val stack = state.currentStack
-        if (stack.size > 1 && stack.last()::class == key::class) {
-            stack[stack.lastIndex] = key
+        val last = stack.last()
+        if (stack.size > 1 && last::class == key::class) {
+            stack[stack.lastIndex] =
+                if (key is PebblesKey.PebbleDetail && last is PebblesKey.PebbleDetail && last.momentId == key.momentId) {
+                    key.copy(request = last.request + 1)
+                } else {
+                    key
+                }
         } else {
             navigate(key)
         }
@@ -65,8 +75,8 @@ class Navigator(
     }
 
     /**
-     * Closes the open detail of [momentId] whatever face it opened on; [closeDetail]
-     * compares the whole key, face included.
+     * Closes the open detail of [momentId] whatever face it opened on and however
+     * often it was pressed; [closeDetail] compares the whole key, face and request included.
      */
     fun closeMomentDetail(momentId: String) {
         val stack = state.currentStack

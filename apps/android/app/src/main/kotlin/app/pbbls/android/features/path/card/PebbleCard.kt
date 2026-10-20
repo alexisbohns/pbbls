@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -81,7 +82,7 @@ private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
  * The turn (pebble card spec §Behaviour, [CardTurnState]): the face area alone rotates on
  * Y inside the still shell, by the footer's button, a horizontal drag toward the start
  * edge (a flick carries it, a release short of the half reverts), or a changed
- * [requestedFace]; the face in front swaps at 90°, edge-on. For TalkBack the footer's
+ * request ([requestedFace], [faceRequest]); the face in front swaps at 90°, edge-on. For TalkBack the footer's
  * button is the turn: a custom action on the card would sit on a node TalkBack never
  * focuses. Under reduced motion the faces crossfade, and only the incoming one speaks.
  * While it turns, the face shrinks by exactly what perspective adds to its near edge, so
@@ -98,10 +99,12 @@ private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
  * @param thumbUrl the signed thumb, the photo's placeholder.
  * @param soulsById the souls cache, for the recto's marks.
  * @param domains the reference domains, for the postmarks' glyphs.
- * @param requestedFace the face showing first, and the face the card turns to when it
- *   changes after: beside Path the detail entry stays while its key's face changes (a
- *   stone pressed after its card). Only a change counts, so pressing the face already
- *   asked for again does nothing, even on a card turned by hand since.
+ * @param requestedFace the face showing first, and the face the card turns to on each new
+ *   request after: beside Path the detail entry stays while its key changes (a stone
+ *   pressed after its card, or either pressed again).
+ * @param faceRequest which press asked for [requestedFace]. A new one is a new request even
+ *   for the same face, so pressing the card again turns back a card turned by hand since
+ *   to the recto; a request for the face already showing turns nothing.
  * @param zone where the recto's day, time and dateline fall, as `SpineWeek` takes its own.
  * @param turnProgressOverride a turn frozen part way, for previews; it shows the rotation
  *   even where previews report reduced motion.
@@ -117,6 +120,7 @@ internal fun PebbleCard(
     domains: List<Domain>,
     modifier: Modifier = Modifier,
     requestedFace: CardFace = CardFace.RECTO,
+    faceRequest: Int = 0,
     zone: ZoneId = ZoneId.systemDefault(),
     turnProgressOverride: Float? = null,
 ) {
@@ -130,14 +134,16 @@ internal fun PebbleCard(
         }
     // Saved with the face, so a restored card turned by hand is not turned back to the request.
     var answered by rememberSaveable { mutableStateOf(requestedFace) }
-    LaunchedEffect(requestedFace) {
-        if (requestedFace != answered) {
+    var answeredRequest by rememberSaveable { mutableIntStateOf(faceRequest) }
+    LaunchedEffect(requestedFace, faceRequest) {
+        if (requestedFace != answered || faceRequest != answeredRequest) {
             // A turn or a drag in flight finishes first; then the card turns if it will not land there.
             turn.awaitFree()
             turn.turnTo(requestedFace, reduceMotion)
             // Answered only once acted on: a request still waiting when the state is saved is not
             // saved as answered, so the restored card takes it up again.
             answered = requestedFace
+            answeredRequest = faceRequest
         }
     }
     val colors = PebblesTheme.spine.colors

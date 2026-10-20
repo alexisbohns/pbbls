@@ -98,6 +98,13 @@ sealed interface PebblesKey : NavKey {
         val momentId: String,
         /** The face the card opens on. Defaulted so a stack saved before faces existed still decodes, as the recto. */
         val face: CardFace = CardFace.RECTO,
+        /**
+         * Which press of this moment asked for [face]: beside Path, pressing the open
+         * moment's card or stone again bumps it ([Navigator.navigateToDetail]), so a press
+         * asking for the face already asked for is still a new request, and the card turns
+         * back to it if it was turned by hand since. Defaulted so an older stack still decodes.
+         */
+        val request: Int = 0,
     ) : PebblesKey,
         BarKey
 

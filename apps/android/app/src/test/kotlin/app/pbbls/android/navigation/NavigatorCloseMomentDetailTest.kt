@@ -8,8 +8,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
- * A detail key carries the face it opened on, so [Navigator.closeDetail], which compares
- * whole keys, would miss a verso. [Navigator.closeMomentDetail] closes by moment id.
+ * A detail key carries the face it opened on and its request, so [Navigator.closeDetail],
+ * which compares whole keys, would miss a verso or a moment pressed again. [Navigator.closeMomentDetail] closes by moment id.
  */
 class NavigatorCloseMomentDetailTest {
     private fun navigatorOn(vararg path: PebblesKey): Pair<Navigator, NavigationState> {

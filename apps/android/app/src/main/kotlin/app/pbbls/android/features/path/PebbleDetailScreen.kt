@@ -88,6 +88,8 @@ import java.time.ZoneId
  * @param requestedFace The face the held card opens on: the stone pressed on the Path opens
  *   the verso, the card the recto. Beside Path the entry stays while the face changes
  *   (one content key per moment), and the card turns to the new one.
+ * @param faceRequest Which press asked for [requestedFace]; a new one with the same face is
+ *   a new request, which turns back a card turned by hand since.
  * @param showBack False beside Path on a large screen (#940): the list is the
  *   way back, and system back still pops.
  */
@@ -96,6 +98,7 @@ fun PebbleDetailScreen(
     momentId: String,
     modifier: Modifier = Modifier,
     requestedFace: CardFace = CardFace.RECTO,
+    faceRequest: Int = 0,
     onEditMoment: () -> Unit = {},
     onEditPebble: () -> Unit = {},
     onMomentDeleted: () -> Unit = {},
@@ -192,6 +195,7 @@ fun PebbleDetailScreen(
         modifier = modifier,
         onComplete = onCompleteRequested,
         requestedFace = requestedFace,
+        faceRequest = faceRequest,
     )
 
     if (pendingDelete && detail != null) {
@@ -221,6 +225,7 @@ fun PebbleDetailScreen(
  * @param domains the reference domains, for the verso's postmarks.
  * @param showBack False beside Path on a large screen (#940).
  * @param requestedFace the face the held card opens on, and turns to when it changes.
+ * @param faceRequest which press asked for [requestedFace]; a new one is a new request.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -246,6 +251,7 @@ fun PebbleDetailContent(
     /** Where the card's day, time and dateline fall; previews pin it. */
     zone: ZoneId = ZoneId.systemDefault(),
     requestedFace: CardFace = CardFace.RECTO,
+    faceRequest: Int = 0,
 ) {
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
 
@@ -291,6 +297,7 @@ fun PebbleDetailContent(
                             soulsById = soulsById,
                             domains = domains,
                             requestedFace = requestedFace,
+                            faceRequest = faceRequest,
                             zone = zone,
                         )
                     }

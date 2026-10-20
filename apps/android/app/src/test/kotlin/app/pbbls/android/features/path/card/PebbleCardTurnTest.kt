@@ -4,6 +4,7 @@ import android.app.Application
 import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -88,8 +89,11 @@ class PebbleCardTurnTest {
         Settings.Global.putFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
     }
 
-    private fun setCard(requested: () -> CardFace = { CardFace.RECTO }) {
-        compose.setContent { Card(requested()) }
+    private fun setCard(
+        request: () -> Int = { 0 },
+        requested: () -> CardFace = { CardFace.RECTO },
+    ) {
+        compose.setContent { Card(requested(), request()) }
     }
 
     @Test
@@ -158,6 +162,41 @@ class PebbleCardTurnTest {
         compose.waitForIdle()
 
         compose.onNode(versoHeading).assertIsDisplayed()
+    }
+
+    @Test
+    fun `the face asked for again turns back a card turned by hand`() {
+        var request by mutableIntStateOf(0)
+        setCard(request = { request })
+        compose.onNodeWithContentDescription(context.getString(R.string.card_turn_action_to_pebble)).performClick()
+        compose.waitForIdle()
+        compose.onNode(versoHeading).assertIsDisplayed()
+
+        // The card pressed again on the Path: the recto again, as a new request.
+        request = 1
+        compose.waitForIdle()
+
+        compose.onNode(versoHeading).assertDoesNotExist()
+        compose.onNodeWithContentDescription(context.getString(R.string.card_turn_action_to_pebble)).assertExists()
+    }
+
+    @Test
+    fun `a new request for the face already showing turns nothing`() {
+        var request by mutableIntStateOf(0)
+        setCard(request = { request })
+        compose.mainClock.autoAdvance = false
+
+        compose.runOnUiThread {
+            request = 1
+            Snapshot.sendApplyNotifications()
+        }
+        compose.mainClock.advanceTimeByFrame()
+        compose.mainClock.advanceTimeBy(TURN_MS / 2L)
+
+        // No turn ran: the recto was never left, not even part way.
+        compose.onNode(versoHeading).assertDoesNotExist()
+        compose.onNodeWithContentDescription(context.getString(R.string.card_turn_action_to_pebble)).assertExists()
+        compose.mainClock.autoAdvance = true
     }
 
     @Test
@@ -290,7 +329,10 @@ class PebbleCardTurnTest {
     }
 
     @Composable
-    private fun Card(requested: CardFace) {
+    private fun Card(
+        requested: CardFace,
+        request: Int = 0,
+    ) {
         PebblesTheme {
             PebbleCard(
                 detail = detail,
@@ -301,6 +343,7 @@ class PebbleCardTurnTest {
                 soulsById = emptyMap(),
                 domains = emptyList(),
                 requestedFace = requested,
+                faceRequest = request,
                 zone = ZoneOffset.UTC,
             )
         }
