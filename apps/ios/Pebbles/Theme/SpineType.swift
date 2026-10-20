@@ -92,6 +92,8 @@ enum SpineType {
     }
 }
 
+// The rank table keeps one rank per line, so it reads as the spec's table.
+// swiftlint:disable line_length
 /// The ranks live on `Style`, so a view writes `.spineType(.kicker)`.
 extension SpineType.Style {
     private static let card = SpineType.Scaling.card(cap: SpineType.cardCap)
@@ -212,3 +214,4 @@ extension SpineType.Style {
         Self(size: size, weight: 650, features: [.lining], scaling: .none)
     }
 }
+// swiftlint:enable line_length

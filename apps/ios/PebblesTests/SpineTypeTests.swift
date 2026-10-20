@@ -92,7 +92,8 @@ struct SpineTypeTests {
 
     @Test("lockupWord is the only Caveat rank; postmarkRing the only unscaled one")
     func singletons() {
-        let caveat = Set(Self.rows.filter { $0.actual.face == .caveat }.map { String($0.name.split(separator: "·")[0]) })
+        let caveat = Set(Self.rows.filter { $0.actual.face == .caveat }
+            .map { String($0.name.split(separator: "·")[0]) })
         let unscaled = Set(Self.rows.filter { $0.actual.scaling == .none }.map { $0.name })
         #expect(caveat == ["lockupWord"])
         #expect(unscaled == ["postmarkRing"])

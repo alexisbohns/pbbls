@@ -23,16 +23,16 @@ struct SpineTypeResolveTests {
 
     @Test("kicker is 12 pt at .large and follows caption up to .accessibility2")
     func kickerScales() {
-        #expect(size(SpineType.Style.kicker, .large) == 12)
+        #expect(size(.kicker, .large) == 12)
         let expected = UIFontMetrics(forTextStyle: .caption1).scaledValue(for: 12, compatibleWith: ax2Traits)
-        #expect(size(SpineType.Style.kicker, .accessibility2) == expected)
+        #expect(size(.kicker, .accessibility2) == expected)
         #expect(expected > 12)
     }
 
     @Test(".accessibility5 resolves to the .accessibility2 size")
     func textCapsAtAx2() {
-        #expect(size(SpineType.Style.kicker, .accessibility5) == size(SpineType.Style.kicker, .accessibility2))
-        #expect(size(SpineType.Style.cardLeafBody, .accessibility5) == size(SpineType.Style.cardLeafBody, .accessibility2))
+        #expect(size(.kicker, .accessibility5) == size(.kicker, .accessibility2))
+        #expect(size(.cardLeafBody, .accessibility5) == size(.cardLeafBody, .accessibility2))
     }
 
     @Test("card ranks stop at ×1.3")
@@ -47,33 +47,33 @@ struct SpineTypeResolveTests {
 
     @Test("postmarkRing never scales", arguments: DynamicTypeSize.allCases)
     func ringIsFixed(dynamicType: DynamicTypeSize) {
-        #expect(size(SpineType.Style.postmarkRing(8), dynamicType) == 8)
+        #expect(size(.postmarkRing(8), dynamicType) == 8)
     }
 
     @Test("Bold Text adds 100 to the axis and caps at 800")
     func boldText() {
-        #expect(SpineType.resolve(SpineType.Style.kicker, dynamicTypeSize: .large, legibilityWeight: .bold).weight == 700)
-        #expect(SpineType.resolve(SpineType.Style.kicker, dynamicTypeSize: .large, legibilityWeight: .regular).weight == 600)
+        #expect(SpineType.resolve(.kicker, dynamicTypeSize: .large, legibilityWeight: .bold).weight == 700)
+        #expect(SpineType.resolve(.kicker, dynamicTypeSize: .large, legibilityWeight: .regular).weight == 600)
         var heavy = SpineType.Style.kicker
         heavy.weight = 750
         #expect(SpineType.resolve(heavy, dynamicTypeSize: .large, legibilityWeight: .bold).weight == 800)
-        let resolved = SpineType.resolve(SpineType.Style.kicker, dynamicTypeSize: .large, legibilityWeight: .bold)
+        let resolved = SpineType.resolve(.kicker, dynamicTypeSize: .large, legibilityWeight: .bold)
         #expect(wght(resolved.uiFont) == 700)
     }
 
     @Test("tracking is em × resolved size; line spacing is the line height less the font's")
     func trackingAndLineSpacing() {
-        let kicker = SpineType.resolve(SpineType.Style.kicker, dynamicTypeSize: .large, legibilityWeight: nil)
+        let kicker = SpineType.resolve(.kicker, dynamicTypeSize: .large, legibilityWeight: nil)
         #expect(abs(kicker.tracking - 2.4) < 0.0001)
         #expect(kicker.lineSpacing == 0)
-        let title = SpineType.resolve(SpineType.Style.title, dynamicTypeSize: .large, legibilityWeight: nil)
+        let title = SpineType.resolve(.title, dynamicTypeSize: .large, legibilityWeight: nil)
         #expect(abs(title.lineSpacing - (40.8 - title.uiFont.lineHeight)) < 0.0001)
         #expect(title.lineSpacing < 0, "title asks for less than Ysabeau's natural 1.343 em")
     }
 
     @Test("Bold Text never pushes Caveat past its axis maximum, 700")
     func boldTextCapsCaveat() throws {
-        let resolved = SpineType.resolve(SpineType.Style.lockupWord(.large), dynamicTypeSize: .large, legibilityWeight: .bold)
+        let resolved = SpineType.resolve(.lockupWord(.large), dynamicTypeSize: .large, legibilityWeight: .bold)
         #expect(resolved.weight == 700)
         #expect(wght(resolved.uiFont) == 700)
         let axes = CTFontCopyVariationAxes(resolved.uiFont as CTFont) as? [[String: Any]] ?? []
@@ -86,7 +86,7 @@ struct SpineTypeResolveTests {
 
     @Test("lockupWord resolves through the Caveat descriptor at 700")
     func lockupFace() {
-        let resolved = SpineType.resolve(SpineType.Style.lockupWord(.medium), dynamicTypeSize: .large, legibilityWeight: nil)
+        let resolved = SpineType.resolve(.lockupWord(.medium), dynamicTypeSize: .large, legibilityWeight: nil)
         #expect(resolved.uiFont.fontName.hasPrefix("Caveat"))
         #expect(wght(resolved.uiFont) == 700)
     }

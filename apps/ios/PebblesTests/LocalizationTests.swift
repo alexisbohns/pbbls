@@ -317,7 +317,8 @@ struct LocalizationCatalogFileTests {
 
         for (key, entry) in catalog.strings {
             for value in entry.localizations?["fr"]?.values ?? [] {
-                #expect(value.range(of: "caillou", options: .caseInsensitive) == nil, "fr '\(key)' says caillou: \(value)")
+                #expect(value.range(of: "caillou", options: .caseInsensitive) == nil,
+                        "fr '\(key)' says caillou: \(value)")
             }
         }
         #expect(catalog.strings["New pebble"]?.localizations?["fr"]?.values == ["Nouveau galet"])

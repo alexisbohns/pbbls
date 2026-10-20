@@ -18,14 +18,17 @@ extension SpineType {
     static let dynamicTypeCeiling: DynamicTypeSize = .accessibility2
 
     /// Pure, so tests pin Dynamic Type and Bold Text without a view.
-    static func resolve(_ style: Style, dynamicTypeSize: DynamicTypeSize, legibilityWeight: LegibilityWeight?) -> Resolved {
+    static func resolve(
+        _ style: Style, dynamicTypeSize: DynamicTypeSize, legibilityWeight: LegibilityWeight?
+    ) -> Resolved {
         let traits = UITraitCollection(
             preferredContentSizeCategory: contentSizeCategory(min(dynamicTypeSize, dynamicTypeCeiling))
         )
         let size: CGFloat
         switch style.scaling {
         case .text(let textStyle):
-            size = UIFontMetrics(forTextStyle: uiTextStyle(textStyle)).scaledValue(for: style.size, compatibleWith: traits)
+            size = UIFontMetrics(forTextStyle: uiTextStyle(textStyle))
+                .scaledValue(for: style.size, compatibleWith: traits)
         case .card(let cap):
             size = style.size * min(cap, UIFontMetrics(forTextStyle: .body).scaledValue(for: 1, compatibleWith: traits))
         case .none:
@@ -44,7 +47,8 @@ extension SpineType {
         }
         let factor = style.size > 0 ? size / style.size : 1
         let lineSpacing = style.lineHeight.map { $0 * factor - uiFont.lineHeight } ?? 0
-        return Resolved(size: size, weight: weight, tracking: style.trackingEm * size, lineSpacing: lineSpacing, uiFont: uiFont)
+        return Resolved(size: size, weight: weight, tracking: style.trackingEm * size,
+                        lineSpacing: lineSpacing, uiFont: uiFont)
     }
 
     static func contentSizeCategory(_ size: DynamicTypeSize) -> UIContentSizeCategory {

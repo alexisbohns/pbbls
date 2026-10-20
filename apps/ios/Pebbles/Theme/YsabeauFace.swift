@@ -47,7 +47,8 @@ enum YsabeauFace {
     private static let cache = NSCache<NSString, UIFont>()
     private static var loggedMissing: Set<String> = []
 
-    private static let variationAttribute = UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String)
+    private static let variationAttribute =
+        UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String)
     private static let featureTagKey = UIFontDescriptor.FeatureKey(rawValue: kCTFontOpenTypeFeatureTag as String)
     private static let featureValueKey = UIFontDescriptor.FeatureKey(rawValue: kCTFontOpenTypeFeatureValue as String)
 
