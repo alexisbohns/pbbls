@@ -62,6 +62,16 @@ struct YsabeauFaceTests {
         #expect(first === second)
     }
 
+    @Test("700, the axis default, reads 700 and matches the default instance")
+    func defaultWeightReads() throws {
+        let font = YsabeauFace.uiFont(size: 17, weight: 700, italic: false, features: [])
+        #expect(wght(font) == 700)
+        let defaultInstance = try #require(UIFont(name: YsabeauFace.romanName, size: 17))
+        #expect(inkWidth("l", font: font) == inkWidth("l", font: defaultInstance))
+        let caps = YsabeauFace.uiFont(size: 17, weight: 700, italic: false, features: [.smallCaps])
+        #expect(wght(caps) == 700)
+    }
+
     @Test("the shared Caveat descriptor sets 700 on the axis")
     func caveatBoldDescriptor() {
         let font = UIFont.pebblesCaveat(size: 34, weight: 700)
@@ -72,9 +82,16 @@ struct YsabeauFaceTests {
 
 // MARK: - CoreText probes
 
+/// The font's `wght`. CoreText leaves an axis at its default value (700 for
+/// Ysabeau) out of `CTFontCopyVariation`, so a missing entry on a font that
+/// has the axis reads as the axis default. Nil when the font has no `wght`.
 func wght(_ font: UIFont) -> Double? {
+    let axisID = NSNumber(value: YsabeauFace.weightAxis)
     let variation = CTFontCopyVariation(font as CTFont) as? [NSNumber: NSNumber]
-    return variation?[NSNumber(value: YsabeauFace.weightAxis)]?.doubleValue
+    if let value = variation?[axisID] { return value.doubleValue }
+    let axes = CTFontCopyVariationAxes(font as CTFont) as? [[String: Any]] ?? []
+    let axis = axes.first { ($0[kCTFontVariationAxisIdentifierKey as String] as? NSNumber) == axisID }
+    return (axis?[kCTFontVariationAxisDefaultValueKey as String] as? NSNumber)?.doubleValue
 }
 
 func advance(_ string: String, font: UIFont) -> Double {
