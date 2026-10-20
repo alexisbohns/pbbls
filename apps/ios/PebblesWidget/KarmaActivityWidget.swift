@@ -10,7 +10,7 @@ struct KarmaActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: KarmaActivityAttributes.self) { context in
             HStack(spacing: 8) {
-                Image(systemName: "sparkle").foregroundStyle(Color("AccentPrimary"))
+                Image(systemName: "sparkle").foregroundStyle(Color.pebbles.primary)
                 Text("+\(context.state.amount) karma").font(.headline)
                 Spacer()
             }
@@ -19,7 +19,7 @@ struct KarmaActivityWidget: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Image(systemName: "sparkle").foregroundStyle(Color("AccentPrimary"))
+                    Image(systemName: "sparkle").foregroundStyle(Color.pebbles.primary)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     Text("+\(context.state.amount)").font(.title3.bold())
@@ -28,11 +28,11 @@ struct KarmaActivityWidget: Widget {
                     Text("karma").font(.caption).foregroundStyle(.secondary)
                 }
             } compactLeading: {
-                Image(systemName: "sparkle").foregroundStyle(Color("AccentPrimary"))
+                Image(systemName: "sparkle").foregroundStyle(Color.pebbles.primary)
             } compactTrailing: {
                 Text("+\(context.state.amount)").font(.caption.bold())
             } minimal: {
-                Image(systemName: "sparkle").foregroundStyle(Color("AccentPrimary"))
+                Image(systemName: "sparkle").foregroundStyle(Color.pebbles.primary)
             }
         }
     }
