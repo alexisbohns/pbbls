@@ -7,11 +7,13 @@ import SwiftUI
 /// Pebbles logo in `WelcomeView`'s persistent header plays that role.
 struct WelcomeSlideView: View {
     let step: WelcomeStep
+    /// Scales with Dynamic Type as the old `.custom` face did.
+    @ScaledMetric(relativeTo: .title2) private var titleSize: CGFloat = 22
 
     var body: some View {
         VStack(alignment: .center, spacing: 8) {
             Text(step.title)
-                .font(.ysabeauSemibold(22))
+                .font(.ysabeauSemibold(titleSize))
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .multilineTextAlignment(.center)
 
