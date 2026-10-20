@@ -61,7 +61,6 @@ import app.pbbls.android.core.ui.render.stone.toStonePalette
 import app.pbbls.android.features.path.card.logic.LockupInk
 import app.pbbls.android.features.path.card.logic.ValenceLockups
 import app.pbbls.android.features.path.spine.drawFieldPattern
-import app.pbbls.android.features.path.spine.stoneKindRes
 import app.pbbls.android.features.path.valence.ValenceWord
 
 /*
@@ -178,7 +177,6 @@ internal fun CardVerso(
                 color = colors.ink,
             )
             Spacer(Modifier.weight(1f))
-            val kind = stringResource(stoneKindRes(valence.sizeGroup, polarity))
             val stoneWidth = versoStoneWidth(valence.sizeGroup)
             LitStone(
                 valence = valence,
@@ -190,7 +188,9 @@ internal fun CardVerso(
                 modifier =
                     Modifier
                         .padding(vertical = stoneWidth * CLEARING_SHARE)
-                        .semantics { contentDescription = kind },
+                        // Hidden from TalkBack: the lockup and the emotion already say what the stone means,
+                        // and its kind is the Spine's word for it ("gem"), which the card does not use.
+                        .clearAndSetSemantics {},
             )
             Spacer(Modifier.weight(1f))
             Postmarks(pebble, domains, stone, night, rowWidth = u * CardLayout.U_DIVISOR - side * 2)
