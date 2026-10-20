@@ -159,10 +159,11 @@ private class RingLayout(
                 )
             }
 
+            // The float advance, not the intrinsic width, which rounds each character up to a whole pixel.
             fun charAdvance(
                 c: Char,
                 sizeSp: Float,
-            ): Float = layout(c, sizeSp).multiParagraph.intrinsics.maxIntrinsicWidth
+            ): Float = layout(c, sizeSp).getHorizontalPosition(1, usePrimaryDirection = true)
 
             val circumference = 2f * PI.toFloat() * baselineRadiusPx
             val fit = RingFits.fit(name, circumference, locale) { t, s -> t.sumOf { charAdvance(it, s).toDouble() }.toFloat() }
