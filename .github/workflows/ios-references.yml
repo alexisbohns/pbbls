@@ -1,0 +1,210 @@
+name: iOS references (re-baseline)
+
+# Regenerates the committed reference images under
+# apps/ios/PebblesTests/References/__References__/ and pushes them.
+#
+# ios.yml validates those references on every PR, so a change that moves a
+# rendered pixel on purpose lands red until they are regenerated. This
+# workflow is that one command, and it mirrors android-screenshots.yml step for
+# step. It is deliberately NOT part of ios.yml: it is the only iOS workflow
+# that writes to the repository, and the pre-merge gate stays read-only.
+#
+# Two ways in, both manual:
+#   - label a PR `rebaseline-ios-screenshots`: the new PNGs are committed to the
+#     PR branch (same-repo PRs only; a fork PR skips, see the job's `if`)
+#   - run it from the Actions tab on any ref
+#
+# The references are rendered here on the same image, Xcode, device and
+# runtime that ios.yml validates on, so the baseline and its oracle come off
+# the same renderer. A local render is for looking at; never commit one.
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: ios-references-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  rebaseline:
+    # The `labeled` event fires for every label, so gate on the one that means
+    # it. A fork's head branch does not exist in this repository and its token
+    # cannot push, so skip rather than fail the checkout on a run that could
+    # never have finished.
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event.label.name == 'rebaseline-ios-screenshots' &&
+           github.event.pull_request.head.repo.full_name == github.repository) }}
+    name: Re-render and commit the iOS reference images
+    runs-on: macos-26
+    # Same pins as ios.yml's test job. Change them together, never apart.
+    env:
+      SIM_DEVICE: iPhone 17
+      SIM_RUNTIME: com.apple.CoreSimulator.SimRuntime.iOS-26-2
+      TEST_RUNNER_TZ: Europe/Paris
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # On a pull_request event the default checkout is the merge commit,
+          # which is detached and cannot be pushed. Take the head branch instead.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
+
+      - name: Select Xcode 26.3
+        run: |
+          if [ ! -d /Applications/Xcode_26.3.app ]; then
+            echo "Xcode 26.3 is gone from the runner image. Installed:"
+            ls -d /Applications/Xcode*.app
+            echo "Raise the pin in ios.yml and here in one PR, and re-baseline."
+            exit 1
+          fi
+          sudo xcode-select -s /Applications/Xcode_26.3.app
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      # Placeholders, as in ios.yml: the suite is offline.
+      # The $() escape is required: xcconfig parses // as a comment.
+      - name: Write placeholder Secrets.xcconfig
+        working-directory: apps/ios
+        run: |
+          cat > Config/Secrets.xcconfig <<'EOF'
+          SUPABASE_URL = https:/$()/placeholder.supabase.co
+          SUPABASE_ANON_KEY = placeholder-anon-key
+          EOF
+
+      - name: Generate Xcode project
+        working-directory: apps/ios
+        run: xcodegen generate
+
+      - name: Resolve the pinned simulator
+        id: sim
+        run: |
+          udid=$(xcrun simctl list devices available --json | python3 -c '
+          import json, os, sys
+          devices = json.load(sys.stdin)["devices"].get(os.environ["SIM_RUNTIME"], [])
+          match = [d["udid"] for d in devices if d["name"] == os.environ["SIM_DEVICE"]]
+          if not match:
+              raise SystemExit("%s on %s is gone from the runner image; raise the pin in its own PR and re-baseline" % (os.environ["SIM_DEVICE"], os.environ["SIM_RUNTIME"]))
+          print(match[0])
+          ')
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices available | grep -F "$udid"
+
+      # Removing the folder first is what drops the references of deleted tests.
+      - name: Clear the old references
+        run: git rm -rq --ignore-unmatch apps/ios/PebblesTests/References/__References__
+
+      - name: Record the English references
+        working-directory: apps/ios
+        env:
+          TEST_RUNNER_PBBLS_RECORD_REFERENCES: '1'
+        run: |
+          xcodebuild test \
+            -scheme Pebbles \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build \
+            -skipMacroValidation \
+            -only-testing:PebblesTests/References \
+            -quiet \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Record the French references
+        working-directory: apps/ios
+        env:
+          TEST_RUNNER_PBBLS_RECORD_REFERENCES: '1'
+        run: |
+          xcodebuild test-without-building \
+            -scheme Pebbles \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build \
+            -testLanguage fr \
+            -testRegion FR \
+            -only-testing:PebblesTests/References \
+            -quiet \
+            CODE_SIGNING_ALLOWED=NO
+
+      # The calibration's first half, kept for every re-baseline: a second
+      # render of the same tree must match the one just recorded, byte for byte
+      # inside the threshold. A red step here means the renders are not
+      # deterministic, and committing them would make ios.yml flaky. Each pass
+      # repeats its record pass's language and region flags exactly.
+      - name: Verify the new references reproduce
+        working-directory: apps/ios
+        run: |
+          xcodebuild test-without-building \
+            -scheme Pebbles \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build \
+            -only-testing:PebblesTests/References \
+            -quiet \
+            CODE_SIGNING_ALLOWED=NO
+          xcodebuild test-without-building \
+            -scheme Pebbles \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build \
+            -testLanguage fr \
+            -testRegion FR \
+            -only-testing:PebblesTests/References \
+            -quiet \
+            CODE_SIGNING_ALLOWED=NO
+
+      # Recording rewrites every reference, so "nothing changed" is the normal
+      # outcome and must not fail the run.
+      - name: Commit the references
+        id: commit
+        env:
+          TARGET_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/ios/PebblesTests/References/__References__
+
+          if git diff --cached --quiet; then
+            echo "The references already match this revision — nothing to commit."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          git commit -m "test(ios): re-baseline reference images"
+
+          # Never write the references straight onto the default branch: a
+          # re-baseline is a reviewable change like any other.
+          if [ "$TARGET_REF" = "$DEFAULT_BRANCH" ]; then
+            branch="test/ios-reference-rebaseline-${GITHUB_RUN_NUMBER}"
+            git push origin "HEAD:refs/heads/$branch"
+            echo "branch=$branch" >> "$GITHUB_OUTPUT"
+            echo "Pushed $branch — open a PR from it."
+          else
+            git push origin "HEAD:$TARGET_REF"
+            echo "branch=$TARGET_REF" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The push above is attributed to github-actions[bot], so the ios.yml run
+      # queued against the new commit waits at `action_required`. A re-run of
+      # the failed run would replay the pre-baseline SHA and fail again.
+      - name: Next step
+        if: ${{ steps.commit.outputs.changed == 'true' }}
+        run: |
+          {
+            echo "References committed to \`${{ steps.commit.outputs.branch }}\`."
+            echo
+            echo "**The iOS check is not green yet.** This push is attributed to"
+            echo "\`github-actions[bot]\`, so the runs queued against the new commit are held"
+            echo "at \`action_required\` pending approval. Do one of:"
+            echo
+            echo "- approve them from the PR's **Checks** tab, or"
+            echo '  `gh api --method POST repos/${{ github.repository }}/actions/runs/<run-id>/approve`'
+            echo "- push any further commit yourself, which runs them without approval"
+            echo
+            echo "Do **not** re-run the failed iOS run: a re-run replays the commit it was"
+            echo "created for, which is the tree from before the re-baseline."
+          } >> "$GITHUB_STEP_SUMMARY"
