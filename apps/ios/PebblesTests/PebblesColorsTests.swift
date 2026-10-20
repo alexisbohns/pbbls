@@ -69,7 +69,9 @@ struct PebblesColorsTests {
 
     @Test("googleCapsuleInk ignores appearance and contrast")
     func googleInkIsPinned() {
-        let resolved = Set(Look.allCases.map { hex(UIColor.pebbles(.googleCapsuleInk).resolvedColor(with: $0.traits)) })
+        let resolved = Set(Look.allCases.map { look in
+            hex(UIColor.pebbles(.googleCapsuleInk).resolvedColor(with: look.traits))
+        })
         #expect(resolved == ["#4A3639"])
     }
 }

@@ -124,10 +124,15 @@ struct ThemeLiteralsTests {
         "Features/Welcome/WelcomeView.swift": 2
     ]
 
+    /// `apps/ios/Pebbles`, two levels up from this file (`apps/ios/PebblesTests/`).
     static let pebblesRoot: URL = {
-        var url = URL(fileURLWithPath: #filePath)
-        while url.lastPathComponent != "apps" { url.deleteLastPathComponent() }
-        return url.appendingPathComponent("ios/Pebbles")
+        let iosRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let root = iosRoot.appendingPathComponent("Pebbles")
+        var isDirectory: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: root.path, isDirectory: &isDirectory), isDirectory.boolValue else {
+            preconditionFailure("ThemeLiteralsTests expects the app sources at \(root.path)")
+        }
+        return root
     }()
 
     /// A string literal on one line, escapes included. Its contents are blanked
@@ -253,8 +258,13 @@ struct ThemeLiteralsTests {
                 problems.append("\(path): \(hits.count) offending lines, \(limit) allowed — lower the debt.")
             }
         }
-        let current = found.keys.sorted().map { "\"\($0)\": \(found[$0]?.count ?? 0)," }.joined(separator: "\n")
+        // Paste-ready: the debt a file still owes once its permanent allowlist
+        // entry is taken out. Files that owe nothing are left out.
+        let pasteReady = found.keys.sorted().compactMap { path -> String? in
+            let owed = max(0, (found[path]?.count ?? 0) - (Self.allowlist[path]?.count ?? 0))
+            return owed > 0 ? "\"\(path)\": \(owed)," : nil
+        }.joined(separator: "\n")
         let summary = problems.joined(separator: "\n")
-        #expect(problems.isEmpty, "\(summary)\n\nCurrent counts (allowlist + debt):\n\(current)")
+        #expect(problems.isEmpty, "\(summary)\n\nPaste-ready debt (allowlist excluded):\n\(pasteReady)")
     }
 }
