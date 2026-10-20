@@ -21,4 +21,18 @@ struct YsabeauItalicFontTests {
         #expect(font?.fontName == "Ysabeau-BoldItalic")
         #expect(font?.fontDescriptor.symbolicTraits.contains(.traitItalic) == true)
     }
+
+    @Test("the variable roman is bundled and the static SemiBold is gone")
+    func variableRomanReplacesStaticCut() {
+        #expect(Bundle.main.url(forResource: "Ysabeau", withExtension: "ttf") != nil, "missing font: Ysabeau.ttf")
+        #expect(Bundle.main.url(forResource: "Ysabeau SemiBold", withExtension: "ttf") == nil)
+        #expect(UIFont(name: "Ysabeau-SemiBold", size: 17) == nil)
+    }
+
+    @Test("Ysabeau-Bold, the roman's default instance, resolves upright")
+    func romanDefaultInstanceResolves() {
+        let font = UIFont(name: "Ysabeau-Bold", size: 17)
+        #expect(font?.fontName == "Ysabeau-Bold")
+        #expect(font?.fontDescriptor.symbolicTraits.contains(.traitItalic) == false)
+    }
 }
