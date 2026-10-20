@@ -63,7 +63,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         metadata = NavTransitions.forKey(PebblesKey.Path) + PanePairs.metadataFor(PebblesKey.Path),
     ) {
         PathScreen(
-            onOpenDetail = { momentId -> navigator.navigateToDetail(PebblesKey.PebbleDetail(momentId)) },
+            onOpenDetail = { momentId, face -> navigator.navigateToDetail(PebblesKey.PebbleDetail(momentId, face)) },
             onCreatePebble = { navigator.navigate(PebblesKey.Capture) },
             onDeleteConfirmed = { navigator.closeMomentDetail(it) },
         )

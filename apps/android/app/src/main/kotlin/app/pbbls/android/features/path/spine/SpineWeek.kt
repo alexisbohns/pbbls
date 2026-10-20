@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.rememberReduceMotion
+import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
@@ -97,7 +98,7 @@ fun SpineWeek(
     soulsById: Map<String, SoulWithGlyph>,
     paletteFor: (PathMoment) -> EmotionPalette?,
     aspect: SnapAspectCache?,
-    onOpen: (PathMoment) -> Unit,
+    onOpen: (PathMoment, CardFace) -> Unit,
     onRequestDelete: (PathMoment) -> Unit,
     previousWeek: WeekNeighbour?,
     nextWeek: WeekNeighbour?,

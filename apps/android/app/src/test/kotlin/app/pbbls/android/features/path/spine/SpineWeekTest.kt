@@ -73,7 +73,7 @@ class SpineWeekTest {
                             soulsById = SpineFixtureWeek.soulsById,
                             paletteFor = SpineFixtureWeek.palettes,
                             aspect = null,
-                            onOpen = {},
+                            onOpen = { _, _ -> },
                             onRequestDelete = {},
                             previousWeek = null,
                             nextWeek = null,
