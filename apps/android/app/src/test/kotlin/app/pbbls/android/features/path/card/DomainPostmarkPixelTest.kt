@@ -12,6 +12,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.testing.PIXEL_TEST_SDK
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -28,7 +29,7 @@ import kotlin.math.hypot
  * tint, clip and restraint, not a proof of HWUI: the device is.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(application = Application::class, qualifiers = "w390dp-h800dp-xhdpi")
+@Config(application = Application::class, qualifiers = "w390dp-h800dp-xhdpi", sdk = [PIXEL_TEST_SDK])
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class DomainPostmarkPixelTest {
     @get:Rule
