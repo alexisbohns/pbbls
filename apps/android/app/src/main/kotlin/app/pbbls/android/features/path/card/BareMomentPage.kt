@@ -3,6 +3,7 @@ package app.pbbls.android.features.path.card
 import android.icu.text.DateTimePatternGenerator
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -79,6 +80,14 @@ private val PHOTO_GAP = 20.dp
 private val MAT_PADDING = 10.dp
 private val WORDS_GAP = 16.dp
 private val PLACE_GAP = 28.dp
+private val BED_RULE = 1.dp
+
+/**
+ * The tallest the photo stands: the Spine's tallest card less its chrome (`CardSizes`, the
+ * strongest intensity), so a portrait narrows rather than pushing the place below the fold.
+ */
+private val PHOTO_MAX_HEIGHT = (CardSizes.cap(STRONGEST) - CardSizes.CHROME_VERTICAL).dp
+private const val STRONGEST = 3
 
 // The place (the synthesis's `.slot`).
 private const val PLACE_RATIO = 1.12f
@@ -151,14 +160,14 @@ internal fun BareMomentPage(
             Text(
                 text =
                     buildAnnotatedString {
-                        append(day.uppercase(locale))
+                        append(day)
                         withStyle(SpanStyle(color = colors.ink3)) { append(" · ") }
                         withStyle(SpanStyle(color = colors.ink)) { append(time) }
                     },
                 style = SpineTypography.kicker,
                 color = colors.ink2,
                 textAlign = TextAlign.Center,
-                // Read as the locale writes it, not spelled out in capitals.
+                // A pause rather than the middle dot read out.
                 modifier = Modifier.semantics { contentDescription = "$day, $time" },
             )
             Text(
@@ -186,11 +195,16 @@ internal fun BareMomentPage(
                 modifier = Modifier.fillMaxWidth().padding(top = WORDS_GAP),
             )
         }
-        BarePlace(onComplete = onComplete, modifier = placeModifier.padding(top = PLACE_GAP))
+        // The gap outside the caller's modifier, so the bounds it reports are the place's own.
+        BarePlace(onComplete = onComplete, modifier = Modifier.padding(top = PLACE_GAP).then(placeModifier))
     }
 }
 
-/** The photo on a white mat, at its ratio, whole ([ContentScale.Fit]). */
+/**
+ * The photo on a white mat, at its ratio, whole ([ContentScale.Fit]), no taller than
+ * [PHOTO_MAX_HEIGHT]: a portrait narrows, centred. At Night the bed carries a hairline, so
+ * the mat reads before the photo lands.
+ */
 @Composable
 private fun MattedPhoto(
     photoUrl: String?,
@@ -214,6 +228,7 @@ private fun MattedPhoto(
         }
     Box(
         modifier
+            .widthIn(max = PHOTO_MAX_HEIGHT * ratio + MAT_PADDING * 2)
             .fillMaxWidth()
             .background(colors.stock)
             .padding(MAT_PADDING),
@@ -222,7 +237,8 @@ private fun MattedPhoto(
             Modifier
                 .fillMaxWidth()
                 .aspectRatio(ratio)
-                .background(colors.halo),
+                .background(colors.halo)
+                .then(if (colors.isNight) Modifier.border(BED_RULE, colors.rule) else Modifier),
             contentAlignment = Alignment.Center,
         ) {
             if (failed) {
@@ -252,7 +268,6 @@ private fun BarePlace(
     modifier: Modifier = Modifier,
 ) {
     val colors = PebblesTheme.spine.colors
-    val kicker = stringResource(R.string.bare_place_kicker)
     Column(
         modifier
             .fillMaxWidth()
@@ -264,15 +279,11 @@ private fun BarePlace(
     ) {
         GhostStone()
         Text(
-            text = kicker.uppercase(LocalConfiguration.current.locales[0]),
+            text = stringResource(R.string.bare_place_kicker),
             style = SpineTypography.sectionLabel,
             color = colors.ink2,
             textAlign = TextAlign.Center,
-            modifier =
-                Modifier.padding(top = GHOST_TO_KICKER).semantics {
-                    heading()
-                    contentDescription = kicker
-                },
+            modifier = Modifier.padding(top = GHOST_TO_KICKER).semantics { heading() },
         )
         Text(
             text = stringResource(R.string.bare_place_body),
@@ -362,6 +373,10 @@ private fun DrawScope.drawPlace(
  */
 private fun Modifier.minHeightForRatio(ratio: Float): Modifier =
     layout { measurable, constraints ->
+        if (!constraints.hasBoundedWidth) {
+            val free = measurable.measure(constraints)
+            return@layout layout(free.width, free.height) { free.place(0, 0) }
+        }
         val floor = (constraints.maxWidth / ratio).roundToInt().coerceAtMost(constraints.maxHeight)
         val placeable = measurable.measure(constraints.copy(minHeight = max(constraints.minHeight, floor)))
         layout(placeable.width, placeable.height) { placeable.place(0, 0) }
