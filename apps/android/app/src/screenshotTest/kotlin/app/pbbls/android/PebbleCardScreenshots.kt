@@ -17,6 +17,7 @@ import app.pbbls.android.core.common.UuidHash
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.MomentDetail
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
@@ -25,11 +26,13 @@ import app.pbbls.android.features.path.card.CardFooter
 import app.pbbls.android.features.path.card.CardLayout
 import app.pbbls.android.features.path.card.CollectionBand
 import app.pbbls.android.features.path.card.DomainPostmark
+import app.pbbls.android.features.path.card.PebbleCard
 import com.android.tools.screenshot.PreviewTest
 
 /*
  * The pebble card's parts (#1135 Part 1), each on the verso's stock in Paper and
- * Night: the domain postmarks, the collection band and the still footer.
+ * Night: the domain postmarks, the collection band and the still footer. Then the
+ * whole card, each face alone on a 412 dp phone.
  */
 
 /** Two stamps at the full 72 dp. */
@@ -205,6 +208,137 @@ private fun FooterOnStock(
             stone = if (colors.isNight) palette.secondary else palette.primary,
             onTurn = {},
             modifier = Modifier.width(328.dp).background(colors.stock),
+        )
+    }
+}
+
+/** F1's recto: the photo field, five souls named, the leaf with the long words. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412)
+@Composable
+fun PebbleCardF1RectoLight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f1, CardFaceTarget.MOMENT, PebbleCardFixtures.ROOFTOP_RATIO) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleCardF1RectoNight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f1, CardFaceTarget.MOMENT, PebbleCardFixtures.ROOFTOP_RATIO) }
+}
+
+/** F1's verso: "Highlight of my month", two postmarks, the Birthdays band. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412)
+@Composable
+fun PebbleCardF1VersoLight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f1, CardFaceTarget.PEBBLE, PebbleCardFixtures.ROOFTOP_RATIO) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleCardF1VersoNight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f1, CardFaceTarget.PEBBLE, PebbleCardFixtures.ROOFTOP_RATIO) }
+}
+
+/** F1's verso in French: "Temps fort de mon mois", "Retourner". */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, locale = "fr")
+@Composable
+fun PebbleCardF1VersoFrenchLight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f1, CardFaceTarget.PEBBLE, PebbleCardFixtures.ROOFTOP_RATIO) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, locale = "fr", uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleCardF1VersoFrenchNight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f1, CardFaceTarget.PEBBLE, PebbleCardFixtures.ROOFTOP_RATIO) }
+}
+
+/** F2's verso: a medium stone, one postmark, no band; the face is as tall as the portrait recto. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412)
+@Composable
+fun PebbleCardF2VersoLight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f2, CardFaceTarget.PEBBLE, PebbleCardFixtures.SEAWALL_RATIO) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleCardF2VersoNight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f2, CardFaceTarget.PEBBLE, PebbleCardFixtures.SEAWALL_RATIO) }
+}
+
+/** F3's recto: no photo, so the slip carries the name; nobody with it. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412)
+@Composable
+fun PebbleCardF3RectoLight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f3, CardFaceTarget.MOMENT, ratio = null) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleCardF3RectoNight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f3, CardFaceTarget.MOMENT, ratio = null) }
+}
+
+/** F3's verso: "lowlight of my day" in ink, a small stone. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412)
+@Composable
+fun PebbleCardF3VersoLight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f3, CardFaceTarget.PEBBLE, ratio = null) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleCardF3VersoNight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.f3, CardFaceTarget.PEBBLE, ratio = null) }
+}
+
+/** The stress verso: four shrunk postmarks and a band that wraps two long names. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412)
+@Composable
+fun PebbleCardStressVersoLight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.stress, CardFaceTarget.PEBBLE, PebbleCardFixtures.ROOFTOP_RATIO) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleCardStressVersoNight() {
+    PebblesTheme { CardOnGround(PebbleCardFixtures.stress, CardFaceTarget.PEBBLE, PebbleCardFixtures.ROOFTOP_RATIO) }
+}
+
+/** The card alone on the page's ground; the photo is unsigned, so the field shows its tint. */
+@Composable
+private fun CardOnGround(
+    detail: MomentDetail,
+    face: CardFaceTarget,
+    ratio: Float?,
+) {
+    val colors = PebblesTheme.spine.colors
+    Box(Modifier.background(colors.ground).padding(vertical = 16.dp)) {
+        PebbleCard(
+            detail = detail,
+            palette =
+                detail.pebble
+                    ?.emotion
+                    ?.id
+                    ?.let(PebbleCardFixtures.palettes::get),
+            ratio = ratio,
+            photoUrl = null,
+            thumbUrl = null,
+            soulsById = PebbleCardFixtures.soulsById,
+            domains = PebbleCardFixtures.domains,
+            initialFace = face,
         )
     }
 }

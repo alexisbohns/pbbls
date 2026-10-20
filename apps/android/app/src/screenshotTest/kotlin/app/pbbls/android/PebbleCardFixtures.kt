@@ -1,8 +1,19 @@
 package app.pbbls.android
 
 import app.pbbls.android.core.model.Domain
+import app.pbbls.android.core.model.DomainRef
 import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.EmotionRef
 import app.pbbls.android.core.model.GlyphStroke
+import app.pbbls.android.core.model.MomentDetail
+import app.pbbls.android.core.model.MomentPebble
+import app.pbbls.android.core.model.MomentSnap
+import app.pbbls.android.core.model.PebbleCollection
+import app.pbbls.android.core.model.PebbleGlyph
+import app.pbbls.android.core.model.SoulRef
+import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.core.model.Visibility
+import java.time.OffsetDateTime
 
 /**
  * The pebble card's preview data: the 18 life domains with their real seed glyphs
@@ -837,5 +848,182 @@ internal object PebbleCardFixtures {
                 "M99.89,175.78 L107.22,184",
                 4.0,
             ),
+        )
+
+    /** The real fear category palette, as `SpineFixtureWeek` carries it. */
+    val fearPalette: EmotionPalette =
+        requireNotNull(
+            EmotionPalette.fromHex(
+                primaryHex = "#7B5E99FF",
+                secondaryHex = "#AE91CCFF",
+                lightHex = "#F2EFF5FF",
+                surfaceHex = "#7B5E991A",
+                darkHex = "#19131FFF",
+                shadedHex = "#56426BFF",
+            ),
+        )
+
+    /** The palettes by emotion id, as the palette service hands them out. */
+    val palettes: Map<String, EmotionPalette> by lazy {
+        mapOf(JOY.id to joyPalette, FEAR.id to fearPalette, GRATITUDE.id to gratitudePalette)
+    }
+
+    /** Every reference domain, as `LocalReferenceDataService` caches them. */
+    val domains: List<Domain> by lazy {
+        listOf(
+            community,
+            currentEvents,
+            dating,
+            education,
+            family,
+            fitness,
+            friends,
+            health,
+            hobbies,
+            identity,
+            money,
+            partner,
+            selfCare,
+            spirituality,
+            tasks,
+            travel,
+            weather,
+            work,
+        )
+    }
+
+    /** The Spine fixture's souls (Mara, Elio, Nadia, Jules, Bruno, …), for the recto's marks. */
+    val soulsById: Map<String, SoulWithGlyph> get() = SpineFixtureWeek.soulsById
+
+    private val JOY = EmotionRef(id = "3ffd6ca6-e033-6926-fa1f-ddf8f90bfd8c", slug = "joyful", name = "Joy")
+    private val FEAR = EmotionRef(id = "8b2993f3-4043-7bdf-388d-c0e3d5c96f02", slug = "scared", name = "Fear")
+
+    /** A fake id: the gratitude palette has no seeded emotion row in the Spine fixture. */
+    private val GRATITUDE = EmotionRef(id = "c5d2a1f0-5f0e-4b8e-9a51-6f1f2f6b7a10", slug = "grateful", name = "Gratitude")
+
+    /** The photo ratios the previews prime: the rooftop is 16 : 9, the seawall 2 : 3. */
+    const val ROOFTOP_RATIO = 1200f / 675f
+    const val SEAWALL_RATIO = 1200f / 1800f
+
+    private fun ref(domain: Domain) = DomainRef(id = domain.id, slug = domain.slug, name = domain.name)
+
+    private fun soul(key: String) = SpineFixtureWeek.soulsById.getValue("soul-$key").let { SoulRef(it.id, it.name) }
+
+    private fun glyph(key: String) =
+        SpineFixtureWeek.glyphs
+            .getValue(
+                "glyph-$key",
+            ).let { PebbleGlyph(id = it.id, name = it.name, strokes = it.strokes, viewBox = it.viewBox) }
+
+    private fun at(iso: String) = OffsetDateTime.parse("$iso:00+02:00")
+
+    private fun detail(
+        id: String,
+        name: String,
+        happenedAt: String,
+        description: String?,
+        photo: Boolean,
+        pebble: MomentPebble,
+    ) = MomentDetail(
+        id = id,
+        name = name,
+        description = description,
+        happenedAt = at(happenedAt),
+        createdAt = at(happenedAt),
+        snaps = if (photo) listOf(MomentSnap(id = "snap-$id", storagePath = "fixture/snap-$id")) else emptyList(),
+        pebble = pebble,
+    )
+
+    /** F1: a large highlight with a photo, five souls, two domains, one collection, the long words. */
+    val f1: MomentDetail =
+        detail(
+            id = "card-f1",
+            name = "Rooftop birthday",
+            happenedAt = "2026-10-08T21:00",
+            description =
+                "Nadia turned forty on the roof of her building. Jules carried the cake up seven floors and dropped " +
+                    "the candles on the stairs, so we lit matches instead and everyone sang too fast. Elio fell asleep " +
+                    "on the deckchairs before the second song. Bruno ate a paper plate. Around midnight the whole " +
+                    "street’s lights went off for a minute and nobody said anything, we just looked at the city with " +
+                    "the candles still going.",
+            photo = true,
+            pebble =
+                MomentPebble(
+                    id = "card-f1",
+                    intensity = 3,
+                    positiveness = 1,
+                    visibility = Visibility.PRIVATE,
+                    emotion = JOY,
+                    glyph = glyph("friends"),
+                    souls = listOf("mara", "elio", "nadia", "jules", "bruno").map(::soul),
+                    domains = listOf(ref(friends), ref(community)),
+                    collections = listOf(PebbleCollection(id = "collection-birthdays", name = "Birthdays")),
+                ),
+        )
+
+    /** F2: a medium highlight, a portrait photo, one soul, one domain, public, no collection. */
+    val f2: MomentDetail =
+        detail(
+            id = "card-f2",
+            name = "Mara on the seawall",
+            happenedAt = "2026-10-10T17:45",
+            description = "The wind took her scarf and she didn’t run after it.",
+            photo = true,
+            pebble =
+                MomentPebble(
+                    id = "card-f2",
+                    intensity = 2,
+                    positiveness = 1,
+                    visibility = Visibility.PUBLIC,
+                    emotion = JOY,
+                    glyph = glyph("partner"),
+                    souls = listOf(soul("mara")),
+                    domains = listOf(ref(partner)),
+                ),
+        )
+
+    /** F3: a small lowlight with no photo (the slip), alone, secret. */
+    val f3: MomentDetail =
+        detail(
+            id = "card-f3",
+            name = "Couldn’t sleep",
+            happenedAt = "2026-10-07T03:10",
+            description = "Kitchen light, the fridge humming. Counted the rent twice in my head.",
+            photo = false,
+            pebble =
+                MomentPebble(
+                    id = "card-f3",
+                    intensity = 1,
+                    positiveness = -1,
+                    visibility = Visibility.SECRET,
+                    emotion = FEAR,
+                    glyph = glyph("identity"),
+                    domains = listOf(ref(health)),
+                ),
+        )
+
+    /** The stress verso: four domains and two long French collections that wrap the band. */
+    val stress: MomentDetail =
+        detail(
+            id = "card-stress",
+            name = "Rooftop birthday",
+            happenedAt = "2026-10-08T21:00",
+            description = null,
+            photo = true,
+            pebble =
+                MomentPebble(
+                    id = "card-stress",
+                    intensity = 2,
+                    positiveness = 1,
+                    visibility = Visibility.PRIVATE,
+                    emotion = JOY,
+                    glyph = glyph("hobbies"),
+                    domains = listOf(ref(spirituality), ref(currentEvents), ref(community), ref(selfCare)),
+                    collections =
+                        listOf(
+                            PebbleCollection(id = "collection-mamie", name = "Les étés chez Mamie"),
+                            PebbleCollection(id = "collection-elio", name = "Ce qu’Elio a dit"),
+                        ),
+                ),
         )
 }
