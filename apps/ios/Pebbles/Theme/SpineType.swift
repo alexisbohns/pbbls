@@ -15,7 +15,18 @@ import SwiftUI
 /// (`Style.scaling`), and `Cut` as the only logic-to-view handoff for a name's
 /// weight.
 enum SpineType {
-    enum Face: Equatable { case ysabeau, caveat }
+    enum Face: Equatable {
+        case ysabeau, caveat
+
+        /// The heaviest weight Bold Text may reach: the spec's 800 for Ysabeau
+        /// (its axis runs to 1000), Caveat's axis maximum, 700.
+        var maxWeight: Int {
+            switch self {
+            case .ysabeau: return 800
+            case .caveat:  return 700
+            }
+        }
+    }
 
     enum Scaling: Equatable {
         /// Scales with the text style through `UIFontMetrics`, up to `.accessibility2`.

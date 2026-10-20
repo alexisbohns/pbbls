@@ -1,5 +1,6 @@
 import SwiftUI
 import Testing
+import CoreText
 import UIKit
 @testable import Pebbles
 
@@ -68,6 +69,19 @@ struct SpineTypeResolveTests {
         let title = SpineType.resolve(SpineType.Style.title, dynamicTypeSize: .large, legibilityWeight: nil)
         #expect(abs(title.lineSpacing - (40.8 - title.uiFont.lineHeight)) < 0.0001)
         #expect(title.lineSpacing < 0, "title asks for less than Ysabeau's natural 1.343 em")
+    }
+
+    @Test("Bold Text never pushes Caveat past its axis maximum, 700")
+    func boldTextCapsCaveat() throws {
+        let resolved = SpineType.resolve(SpineType.Style.lockupWord(.large), dynamicTypeSize: .large, legibilityWeight: .bold)
+        #expect(resolved.weight == 700)
+        #expect(wght(resolved.uiFont) == 700)
+        let axes = CTFontCopyVariationAxes(resolved.uiFont as CTFont) as? [[String: Any]] ?? []
+        let axis = try #require(axes.first {
+            ($0[kCTFontVariationAxisIdentifierKey as String] as? NSNumber)?.intValue == YsabeauFace.weightAxis
+        })
+        let maximum = try #require(axis[kCTFontVariationAxisMaximumValueKey as String] as? NSNumber)
+        #expect(SpineType.Face.caveat.maxWeight == maximum.intValue)
     }
 
     @Test("lockupWord resolves through the Caveat descriptor at 700")

@@ -32,7 +32,9 @@ extension SpineType {
             size = style.size
         }
         // A custom face gets no Bold Text from the system, and the Spine is text-heavy.
-        let weight = legibilityWeight == .bold ? min(style.weight + 100, 800) : style.weight
+        // Capped per face, so Caveat never asks for more than its axis carries.
+        let bolder = min(style.weight + 100, style.face.maxWeight)
+        let weight = legibilityWeight == .bold ? max(style.weight, bolder) : style.weight
         let uiFont: UIFont
         switch style.face {
         case .ysabeau:
