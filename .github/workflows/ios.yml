@@ -207,8 +207,11 @@ jobs:
 
       # `String(localized:)` ignores the SwiftUI environment, so French is a
       # second process-level pass over the references only. Each reference
-      # declares its locales and is skipped in the other pass.
+      # declares its locales and returns without a check in the other pass.
+      # It runs even when the English pass failed, so one round trip uploads
+      # both locales' diffs; it still needs the pinned simulator.
       - name: French references
+        if: ${{ !cancelled() && steps.sim.outcome == 'success' }}
         working-directory: apps/ios
         run: |
           xcodebuild test-without-building \

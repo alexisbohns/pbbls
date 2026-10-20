@@ -22,10 +22,6 @@ on:
   pull_request:
     types: [labeled]
 
-concurrency:
-  group: ios-references-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: write
 
@@ -41,6 +37,13 @@ jobs:
            github.event.pull_request.head.repo.full_name == github.repository) }}
     name: Re-render and commit the iOS reference images
     runs-on: macos-26
+    # On the job, not the workflow: every label added to the PR fires a
+    # `labeled` run, and a workflow-level group would let an unrelated label
+    # cancel a re-baseline in progress. A job skipped by the `if` above never
+    # enters the group.
+    concurrency:
+      group: ios-references-${{ github.ref }}
+      cancel-in-progress: true
     # Same pins as ios.yml's test job. Change them together, never apart.
     env:
       SIM_DEVICE: iPhone 17
@@ -96,6 +99,16 @@ jobs:
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
           xcrun simctl list devices available | grep -F "$udid"
 
+      # The references depend on the image as much as on the pins: name it, so
+      # a drift between two re-baselines can be traced to an image bump.
+      - name: Record the runner image
+        run: |
+          {
+            echo "Runner image: \`${ImageOS:-unknown}\` \`${ImageVersion:-unknown}\`."
+            echo "Simulator: $SIM_DEVICE on \`$SIM_RUNTIME\` (\`${{ steps.sim.outputs.udid }}\`)."
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+
       # Removing the folder first is what drops the references of deleted tests.
       - name: Clear the old references
         run: git rm -rq --ignore-unmatch apps/ios/PebblesTests/References/__References__
@@ -143,7 +156,7 @@ jobs:
           set -euo pipefail
           first="$RUNNER_TEMP/references-first.sha"
           second="$RUNNER_TEMP/references-second.sha"
-          (cd "$REFERENCES" && find . -type f -name '*.png' | LC_ALL=C sort | xargs shasum -a 256) > "$first"
+          (cd "$REFERENCES" && find . -type f -name '*.png' -print0 | LC_ALL=C sort -z | xargs -0 shasum -a 256) > "$first"
           if [ ! -s "$first" ]; then
             echo "::error::The record passes wrote no reference PNG under $REFERENCES."
             exit 1
@@ -164,7 +177,7 @@ jobs:
             -only-testing:PebblesTests/References \
             -quiet \
             CODE_SIGNING_ALLOWED=NO
-          (cd "$REFERENCES" && find . -type f -name '*.png' | LC_ALL=C sort | xargs shasum -a 256) > "$second"
+          (cd "$REFERENCES" && find . -type f -name '*.png' -print0 | LC_ALL=C sort -z | xargs -0 shasum -a 256) > "$second"
           if ! diff -u "$first" "$second"; then
             echo "::error::A second recording of the same tree is not byte-identical (diff above). The renders are not deterministic; do not commit these references."
             exit 1
@@ -210,16 +223,21 @@ jobs:
       # the failed run would replay the pre-baseline SHA and fail again.
       - name: Next step
         if: ${{ steps.commit.outputs.changed == 'true' }}
+        # Through env, not `${{ }}` in the script: a branch name is
+        # author-controlled text and must never be spliced into shell.
+        env:
+          BRANCH: ${{ steps.commit.outputs.branch }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           {
-            echo "References committed to \`${{ steps.commit.outputs.branch }}\`."
+            echo "References committed to \`$BRANCH\`."
             echo
             echo "**The iOS check is not green yet.** This push is attributed to"
             echo "\`github-actions[bot]\`, so the runs queued against the new commit are held"
             echo "at \`action_required\` pending approval. Do one of:"
             echo
             echo "- approve them from the PR's **Checks** tab, or"
-            echo '  `gh api --method POST repos/${{ github.repository }}/actions/runs/<run-id>/approve`'
+            echo "  \`gh api --method POST repos/$REPOSITORY/actions/runs/<run-id>/approve\`"
             echo "- push any further commit yourself, which runs them without approval"
             echo
             echo "Do **not** re-run the failed iOS run: a re-run replays the commit it was"
