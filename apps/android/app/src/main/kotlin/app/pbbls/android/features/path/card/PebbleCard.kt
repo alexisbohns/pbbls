@@ -328,7 +328,7 @@ private fun TurnFooter(
 internal fun Modifier.printing(
     completion: CardCompletionState?,
     part: PrintPart,
-): Modifier = if (completion == null) this else graphicsLayer { alpha = part.alpha(completion.progress.print) }
+): Modifier = if (completion == null) this else graphicsLayer { alpha = part.alpha(CompletionMotion.print(completion.t)) }
 
 /**
  * One face's content, silent to TalkBack while it is not in front: both faces stay

@@ -5,6 +5,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -12,14 +13,17 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.lerp
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
@@ -28,6 +32,10 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.ui.render.stone.Frames
@@ -92,12 +100,14 @@ internal object CompletionMotion {
     val PAGE_ALPHA_FRAMES: Frames = listOf(0f to 1f, .6f to 0f)
     const val PAGE_SCALE_END = .97f
 
-    fun at(timeline: Float): CompletionProgress =
-        CompletionProgress(
-            print = StoneMotion.piecewise(timeline, PRINT_FRAMES),
-            stone = StoneMotion.piecewise(timeline, STONE_FRAMES),
-            rise = StoneMotion.piecewise(timeline, RISE_FRAMES),
-        )
+    fun at(timeline: Float): CompletionProgress = CompletionProgress(print(timeline), stone(timeline), rise(timeline))
+
+    /** The phases one at a time, for draw blocks: no [CompletionProgress] allocated per frame. */
+    fun print(timeline: Float): Float = StoneMotion.piecewise(timeline, PRINT_FRAMES)
+
+    fun stone(timeline: Float): Float = StoneMotion.piecewise(timeline, STONE_FRAMES)
+
+    fun rise(timeline: Float): Float = StoneMotion.piecewise(timeline, RISE_FRAMES)
 
     fun litStoneAlpha(stone: Float): Float = StoneMotion.piecewise(stone, LIT_STONE_FRAMES)
 }
@@ -139,9 +149,16 @@ internal class CardCompletionState(
     var crossfade by mutableStateOf(false)
         private set
 
-    /** The print's phases; [CompletionProgress.REST] while it crossfades. A state read: use it in draw and layer blocks. */
+    /**
+     * Where the print's timeline stands, 0 to 1; 1 (printed and home) while it crossfades. A
+     * state read: read it once per draw or layer block and map it through [CompletionMotion].
+     */
+    val t: Float
+        get() = if (crossfade) 1f else timeline.value
+
+    /** The print's phases, for tests and previews; draw blocks read [t]. */
     val progress: CompletionProgress
-        get() = if (crossfade) CompletionProgress.REST else CompletionMotion.at(timeline.value)
+        get() = CompletionMotion.at(t)
 
     /** The crossfade's 0 to 1; 1 while it prints. */
     val fade: Float
@@ -185,31 +202,31 @@ internal class CardCompletionState(
         return inBox(card) != null && place.bottom > 0f && place.top < height
     }
 
-    /** The card's offset from its resting bounds: at the place through the print, home over the rise. */
-    fun cardOffset(progress: CompletionProgress): Offset {
+    /** The card's offset from its resting bounds at [rise]: at the place through the print, home over the rise. */
+    fun cardOffset(rise: Float): Offset {
         val place = inBox(place) ?: return Offset.Zero
         val rest = inBox(card) ?: return Offset.Zero
         val away = Offset(place.center.x - rest.center.x, place.top - rest.top)
-        return away * (1f - FastOutSlowInEasing.transform(progress.rise))
+        return away * (1f - FastOutSlowInEasing.transform(rise))
     }
 
-    /** How much of the card has fed out of the place, from its top, in its own pixels. */
+    /** How much of the card has fed out of the place at [print], from its top, in its own pixels. */
     fun revealed(
-        progress: CompletionProgress,
+        print: Float,
         cardHeight: Float,
     ): Float {
         val place = inBox(place) ?: return cardHeight
-        return lerp(place.height, cardHeight, FastOutSlowInEasing.transform(progress.print)).coerceAtLeast(place.height)
+        return lerp(place.height, cardHeight, FastOutSlowInEasing.transform(print)).coerceAtLeast(place.height)
     }
 
-    /** The dashed stone's flight in the box: from the page's ghost to the verso's clearing, centre and width. */
-    fun flight(progress: CompletionProgress): Pair<Offset, Float>? {
+    /** The dashed stone's flight in the box at [t]: from the page's ghost to the verso's clearing, centre and width. */
+    fun flight(t: Float): Pair<Offset, Float>? {
         val from = inBox(ghost) ?: return null
         val card = card?.takeIf { it.isAttached } ?: return null
         val stoneInCard = stone?.takeIf { it.isAttached }?.let { card.localBoundingBoxOf(it, clipBounds = false) } ?: return null
         val rest = inBox(this.card) ?: return null
-        val to = stoneInCard.translate(rest.topLeft + cardOffset(progress))
-        val f = FastOutSlowInEasing.transform(StoneMotion.piecewise(progress.stone, CompletionMotion.FLIGHT_FRAMES))
+        val to = stoneInCard.translate(rest.topLeft + cardOffset(CompletionMotion.rise(t)))
+        val f = FastOutSlowInEasing.transform(StoneMotion.piecewise(CompletionMotion.stone(t), CompletionMotion.FLIGHT_FRAMES))
         return lerp(from.center, to.center, f) to lerp(from.width, to.width, f)
     }
 }
@@ -220,11 +237,13 @@ internal class CardCompletionState(
  * stone presses in, the lockup, postmarks, band and footer print in turn, the page
  * steps aside and the card rises to its rest. Reduced motion: a crossfade.
  *
- * It hosts the moment's two layers in one box whether or not a print runs, so neither is
- * remounted when one starts or ends: the bare [page] (its place and dashed stone found
- * through the two modifiers it is handed) and the [card] (handed the modifier that moves
- * it). A print is on while [completion] is set and both layers are; the caller keeps the
- * page up for exactly that long. The card lays out at rest the whole time and is drawn
+ * It hosts the moment's two layers in one box whether or not a print runs, each at one call
+ * site, so neither is remounted when a print starts or ends (the page keeps its scroll, its
+ * photo, its measured place): the bare [page] (its place and dashed stone found through the
+ * two modifiers it is handed) and the [card] (handed the modifier that moves it). A print is
+ * on while [completion] is set and both layers are; the caller keeps the page up for
+ * exactly that long, and ignores its call to action meanwhile. Mid-print the page says
+ * nothing to TalkBack and takes no focus, so nothing on it can be pressed under the card. The card lays out at rest the whole time and is drawn
  * away from it, so its resting bounds are always known and the page's place is read
  * in the same box: no frame shows the card at rest before the print, and the place's
  * bounds live as long as the page does. Input is held for the print's length.
@@ -243,11 +262,12 @@ internal fun CardCompletion(
     val printing = completion != null && page != null && card != null
     Box(modifier.then(if (completion != null && printing) Modifier.onPlaced { completion.box = it } else Modifier)) {
         if (page != null) {
-            Box(Modifier.fillMaxSize().then(if (completion != null && printing) Modifier.pageLayer(completion) else Modifier)) {
-                if (completion != null && printing) {
-                    page(Modifier.onPlaced { completion.place = it }, Modifier.onPlaced { completion.ghost = it })
-                } else {
-                    page(Modifier, Modifier)
+            Box(Modifier.fillMaxSize().testTag(COMPLETION_PAGE_TAG)) {
+                Box(Modifier.fillMaxSize().then(if (completion != null && printing) Modifier.pageLayer(completion) else Modifier)) {
+                    page(
+                        if (completion != null && printing) Modifier.onPlaced { completion.place = it } else Modifier,
+                        if (completion != null && printing) Modifier.onPlaced { completion.ghost = it } else Modifier,
+                    )
                 }
             }
         }
@@ -256,36 +276,64 @@ internal fun CardCompletion(
     }
 }
 
-/** The page under the print: whole until the rise, then fading and stepping back (or crossfading out). */
+/**
+ * The page under the print: whole until the rise, then fading and stepping back (or
+ * crossfading out). Silent and unfocusable meanwhile: the card is coming over it.
+ */
 private fun Modifier.pageLayer(completion: CardCompletionState): Modifier =
-    graphicsLayer {
-        val p = completion.progress
-        if (completion.crossfade) {
-            alpha = 1f - completion.fade
-        } else {
-            alpha = StoneMotion.piecewise(p.rise, CompletionMotion.PAGE_ALPHA_FRAMES)
-            val scale = lerp(1f, CompletionMotion.PAGE_SCALE_END, FastOutSlowInEasing.transform(p.rise))
-            scaleX = scale
-            scaleY = scale
-            transformOrigin = TransformOrigin(0.5f, 0f)
+    clearAndSetSemantics {}
+        .focusProperties { onEnter = { cancelFocusChange() } }
+        .focusGroup()
+        .graphicsLayer {
+            if (completion.crossfade) {
+                alpha = 1f - completion.fade
+            } else {
+                val rise = CompletionMotion.rise(completion.t)
+                alpha = StoneMotion.piecewise(rise, CompletionMotion.PAGE_ALPHA_FRAMES)
+                val scale = lerp(1f, CompletionMotion.PAGE_SCALE_END, FastOutSlowInEasing.transform(rise))
+                scaleX = scale
+                scaleY = scale
+                transformOrigin = TransformOrigin(0.5f, 0f)
+            }
         }
-    }
+
+/** The bare page's layer while a print may run over it, for tests: its own contents say nothing mid-print. */
+internal const val COMPLETION_PAGE_TAG = "completion_page"
+
+/**
+ * How far the shell's painting reaches past the card's bounds: its blurred shadow (the
+ * Spine's `--spine-card-shadow`, 18 dp down with a 30 dp blur less 22 dp of spread) and its
+ * painted edge lip below. The print's clip keeps clear of it.
+ */
+private val SHELL_OVERHANG = 32.dp
 
 /**
  * The card under the print, laid out at rest and drawn at [CardCompletionState.cardOffset]:
- * moved in the draw, not the layer, so the layer's alpha never clips what is moved past
- * its bounds. It fades in ([PrintPart.CARD]) and feeds out of the place top first.
+ * moved in the draw, not the layer. It fades in ([PrintPart.CARD]) with the alpha applied
+ * to each draw rather than through an offscreen buffer, which would clip the shell's
+ * shadow and edge to the card's bounds, and feeds out of the place top first: the clip
+ * cuts only the foot, clear of the shadow on the other three sides, grows past the foot by
+ * the shadow's reach as the print ends, and is gone once the card is printed.
  */
 private fun Modifier.cardLayer(completion: CardCompletionState): Modifier =
     onPlaced { completion.card = it }
         .drawWithContent {
-            val offset = completion.cardOffset(completion.progress)
+            val offset = completion.cardOffset(CompletionMotion.rise(completion.t))
             translate(offset.x, offset.y) { this@drawWithContent.drawContent() }
         }.graphicsLayer {
-            alpha = if (completion.crossfade) completion.fade else PrintPart.CARD.alpha(completion.progress.print)
+            compositingStrategy = CompositingStrategy.ModulateAlpha
+            alpha = if (completion.crossfade) completion.fade else PrintPart.CARD.alpha(CompletionMotion.print(completion.t))
         }.drawWithContent {
-            val bottom = completion.revealed(completion.progress, size.height)
-            clipRect(bottom = bottom) { this@drawWithContent.drawContent() }
+            val print = CompletionMotion.print(completion.t)
+            if (print >= 1f) {
+                drawContent()
+            } else {
+                val overhang = SHELL_OVERHANG.toPx()
+                val bottom = completion.revealed(print, size.height) + overhang * FastOutSlowInEasing.transform(print)
+                clipRect(left = -overhang, top = -overhang, right = size.width + overhang, bottom = bottom) {
+                    this@drawWithContent.drawContent()
+                }
+            }
         }
 
 /** The dashed stone in flight over the card, and a hand over the page so nothing is pressed mid-print. */
@@ -297,6 +345,8 @@ private fun PrintOverlay(
     val ink = PebblesTheme.spine.colors.ink3
     val outline = rememberStoneOutline(GHOST_SIZE, GHOST_POLARITY)
     val box = StoneGeometry.outlineBox(GHOST_SIZE)
+    val density = LocalDensity.current
+    val dashes = remember(density) { ghostDashes(density) }
     Canvas(
         modifier.pointerInput(completion) {
             awaitPointerEventScope {
@@ -304,12 +354,13 @@ private fun PrintOverlay(
             }
         },
     ) {
-        val p = completion.progress
-        if (completion.crossfade || p.stone <= 0f || p.stone >= 1f) return@Canvas
-        val alpha = StoneMotion.piecewise(p.stone, CompletionMotion.GHOST_ALPHA_FRAMES)
+        val t = completion.t
+        val stone = CompletionMotion.stone(t)
+        if (completion.crossfade || stone <= 0f || stone >= 1f) return@Canvas
+        val alpha = StoneMotion.piecewise(stone, CompletionMotion.GHOST_ALPHA_FRAMES)
         if (alpha <= 0f) return@Canvas
-        val (centre, width) = completion.flight(p) ?: return@Canvas
+        val (centre, width) = completion.flight(t) ?: return@Canvas
         val height = width * box.height / box.width
-        translate(centre.x - width / 2f, centre.y - height / 2f) { drawGhostStone(outline.path, width, ink, alpha) }
+        translate(centre.x - width / 2f, centre.y - height / 2f) { drawGhostStone(outline.path, width, ink, dashes, alpha) }
     }
 }

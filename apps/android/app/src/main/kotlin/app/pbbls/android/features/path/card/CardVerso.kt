@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -69,6 +70,7 @@ import app.pbbls.android.features.path.card.logic.LockupInk
 import app.pbbls.android.features.path.card.logic.ValenceLockups
 import app.pbbls.android.features.path.spine.drawFieldPattern
 import app.pbbls.android.features.path.valence.ValenceWord
+import kotlinx.coroutines.launch
 
 /*
  * The frame, in card units (back-token3 `.back .panel`, `.vpanel`): the mat's corner,
@@ -210,10 +212,13 @@ internal fun CardVerso(
                 Spacer(clearing.size(stoneWidth, stoneWidth * (box.height / box.width)))
             } else {
                 val press = rememberStonePressState()
+                // The press runs in the verso's own scope, not the print's: the print ends at
+                // 1600 ms, mid-swell, and a press cut short would leave the rings swollen.
+                val pressScope = rememberCoroutineScope()
                 if (completion != null) {
                     LaunchedEffect(completion) {
                         completion.awaitPress()
-                        press.press(reduceMotion = false)
+                        pressScope.launch { press.press(reduceMotion = false) }
                     }
                 }
                 Box(
@@ -225,7 +230,7 @@ internal fun CardVerso(
                             if (completion == null) {
                                 Modifier
                             } else {
-                                Modifier.graphicsLayer { alpha = CompletionMotion.litStoneAlpha(completion.progress.stone) }
+                                Modifier.graphicsLayer { alpha = CompletionMotion.litStoneAlpha(CompletionMotion.stone(completion.t)) }
                             },
                         ),
                 ) {

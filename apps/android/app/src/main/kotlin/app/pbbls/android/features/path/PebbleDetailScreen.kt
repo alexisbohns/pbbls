@@ -66,6 +66,7 @@ import app.pbbls.android.features.path.card.BareMomentPage
 import app.pbbls.android.features.path.card.CardCompletion
 import app.pbbls.android.features.path.card.CardCompletionState
 import app.pbbls.android.features.path.card.PebbleCard
+import kotlinx.coroutines.delay
 import java.time.ZoneId
 
 /**
@@ -154,6 +155,9 @@ fun PebbleDetailScreen(
     var printedOver by rememberSaveable { mutableStateOf<CardFace?>(null) }
     var printingFor by rememberSaveable { mutableStateOf<String?>(null) }
     var cutShort by remember { mutableStateOf(printingFor) }
+    // The verso heading's live region, from the print's start until just after it lands:
+    // the arrival is said once, and later changes to the heading (an edit) are not.
+    var announcing by remember { mutableStateOf(false) }
     val currentFace by rememberUpdatedState(requestedFace)
     val printing = completing && detail != null && cutShort != detail.id
     val completion = remember(detail?.id, printing) { if (printing) CardCompletionState() else null }
@@ -162,8 +166,14 @@ fun PebbleDetailScreen(
             completion != null -> {
                 printedOver = currentFace
                 printingFor = detail?.id
-                completion.play(reduceMotion)
-                printingFor = null
+                announcing = true
+                // Cleared however the print ends: done, or cut off in place (a pebble deleted
+                // mid-print, another moment opened). A recreation has saved it already.
+                try {
+                    completion.play(reduceMotion)
+                } finally {
+                    printingFor = null
+                }
                 viewModel.onCompletionShown()
             }
             completing -> {
@@ -171,6 +181,12 @@ fun PebbleDetailScreen(
                 viewModel.onCompletionShown()
             }
             else -> cutShort = null
+        }
+    }
+    LaunchedEffect(announcing, completing) {
+        if (announcing && !completing) {
+            delay(ANNOUNCE_HOLD_MS)
+            announcing = false
         }
     }
     LaunchedEffect(requestedFace) {
@@ -242,7 +258,7 @@ fun PebbleDetailScreen(
         requestedFace = face,
         faceRequest = faceRequest,
         completion = completion,
-        printed = printedOver != null,
+        printed = announcing,
     )
 
     if (pendingDelete && detail != null) {
@@ -277,7 +293,7 @@ fun PebbleDetailScreen(
  * @param completion the print under way while the state is
  *   [PebbleDetailUiState.Content.completing]: the bare page stays up under the card printing
  *   into its place ([CardCompletion]). Null, a completing state shows the card at rest.
- * @param printed the card printed on this page (its arrival is announced once).
+ * @param printed the card has just printed on this page: its arrival is announced, once.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -350,7 +366,8 @@ internal fun PebbleDetailContent(
                                         photoUrl = photo?.first,
                                         thumbUrl = photo?.second,
                                         ratio = ratio,
-                                        onComplete = onComplete,
+                                        // Mid-print the page is under the card: nothing on it acts.
+                                        onComplete = if (print != null) ({}) else onComplete,
                                         zone = zone,
                                         modifier = Modifier.padding(bottom = 24.dp),
                                         placeModifier = placeModifier,
@@ -515,3 +532,6 @@ private fun DetailLoadError(onRetry: () -> Unit) {
 }
 
 private const val TAG = "pebble-detail"
+
+/** How long the verso heading stays a live region after a print lands: long enough for its one announcement. */
+private const val ANNOUNCE_HOLD_MS = 1_000L

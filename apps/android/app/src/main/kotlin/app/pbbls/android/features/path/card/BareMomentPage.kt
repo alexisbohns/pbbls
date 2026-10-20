@@ -30,15 +30,16 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -315,7 +317,9 @@ private fun BarePlace(
 private fun GhostStone(modifier: Modifier = Modifier) {
     val ink = PebblesTheme.spine.colors.ink3
     val outline = rememberStoneOutline(GHOST_SIZE, GHOST_POLARITY)
-    Canvas(modifier.stoneBox(GHOST_SIZE, width = GHOST_WIDTH)) { drawGhostStone(outline.path, size.width, ink) }
+    val density = LocalDensity.current
+    val dashes = remember(density) { ghostDashes(density) }
+    Canvas(modifier.stoneBox(GHOST_SIZE, width = GHOST_WIDTH)) { drawGhostStone(outline.path, size.width, ink, dashes) }
 }
 
 /** The ghost's silhouette: a medium river pebble, the outline [drawGhostStone] takes. */
@@ -323,27 +327,33 @@ internal val GHOST_SIZE = ValenceSizeGroup.MEDIUM
 internal val GHOST_POLARITY = ValencePolarity.NEUTRAL
 
 /**
+ * The ghost's dashes in outline units, [GHOST_DASH] long on the page's [GHOST_WIDTH] ghost:
+ * made once per density, and growing with the outline when the completion flies it.
+ */
+internal fun ghostDashes(density: Density): PathEffect {
+    val unit = with(density) { GHOST_WIDTH.toPx() } / StoneGeometry.outlineBox(GHOST_SIZE).width
+    val dash = with(density) { GHOST_DASH.toPx() } / unit
+    return PathEffect.dashPathEffect(floatArrayOf(dash, dash))
+}
+
+/**
  * The ghost stone's dashed [outline] (the [GHOST_SIZE] outline, in outline units) at
- * [width] px from the origin: the bare page draws it in its place, the completion in
- * flight to the card's clearing.
+ * [width] px from the origin, with [dashes] from [ghostDashes]: the bare page draws it in
+ * its place, the completion in flight to the card's clearing. Drawn under a scale, the
+ * stroke divided back to [GHOST_STROKE], so a frame of the flight allocates no path.
  */
 internal fun DrawScope.drawGhostStone(
     outline: Path,
     width: Float,
     ink: Color,
+    dashes: PathEffect,
     alpha: Float = 1f,
 ) {
     val scale = width / StoneGeometry.outlineBox(GHOST_SIZE).width
-    // Scaled into px first, so the stroke and its dashes are in dp, not outline units.
-    val path = Path().apply { addPath(outline) }
-    path.transform(Matrix().apply { scale(scale, scale) })
-    val dash = GHOST_DASH.toPx()
-    drawPath(
-        path,
-        ink,
-        alpha = alpha,
-        style = Stroke(width = GHOST_STROKE.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, dash))),
-    )
+    val stroke = GHOST_STROKE.toPx() / scale
+    withTransform({ scale(scale, scale, Offset.Zero) }) {
+        drawPath(outline, ink, alpha = alpha, style = Stroke(width = stroke, pathEffect = dashes))
+    }
 }
 
 /** The dashed card outline and its four album corners, clipped to the outline's rounding. */
