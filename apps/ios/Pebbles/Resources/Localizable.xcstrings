@@ -5558,7 +5558,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nouveau pebble"
+            "value" : "Nouveau galet"
           }
         }
       }
@@ -6108,7 +6108,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Caillou créé"
+            "value" : "Galet créé"
           }
         }
       }
@@ -6124,7 +6124,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Caillou enrichi"
+            "value" : "Galet enrichi"
           }
         }
       }
