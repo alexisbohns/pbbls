@@ -219,7 +219,8 @@ private fun Lockup(
     val lockup = ValenceLockups.of(pebble.valence)
     val word = stringResource(lockup.wordRes).let { if (lockup.lowercase) it.lowercase(locale) else it }
     val span = stringResource(lockup.spanRes)
-    val description = stringResource(R.string.card_verso_heading) + ". " + word + " " + span.lowercase(locale)
+    val description =
+        stringResource(R.string.card_verso_heading_a11y, stringResource(R.string.card_verso_heading), word, span.lowercase(locale))
     val primary = MaterialTheme.colorScheme.primary
     val brush: Brush =
         remember(lockup.ink, stone, night, colors.ink, primary) {

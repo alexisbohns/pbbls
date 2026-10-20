@@ -365,6 +365,10 @@
     <string name="card_turn_action_to_pebble">Retourner vers ton galet</string>
     <string name="card_turn_action_to_moment">Retourner vers le moment</string>
     <string name="card_verso_heading">Ton galet</string>
+    <!-- The verso's lockup, read once: the heading, the valence word, its span ("Your pebble. Highlight of my month"). -->
+    <string name="card_verso_heading_a11y">%1$s. %2$s %3$s</string>
+    <!-- The recto's dateline read with the emotion, so the emotion follows the date. -->
+    <string name="card_dateline_emotion_a11y">%1$s. %2$s</string>
     <string name="card_domains_a11y">Domaines de vie : %1$s</string>
     <string name="card_collections_a11y">Collections : %1$s</string>
     <string name="bare_place_kicker" tools:ignore="UnusedResources">Pas encore un galet</string>

@@ -92,6 +92,8 @@ internal fun CardRecto(
     val weekday = remember(zoned, locale) { shortWeekday(zoned.dayOfWeek, locale) }
     val dateline = remember(detail.happenedAt, locale, zone) { cardDateline(detail.happenedAt, locale, zone) }
     val emotionName = pebble?.emotion?.let { ReferenceStrings.referenceName(ReferenceType.EMOTION, it.slug, it.name) } ?: ""
+    val datelineDescription =
+        if (emotionName.isEmpty()) dateline else stringResource(R.string.card_dateline_emotion_a11y, dateline, emotionName)
 
     // No week here: the souls keep the server's order.
     val souls = pebble?.souls ?: emptyList()
@@ -152,7 +154,7 @@ internal fun CardRecto(
                 dateline = dateline,
                 description = detail.description,
                 u = cardU,
-                datelineDescription = if (emotionName.isEmpty()) dateline else "$dateline. $emotionName",
+                datelineDescription = datelineDescription,
             )
         },
         slip =
