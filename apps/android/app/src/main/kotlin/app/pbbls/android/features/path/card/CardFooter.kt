@@ -89,7 +89,8 @@ internal fun CardFooter(
                 modifier =
                     Modifier
                         .minimumInteractiveComponentSize()
-                        .clickable(role = Role.Button, onClickLabel = action, onClick = onTurn)
+                        // No onClickLabel: the description already names the action, and TalkBack would read it twice.
+                        .clickable(role = Role.Button, onClick = onTurn)
                         .clearAndSetSemantics { contentDescription = action }
                         .padding(start = MINIATURE_GAP, end = CardLayout.FOOTER_PADDING_H),
                 verticalAlignment = Alignment.CenterVertically,
