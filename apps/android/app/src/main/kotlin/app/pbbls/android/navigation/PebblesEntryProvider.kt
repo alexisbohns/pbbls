@@ -232,6 +232,11 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     // ---- The write path promoted to entries (#852) ----
 
     entry<PebblesKey.PebbleDetail>(
+        // One moment is one entry whatever face was asked for: beside Path, pressing the
+        // open moment's stone after its card replaces the key with the verso, and the
+        // default content key (the whole key) would reload the page, a new ViewModel and
+        // a fade-through, where the card should turn in place (pebble card spec §Behaviour).
+        clazzContentKey = { key -> "PebbleDetail:${key.momentId}" },
         // Fade-through, not the push BarKeys get: beside Path this is a scene
         // change, not a lateral move (#940). It also covers the phone page
         // (#1135) until Part 4's container transform from the Spine.
@@ -239,7 +244,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     ) { key ->
         PebbleDetailScreen(
             momentId = key.momentId,
-            initialFace = key.face,
+            requestedFace = key.face,
             onEditMoment = { navigator.navigate(PebblesKey.EditMoment(key.momentId)) },
             onEditPebble = { navigator.navigate(PebblesKey.EditPebble(key.momentId)) },
             onMomentDeleted = { navigator.closeMomentDetail(key.momentId) },

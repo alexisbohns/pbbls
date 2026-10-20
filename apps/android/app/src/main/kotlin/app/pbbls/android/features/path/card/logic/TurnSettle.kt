@@ -7,7 +7,7 @@ import kotlin.math.abs
  * up when the drag began, 1 the other. Dragging toward the start edge (negative x in LTR;
  * callers flip for RTL) turns it.
  */
-object TurnSettle {
+internal object TurnSettle {
     /** Turns of the card per second past which a release carries in its direction. */
     const val FLICK = 1.5f
 

@@ -85,8 +85,9 @@ import java.time.ZoneId
  * A bare moment offers "Make it a pebble" under its title
  * ([onCompleteRequested], A-8); the resume refresh shows the pebble on return.
  *
- * @param initialFace The face the held card opens on: the stone pressed on the Path opens
- *   the verso, the card the recto.
+ * @param requestedFace The face the held card opens on: the stone pressed on the Path opens
+ *   the verso, the card the recto. Beside Path the entry stays while the face changes
+ *   (one content key per moment), and the card turns to the new one.
  * @param showBack False beside Path on a large screen (#940): the list is the
  *   way back, and system back still pops.
  */
@@ -94,7 +95,7 @@ import java.time.ZoneId
 fun PebbleDetailScreen(
     momentId: String,
     modifier: Modifier = Modifier,
-    initialFace: CardFace = CardFace.RECTO,
+    requestedFace: CardFace = CardFace.RECTO,
     onEditMoment: () -> Unit = {},
     onEditPebble: () -> Unit = {},
     onMomentDeleted: () -> Unit = {},
@@ -190,7 +191,7 @@ fun PebbleDetailScreen(
         onBack = onBack,
         modifier = modifier,
         onComplete = onCompleteRequested,
-        initialFace = initialFace,
+        requestedFace = requestedFace,
     )
 
     if (pendingDelete && detail != null) {
@@ -219,7 +220,7 @@ fun PebbleDetailScreen(
  * @param soulsById the souls cache, for the recto's marks.
  * @param domains the reference domains, for the verso's postmarks.
  * @param showBack False beside Path on a large screen (#940).
- * @param initialFace the face the held card opens on.
+ * @param requestedFace the face the held card opens on, and turns to when it changes.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -244,7 +245,7 @@ fun PebbleDetailContent(
     initialMenuOpen: Boolean = false,
     /** Where the card's day, time and dateline fall; previews pin it. */
     zone: ZoneId = ZoneId.systemDefault(),
-    initialFace: CardFace = CardFace.RECTO,
+    requestedFace: CardFace = CardFace.RECTO,
 ) {
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
 
@@ -289,7 +290,7 @@ fun PebbleDetailContent(
                             thumbUrl = photo?.second,
                             soulsById = soulsById,
                             domains = domains,
-                            initialFace = initialFace,
+                            requestedFace = requestedFace,
                             zone = zone,
                         )
                     }

@@ -371,7 +371,7 @@ private fun CardOnGround(
             thumbUrl = null,
             soulsById = PebbleCardFixtures.soulsById,
             domains = PebbleCardFixtures.domains,
-            initialFace = if (face == CardFaceTarget.MOMENT) CardFace.RECTO else CardFace.VERSO,
+            requestedFace = if (face == CardFaceTarget.MOMENT) CardFace.RECTO else CardFace.VERSO,
             zone = PebbleCardFixtures.zone,
         )
     }

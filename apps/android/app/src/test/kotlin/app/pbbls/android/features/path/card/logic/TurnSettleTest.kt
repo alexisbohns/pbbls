@@ -21,6 +21,13 @@ class TurnSettleTest {
     }
 
     @Test
+    fun `the flick threshold and the half are inclusive`() {
+        assertEquals(1f, TurnSettle.target(progress = 0f, velocityPerSecond = 1.5f))
+        assertEquals(0f, TurnSettle.target(progress = 1f, velocityPerSecond = -1.5f))
+        assertEquals(1f, TurnSettle.target(progress = 0.5f, velocityPerSecond = 0f))
+    }
+
+    @Test
     fun `progress maps drag distance against the card width, clamped`() {
         assertEquals(0.5f, TurnSettle.progress(dragPx = -150f, widthPx = 300f), 0.001f)
         assertEquals(1f, TurnSettle.progress(dragPx = -900f, widthPx = 300f), 0.001f)

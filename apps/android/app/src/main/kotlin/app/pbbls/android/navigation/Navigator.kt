@@ -70,8 +70,9 @@ class Navigator(
      */
     fun closeMomentDetail(momentId: String) {
         val stack = state.currentStack
+        if (stack.size <= 1) return
         val last = stack.last()
-        if (stack.size > 1 && last is PebblesKey.PebbleDetail && last.momentId == momentId) {
+        if (last is PebblesKey.PebbleDetail && last.momentId == momentId) {
             stack.removeAt(stack.lastIndex)
         }
     }

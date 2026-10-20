@@ -96,9 +96,11 @@ class PebblesKeysTest {
 
     @Test
     fun `a detail key saved before faces decodes as the recto`() {
+        // Through the polymorphic serializer, as the stack's restore decodes it.
+        val saved = """{"type":"app.pbbls.android.navigation.PebblesKey.PebbleDetail","pebbleId":"m1"}"""
         assertEquals(
             PebblesKey.PebbleDetail("m1", CardFace.RECTO),
-            Json.decodeFromString<PebblesKey.PebbleDetail>("""{"pebbleId":"m1"}"""),
+            Json.decodeFromString(PebblesKey.serializer(), saved),
         )
     }
 

@@ -43,4 +43,25 @@ class NavigatorCloseMomentDetailTest {
 
         assertEquals(PebblesKey.PebbleDetail("m2"), state.backStacks[PebblesKey.Path]!!.last())
     }
+
+    @Test
+    fun `leaves a form on top of the detail`() {
+        val (navigator, state) = navigatorOn(PebblesKey.Path, PebblesKey.PebbleDetail("m1"), PebblesKey.EditPebble("m1"))
+
+        navigator.closeMomentDetail("m1")
+
+        assertEquals(
+            listOf(PebblesKey.Path, PebblesKey.PebbleDetail("m1"), PebblesKey.EditPebble("m1")),
+            state.backStacks[PebblesKey.Path]!!.toList(),
+        )
+    }
+
+    @Test
+    fun `leaves a stack holding only the tab root`() {
+        val (navigator, state) = navigatorOn(PebblesKey.Path)
+
+        navigator.closeMomentDetail("m1")
+
+        assertEquals(listOf<NavKey>(PebblesKey.Path), state.backStacks[PebblesKey.Path]!!.toList())
+    }
 }

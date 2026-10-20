@@ -11,17 +11,21 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.ui.render.stone.StoneMotion
 import app.pbbls.android.testing.PIXEL_TEST_SDK
 import org.junit.Assert.assertEquals
@@ -37,6 +41,10 @@ import org.robolectric.annotation.GraphicsMode
 /** A Sunday moment of the fixture: its stone is a screen and a half below the contents. */
 private const val SUNDAY_NAME = "Grandma’s call went quiet"
 
+/** A pebble on a card, and a moment that is not a pebble yet, from the fixture. */
+private const val FLAG_MARCH = "Flag march with Nadia"
+private const val BAKERY = "Bread from the corner bakery"
+
 /** Pixels that must differ between a stone touched still and the same stone released. */
 private const val MIN_CHANGED_PIXELS = 20
 
@@ -50,6 +58,9 @@ private const val SETTLE_POLL_MS = 50L
  * the device sets it (animator scale 0), so the press is a still touch: the rings turn ink
  * and the sheen holds for `STILL_TOUCH_MS`, then release. The stone rasterises for real
  * (Robolectric's native graphics) and the test reads it twice: touched, then released.
+ *
+ * And the face a press opens (pebble card spec §Behaviour): a pebble's stone opens the
+ * verso, its card the recto, and a bare moment's stone the recto, as it has no verso.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, qualifiers = "w390dp-h800dp-xhdpi", sdk = [PIXEL_TEST_SDK])
@@ -105,6 +116,72 @@ class SpineWeekTest {
 
         val changed = changedPixels(touched, released)
         assertTrue("the still touch should show on the stone and release ($changed px changed)", changed >= MIN_CHANGED_PIXELS)
+    }
+
+    @Test
+    fun `a pebble's stone opens the verso`() {
+        val opened = openedBy(FLAG_MARCH, stone = true)
+        assertEquals(FLAG_MARCH to CardFace.VERSO, opened)
+    }
+
+    @Test
+    fun `a pebble's card opens the recto`() {
+        val opened = openedBy(FLAG_MARCH, stone = false)
+        assertEquals(FLAG_MARCH to CardFace.RECTO, opened)
+    }
+
+    @Test
+    fun `a bare moment's stone opens the recto, as it has no verso`() {
+        val opened = openedBy(BAKERY, stone = true)
+        assertEquals(BAKERY to CardFace.RECTO, opened)
+    }
+
+    /**
+     * Presses [name]'s stone, or its card or entry, at full motion, and returns what the
+     * week opened, as (name, face). The stone opens once its dip has landed, on the
+     * composition's clock.
+     */
+    private fun openedBy(
+        name: String,
+        stone: Boolean,
+    ): Pair<String?, CardFace>? {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        Settings.Global.putFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
+        var opened: Pair<String?, CardFace>? = null
+        compose.setContent {
+            PebblesTheme {
+                Surface(color = PebblesTheme.spine.colors.ground) {
+                    Box(Modifier.size(390.dp, 800.dp)) {
+                        SpineWeek(
+                            entry = SpineFixtureWeek.entry,
+                            today = SpineFixtureWeek.today,
+                            soulsById = SpineFixtureWeek.soulsById,
+                            paletteFor = SpineFixtureWeek.palettes,
+                            aspect = null,
+                            onOpen = { moment, face -> opened = moment.name to face },
+                            onRequestDelete = {},
+                            previousWeek = null,
+                            nextWeek = null,
+                            onCreatePebble = {},
+                            zone = SpineFixtureWeek.zone,
+                            ratioOverride = SpineFixtureWeek.ratios::get,
+                        )
+                    }
+                }
+            }
+        }
+        val named = hasContentDescription(name, substring = true) and hasAnyAncestor(hasTestTag(JourneyTags.PATH_PEBBLE_ROW))
+        val target =
+            if (stone) {
+                named and hasTestTag(JourneyTags.PATH_PEBBLE_STONE)
+            } else {
+                named and hasClickAction() and !hasTestTag(JourneyTags.PATH_PEBBLE_STONE)
+            }
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(target)
+        compose.onNode(target).performClick()
+        compose.mainClock.advanceTimeBy(StoneMotion.OPEN_DELAY_MS + 100)
+        settle()
+        return opened
     }
 
     /** Frames and the main looper. */

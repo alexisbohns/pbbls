@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,7 +53,10 @@ private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
  * @param thumbUrl the signed thumb, the photo's placeholder.
  * @param soulsById the souls cache, for the recto's marks.
  * @param domains the reference domains, for the postmarks' glyphs.
- * @param initialFace the face showing first.
+ * @param requestedFace the face showing first, and the face the card turns to when it
+ *   changes after: beside Path the detail entry stays while its key's face changes (a
+ *   stone pressed after its card). Only a change counts, so pressing the face already
+ *   asked for again does nothing, even on a card turned by hand since.
  * @param zone where the recto's day, time and dateline fall, as `SpineWeek` takes its own.
  */
 @Composable
@@ -65,12 +69,20 @@ internal fun PebbleCard(
     soulsById: Map<String, SoulWithGlyph>,
     domains: List<Domain>,
     modifier: Modifier = Modifier,
-    initialFace: CardFace = CardFace.RECTO,
+    requestedFace: CardFace = CardFace.RECTO,
     zone: ZoneId = ZoneId.systemDefault(),
 ) {
     val pebble = requireNotNull(detail.pebble) { "only a pebble has a card" }
     var face by rememberSaveable {
-        mutableStateOf(if (initialFace == CardFace.RECTO) CardFaceTarget.MOMENT else CardFaceTarget.PEBBLE)
+        mutableStateOf(if (requestedFace == CardFace.RECTO) CardFaceTarget.MOMENT else CardFaceTarget.PEBBLE)
+    }
+    // Saved with the face, so a restored card turned by hand is not turned back to the request.
+    var answered by rememberSaveable { mutableStateOf(requestedFace) }
+    LaunchedEffect(requestedFace) {
+        if (requestedFace != answered) {
+            answered = requestedFace
+            face = if (requestedFace == CardFace.RECTO) CardFaceTarget.MOMENT else CardFaceTarget.PEBBLE
+        }
     }
     val colors = PebblesTheme.spine.colors
     val stone = remember(palette) { palette?.toStonePalette() ?: BLANK_STONE_PALETTE }
