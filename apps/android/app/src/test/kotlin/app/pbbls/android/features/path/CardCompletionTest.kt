@@ -42,7 +42,8 @@ import org.robolectric.annotation.Config
  * semantics alone: the refresh that brings a bare moment's pebble keeps the bare page up,
  * silent and out of reach, under the printing card, whose heading is silent until it lands
  * verso up and the ViewModel is told it was shown; through the press under full motion, as
- * a crossfade under reduced motion, and after leaving mid-print and coming back.
+ * a crossfade under reduced motion, into a place first brought into view from under the
+ * fold, and after leaving mid-print and coming back.
  *
  * Robolectric's legacy graphics on purpose, with no `@GraphicsMode(NATIVE)`: drawn
  * natively, a print (the press's glint, or frames still rendering when a test ended)
@@ -109,6 +110,24 @@ class CardCompletionTest {
     }
 
     /**
+     * A bare moment read from its top, its place far under the fold (the resume could also
+     * land there): the page scrolls the place into view and the card prints into it, a
+     * print still running where a quarter-second crossfade would long be over.
+     */
+    @Test
+    fun `a place under the fold is brought into view and printed into`() {
+        val vm = completedOnScreen(description = LONG_DESCRIPTION) { content -> compose.setContent(content) }
+        compose.mainClock.advanceTimeBy(PAST_THE_PRESS_MS)
+        assertPrinting(vm)
+
+        compose.mainClock.advanceTimeBy(PAST_THE_RIPPLE_MS)
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+
+        assertLanded(vm)
+    }
+
+    /**
      * Leaving mid-print (Edit pebble, another tab) and coming back lands at rest. The screen
      * is disposed under a saveable holder, as Nav3 holds an entry, and its cancelled print
      * gets to run before the return: a write it made on its way out would reach the saved
@@ -151,14 +170,18 @@ class CardCompletionTest {
     }
 
     /** A bare moment on screen through [setContent], then the resume after Complete finds its pebble; the clock is held. */
-    private fun completedOnScreen(setContent: (@Composable () -> Unit) -> Unit): PebbleDetailViewModel {
-        val service = FakeMomentReadService(moments = mapOf("m1" to UiFixtures.momentDetail(id = "m1", pebble = null)))
+    private fun completedOnScreen(
+        description: String? = null,
+        setContent: (@Composable () -> Unit) -> Unit,
+    ): PebbleDetailViewModel {
+        val bare = UiFixtures.momentDetail(id = "m1", description = description, pebble = null)
+        val service = FakeMomentReadService(moments = mapOf("m1" to bare))
         val vm = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
         setContent { PebblesTheme { PebblesTestHarness { PebbleDetailScreen(momentId = "m1", viewModel = vm) } } }
-        compose.onNodeWithText(cta).assertIsDisplayed()
+        compose.onNodeWithText(cta).assertExists()
 
         compose.mainClock.autoAdvance = false
-        service.moments = mapOf("m1" to UiFixtures.momentDetail(id = "m1"))
+        service.moments = mapOf("m1" to UiFixtures.momentDetail(id = "m1", description = description))
         // The resume after Complete: the composition's own was the first.
         compose.runOnIdle { vm.onResumed() }
         return vm
@@ -187,6 +210,9 @@ class CardCompletionTest {
         const val PAST_THE_FADE_MS = 1_000L
         const val FRAMES_MS = 100L
         const val PAST_THE_PRESS_MS = 1_000L
+
+        /** Enough words to push the place a few screens under the fold. */
+        val LONG_DESCRIPTION = List(60) { "A line of the moment's words, number $it." }.joinToString("\n")
 
         /** The print ends at 1600 ms; the press's last wave about 3.3 s in. */
         const val PAST_THE_RIPPLE_MS = 3_000L

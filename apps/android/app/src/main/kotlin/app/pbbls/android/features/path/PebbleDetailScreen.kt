@@ -2,6 +2,7 @@ package app.pbbls.android.features.path
 
 import android.content.Intent
 import android.util.Log
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -69,6 +71,7 @@ import app.pbbls.android.features.path.card.CardCompletionState
 import app.pbbls.android.features.path.card.PebbleCard
 import kotlinx.coroutines.delay
 import java.time.ZoneId
+import kotlin.math.min
 
 /**
  * The moment read page (#852, ports iOS `PebbleDetailSheet`, D7): a page on
@@ -99,7 +102,8 @@ import java.time.ZoneId
  * - back leaves with the entry, and the print with it;
  * - a configuration change mid-print lands at rest (the print that was cut short is
  *   saved, so the new composition does not replay it), verso up;
- * - the place scrolled out of view, or reduced motion: a crossfade instead.
+ * - the place not whole on screen: the page scrolls it into view, then the card prints;
+ *   a place taller than the screen, or reduced motion: a crossfade instead.
  *
  * @param requestedFace The face the held card opens on: the stone pressed on the Path opens
  *   the verso, the card the recto. Beside Path the entry stays while the face changes
@@ -424,12 +428,53 @@ private fun PageColumn(content: @Composable ColumnScope.() -> Unit) {
     Column(
         Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberHeldScrollState())
             .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
             .padding(vertical = 8.dp),
         content = content,
     )
 }
+
+/**
+ * A layer's scroll that comes back where the reader left it. A plain [rememberScrollState]
+ * saves its value, and the value is clamped to the content's reach whenever the reach
+ * shrinks: an entry pushed without the bar (Edit moment, Make it a pebble) snaps the bar
+ * away while this page is still laid out under the transition, so its viewport grows by
+ * the bar, a page read to its foot is pulled up by as much, and that is what is saved.
+ * Back on the page the bar returns and the page sits a bar's height higher than it was
+ * left: at its top when it was scarcely taller than the screen, and with a bare moment's
+ * place half under the bar when the card prints into it.
+ *
+ * So the reader's position is held apart from the value, and is what is saved: a clamp
+ * (the value pinned at a reach that shrank below the position) leaves it as it was, and
+ * any other change (a scroll, a smaller reach above the value) takes it. While the value is
+ * pinned, a reach growing back (the bar returning, a page that lays out short for a frame)
+ * returns the value to the position.
+ */
+@Composable
+private fun rememberHeldScrollState(): ScrollState {
+    var held by rememberSaveable { mutableIntStateOf(0) }
+    val scroll = remember { ScrollState(held) }
+    LaunchedEffect(scroll) {
+        var pinnedAt = NOT_PINNED
+        snapshotFlow { scroll.value to scroll.maxValue }.collect { (value, reach) ->
+            when {
+                value == reach && value < held -> pinnedAt = value
+                value == pinnedAt && reach > value -> {
+                    pinnedAt = NOT_PINNED
+                    scroll.dispatchRawDelta((min(held, reach) - value).toFloat())
+                }
+                else -> {
+                    pinnedAt = NOT_PINNED
+                    held = value
+                }
+            }
+        }
+    }
+    return scroll
+}
+
+private const val NOT_PINNED = -1
 
 /**
  * Detail top bar: a back arrow when it is a page of its own ([showBack]; beside

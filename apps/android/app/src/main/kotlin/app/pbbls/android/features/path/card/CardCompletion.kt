@@ -7,7 +7,14 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -71,7 +78,7 @@ internal data class CompletionProgress(
 internal object CompletionMotion {
     const val PRINT_MS = 1600
 
-    /** Reduced motion, or no place on screen: the page crossfades to the card. */
+    /** Reduced motion, or a place that cannot be shown whole: the page crossfades to the card. */
     const val CROSSFADE_MS = 250
 
     private const val PRINT_END = .35f
@@ -145,7 +152,7 @@ internal class CardCompletionState(
     private val frozen = frozenAt != null
     private val timeline = Animatable(frozenAt ?: 0f)
 
-    /** A crossfade instead of the print: reduced motion, or the place was not on screen. */
+    /** A crossfade instead of the print: reduced motion, or the place could not be shown whole. */
     var crossfade by mutableStateOf(false)
         private set
 
@@ -165,20 +172,37 @@ internal class CardCompletionState(
         get() = if (crossfade) timeline.value else 1f
 
     internal var box: LayoutCoordinates? = null
+
+    /** The part of the box the reader sees: the box less what the system bars still cover at its foot. */
+    internal var view: LayoutCoordinates? = null
     internal var place: LayoutCoordinates? = null
+
+    /** Scrolls the page until the place shows; the place's own node, as the page is not the print's to scroll. */
+    internal val placeRequester = BringIntoViewRequester()
     internal var ghost: LayoutCoordinates? = null
     internal var card: LayoutCoordinates? = null
     internal var stone: LayoutCoordinates? = null
 
     /**
      * Plays the print once, from the first frame laid out, so the place has bounds: the
-     * whole choreography, or under [reduceMotion] or with the place off screen a
-     * crossfade (spec §Completion, last line). Returns when the card is home.
+     * whole choreography, or under [reduceMotion] a crossfade (spec §Completion, last line).
+     * Returns when the card is home.
+     *
+     * The print happens in the place, so it plays only with the whole place in [view]: the
+     * dashed stone's flight starts in it and the card feeds out of it, and a place cut by the
+     * screen's foot hid both behind the navigation bar. A place not whole on screen is
+     * brought into view first, the page scrolling while the card is still unprinted (nothing
+     * of it drawn, and the page under it held); one taller than the view, or one the page
+     * cannot scroll to, crossfades instead.
      */
     suspend fun play(reduceMotion: Boolean) {
         if (frozen) return
         withFrameNanos { }
-        crossfade = reduceMotion || !placeInView()
+        if (!reduceMotion && !placeShown() && placeFits()) {
+            bringPlaceIntoView()
+            withFrameNanos { }
+        }
+        crossfade = reduceMotion || !placeShown()
         val ms = if (crossfade) CompletionMotion.CROSSFADE_MS else CompletionMotion.PRINT_MS
         timeline.animateTo(1f, tween(ms, easing = LinearEasing))
     }
@@ -195,11 +219,31 @@ internal class CardCompletionState(
         return b.localBoundingBoxOf(n, clipBounds = false)
     }
 
-    /** At least part of the place shows: printing into a place scrolled away would happen off screen. */
-    private fun placeInView(): Boolean {
+    /** The whole place shows, within a pixel: a print into a place cut by the view's edge happens partly off screen. */
+    internal fun placeShown(): Boolean {
         val place = inBox(place) ?: return false
-        val height = box?.size?.height ?: return false
-        return inBox(card) != null && place.bottom > 0f && place.top < height
+        val view = inBox(view) ?: return false
+        return inBox(card) != null && place.top >= view.top - EDGE_SLOP && place.bottom <= view.bottom + EDGE_SLOP
+    }
+
+    /** The place is no taller than the view, so scrolling can show it whole. */
+    private fun placeFits(): Boolean {
+        val place = inBox(place) ?: return false
+        val view = inBox(view) ?: return false
+        return place.height <= view.height
+    }
+
+    /**
+     * Scrolls the page until the place shows whole, its foot clear of what [view] leaves
+     * out at the box's foot (the bar's inset where the page's own padding stands under it):
+     * the page's scroll knows only its own viewport, the box.
+     */
+    private suspend fun bringPlaceIntoView() {
+        val place = place?.takeIf { it.isAttached } ?: return
+        val box = inBox(box) ?: return
+        val view = inBox(view) ?: return
+        val covered = (box.bottom - view.bottom).coerceAtLeast(0f)
+        placeRequester.bringIntoView(Rect(0f, 0f, place.size.width.toFloat(), place.size.height + covered))
     }
 
     /** The card's offset from its resting bounds at [rise]: at the place through the print, home over the rise. */
@@ -265,14 +309,27 @@ internal fun CardCompletion(
             Box(Modifier.fillMaxSize().testTag(COMPLETION_PAGE_TAG)) {
                 Box(Modifier.fillMaxSize().then(if (completion != null && printing) Modifier.pageLayer(completion) else Modifier)) {
                     page(
-                        if (completion != null && printing) Modifier.onPlaced { completion.place = it } else Modifier,
+                        if (completion != null && printing) {
+                            Modifier.bringIntoViewRequester(completion.placeRequester).onPlaced { completion.place = it }
+                        } else {
+                            Modifier
+                        },
                         if (completion != null && printing) Modifier.onPlaced { completion.ghost = it } else Modifier,
                     )
                 }
             }
         }
         card?.invoke(if (completion != null && printing) Modifier.cardLayer(completion) else Modifier)
-        if (completion != null && printing) PrintOverlay(completion, Modifier.fillMaxSize())
+        if (completion != null && printing) {
+            PrintOverlay(completion, Modifier.fillMaxSize())
+            // The view: the box less the inset left to the page's own padding at its foot (none above a bar).
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+                    .onPlaced { completion.view = it },
+            )
+        }
     }
 }
 
@@ -296,6 +353,9 @@ private fun Modifier.pageLayer(completion: CardCompletionState): Modifier =
                 transformOrigin = TransformOrigin(0.5f, 0f)
             }
         }
+
+/** How far, in pixels, a place may run past the view's edge and still count as shown: layout rounding. */
+private const val EDGE_SLOP = 1f
 
 /** The bare page's layer while a print may run over it, for tests: its own contents say nothing mid-print. */
 internal const val COMPLETION_PAGE_TAG = "completion_page"
