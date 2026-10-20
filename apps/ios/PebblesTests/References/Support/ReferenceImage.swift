@@ -17,9 +17,12 @@ import UniformTypeIdentifiers
 /// same metric as Android's gate (the fraction of pixels that differ).
 enum ReferenceImage {
     /// The fraction of pixels allowed to differ, exact per pixel (any RGBA
-    /// channel). Calibrated in B2 with at least 2× headroom against a one-word
-    /// re-wording (see the plan's Lessons). NEVER widen it: a change that moves
-    /// pixels on purpose re-baselines. If calibration shows less headroom, lower it.
+    /// channel). Calibrated on CI (run 39513930756, iOS 26.2): re-wording the
+    /// welcome title moved 2.63–3.14 % of the slide's pixels, 50× this threshold;
+    /// a local iOS 26.3 render of the lit stones drifts by up to 0.125 %, which is
+    /// why references are rendered on CI only. NEVER widen it: a change that moves
+    /// pixels on purpose re-baselines. If a later calibration shows less headroom,
+    /// lower it.
     static let threshold = 0.0005
 
     /// 2× keeps PNGs small; parity with Android is judged by eye.
