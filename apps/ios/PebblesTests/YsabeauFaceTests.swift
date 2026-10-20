@@ -78,6 +78,11 @@ struct YsabeauFaceTests {
         #expect(font.fontName.hasPrefix("Caveat"))
         #expect(wght(font) == 700)
     }
+
+    @Test("one Caveat UIFont per (size, weight)")
+    func caveatMemoised() {
+        #expect(UIFont.pebblesCaveat(size: 44, weight: 700) === UIFont.pebblesCaveat(size: 44, weight: 700))
+    }
 }
 
 // MARK: - CoreText probes

@@ -237,15 +237,26 @@ extension UIFont {
     /// file's default instance (400), so the axis is set explicitly; `Caveat-Bold`
     /// is not a resolvable name. One descriptor for `PebblesFont.valenceWord*`
     /// and `SpineType.Style.lockupWord`. Falls back to the bold system font.
+    /// Memoised by (size, weight), like `YsabeauFace`, so a render never
+    /// rebuilds the descriptor.
     static func pebblesCaveat(size: CGFloat, weight: Int) -> UIFont {
-        guard let base = UIFont(name: "Caveat-Regular", size: size) else {
-            return UIFont.systemFont(ofSize: size, weight: .bold)
+        let key = "\(size)|\(weight)" as NSString
+        if let cached = caveatCache.object(forKey: key) { return cached }
+        let font: UIFont
+        if let base = UIFont(name: "Caveat-Regular", size: size) {
+            let descriptor = base.fontDescriptor.addingAttributes([
+                UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [
+                    YsabeauFace.weightAxis: weight
+                ]
+            ])
+            font = UIFont(descriptor: descriptor, size: size)
+        } else {
+            font = UIFont.systemFont(ofSize: size, weight: .bold)
         }
-        let descriptor = base.fontDescriptor.addingAttributes([
-            UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [
-                YsabeauFace.weightAxis: weight
-            ]
-        ])
-        return UIFont(descriptor: descriptor, size: size)
+        caveatCache.setObject(font, forKey: key)
+        return font
     }
+
+    /// `NSCache` is thread-safe, so no lock is needed around it.
+    private static let caveatCache = NSCache<NSString, UIFont>()
 }
