@@ -32,6 +32,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -148,23 +149,27 @@ fun PebbleDetailScreen(
     val palette = pebble?.emotion?.id?.let(palettes::palette)
 
     // The print (spec §Completion). The face asked for when a print began: the card stays
-    // verso up until the key asks for another. Saved, as is the print under way, so a
-    // recreation mid-print lands at rest rather than printing twice.
+    // verso up until the key asks again (another face, or the same one pressed anew). Saved,
+    // as is the print under way, so a recreation mid-print lands at rest rather than
+    // printing twice.
     val completing = (uiState as? PebbleDetailUiState.Content)?.completing == true
     val reduceMotion = rememberReduceMotion()
     var printedOver by rememberSaveable { mutableStateOf<CardFace?>(null) }
+    var printedRequest by rememberSaveable { mutableIntStateOf(0) }
     var printingFor by rememberSaveable { mutableStateOf<String?>(null) }
     var cutShort by remember { mutableStateOf(printingFor) }
     // The verso heading's live region, from the print's start until just after it lands:
     // the arrival is said once, and later changes to the heading (an edit) are not.
     var announcing by remember { mutableStateOf(false) }
     val currentFace by rememberUpdatedState(requestedFace)
+    val currentRequest by rememberUpdatedState(faceRequest)
     val printing = completing && detail != null && cutShort != detail.id
     val completion = remember(detail?.id, printing) { if (printing) CardCompletionState() else null }
     LaunchedEffect(completion, completing) {
         when {
             completion != null -> {
                 printedOver = currentFace
+                printedRequest = currentRequest
                 printingFor = detail?.id
                 announcing = true
                 completion.play(reduceMotion)
@@ -192,10 +197,11 @@ fun PebbleDetailScreen(
             announcing = false
         }
     }
-    LaunchedEffect(requestedFace) {
-        if (printedOver != null && printedOver != requestedFace) printedOver = null
+    val askedSincePrint = printedOver != requestedFace || printedRequest != faceRequest
+    LaunchedEffect(requestedFace, faceRequest) {
+        if (printedOver != null && askedSincePrint) printedOver = null
     }
-    val face = if (completing || printedOver == requestedFace) CardFace.VERSO else requestedFace
+    val face = if (completing || (printedOver != null && !askedSincePrint)) CardFace.VERSO else requestedFace
 
     // The cover photo: signed once per prefix, as the Spine's cards do, and its
     // ratio from the same process-wide probe. Keyed on the prefix, so an edit
