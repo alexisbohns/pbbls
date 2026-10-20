@@ -58,7 +58,7 @@ private fun WeekPage(
                 soulsById = SpineFixtureWeek.soulsById,
                 paletteFor = SpineFixtureWeek.palettes,
                 aspect = null,
-                onOpen = {},
+                onOpen = { _, _ -> },
                 onRequestDelete = {},
                 previousWeek = WeekNeighbour(SpineFixtureWeek.previousNumber) {},
                 nextWeek = WeekNeighbour(SpineFixtureWeek.nextNumber) {},

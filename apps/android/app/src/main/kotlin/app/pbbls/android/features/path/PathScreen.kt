@@ -33,6 +33,7 @@ import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
+import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
@@ -71,7 +72,7 @@ import kotlin.math.abs
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PathScreen(
-    onOpenDetail: (String) -> Unit,
+    onOpenDetail: (String, CardFace) -> Unit,
     onCreatePebble: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteConfirmed: (momentId: String) -> Unit = {},
@@ -129,7 +130,7 @@ fun PathScreen(
                         onFocusChange = viewModel::onFocusWeek,
                         paletteFor = { moment -> moment.pebble?.emotion?.let { palettes.palette(it.id) } },
                         aspect = viewModel.snapAspect,
-                        onPebbleTap = { moment -> onOpenDetail(moment.id) },
+                        onPebbleTap = { moment, face -> onOpenDetail(moment.id, face) },
                         onPebbleDelete = viewModel::requestDelete,
                         onCreatePebble = onCreatePebble,
                         // The timeline alone is capped (#855): the FAB below
@@ -209,7 +210,7 @@ fun PathContent(
     paletteFor: (PathMoment) -> EmotionPalette?,
     modifier: Modifier = Modifier,
     aspect: SnapAspectCache? = null,
-    onPebbleTap: (PathMoment) -> Unit = {},
+    onPebbleTap: (PathMoment, CardFace) -> Unit = { _, _ -> },
     onPebbleDelete: (PathMoment) -> Unit = {},
     onCreatePebble: () -> Unit = {},
     ratioOverride: ((String) -> Float?)? = null,

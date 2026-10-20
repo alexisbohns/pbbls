@@ -1,6 +1,7 @@
 package app.pbbls.android.navigation
 
 import app.pbbls.android.core.model.AuthMode
+import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.core.model.GlyphStroke
@@ -63,6 +64,8 @@ class PebblesKeysTest {
                 PebblesKey.LabLogList("announcements"),
                 PebblesKey.Capture,
                 PebblesKey.PebbleDetail(momentId = "m-1"),
+                PebblesKey.PebbleDetail(momentId = "m-1", face = CardFace.VERSO),
+                PebblesKey.PebbleDetail(momentId = "m-1", face = CardFace.RECTO, request = 3),
                 PebblesKey.GlyphDetail(sampleItem),
                 PebblesKey.GlyphDetail(ownedItem),
                 PebblesKey.EditPebble(momentId = "m-1"),
@@ -90,6 +93,25 @@ class PebblesKeysTest {
         val saved = """{"type":"app.pbbls.android.navigation.PebblesKey.PebbleDetail","pebbleId":"m-1"}"""
         val key = Json.decodeFromString(PebblesKey.serializer(), saved)
         assertEquals(PebblesKey.PebbleDetail(momentId = "m-1"), key)
+    }
+
+    @Test
+    fun `a detail key saved before faces decodes as the recto`() {
+        // Through the polymorphic serializer, as the stack's restore decodes it.
+        val saved = """{"type":"app.pbbls.android.navigation.PebblesKey.PebbleDetail","pebbleId":"m1"}"""
+        assertEquals(
+            PebblesKey.PebbleDetail("m1", CardFace.RECTO),
+            Json.decodeFromString(PebblesKey.serializer(), saved),
+        )
+    }
+
+    @Test
+    fun `a detail key saved before requests decodes as the first press`() {
+        val saved = """{"type":"app.pbbls.android.navigation.PebblesKey.PebbleDetail","pebbleId":"m1","face":"VERSO"}"""
+        assertEquals(
+            PebblesKey.PebbleDetail("m1", CardFace.VERSO, request = 0),
+            Json.decodeFromString(PebblesKey.serializer(), saved),
+        )
     }
 
     @Test

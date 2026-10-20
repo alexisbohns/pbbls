@@ -52,6 +52,7 @@ import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.rememberReduceMotion
+import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
@@ -118,7 +119,7 @@ internal fun SpinePebble(
     aspect: SnapAspectCache?,
     zone: ZoneId,
     pressRequests: StonePressRequests,
-    onOpen: (PathMoment) -> Unit,
+    onOpen: (PathMoment, CardFace) -> Unit,
     onRequestDelete: (PathMoment) -> Unit,
     modifier: Modifier = Modifier,
     ratioOverride: Float? = null,
@@ -207,7 +208,8 @@ internal fun SpinePebble(
         openJob =
             scope.launch {
                 delay(if (reduceMotion) 0L else StoneMotion.OPEN_DELAY_MS)
-                onOpen(moment)
+                // A bare moment has no verso, so its stone opens the recto too.
+                onOpen(moment, if (moment.pebble != null) CardFace.VERSO else CardFace.RECTO)
             }
     }
     val openNow = {
@@ -215,7 +217,7 @@ internal fun SpinePebble(
         // A stone tap followed by a card tap within the delay opens once.
         openJob?.cancel()
         openJob = null
-        onOpen(moment)
+        onOpen(moment, CardFace.RECTO)
         scope.launch { press.press(reduceMotion) }
         Unit
     }

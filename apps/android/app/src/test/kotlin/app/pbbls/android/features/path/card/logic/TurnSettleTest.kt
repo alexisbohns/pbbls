@@ -1,0 +1,54 @@
+package app.pbbls.android.features.path.card.logic
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class TurnSettleTest {
+    @Test
+    fun `a release past the half completes the turn`() {
+        assertEquals(1f, TurnSettle.target(progress = 0.6f, velocityPerSecond = 0f))
+    }
+
+    @Test
+    fun `a release short of the half reverts`() {
+        assertEquals(0f, TurnSettle.target(progress = 0.4f, velocityPerSecond = 0f))
+    }
+
+    @Test
+    fun `a flick carries the turn whatever the progress`() {
+        assertEquals(1f, TurnSettle.target(progress = 0.1f, velocityPerSecond = 2.5f))
+        assertEquals(0f, TurnSettle.target(progress = 0.9f, velocityPerSecond = -2.5f))
+    }
+
+    @Test
+    fun `the flick threshold and the half are inclusive`() {
+        assertEquals(1f, TurnSettle.target(progress = 0f, velocityPerSecond = 1.5f))
+        assertEquals(0f, TurnSettle.target(progress = 1f, velocityPerSecond = -1.5f))
+        assertEquals(1f, TurnSettle.target(progress = 0.5f, velocityPerSecond = 0f))
+    }
+
+    @Test
+    fun `a slow release never starts away from where it settles`() {
+        // Past the half, drifting back slowly: it completes, starting still rather than backward.
+        assertEquals(0f, TurnSettle.launchVelocity(target = 1f, velocityPerSecond = -0.8f), 0f)
+        assertEquals(0f, TurnSettle.launchVelocity(target = 0f, velocityPerSecond = 0.8f), 0f)
+    }
+
+    @Test
+    fun `a release toward where it settles keeps the finger's speed`() {
+        assertEquals(0.8f, TurnSettle.launchVelocity(target = 1f, velocityPerSecond = 0.8f), 0f)
+        assertEquals(-2.5f, TurnSettle.launchVelocity(target = 0f, velocityPerSecond = -2.5f), 0f)
+    }
+
+    @Test
+    fun `progress maps drag distance against the card width, clamped`() {
+        assertEquals(0.5f, TurnSettle.progress(dragPx = -150f, widthPx = 300f), 0.001f)
+        assertEquals(1f, TurnSettle.progress(dragPx = -900f, widthPx = 300f), 0.001f)
+        assertEquals(0f, TurnSettle.progress(dragPx = 120f, widthPx = 300f), 0.001f)
+    }
+
+    @Test
+    fun `a card with no width does not turn`() {
+        assertEquals(0f, TurnSettle.progress(dragPx = -50f, widthPx = 0f), 0.001f)
+    }
+}

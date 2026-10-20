@@ -1101,13 +1101,13 @@ object TurnSettle {
   - **Button:** `scope.launch { turn.animateTo(1f, tween(TURN_MS = 420, easing = FastOutSlowInEasing)) }`.
   - **Reduced motion** (`rememberReduceMotion()`): no rotation. Crossfade the faces over 150 ms with `Crossfade(face, animationSpec = tween(150))`.
   - **Drag:** `Modifier.pointerInput(Unit) { detectHorizontalDragGestures(onDragEnd = …) { change, dx -> … } }` on the face area. Accumulate `dragPx`, then `turn.snapTo(TurnSettle.progress(dragPx, widthPx))`. On end, read the velocity from a `VelocityTracker` in turns per second (`vx / widthPx`), then `turn.animateTo(TurnSettle.target(turn.value, v))`. A horizontal detector does not steal the page's vertical scroll.
-  - **TalkBack:** on the card's root, `Modifier.semantics { customActions = listOf(CustomAccessibilityAction(label) { turn(); true }) }`, with the label from `card_turn_action_to_pebble` or `card_turn_action_to_moment`.
+  - **TalkBack:** the footer's turn button, labelled `card_turn_action_to_pebble` or `card_turn_action_to_moment`, is the turn. A custom action on the card's root was built and removed in review: Compose never makes that node screen-reader focusable, so TalkBack would never offer it.
 
 - [ ] **Step 4: Preview.** Add `@PreviewTest` `PebbleCardMidTurn` at a frozen progress of 0.3, by exposing `turnProgressOverride: Float? = null` for previews only, as `SpinePebble` exposes `ratioOverride`.
 
 - [ ] **Step 5: Gates and device.**
   - Run the gates.
-  - On the Pixel: drag a slow half and release; drag a short way and release; flick; tap the button; test with TalkBack's actions menu.
+  - On the Pixel: drag a slow half and release; drag a short way and release; flick; tap the button; with TalkBack, reach the footer's turn button and double-tap it.
   - With animator duration scale set to 0 in developer options, check the crossfade.
   - Open from a stone: the card opens verso up. Open from a card: recto up.
   - Commit with the message `feat(android): the card turns`. Push, ask, then open the PR.

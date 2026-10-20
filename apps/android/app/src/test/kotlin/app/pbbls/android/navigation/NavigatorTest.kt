@@ -3,6 +3,7 @@ package app.pbbls.android.navigation
 import androidx.compose.runtime.mutableStateOf
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import app.pbbls.android.core.model.CardFace
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -210,5 +211,30 @@ class NavigatorTest {
 
         assertEquals(PebblesKey.People, state.topLevelRoute)
         assertEquals(listOf<NavKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
+    }
+
+    @Test
+    fun `pressing the open moment again is a new request`() {
+        navigator.navigateToDetail(PebblesKey.PebbleDetail("m1"))
+        navigator.navigateToDetail(PebblesKey.PebbleDetail("m1"))
+        navigator.navigateToDetail(PebblesKey.PebbleDetail("m1", CardFace.VERSO))
+
+        assertEquals(
+            listOf<NavKey>(PebblesKey.Path, PebblesKey.PebbleDetail("m1", CardFace.VERSO, request = 2)),
+            state.backStacks[PebblesKey.Path]!!.toList(),
+        )
+    }
+
+    @Test
+    fun `pressing another moment replaces the detail as its first request`() {
+        navigator.navigateToDetail(PebblesKey.PebbleDetail("m1"))
+        navigator.navigateToDetail(PebblesKey.PebbleDetail("m1", CardFace.VERSO))
+
+        navigator.navigateToDetail(PebblesKey.PebbleDetail("m2"))
+
+        assertEquals(
+            listOf<NavKey>(PebblesKey.Path, PebblesKey.PebbleDetail("m2")),
+            state.backStacks[PebblesKey.Path]!!.toList(),
+        )
     }
 }
