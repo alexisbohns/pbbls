@@ -24,12 +24,24 @@ on:
     paths:
       - 'apps/ios/**'
       - 'packages/supabase/**'
+      # The iOS colours are generated from the Android palette by a web script,
+      # so a palette change that touches no apps/ios file must still run the
+      # drift check below (web.yml catches it too, via Vitest).
+      - 'apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/ColorSchemes.kt'
+      - 'apps/web/lib/theme/**'
+      - 'apps/web/scripts/generate-ios-colors.ts'
       - '.github/workflows/ios.yml'
   push:
     branches: [main]
     paths:
       - 'apps/ios/**'
       - 'packages/supabase/**'
+      # The iOS colours are generated from the Android palette by a web script,
+      # so a palette change that touches no apps/ios file must still run the
+      # drift check below (web.yml catches it too, via Vitest).
+      - 'apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/ColorSchemes.kt'
+      - 'apps/web/lib/theme/**'
+      - 'apps/web/scripts/generate-ios-colors.ts'
       - '.github/workflows/ios.yml'
 
 concurrency:
@@ -41,7 +53,7 @@ permissions:
 
 jobs:
   verify:
-    name: privacy manifests · colour contrast
+    name: privacy manifests · colour contrast · colour drift
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -51,6 +63,22 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The colorsets and Shared/Theme/PebblesColors.swift are generated from
+      # ColorSchemes.kt. Regenerating must leave apps/ios untouched. `git status`
+      # rather than `git diff`, which would miss a new, uncommitted colorset.
+      - name: Check colour drift
+        run: |
+          npm run generate:ios-colors --workspace=@pbbls/web
+          if [ -n "$(git status --porcelain -- apps/ios)" ]; then
+            echo "apps/ios colours differ from ColorSchemes.kt. Run 'npm run generate:colors --workspace=@pbbls/ios' and commit:"
+            git status --porcelain -- apps/ios
+            exit 1
+          fi
 
       # Both bundles carry a manifest, and the required-reason declarations
       # still match what the Swift sources actually call. Undeclared usage is
