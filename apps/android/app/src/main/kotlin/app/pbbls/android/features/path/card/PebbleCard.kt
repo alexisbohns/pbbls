@@ -33,8 +33,6 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.CardFace
@@ -47,6 +45,7 @@ import app.pbbls.android.core.ui.render.stone.BLANK_STONE_PALETTE
 import app.pbbls.android.core.ui.render.stone.StoneTones
 import app.pbbls.android.core.ui.render.stone.toStonePalette
 import app.pbbls.android.core.ui.sharedCardBounds
+import app.pbbls.android.features.path.card.logic.CardFlight
 import app.pbbls.android.features.path.card.logic.TurnSettle
 import app.pbbls.android.features.path.spine.SpineCardShell
 import java.time.ZoneId
@@ -115,10 +114,15 @@ private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
  *   recompose per frame. Null at rest.
  * @param printed this card printed on this page: its verso heading is a polite live region,
  *   so TalkBack says once, when the print lands, that the pebble arrived.
- * @param flies the card opened from its slot on the Spine, and returns to it: its shell is
- *   the far end of the Spine card's shared bounds (`sharedCardBounds`, pebble card spec
- *   §Behaviour). Never while it prints ([completion]), which draws the card at an offset of
- *   its own inside the page.
+ * @param leaving the moment has been deleted and its page is closing: the card fades rather
+ *   than fly back into the slot of a row that is gone.
+ *
+ * The shell is the far end of the Spine card's shared bounds (`sharedCardBounds`, pebble card
+ * spec §Behaviour) while the recto is the face in front ([CardFlight.heldCardFlies]): opened
+ * on the recto, it flies in from its slot, and it flies home on back unless it was turned to
+ * its verso since, when it fades; opened on the verso by the stone and turned to the recto,
+ * it flies home. Never while it prints ([completion]), which draws the card at an offset of
+ * its own inside the page.
  */
 @Composable
 internal fun PebbleCard(
@@ -136,7 +140,7 @@ internal fun PebbleCard(
     turnProgressOverride: Float? = null,
     completion: CardCompletionState? = null,
     printed: Boolean = false,
-    flies: Boolean = false,
+    leaving: Boolean = false,
 ) {
     val pebble = requireNotNull(detail.pebble) { "only a pebble has a card" }
     val scope = rememberCoroutineScope()
@@ -165,7 +169,7 @@ internal fun PebbleCard(
     val spot = StoneTones.spot(stone, colors.isNight)
 
     BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-        val width = min(maxWidth - CardLayout.PAGE_MARGIN * 2, CardLayout.MAX_WIDTH).coerceAtLeast(0.dp)
+        val width = CardLayout.cardWidth(maxWidth)
         val u = width / CardLayout.U_DIVISOR
         val area: @Composable (shown: () -> CardFace, areaModifier: Modifier) -> Unit = { shown, areaModifier ->
             FaceArea(
@@ -203,12 +207,15 @@ internal fun PebbleCard(
                 modifier = areaModifier,
             )
         }
+        // The committed face, which changes only when a turn lands, so the card does not
+        // recompose through a turn's frames for this.
+        val flies = CardFlight.heldCardFlies(turn.face, printing = completion != null, leaving = leaving)
         SpineCardShell(
             palette = palette,
             polarity = pebble.valence.polarity,
             intensity = pebble.valence.intensity,
             modifier =
-                sharedCardBounds(detail.id, enabled = flies && completion == null)
+                sharedCardBounds(detail.id, enabled = flies)
                     .width(width)
                     .testTag(PEBBLE_CARD_TAG),
         ) {

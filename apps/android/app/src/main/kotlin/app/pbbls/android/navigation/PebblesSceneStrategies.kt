@@ -63,6 +63,14 @@ fun pebblesListDetailStrategy(directive: PaneScaffoldDirective): SceneStrategy<N
 }
 
 /**
+ * The window's pane directive, which `RootScreen` reads once and derives both the strategies
+ * ([rememberPebblesSceneStrategies]) and [isSinglePane] from, so the two agree by construction.
+ */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+fun rememberPebblesPaneDirective(): PaneScaffoldDirective = pebblesPaneDirective(currentWindowAdaptiveInfoV2())
+
+/**
  * The strategies `RootScreen`'s `NavDisplay` tries, in order (#940). List-detail
  * comes first, so on two panes a pebble sits beside Path and a glyph beside the
  * store; only when it declines (one pane) does a glyph fall to the sheet. A
@@ -70,10 +78,8 @@ fun pebblesListDetailStrategy(directive: PaneScaffoldDirective): SceneStrategy<N
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun rememberPebblesSceneStrategies(): List<SceneStrategy<NavKey>> {
-    val directive = pebblesPaneDirective(currentWindowAdaptiveInfoV2())
-    return remember(directive) { pebblesSceneStrategies(directive) }
-}
+fun rememberPebblesSceneStrategies(directive: PaneScaffoldDirective): List<SceneStrategy<NavKey>> =
+    remember(directive) { pebblesSceneStrategies(directive) }
 
 /**
  * True while the window has one pane, so a detail covers its list rather than sitting beside
@@ -81,8 +87,7 @@ fun rememberPebblesSceneStrategies(): List<SceneStrategy<NavKey>> {
  * The held card flies from its slot only then (#1135).
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-@Composable
-fun isSinglePane(): Boolean = pebblesPaneDirective(currentWindowAdaptiveInfoV2()).maxHorizontalPartitions < 2
+fun PaneScaffoldDirective.isSinglePane(): Boolean = maxHorizontalPartitions < 2
 
 /** The chain itself, for a given [directive]; `NavDisplay` takes the first scene. */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)

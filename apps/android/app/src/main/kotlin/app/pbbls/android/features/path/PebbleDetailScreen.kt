@@ -71,6 +71,7 @@ import app.pbbls.android.features.path.card.CardCompletion
 import app.pbbls.android.features.path.card.CardCompletionState
 import app.pbbls.android.features.path.card.CardPlaceholder
 import app.pbbls.android.features.path.card.PebbleCard
+import app.pbbls.android.features.path.card.logic.CardFlight
 import kotlinx.coroutines.delay
 import java.time.ZoneId
 import kotlin.math.min
@@ -137,9 +138,16 @@ fun PebbleDetailScreen(
 
     LaunchedEffect(momentId) { viewModel.start(momentId) }
 
+    // The moment is deleted and the page closing: its card fades out with the page rather
+    // than fly back into the slot of a row that is gone. Set before the pop, so the frame
+    // that starts the close already has no shared bounds on the card.
+    var leaving by remember { mutableStateOf(false) }
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {
-            PebbleDetailEffect.MomentDeleted -> onMomentDeleted()
+            PebbleDetailEffect.MomentDeleted -> {
+                leaving = true
+                onMomentDeleted()
+            }
         }
     }
 
@@ -276,7 +284,8 @@ fun PebbleDetailScreen(
         printed = announcing,
         // A card pressed on the Spine flies in from the open's first frame, onto a blank
         // card while the moment loads; the stone's verso opens in place.
-        flightMomentId = momentId.takeIf { face == CardFace.RECTO },
+        flightMomentId = CardFlight.placeholderFor(momentId, face),
+        leaving = leaving,
     )
 
     if (pendingDelete && detail != null) {
@@ -314,7 +323,8 @@ fun PebbleDetailScreen(
  * @param printed the card has just printed on this page: its arrival is announced, once.
  * @param flightMomentId the moment whose card may be flying in from the Spine: while it loads,
  *   the page holds a blank card for the flight to land on ([CardPlaceholder]). Null, the
- *   spinner alone.
+ *   spinner alone. Once loaded, the card flies by the face it shows ([PebbleCard]).
+ * @param leaving the moment has been deleted and the page is closing: the card does not fly.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -344,6 +354,7 @@ internal fun PebbleDetailContent(
     completion: CardCompletionState? = null,
     printed: Boolean = false,
     flightMomentId: String? = null,
+    leaving: Boolean = false,
 ) {
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
 
@@ -421,10 +432,9 @@ internal fun PebbleDetailContent(
                                         zone = zone,
                                         completion = print,
                                         printed = printed,
-                                        // The card's press opens the recto and flies it from
-                                        // its slot; the stone's opens the verso in place, as
-                                        // does a print, which leaves the card verso up.
-                                        flies = requestedFace == CardFace.RECTO,
+                                        // Its flight follows the face it shows; a deleted
+                                        // moment's card fades with the page.
+                                        leaving = leaving,
                                         modifier = cardModifier,
                                     )
                                 }

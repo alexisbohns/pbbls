@@ -12,7 +12,8 @@ import androidx.navigation3.ui.LocalNavAnimatedContentScope
  * The scope a card flies in between its slot on the Spine and the held card (#1135, pebble
  * card spec §Behaviour, open and close): `RootScreen`'s `SharedTransitionLayout` around the
  * one `NavDisplay`, provided only while a detail covers its list (one pane). Beside the list
- * on two panes it is null, and the detail fades through as before.
+ * on two panes it is null, and the detail fades through as before. A window change mid-flight
+ * (a fold, a resize to two panes) withdraws the scope and drops the bounds: the card jumps.
  *
  * This is UI plumbing, not a service: nothing calls it, and leaf modifiers read it where
  * they lay out, as `LocalSheetOverlaySlot` is read. The android CLAUDE.md rule of exactly
@@ -42,6 +43,7 @@ fun sharedCardKey(momentId: String): String = "card-$momentId"
  * Reads `LocalNavAnimatedContentScope`, so it must sit inside a `NavDisplay` entry whenever
  * the scope is provided, which the root guarantees.
  */
+@Suppress("ModifierFactoryExtensionFunction") // It heads each shell's chain, from composition locals.
 @Composable
 fun sharedCardBounds(
     momentId: String,

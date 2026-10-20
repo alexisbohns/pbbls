@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.ui.LocalSharedTransitionScope
 import app.pbbls.android.core.ui.sharedCardBounds
@@ -57,7 +56,7 @@ internal fun CardPlaceholder(
     }
     Box(modifier.fillMaxSize()) {
         BoxWithConstraints(Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.TopCenter) {
-            val width = min(maxWidth - CardLayout.PAGE_MARGIN * 2, CardLayout.MAX_WIDTH).coerceAtLeast(0.dp)
+            val width = CardLayout.cardWidth(maxWidth)
             Box(
                 sharedCardBounds(momentId)
                     .width(width)

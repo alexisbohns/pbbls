@@ -46,6 +46,7 @@ import app.pbbls.android.navigation.pebblesEntries
 import app.pbbls.android.navigation.pebblesNavigationSuiteColors
 import app.pbbls.android.navigation.pebblesNavigationSuiteType
 import app.pbbls.android.navigation.rememberNavigationState
+import app.pbbls.android.navigation.rememberPebblesPaneDirective
 import app.pbbls.android.navigation.rememberPebblesSceneStrategies
 import coil3.SingletonImageLoader
 import kotlinx.coroutines.Dispatchers
@@ -313,7 +314,9 @@ private fun PebblesNavDisplay(
     // without a second condition.
     val isNavigationVisible = state.topKey is BarKey
     val navigationSuiteType = pebblesNavigationSuiteType()
-    val sceneStrategies = rememberPebblesSceneStrategies()
+    // One directive for both the scene strategies and the card's flight below, so they agree.
+    val paneDirective = rememberPebblesPaneDirective()
+    val sceneStrategies = rememberPebblesSceneStrategies(paneDirective)
     val suiteState =
         rememberNavigationSuiteScaffoldState(
             initialValue = if (isNavigationVisible) NavigationSuiteScaffoldValue.Visible else NavigationSuiteScaffoldValue.Hidden,
@@ -350,7 +353,7 @@ private fun PebblesNavDisplay(
         // handed to the cards only while a detail covers the Path (one pane). Not passed to
         // NavDisplay's own `sharedTransitionScope`, which shares whole entries between
         // scenes and would turn the wide Path's fade-through into a morph.
-        val singlePane = isSinglePane()
+        val singlePane = paneDirective.isSinglePane()
         SharedTransitionLayout(Modifier.fillMaxSize()) {
             CompositionLocalProvider(LocalSharedTransitionScope provides if (singlePane) this else null) {
                 NavDisplay(
