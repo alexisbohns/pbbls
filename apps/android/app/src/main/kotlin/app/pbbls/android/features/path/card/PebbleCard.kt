@@ -19,6 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
@@ -73,7 +75,8 @@ private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
  *
  * Both faces are composed at the card's width and the face area takes the taller, so
  * turning never changes the card's size; the verso fills that height, so its stone
- * centres. Only the face in front is placed, and only it speaks to TalkBack.
+ * centres. Both faces are placed, ready to draw ([face]); only the face in front is seen,
+ * and only it speaks to TalkBack.
  *
  * The turn (pebble card spec §Behaviour, [CardTurnState]): the face area alone rotates on
  * Y inside the still shell, by the footer's button, a horizontal drag toward the start
@@ -334,19 +337,19 @@ private class VersoSlots(
 }
 
 /**
- * The face slot: both faces composed at one width, the area as tall as the taller, the
- * one in front placed. On the verso the band, measured first so the verso can leave it
- * room, lies over the face's foot, edge to edge.
+ * The face slot: both faces composed at one width, the area as tall as the taller, both
+ * placed and the one in front seen ([face]). On the verso the band, measured first so the
+ * verso can leave it room, lies over the face's foot, edge to edge.
  *
  * One probe, the verso measured free without its stone painted, gives the verso's own
  * height; the recto is measured once with that as its least height, so its height is the
  * taller of the two, and the verso is measured once at it. Each real face is composed
  * once, so the photo is fetched and the stone painted once.
  *
- * The measure block reads nothing of the turn. Which face is in front ([shown], derived
- * from the turn's progress) is read only while placing, so a turn re-places the area
- * twice, at the half there and back, and never re-measures it; the rotation itself is in
- * the caller's layer.
+ * Neither the measure block nor the placement reads the turn. Which face is in front
+ * ([shown], derived from the turn's progress) is read only in the faces' layers, so the
+ * half changes two layers' alpha and neither re-measures nor re-places the area; the
+ * rotation itself is in the caller's layer.
  */
 @Composable
 private fun FaceArea(
@@ -376,13 +379,30 @@ private fun FaceArea(
                 .measure(Constraints(minWidth = width, maxWidth = width, minHeight = versoNatural))
         val height = rectoPlaceable.height
         val versoPlaceable = subcompose(FaceSlot.VERSO, versoSlots.face).first().measure(Constraints.fixed(width, height))
+        val bandTop = height - CardLayout.bandFoot(u).roundToPx() - bandHeight
         layout(width, height) {
-            if (shown() == CardFace.RECTO) {
-                rectoPlaceable.place(0, 0)
-            } else {
-                versoPlaceable.place(0, 0)
-                bandPlaceable?.place(0, height - CardLayout.bandFoot(u).roundToPx() - bandHeight)
-            }
+            rectoPlaceable.placeWithLayer(0, 0) { face(shown() == CardFace.RECTO) }
+            versoPlaceable.placeWithLayer(0, 0) { face(shown() == CardFace.VERSO) }
+            bandPlaceable?.placeWithLayer(0, bandTop) { face(shown() == CardFace.VERSO) }
         }
     }
+}
+
+/**
+ * A face's own layer: drawn offscreen, seen only while [inFront].
+ *
+ * Offscreen, the face is rendered once into a texture of its own, and the turn rotates the
+ * texture: drawn into the rotating layer itself, every frame of the turn redrew the verso's
+ * mat print, rings, postmarks and lockup in perspective, two to three times the recto's GPU
+ * time and past the frame on a Pixel 8. At rest the texture is drawn pixel for pixel; it
+ * costs a face-sized texture per face while the card is shown.
+ *
+ * The hidden face stays placed at alpha 0 rather than unplaced: its display list is recorded
+ * and its texture rendered when the card opens, while HWUI skips drawing a node at alpha 0,
+ * so the half only swaps two alphas. Unplaced, the face was placed, recorded and rasterised
+ * in the half's own frame, which dropped it.
+ */
+private fun GraphicsLayerScope.face(inFront: Boolean) {
+    alpha = if (inFront) 1f else 0f
+    compositingStrategy = CompositingStrategy.Offscreen
 }
