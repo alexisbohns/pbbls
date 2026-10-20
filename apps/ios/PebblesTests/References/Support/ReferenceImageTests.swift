@@ -99,4 +99,20 @@ struct ReferenceImageTests {
         let read = try #require(ReferenceImage.readPNG(at: url))
         #expect(ReferenceImage.compare(image, read) == .differing(fraction: 0))
     }
+
+    /// Role-free on purpose (stack B reads no colour role): a dynamic sRGB
+    /// swatch resolved through the trait collection, so this checks both the
+    /// SwiftUI environment and the `performAsCurrent` pin.
+    @Test("scheme probe: paper renders white, Night renders black", arguments: ReferenceScheme.allCases)
+    @MainActor
+    func schemeProbe(scheme: ReferenceScheme) throws {
+        let swatch = UIColor { $0.userInterfaceStyle == .dark ? .black : .white }
+        let view = Rectangle().fill(Color(uiColor: swatch)).frame(width: 10, height: 10)
+        let image = try #require(ReferenceImage.render(view, config: ReferenceConfig(scheme: scheme, width: nil), locale: .en))
+        #expect(image.width == 20 && image.height == 20)
+        let bytes = ReferenceImage.rgba(image)
+        let centre = (10 * 20 + 10) * 4
+        let expected: UInt8 = scheme == .paper ? 255 : 0
+        #expect(Array(bytes[centre..<centre + 4]) == [expected, expected, expected, 255])
+    }
 }

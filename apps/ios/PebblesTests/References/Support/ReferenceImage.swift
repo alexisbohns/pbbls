@@ -142,4 +142,82 @@ enum ReferenceImage {
         CGImageDestinationAddImage(destination, image, nil)
         guard CGImageDestinationFinalize(destination) else { throw ReferenceError.cannotWrite(url) }
     }
+
+    // MARK: - Render and assert
+
+    /// Renders under every pin of `config` and `locale`, then normalises the bytes.
+    @MainActor
+    static func render<V: View>(_ view: V, config: ReferenceConfig, locale: ReferenceLocale) -> CGImage? {
+        let content = view
+            .frame(width: config.width)
+            .environment(\.colorScheme, config.scheme.colorScheme)
+            .environment(\.locale, Locale(identifier: locale.rawValue))
+            .environment(\.timeZone, TimeZone(identifier: "Europe/Paris") ?? .gmt)
+            .environment(\.dynamicTypeSize, config.dynamicType)
+        let renderer = ImageRenderer(content: content)
+        renderer.scale = scale
+        renderer.proposedSize = ProposedViewSize(width: config.width, height: nil)
+        var image: CGImage?
+        // A UIColor resolved against `UITraitCollection.current` ignores the
+        // SwiftUI environment; this makes it follow the scheme too.
+        UITraitCollection(userInterfaceStyle: config.scheme.userInterfaceStyle).performAsCurrent {
+            image = renderer.cgImage
+        }
+        return image.flatMap(normalized)
+    }
+
+    /// Compares `view` with `__References__/<Suite>/<name>-<scheme>-<locale>[-ax2].png`
+    /// beside the calling suite file. A missing reference fails; it is never
+    /// recorded implicitly. Returns without a check in a locale pass the config
+    /// does not declare.
+    @MainActor
+    static func assertMatches<V: View>(
+        _ view: V,
+        named name: String,
+        config: ReferenceConfig,
+        filePath: String = #filePath,
+        sourceLocation: SourceLocation = #_sourceLocation
+    ) {
+        let locale = ReferenceLocale.current
+        guard config.runs(in: locale) else { return }
+        let paths = paths(file: config.fileName(name, locale: locale), filePath: filePath)
+        guard let actual = render(view, config: config, locale: locale) else {
+            Issue.record("\(name): ImageRenderer produced no image", sourceLocation: sourceLocation)
+            return
+        }
+        if isRecording {
+            do {
+                try writePNG(actual, to: paths.reference)
+            } catch {
+                Issue.record("\(name): could not record \(paths.reference.path): \(error)", sourceLocation: sourceLocation)
+            }
+            return
+        }
+        guard let reference = readPNG(at: paths.reference) else {
+            try? writePNG(actual, to: paths.actual)
+            Issue.record("""
+                \(name): no reference at \(paths.reference.path). References are rendered on CI only: \
+                add the rebaseline-ios-screenshots label to the PR.
+                """, sourceLocation: sourceLocation)
+            return
+        }
+        switch compare(actual, reference) {
+        case .sizeMismatch:
+            try? writePNG(actual, to: paths.actual)
+            Issue.record("""
+                \(name): size \(actual.width)×\(actual.height) px ≠ reference \(reference.width)×\(reference.height) px. \
+                Actual at \(paths.actual.path)
+                """, sourceLocation: sourceLocation)
+        case .differing(let fraction) where fraction > threshold:
+            try? writePNG(actual, to: paths.actual)
+            if let diff = diffImage(actual, reference) { try? writePNG(diff, to: paths.diff) }
+            let percent = String(format: "%.4f", fraction * 100)
+            Issue.record("""
+                \(name): \(percent) % of pixels differ (threshold \(threshold * 100) %). \
+                Actual and diff in \(paths.diff.deletingLastPathComponent().path)
+                """, sourceLocation: sourceLocation)
+        case .differing:
+            return
+        }
+    }
 }
