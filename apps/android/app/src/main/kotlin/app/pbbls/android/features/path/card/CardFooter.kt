@@ -39,7 +39,8 @@ private val BALANCED = LineBreak(LineBreak.Strategy.Balanced, LineBreak.Strictne
 /**
  * The card's still footer (pebble card spec §The card): privacy left, the turn right.
  * The turn target is one 48 dp box covering label and miniature out to the card's
- * edge; the custom layout places it so it never overlaps the privacy sentence.
+ * edge; the custom layout places it so it never overlaps the privacy sentence, and
+ * drops it under the privacy when it would take more than half the width.
  */
 @Composable
 internal fun CardFooter(
@@ -112,21 +113,27 @@ internal fun CardFooter(
         },
     ) { measurables, constraints ->
         val (privacyColumn, turn) = measurables
+        val gap = CardLayout.FOOTER_GAP.roundToPx()
         val right = turn.measure(Constraints(maxWidth = constraints.maxWidth, maxHeight = constraints.maxHeight))
-        val leftMax = (constraints.maxWidth - right.width - CardLayout.FOOTER_GAP.roundToPx()).coerceAtLeast(0)
+        // Side by side while the turn takes at most half the width; past that (a large font
+        // scale) the turn drops under the privacy, end-aligned, rather than squeezing it to a column.
+        val stacked = constraints.hasBoundedWidth && right.width > constraints.maxWidth / 2
+        val leftMax =
+            if (stacked) constraints.maxWidth else (constraints.maxWidth - right.width - gap).coerceAtLeast(0)
         val left = privacyColumn.measure(Constraints(maxWidth = leftMax, maxHeight = constraints.maxHeight))
+        val target = CardLayout.TURN_TARGET.roundToPx()
         val height =
-            maxOf(left.height, right.height, CardLayout.TURN_TARGET.roundToPx())
+            (if (stacked) left.height + maxOf(right.height, target) else maxOf(left.height, right.height, target))
                 .coerceIn(constraints.minHeight, constraints.maxHeight)
-        val width =
-            if (constraints.hasBoundedWidth) {
-                constraints.maxWidth
-            } else {
-                left.width + CardLayout.FOOTER_GAP.roundToPx() + right.width
-            }
+        val width = if (constraints.hasBoundedWidth) constraints.maxWidth else left.width + gap + right.width
         layout(width, height) {
-            left.placeRelative(0, (height - left.height) / 2)
-            right.placeRelative(width - right.width, (height - right.height) / 2)
+            if (stacked) {
+                left.placeRelative(0, 0)
+                right.placeRelative(width - right.width, left.height)
+            } else {
+                left.placeRelative(0, (height - left.height) / 2)
+                right.placeRelative(width - right.width, (height - right.height) / 2)
+            }
         }
     }
 }

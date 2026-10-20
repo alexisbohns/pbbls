@@ -208,11 +208,20 @@ fun CardFooterSecretFrenchNight() {
     PebblesTheme { FooterOnStock(Visibility.SECRET, CardFaceTarget.PEBBLE) }
 }
 
+/** French at the largest font scale on a 288 dp card: the turn drops under the privacy rather than squeezing it. */
+@PreviewTest
+@Preview(showBackground = true, locale = "fr", fontScale = 2f)
+@Composable
+fun CardFooterPublicFrenchLargeFontLight() {
+    PebblesTheme { FooterOnStock(Visibility.PUBLIC, CardFaceTarget.PEBBLE, width = 288.dp) }
+}
+
 /** The footer across a 328 dp card's stock; the miniature's stone is the joy spot. */
 @Composable
 private fun FooterOnStock(
     visibility: Visibility,
     turnTo: CardFaceTarget,
+    width: Dp = 328.dp,
 ) {
     val colors = PebblesTheme.spine.colors
     val palette = PebbleCardFixtures.joyPalette
@@ -222,7 +231,7 @@ private fun FooterOnStock(
             turnTo = turnTo,
             stone = if (colors.isNight) palette.secondary else palette.primary,
             onTurn = {},
-            modifier = Modifier.width(328.dp).background(colors.stock),
+            modifier = Modifier.width(width).background(colors.stock),
         )
     }
 }
