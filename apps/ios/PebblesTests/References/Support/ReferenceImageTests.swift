@@ -7,21 +7,35 @@ import UIKit
 @Suite("Reference harness")
 struct ReferenceImageTests {
 
+    private struct NamingCase {
+        let scheme: ReferenceScheme
+        let locale: ReferenceLocale
+        let dynamicType: DynamicTypeSize
+        let name: String
+
+        init(_ scheme: ReferenceScheme, _ locale: ReferenceLocale, _ dynamicType: DynamicTypeSize, _ name: String) {
+            self.scheme = scheme
+            self.locale = locale
+            self.dynamicType = dynamicType
+            self.name = name
+        }
+    }
+
     @Test("file names cover every scheme, locale and Dynamic Type combination")
     func fileNames() {
-        let expected: [(ReferenceScheme, ReferenceLocale, DynamicTypeSize, String)] = [
-            (.paper, .en, .large, "slide-paper-en.png"),
-            (.paper, .fr, .large, "slide-paper-fr.png"),
-            (.night, .en, .large, "slide-night-en.png"),
-            (.night, .fr, .large, "slide-night-fr.png"),
-            (.paper, .en, .accessibility2, "slide-paper-en-ax2.png"),
-            (.paper, .fr, .accessibility2, "slide-paper-fr-ax2.png"),
-            (.night, .en, .accessibility2, "slide-night-en-ax2.png"),
-            (.night, .fr, .accessibility2, "slide-night-fr-ax2.png")
+        let expected: [NamingCase] = [
+            .init(.paper, .en, .large, "slide-paper-en.png"),
+            .init(.paper, .fr, .large, "slide-paper-fr.png"),
+            .init(.night, .en, .large, "slide-night-en.png"),
+            .init(.night, .fr, .large, "slide-night-fr.png"),
+            .init(.paper, .en, .accessibility2, "slide-paper-en-ax2.png"),
+            .init(.paper, .fr, .accessibility2, "slide-paper-fr-ax2.png"),
+            .init(.night, .en, .accessibility2, "slide-night-en-ax2.png"),
+            .init(.night, .fr, .accessibility2, "slide-night-fr-ax2.png")
         ]
-        for (scheme, locale, dynamicType, name) in expected {
-            let config = ReferenceConfig(scheme: scheme, locales: [locale], dynamicType: dynamicType)
-            #expect(config.fileName("slide", locale: locale) == name)
+        for item in expected {
+            let config = ReferenceConfig(scheme: item.scheme, locales: [item.locale], dynamicType: item.dynamicType)
+            #expect(config.fileName("slide", locale: item.locale) == item.name)
         }
     }
 
@@ -85,7 +99,8 @@ struct ReferenceImageTests {
             file: "nineStones-paper-en.png",
             filePath: "/r/apps/ios/PebblesTests/References/StoneReferences.swift"
         )
-        #expect(paths.reference.path == "/r/apps/ios/PebblesTests/References/__References__/StoneReferences/nineStones-paper-en.png")
+        #expect(paths.reference.path
+                == "/r/apps/ios/PebblesTests/References/__References__/StoneReferences/nineStones-paper-en.png")
         #expect(paths.actual.path == "/r/apps/ios/build/reference-diffs/StoneReferences/nineStones-paper-en.actual.png")
         #expect(paths.diff.path == "/r/apps/ios/build/reference-diffs/StoneReferences/nineStones-paper-en.diff.png")
     }
@@ -108,7 +123,8 @@ struct ReferenceImageTests {
     func schemeProbe(scheme: ReferenceScheme) throws {
         let swatch = UIColor { $0.userInterfaceStyle == .dark ? .black : .white }
         let view = Rectangle().fill(Color(uiColor: swatch)).frame(width: 10, height: 10)
-        let image = try #require(ReferenceImage.render(view, config: ReferenceConfig(scheme: scheme, width: nil), locale: .en))
+        let config = ReferenceConfig(scheme: scheme, width: nil)
+        let image = try #require(ReferenceImage.render(view, config: config, locale: .en))
         #expect(image.width == 20 && image.height == 20)
         let bytes = ReferenceImage.rgba(image)
         let centre = (10 * 20 + 10) * 4

@@ -51,7 +51,9 @@ private struct NineStonesFixture: View {
             ForEach(ValenceSizeGroup.allCases) { size in
                 HStack(spacing: 12) {
                     ForEach(ValencePolarity.allCases, id: \.self) { polarity in
-                        if let valence = Valence.allCases.first(where: { $0.sizeGroup == size && $0.polarity == polarity }) {
+                        if let valence = Valence.allCases.first(where: {
+                            $0.sizeGroup == size && $0.polarity == polarity
+                        }) {
                             StoneView(
                                 valence: valence, palette: .brand,
                                 material: .starting(for: polarity), tones: .starting(for: polarity),

@@ -189,7 +189,8 @@ enum ReferenceImage {
             do {
                 try writePNG(actual, to: paths.reference)
             } catch {
-                Issue.record("\(name): could not record \(paths.reference.path): \(error)", sourceLocation: sourceLocation)
+                Issue.record("\(name): could not record \(paths.reference.path): \(error)",
+                             sourceLocation: sourceLocation)
             }
             return
         }
@@ -205,8 +206,8 @@ enum ReferenceImage {
         case .sizeMismatch:
             try? writePNG(actual, to: paths.actual)
             Issue.record("""
-                \(name): size \(actual.width)×\(actual.height) px ≠ reference \(reference.width)×\(reference.height) px. \
-                Actual at \(paths.actual.path)
+                \(name): size \(actual.width)×\(actual.height) px ≠ \
+                reference \(reference.width)×\(reference.height) px. Actual at \(paths.actual.path)
                 """, sourceLocation: sourceLocation)
         case .differing(let fraction) where fraction > threshold:
             try? writePNG(actual, to: paths.actual)

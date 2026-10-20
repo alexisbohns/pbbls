@@ -17,8 +17,8 @@ extension References {
 
         @Test(.enabled(if: ReferenceLocale.current == .fr))
         func slideAx2() {
-            ReferenceImage.assertMatches(SlideFixture(), named: "slide",
-                                         config: ReferenceConfig(scheme: .paper, locales: [.fr], dynamicType: .accessibility2))
+            let config = ReferenceConfig(scheme: .paper, locales: [.fr], dynamicType: .accessibility2)
+            ReferenceImage.assertMatches(SlideFixture(), named: "slide", config: config)
         }
     }
 }
