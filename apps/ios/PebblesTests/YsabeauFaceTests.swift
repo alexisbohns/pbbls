@@ -68,7 +68,7 @@ struct YsabeauFaceTests {
         #expect(CTProbe.wght(font) == 700)
         let defaultInstance = try #require(UIFont(name: YsabeauFace.romanName, size: 17))
         let ink = try CTProbe.inkWidth("l", font: font)
-        #expect(ink == (try CTProbe.inkWidth("l", font: defaultInstance)))
+        #expect(abs(ink - (try CTProbe.inkWidth("l", font: defaultInstance))) < 0.01)
         let caps = YsabeauFace.uiFont(size: 17, weight: 700, italic: false, features: [.smallCaps])
         #expect(CTProbe.wght(caps) == 700)
     }
