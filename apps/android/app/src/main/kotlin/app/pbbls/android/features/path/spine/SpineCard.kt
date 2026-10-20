@@ -207,6 +207,8 @@ internal val NIGHT_PHOTO_FILTER: ColorFilter =
  * @param width the held card's width; null sizes the card by intensity and ratio, as the Spine does.
  *   A [width] without a raised [uMax] keeps the Spine's 4.4 dp cap on the chrome.
  * @param uMax the card unit's cap; the held card raises it.
+ * @param shell modifiers for the shell itself, outside its shadow and clip: the card's end of
+ *   its flight to the held card (`sharedCardBounds`).
  */
 @Composable
 internal fun SpineCard(
@@ -223,6 +225,7 @@ internal fun SpineCard(
     button: Modifier = Modifier,
     width: Dp? = null,
     uMax: Dp = U_MAX,
+    shell: Modifier = Modifier,
 ) {
     val valence = moment.valence
     val intensity = valence.intensity
@@ -241,7 +244,7 @@ internal fun SpineCard(
             palette = palette,
             polarity = valence.polarity,
             intensity = intensity,
-            modifier = Modifier.width(cardWidth),
+            modifier = shell.width(cardWidth),
             button = button,
         ) {
             SpineCardFace(

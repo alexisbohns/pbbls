@@ -239,8 +239,9 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         // the card should turn in place (pebble card spec §Behaviour).
         clazzContentKey = { key -> "PebbleDetail:${key.momentId}" },
         // Fade-through, not the push BarKeys get: beside Path this is a scene
-        // change, not a lateral move (#940). It also covers the phone page
-        // (#1135) until Part 4's container transform from the Spine.
+        // change, not a lateral move (#940). It also carries the phone page
+        // (#1135), while the card itself flies from its slot on the Spine
+        // (`sharedCardBounds`, provided only on one pane by RootScreen).
         metadata = NavTransitions.split + PanePairs.metadataFor<PebblesKey.PebbleDetail>(),
     ) { key ->
         PebbleDetailScreen(

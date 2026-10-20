@@ -69,7 +69,9 @@ import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.card.BareMomentPage
 import app.pbbls.android.features.path.card.CardCompletion
 import app.pbbls.android.features.path.card.CardCompletionState
+import app.pbbls.android.features.path.card.CardPlaceholder
 import app.pbbls.android.features.path.card.PebbleCard
+import app.pbbls.android.features.path.card.logic.CardFlight
 import kotlinx.coroutines.delay
 import java.time.ZoneId
 import kotlin.math.min
@@ -136,9 +138,16 @@ fun PebbleDetailScreen(
 
     LaunchedEffect(momentId) { viewModel.start(momentId) }
 
+    // The moment is deleted and the page closing: its card fades out with the page rather
+    // than fly back into the slot of a row that is gone. Set before the pop, so the frame
+    // that starts the close already has no shared bounds on the card.
+    var leaving by remember { mutableStateOf(false) }
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {
-            PebbleDetailEffect.MomentDeleted -> onMomentDeleted()
+            PebbleDetailEffect.MomentDeleted -> {
+                leaving = true
+                onMomentDeleted()
+            }
         }
     }
 
@@ -273,6 +282,10 @@ fun PebbleDetailScreen(
         faceRequest = faceRequest,
         completion = completion,
         printed = announcing,
+        // A card pressed on the Spine flies in from the open's first frame, onto a blank
+        // card while the moment loads; the stone's verso opens in place.
+        flightMomentId = CardFlight.placeholderFor(momentId, face),
+        leaving = leaving,
     )
 
     if (pendingDelete && detail != null) {
@@ -308,6 +321,10 @@ fun PebbleDetailScreen(
  *   [PebbleDetailUiState.Content.completing]: the bare page stays up under the card printing
  *   into its place ([CardCompletion]). Null, a completing state shows the card at rest.
  * @param printed the card has just printed on this page: its arrival is announced, once.
+ * @param flightMomentId the moment whose card may be flying in from the Spine: while it loads,
+ *   the page holds a blank card for the flight to land on ([CardPlaceholder]). Null, the
+ *   spinner alone. Once loaded, the card flies by the face it shows ([PebbleCard]).
+ * @param leaving the moment has been deleted and the page is closing: the card does not fly.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -336,6 +353,8 @@ internal fun PebbleDetailContent(
     faceRequest: Int = 0,
     completion: CardCompletionState? = null,
     printed: Boolean = false,
+    flightMomentId: String? = null,
+    leaving: Boolean = false,
 ) {
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
 
@@ -358,8 +377,12 @@ internal fun PebbleDetailContent(
         // Exhaustive with no `else`: a new PebbleDetailUiState case must render.
         when (val state = uiState) {
             PebbleDetailUiState.Loading ->
-                Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    LoadingIndicator()
+                if (flightMomentId != null) {
+                    CardPlaceholder(flightMomentId)
+                } else {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        LoadingIndicator()
+                    }
                 }
             PebbleDetailUiState.Error ->
                 DetailLoadError(onRetry = onRetry)
@@ -409,6 +432,9 @@ internal fun PebbleDetailContent(
                                         zone = zone,
                                         completion = print,
                                         printed = printed,
+                                        // Its flight follows the face it shows; a deleted
+                                        // moment's card fades with the page.
+                                        leaving = leaving,
                                         modifier = cardModifier,
                                     )
                                 }

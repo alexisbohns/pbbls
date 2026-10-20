@@ -45,6 +45,11 @@ import androidx.navigation3.scene.SceneStrategyScope
  * sign-out's `replaceAll` clears the stack. A sheet sliding down over Edit's
  * slide-up, over the new pair or over Welcome would be worse than the sheet
  * simply giving way.
+ *
+ * Never host the Spine or the pebble detail here while `RootScreen` provides
+ * `LocalSharedTransitionScope`: an overlay scene sits outside `NavDisplay`'s
+ * `AnimatedContent`, so the card's `sharedCardBounds` would find no
+ * `LocalNavAnimatedContentScope` and throw.
  */
 class BottomSheetSceneStrategy<T : Any> : SceneStrategy<T> {
     override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>? {

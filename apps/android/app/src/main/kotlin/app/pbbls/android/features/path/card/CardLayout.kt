@@ -2,11 +2,18 @@ package app.pbbls.android.features.path.card
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 
 /** The held card's geometry, in dp from the final mocks (pebble card spec). */
 internal object CardLayout {
     val MAX_WIDTH = 440.dp
     val PAGE_MARGIN = 16.dp
+
+    /**
+     * The held card's width on a page [maxWidth] wide: the page margin each side, capped at
+     * [MAX_WIDTH]. The blank card a flight lands on while the moment loads takes the same.
+     */
+    fun cardWidth(maxWidth: Dp): Dp = min(maxWidth - PAGE_MARGIN * 2, MAX_WIDTH).coerceAtLeast(0.dp)
 
     /** Card units on the held card are not capped (the Spine caps them at 4.4 dp). */
     const val U_DIVISOR = 70f
