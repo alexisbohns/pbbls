@@ -384,8 +384,8 @@
     <string name="card_turn_action_to_pebble">Turn over to your pebble</string>
     <string name="card_turn_action_to_moment">Turn over to the moment</string>
     <string name="card_verso_heading">Your pebble</string>
-    <string name="card_domains_a11y">Life domains</string>
-    <string name="card_collections_a11y">Collections</string>
+    <string name="card_domains_a11y">Life domains: %1$s</string>
+    <string name="card_collections_a11y">Collections: %1$s</string>
     <string name="bare_place_kicker" tools:ignore="UnusedResources">Not a pebble yet</string>
     <string name="bare_place_body" tools:ignore="UnusedResources">Its card prints here once you say what it meant: a feeling and its weight, the parts of your life it touched, who was there.</string>
     <!-- Karma-earned flash (D9). -->

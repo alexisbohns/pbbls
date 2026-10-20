@@ -267,7 +267,7 @@ private fun Postmarks(
     val locale = LocalConfiguration.current.locales[0]
     val names = pebble.domains.map { ReferenceStrings.referenceName(ReferenceType.DOMAIN, it.slug, it.name) }
     val listed = remember(names, locale) { ListFormatter.getInstance(locale).format(names) }
-    val description = stringResource(R.string.card_domains_a11y) + ": " + listed
+    val description = stringResource(R.string.card_domains_a11y, listed)
     val count = pebble.domains.size
     val diameter = min(CardLayout.POSTMARK_DIAMETER, (rowWidth - CardLayout.POSTMARK_GAP * (count - 1)) / count)
     // The emotion's shaded tone on paper, its secondary at Night (back-token3 `--ink-c`).

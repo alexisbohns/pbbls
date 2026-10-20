@@ -60,7 +60,7 @@ internal fun CollectionBand(
     if (names.isEmpty()) return
     val locale = LocalConfiguration.current.locales[0]
     val listed = remember(names, locale) { ListFormatter.getInstance(locale).format(names) }
-    val description = stringResource(R.string.card_collections_a11y) + ": " + listed
+    val description = stringResource(R.string.card_collections_a11y, listed)
 
     Box(
         modifier
