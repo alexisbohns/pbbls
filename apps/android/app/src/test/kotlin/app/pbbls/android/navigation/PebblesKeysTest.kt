@@ -1,6 +1,7 @@
 package app.pbbls.android.navigation
 
 import app.pbbls.android.core.model.AuthMode
+import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.core.model.GlyphStroke
@@ -63,6 +64,7 @@ class PebblesKeysTest {
                 PebblesKey.LabLogList("announcements"),
                 PebblesKey.Capture,
                 PebblesKey.PebbleDetail(momentId = "m-1"),
+                PebblesKey.PebbleDetail(momentId = "m-1", face = CardFace.VERSO),
                 PebblesKey.GlyphDetail(sampleItem),
                 PebblesKey.GlyphDetail(ownedItem),
                 PebblesKey.EditPebble(momentId = "m-1"),
@@ -90,6 +92,14 @@ class PebblesKeysTest {
         val saved = """{"type":"app.pbbls.android.navigation.PebblesKey.PebbleDetail","pebbleId":"m-1"}"""
         val key = Json.decodeFromString(PebblesKey.serializer(), saved)
         assertEquals(PebblesKey.PebbleDetail(momentId = "m-1"), key)
+    }
+
+    @Test
+    fun `a detail key saved before faces decodes as the recto`() {
+        assertEquals(
+            PebblesKey.PebbleDetail("m1", CardFace.RECTO),
+            Json.decodeFromString<PebblesKey.PebbleDetail>("""{"pebbleId":"m1"}"""),
+        )
     }
 
     @Test

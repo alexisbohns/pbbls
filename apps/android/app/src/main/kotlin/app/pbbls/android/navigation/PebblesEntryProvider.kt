@@ -65,7 +65,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         PathScreen(
             onOpenDetail = { momentId -> navigator.navigateToDetail(PebblesKey.PebbleDetail(momentId)) },
             onCreatePebble = { navigator.navigate(PebblesKey.Capture) },
-            onDeleteConfirmed = { navigator.closeDetail(PebblesKey.PebbleDetail(it)) },
+            onDeleteConfirmed = { navigator.closeMomentDetail(it) },
         )
     }
 
@@ -239,9 +239,10 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     ) { key ->
         PebbleDetailScreen(
             momentId = key.momentId,
+            initialFace = key.face,
             onEditMoment = { navigator.navigate(PebblesKey.EditMoment(key.momentId)) },
             onEditPebble = { navigator.navigate(PebblesKey.EditPebble(key.momentId)) },
-            onMomentDeleted = { navigator.closeDetail(PebblesKey.PebbleDetail(key.momentId)) },
+            onMomentDeleted = { navigator.closeMomentDetail(key.momentId) },
             onCompleteRequested = { navigator.navigate(PebblesKey.CompletePebble(key.momentId)) },
             showBack = !isInListDetailPane(),
             onBack = navigator::goBack,

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.MomentDetail
@@ -51,7 +52,7 @@ private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
  * @param thumbUrl the signed thumb, the photo's placeholder.
  * @param soulsById the souls cache, for the recto's marks.
  * @param domains the reference domains, for the postmarks' glyphs.
- * @param initialFace the face showing first: [CardFaceTarget.MOMENT] is the recto.
+ * @param initialFace the face showing first.
  * @param zone where the recto's day, time and dateline fall, as `SpineWeek` takes its own.
  */
 @Composable
@@ -64,11 +65,13 @@ internal fun PebbleCard(
     soulsById: Map<String, SoulWithGlyph>,
     domains: List<Domain>,
     modifier: Modifier = Modifier,
-    initialFace: CardFaceTarget = CardFaceTarget.MOMENT,
+    initialFace: CardFace = CardFace.RECTO,
     zone: ZoneId = ZoneId.systemDefault(),
 ) {
     val pebble = requireNotNull(detail.pebble) { "only a pebble has a card" }
-    var face by rememberSaveable { mutableStateOf(initialFace) }
+    var face by rememberSaveable {
+        mutableStateOf(if (initialFace == CardFace.RECTO) CardFaceTarget.MOMENT else CardFaceTarget.PEBBLE)
+    }
     val colors = PebblesTheme.spine.colors
     val stone = remember(palette) { palette?.toStonePalette() ?: BLANK_STONE_PALETTE }
     val spot = StoneTones.spot(stone, colors.isNight)

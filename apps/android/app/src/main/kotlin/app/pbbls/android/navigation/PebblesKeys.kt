@@ -2,6 +2,7 @@ package app.pbbls.android.navigation
 
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
+import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.GlyphGridItem
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -95,6 +96,8 @@ sealed interface PebblesKey : NavKey {
         /** A moment id. Serialized under its pre-split name so a restored back stack still decodes. */
         @SerialName("pebbleId")
         val momentId: String,
+        /** The face the card opens on. Defaulted so a stack saved before faces existed still decodes, as the recto. */
+        val face: CardFace = CardFace.RECTO,
     ) : PebblesKey,
         BarKey
 

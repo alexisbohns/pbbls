@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.common.UuidHash
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.MomentDetail
@@ -370,7 +371,7 @@ private fun CardOnGround(
             thumbUrl = null,
             soulsById = PebbleCardFixtures.soulsById,
             domains = PebbleCardFixtures.domains,
-            initialFace = face,
+            initialFace = if (face == CardFaceTarget.MOMENT) CardFace.RECTO else CardFace.VERSO,
             zone = PebbleCardFixtures.zone,
         )
     }

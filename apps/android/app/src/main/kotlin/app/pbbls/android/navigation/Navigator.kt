@@ -65,6 +65,18 @@ class Navigator(
     }
 
     /**
+     * Closes the open detail of [momentId] whatever face it opened on; [closeDetail]
+     * compares the whole key, face included.
+     */
+    fun closeMomentDetail(momentId: String) {
+        val stack = state.currentStack
+        val last = stack.last()
+        if (stack.size > 1 && last is PebblesKey.PebbleDetail && last.momentId == momentId) {
+            stack.removeAt(stack.lastIndex)
+        }
+    }
+
+    /**
      * Unwind the current tab, then fall back to the start route, then let the
      * system exit (D4). Popping the start route's last entry is deliberately a
      * no-op: an empty stack has nothing to render.
