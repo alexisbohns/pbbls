@@ -26,8 +26,7 @@ extension References {
 
 private struct SlideFixture: View {
     var body: some View {
-        WelcomeSlideView(step: WelcomeStep(id: "calibration", title: "Enrich with purpose.",
-                                           description: WelcomeSteps.all[1].description))
+        WelcomeSlideView(step: WelcomeSteps.all[1])
             .padding(.vertical, 24)
             .background(Color.system.background)
     }
