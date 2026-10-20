@@ -46,9 +46,11 @@ import kotlin.math.roundToInt
  * is laid over the ink so it reads as pressed, not printed. Not clickable; the
  * ring is decorative and hidden from TalkBack (the verso's list reads the name).
  *
- * The geometry is the mock's at [CardLayout.POSTMARK_DIAMETER] and scales with a
- * shrunk [diameter]; the ring's type does not (it steps down through [RingFits]
- * instead), and ignores the font scale, being decoration inside a fixed stamp.
+ * The outer ring and the glyph are the mock's at [CardLayout.POSTMARK_DIAMETER] and
+ * scale with a shrunk [diameter]. The ring's type does not (it steps down through
+ * [RingFits] instead, and ignores the font scale, being decoration inside a fixed
+ * stamp), so its band, the baseline and the inner ring under it, is in absolute dp:
+ * scaled with the stamp, the capitals' accents would run into the outer ring.
  */
 @Composable
 internal fun DomainPostmark(
@@ -65,7 +67,7 @@ internal fun DomainPostmark(
     val locale = LocalConfiguration.current.locales[0]
     val textMeasurer = rememberTextMeasurer()
     val scale = diameter / CardLayout.POSTMARK_DIAMETER
-    val baselineRadiusPx = with(density) { (diameter / 2 - CardLayout.POSTMARK_TEXT_INSET * scale).toPx() }
+    val baselineRadiusPx = with(density) { (diameter / 2 - CardLayout.POSTMARK_TEXT_INSET).toPx() }
     val ring =
         remember(name, baselineRadiusPx, locale, density, textMeasurer) {
             RingLayout.of(name, baselineRadiusPx, locale, textMeasurer, Density(density.density, fontScale = 1f))
@@ -82,7 +84,7 @@ internal fun DomainPostmark(
             )
             drawCircle(
                 color = ink,
-                radius = r - (CardLayout.POSTMARK_INNER_RING_INSET * scale).toPx(),
+                radius = baselineRadiusPx - CardLayout.POSTMARK_INNER_RING_DROP.toPx(),
                 style = Stroke(width = (CardLayout.POSTMARK_INNER_RING * scale).toPx()),
             )
             ring.glyphs.forEach { glyph ->

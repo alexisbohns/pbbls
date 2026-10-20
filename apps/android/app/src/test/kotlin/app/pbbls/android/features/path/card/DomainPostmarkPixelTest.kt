@@ -2,6 +2,7 @@ package app.pbbls.android.features.path.card
 
 import android.app.Application
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
@@ -70,5 +71,74 @@ class DomainPostmarkPixelTest {
         // The noise is clipped to the disc: the square's corners stay ground.
         assertEquals(0f, pixels[1, 1].red, 0.01f)
         assertEquals(0f, pixels[pixels.width - 2, pixels.height - 2].red, 0.01f)
+    }
+
+    @Test
+    fun `capital accents print inside the ring band on a shrunk stamp`() {
+        val diameter = 61.5.dp
+        compose.setContent {
+            PebblesTheme {
+                Row {
+                    listOf("ÉÊÉ" to "accented", "EEE" to "bare").forEach { (name, tag) ->
+                        DomainPostmark(
+                            name = name,
+                            strokes = null,
+                            viewBox = null,
+                            ink = Color.Black,
+                            paper = Color.White,
+                            seed = 1L,
+                            diameter = diameter,
+                            modifier = Modifier.testTag(tag).background(Color.White),
+                        )
+                    }
+                }
+            }
+        }
+        val density = compose.density.density
+        val r = diameter.value / 2
+        val baseline = r - CardLayout.POSTMARK_TEXT_INSET.value
+        val scale = diameter / CardLayout.POSTMARK_DIAMETER
+        val ringInner = r - (CardLayout.POSTMARK_OUTER_RING_INSET.value + CardLayout.POSTMARK_OUTER_RING.value / 2) * scale
+        // Above Ysabeau's cap height (0.66 em at 8.5 sp, 5.6 dp) and short of the outer ring: only accents print here.
+        val band = (baseline + 6f) * density..(ringInner - 0.4f) * density
+        val accented = inkIn("accented", band)
+        val bare = inkIn("bare", band)
+        // Bare capitals leave the band empty; a scaled-down band put their tops in it and the accents in the ring.
+        assertTrue("accents should print in the band: accented $accented, bare $bare", accented > bare + 10 && bare * 4 < accented)
+    }
+
+    @Test
+    fun `the tallest accent clears the outer ring at both diameters`() {
+        // Ysabeau's É and Ê reach 0.907 em above the baseline; the ring type is at most 8.5 sp.
+        val accentTop = 0.907f * 8.5f
+        for (diameter in listOf(72f, 61.5f)) {
+            val r = diameter / 2
+            val scale = diameter / CardLayout.POSTMARK_DIAMETER.value
+            val ringInner = r - (CardLayout.POSTMARK_OUTER_RING_INSET.value + CardLayout.POSTMARK_OUTER_RING.value / 2) * scale
+            val baseline = r - CardLayout.POSTMARK_TEXT_INSET.value
+            assertTrue(
+                "at $diameter dp the accent tops at ${baseline + accentTop}, the ring starts at $ringInner",
+                baseline + accentTop < ringInner,
+            )
+            val innerRing = baseline - CardLayout.POSTMARK_INNER_RING_DROP.value
+            val glyphRadius = CardLayout.POSTMARK_GLYPH.value * scale / 2
+            assertTrue("at $diameter dp the inner ring $innerRing should clear the glyph $glyphRadius", innerRing > glyphRadius)
+        }
+    }
+
+    /** Dark pixels of the stamp tagged [tag] whose distance from its centre falls in [band], in px. */
+    private fun inkIn(
+        tag: String,
+        band: ClosedFloatingPointRange<Float>,
+    ): Int {
+        val pixels = compose.onNodeWithTag(tag).captureToImage().toPixelMap()
+        val c = pixels.width / 2f
+        var n = 0
+        for (y in 0 until pixels.height) {
+            for (x in 0 until pixels.width) {
+                if (hypot(x + 0.5f - c, y + 0.5f - c) in band && pixels[x, y].red < 0.5f) n++
+            }
+        }
+        return n
     }
 }

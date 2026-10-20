@@ -26,14 +26,19 @@ internal object CardLayout {
     val POSTMARK_OUTER_RING = 1.6.dp
     val POSTMARK_INNER_RING = 0.8.dp
 
-    /**
-     * Insets from the stamp's edge at [POSTMARK_DIAMETER], from the mock's 72-unit
-     * SVG (outer ring r 34.6, text baseline r 26, inner ring r 23.6); a shrunk stamp
-     * scales them with its diameter.
-     */
+    /** The outer ring's inset from the stamp's edge at [POSTMARK_DIAMETER] (the mock's r 34.6 of 36); it scales with a shrunk stamp. */
     val POSTMARK_OUTER_RING_INSET = 1.4.dp
-    val POSTMARK_TEXT_INSET = 10.dp
-    val POSTMARK_INNER_RING_INSET = 12.4.dp
+
+    /**
+     * The ring text's band, in absolute dp because the ring type does not scale: the
+     * baseline sits [POSTMARK_TEXT_INSET] in from the stamp's edge and the inner ring
+     * [POSTMARK_INNER_RING_DROP] under it. 10.5 dp leaves room above the baseline for
+     * Ysabeau's capital accents (É, Ê reach 0.907 em, 7.7 dp at 8.5 sp) inside the outer
+     * ring even on a shrunk 61.5 dp stamp, where the inner ring (r 17.85) still clears
+     * the glyph field (r 16.2).
+     */
+    val POSTMARK_TEXT_INSET = 10.5.dp
+    val POSTMARK_INNER_RING_DROP = 2.4.dp
     val POSTMARK_ROW_TO_BAND = 18.dp
     val BAND_MIN_HEIGHT = 40.dp
 

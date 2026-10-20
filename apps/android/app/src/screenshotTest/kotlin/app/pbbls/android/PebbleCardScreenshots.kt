@@ -65,6 +65,21 @@ fun PostmarkRowFourFrenchNight() {
     PebblesTheme { PostmarkRow(fourDomains, PebbleCardFixtures.gratitudePalette, diameter = shrunkDiameter) }
 }
 
+/** The accented French capitals at the full 72 dp: É and Ê must clear the outer ring. */
+@PreviewTest
+@Preview(showBackground = true, locale = "fr")
+@Composable
+fun PostmarkRowAccentsFrenchLight() {
+    PebblesTheme { PostmarkRow(listOf(PebbleCardFixtures.health, PebbleCardFixtures.selfCare), PebbleCardFixtures.gratitudePalette) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, locale = "fr", uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PostmarkRowAccentsFrenchNight() {
+    PebblesTheme { PostmarkRow(listOf(PebbleCardFixtures.health, PebbleCardFixtures.selfCare), PebbleCardFixtures.gratitudePalette) }
+}
+
 private val fourDomains =
     listOf(PebbleCardFixtures.family, PebbleCardFixtures.travel, PebbleCardFixtures.health, PebbleCardFixtures.selfCare)
 
