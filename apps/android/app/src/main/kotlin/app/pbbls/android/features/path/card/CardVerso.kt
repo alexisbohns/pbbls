@@ -111,6 +111,9 @@ private const val RAMP_MID = 0.4f
  *
  * Give it the face's height (`fillMaxHeight` from the caller's constraints) and the
  * stone centres between the emotion and the postmarks.
+ *
+ * [measureOnly] lays the stone out as an empty box of its size, for a probe that measures
+ * the verso without painting a stone it never shows.
  */
 @Composable
 internal fun CardVerso(
@@ -120,6 +123,7 @@ internal fun CardVerso(
     domains: List<Domain>,
     bandHeight: Dp,
     modifier: Modifier = Modifier,
+    measureOnly: Boolean = false,
 ) {
     val colors = PebblesTheme.spine.colors
     val night = colors.isNight
@@ -178,20 +182,25 @@ internal fun CardVerso(
             )
             Spacer(Modifier.weight(1f))
             val stoneWidth = versoStoneWidth(valence.sizeGroup)
-            LitStone(
-                valence = valence,
-                palette = palette,
-                glyph = pebble.glyph,
-                seed = remember(pebble.id) { UuidHash.fnv1a(pebble.id) },
-                press = rememberStonePressState(),
-                width = stoneWidth,
-                modifier =
-                    Modifier
-                        .padding(vertical = stoneWidth * CLEARING_SHARE)
-                        // Hidden from TalkBack: the lockup and the emotion already say what the stone means,
-                        // and its kind is the Spine's word for it ("gem"), which the card does not use.
-                        .clearAndSetSemantics {},
-            )
+            val clearing = Modifier.padding(vertical = stoneWidth * CLEARING_SHARE)
+            if (measureOnly) {
+                val box = StoneGeometry.outlineBox(valence.sizeGroup)
+                Spacer(clearing.size(stoneWidth, stoneWidth * (box.height / box.width)))
+            } else {
+                LitStone(
+                    valence = valence,
+                    palette = palette,
+                    glyph = pebble.glyph,
+                    seed = remember(pebble.id) { UuidHash.fnv1a(pebble.id) },
+                    press = rememberStonePressState(),
+                    width = stoneWidth,
+                    modifier =
+                        clearing
+                            // Hidden from TalkBack: the lockup and the emotion already say what the stone means,
+                            // and its kind is the Spine's word for it ("gem"), which the card does not use.
+                            .clearAndSetSemantics {},
+                )
+            }
             Spacer(Modifier.weight(1f))
             Postmarks(pebble, domains, stone, night, rowWidth = u * CardLayout.U_DIVISOR - side * 2)
         }
