@@ -108,6 +108,12 @@ private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
  * @param zone where the recto's day, time and dateline fall, as `SpineWeek` takes its own.
  * @param turnProgressOverride a turn frozen part way, for previews; it shows the rotation
  *   even where previews report reduced motion.
+ * @param completion the print running into a completed moment's place (spec §Completion,
+ *   [CardCompletion]): the lockup, postmarks, band and footer print in turn and the verso
+ *   stone presses in, all read from its progress in layer blocks, so the card does not
+ *   recompose per frame. Null at rest.
+ * @param printed this card printed on this page: its verso heading is a polite live region,
+ *   so TalkBack says once, when the print lands, that the pebble arrived.
  */
 @Composable
 internal fun PebbleCard(
@@ -123,6 +129,8 @@ internal fun PebbleCard(
     faceRequest: Int = 0,
     zone: ZoneId = ZoneId.systemDefault(),
     turnProgressOverride: Float? = null,
+    completion: CardCompletionState? = null,
+    printed: Boolean = false,
 ) {
     val pebble = requireNotNull(detail.pebble) { "only a pebble has a card" }
     val scope = rememberCoroutineScope()
@@ -164,11 +172,20 @@ internal fun PebbleCard(
                 },
                 verso = { bandHeight, measureOnly ->
                     FaceContent(inFront = shown() == CardFace.VERSO) {
-                        CardVerso(pebble, palette, u, domains, bandHeight, measureOnly = measureOnly)
+                        CardVerso(
+                            pebble,
+                            palette,
+                            u,
+                            domains,
+                            bandHeight,
+                            measureOnly = measureOnly,
+                            completion = completion.takeUnless { measureOnly },
+                            printed = printed,
+                        )
                     }
                 },
                 band = {
-                    FaceContent(inFront = shown() == CardFace.VERSO) {
+                    FaceContent(inFront = shown() == CardFace.VERSO, modifier = Modifier.printing(completion, PrintPart.BAND)) {
                         CollectionBand(
                             names = pebble.collections.map { it.name },
                             paper = StoneTones.mixOklab(spot, if (colors.isNight) BAND_PAPER_NIGHT else BAND_PAPER, colors.stock),
@@ -200,7 +217,7 @@ internal fun PebbleCard(
                 } else {
                     area({ turn.front }, Modifier.turnDrag(turn, reduceMotion = false, rtl = rtl).turnLayer(turn, rtl))
                 }
-                TurnFooter(turn, pebble.visibility, spot, reduceMotion)
+                TurnFooter(turn, pebble.visibility, spot, reduceMotion, Modifier.printing(completion, PrintPart.FOOTER))
             }
         }
     }
@@ -295,6 +312,7 @@ private fun TurnFooter(
     visibility: Visibility,
     stone: Color,
     reduceMotion: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     CardFooter(
         visibility = visibility,
@@ -302,8 +320,15 @@ private fun TurnFooter(
         stone = stone,
         // Ignored while a turn runs; the button has nothing to report.
         onTurn = { turn.turn(reduceMotion) },
+        modifier = modifier,
     )
 }
+
+/** [part]'s alpha while [completion] prints it in; nothing at rest. Read in the layer, so a print never recomposes. */
+internal fun Modifier.printing(
+    completion: CardCompletionState?,
+    part: PrintPart,
+): Modifier = if (completion == null) this else graphicsLayer { alpha = part.alpha(completion.progress.print) }
 
 /**
  * One face's content, silent to TalkBack while it is not in front: both faces stay
@@ -313,9 +338,10 @@ private fun TurnFooter(
 @Composable
 private fun FaceContent(
     inFront: Boolean,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    Box(if (inFront) Modifier else Modifier.clearAndSetSemantics {}, propagateMinConstraints = true) { content() }
+    Box(modifier.then(if (inFront) Modifier else Modifier.clearAndSetSemantics {}), propagateMinConstraints = true) { content() }
 }
 
 /**

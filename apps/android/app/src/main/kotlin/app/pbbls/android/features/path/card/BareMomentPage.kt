@@ -110,7 +110,8 @@ private val BODY_TO_CTA = 22.dp
 /**
  * A moment with no pebble has no card (pebble card spec §Bare moment): the Gathering's
  * plain opening, then the place its card will print into, with the page's one call to
- * action. [placeModifier] lets the completion find the place's bounds.
+ * action. [placeModifier] and [ghostModifier] let the completion find the place and its
+ * dashed stone (`CardCompletion`).
  *
  * The opening is the kicker ("SUNDAY 11 OCTOBER · 09:40", in [zone]), the title, the
  * photo on a white mat when there is one, and the words. The place is Suit's "Not a
@@ -134,6 +135,7 @@ internal fun BareMomentPage(
     onComplete: () -> Unit,
     modifier: Modifier = Modifier,
     placeModifier: Modifier = Modifier,
+    ghostModifier: Modifier = Modifier,
     thumbUrl: String? = null,
     zone: ZoneId = ZoneId.systemDefault(),
 ) {
@@ -196,7 +198,7 @@ internal fun BareMomentPage(
             )
         }
         // The gap outside the caller's modifier, so the bounds it reports are the place's own.
-        BarePlace(onComplete = onComplete, modifier = Modifier.padding(top = PLACE_GAP).then(placeModifier))
+        BarePlace(onComplete = onComplete, modifier = Modifier.padding(top = PLACE_GAP).then(placeModifier), ghostModifier = ghostModifier)
     }
 }
 
@@ -266,6 +268,7 @@ private fun MattedPhoto(
 private fun BarePlace(
     onComplete: () -> Unit,
     modifier: Modifier = Modifier,
+    ghostModifier: Modifier = Modifier,
 ) {
     val colors = PebblesTheme.spine.colors
     Column(
@@ -277,7 +280,7 @@ private fun BarePlace(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        GhostStone()
+        GhostStone(ghostModifier)
         Text(
             text = stringResource(R.string.bare_place_kicker),
             style = SpineTypography.sectionLabel,
@@ -309,22 +312,38 @@ private fun BarePlace(
 
 /** The stone its card will carry, as a dashed outline: a medium river pebble, whatever comes. */
 @Composable
-private fun GhostStone() {
+private fun GhostStone(modifier: Modifier = Modifier) {
     val ink = PebblesTheme.spine.colors.ink3
-    val outline = rememberStoneOutline(ValenceSizeGroup.MEDIUM, ValencePolarity.NEUTRAL)
-    Canvas(Modifier.stoneBox(ValenceSizeGroup.MEDIUM, width = GHOST_WIDTH)) {
-        val box = StoneGeometry.outlineBox(ValenceSizeGroup.MEDIUM)
-        val scale = size.width / box.width
-        // Scaled into px first, so the stroke and its dashes are in dp, not outline units.
-        val path = Path().apply { addPath(outline.path) }
-        path.transform(Matrix().apply { scale(scale, scale) })
-        val dash = GHOST_DASH.toPx()
-        drawPath(
-            path,
-            ink,
-            style = Stroke(width = GHOST_STROKE.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, dash))),
-        )
-    }
+    val outline = rememberStoneOutline(GHOST_SIZE, GHOST_POLARITY)
+    Canvas(modifier.stoneBox(GHOST_SIZE, width = GHOST_WIDTH)) { drawGhostStone(outline.path, size.width, ink) }
+}
+
+/** The ghost's silhouette: a medium river pebble, the outline [drawGhostStone] takes. */
+internal val GHOST_SIZE = ValenceSizeGroup.MEDIUM
+internal val GHOST_POLARITY = ValencePolarity.NEUTRAL
+
+/**
+ * The ghost stone's dashed [outline] (the [GHOST_SIZE] outline, in outline units) at
+ * [width] px from the origin: the bare page draws it in its place, the completion in
+ * flight to the card's clearing.
+ */
+internal fun DrawScope.drawGhostStone(
+    outline: Path,
+    width: Float,
+    ink: Color,
+    alpha: Float = 1f,
+) {
+    val scale = width / StoneGeometry.outlineBox(GHOST_SIZE).width
+    // Scaled into px first, so the stroke and its dashes are in dp, not outline units.
+    val path = Path().apply { addPath(outline) }
+    path.transform(Matrix().apply { scale(scale, scale) })
+    val dash = GHOST_DASH.toPx()
+    drawPath(
+        path,
+        ink,
+        alpha = alpha,
+        style = Stroke(width = GHOST_STROKE.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, dash))),
+    )
 }
 
 /** The dashed card outline and its four album corners, clipped to the outline's rounding. */

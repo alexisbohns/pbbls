@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -31,12 +32,16 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.inset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -56,6 +61,7 @@ import app.pbbls.android.core.ui.render.stone.BLANK_STONE_PALETTE
 import app.pbbls.android.core.ui.render.stone.LitStone
 import app.pbbls.android.core.ui.render.stone.StoneGeometry
 import app.pbbls.android.core.ui.render.stone.StonePalette
+import app.pbbls.android.core.ui.render.stone.StoneRipple
 import app.pbbls.android.core.ui.render.stone.StoneTones
 import app.pbbls.android.core.ui.render.stone.rememberStonePressState
 import app.pbbls.android.core.ui.render.stone.toStonePalette
@@ -115,6 +121,12 @@ private const val RAMP_MID = 0.4f
  *
  * [measureOnly] lays the stone out as an empty box of its size, for a probe that measures
  * the verso without painting a stone it never shows.
+ *
+ * While [completion] prints the card (spec §Completion), the lockup and the postmarks print
+ * in turn, the stone stays out of its clearing until the dashed one lands there, then
+ * presses in with the Spine's dip, glint and ripple (the ripple at the verso stone's own
+ * width). The heading is silent until the print lands; once the card has [printed], it is a
+ * polite live region, so its arrival is said once.
  */
 @Composable
 internal fun CardVerso(
@@ -125,6 +137,8 @@ internal fun CardVerso(
     bandHeight: Dp,
     modifier: Modifier = Modifier,
     measureOnly: Boolean = false,
+    completion: CardCompletionState? = null,
+    printed: Boolean = false,
 ) {
     val colors = PebblesTheme.spine.colors
     val night = colors.isNight
@@ -169,7 +183,14 @@ internal fun CardVerso(
                 .padding(start = side, end = side, top = panelInset + u * PANEL_PAD_TOP_UNITS, bottom = contentFoot),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Lockup(pebble, stone, night)
+            Lockup(
+                pebble,
+                stone,
+                night,
+                speaking = completion == null,
+                live = printed || completion != null,
+                modifier = Modifier.printing(completion, PrintPart.LOCKUP),
+            )
             Box(
                 Modifier
                     .padding(top = u * EMOTION_GAP_UNITS, bottom = u * HAIRLINE_GAP_UNITS)
@@ -188,32 +209,71 @@ internal fun CardVerso(
                 val box = StoneGeometry.outlineBox(valence.sizeGroup)
                 Spacer(clearing.size(stoneWidth, stoneWidth * (box.height / box.width)))
             } else {
-                LitStone(
-                    valence = valence,
-                    palette = palette,
-                    glyph = pebble.glyph,
-                    seed = remember(pebble.id) { UuidHash.fnv1a(pebble.id) },
-                    press = rememberStonePressState(),
-                    width = stoneWidth,
-                    modifier =
-                        clearing
-                            // Hidden from TalkBack: the lockup and the emotion already say what the stone means,
-                            // and its kind is the Spine's word for it ("gem"), which the card does not use.
-                            .clearAndSetSemantics {},
-                )
+                val press = rememberStonePressState()
+                if (completion != null) {
+                    LaunchedEffect(completion) {
+                        completion.awaitPress()
+                        press.press(reduceMotion = false)
+                    }
+                }
+                Box(
+                    clearing
+                        // Hidden from TalkBack: the lockup and the emotion already say what the stone means,
+                        // and its kind is the Spine's word for it ("gem"), which the card does not use.
+                        .clearAndSetSemantics {}
+                        .then(
+                            if (completion == null) {
+                                Modifier
+                            } else {
+                                Modifier.graphicsLayer { alpha = CompletionMotion.litStoneAlpha(completion.progress.stone) }
+                            },
+                        ),
+                ) {
+                    press.rippleToken?.let { token ->
+                        StoneRipple(
+                            valence = valence,
+                            blank = palette == null,
+                            token = token,
+                            onDone = press::rippleDone,
+                            width = stoneWidth,
+                        )
+                    }
+                    LitStone(
+                        valence = valence,
+                        palette = palette,
+                        glyph = pebble.glyph,
+                        seed = remember(pebble.id) { UuidHash.fnv1a(pebble.id) },
+                        press = press,
+                        width = stoneWidth,
+                        modifier = if (completion == null) Modifier else Modifier.onPlaced { completion.stone = it },
+                    )
+                }
             }
             Spacer(Modifier.weight(1f))
-            Postmarks(pebble, domains, stone, night, rowWidth = u * CardLayout.U_DIVISOR - side * 2)
+            Postmarks(
+                pebble,
+                domains,
+                stone,
+                night,
+                rowWidth = u * CardLayout.U_DIVISOR - side * 2,
+                modifier = Modifier.printing(completion, PrintPart.POSTMARKS),
+            )
         }
     }
 }
 
-/** The valence lockup, one heading: "Your pebble. Highlight of my month". */
+/**
+ * The valence lockup, one heading: "Your pebble. Highlight of my month". Not [speaking]
+ * (mid-print) it says nothing; [live], a change in what it says is announced politely.
+ */
 @Composable
 private fun Lockup(
     pebble: MomentPebble,
     stone: StonePalette,
     night: Boolean,
+    modifier: Modifier = Modifier,
+    speaking: Boolean = true,
+    live: Boolean = false,
 ) {
     val colors = PebblesTheme.spine.colors
     val locale = LocalConfiguration.current.locales[0]
@@ -232,9 +292,10 @@ private fun Lockup(
             }
         }
     Column(
-        Modifier.clearAndSetSemantics {
+        modifier.clearAndSetSemantics {
             heading()
-            contentDescription = description
+            contentDescription = if (speaking) description else ""
+            if (live) liveRegion = LiveRegionMode.Polite
         },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -272,6 +333,7 @@ private fun Postmarks(
     stone: StonePalette,
     night: Boolean,
     rowWidth: Dp,
+    modifier: Modifier = Modifier,
 ) {
     if (pebble.domains.isEmpty()) return
     val colors = PebblesTheme.spine.colors
@@ -285,7 +347,7 @@ private fun Postmarks(
     val ink = if (night) stone.secondary else stone.shaded
 
     Row(
-        Modifier.clearAndSetSemantics { contentDescription = description },
+        modifier.clearAndSetSemantics { contentDescription = description },
         horizontalArrangement = Arrangement.spacedBy(CardLayout.POSTMARK_GAP, Alignment.CenterHorizontally),
     ) {
         pebble.domains.forEachIndexed { i, ref ->

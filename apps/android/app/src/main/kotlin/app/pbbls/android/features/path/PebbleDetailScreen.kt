@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +34,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +54,7 @@ import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
+import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
@@ -59,6 +63,8 @@ import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.card.BareMomentPage
+import app.pbbls.android.features.path.card.CardCompletion
+import app.pbbls.android.features.path.card.CardCompletionState
 import app.pbbls.android.features.path.card.PebbleCard
 import java.time.ZoneId
 
@@ -82,7 +88,16 @@ import java.time.ZoneId
  * ([onMomentDeleted]), only the pebble leaves it open as a bare moment.
  *
  * A bare moment offers "Make it a pebble" in the place its card will print into
- * ([onCompleteRequested], A-8); the resume refresh shows the pebble on return.
+ * ([onCompleteRequested], A-8). The resume refresh brings the pebble back already
+ * [PebbleDetailUiState.Content.completing], and the card prints into that place
+ * ([CardCompletion], pebble card spec §Completion): the page renders the print from the
+ * very frame the pebble arrives in, plays it once, and reports it shown
+ * ([PebbleDetailViewModel.onCompletionShown]). The card lands verso up, scrolled to its
+ * top, and stays verso up until the key asks for another face. Interrupted:
+ * - back leaves with the entry, and the print with it;
+ * - a configuration change mid-print lands at rest (the print that was cut short is
+ *   saved, so the new composition does not replay it), verso up;
+ * - the place scrolled out of view, or reduced motion: a crossfade instead.
  *
  * @param requestedFace The face the held card opens on: the stone pressed on the Path opens
  *   the verso, the card the recto. Beside Path the entry stays while the face changes
@@ -117,10 +132,6 @@ fun PebbleDetailScreen(
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {
             PebbleDetailEffect.MomentDeleted -> onMomentDeleted()
-            // The resume refresh already swaps the bare page for the card; the
-            // print-into-place choreography is the completion task's (pebble
-            // card spec §Completion, `CardCompletion`).
-            PebbleDetailEffect.Completed -> Unit
         }
     }
 
@@ -134,6 +145,38 @@ fun PebbleDetailScreen(
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
     val pebble = detail?.pebble
     val palette = pebble?.emotion?.id?.let(palettes::palette)
+
+    // The print (spec §Completion). The face asked for when a print began: the card stays
+    // verso up until the key asks for another. Saved, as is the print under way, so a
+    // recreation mid-print lands at rest rather than printing twice.
+    val completing = (uiState as? PebbleDetailUiState.Content)?.completing == true
+    val reduceMotion = rememberReduceMotion()
+    var printedOver by rememberSaveable { mutableStateOf<CardFace?>(null) }
+    var printingFor by rememberSaveable { mutableStateOf<String?>(null) }
+    var cutShort by remember { mutableStateOf(printingFor) }
+    val currentFace by rememberUpdatedState(requestedFace)
+    val printing = completing && detail != null && cutShort != detail.id
+    val completion = remember(detail?.id, printing) { if (printing) CardCompletionState() else null }
+    LaunchedEffect(completion, completing) {
+        when {
+            completion != null -> {
+                printedOver = currentFace
+                printingFor = detail?.id
+                completion.play(reduceMotion)
+                printingFor = null
+                viewModel.onCompletionShown()
+            }
+            completing -> {
+                printingFor = null
+                viewModel.onCompletionShown()
+            }
+            else -> cutShort = null
+        }
+    }
+    LaunchedEffect(requestedFace) {
+        if (printedOver != null && printedOver != requestedFace) printedOver = null
+    }
+    val face = if (completing || printedOver == requestedFace) CardFace.VERSO else requestedFace
 
     // The cover photo: signed once per prefix, as the Spine's cards do, and its
     // ratio from the same process-wide probe. Keyed on the prefix, so an edit
@@ -196,8 +239,10 @@ fun PebbleDetailScreen(
         onBack = onBack,
         modifier = modifier,
         onComplete = onCompleteRequested,
-        requestedFace = requestedFace,
+        requestedFace = face,
         faceRequest = faceRequest,
+        completion = completion,
+        printed = printedOver != null,
     )
 
     if (pendingDelete && detail != null) {
@@ -229,10 +274,14 @@ fun PebbleDetailScreen(
  * @param showBack False beside Path on a large screen (#940).
  * @param requestedFace the face the held card opens on, and turns to when it changes.
  * @param faceRequest which press asked for [requestedFace]; a new one is a new request.
+ * @param completion the print under way while the state is
+ *   [PebbleDetailUiState.Content.completing]: the bare page stays up under the card printing
+ *   into its place ([CardCompletion]). Null, a completing state shows the card at rest.
+ * @param printed the card printed on this page (its arrival is announced once).
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PebbleDetailContent(
+internal fun PebbleDetailContent(
     uiState: PebbleDetailUiState,
     palette: EmotionPalette?,
     onEditMoment: () -> Unit,
@@ -255,6 +304,8 @@ fun PebbleDetailContent(
     zone: ZoneId = ZoneId.systemDefault(),
     requestedFace: CardFace = CardFace.RECTO,
     faceRequest: Int = 0,
+    completion: CardCompletionState? = null,
+    printed: Boolean = false,
 ) {
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
 
@@ -282,41 +333,76 @@ fun PebbleDetailContent(
                 }
             PebbleDetailUiState.Error ->
                 DetailLoadError(onRetry = onRetry)
-            is PebbleDetailUiState.Content ->
-                Column(
-                    Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
-                        .padding(vertical = 8.dp),
-                ) {
-                    if (state.detail.pebble != null) {
-                        PebbleCard(
-                            detail = state.detail,
-                            palette = palette,
-                            ratio = ratio,
-                            photoUrl = photo?.first,
-                            thumbUrl = photo?.second,
-                            soulsById = soulsById,
-                            domains = domains,
-                            requestedFace = requestedFace,
-                            faceRequest = faceRequest,
-                            zone = zone,
-                        )
-                    } else {
-                        BareMomentPage(
-                            detail = state.detail,
-                            photoUrl = photo?.first,
-                            thumbUrl = photo?.second,
-                            ratio = ratio,
-                            onComplete = onComplete,
-                            zone = zone,
-                            modifier = Modifier.padding(bottom = 24.dp),
-                        )
-                    }
-                }
+            is PebbleDetailUiState.Content -> {
+                val hasPebble = state.detail.pebble != null
+                val print = completion?.takeIf { state.completing && hasPebble }
+                // Two layers in one host, so neither remounts when a print starts or ends: the
+                // bare page while there is no pebble or one is printing into it, the card once
+                // there is a pebble. Each scrolls on its own: the card's opens at its top.
+                CardCompletion(
+                    completion = print,
+                    page =
+                        if (!hasPebble || print != null) {
+                            { placeModifier, ghostModifier ->
+                                PageColumn {
+                                    BareMomentPage(
+                                        detail = state.detail,
+                                        photoUrl = photo?.first,
+                                        thumbUrl = photo?.second,
+                                        ratio = ratio,
+                                        onComplete = onComplete,
+                                        zone = zone,
+                                        modifier = Modifier.padding(bottom = 24.dp),
+                                        placeModifier = placeModifier,
+                                        ghostModifier = ghostModifier,
+                                    )
+                                }
+                            }
+                        } else {
+                            null
+                        },
+                    card =
+                        if (hasPebble) {
+                            { cardModifier ->
+                                PageColumn {
+                                    PebbleCard(
+                                        detail = state.detail,
+                                        palette = palette,
+                                        ratio = ratio,
+                                        photoUrl = photo?.first,
+                                        thumbUrl = photo?.second,
+                                        soulsById = soulsById,
+                                        domains = domains,
+                                        requestedFace = if (print != null) CardFace.VERSO else requestedFace,
+                                        faceRequest = faceRequest,
+                                        zone = zone,
+                                        completion = print,
+                                        printed = printed,
+                                        modifier = cardModifier,
+                                    )
+                                }
+                            }
+                        } else {
+                            null
+                        },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
     }
+}
+
+/** One layer of the moment: the page's scroll, its foot clear of the navigation bar. */
+@Composable
+private fun PageColumn(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+            .padding(vertical = 8.dp),
+        content = content,
+    )
 }
 
 /**

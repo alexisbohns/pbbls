@@ -29,20 +29,22 @@ sealed interface PebbleDetailUiState {
 
     data object Error : PebbleDetailUiState
 
+    /**
+     * @property completing a refresh found a pebble on this moment while it was bare: the
+     *   card prints into the bare page's place (pebble card spec §Completion) until the
+     *   screen reports it shown ([PebbleDetailViewModel.onCompletionShown]). State, not an
+     *   effect, so the frame that brings the pebble is the frame that starts the print: no
+     *   frame of the resting card comes before it, whatever order the collectors run in.
+     */
     data class Content(
         val detail: MomentDetail,
+        val completing: Boolean = false,
     ) : PebbleDetailUiState
 }
 
 sealed interface PebbleDetailEffect {
     /** The moment is gone (`delete_moment`): the page closes. */
     data object MomentDeleted : PebbleDetailEffect
-
-    /**
-     * The moment came back from Complete with a pebble: the card prints into
-     * its place (pebble card spec §Completion).
-     */
-    data object Completed : PebbleDetailEffect
 }
 
 /**
@@ -63,8 +65,12 @@ sealed interface PebbleDetailEffect {
  * its pebble reloads it as a bare moment.
  *
  * Complete is an entry of its own too, so the same resume refresh is what
- * notices a bare moment that came back with a pebble
- * ([PebbleDetailEffect.Completed], pebble card spec §Completion).
+ * notices a bare moment that came back with a pebble: it publishes the pebble
+ * already [PebbleDetailUiState.Content.completing] (pebble card spec §Completion),
+ * and the flag holds through later refreshes until [onCompletionShown]. After
+ * process death the ViewModel is fresh, with no bare moment before the pebble,
+ * so a completion then shows the resting card without the print: an accepted
+ * fallback.
  */
 @HiltViewModel
 class PebbleDetailViewModel
@@ -98,14 +104,25 @@ class PebbleDetailViewModel
         private var loadJob: Job? = null
         private var resumeCount = 0
 
+        /** A completion the screen has not shown yet; cleared by [onCompletionShown]. */
+        private var completing = false
+
         /** Load [id], unless it is the one already loaded. */
         fun start(id: String) {
             if (momentId == id) return
             momentId = id
+            completing = false
             load()
         }
 
         fun retry() = load()
+
+        /** The card has printed into its place (or landed there): the page is at rest. */
+        fun onCompletionShown() {
+            if (!completing) return
+            completing = false
+            publish()
+        }
 
         /**
          * The entry came back to the foreground, e.g. from an edit entry popping
@@ -133,7 +150,6 @@ class PebbleDetailViewModel
         }
 
         private suspend fun fetch(id: String) {
-            var completed = false
             runCatchingCancellable { moments.loadMoment(id) }
                 .fold(
                     onSuccess = {
@@ -144,7 +160,8 @@ class PebbleDetailViewModel
                         detail = it
                         hasFailed = false
                         isLoaded = true
-                        completed = wasBare && it.pebble != null
+                        if (wasBare && it.pebble != null) completing = true
+                        if (it.pebble == null) completing = false
                     },
                     onFailure = {
                         Log.e(TAG, "moment load failed", it)
@@ -154,8 +171,6 @@ class PebbleDetailViewModel
                     },
                 )
             publish()
-            // After `publish`: the card is on screen before it is told to print.
-            if (completed) _effects.emit(PebbleDetailEffect.Completed)
         }
 
         private fun publish() {
@@ -164,7 +179,7 @@ class PebbleDetailViewModel
                 when {
                     hasFailed -> PebbleDetailUiState.Error
                     !isLoaded || current == null -> PebbleDetailUiState.Loading
-                    else -> PebbleDetailUiState.Content(current)
+                    else -> PebbleDetailUiState.Content(current, completing = completing)
                 }
         }
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
@@ -15,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.DomainRef
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Glyph
@@ -29,6 +31,7 @@ import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.PebbleDetailContent
 import app.pbbls.android.features.path.PebbleDetailUiState
+import app.pbbls.android.features.path.card.CardCompletionState
 import app.pbbls.android.features.path.read.BannerAspect
 import app.pbbls.android.features.path.read.PebbleReadView
 import app.pbbls.android.features.path.read.PebbleSnapFrame
@@ -264,10 +267,12 @@ fun PebbleDetailNoDomainDark() {
 private fun PagePreview(
     detail: MomentDetail = PebbleCardFixtures.f1,
     initialMenuOpen: Boolean = false,
+    printProgress: Float? = null,
 ) {
+    val completion = remember(printProgress) { printProgress?.let { CardCompletionState(frozenAt = it) } }
     CompositionLocalProvider(LocalReferenceDataService provides detailPreviewRefs) {
         PebbleDetailContent(
-            uiState = PebbleDetailUiState.Content(detail),
+            uiState = PebbleDetailUiState.Content(detail, completing = completion != null),
             palette =
                 detail.pebble
                     ?.emotion
@@ -286,8 +291,41 @@ private fun PagePreview(
             onBack = {},
             initialMenuOpen = initialMenuOpen,
             zone = PebbleCardFixtures.zone,
+            requestedFace = if (completion != null) CardFace.VERSO else CardFace.RECTO,
+            completion = completion,
+            printed = completion != null,
         )
     }
+}
+
+/** F4 come back from Complete with F1's pebble: the moment of the print frames below. */
+private val f4Completed = PebbleCardFixtures.f4.copy(pebble = PebbleCardFixtures.f1.pebble)
+
+/**
+ * The print (pebble card spec §Completion), a fifth of the way: the card feeds out of the
+ * place verso up, the lockup printed and the postmarks coming, the clearing still empty.
+ */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, heightDp = 915)
+@Composable
+fun PebbleDetail_CompletionPrinting() {
+    PebblesTheme { PagePreview(detail = f4Completed, printProgress = 0.2f) }
+}
+
+/** At the press: the dashed stone has landed in the clearing and the lit stone is in; band and footer printed. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, heightDp = 915)
+@Composable
+fun PebbleDetail_CompletionPress() {
+    PebblesTheme { PagePreview(detail = f4Completed, printProgress = 0.45f) }
+}
+
+/** Rising: the page steps back and fades while the card climbs to its rest. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, heightDp = 915, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleDetail_CompletionRising() {
+    PebblesTheme { PagePreview(detail = f4Completed, printProgress = 0.8f) }
 }
 
 /** A pebble opens as the card, on its recto (#1135). */

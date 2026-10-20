@@ -190,8 +190,8 @@ fun rememberStonePressState(): StonePressState = remember { StonePressState() }
  * [width] defaults to the phone width for the stone's size; the card's verso paints
  * it larger. The rings and halo scale with the box, their strokes stay hairlines;
  * the carved glyph line scales with [width], so a larger stone carves heavier.
- * `StoneRipple` still sizes from the default `stoneBox(size)`, so a stone at
- * another [width] has no matching ripple; the verso stone has none.
+ * A stone at another [width] mounts its `StoneRipple` at the same width: the verso's
+ * ripples once, when its card prints into a completed moment.
  */
 @Composable
 fun LitStone(
