@@ -41,6 +41,6 @@ struct YsabeauItalicFontTests {
     func italicTakesTheAxis() {
         let font = YsabeauFace.uiFont(size: 17, weight: 380, italic: true, features: [])
         #expect(font.fontDescriptor.symbolicTraits.contains(.traitItalic))
-        #expect(wght(font) == 380)
+        #expect(CTProbe.wght(font) == 380)
     }
 }

@@ -58,7 +58,7 @@ struct SpineTypeResolveTests {
         heavy.weight = 750
         #expect(SpineType.resolve(heavy, dynamicTypeSize: .large, legibilityWeight: .bold).weight == 800)
         let resolved = SpineType.resolve(.kicker, dynamicTypeSize: .large, legibilityWeight: .bold)
-        #expect(wght(resolved.uiFont) == 700)
+        #expect(CTProbe.wght(resolved.uiFont) == 700)
     }
 
     @Test("tracking is em × resolved size; line spacing is the line height less the font's")
@@ -75,7 +75,7 @@ struct SpineTypeResolveTests {
     func boldTextCapsCaveat() throws {
         let resolved = SpineType.resolve(.lockupWord(.large), dynamicTypeSize: .large, legibilityWeight: .bold)
         #expect(resolved.weight == 700)
-        #expect(wght(resolved.uiFont) == 700)
+        #expect(CTProbe.wght(resolved.uiFont) == 700)
         let axes = CTFontCopyVariationAxes(resolved.uiFont as CTFont) as? [[String: Any]] ?? []
         let axis = try #require(axes.first {
             ($0[kCTFontVariationAxisIdentifierKey as String] as? NSNumber)?.intValue == YsabeauFace.weightAxis
@@ -88,7 +88,7 @@ struct SpineTypeResolveTests {
     func lockupFace() {
         let resolved = SpineType.resolve(.lockupWord(.medium), dynamicTypeSize: .large, legibilityWeight: nil)
         #expect(resolved.uiFont.fontName.hasPrefix("Caveat"))
-        #expect(wght(resolved.uiFont) == 700)
+        #expect(CTProbe.wght(resolved.uiFont) == 700)
     }
 
     /// Spec §Risks: iOS 17 `Text` has no line-height API, so a tight rank relies
