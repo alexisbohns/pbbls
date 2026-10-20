@@ -167,20 +167,23 @@ fun PebbleDetailScreen(
                 printedOver = currentFace
                 printingFor = detail?.id
                 announcing = true
-                // Cleared however the print ends: done, or cut off in place (a pebble deleted
-                // mid-print, another moment opened). A recreation has saved it already.
-                try {
-                    completion.play(reduceMotion)
-                } finally {
-                    printingFor = null
-                }
+                completion.play(reduceMotion)
+                // Cleared only where the print ends in this composition: here, or below when
+                // the state stops completing (a pebble deleted mid-print, another moment
+                // opened). Never on cancellation: a disposed screen has already saved this
+                // very state object (a recreation, Nav3's saveable holder), and a write from a
+                // cancelled coroutine would reach the saved copy and replay the print.
+                printingFor = null
                 viewModel.onCompletionShown()
             }
             completing -> {
                 printingFor = null
                 viewModel.onCompletionShown()
             }
-            else -> cutShort = null
+            else -> {
+                cutShort = null
+                printingFor = null
+            }
         }
     }
     LaunchedEffect(announcing, completing) {
