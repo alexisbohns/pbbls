@@ -129,14 +129,25 @@ jobs:
             -quiet \
             CODE_SIGNING_ALLOWED=NO
 
-      # The calibration's first half, kept for every re-baseline: a second
-      # render of the same tree must match the one just recorded, byte for byte
-      # inside the threshold. A red step here means the renders are not
-      # deterministic, and committing them would make ios.yml flaky. Each pass
-      # repeats its record pass's language and region flags exactly.
-      - name: Verify the new references reproduce
+      # The calibration's first half (spec D4), kept for every re-baseline: the
+      # same tree recorded twice must give byte-identical PNGs. The threshold
+      # is not the oracle here; a render that wobbles inside it would still
+      # make ios.yml flaky. Both record passes run again, with the same flags,
+      # and every PNG's checksum must match the first recording's.
+      - name: Verify the new references reproduce byte for byte
         working-directory: apps/ios
+        env:
+          TEST_RUNNER_PBBLS_RECORD_REFERENCES: '1'
+          REFERENCES: PebblesTests/References/__References__
         run: |
+          set -euo pipefail
+          first="$RUNNER_TEMP/references-first.sha"
+          second="$RUNNER_TEMP/references-second.sha"
+          (cd "$REFERENCES" && find . -type f -name '*.png' | LC_ALL=C sort | xargs shasum -a 256) > "$first"
+          if [ ! -s "$first" ]; then
+            echo "::error::The record passes wrote no reference PNG under $REFERENCES."
+            exit 1
+          fi
           xcodebuild test-without-building \
             -scheme Pebbles \
             -destination "id=${{ steps.sim.outputs.udid }}" \
@@ -153,6 +164,12 @@ jobs:
             -only-testing:PebblesTests/References \
             -quiet \
             CODE_SIGNING_ALLOWED=NO
+          (cd "$REFERENCES" && find . -type f -name '*.png' | LC_ALL=C sort | xargs shasum -a 256) > "$second"
+          if ! diff -u "$first" "$second"; then
+            echo "::error::A second recording of the same tree is not byte-identical (diff above). The renders are not deterministic; do not commit these references."
+            exit 1
+          fi
+          echo "$(wc -l < "$first" | tr -d ' ') references reproduce byte for byte."
 
       # Recording rewrites every reference, so "nothing changed" is the normal
       # outcome and must not fail the run.
