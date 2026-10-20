@@ -1140,3 +1140,22 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - iOS still shows the row list; its Spine is a separate issue.
 - **Supersedes / Superseded-by:** Extends **2026-10-13 — The web Path becomes the Spine** (#1052) and **2026-10-18 — Android's brand neutrals are the Spine paper** (#1118). Supersedes the M37 Path rendering notes for Android (row list, static cairn).
 - **Refs:** #1122, #1121, #1118, #1052, #979, `docs/superpowers/specs/2026-10-18-android-spine-path-design.md`, `docs/superpowers/plans/2026-10-18-android-spine-path.md`, `docs/superpowers/specs/2026-10-11-web-path-spine-design.md`.
+
+## 2026-10-20 — The Android pebble detail is the held card: a page on phones, opened with shared bounds from its Spine slot (#1135)
+
+- **Status:** taken
+- **Scope:** android, ui
+- **Context:** The Path became the Spine (#1122), where a pebble is a card. The detail was still the old read page (`PebbleReadView`: banner, title, meta rows), shown as a bottom sheet on phones, so pressing a card opened something that looked nothing like it.
+- **Decision:**
+  - The held card (`features/path/card/`) replaces the read view: the Spine's own card shell (`SpineCardShell`/`SpineCardFace`) with a recto (photo, leaf, souls) and a verso (valence lockup, lit stone, domain postmarks, collection band) that turn, and a bare moment's plain page that the card prints into on completion. `PebbleReadView`, its banner, title, privacy badge and snap frame are deleted; `PebbleReadPetroglyph` stays for the record flow.
+  - The phone detail is a page (a `BarKey`), no longer a `BottomSheetSceneStrategy` sheet; the sheet now serves only the glyph detail. From 840 dp it stays the pane beside the Path.
+  - Postmark ink texture is laid over the ink as paper-coloured speckles, never masked with `DstIn`.
+  - Open and close (the Part 4 spike: **go**): `Modifier.sharedBounds` keyed `card-<moment id>`, `ScaleToBounds` (FillWidth, top) rather than remeasure, **no** `OverlayClip`, and a blank-card placeholder carrying the key while the detail loads. Single pane only; on two panes the detail fades through as before.
+  - The scope reaches the cards through `LocalSharedTransitionScope` (`core/ui/SharedCard.kt`), and is not passed to `NavDisplay`'s `sharedTransitionScope`.
+- **Why:** The card a reader pressed should be the card they hold; the turn and the print need the full height a sheet does not give. HWUI ignored `DstIn` inside an offscreen layer on a Pixel 8 while Robolectric honoured it (the 2026-10-18 Spine lesson), so a masked texture rendered blank on device. Remeasuring to the flying bounds would lay out both faces at a new width every frame; with `OverlayClip` the detail page drew nothing from the first frame of the close, a black flash. The detail loads over the network after the open, so without the placeholder the flight had no target. `LocalSharedTransitionScope` is UI plumbing that leaf modifiers read where they lay out, not a service a screen calls, so the 2026-09-21 rule of exactly three service locals does not cover it; giving the scope to `NavDisplay` would share whole entries between scenes and morph the wide Path's fade-through.
+- **Consequences:**
+  - A new local of this kind is UI plumbing only: null by default, so previews, screenshot tests and the Spine Lab need no setup and get no flight. Do not route a service through it.
+  - Do not reintroduce a sheet for the pebble detail on phones, an `OverlayClip` on the card's bounds, or a `DstIn` mask in an offscreen layer.
+  - iOS still has the old read page; its held card is #1146. The baseline profiles list the deleted read-view classes until regenerated.
+- **Supersedes / Superseded-by:** Supersedes the phone half of **2026-09-26 — Android list-detail on large screens; pebble detail is a sheet on phones and a pane beside Path** (#940), and makes **2026-09-26 — Android's pebble read page drops its emotion tint** (#940) moot with the page it described. Extends **2026-10-18 — The Android Path becomes the Spine** (#1122).
+- **Refs:** #1135, #1146, `docs/superpowers/specs/2026-10-20-android-pebble-card-design.md`, `docs/superpowers/plans/2026-10-20-android-pebble-card.md`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/ui/SharedCard.kt`.

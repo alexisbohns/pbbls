@@ -29,8 +29,8 @@ and none crosses a data contract:
 | No Rive runtime; the Welcome logo is a static vector | #856 |
 
 Anything else that differs is drift, not design. Fix it rather than documenting
-it. One known drift runs the other way: Android's pebble read page dropped its
-emotion tint (#940) and iOS still has it.
+it. One known drift runs the other way: Android's pebble detail is the held
+card (#1135) and iOS still has the old read page; the iOS mirror is #1146.
 
 History: the app was bootstrapped in **M38 · Android App**
 (`docs/superpowers/specs/2026-07-10-android-bootstrap-design.md`, decisions
@@ -215,7 +215,8 @@ The files, in the order you touch them when adding a destination:
   AcceptInvite are ordinary entries.
 - **Large screens are Scenes** (`navigation/PebblesSceneStrategies.kt`): a
   wrapped `ListDetailSceneStrategy` (two panes from 840 dp, or at a separating
-  hinge) then `BottomSheetSceneStrategy` (pebble detail is a sheet on phones).
+  hinge) then `BottomSheetSceneStrategy`, which serves only the glyph detail on
+  phones. The pebble detail is a full page there (a `BarKey`, #1135).
   A detail learns it is a pane only through a `showBack` parameter. Screens
   never import the adaptive library.
 - **Back is `NavigationBackHandler`** (`androidx.navigationevent`), never the
@@ -500,6 +501,18 @@ Do not bring it back for a single asset.
   fossil's spiral, which goes through `backdropArt` instead. Tracing a filled
   spiral as a centreline fills it in solid, so the split is load-bearing and
   `ValenceArtTest` asserts it. Do not re-derive these from the web line art.
+- **The pebble detail is the held card** (`features/path/card/`, #1135).
+  `SpineCard` is split into `SpineCardShell` and `SpineCardFace`, so the detail
+  reuses the Path's card. Recto and verso are both composed and placed, each in
+  an offscreen layer, the hidden one at alpha 0: an unplaced face loses its
+  display list. The half swaps two alphas and the turn rotates a texture
+  (`CardTurnState`). Postmarks fit their ring type with `RingFits`; the ink's
+  noise is laid over the ink as paper-coloured speckles, never `DstIn` (see
+  above). The print into a completed moment (`CardCompletion`) is UI state, not
+  an effect. The open is shared bounds (`core/ui/SharedCard.kt`):
+  `LocalSharedTransitionScope` is UI plumbing, null on two panes, and the scope
+  is deliberately not passed to `NavDisplay`, which would morph every entry
+  across scenes. Decision log 2026-10-20.
 - **A debug-only Spine Lab** (`src/debug/…/SpineLabActivity`, a second
   launcher icon) renders the stone gallery and the fixture week; use it to
   check a change on a device before touching the real Path.
@@ -508,9 +521,9 @@ Do not bring it back for a single asset.
 
 - **Capture and Complete (#1048).** New pebble opens Capture (photo · when ·
   name → `save_moment`); Complete (valence · emotion · domain · souls ·
-  collection · privacy → `complete_pebble`) opens from the read page of an
+  collection · privacy → `complete_pebble`) opens from the detail of an
   uncompleted moment or from Capture's "Make it a pebble now". Editing is two
-  screens with one write each, both from the read page's ⋮ menu:
+  screens with one write each, both from the held card's ⋮ menu:
   `EditMomentScreen` (`save_moment`) and `EditPebbleScreen` (`complete_pebble`).
   Every flow interaction goes through its state machine, so the
   haptic-on-every-tap rule stays structural. Spec:
