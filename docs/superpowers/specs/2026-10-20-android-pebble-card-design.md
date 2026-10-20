@@ -195,9 +195,12 @@ Under reduced motion, this becomes a crossfade to the card.
   - `PebblesKey.PebbleDetail` gains `face: CardFace = RECTO`, and the Spine
     passes `VERSO` from the stone's press.
 - **The turn:**
-  - Ways to turn: the turn button; a horizontal drag on the panel (a flick
-    carries it, release past the half reverts or completes); and a TalkBack
-    custom action, "Turn over to your pebble" / "Turn over to the moment".
+  - Ways to turn: the turn button; and a horizontal drag on the panel (a flick
+    carries it, release past the half reverts or completes).
+  - For TalkBack the footer's turn button is the turn ("Turn over to your
+    pebble" / "Turn over to the moment"), the last stop in the reading order.
+    A custom action on the card would never be offered: TalkBack lists the
+    actions of the focused node, and the card's root is never focused.
   - The panel alone rotates on Y (`graphicsLayer.rotationY` with camera
     distance), and the content swaps at 90°. The shell and footer stay still.
   - Reduced motion: a 150 ms crossfade.
@@ -340,7 +343,7 @@ Reused strings: `visibility_*`, `record_privacy_*_explanation`, `valence_*`,
    and band, replacing `PebbleReadView` for pebbles. The top bar loses the
    badge. The turn is button only, with no animation. On phones the detail
    leaves the sheet scene.
-2. **The turn.** The rotation, the drag, the TalkBack action, reduced motion,
+2. **The turn.** The rotation, the drag, reduced motion,
    and the `face` key from the Spine's stone press.
 3. **The bare moment.** `BareMomentPage` and the completion choreography.
 4. **Open and close.** The container transform from the Spine, predictive
