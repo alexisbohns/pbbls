@@ -134,7 +134,7 @@ struct SettingsSheet: View {
                     Section {
                         Text(saveError)
                             .font(.footnote)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.pebbles.error)
                             .pebblesListRow(position: .only)
                     }
                 }
@@ -388,7 +388,7 @@ struct SettingsSheet: View {
             Text("Public profile").pebblesSectionHeader()
         } footer: {
             if let handleError {
-                Text(handleError).foregroundStyle(.red)
+                Text(handleError).foregroundStyle(Color.pebbles.error)
             } else if initialHandle == nil {
                 Text("Claim a handle first to go public.")
             } else {
@@ -464,7 +464,7 @@ struct SettingsSheet: View {
             } label: {
                 HStack {
                     Label("Delete account", systemImage: "trash")
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.pebbles.error)
                     Spacer()
                     if isDeleting {
                         ProgressView()

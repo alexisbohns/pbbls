@@ -87,7 +87,7 @@ struct GlyphCarveSheet: View {
 
             if let saveError {
                 Text(saveError)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Color.pebbles.error)
                     .font(.callout)
             }
 

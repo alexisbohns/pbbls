@@ -55,7 +55,7 @@ struct AttachedPhotoView: View {
             Label("Upload failed", systemImage: "exclamationmark.triangle.fill")
                 .labelStyle(.titleAndIcon)
                 .font(.caption)
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.pebbles.error)
         }
     }
 

@@ -53,7 +53,7 @@ struct EditSoulSheet: View {
                     Section {
                         Text(saveError)
                             .font(.footnote)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.pebbles.error)
                             .pebblesListRow(position: .only)
                     }
                 }

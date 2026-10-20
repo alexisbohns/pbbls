@@ -62,12 +62,12 @@ struct GlyphDetailDrawer: View {
                         if !canAfford {
                             Text("Not enough karma")
                                 .font(.footnote)
-                                .foregroundStyle(.red)
+                                .foregroundStyle(Color.pebbles.error)
                         }
                     }
 
                     if let errorText {
-                        Text(errorText).font(.footnote).foregroundStyle(.red)
+                        Text(errorText).font(.footnote).foregroundStyle(Color.pebbles.error)
                     }
                 }
                 .padding(Spacing.lg)

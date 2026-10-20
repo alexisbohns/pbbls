@@ -137,7 +137,7 @@ struct PebbleFormView: View {
             if let saveError {
                 Section {
                     Text(saveError)
-                        .foregroundStyle(.red) // #921
+                        .foregroundStyle(Color.pebbles.error)
                         .font(.callout)
                         .pebblesListRow(position: .only)
                 }

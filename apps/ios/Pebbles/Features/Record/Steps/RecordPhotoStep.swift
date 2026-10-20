@@ -100,7 +100,7 @@ struct RecordPhotoStep: View {
         case .failed:
             Text("Upload failed")
                 .pebblesFont(.subhead)
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.pebbles.error)
         }
     }
 
