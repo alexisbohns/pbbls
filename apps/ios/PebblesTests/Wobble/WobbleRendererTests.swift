@@ -116,4 +116,50 @@ struct WobbleRendererTests {
         }
         #expect(identities.count == 1)
     }
+
+    @Test("the soft silhouette is the asset's own path, point for point")
+    func softBackdropIsUnwobbled() throws {
+        let url = try #require(Bundle.main.url(forResource: "medium-neutral", withExtension: "svg"))
+        let raw = try String(contentsOf: url, encoding: .utf8)
+        let soft = try #require(WobbleRenderer.softBackdropArt(size: .medium, polarity: .neutral))
+        let wobbled = try #require(WobbleRenderer.backdropArt(size: .medium, polarity: .neutral))
+
+        let d = try #require(Self.attribute("d", in: raw))
+        let parsed = try #require(SVGPathParser.parse(d))
+        let step = WobbleParams.scaled(for: soft.viewBox.size).flattenStep
+        let expected = WobblePathFlattener.flatten(parsed, step: step)
+            .filter { $0.points.count > 2 }
+            .flatMap(\.points)
+
+        #expect(Self.points(of: soft.path) == expected)
+        #expect(soft.path != wobbled.path)
+        #expect(soft.viewBox == wobbled.viewBox)
+        #expect(soft.usesEvenOddFill == wobbled.usesEvenOddFill)
+    }
+
+    @Test("the soft silhouette is memoised apart from the wobbled one")
+    func softBackdropIsCached() throws {
+        let first = try #require(WobbleRenderer.softBackdropArt(size: .large, polarity: .highlight))
+        let second = try #require(WobbleRenderer.softBackdropArt(size: .large, polarity: .highlight))
+        #expect(first === second)
+        #expect(first !== WobbleRenderer.backdropArt(size: .large, polarity: .highlight))
+    }
+
+    private static func attribute(_ name: String, in svg: String) -> String? {
+        guard let regex = try? NSRegularExpression(pattern: "(?<![\\w-])\(name)=\"([^\"]*)\""),
+              let match = regex.firstMatch(in: svg, range: NSRange(svg.startIndex..., in: svg)),
+              let range = Range(match.range(at: 1), in: svg) else { return nil }
+        return String(svg[range])
+    }
+
+    private static func points(of path: CGPath) -> [CGPoint] {
+        var result: [CGPoint] = []
+        path.applyWithBlock { element in
+            switch element.pointee.type {
+            case .moveToPoint, .addLineToPoint: result.append(element.pointee.points[0])
+            default: break
+            }
+        }
+        return result
+    }
 }
