@@ -27,3 +27,64 @@ export function parsePinnedColors(kotlin: string): IosPins {
   }
   return { googleCapsuleInk: `#${rgb.toUpperCase()}` }
 }
+
+export type Appearance = "light" | "dark" | "lightHigh" | "darkHigh"
+
+export interface Tone {
+  hex: string
+  alpha: number
+}
+
+/** D2: entry order in every colorset. */
+export const APPEARANCES: readonly Appearance[] = ["light", "dark", "lightHigh", "darkHigh"]
+
+interface AppearanceKey {
+  appearance: "luminosity" | "contrast"
+  value: "dark" | "high"
+}
+
+/**
+ * D2: the keys actool honours, checked by compiling a test catalog with Xcode
+ * 26.3 and reading the .car with `assetutil --info`. A misspelt key compiles
+ * silently and falls back to light, which is why PebblesColorsTests resolves
+ * real trait collections.
+ */
+const APPEARANCE_KEYS: Record<Appearance, AppearanceKey[] | null> = {
+  light: null,
+  dark: [{ appearance: "luminosity", value: "dark" }],
+  lightHigh: [{ appearance: "contrast", value: "high" }],
+  darkHigh: [
+    { appearance: "luminosity", value: "dark" },
+    { appearance: "contrast", value: "high" },
+  ],
+}
+
+const XCODE_INFO = { author: "xcode", version: 1 }
+
+/** JSON the way Xcode writes it: two-space indent, `"key" : value`, trailing newline. */
+export function xcodeJson(value: unknown): string {
+  return `${JSON.stringify(value, null, 2).replace(/"([^"]+)": /g, '"$1" : ')}\n`
+}
+
+function components({ hex, alpha }: Tone) {
+  if (!/^#[0-9A-F]{6}$/.test(hex)) throw new Error(`${hex} is not an uppercase #RRGGBB`)
+  // Key order is Xcode's (alphabetical), so the file does not churn on open.
+  return {
+    alpha: alpha.toFixed(3),
+    blue: `0x${hex.slice(5, 7)}`,
+    green: `0x${hex.slice(3, 5)}`,
+    red: `0x${hex.slice(1, 3)}`,
+  }
+}
+
+/** One `Contents.json`. A tone given only for `light` is a single-appearance colorset (§2.5). */
+export function renderColorset(tones: Partial<Record<Appearance, Tone>>): string {
+  const colors = APPEARANCES.flatMap((appearance) => {
+    const tone = tones[appearance]
+    if (!tone) return []
+    const color = { "color-space": "srgb", components: components(tone) }
+    const keys = APPEARANCE_KEYS[appearance]
+    return [keys ? { appearances: keys, color, idiom: "universal" } : { color, idiom: "universal" }]
+  })
+  return xcodeJson({ colors, info: XCODE_INFO })
+}
