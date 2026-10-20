@@ -459,7 +459,7 @@ struct SettingsSheet: View {
     /// Store-mandated account deletion entry (Apple 5.1.1(v): easy to find).
     private var deleteAccountSection: some View {
         Section {
-            Button(role: .destructive) {
+            Button {
                 isPresentingDeleteConfirm = true
             } label: {
                 HStack {

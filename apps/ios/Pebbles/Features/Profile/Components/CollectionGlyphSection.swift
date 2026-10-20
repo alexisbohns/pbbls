@@ -33,7 +33,8 @@ struct CollectionGlyphSection: View {
             .accessibilityHint(Text("Tap to choose"))
             .pebblesListRow(position: glyph == nil ? .only : .top)
             if glyph != nil {
-                Button("Remove glyph", role: .destructive) { glyph = nil }
+                Button("Remove glyph") { glyph = nil }
+                    .foregroundStyle(Color.pebbles.error)
                     .pebblesListRow(position: .bottom)
             }
             // A plain row, not a `footer:`: a plain-style list draws footers as

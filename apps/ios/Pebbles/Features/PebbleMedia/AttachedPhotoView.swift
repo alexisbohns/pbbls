@@ -79,9 +79,9 @@ struct AttachedPhotoView: View {
     }
 
     private var removeButton: some View {
-        Button(role: .destructive, action: onRemove) {
+        Button(action: onRemove) {
             Image(systemName: "xmark.circle.fill")
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.pebbles.error)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Remove photo")

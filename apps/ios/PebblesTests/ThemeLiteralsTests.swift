@@ -86,9 +86,7 @@ struct ThemeLiteralsTests {
         "Components/Inputs/PebblesTextInput.swift": 1,
         "Components/PebbleRow.swift": 1,
         "Features/Connections/ConnectionsListView.swift": 1,
-        "Features/Connections/InviteSheet.swift": 1,
         "Features/Glyph/Views/GlyphCanvasView.swift": 1,
-        "Features/Glyph/Views/GlyphCarveSheet.swift": 1,
         "Features/Glyph/Views/GlyphPickerContent.swift": 1,
         "Features/Glyph/Views/GlyphTabBar.swift": 2,
         "Features/Glyph/Views/SlideToConfirm.swift": 1,
@@ -100,15 +98,11 @@ struct ThemeLiteralsTests {
         "Features/Path/Components/WeekPathView.swift": 1,
         "Features/Path/PebbleDetailSheet.swift": 1,
         "Features/Path/Valence/ValenceStoneStyle.swift": 1,
-        "Features/PebbleMedia/AttachedPhotoView.swift": 3,
-        "Features/PebbleMedia/ExistingSnapRow.swift": 3,
+        "Features/PebbleMedia/AttachedPhotoView.swift": 2,
+        "Features/PebbleMedia/ExistingSnapRow.swift": 2,
         "Features/PebbleMedia/SnapImageView.swift": 1,
-        "Features/Profile/Components/CollectionGlyphSection.swift": 1,
-        "Features/Profile/Lists/CollectionsListView.swift": 1,
         "Features/Profile/Lists/SoulsListView.swift": 1,
-        "Features/Profile/Sheets/SettingsSheet.swift": 1,
         "Features/Record/RecordStepScaffold.swift": 1,
-        "Features/Record/Steps/RecordPhotoStep.swift": 2,
         "Features/Welcome/WelcomeView.swift": 1
     ]
 
