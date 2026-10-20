@@ -1181,3 +1181,20 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The old colorsets and `Palettes.swift` are deleted at the end of the stack.
 - **Supersedes / Superseded-by:** Supersedes the "iOS keeps its old palette (#921)" consequence of **2026-09-28 — The error colour is orange, never red** (#990), and answers the #921 lines of 2026-09-24 (#853), 2026-09-28 (#986) and 2026-10-18 (#1118).
 - **Refs:** #921, #853, #990, #986, #1118, `docs/superpowers/specs/2026-10-20-ios-m3-colour-design.md`, `apps/web/lib/theme/ios-colorsets.ts`, `apps/ios/Shared/Theme/PebblesColors.swift`, `apps/ios/PebblesTests/ThemeLiteralsTests.swift`, `apps/ios/Pebbles/Components/Menus/PebblesMenu.swift`.
+
+## 2026-10-20 — iOS reference images: a hand-rolled ImageRenderer gate, rendered on CI only (#1159)
+
+- **Status:** taken
+- **Scope:** ios, quality
+- **Context:** The iOS Spine (#1130) and the held card (#1146) need a visual gate before they are built. Android has one (#847); iOS had none, and `project.yml` pins every package exactly.
+- **Decision:**
+  - Swift Testing renders named views with `ImageRenderer` (`PebblesTests/References/Support/`), compares them pixel for pixel with PNGs under `PebblesTests/References/__References__/`, and fails above 0.05 % of differing pixels, a size mismatch, or a missing reference.
+  - Pins: 393 pt (iPhone 15) at 2×, paper/Night, EN and a second `-testLanguage fr` pass, Europe/Paris, `.large` plus `-ax2` at `.accessibility2`; Xcode 26.3, iPhone 17 on iOS 26.2 for the whole `test` job.
+  - References are rendered on CI only: the `rebaseline-ios-screenshots` label runs `ios-references.yml`, which records, re-renders to prove the renders reproduce, and commits.
+- **Why:** No dependency (`swift-snapshot-testing` would add three pinned packages and a metric that is not Android's); no XCTest; the same metric as the Android gate; #793 shows two Xcode builds disagreeing on the same code.
+- **Consequences:**
+  - Never commit a local render; never widen `ReferenceImage.threshold`; lower it if calibration shows under 2× headroom.
+  - No `ScrollView` or `containerRelativeFrame` in a rendered view; lazy stacks become eager in fixtures.
+  - Moving Xcode, the device or the runtime is its own PR that re-baselines every reference.
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #1159, #793, `docs/superpowers/specs/2026-10-20-ios-new-path-foundations-design.md`, `docs/superpowers/plans/2026-10-20-ios-new-path-foundations.md`.
