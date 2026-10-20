@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path.card
 
+import android.icu.text.ListFormatter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
@@ -98,6 +101,8 @@ internal fun CardRecto(
             PeopleLines.of(ids, ids, locale, namedInFull = PeopleLines.NAMED_ON_CARD)
         }
     val namesById = remember(souls) { souls.associate { it.id to it.name } }
+    // Everyone, once, as the locale lists them: the strip is read as one stop, not name by name.
+    val names = remember(souls, locale) { if (souls.isEmpty()) "" else ListFormatter.getInstance(locale).format(souls.map { it.name }) }
 
     val stone = remember(palette) { palette?.toStonePalette() ?: BLANK_STONE_PALETTE }
     val spot = StoneTones.spot(stone, colors.isNight)
@@ -133,7 +138,12 @@ internal fun CardRecto(
                         moreStyle = type.cardMore(uSp),
                         othersStyle = type.cardOthers(uSp),
                         glyphInk = colors.ink,
-                        modifier = Modifier.semantics { traversalIndex = RECTO_LATE },
+                        // One merged stop: a traversal index on the strip's plain FlowRow would be ignored.
+                        modifier =
+                            Modifier.clearAndSetSemantics {
+                                contentDescription = names
+                                traversalIndex = RECTO_LATE
+                            },
                     )
                 }
             },
