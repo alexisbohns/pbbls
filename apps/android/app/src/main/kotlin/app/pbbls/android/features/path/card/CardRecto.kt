@@ -1,6 +1,10 @@
 package app.pbbls.android.features.path.card
 
 import android.icu.text.ListFormatter
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +12,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SpineTypography
+import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.MomentDetail
 import app.pbbls.android.core.model.SoulWithGlyph
@@ -37,9 +43,11 @@ import app.pbbls.android.core.ui.ReferenceType
 import app.pbbls.android.core.ui.render.stone.BLANK_STONE_PALETTE
 import app.pbbls.android.core.ui.render.stone.StoneTones
 import app.pbbls.android.core.ui.render.stone.toStonePalette
+import app.pbbls.android.features.path.spine.ASPECT_MS
 import app.pbbls.android.features.path.spine.CARD_GLYPH_UNITS
 import app.pbbls.android.features.path.spine.PeopleLine
 import app.pbbls.android.features.path.spine.SpineCardFace
+import app.pbbls.android.features.path.spine.logic.CardSizes
 import app.pbbls.android.features.path.spine.logic.EntryTypes
 import app.pbbls.android.features.path.spine.logic.PeopleLines
 import app.pbbls.android.features.path.spine.shortWeekday
@@ -111,13 +119,20 @@ internal fun CardRecto(
     val spot = StoneTones.spot(stone, colors.isNight)
     val hasPhoto = detail.sortedSnaps.firstOrNull() != null
     val name = detail.name?.takeIf { it.isNotBlank() } ?: stringResource(R.string.path_spine_untitled)
+    // The field eases to the photo's shape once the probe lands, as the Spine card's does.
+    val reduceMotion = rememberReduceMotion()
+    val animatedRatio by animateFloatAsState(
+        targetValue = ratio ?: CardSizes.PENDING_RATIO,
+        animationSpec = if (reduceMotion) snap() else tween(ASPECT_MS, easing = EaseOut),
+        label = "card-recto-aspect",
+    )
     val nameType = remember(moment.valence) { EntryTypes.entry(moment.valence.intensity, moment.valence.polarity).name }
 
     SpineCardFace(
         moment = moment,
         palette = palette,
         u = u,
-        ratio = ratio ?: 1f,
+        ratio = animatedRatio,
         photoUrl = photoUrl,
         thumbUrl = thumbUrl,
         weekday = weekday,

@@ -88,7 +88,9 @@ private const val U_DIVISOR = 70f
 private val U_MAX = 4.4.dp
 
 private val RULE = 1.dp
-private const val ASPECT_MS = 240
+
+/** The field's ease to the photo's ratio once probed; the held card's recto eases the same. */
+internal const val ASPECT_MS = 240
 private const val RING_ALPHA = 0.30f
 private const val RAIL_RULE_ALPHA = 0.5f
 
