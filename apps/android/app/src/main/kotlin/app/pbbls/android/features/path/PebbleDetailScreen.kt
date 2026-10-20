@@ -118,6 +118,10 @@ fun PebbleDetailScreen(
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {
             PebbleDetailEffect.MomentDeleted -> onMomentDeleted()
+            // The resume refresh already swaps the bare page for the card; the
+            // print-into-place choreography is the completion task's (pebble
+            // card spec §Completion, `CardCompletion`).
+            PebbleDetailEffect.Completed -> Unit
         }
     }
 

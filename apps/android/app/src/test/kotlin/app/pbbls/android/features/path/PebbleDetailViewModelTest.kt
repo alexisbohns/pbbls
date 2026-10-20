@@ -153,6 +153,68 @@ class PebbleDetailViewModelTest {
             assertEquals(listOf("moment-1", "moment-2"), service.loadedMomentIds)
         }
 
+    // MARK: - Completion (pebble card spec §Completion)
+
+    /** Complete is its own entry: the resume refresh is what finds the new pebble. */
+    @Test
+    fun `a resume that finds a pebble on a bare moment emits Completed`() =
+        runTest {
+            val service = FakeMomentReadService(moments = mapOf("m1" to UiFixtures.momentDetail(id = "m1", pebble = null)))
+            val vm = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val effects = recordEffects(vm.effects)
+            vm.start("m1")
+            advanceUntilIdle()
+            vm.onResumed() // the first resume is skipped
+            advanceUntilIdle()
+
+            service.moments = mapOf("m1" to UiFixtures.momentDetail(id = "m1"))
+            vm.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(listOf(PebbleDetailEffect.Completed), effects.values)
+            effects.stop()
+        }
+
+    @Test
+    fun `a pebble that was already there emits nothing`() =
+        runTest {
+            val service = FakeMomentReadService(moments = mapOf("m1" to UiFixtures.momentDetail(id = "m1")))
+            val vm = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val effects = recordEffects(vm.effects)
+            vm.start("m1")
+            advanceUntilIdle()
+            vm.onResumed()
+            advanceUntilIdle()
+            vm.onResumed()
+            advanceUntilIdle()
+
+            assertTrue(effects.values.isEmpty())
+            effects.stop()
+        }
+
+    /** `start` with another id loads it in place: a pebble there is not a completion. */
+    @Test
+    fun `opening a pebble after a bare moment emits nothing`() =
+        runTest {
+            val service =
+                FakeMomentReadService(
+                    moments =
+                        mapOf(
+                            "m1" to UiFixtures.momentDetail(id = "m1", pebble = null),
+                            "m2" to UiFixtures.momentDetail(id = "m2"),
+                        ),
+                )
+            val vm = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val effects = recordEffects(vm.effects)
+            vm.start("m1")
+            advanceUntilIdle()
+            vm.start("m2")
+            advanceUntilIdle()
+
+            assertTrue(effects.values.isEmpty())
+            effects.stop()
+        }
+
     // MARK: - Delete (R7, R8)
 
     @Test

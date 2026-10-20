@@ -37,6 +37,12 @@ sealed interface PebbleDetailUiState {
 sealed interface PebbleDetailEffect {
     /** The moment is gone (`delete_moment`): the page closes. */
     data object MomentDeleted : PebbleDetailEffect
+
+    /**
+     * The moment came back from Complete with a pebble: the card prints into
+     * its place (pebble card spec §Completion).
+     */
+    data object Completed : PebbleDetailEffect
 }
 
 /**
@@ -55,6 +61,10 @@ sealed interface PebbleDetailEffect {
  * Delete lives in the ⋮ menu (R7) and asks what to delete (R8): deleting the
  * moment closes the page ([PebbleDetailEffect.MomentDeleted]); deleting only
  * its pebble reloads it as a bare moment.
+ *
+ * Complete is an entry of its own too, so the same resume refresh is what
+ * notices a bare moment that came back with a pebble
+ * ([PebbleDetailEffect.Completed], pebble card spec §Completion).
  */
 @HiltViewModel
 class PebbleDetailViewModel
@@ -123,12 +133,18 @@ class PebbleDetailViewModel
         }
 
         private suspend fun fetch(id: String) {
+            var completed = false
             runCatchingCancellable { moments.loadMoment(id) }
                 .fold(
                     onSuccess = {
+                        // Only a refresh of the same moment can complete it: a
+                        // first load has nothing before it, and `start` with
+                        // another id is a different moment.
+                        val wasBare = detail?.let { before -> before.id == it.id && before.pebble == null } == true
                         detail = it
                         hasFailed = false
                         isLoaded = true
+                        completed = wasBare && it.pebble != null
                     },
                     onFailure = {
                         Log.e(TAG, "moment load failed", it)
@@ -138,6 +154,8 @@ class PebbleDetailViewModel
                     },
                 )
             publish()
+            // After `publish`: the card is on screen before it is told to print.
+            if (completed) _effects.emit(PebbleDetailEffect.Completed)
         }
 
         private fun publish() {
