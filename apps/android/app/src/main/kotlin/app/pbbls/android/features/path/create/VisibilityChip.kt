@@ -33,7 +33,7 @@ import app.pbbls.android.core.ui.labelRes
  * (`contentDescription = null`), matching the neighboring `FormRow`/
  * `DomainRow` picker rows rather than adding a separate semantics label.
  * Tinted `onSurfaceVariant` end to end, mirroring iOS's `.tint(Color.system.secondary)`
- * on the chip and the existing `PebblePrivacyBadge` chip tint. The chip's merged
+ * on the chip. The chip's merged
  * semantics carry the same "Privacy: <grade>" a11y string as the iOS chip's
  * `accessibilityLabel` (M51). The dropdown marks the current grade with a
  * checkmark, mirroring the system checkmark iOS's Menu-hosted `Picker` renders

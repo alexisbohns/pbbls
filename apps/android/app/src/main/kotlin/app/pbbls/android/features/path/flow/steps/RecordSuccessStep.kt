@@ -33,7 +33,7 @@ import app.pbbls.android.features.path.read.PebbleReadPetroglyph
 /**
  * Step 10 — the pebble, drawn on — ports iOS `RecordSuccessStep`.
  *
- * Reuses [PebbleReadPetroglyph], the same component the read view uses: it
+ * Reuses [PebbleReadPetroglyph], drawn for the old read view (#1135 retired it): it
  * composites the outline backdrop and the composed stone, coloured through the
  * emotion palette. The stone always draws: a null [glyph] is a bare stone, not
  * an absent one (R12).
