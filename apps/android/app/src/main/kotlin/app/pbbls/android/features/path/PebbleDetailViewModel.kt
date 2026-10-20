@@ -7,6 +7,7 @@ import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
+import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.data.delete
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.MomentDetail
@@ -61,6 +62,12 @@ class PebbleDetailViewModel
     constructor(
         private val moments: MomentReadServicing,
         private val writes: MomentWriteServicing,
+        /**
+         * The photo-ratio probe the card's recto reads (#1135), the same
+         * process-wide cache the Spine fills, so a card opened from the Spine
+         * finds its ratio already known.
+         */
+        val snapAspect: SnapAspectCache,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow<PebbleDetailUiState>(PebbleDetailUiState.Loading)
         val uiState: StateFlow<PebbleDetailUiState> = _uiState.asStateFlow()

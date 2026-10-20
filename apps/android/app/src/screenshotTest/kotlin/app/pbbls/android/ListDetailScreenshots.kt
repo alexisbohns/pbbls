@@ -368,14 +368,23 @@ private fun PathPebblePair() {
         },
         detail = {
             CompositionLocalProvider(LocalReferenceDataService provides detailPreviewRefs) {
+                // The held card beside Path (#1135): F1, its photo unsigned so the field shows its tint.
                 PebbleDetailContent(
-                    uiState = PebbleDetailUiState.Content(fullDetail),
-                    palette = previewPalette,
+                    uiState = PebbleDetailUiState.Content(PebbleCardFixtures.f1),
+                    palette = PebbleCardFixtures.joyPalette,
                     onEditMoment = {},
                     onEditPebble = {},
                     onDelete = {},
                     onShare = null,
                     onRetry = {},
+                    photo = null,
+                    ratio = PebbleCardFixtures.ROOFTOP_RATIO,
+                    soulsById = PebbleCardFixtures.soulsById,
+                    domains = PebbleCardFixtures.domains,
+                    // Beside its list, as the entry decides (#940): the list is the way back.
+                    showBack = false,
+                    onBack = {},
+                    zone = PebbleCardFixtures.zone,
                 )
             }
         },

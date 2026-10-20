@@ -242,6 +242,8 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onEditPebble = { navigator.navigate(PebblesKey.EditPebble(key.momentId)) },
             onMomentDeleted = { navigator.closeDetail(PebblesKey.PebbleDetail(key.momentId)) },
             onCompleteRequested = { navigator.navigate(PebblesKey.CompletePebble(key.momentId)) },
+            showBack = !isInListDetailPane(),
+            onBack = navigator::goBack,
         )
     }
 

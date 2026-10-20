@@ -2,18 +2,12 @@ package app.pbbls.android
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
@@ -45,7 +39,8 @@ import java.time.OffsetDateTime
  * across its variants — full (description + souls + domain + collection), glyph
  * souls, minimal, the no-domain fallback, and a bare moment with no pebble —
  * plus the open ⋮ menu and the R8 [MomentDeleteDialog] with and without a
- * pebble. Light and
+ * pebble. The page itself ([PebbleDetailContent]) shows a pebble as the held
+ * card (#1135). Light and
  * dark, driven with fixture [MomentDetail]s and a fixed souls cache so no
  * services are needed. The stateful `PebbleDetailScreen` (service-backed) is
  * deliberately not previewed.
@@ -141,8 +136,7 @@ private fun detail(
             ),
     )
 
-// Internal so the Path list-detail and sheet renders show this moment (#940).
-internal val fullDetail: MomentDetail =
+private val fullDetail: MomentDetail =
     detail(
         name = "Morning walk",
         description = "Long loop around the park before work. The light was unreal.",
@@ -191,7 +185,7 @@ private fun DetailPreview(
     palette: EmotionPalette? = previewPalette,
 ) {
     // PebbleReadView draws no background of its own (#940): it sits on its
-    // host, which in production is the sheet's container or the pane's surface.
+    // host, which in production is the page's or the pane's surface.
     CompositionLocalProvider(LocalReferenceDataService provides detailPreviewRefs) {
         PebbleReadView(
             detail = detail,
@@ -259,54 +253,56 @@ fun PebbleDetailNoDomainDark() {
 }
 
 /**
- * The pebble as a docked sheet on a phone (#940). Layoutlib cannot render
- * `ModalBottomSheet`'s own window, so this is the sheet's look without it: the
- * top-rounded sheet surface and its drag handle over the real
- * [PebbleDetailContent].
+ * The read page as a phone shows it (#1135): a page of its own, no longer a
+ * sheet, with its back arrow, over the real [PebbleDetailContent]. A pebble is
+ * the held card (F1 from [PebbleCardFixtures], its photo unsigned so the field
+ * shows its tint); a bare moment still renders the read view.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SheetPreview(
-    detail: MomentDetail = fullDetail,
+private fun PagePreview(
+    detail: MomentDetail = PebbleCardFixtures.f1,
     initialMenuOpen: Boolean = false,
     onComplete: (() -> Unit)? = null,
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize().padding(top = 24.dp),
-        shape = MaterialTheme.shapes.extraLarge.copy(bottomStart = CornerSize(0), bottomEnd = CornerSize(0)),
-        color = BottomSheetDefaults.ContainerColor,
-    ) {
-        Column {
-            BottomSheetDefaults.DragHandle(modifier = Modifier.align(Alignment.CenterHorizontally))
-            CompositionLocalProvider(LocalReferenceDataService provides detailPreviewRefs) {
-                PebbleDetailContent(
-                    uiState = PebbleDetailUiState.Content(detail),
-                    palette = if (detail.pebble != null) previewPalette else null,
-                    onEditMoment = {},
-                    onEditPebble = {},
-                    onDelete = {},
-                    onShare = null,
-                    onRetry = {},
-                    onComplete = onComplete,
-                    initialMenuOpen = initialMenuOpen,
-                )
-            }
-        }
+    CompositionLocalProvider(LocalReferenceDataService provides detailPreviewRefs) {
+        PebbleDetailContent(
+            uiState = PebbleDetailUiState.Content(detail),
+            palette =
+                detail.pebble
+                    ?.emotion
+                    ?.id
+                    ?.let(PebbleCardFixtures.palettes::get),
+            onEditMoment = {},
+            onEditPebble = {},
+            onDelete = {},
+            onShare = null,
+            onRetry = {},
+            photo = null,
+            ratio = if (detail.snaps.isEmpty()) null else PebbleCardFixtures.ROOFTOP_RATIO,
+            soulsById = PebbleCardFixtures.soulsById,
+            domains = PebbleCardFixtures.domains,
+            showBack = true,
+            onBack = {},
+            onComplete = onComplete,
+            initialMenuOpen = initialMenuOpen,
+            zone = PebbleCardFixtures.zone,
+        )
     }
 }
 
+/** A pebble opens as the card, on its recto (#1135). */
 @PreviewTest
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = 412, heightDp = 915)
 @Composable
-fun PebbleDetailSheetLight() {
-    PebblesTheme { SheetPreview() }
+fun PebbleDetailCardLight() {
+    PebblesTheme { PagePreview() }
 }
 
 @PreviewTest
-@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Preview(showBackground = true, widthDp = 412, heightDp = 915, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun PebbleDetailSheetDark() {
-    PebblesTheme { SheetPreview() }
+fun PebbleDetailCardDark() {
+    PebblesTheme { PagePreview() }
 }
 
 @PreviewTest
@@ -314,14 +310,14 @@ fun PebbleDetailSheetDark() {
 @PreviewFrench
 @Composable
 fun PebbleDetail_BareMoment() {
-    PebblesTheme { SheetPreview(detail = bareMoment) }
+    PebblesTheme { PagePreview(detail = bareMoment) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun PebbleDetail_BareMomentDark() {
-    PebblesTheme { SheetPreview(detail = bareMoment) }
+    PebblesTheme { PagePreview(detail = bareMoment) }
 }
 
 /** A bare moment's one call to action, "Make it a pebble", under its title (A-8). */
@@ -330,23 +326,30 @@ fun PebbleDetail_BareMomentDark() {
 @PreviewFrench
 @Composable
 fun PebbleDetail_BareMomentWithCta() {
-    PebblesTheme { SheetPreview(detail = bareMoment, onComplete = {}) }
+    PebblesTheme { PagePreview(detail = bareMoment, onComplete = {}) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun PebbleDetail_BareMomentWithCtaDark() {
-    PebblesTheme { SheetPreview(detail = bareMoment, onComplete = {}) }
+    PebblesTheme { PagePreview(detail = bareMoment, onComplete = {}) }
 }
 
-/** The ⋮ menu (R7): Edit moment, Edit pebble because this moment has one, and Delete. */
+/** The ⋮ menu (R7) over the card: Edit moment, Edit pebble because this moment has one, a divider, and Delete. */
 @PreviewTest
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = 412, heightDp = 915)
 @PreviewFrench
 @Composable
 fun PebbleDetail_MenuOpenWithDelete() {
-    PebblesTheme { SheetPreview(initialMenuOpen = true) }
+    PebblesTheme { PagePreview(initialMenuOpen = true) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, heightDp = 915, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleDetail_MenuOpenWithDeleteDark() {
+    PebblesTheme { PagePreview(initialMenuOpen = true) }
 }
 
 /** R8 with your pebble: keep the moment, or delete it too. */
