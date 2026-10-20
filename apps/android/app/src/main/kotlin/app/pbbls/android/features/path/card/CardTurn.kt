@@ -76,7 +76,11 @@ internal class CardTurnState(
     /** The face a running settle lands on; null while none runs. */
     private var settlingTo: CardFace? by mutableStateOf(null)
 
-    private val isBusy: Boolean get() = dragging || running?.isActive == true
+    /**
+     * A settle counts from its first line ([settlingTo]), not only once its launch has returned
+     * a job: an observer can run inside an undispatched launch, before [running] is assigned.
+     */
+    private val isBusy: Boolean get() = dragging || settlingTo != null || running?.isActive == true
 
     /**
      * Where the card will rest: the face a running turn lands on, the face in front while
@@ -105,13 +109,17 @@ internal class CardTurnState(
         reduceMotion: Boolean,
     ): Boolean = target == landing || turn(reduceMotion)
 
-    /** Returns once no drag holds the card and no turn runs: a drag's release may start a settle, so it loops. */
+    /**
+     * Returns once no drag holds the card and no turn runs: a drag's release may start a
+     * settle, so it loops. One dispatch separates a settle completing from this resuming; a
+     * tap landing in it starts a turn, which this then waits out and the pending request follows.
+     */
     suspend fun awaitFree() {
         while (true) {
             val job = running
             when {
-                dragging -> snapshotFlow { dragging }.first { !it }
                 job != null && job.isActive -> job.join()
+                dragging || settlingTo != null -> snapshotFlow { dragging || settlingTo != null }.first { !it }
                 else -> return
             }
         }

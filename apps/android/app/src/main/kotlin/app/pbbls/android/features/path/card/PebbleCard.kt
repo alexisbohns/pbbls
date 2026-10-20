@@ -80,9 +80,10 @@ private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
  * edge (a flick carries it, a release short of the half reverts), or a changed
  * [requestedFace]; the face in front swaps at 90°, edge-on. For TalkBack the footer's
  * button is the turn: a custom action on the card would sit on a node TalkBack never
- * focuses. Under reduced motion the faces crossfade, and only the incoming one speaks. While it turns, the face shrinks by exactly what perspective adds to
- * its near edge, so the near corners stay inside the shell's clip rather than being cut by
- * it, and the far edge recedes as on a real card.
+ * focuses. Under reduced motion the faces crossfade, and only the incoming one speaks.
+ * While it turns, the face shrinks by exactly what perspective adds to its near edge, so
+ * the near corners stay inside the shell's clip rather than being cut by it, and the far
+ * edge recedes as on a real card.
  *
  * The footer names the face that is not in front: it switches at the half, with the
  * picture, so a drag held past the half offers the turn back. It reads the turn itself
@@ -128,10 +129,12 @@ internal fun PebbleCard(
     var answered by rememberSaveable { mutableStateOf(requestedFace) }
     LaunchedEffect(requestedFace) {
         if (requestedFace != answered) {
-            answered = requestedFace
             // A turn or a drag in flight finishes first; then the card turns if it will not land there.
             turn.awaitFree()
             turn.turnTo(requestedFace, reduceMotion)
+            // Answered only once acted on: a request still waiting when the state is saved is not
+            // saved as answered, so the restored card takes it up again.
+            answered = requestedFace
         }
     }
     val colors = PebblesTheme.spine.colors
@@ -200,7 +203,8 @@ internal fun PebbleCard(
  * finger dragging toward the start (negative degrees in LTR, mirrored in RTL). Past the
  * half the other face is in front, a half-turn on, so its rotation runs back from 90° to
  * 0° and its text reads the right way round. Drawn in the layer alone: no frame of a turn
- * re-measures, and only the half recomposes, the footer alone ([TurnFooter]).
+ * re-measures, and only the half recomposes: the footer ([TurnFooter]) and the faces'
+ * semantics.
  *
  * Perspective makes the near edge taller than the card by `d / (d - w/2 · sin θ)`; the
  * scale `d / (d + w/2 · sin θ)` brings the near edge back to exactly the card's height, so

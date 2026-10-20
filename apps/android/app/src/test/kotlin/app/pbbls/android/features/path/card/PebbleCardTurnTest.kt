@@ -51,8 +51,9 @@ import java.time.ZoneOffset
 /**
  * The held card's turn (pebble card spec §Behaviour): the footer's button (TalkBack's turn
  * too), a drag and a changed requested face each bring the other face in front, the
- * face a turn lands on survives a restore, and the face not in front says nothing. The verso's lockup heading ("Your pebble. …") is the verso-only
- * node; both faces stay composed, so it must be absent from the semantics on the recto.
+ * face a turn lands on survives a restore, and the face not in front says nothing. The
+ * verso's lockup heading ("Your pebble. …") is the verso-only node; both faces stay
+ * composed, so it must be absent from the semantics on the recto.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, qualifiers = "w390dp-h800dp-xhdpi")
@@ -182,6 +183,35 @@ class PebbleCardTurnTest {
         compose.onNode(versoHeading).assertExists()
         request(CardFace.RECTO) { requested = it }
         compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+
+        compose.onNode(versoHeading).assertDoesNotExist()
+        compose.onNodeWithContentDescription(context.getString(R.string.card_turn_action_to_pebble)).assertExists()
+    }
+
+    @Test
+    fun `a face requested while a finger holds the card is turned to once it lets go`() {
+        var requested by mutableStateOf(CardFace.VERSO)
+        setCard { requested }
+        // Turned back to the recto by hand, so the verso stays the answered request.
+        compose.onNodeWithContentDescription(context.getString(R.string.card_turn_action_to_moment)).performClick()
+        compose.waitForIdle()
+        compose.onNode(versoHeading).assertDoesNotExist()
+
+        // A finger holds the card past the half: the verso is in front, and the drag is not released.
+        compose.onNode(hasTestTag(PEBBLE_CARD_TAG)).performTouchInput {
+            down(Offset(width * 0.9f, height * 0.3f))
+            moveBy(Offset(-width * 0.7f, 0f))
+        }
+        compose.waitForIdle()
+        compose.onNode(versoHeading).assertExists()
+
+        requested = CardFace.RECTO
+        compose.mainClock.advanceTimeBy(TURN_MS / 4L)
+        // Waiting for the finger: nothing has turned toward the recto yet.
+        compose.onNode(versoHeading).assertExists()
+
+        compose.onNode(hasTestTag(PEBBLE_CARD_TAG)).performTouchInput { up() }
         compose.waitForIdle()
 
         compose.onNode(versoHeading).assertDoesNotExist()
