@@ -132,19 +132,24 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
         float pitThreshold = 0.5 + (1.0 - pits) * 0.35;
         float pit = smoothstep(pitThreshold, pitThreshold + 0.04, pitField);
         col = mix(col, ink * 0.6, pit);
+        // Fine grain at a fixed amplitude (the web lava grain, #1097).
+        col *= 1.0 - 0.32 * (fractal(p, scale * 6.0, 1, seed + 11u) - 0.5);
         col += sheen * l.spec * lipLight * lipLightOpacity * 0.5;
     } else if (m == 1) {
         // River: continuous fine grain, one axis stretched into sediment
-        // banding, a soft broad specular.
+        // banding, a matte broad specular and a fine tooth set by pits.
         float2 q = p * float2(1.0, 1.0 + banding * 3.0);
         float step = 0.5;
         float h = fractal(q, scale, 3, seed);
         float hx = fractal(q + float2(step, 0.0), scale, 3, seed);
         float hy = fractal(q + float2(0.0, step), scale, 3, seed);
         float3 n = normalFromHeight(h, hx, hy, step, relief);
-        Lit l = lit(n, L, 18.0);
+        // Exponent 6, not 18: a broad, dim light with no hot spot (#1097).
+        Lit l = lit(n, L, 6.0);
         float shade = 0.6 + 0.6 * l.diffuse;
         col = body * mix(1.0, shade, contrast);
+        // A fine tooth. River ignored `pits` until now; it is its grain.
+        col *= 1.0 - pits * (fractal(p, scale * 6.0, 1, seed + 11u) - 0.5);
         col += sheen * l.spec * lipLight * lipLightOpacity * 0.8;
     } else {
         // Gem: flat facets, one random normal per Worley cell, blinking as
