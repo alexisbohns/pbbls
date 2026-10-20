@@ -98,6 +98,9 @@ private const val LEGEND_TO_LEAF_UNITS = 4.4f
 /** The mat round a slip, wider than round a photo (the mock's `.field.plate`). */
 private const val SLIP_MAT_UNITS = 2.6f
 
+/** The legend's head room under a slip: no title, so less (the mock's `.lg.no-title`). */
+private const val SLIP_LEGEND_UNITS = 2.2f
+
 /** The photo's bed while it loads: the spot mixed into the stock. */
 private const val PHOTO_BED = 0.18f
 
@@ -419,29 +422,37 @@ private fun BoxScope.Print(
             unavailableStyle = type.cardSoul(uSp),
             slip = slip?.let { { it(u) } },
         )
-        Column(
-            Modifier.fillMaxWidth().padding(top = u * 3.3f),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            // A photo-only moment shows no title: the photo is the moment (spec D3). A slip
-            // already carries the name.
-            moment.name?.takeIf { slip == null }?.let { name ->
-                Text(
-                    text = name,
-                    style =
-                        type
-                            .cardTitle(
-                                uSp,
-                                cut.first,
-                                cut.second,
-                            ).copy(lineBreak = LineBreak.Heading, textAlign = TextAlign.Center),
-                    color = colors.ink,
-                    // The held card's first stop for TalkBack; the Spine clears it into its button.
-                    modifier = Modifier.fillMaxWidth().semantics { heading() },
-                )
-            }
-            if (people != null) {
-                Box(Modifier.fillMaxWidth().padding(top = u * 1.8f), contentAlignment = Alignment.Center) { people(u) }
+        // Under a slip the legend has no title (the mock's `.lg.no-title`, 2.2u in, the souls
+        // flush), and with no souls either it is not there at all (`.lg.empty`). The Spine never
+        // passes a slip, so its legend is as it was.
+        if (slip == null || people != null) {
+            Column(
+                Modifier.fillMaxWidth().padding(top = if (slip != null) u * SLIP_LEGEND_UNITS else u * 3.3f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                // A photo-only moment shows no title: the photo is the moment (spec D3). A slip
+                // already carries the name.
+                moment.name?.takeIf { slip == null }?.let { name ->
+                    Text(
+                        text = name,
+                        style =
+                            type
+                                .cardTitle(
+                                    uSp,
+                                    cut.first,
+                                    cut.second,
+                                ).copy(lineBreak = LineBreak.Heading, textAlign = TextAlign.Center),
+                        color = colors.ink,
+                        // The held card's first stop for TalkBack; the Spine clears it into its button.
+                        modifier = Modifier.fillMaxWidth().semantics { heading() },
+                    )
+                }
+                if (people != null) {
+                    Box(
+                        Modifier.fillMaxWidth().padding(top = if (slip != null) 0.dp else u * 1.8f),
+                        contentAlignment = Alignment.Center,
+                    ) { people(u) }
+                }
             }
         }
     }
