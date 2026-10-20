@@ -40,6 +40,11 @@ private val BAND_MARK = 14.dp
 private val BAND_KNOT = 5.dp
 private val BAND_GAP = 10.dp
 private val BAND_LINE_GAP = 4.dp
+private val BAND_HAIRLINE = 1.dp
+private val BAND_PADDING_H = 16.dp
+private val BAND_PADDING_V = 8.dp
+private val BAND_MARK_GAP = 6.dp
+private const val BAND_KNOT_TURN_DEG = 45f
 
 /**
  * The pebble's collections as a paper band wrapped across the card's foot (pebble card
@@ -68,7 +73,7 @@ internal fun CollectionBand(
             .heightIn(min = CardLayout.BAND_MIN_HEIGHT)
             .background(paper)
             .drawBehind {
-                val hairline = 1.dp.toPx()
+                val hairline = BAND_HAIRLINE.toPx()
                 val inset = BAND_HAIRLINE_INSET.toPx()
                 val rule = edge.copy(alpha = edge.alpha * BAND_HAIRLINE_ALPHA)
                 drawRect(rule, Offset(0f, inset), Size(size.width, hairline))
@@ -80,7 +85,7 @@ internal fun CollectionBand(
             }.clearAndSetSemantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
-        BandFlow(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        BandFlow(Modifier.padding(horizontal = BAND_PADDING_H, vertical = BAND_PADDING_V)) {
             names.forEach { name ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -89,7 +94,7 @@ internal fun CollectionBand(
                         tint = ink,
                         modifier = Modifier.size(BAND_MARK),
                     )
-                    Spacer(Modifier.width(6.dp))
+                    Spacer(Modifier.width(BAND_MARK_GAP))
                     Text(
                         text = name,
                         style = SpineTypography.cardBandName,
@@ -100,7 +105,7 @@ internal fun CollectionBand(
             }
             // The knots between names: small diamonds in the band's rule colour.
             repeat(names.size - 1) {
-                Box(Modifier.size(BAND_KNOT).rotate(45f).background(edge))
+                Box(Modifier.size(BAND_KNOT).rotate(BAND_KNOT_TURN_DEG).background(edge))
             }
         }
     }

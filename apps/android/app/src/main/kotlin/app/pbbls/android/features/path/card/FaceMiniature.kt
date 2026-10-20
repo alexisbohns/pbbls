@@ -27,6 +27,17 @@ private val MINI_STONE = Size(9f, 7f)
 private const val MINI_PHOTO_ALPHA = 0.35f
 private const val MINI_LINE_ALPHA = 0.6f
 
+/** The stone's centre, as a share of the card's height: a little above the middle. */
+private const val MINI_STONE_CENTRE = 0.45f
+
+/** The recto's photo: its margin inside the card, in dp, and the share of the card's height it ends at. */
+private const val MINI_PHOTO_MARGIN = 2.3f
+private const val MINI_PHOTO_SHARE = 0.4f
+
+/** The recto's three legend lines, in dp from the card's top-left: where they start, and each one's (y, end x). */
+private const val MINI_LINE_START = 3f
+private val MINI_LINES = listOf(13f to 12f, 15.8f to 10.2f, 18.6f to 11.2f)
+
 /**
  * A thumbnail of the face the turn leads to (from the Label exploration), tilted
  * [CardLayout.MINIATURE_TILT_DEG]: a card back with a stone in [stone] for
@@ -76,7 +87,7 @@ private fun DrawScope.drawBack(
         style = Stroke(MINI_RULE * unit),
     )
     val oval = Size(MINI_STONE.width * unit, MINI_STONE.height * unit)
-    val centre = origin + Offset(card.width / 2, card.height * 0.45f)
+    val centre = origin + Offset(card.width / 2, card.height * MINI_STONE_CENTRE)
     drawOval(stone, centre - Offset(oval.width / 2, oval.height / 2), oval)
 }
 
@@ -87,13 +98,12 @@ private fun DrawScope.drawRecto(
     unit: Float,
     ink: Color,
 ) {
-    val margin = 2.3f * unit
-    val photo = Size(card.width - margin * 2, card.height * 0.4f - margin)
+    val margin = MINI_PHOTO_MARGIN * unit
+    val photo = Size(card.width - margin * 2, card.height * MINI_PHOTO_SHARE - margin)
     drawRect(ink.copy(alpha = ink.alpha * MINI_PHOTO_ALPHA), origin + Offset(margin, margin), photo)
     val line = ink.copy(alpha = ink.alpha * MINI_LINE_ALPHA)
-    val start = origin.x + 3f * unit
-    // The mock's three lines: full, short, middling.
-    listOf(13f to 12f, 15.8f to 10.2f, 18.6f to 11.2f).forEach { (y, end) ->
+    val start = origin.x + MINI_LINE_START * unit
+    MINI_LINES.forEach { (y, end) ->
         drawLine(
             color = line,
             start = Offset(start, origin.y + y * unit),
