@@ -236,7 +236,7 @@ extension UIFont {
     /// Caveat at an exact `wght`. `UIFont(name:)` only resolves the variable
     /// file's default instance (400), so the axis is set explicitly; `Caveat-Bold`
     /// is not a resolvable name. One descriptor for `PebblesFont.valenceWord*`
-    /// and `SpineType.lockupWord`. Falls back to the bold system font.
+    /// and `SpineType.Style.lockupWord`. Falls back to the bold system font.
     static func pebblesCaveat(size: CGFloat, weight: Int) -> UIFont {
         guard let base = UIFont(name: "Caveat-Regular", size: size) else {
             return UIFont.systemFont(ofSize: size, weight: .bold)

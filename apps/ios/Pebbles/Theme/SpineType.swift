@@ -60,123 +60,6 @@ enum SpineType {
     }
 
     static let cardCap: CGFloat = 1.3
-    private static let card = Scaling.card(cap: cardCap)
-
-    // MARK: - Fixed ranks (the Spine)
-
-    static let kicker = Style(size: 12, weight: 600, trackingEm: 0.2, features: [.smallCaps], scaling: .text(.caption))
-    static let title = Style(size: 40, weight: 300, trackingEm: -0.026, features: [.lining], lineHeight: 40.8,
-                             scaling: .text(.largeTitle))
-    static let summary = Style(size: 18, weight: 380, italic: true, scaling: .text(.body))
-    static let sectionLabel = Style(size: 11.5, weight: 600, trackingEm: 0.2, features: [.smallCaps], scaling: .text(.caption2))
-    /// The masthead's way back a week: the body's 400; only the number is bold.
-    static let masthead = Style(size: 11.5, weight: 400, trackingEm: 0.18, features: [.smallCaps], scaling: .text(.caption2))
-    static let mastheadNumber = Style(size: 11.5, weight: 650, trackingEm: 0.18, features: [.smallCaps],
-                                      scaling: .text(.caption2))
-    static let personName = Style(size: 15, weight: 600, trackingEm: 0.1, features: [.smallCaps], scaling: .text(.subheadline))
-    static let dayLetter = Style(size: 9.5, weight: 600, features: [.smallCaps], lineHeight: 12, scaling: .text(.caption2))
-    static let contentsDay = Style(size: 10.5, weight: 600, trackingEm: 0.18, features: [.smallCaps], scaling: .text(.caption2))
-    static let contentsTime = Style(size: 12.5, weight: 400, trackingEm: 0.04, features: [.tabular], scaling: .text(.caption))
-    /// The persons' fold, "and *N* others".
-    static let personsFold = Style(size: 16, weight: 380, italic: true, scaling: .text(.body))
-    static let entryTime = Style(size: 13, weight: 560, trackingEm: 0.06, features: [.tabular], scaling: .text(.footnote))
-    static let entryEmotion = Style(size: 12, weight: 600, trackingEm: 0.12, features: [.smallCaps], scaling: .text(.caption))
-    static let people = Style(size: 15, weight: 400, lineHeight: 22.5, scaling: .text(.subheadline))
-    static let soulName = Style(size: 13, weight: 620, trackingEm: 0.1, features: [.smallCaps], scaling: .text(.footnote))
-    static let dayNumeral = Style(size: 25, weight: 330, trackingEm: -0.02, features: [.lining], scaling: .text(.title2))
-    static let dayWeekday = Style(size: 10, weight: 600, trackingEm: 0.2, features: [.smallCaps], scaling: .text(.caption2))
-    static let mouthLabel = Style(size: 12, weight: 600, trackingEm: 0.18, features: [.smallCaps], scaling: .text(.caption))
-    static let mouthLine = Style(size: 16, weight: 380, italic: true, scaling: .text(.body))
-    static let rollNumeral = Style(size: 14, weight: 600, trackingEm: 0.1, features: [.smallCaps, .lining],
-                                   scaling: .text(.footnote))
-    static let still = Style(size: 15, weight: 380, italic: true, scaling: .text(.subheadline))
-
-    // MARK: - Ranks that take a name's cut
-
-    static func contentsName(_ cut: Cut) -> Style {
-        Style(size: 16.5, weight: cut.weight, italic: cut.italic, lineHeight: 19.8, scaling: .text(.body))
-    }
-
-    static func entryName(_ cut: Cut) -> Style {
-        Style(size: cut.size, weight: cut.weight, trackingEm: cut.trackingEm, italic: cut.italic,
-              lineHeight: cut.size * 1.12, scaling: .text(textStyle(forSize: cut.size)))
-    }
-
-    // MARK: - Card-unit ranks (`u` in points)
-
-    static func cardIndexNumeral(u: CGFloat) -> Style {
-        let size = 5.3 * u
-        return Style(size: size, weight: 600, trackingEm: -0.045, features: [.lining], lineHeight: size * 0.86, scaling: card)
-    }
-
-    static func cardIndexDay(u: CGFloat) -> Style {
-        Style(size: 1.8 * u, weight: 650, trackingEm: 0.14, features: [.smallCaps], scaling: card)
-    }
-
-    static func cardRail(u: CGFloat) -> Style {
-        Style(size: 1.95 * u, weight: 560, trackingEm: 0.07, features: [.tabular], scaling: card)
-    }
-
-    static func cardRailEmotion(u: CGFloat) -> Style {
-        Style(size: 1.95 * u, weight: 650, trackingEm: 0.15, features: [.smallCaps], scaling: card)
-    }
-
-    static func cardTitle(u: CGFloat, cut: Cut) -> Style {
-        let size = 4.4 * u
-        return Style(size: size, weight: cut.weight, trackingEm: -0.012, italic: cut.italic, lineHeight: size * 1.1, scaling: card)
-    }
-
-    static func cardSoul(u: CGFloat) -> Style {
-        Style(size: 2.5 * u, weight: 650, trackingEm: 0.12, features: [.smallCaps], scaling: card)
-    }
-
-    static func cardMore(u: CGFloat) -> Style {
-        Style(size: 2.5 * u, weight: 560, features: [.tabular], scaling: card)
-    }
-
-    /// The strip's "& twelve others".
-    static func cardOthers(u: CGFloat) -> Style {
-        Style(size: 2.6 * u, weight: 380, italic: true, scaling: card)
-    }
-
-    /// The photo-less recto's slip: the entry's cut at 6.4 card units.
-    static func cardSlipName(u: CGFloat, cut: Cut) -> Style {
-        let size = 6.4 * u
-        return Style(size: size, weight: cut.weight, trackingEm: -0.014, italic: cut.italic, lineHeight: size * 1.08, scaling: card)
-    }
-
-    // MARK: - The held card's fixed ranks
-
-    static let cardFooterGrade = Style(size: 10.5, weight: 650, trackingEm: 0.16, features: [.smallCaps], scaling: .text(.caption2))
-    static let cardFooterNote = Style(size: 12.5, weight: 380, italic: true, scaling: .text(.caption))
-    static let cardTurnTarget = Style(size: 13, weight: 380, italic: true, scaling: .text(.footnote))
-    static let cardLeafDateline = Style(size: 10.5, weight: 600, trackingEm: 0.18, features: [.smallCaps, .lining],
-                                        scaling: .text(.caption2))
-    static let cardLeafBody = Style(size: 17, weight: 380, lineHeight: 27, scaling: .text(.body))
-    static let cardLockupSpan = Style(size: 10, weight: 650, trackingEm: 0.22, features: [.smallCaps], scaling: .text(.caption2))
-    static let cardEmotion = Style(size: 20, weight: 400, scaling: .text(.title3))
-    static let cardBandName = Style(size: 14, weight: 400, italic: true, scaling: .text(.footnote))
-    static let bareTitle = Style(size: 34, weight: 300, trackingEm: -0.02, lineHeight: 38, scaling: .text(.largeTitle))
-    static let placeBody = Style(size: 16, weight: 380, lineHeight: 24, scaling: .text(.body))
-
-    /// The valence word at the top of the card's verso: Caveat Bold at 34 / 44 / 56
-    /// by size group, lowercase for a day event, with `PebblesFont.valenceWord*`'s
-    /// ink overhang. The one non-Ysabeau rank.
-    static func lockupWord(_ group: ValenceSizeGroup) -> Style {
-        switch group {
-        case .small:
-            return Style(size: 34, weight: 700, scaling: card, face: .caveat, isLowercase: true, inkOverhang: 6)
-        case .medium:
-            return Style(size: 44, weight: 700, scaling: card, face: .caveat, inkOverhang: 8)
-        case .large:
-            return Style(size: 56, weight: 700, scaling: card, face: .caveat, inkOverhang: 10)
-        }
-    }
-
-    /// The postmark ring: capitals (small caps are too small at ring size), sized by `RingFit`.
-    static func postmarkRing(_ size: CGFloat) -> Style {
-        Style(size: size, weight: 650, features: [.lining], scaling: .none)
-    }
 
     // MARK: - Size bands
 
@@ -195,5 +78,126 @@ enum SpineType {
         case ..<34: return .title
         default:    return .largeTitle
         }
+    }
+}
+
+/// The ranks live on `Style`, so a view writes `.spineType(.kicker)`.
+extension SpineType.Style {
+    private static let card = SpineType.Scaling.card(cap: SpineType.cardCap)
+
+    // MARK: - Fixed ranks (the Spine)
+
+    static let kicker = Self(size: 12, weight: 600, trackingEm: 0.2, features: [.smallCaps], scaling: .text(.caption))
+    static let title = Self(size: 40, weight: 300, trackingEm: -0.026, features: [.lining], lineHeight: 40.8,
+                             scaling: .text(.largeTitle))
+    static let summary = Self(size: 18, weight: 380, italic: true, scaling: .text(.body))
+    static let sectionLabel = Self(size: 11.5, weight: 600, trackingEm: 0.2, features: [.smallCaps], scaling: .text(.caption2))
+    /// The masthead's way back a week: the body's 400; only the number is bold.
+    static let masthead = Self(size: 11.5, weight: 400, trackingEm: 0.18, features: [.smallCaps], scaling: .text(.caption2))
+    static let mastheadNumber = Self(size: 11.5, weight: 650, trackingEm: 0.18, features: [.smallCaps],
+                                      scaling: .text(.caption2))
+    static let personName = Self(size: 15, weight: 600, trackingEm: 0.1, features: [.smallCaps], scaling: .text(.subheadline))
+    static let dayLetter = Self(size: 9.5, weight: 600, features: [.smallCaps], lineHeight: 12, scaling: .text(.caption2))
+    static let contentsDay = Self(size: 10.5, weight: 600, trackingEm: 0.18, features: [.smallCaps], scaling: .text(.caption2))
+    static let contentsTime = Self(size: 12.5, weight: 400, trackingEm: 0.04, features: [.tabular], scaling: .text(.caption))
+    /// The persons' fold, "and *N* others".
+    static let personsFold = Self(size: 16, weight: 380, italic: true, scaling: .text(.body))
+    static let entryTime = Self(size: 13, weight: 560, trackingEm: 0.06, features: [.tabular], scaling: .text(.footnote))
+    static let entryEmotion = Self(size: 12, weight: 600, trackingEm: 0.12, features: [.smallCaps], scaling: .text(.caption))
+    static let people = Self(size: 15, weight: 400, lineHeight: 22.5, scaling: .text(.subheadline))
+    static let soulName = Self(size: 13, weight: 620, trackingEm: 0.1, features: [.smallCaps], scaling: .text(.footnote))
+    static let dayNumeral = Self(size: 25, weight: 330, trackingEm: -0.02, features: [.lining], scaling: .text(.title2))
+    static let dayWeekday = Self(size: 10, weight: 600, trackingEm: 0.2, features: [.smallCaps], scaling: .text(.caption2))
+    static let mouthLabel = Self(size: 12, weight: 600, trackingEm: 0.18, features: [.smallCaps], scaling: .text(.caption))
+    static let mouthLine = Self(size: 16, weight: 380, italic: true, scaling: .text(.body))
+    static let rollNumeral = Self(size: 14, weight: 600, trackingEm: 0.1, features: [.smallCaps, .lining],
+                                   scaling: .text(.footnote))
+    static let still = Self(size: 15, weight: 380, italic: true, scaling: .text(.subheadline))
+
+    // MARK: - Ranks that take a name's cut
+
+    static func contentsName(_ cut: SpineType.Cut) -> Self {
+        Self(size: 16.5, weight: cut.weight, italic: cut.italic, lineHeight: 19.8, scaling: .text(.body))
+    }
+
+    static func entryName(_ cut: SpineType.Cut) -> Self {
+        Self(size: cut.size, weight: cut.weight, trackingEm: cut.trackingEm, italic: cut.italic,
+              lineHeight: cut.size * 1.12, scaling: .text(SpineType.textStyle(forSize: cut.size)))
+    }
+
+    // MARK: - Card-unit ranks (`u` in points)
+
+    static func cardIndexNumeral(u: CGFloat) -> Self {
+        let size = 5.3 * u
+        return Self(size: size, weight: 600, trackingEm: -0.045, features: [.lining], lineHeight: size * 0.86, scaling: card)
+    }
+
+    static func cardIndexDay(u: CGFloat) -> Self {
+        Self(size: 1.8 * u, weight: 650, trackingEm: 0.14, features: [.smallCaps], scaling: card)
+    }
+
+    static func cardRail(u: CGFloat) -> Self {
+        Self(size: 1.95 * u, weight: 560, trackingEm: 0.07, features: [.tabular], scaling: card)
+    }
+
+    static func cardRailEmotion(u: CGFloat) -> Self {
+        Self(size: 1.95 * u, weight: 650, trackingEm: 0.15, features: [.smallCaps], scaling: card)
+    }
+
+    static func cardTitle(u: CGFloat, cut: SpineType.Cut) -> Self {
+        let size = 4.4 * u
+        return Self(size: size, weight: cut.weight, trackingEm: -0.012, italic: cut.italic, lineHeight: size * 1.1, scaling: card)
+    }
+
+    static func cardSoul(u: CGFloat) -> Self {
+        Self(size: 2.5 * u, weight: 650, trackingEm: 0.12, features: [.smallCaps], scaling: card)
+    }
+
+    static func cardMore(u: CGFloat) -> Self {
+        Self(size: 2.5 * u, weight: 560, features: [.tabular], scaling: card)
+    }
+
+    /// The strip's "& twelve others".
+    static func cardOthers(u: CGFloat) -> Self {
+        Self(size: 2.6 * u, weight: 380, italic: true, scaling: card)
+    }
+
+    /// The photo-less recto's slip: the entry's cut at 6.4 card units.
+    static func cardSlipName(u: CGFloat, cut: SpineType.Cut) -> Self {
+        let size = 6.4 * u
+        return Self(size: size, weight: cut.weight, trackingEm: -0.014, italic: cut.italic, lineHeight: size * 1.08, scaling: card)
+    }
+
+    // MARK: - The held card's fixed ranks
+
+    static let cardFooterGrade = Self(size: 10.5, weight: 650, trackingEm: 0.16, features: [.smallCaps], scaling: .text(.caption2))
+    static let cardFooterNote = Self(size: 12.5, weight: 380, italic: true, scaling: .text(.caption))
+    static let cardTurnTarget = Self(size: 13, weight: 380, italic: true, scaling: .text(.footnote))
+    static let cardLeafDateline = Self(size: 10.5, weight: 600, trackingEm: 0.18, features: [.smallCaps, .lining],
+                                        scaling: .text(.caption2))
+    static let cardLeafBody = Self(size: 17, weight: 380, lineHeight: 27, scaling: .text(.body))
+    static let cardLockupSpan = Self(size: 10, weight: 650, trackingEm: 0.22, features: [.smallCaps], scaling: .text(.caption2))
+    static let cardEmotion = Self(size: 20, weight: 400, scaling: .text(.title3))
+    static let cardBandName = Self(size: 14, weight: 400, italic: true, scaling: .text(.footnote))
+    static let bareTitle = Self(size: 34, weight: 300, trackingEm: -0.02, lineHeight: 38, scaling: .text(.largeTitle))
+    static let placeBody = Self(size: 16, weight: 380, lineHeight: 24, scaling: .text(.body))
+
+    /// The valence word at the top of the card's verso: Caveat Bold at 34 / 44 / 56
+    /// by size group, lowercase for a day event, with `PebblesFont.valenceWord*`'s
+    /// ink overhang. The one non-Ysabeau rank.
+    static func lockupWord(_ group: ValenceSizeGroup) -> Self {
+        switch group {
+        case .small:
+            return Self(size: 34, weight: 700, scaling: card, face: .caveat, isLowercase: true, inkOverhang: 6)
+        case .medium:
+            return Self(size: 44, weight: 700, scaling: card, face: .caveat, inkOverhang: 8)
+        case .large:
+            return Self(size: 56, weight: 700, scaling: card, face: .caveat, inkOverhang: 10)
+        }
+    }
+
+    /// The postmark ring: capitals (small caps are too small at ring size), sized by `RingFit`.
+    static func postmarkRing(_ size: CGFloat) -> Self {
+        Self(size: size, weight: 650, features: [.lining], scaling: .none)
     }
 }
