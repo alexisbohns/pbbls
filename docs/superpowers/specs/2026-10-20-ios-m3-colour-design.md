@@ -253,7 +253,7 @@ Considered and rejected:
 
 It mirrors Android's `ThemeLiteralsTest`. It locates the sources from `#filePath`, the precedent being `StoneLab/StoneLabPalettesTests.swift`. It scans every `.swift` file under `Pebbles/Features/` and `Pebbles/Components/` line by line, with two exclusions:
 - the text after `//` on each line;
-- everything from a file's first `#Preview` to its end (preview fixtures fake server data).
+- each brace-balanced `#Preview { … }` block (preview fixtures fake server data); code after a preview is scanned again. Strings are blanked before the `//` split, so a `https://` link cannot hide the rest of a line; a colour inside string interpolation is the one known gap.
 
 **Forbidden patterns** (Swift regex, each with its failure reason):
 
