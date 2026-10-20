@@ -927,7 +927,7 @@ internal object PebbleCardFixtures {
         happenedAt: String,
         description: String?,
         photo: Boolean,
-        pebble: MomentPebble,
+        pebble: MomentPebble?,
     ) = MomentDetail(
         id = id,
         name = name,
@@ -1004,6 +1004,28 @@ internal object PebbleCardFixtures {
                     glyph = glyph("identity"),
                     domains = listOf(ref(health)),
                 ),
+        )
+
+    /** F4: a bare moment, no pebble yet, so no card: the plain page and its place (spec §Bare moment). */
+    val f4: MomentDetail =
+        detail(
+            id = "card-f4",
+            name = "Sunday market",
+            happenedAt = "2026-10-11T09:40",
+            description = "Elio wanted the yellow tomatoes.",
+            photo = false,
+            pebble = null,
+        )
+
+    /** F4 with a photo, matted on the page. */
+    val f4Photo: MomentDetail =
+        detail(
+            id = "card-f4-photo",
+            name = "Sunday market",
+            happenedAt = "2026-10-11T09:40",
+            description = "Elio wanted the yellow tomatoes.",
+            photo = true,
+            pebble = null,
         )
 
     /** The stress verso: four domains and two long French collections that wrap the band. */

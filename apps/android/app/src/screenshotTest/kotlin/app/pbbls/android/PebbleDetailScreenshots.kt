@@ -20,6 +20,7 @@ import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.MomentDetail
+import app.pbbls.android.core.model.MomentSnap
 import app.pbbls.android.core.model.PebbleCollection
 import app.pbbls.android.core.model.SoulRef
 import app.pbbls.android.core.model.SoulWithGlyph
@@ -37,10 +38,10 @@ import java.time.OffsetDateTime
 /**
  * Previews for the moment read surface (#540, #1048): the pure [PebbleReadView]
  * across its variants — full (description + souls + domain + collection), glyph
- * souls, minimal, the no-domain fallback, and a bare moment with no pebble —
- * plus the open ⋮ menu and the R8 [MomentDeleteDialog] with and without a
- * pebble. The page itself ([PebbleDetailContent]) shows a pebble as the held
- * card (#1135). Light and
+ * souls, minimal and the no-domain fallback — plus the open ⋮ menu and the R8
+ * [MomentDeleteDialog] with and without a pebble. The page itself
+ * ([PebbleDetailContent]) shows a pebble as the held card and a bare moment as
+ * its plain page (#1135). Light and
  * dark, driven with fixture [MomentDetail]s and a fixed souls cache so no
  * services are needed. The stateful `PebbleDetailScreen` (service-backed) is
  * deliberately not previewed.
@@ -170,12 +171,13 @@ private val noDomainDetail: MomentDetail =
         valence = Valence.LOWLIGHT_MEDIUM,
     )
 
-/** A capture without its pebble yet: the blank stone heading, no tiles, no souls, no privacy badge, no share (A-8). */
-private val bareMoment: MomentDetail =
+/** A photo-only capture without its pebble yet: no name, so the page's title reads "untitled" (A-8). */
+private val untitledBareMoment: MomentDetail =
     MomentPreviewFixtures.momentDetail(
         name = null,
         description = "Saved from the bus stop, to finish later.",
         happenedAt = OffsetDateTime.parse("2026-07-08T14:23:00+00:00"),
+        snaps = listOf(MomentSnap(id = "snap-bus-stop", storagePath = "fixture/snap-bus-stop")),
         pebble = null,
     )
 
@@ -256,13 +258,12 @@ fun PebbleDetailNoDomainDark() {
  * The read page as a phone shows it (#1135): a page of its own, no longer a
  * sheet, with its back arrow, over the real [PebbleDetailContent]. A pebble is
  * the held card (F1 from [PebbleCardFixtures], its photo unsigned so the field
- * shows its tint); a bare moment still renders the read view.
+ * shows its tint); a bare moment is its plain page and the place for its card.
  */
 @Composable
 private fun PagePreview(
     detail: MomentDetail = PebbleCardFixtures.f1,
     initialMenuOpen: Boolean = false,
-    onComplete: (() -> Unit)? = null,
 ) {
     CompositionLocalProvider(LocalReferenceDataService provides detailPreviewRefs) {
         PebbleDetailContent(
@@ -283,7 +284,6 @@ private fun PagePreview(
             domains = PebbleCardFixtures.domains,
             showBack = true,
             onBack = {},
-            onComplete = onComplete,
             initialMenuOpen = initialMenuOpen,
             zone = PebbleCardFixtures.zone,
         )
@@ -305,35 +305,28 @@ fun PebbleDetailCardDark() {
     PebblesTheme { PagePreview() }
 }
 
+/** F4, a bare moment, as the page shows it: no card, the place its card will print into, and "Make it a pebble" (A-8). */
 @PreviewTest
 @Preview(showBackground = true)
 @PreviewFrench
 @Composable
 fun PebbleDetail_BareMoment() {
-    PebblesTheme { PagePreview(detail = bareMoment) }
+    PebblesTheme { PagePreview(detail = PebbleCardFixtures.f4) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun PebbleDetail_BareMomentDark() {
-    PebblesTheme { PagePreview(detail = bareMoment) }
+    PebblesTheme { PagePreview(detail = PebbleCardFixtures.f4) }
 }
 
-/** A bare moment's one call to action, "Make it a pebble", under its title (A-8). */
+/** A photo-only capture: "untitled", its photo matted (unsigned here). */
 @PreviewTest
 @Preview(showBackground = true)
-@PreviewFrench
 @Composable
-fun PebbleDetail_BareMomentWithCta() {
-    PebblesTheme { PagePreview(detail = bareMoment, onComplete = {}) }
-}
-
-@PreviewTest
-@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun PebbleDetail_BareMomentWithCtaDark() {
-    PebblesTheme { PagePreview(detail = bareMoment, onComplete = {}) }
+fun PebbleDetail_BareMomentUntitled() {
+    PebblesTheme { PagePreview(detail = untitledBareMoment) }
 }
 
 /** The ⋮ menu (R7) over the card: Edit moment, Edit pebble because this moment has one, a divider, and Delete. */

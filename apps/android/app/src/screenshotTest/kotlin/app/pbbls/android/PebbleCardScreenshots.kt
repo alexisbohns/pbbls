@@ -22,6 +22,7 @@ import app.pbbls.android.core.model.MomentDetail
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
+import app.pbbls.android.features.path.card.BareMomentPage
 import app.pbbls.android.features.path.card.CardFaceTarget
 import app.pbbls.android.features.path.card.CardFooter
 import app.pbbls.android.features.path.card.CardLayout
@@ -394,6 +395,69 @@ private fun CardOnGround(
             requestedFace = face,
             zone = PebbleCardFixtures.zone,
             turnProgressOverride = turnProgress,
+        )
+    }
+}
+
+/** F4, a bare moment (spec §Bare moment): the plain opening, then the place its card will print into. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412)
+@Composable
+fun BareMomentLight() {
+    PebblesTheme { BareOnGround(PebbleCardFixtures.f4) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun BareMomentNight() {
+    PebblesTheme { BareOnGround(PebbleCardFixtures.f4) }
+}
+
+/** "DIMANCHE 11 OCTOBRE · 09:40", "Pas encore un galet", "En faire un galet". */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, locale = "fr")
+@Composable
+fun BareMomentFrench() {
+    PebblesTheme { BareOnGround(PebbleCardFixtures.f4) }
+}
+
+/** With a photo, on its white mat at its ratio; unsigned here, so the mat holds its bed. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412)
+@Composable
+fun BareMomentPhotoLight() {
+    PebblesTheme { BareOnGround(PebbleCardFixtures.f4Photo, PebbleCardFixtures.ROOFTOP_RATIO) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun BareMomentPhotoNight() {
+    PebblesTheme { BareOnGround(PebbleCardFixtures.f4Photo, PebbleCardFixtures.ROOFTOP_RATIO) }
+}
+
+/** French at 2x on a 360 dp phone: the place grows past its 1 : 1.12 rather than clipping its sentence. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 360, locale = "fr", fontScale = 2f)
+@Composable
+fun BareMomentLargeFontFrench() {
+    PebblesTheme { BareOnGround(PebbleCardFixtures.f4) }
+}
+
+@Composable
+private fun BareOnGround(
+    detail: MomentDetail,
+    ratio: Float? = null,
+) {
+    val colors = PebblesTheme.spine.colors
+    Box(Modifier.background(colors.ground).padding(vertical = 16.dp)) {
+        BareMomentPage(
+            detail = detail,
+            photoUrl = null,
+            ratio = ratio,
+            onComplete = {},
+            zone = PebbleCardFixtures.zone,
         )
     }
 }

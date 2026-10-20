@@ -156,8 +156,8 @@ private const val SKIA_SIGMA_PER_RADIUS = 0.57735f
 private const val SKIA_SIGMA_OFFSET = 0.5f
 private const val MIN_BLUR_RADIUS_PX = 0.5f
 
-/** The web's Night `--spine-photo-filter: brightness(.9) contrast(1.02)` as one matrix. */
-private val NIGHT_PHOTO_FILTER: ColorFilter =
+/** The web's Night `--spine-photo-filter: brightness(.9) contrast(1.02)` as one matrix; the bare page's photo takes it too. */
+internal val NIGHT_PHOTO_FILTER: ColorFilter =
     run {
         val brightness = 0.9f
         val contrast = 1.02f

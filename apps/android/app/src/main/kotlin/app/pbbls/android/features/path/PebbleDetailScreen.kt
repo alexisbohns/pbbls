@@ -51,7 +51,6 @@ import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
-import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
@@ -59,8 +58,8 @@ import app.pbbls.android.core.model.SharedPebbleLink
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.MomentDeleteDialog
+import app.pbbls.android.features.path.card.BareMomentPage
 import app.pbbls.android.features.path.card.PebbleCard
-import app.pbbls.android.features.path.read.PebbleReadView
 import java.time.ZoneId
 
 /**
@@ -68,7 +67,7 @@ import java.time.ZoneId
  * phones (#1135) and a pane beside Path on large screens (#940). The scene
  * decides which. Loads a `MomentDetail` through [PebbleDetailViewModel], owns
  * its loading/error/retry state, hosts the top bar, and shows a pebble as the
- * held [PebbleCard]; a bare moment still renders the pure [PebbleReadView].
+ * held [PebbleCard]; a bare moment as the [BareMomentPage].
  * System back is `NavDisplay`'s own — its one write, the delete, runs
  * uncancellable in the ViewModel, so it needs no back handler.
  *
@@ -82,7 +81,7 @@ import java.time.ZoneId
  * last item, Delete, asks what to delete (R8): the moment closes the page
  * ([onMomentDeleted]), only the pebble leaves it open as a bare moment.
  *
- * A bare moment offers "Make it a pebble" under its title
+ * A bare moment offers "Make it a pebble" in the place its card will print into
  * ([onCompleteRequested], A-8); the resume refresh shows the pebble on return.
  *
  * @param requestedFace The face the held card opens on: the stone pressed on the Path opens
@@ -139,10 +138,9 @@ fun PebbleDetailScreen(
     // The cover photo: signed once per prefix, as the Spine's cards do, and its
     // ratio from the same process-wide probe. Keyed on the prefix, so an edit
     // that swaps the photo never shows the last one while the new one signs.
-    // Only a pebble has a card: the bare moment's read view signs its own.
+    // The bare page mats the same photo.
     val prefix =
         detail
-            ?.takeIf { it.pebble != null }
             ?.sortedSnaps
             ?.firstOrNull()
             ?.storagePath
@@ -219,8 +217,9 @@ fun PebbleDetailScreen(
  * [PebbleDetailScreen] wires it; screenshots drive it.
  *
  * It is a page on `surface`, as on a phone it is no longer a sheet (#1135). A
- * pebble shows as the held [PebbleCard], which caps its own width, so the page
- * column is not [readableWidth]; a bare moment keeps the read view at it.
+ * pebble shows as the held [PebbleCard] and a bare moment as the
+ * [BareMomentPage]; both cap their own width, so the page column is not
+ * `readableWidth`.
  * [palette] is the emotion's, null while loading or on a palette-cache miss.
  *
  * @param photo the cover's signed original and thumb; null until signed, or with no photo.
@@ -248,11 +247,11 @@ fun PebbleDetailContent(
     showBack: Boolean,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    /** "Make it a pebble" on a bare moment; null offers no call to action. */
-    onComplete: (() -> Unit)? = null,
+    /** "Make it a pebble", a bare moment's one call to action. */
+    onComplete: () -> Unit = {},
     /** Opens the ⋮ menu on first composition; for previews of the open menu only. */
     initialMenuOpen: Boolean = false,
-    /** Where the card's day, time and dateline fall; previews pin it. */
+    /** Where the card's (or the bare page's) day, time and dateline fall; previews pin it. */
     zone: ZoneId = ZoneId.systemDefault(),
     requestedFace: CardFace = CardFace.RECTO,
     faceRequest: Int = 0,
@@ -284,14 +283,14 @@ fun PebbleDetailContent(
             PebbleDetailUiState.Error ->
                 DetailLoadError(onRetry = onRetry)
             is PebbleDetailUiState.Content ->
-                if (state.detail.pebble != null) {
-                    Column(
-                        Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
-                            .padding(vertical = 8.dp),
-                    ) {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+                        .padding(vertical = 8.dp),
+                ) {
+                    if (state.detail.pebble != null) {
                         PebbleCard(
                             detail = state.detail,
                             palette = palette,
@@ -304,15 +303,17 @@ fun PebbleDetailContent(
                             faceRequest = faceRequest,
                             zone = zone,
                         )
+                    } else {
+                        BareMomentPage(
+                            detail = state.detail,
+                            photoUrl = photo?.first,
+                            thumbUrl = photo?.second,
+                            ratio = ratio,
+                            onComplete = onComplete,
+                            zone = zone,
+                            modifier = Modifier.padding(bottom = 24.dp),
+                        )
                     }
-                } else {
-                    // Part 3 of #1135 replaces the bare moment's read view.
-                    PebbleReadView(
-                        detail = state.detail,
-                        palette = palette,
-                        modifier = Modifier.fillMaxSize().readableWidth(),
-                        onComplete = onComplete,
-                    )
                 }
         }
     }
