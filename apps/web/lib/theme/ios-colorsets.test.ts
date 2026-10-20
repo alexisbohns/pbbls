@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest"
-import { fromKebab, parsePinnedColors, renderColorset } from "./ios-colorsets"
+import type { M3Scheme } from "./m3-schemes"
+import {
+  APP_CATALOG,
+  M3_FOLDER,
+  WIDGET_CATALOG,
+  fromKebab,
+  parsePinnedColors,
+  renderColorset,
+  renderIosColorsets,
+} from "./ios-colorsets"
 
 describe("fromKebab", () => {
   it("camel-cases a kebab role, inverting m3-schemes' toKebab", () => {
@@ -98,5 +107,129 @@ describe("renderColorset", () => {
 
   it("rejects a hex that is not #RRGGBB", () => {
     expect(() => renderColorset({ light: { hex: "#abc", alpha: 1 } })).toThrow(/RRGGBB/)
+  })
+})
+
+// The renderer reads only these four schemes. Each carries the five roles the
+// Spine tokens derive from. Hexes are the real ColorSchemes.kt values.
+function scheme(
+  name: string,
+  mode: "light" | "dark",
+  contrast: "standard" | "high",
+  [primary, onSurface, onSurfaceVariant, low, lowest]: [string, string, string, string, string],
+): M3Scheme {
+  return {
+    name,
+    mode,
+    contrast,
+    roles: [
+      ["primary", primary],
+      ["on-surface", onSurface],
+      ["on-surface-variant", onSurfaceVariant],
+      ["surface-container-low", low],
+      ["surface-container-lowest", lowest],
+    ],
+  }
+}
+const FIXTURE: M3Scheme[] = [
+  scheme("LightScheme", "light", "standard", ["#8E4955", "#1D1B16", "#4C4639", "#F9F3EA", "#FFFFFF"]),
+  scheme("LightHighContrastScheme", "light", "high", ["#501824", "#000000", "#000000", "#F6F0E7", "#FFFFFF"]),
+  scheme("DarkScheme", "dark", "standard", ["#FFB2BC", "#E7E2D9", "#CFC6B4", "#1B1B1E", "#0E0E10"]),
+  scheme("DarkHighContrastScheme", "dark", "high", ["#FFEBED", "#FFFFFF", "#FFFFFF", "#1F1F22", "#000000"]),
+]
+const PINS = { googleCapsuleInk: "#4A3639" }
+
+interface ColorsetEntry {
+  appearances?: { appearance: string; value: string }[]
+  color: { components: { alpha: string; red: string; green: string; blue: string } }
+}
+interface ColorsetJson {
+  colors: ColorsetEntry[]
+}
+function colorset(files: Map<string, string>, role: string, catalog = APP_CATALOG): ColorsetJson {
+  const text = files.get(`${catalog}/${M3_FOLDER}/${role}.colorset/Contents.json`)
+  if (text === undefined) throw new Error(`no colorset for ${role} in ${catalog}`)
+  const parsed: ColorsetJson = JSON.parse(text)
+  return parsed
+}
+const hexes = (json: ColorsetJson) =>
+  json.colors.map(({ color: { components: c } }) => `#${c.red.slice(2)}${c.green.slice(2)}${c.blue.slice(2)}`)
+const alphas = (json: ColorsetJson) => json.colors.map(({ color: { components: c } }) => c.alpha)
+
+describe("renderIosColorsets", () => {
+  const files = renderIosColorsets(FIXTURE, PINS)
+
+  it("maps each scheme role's four entries to light, dark, light HC, dark HC", () => {
+    expect(hexes(colorset(files, "primary"))).toEqual(["#8E4955", "#FFB2BC", "#501824", "#FFEBED"])
+    expect(colorset(files, "surfaceContainerLowest").colors).toHaveLength(4)
+  })
+
+  it("regenerates AccentColor as primary, so the global tint is the role", () => {
+    expect(files.get(`${APP_CATALOG}/AccentColor.colorset/Contents.json`)).toBe(
+      files.get(`${APP_CATALOG}/${M3_FOLDER}/primary.colorset/Contents.json`),
+    )
+  })
+
+  it("pins googleCapsuleInk to one entry with no appearances", () => {
+    const ink = colorset(files, "googleCapsuleInk")
+    expect(ink.colors).toHaveLength(1)
+    expect(ink.colors[0].appearances).toBeUndefined()
+    expect(hexes(ink)).toEqual(["#4A3639"])
+  })
+
+  it("blends rule from onSurface at 0.14 Paper and 0.12 Night", () => {
+    const rule = colorset(files, "rule")
+    expect(hexes(rule)).toEqual(["#1D1B16", "#E7E2D9", "#000000", "#FFFFFF"])
+    expect(alphas(rule)).toEqual(["0.140", "0.120", "0.140", "0.120"])
+  })
+
+  it("reads stock from surfaceContainerLowest Paper and surfaceContainerLow Night", () => {
+    expect(hexes(colorset(files, "stock"))).toEqual(["#FFFFFF", "#1B1B1E", "#FFFFFF", "#1F1F22"])
+  })
+
+  it("takes ring from onSurfaceVariant Paper and onSurface Night", () => {
+    const ring = colorset(files, "ring")
+    expect(hexes(ring)).toEqual(["#4C4639", "#E7E2D9", "#000000", "#FFFFFF"])
+    expect(alphas(ring)).toEqual(["0.300", "0.170", "0.300", "0.170"])
+  })
+
+  it("emits all nine Spine tokens", () => {
+    for (const token of ["halo", "stock", "rule", "cardRule", "line", "seam", "teeth", "ring", "ripple"]) {
+      expect(colorset(files, token).colors, token).toHaveLength(4)
+    }
+  })
+
+  it("marks the M3 folder as a namespace in both catalogs", () => {
+    for (const catalog of [APP_CATALOG, WIDGET_CATALOG]) {
+      expect(files.get(`${catalog}/${M3_FOLDER}/Contents.json`)).toBe(`{
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "provides-namespace" : true
+  }
+}
+`)
+    }
+  })
+
+  it("gives the widget the app's M3 folder byte for byte", () => {
+    const appPrefix = `${APP_CATALOG}/${M3_FOLDER}/`
+    const appFiles = [...files.keys()].filter((k) => k.startsWith(appPrefix))
+    expect(appFiles.length).toBeGreaterThan(0)
+    for (const key of appFiles) {
+      const widgetKey = `${WIDGET_CATALOG}/${M3_FOLDER}/${key.slice(appPrefix.length)}`
+      expect(files.get(widgetKey), widgetKey).toBe(files.get(key))
+    }
+  })
+
+  it("fails when a Spine token collides with a scheme role", () => {
+    const colliding = FIXTURE.map((s) => ({ ...s, roles: [...s.roles, ["halo", "#000000"] as [string, string]] }))
+    expect(() => renderIosColorsets(colliding, PINS)).toThrow(/halo/)
+  })
+
+  it("fails when one of the four schemes is missing", () => {
+    expect(() => renderIosColorsets(FIXTURE.slice(1), PINS)).toThrow(/LightScheme/)
   })
 })

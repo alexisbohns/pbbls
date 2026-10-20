@@ -6,6 +6,16 @@
  * Spec: docs/superpowers/specs/2026-10-20-ios-m3-colour-design.md (D1–D3, §2.3–2.5).
  */
 
+import type { M3Scheme } from "./m3-schemes"
+
+/** `apps/ios`, relative to the `apps/web` workspace root. */
+export const IOS_ROOT_FROM_WEB = "../ios"
+/** Paths below are relative to `apps/ios` (§2.3). */
+export const APP_CATALOG = "Pebbles/Resources/Assets.xcassets"
+export const WIDGET_CATALOG = "PebblesWidget/Assets.xcassets"
+export const M3_FOLDER = "M3"
+export const SWIFT_ENTRY_POINT = "Shared/Theme/PebblesColors.swift"
+
 export interface IosPins {
   googleCapsuleInk: string
 }
@@ -87,4 +97,91 @@ export function renderColorset(tones: Partial<Record<Appearance, Tone>>): string
     return [keys ? { appearances: keys, color, idiom: "universal" } : { color, idiom: "universal" }]
   })
   return xcodeJson({ colors, info: XCODE_INFO })
+}
+
+const SCHEME_FOR: Record<Appearance, string> = {
+  light: "LightScheme",
+  dark: "DarkScheme",
+  lightHigh: "LightHighContrastScheme",
+  darkHigh: "DarkHighContrastScheme",
+}
+
+type Source = readonly [role: string, alpha: number]
+
+interface SpineToken {
+  name: string
+  /** Light and light high contrast. */
+  paper: Source
+  /** Dark and dark high contrast. */
+  night: Source
+}
+
+/**
+ * §2.4: the nine scheme-only Spine tokens, from #1118's "Spine token → M3 role"
+ * table (docs/superpowers/specs/2026-10-18-android-spine-brand-scheme-design.md,
+ * §The rule set), mirroring Android's `SpineColors.from(scheme, night)`. A blend
+ * with an emotion palette is never here: stack D computes it in SpineColors.swift.
+ */
+export const SPINE_TOKENS: readonly SpineToken[] = [
+  { name: "halo", paper: ["surfaceContainerLow", 1], night: ["surfaceContainerLow", 1] },
+  { name: "stock", paper: ["surfaceContainerLowest", 1], night: ["surfaceContainerLow", 1] },
+  { name: "rule", paper: ["onSurface", 0.14], night: ["onSurface", 0.12] },
+  { name: "cardRule", paper: ["onSurface", 0.22], night: ["onSurface", 0.18] },
+  { name: "line", paper: ["onSurface", 0.34], night: ["onSurface", 0.3] },
+  { name: "seam", paper: ["onSurface", 0.3], night: ["onSurface", 0.24] },
+  { name: "teeth", paper: ["onSurface", 0.2], night: ["onSurface", 0.14] },
+  { name: "ring", paper: ["onSurfaceVariant", 0.3], night: ["onSurface", 0.17] },
+  { name: "ripple", paper: ["onSurface", 0.55], night: ["onSurface", 0.5] },
+]
+
+function perAppearance<T>(make: (appearance: Appearance) => T): Record<Appearance, T> {
+  return { light: make("light"), dark: make("dark"), lightHigh: make("lightHigh"), darkHigh: make("darkHigh") }
+}
+
+/** Every file the generator owns, keyed by its path relative to `apps/ios`. */
+export function renderIosColorsets(schemes: readonly M3Scheme[], pins: IosPins): Map<string, string> {
+  const rolesByAppearance = perAppearance((appearance) => {
+    const name = SCHEME_FOR[appearance]
+    const found = schemes.find((s) => s.name === name)
+    if (!found) throw new Error(`no ${name} to render the iOS ${appearance} appearance from`)
+    return new Map(found.roles.map(([kebab, hex]) => [fromKebab(kebab), hex]))
+  })
+  const hexFor = (appearance: Appearance, role: string): string => {
+    const hex = rolesByAppearance[appearance].get(role)
+    if (hex === undefined) throw new Error(`${SCHEME_FOR[appearance]} has no ${role}`)
+    return hex
+  }
+
+  // Insertion order is the Swift enum order: scheme roles in Kotlin source
+  // order (sand appended by parseColorSchemes), then Spine, then the pin.
+  const tones = new Map<string, Partial<Record<Appearance, Tone>>>()
+  for (const role of rolesByAppearance.light.keys()) {
+    tones.set(role, perAppearance((appearance) => ({ hex: hexFor(appearance, role), alpha: 1 })))
+  }
+  for (const token of SPINE_TOKENS) {
+    if (tones.has(token.name)) throw new Error(`Spine token ${token.name} collides with a scheme role`)
+    tones.set(
+      token.name,
+      perAppearance((appearance) => {
+        const [role, alpha] = appearance === "light" || appearance === "lightHigh" ? token.paper : token.night
+        return { hex: hexFor(appearance, role), alpha }
+      }),
+    )
+  }
+  if (tones.has("googleCapsuleInk")) throw new Error("googleCapsuleInk collides with a scheme role")
+  tones.set("googleCapsuleInk", { light: { hex: pins.googleCapsuleInk, alpha: 1 } })
+
+  const primary = tones.get("primary")
+  if (!primary) throw new Error("the schemes have no primary role to regenerate AccentColor from")
+
+  const files = new Map<string, string>()
+  files.set(`${APP_CATALOG}/AccentColor.colorset/Contents.json`, renderColorset(primary))
+  const namespace = xcodeJson({ info: XCODE_INFO, properties: { "provides-namespace": true } })
+  for (const catalog of [APP_CATALOG, WIDGET_CATALOG]) {
+    files.set(`${catalog}/${M3_FOLDER}/Contents.json`, namespace)
+    for (const [role, tone] of tones) {
+      files.set(`${catalog}/${M3_FOLDER}/${role}.colorset/Contents.json`, renderColorset(tone))
+    }
+  }
+  return files
 }
