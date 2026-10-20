@@ -15,7 +15,8 @@ extension References {
                                          config: ReferenceConfig(scheme: scheme, locales: [.en, .fr]))
         }
 
-        @Test(.enabled(if: ReferenceLocale.current == .fr))
+        /// French only, declared by the config's `locales`.
+        @Test
         func slideAx2() {
             let config = ReferenceConfig(scheme: .paper, locales: [.fr], dynamicType: .accessibility2)
             ReferenceImage.assertMatches(SlideFixture(), named: "slide", config: config)

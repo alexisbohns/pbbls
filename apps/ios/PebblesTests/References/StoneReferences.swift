@@ -5,19 +5,20 @@ import Testing
 extension References {
     /// The nine lit stones on the brand palette, laid out as `StoneView`'s
     /// "Nine stones · brand" preview: Metal, the wobbled silhouette and both
-    /// schemes. B3 moves these on purpose.
+    /// schemes. B3 moves these on purpose. English only: the config's
+    /// default `locales` is the one gate: the French pass returns before rendering.
     @Suite("Stone references")
     @MainActor
     struct StoneReferences {
 
-        @Test(.enabled(if: ReferenceLocale.current == .en), arguments: ReferenceScheme.allCases)
+        @Test(arguments: ReferenceScheme.allCases)
         func nineStones(scheme: ReferenceScheme) {
             ReferenceImage.assertMatches(NineStonesFixture(isFlat: false), named: "nineStones",
                                          config: ReferenceConfig(scheme: scheme, width: nil))
         }
 
         /// The Low Power drawing.
-        @Test(.enabled(if: ReferenceLocale.current == .en), arguments: ReferenceScheme.allCases)
+        @Test(arguments: ReferenceScheme.allCases)
         func nineStonesFlat(scheme: ReferenceScheme) {
             ReferenceImage.assertMatches(NineStonesFixture(isFlat: true), named: "nineStonesFlat",
                                          config: ReferenceConfig(scheme: scheme, width: nil))
@@ -31,7 +32,7 @@ extension References {
             let config = ReferenceConfig(scheme: .paper, width: nil)
             let lit = try #require(ReferenceImage.render(ShaderOnlyStone(isFlat: false), config: config, locale: .en))
             let flat = try #require(ReferenceImage.render(ShaderOnlyStone(isFlat: true), config: config, locale: .en))
-            let bytes = ReferenceImage.rgba(lit)
+            let bytes = try #require(ReferenceImage.rgba(lit))
             let centre = ((lit.height / 2) * lit.width + lit.width / 2) * 4
             #expect(bytes[centre + 3] == 255, "the lit stone's centre is transparent: the shader drew nothing")
             guard case .differing(let fraction) = ReferenceImage.compare(lit, flat) else {

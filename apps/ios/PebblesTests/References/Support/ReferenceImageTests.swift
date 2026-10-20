@@ -83,6 +83,15 @@ struct ReferenceImageTests {
         #expect(ReferenceImage.compare(a, b) == .sizeMismatch)
     }
 
+    @Test("an undecodable side never compares equal, even to another")
+    func undecodable() throws {
+        let image = try #require(ReferenceImage.image(fromRGBA: solid(2, 2, rgba: [0, 0, 0, 255]), width: 2, height: 2))
+        let pixels = try #require(ReferenceImage.pixels(image))
+        #expect(ReferenceImage.compare(nil, pixels) == .undecodable)
+        #expect(ReferenceImage.compare(pixels, nil) == .undecodable)
+        #expect(ReferenceImage.compare(nil, nil) == .undecodable)
+    }
+
     @Test("the diff paints differing pixels magenta over a grey copy")
     func diffImage() throws {
         var bytes = solid(2, 1, rgba: [255, 255, 255, 255])
@@ -90,7 +99,7 @@ struct ReferenceImageTests {
         bytes[0] = 0
         let actual = try #require(ReferenceImage.image(fromRGBA: bytes, width: 2, height: 1))
         let diff = try #require(ReferenceImage.diffImage(actual, reference))
-        #expect(Array(ReferenceImage.rgba(diff)) == [255, 0, 255, 255, 255, 255, 255, 255])
+        #expect(ReferenceImage.rgba(diff) == [255, 0, 255, 255, 255, 255, 255, 255])
     }
 
     @Test("references sit beside the suite file; diffs go to apps/ios/build")
@@ -126,7 +135,7 @@ struct ReferenceImageTests {
         let config = ReferenceConfig(scheme: scheme, width: nil)
         let image = try #require(ReferenceImage.render(view, config: config, locale: .en))
         #expect(image.width == 20 && image.height == 20)
-        let bytes = ReferenceImage.rgba(image)
+        let bytes = try #require(ReferenceImage.rgba(image))
         let centre = (10 * 20 + 10) * 4
         let expected: UInt8 = scheme == .paper ? 255 : 0
         #expect(Array(bytes[centre..<centre + 4]) == [expected, expected, expected, 255])

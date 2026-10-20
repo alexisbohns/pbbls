@@ -26,8 +26,19 @@ enum ReferenceImage {
     static let scale: CGFloat = 2
 
     enum Comparison: Equatable {
+        /// One side could not be drawn into `Pixels`. Always a failure: two
+        /// bad decodes must never compare equal.
+        case undecodable
         case sizeMismatch
         case differing(fraction: Double)
+    }
+
+    /// sRGB, 8 bits per channel, RGBA order with premultiplied alpha last: the
+    /// one layout every compare reads.
+    struct Pixels: Equatable {
+        let bytes: [UInt8]
+        let width: Int
+        let height: Int
     }
 
     struct Paths {
@@ -46,18 +57,25 @@ enum ReferenceImage {
 
     // MARK: - Pixels
 
-    /// Straight sRGB RGBA8, premultiplied last: the one layout every compare reads.
-    static func rgba(_ image: CGImage) -> [UInt8] {
+    /// Draws `image` into the `Pixels` layout; nil when no colour space or
+    /// bitmap context could be made, never a zero-filled buffer.
+    static func pixels(_ image: CGImage) -> Pixels? {
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB) else { return nil }
         var bytes = [UInt8](repeating: 0, count: image.width * image.height * 4)
-        guard let space = CGColorSpace(name: CGColorSpace.sRGB) else { return bytes }
-        bytes.withUnsafeMutableBytes { buffer in
-            let context = CGContext(
+        let drawn = bytes.withUnsafeMutableBytes { buffer -> Bool in
+            guard let context = CGContext(
                 data: buffer.baseAddress, width: image.width, height: image.height, bitsPerComponent: 8,
                 bytesPerRow: image.width * 4, space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-            )
-            context?.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+            ) else { return false }
+            context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+            return true
         }
-        return bytes
+        return drawn ? Pixels(bytes: bytes, width: image.width, height: image.height) : nil
+    }
+
+    /// The `Pixels` bytes of `image`, or nil when it cannot be decoded.
+    static func rgba(_ image: CGImage) -> [UInt8]? {
+        pixels(image)?.bytes
     }
 
     static func image(fromRGBA bytes: [UInt8], width: Int, height: Int) -> CGImage? {
@@ -71,10 +89,10 @@ enum ReferenceImage {
         )
     }
 
-    /// Re-draws any image into the RGBA8 sRGB layout, so a recorded PNG and a
+    /// Re-draws any image into the `Pixels` layout, so a recorded PNG and a
     /// fresh render are compared in the same bytes.
     static func normalized(_ image: CGImage) -> CGImage? {
-        Self.image(fromRGBA: rgba(image), width: image.width, height: image.height)
+        pixels(image).flatMap { Self.image(fromRGBA: $0.bytes, width: $0.width, height: $0.height) }
     }
 
     private static func differs(_ a: [UInt8], _ b: [UInt8], at i: Int) -> Bool {
@@ -82,23 +100,33 @@ enum ReferenceImage {
     }
 
     static func compare(_ actual: CGImage, _ reference: CGImage) -> Comparison {
+        compare(pixels(actual), pixels(reference))
+    }
+
+    static func compare(_ actual: Pixels?, _ reference: Pixels?) -> Comparison {
+        guard let actual, let reference else { return .undecodable }
         guard actual.width == reference.width, actual.height == reference.height else { return .sizeMismatch }
-        let pixels = actual.width * actual.height
-        guard pixels > 0 else { return .differing(fraction: 0) }
-        let a = rgba(actual)
-        let b = rgba(reference)
+        let count = actual.width * actual.height
+        guard count > 0 else { return .differing(fraction: 0) }
+        let a = actual.bytes
+        let b = reference.bytes
         var differing = 0
         for i in stride(from: 0, to: a.count, by: 4) where differs(a, b, at: i) {
             differing += 1
         }
-        return .differing(fraction: Double(differing) / Double(pixels))
+        return .differing(fraction: Double(differing) / Double(count))
+    }
+
+    static func diffImage(_ actual: CGImage, _ reference: CGImage) -> CGImage? {
+        guard let a = pixels(actual), let b = pixels(reference) else { return nil }
+        return diffImage(a, b)
     }
 
     /// Differing pixels in magenta over a 30 % grey copy of the reference.
-    static func diffImage(_ actual: CGImage, _ reference: CGImage) -> CGImage? {
+    static func diffImage(_ actual: Pixels, _ reference: Pixels) -> CGImage? {
         guard actual.width == reference.width, actual.height == reference.height else { return nil }
-        let a = rgba(actual)
-        let b = rgba(reference)
+        let a = actual.bytes
+        let b = reference.bytes
         var out = [UInt8](repeating: 255, count: a.count)
         for i in stride(from: 0, to: a.count, by: 4) {
             if differs(a, b, at: i) {
@@ -198,11 +226,32 @@ enum ReferenceImage {
             try? writePNG(actual, to: paths.actual)
             Issue.record("""
                 \(name): no reference at \(paths.reference.path). References are rendered on CI only: \
-                add the rebaseline-ios-screenshots label to the PR.
+                add the rebaseline-ios-screenshots label to the PR. Actual at \(paths.actual.path)
                 """, sourceLocation: sourceLocation)
             return
         }
-        switch compare(actual, reference) {
+        check(actual, against: reference, named: name, paths: paths, sourceLocation: sourceLocation)
+    }
+
+    /// Records a failure when `actual` and `reference` differ beyond the
+    /// threshold, writing the actual and the diff beside each other.
+    private static func check(
+        _ actual: CGImage,
+        against reference: CGImage,
+        named name: String,
+        paths: Paths,
+        sourceLocation: SourceLocation
+    ) {
+        // Decoded once: the compare and the diff read the same buffers.
+        let actualPixels = pixels(actual)
+        let referencePixels = pixels(reference)
+        switch compare(actualPixels, referencePixels) {
+        case .undecodable:
+            try? writePNG(actual, to: paths.actual)
+            let side = actualPixels == nil ? "the render" : "the reference at \(paths.reference.path)"
+            Issue.record("""
+                \(name): \(side) could not be decoded into sRGB RGBA8. Actual at \(paths.actual.path)
+                """, sourceLocation: sourceLocation)
         case .sizeMismatch:
             try? writePNG(actual, to: paths.actual)
             Issue.record("""
@@ -211,7 +260,9 @@ enum ReferenceImage {
                 """, sourceLocation: sourceLocation)
         case .differing(let fraction) where fraction > threshold:
             try? writePNG(actual, to: paths.actual)
-            if let diff = diffImage(actual, reference) { try? writePNG(diff, to: paths.diff) }
+            if let actualPixels, let referencePixels, let diff = diffImage(actualPixels, referencePixels) {
+                try? writePNG(diff, to: paths.diff)
+            }
             let percent = String(format: "%.4f", fraction * 100)
             Issue.record("""
                 \(name): \(percent) % of pixels differ (threshold \(threshold * 100) %). \
