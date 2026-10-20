@@ -127,7 +127,13 @@ fun PebbleDetailScreen(
     // The cover photo: signed once per prefix, as the Spine's cards do, and its
     // ratio from the same process-wide probe. Keyed on the prefix, so an edit
     // that swaps the photo never shows the last one while the new one signs.
-    val prefix = detail?.sortedSnaps?.firstOrNull()?.storagePath
+    // Only a pebble has a card: the bare moment's read view signs its own.
+    val prefix =
+        detail
+            ?.takeIf { it.pebble != null }
+            ?.sortedSnaps
+            ?.firstOrNull()
+            ?.storagePath
     val urls = LocalSnapURLCache.current
     var photo by remember(prefix) { mutableStateOf<Pair<String, String>?>(null) }
     LaunchedEffect(prefix, urls) {
@@ -314,7 +320,7 @@ private fun DetailTopBar(
     initialMenuOpen: Boolean,
 ) {
     // A stock top app bar (#854) on a clear container, so it sits on whatever
-    // hosts the page (the sheet's container, or surface in the pane) with no seam.
+    // hosts the page (the page's or the pane's surface) with no seam.
     TopAppBar(
         title = {},
         navigationIcon = {

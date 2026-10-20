@@ -86,8 +86,9 @@ sealed interface PebblesKey : NavKey {
     /**
      * A page on phones (#1135, the held card needs the height and the container
      * transform), a pane beside Path on large screens (#940); never a modal, so
-     * the bar stays. D6 still holds because this is no longer a modal;
-     * [EditPebble], opened from it, still is.
+     * the bar stays. Opened from a soul or a collection, it is a page of its
+     * own at either width: its pane pair is Path's. D6 still holds because
+     * this is no longer a modal; [EditPebble], opened from it, still is.
      */
     @Serializable
     data class PebbleDetail(
