@@ -20,8 +20,6 @@ import UIKit
 enum YsabeauFace {
     static let romanName = "Ysabeau-Bold"
     static let italicName = "Ysabeau-BoldItalic"
-    /// `'wght'` as a four-char code (`kCTFontVariationAxisIdentifierKey`).
-    static let weightAxis = 0x77_67_68_74
 
     private static let logger = Logger(subsystem: "app.pbbls.ios", category: "fonts")
     private static let lock = NSLock()
@@ -76,7 +74,9 @@ enum YsabeauFace {
             guard italic, let descriptor = system.fontDescriptor.withSymbolicTraits(.traitItalic) else { return system }
             return UIFont(descriptor: descriptor, size: size)
         }
-        var attributes: [UIFontDescriptor.AttributeName: Any] = [variationAttribute: [weightAxis: weight]]
+        var attributes: [UIFontDescriptor.AttributeName: Any] = [
+            variationAttribute: [UIFontDescriptor.weightAxis: weight]
+        ]
         if !tags.isEmpty {
             attributes[.featureSettings] = tags.map { [featureTagKey: $0, featureValueKey: 1] }
         }

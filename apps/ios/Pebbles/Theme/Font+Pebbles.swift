@@ -246,7 +246,7 @@ extension UIFont {
         if let base = UIFont(name: "Caveat-Regular", size: size) {
             let descriptor = base.fontDescriptor.addingAttributes([
                 UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [
-                    YsabeauFace.weightAxis: weight
+                    UIFontDescriptor.weightAxis: weight
                 ]
             ])
             font = UIFont(descriptor: descriptor, size: size)

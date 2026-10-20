@@ -95,7 +95,7 @@ enum CTProbe {
     /// Ysabeau) out of `CTFontCopyVariation`, so a missing entry on a font that
     /// has the axis reads as the axis default. Nil when the font has no `wght`.
     static func wght(_ font: UIFont) -> Double? {
-        let axisID = NSNumber(value: YsabeauFace.weightAxis)
+        let axisID = NSNumber(value: UIFontDescriptor.weightAxis)
         let variation = CTFontCopyVariation(font as CTFont) as? [NSNumber: NSNumber]
         if let value = variation?[axisID] { return value.doubleValue }
         let axes = CTFontCopyVariationAxes(font as CTFont) as? [[String: Any]] ?? []

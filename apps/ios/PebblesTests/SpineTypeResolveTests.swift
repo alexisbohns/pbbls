@@ -78,7 +78,8 @@ struct SpineTypeResolveTests {
         #expect(CTProbe.wght(resolved.uiFont) == 700)
         let axes = CTFontCopyVariationAxes(resolved.uiFont as CTFont) as? [[String: Any]] ?? []
         let axis = try #require(axes.first {
-            ($0[kCTFontVariationAxisIdentifierKey as String] as? NSNumber)?.intValue == YsabeauFace.weightAxis
+            let identifier = $0[kCTFontVariationAxisIdentifierKey as String] as? NSNumber
+            return identifier?.intValue == UIFontDescriptor.weightAxis
         })
         let maximum = try #require(axis[kCTFontVariationAxisMaximumValueKey as String] as? NSNumber)
         #expect(SpineType.Face.caveat.maxWeight == maximum.intValue)
