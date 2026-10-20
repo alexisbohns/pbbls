@@ -25,8 +25,8 @@ import app.pbbls.android.core.ui.render.PebbleStone
  * shared theme-neutral `pebbleFrameColors`. A null [glyph] draws the stone
  * without one.
  *
- * Sized by the caller's [modifier]: the heading treatment gives it a large
- * square slot, the snap overlay a smaller one. A missing [palette] (cache cold,
+ * Sized by the caller's [modifier]: the record flow's success step gives it
+ * its slot. A missing [palette] (cache cold,
  * unknown or absent emotion) falls back to the theme's `primary`, mirroring
  * `PebbleThumbnail`. A null [valence] is a moment without a pebble: the
  * [BlankStone] in the fixed blank greys (R4). [palette] and the valence data

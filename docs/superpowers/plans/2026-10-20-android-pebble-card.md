@@ -1366,3 +1366,14 @@ Branch: `chore/1135-pebble-card-cleanup`, stacked. PR title: `chore(android): re
   - `LitStone(width =)` is defined in 1.7 and used in 1.11.
   - `PebbleDetailEffect.Completed` is defined in 3.1 and used in 3.3.
   - `Navigator.closeMomentDetail` is defined in 2.1 and used in 2.1.
+
+## Lessons learned (execution, Parts 1–5, 2026-10-20)
+
+- **A completion is state, not an effect.** Emitting `Completed` after publishing the refreshed moment let the page swap to the card before the effect arrived, so the print had nothing to play into. The refresh now publishes the pebble already `completing`: the frame that brings the pebble is the frame that starts the print, and the screen reports it shown.
+- **A `rememberSaveable` `MutableState` written from a cancelled coroutine reaches the saved copy.** Nav 3's saveable holder keeps the saved state object in memory, so a `finally` clearing the print-under-way marker after the screen was disposed wrote into what the next composition restored, and the print replayed from 0 after Edit pebble and back. Clear such state where the work ends inside the same composition, never in a `finally`.
+- **`ScrollState` clamps, and the clamped value is what gets saved.** Pushing an entry with no bar snaps the bar away while the page is still laid out under the outgoing transition; the viewport grows, the value clamps to the shorter reach, and the page comes back a bar's height higher. Hold the reader's position apart from the value (`rememberHeldScrollState`): a clamp leaves it, any other change takes it, it is what is saved.
+- **An unplaced face loses its display list.** A verso that is composed but not placed has to record and upload on the turn's first frame. Place both faces, each in an offscreen layer, the hidden one at alpha 0: the half swaps two alphas, and the turn rotates a texture instead of redrawing in perspective.
+- **`OverlayClip` on `sharedBounds` blacked out the page on close** on a Pixel 8, from the first frame of the close until the Path faded in. The bounds are unclipped and scale (`ScaleToBounds`) rather than remeasure.
+- **HWUI ignores `DstIn` inside an offscreen layer** (again: the Spine's ground hit it first). The postmark noise is paper-coloured speckles laid over the ink, not a mask.
+- **Robolectric NATIVE tests pollute each other in one JVM** (#1141): screen tests drawn natively blanked a later pixel test. Keep semantics-only screen tests on legacy graphics, and treat a pixel test failing only beside others as pollution before a regression.
+- **A custom accessibility action on an unfocusable container is unreachable.** TalkBack never focuses the card's shell, so its turn action never surfaced; the footer's visible button is the turn for TalkBack.
