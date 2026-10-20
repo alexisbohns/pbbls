@@ -18,23 +18,20 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.customActions
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
-import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.CardFace
@@ -42,6 +39,7 @@ import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.MomentDetail
 import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.render.stone.BLANK_STONE_PALETTE
 import app.pbbls.android.core.ui.render.stone.StoneTones
 import app.pbbls.android.core.ui.render.stone.toStonePalette
@@ -63,6 +61,9 @@ private const val SKIA_CAMERA_UNIT = 72f
 
 private const val HALF_TURN_DEG = 180f
 
+/** The card's shell, for tests: its own content has no text to find it by. */
+internal const val PEBBLE_CARD_TAG = "pebble_card"
+
 private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
 
 /**
@@ -76,14 +77,16 @@ private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
  *
  * The turn (pebble card spec §Behaviour, [CardTurnState]): the face area alone rotates on
  * Y inside the still shell, by the footer's button, a horizontal drag toward the start
- * edge (a flick carries it, a release short of the half reverts), or the card's TalkBack
- * action; the face in front swaps at 90°, edge-on. Under reduced motion the faces
- * crossfade instead. While it turns, the face shrinks by exactly what perspective adds to
+ * edge (a flick carries it, a release short of the half reverts), or a changed
+ * [requestedFace]; the face in front swaps at 90°, edge-on. For TalkBack the footer's
+ * button is the turn: a custom action on the card would sit on a node TalkBack never
+ * focuses. Under reduced motion the faces crossfade, and only the incoming one speaks. While it turns, the face shrinks by exactly what perspective adds to
  * its near edge, so the near corners stay inside the shell's clip rather than being cut by
  * it, and the far edge recedes as on a real card.
  *
  * The footer names the face that is not in front: it switches at the half, with the
- * picture, so a drag held past the half offers the turn back.
+ * picture, so a drag held past the half offers the turn back. It reads the turn itself
+ * ([TurnFooter]), so the half recomposes the footer alone.
  *
  * @param detail a moment with a pebble: only a pebble has a card.
  * @param ratio the photo's width / height; null until probed.
@@ -126,16 +129,14 @@ internal fun PebbleCard(
     LaunchedEffect(requestedFace) {
         if (requestedFace != answered) {
             answered = requestedFace
+            // A turn or a drag in flight finishes first; then the card turns if it will not land there.
+            turn.awaitFree()
             turn.turnTo(requestedFace, reduceMotion)
         }
     }
     val colors = PebblesTheme.spine.colors
     val stone = remember(palette) { palette?.toStonePalette() ?: BLANK_STONE_PALETTE }
     val spot = StoneTones.spot(stone, colors.isNight)
-    val turnAction =
-        stringResource(
-            if (turn.front == CardFace.RECTO) R.string.card_turn_action_to_pebble else R.string.card_turn_action_to_moment,
-        )
 
     BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
         val width = min(maxWidth - CardLayout.PAGE_MARGIN * 2, CardLayout.MAX_WIDTH).coerceAtLeast(0.dp)
@@ -171,18 +172,7 @@ internal fun PebbleCard(
             palette = palette,
             polarity = pebble.valence.polarity,
             intensity = pebble.valence.intensity,
-            modifier =
-                Modifier
-                    .width(width)
-                    .semantics {
-                        customActions =
-                            listOf(
-                                CustomAccessibilityAction(turnAction) {
-                                    turn.turn(reduceMotion)
-                                    true
-                                },
-                            )
-                    },
+            modifier = Modifier.width(width).testTag(PEBBLE_CARD_TAG),
         ) {
             Column {
                 if (reduceMotion) {
@@ -191,16 +181,14 @@ internal fun PebbleCard(
                         modifier = Modifier.turnDrag(turn, reduceMotion = true, rtl = rtl),
                         animationSpec = tween(TURN_FADE_MS),
                         label = "card face",
-                    ) { face -> area({ face }, Modifier) }
+                    ) { face ->
+                        // The outgoing face fades out silent: only the incoming one speaks.
+                        area({ face }, if (face == turn.face) Modifier else Modifier.clearAndSetSemantics {})
+                    }
                 } else {
                     area({ turn.front }, Modifier.turnDrag(turn, reduceMotion = false, rtl = rtl).turnLayer(turn, rtl))
                 }
-                CardFooter(
-                    visibility = pebble.visibility,
-                    turnTo = turn.front.other().toTarget(),
-                    stone = spot,
-                    onTurn = { turn.turn(reduceMotion) },
-                )
+                TurnFooter(turn, pebble.visibility, spot, reduceMotion)
             }
         }
     }
@@ -212,7 +200,7 @@ internal fun PebbleCard(
  * finger dragging toward the start (negative degrees in LTR, mirrored in RTL). Past the
  * half the other face is in front, a half-turn on, so its rotation runs back from 90° to
  * 0° and its text reads the right way round. Drawn in the layer alone: no frame of a turn
- * recomposes or re-measures.
+ * re-measures, and only the half recomposes, the footer alone ([TurnFooter]).
  *
  * Perspective makes the near edge taller than the card by `d / (d - w/2 · sin θ)`; the
  * scale `d / (d + w/2 · sin θ)` brings the near edge back to exactly the card's height, so
@@ -251,32 +239,58 @@ private fun Modifier.turnDrag(
         var dragPx = 0f
         var taken = false
         val width = { size.width.toFloat() }
-        detectHorizontalDragGestures(
-            onDragStart = {
-                tracker.resetTracking()
-                dragPx = 0f
-                taken = turn.startDrag()
-            },
-            onDragEnd = {
+        try {
+            detectHorizontalDragGestures(
+                onDragStart = {
+                    tracker.resetTracking()
+                    dragPx = 0f
+                    taken = turn.startDrag()
+                },
+                onDragEnd = {
+                    if (taken) {
+                        val velocity = if (width() > 0f) -tracker.calculateVelocity().x * toStart / width() else 0f
+                        turn.release(TurnSettle.progress(dragPx, width()), velocity, reduceMotion)
+                    }
+                    taken = false
+                },
+                onDragCancel = {
+                    if (taken) turn.cancelDrag()
+                    taken = false
+                },
+            ) { change, dragAmount ->
                 if (taken) {
-                    val velocity = if (width() > 0f) -tracker.calculateVelocity().x * toStart / width() else 0f
-                    turn.release(TurnSettle.progress(dragPx, width()), velocity, reduceMotion)
+                    change.consume()
+                    tracker.addPointerInputChange(change)
+                    dragPx += dragAmount * toStart
+                    turn.drag(TurnSettle.progress(dragPx, width()), reduceMotion)
                 }
-                taken = false
-            },
-            onDragCancel = {
-                if (taken) turn.cancelDrag()
-                taken = false
-            },
-        ) { change, dragAmount ->
-            if (taken) {
-                change.consume()
-                tracker.addPointerInputChange(change)
-                dragPx += dragAmount * toStart
-                turn.drag(TurnSettle.progress(dragPx, width()), reduceMotion)
             }
+        } finally {
+            // The gesture's coroutine was cancelled mid-drag (the modifier's keys changed, the
+            // card left): no callback will end the drag, and a held drag blocks every turn.
+            if (taken) turn.cancelDrag()
         }
     }
+
+/**
+ * The still footer for [turn]: it names the face not in front. Reading the turn here
+ * rather than in [PebbleCard] keeps the recomposition at the half to the footer.
+ */
+@Composable
+private fun TurnFooter(
+    turn: CardTurnState,
+    visibility: Visibility,
+    stone: Color,
+    reduceMotion: Boolean,
+) {
+    CardFooter(
+        visibility = visibility,
+        turnTo = turn.front.other().toTarget(),
+        stone = stone,
+        // Ignored while a turn runs; the button has nothing to report.
+        onTurn = { turn.turn(reduceMotion) },
+    )
+}
 
 /**
  * One face's content, silent to TalkBack while it is not in front: both faces stay

@@ -2,15 +2,25 @@ package app.pbbls.android.features.path.card
 
 import android.app.Application
 import android.provider.Settings
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isHeading
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -24,6 +34,9 @@ import app.pbbls.android.core.model.EmotionRef
 import app.pbbls.android.core.model.MomentDetail
 import app.pbbls.android.core.model.MomentPebble
 import app.pbbls.android.core.model.Visibility
+import kotlinx.coroutines.CoroutineScope
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -36,9 +49,9 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 /**
- * The held card's turn (pebble card spec §Behaviour): the button, the TalkBack action, a
- * drag and a changed requested face each bring the other face in front, and the face not
- * in front says nothing. The verso's lockup heading ("Your pebble. …") is the verso-only
+ * The held card's turn (pebble card spec §Behaviour): the footer's button (TalkBack's turn
+ * too), a drag and a changed requested face each bring the other face in front, the
+ * face a turn lands on survives a restore, and the face not in front says nothing. The verso's lockup heading ("Your pebble. …") is the verso-only
  * node; both faces stay composed, so it must be absent from the semantics on the recto.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -75,21 +88,7 @@ class PebbleCardTurnTest {
     }
 
     private fun setCard(requested: () -> CardFace = { CardFace.RECTO }) {
-        compose.setContent {
-            PebblesTheme {
-                PebbleCard(
-                    detail = detail,
-                    palette = null,
-                    ratio = null,
-                    photoUrl = null,
-                    thumbUrl = null,
-                    soulsById = emptyMap(),
-                    domains = emptyList(),
-                    requestedFace = requested(),
-                    zone = ZoneOffset.UTC,
-                )
-            }
-        }
+        compose.setContent { Card(requested()) }
     }
 
     @Test
@@ -105,34 +104,30 @@ class PebbleCardTurnTest {
     }
 
     @Test
-    fun `the card's TalkBack action turns it`() {
+    fun `for TalkBack the turn is the footer's button, named for where it leads`() {
         setCard()
-        val label = context.getString(R.string.card_turn_action_to_pebble)
-        val withAction =
-            SemanticsMatcher("has the custom action \"$label\"") { node ->
-                node.config
-                    .getOrElseNullable(SemanticsActions.CustomActions) { null }
-                    .orEmpty()
-                    .any { it.label == label }
-            }
-        val action =
-            compose
-                .onNode(withAction)
-                .fetchSemanticsNode()
-                .config[SemanticsActions.CustomActions]
-                .single { it.label == label }
+        val toPebble = context.getString(R.string.card_turn_action_to_pebble)
+        val toMoment = context.getString(R.string.card_turn_action_to_moment)
 
-        compose.runOnUiThread { assertTrue(action.action()) }
+        compose
+            .onNodeWithContentDescription(toPebble)
+            .assertHasClickAction()
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+            .performClick()
         compose.waitForIdle()
-
         compose.onNode(versoHeading).assertIsDisplayed()
+
+        compose.onNodeWithContentDescription(toMoment).assertHasClickAction().performClick()
+        compose.waitForIdle()
+        compose.onNode(versoHeading).assertDoesNotExist()
+        compose.onNodeWithContentDescription(toPebble).assertExists()
     }
 
     @Test
     fun `a drag toward the start edge past the half turns the card`() {
         setCard()
 
-        compose.onNode(cardRoot()).performTouchInput {
+        compose.onNode(hasTestTag(PEBBLE_CARD_TAG)).performTouchInput {
             swipe(Offset(width * 0.9f, height * 0.3f), Offset(width * 0.1f, height * 0.3f), durationMillis = 600)
         }
         compose.waitForIdle()
@@ -144,7 +139,7 @@ class PebbleCardTurnTest {
     fun `a short drag reverts`() {
         setCard()
 
-        compose.onNode(cardRoot()).performTouchInput {
+        compose.onNode(hasTestTag(PEBBLE_CARD_TAG)).performTouchInput {
             swipe(Offset(width * 0.6f, height * 0.3f), Offset(width * 0.45f, height * 0.3f), durationMillis = 600)
         }
         compose.waitForIdle()
@@ -175,6 +170,109 @@ class PebbleCardTurnTest {
         compose.onNode(versoHeading).assertIsDisplayed()
     }
 
-    /** The card's root: the node that carries the turn's TalkBack action. */
-    private fun cardRoot() = SemanticsMatcher.keyIsDefined(SemanticsActions.CustomActions)
+    @Test
+    fun `a face requested during a turn is turned to once the turn lands`() {
+        var requested by mutableStateOf(CardFace.RECTO)
+        setCard { requested }
+        compose.mainClock.autoAdvance = false
+
+        request(CardFace.VERSO) { requested = it }
+        // Past the half of that turn: the verso is in front, and the turn still runs.
+        compose.mainClock.advanceTimeBy(TURN_MS * 3L / 4)
+        compose.onNode(versoHeading).assertExists()
+        request(CardFace.RECTO) { requested = it }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+
+        compose.onNode(versoHeading).assertDoesNotExist()
+        compose.onNodeWithContentDescription(context.getString(R.string.card_turn_action_to_pebble)).assertExists()
+    }
+
+    @Test
+    fun `a card turned by hand stays turned across a restore`() {
+        val restore = StateRestorationTester(compose)
+        restore.setContent { Card(CardFace.RECTO) }
+        compose.onNodeWithContentDescription(context.getString(R.string.card_turn_action_to_pebble)).performClick()
+        compose.waitForIdle()
+
+        restore.emulateSavedInstanceStateRestore()
+        compose.waitForIdle()
+
+        compose.onNode(versoHeading).assertIsDisplayed()
+    }
+
+    @Test
+    fun `mid-turn the card saves the face the turn lands on, and takes no second turn`() {
+        lateinit var turn: CardTurnState
+        lateinit var scope: CoroutineScope
+        compose.setContent {
+            scope = rememberCoroutineScope()
+            turn = remember { CardTurnState(CardFace.RECTO, scope) }
+        }
+        compose.mainClock.autoAdvance = false
+
+        compose.runOnUiThread { assertTrue(turn.turn(reduceMotion = false)) }
+        compose.mainClock.advanceTimeBy(TURN_MS / 3L)
+
+        compose.runOnUiThread {
+            // Short of the half the recto is still up and in front, but the card is bound for the verso.
+            assertEquals(CardFace.RECTO, turn.face)
+            assertEquals(CardFace.RECTO, turn.front)
+            assertEquals(CardFace.VERSO, with(CardTurnState.saver(scope)) { SaverScope { true }.save(turn) })
+            assertFalse(turn.turn(reduceMotion = false))
+        }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        compose.runOnUiThread { assertEquals(CardFace.VERSO, turn.face) }
+    }
+
+    @Test
+    fun `an answered request is not answered again after a restore`() {
+        var requested by mutableStateOf(CardFace.RECTO)
+        val restore = StateRestorationTester(compose)
+        restore.setContent { Card(requested) }
+        requested = CardFace.VERSO
+        compose.waitForIdle()
+        compose.onNode(versoHeading).assertIsDisplayed()
+        // Turned back by hand: the verso was asked for, but the reader chose the recto since.
+        compose.onNodeWithContentDescription(context.getString(R.string.card_turn_action_to_moment)).performClick()
+        compose.waitForIdle()
+
+        restore.emulateSavedInstanceStateRestore()
+        compose.waitForIdle()
+
+        compose.onNode(versoHeading).assertDoesNotExist()
+    }
+
+    /**
+     * Sets the requested face with the clock held: a write from the test thread reaches the
+     * composition only once its snapshot is applied, which `waitForIdle` would otherwise do.
+     */
+    private fun request(
+        face: CardFace,
+        set: (CardFace) -> Unit,
+    ) {
+        compose.runOnUiThread {
+            set(face)
+            Snapshot.sendApplyNotifications()
+        }
+        compose.mainClock.advanceTimeByFrame()
+    }
+
+    @Composable
+    private fun Card(requested: CardFace) {
+        PebblesTheme {
+            PebbleCard(
+                detail = detail,
+                palette = null,
+                ratio = null,
+                photoUrl = null,
+                thumbUrl = null,
+                soulsById = emptyMap(),
+                domains = emptyList(),
+                requestedFace = requested,
+                zone = ZoneOffset.UTC,
+            )
+        }
+    }
 }

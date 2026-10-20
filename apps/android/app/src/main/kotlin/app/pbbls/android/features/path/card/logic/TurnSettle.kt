@@ -1,6 +1,8 @@
 package app.pbbls.android.features.path.card.logic
 
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * The card's drag-to-turn (pebble card spec §Behaviour). Progress 0 is the face that was
@@ -31,4 +33,14 @@ internal object TurnSettle {
             abs(velocityPerSecond) >= FLICK -> if (velocityPerSecond > 0f) 1f else 0f
             else -> if (progress >= 0.5f) 1f else 0f
         }
+
+    /**
+     * The speed the settle starts with, toward [target]: the finger's, unless it points
+     * away. A slow release that settles against the finger's last motion starts still, so
+     * the settle never crosses the half and comes back.
+     */
+    fun launchVelocity(
+        target: Float,
+        velocityPerSecond: Float,
+    ): Float = if (target >= 1f) max(velocityPerSecond, 0f) else min(velocityPerSecond, 0f)
 }

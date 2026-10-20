@@ -12,11 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.features.path.card.logic.TurnSettle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** The button's turn, end to end (pebble card spec §Behaviour). */
@@ -41,10 +43,12 @@ internal fun CardFace.toTarget(): CardFaceTarget = if (this == CardFace.RECTO) C
  * same frame, so the picture does not change at the commit (the other face at 180° is the
  * same face at 0°).
  *
- * One turn at a time: the button, the requested face and the TalkBack action are ignored
- * while a turn or a drag runs, and a drag that starts during a turn is not taken.
+ * One turn at a time: the button is ignored while a turn or a drag runs ([turn] says so),
+ * and a drag that starts during a turn is not taken. A requested face waits its turn
+ * ([awaitFree]) rather than being dropped.
  *
- * Only [face] is saved: a configuration change mid-turn comes back on the face that was up.
+ * [landing] is what is saved: a configuration change mid-turn comes back on the face the
+ * turn was heading to, and a drag held past the half on the face in front.
  *
  * @param scope the composition's scope, which the turns run in and cancel with.
  * @param initialProgress a frozen turn, for previews; 0 otherwise.
@@ -65,26 +69,52 @@ internal class CardTurnState(
     val front: CardFace by derivedStateOf { if (progress.value > TURN_HALF) this.face.other() else this.face }
 
     private var running: Job? = null
-    private var dragging = false
+
+    /** State, so [awaitFree] can wait for the finger to lift. */
+    private var dragging by mutableStateOf(false)
+
+    /** The face a running settle lands on; null while none runs. */
+    private var settlingTo: CardFace? by mutableStateOf(null)
 
     private val isBusy: Boolean get() = dragging || running?.isActive == true
 
-    /** Turns to the other face: a rotation, or at once under [reduceMotion], where the caller crossfades [face]. */
-    fun turn(reduceMotion: Boolean) {
-        if (isBusy) return
+    /**
+     * Where the card will rest: the face a running turn lands on, the face in front while
+     * a finger holds the card, else [face].
+     */
+    val landing: CardFace
+        get() = settlingTo ?: if (dragging) front else face
+
+    /**
+     * Turns to the other face: a rotation, or at once under [reduceMotion], where the caller
+     * crossfades [face]. False, and nothing happens, while a turn or a drag runs.
+     */
+    fun turn(reduceMotion: Boolean): Boolean {
+        if (isBusy) return false
         if (reduceMotion) {
             face = face.other()
         } else {
-            running = scope.launch { settle(1f, tween(TURN_MS, easing = FastOutSlowInEasing)) }
+            running = scope.launch(start = CoroutineStart.UNDISPATCHED) { settle(1f, tween(TURN_MS, easing = FastOutSlowInEasing)) }
         }
+        return true
     }
 
-    /** Turns to [target] if it is not already up. */
+    /** Turns to [target] unless the card already rests or lands there; false if a turn or a drag is in the way. */
     fun turnTo(
         target: CardFace,
         reduceMotion: Boolean,
-    ) {
-        if (target != face) turn(reduceMotion)
+    ): Boolean = target == landing || turn(reduceMotion)
+
+    /** Returns once no drag holds the card and no turn runs: a drag's release may start a settle, so it loops. */
+    suspend fun awaitFree() {
+        while (true) {
+            val job = running
+            when {
+                dragging -> snapshotFlow { dragging }.first { !it }
+                job != null && job.isActive -> job.join()
+                else -> return
+            }
+        }
     }
 
     /** A drag begins; false while a turn runs, and then the drag is not the card's. */
@@ -123,9 +153,12 @@ internal class CardTurnState(
             if (target == 1f) face = face.other()
             return
         }
+        // A slow release never starts away from where it settles, or it could cross the half
+        // and come back, swapping the face in front twice.
+        val velocity = TurnSettle.launchVelocity(target, velocityPerSecond)
         running =
-            scope.launch {
-                settle(target, spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow), velocityPerSecond)
+            scope.launch(start = CoroutineStart.UNDISPATCHED) {
+                settle(target, spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow), velocity)
             }
     }
 
@@ -133,7 +166,7 @@ internal class CardTurnState(
     fun cancelDrag() {
         if (!dragging) return
         dragging = false
-        running = scope.launch { settle(0f, tween(TURN_MS / 2, easing = FastOutSlowInEasing)) }
+        running = scope.launch(start = CoroutineStart.UNDISPATCHED) { settle(0f, tween(TURN_MS / 2, easing = FastOutSlowInEasing)) }
     }
 
     private suspend fun settle(
@@ -141,15 +174,22 @@ internal class CardTurnState(
         spec: AnimationSpec<Float>,
         velocityPerSecond: Float = 0f,
     ) {
-        progress.animateTo(target, spec, initialVelocity = velocityPerSecond)
-        // No suspension between the two writes, so no frame sees the new face at 180°.
-        if (progress.value >= 1f) {
-            face = face.other()
-            progress.snapTo(0f)
+        // Launched undispatched, so this is set before the launch returns: [landing] never lags a turn.
+        settlingTo = if (target >= 1f) face.other() else face
+        try {
+            progress.animateTo(target, spec, initialVelocity = velocityPerSecond)
+            // No suspension between the two writes, so no frame sees the new face at 180°.
+            if (progress.value >= 1f) {
+                face = face.other()
+                progress.snapTo(0f)
+            }
+        } finally {
+            settlingTo = null
         }
     }
 
     companion object {
-        fun saver(scope: CoroutineScope): Saver<CardTurnState, CardFace> = Saver(save = { it.face }, restore = { CardTurnState(it, scope) })
+        fun saver(scope: CoroutineScope): Saver<CardTurnState, CardFace> =
+            Saver(save = { it.landing }, restore = { CardTurnState(it, scope) })
     }
 }
