@@ -1,7 +1,11 @@
+import { readdirSync, readFileSync } from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
-import type { M3Scheme } from "./m3-schemes"
+import { ANDROID_SCHEMES_FROM_WEB, type M3Scheme, parseColorSchemes, toKebab } from "./m3-schemes"
 import {
   APP_CATALOG,
+  IOS_ROOT_FROM_WEB,
   M3_FOLDER,
   SWIFT_ENTRY_POINT,
   WIDGET_CATALOG,
@@ -267,5 +271,55 @@ describe("renderIosColorsets' Swift file", () => {
       "halo", "stock", "rule", "cardRule", "line", "seam", "teeth", "ring", "ripple",
       "googleCapsuleInk",
     ])
+  })
+})
+
+// The drift gate (§8): the committed iOS files must be exactly what the
+// generator writes from the committed Kotlin. Runs in web.yml on every PR.
+describe("committed iOS colours", () => {
+  const webRoot = fileURLToPath(new URL("../..", import.meta.url))
+  const iosRoot = path.join(webRoot, IOS_ROOT_FROM_WEB)
+  const kotlin = readFileSync(path.join(webRoot, ANDROID_SCHEMES_FROM_WEB), "utf8")
+  const files = renderIosColorsets(parseColorSchemes(kotlin), parsePinnedColors(kotlin))
+
+  it("matches the generator output (run `npm run generate:colors --workspace=@pbbls/ios`)", () => {
+    for (const [relative, contents] of files) {
+      expect(readFileSync(path.join(iosRoot, relative), "utf8"), relative).toBe(contents)
+    }
+  })
+
+  it("holds no colorset in M3/ that the generator does not write", () => {
+    for (const catalog of [APP_CATALOG, WIDGET_CATALOG]) {
+      const onDisk = readdirSync(path.join(iosRoot, catalog, M3_FOLDER)).filter((n) => n.endsWith(".colorset"))
+      const prefix = `${catalog}/${M3_FOLDER}/`
+      const expected = [...files.keys()]
+        .filter((k) => k.startsWith(prefix) && k.endsWith(".colorset/Contents.json"))
+        .map((k) => k.slice(prefix.length, -"/Contents.json".length))
+      expect(onDisk.sort()).toEqual(expected.sort())
+    }
+  })
+
+  it("renders 62 roles: 48 M3 + 4 sand + 9 Spine + the pin", () => {
+    const prefix = `${APP_CATALOG}/${M3_FOLDER}/`
+    expect([...files.keys()].filter((k) => k.startsWith(prefix) && k.endsWith(".colorset/Contents.json"))).toHaveLength(62)
+  })
+
+  it("carries the real primary, error and surface hexes in D2 order", () => {
+    expect(hexes(colorset(files, "primary"))).toEqual(["#8E4955", "#FFB2BC", "#501824", "#FFEBED"])
+    expect(hexes(colorset(files, "error"))).toEqual(["#9B4500", "#FFB68E", "#4D1E00", "#FFECE4"])
+    expect(hexes(colorset(files, "surface"))).toEqual(["#FEF9EF", "#131315", "#FEF9EF", "#131315"])
+  })
+
+  it("round-trips every Kotlin role name through toKebab and fromKebab", () => {
+    const lightBlock = kotlin.slice(
+      kotlin.indexOf("internal val LightScheme"),
+      kotlin.indexOf("internal val LightMediumContrastScheme"),
+    )
+    const camel = [...lightBlock.matchAll(/(\w+) = Color\(0x/g)].map(([, role]) => role)
+    expect(camel.length).toBe(48)
+    for (const role of camel) expect(fromKebab(toKebab(role))).toBe(role)
+    for (const role of ["sand", "onSand", "sandContainer", "onSandContainer"]) {
+      expect(fromKebab(toKebab(role))).toBe(role)
+    }
   })
 })
