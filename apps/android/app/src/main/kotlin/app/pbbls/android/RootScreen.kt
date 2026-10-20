@@ -1,5 +1,6 @@
 package app.pbbls.android
 
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +29,7 @@ import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.core.data.OnboardingPreferences
 import app.pbbls.android.core.ui.AchievementMomentOverlay
 import app.pbbls.android.core.ui.KarmaOverlayHost
+import app.pbbls.android.core.ui.LocalSharedTransitionScope
 import app.pbbls.android.features.consent.ConsentGateScreen
 import app.pbbls.android.features.consent.ConsentGateUiState
 import app.pbbls.android.features.consent.ConsentGateViewModel
@@ -39,6 +41,7 @@ import app.pbbls.android.navigation.Navigator
 import app.pbbls.android.navigation.PebblesKey
 import app.pbbls.android.navigation.PebblesNavigationItems
 import app.pbbls.android.navigation.SheetOverlaySlot
+import app.pbbls.android.navigation.isSinglePane
 import app.pbbls.android.navigation.pebblesEntries
 import app.pbbls.android.navigation.pebblesNavigationSuiteColors
 import app.pbbls.android.navigation.pebblesNavigationSuiteType
@@ -343,31 +346,40 @@ private fun PebblesNavDisplay(
         containerColor = MaterialTheme.colorScheme.surface,
         state = suiteState,
     ) {
-        NavDisplay(
-            entries =
-                state.toDecoratedEntries(
-                    entryProvider =
-                        entryProvider {
-                            pebblesEntries(
-                                navigator = navigator,
-                                onSignOut = onSignOut,
-                                welcomeContentRevealed = welcomeContentRevealed,
-                                onOnboardingFinished = onOnboardingFinished,
-                            )
-                        },
-                ),
-            // The list form of this parameter replaces the default single-pane
-            // strategy; NavDisplay still falls back to a single pane itself
-            // when every strategy here returns null.
-            sceneStrategies = sceneStrategies,
-            onBack = { navigator.goBack() },
-            // No padding here, unlike the Scaffold this replaced: the suite
-            // passes no content padding, only consumed insets (see above), and
-            // every screen pads the status bar itself through
-            // `safeDrawingPadding()` or `PebblesScreen`'s top app bar. Adding
-            // the status-bar inset here as well is what once opened every page
-            // with a dead band under it. IME insets are untouched, so
-            // `imePadding()` still works.
-        )
+        // The card's flight from its slot on the Spine (#1135): one scope over the display,
+        // handed to the cards only while a detail covers the Path (one pane). Not passed to
+        // NavDisplay's own `sharedTransitionScope`, which shares whole entries between
+        // scenes and would turn the wide Path's fade-through into a morph.
+        val singlePane = isSinglePane()
+        SharedTransitionLayout(Modifier.fillMaxSize()) {
+            CompositionLocalProvider(LocalSharedTransitionScope provides if (singlePane) this else null) {
+                NavDisplay(
+                    entries =
+                        state.toDecoratedEntries(
+                            entryProvider =
+                                entryProvider {
+                                    pebblesEntries(
+                                        navigator = navigator,
+                                        onSignOut = onSignOut,
+                                        welcomeContentRevealed = welcomeContentRevealed,
+                                        onOnboardingFinished = onOnboardingFinished,
+                                    )
+                                },
+                        ),
+                    // The list form of this parameter replaces the default single-pane
+                    // strategy; NavDisplay still falls back to a single pane itself
+                    // when every strategy here returns null.
+                    sceneStrategies = sceneStrategies,
+                    onBack = { navigator.goBack() },
+                    // No padding here, unlike the Scaffold this replaced: the suite
+                    // passes no content padding, only consumed insets (see above), and
+                    // every screen pads the status bar itself through
+                    // `safeDrawingPadding()` or `PebblesScreen`'s top app bar. Adding
+                    // the status-bar inset here as well is what once opened every page
+                    // with a dead band under it. IME insets are untouched, so
+                    // `imePadding()` still works.
+                )
+            }
+        }
     }
 }

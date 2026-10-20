@@ -46,6 +46,7 @@ import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.render.stone.BLANK_STONE_PALETTE
 import app.pbbls.android.core.ui.render.stone.StoneTones
 import app.pbbls.android.core.ui.render.stone.toStonePalette
+import app.pbbls.android.core.ui.sharedCardBounds
 import app.pbbls.android.features.path.card.logic.TurnSettle
 import app.pbbls.android.features.path.spine.SpineCardShell
 import java.time.ZoneId
@@ -114,6 +115,10 @@ private enum class FaceSlot { RECTO, VERSO, VERSO_PROBE, BAND }
  *   recompose per frame. Null at rest.
  * @param printed this card printed on this page: its verso heading is a polite live region,
  *   so TalkBack says once, when the print lands, that the pebble arrived.
+ * @param flies the card opened from its slot on the Spine, and returns to it: its shell is
+ *   the far end of the Spine card's shared bounds (`sharedCardBounds`, pebble card spec
+ *   §Behaviour). Never while it prints ([completion]), which draws the card at an offset of
+ *   its own inside the page.
  */
 @Composable
 internal fun PebbleCard(
@@ -131,6 +136,7 @@ internal fun PebbleCard(
     turnProgressOverride: Float? = null,
     completion: CardCompletionState? = null,
     printed: Boolean = false,
+    flies: Boolean = false,
 ) {
     val pebble = requireNotNull(detail.pebble) { "only a pebble has a card" }
     val scope = rememberCoroutineScope()
@@ -201,7 +207,10 @@ internal fun PebbleCard(
             palette = palette,
             polarity = pebble.valence.polarity,
             intensity = pebble.valence.intensity,
-            modifier = Modifier.width(width).testTag(PEBBLE_CARD_TAG),
+            modifier =
+                sharedCardBounds(detail.id, enabled = flies && completion == null)
+                    .width(width)
+                    .testTag(PEBBLE_CARD_TAG),
         ) {
             Column {
                 if (reduceMotion) {

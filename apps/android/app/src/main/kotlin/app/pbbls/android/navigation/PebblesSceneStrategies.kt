@@ -75,6 +75,15 @@ fun rememberPebblesSceneStrategies(): List<SceneStrategy<NavKey>> {
     return remember(directive) { pebblesSceneStrategies(directive) }
 }
 
+/**
+ * True while the window has one pane, so a detail covers its list rather than sitting beside
+ * it: exactly when [pebblesListDetailStrategy] declines and the detail is a page of its own.
+ * The held card flies from its slot only then (#1135).
+ */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+fun isSinglePane(): Boolean = pebblesPaneDirective(currentWindowAdaptiveInfoV2()).maxHorizontalPartitions < 2
+
 /** The chain itself, for a given [directive]; `NavDisplay` takes the first scene. */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 fun pebblesSceneStrategies(directive: PaneScaffoldDirective): List<SceneStrategy<NavKey>> =

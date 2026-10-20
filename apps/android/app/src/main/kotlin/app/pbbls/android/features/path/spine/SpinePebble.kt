@@ -65,6 +65,7 @@ import app.pbbls.android.core.ui.render.stone.StoneRipple
 import app.pbbls.android.core.ui.render.stone.StoneTones
 import app.pbbls.android.core.ui.render.stone.rememberStonePressState
 import app.pbbls.android.core.ui.render.stone.toStonePalette
+import app.pbbls.android.core.ui.sharedCardBounds
 import app.pbbls.android.features.path.spine.SpineLayout.CARD_ANCHOR
 import app.pbbls.android.features.path.spine.SpineLayout.COL_X
 import app.pbbls.android.features.path.spine.SpineLayout.PAD_R
@@ -282,6 +283,10 @@ internal fun SpinePebble(
             if (hasCard) {
                 SpineCard(
                     button = button,
+                    // The card's end of its flight to the held card. Only the card's press
+                    // flies: the held card opened verso up by the stone takes no part, and
+                    // an entry has no card, so both open with the page's fade-through.
+                    shell = sharedCardBounds(moment.id),
                     moment = moment,
                     palette = palette,
                     ratio = ratio,

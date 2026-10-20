@@ -69,6 +69,7 @@ import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.card.BareMomentPage
 import app.pbbls.android.features.path.card.CardCompletion
 import app.pbbls.android.features.path.card.CardCompletionState
+import app.pbbls.android.features.path.card.CardPlaceholder
 import app.pbbls.android.features.path.card.PebbleCard
 import kotlinx.coroutines.delay
 import java.time.ZoneId
@@ -273,6 +274,9 @@ fun PebbleDetailScreen(
         faceRequest = faceRequest,
         completion = completion,
         printed = announcing,
+        // A card pressed on the Spine flies in from the open's first frame, onto a blank
+        // card while the moment loads; the stone's verso opens in place.
+        flightMomentId = momentId.takeIf { face == CardFace.RECTO },
     )
 
     if (pendingDelete && detail != null) {
@@ -308,6 +312,9 @@ fun PebbleDetailScreen(
  *   [PebbleDetailUiState.Content.completing]: the bare page stays up under the card printing
  *   into its place ([CardCompletion]). Null, a completing state shows the card at rest.
  * @param printed the card has just printed on this page: its arrival is announced, once.
+ * @param flightMomentId the moment whose card may be flying in from the Spine: while it loads,
+ *   the page holds a blank card for the flight to land on ([CardPlaceholder]). Null, the
+ *   spinner alone.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -336,6 +343,7 @@ internal fun PebbleDetailContent(
     faceRequest: Int = 0,
     completion: CardCompletionState? = null,
     printed: Boolean = false,
+    flightMomentId: String? = null,
 ) {
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
 
@@ -358,8 +366,12 @@ internal fun PebbleDetailContent(
         // Exhaustive with no `else`: a new PebbleDetailUiState case must render.
         when (val state = uiState) {
             PebbleDetailUiState.Loading ->
-                Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    LoadingIndicator()
+                if (flightMomentId != null) {
+                    CardPlaceholder(flightMomentId)
+                } else {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        LoadingIndicator()
+                    }
                 }
             PebbleDetailUiState.Error ->
                 DetailLoadError(onRetry = onRetry)
@@ -409,6 +421,10 @@ internal fun PebbleDetailContent(
                                         zone = zone,
                                         completion = print,
                                         printed = printed,
+                                        // The card's press opens the recto and flies it from
+                                        // its slot; the stone's opens the verso in place, as
+                                        // does a print, which leaves the card verso up.
+                                        flies = requestedFace == CardFace.RECTO,
                                         modifier = cardModifier,
                                     )
                                 }
