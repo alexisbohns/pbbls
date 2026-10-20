@@ -29,8 +29,16 @@ sealed interface PebbleDetailUiState {
 
     data object Error : PebbleDetailUiState
 
+    /**
+     * @property completing a refresh found a pebble on this moment while it was bare: the
+     *   card prints into the bare page's place (pebble card spec §Completion) until the
+     *   screen reports it shown ([PebbleDetailViewModel.onCompletionShown]). State, not an
+     *   effect, so the frame that brings the pebble is the frame that starts the print: no
+     *   frame of the resting card comes before it, whatever order the collectors run in.
+     */
     data class Content(
         val detail: MomentDetail,
+        val completing: Boolean = false,
     ) : PebbleDetailUiState
 }
 
@@ -55,6 +63,14 @@ sealed interface PebbleDetailEffect {
  * Delete lives in the ⋮ menu (R7) and asks what to delete (R8): deleting the
  * moment closes the page ([PebbleDetailEffect.MomentDeleted]); deleting only
  * its pebble reloads it as a bare moment.
+ *
+ * Complete is an entry of its own too, so the same resume refresh is what
+ * notices a bare moment that came back with a pebble: it publishes the pebble
+ * already [PebbleDetailUiState.Content.completing] (pebble card spec §Completion),
+ * and the flag holds through later refreshes until [onCompletionShown]. After
+ * process death the ViewModel is fresh, with no bare moment before the pebble,
+ * so a completion then shows the resting card without the print: an accepted
+ * fallback.
  */
 @HiltViewModel
 class PebbleDetailViewModel
@@ -88,14 +104,25 @@ class PebbleDetailViewModel
         private var loadJob: Job? = null
         private var resumeCount = 0
 
+        /** A completion the screen has not shown yet; cleared by [onCompletionShown]. */
+        private var completing = false
+
         /** Load [id], unless it is the one already loaded. */
         fun start(id: String) {
             if (momentId == id) return
             momentId = id
+            completing = false
             load()
         }
 
         fun retry() = load()
+
+        /** The card has printed into its place (or landed there): the page is at rest. */
+        fun onCompletionShown() {
+            if (!completing) return
+            completing = false
+            publish()
+        }
 
         /**
          * The entry came back to the foreground, e.g. from an edit entry popping
@@ -126,9 +153,15 @@ class PebbleDetailViewModel
             runCatchingCancellable { moments.loadMoment(id) }
                 .fold(
                     onSuccess = {
+                        // Only a refresh of the same moment can complete it: a
+                        // first load has nothing before it, and `start` with
+                        // another id is a different moment.
+                        val wasBare = detail?.let { before -> before.id == it.id && before.pebble == null } == true
                         detail = it
                         hasFailed = false
                         isLoaded = true
+                        if (wasBare && it.pebble != null) completing = true
+                        if (it.pebble == null) completing = false
                     },
                     onFailure = {
                         Log.e(TAG, "moment load failed", it)
@@ -146,7 +179,7 @@ class PebbleDetailViewModel
                 when {
                     hasFailed -> PebbleDetailUiState.Error
                     !isLoaded || current == null -> PebbleDetailUiState.Loading
-                    else -> PebbleDetailUiState.Content(current)
+                    else -> PebbleDetailUiState.Content(current, completing = completing)
                 }
         }
 

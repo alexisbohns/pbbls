@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
@@ -15,11 +16,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.DomainRef
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.MomentDetail
+import app.pbbls.android.core.model.MomentSnap
 import app.pbbls.android.core.model.PebbleCollection
 import app.pbbls.android.core.model.SoulRef
 import app.pbbls.android.core.model.SoulWithGlyph
@@ -28,6 +31,7 @@ import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.PebbleDetailContent
 import app.pbbls.android.features.path.PebbleDetailUiState
+import app.pbbls.android.features.path.card.CardCompletionState
 import app.pbbls.android.features.path.read.BannerAspect
 import app.pbbls.android.features.path.read.PebbleReadView
 import app.pbbls.android.features.path.read.PebbleSnapFrame
@@ -37,10 +41,10 @@ import java.time.OffsetDateTime
 /**
  * Previews for the moment read surface (#540, #1048): the pure [PebbleReadView]
  * across its variants — full (description + souls + domain + collection), glyph
- * souls, minimal, the no-domain fallback, and a bare moment with no pebble —
- * plus the open ⋮ menu and the R8 [MomentDeleteDialog] with and without a
- * pebble. The page itself ([PebbleDetailContent]) shows a pebble as the held
- * card (#1135). Light and
+ * souls, minimal and the no-domain fallback — plus the open ⋮ menu and the R8
+ * [MomentDeleteDialog] with and without a pebble. The page itself
+ * ([PebbleDetailContent]) shows a pebble as the held card and a bare moment as
+ * its plain page (#1135). Light and
  * dark, driven with fixture [MomentDetail]s and a fixed souls cache so no
  * services are needed. The stateful `PebbleDetailScreen` (service-backed) is
  * deliberately not previewed.
@@ -170,12 +174,13 @@ private val noDomainDetail: MomentDetail =
         valence = Valence.LOWLIGHT_MEDIUM,
     )
 
-/** A capture without its pebble yet: the blank stone heading, no tiles, no souls, no privacy badge, no share (A-8). */
-private val bareMoment: MomentDetail =
+/** A photo-only capture without its pebble yet: no name, so the page's title reads "untitled" (A-8). */
+private val untitledBareMoment: MomentDetail =
     MomentPreviewFixtures.momentDetail(
         name = null,
         description = "Saved from the bus stop, to finish later.",
         happenedAt = OffsetDateTime.parse("2026-07-08T14:23:00+00:00"),
+        snaps = listOf(MomentSnap(id = "snap-bus-stop", storagePath = "fixture/snap-bus-stop")),
         pebble = null,
     )
 
@@ -256,17 +261,18 @@ fun PebbleDetailNoDomainDark() {
  * The read page as a phone shows it (#1135): a page of its own, no longer a
  * sheet, with its back arrow, over the real [PebbleDetailContent]. A pebble is
  * the held card (F1 from [PebbleCardFixtures], its photo unsigned so the field
- * shows its tint); a bare moment still renders the read view.
+ * shows its tint); a bare moment is its plain page and the place for its card.
  */
 @Composable
 private fun PagePreview(
     detail: MomentDetail = PebbleCardFixtures.f1,
     initialMenuOpen: Boolean = false,
-    onComplete: (() -> Unit)? = null,
+    printProgress: Float? = null,
 ) {
+    val completion = remember(printProgress) { printProgress?.let { CardCompletionState(frozenAt = it) } }
     CompositionLocalProvider(LocalReferenceDataService provides detailPreviewRefs) {
         PebbleDetailContent(
-            uiState = PebbleDetailUiState.Content(detail),
+            uiState = PebbleDetailUiState.Content(detail, completing = completion != null),
             palette =
                 detail.pebble
                     ?.emotion
@@ -283,11 +289,43 @@ private fun PagePreview(
             domains = PebbleCardFixtures.domains,
             showBack = true,
             onBack = {},
-            onComplete = onComplete,
             initialMenuOpen = initialMenuOpen,
             zone = PebbleCardFixtures.zone,
+            requestedFace = if (completion != null) CardFace.VERSO else CardFace.RECTO,
+            completion = completion,
+            printed = completion != null,
         )
     }
+}
+
+/** F4 come back from Complete with F1's pebble: the moment of the print frames below. */
+private val f4Completed = PebbleCardFixtures.f4.copy(pebble = PebbleCardFixtures.f1.pebble)
+
+/**
+ * The print (pebble card spec §Completion), a fifth of the way: the card feeds out of the
+ * place verso up, the lockup printed and the postmarks coming, the clearing still empty.
+ */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, heightDp = 915)
+@Composable
+fun PebbleDetail_CompletionPrinting() {
+    PebblesTheme { PagePreview(detail = f4Completed, printProgress = 0.2f) }
+}
+
+/** At the press: the dashed stone has landed in the clearing and the lit stone is in; band and footer printed. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, heightDp = 915)
+@Composable
+fun PebbleDetail_CompletionPress() {
+    PebblesTheme { PagePreview(detail = f4Completed, printProgress = 0.45f) }
+}
+
+/** Rising: the page steps back and fades while the card climbs to its rest. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 412, heightDp = 915, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleDetail_CompletionRising() {
+    PebblesTheme { PagePreview(detail = f4Completed, printProgress = 0.8f) }
 }
 
 /** A pebble opens as the card, on its recto (#1135). */
@@ -305,35 +343,28 @@ fun PebbleDetailCardDark() {
     PebblesTheme { PagePreview() }
 }
 
+/** F4, a bare moment, as the page shows it: no card, the place its card will print into, and "Make it a pebble" (A-8). */
 @PreviewTest
 @Preview(showBackground = true)
 @PreviewFrench
 @Composable
 fun PebbleDetail_BareMoment() {
-    PebblesTheme { PagePreview(detail = bareMoment) }
+    PebblesTheme { PagePreview(detail = PebbleCardFixtures.f4) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun PebbleDetail_BareMomentDark() {
-    PebblesTheme { PagePreview(detail = bareMoment) }
+    PebblesTheme { PagePreview(detail = PebbleCardFixtures.f4) }
 }
 
-/** A bare moment's one call to action, "Make it a pebble", under its title (A-8). */
+/** A photo-only capture: "untitled", its photo matted (unsigned here). */
 @PreviewTest
 @Preview(showBackground = true)
-@PreviewFrench
 @Composable
-fun PebbleDetail_BareMomentWithCta() {
-    PebblesTheme { PagePreview(detail = bareMoment, onComplete = {}) }
-}
-
-@PreviewTest
-@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun PebbleDetail_BareMomentWithCtaDark() {
-    PebblesTheme { PagePreview(detail = bareMoment, onComplete = {}) }
+fun PebbleDetail_BareMomentUntitled() {
+    PebblesTheme { PagePreview(detail = untitledBareMoment) }
 }
 
 /** The ⋮ menu (R7) over the card: Edit moment, Edit pebble because this moment has one, a divider, and Delete. */

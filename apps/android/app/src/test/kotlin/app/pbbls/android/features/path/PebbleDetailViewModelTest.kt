@@ -13,6 +13,7 @@ import app.pbbls.android.testing.UiFixtures
 import app.pbbls.android.testing.recordEffects
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -151,6 +152,123 @@ class PebbleDetailViewModelTest {
             advanceUntilIdle()
 
             assertEquals(listOf("moment-1", "moment-2"), service.loadedMomentIds)
+        }
+
+    // MARK: - Completion (pebble card spec §Completion)
+
+    private val PebbleDetailViewModel.completing: Boolean
+        get() = (uiState.value as PebbleDetailUiState.Content).completing
+
+    /** A bare moment `m1` loaded and resumed once (the first resume is skipped), its pebble then saved. */
+    private fun TestScope.bareThenCompleted(service: FakeMomentReadService): PebbleDetailViewModel {
+        val vm = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+        vm.start("m1")
+        advanceUntilIdle()
+        vm.onResumed()
+        advanceUntilIdle()
+        service.moments = mapOf("m1" to UiFixtures.momentDetail(id = "m1"))
+        return vm
+    }
+
+    private fun bareService() = FakeMomentReadService(moments = mapOf("m1" to UiFixtures.momentDetail(id = "m1", pebble = null)))
+
+    /** Complete is its own entry: the resume refresh is what finds the new pebble, and publishes it completing. */
+    @Test
+    fun `a resume that finds a pebble on a bare moment publishes it completing`() =
+        runTest {
+            val vm = bareThenCompleted(bareService())
+            assertFalse(vm.completing)
+
+            vm.onResumed()
+            advanceUntilIdle()
+
+            val content = vm.uiState.value as PebbleDetailUiState.Content
+            assertTrue(content.completing)
+            assertEquals("pebble-1", content.detail.pebble?.id)
+        }
+
+    /** Rotation mid-print, a menu opened and closed: the completion waits for the screen. */
+    @Test
+    fun `a completion holds through a later refresh until it is shown`() =
+        runTest {
+            val vm = bareThenCompleted(bareService())
+            vm.onResumed()
+            advanceUntilIdle()
+
+            vm.onResumed()
+            advanceUntilIdle()
+            assertTrue(vm.completing)
+
+            vm.onCompletionShown()
+            assertFalse(vm.completing)
+        }
+
+    @Test
+    fun `a second resume after a shown completion is no completion`() =
+        runTest {
+            val vm = bareThenCompleted(bareService())
+            vm.onResumed()
+            advanceUntilIdle()
+            vm.onCompletionShown()
+
+            vm.onResumed()
+            advanceUntilIdle()
+
+            assertFalse(vm.completing)
+        }
+
+    @Test
+    fun `a failed refresh of a bare moment is no completion`() =
+        runTest {
+            val service = bareService()
+            val vm = bareThenCompleted(service)
+            service.failNext = IOException("offline")
+
+            vm.onResumed()
+            advanceUntilIdle()
+
+            val content = vm.uiState.value as PebbleDetailUiState.Content
+            assertFalse(content.completing)
+            assertNull(content.detail.pebble)
+        }
+
+    @Test
+    fun `a pebble that was already there is no completion`() =
+        runTest {
+            val service = FakeMomentReadService(moments = mapOf("m1" to UiFixtures.momentDetail(id = "m1")))
+            val vm = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val effects = recordEffects(vm.effects)
+            vm.start("m1")
+            advanceUntilIdle()
+            vm.onResumed()
+            advanceUntilIdle()
+            vm.onResumed()
+            advanceUntilIdle()
+
+            assertFalse(vm.completing)
+            assertTrue(effects.values.isEmpty())
+            effects.stop()
+        }
+
+    /** `start` with another id loads it in place: a pebble there is not a completion. */
+    @Test
+    fun `opening a pebble after a bare moment is no completion`() =
+        runTest {
+            val service =
+                FakeMomentReadService(
+                    moments =
+                        mapOf(
+                            "m1" to UiFixtures.momentDetail(id = "m1", pebble = null),
+                            "m2" to UiFixtures.momentDetail(id = "m2"),
+                        ),
+                )
+            val vm = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            vm.start("m1")
+            advanceUntilIdle()
+            vm.start("m2")
+            advanceUntilIdle()
+
+            assertFalse(vm.completing)
         }
 
     // MARK: - Delete (R7, R8)

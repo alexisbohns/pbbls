@@ -371,8 +371,8 @@
     <string name="card_dateline_emotion_a11y">%1$s. %2$s</string>
     <string name="card_domains_a11y">Domaines de vie : %1$s</string>
     <string name="card_collections_a11y">Collections : %1$s</string>
-    <string name="bare_place_kicker" tools:ignore="UnusedResources">Pas encore un galet</string>
-    <string name="bare_place_body" tools:ignore="UnusedResources">Sa carte s\'imprimera ici quand tu diras ce qu\'il a compté : un sentiment et son poids, les parts de ta vie qu\'il a touchées, qui était là.</string>
+    <string name="bare_place_kicker">Pas encore un galet</string>
+    <string name="bare_place_body">Sa carte s\'imprimera ici quand tu diras ce qu\'il a compté : un sentiment et son poids, les parts de ta vie qu\'il a touchées, qui était là.</string>
     <!-- Karma-earned flash (D9). -->
     <string name="karma_flash_amount">+%1$d karma</string>
     <string name="karma_flash_a11y">%1$d karma gagné, %2$s</string>

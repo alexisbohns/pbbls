@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Valence
@@ -27,7 +28,8 @@ import kotlinx.coroutines.launch
  * [onDone] with [token] after the last wave, and a still week holds none of
  * it. Under reduced motion the press sets no token, so this never mounts.
  * [blank] is the stone's own rule (no palette): the waves take the river
- * pebble's silhouette, as the stone did.
+ * pebble's silhouette, as the stone did. [width] is the stone's, when it is drawn at
+ * another than its size's (the card's verso): the waves travel in stone widths.
  */
 @Composable
 fun StoneRipple(
@@ -36,6 +38,7 @@ fun StoneRipple(
     token: Long,
     onDone: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    width: Dp = StoneGeometry.STONE_WIDTH_DP.getValue(valence.sizeGroup).dp,
 ) {
     val size = valence.sizeGroup
     val polarity = stonePolarity(valence.polarity, blank)
@@ -61,7 +64,7 @@ fun StoneRipple(
     }
 
     val box = StoneGeometry.outlineBox(size)
-    Canvas(modifier.stoneBox(size)) {
+    Canvas(modifier.stoneBox(size, width)) {
         val pxPerUnit = this.size.width / box.width
         // The rings' own origin, the silhouette's centroid, so waves and rings share it.
         val centre = Offset(frame.cx * pxPerUnit, frame.cy * pxPerUnit)
