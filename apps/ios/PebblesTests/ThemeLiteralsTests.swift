@@ -32,7 +32,9 @@ struct ThemeLiteralsTests {
     static let absoluteColours = "red|orange|yellow|green|mint|teal|cyan|blue|indigo|purple|pink|brown|gray|white|black"
 
     static let rules: [Rule] = [
-        Rule(#"(?<![\w.])(Color)?\.("# + absoluteColours + #")\b"#,
+        // The lookbehinds spare font weights: `.fontWeight(.black)` and
+        // `weight: .black` name a weight, not a colour.
+        Rule(#"(?<![\w.])(?<!fontWeight\()(?<!weight: )(?<!weight:)(Color)?\.("# + absoluteColours + #")\b"#,
              "a system or absolute colour: use a Color.pebbles role"),
         Rule(#"Color\.(primary|secondary|accentColor)\b"#,
              "a system label colour: use onSurface / onSurfaceVariant / primary"),
@@ -42,6 +44,9 @@ struct ThemeLiteralsTests {
         Rule(#"UIColor\((red|white|hue|named|displayP3Red):"#, "a UIKit literal: use UIColor.pebbles(_:)"),
         Rule(#"UIColor\.(system\w+|label|secondaryLabel|tertiaryLabel|white|black|red|clear)\b"#,
              "a UIKit system colour: use UIColor.pebbles(_:)"),
+        Rule(#"Color\(\s*(uiColor:\s*)?\."#
+                + #"(system\w+|label|secondaryLabel|tertiaryLabel|separator|\w*[Ss]ystem\w*Background)"#,
+             "a UIKit system colour via Color(_:): use a Color.pebbles role"),
         Rule(#"role:\s*\.destructive"#, "a destructive role outside a system .alert / .confirmationDialog")
     ]
 
@@ -125,15 +130,45 @@ struct ThemeLiteralsTests {
         return url.appendingPathComponent("ios/Pebbles")
     }()
 
-    /// Offending lines of one source. Text after `//` is ignored, and so is
-    /// everything from the first `#Preview` on (preview fixtures fake server data).
+    /// A string literal on one line, escapes included. Its contents are blanked
+    /// before the `//` split, so a `"https://…"` does not hide the rest of the
+    /// line, and words inside strings never match. The quotes stay, which keeps
+    /// `Color("…")` and `Color(hex: "…")` detectable. Multi-line `"""` strings
+    /// are not modelled: their inner lines are scanned as code.
+    static let stringLiteral: NSRegularExpression = {
+        guard let regex = try? NSRegularExpression(pattern: #""(?:[^"\\]|\\.)*""#) else {
+            preconditionFailure("invalid string-literal pattern")
+        }
+        return regex
+    }()
+
+    /// One line with its string contents blanked and its `//` comment dropped.
+    static func code(of line: String) -> String {
+        let range = NSRange(line.startIndex..., in: line)
+        let blanked = stringLiteral.stringByReplacingMatches(in: line, range: range, withTemplate: "\"\"")
+        return blanked.components(separatedBy: "//")[0]
+    }
+
+    /// Offending lines of one source. Comments are ignored (see `code(of:)`), and
+    /// so is each brace-balanced `#Preview { … }` block, since preview fixtures
+    /// fake server data. Code after a preview block is scanned again.
     static func offendingLines(in source: String) -> [(line: Int, reason: String)] {
         var hits: [(line: Int, reason: String)] = []
+        var previewDepth: Int?
         for (index, rawLine) in source.components(separatedBy: "\n").enumerated() {
-            if rawLine.trimmingCharacters(in: .whitespaces).hasPrefix("#Preview") { break }
-            let code = rawLine.components(separatedBy: "//")[0]
-            let range = NSRange(code.startIndex..., in: code)
-            if let rule = rules.first(where: { $0.regex.firstMatch(in: code, range: range) != nil }) {
+            let text = code(of: rawLine)
+            if previewDepth == nil, text.trimmingCharacters(in: .whitespaces).hasPrefix("#Preview") {
+                previewDepth = 0
+            }
+            if let depth = previewDepth {
+                let opened = text.filter { $0 == "{" }.count
+                let next = depth + opened - text.filter { $0 == "}" }.count
+                // The block ends once its braces balance after opening.
+                previewDepth = (opened > 0 || depth > 0) && next <= 0 ? nil : next
+                continue
+            }
+            let range = NSRange(text.startIndex..., in: text)
+            if let rule = rules.first(where: { $0.regex.firstMatch(in: text, range: range) != nil }) {
                 hits.append((index + 1, rule.reason))
             }
         }
@@ -177,16 +212,26 @@ struct ThemeLiteralsTests {
         ("Button(role: .destructive) {", true),
         (".foregroundStyle(Color.pebbles.error)", false),
         ("proxy.backgroundColor = UIColor.pebbles(.surfaceContainerHighest)", false),
-        (".tint(.primary) // was Color.white", false)
+        (".tint(.primary) // was Color.white", false),
+        (".fontWeight(.black)", false),
+        (".font(.system(size: 12, weight: .black))", false),
+        ("Color(.systemGray6)", true),
+        ("Color(uiColor: .label)", true),
+        (".background(Color(.secondarySystemBackground))", true),
+        ("Color(uiColor: UIColor.pebbles(.surface).resolvedColor(with: traits))", false),
+        ("Link(\"Terms\", destination: URL(string: \"https://pbbls.app\")!).tint(.blue)", true),
+        ("Text(\"Use .red sparingly\")", false)
     ])
     func rule(line: String, offends: Bool) {
         #expect(Self.offendingLines(in: line).isEmpty != offends, "\(line)")
     }
 
-    @Test("nothing from the first #Preview on is scanned")
+    @Test("a #Preview block is skipped and the code after it is scanned")
     func previewIsExempt() {
-        let source = "let ink = Color.pebbles.onSurface\n#Preview {\n    Text(\"x\").foregroundStyle(.red)\n}\n"
-        #expect(Self.offendingLines(in: source).isEmpty)
+        let preview = "#Preview {\n    VStack {\n        Text(\"x\").foregroundStyle(.red)\n    }\n}\n"
+        #expect(Self.offendingLines(in: "let ink = Color.pebbles.onSurface\n" + preview).isEmpty)
+        let after = Self.offendingLines(in: preview + "private let leak = Color.white\n")
+        #expect(after.map(\.line) == [6])
     }
 
     // MARK: - Ratchet
