@@ -4,10 +4,10 @@ import Testing
 @Suite("StoneView · silhouette")
 struct StoneSilhouetteTests {
 
-    @Test("only the lava (lowlight) stone keeps the wobbled edge")
-    func silhouetteByPolarity() {
-        #expect(StoneView.usesWobbledSilhouette(.lowlight))
-        #expect(!StoneView.usesWobbledSilhouette(.neutral))
-        #expect(!StoneView.usesWobbledSilhouette(.highlight))
+    @Test("lava keeps the wobbled edge")
+    func silhouetteByKind() {
+        #expect(StoneView.usesWobbledSilhouette(.lava))
+        #expect(!StoneView.usesWobbledSilhouette(.river))
+        #expect(!StoneView.usesWobbledSilhouette(.gem))
     }
 }

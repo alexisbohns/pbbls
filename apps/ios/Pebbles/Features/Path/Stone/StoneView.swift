@@ -28,14 +28,16 @@ struct StoneView: View {
     private var seed: Int { Valence.allCases.firstIndex(of: valence).map { $0 * 31 + 7 } ?? 7 }
 
     /// Lava keeps the wobbled edge; gem and river take the asset's own soft
-    /// outline (#1097, web #1088). The glyph stays wobbled either way.
-    static func usesWobbledSilhouette(_ polarity: ValencePolarity) -> Bool {
-        polarity == .lowlight
+    /// outline (#1097, web #1088). Keyed on the material, not the valence, so
+    /// the lab's Kind picker moves the edge with the surface. The glyph stays
+    /// wobbled either way.
+    static func usesWobbledSilhouette(_ kind: StoneMaterial.Kind) -> Bool {
+        kind == .lava
     }
 
     /// The one silhouette body, edge, shadow and sheen are drawn from.
     private var silhouette: WobbleBackdropArt? {
-        Self.usesWobbledSilhouette(valence.polarity)
+        Self.usesWobbledSilhouette(material.kind)
             ? WobbleRenderer.backdropArt(size: size, polarity: valence.polarity)
             : WobbleRenderer.softBackdropArt(size: size, polarity: valence.polarity)
     }

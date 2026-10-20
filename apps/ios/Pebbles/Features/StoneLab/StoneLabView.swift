@@ -250,6 +250,7 @@ struct StoneLabView: View {
         case .lava:
             knob("Pits", m.pits, 0...1)
         case .river:
+            knob("Pits", m.pits, 0...1)
             knob("Banding", m.banding, 0...1)
         case .gem:
             knob("Facet density", m.facetDensity, 0.3...3)
