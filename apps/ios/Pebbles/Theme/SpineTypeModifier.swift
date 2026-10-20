@@ -48,23 +48,11 @@ extension SpineType {
     }
 
     static func contentSizeCategory(_ size: DynamicTypeSize) -> UIContentSizeCategory {
-        switch size {
-        case .xSmall:         return .extraSmall
-        case .small:          return .small
-        case .medium:         return .medium
-        case .large:          return .large
-        case .xLarge:         return .extraLarge
-        case .xxLarge:        return .extraExtraLarge
-        case .xxxLarge:       return .extraExtraExtraLarge
-        case .accessibility1: return .accessibilityMedium
-        case .accessibility2: return .accessibilityLarge
-        case .accessibility3: return .accessibilityExtraLarge
-        case .accessibility4: return .accessibilityExtraExtraLarge
-        case .accessibility5: return .accessibilityExtraExtraExtraLarge
-        @unknown default:     return .large
-        }
+        UIContentSizeCategory(size)
     }
 
+    // One case per text style: SwiftUI ships no `UIFont.TextStyle` initialiser.
+    // swiftlint:disable:next cyclomatic_complexity
     static func uiTextStyle(_ style: Font.TextStyle) -> UIFont.TextStyle {
         switch style {
         case .largeTitle:  return .largeTitle
