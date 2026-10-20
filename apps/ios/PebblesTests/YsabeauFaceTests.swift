@@ -61,6 +61,13 @@ struct YsabeauFaceTests {
         let second = YsabeauFace.uiFont(size: 13, weight: 560, italic: false, features: [.tabular])
         #expect(first === second)
     }
+
+    @Test("the shared Caveat descriptor sets 700 on the axis")
+    func caveatBoldDescriptor() {
+        let font = UIFont.pebblesCaveat(size: 34, weight: 700)
+        #expect(font.fontName.hasPrefix("Caveat"))
+        #expect(wght(font) == 700)
+    }
 }
 
 // MARK: - CoreText probes

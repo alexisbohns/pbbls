@@ -20,7 +20,7 @@ struct PebbleReadTitle: View {
                 untitledColor: dateColor ?? Color.pebbles.onSurfaceVariant,
                 untitledFont: .ysabeauSemiboldItalic(24)
             )
-            .font(.custom("Ysabeau-SemiBold", size: 24))
+            .font(.ysabeauSemibold(24))
             .multilineTextAlignment(.center)
             Text(formattedDate)
                 .font(.caption)
