@@ -1,7 +1,6 @@
 import Observation
 
-/// Cross-tab "a moment changed" signal (#903 D5). New pattern, named in the
-/// C1 PR body.
+/// Cross-tab "a moment changed" signal (#903 D5).
 ///
 /// Bumpers: `PebbleDetailSheet` (save, delete, completion), the
 /// `.momentDeleteDialog` presenters, and Capture's `onMomentChanged`.

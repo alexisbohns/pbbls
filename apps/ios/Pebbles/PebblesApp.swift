@@ -95,9 +95,9 @@ struct PebblesApp: App {
         proxy.compactAppearance = appearance
     }
 
-    /// The two bar colours iOS 17 SwiftUI cannot express (#903 §6, a new
-    /// pattern named in the C1 PR): the unselected item (`onSurfaceVariant`)
-    /// and the hairline (`outlineVariant`). The background repeats
+    /// The two bar colours iOS 17 SwiftUI cannot express (#903 §6): the
+    /// unselected item (`onSurfaceVariant`) and the hairline
+    /// (`outlineVariant`). The background repeats
     /// `PebblesTabView`'s `toolbarBackground` so the bar is opaque before
     /// SwiftUI applies it. The selected item follows `.tint(primary)`.
     private static func configureTabBarAppearance() {
