@@ -12,6 +12,7 @@ struct PathModelTests {
     typealias F = SpineFixtureWeek
     struct Failure: Error {}
     final class Calls: @unchecked Sendable { var count = 0 }
+    final class Outcome: @unchecked Sendable { var value: PathModel.DeleteOutcome? }
 
     private func model() -> PathModel {
         PathModel(calendar: F.calendar, now: { F.today }, locale: { Vectors.en })
@@ -134,10 +135,13 @@ struct PathModelTests {
         #expect(calls.count == 1)
     }
 
-    @Test("a delete reports its success and its failure")
+    @Test("a delete reports its success, its failure, and a second confirm it ignored")
     func delete() async {
         let model = model()
-        #expect(await model.delete { })
-        #expect(!(await model.delete { throw Failure() }))
+        #expect(await model.delete { } == .done)
+        #expect(await model.delete { throw Failure() } == .failed)
+        let inner = Outcome()
+        #expect(await model.delete { inner.value = await model.delete { } } == .done)
+        #expect(inner.value == .ignored)
     }
 }

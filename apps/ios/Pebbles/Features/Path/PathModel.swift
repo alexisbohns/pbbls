@@ -13,6 +13,9 @@ import os
 @Observable @MainActor
 final class PathModel {
     enum Phase: Equatable { case loading, failed, content }
+    /// A delete ran (`done`), failed and was logged (`failed`), or was ignored
+    /// because another was still running (`ignored`).
+    enum DeleteOutcome: Equatable { case done, failed, ignored }
 
     private(set) var phase: Phase = .loading
     private(set) var moments: [MomentSummary] = []
@@ -187,18 +190,18 @@ final class PathModel {
 
     // MARK: - Delete
 
-    /// Runs `perform` (today's `MomentDeletion.perform`); false, logged, on a
-    /// failure. A second confirm while one runs is ignored, as today.
-    func delete(_ perform: () async throws -> Void) async -> Bool {
-        guard !isDeleting else { return true }
+    /// Runs `perform` (today's `MomentDeletion.perform`), logged on a failure.
+    /// A second confirm while one runs is ignored, as today, and says so.
+    func delete(_ perform: () async throws -> Void) async -> DeleteOutcome {
+        guard !isDeleting else { return .ignored }
         isDeleting = true
         defer { isDeleting = false }
         do {
             try await perform()
-            return true
+            return .done
         } catch {
             logger.error("delete failed: \(error.localizedDescription, privacy: .private)")
-            return false
+            return .failed
         }
     }
 }
