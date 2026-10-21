@@ -53,11 +53,21 @@ struct StoneRingGeometryTests {
         #expect(near(geometry.rings[0].width, 1 + 2 * 4.4 / 50) && near(geometry.rings[0].height, 1 + 2 * 4.4 / 25))
     }
 
-    @Test("every bundled soft outline yields rings at its phone size")
+    /// The ring outline is fitted by a private copy of `WobbledPathShape`'s fit;
+    /// if that fit ever changes, this fails instead of the rings drifting off the stone.
+    @Test("every bundled soft outline yields rings at its phone size, fitted as the stone is")
     @MainActor
-    func bundled() {
+    func bundled() throws {
+        func close(_ a: CGRect, _ b: CGRect) -> Bool {
+            abs(a.minX - b.minX) < 1e-6 && abs(a.minY - b.minY) < 1e-6
+                && abs(a.width - b.width) < 1e-6 && abs(a.height - b.height) < 1e-6
+        }
         for valence in Valence.allCases {
-            #expect(StoneRingGeometry.forStone(valence) != nil, "\(valence)")
+            let geometry = try #require(StoneRingGeometry.forStone(valence), "\(valence)")
+            let art = try #require(WobbleRenderer.softBackdropArt(size: valence.sizeGroup, polarity: valence.polarity))
+            let stone = WobbledBackdropShape(art: art)
+                .path(in: CGRect(origin: .zero, size: SpineLayout.stoneSize(valence.sizeGroup)))
+            #expect(close(geometry.outline.boundingRect, stone.boundingRect), "\(valence)")
         }
     }
 }
