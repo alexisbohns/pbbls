@@ -28,6 +28,6 @@ private struct SlideFixture: View {
     var body: some View {
         WelcomeSlideView(step: WelcomeSteps.all[1])
             .padding(.vertical, 24)
-            .background(Color.system.background)
+            .background(Color.pebbles.surface)
     }
 }
