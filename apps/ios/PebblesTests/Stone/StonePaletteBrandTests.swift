@@ -8,7 +8,12 @@ import Testing
 struct StonePaletteBrandTests {
 
     private func hex(_ rgb: SIMD3<Float>) -> String {
-        String(format: "#%02X%02X%02X", Int((rgb.x * 255).rounded()), Int((rgb.y * 255).rounded()), Int((rgb.z * 255).rounded()))
+        String(
+            format: "#%02X%02X%02X",
+            Int((rgb.x * 255).rounded()),
+            Int((rgb.y * 255).rounded()),
+            Int((rgb.z * 255).rounded())
+        )
     }
 
     @Test("every slot keeps the old accent value in light and dark", arguments: [
