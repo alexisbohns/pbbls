@@ -14,6 +14,7 @@ struct PebblesApp: App {
     @State private var completeDrafts: CompleteDraftStore
     @State private var connections: ConnectionsService
     @State private var karmaOverlay = KarmaOverlayWindowController()
+    @State private var momentsRevision = MomentsRevision()
 
     init() {
         let supabase = SupabaseService()
@@ -49,6 +50,7 @@ struct PebblesApp: App {
                 .environment(achievements)
                 .environment(completeDrafts)
                 .environment(connections)
+                .environment(momentsRevision)
                 .onAppear { karmaOverlay.attachIfNeeded(service: karma, achievements: achievementNotify) }
         }
     }

@@ -199,4 +199,5 @@ struct RootView: View {
         .environment(SnapURLCache(client: supabase.client))
         .environment(KarmaNotificationService())
         .environment(ConnectionsService(supabase: supabase))
+        .environment(MomentsRevision())
 }
