@@ -223,5 +223,18 @@ extension SpineFixtureWeek {
             onOpen: { _, _ in }, onDelete: { _ in }
         )
     }
+
+    /// Twenty pebbles in one week: the fixture's thirteen and seven copies an
+    /// hour later, for the 20-pebble scroll budget (§Risks).
+    static var dense: [MomentSummary] {
+        let pebbles = moments.filter { $0.pebble != nil }
+        let copies = pebbles.prefix(7).enumerated().map { index, moment in
+            let id = UUID(uuidString: String(format: "00000000-0000-4000-C000-%012ld", index + 1)) ?? UUID()
+            return MomentSummary(id: id, name: moment.name, happenedAt: moment.happenedAt.addingTimeInterval(3600),
+                                 createdAt: moment.createdAt, firstSnapPath: moment.firstSnapPath,
+                                 pebble: moment.pebble)
+        }
+        return pebbles + copies
+    }
 }
 #endif
