@@ -22,9 +22,9 @@ struct AnnouncementDetailView: View {
                         case .success(let image):
                             image.resizable().aspectRatio(contentMode: .fill)
                         case .empty, .failure:
-                            Rectangle().fill(Color.system.muted.opacity(0.3))
+                            Rectangle().fill(Color.pebbles.surfaceContainerHighest)
                         @unknown default:
-                            Rectangle().fill(Color.system.muted.opacity(0.3))
+                            Rectangle().fill(Color.pebbles.surfaceContainerHighest)
                         }
                     }
                     .frame(height: 200)
@@ -33,11 +33,11 @@ struct AnnouncementDetailView: View {
 
                 Text(log.title(for: locale))
                     .font(.largeTitle.bold())
-                    .foregroundStyle(Color.system.foreground)
+                    .foregroundStyle(Color.pebbles.onSurface)
 
                 Text(log.summary(for: locale))
                     .font(.title3)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
 
                 if let body = log.body(for: locale), !body.isEmpty {
                     ForEach(Array(blocks(from: body).enumerated()), id: \.offset) { _, block in
@@ -83,11 +83,11 @@ struct AnnouncementDetailView: View {
         case .heading(let level, let text):
             Text(text)
                 .font(headingFont(for: level))
-                .foregroundStyle(Color.system.foreground)
+                .foregroundStyle(Color.pebbles.onSurface)
         case .paragraph(let text):
             Text(attributed(text))
                 .font(.body)
-                .foregroundStyle(Color.system.foreground)
+                .foregroundStyle(Color.pebbles.onSurface)
         }
     }
 

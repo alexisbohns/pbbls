@@ -103,7 +103,7 @@ struct LabView: View {
                     }
                 }
             }
-            .listRowSeparatorTint(Color.system.muted)
+            .listRowSeparatorTint(Color.pebbles.rule)
         }
     }
 

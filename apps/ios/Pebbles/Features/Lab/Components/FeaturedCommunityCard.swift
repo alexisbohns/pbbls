@@ -11,14 +11,14 @@ struct FeaturedCommunityCard: View {
             HStack(spacing: 12) {
                 Image(systemName: "bubble.left.and.bubble.right.fill")
                     .font(.title2)
-                    .foregroundStyle(Color.accent.primary)
+                    .foregroundStyle(Color.pebbles.primary)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Join the community")
                         .font(.headline)
-                        .foregroundStyle(Color.system.foreground)
+                        .foregroundStyle(Color.pebbles.onSurface)
                     Text("Shape Pebbles with other pebblers on WhatsApp.")
                         .font(.footnote)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 }
             }
 
@@ -27,7 +27,7 @@ struct FeaturedCommunityCard: View {
                     openURL(LabConfig.whatsappInviteURL)
                 } label: {
                     Text("Open in WhatsApp")
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.pebbles.onPrimary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                 }

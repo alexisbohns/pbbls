@@ -20,11 +20,11 @@ struct AnnouncementRow: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                     case .empty:
-                        Rectangle().fill(Color.system.muted.opacity(0.3))
+                        Rectangle().fill(Color.pebbles.surfaceContainerHighest)
                     case .failure:
-                        Rectangle().fill(Color.system.muted.opacity(0.3))
+                        Rectangle().fill(Color.pebbles.surfaceContainerHighest)
                     @unknown default:
-                        Rectangle().fill(Color.system.muted.opacity(0.3))
+                        Rectangle().fill(Color.pebbles.surfaceContainerHighest)
                     }
                 }
                 .frame(height: 140)
@@ -33,11 +33,11 @@ struct AnnouncementRow: View {
 
             Text(log.title(for: locale))
                 .font(.headline)
-                .foregroundStyle(Color.system.foreground)
+                .foregroundStyle(Color.pebbles.onSurface)
 
             Text(log.summary(for: locale))
                 .font(.footnote)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .lineLimit(3)
         }
         .padding(.vertical, 4)

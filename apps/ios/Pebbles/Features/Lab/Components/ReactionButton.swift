@@ -14,7 +14,7 @@ struct ReactionButton: View {
                 Text("\(count)")
                     .font(.footnote.monospacedDigit())
             }
-            .foregroundStyle(isReacted ? Color.accent.primary : Color.system.secondary)
+            .foregroundStyle(isReacted ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(isReacted ? "Remove upvote" : "Upvote")

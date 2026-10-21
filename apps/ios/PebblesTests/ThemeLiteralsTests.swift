@@ -85,9 +85,6 @@ struct ThemeLiteralsTests {
         "Features/Glyph/Views/GlyphPickerContent.swift": 1,
         "Features/Glyph/Views/GlyphTabBar.swift": 2,
         "Features/Glyph/Views/SlideToConfirm.swift": 1,
-        "Features/Karma/AchievementMomentView.swift": 1,
-        "Features/Karma/KarmaEarnedCapsule.swift": 2,
-        "Features/Lab/Components/FeaturedCommunityCard.swift": 1,
         "Features/Path/Components/PathPebbleRow.swift": 2,
         "Features/Path/Components/WeekPathView.swift": 1,
         "Features/Path/Valence/ValenceStoneStyle.swift": 1

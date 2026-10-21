@@ -40,7 +40,7 @@ struct InviteSheet: View {
             VStack(spacing: Spacing.md) {
                 Text(loadError)
                     .pebblesFont(.callout)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .multilineTextAlignment(.center)
                 Button("Try again") { Task { await load() } }
             }
@@ -51,14 +51,14 @@ struct InviteSheet: View {
                 VStack(spacing: Spacing.lg) {
                     Text("Anyone who opens this link can connect with you. It works for several people, so one code is enough for a whole table.")
                         .pebblesFont(.callout)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .multilineTextAlignment(.center)
 
                     qrCode(for: invite.url)
 
                     Text(invite.url.absoluteString)
                         .pebblesFont(.meta)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .multilineTextAlignment(.center)
                         .textSelection(.enabled)
 
@@ -79,7 +79,7 @@ struct InviteSheet: View {
 
                     Text("Expires \(invite.expiresAt, format: .relative(presentation: .named)).")
                         .pebblesFont(.meta)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
 
                     Button {
                         Task { await rotate() }
@@ -96,7 +96,7 @@ struct InviteSheet: View {
 
                     Text("A new link retires this one. Anyone still holding it won't be able to connect.")
                         .pebblesFont(.meta)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .multilineTextAlignment(.center)
                 }
                 .padding(Spacing.lg)
