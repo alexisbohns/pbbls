@@ -14,6 +14,7 @@ struct SoulDetailView: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(CompleteDraftStore.self) private var completeDrafts
+    @Environment(MomentsRevision.self) private var revision
 
     @State private var soulWithGlyph: SoulWithGlyph
     @State private var moments: [MomentSummary] = []
@@ -52,7 +53,7 @@ struct SoulDetailView: View {
             }
             // R9: a row opens the moment's read page, not the edit form.
             .sheet(item: $selectedMomentId) { id in
-                PebbleDetailSheet(momentId: id, onPebbleUpdated: {
+                PebbleDetailSheet(momentId: id, origin: .people, onPebbleUpdated: {
                     Task { await load() }
                     onChanged()
                 })
@@ -169,6 +170,7 @@ struct SoulDetailView: View {
             try await MomentDeletion.perform(
                 option, on: target, client: supabase.client, drafts: completeDrafts
             )
+            revision.bump(from: .people)
             await load()
             onChanged()
         } catch {
@@ -198,5 +200,6 @@ struct SoulDetailView: View {
         )
         .environment(SupabaseService())
         .environment(CompleteDraftStore())
+        .environment(MomentsRevision())
     }
 }

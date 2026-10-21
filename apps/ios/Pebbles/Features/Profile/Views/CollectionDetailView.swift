@@ -15,6 +15,7 @@ struct CollectionDetailView: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(CompleteDraftStore.self) private var completeDrafts
+    @Environment(MomentsRevision.self) private var revision
 
     @State private var collection: Collection
     @State private var moments: [MomentSummary] = []
@@ -61,7 +62,7 @@ struct CollectionDetailView: View {
             }
             // R9: a row opens the moment's read page, not the edit form.
             .sheet(item: $selectedMomentId) { id in
-                PebbleDetailSheet(momentId: id, onPebbleUpdated: {
+                PebbleDetailSheet(momentId: id, origin: .collections, onPebbleUpdated: {
                     Task { await load() }
                     onChanged()
                 })
@@ -168,6 +169,7 @@ struct CollectionDetailView: View {
             try await MomentDeletion.perform(
                 option, on: target, client: supabase.client, drafts: completeDrafts
             )
+            revision.bump(from: .collections)
             await load()
             onChanged()
         } catch {

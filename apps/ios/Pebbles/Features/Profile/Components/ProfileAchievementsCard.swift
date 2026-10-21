@@ -24,9 +24,7 @@ struct ProfileAchievementsCard: View {
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.achievements-shelf")
 
     var body: some View {
-        NavigationLink {
-            AchievementsView()
-        } label: {
+        NavigationLink(value: YouRoute.achievements) {
             HStack(spacing: Spacing.lg) {
                 Image(systemName: "trophy")
                     .pebblesIcon(.large)

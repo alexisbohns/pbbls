@@ -14,6 +14,7 @@ struct PebblesApp: App {
     @State private var completeDrafts: CompleteDraftStore
     @State private var connections: ConnectionsService
     @State private var karmaOverlay = KarmaOverlayWindowController()
+    @State private var momentsRevision = MomentsRevision()
 
     init() {
         let supabase = SupabaseService()
@@ -34,6 +35,7 @@ struct PebblesApp: App {
         self._connections = State(initialValue: ConnectionsService(supabase: supabase))
         Self.configureSegmentedControlAppearance()
         Self.configureNavigationBarAppearance()
+        Self.configureTabBarAppearance()
     }
 
     var body: some Scene {
@@ -49,6 +51,7 @@ struct PebblesApp: App {
                 .environment(achievements)
                 .environment(completeDrafts)
                 .environment(connections)
+                .environment(momentsRevision)
                 .onAppear { karmaOverlay.attachIfNeeded(service: karma, achievements: achievementNotify) }
         }
     }
@@ -90,5 +93,31 @@ struct PebblesApp: App {
         proxy.standardAppearance = appearance
         proxy.scrollEdgeAppearance = appearance
         proxy.compactAppearance = appearance
+    }
+
+    /// The two bar colours iOS 17 SwiftUI cannot express (#903 §6): the
+    /// unselected item (`onSurfaceVariant`) and the hairline
+    /// (`outlineVariant`). The background repeats
+    /// `PebblesTabView`'s `toolbarBackground` so the bar is opaque before
+    /// SwiftUI applies it. The selected item follows `.tint(primary)`.
+    private static func configureTabBarAppearance() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor.pebbles(.surfaceContainer)
+        appearance.shadowColor = UIColor.pebbles(.outlineVariant)
+
+        let unselected = UIColor.pebbles(.onSurfaceVariant)
+        for item in [
+            appearance.stackedLayoutAppearance,
+            appearance.inlineLayoutAppearance,
+            appearance.compactInlineLayoutAppearance
+        ] {
+            item.normal.iconColor = unselected
+            item.normal.titleTextAttributes = [.foregroundColor: unselected]
+        }
+
+        let proxy = UITabBar.appearance()
+        proxy.standardAppearance = appearance
+        proxy.scrollEdgeAppearance = appearance
     }
 }

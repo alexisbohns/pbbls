@@ -4,13 +4,15 @@ import SwiftUI
 /// pebble list with a per-pebble reveal cascade that re-runs whenever
 /// the entry's identity or pebble count changes.
 ///
-/// The bottom of the list fades behind the New button via a vertical
+/// The bottom of the list fades behind the FAB row via a vertical
 /// gradient mask (opaque 0% → opaque 85% → transparent 100%).
 struct WeekPathView: View {
     let entry: WeekRollEntry
     let onTap: (MomentSummary) -> Void
     let onDelete: (MomentSummary) -> Void
     let onCreate: () -> Void
+    /// Bumped by `TabNavigation` when Path is reselected at its root.
+    var scrollToTopToken: Int = 0
 
     @State private var revealedCount = 0
 
@@ -29,36 +31,42 @@ struct WeekPathView: View {
             if entry.moments.isEmpty {
                 emptyState
             } else {
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(Array(entry.moments.enumerated()), id: \.element.id) { index, moment in
-                            if index < revealedCount {
-                                PathPebbleRow(
-                                    moment: moment,
-                                    positionIndex: index,
-                                    onTap: { onTap(moment) },
-                                    onDelete: { onDelete(moment) }
-                                )
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 24)
-                                .transition(.opacity.combined(with: .move(edge: .top)))
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            ForEach(Array(entry.moments.enumerated()), id: \.element.id) { index, moment in
+                                if index < revealedCount {
+                                    PathPebbleRow(
+                                        moment: moment,
+                                        positionIndex: index,
+                                        onTap: { onTap(moment) },
+                                        onDelete: { onDelete(moment) }
+                                    )
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 24)
+                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                                }
                             }
                         }
+                        .padding(.bottom, 80)
+                        .id(TabNavigation.scrollTopAnchor)
                     }
-                    .padding(.bottom, 80)
-                }
-                .scrollClipDisabled()
-                .mask(
-                    LinearGradient(
-                        stops: [
-                            .init(color: .black, location: 0.0),
-                            .init(color: .black, location: 0.85),
-                            .init(color: .clear, location: 1.0),
-                        ],
-                        startPoint: .top, endPoint: .bottom
+                    .scrollClipDisabled()
+                    .mask(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .black, location: 0.0),
+                                .init(color: .black, location: 0.85),
+                                .init(color: .clear, location: 1.0),
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        )
                     )
-                )
+                    .onChange(of: scrollToTopToken) {
+                        withAnimation { proxy.scrollTo(TabNavigation.scrollTopAnchor, anchor: .top) }
+                    }
+                }
             }
         }
         .task(id: cascadeKey) {

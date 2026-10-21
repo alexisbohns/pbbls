@@ -1,10 +1,8 @@
 import SwiftUI
 import os
 
-private enum PathRoute: Hashable {
-    case profile
-}
-
+/// The Path tab's root (#903). Its `NavigationStack` lives in
+/// `PebblesTabView`; Path pushes nothing yet.
 struct PathView: View {
     /// Fired when the initial timeline load settles (success or failure), so
     /// `RootView` can keep the launch loader up until the home feed is ready
@@ -15,11 +13,12 @@ struct PathView: View {
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(PathStatsService.self) private var stats
     @Environment(CompleteDraftStore.self) private var completeDrafts
+    @Environment(TabNavigation.self) private var nav
+    @Environment(MomentsRevision.self) private var revision
 
     @State private var moments: [MomentSummary] = []
     @State private var entries: [WeekRollEntry] = []
     @State private var focusedWeekStart: Date = Date()
-    @State private var navPath = NavigationPath()
     /// The Capture flow — what `+` opens.
     @State private var isPresentingCapture = false
     @State private var selectedMomentId: UUID?
@@ -54,24 +53,30 @@ struct PathView: View {
     }
 
     var body: some View {
-        NavigationStack(path: $navPath) {
-            content
-                .navigationDestination(for: PathRoute.self) { route in
-                    switch route {
-                    case .profile: ProfileView()
-                    }
-                }
-                .toolbar(.hidden, for: .navigationBar)
-                .pebblesScreen()
-        }
+        content
+            .toolbar(.hidden, for: .navigationBar)
+            .pebblesScreen()
         .task {
             await load()
             onFirstLoad()
         }
         .task { await stats.load() }
+        .onChange(of: nav.scrollToTop[.path, default: 0]) { focusCurrentWeek() }
+        // #903 D5: a moment changed from People or Collections. Path's own
+        // changes already reloaded through their callbacks, and its `.task`
+        // reloads whenever the tab reappears, so this reader only covers
+        // changes made while Path stays visible. Stack D's
+        // `PathModel` takes this over.
+        .onChange(of: revision.value) {
+            guard revision.changedOutside(.path) else { return }
+            Task { await stats.refresh() }
+            reloadTask?.cancel()
+            reloadTask = Task { await load() }
+        }
         .fullScreenCover(isPresented: $isPresentingCapture) {
             // Fired after the save and again after a chained completion (A5).
             CaptureFlowView(onMomentChanged: { momentId in
+                revision.bump(from: .path)
                 // Not cancelled with the path reload: `refresh()` no-ops while
                 // one is running, so a cancelled refresh would drop the next.
                 Task { await stats.refresh() }
@@ -84,7 +89,7 @@ struct PathView: View {
             })
         }
         .sheet(item: $selectedMomentId) { id in
-            PebbleDetailSheet(momentId: id, onPebbleUpdated: {
+            PebbleDetailSheet(momentId: id, origin: .path, onPebbleUpdated: {
                 Task {
                     async let timeline: Void = load()
                     async let statsReload: Void = stats.refresh()
@@ -142,21 +147,27 @@ struct PathView: View {
                             entry: entry,
                             onTap: { moment in selectedMomentId = moment.id },
                             onDelete: { moment in pendingDeletion = MomentDeleteTarget(summary: moment) },
-                            onCreate: { isPresentingCapture = true }
+                            onCreate: { isPresentingCapture = true },
+                            scrollToTopToken: nav.scrollToTop[.path, default: 0]
                         )
                         .tag(entry.weekStart)
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
             }
+            // One row, clear background, 8pt above the tab bar (#903 §5). The
+            // week list scrolls under it; `WeekPathView`'s bottom padding lets
+            // the last pebble clear it.
             .safeAreaInset(edge: .bottom) {
-                VStack(spacing: 12) {
-                    NewPebbleButton(onTap: { isPresentingCapture = true })
-                    PathBottomBar(
+                HStack(alignment: .center, spacing: 16) {
+                    PathStatusCluster(
                         karma: stats.karma,
                         ripple: rippleWithLocalActiveToday,
-                        onProfile: { navPath.append(PathRoute.profile) }
+                        onKarma: { nav.select(.you) },
+                        onRipple: { nav.select(.you) }
                     )
+                    Spacer(minLength: 0)
+                    NewPebbleFab(onTap: { isPresentingCapture = true })
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 8)
@@ -176,6 +187,14 @@ struct PathView: View {
             entry.moments.contains { $0.id == momentId }
         }) else { return }
         focusedWeekStart = entry.weekStart
+    }
+
+    /// Path reselected at its root (#903 §4): "top of Path" means now. The
+    /// same current-week lookup `load()` uses.
+    private func focusCurrentWeek() {
+        let current = WeekRollBuilder.weekStart(for: today, calendar: isoCalendar)
+        guard entries.contains(where: { $0.weekStart == current }) else { return }
+        withAnimation { focusedWeekStart = current }
     }
 
     private func load() async {
@@ -218,6 +237,7 @@ struct PathView: View {
             try await MomentDeletion.perform(
                 option, on: target, client: supabase.client, drafts: completeDrafts
             )
+            revision.bump(from: .path)
             async let timeline: Void = load()
             async let statsReload: Void = stats.refresh()
             _ = await (timeline, statsReload)
@@ -229,7 +249,11 @@ struct PathView: View {
 }
 
 #Preview {
-    PathView()
-        .environment(SupabaseService())
-        .environment(CompleteDraftStore())
+    NavigationStack {
+        PathView()
+    }
+    .environment(SupabaseService())
+    .environment(CompleteDraftStore())
+    .environment(TabNavigation())
+    .environment(MomentsRevision())
 }

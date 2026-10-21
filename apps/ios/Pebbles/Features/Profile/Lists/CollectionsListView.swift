@@ -4,6 +4,7 @@ import os
 struct CollectionsListView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(ReferenceDataService.self) private var refs
+    @Environment(TabNavigation.self) private var nav
     @State private var items: [Collection] = []
     @State private var isLoading = true
     @State private var loadError: String?
@@ -22,6 +23,17 @@ struct CollectionsListView: View {
                         Image(systemName: "plus")
                     }
                     .accessibilityLabel("Add collection")
+                }
+            }
+            .navigationDestination(for: CollectionsRoute.self) { route in
+                switch route {
+                case .collection(let id):
+                    CollectionRoute(id: id, known: items.first(where: { $0.id == id }), onChanged: {
+                        Task {
+                            await load()
+                            await refs.refreshCollections()
+                        }
+                    })
                 }
             }
             .task { await load() }
@@ -70,7 +82,9 @@ struct CollectionsListView: View {
 
     @ViewBuilder
     private var content: some View {
-        if isLoading {
+        // A tab root reloads on every return; keep the rows (and the scroll
+        // position) on screen while it does.
+        if isLoading && items.isEmpty {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let loadError {
@@ -86,30 +100,29 @@ struct CollectionsListView: View {
                 description: Text("Your collections will appear here.")
             )
         } else {
-            List {
-                ForEach(Array(items.enumerated()), id: \.element.id) { index, collection in
-                    NavigationLink {
-                        CollectionDetailView(collection: collection, onChanged: {
-                            Task {
-                                await load()
-                                await refs.refreshCollections()
-                            }
-                        })
-                    } label: {
-                        CollectionRow(collection: collection)
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button {
-                            pendingDeletion = collection
-                        } label: {
-                            Label("Delete", systemImage: "trash")
+            ScrollViewReader { proxy in
+                List {
+                    ForEach(Array(items.enumerated()), id: \.element.id) { index, collection in
+                        NavigationLink(value: CollectionsRoute.collection(collection.id)) {
+                            CollectionRow(collection: collection)
                         }
-                        .tint(Color.pebbles.error)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button {
+                                pendingDeletion = collection
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                            .tint(Color.pebbles.error)
+                        }
+                        .pebblesListRow(position: pebblesRowPosition(index: index, count: items.count))
                     }
-                    .pebblesListRow(position: pebblesRowPosition(index: index, count: items.count))
+                }
+                .pebblesList()
+                .onChange(of: nav.scrollToTop[.collections, default: 0]) {
+                    guard let first = items.first else { return }
+                    withAnimation { proxy.scrollTo(first.id, anchor: .top) }
                 }
             }
-            .pebblesList()
         }
     }
 
@@ -125,6 +138,8 @@ struct CollectionsListView: View {
                 .value
             self.items = result
         } catch {
+            // Cancelled by a tab switch, not failed.
+            guard !Task.isCancelled else { return }
             logger.error("collections fetch failed: \(error.localizedDescription, privacy: .private)")
             self.loadError = "Something went wrong. Please try again."
         }
@@ -185,5 +200,8 @@ private struct CollectionRow: View {
         CollectionsListView()
             .environment(supabase)
             .environment(ReferenceDataService(client: supabase.client))
+            .environment(TabNavigation())
+            .environment(CompleteDraftStore())
+            .environment(MomentsRevision())
     }
 }

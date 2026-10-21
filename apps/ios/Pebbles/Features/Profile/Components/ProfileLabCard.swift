@@ -2,9 +2,7 @@ import SwiftUI
 
 struct ProfileLabCard: View {
     var body: some View {
-        NavigationLink {
-            LabView()
-        } label: {
+        NavigationLink(value: YouRoute.lab) {
             HStack(spacing: Spacing.lg) {
                 Image(systemName: "lightbulb.max")
                     .pebblesIcon(.large)

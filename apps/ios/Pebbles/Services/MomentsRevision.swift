@@ -1,0 +1,26 @@
+import Observation
+
+/// Cross-tab "a moment changed" signal (#903 D5).
+///
+/// Bumpers: `PebbleDetailSheet` (save, delete, completion), the
+/// `.momentDeleteDialog` presenters, and Capture's `onMomentChanged`.
+/// Reader: `PathView`, which reloads when another tab bumped. People and
+/// Collections detail views already reload through their own callbacks.
+/// When stack D lands, `PathModel` becomes the reader. When E5 deletes
+/// `PebbleDetailSheet`, `HeldCardModel` takes over its bumps.
+@Observable @MainActor
+final class MomentsRevision {
+    private(set) var value = 0
+    private(set) var lastOrigin: AppTab?
+
+    func bump(from origin: AppTab) {
+        lastOrigin = origin
+        value += 1
+    }
+
+    /// True when the latest change was made somewhere other than `tab`.
+    func changedOutside(_ tab: AppTab) -> Bool {
+        guard let lastOrigin else { return false }
+        return lastOrigin != tab
+    }
+}

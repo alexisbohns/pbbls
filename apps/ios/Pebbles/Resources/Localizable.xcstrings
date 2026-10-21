@@ -5979,6 +5979,23 @@
         }
       }
     },
+    "Opens You" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens You"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre Toi"
+          }
+        }
+      }
+    },
     "Opens soul creation form" : {
       "localizations" : {
         "en" : {
@@ -6194,6 +6211,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les galets associés à cette âme apparaîtront ici."
+          }
+        }
+      }
+    },
+    "People" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "People"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proches"
           }
         }
       }
@@ -7936,6 +7970,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Qui peut le voir ?"
+          }
+        }
+      }
+    },
+    "You" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toi"
           }
         }
       }

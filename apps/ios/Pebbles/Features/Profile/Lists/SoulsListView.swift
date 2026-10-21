@@ -4,6 +4,7 @@ import os
 struct SoulsListView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(ReferenceDataService.self) private var refs
+    @Environment(TabNavigation.self) private var nav
     @State private var items: [SoulWithGlyph] = []
     @State private var isLoading = true
     @State private var loadError: String?
@@ -19,11 +20,32 @@ struct SoulsListView: View {
         content
             .pebblesToolbarTitle("Souls")
             .toolbar {
+                // People reaches Connections from here (#903 §2): the hub
+                // tile's icon and copy.
+                ToolbarItem(placement: .topBarLeading) {
+                    PebbleToolbarButton(action: { nav.people.append(.connections) }) {
+                        Image(systemName: "person.2.badge.plus")
+                    }
+                    .accessibilityLabel("Circle")
+                }
                 ToolbarItem(placement: .primaryAction) {
                     PebbleToolbarButton(action: { isPresentingCreate = true }) {
                         Image(systemName: "plus")
                     }
                     .accessibilityLabel("Add soul")
+                }
+            }
+            .navigationDestination(for: PeopleRoute.self) { route in
+                switch route {
+                case .soul(let id):
+                    SoulRoute(id: id, known: items, onChanged: {
+                        Task {
+                            await load()
+                            await refs.refreshSouls()
+                        }
+                    })
+                case .connections:
+                    ConnectionsListView()
                 }
             }
             .task { await load() }
@@ -71,7 +93,9 @@ struct SoulsListView: View {
 
     @ViewBuilder
     private var content: some View {
-        if isLoading {
+        // A tab root reloads on every return; keep the rows (and the scroll
+        // position) on screen while it does.
+        if isLoading && items.isEmpty {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let loadError {
@@ -87,28 +111,27 @@ struct SoulsListView: View {
                 description: Text("People and beings you tag on your pebbles will appear here.")
             )
         } else {
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: Spacing.lg) {
-                    ForEach(items) { item in
-                        NavigationLink {
-                            SoulDetailView(initial: item, onChanged: {
-                                Task {
-                                    await load()
-                                    await refs.refreshSouls()
-                                }
-                            })
-                        } label: {
-                            SoulItem(case: .default, soul: item, count: item.pebblesCount)
-                        }
-                        .buttonStyle(.plain)
-                        .pebblesContextMenu([
-                            .delete {
-                                pendingDeletion = item
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: Spacing.lg) {
+                        ForEach(items) { item in
+                            NavigationLink(value: PeopleRoute.soul(item.id)) {
+                                SoulItem(case: .default, soul: item, count: item.pebblesCount)
                             }
-                        ])
+                            .buttonStyle(.plain)
+                            .pebblesContextMenu([
+                                .delete {
+                                    pendingDeletion = item
+                                }
+                            ])
+                        }
                     }
+                    .padding(Spacing.lg)
+                    .id(TabNavigation.scrollTopAnchor)
                 }
-                .padding(Spacing.lg)
+                .onChange(of: nav.scrollToTop[.people, default: 0]) {
+                    withAnimation { proxy.scrollTo(TabNavigation.scrollTopAnchor, anchor: .top) }
+                }
             }
         }
     }
@@ -125,6 +148,8 @@ struct SoulsListView: View {
                 .value
             self.items = result
         } catch {
+            // Cancelled by a tab switch, not failed.
+            guard !Task.isCancelled else { return }
             logger.error("souls fetch failed: \(error.localizedDescription, privacy: .private)")
             self.loadError = "Something went wrong. Please try again."
         }
@@ -154,5 +179,8 @@ struct SoulsListView: View {
         SoulsListView()
             .environment(supabase)
             .environment(ReferenceDataService(client: supabase.client))
+            .environment(TabNavigation())
+            .environment(CompleteDraftStore())
+            .environment(MomentsRevision())
     }
 }
