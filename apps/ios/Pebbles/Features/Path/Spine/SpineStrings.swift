@@ -18,9 +18,14 @@ enum SpineStrings {
     /// and region, so a 24-hour user reads 24-hour times, as on Android and web.
     /// Copy keeps `appLocale`; `SpineDates` caches on the hour cycle too.
     static var dateLocale: Locale {
-        var components = Locale.Components(locale: appLocale)
-        components.hourCycle = Locale.current.hourCycle
-        components.region = Locale.current.region
+        dateLocale(app: appLocale, device: .current)
+    }
+
+    /// `app`'s language with `device`'s hour cycle and region; pure, so tests cross them.
+    static func dateLocale(app: Locale, device: Locale) -> Locale {
+        var components = Locale.Components(locale: app)
+        components.hourCycle = device.hourCycle
+        components.region = device.region
         return Locale(components: components)
     }
 
