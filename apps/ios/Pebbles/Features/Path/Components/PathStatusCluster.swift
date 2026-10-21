@@ -37,7 +37,7 @@ struct PathStatusCluster: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text(karma.map { "\($0)" } ?? "—")
                     .font(.ysabeauSemibold(17))
-                    .foregroundStyle(Color.pebbles.onSurface)
+                    .foregroundStyle(Color.pebbles.primary)
                 Text("karma")
                     .font(.caption)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
