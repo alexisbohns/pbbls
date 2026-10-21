@@ -4,6 +4,9 @@ import Foundation
 /// month names need no keys: a port of `apps/web/lib/utils/spine/spine-dates.ts`
 /// plus the month, weekday and time the opening, the dots and the entries print.
 /// The calendar carries the zone and the locale the language; never `.current`.
+/// Callers pass the bare language locale (`en`, `fr`), as iOS reads
+/// `Locale.current`'s language and `SpineDatesTests` assumes; its hour cycle
+/// (the user's 12/24 h setting) is part of each formatter's cache key.
 enum SpineDates {
     /// "mon", "lun": short weekday, lowercase, trailing period stripped.
     static func shortWeekday(_ date: Date, calendar: Calendar, locale: Locale) -> String {
@@ -47,13 +50,13 @@ enum SpineDates {
         format(date, "jmm", calendar, locale)
     }
 
-    // MARK: - Formatters, one per template, locale and zone
+    // MARK: - Formatters, one per template, locale, hour cycle and zone
 
     private static let lock = NSLock()
     private static var formatters: [String: DateFormatter] = [:]
 
     private static func format(_ date: Date, _ template: String, _ calendar: Calendar, _ locale: Locale) -> String {
-        let key = "\(template)|\(locale.identifier)|\(calendar.timeZone.identifier)"
+        let key = "\(template)|\(locale.identifier)|\(locale.hourCycle)|\(calendar.timeZone.identifier)"
         lock.lock()
         defer { lock.unlock() }
         if let formatter = formatters[key] { return formatter.string(from: date) }
@@ -66,8 +69,8 @@ enum SpineDates {
         return formatter.string(from: date)
     }
 
-    /// The ISO calendar the logic counts weeks in formats like the Gregorian one,
-    /// but names are read from a Gregorian calendar in the same zone to be sure.
+    /// Formatters read names from a Gregorian calendar in the caller's zone; the
+    /// ISO calendar differs only in week rules.
     private static func gregorian(_ calendar: Calendar) -> Calendar {
         var gregorian = Calendar(identifier: .gregorian)
         gregorian.timeZone = calendar.timeZone
