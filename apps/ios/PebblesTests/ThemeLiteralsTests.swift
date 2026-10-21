@@ -81,9 +81,6 @@ struct ThemeLiteralsTests {
     /// Shrinks to nothing by the end of the stack (A2: .red and owned
     /// destructive roles; A3a / A3b: the folders they migrate). Never raise it.
     static let debt: [String: Int] = [
-        "Components/Buttons/PebblesPrimaryButtonStyle.swift": 2,
-        "Components/Checkboxes/PebblesCheckbox.swift": 1,
-        "Components/Inputs/PebblesTextInput.swift": 1,
         "Features/Glyph/Views/GlyphCanvasView.swift": 1,
         "Features/Glyph/Views/GlyphPickerContent.swift": 1,
         "Features/Glyph/Views/GlyphTabBar.swift": 2,

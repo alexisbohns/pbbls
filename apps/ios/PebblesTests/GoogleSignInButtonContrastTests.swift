@@ -42,11 +42,15 @@ struct GoogleSignInButtonContrastTests {
         }
     }
 
-    @Test("onLight resolves identically in both appearances")
-    func onLightIsAppearanceIndependent() {
-        let token = UIColor(Color.system.onLight)
-        let light = token.resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
-        let dark = token.resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark))
-        #expect(light == dark)
+    @Test("googleCapsuleInk resolves identically in all four appearances")
+    func capsuleInkIsAppearanceIndependent() {
+        let looks: [(UIUserInterfaceStyle, UIAccessibilityContrast)] = [(.light, .normal), (.dark, .normal), (.light, .high), (.dark, .high)]
+        let resolved = looks.map { style, contrast in
+            UIColor.pebbles(.googleCapsuleInk).resolvedColor(with: UITraitCollection { traits in
+                traits.userInterfaceStyle = style
+                traits.accessibilityContrast = contrast
+            })
+        }
+        #expect(Set(resolved).count == 1)
     }
 }

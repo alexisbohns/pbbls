@@ -20,5 +20,5 @@ struct PebblesAuthSwitcher: View {
     @Previewable @State var mode: AuthView.Mode = .login
     return PebblesAuthSwitcher(mode: $mode)
         .padding()
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
 }

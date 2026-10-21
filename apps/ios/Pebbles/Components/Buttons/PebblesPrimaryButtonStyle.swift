@@ -14,21 +14,21 @@ struct PebblesPrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         ZStack {
             if isLoading {
-                ProgressView().tint(.white)
+                ProgressView().tint(Color.pebbles.onPrimary)
             } else {
                 configuration.label
                     .fontWeight(.medium)
-                    .foregroundStyle(isEnabled ? Color.white : Color.system.muted)
+                    .foregroundStyle(isEnabled ? Color.pebbles.onPrimary : Color.pebbles.onSurface.opacity(0.38))
             }
         }
         .frame(maxWidth: .infinity)
         .frame(minHeight: minHeight)
         .background(
-            Capsule().fill(isEnabled ? Color.accent.primary : Color.clear)
+            Capsule().fill(isEnabled ? Color.pebbles.primary : Color.clear)
         )
         .overlay(
             Capsule().stroke(
-                isEnabled ? Color.clear : Color.system.muted,
+                isEnabled ? Color.clear : Color.pebbles.surfaceContainerHighest,
                 lineWidth: 1
             )
         )
