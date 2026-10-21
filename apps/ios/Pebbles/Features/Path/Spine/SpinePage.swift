@@ -11,7 +11,7 @@ struct WeekNeighbour: Equatable {
 }
 
 /// One page of the pager, as values (§Data flow), built once per load by `PathModel`.
-struct SpinePage {
+struct SpinePage: Identifiable {
     let weekStart: Date
     let week: SpineWeek<MomentSummary>
     let words: WeekWords
@@ -25,6 +25,8 @@ struct SpinePage {
     let soulNames: [String: String]
     /// Lowercase soul id → glyph strokes, from the reference cache; a miss draws the dashed mark.
     let soulGlyphs: [String: [GlyphStroke]]
+
+    var id: Date { weekStart }
 
     /// The persons-of-the-week order every people line on this page follows.
     var soulOrder: [String] { persons.map(\.soulId) }
