@@ -5,7 +5,9 @@ import Testing
 extension References {
     /// #1130 D2b: four cards at their photos' ratios in the 293 pt column of a
     /// 393 pt page (1:1 flag march, 3:2 forest walk, 16:9 rooftop, 2:3 seawall),
-    /// then the untitled photo and the bare moment's card, in English and French.
+    /// then the untitled photo and the bare moment's card (grey ramp, no emotion on
+    /// its rail, no painted edge, as Android's), in English and French. Paper casts
+    /// three shadow layers, Night two and a hairline ring.
     @Suite("Spine card references")
     @MainActor
     struct SpineCardReferences {
