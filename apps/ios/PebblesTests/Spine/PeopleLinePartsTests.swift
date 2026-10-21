@@ -5,6 +5,7 @@ import Testing
 /// parts; the card's strip drops "with", the commas and the "&".
 @Suite("People line parts")
 struct PeopleLinePartsTests {
+    // swiftlint:disable:next type_name
     typealias V = Vectors
     private let names = ["a": "Mara", "b": "Elio", "c": "Nadia"]
 
@@ -26,8 +27,10 @@ struct PeopleLinePartsTests {
     @Test("fourteen: two named, the others in words, five marks and +7")
     func fourteen() {
         let ids = ["a", "b"] + (0..<12).map { "s\($0)" }
-        let parts = PeopleLineParts.parts(line(ids), names: names, with: "with", others: "& twelve others", style: .line)
-        #expect(parts.prefix(6) == [.aside("with"), .mark("a"), .name("Mara"), .separator(","), .mark("b"), .name("Elio")])
+        let parts = PeopleLineParts.parts(line(ids), names: names, with: "with", others: "& twelve others",
+                                          style: .line)
+        #expect(parts.prefix(6) == [.aside("with"), .mark("a"), .name("Mara"), .separator(","),
+                                    .mark("b"), .name("Elio")])
         #expect(parts[6] == .aside("& twelve others"))
         #expect(parts.filter { if case .mark = $0 { return true } else { return false } }.count == 7)
         #expect(parts.last == .more("+7"))

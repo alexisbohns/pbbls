@@ -1,3 +1,4 @@
+import Testing
 import UIKit
 @testable import Pebbles
 
@@ -14,7 +15,10 @@ enum SpineFixturePhotos {
                 images[path] = image
             }
         }
-        precondition(images.count == SpineFixtureWeek.photos.count, "missing a fixture photo in \(folder.path)")
+        guard images.count == SpineFixtureWeek.photos.count else {
+            Issue.record("missing a fixture photo in \(folder.path)")
+            return .none
+        }
         return .images(images)
     }()
 }

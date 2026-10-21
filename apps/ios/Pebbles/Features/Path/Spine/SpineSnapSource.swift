@@ -4,7 +4,7 @@ import UIKit
 /// Where a Spine card's photo comes from (#1130 §Testing). In the app, the snap
 /// is signed and `AsyncImage` loads it; references and the lab hand decoded
 /// `UIImage`s instead, because `AsyncImage` does not render under
-/// `ImageRenderer`. New pattern, named in the D2b PR.
+/// `ImageRenderer`.
 struct SpineSnapSource {
     /// A decoded photo for a storage path, at once; nil when this source has none in memory.
     var image: (String) -> UIImage?

@@ -15,16 +15,16 @@ struct SpineCardField: View {
     let size: CGSize
 
     var body: some View {
-        Canvas { context, size in
-            let rect = CGRect(origin: .zero, size: size)
+        Canvas { context, canvas in
+            let rect = CGRect(origin: .zero, size: canvas)
             context.clip(to: Path(rect))
             context.fill(Path(rect), with: .color(Color.pebbles.stock))
             context.fill(Path(rect), with: .color(spot.opacity(tint)))
             let ink = GraphicsContext.Shading.color(spot.opacity(pattern))
             switch polarity {
-            case .highlight: Self.rays(in: size, context: context, ink: ink)
-            case .neutral: Self.ripples(in: size, context: context, ink: ink)
-            case .lowlight: Self.contours(in: size, context: context, ink: ink)
+            case .highlight: Self.rays(in: canvas, context: context, ink: ink)
+            case .neutral: Self.ripples(in: canvas, context: context, ink: ink)
+            case .lowlight: Self.contours(in: canvas, context: context, ink: ink)
             }
         }
         .frame(width: size.width, height: size.height)
@@ -48,7 +48,8 @@ struct SpineCardField: View {
         let farthest = hypot(size.width - centre.x, size.height - centre.y)
         var path = Path()
         for radius in stride(from: 5.9, through: farthest, by: 6.3) {
-            path.addEllipse(in: CGRect(x: centre.x - radius, y: centre.y - radius, width: 2 * radius, height: 2 * radius))
+            let diameter = 2 * radius
+            path.addEllipse(in: CGRect(x: centre.x - radius, y: centre.y - radius, width: diameter, height: diameter))
         }
         context.stroke(path, with: ink, lineWidth: 0.8)
     }
