@@ -44,4 +44,28 @@ struct SpineColorsTests {
         #expect(SpineColors.shadowInkRole(scheme: .dark) == .scrim)
         #expect(SpineColors.shadowAlpha(scheme: .light) == 0.30 && SpineColors.shadowAlpha(scheme: .dark) == 0.62)
     }
+
+    @Test("a moment with no emotion paints no edge")
+    func noEdge() {
+        #expect(SpineColors.edge(nil, polarity: .highlight, scheme: .light) == nil)
+        #expect(SpineColors.edge(nil, polarity: .lowlight, scheme: .dark) == nil)
+    }
+
+    /// Android's PAPER_SHADOW / NIGHT_SHADOW and drawNightRing (SpineCard.kt).
+    @Test("the card's shadow layers and the Night ring mirror Android")
+    func cardShadow() {
+        typealias Layer = SpineColors.CardShadowLayer
+        #expect(SpineColors.cardShadow(scheme: .light) == [
+            Layer(dy: 0.5, blur: 0, spread: 0, alpha: 0.10),
+            Layer(dy: 1, blur: 2, spread: 0, alpha: 0.07),
+            Layer(dy: 18, blur: 30, spread: -22, alpha: 0.55)
+        ])
+        #expect(SpineColors.cardShadow(scheme: .dark) == [
+            Layer(dy: 1, blur: 2, spread: 0, alpha: 0.5),
+            Layer(dy: 18, blur: 30, spread: -18, alpha: 0.9)
+        ])
+        #expect(SpineColors.nightRingSource(scheme: .light) == nil)
+        #expect(SpineColors.nightRingSource(scheme: .dark).map { $0 == (PebblesColorRole.onSurface, 0.06) } == true)
+        #expect(SpineColors.nightRingWidth == 0.5)
+    }
 }

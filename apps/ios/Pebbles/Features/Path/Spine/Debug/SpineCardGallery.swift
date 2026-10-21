@@ -9,6 +9,7 @@ struct SpineCardGallery: View {
     let numbers: [Int]
     var width: CGFloat = 393
 
+    // swiftlint:disable:next type_name
     private typealias F = SpineFixtureWeek
 
     private var moments: [MomentSummary] {
@@ -27,7 +28,7 @@ struct SpineCardGallery: View {
             ForEach(moments) { moment in
                 SpineCard(
                     moment: moment,
-                    palette: SpineColors.palette(F.palette(for: moment), isBlank: moment.pebble == nil),
+                    emotion: F.palette(for: moment),
                     ratio: moment.firstSnapPath.flatMap { F.photos[$0]?.ratio },
                     column: SpineLayout.column(width: width),
                     soulNames: F.soulNames, soulGlyphs: F.soulGlyphs, soulOrder: order

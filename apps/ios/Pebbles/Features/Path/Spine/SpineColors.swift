@@ -36,8 +36,10 @@ enum SpineColors {
     /// The valence pattern's strength over the field.
     static func patternK(scheme: ColorScheme) -> Double { scheme == .dark ? 0.40 : 0.34 }
 
-    static func edge(_ palette: StonePalette, polarity: ValencePolarity, scheme: ColorScheme) -> Color {
-        palette.color(edgeSlot(polarity, scheme: scheme))
+    /// The painted edge, from the emotion's own palette. A moment with no emotion
+    /// paints none, as Android's `SpineCardShell` ("the web's --edge is unset").
+    static func edge(_ emotion: EmotionPalette?, polarity: ValencePolarity, scheme: ColorScheme) -> Color? {
+        emotion.map { StonePalette(emotion: $0).color(edgeSlot(polarity, scheme: scheme)) }
     }
 
     static func spot(_ palette: StonePalette, scheme: ColorScheme) -> Color {
@@ -58,8 +60,8 @@ enum SpineColors {
         return role(source.role).opacity(source.alpha)
     }
 
-    /// The shadow ink under the card: `onSurface` on Paper, black at Night,
-    /// carried with Android's `shadowAlpha`.
+    /// The shadow ink under the card (and under a stone): `onSurface` on Paper,
+    /// black at Night. The card's layers carry their own alphas (`cardShadow`).
     static func shadowInkRole(scheme: ColorScheme) -> PebblesColorRole {
         scheme == .dark ? .scrim : .onSurface
     }
@@ -68,9 +70,44 @@ enum SpineColors {
         role(shadowInkRole(scheme: scheme))
     }
 
-    /// Android's `shadowAlpha`: 0.30 on Paper, 0.62 at Night.
+    /// Android's `SpineColors.shadowAlpha`: 0.30 on Paper, 0.62 at Night. Android
+    /// gives it to the stone's drop shadow (`LitStone`), not to the card.
     static func shadowAlpha(scheme: ColorScheme) -> Double {
         scheme == .dark ? 0.62 : 0.30
+    }
+
+    /// One layer of the card's shadow, the web's `--spine-card-shadow`
+    /// (`0 dy blur spread rgba(shadow, alpha)`), in points.
+    struct CardShadowLayer: Equatable {
+        let dy: CGFloat
+        let blur: CGFloat
+        let spread: CGFloat
+        let alpha: Double
+    }
+
+    /// Android's `PAPER_SHADOW` / `NIGHT_SHADOW` (`features/path/spine/SpineCard.kt`):
+    /// three layers on Paper, two at Night, each in `shadowInk` at its own alpha.
+    static func cardShadow(scheme: ColorScheme) -> [CardShadowLayer] {
+        scheme == .dark
+            ? [CardShadowLayer(dy: 1, blur: 2, spread: 0, alpha: 0.5),
+               CardShadowLayer(dy: 18, blur: 30, spread: -18, alpha: 0.9)]
+            : [CardShadowLayer(dy: 0.5, blur: 0, spread: 0, alpha: 0.10),
+               CardShadowLayer(dy: 1, blur: 2, spread: 0, alpha: 0.07),
+               CardShadowLayer(dy: 18, blur: 30, spread: -22, alpha: 0.55)]
+    }
+
+    /// Android's `drawNightRing` width: a hairline just outside the card, at Night only.
+    static let nightRingWidth: CGFloat = 0.5
+
+    /// The Night ring: the web's `rgba(255,245,225,.06)`, which Android writes as
+    /// white @ 0.06. `Features/` names no hex, so it is the warm `onSurface` @ 0.06
+    /// (`#E7E2D9` at Night, white in high contrast). Paper has none.
+    static func nightRingSource(scheme: ColorScheme) -> (role: PebblesColorRole, alpha: Double)? {
+        scheme == .dark ? (.onSurface, 0.06) : nil
+    }
+
+    static func nightRing(scheme: ColorScheme) -> Color? {
+        nightRingSource(scheme: scheme).map { role($0.role).opacity($0.alpha) }
     }
 
     /// The two roles the blends use, named through `Color.pebbles`.

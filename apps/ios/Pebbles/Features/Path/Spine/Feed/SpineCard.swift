@@ -13,7 +13,9 @@ import os
 /// `CardFrameRegistry` for stack E and hides while E flies it.
 struct SpineCard: View {
     let moment: MomentSummary
-    let palette: StonePalette
+    /// The emotion's palette; nil for a bare moment or an unknown emotion, which
+    /// wear the blank or brand ramp and paint no edge (Android's `SpineCardShell`).
+    let emotion: EmotionPalette?
     /// The photo's ratio once probed; nil holds the square.
     let ratio: CGFloat?
     let column: CGFloat
@@ -30,13 +32,17 @@ struct SpineCard: View {
     @Environment(CardFrameRegistry.self) private var registry: CardFrameRegistry?
     @State private var shownRatio: CGFloat?
     @State private var photoURL: URL?
+    @State private var loggedFailure: URL?
+    /// The frame this slot last reported; a reference, so writing it on every
+    /// scroll frame invalidates nothing.
+    @State private var reported = ReportedFrame()
 
-    private let logger = Logger(subsystem: "app.pbbls.ios", category: "spine")
+    private static let logger = Logger(subsystem: "app.pbbls.ios", category: "spine")
 
-    init(moment: MomentSummary, palette: StonePalette, ratio: CGFloat?, column: CGFloat,
+    init(moment: MomentSummary, emotion: EmotionPalette?, ratio: CGFloat?, column: CGFloat,
          soulNames: [String: String], soulGlyphs: [String: [GlyphStroke]], soulOrder: [String], namedInFull: Int = 3) {
         self.moment = moment
-        self.palette = palette
+        self.emotion = emotion
         self.ratio = ratio
         self.column = column
         self.soulNames = soulNames
@@ -51,6 +57,7 @@ struct SpineCard: View {
     private var calendar: Calendar { SpineCalendar.current }
     private var intensity: Int { moment.pebble?.intensity ?? 2 }
     private var valence: Valence { moment.pebble?.valence ?? .neutralMedium }
+    private var palette: StonePalette { SpineColors.palette(emotion, isBlank: moment.pebble == nil) }
     private var spot: Color { SpineColors.spot(palette, scheme: scheme) }
 
     var body: some View {
@@ -74,10 +81,15 @@ struct SpineCard: View {
         .background { ground }
         .opacity(registry?.hidden == moment.id ? 0 : 1)
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            reported.frame = frame
             registry?.report(moment.id, frame: frame)
         }
-        .onDisappear { registry?.forget(moment.id) }
-        .task(id: ratio) {
+        .onDisappear {
+            guard let frame = reported.frame else { return }
+            registry?.forget(moment.id, ifAt: frame)
+            reported.frame = nil
+        }
+        .onChange(of: ratio) { _, ratio in
             guard let ratio, ratio != shownRatio else { return }
             if reduceMotion {
                 shownRatio = ratio
@@ -86,6 +98,7 @@ struct SpineCard: View {
             }
         }
         .task(id: moment.firstSnapPath) {
+            photoURL = nil
             guard let path = moment.firstSnapPath, snaps.image(path) == nil else { return }
             photoURL = await snaps.url(path)
         }
@@ -118,7 +131,11 @@ struct SpineCard: View {
                     image.resizable().scaledToFit()
                 case .failure(let error):
                     unavailable(u: u).onAppear {
-                        logger.warning("spine card photo failed: \(error.localizedDescription, privacy: .private)")
+                        // Once per URL: a card scrolled back into view does not log again.
+                        guard loggedFailure != photoURL else { return }
+                        loggedFailure = photoURL
+                        let reason = error.localizedDescription
+                        Self.logger.warning("spine card photo failed: \(reason, privacy: .private)")
                     }
                 default:
                     bed
@@ -218,22 +235,35 @@ struct SpineCard: View {
         .accessibilityHidden(true)
     }
 
-    /// The stock with its painted edge (2 / 3.5 / 5.5 pt in the edge colour) and
-    /// the rule set's two-layer shadow, on the ground only, so no text casts one.
-    /// The ink and its alpha are Android's (`SpineColors.shadowInk` /
-    /// `shadowAlpha`); SwiftUI has no shadow spread, so each layer takes a share
-    /// of that alpha to read as the web's `0 1px 2px` and `0 18px 30px -22px`.
+    /// Android's `SpineCardShell` order, bottom up: the shadow, the Night ring, the
+    /// painted edge (2 / 3.5 / 5.5 pt, none without an emotion), the stock. On the
+    /// ground only, so no text casts a shadow. Each shadow layer is the card's shape
+    /// in `shadowInk` at its own alpha, inset by its negative spread (SwiftUI's
+    /// `.shadow` has no spread), dropped by `dy` and blurred at the CSS σ = blur / 2,
+    /// so the pool sits under the card instead of haloing its sides.
     private var ground: some View {
         let shape = RoundedRectangle(cornerRadius: 11, style: .continuous)
         let ink = SpineColors.shadowInk(scheme: scheme)
-        let alpha = SpineColors.shadowAlpha(scheme: scheme)
-        return shape.fill(Color.pebbles.stock)
-            .background(
-                shape.fill(SpineColors.edge(palette, polarity: valence.polarity, scheme: scheme))
-                    .offset(y: CardSizes.edge(intensity))
-            )
-            .shadow(color: ink.opacity(alpha * 0.3), radius: 1, x: 0, y: 1)
-            .shadow(color: ink.opacity(alpha * 0.55), radius: 15, x: 0, y: 18)
+        let edge = SpineColors.edge(emotion, polarity: valence.polarity, scheme: scheme)
+        return ZStack {
+            ForEach(Array(SpineColors.cardShadow(scheme: scheme).enumerated()), id: \.offset) { _, layer in
+                shape.fill(ink.opacity(layer.alpha))
+                    .padding(-layer.spread)
+                    .offset(y: layer.dy)
+                    .blur(radius: layer.blur / 2)
+            }
+            if let ring = SpineColors.nightRing(scheme: scheme) {
+                let half = SpineColors.nightRingWidth / 2
+                RoundedRectangle(cornerRadius: 11 + half, style: .continuous)
+                    .stroke(ring, lineWidth: SpineColors.nightRingWidth)
+                    .padding(-half)
+            }
+            if let edge {
+                shape.fill(edge).offset(y: CardSizes.edge(intensity))
+            }
+            shape.fill(Color.pebbles.stock)
+        }
+        .accessibilityHidden(true)
     }
 }
 
@@ -241,6 +271,11 @@ struct SpineCard: View {
 /// the sides swapped and centres the child, so the child's own
 /// `.rotationEffect(.degrees(90))` lands inside the swapped box. Measured in
 /// layout, so it holds under `ImageRenderer` too.
+/// A slot's last reported frame, held by reference so updating it re-renders nothing.
+private final class ReportedFrame {
+    var frame: CGRect?
+}
+
 private struct QuarterTurn: Layout {
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         guard let child = subviews.first else { return .zero }
