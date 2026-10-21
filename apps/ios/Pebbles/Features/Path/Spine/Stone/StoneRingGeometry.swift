@@ -32,7 +32,9 @@ struct StoneRingGeometry {
         guard !outline.isEmpty, !unitBounds.isNull, !unitBounds.isInfinite else { return nil }
         let polygon = WobblePathFlattener.flatten(outline, step: flattenStep).first?.points ?? []
         let unitCentroid = areaCentroid(polygon) ?? CGPoint(x: unitBounds.midX, y: unitBounds.midY)
-        let fitted = Path(outline).applying(toPoints)
+        // `CGPath.copy(using:)`, as `WobbledPathShape` fits it: the same points to the last bit.
+        var transform = toPoints
+        let fitted = outline.copy(using: &transform).map(Path.init) ?? Path(outline).applying(toPoints)
         let bounds = fitted.boundingRect
         let step = Self.step[size] ?? 4.4
         let width = max(bounds.width, 1)
