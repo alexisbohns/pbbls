@@ -5,7 +5,8 @@ import os
 /// freshest source (a soul created a moment ago is not in reference data until
 /// `refreshSouls()` lands); reference data covers a restored scene whose list
 /// has not loaded yet. An id found in neither, once reference data has
-/// loaded, was deleted elsewhere: log and pop.
+/// finished loading (or failed to), was deleted elsewhere or cannot be
+/// resolved: log and pop, rather than spin forever.
 struct SoulRoute: View {
     let id: UUID
     let known: [SoulWithGlyph]
@@ -24,7 +25,7 @@ struct SoulRoute: View {
         if let soul = known.first(where: { $0.id == id }) ?? refs.souls.first(where: { $0.id == id }) {
             return .found(soul)
         }
-        return refs.hasLoaded ? .missing : .loading
+        return refs.hasLoaded || refs.didFinishLoading ? .missing : .loading
     }
 
     var body: some View {
@@ -37,7 +38,11 @@ struct SoulRoute: View {
                 .pebblesScreen()
         case .missing:
             Color.clear.task {
-                logger.notice("soul \(id.uuidString, privacy: .private) no longer exists; popping its route")
+                if refs.hasLoaded {
+                    logger.notice("soul \(id.uuidString, privacy: .private) no longer exists; popping its route")
+                } else {
+                    logger.error("reference data failed; popping soul route \(id.uuidString, privacy: .private)")
+                }
                 dismiss()
             }
         }
