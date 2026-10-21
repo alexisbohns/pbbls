@@ -64,10 +64,6 @@ final class TabNavigation {
         var collections: [CollectionsRoute]
         var you: [YouRoute]
 
-        enum CodingKeys: String, CodingKey {
-            case selected, path, people, collections, you
-        }
-
         init(
             selected: AppTab = .path,
             path: [PathRoute] = [],
