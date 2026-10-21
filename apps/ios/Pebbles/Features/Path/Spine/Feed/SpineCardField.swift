@@ -4,8 +4,9 @@ import SwiftUI
 /// valence pattern: rays from the stone's corner for a highlight (every 2.2°,
 /// from −6 % −14 %), ripples for a neutral (every 6.3 pt, from −4 % −10 %),
 /// contours from the far corner for a lowlight (150 % × 110 % ellipses at
-/// 112 % 122 %, every 6.8 pt). A `Canvas` draws only inside its own bounds, so
-/// nothing here needs a clip (D4).
+/// 112 % 122 %, every 6.8 pt). A `Canvas` does not clip its drawing to its
+/// frame, so the context is clipped to its own rect: a drawing clip, not a view
+/// one, so hit-testing and the overhangs D4 protects are untouched.
 struct SpineCardField: View {
     let polarity: ValencePolarity
     let spot: Color
@@ -16,6 +17,7 @@ struct SpineCardField: View {
     var body: some View {
         Canvas { context, size in
             let rect = CGRect(origin: .zero, size: size)
+            context.clip(to: Path(rect))
             context.fill(Path(rect), with: .color(Color.pebbles.stock))
             context.fill(Path(rect), with: .color(spot.opacity(tint)))
             let ink = GraphicsContext.Shading.color(spot.opacity(pattern))
