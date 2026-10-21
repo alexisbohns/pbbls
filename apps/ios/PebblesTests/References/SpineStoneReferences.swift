@@ -15,7 +15,8 @@ extension References {
             ReferenceImage.assertMatches(SpineStoneGallery(), named: "gallery", config: ReferenceConfig(scheme: scheme))
         }
 
-        /// The dip, the rings' swell, the sweep, the spark and two waves.
+        /// Half a second in: the rings swollen, the sweep band crossing, the spark
+        /// past its peak and two waves out; the dip is over (pinned in StoneMotionTests).
         @Test(arguments: ReferenceScheme.allCases)
         func midPress(scheme: ReferenceScheme) {
             ReferenceImage.assertMatches(SpineStoneGallery(frozenAt: 0.5), named: "midPress",
