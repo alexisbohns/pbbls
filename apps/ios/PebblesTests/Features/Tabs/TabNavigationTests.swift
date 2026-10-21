@@ -143,6 +143,20 @@ struct TabNavigationSnapshotTests {
         #expect(snapshot == TabNavigation.Snapshot())
     }
 
+    @Test("a wrong-typed field falls back to its own default and keeps the rest")
+    func wrongTypedFields() throws {
+        let json = #"{"selected":3,"path":[],"people":"x","collections":[],"you":[{"lab":{}}]}"#
+        let snapshot = try #require(TabNavigation.Snapshot.decoded(from: Data(json.utf8)))
+        #expect(snapshot.selected == .path)
+        #expect(snapshot.people.isEmpty)
+        #expect(snapshot.you == [.lab])
+    }
+
+    @Test("a top-level JSON array is not a snapshot and decodes to nil")
+    func topLevelArray() {
+        #expect(TabNavigation.Snapshot.decoded(from: Data("[]".utf8)) == nil)
+    }
+
     @Test("bytes that are not a snapshot decode to nil")
     func garbage() {
         #expect(TabNavigation.Snapshot.decoded(from: Data("not json".utf8)) == nil)
