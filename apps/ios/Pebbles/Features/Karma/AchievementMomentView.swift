@@ -12,7 +12,7 @@ struct AchievementMomentView: View {
         ZStack {
             // The scrim is a real subview, so the passthrough window lets it
             // capture touches for as long as the moment is up.
-            Color.black.opacity(0.55)
+            Color.pebbles.scrim.opacity(0.55)
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
                 .onTapGesture { achievements.dismiss() }
@@ -33,22 +33,22 @@ struct AchievementMomentView: View {
         VStack(spacing: Spacing.lg) {
             Image(systemName: "trophy")
                 .font(.system(size: 44))
-                .foregroundStyle(Color.accent.primary)
+                .foregroundStyle(Color.pebbles.primary)
                 .padding(Spacing.lg)
-                .background(Circle().fill(Color.accent.primary.opacity(0.12)))
+                .background(Circle().fill(Color.pebbles.primary.opacity(0.12)))
 
             VStack(spacing: Spacing.xs) {
                 Text("Achievement unlocked")
                     .pebblesFont(.subhead)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 Text(card.title)
                     .pebblesFont(.headlineEmphasized)
-                    .foregroundStyle(Color.system.foreground)
+                    .foregroundStyle(Color.pebbles.onSurface)
                     .multilineTextAlignment(.center)
                 if let description = card.description {
                     Text(description)
                         .pebblesFont(.subhead)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .multilineTextAlignment(.center)
                 }
             }
@@ -56,13 +56,13 @@ struct AchievementMomentView: View {
             if card.karmaGranted > 0 {
                 Text("+\(card.karmaGranted) karma")
                     .pebblesFont(.headline)
-                    .foregroundStyle(Color.accent.primary)
+                    .foregroundStyle(Color.pebbles.primary)
             }
 
             if achievements.cards.count > 1 {
                 Text("\(achievements.index + 1) of \(achievements.cards.count)")
                     .pebblesFont(.subhead)
-                    .foregroundStyle(Color.system.muted)
+                    .foregroundStyle(Color.pebbles.outline)
             }
 
             Button {
@@ -72,13 +72,13 @@ struct AchievementMomentView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .tint(Color.accent.primary)
+            .tint(Color.pebbles.primary)
         }
         .padding(Spacing.xl)
         .frame(maxWidth: 340)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color.system.background)
+                .fill(Color.pebbles.stock)
         )
         .accessibilityElement(children: .contain)
         .accessibilityLabel(accessibilityLabel(card))

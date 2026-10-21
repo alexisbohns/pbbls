@@ -34,10 +34,10 @@ struct CompleteSuccessStep: View {
                 if let karma = result.karmaDelta, karma > 0 {
                     HStack(spacing: 6) {
                         Image(systemName: "sparkle")
-                            .foregroundStyle(Color.accent.primary)
+                            .foregroundStyle(Color.pebbles.primary)
                         Text("+\(karma) karma")
                             .pebblesFont(.headline)
-                            .foregroundStyle(Color.system.foreground)
+                            .foregroundStyle(Color.pebbles.onSurface)
                     }
                     .accessibilityElement(children: .combine)
                     .accessibilityLabel(Text("Earned \(karma) karma"))

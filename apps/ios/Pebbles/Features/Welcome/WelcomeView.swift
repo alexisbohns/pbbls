@@ -51,7 +51,7 @@ struct WelcomeView: View {
 
     var body: some View {
         ZStack {
-            Color.system.background.ignoresSafeArea()
+            Color.pebbles.surface.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
@@ -104,7 +104,7 @@ struct WelcomeView: View {
             LegalDocumentSheet(url: doc.url)
                 .ignoresSafeArea()
         }
-        .tint(Color.accent.primary)
+        .tint(Color.pebbles.primary)
     }
 
     // MARK: - Revealed content (slides in from below the logo)
@@ -121,7 +121,7 @@ struct WelcomeView: View {
                 } label: {
                     Text("Create an account")
                         .fontWeight(.medium)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.pebbles.onPrimary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                 }
@@ -135,12 +135,12 @@ struct WelcomeView: View {
                 } label: {
                     Text("Log in")
                         .fontWeight(.medium)
-                        .foregroundStyle(Color.accent.primary)
+                        .foregroundStyle(Color.pebbles.primary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .overlay(
                             Capsule()
-                                .stroke(Color.accent.primary, lineWidth: 1)
+                                .stroke(Color.pebbles.primary, lineWidth: 1)
                         )
                 }
                 .buttonStyle(.plain)

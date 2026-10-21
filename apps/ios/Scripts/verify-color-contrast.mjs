@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Asserts that SystemOnLight is a single-appearance colorset and that it clears
+// Asserts that googleCapsuleInk is a single-appearance colorset and that it clears
 // WCAG AA against the pinned white capsule it inks. Runs on plain Node (no Xcode),
 // so CI can gate the iOS half of the contrast fix without a macOS runner.
 import { readFileSync } from "node:fs";
@@ -9,7 +9,7 @@ import { dirname, join } from "node:path";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const colorset = join(
   root,
-  "Pebbles/Resources/Assets.xcassets/SystemOnLight.colorset/Contents.json",
+  "Pebbles/Resources/Assets.xcassets/M3/googleCapsuleInk.colorset/Contents.json",
 );
 
 const channel = (v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
@@ -30,12 +30,12 @@ const entries = parsed.colors ?? [];
 
 if (entries.length !== 1) {
   fail(
-    `SystemOnLight must hold exactly one universal entry, found ${entries.length}. ` +
+    `googleCapsuleInk must hold exactly one universal entry, found ${entries.length}. ` +
       `Its ground is a pinned white capsule, so the ink must not follow the appearance.`,
   );
 }
 if (entries[0].appearances) {
-  fail("SystemOnLight must not declare an appearances block (see SystemPalette.onLight).");
+  fail("googleCapsuleInk must not declare an appearances block (see GoogleCapsuleInk in ColorSchemes.kt).");
 }
 
 const { components } = entries[0].color;
@@ -47,6 +47,6 @@ const ink = {
 const measured = ratio(ink, { r: 1, g: 1, b: 1 });
 
 if (measured < 4.5) {
-  fail(`SystemOnLight on white is ${measured.toFixed(3)}:1, below WCAG AA (4.5:1).`);
+  fail(`googleCapsuleInk on white is ${measured.toFixed(3)}:1, below WCAG AA (4.5:1).`);
 }
-console.log(`verify-color-contrast: SystemOnLight on white = ${measured.toFixed(3)}:1 (AA ok)`);
+console.log(`verify-color-contrast: googleCapsuleInk on white = ${measured.toFixed(3)}:1 (AA ok)`);

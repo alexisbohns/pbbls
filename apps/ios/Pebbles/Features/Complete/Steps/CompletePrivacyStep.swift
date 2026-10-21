@@ -33,15 +33,15 @@ struct CompletePrivacyStep: View {
                 Image(systemName: grade.systemImageName)
                     .font(.title3)
                     .frame(width: 32)
-                    .foregroundStyle(isSelected ? Color.accent.primary : Color.system.secondary)
+                    .foregroundStyle(isSelected ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(grade.label)
                         .pebblesFont(.bodyEmphasized)
-                        .foregroundStyle(isSelected ? Color.accent.primary : Color.system.foreground)
+                        .foregroundStyle(isSelected ? Color.pebbles.primary : Color.pebbles.onSurface)
                     Text(explanation(for: grade))
                         .pebblesFont(.subhead)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .multilineTextAlignment(.leading)
                 }
 
@@ -49,7 +49,7 @@ struct CompletePrivacyStep: View {
             }
             .padding(Spacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(isSelected ? Color.accent.primary.opacity(0.12) : Color.system.muted)
+            .background(isSelected ? Color.pebbles.primary.opacity(0.12) : Color.pebbles.surfaceContainerHighest)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .buttonStyle(.plain)

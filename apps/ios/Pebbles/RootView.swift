@@ -107,7 +107,7 @@ struct RootView: View {
                         HandcraftedLogoView(shouldSettle: false, startSettled: true)
                             .containerRelativeFrame(.horizontal) { width, _ in width * 0.33 }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(Color.system.background.ignoresSafeArea())
+                            .background(Color.pebbles.surface.ignoresSafeArea())
                             .transition(.opacity)
                     }
                 }

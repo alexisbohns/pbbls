@@ -30,7 +30,7 @@ struct ExistingSnapRow: View {
                 Label("Saved", systemImage: "checkmark.circle.fill")
                     .labelStyle(.titleAndIcon)
                     .font(.caption)
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Color.pebbles.tertiary)
             }
             Spacer()
             trailingButton
@@ -64,7 +64,7 @@ struct ExistingSnapRow: View {
 
     private var placeholder: some View {
         RoundedRectangle(cornerRadius: 8)
-            .fill(Color.secondary.opacity(0.2))
+            .fill(Color.pebbles.surfaceContainerHighest)
             .frame(width: 56, height: 56)
     }
 

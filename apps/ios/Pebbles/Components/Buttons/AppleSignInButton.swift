@@ -26,5 +26,5 @@ struct AppleSignInButton: View {
 #Preview {
     AppleSignInButton(action: {})
         .padding()
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
 }

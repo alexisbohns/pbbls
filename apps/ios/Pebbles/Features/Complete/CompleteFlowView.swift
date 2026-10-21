@@ -41,7 +41,7 @@ struct CompleteFlowView: View {
             stepBody
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
         .pebblesScreen()
         .animation(.snappy(duration: 0.28), value: model.step)
         .onChange(of: model.step) { old, new in

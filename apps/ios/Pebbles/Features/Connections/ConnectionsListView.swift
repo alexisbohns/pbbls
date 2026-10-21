@@ -142,11 +142,11 @@ private struct ConnectionRow: View {
                     GlyphThumbnail(
                         strokes: glyph.strokes,
                         side: 28,
-                        strokeColor: Color.accent.primary
+                        strokeColor: Color.pebbles.primary
                     )
                 } else {
                     Image(systemName: "person.circle")
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 }
             }
             .frame(width: 32, height: 32)
@@ -155,10 +155,10 @@ private struct ConnectionRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(connection.peer.displayName ?? String(localized: "Someone"))
                     .pebblesFont(.callout)
-                    .foregroundStyle(Color.system.foreground)
+                    .foregroundStyle(Color.pebbles.onSurface)
                 Text(connection.connectedAt, format: .relative(presentation: .named))
                     .pebblesFont(.meta)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
             }
 
             Spacer(minLength: 0)

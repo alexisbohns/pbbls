@@ -58,31 +58,28 @@ struct PebblesApp: App {
     /// (`PebblesAuthSwitcher`); if a second variant is added later, scope this
     /// via `appearance(whenContainedInInstancesOf:)`.
     private static func configureSegmentedControlAppearance() {
-        let muted = UIColor(named: "SystemMuted") ?? .systemGray5
-        let secondary = UIColor(named: "SystemSecondary") ?? .systemGray
-
         let proxy = UISegmentedControl.appearance()
-        proxy.backgroundColor = muted
-        proxy.selectedSegmentTintColor = secondary
+        proxy.backgroundColor = UIColor.pebbles(.surfaceContainerHighest)
+        proxy.selectedSegmentTintColor = UIColor.pebbles(.secondaryContainer)
 
         proxy.setTitleTextAttributes([
-            .foregroundColor: UIColor.white,
+            .foregroundColor: UIColor.pebbles(.onSecondaryContainer),
             .font: UIFont.systemFont(ofSize: UIFont.systemFontSize, weight: .medium)
         ], for: .selected)
 
         proxy.setTitleTextAttributes([
-            .foregroundColor: secondary,
+            .foregroundColor: UIColor.pebbles(.onSurfaceVariant),
             .font: UIFont.systemFont(ofSize: UIFont.systemFontSize, weight: .regular)
         ], for: .normal)
     }
 
-    /// Recolors the navigation bar title so it picks up `system.foreground`
+    /// Recolors the navigation bar title so it picks up the `onSurface` role
     /// instead of SwiftUI's default `UIColor.label`. Asset-catalog can't
     /// override `Color.primary` directly — only `AccentColor` has that
     /// magic — so titles must be re-tinted via the UIKit appearance proxy.
     /// Applied to both inline and large-title display modes.
     private static func configureNavigationBarAppearance() {
-        guard let foreground = UIColor(named: "SystemForeground") else { return }
+        let foreground = UIColor.pebbles(.onSurface)
 
         let appearance = UINavigationBarAppearance()
         appearance.configureWithDefaultBackground()

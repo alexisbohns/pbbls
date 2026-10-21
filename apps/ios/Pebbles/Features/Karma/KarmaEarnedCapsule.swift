@@ -17,10 +17,10 @@ struct KarmaEarnedCapsule: View {
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: "sparkle")
-                .foregroundStyle(Color.accent.primary)
+                .foregroundStyle(Color.pebbles.primary)
             Text("+\(content.amount) karma")
                 .font(.ysabeauSemibold(16))
-                .foregroundStyle(Color.system.foreground)
+                .foregroundStyle(Color.pebbles.onSurface)
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 11)
@@ -41,7 +41,7 @@ struct KarmaEarnedCapsule: View {
     private var countdownRing: some View {
         Capsule()
             .trim(from: 0, to: ringProgress)
-            .stroke(Color.accent.primary, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+            .stroke(Color.pebbles.primary, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
             .padding(1.25)  // keep the stroke inside the pastille edge
             .allowsHitTesting(false)
     }
@@ -74,12 +74,12 @@ private extension View {
                 // so the shadow is cast once as a single capsule silhouette.
                 .background {
                     Capsule()
-                        .fill(Color.system.background)
+                        .fill(Color.pebbles.stock)
                         .overlay(Capsule().fill(.regularMaterial))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.22), lineWidth: 0.5))
+                        .overlay(Capsule().strokeBorder(Color.pebbles.rule, lineWidth: 0.5))
                 }
                 .compositingGroup()
-                .shadow(color: .black.opacity(0.16), radius: 12, y: 4)
+                .shadow(color: Color.pebbles.scrim.opacity(0.16), radius: 12, y: 4)
         }
     }
 }
@@ -140,7 +140,7 @@ final class KarmaPassthroughWindow: UIWindow {
     // both). Toggle light/dark with the appearance control in the canvas.
     ZStack {
         LinearGradient(
-            colors: [.indigo, .purple, .orange],
+            colors: [Color.pebbles.primary, Color.pebbles.tertiary, Color.pebbles.sand],
             startPoint: .topLeading, endPoint: .bottomTrailing
         )
         .ignoresSafeArea()

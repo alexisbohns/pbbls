@@ -17,12 +17,12 @@ struct RecordWhenStep: View {
             )
             .datePickerStyle(.graphical)
             .labelsHidden()
-            .tint(Color.accent.primary)
+            .tint(Color.pebbles.primary)
 
             if seededFromPhoto {
                 Label("Taken from your photo", systemImage: "sparkles")
                     .pebblesFont(.subhead)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
             }
         }
     }

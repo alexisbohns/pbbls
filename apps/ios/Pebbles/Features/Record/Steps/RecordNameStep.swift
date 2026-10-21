@@ -60,7 +60,7 @@ struct RecordNameStep: View {
                 .pebblesFont(.subhead)
                 .monospacedDigit()
                 .foregroundStyle(
-                    remaining == 0 ? Color.accent.primary : Color.system.secondary
+                    remaining == 0 ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant
                 )
                 .opacity(showsCountdown ? 1 : 0)
                 .animation(.easeInOut(duration: 0.2), value: showsCountdown)

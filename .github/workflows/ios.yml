@@ -87,7 +87,7 @@ jobs:
       - name: Verify privacy manifests
         run: npm run verify:privacy --workspace=@pbbls/ios
 
-      # SystemOnLight stays a single-appearance colorset clearing WCAG AA on
+      # M3/googleCapsuleInk stays a single-appearance colorset clearing WCAG AA on
       # the pinned white Google capsule. The Swift mirror of this assertion
       # needs a simulator; this half does not.
       - name: Verify colour contrast

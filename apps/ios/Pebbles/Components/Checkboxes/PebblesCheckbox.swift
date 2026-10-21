@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Consent checkbox: a 28pt rounded square (white when empty, accent when
+/// Consent checkbox: a 28pt rounded square (stock when empty, primary when
 /// checked) followed by a label that contains a tappable link fragment.
 /// Tap area on the box is at least 44×44pt regardless of the visual size,
 /// per HIG. The label tap fires `onLinkTap` (whole-label, since per-range
@@ -35,21 +35,21 @@ struct PebblesCheckbox: View {
     private var box: some View {
         ZStack {
             RoundedRectangle(cornerRadius: cornerRadius)
-                .fill(isChecked ? Color.accent.primary : Color.white)
+                .fill(isChecked ? Color.pebbles.primary : Color.pebbles.stock)
             RoundedRectangle(cornerRadius: cornerRadius)
-                .stroke(isChecked ? Color.accent.primary : Color.system.muted, lineWidth: 1)
+                .stroke(isChecked ? Color.pebbles.primary : Color.pebbles.outline, lineWidth: 1)
 
             Image(systemName: isChecked ? "checkmark.square" : "square")
                 .font(.title3)
-                .foregroundStyle(isChecked ? Color.system.background : Color.system.secondary)
+                .foregroundStyle(isChecked ? Color.pebbles.onPrimary : Color.pebbles.onSurfaceVariant)
         }
         .frame(width: boxSize, height: boxSize)
     }
 
     private var label: some View {
-        (Text(prefix) + Text(linkText).underline().foregroundColor(Color.accent.primary))
+        (Text(prefix) + Text(linkText).underline().foregroundColor(Color.pebbles.primary))
             .font(.subheadline)
-            .foregroundStyle(Color.system.secondary)
+            .foregroundStyle(Color.pebbles.onSurfaceVariant)
     }
 }
 
@@ -62,7 +62,7 @@ struct PebblesCheckbox: View {
         onLinkTap: {}
     )
     .padding()
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }
 
 #Preview("Checked") {
@@ -74,5 +74,5 @@ struct PebblesCheckbox: View {
         onLinkTap: {}
     )
     .padding()
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }

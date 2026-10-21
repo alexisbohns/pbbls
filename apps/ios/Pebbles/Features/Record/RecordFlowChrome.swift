@@ -18,7 +18,7 @@ struct RecordFlowChrome: View {
             Button(action: onBack) {
                 Image(systemName: "chevron.left")
                     .font(.body.weight(.medium))
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.plain)
@@ -36,7 +36,7 @@ struct RecordFlowChrome: View {
             Button(action: onClose) {
                 Image(systemName: "xmark")
                     .font(.body.weight(.medium))
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.plain)
@@ -60,7 +60,7 @@ struct RecordFlowChrome: View {
     }
 
     private func fill(for index: Int) -> Color {
-        index <= (dotIndex ?? -1) ? Color.accent.primary : Color.system.muted
+        index <= (dotIndex ?? -1) ? Color.pebbles.primary : Color.pebbles.outlineVariant
     }
 
     private var stepAnnouncement: Text {

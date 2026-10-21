@@ -70,7 +70,7 @@ struct RecordPhotoStep: View {
         .padding(Spacing.sm)
         .background(
             RoundedRectangle(cornerRadius: Spacing.xl, style: .continuous)
-                .fill(Color.accent.surface)
+                .fill(Color.pebbles.primaryContainer)
         )
     }
 
@@ -92,11 +92,11 @@ struct RecordPhotoStep: View {
         case .uploading:
             Text("Uploading…")
                 .pebblesFont(.subhead)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onPrimaryContainer)
         case .uploaded:
             Label("Ready", systemImage: "checkmark.circle.fill")
                 .pebblesFont(.subhead)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onPrimaryContainer)
         case .failed:
             Text("Upload failed")
                 .pebblesFont(.subhead)
@@ -133,10 +133,10 @@ struct RecordPhotoStep: View {
         VStack(spacing: Spacing.sm) {
             Image(systemName: "photo")
                 .font(.system(size: 40))
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
             Text("A photo is already attached.")
                 .pebblesFont(.subhead)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
             Button("Remove", action: onRemove)
                 .pebblesFont(.subhead)
                 .foregroundStyle(Color.pebbles.error)

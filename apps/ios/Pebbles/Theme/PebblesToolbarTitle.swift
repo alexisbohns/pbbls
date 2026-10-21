@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Adds a centered toolbar title rendered in the Pebbles `meta` typography
-/// token (uppercase, SF Compact Rounded, 12pt) and `system.secondary` color.
+/// token (uppercase, SF Compact Rounded, 12pt) and `onSurfaceVariant` color.
 ///
 /// Coexists with `.navigationTitle(...)` so VoiceOver and the back stack still
 /// see the page name; the system inline title slot is taken by this
@@ -19,7 +19,7 @@ extension View {
                 ToolbarItem(placement: .principal) {
                     Text(title)
                         .pebblesFont(.meta)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 }
             }
     }
@@ -34,7 +34,7 @@ extension View {
                 ToolbarItem(placement: .principal) {
                     Text(title)
                         .pebblesFont(.meta)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 }
             }
     }
@@ -42,7 +42,7 @@ extension View {
 
 #Preview {
     NavigationStack {
-        Color.system.background
+        Color.pebbles.surface
             .pebblesToolbarTitle("Preview title")
     }
 }

@@ -22,15 +22,15 @@ struct PebblesTextInput: View {
         ZStack(alignment: .leading) {
             if text.isEmpty {
                 Text(placeholder)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .padding(.horizontal, horizontalPadding)
                     .allowsHitTesting(false)
             }
 
             field
                 .font(.body)
-                .foregroundStyle(Color.system.secondary)
-                .tint(Color.accent.primary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                .tint(Color.pebbles.primary)
                 .textContentType(contentType)
                 .keyboardType(keyboard)
                 .textInputAutocapitalization(autocapitalization)
@@ -39,11 +39,11 @@ struct PebblesTextInput: View {
         }
         .frame(minHeight: minHeight)
         .background(
-            RoundedRectangle(cornerRadius: cornerRadius).fill(Color.white)
+            RoundedRectangle(cornerRadius: cornerRadius).fill(Color.pebbles.stock)
         )
         .overlay(
             RoundedRectangle(cornerRadius: cornerRadius)
-                .stroke(Color.system.muted, lineWidth: 1)
+                .stroke(Color.pebbles.outline, lineWidth: 1)
         )
     }
 
@@ -61,19 +61,19 @@ struct PebblesTextInput: View {
     @Previewable @State var text = ""
     return PebblesTextInput(placeholder: "Email", text: $text)
         .padding()
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
 }
 
 #Preview("Filled") {
     @Previewable @State var text = "hello@bohns.design"
     return PebblesTextInput(placeholder: "Email", text: $text)
         .padding()
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
 }
 
 #Preview("Secure") {
     @Previewable @State var text = "hunter22"
     return PebblesTextInput(placeholder: "Password", text: $text, isSecure: true)
         .padding()
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
 }

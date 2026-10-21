@@ -81,25 +81,13 @@ struct ThemeLiteralsTests {
     /// Shrinks to nothing by the end of the stack (A2: .red and owned
     /// destructive roles; A3a / A3b: the folders they migrate). Never raise it.
     static let debt: [String: Int] = [
-        "Components/Buttons/PebblesPrimaryButtonStyle.swift": 2,
-        "Components/Checkboxes/PebblesCheckbox.swift": 1,
-        "Components/Inputs/PebblesTextInput.swift": 1,
         "Features/Glyph/Views/GlyphCanvasView.swift": 1,
         "Features/Glyph/Views/GlyphPickerContent.swift": 1,
         "Features/Glyph/Views/GlyphTabBar.swift": 2,
         "Features/Glyph/Views/SlideToConfirm.swift": 1,
-        "Features/Karma/AchievementMomentView.swift": 1,
-        "Features/Karma/KarmaEarnedCapsule.swift": 2,
-        "Features/Lab/Components/FeaturedCommunityCard.swift": 1,
-        "Features/Onboarding/OnboardingView.swift": 3,
         "Features/Path/Components/PathPebbleRow.swift": 2,
         "Features/Path/Components/WeekPathView.swift": 1,
-        "Features/Path/Valence/ValenceStoneStyle.swift": 1,
-        "Features/PebbleMedia/AttachedPhotoView.swift": 2,
-        "Features/PebbleMedia/ExistingSnapRow.swift": 2,
-        "Features/PebbleMedia/SnapImageView.swift": 1,
-        "Features/Record/RecordStepScaffold.swift": 1,
-        "Features/Welcome/WelcomeView.swift": 1
+        "Features/Path/Valence/ValenceStoneStyle.swift": 1
     ]
 
     /// `apps/ios/Pebbles`, two levels up from this file (`apps/ios/PebblesTests/`).

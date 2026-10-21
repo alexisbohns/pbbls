@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// White capsule button with the multi-color G mark and "Continue with Google"
-/// label. 1pt border in `system.muted` so it reads against the page background.
+/// label. 1pt border in the `outline` role so it reads against the page background.
 struct GoogleSignInButton: View {
     var action: () -> Void
 
@@ -22,7 +22,7 @@ struct GoogleSignInButton: View {
             .frame(minHeight: minHeight)
         }
         .background(Capsule().fill(Self.surface))
-        .overlay(Capsule().stroke(Color.system.muted, lineWidth: 1))
+        .overlay(Capsule().stroke(Color.pebbles.outline, lineWidth: 1))
         .buttonStyle(.plain)
     }
 }
@@ -31,13 +31,14 @@ extension GoogleSignInButton {
     /// The capsule is a pinned light surface: the multi-colour G mark requires one.
     static let surface = Color.white
 
-    /// Ink for `surface`. Never `system.foreground`, which flips to a pale grey in
-    /// dark appearance and lands at 1.28:1 on white. See `SystemPalette.onLight`.
-    static let labelColor = Color.system.onLight
+    /// Ink for `surface`. Never `onSurface`, which flips to a pale grey in
+    /// dark appearance and lands at about 1.3:1 on white. The pinned value is
+    /// `GoogleCapsuleInk` in Android's `ColorSchemes.kt`.
+    static let labelColor = Color.pebbles.googleCapsuleInk
 }
 
 #Preview {
     GoogleSignInButton(action: {})
         .padding()
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
 }

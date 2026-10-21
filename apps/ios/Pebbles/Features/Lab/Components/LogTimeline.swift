@@ -51,14 +51,14 @@ struct LogTimeline<Trailing: View>: View {
                     if mode == .changelog, let date = log.releasedAt ?? log.publishedAt {
                         Text(date, format: Date.FormatStyle(date: .long, time: .omitted))
                             .font(.footnote)
-                            .foregroundStyle(Color.system.secondary)
+                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     }
                     Text(log.title(for: locale))
                         .font(.body)
-                        .foregroundStyle(Color.system.foreground)
+                        .foregroundStyle(Color.pebbles.onSurface)
                     Text(log.summary(for: locale))
                         .font(.footnote)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .lineLimit(3)
                 }
                 Spacer(minLength: 0)
@@ -78,14 +78,14 @@ struct LogTimeline<Trailing: View>: View {
             // the first row it's transparent so the timeline starts cleanly
             // at the icon.
             Rectangle()
-                .fill(isFirst ? Color.clear : Color.system.muted)
+                .fill(isFirst ? Color.clear : Color.pebbles.rule)
                 .frame(width: 1, height: 12)
             Image(systemName: iconName)
                 .font(.system(size: 14, weight: .regular))
                 .foregroundStyle(iconColor)
             if !isLast {
                 Rectangle()
-                    .fill(Color.system.muted)
+                    .fill(Color.pebbles.rule)
                     .frame(width: 1)
                     .frame(maxHeight: .infinity)
                     .padding(.top, 2)
@@ -104,8 +104,8 @@ struct LogTimeline<Trailing: View>: View {
 
     private var iconColor: Color {
         switch mode {
-        case .changelog:  return Color.accent.primary
-        case .inProgress, .backlog: return Color.system.secondary
+        case .changelog:  return Color.pebbles.primary
+        case .inProgress, .backlog: return Color.pebbles.onSurfaceVariant
         }
     }
 }

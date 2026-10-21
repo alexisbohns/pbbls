@@ -46,7 +46,7 @@ struct InviteAcceptSheet: View {
                      ? "You're already connected with \(accepted.peer.displayName ?? String(localized: "them"))."
                      : "You're connected with \(accepted.peer.displayName ?? String(localized: "them")).")
                     .pebblesFont(.cardHeading)
-                    .foregroundStyle(Color.system.foreground)
+                    .foregroundStyle(Color.pebbles.onSurface)
                     .multilineTextAlignment(.center)
                 Button("Done") {
                     onAccepted()
@@ -58,7 +58,7 @@ struct InviteAcceptSheet: View {
             centeredStack {
                 Text(loadError)
                     .pebblesFont(.callout)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .multilineTextAlignment(.center)
                 Button("Close") { dismiss() }
             }
@@ -67,11 +67,11 @@ struct InviteAcceptSheet: View {
                 glyphBadge(preview.inviter?.glyph)
                 Text("\(preview.inviter?.displayName ?? String(localized: "Someone")) invites you to connect.")
                     .pebblesFont(.cardHeading)
-                    .foregroundStyle(Color.system.foreground)
+                    .foregroundStyle(Color.pebbles.onSurface)
                     .multilineTextAlignment(.center)
                 Text("You'll both see each other in your connections. You can remove the connection at any time.")
                     .pebblesFont(.meta)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .multilineTextAlignment(.center)
 
                 if let acceptError {
@@ -99,14 +99,14 @@ struct InviteAcceptSheet: View {
             centeredStack {
                 Image(systemName: "link.badge.plus")
                     .font(.largeTitle)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 Text("This invite link isn't valid anymore.")
                     .pebblesFont(.cardHeading)
-                    .foregroundStyle(Color.system.foreground)
+                    .foregroundStyle(Color.pebbles.onSurface)
                     .multilineTextAlignment(.center)
                 Text("Ask for a fresh one and try again.")
                     .pebblesFont(.meta)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 Button("Close") { dismiss() }
             }
         }
@@ -124,7 +124,7 @@ struct InviteAcceptSheet: View {
     @ViewBuilder
     private func glyphBadge(_ glyph: PeerGlyph?) -> some View {
         if let glyph {
-            GlyphThumbnail(strokes: glyph.strokes, side: 72, strokeColor: Color.accent.primary)
+            GlyphThumbnail(strokes: glyph.strokes, side: 72, strokeColor: Color.pebbles.primary)
                 .frame(width: 72, height: 72)
                 .accessibilityHidden(true)
         }

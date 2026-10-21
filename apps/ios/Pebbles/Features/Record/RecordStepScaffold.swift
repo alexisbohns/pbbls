@@ -49,13 +49,13 @@ struct RecordStepScaffold<Content: View>: View {
             VStack(spacing: Spacing.xs) {
                 Text(title)
                     .pebblesFont(.title)
-                    .foregroundStyle(Color.system.foreground)
+                    .foregroundStyle(Color.pebbles.onSurface)
                     .multilineTextAlignment(.center)
 
                 if let subtitle {
                     Text(subtitle)
                         .pebblesFont(.subhead)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .multilineTextAlignment(.center)
                 }
             }
@@ -97,11 +97,11 @@ struct RecordStepScaffold<Content: View>: View {
         Button(action: secondary.perform) {
             Group {
                 if secondary.isLoading {
-                    ProgressView().tint(Color.accent.primary)
+                    ProgressView().tint(Color.pebbles.primary)
                 } else {
                     Text(secondary.label)
                         .pebblesFont(.bodyEmphasized)
-                        .foregroundStyle(Color.accent.primary)
+                        .foregroundStyle(Color.pebbles.primary)
                 }
             }
             .frame(maxWidth: .infinity, minHeight: 44)
@@ -120,7 +120,7 @@ struct RecordStepScaffold<Content: View>: View {
     private var floatingAction: some View {
         if let action {
             actionView(action)
-                .shadow(color: .black.opacity(0.22), radius: 14, y: 4)
+                .shadow(color: Color.pebbles.scrim.opacity(0.22), radius: 14, y: 4)
                 .padding(.horizontal, Spacing.xl)
                 .padding(.bottom, Spacing.lg)
         }

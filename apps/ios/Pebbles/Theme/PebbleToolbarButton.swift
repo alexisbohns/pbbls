@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Toolbar button wrapper that renders as a native iOS button (Liquid Glass
-/// capsule on iOS 26) with its label color pinned to `system.secondary`.
+/// capsule on iOS 26) with its label color pinned to `onSurfaceVariant`.
 ///
 /// Exists so toolbar buttons render in the branded "secondary" color rather
 /// than the ambient accent set by `pebblesScreen()`, and so the rule has one
@@ -22,7 +22,7 @@ struct PebbleToolbarButton<Label: View>: View {
 
     var body: some View {
         Button(role: role, action: action) { label() }
-            .tint(Color.system.secondary)
+            .tint(Color.pebbles.onSurfaceVariant)
     }
 }
 
@@ -37,7 +37,7 @@ extension PebbleToolbarButton where Label == Text {
 
 #Preview {
     NavigationStack {
-        Color.system.background
+        Color.pebbles.surface
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     PebbleToolbarButton("Cancel") {}
