@@ -23,12 +23,13 @@ struct StoneMaterialTests {
         #expect(material.uniforms == [1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     }
 
-    @Test("starting tones follow the spec table")
+    @Test("starting tones follow the lab paste of 2026-10-21")
     func startingTones() {
         #expect(StoneTones.starting(for: .lowlight).body.slot == .dark)
         #expect(StoneTones.starting(for: .neutral).body.slot == .shaded)
         #expect(StoneTones.starting(for: .highlight).body.slot == .primary)
-        #expect(StoneTones.starting(for: .highlight).ink.slot == .secondary)
+        #expect(StoneTones.starting(for: .highlight).ink.slot == .light)
+        #expect(StoneTones.starting(for: .highlight).lipLight.slot == .secondary)
         #expect(StoneTones.starting(for: .lowlight).lipShadow.slot == .shaded)
         #expect(StoneTones.starting(for: .neutral).lipShadow.opacity < 1)
     }
@@ -50,5 +51,19 @@ struct StoneMaterialTests {
         #expect(abs(light.direction.dx - 0.6) < 0.001)
         #expect(abs(light.direction.dy + 0.8) < 0.001)
         #expect(StoneLight(pointingTo: .zero, elevationDegrees: 40).direction == StoneLight.rest.direction)
+    }
+
+    @Test("starting tables transcribe the lab paste of 2026-10-21")
+    func startingTables() {
+        #expect(StoneMaterial.starting(for: .lowlight) == StoneMaterial(
+            kind: .lava, scale: 0.07, relief: 3.6, contrast: 1, sheen: 0.05,
+            facetDensity: 1, glitter: 0, pits: 1, banding: 0, lipWidth: 0.5, lipOpacity: 0.84))
+        #expect(StoneMaterial.starting(for: .neutral) == StoneMaterial(
+            kind: .river, scale: 0.16, relief: 1.31, contrast: 0.58, sheen: 0.2,
+            facetDensity: 1, glitter: 0, pits: 0, banding: 0.5, lipWidth: 1.2, lipOpacity: 0.7))
+        #expect(StoneMaterial.starting(for: .highlight) == StoneMaterial(
+            kind: .gem, scale: 0.08, relief: 1.05, contrast: 0.61, sheen: 0.51,
+            facetDensity: 2.72, glitter: 0.85, pits: 0, banding: 0,
+            rimWidth: 3.63, rimStrength: 0.67, lipWidth: 0.93, lipOpacity: 0.97))
     }
 }

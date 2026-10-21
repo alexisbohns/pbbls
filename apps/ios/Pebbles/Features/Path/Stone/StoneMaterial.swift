@@ -51,22 +51,23 @@ struct StoneMaterial: Equatable, Codable {
          Float(rimWidth), Float(rimStrength)]
     }
 
-    /// The maintainer's picks on the phone (2026-09-27, second round),
-    /// pasted from the lab's Copy button.
+    /// The maintainer's picks on the iPhone 15 (2026-10-21), pasted from the
+    /// lab's Copy button (#1097). Lowlight kept the spec §B3.3 values.
     static func starting(for polarity: ValencePolarity) -> StoneMaterial {
         switch polarity {
         case .lowlight:
-            return StoneMaterial(kind: .lava, scale: 0.05, relief: 3, contrast: 1, sheen: 0.05,
+            return StoneMaterial(kind: .lava, scale: 0.07, relief: 3.6, contrast: 1, sheen: 0.05,
                                  facetDensity: 1, glitter: 0, pits: 1, banding: 0,
                                  lipWidth: 0.5, lipOpacity: 0.84)
         case .neutral:
-            return StoneMaterial(kind: .river, scale: 0.2, relief: 1.28, contrast: 0.64, sheen: 0.18,
+            return StoneMaterial(kind: .river, scale: 0.16, relief: 1.31, contrast: 0.58, sheen: 0.2,
                                  facetDensity: 1, glitter: 0, pits: 0, banding: 0.5,
                                  lipWidth: 1.2, lipOpacity: 0.7)
         case .highlight:
-            return StoneMaterial(kind: .gem, scale: 0.11, relief: 1.94, contrast: 0.59, sheen: 0.35,
-                                 facetDensity: 3, glitter: 1, pits: 0, banding: 0,
-                                 lipWidth: 1.47, lipOpacity: 0.94)
+            return StoneMaterial(kind: .gem, scale: 0.08, relief: 1.05, contrast: 0.61, sheen: 0.51,
+                                 facetDensity: 2.72, glitter: 0.85, pits: 0, banding: 0,
+                                 rimWidth: 3.63, rimStrength: 0.67,
+                                 lipWidth: 0.93, lipOpacity: 0.97)
         }
     }
 }

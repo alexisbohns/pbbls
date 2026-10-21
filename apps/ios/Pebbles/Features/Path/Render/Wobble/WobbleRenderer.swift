@@ -122,24 +122,42 @@ enum WobbleRenderer {
     static func backdropArt(size: ValenceSizeGroup, polarity: ValencePolarity) -> WobbleBackdropArt? {
         let name = "\(size.rawValue)-\(polarity.rawValue)"
         return memoized(backdropCache, key: name as NSString) {
-            guard let url = Bundle.main.url(forResource: name, withExtension: "svg"),
-                  let raw = try? String(contentsOf: url, encoding: .utf8) else {
-                logger.error("wobble backdrop: missing outline asset \(name, privacy: .public).svg")
-                return nil
-            }
-            guard let art = backdropArt(fromAsset: raw) else {
-                logger.error("wobble backdrop: could not parse outline asset \(name, privacy: .public).svg")
-                return nil
-            }
-            return art
+            outlineAsset(named: name).flatMap { parsedBackdropArt(named: name, raw: $0, wobble: true) }
         }
+    }
+
+    /// The same outline asset with no displacement: the soft edge the gem and
+    /// river stones wear (#1097, web #1088). Memoised under `"<name>-soft"`.
+    static func softBackdropArt(size: ValenceSizeGroup, polarity: ValencePolarity) -> WobbleBackdropArt? {
+        let name = "\(size.rawValue)-\(polarity.rawValue)"
+        return memoized(backdropCache, key: "\(name)-soft" as NSString) {
+            outlineAsset(named: name).flatMap { parsedBackdropArt(named: name, raw: $0, wobble: false) }
+        }
+    }
+
+    private static func outlineAsset(named name: String) -> String? {
+        guard let url = Bundle.main.url(forResource: name, withExtension: "svg"),
+              let raw = try? String(contentsOf: url, encoding: .utf8) else {
+            logger.error("wobble backdrop: missing outline asset \(name, privacy: .public).svg")
+            return nil
+        }
+        return raw
+    }
+
+    private static func parsedBackdropArt(named name: String, raw: String, wobble: Bool) -> WobbleBackdropArt? {
+        guard let art = backdropArt(fromAsset: raw, wobble: wobble) else {
+            logger.error("wobble backdrop: could not parse outline asset \(name, privacy: .public).svg")
+            return nil
+        }
+        return art
     }
 
     /// Parses one outline asset — a single filled `<path>`, the verified shape
     /// of all nine bundled files — and displaces its contours. No outline
     /// building: the silhouette is already a fill region, so wobbling its edge
-    /// is the whole effect.
-    static func backdropArt(fromAsset raw: String) -> WobbleBackdropArt? {
+    /// is the whole effect. `wobble: false` keeps the parsed contour and skips
+    /// only the displacement.
+    static func backdropArt(fromAsset raw: String, wobble: Bool = true) -> WobbleBackdropArt? {
         guard
             let viewBoxAttribute = attribute("viewBox", in: raw),
             let viewBox = parseViewBox(viewBoxAttribute),
@@ -151,7 +169,7 @@ enum WobbleRenderer {
         let params = WobbleParams.scaled(for: viewBox.size)
         let wobbled = CGMutablePath()
         for polyline in WobblePathFlattener.flatten(path, step: params.flattenStep) {
-            let displaced = polyline.points.map { params.displace($0, using: noise) }
+            let displaced = wobble ? polyline.points.map { params.displace($0, using: noise) } : polyline.points
             guard displaced.count > 2, let first = displaced.first else { continue }
             wobbled.move(to: first)
             for point in displaced.dropFirst() {
@@ -196,7 +214,7 @@ enum WobbleRenderer {
 
     /// First `name="…"` attribute value in `svg`. The word boundary keeps
     /// `d=` from matching `id=`.
-    private static func attribute(_ name: String, in svg: String) -> String? {
+    static func attribute(_ name: String, in svg: String) -> String? {
         guard
             let regex = try? NSRegularExpression(pattern: "(?<![\\w-])\(name)=\"([^\"]*)\""),
             let match = regex.firstMatch(in: svg, range: NSRange(svg.startIndex..., in: svg)),

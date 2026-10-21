@@ -1,10 +1,10 @@
 import SwiftUI
 
-/// One stone under the lab's light. Bottom to top: the wobbled backdrop
-/// silhouette filled with the body tone and painted by the `stone` shader,
-/// the carving (outline, veins, fossil, glyph) shaded by `carve`, and a sheen
-/// pool masked by the silhouette. `isFlat` draws the feed rendering instead:
-/// body tone and ink, no shader, no sheen.
+/// One stone under the lab's light. Bottom to top: the backdrop silhouette
+/// (wobbled for lava, soft for gem and river) filled with the body tone and
+/// painted by the `stone` shader, the carving (outline, veins, fossil, glyph)
+/// shaded by `carve`, and a sheen pool masked by the silhouette. `isFlat`
+/// draws the feed rendering instead: body tone and ink, no shader, no sheen.
 ///
 /// Nothing here reads time. The view redraws when a parameter changes.
 struct StoneView: View {
@@ -26,6 +26,21 @@ struct StoneView: View {
     private var width: CGFloat { height * PebbleOutlineGeometry.aspectRatio(for: size) }
     /// A different crust per shape, stable across launches.
     private var seed: Int { Valence.allCases.firstIndex(of: valence).map { $0 * 31 + 7 } ?? 7 }
+
+    /// Lava keeps the wobbled edge; gem and river take the asset's own soft
+    /// outline (#1097, web #1088). Keyed on the material, not the valence, so
+    /// the lab's Kind picker moves the edge with the surface. The glyph stays
+    /// wobbled either way.
+    static func usesWobbledSilhouette(_ kind: StoneMaterial.Kind) -> Bool {
+        kind == .lava
+    }
+
+    /// The one silhouette body, edge, shadow and sheen are drawn from.
+    private var silhouette: WobbleBackdropArt? {
+        Self.usesWobbledSilhouette(material.kind)
+            ? WobbleRenderer.backdropArt(size: size, polarity: valence.polarity)
+            : WobbleRenderer.softBackdropArt(size: size, polarity: valence.polarity)
+    }
 
     var body: some View {
         ZStack {
@@ -49,7 +64,7 @@ struct StoneView: View {
 
     @ViewBuilder
     private var bodyLayer: some View {
-        if let art = WobbleRenderer.backdropArt(size: size, polarity: valence.polarity) {
+        if let art = silhouette {
             let shape = WobbledBackdropShape(art: art)
             let fill = shape.fill(tones.color(tones.body, in: palette), style: FillStyle(eoFill: art.usesEvenOddFill))
             if isFlat {
@@ -117,7 +132,7 @@ struct StoneView: View {
     /// body, it follows the edge exactly, which the engine outline never could.
     @ViewBuilder
     private var edgeLayer: some View {
-        if let art = WobbleRenderer.backdropArt(size: size, polarity: valence.polarity) {
+        if let art = silhouette {
             let line = WobbledBackdropShape(art: art)
                 .stroke(tones.color(tones.ink, in: palette), style: StrokeStyle(lineWidth: look.edgeWidth, lineCap: .round, lineJoin: .round))
                 .scaleEffect(1 - look.edgeInset)
@@ -140,7 +155,7 @@ struct StoneView: View {
     /// stone sits on the page. Static: rendered once per parameter change.
     @ViewBuilder
     private var shadowLayer: some View {
-        if let art = WobbleRenderer.backdropArt(size: size, polarity: valence.polarity) {
+        if let art = silhouette {
             let push = light.lipOffset(width: -Double(height) * 0.03)
             // On a light page a black shadow at the lab's strength reads as
             // soot; the palette's darkest tone at a third of it sits the stone
@@ -158,7 +173,7 @@ struct StoneView: View {
 
     @ViewBuilder
     private var sheenLayer: some View {
-        if let art = WobbleRenderer.backdropArt(size: size, polarity: valence.polarity) {
+        if let art = silhouette {
             let center = light.poolCenter
             RadialGradient(
                 colors: [Color.white.opacity(0.9), Color.white.opacity(0.25), .clear],
