@@ -11,10 +11,6 @@ struct PathBottomBar: View {
     let ripple: RippleSummary?
     let onProfile: () -> Void
 
-    private var numberColor: Color {
-        Color.pebbles.primary
-    }
-
     var body: some View {
         HStack(spacing: 0) {
             Button(action: onProfile) {
@@ -50,7 +46,7 @@ struct PathBottomBar: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text(karma.map { "\($0)" } ?? "—")
                     .font(.ysabeauSemibold(17))
-                    .foregroundStyle(numberColor)
+                    .foregroundStyle(Color.pebbles.primary)
                 Text("karma")
                     .font(.caption)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)

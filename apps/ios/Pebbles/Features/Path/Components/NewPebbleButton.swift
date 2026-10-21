@@ -21,7 +21,10 @@ struct NewPebbleButton: View {
                 .foregroundStyle(Color.pebbles.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
-                .background(RoundedRectangle(cornerRadius: Self.cornerRadius).fill(Color.pebbles.surfaceContainerHighest))
+                .background(
+                    RoundedRectangle(cornerRadius: Self.cornerRadius)
+                        .fill(Color.pebbles.surfaceContainerHighest)
+                )
         }
         .buttonStyle(.plain)
         .accessibilityLabel("New pebble")

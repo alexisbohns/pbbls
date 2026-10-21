@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The six tones a stone is coloured from. The picker uses
+/// The six tones a stone is coloured from. The picker builds one from
 /// `brand`, the Path from an emotion's palette, the lab from a hex
 /// sextet; a `StoneTones` value then says which slot each role (body, ink,
 /// lips) takes. `dark` is the darkest tone and `shaded` the mid one.
