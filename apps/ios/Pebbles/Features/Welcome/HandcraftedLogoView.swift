@@ -18,7 +18,7 @@ struct HandcraftedLogoView: View {
     /// draw-on has already played once, so it holds/boils without redrawing.
     var startSettled: Bool = false
     /// Logo ink colour. Tinted with the brand accent by default.
-    var color: Color = .accent.primary
+    var color: Color = Color.pebbles.primary
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -256,19 +256,19 @@ struct HandcraftedLogoView: View {
     HandcraftedLogoView(shouldSettle: false)
         .frame(width: 160, height: 160)
         .padding()
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
 }
 
 #Preview("Settled (static)") {
     HandcraftedLogoView(shouldSettle: true)
         .frame(width: 160, height: 160)
         .padding()
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
 }
 
 #Preview("Cover (boil, no draw-on)") {
     HandcraftedLogoView(shouldSettle: false, startSettled: true)
         .frame(width: 160, height: 160)
         .padding()
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
 }

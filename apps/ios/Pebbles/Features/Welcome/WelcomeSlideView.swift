@@ -12,12 +12,12 @@ struct WelcomeSlideView: View {
         VStack(alignment: .center, spacing: 8) {
             Text(step.title)
                 .font(.custom("Ysabeau-SemiBold", size: 22))
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .multilineTextAlignment(.center)
 
             Text(step.description)
                 .font(.body)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, alignment: .center)

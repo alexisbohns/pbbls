@@ -94,8 +94,7 @@ struct ThemeLiteralsTests {
         "Features/PebbleMedia/AttachedPhotoView.swift": 2,
         "Features/PebbleMedia/ExistingSnapRow.swift": 2,
         "Features/PebbleMedia/SnapImageView.swift": 1,
-        "Features/Record/RecordStepScaffold.swift": 1,
-        "Features/Welcome/WelcomeView.swift": 1
+        "Features/Record/RecordStepScaffold.swift": 1
     ]
 
     /// `apps/ios/Pebbles`, two levels up from this file (`apps/ios/PebblesTests/`).
