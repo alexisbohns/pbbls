@@ -14,8 +14,6 @@ struct SoulItem: View {
     let count: Int?
     var onTap: (() -> Void)? = nil
 
-    @Environment(\.colorScheme) private var colorScheme
-
     var body: some View {
         Group {
             if let onTap {
@@ -57,7 +55,7 @@ struct SoulItem: View {
                             .foregroundStyle(fossilColor)
                         Text("\(count)")
                             .pebblesFont(.meta)
-                            .foregroundStyle(Color.system.secondary)
+                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     }
                 }
             }
@@ -86,12 +84,12 @@ struct SoulItem: View {
     private var nameToken: PebblesFont { .bodyLeadHand }
 
     private var nameColor: Color {
-        `case` == .selected ? Color.accent.primary : Color.system.secondary
+        `case` == .selected ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant
     }
 
-    /// Count icon uses AccentSecondary in light, AccentShaded in dark.
+    /// Count icon uses the secondaryContainer role.
     private var fossilColor: Color {
-        colorScheme == .dark ? Color.accent.shaded : Color.accent.secondary
+        Color.pebbles.secondaryContainer
     }
 }
 

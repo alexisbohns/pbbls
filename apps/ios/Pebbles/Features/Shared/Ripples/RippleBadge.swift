@@ -36,7 +36,7 @@ struct RippleBadge: View {
 
             Text(verbatim: "\(clampedLevel)")
                 .pebblesFont(.captionEmphasized)
-                .foregroundStyle(Color.system.foreground)
+                .foregroundStyle(Color.pebbles.onSurface)
         }
         .frame(width: 44, height: 44)
         .accessibilityElement(children: .ignore)
@@ -79,6 +79,6 @@ private struct RipplePreviewGrid: View {
             }
         }
         .padding()
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
     }
 }
