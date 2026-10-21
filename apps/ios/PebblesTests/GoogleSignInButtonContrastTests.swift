@@ -44,7 +44,9 @@ struct GoogleSignInButtonContrastTests {
 
     @Test("googleCapsuleInk resolves identically in all four appearances")
     func capsuleInkIsAppearanceIndependent() {
-        let looks: [(UIUserInterfaceStyle, UIAccessibilityContrast)] = [(.light, .normal), (.dark, .normal), (.light, .high), (.dark, .high)]
+        let looks: [(UIUserInterfaceStyle, UIAccessibilityContrast)] = [
+            (.light, .normal), (.dark, .normal), (.light, .high), (.dark, .high)
+        ]
         let resolved = looks.map { style, contrast in
             UIColor.pebbles(.googleCapsuleInk).resolvedColor(with: UITraitCollection { traits in
                 traits.userInterfaceStyle = style

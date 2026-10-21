@@ -32,7 +32,8 @@ extension GoogleSignInButton {
     static let surface = Color.white
 
     /// Ink for `surface`. Never `onSurface`, which flips to a pale grey in
-    /// dark appearance and lands at 1.28:1 on white. See `googleCapsuleInk`.
+    /// dark appearance and lands at about 1.3:1 on white. The pinned value is
+    /// `GoogleCapsuleInk` in Android's `ColorSchemes.kt`.
     static let labelColor = Color.pebbles.googleCapsuleInk
 }
 

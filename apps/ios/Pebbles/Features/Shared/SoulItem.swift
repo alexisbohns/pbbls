@@ -87,7 +87,8 @@ struct SoulItem: View {
         `case` == .selected ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant
     }
 
-    /// Count icon uses the secondaryContainer role.
+    /// A container role as a foreground, on purpose: Android's soul rows
+    /// draw the fossil count in `secondaryContainer` too.
     private var fossilColor: Color {
         Color.pebbles.secondaryContainer
     }
