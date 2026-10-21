@@ -17,7 +17,6 @@ struct StoneGlint: View {
             context.opacity = strength
             let width = size.width
             let height = size.height
-            let ink = StoneGlintInk.light
             if frame.stillSheen > 0 {
                 var sheen = context
                 sheen.opacity = strength * frame.stillSheen
@@ -25,9 +24,8 @@ struct StoneGlint: View {
                 sheen.rotate(by: .degrees(-24))
                 sheen.scaleBy(x: 1, y: 0.14 * height / (0.3 * width))
                 let radius = 0.3 * width
-                let glow = Gradient(colors: [ink.opacity(StoneGlintInk.sheenPeak), ink.opacity(0)])
                 sheen.fill(Path(ellipseIn: CGRect(x: -radius, y: -radius, width: 2 * radius, height: 2 * radius)),
-                           with: .radialGradient(glow, center: .zero, startRadius: 0, endRadius: radius))
+                           with: .radialGradient(Self.sheenGlow, center: .zero, startRadius: 0, endRadius: radius))
             }
             if let sweep = frame.sweep {
                 var band = context
@@ -35,8 +33,7 @@ struct StoneGlint: View {
                 band.rotate(by: .degrees(22))
                 band.translateBy(x: -width / 2 + sweep * StoneMotion.Sweep.travel * width, y: -height / 2)
                 let rect = CGRect(x: -0.55 * width, y: -0.4 * height, width: 0.38 * width, height: 1.8 * height)
-                let stops = Gradient(colors: [ink.opacity(0), ink.opacity(StoneGlintInk.sweepPeak), ink.opacity(0)])
-                band.fill(Path(rect), with: .linearGradient(stops, startPoint: CGPoint(x: rect.minX, y: 0),
+                band.fill(Path(rect), with: .linearGradient(Self.sweepBand, startPoint: CGPoint(x: rect.minX, y: 0),
                                                             endPoint: CGPoint(x: rect.maxX, y: 0)))
             }
             if frame.sparkAlpha > 0, frame.sparkScale > 0 {
@@ -44,13 +41,22 @@ struct StoneGlint: View {
                 spark.translateBy(x: 0.33 * width, y: 0.25 * height)
                 spark.rotate(by: .degrees(frame.sparkRotation))
                 spark.scaleBy(x: frame.sparkScale, y: frame.sparkScale)
-                spark.fill(Self.spark(radius: 0.085 * width), with: .color(ink.opacity(frame.sparkAlpha)))
+                spark.fill(Self.spark(radius: 0.085 * width),
+                           with: .color(StoneGlintInk.light.opacity(frame.sparkAlpha)))
             }
         }
         .frame(width: stone.width, height: stone.height)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
+
+    private static let sheenGlow = Gradient(colors: [
+        StoneGlintInk.light.opacity(StoneGlintInk.sheenPeak), StoneGlintInk.light.opacity(0)
+    ])
+    private static let sweepBand = Gradient(colors: [
+        StoneGlintInk.light.opacity(0), StoneGlintInk.light.opacity(StoneGlintInk.sweepPeak),
+        StoneGlintInk.light.opacity(0)
+    ])
 
     /// The mock's four-point star about the origin: quadratic arms pinched to 16 % of the radius.
     static func spark(radius r: CGFloat) -> Path {
