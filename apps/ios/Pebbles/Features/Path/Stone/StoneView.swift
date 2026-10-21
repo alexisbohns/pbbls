@@ -19,13 +19,23 @@ struct StoneView: View {
     var look: StoneLook = .standard
     /// What is carved. `.sample` (the default) is the picker and the lab.
     var carving: StoneCarving = .sample
+    /// A pebble's own crust (#1130 D1): `StableHash.seed(pebble.id)`, so each
+    /// stone's grain varies as on web and Android. Nil keeps the per-shape seed.
+    var seed: UInt32?
 
     @Environment(\.colorScheme) private var scheme
 
     private var size: ValenceSizeGroup { valence.sizeGroup }
     private var width: CGFloat { height * PebbleOutlineGeometry.aspectRatio(for: size) }
-    /// A different crust per shape, stable across launches.
-    private var seed: Int { Valence.allCases.firstIndex(of: valence).map { $0 * 31 + 7 } ?? 7 }
+    /// The pebble's seed when given, else a different crust per shape, stable across launches.
+    private var crustSeed: Int {
+        seed.map(Self.shaderSeed) ?? Valence.allCases.firstIndex(of: valence).map { $0 * 31 + 7 } ?? 7
+    }
+
+    /// The shader takes the seed as a Float, exact only to 24 bits; fold a 32-bit hash into them.
+    static func shaderSeed(_ seed: UInt32) -> Int {
+        Int(seed & 0x00FF_FFFF)
+    }
 
     /// Lava keeps the wobbled edge; gem and river take the asset's own soft
     /// outline (#1097, web #1088). Keyed on the material, not the valence, so
@@ -77,7 +87,7 @@ struct StoneView: View {
                 fill.layerEffect(
                     StoneShaders.stone(
                         material: material, tones: tones, palette: palette, scheme: scheme,
-                        light: light, unit: unit, seed: seed
+                        light: light, unit: unit, seed: crustSeed
                     ),
                     maxSampleOffset: CGSize(width: rim, height: rim)
                 )
