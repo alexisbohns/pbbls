@@ -39,10 +39,14 @@ enum SpineRakeTile {
                 if let shadow = SVGPathParser.parse(SpineRakeTile.shadow) {
                     context.stroke(Path(shadow), with: .color(SpineColors.rakeShadow(scheme: scheme)),
                                    style: StrokeStyle(lineWidth: 0.75, lineCap: .butt))
+                } else {
+                    SpineRakeTile.logger.error("spine rake shadow path did not parse")
                 }
                 if let lit = SVGPathParser.parse(SpineRakeTile.lit) {
                     context.stroke(Path(lit), with: .color(Color.pebbles.rakeLight),
                                    style: StrokeStyle(lineWidth: 0.6, lineCap: .butt))
+                } else {
+                    SpineRakeTile.logger.error("spine rake lit path did not parse")
                 }
             }
             .frame(width: SpineLayout.rakeTile.width, height: SpineLayout.rakeTile.height)
