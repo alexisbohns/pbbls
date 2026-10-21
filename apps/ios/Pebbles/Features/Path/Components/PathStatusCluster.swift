@@ -30,7 +30,7 @@ struct PathStatusCluster: View {
     }
 
     /// The caption sits under the number, so it stays legible at
-    /// accessibility sizes (as `PathBottomBar` did).
+    /// accessibility sizes.
     private var karmaStat: some View {
         HStack(spacing: 6) {
             Image(systemName: "sparkle")
