@@ -12,7 +12,8 @@ struct PathMomentDecodingTests {
     static let rows = Data(#"""
 [{"id":"3f1d2c4b-5a69-4788-9a0b-1c2d3e4f5a6b","name":"Picnic on the square","happened_at":"2026-10-08T11:10:00+00:00","created_at":"2026-10-08T11:12:41.376669+00:00","first_snap_path":null,"pebble":{"id": "3f1d2c4b-5a69-4788-9a0b-1c2d3e4f5a6b", "glyph": null, "souls": [{"id": "a1b2c3d4-0000-4000-8000-000000000001", "name": "Elio", "glyph_id": "b7c8d9e0-0000-4000-8000-0000000000e1"}, {"id": "a1b2c3d4-0000-4000-8000-000000000002", "name": "Mara", "glyph_id": "b7c8d9e0-0000-4000-8000-0000000000e2"}], "emotion": {"id": "50a68890-f6bb-e67a-6655-e84ff0b71f49", "name": "Joy", "slug": "joyful"}, "intensity": 2, "visibility": "private", "positiveness": 1}},
  {"id":"4a2e3d5c-6b7a-4899-8b1c-2d3e4f5a6b7c","name":null,"happened_at":"2026-10-10T17:05:00.123456+00:00","created_at":"2026-10-10T17:05:01+00:00","first_snap_path":"907e7d76-00d3-4e53-82a3-4849bf0a9614/d49168b5-b97a-4888-a787-43ec65bb416a","pebble":{"id": "5b3f4e6d-7c8b-49aa-9c2d-3e4f5a6b7c8d", "glyph": null, "souls": [], "emotion": null, "intensity": 1, "visibility": "private", "positiveness": 0}},
- {"id":"6c4a5f7e-8d9c-4abb-8d3e-4f5a6b7c8d9e","name":"Bread from the corner bakery","happened_at":"2026-10-07T16:20:00+00:00","created_at":"2026-10-07T16:20:00+00:00","first_snap_path":null,"pebble":null}]
+ {"id":"6c4a5f7e-8d9c-4abb-8d3e-4f5a6b7c8d9e","name":"Bread from the corner bakery","happened_at":"2026-10-07T16:20:00+00:00","created_at":"2026-10-07T16:20:00+00:00","first_snap_path":null,"pebble":null},
+ {"id":"7d5b6a8f-9e0d-4bcc-9e4f-5a6b7c8d9e0f","name":"Rain on the window","happened_at":"2026-10-09T05:30:00+00:00","created_at":"2026-10-09T05:30:00+00:00","first_snap_path":null,"pebble":{"id": "8e6c7b9a-0f1e-4cdd-8f5a-6b7c8d9e0f1a", "glyph": null, "souls": null, "emotion": null, "intensity": 3, "visibility": "private", "positiveness": -1}}]
 """#.utf8)
     // swiftlint:enable line_length
 
@@ -44,6 +45,14 @@ struct PathMomentDecodingTests {
         #expect(row.pebble == nil)
         #expect(row.soulIds == [])
         #expect(!row.isPebble)
+    }
+
+    @Test("an explicit null souls decodes as no souls")
+    func nullSouls() throws {
+        let row = try decode(Self.rows)[3]
+        #expect(row.pebble?.souls == [])
+        #expect(row.soulIds == [])
+        #expect(row.isPebble)
     }
 
     @Test("the captured pre-#1121 rows decode with no souls")
