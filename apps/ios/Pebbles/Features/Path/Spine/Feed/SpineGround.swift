@@ -15,9 +15,12 @@ struct SpineGround: View {
             let width = max(proxy.size.width, 1)
             ZStack(alignment: .topLeading) {
                 if let tile = SpineRakeTile.image(scheme: scheme, scale: displayScale) {
+                    // From the first hairline down, as the line: the band the label hangs in stays bare.
                     Image(uiImage: tile)
                         .resizable(resizingMode: .tile)
                         .mask(mask(width: width))
+                        .frame(width: width, height: max(0, proxy.size.height - SpineLayout.seamOverhang))
+                        .offset(y: SpineLayout.seamOverhang)
                 }
                 Rectangle()
                     .fill(Color.pebbles.line)
