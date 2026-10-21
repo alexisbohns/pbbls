@@ -92,3 +92,72 @@ struct TabNavigationTests {
         #expect(nav.depth(of: .path) == 0)
     }
 }
+
+/// #903 §3 / §11: restoration survives a system kill, and a snapshot from an
+/// older build never crashes the launch.
+@Suite("TabNavigation — snapshot")
+@MainActor
+struct TabNavigationSnapshotTests {
+    private let soulId = UUID(uuidString: "11111111-1111-1111-1111-111111111111")!
+    private let collectionId = UUID(uuidString: "22222222-2222-2222-2222-222222222222")!
+
+    @Test("snapshot and restore round-trip every stack and the selection")
+    func roundTrip() throws {
+        let nav = TabNavigation()
+        nav.select(.collections)
+        nav.people = [.soul(soulId), .connections]
+        nav.collections = [.collection(collectionId)]
+        nav.you = [.glyphs, .achievements, .lab]
+
+        let data = try #require(nav.snapshot.encoded)
+        let restored = TabNavigation()
+        restored.restore(try #require(TabNavigation.Snapshot.decoded(from: data)))
+
+        #expect(restored.snapshot == nav.snapshot)
+        #expect(restored.selected == .collections)
+        #expect(restored.people == [.soul(soulId), .connections])
+        #expect(restored.collections == [.collection(collectionId)])
+        #expect(restored.you == [.glyphs, .achievements, .lab])
+    }
+
+    @Test("an unknown tab raw value decodes to Path and keeps the stacks")
+    func unknownTab() throws {
+        let json = #"{"selected":"settings","path":[],"people":[{"connections":{}}],"collections":[],"you":[]}"#
+        let snapshot = try #require(TabNavigation.Snapshot.decoded(from: Data(json.utf8)))
+        #expect(snapshot.selected == .path)
+        #expect(snapshot.people == [.connections])
+    }
+
+    @Test("a removed route case drops that stack to root, not the whole snapshot")
+    func removedRouteCase() throws {
+        let json = #"{"selected":"you","path":[],"people":[{"connections":{}}],"collections":[],"you":[{"wallet":{}}]}"#
+        let snapshot = try #require(TabNavigation.Snapshot.decoded(from: Data(json.utf8)))
+        #expect(snapshot.selected == .you)
+        #expect(snapshot.you.isEmpty)
+        #expect(snapshot.people == [.connections])
+    }
+
+    @Test("missing keys decode to defaults")
+    func missingKeys() throws {
+        let snapshot = try #require(TabNavigation.Snapshot.decoded(from: Data("{}".utf8)))
+        #expect(snapshot == TabNavigation.Snapshot())
+    }
+
+    @Test("bytes that are not a snapshot decode to nil")
+    func garbage() {
+        #expect(TabNavigation.Snapshot.decoded(from: Data("not json".utf8)) == nil)
+    }
+
+    @Test("reset empties every stack, the selection and the scroll tokens")
+    func reset() {
+        let nav = TabNavigation()
+        nav.select(.people)
+        nav.people = [.soul(soulId)]
+        nav.you = [.lab]
+        nav.select(.path)
+        nav.select(.path)
+        nav.reset()
+        #expect(nav.snapshot == TabNavigation.Snapshot())
+        #expect(nav.scrollToTop.isEmpty)
+    }
+}

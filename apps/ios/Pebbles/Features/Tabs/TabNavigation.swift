@@ -50,4 +50,74 @@ final class TabNavigation {
         case .you: you.count
         }
     }
+
+    // MARK: - Restoration
+
+    /// The `Codable` mirror of the five navigation fields, written to
+    /// `@SceneStorage("tabs.navigation")` by `RootView`. Decoding is tolerant
+    /// per field: an unknown tab or a removed route case falls back to that
+    /// field's default rather than failing the whole snapshot.
+    struct Snapshot: Codable, Equatable {
+        var selected: AppTab
+        var path: [PathRoute]
+        var people: [PeopleRoute]
+        var collections: [CollectionsRoute]
+        var you: [YouRoute]
+
+        enum CodingKeys: String, CodingKey {
+            case selected, path, people, collections, you
+        }
+
+        init(
+            selected: AppTab = .path,
+            path: [PathRoute] = [],
+            people: [PeopleRoute] = [],
+            collections: [CollectionsRoute] = [],
+            you: [YouRoute] = []
+        ) {
+            self.selected = selected
+            self.path = path
+            self.people = people
+            self.collections = collections
+            self.you = you
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            self.init(
+                selected: (try? container.decode(AppTab.self, forKey: .selected)) ?? .path,
+                path: (try? container.decode([PathRoute].self, forKey: .path)) ?? [],
+                people: (try? container.decode([PeopleRoute].self, forKey: .people)) ?? [],
+                collections: (try? container.decode([CollectionsRoute].self, forKey: .collections)) ?? [],
+                you: (try? container.decode([YouRoute].self, forKey: .you)) ?? []
+            )
+        }
+
+        /// nil when the bytes are not a JSON object at all.
+        static func decoded(from data: Data) -> Snapshot? {
+            try? JSONDecoder().decode(Snapshot.self, from: data)
+        }
+
+        var encoded: Data? {
+            try? JSONEncoder().encode(self)
+        }
+    }
+
+    var snapshot: Snapshot {
+        Snapshot(selected: selected, path: path, people: people, collections: collections, you: you)
+    }
+
+    func restore(_ snapshot: Snapshot) {
+        selected = snapshot.selected
+        path = snapshot.path
+        people = snapshot.people
+        collections = snapshot.collections
+        you = snapshot.you
+    }
+
+    /// Sign-out (#903 §6): the next account inherits nothing.
+    func reset() {
+        restore(Snapshot())
+        scrollToTop = [:]
+    }
 }
