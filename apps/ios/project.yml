@@ -118,7 +118,13 @@ targets:
     platform: iOS
     deploymentTarget: "17.0"
     sources:
+      # The reference PNGs are read and written through #filePath (the
+      # simulator shares the host filesystem), never from the bundle. Left in,
+      # XcodeGen copies them as resources, and two suites with the same file
+      # name would collide ("Multiple commands produce").
       - path: PebblesTests
+        excludes:
+          - "References/__References__/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.pbbls.ios.tests
