@@ -16,6 +16,8 @@ struct SnapAspectCacheTests {
         var count = 0
     }
 
+    private struct Failure: Error {}
+
     private static func png(width: Int, height: Int) -> Data {
         let space = CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB()
         let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
@@ -29,9 +31,9 @@ struct SnapAspectCacheTests {
         return data as Data
     }
 
-    private func cache(loads: Loads, timeout: Duration = .seconds(4),
+    private func cache(loads: Loads, timeout: Duration = .seconds(4), provider: FakeSignedURLProvider? = nil,
                        load: @escaping @Sendable () async throws -> Data) -> (SnapAspectCache, FakeSignedURLProvider) {
-        let provider = FakeSignedURLProvider()
+        let provider = provider ?? FakeSignedURLProvider()
         let urls = SnapURLCache(provider: provider, now: { Date() })
         let aspects = SnapAspectCache(urls: urls, load: { _ in
             loads.count += 1
@@ -62,6 +64,64 @@ struct SnapAspectCacheTests {
         #expect(await aspects.probe("slow") == nil)
         #expect(await aspects.probe("slow") == nil)
         #expect(loads.count == 1)
+    }
+
+    @Test("a signer that hangs is cut by the same timeout, so the load never starts")
+    func hangingSigner() async {
+        let loads = Loads()
+        let provider = FakeSignedURLProvider()
+        provider.suspendUntilResumed = true
+        let (aspects, _) = cache(loads: loads, timeout: .milliseconds(50), provider: provider) { Data() }
+        #expect(await aspects.probe("hung") == nil)
+        #expect(await aspects.probe("hung") == nil)
+        #expect(loads.count == 0 && provider.callCount == 1)
+        provider.resumePending()
+    }
+
+    @Test("a signer that throws fails the probe once")
+    func throwingSigner() async {
+        let loads = Loads()
+        let provider = FakeSignedURLProvider()
+        provider.results = [.failure(Failure())]
+        let (aspects, _) = cache(loads: loads, provider: provider) { Data() }
+        #expect(await aspects.probe("unsigned") == nil)
+        #expect(await aspects.probe("unsigned") == nil)
+        #expect(loads.count == 0 && provider.callCount == 1)
+    }
+
+    @Test("a loader that throws fails the probe once")
+    func throwingLoader() async {
+        let loads = Loads()
+        let (aspects, _) = cache(loads: loads) { throw Failure() }
+        #expect(await aspects.probe("offline") == nil)
+        #expect(await aspects.probe("offline") == nil)
+        #expect(loads.count == 1)
+    }
+
+    @Test("concurrent probes of one path share a single load")
+    func concurrent() async {
+        let loads = Loads()
+        let data = Self.png(width: 20, height: 10)
+        let (aspects, provider) = cache(loads: loads) {
+            try await Task.sleep(for: .milliseconds(50))
+            return data
+        }
+        async let first = aspects.probe("shared")
+        async let second = aspects.probe("shared")
+        let ratios = await [first, second]
+        #expect(ratios == [2, 2])
+        #expect(loads.count == 1 && provider.callCount == 1)
+    }
+
+    @Test("prefetch probes each new path once and skips the known ones")
+    func prefetch() async {
+        let loads = Loads()
+        let data = Self.png(width: 30, height: 20)
+        let (aspects, _) = cache(loads: loads) { data }
+        aspects.prime("known", ratio: 1)
+        await aspects.prefetch(["a", "b", "a", "known"])
+        #expect(loads.count == 2)
+        #expect(aspects.ratio(for: "a") == 1.5 && aspects.ratio(for: "b") == 1.5 && aspects.ratio(for: "known") == 1)
     }
 
     @Test("an unreadable body is a failure too, and is not retried")

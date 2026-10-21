@@ -4,12 +4,13 @@ import ImageIO
 import Observation
 import os
 
-/// Photo ratios for the Spine's cards (#1130 D3). The thumb is signed through
+/// Photo ratios for the Spine's cards (#1130). The thumb is signed through
 /// `SnapURLCache`, downloaded, and its header read with
 /// `CGImageSourceCopyPropertiesAtIndex`, which does not decode. Ratios are kept
-/// by storage path for the session; a probe that fails or passes 4 s logs a
-/// warning once and is not retried in the session. Neither `path_moments` nor
-/// `MomentDetail.snaps` carries dimensions. New pattern, named in the D2b PR.
+/// by storage path for the session; a probe that fails or passes 4 s (signing
+/// and download together, as Android's `SnapAspectCache.kt`) logs a warning
+/// once and is not retried in the session. Neither `path_moments` nor
+/// `MomentDetail.snaps` carries dimensions.
 @Observable @MainActor
 final class SnapAspectCache {
     typealias Loader = @Sendable (URL) async throws -> Data
@@ -55,44 +56,72 @@ final class SnapAspectCache {
         return ratio
     }
 
-    /// The focused week's photos and its pager neighbours' (§Data flow).
+    /// The focused week's photos and its pager neighbours' (§Data flow), probed together.
     func prefetch(_ paths: [String]) async {
-        for path in Set(paths) where ratios[path] == nil && !failed.contains(path) {
-            await probe(path)
+        let pending = Set(paths).filter { ratios[$0] == nil && !failed.contains($0) }
+        await withTaskGroup(of: Void.self) { group in
+            for path in pending {
+                group.addTask { await self.probe(path) }
+            }
         }
     }
 
     private func fetch(_ path: String) async -> CGFloat? {
         do {
-            let url = try await urls.signedURLs(storagePath: path).thumb
-            let data = try await Self.withTimeout(timeout) { [load] in try await load(url) }
+            let data = try await Self.withTimeout(timeout) { [urls, load] in
+                let url = try await urls.signedURLs(storagePath: path).thumb
+                return try await load(url)
+            }
             guard let ratio = Self.ratio(ofImage: data) else {
                 logger.warning("snap ratio unreadable for \(path, privacy: .public)")
                 return nil
             }
             return ratio
         } catch {
-            logger.warning(
-                "snap ratio probe failed for \(path, privacy: .public): \(error.localizedDescription, privacy: .private)"
-            )
+            let reason = error.localizedDescription
+            logger.warning("snap ratio probe failed for \(path, privacy: .public): \(reason, privacy: .private)")
             return nil
         }
     }
 
     private struct Timeout: Error {}
 
-    private nonisolated static func withTimeout(
-        _ limit: Duration, _ work: @escaping @Sendable () async throws -> Data
-    ) async throws -> Data {
-        try await withThrowingTaskGroup(of: Data.self) { group in
-            group.addTask { try await work() }
-            group.addTask {
-                try await Task.sleep(for: limit)
-                throw Timeout()
+    /// Resumes its continuation once: with the work's result or with `Timeout`, whichever comes first.
+    private final class Race<T: Sendable>: @unchecked Sendable {
+        private let lock = NSLock()
+        private var continuation: CheckedContinuation<T, Error>?
+
+        init(_ continuation: CheckedContinuation<T, Error>) {
+            self.continuation = continuation
+        }
+
+        /// True when this call won the race.
+        @discardableResult
+        func finish(_ result: Result<T, Error>) -> Bool {
+            lock.lock()
+            let winner = continuation
+            continuation = nil
+            lock.unlock()
+            winner?.resume(with: result)
+            return winner != nil
+        }
+    }
+
+    /// `work`'s result, or `Timeout` after `limit`. Unstructured on purpose: a task
+    /// group waits for its children, so a step that ignores cancellation (a hung
+    /// signer) would hold the probe past its limit.
+    private nonisolated static func withTimeout<T: Sendable>(
+        _ limit: Duration, _ work: @escaping @Sendable () async throws -> T
+    ) async throws -> T {
+        try await withCheckedThrowingContinuation { continuation in
+            let race = Race(continuation)
+            let worker = Task {
+                do { race.finish(.success(try await work())) } catch { race.finish(.failure(error)) }
             }
-            defer { group.cancelAll() }
-            guard let first = try await group.next() else { throw Timeout() }
-            return first
+            Task {
+                try? await Task.sleep(for: limit)
+                if race.finish(.failure(Timeout())) { worker.cancel() }
+            }
         }
     }
 
