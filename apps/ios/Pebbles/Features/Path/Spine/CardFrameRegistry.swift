@@ -22,4 +22,10 @@ final class CardFrameRegistry {
     func forget(_ momentId: UUID) {
         frames[momentId] = nil
     }
+
+    /// Forgets `momentId` only while it still holds `frame`, the one the leaving
+    /// slot reported: a newer slot for the same moment keeps its live frame.
+    func forget(_ momentId: UUID, ifAt frame: CGRect) {
+        if frames[momentId] == frame { frames[momentId] = nil }
+    }
 }

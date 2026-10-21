@@ -25,6 +25,19 @@ struct CardFrameRegistryTests {
         #expect(registry.frames[id] == nil)
     }
 
+    @Test("a leaving slot forgets only the frame it reported, never a newer one")
+    func forgetOwnFrame() {
+        let registry = CardFrameRegistry()
+        let old = CGRect(x: 0, y: 0, width: 10, height: 10)
+        let live = CGRect(x: 0, y: 80, width: 10, height: 10)
+        registry.report(id, frame: old)
+        registry.report(id, frame: live)
+        registry.forget(id, ifAt: old)
+        #expect(registry.frames[id] == live)
+        registry.forget(id, ifAt: live)
+        #expect(registry.frames[id] == nil)
+    }
+
     @Test("a reported frame does not invalidate a reader; hiding a slot does")
     func observation() {
         let registry = CardFrameRegistry()
