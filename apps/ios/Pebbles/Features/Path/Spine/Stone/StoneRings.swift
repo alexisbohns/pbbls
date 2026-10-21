@@ -26,15 +26,20 @@ struct StoneRings: View {
         let origin = CGPoint(x: stone.width / 2, y: stone.height / 2)
         let ink = still ? Color.pebbles.onSurfaceVariant : Color.pebbles.ring
         Canvas { context, _ in
-            context.fill(geometry.path(scaled: geometry.halo, offset: origin), with: .color(Color.pebbles.halo))
+            context.fill(geometry.path(scaled: swollen(geometry.halo), offset: origin),
+                         with: .color(Color.pebbles.halo))
             for ring in geometry.rings {
-                context.stroke(geometry.path(scaled: ring, offset: origin), with: .color(ink), lineWidth: 1)
+                context.stroke(geometry.path(scaled: swollen(ring), offset: origin), with: .color(ink), lineWidth: 1)
             }
         }
         .frame(width: canvas.width, height: canvas.height)
-        .scaleEffect(scale, anchor: UnitPoint(x: (origin.x + geometry.centroid.x) / canvas.width,
-                                              y: (origin.y + geometry.centroid.y) / canvas.height))
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+
+    /// The swell scales the paths, not the canvas, so every ring stays a 1 pt
+    /// hairline (the web's non-scaling stroke), as in `StoneRipple`.
+    private func swollen(_ ring: CGSize) -> CGSize {
+        CGSize(width: ring.width * scale, height: ring.height * scale)
     }
 }
