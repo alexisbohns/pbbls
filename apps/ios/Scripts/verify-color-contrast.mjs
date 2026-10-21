@@ -50,3 +50,35 @@ if (measured < 4.5) {
   fail(`googleCapsuleInk on white is ${measured.toFixed(3)}:1, below WCAG AA (4.5:1).`);
 }
 console.log(`verify-color-contrast: googleCapsuleInk on white = ${measured.toFixed(3)}:1 (AA ok)`);
+
+// Tab bar pairs (#903 §8): the unselected label and the selected item on the
+// bar ground, in every appearance the role colorsets declare.
+const m3 = (role) =>
+  JSON.parse(
+    readFileSync(
+      join(root, `Pebbles/Resources/Assets.xcassets/M3/${role}.colorset/Contents.json`),
+      "utf8",
+    ),
+  ).colors;
+const rgb = ({ color: { components: c } }) => ({
+  r: Number.parseInt(c.red, 16) / 255,
+  g: Number.parseInt(c.green, 16) / 255,
+  b: Number.parseInt(c.blue, 16) / 255,
+});
+const look = (entry) => JSON.stringify(entry.appearances ?? []);
+
+for (const [ink, ground] of [
+  ["onSurfaceVariant", "surfaceContainer"],
+  ["primary", "surfaceContainer"],
+]) {
+  const grounds = new Map(m3(ground).map((entry) => [look(entry), entry]));
+  for (const entry of m3(ink)) {
+    const bg = grounds.get(look(entry));
+    if (!bg) fail(`${ink} declares appearance ${look(entry)} that ${ground} lacks.`);
+    const measured = ratio(rgb(entry), rgb(bg));
+    if (measured < 4.5) {
+      fail(`${ink} on ${ground} ${look(entry)} is ${measured.toFixed(3)}:1, below WCAG AA (4.5:1).`);
+    }
+  }
+  console.log(`verify-color-contrast: ${ink} on ${ground} is AA in every appearance`);
+}

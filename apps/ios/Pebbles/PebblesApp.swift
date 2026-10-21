@@ -35,6 +35,7 @@ struct PebblesApp: App {
         self._connections = State(initialValue: ConnectionsService(supabase: supabase))
         Self.configureSegmentedControlAppearance()
         Self.configureNavigationBarAppearance()
+        Self.configureTabBarAppearance()
     }
 
     var body: some Scene {
@@ -92,5 +93,31 @@ struct PebblesApp: App {
         proxy.standardAppearance = appearance
         proxy.scrollEdgeAppearance = appearance
         proxy.compactAppearance = appearance
+    }
+
+    /// The two bar colours iOS 17 SwiftUI cannot express (#903 §6, a new
+    /// pattern named in the C1 PR): the unselected item (`onSurfaceVariant`)
+    /// and the hairline (`outlineVariant`). The background repeats
+    /// `PebblesTabView`'s `toolbarBackground` so the bar is opaque before
+    /// SwiftUI applies it. The selected item follows `.tint(primary)`.
+    private static func configureTabBarAppearance() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor.pebbles(.surfaceContainer)
+        appearance.shadowColor = UIColor.pebbles(.outlineVariant)
+
+        let unselected = UIColor.pebbles(.onSurfaceVariant)
+        for item in [
+            appearance.stackedLayoutAppearance,
+            appearance.inlineLayoutAppearance,
+            appearance.compactInlineLayoutAppearance
+        ] {
+            item.normal.iconColor = unselected
+            item.normal.titleTextAttributes = [.foregroundColor: unselected]
+        }
+
+        let proxy = UITabBar.appearance()
+        proxy.standardAppearance = appearance
+        proxy.scrollEdgeAppearance = appearance
     }
 }
