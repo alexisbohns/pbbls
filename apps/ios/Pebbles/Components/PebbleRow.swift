@@ -33,7 +33,7 @@ struct PebbleRow: View {
         }
         .buttonStyle(.plain)
         .pebblesContextMenu([
-            PebblesMenuItem(title: "Delete", systemImage: "trash", isDestructive: true, action: onDelete)
+            .delete(onDelete)
         ])
     }
 

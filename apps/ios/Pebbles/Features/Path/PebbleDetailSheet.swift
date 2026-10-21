@@ -39,7 +39,7 @@ struct PebbleDetailSheet: View {
                 isPresentingEditPebble = true
             })
         }
-        items.append(PebblesMenuItem(title: "Delete", systemImage: "trash", isDestructive: true) {
+        items.append(PebblesMenuItem.delete {
             if let detail { pendingDeletion = MomentDeleteTarget(detail: detail) }
         })
         return items

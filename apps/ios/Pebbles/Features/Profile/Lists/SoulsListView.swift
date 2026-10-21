@@ -102,7 +102,7 @@ struct SoulsListView: View {
                         }
                         .buttonStyle(.plain)
                         .pebblesContextMenu([
-                            PebblesMenuItem(title: "Delete", systemImage: "trash", isDestructive: true) {
+                            .delete {
                                 pendingDeletion = item
                             }
                         ])

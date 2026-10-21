@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// One row of a `PebblesMenu`.
-struct PebblesMenuItem: Identifiable {
-    let id = UUID()
+/// One row of a `PebblesMenu`. Rows are addressed by index: callers build
+/// items inline, so a stored `UUID` would change on every parent redraw.
+struct PebblesMenuItem {
     let title: LocalizedStringResource
     let systemImage: String
     let isDestructive: Bool
@@ -18,6 +18,11 @@ struct PebblesMenuItem: Identifiable {
         self.systemImage = systemImage
         self.isDestructive = isDestructive
         self.action = action
+    }
+
+    /// The orange Delete row every delete menu carries.
+    static func delete(_ action: @escaping () -> Void) -> PebblesMenuItem {
+        PebblesMenuItem(title: "Delete", systemImage: "trash", isDestructive: true, action: action)
     }
 }
 
@@ -60,9 +65,10 @@ private struct PebblesContextMenu: ViewModifier {
             // tap, and `.onLongPressGesture` lost to the Button entirely. A short
             // tap fails this gesture and still reaches the Button.
             .highPriorityGesture(LongPressGesture(minimumDuration: 0.5).onEnded { _ in isPresented = true })
+            .sensoryFeedback(.impact, trigger: isPresented)
             .accessibilityActions {
-                ForEach(items) { item in
-                    Button(action: item.action) { Text(item.title) }
+                ForEach(items.indices, id: \.self) { index in
+                    Button(action: items[index].action) { Text(items[index].title) }
                 }
             }
             .popover(isPresented: $isPresented) {
@@ -75,16 +81,21 @@ private struct PebblesMenuList: View {
     let items: [PebblesMenuItem]
     let dismiss: () -> Void
 
-    @AccessibilityFocusState private var focusedItem: UUID?
+    @AccessibilityFocusState private var focusedIndex: Int?
+    @ScaledMetric(relativeTo: .body) private var iconWidth: CGFloat = 24
+    /// Run on disappear, once the popover is gone, so a sheet or dialog the
+    /// action presents is not dropped by the dismissal transaction.
+    @State private var chosen: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(items) { item in
+            ForEach(items.indices, id: \.self) { index in
+                let item = items[index]
                 Button {
+                    chosen = item.action
                     dismiss()
-                    item.action()
                 } label: {
-                    Label { Text(item.title) } icon: { Image(systemName: item.systemImage) }
+                    Label { Text(item.title) } icon: { Image(systemName: item.systemImage).frame(width: iconWidth) }
                         .labelStyle(.titleAndIcon)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, Spacing.lg)
@@ -93,18 +104,22 @@ private struct PebblesMenuList: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(item.isDestructive ? Color.pebbles.error : Color.pebbles.onSurface)
-                .accessibilityFocused($focusedItem, equals: item.id)
-                if item.id != items.last?.id {
+                .accessibilityFocused($focusedIndex, equals: index)
+                if index < items.count - 1 {
                     Rectangle().fill(Color.pebbles.rule).frame(height: 1)
                 }
             }
         }
         .frame(minWidth: 220)
-        .background(Color.pebbles.surfaceContainer)
+        .presentationBackground(Color.pebbles.surfaceContainer)
         .presentationCompactAdaptation(.popover)
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(.isModal)
         .accessibilityAction(.escape, dismiss)
-        .onAppear { focusedItem = items.first?.id }
+        .onAppear { focusedIndex = items.isEmpty ? nil : 0 }
+        .onDisappear {
+            chosen?()
+            chosen = nil
+        }
     }
 }
