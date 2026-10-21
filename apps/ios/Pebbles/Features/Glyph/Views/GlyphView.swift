@@ -13,12 +13,12 @@ import SwiftUI
 /// `docs/superpowers/specs/2026-05-17-issue-459-glyph-souls-consistency-design.md` §2.
 struct GlyphView: View {
     enum Case {
-        case profile      // no frame; glyph in accent.primary
-        case carve        // dashed 2pt system.muted; sf.scribble in system.secondary
-        case create       // dashed 2pt system.muted; sf.plus in system.muted
-        case selected     // no frame; glyph in accent.primary
-        case unselected   // no frame; glyph in system.muted
-        case `default`    // no frame; glyph in system.secondary
+        case profile      // no frame; glyph in primary role
+        case carve        // dashed 2pt outline; sf.scribble in onSurfaceVariant
+        case create       // dashed 2pt outline; sf.plus in outline
+        case selected     // no frame; glyph in primary role
+        case unselected   // no frame; glyph in outline
+        case `default`    // no frame; glyph in onSurfaceVariant
     }
 
     let `case`: Case
@@ -49,7 +49,7 @@ struct GlyphView: View {
         switch `case` {
         case .carve, .create:
             shape.strokeBorder(
-                Color.system.muted,
+                Color.pebbles.outline,
                 style: StrokeStyle(lineWidth: 2, dash: [10, 10])
             )
         case .profile, .selected, .unselected, .default:
@@ -63,17 +63,17 @@ struct GlyphView: View {
         case .carve:
             Image(systemName: "scribble")
                 .font(.system(size: max(side * 0.4, 18), weight: .regular))
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
         case .create:
             Image(systemName: "plus")
                 .font(.system(size: max(side * 0.4, 18), weight: .regular))
-                .foregroundStyle(Color.system.muted)
+                .foregroundStyle(Color.pebbles.outline)
         case .profile, .selected:
-            GlyphThumbnail(strokes: strokes ?? [], side: side, strokeColor: Color.accent.primary)
+            GlyphThumbnail(strokes: strokes ?? [], side: side, strokeColor: Color.pebbles.primary)
         case .unselected:
-            GlyphThumbnail(strokes: strokes ?? [], side: side, strokeColor: Color.system.muted)
+            GlyphThumbnail(strokes: strokes ?? [], side: side, strokeColor: Color.pebbles.outline)
         case .default:
-            GlyphThumbnail(strokes: strokes ?? [], side: side, strokeColor: Color.system.secondary)
+            GlyphThumbnail(strokes: strokes ?? [], side: side, strokeColor: Color.pebbles.onSurfaceVariant)
         }
     }
 }

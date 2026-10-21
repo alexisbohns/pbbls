@@ -79,12 +79,7 @@ struct ThemeLiteralsTests {
 
     /// Shrinks to nothing by the end of the stack (A2: .red and owned
     /// destructive roles; A3a / A3b: the folders they migrate). Never raise it.
-    static let debt: [String: Int] = [
-        "Features/Glyph/Views/GlyphCanvasView.swift": 1,
-        "Features/Glyph/Views/GlyphPickerContent.swift": 1,
-        "Features/Glyph/Views/GlyphTabBar.swift": 2,
-        "Features/Glyph/Views/SlideToConfirm.swift": 1,
-    ]
+    static let debt: [String: Int] = [:]
 
     /// `apps/ios/Pebbles`, two levels up from this file (`apps/ios/PebblesTests/`).
     static let pebblesRoot: URL = {

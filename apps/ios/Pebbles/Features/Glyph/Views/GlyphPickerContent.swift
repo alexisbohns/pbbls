@@ -141,7 +141,7 @@ struct GlyphPickerContent: View {
                     .foregroundStyle(.secondary)
             }
             .padding(Spacing.sm)
-            .background(Color.secondary.opacity(0.06))
+            .background(Color.pebbles.surfaceContainerHighest)
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
@@ -172,7 +172,7 @@ struct GlyphPickerContent: View {
                         Text("\(item.price)")
                     }
                     .font(.caption2)
-                    .foregroundStyle(Color.system.muted)
+                    .foregroundStyle(Color.pebbles.outline)
                 }
             }
         }

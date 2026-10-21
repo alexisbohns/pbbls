@@ -26,7 +26,7 @@ struct GlyphBanner: View {
             VStack(spacing: Spacing.xs) {
                 Text(title)
                     .pebblesFont(titleFont)
-                    .foregroundStyle(Color.system.foreground)
+                    .foregroundStyle(Color.pebbles.onSurface)
                 subtitleView
             }
         }
@@ -41,15 +41,15 @@ struct GlyphBanner: View {
         case .meta(let text):
             Text(text)
                 .pebblesFont(.meta)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
         case .byline(let name):
             HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
                 Text("BY")
                     .pebblesFont(.meta)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 Text(name)
                     .pebblesFont(.bodyLeadHand)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
             }
         }
     }
