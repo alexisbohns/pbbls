@@ -56,7 +56,10 @@ private struct PebblesContextMenu: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .simultaneousGesture(LongPressGesture(minimumDuration: 0.5).onEnded { _ in isPresented = true })
+            // High priority: a simultaneous long press also fired the row Button's
+            // tap, and `.onLongPressGesture` lost to the Button entirely. A short
+            // tap fails this gesture and still reaches the Button.
+            .highPriorityGesture(LongPressGesture(minimumDuration: 0.5).onEnded { _ in isPresented = true })
             .accessibilityActions {
                 ForEach(items) { item in
                     Button(action: item.action) { Text(item.title) }
