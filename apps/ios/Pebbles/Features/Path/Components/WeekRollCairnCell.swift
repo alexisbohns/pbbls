@@ -18,6 +18,7 @@ struct WeekRollCairnCell: View {
     let onTap: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
     // RiveViewModel is an ObservableObject (SDK class); @StateObject keeps it
     // alive for the cell's lifetime and lets it drive re-renders when Rive
@@ -40,7 +41,7 @@ struct WeekRollCairnCell: View {
                     .accessibilityHidden(true)
                 Text(verbatim: "\(weekNum)")
                     .font(.ysabeauSemibold(13))
-                    .foregroundStyle(isFocused ? Color.accent.primary : Color.system.secondary)
+                    .foregroundStyle(isFocused ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant)
             }
         }
         .buttonStyle(.plain)
@@ -48,18 +49,17 @@ struct WeekRollCairnCell: View {
         .onAppear { configureAutoBind() }
         .onChange(of: isFocused) { _, _ in applyViewModel() }
         .onChange(of: colorScheme) { _, _ in applyViewModel() }
+        .onChange(of: colorSchemeContrast) { _, _ in applyViewModel() }
         .accessibilityLabel("Week \(weekNum), \(entry.moments.count) pebbles")
     }
 
     // MARK: - Computed state
 
     /// The stroke color to feed into Rive:
-    ///   - focused → accent (both schemes)
-    ///   - unfocused → mutedForeground (both schemes; same shade in light/dark
-    ///     so the cairn stays visible on both the white path background and
-    ///     the dark theme background)
+    ///   - focused → primary, unfocused → onSurfaceVariant (spec §4, D6);
+    ///     both roles resolve per appearance and Increase Contrast.
     private var strokeColor: SwiftUI.Color {
-        isFocused ? SwiftUI.Color.accent.primary : SwiftUI.Color.system.secondary
+        isFocused ? SwiftUI.Color.pebbles.primary : SwiftUI.Color.pebbles.onSurfaceVariant
     }
 
     // MARK: - Data Binding setup
@@ -82,7 +82,7 @@ struct WeekRollCairnCell: View {
 
     // MARK: - State application
 
-    /// Pushes the current `isFocused` / `colorScheme` state into Rive.
+    /// Pushes the current `isFocused` / `colorScheme` / `colorSchemeContrast` state into Rive.
     ///
     /// (a) State-machine bool input — `setInput(_:value:)` on `RiveViewModel`
     ///     works in 6.19.2 (defined in RiveViewModel.swift:376–377).
@@ -96,6 +96,6 @@ struct WeekRollCairnCell: View {
     private func applyViewModel() {
         rvm.setInput("isSelected", value: isFocused)
         guard let prop = colorProperty else { return }
-        strokeColor.applyToRiveColorProperty(prop, in: colorScheme)
+        strokeColor.applyToRiveColorProperty(prop, in: colorScheme, contrast: colorSchemeContrast)
     }
 }
