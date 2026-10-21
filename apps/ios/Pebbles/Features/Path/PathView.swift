@@ -60,6 +60,7 @@ struct PathView: View {
             onFirstLoad()
         }
         .task { await stats.load() }
+        .onChange(of: nav.scrollToTop[.path, default: 0]) { focusCurrentWeek() }
         .fullScreenCover(isPresented: $isPresentingCapture) {
             // Fired after the save and again after a chained completion (A5).
             CaptureFlowView(onMomentChanged: { momentId in
@@ -133,21 +134,27 @@ struct PathView: View {
                             entry: entry,
                             onTap: { moment in selectedMomentId = moment.id },
                             onDelete: { moment in pendingDeletion = MomentDeleteTarget(summary: moment) },
-                            onCreate: { isPresentingCapture = true }
+                            onCreate: { isPresentingCapture = true },
+                            scrollToTopToken: nav.scrollToTop[.path, default: 0]
                         )
                         .tag(entry.weekStart)
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
             }
+            // One row, clear background, 8pt above the tab bar (#903 §5). The
+            // week list scrolls under it; `WeekPathView`'s bottom padding lets
+            // the last pebble clear it.
             .safeAreaInset(edge: .bottom) {
-                VStack(spacing: 12) {
-                    NewPebbleButton(onTap: { isPresentingCapture = true })
-                    PathBottomBar(
+                HStack(alignment: .center, spacing: 16) {
+                    PathStatusCluster(
                         karma: stats.karma,
                         ripple: rippleWithLocalActiveToday,
-                        onProfile: { nav.select(.you) }
+                        onKarma: { nav.select(.you) },
+                        onRipple: { nav.select(.you) }
                     )
+                    Spacer(minLength: 0)
+                    NewPebbleFab(onTap: { isPresentingCapture = true })
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 8)
@@ -167,6 +174,14 @@ struct PathView: View {
             entry.moments.contains { $0.id == momentId }
         }) else { return }
         focusedWeekStart = entry.weekStart
+    }
+
+    /// Path reselected at its root (#903 §4): "top of Path" means now. The
+    /// same current-week lookup `load()` uses.
+    private func focusCurrentWeek() {
+        let current = WeekRollBuilder.weekStart(for: today, calendar: isoCalendar)
+        guard entries.contains(where: { $0.weekStart == current }) else { return }
+        withAnimation { focusedWeekStart = current }
     }
 
     private func load() async {
