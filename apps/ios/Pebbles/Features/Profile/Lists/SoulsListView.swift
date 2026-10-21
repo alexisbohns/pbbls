@@ -93,7 +93,9 @@ struct SoulsListView: View {
 
     @ViewBuilder
     private var content: some View {
-        if isLoading {
+        // A tab root reloads on every return; keep the rows (and the scroll
+        // position) on screen while it does.
+        if isLoading && items.isEmpty {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let loadError {
@@ -146,6 +148,8 @@ struct SoulsListView: View {
                 .value
             self.items = result
         } catch {
+            // Cancelled by a tab switch, not failed.
+            guard !Task.isCancelled else { return }
             logger.error("souls fetch failed: \(error.localizedDescription, privacy: .private)")
             self.loadError = "Something went wrong. Please try again."
         }
