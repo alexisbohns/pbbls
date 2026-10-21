@@ -24,6 +24,10 @@ final class PathModel {
     /// The slot VoiceOver returns to; stack E sets it when a held card closes.
     var returnFocus: UUID?
     private(set) var isDeleting = false
+    /// Bumped whenever the memoised pages are dropped (a load, the reference
+    /// cache's souls). `page(for:)` reads it, so a view that read a page before
+    /// the souls arrived is invalidated; the pages themselves are not tracked.
+    private(set) var pagesRevision = 0
 
     @ObservationIgnored private var pages: [Date: SpinePage] = [:]
     @ObservationIgnored private var referenceNames: [String: String] = [:]
@@ -72,6 +76,7 @@ final class PathModel {
         moments = result
         entries = WeekRollBuilder.build(moments: result, calendar: calendar, today: now())
         pages = [:]
+        pagesRevision += 1
         // Keep the focused week if it is still there, else the current week, else the closest.
         guard !entries.contains(where: { $0.weekStart == focusedWeekStart }) else { return }
         let current = currentWeekStart
@@ -90,6 +95,7 @@ final class PathModel {
         referenceNames = names
         soulGlyphs = glyphs
         pages = [:]
+        pagesRevision += 1
     }
 
     // MARK: - Focus
@@ -124,6 +130,7 @@ final class PathModel {
     // MARK: - Pages
 
     func page(for weekStart: Date) -> SpinePage? {
+        _ = pagesRevision
         if let cached = pages[weekStart] { return cached }
         guard let index = entries.firstIndex(where: { $0.weekStart == weekStart }) else { return nil }
         let entry = entries[index]

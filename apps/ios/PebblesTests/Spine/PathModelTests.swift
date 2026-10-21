@@ -95,6 +95,16 @@ struct PathModelTests {
         #expect(page.soulGlyphs.count == 14)
     }
 
+    @Test("a view that read a page before the souls arrived is told to read it again")
+    func soulsInvalidatePages() async {
+        let model = model()
+        await model.load { F.moments }
+        let changed = CardFrameRegistryTests.Flag()
+        withObservationTracking { _ = model.page(for: F.weekStart) } onChange: { changed.raised = true }
+        model.updateSouls(names: F.soulNames, glyphs: F.soulGlyphs)
+        #expect(changed.raised)
+    }
+
     @Test("the reading day is written only when it changes")
     func readingDay() async {
         let model = model()
