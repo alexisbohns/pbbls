@@ -63,7 +63,6 @@ struct ThemeLiteralsTests {
 
     /// Permanent: hits that are not chrome colours.
     static let allowlist: [String: (count: Int, reason: String)] = [
-        "Features/Path/Valence/ValenceStoneStyle.swift": (1, "joySurface, Joy's emotion surface (data)"),
         "Features/Path/Read/PebbleSnapFrame.swift": (1, "preview fixture image drawn above #Preview"),
         "Features/Path/Components/WeekPathView.swift": (2, "fade mask stops (alpha only)"),
         "Features/Path/Render/PebbleAnimatedRenderView.swift": (1, "stroke-reveal mask"),
@@ -87,7 +86,6 @@ struct ThemeLiteralsTests {
         "Features/Glyph/Views/SlideToConfirm.swift": 1,
         "Features/Path/Components/PathPebbleRow.swift": 2,
         "Features/Path/Components/WeekPathView.swift": 1,
-        "Features/Path/Valence/ValenceStoneStyle.swift": 1
     ]
 
     /// `apps/ios/Pebbles`, two levels up from this file (`apps/ios/PebblesTests/`).
