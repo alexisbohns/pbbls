@@ -1,10 +1,8 @@
 import SwiftUI
 import os
 
-private enum PathViewRoute: Hashable {
-    case profile
-}
-
+/// The Path tab's root (#903). Its `NavigationStack` lives in
+/// `PebblesTabView`; Path pushes nothing yet.
 struct PathView: View {
     /// Fired when the initial timeline load settles (success or failure), so
     /// `RootView` can keep the launch loader up until the home feed is ready
@@ -15,11 +13,11 @@ struct PathView: View {
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(PathStatsService.self) private var stats
     @Environment(CompleteDraftStore.self) private var completeDrafts
+    @Environment(TabNavigation.self) private var nav
 
     @State private var moments: [MomentSummary] = []
     @State private var entries: [WeekRollEntry] = []
     @State private var focusedWeekStart: Date = Date()
-    @State private var navPath = NavigationPath()
     /// The Capture flow — what `+` opens.
     @State private var isPresentingCapture = false
     @State private var selectedMomentId: UUID?
@@ -54,16 +52,9 @@ struct PathView: View {
     }
 
     var body: some View {
-        NavigationStack(path: $navPath) {
-            content
-                .navigationDestination(for: PathViewRoute.self) { route in
-                    switch route {
-                    case .profile: ProfileView()
-                    }
-                }
-                .toolbar(.hidden, for: .navigationBar)
-                .pebblesScreen()
-        }
+        content
+            .toolbar(.hidden, for: .navigationBar)
+            .pebblesScreen()
         .task {
             await load()
             onFirstLoad()
@@ -155,7 +146,7 @@ struct PathView: View {
                     PathBottomBar(
                         karma: stats.karma,
                         ripple: rippleWithLocalActiveToday,
-                        onProfile: { navPath.append(PathViewRoute.profile) }
+                        onProfile: { nav.select(.you) }
                     )
                 }
                 .padding(.horizontal, 16)
@@ -229,7 +220,11 @@ struct PathView: View {
 }
 
 #Preview {
-    PathView()
-        .environment(SupabaseService())
-        .environment(CompleteDraftStore())
+    NavigationStack {
+        PathView()
+    }
+    .environment(SupabaseService())
+    .environment(CompleteDraftStore())
+    .environment(TabNavigation())
+    .environment(MomentsRevision())
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import os
 
 /// Top-level auth gate. The loader and pre-login welcome are merged into
 /// a single `WelcomeView`, which hosts `HandcraftedLogoView` as its splash:
@@ -13,9 +14,10 @@ import SwiftUI
 ///   - if the user is unauthenticated, `contentRevealed` flips true and
 ///     `WelcomeView` slides the carousel + sign-in buttons + disclaimer
 ///     in from the bottom, pushing the logo up to its header position;
-///   - if the user is authenticated, the stack swaps to `PathView`, with the
+///   - if the user is authenticated, the stack swaps to `PebblesTabView`, with the
 ///     loader held over it (via `startSettled`) until the first timeline load
-///     settles — so `PathView`'s own spinner never flashes.
+///     settles — so `PathView`'s own spinner never flashes. A launch restored
+///     onto another tab holds no loader (`holdsLoader`).
 struct RootView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
@@ -35,6 +37,16 @@ struct RootView: View {
     /// Invite token lifted out of a universal link, presented as a sheet once
     /// there is a session to accept with (M49, design D12).
     @State private var acceptingInvite: InviteToken?
+    /// Authed navigation (#903 §3). Lives here, not in a child, so this view
+    /// can read `selected` for `holdsLoader` and reset it on sign-out.
+    @State private var nav = TabNavigation()
+    /// Sign-out reset contract (#903 §6): every authed `@SceneStorage` key is
+    /// declared here and cleared in `resetAuthedSceneState()`. A later stack
+    /// that adds one (stack E's `heldCard`) registers it in both places, in
+    /// the PR that adds it.
+    @SceneStorage("tabs.navigation") private var storedTabs: Data?
+
+    private let logger = Logger(subsystem: "app.pbbls.ios", category: "root")
 
     /// Safety ceiling: if reference data never settles (e.g. a wedged
     /// network beyond the client's own timeout), open the app anyway rather
@@ -88,11 +100,18 @@ struct RootView: View {
         !supabase.isInitializing && supabase.session == nil
     }
 
+    /// A restored scene on People or You would otherwise boil forever: Path's
+    /// `.task` (and so `onFirstLoad`) only runs once Path is shown.
+    private var holdsLoader: Bool {
+        !pathFeedLoaded && nav.selected == .path
+    }
+
     var body: some View {
         ZStack {
             if canShowAuthedTabs {
                 ZStack {
-                    PathView(onFirstLoad: { pathFeedLoaded = true })
+                    PebblesTabView(onPathFirstLoad: { pathFeedLoaded = true })
+                        .environment(nav)
                         .fullScreenCover(isPresented: $isPresentingOnboarding) {
                             OnboardingView(steps: OnboardingSteps.all) {
                                 hasSeenOnboarding = true
@@ -100,7 +119,7 @@ struct RootView: View {
                             }
                         }
 
-                    if !pathFeedLoaded {
+                    if holdsLoader {
                         // Hold the loader over the home feed load so its own
                         // spinner never flashes. `startSettled` skips a second
                         // draw-on — the logo just boils, then fades out.
@@ -110,8 +129,11 @@ struct RootView: View {
                             .background(Color.pebbles.surface.ignoresSafeArea())
                             .transition(.opacity)
                     }
+
+                    // The card-stack overlay host (#903 §7, later stack) goes
+                    // here, above the tabs, so one overlay serves every tab.
                 }
-                .animation(.easeInOut(duration: 0.35), value: pathFeedLoaded)
+                .animation(.easeInOut(duration: 0.35), value: holdsLoader)
                 .sheet(item: $acceptingInvite) { invite in
                     InviteAcceptSheet(token: invite.value)
                 }
@@ -141,6 +163,14 @@ struct RootView: View {
             loaderCeilingReached = true
         }
         .task { await palettes.load() }
+        // Restore once, before the authed branch first renders: the loader
+        // keeps that branch hidden for well over one runloop.
+        .task { restoreTabs() }
+        .onChange(of: nav.snapshot) { _, snapshot in
+            // Signed out, the state is being reset, not navigated.
+            guard supabase.session != nil else { return }
+            storedTabs = snapshot.encoded
+        }
         // Keyed on the user: souls and collections are theirs, so each sign-in
         // loads its own lists instead of keeping whatever the launch fetched.
         .task(id: supabase.session?.user.id) { await refs.load() }
@@ -177,6 +207,7 @@ struct RootView: View {
         }
         .onChange(of: isResolvedSignedOut) { _, signedOut in
             guard signedOut else { return }
+            resetAuthedSceneState()
             SignedOutPurge(
                 completeDrafts: completeDrafts,
                 refs: refs,
@@ -185,6 +216,21 @@ struct RootView: View {
                 urlCache: .shared
             ).run()
         }
+    }
+
+    private func restoreTabs() {
+        guard let storedTabs else { return }
+        guard let snapshot = TabNavigation.Snapshot.decoded(from: storedTabs) else {
+            logger.error("tabs.navigation scene storage did not decode; keeping defaults")
+            return
+        }
+        nav.restore(snapshot)
+    }
+
+    /// The one place authed scene state is cleared (#903 §6).
+    private func resetAuthedSceneState() {
+        nav.reset()
+        storedTabs = nil
     }
 }
 
