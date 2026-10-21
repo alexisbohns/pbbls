@@ -30,14 +30,14 @@ struct ProfileAchievementsCard: View {
             HStack(spacing: Spacing.lg) {
                 Image(systemName: "trophy")
                     .pebblesIcon(.large)
-                    .foregroundStyle(Color.accent.primary)
+                    .foregroundStyle(Color.pebbles.primary)
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text("Achievements")
                         .pebblesFont(.headline)
-                        .foregroundStyle(Color.system.foreground)
+                        .foregroundStyle(Color.pebbles.onSurface)
                     Text(subtitle)
                         .pebblesFont(.subhead)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     if !recent.isEmpty {
                         HStack(spacing: Spacing.sm) {
                             ForEach(recent) { record in
@@ -50,7 +50,7 @@ struct ProfileAchievementsCard: View {
                 Spacer()
                 Image(systemName: "chevron.right")
                     .pebblesIcon(.medium)
-                    .foregroundStyle(Color.system.muted)
+                    .foregroundStyle(Color.pebbles.outline)
             }
             .contentShape(Rectangle())
             .profileCard()
@@ -72,9 +72,9 @@ struct ProfileAchievementsCard: View {
     private func badge(_ record: AchievementRecord) -> some View {
         Image(systemName: record.familySymbol)
             .pebblesIcon(.medium)
-            .foregroundStyle(Color.accent.primary)
+            .foregroundStyle(Color.pebbles.primary)
             .frame(width: 32, height: 32)
-            .background(Circle().fill(Color.accent.primary.opacity(0.12)))
+            .background(Circle().fill(Color.pebbles.primary.opacity(0.12)))
             .accessibilityLabel(
                 record.localizedTitle(
                     emotionName: emotionName(for: record),

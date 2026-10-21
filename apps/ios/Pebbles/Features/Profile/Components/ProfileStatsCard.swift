@@ -11,11 +11,11 @@ struct ProfileStatsCard: View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
             Text("Stats")
                 .pebblesFont(.cardHeading)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
 
             RipplesRow(ripple: ripple, assiduity: assiduity)
 
-            Divider().overlay(Color.system.muted)
+            Divider().overlay(Color.pebbles.rule)
 
             ProfileCountersRow(daysPracticed: daysPracticed, pebbles: pebbles, karma: karma)
         }

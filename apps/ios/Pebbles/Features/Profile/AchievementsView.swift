@@ -46,7 +46,7 @@ struct AchievementsView: View {
                         VStack(alignment: .leading, spacing: Spacing.md) {
                             Text(AchievementRecord.localizedGroupName(family: group.family))
                                 .pebblesFont(.headline)
-                                .foregroundStyle(Color.system.foreground)
+                                .foregroundStyle(Color.pebbles.onSurface)
                             LazyVGrid(columns: columns, spacing: Spacing.lg) {
                                 ForEach(group.records) { record in
                                     AchievementBadgeCell(
@@ -130,22 +130,22 @@ struct AchievementBadgeCell: View {
             HStack {
                 Image(systemName: record.familySymbol)
                     .pebblesIcon(.large)
-                    .foregroundStyle(isUnlocked ? Color.accent.primary : Color.system.muted)
+                    .foregroundStyle(isUnlocked ? Color.pebbles.primary : Color.pebbles.outline)
                 Spacer()
                 if !isUnlocked {
                     Image(systemName: "lock")
                         .pebblesIcon(.medium)
-                        .foregroundStyle(Color.system.muted)
+                        .foregroundStyle(Color.pebbles.outline)
                 }
             }
             Text(record.localizedTitle(emotionName: emotionName, domainName: domainName))
                 .pebblesFont(.headline)
-                .foregroundStyle(isUnlocked ? Color.system.foreground : Color.system.secondary)
+                .foregroundStyle(isUnlocked ? Color.pebbles.onSurface : Color.pebbles.onSurfaceVariant)
                 .multilineTextAlignment(.leading)
             if let description = record.localizedDescription(emotionName: emotionName, domainName: domainName) {
                 Text(description)
                     .pebblesFont(.subhead)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .multilineTextAlignment(.leading)
             }
             if let unlockedAt {
@@ -154,11 +154,11 @@ struct AchievementBadgeCell: View {
                     Text(unlockedAt, format: .dateTime.day().month().year())
                 }
                 .pebblesFont(.subhead)
-                .foregroundStyle(Color.accent.primary)
+                .foregroundStyle(Color.pebbles.primary)
             } else {
                 Text("Locked")
                     .pebblesFont(.subhead)
-                    .foregroundStyle(Color.system.muted)
+                    .foregroundStyle(Color.pebbles.outline)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

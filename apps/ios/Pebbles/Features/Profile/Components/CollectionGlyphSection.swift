@@ -41,7 +41,7 @@ struct CollectionGlyphSection: View {
             // opaque, separated cells (same as EditMomentSheet's hint).
             Text("Pebbles in this collection carry its glyph.")
                 .font(.footnote)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
         } header: {

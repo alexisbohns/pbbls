@@ -62,11 +62,11 @@ struct ProfileCollectionsCard: View {
             HStack {
                 Text("Collections")
                     .pebblesFont(.cardHeading)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .pebblesIcon(.medium)
-                    .foregroundStyle(Color.system.muted)
+                    .foregroundStyle(Color.pebbles.outline)
             }
             .contentShape(Rectangle())
         }
