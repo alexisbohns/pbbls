@@ -14,6 +14,7 @@ struct PathView: View {
     @Environment(PathStatsService.self) private var stats
     @Environment(CompleteDraftStore.self) private var completeDrafts
     @Environment(TabNavigation.self) private var nav
+    @Environment(MomentsRevision.self) private var revision
 
     @State private var moments: [MomentSummary] = []
     @State private var entries: [WeekRollEntry] = []
@@ -61,9 +62,18 @@ struct PathView: View {
         }
         .task { await stats.load() }
         .onChange(of: nav.scrollToTop[.path, default: 0]) { focusCurrentWeek() }
+        // #903 D5: a moment changed from People or Collections. Path's own
+        // changes already reloaded through their callbacks.
+        .onChange(of: revision.value) {
+            guard revision.changedOutside(.path) else { return }
+            Task { await stats.refresh() }
+            reloadTask?.cancel()
+            reloadTask = Task { await load() }
+        }
         .fullScreenCover(isPresented: $isPresentingCapture) {
             // Fired after the save and again after a chained completion (A5).
             CaptureFlowView(onMomentChanged: { momentId in
+                revision.bump(from: .path)
                 // Not cancelled with the path reload: `refresh()` no-ops while
                 // one is running, so a cancelled refresh would drop the next.
                 Task { await stats.refresh() }
@@ -76,7 +86,7 @@ struct PathView: View {
             })
         }
         .sheet(item: $selectedMomentId) { id in
-            PebbleDetailSheet(momentId: id, onPebbleUpdated: {
+            PebbleDetailSheet(momentId: id, origin: .path, onPebbleUpdated: {
                 Task {
                     async let timeline: Void = load()
                     async let statsReload: Void = stats.refresh()
@@ -224,6 +234,7 @@ struct PathView: View {
             try await MomentDeletion.perform(
                 option, on: target, client: supabase.client, drafts: completeDrafts
             )
+            revision.bump(from: .path)
             async let timeline: Void = load()
             async let statsReload: Void = stats.refresh()
             _ = await (timeline, statsReload)

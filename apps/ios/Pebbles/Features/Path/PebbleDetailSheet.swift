@@ -13,11 +13,15 @@ import os
 /// Opened from a Path row and from soul and collection detail rows (R9).
 struct PebbleDetailSheet: View {
     let momentId: UUID
+    /// The tab that presented this page, so the cross-tab signal can tell
+    /// the presenter's own change from another tab's (#903 D5).
+    let origin: AppTab
     var onPebbleUpdated: (() -> Void)?
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(CompleteDraftStore.self) private var completeDrafts
+    @Environment(MomentsRevision.self) private var revision
     @Environment(\.dismiss) private var dismiss
 
     @State private var detail: MomentDetail?
@@ -84,7 +88,7 @@ struct PebbleDetailSheet: View {
             if let detail, let pebble = detail.pebble {
                 EditPebbleSheet(momentId: detail.id, pebble: pebble, onSaved: {
                     Task { await load(showsSpinner: false) }
-                    onPebbleUpdated?()
+                    notifyChanged()
                 })
             }
         }
@@ -92,7 +96,7 @@ struct PebbleDetailSheet: View {
             if let detail {
                 EditMomentSheet(detail: detail, onSaved: {
                     Task { await load(showsSpinner: false) }
-                    onPebbleUpdated?()
+                    notifyChanged()
                 })
             }
         }
@@ -103,7 +107,7 @@ struct PebbleDetailSheet: View {
                 onCompleted: { _ in
                     // In place, behind the success screen.
                     Task { await load(showsSpinner: false) }
-                    onPebbleUpdated?()
+                    notifyChanged()
                 }
             )
         }
@@ -124,6 +128,13 @@ struct PebbleDetailSheet: View {
         }
     }
 
+    /// Every change made from this page: the presenter's own reload, then the
+    /// cross-tab signal so the other tabs catch up (#903 D5).
+    private func notifyChanged() {
+        onPebbleUpdated?()
+        revision.bump(from: origin)
+    }
+
     private func delete(_ option: MomentDeleteOption, on target: MomentDeleteTarget) async {
         guard !isDeleting else { return }
         isDeleting = true
@@ -132,7 +143,7 @@ struct PebbleDetailSheet: View {
             try await MomentDeletion.perform(
                 option, on: target, client: supabase.client, drafts: completeDrafts
             )
-            onPebbleUpdated?()
+            notifyChanged()
             if target.closesReadPage(after: option) {
                 dismiss()
             } else {
@@ -184,10 +195,11 @@ struct PebbleDetailSheet: View {
 
 #Preview {
     let supabase = SupabaseService()
-    return PebbleDetailSheet(momentId: UUID())
+    return PebbleDetailSheet(momentId: UUID(), origin: .path)
         .environment(supabase)
         .environment(ReferenceDataService(client: supabase.client))
         .environment(EmotionPaletteService(client: supabase.client))
         .environment(SnapURLCache(client: supabase.client))
         .environment(CompleteDraftStore())
+        .environment(MomentsRevision())
 }
