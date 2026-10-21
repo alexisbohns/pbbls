@@ -30,6 +30,8 @@ final class PathModel {
     private(set) var pagesRevision = 0
 
     @ObservationIgnored private var pages: [Date: SpinePage] = [:]
+    /// Each load takes the next number; only the latest one applies its result.
+    @ObservationIgnored private var loadGeneration = 0
     @ObservationIgnored private var referenceNames: [String: String] = [:]
     @ObservationIgnored private var soulGlyphs: [String: [GlyphStroke]] = [:]
     @ObservationIgnored let calendar: Calendar
@@ -51,15 +53,17 @@ final class PathModel {
 
     // MARK: - Load
 
-    /// A cancelled load (a newer one replaced it) changes nothing.
+    /// A cancelled load, or one a newer load overtook, changes nothing.
     func load(_ fetch: () async throws -> [MomentSummary]) async {
+        loadGeneration += 1
+        let generation = loadGeneration
         do {
             let result = try await fetch()
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, generation == loadGeneration else { return }
             apply(result)
             phase = .content
         } catch {
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, generation == loadGeneration else { return }
             logger.error("path fetch failed: \(error.localizedDescription, privacy: .private)")
             phase = .failed
         }
@@ -78,8 +82,12 @@ final class PathModel {
         pages = [:]
         pagesRevision += 1
         // Keep the focused week if it is still there, else the current week, else the closest.
+        // A refocus is a page change, so it drops a pending press as `focus(_:)` does.
         guard !entries.contains(where: { $0.weekStart == focusedWeekStart }) else { return }
+        pressRequests.cancel()
         let current = currentWeekStart
+        // The closest-week branch is unreachable while `WeekRollBuilder.build`
+        // unions in the current week; it is kept for parity with `PathView`.
         if entries.contains(where: { $0.weekStart == current }) {
             focusedWeekStart = current
         } else if let closest = entries.min(by: { lhs, rhs in
@@ -147,6 +155,7 @@ final class PathModel {
             contents: SpineWeekBuilder.readingOrder(week),
             previous: index > 0 ? neighbour(entries[index - 1]) : nil,
             next: index + 1 < entries.count ? neighbour(entries[index + 1]) : nil,
+            // Memoised until the next load: across the Sunday → Monday roll it stays stale without one.
             isCurrent: weekStart == currentWeekStart,
             soulNames: names,
             soulGlyphs: soulGlyphs

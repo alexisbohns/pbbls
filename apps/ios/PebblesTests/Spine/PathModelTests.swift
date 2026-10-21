@@ -34,7 +34,7 @@ struct PathModelTests {
         #expect(model.phase == .failed)
     }
 
-    @Test("a reload keeps the focused week while it is still there, else falls back to the current one")
+    @Test("a reload keeps the focused week while it is there, else takes the current one and drops the press")
     func refocus() async {
         let older = MomentSummary(id: UUID(), name: "Older", happenedAt: Vectors.at("2026-09-02T10:00:00Z"),
                                   createdAt: Vectors.at("2026-09-02T10:00:00Z"), firstSnapPath: nil, pebble: nil)
@@ -44,8 +44,10 @@ struct PathModelTests {
         model.focus(olderWeek)
         await model.load { F.moments + [older] }
         #expect(model.focusedWeekStart == olderWeek)
+        model.pressRequests.request(older.id)
         await model.load { F.moments }
         #expect(model.focusedWeekStart == F.weekStart)
+        #expect(model.pressRequests.pending == nil)
     }
 
     @Test("focus ignores an equal week, and a page change cancels a pending press")
