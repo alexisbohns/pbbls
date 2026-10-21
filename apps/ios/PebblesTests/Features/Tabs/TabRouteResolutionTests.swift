@@ -25,30 +25,45 @@ struct TabRouteResolutionTests {
         return service
     }
 
-    @Test("a soul missing from loaded reference data resolves to missing (pops)")
-    func soulMissing() {
-        let result = SoulRoute.resolve(soulId, known: [], refs: refs(loadedWith: [soul(UUID())]))
-        #expect(result == .missing)
+    @Test("a soul missing from loaded reference data is not found locally (fetches)")
+    func soulMissingLocally() {
+        #expect(SoulRoute.local(soulId, known: [], refs: refs(loadedWith: [soul(UUID())])) == nil)
     }
 
-    @Test("before reference data loads, an unknown soul is still loading")
-    func soulLoading() {
-        let result = SoulRoute.resolve(soulId, known: [], refs: refs(loadedWith: nil))
-        #expect(result == .loading)
+    @Test("before reference data loads, an unknown soul is not found locally (fetches)")
+    func soulBeforeRefsLoad() {
+        #expect(SoulRoute.local(soulId, known: [], refs: refs(loadedWith: nil)) == nil)
     }
 
     @Test("the list's own rows win over reference data")
     func soulFromKnown() {
         let fresh = soul(soulId, name: "Fresh")
-        let result = SoulRoute.resolve(soulId, known: [fresh], refs: refs(loadedWith: [soul(soulId, name: "Stale")]))
-        #expect(result == .found(fresh))
+        let result = SoulRoute.local(soulId, known: [fresh], refs: refs(loadedWith: [soul(soulId, name: "Stale")]))
+        #expect(result == fresh)
     }
 
     @Test("a restored soul resolves from reference data")
     func soulFromRefs() {
         let stored = soul(soulId)
-        let result = SoulRoute.resolve(soulId, known: [], refs: refs(loadedWith: [stored]))
-        #expect(result == .found(stored))
+        #expect(SoulRoute.local(soulId, known: [], refs: refs(loadedWith: [stored])) == stored)
+    }
+
+    @Test("no fetched soul row means missing (pops)")
+    func soulFetchedMissing() {
+        #expect(SoulRoute.resolution(fetched: []) == .missing)
+    }
+
+    @Test("a fetched soul row resolves, decoded from the souls select payload")
+    func soulFetchedFound() throws {
+        let json = """
+        {"id":"33333333-3333-3333-3333-333333333333","name":"Ada",\
+        "glyph_id":"4759c37c-68a6-46a6-b4fc-046bd0316752",\
+        "glyphs":{"id":"4759c37c-68a6-46a6-b4fc-046bd0316752","name":null,"strokes":[],"view_box":"0 0 200 200"},\
+        "pebbles_count":[{"count":2}]}
+        """
+        let row = try JSONDecoder().decode(SoulWithGlyph.self, from: Data(json.utf8))
+        #expect(SoulRoute.resolution(fetched: [row]) == .found(row))
+        #expect(row.pebblesCount == 2)
     }
 
     @Test("no collection row means missing (pops)")
