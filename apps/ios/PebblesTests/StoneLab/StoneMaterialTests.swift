@@ -23,12 +23,13 @@ struct StoneMaterialTests {
         #expect(material.uniforms == [1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     }
 
-    @Test("starting tones follow the spec table")
+    @Test("starting tones follow the lab paste of 2026-10-21")
     func startingTones() {
         #expect(StoneTones.starting(for: .lowlight).body.slot == .dark)
         #expect(StoneTones.starting(for: .neutral).body.slot == .shaded)
         #expect(StoneTones.starting(for: .highlight).body.slot == .primary)
-        #expect(StoneTones.starting(for: .highlight).ink.slot == .secondary)
+        #expect(StoneTones.starting(for: .highlight).ink.slot == .light)
+        #expect(StoneTones.starting(for: .highlight).lipLight.slot == .secondary)
         #expect(StoneTones.starting(for: .lowlight).lipShadow.slot == .shaded)
         #expect(StoneTones.starting(for: .neutral).lipShadow.opacity < 1)
     }
