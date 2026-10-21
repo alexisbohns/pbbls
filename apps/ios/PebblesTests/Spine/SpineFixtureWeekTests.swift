@@ -6,6 +6,7 @@ import Testing
 /// product takes (the web file's own list), and reads like the web's week.
 @Suite("Spine fixture week")
 struct SpineFixtureWeekTests {
+    // swiftlint:disable:next type_name
     typealias F = SpineFixtureWeek
 
     private var week: SpineWeek<MomentSummary> {

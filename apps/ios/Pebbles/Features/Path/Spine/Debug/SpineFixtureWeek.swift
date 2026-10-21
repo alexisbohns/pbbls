@@ -20,6 +20,7 @@ enum SpineFixtureWeek {
 
     // MARK: - Souls
 
+    // swiftlint:disable:next large_tuple
     private static let soulTable: [(key: String, name: String, mark: String)] = [
         ("mara", "Mara", "partner"), ("elio", "Elio", "family"), ("nadia", "Nadia", "friends"),
         ("jules", "Jules", "hobbies"), ("bruno", "Bruno", "travel"), ("ana", "Ana", "friends"),
@@ -30,8 +31,12 @@ enum SpineFixtureWeek {
     private static let markNames = ["identity", "travel", "friends", "family", "hobbies", "partner"]
 
     private static func soul(_ key: String) -> PathSoul {
-        let index = soulTable.firstIndex { $0.key == key } ?? 0
-        let mark = markNames.firstIndex(of: soulTable[index].mark) ?? 0
+        guard let index = soulTable.firstIndex(where: { $0.key == key }) else {
+            preconditionFailure("unknown soul \(key)")
+        }
+        guard let mark = markNames.firstIndex(of: soulTable[index].mark) else {
+            preconditionFailure("unknown mark \(soulTable[index].mark)")
+        }
         return PathSoul(id: id(0x9000, index + 1), name: soulTable[index].name, glyphId: id(0xA000, mark + 1))
     }
 
@@ -61,13 +66,16 @@ enum SpineFixtureWeek {
         "peace": ["#487C5AFF", "#80BF96FF", "#EDF2EEFF", "#487C5A1A", "#32573FFF", "#0E1912FF"],
         "anger": ["#8E4242FF", "#C17575FF", "#F4ECECFF", "#8E42421A", "#632E2EFF", "#1C0D0DFF"]
     ]
+    // swiftlint:disable:next large_tuple
     private static let emotionTable: [(slug: String, name: String, category: String)] = [
         ("proud", "Proud", "pride"), ("joyful", "Joyful", "joy"), ("angry", "Angry", "anger"),
         ("scared", "Scared", "fear"), ("peaceful", "Peaceful", "peace"), ("sad", "Sad", "sadness")
     ]
 
     private static func emotion(_ slug: String) -> EmotionRef {
-        let index = emotionTable.firstIndex { $0.slug == slug } ?? 0
+        guard let index = emotionTable.firstIndex(where: { $0.slug == slug }) else {
+            preconditionFailure("unknown emotion \(slug)")
+        }
         return EmotionRef(id: id(0xB000, index + 1), slug: slug, name: emotionTable[index].name)
     }
 
@@ -96,37 +104,64 @@ enum SpineFixtureWeek {
 
     // MARK: - Moments
 
+    private struct PebbleSpec {
+        let intensity: Int
+        let positiveness: Int
+        let emotion: String
+        let souls: [String]
+        let glyph: String?
+    }
+
     private struct Spec {
         let n: Int
         let name: String
         let at: String
         var photo: String?
-        var pebble: (intensity: Int, positiveness: Int, emotion: String, souls: [String], glyph: String?)?
+        var pebble: PebbleSpec?
     }
 
     private static let neighbours = ["ana", "bea", "cyril", "dora", "ezra", "felix", "gaby", "hugo", "ines"]
 
     private static let specs: [Spec] = [
         Spec(n: 1, name: "Flag march with Nadia", at: "05T10:15", photo: "flag-march.jpg",
-             pebble: (3, 1, "proud", ["nadia"], "friends")),
+             pebble: PebbleSpec(intensity: 3, positiveness: 1, emotion: "proud",
+                                souls: ["nadia"], glyph: "friends")),
         Spec(n: 2, name: "Elio lost his first tooth", at: "05T19:40",
-             pebble: (2, 1, "joyful", ["elio", "mara"], "family")),
-        Spec(n: 3, name: "Rent went up again", at: "06T08:02", pebble: (2, -1, "angry", [], "identity")),
+             pebble: PebbleSpec(intensity: 2, positiveness: 1, emotion: "joyful",
+                                souls: ["elio", "mara"], glyph: "family")),
+        Spec(n: 3, name: "Rent went up again", at: "06T08:02",
+             pebble: PebbleSpec(intensity: 2, positiveness: -1, emotion: "angry",
+                                souls: [], glyph: "identity")),
         Spec(n: 4, name: "Forest walk, all of us", at: "06T16:30", photo: "forest-crew.jpg",
-             pebble: (3, 1, "peaceful", ["mara", "elio", "bruno"], "travel")),
-        Spec(n: 5, name: "Couldn’t sleep", at: "07T03:10", pebble: (1, -1, "scared", [], "identity")),
+             pebble: PebbleSpec(intensity: 3, positiveness: 1, emotion: "peaceful",
+                                souls: ["mara", "elio", "bruno"], glyph: "travel")),
+        Spec(n: 5, name: "Couldn’t sleep", at: "07T03:10",
+             pebble: PebbleSpec(intensity: 1, positiveness: -1, emotion: "scared",
+                                souls: [], glyph: "identity")),
         Spec(n: 6, name: "Coffee by the fountain", at: "07T12:05", photo: "fountain.jpg",
-             pebble: (1, 0, "peaceful", ["jules"], "friends")),
+             pebble: PebbleSpec(intensity: 1, positiveness: 0, emotion: "peaceful",
+                                souls: ["jules"], glyph: "friends")),
         Spec(n: 7, name: "Rooftop birthday", at: "08T21:00", photo: "rooftop-group.jpg",
-             pebble: (3, 1, "joyful", ["nadia", "jules", "mara"], "hobbies")),
+             pebble: PebbleSpec(intensity: 3, positiveness: 1, emotion: "joyful",
+                                souls: ["nadia", "jules", "mara"], glyph: "hobbies")),
         Spec(n: 12, name: "Picnic on the square, the whole street", at: "08T13:10",
-             pebble: (2, 1, "joyful", ["mara", "elio", "nadia", "jules", "bruno"] + neighbours, "friends")),
-        Spec(n: 8, name: "Said no to the extra project", at: "10T09:20", pebble: (2, 0, "proud", [], "identity")),
+             pebble: PebbleSpec(intensity: 2, positiveness: 1, emotion: "joyful",
+                                souls: ["mara", "elio", "nadia", "jules", "bruno"] + neighbours, glyph: "friends")),
+        Spec(n: 8, name: "Said no to the extra project", at: "10T09:20",
+             pebble: PebbleSpec(intensity: 2, positiveness: 0, emotion: "proud",
+                                souls: [], glyph: "identity")),
         Spec(n: 9, name: "Mara on the seawall", at: "10T17:45", photo: "seawall-portrait.jpg",
-             pebble: (2, 1, "joyful", ["mara"], "partner")),
-        Spec(n: 13, name: "", at: "10T19:05", photo: "fountain.jpg", pebble: (1, 0, "peaceful", ["mara"], "partner")),
-        Spec(n: 10, name: "Grandma’s call went quiet", at: "11T14:00", pebble: (2, -1, "sad", [], "family")),
-        Spec(n: 11, name: "Bruno asleep on my feet", at: "11T22:30", pebble: (1, 0, "peaceful", ["bruno"], nil)),
+             pebble: PebbleSpec(intensity: 2, positiveness: 1, emotion: "joyful",
+                                souls: ["mara"], glyph: "partner")),
+        Spec(n: 13, name: "", at: "10T19:05", photo: "fountain.jpg",
+             pebble: PebbleSpec(intensity: 1, positiveness: 0, emotion: "peaceful",
+                                souls: ["mara"], glyph: "partner")),
+        Spec(n: 10, name: "Grandma’s call went quiet", at: "11T14:00",
+             pebble: PebbleSpec(intensity: 2, positiveness: -1, emotion: "sad",
+                                souls: [], glyph: "family")),
+        Spec(n: 11, name: "Bruno asleep on my feet", at: "11T22:30",
+             pebble: PebbleSpec(intensity: 1, positiveness: 0, emotion: "peaceful",
+                                souls: ["bruno"], glyph: nil)),
         // Not pebbles yet (#1050): blank stones, one set as type, one on a card.
         Spec(n: 14, name: "Bread from the corner bakery", at: "07T18:20"),
         Spec(n: 15, name: "", at: "11T09:10", photo: "forest-crew.jpg")
@@ -150,12 +185,15 @@ enum SpineFixtureWeek {
     }
 
     private static func glyph(_ mark: String) -> PebbleGlyph {
-        PebbleGlyph(id: id(0xA000, (markNames.firstIndex(of: mark) ?? 0) + 1), name: mark,
+        guard let index = markNames.firstIndex(of: mark) else { preconditionFailure("unknown mark \(mark)") }
+        return PebbleGlyph(id: id(0xA000, index + 1), name: mark,
                     strokes: SpineFixtureMarks.strokes[mark] ?? [], viewBox: "0 0 200 200", source: .domain)
     }
 
     private static func id(_ group: Int, _ n: Int) -> UUID {
-        UUID(uuidString: String(format: "00000000-0000-4000-%04lX-%012ld", group, n)) ?? UUID()
+        let text = String(format: "00000000-0000-4000-%04lX-%012ld", group, n)
+        guard let uuid = UUID(uuidString: text) else { preconditionFailure("bad fixture id \(text)") }
+        return uuid
     }
 
     private static func date(_ iso: String) -> Date {

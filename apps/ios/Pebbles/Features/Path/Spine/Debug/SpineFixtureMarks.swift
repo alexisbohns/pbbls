@@ -1,5 +1,7 @@
 #if DEBUG
-// Generated from apps/web/lib/seed/spine-fixture-week.ts (SPINE_FIXTURE_MARKS) by #1130 D1c. Do not edit.
+// Generated from `apps/web/lib/seed/spine-fixture-week.ts` (`SPINE_FIXTURE_MARKS`) by the port script in
+// `docs/superpowers/plans/2026-10-21-ios-spine-path.md`, Task D1c.3. Do not edit by hand; re-run the script
+// when the web marks change.
 // swiftlint:disable line_length
 
 /// The fixture week's six glyphs, 200 × 200, engine stroke widths.
