@@ -17,7 +17,8 @@ import os
 ///   - if the user is authenticated, the stack swaps to `PebblesTabView`, with the
 ///     loader held over it (via `startSettled`) until the first timeline load
 ///     settles — so `PathView`'s own spinner never flashes. A launch restored
-///     onto another tab holds no loader (`holdsLoader`).
+///     onto another tab skips the loader: `restoreTabs()` marks the feed as
+///     handed off, since `TabView` only builds Path when it is first shown.
 struct RootView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
@@ -38,7 +39,7 @@ struct RootView: View {
     /// there is a session to accept with (M49, design D12).
     @State private var acceptingInvite: InviteToken?
     /// Authed navigation (#903 §3). Lives here, not in a child, so this view
-    /// can read `selected` for `holdsLoader` and reset it on sign-out.
+    /// can settle `holdsLoader` at restore and reset it on sign-out.
     @State private var nav = TabNavigation()
     /// Sign-out reset contract (#903 §6): every authed `@SceneStorage` key is
     /// declared here and cleared in `resetAuthedSceneState()`. A later stack
@@ -100,10 +101,12 @@ struct RootView: View {
         !supabase.isInitializing && supabase.session == nil
     }
 
-    /// A restored scene on People or You would otherwise boil forever: Path's
-    /// `.task` (and so `onFirstLoad`) only runs once Path is shown.
+    /// Decided once, at restore: a scene restored onto People or You sets
+    /// `pathFeedLoaded` there, because `TabView` builds Path lazily and its
+    /// `onFirstLoad` would otherwise fire mid-session, under a full-screen
+    /// loader on the first tap on Path.
     private var holdsLoader: Bool {
-        !pathFeedLoaded && nav.selected == .path
+        !pathFeedLoaded
     }
 
     var body: some View {
@@ -225,12 +228,18 @@ struct RootView: View {
             return
         }
         nav.restore(snapshot)
+        if snapshot.selected != .path {
+            pathFeedLoaded = true
+        }
     }
 
     /// The one place authed scene state is cleared (#903 §6).
     private func resetAuthedSceneState() {
         nav.reset()
         storedTabs = nil
+        // The `session == nil` re-arm never fires on a cold launch that
+        // resolves signed out, so re-arm the loader for the next sign-in here.
+        pathFeedLoaded = false
     }
 }
 
