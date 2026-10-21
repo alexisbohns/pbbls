@@ -65,7 +65,7 @@ private struct PebblesContextMenu: ViewModifier {
             // tap, and `.onLongPressGesture` lost to the Button entirely. A short
             // tap fails this gesture and still reaches the Button.
             .highPriorityGesture(LongPressGesture(minimumDuration: 0.5).onEnded { _ in isPresented = true })
-            .sensoryFeedback(.impact, trigger: isPresented)
+            .sensoryFeedback(.impact, trigger: isPresented) { _, opened in opened }
             .accessibilityActions {
                 ForEach(items.indices, id: \.self) { index in
                     Button(action: items[index].action) { Text(items[index].title) }
