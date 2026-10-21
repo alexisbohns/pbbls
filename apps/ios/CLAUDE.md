@@ -46,6 +46,6 @@ Pebbles/
   Resources/                Info.plist, Assets.xcassets, fonts, Rive/SVG assets
 ```
 
-Features map roughly to the web app's navigation structure: Path (home/timeline), Profile (access to Collections, Glyphs, Souls). The authed root is `PathView` with a custom bottom bar (not a system `TabView`); sheets and full-screen covers do most secondary navigation.
+Features map roughly to the web app's navigation structure: Path (home/timeline), Profile (access to Collections, Glyphs, Souls). The authed root is a system `TabView` (Path / People / Collections / You), each tab owning a `NavigationStack` driven by `TabNavigation` (`Features/Tabs/`); sheets and full-screen covers still do secondary navigation.
 
 `apps/android` mirrors this app 1:1 (see `apps/android/CLAUDE.md`) — when changing a schema/RPC contract or a cross-surface behavior here, check whether the Android mirror needs the same change.
