@@ -43,7 +43,7 @@ private struct PebblesListModifier: ViewModifier {
 // MARK: - Row chrome
 
 /// Applied to each row inside a Section: replaces the native row background
-/// with a the `rule` role stroke that draws only the edges this row owns —
+/// with a `rule` stroke that draws only the edges this row owns —
 /// top/sides for the first row, sides only for middle rows, bottom/sides for
 /// the last. Combined with the list-level `listRowSeparatorTint` (also
 /// the `rule` role), the horizontal dividers between rows complete the card.

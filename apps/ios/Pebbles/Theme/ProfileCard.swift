@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Shared chrome modifier for Profile-screen cards (Stats, Collections, Lab):
-/// clear background, 1pt the `rule` role border, `Spacing.lg` corner radius,
+/// clear background, 1pt `rule` border, `Spacing.lg` corner radius,
 /// `Spacing.lg` padding. Lives as a `ViewModifier` (call site reads as
 /// `.profileCard()`) rather than a wrapper view so the SwiftUI hierarchy stays
 /// flat.

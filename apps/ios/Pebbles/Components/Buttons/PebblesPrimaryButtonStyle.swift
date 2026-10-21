@@ -28,7 +28,7 @@ struct PebblesPrimaryButtonStyle: ButtonStyle {
         )
         .overlay(
             Capsule().stroke(
-                isEnabled ? Color.clear : Color.pebbles.surfaceContainerHighest,
+                isEnabled ? Color.clear : Color.pebbles.outline,
                 lineWidth: 1
             )
         )
