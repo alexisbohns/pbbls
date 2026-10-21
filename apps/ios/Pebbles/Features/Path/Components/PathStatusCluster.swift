@@ -25,6 +25,7 @@ struct PathStatusCluster: View {
                             activeToday: ripple?.activeToday ?? false)
             }
             .buttonStyle(.plain)
+            .accessibilityHint("Opens You")
         }
     }
 
