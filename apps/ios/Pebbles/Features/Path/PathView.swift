@@ -1,7 +1,7 @@
 import SwiftUI
 import os
 
-private enum PathRoute: Hashable {
+private enum PathViewRoute: Hashable {
     case profile
 }
 
@@ -56,7 +56,7 @@ struct PathView: View {
     var body: some View {
         NavigationStack(path: $navPath) {
             content
-                .navigationDestination(for: PathRoute.self) { route in
+                .navigationDestination(for: PathViewRoute.self) { route in
                     switch route {
                     case .profile: ProfileView()
                     }
@@ -155,7 +155,7 @@ struct PathView: View {
                     PathBottomBar(
                         karma: stats.karma,
                         ripple: rippleWithLocalActiveToday,
-                        onProfile: { navPath.append(PathRoute.profile) }
+                        onProfile: { navPath.append(PathViewRoute.profile) }
                     )
                 }
                 .padding(.horizontal, 16)
