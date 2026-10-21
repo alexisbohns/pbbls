@@ -74,14 +74,15 @@ enum SpineCopy {
         SpineStrings.format("path.spine.dayDots", locale: locale, count, days)
     }
 
+    // swiftlint:disable function_parameter_count
     /// The stone's and the card's name (A2, A3). An empty `withNames` leaves two
     /// spaces in the template; `tidy` collapses double spaces across the whole sentence, names included.
-    // swiftlint:disable:next function_parameter_count
     static func stoneA11y(
         name: String, date: String, time: String, kind: String, emotion: String, withNames: String, locale: Locale
     ) -> String {
         tidy(SpineStrings.format("path.spine.stoneA11y", locale: locale, name, date, time, kind, emotion, withNames))
     }
+    // swiftlint:enable function_parameter_count
 
     static func blankA11y(name: String, date: String, time: String, withNames: String, locale: Locale) -> String {
         tidy(SpineStrings.format("path.spine.blankA11y", locale: locale, name, date, time, withNames))
