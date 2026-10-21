@@ -57,6 +57,54 @@ struct StoneMotionTests {
         #expect(Motion.openDelay == 0.36 && Motion.goPressDelay == 0.62)
     }
 
+    @Test("each element's delay and duration are the web's, one by one")
+    func timings() {
+        let elements: [(element: Motion.Element, timing: [Double])] = [
+            (Motion.Dip.element, [0, 0.52]),
+            (Motion.Rings.element, [0.11, 1.15]),
+            (Motion.Sweep.element, [0.14, 0.9]),
+            (Motion.Spark.element, [0.3, 0.76]),
+            (Motion.Wave.element(0), [0.12, 1.65]),
+            (Motion.Wave.element(1), [0.35, 1.82]),
+            (Motion.Wave.element(2), [0.58, 1.99])
+        ]
+        for (element, timing) in elements {
+            #expect(near(element.delay, timing[0]) && near(element.duration, timing[1]), "\(timing)")
+        }
+    }
+
+    @Test("every keyframe table is the web's, stop by stop")
+    func tables() {
+        func stops(_ frames: Motion.Frames) -> [[Double]] { frames.map { [$0.at, $0.value] } }
+        #expect(stops(Motion.Dip.frames) == [[0, 1], [0.26, 0.9], [0.6, 1.03], [1, 1]])
+        #expect(stops(Motion.Rings.frames) == [[0, 1], [0.35, 1.08], [1, 1]])
+        #expect(stops(Motion.Spark.scaleFrames) == [[0, 0], [0.35, 1], [1, 0]])
+        #expect(stops(Motion.Spark.rotationFrames) == [[0, 0], [0.35, 40], [1, 90]])
+        #expect(stops(Motion.Spark.alphaFrames) == [[0, 0], [0.35, 1], [1, 0]])
+        #expect(stops(Motion.Wave.alphaFrames) == [[0, 0], [0.07, 0.85], [1, 0]])
+        #expect(stops(Motion.Wave.scaleFrames(.medium, 2)) == [[0, 1.15], [0.07, 1.45], [1, 4.6]])
+        #expect(Motion.Wave.reach[.small] == 7.2)
+        #expect(Motion.Sweep.travel == 1.6)
+    }
+
+    /// Halfway through each element, against the web's `cubic-bezier` solved
+    /// for x = 0.5 (bisection on the CSS definition).
+    @Test("each easing is the web's cubic-bezier")
+    func curves() {
+        let tolerance = 1e-3
+        #expect(near(Motion.Dip.element.progress(at: 0.26), 0.92217, tolerance))
+        #expect(near(Motion.Rings.element.progress(at: 0.685), 0.92958, tolerance))
+        #expect(near(Motion.Sweep.element.progress(at: 0.59), 0.5, tolerance))
+        #expect(near(Motion.Spark.element.progress(at: 0.68), 0.87668, tolerance))
+        #expect(near(Motion.Wave.element(0).progress(at: 0.945), 0.88907, tolerance))
+    }
+
+    @Test("a zero-length element jumps at its delay")
+    func instant() {
+        let element = Motion.Element(delay: 0.2, duration: 0, curve: .linear)
+        #expect(element.progress(at: 0.1) == 0 && element.progress(at: 0.2) == 1)
+    }
+
     @Test("one easing runs the whole element: 0 at its start, 1 at its end, rising between")
     func easing() {
         let rings = Motion.Rings.element
@@ -80,7 +128,9 @@ struct StoneMotionTests {
     /// stone is under 1 early and already springing back by the time the sweep runs.
     @Test("early in the press the stone dips; mid-press the sweep crosses")
     func middle() throws {
-        #expect(Motion.frame(at: 0.06, still: false, size: .medium).dip < 1)
+        // 70 ms in: eased progress 0.351, past the 26 % stop, so 0.935 on the way back up.
+        let dip = Motion.frame(at: 0.07, still: false, size: .medium).dip
+        #expect((0.93...0.94).contains(dip))
         let frame = Motion.frame(at: 0.2, still: false, size: .medium)
         let sweep = try #require(frame.sweep)
         #expect(sweep > 0 && sweep < 1)
