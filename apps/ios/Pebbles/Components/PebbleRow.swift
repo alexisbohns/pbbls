@@ -32,11 +32,9 @@ struct PebbleRow: View {
             }
         }
         .buttonStyle(.plain)
-        .contextMenu {
-            Button(role: .destructive, action: onDelete) {
-                Label("Delete", systemImage: "trash")
-            }
-        }
+        .pebblesContextMenu([
+            .delete(onDelete)
+        ])
     }
 
     /// The lit stone (#974), at the rest light: the row never animates.

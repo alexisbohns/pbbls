@@ -87,7 +87,7 @@ struct GlyphCarveSheet: View {
 
             if let saveError {
                 Text(saveError)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Color.pebbles.error)
                     .font(.callout)
             }
 
@@ -104,14 +104,14 @@ struct GlyphCarveSheet: View {
                 .buttonStyle(.plain)
                 .disabled(strokes.isEmpty)
 
-                Button(role: .destructive) {
+                Button {
                     strokes.removeAll()
                 } label: {
                     Label("Clear", systemImage: "trash")
-                        .foregroundStyle(Color.accent.primary)
+                        .foregroundStyle(Color.pebbles.error)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
-                        .background(Capsule().fill(Color.accent.surface))
+                        .background(Capsule().fill(Color.pebbles.errorContainer))
                 }
                 .buttonStyle(.plain)
                 .disabled(strokes.isEmpty)

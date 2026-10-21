@@ -158,7 +158,7 @@ struct WelcomeView: View {
                 if let error = authError {
                     Text(error)
                         .font(.footnote)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.pebbles.error)
                         .multilineTextAlignment(.center)
                         .padding(.top, 4)
                 }

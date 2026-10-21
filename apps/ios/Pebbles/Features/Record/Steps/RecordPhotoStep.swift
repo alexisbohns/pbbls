@@ -100,7 +100,7 @@ struct RecordPhotoStep: View {
         case .failed:
             Text("Upload failed")
                 .pebblesFont(.subhead)
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.pebbles.error)
         }
     }
 
@@ -121,9 +121,9 @@ struct RecordPhotoStep: View {
     }
 
     private var removeButton: some View {
-        Button(role: .destructive, action: onRemove) {
+        Button(action: onRemove) {
             Image(systemName: "xmark.circle.fill")
-                .foregroundStyle(Color.system.muted)
+                .foregroundStyle(Color.pebbles.error)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Remove photo")
@@ -137,8 +137,9 @@ struct RecordPhotoStep: View {
             Text("A photo is already attached.")
                 .pebblesFont(.subhead)
                 .foregroundStyle(Color.system.secondary)
-            Button("Remove", role: .destructive, action: onRemove)
+            Button("Remove", action: onRemove)
                 .pebblesFont(.subhead)
+                .foregroundStyle(Color.pebbles.error)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

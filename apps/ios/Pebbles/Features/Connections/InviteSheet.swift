@@ -81,7 +81,7 @@ struct InviteSheet: View {
                         .pebblesFont(.meta)
                         .foregroundStyle(Color.system.secondary)
 
-                    Button(role: .destructive) {
+                    Button {
                         Task { await rotate() }
                     } label: {
                         if isRotating {
@@ -91,6 +91,7 @@ struct InviteSheet: View {
                         }
                     }
                     .disabled(isRotating)
+                    .foregroundStyle(Color.pebbles.error)
                     .padding(.top, Spacing.sm)
 
                     Text("A new link retires this one. Anyone still holding it won't be able to connect.")

@@ -188,7 +188,7 @@ struct CaptureFlowView: View {
                 if let error = model.saveError {
                     Text(verbatim: error)
                         .pebblesFont(.callout)
-                        .foregroundStyle(.red) // #921
+                        .foregroundStyle(Color.pebbles.error)
                         .multilineTextAlignment(.center)
                 }
             }

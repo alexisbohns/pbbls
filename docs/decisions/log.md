@@ -1159,3 +1159,25 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - iOS still has the old read page; its held card is #1146. The baseline profiles list the deleted read-view classes until regenerated.
 - **Supersedes / Superseded-by:** Supersedes the phone half of **2026-09-26 — Android list-detail on large screens; pebble detail is a sheet on phones and a pane beside Path** (#940), and makes **2026-09-26 — Android's pebble read page drops its emotion tint** (#940) moot with the page it described. Extends **2026-10-18 — The Android Path becomes the Spine** (#1122).
 - **Refs:** #1135, #1146, `docs/superpowers/specs/2026-10-20-android-pebble-card-design.md`, `docs/superpowers/plans/2026-10-20-android-pebble-card.md`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/ui/SharedCard.kt`.
+
+## 2026-10-21 — iOS adopts the brand Material 3 scheme; errors are orange, system dialogs keep their red (#921)
+
+- **Status:** taken
+- **Scope:** ios, ui
+- **Context:** Android (#853, #990, #1118) and the web (#986, #991) draw from the M3-evo scheme generated from `ColorSchemes.kt`, with an orange error and no red anywhere. iOS kept the #456 palette (`Color.system` / `Color.accent`) and system red for errors and destructive buttons, recorded as "iOS keeps its old palette (#921)".
+- **Decision:**
+  - iOS takes the same scheme, generated from `ColorSchemes.kt` by `npm run generate:ios-colors --workspace=@pbbls/web` into `Assets.xcassets/M3/` (app and widget) and `Shared/Theme/PebblesColors.swift`. Feature code names colours only as `Color.pebbles.<role>` (`UIColor.pebbles(_:)` for UIKit).
+  - Contrast is standard plus the asset catalog's High Contrast appearance, filled from Android's *high* schemes. Medium is not shipped.
+  - The Spine neutrals apply app-wide, as on Android (#1118 D1). Old tokens map by use through the Spine rule set. The nine scheme-only Spine tokens (`halo`, `stock`, `rule`, `cardRule`, `line`, `seam`, `teeth`, `ring`, `ripple`) are generated. Blends with an emotion palette are computed in Swift (`SpineColors.swift`).
+  - Error is the `error` role (key `#EA6B00`). Destructive controls the app owns drop `role: .destructive` and take the error role. **Platform exception:** the destructive button of a system `.alert` / `.confirmationDialog` keeps the role and its system red, because it cannot be tinted and the role is what VoiceOver announces.
+  - **Destructive menus, one rule for every stack:** UIMenu ignores a SwiftUI tint on a `Menu` / `.contextMenu` item's title (the A2 trial, iOS 26.3 on the iPhone 17 simulator; no iOS 17 runtime or device was available: only the icon turned orange), so every menu with an orange Delete, the card's ⋮ menu included, uses the one shared `PebblesMenu` (`apps/ios/Pebbles/Components/Menus/PebblesMenu.swift`, a VoiceOver modal with escape).
+  - Emotion palettes, stone ramps (`StonePalette.brand` keeps the old accent ramp as stone data) and baked `.riv` colours are not scheme roles.
+  - `ThemeLiteralsTests` fails on colour literals, system colours, named assets and stray destructive roles in `Features/` and `Components/`.
+- **Why:** One palette on four clients is what the database contract already assumes for everything else. Two brand looks would be drift. Generating the colours keeps the Kotlin as the single source. The alert exception is the one place where the no-red rule would cost accessibility rather than a hue.
+- **Consequences:**
+  - Re-exporting the Android palette now means running `generate:m3` and `generate:ios-colors` in the same PR. `web.yml` and `ios.yml` both fail otherwise.
+  - iOS has no wallpaper colour, so nothing is pinned. The error roles are simply never system red.
+  - Red remains visible in iOS system dialogs. Anyone tempted to "fix" that with custom sheets should read this entry first.
+  - The old colorsets and `Palettes.swift` are deleted at the end of the stack.
+- **Supersedes / Superseded-by:** Supersedes the "iOS keeps its old palette (#921)" consequence of **2026-09-28 — The error colour is orange, never red** (#990), and answers the #921 lines of 2026-09-24 (#853), 2026-09-28 (#986) and 2026-10-18 (#1118).
+- **Refs:** #921, #853, #990, #986, #1118, `docs/superpowers/specs/2026-10-20-ios-m3-colour-design.md`, `apps/web/lib/theme/ios-colorsets.ts`, `apps/ios/Shared/Theme/PebblesColors.swift`, `apps/ios/PebblesTests/ThemeLiteralsTests.swift`, `apps/ios/Pebbles/Components/Menus/PebblesMenu.swift`.

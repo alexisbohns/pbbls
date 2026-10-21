@@ -82,7 +82,7 @@ struct GlyphsListView: View {
             VStack(spacing: 0) {
                 if let renameError {
                     Text(renameError)
-                        .font(.callout).foregroundStyle(.red)
+                        .font(.callout).foregroundStyle(Color.pebbles.error)
                         .padding(.horizontal).padding(.top, 8)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }

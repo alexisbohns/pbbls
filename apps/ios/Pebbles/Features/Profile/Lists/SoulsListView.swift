@@ -101,13 +101,11 @@ struct SoulsListView: View {
                             SoulItem(case: .default, soul: item, count: item.pebblesCount)
                         }
                         .buttonStyle(.plain)
-                        .contextMenu {
-                            Button(role: .destructive) {
+                        .pebblesContextMenu([
+                            .delete {
                                 pendingDeletion = item
-                            } label: {
-                                Label("Delete", systemImage: "trash")
                             }
-                        }
+                        ])
                     }
                 }
                 .padding(Spacing.lg)

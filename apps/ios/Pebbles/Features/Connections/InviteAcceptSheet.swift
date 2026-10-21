@@ -77,7 +77,7 @@ struct InviteAcceptSheet: View {
                 if let acceptError {
                     Text(acceptError)
                         .pebblesFont(.meta)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.pebbles.error)
                         .multilineTextAlignment(.center)
                 }
 

@@ -21,7 +21,7 @@ import SwiftUI
 /// border + drop shadow. Row height grows to fit the rotated photo per
 /// `rowHeight(intensity:hasPhoto:positionIndex:)`.
 ///
-/// Long-press surfaces a delete option via `.contextMenu` — the parent
+/// Long-press surfaces a delete option via `.pebblesContextMenu` — the parent
 /// `PathView` owns the confirmation dialog.
 struct PathPebbleRow: View {
     let moment: MomentSummary
@@ -73,11 +73,9 @@ struct PathPebbleRow: View {
             )
         }
         .buttonStyle(.plain)
-        .contextMenu {
-            Button(role: .destructive, action: onDelete) {
-                Label("Delete", systemImage: "trash")
-            }
-        }
+        .pebblesContextMenu([
+            .delete(onDelete)
+        ])
     }
 
     /// The lit stone (#974), at the rest light: the row never animates.

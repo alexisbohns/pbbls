@@ -15,7 +15,7 @@ struct CompletePrivacyStep: View {
             if let error = model.completeError {
                 Text(verbatim: error)
                     .pebblesFont(.callout)
-                    .foregroundStyle(.red) // #921
+                    .foregroundStyle(Color.pebbles.error)
                     .multilineTextAlignment(.center)
                     .padding(.top, Spacing.sm)
             }

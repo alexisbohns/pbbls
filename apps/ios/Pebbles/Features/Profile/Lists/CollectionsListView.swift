@@ -99,11 +99,12 @@ struct CollectionsListView: View {
                         CollectionRow(collection: collection)
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
+                        Button {
                             pendingDeletion = collection
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
+                        .tint(Color.pebbles.error)
                     }
                     .pebblesListRow(position: pebblesRowPosition(index: index, count: items.count))
                 }
