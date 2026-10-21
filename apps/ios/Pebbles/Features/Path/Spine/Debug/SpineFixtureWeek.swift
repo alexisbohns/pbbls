@@ -200,4 +200,28 @@ enum SpineFixtureWeek {
         ISO8601Flexible.parse(iso) ?? .distantPast
     }
 }
+
+extension SpineFixtureWeek {
+    /// A `PathModel` holding the fixture week, its souls in the reference cache,
+    /// for the lab and the references. Its words read the model's default, the date locale.
+    @MainActor
+    static func model() async -> PathModel {
+        let model = PathModel(calendar: calendar, now: { today })
+        await model.load { moments }
+        model.updateSouls(names: soulNames, glyphs: soulGlyphs)
+        return model
+    }
+
+    /// The feed context over the fixture: its palettes and its primed photo ratios.
+    @MainActor
+    static func context(_ model: PathModel, page: SpinePage, width: CGFloat = 393) -> SpineFeedContext {
+        SpineFeedContext(
+            page: page, column: SpineLayout.column(width: width),
+            palette: { palette(for: $0) },
+            ratio: { $0.firstSnapPath.flatMap { photos[$0]?.ratio } },
+            pressRequests: model.pressRequests,
+            onOpen: { _, _ in }, onDelete: { _ in }
+        )
+    }
+}
 #endif
