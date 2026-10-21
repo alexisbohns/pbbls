@@ -66,7 +66,7 @@ private struct NineStonesFixture: View {
             }
         }
         .padding()
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
     }
 }
 
