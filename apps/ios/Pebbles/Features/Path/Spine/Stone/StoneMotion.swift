@@ -17,8 +17,10 @@ enum StoneMotion {
         var end: Double { delay + duration }
 
         /// The eased progress at `elapsed`: 0 until the start, 1 from the end.
+        /// A zero-length element jumps at its delay instead of dividing by zero.
         func progress(at elapsed: Double) -> Double {
-            curve.value(at: min(max((elapsed - delay) / duration, 0), 1))
+            guard duration > 0 else { return elapsed >= delay ? 1 : 0 }
+            return curve.value(at: min(max((elapsed - delay) / duration, 0), 1))
         }
 
         func isRunning(at elapsed: Double) -> Bool { elapsed >= delay && elapsed < end }
