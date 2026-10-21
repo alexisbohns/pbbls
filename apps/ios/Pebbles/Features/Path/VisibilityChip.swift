@@ -28,6 +28,6 @@ struct VisibilityChip: View {
         }
         .accessibilityLabel(Text("Privacy: \(String(localized: visibility.label))",
                                  comment: "Accessibility label for the composer grade chip"))
-        .tint(Color.system.secondary)
+        .tint(Color.pebbles.onSurfaceVariant)
     }
 }

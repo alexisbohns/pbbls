@@ -48,7 +48,7 @@ struct PebbleReadView: View {
                 if let description = detail.description, !description.isEmpty {
                     Text(description)
                         .font(.system(size: 17, weight: .regular, design: .serif))
-                        .foregroundStyle(pageColors?.description ?? Color.system.foreground)
+                        .foregroundStyle(pageColors?.description ?? Color.pebbles.onSurface)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
@@ -71,7 +71,7 @@ struct PebbleReadView: View {
         // across the whole page — behind the transparent nav bar and into the
         // bottom inset — meeting the Petroglyph's palette seamlessly. Falls back
         // to the system background on a palette cache miss.
-        .background(pageColors?.background ?? Color.system.background)
+        .background(pageColors?.background ?? Color.pebbles.surface)
     }
 
     /// Emotion / domain / collection as the shared `SurfaceTile`s — the same
@@ -164,11 +164,11 @@ private struct DetailSoulCell: View {
             GlyphThumbnail(
                 strokes: strokes,
                 side: 96,
-                strokeColor: glyphColor ?? Color.system.secondary
+                strokeColor: glyphColor ?? Color.pebbles.onSurfaceVariant
             )
             Text(name)
                 .pebblesFont(.bodyLeadHand)
-                .foregroundStyle(nameColor ?? Color.system.secondary)
+                .foregroundStyle(nameColor ?? Color.pebbles.onSurfaceVariant)
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .frame(maxWidth: .infinity)

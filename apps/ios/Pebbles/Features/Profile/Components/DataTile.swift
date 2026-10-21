@@ -13,15 +13,15 @@ struct DataTile: View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             Text(value.map { "\($0)" } ?? "—")
                 .pebblesFont(.counterLg)
-                .foregroundStyle(Color.system.foreground)
+                .foregroundStyle(Color.pebbles.onSurface)
                 .monospacedDigit()
             HStack(spacing: Spacing.xs) {
                 Image(systemName: icon)
                     .pebblesIcon(.small)
-                    .foregroundStyle(Color.accent.primary)
+                    .foregroundStyle(Color.pebbles.primary)
                 Text(label)
                     .pebblesFont(.subhead)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

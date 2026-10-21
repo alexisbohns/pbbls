@@ -41,9 +41,9 @@ struct PebblePrivacyBadge: View {
         .padding(.vertical, 6)
         .overlay(
             Capsule()
-                .strokeBorder(Color.system.muted, lineWidth: 1)
+                .strokeBorder(Color.pebbles.rule, lineWidth: 1)
         )
-        .foregroundStyle(Color.system.foreground)
+        .foregroundStyle(Color.pebbles.onSurface)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabelText)
     }
@@ -51,7 +51,7 @@ struct PebblePrivacyBadge: View {
     private var chipBody: some View {
         Image(systemName: visibility.systemImageName)
             .font(.system(size: 14, weight: .medium))
-            .foregroundStyle(Color.system.secondary)
+            .foregroundStyle(Color.pebbles.onSurfaceVariant)
             .frame(width: 36, height: 36)
             .accessibilityLabel(accessibilityLabelText)
     }
@@ -67,5 +67,5 @@ struct PebblePrivacyBadge: View {
         PebblePrivacyBadge(visibility: .public, style: .chip)
     }
     .padding()
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }

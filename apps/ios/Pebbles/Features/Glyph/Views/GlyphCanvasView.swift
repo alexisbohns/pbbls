@@ -66,7 +66,7 @@ struct GlyphCanvasView: View {
             }
         }
         .frame(width: side, height: side)
-        .background(Color.white)
+        .background(Color.pebbles.stock)
         .clipShape(RoundedRectangle(cornerRadius: Spacing.xxl, style: .continuous))
         .gesture(
             DragGesture(minimumDistance: 0, coordinateSpace: .local)

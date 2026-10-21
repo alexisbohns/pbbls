@@ -197,7 +197,7 @@ struct EditMomentForm<PhotoRow: View>: View {
         List {
             Section {
                 DatePicker("When", selection: $draft.happenedAt, displayedComponents: [.date, .hourAndMinute])
-                    .tint(Color.accent.primary)
+                    .tint(Color.pebbles.primary)
                     .pebblesListRow(position: .top)
                 TextField("Name", text: $draft.name)
                     // Clamp on screen like RecordNameStep: a binding setter
@@ -220,7 +220,7 @@ struct EditMomentForm<PhotoRow: View>: View {
                 if !draft.canSave(hasSnap: hasSnap) {
                     Text("A moment needs a name or a photo.")
                         .font(.footnote)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                 }

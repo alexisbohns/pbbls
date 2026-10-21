@@ -96,7 +96,7 @@ private let previewSnapPalette = EmotionPalette(
     )
     .padding(.vertical, 24)
     .frame(maxWidth: .infinity)
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }
 
 #Preview("Snap frame · landscape") {
@@ -108,7 +108,7 @@ private let previewSnapPalette = EmotionPalette(
     )
     .padding(.vertical, 24)
     .frame(maxWidth: .infinity)
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }
 
 #Preview("Snap frame · portrait large") {
@@ -120,6 +120,6 @@ private let previewSnapPalette = EmotionPalette(
     )
     .padding(.vertical, 24)
     .frame(maxWidth: .infinity)
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }
 #endif

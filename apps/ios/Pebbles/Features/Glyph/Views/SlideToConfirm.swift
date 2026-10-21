@@ -36,15 +36,15 @@ struct SlideToConfirm: View {
 
     var body: some View {
         ZStack(alignment: .leading) {
-            Capsule().fill(Color.accent.surface)
+            Capsule().fill(Color.pebbles.surfaceContainerHighest)
 
             Capsule()
-                .fill(Color.accent.light)
+                .fill(Color.pebbles.primaryContainer)
                 .frame(width: dragX + thumb)
 
             Text("Slide to confirm")
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(Color.accent.primary)
+                .foregroundStyle(Color.pebbles.primary)
                 .frame(maxWidth: .infinity)
 
             thumbView
@@ -72,10 +72,10 @@ struct SlideToConfirm: View {
 
     private var thumbView: some View {
         ZStack {
-            Circle().fill(Color.accent.primary)
+            Circle().fill(Color.pebbles.primary)
             Text("\(cost)")
                 .font(.headline)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.pebbles.onPrimary)
         }
         .frame(width: thumb, height: thumb)
     }

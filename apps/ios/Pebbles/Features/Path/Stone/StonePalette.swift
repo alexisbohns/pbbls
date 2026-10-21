@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The six tones a stone is coloured from. The picker builds one from the
-/// brand accent, the Path from an emotion's palette, the lab from a hex
+/// The six tones a stone is coloured from. The picker builds one from
+/// `brand`, the Path from an emotion's palette, the lab from a hex
 /// sextet; a `StoneTones` value then says which slot each role (body, ink,
 /// lips) takes. `dark` is the darkest tone and `shaded` the mid one.
 struct StonePalette: Equatable {
@@ -17,16 +17,18 @@ struct StonePalette: Equatable {
     let dark: Color
     let shaded: Color
 
-    /// The brand accent: `AccentDark` (#341B1B) is the darkest tone and
-    /// `AccentShaded` (#8C4949) the mid one, the same convention as the
-    /// `emotion_categories` columns.
+    /// The brand stone (D5, spec 2026-10-20-ios-m3-colour): the #456 accent ramp
+    /// kept verbatim as stone data, not scheme roles. The lit-stone shader (#975)
+    /// is tuned to a body ramp, and a stone never changes with the theme. `dark`
+    /// (#341B1B) is the darkest tone and `shaded` (#8C4949) the mid one, the
+    /// `emotion_categories` convention.
     static let brand = StonePalette(
-        primary: Color.accent.primary,
-        secondary: Color.accent.secondary,
-        light: Color.accent.light,
-        surface: Color.accent.surface,
-        dark: Color.accent.dark,
-        shaded: Color.accent.shaded
+        primary: Color(.sRGB, red: 192 / 255, green: 122 / 255, blue: 122 / 255),
+        secondary: Color(.sRGB, red: 234 / 255, green: 211 / 255, blue: 211 / 255),
+        light: Color(.sRGB, red: 250 / 255, green: 244 / 255, blue: 244 / 255),
+        surface: Color(.sRGB, red: 192 / 255, green: 122 / 255, blue: 122 / 255, opacity: 0.1),
+        dark: Color(.sRGB, red: 52 / 255, green: 27 / 255, blue: 27 / 255),
+        shaded: Color(.sRGB, red: 140 / 255, green: 73 / 255, blue: 73 / 255)
     )
 
     /// An uncompleted moment's stone (R4): the web `BLANK_PALETTE` grey ramp

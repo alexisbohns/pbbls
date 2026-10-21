@@ -48,7 +48,7 @@ struct ValenceRollView: View {
 
             Text(valence.headline.span)
                 .pebblesFont(.cardHeading)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
 
             pyramid
                 .padding(.top, Spacing.sm)
@@ -99,7 +99,7 @@ struct ValenceRollView: View {
         VStack(spacing: 6) {
             ForEach(ValenceSizeGroup.ladder, id: \.self) { size in
                 Capsule()
-                    .fill(Color.accent.primary.opacity(size == valence.sizeGroup ? 1 : 0.25))
+                    .fill(Color.pebbles.primary.opacity(size == valence.sizeGroup ? 1 : 0.25))
                     .frame(width: markWidth(size), height: 6)
             }
         }

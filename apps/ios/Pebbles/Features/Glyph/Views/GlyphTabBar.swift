@@ -29,12 +29,12 @@ struct GlyphTabBar: View {
                 Text(title(tab))
                     .font(.caption2.weight(.medium))
             }
-            .foregroundStyle(selection == tab ? Color.accent.primary : Color.system.secondary)
+            .foregroundStyle(selection == tab ? Color.pebbles.onPrimaryContainer : Color.pebbles.onSurfaceVariant)
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.sm)
             .background {
                 if selection == tab {
-                    Capsule().fill(Color.accent.surface)
+                    Capsule().fill(Color.pebbles.primaryContainer)
                 }
             }
             .contentShape(Capsule())
@@ -69,12 +69,12 @@ private struct GlyphTabBarGlass: ViewModifier {
         } else {
             content
                 .background {
-                    Capsule().fill(Color.system.background)
+                    Capsule().fill(Color.pebbles.stock)
                         .overlay(Capsule().fill(.regularMaterial))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.22), lineWidth: 0.5))
+                        .overlay(Capsule().strokeBorder(Color.pebbles.rule, lineWidth: 0.5))
                 }
                 .compositingGroup()
-                .shadow(color: .black.opacity(0.16), radius: 12, y: 4)
+                .shadow(color: Color.pebbles.scrim.opacity(0.16), radius: 12, y: 4)
         }
     }
 }

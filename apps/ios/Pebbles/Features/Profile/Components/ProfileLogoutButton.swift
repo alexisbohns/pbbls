@@ -7,12 +7,12 @@ struct ProfileLogoutButton: View {
         Button(action: action) {
             Text("Log out")
                 .pebblesFont(.buttonLabel)
-                .foregroundStyle(Color.accent.primary)
+                .foregroundStyle(Color.pebbles.onPrimaryContainer)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.md)
                 .background(
                     RoundedRectangle(cornerRadius: Spacing.lg)
-                        .fill(Color.accent.surface)
+                        .fill(Color.pebbles.primaryContainer)
                 )
         }
         .buttonStyle(.plain)

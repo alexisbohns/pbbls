@@ -64,10 +64,10 @@ struct GlyphCarveSheet: View {
             TextField(
                 "",
                 text: $name,
-                prompt: Text("Name (optional)").foregroundStyle(Color.system.muted)
+                prompt: Text("Name (optional)").foregroundStyle(Color.pebbles.outline)
             )
             .pebblesFont(.title)
-            .foregroundStyle(Color.system.foreground)
+            .foregroundStyle(Color.pebbles.onSurface)
             .multilineTextAlignment(.center)
             .textInputAutocapitalization(.words)
             .submitLabel(.done)
@@ -78,11 +78,11 @@ struct GlyphCarveSheet: View {
             GlyphCanvasView(
                 committedStrokes: strokes,
                 onStrokeCommit: { stroke in strokes.append(stroke) },
-                strokeColor: Color.accent.primary
+                strokeColor: Color.pebbles.primary
             )
             .overlay(
                 RoundedRectangle(cornerRadius: Spacing.xxl, style: .continuous)
-                    .stroke(Color.system.muted, lineWidth: 1)
+                    .stroke(Color.pebbles.outline, lineWidth: 1)
             )
 
             if let saveError {
@@ -96,10 +96,10 @@ struct GlyphCarveSheet: View {
                     if !strokes.isEmpty { strokes.removeLast() }
                 } label: {
                     Label("Undo", systemImage: "arrow.uturn.backward")
-                        .foregroundStyle(Color.accent.primary)
+                        .foregroundStyle(Color.pebbles.onPrimaryContainer)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
-                        .background(Capsule().fill(Color.accent.surface))
+                        .background(Capsule().fill(Color.pebbles.primaryContainer))
                 }
                 .buttonStyle(.plain)
                 .disabled(strokes.isEmpty)

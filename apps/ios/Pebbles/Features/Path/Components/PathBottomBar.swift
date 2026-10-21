@@ -11,18 +11,12 @@ struct PathBottomBar: View {
     let ripple: RippleSummary?
     let onProfile: () -> Void
 
-    @Environment(\.colorScheme) private var colorScheme
-
-    private var numberColor: Color {
-        colorScheme == .dark ? Color.accent.primary : Color.system.foreground
-    }
-
     var body: some View {
         HStack(spacing: 0) {
             Button(action: onProfile) {
                 Image(systemName: "person.crop.circle")
                     .font(.title2)
-                    .foregroundStyle(Color.accent.primary)
+                    .foregroundStyle(Color.pebbles.primary)
                     .frame(width: 40, height: 40)
             }
             .accessibilityLabel("Profile")
@@ -48,14 +42,14 @@ struct PathBottomBar: View {
     private var karmaStat: some View {
         HStack(spacing: 6) {
             Image(systemName: "sparkle")
-                .foregroundStyle(Color.accent.primary)
+                .foregroundStyle(Color.pebbles.primary)
             VStack(alignment: .leading, spacing: 0) {
                 Text(karma.map { "\($0)" } ?? "—")
                     .font(.ysabeauSemibold(17))
-                    .foregroundStyle(numberColor)
+                    .foregroundStyle(Color.pebbles.primary)
                 Text("karma")
                     .font(.caption)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
             }
         }
     }

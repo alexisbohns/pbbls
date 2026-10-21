@@ -102,9 +102,9 @@ struct PathPebbleRow: View {
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.white, lineWidth: 4)
+                    .stroke(Color.pebbles.stock, lineWidth: 4)
             )
-            .shadow(color: Color.black.opacity(0.18), radius: 6, x: 0, y: 2)
+            .shadow(color: Color.pebbles.scrim.opacity(0.18), radius: 6, x: 0, y: 2)
             .rotationEffect(.degrees(PathPebbleRow.rotationAngle(forPositionIndex: positionIndex)))
     }
 
@@ -118,7 +118,7 @@ struct PathPebbleRow: View {
     }
 
     private var nameColor: Color {
-        guard let palette else { return Color.system.foreground }
+        guard let palette else { return Color.pebbles.onSurface }
         return PathPebbleRow.nameColor(palette: palette, isLarge: isLarge, colorScheme: colorScheme)
     }
 

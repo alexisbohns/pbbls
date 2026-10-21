@@ -8,19 +8,19 @@ struct ProfileLabCard: View {
             HStack(spacing: Spacing.lg) {
                 Image(systemName: "lightbulb.max")
                     .pebblesIcon(.large)
-                    .foregroundStyle(Color.accent.primary)
+                    .foregroundStyle(Color.pebbles.primary)
                 VStack(alignment: .leading) {
                     Text("Lab")
                         .pebblesFont(.headline)
-                        .foregroundStyle(Color.system.foreground)
+                        .foregroundStyle(Color.pebbles.onSurface)
                     Text("News & community")
                         .pebblesFont(.subhead)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
                     .pebblesIcon(.medium)
-                    .foregroundStyle(Color.system.muted)
+                    .foregroundStyle(Color.pebbles.outline)
             }
             .contentShape(Rectangle())
             .profileCard()

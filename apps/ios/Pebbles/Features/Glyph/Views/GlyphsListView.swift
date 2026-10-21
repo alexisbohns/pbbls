@@ -135,7 +135,7 @@ struct GlyphsListView: View {
                         Text("\(item.price)")
                     }
                     .font(.caption2)
-                    .foregroundStyle(Color.system.muted)
+                    .foregroundStyle(Color.pebbles.outline)
                 }
             }
         }

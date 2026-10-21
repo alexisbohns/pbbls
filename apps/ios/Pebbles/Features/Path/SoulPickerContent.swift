@@ -23,7 +23,7 @@ struct SoulPickerContent: View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
             Text("All my souls")
                 .pebblesFont(.cardHeading)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             LazyVGrid(columns: columns, spacing: Spacing.lg) {
@@ -42,7 +42,7 @@ struct SoulPickerContent: View {
             if souls.isEmpty {
                 Text("Add the first soul to tag this pebble with")
                     .pebblesFont(.callout)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
             }

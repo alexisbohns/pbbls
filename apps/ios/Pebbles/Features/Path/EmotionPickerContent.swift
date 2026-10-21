@@ -97,7 +97,7 @@ struct EmotionPickerContent: View {
                 .fontWeight(.semibold)
                 .tracking(1.5)
                 .textCase(.uppercase)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
         }
     }
 
@@ -117,7 +117,7 @@ struct EmotionPickerContent: View {
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(isSelected ? category.palette.primary : category.palette.surface)
-            .foregroundStyle(isSelected ? category.palette.light : Color.system.foreground)
+            .foregroundStyle(isSelected ? category.palette.light : Color.pebbles.onSurface)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)

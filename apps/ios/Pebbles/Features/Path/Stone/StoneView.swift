@@ -193,5 +193,5 @@ struct StoneView: View {
         }
     }
     .padding()
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }

@@ -42,14 +42,14 @@ struct DomainPickerContent: View {
                     Text(verbatim: domain.localizedName)
                         .pebblesFont(.bodyEmphasized)
                         .foregroundStyle(
-                            isSelected ? Color.accent.primary : Color.system.foreground
+                            isSelected ? Color.pebbles.primary : Color.pebbles.onSurface
                         )
                     // .subhead, not .meta: the `meta` token uppercases and
                     // letter-spaces, which is right for a label and wrong for a
                     // sentence-length description.
                     Text(verbatim: domain.localizedLabel)
                         .pebblesFont(.subhead)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .multilineTextAlignment(.leading)
                 }
 
@@ -84,5 +84,5 @@ struct DomainPickerContent: View {
         DomainPickerContent(domains: domains, selected: domains[0].id, onSelect: { _ in })
             .padding()
     }
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }

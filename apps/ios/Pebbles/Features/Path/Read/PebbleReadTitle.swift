@@ -16,8 +16,8 @@ struct PebbleReadTitle: View {
         VStack(spacing: 6) {
             MomentNameText(
                 name: name,
-                color: nameColor ?? Color.system.foreground,
-                untitledColor: dateColor ?? Color.system.secondary,
+                color: nameColor ?? Color.pebbles.onSurface,
+                untitledColor: dateColor ?? Color.pebbles.onSurfaceVariant,
                 untitledFont: .ysabeauSemiboldItalic(24)
             )
             .font(.custom("Ysabeau-SemiBold", size: 24))
@@ -26,7 +26,7 @@ struct PebbleReadTitle: View {
                 .font(.caption)
                 .tracking(1.2)
                 .textCase(.uppercase)
-                .foregroundStyle(dateColor ?? Color.system.secondary)
+                .foregroundStyle(dateColor ?? Color.pebbles.onSurfaceVariant)
         }
         .frame(maxWidth: .infinity)
     }
@@ -57,5 +57,5 @@ struct PebbleReadTitle: View {
         PebbleReadTitle(name: nil, happenedAt: .now)
     }
     .padding()
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }

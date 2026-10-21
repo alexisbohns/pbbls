@@ -291,7 +291,7 @@ struct SettingsSheet: View {
             ForEach(Array(linkedProviders.enumerated()), id: \.element.id) { index, provider in
                 HStack(spacing: 12) {
                     Image(systemName: provider.systemImage)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     Text(verbatim: provider.label)
                     Spacer()
                 }
@@ -306,7 +306,7 @@ struct SettingsSheet: View {
         Section {
             HStack {
                 Text("Name")
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 Spacer()
                 TextField("Your name", text: $displayName)
                     .multilineTextAlignment(.trailing)
@@ -319,10 +319,10 @@ struct SettingsSheet: View {
             .pebblesListRow(position: .top)
             HStack {
                 Text("Email")
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 Spacer()
                 Text(email ?? "—")
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
             }
             .pebblesListRow(position: .bottom)
         } header: {
@@ -337,10 +337,10 @@ struct SettingsSheet: View {
         Section {
             HStack {
                 Text("Handle")
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 Spacer()
                 Text(verbatim: "@")
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 TextField("your_handle", text: $handle)
                     .multilineTextAlignment(.trailing)
                     .textInputAutocapitalization(.never)
@@ -363,10 +363,10 @@ struct SettingsSheet: View {
             Toggle(isOn: $isPublicProfile) {
                 Text("Make my profile public")
                     .foregroundStyle(
-                        initialHandle == nil ? Color.system.secondary : Color.system.foreground
+                        initialHandle == nil ? Color.pebbles.onSurfaceVariant : Color.pebbles.onSurface
                     )
             }
-            .tint(Color.accent.primary)
+            .tint(Color.pebbles.primary)
             .disabled(initialHandle == nil)
             .pebblesListRow(position: shareURL == nil ? .bottom : .middle)
 
@@ -377,7 +377,7 @@ struct SettingsSheet: View {
                         Spacer()
                         Text(verbatim: shareURL.absoluteString)
                             .font(.footnote)
-                            .foregroundStyle(Color.system.secondary)
+                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
                             .lineLimit(1)
                             .truncationMode(.middle)
                     }

@@ -113,18 +113,18 @@ struct GlyphDetailDrawer: View {
     @ViewBuilder private var costOrSeal: some View {
         if isOwned {
             Image(systemName: "checkmark.seal.fill")
-                .foregroundStyle(Color.accent.primary)
+                .foregroundStyle(Color.pebbles.primary)
                 .padding(.horizontal, Spacing.sm)
-                .background(Color.system.background)
+                .background(Color.pebbles.surface)
         } else {
             HStack(spacing: 2) {
                 Image(systemName: "sparkle")
                 Text("\(item.price)")
             }
             .font(.headline)
-            .foregroundStyle(Color.accent.primary)
+            .foregroundStyle(Color.pebbles.primary)
             .padding(.horizontal, Spacing.sm)
-            .background(Color.system.background)
+            .background(Color.pebbles.surface)
         }
     }
 
@@ -132,7 +132,7 @@ struct GlyphDetailDrawer: View {
         // Both columns flex-grow equally so the trade arrow sits at the true center.
         HStack(spacing: Spacing.sm) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Me").font(.caption).foregroundStyle(Color.system.secondary)
+                Text("Me").font(.caption).foregroundStyle(Color.pebbles.onSurfaceVariant)
                 HStack(spacing: 2) {
                     Image(systemName: "sparkle")
                     Text("\(currentBalance)")
@@ -140,11 +140,11 @@ struct GlyphDetailDrawer: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Image(systemName: "arrow.left.arrow.right").foregroundStyle(Color.system.muted)
+            Image(systemName: "arrow.left.arrow.right").foregroundStyle(Color.pebbles.outline)
 
             VStack(alignment: .trailing, spacing: 2) {
-                Text("Creator").font(.caption).foregroundStyle(Color.system.secondary)
-                Text("@community").pebblesFont(.bodyLeadHand).foregroundStyle(Color.system.muted)
+                Text("Creator").font(.caption).foregroundStyle(Color.pebbles.onSurfaceVariant)
+                Text("@community").pebblesFont(.bodyLeadHand).foregroundStyle(Color.pebbles.outline)
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
         }
@@ -154,9 +154,9 @@ struct GlyphDetailDrawer: View {
         if let acquiredAt {
             Text("Acquired · \(acquiredAt.formatted(.dateTime.month(.abbreviated).day().year()))")
                 .font(.subheadline)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
         } else {
-            Text("Owned").font(.subheadline).foregroundStyle(Color.system.secondary)
+            Text("Owned").font(.subheadline).foregroundStyle(Color.pebbles.onSurfaceVariant)
         }
     }
 
@@ -192,13 +192,13 @@ struct GlyphDetailDrawer: View {
     }
 }
 
-/// Horizontal dotted rule — 4pt round dots in `accent.secondary`, the design's
+/// Horizontal dotted rule — 4pt round dots in the `rule` role, the design's
 /// divider treatment (replaces the default hairline `Divider`).
 private struct DottedRule: View {
     var body: some View {
         DottedLineShape()
             .stroke(
-                Color.accent.secondary,
+                Color.pebbles.rule,
                 style: StrokeStyle(lineWidth: 4, lineCap: .round, dash: [0.1, 8])
             )
             .frame(height: 4)

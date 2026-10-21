@@ -116,7 +116,7 @@ struct PathView: View {
             // owns the loading visual and stays up until `onFirstLoad`. Showing
             // the plain background here means the hand-off to the feed can't
             // flash a spinner even for a frame (#598).
-            Color.system.background
+            Color.pebbles.surface
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let loadError {
             Text(loadError)

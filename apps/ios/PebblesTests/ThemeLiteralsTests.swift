@@ -7,9 +7,8 @@ import Testing
 /// reads the sources from `#filePath` (precedent: StoneLab/StoneLabPalettesTests).
 ///
 /// A file's count is its number of offending *lines* (one line can break two
-/// rules: `UIColor(red:` also matches `Color(red`). The ratchet fails when a
-/// count rises ("new literal") and when one falls without its `debt` entry
-/// being lowered ("lower the debt").
+/// rules: `UIColor(red:` also matches `Color(red`). A file's count must equal
+/// its `allowlist` entry exactly, so a stale entry fails too.
 @Suite("Theme literals")
 struct ThemeLiteralsTests {
 
@@ -63,7 +62,6 @@ struct ThemeLiteralsTests {
 
     /// Permanent: hits that are not chrome colours.
     static let allowlist: [String: (count: Int, reason: String)] = [
-        "Features/Path/Valence/ValenceStoneStyle.swift": (1, "joySurface, Joy's emotion surface (data)"),
         "Features/Path/Read/PebbleSnapFrame.swift": (1, "preview fixture image drawn above #Preview"),
         "Features/Path/Components/WeekPathView.swift": (2, "fade mask stops (alpha only)"),
         "Features/Path/Render/PebbleAnimatedRenderView.swift": (1, "stroke-reveal mask"),
@@ -76,18 +74,6 @@ struct ThemeLiteralsTests {
         "Features/Connections/ConnectionsListView.swift": (2, "role: .destructive in a system dialog"),
         "Features/Profile/Lists/CollectionsListView.swift": (1, "role: .destructive in a system dialog"),
         "Features/Glyph/Views/GlyphCarveSheet.swift": (1, "role: .destructive in a system dialog")
-    ]
-
-    /// Shrinks to nothing by the end of the stack (A2: .red and owned
-    /// destructive roles; A3a / A3b: the folders they migrate). Never raise it.
-    static let debt: [String: Int] = [
-        "Features/Glyph/Views/GlyphCanvasView.swift": 1,
-        "Features/Glyph/Views/GlyphPickerContent.swift": 1,
-        "Features/Glyph/Views/GlyphTabBar.swift": 2,
-        "Features/Glyph/Views/SlideToConfirm.swift": 1,
-        "Features/Path/Components/PathPebbleRow.swift": 2,
-        "Features/Path/Components/WeekPathView.swift": 1,
-        "Features/Path/Valence/ValenceStoneStyle.swift": 1
     ]
 
     /// `apps/ios/Pebbles`, two levels up from this file (`apps/ios/PebblesTests/`).
@@ -210,7 +196,7 @@ struct ThemeLiteralsTests {
     @Test("feature code names colours only through Color.pebbles")
     func ratchet() throws {
         let found = try Self.scan()
-        var allowed = Self.debt
+        var allowed: [String: Int] = [:]
         for (path, entry) in Self.allowlist { allowed[path, default: 0] += entry.count }
 
         var problems: [String] = []
@@ -221,16 +207,12 @@ struct ThemeLiteralsTests {
                 let lines = hits.map { "  \(path):\($0.line) — \($0.reason)" }.joined(separator: "\n")
                 problems.append("\(path): \(hits.count) offending lines, \(limit) allowed — new literal.\n\(lines)")
             } else if hits.count < limit {
-                problems.append("\(path): \(hits.count) offending lines, \(limit) allowed — lower the debt.")
+                problems.append(
+                    "\(path): \(hits.count) offending lines, \(limit) allowed — drop the stale allowlist entry."
+                )
             }
         }
-        // Paste-ready: the debt a file still owes once its permanent allowlist
-        // entry is taken out. Files that owe nothing are left out.
-        let pasteReady = found.keys.sorted().compactMap { path -> String? in
-            let owed = max(0, (found[path]?.count ?? 0) - (Self.allowlist[path]?.count ?? 0))
-            return owed > 0 ? "\"\(path)\": \(owed)," : nil
-        }.joined(separator: "\n")
         let summary = problems.joined(separator: "\n")
-        #expect(problems.isEmpty, "\(summary)\n\nPaste-ready debt (allowlist excluded):\n\(pasteReady)")
+        #expect(problems.isEmpty, "\(summary)")
     }
 }

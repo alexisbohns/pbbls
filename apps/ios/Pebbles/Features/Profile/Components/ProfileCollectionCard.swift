@@ -25,11 +25,11 @@ struct ProfileCollectionCard: View {
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(variant.title)
                     .pebblesFont(.headline)
-                    .foregroundStyle(Color.system.foreground)
+                    .foregroundStyle(Color.pebbles.onSurface)
                 if let subtitleKey = variant.subtitleKey {
                     Text(subtitleKey)
                         .pebblesFont(.subhead)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 }
             }
         }
@@ -42,10 +42,10 @@ struct ProfileCollectionCard: View {
     private var iconBox: some View {
         ZStack {
             RoundedRectangle(cornerRadius: Spacing.sm)
-                .fill(Color.accent.surface)
+                .fill(Color.pebbles.primaryContainer)
             Image(systemName: variant.iconName)
                 .pebblesIcon(.small)
-                .foregroundStyle(Color.accent.primary)
+                .foregroundStyle(Color.pebbles.onPrimaryContainer)
         }
         .frame(width: Spacing.xxl, height: Spacing.xxl)
     }
@@ -82,11 +82,11 @@ private extension ProfileCollectionCard.Variant {
         switch self {
         case .filled:
             RoundedRectangle(cornerRadius: Spacing.lg)
-                .strokeBorder(Color.system.muted, lineWidth: 1)
+                .strokeBorder(Color.pebbles.rule, lineWidth: 1)
         case .empty:
             RoundedRectangle(cornerRadius: Spacing.lg)
                 .strokeBorder(
-                    Color.system.muted,
+                    Color.pebbles.outline,
                     style: StrokeStyle(lineWidth: 1, lineCap: .round, dash: [10, 10])
                 )
         }

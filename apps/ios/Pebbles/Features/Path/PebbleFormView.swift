@@ -34,13 +34,13 @@ struct PebbleFormView: View {
                             RoundedRectangle(cornerRadius: 6)
                                 .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
                                 .frame(width: 32, height: 32)
-                                .foregroundStyle(Color.system.secondary)
+                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         }
                         Text("Emotion")
-                            .foregroundStyle(Color.system.foreground)
+                            .foregroundStyle(Color.pebbles.onSurface)
                         Spacer()
                         emotionRowLabel
-                            .foregroundStyle(Color.system.secondary)
+                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         Image(systemName: "chevron.right")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
@@ -76,23 +76,23 @@ struct PebbleFormView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 32, height: 32)
-                                .foregroundStyle(Color.system.secondary)
+                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                                 .accessibilityHidden(true)
                         } else {
                             RoundedRectangle(cornerRadius: 6)
                                 .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
                                 .frame(width: 32, height: 32)
-                                .foregroundStyle(Color.system.secondary)
+                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         }
                         Text("Valence")
-                            .foregroundStyle(Color.system.foreground)
+                            .foregroundStyle(Color.pebbles.onSurface)
                         Spacer()
                         if let label = draft.valence?.label {
                             Text(label)
-                                .foregroundStyle(Color.system.secondary)
+                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         } else {
                             Text("Choose…")
-                                .foregroundStyle(Color.system.secondary)
+                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         }
                         Image(systemName: "chevron.right")
                             .font(.caption)

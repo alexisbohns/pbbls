@@ -100,5 +100,5 @@ struct PebblePillFlow: Layout {
     }
     .frame(width: 320)
     .padding()
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }
