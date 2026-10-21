@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "generate": "xcodegen generate",
+    "generate:colors": "npm run generate:ios-colors --workspace=@pbbls/web",
     "build": "xcodegen generate && xcodebuild -scheme Pebbles -destination 'generic/platform=iOS Simulator' build",
     "lint": "swiftlint",
     "test": "xcodegen generate && xcodebuild test -scheme Pebbles -destination 'platform=iOS Simulator,name=iPhone 17'",

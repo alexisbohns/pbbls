@@ -15,6 +15,7 @@ Native iOS app for Pebbles. SwiftUI, iOS 17+, iPhone-only.
 - **No UI tests for now.** Add a `PebblesUITests` target in a dedicated PR when smoke tests are actually needed.
 - **Use `os.Logger` not `print`.** When async operations land, every error path logs — mirror the web-side discipline that silent failures are bugs.
 - **Use `.task { ... }` for view-scoped async work.** It cancels automatically when the view disappears. Don't kick off `Task { ... }` from `.onAppear` without a reason.
+- **Colours are generated.** `npm run generate:colors` writes `Assets.xcassets/M3/` and `Shared/Theme/PebblesColors.swift` from Android's `ColorSchemes.kt`. Feature code uses `Color.pebbles.<role>` only, and `ThemeLiteralsTests` fails on anything else.
 
 ## Data layer
 
