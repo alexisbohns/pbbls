@@ -11,7 +11,7 @@ struct CompleteCollectionStep: View {
         if refs.collections.isEmpty {
             Text("You don't have any collections yet.")
                 .pebblesFont(.callout)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.xxl)
@@ -33,17 +33,17 @@ struct CompleteCollectionStep: View {
         } label: {
             HStack(spacing: Spacing.md) {
                 Image(systemName: "square.stack")
-                    .foregroundStyle(isSelected ? Color.accent.primary : Color.system.secondary)
+                    .foregroundStyle(isSelected ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant)
                 // Collection names are user-authored, so never localized.
                 Text(verbatim: collection.name)
                     .pebblesFont(.body)
-                    .foregroundStyle(isSelected ? Color.accent.primary : Color.system.foreground)
+                    .foregroundStyle(isSelected ? Color.pebbles.primary : Color.pebbles.onSurface)
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, Spacing.md)
             .padding(.vertical, Spacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(isSelected ? Color.accent.primary.opacity(0.12) : Color.system.muted)
+            .background(isSelected ? Color.pebbles.primary.opacity(0.12) : Color.pebbles.surfaceContainerHighest)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .buttonStyle(.plain)

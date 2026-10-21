@@ -90,11 +90,7 @@ struct ThemeLiteralsTests {
         "Features/Lab/Components/FeaturedCommunityCard.swift": 1,
         "Features/Path/Components/PathPebbleRow.swift": 2,
         "Features/Path/Components/WeekPathView.swift": 1,
-        "Features/Path/Valence/ValenceStoneStyle.swift": 1,
-        "Features/PebbleMedia/AttachedPhotoView.swift": 2,
-        "Features/PebbleMedia/ExistingSnapRow.swift": 2,
-        "Features/PebbleMedia/SnapImageView.swift": 1,
-        "Features/Record/RecordStepScaffold.swift": 1
+        "Features/Path/Valence/ValenceStoneStyle.swift": 1
     ]
 
     /// `apps/ios/Pebbles`, two levels up from this file (`apps/ios/PebblesTests/`).

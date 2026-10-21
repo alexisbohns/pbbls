@@ -82,7 +82,7 @@ struct CaptureFlowView: View {
             stepBody
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(Color.system.background)
+        .background(Color.pebbles.surface)
         .pebblesScreen()
         .animation(.snappy(duration: 0.28), value: model.step)
         .onChange(of: model.step) { old, new in
@@ -182,7 +182,7 @@ struct CaptureFlowView: View {
                 if let blocked = snapBlockedMessage {
                     Text(verbatim: blocked)
                         .pebblesFont(.subhead)
-                        .foregroundStyle(Color.system.secondary)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .multilineTextAlignment(.center)
                 }
                 if let error = model.saveError {

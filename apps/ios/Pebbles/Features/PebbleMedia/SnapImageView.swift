@@ -53,7 +53,7 @@ struct SnapImageView: View {
 
     private var fallbackPlaceholder: some View {
         Rectangle()
-            .fill(Color.secondary.opacity(0.1))
+            .fill(Color.pebbles.surfaceContainerHighest)
             .overlay(
                 Image(systemName: "photo.on.rectangle.angled")
                     .foregroundStyle(.secondary)

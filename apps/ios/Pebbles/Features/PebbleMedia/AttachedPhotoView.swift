@@ -33,7 +33,7 @@ struct AttachedPhotoView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
         } else {
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.secondary.opacity(0.2))
+                .fill(Color.pebbles.surfaceContainerHighest)
                 .frame(width: 56, height: 56)
         }
     }
@@ -50,7 +50,7 @@ struct AttachedPhotoView: View {
             Label("Ready", systemImage: "checkmark.circle.fill")
                 .labelStyle(.titleAndIcon)
                 .font(.caption)
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.pebbles.tertiary)
         case .failed:
             Label("Upload failed", systemImage: "exclamationmark.triangle.fill")
                 .labelStyle(.titleAndIcon)
