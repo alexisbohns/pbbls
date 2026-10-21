@@ -187,7 +187,7 @@ enum SpineFixtureWeek {
     private static func glyph(_ mark: String) -> PebbleGlyph {
         guard let index = markNames.firstIndex(of: mark) else { preconditionFailure("unknown mark \(mark)") }
         return PebbleGlyph(id: id(0xA000, index + 1), name: mark,
-                    strokes: SpineFixtureMarks.strokes[mark] ?? [], viewBox: "0 0 200 200", source: .domain)
+                           strokes: SpineFixtureMarks.strokes[mark] ?? [], viewBox: "0 0 200 200", source: .domain)
     }
 
     private static func id(_ group: Int, _ n: Int) -> UUID {

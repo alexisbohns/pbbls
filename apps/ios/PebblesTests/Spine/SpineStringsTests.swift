@@ -41,9 +41,9 @@ struct SpineStringsTests {
         #expect(SpineCopy.others(count: 12, words: "douze", locale: V.fr) == "& douze autres")
         #expect(SpineCopy.personsMore(count: 6, locale: V.en) == "and six others")
         #expect(SpineCopy.personsMore(count: 1, locale: V.fr) == "et un autre")
-        // French `many` (a million) and English `other` differ from the device locale's categories.
-        #expect(SpineCopy.others(count: 1_000_000, words: "un million", locale: V.fr) == "& un million autres")
-        #expect(SpineCopy.others(count: 1_000_000, words: "one million", locale: V.en) == "& one million others")
+        // French puts 0 in `one`, English in `other`: the plural rule follows the pinned locale.
+        #expect(SpineCopy.others(count: 0, words: "zéro", locale: V.fr) == "& zéro autre")
+        #expect(SpineCopy.others(count: 0, words: "zero", locale: V.en) == "& zero others")
     }
 
     @Test("the day dots say how many days, then which")
