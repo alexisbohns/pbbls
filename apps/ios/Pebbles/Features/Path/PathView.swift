@@ -63,7 +63,10 @@ struct PathView: View {
         .task { await stats.load() }
         .onChange(of: nav.scrollToTop[.path, default: 0]) { focusCurrentWeek() }
         // #903 D5: a moment changed from People or Collections. Path's own
-        // changes already reloaded through their callbacks.
+        // changes already reloaded through their callbacks, and its `.task`
+        // reloads whenever the tab reappears, so this reader only covers
+        // changes made while Path stays visible. Stack D's
+        // `PathModel` takes this over.
         .onChange(of: revision.value) {
             guard revision.changedOutside(.path) else { return }
             Task { await stats.refresh() }
