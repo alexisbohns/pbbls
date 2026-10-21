@@ -3,6 +3,7 @@ import Foundation
 /// The Spine's copy, typed: one function per `path.spine.*` key, so no view
 /// spells a key or an argument order. Counts that drive a plural come first.
 enum SpineCopy {
+    /// The year is `String(year)`, so no locale groups it ("2 026").
     static func kicker(ordinal: String, year: Int, locale: Locale) -> String {
         SpineStrings.format("path.spine.kicker", locale: locale, ordinal, String(year))
     }
@@ -74,7 +75,8 @@ enum SpineCopy {
     }
 
     /// The stone's and the card's name (A2, A3). An empty `withNames` leaves two
-    /// spaces in the template; they close to one.
+    /// spaces in the template; `tidy` collapses double spaces across the whole sentence, names included.
+    // swiftlint:disable:next function_parameter_count
     static func stoneA11y(
         name: String, date: String, time: String, kind: String, emotion: String, withNames: String, locale: Locale
     ) -> String {

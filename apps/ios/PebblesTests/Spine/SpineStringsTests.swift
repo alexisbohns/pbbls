@@ -7,6 +7,7 @@ import Testing
 /// stone's sentence closes the gap an empty "with" leaves.
 @Suite("Spine strings")
 struct SpineStringsTests {
+    // swiftlint:disable:next type_name
     typealias V = Vectors
 
     @Test("the kicker and the titles read the web's sentences")
@@ -40,6 +41,9 @@ struct SpineStringsTests {
         #expect(SpineCopy.others(count: 12, words: "douze", locale: V.fr) == "& douze autres")
         #expect(SpineCopy.personsMore(count: 6, locale: V.en) == "and six others")
         #expect(SpineCopy.personsMore(count: 1, locale: V.fr) == "et un autre")
+        // French `many` (a million) and English `other` differ from the device locale's categories.
+        #expect(SpineCopy.others(count: 1_000_000, words: "un million", locale: V.fr) == "& un million autres")
+        #expect(SpineCopy.others(count: 1_000_000, words: "one million", locale: V.en) == "& one million others")
     }
 
     @Test("the day dots say how many days, then which")
@@ -91,6 +95,8 @@ struct SpineStringsTests {
             let entry = try #require(strings[key] as? [String: Any])
             let localizations = try #require(entry["localizations"] as? [String: Any], "\(key)")
             #expect(localizations["en"] != nil && localizations["fr"] != nil, "\(key) needs en and fr")
+            #expect(SpineStrings.string(key, locale: V.en) != key, "\(key) does not resolve in en")
+            #expect(SpineStrings.string(key, locale: V.fr) != key, "\(key) does not resolve in fr")
             let french = Self.values(in: localizations["fr"] as Any).joined(separator: " ").lowercased()
                 .replacingOccurrences(of: "#@[a-z]+@", with: "", options: .regularExpression)
             #expect(!french.contains("caillou") && !french.contains("pebble"), "\(key)")
