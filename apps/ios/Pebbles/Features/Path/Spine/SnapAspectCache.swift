@@ -115,13 +115,16 @@ final class SnapAspectCache {
     ) async throws -> T {
         try await withCheckedThrowingContinuation { continuation in
             let race = Race(continuation)
-            let worker = Task {
-                do { race.finish(.success(try await work())) } catch { race.finish(.failure(error)) }
-            }
-            Task {
+            let timer = Task {
                 try? await Task.sleep(for: limit)
-                if race.finish(.failure(Timeout())) { worker.cancel() }
+                return race.finish(.failure(Timeout()))
             }
+            let worker = Task {
+                let result: Result<T, Error>
+                do { result = .success(try await work()) } catch { result = .failure(error) }
+                if race.finish(result) { timer.cancel() }
+            }
+            Task { if await timer.value { worker.cancel() } }
         }
     }
 
