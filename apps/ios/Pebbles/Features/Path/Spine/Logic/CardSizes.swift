@@ -19,13 +19,16 @@ enum CardSizes {
     /// The ratio a card holds until its photo's is known.
     static let pendingRatio: CGFloat = 1
 
+    private static let caps: [Int: CGFloat] = [1: 330, 2: 370, 3: 400]
+    private static let edges: [Int: CGFloat] = [1: 2, 2: 3.5, 3: 5.5]
+
     static func cap(_ intensity: Int) -> CGFloat {
-        [1: 330, 2: 370, 3: 400][intensity] ?? 370
+        caps[intensity] ?? 370
     }
 
     /// The painted bottom edge's thickness.
     static func edge(_ intensity: Int) -> CGFloat {
-        [1: 2, 2: 3.5, 3: 5.5][intensity] ?? 3.5
+        edges[intensity] ?? 3.5
     }
 
     static func cardSize(intensity: Int, ratio: CGFloat?, column: CGFloat) -> CardSize {

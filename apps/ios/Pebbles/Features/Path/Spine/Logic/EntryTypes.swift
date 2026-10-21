@@ -2,7 +2,8 @@ import CoreGraphics
 
 /// A no-photo entry's name (#1130 R6): its cut, its line height (× size) and the
 /// stone's anchor, the centre of the name's first line in points from the top.
-/// `SpineType.Cut` is stack B's; this type only adds the two numbers around it.
+/// `SpineType.Cut` is the Spine's type cut (size, weight, italic, tracking);
+/// this type only adds the two numbers around it.
 struct EntryType: Equatable {
     let name: SpineType.Cut
     let lineHeight: CGFloat

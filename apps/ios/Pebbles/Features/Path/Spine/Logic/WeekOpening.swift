@@ -78,8 +78,9 @@ enum WeekOpening {
     }
 
     /// The days a person's dots mark, as VoiceOver reads them: "Monday 5, Tuesday 6,
-    /// and Thursday 8". Joined by hand (the web's `Intl.ListFormat` with the serial
-    /// comma outside French): `ListFormatter` follows the region, not the language.
+    /// and Thursday 8". Joined by hand, for en and fr only (the web's `Intl.ListFormat`:
+    /// English takes the serial comma, French does not): `ListFormatter` follows the
+    /// region, not the language.
     static func dotDays(
         _ days: [Bool], weekStart: Date, calendar: Calendar, locale: Locale
     ) -> (count: Int, days: String) {

@@ -14,7 +14,7 @@ struct SpineWeek<M: SpineMoment> {
     let weekStart: Date
     let days: [SpineDay<M>]
     /// Completed moments only; a bare moment takes its place but is not counted.
-    var pebbleCount: Int
+    let pebbleCount: Int
 }
 
 /// The week as the Spine reads it, a port of `apps/web/lib/utils/spine/spine-week.ts`:
