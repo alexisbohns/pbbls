@@ -19,15 +19,20 @@ struct PeopleLine: Equatable {
 /// A port of `apps/web/lib/utils/spine/people-line.ts`.
 enum PeopleLines {
     static let marks = 5
-    /// The held card names up to eight souls in full (stack E passes it as `namedInFull`).
+    /// The held card's limit: it names up to eight souls in full (its `namedInFull`).
     static let namedOnCard = 8
 
     /// - Parameters:
     ///   - soulIds: the pebble's souls.
     ///   - order: soul ids in persons-of-the-week order; ids missing from it keep
-    ///     their relative order after the ranked ones.
+    ///     their relative order after the ranked ones. A repeated id ranks by its
+    ///     first index here, where the web's `Map` keeps the last; persons-of-the-week
+    ///     never repeats an id, so the two agree on every real input.
     ///   - namedInFull: up to this many souls are all named (the line's 3, the card's 8).
+    ///     At least 3: past it the line names two and folds the rest, and under 3
+    ///     would fold a single soul into "one others".
     static func peopleLine(_ soulIds: [String], order: [String], locale: Locale, namedInFull: Int = 3) -> PeopleLine {
+        precondition(namedInFull >= 3, "namedInFull is at least 3 (the line's 3, the card's 8), got \(namedInFull)")
         var rank: [String: Int] = [:]
         for (index, id) in order.enumerated() where rank[id] == nil { rank[id] = index }
         var seen = Set<String>()
