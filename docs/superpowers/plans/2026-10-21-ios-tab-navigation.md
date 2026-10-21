@@ -137,7 +137,7 @@ Load the tools: ToolSearch `select:mcp__arkaik-mcp__get_node,mcp__arkaik-mcp__up
 For each of `V-timeline`, `V-profile`, `V-souls-list`, `V-collections-list`, `V-connections-list`, `V-soul-detail`, `V-collection-detail`:
 
 1. `get_node(node_id)`. Keep the returned `status`, `platforms` and any `metadata`.
-2. `update_node` with `patch.metadata` set to the **whole** returned metadata object, with `platform_statuses.ios = "development"` set inside it. `update_node` replaces metadata wholesale, so every other key (gherkin, values, other platforms) is sent back unchanged. If the node returned no `metadata` or no `platform_statuses`, send `{"platform_statuses": {<each platform in platforms>: <the node's status>, "ios": "development"}}`.
+2. `update_node` with `patch.metadata` set to the **whole** returned metadata object, with its `platformStatuses.ios` key set to `"development"`. `update_node` replaces metadata wholesale, so every other key (gherkin, values, other platforms) is sent back unchanged. If the node returned no `metadata` or no `platformStatuses` key inside it, send `{"platformStatuses": {<each platform in platforms>: <the node's status>, "ios": "development"}}`.
 3. Do **not** patch the top-level `status`. It reflects web and Android, which are not changing.
 4. `get_node` again and confirm iOS reads `development` and nothing else moved.
 
