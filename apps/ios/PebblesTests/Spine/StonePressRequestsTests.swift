@@ -21,12 +21,12 @@ struct StonePressRequestsTests {
     }
 
     @Test("claiming a stale request leaves the newer one pending")
-    func staleClaim() {
+    func staleClaim() throws {
         let requests = StonePressRequests()
         requests.request(first)
-        let stale = requests.pending
+        let stale = try #require(requests.pending)
         requests.request(first)
-        if let stale { requests.claim(stale) }
+        #expect(!requests.claim(stale))
         #expect(requests.pending?.seq == 2)
     }
 
@@ -39,6 +39,15 @@ struct StonePressRequestsTests {
         requests.request(second)
         requests.cancel()
         #expect(requests.pending == nil)
+    }
+
+    @Test("a request is claimed once: the second claim of the same request is refused")
+    func claimOnce() throws {
+        let requests = StonePressRequests()
+        requests.request(first)
+        let request = try #require(requests.pending)
+        #expect(requests.claim(request))
+        #expect(!requests.claim(request))
     }
 
     @Test("a press follows the last one and measures from its start")
