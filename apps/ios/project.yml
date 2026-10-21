@@ -125,6 +125,8 @@ targets:
       - path: PebblesTests
         excludes:
           - "References/__References__/**"
+          # The Spine fixture photos are read through #filePath too (SpineFixturePhotos).
+          - "Spine/Fixtures/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.pbbls.ios.tests
