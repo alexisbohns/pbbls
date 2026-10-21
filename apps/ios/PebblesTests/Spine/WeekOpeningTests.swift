@@ -59,6 +59,21 @@ struct WeekOpeningTests {
         #expect(from == "premier" && to == "sept")
     }
 
+    @Test("counts ISO weeks even when the caller passes a Gregorian calendar")
+    func gregorianCaller() {
+        // US rules put Monday 28 December 2026 in week 1 of 2027; ISO keeps it in 53 of 2026.
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = V.paris.timeZone
+        gregorian.firstWeekday = 1
+        gregorian.minimumDaysInFirstWeek = 1
+        let monday = V.weekStart(V.local(2026, 11, 28))
+        let words = WeekOpening.weekWords(weekStart: monday, calendar: gregorian, locale: V.fr)
+        #expect(words.number == 53)
+        #expect(words.year == 2026)
+        #expect(words.previousNumber == 52)
+        #expect(words.nextNumber == 1)
+    }
+
     @Test("agrees in gender in French")
     func summaryWords() {
         #expect(WeekOpening.summaryWords(pebbles: 1, people: 1, locale: V.fr) == ("un", "une"))

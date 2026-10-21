@@ -23,13 +23,17 @@ struct WeekWords: Equatable {
 }
 
 enum WeekOpening {
-    /// - Parameter calendar: an ISO-8601 calendar in the reader's zone.
+    /// - Parameter calendar: the reader's calendar and zone, for days and months.
+    ///   The week number and its year are always read from an ISO-8601 calendar
+    ///   in that zone, so a Gregorian calendar (US week rules) cannot shift them.
     static func weekWords(weekStart: Date, calendar: Calendar, locale: Locale) -> WeekWords {
+        var iso = Calendar(identifier: .iso8601)
+        iso.timeZone = calendar.timeZone
         let sunday = LocalDays.adding(6, to: weekStart, calendar: calendar)
         let nextMonday = LocalDays.adding(7, to: weekStart, calendar: calendar)
         let previousMonday = LocalDays.adding(-7, to: weekStart, calendar: calendar)
-        let number = calendar.component(.weekOfYear, from: weekStart)
-        let nextNumber = calendar.component(.weekOfYear, from: nextMonday)
+        let number = iso.component(.weekOfYear, from: weekStart)
+        let nextNumber = iso.component(.weekOfYear, from: nextMonday)
         let from = NumberWords.dayOfMonth(calendar.component(.day, from: weekStart), locale: locale)
         let to = NumberWords.dayOfMonth(calendar.component(.day, from: sunday), locale: locale)
         let title: WeekTitle
@@ -43,10 +47,10 @@ enum WeekOpening {
         }
         return WeekWords(
             number: number,
-            year: calendar.component(.yearForWeekOfYear, from: weekStart),
+            year: iso.component(.yearForWeekOfYear, from: weekStart),
             ordinal: NumberWords.ordinal(number, locale: locale, gender: .feminine),
             title: title,
-            previousNumber: calendar.component(.weekOfYear, from: previousMonday),
+            previousNumber: iso.component(.weekOfYear, from: previousMonday),
             nextNumber: nextNumber,
             nextOrdinal: NumberWords.ordinal(nextNumber, locale: locale, gender: .feminine),
             nextMonday: NumberWords.dayOfMonth(calendar.component(.day, from: nextMonday), locale: locale)
