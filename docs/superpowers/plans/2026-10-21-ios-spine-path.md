@@ -227,8 +227,8 @@ Load the tools: ToolSearch `select:mcp__arkaik-mcp__get_node,mcp__arkaik-mcp__up
 
 For each of `V-timeline`, `AC-the-week-opens-with-who-was-there-and-what-happened`, `AC-path-week-roll`, `AC-a-photo-keeps-its-own-shape`:
 
-1. `get_node(node_id)`. Keep the returned `status`, `platforms` and the whole `metadata` object (gherkin, values, `platform_statuses`, anything else).
-2. `update_node` with `patch.metadata` = that **whole** object with `platform_statuses.ios` set to `"development"`. `update_node` replaces metadata wholesale, so every other key goes back unchanged. If the node has no `platform_statuses`, send `{"platform_statuses": {<each platform in platforms>: <the node's status>, "ios": "development"}}` merged into the returned metadata.
+1. `get_node(node_id)`. Keep the returned `status`, `platforms` and the whole `metadata` object (gherkin, values, `platformStatuses`, anything else).
+2. `update_node` with `patch.metadata` = that **whole** object with its `platformStatuses.ios` key set to `"development"`. `update_node` replaces metadata wholesale, so every other key goes back unchanged. If the metadata has no `platformStatuses` key, send `{"platformStatuses": {<each platform in platforms>: <the node's status>, "ios": "development"}}` merged into the returned metadata.
 3. Do not patch the top-level `status`.
 4. `get_node` again: `ios` reads `development`; the gherkin, the values and the other platforms are byte-identical to step 1.
 

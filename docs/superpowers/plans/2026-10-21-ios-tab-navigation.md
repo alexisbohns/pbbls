@@ -137,7 +137,7 @@ Load the tools: ToolSearch `select:mcp__arkaik-mcp__get_node,mcp__arkaik-mcp__up
 For each of `V-timeline`, `V-profile`, `V-souls-list`, `V-collections-list`, `V-connections-list`, `V-soul-detail`, `V-collection-detail`:
 
 1. `get_node(node_id)`. Keep the returned `status`, `platforms` and any `metadata`.
-2. `update_node` with `patch.metadata` set to the **whole** returned metadata object, with `platform_statuses.ios = "development"` set inside it. `update_node` replaces metadata wholesale, so every other key (gherkin, values, other platforms) is sent back unchanged. If the node returned no `metadata` or no `platform_statuses`, send `{"platform_statuses": {<each platform in platforms>: <the node's status>, "ios": "development"}}`.
+2. `update_node` with `patch.metadata` set to the **whole** returned metadata object, with its `platformStatuses.ios` key set to `"development"`. `update_node` replaces metadata wholesale, so every other key (gherkin, values, other platforms) is sent back unchanged. If the node returned no `metadata` or no `platformStatuses` key inside it, send `{"platformStatuses": {<each platform in platforms>: <the node's status>, "ios": "development"}}`.
 3. Do **not** patch the top-level `status`. It reflects web and Android, which are not changing.
 4. `get_node` again and confirm iOS reads `development` and nothing else moved.
 
@@ -2956,3 +2956,17 @@ When all twelve pass in both appearances, merge the whole stack bottom to top wi
   - Profile edges may be kept for web.
   - Stack E's `heldCard` key does not exist yet; C1 leaves its registration point.
 - **Type consistency:** `TabNavigation.select/popToRoot/depth/snapshot/restore/reset/scrollToTop/scrollTopAnchor`, `Snapshot.decoded(from:)/encoded`, `RouteResolution`, `SoulRoute.resolve(_:known:refs:)`, `CollectionRoute.resolution(fetched:)`, `MomentsRevision.bump(from:)/changedOutside(_:)/value/lastOrigin`, `PebbleDetailSheet(momentId:origin:onPebbleUpdated:)`, `ProfileShortcutTile(title:systemImage:target:)` in C1 and `(title:systemImage:route:)` in C2. Every use above matches its definition.
+
+## Lessons learned (2026-10-21)
+
+Stack C code complete: #1175 → #1176, device pass on the iPhone 15 (iOS 26) done for both parts.
+
+- **A screen that becomes a tab root reloads on every tab switch.** Its `.task { await load() }` is cancelled when the tab goes offscreen and runs again on return, so a plain `if isLoading` spinner blanks the list on each visit and a cancelled load lands in the catch as an error. The fix is the one `PathView.load()` already had: show the spinner only when `isLoading && items.isEmpty`, and put `guard !Task.isCancelled else { return }` at the top of the catch (`SoulsListView`, `CollectionsListView`). The reviewer caught it; the plan did not anticipate it. Any screen promoted to a tab root needs the same check.
+- **`TabView` builds its tabs lazily, so the launch loader is decided once, at restore.** A rule that reads the selected tab shows the splash on the first Path visit mid-session, when Path's `onFirstLoad` finally fires. `restoreTabs()` sets `pathFeedLoaded = true` when the scene restores onto another tab (`holdsLoader` is `!pathFeedLoaded`), and `resetAuthedSceneState()` clears it for the next sign-in.
+- **A route resolver must not trust the launch load's flags.** `ReferenceDataService.didFinishLoading` is set by the load's `defer`, so a cancelled load reports finished with empty lists. `SoulRoute` resolves from the list's rows, then reference data, then fetches the one `souls` row by id, as `CollectionRoute` does; a missing row or a failed fetch logs and pops.
+- **Reselect needed no UIKit shim.** On iOS 26 (device pass 2026-10-21) the `TabView(selection:)` setter fires for the current tab, so C1.8's `UITabBarControllerDelegate` proxy was not built.
+- **The hosted Arkaik per-platform status key is `metadata.platformStatuses`** (camelCase); this plan spelled it in snake case (corrected since, with the D and E plans). A subagent in auto mode was denied `update_node` by the permission classifier, so the orchestrator did the pickup; plan the Arkaik step for the session that holds the permission.
+- **Count the block, don't trust the plan's arithmetic.** The catalog insert's expected `48 insertions(+)` was 51 (the plan was off by one per block). When a plan predicts a line count, count the block you pasted.
+- **A decision-log template must not claim what has not happened yet.** The template said reselect was "verified on device" before the device pass ran. Write "verified in the simulator; the device checklist gates the merge", and amend the entry after the pass (C2's entry now names the iPhone 15, 2026-10-21, iOS 26).
+- **Keep `apps/ios/CLAUDE.md` true when touching the paragraph.** The plan left the "Profile (access to Collections, Glyphs, Souls)" clause as a follow-up; it was stale the moment C2 landed, so C2 rewrote it ("Features map to the four tabs: Path, People (Souls, Circle), Collections, You …").
+- **A plan must not restyle in passing.** The plan's `PathStatusCluster` gave the karma number `onSurface`; the spec only moved it and names no colour. Stack A's `primary` won, and the PR body records the deviation.
