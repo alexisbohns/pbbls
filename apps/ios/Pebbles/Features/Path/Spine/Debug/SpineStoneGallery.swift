@@ -13,10 +13,14 @@ struct SpineStoneGallery: View {
     var body: some View {
         VStack(spacing: 28) {
             if seeds {
-                HStack(spacing: 20) {
-                    ForEach(0..<6, id: \.self) { index in
-                        SpineStoneCell(valence: .neutralLarge, isBlank: false, seed: StableHash.fnv1a("seed-\(index)"),
-                                       pressable: pressable, frozenAt: frozenAt)
+                // Two rows of three: six 80 pt cells do not fit across 393 pt.
+                ForEach(0..<2, id: \.self) { row in
+                    HStack(spacing: 28) {
+                        ForEach(0..<3, id: \.self) { column in
+                            SpineStoneCell(valence: .neutralLarge, isBlank: false,
+                                           seed: StableHash.fnv1a("seed-\(row * 3 + column)"),
+                                           pressable: pressable, frozenAt: frozenAt)
+                        }
                     }
                 }
             } else {
