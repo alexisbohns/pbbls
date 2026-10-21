@@ -69,6 +69,7 @@ enum PebblesColorRole: String, CaseIterable, Sendable {
     case teeth
     case ring
     case ripple
+    case rakeLight
     case googleCapsuleInk
 
     /// The colorset's name in the `M3` namespace of both asset catalogs.
@@ -138,6 +139,7 @@ struct PebblesColors: Sendable {
     var teeth: Color { Color(PebblesColorRole.teeth.assetName) }
     var ring: Color { Color(PebblesColorRole.ring.assetName) }
     var ripple: Color { Color(PebblesColorRole.ripple.assetName) }
+    var rakeLight: Color { Color(PebblesColorRole.rakeLight.assetName) }
     var googleCapsuleInk: Color { Color(PebblesColorRole.googleCapsuleInk.assetName) }
 }
 

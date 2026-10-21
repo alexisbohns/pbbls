@@ -106,7 +106,8 @@ const SCHEME_FOR: Record<Appearance, string> = {
   darkHigh: "DarkHighContrastScheme",
 }
 
-type Source = readonly [role: string, alpha: number]
+/** A scheme role at an alpha, or a constant the Android scheme writes as a hex (#1130). */
+type Source = readonly [role: string, alpha: number] | { readonly hex: string; readonly alpha: number }
 
 interface SpineToken {
   name: string
@@ -117,7 +118,7 @@ interface SpineToken {
 }
 
 /**
- * §2.4: the nine scheme-only Spine tokens, from #1118's "Spine token → M3 role"
+ * §2.4: the scheme-only Spine tokens (and one constant, rakeLight), from #1118's "Spine token → M3 role"
  * table (docs/superpowers/specs/2026-10-18-android-spine-brand-scheme-design.md,
  * §The rule set), mirroring Android's `SpineColors.from(scheme, night)`. A blend
  * with an emotion palette is never here: stack D computes it in SpineColors.swift.
@@ -132,6 +133,10 @@ export const SPINE_TOKENS: readonly SpineToken[] = [
   { name: "teeth", paper: ["onSurface", 0.2], night: ["onSurface", 0.14] },
   { name: "ring", paper: ["onSurfaceVariant", 0.3], night: ["onSurface", 0.17] },
   { name: "ripple", paper: ["onSurface", 0.55], night: ["onSurface", 0.5] },
+  // #1130: the rake's lit line, Android's SpineColors.rakeLight. White on Paper and
+  // a cool #DCE2EA at Night are constants there, so they are constants here:
+  // Features/ never names a hex.
+  { name: "rakeLight", paper: { hex: "#FFFFFF", alpha: 0.55 }, night: { hex: "#DCE2EA", alpha: 0.075 } },
 ]
 
 function perAppearance<T>(make: (appearance: Appearance) => T): Record<Appearance, T> {
@@ -163,7 +168,9 @@ export function renderIosColorsets(schemes: readonly M3Scheme[], pins: IosPins):
     tones.set(
       token.name,
       perAppearance((appearance) => {
-        const [role, alpha] = appearance === "light" || appearance === "lightHigh" ? token.paper : token.night
+        const source = appearance === "light" || appearance === "lightHigh" ? token.paper : token.night
+        if ("hex" in source) return { hex: source.hex, alpha: source.alpha }
+        const [role, alpha] = source
         return { hex: hexFor(appearance, role), alpha }
       }),
     )
