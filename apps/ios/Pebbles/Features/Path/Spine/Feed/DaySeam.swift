@@ -44,6 +44,8 @@ struct DaySeam: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: SpineDates.longDay(date, calendar: calendar, locale: dateLocale)))
+        // A still day says so after its date: the seam is all VoiceOver reaches of it.
+        .accessibilityValue(isStill ? SpineCopy.still(locale: locale) : "")
         .accessibilityAddTraits(.isHeader)
     }
 
