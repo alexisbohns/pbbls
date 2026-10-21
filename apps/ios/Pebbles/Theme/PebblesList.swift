@@ -21,7 +21,7 @@ func pebblesRowPosition(index: Int, count: Int) -> PebblesListRowPosition {
 // MARK: - List/Form chrome
 
 /// Applied to `List` or `Form`: hides the native grouped background,
-/// recolors row separators to `system.muted`, and sets `Spacing.lg`
+/// recolors row separators to the `rule` role, and sets `Spacing.lg`
 /// between sections so the bordered groups breathe consistently.
 extension View {
     func pebblesList() -> some View {
@@ -34,7 +34,7 @@ private struct PebblesListModifier: ViewModifier {
         content
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .listRowSeparatorTint(Color.system.muted)
+            .listRowSeparatorTint(Color.pebbles.rule)
             .listSectionSpacing(Spacing.lg)
             .padding(.horizontal, Spacing.lg)
     }
@@ -43,10 +43,10 @@ private struct PebblesListModifier: ViewModifier {
 // MARK: - Row chrome
 
 /// Applied to each row inside a Section: replaces the native row background
-/// with a `system.muted` stroke that draws only the edges this row owns —
+/// with a the `rule` role stroke that draws only the edges this row owns —
 /// top/sides for the first row, sides only for middle rows, bottom/sides for
 /// the last. Combined with the list-level `listRowSeparatorTint` (also
-/// `system.muted`), the horizontal dividers between rows complete the card.
+/// the `rule` role), the horizontal dividers between rows complete the card.
 extension View {
     func pebblesListRow(position: PebblesListRowPosition = .only) -> some View {
         modifier(PebblesListRowModifier(position: position))
@@ -68,7 +68,7 @@ private struct PebblesListRowModifier: ViewModifier {
         switch position {
         case .only:
             RoundedRectangle(cornerRadius: radius)
-                .stroke(Color.system.muted, lineWidth: 1)
+                .stroke(Color.pebbles.rule, lineWidth: 1)
         case .top:
             UnevenRoundedRectangle(
                 cornerRadii: RectangleCornerRadii(
@@ -78,10 +78,10 @@ private struct PebblesListRowModifier: ViewModifier {
                     topTrailing: radius
                 )
             )
-            .stroke(Color.system.muted, lineWidth: 1)
+            .stroke(Color.pebbles.rule, lineWidth: 1)
         case .middle:
             Rectangle()
-                .stroke(Color.system.muted, lineWidth: 1)
+                .stroke(Color.pebbles.rule, lineWidth: 1)
         case .bottom:
             UnevenRoundedRectangle(
                 cornerRadii: RectangleCornerRadii(
@@ -91,7 +91,7 @@ private struct PebblesListRowModifier: ViewModifier {
                     topTrailing: 0
                 )
             )
-            .stroke(Color.system.muted, lineWidth: 1)
+            .stroke(Color.pebbles.rule, lineWidth: 1)
         }
     }
 }
@@ -100,12 +100,12 @@ private struct PebblesListRowModifier: ViewModifier {
 
 /// Section header typography matching profile cards (Stats, Collections):
 /// `.pebblesFont(.cardHeading)` (SF Compact Rounded 15 semibold, uppercase,
-/// 10% tracking) in `system.secondary`.
+/// 10% tracking) in `onSurfaceVariant`.
 extension Text {
     func pebblesSectionHeader() -> some View {
         self
             .pebblesFont(.cardHeading)
-            .foregroundStyle(Color.system.secondary)
+            .foregroundStyle(Color.pebbles.onSurfaceVariant)
     }
 }
 

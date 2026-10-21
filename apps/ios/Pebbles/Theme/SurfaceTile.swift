@@ -1,10 +1,10 @@
 import SwiftUI
 
-/// Presentational tile: an SF Symbol above a short label on an `accent.surface`
+/// Presentational tile: an SF Symbol above a short label on a `primaryContainer`
 /// rounded card. The shared visual for the profile shortcuts row
 /// (`ProfileShortcutTile`) and the glyph drawer's stat cards.
 ///
-/// `muted` renders the icon + label in `system.muted` for placeholder values
+/// `muted` renders the icon + label in `outline` for placeholder values
 /// (e.g. the "Soon" stats we don't source yet).
 ///
 /// `backgroundColor` / `iconTint` / `labelColor` override the default chrome
@@ -24,21 +24,21 @@ struct SurfaceTile<Label: View>: View {
         VStack(spacing: Spacing.xs) {
             Image(systemName: systemImage)
                 .pebblesIcon(.large)
-                .foregroundStyle(muted ? Color.system.muted : (iconTint ?? Color.accent.primary))
+                .foregroundStyle(muted ? Color.pebbles.outline : (iconTint ?? Color.pebbles.onPrimaryContainer))
                 // Fixed icon slot so tiles stay equal height regardless of which
                 // SF Symbol they carry (heart/tag/stack render at different
                 // intrinsic heights). Matches the Figma tile spec (30×30).
                 .frame(width: 30, height: 30)
             label()
                 .pebblesFont(.callout)
-                .foregroundStyle(muted ? Color.system.muted : (labelColor ?? Color.system.secondary))
+                .foregroundStyle(muted ? Color.pebbles.outline : (labelColor ?? Color.pebbles.onPrimaryContainer))
                 // Clamp to one line so tiles stay equal height even when a label
                 // (e.g. multiple joined domains/collections) would otherwise wrap.
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Spacing.md)
-        .background(backgroundColor ?? Color.accent.surface)
+        .background(backgroundColor ?? Color.pebbles.primaryContainer)
         .clipShape(RoundedRectangle(cornerRadius: Spacing.lg))
     }
 }

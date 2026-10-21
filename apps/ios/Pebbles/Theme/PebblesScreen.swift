@@ -9,7 +9,7 @@ private struct PebblesLabelStyle: LabelStyle {
             configuration.title
         } icon: {
             configuration.icon
-                .foregroundStyle(Color.accent.primary)
+                .foregroundStyle(Color.pebbles.primary)
         }
     }
 }
@@ -17,19 +17,19 @@ private struct PebblesLabelStyle: LabelStyle {
 private struct PebblesScreen: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .tint(Color.accent.primary)
-            .foregroundStyle(Color.system.secondary)
+            .tint(Color.pebbles.primary)
+            .foregroundStyle(Color.pebbles.onSurfaceVariant)
             .labelStyle(PebblesLabelStyle())
             .scrollContentBackground(.hidden)
-            .background(Color.system.background)
-            .toolbarBackground(Color.system.background, for: .navigationBar)
+            .background(Color.pebbles.surface)
+            .toolbarBackground(Color.pebbles.surface, for: .navigationBar)
     }
 }
 
 extension View {
     /// Applies the Pebbles design-system styling: tint, foreground,
     /// background, hidden scroll-content background, and nav-toolbar
-    /// background. Background is always `system.background` — there is
+    /// background. Background is always the `surface` role — there is
     /// no override knob, screens should not deviate.
     ///
     /// Apply inside a `NavigationStack` so the toolbar modifier attaches
