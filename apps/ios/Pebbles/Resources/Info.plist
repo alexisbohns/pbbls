@@ -43,7 +43,7 @@
 	<string>Attach a photo to a pebble.</string>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Ysabeau SemiBold.ttf</string>
+		<string>Ysabeau.ttf</string>
 		<string>Ysabeau Italic.ttf</string>
 		<string>ReenieBeanie-Regular.ttf</string>
 		<string>Caveat-VariableFont_wght.ttf</string>

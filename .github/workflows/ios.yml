@@ -30,6 +30,7 @@ on:
       - 'apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/ColorSchemes.kt'
       - 'apps/web/lib/theme/**'
       - 'apps/web/scripts/generate-ios-colors.ts'
+      - 'apps/android/app/src/main/res/font/**'
       - '.github/workflows/ios.yml'
   push:
     branches: [main]
@@ -42,6 +43,7 @@ on:
       - 'apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/ColorSchemes.kt'
       - 'apps/web/lib/theme/**'
       - 'apps/web/scripts/generate-ios-colors.ts'
+      - 'apps/android/app/src/main/res/font/**'
       - '.github/workflows/ios.yml'
 
 concurrency:
@@ -92,6 +94,16 @@ jobs:
       # needs a simulator; this half does not.
       - name: Verify colour contrast
         run: npm run verify:contrast --workspace=@pbbls/ios
+
+      # The variable Ysabeau is one font on both native apps (#1158): the
+      # Spine's rank table on each surface pins the same `wght` values, so a
+      # different file is a different design. Android is the source; a font
+      # bump there turns this check red until apps/ios carries the same bytes
+      # (the path filter above includes Android's font folder for that reason).
+      - name: Verify Ysabeau matches Android
+        run: |
+          cmp "apps/ios/Pebbles/Resources/Ysabeau.ttf" "apps/android/app/src/main/res/font/ysabeau.ttf"
+          cmp "apps/ios/Pebbles/Resources/Ysabeau Italic.ttf" "apps/android/app/src/main/res/font/ysabeau_italic.ttf"
 
   test:
     name: swiftlint · unit tests

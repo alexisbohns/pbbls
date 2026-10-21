@@ -1,17 +1,19 @@
 import SwiftUI
 
 /// Renders a single `WelcomeStep` as a centered title + description.
-/// The title uses the bundled Ysabeau-SemiBold display face in muted
+/// The title uses Ysabeau at 600 (`Font.ysabeauSemibold`) in muted
 /// foreground; the description keeps the system body font and is also
 /// centered. The welcome carousel has no per-slide illustration — the
 /// Pebbles logo in `WelcomeView`'s persistent header plays that role.
 struct WelcomeSlideView: View {
     let step: WelcomeStep
+    /// Scales with Dynamic Type as the old `.custom` face did.
+    @ScaledMetric(relativeTo: .title2) private var titleSize: CGFloat = 22
 
     var body: some View {
         VStack(alignment: .center, spacing: 8) {
             Text(step.title)
-                .font(.custom("Ysabeau-SemiBold", size: 22))
+                .font(.ysabeauSemibold(titleSize))
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .multilineTextAlignment(.center)
 

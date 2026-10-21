@@ -11,6 +11,8 @@ struct PebbleReadTitle: View {
     let happenedAt: Date
     var nameColor: Color? = nil
     var dateColor: Color? = nil
+    /// Scales with Dynamic Type as the old `.custom` face did.
+    @ScaledMetric(relativeTo: .title2) private var titleSize: CGFloat = 24
 
     var body: some View {
         VStack(spacing: 6) {
@@ -18,9 +20,9 @@ struct PebbleReadTitle: View {
                 name: name,
                 color: nameColor ?? Color.pebbles.onSurface,
                 untitledColor: dateColor ?? Color.pebbles.onSurfaceVariant,
-                untitledFont: .ysabeauSemiboldItalic(24)
+                untitledFont: .ysabeauSemiboldItalic(titleSize)
             )
-            .font(.custom("Ysabeau-SemiBold", size: 24))
+            .font(.ysabeauSemibold(titleSize))
             .multilineTextAlignment(.center)
             Text(formattedDate)
                 .font(.caption)

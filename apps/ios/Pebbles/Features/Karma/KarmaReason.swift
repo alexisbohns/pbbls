@@ -7,8 +7,8 @@ enum KarmaReason: String, Sendable, Codable, CaseIterable {
     case pebbleCreated
     case pebbleEnriched
 
-    /// User-facing label, localized. French copy matches web verbatim
-    /// ("Caillou créé" / "Caillou enrichi").
+    /// User-facing label, localized. French says galet (#1101):
+    /// "Galet créé" / "Galet enrichi".
     var label: LocalizedStringResource {
         switch self {
         case .pebbleCreated:  "Pebble created"

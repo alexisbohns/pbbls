@@ -309,6 +309,23 @@ struct LocalizationCatalogFileTests {
         }
     }
 
+    @Test("French says galet, never caillou (#1101)")
+    func frenchSaysGalet() throws {
+        let bundle = Bundle(for: CatalogProbe.self)
+        let url = try #require(bundle.url(forResource: "Localizable", withExtension: "xcstrings"))
+        let catalog = try JSONDecoder().decode(Catalog.self, from: Data(contentsOf: url))
+
+        for (key, entry) in catalog.strings {
+            for value in entry.localizations?["fr"]?.values ?? [] {
+                #expect(value.range(of: "caillou", options: .caseInsensitive) == nil,
+                        "fr '\(key)' says caillou: \(value)")
+            }
+        }
+        #expect(catalog.strings["New pebble"]?.localizations?["fr"]?.values == ["Nouveau galet"])
+        #expect(catalog.strings["Pebble created"]?.localizations?["fr"]?.values == ["Galet créé"])
+        #expect(catalog.strings["Pebble enriched"]?.localizations?["fr"]?.values == ["Galet enrichi"])
+    }
+
     // MARK: - Catalog decoding types
 
     private final class CatalogProbe {}

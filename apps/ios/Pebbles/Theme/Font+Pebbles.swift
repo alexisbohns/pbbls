@@ -1,14 +1,5 @@
-import os
 import SwiftUI
 import UIKit
-
-/// Logs a missing bundled face once per launch, not once per render.
-private enum FontLoadLog {
-    static let missingYsabeauItalic: Void = {
-        Logger(subsystem: "app.pbbls.ios", category: "fonts")
-            .error("Ysabeau-BoldItalic failed to load; falling back to upright SemiBold")
-    }()
-}
 
 // MARK: - Token catalog
 
@@ -170,49 +161,17 @@ private extension PebblesFont {
 // MARK: - Family helpers
 
 extension Font {
-    /// Ysabeau-SemiBold with OpenType proportional + lining figures
-    /// (numbers align to cap height, proportional widths). Used everywhere
-    /// Ysabeau renders mixed text + numbers so digits look right.
-    ///
-    /// Feature constants from `CoreText/SFNTLayoutTypes.h`:
-    ///   - Number Spacing (type 6) → Proportional Numbers (selector 1)
-    ///   - Number Case  (type 21) → Upper Case Numbers / lining (selector 1)
+    /// Ysabeau at weight 600 with lining, proportional figures (`lnum, pnum`),
+    /// so digits align to the cap height. The variable roman since #1158
+    /// (`YsabeauFace`); the old static SemiBold cut is gone.
     static func ysabeauSemibold(_ size: CGFloat) -> Font {
-        let descriptor = UIFontDescriptor(name: "Ysabeau-SemiBold", size: size)
-            .addingAttributes([
-                .featureSettings: [
-                    [UIFontDescriptor.FeatureKey.type: 6,  UIFontDescriptor.FeatureKey.selector: 1],
-                    [UIFontDescriptor.FeatureKey.type: 21, UIFontDescriptor.FeatureKey.selector: 1],
-                ],
-            ])
-        return Font(UIFont(descriptor: descriptor, size: size))
+        Font(YsabeauFace.uiFont(size: size, weight: 600, italic: false, features: [.lining]))
     }
 
-    /// Ysabeau's true italic at weight 600, so it sits beside
-    /// `ysabeauSemibold` at the same colour. The bundled italic is a variable
-    /// TTF (`Resources/Ysabeau Italic.ttf`, registered in Info.plist
-    /// `UIAppFonts`) whose default instance is Bold (`Ysabeau-BoldItalic`,
-    /// wght 700), so the weight axis is set explicitly. Same figure features
-    /// as the upright face. Falls back to the upright SemiBold with
-    /// `.italic()` (which renders upright, since that face has no italic) if
-    /// the file is missing from the build.
+    /// Ysabeau's true italic at weight 600, beside `ysabeauSemibold` at the
+    /// same colour and with the same figures.
     static func ysabeauSemiboldItalic(_ size: CGFloat) -> Font {
-        // 'wght' as a four-char code (see kCTFontVariationAxisIdentifierKey).
-        let weightAxis = 0x77_67_68_74
-        guard let base = UIFont(name: "Ysabeau-BoldItalic", size: size) else {
-            _ = FontLoadLog.missingYsabeauItalic
-            return ysabeauSemibold(size).italic()
-        }
-        let descriptor = base.fontDescriptor.addingAttributes([
-            UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [
-                weightAxis: 600
-            ],
-            .featureSettings: [
-                [UIFontDescriptor.FeatureKey.type: 6,  UIFontDescriptor.FeatureKey.selector: 1],
-                [UIFontDescriptor.FeatureKey.type: 21, UIFontDescriptor.FeatureKey.selector: 1],
-            ],
-        ])
-        return Font(UIFont(descriptor: descriptor, size: size))
+        Font(YsabeauFace.uiFont(size: size, weight: 600, italic: true, features: [.lining]))
     }
 
     /// Reenie Beanie — handwritten display face used for names (souls,
@@ -243,18 +202,7 @@ extension Font {
     /// `Caveat-Bold` is not a resolvable name for this file. Falls back to the
     /// regular instance, then to the system font.
     fileprivate static func caveatBold(_ size: CGFloat) -> Font {
-        // 'wght' as a four-char code, the identifier CoreText wants for the
-        // variation axis (see kCTFontVariationAxisIdentifierKey).
-        let weightAxis = 0x77_67_68_74
-        guard let base = UIFont(name: "Caveat-Regular", size: size) else {
-            return Font(UIFont.systemFont(ofSize: size, weight: .bold))
-        }
-        let descriptor = base.fontDescriptor.addingAttributes([
-            UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [
-                weightAxis: 700
-            ]
-        ])
-        return Font(UIFont(descriptor: descriptor, size: size))
+        Font(UIFont.pebblesCaveat(size: size, weight: 700))
     }
 
     /// SF Pro Rounded — system rounded design.
@@ -282,4 +230,33 @@ extension Font {
         }
         return sfProRounded(size, weight)
     }
+}
+
+extension UIFont {
+    /// Caveat at an exact `wght`. `UIFont(name:)` only resolves the variable
+    /// file's default instance (400), so the axis is set explicitly; `Caveat-Bold`
+    /// is not a resolvable name. One descriptor for `PebblesFont.valenceWord*`
+    /// and `SpineType.Style.lockupWord`. Falls back to the bold system font.
+    /// Memoised by (size, weight), like `YsabeauFace`, so a render never
+    /// rebuilds the descriptor.
+    static func pebblesCaveat(size: CGFloat, weight: Int) -> UIFont {
+        let key = "\(size)|\(weight)" as NSString
+        if let cached = caveatCache.object(forKey: key) { return cached }
+        let font: UIFont
+        if let base = UIFont(name: "Caveat-Regular", size: size) {
+            let descriptor = base.fontDescriptor.addingAttributes([
+                UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [
+                    UIFontDescriptor.weightAxis: weight
+                ]
+            ])
+            font = UIFont(descriptor: descriptor, size: size)
+        } else {
+            font = UIFont.systemFont(ofSize: size, weight: .bold)
+        }
+        caveatCache.setObject(font, forKey: key)
+        return font
+    }
+
+    /// `NSCache` is thread-safe, so no lock is needed around it.
+    private static let caveatCache = NSCache<NSString, UIFont>()
 }
