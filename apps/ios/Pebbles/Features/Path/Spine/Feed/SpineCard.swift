@@ -270,8 +270,9 @@ struct SpineCard: View {
     }
 }
 
-/// A slot's last reported frame, held by reference so updating it re-renders nothing.
-private final class ReportedFrame {
+/// A slot's last reported frame, held by reference so updating it re-renders nothing
+/// (the card's, and `SpinePebble`'s for an entry).
+final class ReportedFrame {
     var frame: CGRect?
 }
 
