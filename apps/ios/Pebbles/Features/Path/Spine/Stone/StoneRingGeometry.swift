@@ -17,11 +17,23 @@ struct StoneRingGeometry {
     static let step: [ValenceSizeGroup: CGFloat] = [.small: 4.8, .medium: 4.4, .large: 4.2]
     static let haloStep: CGFloat = 0.78
 
-    /// - Parameter outline: the silhouette already in points, in the stone's frame.
-    static func make(outline: CGPath, size: ValenceSizeGroup) -> StoneRingGeometry {
-        let polygon = WobblePathFlattener.flatten(outline, step: 2).first?.points ?? []
-        let bounds = outline.boundingBoxOfPath
-        let centroid = areaCentroid(polygon) ?? CGPoint(x: bounds.midX, y: bounds.midY)
+    /// The web and Android flatten the silhouette at this step, in outline
+    /// units, before taking its centroid; flattening after the fit to points
+    /// would sample a different polygon and the centroids would drift.
+    static let flattenStep = 2.0
+
+    /// - Parameters:
+    ///   - outline: the silhouette in its own units (the SVG's viewBox, or points already).
+    ///   - toPoints: the fit from those units into the stone's frame, in points.
+    /// - Returns: nil for an outline with no extent, which has no frame to ring.
+    static func make(outline: CGPath, size: ValenceSizeGroup,
+                     toPoints: CGAffineTransform = .identity) -> StoneRingGeometry? {
+        let unitBounds = outline.boundingBoxOfPath
+        guard !outline.isEmpty, !unitBounds.isNull, !unitBounds.isInfinite else { return nil }
+        let polygon = WobblePathFlattener.flatten(outline, step: flattenStep).first?.points ?? []
+        let unitCentroid = areaCentroid(polygon) ?? CGPoint(x: unitBounds.midX, y: unitBounds.midY)
+        let fitted = Path(outline).applying(toPoints)
+        let bounds = fitted.boundingRect
         let step = Self.step[size] ?? 4.4
         let width = max(bounds.width, 1)
         let height = max(bounds.height, 1)
@@ -29,7 +41,7 @@ struct StoneRingGeometry {
             CGSize(width: 1 + 2 * k * step / width, height: 1 + 2 * k * step / height)
         }
         let rings = Self.count[size] ?? 2
-        return StoneRingGeometry(outline: Path(outline), centroid: centroid,
+        return StoneRingGeometry(outline: fitted, centroid: unitCentroid.applying(toPoints),
                                  rings: (1...rings).map { at(CGFloat($0)) }, halo: at(CGFloat(rings) + haloStep))
     }
 
@@ -38,14 +50,21 @@ struct StoneRingGeometry {
     @MainActor
     static func forStone(_ valence: Valence) -> StoneRingGeometry? {
         if let cached = cache[valence] { return cached }
-        guard let art = WobbleRenderer.softBackdropArt(size: valence.sizeGroup, polarity: valence.polarity) else {
+        guard let art = WobbleRenderer.softBackdropArt(size: valence.sizeGroup, polarity: valence.polarity),
+              let geometry = make(outline: art.path, size: valence.sizeGroup,
+                                  toPoints: fit(art.viewBox, into: SpineLayout.stoneSize(valence.sizeGroup))) else {
             return nil
         }
-        let stone = SpineLayout.stoneSize(valence.sizeGroup)
-        let outline = WobbledBackdropShape(art: art).path(in: CGRect(origin: .zero, size: stone)).cgPath
-        let geometry = make(outline: outline, size: valence.sizeGroup)
         cache[valence] = geometry
         return geometry
+    }
+
+    /// The aspect fit `WobbledBackdropShape` draws with: viewBox to the stone's frame, centred.
+    private static func fit(_ viewBox: CGRect, into stone: CGSize) -> CGAffineTransform {
+        let scale = min(stone.width / viewBox.width, stone.height / viewBox.height)
+        let dx = (stone.width - viewBox.width * scale) / 2 - viewBox.minX * scale
+        let dy = (stone.height - viewBox.height * scale) / 2 - viewBox.minY * scale
+        return CGAffineTransform(scaleX: scale, y: scale).concatenating(CGAffineTransform(translationX: dx, y: dy))
     }
 
     @MainActor private static var cache: [Valence: StoneRingGeometry] = [:]
