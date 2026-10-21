@@ -89,13 +89,11 @@ struct ConnectionsListView: View {
                 ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
                     ConnectionRow(connection: row)
                         .pebblesListRow(position: pebblesRowPosition(index: index, count: rows.count))
-                        .contextMenu {
-                            Button(role: .destructive) {
+                        .pebblesContextMenu([
+                            PebblesMenuItem(title: "Remove", systemImage: "person.badge.minus", isDestructive: true) {
                                 pendingRemoval = row
-                            } label: {
-                                Label("Remove", systemImage: "person.badge.minus")
                             }
-                        }
+                        ])
                 }
             }
             .pebblesList()

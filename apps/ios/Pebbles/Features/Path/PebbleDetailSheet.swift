@@ -32,6 +32,19 @@ struct PebbleDetailSheet: View {
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "pebble-detail")
 
+    private var menuItems: [PebblesMenuItem] {
+        var items = [PebblesMenuItem(title: "Edit moment", systemImage: "pencil") { isPresentingEditMoment = true }]
+        if detail?.pebble != nil {
+            items.append(PebblesMenuItem(title: "Edit pebble", systemImage: "circle.hexagongrid") {
+                isPresentingEditPebble = true
+            })
+        }
+        items.append(PebblesMenuItem(title: "Delete", systemImage: "trash", isDestructive: true) {
+            if let detail { pendingDeletion = MomentDeleteTarget(detail: detail) }
+        })
+        return items
+    }
+
     var body: some View {
         NavigationStack {
             content
@@ -54,21 +67,7 @@ struct PebbleDetailSheet: View {
                                     comment: "Accessibility label for the public pebble share button"
                                 ))
                             }
-                            Menu {
-                                Button { isPresentingEditMoment = true } label: {
-                                    Label("Edit moment", systemImage: "pencil")
-                                }
-                                if detail?.pebble != nil {
-                                    Button { isPresentingEditPebble = true } label: {
-                                        Label("Edit pebble", systemImage: "circle.hexagongrid")
-                                    }
-                                }
-                                Button(role: .destructive) {
-                                    if let detail { pendingDeletion = MomentDeleteTarget(detail: detail) }
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                            } label: {
+                            PebblesMenu(items: menuItems) {
                                 Image(systemName: "ellipsis.circle")
                             }
                             .disabled(detail == nil || isDeleting || isLoading)
