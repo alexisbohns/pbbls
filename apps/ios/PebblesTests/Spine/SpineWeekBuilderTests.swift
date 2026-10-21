@@ -46,12 +46,12 @@ struct SpineWeekBuilderTests {
     }
 
     @Test("reads oldest first in the current week too, unlike the roll")
-    func currentOrder() {
+    func currentOrder() throws {
         let today = V.local(2026, 9, 11, 23, 59, 30)
         // The roll keeps its newest-first current week for its other consumers…
-        let summaries = Self.week.enumerated().map { index, moment in
+        let summaries = try Self.week.enumerated().map { index, moment in
             MomentSummary(
-                id: UUID(uuidString: String(format: "00000000-0000-4000-8000-%012ld", index)) ?? UUID(),
+                id: try #require(UUID(uuidString: String(format: "00000000-0000-4000-8000-%012ld", index))),
                 name: moment.spineId, happenedAt: moment.happenedAt, createdAt: moment.happenedAt,
                 firstSnapPath: nil, pebble: nil
             )
@@ -76,7 +76,9 @@ struct SpineWeekBuilderTests {
         let week = weekOf(Self.week.filter { ["mon", "tue-early"].contains($0.spineId) }, today: today)
         #expect(week.days.map(\.index) == [0, 1, 2])
         let wednesday = week.days[2]
-        #expect(wednesday.isToday && wednesday.isStill && wednesday.moments.isEmpty)
+        #expect(wednesday.isToday)
+        #expect(wednesday.isStill)
+        #expect(wednesday.moments.isEmpty)
         #expect(week.days.filter(\.isToday).count == 1)
     }
 

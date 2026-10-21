@@ -20,7 +20,9 @@ struct PeopleLineTests {
     func namesAll(_ n: Int) {
         let line = PeopleLines.peopleLine(ids(n), order: ids(n), locale: V.en)
         #expect(line.named == ids(n))
-        #expect(line.others == 0 && line.marks.isEmpty && line.overflow == 0)
+        #expect(line.others == 0)
+        #expect(line.marks.isEmpty)
+        #expect(line.overflow == 0)
     }
 
     @Test("names two and folds the rest from four")
@@ -33,7 +35,8 @@ struct PeopleLineTests {
     func seven() {
         let line = PeopleLines.peopleLine(ids(7), order: ids(7), locale: V.en)
         #expect(line.named.count == 2)
-        #expect(line.others == 5 && line.othersWords == "five")
+        #expect(line.others == 5)
+        #expect(line.othersWords == "five")
         #expect(line.marks == ["s2", "s3", "s4", "s5", "s6"])
         #expect(line.overflow == 0)
     }
@@ -42,8 +45,10 @@ struct PeopleLineTests {
     func fourteen() {
         let line = PeopleLines.peopleLine(ids(14), order: ids(14), locale: V.en)
         #expect(line.named == ["s0", "s1"])
-        #expect(line.others == 12 && line.othersWords == "twelve")
-        #expect(line.marks.count == 5 && line.overflow == 7)
+        #expect(line.others == 12)
+        #expect(line.othersWords == "twelve")
+        #expect(line.marks.count == 5)
+        #expect(line.overflow == 7)
         #expect(PeopleLines.peopleLine(ids(14), order: ids(14), locale: V.fr).othersWords == "douze")
     }
 
@@ -69,8 +74,11 @@ struct PeopleLineTests {
     func card() {
         #expect(PeopleLines.namedOnCard == 8)
         let eight = PeopleLines.peopleLine(ids(8), order: ids(8), locale: V.en, namedInFull: PeopleLines.namedOnCard)
-        #expect(eight.named == ids(8) && eight.others == 0)
+        #expect(eight.named == ids(8))
+        #expect(eight.others == 0)
         let nine = PeopleLines.peopleLine(ids(9), order: ids(9), locale: V.en, namedInFull: PeopleLines.namedOnCard)
-        #expect(nine.named == ["s0", "s1"] && nine.others == 7 && nine.overflow == 2)
+        #expect(nine.named == ["s0", "s1"])
+        #expect(nine.others == 7)
+        #expect(nine.overflow == 2)
     }
 }

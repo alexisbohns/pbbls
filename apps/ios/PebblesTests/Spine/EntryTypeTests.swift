@@ -36,7 +36,8 @@ struct EntryTypeTests {
         #expect([1, 2, 3].map { EntryTypes.contentsNameType(intensity: $0, valence: 0).weight } == [400, 470, 620])
         for intensity in [1, 2, 3] {
             let cut = EntryTypes.contentsNameType(intensity: intensity, valence: -1)
-            #expect(cut.weight == 350 && cut.italic)
+            #expect(cut.weight == 350)
+            #expect(cut.italic)
         }
         #expect(EntryTypes.contentsNameType(intensity: 2, valence: 0).size == 16.5)
     }

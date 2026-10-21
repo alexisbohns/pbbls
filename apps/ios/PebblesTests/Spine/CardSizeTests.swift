@@ -34,7 +34,7 @@ struct CardSizeTests {
 
     @Test("never lets a fitted card exceed its cap")
     func cap() {
-        for (_, ratio, _) in Self.table where ratio >= 0.5 {
+        for (_, ratio, _) in Self.table {
             for intensity in [1, 2, 3] {
                 let size = CardSizes.cardSize(intensity: intensity, ratio: ratio, column: Self.phone)
                 #expect(size.height <= size.cap + 1e-9)

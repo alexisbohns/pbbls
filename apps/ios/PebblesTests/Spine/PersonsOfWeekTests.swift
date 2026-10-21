@@ -36,7 +36,7 @@ struct PersonsOfWeekTests {
     func dstSunday() {
         for at in ["2026-10-25T22:59:00Z", "2026-10-25T22:59:59.123456+00:00"] {
             let rows = persons([V.pebble("a", at, souls: ["mara"])], named("mara"))
-            #expect(rows.first?.days == [false, false, false, false, false, false, true])
+            #expect(rows.first?.days == [false, false, false, false, false, false, true], "\(at)")
         }
     }
 
@@ -46,7 +46,8 @@ struct PersonsOfWeekTests {
                                 soulIds: ["mara"])
         let rows = persons([bare, V.pebble("a", "2026-10-19T08:00:00Z", souls: ["mara"])], named("mara"))
         #expect(rows.count == 1)
-        #expect(rows[0].dayCount == 1 && rows[0].pebbleCount == 1)
+        #expect(rows[0].dayCount == 1)
+        #expect(rows[0].pebbleCount == 1)
         #expect(rows[0].days == [true, false, false, false, false, false, false])
     }
 

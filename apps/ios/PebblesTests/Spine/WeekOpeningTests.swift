@@ -29,7 +29,9 @@ struct WeekOpeningTests {
         let french = words(Self.w41, V.fr)
         #expect(french.ordinal == "quarante et unième")
         #expect(french.title == .sameMonth(from: "cinq", to: "onze", month: "octobre"))
-        #expect(french.nextNumber == 42 && french.nextOrdinal == "quarante-deuxième" && french.nextMonday == "douze")
+        #expect(french.nextNumber == 42)
+        #expect(french.nextOrdinal == "quarante-deuxième")
+        #expect(french.nextMonday == "douze")
     }
 
     @Test("names both months when the week crosses one")
@@ -44,10 +46,16 @@ struct WeekOpeningTests {
     @Test("takes the ISO year and wraps the week numbers at the new year")
     func newYear() {
         let french = words(V.weekStart(V.local(2026, 11, 28)), V.fr)
-        #expect(french.number == 53 && french.year == 2026 && french.previousNumber == 52)
-        #expect(french.nextNumber == 1 && french.nextOrdinal == "première" && french.nextMonday == "quatre")
+        #expect(french.number == 53)
+        #expect(french.year == 2026)
+        #expect(french.previousNumber == 52)
+        #expect(french.nextNumber == 1)
+        #expect(french.nextOrdinal == "première")
+        #expect(french.nextMonday == "quatre")
         let english = words(V.weekStart(V.local(2025, 11, 29)), V.en)
-        #expect(english.number == 1 && english.year == 2026 && english.ordinal == "first")
+        #expect(english.number == 1)
+        #expect(english.year == 2026)
+        #expect(english.ordinal == "first")
     }
 
     @Test("says premier for the first of a month in French")
@@ -56,7 +64,8 @@ struct WeekOpeningTests {
             Issue.record("1 March 2027 to 7 March 2027 is one month")
             return
         }
-        #expect(from == "premier" && to == "sept")
+        #expect(from == "premier")
+        #expect(to == "sept")
     }
 
     @Test("counts ISO weeks even when the caller passes a Gregorian calendar")
