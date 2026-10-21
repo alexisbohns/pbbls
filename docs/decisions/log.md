@@ -1198,3 +1198,27 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Moving Xcode, the device or the runtime is its own PR that re-baselines every reference.
 - **Supersedes / Superseded-by:** none.
 - **Refs:** #1159, #793, `docs/superpowers/specs/2026-10-20-ios-new-path-foundations-design.md`, `docs/superpowers/plans/2026-10-20-ios-new-path-foundations.md`.
+
+## 2026-10-21 — iOS converges on the four-tab IA (#903)
+
+- **Status:** taken
+- **Scope:** ios, ui
+- **Context:** The 2026-09-21 entry gave Android a four-tab bar (Path, People, Collections, You) and recorded that "iOS and Android now differ in IA on purpose", leaving the iOS question to #903. iOS kept `PathView` as the authed root with one `NavigationStack`, a Profile hub reached from `PathBottomBar`, and Souls, Collections and Circle as closure links inside that hub. Every new surface had two answers to "where does it live", and #446 / #444 were blocked on a bar Android had already deleted. The maintainer decided #903 as **converge**.
+- **Decision:**
+  - **D1** The authed root is a system `TabView` with Path, People, Collections and You. The tab roots are the existing views (`PathView`, `SoulsListView`, `CollectionsListView`, `ProfileView`), not new hub screens. People reaches Connections from a toolbar button. The hub's duplicate entries are removed.
+  - **D2** One `@Observable` `TabNavigation` (`Features/Tabs/`), created in `RootView`'s authed branch and injected, holds the selection and four typed `Codable` route arrays (ids, never models). It is persisted under `@SceneStorage("tabs.navigation")` with per-field tolerant decoding. `SoulRoute` / `CollectionRoute` resolve ids and pop when they no longer resolve.
+  - **D3** Back is per stack. A reselect pops to root; a second reselect scrolls to top. Path's "top" is the current week.
+  - **D4** "New pebble" is a Path-only FAB (`NewPebbleFab`), and karma + Ripples stay on Path as `PathStatusCluster` on the same row. `PathBottomBar` and `NewPebbleButton` are deleted. **There is no long-press:** none existed on iOS, and Android's went with the all-at-once form, so "tap opens Capture" is the whole gesture.
+  - **D5** `MomentsRevision` (one counter plus its origin tab) tells Path that a moment changed on another tab. Bumpers: `PebbleDetailSheet`, the delete-dialog presenters, Capture.
+  - Settings stays a sheet from the You tab (Android pushes it). That is a presentation difference, not an IA one.
+- **Why:** The 1:1 rule is about behaviour and contract; the 2026-09-21 break was accepted only as an IA divergence awaiting #903, and converging removes it. Typed arrays rather than `NavigationPath` make restoration assertable and need no opaque blob. One navigator makes reselect, the karma jump to You and the sign-out reset single calls. The two-tap pop-then-scroll is the `UITabBarController` behaviour iOS users already expect. Keeping karma and Ripples beside the FAB costs no height (the row exists for the FAB) and gives #446 / #444 their hook; Android's attempt to move them above the roll was reverted on device.
+- **Consequences:**
+  - **Cross-tab presentation goes through `RootView` (or the future card-stack host above the tabs), never by setting another tab's state.** A `.sheet` on a non-selected tab is dropped by UIKit.
+  - **Every authed `@SceneStorage` key is declared in `RootView` and cleared in `resetAuthedSceneState()`**, in the PR that adds it (stack E's `heldCard` is next). The next account must inherit nothing.
+  - A tab root registers its own `navigationDestination`, so a destination can call back into the list that pushed it. Links below a tab root's first push may stay closure-based; they are not restored, and restoration lands on their parent.
+  - New patterns accepted: `MomentsRevision`, and a `UITabBarAppearance` shim in `PebblesApp` for the unselected item and the hairline (iOS 17 SwiftUI cannot express them).
+  - All four tabs stay mounted once visited. Offscreen work stops on `.onDisappear` (stone tilt already did). The device pass of 2026-10-21 showed no stutter switching between visited tabs.
+  - When stack D lands, `PathModel` reads `MomentsRevision`. When E5 deletes `PebbleDetailSheet`, `HeldCardModel` takes over its bumps.
+  - Reselect relies on the `TabView(selection:)` setter firing for the current tab, verified on the iPhone 15 (2026-10-21, iOS 26). If a point release breaks it, the fallback is a `UITabBarControllerDelegate` proxy found through the hosting controller.
+- **Supersedes / Superseded-by:** Supersedes nothing. It answers the "iOS and Android now differ in IA on purpose" consequence of **2026-09-21 — Android gets a four-tab bottom bar, a deliberate break from the 1:1 iOS mirror (#852)**: the two clients share the IA again.
+- **Refs:** #903, #446, #444, #852, `docs/superpowers/specs/2026-10-20-ios-tab-navigation-design.md`, `docs/superpowers/plans/2026-10-21-ios-tab-navigation.md`, `apps/ios/Pebbles/Features/Tabs/TabNavigation.swift`, `apps/ios/Pebbles/Features/Tabs/PebblesTabView.swift`, `apps/ios/Pebbles/RootView.swift`.

@@ -1,21 +1,11 @@
 import SwiftUI
 
-/// Souls / Glyphs / Circle. Souls and Circle now live under the People tab
-/// (#903), so their tiles switch to it; C2 removes them.
+/// Hub shortcuts, Glyphs only: Souls and Circle live under the People tab, Collections under its
+/// own tab (#903), so they have no tile here.
 struct ProfileShortcutsRow: View {
-    @Environment(TabNavigation.self) private var nav
-
     var body: some View {
         HStack(spacing: Spacing.sm) {
-            ProfileShortcutTile(title: "Souls", systemImage: "person.2", target: .action {
-                nav.popToRoot(.people)
-                nav.select(.people)
-            })
-            ProfileShortcutTile(title: "Glyphs", systemImage: "scribble", target: .route(.glyphs))
-            ProfileShortcutTile(title: "Circle", systemImage: "person.2.badge.plus", target: .action {
-                nav.people = [.connections]
-                nav.select(.people)
-            })
+            ProfileShortcutTile(title: "Glyphs", systemImage: "scribble", route: .glyphs)
         }
     }
 }
@@ -24,5 +14,4 @@ struct ProfileShortcutsRow: View {
     NavigationStack {
         ProfileShortcutsRow().padding()
     }
-    .environment(TabNavigation())
 }

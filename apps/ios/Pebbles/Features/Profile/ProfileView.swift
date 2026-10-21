@@ -21,7 +21,6 @@ struct ProfileView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(PathStatsService.self) private var stats
     @Environment(TabNavigation.self) private var nav
-    @Environment(\.dismiss) private var dismiss
 
     @State private var profile: ProfileRow?
     @State private var glyphStrokes: [GlyphStroke]?
@@ -51,8 +50,6 @@ struct ProfileView: View {
                     )
 
                     ProfileAchievementsCard()
-
-                    ProfileCollectionsCard()
 
                     ProfileLabCard()
 
