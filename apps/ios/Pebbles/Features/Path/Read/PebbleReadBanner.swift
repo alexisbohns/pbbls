@@ -85,7 +85,7 @@ struct PebbleReadBanner: View {
         pebble: nil
     )
     .padding()
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
     .environment(supabase)
     .environment(EmotionPaletteService(client: supabase.client))
     .environment(SnapURLCache(client: supabase.client))
@@ -98,7 +98,7 @@ struct PebbleReadBanner: View {
         pebble: nil
     )
     .padding()
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
     .environment(supabase)
     .environment(EmotionPaletteService(client: supabase.client))
     .environment(SnapURLCache(client: supabase.client))
@@ -114,7 +114,7 @@ struct PebbleReadBanner: View {
         pebble: nil
     )
     .padding()
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
     .environment(supabase)
     .environment(EmotionPaletteService(client: supabase.client))
     .environment(SnapURLCache(client: supabase.client))

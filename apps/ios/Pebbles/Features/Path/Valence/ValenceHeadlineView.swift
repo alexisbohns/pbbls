@@ -22,7 +22,7 @@ struct ValenceHeadlineView: View {
             if showsSpan {
                 Text(valence.headline.span)
                     .pebblesFont(.cardHeading)
-                    .foregroundStyle(Color.system.secondary)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
             }
         }
         .multilineTextAlignment(.center)

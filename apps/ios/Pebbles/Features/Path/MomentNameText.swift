@@ -9,8 +9,8 @@ import SwiftUI
 /// (`.ysabeauSemiboldItalic(_:)`); without one the caller's font is italicised.
 struct MomentNameText: View {
     let name: String?
-    var color: Color = Color.system.foreground
-    var untitledColor: Color = Color.system.secondary
+    var color: Color = Color.pebbles.onSurface
+    var untitledColor: Color = Color.pebbles.onSurfaceVariant
     var untitledFont: Font? = nil
 
     var body: some View {

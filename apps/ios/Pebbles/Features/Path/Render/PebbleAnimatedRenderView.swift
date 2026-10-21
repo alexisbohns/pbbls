@@ -247,7 +247,7 @@ struct PebbleAnimatedRenderView: View {
     )
     .frame(width: 200, height: 200)
     .padding()
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }
 
 #Preview("Static fallback (unknown version)") {

@@ -14,7 +14,7 @@ import SwiftUI
 /// Initialized from the 8-digit hex strings stored on
 /// `public.emotion_categories`. Returns `nil` if any hex fails to parse —
 /// callers treat the palette as unavailable and fall back to
-/// `Color.accent.primary` / `Color.accent.primaryHex`.
+/// `Color.pebbles.primary`.
 ///
 /// `dark` is the #599 addition: the small/medium read-view Petroglyph backfill
 /// in dark mode (the "palette.dark" role, from the `dark_color` column).

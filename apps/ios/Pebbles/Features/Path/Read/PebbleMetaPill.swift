@@ -70,7 +70,7 @@ struct PebbleMetaPill: View {
         case .emotion(let background, _):
             Capsule().fill(background)
         case .neutral, .unset:
-            Capsule().fill(Color.accent.secondary)
+            Capsule().fill(Color.pebbles.secondaryContainer)
         }
     }
 
@@ -79,7 +79,7 @@ struct PebbleMetaPill: View {
         if case .unset = style {
             Capsule()
                 .strokeBorder(
-                    Color.system.secondary,
+                    Color.pebbles.onSurfaceVariant,
                     style: StrokeStyle(lineWidth: 1, dash: [3])
                 )
         }
@@ -88,8 +88,8 @@ struct PebbleMetaPill: View {
     private var foreground: Color {
         switch style {
         case .emotion(_, let foreground): return foreground
-        case .neutral: return Color.system.foreground
-        case .unset:   return Color.system.secondary
+        case .neutral: return Color.pebbles.onSecondaryContainer
+        case .unset:   return Color.pebbles.onSecondaryContainer
         }
     }
 }
@@ -161,5 +161,5 @@ extension Color {
         )
     }
     .padding()
-    .background(Color.system.background)
+    .background(Color.pebbles.surface)
 }

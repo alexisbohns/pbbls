@@ -21,7 +21,7 @@ struct WeekHeaderView: View {
             .font(.ysabeauSemibold(17))
             .tracking(0.34)              // 2% of 17pt
             .textCase(.uppercase)
-            .foregroundStyle(Color.system.secondary)
+            .foregroundStyle(Color.pebbles.onSurfaceVariant)
             Spacer(minLength: 0)
             chevronButton(isPrevious: false)
         }
@@ -34,7 +34,7 @@ struct WeekHeaderView: View {
     }
 
     private var strokeColor: Color {
-        Color.system.muted
+        Color.pebbles.rule
     }
 
     @ViewBuilder
@@ -49,7 +49,7 @@ struct WeekHeaderView: View {
         } label: {
             Image(systemName: isPrevious ? "chevron.compact.left" : "chevron.compact.right")
                 .font(.title3)
-                .foregroundStyle(Color.accent.primary)
+                .foregroundStyle(Color.pebbles.primary)
                 .opacity(target == nil ? 0.3 : 1.0)
         }
         .disabled(target == nil)

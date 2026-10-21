@@ -84,8 +84,6 @@ struct ThemeLiteralsTests {
         "Features/Glyph/Views/GlyphPickerContent.swift": 1,
         "Features/Glyph/Views/GlyphTabBar.swift": 2,
         "Features/Glyph/Views/SlideToConfirm.swift": 1,
-        "Features/Path/Components/PathPebbleRow.swift": 2,
-        "Features/Path/Components/WeekPathView.swift": 1,
     ]
 
     /// `apps/ios/Pebbles`, two levels up from this file (`apps/ios/PebblesTests/`).

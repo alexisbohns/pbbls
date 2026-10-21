@@ -9,7 +9,7 @@ import os
 /// loader gates on `didFinishLoading`. Render surfaces look up by `emotion.id`
 /// via `palette(for:)`. A miss (cache not warm yet, or a bad row that the
 /// decoder rejected) returns `nil` — callers fall back to
-/// `Color.accent.primary` / `Color.accent.primaryHex`. No retry on failure;
+/// `Color.pebbles.primary`. No retry on failure;
 /// state recovers on next app launch.
 @Observable
 @MainActor
