@@ -1,0 +1,51 @@
+import SwiftUI
+import UIKit
+import os
+
+/// The rake tile (#1130 R11): the web's 36 × 240 `--spine-rake` SVG, six
+/// grooves 6 pt apart meandering in phase by 1.15 pt, each a 0.75 pt shadow
+/// line and a 0.6 pt lit line carried 0.9 pt right. The paths are verbatim
+/// from Android's `SpineRakePaths`. Paper and Night share the geometry and
+/// differ in `SpineColors.rakeShadow` and the `rakeLight` token. Rendered once per scheme
+/// and display scale; the ground tiles the image.
+enum SpineRakeTile {
+    // swiftlint:disable line_length
+    static let shadow = "M2.91 0L3.32 12L3.43 24L3.86 36L3.88 48L4.12 60L3.85 72L3.86 84L3.46 96L3.32 108L2.76 120L2.57 132L2.11 144L2.04 156L1.66 168L1.77 180L1.69 192L2.04 204L2.08 216L2.57 228L2.91 240M8.78 0L8.97 12L9.43 24L9.55 36L9.88 48L9.76 60L9.85 72L9.55 84L9.46 96L8.97 108L8.76 120L8.27 132L8.11 144L7.68 156L7.66 168L7.47 180L7.69 192L7.68 204L8.08 216L8.27 228L8.78 240M14.96 0L15.18 12L15.54 24L15.94 36L16.17 48L15.98 60L15.96 72L15.94 84L15.76 96L15.18 108L14.86 120L14.65 132L14.40 144L13.90 156L13.77 168L13.86 180L13.99 192L13.90 204L14.19 216L14.65 228L14.96 240M21.04 0L21.57 12L21.55 24L22.10 36L22.10 48L22.36 60L21.97 72L22.10 84L21.68 96L21.57 108L20.88 120L20.81 132L20.33 144L20.28 156L19.78 168L20.02 180L19.91 192L20.28 204L20.20 216L20.81 228L21.04 240M26.82 0L27.11 12L27.61 24L27.64 36L27.78 48L27.90 60L28.03 72L27.64 84L27.36 96L27.11 108L26.94 120L26.35 132L26.01 144L25.82 156L25.84 168L25.56 180L25.59 192L25.82 204L26.26 216L26.35 228L26.82 240M33.07 0L33.44 12L33.59 24L33.84 36L34.12 48L34.24 60L34.01 72L33.84 84L33.70 96L33.44 108L32.91 120L32.56 132L32.35 144L32.16 156L31.82 168L31.76 180L31.93 192L32.16 204L32.24 216L32.56 228L33.07 240"
+    static let lit = "M3.81 0L4.22 12L4.33 24L4.76 36L4.78 48L5.02 60L4.75 72L4.76 84L4.36 96L4.22 108L3.66 120L3.47 132L3.01 144L2.94 156L2.56 168L2.67 180L2.59 192L2.94 204L2.98 216L3.47 228L3.81 240M9.68 0L9.87 12L10.33 24L10.45 36L10.78 48L10.66 60L10.75 72L10.45 84L10.36 96L9.87 108L9.66 120L9.17 132L9.01 144L8.58 156L8.56 168L8.37 180L8.59 192L8.58 204L8.98 216L9.17 228L9.68 240M15.86 0L16.08 12L16.44 24L16.84 36L17.07 48L16.88 60L16.86 72L16.84 84L16.66 96L16.08 108L15.76 120L15.55 132L15.30 144L14.80 156L14.67 168L14.76 180L14.89 192L14.80 204L15.09 216L15.55 228L15.86 240M21.94 0L22.47 12L22.45 24L23.00 36L23.00 48L23.26 60L22.87 72L23.00 84L22.58 96L22.47 108L21.78 120L21.71 132L21.23 144L21.18 156L20.68 168L20.92 180L20.81 192L21.18 204L21.10 216L21.71 228L21.94 240M27.72 0L28.01 12L28.51 24L28.54 36L28.68 48L28.80 60L28.93 72L28.54 84L28.26 96L28.01 108L27.84 120L27.25 132L26.91 144L26.72 156L26.74 168L26.46 180L26.49 192L26.72 204L27.16 216L27.25 228L27.72 240M33.97 0L34.34 12L34.49 24L34.74 36L35.02 48L35.14 60L34.91 72L34.74 84L34.60 96L34.34 108L33.81 120L33.46 132L33.25 144L33.06 156L32.72 168L32.66 180L32.83 192L33.06 204L33.14 216L33.46 228L33.97 240"
+    // swiftlint:enable line_length
+
+    private static let logger = Logger(subsystem: "app.pbbls.ios", category: "spine")
+    @MainActor private static var images: [String: UIImage] = [:]
+
+    @MainActor
+    static func image(scheme: ColorScheme, scale: CGFloat) -> UIImage? {
+        let key = "\(scheme)|\(scale)"
+        if let cached = images[key] { return cached }
+        let renderer = ImageRenderer(content: Tile().environment(\.colorScheme, scheme))
+        renderer.scale = scale
+        guard let image = renderer.uiImage else {
+            logger.error("spine rake tile did not render (\(String(describing: scheme), privacy: .public))")
+            return nil
+        }
+        images[key] = image
+        return image
+    }
+
+    private struct Tile: View {
+        @Environment(\.colorScheme) private var scheme
+
+        var body: some View {
+            Canvas { context, _ in
+                if let shadow = SVGPathParser.parse(SpineRakeTile.shadow) {
+                    context.stroke(Path(shadow), with: .color(SpineColors.rakeShadow(scheme: scheme)),
+                                   style: StrokeStyle(lineWidth: 0.75, lineCap: .butt))
+                }
+                if let lit = SVGPathParser.parse(SpineRakeTile.lit) {
+                    context.stroke(Path(lit), with: .color(Color.pebbles.rakeLight),
+                                   style: StrokeStyle(lineWidth: 0.6, lineCap: .butt))
+                }
+            }
+            .frame(width: SpineLayout.rakeTile.width, height: SpineLayout.rakeTile.height)
+        }
+    }
+}
