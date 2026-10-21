@@ -20,28 +20,28 @@
 - **Standards:** colours only via `Color.pebbles.*` (`ThemeLiteralsTests` fails otherwise); Spine text only via `.spineType(.rank)`; `@Observable` + `.task`; state as values (the press request and the completion are state, not events); `os.Logger` on every error path; pure logic outside views; iOS 17 floor, no `#available`; Swift 6 out of scope; EN/FR strings in `Localizable.xcstrings` with no `New`/`Stale` entry, "galet" never "caillou"; VoiceOver order per spec; 44 pt targets; Dynamic Type up to the accessibility sizes; reference images rendered on CI only through the B2 gate (record mode `PBBLS_RECORD_REFERENCES=1`, label `rebaseline-ios-screenshots`, threshold never widened), so each visual part adds its reference suite and its PR task applies the label and approves the held run; Arkaik through `arkaik-mcp` only, the Spine view and acceptances move to `development` at pickup, never `live`, and `update_node` replaces metadata wholesale.
 - Tests run on the stack's simulator with `-derivedDataPath`. Delete that folder, never the global DerivedData. Run `xcodegen generate` after any `project.yml` change.
 
-## Decisions waiting on the maintainer
+## Decisions taken by the maintainer (2026-10-21)
 
-Each one has a recommendation, and the plan is written to that recommendation. If the maintainer picks the alternative, the task named in brackets is the only one that changes.
+The plan was first written with these as recommendations; the maintainer decided each one. The task in brackets carries it.
 
-1. **Three tones the Spine needs are not among stack A's nine tokens** (the rake's groove shadow and lit line, and the card shadow ink). Android writes them in `SpineColors.kt` (`rakeShadow`: Paper `onSurface` @ 0.20, Night black @ 0.34; `rakeLight`: Paper white @ 0.55, Night `#DCE2EA` @ 0.075; card shadow: Paper `onSurface`, Night black). *Recommendation:* three new generated rows in stack A's `SPINE_TOKENS` table (stack A §2.4: "If the Spine spec needs another scheme-only token later, it is a new row in the same table"): `rakeShadow` = Paper `onSurface` @ 0.20 / Night `scrim` @ 0.34, `rakeLight` = Paper `surfaceContainerLowest` @ 0.55 / Night `onSurface` @ 0.075 (the cool `#DCE2EA` is approximated by Night's own `onSurface`), `cardShadow` = Paper `onSurface` @ 1 / Night `scrim` @ 1. This touches `apps/web/lib/theme/ios-colorsets.ts`, outside `apps/ios`, in one commit. *Alternative:* blend them in `SpineColors.swift` from `Color.pebbles.onSurface` / `.scrim` / `.surfaceContainerLowest` with `.opacity`, reading `colorScheme`. [Task D2b1.1]
-2. **The reading day reads seams only (spec D12) or seams and pebble rows (Android `ReadingDay.kt`).** A `LazyVStack` drops a seam that has scrolled far above the viewport, so on a long day with seams only, no seam is reported and the reading day falls back to the first day while the user reads the middle of the week. *Recommendation:* every pebble row reports its day too, as on Android. *Alternative:* seams only (delete the pebble row's `.spineDayMark` line). [Task D4c.4]
-3. **Fifteen PRs instead of seven.** The rule "each part under roughly 500 changed lines" splits the brief's parts: D1 → D1a (days and people) / D1b (words and sizes) / D1c (strings and fixture); D2a → D2a1 (press logic) / D2a2 (stone views); D2b → D2b1 (card data) / D2b2 (card view); D3 → D3a (`PathModel`) / D3b (ground and seams) / D3c (entries and pebbles); D4 → D4a (opening) / D4b (contents and seal) / D4c (pager). The order is the brief's and every boundary is a dependency boundary. The verbatim vectors (D1a, D1b) and the string catalogue (D1c, about 700 lines of catalogue JSON) stay over 500, because splitting a vector file or a catalogue block would leave a part that cannot prove itself. *Recommendation:* accept. *Alternative:* fold each split back into the brief's part (no code changes, only fewer branches). [Parts table]
-4. **Items moved between parts, by dependency:** `CardFace` to D2a1 (the press carries it; spec §Press-request state defines it beside `StonePressRequests`); `SpineColors` to D2b1 and D4b (where its blends are first drawn); `SoulMark` to D2b2 (the card's strip draws it first); `StoneSeal` to D4b (the contents are its only user); `PathModel` to D3a (the brief puts it in D3; the spec puts it in D5a); `SpineOpen` to D4c (the brief puts it in D4; the spec in D2b); `WeekNeighbourTests` to D3a (it tests `PathModel`). *Recommendation:* accept. [Parts table]
-5. **Which PR says `Resolves #1130`.** The spec says D5a; the brief says the part that completes the issue, and D5b's removals are in the spec too. *Recommendation:* D5a (`Resolves #1130`, as the spec's table), D5b `Part of #1130`. The stack merges whole, so the issue closes once either way. [Task D5a.8]
-6. **The glint's white.** The literal test forbids `.white` under `Features/`, and no role is white in both schemes. *Recommendation:* the glint's light is stone data, so it lives in the exempt `Features/Path/Stone/StoneGlintInk.swift` beside `StonePalette.blank`'s literal ramp. *Alternative:* a fourth generated token `glint` (white in all four appearances). [Task D2a2.2]
-7. **The lab's photos.** The fixture week's five JPGs are read by the reference suites through `#filePath`, which a device cannot reach, so the DEBUG lab draws fixture cards on their photo bed (ratio primed) and offers a "Live" week for real photos. *Recommendation:* accept. *Alternative:* ship the five JPGs (877 KB) in the app bundle. [Task D2b2.4]
-8. **"No pebbles" as its own key.** The spec's table puts `zero: no pebbles` inside `path.spine.summaryPebbles` and also says "the ICU `=0` branches become an explicit zero check". *Recommendation:* the explicit check reads a separate key, `path.spine.summaryNoPebbles`, so every plural keeps to CLDR categories (English has no `zero`). [Task D1c.1]
-9. **The verbatim souls row.** No captured `path_moments` body with `souls` exists in the repo (the captured iOS rows predate #1121; Android's test rows use non-UUID ids). *Recommendation:* D1a tests rows written in the server's exact jsonb shape (from `20261018120000_path_moments_souls.sql`) plus the captured pre-#1121 rows; D5a's device pass captures one real row with a throwaway account and adds it to `MomentFixtures.Captured`. [Tasks D1a.1, D5a.6]
-10. **The brief's "ring fit and valence → lockup" vectors** are stack E's (`RingFit`, `SpineType.Style.lockupWord`), not in D's spec. *Recommendation:* E's plan ports them; D ports `spineWeek`, `personsOfWeek`, `weekOpening`, `cardSize` and the rest of the spec's vector table. [none in D]
+1. **The three tones the stack A tokens lack mirror Android's `core/designsystem/SpineColors.kt`.** The rake's groove shadow and the card's shadow ink are blends computed once per scheme in `SpineColors.swift`: `rakeShadow` is `onSurface` @ 0.20 on Paper and black @ 0.34 at Night; the shadow ink is `onSurface` on Paper and black at Night, carried with Android's `shadowAlpha` (0.30 Paper, 0.62 Night). Black is `Color.pebbles.scrim`, which M3 keeps `#000000` in every scheme, because `Features/` may not name `.black`. The rake's lit line is **one** generated token, `rakeLight` (white @ 0.55 on Paper, `#DCE2EA` @ 0.075 at Night, the same in the high-contrast appearances), because `Features/` may not name a hex; the generator learns constant-hex sources for it. There are no `rakeShadow` or `cardShadow` tokens. [Tasks D2b.1, D2b.2, D3.3, D2b.8]
+2. **The reading day reads seams and pebble rows**, as Android's `ReadingDay.kt` does: a `LazyVStack` drops a seam that has scrolled far above the viewport, and a long day is still read through its pebbles. [Task D4c.1]
+3. **Ten parts, fewer and larger.** The brief's parts stand, with three kept apart because each is a reviewable unit of its own: D1c (the strings and the fixture week; folding it into D1 would make ~2,250 lines, past the ~1,700 the maintainer allowed), D3c (the feed) and D4c (the pager). One commit per task inside each part. [Parts table]
+4. **Items placed by dependency:** `CardFace` in D2a (the press carries it; spec §Press-request state defines it beside `StonePressRequests`); `SpineColors` in D2b, extended in D4 (where its blends are first drawn); `SoulMark` and the people-line view in D2b (the card's strip draws them first); `StoneSeal` in D4 (the contents are its only user); `PathModel` in D3 (the brief's part; the spec puts it in D5a); `SpineOpen` in D4c (the brief's D4; the spec says D2b); `WeekNeighbourTests` in D3 (it tests `PathModel`). [Parts table]
+5. **`Resolves #1130` is on D5a**, as the spec's table says; D5b says `Part of #1130`. The stack merges whole. [Task D5a.8]
+6. **The glint's white** is stone data and lives in the exempt `Features/Path/Stone/StoneGlintInk.swift`, beside `StonePalette.blank`'s literal ramp. [Task D2a.7]
+7. **The lab's photos.** The reference suites read the five sandbox JPGs through `#filePath`, which a device cannot reach, so the DEBUG lab draws fixture cards on their photo bed (ratio primed); real photos show in the app. [Task D2b.9]
+8. **"No pebbles" is its own key**, `path.spine.summaryNoPebbles`, read by the explicit zero check the spec asks for, so every plural keeps to CLDR categories. [Task D1c.1]
+9. **The verbatim souls row.** D1 tests rows written in the server's exact jsonb shape (from `20261018120000_path_moments_souls.sql`) and the captured pre-#1121 rows; D5a captures one real `path_moments` row with souls through a throwaway account on the linked project, adds it to `MomentFixtures.Captured`, then purges the account through the existing `delete-account` flow (`purge_account`, storage, auth user). [Tasks D1.1, D5a.6]
+10. **The brief's "ring fit and valence → lockup" vectors** are stack E's (`RingFit`, `SpineType.Style.lockupWord`) and stay with stack E's plan. [none in D]
 
 ## Dependencies
 
 - **Stack A whole** (#1163 → #1169 → #1171 → #1174): `Color.pebbles.*`, the nine Spine tokens, `PebblesMenu` / `.pebblesContextMenu`, `ThemeLiteralsTests` with an empty debt table.
 - **Stack B whole** (#1164 → #1166 → #1168): `SpineType` and `.spineType(_:)` (`Theme/SpineType.swift`, `Theme/SpineTypeModifier.swift`), `SpineType.Cut`, the reference harness (`PebblesTests/References/Support/`), the soft silhouette (`WobbleRenderer.softBackdropArt(size:polarity:)`), `ios-references.yml` and the `rebaseline-ios-screenshots` label.
 - **Stack C** (#903's two parts): `PebblesTabView`, `TabNavigation` (with `scrollToTop`), `MomentsRevision`, `NewPebbleFab`, `PathStatusCluster`, `PebbleDetailSheet(momentId:origin:onPebbleUpdated:)`, `PathBottomBar` deleted.
-- Task D1a.0 checks all three and stops with "waiting on <stack>" if one is missing.
-- **Feeds stack E:** E1–E3 need `SpineCard` (D2b2) and `PeopleLines` (D1b); E4 needs `CardFrameRegistry` (D2b1), `SpineOpen` (D4c) and the per-slot focus state (D3c).
+- Task D1.0 checks all three and stops with "waiting on <stack>" if one is missing.
+- **Feeds stack E:** E1–E3 need `SpineCard` (D2b) and `PeopleLines` (D1); E4 needs `CardFrameRegistry` (D2b), `SpineOpen` (D4c) and the per-slot focus state (D3c).
 
 ## Re-grep before trusting line numbers
 
@@ -57,7 +57,7 @@ This plan was written on 2026-10-21 against `main` at `d53be9cf` (`chore(android
   DD="$HOME/Library/Developer/Xcode/DerivedData/Pebbles-stack-d"
   ```
 
-  Task D1a.0 creates the simulator. Use `-destination "id=$SIM"` with **double** quotes. To clear stale objects, delete `$DD/Build` only, never `~/Library/Developer/Xcode/DerivedData` as a whole (another stack's simulator run lives there).
+  Task D1.0 creates the simulator. Use `-destination "id=$SIM"` with **double** quotes. To clear stale objects, delete `$DD/Build` only, never `~/Library/Developer/Xcode/DerivedData` as a whole (another stack's simulator run lives there).
 - **Named commands** (each starts with the two lines above):
   - **Suite command** for `<Suite>`:
     `cd apps/ios && xcodegen generate && TEST_RUNNER_TZ=Europe/Paris xcodebuild test -scheme Pebbles -destination "id=$SIM" -derivedDataPath "$DD" -only-testing:PebblesTests/<Suite> -quiet`
@@ -98,20 +98,15 @@ This plan was written on 2026-10-21 against `main` at `d53be9cf` (`chore(android
 
 | # | Branch | PR title | Contents | Est. changed lines |
 |---|---|---|---|---|
-| D1a | `feat/1130-ios-spine-days` | `feat(ios): spine days, people and stable seeds` | `PathSoul` + `souls` decoding, `SpineMoment`, `LocalDays`, `SpineWeekBuilder`, `PersonsOfWeek`, `StableHash`, vectors; Arkaik pickup | ~560 (vectors ~330) |
-| D1b | `feat/1130-ios-spine-words` | `feat(ios): spine words, dates, people lines and card sizes` | `NumberWords`, `SpineDates`, `WeekOpening` (logic), `PeopleLines`, `EntryTypes`, `CardSizes`, vectors | ~640 (vectors ~330) |
+| D1 | `feat/1130-ios-spine-logic` | `feat(ios): spine logic, from days and people to words and card sizes` | `PathSoul` + `souls` decoding, `SpineMoment`, `LocalDays`, `SpineWeekBuilder`, `PersonsOfWeek`, `StableHash`, `NumberWords`, `SpineDates`, `WeekOpening` (logic), `PeopleLines`, `EntryTypes`, `CardSizes`, the verbatim vectors; Arkaik pickup | ~1,200 (vectors ~660) |
 | D1c | `feat/1130-ios-spine-strings` | `feat(ios): spine strings in english and french, and the fixture week` | 33 `path.spine.*` keys, `SpineStrings`, `SpineCopy`, the fixture week and its marks | ~1,050 (catalogue JSON ~700, generated marks ~120) |
-| D2a1 | `feat/1130-ios-stone-press` | `feat(ios): the stone press as timed state` | `StoneMotion`, `StonePress`, `StonePressRequests`, `CardFace`, `StoneRingGeometry`, `SpineLayout`, the `seed:` parameter | ~560 |
-| D2a2 | `feat/1130-ios-spine-stone` | `feat(ios): the spine stone with rings, ripple and glint` | `SpineStone`, `StoneRings`, `StoneRipple`, `StoneGlint`, `StoneGlintInk`, `SpineLabView` (stones), stone references | ~470 |
-| D2b1 | `feat/1130-ios-card-data` | `feat(ios): photo ratios, card frames and spine card colours` | 3 generated tokens, `SpineColors`, `SnapAspectCache`, `CardFrameRegistry`, `SpineSnapSource` | ~470 |
-| D2b2 | `feat/1130-ios-spine-card` | `feat(ios): the spine deck card` | `SoulMark`, `SpineCard`, card references, lab cards | ~430 |
-| D3a | `feat/1130-ios-path-model` | `feat(ios): the path model and its spine pages` | `PathModel`, `SpinePage`, `WeekNeighbour`, tests | ~470 |
-| D3b | `feat/1130-ios-spine-ground` | `feat(ios): the raked ground and the day seams` | `SpineRakeTile`, `SpineGround`, `DaySeam`, seam references | ~330 |
-| D3c | `feat/1130-ios-spine-feed` | `feat(ios): spine entries, pebbles and the days of a week` | `PeopleLineText`, `SpineEntry`, `SpinePebble`, `SpineWeekRows` (days), `SpineWeekStack`, day references, dense lab week | ~620 |
-| D4a | `feat/1130-ios-spine-opening` | `feat(ios): the week opens with its persons and closes at the mouth` | `WeekOpeningText`, `WeekMasthead`, `WeekOpeningView`, `DayDots`, `PersonsOfWeekView`, `WeekMouth`, `SpineEmptyWeek`, rows, references | ~600 |
-| D4b | `feat/1130-ios-spine-contents` | `feat(ios): the week's contents with their seals` | `SpineColors` spot and deep, `StoneSeal`, `WeekContents`, references | ~380 |
-| D4c | `feat/1130-ios-spine-pager` | `feat(ios): the spine week pages, rolls and presses from its contents` | `ReadingDay`, `SpineOpen`, `SpineWeekView`, `SpinePager`, `SpineWeekRoll`, lab pager | ~500 |
-| D5a | `feat/1130-ios-path-becomes-spine` | `feat(ios): the path becomes the spine` | `RootView` registry, `PathView` on `PathModel` + pager, full-week references, decision log, `apps/ios/CLAUDE.md` | ~360 |
+| D2a | `feat/1130-ios-spine-stone` | `feat(ios): the spine stone, its press, rings, ripple and glint` | `StoneMotion`, `StonePress`, `StonePressRequests`, `CardFace`, `StoneRingGeometry`, `SpineLayout`, the `seed:` parameter, `SpineStone`, `StoneRings`, `StoneRipple`, `StoneGlint`, `StoneGlintInk`, the lab (stones), stone references | ~1,030 |
+| D2b | `feat/1130-ios-spine-card` | `feat(ios): the spine deck card, its photo ratio and its frame` | the `rakeLight` token, `SpineColors` (edge, spot, rake shadow, shadow ink), `SnapAspectCache`, `CardFrameRegistry`, `SpineSnapSource`, the people line's parts and view, `SoulMark`, `SpineCard`, card references, lab cards | ~900 |
+| D3 | `feat/1130-ios-path-model` | `feat(ios): the path model, the raked ground and the day seams` | `PathModel`, `SpinePage`, `WeekNeighbour`, `SpineRakeTile`, `SpineGround`, `DaySeam`, seam references | ~800 |
+| D3c | `feat/1130-ios-spine-feed` | `feat(ios): spine entries, pebbles and the days of a week` | `SpineStoneDescription`, `SpineEntry`, `SpinePebble`, `SpineWeekRows` (days), `SpineWeekStack`, day references, dense lab week | ~620 |
+| D4 | `feat/1130-ios-spine-opening` | `feat(ios): the week opens with its persons and contents and closes at the mouth` | `WeekOpeningText`, `WeekMasthead`, `WeekOpeningView`, `DayDots`, `PersonsOfWeekView`, `WeekMouth`, `SpineEmptyWeek`, `SpineColors` deep ink, `StoneSeal`, `WeekContents`, rows, references | ~980 |
+| D4c | `feat/1130-ios-spine-pager` | `feat(ios): the spine week pages, rolls and presses from its contents` | `ReadingDay`, `SpineOpen`, `SpineWeekView`, `SpinePager`, `SpineWeekRoll`, lab pager, the paging spike | ~500 |
+| D5a | `feat/1130-ios-path-becomes-spine` | `feat(ios): the path becomes the spine` | `RootView` registry, `PathView` on `PathModel` + pager, full-week references, the captured souls row, decision log, `apps/ios/CLAUDE.md` | ~400 |
 | D5b | `chore/1130-ios-remove-row-path` | `chore(ios): remove the row path` | The removal list, the `.riv`, five tests, orphaned strings, the literal allowlist entry | ~-1,400 (deletions) |
 
 ## File map
@@ -120,60 +115,62 @@ All app paths are under `apps/ios/Pebbles/`, test paths under `apps/ios/PebblesT
 
 | File | Part | Responsibility |
 |---|---|---|
-| `Features/Path/Models/PathSoul.swift` (new) | D1a | A pebble's soul on `path_moments` |
-| `Features/Path/Models/MomentSummary.swift` | D1a | `PebbleSummary.souls`, tolerant decode |
-| `Features/Path/Spine/Logic/SpineMoment.swift` (new) | D1a | The logic's moment protocol; `MomentSummary` conformance |
-| `Features/Path/Spine/Logic/LocalDays.swift` (new) | D1a | Calendar-day arithmetic, DST-safe |
-| `Features/Path/Spine/Logic/SpineWeekBuilder.swift` (new) | D1a | Days of a week, reading order |
-| `Features/Path/Spine/Logic/PersonsOfWeek.swift` (new) | D1a | Persons of the week, the fold |
-| `Features/Path/Spine/Logic/StableHash.swift` (new) | D1a | FNV-1a seeds |
-| `Features/Path/Spine/Logic/NumberWords.swift` (new) | D1b | Spelled-out numbers EN/FR |
-| `Features/Path/Spine/Logic/SpineDates.swift` (new) | D1b | Weekdays, days, ranges, times, months |
-| `Features/Path/Spine/Logic/WeekOpening.swift` (new) | D1b | `WeekWords`, summary words, letters, dot days |
-| `Features/Path/Spine/Logic/PeopleLines.swift` (new) | D1b | The people line |
-| `Features/Path/Spine/Logic/EntryTypes.swift` (new) | D1b | Name cuts for entry, contents, card |
-| `Features/Path/Spine/Logic/CardSizes.swift` (new) | D1b | Card width and height |
+| `Features/Path/Models/PathSoul.swift` (new) | D1 | A pebble's soul on `path_moments` |
+| `Features/Path/Models/MomentSummary.swift` | D1 | `PebbleSummary.souls`, tolerant decode |
+| `Features/Path/Spine/Logic/SpineMoment.swift` (new) | D1 | The logic's moment protocol; `MomentSummary` conformance |
+| `Features/Path/Spine/Logic/LocalDays.swift` (new) | D1 | Calendar-day arithmetic, DST-safe |
+| `Features/Path/Spine/Logic/SpineWeekBuilder.swift` (new) | D1 | Days of a week, reading order |
+| `Features/Path/Spine/Logic/PersonsOfWeek.swift` (new) | D1 | Persons of the week, the fold |
+| `Features/Path/Spine/Logic/StableHash.swift` (new) | D1 | FNV-1a seeds |
+| `Features/Path/Spine/Logic/NumberWords.swift` (new) | D1 | Spelled-out numbers EN/FR |
+| `Features/Path/Spine/Logic/SpineDates.swift` (new) | D1 | Weekdays, days, ranges, times, months |
+| `Features/Path/Spine/Logic/WeekOpening.swift` (new) | D1 | `WeekWords`, summary words, letters, dot days |
+| `Features/Path/Spine/Logic/PeopleLines.swift` (new) | D1 | The people line |
+| `Features/Path/Spine/Logic/EntryTypes.swift` (new) | D1 | Name cuts for entry, contents, card |
+| `Features/Path/Spine/Logic/CardSizes.swift` (new) | D1 | Card width and height |
 | `Resources/Localizable.xcstrings` | D1c, D5b | `path.spine.*`; D5b drops orphaned keys |
 | `Features/Path/Spine/SpineStrings.swift` (new) | D1c | Catalogue lookup for a pinned language |
 | `Features/Path/Spine/SpineCopy.swift` (new) | D1c | Typed Spine copy |
 | `Features/Path/Spine/Debug/SpineFixtureWeek.swift` (new) | D1c | The web fixture week, `#if DEBUG` |
 | `Features/Path/Spine/Debug/SpineFixtureMarks.swift` (new, generated) | D1c | The fixture's six glyphs |
-| `Features/Path/Spine/Stone/StoneMotion.swift` (new) | D2a1 | Press timings, piecewise tables, frames |
-| `Features/Path/Spine/Stone/StonePress.swift` (new) | D2a1 | A live press value and its lifetime modifier |
-| `Features/Path/Spine/StonePressRequests.swift` (new) | D2a1 | Press requests as state; `CardFace` |
-| `Features/Path/Spine/Stone/StoneRingGeometry.swift` (new) | D2a1 | Rings and halo about the centroid |
-| `Features/Path/Spine/SpineLayout.swift` (new) | D2a1 | Every point constant; stone rows |
-| `Features/Path/Stone/StoneView.swift`, `PebbleStoneView.swift` | D2a1 | `seed:` |
-| `Features/Path/Stone/StoneGlintInk.swift` (new) | D2a2 | The glint's light (exempt folder) |
-| `Features/Path/Spine/Stone/SpineStone.swift`, `StoneRings.swift`, `StoneRipple.swift`, `StoneGlint.swift` (new) | D2a2 | The stone in the slot |
-| `Features/Path/Spine/Debug/SpineLabView.swift` (new) | D2a2 → D4c | The lab, one section per part |
-| `Features/Profile/Sheets/SettingsSheet.swift` | D2a2 | "Spine lab" row |
-| `apps/web/lib/theme/ios-colorsets.ts` (+ test), generated colorsets, `Shared/Theme/PebblesColors.swift` | D2b1 | `rakeShadow`, `rakeLight`, `cardShadow` |
-| `Features/Path/Spine/SpineColors.swift` (new) | D2b1, D4b | Blends with the emotion palette |
-| `Features/Path/Spine/SnapAspectCache.swift` (new) | D2b1 | Photo ratios from headers |
-| `Features/Path/Spine/CardFrameRegistry.swift` (new) | D2b1 | Slot frames for stack E |
-| `Features/Path/Spine/SpineSnapSource.swift` (new) | D2b1 | Where a card's photo comes from |
-| `Features/Path/Spine/Feed/SoulMark.swift`, `SpineCard.swift` (new) | D2b2 | The card and its marks |
-| `Features/Path/PathModel.swift`, `Features/Path/Spine/SpinePage.swift` (new) | D3a | Path state, pages, neighbours |
-| `Features/Path/Spine/Feed/SpineRakeTile.swift`, `SpineGround.swift`, `DaySeam.swift` (new) | D3b | The ground and the seams |
-| `Features/Path/Spine/Feed/PeopleLineText.swift`, `SpineEntry.swift`, `SpinePebble.swift` (new) | D3c | Entries, pebbles |
-| `Features/Path/Spine/SpineWeekRows.swift`, `SpineWeekStack.swift` (new) | D3c, D4a, D4b | Row order; eager layout |
-| `Features/Path/Spine/Opening/*.swift` (new) | D4a, D4b | Masthead, opening, persons, dots, contents, mouth, empty week |
-| `Features/Path/Spine/Stone/StoneSeal.swift` (new) | D4b | The contents' seal |
+| `Features/Path/Spine/Stone/StoneMotion.swift` (new) | D2a | Press timings, piecewise tables, frames |
+| `Features/Path/Spine/Stone/StonePress.swift` (new) | D2a | A live press value and its lifetime modifier |
+| `Features/Path/Spine/StonePressRequests.swift` (new) | D2a | Press requests as state; `CardFace` |
+| `Features/Path/Spine/Stone/StoneRingGeometry.swift` (new) | D2a | Rings and halo about the centroid |
+| `Features/Path/Spine/SpineLayout.swift` (new) | D2a | Every point constant; stone rows |
+| `Features/Path/Stone/StoneView.swift`, `PebbleStoneView.swift` | D2a | `seed:` |
+| `Features/Path/Stone/StoneGlintInk.swift` (new) | D2a | The glint's light (exempt folder) |
+| `Features/Path/Spine/Stone/SpineStone.swift`, `StoneRings.swift`, `StoneRipple.swift`, `StoneGlint.swift` (new) | D2a | The stone in the slot |
+| `Features/Path/Spine/Debug/SpineLabView.swift` (new) | D2a → D4c | The lab, one section per part |
+| `Features/Profile/Sheets/SettingsSheet.swift` | D2a | "Spine lab" row |
+| `apps/web/lib/theme/ios-colorsets.ts` (+ test), generated colorsets, `Shared/Theme/PebblesColors.swift` | D2b | `rakeLight`, and constant-hex sources in the generator |
+| `Features/Path/Spine/SpineColors.swift` (new) | D2b, D4 | Blends with the emotion palette; the rake shadow and shadow ink per scheme |
+| `Features/Path/Spine/SnapAspectCache.swift` (new) | D2b | Photo ratios from headers |
+| `Features/Path/Spine/CardFrameRegistry.swift` (new) | D2b | Slot frames for stack E |
+| `Features/Path/Spine/SpineSnapSource.swift` (new) | D2b | Where a card's photo comes from |
+| `Features/Path/Spine/SpineCalendar.swift`, `SpineTextSpan.swift` (new) | D2b | The views' calendar; rank spans in one `Text` |
+| `Features/Path/Spine/Feed/PeopleLineParts.swift`, `PeopleLineView.swift`, `SoulMark.swift`, `SpineCardField.swift`, `SpineCard.swift` (new) | D2b | The people line, the marks, the card |
+| `Features/Path/Spine/Debug/SpineStoneGallery.swift`, `SpineCardGallery.swift` (new) | D2a, D2b | Lab and reference galleries |
+| `Features/Path/PathModel.swift`, `Features/Path/Spine/SpinePage.swift` (new) | D3 | Path state, pages, neighbours |
+| `Features/Path/Spine/Feed/SpineRakeTile.swift`, `SpineGround.swift`, `DaySeam.swift` (new) | D3 | The ground and the seams |
+| `Features/Path/Spine/Feed/SpineStoneDescription.swift`, `SpineEntry.swift`, `SpinePebble.swift` (new) | D3c | VoiceOver names, entries, pebbles |
+| `Features/Path/Spine/SpineWeekRows.swift`, `SpineWeekStack.swift` (new) | D3c, D4, D4c | Row order; eager layout |
+| `Features/Path/Spine/Opening/*.swift` (new) | D4 | Masthead, opening, persons, dots, contents, mouth, empty week |
+| `Features/Path/Spine/Stone/StoneSeal.swift` (new) | D4 | The contents' seal |
 | `Features/Path/Spine/ReadingDay.swift`, `SpineOpen.swift`, `SpineWeekView.swift`, `SpinePager.swift`, `Roll/SpineWeekRoll.swift` (new) | D4c | The page, the pager, the roll |
 | `RootView.swift`, `Features/Path/PathView.swift` | D5a | Registry; the Spine as the Path |
 | `docs/decisions/log.md`, `apps/ios/CLAUDE.md` | D5a | Decision entry; the Path line |
-| `PebblesTests/Spine/*.swift` (new) | D1a → D4c | Logic and model tests |
-| `PebblesTests/References/Spine*References.swift` (new) | D2a2 → D5a | Reference suites |
-| `PebblesTests/Spine/Fixtures/*.jpg` (new) | D2b2 | The five sandbox photos |
+| `PebblesTests/Spine/*.swift` (new) | D1 → D4c | Logic and model tests |
+| `PebblesTests/References/Spine*References.swift` (new) | D2a → D5a | Reference suites |
+| `PebblesTests/Spine/Fixtures/*.jpg` (new) | D2b | The five sandbox photos |
 | `PebblesTests/ThemeLiteralsTests.swift` | D5b | Drops `WeekPathView`'s allowlist entry |
 
 ---
-## Part D1a — `feat/1130-ios-spine-days`
+## Part D1 — `feat/1130-ios-spine-logic`
 
-PR title: `feat(ios): spine days, people and stable seeds`. Body opens `Part of #1130`. No view changes.
+PR title: `feat(ios): spine logic, from days and people to words and card sizes`. Body opens `Part of #1130`. No view changes. The brief's D1 whole: the days and people (Tasks D1.1–D1.4), then the words and sizes (Tasks D1.5–D1.10), one commit per task.
 
-### Task D1a.0: Preflight, simulator, stack init, Arkaik pickup
+### Task D1.0: Preflight, simulator, stack init, Arkaik pickup
 
 **Files:** none in the repo.
 
@@ -214,11 +211,11 @@ Expected: one UDID prints.
 ```bash
 git config rerere.enabled true
 git config remote.pushDefault origin
-gh stack init feat/1130-ios-spine-days
+gh stack init feat/1130-ios-spine-logic
 git branch --show-current
 ```
 
-Expected: `feat/1130-ios-spine-days`.
+Expected: `feat/1130-ios-spine-logic`.
 
 - [ ] **Step 4: Baseline**
 
@@ -226,7 +223,7 @@ Run the **Full suite** and **Lint**. Expected: green (all reference suites alrea
 
 - [ ] **Step 5: Move the Spine's nodes to `ios: development` in Arkaik**
 
-Load the tools: ToolSearch `select:mcp__arkaik-mcp__get_node,mcp__arkaik-mcp__update_node`. If they do not load, say so, skip this step and record it for the D1a PR body. Never fall back to the bundle file.
+Load the tools: ToolSearch `select:mcp__arkaik-mcp__get_node,mcp__arkaik-mcp__update_node`. If they do not load, say so, skip this step and record it for the D1 PR body. Never fall back to the bundle file.
 
 For each of `V-timeline`, `AC-the-week-opens-with-who-was-there-and-what-happened`, `AC-path-week-roll`, `AC-a-photo-keeps-its-own-shape`:
 
@@ -239,7 +236,7 @@ If the validator refuses a patch, stop and report the refusal verbatim.
 
 ---
 
-### Task D1a.1: `PathSoul` and the pebble's souls
+### Task D1.1: `PathSoul` and the pebble's souls
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Models/PathSoul.swift`
@@ -324,7 +321,7 @@ struct PathMomentDecodingTests {
 }
 ```
 
-This file uses `Vectors.at`, `spineId`, `soulIds` and `isPebble`, which Task D1a.2 adds; write the vectors helper now too, so the test compiles once the code exists. Create `apps/ios/PebblesTests/Spine/SpineVectors.swift`:
+This file uses `Vectors.at`, `spineId`, `soulIds` and `isPebble`, which Task D1.2 adds; write the vectors helper now too, so the test compiles once the code exists. Create `apps/ios/PebblesTests/Spine/SpineVectors.swift`:
 
 ```swift
 import Foundation
@@ -510,7 +507,7 @@ git commit -m "feat(ios): path moments carry each pebble's souls"
 
 ---
 
-### Task D1a.2: `LocalDays` and `SpineWeekBuilder`
+### Task D1.2: `LocalDays` and `SpineWeekBuilder`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Logic/LocalDays.swift`
@@ -749,7 +746,7 @@ const swift = [
   "extension MomentFixtures {",
   "",
   "    /// Android's captured v_moments_full bodies, byte for byte from",
-  "    /// apps/web/lib/data/__fixtures__/moments-captured.ts (generated by #1130 D1a; never reformat).",
+  "    /// apps/web/lib/data/__fixtures__/moments-captured.ts (generated by #1130 D1; never reformat).",
   "    enum Android {",
   "        static let detailCompleted = Data(#\"\"\"",
   pick("ANDROID_DETAIL_COMPLETED"),
@@ -878,7 +875,7 @@ git commit -m "feat(ios): lay a spine week out as a book, oldest first"
 
 ---
 
-### Task D1a.3: `PersonsOfWeek`
+### Task D1.3: `PersonsOfWeek`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Logic/PersonsOfWeek.swift`
@@ -1091,7 +1088,7 @@ git commit -m "feat(ios): the persons of a spine week, in the order every surfac
 
 ---
 
-### Task D1a.4: `StableHash`
+### Task D1.4: `StableHash`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Logic/StableHash.swift`
@@ -1167,58 +1164,7 @@ git commit -m "feat(ios): seed each pebble's stone from its id, as web and andro
 
 ---
 
-### Task D1a.5: D1a verification and PR
-
-**Files:** none.
-
-- [ ] **Step 1: Gates**
-
-Run **Lint**, the **Full suite** and **Build**. Expected: zero SwiftLint errors; every suite green; `** BUILD SUCCEEDED **`. Then:
-
-```bash
-git diff --stat main...HEAD -- apps/ios/Pebbles | tail -1
-grep -rn "import SwiftUI" apps/ios/Pebbles/Features/Path/Spine/Logic || echo "logic is Foundation-only"
-```
-
-Expected: only `Models/` and `Spine/Logic/` files changed; `logic is Foundation-only`.
-
-- [ ] **Step 2: Push and submit**
-
-```bash
-git fetch origin && git log --oneline -1 origin/main
-gh stack push
-gh stack submit --auto
-gh stack view --json
-```
-
-- [ ] **Step 3: Title, body, labels, milestone**
-
-Body (scratch file): `Part of #1130`, then: key files (the file map's D1a rows); the vector mapping (web file → Swift file, all ported verbatim; `LocalDaysTests` uses `persons-of-week.test.ts`' DST vectors); the decode cases and decision 9 (no captured souls row yet; D5a captures one); the Arkaik outcome from D1a.0; no Lab Note, no `F-…` ids.
-
-```bash
-gh pr edit <D1a-number> --title "feat(ios): spine days, people and stable seeds" --body-file <scratch-body-file> \
-  --add-label feat,ui,ios,no-lab-note --milestone "M64 · New Path"
-```
-
----
-## Part D1b — `feat/1130-ios-spine-words`
-
-PR title: `feat(ios): spine words, dates, people lines and card sizes`. Body opens `Part of #1130`. No view changes.
-
-### Task D1b.0: Add the branch
-
-- [ ] **Step 1**
-
-```bash
-gh stack add feat/1130-ios-spine-words
-git branch --show-current
-```
-
-Expected: `feat/1130-ios-spine-words`.
-
----
-
-### Task D1b.1: `NumberWords`
+### Task D1.5: `NumberWords`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Logic/NumberWords.swift`
@@ -1414,7 +1360,7 @@ git commit -m "feat(ios): spell spine numbers out in english and french"
 
 ---
 
-### Task D1b.2: `SpineDates`
+### Task D1.6: `SpineDates`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Logic/SpineDates.swift`
@@ -1567,7 +1513,7 @@ git commit -m "feat(ios): spine dates in the reader's language and zone"
 
 ---
 
-### Task D1b.3: `WeekOpening` (the words a week opens and closes with)
+### Task D1.7: `WeekOpening` (the words a week opens and closes with)
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Logic/WeekOpening.swift`
@@ -1790,7 +1736,7 @@ git commit -m "feat(ios): the words a spine week opens and closes with"
 
 ---
 
-### Task D1b.4: `PeopleLines`
+### Task D1.8: `PeopleLines`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Logic/PeopleLines.swift`
@@ -1954,7 +1900,7 @@ git commit -m "feat(ios): the people line, named in the persons-of-the-week orde
 
 ---
 
-### Task D1b.5: `EntryTypes`
+### Task D1.9: `EntryTypes`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Logic/EntryTypes.swift`
@@ -2080,7 +2026,7 @@ git commit -m "feat(ios): name cuts for the spine's entries, contents and cards"
 
 ---
 
-### Task D1b.6: `CardSizes`
+### Task D1.10: `CardSizes`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Logic/CardSizes.swift`
@@ -2230,7 +2176,7 @@ git commit -m "feat(ios): size a spine card to its photo's own ratio"
 
 ---
 
-### Task D1b.7: D1b verification and PR
+### Task D1.11: D1 verification and PR
 
 **Files:** none.
 
@@ -2249,10 +2195,10 @@ gh stack view --json
 
 - [ ] **Step 3: Title, body, labels, milestone**
 
-Body (scratch file): `Part of #1130`; key files (the file map's D1b rows); the vector mapping (skipped: `number-words`' 2.5 case, the `wide` rows of `entry-type` and `card-size`); `dotDays`' hand join (D1 rule); no Lab Note, no `F-…` ids.
+Body (scratch file): `Part of #1130`; key files (the file map's D1 rows); the vector mapping (web file → Swift file, all verbatim; `LocalDaysTests` uses `persons-of-week.test.ts`' DST vectors; skipped: `number-words`' 2.5 case, the `wide` rows of `entry-type` and `card-size`); the decode cases and decision 9 (D5a captures a real souls row); `dotDays`' hand join (D1 rule); the Arkaik outcome from D1.0; no Lab Note, no `F-…` ids.
 
 ```bash
-gh pr edit <D1b-number> --title "feat(ios): spine words, dates, people lines and card sizes" --body-file <scratch-body-file> \
+gh pr edit <D1-number> --title "feat(ios): spine logic, from days and people to words and card sizes" --body-file <scratch-body-file> \
   --add-label feat,ui,ios,no-lab-note --milestone "M64 · New Path"
 ```
 
@@ -3008,24 +2954,24 @@ gh pr edit <D1c-number> --title "feat(ios): spine strings in english and french,
 Body: `Part of #1130`; the key table (33 keys; `summaryNoPebbles` is decision 8; `cardAria` folded into `stoneA11y`, `prevWeek` / `nextWeek` into `weekLink`, `carve` not ported, `contentsHint` new); the plural encoding (substitutions on argument 1; French `many` = `other`); the fixture's generated marks and how to regenerate them; **new pattern for review:** typed copy over explicit dotted keys resolved for a pinned language (`SpineStrings` / `SpineCopy`). No Lab Note, no `F-…` ids.
 
 ---
-## Part D2a1 — `feat/1130-ios-stone-press`
+## Part D2a — `feat/1130-ios-spine-stone`
 
-PR title: `feat(ios): the stone press as timed state`. Body opens `Part of #1130`. No visible change in the app.
+PR title: `feat(ios): the spine stone, its press, rings, ripple and glint`. Body opens `Part of #1130`. Visible in the lab and the references only. The press as timed state comes first (Tasks D2a.1–D2a.5), then the stone's views (Tasks D2a.6–D2a.10).
 
-### Task D2a1.0: Add the branch
+### Task D2a.0: Add the branch
 
 - [ ] **Step 1**
 
 ```bash
-gh stack add feat/1130-ios-stone-press
+gh stack add feat/1130-ios-spine-stone
 git branch --show-current
 ```
 
-Expected: `feat/1130-ios-stone-press`.
+Expected: `feat/1130-ios-spine-stone`.
 
 ---
 
-### Task D2a1.1: `StoneMotion`
+### Task D2a.1: `StoneMotion`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Stone/StoneMotion.swift`
@@ -3309,7 +3255,7 @@ git commit -m "feat(ios): the stone press timeline, waapi keyframes in eased pro
 
 ---
 
-### Task D2a1.2: `StonePress`, `StonePressRequests` and `CardFace`
+### Task D2a.2: `StonePress`, `StonePressRequests` and `CardFace`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Stone/StonePress.swift`
@@ -3405,7 +3351,7 @@ enum CardFace: String, Codable {
 /// A press asked of a stone that may not exist yet (D8). A contents tap scrolls
 /// first and presses later; the stone it targets is realised by the scroll and
 /// finds the request in its `.task(id:)`, where a closure or a notification
-/// would have fired into nothing. New pattern, named in the D2a1 PR.
+/// would have fired into nothing. New pattern, named in the D2a PR.
 @Observable @MainActor
 final class StonePressRequests {
     struct PressRequest: Equatable {
@@ -3493,7 +3439,7 @@ git commit -m "feat(ios): stone presses as state a stone claims, and the card fa
 
 ---
 
-### Task D2a1.3: `StoneRingGeometry`
+### Task D2a.3: `StoneRingGeometry`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Stone/StoneRingGeometry.swift`
@@ -3639,11 +3585,11 @@ The shoelace's `area` here is twice the signed area, so the centroid divides by 
 
 - [ ] **Step 4: Run the test to verify it fails on `SpineLayout`**
 
-Run the **Suite command** with `StoneRingGeometryTests`. Expected: build FAIL with "cannot find 'SpineLayout' in scope". Task D2a1.4 adds it; continue there and run this suite again at its Step 5.
+Run the **Suite command** with `StoneRingGeometryTests`. Expected: build FAIL with "cannot find 'SpineLayout' in scope". Task D2a.4 adds it; continue there and run this suite again at its Step 5.
 
 ---
 
-### Task D2a1.4: `SpineLayout` and the stone row
+### Task D2a.4: `SpineLayout` and the stone row
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/SpineLayout.swift`
@@ -3832,7 +3778,7 @@ git commit -m "feat(ios): the spine's phone geometry and its rings about the cen
 
 ---
 
-### Task D2a1.5: Each pebble's own crust (`seed:`)
+### Task D2a.5: Each pebble's own crust (`seed:`)
 
 **Files:**
 - Modify: `apps/ios/Pebbles/Features/Path/Stone/StoneView.swift`
@@ -4008,52 +3954,13 @@ git commit -m "feat(ios): a stone can take its pebble's own seed"
 
 ---
 
-### Task D2a1.6: D2a1 verification and PR
-
-**Files:** none.
-
-- [ ] **Step 1: Gates**
-
-Run **Lint**, the **Full suite** and **Build**. Expected: green. On CI, the stone references stay byte-identical (no caller passes a seed yet).
-
-- [ ] **Step 2: Push, submit, metadata**
-
-```bash
-git fetch origin && git log --oneline -1 origin/main
-gh stack push
-gh stack submit --auto
-gh stack view --json
-gh pr edit <D2a1-number> --title "feat(ios): the stone press as timed state" --body-file <scratch-body-file> \
-  --add-label feat,ui,ios,no-lab-note --milestone "M64 · New Path"
-```
-
-Body: `Part of #1130`; key files (the file map's D2a1 rows); **new pattern for review:** `StonePressRequests`, observable state consumed as a request (D8), with `CardFace` beside it for stack E; the 24-bit seed fold and why (the shader's Float); decision 4 (`CardFace` here); no visible change. No Lab Note, no `F-…` ids.
-
----
-## Part D2a2 — `feat/1130-ios-spine-stone`
-
-PR title: `feat(ios): the spine stone with rings, ripple and glint`. Body opens `Part of #1130`. Visible in the lab and the references only.
-
-### Task D2a2.0: Add the branch
-
-- [ ] **Step 1**
-
-```bash
-gh stack add feat/1130-ios-spine-stone
-git branch --show-current
-```
-
-Expected: `feat/1130-ios-spine-stone`.
-
----
-
-### Task D2a2.1: The rings and the ripple
+### Task D2a.6: The rings and the ripple
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Stone/StoneRings.swift`
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Stone/StoneRipple.swift`
 
-These two are drawing only; the geometry and the timings are tested (D2a1), the drawing by the references (D2a2.5).
+These two are drawing only; the geometry and the timings are tested (D2a), the drawing by the references (D2a.10).
 
 - [ ] **Step 1: `StoneRings.swift`**
 
@@ -4145,7 +4052,7 @@ git commit -m "feat(ios): the stone's halo, rings and ripple"
 
 ---
 
-### Task D2a2.2: The glint and its light
+### Task D2a.7: The glint and its light
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Stone/StoneGlintInk.swift`
@@ -4296,7 +4203,7 @@ git commit -m "feat(ios): the stone's glint, sweep and spark"
 
 ---
 
-### Task D2a2.3: `SpineStone`
+### Task D2a.8: `SpineStone`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Stone/SpineStone.swift`
@@ -4404,7 +4311,7 @@ git commit -m "feat(ios): the spine stone, the lit stone in its rings"
 
 ---
 
-### Task D2a2.4: The Spine lab and its stone gallery
+### Task D2a.9: The Spine lab and its stone gallery
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Debug/SpineLabView.swift`
@@ -4628,7 +4535,7 @@ xcrun simctl install "$SIM" "$DD/Build/Products/Debug-iphonesimulator/Pebbles.ap
 xcrun simctl launch "$SIM" app.pbbls.ios
 ```
 
-The simulator has no signed-in session (stack A lesson), so Settings is not reachable there; the lab is checked on the device in Task D2a2.6. Here only confirm the build installs and launches.
+The simulator has no signed-in session (stack A lesson), so Settings is not reachable there; the lab is checked on the device in Task D2a.11. Here only confirm the build installs and launches.
 
 - [ ] **Step 5: Commit**
 
@@ -4639,7 +4546,7 @@ git commit -m "feat(ios): a spine lab with the pressable stone gallery"
 
 ---
 
-### Task D2a2.5: The stone references
+### Task D2a.10: The stone references
 
 **Files:**
 - Create: `apps/ios/PebblesTests/References/SpineStoneReferences.swift`
@@ -4693,7 +4600,7 @@ git commit -m "test(ios): spine stone references at rest, mid-press and by seed"
 
 ---
 
-### Task D2a2.6: D2a2 verification, PR and CI references
+### Task D2a.11: D2a verification, PR and CI references
 
 **Files:** none (the bot commits the PNGs).
 
@@ -4708,11 +4615,11 @@ git fetch origin && git log --oneline -1 origin/main
 gh stack push
 gh stack submit --auto
 gh stack view --json
-gh pr edit <D2a2-number> --title "feat(ios): the spine stone with rings, ripple and glint" --body-file <scratch-body-file> \
+gh pr edit <D2a-number> --title "feat(ios): the spine stone, its press, rings, ripple and glint" --body-file <scratch-body-file> \
   --add-label feat,ui,ios,no-lab-note --milestone "M64 · New Path"
 ```
 
-Body: `Part of #1130`; key files; decision 6 (the glint's white in `Stone/`); the lab entry; the device check below; "no visible change outside the lab". No Lab Note, no `F-…` ids.
+Body: `Part of #1130`; key files; **new pattern for review:** `StonePressRequests`, observable state consumed as a request (D8), with `CardFace` beside it for stack E (decision 4); the 24-bit seed fold and why (the shader's Float); decision 6 (the glint's white in `Stone/`); the lab entry; the device check below; "no visible change outside the lab". No Lab Note, no `F-…` ids.
 
 - [ ] **Step 3: Rebaseline on CI**
 
@@ -4729,33 +4636,33 @@ Settings → Developer → Spine lab:
 Record pass/fail in the PR.
 
 ---
-## Part D2b1 — `feat/1130-ios-card-data`
+## Part D2b — `feat/1130-ios-spine-card`
 
-PR title: `feat(ios): photo ratios, card frames and spine card colours`. Body opens `Part of #1130`. No visible change.
+PR title: `feat(ios): the spine deck card, its photo ratio and its frame`. Body opens `Part of #1130`. Visible in the lab and the references only. The card's data comes first (Tasks D2b.1–D2b.5), then the card (Tasks D2b.6–D2b.10).
 
-### Task D2b1.0: Add the branch
+### Task D2b.0: Add the branch
 
 - [ ] **Step 1**
 
 ```bash
-gh stack add feat/1130-ios-card-data
+gh stack add feat/1130-ios-spine-card
 git branch --show-current
 ```
 
-Expected: `feat/1130-ios-card-data`.
+Expected: `feat/1130-ios-spine-card`.
 
 ---
 
-### Task D2b1.1: Three generated Spine tones (decision 1)
+### Task D2b.1: The `rakeLight` token (decision 1)
 
 **Files:**
 - Modify: `apps/web/lib/theme/ios-colorsets.ts`
 - Modify: `apps/web/lib/theme/ios-colorsets.test.ts`
-- Regenerated: `apps/ios/Pebbles/Resources/Assets.xcassets/M3/{rakeShadow,rakeLight,cardShadow}.colorset/Contents.json`, the widget catalogue's copies, `apps/ios/Shared/Theme/PebblesColors.swift`
+- Regenerated: `apps/ios/Pebbles/Resources/Assets.xcassets/M3/rakeLight.colorset/Contents.json`, the widget catalogue's copy, `apps/ios/Shared/Theme/PebblesColors.swift`
 
-The rake's groove shadow and lit line and the card's shadow ink are scheme-only constants, so stack A's ownership rule makes them generated rows. The three rows read only the five roles the generator's test fixture carries (`onSurface`, `surfaceContainerLowest`), so the fixture does not change: Night's black is approximated by Night's `surfaceContainerLowest` (`#0E0E10`, `#000000` in high contrast) and Android's Night `#DCE2EA` lit line by Night's own `onSurface`.
+The rake's lit line is Android's `SpineColors.rakeLight`: white @ 0.55 on Paper, the cool `#DCE2EA` @ 0.075 at Night. Neither is a scheme role, and `Features/` may not name a hex, so it becomes one generated token, and the generator learns a constant-hex source beside its `[role, alpha]` sources. The high-contrast appearances take the same values (Paper's for light high, Night's for dark high). The rake's shadow and the card's shadow ink stay blends in `SpineColors.swift` (Task D2b.2), as Android's are.
 
-- [ ] **Step 1: Make the generator test expect them**
+- [ ] **Step 1: Make the generator test expect it**
 
 In `apps/web/lib/theme/ios-colorsets.test.ts`:
 
@@ -4769,11 +4676,8 @@ In `apps/web/lib/theme/ios-colorsets.test.ts`:
 with
 
 ```ts
-  it("emits all twelve Spine tokens", () => {
-    for (const token of [
-      "halo", "stock", "rule", "cardRule", "line", "seam", "teeth", "ring", "ripple",
-      "rakeShadow", "rakeLight", "cardShadow",
-    ]) {
+  it("emits all ten Spine tokens", () => {
+    for (const token of ["halo", "stock", "rule", "cardRule", "line", "seam", "teeth", "ring", "ripple", "rakeLight"]) {
 ```
 
 2. Replace
@@ -4786,33 +4690,19 @@ with
 with
 
 ```ts
-      "halo", "stock", "rule", "cardRule", "line", "seam", "teeth", "ring", "ripple",
-      "rakeShadow", "rakeLight", "cardShadow",
+      "halo", "stock", "rule", "cardRule", "line", "seam", "teeth", "ring", "ripple", "rakeLight",
       "googleCapsuleInk",
 ```
 
-3. Replace
-
-```ts
-  it("renders 62 roles: 48 M3 + 4 sand + 9 Spine + the pin", () => {
-```
-
-and the `toHaveLength(62)` on the next lines with
-
-```ts
-  it("renders 65 roles: 48 M3 + 4 sand + 12 Spine + the pin", () => {
-```
-
-and `toHaveLength(65)`.
+3. Replace `  it("renders 62 roles: 48 M3 + 4 sand + 9 Spine + the pin", () => {` with `  it("renders 63 roles: 48 M3 + 4 sand + 10 Spine + the pin", () => {`, and the `toHaveLength(62)` on the next lines with `toHaveLength(63)`.
 
 4. After the `it("takes ring from onSurfaceVariant Paper and onSurface Night", …)` case, add:
 
 ```ts
-  it("derives the rake and the card shadow from onSurface and the lowest container (#1130)", () => {
-    expect(alphas(colorset(files, "rakeShadow"))).toEqual(["0.200", "0.340", "0.200", "0.340"])
-    expect(hexes(colorset(files, "rakeShadow"))).toEqual(["#1D1B16", "#0E0E10", "#000000", "#000000"])
-    expect(alphas(colorset(files, "rakeLight"))).toEqual(["0.550", "0.075", "0.550", "0.075"])
-    expect(hexes(colorset(files, "cardShadow"))).toEqual(["#1D1B16", "#0E0E10", "#000000", "#000000"])
+  it("writes the rake's lit line from constants, not roles (#1130)", () => {
+    const rakeLight = colorset(files, "rakeLight")
+    expect(hexes(rakeLight)).toEqual(["#FFFFFF", "#DCE2EA", "#FFFFFF", "#DCE2EA"])
+    expect(alphas(rakeLight)).toEqual(["0.550", "0.075", "0.550", "0.075"])
   })
 ```
 
@@ -4824,11 +4714,46 @@ The appearance order of `hexes` / `alphas` is the file's existing one (light, da
 npm run test --workspace=@pbbls/web -- lib/theme/ios-colorsets.test.ts
 ```
 
-Expected: FAIL ("no colorset for rakeShadow", and the length 62 ≠ 65).
+Expected: FAIL ("no colorset for rakeLight", and 62 ≠ 63).
 
-- [ ] **Step 3: Add the rows**
+- [ ] **Step 3: Teach the generator a constant source and add the row**
 
-In `apps/web/lib/theme/ios-colorsets.ts`, replace
+In `apps/web/lib/theme/ios-colorsets.ts`:
+
+1. Replace
+
+```ts
+type Source = readonly [role: string, alpha: number]
+```
+
+with
+
+```ts
+/** A scheme role at an alpha, or a constant the Android scheme writes as a hex (#1130). */
+type Source = readonly [role: string, alpha: number] | { readonly hex: string; readonly alpha: number }
+```
+
+2. Replace
+
+```ts
+      perAppearance((appearance) => {
+        const [role, alpha] = appearance === "light" || appearance === "lightHigh" ? token.paper : token.night
+        return { hex: hexFor(appearance, role), alpha }
+      }),
+```
+
+with
+
+```ts
+      perAppearance((appearance) => {
+        const source = appearance === "light" || appearance === "lightHigh" ? token.paper : token.night
+        if ("hex" in source) return { hex: source.hex, alpha: source.alpha }
+        const [role, alpha] = source
+        return { hex: hexFor(appearance, role), alpha }
+      }),
+```
+
+3. Replace
 
 ```ts
   { name: "ripple", paper: ["onSurface", 0.55], night: ["onSurface", 0.5] },
@@ -4839,16 +4764,14 @@ with
 
 ```ts
   { name: "ripple", paper: ["onSurface", 0.55], night: ["onSurface", 0.5] },
-  // #1130: the iOS Spine's three remaining scheme-only tones, Android's
-  // SpineColors rakeShadow / rakeLight and the card shadow ink. Night's black is
-  // its lowest container; Night's #DCE2EA lit line is its own onSurface.
-  { name: "rakeShadow", paper: ["onSurface", 0.2], night: ["surfaceContainerLowest", 0.34] },
-  { name: "rakeLight", paper: ["surfaceContainerLowest", 0.55], night: ["onSurface", 0.075] },
-  { name: "cardShadow", paper: ["onSurface", 1], night: ["surfaceContainerLowest", 1] },
+  // #1130: the rake's lit line, Android's SpineColors.rakeLight. White on Paper and
+  // a cool #DCE2EA at Night are constants there, so they are constants here:
+  // Features/ never names a hex.
+  { name: "rakeLight", paper: { hex: "#FFFFFF", alpha: 0.55 }, night: { hex: "#DCE2EA", alpha: 0.075 } },
 ]
 ```
 
-Also replace the doc comment's `the nine scheme-only Spine tokens` with `the scheme-only Spine tokens`.
+4. Replace the doc comment's `the nine scheme-only Spine tokens` with `the scheme-only Spine tokens (and one constant, rakeLight)`.
 
 - [ ] **Step 4: Regenerate and run**
 
@@ -4856,27 +4779,27 @@ Also replace the doc comment's `the nine scheme-only Spine tokens` with `the sch
 npm run generate:ios-colors --workspace=@pbbls/web
 git status --short apps/ios
 npm run test --workspace=@pbbls/web -- lib/theme/ios-colorsets.test.ts
-grep -cE "^    case (rakeShadow|rakeLight|cardShadow)$" apps/ios/Shared/Theme/PebblesColors.swift
+grep -cE "^    case rakeLight$" apps/ios/Shared/Theme/PebblesColors.swift
 ```
 
-Expected: six new colorset folders (app and widget) and a modified `PebblesColors.swift`, nothing else; the web test PASSES (including the drift gate); the case count is `3`.
+Expected: two new `rakeLight.colorset` folders (app and widget) and a modified `PebblesColors.swift`, nothing else; the web test PASSES, the drift gate included; the case count is `1`. `renderColorset` already rejects anything but `#RRGGBB`, so a malformed constant fails the generator.
 
 - [ ] **Step 5: Build iOS**
 
-Run **Build**. Expected: `** BUILD SUCCEEDED **` (`Color.pebbles.rakeShadow` and the others now exist).
+Run **Build**. Expected: `** BUILD SUCCEEDED **` (`Color.pebbles.rakeLight` now exists).
 
 - [ ] **Step 6: Commit**
 
 ```bash
 git add apps/web/lib/theme/ios-colorsets.ts apps/web/lib/theme/ios-colorsets.test.ts apps/ios/Pebbles/Resources/Assets.xcassets/M3 apps/ios/PebblesWidget apps/ios/Shared/Theme/PebblesColors.swift
-git commit -m "feat(ios): generate the rake and card shadow tones the spine needs"
+git commit -m "feat(ios): generate the rake's lit line, a constant spine tone"
 ```
 
 If `git status` in Step 4 showed the widget catalogue under another path, add that path instead of `apps/ios/PebblesWidget`.
 
 ---
 
-### Task D2b1.2: `SpineColors`
+### Task D2b.2: `SpineColors`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/SpineColors.swift`
@@ -4920,6 +4843,17 @@ struct SpineColorsTests {
         #expect(SpineColors.palette(nil, isBlank: true) == .blank)
         #expect(SpineColors.palette(nil, isBlank: false) == .brand)
     }
+
+    /// Android's SpineColors: rakeShadow = onSurface @ .20 Paper, black @ .34 Night;
+    /// shadow = onSurface Paper, black Night, at shadowAlpha .30 / .62.
+    @Test("the rake shadow and the shadow ink mirror Android, black being scrim")
+    func shadows() {
+        #expect(SpineColors.rakeShadowSource(scheme: .light) == (PebblesColorRole.onSurface, 0.2))
+        #expect(SpineColors.rakeShadowSource(scheme: .dark) == (PebblesColorRole.scrim, 0.34))
+        #expect(SpineColors.shadowInkRole(scheme: .light) == .onSurface)
+        #expect(SpineColors.shadowInkRole(scheme: .dark) == .scrim)
+        #expect(SpineColors.shadowAlpha(scheme: .light) == 0.30 && SpineColors.shadowAlpha(scheme: .dark) == 0.62)
+    }
 }
 ```
 
@@ -4939,8 +4873,9 @@ import SwiftUI
 /// The Spine's blends with a pebble's emotion palette (#1130 R5, R17). The
 /// palette is runtime data (`v_emotions_with_palette`), so these are computed
 /// here and are never colorsets (stack A §2.4). The scheme-only tones are
-/// `Color.pebbles.*`. The slot choice is pure and tested; the colour is the
-/// palette's own.
+/// `Color.pebbles.*`, except the rake shadow and the shadow ink, which Android
+/// also blends from the scheme in `SpineColors.kt` (decision 1). The slot and
+/// role choices are pure and tested; the colour is the palette's or the role's.
 enum SpineColors {
     /// The stone palette a moment wears: blank for a bare moment, the brand
     /// ramp for a pebble with no known emotion.
@@ -4978,6 +4913,40 @@ enum SpineColors {
     static func spot(_ palette: StonePalette, scheme: ColorScheme) -> Color {
         palette.color(spotSlot(scheme: scheme))
     }
+
+    // MARK: - Scheme blends Android computes in `SpineColors.kt` (decision 1)
+
+    /// The rake's groove shadow: `onSurface` @ 0.20 on Paper, black @ 0.34 at
+    /// Night. Black is `scrim`, which M3 keeps `#000000` in every scheme
+    /// (`Features/` may not name `.black`). The lit line is the `rakeLight` token.
+    static func rakeShadowSource(scheme: ColorScheme) -> (role: PebblesColorRole, alpha: Double) {
+        scheme == .dark ? (.scrim, 0.34) : (.onSurface, 0.2)
+    }
+
+    static func rakeShadow(scheme: ColorScheme) -> Color {
+        let source = rakeShadowSource(scheme: scheme)
+        return role(source.role).opacity(source.alpha)
+    }
+
+    /// The shadow ink under the card: `onSurface` on Paper, black at Night,
+    /// carried with Android's `shadowAlpha`.
+    static func shadowInkRole(scheme: ColorScheme) -> PebblesColorRole {
+        scheme == .dark ? .scrim : .onSurface
+    }
+
+    static func shadowInk(scheme: ColorScheme) -> Color {
+        role(shadowInkRole(scheme: scheme))
+    }
+
+    /// Android's `shadowAlpha`: 0.30 on Paper, 0.62 at Night.
+    static func shadowAlpha(scheme: ColorScheme) -> Double {
+        scheme == .dark ? 0.62 : 0.30
+    }
+
+    /// The two roles the blends use, named through `Color.pebbles`.
+    private static func role(_ role: PebblesColorRole) -> Color {
+        role == .scrim ? Color.pebbles.scrim : Color.pebbles.onSurface
+    }
 }
 ```
 
@@ -4985,18 +4954,18 @@ enum SpineColors {
 
 - [ ] **Step 4: Run the test to verify it passes**
 
-Run the **Suite command** with `SpineColorsTests`. Expected: PASS (4).
+Run the **Suite command** with `SpineColorsTests`. Expected: PASS (5).
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add apps/ios/Pebbles/Features/Path/Spine/SpineColors.swift apps/ios/PebblesTests/Spine/SpineColorsTests.swift
-git commit -m "feat(ios): the spine card's edge and spot from the emotion palette"
+git commit -m "feat(ios): the spine's palette blends and its shadow inks"
 ```
 
 ---
 
-### Task D2b1.3: `SnapAspectCache`
+### Task D2b.3: `SnapAspectCache`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/SnapAspectCache.swift`
@@ -5121,7 +5090,7 @@ import os
 /// `CGImageSourceCopyPropertiesAtIndex`, which does not decode. Ratios are kept
 /// by storage path for the session; a probe that fails or passes 4 s logs a
 /// warning once and is not retried in the session. Neither `path_moments` nor
-/// `MomentDetail.snaps` carries dimensions. New pattern, named in the D2b1 PR.
+/// `MomentDetail.snaps` carries dimensions. New pattern, named in the D2b PR.
 @Observable @MainActor
 final class SnapAspectCache {
     typealias Loader = @Sendable (URL) async throws -> Data
@@ -5240,7 +5209,7 @@ git commit -m "feat(ios): read a photo's ratio from its header, once per session
 
 ---
 
-### Task D2b1.4: `CardFrameRegistry` and `SpineSnapSource`
+### Task D2b.4: `CardFrameRegistry` and `SpineSnapSource`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/CardFrameRegistry.swift`
@@ -5342,7 +5311,7 @@ import UIKit
 /// Where a Spine card's photo comes from (#1130 §Testing). In the app, the snap
 /// is signed and `AsyncImage` loads it; references and the lab hand decoded
 /// `UIImage`s instead, because `AsyncImage` does not render under
-/// `ImageRenderer`. New pattern, named in the D2b1 PR.
+/// `ImageRenderer`. New pattern, named in the D2b PR.
 struct SpineSnapSource {
     /// A decoded photo for a storage path, at once; nil when this source has none in memory.
     var image: (String) -> UIImage?
@@ -5388,13 +5357,13 @@ git commit -m "feat(ios): the card frame registry for the held card, and the sna
 
 ---
 
-### Task D2b1.5: The people line's parts
+### Task D2b.5: The people line's parts
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Feed/PeopleLineParts.swift`
 - Test: `apps/ios/PebblesTests/Spine/PeopleLinePartsTests.swift`
 
-The line and the card's strip are one `Text` each (so they wrap as type does), set from parts; the parts are pure and tested here, the `Text` is assembled in D2b2. Port of Android's `peopleLineText` / `peopleStripItems` shape (`PeopleLineTextTest.kt`).
+The line and the card's strip are one `Text` each (so they wrap as type does), set from parts; the parts are pure and tested here, the `Text` is assembled in D2b. Port of Android's `peopleLineText` / `peopleStripItems` shape (`PeopleLineTextTest.kt`).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -5519,46 +5488,7 @@ git commit -m "feat(ios): the people line as parts for the entry and the card"
 
 ---
 
-### Task D2b1.6: D2b1 verification and PR
-
-**Files:** none.
-
-- [ ] **Step 1: Gates**
-
-Run **Lint**, the **Full suite**, **Build**, and `npm run lint --workspace=@pbbls/web && npm run test --workspace=@pbbls/web -- lib/theme`. Expected: green.
-
-- [ ] **Step 2: Push, submit, metadata**
-
-```bash
-git fetch origin && git log --oneline -1 origin/main
-gh stack push
-gh stack submit --auto
-gh stack view --json
-gh pr edit <D2b1-number> --title "feat(ios): photo ratios, card frames and spine card colours" --body-file <scratch-body-file> \
-  --add-label feat,ui,ios,no-lab-note --milestone "M64 · New Path"
-```
-
-Body: `Part of #1130`; key files; decision 1 (three generated rows, touching `apps/web/lib/theme/ios-colorsets.ts`; values and their Android sources); **new patterns for review:** `SnapAspectCache` (header-only ratio probe, session cache, 4 s timeout, no retry) and `SpineSnapSource` (an environment value that hands decoded images to references and the lab); `CardFrameRegistry` as the spec's canonical block, for stack E. No Lab Note, no `F-…` ids.
-
----
-## Part D2b2 — `feat/1130-ios-spine-card`
-
-PR title: `feat(ios): the spine deck card`. Body opens `Part of #1130`. Visible in the lab and the references only.
-
-### Task D2b2.0: Add the branch
-
-- [ ] **Step 1**
-
-```bash
-gh stack add feat/1130-ios-spine-card
-git branch --show-current
-```
-
-Expected: `feat/1130-ios-spine-card`.
-
----
-
-### Task D2b2.1: The Spine's calendar, text spans and soul marks
+### Task D2b.6: The Spine's calendar, text spans and soul marks
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/SpineCalendar.swift`
@@ -5737,7 +5667,7 @@ git commit -m "feat(ios): soul marks and the people line as one wrapping text"
 
 ---
 
-### Task D2b2.2: The card's field
+### Task D2b.7: The card's field
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Feed/SpineCardField.swift`
@@ -5822,7 +5752,7 @@ git commit -m "feat(ios): the spine card's tinted field and valence pattern"
 
 ---
 
-### Task D2b2.3: `SpineCard`
+### Task D2b.8: `SpineCard`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Feed/SpineCard.swift`
@@ -6052,18 +5982,20 @@ struct SpineCard: View {
 
     /// The stock with its painted edge (2 / 3.5 / 5.5 pt in the edge colour) and
     /// the rule set's two-layer shadow, on the ground only, so no text casts one.
-    /// SwiftUI has no shadow spread, so the far layer's alpha is lowered to read
-    /// as the web's `0 18px 30px -22px`.
+    /// The ink and its alpha are Android's (`SpineColors.shadowInk` /
+    /// `shadowAlpha`); SwiftUI has no shadow spread, so each layer takes a share
+    /// of that alpha to read as the web's `0 1px 2px` and `0 18px 30px -22px`.
     private var ground: some View {
         let shape = RoundedRectangle(cornerRadius: 11, style: .continuous)
-        let night = scheme == .dark
+        let ink = SpineColors.shadowInk(scheme: scheme)
+        let alpha = SpineColors.shadowAlpha(scheme: scheme)
         return shape.fill(Color.pebbles.stock)
             .background(
                 shape.fill(SpineColors.edge(palette, polarity: valence.polarity, scheme: scheme))
                     .offset(y: CardSizes.edge(intensity))
             )
-            .shadow(color: Color.pebbles.cardShadow.opacity(night ? 0.5 : 0.07), radius: 1, x: 0, y: 1)
-            .shadow(color: Color.pebbles.cardShadow.opacity(night ? 0.3 : 0.16), radius: 15, x: 0, y: 18)
+            .shadow(color: ink.opacity(alpha * 0.3), radius: 1, x: 0, y: 1)
+            .shadow(color: ink.opacity(alpha * 0.55), radius: 15, x: 0, y: 18)
     }
 }
 
@@ -6097,7 +6029,7 @@ git commit -m "feat(ios): the spine deck card at its photo's own ratio"
 
 ---
 
-### Task D2b2.4: Card gallery, lab section and the fixture photos
+### Task D2b.9: Card gallery, lab section and the fixture photos
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Debug/SpineCardGallery.swift`
@@ -6238,7 +6170,7 @@ git commit -m "feat(ios): the spine lab's cards and the fixture photos"
 
 ---
 
-### Task D2b2.5: The card references
+### Task D2b.10: The card references
 
 **Files:**
 - Create: `apps/ios/PebblesTests/References/SpineCardReferences.swift`
@@ -6289,13 +6221,13 @@ git commit -m "test(ios): spine card references at four ratios and two states"
 
 ---
 
-### Task D2b2.6: D2b2 verification, PR and CI references
+### Task D2b.11: D2b verification, PR and CI references
 
 **Files:** none.
 
 - [ ] **Step 1: Gates**
 
-Run **Lint**, the **Full suite** (new references fail locally, expected) and **Build**.
+Run **Lint**, the **Full suite** (new references fail locally, expected), **Build**, and `npm run lint --workspace=@pbbls/web && npm run test --workspace=@pbbls/web -- lib/theme`.
 
 - [ ] **Step 2: Push, submit, metadata**
 
@@ -6304,11 +6236,11 @@ git fetch origin && git log --oneline -1 origin/main
 gh stack push
 gh stack submit --auto
 gh stack view --json
-gh pr edit <D2b2-number> --title "feat(ios): the spine deck card" --body-file <scratch-body-file> \
+gh pr edit <D2b-number> --title "feat(ios): the spine deck card, its photo ratio and its frame" --body-file <scratch-body-file> \
   --add-label feat,ui,ios,no-lab-note --milestone "M64 · New Path"
 ```
 
-Body: `Part of #1130`; key files; the `QuarterTurn` layout for the rail (measured in layout so it holds under `ImageRenderer`); the shadow approximation (no spread in SwiftUI); `Text.spineSpan` (a people line's runs take their ranks through `SpineType.resolve`, the function `.spineType` uses); decision 7 (the lab's photo bed). No Lab Note, no `F-…` ids.
+Body: `Part of #1130`; key files; decision 1 (one generated token, `rakeLight`, through `apps/web/lib/theme/ios-colorsets.ts`, with constant-hex sources; the rake shadow and the shadow ink blended in `SpineColors.swift` as Android's are); **new patterns for review:** `SnapAspectCache` (header-only ratio probe, session cache, 4 s timeout, no retry) and `SpineSnapSource` (an environment value that hands decoded images to references and the lab); `CardFrameRegistry` as the spec's canonical block, for stack E; the `QuarterTurn` layout for the rail (measured in layout so it holds under `ImageRenderer`); the shadow approximation (no spread in SwiftUI); `Text.spineSpan` (a people line's runs take their ranks through `SpineType.resolve`, the function `.spineType` uses); decision 7 (the lab's photo bed). No Lab Note, no `F-…` ids.
 
 - [ ] **Step 3: Rebaseline on CI**
 
@@ -6319,11 +6251,11 @@ Run **Rebaseline on CI**. Compare `ratios-paper-en.png` with Android's `SpineFee
 On the iPhone 15, Spine lab → cards: the six fixture cards draw on their photo beds at their ratios in Paper and Night, with Dynamic Type at the largest standard size (card text grows up to ×1.3 only).
 
 ---
-## Part D3a — `feat/1130-ios-path-model`
+## Part D3 — `feat/1130-ios-path-model`
 
-PR title: `feat(ios): the path model and its spine pages`. Body opens `Part of #1130`. No visible change: `PathView` adopts the model in D5a.
+PR title: `feat(ios): the path model, the raked ground and the day seams`. Body opens `Part of #1130`. Visible in the references only: `PathView` adopts the model in D5a. The model comes first (Tasks D3.1–D3.2), then the ground and the seams (Tasks D3.3–D3.6).
 
-### Task D3a.0: Add the branch
+### Task D3.0: Add the branch
 
 - [ ] **Step 1**
 
@@ -6336,7 +6268,7 @@ Expected: `feat/1130-ios-path-model`.
 
 ---
 
-### Task D3a.1: `SpinePage` and `WeekNeighbour`
+### Task D3.1: `SpinePage` and `WeekNeighbour`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/SpinePage.swift`
@@ -6388,7 +6320,7 @@ git commit -m "feat(ios): a spine page as values, with its pager neighbours"
 
 ---
 
-### Task D3a.2: `PathModel`
+### Task D3.2: `PathModel`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/PathModel.swift`
@@ -6576,7 +6508,7 @@ import Observation
 import os
 
 /// The Path tab's state (#1130 §Data flow), the Path's first `@Observable` view
-/// model (new pattern, named in the D3a PR). It takes over `PathView`'s inline
+/// model (new pattern, named in the D3 PR). It takes over `PathView`'s inline
 /// load, its refocus rule and its delete path, unchanged in behaviour, and
 /// builds one `SpinePage` per week, memoised per load. `focusedWeekStart` is the
 /// one source of truth for the roll, the pager and the links.
@@ -6773,46 +6705,7 @@ git commit -m "feat(ios): the path model owns the load, the focus and the spine 
 
 ---
 
-### Task D3a.3: D3a verification and PR
-
-**Files:** none.
-
-- [ ] **Step 1: Gates**
-
-Run **Lint**, the **Full suite** and **Build**. Expected: green; no view changed (`git diff --stat main...HEAD -- apps/ios/Pebbles/Features/Path/PathView.swift` prints nothing).
-
-- [ ] **Step 2: Push, submit, metadata**
-
-```bash
-git fetch origin && git log --oneline -1 origin/main
-gh stack push
-gh stack submit --auto
-gh stack view --json
-gh pr edit <D3a-number> --title "feat(ios): the path model and its spine pages" --body-file <scratch-body-file> \
-  --add-label feat,ui,ios,no-lab-note --milestone "M64 · New Path"
-```
-
-Body: `Part of #1130`; **new pattern for review:** `PathModel`, the Path's first `@Observable` view model (fetch and delete passed as closures); the `MomentsRevision` reload rule (`reloadIfChangedOutside`); decision 4 (the brief puts `PathModel` in D3, the spec in D5a; `PathView` adopts it in D5a); `page(for:)` is optional (a week missing from the roll has no page). No Lab Note, no `F-…` ids.
-
----
-## Part D3b — `feat/1130-ios-spine-ground`
-
-PR title: `feat(ios): the raked ground and the day seams`. Body opens `Part of #1130`. Visible in the references only.
-
-### Task D3b.0: Add the branch
-
-- [ ] **Step 1**
-
-```bash
-gh stack add feat/1130-ios-spine-ground
-git branch --show-current
-```
-
-Expected: `feat/1130-ios-spine-ground`.
-
----
-
-### Task D3b.1: The rake tile
+### Task D3.3: The rake tile
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Feed/SpineRakeTile.swift`
@@ -6867,7 +6760,7 @@ import os
 /// grooves 6 pt apart meandering in phase by 1.15 pt, each a 0.75 pt shadow
 /// line and a 0.6 pt lit line carried 0.9 pt right. The paths are verbatim
 /// from Android's `SpineRakePaths`. Paper and Night share the geometry and
-/// differ in `Color.pebbles.rakeShadow` / `rakeLight`. Rendered once per scheme
+/// differ in `SpineColors.rakeShadow` and the `rakeLight` token. Rendered once per scheme
 /// and display scale; the ground tiles the image.
 enum SpineRakeTile {
     // swiftlint:disable line_length
@@ -6893,10 +6786,12 @@ enum SpineRakeTile {
     }
 
     private struct Tile: View {
+        @Environment(\.colorScheme) private var scheme
+
         var body: some View {
             Canvas { context, _ in
                 if let shadow = SVGPathParser.parse(SpineRakeTile.shadow) {
-                    context.stroke(Path(shadow), with: .color(Color.pebbles.rakeShadow),
+                    context.stroke(Path(shadow), with: .color(SpineColors.rakeShadow(scheme: scheme)),
                                    style: StrokeStyle(lineWidth: 0.75, lineCap: .butt))
                 }
                 if let lit = SVGPathParser.parse(SpineRakeTile.lit) {
@@ -6941,7 +6836,7 @@ git commit -m "feat(ios): the spine's rake tile, verbatim from the web"
 
 ---
 
-### Task D3b.2: `SpineGround`
+### Task D3.4: `SpineGround`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Feed/SpineGround.swift`
@@ -7004,7 +6899,7 @@ git commit -m "feat(ios): the raked ground, drawn once behind a week's days"
 
 ---
 
-### Task D3b.3: `DaySeam`
+### Task D3.5: `DaySeam`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Feed/DaySeam.swift`
@@ -7131,7 +7026,7 @@ git commit -m "feat(ios): the day seam, its teeth and the date in the margin"
 
 ---
 
-### Task D3b.4: The seam references
+### Task D3.6: The seam references
 
 **Files:**
 - Create: `apps/ios/PebblesTests/References/SpineSeamReferences.swift`
@@ -7195,7 +7090,7 @@ git commit -m "test(ios): spine seam references on the raked ground"
 
 ---
 
-### Task D3b.5: D3b verification, PR and CI references
+### Task D3.7: D3 verification, PR and CI references
 
 **Files:** none.
 
@@ -7210,11 +7105,11 @@ git fetch origin && git log --oneline -1 origin/main
 gh stack push
 gh stack submit --auto
 gh stack view --json
-gh pr edit <D3b-number> --title "feat(ios): the raked ground and the day seams" --body-file <scratch-body-file> \
+gh pr edit <D3-number> --title "feat(ios): the path model, the raked ground and the day seams" --body-file <scratch-body-file> \
   --add-label feat,ui,ios,no-lab-note --milestone "M64 · New Path"
 ```
 
-Body: `Part of #1130`; D6 (one ground in content coordinates; Android's re-phasing cannot happen); the 22 pt seam with its hairline at 14 (Android lesson); the still day's height from the label's resolved metrics; the rake tones from decision 1. No Lab Note, no `F-…` ids.
+Body: `Part of #1130`; **new pattern for review:** `PathModel`, the Path's first `@Observable` view model (fetch and delete passed as closures), with its `MomentsRevision` reload rule (`reloadIfChangedOutside`); decision 4 (the brief puts `PathModel` in D3, the spec in D5a; `PathView` adopts it in D5a); `page(for:)` is optional; D6 (one ground in content coordinates; Android's re-phasing cannot happen); the 22 pt seam with its hairline at 14 (Android lesson); the still day's height from the label's resolved metrics; the rake's shadow from `SpineColors` and its lit line from the `rakeLight` token (decision 1). No Lab Note, no `F-…` ids.
 
 - [ ] **Step 3: Rebaseline on CI**
 
@@ -7752,7 +7647,7 @@ Create `apps/ios/Pebbles/Features/Path/Spine/SpineWeekRows.swift`:
 ```swift
 import SwiftUI
 
-/// One row of a Spine week. D4a adds the verso's rows and the mouth.
+/// One row of a Spine week. D4 adds the verso's rows and the mouth.
 enum SpineRow: Identifiable {
     /// A day's seam; `isLast` keeps a still last day's full height to the mouth.
     case seam(SpineDay<MomentSummary>, isLast: Bool)
@@ -7821,7 +7716,7 @@ import SwiftUI
 
 /// A Spine page as a plain `VStack` (#1130 D4): the B2 references (which cannot
 /// render a `ScrollView`) and the lab lay the rows out here. The ground runs
-/// behind the days block only. D4a adds the verso above and the mouth below.
+/// behind the days block only. D4 adds the verso above and the mouth below.
 struct SpineWeekStack: View {
     let context: SpineFeedContext
     /// A reference slice of the days; nil draws them all.
@@ -8051,11 +7946,11 @@ Run **Rebaseline on CI**. Compare `picnic-paper-en.png` with Android's `SpineFee
 - VoiceOver over Monday: the seam heading, the stone ("… Large gem, Proud. With Nadia. Opens the pebble."), then the card with the same name and a "Delete" action.
 
 ---
-## Part D4a — `feat/1130-ios-spine-opening`
+## Part D4 — `feat/1130-ios-spine-opening`
 
-PR title: `feat(ios): the week opens with its persons and closes at the mouth`. Body opens `Part of #1130`. Visible in the lab and the references only.
+PR title: `feat(ios): the week opens with its persons and contents and closes at the mouth`. Body opens `Part of #1130`. Visible in the lab and the references only. The opening, persons, mouth and empty week come first (Tasks D4.1–D4.6), then the contents and their seals (Tasks D4.7–D4.10).
 
-### Task D4a.0: Add the branch
+### Task D4.0: Add the branch
 
 - [ ] **Step 1**
 
@@ -8068,7 +7963,7 @@ Expected: `feat/1130-ios-spine-opening`.
 
 ---
 
-### Task D4a.1: `WeekOpeningText`
+### Task D4.1: `WeekOpeningText`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Opening/WeekOpeningText.swift`
@@ -8160,13 +8055,13 @@ git commit -m "feat(ios): the words a spine page opens with"
 
 ---
 
-### Task D4a.2: The masthead and the opening
+### Task D4.2: The masthead and the opening
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Opening/WeekMasthead.swift`
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Opening/WeekOpeningView.swift`
 
-The logic's `WeekOpening` enum (D1b) owns that name, so the view is `WeekOpeningView` (a rename from the spec's view tree, recorded in the PR).
+The logic's `WeekOpening` enum (D1) owns that name, so the view is `WeekOpeningView` (a rename from the spec's view tree, recorded in the PR).
 
 - [ ] **Step 1: `WeekMasthead.swift`**
 
@@ -8254,7 +8149,7 @@ git commit -m "feat(ios): the spine masthead and the week's opening"
 
 ---
 
-### Task D4a.3: The persons of the week and their day dots
+### Task D4.3: The persons of the week and their day dots
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Opening/DayDots.swift`
@@ -8385,7 +8280,7 @@ git commit -m "feat(ios): the persons of the week with their day dots"
 
 ---
 
-### Task D4a.4: The mouth and the empty week
+### Task D4.4: The mouth and the empty week
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Opening/WeekMouth.swift`
@@ -8510,7 +8405,7 @@ git commit -m "feat(ios): the week's mouth and the fresh week"
 
 ---
 
-### Task D4a.5: The verso and the closing in the rows
+### Task D4.5: The verso and the closing in the rows
 
 **Files:**
 - Modify: `apps/ios/Pebbles/Features/Path/Spine/Feed/SpinePebble.swift` (the context)
@@ -8578,7 +8473,7 @@ In `apps/ios/Pebbles/Features/Path/Spine/SpineWeekRows.swift`:
 1. Replace
 
 ```swift
-/// One row of a Spine week. D4a adds the verso's rows and the mouth.
+/// One row of a Spine week. D4 adds the verso's rows and the mouth.
 enum SpineRow: Identifiable {
 ```
 
@@ -8740,7 +8635,7 @@ git commit -m "feat(ios): a spine page from its masthead to its mouth"
 
 ---
 
-### Task D4a.6: The opening references
+### Task D4.6: The opening references
 
 **Files:**
 - Create: `apps/ios/PebblesTests/References/SpineWeekReferences.swift`
@@ -8827,50 +8722,7 @@ git commit -m "test(ios): spine week references for the verso, the mouth and the
 
 ---
 
-### Task D4a.7: D4a verification, PR and CI references
-
-**Files:** none.
-
-- [ ] **Step 1: Gates**
-
-Run **Lint**, the **Full suite** and **Build**. Before the PR, open `Localizable.xcstrings` in Xcode: "Fresh week", "Collect a new pebble" and "New pebble" are still `translated` in both languages and nothing is `New` or `Stale`.
-
-- [ ] **Step 2: Push, submit, metadata**
-
-```bash
-git fetch origin && git log --oneline -1 origin/main
-gh stack push
-gh stack submit --auto
-gh stack view --json
-gh pr edit <D4a-number> --title "feat(ios): the week opens with its persons and closes at the mouth" --body-file <scratch-body-file> \
-  --add-label feat,ui,ios,no-lab-note --milestone "M64 · New Path"
-```
-
-Body: `Part of #1130`; key files; D9 (the links name the pager's neighbour; only "begins on Monday" is the calendar's); the `WeekOpeningView` rename (the logic owns `WeekOpening`); the empty week has no days. No Lab Note, no `F-…` ids.
-
-- [ ] **Step 3: Rebaseline on CI**
-
-Run **Rebaseline on CI**. Compare `verso-paper-en.png` with Android's `SpineWeekVersoLight`, `mouth-night-en.png` with `SpineWeekMouthDark` and `empty-paper-en.png` with `SpineWeekEmptyLight`. Green after the approved re-run.
-
----
-## Part D4b — `feat/1130-ios-spine-contents`
-
-PR title: `feat(ios): the week's contents with their seals`. Body opens `Part of #1130`. Visible in the lab and the references only.
-
-### Task D4b.0: Add the branch
-
-- [ ] **Step 1**
-
-```bash
-gh stack add feat/1130-ios-spine-contents
-git branch --show-current
-```
-
-Expected: `feat/1130-ios-spine-contents`.
-
----
-
-### Task D4b.1: The seal's deep ink
+### Task D4.7: The seal's deep ink
 
 **Files:**
 - Modify: `apps/ios/Pebbles/Features/Path/Spine/SpineColors.swift`
@@ -8926,7 +8778,7 @@ with
 
 - [ ] **Step 4: Run the test to verify it passes**
 
-Run the **Suite command** with `SpineColorsTests`. Expected: PASS (5).
+Run the **Suite command** with `SpineColorsTests`. Expected: PASS (6).
 
 - [ ] **Step 5: Commit**
 
@@ -8937,7 +8789,7 @@ git commit -m "feat(ios): the seal's deep ink from the emotion palette"
 
 ---
 
-### Task D4b.2: `StoneSeal`
+### Task D4.8: `StoneSeal`
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Stone/StoneSeal.swift`
@@ -9050,7 +8902,7 @@ git commit -m "feat(ios): the contents' seal in relief, line or engraving"
 
 ---
 
-### Task D4b.3: `WeekContents` and its row
+### Task D4.9: `WeekContents` and its row
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Spine/Opening/WeekContents.swift`
@@ -9251,7 +9103,7 @@ git commit -m "feat(ios): the week's contents, a row per moment with its seal"
 
 ---
 
-### Task D4b.4: The contents and seal references
+### Task D4.10: The contents and seal references
 
 **Files:**
 - Create: `apps/ios/PebblesTests/References/SpineContentsReferences.swift`
@@ -9315,7 +9167,7 @@ extension References {
 
 - [ ] **Step 2: Look locally (not committed)**
 
-Run **Look** at `SpineContentsReferences`. Expected: "CONTENTS", then fifteen rows; "mon", "tue", "wed", "thu", "sat", "sun" each on its day's first row under a hairline (no Friday); Monday's rows carry a dot left of the day column; seals vary by valence (solid, outlined, hatched) and size; names weigh by intensity, lowlights in italic; times in ink-3. French: "lun", "mar", "sommaire", "sans titre". The seals grid shows three recipes by column. Clean afterwards.
+Run **Look** at `SpineContentsReferences`. Expected: "CONTENTS", then fifteen rows; "mon", "tue", "wed", "thu", "sat", "sun" each on its day's first row under a hairline (no Friday); Monday's rows carry a dot left of the day column; seals vary by valence (solid, outlined, hatched) and size; names weigh by intensity, lowlights in italic; times in ink-3. French: "lun", "mar", "sommaire", "sans titre". The seals grid shows three recipes by column. Re-run **Look** at `SpineWeekReferences` too: the verso now ends with the contents. Clean afterwards.
 
 - [ ] **Step 3: Commit**
 
@@ -9326,13 +9178,13 @@ git commit -m "test(ios): spine contents and seal references"
 
 ---
 
-### Task D4b.5: D4b verification, PR and CI references
+### Task D4.11: D4 verification, PR and CI references
 
 **Files:** none.
 
 - [ ] **Step 1: Gates**
 
-Run **Lint**, the **Full suite** and **Build**. The `SpineWeekReferences.verso` PNGs move on CI (the verso now ends with the contents); that is intended.
+Run **Lint**, the **Full suite** and **Build**. Before the PR, open `Localizable.xcstrings` in Xcode: "Fresh week", "Collect a new pebble" and "New pebble" are still `translated` in both languages and nothing is `New` or `Stale`.
 
 - [ ] **Step 2: Push, submit, metadata**
 
@@ -9341,15 +9193,15 @@ git fetch origin && git log --oneline -1 origin/main
 gh stack push
 gh stack submit --auto
 gh stack view --json
-gh pr edit <D4b-number> --title "feat(ios): the week's contents with their seals" --body-file <scratch-body-file> \
+gh pr edit <D4-number> --title "feat(ios): the week opens with its persons and contents and closes at the mouth" --body-file <scratch-body-file> \
   --add-label feat,ui,ios,no-lab-note --milestone "M64 · New Path"
 ```
 
-Body: `Part of #1130`; key files; the seal is new on iOS (R17); the Night deep ink drawn as `secondary` at 0.8 over the ground (no colour mix on iOS 17); the verso references move on purpose. No Lab Note, no `F-…` ids.
+Body: `Part of #1130`; key files; D9 (the links name the pager's neighbour; only "begins on Monday" is the calendar's); the `WeekOpeningView` rename (the logic owns `WeekOpening`); the empty week has no days; the seal is new on iOS (R17); the Night deep ink drawn as `secondary` at 0.8 over the ground (no colour mix on iOS 17); the verso ends with the contents. No Lab Note, no `F-…` ids.
 
 - [ ] **Step 3: Rebaseline on CI**
 
-Run **Rebaseline on CI**. Compare `contents-paper-en.png` with the contents section of Android's `SpineWeekVersoLight`. Green after the approved re-run.
+Run **Rebaseline on CI**. Compare `verso-paper-en.png` with Android's `SpineWeekVersoLight` (contents included), `mouth-night-en.png` with `SpineWeekMouthDark` and `empty-paper-en.png` with `SpineWeekEmptyLight`. Green after the approved re-run.
 
 ---
 ## Part D4c — `feat/1130-ios-spine-pager`
@@ -10437,7 +10289,7 @@ Append this at the end of `docs/decisions/log.md`, after one blank line. Replace
 - **Why:** The 1:1 rule: iOS reads the same contract and shows the same week. The lit stone already exists on iOS and reads as stone at feed size; `List` clips cells and fights the overhang; `TabView(.page)` keeps ±1 pages live (three weeks of shader layers) in separate controllers; a summed-height ground re-phases after a far jump (Android's lesson).
 - **Consequences:**
   - The row Path (`WeekPathView`, `PathPebbleRow`, `PathPebbleSnapThumb`, `WeekHeaderView`, `WeekRollView`, `WeekRollCairnCell`, `pbbls-cairn-states.riv`) is removed in D5b.
-  - Three generated tones join stack A's Spine table (`rakeShadow`, `rakeLight`, `cardShadow`); a fourth scheme-only Spine tone is a row there, never a literal.
+  - One generated token joins stack A's Spine table, `rakeLight` (a constant source: white / `#DCE2EA`); the rake shadow and the card's shadow ink are scheme blends in `SpineColors.swift`, as in Android's `SpineColors.kt`. Another scheme-only Spine tone is a row in that table or a blend there, never a literal in `Features/`.
   - The glint's white lives in the exempt `Features/Path/Stone/` folder with the stone's other literal tones.
   - A press opens `PebbleDetailSheet` until stack E's held card consumes `SpineOpen`.
 - **Supersedes / Superseded-by:** Extends **2026-10-18 — The Android Path becomes the Spine** (#1122) to iOS, which closes its consequence "iOS still shows the row list; its Spine is a separate issue".
@@ -10485,49 +10337,102 @@ git commit -m "docs(ios): describe the spine path in the ios agent context"
 
 ---
 
-### Task D5a.6 (decision 9): Capture one real `path_moments` row with souls
+### Task D5a.6 (decision 9): Capture one real `path_moments` row with souls, then purge the account
 
 **Files:**
 - Modify: `apps/ios/PebblesTests/Moments/MomentFixtures+Captured.swift`
 - Modify: `apps/ios/PebblesTests/Spine/PathMomentDecodingTests.swift`
 
-Run only with the maintainer's go-ahead, with a **throwaway** account (never the maintainer's real one without asking), on the linked project.
+The foreign-payload rule wants the server's own bytes. This runs against the **linked** project with a **throwaway** account the maintainer creates for it (never the maintainer's real account), and ends by purging that account through the existing `delete-account` flow, which runs `purge_account`, empties its storage prefix and deletes its auth user. The orchestrator runs it with the maintainer: the address and the password are typed by the maintainer, never written into the repo, the plan or a PR.
 
-- [ ] **Step 1: Make the row**
+- [ ] **Step 1: Make the account and the row (simulator, Debug build)**
 
-In a Debug build signed in as the throwaway account, record one pebble with two souls. Then, from the repo root, read the anon key and URL from `apps/ios/Config/Secrets.xcconfig` (never print them into the PR) and fetch the row:
+1. Launch the D5a build on the stack's simulator (Task D2a.9 Step 4's `simctl install` / `launch` lines).
+2. Sign up with an email address the maintainer controls (no `+`: the app refuses it) and a fresh password. Confirm the address if the project asks for it.
+3. People tab: create two souls, "Capture A" and "Capture B" (any glyphs).
+4. Capture a moment named "Capture souls" with no photo, complete it into a pebble (any emotion and domain), and add both souls.
+5. The Path shows it as a Spine entry naming "CAPTURE A & CAPTURE B". Leave the app signed in.
+
+- [ ] **Step 2: Fetch the row as that user**
+
+Steps 2 to 4 run in **one** terminal session from the repo root: they share its variables, and the session's token must still be fresh for the purge.
 
 ```bash
 SCRATCH="${TMPDIR:-/tmp}/spine-d5a"; mkdir -p "$SCRATCH"
-URL=$(grep -E '^SUPABASE_URL' apps/ios/Config/Secrets.xcconfig | sed 's/.*= *//; s#\\/#/#g')
-ANON=$(grep -E '^SUPABASE_ANON_KEY' apps/ios/Config/Secrets.xcconfig | sed 's/.*= *//')
-read -r -p "throwaway email: " EMAIL; read -r -s -p "password: " PASSWORD; echo
-JWT=$(curl -s "$URL/auth/v1/token?grant_type=password" -H "apikey: $ANON" -H "Content-Type: application/json" \
-  -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}" | python3 -c "import json,sys; print(json.load(sys.stdin)['access_token'])")
+# xcconfig breaks "//" with "$()", so strip it; neither value is ever echoed.
+URL=$(grep -E '^SUPABASE_URL' apps/ios/Config/Secrets.xcconfig | sed -E 's/^[^=]*= *//; s/\$\(\)//g')
+ANON=$(grep -E '^SUPABASE_ANON_KEY' apps/ios/Config/Secrets.xcconfig | sed -E 's/^[^=]*= *//')
+read -r -p "throwaway email: " EMAIL
+read -r -s -p "throwaway password: " PASSWORD; echo
+curl -s "$URL/auth/v1/token?grant_type=password" -H "apikey: $ANON" -H "Content-Type: application/json" \
+  -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}" > "$SCRATCH/session.json"
+JWT=$(python3 -c "import json; print(json.load(open('$SCRATCH/session.json'))['access_token'])")
 curl -s "$URL/rest/v1/rpc/path_moments" -H "apikey: $ANON" -H "Authorization: Bearer $JWT" \
   -H "Content-Type: application/json" -d '{}' > "$SCRATCH/path_moments.json"
-python3 -c "import json; rows=json.load(open('$SCRATCH/path_moments.json')); print([len((r.get('pebble') or {}).get('souls', [])) for r in rows])"
+python3 -c "
+import json
+rows = json.load(open('$SCRATCH/path_moments.json'))
+print(len(rows), [len((r.get('pebble') or {}).get('souls', [])) for r in rows])"
 ```
 
-Expected: a list with a `2` in it. If the key names differ in `Secrets.xcconfig`, read them from it as named there.
+Expected: `1 [2]` (one moment, its pebble with two souls). If `session.json` holds an `error`, the password grant was refused: re-check the address is confirmed.
 
-- [ ] **Step 2: Add the body verbatim and a test**
+- [ ] **Step 3: Add the body verbatim and a test**
 
-Add `static let pathMomentsWithSouls = Data(#"""` … `"""#.utf8)` to `MomentFixtures.Captured`, the body pasted byte for byte from `$SCRATCH/path_moments.json` (one row is enough: keep the array with the two-soul pebble only, unreformatted), with the file's capture date in its doc comment. Then append to `PathMomentDecodingTests`:
+Insert the body as the server sent it, byte for byte, after the existing `pathMoments` fixture (the script splices text; it never reformats the JSON):
+
+```bash
+python3 - "$SCRATCH/path_moments.json" <<'PY'
+import datetime, sys
+body = open(sys.argv[1], encoding="utf-8").read().rstrip("\n")
+path = "apps/ios/PebblesTests/Moments/MomentFixtures+Captured.swift"
+text = open(path, encoding="utf-8").read()
+anchor = '        static let detailCompleted = Data(#"""\n'
+assert text.count(anchor) == 1, "anchor"
+day = datetime.date.today().isoformat()
+block = (
+    "        /// `path_moments()` after #1121, captured from the linked project with a\n"
+    f"        /// throwaway account on {day} (since purged): one pebble with two souls.\n"
+    '        static let pathMomentsWithSouls = Data(#"""\n' + body + '\n"""#.utf8)\n\n'
+)
+open(path, "w", encoding="utf-8").write(text.replace(anchor, block + anchor))
+PY
+git diff --stat -- apps/ios/PebblesTests/Moments/MomentFixtures+Captured.swift
+```
+
+Expected: one file, about five lines inserted, none removed.
+
+Then append to `struct PathMomentDecodingTests` in `apps/ios/PebblesTests/Spine/PathMomentDecodingTests.swift`:
 
 ```swift
-    @Test("a captured row carries its souls with names and glyph ids")
+    @Test("the captured row carries its souls with names and glyph ids, ordered by name")
     func captured() throws {
         let rows = try decode(MomentFixtures.Captured.pathMomentsWithSouls)
-        let souls = try #require(rows.first { $0.pebble?.souls.isEmpty == false }?.pebble?.souls)
-        #expect(souls.count == 2)
-        #expect(souls.allSatisfy { $0.glyphId != nil && !$0.name.isEmpty })
+        let souls = try #require(rows.first?.pebble?.souls)
+        #expect(souls.map(\.name) == ["Capture A", "Capture B"])
+        #expect(souls.allSatisfy { $0.glyphId != nil })
+        #expect(rows.first?.soulIds == souls.map { $0.id.uuidString.lowercased() })
     }
 ```
 
-Run the **Suite command** with `PathMomentDecodingTests`. Expected: PASS (7). Delete the throwaway account afterwards (Settings → Delete account in the app).
+Run the **Suite command** with `PathMomentDecodingTests`. Expected: PASS (7).
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Purge the throwaway account**
+
+Still within ten minutes of the sign-in (the function's recent-auth check), call the existing `delete-account` edge function as that user, the same call Settings → Delete account makes:
+
+```bash
+curl -s -X POST "$URL/functions/v1/delete-account" -H "apikey: $ANON" -H "Authorization: Bearer $JWT" \
+  -H "Content-Type: application/json" -d '{}'; echo
+curl -s "$URL/auth/v1/token?grant_type=password" -H "apikey: $ANON" -H "Content-Type: application/json" \
+  -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('error', 'STILL SIGNS IN'))"
+rm -f "$SCRATCH/session.json"
+unset JWT PASSWORD EMAIL ANON URL
+```
+
+Expected: `{"ok":true,"purged":…}`, then `invalid_grant` (the auth user is gone). A `428 {"error":"reauth_required"}` means more than ten minutes passed: sign in again in the app and use Settings → Delete account instead, which re-authenticates and runs the same function. If the call fails after `purge_account` (a 500 naming storage or the auth delete), re-run it: the function is idempotent and resumes. Then, in the simulator, the app returns to the welcome screen on its next launch.
+
+- [ ] **Step 5: Commit**
 
 ```bash
 git add apps/ios/PebblesTests/Moments/MomentFixtures+Captured.swift apps/ios/PebblesTests/Spine/PathMomentDecodingTests.swift
@@ -10574,7 +10479,7 @@ gh pr edit <D5a-number> --title "feat(ios): the path becomes the spine" --body-f
   --add-label feat,ui,ios,no-lab-note --milestone "M64 · New Path"
 ```
 
-Body: `Resolves #1130` (decision 5); what changes for a user (the Path tab is the Spine); key files; the device checklist table; the PNG sizes; the decision-log entry; the `apps/ios/CLAUDE.md` line; **new pattern for review:** `PathModel` adopted by `PathView`; follow-ups: "Couldn't load your pebbles." is still an English-only line (unchanged), stack E consumes `SpineOpen`. Arkaik: nothing to set; the App marks the four nodes `releasing` at merge (never `live`). No Lab Note, no `F-…` ids.
+Body: `Resolves #1130` (decision 5); what changes for a user (the Path tab is the Spine); key files; the captured `path_moments` row and the throwaway account's purge (D5a.6, no address or id in the body); the device checklist table; the PNG sizes; the decision-log entry; the `apps/ios/CLAUDE.md` line; **new pattern for review:** `PathModel` adopted by `PathView`; follow-ups: "Couldn't load your pebbles." is still an English-only line (unchanged), stack E consumes `SpineOpen`. Arkaik: nothing to set; the App marks the four nodes `releasing` at merge (never `live`). No Lab Note, no `F-…` ids.
 
 - [ ] **Step 3: Rebaseline on CI**
 
@@ -10772,79 +10677,79 @@ Body: `Part of #1130`; the removal list and its replacements (spec §Removal); t
 Only once every part is green and D5a's checklist passed: `gh stack rebase`, wait for CI on the rebased heads (approve any held runs; a rebaseline bot commit breaks linearity, so rebase and re-run before merging, per the stack memory notes), then `gh stack merge --yes` from the bottom.
 
 ---
-## Self-review notes (done while writing)
+## Self-review notes (done while writing; re-run after the maintainer's decisions)
 
 ### Spec coverage
 
 | Spec section | Tasks |
 |---|---|
-| Summary, Goal (Android parity for the fixture week in Paper/Night, EN/FR; vectors verbatim; Arkaik) | D5a.3, the reference suites of D2a2–D4b; D1a–D1b vector files; D1a.0 Step 5 |
-| Non-goals | Kept out: no new renderer (D2a1.5 adds only `seed:`), no tilt or sweep on the feed (`PebbleStoneView` at rest light), no spread, no grain, no dock, no stored dimensions, no held card, no change to Capture, Complete, Edit, delete, `PebbleDetailSheet` or the soul and collection lists, no Swift 6, no `#available` |
-| D1 margin stone | D2a1.5 (`seed:`), D2a2.3 (`SpineStone`), D2a1.4 (sizes) |
-| D2 souls from `path_moments` | D1a.1, D3a.2 (names merged from the pebbles), D5a.2 (`syncSouls`), D5a.6 (decision 9) |
-| D3 photo ratio on device | D2b1.3, D2b2.3 (square then 240 ms ease, snap under Reduce Motion), D4c.3 (prefetch of the week and its neighbours), D5a.1 |
+| Summary, Goal (Android parity for the fixture week in Paper/Night, EN/FR; vectors verbatim; Arkaik) | D5a.3, the reference suites of D2a–D4; D1 vector files; D1.0 Step 5 |
+| Non-goals | Kept out: no new renderer (D2a.5 adds only `seed:`), no tilt or sweep on the feed (`PebbleStoneView` at rest light), no spread, no grain, no dock, no stored dimensions, no held card, no change to Capture, Complete, Edit, delete, `PebbleDetailSheet` or the soul and collection lists, no Swift 6, no `#available` |
+| D1 margin stone | D2a.5 (`seed:`), D2a.8 (`SpineStone`), D2a.4 (sizes) |
+| D2 souls from `path_moments` | D1.1, D3.2 (names merged from the pebbles), D5a.2 (`syncSouls`), D5a.6 (the captured row, then the account purged; decision 9) |
+| D3 photo ratio on device | D2b.3, D2b.8 (square then 240 ms ease, snap under Reduce Motion), D4c.3 (prefetch of the week and its neighbours), D5a.1 |
 | D4 `ScrollView` + `LazyVStack`, no clipping, standalone rows | D3c.4 (`SpineWeekRows`, `SpineWeekStack`), D4c.2 (`SpineWeekView`), D3c.3 (no clip in a row) |
 | D5 paging `ScrollView` | D4c.3, D4c.5 (spike and fallback) |
-| D6 ground once, in content coordinates | D3b.1–D3b.2 |
-| D7 Android's form choices | D4a.2 / D4a.4 (masthead and mouth carry the links; no date header), D5a.2 (stack C's FAB row) |
-| D8 press request as state | D2a1.2, D3c.3 (claim), D4c.2 (go) |
-| D9 links name the pager's neighbour | D3a.1–D3a.2 (`WeekNeighbour`, `WeekNeighbourTests`), D4a.2, D4a.4 |
-| D10 explicit time and language; lowercase string ids | D1a–D1b (every function takes `calendar` and `locale`), D1a.1 (`spineId`), D2b2.1 (`SpineCalendar`) |
-| D11 Dynamic Type scales text, not geometry | D3c.3 (anchor 0.6 × resolved size), D2b2.3 (card text through `.card(cap: 1.3)`), D3b.3 (still day from resolved metrics), `-ax2` references in D3b.4, D4a.6, D5a.3 |
-| D12 reading day by preference | D4c.1 (+ decision 2), D3a.2 (`setReadingDay` writes on change only) |
-| R1 page geometry | D2a1.4 |
-| R2 stone sizes, anchor, hit area ≥ 44 | D2a1.4, D3c.3 |
-| R3 rings and halo | D2a1.3, D2a2.1 |
-| R4 card sizing | D1b.6, D2b2.3 |
-| R5 card anatomy, edge and tint | D2b1.2, D2b2.2, D2b2.3 |
-| R6 no-photo entry | D1b.5, D3c.2 |
-| R7 many people | D1b.4, D2b1.5, D2b2.1, D3c.2 |
-| R8 seam | D3b.3 |
-| R9 day label | D3b.3 |
-| R10 empty day | D3b.3, D3c.4 (48 hairline to hairline, the last day's 48 to the mouth) |
-| R11 ground | D3b.1, D3b.2, D2b1.1 (tones) |
-| R12 press | D2a1.1, D2a2.1–D2a2.3, D3c.3 |
-| R13 reduced motion | D2a1.1 (still touch), D2a2.1 (rings in ink-2), D3c.3 (open at once), D4c.2–D4c.3 (instant scroll and paging), D2b2.3 (ratio snaps) |
-| R14 ripple mounted only while live | D2a2.3 (`waves` empty at rest), D2a1.2 (`stonePressLifetime`) |
-| R15 persons of the week | D1a.3, D4a.3 |
-| R16 contents | D1b.5, D4b.3 |
-| R17 seal recipe | D4b.1, D4b.2 |
-| R18 opening type | D1b.3, D4a.1, D4a.2 |
-| §Data flow (`PathModel`, registry ownership, reload, source, palettes, photos) | D3a.2, D5a.1, D5a.2, D1a.1, D2b1.4 |
-| §Logic API | D1a.1–D1a.4, D1b.1–D1b.6 |
+| D6 ground once, in content coordinates | D3.3–D3.4 |
+| D7 Android's form choices | D4.2 / D4.4 (masthead and mouth carry the links; no date header), D5a.2 (stack C's FAB row) |
+| D8 press request as state | D2a.2, D3c.3 (claim), D4c.2 (go) |
+| D9 links name the pager's neighbour | D3.1–D3.2 (`WeekNeighbour`, `WeekNeighbourTests`), D4.2, D4.4 |
+| D10 explicit time and language; lowercase string ids | D1 (every function takes `calendar` and `locale`), D1.1 (`spineId`), D2b.6 (`SpineCalendar`) |
+| D11 Dynamic Type scales text, not geometry | D3c.3 (anchor 0.6 × resolved size), D2b.8 (card text through `.card(cap: 1.3)`), D3.5 (still day from resolved metrics), `-ax2` references in D3.6, D4.6, D5a.3 |
+| D12 reading day by preference | D4c.1 (seams and pebble rows report, decision 2), D3.2 (`setReadingDay` writes on change only) |
+| R1 page geometry | D2a.4 |
+| R2 stone sizes, anchor, hit area ≥ 44 | D2a.4, D3c.3 |
+| R3 rings and halo | D2a.3, D2a.6 |
+| R4 card sizing | D1.10, D2b.8 |
+| R5 card anatomy, edge, tint and shadow | D2b.2 (edge, spot, shadow ink and `shadowAlpha`), D2b.7, D2b.8 |
+| R6 no-photo entry | D1.9, D3c.2 |
+| R7 many people | D1.8, D2b.5, D2b.6, D3c.2 |
+| R8 seam | D3.5 |
+| R9 day label | D3.5 |
+| R10 empty day | D3.5, D3c.4 (48 hairline to hairline, the last day's 48 to the mouth) |
+| R11 ground | D3.3, D3.4, D2b.1 (`rakeLight`), D2b.2 (`rakeShadow`) |
+| R12 press | D2a.1, D2a.6–D2a.8, D3c.3 |
+| R13 reduced motion | D2a.1 (still touch), D2a.6 (rings in ink-2), D3c.3 (open at once), D4c.2–D4c.3 (instant scroll and paging), D2b.8 (ratio snaps) |
+| R14 ripple mounted only while live | D2a.8 (`waves` empty at rest), D2a.2 (`stonePressLifetime`) |
+| R15 persons of the week | D1.3, D4.3 |
+| R16 contents | D1.9, D4.9 |
+| R17 seal recipe | D4.7, D4.8 |
+| R18 opening type | D1.7, D4.1, D4.2 |
+| §Data flow (`PathModel`, registry ownership, reload, source, palettes, photos) | D3.2, D5a.1, D5a.2, D1.1, D2b.4 |
+| §Logic API | D1.1–D1.4, D1.5–D1.10 |
 | §Strings (keys, plurals, collision check, parity) | D1c.1, D1c.2 (catalogue test), D1c.4 |
-| §Vector mapping table | `SpineWeekBuilderTests`, `LocalDaysTests`, `PersonsOfWeekTests` (D1a); `PeopleLineTests`, `EntryTypeTests`, `CardSizeTests`, `WeekOpeningTests`, `SpineDatesTests`, `NumberWordsTests` (D1b); `StableHashTests` (D1a.4); `PathMomentDecodingTests` (D1a.1) |
+| §Vector mapping table | `SpineWeekBuilderTests`, `LocalDaysTests`, `PersonsOfWeekTests` (D1); `PeopleLineTests`, `EntryTypeTests`, `CardSizeTests`, `WeekOpeningTests`, `SpineDatesTests`, `NumberWordsTests` (D1); `StableHashTests` (D1.4); `PathMomentDecodingTests` (D1.1) |
 | §View tree | Every file is created in the task the file map names; `WeekOpening.swift` (view) becomes `WeekOpeningView.swift` (deviation 3) |
-| §Geometry | D2a1.4, D3b.3, D3c.3–D3c.4, D2b2.3, D4a.3, D4b.3 |
-| §Pager semantics (one source of truth, links, load, reselect, page change) | D3a.2 (`focus`, refocus, cancel on page change), D4c.3, D5a.2 (reselect) |
-| §Press-request state | D2a1.2, D3c.3, D4c.2 |
-| §Frame registry for stack E (reporting, entries, unobserved frames, ownership, focus return) | D2b1.4, D2b2.3, D3c.3, D5a.1, D4c.2 |
+| §Geometry | D2a.4, D3.5, D3c.3–D3c.4, D2b.8, D4.3, D4.9 |
+| §Pager semantics (one source of truth, links, load, reselect, page change) | D3.2 (`focus`, refocus, cancel on page change), D4c.3, D5a.2 (reselect) |
+| §Press-request state | D2a.2, D3c.3, D4c.2 |
+| §Frame registry for stack E (reporting, entries, unobserved frames, ownership, focus return) | D2b.4, D2b.8, D3c.3, D5a.1, D4c.2 |
 | §Removal (D5b) | D5b.1–D5b.4 |
-| §Accessibility A1–A8, order, Reduce Motion, focus return | A1 D3b.3 / D4a.2; A2 D3c.1 / D3c.3; A3 D3c.3; A4 D4b.3; A5 D4a.3; A6 D4c.3; A7 D1b.5; A8 D3c.2 / D4b.3; order D3c.3 (`accessibilitySortPriority`); focus return D4c.2 |
-| §Testing table | D1a–D1c; D2a1 (`StoneMotionTests`, `StonePressRequestsTests`) + D2a2.5; D2b1 (`SnapAspectCacheTests`, `CardFrameRegistryTests`) + D2b2.5; D3c.5 + the budget in D3c.6; D4c.1 (`ReadingDayTests`), D3a.2 (`WeekNeighbourTests`), D4a.6; D5a.3; D5b.4 |
-| §Device checklist | D5a.7 (and the per-part checks in D2a2.6, D2b2.6, D3c.6, D4c.5) |
-| §Parts, Arkaik, decision log | Parts table, decision 3; D1a.0 Step 5; D5a.4 |
-| §New patterns, raised in the PR | `StonePressRequests` (D2a1.6), `SnapAspectCache` and `SpineSnapSource` (D2b1.6), `PathModel` (D3a.3, D5a.8), the paging `ScrollView` (D4c.6) |
-| §Risks | Paged `ScrollView`: D4c.5 with the `TabView(.page)` fallback; `ImageRenderer`: `SpineSnapSource`, `SpineWeekStack`, `frozenAt`, `QuarterTurn`, B2's window fallback named in D2a2.5; shader stones in a lazy list: D3c.6 (budget, `.drawingGroup()`); frames while paging: stack E reads at the press (stated in `CardFrameRegistry`'s doc); small caps: B's; preference churn: D3a.2 and D4c.1 |
+| §Accessibility A1–A8, order, Reduce Motion, focus return | A1 D3.5 / D4.2; A2 D3c.1 / D3c.3; A3 D3c.3; A4 D4.9; A5 D4.3; A6 D4c.3; A7 D1.9; A8 D3c.2 / D4.9; order D3c.3 (`accessibilitySortPriority`); focus return D4c.2 |
+| §Testing table | D1–D1c; D2a (`StoneMotionTests`, `StonePressRequestsTests`) + D2a.10; D2b (`SnapAspectCacheTests`, `CardFrameRegistryTests`) + D2b.10; D3c.5 + the budget in D3c.6; D4c.1 (`ReadingDayTests`), D3.2 (`WeekNeighbourTests`), D4.6; D5a.3; D5b.4 |
+| §Device checklist | D5a.7 (and the per-part checks in D2a.11, D2b.11, D3c.6, D4c.5) |
+| §Parts, Arkaik, decision log | Parts table, decision 3; D1.0 Step 5; D5a.4 |
+| §New patterns, raised in the PR | `StonePressRequests` (D2a.11), `SnapAspectCache` and `SpineSnapSource` (D2b.11), `PathModel` (D3.7, D5a.8), the paging `ScrollView` (D4c.6) |
+| §Risks | Paged `ScrollView`: D4c.5 with the `TabView(.page)` fallback; `ImageRenderer`: `SpineSnapSource`, `SpineWeekStack`, `frozenAt`, `QuarterTurn`, B2's window fallback named in D2a.10; shader stones in a lazy list: D3c.6 (budget, `.drawingGroup()`); frames while paging: stack E reads at the press (stated in `CardFrameRegistry`'s doc); small caps: B's; preference churn: D3.2 and D4c.1 |
 
 ### Deviations to surface in the PR bodies
 
-1. Fifteen parts instead of seven, and the moves of decision 4 (each PR says which brief part it belongs to).
+1. Ten parts: the brief's seven plus D1c (strings and fixture), D3c (feed) and D4c (pager) kept apart (decision 3), and the moves of decision 4.
 2. Branch names follow the brief (`feat/1130-ios-<slug>`), not the spec's table (`feat/1130-spine-logic`, …).
 3. The opening view is `WeekOpeningView`: the logic's `WeekOpening` enum owns the name.
 4. `path.spine.summaryNoPebbles` is its own key (decision 8); plurals are xcstrings substitutions on argument 1 (French `many` = `other`); 33 keys.
-5. Three generated tones in stack A's table, through `apps/web/lib/theme/ios-colorsets.ts` (decision 1).
+5. One generated token in stack A's table, `rakeLight`, from constant hexes (the generator gains a constant-hex source), through `apps/web/lib/theme/ios-colorsets.ts`; the rake shadow and the shadow ink are blends in `SpineColors.swift`, black being `Color.pebbles.scrim` (decision 1).
 6. The glint's white lives in `Features/Path/Stone/StoneGlintInk.swift` (decision 6).
-7. Pebble rows report the reading day as seams do (decision 2).
+7. Pebble rows report the reading day as seams do, as on Android (decision 2; the spec's D12 names seams only).
 8. `PathModel.page(for:)` returns an optional, `focusedWeekStart` is `private(set)` and moves through `focus(_:)`, and `SpinePage` also carries `soulNames`.
-9. The card's shadow has no spread on SwiftUI (the far layer's alpha is lowered); Night's deep seal ink is `secondary` at 0.8 over the ground (no colour mix on iOS 17).
+9. The card's shadow uses Android's ink and `shadowAlpha` in two layers, each a share of that alpha, because SwiftUI has no spread; Night's deep seal ink is `secondary` at 0.8 over the ground (no colour mix on iOS 17).
 10. People-line runs take their ranks through `Text.spineSpan` (the same `SpineType.resolve` the modifier uses), and `SpineType.Style.peopleAside` is the `people` rank in italic.
 11. Vectors not ported: `number-words`' 2.5 case (an `Int` API); `entry-type`'s and `card-size`'s wide rows; `card-size`'s cap and pending cases run at the phone caps.
 12. The shader seed is folded to 24 bits (the shader reads a Float).
 13. The lab's fixture cards show their photo bed (decision 7).
 14. "Couldn't load your pebbles." stays English-only, unchanged from today.
 15. The stone's VoiceOver name lists souls with `ListFormatter` (a sentence for the reader), while `dotDays` hand-joins (its vector pins the web's output).
-16. No captured `path_moments` row with souls existed; D5a.6 captures one (decision 9).
+16. No captured `path_moments` row with souls existed; D5a.6 captures one with a throwaway account and purges it through `delete-account` (decision 9).
 17. D5b is labelled `chore` (the spec's table) where the brief lists `feat`.
 18. `CardFace` gains `other` for stack E's turn.
 19. The brief's ring-fit and lockup vectors are stack E's (decision 10).
@@ -10852,8 +10757,8 @@ Only once every part is green and D5a's checklist passed: `gh stack rebase`, wai
 
 ### Placeholder scan
 
-Searched the plan for "TBD", "TODO", "implement later", "fill in", "similar to Task", "appropriate error handling", "handle edge cases" and bracketed angle placeholders. The only angle brackets left are the PR numbers `gh stack view --json` prints (`<D1a-number>` … `<D5b-number>`), the scratch body path every PR task writes (`<scratch-body-file>`), the merge date in the decision-log entry (`<YYYY-MM-DD>`, filled at merge, as stack C's plan does) and `<Suite>` in the named commands. Every code step shows its code; every test step shows the test and its command.
+Searched the plan for "TBD", "TODO", "implement later", "fill in", "similar to Task", "appropriate error handling", "handle edge cases" and bracketed angle placeholders. The only angle brackets left are the PR numbers `gh stack view --json` prints (`<D1-number>` … `<D5b-number>`), the scratch body path every PR task writes (`<scratch-body-file>`), the merge date in the decision-log entry (`<YYYY-MM-DD>`, filled at merge, as stack C's plan does) and `<Suite>` in the named commands. Every code step shows its code; every test step shows the test and its command.
 
 ### Type consistency
 
-Checked across tasks: `SpineMoment` (`spineId`, `happenedAt`, `isPebble`, `soulIds`); `SpineWeekBuilder.spineWeek(weekStart:moments:today:calendar:)`, `readingOrder(_:)`; `SpineDay` (`date`, `index`, `moments`, `isStill`, `isToday`); `PersonsOfWeek.personsOfWeek(_:names:weekStart:calendar:locale:)`, `split(_:cap:)`; `PeopleLines.peopleLine(_:order:locale:namedInFull:)`, `namedOnCard`; `EntryTypes.entryType(intensity:valence:)` → `EntryType(name:lineHeight:anchor:)`; `CardSizes.cardSize(intensity:ratio:column:)`; `WeekOpening.weekWords(weekStart:calendar:locale:)`; `SpineCopy.*`; `StoneMotion.frame(at:still:size:)`, `total(still:)`, `openDelay`, `goPressDelay`; `StonePress.next(after:still:now:)`, `.stonePressLifetime(_:)`; `StonePressRequests.request(_:)` / `claim(_:)` / `cancel()`; `StoneRingGeometry.forStone(_:)`, `path(scaled:offset:)`; `SpineLayout.stoneRow(anchor:stone:)` → `StoneRow(stone:hit:minHeight:)`; `SpineColors.palette(_:isBlank:)`, `edge`, `spot`, `deep`; `SnapAspectCache(urls:load:timeout:)`, `probe`, `prime`, `prefetch`, `ratio(for:)`; `CardFrameRegistry.report(_:frame:)` / `forget(_:)` / `hidden`; `SpineSnapSource.signed(_:)` / `.images(_:)`; `PeopleLineParts.parts(_:names:with:others:style:)`; `SpineCard(moment:palette:ratio:column:soulNames:soulGlyphs:soulOrder:namedInFull:)`; `PathModel.load(_:)`, `reloadIfChangedOutside(_:_:)`, `updateSouls(names:glyphs:)`, `focus(_:)`, `focusWeek(containing:)`, `focusCurrentWeek()`, `setReadingDay(_:for:)`, `page(for:)`, `photoPaths(around:)`, `delete(_:)`; `SpineFeedContext` (memberwise order `page, column, palette, ratio, pressRequests, onOpen, onDelete, onFocus, onCreate, onGo, readingDay`); `SpineRowView(row:context:slotFocus:markSpace:)`; `SpineWeekStack(context:days:part:width:)`; `SpineOpen(momentId:face:summary:soulOrder:)`; `SpineWeekView` and `SpinePager` initialisers as D5a calls them.
+Checked across tasks: `SpineMoment` (`spineId`, `happenedAt`, `isPebble`, `soulIds`); `SpineWeekBuilder.spineWeek(weekStart:moments:today:calendar:)`, `readingOrder(_:)`; `SpineDay` (`date`, `index`, `moments`, `isStill`, `isToday`); `PersonsOfWeek.personsOfWeek(_:names:weekStart:calendar:locale:)`, `split(_:cap:)`; `PeopleLines.peopleLine(_:order:locale:namedInFull:)`, `namedOnCard`; `EntryTypes.entryType(intensity:valence:)` → `EntryType(name:lineHeight:anchor:)`; `CardSizes.cardSize(intensity:ratio:column:)`; `WeekOpening.weekWords(weekStart:calendar:locale:)`; `SpineCopy.*`; `StoneMotion.frame(at:still:size:)`, `total(still:)`, `openDelay`, `goPressDelay`; `StonePress.next(after:still:now:)`, `.stonePressLifetime(_:)`; `StonePressRequests.request(_:)` / `claim(_:)` / `cancel()`; `StoneRingGeometry.forStone(_:)`, `path(scaled:offset:)`; `SpineLayout.stoneRow(anchor:stone:)` → `StoneRow(stone:hit:minHeight:)`; `SpineColors.palette(_:isBlank:)`, `edge`, `spot`, `deep`, `rakeShadowSource` / `rakeShadow`, `shadowInkRole` / `shadowInk`, `shadowAlpha` (the rake tile and the card's ground call these, and no file names `Color.pebbles.rakeShadow` or `cardShadow`); `SnapAspectCache(urls:load:timeout:)`, `probe`, `prime`, `prefetch`, `ratio(for:)`; `CardFrameRegistry.report(_:frame:)` / `forget(_:)` / `hidden`; `SpineSnapSource.signed(_:)` / `.images(_:)`; `PeopleLineParts.parts(_:names:with:others:style:)`; `SpineCard(moment:palette:ratio:column:soulNames:soulGlyphs:soulOrder:namedInFull:)`; `PathModel.load(_:)`, `reloadIfChangedOutside(_:_:)`, `updateSouls(names:glyphs:)`, `focus(_:)`, `focusWeek(containing:)`, `focusCurrentWeek()`, `setReadingDay(_:for:)`, `page(for:)`, `photoPaths(around:)`, `delete(_:)`; `SpineFeedContext` (memberwise order `page, column, palette, ratio, pressRequests, onOpen, onDelete, onFocus, onCreate, onGo, readingDay`); `SpineRowView(row:context:slotFocus:markSpace:)`; `SpineWeekStack(context:days:part:width:)`; `SpineOpen(momentId:face:summary:soulOrder:)`; `SpineWeekView` and `SpinePager` initialisers as D5a calls them.
