@@ -91,7 +91,6 @@ struct ThemeLiteralsTests {
         "Features/Karma/AchievementMomentView.swift": 1,
         "Features/Karma/KarmaEarnedCapsule.swift": 2,
         "Features/Lab/Components/FeaturedCommunityCard.swift": 1,
-        "Features/Onboarding/OnboardingView.swift": 3,
         "Features/Path/Components/PathPebbleRow.swift": 2,
         "Features/Path/Components/WeekPathView.swift": 1,
         "Features/Path/Valence/ValenceStoneStyle.swift": 1,

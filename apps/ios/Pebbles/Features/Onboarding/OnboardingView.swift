@@ -21,8 +21,8 @@ struct OnboardingView: View {
         // SwiftUI's TabView page-dot indicator is a UIPageControl under the
         // hood; the only way to color it is via UIKit appearance proxies.
         // Same approach used by MainTabView for the tab bar.
-        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(named: "AccentColor")
-        UIPageControl.appearance().pageIndicatorTintColor = UIColor(named: "SystemMuted")
+        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor.pebbles(.primary)
+        UIPageControl.appearance().pageIndicatorTintColor = UIColor.pebbles(.outlineVariant)
     }
 
     var body: some View {
@@ -54,7 +54,7 @@ struct OnboardingView: View {
                             onFinish()
                         } label: {
                             Text("Start your path")
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color.pebbles.onPrimary)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 8)
                         }
