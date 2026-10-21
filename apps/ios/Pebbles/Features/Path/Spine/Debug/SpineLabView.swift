@@ -6,7 +6,7 @@ import SwiftUI
 /// Verbatim text throughout, so nothing reaches the string catalogue.
 struct SpineLabView: View {
     enum Section: String, CaseIterable, Identifiable {
-        case stones
+        case stones, cards
         var id: String { rawValue }
     }
 
@@ -19,6 +19,8 @@ struct SpineLabView: View {
                 switch section {
                 case .stones:
                     SpineStoneGallery(pressable: true)
+                case .cards:
+                    SpineCardGallery(numbers: [1, 4, 7, 9, 13, 15])
                 }
             }
             .background(Color.pebbles.surface)
