@@ -143,8 +143,7 @@ final class PathModel {
     func page(for weekStart: Date) -> SpinePage? {
         _ = pagesRevision
         if let cached = pages[weekStart] { return cached }
-        guard let index = entries.firstIndex(where: { $0.weekStart == weekStart }) else { return nil }
-        let entry = entries[index]
+        guard let entry = entries.first(where: { $0.weekStart == weekStart }) else { return nil }
         let locale = locale()
         let names = names(for: entry.moments)
         let week = SpineWeekBuilder.spineWeek(weekStart: weekStart, moments: entry.moments, today: now(),
@@ -156,8 +155,8 @@ final class PathModel {
             persons: PersonsOfWeek.personsOfWeek(entry.moments, names: names, weekStart: weekStart,
                                                  calendar: calendar, locale: locale),
             contents: SpineWeekBuilder.readingOrder(week),
-            previous: index > 0 ? neighbour(entries[index - 1]) : nil,
-            next: index + 1 < entries.count ? neighbour(entries[index + 1]) : nil,
+            previous: WeekRollBuilder.previous(of: weekStart, in: entries).map(neighbour),
+            next: WeekRollBuilder.next(of: weekStart, in: entries).map(neighbour),
             // Memoised until the next load: across the Sunday → Monday roll it stays stale without one.
             isCurrent: weekStart == currentWeekStart,
             soulNames: names,
@@ -175,7 +174,8 @@ final class PathModel {
     }
 
     private func neighbour(_ entry: WeekRollEntry) -> WeekNeighbour {
-        WeekNeighbour(number: calendar.component(.weekOfYear, from: entry.weekStart), weekStart: entry.weekStart)
+        WeekNeighbour(number: WeekOpening.isoWeekNumber(entry.weekStart, timeZone: calendar.timeZone),
+                      weekStart: entry.weekStart)
     }
 
     /// The reference cache's names, then the names `path_moments` carries on each pebble.

@@ -83,6 +83,13 @@ struct WeekOpeningTests {
         #expect(words.nextNumber == 1)
     }
 
+    @Test("the pager's links and the opening read one ISO week number")
+    func isoWeekNumber() {
+        let monday = V.weekStart(V.local(2026, 11, 28))
+        #expect(WeekOpening.isoWeekNumber(monday, timeZone: V.paris.timeZone) == 53)
+        #expect(WeekOpening.isoWeekNumber(V.at("2027-01-04T10:00:00Z"), timeZone: V.paris.timeZone) == 1)
+    }
+
     @Test("agrees in gender in French")
     func summaryWords() {
         #expect(WeekOpening.summaryWords(pebbles: 1, people: 1, locale: V.fr) == ("un", "une"))
