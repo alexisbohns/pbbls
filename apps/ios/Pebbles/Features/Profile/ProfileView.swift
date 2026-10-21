@@ -20,6 +20,7 @@ private struct ProfileRow: Decodable {
 struct ProfileView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(PathStatsService.self) private var stats
+    @Environment(TabNavigation.self) private var nav
     @Environment(\.dismiss) private var dismiss
 
     @State private var profile: ProfileRow?
@@ -30,36 +31,49 @@ struct ProfileView: View {
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile-view")
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: Spacing.xl) {
-                ProfileBanner(
-                    displayName: profile?.displayName,
-                    memberSince: profile?.createdAt,
-                    glyphStrokes: glyphStrokes
-                )
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: Spacing.xl) {
+                    ProfileBanner(
+                        displayName: profile?.displayName,
+                        memberSince: profile?.createdAt,
+                        glyphStrokes: glyphStrokes
+                    )
 
-                ProfileShortcutsRow()
+                    ProfileShortcutsRow()
 
-                ProfileStatsCard(
-                    ripple: stats.ripple,
-                    assiduity: stats.assiduity,
-                    daysPracticed: stats.daysPracticed,
-                    pebbles: stats.pebbles,
-                    karma: stats.karma
-                )
+                    ProfileStatsCard(
+                        ripple: stats.ripple,
+                        assiduity: stats.assiduity,
+                        daysPracticed: stats.daysPracticed,
+                        pebbles: stats.pebbles,
+                        karma: stats.karma
+                    )
 
-                ProfileAchievementsCard()
+                    ProfileAchievementsCard()
 
-                ProfileCollectionsCard()
+                    ProfileCollectionsCard()
 
-                ProfileLabCard()
+                    ProfileLabCard()
 
-                ProfileLogoutButton {
-                    Task { await supabase.signOut() }
+                    ProfileLogoutButton {
+                        Task { await supabase.signOut() }
+                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 32)
+                .id(TabNavigation.scrollTopAnchor)
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
+            .onChange(of: nav.scrollToTop[.you, default: 0]) {
+                withAnimation { proxy.scrollTo(TabNavigation.scrollTopAnchor, anchor: .top) }
+            }
+        }
+        .navigationDestination(for: YouRoute.self) { route in
+            switch route {
+            case .glyphs: GlyphsListView()
+            case .achievements: AchievementsView()
+            case .lab: LabView()
+            }
         }
         .pebblesToolbarTitle("Profile")
         .toolbar {
@@ -142,5 +156,6 @@ struct ProfileView: View {
         ProfileView()
             .environment(supabase)
             .environment(PathStatsService(supabase: supabase))
+            .environment(TabNavigation())
     }
 }

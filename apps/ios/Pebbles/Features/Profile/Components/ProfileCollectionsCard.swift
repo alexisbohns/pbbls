@@ -3,6 +3,7 @@ import os
 
 struct ProfileCollectionsCard: View {
     @Environment(SupabaseService.self) private var supabase
+    @Environment(TabNavigation.self) private var nav
 
     @State private var collections: [Collection] = []
     @State private var hasLoaded = false
@@ -25,13 +26,9 @@ struct ProfileCollectionsCard: View {
                         .buttonStyle(.plain)
                     } else {
                         ForEach(collections) { collection in
-                            NavigationLink {
-                                CollectionDetailView(collection: collection, onChanged: {
-                                    Task {
-                                        hasLoaded = false
-                                        await load()
-                                    }
-                                })
+                            Button {
+                                nav.collections = [.collection(collection.id)]
+                                nav.select(.collections)
                             } label: {
                                 ProfileCollectionCard(variant: .filled(collection: collection))
                             }
@@ -56,8 +53,9 @@ struct ProfileCollectionsCard: View {
     }
 
     private var header: some View {
-        NavigationLink {
-            CollectionsListView()
+        Button {
+            nav.popToRoot(.collections)
+            nav.select(.collections)
         } label: {
             HStack {
                 Text("Collections")
