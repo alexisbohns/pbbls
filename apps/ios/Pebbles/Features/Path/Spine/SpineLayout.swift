@@ -39,6 +39,13 @@ enum SpineLayout {
     /// The day label hangs this far above the hairline; `DaySeam` is overhang + seam tall.
     static let seamOverhang: CGFloat = 14
     static let labelWidth: CGFloat = 46
+    /// The label's tab: 1 above the numeral, 3 between the numeral and the
+    /// weekday, 5 below, its bottom corners rounded 10; a still day clears it by 4.
+    static let labelPadTop: CGFloat = 1
+    static let labelGap: CGFloat = 3
+    static let labelPadBottom: CGFloat = 5
+    static let labelRadius: CGFloat = 10
+    static let labelClearance: CGFloat = 4
     static let stillPadTop: CGFloat = 14
     static let stillMinHeight: CGFloat = 48
     static let rakeTile = CGSize(width: 36, height: 240)

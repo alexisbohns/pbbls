@@ -39,7 +39,7 @@ struct DaySeam: View {
             // A zero-width anchor on the line: the label centres on x 40 at any width.
             Color.clear
                 .frame(width: 0, height: 0)
-                .overlay(alignment: .top) { DayLabel(date: date).fixedSize() }
+                .overlay(alignment: .top) { DayLabel(date: date, locale: dateLocale).fixedSize() }
                 .padding(.leading, SpineLayout.spineX)
         }
         .accessibilityElement(children: .ignore)
@@ -55,7 +55,8 @@ struct DaySeam: View {
         let weekday = SpineType.resolve(.dayWeekday, dynamicTypeSize: dynamicTypeSize,
                                         legibilityWeight: legibilityWeight)
         let label = numeral.uiFont.lineHeight + weekday.uiFont.lineHeight + DayLabel.verticalPadding
-        return max(SpineLayout.stillMinHeight + (isLast ? SpineLayout.seamOverhang : 0), label + 4)
+        return max(SpineLayout.stillMinHeight + (isLast ? SpineLayout.seamOverhang : 0),
+                   label + SpineLayout.labelClearance)
     }
 }
 
@@ -90,26 +91,28 @@ private struct SeamRule: View {
 /// The date in the margin: the numeral over the weekday on a tab of ground,
 /// 46 pt wide (wider at accessibility sizes), its bottom corners rounded 10.
 private struct DayLabel: View {
-    static let verticalPadding: CGFloat = 9
+    static let verticalPadding = SpineLayout.labelPadTop + SpineLayout.labelGap + SpineLayout.labelPadBottom
 
     let date: Date
+    let locale: Locale
 
     private var calendar: Calendar { SpineCalendar.current }
 
     var body: some View {
-        VStack(spacing: 3) {
+        VStack(spacing: SpineLayout.labelGap) {
             Text(verbatim: "\(calendar.component(.day, from: date))")
                 .spineType(.dayNumeral)
                 .foregroundStyle(Color.pebbles.onSurface)
-            Text(verbatim: SpineDates.shortWeekday(date, calendar: calendar, locale: SpineStrings.dateLocale))
+            Text(verbatim: SpineDates.shortWeekday(date, calendar: calendar, locale: locale))
                 .spineType(.dayWeekday)
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
         }
-        .padding(.top, 1)
-        .padding(.bottom, 5)
+        .padding(.top, SpineLayout.labelPadTop)
+        .padding(.bottom, SpineLayout.labelPadBottom)
         .frame(minWidth: SpineLayout.labelWidth)
         .background(
-            UnevenRoundedRectangle(bottomLeadingRadius: 10, bottomTrailingRadius: 10)
+            UnevenRoundedRectangle(bottomLeadingRadius: SpineLayout.labelRadius,
+                                   bottomTrailingRadius: SpineLayout.labelRadius)
                 .fill(Color.pebbles.surface)
         )
         .accessibilityHidden(true)
