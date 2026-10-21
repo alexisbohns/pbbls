@@ -1,9 +1,9 @@
 #if DEBUG
 import SwiftUI
 
-/// The Spine's debug lab (#1130), Settings → Developer, beside the stone lab.
-/// Until D5a the Spine shows only here and in the references; each part adds a
-/// section. Verbatim text throughout, so nothing reaches the string catalogue.
+/// The Spine's debug lab (#1130), Settings → Developer, beside the stone lab:
+/// the Spine's pieces on their own, one section each, pressable on a device.
+/// Verbatim text throughout, so nothing reaches the string catalogue.
 struct SpineLabView: View {
     enum Section: String, CaseIterable, Identifiable {
         case stones
