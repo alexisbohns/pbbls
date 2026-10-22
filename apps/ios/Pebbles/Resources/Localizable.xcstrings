@@ -5614,23 +5614,6 @@
         }
       }
     },
-    "Next week" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next week"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semaine suivante"
-          }
-        }
-      }
-    },
     "Nice" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7131,23 +7114,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Veuillez réessayer."
-          }
-        }
-      }
-    },
-    "Previous week" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Previous week"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semaine précédente"
           }
         }
       }
