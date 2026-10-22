@@ -126,11 +126,10 @@ struct PathView: View {
         moment.pebble?.emotion.flatMap { palettes.palette(for: $0.id) }
     }
 
-    /// A press opens the held card (#1146), seeded with the Spine's summary and
-    /// its persons order. Every press asks for the recto until E2.
+    /// A press opens the held card on the face it asked for (#1146): the stone
+    /// the verso, after its dip; the card or the entry the recto.
     private func open(_ open: SpineOpen) {
-        heldCard.open(HeldCardRequest(momentId: open.momentId, seed: open.summary, soulOrder: open.soulOrder,
-                                      origin: .path, onChanged: { reloadAfterCard() }))
+        heldCard.open(HeldCardRequest(open, origin: .path, onChanged: { reloadAfterCard() }))
     }
 
     /// The card changed a moment: the Path and the stats reload.

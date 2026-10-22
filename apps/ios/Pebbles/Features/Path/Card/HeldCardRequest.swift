@@ -27,3 +27,13 @@ struct HeldCardRequest: Identifiable {
         self.onChanged = onChanged
     }
 }
+
+extension HeldCardRequest {
+    /// A Spine press (#1146 §Turn): the face the press asked for, the summary
+    /// that seeds the first frame and the page's persons order. A bare moment
+    /// has no card to turn, so it always opens on its plain page.
+    init(_ open: SpineOpen, origin: AppTab, onChanged: @escaping @MainActor () -> Void) {
+        self.init(momentId: open.momentId, face: open.summary.pebble == nil ? .recto : open.face,
+                  seed: open.summary, soulOrder: open.soulOrder, origin: origin, onChanged: onChanged)
+    }
+}
