@@ -246,20 +246,23 @@ struct RootView: View {
         // The `session == nil` re-arm never fires on a cold launch that
         // resolves signed out, so re-arm the loader for the next sign-in here.
         pathFeedLoaded = false
+        // No slot of the last account survives into the next one.
+        cardFrames = CardFrameRegistry()
     }
 }
 
 #Preview {
     let supabase = SupabaseService()
+    let snapURLs = SnapURLCache(client: supabase.client)
     return RootView()
         .environment(supabase)
         .environment(EmotionPaletteService(client: supabase.client))
         .environment(ReferenceDataService(client: supabase.client))
         .environment(PathStatsService(supabase: supabase))
         .environment(CompleteDraftStore())
-        .environment(SnapURLCache(client: supabase.client))
+        .environment(snapURLs)
         .environment(KarmaNotificationService())
         .environment(ConnectionsService(supabase: supabase))
         .environment(MomentsRevision())
-        .environment(SnapAspectCache(urls: SnapURLCache(client: SupabaseService().client)))
+        .environment(SnapAspectCache(urls: snapURLs))
 }

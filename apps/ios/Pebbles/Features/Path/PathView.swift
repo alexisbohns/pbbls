@@ -136,8 +136,8 @@ struct PathView: View {
     }
 
     /// Until stack E's held card: every press opens today's detail sheet.
-    private func open(_ open: SpineOpen) {
-        selectedMomentId = open.momentId
+    private func open(_ request: SpineOpen) {
+        selectedMomentId = request.momentId
     }
 
     private func syncSouls() {
