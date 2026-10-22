@@ -1,0 +1,41 @@
+import CoreGraphics
+import Testing
+@testable import Pebbles
+
+/// #1130 D12 and decision 2: of the realised marks (seams and pebble rows, each
+/// with its day and its top in the page's space), the day of the last one at or
+/// above 35 % of the viewport (Android ReadingDayTest).
+@Suite("ReadingDay")
+struct ReadingDayTests {
+    typealias Mark = ReadingDay.Mark
+
+    @Test("the last mark at or above the reading line wins")
+    func line() {
+        let marks = [Mark(day: 0, minY: -500), Mark(day: 0, minY: -100), Mark(day: 1, minY: 200),
+                     Mark(day: 1, minY: 400)]
+        #expect(ReadingDay.index(marks, viewportHeight: 1000) == 1)
+        #expect(ReadingDay.index(marks, viewportHeight: 400) == 0)
+    }
+
+    @Test("a mark exactly on the line counts")
+    func onTheLine() {
+        #expect(ReadingDay.index([Mark(day: 3, minY: 350)], viewportHeight: 1000) == 3)
+    }
+
+    @Test("nothing has reached the line yet: nil, and the page reads its first day")
+    func none() {
+        #expect(ReadingDay.index([Mark(day: 0, minY: 600)], viewportHeight: 1000) == nil)
+        #expect(ReadingDay.index([], viewportHeight: 1000) == nil)
+    }
+
+    @Test("the marks' order of arrival does not matter")
+    func unordered() {
+        let marks = [Mark(day: 2, minY: 300), Mark(day: 1, minY: -50), Mark(day: 4, minY: 800)]
+        #expect(ReadingDay.index(marks, viewportHeight: 1000) == 2)
+    }
+
+    @Test("a long day whose seam has scrolled away is still read through its pebbles")
+    func longDay() {
+        #expect(ReadingDay.index([Mark(day: 3, minY: -900), Mark(day: 3, minY: 120)], viewportHeight: 800) == 3)
+    }
+}
