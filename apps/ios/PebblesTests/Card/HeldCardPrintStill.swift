@@ -19,7 +19,7 @@ struct HeldCardPrintStill: View {
                                            domains: HeldCardFixtures.domains,
                                            collectionGlyphs: HeldCardFixtures.collectionGlyphs,
                                            soulGlyphs: HeldCardFixtures.soulGlyphs, soulOrder: [],
-                                           turn: CardTurnModel(face: .verso), print: t))
+                                           turn: CardTurnModel(face: .verso), turnByDrag: false, print: t))
             } else {
                 page
             }
