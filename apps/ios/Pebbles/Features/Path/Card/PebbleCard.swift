@@ -67,6 +67,8 @@ struct PebbleCard: View {
                            stone: SpineColors.spot(stone, scheme: scheme), onTurn: turnByButton)
                     .frame(width: width)
                     .opacity(print.map { PrintPart.footer.alpha(CompletionMotion.print($0)) } ?? 1)
+                    // Printing in, the footer is seen but not yet pressed.
+                    .allowsHitTesting(print == nil)
             }
         }
         .accessibilityElement(children: .contain)

@@ -112,7 +112,7 @@ struct HeldCardPage: View {
             VStack(spacing: 12) {
                 Text("Couldn't load this pebble.")
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                Button("Retry") { Task { await reload() } }
+                Button("Retry") { Task { await reload(); cutShortIfRestored() } }
             }
         case .loaded:
             if let detail = model.detail {
@@ -142,11 +142,12 @@ struct HeldCardPage: View {
                 let elapsed = context.date.timeIntervalSince(printStart)
                 let t = CompletionMotion.timeline(elapsed: elapsed, duration: duration)
                 CardPrint(t: t, crossfade: printCrossfades, page: bare(detail), card: card(detail, pebble, print: t))
-                    .onChange(of: t >= CompletionMotion.pressAt) { _, pressed in
+                    .onChange(of: t >= CompletionMotion.pressAt, initial: true) { _, pressed in
                         if pressed, !printCrossfades { versoPress = .next(after: nil, still: false, now: .now) }
                     }
-                    // The frame that reaches the end ends it (D6).
-                    .onChange(of: t >= 1) { _, done in
+                    // The frame that reaches the end ends it (D6); `initial` covers a
+                    // first frame already past the end after a late cover dismissal.
+                    .onChange(of: t >= 1, initial: true) { _, done in
                         if done { endPrint() }
                     }
             }
