@@ -110,4 +110,27 @@ enum HeldCardFixtures {
                                          (growth, "growth", "Personal growth"), (spirit, "spirit", "Spirituality")],
                                collections: [(autumn, "Autumn evenings on the river"),
                                              (UUID(), "Things I want to remember next year")])
+
+    /// F4: a bare moment with a photo and words.
+    static let f4 = decode("""
+    {
+      "id": "1c8d4a6f-3e52-4b9f-a07c-2d3e4f5a6b01", "user_id": "5f0e1d2c-3b4a-4958-8776-655443322110",
+      "name": "Sunday market", "description": "Elio wanted the yellow tomatoes.",
+      "happened_at": "2026-10-11T07:40:00+00:00", "hidden_at": null,
+      "created_at": "2026-10-11T07:41:00+00:00", "updated_at": "2026-10-11T07:41:00+00:00",
+      "snaps": [{"id": "b2c3d4e5-f6a7-4890-9bcd-ef0123456701", "storage_path": "\(fountain)", "sort_order": 0}],
+      "pebble": null
+    }
+    """)
+
+    /// F4 without a photo.
+    static let f4NoPhoto = decode("""
+    {
+      "id": "1c8d4a6f-3e52-4b9f-a07c-2d3e4f5a6b02", "user_id": "5f0e1d2c-3b4a-4958-8776-655443322110",
+      "name": "Sunday market", "description": "Elio wanted the yellow tomatoes.",
+      "happened_at": "2026-10-11T07:40:00+00:00", "hidden_at": null,
+      "created_at": "2026-10-11T07:41:00+00:00", "updated_at": "2026-10-11T07:41:00+00:00",
+      "snaps": [], "pebble": null
+    }
+    """)
 }
