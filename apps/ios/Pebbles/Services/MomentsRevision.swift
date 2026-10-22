@@ -4,9 +4,8 @@ import Observation
 ///
 /// Bumpers: `HeldCardModel` on every save, delete and completion made on the
 /// held card, from the tab that opened it (#1146), the `.momentDeleteDialog`
-/// presenters, and Capture's `onMomentChanged`. Reader: `PathModel`, which
-/// reloads when another tab bumped. People and Collections detail views
-/// already reload through their own callbacks.
+/// presenters, and Capture's `onMomentChanged`. Readers: `PathModel`, and the
+/// People and Collections detail views, each reloading when another tab bumped.
 @Observable @MainActor
 final class MomentsRevision {
     private(set) var value = 0
