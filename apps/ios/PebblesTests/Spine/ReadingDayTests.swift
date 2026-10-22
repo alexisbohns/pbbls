@@ -38,4 +38,20 @@ struct ReadingDayTests {
     func longDay() {
         #expect(ReadingDay.index([Mark(day: 3, minY: -900), Mark(day: 3, minY: 120)], viewportHeight: 800) == 3)
     }
+
+    /// Android's `ReadingDayTest` verbatim: the line at 350 of a 1000 viewport.
+    /// Android walks the list in order and stops at the first mark past the
+    /// line; iOS takes the last mark at or above it. The same on ordered input.
+    @Test("the android vectors", arguments: [
+        ([(Int, CGFloat)](), nil),
+        ([(0, 400), (1, 700)], nil),
+        ([(0, -200), (1, 100), (2, 600)], 1),
+        ([(1, -500), (2, -40)], 2),
+        ([(2, 0), (3, 350), (4, 351)], 3),
+        ([(1, -30), (1, 200), (2, 500)], 1)
+    ] as [([(Int, CGFloat)], Int?)])
+    func androidVectors(marks: [(Int, CGFloat)], expected: Int?) {
+        let marks = marks.map { Mark(day: $0.0, minY: $0.1) }
+        #expect(ReadingDay.index(marks, viewportHeight: 1000) == expected)
+    }
 }
