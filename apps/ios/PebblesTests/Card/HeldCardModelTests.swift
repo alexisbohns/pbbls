@@ -47,12 +47,16 @@ struct HeldCardModelTests {
     func latestLoadWins() async throws {
         let model = model()
         let stale = try detail()
-        let fresh = try detail(MomentFixtures.Android.detailBareNamed)
+        let fresh = try detail(MomentFixtures.Captured.detailPhoto)
         let gate = AsyncStream<Void>.makeStream()
+        let started = Calls()
         async let slow: Void = model.load {
+            started.count = 1
             for await _ in gate.stream { break }
             return stale
         }
+        // The model runs on the main actor: let the slow load begin before the fast one.
+        while started.count == 0 { await Task.yield() }
         await model.load { fresh }
         gate.continuation.yield()
         gate.continuation.finish()
