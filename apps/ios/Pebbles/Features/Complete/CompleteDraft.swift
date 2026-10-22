@@ -4,12 +4,25 @@ import Foundation
 /// domain (D2); souls and collection are optional; visibility defaults to
 /// secret. One domain and one collection at most (A1).
 struct CompleteDraft: Equatable {
+    /// What Edit pebble prefilled (#1099 D8): the pebble's first domain and its
+    /// first collection. `CompletePebblePayload` omits a set the user left as
+    /// prefilled, so `complete_pebble` keeps the pebble's whole set.
+    struct Prefill: Equatable {
+        let domainId: UUID?
+        let collectionId: UUID?
+    }
+
     var valence: Valence?
     var emotionId: UUID?
     var domainId: UUID?
     var soulIds: [UUID] = []
     var collectionId: UUID?
     var visibility: Visibility = .secret
+    /// Set only by `init(from:)`; nil in the Complete flow, so a first
+    /// completion sends both sets. Never counts toward `isEmpty`. Not carried
+    /// by `CompleteDraftSnapshot`: Edit pebble never persists its draft, and an
+    /// autosave that did would turn an edit into a set-collapsing one.
+    var prefill: Prefill?
 
     var isComplete: Bool { valence != nil && emotionId != nil && domainId != nil }
 
@@ -44,5 +57,6 @@ extension CompleteDraft {
         soulIds = pebble.souls.map(\.id)
         collectionId = pebble.collections.first?.id
         visibility = pebble.visibility
+        prefill = Prefill(domainId: domainId, collectionId: collectionId)
     }
 }

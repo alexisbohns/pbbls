@@ -2,7 +2,8 @@ import Foundation
 
 /// The `payload` of `complete_pebble(payload jsonb)` (spec §3): the caller's
 /// one pebble on `momentId`, inserted or updated. Keys other than
-/// `moment_id` are omitted when nil (null means "keep"). iOS never sends
+/// `moment_id` are omitted when nil (absent means "keep"; Edit pebble omits
+/// the sets the user left as prefilled, #1099). iOS never sends
 /// `new_souls`, `new_collections` or `cards` (A2).
 struct CompletePebblePayload: Encodable, Equatable {
     let momentId: UUID
@@ -52,8 +53,22 @@ extension CompletePebblePayload {
         self.intensity = valence.intensity
         self.positiveness = valence.positiveness
         self.visibility = draft.visibility
-        self.domainIds = [domainId]
         self.soulIds = draft.soulIds
-        self.collectionIds = draft.collectionId.map { [$0] } ?? []
+        // #1099 D8: a set Edit pebble left as prefilled is omitted, and absent
+        // means keep: `complete_pebble` replaces a set only when its key is
+        // present. A pre-split pebble keeps every domain and collection through
+        // an edit of its emotion; touching the field collapses it to the pick.
+        // The explicit unwrap matters: a fresh draft has no prefill, and
+        // `nil == nil` would read as "untouched".
+        if let prefill = draft.prefill, prefill.domainId == domainId {
+            self.domainIds = nil
+        } else {
+            self.domainIds = [domainId]
+        }
+        if let prefill = draft.prefill, prefill.collectionId == draft.collectionId {
+            self.collectionIds = nil
+        } else {
+            self.collectionIds = draft.collectionId.map { [$0] } ?? []
+        }
     }
 }

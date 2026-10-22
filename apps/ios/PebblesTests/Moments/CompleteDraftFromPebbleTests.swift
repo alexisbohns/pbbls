@@ -27,14 +27,14 @@ struct CompleteDraftFromPebbleTests {
         #expect(!draft.isComplete)
     }
 
-    @Test("the prefilled draft becomes a complete_pebble payload keeping one domain and one collection (A2)")
+    @Test("the untouched prefilled draft keeps the pebble's sets by omitting them (#1099)")
     func payload() throws {
         let detail = try JSONDecoder().decode(MomentDetail.self, from: MomentFixtures.completedMoment)
         let draft = CompleteDraft(from: try #require(detail.pebble))
         let payload = try #require(CompletePebblePayload(momentId: detail.id, draft: draft))
         #expect(payload.momentId == detail.id)
-        #expect(payload.domainIds == [MomentFixtures.uuid(MomentFixtures.domainId)])
-        #expect(payload.collectionIds == [MomentFixtures.uuid(MomentFixtures.collectionId)])
+        #expect(payload.domainIds == nil)
+        #expect(payload.collectionIds == nil)
         #expect(payload.visibility == .private)
     }
 }
