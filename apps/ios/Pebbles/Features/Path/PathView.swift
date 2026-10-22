@@ -17,11 +17,11 @@ struct PathView: View {
     @Environment(ReferenceDataService.self) private var references
     @Environment(TabNavigation.self) private var nav
     @Environment(MomentsRevision.self) private var revision
+    @Environment(HeldCardHostModel.self) private var heldCard
 
     @State private var model = PathModel()
     /// The Capture flow, what `+` opens.
     @State private var isPresentingCapture = false
-    @State private var selectedMomentId: UUID?
     @State private var pendingDeletion: MomentDeleteTarget?
     /// The latest reload asked for; a newer one cancels it, so a slow first
     /// fetch cannot land after the second.
@@ -63,15 +63,6 @@ struct PathView: View {
                     revision.bump(from: .path)
                     Task { await stats.refresh() }
                     reload(focusing: momentId)
-                })
-            }
-            .sheet(item: $selectedMomentId) { id in
-                PebbleDetailSheet(momentId: id, origin: .path, onPebbleUpdated: {
-                    Task {
-                        async let timeline: Void = model.load { try await service.pathMoments() }
-                        async let statsReload: Void = stats.refresh()
-                        _ = await (timeline, statsReload)
-                    }
                 })
             }
             .momentDeleteDialog(target: $pendingDeletion) { target, option in
@@ -135,9 +126,20 @@ struct PathView: View {
         moment.pebble?.emotion.flatMap { palettes.palette(for: $0.id) }
     }
 
-    /// Until stack E's held card: every press opens today's detail sheet.
-    private func open(_ request: SpineOpen) {
-        selectedMomentId = request.momentId
+    /// A press opens the held card (#1146), seeded with the Spine's summary and
+    /// its persons order. Every press asks for the recto until E2.
+    private func open(_ open: SpineOpen) {
+        heldCard.open(HeldCardRequest(momentId: open.momentId, seed: open.summary, soulOrder: open.soulOrder,
+                                      origin: .path, onChanged: { reloadAfterCard() }))
+    }
+
+    /// The card changed a moment: the Path and the stats reload.
+    private func reloadAfterCard() {
+        Task {
+            async let timeline: Void = model.load { try await service.pathMoments() }
+            async let statsReload: Void = stats.refresh()
+            _ = await (timeline, statsReload)
+        }
     }
 
     private func syncSouls() {
@@ -193,5 +195,6 @@ struct PathView: View {
     .environment(CompleteDraftStore())
     .environment(TabNavigation())
     .environment(MomentsRevision())
+    .environment(HeldCardHostModel())
     .environment(SnapAspectCache(urls: SnapURLCache(client: supabase.client)))
 }
