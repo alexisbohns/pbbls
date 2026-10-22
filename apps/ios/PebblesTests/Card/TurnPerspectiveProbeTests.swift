@@ -53,7 +53,8 @@ struct TurnPerspectiveProbeTests {
         #expect(measured.right > measured.left)
     }
 
-    @Test("CardTurnEffect builds the same projection, and its fit holds the near edge to the card", arguments: [0.25, 0.45])
+    @Test("CardTurnEffect builds the same projection, and its fit holds the near edge to the card",
+          arguments: [0.25, 0.45])
     func effect(t: Double) throws {
         let unfitted = try edges(panel.modifier(CardTurnEffect(progress: t, rightToLeft: false, fits: false)))
         #expect(abs(unfitted.right - nearEdge(t)) <= 6, "near edge \(unfitted.right), predicted \(nearEdge(t))")
