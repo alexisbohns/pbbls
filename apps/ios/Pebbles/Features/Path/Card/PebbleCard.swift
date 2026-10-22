@@ -33,6 +33,9 @@ struct PebbleCard: View {
     /// The verso stone's press, which the print plays at 0.45 (E3).
     var stonePress: StonePress?
     var focus: AccessibilityFocusState<CardFocus?>.Binding?
+    /// Until the moment has landed (the card drawn from its seed, #1160), the
+    /// footer shows but neither its button nor the pan turns the card.
+    var turnDisabled = false
 
     @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -51,7 +54,7 @@ struct PebbleCard: View {
                     .overlay {
                         if turnByDrag {
                             TurnPanFallback(
-                                onBegan: { turn.startDrag() },
+                                onBegan: { !turnDisabled && turn.startDrag() },
                                 onChanged: { dx in
                                     turn.drag(to: TurnSettle.progress(drag: dx, width: width,
                                                                       rightToLeft: rightToLeft),
@@ -67,6 +70,7 @@ struct PebbleCard: View {
                 TurnFooter(progress: shownProgress, face: turn.face, visibility: pebble.visibility,
                            stone: SpineColors.spot(stone, scheme: scheme), onTurn: turnByButton)
                     .frame(width: width)
+                    .disabled(turnDisabled)
                     .opacity(print.map { PrintPart.footer.alpha(CompletionMotion.print($0)) } ?? 1)
                     // Printing in, the footer is seen but not yet pressed.
                     .allowsHitTesting(print == nil)

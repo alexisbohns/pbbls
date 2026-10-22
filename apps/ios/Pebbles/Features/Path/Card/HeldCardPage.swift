@@ -8,6 +8,11 @@ import os
 /// Complete flow and the delete dialog over the window as before. A moment with
 /// no pebble opens as the bare page, and a completion prints its card into it
 /// (E3, D6); a restore mid-print lands the card at rest, verso up (D7).
+///
+/// A seeded open (the Spine's press, #1160) draws the card from the seed's
+/// detail on its first frame and keeps that one view while the moment loads:
+/// the words, the souls past three and the verso's stamps fill in in place,
+/// and the turn waits for the real detail.
 struct HeldCardPage: View {
     let request: HeldCardRequest
     /// The card's resting global rect, for the host's FLIP; reported on every change.
@@ -21,6 +26,9 @@ struct HeldCardPage: View {
     @Environment(MomentsRevision.self) private var revision
     @Environment(HeldCardHostModel.self) private var host
     @Environment(SnapAspectCache.self) private var aspects
+
+    /// The card the seed can draw before the load; nil without a seed.
+    private let seededDetail: MomentDetail?
 
     @State private var model: HeldCardModel
     @State private var turn: CardTurnModel
@@ -45,12 +53,15 @@ struct HeldCardPage: View {
         self.request = request
         self.onRest = onRest
         self.onClose = onClose
+        seededDetail = request.seed.flatMap { MomentDetail(seed: $0) }
         _model = State(initialValue: HeldCardModel(momentId: request.momentId, origin: request.origin,
                                                    onChanged: request.onChanged))
         _turn = State(initialValue: CardTurnModel(face: request.face))
     }
 
     private var service: MomentsService { MomentsService(client: supabase.client) }
+    /// The loaded moment, or the seed's until it lands: one card, no swap.
+    private var shownDetail: MomentDetail? { model.detail ?? seededDetail }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -76,8 +87,8 @@ struct HeldCardPage: View {
             try? await Task.sleep(for: .seconds(1))
             model.announced()
         }
-        .task(id: model.detail?.snaps.first?.storagePath) {
-            guard let path = model.detail?.snaps.first?.storagePath else { return }
+        .task(id: shownDetail?.snaps.first?.storagePath) {
+            guard let path = shownDetail?.snaps.first?.storagePath else { return }
             await aspects.probe(path)
         }
         .onChange(of: turn.landing) { _, face in host.land(face) }
@@ -114,43 +125,37 @@ struct HeldCardPage: View {
 
     @ViewBuilder
     private var content: some View {
-        switch shown {
-        case .seed:
-            ScrollView {
-                Group {
-                    if let seed = request.seed, let pebble = seed.pebble {
-                        seededCard(seed, pebble)
-                    } else {
-                        CardPlaceholder(width: CardLayout.cardWidth(available: pageWidth))
-                    }
-                }
-                .modifier(Flying(host: host, onRest: onRest))
-                .frame(maxWidth: .infinity)
-                .padding(.top, 8)
-            }
-            .scrollClipDisabled()
-        case .failed:
+        if model.phase == .failed {
             VStack(spacing: 12) {
                 Text("Couldn't load this pebble.")
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 Button("Retry") { Task { await reload(); cutShortIfRestored() } }
             }
-        case .detail:
-            if let detail = model.detail {
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        page(detail)
-                            .padding(.top, 8)
-                            .padding(.bottom, 32)
-                    }
-                    .scrollClipDisabled()
-                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { viewport = $0 }
-                    .task(id: printReady) {
-                        guard printReady else { return }
-                        await beginPrint(proxy)
-                    }
+        } else if let detail = shownDetail {
+            // One identity from the first frame through the load (#1160): the
+            // scroll, the reader and the card's `Flying` never rebuild.
+            ScrollViewReader { proxy in
+                ScrollView {
+                    page(detail)
+                        .padding(.top, 8)
+                        .padding(.bottom, 32)
+                }
+                .scrollClipDisabled()
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { viewport = $0 }
+                .task(id: printReady) {
+                    guard printReady else { return }
+                    await beginPrint(proxy)
                 }
             }
+        } else {
+            // No seed (a soul's or a collection's row): the blank card until the moment lands.
+            ScrollView {
+                CardPlaceholder(width: CardLayout.cardWidth(available: pageWidth))
+                    .modifier(Flying(host: host, onRest: onRest))
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 8)
+            }
+            .scrollClipDisabled()
         }
     }
 
@@ -183,7 +188,7 @@ struct HeldCardPage: View {
     private func bare(_ detail: MomentDetail) -> BareMomentPage {
         BareMomentPage(detail: detail, ratio: detail.snaps.first.flatMap { aspects.ratio(for: $0.storagePath) },
                        onComplete: { isPresentingComplete = true },
-                       isCompleteDisabled: model.completion != nil || printStart != nil,
+                       isCompleteDisabled: model.detail == nil || model.completion != nil || printStart != nil,
                        onPlaceFrame: { placeFrame = $0 }, titleFocus: $focus)
     }
 
@@ -192,7 +197,10 @@ struct HeldCardPage: View {
                    ratio: detail.snaps.first.flatMap { aspects.ratio(for: $0.storagePath) },
                    width: CardLayout.cardWidth(available: pageWidth), domains: refs.domains,
                    collectionGlyphs: collectionGlyphs, soulGlyphs: soulGlyphs, soulOrder: request.soulOrder,
-                   turn: turn, print: print, stonePress: versoPress, focus: $focus)
+                   turn: turn, print: print, stonePress: versoPress, focus: $focus, turnDisabled: model.detail == nil)
+            // The load fills the seed's card in place: its height and new content ease in.
+            .animation(.easeOut(duration: 0.25), value: model.detail != nil)
+            .modifier(FlightRaster(on: host.phase == .opening && host.flies))
             .modifier(Flying(host: host, onRest: onRest, active: print == nil))
             .frame(maxWidth: .infinity)
             .stonePressLifetime($versoPress)
@@ -300,37 +308,6 @@ private enum ReferencePhone {
     static let width: CGFloat = 393
 }
 
-// MARK: - The flight's first frame (E4)
-
-private extension HeldCardPage {
-    /// What the page shows. The seed stays up while the open still flies, even
-    /// once the detail has landed, so the flying card keeps one view identity
-    /// across the load (a new `Flying` would start at `flight == 1` and snap).
-    enum Shown { case seed, failed, detail }
-
-    var shown: Shown {
-        switch model.phase {
-        case .loading: .seed
-        case .failed: .failed
-        case .loaded: host.phase == .opening && host.flies ? .seed : .detail
-        }
-    }
-
-    /// The seed's recto (#1146 §Flight, first frame): the Spine card at the
-    /// card's width, so the flight lands on a card, never a spinner; the leaf,
-    /// the souls past three and the verso fill in when the moment lands.
-    func seededCard(_ seed: MomentSummary, _ pebble: MomentSummary.PebbleSummary) -> some View {
-        let width = CardLayout.cardWidth(available: pageWidth)
-        let emotion = pebble.emotion.flatMap { palettes.palette(for: $0.id) }
-        return SpineCardShell(emotion: emotion, polarity: pebble.valence.polarity, intensity: pebble.intensity) {
-            SpineCardFace(moment: seed, palette: SpineColors.palette(emotion, isBlank: false),
-                          ratio: seed.firstSnapPath.flatMap { aspects.ratio(for: $0) },
-                          width: width, u: CardLayout.u(cardWidth: width), soulNames: [:], soulGlyphs: soulGlyphs,
-                          soulOrder: request.soulOrder, accessible: true)
-        }
-    }
-}
-
 /// The FLIP on whichever card the page shows (#1160 D1): the transform from the
 /// host's state, the rest read outside it, and the card invisible until its
 /// rest is known, so the first frame of an open is measured, not guessed.
@@ -348,5 +325,22 @@ private struct Flying: ViewModifier {
                 Color.clear
                     .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { onRest($0) }
             }
+    }
+}
+
+/// While the open flies, the card is one Metal texture (`drawingGroup`), so the
+/// shell's blurred shadows are not re-rendered on every frame of the scale; at
+/// rest it draws as layers again. The toggle rebuilds the card's subtree once,
+/// at rest, when its photo is already in `SnapImageCache`: nothing blinks.
+private struct FlightRaster: ViewModifier {
+    let on: Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if on {
+            content.drawingGroup()
+        } else {
+            content
+        }
     }
 }
