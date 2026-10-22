@@ -30,11 +30,14 @@ struct GlyphThumbnail: View {
                 }
                 var path = SVGPath.path(from: stroke.d)
                 path = path.applying(CGAffineTransform(scaleX: scale, y: scale))
+                // The 6 px rule scaled into the slot, floored at a point: a small
+                // mark (14 pt on the band, 24 pt on a card's strip) must read at
+                // the weight of the SF symbols beside it, not as a hairline.
                 ctx.stroke(
                     path,
                     with: .color(strokeColor),
                     style: StrokeStyle(
-                        lineWidth: stroke.width * scale,
+                        lineWidth: max(stroke.width * scale, 1),
                         lineCap: .round,
                         lineJoin: .round
                     )
