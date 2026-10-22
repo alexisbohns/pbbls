@@ -58,14 +58,28 @@ struct StoneRingGeometry {
     /// flattening walks the whole path.
     @MainActor
     static func forStone(_ valence: Valence) -> StoneRingGeometry? {
-        if let cached = cache[valence] { return cached }
+        forStone(valence, in: SpineLayout.stoneSize(valence.sizeGroup))
+    }
+
+    /// The same outline fitted into `stone` instead (the held card's verso
+    /// draws it at 150 pt, #1146); the ring steps stay in points.
+    @MainActor
+    static func forStone(_ valence: Valence, in stone: CGSize) -> StoneRingGeometry? {
+        let key = CacheKey(valence: valence, width: stone.width, height: stone.height)
+        if let cached = cache[key] { return cached }
         guard let art = WobbleRenderer.softBackdropArt(size: valence.sizeGroup, polarity: valence.polarity),
               let geometry = make(outline: art.path, size: valence.sizeGroup,
-                                  toPoints: fit(art.viewBox, into: SpineLayout.stoneSize(valence.sizeGroup))) else {
+                                  toPoints: fit(art.viewBox, into: stone)) else {
             return nil
         }
-        cache[valence] = geometry
+        cache[key] = geometry
         return geometry
+    }
+
+    private struct CacheKey: Hashable {
+        let valence: Valence
+        let width: CGFloat
+        let height: CGFloat
     }
 
     /// The aspect fit `WobbledBackdropShape` draws with: viewBox to the stone's frame, centred.
@@ -76,7 +90,7 @@ struct StoneRingGeometry {
         return CGAffineTransform(scaleX: scale, y: scale).concatenating(CGAffineTransform(translationX: dx, y: dy))
     }
 
-    @MainActor private static var cache: [Valence: StoneRingGeometry] = [:]
+    @MainActor private static var cache: [CacheKey: StoneRingGeometry] = [:]
 
     /// Shoelace over the first contour; nil when it encloses no area.
     private static func areaCentroid(_ points: [CGPoint]) -> CGPoint? {
