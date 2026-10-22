@@ -8,8 +8,8 @@ struct HeldCardHost: ViewModifier {
     let host: HeldCardHostModel
 
     func body(content: Content) -> some View {
-        content.sheet(item: Binding(get: { host.request }, set: { if $0 == nil { host.close() } })) { request in
-            PebbleDetailSheet(request: request, onClose: { host.close() })
+        content.sheet(item: Binding(get: { host.request }, set: { if $0 == nil { host.finishClose() } })) { request in
+            PebbleDetailSheet(request: request, onClose: { host.finishClose() })
         }
     }
 }
