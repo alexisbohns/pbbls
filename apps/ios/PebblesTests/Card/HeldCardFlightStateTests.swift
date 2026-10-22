@@ -116,6 +116,15 @@ struct HeldCardFlightStateTests {
         #expect(host.returnFocus == request.momentId)
     }
 
+    @Test("a card from another list returns focus to no slot")
+    func finishElsewhere() {
+        let host = HeldCardHostModel()
+        host.open(HeldCardRequest(momentId: UUID(), origin: .people))
+        _ = host.beginClose(sourceRect: nil, reduceMotion: false)
+        host.finishClose()
+        #expect(host.request == nil && host.returnFocus == nil)
+    }
+
     @Test("a restored card opens at rest, without a flight")
     func restore() {
         let host = HeldCardHostModel()

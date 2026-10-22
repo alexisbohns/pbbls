@@ -122,9 +122,10 @@ final class HeldCardHostModel {
         pageOpacity = 1
     }
 
-    /// The close's last frame: the card is gone and focus returns to its slot.
+    /// The close's last frame: the card is gone and focus returns to its slot,
+    /// when the Path opened it; a card from another list has no slot to return to.
     func finishClose() {
-        let id = request?.momentId
+        let id = request?.origin == .path ? request?.momentId : nil
         clear()
         returnFocus = id
     }

@@ -67,12 +67,19 @@ struct HeldCardHost: View {
 
     // MARK: - Close
 
+    /// A second Back while a close runs is ignored: `finishClose()` fires once.
     private func close() {
         guard let id = host.request?.momentId, host.phase != .idle else { return }
-        if case .closing = host.phase {} else {
-            _ = host.beginClose(sourceRect: registry.frames[id], reduceMotion: reduceMotion)
-        }
+        if case .closing = host.phase { return }
+        beginClose(id: id)
         completeClose(width: nil)
+    }
+
+    /// The slot hides whenever the close flies, including after an open that faded.
+    private func beginClose(id: UUID) {
+        if host.beginClose(sourceRect: registry.frames[id], reduceMotion: reduceMotion) {
+            registry.hidden = id
+        }
     }
 
     private func completeClose(width: CGFloat?) {
@@ -103,8 +110,9 @@ struct HeldCardHost: View {
 
     /// The leading 20 pt (trailing in RTL, by layout direction) has priority
     /// over the card's turn; the card starts 16 pt in, and they move in opposite
-    /// directions. Release with the turn's rule: a flick of 1.5 screens a second
-    /// carries, else past the half completes; a cancel springs back in 0.21 s.
+    /// directions. It starts under the top bar, so Back keeps its 44 pt target.
+    /// Release with the turn's rule: a flick of 1.5 screens a second carries,
+    /// else past the half completes; a cancel springs back in 0.21 s.
     private func edgeStrip(width: CGFloat) -> some View {
         HStack(spacing: 0) {
             Color.clear
@@ -116,9 +124,7 @@ struct HeldCardHost: View {
                             guard let id = host.request?.momentId, host.phase != .opening, host.phase != .idle else {
                                 return
                             }
-                            if case .closing = host.phase {} else {
-                                _ = host.beginClose(sourceRect: registry.frames[id], reduceMotion: reduceMotion)
-                            }
+                            if case .closing = host.phase {} else { beginClose(id: id) }
                             let dx = rightToLeft ? -value.translation.width : value.translation.width
                             host.scrub(Double(max(0, dx) / max(width, 1)), width: width)
                         }
@@ -135,6 +141,7 @@ struct HeldCardHost: View {
                 )
             Spacer(minLength: 0)
         }
+        .padding(.top, CardLayout.turnTarget)
         .accessibilityHidden(true)
     }
 }
