@@ -46,6 +46,10 @@ struct RootView: View {
     /// that adds one (stack E's `heldCard`) registers it in both places, in
     /// the PR that adds it.
     @SceneStorage("tabs.navigation") private var storedTabs: Data?
+    /// Where each Spine slot sits on screen, for stack E's held card (#1130
+    /// §Frame registry). Created here, above the tabs, so the overlay E adds
+    /// beside `PebblesTabView` reads the same one.
+    @State private var cardFrames = CardFrameRegistry()
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "root")
 
@@ -115,6 +119,8 @@ struct RootView: View {
                 ZStack {
                     PebblesTabView(onPathFirstLoad: { pathFeedLoaded = true })
                         .environment(nav)
+                        .environment(cardFrames)
+                        .environment(\.spineSnapSource, .signed(snapURLs))
                         .fullScreenCover(isPresented: $isPresentingOnboarding) {
                             OnboardingView(steps: OnboardingSteps.all) {
                                 hasSeenOnboarding = true
@@ -255,4 +261,5 @@ struct RootView: View {
         .environment(KarmaNotificationService())
         .environment(ConnectionsService(supabase: supabase))
         .environment(MomentsRevision())
+        .environment(SnapAspectCache(urls: SnapURLCache(client: SupabaseService().client)))
 }

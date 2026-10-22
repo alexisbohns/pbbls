@@ -8,6 +8,7 @@ struct PebblesApp: App {
     @State private var refs: ReferenceDataService
     @State private var stats: PathStatsService
     @State private var snapURLs: SnapURLCache
+    @State private var snapAspects: SnapAspectCache
     @State private var karma: KarmaNotificationService
     @State private var achievementNotify: AchievementNotificationService
     @State private var achievements: AchievementsService
@@ -27,7 +28,10 @@ struct PebblesApp: App {
         self._palettes = State(initialValue: palettes)
         self._refs     = State(initialValue: refs)
         self._stats    = State(initialValue: PathStatsService(supabase: supabase))
-        self._snapURLs = State(initialValue: SnapURLCache(client: supabase.client))
+        let snapURLs = SnapURLCache(client: supabase.client)
+        self._snapURLs = State(initialValue: snapURLs)
+        // The Spine's photo ratios (#1130 D3), signed through the same cache.
+        self._snapAspects = State(initialValue: SnapAspectCache(urls: snapURLs))
         self._karma    = State(initialValue: KarmaNotificationService())
         self._achievementNotify = State(initialValue: achievementNotify)
         self._achievements = State(initialValue: achievements)
@@ -46,6 +50,7 @@ struct PebblesApp: App {
                 .environment(refs)
                 .environment(stats)
                 .environment(snapURLs)
+                .environment(snapAspects)
                 .environment(karma)
                 .environment(achievementNotify)
                 .environment(achievements)
