@@ -19,6 +19,13 @@ struct SpineCardFace: View {
     let soulOrder: [String]
     /// Up to this many souls are named in full: 3 on the Spine (R7), 8 on the held card (E).
     var namedInFull = 3
+    /// The held card's recto: VoiceOver reads the face in the card's order (§VoiceOver).
+    var accessible = false
+    /// Stands in the field's mat in place of the photo (the held card's F3) and
+    /// carries the name, so the legend does not repeat it.
+    var slip: AnyView?
+    /// Lays out under the legend, across the printed border (the held card's words).
+    var leaf: AnyView?
 
     @Environment(\.colorScheme) private var scheme
     @Environment(\.spineSnapSource) private var snaps
@@ -36,15 +43,23 @@ struct SpineCardFace: View {
     private var spot: Color { SpineColors.spot(palette, scheme: scheme) }
 
     var body: some View {
-        VStack(spacing: 2.6 * u) {
-            field(width: width, u: u)
-            title(u: u)
-            strip(u: u)
+        VStack(spacing: 0) {
+            VStack(spacing: 2.6 * u) {
+                field(width: width, u: u)
+                if slip == nil { title(u: u) }
+                strip(u: u)
+            }
+            // Over a leaf, the legend's foot is the score's head room (4.4u).
+            .padding(EdgeInsets(top: 4.6 * u, leading: 9 * u, bottom: leaf == nil ? 6.2 * u : 4.4 * u, trailing: 9 * u))
+            .frame(width: width)
+            .overlay(alignment: .topLeading) { index(u: u) }
+            .overlay(alignment: .topTrailing) { rail(u: u) }
+            if let leaf {
+                // Inside the printed border, 1.6u in, so the score runs from rule to rule.
+                leaf.padding(.horizontal, 1.6 * u)
+            }
         }
-        .padding(EdgeInsets(top: 4.6 * u, leading: 9 * u, bottom: 6.2 * u, trailing: 9 * u))
         .frame(width: width)
-        .overlay(alignment: .topLeading) { index(u: u) }
-        .overlay(alignment: .topTrailing) { rail(u: u) }
         .overlay {
             RoundedRectangle(cornerRadius: 1.3 * u)
                 .strokeBorder(Color.pebbles.cardRule, lineWidth: 1)
@@ -60,7 +75,33 @@ struct SpineCardFace: View {
 
     // MARK: - Field and photo
 
+    @ViewBuilder
     private func field(width: CGFloat, u: CGFloat) -> some View {
+        if let slip {
+            // The mat round a slip is wider than round a photo (2.6u).
+            slip
+                .padding(2.6 * u)
+                .frame(width: width - 18 * u)
+                .background {
+                    GeometryReader { proxy in
+                        SpineCardField(polarity: valence.polarity, spot: spot, tint: SpineColors.tintK(scheme: scheme),
+                                       pattern: SpineColors.patternK(scheme: scheme), size: proxy.size)
+                    }
+                    .accessibilityHidden(true)
+                }
+        } else if accessible {
+            photoField(width: width, u: u)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text("Photo"))
+                .accessibilityAddTraits(.isImage)
+                .accessibilitySortPriority(2)
+        } else {
+            photoField(width: width, u: u)
+                .accessibilityHidden(true)
+        }
+    }
+
+    private func photoField(width: CGFloat, u: CGFloat) -> some View {
         let photoWidth = width - 21.6 * u
         let photoHeight = photoWidth / (ratio ?? CardSizes.pendingRatio)
         return ZStack {
@@ -69,7 +110,6 @@ struct SpineCardFace: View {
                            size: CGSize(width: photoWidth + 3.6 * u, height: photoHeight + 3.6 * u))
             photo(u: u).frame(width: photoWidth, height: photoHeight)
         }
-        .accessibilityHidden(true)
     }
 
     /// Uncropped: `scaledToFit`, so a photo whose ratio is still pending sits
@@ -122,6 +162,8 @@ struct SpineCardFace: View {
                 .foregroundStyle(Color.pebbles.onSurface)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
+                .accessibilityAddTraits(.isHeader)
+                .accessibilitySortPriority(5)
         } else {
             Text(verbatim: SpineCopy.untitled(locale: locale))
                 .spineType(.cardTitle(u: u, cut: .untitled(size: 4.4)))
@@ -139,7 +181,15 @@ struct SpineCardFace: View {
             PeopleLineView(parts: parts, glyphs: soulGlyphs, markSide: 4 * u, base: .cardOthers(u: u),
                            name: .cardSoul(u: u), aside: .cardOthers(u: u), more: .cardMore(u: u), alignment: .center)
                 .frame(maxWidth: .infinity)
+                // Everyone, once, as the locale lists them: one stop, not name by name.
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text(verbatim: everyone))
+                .accessibilitySortPriority(3)
         }
+    }
+
+    private var everyone: String {
+        moment.soulIds.compactMap { names[$0] }.formatted(.list(type: .and).locale(locale))
     }
 
     /// The page's names, falling back to the names `path_moments` carries on the pebble.
