@@ -45,6 +45,11 @@ struct SoulDetailView: View {
                 }
             }
             .task { await load() }
+            // A change made outside this list (a restored held card, another tab) reloads it (#1146).
+            .onChange(of: revision.value) {
+                guard revision.changedOutside(.people) else { return }
+                Task { await load() }
+            }
             .sheet(isPresented: $isPresentingEdit) {
                 EditSoulSheet(original: soulWithGlyph, onSaved: {
                     Task { await reloadSoul() }

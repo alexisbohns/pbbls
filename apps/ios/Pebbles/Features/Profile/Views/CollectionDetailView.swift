@@ -52,6 +52,11 @@ struct CollectionDetailView: View {
                 }
             }
             .task { await load() }
+            // A change made outside this list (a restored held card, another tab) reloads it (#1146).
+            .onChange(of: revision.value) {
+                guard revision.changedOutside(.collections) else { return }
+                Task { await load() }
+            }
             .sheet(isPresented: $isPresentingEdit) {
                 EditCollectionSheet(collection: collection, onSaved: {
                     // Refresh this view's header/subheader and the parent list
