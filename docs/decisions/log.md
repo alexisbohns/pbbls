@@ -1243,3 +1243,17 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - A press opens `PebbleDetailSheet` until stack E's held card consumes `SpineOpen`.
 - **Supersedes / Superseded-by:** Extends **2026-10-18 — The Android Path becomes the Spine** (#1122) to iOS, which closes its consequence "iOS still shows the row list; its Spine is a separate issue".
 - **Refs:** #1130, #1161, #1122, #1052, `docs/superpowers/specs/2026-10-20-ios-spine-path-design.md`, `docs/superpowers/plans/2026-10-21-ios-spine-path.md`, `apps/ios/Pebbles/Features/Path/Spine/`, `apps/ios/Pebbles/Features/Path/PathModel.swift`.
+
+## 2026-10-22 — The iOS held card opens from its slot as an overlay with a measured-frame FLIP (#1160, #1146)
+
+- **Status:** taken
+- **Scope:** ios, ui
+- **Context:** The iOS Path became the Spine (#1130), where a pebble is a card, and the detail became the held card (#1146), first in a `.large` sheet. The card needs the whole height and should fly from its slot, on an iOS 17 floor where SwiftUI's zoom transition does not exist.
+- **Decision:** On an iOS 17 floor the card is a full-screen layer in `RootView` above the tabs (`HeldCardHost`), not a presentation; it animates `scaleEffect` + `offset` from the Spine slot's measured global rect (a `[momentId: CGRect]` registry, `CardFrameRegistry`) to its resting rect, and back on close while the committed face is the recto. Stone presses, bare moments, printing, delete and Reduce Motion do not fly. The detail leaves the sheet. The device spike (iPhone 15: five opens and closes from the top, middle and bottom, cancelled and completed edge swipes, VoiceOver, Reduce Motion) came out go.
+- **Why:** It flies on every supported iOS with no `#available` guard, and it is the only SwiftUI-native option in which every rule is exact (the close follows the committed face; stone presses, bare moments, printing and delete do not fly; Reduce Motion is a chosen crossfade). Rejected: zoom on 18 + push on 17 (a guard where an iOS 17 equivalent exists, #727; zoom cannot close by face), `matchedGeometryEffect` (remeasures both faces each frame, untrusted across the week pager), raising the floor to 18 (no adoption data; zoom still cannot close by face), a UIKit animator (environment re-injection; kept as the spike's fallback).
+- **Consequences:**
+  - Every caller opens the card through `HeldCardHostModel.open`; nothing presents a pebble detail as a sheet or a push.
+  - The layer owns its modality: `.isModal`, the tabs `accessibilityHidden` while a card is held, the escape gesture, focus to the title on open and back to the slot on close, a hand-built leading-edge swipe.
+  - `@SceneStorage("heldCard")` reopens the card on its face after a background kill; the sign-out reset clears it.
+- **Supersedes / Superseded-by:** Extends **2026-10-20 — The Android pebble detail is the held card** (#1135) to iOS; its consequence "iOS still has the old read page" is closed by #1146.
+- **Refs:** #1160, #1146, #1161, `docs/superpowers/specs/2026-10-20-ios-pebble-card-design.md`, `docs/superpowers/plans/2026-10-21-ios-pebble-card.md`, `apps/ios/Pebbles/Features/Path/Card/HeldCardHost.swift`.
