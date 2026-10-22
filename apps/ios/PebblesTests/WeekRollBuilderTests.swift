@@ -26,7 +26,7 @@ struct WeekRollBuilderTests {
             firstSnapPath: nil,
             pebble: .init(
                 id: UUID(), intensity: intensity, positiveness: 0,
-                visibility: .secret, emotion: nil, glyph: nil
+                visibility: .secret, emotion: nil, glyph: nil, souls: []
             )
         )
     }
