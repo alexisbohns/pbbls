@@ -5,7 +5,8 @@ import Testing
 extension References {
     /// #1146 E1: each face of a photo card (F1, with the French row), a public
     /// card under its bar (F2, Share showing), a card without a photo (F3), the
-    /// stress verso, the menu open. Paper and Night. Android: PebbleCardScreenshots.
+    /// stress verso. Paper and Night. Android: PebbleCardScreenshots. The ⋮ menu is
+    /// a popover `ImageRenderer` cannot draw; it is checked on the device.
     @Suite("Held card references")
     @MainActor
     struct HeldCardReferences {
@@ -42,15 +43,6 @@ extension References {
         func stressVerso(scheme: ReferenceScheme) {
             ReferenceImage.assertMatches(HeldCardStill(detail: HeldCardFixtures.stress, face: .verso),
                                          named: "stress-verso", config: ReferenceConfig(scheme: scheme))
-        }
-
-        // `PebblesMenuList`'s rows carry `.accessibilityFocused`, and `ImageRenderer`
-        // draws such a row at zero size (measured 2026-10-22: the same rows without it
-        // render whole). Until the list can be drawn, the menu is checked on the device.
-        @Test(.disabled("ImageRenderer draws a row with .accessibilityFocused at zero size"))
-        func menuOpen() {
-            ReferenceImage.assertMatches(HeldCardStill(detail: HeldCardFixtures.f1, showsBar: true, menuOpen: true),
-                                         named: "menu-open", config: ReferenceConfig(scheme: .paper))
         }
 
         @Test

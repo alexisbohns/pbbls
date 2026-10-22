@@ -2,25 +2,19 @@ import SwiftUI
 @testable import Pebbles
 
 /// The held card without a `ScrollView` (the B2 harness cannot render one), on
-/// the page's ground at 393 pt: the card, optionally under its top bar, and
-/// optionally with the ⋮ list drawn open under the bar (decision 4).
+/// the page's ground at 393 pt: the card, optionally under its top bar. The ⋮
+/// list is a popover `ImageRenderer` cannot draw; the menu is checked on the device.
 struct HeldCardStill: View {
     let detail: MomentDetail
     var face: CardFace = .recto
     var palette: EmotionPalette? = HeldCardFixtures.joy
     var showsBar = false
-    var menuOpen = false
     var width: CGFloat = ReferenceConfig.phoneWidth
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 8) {
             if showsBar {
                 CardTopBar(shareURL: shareURL, menuItems: menu, isDisabled: false, onBack: {})
-            }
-            if menuOpen {
-                PebblesMenuList(items: menu, dismiss: {})
-                    .background(Color.pebbles.surfaceContainer)
-                    .padding(.trailing, 16)
             }
             if let pebble = detail.pebble {
                 PebbleCard(detail: detail, pebble: pebble, palette: palette,

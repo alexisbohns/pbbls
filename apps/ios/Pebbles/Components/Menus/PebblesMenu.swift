@@ -77,9 +77,7 @@ private struct PebblesContextMenu: ViewModifier {
     }
 }
 
-/// Internal (not private) so the held card's reference can draw the list as it
-/// opens: `ImageRenderer` cannot draw a popover (#1146, decision 4).
-struct PebblesMenuList: View {
+private struct PebblesMenuList: View {
     let items: [PebblesMenuItem]
     let dismiss: () -> Void
 
