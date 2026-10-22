@@ -38,6 +38,13 @@ struct CardTurnModelTests {
         #expect(!turn.startDrag())
     }
 
+    @Test("the button is ignored while a drag holds the card")
+    func buttonDuringDrag() {
+        let turn = CardTurnModel(face: .recto)
+        #expect(turn.startDrag())
+        #expect(!turn.beginTurn(reduceMotion: false))
+    }
+
     @Test("while held, the landing is the face in front, swapping at the half")
     func held() {
         let turn = CardTurnModel(face: .recto)

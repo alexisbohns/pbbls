@@ -29,6 +29,9 @@ final class CardTurnModel {
         self.progress = progress
     }
 
+    /// The face past the half of `progress`. A button turn commits `progress`
+    /// at once and only the presentation animates, so `front` swaps at the
+    /// start of a button turn; it swaps at the half while held or settling by hand.
     var front: CardFace { progress < TurnSettle.half ? face : face.other }
     var landing: CardFace { settlingTo ?? (isDragging ? front : face) }
     var isBusy: Bool { isDragging || settlingTo != nil }
