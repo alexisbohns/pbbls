@@ -63,7 +63,6 @@ struct ThemeLiteralsTests {
     /// Permanent: hits that are not chrome colours.
     static let allowlist: [String: (count: Int, reason: String)] = [
         "Features/Path/Read/PebbleSnapFrame.swift": (1, "preview fixture image drawn above #Preview"),
-        "Features/Path/Components/WeekPathView.swift": (2, "fade mask stops (alpha only)"),
         "Features/Path/Render/PebbleAnimatedRenderView.swift": (1, "stroke-reveal mask"),
         "Features/Welcome/HandcraftedLogoView.swift": (1, "stroke-reveal mask"),
         "Features/Connections/InviteSheet.swift": (1, "QR quiet zone must be white for scanners"),
