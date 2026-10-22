@@ -38,7 +38,8 @@ struct PrintStartTests {
 
     @Test("Reduce Motion, or a place not yet measured, crossfades")
     func crossfades() {
-        #expect(PrintStart.decide(place: place(top: 100, height: 400), viewport: view, reduceMotion: true) == .crossfade)
+        #expect(PrintStart.decide(place: place(top: 100, height: 400), viewport: view, reduceMotion: true)
+            == .crossfade)
         #expect(PrintStart.decide(place: nil, viewport: view, reduceMotion: false) == .crossfade)
     }
 

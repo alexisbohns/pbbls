@@ -183,8 +183,10 @@ private struct PlaceOutline: View {
                 path.closeSubpath()
                 corners.fill(path, with: .color(Color.pebbles.rule))
             }
-            let inset = RoundedRectangle(cornerRadius: 15.5, style: .continuous).path(in: rect.insetBy(dx: 0.5, dy: 0.5))
-            context.stroke(inset, with: .color(Color.pebbles.outline), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+            let inset = RoundedRectangle(cornerRadius: 15.5, style: .continuous)
+                .path(in: rect.insetBy(dx: 0.5, dy: 0.5))
+            context.stroke(inset, with: .color(Color.pebbles.outline),
+                           style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
         }
         .accessibilityHidden(true)
     }
@@ -199,7 +201,8 @@ struct GhostStone: View {
         let stone = CardLayout.versoStoneSize(.medium)
         Canvas { context, size in
             let style = StrokeStyle(lineWidth: 1.25, dash: [4, 4])
-            guard let outline = StoneRingGeometry.forStone(.neutralMedium)?.outline, !outline.boundingRect.isEmpty else {
+            guard let outline = StoneRingGeometry.forStone(.neutralMedium)?.outline,
+                  !outline.boundingRect.isEmpty else {
                 context.stroke(Path(ellipseIn: CGRect(origin: .zero, size: size).insetBy(dx: 1, dy: 1)),
                                with: .color(Color.pebbles.outline), style: style)
                 return

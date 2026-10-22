@@ -69,9 +69,9 @@ struct CardPrint<Card: View>: View {
             }
             .mask(alignment: .top) {
                 GeometryReader { proxy in
-                    let revealed = print >= 1 ? proxy.size.height
-                        : max(place?.height ?? 0,
-                              (place?.height ?? 0) + (proxy.size.height - (place?.height ?? 0)) * CompletionMotion.ease(print))
+                    let placeHeight = place?.height ?? 0
+                    let fed = placeHeight + (proxy.size.height - placeHeight) * CompletionMotion.ease(print)
+                    let revealed = print >= 1 ? proxy.size.height : max(placeHeight, fed)
                     // 32 pt round the card for its shadow and painted edge.
                     Rectangle()
                         .frame(width: proxy.size.width + 64, height: revealed + 32 + 32 * CompletionMotion.ease(print))
