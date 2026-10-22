@@ -193,30 +193,3 @@ struct VersoStack: Layout {
         }
     }
 }
-
-// E3 replaces these with the print's timeline (`Card/Logic/CompletionMotion.swift`)
-// and its anchors (`Card/CardPrint.swift`). Until then nothing prints: `print` is
-// always nil, so none of them is read.
-enum PrintPart {
-    case card, lockup, postmarks, band, footer
-
-    func alpha(_ print: Double) -> Double { 1 }
-}
-
-enum CompletionMotion {
-    static func print(_ timeline: Double) -> Double { 1 }
-    static func stone(_ timeline: Double) -> Double { 1 }
-    static func litStoneAlpha(_ stone: Double) -> Double { 1 }
-}
-
-enum PrintAnchor: Hashable {
-    case versoStone
-}
-
-struct PrintAnchors: PreferenceKey {
-    static let defaultValue: [PrintAnchor: Anchor<CGRect>] = [:]
-
-    static func reduce(value: inout [PrintAnchor: Anchor<CGRect>], nextValue: () -> [PrintAnchor: Anchor<CGRect>]) {
-        value.merge(nextValue()) { $1 }
-    }
-}
