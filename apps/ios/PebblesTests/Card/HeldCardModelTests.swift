@@ -108,4 +108,52 @@ struct HeldCardModelTests {
         #expect(!model.leaving && !model.isDeleting)
         #expect(calls.count == 0 && revision.value == 0)
     }
+
+    // MARK: - Completion (D6)
+
+    @Test("a reload finding a pebble on a bare moment publishes the pebble and the completion together")
+    func completion() async throws {
+        let model = model()
+        let bare = try detail(MomentFixtures.photoOnlyMoment)
+        let completed = try detail()
+        await model.load { bare }
+        #expect(model.completion == nil)
+        await model.load { completed }
+        #expect(model.detail?.pebble != nil)
+        #expect(model.completion == HeldCardModel.Completion(pebbleId: try #require(completed.pebble?.id)))
+    }
+
+    @Test("the completion holds through a later reload until it is shown")
+    func holds() async throws {
+        let model = model()
+        let bare = try detail(MomentFixtures.photoOnlyMoment)
+        let completed = try detail()
+        await model.load { bare }
+        await model.load { completed }
+        await model.load { completed }
+        #expect(model.completion != nil)
+        model.printEnded()
+        #expect(model.completion == nil && model.printedOver && model.announcing)
+        await model.load { completed }
+        #expect(model.completion == nil)
+        model.announced()
+        #expect(!model.announcing)
+    }
+
+    @Test("the completion clears when the pebble disappears")
+    func clears() async throws {
+        let model = model()
+        let bare = try detail(MomentFixtures.photoOnlyMoment)
+        await model.load { bare }
+        await model.load { try detail() }
+        await model.load { bare }
+        #expect(model.completion == nil)
+    }
+
+    @Test("a completed moment opened as such never prints")
+    func noPrintOnOpen() async throws {
+        let model = model()
+        await model.load { try detail() }
+        #expect(model.completion == nil)
+    }
 }

@@ -16,8 +16,27 @@ final class HeldCardModel {
     enum Phase: Equatable { case loading, failed, loaded }
     enum DeleteOutcome: Equatable { case closes, reloads, failed, ignored }
 
+    /// D6: a pebble appeared on a moment that was bare.
+    struct Completion: Equatable {
+        let pebbleId: UUID
+    }
+
+    /// The moment and its completion as one value, so a refresh publishes the
+    /// swap and the cue in one assignment (Android's lesson: an event raced the swap).
+    struct Loaded: Equatable {
+        let detail: MomentDetail
+        let completion: Completion?
+    }
+
     private(set) var phase: Phase = .loading
-    private(set) var detail: MomentDetail?
+    private(set) var loaded: Loaded?
+    /// Keeps the card verso up after a print, until the next request.
+    private(set) var printedOver = false
+    /// The verso heading is announced once after a print, then this goes false.
+    private(set) var announcing = false
+
+    var detail: MomentDetail? { loaded?.detail }
+    var completion: Completion? { loaded?.completion }
     private(set) var isDeleting = false
     /// Set before the close a delete triggers, so that close never flies (E4).
     private(set) var leaving = false
@@ -53,8 +72,39 @@ final class HeldCardModel {
         }
     }
 
+    /// A pebble on a moment that was bare is a completion; it survives later
+    /// refreshes until shown, and clears if the pebble disappears.
     private func apply(_ fresh: MomentDetail) {
-        detail = fresh
+        let wasBare = loaded.map { $0.detail.pebble == nil } ?? false
+        var completion = loaded?.completion
+        if let pebble = fresh.pebble {
+            if wasBare { completion = Completion(pebbleId: pebble.id) }
+        } else {
+            completion = nil
+        }
+        loaded = Loaded(detail: fresh, completion: completion)
+    }
+
+    /// The frame where the print reached its end (D6): the card is at rest, verso up.
+    func printEnded() {
+        completionShown()
+        announcing = true
+    }
+
+    /// A restore found a print under way: land at rest, verso up, without it.
+    func cutShort() {
+        completionShown()
+    }
+
+    func announced() {
+        announcing = false
+    }
+
+    private func completionShown() {
+        if let loaded, loaded.completion != nil {
+            self.loaded = Loaded(detail: loaded.detail, completion: nil)
+        }
+        printedOver = true
     }
 
     /// A save, a delete or a completion: the opener reloads its list, and the

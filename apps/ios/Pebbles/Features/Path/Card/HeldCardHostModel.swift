@@ -31,6 +31,24 @@ final class HeldCardHostModel {
         snapshot = current
     }
 
+    /// The print under way, mirrored to the scene (D6–D7).
+    var printingFor: UUID? { snapshot?.printingFor }
+
+    /// A print starts: saved with the card, verso up, so a restore lands there.
+    func startPrinting(_ momentId: UUID) {
+        guard var current = snapshot else { return }
+        current.printingFor = momentId
+        current.face = .verso
+        snapshot = current
+    }
+
+    /// Only the frame where the print ends calls this (D6).
+    func endPrinting() {
+        guard var current = snapshot, current.printingFor != nil else { return }
+        current.printingFor = nil
+        snapshot = current
+    }
+
     /// A relaunch after a background kill: the card reopens at rest on the
     /// saved face. The list that opened it is gone, so the restored card is
     /// owned by no list: it reports from `.you`, the tab that lists no moments,
