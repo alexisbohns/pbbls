@@ -28,6 +28,10 @@ struct PebbleCard: View {
     /// the lab's still: `ImageRenderer` draws a platform view as a placeholder
     /// over the whole panel. The footer's button turns either way.
     var turnByDrag = true
+    /// The print's timeline while the card prints into its place (E3); nil at rest.
+    var print: Double?
+    /// The verso stone's press, which the print plays at 0.45 (E3).
+    var stonePress: StonePress?
 
     @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -57,9 +61,12 @@ struct PebbleCard: View {
                             )
                         }
                     }
+                    // No turning while the card prints.
+                    .allowsHitTesting(print == nil)
                 TurnFooter(progress: shownProgress, face: turn.face, visibility: pebble.visibility,
                            stone: SpineColors.spot(stone, scheme: scheme), onTurn: turnByButton)
                     .frame(width: width)
+                    .opacity(print.map { PrintPart.footer.alpha(CompletionMotion.print($0)) } ?? 1)
             }
         }
         .accessibilityElement(children: .contain)
@@ -73,7 +80,7 @@ struct PebbleCard: View {
             }
             face(.verso) {
                 CardVerso(pebble: pebble, summary: MomentSummary(detail: detail), palette: palette, width: width,
-                          domains: domains, collectionGlyphs: collectionGlyphs)
+                          domains: domains, collectionGlyphs: collectionGlyphs, print: print, stonePress: stonePress)
             }
         }
     }
