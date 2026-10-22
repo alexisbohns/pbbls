@@ -7,6 +7,8 @@ import SwiftUI
 struct HeldCardStill: View {
     let detail: MomentDetail
     var face: CardFace = .recto
+    /// A turn frozen part way (E2's references).
+    var progress: Double = 0
     var palette: EmotionPalette? = HeldCardFixtures.joy
     var showsBar = false
     var width: CGFloat = ReferenceConfig.phoneWidth
@@ -21,7 +23,7 @@ struct HeldCardStill: View {
                            ratio: detail.snaps.first.flatMap { HeldCardFixtures.ratio($0.storagePath) },
                            width: CardLayout.cardWidth(available: width), domains: HeldCardFixtures.domains,
                            collectionGlyphs: HeldCardFixtures.collectionGlyphs, soulGlyphs: HeldCardFixtures.soulGlyphs,
-                           soulOrder: [], turn: CardTurnModel(face: face))
+                           soulOrder: [], turn: CardTurnModel(face: face, progress: progress), turnByDrag: false)
                     .frame(maxWidth: .infinity)
             }
         }
