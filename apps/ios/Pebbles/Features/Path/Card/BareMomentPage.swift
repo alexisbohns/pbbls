@@ -18,6 +18,8 @@ struct BareMomentPage: View {
     var isCompleteDisabled = false
     /// The place's global frame, for `PrintStart`.
     var onPlaceFrame: (CGRect) -> Void = { _ in }
+    /// The held card's VoiceOver landing on the title after the open (E4).
+    var titleFocus: AccessibilityFocusState<CardFocus?>.Binding?
 
     static let placeID = "bare-place"
 
@@ -33,6 +35,7 @@ struct BareMomentPage: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 10)
                 .accessibilityAddTraits(.isHeader)
+                .cardFocus(titleFocus, .title)
             if let path = detail.snaps.first?.storagePath {
                 BarePhoto(path: path, ratio: ratio ?? CardSizes.pendingRatio)
                     .padding(.top, 20)

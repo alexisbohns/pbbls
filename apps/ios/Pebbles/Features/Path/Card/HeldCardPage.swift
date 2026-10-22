@@ -62,9 +62,9 @@ struct HeldCardPage: View {
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { pageWidth = $0 }
         .onChange(of: turn.face, initial: true) { _, face in host.faceCommitted(face) }
-        // After the open: the title on the recto, "Your pebble" on the verso.
-        .onChange(of: host.phase == .open && model.detail?.pebble != nil, initial: true) { _, ready in
-            if ready { focus = turn.face == .recto ? .title : .versoHeading }
+        // After the open: the title on the recto and the bare page, "Your pebble" on the verso.
+        .onChange(of: host.phase == .open && model.detail != nil, initial: true) { _, ready in
+            if ready { focus = model.detail?.pebble != nil && turn.face == .verso ? .versoHeading : .title }
         }
         .task {
             await reload()
@@ -184,7 +184,7 @@ struct HeldCardPage: View {
         BareMomentPage(detail: detail, ratio: detail.snaps.first.flatMap { aspects.ratio(for: $0.storagePath) },
                        onComplete: { isPresentingComplete = true },
                        isCompleteDisabled: model.completion != nil || printStart != nil,
-                       onPlaceFrame: { placeFrame = $0 })
+                       onPlaceFrame: { placeFrame = $0 }, titleFocus: $focus)
     }
 
     private func card(_ detail: MomentDetail, _ pebble: MomentDetail.Pebble, print: Double?) -> some View {
