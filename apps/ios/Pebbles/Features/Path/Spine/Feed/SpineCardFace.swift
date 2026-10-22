@@ -169,6 +169,8 @@ struct SpineCardFace: View {
                 .spineType(.cardTitle(u: u, cut: .untitled(size: 4.4)))
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .frame(maxWidth: .infinity)
+                .accessibilityAddTraits(.isHeader)
+                .accessibilitySortPriority(5)
         }
     }
 
