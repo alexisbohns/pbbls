@@ -29,6 +29,17 @@ struct CardDatelineTests {
             == "jeudi 8 octobre 2026 · 21:00")
     }
 
+    @Test("the Spine's ISO 8601 calendar keeps the locale's order (ICU has no patterns for it)")
+    func isoCalendar() throws {
+        let date = try #require(thursday)
+        var iso = Calendar(identifier: .iso8601)
+        iso.timeZone = try #require(TimeZone(identifier: "Europe/Paris"))
+        #expect(CardDateline.text(date, calendar: iso, locale: Locale(identifier: "en_GB"))
+            == "Thursday, 8 October 2026 · 21:00")
+        #expect(CardDateline.text(date, calendar: iso, locale: Locale(identifier: "fr_FR"))
+            == "jeudi 8 octobre 2026 · 21:00")
+    }
+
     @Test("the zone decides the day: the same instant in New York is the afternoon")
     func zone() throws {
         let date = try #require(thursday)
