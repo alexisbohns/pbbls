@@ -133,7 +133,9 @@ final class PathModel {
         focus(current)
     }
 
-    func setReadingDay(_ index: Int, for weekStart: Date) {
+    /// Nil when no day has reached the reading line (the page reads its first
+    /// day again, as Android does); written only on a change.
+    func setReadingDay(_ index: Int?, for weekStart: Date) {
         guard readingDay[weekStart] != index else { return }
         readingDay[weekStart] = index
     }

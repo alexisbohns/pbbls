@@ -83,11 +83,27 @@ struct SpineRowView: View {
     let context: SpineFeedContext
     /// Nil in the eager stack (see `SpinePebble.slotFocus`).
     let slotFocus: AccessibilityFocusState<UUID?>.Binding?
+    /// The page's coordinate space for the reading day; nil (the eager stack) reports nothing.
+    var markSpace: String?
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.legibilityWeight) private var legibilityWeight
 
     var body: some View {
+        content
+            .modifier(DayMark(day: day, space: markSpace))
+    }
+
+    private var day: Int? {
+        switch row {
+        case let .seam(day, _): return day.index
+        case let .pebble(_, day, _): return day
+        default: return nil
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
         switch row {
         case .masthead:
             WeekMasthead(page: context.page, onFocus: context.onFocus)
@@ -109,6 +125,19 @@ struct SpineRowView: View {
         case let .pebble(moment, _, bottom):
             SpinePebble(moment: moment, context: context, slotFocus: slotFocus)
                 .padding(.bottom, bottom)
+        }
+    }
+}
+
+private struct DayMark: ViewModifier {
+    let day: Int?
+    let space: String?
+
+    func body(content: Content) -> some View {
+        if let day, let space {
+            content.spineDayMark(day, in: space)
+        } else {
+            content
         }
     }
 }
