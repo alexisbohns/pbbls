@@ -7,8 +7,9 @@ import SwiftUI
 /// to VoiceOver. The panel alone rotates on Y (`CardTurnEffect`).
 ///
 /// Ways to turn: the footer's button (a 0.42 s spring, no bounce), and a
-/// horizontal drag on the panel measured in its unrotated parent (a flick
-/// carries, a release past the half completes, `TurnSettle`). For VoiceOver the
+/// horizontal pan on the panel (`TurnPanFallback`, a `UIPanGestureRecognizer`
+/// that leaves vertical drags to the scroll) measured in its unrotated parent
+/// (a flick carries, a release past the half completes, `TurnSettle`). For VoiceOver the
 /// footer's button is the turn; the card has no custom action. Under Reduce
 /// Motion the faces crossfade in 0.15 s and a drag commits only on release.
 struct PebbleCard: View {
@@ -27,12 +28,6 @@ struct PebbleCard: View {
     @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.layoutDirection) private var layoutDirection
-    @State private var lock: DragLock?
-    @GestureState private var dragging = false
-
-    /// The direction a drag committed to on its first change.
-    private enum DragLock { case turning, ignored }
-
     private var rightToLeft: Bool { layoutDirection == .rightToLeft }
     /// Reduce Motion never rotates: the progress the faces see stays 0.
     private var shownProgress: Double { reduceMotion ? 0 : turn.progress }
@@ -44,12 +39,16 @@ struct PebbleCard: View {
                 panel
                     .frame(width: width)
                     .modifier(CardTurnEffect(progress: shownProgress, rightToLeft: rightToLeft))
-                    .contentShape(Rectangle())
-                    .simultaneousGesture(turnDrag)
-                    .onChange(of: dragging) { _, isDragging in
-                        guard !isDragging else { return }
-                        lock = nil
-                        if turn.cancelDrag() { settleBack() }
+                    .overlay {
+                        TurnPanFallback(
+                            onBegan: { turn.startDrag() },
+                            onChanged: { dx in
+                                turn.drag(to: TurnSettle.progress(drag: dx, width: width, rightToLeft: rightToLeft),
+                                          reduceMotion: reduceMotion)
+                            },
+                            onEnded: { dx, vx in release(translation: dx, velocity: vx) },
+                            onCancelled: { if turn.cancelDrag() { settleBack() } }
+                        )
                     }
                 TurnFooter(progress: shownProgress, face: turn.face, visibility: pebble.visibility,
                            stone: SpineColors.spot(stone, scheme: scheme), onTurn: turnByButton)
@@ -103,41 +102,20 @@ struct PebbleCard: View {
 
     // MARK: - The drag
 
-    private var turnDrag: some Gesture {
-        DragGesture(minimumDistance: 12)
-            .updating($dragging) { _, state, _ in state = true }
-            .onChanged { value in
-                if lock == nil {
-                    // The direction lock: horizontal turns the card, anything else
-                    // is left to the scroll until the finger lifts.
-                    let horizontal = abs(value.translation.width) > abs(value.translation.height)
-                    lock = horizontal && turn.startDrag() ? .turning : .ignored
-                }
-                guard lock == .turning else { return }
-                let target = TurnSettle.progress(drag: value.translation.width, width: width,
-                                                 rightToLeft: rightToLeft)
-                turn.drag(to: target, reduceMotion: reduceMotion)
-            }
-            .onEnded { value in
-                defer { lock = nil }
-                guard lock == .turning else { return }
-                let at = TurnSettle.progress(drag: value.translation.width, width: width, rightToLeft: rightToLeft)
-                let velocity = TurnSettle.turnsPerSecond(velocity: value.velocity.width, width: width,
-                                                         rightToLeft: rightToLeft)
-                if reduceMotion {
-                    withAnimation(.easeInOut(duration: 0.15)) {
-                        _ = turn.release(at: at, velocity: velocity, reduceMotion: true)
-                    }
-                    return
-                }
-                guard let settle = turn.release(at: at, velocity: velocity, reduceMotion: false) else { return }
-                withAnimation(.interpolatingSpring(duration: 0.35, bounce: 0, initialVelocity: settle.springVelocity),
-                              completionCriteria: .logicallyComplete) {
-                    turn.progress = settle.target
-                } completion: {
-                    land()
-                }
-            }
+    private func release(translation: CGFloat, velocity: CGFloat) {
+        let at = TurnSettle.progress(drag: translation, width: width, rightToLeft: rightToLeft)
+        let turns = TurnSettle.turnsPerSecond(velocity: velocity, width: width, rightToLeft: rightToLeft)
+        if reduceMotion {
+            withAnimation(.easeInOut(duration: 0.15)) { _ = turn.release(at: at, velocity: turns, reduceMotion: true) }
+            return
+        }
+        guard let settle = turn.release(at: at, velocity: turns, reduceMotion: false) else { return }
+        withAnimation(.interpolatingSpring(duration: 0.35, bounce: 0, initialVelocity: settle.springVelocity),
+                      completionCriteria: .logicallyComplete) {
+            turn.progress = settle.target
+        } completion: {
+            land()
+        }
     }
 
     /// A drag taken away (the scroll took it, the page left) reverts.
