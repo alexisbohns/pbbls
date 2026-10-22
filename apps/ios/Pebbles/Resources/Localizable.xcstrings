@@ -5862,23 +5862,6 @@
         }
       }
     },
-    "No domain" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No domain"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun domaine"
-          }
-        }
-      }
-    },
     "No glyphs yet" : {
       "extractionState" : "manual",
       "localizations" : {
