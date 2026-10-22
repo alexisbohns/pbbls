@@ -21,6 +21,7 @@ struct CollectionDetailView: View {
     @State private var collection: Collection
     @State private var moments: [MomentSummary] = []
     @State private var isLoading = true
+    @State private var reloadTask: Task<Void, Never>?
     @State private var loadError: String?
     @State private var isPresentingEdit = false
     @State private var pendingDeletion: MomentDeleteTarget?
@@ -52,6 +53,13 @@ struct CollectionDetailView: View {
                 }
             }
             .task { await load() }
+            // A change made outside this list (a restored held card, another tab) reloads it (#1146).
+            .onChange(of: revision.value) {
+                guard revision.changedOutside(.collections) else { return }
+                // Quietly: the list stays on screen, and a newer reload cancels this one.
+                reloadTask?.cancel()
+                reloadTask = Task { await load(quietly: true) }
+            }
             .sheet(isPresented: $isPresentingEdit) {
                 EditCollectionSheet(collection: collection, onSaved: {
                     // Refresh this view's header/subheader and the parent list
@@ -147,17 +155,22 @@ struct CollectionDetailView: View {
         }))
     }
 
-    private func load() async {
-        isLoading = true
+    /// `quietly` keeps the loaded list on screen while a fresh one is fetched;
+    /// a cancelled fetch (a newer reload) changes nothing.
+    private func load(quietly: Bool = false) async {
+        if !quietly { isLoading = true }
         loadError = nil
         do {
-            self.moments = try await MomentsService(client: supabase.client)
+            let fresh = try await MomentsService(client: supabase.client)
                 .moments(inCollection: collection.id)
+            guard !Task.isCancelled else { return }
+            self.moments = fresh
         } catch {
+            guard !Task.isCancelled else { return }
             logger.error("collection moments fetch failed: \(error.localizedDescription, privacy: .private)")
             self.loadError = "Something went wrong. Please try again."
         }
-        self.isLoading = false
+        if !quietly { self.isLoading = false }
     }
 
     /// Either delete drops the row: the list only carries moments with a

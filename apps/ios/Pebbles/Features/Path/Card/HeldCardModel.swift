@@ -10,7 +10,7 @@ import os
 ///
 /// Every change made here calls the opener's `onChanged` and bumps
 /// `MomentsRevision` from the opener's tab (stack C's contract, which this model
-/// takes over from `PebbleDetailSheet`).
+/// took over from the old detail sheet).
 @Observable @MainActor
 final class HeldCardModel {
     enum Phase: Equatable { case loading, failed, loaded }
