@@ -1,9 +1,8 @@
 import SwiftUI
 
-/// Bordered pill used to render a soul in a 3-column grid. Shared between
-/// `PebbleReadView.soulsRow` and `SelectedSoulsRow` (the edit form), so the
-/// two surfaces stay visually identical. Pure UI: tap behavior is owned by
-/// the parent.
+/// Bordered pill used to render a soul in a 3-column grid, in
+/// `SelectedSoulsRow` (the edit form). Pure UI: tap behavior is owned by the
+/// parent.
 ///
 /// Visual: rounded-rectangle border, no fill. Glyph drawn in
 /// `pebblesAccent` with no inner background. Name label in muted
@@ -73,9 +72,7 @@ struct AddSoulPill: View {
     }
 }
 
-/// Three-column adaptive grid spec used by both `PebbleReadView.soulsRow`
-/// and `SelectedSoulsRow`. Lifted out so the two surfaces share the
-/// exact same column geometry.
+/// Three-column adaptive grid spec used by `SelectedSoulsRow`.
 enum SoulPillGrid {
     static let columns: [GridItem] = [
         GridItem(.flexible(), spacing: 12),

@@ -7,7 +7,6 @@ import SwiftUI
 ///
 /// Direct callers after the #459 refactor:
 /// - `SoulPill` (path)         — explicitly chrome-less inside a pill
-/// - `PebbleMetaPill` (path)   — explicitly chrome-less inside a pill
 /// - `GlyphView` (composition) — owns 34-radius border + state colors
 struct GlyphThumbnail: View {
     let strokes: [GlyphStroke]
