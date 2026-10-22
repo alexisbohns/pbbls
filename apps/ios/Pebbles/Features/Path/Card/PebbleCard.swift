@@ -32,6 +32,7 @@ struct PebbleCard: View {
     var print: Double?
     /// The verso stone's press, which the print plays at 0.45 (E3).
     var stonePress: StonePress?
+    var focus: AccessibilityFocusState<CardFocus?>.Binding?
 
     @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -78,11 +79,12 @@ struct PebbleCard: View {
         FaceStack {
             face(.recto) {
                 CardRecto(detail: detail, pebble: pebble, palette: palette, ratio: ratio, width: width,
-                          soulGlyphs: soulGlyphs, soulOrder: soulOrder)
+                          soulGlyphs: soulGlyphs, soulOrder: soulOrder, focus: focus)
             }
             face(.verso) {
                 CardVerso(pebble: pebble, summary: MomentSummary(detail: detail), palette: palette, width: width,
-                          domains: domains, collectionGlyphs: collectionGlyphs, print: print, stonePress: stonePress)
+                          domains: domains, collectionGlyphs: collectionGlyphs, print: print, stonePress: stonePress,
+                          focus: focus)
             }
         }
     }

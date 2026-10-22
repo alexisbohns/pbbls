@@ -26,6 +26,8 @@ struct SpineCardFace: View {
     var slip: AnyView?
     /// Lays out under the legend, across the printed border (the held card's words).
     var leaf: AnyView?
+    /// The held card's VoiceOver landing on the title; nil on the Spine.
+    var titleFocus: AccessibilityFocusState<CardFocus?>.Binding?
 
     @Environment(\.colorScheme) private var scheme
     @Environment(\.spineSnapSource) private var snaps
@@ -164,6 +166,7 @@ struct SpineCardFace: View {
                 .frame(maxWidth: .infinity)
                 .accessibilityAddTraits(.isHeader)
                 .accessibilitySortPriority(5)
+                .cardFocus(titleFocus, .title)
         } else {
             Text(verbatim: SpineCopy.untitled(locale: locale))
                 .spineType(.cardTitle(u: u, cut: .untitled(size: 4.4)))

@@ -14,13 +14,15 @@ struct CardRecto: View {
     let soulGlyphs: [String: [GlyphStroke]]
     /// The Spine's persons-of-the-week order; `[]` keeps the pebble's own.
     let soulOrder: [String]
+    var focus: AccessibilityFocusState<CardFocus?>.Binding?
 
     @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var shownRatio: CGFloat?
 
     init(detail: MomentDetail, pebble: MomentDetail.Pebble, palette: EmotionPalette?, ratio: CGFloat?,
-         width: CGFloat, soulGlyphs: [String: [GlyphStroke]], soulOrder: [String]) {
+         width: CGFloat, soulGlyphs: [String: [GlyphStroke]], soulOrder: [String],
+         focus: AccessibilityFocusState<CardFocus?>.Binding? = nil) {
         self.detail = detail
         self.pebble = pebble
         self.palette = palette
@@ -28,6 +30,7 @@ struct CardRecto: View {
         self.width = width
         self.soulGlyphs = soulGlyphs
         self.soulOrder = soulOrder
+        self.focus = focus
         _shownRatio = State(initialValue: ratio)
     }
 
@@ -50,7 +53,8 @@ struct CardRecto: View {
                       slip: detail.snaps.isEmpty ? AnyView(slip(u: u)) : nil,
                       leaf: AnyView(CardLeaf(dateline: dateline,
                                              datelineLabel: dateline + ", " + pebble.emotion.localizedName,
-                                             words: detail.description, u: u)))
+                                             words: detail.description, u: u)),
+                      titleFocus: focus)
             .accessibilityElement(children: .contain)
             .task(id: ratio) {
                 guard let ratio, ratio != shownRatio else { return }
@@ -65,6 +69,6 @@ struct CardRecto: View {
     private func slip(u: CGFloat) -> some View {
         let name = detail.name.flatMap { $0.isEmpty ? nil : $0 } ?? SpineCopy.untitled(locale: locale)
         let cut = EntryTypes.entryType(intensity: pebble.intensity, valence: pebble.valence.positiveness).name
-        return CardSlip(name: name, cut: cut, spot: SpineColors.spot(stone, scheme: scheme), u: u)
+        return CardSlip(name: name, cut: cut, spot: SpineColors.spot(stone, scheme: scheme), u: u, focus: focus)
     }
 }

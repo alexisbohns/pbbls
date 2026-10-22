@@ -124,10 +124,11 @@ struct RootView: View {
             if canShowAuthedTabs {
                 ZStack {
                     PebblesTabView(onPathFirstLoad: { pathFeedLoaded = true })
-                        .heldCardHost(heldCard)
                         .environment(nav)
                         .environment(cardFrames)
                         .environment(heldCard)
+                        // Nothing under the held card is reachable (stack C §7's slot).
+                        .accessibilityHidden(heldCard.request != nil)
                         .environment(\.spineSnapSource, .signed(snapURLs))
                         .fullScreenCover(isPresented: $isPresentingOnboarding) {
                             OnboardingView(steps: OnboardingSteps.all) {
@@ -147,8 +148,11 @@ struct RootView: View {
                             .transition(.opacity)
                     }
 
-                    // The card-stack overlay host (#903 §7, later stack) goes
-                    // here, above the tabs, so one overlay serves every tab.
+                    // The held card (#1160 D1): one layer above the tabs for every tab.
+                    HeldCardHost()
+                        .environment(heldCard)
+                        .environment(cardFrames)
+                        .environment(\.spineSnapSource, .signed(snapURLs))
                 }
                 .animation(.easeInOut(duration: 0.35), value: holdsLoader)
                 .sheet(item: $acceptingInvite) { invite in

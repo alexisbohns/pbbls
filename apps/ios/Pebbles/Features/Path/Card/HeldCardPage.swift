@@ -10,6 +10,8 @@ import os
 /// (E3, D6); a restore mid-print lands the card at rest, verso up (D7).
 struct HeldCardPage: View {
     let request: HeldCardRequest
+    /// The card's resting global rect, for the host's FLIP; reported on every change.
+    var onRest: (CGRect) -> Void = { _ in }
     let onClose: () -> Void
 
     @Environment(SupabaseService.self) private var supabase
@@ -35,11 +37,13 @@ struct HeldCardPage: View {
     @State private var viewport: CGRect?
     /// The verso stone's press, played at 0.45 and kept for its own length.
     @State private var versoPress: StonePress?
+    @AccessibilityFocusState private var focus: CardFocus?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(request: HeldCardRequest, onClose: @escaping () -> Void) {
+    init(request: HeldCardRequest, onRest: @escaping (CGRect) -> Void = { _ in }, onClose: @escaping () -> Void) {
         self.request = request
+        self.onRest = onRest
         self.onClose = onClose
         _model = State(initialValue: HeldCardModel(momentId: request.momentId, origin: request.origin,
                                                    onChanged: request.onChanged))
@@ -52,11 +56,16 @@ struct HeldCardPage: View {
         VStack(spacing: 0) {
             CardTopBar(shareURL: shareURL, menuItems: menuItems,
                        isDisabled: model.detail == nil || model.isDeleting || printStart != nil, onBack: onClose)
+                .opacity(host.chrome)
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(Color.pebbles.surface.ignoresSafeArea())
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { pageWidth = $0 }
+        .onChange(of: turn.face, initial: true) { _, face in host.faceCommitted(face) }
+        // After the open: the title on the recto, "Your pebble" on the verso.
+        .onChange(of: host.phase == .open && model.detail?.pebble != nil, initial: true) { _, ready in
+            if ready { focus = turn.face == .recto ? .title : .versoHeading }
+        }
         .task {
             await reload()
             cutShortIfRestored()
@@ -107,7 +116,19 @@ struct HeldCardPage: View {
     private var content: some View {
         switch model.phase {
         case .loading:
-            ProgressView()
+            ScrollView {
+                Group {
+                    if let seed = request.seed, let pebble = seed.pebble {
+                        seededCard(seed, pebble)
+                    } else {
+                        CardPlaceholder(width: CardLayout.cardWidth(available: pageWidth))
+                    }
+                }
+                .modifier(Flying(host: host, onRest: onRest))
+                .frame(maxWidth: .infinity)
+                .padding(.top, 8)
+            }
+            .scrollClipDisabled()
         case .failed:
             VStack(spacing: 12) {
                 Text("Couldn't load this pebble.")
@@ -122,6 +143,7 @@ struct HeldCardPage: View {
                             .padding(.top, 8)
                             .padding(.bottom, 32)
                     }
+                    .scrollClipDisabled()
                     .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { viewport = $0 }
                     .task(id: printReady) {
                         guard printReady else { return }
@@ -170,9 +192,24 @@ struct HeldCardPage: View {
                    ratio: detail.snaps.first.flatMap { aspects.ratio(for: $0.storagePath) },
                    width: CardLayout.cardWidth(available: pageWidth), domains: refs.domains,
                    collectionGlyphs: collectionGlyphs, soulGlyphs: soulGlyphs, soulOrder: request.soulOrder,
-                   turn: turn, print: print, stonePress: versoPress)
+                   turn: turn, print: print, stonePress: versoPress, focus: $focus)
+            .modifier(Flying(host: host, onRest: onRest, active: print == nil))
             .frame(maxWidth: .infinity)
             .stonePressLifetime($versoPress)
+    }
+
+    /// The seed's recto (#1146 §Flight, first frame): the Spine card at the
+    /// card's width, so the flight lands on a card, never a spinner; the leaf,
+    /// the souls past three and the verso fill in when the moment lands.
+    private func seededCard(_ seed: MomentSummary, _ pebble: MomentSummary.PebbleSummary) -> some View {
+        let width = CardLayout.cardWidth(available: pageWidth)
+        let emotion = pebble.emotion.flatMap { palettes.palette(for: $0.id) }
+        return SpineCardShell(emotion: emotion, polarity: pebble.valence.polarity, intensity: pebble.intensity) {
+            SpineCardFace(moment: seed, palette: SpineColors.palette(emotion, isBlank: false),
+                          ratio: seed.firstSnapPath.flatMap { aspects.ratio(for: $0) },
+                          width: width, u: CardLayout.u(cardWidth: width), soulNames: [:], soulGlyphs: soulGlyphs,
+                          soulOrder: request.soulOrder, accessible: true)
+        }
     }
 
     // MARK: - The print (D6)
@@ -258,6 +295,8 @@ struct HeldCardPage: View {
         }
         switch outcome {
         case .closes:
+            // Before the close, so it fades: the slot has gone from the Path.
+            host.markLeaving()
             onClose()
         case .reloads:
             // In place: the page keeps showing until the fresh detail lands.
@@ -273,4 +312,24 @@ struct HeldCardPage: View {
 /// The phone width the page assumes until its first layout reports its own.
 private enum ReferencePhone {
     static let width: CGFloat = 393
+}
+
+/// The FLIP on whichever card the page shows (#1160 D1): the transform from the
+/// host's state, the rest read outside it, and the card invisible until its
+/// rest is known, so the first frame of an open is measured, not guessed.
+private struct Flying: ViewModifier {
+    let host: HeldCardHostModel
+    let onRest: (CGRect) -> Void
+    var active = true
+
+    func body(content: Content) -> some View {
+        content
+            .modifier(FlightEffect(progress: active ? host.flight : 1, slot: active ? host.sourceRect : nil,
+                                   rest: host.restRect))
+            .opacity(host.phase == .opening && host.flies && host.restRect == nil ? 0 : 1)
+            .background {
+                Color.clear
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { onRest($0) }
+            }
+    }
 }
