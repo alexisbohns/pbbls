@@ -269,7 +269,8 @@ struct RootView: View {
         // The `session == nil` re-arm never fires on a cold launch that
         // resolves signed out, so re-arm the loader for the next sign-in here.
         pathFeedLoaded = false
-        // No slot of the last account survives into the next one.
+        // No slot of the last account survives into the next one, and none
+        // stays hidden by a flight the sign-out cut short (`hidden` starts nil).
         cardFrames = CardFrameRegistry()
         heldCard.reset()
         storedHeldCard = nil
