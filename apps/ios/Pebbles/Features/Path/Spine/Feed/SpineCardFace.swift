@@ -31,8 +31,9 @@ struct SpineCardFace: View {
 
     @Environment(\.colorScheme) private var scheme
     @Environment(\.spineSnapSource) private var snaps
-    @State private var photoURL: URL?
-    @State private var loggedFailure: URL?
+    /// The photo this face fetched itself, by path; the shared cache is read first.
+    @State private var fetched: (path: String, image: UIImage)?
+    @State private var failedURL: URL?
 
     private static let logger = Logger(subsystem: "app.pbbls.ios", category: "spine")
 
@@ -68,10 +69,40 @@ struct SpineCardFace: View {
                 .padding(1.6 * u)
                 .accessibilityHidden(true)
         }
-        .task(id: moment.firstSnapPath) {
-            photoURL = nil
-            guard let path = moment.firstSnapPath, snaps.image(path) == nil else { return }
-            photoURL = await snaps.url(path)
+        .task(id: moment.firstSnapPath) { await loadPhoto() }
+    }
+
+    // MARK: - The photo's load
+
+    /// A decoded photo at once: the source's (references, the lab), the shared
+    /// cache's (a card the Spine already drew), or this face's own fetch.
+    private func decoded(_ path: String) -> UIImage? {
+        snaps.image(path) ?? SnapImageCache.shared.image(for: path) ?? (fetched?.path == path ? fetched?.image : nil)
+    }
+
+    /// Fetches the signed original once per path and caches the decoded image,
+    /// so the held card flying out of this slot draws it with no fetch and no
+    /// empty frame. Nothing is reset while the path is unchanged.
+    private func loadPhoto() async {
+        guard let path = moment.firstSnapPath, decoded(path) == nil else { return }
+        // Unsigned: the cache logged why; the bed stays.
+        guard let url = await snaps.url(path) else { return }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            guard let image = await UIImage(data: data)?.byPreparingForDisplay() else {
+                throw URLError(.cannotDecodeContentData)
+            }
+            guard !Task.isCancelled else { return }
+            SnapImageCache.shared.store(image, for: path)
+            fetched = (path, image)
+        } catch {
+            guard !Task.isCancelled else { return }
+            // Once per URL: a card scrolled back into view does not log again.
+            if failedURL != url {
+                let reason = error.localizedDescription
+                Self.logger.warning("spine card photo failed: \(reason, privacy: .private)")
+            }
+            failedURL = url
         }
     }
 
@@ -118,25 +149,10 @@ struct SpineCardFace: View {
     /// letterboxed in the square rather than cut.
     @ViewBuilder
     private func photo(u: CGFloat) -> some View {
-        if let path = moment.firstSnapPath, let image = snaps.image(path) {
+        if let path = moment.firstSnapPath, let image = decoded(path) {
             Image(uiImage: image).resizable().scaledToFit()
-        } else if let photoURL {
-            AsyncImage(url: photoURL) { phase in
-                switch phase {
-                case .success(let image):
-                    image.resizable().scaledToFit()
-                case .failure(let error):
-                    unavailable(u: u).onAppear {
-                        // Once per URL: a card scrolled back into view does not log again.
-                        guard loggedFailure != photoURL else { return }
-                        loggedFailure = photoURL
-                        let reason = error.localizedDescription
-                        Self.logger.warning("spine card photo failed: \(reason, privacy: .private)")
-                    }
-                default:
-                    bed
-                }
-            }
+        } else if failedURL != nil {
+            unavailable(u: u)
         } else {
             bed
         }
