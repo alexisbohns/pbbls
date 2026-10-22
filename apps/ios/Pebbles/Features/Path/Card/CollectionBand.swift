@@ -27,9 +27,10 @@ struct CollectionBand: View {
                 }
             }
             ForEach(collections.dropFirst()) { _ in
+                // Ideal, not fixed: the flow proposes zero to a knot it does not draw.
                 Rectangle()
                     .fill(spot)
-                    .frame(width: 5, height: 5)
+                    .frame(idealWidth: 5, maxWidth: 5, idealHeight: 5, maxHeight: 5)
                     .rotationEffect(.degrees(45))
             }
         }
@@ -100,6 +101,10 @@ struct BandFlow: Layout {
                         at: CGPoint(x: x + gap, y: y + (lineHeight - arrangement.knot.height) / 2),
                         anchor: .topLeading, proposal: ProposedViewSize(arrangement.knot))
                     x += arrangement.knotRun
+                } else if index > 0 {
+                    // The knot of a name that starts a line is not drawn: a subview a
+                    // layout leaves unplaced lands at its centre, so it takes zero room.
+                    subviews[count + index - 1].place(at: bounds.origin, anchor: .topLeading, proposal: .zero)
                 }
                 let size = arrangement.names[index]
                 subviews[index].place(at: CGPoint(x: x, y: y + (lineHeight - size.height) / 2),
