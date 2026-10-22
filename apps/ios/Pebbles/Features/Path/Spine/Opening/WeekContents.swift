@@ -39,7 +39,8 @@ struct WeekContents: View {
                 .accessibilityAddTraits(.isHeader)
                 .padding(.bottom, SpineLayout.sectionHeaderGap)
             ForEach(rows) { row in
-                rowView(row, isRead: row.day == read)
+                // The reading day's dot sits beside its first row only, as on the web and Android.
+                rowView(row, isRead: row.day == read && row.firstOfDay)
             }
         }
         .padding(.top, SpineLayout.sectionTop)
