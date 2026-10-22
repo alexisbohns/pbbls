@@ -27,7 +27,7 @@ struct PebbleCard: View {
                 panel
                     .frame(width: width)
                 CardFooter(visibility: pebble.visibility, turnTo: turn.front.other,
-                           stone: SpineColors.spot(stone, scheme: scheme), onTurn: { turn.turnInstantly() })
+                           stone: SpineColors.spot(stone, scheme: scheme), onTurn: { _ = turn.beginTurn(reduceMotion: true) })
                     .frame(width: width)
             }
         }
