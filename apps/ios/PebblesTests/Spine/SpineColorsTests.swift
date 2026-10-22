@@ -68,4 +68,10 @@ struct SpineColorsTests {
         #expect(SpineColors.nightRingSource(scheme: .dark).map { $0 == (PebblesColorRole.onSurface, 0.06) } == true)
         #expect(SpineColors.nightRingWidth == 0.5)
     }
+
+    @Test("the seal's deep ink: shaded on Paper, secondary at 80 % over the ground at Night")
+    func deep() {
+        #expect(SpineColors.deepSlot(scheme: .light) == (StonePalette.Slot.shaded, 1.0))
+        #expect(SpineColors.deepSlot(scheme: .dark) == (StonePalette.Slot.secondary, 0.8))
+    }
 }

@@ -46,6 +46,18 @@ enum SpineColors {
         palette.color(spotSlot(scheme: scheme))
     }
 
+    /// The seal's deep ink (R17): `shaded` on Paper; at Night `secondary` mixed
+    /// 80 % toward the ground, drawn as `secondary` at 0.8 over the page's
+    /// `surface` (iOS 17 has no colour mix; the seal always sits on the ground).
+    static func deepSlot(scheme: ColorScheme) -> (slot: StonePalette.Slot, opacity: Double) {
+        scheme == .dark ? (.secondary, 0.8) : (.shaded, 1)
+    }
+
+    static func deep(_ palette: StonePalette, scheme: ColorScheme) -> Color {
+        let deep = deepSlot(scheme: scheme)
+        return palette.color(deep.slot).opacity(deep.opacity)
+    }
+
     // MARK: - Scheme blends Android computes in `SpineColors.kt` (decision 1)
 
     /// The rake's groove shadow: `onSurface` @ 0.20 on Paper, black @ 0.34 at
