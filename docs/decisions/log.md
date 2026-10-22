@@ -1222,3 +1222,24 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Reselect relies on the `TabView(selection:)` setter firing for the current tab, verified on the iPhone 15 (2026-10-21, iOS 26). If a point release breaks it, the fallback is a `UITabBarControllerDelegate` proxy found through the hosting controller.
 - **Supersedes / Superseded-by:** Supersedes nothing. It answers the "iOS and Android now differ in IA on purpose" consequence of **2026-09-21 — Android gets a four-tab bottom bar, a deliberate break from the 1:1 iOS mirror (#852)**: the two clients share the IA again.
 - **Refs:** #903, #446, #444, #852, `docs/superpowers/specs/2026-10-20-ios-tab-navigation-design.md`, `docs/superpowers/plans/2026-10-21-ios-tab-navigation.md`, `apps/ios/Pebbles/Features/Tabs/TabNavigation.swift`, `apps/ios/Pebbles/Features/Tabs/PebblesTabView.swift`, `apps/ios/Pebbles/RootView.swift`.
+
+## 2026-10-22 — The iOS Path becomes the Spine: the existing lit stone in the margin, a SwiftUI paging pager, souls from `path_moments` (#1130)
+
+- **Status:** taken
+- **Scope:** ios, ui
+- **Context:** Web (#1052) and Android (#1122) draw the Path as the Spine; iOS still drew the row list (`WeekPathView`, `PathPebbleRow`, a Rive cairn roll) inside a `TabView(.page)`. Stacks A (M3 roles), B (`SpineType`, the reference gate, the soft stone) and C (the four tabs, `MomentsRevision`) had landed.
+- **Decision:**
+  - **D1** The margin stone is the existing lit `PebbleStoneView` at rest light, at 34 / 44 / 54 pt, with an additive `seed:` (`StableHash.seed(pebble.id)`, folded to 24 bits for the shader's Float). Rings, halo, ripple and glint are SwiftUI layers over it. No new renderer, no SVG port.
+  - **D4** Each week page is a `ScrollView` with the days in a `LazyVStack`, never a `List`; no view in a day column clips, so an overhanging stone stays pressable. `SpineWeekRows` is the one row order; `SpineWeekStack` lays the same rows out eagerly for the reference harness.
+  - **D5** The pager is a horizontal `ScrollView` + `LazyHStack` with `.scrollTargetBehavior(.paging)` and `.scrollPosition(id:)`, bound to `PathModel.focusedWeekStart`, which passed the D4c.5 device spike.
+  - **D6** The rake ground is one tiled image behind the days block, in content coordinates, so its phase cannot drift.
+  - **D11** Dynamic Type scales text, never geometry; card text through `SpineType`'s `.card(cap: 1.3)`; an entry's anchor is 0.6 × its resolved name size.
+  - Souls come from `path_moments` (`PebbleSummary.souls`, tolerant of rows without them), glyphs from `ReferenceDataService`; photo ratios from image headers (`SnapAspectCache`); press requests and card frames are observable state (`StonePressRequests`, `CardFrameRegistry`) for stack E.
+- **Why:** The 1:1 rule: iOS reads the same contract and shows the same week. The lit stone already exists on iOS and reads as stone at feed size; `List` clips cells and fights the overhang; `TabView(.page)` keeps ±1 pages live (three weeks of shader layers) in separate controllers; a summed-height ground re-phases after a far jump (Android's lesson).
+- **Consequences:**
+  - The row Path (`WeekPathView`, `PathPebbleRow`, `PathPebbleSnapThumb`, `WeekHeaderView`, `WeekRollView`, `WeekRollCairnCell`, `pbbls-cairn-states.riv`) is removed in D5b.
+  - One generated token joins stack A's Spine table, `rakeLight` (a constant source: white / `#DCE2EA`); the rake shadow and the card's shadow ink are scheme blends in `SpineColors.swift`, as in Android's `SpineColors.kt`. Another scheme-only Spine tone is a row in that table or a blend there, never a literal in `Features/`.
+  - The glint's white lives in the exempt `Features/Path/Stone/` folder with the stone's other literal tones.
+  - A press opens `PebbleDetailSheet` until stack E's held card consumes `SpineOpen`.
+- **Supersedes / Superseded-by:** Extends **2026-10-18 — The Android Path becomes the Spine** (#1122) to iOS, which closes its consequence "iOS still shows the row list; its Spine is a separate issue".
+- **Refs:** #1130, #1161, #1122, #1052, `docs/superpowers/specs/2026-10-20-ios-spine-path-design.md`, `docs/superpowers/plans/2026-10-21-ios-spine-path.md`, `apps/ios/Pebbles/Features/Path/Spine/`, `apps/ios/Pebbles/Features/Path/PathModel.swift`.
