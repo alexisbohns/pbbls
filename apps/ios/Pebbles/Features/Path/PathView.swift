@@ -18,6 +18,8 @@ struct PathView: View {
     @Environment(TabNavigation.self) private var nav
     @Environment(MomentsRevision.self) private var revision
     @Environment(HeldCardHostModel.self) private var heldCard
+    @Environment(CardFrameRegistry.self) private var cardFrames
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var model = PathModel()
     /// The Capture flow, what `+` opens.
@@ -48,6 +50,10 @@ struct PathView: View {
             }
             .task { await stats.load() }
             .task(id: references.souls) { syncSouls() }
+            // A held card closed: VoiceOver returns to its slot (stack D3's focus state).
+            .onChange(of: heldCard.returnFocus) { _, id in
+                if let id { model.returnFocus = id }
+            }
             // Path reselected at its root (#903 §4): "top of Path" means now.
             .onChange(of: nav.scrollToTop[.path, default: 0]) { model.focusCurrentWeek() }
             // #903 D5: a moment changed from another tab or a sheet.
@@ -129,7 +135,9 @@ struct PathView: View {
     /// A press opens the held card on the face it asked for (#1146): the stone
     /// the verso, after its dip; the card or the entry the recto.
     private func open(_ open: SpineOpen) {
-        heldCard.open(HeldCardRequest(open, origin: .path, onChanged: { reloadAfterCard() }))
+        model.returnFocus = nil
+        heldCard.open(HeldCardRequest(open, origin: .path, onChanged: { reloadAfterCard() }),
+                      sourceRect: cardFrames.frames[open.momentId], reduceMotion: reduceMotion)
     }
 
     /// The card changed a moment: the Path and the stats reload.
@@ -195,5 +203,6 @@ struct PathView: View {
     .environment(TabNavigation())
     .environment(MomentsRevision())
     .environment(HeldCardHostModel())
+    .environment(CardFrameRegistry())
     .environment(SnapAspectCache(urls: SnapURLCache(client: supabase.client)))
 }

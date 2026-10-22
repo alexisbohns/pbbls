@@ -124,10 +124,11 @@ struct RootView: View {
             if canShowAuthedTabs {
                 ZStack {
                     PebblesTabView(onPathFirstLoad: { pathFeedLoaded = true })
-                        .heldCardHost(heldCard)
                         .environment(nav)
                         .environment(cardFrames)
                         .environment(heldCard)
+                        // Nothing under the held card is reachable (stack C §7's slot).
+                        .accessibilityHidden(heldCard.request != nil)
                         .environment(\.spineSnapSource, .signed(snapURLs))
                         .fullScreenCover(isPresented: $isPresentingOnboarding) {
                             OnboardingView(steps: OnboardingSteps.all) {
@@ -147,8 +148,11 @@ struct RootView: View {
                             .transition(.opacity)
                     }
 
-                    // The card-stack overlay host (#903 §7, later stack) goes
-                    // here, above the tabs, so one overlay serves every tab.
+                    // The held card (#1160 D1): one layer above the tabs for every tab.
+                    HeldCardHost()
+                        .environment(heldCard)
+                        .environment(cardFrames)
+                        .environment(\.spineSnapSource, .signed(snapURLs))
                 }
                 .animation(.easeInOut(duration: 0.35), value: holdsLoader)
                 .sheet(item: $acceptingInvite) { invite in
@@ -265,7 +269,8 @@ struct RootView: View {
         // The `session == nil` re-arm never fires on a cold launch that
         // resolves signed out, so re-arm the loader for the next sign-in here.
         pathFeedLoaded = false
-        // No slot of the last account survives into the next one.
+        // No slot of the last account survives into the next one, and none
+        // stays hidden by a flight the sign-out cut short (`hidden` starts nil).
         cardFrames = CardFrameRegistry()
         heldCard.reset()
         storedHeldCard = nil

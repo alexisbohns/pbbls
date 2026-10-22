@@ -20,6 +20,7 @@ struct CardVerso: View {
     var print: Double?
     /// The verso stone's press, played by the print (E3).
     var stonePress: StonePress?
+    var focus: AccessibilityFocusState<CardFocus?>.Binding?
 
     /// One environment for the ramp's mix and its scheme, so both agree.
     @Environment(\.self) private var environment
@@ -84,6 +85,7 @@ struct CardVerso: View {
         .accessibilityLabel(Text(CardStrings.versoHeading))
         .accessibilityValue(Text(lockup.word) + Text(verbatim: " ") + Text(lockup.span))
         .accessibilityAddTraits(.isHeader)
+        .cardFocus(focus, .versoHeading)
         .opacity(print.map { PrintPart.lockup.alpha(CompletionMotion.print($0)) } ?? 1)
     }
 

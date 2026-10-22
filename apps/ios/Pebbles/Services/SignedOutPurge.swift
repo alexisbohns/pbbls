@@ -34,6 +34,7 @@ struct SignedOutPurge {
         stats.reset()
         snapURLs.invalidateAll()
         urlCache.removeAllCachedResponses()
+        SnapImageCache.shared.removeAll()
         Self.logger.info("cleared local account state")
     }
 }

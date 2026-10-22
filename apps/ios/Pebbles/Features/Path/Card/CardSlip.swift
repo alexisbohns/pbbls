@@ -8,6 +8,7 @@ struct CardSlip: View {
     let cut: SpineType.Cut
     let spot: Color
     let u: CGFloat
+    var focus: AccessibilityFocusState<CardFocus?>.Binding?
 
     var body: some View {
         Text(verbatim: name)
@@ -28,5 +29,6 @@ struct CardSlip: View {
             }
             .accessibilityAddTraits(.isHeader)
             .accessibilitySortPriority(5)
+            .cardFocus(focus, .title)
     }
 }

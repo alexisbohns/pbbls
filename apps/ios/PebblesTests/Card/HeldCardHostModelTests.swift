@@ -30,7 +30,7 @@ struct HeldCardHostModelTests {
     func close() {
         let host = HeldCardHostModel()
         host.open(HeldCardRequest(momentId: id, origin: .path))
-        host.close()
+        host.finishClose()
         #expect(host.request == nil && host.snapshot == nil)
     }
 
