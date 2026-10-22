@@ -72,15 +72,22 @@ struct SpineWeekView: View {
             .accessibilityLabel(Text(verbatim: feedLabel))
             .onGeometryChange(for: CGSize.self) { $0.size } action: { viewport = $0 }
             .onPreferenceChange(ReadingDayKey.self) { marks in
-                guard let day = ReadingDay.index(marks, viewportHeight: viewport.height) else { return }
-                model.setReadingDay(day, for: page.weekStart)
+                // Nil above the line: the page reads its first day again.
+                model.setReadingDay(ReadingDay.index(marks, viewportHeight: viewport.height), for: page.weekStart)
             }
             .onChange(of: scrollToTopToken) {
+                // Every page sees the token; only the focused one moves.
+                guard page.weekStart == model.focusedWeekStart else { return }
                 if reduceMotion { proxy.scrollTo(Self.top, anchor: .top) } else {
                     withAnimation { proxy.scrollTo(Self.top, anchor: .top) }
                 }
             }
-            .onChange(of: model.returnFocus) { _, id in slotFocus = id }
+            .onChange(of: model.returnFocus) { _, id in
+                // Mirrored then cleared, so closing the same card twice returns twice.
+                guard let id else { return }
+                slotFocus = id
+                model.returnFocus = nil
+            }
             .task(id: go) { await perform(go, proxy: proxy) }
         }
     }
@@ -109,10 +116,11 @@ struct SpineWeekView: View {
         let animation: Animation? = reduceMotion ? nil : .easeInOut(duration: 0.35)
         withAnimation(animation) { proxy.scrollTo(request.momentId.uuidString, anchor: .center) }
         try? await Task.sleep(for: .milliseconds(16))
+        // A newer tap, or the page leaving, cancels this one at every step.
+        guard !Task.isCancelled else { return }
         withAnimation(animation) { proxy.scrollTo(SpinePebble.stoneAnchor(request.momentId), anchor: .center) }
         if !reduceMotion { try? await Task.sleep(for: .seconds(StoneMotion.goPressDelay)) }
-        // A newer tap, or the page leaving, cancels this one.
-        guard !Task.isCancelled else { return }
+        guard !Task.isCancelled, page.weekStart == model.focusedWeekStart else { return }
         model.pressRequests.request(request.momentId)
     }
 }

@@ -28,8 +28,7 @@ struct SpinePager: View {
                         if let page = model.page(for: entry.weekStart) {
                             SpineWeekView(page: page, model: model, palette: palette, ratio: ratio, onOpen: onOpen,
                                           onDelete: onDelete, onCreate: onCreate,
-                                          scrollToTopToken: entry.weekStart == model.focusedWeekStart
-                                              ? scrollToTopToken : 0)
+                                          scrollToTopToken: scrollToTopToken)
                         }
                     }
                     .containerRelativeFrame(.horizontal)
@@ -49,10 +48,11 @@ struct SpinePager: View {
             if let settled { model.focus(settled) }
         }
         .onChange(of: model.focusedWeekStart) { _, week in
-            guard position != week else { return }
-            if reduceMotion { position = week } else { withAnimation { position = week } }
+            if position != week {
+                if reduceMotion { position = week } else { withAnimation { position = week } }
+            }
+            announce(week)
         }
-        .onChange(of: model.focusedWeekStart) { _, week in announce(week) }
         .task(id: model.focusedWeekStart) {
             await aspects?.prefetch(model.photoPaths(around: model.focusedWeekStart))
         }

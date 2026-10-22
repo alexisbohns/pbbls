@@ -120,6 +120,8 @@ struct PathModelTests {
         model.setReadingDay(3, for: F.weekStart)
         #expect(changed.raised)
         #expect(model.readingDay[F.weekStart] == 3)
+        model.setReadingDay(nil, for: F.weekStart)
+        #expect(model.readingDay[F.weekStart] == nil)
     }
 
     @Test("a change made on another tab reloads; the Path's own does not")
