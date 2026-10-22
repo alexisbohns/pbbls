@@ -33,7 +33,7 @@ struct WeekMouth: View {
                             Text(verbatim: SpineCopy.weekLink(next.number, locale: locale)).spineType(.masthead)
                             Image(systemName: "chevron.right").imageScale(.small)
                         }
-                        .frame(minHeight: SpineLayout.minTarget)
+                        .frame(minWidth: SpineLayout.minTarget, minHeight: SpineLayout.minTarget)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)

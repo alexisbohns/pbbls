@@ -91,6 +91,5 @@ struct WeekContents: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: name ?? SpineCopy.untitled(locale: locale)))
         .accessibilityHint(Text(verbatim: SpineCopy.contentsHint(locale: locale)))
-        .accessibilityAddTraits(.isButton)
     }
 }

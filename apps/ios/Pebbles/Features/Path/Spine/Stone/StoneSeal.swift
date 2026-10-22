@@ -67,17 +67,33 @@ struct StoneSeal: View {
         StrokeStyle(lineWidth: width, lineCap: .round, lineJoin: .round)
     }
 
-    /// The glyph's strokes (a 200 × 200 drawing) in the middle 56 % of the seal.
+    /// The glyph's strokes (drawn in its own view box) in the middle 56 % of the seal.
     private func glyphPath(in size: CGSize) -> Path {
-        guard !isBlank, let strokes = glyph?.strokes, !strokes.isEmpty else { return Path() }
+        guard !isBlank, let glyph, let strokes = Self.strokes(of: glyph) else { return Path() }
         let side = 0.56 * min(size.width, size.height)
-        let scale = side / 200
+        let scale = side / CGFloat(glyph.viewBoxSide)
         let transform = CGAffineTransform(translationX: (size.width - side) / 2, y: (size.height - side) / 2)
             .scaledBy(x: scale, y: scale)
-        var path = Path()
-        for stroke in strokes {
-            if let parsed = SVGPathParser.parse(stroke.d) { path.addPath(Path(parsed), transform: transform) }
+        return Path(strokes).applying(transform)
+    }
+
+    /// The glyph's strokes parsed once, in view-box units: a `Canvas` draws on
+    /// every frame and a week lists up to twenty seals, so the parse is memoised
+    /// by glyph (single-flight under the lock, as `WobbleRenderer` does).
+    private static let strokeCache = NSCache<NSString, CGPath>()
+    private static let strokeLock = NSLock()
+
+    private static func strokes(of glyph: PebbleGlyph) -> CGPath? {
+        let key = glyph.id.uuidString as NSString
+        strokeLock.lock()
+        defer { strokeLock.unlock() }
+        if let cached = strokeCache.object(forKey: key) { return cached }
+        let path = CGMutablePath()
+        for stroke in glyph.strokes {
+            if let parsed = SVGPathParser.parse(stroke.d) { path.addPath(parsed) }
         }
+        guard !path.isEmpty else { return nil }
+        strokeCache.setObject(path, forKey: key)
         return path
     }
 
