@@ -72,4 +72,22 @@ struct SpineWeekRowsTests {
             #expect(gap >= SpineLayout.labelClearance - 0.001, "day \(day.index)")
         }
     }
+
+    @Test("the verso opens with the masthead, the opening and the persons, and the page ends at the mouth")
+    func versoAndClosing() async throws {
+        let model = await SpineFixtureWeek.model()
+        let page = try #require(model.page(for: SpineFixtureWeek.weekStart))
+        #expect(SpineWeekRows.verso(page).map(\.id) == ["masthead", "opening", "persons"])
+        #expect(SpineWeekRows.closing(page).map(\.id) == ["mouth"])
+    }
+
+    @Test("an empty current week has no persons, no days and the fresh week instead of the mouth")
+    func emptyWeek() async throws {
+        let model = PathModel(calendar: SpineFixtureWeek.calendar, now: { SpineFixtureWeek.today })
+        await model.load { [] }
+        let page = try #require(model.page(for: SpineFixtureWeek.weekStart))
+        #expect(SpineWeekRows.verso(page).map(\.id) == ["masthead", "opening"])
+        #expect(SpineWeekRows.days(page).isEmpty)
+        #expect(SpineWeekRows.closing(page).map(\.id) == ["empty"])
+    }
 }

@@ -10,6 +10,12 @@ struct SpineFeedContext {
     /// A press asks to open the moment on a face; the host decides what opens (until stack E, the detail sheet).
     let onOpen: (MomentSummary, CardFace) -> Void
     let onDelete: (MomentSummary) -> Void
+    /// A masthead or mouth link, a contents tap's page change.
+    var onFocus: (Date) -> Void = { _ in }
+    /// The empty week's button: opens Capture.
+    var onCreate: () -> Void = {}
+    /// The day being read (D12): the persons' letter and the contents' dot follow it.
+    var readingDay: Int?
 }
 
 /// One moment on the Spine (#1130 §View tree, §Press-request state): the stone
