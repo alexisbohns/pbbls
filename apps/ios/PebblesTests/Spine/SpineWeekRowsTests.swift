@@ -77,7 +77,7 @@ struct SpineWeekRowsTests {
     func versoAndClosing() async throws {
         let model = await SpineFixtureWeek.model()
         let page = try #require(model.page(for: SpineFixtureWeek.weekStart))
-        #expect(SpineWeekRows.verso(page).map(\.id) == ["masthead", "opening", "persons"])
+        #expect(SpineWeekRows.verso(page).map(\.id) == ["masthead", "opening", "persons", "contents"])
         #expect(SpineWeekRows.closing(page).map(\.id) == ["mouth"])
     }
 

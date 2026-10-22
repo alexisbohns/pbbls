@@ -14,6 +14,8 @@ struct SpineFeedContext {
     var onFocus: (Date) -> Void = { _ in }
     /// The empty week's button: opens Capture.
     var onCreate: () -> Void = {}
+    /// A contents tap: scroll to the stone and press it, without opening (D8).
+    var onGo: (MomentSummary) -> Void = { _ in }
     /// The day being read (D12): the persons' letter and the contents' dot follow it.
     var readingDay: Int?
 }

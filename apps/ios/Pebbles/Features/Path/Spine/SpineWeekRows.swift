@@ -5,6 +5,7 @@ enum SpineRow: Identifiable {
     case masthead
     case opening
     case persons
+    case contents
     case mouth
     case empty
     /// A day's seam; `isLast` keeps a still last day's full height to the mouth.
@@ -17,6 +18,7 @@ enum SpineRow: Identifiable {
         case .masthead: return "masthead"
         case .opening: return "opening"
         case .persons: return "persons"
+        case .contents: return "contents"
         case .mouth: return "mouth"
         case .empty: return "empty"
         case let .seam(day, _): return "seam-\(day.index)"
@@ -29,9 +31,9 @@ enum SpineRow: Identifiable {
 /// its pebbles. `SpineWeekView` lays the rows out lazily and `SpineWeekStack`
 /// eagerly, so the app and the B2 references cannot disagree.
 enum SpineWeekRows {
-    /// The verso: the masthead, the opening, then the persons when anyone was there.
+    /// The verso: the masthead, the opening, the persons when anyone was there, and the contents.
     static func verso(_ page: SpinePage) -> [SpineRow] {
-        [.masthead, .opening] + (page.persons.isEmpty ? [] : [.persons])
+        [.masthead, .opening] + (page.persons.isEmpty ? [] : [.persons]) + (page.contents.isEmpty ? [] : [.contents])
     }
 
     /// The mouth, or the fresh week when the page has no moment (only the current week can be empty).
@@ -93,6 +95,9 @@ struct SpineRowView: View {
             WeekOpeningView(text: WeekOpeningText(page: context.page, locale: SpineStrings.appLocale))
         case .persons:
             PersonsOfWeekView(page: context.page, readingDay: context.readingDay)
+        case .contents:
+            WeekContents(page: context.page, readingDay: context.readingDay, palette: context.palette,
+                         onGo: context.onGo)
         case .mouth:
             WeekMouth(page: context.page, onFocus: context.onFocus)
         case .empty:
