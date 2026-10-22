@@ -1698,6 +1698,42 @@
         }
       }
     },
+    "bare.place.body" : {
+      "comment" : "Bare moment: the sentence in its card's place",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its card prints here once you say what it meant: a feeling and its weight, the parts of your life it touched, who was there."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sa carte s'imprimera ici quand tu diras ce qu'il a compté : un sentiment et son poids, les parts de ta vie qu'il a touchées, qui était là."
+          }
+        }
+      }
+    },
+    "bare.place.kicker" : {
+      "comment" : "Bare moment: the kicker over its card's place",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not a pebble yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore un galet"
+          }
+        }
+      }
+    },
     "Blocking also stops them joining again through your invite link." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1762,6 +1798,150 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Capture les moments au fil de l’eau. Pas de page blanche, pas de pression."
+          }
+        }
+      }
+    },
+    "card.collections.a11y" : {
+      "comment" : "VoiceOver: before the band's collection names",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections"
+          }
+        }
+      }
+    },
+    "card.domains.a11y" : {
+      "comment" : "VoiceOver: before the verso's domain names",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Life domains"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domaines de vie"
+          }
+        }
+      }
+    },
+    "card.turn" : {
+      "comment" : "Held card footer: small caps over where the turn leads",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retourner"
+          }
+        }
+      }
+    },
+    "card.turn.action.toMoment" : {
+      "comment" : "VoiceOver: the held card's turn button on the verso",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn over to the moment"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retourner vers le moment"
+          }
+        }
+      }
+    },
+    "card.turn.action.toPebble" : {
+      "comment" : "VoiceOver: the held card's turn button on the recto",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn over to your pebble"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retourner vers ton galet"
+          }
+        }
+      }
+    },
+    "card.turn.toMoment" : {
+      "comment" : "Held card footer: the turn leads to the moment (recto)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moment"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moment"
+          }
+        }
+      }
+    },
+    "card.turn.toPebble" : {
+      "comment" : "Held card footer: the turn leads to the pebble (verso)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebble"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Galet"
+          }
+        }
+      }
+    },
+    "card.verso.heading" : {
+      "comment" : "VoiceOver: the verso's heading",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your pebble"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton galet"
           }
         }
       }

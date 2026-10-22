@@ -39,7 +39,7 @@ struct CompletePrivacyStep: View {
                     Text(grade.label)
                         .pebblesFont(.bodyEmphasized)
                         .foregroundStyle(isSelected ? Color.pebbles.primary : Color.pebbles.onSurface)
-                    Text(explanation(for: grade))
+                    Text(grade.explanation)
                         .pebblesFont(.subhead)
                         .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .multilineTextAlignment(.leading)
@@ -54,15 +54,7 @@ struct CompletePrivacyStep: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(grade.label)
-        .accessibilityHint(explanation(for: grade))
+        .accessibilityHint(grade.explanation)
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
-    }
-
-    private func explanation(for grade: Visibility) -> LocalizedStringResource {
-        switch grade {
-        case .secret:  return "Only you can see this one."
-        case .private: return "Your mutual connections can see it."
-        case .public:  return "Anyone with the link can see it."
-        }
     }
 }
