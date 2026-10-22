@@ -68,7 +68,7 @@ extension References {
         private func stack(_ days: ClosedRange<Int>) async throws -> some View {
             let model = await SpineFixtureWeek.model()
             let page = try #require(model.page(for: SpineFixtureWeek.weekStart))
-            return SpineWeekStack(context: SpineFixtureWeek.context(model, page: page), days: days)
+            return SpineWeekStack(context: SpineFixtureWeek.context(model, page: page), days: days, part: .days)
                 .environment(\.spineSnapSource, SpineFixturePhotos.source)
         }
     }
