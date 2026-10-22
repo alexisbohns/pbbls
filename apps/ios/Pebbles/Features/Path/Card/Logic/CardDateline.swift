@@ -15,6 +15,17 @@ enum CardDateline {
         return date.formatted(day) + " · " + time(date, calendar: calendar, locale: locale)
     }
 
+    /// The bare page's kicker (#1146 §Bare page): the full weekday, the day
+    /// and the month ("Sunday 11 October", "dimanche 11 octobre"), and the
+    /// short time, set in small caps by the view with " · " between.
+    static func kicker(_ date: Date, calendar: Calendar, locale: Locale) -> (day: String, time: String) {
+        var day = Date.FormatStyle.dateTime.weekday(.wide).day().month(.wide)
+        day.calendar = gregorian(in: calendar)
+        day.timeZone = calendar.timeZone
+        day.locale = locale
+        return (date.formatted(day), time(date, calendar: calendar, locale: locale))
+    }
+
     /// The locale's short time.
     static func time(_ date: Date, calendar: Calendar, locale: Locale) -> String {
         var style = Date.FormatStyle(date: .omitted, time: .shortened)

@@ -6,7 +6,8 @@ import os
 /// overlay (E4). It loads the moment in `.task`, reloads it in place after an
 /// edit, a pebble delete or a completion, and presents the edit sheets, the
 /// Complete flow and the delete dialog over the window as before. A moment with
-/// no pebble still shows the old read view until E3's bare page.
+/// no pebble opens as the bare page, and a completion prints its card into it
+/// (E3, D6); a restore mid-print lands the card at rest, verso up (D7).
 struct HeldCardPage: View {
     let request: HeldCardRequest
     let onClose: () -> Void
@@ -27,6 +28,15 @@ struct HeldCardPage: View {
     @State private var isPresentingComplete = false
     @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
+    /// When the print started; nil when none runs (D6). Cleared only by its last frame.
+    @State private var printStart: Date?
+    @State private var printCrossfades = false
+    @State private var placeFrame: CGRect?
+    @State private var viewport: CGRect?
+    /// The verso stone's press, played at 0.45 and kept for its own length.
+    @State private var versoPress: StonePress?
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(request: HeldCardRequest, onClose: @escaping () -> Void) {
         self.request = request
@@ -41,13 +51,22 @@ struct HeldCardPage: View {
     var body: some View {
         VStack(spacing: 0) {
             CardTopBar(shareURL: shareURL, menuItems: menuItems,
-                       isDisabled: model.detail == nil || model.isDeleting, onBack: onClose)
+                       isDisabled: model.detail == nil || model.isDeleting || printStart != nil, onBack: onClose)
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .background(Color.pebbles.surface.ignoresSafeArea())
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { pageWidth = $0 }
-        .task { await reload() }
+        .task {
+            await reload()
+            cutShortIfRestored()
+        }
+        .task(id: model.announcing) {
+            guard model.announcing else { return }
+            AccessibilityNotification.Announcement(String(localized: CardStrings.versoHeading)).post()
+            try? await Task.sleep(for: .seconds(1))
+            model.announced()
+        }
         .task(id: model.detail?.snaps.first?.storagePath) {
             guard let path = model.detail?.snaps.first?.storagePath else { return }
             await aspects.probe(path)
@@ -93,31 +112,106 @@ struct HeldCardPage: View {
             VStack(spacing: 12) {
                 Text("Couldn't load this pebble.")
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                Button("Retry") { Task { await reload() } }
+                Button("Retry") { Task { await reload(); cutShortIfRestored() } }
             }
         case .loaded:
             if let detail = model.detail {
-                if let pebble = detail.pebble {
-                    card(detail, pebble)
-                } else {
-                    // Until E3's bare page.
-                    PebbleReadView(detail: detail, palette: nil, onComplete: { isPresentingComplete = true })
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        page(detail)
+                            .padding(.top, 8)
+                            .padding(.bottom, 32)
+                    }
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { viewport = $0 }
+                    .task(id: printReady) {
+                        guard printReady else { return }
+                        await beginPrint(proxy)
+                    }
                 }
             }
         }
     }
 
-    private func card(_ detail: MomentDetail, _ pebble: MomentDetail.Pebble) -> some View {
-        ScrollView {
-            PebbleCard(detail: detail, pebble: pebble, palette: palettes.palette(for: pebble.emotion.id),
-                       ratio: detail.snaps.first.flatMap { aspects.ratio(for: $0.storagePath) },
-                       width: CardLayout.cardWidth(available: pageWidth), domains: refs.domains,
-                       collectionGlyphs: collectionGlyphs, soulGlyphs: soulGlyphs, soulOrder: request.soulOrder,
-                       turn: turn)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 8)
-                .padding(.bottom, 32)
+    /// The bare page until a completion has printed; the print while it runs;
+    /// the card at rest otherwise.
+    @ViewBuilder
+    private func page(_ detail: MomentDetail) -> some View {
+        if let pebble = detail.pebble, let printStart {
+            TimelineView(.animation) { context in
+                let duration = printCrossfades ? CompletionMotion.crossfade : CompletionMotion.duration
+                let elapsed = context.date.timeIntervalSince(printStart)
+                let t = CompletionMotion.timeline(elapsed: elapsed, duration: duration)
+                CardPrint(t: t, crossfade: printCrossfades, page: bare(detail), card: card(detail, pebble, print: t))
+                    .onChange(of: t >= CompletionMotion.pressAt, initial: true) { _, pressed in
+                        if pressed, !printCrossfades { versoPress = .next(after: nil, still: false, now: .now) }
+                    }
+                    // The frame that reaches the end ends it (D6); `initial` covers a
+                    // first frame already past the end after a late cover dismissal.
+                    .onChange(of: t >= 1, initial: true) { _, done in
+                        if done { endPrint() }
+                    }
+            }
+        } else if let pebble = detail.pebble, model.completion == nil {
+            card(detail, pebble, print: nil)
+        } else {
+            bare(detail)
         }
+    }
+
+    private func bare(_ detail: MomentDetail) -> BareMomentPage {
+        BareMomentPage(detail: detail, ratio: detail.snaps.first.flatMap { aspects.ratio(for: $0.storagePath) },
+                       onComplete: { isPresentingComplete = true },
+                       isCompleteDisabled: model.completion != nil || printStart != nil,
+                       onPlaceFrame: { placeFrame = $0 })
+    }
+
+    private func card(_ detail: MomentDetail, _ pebble: MomentDetail.Pebble, print: Double?) -> some View {
+        PebbleCard(detail: detail, pebble: pebble, palette: palettes.palette(for: pebble.emotion.id),
+                   ratio: detail.snaps.first.flatMap { aspects.ratio(for: $0.storagePath) },
+                   width: CardLayout.cardWidth(available: pageWidth), domains: refs.domains,
+                   collectionGlyphs: collectionGlyphs, soulGlyphs: soulGlyphs, soulOrder: request.soulOrder,
+                   turn: turn, print: print, stonePress: versoPress)
+            .frame(maxWidth: .infinity)
+            .stonePressLifetime($versoPress)
+    }
+
+    // MARK: - The print (D6)
+
+    /// A completion waits for the Complete flow's cover to go, so the print is
+    /// seen; then it starts once.
+    private var printReady: Bool {
+        model.completion != nil && !isPresentingComplete && printStart == nil
+    }
+
+    private func beginPrint(_ proxy: ScrollViewProxy) async {
+        let start = PrintStart.decide(place: placeFrame, viewport: viewport, reduceMotion: reduceMotion)
+        if start == .scrollThenPrint {
+            withAnimation(.easeInOut(duration: 0.3)) { proxy.scrollTo(BareMomentPage.placeID, anchor: .bottom) }
+            try? await Task.sleep(for: .milliseconds(350))
+            // The page left while it scrolled: nothing started, nothing to clear.
+            guard !Task.isCancelled else { return }
+        }
+        turn = CardTurnModel(face: .verso)
+        printCrossfades = start == .crossfade
+        host.startPrinting(request.momentId)
+        printStart = .now
+    }
+
+    /// The last frame: the card at rest, verso up; announced once.
+    private func endPrint() {
+        printStart = nil
+        host.endPrinting()
+        model.printEnded()
+    }
+
+    /// D7: a relaunch mid-print lands the card at rest, verso up.
+    private func cutShortIfRestored() {
+        guard let detail = model.detail,
+              PrintStart.cutsShort(printingFor: host.printingFor, momentId: request.momentId,
+                                   hasPebble: detail.pebble != nil) else { return }
+        turn = CardTurnModel(face: .verso)
+        model.cutShort()
+        host.endPrinting()
     }
 
     // MARK: - Data the card reads
