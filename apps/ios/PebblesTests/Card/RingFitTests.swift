@@ -42,6 +42,15 @@ struct RingFitTests {
         #expect(fit.tracking == 0)
     }
 
+    @Test("a measure of zero never traps: the name is set once at the smallest size")
+    func zeroMeasure() {
+        let fit = RingFits.fit(name: "Friends", circumference: 200, locale: Locale(identifier: "en"),
+                               measure: { _, _ in 0 })
+        #expect(fit.repetitions == 1)
+        #expect(fit.size == 7.5)
+        #expect(fit.tracking >= 0)
+    }
+
     @Test("tracking is never negative", arguments: [90.0, 120.0, 163.2, 200.0, 260.0])
     func neverNegative(circumference: Double) {
         let fit = RingFits.fit(name: "Friends", circumference: circumference, locale: Locale(identifier: "en"),

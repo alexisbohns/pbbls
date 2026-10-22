@@ -16,7 +16,10 @@ struct PostmarkNoiseTests {
 
     @Test("the same seed gives the same mask")
     func deterministic() {
-        #expect(PostmarkNoise.alphas(size: 64, seed: 7) == PostmarkNoise.alphas(size: 64, seed: 7))
+        let alphas = PostmarkNoise.alphas(size: 16, seed: 7)
+        #expect(alphas == PostmarkNoise.alphas(size: 16, seed: 7))
+        // Pinned bytes, so a refactor of the lattice is caught, not only a change between calls.
+        #expect(Array(alphas.prefix(8)) == [16, 16, 14, 11, 8, 5, 3, 1])
     }
 
     @Test("different seeds give different masks")

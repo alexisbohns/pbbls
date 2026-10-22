@@ -11,6 +11,7 @@ struct CardStringsTests {
         return String(localized: copy)
     }
 
+    // swiftlint:disable:next large_tuple
     static let rows: [(LocalizedStringResource, String, String)] = [
         (CardStrings.turn, "Turn", "Retourner"),
         (CardStrings.turnToPebble, "Pebble", "Galet"),

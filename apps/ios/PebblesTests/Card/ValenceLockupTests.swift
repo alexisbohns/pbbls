@@ -13,6 +13,7 @@ struct ValenceLockupTests {
         return String(localized: copy)
     }
 
+    // swiftlint:disable:next large_tuple
     static let expected: [(Valence, String, Bool, LockupRank, String, LockupInk)] = [
         (.highlightLarge, "Highlight", false, .large, "OF MY MONTH", .stoneRamp),
         (.highlightMedium, "Highlight", false, .medium, "OF MY WEEK", .stoneRamp),

@@ -27,7 +27,11 @@ enum RingFits {
                     measure: (_ text: String, _ size: CGFloat) -> CGFloat) -> RingFit {
         let unit = name.uppercased(with: locale) + separator
         for size in sizes {
-            var repetitions = Int((circumference / measure(unit, size)).rounded(.down))
+            // A measure of zero (a font that failed to load) would make the
+            // quotient infinite, and `Int(.infinity)` traps; such a size is set once.
+            let advance = measure(unit, size)
+            guard advance > 0 else { continue }
+            var repetitions = Int((circumference / advance).rounded(.down))
             // A real measure is not additive (kerning, rounding), so the repeated
             // text can overrun where the unit's multiple did not: step down until it
             // fits, so the tracking can never go negative.

@@ -2,7 +2,8 @@ import Foundation
 
 /// The held card's dates (#1146 §Recto), formatted with an explicit calendar
 /// and locale so tests pin them; views pass `SpineCalendar.current` and
-/// `SpineStrings.appLocale`. iOS's `MomentDetail` has no zone of its own, so
+/// `SpineStrings.dateLocale` (the app language with the device's hour cycle
+/// and region, as the Spine's seams and cards do). iOS's `MomentDetail` has no zone of its own, so
 /// "the moment's zone" is the device's, as on the Spine.
 enum CardDateline {
     /// "Thursday, 8 October 2026 · 21:00": the full date, then the short time.
