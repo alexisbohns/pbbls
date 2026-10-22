@@ -15,6 +15,8 @@ struct PebbleStoneView: View {
     let carving: StoneCarving
     let stonePalette: StonePalette
     var followsTilt: Bool = false
+    /// `StableHash.seed(pebble.id)` on the Spine (#1130 D1); nil elsewhere keeps the per-shape crust.
+    var seed: UInt32?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var motion = StoneMotionSource()
@@ -25,24 +27,29 @@ struct PebbleStoneView: View {
 
     /// A completed pebble: its derived glyph, coloured by its emotion
     /// (the brand accent when the palette is unknown).
-    init(valence: Valence, glyph: PebbleGlyph?, palette: EmotionPalette?, followsTilt: Bool = false) {
+    init(valence: Valence, glyph: PebbleGlyph?, palette: EmotionPalette?, followsTilt: Bool = false,
+         seed: UInt32? = nil) {
         self.valence = valence
         self.carving = .pebble(glyph)
         self.stonePalette = palette.map(StonePalette.init(emotion:)) ?? .brand
         self.followsTilt = followsTilt
+        self.seed = seed
     }
 
     /// An uncompleted moment (R4): neutral-medium silhouette, outline only,
     /// the fixed grey ramp, labelled "Not a pebble yet" for VoiceOver.
-    static func blank(followsTilt: Bool = false) -> PebbleStoneView {
-        PebbleStoneView(valence: .neutralMedium, carving: .blank, stonePalette: .blank, followsTilt: followsTilt)
+    static func blank(followsTilt: Bool = false, seed: UInt32? = nil) -> PebbleStoneView {
+        PebbleStoneView(valence: .neutralMedium, carving: .blank, stonePalette: .blank, followsTilt: followsTilt,
+                        seed: seed)
     }
 
-    private init(valence: Valence, carving: StoneCarving, stonePalette: StonePalette, followsTilt: Bool) {
+    private init(valence: Valence, carving: StoneCarving, stonePalette: StonePalette, followsTilt: Bool,
+                 seed: UInt32?) {
         self.valence = valence
         self.carving = carving
         self.stonePalette = stonePalette
         self.followsTilt = followsTilt
+        self.seed = seed
     }
 
     var body: some View {
@@ -58,7 +65,8 @@ struct PebbleStoneView: View {
                     light: light(at: context.date),
                     height: height,
                     isFlat: ProcessInfo.processInfo.isLowPowerModeEnabled,
-                    carving: carving
+                    carving: carving,
+                    seed: seed
                 )
             }
             .frame(width: proxy.size.width, height: proxy.size.height)

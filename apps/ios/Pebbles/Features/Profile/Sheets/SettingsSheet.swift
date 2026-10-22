@@ -33,6 +33,7 @@ struct SettingsSheet: View {
     @State private var isPresentingDeleteConfirm = false
     #if DEBUG
     @State private var isPresentingStoneLab = false
+    @State private var isPresentingSpineLab = false
     #endif
     @State private var isDeleting = false
     @State private var deleteError: String?
@@ -182,6 +183,9 @@ struct SettingsSheet: View {
             #if DEBUG
             .fullScreenCover(isPresented: $isPresentingStoneLab) {
                 StoneLabView()
+            }
+            .fullScreenCover(isPresented: $isPresentingSpineLab) {
+                SpineLabView()
             }
             #endif
             .confirmationDialog(
@@ -449,7 +453,18 @@ struct SettingsSheet: View {
                 }
             }
             .buttonStyle(.plain)
-            .pebblesListRow(position: .only)
+            .pebblesListRow(position: .top)
+            Button {
+                isPresentingSpineLab = true
+            } label: {
+                Label {
+                    Text(verbatim: "Spine lab")
+                } icon: {
+                    Image(systemName: "line.3.horizontal.decrease")
+                }
+            }
+            .buttonStyle(.plain)
+            .pebblesListRow(position: .bottom)
         } header: {
             Text(verbatim: "Developer").pebblesSectionHeader()
         }
