@@ -24,6 +24,10 @@ struct PebbleCard: View {
     let soulGlyphs: [String: [GlyphStroke]]
     let soulOrder: [String]
     let turn: CardTurnModel
+    /// Mounts the pan recogniser over the panel. False in the references' and
+    /// the lab's still: `ImageRenderer` draws a platform view as a placeholder
+    /// over the whole panel. The footer's button turns either way.
+    var turnByDrag = true
 
     @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -40,15 +44,18 @@ struct PebbleCard: View {
                     .frame(width: width)
                     .modifier(CardTurnEffect(progress: shownProgress, rightToLeft: rightToLeft))
                     .overlay {
-                        TurnPanFallback(
-                            onBegan: { turn.startDrag() },
-                            onChanged: { dx in
-                                turn.drag(to: TurnSettle.progress(drag: dx, width: width, rightToLeft: rightToLeft),
-                                          reduceMotion: reduceMotion)
-                            },
-                            onEnded: { dx, vx in release(translation: dx, velocity: vx) },
-                            onCancelled: { if turn.cancelDrag() { settleBack() } }
-                        )
+                        if turnByDrag {
+                            TurnPanFallback(
+                                onBegan: { turn.startDrag() },
+                                onChanged: { dx in
+                                    turn.drag(to: TurnSettle.progress(drag: dx, width: width,
+                                                                      rightToLeft: rightToLeft),
+                                              reduceMotion: reduceMotion)
+                                },
+                                onEnded: { dx, vx in release(translation: dx, velocity: vx) },
+                                onCancelled: { if turn.cancelDrag() { settleBack() } }
+                            )
+                        }
                     }
                 TurnFooter(progress: shownProgress, face: turn.face, visibility: pebble.visibility,
                            stone: SpineColors.spot(stone, scheme: scheme), onTurn: turnByButton)
