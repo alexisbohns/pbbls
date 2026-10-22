@@ -24,6 +24,10 @@ import os
 @MainActor
 final class ReferenceDataService {
     private(set) var domains: [Domain] = []
+    /// The collections' columns (#1145 D9): the glyph embedded as the souls
+    /// query embeds a soul's, so the held card's band can draw it.
+    nonisolated static let collectionsSelect = "id, name, glyph_id, glyphs(id, name, strokes, view_box)"
+
     private(set) var souls: [SoulWithGlyph] = []
     private(set) var collections: [PebbleCollection] = []
     private(set) var hasLoaded: Bool = false
@@ -71,7 +75,7 @@ final class ReferenceDataService {
                 .value
             async let collectionsQuery: [PebbleCollection] = client
                 .from("collections")
-                .select("id, name")
+                .select(Self.collectionsSelect)
                 .order("name")
                 .execute()
                 .value
@@ -143,7 +147,7 @@ final class ReferenceDataService {
         do {
             let rows: [PebbleCollection] = try await client
                 .from("collections")
-                .select("id, name")
+                .select(Self.collectionsSelect)
                 .order("name")
                 .execute()
                 .value
