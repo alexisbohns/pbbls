@@ -270,12 +270,6 @@ struct SpineCard: View {
     }
 }
 
-/// A slot's last reported frame, held by reference so updating it re-renders nothing
-/// (the card's, and `SpinePebble`'s for an entry).
-final class ReportedFrame {
-    var frame: CGRect?
-}
-
 /// Lays one child out a quarter turn: it reports the child's ideal size with
 /// the sides swapped and centres the child, so the child's own
 /// `.rotationEffect(.degrees(90))` lands inside the swapped box. Measured in

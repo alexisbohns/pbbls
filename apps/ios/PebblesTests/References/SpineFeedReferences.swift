@@ -4,7 +4,7 @@ import Testing
 
 extension References {
     /// #1130 D3: the fixture week's days in slices (PNGs stay under 1 MB, B2
-    /// §Risks: Monday and Tuesday apart, Friday with Saturday, Sunday alone),
+    /// §Risks: one day per slice, the still Friday too),
     /// every entry cut, the cards, the glyph-less stone, the bare and untitled
     /// moments and the still Friday. Android: SpineFeedPicnic*, SpineWeekDays*.
     @Suite("Spine feed references")
@@ -44,10 +44,17 @@ extension References {
                                          config: ReferenceConfig(scheme: scheme, locales: [.en, .fr]))
         }
 
-        /// The still Friday, then Saturday: the entry, the seawall portrait, the untitled photo.
+        /// The still Friday among days with moments.
         @Test(arguments: ReferenceScheme.allCases)
-        func friSat(scheme: ReferenceScheme) async throws {
-            ReferenceImage.assertMatches(try await stack(4...5), named: "friSat",
+        func friday(scheme: ReferenceScheme) async throws {
+            ReferenceImage.assertMatches(try await stack(4...4), named: "friday",
+                                         config: ReferenceConfig(scheme: scheme))
+        }
+
+        /// Saturday: the entry, the seawall portrait, the untitled photo.
+        @Test(arguments: ReferenceScheme.allCases)
+        func saturday(scheme: ReferenceScheme) async throws {
+            ReferenceImage.assertMatches(try await stack(5...5), named: "saturday",
                                          config: ReferenceConfig(scheme: scheme))
         }
 

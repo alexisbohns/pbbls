@@ -103,8 +103,12 @@ struct SpinePebble: View {
             .task(id: pendingOpen) {
                 guard let open = pendingOpen else { return }
                 try? await Task.sleep(for: .seconds(StoneMotion.openDelay))
-                guard pendingOpen == open, !Task.isCancelled else { return }
+                guard pendingOpen == open else { return }
+                // A row that left a lazy stack keeps its state: a cancelled wait drops its
+                // open, or the row would open on its way back in. A newer press has already
+                // replaced the id, so this never clears a live one.
                 pendingOpen = nil
+                guard !Task.isCancelled else { return }
                 context.onOpen(moment, open.face)
             }
     }
@@ -140,8 +144,10 @@ struct SpinePebble: View {
                           column: context.column, soulNames: context.page.soulNames,
                           soulGlyphs: context.page.soulGlyphs, soulOrder: context.page.soulOrder)
             } else {
+                // A one-line entry can fall under 44 pt; the button keeps the target.
                 SpineEntry(moment: moment, palette: stonePalette, soulNames: context.page.soulNames,
                            soulGlyphs: context.page.soulGlyphs, soulOrder: context.page.soulOrder)
+                    .frame(minHeight: SpineLayout.minTarget, alignment: .topLeading)
                     .opacity(registry?.hidden == moment.id ? 0 : 1)
                     .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
                         reported.frame = frame
@@ -157,7 +163,6 @@ struct SpinePebble: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: description))
-        .accessibilityAddTraits(.isButton)
         .modifier(SlotFocus(focus: slotFocus, id: moment.id))
         .accessibilitySortPriority(1)
         // Also VoiceOver's "Delete" action, so the slot names no action of its own.
