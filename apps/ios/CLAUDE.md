@@ -46,6 +46,6 @@ Pebbles/
   Resources/                Info.plist, Assets.xcassets, fonts, Rive/SVG assets
 ```
 
-Features map to the four tabs: Path, People (Souls, Circle), Collections, You (Profile hub: Glyphs, Achievements, Lab). The authed root is a system `TabView`; each tab owns a `NavigationStack` driven by `TabNavigation` (`Features/Tabs/`). Sheets and full-screen covers do secondary navigation.
+Features map to the four tabs: Path (the Spine: a week roll over a pager of Spine weeks, `Features/Path/Spine/`, its state in `PathModel`), People (Souls, Circle), Collections, You (Profile hub: Glyphs, Achievements, Lab). The authed root is a system `TabView`; each tab owns a `NavigationStack` driven by `TabNavigation` (`Features/Tabs/`). Sheets and full-screen covers do secondary navigation.
 
 `apps/android` mirrors this app 1:1 (see `apps/android/CLAUDE.md`) — when changing a schema/RPC contract or a cross-surface behavior here, check whether the Android mirror needs the same change.
