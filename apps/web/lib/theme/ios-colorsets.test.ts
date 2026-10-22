@@ -199,8 +199,14 @@ describe("renderIosColorsets", () => {
     expect(alphas(ring)).toEqual(["0.300", "0.170", "0.300", "0.170"])
   })
 
-  it("emits all nine Spine tokens", () => {
-    for (const token of ["halo", "stock", "rule", "cardRule", "line", "seam", "teeth", "ring", "ripple"]) {
+  it("writes the rake's lit line from constants, not roles (#1130)", () => {
+    const rakeLight = colorset(files, "rakeLight")
+    expect(hexes(rakeLight)).toEqual(["#FFFFFF", "#DCE2EA", "#FFFFFF", "#DCE2EA"])
+    expect(alphas(rakeLight)).toEqual(["0.550", "0.075", "0.550", "0.075"])
+  })
+
+  it("emits all ten Spine tokens", () => {
+    for (const token of ["halo", "stock", "rule", "cardRule", "line", "seam", "teeth", "ring", "ripple", "rakeLight"]) {
       expect(colorset(files, token).colors, token).toHaveLength(4)
     }
   })
@@ -268,7 +274,7 @@ describe("renderIosColorsets' Swift file", () => {
     const cases = [...swift.matchAll(/^ {4}case (\w+)$/gm)].map(([, c]) => c)
     expect(cases).toEqual([
       "primary", "onSurface", "onSurfaceVariant", "surfaceContainerLow", "surfaceContainerLowest",
-      "halo", "stock", "rule", "cardRule", "line", "seam", "teeth", "ring", "ripple",
+      "halo", "stock", "rule", "cardRule", "line", "seam", "teeth", "ring", "ripple", "rakeLight",
       "googleCapsuleInk",
     ])
   })
@@ -299,9 +305,9 @@ describe("committed iOS colours", () => {
     }
   })
 
-  it("renders 62 roles: 48 M3 + 4 sand + 9 Spine + the pin", () => {
+  it("renders 63 roles: 48 M3 + 4 sand + 10 Spine + the pin", () => {
     const prefix = `${APP_CATALOG}/${M3_FOLDER}/`
-    expect([...files.keys()].filter((k) => k.startsWith(prefix) && k.endsWith(".colorset/Contents.json"))).toHaveLength(62)
+    expect([...files.keys()].filter((k) => k.startsWith(prefix) && k.endsWith(".colorset/Contents.json"))).toHaveLength(63)
   })
 
   it("carries the real primary, error and surface hexes in D2 order", () => {
