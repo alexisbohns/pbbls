@@ -102,8 +102,8 @@ struct BandFlow: Layout {
                         anchor: .topLeading, proposal: ProposedViewSize(arrangement.knot))
                     x += arrangement.knotRun
                 } else if index > 0 {
-                    // The knot of a name that starts a line is not drawn: a subview a
-                    // layout leaves unplaced lands at its centre, so it takes zero room.
+                    // The knot of a name that starts a line is placed at a zero proposal
+                    // (a subview a layout leaves unplaced lands at its centre), so it draws nothing.
                     subviews[count + index - 1].place(at: bounds.origin, anchor: .topLeading, proposal: .zero)
                 }
                 let size = arrangement.names[index]

@@ -81,7 +81,8 @@ struct PostmarkRing {
 /// allocates on every call.
 @MainActor
 enum PostmarkNoiseImage {
-    private static var cache: [UInt64: Image] = [:]
+    /// A failed image is remembered as nil, so the error logs once per seed, not per body.
+    private static var cache: [UInt64: Image?] = [:]
     private static let logger = Logger(subsystem: "app.pbbls.ios", category: "held-card")
 
     static func image(seed: UInt64) -> Image? {
@@ -98,6 +99,7 @@ enum PostmarkNoiseImage {
                                     provider: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
         else {
             logger.error("postmark noise image could not be made; the stamp draws without texture")
+            cache[seed] = .some(nil)
             return nil
         }
         let image = Image(decorative: cgImage, scale: 1)

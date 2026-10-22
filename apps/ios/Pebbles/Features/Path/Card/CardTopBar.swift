@@ -18,7 +18,7 @@ struct CardTopBar: View {
                     .frame(width: CardLayout.turnTarget, height: CardLayout.turnTarget)
                     .contentShape(Rectangle())
             }
-            .accessibilityLabel(Text("Back"))
+            .accessibilityLabel(Text("Back", comment: "Accessibility label for the held card's back button"))
             Spacer(minLength: 0)
             if let shareURL {
                 ShareLink(item: shareURL) {
@@ -35,7 +35,7 @@ struct CardTopBar: View {
                     .contentShape(Rectangle())
             }
             .disabled(isDisabled)
-            .accessibilityLabel(Text("More"))
+            .accessibilityLabel(Text("More", comment: "Accessibility label for the held card's menu button"))
         }
         .foregroundStyle(Color.pebbles.onSurface)
         .padding(.horizontal, 4)
