@@ -132,7 +132,9 @@ struct HeldCardPage: View {
         HeldCardMenu.items(hasPebble: model.detail?.pebble != nil,
                            editMoment: { isPresentingEditMoment = true },
                            editPebble: { isPresentingEditPebble = true },
-                           delete: { if let detail = model.detail { pendingDeletion = MomentDeleteTarget(detail: detail) } })
+                           delete: {
+                               if let detail = model.detail { pendingDeletion = MomentDeleteTarget(detail: detail) }
+                           })
     }
 
     private var collectionGlyphs: [UUID: Glyph] {

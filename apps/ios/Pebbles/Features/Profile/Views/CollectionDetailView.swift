@@ -6,7 +6,7 @@ import os
 /// - Subheader shows the mode badge + pebble count.
 /// - Pebbles are grouped by calendar month (see `groupPebblesByMonth`) with
 ///   section headers like "April 2026".
-/// - Tapping a pebble opens its read page (`PebbleDetailSheet`).
+/// - Tapping a pebble opens its held card (`HeldCardHostModel.open`).
 /// - The Edit toolbar opens `EditCollectionSheet`. After save, the local
 ///   `collection` is reloaded so the header (title + mode badge + count)
 ///   stays in sync without popping the stack.
@@ -15,13 +15,13 @@ struct CollectionDetailView: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(CompleteDraftStore.self) private var completeDrafts
+    @Environment(HeldCardHostModel.self) private var heldCard
     @Environment(MomentsRevision.self) private var revision
 
     @State private var collection: Collection
     @State private var moments: [MomentSummary] = []
     @State private var isLoading = true
     @State private var loadError: String?
-    @State private var selectedMomentId: UUID?
     @State private var isPresentingEdit = false
     @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
@@ -57,13 +57,6 @@ struct CollectionDetailView: View {
                     // Refresh this view's header/subheader and the parent list
                     // independently — neither blocks the other.
                     Task { await reloadCollection() }
-                    onChanged()
-                })
-            }
-            // R9: a row opens the moment's read page, not the edit form.
-            .sheet(item: $selectedMomentId) { id in
-                PebbleDetailSheet(momentId: id, origin: .collections, onPebbleUpdated: {
-                    Task { await load() }
                     onChanged()
                 })
             }
@@ -120,7 +113,7 @@ struct CollectionDetailView: View {
                         ForEach(Array(group.value.enumerated()), id: \.element.id) { index, moment in
                             PebbleRow(
                                 moment: moment,
-                                onTap: { selectedMomentId = moment.id },
+                                onTap: { open(moment) },
                                 onDelete: { pendingDeletion = MomentDeleteTarget(summary: moment) }
                             )
                             .pebblesListRow(position: pebblesRowPosition(index: index, count: group.value.count))
@@ -144,6 +137,14 @@ struct CollectionDetailView: View {
         case 1: return "1 pebble"
         default: return "\(moments.count) pebbles"
         }
+    }
+
+    /// R9: a row opens the held card, not the edit form; no seed, so no flight (#1146).
+    private func open(_ moment: MomentSummary) {
+        heldCard.open(HeldCardRequest(momentId: moment.id, origin: .collections, onChanged: {
+            Task { await load() }
+            onChanged()
+        }))
     }
 
     private func load() async {

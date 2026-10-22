@@ -50,6 +50,12 @@ struct RootView: View {
     /// §Frame registry). Created here, above the tabs, so the overlay E adds
     /// beside `PebblesTabView` reads the same one.
     @State private var cardFrames = CardFrameRegistry()
+    /// The held card's one host (#1146 D1, D7), above the tabs.
+    @State private var heldCard = HeldCardHostModel()
+    /// Stack C §6: an authed scene key, declared here and cleared in
+    /// `resetAuthedSceneState()`. Restored once the launch loader is down.
+    @SceneStorage("heldCard") private var storedHeldCard: Data?
+    @State private var heldCardRestored = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "root")
 
@@ -118,8 +124,10 @@ struct RootView: View {
             if canShowAuthedTabs {
                 ZStack {
                     PebblesTabView(onPathFirstLoad: { pathFeedLoaded = true })
+                        .heldCardHost(heldCard)
                         .environment(nav)
                         .environment(cardFrames)
+                        .environment(heldCard)
                         .environment(\.spineSnapSource, .signed(snapURLs))
                         .fullScreenCover(isPresented: $isPresentingOnboarding) {
                             OnboardingView(steps: OnboardingSteps.all) {
@@ -175,6 +183,17 @@ struct RootView: View {
         // Restore once, before the authed branch first renders: the loader
         // keeps that branch hidden for well over one runloop.
         .task { restoreTabs() }
+        // Restore the held card once the launch loader is down (#1146 D7).
+        .task(id: holdsLoader) {
+            guard !holdsLoader, !heldCardRestored else { return }
+            heldCardRestored = true
+            restoreHeldCard()
+        }
+        .onChange(of: heldCard.snapshot) { _, snapshot in
+            // Signed out, the state is being reset, not navigated.
+            guard supabase.session != nil else { return }
+            storedHeldCard = snapshot?.encoded
+        }
         .onChange(of: nav.snapshot) { _, snapshot in
             // Signed out, the state is being reset, not navigated.
             guard supabase.session != nil else { return }
@@ -248,6 +267,19 @@ struct RootView: View {
         pathFeedLoaded = false
         // No slot of the last account survives into the next one.
         cardFrames = CardFrameRegistry()
+        heldCard.reset()
+        storedHeldCard = nil
+        heldCardRestored = false
+    }
+
+    private func restoreHeldCard() {
+        guard let storedHeldCard else { return }
+        guard let snapshot = HeldCardSnapshot.decoded(from: storedHeldCard) else {
+            logger.error("heldCard scene storage did not decode; no card reopens")
+            self.storedHeldCard = nil
+            return
+        }
+        heldCard.restore(snapshot)
     }
 }
 

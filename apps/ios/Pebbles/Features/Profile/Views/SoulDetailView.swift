@@ -14,13 +14,13 @@ struct SoulDetailView: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(CompleteDraftStore.self) private var completeDrafts
+    @Environment(HeldCardHostModel.self) private var heldCard
     @Environment(MomentsRevision.self) private var revision
 
     @State private var soulWithGlyph: SoulWithGlyph
     @State private var moments: [MomentSummary] = []
     @State private var isLoading = true
     @State private var loadError: String?
-    @State private var selectedMomentId: UUID?
     @State private var isPresentingEdit = false
     @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
@@ -48,13 +48,6 @@ struct SoulDetailView: View {
             .sheet(isPresented: $isPresentingEdit) {
                 EditSoulSheet(original: soulWithGlyph, onSaved: {
                     Task { await reloadSoul() }
-                    onChanged()
-                })
-            }
-            // R9: a row opens the moment's read page, not the edit form.
-            .sheet(item: $selectedMomentId) { id in
-                PebbleDetailSheet(momentId: id, origin: .people, onPebbleUpdated: {
-                    Task { await load() }
                     onChanged()
                 })
             }
@@ -119,7 +112,7 @@ struct SoulDetailView: View {
                         ForEach(Array(moments.enumerated()), id: \.element.id) { index, moment in
                             PebbleRow(
                                 moment: moment,
-                                onTap: { selectedMomentId = moment.id },
+                                onTap: { open(moment) },
                                 onDelete: { pendingDeletion = MomentDeleteTarget(summary: moment) }
                             )
                             .pebblesListRow(position: pebblesRowPosition(index: index, count: moments.count))
@@ -145,6 +138,14 @@ struct SoulDetailView: View {
             logger.error("soul reload failed: \(error.localizedDescription, privacy: .private)")
             // Leave stale state; next navigation will refresh.
         }
+    }
+
+    /// R9: a row opens the held card, not the edit form; no seed, so no flight (#1146).
+    private func open(_ moment: MomentSummary) {
+        heldCard.open(HeldCardRequest(momentId: moment.id, origin: .people, onChanged: {
+            Task { await load() }
+            onChanged()
+        }))
     }
 
     private func load() async {
@@ -201,5 +202,6 @@ struct SoulDetailView: View {
         .environment(SupabaseService())
         .environment(CompleteDraftStore())
         .environment(MomentsRevision())
+        .environment(HeldCardHostModel())
     }
 }
