@@ -47,7 +47,8 @@ struct BareMomentPage: View {
             }
             BarePlace(onComplete: onComplete, isDisabled: isCompleteDisabled)
                 .id(Self.placeID)
-                .anchorPreference(key: PrintAnchors.self, value: .bounds) { [.place: $0] }
+                // Merged, not set: the place's dashed stone reports its own anchor beneath.
+                .transformAnchorPreference(key: PrintAnchors.self, value: .bounds) { $0[.place] = $1 }
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { onPlaceFrame($0) }
                 .padding(.top, 28)
         }
