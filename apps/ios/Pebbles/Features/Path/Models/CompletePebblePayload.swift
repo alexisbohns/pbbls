@@ -58,6 +58,8 @@ extension CompletePebblePayload {
         // means keep: `complete_pebble` replaces a set only when its key is
         // present. A pre-split pebble keeps every domain and collection through
         // an edit of its emotion; touching the field collapses it to the pick.
+        // The explicit unwrap matters: a fresh draft has no prefill, and
+        // `nil == nil` would read as "untouched".
         if let prefill = draft.prefill, prefill.domainId == domainId {
             self.domainIds = nil
         } else {

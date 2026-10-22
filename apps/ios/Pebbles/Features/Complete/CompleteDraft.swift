@@ -19,7 +19,9 @@ struct CompleteDraft: Equatable {
     var collectionId: UUID?
     var visibility: Visibility = .secret
     /// Set only by `init(from:)`; nil in the Complete flow, so a first
-    /// completion sends both sets. Never counts toward `isEmpty`.
+    /// completion sends both sets. Never counts toward `isEmpty`. Not carried
+    /// by `CompleteDraftSnapshot`: Edit pebble never persists its draft, and an
+    /// autosave that did would turn an edit into a set-collapsing one.
     var prefill: Prefill?
 
     var isComplete: Bool { valence != nil && emotionId != nil && domainId != nil }
