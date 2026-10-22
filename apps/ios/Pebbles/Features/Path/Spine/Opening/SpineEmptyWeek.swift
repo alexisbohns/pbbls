@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// The current week with nothing in it yet (#1130): "Fresh week", the call to
-/// collect one and the button that opens Capture. A copy of the old
-/// `WeekPathView`'s block with the same catalogue keys; D5b removes the original.
+/// collect one and the button that opens Capture. A copy of the old row
+/// Path's empty block with the same catalogue keys; D5b removed the original.
 struct SpineEmptyWeek: View {
     let onCreate: () -> Void
 

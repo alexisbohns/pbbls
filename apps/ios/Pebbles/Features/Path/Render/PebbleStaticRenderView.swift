@@ -1,8 +1,8 @@
 import SwiftUI
 import os
 
-/// Static (non-animated) counterpart to `PebbleAnimatedRenderView`, used by
-/// `PathPebbleRow`.
+/// Static (non-animated) counterpart to `PebbleAnimatedRenderView`, formerly
+/// used by the row Path's pebble row (removed in D5b).
 ///
 /// Traces each parsed `PebbleSVGModel` layer at a uniform stroke width equal to
 /// the outline's authored weight (`PebbleStroke.lineWidth`), so the glyph reads
