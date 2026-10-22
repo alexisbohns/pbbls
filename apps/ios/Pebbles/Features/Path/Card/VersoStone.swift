@@ -26,7 +26,8 @@ struct VersoStone: View {
 
     private func layers(_ frame: StoneMotion.Frame) -> some View {
         let stone = CardLayout.versoStoneSize(size)
-        let geometry = StoneRingGeometry.forStone(valence)
+        // Fitted to the verso's size: the Spine's geometry is in its own points.
+        let geometry = StoneRingGeometry.forStone(valence, in: stone)
         let reach = (StoneMotion.Wave.reach[size] ?? 5.6) * stone.width / SpineLayout.stoneWidth(size)
         return ZStack {
             if let geometry {
