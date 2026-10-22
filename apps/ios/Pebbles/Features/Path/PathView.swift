@@ -1,163 +1,119 @@
 import SwiftUI
-import os
 
-/// The Path tab's root (#903). Its `NavigationStack` lives in
-/// `PebblesTabView`; Path pushes nothing yet.
+/// The Path tab's root (#1130): the Spine. The week roll over a pager of Spine
+/// weeks (`SpinePager`); `PathModel` holds the weeks, the focused week and the
+/// pages. This view hands the environment's services to the model, and owns
+/// Capture, the detail sheet (until stack E's held card), the delete dialog and
+/// stack C's FAB row. Its `NavigationStack` lives in `PebblesTabView`.
 struct PathView: View {
-    /// Fired when the initial timeline load settles (success or failure), so
-    /// `RootView` can keep the launch loader up until the home feed is ready
-    /// instead of flashing this view's own spinner.
+    /// Fired when the first load settles (success or failure), so `RootView`
+    /// keeps the launch loader up until the home feed is ready.
     var onFirstLoad: () -> Void = {}
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(PathStatsService.self) private var stats
     @Environment(CompleteDraftStore.self) private var completeDrafts
+    @Environment(ReferenceDataService.self) private var references
     @Environment(TabNavigation.self) private var nav
     @Environment(MomentsRevision.self) private var revision
 
-    @State private var moments: [MomentSummary] = []
-    @State private var entries: [WeekRollEntry] = []
-    @State private var focusedWeekStart: Date = Date()
-    /// The Capture flow — what `+` opens.
+    @State private var model = PathModel()
+    /// The Capture flow, what `+` opens.
     @State private var isPresentingCapture = false
     @State private var selectedMomentId: UUID?
     @State private var pendingDeletion: MomentDeleteTarget?
-    /// The latest reload Capture asked for. Capture can fire twice (after the
-    /// save, after a chained completion); the newer one cancels the older so a
-    /// slow first fetch cannot land after the second.
+    /// The latest reload asked for; a newer one cancels it, so a slow first
+    /// fetch cannot land after the second.
     @State private var reloadTask: Task<Void, Never>?
     @State private var deleteError: String?
-    /// Ignores a second delete confirmed while the first is still running.
-    @State private var isDeleting = false
-    @State private var isLoading = true
-    @State private var loadError: String?
 
-    private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
+    private var service: MomentsService { MomentsService(client: supabase.client) }
 
-    private var isoCalendar: Calendar { Calendar(identifier: .iso8601) }
-    private var today: Date { Date() }
-
-    /// Overrides the server's `active_today` flag (which compares against
-    /// UTC `current_date`) with a device-local check so users in non-UTC
-    /// timezones don't see "active today" while local-midnight has passed.
-    /// See M22 follow-up for proper server-side timezone handling.
+    /// The server's `active_today` compares against UTC; a device-local check
+    /// keeps "active today" honest past local midnight (M22 follow-up).
     private var rippleWithLocalActiveToday: RippleSummary? {
         guard let server = stats.ripple else { return nil }
-        let activeToday = moments.contains { $0.isCompleted && Calendar.current.isDateInToday($0.createdAt) }
-        return RippleSummary(
-            rippleLevel: server.rippleLevel,
-            pebbles28d: server.pebbles28d,
-            activeToday: activeToday
-        )
+        let activeToday = model.moments.contains { $0.isCompleted && Calendar.current.isDateInToday($0.createdAt) }
+        return RippleSummary(rippleLevel: server.rippleLevel, pebbles28d: server.pebbles28d, activeToday: activeToday)
     }
 
     var body: some View {
         content
             .toolbar(.hidden, for: .navigationBar)
             .pebblesScreen()
-        .task {
-            await load()
-            onFirstLoad()
-        }
-        .task { await stats.load() }
-        .onChange(of: nav.scrollToTop[.path, default: 0]) { focusCurrentWeek() }
-        // #903 D5: a moment changed from People or Collections. Path's own
-        // changes already reloaded through their callbacks, and its `.task`
-        // reloads whenever the tab reappears, so this reader only covers
-        // changes made while Path stays visible. Stack D's
-        // `PathModel` takes this over.
-        .onChange(of: revision.value) {
-            guard revision.changedOutside(.path) else { return }
-            Task { await stats.refresh() }
-            reloadTask?.cancel()
-            reloadTask = Task { await load() }
-        }
-        .fullScreenCover(isPresented: $isPresentingCapture) {
-            // Fired after the save and again after a chained completion (A5).
-            CaptureFlowView(onMomentChanged: { momentId in
-                revision.bump(from: .path)
-                // Not cancelled with the path reload: `refresh()` no-ops while
-                // one is running, so a cancelled refresh would drop the next.
+            .task {
+                await model.load { try await service.pathMoments() }
+                onFirstLoad()
+            }
+            .task { await stats.load() }
+            .task(id: references.souls) { syncSouls() }
+            // Path reselected at its root (#903 §4): "top of Path" means now.
+            .onChange(of: nav.scrollToTop[.path, default: 0]) { model.focusCurrentWeek() }
+            // #903 D5: a moment changed from another tab or a sheet.
+            .onChange(of: revision.value) {
+                guard revision.changedOutside(.path) else { return }
                 Task { await stats.refresh() }
                 reloadTask?.cancel()
-                reloadTask = Task {
-                    await load()
-                    guard !Task.isCancelled else { return }
-                    focusWeek(containing: momentId)
-                }
-            })
-        }
-        .sheet(item: $selectedMomentId) { id in
-            PebbleDetailSheet(momentId: id, origin: .path, onPebbleUpdated: {
-                Task {
-                    async let timeline: Void = load()
-                    async let statsReload: Void = stats.refresh()
-                    _ = await (timeline, statsReload)
-                }
-            })
-        }
-        .momentDeleteDialog(target: $pendingDeletion) { target, option in
-            Task { await delete(option, on: target) }
-        }
-        .alert(
-            "Couldn't delete",
-            isPresented: Binding(
-                get: { deleteError != nil },
-                set: { if !$0 { deleteError = nil } }
-            ),
-            presenting: deleteError
-        ) { _ in
-            Button("OK", role: .cancel) { deleteError = nil }
-        } message: { message in
-            Text(message)
-        }
+                reloadTask = Task { await model.reloadIfChangedOutside(revision) { try await service.pathMoments() } }
+            }
+            .fullScreenCover(isPresented: $isPresentingCapture) {
+                // Fired after the save and again after a chained completion.
+                CaptureFlowView(onMomentChanged: { momentId in
+                    revision.bump(from: .path)
+                    Task { await stats.refresh() }
+                    reload(focusing: momentId)
+                })
+            }
+            .sheet(item: $selectedMomentId) { id in
+                PebbleDetailSheet(momentId: id, origin: .path, onPebbleUpdated: {
+                    Task {
+                        async let timeline: Void = model.load { try await service.pathMoments() }
+                        async let statsReload: Void = stats.refresh()
+                        _ = await (timeline, statsReload)
+                    }
+                })
+            }
+            .momentDeleteDialog(target: $pendingDeletion) { target, option in
+                Task { await delete(option, on: target) }
+            }
+            .alert(
+                "Couldn't delete",
+                isPresented: Binding(get: { deleteError != nil }, set: { if !$0 { deleteError = nil } }),
+                presenting: deleteError
+            ) { _ in
+                Button("OK", role: .cancel) { deleteError = nil }
+            } message: { message in
+                Text(message)
+            }
     }
 
     @ViewBuilder
     private var content: some View {
-        if isLoading {
-            // No spinner: the launch loader (RootView's handcrafted-logo cover)
-            // owns the loading visual and stays up until `onFirstLoad`. Showing
-            // the plain background here means the hand-off to the feed can't
-            // flash a spinner even for a frame (#598).
+        switch model.phase {
+        case .loading:
+            // No spinner: the launch loader owns the loading visual (#598).
             Color.pebbles.surface
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if let loadError {
-            Text(loadError)
-                .foregroundStyle(.secondary)
+        case .failed:
+            // Unchanged from the row Path: an English line (follow-up in the D5a PR).
+            Text(verbatim: "Couldn't load your pebbles.")
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
+        case .content:
             VStack(spacing: 0) {
-                WeekRollView(
-                    entries: entries,
-                    focusedWeekStart: $focusedWeekStart,
-                    calendar: isoCalendar
+                SpineWeekRoll(model: model)
+                SpinePager(
+                    model: model,
+                    palette: palette,
+                    onOpen: open,
+                    onDelete: { pendingDeletion = MomentDeleteTarget(summary: $0) },
+                    onCreate: { isPresentingCapture = true },
+                    scrollToTopToken: nav.scrollToTop[.path, default: 0]
                 )
-                WeekHeaderView(
-                    entries: entries,
-                    focusedWeekStart: $focusedWeekStart,
-                    calendar: isoCalendar,
-                    today: today
-                )
-                .padding(.top, 16)
-                TabView(selection: $focusedWeekStart) {
-                    ForEach(entries) { entry in
-                        WeekPathView(
-                            entry: entry,
-                            onTap: { moment in selectedMomentId = moment.id },
-                            onDelete: { moment in pendingDeletion = MomentDeleteTarget(summary: moment) },
-                            onCreate: { isPresentingCapture = true },
-                            scrollToTopToken: nav.scrollToTop[.path, default: 0]
-                        )
-                        .tag(entry.weekStart)
-                    }
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
             }
-            // One row, clear background, 8pt above the tab bar (#903 §5). The
-            // week list scrolls under it; `WeekPathView`'s bottom padding lets
-            // the last pebble clear it.
+            // One row, clear background, 8 pt above the tab bar (#903 §5). The
+            // page scrolls under it; the Spine's 96 pt feed bottom clears it.
             .safeAreaInset(edge: .bottom) {
                 HStack(alignment: .center, spacing: 16) {
                     PathStatusCluster(
@@ -175,85 +131,67 @@ struct PathView: View {
         }
     }
 
-    /// Focus the week the moment landed in, so exiting the flow puts the
-    /// user where their moment is rather than wherever they happened to be.
-    ///
-    /// Asks which entry actually holds the moment rather than recomputing its
-    /// week: `WeekRollBuilder` owns the bucketing, and a second implementation
-    /// here could disagree with it. Silent no-op if the reload has not yet
-    /// surfaced the moment.
-    private func focusWeek(containing momentId: UUID) {
-        guard let entry = entries.first(where: { entry in
-            entry.moments.contains { $0.id == momentId }
-        }) else { return }
-        focusedWeekStart = entry.weekStart
+    private func palette(_ moment: MomentSummary) -> EmotionPalette? {
+        moment.pebble?.emotion.flatMap { palettes.palette(for: $0.id) }
     }
 
-    /// Path reselected at its root (#903 §4): "top of Path" means now. The
-    /// same current-week lookup `load()` uses.
-    private func focusCurrentWeek() {
-        let current = WeekRollBuilder.weekStart(for: today, calendar: isoCalendar)
-        guard entries.contains(where: { $0.weekStart == current }) else { return }
-        withAnimation { focusedWeekStart = current }
+    /// Until stack E's held card: every press opens today's detail sheet.
+    private func open(_ request: SpineOpen) {
+        selectedMomentId = request.momentId
     }
 
-    private func load() async {
-        do {
-            let result = try await MomentsService(client: supabase.client).pathMoments()
-            // A newer reload replaced this one: its result is already stale.
-            guard !Task.isCancelled else { return }
-            self.moments = result
-            self.entries = WeekRollBuilder.build(
-                moments: result, calendar: isoCalendar, today: today
-            )
-            // First load (or after a deletion that removed the focused week):
-            // pick the current-week entry if present, else the closest entry.
-            if !entries.contains(where: { $0.weekStart == focusedWeekStart }) {
-                let currentWeekStart = WeekRollBuilder.weekStart(for: today, calendar: isoCalendar)
-                if let cur = entries.first(where: { $0.weekStart == currentWeekStart }) {
-                    focusedWeekStart = cur.weekStart
-                } else if let closest = entries.min(by: {
-                    abs($0.weekStart.timeIntervalSince(focusedWeekStart)) <
-                    abs($1.weekStart.timeIntervalSince(focusedWeekStart))
-                }) {
-                    focusedWeekStart = closest.weekStart
-                }
-            }
-            self.isLoading = false
-        } catch {
-            // Cancelled for a newer reload, not failed.
-            guard !Task.isCancelled else { return }
-            logger.error("path fetch failed: \(error.localizedDescription, privacy: .private)")
-            self.loadError = "Couldn't load your pebbles."
-            self.isLoading = false
+    private func syncSouls() {
+        let souls = references.souls
+        model.updateSouls(
+            names: Dictionary(souls.map { ($0.id.uuidString.lowercased(), $0.name) },
+                              uniquingKeysWith: { first, _ in first }),
+            glyphs: Dictionary(souls.map { ($0.id.uuidString.lowercased(), $0.glyph.strokes) },
+                               uniquingKeysWith: { first, _ in first })
+        )
+    }
+
+    /// Focus the week the moment landed in once the reload has it.
+    private func reload(focusing momentId: UUID? = nil) {
+        reloadTask?.cancel()
+        reloadTask = Task {
+            await model.load { try await service.pathMoments() }
+            guard !Task.isCancelled, let momentId else { return }
+            model.focusWeek(containing: momentId)
         }
     }
 
     private func delete(_ option: MomentDeleteOption, on target: MomentDeleteTarget) async {
-        guard !isDeleting else { return }
-        isDeleting = true
-        defer { isDeleting = false }
-        do {
-            try await MomentDeletion.perform(
-                option, on: target, client: supabase.client, drafts: completeDrafts
-            )
-            revision.bump(from: .path)
-            async let timeline: Void = load()
-            async let statsReload: Void = stats.refresh()
-            _ = await (timeline, statsReload)
-        } catch {
-            logger.error("delete failed: \(error.localizedDescription, privacy: .private)")
+        // The model logs a failure itself; this view only shows the alert. A
+        // second confirm while one runs is ignored, as before.
+        switch await model.delete({
+            try await MomentDeletion.perform(option, on: target, client: supabase.client, drafts: completeDrafts)
+        }) {
+        case .ignored:
+            return
+        case .failed:
             deleteError = String(localized: "Something went wrong. Please try again.")
+            return
+        case .done:
+            break
         }
+        revision.bump(from: .path)
+        async let timeline: Void = model.load { try await service.pathMoments() }
+        async let statsReload: Void = stats.refresh()
+        _ = await (timeline, statsReload)
     }
 }
 
 #Preview {
-    NavigationStack {
+    let supabase = SupabaseService()
+    return NavigationStack {
         PathView()
     }
-    .environment(SupabaseService())
+    .environment(supabase)
+    .environment(EmotionPaletteService(client: supabase.client))
+    .environment(ReferenceDataService(client: supabase.client))
+    .environment(PathStatsService(supabase: supabase))
     .environment(CompleteDraftStore())
     .environment(TabNavigation())
     .environment(MomentsRevision())
+    .environment(SnapAspectCache(urls: SnapURLCache(client: supabase.client)))
 }
