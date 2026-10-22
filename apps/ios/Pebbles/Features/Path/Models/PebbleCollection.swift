@@ -15,15 +15,10 @@ struct PebbleCollection: Identifiable, Decodable, Hashable {
         self.glyph = glyph
     }
 
+    /// Synthesised decoding: an optional `let` reads `decodeIfPresent`, so a
+    /// missing `glyphs` key and `null` both decode to no glyph.
     private enum CodingKeys: String, CodingKey {
         case id, name
         case glyph = "glyphs"
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(UUID.self, forKey: .id)
-        name = try container.decode(String.self, forKey: .name)
-        glyph = try container.decodeIfPresent(Glyph.self, forKey: .glyph)
     }
 }
