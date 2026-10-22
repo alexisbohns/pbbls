@@ -53,7 +53,10 @@ struct SpineCard: View {
         _shownRatio = State(initialValue: ratio)
     }
 
+    /// Copy reads the app's language; the index's weekday and the rail's time
+    /// add the device's hour cycle and region (`SpineStrings.dateLocale`, D3).
     private var locale: Locale { SpineStrings.appLocale }
+    private var dateLocale: Locale { SpineStrings.dateLocale }
     private var calendar: Calendar { SpineCalendar.current }
     private var intensity: Int { moment.pebble?.intensity ?? 2 }
     private var valence: Valence { moment.pebble?.valence ?? .neutralMedium }
@@ -205,7 +208,7 @@ struct SpineCard: View {
             Text(verbatim: "\(calendar.component(.day, from: moment.happenedAt))")
                 .spineType(.cardIndexNumeral(u: u))
                 .foregroundStyle(Color.pebbles.onSurface)
-            Text(verbatim: SpineDates.shortWeekday(moment.happenedAt, calendar: calendar, locale: locale))
+            Text(verbatim: SpineDates.shortWeekday(moment.happenedAt, calendar: calendar, locale: dateLocale))
                 .spineType(.cardIndexDay(u: u))
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
         }
@@ -217,7 +220,7 @@ struct SpineCard: View {
     private func rail(u: CGFloat) -> some View {
         QuarterTurn {
             HStack(spacing: 1.2 * u) {
-                Text(verbatim: SpineDates.time(moment.happenedAt, calendar: calendar, locale: locale))
+                Text(verbatim: SpineDates.time(moment.happenedAt, calendar: calendar, locale: dateLocale))
                     .spineType(.cardRail(u: u))
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 if let emotion = moment.pebble?.emotion {

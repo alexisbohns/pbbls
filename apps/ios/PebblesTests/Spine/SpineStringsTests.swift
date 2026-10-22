@@ -103,6 +103,26 @@ struct SpineStringsTests {
         }
     }
 
+    @Test("dates take the app's language with the device's hour cycle and region")
+    func dateLocale() {
+        let locale = SpineStrings.dateLocale
+        #expect(locale.language.languageCode == SpineStrings.appLocale.language.languageCode)
+        #expect(locale.hourCycle == Locale.current.hourCycle)
+        #expect(locale.region == Locale.current.region)
+    }
+
+    @Test("the date locale keeps the app's language and takes the device's clock and region")
+    func dateLocaleCrossed() {
+        let english = SpineStrings.dateLocale(app: Locale(identifier: "en"), device: Locale(identifier: "fr_FR"))
+        #expect(english.language.languageCode == .english)
+        #expect(english.hourCycle == .zeroToTwentyThree)
+        #expect(english.region == .france)
+        let french = SpineStrings.dateLocale(app: Locale(identifier: "fr"), device: Locale(identifier: "en_US"))
+        #expect(french.language.languageCode == .french)
+        #expect(french.hourCycle == .oneToTwelve)
+        #expect(french.region == .unitedStates)
+    }
+
     /// Every `value` string under a localization: the words a reader sees, not the
     /// substitution names (`%1$#@pebbles@`) that only the catalogue reads.
     private static func values(in node: Any) -> [String] {

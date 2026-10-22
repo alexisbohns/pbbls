@@ -27,13 +27,12 @@ enum WeekOpening {
     ///   The week number and its year are always read from an ISO-8601 calendar
     ///   in that zone, so a Gregorian calendar (US week rules) cannot shift them.
     static func weekWords(weekStart: Date, calendar: Calendar, locale: Locale) -> WeekWords {
-        var iso = Calendar(identifier: .iso8601)
-        iso.timeZone = calendar.timeZone
+        let iso = isoCalendar(calendar.timeZone)
         let sunday = LocalDays.adding(6, to: weekStart, calendar: calendar)
         let nextMonday = LocalDays.adding(7, to: weekStart, calendar: calendar)
         let previousMonday = LocalDays.adding(-7, to: weekStart, calendar: calendar)
-        let number = iso.component(.weekOfYear, from: weekStart)
-        let nextNumber = iso.component(.weekOfYear, from: nextMonday)
+        let number = isoWeekNumber(weekStart, timeZone: calendar.timeZone)
+        let nextNumber = isoWeekNumber(nextMonday, timeZone: calendar.timeZone)
         let from = NumberWords.dayOfMonth(calendar.component(.day, from: weekStart), locale: locale)
         let to = NumberWords.dayOfMonth(calendar.component(.day, from: sunday), locale: locale)
         let title: WeekTitle
@@ -50,11 +49,23 @@ enum WeekOpening {
             year: iso.component(.yearForWeekOfYear, from: weekStart),
             ordinal: NumberWords.ordinal(number, locale: locale, gender: .feminine),
             title: title,
-            previousNumber: iso.component(.weekOfYear, from: previousMonday),
+            previousNumber: isoWeekNumber(previousMonday, timeZone: calendar.timeZone),
             nextNumber: nextNumber,
             nextOrdinal: NumberWords.ordinal(nextNumber, locale: locale, gender: .feminine),
             nextMonday: NumberWords.dayOfMonth(calendar.component(.day, from: nextMonday), locale: locale)
         )
+    }
+
+    /// The ISO-8601 week of `date` in `timeZone`: the one source of every week
+    /// number the Spine prints (the opening, the mouth, the pager's links).
+    static func isoWeekNumber(_ date: Date, timeZone: TimeZone) -> Int {
+        isoCalendar(timeZone).component(.weekOfYear, from: date)
+    }
+
+    private static func isoCalendar(_ timeZone: TimeZone) -> Calendar {
+        var iso = Calendar(identifier: .iso8601)
+        iso.timeZone = timeZone
+        return iso
     }
 
     /// Pebbles are masculine in French ("un galet"), people feminine ("une personne").

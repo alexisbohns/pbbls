@@ -13,6 +13,22 @@ enum SpineStrings {
         Locale(identifier: Bundle.main.preferredLocalizations.first ?? "en")
     }
 
+    /// The locale the Spine's dates and times are formatted in (maintainer
+    /// decision, 2026-10-22): the app's language with the device's hour cycle
+    /// and region, so a 24-hour user reads 24-hour times, as on Android and web.
+    /// Copy keeps `appLocale`; `SpineDates` caches on the hour cycle too.
+    static var dateLocale: Locale {
+        dateLocale(app: appLocale, device: .current)
+    }
+
+    /// `app`'s language with `device`'s hour cycle and region; pure, so tests cross them.
+    static func dateLocale(app: Locale, device: Locale) -> Locale {
+        var components = Locale.Components(locale: app)
+        components.hourCycle = device.hourCycle
+        components.region = device.region
+        return Locale(components: components)
+    }
+
     /// The raw format for `key`, or the key itself, logged, when the catalogue misses it.
     static func string(_ key: String, locale: Locale) -> String {
         let language = locale.language.languageCode?.identifier ?? "en"
