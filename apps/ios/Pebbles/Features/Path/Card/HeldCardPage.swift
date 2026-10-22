@@ -197,7 +197,10 @@ struct HeldCardPage: View {
                    ratio: detail.snaps.first.flatMap { aspects.ratio(for: $0.storagePath) },
                    width: CardLayout.cardWidth(available: pageWidth), domains: refs.domains,
                    collectionGlyphs: collectionGlyphs, soulGlyphs: soulGlyphs, soulOrder: request.soulOrder,
-                   turn: turn, print: print, stonePress: versoPress, focus: $focus, turnDisabled: model.detail == nil)
+                   turn: turn,
+                   // The pan's platform view stays out of the flight's raster: mounted once the card is open.
+                   turnByDrag: host.phase == .open, print: print, stonePress: versoPress, focus: $focus,
+                   turnDisabled: model.detail == nil)
             // The load fills the seed's card in place: its height and new content ease in.
             .animation(.easeOut(duration: 0.25), value: model.detail != nil)
             .modifier(FlightRaster(on: host.phase == .opening && host.flies))

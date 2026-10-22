@@ -10,8 +10,12 @@ final class SnapImageCache {
 
     private let cache = NSCache<NSString, UIImage>()
 
-    init(countLimit: Int = 80) {
+    /// Originals are at most 1024 px an edge (3–4 MB decoded), so the count
+    /// alone would let the cache reach hundreds of megabytes before NSCache
+    /// reacts; the cost limit keeps it near a hundred.
+    init(countLimit: Int = 80, totalCostLimit: Int = 96 * 1024 * 1024) {
         cache.countLimit = countLimit
+        cache.totalCostLimit = totalCostLimit
     }
 
     func image(for path: String) -> UIImage? {
@@ -19,7 +23,8 @@ final class SnapImageCache {
     }
 
     func store(_ image: UIImage, for path: String) {
-        cache.setObject(image, forKey: path as NSString)
+        let cost = image.cgImage.map { $0.bytesPerRow * $0.height } ?? 0
+        cache.setObject(image, forKey: path as NSString, cost: cost)
     }
 
     func removeAll() {

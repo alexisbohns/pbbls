@@ -92,8 +92,9 @@ struct SpineCardFace: View {
             guard let image = await UIImage(data: data)?.byPreparingForDisplay() else {
                 throw URLError(.cannotDecodeContentData)
             }
-            guard !Task.isCancelled else { return }
+            // A decoded image is kept even when this card has scrolled off: the cache is shared.
             SnapImageCache.shared.store(image, for: path)
+            guard !Task.isCancelled else { return }
             fetched = (path, image)
         } catch {
             guard !Task.isCancelled else { return }

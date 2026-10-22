@@ -54,7 +54,7 @@ struct PebbleCard: View {
                     .overlay {
                         if turnByDrag {
                             TurnPanFallback(
-                                onBegan: { !turnDisabled && turn.startDrag() },
+                                onBegan: { !turnDisabled && print == nil && turn.startDrag() },
                                 onChanged: { dx in
                                     turn.drag(to: TurnSettle.progress(drag: dx, width: width,
                                                                       rightToLeft: rightToLeft),
