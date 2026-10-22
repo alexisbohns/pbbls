@@ -114,8 +114,8 @@ struct HeldCardPage: View {
 
     @ViewBuilder
     private var content: some View {
-        switch model.phase {
-        case .loading:
+        switch shown {
+        case .seed:
             ScrollView {
                 Group {
                     if let seed = request.seed, let pebble = seed.pebble {
@@ -135,7 +135,7 @@ struct HeldCardPage: View {
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 Button("Retry") { Task { await reload(); cutShortIfRestored() } }
             }
-        case .loaded:
+        case .detail:
             if let detail = model.detail {
                 ScrollViewReader { proxy in
                     ScrollView {
@@ -196,20 +196,6 @@ struct HeldCardPage: View {
             .modifier(Flying(host: host, onRest: onRest, active: print == nil))
             .frame(maxWidth: .infinity)
             .stonePressLifetime($versoPress)
-    }
-
-    /// The seed's recto (#1146 §Flight, first frame): the Spine card at the
-    /// card's width, so the flight lands on a card, never a spinner; the leaf,
-    /// the souls past three and the verso fill in when the moment lands.
-    private func seededCard(_ seed: MomentSummary, _ pebble: MomentSummary.PebbleSummary) -> some View {
-        let width = CardLayout.cardWidth(available: pageWidth)
-        let emotion = pebble.emotion.flatMap { palettes.palette(for: $0.id) }
-        return SpineCardShell(emotion: emotion, polarity: pebble.valence.polarity, intensity: pebble.intensity) {
-            SpineCardFace(moment: seed, palette: SpineColors.palette(emotion, isBlank: false),
-                          ratio: seed.firstSnapPath.flatMap { aspects.ratio(for: $0) },
-                          width: width, u: CardLayout.u(cardWidth: width), soulNames: [:], soulGlyphs: soulGlyphs,
-                          soulOrder: request.soulOrder, accessible: true)
-        }
     }
 
     // MARK: - The print (D6)
@@ -312,6 +298,37 @@ struct HeldCardPage: View {
 /// The phone width the page assumes until its first layout reports its own.
 private enum ReferencePhone {
     static let width: CGFloat = 393
+}
+
+// MARK: - The flight's first frame (E4)
+
+private extension HeldCardPage {
+    /// What the page shows. The seed stays up while the open still flies, even
+    /// once the detail has landed, so the flying card keeps one view identity
+    /// across the load (a new `Flying` would start at `flight == 1` and snap).
+    enum Shown { case seed, failed, detail }
+
+    var shown: Shown {
+        switch model.phase {
+        case .loading: .seed
+        case .failed: .failed
+        case .loaded: host.phase == .opening && host.flies ? .seed : .detail
+        }
+    }
+
+    /// The seed's recto (#1146 §Flight, first frame): the Spine card at the
+    /// card's width, so the flight lands on a card, never a spinner; the leaf,
+    /// the souls past three and the verso fill in when the moment lands.
+    func seededCard(_ seed: MomentSummary, _ pebble: MomentSummary.PebbleSummary) -> some View {
+        let width = CardLayout.cardWidth(available: pageWidth)
+        let emotion = pebble.emotion.flatMap { palettes.palette(for: $0.id) }
+        return SpineCardShell(emotion: emotion, polarity: pebble.valence.polarity, intensity: pebble.intensity) {
+            SpineCardFace(moment: seed, palette: SpineColors.palette(emotion, isBlank: false),
+                          ratio: seed.firstSnapPath.flatMap { aspects.ratio(for: $0) },
+                          width: width, u: CardLayout.u(cardWidth: width), soulNames: [:], soulGlyphs: soulGlyphs,
+                          soulOrder: request.soulOrder, accessible: true)
+        }
+    }
 }
 
 /// The FLIP on whichever card the page shows (#1160 D1): the transform from the
