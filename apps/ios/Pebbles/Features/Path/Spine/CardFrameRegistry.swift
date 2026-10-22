@@ -29,3 +29,9 @@ final class CardFrameRegistry {
         if frames[momentId] == frame { frames[momentId] = nil }
     }
 }
+
+/// A slot's last reported frame, held by reference so updating it re-renders nothing
+/// (the card's, and `SpinePebble`'s for an entry); what `forget(_:ifAt:)` compares against.
+final class ReportedFrame {
+    var frame: CGRect?
+}

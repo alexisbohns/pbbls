@@ -200,4 +200,41 @@ enum SpineFixtureWeek {
         ISO8601Flexible.parse(iso) ?? .distantPast
     }
 }
+
+extension SpineFixtureWeek {
+    /// A `PathModel` holding the fixture week, its souls in the reference cache,
+    /// for the lab and the references. Its words read the model's default, the date locale.
+    @MainActor
+    static func model() async -> PathModel {
+        let model = PathModel(calendar: calendar, now: { today })
+        await model.load { moments }
+        model.updateSouls(names: soulNames, glyphs: soulGlyphs)
+        return model
+    }
+
+    /// The feed context over the fixture: its palettes and its primed photo ratios.
+    @MainActor
+    static func context(_ model: PathModel, page: SpinePage, width: CGFloat = 393) -> SpineFeedContext {
+        SpineFeedContext(
+            page: page, column: SpineLayout.column(width: width),
+            palette: { palette(for: $0) },
+            ratio: { $0.firstSnapPath.flatMap { photos[$0]?.ratio } },
+            pressRequests: model.pressRequests,
+            onOpen: { _, _ in }, onDelete: { _ in }
+        )
+    }
+
+    /// Twenty pebbles in one week: the fixture's thirteen and seven copies an
+    /// hour later, for the 20-pebble scroll budget (§Risks).
+    static var dense: [MomentSummary] {
+        let pebbles = moments.filter { $0.pebble != nil }
+        let copies = pebbles.prefix(7).enumerated().map { index, moment in
+            let id = UUID(uuidString: String(format: "00000000-0000-4000-C000-%012ld", index + 1)) ?? UUID()
+            return MomentSummary(id: id, name: moment.name, happenedAt: moment.happenedAt.addingTimeInterval(3600),
+                                 createdAt: moment.createdAt, firstSnapPath: moment.firstSnapPath,
+                                 pebble: moment.pebble)
+        }
+        return pebbles + copies
+    }
+}
 #endif

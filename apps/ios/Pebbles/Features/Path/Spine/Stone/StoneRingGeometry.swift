@@ -13,6 +13,13 @@ struct StoneRingGeometry {
     let rings: [CGSize]
     let halo: CGSize
 
+    /// The outermost ring's top edge in the stone's own frame (negative above
+    /// the stone), at rest: the outline's top scaled about the centroid, as
+    /// `path(scaled:offset:)` draws it.
+    var ringTop: CGFloat {
+        centroid.y + (outline.boundingRect.minY - centroid.y) * (rings.last?.height ?? 1)
+    }
+
     static let count: [ValenceSizeGroup: Int] = [.small: 1, .medium: 2, .large: 3]
     static let step: [ValenceSizeGroup: CGFloat] = [.small: 4.8, .medium: 4.4, .large: 4.2]
     static let haloStep: CGFloat = 0.78
