@@ -53,6 +53,15 @@ struct HeldCardHostModelTests {
         #expect(host.request?.momentId == other)
     }
 
+    @Test("opening the card already open changes nothing")
+    func openTwice() {
+        let host = HeldCardHostModel()
+        host.open(HeldCardRequest(momentId: id, face: .verso, origin: .path))
+        host.open(HeldCardRequest(momentId: id, face: .recto, origin: .people))
+        #expect(host.request?.origin == .path)
+        #expect(host.snapshot?.face == .verso)
+    }
+
     @Test("sign-out resets it")
     func reset() {
         let host = HeldCardHostModel()

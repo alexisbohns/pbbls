@@ -23,6 +23,9 @@ final class HeldCardModel {
     private(set) var leaving = false
 
     @ObservationIgnored let momentId: UUID
+    /// Only the latest load applies: a save's reload and a pebble delete's can
+    /// run at once, and the slower fetch must not land last.
+    @ObservationIgnored private var loadGeneration = 0
     @ObservationIgnored private let origin: AppTab
     @ObservationIgnored private let onChanged: @MainActor () -> Void
     @ObservationIgnored private let logger = Logger(subsystem: "app.pbbls.ios", category: "held-card")
@@ -36,13 +39,15 @@ final class HeldCardModel {
     /// The first load and every reload in place. A failed reload keeps the page
     /// it has; a cancelled load (the page left) changes nothing.
     func load(_ fetch: () async throws -> MomentDetail) async {
+        loadGeneration += 1
+        let generation = loadGeneration
         do {
             let fresh = try await fetch()
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, generation == loadGeneration else { return }
             apply(fresh)
             phase = .loaded
         } catch {
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, generation == loadGeneration else { return }
             logger.error("held card load failed: \(error.localizedDescription, privacy: .private)")
             if detail == nil { phase = .failed }
         }

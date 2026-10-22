@@ -43,6 +43,23 @@ struct HeldCardModelTests {
         #expect(shown.phase == .loaded && shown.detail != nil)
     }
 
+    @Test("only the latest load applies when two overlap")
+    func latestLoadWins() async throws {
+        let model = model()
+        let stale = try detail()
+        let fresh = try detail(MomentFixtures.Android.detailBareNamed)
+        let gate = AsyncStream<Void>.makeStream()
+        async let slow: Void = model.load {
+            for await _ in gate.stream { break }
+            return stale
+        }
+        await model.load { fresh }
+        gate.continuation.yield()
+        gate.continuation.finish()
+        await slow
+        #expect(model.detail?.id == fresh.id)
+    }
+
     @Test("a change calls the opener once and bumps the revision once, from the opener's tab")
     func changed() {
         let calls = Calls()

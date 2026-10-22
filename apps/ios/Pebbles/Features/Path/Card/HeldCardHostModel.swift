@@ -11,7 +11,10 @@ final class HeldCardHostModel {
     private(set) var request: HeldCardRequest?
     private(set) var snapshot: HeldCardSnapshot?
 
+    /// Opening the card already open is a no-op: the sheet keys on the moment,
+    /// so a second request's opener would otherwise be silently dropped.
     func open(_ request: HeldCardRequest) {
+        guard self.request?.momentId != request.momentId else { return }
         self.request = request
         snapshot = HeldCardSnapshot(momentId: request.momentId, face: request.face)
     }
