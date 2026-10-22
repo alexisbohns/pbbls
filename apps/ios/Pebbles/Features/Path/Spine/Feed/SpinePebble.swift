@@ -52,13 +52,28 @@ struct SpinePebble: View {
         SpineColors.palette(context.palette(moment), isBlank: moment.pebble == nil)
     }
 
+    private var anchor: CGFloat {
+        Self.anchor(for: moment, dynamicTypeSize: dynamicTypeSize, legibilityWeight: legibilityWeight)
+    }
+
     /// 31 for a card; 0.6 × the resolved name size for an entry, so the stone
     /// stays centred on the name's first line at any Dynamic Type size (D11).
-    private var anchor: CGFloat {
-        if hasCard { return SpineLayout.cardAnchor }
+    static func anchor(for moment: MomentSummary, dynamicTypeSize: DynamicTypeSize,
+                       legibilityWeight: LegibilityWeight?) -> CGFloat {
+        if moment.firstSnapPath != nil { return SpineLayout.cardAnchor }
         let name = SpineEntry.type(for: moment).name
         return 0.6 * SpineType.resolve(.entryName(name), dynamicTypeSize: dynamicTypeSize,
                                        legibilityWeight: legibilityWeight).size
+    }
+
+    /// The top of the stone's outermost ring at rest in the row's coordinates (negative above the row).
+    @MainActor
+    static func ringTop(for moment: MomentSummary, dynamicTypeSize: DynamicTypeSize,
+                        legibilityWeight: LegibilityWeight?) -> CGFloat {
+        let valence = moment.pebble?.valence ?? .neutralMedium
+        let stone = SpineLayout.stoneSize(valence.sizeGroup)
+        let anchor = anchor(for: moment, dynamicTypeSize: dynamicTypeSize, legibilityWeight: legibilityWeight)
+        return anchor - stone.height / 2 + (StoneRingGeometry.forStone(valence)?.ringTop ?? 0)
     }
 
     private var description: String {

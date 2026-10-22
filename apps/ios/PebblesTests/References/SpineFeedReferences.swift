@@ -16,6 +16,15 @@ extension References {
                                          config: ReferenceConfig(scheme: scheme))
         }
 
+        /// At `.accessibility2` the label grows past the spec's 50 pt pad, so the
+        /// pad grows with it (maintainer decision, 2026-10-22): the label's text
+        /// stays clear of the large gem's rings and of Tuesday's seam.
+        @Test
+        func mondayAx2() async throws {
+            ReferenceImage.assertMatches(try await stack(0...0), named: "monday",
+                                         config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+        }
+
         @Test(arguments: ReferenceScheme.allCases)
         func tuesday(scheme: ReferenceScheme) async throws {
             ReferenceImage.assertMatches(try await stack(1...1), named: "tuesday",

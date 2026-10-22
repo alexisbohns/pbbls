@@ -98,6 +98,26 @@ enum SpineLayout {
         }
     }
 
+    /// The pad under a day's seam when the day has moments (maintainer decision,
+    /// 2026-10-22: a day with moments, like a still day, is never shorter than
+    /// its label). The spec's 50 (`dayPadTop − seamHeight`), grown only when the
+    /// label's text, hung from the seam's top, would come within
+    /// `labelClearance` of the first stone's outermost ring.
+    ///
+    /// - `labelHeight`: the whole tab (`DaySeam.labelHeight`); its text ends
+    ///   `labelPadBottom` above the tab's foot, and the tab's foot sits
+    ///   `labelHeight − (seamOverhang + seamHeight)` below the seam.
+    /// - `ringTop`: the outermost ring's top in the first pebble row's
+    ///   coordinates (negative above the row); it sits `pad + ringTop` below the seam.
+    ///
+    /// At `.large` this is 50 for every stone of the fixture (the tightest, the
+    /// picnic's medium gem, clears by 1.7 pt); it grows from `.xxxLarge` up.
+    static func seamPad(labelHeight: CGFloat, ringTop: CGFloat) -> CGFloat {
+        let text = labelHeight - labelPadBottom
+        let reach = max(0, -ringTop)
+        return max(dayPadTop - seamHeight, text + labelClearance - (seamOverhang + seamHeight) + reach)
+    }
+
     /// The content column: from `colX` to the width less `padRight`.
     static func column(width: CGFloat) -> CGFloat {
         width - colX - padRight

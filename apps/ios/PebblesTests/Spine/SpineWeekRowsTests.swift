@@ -41,4 +41,35 @@ struct SpineWeekRowsTests {
         guard case let .seam(day, _) = rows[0] else { Issue.record("Friday is a seam"); return }
         #expect(day.isStill)
     }
+
+    @Test("at the default size a day with moments keeps the spec's 50 under its seam, a still day none")
+    func padAtLarge() async throws {
+        let model = await SpineFixtureWeek.model()
+        let page = try #require(model.page(for: SpineFixtureWeek.weekStart))
+        for day in page.week.days {
+            let pad = SpineWeekRows.seamPad(day, dynamicTypeSize: .large, legibilityWeight: .regular)
+            #expect(pad == (day.isStill ? 0 : SpineLayout.dayPadTop - SpineLayout.seamHeight), "day \(day.index)")
+        }
+    }
+
+    @Test("a tall label grows the pad until its text clears the first ring by 4")
+    func padGrows() async throws {
+        // A 100 pt tab, its text 95; the ring 12 pt above the row: 95 + 4 − 22 + 12.
+        #expect(SpineLayout.seamPad(labelHeight: 100, ringTop: -12) == 89)
+        #expect(SpineLayout.seamPad(labelHeight: 40, ringTop: -12) == 50)
+
+        let model = await SpineFixtureWeek.model()
+        let page = try #require(model.page(for: SpineFixtureWeek.weekStart))
+        let label = DaySeam.labelHeight(dynamicTypeSize: .accessibility2, legibilityWeight: .regular)
+        for day in page.week.days {
+            guard let first = day.moments.first else { continue }
+            let pad = SpineWeekRows.seamPad(day, dynamicTypeSize: .accessibility2, legibilityWeight: .regular)
+            let ring = SpinePebble.ringTop(for: first, dynamicTypeSize: .accessibility2, legibilityWeight: .regular)
+            #expect(pad > SpineLayout.dayPadTop - SpineLayout.seamHeight, "day \(day.index)")
+            let seam = SpineLayout.seamOverhang + SpineLayout.seamHeight
+            let gap = seam + pad + ring - (label - SpineLayout.labelPadBottom)
+            // Exactly 4 where the ring rises above the row; more where it starts below it.
+            #expect(gap >= SpineLayout.labelClearance - 0.001, "day \(day.index)")
+        }
+    }
 }

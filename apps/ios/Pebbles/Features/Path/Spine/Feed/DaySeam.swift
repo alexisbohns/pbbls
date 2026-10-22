@@ -52,13 +52,19 @@ struct DaySeam: View {
     /// 48 pt hairline to hairline (the next seam's overhang comes off it), the
     /// last day's 48 to the mouth, and never less than the label plus 4.
     private var stillHeight: CGFloat {
+        let label = Self.labelHeight(dynamicTypeSize: dynamicTypeSize, legibilityWeight: legibilityWeight)
+        return max(SpineLayout.stillMinHeight + (isLast ? SpineLayout.seamOverhang : 0),
+                   label + SpineLayout.labelClearance)
+    }
+
+    /// The hung label's height at a Dynamic Type size, from its ranks' resolved metrics:
+    /// a still day's floor, and a day with moments' (`SpineLayout.seamPad`).
+    static func labelHeight(dynamicTypeSize: DynamicTypeSize, legibilityWeight: LegibilityWeight?) -> CGFloat {
         let numeral = SpineType.resolve(.dayNumeral, dynamicTypeSize: dynamicTypeSize,
                                         legibilityWeight: legibilityWeight)
         let weekday = SpineType.resolve(.dayWeekday, dynamicTypeSize: dynamicTypeSize,
                                         legibilityWeight: legibilityWeight)
-        let label = numeral.uiFont.lineHeight + weekday.uiFont.lineHeight + DayLabel.verticalPadding
-        return max(SpineLayout.stillMinHeight + (isLast ? SpineLayout.seamOverhang : 0),
-                   label + SpineLayout.labelClearance)
+        return numeral.uiFont.lineHeight + weekday.uiFont.lineHeight + DayLabel.verticalPadding
     }
 }
 

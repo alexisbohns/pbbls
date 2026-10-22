@@ -39,6 +39,19 @@ enum SpineWeekRows {
         }
         return rows
     }
+
+    /// The pad under a seam: none under a still day (it sizes itself), else
+    /// `SpineLayout.seamPad` for this day's label and its first stone's rings.
+    @MainActor
+    static func seamPad(_ day: SpineDay<MomentSummary>, dynamicTypeSize: DynamicTypeSize,
+                        legibilityWeight: LegibilityWeight?) -> CGFloat {
+        guard let first = day.moments.first else { return 0 }
+        return SpineLayout.seamPad(
+            labelHeight: DaySeam.labelHeight(dynamicTypeSize: dynamicTypeSize, legibilityWeight: legibilityWeight),
+            ringTop: SpinePebble.ringTop(for: first, dynamicTypeSize: dynamicTypeSize,
+                                         legibilityWeight: legibilityWeight)
+        )
+    }
 }
 
 /// A row drawn for a page.
@@ -48,11 +61,15 @@ struct SpineRowView: View {
     /// Nil in the eager stack (see `SpinePebble.slotFocus`).
     let slotFocus: AccessibilityFocusState<UUID?>.Binding?
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.legibilityWeight) private var legibilityWeight
+
     var body: some View {
         switch row {
         case let .seam(day, isLast):
             DaySeam(date: day.date, isStill: day.isStill, isLast: isLast)
-                .padding(.bottom, day.isStill ? 0 : SpineLayout.dayPadTop - SpineLayout.seamHeight)
+                .padding(.bottom, SpineWeekRows.seamPad(day, dynamicTypeSize: dynamicTypeSize,
+                                                        legibilityWeight: legibilityWeight))
         case let .pebble(moment, _, bottom):
             SpinePebble(moment: moment, context: context, slotFocus: slotFocus)
                 .padding(.bottom, bottom)
