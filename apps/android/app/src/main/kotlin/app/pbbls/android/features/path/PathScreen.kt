@@ -33,20 +33,24 @@ import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
+import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
+import app.pbbls.android.core.model.wrap.StripItem
 import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.components.NewPebbleFab
-import app.pbbls.android.features.path.components.WeekRoll
 import app.pbbls.android.features.path.spine.SpineWeek
 import app.pbbls.android.features.path.spine.WeekNeighbour
+import app.pbbls.android.features.path.strip.PathPage
+import app.pbbls.android.features.path.strip.PathPages
+import app.pbbls.android.features.path.strip.PathStrip
+import app.pbbls.android.features.path.wrap.month.MonthPagePlaceholder
 import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
-import kotlin.math.abs
 
 /**
  * The Path timeline — the authenticated landing surface (`PathView.swift`
@@ -123,11 +127,11 @@ fun PathScreen(
                     val content = uiState as PathUiState.Content
                     PathContent(
                         entries = content.entries,
-                        initialWeekStart = content.focusedWeekStart,
-                        focusedWeekStart = content.focusedWeekStart,
+                        stripItems = content.stripItems,
+                        focus = content.focus,
                         today = content.today,
                         soulsById = content.soulsById,
-                        onFocusChange = viewModel::onFocusWeek,
+                        onFocusChange = viewModel::onFocus,
                         paletteFor = { moment -> moment.pebble?.emotion?.let { palettes.palette(it.id) } },
                         aspect = viewModel.snapAspect,
                         onPebbleTap = { moment, face -> onOpenDetail(moment.id, face) },
@@ -184,14 +188,15 @@ fun PathScreen(
  * Stateless timeline layout — separated from [PathScreen] so screenshot
  * previews can drive it with fixture data (no services, no network).
  *
- * The roll, then the pager; each page is the week on the Spine (#1122, spec
- * §Chrome D5): the masthead and the mouth carry the week links the old header
- * held, so there is no header between the two. Week-focus has a single source
- * of truth (the caller's `focusedWeekStart`); the pager and the roll both
- * follow it: a swipe reports the new page through [onFocusChange], a roll tap
- * or a week link changes focus and the pager animates to it. Scrolling to the
- * already-current page is a no-op, so the two effects settle.
+ * The strip, then the pager (#1207): one page per focusable strip item, a
+ * week on the Spine (#1122) or a month. Focus has a single source of truth
+ * (the caller's [focus]); the pager and the strip both follow it: a swipe
+ * reports the new page through [onFocusChange], a strip tap or a week link
+ * changes focus and the pager moves to it (snapping under reduced motion).
+ * Scrolling to the already-current page is a no-op, so the two effects settle.
  *
+ * @param entries the feed's weeks; a week page the feed does not hold renders empty.
+ * @param stripItems the strip as drawn ([PathPages.items]); its focusable items are the pages.
  * @param soulsById the souls the persons rows and people lines draw glyphs
  *   from; a soul absent from it is skipped.
  * @param aspect the photo-ratio probe the cards read; null (previews) keeps
@@ -202,11 +207,11 @@ fun PathScreen(
 @Composable
 fun PathContent(
     entries: List<WeekRollEntry>,
-    initialWeekStart: LocalDate,
-    focusedWeekStart: LocalDate,
+    stripItems: List<StripItem>,
+    focus: PathPage,
     today: LocalDate,
     soulsById: Map<String, SoulWithGlyph>,
-    onFocusChange: (LocalDate) -> Unit,
+    onFocusChange: (PathPage) -> Unit,
     paletteFor: (PathMoment) -> EmotionPalette?,
     modifier: Modifier = Modifier,
     aspect: SnapAspectCache? = null,
@@ -215,33 +220,34 @@ fun PathContent(
     onCreatePebble: () -> Unit = {},
     ratioOverride: ((String) -> Float?)? = null,
 ) {
-    val initialIndex =
-        entries.indexOfFirst { it.weekStart == initialWeekStart }.coerceAtLeast(0)
-    val pagerState = rememberPagerState(initialPage = initialIndex) { entries.size }
+    val pages = remember(stripItems) { PathPages.pages(stripItems) }
+    val weeks = remember(entries) { entries.associateBy { it.weekStart } }
+    val reduceMotion = rememberReduceMotion()
+    val pagerState = rememberPagerState(initialPage = pages.indexOf(focus).coerceAtLeast(0)) { pages.size }
 
     // Programmatic scrolls in flight. A counter, not a flag: a new focus
     // cancels the running scroll, whose cleanup can land after the next one
     // has started. Not snapshot state: only the collector below reads it.
     val steering = remember { intArrayOf(0) }
 
-    // Swipe → focus. Keyed on entries so a reload re-subscribes; the page in
+    // Swipe → focus. Keyed on the pages so a reload re-subscribes; the page in
     // place at (re)subscription is dropped, because a reload is not a page
     // change and reporting it would overwrite a requested focus (R14). Pages
     // the pager passes while it is being steered are skipped too, or a jump
-    // several weeks away would re-steer itself to the first week in between.
-    LaunchedEffect(pagerState, entries) {
+    // several pages away would re-steer itself to the first page in between.
+    LaunchedEffect(pagerState, pages) {
         snapshotFlow { pagerState.currentPage }.drop(1).collect { page ->
             if (steering[0] > 0) return@collect
-            entries.getOrNull(page)?.let { onFocusChange(it.weekStart) }
+            pages.getOrNull(page)?.let(onFocusChange)
         }
     }
-    // Focus (roll tap, week link, R14 request) → pager.
-    LaunchedEffect(focusedWeekStart) {
-        val index = entries.indexOfFirst { it.weekStart == focusedWeekStart }
+    // Focus (strip tap, week link, R14 request) → pager.
+    LaunchedEffect(focus, pages) {
+        val index = pages.indexOf(focus)
         if (index >= 0 && index != pagerState.currentPage) {
             steering[0] += 1
             try {
-                pagerState.animateScrollToPage(index)
+                if (reduceMotion) pagerState.scrollToPage(index) else pagerState.animateScrollToPage(index)
             } finally {
                 steering[0] -= 1
             }
@@ -249,63 +255,48 @@ fun PathContent(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        WeekRoll(
-            entries = entries,
-            focusedWeekStart = focusedWeekStart,
-            onFocusChange = onFocusChange,
+        PathStrip(
+            items = stripItems,
+            focus = focus,
+            onFocus = onFocusChange,
             modifier = Modifier.fillMaxWidth(),
         )
         HorizontalPager(
             state = pagerState,
-            key = { entries[it].weekStart.toEpochDay() },
+            key = { pages[it].toString() },
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .weight(1f)
                     .testTag(JourneyTags.PATH_WEEK_PAGER),
-        ) { page ->
-            // Entries sort ascending, so the neighbours are the pages either side; the
-            // first week has no way back and the last no way on. Each link is named by
-            // the week it reaches, as the roll names it.
-            fun neighbour(index: Int): WeekNeighbour? =
-                entries.getOrNull(index)?.let {
-                    WeekNeighbour(WeekRollBuilder.isoWeekNumber(it.weekStart)) { onFocusChange(it.weekStart) }
+        ) { index ->
+            when (val page = pages[index]) {
+                is PathPage.Week -> {
+                    // The week links reach the nearest week on each side, past any month
+                    // between; each is named by its ISO week, as the strip names it.
+                    fun neighbour(range: IntProgression): WeekNeighbour? =
+                        range
+                            .firstNotNullOfOrNull { pages.getOrNull(it) as? PathPage.Week }
+                            ?.let { week -> WeekNeighbour(WeekRollBuilder.isoWeekNumber(week.weekStart)) { onFocusChange(week) } }
+                    SpineWeek(
+                        entry = weeks[page.weekStart] ?: WeekRollEntry(page.weekStart, emptyList()),
+                        today = today,
+                        soulsById = soulsById,
+                        paletteFor = paletteFor,
+                        aspect = aspect,
+                        onOpen = onPebbleTap,
+                        onRequestDelete = onPebbleDelete,
+                        previousWeek = neighbour(index - 1 downTo 0),
+                        nextWeek = neighbour(index + 1..pages.lastIndex),
+                        onCreatePebble = onCreatePebble,
+                        modifier = Modifier.fillMaxSize(),
+                        ratioOverride = ratioOverride,
+                    )
                 }
-            SpineWeek(
-                entry = entries[page],
-                today = today,
-                soulsById = soulsById,
-                paletteFor = paletteFor,
-                aspect = aspect,
-                onOpen = onPebbleTap,
-                onRequestDelete = onPebbleDelete,
-                previousWeek = neighbour(page - 1),
-                nextWeek = neighbour(page + 1),
-                onCreatePebble = onCreatePebble,
-                modifier = Modifier.fillMaxSize(),
-                ratioOverride = ratioOverride,
-            )
+                is PathPage.Month -> MonthPagePlaceholder(page.month, Modifier.fillMaxSize())
+            }
         }
     }
-}
-
-/**
- * The iOS `PathView.load()` refocus rule: keep the focused week if it still
- * exists; otherwise prefer the current week; otherwise the entry closest in
- * time. Null only for an empty roll (unreachable — the builder always emits
- * the current week).
- */
-internal fun refocusedWeekStart(
-    entries: List<WeekRollEntry>,
-    focused: LocalDate?,
-    today: LocalDate,
-): LocalDate? {
-    if (entries.isEmpty()) return null
-    if (focused != null && entries.any { it.weekStart == focused }) return focused
-    val currentStart = WeekRollBuilder.weekStart(today)
-    entries.firstOrNull { it.weekStart == currentStart }?.let { return it.weekStart }
-    val anchor = focused ?: currentStart
-    return entries.minByOrNull { abs(it.weekStart.toEpochDay() - anchor.toEpochDay()) }?.weekStart
 }
 
 /** Delete-failure notice — a single-action AlertDialog dismissing back to the timeline. Copy shared with iOS (R15). */

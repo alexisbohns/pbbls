@@ -10,9 +10,13 @@ import app.pbbls.android.core.data.SnapUrls
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.RippleSummary
+import app.pbbls.android.core.model.wrap.Strip
+import app.pbbls.android.core.model.wrap.StripItem
+import app.pbbls.android.features.path.strip.PathPage
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakePathStatsService
+import app.pbbls.android.testing.FakePathWrapService
 import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
@@ -53,7 +57,8 @@ class PathViewModelTest {
         writes: FakeMomentWriteService = FakeMomentWriteService(),
         focusRequests: PathFocusRequests = PathFocusRequests(),
         souls: FakeSoulsService = FakeSoulsService(),
-    ) = PathViewModel(path, stats, writes, focusRequests, souls, snapAspect())
+        wraps: FakePathWrapService = FakePathWrapService(),
+    ) = PathViewModel(path, stats, writes, focusRequests, souls, wraps, snapAspect())
 
     /** Never reached from a ViewModel test: the ratio probe belongs to the cards. */
     private fun snapAspect(): SnapAspectCache {
@@ -80,14 +85,14 @@ class PathViewModelTest {
             advanceUntilIdle()
             val before = viewModel.uiState.value as PathUiState.Content
             val oldWeek = before.entries.first { entry -> entry.moments.any { it.id == "old" } }.weekStart
-            assertTrue("starts on the current week", before.focusedWeekStart != oldWeek)
+            assertTrue("starts on the current week", before.focus != PathPage.Week(oldWeek))
 
             focusRequests.request("OLD")
             viewModel.onResumed()
             viewModel.onResumed()
             advanceUntilIdle()
 
-            assertEquals(oldWeek, (viewModel.uiState.value as PathUiState.Content).focusedWeekStart)
+            assertEquals(PathPage.Week(oldWeek), (viewModel.uiState.value as PathUiState.Content).focus)
             assertNull("the request is consumed", focusRequests.consume())
         }
 
@@ -101,14 +106,14 @@ class PathViewModelTest {
                     focusRequests = focusRequests,
                 )
             advanceUntilIdle()
-            val focused = (viewModel.uiState.value as PathUiState.Content).focusedWeekStart
+            val focused = (viewModel.uiState.value as PathUiState.Content).focus
 
             focusRequests.request("gone")
             viewModel.onResumed()
             viewModel.onResumed()
             advanceUntilIdle()
 
-            assertEquals(focused, (viewModel.uiState.value as PathUiState.Content).focusedWeekStart)
+            assertEquals(focused, (viewModel.uiState.value as PathUiState.Content).focus)
         }
 
     // MARK: - Returning from a pushed screen
@@ -454,5 +459,47 @@ class PathViewModelTest {
 
             assertEquals(listOf("m-1"), writes.deletedMoments)
             assertTrue(writes.deletedPebbles.isEmpty())
+        }
+
+    // MARK: - The strip (#1207)
+
+    @Test
+    fun `the strip loads with the feed, in the device zone, and its months become pages`() =
+        runTest {
+            val month = java.time.YearMonth.from(now.toLocalDate().minusMonths(1))
+            val wraps = FakePathWrapService(strip = Strip(listOf(StripItem.Month(month, 3))))
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(moment("a"))), wraps = wraps)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as PathUiState.Content
+            assertEquals(1, wraps.stripCount)
+            assertEquals(java.time.ZoneId.systemDefault(), wraps.lastZone)
+            assertTrue(PathPage.Month(month) in state.pages)
+            assertTrue("the feed's week still has its page", state.pages.any { it is PathPage.Week })
+
+            viewModel.onFocus(PathPage.Month(month))
+            assertEquals(PathPage.Month(month), (viewModel.uiState.value as PathUiState.Content).focus)
+        }
+
+    @Test
+    fun `a failed strip leaves the timeline on the feed's weeks, and a failed refresh keeps the last strip`() =
+        runTest {
+            val month = java.time.YearMonth.from(now.toLocalDate().minusMonths(1))
+            val wraps = FakePathWrapService(strip = Strip(listOf(StripItem.Month(month, 3))))
+            wraps.failNext = IOException("offline")
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(moment("a"))), wraps = wraps)
+            advanceUntilIdle()
+
+            val first = viewModel.uiState.value as PathUiState.Content
+            assertNull(first.strip)
+            assertEquals(listOf(PathPage.Week(first.entries.single().weekStart)), first.pages)
+
+            viewModel.reload()
+            advanceUntilIdle()
+            wraps.failNext = IOException("offline again")
+            viewModel.reload()
+            advanceUntilIdle()
+
+            assertTrue(PathPage.Month(month) in (viewModel.uiState.value as PathUiState.Content).pages)
         }
 }

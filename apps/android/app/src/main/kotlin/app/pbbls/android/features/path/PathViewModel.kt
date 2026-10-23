@@ -10,6 +10,7 @@ import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsServicing
+import app.pbbls.android.core.data.PathWrapServicing
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.data.SoulsServicing
 import app.pbbls.android.core.data.delete
@@ -18,6 +19,10 @@ import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
+import app.pbbls.android.core.model.wrap.Strip
+import app.pbbls.android.core.model.wrap.StripItem
+import app.pbbls.android.features.path.strip.PathPage
+import app.pbbls.android.features.path.strip.PathPages
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -51,12 +56,18 @@ sealed interface PathUiState {
 
     data class Content(
         val entries: List<WeekRollEntry>,
-        val focusedWeekStart: LocalDate,
+        /** The server's strip (#1207); null until it first loads, or while it fails, and the feed's weeks stand in. */
+        val strip: Strip?,
+        val focus: PathPage,
         val today: LocalDate,
         val karma: Int?,
         val serverRipple: RippleSummary?,
         val soulsById: Map<String, SoulWithGlyph>,
     ) : PathUiState {
+        val stripItems: List<StripItem> by lazy { PathPages.items(strip, entries, today) }
+
+        val pages: List<PathPage> by lazy { PathPages.pages(stripItems) }
+
         /**
          * The server's `active_today` compares against UTC `current_date`, so a
          * user past local midnight in a non-UTC zone would see "active today"
@@ -130,6 +141,7 @@ class PathViewModel
         private val writes: MomentWriteServicing,
         private val focusRequests: PathFocusRequests,
         private val souls: SoulsServicing,
+        private val wraps: PathWrapServicing,
         /**
          * The photo-ratio probe the Spine's cards read (#1122). Process-wide and
          * injected here rather than through a `Local…`: the screen takes its
@@ -139,9 +151,13 @@ class PathViewModel
     ) : ViewModel() {
         private val today = LocalDate.now()
 
+        /** The zone the feed cuts its days in, and the one the strip is asked for (#1207). */
+        private val zone = ZoneId.systemDefault()
+
         private var entries: List<WeekRollEntry> = emptyList()
+        private var strip: Strip? = null
         private var soulsById: Map<String, SoulWithGlyph> = emptyMap()
-        private var focusedWeekStart: LocalDate? = null
+        private var focus: PathPage? = null
         private var hasFailed = false
         private var isLoaded = false
 
@@ -232,19 +248,32 @@ class PathViewModel
                                 emptyList()
                             }
                         }
-                    val built = WeekRollBuilder.build(moments.loadPath(), ZoneId.systemDefault(), today)
-                    built to loadedSouls.await().associateBy { it.id }
+                    // A strip failure must not fail the timeline either: the feed's weeks
+                    // stand in (PathPages) and the last strip that loaded is kept.
+                    val loadedStrip =
+                        async {
+                            runCatchingCancellable { wraps.strip(zone) }.getOrElse {
+                                Log.e(TAG, "path_strip failed", it)
+                                null
+                            }
+                        }
+                    val built = WeekRollBuilder.build(moments.loadPath(), zone, today)
+                    Triple(built, loadedSouls.await().associateBy { it.id }, loadedStrip.await())
                 }
             }.fold(
-                onSuccess = { (built, loadedSouls) ->
+                onSuccess = { (built, loadedSouls, loadedStrip) ->
                     entries = built
                     soulsById = loadedSouls
+                    if (loadedStrip != null) strip = loadedStrip
+                    val pages = PathPages.pages(PathPages.items(strip, built, today))
                     // A flow that just wrote a moment wins over the kept focus (R14).
                     val requested =
                         focusRequests.consume()?.let { id ->
-                            built.firstOrNull { entry -> entry.moments.any { it.id.equals(id, ignoreCase = true) } }?.weekStart
+                            built
+                                .firstOrNull { entry -> entry.moments.any { it.id.equals(id, ignoreCase = true) } }
+                                ?.let { PathPage.Week(it.weekStart) }
                         }
-                    focusedWeekStart = requested ?: refocusedWeekStart(built, focusedWeekStart, today)
+                    focus = requested ?: PathPages.refocused(pages, focus, today)
                     hasFailed = false
                     isLoaded = true
                 },
@@ -261,14 +290,14 @@ class PathViewModel
 
         /** Rebuilds the exposed state from the pieces above. */
         private fun publish() {
-            val focused = focusedWeekStart
+            val focused = focus
             _uiState.value =
                 when {
                     hasFailed -> PathUiState.Error(R.string.path_load_error)
                     !isLoaded -> PathUiState.Loading
                     // Unreachable in practice, and kept as a belt: `WeekRollBuilder`
                     // unions the current week in unconditionally, so a successful
-                    // load always has at least one week and `refocusedWeekStart`
+                    // load always has at least one page and `PathPages.refocused`
                     // always finds one. A user with no pebbles gets the current
                     // week, empty — not this branch. The old screen had the same
                     // fallback written as `didLoadFail || focused == null`.
@@ -276,7 +305,8 @@ class PathViewModel
                     else ->
                         PathUiState.Content(
                             entries = entries,
-                            focusedWeekStart = focused,
+                            strip = strip,
+                            focus = focused,
                             today = today,
                             karma = stats.karma,
                             serverRipple = stats.ripple,
@@ -285,9 +315,9 @@ class PathViewModel
                 }
         }
 
-        fun onFocusWeek(weekStart: LocalDate) {
-            if (focusedWeekStart == weekStart) return
-            focusedWeekStart = weekStart
+        fun onFocus(page: PathPage) {
+            if (focus == page) return
+            focus = page
             publish()
         }
 
