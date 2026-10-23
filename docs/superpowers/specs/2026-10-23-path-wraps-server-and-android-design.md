@@ -380,6 +380,7 @@ Server first: the clients cannot render what the server does not compute.
 7. **android, atoms:** `DotMark`, `RadialLayout`, `SpineSectionHeader`, `MoreLink`, `TileCard`, `ProportionBar`, `PageDots` (onboarding moves onto it), the `StoneSeal` sizes, `DaySetMarks` and `MarkRow`. `PersonsOfWeek` and `WeekContents` are rebased with identical pixels.
 8. **android, strip:** `CairnMark`, `DolmenMark`, `PathStrip` and `PathPage`, with the month page as a placeholder. `WeekRoll` is deleted.
 9. **android, week wrap:** `WeekLine`, the tiles, `TabbedSheetPager` and `WrapCopy` (week). The opening rows and client aggregation are deleted.
+9b. **android, disk cache:** §7.1's per-page JSON copy under `noBackupFilesDir/path-wraps/` (keyed by user, `p_tz` and schema version), read at launch before the network answers and wiped on sign-out and account deletion. Part 9 ships the session half (stale-while-revalidate in `PathViewModel`); this is what makes a cold start instant.
 10. **android, DataStore:** the preference migration and `DisplayPreferences`.
 11. **android, month page:** the cover, weeks, milestones, persons, domains and the month sheet with `ViewModeSwitch`.
 12. **android, gem:** `GemGeometry`, `GemCanvas` and `EmotionGem`.
