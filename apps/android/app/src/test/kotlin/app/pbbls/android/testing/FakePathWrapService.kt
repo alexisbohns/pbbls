@@ -11,11 +11,25 @@ import java.time.ZoneId
 
 /**
  * In-memory [PathWrapServicing] (#1207). The strip defaults to empty, which leaves the Path on the
- * feed's own weeks. The wraps are not armed until a part renders them, so they throw.
+ * feed's own weeks; a week answers from [weeks], or with an empty wrap. Months are not armed until
+ * the month page renders them, so they throw.
  */
 class FakePathWrapService(
     var strip: Strip = Strip(emptyList()),
+    val weeks: MutableMap<LocalDate, WeekWrap> = mutableMapOf(),
 ) : PathWrapServicing {
+    private val weekFailure = ArmedFailure()
+
+    /** Arms the next week wrap call to throw. */
+    var failNextWeek: Exception?
+        get() = weekFailure.next
+        set(value) {
+            weekFailure.next = value
+        }
+
+    /** Week wrap calls by week, in order. */
+    val weekCalls = mutableListOf<LocalDate>()
+
     private val failure = ArmedFailure()
 
     var failNext: Exception?
@@ -40,10 +54,19 @@ class FakePathWrapService(
     override suspend fun weekWrap(
         weekStart: LocalDate,
         zone: ZoneId,
-    ): WeekWrap = throw IOException("no week wrap armed in the fake")
+    ): WeekWrap {
+        weekCalls += weekStart
+        weekFailure.fire()
+        return weeks[weekStart] ?: emptyWeek(weekStart)
+    }
 
     override suspend fun monthWrap(
         month: YearMonth,
         zone: ZoneId,
     ): MonthWrap = throw IOException("no month wrap armed in the fake")
+
+    companion object {
+        fun emptyWeek(weekStart: LocalDate): WeekWrap =
+            WeekWrap(weekStart, 0, 0, false, 0, 0, emptyList(), null, null, null, null, null, null, null, null)
+    }
 }
