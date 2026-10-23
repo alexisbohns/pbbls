@@ -2379,6 +2379,7 @@ export type Database = {
       delete_moment: { Args: { p_moment_id: string }; Returns: Json }
       delete_moment_media: { Args: { p_snap_id: string }; Returns: string }
       delete_pebble: { Args: { p_pebble_id: string }; Returns: undefined }
+      gem_allocate: { Args: { p_families: Json }; Returns: Json }
       get_active_users_series: {
         Args: { p_end: string; p_start: string }
         Returns: {
