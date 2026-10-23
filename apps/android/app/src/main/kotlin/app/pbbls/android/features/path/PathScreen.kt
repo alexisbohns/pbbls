@@ -30,17 +30,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.data.LocalEmotionPaletteService
+import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.CardFace
+import app.pbbls.android.core.model.EmotionFamilies
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.core.model.wrap.StripItem
+import app.pbbls.android.core.model.wrap.WeekWrap
 import app.pbbls.android.core.ui.MomentDeleteDialog
 import app.pbbls.android.features.path.components.NewPebbleFab
 import app.pbbls.android.features.path.spine.SpineWeek
@@ -48,7 +51,10 @@ import app.pbbls.android.features.path.spine.WeekNeighbour
 import app.pbbls.android.features.path.strip.PathPage
 import app.pbbls.android.features.path.strip.PathPages
 import app.pbbls.android.features.path.strip.PathStrip
+import app.pbbls.android.features.path.wrap.WrapLookups
+import app.pbbls.android.features.path.wrap.WrapState
 import app.pbbls.android.features.path.wrap.month.MonthPagePlaceholder
+import app.pbbls.android.features.path.wrap.shown
 import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
 
@@ -125,14 +131,26 @@ fun PathScreen(
 
                 is PathUiState.Content -> {
                     val content = uiState as PathUiState.Content
+                    val paletteFor: (PathMoment) -> EmotionPalette? = { moment -> moment.pebble?.emotion?.let { palettes.palette(it.id) } }
+                    val references = LocalReferenceDataService.current
+                    val families =
+                        remember(palettes.byEmotionId) { EmotionFamilies.of(palettes.byEmotionId.values).associateBy { it.slug } }
+                    val domains = remember(references.domains) { references.domains.associateBy { it.id } }
+                    val moments = remember(content.entries) { content.entries.flatMap { it.moments }.associateBy { it.id } }
+                    val lookups =
+                        remember(moments, content.soulsById, families, domains, palettes) {
+                            WrapLookups(moments::get, content.soulsById::get, families::get, domains::get, paletteFor)
+                        }
                     PathContent(
                         entries = content.entries,
                         stripItems = content.stripItems,
                         focus = content.focus,
+                        weekWraps = content.weekWraps,
+                        lookups = lookups,
                         today = content.today,
                         soulsById = content.soulsById,
                         onFocusChange = viewModel::onFocus,
-                        paletteFor = { moment -> moment.pebble?.emotion?.let { palettes.palette(it.id) } },
+                        paletteFor = paletteFor,
                         aspect = viewModel.snapAspect,
                         onPebbleTap = { moment, face -> onOpenDetail(moment.id, face) },
                         onPebbleDelete = viewModel::requestDelete,
@@ -197,6 +215,8 @@ fun PathScreen(
  *
  * @param entries the feed's weeks; a week page the feed does not hold renders empty.
  * @param stripItems the strip as drawn ([PathPages.items]); its focusable items are the pages.
+ * @param weekWraps each week page's wrap; a week absent here shows its line alone.
+ * @param lookups what the wraps' ids point at.
  * @param soulsById the souls the persons rows and people lines draw glyphs
  *   from; a soul absent from it is skipped.
  * @param aspect the photo-ratio probe the cards read; null (previews) keeps
@@ -209,6 +229,8 @@ fun PathContent(
     entries: List<WeekRollEntry>,
     stripItems: List<StripItem>,
     focus: PathPage,
+    weekWraps: Map<LocalDate, WrapState<WeekWrap>>,
+    lookups: WrapLookups,
     today: LocalDate,
     soulsById: Map<String, SoulWithGlyph>,
     onFocusChange: (PathPage) -> Unit,
@@ -272,10 +294,10 @@ fun PathContent(
         ) { index ->
             when (val page = pages[index]) {
                 is PathPage.Week -> {
-                    // The week links reach the nearest week on each side, past any month
-                    // between; each is named by its ISO week, as the strip names it.
-                    fun neighbour(range: IntProgression): WeekNeighbour? =
-                        range
+                    // The mouth reaches the nearest week after, past any month between; it is
+                    // named by its ISO week, as the strip names it.
+                    val next =
+                        (index + 1..pages.lastIndex)
                             .firstNotNullOfOrNull { pages.getOrNull(it) as? PathPage.Week }
                             ?.let { week -> WeekNeighbour(WeekRollBuilder.isoWeekNumber(week.weekStart)) { onFocusChange(week) } }
                     SpineWeek(
@@ -286,8 +308,9 @@ fun PathContent(
                         aspect = aspect,
                         onOpen = onPebbleTap,
                         onRequestDelete = onPebbleDelete,
-                        previousWeek = neighbour(index - 1 downTo 0),
-                        nextWeek = neighbour(index + 1..pages.lastIndex),
+                        wrap = weekWraps[page.weekStart]?.shown,
+                        lookups = lookups,
+                        nextWeek = next,
                         onCreatePebble = onCreatePebble,
                         modifier = Modifier.fillMaxSize(),
                         ratioOverride = ratioOverride,

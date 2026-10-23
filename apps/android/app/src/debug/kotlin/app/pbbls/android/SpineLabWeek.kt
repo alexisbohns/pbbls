@@ -12,8 +12,7 @@ import app.pbbls.android.features.path.spine.WeekNeighbour
 /*
  * The fixture week on the Spine (#1122), for the Spine lab's Week tab and the
  * previews. No network: the ratios are primed and the photo URLs withheld, so the
- * cards show their fields. Both week links are live so the masthead and the mouth
- * render them; they go nowhere.
+ * cards show their fields. The mouth's week link is live so it renders; it goes nowhere.
  */
 
 /** The whole fixture week as `SpineWeek` lays it out: the lab's Week tab. */
@@ -27,7 +26,9 @@ internal fun SpineLabWeek(modifier: Modifier = Modifier) {
         aspect = null,
         onOpen = { _, _ -> },
         onRequestDelete = {},
-        previousWeek = WeekNeighbour(SpineFixtureWeek.previousNumber) {},
+        // The settled week's wrap, so the lab shows every tile (the fixture's Sunday would be live).
+        wrap = SpineFixtureWeek.wrap(live = false),
+        lookups = SpineFixtureWeek.lookups,
         nextWeek = WeekNeighbour(SpineFixtureWeek.nextNumber) {},
         onCreatePebble = {},
         modifier = modifier,

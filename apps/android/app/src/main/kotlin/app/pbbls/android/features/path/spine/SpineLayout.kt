@@ -49,8 +49,12 @@ internal object SpineLayout {
     val STILL_PAD_TOP = 14.dp
     val STILL_MIN_HEIGHT = 48.dp
 
-    /** From the verso's last row to the first day's hairline: the web's aside `pb-2` + feed `mt-10`. */
-    val FEED_TOP = 48.dp
+    /**
+     * From the week's line or tiles to the first day's hairline (#1207): the tiles keep their own 16
+     * below, so the path starts close under them as on the round-2 board. It was 48 under the old
+     * opening, persons and contents (the web's aside `pb-2` + feed `mt-10`).
+     */
+    val FEED_TOP = 24.dp
 
     /** Under the mouth, so the last pebble clears the FAB: the web's feed `pb-24`. */
     val FEED_BOTTOM = 96.dp

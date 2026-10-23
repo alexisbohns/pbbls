@@ -1,5 +1,7 @@
 package app.pbbls.android
 
+import app.pbbls.android.core.model.Domain
+import app.pbbls.android.core.model.EmotionFamily
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.EmotionRef
 import app.pbbls.android.core.model.Glyph
@@ -10,12 +12,22 @@ import app.pbbls.android.core.model.PathSoul
 import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
+import app.pbbls.android.core.model.wrap.CardCount
+import app.pbbls.android.core.model.wrap.DaySet
+import app.pbbls.android.core.model.wrap.DomainStat
+import app.pbbls.android.core.model.wrap.FamilyStat
+import app.pbbls.android.core.model.wrap.HourMark
+import app.pbbls.android.core.model.wrap.Kept
+import app.pbbls.android.core.model.wrap.Lead
+import app.pbbls.android.core.model.wrap.PersonStat
+import app.pbbls.android.core.model.wrap.WeekTile
+import app.pbbls.android.core.model.wrap.WeekWrap
+import app.pbbls.android.core.model.wrap.WeightGrid
 import app.pbbls.android.features.path.WeekRollBuilder
-import app.pbbls.android.features.path.spine.logic.PersonsOfWeek
+import app.pbbls.android.features.path.wrap.WrapLookups
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
-import java.util.Locale
 
 /**
  * The Spine's fixture week, the web's `spine-fixture-week.ts` transcribed (#1122,
@@ -410,7 +422,102 @@ internal object SpineFixtureWeek {
             prefix("seawall-portrait.jpg") to 1200f / 1800f,
         )
 
-    /** Soul ids in persons-of-the-week order, the order the people lines name them in. */
-    val personsOrder: List<String> =
-        PersonsOfWeek.of(entry.moments, weekStart, zone, Locale.ENGLISH).map { it.soul.id }
+    /** The domains the wrap names, by id (the fixture's pebbles carry none of their own). */
+    val domainsById: Map<String, Domain> =
+        listOf("friends", "identity", "family", "partner", "travel", "hobbies")
+            .map { Domain(id = "domain-$it", slug = it, name = it.replaceFirstChar { c -> c.uppercase() }, label = "") }
+            .associateBy { it.id }
+
+    /** The seven families, named and inked as `v_emotions_with_palette` would give them. */
+    val families: Map<String, EmotionFamily> =
+        categories.mapValues { (slug, palette) -> EmotionFamily(slug, slug.replaceFirstChar { it.uppercase() }, palette) }
+
+    private fun days(vararg d: Int) = DaySet(7, d.toSet())
+
+    private fun person(
+        key: String,
+        count: Int,
+        vararg d: Int,
+    ) = PersonStat("soul-$key", count, days(*d), newSincePrevious = false)
+
+    private fun id(n: Int) = "spine-fixture-" + n.toString().padStart(2, '0')
+
+    /**
+     * The wrap `path_week_wrap` sends for the fixture, worked out by hand from the moments above
+     * with the server's rules (#1207, spec §3.2): thirteen pebbles, fourteen people; [live] as on
+     * the fixture's own Sunday, when the stat tiles wait for the week to end.
+     */
+    fun wrap(live: Boolean): WeekWrap =
+        WeekWrap(
+            weekStart = weekStart,
+            isoWeek = 41,
+            isoYear = 2026,
+            live = live,
+            pebbles = 13,
+            people = 14,
+            tiles = if (live) listOf(WeekTile.CONTENTS, WeekTile.PERSONS) else WeekTile.entries,
+            persons =
+                listOf(person("mara", 6, 0, 1, 3, 5), person("bruno", 3, 1, 3, 6), person("elio", 3, 0, 1, 3)) +
+                    listOf(person("jules", 3, 2, 3), person("nadia", 3, 0, 3)) +
+                    neighbours.map { PersonStat(it.id, 1, days(3), newSincePrevious = false) },
+            inviteMomentIds = null,
+            families = if (live) null else fixtureFamilies,
+            lead = if (live) null else Lead(listOf("joy", "peace", "pride", "anger", "sadness", "fear"), listOf("shame")),
+            domains =
+                if (live) {
+                    null
+                } else {
+                    listOf(
+                        DomainStat("domain-friends", 4, days(0, 2, 3, 5)),
+                        DomainStat("domain-identity", 3, days(1, 2, 5)),
+                        DomainStat("domain-family", 2, days(0, 6)),
+                        DomainStat("domain-partner", 2, days(5)),
+                        DomainStat("domain-travel", 1, days(1)),
+                        DomainStat("domain-hobbies", 1, days(3)),
+                    )
+                },
+            weight = if (live) null else WeightGrid(bright = listOf(0, 3, 3), even = listOf(3, 1, 0), heavy = listOf(1, 2, 0)),
+            hours = if (live) null else fixtureHours,
+            kept = if (live) null else Kept(listOf(1, 4, 6, 7, 9, 13).map(::id), listOf(CardCount(id(4), 2), CardCount(id(7), 1))),
+        )
+
+    private val fixtureFamilies =
+        listOf(
+            FamilyStat("joy", 4, 9.0, 0.4, days(0, 3, 5)),
+            FamilyStat("peace", 4, 4.5, 0.2, days(1, 2, 5, 6)),
+            FamilyStat("pride", 2, 4.0, 0.178, days(0, 5)),
+            FamilyStat("anger", 1, 2.0, 0.089, days(1)),
+            FamilyStat("sadness", 1, 2.0, 0.089, days(6)),
+            FamilyStat("fear", 1, 1.0, 0.044, days(2)),
+        )
+
+    private val fixtureHours =
+        listOf(
+            1 to 10.25,
+            2 to 19.667,
+            3 to 8.033,
+            4 to 16.5,
+            5 to 3.167,
+            6 to 12.083,
+            7 to 21.0,
+            12 to 13.167,
+            8 to 9.333,
+            9 to 17.75,
+            13 to 19.083,
+            10 to 14.0,
+            11 to 22.5,
+        ).map { (n, h) -> HourMark(id(n), h, (h + 0.5) % 24) }
+
+    /** Soul ids in the server's persons order, the order the people lines name them in. */
+    val personsOrder: List<String> = wrap(live = false).persons.orEmpty().map { it.soulId }
+
+    /** The fixture's ids resolved, as the Path screen resolves them from its services. */
+    val lookups: WrapLookups =
+        WrapLookups(
+            moment = entry.moments.associateBy { it.id }::get,
+            soul = soulsById::get,
+            family = families::get,
+            domain = domainsById::get,
+            paletteFor = palettes,
+        )
 }

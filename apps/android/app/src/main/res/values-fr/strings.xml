@@ -66,10 +66,54 @@
 
     <!-- ==== Path timeline (sub-project D) ==== -->
     <string name="path_load_error">Impossible de charger vos pebbles.</string>
-    <string name="path_empty_week_title">Nouvelle semaine</string>
-    <string name="path_empty_week_subtitle">Des galets en vue ?</string>
-    <string name="path_week_previous">Semaine précédente</string>
     <string name="path_week_next">Semaine suivante</string>
+    <!-- The week wrap (#1207): the line under the strip, the tiles and the sheet's lists. -->
+    <string name="path_wrap_week">semaine %1$d</string>
+    <string name="path_wrap_so_far">pour l\'instant</string>
+    <string name="path_wrap_line_nothing">Rien pour l\'instant.</string>
+    <string name="path_wrap_line_no_pebble">Pas encore de galet.</string>
+    <string name="path_wrap_collect">Ramasser un galet</string>
+    <string name="path_wrap_tile_contents">sommaire</string>
+    <string name="path_wrap_tile_persons">personnes</string>
+    <string name="path_wrap_tile_emotions">émotions</string>
+    <string name="path_wrap_tile_domains">domaines</string>
+    <string name="path_wrap_tile_weight">poids</string>
+    <string name="path_wrap_tile_hours">heures</string>
+    <string name="path_wrap_tile_kept">gardé</string>
+    <string name="path_wrap_tile_a11y">%1$s : %2$s. Ouvre la liste.</string>
+    <string name="path_wrap_list_and">%1$s et %2$s</string>
+    <string name="path_wrap_list_or">%1$s ou %2$s</string>
+    <string name="path_wrap_lead_mostly">Surtout %1$s.</string>
+    <string name="path_wrap_lead_mostly_then">Surtout %1$s, puis %2$s.</string>
+    <string name="path_wrap_domains_first">%1$s d\'abord.</string>
+    <string name="path_wrap_domains_first_then">%1$s d\'abord, puis %2$s.</string>
+    <string name="path_wrap_weight_lead">%1$s clairs, %2$s égaux, %3$s lourds.</string>
+    <string name="path_wrap_weight_caption">clair · égal · lourd</string>
+    <string name="path_wrap_bright">clair</string>
+    <string name="path_wrap_even">égal</string>
+    <string name="path_wrap_heavy">lourd</string>
+    <string name="path_wrap_small">petit</string>
+    <string name="path_wrap_medium">moyen</string>
+    <string name="path_wrap_large">grand</string>
+    <string name="path_wrap_hours_lead">De %1$s à %2$s.</string>
+    <string name="path_wrap_hours_range">%1$s à %2$s</string>
+    <string name="path_wrap_invite">Quelqu\'un était-il là pour %1$s ?</string>
+    <string name="path_wrap_invite_more">Nomme une âme une fois ; elle rejoint chaque moment que tu y lies.</string>
+    <plurals name="path_wrap_photos">
+        <item quantity="one">%1$s photo</item>
+        <item quantity="many">%1$s photos</item>
+        <item quantity="other">%1$s photos</item>
+    </plurals>
+    <plurals name="path_wrap_cards">
+        <item quantity="one">%1$s carte écrite</item>
+        <item quantity="many">%1$s cartes écrites</item>
+        <item quantity="other">%1$s cartes écrites</item>
+    </plurals>
+    <plurals name="path_wrap_cards_short">
+        <item quantity="one">%1$d carte</item>
+        <item quantity="many">%1$d cartes</item>
+        <item quantity="other">%1$d cartes</item>
+    </plurals>
     <!-- The Path's strip (#1207): a cairn per week, a dolmen per month. -->
     <string name="path_strip_now">maintenant</string>
     <plurals name="path_strip_week_a11y">
@@ -633,15 +677,11 @@
     <string name="tab_you">Toi</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
-    <string name="path_spine_kicker">la %1$s semaine · %2$d</string>
-    <string name="path_spine_title_same_month">Du %1$s au %2$s %3$s</string>
-    <string name="path_spine_title_cross_month">Du %1$s %2$s au %3$s %4$s</string>
     <plurals name="path_spine_summary_pebbles">
         <item quantity="one">%1$s galet</item>
         <item quantity="other">%1$s galets</item>
         <item quantity="many">%1$s galets</item>
     </plurals>
-    <string name="path_spine_summary_no_pebbles">aucun galet</string>
     <plurals name="path_spine_summary_people">
         <item quantity="one">, %1$s personne</item>
         <item quantity="other">, %1$s personnes</item>
