@@ -2580,6 +2580,7 @@ export type Database = {
           pebble: Json
         }[]
       }
+      path_strip: { Args: { p_tz: string }; Returns: Json }
       preview_connection_invite: { Args: { p_token: string }; Returns: Json }
       publish_admin_glyph: {
         Args: {
