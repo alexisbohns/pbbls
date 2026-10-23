@@ -274,7 +274,12 @@ class PathViewModel
                 onSuccess = { (built, loadedSouls, loadedStrip) ->
                     entries = built
                     soulsById = loadedSouls
-                    if (loadedStrip != null) strip = loadedStrip
+                    // Offline, the device's last strip stands in for one that never loaded (spec §7.1).
+                    if (loadedStrip != null) {
+                        strip = loadedStrip
+                    } else if (strip == null) {
+                        strip = wraps.cachedStrip(zone)
+                    }
                     pages = PathPages.pages(PathPages.items(strip, built, today))
                     // A load follows a write or a return: what was fetched may be out of date.
                     weekWraps.replaceAll { _, state -> if (state is WrapState.Ready) state.copy(stale = true) else state }
@@ -319,6 +324,13 @@ class PathViewModel
             if (wrapJobs[weekStart]?.isActive == true) return
             wrapJobs[weekStart] =
                 viewModelScope.launch {
+                    // A week never shown this session opens on the device's copy at once, stale, while the fetch runs.
+                    if (state == WrapState.NeverLoaded) {
+                        wraps.cachedWeekWrap(weekStart, zone)?.let {
+                            weekWraps[weekStart] = WrapState.Ready(it, stale = true)
+                            publish()
+                        }
+                    }
                     runCatchingCancellable { wraps.weekWrap(weekStart, zone) }.fold(
                         onSuccess = { weekWraps[weekStart] = WrapState.Ready(it) },
                         onFailure = {

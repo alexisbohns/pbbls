@@ -7,6 +7,7 @@ import app.pbbls.android.core.data.AchievementNotificationService
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.testing.FakeCompleteSnapshotStore
 import app.pbbls.android.testing.FakeSupabaseService
+import app.pbbls.android.testing.FakeWrapDiskCache
 import app.pbbls.android.testing.MainDispatcherRule
 import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.auth.user.UserSession
@@ -62,6 +63,7 @@ class RootViewModelTest {
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     SavedStateHandle(),
                 )
 
@@ -81,6 +83,7 @@ class RootViewModelTest {
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     SavedStateHandle(),
                 )
 
@@ -100,6 +103,7 @@ class RootViewModelTest {
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     SavedStateHandle(),
                 )
 
@@ -118,7 +122,7 @@ class RootViewModelTest {
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
             val completeSnapshots = FakeCompleteSnapshotStore()
-            RootViewModel(supabase, karma(), achievements(), completeSnapshots, SavedStateHandle())
+            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), SavedStateHandle())
 
             supabase.emitResolved(session = session(userId = "u1"))
             advanceUntilIdle()
@@ -135,7 +139,7 @@ class RootViewModelTest {
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
             val completeSnapshots = FakeCompleteSnapshotStore()
-            RootViewModel(supabase, karma(), achievements(), completeSnapshots, SavedStateHandle())
+            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), SavedStateHandle())
 
             supabase.emitResolved(session = null)
             advanceUntilIdle()
@@ -148,7 +152,7 @@ class RootViewModelTest {
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
             val completeSnapshots = FakeCompleteSnapshotStore()
-            RootViewModel(supabase, karma(), achievements(), completeSnapshots, SavedStateHandle())
+            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), SavedStateHandle())
 
             advanceUntilIdle()
             supabase.emitResolved(session = session(userId = "u1"))
@@ -166,6 +170,7 @@ class RootViewModelTest {
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     SavedStateHandle(),
                 )
 
@@ -184,6 +189,7 @@ class RootViewModelTest {
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     handle,
                 )
 
@@ -196,6 +202,7 @@ class RootViewModelTest {
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     handle,
                 )
             assertEquals("tok-1", restored.uiState.value.pendingInvite)
@@ -210,6 +217,7 @@ class RootViewModelTest {
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     SavedStateHandle(),
                 )
             vm.onInviteTokenReceived("tok-1")
@@ -231,6 +239,7 @@ class RootViewModelTest {
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     SavedStateHandle(),
                 )
             supabase.emitResolved(session = session(userId = "u1"))
@@ -255,6 +264,7 @@ class RootViewModelTest {
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     SavedStateHandle(),
                 )
 
@@ -281,6 +291,7 @@ class RootViewModelTest {
                     karma(),
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     SavedStateHandle(),
                 )
 
@@ -305,6 +316,7 @@ class RootViewModelTest {
                     karma(),
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     SavedStateHandle(),
                 )
             achievementNotify.present(listOf(card("first-soul"), card("first-glyph")))
@@ -332,6 +344,7 @@ class RootViewModelTest {
                     karma(),
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
+                    FakeWrapDiskCache(),
                     SavedStateHandle(),
                 )
             achievementNotify.present(listOf(card("first-soul"), card("first-glyph")))
@@ -343,5 +356,22 @@ class RootViewModelTest {
             advanceUntilIdle()
 
             assertNull(vm.uiState.value.achievementMoment)
+        }
+
+    @Test
+    fun `signing out drops the Path's kept wraps`() =
+        runTest(rule.dispatcher) {
+            val supabase = FakeSupabaseService()
+            val wraps = FakeWrapDiskCache()
+            RootViewModel(supabase, karma(), achievements(), FakeCompleteSnapshotStore(), wraps, SavedStateHandle())
+
+            supabase.emitResolved(session = session(userId = "u1"))
+            advanceUntilIdle()
+            assertEquals(0, wraps.clearAllCount)
+
+            supabase.emitResolved(session = null)
+            advanceUntilIdle()
+
+            assertEquals(1, wraps.clearAllCount)
         }
 }

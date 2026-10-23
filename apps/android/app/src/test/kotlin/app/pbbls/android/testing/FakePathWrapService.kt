@@ -18,6 +18,22 @@ class FakePathWrapService(
     var strip: Strip = Strip(emptyList()),
     val weeks: MutableMap<LocalDate, WeekWrap> = mutableMapOf(),
 ) : PathWrapServicing {
+    /** The device's copies, as `WrapDiskCache` would return them. */
+    var keptStrip: Strip? = null
+    val keptWeeks: MutableMap<LocalDate, WeekWrap> = mutableMapOf()
+
+    override suspend fun cachedStrip(zone: ZoneId): Strip? = keptStrip
+
+    override suspend fun cachedWeekWrap(
+        weekStart: LocalDate,
+        zone: ZoneId,
+    ): WeekWrap? = keptWeeks[weekStart]
+
+    override suspend fun cachedMonthWrap(
+        month: YearMonth,
+        zone: ZoneId,
+    ): MonthWrap? = null
+
     private val weekFailure = ArmedFailure()
 
     /** Arms the next week wrap call to throw. */

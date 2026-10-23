@@ -21,6 +21,7 @@ import app.pbbls.android.core.data.SnapUrls
 import app.pbbls.android.core.data.SnapWriteRepositing
 import app.pbbls.android.core.data.SoulsServicing
 import app.pbbls.android.core.data.SupabaseServicing
+import app.pbbls.android.core.data.WrapDiskCaching
 import app.pbbls.android.di.IoApplicationScope
 import app.pbbls.android.di.ServiceBindings
 import app.pbbls.android.di.ServiceModule
@@ -145,6 +146,9 @@ object FakeServicesModule {
     fun fakePathWraps() = FakePathWrapService()
 
     @Provides @Singleton
+    fun fakeWrapDiskCache() = FakeWrapDiskCache()
+
+    @Provides @Singleton
     fun fakeComposerMedia() = FakeComposerMedia()
 
     @Provides @Singleton
@@ -199,6 +203,9 @@ object FakeServicesModule {
 
     @Provides
     fun pathWraps(fake: FakePathWrapService): PathWrapServicing = fake
+
+    @Provides
+    fun wrapDiskCache(fake: FakeWrapDiskCache): WrapDiskCaching = fake
 
     @Provides
     fun composerMedia(fake: FakeComposerMedia): ComposerMedia = fake
