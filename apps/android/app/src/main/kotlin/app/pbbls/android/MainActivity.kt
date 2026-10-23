@@ -20,7 +20,9 @@ import app.pbbls.android.core.data.EmotionPaletteService
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.LocalSnapURLCache
+import app.pbbls.android.core.data.OnboardingPreferences
 import app.pbbls.android.core.data.ReferenceDataServicing
+import app.pbbls.android.core.data.SettingsStore
 import app.pbbls.android.core.data.SnapURLCache
 import app.pbbls.android.core.data.SupabaseService
 import app.pbbls.android.core.data.SupabaseServicing
@@ -78,6 +80,14 @@ class MainActivity : ComponentActivity() {
     @Inject
     internal lateinit var appearance: AppearancePreferences
 
+    /** Read by the onboarding gate in `RootScreen` (#1207: it moved to DataStore with the theme). */
+    @Inject
+    internal lateinit var onboarding: OnboardingPreferences
+
+    /** The settings' first read, which the splash waits for (#1207). */
+    @Inject
+    internal lateinit var settings: SettingsStore
+
     /**
      * The same instance `RootScreen` reads via `hiltViewModel()` (#852):
      * `RootScreen` calls it above `PebblesNavDisplay`, outside any `NavEntry`, so
@@ -107,7 +117,8 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { keepSplashOnScreen }
         lifecycleScope.launch {
             withTimeoutOrNull(SPLASH_CEILING_MILLIS) {
-                snapshotFlow { supabase.isInitializing }.first { !it }
+                // The settings too, so the first frame has the right theme and onboarding gate.
+                snapshotFlow { supabase.isInitializing || !settings.isLoaded }.first { !it }
             }
             keepSplashOnScreen = false
             // The predicate is only re-read on a draw pass, and a stalled launch
@@ -130,7 +141,7 @@ class MainActivity : ComponentActivity() {
                     // `JourneyTags`). It only adds the tag to the accessibility
                     // node; nothing renders differently.
                     Box(modifier = Modifier.semantics { testTagsAsResourceId = true }) {
-                        RootScreen()
+                        RootScreen(onboarding = onboarding)
                     }
                 }
             }

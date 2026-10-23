@@ -44,7 +44,7 @@ class ConsentPreferences internal constructor(
     ) = "$userId|$fingerprint"
 
     private companion object {
-        /** Shared with OnboardingPreferences and AppearancePreferences: one prefs file for the app. */
+        /** Shared with the Complete autosaves (onboarding and appearance moved to SettingsStore, #1207). */
         const val PREFS_NAME = "pebbles_prefs"
         const val KEY_SATISFIED = "consentGateSatisfied"
     }

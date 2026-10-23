@@ -1,26 +1,32 @@
 package app.pbbls.android.core.data
 
-import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * `hasSeenOnboarding` persistence — the `@AppStorage("hasSeenOnboarding")`
- * analog (D5). Backed by `SharedPreferences`; DataStore is deferred until real
- * settings exist. The onboarding overlay reads this once at the session gate and
- * writes `true` when the flow completes, so it shows once and never again across
- * restarts.
+ * `hasSeenOnboarding`, the `@AppStorage("hasSeenOnboarding")` analog, on [SettingsStore] since #1207.
+ * The onboarding overlay reads it at the session gate and sets it when the flow completes, so it
+ * shows once and never again across restarts.
  */
-object OnboardingPreferences {
-    private const val PREFS_NAME = "pebbles_prefs"
-    private const val KEY_HAS_SEEN_ONBOARDING = "hasSeenOnboarding"
-
-    fun hasSeenOnboarding(context: Context): Boolean = prefs(context).getBoolean(KEY_HAS_SEEN_ONBOARDING, false)
-
-    fun setHasSeenOnboarding(
-        context: Context,
-        value: Boolean,
+@Singleton
+class OnboardingPreferences
+    @Inject
+    constructor(
+        private val settings: SettingsStore,
     ) {
-        prefs(context).edit().putBoolean(KEY_HAS_SEEN_ONBOARDING, value).apply()
-    }
+        val hasSeenOnboarding: Boolean get() = settings[KEY] ?: false
 
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-}
+        /**
+         * False until the settings' first read. The splash hides the screen but not the composition, so
+         * the gate must not decide on the default: a pushed onboarding entry stays pushed.
+         */
+        val isLoaded: Boolean get() = settings.isLoaded
+
+        fun setHasSeenOnboarding(value: Boolean) = settings.set(KEY, value)
+
+        private companion object {
+            /** The key it had in `pebbles_prefs`, so the migration carries it over. */
+            val KEY = booleanPreferencesKey("hasSeenOnboarding")
+        }
+    }

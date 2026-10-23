@@ -12,9 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -84,7 +82,7 @@ import kotlinx.coroutines.withContext
  * around it; the parked invite also waits for it.
  */
 @Composable
-fun RootScreen() {
+fun RootScreen(onboarding: OnboardingPreferences) {
     val palettes = LocalEmotionPaletteService.current
     val referenceData = LocalReferenceDataService.current
     val snapUrls = LocalSnapURLCache.current
@@ -100,7 +98,7 @@ fun RootScreen() {
     val consent by consentViewModel.uiState.collectAsStateWithLifecycle()
     val consentDeletion by consentViewModel.deletion.collectAsStateWithLifecycle()
 
-    var hasSeenOnboarding by rememberSaveable { mutableStateOf(OnboardingPreferences.hasSeenOnboarding(context)) }
+    val hasSeenOnboarding = onboarding.hasSeenOnboarding
 
     // Four per-tab back stacks (#852, D4). Welcome is the initial seed of the
     // START tab for both real sign-outs and the Unresolved splash hold — see the
@@ -155,15 +153,19 @@ fun RootScreen() {
         if (userId != null) referenceData.load()
     }
 
-    // Onboarding gate stays pure composition — it needs OnboardingPreferences'
-    // Context-backed flag, which has no place in a plain-JVM-tested ViewModel.
+    // Onboarding gate stays pure composition over the flag MainActivity hands in (#1207: on DataStore,
+    // read as Compose state, loaded before the splash lifts).
     val shouldPresentOnboarding = OnboardingGate.shouldPresent(userId, hasSeenOnboarding)
+    // The splash hides the screen, not the composition: until the settings' first read (#1207) the
+    // gate below would decide on a default, and a pushed (or skipped) onboarding stays that way.
+    val settingsLoaded = onboarding.isLoaded
 
     // Drives the stack off RootViewModel's destination (§5, D8) — replaces the
     // `if (canShowAuthedTabs) … else …` composition branch this task deletes.
     // `when` over the sealed type with no `else`, so a new case is a compile
     // error.
-    LaunchedEffect(root.destination) {
+    LaunchedEffect(root.destination, settingsLoaded) {
+        if (!settingsLoaded) return@LaunchedEffect
         when (root.destination) {
             RootDestination.Unresolved -> Unit // the splash still owns the screen
             RootDestination.SignedOut -> navigator.rootAt(PebblesKey.Welcome)
@@ -192,8 +194,9 @@ fun RootScreen() {
     // stranger's invite before the app had introduced itself. And past the
     // consent gate: an invite is a stranger's content, and nobody reaches
     // content before consent is on record.
-    LaunchedEffect(root.pendingInvite, root.destination, shouldPresentOnboarding, isConsentGated) {
+    LaunchedEffect(root.pendingInvite, root.destination, shouldPresentOnboarding, isConsentGated, settingsLoaded) {
         val token = root.pendingInvite ?: return@LaunchedEffect
+        if (!settingsLoaded) return@LaunchedEffect
         if (root.destination != RootDestination.SignedIn) return@LaunchedEffect
         if (shouldPresentOnboarding) return@LaunchedEffect
         if (isConsentGated) return@LaunchedEffect
@@ -222,8 +225,7 @@ fun RootScreen() {
                     onSignOut = viewModel::onSignOut,
                     welcomeContentRevealed = welcomeContentRevealed,
                     onOnboardingFinished = {
-                        OnboardingPreferences.setHasSeenOnboarding(context, true)
-                        hasSeenOnboarding = true
+                        onboarding.setHasSeenOnboarding(true)
                         navigator.goBack()
                     },
                 )
