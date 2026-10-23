@@ -18,6 +18,21 @@ import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** The seam [PathViewModel][app.pbbls.android.features.path.PathViewModel]'s tests fake (#1207). */
+interface PathWrapServicing {
+    suspend fun strip(zone: ZoneId): Strip
+
+    suspend fun weekWrap(
+        weekStart: LocalDate,
+        zone: ZoneId,
+    ): WeekWrap
+
+    suspend fun monthWrap(
+        month: YearMonth,
+        zone: ZoneId,
+    ): MonthWrap
+}
+
 /**
  * The Path's strip, week wraps and month pages (#1207). The server aggregates them (`path_strip`,
  * `path_week_wrap`, `path_month_wrap`); this service only calls, decodes and maps. Each call sends
@@ -28,16 +43,16 @@ class PathWrapService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
-        suspend fun strip(zone: ZoneId): Strip = WrapJson.decodeFromString<StripDto>(rpc("path_strip", zone)).toModel()
+    ) : PathWrapServicing {
+        override suspend fun strip(zone: ZoneId): Strip = WrapJson.decodeFromString<StripDto>(rpc("path_strip", zone)).toModel()
 
-        suspend fun weekWrap(
+        override suspend fun weekWrap(
             weekStart: LocalDate,
             zone: ZoneId,
         ): WeekWrap =
             WrapJson.decodeFromString<WeekWrapDto>(rpc("path_week_wrap", zone) { put("p_week_start", weekStart.toString()) }).toModel()
 
-        suspend fun monthWrap(
+        override suspend fun monthWrap(
             month: YearMonth,
             zone: ZoneId,
         ): MonthWrap =
