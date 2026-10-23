@@ -264,6 +264,7 @@ const PUBLIC_ROUTES: readonly string[] = [
   "/lab", // published logs, readable by anyone (logs_select RLS)
   "/offline", // service-worker fallback
   "/sandbox", // design sandboxes on seed data
+  "/blog", // the in-house blog (#1209)
 ]
 
 /**
