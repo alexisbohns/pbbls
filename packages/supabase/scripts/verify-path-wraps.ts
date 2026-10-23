@@ -16,13 +16,21 @@
  *      with the reader's zone (a moment at 23:30 UTC on 31 July is 1 August in
  *      Europe/Paris and 31 July in America/New_York). An unknown zone and anon
  *      are refused.
+ *   3. path_week_wrap on a reader seeded with the round-2 fixture's weeks 40–42
+ *      (Europe/Paris times, real souls, domains, cards and photo rows) and five
+ *      pebbles in the live week: the tiles each threshold allows, persons in
+ *      order with their days, families with worth and share and the lead, the
+ *      domains, the weight grid, hours, kept, the invitation for a week with
+ *      nobody named, no wrap for one pebble, no stats for the live week, and
+ *      the invalid_week_start and anon refusals. Expected values are worked
+ *      out by hand from the fixture, never recomputed here.
  *
- * Later parts of #1207 add path_week_wrap and path_month_wrap here.
+ * Part 4 of #1207 adds path_month_wrap here.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:path-wraps --workspace=packages/supabase
- * Expected: `Summary: passed=23 failed=0` (gem: 10 fixed months, 1 random batch, 1 empty-input shape, 1 anon refusal;
- *   strip: 10).
- * Needs NO service-role key: it signs up two throwaway users (path-wraps-verify-*@example.test)
+ * Expected: `Summary: passed=35 failed=0` (gem: 10 fixed months, 1 random batch, 1 empty-input shape, 1 anon refusal;
+ *   strip: 10; week: 12).
+ * Needs NO service-role key: it signs up three throwaway users (path-wraps-verify-*@example.test)
  * and deletes them through the real `delete-account` edge function, even on failure.
  */
 
@@ -153,6 +161,21 @@ const STRIP_SEED: [string, number | null][] = [
   ["2026-09-30T10:00:00Z", 1],
 ];
 
+// ---------------------------------------------------------------- the week
+type FixturePebble = Pebble & { day: string; date: number; time: string; title: string; souls: string[]; domains: string[]; photo: boolean; cards: number };
+type WeekWrap = {
+  week_start: string; live: boolean; count: number; people_count: number; tiles: string[];
+  persons?: { soul_id: string; count: number; days: number[] }[];
+  invite_moment_ids?: string[];
+  families?: { slug: string; count: number; worth: number; share: number; days: number[] }[];
+  lead?: { order: string[]; zero: string[] };
+  domains?: { domain_id: string; count: number; days: number[] }[];
+  weight?: Record<"high" | "neutral" | "low", number[]>;
+  hours?: { moment_id: string; happened: number; collected: number }[];
+  kept?: { photo_moment_ids: string[]; cards: { moment_id: string; count: number }[] };
+};
+const POSITIVENESS: Record<string, number> = { high: 1, neutral: 0, low: -1 };
+
 // ---------------------------------------------------------------- the run
 const runId = crypto.randomUUID().slice(0, 8);
 const password = `PathWraps-${crypto.randomUUID()}`;
@@ -178,6 +201,7 @@ async function deleteAccount(token: string): Promise<Response> {
 
 let reader: TestUser | null = null;
 let seeded: TestUser | null = null;
+let weekly: TestUser | null = null;
 
 try {
   reader = await signUp("a");
@@ -282,11 +306,126 @@ try {
     !!badZone.error && badZone.error.message.includes("invalid_tz"), badZone.error?.message);
   const anonStrip = await anon.rpc("path_strip", { p_tz: "Europe/Paris" });
   check("path_strip is refused to anon", !!anonStrip.error, JSON.stringify(anonStrip.data));
+
+  // 3. path_week_wrap -----------------------------------------------------------------------
+  weekly = await signUp("c");
+  const c = weekly.client;
+  const { data: emotionRows } = await c.from("v_emotions_with_palette").select("id, category_slug");
+  const emotionFor: Record<string, string> = {};
+  for (const r of (emotionRows ?? []) as { id: string; category_slug: string }[]) emotionFor[r.category_slug] ??= r.id;
+  const { data: domainRows } = await c.from("domains").select("id, name").order("name");
+  const { data: cardType } = await c.from("card_types").select("id").limit(1).single();
+  if (!cardType || !domainRows?.length || GEM.ORDER.some((k) => !emotionFor[k])) {
+    throw new Error("reference data missing (an emotion per family, domains, a card type)");
+  }
+  // each fixture domain name maps to the real domain of that name, else to an unused one, so counts survive
+  const fixtureDomains = [...new Set([OCT, FEW, ONE_SOUL].flat().flatMap((p) => (p as FixturePebble).domains))];
+  const domainFor: Record<string, string> = {};
+  const unused = (domainRows as { id: string; name: string }[]).filter((d) => !fixtureDomains.some((n) => n.toLowerCase() === d.name.toLowerCase()));
+  for (const name of fixtureDomains) {
+    domainFor[name] = (domainRows as { id: string; name: string }[]).find((d) => d.name.toLowerCase() === name.toLowerCase())?.id
+      ?? unused.shift()?.id ?? "";
+    if (!domainFor[name]) throw new Error(`not enough domains to map ${name}`);
+  }
+  const soulFor: Record<string, string> = {};
+  let n = 0;
+  async function seed(p: FixturePebble, at: string): Promise<string> {
+    n += 1;
+    const saved = await c.rpc("save_moment", {
+      payload: { name: p.title, happened_at: at, ...(p.photo ? { snaps: [{ storage_path: `${weekly!.id}/verify-${runId}-${n}.jpg` }] } : {}) },
+    });
+    if (saved.error || typeof saved.data !== "string") throw new Error(`save_moment ${p.title}: ${saved.error?.message}`);
+    const known = p.souls.filter((k) => soulFor[k]);
+    const fresh = p.souls.filter((k) => !soulFor[k]);
+    const done = await c.rpc("complete_pebble", {
+      payload: {
+        moment_id: saved.data, emotion_id: emotionFor[p.emotion], intensity: p.intensity,
+        positiveness: POSITIVENESS[p.valence], domain_ids: p.domains.map((d) => domainFor[d]),
+        soul_ids: known.map((k) => soulFor[k]), new_souls: fresh.map((k) => ({ name: FIXTURE.souls[k].name })),
+        cards: Array.from({ length: p.cards }, (_, i) => ({ species_id: cardType!.id, value: `card ${i + 1}`, sort_order: i })),
+      },
+    });
+    if (done.error) throw new Error(`complete_pebble ${p.title}: ${done.error.message}`);
+    if (fresh.length) {
+      const { data: souls } = await c.from("souls").select("id, name");
+      for (const k of fresh) soulFor[k] = (souls as { id: string; name: string }[]).find((s) => s.name === FIXTURE.souls[k].name)!.id;
+    }
+    return saved.data;
+  }
+  const parisAt = (p: FixturePebble) => `2026-10-${String(p.date).padStart(2, "0")}T${p.time}:00+02:00`;
+  const momentOf: Record<string, string> = {};
+  for (const st of [FIXTURE.states.one, FIXTURE.states.rich, FIXTURE.states.few]) {
+    for (const p of st.pebbles as FixturePebble[]) momentOf[p.title] = await seed(p, parisAt(p));
+  }
+  const liveFamilies = ["joy", "joy", "peace", "pride", "peace"];
+  for (const [i, family] of liveFamilies.entries()) {
+    const at = new Date(Date.now() - (liveFamilies.length - i) * 1000).toISOString();
+    await seed({ emotion: family, intensity: 2, valence: "high", day: "", date: 0, time: "", title: `live ${i}`,
+      souls: i === 0 ? ["mara"] : [], domains: ["Family"], photo: false, cards: 0 }, at);
+  }
+
+  const wk = async (start: string) => {
+    const r = await c.rpc("path_week_wrap", { p_week_start: start, p_tz: "Europe/Paris" });
+    if (r.error) throw new Error(`path_week_wrap ${start}: ${r.error.message}`);
+    return r.data as WeekWrap;
+  };
+  const rich = await wk("2026-10-05");
+  check("path_week_wrap: a full past week shows every tile, in order",
+    rich.count === 11 && rich.people_count === 5 && rich.live === false
+      && JSON.stringify(rich.tiles) === JSON.stringify(["contents", "persons", "emotions", "domains", "weight", "hours", "kept"]),
+    JSON.stringify({ count: rich.count, people: rich.people_count, tiles: rich.tiles }));
+  const personNames = (rich.persons ?? []).map((p) => Object.keys(soulFor).find((k) => soulFor[k] === p.soul_id));
+  check("path_week_wrap: persons ranked by pebbles, then first appearance, with their days",
+    JSON.stringify(personNames) === JSON.stringify(["mara", "nadia", "elio", "bruno", "jules"])
+      && JSON.stringify((rich.persons ?? []).map((p) => p.count)) === JSON.stringify([4, 2, 2, 2, 2])
+      && JSON.stringify(rich.persons?.[0].days) === JSON.stringify([0, 1, 3, 5]),
+    JSON.stringify(rich.persons));
+  check("path_week_wrap: families by worth (even pebbles half), shares and the lead",
+    JSON.stringify((rich.families ?? []).map((f) => `${f.slug}:${f.worth}`))
+        === JSON.stringify(["joy:7", "peace:4", "pride:4", "anger:2", "sadness:2", "fear:1"])
+      && Math.abs((rich.families?.[0].share ?? 0) - 0.35) < 1e-9
+      && JSON.stringify(rich.lead?.order) === JSON.stringify(["joy", "peace", "pride", "anger", "sadness", "fear"])
+      && JSON.stringify(rich.lead?.zero) === JSON.stringify(["shame"]),
+    JSON.stringify({ families: rich.families, lead: rich.lead }));
+  check("path_week_wrap: domains ranked, family first with its days",
+    rich.domains?.length === 9 && rich.domains[0].domain_id === domainFor["Family"] && rich.domains[0].count === 4
+      && JSON.stringify(rich.domains[0].days) === JSON.stringify([0, 1, 6]),
+    JSON.stringify(rich.domains?.slice(0, 2)));
+  check("path_week_wrap: the weight grid by valence and intensity",
+    JSON.stringify([rich.weight?.high, rich.weight?.neutral, rich.weight?.low]) === JSON.stringify([[0, 2, 3], [2, 1, 0], [1, 2, 0]]),
+    JSON.stringify(rich.weight));
+  check("path_week_wrap: hours list every pebble in time order, in local decimal hours",
+    rich.hours?.length === 11 && rich.hours[0].moment_id === momentOf["Flag march with Nadia"] && rich.hours[0].happened === 10.25
+      && rich.hours.every((h, i) => h.collected >= 0 && h.collected < 24 && (i === 0 || h.happened >= 0)),
+    JSON.stringify(rich.hours?.[0]));
+  check("path_week_wrap: kept lists the photos and the cards per moment, in time order",
+    rich.kept?.photo_moment_ids.length === 5
+      && JSON.stringify(rich.kept.cards.map((x) => x.count)) === JSON.stringify([2, 1, 1, 3, 1, 2, 1]),
+    JSON.stringify(rich.kept));
+  const few = await wk("2026-10-12");
+  check("path_week_wrap: three pebbles and nobody named give contents, persons and the invitation's moments",
+    JSON.stringify(few.tiles) === JSON.stringify(["contents", "persons"]) && JSON.stringify(few.persons) === "[]"
+      && JSON.stringify(few.invite_moment_ids) === JSON.stringify((FIXTURE.states.few.pebbles as FixturePebble[]).map((p) => momentOf[p.title]))
+      && few.families === undefined,
+    JSON.stringify(few));
+  const one = await wk("2026-09-28");
+  check("path_week_wrap: one pebble gets no wrap",
+    one.count === 1 && JSON.stringify(one.tiles) === "[]" && one.persons === undefined, JSON.stringify(one));
+  const live = await wk(liveWeek("Europe/Paris"));
+  check("path_week_wrap: the live week shows contents and persons only, even with five pebbles in two families",
+    live.live === true && live.count === 5 && JSON.stringify(live.tiles) === JSON.stringify(["contents", "persons"])
+      && live.persons?.length === 1 && live.families === undefined && live.invite_moment_ids === undefined,
+    JSON.stringify(live));
+  const tuesday = await c.rpc("path_week_wrap", { p_week_start: "2026-10-06", p_tz: "Europe/Paris" });
+  check("path_week_wrap: a week start that is not a Monday is refused",
+    !!tuesday.error && tuesday.error.message.includes("invalid_week_start"), tuesday.error?.message);
+  const anonWeek = await anon.rpc("path_week_wrap", { p_week_start: "2026-10-05", p_tz: "Europe/Paris" });
+  check("path_week_wrap is refused to anon", !!anonWeek.error, JSON.stringify(anonWeek.data));
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
 } finally {
-  for (const [user, label] of [[reader, "reader"], [seeded, "seeded"]] as const) {
+  for (const [user, label] of [[reader, "reader"], [seeded, "seeded"], [weekly, "weekly"]] as const) {
     if (!user) continue;
     const res = await deleteAccount(user.token).catch(() => null);
     console.log(`… cleanup ${label}: ${res ? res.status : "FAILED — remove path-wraps-verify-* manually"}`);
