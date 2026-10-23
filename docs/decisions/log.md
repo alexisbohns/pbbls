@@ -1257,3 +1257,16 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - `@SceneStorage("heldCard")` reopens the card on its face after a background kill; the sign-out reset clears it.
 - **Supersedes / Superseded-by:** Extends **2026-10-20 — The Android pebble detail is the held card** (#1135) to iOS; its consequence "iOS still has the old read page" is closed by #1146.
 - **Refs:** #1160, #1146, #1161, `docs/superpowers/specs/2026-10-20-ios-pebble-card-design.md`, `docs/superpowers/plans/2026-10-21-ios-pebble-card.md`, `apps/ios/Pebbles/Features/Path/Card/HeldCardHost.swift`.
+
+## 2026-10-23 — Editorial pages may use one scoped CSS module; the in-house blog starts as a public POC (#1209)
+
+- **Status:** taken
+- **Scope:** web, ui
+- **Context:** `apps/web/CLAUDE.md` says "Do not add CSS files — use Tailwind utilities and CSS variables in `app/globals.css`." The blog proof of concept had to render an article exactly as its hosted draft looks: a Spine editorial column with its own paper and night tokens, figure layouts and type rhythm. That draft is a hand-written stylesheet.
+- **Decision:** The blog (`/blog`, `/blog/[slug]`) uses one CSS module, `apps/web/components/blog/blog.module.css`, scoped to the blog, with no global selectors except the dark-mode hook (`:global(.dark) .page`) and the body background on blog pages (`body:has(.page)`). Posts are typed content modules in `apps/web/lib/blog/`, with no CMS and no new dependency. The routes are public: `/blog` joins the consent gate's public routes and skips the onboarding and pending-invite redirects, like public profiles. Every other web surface keeps the Tailwind-only rule.
+- **Why:** An exact match to the approved layout was the requirement, and a scoped module carries the draft's rules without leaking into the app or bending Tailwind into a one-off design language. Rejected: porting to Tailwind utilities (an exact match is harder and the markup gets noisy for long-form prose); global CSS in `globals.css` (it would leak).
+- **Consequences:**
+  - This is the only CSS module in `apps/web`. A second editorial surface reuses it, or extends it in place; it is not a precedent for app screens.
+  - Blog images live in `apps/web/public/blog/<slug>/` and count against the repo's size; the service worker does not precache them.
+- **Supersedes / Superseded-by:** Narrows the "no CSS files" rule in `apps/web/CLAUDE.md` for the blog only.
+- **Refs:** #1209, #1207, `apps/web/components/blog/`, `apps/web/lib/blog/`, `apps/web/lib/auth/consent-gate.ts`.
