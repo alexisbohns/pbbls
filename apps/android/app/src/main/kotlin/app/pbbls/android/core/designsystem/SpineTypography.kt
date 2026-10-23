@@ -43,6 +43,9 @@ object SpineTypography {
     val summary = ysabeau(18.sp, 380, italic = true)
     val sectionLabel = ysabeau(11.5.sp, 600, 0.2f.em, features = SMALL_CAPS)
 
+    /** A section's italic hint beside its label (#1207), "from the 1st, clockwise". */
+    val sectionHint = ysabeau(13.sp, 380, italic = true)
+
     /** The masthead's way back a week: the web link inherits the body's 400; only the number is bold. */
     val masthead = ysabeau(11.5.sp, 400, 0.18f.em, features = SMALL_CAPS)
 
