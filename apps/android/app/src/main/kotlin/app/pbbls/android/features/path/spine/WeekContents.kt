@@ -20,16 +20,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.CalendarLabels
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.SpineSectionHeader
 import app.pbbls.android.core.designsystem.rule
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PathMoment
+import app.pbbls.android.core.ui.render.stone.SealSize
 import app.pbbls.android.core.ui.render.stone.StoneSeal
 import app.pbbls.android.features.path.spine.SpineLayout.CONTENTS_DAY_COL
 import app.pbbls.android.features.path.spine.SpineLayout.CONTENTS_HEADER_GAP
@@ -41,7 +41,6 @@ import app.pbbls.android.features.path.spine.SpineLayout.CONTENTS_SEAL_COL
 import app.pbbls.android.features.path.spine.SpineLayout.CONTENTS_TOP
 import app.pbbls.android.features.path.spine.SpineLayout.READING_DOT
 import app.pbbls.android.features.path.spine.SpineLayout.READING_DOT_OFFSET
-import app.pbbls.android.features.path.spine.SpineLayout.SEAL_WIDTH
 import app.pbbls.android.features.path.spine.SpineLayout.VERSO_PAD_X
 import app.pbbls.android.features.path.spine.logic.EntryTypes
 import app.pbbls.android.features.path.spine.logic.SpineDay
@@ -78,12 +77,7 @@ internal fun WeekContents(
     val type = PebblesTheme.spine.type
 
     Column(modifier.padding(horizontal = VERSO_PAD_X).padding(top = CONTENTS_TOP)) {
-        Text(
-            text = stringResource(R.string.path_spine_contents),
-            style = type.sectionLabel,
-            color = colors.ink2,
-            modifier = Modifier.semantics { heading() },
-        )
+        SpineSectionHeader(label = stringResource(R.string.path_spine_contents))
         Column(Modifier.padding(top = CONTENTS_HEADER_GAP)) {
             var firstOfList = true
             week.days.forEach { day ->
@@ -173,7 +167,7 @@ private fun ContentsRow(
                 palette = palette,
                 glyph = moment.pebble?.glyph,
                 knockout = colors.ground,
-                modifier = Modifier.width(SEAL_WIDTH.getValue(valence.sizeGroup)),
+                size = SealSize.CONTENTS,
             )
         }
         Text(

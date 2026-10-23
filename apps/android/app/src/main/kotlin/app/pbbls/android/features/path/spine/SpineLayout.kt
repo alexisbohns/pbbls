@@ -1,9 +1,7 @@
 package app.pbbls.android.features.path.spine
 
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.model.ValenceSizeGroup
 
 /**
  * The feed's phone geometry, from the web rule set (2026-10-11-web-path-spine-design.md,
@@ -92,10 +90,6 @@ internal object SpineLayout {
     val CONTENTS_ROW_PAD_Y = 2.dp
     val CONTENTS_NAME_PAD_Y = 6.dp
     val CONTENTS_NAME_PAD_END = 10.dp
-
-    /** The seal in a contents row, by the stone's size: 20 / 24 / 27. */
-    val SEAL_WIDTH: Map<ValenceSizeGroup, Dp> =
-        mapOf(ValenceSizeGroup.SMALL to 20.dp, ValenceSizeGroup.MEDIUM to 24.dp, ValenceSizeGroup.LARGE to 27.dp)
 
     /** The reading day's dot in the contents, and how far left of the row it sits. */
     val READING_DOT = 5.dp
