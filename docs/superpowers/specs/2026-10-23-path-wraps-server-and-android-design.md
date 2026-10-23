@@ -48,7 +48,7 @@ Copy is the one borderline case. The server returns **semantic values**, never s
 | D11 | **The tone:** for each day, a bar up for bright, a bar down for heavy and a circle on the line for even, all scaled by intensity. The server sends the per-day values and a verdict. | Round 4. |
 | D12 | **The hours:** a 24-hour dial with noon on top: the stone at `happened_at`, a dot at `created_at`, a wait line between them, and the busiest four-hour window in the centre. The server sends local hours and the window. | Round 4. |
 | D13 | **Three read RPCs:** `path_strip(p_tz)`, `path_week_wrap(p_week_start, p_tz)` and `path_month_wrap(p_month, p_tz)`. All are `security invoker` and scoped to `auth.uid()`. `p_tz` is the device's IANA zone; no timezone is stored on the profile today, and clients already bucket days in the device zone. `path_moments` stays the feed and is unchanged. | One aggregation for three clients. The feed and the wraps load independently. |
-| D14 | **The gem allocation is a SQL function,** `gem_allocate(p_worths jsonb) returns jsonb`: a plpgsql port of `gem-method.js`, called by `path_month_wrap`. The JS reference and `METHOD.md` are committed as the **oracle** under `packages/supabase/scripts/oracles/path-wrap/`. The harness computes the expected allocation with the oracle and compares it facet by facet. Rejected alternative: an edge function running the JS directly. It needs no port, but adds a second network hop and a cold start to a page read, and the house pattern for reads is a single RPC. | One implementation serves every client; the oracle keeps the port honest. |
+| D14 | **The gem allocation is a SQL function,** `gem_allocate(p_families jsonb) returns jsonb`: a plpgsql port of `gem-method.js`, called by `path_month_wrap`. The JS reference and `METHOD.md` are committed as the **oracle** under `packages/supabase/scripts/oracles/path-wrap/`. The harness computes the expected allocation with the oracle and compares it facet by facet. Rejected alternative: an edge function running the JS directly. It needs no port, but adds a second network hop and a cold start to a page read, and the house pattern for reads is a single RPC. | One implementation serves every client; the oracle keeps the port honest. |
 | D15 | **The dot-view preference triggers the DataStore migration** that `apps/android/CLAUDE.md` defers to "the next preference". `OnboardingPreferences` and `AppearancePreferences` move with it, in their own part. | The written trigger fires. |
 
 **Out of scope** (open questions in §11):
@@ -120,7 +120,9 @@ All three RPCs:
 - **`gem.facets`** maps all 28 facet ids (`star_0..6`, `kite_0..6`, `girdle_0..13`); the table is not data.
 - **`first_weekday`** is 0 = Monday.
 
-### 3.4 `gem_allocate(p_worths jsonb) returns jsonb` (immutable)
+### 3.4 `gem_allocate(p_families jsonb) returns jsonb` (immutable)
+The input is each present family's worth and pebble count, `{"joy": {"worth": 14, "count": 7}, …}`. The count is needed because a tie on worth goes to the family with more pebbles. The output is `{main, rotation, shares, facets}`; `path_month_wrap` adds `worths` and `lead` around it. Execute is granted to `authenticated` only (revoked from `anon`), and the function is pure: no table access.
+
 A port of `GEM.allocate` from `gem-method.js`, step for step:
 - proportional wedges on the facet cycle, in the fixed order, with the main family centred on the crown
 - each facet goes to the wedge covering most of it, with ties going counter-clockwise
