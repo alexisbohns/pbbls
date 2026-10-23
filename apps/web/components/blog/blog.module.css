@@ -1,0 +1,201 @@
+/*
+ * The blog (#1209), ported from the approved article draft. A CSS module rather
+ * than Tailwind utilities on purpose: the page must match the draft exactly, so
+ * its stylesheet is kept as close to the draft's as a module allows, with its
+ * own paper and night tokens, scoped to the blog.
+ *
+ * Differences from the draft, all mechanical:
+ * - Element selectors (p, h1, h2, figure, img, figcaption, em) became classes
+ *   set by the renderer, so nothing leaks out of the module. A block gets only
+ *   the classes the draft's cascade would have applied to it.
+ * - The draft's :root/body rules sit on .page, which fills the app's <main>;
+ *   the body takes the ground too, so overscroll shows paper, not the app.
+ * - Night follows the app's theme (next-themes puts .dark on <html>), which
+ *   itself follows the system unless the reader picked a theme.
+ * - The faces are the Fontsource builds the app already ships ("… Variable"),
+ *   followed by the draft's own fallbacks.
+ */
+
+.page,
+:global(body):has(.page) {
+  --ground: #ECE8DF;
+  --stock: #FBF9F4;
+  --ink: #1F1D1A;
+  --ink-2: #686255;
+  --ink-3: #9C9588;
+  --rule: rgba(31, 29, 26, .14);
+  --frame: rgba(31, 29, 26, .08);
+  color-scheme: light;
+  background: var(--ground);
+}
+
+:global(.dark) .page,
+:global(.dark) :global(body):has(.page) {
+  --ground: #141416;
+  --stock: #1E1D1B;
+  --ink: #ECE6DA;
+  --ink-2: #A59E91;
+  --ink-3: #6E685E;
+  --rule: rgba(236, 230, 218, .12);
+  --frame: rgba(236, 230, 218, .06);
+  color-scheme: dark;
+}
+
+.page {
+  /* Fill the rest of the app's <main> (a flex column) with paper. */
+  flex: 1 0 auto;
+  color: var(--ink);
+  font-family: "Ysabeau Variable", "Ysabeau", Georgia, serif;
+  font-weight: 380;
+  font-size: 19px;
+  line-height: 1.62;
+  font-feature-settings: "kern", "liga", "onum";
+  text-rendering: optimizeLegibility;
+  /* The app sets <html> antialiased and unselectable; the draft is neither. */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  -webkit-user-select: text;
+  user-select: text;
+  /* The app's shell already pads the safe-area insets, so take them back out:
+     the total stays max(16px, inset), as in the draft. */
+  padding-left: calc(max(16px, env(safe-area-inset-left, 0px)) - var(--safe-area-left, 0px));
+  padding-right: calc(max(16px, env(safe-area-inset-right, 0px)) - var(--safe-area-right, 0px));
+  padding-block: 56px 96px;
+}
+.col { max-width: 680px; margin: 0 auto; }
+
+.kicker, .sc, .n, .heading {
+  font-family: "Ysabeau SC Variable", "Ysabeau SC", "Ysabeau Variable", "Ysabeau", serif;
+}
+.kicker {
+  font-size: 13px;
+  letter-spacing: .22em;
+  text-transform: lowercase;
+  color: var(--ink-2);
+  font-weight: 500;
+  margin: 0 0 28px;
+}
+.title {
+  font-family: "Ysabeau Variable", "Ysabeau", serif;
+  font-weight: 300;
+  font-size: clamp(38px, 8vw, 58px);
+  line-height: 1.05;
+  letter-spacing: -.01em;
+  margin: 0 0 22px;
+}
+.standfirst {
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  margin: 0 0 18px;
+}
+.byline {
+  font-family: "Ysabeau SC Variable", "Ysabeau SC", serif;
+  font-size: 13px;
+  letter-spacing: .16em;
+  text-transform: lowercase;
+  color: var(--ink-3);
+  margin: 0 0 48px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--rule);
+}
+.heading {
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: .2em;
+  text-transform: lowercase;
+  color: var(--ink);
+  margin: 64px 0 18px;
+  padding-top: 26px;
+  border-top: 1px solid var(--rule);
+}
+.p { margin: 0 0 1.05em; }
+.em { font-style: italic; }
+.num { font-family: "Ysabeau Office Variable", "Ysabeau Office", "Ysabeau Variable", "Ysabeau", sans-serif; font-variant-numeric: lining-nums; }
+
+.figure {
+  margin: 36px 0 40px;
+}
+.img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 12px;
+  background: var(--stock);
+  box-shadow: 0 0 0 1px var(--frame);
+}
+.narrow .img { max-width: min(100%, 440px); }
+.mid .img { max-width: min(100%, 560px); }
+.caption {
+  font-size: 15.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  margin: 12px auto 0;
+  max-width: 600px;
+  text-align: center;
+}
+.n {
+  font-size: 12px;
+  letter-spacing: .16em;
+  color: var(--ink-3);
+  margin-right: .5em;
+}
+.end {
+  margin-top: 56px;
+  text-align: center;
+  color: var(--ink-3);
+  letter-spacing: .5em;
+  font-size: 14px;
+}
+
+/* The index: one entry per post, in the article's own type. */
+.entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.entry {
+  padding-top: 26px;
+  border-top: 1px solid var(--rule);
+  margin: 0 0 48px;
+}
+.entryTitle {
+  font-family: "Ysabeau Variable", "Ysabeau", serif;
+  font-weight: 300;
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  margin: 0 0 12px;
+}
+.entryTitle a {
+  color: inherit;
+  text-decoration: none;
+}
+.entryTitle a:hover,
+.entryTitle a:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .12em;
+}
+.entryTitle a:focus-visible {
+  outline: 2px solid var(--ink-2);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+.entry .byline {
+  margin: 0 0 10px;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.entry .standfirst {
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .page { font-size: 18px; }
+  .standfirst { font-size: 20px; }
+  .page { padding-block: 36px 72px; }
+  .caption { font-size: 15px; }
+}
