@@ -420,6 +420,8 @@ describe("gate cache and routes", () => {
       "/lab/announcements/1",
       "/offline",
       "/sandbox/design",
+      "/blog",
+      "/blog/redrawing-the-week",
     ]) {
       expect(isGatePublicPath(path), path).toBe(true)
     }
@@ -445,6 +447,7 @@ describe("gate cache and routes", () => {
       "/users",
       "/pebbles",
       "/labx",
+      "/blogs",
       "/something-new",
     ]) {
       expect(isGatePublicPath(path), path).toBe(false)

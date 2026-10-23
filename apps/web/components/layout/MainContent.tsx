@@ -22,10 +22,13 @@ export function MainContent({ children }: MainContentProps) {
   // Public profile pages serve anonymous visitors and signed-in users alike —
   // never bounce a mid-onboarding viewer away from someone's public page.
   const isPublicProfile = pathname.startsWith("/u/")
+  // The blog (#1209) is public reading, set edge-to-edge on its own paper:
+  // like a public profile, never bounce a mid-onboarding reader away from it.
+  const isBlog = pathname === "/blog" || pathname.startsWith("/blog/")
   // /path owns its own sticky bottom dock and scrollable interior — it should
   // fill the dynamic viewport edge-to-edge, with no body-level scrolling.
   const isPath = pathname === "/path" || pathname.startsWith("/path/")
-  const isFullScreen = isLanding || isOnboarding || isAuth || isPath
+  const isFullScreen = isLanding || isOnboarding || isAuth || isPath || isBlog
   const isRecord = pathname.startsWith("/record")
   const isCarve = pathname.startsWith("/carve")
   const isImmersive = isRecord || isCarve
@@ -50,8 +53,8 @@ export function MainContent({ children }: MainContentProps) {
             : "pt-[var(--safe-area-top)] pb-[calc(2rem+var(--safe-area-bottom))]",
       )}
     >
-      {!isLanding && !isAuth && !isDocs && !isPublicProfile && <OnboardingGate />}
-      {!isLanding && !isAuth && !isDocs && !isPublicProfile && <PendingInviteRedirect />}
+      {!isLanding && !isAuth && !isDocs && !isPublicProfile && !isBlog && <OnboardingGate />}
+      {!isLanding && !isAuth && !isDocs && !isPublicProfile && !isBlog && <PendingInviteRedirect />}
       <AuthGate>
         {/* Above the store shell and every route: while it blocks, nothing
             below is mounted, so no navigation reaches around it. */}
