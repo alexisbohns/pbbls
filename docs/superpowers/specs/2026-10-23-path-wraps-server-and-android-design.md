@@ -116,7 +116,7 @@ All three RPCs:
 ```
 - **`sections`** is the threshold's verdict, in render order. Absent sections are omitted.
 - **`tone.days[i]`** is `[up, even, down]`: the summed intensities of bright, even and heavy pebbles that day.
-- **`verdict`** ∈ `bright_more_than_two_to_one`, `bright_two_to_one`, `balance`, `heavy_outweighed`, `nothing_heavy`, `nothing_bright`.
+- **`verdict`** ∈ `bright_more_than_two_to_one` (bright ÷ heavy ≥ 2.5), `bright_two_to_one` (≥ 1.8), `balance`, `heavy_outweighed` (≤ 1/1.8), `nothing_heavy`, `nothing_bright`, `all_even` (no bright and no heavy pebble), computed on summed intensities. `first` and `last` are the polarities of the month's first and last pebbles.
 - **`gem.facets`** maps all 28 facet ids (`star_0..6`, `kite_0..6`, `girdle_0..13`); the table is not data.
 - **`first_weekday`** is 0 = Monday.
 
