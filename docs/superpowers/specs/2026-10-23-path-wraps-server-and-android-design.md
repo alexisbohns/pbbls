@@ -153,7 +153,7 @@ The facet table (ids, kinds, nominal areas, cycle positions) is a constant insid
   - `…_path_month_wrap.sql`
 
   Each comes with a `comment on function` and regenerated types.
-- **Indexes:** check `moments (user_id, happened_at)` and the join paths with `explain analyze` on a month of the maintainer's data. The month RPC must stay well under 100 ms.
+- **Indexes and budget:** check `moments (user_id, happened_at)` and the join paths with `explain analyze`, on the maintainer's real data and on a seeded heavy account. The budget is server execution time at p95: under **20 ms** for `path_month_wrap` on a 200-pebble month, and under **10 ms** for `path_strip` over 2,000 pebbles. The expected cost for a typical 40-pebble month is a few milliseconds; the user's wait is dominated by the network round trip, which §7 hides. The harness records the timings, so a regression is visible.
 - **Harness:** `scripts/verify-path-wraps.ts` (anon, throwaway users, like `verify-moments.ts`) seeds the round-2 fixture (24 October pebbles and the thin, quiet and heavy subsets) and checks:
   - the thresholds
   - rankings and their tie-breaks
@@ -166,6 +166,13 @@ The facet table (ids, kinds, nominal areas, cycle positions) is a constant insid
 
   It also writes the verbatim payloads to `scripts/oracles/path-wrap/payloads/*.json` for the clients' decoding tests. It joins the CI harness gate.
 - **Oracle:** `scripts/oracles/path-wrap/{METHOD.md, gem-method.js, test.js}`, committed unchanged from the method round.
+
+### 3.7 Freshness: computed on read
+- **Nothing is stored.** Each call reads the current `moments`, `pebbles`, `pebble_souls`, `pebble_domains`, `pebble_cards` and `snaps`, and builds the answer then. A write (`save_moment`, `complete_pebble`, an edit, a delete) is visible on the very next read; no refresh job, trigger or queue exists that could lag.
+- **Not a view.** The answers depend on parameters (the page asked for, `p_tz`), which a view cannot take. Day boundaries depend on the reader's zone, so one stored answer per month would also be wrong for a reader who travels.
+- **Not a stored aggregate table.** A `month_wraps` table kept by triggers would watch six tables, need a stored timezone the profile does not have, and join `purge_account` along with its harness assertion. That is a lot of machinery to save milliseconds (§3.6).
+- **The upgrade path,** if a budget is ever missed: a cache behind the same function signatures, keyed by user, zone and a per-user data version bumped by the write RPCs. No client changes.
+- **Other devices** see a change on their next read (load, refresh, foreground), as with the feed today. Live push (Supabase Realtime) is out of scope and not blocked.
 
 ---
 
@@ -284,9 +291,29 @@ All components are stateless and read `PebblesTheme.spine` for colours and type.
 
 ## 7. State, data flow, caching (Android)
 
-- **ViewModel:** `PathViewModel` loads `path_moments` (the feed) and `path_strip` in parallel. On focus, it loads the focused page's wrap through `PathWrapService` and keeps it in `Content.wraps: Map<PathPage, WrapState>`, where `WrapState` is `Loading`, `Error` or `Ready`.
+- **ViewModel:** `PathViewModel` loads `path_moments` (the feed) and `path_strip` in parallel. On focus, it loads the focused page's wrap through `PathWrapService` and keeps it in `Content.wraps: Map<PathPage, WrapState>`.
+- **`WrapState`** is `NeverLoaded` (the only state that may show a placeholder, and only for a page never fetched on this device), `Ready(payload, stale: Boolean)` or `Failed(lastGood: payload?)`. A failed refresh keeps showing the last good payload, with a quiet retry; an error state appears only when no payload exists.
 - **Neighbours:** the next and previous pages are prefetched.
-- **Invalidation:** any write that already reloads the feed (create, edit, delete) also clears the wraps and reloads the strip.
+
+### 7.1 Caching: stale-while-revalidate, no blink
+- **Show, then check.** A page with a cached payload renders it immediately and revalidates in the background. If the fresh payload equals the cached one, which is the usual case, nothing recomposes. If it differs, only the changed sections update in place. Content is never replaced by a spinner.
+- **After a write** (create, edit, delete, completing a moment), the cached wraps are **marked stale, never cleared**. The focused page and the strip refetch at once; the page keeps showing the old payload until the new one lands, about one round trip later.
+- **Memory cache:** `PathWrapService` holds the payloads for the session (strip, weeks, months).
+- **Disk cache,** so a cold start opens instantly: one JSON file per page under `noBackupFilesDir/path-wraps/`, written after each successful fetch and read at launch before the network answers.
+  - **Keys:** user id, `p_tz` and a payload schema version. A change of user, zone or format never shows wrong data; a version bump drops the old files.
+  - **Privacy:** wiped on sign-out and on account deletion (the same path that ends the session). It is private journal content at rest, never backed up.
+  - **Order:** the disk cache is display-only. The background revalidation always runs, and the server stays the truth.
+
+### 7.2 Progressive reveal (animation in a later step)
+The month payload arrives in one call, organised by section; it is never split into one request per section, which would pay a network round trip per section to save milliseconds of server work. Progressive display is a device concern:
+- **Off the main thread:** each section maps to its own display model on the default dispatcher: gem facet colours and label placement, the dial and garland paths, tone bars. Each section renders as soon as its model is ready, in page order, so the cover appears first while heavier sections finish.
+- **The later animation** only staggers the reveal of models that are already present (from the network or the cache). It never waits on I/O and never shows a placeholder for a section the payload left out.
+- **Rules:**
+  - Stagger only on a page's first reveal in a session.
+  - A revisit or background refresh shows everything at once.
+  - After a write, only the changed section animates.
+  - `rememberReduceMotion()` disables the stagger entirely.
+- **If one section ever proves slow,** `path_month_wrap` can take an optional `p_sections text[]` and the client can request it separately. The keyed payload makes that a server-side change with no new client shape.
 - **`PathUiState.Content` changes:**
   - It gains `strip`, `focus: PathFocus` (replacing `focusedWeekStart`) and `wraps`.
   - The pages are a lazy getter.
