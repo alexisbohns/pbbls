@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.CalendarLabels
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.features.path.spine.SpineLayout.COL_X
 import app.pbbls.android.features.path.spine.SpineLayout.LABEL_WIDTH
@@ -75,7 +76,7 @@ internal fun DaySeam(
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val locale = LocalConfiguration.current.locales[0]
-    val weekday = remember(day.date, locale) { shortWeekday(day.date.dayOfWeek, locale) }
+    val weekday = remember(day.date, locale) { CalendarLabels.shortWeekday(day.date.dayOfWeek, locale) }
     val fullDate =
         remember(day.date, locale) {
             day.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale))

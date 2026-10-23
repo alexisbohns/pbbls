@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.CalendarLabels
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SpineTypography
 import app.pbbls.android.core.designsystem.rememberReduceMotion
@@ -50,7 +51,6 @@ import app.pbbls.android.features.path.spine.SpineCardFace
 import app.pbbls.android.features.path.spine.logic.CardSizes
 import app.pbbls.android.features.path.spine.logic.EntryTypes
 import app.pbbls.android.features.path.spine.logic.PeopleLines
-import app.pbbls.android.features.path.spine.shortWeekday
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -98,7 +98,7 @@ internal fun CardRecto(
 
     val zoned = remember(detail.happenedAt, zone) { detail.happenedAt.atZoneSameInstant(zone) }
     val time = remember(zoned, locale) { zoned.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)) }
-    val weekday = remember(zoned, locale) { shortWeekday(zoned.dayOfWeek, locale) }
+    val weekday = remember(zoned, locale) { CalendarLabels.shortWeekday(zoned.dayOfWeek, locale) }
     val dateline = remember(detail.happenedAt, locale, zone) { cardDateline(detail.happenedAt, locale, zone) }
     val emotionName = pebble?.emotion?.let { ReferenceStrings.referenceName(ReferenceType.EMOTION, it.slug, it.name) } ?: ""
     val datelineDescription =

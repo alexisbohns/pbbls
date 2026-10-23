@@ -50,6 +50,7 @@ import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.data.rememberTapHaptics
+import app.pbbls.android.core.designsystem.CalendarLabels
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.CardFace
@@ -151,7 +152,7 @@ internal fun SpinePebble(
     val zoned = remember(moment.happenedAt, zone) { moment.happenedAt.atZoneSameInstant(zone) }
     val date = remember(zoned, locale) { zoned.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)) }
     val time = remember(zoned, locale) { zoned.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)) }
-    val weekday = remember(zoned, locale) { shortWeekday(zoned.dayOfWeek, locale) }
+    val weekday = remember(zoned, locale) { CalendarLabels.shortWeekday(zoned.dayOfWeek, locale) }
 
     val emotionName = pebble?.emotion?.let { ReferenceStrings.referenceName(ReferenceType.EMOTION, it.slug, it.name) } ?: ""
     val emotionInk = remember(palette, colors) { palette?.let { StoneTones.spot(it.toStonePalette(), colors.isNight) } ?: colors.ink2 }

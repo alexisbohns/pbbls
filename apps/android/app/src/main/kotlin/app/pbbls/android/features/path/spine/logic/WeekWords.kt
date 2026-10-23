@@ -111,19 +111,6 @@ object WeekWordsBuilder {
         locale: Locale,
     ): String = if (text.isEmpty()) text else text.substring(0, 1).uppercase(locale) + text.substring(1)
 
-    /** "m t w t f s s", "l m m j v s d": the persons' day header, Monday first. */
-    fun weekdayLetters(
-        weekStart: LocalDate,
-        locale: Locale,
-    ): List<String> =
-        (0 until DAYS_IN_WEEK).map { offset ->
-            weekStart
-                .plusDays(offset)
-                .dayOfWeek
-                .getDisplayName(TextStyle.NARROW, locale)
-                .lowercase(locale)
-        }
-
     /**
      * The days a person's dots mark, as a screen reader hears them, with their
      * count: "Monday 5, Tuesday 6, and Thursday 8". Composed rather than

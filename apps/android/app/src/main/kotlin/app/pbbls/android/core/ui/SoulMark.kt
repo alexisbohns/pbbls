@@ -1,4 +1,4 @@
-package app.pbbls.android.features.path.spine
+package app.pbbls.android.core.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable

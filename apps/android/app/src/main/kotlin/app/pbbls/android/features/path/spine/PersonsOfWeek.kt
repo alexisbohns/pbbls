@@ -20,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -39,19 +38,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import app.pbbls.android.R
 import app.pbbls.android.core.common.NumberWords
+import app.pbbls.android.core.designsystem.CalendarLabels
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.SpineLayoutTokens.DOT
+import app.pbbls.android.core.designsystem.SpineLayoutTokens.DOT_GAP
+import app.pbbls.android.core.designsystem.SpineLayoutTokens.DOT_RING
+import app.pbbls.android.core.designsystem.SpineLayoutTokens.MARK
+import app.pbbls.android.core.designsystem.SpineLayoutTokens.MARK_COLUMN
+import app.pbbls.android.core.designsystem.SpineLayoutTokens.ROW_GAP
+import app.pbbls.android.core.designsystem.SpineLayoutTokens.ROW_MIN
+import app.pbbls.android.core.designsystem.rule
 import app.pbbls.android.core.model.SoulWithGlyph
-import app.pbbls.android.features.path.spine.SpineLayout.DOT
-import app.pbbls.android.features.path.spine.SpineLayout.DOT_GAP
-import app.pbbls.android.features.path.spine.SpineLayout.DOT_RING
+import app.pbbls.android.core.ui.SoulMark
 import app.pbbls.android.features.path.spine.SpineLayout.FOLD_INDENT
 import app.pbbls.android.features.path.spine.SpineLayout.PERSONS_HEADER_GAP
 import app.pbbls.android.features.path.spine.SpineLayout.PERSONS_TOP
-import app.pbbls.android.features.path.spine.SpineLayout.PERSON_COL_GAP
-import app.pbbls.android.features.path.spine.SpineLayout.PERSON_GLYPH
-import app.pbbls.android.features.path.spine.SpineLayout.PERSON_GLYPH_COL
-import app.pbbls.android.features.path.spine.SpineLayout.PERSON_ROW_MIN
-import app.pbbls.android.features.path.spine.SpineLayout.RULE
 import app.pbbls.android.features.path.spine.SpineLayout.VERSO_PAD_X
 import app.pbbls.android.features.path.spine.logic.PersonOfWeek
 import app.pbbls.android.features.path.spine.logic.PersonsOfWeek
@@ -87,7 +88,7 @@ internal fun PersonsOfWeek(
     val type = PebblesTheme.spine.type
     val locale = LocalConfiguration.current.locales[0]
     val (shown, rest) = remember(persons) { PersonsOfWeek.split(persons) }
-    val letters = remember(weekStart, locale) { WeekWordsBuilder.weekdayLetters(weekStart, locale) }
+    val letters = remember(weekStart, locale) { CalendarLabels.weekdayLetters(weekStart, locale) }
     var expanded by remember { mutableStateOf(false) }
 
     Column(modifier.padding(horizontal = VERSO_PAD_X).padding(top = PERSONS_TOP)) {
@@ -114,7 +115,7 @@ internal fun PersonsOfWeek(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(min = PERSON_ROW_MIN)
+                        .heightIn(min = ROW_MIN)
                         .rule(colors.rule, above = false)
                         .semantics {
                             stateDescription = state
@@ -186,14 +187,14 @@ private fun PersonRow(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .heightIn(min = PERSON_ROW_MIN)
+                .heightIn(min = ROW_MIN)
                 .rule(colors.rule, above = false)
                 .clearAndSetSemantics { contentDescription = description },
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(PERSON_COL_GAP),
+        horizontalArrangement = Arrangement.spacedBy(ROW_GAP),
     ) {
-        Box(Modifier.width(PERSON_GLYPH_COL)) {
-            SoulMark(soulsById[person.soul.id]?.glyph, colors.ink, Modifier.size(PERSON_GLYPH))
+        Box(Modifier.width(MARK_COLUMN)) {
+            SoulMark(soulsById[person.soul.id]?.glyph, colors.ink, Modifier.size(MARK))
         }
         Text(
             text = person.soul.name,
@@ -227,13 +228,3 @@ private fun DayDots(
         }
     }
 }
-
-/** A section's hairline rule along the top or the bottom edge. */
-internal fun Modifier.rule(
-    color: Color,
-    above: Boolean,
-): Modifier =
-    drawBehind {
-        val y = if (above) RULE.toPx() / 2 else size.height - RULE.toPx() / 2
-        drawLine(color, Offset(0f, y), Offset(size.width, y), RULE.toPx())
-    }
