@@ -1,0 +1,1463 @@
+{
+ "_readme": "Shared fixture for every Path-header exploration. Today is Wednesday 4 November 2026 (ISO week 45). Weeks run Monday to Sunday. The strip holds older weeks with moments plus the current week; weeks with no moments are NOT in the strip (except the current one). Months: a month item follows the week that contains the month's last day (September after w40, which holds Sep 30; October after w44, which holds Oct 31). Palette per emotion: p primary, s secondary, l light, sh shaded, d dark (darkest). intensity 1 small / 2 medium / 3 large. valence low / neutral / high (high = gem, neutral = river pebble, low = lava stone). photo: the pebble has a photo (draw a tinted block, never fetch an image). cards: number of reflective cards written on it.",
+ "today": "2026-11-04",
+ "emotions": {
+  "pride": {
+   "p": "#A9478A",
+   "s": "#EA91CE",
+   "l": "#F6EDF3",
+   "sh": "#763261",
+   "d": "#220E1C"
+  },
+  "joy": {
+   "p": "#A15C08",
+   "s": "#CF8C39",
+   "l": "#FAF6EA",
+   "sh": "#714006",
+   "d": "#201202"
+  },
+  "anger": {
+   "p": "#8E4242",
+   "s": "#C17575",
+   "l": "#F4ECEC",
+   "sh": "#632E2E",
+   "d": "#1C0D0D"
+  },
+  "peace": {
+   "p": "#487C5A",
+   "s": "#80BF96",
+   "l": "#EDF2EE",
+   "sh": "#32573F",
+   "d": "#0E1912"
+  },
+  "fear": {
+   "p": "#7B5E99",
+   "s": "#AE91CC",
+   "l": "#F2EFF5",
+   "sh": "#56426B",
+   "d": "#19131F"
+  },
+  "sadness": {
+   "p": "#59658A",
+   "s": "#8C98BD",
+   "l": "#EEF0F3",
+   "sh": "#3E4761",
+   "d": "#12141C"
+  }
+ },
+ "domains": [
+  "Community",
+  "Events",
+  "Dating",
+  "Education",
+  "Family",
+  "Sport",
+  "Friends",
+  "Health",
+  "Passions",
+  "Identity",
+  "Finance",
+  "Partner",
+  "Self Care",
+  "Spirituality"
+ ],
+ "souls": {
+  "mara": {
+   "name": "Mara",
+   "role": "partner",
+   "glyph": "g-partner"
+  },
+  "elio": {
+   "name": "Elio",
+   "role": "son, six",
+   "glyph": "g-family"
+  },
+  "nadia": {
+   "name": "Nadia",
+   "role": "friend",
+   "glyph": "g-friends"
+  },
+  "jules": {
+   "name": "Jules",
+   "role": "friend",
+   "glyph": "g-hobbies"
+  },
+  "bruno": {
+   "name": "Bruno",
+   "role": "the dog",
+   "glyph": "g-travel"
+  },
+  "ines": {
+   "name": "Inès",
+   "role": "colleague",
+   "glyph": "g-identity"
+  }
+ },
+ "strip": [
+  {
+   "week": 33,
+   "start": "2026-08-10",
+   "moments": 4,
+   "days": [
+    [
+     1,
+     2
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "week": 34,
+   "start": "2026-08-17",
+   "moments": 9,
+   "days": [
+    [
+     2,
+     2
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     1,
+     1
+    ]
+   ]
+  },
+  {
+   "week": 35,
+   "start": "2026-08-24",
+   "moments": 2,
+   "days": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ]
+   ]
+  },
+  {
+   "week": 36,
+   "start": "2026-08-31",
+   "moments": 0,
+   "days": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "month": "August",
+   "key": "Aug",
+   "after_week": 36,
+   "_why": "31 Aug falls in week 36"
+  },
+  {
+   "week": 37,
+   "start": "2026-09-07",
+   "moments": 6,
+   "days": [
+    [
+     1,
+     1
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     1,
+     2
+    ]
+   ]
+  },
+  {
+   "week": 38,
+   "start": "2026-09-14",
+   "moments": 1,
+   "days": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "week": 39,
+   "start": "2026-09-21",
+   "moments": 7,
+   "days": [
+    [
+     1,
+     2
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     1,
+     2
+    ]
+   ]
+  },
+  {
+   "week": 40,
+   "start": "2026-09-28",
+   "moments": 1
+  },
+  {
+   "month": "September",
+   "key": "Sep",
+   "after_week": 40,
+   "_why": "30 Sep falls in week 40"
+  },
+  {
+   "week": 41,
+   "start": "2026-10-05",
+   "moments": 11
+  },
+  {
+   "week": 42,
+   "start": "2026-10-12",
+   "moments": 3
+  },
+  {
+   "week": 43,
+   "start": "2026-10-19",
+   "moments": 4
+  },
+  {
+   "week": 44,
+   "start": "2026-10-26",
+   "moments": 6
+  },
+  {
+   "month": "October",
+   "key": "Oct",
+   "after_week": 44,
+   "_why": "31 Oct falls in week 44"
+  },
+  {
+   "week": 45,
+   "start": "2026-11-02",
+   "current": true
+  }
+ ],
+ "_strip_note": "Edge case: August's last day (Mon 31 Aug) falls in w36, which has no moments and is absent from the strip, so the August item attaches to the last week with moments before the month ends (w35). Show it; you may propose a different placement in NOTES.md.",
+ "states": {
+  "rich": {
+   "_why": "11 pebbles, 5 persons, 5 emotions, 7 domains. Every wrap card qualifies.",
+   "week": 41,
+   "start": "2026-10-05",
+   "end": "2026-10-11",
+   "pebbles": [
+    {
+     "day": "mon",
+     "date": 5,
+     "time": "10:15",
+     "title": "Flag march with Nadia",
+     "emotion": "pride",
+     "intensity": 3,
+     "valence": "high",
+     "souls": [
+      "nadia"
+     ],
+     "domains": [
+      "Community",
+      "Identity"
+     ],
+     "photo": true,
+     "cards": 2,
+     "month": "Oct"
+    },
+    {
+     "day": "mon",
+     "date": 5,
+     "time": "19:40",
+     "title": "Elio lost his first tooth",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "elio",
+      "mara"
+     ],
+     "domains": [
+      "Family"
+     ],
+     "photo": false,
+     "cards": 1,
+     "month": "Oct"
+    },
+    {
+     "day": "tue",
+     "date": 6,
+     "time": "08:02",
+     "title": "Rent went up again",
+     "emotion": "anger",
+     "intensity": 2,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Finance"
+     ],
+     "photo": false,
+     "cards": 0,
+     "month": "Oct"
+    },
+    {
+     "day": "tue",
+     "date": 6,
+     "time": "16:30",
+     "title": "Forest walk, all of us",
+     "emotion": "peace",
+     "intensity": 3,
+     "valence": "high",
+     "souls": [
+      "mara",
+      "elio",
+      "bruno"
+     ],
+     "domains": [
+      "Family",
+      "Sport"
+     ],
+     "photo": true,
+     "cards": 1,
+     "month": "Oct"
+    },
+    {
+     "day": "wed",
+     "date": 7,
+     "time": "03:10",
+     "title": "Couldn’t sleep",
+     "emotion": "fear",
+     "intensity": 1,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Health"
+     ],
+     "photo": false,
+     "cards": 3,
+     "month": "Oct"
+    },
+    {
+     "day": "wed",
+     "date": 7,
+     "time": "12:05",
+     "title": "Coffee by the fountain",
+     "emotion": "peace",
+     "intensity": 1,
+     "valence": "neutral",
+     "souls": [
+      "jules"
+     ],
+     "domains": [
+      "Friends"
+     ],
+     "photo": true,
+     "cards": 0,
+     "month": "Oct"
+    },
+    {
+     "day": "thu",
+     "date": 8,
+     "time": "21:00",
+     "title": "Rooftop birthday",
+     "emotion": "joy",
+     "intensity": 3,
+     "valence": "high",
+     "souls": [
+      "nadia",
+      "jules",
+      "mara"
+     ],
+     "domains": [
+      "Friends"
+     ],
+     "photo": true,
+     "cards": 1,
+     "month": "Oct"
+    },
+    {
+     "day": "fri",
+     "date": 9,
+     "time": "11:20",
+     "title": "Said no to the extra project",
+     "emotion": "pride",
+     "intensity": 2,
+     "valence": "neutral",
+     "souls": [],
+     "domains": [
+      "Identity",
+      "Self Care"
+     ],
+     "photo": false,
+     "cards": 2,
+     "month": "Oct"
+    },
+    {
+     "day": "sat",
+     "date": 10,
+     "time": "17:45",
+     "title": "Mara on the seawall",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "mara"
+     ],
+     "domains": [
+      "Partner"
+     ],
+     "photo": true,
+     "cards": 0,
+     "month": "Oct"
+    },
+    {
+     "day": "sun",
+     "date": 11,
+     "time": "14:00",
+     "title": "Grandma’s call went quiet",
+     "emotion": "sadness",
+     "intensity": 2,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Family"
+     ],
+     "photo": false,
+     "cards": 1,
+     "month": "Oct"
+    },
+    {
+     "day": "sun",
+     "date": 11,
+     "time": "22:30",
+     "title": "Bruno asleep on my feet",
+     "emotion": "peace",
+     "intensity": 1,
+     "valence": "neutral",
+     "souls": [
+      "bruno"
+     ],
+     "domains": [
+      "Family",
+      "Self Care"
+     ],
+     "photo": false,
+     "cards": 0,
+     "month": "Oct"
+    }
+   ]
+  },
+  "few": {
+   "_why": "Exactly at the wrap threshold (3 pebbles) and NO souls: the people card must become an invitation. Stat cards do not qualify (< 5 pebbles).",
+   "week": 42,
+   "start": "2026-10-12",
+   "end": "2026-10-18",
+   "pebbles": [
+    {
+     "day": "tue",
+     "date": 13,
+     "time": "07:50",
+     "title": "First frost on the car",
+     "emotion": "peace",
+     "intensity": 1,
+     "valence": "neutral",
+     "souls": [],
+     "domains": [
+      "Events"
+     ],
+     "photo": true,
+     "cards": 0,
+     "month": "Oct"
+    },
+    {
+     "day": "thu",
+     "date": 15,
+     "time": "18:30",
+     "title": "Finished the pottery bowl",
+     "emotion": "pride",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [],
+     "domains": [
+      "Passions"
+     ],
+     "photo": true,
+     "cards": 1,
+     "month": "Oct"
+    },
+    {
+     "day": "sun",
+     "date": 18,
+     "time": "20:10",
+     "title": "Sunday dread",
+     "emotion": "fear",
+     "intensity": 1,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Identity"
+     ],
+     "photo": false,
+     "cards": 0,
+     "month": "Oct"
+    }
+   ]
+  },
+  "few_with_one_soul": {
+   "_why": "4 pebbles, a single person. Wrap shows TOC + a one-person people card.",
+   "week": 43,
+   "start": "2026-10-19",
+   "end": "2026-10-25",
+   "pebbles": [
+    {
+     "day": "mon",
+     "date": 19,
+     "time": "09:00",
+     "title": "New desk by the window",
+     "emotion": "joy",
+     "intensity": 1,
+     "valence": "high",
+     "souls": [],
+     "domains": [
+      "Self Care"
+     ],
+     "photo": true,
+     "cards": 0,
+     "month": "Oct"
+    },
+    {
+     "day": "wed",
+     "date": 21,
+     "time": "13:15",
+     "title": "Lunch with Inès",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "ines"
+     ],
+     "domains": [
+      "Friends"
+     ],
+     "photo": false,
+     "cards": 1,
+     "month": "Oct"
+    },
+    {
+     "day": "wed",
+     "date": 21,
+     "time": "23:40",
+     "title": "Argument replayed in my head",
+     "emotion": "anger",
+     "intensity": 2,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Identity"
+     ],
+     "photo": false,
+     "cards": 2,
+     "month": "Oct"
+    },
+    {
+     "day": "sat",
+     "date": 24,
+     "time": "11:00",
+     "title": "Market in the rain",
+     "emotion": "peace",
+     "intensity": 1,
+     "valence": "neutral",
+     "souls": [],
+     "domains": [
+      "Events"
+     ],
+     "photo": true,
+     "cards": 0,
+     "month": "Oct"
+    }
+   ]
+  },
+  "one": {
+   "_why": "A single pebble, no person. Below the wrap threshold: no gallery, no 'wrap' wording.",
+   "week": 40,
+   "start": "2026-09-28",
+   "end": "2026-10-04",
+   "pebbles": [
+    {
+     "day": "thu",
+     "date": 1,
+     "time": "19:05",
+     "title": "Back from the hospital",
+     "emotion": "sadness",
+     "intensity": 3,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Health",
+      "Family"
+     ],
+     "photo": false,
+     "cards": 2,
+     "month": "Oct"
+    }
+   ]
+  },
+  "empty_current": {
+   "_why": "The current week (45, Mon 2 – Sun 8 Nov, today Wed 4) with nothing yet. Today this is the heavy 'Fresh week / Collect a new pebble' block: make it light.",
+   "week": 45,
+   "start": "2026-11-02",
+   "end": "2026-11-08",
+   "current": true,
+   "pebbles": []
+  },
+  "current_in_progress": {
+   "_why": "Same current week, 3 pebbles so far (Mon–Wed), 2 persons. Use it to show your answer to 'does a live week get its wrap now, or only once it ends?'",
+   "week": 45,
+   "start": "2026-11-02",
+   "end": "2026-11-08",
+   "current": true,
+   "pebbles": [
+    {
+     "day": "mon",
+     "date": 2,
+     "time": "08:40",
+     "title": "Elio’s first day back",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "elio"
+     ],
+     "domains": [
+      "Family"
+     ],
+     "photo": true,
+     "cards": 0,
+     "month": "Nov"
+    },
+    {
+     "day": "tue",
+     "date": 3,
+     "time": "19:00",
+     "title": "Run along the canal",
+     "emotion": "peace",
+     "intensity": 1,
+     "valence": "neutral",
+     "souls": [],
+     "domains": [
+      "Sport"
+     ],
+     "photo": false,
+     "cards": 0,
+     "month": "Nov"
+    },
+    {
+     "day": "wed",
+     "date": 4,
+     "time": "12:30",
+     "title": "Soup with Mara and Nadia",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "mara",
+      "nadia"
+     ],
+     "domains": [
+      "Friends"
+     ],
+     "photo": false,
+     "cards": 1,
+     "month": "Nov"
+    }
+   ]
+  },
+  "month_glimpse": {
+   "_why": "October 2026 in full: every October pebble (Thu 1 Oct in week 40 through Sat 31 Oct in week 44), each tagged with its week.",
+   "month": "October",
+   "year": 2026,
+   "key": "Oct",
+   "first_weekday": "thu",
+   "days_in_month": 31,
+   "weeks": [
+    {
+     "week": 40,
+     "days_in_month": "1–4",
+     "pebbles": 1
+    },
+    {
+     "week": 41,
+     "days_in_month": "5–11",
+     "pebbles": 11
+    },
+    {
+     "week": 42,
+     "days_in_month": "12–18",
+     "pebbles": 3
+    },
+    {
+     "week": 43,
+     "days_in_month": "19–25",
+     "pebbles": 4
+    },
+    {
+     "week": 44,
+     "days_in_month": "26–31",
+     "pebbles": 5
+    }
+   ],
+   "pebbles": [
+    {
+     "day": "thu",
+     "date": 1,
+     "time": "19:05",
+     "title": "Back from the hospital",
+     "emotion": "sadness",
+     "intensity": 3,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Health",
+      "Family"
+     ],
+     "photo": false,
+     "cards": 2,
+     "month": "Oct",
+     "week": 40
+    },
+    {
+     "day": "mon",
+     "date": 5,
+     "time": "10:15",
+     "title": "Flag march with Nadia",
+     "emotion": "pride",
+     "intensity": 3,
+     "valence": "high",
+     "souls": [
+      "nadia"
+     ],
+     "domains": [
+      "Community",
+      "Identity"
+     ],
+     "photo": true,
+     "cards": 2,
+     "month": "Oct",
+     "week": 41
+    },
+    {
+     "day": "mon",
+     "date": 5,
+     "time": "19:40",
+     "title": "Elio lost his first tooth",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "elio",
+      "mara"
+     ],
+     "domains": [
+      "Family"
+     ],
+     "photo": false,
+     "cards": 1,
+     "month": "Oct",
+     "week": 41
+    },
+    {
+     "day": "tue",
+     "date": 6,
+     "time": "08:02",
+     "title": "Rent went up again",
+     "emotion": "anger",
+     "intensity": 2,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Finance"
+     ],
+     "photo": false,
+     "cards": 0,
+     "month": "Oct",
+     "week": 41
+    },
+    {
+     "day": "tue",
+     "date": 6,
+     "time": "16:30",
+     "title": "Forest walk, all of us",
+     "emotion": "peace",
+     "intensity": 3,
+     "valence": "high",
+     "souls": [
+      "mara",
+      "elio",
+      "bruno"
+     ],
+     "domains": [
+      "Family",
+      "Sport"
+     ],
+     "photo": true,
+     "cards": 1,
+     "month": "Oct",
+     "week": 41
+    },
+    {
+     "day": "wed",
+     "date": 7,
+     "time": "03:10",
+     "title": "Couldn’t sleep",
+     "emotion": "fear",
+     "intensity": 1,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Health"
+     ],
+     "photo": false,
+     "cards": 3,
+     "month": "Oct",
+     "week": 41
+    },
+    {
+     "day": "wed",
+     "date": 7,
+     "time": "12:05",
+     "title": "Coffee by the fountain",
+     "emotion": "peace",
+     "intensity": 1,
+     "valence": "neutral",
+     "souls": [
+      "jules"
+     ],
+     "domains": [
+      "Friends"
+     ],
+     "photo": true,
+     "cards": 0,
+     "month": "Oct",
+     "week": 41
+    },
+    {
+     "day": "thu",
+     "date": 8,
+     "time": "21:00",
+     "title": "Rooftop birthday",
+     "emotion": "joy",
+     "intensity": 3,
+     "valence": "high",
+     "souls": [
+      "nadia",
+      "jules",
+      "mara"
+     ],
+     "domains": [
+      "Friends"
+     ],
+     "photo": true,
+     "cards": 1,
+     "month": "Oct",
+     "week": 41
+    },
+    {
+     "day": "fri",
+     "date": 9,
+     "time": "11:20",
+     "title": "Said no to the extra project",
+     "emotion": "pride",
+     "intensity": 2,
+     "valence": "neutral",
+     "souls": [],
+     "domains": [
+      "Identity",
+      "Self Care"
+     ],
+     "photo": false,
+     "cards": 2,
+     "month": "Oct",
+     "week": 41
+    },
+    {
+     "day": "sat",
+     "date": 10,
+     "time": "17:45",
+     "title": "Mara on the seawall",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "mara"
+     ],
+     "domains": [
+      "Partner"
+     ],
+     "photo": true,
+     "cards": 0,
+     "month": "Oct",
+     "week": 41
+    },
+    {
+     "day": "sun",
+     "date": 11,
+     "time": "14:00",
+     "title": "Grandma’s call went quiet",
+     "emotion": "sadness",
+     "intensity": 2,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Family"
+     ],
+     "photo": false,
+     "cards": 1,
+     "month": "Oct",
+     "week": 41
+    },
+    {
+     "day": "sun",
+     "date": 11,
+     "time": "22:30",
+     "title": "Bruno asleep on my feet",
+     "emotion": "peace",
+     "intensity": 1,
+     "valence": "neutral",
+     "souls": [
+      "bruno"
+     ],
+     "domains": [
+      "Family",
+      "Self Care"
+     ],
+     "photo": false,
+     "cards": 0,
+     "month": "Oct",
+     "week": 41
+    },
+    {
+     "day": "tue",
+     "date": 13,
+     "time": "07:50",
+     "title": "First frost on the car",
+     "emotion": "peace",
+     "intensity": 1,
+     "valence": "neutral",
+     "souls": [],
+     "domains": [
+      "Events"
+     ],
+     "photo": true,
+     "cards": 0,
+     "month": "Oct",
+     "week": 42
+    },
+    {
+     "day": "thu",
+     "date": 15,
+     "time": "18:30",
+     "title": "Finished the pottery bowl",
+     "emotion": "pride",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [],
+     "domains": [
+      "Passions"
+     ],
+     "photo": true,
+     "cards": 1,
+     "month": "Oct",
+     "week": 42
+    },
+    {
+     "day": "sun",
+     "date": 18,
+     "time": "20:10",
+     "title": "Sunday dread",
+     "emotion": "fear",
+     "intensity": 1,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Identity"
+     ],
+     "photo": false,
+     "cards": 0,
+     "month": "Oct",
+     "week": 42
+    },
+    {
+     "day": "mon",
+     "date": 19,
+     "time": "09:00",
+     "title": "New desk by the window",
+     "emotion": "joy",
+     "intensity": 1,
+     "valence": "high",
+     "souls": [],
+     "domains": [
+      "Self Care"
+     ],
+     "photo": true,
+     "cards": 0,
+     "month": "Oct",
+     "week": 43
+    },
+    {
+     "day": "wed",
+     "date": 21,
+     "time": "13:15",
+     "title": "Lunch with Inès",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "ines"
+     ],
+     "domains": [
+      "Friends"
+     ],
+     "photo": false,
+     "cards": 1,
+     "month": "Oct",
+     "week": 43
+    },
+    {
+     "day": "wed",
+     "date": 21,
+     "time": "23:40",
+     "title": "Argument replayed in my head",
+     "emotion": "anger",
+     "intensity": 2,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Identity"
+     ],
+     "photo": false,
+     "cards": 2,
+     "month": "Oct",
+     "week": 43
+    },
+    {
+     "day": "sat",
+     "date": 24,
+     "time": "11:00",
+     "title": "Market in the rain",
+     "emotion": "peace",
+     "intensity": 1,
+     "valence": "neutral",
+     "souls": [],
+     "domains": [
+      "Events"
+     ],
+     "photo": true,
+     "cards": 0,
+     "month": "Oct",
+     "week": 43
+    },
+    {
+     "day": "mon",
+     "date": 26,
+     "month": "Oct",
+     "time": "08:30",
+     "title": "Elio read a whole page alone",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "elio"
+     ],
+     "domains": [
+      "Family"
+     ],
+     "photo": false,
+     "cards": 1,
+     "week": 44
+    },
+    {
+     "day": "tue",
+     "date": 27,
+     "month": "Oct",
+     "time": "18:10",
+     "title": "Bike chain snapped in the rain",
+     "emotion": "anger",
+     "intensity": 1,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Events"
+     ],
+     "photo": false,
+     "cards": 0,
+     "week": 44
+    },
+    {
+     "day": "thu",
+     "date": 29,
+     "month": "Oct",
+     "time": "12:40",
+     "title": "Jules lent me his record player",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "jules"
+     ],
+     "domains": [
+      "Friends",
+      "Passions"
+     ],
+     "photo": true,
+     "cards": 0,
+     "week": 44
+    },
+    {
+     "day": "fri",
+     "date": 30,
+     "month": "Oct",
+     "time": "22:15",
+     "title": "Wrote three pages, kept one",
+     "emotion": "pride",
+     "intensity": 2,
+     "valence": "neutral",
+     "souls": [],
+     "domains": [
+      "Passions",
+      "Identity"
+     ],
+     "photo": false,
+     "cards": 2,
+     "week": 44
+    },
+    {
+     "day": "sat",
+     "date": 31,
+     "month": "Oct",
+     "time": "16:00",
+     "title": "Pumpkin carving on the balcony",
+     "emotion": "peace",
+     "intensity": 3,
+     "valence": "high",
+     "souls": [
+      "mara",
+      "elio"
+     ],
+     "domains": [
+      "Family"
+     ],
+     "photo": true,
+     "cards": 1,
+     "week": 44
+    }
+   ],
+   "count": 24,
+   "persons": [
+    "nadia",
+    "elio",
+    "mara",
+    "bruno",
+    "jules",
+    "ines"
+   ],
+   "emotions": {
+    "joy": 7,
+    "peace": 6,
+    "pride": 4,
+    "anger": 3,
+    "sadness": 2,
+    "fear": 2
+   },
+   "domains": {
+    "Family": 7,
+    "Identity": 5,
+    "Friends": 4,
+    "Self Care": 3,
+    "Events": 3,
+    "Passions": 3,
+    "Health": 2,
+    "Community": 1,
+    "Finance": 1,
+    "Sport": 1,
+    "Partner": 1
+   },
+   "busiest_week": 41,
+   "photos": 11,
+   "cards": 21,
+   "previous_month": {
+    "month": "September",
+    "pebbles": 15,
+    "persons": [
+     "mara",
+     "elio",
+     "nadia"
+    ]
+   }
+  },
+  "w44": {
+   "_why": "Week 44 in full (26 Oct – 1 Nov): five October pebbles and one on Sunday 1 November.",
+   "week": 44,
+   "start": "2026-10-26",
+   "end": "2026-11-01",
+   "pebbles": [
+    {
+     "day": "mon",
+     "date": 26,
+     "month": "Oct",
+     "time": "08:30",
+     "title": "Elio read a whole page alone",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "elio"
+     ],
+     "domains": [
+      "Family"
+     ],
+     "photo": false,
+     "cards": 1
+    },
+    {
+     "day": "tue",
+     "date": 27,
+     "month": "Oct",
+     "time": "18:10",
+     "title": "Bike chain snapped in the rain",
+     "emotion": "anger",
+     "intensity": 1,
+     "valence": "low",
+     "souls": [],
+     "domains": [
+      "Events"
+     ],
+     "photo": false,
+     "cards": 0
+    },
+    {
+     "day": "thu",
+     "date": 29,
+     "month": "Oct",
+     "time": "12:40",
+     "title": "Jules lent me his record player",
+     "emotion": "joy",
+     "intensity": 2,
+     "valence": "high",
+     "souls": [
+      "jules"
+     ],
+     "domains": [
+      "Friends",
+      "Passions"
+     ],
+     "photo": true,
+     "cards": 0
+    },
+    {
+     "day": "fri",
+     "date": 30,
+     "month": "Oct",
+     "time": "22:15",
+     "title": "Wrote three pages, kept one",
+     "emotion": "pride",
+     "intensity": 2,
+     "valence": "neutral",
+     "souls": [],
+     "domains": [
+      "Passions",
+      "Identity"
+     ],
+     "photo": false,
+     "cards": 2
+    },
+    {
+     "day": "sat",
+     "date": 31,
+     "month": "Oct",
+     "time": "16:00",
+     "title": "Pumpkin carving on the balcony",
+     "emotion": "peace",
+     "intensity": 3,
+     "valence": "high",
+     "souls": [
+      "mara",
+      "elio"
+     ],
+     "domains": [
+      "Family"
+     ],
+     "photo": true,
+     "cards": 1
+    },
+    {
+     "day": "sun",
+     "date": 1,
+     "month": "Nov",
+     "time": "11:00",
+     "title": "Slow breakfast, no phones",
+     "emotion": "peace",
+     "intensity": 1,
+     "valence": "neutral",
+     "souls": [
+      "mara"
+     ],
+     "domains": [
+      "Partner"
+     ],
+     "photo": false,
+     "cards": 0
+    }
+   ]
+  }
+ }
+}
