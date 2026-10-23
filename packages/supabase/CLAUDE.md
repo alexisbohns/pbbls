@@ -30,7 +30,7 @@ The database is the contract between four clients, and these Deno scripts are th
 | `npm run db:verify:guard` | `verify-profiles-privileged-guard.ts` | `profiles_privileged_guard` (#739) | anon |
 | `npm run db:verify:reference` | `verify-reference-data.ts` | the committed emotion reference data still matches the project (#796) | anon, **read-only** |
 | `npm run db:verify:recent-auth` | `verify-recent-auth.ts` | recent sign-in check (#976, #977): `amr` evaluator, no over-blocking of fresh sessions; nightly (`RECENT_AUTH_STALE_CASE=1`) waits past the window and expects both gates to refuse | anon |
-| `npm run db:verify:path-wraps` | `verify-path-wraps.ts` | the Path wraps (#1207): `gem_allocate` equals the committed JS oracle (`scripts/oracles/path-wrap/`) facet by facet on fixed and seeded random months | anon |
+| `npm run db:verify:path-wraps` | `verify-path-wraps.ts` | the Path wraps (#1207): `gem_allocate` equals the committed JS oracle (`scripts/oracles/path-wrap/`) facet by facet on fixed and seeded random months; `path_strip` weeks, spacers, cairns and month placement in two zones | anon |
 | `npm run db:verify` | the anon harnesses above (plus reports and glyph), in order | — | anon |
 | `npm run db:verify:purge` | `verify-account-purge.ts` | `purge_account` contract | anon + **service role** |
 

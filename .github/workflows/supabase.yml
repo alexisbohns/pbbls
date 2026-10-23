@@ -163,10 +163,10 @@ jobs:
           RECENT_AUTH_STALE_CASE: ${{ github.event_name == 'schedule' && '1' || '' }}
         run: .github/scripts/verify-harness.sh "recent-auth" db:verify:recent-auth
 
-      # The Path wraps (#1207). Part 1: gem_allocate, the SQL port of the gem
-      # method, compared facet by facet with the committed JS oracle
-      # (scripts/oracles/path-wrap/) on fixed months and seeded random ones.
-      - name: Path wraps (#1207 gem allocation)
+      # The Path wraps (#1207): gem_allocate against the committed JS oracle
+      # (scripts/oracles/path-wrap/) on fixed and seeded random months, and
+      # path_strip on a seeded reader in two zones.
+      - name: Path wraps (#1207)
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "path-wraps" db:verify:path-wraps
 
