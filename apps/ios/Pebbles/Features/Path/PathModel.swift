@@ -5,11 +5,14 @@ import os
 /// The Path tab's state (#1130 §Data flow), the Path's first `@Observable` view
 /// model (new pattern, named in the D3 PR). It takes over `PathView`'s inline
 /// load, its refocus rule and its delete path, unchanged in behaviour, and
-/// builds one `SpinePage` per week, memoised per load. `focusedWeekStart` is the
-/// one source of truth for the roll, the pager and the links.
+/// builds one `SpinePage` per week, memoised per load. `focusedPage` is the one
+/// source of truth for the strip, the pager and the links.
 ///
-/// The fetch and the delete are passed in as closures, so the model needs no
-/// Supabase client and the tests need no fake service.
+/// Since #1226 it loads the server's strip (`path_strip`) beside the feed and
+/// pages over the strip's focusable items, weeks and months (D2). The strip
+/// comes through `wraps`, which the view sets and the tests fake; a strip
+/// failure never fails the timeline, and a failed refresh keeps the last strip.
+/// The feed's fetch and the delete are passed in as closures.
 @Observable @MainActor
 final class PathModel {
     enum Phase: Equatable { case loading, failed, content }
@@ -20,7 +23,13 @@ final class PathModel {
     private(set) var phase: Phase = .loading
     private(set) var moments: [MomentSummary] = []
     private(set) var entries: [WeekRollEntry] = []
-    private(set) var focusedWeekStart: Date
+    /// The server's strip; nil until it first loads, and the feed's weeks stand in.
+    private(set) var strip: Strip?
+    /// The strip as drawn: the server's items, with any week the feed holds and the strip does not.
+    private(set) var stripItems: [StripItem] = []
+    /// The pager's pages, the strip's focusable items in order.
+    private(set) var pages: [PathPage] = []
+    private(set) var focusedPage: PathPage
     /// weekStart → the reading day's index (D12), written only on a change.
     private(set) var readingDay: [Date: Int] = [:]
     let pressRequests = StonePressRequests()
@@ -32,12 +41,14 @@ final class PathModel {
     /// the souls arrived is invalidated; the pages themselves are not tracked.
     private(set) var pagesRevision = 0
 
-    @ObservationIgnored private var pages: [Date: SpinePage] = [:]
+    @ObservationIgnored private var spinePages: [Date: SpinePage] = [:]
     /// Each load takes the next number; only the latest one applies its result.
     @ObservationIgnored private var loadGeneration = 0
     @ObservationIgnored private var referenceNames: [String: String] = [:]
     @ObservationIgnored private var soulGlyphs: [String: [GlyphStroke]] = [:]
     @ObservationIgnored let calendar: Calendar
+    /// The wraps' RPCs (`PathWrapService`); set by the view before the first load.
+    @ObservationIgnored var wraps: (any PathWrapServicing)?
     @ObservationIgnored private let now: () -> Date
     @ObservationIgnored private let locale: () -> Locale
     @ObservationIgnored private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
@@ -47,8 +58,11 @@ final class PathModel {
         self.calendar = calendar
         self.now = now
         self.locale = locale
-        focusedWeekStart = WeekRollBuilder.weekStart(for: now(), calendar: calendar)
+        focusedPage = .week(WeekRollBuilder.weekStart(for: now(), calendar: calendar))
     }
+
+    /// The focused week's Monday, nil while a month is focused.
+    var focusedWeekStart: Date? { focusedPage.weekStart }
 
     var currentWeekStart: Date {
         WeekRollBuilder.weekStart(for: now(), calendar: calendar)
@@ -56,19 +70,40 @@ final class PathModel {
 
     // MARK: - Load
 
-    /// A cancelled load, or one a newer load overtook, changes nothing.
+    /// A cancelled load, or one a newer load overtook, changes nothing. The
+    /// strip loads alongside, in the zone the feed buckets its days in.
     func load(_ fetch: () async throws -> [MomentSummary]) async {
         loadGeneration += 1
         let generation = loadGeneration
+        let wraps = wraps, zone = calendar.timeZone, logger = logger
+        async let loadedStrip = Self.fetchStrip(wraps, zone: zone, logger: logger)
         do {
             let result = try await fetch()
+            let fresh = await loadedStrip
             guard !Task.isCancelled, generation == loadGeneration else { return }
+            if let fresh { strip = fresh }
             apply(result)
             phase = .content
         } catch {
+            // The strip's fetch is cancelled with the scope; the error need not wait for it.
             guard !Task.isCancelled, generation == loadGeneration else { return }
             logger.error("path fetch failed: \(error.localizedDescription, privacy: .private)")
             phase = .failed
+        }
+    }
+
+    /// The strip, or nil (logged) when it fails or no service is set.
+    private nonisolated static func fetchStrip(_ wraps: (any PathWrapServicing)?, zone: TimeZone,
+                                               logger: Logger) async -> Strip? {
+        guard let wraps else { return nil }
+        do {
+            return try await wraps.strip(zone: zone)
+        } catch {
+            // A newer load overtook this one: nothing failed.
+            if !error.isCancellation {
+                logger.error("path_strip failed: \(error.localizedDescription, privacy: .private)")
+            }
+            return nil
         }
     }
 
@@ -81,42 +116,41 @@ final class PathModel {
 
     private func apply(_ result: [MomentSummary]) {
         moments = result
-        entries = WeekRollBuilder.build(moments: result, calendar: calendar, today: now())
-        pages = [:]
+        let today = now()
+        entries = WeekRollBuilder.build(moments: result, calendar: calendar, today: today)
+        stripItems = PathPages.items(strip: strip, entries: entries, today: today, calendar: calendar)
+        pages = PathPages.pages(stripItems, calendar: calendar)
+        spinePages = [:]
         pagesRevision += 1
-        // Keep the focused week if it is still there, else the current week, else the closest.
+        // Keep the focused page if it is still there, else the current week, else the closest.
         // A refocus is a page change, so it drops a pending press as `focus(_:)` does.
-        guard !entries.contains(where: { $0.weekStart == focusedWeekStart }) else { return }
+        guard let refocused = PathPages.refocused(pages, focused: focusedPage, today: today, calendar: calendar),
+              refocused != focusedPage else { return }
         pressRequests.cancel()
-        let current = currentWeekStart
-        // The closest-week branch is unreachable while `WeekRollBuilder.build`
-        // unions in the current week; it is kept for parity with `PathView`.
-        if entries.contains(where: { $0.weekStart == current }) {
-            focusedWeekStart = current
-        } else if let closest = entries.min(by: { lhs, rhs in
-            let focused = focusedWeekStart
-            return abs(lhs.weekStart.timeIntervalSince(focused)) < abs(rhs.weekStart.timeIntervalSince(focused))
-        }) {
-            focusedWeekStart = closest.weekStart
-        }
+        focusedPage = refocused
     }
 
     /// The reference cache's souls (`ReferenceDataService.souls`), keyed by lowercase id.
     func updateSouls(names: [String: String], glyphs: [String: [GlyphStroke]]) {
         referenceNames = names
         soulGlyphs = glyphs
-        pages = [:]
+        spinePages = [:]
         pagesRevision += 1
     }
 
     // MARK: - Focus
 
-    /// A roll tap, a link, a settled swipe. An equal week is ignored, so the
+    /// A strip tap, a link, a settled swipe. An equal page is ignored, so the
     /// pager's binding cannot loop; a page change drops a pending press.
-    func focus(_ weekStart: Date) {
-        guard weekStart != focusedWeekStart else { return }
+    func focus(_ page: PathPage) {
+        guard page != focusedPage else { return }
         pressRequests.cancel()
-        focusedWeekStart = weekStart
+        focusedPage = page
+    }
+
+    /// A week link or a week's own focus.
+    func focus(_ weekStart: Date) {
+        focus(.week(weekStart))
     }
 
     /// After Capture: the week that holds the moment, asked of the roll's own
@@ -128,8 +162,8 @@ final class PathModel {
 
     /// The Path tab reselected at its root: "top of Path" means now.
     func focusCurrentWeek() {
-        let current = currentWeekStart
-        guard entries.contains(where: { $0.weekStart == current }) else { return }
+        let current = PathPage.week(currentWeekStart)
+        guard pages.contains(current) else { return }
         focus(current)
     }
 
@@ -142,19 +176,23 @@ final class PathModel {
 
     // MARK: - Pages
 
+    /// A week page; a week the strip focuses and the feed does not hold yet
+    /// (the feed lags it by one fetch) draws with no moments.
     func page(for weekStart: Date) -> SpinePage? {
         _ = pagesRevision
-        if let cached = pages[weekStart] { return cached }
-        guard let entry = entries.first(where: { $0.weekStart == weekStart }) else { return nil }
+        if let cached = spinePages[weekStart] { return cached }
+        let entry = entries.first(where: { $0.weekStart == weekStart })
+        guard entry != nil || pages.contains(.week(weekStart)) else { return nil }
+        let moments = entry?.moments ?? []
         let locale = locale()
-        let names = names(for: entry.moments)
-        let week = SpineWeekBuilder.spineWeek(weekStart: weekStart, moments: entry.moments, today: now(),
+        let names = names(for: moments)
+        let week = SpineWeekBuilder.spineWeek(weekStart: weekStart, moments: moments, today: now(),
                                               calendar: calendar)
         let page = SpinePage(
             weekStart: weekStart,
             week: week,
             words: WeekOpening.weekWords(weekStart: weekStart, calendar: calendar, locale: locale),
-            persons: PersonsOfWeek.personsOfWeek(entry.moments, names: names, weekStart: weekStart,
+            persons: PersonsOfWeek.personsOfWeek(moments, names: names, weekStart: weekStart,
                                                  calendar: calendar, locale: locale),
             contents: SpineWeekBuilder.readingOrder(week),
             previous: WeekRollBuilder.previous(of: weekStart, in: entries).map(neighbour),
@@ -164,15 +202,16 @@ final class PathModel {
             soulNames: names,
             soulGlyphs: soulGlyphs
         )
-        pages[weekStart] = page
+        spinePages[weekStart] = page
         return page
     }
 
-    /// The photos of the focused week and its pager neighbours, for the ratio prefetch.
-    func photoPaths(around weekStart: Date) -> [String] {
-        guard let index = entries.firstIndex(where: { $0.weekStart == weekStart }) else { return [] }
-        return entries[max(0, index - 1)...min(entries.count - 1, index + 1)]
-            .flatMap(\.moments).compactMap(\.firstSnapPath)
+    /// The photos of a page's weeks and its pager neighbours', for the ratio
+    /// prefetch: a month's neighbours are weeks too.
+    func photoPaths(around page: PathPage) -> [String] {
+        guard let index = pages.firstIndex(of: page) else { return [] }
+        let weeks = Set(pages[max(0, index - 1)...min(pages.count - 1, index + 1)].compactMap(\.weekStart))
+        return entries.filter { weeks.contains($0.weekStart) }.flatMap(\.moments).compactMap(\.firstSnapPath)
     }
 
     private func neighbour(_ entry: WeekRollEntry) -> WeekNeighbour {
@@ -205,5 +244,14 @@ final class PathModel {
             logger.error("delete failed: \(error.localizedDescription, privacy: .private)")
             return .failed
         }
+    }
+}
+
+extension Error {
+    /// A cancelled task or request: a newer one overtook it, so nothing failed.
+    var isCancellation: Bool {
+        if self is CancellationError { return true }
+        if let url = self as? URLError, url.code == .cancelled { return true }
+        return false
     }
 }

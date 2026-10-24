@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// The Path tab's root (#1130): the Spine. The week roll over a pager of Spine
-/// weeks (`SpinePager`); `PathModel` holds the weeks, the focused week and the
-/// pages. This view hands the environment's services to the model, and owns
+/// The Path tab's root (#1130): the Spine. The strip (#1226) over a pager of
+/// Spine weeks and months (`SpinePager`); `PathModel` holds the weeks, the
+/// strip, the focused page and the pages. This view hands the environment's services to the model, and owns
 /// Capture, the detail sheet (until stack E's held card), the delete dialog and
 /// stack C's FAB row. Its `NavigationStack` lives in `PebblesTabView`.
 struct PathView: View {
@@ -45,6 +45,7 @@ struct PathView: View {
             .toolbar(.hidden, for: .navigationBar)
             .pebblesScreen()
             .task {
+                model.wraps = PathWrapService(client: supabase.client)
                 await model.load { try await service.pathMoments() }
                 onFirstLoad()
             }
@@ -99,7 +100,9 @@ struct PathView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .content:
             VStack(spacing: 0) {
-                SpineWeekRoll(model: model)
+                PathStrip(items: model.stripItems, focus: model.focusedPage, calendar: model.calendar) { page in
+                    if reduceMotion { model.focus(page) } else { withAnimation { model.focus(page) } }
+                }
                 SpinePager(
                     model: model,
                     palette: palette,
