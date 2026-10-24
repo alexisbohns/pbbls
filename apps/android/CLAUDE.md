@@ -84,10 +84,9 @@ Not applicable here and never routed: `android-skills:android-retrofit`,
 `android-skills:kmp-ktor`, `android-skills:kmp-boundaries` (supabase-kt owns
 the network client), `android-skills:paging` (the Path loads whole),
 `android-skills:rxjava-migration`, `android-skills:pdf-annotations`.
-`android-skills:datastore` is not routed **yet**: two booleans live in
-`SharedPreferences` (`OnboardingPreferences`, `AppearancePreferences`). The
-DataStore trigger D5 named ("real settings exist") fired with #853, and the
-next preference added is where the migration happens. Route it then.
+Settings live in one Preferences DataStore (`core/data/SettingsStore`, #1207);
+`android-skills:datastore` is routed for any change to it. The consent cache
+and the Complete autosaves stay in `SharedPreferences` (`pebbles_prefs`).
 
 ### Owned outright by the Google set
 

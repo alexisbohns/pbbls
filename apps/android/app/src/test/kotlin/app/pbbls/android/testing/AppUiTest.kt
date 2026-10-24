@@ -68,6 +68,8 @@ abstract class AppUiTest {
 
     @Inject lateinit var supabase: FakeSupabaseService
 
+    @Inject lateinit var onboarding: OnboardingPreferences
+
     protected val context: Context get() = ApplicationProvider.getApplicationContext()
 
     private var controller: ActivityController<MainActivity>? = null
@@ -156,7 +158,7 @@ abstract class AppUiTest {
 
     /** Onboarding is first-run only; a test that is not about it marks it seen before [launch]. */
     protected fun skipOnboarding() {
-        OnboardingPreferences.setHasSeenOnboarding(context, true)
+        onboarding.setHasSeenOnboarding(true)
     }
 
     /**

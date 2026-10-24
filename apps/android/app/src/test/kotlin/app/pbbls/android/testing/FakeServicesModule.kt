@@ -14,6 +14,7 @@ import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.PathWrapServicing
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReferenceDataServicing
+import app.pbbls.android.core.data.SettingsStore
 import app.pbbls.android.core.data.SignedUrlProviding
 import app.pbbls.android.core.data.SnapBoundsDecoder
 import app.pbbls.android.core.data.SnapURLCache
@@ -147,6 +148,13 @@ object FakeServicesModule {
 
     @Provides @Singleton
     fun fakeWrapDiskCache() = FakeWrapDiskCache()
+
+    /**
+     * Settings in memory (#1207): the real store is one DataStore file per process, which would
+     * carry one test's onboarding and theme flags into the next.
+     */
+    @Provides @Singleton
+    fun settings(): SettingsStore = inMemorySettings()
 
     @Provides @Singleton
     fun fakeComposerMedia() = FakeComposerMedia()

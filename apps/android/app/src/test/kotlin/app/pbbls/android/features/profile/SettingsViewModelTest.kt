@@ -16,10 +16,10 @@ import app.pbbls.android.core.model.HealthDataConsent
 import app.pbbls.android.testing.FakeConsentService
 import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSupabaseService
-import app.pbbls.android.testing.InMemoryPrefs
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.accessTokenSignedInAt
 import app.pbbls.android.testing.authRestException
+import app.pbbls.android.testing.inMemorySettings
 import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
 import io.github.jan.supabase.auth.user.Identity
@@ -107,7 +107,7 @@ class SettingsViewModelTest {
         profile: FakeProfileService = FakeProfileService(profile = profileRow()),
         supabase: FakeSupabaseService = FakeSupabaseService(),
         savedState: SavedStateHandle = SavedStateHandle(),
-        appearance: AppearancePreferences = AppearancePreferences(InMemoryPrefs()),
+        appearance: AppearancePreferences = AppearancePreferences(inMemorySettings()),
         consents: FakeConsentService = FakeConsentService(),
     ) = SettingsViewModel(savedState, profile, supabase, appearance, consents)
 
@@ -115,7 +115,7 @@ class SettingsViewModelTest {
 
     @Test
     fun `wallpaper switch writes through to appearance preferences`() {
-        val appearance = AppearancePreferences(InMemoryPrefs())
+        val appearance = AppearancePreferences(inMemorySettings())
         val vm = viewModel(appearance = appearance)
         vm.onUseWallpaperColorsChange(false)
         assertFalse(appearance.useWallpaperColors)
