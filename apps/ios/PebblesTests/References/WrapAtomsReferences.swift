@@ -73,7 +73,9 @@ extension References {
         private static func noop() {}
 
         private static var pieces: some View {
-            let mara = F.soulGlyphs.values.first
+            // By name: a dictionary's order changes from one process to the next.
+            let maraId = F.soulNames.first { $0.value == "Mara" }?.key
+            let mara = maraId.flatMap { F.soulGlyphs[$0] }
             return VStack(alignment: .leading, spacing: 20) {
                 SpineSectionHeader("Emotions", hint: "weighed by intensity") {
                     Text(verbatim: "M T W T F S S")
