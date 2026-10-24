@@ -13,6 +13,8 @@ import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.core.model.wrap.Strip
 import app.pbbls.android.core.model.wrap.StripItem
 import app.pbbls.android.features.path.strip.PathPage
+import app.pbbls.android.features.path.wrap.WrapState
+import app.pbbls.android.features.path.wrap.shown
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakePathStatsService
@@ -501,5 +503,66 @@ class PathViewModelTest {
             advanceUntilIdle()
 
             assertTrue(PathPage.Month(month) in (viewModel.uiState.value as PathUiState.Content).pages)
+        }
+
+    // MARK: - Week wraps (#1207, spec §7.1)
+
+    private fun weekOf(moment: PathMoment) =
+        WeekRollBuilder.weekStart(moment.happenedAt.atZoneSameInstant(java.time.ZoneId.systemDefault()).toLocalDate())
+
+    @Test
+    fun `the focused week's wrap and its neighbours' load once, and a write marks them stale behind the wrap`() =
+        runTest {
+            val current = moment("now")
+            val old = moment("old", happenedAt = now.minusWeeks(1))
+            val wraps = FakePathWrapService()
+            wraps.weeks[weekOf(current)] = FakePathWrapService.emptyWeek(weekOf(current)).copy(pebbles = 4)
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(current, old)), wraps = wraps)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as PathUiState.Content
+            assertEquals(setOf(weekOf(current), weekOf(old)), wraps.weekCalls.toSet())
+            assertEquals(4, (state.weekWraps.getValue(weekOf(current)) as WrapState.Ready).value.pebbles)
+
+            // Moving between loaded weeks fetches nothing again.
+            viewModel.onFocus(PathPage.Week(weekOf(old)))
+            advanceUntilIdle()
+            assertEquals(2, wraps.weekCalls.size)
+
+            // A write reloads: the wraps are refetched, and stay shown meanwhile.
+            wraps.weeks[weekOf(current)] = FakePathWrapService.emptyWeek(weekOf(current)).copy(pebbles = 5)
+            viewModel.reload()
+            advanceUntilIdle()
+            assertEquals(4, wraps.weekCalls.size)
+            assertEquals(
+                5,
+                (viewModel.uiState.value as PathUiState.Content)
+                    .weekWraps
+                    .getValue(weekOf(current))
+                    .shown
+                    ?.pebbles,
+            )
+        }
+
+    @Test
+    fun `a failed wrap keeps the last good one, and the next focus retries`() =
+        runTest {
+            val current = moment("now")
+            val wraps = FakePathWrapService()
+            wraps.weeks[weekOf(current)] = FakePathWrapService.emptyWeek(weekOf(current)).copy(pebbles = 4)
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(current)), wraps = wraps)
+            advanceUntilIdle()
+
+            wraps.failNextWeek = IOException("offline")
+            viewModel.reload()
+            advanceUntilIdle()
+            val failed = (viewModel.uiState.value as PathUiState.Content).weekWraps.getValue(weekOf(current))
+            assertTrue(failed is WrapState.Failed)
+            assertEquals(4, failed.shown?.pebbles)
+
+            viewModel.onFocus(PathPage.Week(weekOf(current).minusWeeks(9)))
+            viewModel.onFocus(PathPage.Week(weekOf(current)))
+            advanceUntilIdle()
+            assertTrue((viewModel.uiState.value as PathUiState.Content).weekWraps.getValue(weekOf(current)) is WrapState.Ready)
         }
 }

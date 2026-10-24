@@ -12,9 +12,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -31,6 +34,8 @@ import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
+import app.pbbls.android.core.model.wrap.WeekTile
+import app.pbbls.android.core.model.wrap.WeekWrap
 import app.pbbls.android.core.ui.render.stone.StoneMotion
 import app.pbbls.android.features.path.WeekRollBuilder
 import app.pbbls.android.features.path.spine.SpineLayout.CARD_ANCHOR
@@ -43,11 +48,15 @@ import app.pbbls.android.features.path.spine.SpineLayout.SEAM_HEIGHT
 import app.pbbls.android.features.path.spine.SpineLayout.SEAM_LABEL_OVERHANG
 import app.pbbls.android.features.path.spine.SpineLayout.STILL_MIN_HEIGHT
 import app.pbbls.android.features.path.spine.logic.EntryTypes
-import app.pbbls.android.features.path.spine.logic.PersonsOfWeek
 import app.pbbls.android.features.path.spine.logic.SpineDay
 import app.pbbls.android.features.path.spine.logic.SpineWeek
 import app.pbbls.android.features.path.spine.logic.SpineWeekBuilder
 import app.pbbls.android.features.path.spine.logic.WeekWordsBuilder
+import app.pbbls.android.features.path.wrap.WrapLookups
+import app.pbbls.android.features.path.wrap.week.WeekLine
+import app.pbbls.android.features.path.wrap.week.WeekSheet
+import app.pbbls.android.features.path.wrap.week.WeekTiles
+import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -85,8 +94,10 @@ import java.time.ZoneId
  * @param today the local date, for which days exist and whether this is the current week.
  * @param paletteFor the pebble's emotion palette; null for a blank stone.
  * @param aspect the session's photo-ratio cache; null in previews and the lab.
- * @param previousWeek the week the masthead turns back to, named by its own number; absent on
- *   the first week there is. [nextWeek] likewise for the mouth, absent on the last.
+ * @param wrap the week's wrap from the server (#1207): the line's summary, the tiles and the sheet;
+ *   null until it first loads, when the line shows the week number alone.
+ * @param lookups what the wrap's ids point at.
+ * @param nextWeek the week the mouth reaches, named by its own number; absent on the last.
  * @param listState hoisted so a preview can open the page at a row.
  * @param zone the zone the days are cut in and the times print in; the device's by default.
  * @param ratioOverride a primed photo ratio by snap prefix, for previews with no cache.
@@ -100,7 +111,8 @@ fun SpineWeek(
     aspect: SnapAspectCache?,
     onOpen: (PathMoment, CardFace) -> Unit,
     onRequestDelete: (PathMoment) -> Unit,
-    previousWeek: WeekNeighbour?,
+    wrap: WeekWrap?,
+    lookups: WrapLookups,
     nextWeek: WeekNeighbour?,
     onCreatePebble: () -> Unit,
     modifier: Modifier = Modifier,
@@ -115,12 +127,20 @@ fun SpineWeek(
     val reduceMotion by rememberUpdatedState(rememberReduceMotion())
 
     val week = remember(entry, today, zone) { SpineWeekBuilder.build(entry, zone, today) }
-    val persons = remember(entry, zone, locale) { PersonsOfWeek.of(entry.moments, entry.weekStart, zone, locale) }
-    val personsOrder = remember(persons) { persons.map { it.soul.id } }
+    // The people lines name souls in the server's persons order; before the wrap, in each pebble's own.
+    val personsOrder = remember(wrap) { wrap?.persons.orEmpty().map { it.soulId } }
+    val copy = rememberWrapCopy()
     val words = remember(entry.weekStart, locale) { WeekWordsBuilder.of(entry.weekStart, locale) }
     val current = remember(entry.weekStart, today) { WeekRollBuilder.weekStart(today) == entry.weekStart }
     val empty = entry.moments.isEmpty()
-    val items = remember(week, persons, empty) { WeekItems(week, hasPersons = persons.isNotEmpty(), empty = empty) }
+    val hasTiles = wrap?.tiles?.isNotEmpty() == true
+    val items = remember(week, hasTiles, empty) { WeekItems(week, hasTiles = hasTiles, empty = empty) }
+    val summary =
+        wrap?.let { copy.line(it.pebbles, it.people, it.live, hasMoments = !empty) }
+            ?: if (empty) copy.line(0, 0, live = false, hasMoments = false) else null
+
+    // The sheet's open tile, kept across a rotation; never in the ViewModel (spec §7).
+    var sheetTile by rememberSaveable(entry.weekStart) { mutableStateOf<String?>(null) }
 
     val readingDay = rememberReadingDay(listState) { key -> key?.let(items.dayOfKey::get) }
     val firstDay = week.days.firstOrNull()?.index
@@ -169,12 +189,13 @@ fun SpineWeek(
         ) {
             items(items.rows, key = { it.key }, contentType = { it::class }) { row ->
                 when (row) {
-                    WeekRow.Masthead -> WeekMasthead(words = words, previousWeek = previousWeek)
-                    WeekRow.Opening -> WeekOpening(words = words, pebbleCount = week.pebbleCount, peopleCount = persons.size)
-                    WeekRow.Persons ->
-                        PersonsOfWeek(persons = persons, weekStart = entry.weekStart, soulsById = soulsById, readingDay = dayRead)
-                    WeekRow.Contents -> WeekContents(week = week, zone = zone, paletteFor = paletteFor, readingDay = dayRead, onGo = go)
-                    WeekRow.Empty -> SpineEmptyWeek(onCreatePebble = onCreatePebble)
+                    WeekRow.Line ->
+                        WeekLine(
+                            isoWeek = WeekRollBuilder.isoWeekNumber(entry.weekStart),
+                            summary = summary,
+                            onCollect = if (empty && current) onCreatePebble else null,
+                        )
+                    WeekRow.Tiles -> wrap?.let { WeekTiles(it, week.days, lookups, onOpen = { tile -> sheetTile = tile.name }) }
                     is WeekRow.Seam -> {
                         val seam =
                             Modifier
@@ -228,6 +249,22 @@ fun SpineWeek(
             }
         }
     }
+
+    val openTile = sheetTile?.let { name -> WeekTile.entries.firstOrNull { it.name == name } }
+    if (wrap != null && openTile != null && openTile in wrap.tiles) {
+        WeekSheet(
+            wrap = wrap,
+            week = week,
+            zone = zone,
+            soulsById = soulsById,
+            lookups = lookups,
+            readingDay = dayRead,
+            initialTile = openTile,
+            onDismiss = { sheetTile = null },
+            onGo = go,
+            onPageChange = { page -> wrap.tiles.getOrNull(page)?.let { sheetTile = it.name } },
+        )
+    }
 }
 
 /** The one in-flight contents → press, cancelled by the next and when the week changes. */
@@ -264,24 +301,12 @@ private fun stoneScrollOffset(
 private sealed interface WeekRow {
     val key: Any
 
-    data object Masthead : WeekRow {
-        override val key = "masthead"
+    data object Line : WeekRow {
+        override val key = "line"
     }
 
-    data object Opening : WeekRow {
-        override val key = "opening"
-    }
-
-    data object Persons : WeekRow {
-        override val key = "persons"
-    }
-
-    data object Contents : WeekRow {
-        override val key = "contents"
-    }
-
-    data object Empty : WeekRow {
-        override val key = "empty"
+    data object Tiles : WeekRow {
+        override val key = "tiles"
     }
 
     /** A day's seam; [ground] is its place among the rows on the ground. */
@@ -315,7 +340,7 @@ private sealed interface WeekRow {
 /** The rows of the list in order, computed once per week: the one place the order lives. */
 private class WeekItems(
     week: SpineWeek,
-    hasPersons: Boolean,
+    hasTiles: Boolean,
     empty: Boolean,
 ) {
     val rows: List<WeekRow>
@@ -326,13 +351,10 @@ private class WeekItems(
     init {
         val rows = ArrayList<WeekRow>()
         val dayOfKey = HashMap<Any, Int>()
-        rows += WeekRow.Masthead
-        rows += WeekRow.Opening
-        if (hasPersons) rows += WeekRow.Persons
-        if (week.readingOrder.isNotEmpty()) rows += WeekRow.Contents
-        if (empty) {
-            rows += WeekRow.Empty
-        } else {
+        rows += WeekRow.Line
+        if (hasTiles) rows += WeekRow.Tiles
+        // An empty week is its line alone, with its way to a first pebble.
+        if (!empty) {
             var ground = 0
             week.days.forEachIndexed { position, day ->
                 val seam = WeekRow.Seam(day, first = position == 0, last = position == week.days.lastIndex, ground = ground++)

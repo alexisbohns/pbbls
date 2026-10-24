@@ -43,6 +43,13 @@ object SpineTypography {
     val summary = ysabeau(18.sp, 380, italic = true)
     val sectionLabel = ysabeau(11.5.sp, 600, 0.2f.em, features = SMALL_CAPS)
 
+    /** A wrap tile's caption (#1207): the board's `.tile .sm`, 12.5 px, and its italic. */
+    val tileCaption = ysabeau(12.5.sp, 400, lineHeight = 15.6.sp)
+    val tileCaptionItalic = ysabeau(12.5.sp, 400, italic = true, lineHeight = 15.6.sp)
+
+    /** A sheet list's opening sentence (#1207): the board's `.lead`, 17 px light italic. */
+    val lead = ysabeau(17.sp, 380, italic = true, lineHeight = 23.sp)
+
     /** A section's italic hint beside its label (#1207), "from the 1st, clockwise". */
     val sectionHint = ysabeau(13.sp, 380, italic = true)
 

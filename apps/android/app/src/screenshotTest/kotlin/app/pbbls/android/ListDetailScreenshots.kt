@@ -354,6 +354,8 @@ private fun PathPebblePair() {
                 entries = populatedEntries,
                 stripItems = previewStripItems(populatedEntries),
                 focus = PathPage.Week(focused),
+                weekWraps = previewWeekWraps(populatedEntries),
+                lookups = SpineFixtureWeek.lookups,
                 today = pathPreviewToday,
                 soulsById = SpineFixtureWeek.soulsById,
                 onFocusChange = {},

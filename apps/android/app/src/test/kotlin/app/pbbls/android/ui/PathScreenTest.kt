@@ -13,7 +13,6 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.features.path.PathFocusRequests
 import app.pbbls.android.features.path.WeekRollBuilder
-import app.pbbls.android.features.path.spine.logic.WeekWordsBuilder
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.UiFixtures
@@ -23,7 +22,6 @@ import org.junit.Test
 import java.io.IOException
 import java.time.OffsetDateTime
 import java.time.ZoneId
-import java.util.Locale
 import javax.inject.Inject
 
 /**
@@ -170,11 +168,9 @@ class PathScreenTest : AppUiTest() {
         onMoment("Lake swim").assertIsDisplayed()
     }
 
-    /** The week's kicker on the Spine's opening ("the forty-first week · 2026"): what names the page a moment is on. */
+    /** The week line's "week 41" (#1207, D3): what names the page a moment is on. */
     private fun weekHeader(happenedAt: OffsetDateTime): String {
-        val locale = Locale.getDefault()
         val day = happenedAt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDate()
-        val words = WeekWordsBuilder.of(WeekRollBuilder.weekStart(day), locale)
-        return string(R.string.path_spine_kicker, words.ordinal, words.year)
+        return string(R.string.path_wrap_week, WeekRollBuilder.isoWeekNumber(WeekRollBuilder.weekStart(day)))
     }
 }

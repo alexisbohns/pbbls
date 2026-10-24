@@ -13,9 +13,11 @@ import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.core.model.wrap.DayWeight
 import app.pbbls.android.core.model.wrap.Strip
 import app.pbbls.android.core.model.wrap.StripItem
+import app.pbbls.android.core.model.wrap.WeekWrap
 import app.pbbls.android.features.path.PathContent
 import app.pbbls.android.features.path.strip.PathPage
 import app.pbbls.android.features.path.strip.PathPages
+import app.pbbls.android.features.path.wrap.WrapState
 import com.android.tools.screenshot.PreviewTest
 import java.time.LocalDate
 import java.time.YearMonth
@@ -89,6 +91,17 @@ private val previewStrip: Strip =
 
 internal fun previewStripItems(entries: List<WeekRollEntry>) = PathPages.items(previewStrip, entries, pathPreviewToday)
 
+/** The fixture week's wrap on its own Sunday: live, so contents and persons only, dashed and *so far*. */
+internal fun previewWeekWraps(entries: List<WeekRollEntry>): Map<LocalDate, WrapState<WeekWrap>> =
+    if (entries.any {
+            it.moments.isNotEmpty()
+        }
+    ) {
+        mapOf(SpineFixtureWeek.weekStart to WrapState.Ready(SpineFixtureWeek.wrap(live = true)))
+    } else {
+        emptyMap()
+    }
+
 private val emptyWeekEntries: List<WeekRollEntry> =
     listOf(WeekRollEntry(weekStart = SpineFixtureWeek.weekStart, moments = emptyList()))
 
@@ -98,6 +111,8 @@ private fun ScreenPreview(entries: List<WeekRollEntry>) {
         entries = entries,
         stripItems = previewStripItems(entries),
         focus = PathPage.Week(SpineFixtureWeek.weekStart),
+        weekWraps = previewWeekWraps(entries),
+        lookups = SpineFixtureWeek.lookups,
         today = pathPreviewToday,
         soulsById = SpineFixtureWeek.soulsById,
         onFocusChange = {},

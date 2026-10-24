@@ -22,6 +22,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
+import app.pbbls.android.R
 import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -38,7 +39,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-/** A Sunday moment of the fixture: its stone is a screen and a half below the contents. */
+/** A Sunday moment of the fixture: its stone is a screen and a half below the week's line. */
 private const val SUNDAY_NAME = "Grandma’s call went quiet"
 
 /** A pebble on a card, and a moment that is not a pebble yet, from the fixture. */
@@ -86,7 +87,8 @@ class SpineWeekTest {
                             aspect = null,
                             onOpen = { _, _ -> },
                             onRequestDelete = {},
-                            previousWeek = null,
+                            wrap = SpineFixtureWeek.wrap(live = false),
+                            lookups = SpineFixtureWeek.lookups,
                             nextWeek = null,
                             onCreatePebble = {},
                             zone = SpineFixtureWeek.zone,
@@ -97,8 +99,11 @@ class SpineWeekTest {
             }
         }
 
-        // Only the contents row names the Sunday moment yet: its stone is below the viewport, not
-        // composed. The row itself is below the fold of the verso, so bring it up before the tap.
+        // The contents live in the week's sheet now (#1207): open it from its tile. Only the
+        // contents row names the Sunday moment yet: its stone is below the viewport, not composed.
+        val contentsTile = context.getString(R.string.path_wrap_tile_contents) + ":"
+        compose.onNode(hasContentDescription(contentsTile, substring = true) and hasClickAction()).performClick()
+        settle()
         compose
             .onNode(hasContentDescription(SUNDAY_NAME, substring = true) and hasClickAction())
             .performScrollTo()
@@ -160,7 +165,8 @@ class SpineWeekTest {
                             aspect = null,
                             onOpen = { moment, face -> opened = moment.name to face },
                             onRequestDelete = {},
-                            previousWeek = null,
+                            wrap = SpineFixtureWeek.wrap(live = false),
+                            lookups = SpineFixtureWeek.lookups,
                             nextWeek = null,
                             onCreatePebble = {},
                             zone = SpineFixtureWeek.zone,

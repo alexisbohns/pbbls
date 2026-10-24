@@ -20,7 +20,7 @@ import app.pbbls.android.R
 /**
  * The Path tab's create affordance, now a Path-only FAB (#852, D3) — the bar
  * now occupies the space the pinned "New pebble" pill
- * ([NewPebbleButton]) used to sit in, so the affordance moved up and became
+ * used to sit in, so the affordance moved up and became
  * circular. A tap opens Capture (#1048); the long press to the all-at-once
  * composer is gone with it (A-12). The `primary` fill carries its
  * `onPrimary` icon.

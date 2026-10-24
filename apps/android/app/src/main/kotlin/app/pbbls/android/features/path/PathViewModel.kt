@@ -21,8 +21,11 @@ import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.core.model.wrap.Strip
 import app.pbbls.android.core.model.wrap.StripItem
+import app.pbbls.android.core.model.wrap.WeekWrap
 import app.pbbls.android.features.path.strip.PathPage
 import app.pbbls.android.features.path.strip.PathPages
+import app.pbbls.android.features.path.wrap.WrapState
+import app.pbbls.android.features.path.wrap.shown
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -59,6 +62,8 @@ sealed interface PathUiState {
         /** The server's strip (#1207); null until it first loads, or while it fails, and the feed's weeks stand in. */
         val strip: Strip?,
         val focus: PathPage,
+        /** Each week page's wrap (#1207); a week never fetched in this session is absent. */
+        val weekWraps: Map<LocalDate, WrapState<WeekWrap>>,
         val today: LocalDate,
         val karma: Int?,
         val serverRipple: RippleSummary?,
@@ -158,6 +163,11 @@ class PathViewModel
         private var strip: Strip? = null
         private var soulsById: Map<String, SoulWithGlyph> = emptyMap()
         private var focus: PathPage? = null
+        private var pages: List<PathPage> = emptyList()
+
+        // The session's wraps (spec §7.1): kept across reloads, marked stale by one, refetched behind it.
+        private val weekWraps = HashMap<LocalDate, WrapState<WeekWrap>>()
+        private val wrapJobs = HashMap<LocalDate, Job>()
         private var hasFailed = false
         private var isLoaded = false
 
@@ -265,7 +275,9 @@ class PathViewModel
                     entries = built
                     soulsById = loadedSouls
                     if (loadedStrip != null) strip = loadedStrip
-                    val pages = PathPages.pages(PathPages.items(strip, built, today))
+                    pages = PathPages.pages(PathPages.items(strip, built, today))
+                    // A load follows a write or a return: what was fetched may be out of date.
+                    weekWraps.replaceAll { _, state -> if (state is WrapState.Ready) state.copy(stale = true) else state }
                     // A flow that just wrote a moment wins over the kept focus (R14).
                     val requested =
                         focusRequests.consume()?.let { id ->
@@ -286,6 +298,37 @@ class PathViewModel
                 },
             )
             publish()
+            loadWraps()
+        }
+
+        /**
+         * The focused page's wrap and its neighbours' (spec §7: prefetch either side), each fetched
+         * only when it is missing, stale or failed, and never twice at once.
+         */
+        private fun loadWraps() {
+            val index = pages.indexOf(focus ?: return)
+            if (index < 0) return
+            listOf(index, index + 1, index - 1)
+                .mapNotNull { pages.getOrNull(it) as? PathPage.Week }
+                .forEach { loadWeekWrap(it.weekStart) }
+        }
+
+        private fun loadWeekWrap(weekStart: LocalDate) {
+            val state = weekWraps[weekStart] ?: WrapState.NeverLoaded
+            if (state is WrapState.Ready && !state.stale) return
+            if (wrapJobs[weekStart]?.isActive == true) return
+            wrapJobs[weekStart] =
+                viewModelScope.launch {
+                    runCatchingCancellable { wraps.weekWrap(weekStart, zone) }.fold(
+                        onSuccess = { weekWraps[weekStart] = WrapState.Ready(it) },
+                        onFailure = {
+                            Log.e(TAG, "path_week_wrap $weekStart failed", it)
+                            // The last good wrap stays on screen; the next focus retries.
+                            weekWraps[weekStart] = WrapState.Failed(weekWraps[weekStart]?.shown)
+                        },
+                    )
+                    publish()
+                }
         }
 
         /** Rebuilds the exposed state from the pieces above. */
@@ -307,6 +350,7 @@ class PathViewModel
                             entries = entries,
                             strip = strip,
                             focus = focused,
+                            weekWraps = weekWraps.toMap(),
                             today = today,
                             karma = stats.karma,
                             serverRipple = stats.ripple,
@@ -319,6 +363,7 @@ class PathViewModel
             if (focus == page) return
             focus = page
             publish()
+            loadWraps()
         }
 
         // MARK: - Delete

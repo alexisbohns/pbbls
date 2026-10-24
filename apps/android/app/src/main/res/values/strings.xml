@@ -75,11 +75,52 @@
     <!-- ==== Path timeline (sub-project D) ==== -->
     <!-- iOS never localized the load-error copy (plain String literal) — Android does. -->
     <string name="path_load_error">Couldn\'t load your pebbles.</string>
-    <string name="path_empty_week_title">Fresh week</string>
-    <string name="path_empty_week_subtitle">Collect a new pebble</string>
-    <string name="path_week_previous">Previous week</string>
     <string name="path_week_next">Next week</string>
     <!-- a11y label for a week-roll cairn cell: ISO week number + pebble count. -->
+    <!-- The week wrap (#1207): the line under the strip, the tiles and the sheet's lists. -->
+    <string name="path_wrap_week">week %1$d</string>
+    <string name="path_wrap_so_far">so far</string>
+    <string name="path_wrap_line_nothing">Nothing yet.</string>
+    <string name="path_wrap_line_no_pebble">No pebble yet.</string>
+    <string name="path_wrap_collect">Collect a pebble</string>
+    <string name="path_wrap_tile_contents">contents</string>
+    <string name="path_wrap_tile_persons">persons</string>
+    <string name="path_wrap_tile_emotions">emotions</string>
+    <string name="path_wrap_tile_domains">domains</string>
+    <string name="path_wrap_tile_weight">weight</string>
+    <string name="path_wrap_tile_hours">hours</string>
+    <string name="path_wrap_tile_kept">kept</string>
+    <string name="path_wrap_tile_a11y">%1$s: %2$s. Opens the list.</string>
+    <string name="path_wrap_list_and">%1$s and %2$s</string>
+    <string name="path_wrap_list_or">%1$s or %2$s</string>
+    <string name="path_wrap_lead_mostly">Mostly %1$s.</string>
+    <string name="path_wrap_lead_mostly_then">Mostly %1$s, then %2$s.</string>
+    <string name="path_wrap_domains_first">%1$s first.</string>
+    <string name="path_wrap_domains_first_then">%1$s first, then %2$s.</string>
+    <string name="path_wrap_weight_lead">%1$s bright, %2$s even, %3$s heavy.</string>
+    <string name="path_wrap_weight_caption">bright · even · heavy</string>
+    <string name="path_wrap_bright">bright</string>
+    <string name="path_wrap_even">even</string>
+    <string name="path_wrap_heavy">heavy</string>
+    <string name="path_wrap_small">small</string>
+    <string name="path_wrap_medium">medium</string>
+    <string name="path_wrap_large">large</string>
+    <string name="path_wrap_hours_lead">From %1$s to %2$s.</string>
+    <string name="path_wrap_hours_range">%1$s to %2$s</string>
+    <string name="path_wrap_invite">Was someone there for %1$s?</string>
+    <string name="path_wrap_invite_more">Name a soul once; it joins every moment you link.</string>
+    <plurals name="path_wrap_photos">
+        <item quantity="one">%1$s photo</item>
+        <item quantity="other">%1$s photos</item>
+    </plurals>
+    <plurals name="path_wrap_cards">
+        <item quantity="one">%1$s card written</item>
+        <item quantity="other">%1$s cards written</item>
+    </plurals>
+    <plurals name="path_wrap_cards_short">
+        <item quantity="one">%1$d card</item>
+        <item quantity="other">%1$d cards</item>
+    </plurals>
     <!-- The Path's strip (#1207): a cairn per week, a dolmen per month. -->
     <string name="path_strip_now">now</string>
     <plurals name="path_strip_week_a11y">
@@ -650,14 +691,10 @@
     <string name="tab_you">You</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
-    <string name="path_spine_kicker">the %1$s week · %2$d</string>
-    <string name="path_spine_title_same_month">The %1$s to the %2$s of %3$s</string>
-    <string name="path_spine_title_cross_month">The %1$s of %2$s to the %3$s of %4$s</string>
     <plurals name="path_spine_summary_pebbles">
         <item quantity="one">%1$s pebble</item>
         <item quantity="other">%1$s pebbles</item>
     </plurals>
-    <string name="path_spine_summary_no_pebbles">no pebbles</string>
     <plurals name="path_spine_summary_people">
         <item quantity="one">, %1$s person</item>
         <item quantity="other">, %1$s people</item>

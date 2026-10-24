@@ -40,7 +40,7 @@ import app.pbbls.android.core.designsystem.SpineLayoutTokens.ROW_MIN
 import app.pbbls.android.core.designsystem.SpineSectionHeader
 import app.pbbls.android.core.designsystem.rule
 import app.pbbls.android.core.model.SoulWithGlyph
-import app.pbbls.android.core.model.wrap.DaySet
+import app.pbbls.android.core.model.wrap.PersonStat
 import app.pbbls.android.core.ui.DayMode
 import app.pbbls.android.core.ui.DaySetMarks
 import app.pbbls.android.core.ui.MarkRow
@@ -49,7 +49,6 @@ import app.pbbls.android.features.path.spine.SpineLayout.FOLD_INDENT
 import app.pbbls.android.features.path.spine.SpineLayout.PERSONS_HEADER_GAP
 import app.pbbls.android.features.path.spine.SpineLayout.PERSONS_TOP
 import app.pbbls.android.features.path.spine.SpineLayout.VERSO_PAD_X
-import app.pbbls.android.features.path.spine.logic.PersonOfWeek
 import app.pbbls.android.features.path.spine.logic.PersonsOfWeek
 import app.pbbls.android.features.path.spine.logic.WeekWordsBuilder
 import java.time.LocalDate
@@ -61,23 +60,24 @@ import java.time.LocalDate
  * rest behind "and *N* others", so a fourteen-person picnic does not push the contents off
  * the first screen. Nothing when the week names nobody.
  *
- * @param persons in `PersonsOfWeek.of` order.
- * @param soulsById the glyphs; a soul missing here keeps the dashed placeholder.
+ * @param persons the server's ranked persons (#1207); a soul missing from [soulsById] is skipped.
+ * @param soulsById the souls' names and glyphs.
  * @param readingDay 0 = Monday: its letter in the header turns ink; read by the letters alone.
  */
 @Composable
 internal fun PersonsOfWeek(
-    persons: List<PersonOfWeek>,
+    persons: List<PersonStat>,
     weekStart: LocalDate,
     soulsById: Map<String, SoulWithGlyph>,
     readingDay: () -> Int?,
     modifier: Modifier = Modifier,
 ) {
-    if (persons.isEmpty()) return
+    val rows = remember(persons, soulsById) { persons.mapNotNull { stat -> soulsById[stat.soulId]?.let { PersonRowModel(it, stat) } } }
+    if (rows.isEmpty()) return
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val locale = LocalConfiguration.current.locales[0]
-    val (shown, rest) = remember(persons) { PersonsOfWeek.split(persons) }
+    val (shown, rest) = remember(rows) { PersonsOfWeek.split(rows) }
     val letters = remember(weekStart, locale) { CalendarLabels.weekdayLetters(weekStart, locale) }
     var expanded by remember { mutableStateOf(false) }
 
@@ -86,7 +86,7 @@ internal fun PersonsOfWeek(
             DayLetters(letters, readingDay, Modifier.alignByBaseline())
         }
         Column(Modifier.padding(top = PERSONS_HEADER_GAP).rule(colors.rule, above = true)) {
-            shown.forEach { person -> PersonRow(person, weekStart, soulsById) }
+            shown.forEach { person -> PersonRow(person, weekStart) }
         }
         if (rest.isNotEmpty()) {
             val words = remember(rest.size, locale) { NumberWords.cardinal(rest.size, locale, NumberWords.Gender.FEMININE) }
@@ -119,7 +119,7 @@ internal fun PersonsOfWeek(
                         .wrapContentHeight(Alignment.CenterVertically),
             )
             if (expanded) {
-                rest.forEach { person -> PersonRow(person, weekStart, soulsById) }
+                rest.forEach { person -> PersonRow(person, weekStart) }
             }
         }
     }
@@ -154,30 +154,30 @@ private fun DayLetters(
     }
 }
 
+/** A ranked soul joined to its glyph and name. */
+private class PersonRowModel(
+    val soul: SoulWithGlyph,
+    val stat: PersonStat,
+)
+
 @Composable
 private fun PersonRow(
-    person: PersonOfWeek,
+    person: PersonRowModel,
     weekStart: LocalDate,
-    soulsById: Map<String, SoulWithGlyph>,
 ) {
     val colors = PebblesTheme.spine.colors
     val locale = LocalConfiguration.current.locales[0]
-    val (count, days) = remember(person, weekStart, locale) { WeekWordsBuilder.dotDays(person.days, weekStart, locale) }
-    val dotsDescription = pluralStringResource(R.plurals.path_spine_day_dots_a11y, count, count, days)
-    val daySet =
-        remember(person.days) {
-            DaySet(
-                person.days.size,
-                person.days.indices
-                    .filter { person.days[it] }
-                    .toSet(),
-            )
+    val days = person.stat.days
+    val (count, named) =
+        remember(days, weekStart, locale) {
+            WeekWordsBuilder.dotDays(BooleanArray(days.length) { it in days }, weekStart, locale)
         }
+    val dotsDescription = pluralStringResource(R.plurals.path_spine_day_dots_a11y, count, count, named)
 
     MarkRow(
         title = person.soul.name,
         description = "${person.soul.name}, $dotsDescription",
-        leading = { SoulMark(soulsById[person.soul.id]?.glyph, colors.ink, Modifier.size(MARK)) },
-        trailing = { DaySetMarks(daySet, DayMode.Row, colors.ink, colors.ink3) },
+        leading = { SoulMark(person.soul.glyph, colors.ink, Modifier.size(MARK)) },
+        trailing = { DaySetMarks(days, DayMode.Row, colors.ink, colors.ink3) },
     )
 }
