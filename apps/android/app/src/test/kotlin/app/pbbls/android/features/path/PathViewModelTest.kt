@@ -2,6 +2,8 @@ package app.pbbls.android.features.path
 
 import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
+import app.pbbls.android.core.data.DayView
+import app.pbbls.android.core.data.DisplayPreferences
 import app.pbbls.android.core.data.SignedUrlProviding
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.data.SnapBoundsDecoder
@@ -22,6 +24,7 @@ import app.pbbls.android.testing.FakePathWrapService
 import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
+import app.pbbls.android.testing.inMemorySettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -60,7 +63,8 @@ class PathViewModelTest {
         focusRequests: PathFocusRequests = PathFocusRequests(),
         souls: FakeSoulsService = FakeSoulsService(),
         wraps: FakePathWrapService = FakePathWrapService(),
-    ) = PathViewModel(path, stats, writes, focusRequests, souls, wraps, snapAspect())
+        display: DisplayPreferences = DisplayPreferences(inMemorySettings()),
+    ) = PathViewModel(path, stats, writes, focusRequests, souls, wraps, display, snapAspect())
 
     /** Never reached from a ViewModel test: the ratio probe belongs to the cards. */
     private fun snapAspect(): SnapAspectCache {
@@ -584,5 +588,53 @@ class PathViewModelTest {
             val week = state.weekWraps.getValue(weekOf(current))
             assertTrue("a failed fetch keeps the kept copy on screen", week is WrapState.Failed)
             assertEquals(7, week.shown?.pebbles)
+        }
+
+    // MARK: - Month pages and the day view (#1207, D6, D9)
+
+    @Test
+    fun `a focused month loads its wrap, and the day view is remembered`() =
+        runTest {
+            val current = moment("now")
+            val month = java.time.YearMonth.from(now.toLocalDate().minusMonths(1))
+            val monthWrap =
+                app.pbbls.android.core.model.wrap.MonthWrap(
+                    month,
+                    month.lengthOfMonth(),
+                    month.atDay(1).dayOfWeek,
+                    4,
+                    1,
+                    emptyList(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                )
+            val wraps = FakePathWrapService(strip = Strip(listOf(StripItem.Month(month, 4))), months = mutableMapOf(month to monthWrap))
+            val display = DisplayPreferences(inMemorySettings())
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(current)), wraps = wraps, display = display)
+            advanceUntilIdle()
+
+            viewModel.onFocus(PathPage.Month(month))
+            advanceUntilIdle()
+            val state = viewModel.uiState.value as PathUiState.Content
+            assertEquals(
+                4,
+                state.monthWraps
+                    .getValue(month)
+                    .shown
+                    ?.pebbles,
+            )
+            assertEquals(DayView.CIRCLE, state.dayView)
+
+            viewModel.onDayView(DayView.CALENDAR)
+            assertEquals(DayView.CALENDAR, (viewModel.uiState.value as PathUiState.Content).dayView)
+            assertEquals(DayView.CALENDAR, display.dayView)
         }
 }
