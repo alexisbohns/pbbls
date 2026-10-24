@@ -74,7 +74,7 @@ struct PathModelTests {
         #expect(model.focusedWeekStart == F.weekStart)
     }
 
-    @Test("a page carries its days, words, persons and contents in reading order")
+    @Test("a page carries its days, words, soul names and contents in reading order")
     func page() async throws {
         let model = model()
         await model.load { F.moments }
@@ -84,8 +84,8 @@ struct PathModelTests {
         #expect(page.week.pebbleCount == 13)
         #expect(page.contents.first?.name == "Flag march with Nadia")
         // Names come from the pebbles' own souls before the reference cache loads.
-        #expect(page.persons.first?.name == "Mara")
-        #expect(page.previous == nil && page.next == nil)
+        #expect(page.soulNames.values.contains("Mara"))
+        #expect(page.next == nil)
     }
 
     @Test("the reference cache's glyphs reach the pages")

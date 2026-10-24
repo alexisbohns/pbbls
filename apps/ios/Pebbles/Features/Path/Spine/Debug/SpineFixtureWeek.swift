@@ -212,15 +212,19 @@ extension SpineFixtureWeek {
         return model
     }
 
-    /// The feed context over the fixture: its palettes and its primed photo ratios.
+    /// The feed context over the fixture: its palettes, its primed photo ratios,
+    /// and (#1226) its wrap and lookups when given.
     @MainActor
-    static func context(_ model: PathModel, page: SpinePage, width: CGFloat = 393) -> SpineFeedContext {
+    static func context(_ model: PathModel, page: SpinePage, width: CGFloat = 393,
+                        wrap: WeekWrap? = nil) -> SpineFeedContext {
         SpineFeedContext(
             page: page, column: SpineLayout.column(width: width),
             palette: { palette(for: $0) },
             ratio: { $0.firstSnapPath.flatMap { photos[$0]?.ratio } },
             pressRequests: model.pressRequests,
-            onOpen: { _, _ in }, onDelete: { _ in }
+            onOpen: { _, _ in }, onDelete: { _ in },
+            wrap: wrap,
+            lookups: lookups
         )
     }
 
@@ -235,6 +239,81 @@ extension SpineFixtureWeek {
                                  pebble: moment.pebble)
         }
         return pebbles + copies
+    }
+}
+
+// MARK: - The week's wrap (#1226)
+
+extension SpineFixtureWeek {
+    /// The fixture week's wrap as `path_week_wrap` would send it, worked by hand
+    /// from the fixture's pebbles by the server's rules: persons by days, then
+    /// pebbles, then name; families by worth (intensity × charge, even ½); weight
+    /// by intensity. `live` is the week as it stands (today is its Sunday): only
+    /// contents and persons; settled, every tile. The domains and the cards are
+    /// invented, the fixture's pebbles carrying none.
+    static func weekWrap(live: Bool) -> WeekWrap {
+        let start = CalendarDay(weekStart, in: calendar.timeZone)
+        func person(_ key: String, _ days: [Int], _ count: Int) -> PersonStat {
+            PersonStat(soulId: soul(key).id.uuidString.lowercased(), count: count, days: DaySet(length: 7, days: days),
+                       isNewSincePrevious: false)
+        }
+        let persons = [person("mara", [0, 1, 3, 5], 6), person("bruno", [1, 3, 6], 3), person("elio", [0, 1, 3], 3),
+                       person("jules", [2, 3], 3), person("nadia", [0, 3], 3)]
+            + neighbours.map { person($0, [3], 1) }
+        func family(_ slug: String, _ count: Int, _ worth: Double, _ days: [Int]) -> FamilyStat {
+            FamilyStat(slug: slug, count: count, worth: worth, share: worth / 22.5, days: DaySet(length: 7, days: days))
+        }
+        func moment(_ n: Int) -> String { id(0x8000, n).uuidString.lowercased() }
+        func hour(_ n: Int) -> HourMark {
+            let at = moments.first { $0.id == id(0x8000, n) }?.happenedAt ?? weekStart
+            let parts = calendar.dateComponents([.hour, .minute], from: at)
+            let decimal = Double(parts.hour ?? 0) + Double(parts.minute ?? 0) / 60
+            return HourMark(momentId: moment(n), happened: decimal, collected: decimal)
+        }
+        let all: [WeekTile] = live ? [.contents, .persons] : WeekTile.allCases
+        return WeekWrap(
+            weekStart: start, isoWeek: 41, isoYear: 2026, isLive: live, pebbles: 13, people: 14, tiles: all,
+            persons: persons, inviteMomentIds: nil,
+            families: live ? nil : [family("joy", 4, 9, [0, 3, 5]), family("peace", 4, 4.5, [1, 2, 5, 6]),
+                                    family("pride", 2, 4, [0, 5]), family("anger", 1, 2, [1]),
+                                    family("sadness", 1, 2, [6]), family("fear", 1, 1, [2])],
+            lead: live ? nil : Lead(order: ["joy", "peace", "pride", "anger", "sadness", "fear"], zero: ["shame"]),
+            domains: live ? nil : fixtureDomains.enumerated().map { index, domain in
+                DomainStat(domainId: domain.id.uuidString.lowercased(), count: [4, 3, 3][index],
+                           days: DaySet(length: 7, days: [[0, 2, 3], [0, 1, 6], [1, 2, 5]][index]))
+            },
+            weight: live ? nil : WeightGrid(bright: [0, 3, 3], even: [3, 1, 0], heavy: [1, 2, 0]),
+            hours: live ? nil : [1, 2, 3, 4, 5, 6, 7, 12, 8, 9, 13, 10, 11].map(hour),
+            kept: live ? nil : Kept(photoMomentIds: [1, 4, 6, 7, 9, 13].map(moment),
+                                    cards: [CardCount(momentId: moment(2), count: 1),
+                                            CardCount(momentId: moment(9), count: 2)])
+        )
+    }
+
+    /// The persons' order the week's people lines follow.
+    static var personsOrder: [String] { (weekWrap(live: true).persons ?? []).map(\.soulId) }
+
+    /// The fixture's families: one per category, its palette the sandbox's.
+    static var families: [EmotionCategory] {
+        emotionTable.compactMap { row in
+            guard let palette = palettes[emotion(row.slug).id] else { return nil }
+            return EmotionCategory(id: id(0xD000, emotionTable.firstIndex { $0.slug == row.slug } ?? 0),
+                                   slug: row.category, name: row.category.capitalized, palette: palette)
+        }
+    }
+
+    static let fixtureDomains: [Domain] = [("friends", "Friends"), ("family", "Family"), ("identity", "Identity")]
+        .enumerated().map { index, row in
+            Domain(id: id(0xE000, index + 1), slug: row.0, name: row.1, label: row.1)
+        }
+
+    /// What the fixture wrap's ids point at.
+    static var lookups: WrapLookups {
+        let byId = Dictionary(uniqueKeysWithValues: moments.map { ($0.id.uuidString.lowercased(), $0) })
+        let families = Dictionary(uniqueKeysWithValues: Self.families.map { ($0.slug, $0) })
+        let domains = Dictionary(uniqueKeysWithValues: fixtureDomains.map { ($0.id.uuidString.lowercased(), $0) })
+        return WrapLookups(moment: { byId[$0.lowercased()] }, family: { families[$0] },
+                           domain: { domains[$0.lowercased()] }, palette: { palette(for: $0) })
     }
 }
 #endif

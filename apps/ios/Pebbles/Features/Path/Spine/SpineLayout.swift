@@ -25,7 +25,8 @@ enum SpineLayout {
     static let dayPadBottom: CGFloat = 34
     static let pebbleGap: CGFloat = 38
     static let line: CGFloat = 1
-    static let feedTop: CGFloat = 48
+    /// 24 since the week's tiles sit above the first day (#1226; Android's `FEED_TOP`).
+    static let feedTop: CGFloat = 24
     static let feedBottom: CGFloat = 96
 
     // Stones (R2)

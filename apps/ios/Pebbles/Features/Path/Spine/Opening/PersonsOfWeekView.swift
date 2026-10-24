@@ -5,10 +5,14 @@ import SwiftUI
 /// `MarkRow` per person in the people-line order: the glyph (24 in a 30 column),
 /// the small-caps name and the seven dots, each row at least 44 tall, ruled as
 /// on the web and Android (#1226). Eight rows, then "and N others", which
-/// unfolds the rest.
+/// unfolds the rest. Since #1226 the persons are the server's, ranked
+/// (`path_week_wrap`), and the list is a page of the week's sheet; a soul the
+/// device has no name for is skipped.
 struct PersonsOfWeekView: View {
     let page: SpinePage
+    let persons: [PersonStat]
     let readingDay: Int?
+    var topPadding: CGFloat = SpineLayout.sectionTop
 
     @State private var unfolded = false
 
@@ -16,7 +20,7 @@ struct PersonsOfWeekView: View {
     private var calendar: Calendar { SpineCalendar.current }
 
     var body: some View {
-        let split = PersonsOfWeek.split(page.persons)
+        let split = PersonsOfWeek.split(persons.filter { page.soulNames[$0.soulId] != nil })
         VStack(alignment: .leading, spacing: 0) {
             SpineSectionHeader(SpineCopy.persons(locale: locale)) { letters }
                 .padding(.bottom, SpineLayout.sectionHeaderGap)
@@ -43,7 +47,7 @@ struct PersonsOfWeekView: View {
                 Rectangle().fill(Color.pebbles.rule).frame(height: SpineLayout.rule)
             }
         }
-        .padding(.top, SpineLayout.sectionTop)
+        .padding(.top, topPadding)
         .padding(.horizontal, SpineLayout.versoPadX)
     }
 
@@ -63,14 +67,15 @@ struct PersonsOfWeekView: View {
         .accessibilityHidden(true)
     }
 
-    private func row(_ person: PersonOfWeek) -> some View {
-        let dots = WeekOpening.dotDays(person.days, weekStart: page.weekStart, calendar: calendar, locale: locale)
-        let days = DaySet(length: person.days.count, days: person.days.indices.filter { person.days[$0] })
-        return MarkRow(person.name, accessibilityText: person.name + ", "
+    private func row(_ person: PersonStat) -> some View {
+        let name = page.soulNames[person.soulId] ?? ""
+        let marked = (0..<7).map(person.days.contains)
+        let dots = WeekOpening.dotDays(marked, weekStart: page.weekStart, calendar: calendar, locale: locale)
+        return MarkRow(name, accessibilityText: name + ", "
             + SpineCopy.dayDots(count: dots.count, days: dots.days, locale: locale)) {
             SoulMark(strokes: page.soulGlyphs[person.soulId], side: SpineLayout.mark)
         } trailing: {
-            DaySetMarks(days: days, mode: .row)
+            DaySetMarks(days: person.days, mode: .row)
         }
     }
 }

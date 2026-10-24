@@ -22,8 +22,10 @@ struct WeekWrap: Hashable, Sendable {
     let kept: Kept?
 }
 
-enum WeekTile: String, CaseIterable, Hashable, Sendable {
+enum WeekTile: String, CaseIterable, Hashable, Identifiable, Sendable {
     case contents, persons, emotions, domains, weight, hours, kept
+
+    var id: String { rawValue }
 }
 
 /// Pebble counts by intensity 1..3 (index 0..2), for bright, even and heavy pebbles.

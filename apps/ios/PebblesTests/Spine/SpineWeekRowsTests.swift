@@ -73,21 +73,22 @@ struct SpineWeekRowsTests {
         }
     }
 
-    @Test("the verso opens with the masthead, the opening and the persons, and the page ends at the mouth")
+    @Test("the verso opens with the week's line, then its tiles once the wrap lists any; the page ends at the mouth")
     func versoAndClosing() async throws {
         let model = await SpineFixtureWeek.model()
         let page = try #require(model.page(for: SpineFixtureWeek.weekStart))
-        #expect(SpineWeekRows.verso(page).map(\.id) == ["masthead", "opening", "persons", "contents"])
+        #expect(SpineWeekRows.verso(page, wrap: nil).map(\.id) == ["line"])
+        #expect(SpineWeekRows.verso(page, wrap: SpineFixtureWeek.weekWrap(live: true)).map(\.id) == ["line", "tiles"])
         #expect(SpineWeekRows.closing(page).map(\.id) == ["mouth"])
     }
 
-    @Test("an empty current week has no persons, no days and the fresh week instead of the mouth")
+    @Test("an empty current week is its line alone: no tiles, no days, no mouth")
     func emptyWeek() async throws {
         let model = PathModel(calendar: SpineFixtureWeek.calendar, now: { SpineFixtureWeek.today })
         await model.load { [] }
         let page = try #require(model.page(for: SpineFixtureWeek.weekStart))
-        #expect(SpineWeekRows.verso(page).map(\.id) == ["masthead", "opening"])
+        #expect(SpineWeekRows.verso(page, wrap: nil).map(\.id) == ["line"])
         #expect(SpineWeekRows.days(page).isEmpty)
-        #expect(SpineWeekRows.closing(page).map(\.id) == ["empty"])
+        #expect(SpineWeekRows.closing(page).isEmpty)
     }
 }

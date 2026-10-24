@@ -13,6 +13,14 @@ import os
 /// comes through `wraps`, which the view sets and the tests fake; a strip
 /// failure never fails the timeline, and a failed refresh keeps the last strip.
 /// The feed's fetch and the delete are passed in as closures.
+///
+/// It holds each week's wrap (`path_week_wrap`) the way spec §7.1 asks: a page
+/// shows its wrap at once whenever one ever loaded, and revalidates behind it.
+/// `weekWraps` holds only what the pages show, and is written only when a
+/// payload differs, so an unchanged revalidation invalidates no view; which
+/// pages must be fetched again (a write since, a failure) is unobserved. Each
+/// page's fetch is a task the model owns (Android's `wrapJobs`), so a swipe that
+/// moves the focus never cancels one half-way.
 @Observable @MainActor
 final class PathModel {
     enum Phase: Equatable { case loading, failed, content }
@@ -22,6 +30,8 @@ final class PathModel {
 
     private(set) var phase: Phase = .loading
     private(set) var moments: [MomentSummary] = []
+    /// The feed's moments by lowercase id, built once per load: what the wraps' ids point at.
+    private(set) var momentsById: [String: MomentSummary] = [:]
     private(set) var entries: [WeekRollEntry] = []
     /// The server's strip; nil until it first loads, and the feed's weeks stand in.
     private(set) var strip: Strip?
@@ -29,6 +39,8 @@ final class PathModel {
     private(set) var stripItems: [StripItem] = []
     /// The pager's pages, the strip's focusable items in order.
     private(set) var pages: [PathPage] = []
+    /// Each week's wrap as last fetched, by Monday: what its page shows.
+    private(set) var weekWraps: [Date: WeekWrap] = [:]
     private(set) var focusedPage: PathPage
     /// weekStart → the reading day's index (D12), written only on a change.
     private(set) var readingDay: [Date: Int] = [:]
@@ -42,6 +54,12 @@ final class PathModel {
     private(set) var pagesRevision = 0
 
     @ObservationIgnored private var spinePages: [Date: SpinePage] = [:]
+    /// Pages whose shown wrap must be fetched again: a write since it loaded, or a failed fetch.
+    @ObservationIgnored private var wrapsToRefetch: Set<PathPage> = []
+    /// One running fetch per page.
+    @ObservationIgnored private var wrapTasks: [PathPage: Task<Void, Never>] = [:]
+    /// Bumped by every load: a fetch that started before a write lands stale.
+    @ObservationIgnored private var wrapGeneration = 0
     /// Each load takes the next number; only the latest one applies its result.
     @ObservationIgnored private var loadGeneration = 0
     @ObservationIgnored private var referenceNames: [String: String] = [:]
@@ -83,6 +101,9 @@ final class PathModel {
             guard !Task.isCancelled, generation == loadGeneration else { return }
             if let fresh { strip = fresh }
             apply(result)
+            // A load follows a write or a return: every wrap fetched may be out of date.
+            wrapGeneration += 1
+            wrapsToRefetch.formUnion(weekWraps.keys.map(PathPage.week))
             phase = .content
         } catch {
             // The strip's fetch is cancelled with the scope; the error need not wait for it.
@@ -116,6 +137,8 @@ final class PathModel {
 
     private func apply(_ result: [MomentSummary]) {
         moments = result
+        momentsById = Dictionary(result.map { ($0.id.uuidString.lowercased(), $0) },
+                                 uniquingKeysWith: { first, _ in first })
         let today = now()
         entries = WeekRollBuilder.build(moments: result, calendar: calendar, today: today)
         stripItems = PathPages.items(strip: strip, entries: entries, today: today, calendar: calendar)
@@ -174,6 +197,62 @@ final class PathModel {
         readingDay[weekStart] = index
     }
 
+    // MARK: - Wraps
+
+    /// Starts the fetches the focused page and its neighbours need (never
+    /// loaded, stale or failed) and waits for them, and for any already running.
+    /// The view calls it on each focus and after each load; cancelling the
+    /// caller stops the wait, never the fetches.
+    func refreshWraps() async {
+        for task in scheduleWraps() { await task.value }
+    }
+
+    @discardableResult
+    private func scheduleWraps() -> [Task<Void, Never>] {
+        guard let wraps, let index = pages.firstIndex(of: focusedPage) else { return [] }
+        var running: [Task<Void, Never>] = []
+        for page in pages[max(0, index - 1)...min(pages.count - 1, index + 1)] {
+            if let task = wrapTasks[page] {
+                running.append(task)
+                continue
+            }
+            guard case let .week(start) = page, weekWraps[start] == nil || wrapsToRefetch.contains(page) else {
+                continue
+            }
+            let generation = wrapGeneration
+            let task = Task { await self.fetchWrap(page, wraps: wraps, generation: generation) }
+            wrapTasks[page] = task
+            running.append(task)
+        }
+        return running
+    }
+
+    private func fetchWrap(_ page: PathPage, wraps: any PathWrapServicing, generation: Int) async {
+        guard case let .week(start) = page else { return }
+        let zone = calendar.timeZone
+        let result: Result<WeekWrap, Error>
+        do {
+            result = .success(try await wraps.weekWrap(CalendarDay(start, in: zone), zone: zone))
+        } catch {
+            result = .failure(error)
+        }
+        wrapTasks[page] = nil
+        switch result {
+        case let .success(wrap) where generation == wrapGeneration:
+            wrapsToRefetch.remove(page)
+            if weekWraps[start] != wrap { weekWraps[start] = wrap }
+        case let .success(wrap):
+            // It started before a write: shown if nothing else is, still stale, asked for again.
+            if weekWraps[start] == nil { weekWraps[start] = wrap }
+            wrapsToRefetch.insert(page)
+            scheduleWraps()
+        case let .failure(error):
+            // The last good wrap stays on screen; the next demand retries.
+            wrapsToRefetch.insert(page)
+            logger.error("path_week_wrap failed: \(error.localizedDescription, privacy: .private)")
+        }
+    }
+
     // MARK: - Pages
 
     /// A week page; a week the strip focuses and the feed does not hold yet
@@ -192,10 +271,7 @@ final class PathModel {
             weekStart: weekStart,
             week: week,
             words: WeekOpening.weekWords(weekStart: weekStart, calendar: calendar, locale: locale),
-            persons: PersonsOfWeek.personsOfWeek(moments, names: names, weekStart: weekStart,
-                                                 calendar: calendar, locale: locale),
             contents: SpineWeekBuilder.readingOrder(week),
-            previous: WeekRollBuilder.previous(of: weekStart, in: entries).map(neighbour),
             next: WeekRollBuilder.next(of: weekStart, in: entries).map(neighbour),
             // Memoised until the next load: across the Sunday → Monday roll it stays stale without one.
             isCurrent: weekStart == currentWeekStart,

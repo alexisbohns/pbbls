@@ -3,33 +3,6 @@ import Foundation
 /// The Spine's copy, typed: one function per `path.spine.*` key, so no view
 /// spells a key or an argument order. Counts that drive a plural come first.
 enum SpineCopy {
-    /// The year is `String(year)`, so no locale groups it ("2 026").
-    static func kicker(ordinal: String, year: Int, locale: Locale) -> String {
-        SpineStrings.format("path.spine.kicker", locale: locale, ordinal, String(year))
-    }
-
-    static func title(_ title: WeekTitle, locale: Locale) -> String {
-        switch title {
-        case let .sameMonth(from, to, month):
-            return SpineStrings.format("path.spine.titleSameMonth", locale: locale, from, to, month)
-        case let .crossMonth(from, fromMonth, to, toMonth):
-            return SpineStrings.format("path.spine.titleCrossMonth", locale: locale, from, fromMonth, to, toMonth)
-        }
-    }
-
-    /// "Eleven pebbles, five people." The web's ICU `=0` branches are explicit
-    /// here: no pebbles reads its own words, no people drops the clause.
-    static func summary(pebbles: Int, people: Int, locale: Locale) -> String {
-        let words = WeekOpening.summaryWords(pebbles: pebbles, people: people, locale: locale)
-        let pebblesPart = pebbles == 0
-            ? SpineStrings.string("path.spine.summaryNoPebbles", locale: locale)
-            : SpineStrings.format("path.spine.summaryPebbles", locale: locale, pebbles, words.pebblesWords)
-        let peoplePart = people == 0
-            ? ""
-            : SpineStrings.format("path.spine.summaryPeople", locale: locale, people, words.peopleWords)
-        return WeekOpening.sentenceCase(pebblesPart + peoplePart + ".", locale: locale)
-    }
-
     static func persons(locale: Locale) -> String { SpineStrings.string("path.spine.persons", locale: locale) }
 
     /// "and six others": the persons' fold.

@@ -68,12 +68,6 @@ enum WeekOpening {
         return iso
     }
 
-    /// Pebbles are masculine in French ("un galet"), people feminine ("une personne").
-    static func summaryWords(pebbles: Int, people: Int, locale: Locale) -> (pebblesWords: String, peopleWords: String) {
-        (NumberWords.cardinal(pebbles, locale: locale, gender: .masculine),
-         NumberWords.cardinal(people, locale: locale, gender: .feminine))
-    }
-
     /// "eleven pebbles…" → "Eleven pebbles…": the summary opens a sentence.
     static func sentenceCase(_ text: String, locale: Locale) -> String {
         guard let first = text.first else { return text }

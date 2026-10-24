@@ -1270,3 +1270,17 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Blog images live in `apps/web/public/blog/<slug>/` and count against the repo's size; the service worker does not precache them.
 - **Supersedes / Superseded-by:** Narrows the "no CSS files" rule in `apps/web/CLAUDE.md` for the blog only.
 - **Refs:** #1209, #1207, `apps/web/components/blog/`, `apps/web/lib/blog/`, `apps/web/lib/auth/consent-gate.ts`.
+
+## 2026-10-24 — On iOS the wraps' sheet switches lists with a title menu, Weather's pattern (#1226)
+
+- **Status:** taken
+- **Scope:** ios, ui
+- **Context:** The wraps open one sheet over several lists: the week's (up to seven, one per tile) and the month's (persons · emotions · domains). Android draws it as a stock `ModalBottomSheet` with a `SecondaryScrollableTabRow` and a `HorizontalPager` (`TabbedSheetPager`, #1207). On iPhone the HIG caps a segmented control at about five segments, and a scrolling row of text tabs is not a system control. The maintainer was asked on 2026-10-24.
+- **Decision:** `WrapSheet` is a `.sheet` with fixed `.medium`/`.large` detents and a drag indicator, on the Spine's paper. Inside it is a `NavigationStack` whose leading title is a pull-down `Menu` naming the open list and offering the others, with **Done** as the confirmation action, over a paging horizontal `ScrollView` of the lists, so a swipe turns to the next one. The week and the month use this one component. As on Android, there are no page dots, the sheet never resizes as the reader moves between lists, and the open list is view state. Everything the lists say (names, order, sentences) is shared with Android.
+- **Why:** It is the system's own answer to "a row of tiles opens one sheet of several lists" (Weather's conditions sheet). It holds any number of lists in one pattern, and the title says which list is open. Rejected: Android's scrolling text tabs (a custom control on iOS), and a segmented control for the month with a menu for the week (two patterns for one component).
+- **Consequences:**
+  - The divergence is deliberate. An iOS change that "restores" Android's tab row reopens this entry.
+  - A VoiceOver user switches lists through the menu, or with a three-finger swipe on the pager.
+  - The paging scroll view inside a `.medium` sheet is to be checked on device: it must not steal the vertical drag that expands the sheet.
+- **Supersedes / Superseded-by:** none. Android keeps its `TabbedSheetPager` (#1207); the two differ in chrome only.
+- **Refs:** #1226, #1207, `docs/superpowers/plans/2026-10-24-ios-path-wraps.md` (§2, decision A1), `apps/ios/Pebbles/Features/Path/Wrap/Sheet/WrapSheet.swift`.

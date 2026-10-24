@@ -2,12 +2,11 @@ import SwiftUI
 
 /// One row of a Spine week.
 enum SpineRow: Identifiable {
-    case masthead
-    case opening
-    case persons
-    case contents
+    /// The week's line (#1226, D3): its number and its summary.
+    case line
+    /// The wrap's tiles (#1226, D4), when the server lists any.
+    case tiles
     case mouth
-    case empty
     /// A day's seam; `isLast` keeps a still last day's full height to the mouth.
     case seam(SpineDay<MomentSummary>, isLast: Bool)
     /// A moment, the day it belongs to, and the padding under it.
@@ -15,12 +14,9 @@ enum SpineRow: Identifiable {
 
     var id: String {
         switch self {
-        case .masthead: return "masthead"
-        case .opening: return "opening"
-        case .persons: return "persons"
-        case .contents: return "contents"
+        case .line: return "line"
+        case .tiles: return "tiles"
         case .mouth: return "mouth"
-        case .empty: return "empty"
         case let .seam(day, _): return "seam-\(day.index)"
         case let .pebble(moment, _, _): return moment.id.uuidString
         }
@@ -31,14 +27,14 @@ enum SpineRow: Identifiable {
 /// its pebbles. `SpineWeekView` lays the rows out lazily and `SpineWeekStack`
 /// eagerly, so the app and the B2 references cannot disagree.
 enum SpineWeekRows {
-    /// The verso: the masthead, the opening, the persons when anyone was there, and the contents.
-    static func verso(_ page: SpinePage) -> [SpineRow] {
-        [.masthead, .opening] + (page.persons.isEmpty ? [] : [.persons]) + (page.contents.isEmpty ? [] : [.contents])
+    /// The verso (#1226): the week's line, then its tiles when the wrap lists any.
+    static func verso(_ page: SpinePage, wrap: WeekWrap?) -> [SpineRow] {
+        [.line] + ((wrap?.tiles.isEmpty ?? true) ? [] : [.tiles])
     }
 
-    /// The mouth, or the fresh week when the page has no moment (only the current week can be empty).
+    /// The mouth; an empty week is its line alone, with its way to a first pebble.
     static func closing(_ page: SpinePage) -> [SpineRow] {
-        page.contents.isEmpty ? [.empty] : [.mouth]
+        page.contents.isEmpty ? [] : [.mouth]
     }
     /// - Parameter only: the day indices to keep (a reference slice); nil keeps all.
     static func days(_ page: SpinePage, only: ClosedRange<Int>? = nil) -> [SpineRow] {
@@ -85,6 +81,8 @@ struct SpineRowView: View {
     let slotFocus: AccessibilityFocusState<UUID?>.Binding?
     /// The page's coordinate space for the reading day; nil (the eager stack) reports nothing.
     var markSpace: String?
+    /// The eager stack (references, the lab): no scroll views, which `ImageRenderer` draws blank.
+    var isEager = false
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.legibilityWeight) private var legibilityWeight
@@ -105,19 +103,22 @@ struct SpineRowView: View {
     @ViewBuilder
     private var content: some View {
         switch row {
-        case .masthead:
-            WeekMasthead(page: context.page, onFocus: context.onFocus)
-        case .opening:
-            WeekOpeningView(text: WeekOpeningText(page: context.page, locale: SpineStrings.appLocale))
-        case .persons:
-            PersonsOfWeekView(page: context.page, readingDay: context.readingDay)
-        case .contents:
-            WeekContents(page: context.page, readingDay: context.readingDay, palette: context.palette,
-                         onGo: context.onGo)
+        case .line:
+            WeekLine(isoWeek: context.page.words.number, summary: context.lineSummary,
+                     onCollect: context.page.contents.isEmpty && context.page.isCurrent ? context.onCreate : nil)
+        case .tiles:
+            if let wrap = context.wrap {
+                if isEager {
+                    WeekTileRow(wrap: wrap, page: context.page, lookups: context.lookups, onOpen: context.onOpenTile)
+                        .fixedSize()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .clipped()
+                } else {
+                    WeekTiles(wrap: wrap, page: context.page, lookups: context.lookups, onOpen: context.onOpenTile)
+                }
+            }
         case .mouth:
             WeekMouth(page: context.page, onFocus: context.onFocus)
-        case .empty:
-            SpineEmptyWeek(onCreate: context.onCreate)
         case let .seam(day, isLast):
             DaySeam(date: day.date, isStill: day.isStill, isLast: isLast)
                 .padding(.bottom, SpineWeekRows.seamPad(day, dynamicTypeSize: dynamicTypeSize,

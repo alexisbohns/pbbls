@@ -11,6 +11,7 @@ struct WeekContents: View {
     let readingDay: Int?
     let palette: (MomentSummary) -> EmotionPalette?
     let onGo: (MomentSummary) -> Void
+    var topPadding: CGFloat = SpineLayout.sectionTop
 
     private var locale: Locale { SpineStrings.appLocale }
     private var calendar: Calendar { SpineCalendar.current }
@@ -40,7 +41,7 @@ struct WeekContents: View {
                 rowView(row, isRead: row.day == read && row.firstOfDay)
             }
         }
-        .padding(.top, SpineLayout.sectionTop)
+        .padding(.top, topPadding)
         .padding(.horizontal, SpineLayout.versoPadX)
     }
 

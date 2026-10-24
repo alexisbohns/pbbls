@@ -3,7 +3,8 @@ import SwiftUI
 /// One page of the pager (#1130 D4, §Press-request state): a `ScrollViewReader`
 /// › `ScrollView` of the page's rows, the days in a `LazyVStack` on the raked
 /// ground. It owns the reading day (D12), the contents → press flow (D8), the
-/// slot VoiceOver returns to when stack E closes a card, and the scroll to top.
+/// slot VoiceOver returns to when stack E closes a card, the scroll to top, and
+/// (#1226) the week's sheet, opened from a tile on that tile's list.
 struct SpineWeekView: View {
     let page: SpinePage
     let model: PathModel
@@ -12,9 +13,12 @@ struct SpineWeekView: View {
     let onOpen: (SpineOpen) -> Void
     let onDelete: (MomentSummary) -> Void
     let onCreate: () -> Void
+    var lookups = WrapLookups()
     var scrollToTopToken = 0
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// The tile whose list the sheet opened on; the sheet's own state, never the model's.
+    @State private var openTile: WeekTile?
     @AccessibilityFocusState private var slotFocus: UUID?
     /// The phone's size until the first layout reports the page's own.
     @State private var viewport = CGSize(width: 393, height: 800)
@@ -33,7 +37,8 @@ struct SpineWeekView: View {
             page: page, column: SpineLayout.column(width: viewport.width), palette: palette, ratio: ratio,
             pressRequests: model.pressRequests,
             onOpen: { moment, face in
-                onOpen(SpineOpen(momentId: moment.id, face: face, summary: moment, soulOrder: page.soulOrder))
+                onOpen(SpineOpen(momentId: moment.id, face: face, summary: moment,
+                                 soulOrder: wrap?.persons?.map(\.soulId) ?? []))
             },
             onDelete: onDelete,
             onFocus: { week in
@@ -41,9 +46,14 @@ struct SpineWeekView: View {
             },
             onCreate: onCreate,
             onGo: { moment in go = GoRequest(momentId: moment.id, seq: (go?.seq ?? 0) + 1) },
-            readingDay: model.readingDay[page.weekStart]
+            readingDay: model.readingDay[page.weekStart],
+            wrap: wrap,
+            onOpenTile: { openTile = $0 },
+            lookups: lookups
         )
     }
+
+    private var wrap: WeekWrap? { model.weekWraps[page.weekStart] }
 
     var body: some View {
         let context = context
@@ -51,7 +61,7 @@ struct SpineWeekView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     Color.clear.frame(height: 0).id(Self.top)
-                    rows(SpineWeekRows.verso(page), context: context)
+                    rows(SpineWeekRows.verso(page, wrap: wrap), context: context)
                     let days = SpineWeekRows.days(page)
                     if !days.isEmpty {
                         LazyVStack(spacing: 0) {
@@ -89,6 +99,12 @@ struct SpineWeekView: View {
                 model.returnFocus = nil
             }
             .task(id: go) { await perform(go, proxy: proxy) }
+            .sheet(item: $openTile) { tile in
+                if let wrap {
+                    WeekSheet(wrap: wrap, page: page, lookups: lookups, readingDay: model.readingDay[page.weekStart],
+                              initial: tile, onGo: context.onGo)
+                }
+            }
         }
     }
 
