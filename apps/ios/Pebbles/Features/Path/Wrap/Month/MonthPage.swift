@@ -64,7 +64,16 @@ struct MonthPageSections: View {
             case .gem:
                 EmotionGem(wrap: wrap, lookups: lookups) { onMore(.gem) }
             case .tone, .hours:
-                EmptyView()
+                // One head for both figures, over whichever comes first.
+                if section == wrap.sections.first(where: { $0 == .tone || $0 == .hours }) {
+                    MonthSectionHead(label: WrapCopy.insights(locale: SpineStrings.appLocale),
+                                     hint: WrapCopy.insightsHint(locale: SpineStrings.appLocale))
+                }
+                if section == .tone {
+                    ToneFigure(wrap: wrap)
+                } else {
+                    HoursFigure(wrap: wrap, lookups: lookups)
+                }
             }
         }
     }

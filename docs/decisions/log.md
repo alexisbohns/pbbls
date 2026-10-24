@@ -1284,3 +1284,17 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The paging scroll view inside a `.medium` sheet is to be checked on device: it must not steal the vertical drag that expands the sheet.
 - **Supersedes / Superseded-by:** none. Android keeps its `TabbedSheetPager` (#1207); the two differ in chrome only.
 - **Refs:** #1226, #1207, `docs/superpowers/plans/2026-10-24-ios-path-wraps.md` (§2, decision A1), `apps/ios/Pebbles/Features/Path/Wrap/Sheet/WrapSheet.swift`.
+
+## 2026-10-24 — On iOS the month's tone figure is Swift Charts (#1226)
+
+- **Status:** taken
+- **Scope:** ios, ui
+- **Context:** Android draws the month's tone in a `Canvas` (`ToneFigure`, #1207, D11): a bar up for bright and a bar down for heavy each day, a circle on the line for even, a quiet dot on a still day, and numbered days. Its only accessibility is one sentence. The maintainer chose Swift Charts on 2026-10-24, "if it fits" (plan decision B1).
+- **Decision:** `ToneFigure` is a `Chart` with hidden axes. Its x scale is padded like Android's inset, and its y domain is the whole frame in units of intensity, so one unit is Android's `unit` points and the drawing matches Android's. Each day with pebbles carries one VoiceOver element: its date, then its bright, even and heavy sums. An `AXChartDescriptor` exposes the series to Audio Graphs. Checked locally, two renders under `ImageRenderer` were byte-identical; the committed reference holds it in CI.
+- **Why:** Swift Charts is the system's chart. Charts give VoiceOver day-by-day navigation and Audio Graphs for free, which a `Canvas` can't. Rejected: a `Canvas` port (B2), which would match the pixels but read as one image.
+- **Consequences:**
+  - The figure's words (the numerals and "bright"/"heavy") sit in the chart's overlay, placed from the `ChartProxy`. Changing the scales moves them.
+  - An iOS change that "restores" Android's `Canvas` reopens this entry.
+  - The hours dial stays a `Canvas`: a polar figure is not a chart Swift Charts draws.
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #1226, #1207, `docs/superpowers/plans/2026-10-24-ios-path-wraps.md` (§6 B, §7), `apps/ios/Pebbles/Features/Path/Wrap/Month/ToneFigure.swift`.

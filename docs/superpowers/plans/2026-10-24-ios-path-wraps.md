@@ -318,3 +318,23 @@ The branches are `feat/1226-ios-*`, cut from an up-to-date `main` in one worktre
   The week sheet can hold seven lists, and the HIG caps a segmented control at about five on iPhone. W4 logs the divergence in `docs/decisions/log.md`.
 - **B. The tone figure: B1, Swift Charts, "if it fits".** W7's first task proves that Charts can draw the board's figure (up and down bars, the even circle on the line, quiet still days, numbered days) and render deterministically under `ImageRenderer`. If it can't, W7 falls back to a Canvas port (B2) and says why in its PR.
 - **C. PRs:** labels `feat`, `ui`, `ios` and `no-lab-note`, milestone M64.
+
+## 7. As built (amendments, 2026-10-24)
+
+Where the shipped stack differs from §2–§3, and why. The PRs carry the detail.
+
+- **B was resolved as B1.** The tone figure is Swift Charts: bars, the even circle and the quiet dot as marks, with hidden axes and scales that map one unit of intensity to Android's unit, so the geometry is Android's. Checked locally, two renders of the same figure under `ImageRenderer` were byte-identical; the committed reference holds it in CI. VoiceOver walks it day by day: each day with pebbles is one element, its date then its sums. An `AXChartDescriptor` gives Audio Graphs. Logged in `docs/decisions/log.md`.
+- **`TileCard` follows D11.** It doesn't use `@ScaledMetric`: the tile keeps its size, its text stops growing at the first accessibility size, and the large content viewer takes over. The same rule caps the text inside the garland, the gem's table, the tone figure's numerals and the dial (default size). The words around each figure scale.
+- **`RadialLayout` was deferred.** Every ring is drawn in a `Canvas` over `RingGeometry`, with views positioned on top where text is involved. The one `Layout` adopter is the gem's `GemFigureLayout`. It places the families' names with Android's spread, from measured text, and grows the figure instead of clipping a name at large text sizes.
+- **`DayHeader` became `CalendarHead`** (the calendar's weekday letters, in `MonthDays.swift`).
+- **The strip uses a `ScrollViewReader`.** It follows the focus with `scrollTo` (Reduce Motion respected) rather than `scrollPosition`, which drifts on iOS 17 when items change under it.
+- **The wrap fetches are tasks the model owns** (Android's `wrapJobs`). Weeks and months go through one generic loader. A swipe that cancels the view's `.task` never cancels a fetch half-way, a page is never asked for twice, and a result that started before a write is fetched again.
+- **Other deliberate deviations:**
+  - shares are written as the locale writes a percentage
+  - a soul the reference cache lacks is named from the feed's pebbles, as the Spine's weeks do
+  - the dial's collection dots stop at four lanes, short of the busiest window, and its stones at three, inside the dial's square (a `Canvas` doesn't clip); past the last lane, marks share it. A month collected in one sitting would otherwise run its dots through the words, and a habit of the same hour would run its stones off the dial
+  - the dial's hour numbers sit above the stones (Android draws the stones over them)
+- **Android follow-ups found on the way:**
+  - French "fois" is counted in the masculine ("vingt et un fois")
+  - the dial's lanes are uncapped, inside (dots through the words) and outside (stones off the dial)
+  - the lanes' fixed gaps are added in pixels, not dp, so two close marks can take a different lane than on iOS (which follows the board's CSS pixels)
