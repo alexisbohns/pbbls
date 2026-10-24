@@ -32,4 +32,15 @@ class WrapCopyFrenchTest {
         assertEquals("une photo", copy.photos(1))
         assertEquals("deux cartes écrites", copy.cards(2))
     }
+
+    @Test
+    fun `the month reads in French`() {
+        val october = java.time.YearMonth.of(2026, 10)
+        assertEquals("dixième partie", copy.monthKicker(october))
+        assertEquals("Octobre", copy.monthName(october))
+        assertEquals("cinq semaines", copy.weeksHeader(5))
+        assertEquals("deux jalons", copy.milestonesHeader(2))
+        assertEquals("les six personnes", copy.morePersons(6))
+        assertEquals("Imprimé en joie & paix, sur famille.", copy.colophon(listOf("joie", "paix"), listOf("famille")))
+    }
 }

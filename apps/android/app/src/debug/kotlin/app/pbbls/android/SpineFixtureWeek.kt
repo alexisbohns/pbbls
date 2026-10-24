@@ -4,6 +4,7 @@ import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionFamily
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.EmotionRef
+import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.PathMoment
@@ -13,20 +14,31 @@ import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.core.model.wrap.CardCount
+import app.pbbls.android.core.model.wrap.CoverDay
+import app.pbbls.android.core.model.wrap.CoverPebble
 import app.pbbls.android.core.model.wrap.DaySet
+import app.pbbls.android.core.model.wrap.DayWeight
 import app.pbbls.android.core.model.wrap.DomainStat
 import app.pbbls.android.core.model.wrap.FamilyStat
+import app.pbbls.android.core.model.wrap.FineEmotionStat
 import app.pbbls.android.core.model.wrap.HourMark
 import app.pbbls.android.core.model.wrap.Kept
 import app.pbbls.android.core.model.wrap.Lead
+import app.pbbls.android.core.model.wrap.MonthCover
+import app.pbbls.android.core.model.wrap.MonthSection
+import app.pbbls.android.core.model.wrap.MonthWeek
+import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.model.wrap.PersonStat
+import app.pbbls.android.core.model.wrap.PreviousMonth
 import app.pbbls.android.core.model.wrap.WeekTile
 import app.pbbls.android.core.model.wrap.WeekWrap
 import app.pbbls.android.core.model.wrap.WeightGrid
 import app.pbbls.android.features.path.WeekRollBuilder
 import app.pbbls.android.features.path.wrap.WrapLookups
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.YearMonth
 import java.time.ZoneId
 
 /**
@@ -511,6 +523,112 @@ internal object SpineFixtureWeek {
     /** Soul ids in the server's persons order, the order the people lines name them in. */
     val personsOrder: List<String> = wrap(live = false).persons.orEmpty().map { it.soulId }
 
+    /** The fixture's emotions with their category palettes, as `v_emotions_with_palette` rows. */
+    val emotionsById: Map<String, EmotionWithPalette> =
+        emotions.values.associate { ref ->
+            val category = categoryBySlug.getValue(ref.slug)
+            ref.id to
+                EmotionWithPalette(
+                    id = ref.id,
+                    slug = ref.slug,
+                    name = ref.name,
+                    emoji = "",
+                    categoryId = "category-$category",
+                    categorySlug = category,
+                    categoryName = category.replaceFirstChar { it.uppercase() },
+                    palette = categories.getValue(category),
+                )
+        }
+
+    private fun monthDays(vararg weekDays: Int) = DaySet(31, weekDays.map { it + 4 }.toSet())
+
+    private fun pebbled(n: Int) = entry.moments.first { it.id == id(n) }
+
+    /**
+     * The October page `path_month_wrap` would send if the fixture week were the month's only pebbles,
+     * worked out by hand with the server's rules (#1207, spec §3.3). The gem, the tone and the hours
+     * arrive with their parts.
+     */
+    val monthWrap: MonthWrap by lazy {
+        val pebbles = entry.moments.filter { it.isCompleted }
+        MonthWrap(
+            month = YearMonth.of(2026, 10),
+            daysInMonth = 31,
+            firstWeekday = DayOfWeek.THURSDAY,
+            pebbles = 13,
+            people = 14,
+            sections = listOf(MonthSection.WEEKS, MonthSection.MILESTONES, MonthSection.PERSONS, MonthSection.DOMAINS),
+            cover =
+                MonthCover(
+                    days =
+                        pebbles
+                            .groupBy { it.happenedAt.atZoneSameInstant(zone).dayOfMonth - 1 }
+                            .toSortedMap()
+                            .map { (day, ms) ->
+                                CoverDay(
+                                    day,
+                                    ms.map { CoverPebble(it.id, it.pebble?.emotion?.id, it.valence.intensity, it.valence.polarity) },
+                                )
+                            },
+                    soulsInOrder = listOf("nadia", "elio", "mara", "bruno", "jules").map { "soul-$it" } + neighbours.map { it.id },
+                    inks = listOf("joy", "peace", "pride", "anger", "sadness", "fear"),
+                    papers = listOf("domain-friends", "domain-identity", "domain-family"),
+                ),
+            weeks =
+                listOf(
+                    MonthWeek(LocalDate.of(2026, 9, 28), 0, 3, 0, emptyList(), List(7) { DayWeight(0, 0) }),
+                    MonthWeek(
+                        weekStart,
+                        4,
+                        10,
+                        13,
+                        wrap(live = false).persons.orEmpty().map { it.soulId },
+                        listOf(2 to 3, 2 to 3, 2 to 1, 2 to 3, 0 to 0, 3 to 2, 2 to 2).map { (m, i) -> DayWeight(m, i) },
+                    ),
+                ),
+            milestones = listOf(1, 4, 7, 2, 12).map { pebbled(it).id },
+            persons =
+                wrap(live = false).persons.orEmpty().map { p ->
+                    p.copy(
+                        days =
+                            DaySet(
+                                31,
+                                p.days.days
+                                    .map { it + 4 }
+                                    .toSet(),
+                            ),
+                        newSincePrevious =
+                            p.soulId in setOf("soul-jules", "soul-ana"),
+                    )
+                },
+            previousMonth = PreviousMonth(4, listOf("soul-mara", "soul-nadia")),
+            gem = null,
+            fineEmotions =
+                listOf(
+                    FineEmotionStat("joy", emotions.getValue("joyful").id, 4, monthDays(0, 3, 5)),
+                    FineEmotionStat("peace", emotions.getValue("peaceful").id, 4, monthDays(1, 2, 5, 6)),
+                    FineEmotionStat("pride", emotions.getValue("proud").id, 2, monthDays(0, 5)),
+                    FineEmotionStat("anger", emotions.getValue("angry").id, 1, monthDays(1)),
+                    FineEmotionStat("sadness", emotions.getValue("sad").id, 1, monthDays(6)),
+                    FineEmotionStat("fear", emotions.getValue("scared").id, 1, monthDays(2)),
+                ),
+            domains =
+                wrap(live = false).domains.orEmpty().map {
+                    it.copy(
+                        days =
+                            DaySet(
+                                31,
+                                it.days.days
+                                    .map { d -> d + 4 }
+                                    .toSet(),
+                            ),
+                    )
+                },
+            tone = null,
+            hours = null,
+        )
+    }
+
     /** The fixture's ids resolved, as the Path screen resolves them from its services. */
     val lookups: WrapLookups =
         WrapLookups(
@@ -519,5 +637,6 @@ internal object SpineFixtureWeek {
             family = families::get,
             domain = domainsById::get,
             paletteFor = palettes,
+            emotion = emotionsById::get,
         )
 }

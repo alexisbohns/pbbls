@@ -28,7 +28,7 @@ import app.pbbls.android.core.designsystem.PebblesTheme
  * The Spine lab (#1122, plan Task 4.5): a debug-only launcher entry showing the
  * lit stones and the fixture week on a device before Part 6 wires the Spine into
  * the Path. No Hilt, no services, no network: the brand scheme following the
- * system's dark mode, two tabs, pressable stones.
+ * system's dark mode, three tabs, pressable stones.
  */
 class SpineLabActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +44,7 @@ class SpineLabActivity : ComponentActivity() {
     }
 }
 
-private val TABS = listOf("Stones", "Week")
+private val TABS = listOf("Stones", "Week", "Month")
 
 @Composable
 private fun SpineLab() {
@@ -61,7 +61,8 @@ private fun SpineLab() {
                     LitStoneGallery(pressable = true)
                     LitStoneSeeds(pressable = true)
                 }
-            else -> SpineLabWeek(Modifier.fillMaxSize())
+            1 -> SpineLabWeek(Modifier.fillMaxSize())
+            else -> SpineLabMonth(Modifier.fillMaxSize())
         }
     }
 }

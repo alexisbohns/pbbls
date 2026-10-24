@@ -1,13 +1,20 @@
 package app.pbbls.android
 
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import app.pbbls.android.core.data.DayView
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.features.path.spine.SpinePebble
 import app.pbbls.android.features.path.spine.SpineWeek
 import app.pbbls.android.features.path.spine.StonePressRequests
 import app.pbbls.android.features.path.spine.WeekNeighbour
+import app.pbbls.android.features.path.wrap.month.MonthPage
 
 /*
  * The fixture week on the Spine (#1122), for the Spine lab's Week tab and the
@@ -35,6 +42,23 @@ internal fun SpineLabWeek(modifier: Modifier = Modifier) {
         zone = SpineFixtureWeek.zone,
         ratioOverride = SpineFixtureWeek.ratios::get,
     )
+}
+
+/** The fixture's October page (#1207): the lab's Month tab, the day view switchable but not saved. */
+@Composable
+internal fun SpineLabMonth(modifier: Modifier = Modifier) {
+    var view by remember { mutableStateOf(DayView.CIRCLE) }
+    Surface(color = PebblesTheme.spine.colors.ground, modifier = modifier) {
+        MonthPage(
+            wrap = SpineFixtureWeek.monthWrap,
+            lookups = SpineFixtureWeek.lookups,
+            dayView = view,
+            onDayView = { view = it },
+            onWeek = {},
+            onOpen = {},
+            zone = SpineFixtureWeek.zone,
+        )
+    }
 }
 
 /** One fixture pebble on its own: no cache, no photo, the ratio primed. */

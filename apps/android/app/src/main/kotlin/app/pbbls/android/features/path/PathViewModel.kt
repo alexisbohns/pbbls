@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.DayView
+import app.pbbls.android.core.data.DisplayPreferences
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsServicing
@@ -19,6 +21,7 @@ import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
+import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.model.wrap.Strip
 import app.pbbls.android.core.model.wrap.StripItem
 import app.pbbls.android.core.model.wrap.WeekWrap
@@ -36,6 +39,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 import javax.inject.Inject
 
@@ -64,6 +68,10 @@ sealed interface PathUiState {
         val focus: PathPage,
         /** Each week page's wrap (#1207); a week never fetched in this session is absent. */
         val weekWraps: Map<LocalDate, WrapState<WeekWrap>>,
+        /** Each month page's wrap, as [weekWraps]. */
+        val monthWraps: Map<YearMonth, WrapState<MonthWrap>>,
+        /** The month's day-dot view (D9), from [DisplayPreferences]. */
+        val dayView: DayView,
         val today: LocalDate,
         val karma: Int?,
         val serverRipple: RippleSummary?,
@@ -147,6 +155,7 @@ class PathViewModel
         private val focusRequests: PathFocusRequests,
         private val souls: SoulsServicing,
         private val wraps: PathWrapServicing,
+        private val display: DisplayPreferences,
         /**
          * The photo-ratio probe the Spine's cards read (#1122). Process-wide and
          * injected here rather than through a `Local…`: the screen takes its
@@ -167,7 +176,8 @@ class PathViewModel
 
         // The session's wraps (spec §7.1): kept across reloads, marked stale by one, refetched behind it.
         private val weekWraps = HashMap<LocalDate, WrapState<WeekWrap>>()
-        private val wrapJobs = HashMap<LocalDate, Job>()
+        private val monthWraps = HashMap<YearMonth, WrapState<MonthWrap>>()
+        private val wrapJobs = HashMap<PathPage, Job>()
         private var hasFailed = false
         private var isLoaded = false
 
@@ -283,6 +293,7 @@ class PathViewModel
                     pages = PathPages.pages(PathPages.items(strip, built, today))
                     // A load follows a write or a return: what was fetched may be out of date.
                     weekWraps.replaceAll { _, state -> if (state is WrapState.Ready) state.copy(stale = true) else state }
+                    monthWraps.replaceAll { _, state -> if (state is WrapState.Ready) state.copy(stale = true) else state }
                     // A flow that just wrote a moment wins over the kept focus (R14).
                     val requested =
                         focusRequests.consume()?.let { id ->
@@ -314,33 +325,59 @@ class PathViewModel
             val index = pages.indexOf(focus ?: return)
             if (index < 0) return
             listOf(index, index + 1, index - 1)
-                .mapNotNull { pages.getOrNull(it) as? PathPage.Week }
-                .forEach { loadWeekWrap(it.weekStart) }
+                .mapNotNull { pages.getOrNull(it) }
+                .forEach { page ->
+                    when (page) {
+                        is PathPage.Week ->
+                            loadWrap(page, weekWraps, page.weekStart, { wraps.cachedWeekWrap(page.weekStart, zone) }) {
+                                wraps.weekWrap(page.weekStart, zone)
+                            }
+                        is PathPage.Month ->
+                            loadWrap(page, monthWraps, page.month, { wraps.cachedMonthWrap(page.month, zone) }) {
+                                wraps.monthWrap(page.month, zone)
+                            }
+                    }
+                }
         }
 
-        private fun loadWeekWrap(weekStart: LocalDate) {
-            val state = weekWraps[weekStart] ?: WrapState.NeverLoaded
+        /**
+         * One page's wrap: skipped when fresh or already in flight. A page never shown this session opens
+         * on the device's copy at once, stale, while the fetch runs; a failure keeps the last good wrap
+         * and the next focus retries.
+         */
+        private fun <K, T> loadWrap(
+            page: PathPage,
+            states: HashMap<K, WrapState<T>>,
+            key: K,
+            cached: suspend () -> T?,
+            fetch: suspend () -> T,
+        ) {
+            val state = states[key] ?: WrapState.NeverLoaded
             if (state is WrapState.Ready && !state.stale) return
-            if (wrapJobs[weekStart]?.isActive == true) return
-            wrapJobs[weekStart] =
+            if (wrapJobs[page]?.isActive == true) return
+            wrapJobs[page] =
                 viewModelScope.launch {
-                    // A week never shown this session opens on the device's copy at once, stale, while the fetch runs.
                     if (state == WrapState.NeverLoaded) {
-                        wraps.cachedWeekWrap(weekStart, zone)?.let {
-                            weekWraps[weekStart] = WrapState.Ready(it, stale = true)
+                        cached()?.let {
+                            states[key] = WrapState.Ready(it, stale = true)
                             publish()
                         }
                     }
-                    runCatchingCancellable { wraps.weekWrap(weekStart, zone) }.fold(
-                        onSuccess = { weekWraps[weekStart] = WrapState.Ready(it) },
+                    runCatchingCancellable { fetch() }.fold(
+                        onSuccess = { states[key] = WrapState.Ready(it) },
                         onFailure = {
-                            Log.e(TAG, "path_week_wrap $weekStart failed", it)
-                            // The last good wrap stays on screen; the next focus retries.
-                            weekWraps[weekStart] = WrapState.Failed(weekWraps[weekStart]?.shown)
+                            Log.e(TAG, "wrap for $page failed", it)
+                            states[key] = WrapState.Failed(states[key]?.shown)
                         },
                     )
                     publish()
                 }
+        }
+
+        /** The month sheet's circle / calendar switch (D9), remembered for every month. */
+        fun onDayView(view: DayView) {
+            display.setDayView(view)
+            publish()
         }
 
         /** Rebuilds the exposed state from the pieces above. */
@@ -363,6 +400,8 @@ class PathViewModel
                             strip = strip,
                             focus = focused,
                             weekWraps = weekWraps.toMap(),
+                            monthWraps = monthWraps.toMap(),
+                            dayView = display.dayView,
                             today = today,
                             karma = stats.karma,
                             serverRipple = stats.ripple,

@@ -77,6 +77,44 @@
     <string name="path_load_error">Couldn\'t load your pebbles.</string>
     <string name="path_week_next">Next week</string>
     <!-- a11y label for a week-roll cairn cell: ISO week number + pebble count. -->
+    <!-- The month page (#1207): cover, sections and the month sheet. -->
+    <string name="path_month_kicker">part the %1$s</string>
+    <string name="path_month_persons_label">the persons, in order of appearance</string>
+    <string name="path_month_printed">Printed in %1$s</string>
+    <string name="path_month_printed_with">with %1$s</string>
+    <string name="path_month_printed_on">on %1$s</string>
+    <string name="path_month_amp">%1$s &amp; %2$s</string>
+    <plurals name="path_month_weeks">
+        <item quantity="one">%1$s week</item>
+        <item quantity="other">%1$s weeks</item>
+    </plurals>
+    <string name="path_month_by_week">%1$s by week</string>
+    <plurals name="path_month_milestones">
+        <item quantity="one">%1$s milestone</item>
+        <item quantity="other">%1$s milestones</item>
+    </plurals>
+    <string name="path_month_largest">the largest stones</string>
+    <string name="path_month_clockwise">from the 1st, clockwise</string>
+    <string name="path_month_more_persons">all %1$s persons</string>
+    <string name="path_month_persons_detail">the persons, in detail</string>
+    <string name="path_month_more_domains">all %1$s domains</string>
+    <string name="path_month_domains_detail">the domains, in detail</string>
+    <string name="path_month_new_since">new since %1$s</string>
+    <string name="path_month_nobody">Nobody is named this month.</string>
+    <string name="path_month_range">%1$d–%2$d %3$s</string>
+    <string name="path_month_view_circle">circle</string>
+    <string name="path_month_view_calendar">calendar</string>
+    <plurals name="path_month_times">
+        <item quantity="one">%1$s once</item>
+        <item quantity="other">%1$s %2$s times</item>
+    </plurals>
+    <string name="path_month_new_names">%1$s new since %2$s.</string>
+    <string name="path_month_emotions_lead">%1$s emotions in %2$s families, weighed by intensity.</string>
+    <plurals name="path_month_domains_lead">
+        <item quantity="one">%1$s domains; %2$s in one pebble.</item>
+        <item quantity="other">%1$s domains; %2$s in %3$s pebbles.</item>
+    </plurals>
+    <string name="path_month_more_a11y">%1$s. Opens the list.</string>
     <!-- The week wrap (#1207): the line under the strip, the tiles and the sheet's lists. -->
     <string name="path_wrap_week">week %1$d</string>
     <string name="path_wrap_so_far">so far</string>
@@ -133,7 +171,6 @@
     </plurals>
     <string name="path_strip_spacer_a11y">Week of %1$s, no moments</string>
     <string name="path_strip_month_a11y">%1$s, the month</string>
-    <string name="path_month_placeholder">The month\'s page is on its way.</string>
     <!-- Bottom stats bar (sub-project B). "karma" and "Ripple" are product vocabulary. -->
     <string name="ripple_badge_active">Ripple level %1$d, active today</string>
     <string name="ripple_badge_inactive">Ripple level %1$d, inactive today</string>

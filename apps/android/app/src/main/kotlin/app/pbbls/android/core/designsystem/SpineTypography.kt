@@ -50,6 +50,9 @@ object SpineTypography {
     /** A sheet list's opening sentence (#1207): the board's `.lead`, 17 px light italic. */
     val lead = ysabeau(17.sp, 380, italic = true, lineHeight = 23.sp)
 
+    /** The month's name inside the garland (#1207): the round-2 board's `.mo-name`. */
+    val monthName = ysabeau(36.sp, 380, italic = true, lineHeight = 40.sp)
+
     /** A section's italic hint beside its label (#1207), "from the 1st, clockwise". */
     val sectionHint = ysabeau(13.sp, 380, italic = true)
 

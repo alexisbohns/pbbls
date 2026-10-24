@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionFamily
 import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
 
@@ -20,4 +21,6 @@ class WrapLookups(
     val family: (String) -> EmotionFamily?,
     val domain: (String) -> Domain?,
     val paletteFor: (PathMoment) -> EmotionPalette?,
+    /** An emotion by id (the month's cover pebbles and fine emotions name emotions, not moments). */
+    val emotion: (String) -> EmotionWithPalette? = { null },
 )

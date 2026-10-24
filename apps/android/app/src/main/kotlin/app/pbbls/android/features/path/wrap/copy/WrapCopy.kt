@@ -5,9 +5,12 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.NumberWords
 import app.pbbls.android.core.model.wrap.WeekTile
 import app.pbbls.android.features.path.spine.logic.WeekWordsBuilder
+import java.time.LocalDate
 import java.time.LocalTime
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.floor
 
@@ -122,10 +125,155 @@ class WrapCopy(
 
     fun cardsShort(n: Int): String = resources.getQuantityString(R.plurals.path_wrap_cards_short, n, n)
 
+    // MARK: - The month page
+
+    /** "part the tenth" / "dixième partie": the month as a chapter of the year. */
+    fun monthKicker(month: YearMonth): String =
+        resources.getString(R.string.path_month_kicker, NumberWords.ordinal(month.monthValue, locale, NumberWords.Gender.FEMININE))
+
+    fun monthName(month: YearMonth): String =
+        month.month.getDisplayName(TextStyle.FULL_STANDALONE, locale).replaceFirstChar {
+            it.titlecase(locale)
+        }
+
+    private fun monthShort(month: YearMonth): String =
+        month.month.getDisplayName(TextStyle.SHORT, locale).trimEnd('.').replaceFirstChar {
+            it.titlecase(locale)
+        }
+
+    fun personsInOrderLabel(): String = resources.getString(R.string.path_month_persons_label)
+
+    /**
+     * "Printed in joy, peace & pride, with anger, sadness & fear, on family, identity & friends." The
+     * inks are the server's ranked families (three, then the rest), the papers its top domains.
+     */
+    fun colophon(
+        inks: List<String>,
+        papers: List<String>,
+    ): String {
+        val parts = mutableListOf<String>()
+        if (inks.isNotEmpty()) parts += resources.getString(R.string.path_month_printed, amp(inks.take(3)))
+        if (inks.size > 3) parts += resources.getString(R.string.path_month_printed_with, amp(inks.drop(3)))
+        if (papers.isNotEmpty()) parts += resources.getString(R.string.path_month_printed_on, amp(papers))
+        return WeekWordsBuilder.sentenceCase(parts.joinToString(", ") + ".", locale)
+    }
+
+    fun weeksHeader(n: Int): String = resources.getQuantityString(R.plurals.path_month_weeks, n, words(n, NumberWords.Gender.FEMININE))
+
+    fun weeksHint(month: YearMonth): String = resources.getString(R.string.path_month_by_week, monthName(month))
+
+    fun milestonesHeader(n: Int): String = resources.getQuantityString(R.plurals.path_month_milestones, n, words(n))
+
+    fun milestonesHint(): String = resources.getString(R.string.path_month_largest)
+
+    fun clockwiseHint(): String = resources.getString(R.string.path_month_clockwise)
+
+    /** The *more* link: "all six persons" when the list folds, "the persons, in detail" when it does not. */
+    fun morePersons(total: Int): String =
+        if (total >
+            SHOWN
+        ) {
+            resources.getString(R.string.path_month_more_persons, words(total, NumberWords.Gender.FEMININE))
+        } else {
+            resources.getString(R.string.path_month_persons_detail)
+        }
+
+    fun moreDomains(total: Int): String =
+        if (total >
+            SHOWN
+        ) {
+            resources.getString(R.string.path_month_more_domains, words(total))
+        } else {
+            resources.getString(R.string.path_month_domains_detail)
+        }
+
+    fun moreDescription(link: String): String = resources.getString(R.string.path_month_more_a11y, link)
+
+    fun newSince(previous: YearMonth): String = resources.getString(R.string.path_month_new_since, monthInSentence(previous))
+
+    /** A month's name inside a sentence: "September" in English, "septembre" in French, as each language writes it. */
+    private fun monthInSentence(month: YearMonth): String = month.month.getDisplayName(TextStyle.FULL_STANDALONE, locale)
+
+    fun nobody(): String = resources.getString(R.string.path_month_nobody)
+
+    /** "5–11 Oct": a week's days inside the month, from the server's 0-based indices. */
+    fun range(
+        month: YearMonth,
+        from: Int,
+        to: Int,
+    ): String = resources.getString(R.string.path_month_range, from + 1, to + 1, monthShort(month))
+
+    /** "Mon 5 Oct". */
+    fun dateline(date: LocalDate): String =
+        "${date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale).trimEnd('.')} ${date.dayOfMonth} ${monthShort(YearMonth.from(date))}"
+
+    fun viewCircle(): String = resources.getString(R.string.path_month_view_circle)
+
+    fun viewCalendar(): String = resources.getString(R.string.path_month_view_calendar)
+
+    /** "Mara five times, Nadia three. Inès and Jules are new since September." over the server's ranking. */
+    fun personsLead(
+        top: List<Pair<String, Int>>,
+        fresh: List<String>,
+        previous: YearMonth,
+    ): String {
+        val counts = top.take(2).map { (name, n) -> resources.getQuantityString(R.plurals.path_month_times, n, name, words(n)) }
+        val first = if (counts.isEmpty()) "" else counts.joinToString(", ") + "."
+        val second =
+            if (fresh.isEmpty()) {
+                ""
+            } else {
+                " " +
+                    resources.getString(R.string.path_month_new_names, and(fresh), monthInSentence(previous))
+            }
+        return (first + second).trim()
+    }
+
+    fun emotionsLead(
+        emotions: Int,
+        families: Int,
+    ): String =
+        WeekWordsBuilder.sentenceCase(
+            resources.getString(
+                R.string.path_month_emotions_lead,
+                words(emotions, NumberWords.Gender.FEMININE),
+                words(families, NumberWords.Gender.FEMININE),
+            ),
+            locale,
+        )
+
+    fun domainsLead(
+        domains: Int,
+        top: String,
+        topCount: Int,
+    ): String =
+        WeekWordsBuilder.sentenceCase(
+            resources.getQuantityString(
+                R.plurals.path_month_domains_lead,
+                topCount,
+                words(domains),
+                top.lowercase(locale),
+                words(topCount),
+            ),
+            locale,
+        )
+
+    private fun amp(items: List<String>): String =
+        when (items.size) {
+            0 -> ""
+            1 -> items[0]
+            else -> resources.getString(R.string.path_month_amp, items.dropLast(1).joinToString(", "), items.last())
+        }
+
     /** A local decimal hour as the locale writes a time: 21.5 → "9:30 PM" / "21:30". */
     fun time(hour: Double): String {
         val minutes = floor(hour * 60).toInt().coerceIn(0, 24 * 60 - 1)
         return LocalTime.of(minutes / 60, minutes % 60).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale))
+    }
+
+    private companion object {
+        /** Rows a month section shows before its *more* link (spec §3.5: "shows 5, then more"). */
+        const val SHOWN = 5
     }
 
     private fun words(

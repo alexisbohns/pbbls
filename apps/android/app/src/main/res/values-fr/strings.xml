@@ -67,6 +67,48 @@
     <!-- ==== Path timeline (sub-project D) ==== -->
     <string name="path_load_error">Impossible de charger vos pebbles.</string>
     <string name="path_week_next">Semaine suivante</string>
+    <!-- The month page (#1207): cover, sections and the month sheet. -->
+    <string name="path_month_kicker">%1$s partie</string>
+    <string name="path_month_persons_label">les personnes, dans l\'ordre d\'apparition</string>
+    <string name="path_month_printed">Imprimé en %1$s</string>
+    <string name="path_month_printed_with">avec %1$s</string>
+    <string name="path_month_printed_on">sur %1$s</string>
+    <string name="path_month_amp">%1$s &amp; %2$s</string>
+    <plurals name="path_month_weeks">
+        <item quantity="one">%1$s semaine</item>
+        <item quantity="many">%1$s semaines</item>
+        <item quantity="other">%1$s semaines</item>
+    </plurals>
+    <string name="path_month_by_week">%1$s semaine par semaine</string>
+    <plurals name="path_month_milestones">
+        <item quantity="one">%1$s jalon</item>
+        <item quantity="many">%1$s jalons</item>
+        <item quantity="other">%1$s jalons</item>
+    </plurals>
+    <string name="path_month_largest">les plus grandes pierres</string>
+    <string name="path_month_clockwise">depuis le 1er, dans le sens horaire</string>
+    <string name="path_month_more_persons">les %1$s personnes</string>
+    <string name="path_month_persons_detail">les personnes, en détail</string>
+    <string name="path_month_more_domains">les %1$s domaines</string>
+    <string name="path_month_domains_detail">les domaines, en détail</string>
+    <string name="path_month_new_since">pas vu·e en %1$s</string>
+    <string name="path_month_nobody">Personne n\'est nommé ce mois-ci.</string>
+    <string name="path_month_range">%1$d–%2$d %3$s</string>
+    <string name="path_month_view_circle">cercle</string>
+    <string name="path_month_view_calendar">calendrier</string>
+    <plurals name="path_month_times">
+        <item quantity="one">%1$s une fois</item>
+        <item quantity="many">%1$s %2$s fois</item>
+        <item quantity="other">%1$s %2$s fois</item>
+    </plurals>
+    <string name="path_month_new_names">%1$s : pas vu·e·s en %2$s.</string>
+    <string name="path_month_emotions_lead">%1$s émotions dans %2$s familles, pesées par leur intensité.</string>
+    <plurals name="path_month_domains_lead">
+        <item quantity="one">%1$s domaines ; %2$s dans un galet.</item>
+        <item quantity="many">%1$s domaines ; %2$s dans %3$s galets.</item>
+        <item quantity="other">%1$s domaines ; %2$s dans %3$s galets.</item>
+    </plurals>
+    <string name="path_month_more_a11y">%1$s. Ouvre la liste.</string>
     <!-- The week wrap (#1207): the line under the strip, the tiles and the sheet's lists. -->
     <string name="path_wrap_week">semaine %1$d</string>
     <string name="path_wrap_so_far">pour l\'instant</string>
@@ -128,7 +170,6 @@
     </plurals>
     <string name="path_strip_spacer_a11y">Semaine du %1$s, aucun moment</string>
     <string name="path_strip_month_a11y">%1$s, le mois</string>
-    <string name="path_month_placeholder">La page du mois arrive bientôt.</string>
     <!-- Barre de stats du bas (sous-projet B). « karma » et « Ripple » sont du vocabulaire produit. -->
     <string name="ripple_badge_active">Ripple niveau %1$d, actif aujourd\'hui</string>
     <string name="ripple_badge_inactive">Ripple niveau %1$d, inactif aujourd\'hui</string>

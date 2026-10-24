@@ -17,7 +17,12 @@ import java.time.ZoneId
 class FakePathWrapService(
     var strip: Strip = Strip(emptyList()),
     val weeks: MutableMap<LocalDate, WeekWrap> = mutableMapOf(),
+    /** A month answers from here, or throws: no month is empty on the server. */
+    val months: MutableMap<YearMonth, MonthWrap> = mutableMapOf(),
 ) : PathWrapServicing {
+    /** Month wrap calls by month, in order. */
+    val monthCalls = mutableListOf<YearMonth>()
+
     /** The device's copies, as `WrapDiskCache` would return them. */
     var keptStrip: Strip? = null
     val keptWeeks: MutableMap<LocalDate, WeekWrap> = mutableMapOf()
@@ -79,7 +84,10 @@ class FakePathWrapService(
     override suspend fun monthWrap(
         month: YearMonth,
         zone: ZoneId,
-    ): MonthWrap = throw IOException("no month wrap armed in the fake")
+    ): MonthWrap {
+        monthCalls += month
+        return months[month] ?: throw IOException("no month wrap armed in the fake")
+    }
 
     companion object {
         fun emptyWeek(weekStart: LocalDate): WeekWrap =
