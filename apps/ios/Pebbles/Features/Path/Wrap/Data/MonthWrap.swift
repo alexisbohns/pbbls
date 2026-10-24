@@ -24,8 +24,10 @@ struct MonthWrap: Hashable, Sendable {
     let hours: MonthHours?
 }
 
-enum MonthSection: String, CaseIterable, Hashable, Sendable {
+enum MonthSection: String, CaseIterable, Hashable, Identifiable, Sendable {
     case weeks, milestones, persons, gem, domains, tone, hours
+
+    var id: String { rawValue }
 }
 
 /// The garland's days (only those holding a pebble), the souls in order of

@@ -108,3 +108,10 @@ struct CalendarMonth: Hashable, Comparable, Sendable {
 private extension Character {
     var isASCIIDigit: Bool { isASCII && isNumber }
 }
+
+extension CalendarMonth {
+    /// The month before.
+    var previous: CalendarMonth {
+        month == 1 ? CalendarMonth(year: year - 1, month: 12) : CalendarMonth(year: year, month: month - 1)
+    }
+}

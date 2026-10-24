@@ -7,7 +7,8 @@ import Testing
 /// ported one for one (the tile's VoiceOver sentence split into a label and a hint).
 @Suite("Wrap strings catalogue")
 struct WrapCatalogueTests {
-    @Test("every wrap key has an English and a French value", arguments: [("path.strip.", 5), ("path.wrap.", 35)])
+    @Test("every wrap key has an English and a French value",
+          arguments: [("path.strip.", 5), ("path.wrap.", 35), ("path.month.", 24)])
     func catalogue(prefix: String, count: Int) throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().appendingPathComponent("Pebbles/Resources/Localizable.xcstrings")

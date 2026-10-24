@@ -14,10 +14,11 @@ import os
 /// failure never fails the timeline, and a failed refresh keeps the last strip.
 /// The feed's fetch and the delete are passed in as closures.
 ///
-/// It holds each week's wrap (`path_week_wrap`) the way spec §7.1 asks: a page
-/// shows its wrap at once whenever one ever loaded, and revalidates behind it.
-/// `weekWraps` holds only what the pages show, and is written only when a
-/// payload differs, so an unchanged revalidation invalidates no view; which
+/// It holds each week's and month's wrap (`path_week_wrap`, `path_month_wrap`)
+/// the way spec §7.1 asks: a page shows its wrap at once whenever one ever
+/// loaded (this session, or the device's kept copy), and revalidates behind it.
+/// `weekWraps` and `monthWraps` hold only what the pages show, and are written
+/// only when a payload differs, so an unchanged revalidation invalidates no view; which
 /// pages must be fetched again (a write since, a failure) is unobserved. Each
 /// page's fetch is a task the model owns (Android's `wrapJobs`), so a swipe that
 /// moves the focus never cancels one half-way.
@@ -32,6 +33,8 @@ final class PathModel {
     private(set) var moments: [MomentSummary] = []
     /// The feed's moments by lowercase id, built once per load: what the wraps' ids point at.
     private(set) var momentsById: [String: MomentSummary] = [:]
+    /// The souls' names the pebbles carry, by lowercase id, for a soul the reference cache lacks.
+    private(set) var pebbleSoulNames: [String: String] = [:]
     private(set) var entries: [WeekRollEntry] = []
     /// The server's strip; nil until it first loads, and the feed's weeks stand in.
     private(set) var strip: Strip?
@@ -41,6 +44,8 @@ final class PathModel {
     private(set) var pages: [PathPage] = []
     /// Each week's wrap as last fetched, by Monday: what its page shows.
     private(set) var weekWraps: [Date: WeekWrap] = [:]
+    /// Each month's page as last fetched.
+    private(set) var monthWraps: [CalendarMonth: MonthWrap] = [:]
     private(set) var focusedPage: PathPage
     /// weekStart → the reading day's index (D12), written only on a change.
     private(set) var readingDay: [Date: Int] = [:]
@@ -111,7 +116,7 @@ final class PathModel {
             apply(result)
             // A load follows a write or a return: every wrap fetched may be out of date.
             wrapGeneration += 1
-            wrapsToRefetch.formUnion(weekWraps.keys.map(PathPage.week))
+            wrapsToRefetch.formUnion(weekWraps.keys.map(PathPage.week) + monthWraps.keys.map(PathPage.month))
             phase = .content
         } catch {
             // The strip's fetch is cancelled with the scope; the error need not wait for it.
@@ -147,6 +152,9 @@ final class PathModel {
         moments = result
         momentsById = Dictionary(result.map { ($0.id.uuidString.lowercased(), $0) },
                                  uniquingKeysWith: { first, _ in first })
+        pebbleSoulNames = Dictionary(result.compactMap(\.pebble).flatMap(\.souls).map {
+            ($0.id.uuidString.lowercased(), $0.name)
+        }, uniquingKeysWith: { first, _ in first })
         let today = now()
         entries = WeekRollBuilder.build(moments: result, calendar: calendar, today: today)
         stripItems = PathPages.items(strip: strip, entries: entries, today: today, calendar: calendar)
@@ -203,72 +211,6 @@ final class PathModel {
     func setReadingDay(_ index: Int?, for weekStart: Date) {
         guard readingDay[weekStart] != index else { return }
         readingDay[weekStart] = index
-    }
-
-    // MARK: - Wraps
-
-    /// Starts the fetches the focused page and its neighbours need (never
-    /// loaded, stale or failed) and waits for them, and for any already running.
-    /// The view calls it on each focus and after each load; cancelling the
-    /// caller stops the wait, never the fetches.
-    func refreshWraps() async {
-        for task in scheduleWraps() { await task.value }
-    }
-
-    @discardableResult
-    private func scheduleWraps() -> [Task<Void, Never>] {
-        guard let wraps, let index = pages.firstIndex(of: focusedPage) else { return [] }
-        var running: [Task<Void, Never>] = []
-        for page in pages[max(0, index - 1)...min(pages.count - 1, index + 1)] {
-            if let task = wrapTasks[page] {
-                running.append(task)
-                continue
-            }
-            guard case let .week(start) = page, weekWraps[start] == nil || wrapsToRefetch.contains(page) else {
-                continue
-            }
-            let generation = wrapGeneration
-            let task = Task { await self.fetchWrap(page, wraps: wraps, generation: generation) }
-            wrapTasks[page] = task
-            running.append(task)
-        }
-        return running
-    }
-
-    private func fetchWrap(_ page: PathPage, wraps: any PathWrapServicing, generation: Int) async {
-        guard case let .week(start) = page else { return }
-        let zone = calendar.timeZone
-        let day = CalendarDay(start, in: zone)
-        // A week not yet shown this session opens on its kept copy while the fetch runs.
-        if weekWraps[start] == nil, let kept = await wraps.cachedWeekWrap(day, zone: zone), weekWraps[start] == nil {
-            weekWraps[start] = kept
-            keptPages.insert(page)
-        }
-        let result: Result<WeekWrap, Error>
-        do {
-            result = .success(try await wraps.weekWrap(day, zone: zone))
-        } catch {
-            result = .failure(error)
-        }
-        wrapTasks[page] = nil
-        switch result {
-        case let .success(wrap) where generation == wrapGeneration:
-            wrapsToRefetch.remove(page)
-            keptPages.remove(page)
-            if weekWraps[start] != wrap { weekWraps[start] = wrap }
-        case let .success(wrap):
-            // It started before a write: newer than a kept copy, still stale, asked for again.
-            if weekWraps[start] == nil || keptPages.contains(page) {
-                keptPages.remove(page)
-                if weekWraps[start] != wrap { weekWraps[start] = wrap }
-            }
-            wrapsToRefetch.insert(page)
-            scheduleWraps()
-        case let .failure(error):
-            // The last good wrap stays on screen; the next demand retries.
-            wrapsToRefetch.insert(page)
-            logger.error("path_week_wrap failed: \(error.localizedDescription, privacy: .private)")
-        }
     }
 
     // MARK: - Pages
@@ -337,6 +279,97 @@ final class PathModel {
         } catch {
             logger.error("delete failed: \(error.localizedDescription, privacy: .private)")
             return .failed
+        }
+    }
+}
+
+extension PathModel {
+    // MARK: - Wraps
+
+    /// Starts the fetches the focused page and its neighbours need, weeks and
+    /// months alike (never loaded, stale or failed), and waits for them, and for
+    /// any already running. The view calls it on each focus and after each load;
+    /// cancelling the caller stops the wait, never the fetches.
+    func refreshWraps() async {
+        for task in scheduleWraps() { await task.value }
+    }
+
+    @discardableResult
+    private func scheduleWraps() -> [Task<Void, Never>] {
+        guard let wraps, let index = pages.firstIndex(of: focusedPage) else { return [] }
+        var running: [Task<Void, Never>] = []
+        for page in pages[max(0, index - 1)...min(pages.count - 1, index + 1)] {
+            if let task = wrapTasks[page] {
+                running.append(task)
+                continue
+            }
+            guard !isShown(page) || wrapsToRefetch.contains(page) else { continue }
+            let generation = wrapGeneration
+            let task = Task { await self.fetchWrap(page, wraps: wraps, generation: generation) }
+            wrapTasks[page] = task
+            running.append(task)
+        }
+        return running
+    }
+
+    private func fetchWrap(_ page: PathPage, wraps: any PathWrapServicing, generation: Int) async {
+        let zone = calendar.timeZone
+        let failure: Error?
+        switch page {
+        case let .week(start):
+            let day = CalendarDay(start, in: zone)
+            failure = await load(page, key: start, in: \.weekWraps, generation: generation,
+                                 kept: { await wraps.cachedWeekWrap(day, zone: zone) },
+                                 fetched: { try await wraps.weekWrap(day, zone: zone) })
+        case let .month(month):
+            failure = await load(page, key: month, in: \.monthWraps, generation: generation,
+                                 kept: { await wraps.cachedMonthWrap(month, zone: zone) },
+                                 fetched: { try await wraps.monthWrap(month, zone: zone) })
+        }
+        wrapTasks[page] = nil
+        if let failure {
+            // The last good wrap stays on screen; the next demand retries.
+            wrapsToRefetch.insert(page)
+            logger.error("\(page.rpcName, privacy: .public) failed: \(failure.localizedDescription, privacy: .private)")
+        } else if generation == wrapGeneration {
+            wrapsToRefetch.remove(page)
+        } else {
+            // It started before a write: still stale, asked for again.
+            wrapsToRefetch.insert(page)
+            scheduleWraps()
+        }
+    }
+
+    // swiftlint:disable function_parameter_count
+    /// One page's wrap, weeks and months alike (Android's `loadWrap`): the kept
+    /// copy first when nothing shows yet, then the server's. A result that
+    /// started before a write still beats a kept copy, never a fresher one.
+    /// Returns the error, if any.
+    private func load<Key: Hashable, Wrap: Equatable>(
+        _ page: PathPage, key: Key, in shown: ReferenceWritableKeyPath<PathModel, [Key: Wrap]>, generation: Int,
+        kept: () async -> Wrap?, fetched: () async throws -> Wrap
+    ) async -> Error? {
+        if self[keyPath: shown][key] == nil, let copy = await kept(), self[keyPath: shown][key] == nil {
+            self[keyPath: shown][key] = copy
+            keptPages.insert(page)
+        }
+        do {
+            let wrap = try await fetched()
+            if generation == wrapGeneration || self[keyPath: shown][key] == nil || keptPages.contains(page) {
+                keptPages.remove(page)
+                if self[keyPath: shown][key] != wrap { self[keyPath: shown][key] = wrap }
+            }
+            return nil
+        } catch {
+            return error
+        }
+    }
+    // swiftlint:enable function_parameter_count
+
+    private func isShown(_ page: PathPage) -> Bool {
+        switch page {
+        case let .week(start): return weekWraps[start] != nil
+        case let .month(month): return monthWraps[month] != nil
         }
     }
 }

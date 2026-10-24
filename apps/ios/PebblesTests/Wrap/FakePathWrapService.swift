@@ -56,8 +56,36 @@ final class FakePathWrapService: PathWrapServicing, @unchecked Sendable {
         return try answer.get()
     }
 
+    private var monthAnswers: [CalendarMonth: Result<MonthWrap, Error>] = [:]
+    private var monthAsked: [CalendarMonth] = []
+    private var keptMonths: [CalendarMonth: MonthWrap] = [:]
+
+    func answer(month: CalendarMonth, _ result: Result<MonthWrap, Error>) {
+        lock.withLock { monthAnswers[month] = result }
+    }
+
+    func keep(month: CalendarMonth, _ wrap: MonthWrap) {
+        lock.withLock { keptMonths[month] = wrap }
+    }
+
+    var monthCalls: [CalendarMonth] {
+        lock.withLock { monthAsked }
+    }
+
+    /// How long a month's answer takes; it is read when the call starts.
+    var monthDelay: Duration? {
+        get { lock.withLock { monthWait } }
+        set { lock.withLock { monthWait = newValue } }
+    }
+    private var monthWait: Duration?
+
     func monthWrap(_ month: CalendarMonth, zone: TimeZone) async throws -> MonthWrap {
-        throw Failure()
+        let (answer, wait) = lock.withLock { () -> (Result<MonthWrap, Error>, Duration?) in
+            monthAsked.append(month)
+            return (monthAnswers[month] ?? .failure(Failure()), monthWait)
+        }
+        if let wait { try await Task.sleep(for: wait) }
+        return try answer.get()
     }
 
     // MARK: - The device's copies
@@ -82,6 +110,6 @@ final class FakePathWrapService: PathWrapServicing, @unchecked Sendable {
     }
 
     func cachedMonthWrap(_ month: CalendarMonth, zone: TimeZone) async -> MonthWrap? {
-        nil
+        lock.withLock { keptMonths[month] }
     }
 }

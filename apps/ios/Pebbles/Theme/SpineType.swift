@@ -110,6 +110,8 @@ extension SpineType.Style {
     /// A wrap tile's caption (#1226): the board's `.tile .sm`, and its italic.
     static let tileCaption = Self(size: 12.5, weight: 400, lineHeight: 15.6, scaling: .text(.caption))
     static let tileCaptionItalic = Self(size: 12.5, weight: 400, italic: true, lineHeight: 15.6, scaling: .text(.caption))
+    /// The month's name inside the garland (#1226): the round-2 board's `.mo-name`.
+    static let monthName = Self(size: 36, weight: 380, italic: true, lineHeight: 40, scaling: .text(.largeTitle))
     /// A sheet list's opening sentence (#1226): the board's `.lead`.
     static let lead = Self(size: 17, weight: 380, italic: true, lineHeight: 23, scaling: .text(.body))
     /// The masthead's way back a week: the body's 400; only the number is bold.
