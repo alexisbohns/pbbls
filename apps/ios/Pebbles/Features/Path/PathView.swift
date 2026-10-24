@@ -109,8 +109,13 @@ struct PathView: View {
                     onOpen: open,
                     onDelete: { pendingDeletion = MomentDeleteTarget(summary: $0) },
                     onCreate: { isPresentingCapture = true },
+                    lookups: lookups,
                     scrollToTopToken: nav.scrollToTop[.path, default: 0]
                 )
+                // The focused page's wrap and its neighbours', fetched on each focus and after each load.
+                .task(id: WrapDemand(page: model.focusedPage, revision: model.pagesRevision)) {
+                    await model.refreshWraps()
+                }
             }
             // One row, clear background, 8 pt above the tab bar (#903 §5). The
             // page scrolls under it; the Spine's 96 pt feed bottom clears it.
@@ -129,6 +134,23 @@ struct PathView: View {
                 .padding(.bottom, 8)
             }
         }
+    }
+
+    /// What the wraps' ids point at: the feed's moments, the reference data, the palettes.
+    private var lookups: WrapLookups {
+        let moments = model.momentsById
+        let families = Dictionary(EmotionFamilies.of(palettes.byEmotionId.values).map { ($0.slug, $0) },
+                                  uniquingKeysWith: { first, _ in first })
+        let domains = Dictionary(references.domains.map { ($0.id.uuidString.lowercased(), $0) },
+                                 uniquingKeysWith: { first, _ in first })
+        let emotions = palettes.byEmotionId
+        return WrapLookups(
+            moment: { moments[$0.lowercased()] },
+            family: { families[$0] },
+            domain: { domains[$0.lowercased()] },
+            emotion: { UUID(uuidString: $0).flatMap { emotions[$0] } },
+            palette: palette
+        )
     }
 
     private func palette(_ moment: MomentSummary) -> EmotionPalette? {
@@ -208,4 +230,10 @@ struct PathView: View {
     .environment(HeldCardHostModel())
     .environment(CardFrameRegistry())
     .environment(SnapAspectCache(urls: SnapURLCache(client: supabase.client)))
+}
+
+/// When the Path asks for wraps: on each focus, and after each load.
+private struct WrapDemand: Equatable {
+    let page: PathPage
+    let revision: Int
 }

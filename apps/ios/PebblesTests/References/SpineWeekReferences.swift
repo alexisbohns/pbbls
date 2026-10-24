@@ -4,8 +4,9 @@ import Testing
 
 extension References {
     /// #1130 D4 (B2 §B2.6): the fixture week's verso (+ French Paper, + `-ax2`
-    /// Paper), the current week's mouth against a past week's (which links on),
-    /// and the empty current week. Android: SpineWeekVerso*, SpineWeekMouthDark,
+    /// Paper), since #1226 its line and live tiles, the current week's mouth
+    /// against a past week's (which links on), and the empty current week, its
+    /// line alone with the way to a first pebble. Android: SpineWeekVerso*, SpineWeekMouthDark,
     /// SpineWeekEmpty*.
     @Suite("Spine week references")
     @MainActor
@@ -57,7 +58,9 @@ extension References {
             await model.load { F.moments + extra }
             model.updateSouls(names: F.soulNames, glyphs: F.soulGlyphs)
             let page = try #require(model.page(for: week))
-            return SpineWeekStack(context: F.context(model, page: page), part: part)
+            // The fixture week is the live week: its line says "so far", its tiles are dashed.
+            let wrap = week == F.weekStart ? F.weekWrap(live: true) : nil
+            return SpineWeekStack(context: F.context(model, page: page, wrap: wrap), part: part)
                 .environment(\.spineSnapSource, SpineFixturePhotos.source)
         }
     }

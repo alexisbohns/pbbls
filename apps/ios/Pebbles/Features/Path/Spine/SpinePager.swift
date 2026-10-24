@@ -15,6 +15,7 @@ struct SpinePager: View {
     let onOpen: (SpineOpen) -> Void
     let onDelete: (MomentSummary) -> Void
     let onCreate: () -> Void
+    var lookups = WrapLookups()
     var scrollToTopToken = 0
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -31,7 +32,7 @@ struct SpinePager: View {
                             if let spinePage = model.page(for: weekStart) {
                                 SpineWeekView(page: spinePage, model: model, palette: palette, ratio: ratio,
                                               onOpen: onOpen, onDelete: onDelete, onCreate: onCreate,
-                                              scrollToTopToken: scrollToTopToken)
+                                              lookups: lookups, scrollToTopToken: scrollToTopToken)
                             }
                         case let .month(month):
                             MonthPagePlaceholder(month: month)
@@ -72,8 +73,13 @@ struct SpinePager: View {
         let text: String
         switch page {
         case let .week(weekStart):
+            // The week's line: its number, then its summary once the wrap has loaded.
             guard let spinePage = model.page(for: weekStart) else { return }
-            text = WeekOpeningText(page: spinePage, locale: SpineStrings.appLocale).title
+            let locale = SpineStrings.appLocale
+            let summary = WrapCopy.weekSummary(model.weekWraps[weekStart], isEmpty: spinePage.contents.isEmpty,
+                                               locale: locale)
+            text = [WrapCopy.week(spinePage.words.number, locale: locale), summary].compactMap { $0 }
+                .joined(separator: ". ")
         case let .month(month):
             text = WrapCopy.stripMonth(month, locale: SpineStrings.appLocale)
         }

@@ -18,10 +18,8 @@ struct SpineCardGallery: View {
         }
     }
 
-    private var order: [String] {
-        PersonsOfWeek.personsOfWeek(F.moments, names: F.soulNames, weekStart: F.weekStart, calendar: F.calendar,
-                                    locale: SpineStrings.appLocale).map(\.soulId)
-    }
+    /// The server's persons order for the fixture week (#1226).
+    private var order: [String] { F.personsOrder }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 48) {

@@ -10,30 +10,6 @@ struct SpineStringsTests {
     // swiftlint:disable:next type_name
     typealias V = Vectors
 
-    @Test("the kicker and the titles read the web's sentences")
-    func opening() {
-        #expect(SpineCopy.kicker(ordinal: "forty-first", year: 2026, locale: V.en) == "the forty-first week · 2026")
-        #expect(SpineCopy.kicker(ordinal: "quarante et unième", year: 2026, locale: V.fr)
-            == "la quarante et unième semaine · 2026")
-        #expect(SpineCopy.title(.sameMonth(from: "fifth", to: "eleventh", month: "October"), locale: V.en)
-            == "The fifth to the eleventh of October")
-        #expect(SpineCopy.title(.sameMonth(from: "cinq", to: "onze", month: "octobre"), locale: V.fr)
-            == "Du cinq au onze octobre")
-        #expect(SpineCopy.title(
-            .crossMonth(from: "vingt-huit", fromMonth: "septembre", to: "quatre", toMonth: "octobre"), locale: V.fr
-        ) == "Du vingt-huit septembre au quatre octobre")
-    }
-
-    @Test("the summary pluralises its nouns and reads zero as words")
-    func summary() {
-        #expect(SpineCopy.summary(pebbles: 11, people: 5, locale: V.en) == "Eleven pebbles, five people.")
-        #expect(SpineCopy.summary(pebbles: 1, people: 0, locale: V.en) == "One pebble.")
-        #expect(SpineCopy.summary(pebbles: 0, people: 0, locale: V.en) == "No pebbles.")
-        #expect(SpineCopy.summary(pebbles: 1, people: 1, locale: V.fr) == "Un galet, une personne.")
-        #expect(SpineCopy.summary(pebbles: 2, people: 0, locale: V.fr) == "Deux galets.")
-        #expect(SpineCopy.summary(pebbles: 0, people: 3, locale: V.fr) == "Aucun galet, trois personnes.")
-    }
-
     @Test("the folds and the others choose their plural")
     func folds() {
         #expect(SpineCopy.others(count: 12, words: "twelve", locale: V.en) == "& twelve others")
@@ -90,7 +66,7 @@ struct SpineStringsTests {
         let root = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
         let strings = try #require(root["strings"] as? [String: Any])
         let keys = strings.keys.filter { $0.hasPrefix("path.spine.") }
-        #expect(keys.count == 33)
+        #expect(keys.count == 29)
         for key in keys {
             let entry = try #require(strings[key] as? [String: Any])
             let localizations = try #require(entry["localizations"] as? [String: Any], "\(key)")

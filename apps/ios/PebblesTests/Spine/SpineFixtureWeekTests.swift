@@ -38,15 +38,15 @@ struct SpineFixtureWeekTests {
         #expect(untitled.firstSnapPath == "fixture/snap-fountain.jpg")
     }
 
-    @Test("the persons of the week read as on the web")
+    @Test("the fixture wrap's persons read in the web's order (the server ranks them since #1226)")
     func persons() {
-        let rows = PersonsOfWeek.personsOfWeek(F.moments, names: F.soulNames, weekStart: F.weekStart,
-                                               calendar: F.calendar, locale: Vectors.en)
-        #expect(rows.map(\.name) == [
+        let rows = F.weekWrap(live: false).persons ?? []
+        #expect(rows.compactMap { F.soulNames[$0.soulId] } == [
             "Mara", "Bruno", "Elio", "Jules", "Nadia",
             "Ana", "Béa", "Cyril", "Dora", "Ezra", "Félix", "Gaby", "Hugo", "Inès"
         ])
-        #expect(rows[0].dayCount == 4)
+        #expect(rows.first?.days.count == 4)
+        #expect(F.personsOrder == rows.map(\.soulId))
     }
 
     @Test("every photo has a primed ratio and every carved stone a palette and strokes")

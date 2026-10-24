@@ -9,6 +9,8 @@ final class FakePathWrapService: PathWrapServicing, @unchecked Sendable {
     private let lock = NSLock()
     private var stripAnswer: Result<Strip, Error>
     private var asked: [TimeZone] = []
+    private var weekAnswers: [CalendarDay: Result<WeekWrap, Error>] = [:]
+    private var weekAsked: [CalendarDay] = []
 
     init(strip: Result<Strip, Error> = .failure(Failure())) {
         stripAnswer = strip
@@ -29,8 +31,29 @@ final class FakePathWrapService: PathWrapServicing, @unchecked Sendable {
         }
     }
 
+    func answer(week: CalendarDay, _ result: Result<WeekWrap, Error>) {
+        lock.withLock { weekAnswers[week] = result }
+    }
+
+    /// The weeks asked for, in order.
+    var weekCalls: [CalendarDay] {
+        lock.withLock { weekAsked }
+    }
+
+    /// How long a week's answer takes; it is read when the call starts.
+    var weekDelay: Duration? {
+        get { lock.withLock { delay } }
+        set { lock.withLock { delay = newValue } }
+    }
+    private var delay: Duration?
+
     func weekWrap(_ weekStart: CalendarDay, zone: TimeZone) async throws -> WeekWrap {
-        throw Failure()
+        let (answer, wait) = lock.withLock { () -> (Result<WeekWrap, Error>, Duration?) in
+            weekAsked.append(weekStart)
+            return (weekAnswers[weekStart] ?? .failure(Failure()), delay)
+        }
+        if let wait { try await Task.sleep(for: wait) }
+        return try answer.get()
     }
 
     func monthWrap(_ month: CalendarMonth, zone: TimeZone) async throws -> MonthWrap {

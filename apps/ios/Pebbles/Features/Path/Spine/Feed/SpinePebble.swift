@@ -10,14 +10,30 @@ struct SpineFeedContext {
     /// A press asks to open the moment on a face; the host decides what opens (until stack E, the detail sheet).
     let onOpen: (MomentSummary, CardFace) -> Void
     let onDelete: (MomentSummary) -> Void
-    /// A masthead or mouth link, a contents tap's page change.
+    /// The mouth's link to the next page.
     var onFocus: (Date) -> Void = { _ in }
-    /// The empty week's button: opens Capture.
+    /// An empty current week's line: opens Capture.
     var onCreate: () -> Void = {}
     /// A contents tap: scroll to the stone and press it, without opening (D8).
     var onGo: (MomentSummary) -> Void = { _ in }
     /// The day being read (D12): the persons' letter and the contents' dot follow it.
     var readingDay: Int?
+    /// The week's wrap (#1226), once loaded: its line, its tiles and its persons' order.
+    var wrap: WeekWrap?
+    /// A tile asks for the week's sheet on its list.
+    var onOpenTile: (WeekTile) -> Void = { _ in }
+    /// What the wrap's ids point at.
+    var lookups = WrapLookups()
+
+    /// The week's line: the wrap's summary, "Nothing yet." for an empty week,
+    /// nothing until the wrap first loads.
+    var lineSummary: String? {
+        WrapCopy.weekSummary(wrap, isEmpty: page.contents.isEmpty, locale: SpineStrings.appLocale)
+    }
+
+    /// The server's persons order, which every people line on the page follows
+    /// (#1226); before the wrap loads, each pebble's own order.
+    var soulOrder: [String] { wrap?.persons?.map(\.soulId) ?? [] }
 }
 
 /// One moment on the Spine (#1130 §View tree, §Press-request state): the stone
@@ -85,7 +101,7 @@ struct SpinePebble: View {
     }
 
     private var description: String {
-        SpineStoneDescription.text(moment, names: context.page.soulNames, order: context.page.soulOrder,
+        SpineStoneDescription.text(moment, names: context.page.soulNames, order: context.soulOrder,
                                    calendar: SpineCalendar.current, locale: SpineStrings.appLocale,
                                    dateLocale: SpineStrings.dateLocale)
     }
@@ -150,11 +166,11 @@ struct SpinePebble: View {
             if hasCard {
                 SpineCard(moment: moment, emotion: context.palette(moment), ratio: context.ratio(moment),
                           column: context.column, soulNames: context.page.soulNames,
-                          soulGlyphs: context.page.soulGlyphs, soulOrder: context.page.soulOrder)
+                          soulGlyphs: context.page.soulGlyphs, soulOrder: context.soulOrder)
             } else {
                 // A one-line entry can fall under 44 pt; the button keeps the target.
                 SpineEntry(moment: moment, palette: stonePalette, soulNames: context.page.soulNames,
-                           soulGlyphs: context.page.soulGlyphs, soulOrder: context.page.soulOrder)
+                           soulGlyphs: context.page.soulGlyphs, soulOrder: context.soulOrder)
                     .frame(minHeight: SpineLayout.minTarget, alignment: .topLeading)
                     .opacity(registry?.hidden == moment.id ? 0 : 1)
                     .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in

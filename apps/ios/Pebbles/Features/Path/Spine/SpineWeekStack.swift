@@ -17,7 +17,7 @@ struct SpineWeekStack: View {
     var body: some View {
         VStack(spacing: 0) {
             if part == .whole || part == .verso {
-                rows(SpineWeekRows.verso(context.page))
+                rows(SpineWeekRows.verso(context.page, wrap: context.wrap))
             }
             if part == .whole || part == .days {
                 let dayRows = SpineWeekRows.days(context.page, only: days)
@@ -39,7 +39,7 @@ struct SpineWeekStack: View {
     private func rows(_ rows: [SpineRow]) -> some View {
         VStack(spacing: 0) {
             ForEach(rows) { row in
-                SpineRowView(row: row, context: context, slotFocus: nil)
+                SpineRowView(row: row, context: context, slotFocus: nil, isEager: true)
             }
         }
     }

@@ -90,13 +90,6 @@ struct WeekOpeningTests {
         #expect(WeekOpening.isoWeekNumber(V.at("2027-01-04T10:00:00Z"), timeZone: V.paris.timeZone) == 1)
     }
 
-    @Test("agrees in gender in French")
-    func summaryWords() {
-        #expect(WeekOpening.summaryWords(pebbles: 1, people: 1, locale: V.fr) == ("un", "une"))
-        #expect(WeekOpening.summaryWords(pebbles: 21, people: 31, locale: V.fr) == ("vingt et un", "trente et une"))
-        #expect(WeekOpening.summaryWords(pebbles: 11, people: 5, locale: V.en) == ("eleven", "five"))
-    }
-
     @Test("capitalises the first letter only")
     func sentenceCase() {
         #expect(WeekOpening.sentenceCase("eleven pebbles, five people.", locale: V.en)
