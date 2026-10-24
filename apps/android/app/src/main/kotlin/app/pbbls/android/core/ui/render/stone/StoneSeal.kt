@@ -2,7 +2,9 @@ package app.pbbls.android.core.ui.render.stone
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -17,15 +19,46 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.takeOrElse
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
+import app.pbbls.android.core.ui.render.Affine
 
-/** `MINI` for the contents and the card index (20–30 dp); `PRINT` larger. */
-enum class SealVariant { MINI, PRINT }
+/**
+ * `MINI` for the contents and the card index (20–30 dp); `PRINT` larger. `TINY` (under ~12 dp, #1207)
+ * drops the glyph and keeps the engraving's hatch at a fixed on-screen spacing, so a small heavy stone
+ * never fills in solid and reads as bright. `PIP` is the bare silhouette in the spot ink (deep when low).
+ */
+enum class SealVariant { MINI, PRINT, TINY, PIP }
+
+/**
+ * The seal's size presets (#1207): one width per stone size, so every surface prints the same stone
+ * at the same size. [CONTENTS] is the contents row (20 / 24 / 27), [MILESTONE] the month's milestones,
+ * [TINY] the garland, the dial and the tiles, [PIP] a flat silhouette in a key or a tile.
+ */
+enum class SealSize(
+    private val small: Dp,
+    private val medium: Dp,
+    private val large: Dp,
+    val variant: SealVariant,
+) {
+    CONTENTS(20.dp, 24.dp, 27.dp, SealVariant.MINI),
+    MILESTONE(24.dp, 28.dp, 34.dp, SealVariant.MINI),
+    TINY(8.5.dp, 10.dp, 11.5.dp, SealVariant.TINY),
+    PIP(8.dp, 10.5.dp, 13.dp, SealVariant.PIP),
+    ;
+
+    fun width(group: ValenceSizeGroup): Dp =
+        when (group) {
+            ValenceSizeGroup.SMALL -> small
+            ValenceSizeGroup.MEDIUM -> medium
+            ValenceSizeGroup.LARGE -> large
+        }
+}
 
 /**
  * The stone as a flat print (#1122, spec §The seal): wherever it is read
@@ -46,12 +79,54 @@ fun StoneSeal(
     modifier: Modifier = Modifier,
     variant: SealVariant = SealVariant.MINI,
 ) {
+    val print = rememberSealPrint(valence, palette, glyph, knockout, variant)
+    Canvas(modifier.aspectRatio(print.aspectRatio)) { drawSeal(print, size.width) }
+}
+
+/** The seal at a preset [size]: its width for the stone's size, and the preset's print. */
+@Composable
+fun StoneSeal(
+    valence: Valence,
+    palette: EmotionPalette?,
+    glyph: PebbleGlyph?,
+    knockout: Color,
+    size: SealSize,
+    modifier: Modifier = Modifier,
+) = StoneSeal(valence, palette, glyph, knockout, modifier.width(size.width(valence.sizeGroup)), size.variant)
+
+/**
+ * Everything a seal needs to print, resolved once, so a `Canvas` that draws many stones (the month's
+ * garland, the hours dial) calls [drawSeal] without composing a `StoneSeal` per stone.
+ */
+@Stable
+class SealPrint internal constructor(
+    internal val outline: Path,
+    internal val polarity: ValencePolarity,
+    internal val inks: SealInks,
+    internal val knockout: Color,
+    internal val glyphLines: List<SealGlyphLine>,
+    internal val hatch: Path?,
+    internal val size: ValenceSizeGroup,
+    internal val canvasAffine: Affine,
+    internal val variant: SealVariant,
+    internal val boxWidth: Float,
+    val aspectRatio: Float,
+)
+
+@Composable
+fun rememberSealPrint(
+    valence: Valence,
+    palette: EmotionPalette?,
+    glyph: PebbleGlyph?,
+    knockout: Color,
+    variant: SealVariant = SealVariant.MINI,
+): SealPrint {
     val colors = PebblesTheme.spine.colors
     val blank = palette == null
     val size = valence.sizeGroup
     val polarity = stonePolarity(valence.polarity, blank)
-    // A moment with no emotion yet prints as a blank, uncarved river pebble.
-    val carved = if (blank) null else glyph
+    // A moment with no emotion yet prints as a blank, uncarved river pebble; the small prints carry no glyph.
+    val carved = if (blank || variant == SealVariant.TINY || variant == SealVariant.PIP) null else glyph
     val outline = rememberStoneOutline(size, polarity)
     val stone = remember(palette) { palette?.toStonePalette() ?: BLANK_STONE_PALETTE }
     val night = colors.isNight
@@ -70,44 +145,64 @@ fun StoneSeal(
         remember(carved, size, polarity) {
             carved?.let { sealGlyphLines(it, size, polarity) }.orEmpty()
         }
-    val hatch = remember(size, polarity) { if (polarity == ValencePolarity.LOWLIGHT) hatchPath(size) else null }
+    val hatch = remember(size, polarity) { if (polarity == ValencePolarity.LOWLIGHT) hatchPath(size, HATCH_STEP.toFloat()) else null }
     val canvasAffine = remember(size, polarity) { StoneGeometry.canvasTransform(size, polarity) }
-    val weight = WEIGHTS.getValue(variant)
     val box = StoneGeometry.outlineBox(size)
+    return remember(outline, polarity, inks, knockout, glyphLines, hatch, canvasAffine, variant) {
+        SealPrint(outline.path, polarity, inks, knockout, glyphLines, hatch, size, canvasAffine, variant, box.width, box.width / box.height)
+    }
+}
 
-    Canvas(modifier.aspectRatio(box.width / box.height)) {
-        val pxPerUnit = this.size.width / box.width
-        val body = outline.path
-        withTransform({ scale(pxPerUnit, pxPerUnit, Offset.Zero) }) {
-            when (polarity) {
-                ValencePolarity.HIGHLIGHT -> {
-                    drawPath(body, inks.spot)
-                    drawPath(body, inks.spot, style = Stroke(HIGHLIGHT_RIM.toPx() / pxPerUnit))
-                    drawGlyph(glyphLines, knockout, weight.glyph, pxPerUnit)
-                }
-                ValencePolarity.NEUTRAL -> {
-                    drawPath(body, inks.tint)
-                    drawGlyph(glyphLines, inks.spot, weight.glyph, pxPerUnit)
-                    drawPath(body, inks.spot, style = Stroke(weight.rim.toPx() / pxPerUnit))
-                }
-                ValencePolarity.LOWLIGHT -> {
-                    drawPath(body, inks.wash)
-                    if (hatch != null) {
-                        clipPath(body) {
-                            withTransform({ transform(canvasAffine.toComposeMatrix()) }) {
-                                drawPath(
-                                    hatch,
-                                    inks.deep,
-                                    alpha = HATCH_ALPHA,
-                                    style = Stroke(HATCH_STROKE.toPx() / (pxPerUnit * canvasAffine.a)),
-                                )
-                            }
+/** Prints [print] at the origin, [width] px wide (the height follows its aspect ratio). Move it with `withTransform`. */
+fun DrawScope.drawSeal(
+    print: SealPrint,
+    width: Float,
+) {
+    val pxPerUnit = width / print.boxWidth
+    val body = print.outline
+    val inks = print.inks
+    val weight = WEIGHTS.getValue(print.variant)
+    withTransform({ scale(pxPerUnit, pxPerUnit, Offset.Zero) }) {
+        if (print.variant == SealVariant.PIP) {
+            drawPath(body, if (print.polarity == ValencePolarity.LOWLIGHT) inks.deep else inks.spot)
+            return@withTransform
+        }
+        when (print.polarity) {
+            ValencePolarity.HIGHLIGHT -> {
+                drawPath(body, inks.spot)
+                drawPath(body, inks.spot, style = Stroke(HIGHLIGHT_RIM.toPx() / pxPerUnit))
+                drawGlyph(print.glyphLines, print.knockout, weight.glyph, pxPerUnit)
+            }
+            ValencePolarity.NEUTRAL -> {
+                drawPath(body, inks.tint)
+                drawGlyph(print.glyphLines, inks.spot, weight.glyph, pxPerUnit)
+                drawPath(body, inks.spot, style = Stroke(weight.rim.toPx() / pxPerUnit))
+            }
+            ValencePolarity.LOWLIGHT -> {
+                drawPath(body, inks.wash)
+                val affine = print.canvasAffine
+                // The tiny print keeps its hatch a fixed distance apart on screen (45°, so the step is √2 × the gap).
+                val hatch =
+                    if (print.variant == SealVariant.TINY) {
+                        hatchPath(print.size, TINY_HATCH_GAP.toPx() * SQRT_2 / (pxPerUnit * affine.a))
+                    } else {
+                        print.hatch
+                    }
+                if (hatch != null) {
+                    clipPath(body) {
+                        withTransform({ transform(affine.toComposeMatrix()) }) {
+                            drawPath(
+                                hatch,
+                                inks.deep,
+                                alpha = HATCH_ALPHA,
+                                style = Stroke(weight.hatch.takeOrElse { HATCH_STROKE }.toPx() / (pxPerUnit * affine.a)),
+                            )
                         }
                     }
-                    drawGlyph(glyphLines, knockout, weight.halo, pxPerUnit)
-                    drawGlyph(glyphLines, inks.deep, weight.glyph, pxPerUnit)
-                    drawPath(body, inks.deep, style = Stroke(weight.rim.toPx() / pxPerUnit))
                 }
+                drawGlyph(print.glyphLines, print.knockout, weight.halo, pxPerUnit)
+                drawGlyph(print.glyphLines, inks.deep, weight.glyph, pxPerUnit)
+                drawPath(body, inks.deep, style = Stroke(weight.rim.toPx() / pxPerUnit))
             }
         }
     }
@@ -118,15 +213,20 @@ private class SealWeights(
     val glyph: Dp,
     val halo: Dp,
     val rim: Dp,
+    // Unspecified, not HATCH_STROKE: WEIGHTS is initialised before the constants below it, so a
+    // default read here would be 0 dp. Resolved where the hatch is drawn.
+    val hatch: Dp = Dp.Unspecified,
 )
 
 private val WEIGHTS: Map<SealVariant, SealWeights> =
     mapOf(
         SealVariant.MINI to SealWeights(glyph = 1.dp, halo = 2.6.dp, rim = 1.1.dp),
         SealVariant.PRINT to SealWeights(glyph = 1.4.dp, halo = 3.6.dp, rim = 1.3.dp),
+        SealVariant.TINY to SealWeights(glyph = 0.dp, halo = 0.dp, rim = 0.7.dp, hatch = 0.6.dp),
+        SealVariant.PIP to SealWeights(glyph = 0.dp, halo = 0.dp, rim = 0.dp),
     )
 
-private class SealInks(
+internal class SealInks(
     val spot: Color,
     val deep: Color,
     val tint: Color,
@@ -134,7 +234,7 @@ private class SealInks(
 )
 
 /** A glyph stroke's cut line in outline units, with its width relative to the engine's. */
-private class SealGlyphLine(
+internal class SealGlyphLine(
     val path: Path,
     val weightScale: Float,
 )
@@ -145,6 +245,8 @@ private const val HATCH_ALPHA = 0.85f
 private const val HATCH_STEP = 30
 private const val HATCH_BLEED = 20
 private const val NEUTRAL_TINT = 0.15f
+private val TINY_HATCH_GAP = 2.4.dp
+private const val SQRT_2 = 1.4142135f
 private const val LOWLIGHT_WASH = 0.09f
 
 /** The engine draws strokes at this width; a thinner glyph stroke keeps its proportion. */
@@ -170,17 +272,20 @@ private fun sealGlyphLines(
     }
 }
 
-/** 45° hatching across the canvas, 30 units apart: the engraved seal's shading (web `StoneSprite.hatch`). */
-private fun hatchPath(size: ValenceSizeGroup): Path {
+/** 45° hatching across the canvas, [step] units apart (30 for the web's `StoneSprite.hatch`): the engraved seal's shading. */
+private fun hatchPath(
+    size: ValenceSizeGroup,
+    step: Float,
+): Path {
     val canvas = StoneGeometry.SEED_CANVAS.getValue(size)
     val w = canvas.width.toInt()
     val h = canvas.height.toInt()
     return Path().apply {
-        var x = -(h + HATCH_BLEED)
+        var x = -(h + HATCH_BLEED).toFloat()
         while (x <= w) {
-            moveTo(x.toFloat(), -HATCH_BLEED.toFloat())
-            lineTo((x + h + 2 * HATCH_BLEED).toFloat(), (h + HATCH_BLEED).toFloat())
-            x += HATCH_STEP
+            moveTo(x, -HATCH_BLEED.toFloat())
+            lineTo(x + h + 2 * HATCH_BLEED, (h + HATCH_BLEED).toFloat())
+            x += step
         }
     }
 }

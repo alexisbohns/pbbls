@@ -13,14 +13,12 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -32,6 +30,7 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
+import app.pbbls.android.core.designsystem.PageDots
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.readableWidth
 
@@ -114,24 +113,14 @@ fun OnboardingScreen(
                 OnboardingPageView(step = steps[page])
             }
 
-            Row(
+            PageDots(
+                count = steps.size,
+                current = pagerState.currentPage,
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .padding(vertical = 16.dp),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                steps.indices.forEach { index ->
-                    Box(
-                        modifier =
-                            Modifier
-                                .padding(horizontal = 4.dp)
-                                .size(if (index == pagerState.currentPage) 8.dp else 6.dp)
-                                .clip(CircleShape)
-                                .background(if (index == pagerState.currentPage) colors.primary else colors.outlineVariant),
-                    )
-                }
-            }
+            )
 
             // Direct child of the Column (not wrapped in a Box) so this resolves
             // to ColumnScope.AnimatedVisibility with the innermost receiver.
