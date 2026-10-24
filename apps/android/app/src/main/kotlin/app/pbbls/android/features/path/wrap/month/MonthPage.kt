@@ -15,14 +15,15 @@ import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.features.path.wrap.WrapLookups
+import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import java.time.LocalDate
 import java.time.ZoneId
 
 private val PAGE_BOTTOM = 96.dp
 
 /**
- * A month's page (#1207, D6): the cover, then the sections the server listed, in its order. The
- * insights render from part 13; until then their sections show nothing.
+ * A month's page (#1207, D6): the cover, then the sections the server listed, in its order, the
+ * tone and the hours under one *insights* head.
  */
 @Composable
 fun MonthPage(
@@ -37,6 +38,7 @@ fun MonthPage(
 ) {
     // The sheet's open tab, kept across a rotation; never in the ViewModel (spec §7).
     var sheet by rememberSaveable(wrap.month) { mutableStateOf<String?>(null) }
+    val copy = rememberWrapCopy()
     val onMore: (MonthSection) -> Unit = { sheet = it.name }
 
     LazyColumn(modifier = modifier, contentPadding = PaddingValues(bottom = PAGE_BOTTOM)) {
@@ -48,7 +50,13 @@ fun MonthPage(
                 MonthSection.PERSONS -> PersonsSection(wrap, lookups, dayView, onMore)
                 MonthSection.DOMAINS -> DomainsSection(wrap, lookups, onMore)
                 MonthSection.GEM -> EmotionGem(wrap, lookups, onMore)
-                MonthSection.TONE, MonthSection.HOURS -> Unit
+                MonthSection.TONE, MonthSection.HOURS -> {
+                    // One head for both figures, over whichever comes first.
+                    if (section == wrap.sections.firstOrNull { it == MonthSection.TONE || it == MonthSection.HOURS }) {
+                        MonthSectionHead(copy.insights(), copy.insightsHint())
+                    }
+                    if (section == MonthSection.TONE) ToneFigure(wrap) else HoursFigure(wrap, lookups)
+                }
             }
         }
     }

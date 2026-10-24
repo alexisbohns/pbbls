@@ -67,6 +67,34 @@
     <!-- ==== Path timeline (sub-project D) ==== -->
     <string name="path_load_error">Impossible de charger vos pebbles.</string>
     <string name="path_week_next">Semaine suivante</string>
+    <!-- The month's insights (#1207, D11, D12). -->
+    <string name="path_insights">aperçus</string>
+    <string name="path_insights_hint">expérimental</string>
+    <string name="path_tone_title">le ton du mois</string>
+    <string name="path_tone_hint">jour après jour</string>
+    <string name="path_tone_bright_more_than_two_to_one">Le clair l\'emporte sur le lourd à plus de deux contre un</string>
+    <string name="path_tone_bright_two_to_one">Le clair l\'emporte sur le lourd à deux contre un</string>
+    <string name="path_tone_balance">Clair et lourd à l\'équilibre</string>
+    <string name="path_tone_heavy_outweighed">Le lourd l\'emporte sur le clair</string>
+    <string name="path_tone_nothing_heavy">Rien de lourd ce mois-ci</string>
+    <string name="path_tone_nothing_bright">Rien de clair ce mois-ci</string>
+    <string name="path_tone_all_even">Tout égal ce mois-ci</string>
+    <string name="path_tone_opened_closed">il s\'est ouvert %1$s et refermé %2$s</string>
+    <string name="path_hours_title">les heures</string>
+    <string name="path_hours_hint">midi en haut, dans le sens horaire</string>
+    <string name="path_hours_sub">Dehors, chaque pierre à l\'heure où elle s\'est passée ; dedans, l\'heure où tu l\'as ramassée. Le trait entre les deux, c\'est l\'attente.</string>
+    <plurals name="path_hours_of">
+        <item quantity="one">sur %1$d ramassé</item>
+        <item quantity="many">sur %1$d ramassés</item>
+        <item quantity="other">sur %1$d ramassés</item>
+    </plurals>
+    <string name="path_hours_window">%1$s – %2$s</string>
+    <string name="path_hours_midnight">minuit</string>
+    <plurals name="path_hours_a11y">
+        <item quantity="one">%1$d galet sur %2$d ramassé entre %3$s et %4$s.</item>
+        <item quantity="many">%1$d galets sur %2$d ramassés entre %3$s et %4$s.</item>
+        <item quantity="other">%1$d galets sur %2$d ramassés entre %3$s et %4$s.</item>
+    </plurals>
     <!-- The emotions gem (#1207, D10). -->
     <string name="path_gem_hint">pesées par leur intensité</string>
     <string name="path_gem_first_then">%1$s d\'abord, puis %2$s</string>

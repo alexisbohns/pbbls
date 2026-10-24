@@ -49,4 +49,17 @@ class WrapCopyFrenchTest {
         assertEquals("Joie d'abord, puis paix, rien en honte.", copy.gemLead(listOf("joie", "paix"), listOf("honte"), level = false))
         assertEquals("galet", copy.gemPebbles(1))
     }
+
+    @Test
+    fun `the insights read in French`() {
+        assertEquals(
+            "Le clair l'emporte sur le lourd à deux contre un ; il s'est ouvert lourd et refermé clair.".replace(" ; ", "; "),
+            copy.toneLine(
+                app.pbbls.android.core.model.wrap.ToneVerdict.BRIGHT_TWO_TO_ONE,
+                app.pbbls.android.core.model.ValencePolarity.LOWLIGHT,
+                app.pbbls.android.core.model.ValencePolarity.HIGHLIGHT,
+            ),
+        )
+        assertEquals("20:00 – minuit", copy.hoursWindow(20))
+    }
 }
