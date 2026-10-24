@@ -24,14 +24,16 @@ struct CalendarDayTests {
         #expect(CalendarMonth(year: 2026, month: 9) < CalendarMonth(year: 2026, month: 10))
     }
 
-    @Test("a day in a zone is the reader's day, not UTC's")
+    @Test("a day in a zone is the reader's day, not UTC's (the harness's 23:30 on the 31st)")
     func zonedDay() throws {
-        var paris = Calendar(identifier: .iso8601)
-        paris.timeZone = try #require(TimeZone(identifier: "Europe/Paris"))
+        let paris = try #require(TimeZone(identifier: "Europe/Paris"))
+        let newYork = try #require(TimeZone(identifier: "America/New_York"))
         let lateUTC = try #require(ISO8601Flexible.parse("2026-10-31T23:30:00Z"))
-        #expect(CalendarDay(lateUTC, calendar: paris) == CalendarDay(year: 2026, month: 11, day: 1))
+        #expect(CalendarDay(lateUTC, in: paris) == CalendarDay(year: 2026, month: 11, day: 1))
+        #expect(CalendarDay(lateUTC, in: newYork) == CalendarDay(year: 2026, month: 10, day: 31))
         let midnight = try #require(CalendarDay(year: 2026, month: 11, day: 1).date(in: paris))
-        #expect(CalendarDay(midnight, calendar: paris) == CalendarDay(year: 2026, month: 11, day: 1))
+        #expect(midnight == ISO8601Flexible.parse("2026-10-31T23:00:00Z"))
+        #expect(CalendarDay(midnight, in: paris) == CalendarDay(year: 2026, month: 11, day: 1))
     }
 
     @Test("a month's first day is the p_month the server takes")

@@ -116,6 +116,13 @@ struct WrapPayloadDecodingTests {
         #expect(tone.days[4] == ToneDay(up: 5, even: 0, down: 0))
         #expect(month.hours?.items.count == 24)
         #expect(month.hours?.busiest?.count == 24)
+        let fine = try #require(month.fineEmotions)
+        #expect(fine.first?.family == "joy")
+        #expect(fine.first?.count == 7)
+        #expect(fine.first?.days.days == [4, 7, 9, 18, 20, 25, 28])
+        #expect(fine.first?.days.length == 31)
+        #expect(month.domains?.isEmpty == false)
+        #expect(month.domains?.allSatisfy { $0.days.length == 31 } == true)
     }
 
     @Test("a thin month keeps every section, a quiet month only its cover and weeks")

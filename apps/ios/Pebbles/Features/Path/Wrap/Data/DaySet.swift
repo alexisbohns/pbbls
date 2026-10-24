@@ -8,7 +8,7 @@ struct DaySet: Hashable, Sendable {
     /// Indices outside `0..<length` are dropped.
     init(length: Int, days: some Sequence<Int>) {
         self.length = length
-        self.days = Set(days.filter { (0..<length).contains($0) })
+        self.days = Set(days.filter { $0 >= 0 && $0 < length })
     }
 
     func contains(_ day: Int) -> Bool { days.contains(day) }

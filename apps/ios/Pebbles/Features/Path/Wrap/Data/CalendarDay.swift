@@ -22,35 +22,38 @@ struct CalendarDay: Hashable, Comparable, Sendable {
               parts.allSatisfy({ $0.allSatisfy(\.isASCIIDigit) }),
               let year = Int(parts[0]), let month = Int(parts[1]), let day = Int(parts[2]) else { return nil }
         let components = DateComponents(year: year, month: month, day: day)
-        guard components.isValidDate(in: Self.gregorian) else { return nil }
+        guard components.isValidDate(in: Self.utcGregorian) else { return nil }
         self.init(year: year, month: month, day: day)
     }
 
-    /// The day holding `date` in `calendar`'s zone.
-    init(_ date: Date, calendar: Calendar) {
-        let parts = calendar.dateComponents([.year, .month, .day], from: date)
+    /// The day holding `date` in `zone`, on the Gregorian calendar the wire
+    /// speaks, whatever calendar the reader uses.
+    init(_ date: Date, in zone: TimeZone) {
+        let parts = Self.gregorian(in: zone).dateComponents([.year, .month, .day], from: date)
         self.init(year: parts.year ?? 0, month: parts.month ?? 0, day: parts.day ?? 0)
     }
 
     /// The wire form, `YYYY-MM-DD`.
     var iso: String {
-        String(format: "%04d-%02d-%02d", year, month, day)
+        String(format: "%04ld-%02ld-%02ld", year, month, day)
     }
 
-    /// Midnight of this day in `calendar`'s zone.
-    func date(in calendar: Calendar) -> Date? {
-        calendar.date(from: DateComponents(year: year, month: month, day: day))
+    /// Midnight of this day in `zone`.
+    func date(in zone: TimeZone) -> Date? {
+        Self.gregorian(in: zone).date(from: DateComponents(year: year, month: month, day: day))
     }
 
     static func < (lhs: CalendarDay, rhs: CalendarDay) -> Bool {
         (lhs.year, lhs.month, lhs.day) < (rhs.year, rhs.month, rhs.day)
     }
 
-    private static let gregorian: Calendar = {
+    private static func gregorian(in zone: TimeZone) -> Calendar {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? calendar.timeZone
+        calendar.timeZone = zone
         return calendar
-    }()
+    }
+
+    private static let utcGregorian = gregorian(in: TimeZone(secondsFromGMT: 0) ?? .current)
 }
 
 extension CalendarDay: Codable {

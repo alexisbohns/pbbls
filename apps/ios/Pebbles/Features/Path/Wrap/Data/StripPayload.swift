@@ -13,6 +13,7 @@ struct StripPayload: Decodable {
 }
 
 /// A week (`kind = "week"`) or a month (`kind = "month"`); the other kind's keys are absent.
+/// A day is read only for its own kind, so an unknown kind is dropped whatever it carries.
 struct StripItemPayload: Decodable {
     let kind: String
     let weekStart: CalendarDay?
@@ -35,13 +36,13 @@ struct StripItemPayload: Decodable {
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         kind = try c.decode(.kind, or: "")
-        weekStart = try c.decodeIfPresent(CalendarDay.self, forKey: .weekStart)
         isoWeek = try c.decode(.isoWeek, or: 0)
         isoYear = try c.decode(.isoYear, or: 0)
         count = try c.decode(.count, or: 0)
         focusable = try c.decode(.focusable, or: false)
         live = try c.decode(.live, or: false)
         days = try c.decode(.days, or: [])
-        month = try c.decodeIfPresent(CalendarDay.self, forKey: .month)
+        weekStart = kind == "week" ? try c.decodeIfPresent(CalendarDay.self, forKey: .weekStart) : nil
+        month = kind == "month" ? try c.decodeIfPresent(CalendarDay.self, forKey: .month) : nil
     }
 }

@@ -2,7 +2,7 @@ import Foundation
 import Supabase
 
 /// The seam `PathModel`'s tests fake (#1226).
-protocol PathWrapServicing {
+protocol PathWrapServicing: Sendable {
     func strip(zone: TimeZone) async throws -> Strip
     func weekWrap(_ weekStart: CalendarDay, zone: TimeZone) async throws -> WeekWrap
     func monthWrap(_ month: CalendarMonth, zone: TimeZone) async throws -> MonthWrap
@@ -12,8 +12,10 @@ protocol PathWrapServicing {
 /// them (`path_strip`, `path_week_wrap`, `path_month_wrap`); this service only
 /// calls, decodes and maps. Each call sends the zone the feed buckets its days
 /// in (`SpineCalendar.current.timeZone`). Errors propagate; callers own their
-/// loading and error state. The methods are not actor-isolated, so a caller on
-/// the main actor waits while the decoding runs elsewhere.
+/// loading and error state. The methods are nonisolated `async`, so under the
+/// Swift 5 language mode a caller on the main actor waits while the decoding
+/// runs on the global executor (Swift 6.2's nonisolated-nonsending default
+/// would need `@concurrent` here).
 struct PathWrapService: PathWrapServicing {
     let client: SupabaseClient
 
