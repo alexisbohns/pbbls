@@ -10,6 +10,7 @@ import app.pbbls.android.core.data.CompleteSnapshotStoring
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.data.SupabaseServicing
+import app.pbbls.android.core.data.WrapDiskCaching
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -86,6 +87,7 @@ class RootViewModel
         private val karma: KarmaNotificationService,
         private val achievementNotify: AchievementNotificationService,
         private val completeSnapshots: CompleteSnapshotStoring,
+        private val wrapCache: WrapDiskCaching,
         private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
         private val _uiState =
@@ -162,8 +164,11 @@ class RootViewModel
             // unfinished answers with nobody entitled to them. Account deletion
             // reaches here through its own `signOut()`. The store's owner check
             // covers a session that swaps without passing through signed-out.
+            // The Path's kept wraps (#1207) are the same: private journal content at rest, nobody's
+            // once the device is signed out.
             if (!isInitializing && userId == null) {
                 completeSnapshots.clearAll()
+                wrapCache.clearAll()
             }
             // Only a resolved status updates hasHadSession — Unresolved must
             // never be mistaken for a session, real or absent.

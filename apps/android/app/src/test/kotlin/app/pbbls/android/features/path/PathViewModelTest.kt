@@ -565,4 +565,24 @@ class PathViewModelTest {
             advanceUntilIdle()
             assertTrue((viewModel.uiState.value as PathUiState.Content).weekWraps.getValue(weekOf(current)) is WrapState.Ready)
         }
+
+    @Test
+    fun `a week opens on the device's copy, stale, and an offline start keeps the kept strip`() =
+        runTest {
+            val current = moment("now")
+            val month = java.time.YearMonth.from(now.toLocalDate().minusMonths(1))
+            val wraps = FakePathWrapService()
+            wraps.keptStrip = Strip(listOf(StripItem.Month(month, 3)))
+            wraps.keptWeeks[weekOf(current)] = FakePathWrapService.emptyWeek(weekOf(current)).copy(pebbles = 7)
+            wraps.failNext = IOException("offline")
+            wraps.failNextWeek = IOException("offline")
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(current)), wraps = wraps)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as PathUiState.Content
+            assertTrue("the kept strip's month is a page", PathPage.Month(month) in state.pages)
+            val week = state.weekWraps.getValue(weekOf(current))
+            assertTrue("a failed fetch keeps the kept copy on screen", week is WrapState.Failed)
+            assertEquals(7, week.shown?.pebbles)
+        }
 }
