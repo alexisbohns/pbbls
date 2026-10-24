@@ -67,6 +67,22 @@
     <!-- ==== Path timeline (sub-project D) ==== -->
     <string name="path_load_error">Impossible de charger vos pebbles.</string>
     <string name="path_week_next">Semaine suivante</string>
+    <!-- The emotions gem (#1207, D10). -->
+    <string name="path_gem_hint">pesées par leur intensité</string>
+    <string name="path_gem_first_then">%1$s d\'abord, puis %2$s</string>
+    <string name="path_gem_level">%1$s et %2$s à égalité</string>
+    <string name="path_gem_only">Seulement %1$s</string>
+    <string name="path_gem_nothing_in">, rien en %1$s</string>
+    <string name="path_gem_nothing_in_others">, rien dans les %1$s autres</string>
+    <!-- The gem's table draws the count on its own line above this word, so the word carries no number. -->
+    <plurals name="path_gem_pebbles" tools:ignore="ImpliedQuantity">
+        <item quantity="one">galet</item>
+        <item quantity="many">galets</item>
+        <item quantity="other">galets</item>
+    </plurals>
+    <string name="path_gem_more">les %1$s émotions</string>
+    <string name="path_gem_detail">les émotions, en détail</string>
+    <string name="path_gem_a11y">Les émotions en pierre taillée : %1$s.</string>
     <!-- The month page (#1207): cover, sections and the month sheet. -->
     <string name="path_month_kicker">%1$s partie</string>
     <string name="path_month_persons_label">les personnes, dans l\'ordre d\'apparition</string>

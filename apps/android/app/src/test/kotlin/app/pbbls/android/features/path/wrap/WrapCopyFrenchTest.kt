@@ -43,4 +43,10 @@ class WrapCopyFrenchTest {
         assertEquals("les six personnes", copy.morePersons(6))
         assertEquals("Imprimé en joie & paix, sur famille.", copy.colophon(listOf("joie", "paix"), listOf("famille")))
     }
+
+    @Test
+    fun `the gem's lead reads in French`() {
+        assertEquals("Joie d'abord, puis paix, rien en honte.", copy.gemLead(listOf("joie", "paix"), listOf("honte"), level = false))
+        assertEquals("galet", copy.gemPebbles(1))
+    }
 }

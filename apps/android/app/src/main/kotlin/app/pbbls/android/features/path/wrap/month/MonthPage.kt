@@ -21,8 +21,8 @@ import java.time.ZoneId
 private val PAGE_BOTTOM = 96.dp
 
 /**
- * A month's page (#1207, D6): the cover, then the sections the server listed, in its order. The gem
- * and the insights render from parts 12 and 13; until then their sections show nothing.
+ * A month's page (#1207, D6): the cover, then the sections the server listed, in its order. The
+ * insights render from part 13; until then their sections show nothing.
  */
 @Composable
 fun MonthPage(
@@ -47,7 +47,8 @@ fun MonthPage(
                 MonthSection.MILESTONES -> MilestonesSection(wrap, lookups, zone, onOpen)
                 MonthSection.PERSONS -> PersonsSection(wrap, lookups, dayView, onMore)
                 MonthSection.DOMAINS -> DomainsSection(wrap, lookups, onMore)
-                MonthSection.GEM, MonthSection.TONE, MonthSection.HOURS -> Unit
+                MonthSection.GEM -> EmotionGem(wrap, lookups, onMore)
+                MonthSection.TONE, MonthSection.HOURS -> Unit
             }
         }
     }

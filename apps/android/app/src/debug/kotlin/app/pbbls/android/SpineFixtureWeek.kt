@@ -21,6 +21,7 @@ import app.pbbls.android.core.model.wrap.DayWeight
 import app.pbbls.android.core.model.wrap.DomainStat
 import app.pbbls.android.core.model.wrap.FamilyStat
 import app.pbbls.android.core.model.wrap.FineEmotionStat
+import app.pbbls.android.core.model.wrap.Gem
 import app.pbbls.android.core.model.wrap.HourMark
 import app.pbbls.android.core.model.wrap.Kept
 import app.pbbls.android.core.model.wrap.Lead
@@ -557,7 +558,7 @@ internal object SpineFixtureWeek {
             firstWeekday = DayOfWeek.THURSDAY,
             pebbles = 13,
             people = 14,
-            sections = listOf(MonthSection.WEEKS, MonthSection.MILESTONES, MonthSection.PERSONS, MonthSection.DOMAINS),
+            sections = listOf(MonthSection.WEEKS, MonthSection.MILESTONES, MonthSection.PERSONS, MonthSection.GEM, MonthSection.DOMAINS),
             cover =
                 MonthCover(
                     days =
@@ -602,7 +603,7 @@ internal object SpineFixtureWeek {
                     )
                 },
             previousMonth = PreviousMonth(4, listOf("soul-mara", "soul-nadia")),
-            gem = null,
+            gem = fixtureGem,
             fineEmotions =
                 listOf(
                     FineEmotionStat("joy", emotions.getValue("joyful").id, 4, monthDays(0, 3, 5)),
@@ -626,6 +627,57 @@ internal object SpineFixtureWeek {
                 },
             tone = null,
             hours = null,
+        )
+    }
+
+    /** October's gem: `gem-method.js` (the oracle `gem_allocate` is proven against) run on the fixture's pebbles. */
+    private val fixtureGem: Gem by lazy {
+        Gem(
+            worths = mapOf("joy" to 9.0, "pride" to 4.0, "anger" to 2.0, "fear" to 1.0, "shame" to 0.0, "sadness" to 2.0, "peace" to 4.5),
+            shares =
+                mapOf(
+                    "joy" to 0.4,
+                    "pride" to 0.1778,
+                    "anger" to 0.0889,
+                    "fear" to 0.0444,
+                    "shame" to 0.0,
+                    "sadness" to 0.0889,
+                    "peace" to 0.2,
+                ),
+            main = "joy",
+            rotation = 0,
+            facets =
+                mapOf(
+                    "star_0" to "joy",
+                    "star_1" to "pride",
+                    "star_2" to "pride",
+                    "star_3" to "fear",
+                    "star_4" to "peace",
+                    "star_5" to "peace",
+                    "star_6" to "joy",
+                    "kite_0" to "joy",
+                    "kite_1" to "joy",
+                    "kite_2" to "pride",
+                    "kite_3" to "anger",
+                    "kite_4" to "sadness",
+                    "kite_5" to "peace",
+                    "kite_6" to "joy",
+                    "girdle_0" to "joy",
+                    "girdle_1" to "joy",
+                    "girdle_2" to "joy",
+                    "girdle_3" to "joy",
+                    "girdle_4" to "pride",
+                    "girdle_5" to "pride",
+                    "girdle_6" to "anger",
+                    "girdle_7" to "fear",
+                    "girdle_8" to "sadness",
+                    "girdle_9" to "peace",
+                    "girdle_10" to "peace",
+                    "girdle_11" to "peace",
+                    "girdle_12" to "joy",
+                    "girdle_13" to "joy",
+                ),
+            lead = Lead(listOf("joy", "peace", "pride", "anger", "sadness", "fear"), listOf("shame")),
         )
     }
 

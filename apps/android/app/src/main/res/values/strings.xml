@@ -77,6 +77,21 @@
     <string name="path_load_error">Couldn\'t load your pebbles.</string>
     <string name="path_week_next">Next week</string>
     <!-- a11y label for a week-roll cairn cell: ISO week number + pebble count. -->
+    <!-- The emotions gem (#1207, D10). -->
+    <string name="path_gem_hint">weighed by intensity</string>
+    <string name="path_gem_first_then">%1$s first, then %2$s</string>
+    <string name="path_gem_level">%1$s and %2$s level</string>
+    <string name="path_gem_only">Only %1$s</string>
+    <string name="path_gem_nothing_in">; nothing in %1$s</string>
+    <string name="path_gem_nothing_in_others">; nothing in the other %1$s</string>
+    <!-- The gem's table draws the count on its own line above this word, so the word carries no number. -->
+    <plurals name="path_gem_pebbles" tools:ignore="ImpliedQuantity">
+        <item quantity="one">pebble</item>
+        <item quantity="other">pebbles</item>
+    </plurals>
+    <string name="path_gem_more">all %1$s emotions</string>
+    <string name="path_gem_detail">the emotions, in detail</string>
+    <string name="path_gem_a11y">The emotions as a gem: %1$s.</string>
     <!-- The month page (#1207): cover, sections and the month sheet. -->
     <string name="path_month_kicker">part the %1$s</string>
     <string name="path_month_persons_label">the persons, in order of appearance</string>

@@ -265,6 +265,50 @@ class WrapCopy(
             else -> resources.getString(R.string.path_month_amp, items.dropLast(1).joinToString(", "), items.last())
         }
 
+    // MARK: - The emotions gem
+
+    fun gemHint(): String = resources.getString(R.string.path_gem_hint)
+
+    /**
+     * "Joy first, then peace; nothing in shame." over the server's lead: [order] by worth with the main
+     * family first, [zero] the families with nothing; [level] when the first two weigh the same.
+     */
+    fun gemLead(
+        order: List<String>,
+        zero: List<String>,
+        level: Boolean,
+    ): String {
+        if (order.isEmpty()) return ""
+        val head =
+            when {
+                order.size == 1 -> resources.getString(R.string.path_gem_only, order[0])
+                level -> resources.getString(R.string.path_gem_level, order[0], order[1])
+                else -> resources.getString(R.string.path_gem_first_then, order[0], order[1])
+            }
+        val tail =
+            when {
+                zero.isEmpty() -> ""
+                zero.size <= 2 -> resources.getString(R.string.path_gem_nothing_in, or(zero))
+                else -> resources.getString(R.string.path_gem_nothing_in_others, words(zero.size, NumberWords.Gender.FEMININE))
+            }
+        return WeekWordsBuilder.sentenceCase("$head$tail.", locale)
+    }
+
+    fun gemPebbles(n: Int): String = resources.getQuantityString(R.plurals.path_gem_pebbles, n)
+
+    fun moreEmotions(fine: Int): String =
+        if (fine >
+            3
+        ) {
+            resources.getString(R.string.path_gem_more, words(fine, NumberWords.Gender.FEMININE))
+        } else {
+            resources.getString(R.string.path_gem_detail)
+        }
+
+    /** The gem said in words, main family first: "The emotions as a gem: joy 40 %, peace 20 %…". */
+    fun gemDescription(shares: List<Pair<String, Int>>): String =
+        resources.getString(R.string.path_gem_a11y, shares.joinToString(", ") { (name, pct) -> "$name $pct %" })
+
     /** A local decimal hour as the locale writes a time: 21.5 → "9:30 PM" / "21:30". */
     fun time(hour: Double): String {
         val minutes = floor(hour * 60).toInt().coerceIn(0, 24 * 60 - 1)
