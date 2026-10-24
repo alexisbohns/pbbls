@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
+import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.SnapAspectCache
@@ -42,6 +43,7 @@ import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.WeekRollEntry
+import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.model.wrap.StripItem
 import app.pbbls.android.core.model.wrap.WeekWrap
 import app.pbbls.android.core.ui.MomentDeleteDialog
@@ -53,10 +55,12 @@ import app.pbbls.android.features.path.strip.PathPages
 import app.pbbls.android.features.path.strip.PathStrip
 import app.pbbls.android.features.path.wrap.WrapLookups
 import app.pbbls.android.features.path.wrap.WrapState
+import app.pbbls.android.features.path.wrap.month.MonthPage
 import app.pbbls.android.features.path.wrap.month.MonthPagePlaceholder
 import app.pbbls.android.features.path.wrap.shown
 import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
+import java.time.YearMonth
 
 /**
  * The Path timeline — the authenticated landing surface (`PathView.swift`
@@ -139,13 +143,23 @@ fun PathScreen(
                     val moments = remember(content.entries) { content.entries.flatMap { it.moments }.associateBy { it.id } }
                     val lookups =
                         remember(moments, content.soulsById, families, domains, palettes) {
-                            WrapLookups(moments::get, content.soulsById::get, families::get, domains::get, paletteFor)
+                            WrapLookups(
+                                moments::get,
+                                content.soulsById::get,
+                                families::get,
+                                domains::get,
+                                paletteFor,
+                                palettes.byEmotionId::get,
+                            )
                         }
                     PathContent(
                         entries = content.entries,
                         stripItems = content.stripItems,
                         focus = content.focus,
                         weekWraps = content.weekWraps,
+                        monthWraps = content.monthWraps,
+                        dayView = content.dayView,
+                        onDayView = viewModel::onDayView,
                         lookups = lookups,
                         today = content.today,
                         soulsById = content.soulsById,
@@ -217,6 +231,8 @@ fun PathScreen(
  * @param stripItems the strip as drawn ([PathPages.items]); its focusable items are the pages.
  * @param weekWraps each week page's wrap; a week absent here shows its line alone.
  * @param lookups what the wraps' ids point at.
+ * @param monthWraps each month page's wrap; a month absent here shows its name alone.
+ * @param dayView the month's day-dot view, switched in its sheet through [onDayView].
  * @param soulsById the souls the persons rows and people lines draw glyphs
  *   from; a soul absent from it is skipped.
  * @param aspect the photo-ratio probe the cards read; null (previews) keeps
@@ -231,6 +247,9 @@ fun PathContent(
     focus: PathPage,
     weekWraps: Map<LocalDate, WrapState<WeekWrap>>,
     lookups: WrapLookups,
+    monthWraps: Map<YearMonth, WrapState<MonthWrap>> = emptyMap(),
+    dayView: DayView = DayView.CIRCLE,
+    onDayView: (DayView) -> Unit = {},
     today: LocalDate,
     soulsById: Map<String, SoulWithGlyph>,
     onFocusChange: (PathPage) -> Unit,
@@ -316,7 +335,22 @@ fun PathContent(
                         ratioOverride = ratioOverride,
                     )
                 }
-                is PathPage.Month -> MonthPagePlaceholder(page.month, Modifier.fillMaxSize())
+                is PathPage.Month -> {
+                    val wrap = monthWraps[page.month]?.shown
+                    if (wrap == null) {
+                        MonthPagePlaceholder(page.month, Modifier.fillMaxSize())
+                    } else {
+                        MonthPage(
+                            wrap = wrap,
+                            lookups = lookups,
+                            dayView = dayView,
+                            onDayView = onDayView,
+                            onWeek = { onFocusChange(PathPage.Week(it)) },
+                            onOpen = { moment -> onPebbleTap(moment, CardFace.RECTO) },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                }
             }
         }
     }

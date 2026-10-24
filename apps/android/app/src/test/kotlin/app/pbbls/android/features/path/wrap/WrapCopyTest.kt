@@ -53,4 +53,29 @@ class WrapCopyTest {
         assertEquals("one card written", copy.cards(1))
         assertEquals("2 cards", copy.cardsShort(2))
     }
+
+    @Test
+    fun `the month's cover, sections and sheet read in English`() {
+        val october = java.time.YearMonth.of(2026, 10)
+        assertEquals("part the tenth", copy.monthKicker(october))
+        assertEquals("October", copy.monthName(october))
+        assertEquals(
+            "Printed in joy, peace & pride, with anger, sadness & fear, on family, identity & friends.",
+            copy.colophon(listOf("joy", "peace", "pride", "anger", "sadness", "fear"), listOf("family", "identity", "friends")),
+        )
+        assertEquals("five weeks", copy.weeksHeader(5))
+        assertEquals("October by week", copy.weeksHint(october))
+        assertEquals("one milestone", copy.milestonesHeader(1))
+        assertEquals("all six persons", copy.morePersons(6))
+        assertEquals("the persons, in detail", copy.morePersons(4))
+        assertEquals("5–11 Oct", copy.range(october, 4, 10))
+        assertEquals("Mon 5 Oct", copy.dateline(java.time.LocalDate.of(2026, 10, 5)))
+        assertEquals("new since September", copy.newSince(october.minusMonths(1)))
+        assertEquals(
+            "Mara five times, Nadia once. Inès and Jules new since September.",
+            copy.personsLead(listOf("Mara" to 5, "Nadia" to 1), listOf("Inès", "Jules"), october.minusMonths(1)),
+        )
+        assertEquals("Eleven emotions in six families, weighed by intensity.", copy.emotionsLead(11, 6))
+        assertEquals("Seven domains; family in seven pebbles.", copy.domainsLead(7, "Family", 7))
+    }
 }
