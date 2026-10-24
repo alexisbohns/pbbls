@@ -2581,6 +2581,10 @@ export type Database = {
         }[]
       }
       path_strip: { Args: { p_tz: string }; Returns: Json }
+      path_week_wrap: {
+        Args: { p_tz: string; p_week_start: string }
+        Returns: Json
+      }
       preview_connection_invite: { Args: { p_token: string }; Returns: Json }
       publish_admin_glyph: {
         Args: {

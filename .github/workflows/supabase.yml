@@ -165,7 +165,8 @@ jobs:
 
       # The Path wraps (#1207): gem_allocate against the committed JS oracle
       # (scripts/oracles/path-wrap/) on fixed and seeded random months, and
-      # path_strip on a seeded reader in two zones.
+      # path_strip on a seeded reader in two zones, and path_week_wrap on the
+      # fixture's weeks plus a live week.
       - name: Path wraps (#1207)
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "path-wraps" db:verify:path-wraps
