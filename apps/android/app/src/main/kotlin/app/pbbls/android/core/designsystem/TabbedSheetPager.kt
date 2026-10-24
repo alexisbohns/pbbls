@@ -1,7 +1,6 @@
 package app.pbbls.android.core.designsystem
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,13 +23,13 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 private val TAB_EDGE = 24.dp
-private val DOTS_PAD = 12.dp
 
 /**
- * One half sheet over several lists (#1207, D4): the tabs repeat the lists' names, the pager moves
- * by whole pages and the dots count them. A stock `ModalBottomSheet` (partial expansion first), a
- * stock `SecondaryScrollableTabRow`, a `HorizontalPager` and [PageDots], on the Spine's paper.
- * Each [page] scrolls itself. The open state and the page belong to the caller, never to a
+ * One half sheet over several lists (#1207, D4): the tabs repeat the lists' names and the pager
+ * moves by whole pages. A stock `ModalBottomSheet` (partial expansion first), a stock
+ * `SecondaryScrollableTabRow` and a `HorizontalPager`, on the Spine's paper. The pager fills the
+ * sheet whatever its pages hold, so the sheet opens at half the screen, drags to the top, and never
+ * resizes as the reader swipes between a short list and a long one. Each [page] scrolls itself. The open state and the page belong to the caller, never to a
  * ViewModel: [onPageChange] reports the page so the caller can keep it across a rotation.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,14 +80,7 @@ fun TabbedSheetPager(
         HorizontalPager(
             state = pagerState,
             verticalAlignment = Alignment.Top,
-            modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
+            modifier = Modifier.fillMaxWidth().weight(1f),
         ) { index -> page(index) }
-        PageDots(
-            count = tabs.size,
-            current = pagerState.currentPage,
-            currentColor = colors.ink,
-            otherColor = colors.rule,
-            modifier = Modifier.fillMaxWidth().padding(vertical = DOTS_PAD),
-        )
     }
 }
