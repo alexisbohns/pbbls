@@ -5,13 +5,18 @@ import Foundation
 /// resolve them here. `PathView` builds it from the feed and the reference
 /// services; references and tests build it from fixtures. A nil is something
 /// the device does not know yet, and its row is skipped rather than shown wrong.
-/// Souls resolve through the page's own names and glyphs.
+/// A soul resolves through the reference cache, then through the names the
+/// feed's pebbles carry (as the Spine's weeks do), so a soul made on another
+/// device is named before the cache refreshes; Android names only cached souls.
 struct WrapLookups {
     var moment: (String) -> MomentSummary? = { _ in nil }
     var family: (String) -> EmotionCategory? = { _ in nil }
     var domain: (String) -> Domain? = { _ in nil }
     var emotion: (String) -> EmotionWithPalette? = { _ in nil }
     var palette: (MomentSummary) -> EmotionPalette? = { _ in nil }
+    /// A soul's name and glyph, by lowercase id: the reference cache, then the names the pebbles carry.
+    var soulName: (String) -> String? = { _ in nil }
+    var soulGlyph: (String) -> [GlyphStroke]? = { _ in nil }
 
     /// A family's name in the app's language, falling back to its slug.
     func familyName(_ slug: String) -> String {

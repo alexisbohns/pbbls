@@ -6,7 +6,7 @@ import SwiftUI
 /// Verbatim text throughout, so nothing reaches the string catalogue.
 struct SpineLabView: View {
     enum Section: String, CaseIterable, Identifiable {
-        case stones, cards, feed, dense, pager
+        case stones, cards, feed, dense, pager, month
         var id: String { rawValue }
     }
 
@@ -23,6 +23,8 @@ struct SpineLabView: View {
             Group {
                 if section == .pager {
                     pager
+                } else if section == .month {
+                    month
                 } else {
                     gallery
                 }
@@ -69,7 +71,7 @@ struct SpineLabView: View {
                 lazyDays(model)
             case .dense:
                 lazyDays(denseModel)
-            case .pager:
+            case .pager, .month:
                 EmptyView()
             }
         }
@@ -87,6 +89,21 @@ struct SpineLabView: View {
             }
             .background(alignment: .top) { SpineGround() }
             .padding(.top, SpineLayout.feedTop - SpineLayout.seamOverhang)
+        }
+    }
+
+    /// The harness's October as its page: the cover, the sections, the sheets.
+    /// Week taps and opens are logged on screen.
+    @ViewBuilder
+    private var month: some View {
+        if let october = SpineFixtureMonth.october {
+            VStack(spacing: 0) {
+                Text(verbatim: lastOpen).font(.caption.monospaced()).foregroundStyle(Color.pebbles.outline)
+                MonthPage(wrap: october, lookups: SpineFixtureMonth.lookups(october), isFocused: true,
+                          returnFocus: .constant(nil),
+                          onWeek: { lastOpen = "week of \($0.iso)" },
+                          onOpen: { lastOpen = "open \($0.name ?? "untitled")" })
+            }
         }
     }
 

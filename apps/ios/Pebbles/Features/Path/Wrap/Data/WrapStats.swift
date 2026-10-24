@@ -77,3 +77,10 @@ extension ValencePolarity {
         self = wire < 0 ? .lowlight : wire == 0 ? .neutral : .highlight
     }
 }
+
+extension ValenceSizeGroup {
+    /// The stone size a pebble's intensity prints at (1, 2, 3).
+    init(intensity: Int) {
+        self = intensity <= 1 ? .small : intensity == 2 ? .medium : .large
+    }
+}

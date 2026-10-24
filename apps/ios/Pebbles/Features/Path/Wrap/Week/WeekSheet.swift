@@ -231,8 +231,13 @@ struct SheetPage<Content: View>: View {
 /// A sheet list's opening sentence; nothing when there is none.
 struct SheetLead: View {
     let text: String
+    /// The quiet below it; zero where the container already spaces its rows.
+    var bottom: CGFloat = 14
 
-    init(_ text: String) { self.text = text }
+    init(_ text: String, bottom: CGFloat = 14) {
+        self.text = text
+        self.bottom = bottom
+    }
 
     var body: some View {
         if !text.isEmpty {
@@ -240,7 +245,7 @@ struct SheetLead: View {
                 .spineType(.lead)
                 .foregroundStyle(Color.pebbles.onSurface)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.bottom, 14)
+                .padding(.bottom, bottom)
         }
     }
 }

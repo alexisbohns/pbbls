@@ -11,6 +11,14 @@ enum PathPage: Hashable {
         if case let .week(start) = self { return start }
         return nil
     }
+
+    /// The RPC a page's wrap comes from, for the logs.
+    var rpcName: String {
+        switch self {
+        case .week: return "path_week_wrap"
+        case .month: return "path_month_wrap"
+        }
+    }
 }
 
 extension StripItem: Identifiable {

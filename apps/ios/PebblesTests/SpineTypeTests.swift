@@ -30,6 +30,7 @@ struct SpineTypeTests {
         Row(name: "sectionHint", actual: .sectionHint, expected: S(size: 13, weight: 380, italic: true, scaling: .text(.footnote))),
         Row(name: "tileCaption", actual: .tileCaption, expected: S(size: 12.5, weight: 400, lineHeight: 15.6, scaling: .text(.caption))),
         Row(name: "tileCaptionItalic", actual: .tileCaptionItalic, expected: S(size: 12.5, weight: 400, italic: true, lineHeight: 15.6, scaling: .text(.caption))),
+        Row(name: "monthName", actual: .monthName, expected: S(size: 36, weight: 380, italic: true, lineHeight: 40, scaling: .text(.largeTitle))),
         Row(name: "lead", actual: .lead, expected: S(size: 17, weight: 380, italic: true, lineHeight: 23, scaling: .text(.body))),
         Row(name: "masthead", actual: .masthead, expected: S(size: 11.5, weight: 400, trackingEm: 0.18, features: sc, scaling: .text(.caption2))),
         Row(name: "mastheadNumber", actual: .mastheadNumber, expected: S(size: 11.5, weight: 650, trackingEm: 0.18, features: sc, scaling: .text(.caption2))),

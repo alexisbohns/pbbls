@@ -145,12 +145,17 @@ struct PathView: View {
         let domains = Dictionary(references.domains.map { ($0.id.uuidString.lowercased(), $0) },
                                  uniquingKeysWith: { first, _ in first })
         let emotions = palettes.byEmotionId
+        let souls = Dictionary(references.souls.map { ($0.id.uuidString.lowercased(), $0) },
+                               uniquingKeysWith: { first, _ in first })
+        let pebbleSouls = model.pebbleSoulNames
         return WrapLookups(
             moment: { moments[$0.lowercased()] },
             family: { families[$0] },
             domain: { domains[$0.lowercased()] },
             emotion: { UUID(uuidString: $0).flatMap { emotions[$0] } },
-            palette: palette
+            palette: palette,
+            soulName: { souls[$0.lowercased()]?.name ?? pebbleSouls[$0.lowercased()] },
+            soulGlyph: { souls[$0.lowercased()]?.glyph.strokes }
         )
     }
 

@@ -93,8 +93,9 @@ struct SpineWeekView: View {
                 }
             }
             .onChange(of: model.returnFocus) { _, id in
-                // Mirrored then cleared, so closing the same card twice returns twice.
-                guard let id else { return }
+                // Mirrored then cleared, so closing the same card twice returns twice; the focused
+                // page only, so a realised neighbour (a month's milestone shares its moment) never takes it.
+                guard let id, page.weekStart == model.focusedWeekStart else { return }
                 slotFocus = id
                 model.returnFocus = nil
             }

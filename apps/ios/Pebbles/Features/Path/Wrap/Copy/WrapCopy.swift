@@ -165,6 +165,151 @@ enum WrapCopy {
         return SpineDates.time(day, calendar: calendar, locale: locale)
     }
 
+    // MARK: - The month page
+
+    /// Rows a month section shows before its *more* (spec §3.5: "shows 5, then more").
+    static let shown = 5
+
+    /// "part the tenth" / "dixième partie": the month as a chapter of the year.
+    static func monthKicker(_ month: CalendarMonth, locale: Locale) -> String {
+        SpineStrings.format("path.month.kicker", locale: locale,
+                            NumberWords.ordinal(month.month, locale: locale, gender: .feminine))
+    }
+
+    static func personsInOrderLabel(locale: Locale) -> String {
+        SpineStrings.string("path.month.personsLabel", locale: locale)
+    }
+
+    /// "Printed in joy, peace & pride, with anger, sadness & fear, on family,
+    /// identity & friends." The inks are the server's ranked families (three,
+    /// then the rest), the papers its top domains.
+    static func colophon(inks: [String], papers: [String], locale: Locale) -> String {
+        var parts: [String] = []
+        if !inks.isEmpty {
+            parts.append(SpineStrings.format("path.month.printed", locale: locale, amp(Array(inks.prefix(3)), locale)))
+        }
+        if inks.count > 3 {
+            parts.append(SpineStrings.format("path.month.printedWith", locale: locale,
+                                             amp(Array(inks.dropFirst(3)), locale)))
+        }
+        if !papers.isEmpty {
+            parts.append(SpineStrings.format("path.month.printedOn", locale: locale, amp(papers, locale)))
+        }
+        return WeekOpening.sentenceCase(parts.joined(separator: ", ") + ".", locale: locale)
+    }
+
+    static func weeksHeader(_ count: Int, locale: Locale) -> String {
+        SpineStrings.format("path.month.weeks", locale: locale, words(count, locale: locale, gender: .feminine), count)
+    }
+
+    static func weeksHint(_ month: CalendarMonth, locale: Locale) -> String {
+        SpineStrings.format("path.month.byWeek", locale: locale, monthName(month, locale: locale))
+    }
+
+    static func milestonesHeader(_ count: Int, locale: Locale) -> String {
+        SpineStrings.format("path.month.milestones", locale: locale, words(count, locale: locale), count)
+    }
+
+    static func milestonesHint(locale: Locale) -> String { SpineStrings.string("path.month.largest", locale: locale) }
+
+    static func clockwiseHint(locale: Locale) -> String { SpineStrings.string("path.month.clockwise", locale: locale) }
+
+    /// The *more* link: "all six persons" when the list folds, "the persons, in detail" when it does not.
+    static func morePersons(_ total: Int, locale: Locale) -> String {
+        total > shown
+            ? SpineStrings.format("path.month.morePersons", locale: locale,
+                                  words(total, locale: locale, gender: .feminine))
+            : SpineStrings.string("path.month.personsDetail", locale: locale)
+    }
+
+    static func moreDomains(_ total: Int, locale: Locale) -> String {
+        total > shown
+            ? SpineStrings.format("path.month.moreDomains", locale: locale, words(total, locale: locale))
+            : SpineStrings.string("path.month.domainsDetail", locale: locale)
+    }
+
+    /// "new since September" / "pas vu·e en septembre".
+    static func newSince(_ previous: CalendarMonth, locale: Locale) -> String {
+        SpineStrings.format("path.month.newSince", locale: locale, monthInSentence(previous, locale: locale))
+    }
+
+    static func nobody(locale: Locale) -> String { SpineStrings.string("path.month.nobody", locale: locale) }
+
+    /// "5–11 Oct": a week's days inside the month, from the server's 0-based indices.
+    static func range(_ month: CalendarMonth, from: Int, to: Int, locale: Locale) -> String {
+        SpineStrings.format("path.month.range", locale: locale, from + 1, to + 1, monthAbbreviation(month, locale))
+    }
+
+    /// "Mon 5 Oct": a milestone's day.
+    static func dateline(_ day: CalendarDay, locale: Locale) -> String {
+        let calendar = calendar(locale)
+        let date = day.date(in: TimeZone(secondsFromGMT: 0) ?? .gmt) ?? .distantPast
+        var utc = calendar
+        utc.timeZone = TimeZone(secondsFromGMT: 0) ?? .gmt
+        var weekday = utc.shortWeekdaySymbols[utc.component(.weekday, from: date) - 1]
+        if weekday.hasSuffix(".") { weekday.removeLast() }
+        return "\(weekday) \(day.day) \(monthAbbreviation(CalendarMonth(day), locale))"
+    }
+
+    static func viewCircle(locale: Locale) -> String { SpineStrings.string("path.month.viewCircle", locale: locale) }
+
+    static func viewCalendar(locale: Locale) -> String {
+        SpineStrings.string("path.month.viewCalendar", locale: locale)
+    }
+
+    /// "Mara five times, Nadia once. Inès and Jules new since September." over the server's ranking.
+    static func personsLead(top: [(name: String, count: Int)], fresh: [String], previous: CalendarMonth,
+                            locale: Locale) -> String {
+        let counts = top.prefix(2).map { person in
+            // "fois" is feminine: "vingt et une fois".
+            SpineStrings.format("path.month.times", locale: locale, person.name,
+                                words(person.count, locale: locale, gender: .feminine), person.count)
+        }
+        let first = counts.isEmpty ? "" : counts.joined(separator: ", ") + "."
+        let second = fresh.isEmpty ? "" : " " + SpineStrings.format("path.month.newNames", locale: locale,
+                                                                     and(fresh, locale: locale),
+                                                                     monthInSentence(previous, locale: locale))
+        return (first + second).trimmingCharacters(in: .whitespaces)
+    }
+
+    /// "Eleven emotions in six families, weighed by intensity."
+    static func emotionsLead(emotions: Int, families: Int, locale: Locale) -> String {
+        WeekOpening.sentenceCase(SpineStrings.format("path.month.emotionsLead", locale: locale,
+                                                     words(emotions, locale: locale, gender: .feminine),
+                                                     words(families, locale: locale, gender: .feminine)),
+                                 locale: locale)
+    }
+
+    /// "Seven domains; family in seven pebbles."
+    static func domainsLead(domains: Int, top: String, topCount: Int, locale: Locale) -> String {
+        WeekOpening.sentenceCase(SpineStrings.format("path.month.domainsLead", locale: locale,
+                                                     words(domains, locale: locale), top.lowercased(with: locale),
+                                                     words(topCount, locale: locale), topCount),
+                                 locale: locale)
+    }
+
+    /// A month's name inside a sentence: "September" in English, "septembre" in French.
+    static func monthInSentence(_ month: CalendarMonth, locale: Locale) -> String {
+        calendar(locale).standaloneMonthSymbols[month.month - 1]
+    }
+
+    /// "Oct" / "Oct": the abbreviation a range and a dateline print, its period dropped, capitalised.
+    private static func monthAbbreviation(_ month: CalendarMonth, _ locale: Locale) -> String {
+        var short = calendar(locale).shortMonthSymbols[month.month - 1]
+        if short.hasSuffix(".") { short.removeLast() }
+        return short.prefix(1).uppercased(with: locale) + short.dropFirst()
+    }
+
+    private static func amp(_ items: [String], _ locale: Locale) -> String {
+        switch items.count {
+        case 0: return ""
+        case 1: return items[0]
+        default:
+            return SpineStrings.format("path.month.amp", locale: locale, items.dropLast().joined(separator: ", "),
+                                       items[items.count - 1])
+        }
+    }
+
     // MARK: - Months
 
     /// "October", "Octobre": the month standing alone, capitalised.

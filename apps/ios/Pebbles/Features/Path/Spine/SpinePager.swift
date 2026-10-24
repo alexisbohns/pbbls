@@ -35,7 +35,14 @@ struct SpinePager: View {
                                               lookups: lookups, scrollToTopToken: scrollToTopToken)
                             }
                         case let .month(month):
-                            MonthPagePlaceholder(month: month)
+                            if let wrap = model.monthWraps[month] {
+                                MonthPage(wrap: wrap, lookups: lookups, isFocused: model.focusedPage == page,
+                                          returnFocus: Binding(get: { model.returnFocus },
+                                                               set: { model.returnFocus = $0 }),
+                                          onWeek: focusWeek, onOpen: openMilestone)
+                            } else {
+                                MonthPagePlaceholder(month: month)
+                            }
                         }
                     }
                     .containerRelativeFrame(.horizontal)
@@ -63,6 +70,17 @@ struct SpinePager: View {
         .task(id: model.focusedPage) {
             await aspects?.prefetch(model.photoPaths(around: model.focusedPage))
         }
+    }
+
+    /// A week row of the month: its week in the strip and the pager.
+    private func focusWeek(_ day: CalendarDay) {
+        guard let start = day.date(in: model.calendar.timeZone) else { return }
+        if reduceMotion { model.focus(start) } else { withAnimation { model.focus(start) } }
+    }
+
+    /// A milestone opens its held card, on the recto.
+    private func openMilestone(_ moment: MomentSummary) {
+        onOpen(SpineOpen(momentId: moment.id, face: .recto, summary: moment, soulOrder: []))
     }
 
     private func ratio(_ moment: MomentSummary) -> CGFloat? {
