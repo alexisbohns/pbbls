@@ -16,6 +16,7 @@ struct SignedOutPurgeTests {
         let refs: ReferenceDataService
         let stats: PathStatsService
         let urlCache: URLCache
+        let wrapCache: WrapDiskCache
     }
 
     private let owner = UUID()
@@ -29,18 +30,34 @@ struct SignedOutPurgeTests {
         let stats = PathStatsService(supabase: supabase)
         // Memory-only, so the test never touches the app's real disk cache.
         let urlCache = URLCache(memoryCapacity: 1_000_000, diskCapacity: 0)
+        let wrapCache = WrapDiskCache(root: FileManager.default.temporaryDirectory
+            .appendingPathComponent("signed-out-purge-wraps-\(UUID().uuidString)"))
         let purge = SignedOutPurge(
             completeDrafts: completeDrafts,
             refs: refs,
             stats: stats,
             snapURLs: SnapURLCache(provider: FakeSignedURLProvider(), now: { Date() }),
-            urlCache: urlCache
+            urlCache: urlCache,
+            wrapCache: wrapCache
         )
         return Fixture(
             purge: purge,
             completeDrafts: completeDrafts, completeDraftsDirectory: completeDraftsDirectory,
-            refs: refs, stats: stats, urlCache: urlCache
+            refs: refs, stats: stats, urlCache: urlCache, wrapCache: wrapCache
         )
+    }
+
+    @Test("The Path's kept wraps are deleted from disk, for every owner")
+    func clearsKeptWraps() {
+        let fixture = makeFixture()
+        fixture.wrapCache.write(Data("{}".utf8), page: "strip", owner: owner.uuidString, zone: "Europe/Paris")
+        fixture.wrapCache.write(Data("{}".utf8), page: "strip", owner: "someone-else", zone: "Europe/Paris")
+        #expect(fixture.wrapCache.read("strip", owner: owner.uuidString, zone: "Europe/Paris") != nil)
+
+        fixture.purge.run()
+
+        #expect(fixture.wrapCache.read("strip", owner: owner.uuidString, zone: "Europe/Paris") == nil)
+        #expect(!FileManager.default.fileExists(atPath: fixture.wrapCache.root.path))
     }
 
     @Test("Half-finished Complete flows are deleted from disk")

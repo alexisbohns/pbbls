@@ -60,6 +60,8 @@ final class PathModel {
     @ObservationIgnored private var wrapTasks: [PathPage: Task<Void, Never>] = [:]
     /// Bumped by every load: a fetch that started before a write lands stale.
     @ObservationIgnored private var wrapGeneration = 0
+    /// Pages showing the device's kept copy: any fetched result replaces it.
+    @ObservationIgnored private var keptPages: Set<PathPage> = []
     /// Each load takes the next number; only the latest one applies its result.
     @ObservationIgnored private var loadGeneration = 0
     @ObservationIgnored private var referenceNames: [String: String] = [:]
@@ -99,7 +101,13 @@ final class PathModel {
             let result = try await fetch()
             let fresh = await loadedStrip
             guard !Task.isCancelled, generation == loadGeneration else { return }
-            if let fresh { strip = fresh }
+            if let fresh {
+                strip = fresh
+            } else if strip == nil, let kept = await wraps?.cachedStrip(zone: zone) {
+                // The device's last strip stands in for one that never loaded (spec §7.1).
+                guard !Task.isCancelled, generation == loadGeneration else { return }
+                strip = kept
+            }
             apply(result)
             // A load follows a write or a return: every wrap fetched may be out of date.
             wrapGeneration += 1
@@ -230,9 +238,15 @@ final class PathModel {
     private func fetchWrap(_ page: PathPage, wraps: any PathWrapServicing, generation: Int) async {
         guard case let .week(start) = page else { return }
         let zone = calendar.timeZone
+        let day = CalendarDay(start, in: zone)
+        // A week not yet shown this session opens on its kept copy while the fetch runs.
+        if weekWraps[start] == nil, let kept = await wraps.cachedWeekWrap(day, zone: zone), weekWraps[start] == nil {
+            weekWraps[start] = kept
+            keptPages.insert(page)
+        }
         let result: Result<WeekWrap, Error>
         do {
-            result = .success(try await wraps.weekWrap(CalendarDay(start, in: zone), zone: zone))
+            result = .success(try await wraps.weekWrap(day, zone: zone))
         } catch {
             result = .failure(error)
         }
@@ -240,10 +254,14 @@ final class PathModel {
         switch result {
         case let .success(wrap) where generation == wrapGeneration:
             wrapsToRefetch.remove(page)
+            keptPages.remove(page)
             if weekWraps[start] != wrap { weekWraps[start] = wrap }
         case let .success(wrap):
-            // It started before a write: shown if nothing else is, still stale, asked for again.
-            if weekWraps[start] == nil { weekWraps[start] = wrap }
+            // It started before a write: newer than a kept copy, still stale, asked for again.
+            if weekWraps[start] == nil || keptPages.contains(page) {
+                keptPages.remove(page)
+                if weekWraps[start] != wrap { weekWraps[start] = wrap }
+            }
             wrapsToRefetch.insert(page)
             scheduleWraps()
         case let .failure(error):
