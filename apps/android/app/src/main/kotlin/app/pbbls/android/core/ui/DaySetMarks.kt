@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.DotStyle
 import app.pbbls.android.core.designsystem.RadialLayout
 import app.pbbls.android.core.designsystem.SpineLayoutTokens.DAY_CIRCLE
@@ -21,6 +24,8 @@ import app.pbbls.android.core.designsystem.dotMark
 import app.pbbls.android.core.model.wrap.DaySet
 
 private const val WEEK = 7
+private val MIN_RING_DOT = 3.dp
+private const val RING_LINE_ALPHA = 0.7f
 
 /** How a [DaySet] is laid out. */
 sealed interface DayMode {
@@ -49,9 +54,10 @@ fun DaySetMarks(
     ring: Color,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
+    ringSize: Dp = DAY_CIRCLE,
 ) {
     val described = if (contentDescription != null) Modifier.semantics { this.contentDescription = contentDescription } else Modifier
-    val box = DaySetGeometry.size(days.length, mode)
+    val box = DaySetGeometry.size(days.length, mode, ringSize)
     Canvas(modifier.size(box.width, box.height).then(described)) {
         val ringWidth = DOT_RING.toPx()
         when (mode) {
@@ -76,19 +82,24 @@ fun DaySetMarks(
                 }
             }
             DayMode.Circle -> {
-                val dot = DAY_CIRCLE_DOT.toPx()
+                // The board's ring: one thin line round the month, open across the 1st with a tick
+                // there, and a dot on each day present only, so the eye reads the days, not the grid.
+                val dot = (DAY_CIRCLE_DOT * (ringSize / DAY_CIRCLE)).coerceAtLeast(MIN_RING_DOT).toPx()
                 val ringLayout = RadialLayout(days.length, gapSlots = DAY_CIRCLE_GAP_SLOTS)
                 val radius = size.minDimension / 2 - dot / 2
-                repeat(days.length) { day ->
-                    val on = day in days
-                    dotMark(
-                        ringLayout.point(day, center, radius),
-                        dot,
-                        if (on) DotStyle.FILLED else DotStyle.RING,
-                        if (on) ink else ring,
-                        ringWidth,
-                    )
-                }
+                val start = ringLayout.angleDeg(-0.5f)
+                drawArc(
+                    color = ring,
+                    startAngle = start,
+                    sweepAngle = ringLayout.angleDeg(days.length - 0.5f) - start,
+                    useCenter = false,
+                    topLeft = Offset(center.x - radius, center.y - radius),
+                    size = Size(radius * 2, radius * 2),
+                    alpha = RING_LINE_ALPHA,
+                    style = Stroke(ringWidth),
+                )
+                drawLine(ring, Offset(center.x, center.y - radius - dot / 2), Offset(center.x, center.y - radius + dot / 2), ringWidth)
+                days.days.forEach { day -> dotMark(ringLayout.point(day, center, radius), dot, DotStyle.FILLED, ink, ringWidth) }
             }
         }
     }
@@ -109,6 +120,7 @@ internal object DaySetGeometry {
     fun size(
         length: Int,
         mode: DayMode,
+        ringSize: Dp = DAY_CIRCLE,
     ): Box =
         when (mode) {
             DayMode.Row -> Box(DOT * length + DOT_GAP * (length - 1).coerceAtLeast(0), DOT)
@@ -116,6 +128,6 @@ internal object DaySetGeometry {
                 val rows = rows(length, mode.leading)
                 Box(DOT * WEEK + DOT_GAP * (WEEK - 1), DOT * rows + DOT_GAP * (rows - 1).coerceAtLeast(0))
             }
-            DayMode.Circle -> Box(DAY_CIRCLE, DAY_CIRCLE)
+            DayMode.Circle -> Box(ringSize, ringSize)
         }
 }
