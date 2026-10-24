@@ -2580,6 +2580,10 @@ export type Database = {
           pebble: Json
         }[]
       }
+      path_month_wrap: {
+        Args: { p_month: string; p_tz: string }
+        Returns: Json
+      }
       path_strip: { Args: { p_tz: string }; Returns: Json }
       path_week_wrap: {
         Args: { p_tz: string; p_week_start: string }

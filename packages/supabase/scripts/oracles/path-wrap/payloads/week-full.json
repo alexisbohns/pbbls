@@ -1,0 +1,318 @@
+{
+  "kept": {
+    "cards": [
+      {
+        "count": 2,
+        "moment_id": "d3ee839e-610c-4f11-9b9b-c3063467214a"
+      },
+      {
+        "count": 1,
+        "moment_id": "68b2e05c-9c2d-4c97-8e43-d64cf53815ca"
+      },
+      {
+        "count": 1,
+        "moment_id": "bcef5f4b-95b0-4d3c-b401-25b4f191f343"
+      },
+      {
+        "count": 3,
+        "moment_id": "0e67776e-eb0a-4984-9a15-654b9fafd30a"
+      },
+      {
+        "count": 1,
+        "moment_id": "a336cd2a-2aaa-4ab8-8ec0-810b2496da95"
+      },
+      {
+        "count": 2,
+        "moment_id": "53d230e5-3da4-4cb8-a4da-c6b1de5ec4bb"
+      },
+      {
+        "count": 1,
+        "moment_id": "74cf496d-cdda-4c43-ba2d-9caf3db5ae45"
+      }
+    ],
+    "photo_moment_ids": [
+      "d3ee839e-610c-4f11-9b9b-c3063467214a",
+      "bcef5f4b-95b0-4d3c-b401-25b4f191f343",
+      "47c649a8-c498-4064-822f-8b7dcf6850b0",
+      "a336cd2a-2aaa-4ab8-8ec0-810b2496da95",
+      "ee228a16-9d79-41c4-9f93-302099eeef5c"
+    ]
+  },
+  "lead": {
+    "zero": [
+      "shame"
+    ],
+    "order": [
+      "joy",
+      "peace",
+      "pride",
+      "anger",
+      "sadness",
+      "fear"
+    ]
+  },
+  "live": false,
+  "count": 11,
+  "hours": [
+    {
+      "happened": 10.25,
+      "collected": 23.8604,
+      "moment_id": "d3ee839e-610c-4f11-9b9b-c3063467214a"
+    },
+    {
+      "happened": 19.6667,
+      "collected": 23.8604,
+      "moment_id": "68b2e05c-9c2d-4c97-8e43-d64cf53815ca"
+    },
+    {
+      "happened": 8.0333,
+      "collected": 23.8605,
+      "moment_id": "6f388354-04b0-4f11-8c09-683bd360fd36"
+    },
+    {
+      "happened": 16.5,
+      "collected": 23.8605,
+      "moment_id": "bcef5f4b-95b0-4d3c-b401-25b4f191f343"
+    },
+    {
+      "happened": 3.1667,
+      "collected": 23.8605,
+      "moment_id": "0e67776e-eb0a-4984-9a15-654b9fafd30a"
+    },
+    {
+      "happened": 12.0833,
+      "collected": 23.8605,
+      "moment_id": "47c649a8-c498-4064-822f-8b7dcf6850b0"
+    },
+    {
+      "happened": 21,
+      "collected": 23.8605,
+      "moment_id": "a336cd2a-2aaa-4ab8-8ec0-810b2496da95"
+    },
+    {
+      "happened": 11.3333,
+      "collected": 23.8605,
+      "moment_id": "53d230e5-3da4-4cb8-a4da-c6b1de5ec4bb"
+    },
+    {
+      "happened": 17.75,
+      "collected": 23.8605,
+      "moment_id": "ee228a16-9d79-41c4-9f93-302099eeef5c"
+    },
+    {
+      "happened": 14,
+      "collected": 23.8606,
+      "moment_id": "74cf496d-cdda-4c43-ba2d-9caf3db5ae45"
+    },
+    {
+      "happened": 22.5,
+      "collected": 23.8606,
+      "moment_id": "849be536-a0a6-4fd3-9719-eb0bc994e7e9"
+    }
+  ],
+  "tiles": [
+    "contents",
+    "persons",
+    "emotions",
+    "domains",
+    "weight",
+    "hours",
+    "kept"
+  ],
+  "weight": {
+    "low": [
+      1,
+      2,
+      0
+    ],
+    "high": [
+      0,
+      2,
+      3
+    ],
+    "neutral": [
+      2,
+      1,
+      0
+    ]
+  },
+  "domains": [
+    {
+      "days": [
+        0,
+        1,
+        6
+      ],
+      "count": 4,
+      "domain_id": "bb427d8c-3597-4e94-b18b-acc3fea8d723"
+    },
+    {
+      "days": [
+        0,
+        4
+      ],
+      "count": 2,
+      "domain_id": "2d8e9624-5602-45d3-90f0-5eb16ba0fc0d"
+    },
+    {
+      "days": [
+        2,
+        3
+      ],
+      "count": 2,
+      "domain_id": "66994e63-de24-443d-149b-7b28d9af7ee3"
+    },
+    {
+      "days": [
+        4,
+        6
+      ],
+      "count": 2,
+      "domain_id": "2c282fad-4fe5-41e3-b1a7-2d634ec84c77"
+    },
+    {
+      "days": [
+        0
+      ],
+      "count": 1,
+      "domain_id": "55a005c8-e2af-4f40-ad19-bd6914bee484"
+    },
+    {
+      "days": [
+        1
+      ],
+      "count": 1,
+      "domain_id": "122b15ed-d1ea-4764-8a4e-63b3f79f0ae3"
+    },
+    {
+      "days": [
+        1
+      ],
+      "count": 1,
+      "domain_id": "d1778780-e668-4bff-a70c-06ba3e5ffec1"
+    },
+    {
+      "days": [
+        2
+      ],
+      "count": 1,
+      "domain_id": "4f0f40fc-d7e6-372f-070b-44900032a23f"
+    },
+    {
+      "days": [
+        5
+      ],
+      "count": 1,
+      "domain_id": "6286b53e-a528-4151-94f1-10cf943a61b3"
+    }
+  ],
+  "persons": [
+    {
+      "days": [
+        0,
+        1,
+        3,
+        5
+      ],
+      "count": 4,
+      "soul_id": "67f69e84-d2e7-4882-9620-6cfeecd4c9e7"
+    },
+    {
+      "days": [
+        0,
+        3
+      ],
+      "count": 2,
+      "soul_id": "ed3ff420-73cd-4ddf-8847-8f0426fe6746"
+    },
+    {
+      "days": [
+        0,
+        1
+      ],
+      "count": 2,
+      "soul_id": "67307541-ef33-4c26-9041-ef993ed236e1"
+    },
+    {
+      "days": [
+        1,
+        6
+      ],
+      "count": 2,
+      "soul_id": "96e271c3-d2e0-4707-8986-40e79e02ddd1"
+    },
+    {
+      "days": [
+        2,
+        3
+      ],
+      "count": 2,
+      "soul_id": "e4290e6e-0517-4275-9618-93a70d492a39"
+    }
+  ],
+  "families": [
+    {
+      "days": [
+        0,
+        3,
+        5
+      ],
+      "slug": "joy",
+      "count": 3,
+      "share": 0.35,
+      "worth": 7
+    },
+    {
+      "days": [
+        1,
+        2,
+        6
+      ],
+      "slug": "peace",
+      "count": 3,
+      "share": 0.2,
+      "worth": 4
+    },
+    {
+      "days": [
+        0,
+        4
+      ],
+      "slug": "pride",
+      "count": 2,
+      "share": 0.2,
+      "worth": 4
+    },
+    {
+      "days": [
+        1
+      ],
+      "slug": "anger",
+      "count": 1,
+      "share": 0.1,
+      "worth": 2
+    },
+    {
+      "days": [
+        6
+      ],
+      "slug": "sadness",
+      "count": 1,
+      "share": 0.1,
+      "worth": 2
+    },
+    {
+      "days": [
+        2
+      ],
+      "slug": "fear",
+      "count": 1,
+      "share": 0.05,
+      "worth": 1
+    }
+  ],
+  "iso_week": 41,
+  "iso_year": 2026,
+  "week_start": "2026-10-05",
+  "people_count": 5
+}

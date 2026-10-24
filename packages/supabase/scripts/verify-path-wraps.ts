@@ -24,13 +24,22 @@
  *      nobody named, no wrap for one pebble, no stats for the live week, and
  *      the invalid_week_start and anon refusals. Expected values are worked
  *      out by hand from the fixture, never recomputed here.
+ *   4. path_month_wrap on a reader seeded with the fixture's October (24
+ *      pebbles, Paris times either side of the 25 October clock change), three
+ *      September pebbles naming Mara, Elio and Nadia, a thin May (7) and a quiet
+ *      June (2): the sections each threshold allows, the cover, the weeks, the
+ *      milestones, persons with who is new since the previous month, the gem
+ *      (facets equal to the oracle's), domains, the tone and its verdict, the
+ *      hours, and the invalid_month and anon refusals.
  *
- * Part 4 of #1207 adds path_month_wrap here.
+ * PATH_WRAPS_DUMP=1 (with --allow-write) also writes the verbatim payloads to
+ * scripts/oracles/path-wrap/payloads/, the fixtures the clients' decoding tests
+ * replay. CI never sets it.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:path-wraps --workspace=packages/supabase
- * Expected: `Summary: passed=35 failed=0` (gem: 10 fixed months, 1 random batch, 1 empty-input shape, 1 anon refusal;
- *   strip: 10; week: 12).
- * Needs NO service-role key: it signs up three throwaway users (path-wraps-verify-*@example.test)
+ * Expected: `Summary: passed=48 failed=0` (gem: 10 fixed months, 1 random batch, 1 empty-input shape, 1 anon refusal;
+ *   strip: 10; week: 12; month: 13).
+ * Needs NO service-role key: it signs up four throwaway users (path-wraps-verify-*@example.test)
  * and deletes them through the real `delete-account` edge function, even on failure.
  */
 
@@ -73,6 +82,13 @@ const shim: { exports: unknown } = { exports: {} };
 new Function("module", oracleSource)(shim);
 const GEM = shim.exports as Gem;
 const FIXTURE = JSON.parse(await Deno.readTextFile(new URL("fixture-r2.json", ORACLE_DIR)));
+const DUMP = Deno.env.get("PATH_WRAPS_DUMP") === "1";
+/** Writes a verbatim payload for the clients' decoding tests (only with PATH_WRAPS_DUMP=1). */
+async function dump(name: string, payload: unknown) {
+  if (!DUMP) return;
+  await Deno.mkdir(new URL("payloads/", ORACLE_DIR), { recursive: true });
+  await Deno.writeTextFile(new URL(`payloads/${name}.json`, ORACLE_DIR), JSON.stringify(payload, null, 2) + "\n");
+}
 
 const OCT: Pebble[] = FIXTURE.states.month_glimpse.pebbles;
 const FEW: Pebble[] = FIXTURE.states.few.pebbles;
@@ -176,6 +192,21 @@ type WeekWrap = {
 };
 const POSITIVENESS: Record<string, number> = { high: 1, neutral: 0, low: -1 };
 
+// ---------------------------------------------------------------- the month
+type MonthWrap = {
+  month: string; days_in_month: number; first_weekday: number; count: number; people_count: number; sections: string[];
+  cover?: { days: { day: number; pebbles: { moment_id: string }[] }[]; souls_in_order: string[]; inks: string[]; papers: string[] };
+  weeks?: { week_start: string; from: number; to: number; count: number; soul_ids: string[]; days: [number, number][] }[];
+  milestones?: string[];
+  persons?: { soul_id: string; count: number; days: number[]; new_since_previous: boolean }[];
+  previous_month?: { count: number; soul_ids: string[] };
+  gem?: Allocation & { worths: Record<string, number>; lead: { order: string[]; zero: string[] } };
+  fine_emotions?: { family: string; emotion_id: string; count: number; days: number[] }[];
+  domains?: { domain_id: string; count: number; days: number[] }[];
+  tone?: { days: [number, number, number][]; verdict: string; first: number; last: number };
+  hours?: { items: { moment_id: string }[]; busiest: { start: number; count: number } };
+};
+
 // ---------------------------------------------------------------- the run
 const runId = crypto.randomUUID().slice(0, 8);
 const password = `PathWraps-${crypto.randomUUID()}`;
@@ -202,6 +233,7 @@ async function deleteAccount(token: string): Promise<Response> {
 let reader: TestUser | null = null;
 let seeded: TestUser | null = null;
 let weekly: TestUser | null = null;
+let monthly: TestUser | null = null;
 
 try {
   reader = await signUp("a");
@@ -265,6 +297,7 @@ try {
 
   const paris = await b.rpc("path_strip", { p_tz: "Europe/Paris" });
   const items = (paris.data as { items: StripItem[] } | null)?.items ?? [];
+  await dump("strip", paris.data);
   const weeks = items.filter((i) => i.kind === "week");
   const week = (start: string) => weeks.find((w) => w.week_start === start);
   check("path_strip: weeks run from the first moment's week, oldest first",
@@ -370,6 +403,7 @@ try {
     return r.data as WeekWrap;
   };
   const rich = await wk("2026-10-05");
+  await dump("week-full", rich);
   check("path_week_wrap: a full past week shows every tile, in order",
     rich.count === 11 && rich.people_count === 5 && rich.live === false
       && JSON.stringify(rich.tiles) === JSON.stringify(["contents", "persons", "emotions", "domains", "weight", "hours", "kept"]),
@@ -403,15 +437,18 @@ try {
       && JSON.stringify(rich.kept.cards.map((x) => x.count)) === JSON.stringify([2, 1, 1, 3, 1, 2, 1]),
     JSON.stringify(rich.kept));
   const few = await wk("2026-10-12");
+  await dump("week-nobody-named", few);
   check("path_week_wrap: three pebbles and nobody named give contents, persons and the invitation's moments",
     JSON.stringify(few.tiles) === JSON.stringify(["contents", "persons"]) && JSON.stringify(few.persons) === "[]"
       && JSON.stringify(few.invite_moment_ids) === JSON.stringify((FIXTURE.states.few.pebbles as FixturePebble[]).map((p) => momentOf[p.title]))
       && few.families === undefined,
     JSON.stringify(few));
   const one = await wk("2026-09-28");
+  await dump("week-one-pebble", one);
   check("path_week_wrap: one pebble gets no wrap",
     one.count === 1 && JSON.stringify(one.tiles) === "[]" && one.persons === undefined, JSON.stringify(one));
   const live = await wk(liveWeek("Europe/Paris"));
+  await dump("week-live", live);
   check("path_week_wrap: the live week shows contents and persons only, even with five pebbles in two families",
     live.live === true && live.count === 5 && JSON.stringify(live.tiles) === JSON.stringify(["contents", "persons"])
       && live.persons?.length === 1 && live.families === undefined && live.invite_moment_ids === undefined,
@@ -421,11 +458,116 @@ try {
     !!tuesday.error && tuesday.error.message.includes("invalid_week_start"), tuesday.error?.message);
   const anonWeek = await anon.rpc("path_week_wrap", { p_week_start: "2026-10-05", p_tz: "Europe/Paris" });
   check("path_week_wrap is refused to anon", !!anonWeek.error, JSON.stringify(anonWeek.data));
+
+  // 4. path_month_wrap ----------------------------------------------------------------------
+  // The same seeding as part 3, on a fourth reader, so the live week's pebbles never enter these months.
+  monthly = await signUp("d");
+  const d = monthly.client;
+  const mSoulFor: Record<string, string> = {};
+  const mMoment: Record<string, string> = {};
+  async function seedMonth(p: FixturePebble, at: string) {
+    const saved = await d.rpc("save_moment", { payload: { name: p.title, happened_at: at } });
+    if (saved.error || typeof saved.data !== "string") throw new Error(`save_moment ${p.title}: ${saved.error?.message}`);
+    const known = p.souls.filter((k) => mSoulFor[k]);
+    const fresh = p.souls.filter((k) => !mSoulFor[k]);
+    const done = await d.rpc("complete_pebble", {
+      payload: {
+        moment_id: saved.data, emotion_id: emotionFor[p.emotion], intensity: p.intensity,
+        positiveness: POSITIVENESS[p.valence], domain_ids: p.domains.map((x) => domainFor[x]),
+        soul_ids: known.map((k) => mSoulFor[k]), new_souls: fresh.map((k) => ({ name: FIXTURE.souls[k].name })),
+      },
+    });
+    if (done.error) throw new Error(`complete_pebble ${p.title}: ${done.error.message}`);
+    if (fresh.length) {
+      const { data: souls } = await d.from("souls").select("id, name");
+      for (const k of fresh) mSoulFor[k] = (souls as { id: string; name: string }[]).find((x) => x.name === FIXTURE.souls[k].name)!.id;
+    }
+    mMoment[`${at.slice(5, 7)}:${p.title}`] = saved.data;
+  }
+  const local = (month: string, p: FixturePebble, offset = "+02:00") =>
+    `2026-${month}-${String(p.date).padStart(2, "0")}T${p.time}:00${offset}`;
+  for (const [i, soul] of ["mara", "elio", "nadia"].entries()) {
+    await seedMonth({ emotion: "joy", intensity: 2, valence: "high", day: "", date: 10 + i, time: "12:00", title: `september ${soul}`,
+      souls: [soul], domains: ["Family"], photo: false, cards: 0 }, local("09", { date: 10 + i, time: "12:00" } as FixturePebble));
+  }
+  const october = (FIXTURE.states.month_glimpse.pebbles as (FixturePebble & { month: string })[]).filter((p) => p.month === "Oct");
+  for (const p of october) await seedMonth(p, local("10", p, p.date >= 26 ? "+01:00" : "+02:00"));
+  const thin = [...FEW, ...ONE_SOUL] as FixturePebble[];
+  for (const p of thin) await seedMonth(p, local("05", p));
+  for (const p of (FEW as FixturePebble[]).filter((p) => p.date === 13 || p.date === 15)) await seedMonth(p, local("06", p));
+
+  const mo = async (month: string) => {
+    const r = await d.rpc("path_month_wrap", { p_month: month, p_tz: "Europe/Paris" });
+    if (r.error) throw new Error(`path_month_wrap ${month}: ${r.error.message}`);
+    return r.data as MonthWrap;
+  };
+  const oct = await mo("2026-10-01");
+  await dump("month-full", oct);
+  const name = (id: string) => Object.keys(mSoulFor).find((k) => mSoulFor[k] === id);
+  check("path_month_wrap: October's header and every section",
+    oct.days_in_month === 31 && oct.first_weekday === 3 && oct.count === 24 && oct.people_count === 6
+      && JSON.stringify(oct.sections) === JSON.stringify(["weeks", "milestones", "persons", "gem", "domains", "tone", "hours"]),
+    JSON.stringify({ ...oct, cover: undefined, weeks: undefined, gem: undefined, tone: undefined, hours: undefined, persons: undefined, domains: undefined, fine_emotions: undefined }));
+  const souls = (oct.cover?.souls_in_order ?? []).map(name);
+  check("path_month_wrap: the cover's days, souls in order of appearance, inks and papers",
+    oct.cover?.days.length === 19 && souls[0] === "nadia" && [souls[1], souls[2]].sort().join() === "elio,mara"
+      && JSON.stringify(souls.slice(3)) === JSON.stringify(["bruno", "jules", "ines"])
+      && JSON.stringify(oct.cover.inks) === JSON.stringify(["joy", "peace", "pride", "anger", "sadness", "fear"])
+      && JSON.stringify(oct.cover.papers) === JSON.stringify([domainFor["Family"], domainFor["Identity"], domainFor["Friends"]]),
+    JSON.stringify({ days: oct.cover?.days.length, souls, inks: oct.cover?.inks }));
+  check("path_month_wrap: the weeks summary covers every week of the month",
+    JSON.stringify((oct.weeks ?? []).map((w) => `${w.week_start}:${w.from}-${w.to}:${w.count}`)) === JSON.stringify([
+      "2026-09-28:0-3:1", "2026-10-05:4-10:11", "2026-10-12:11-17:3", "2026-10-19:18-24:4", "2026-10-26:25-30:5"]),
+    JSON.stringify(oct.weeks?.map((w) => [w.week_start, w.from, w.to, w.count])));
+  const milestoneTitles = ["Flag march with Nadia", "Forest walk, all of us", "Rooftop birthday", "Pumpkin carving on the balcony", "Back from the hospital"];
+  check("path_month_wrap: milestones, large first, bright before heavy, then by time",
+    JSON.stringify(oct.milestones) === JSON.stringify(milestoneTitles.map((t) => mMoment[`10:${t}`])), JSON.stringify(oct.milestones));
+  check("path_month_wrap: persons ranked, with who is new since September",
+    JSON.stringify((oct.persons ?? []).map((p) => `${name(p.soul_id)}:${p.count}${p.new_since_previous ? "*" : ""}`))
+        === JSON.stringify(["mara:5", "elio:4", "jules:3*", "nadia:2", "bruno:2*", "ines:1*"])
+      && oct.previous_month?.count === 3 && oct.previous_month.soul_ids.length === 3,
+    JSON.stringify({ persons: oct.persons?.map((p) => [name(p.soul_id), p.count, p.new_since_previous]), previous: oct.previous_month }));
+  const octGem = compare(oct.gem as Allocation, GEM.allocate(october));
+  check("path_month_wrap: the gem's facets equal the oracle's, with worths and the lead",
+    octGem === null && oct.gem?.main === "joy"
+      && JSON.stringify(GEM.ORDER.map((k) => oct.gem?.worths[k] ?? 0)) === JSON.stringify([14, 7, 5, 2, 0, 5, 8])
+      && JSON.stringify(oct.gem?.lead.order) === JSON.stringify(["joy", "peace", "pride", "anger", "sadness", "fear"])
+      && JSON.stringify(oct.gem?.lead.zero) === JSON.stringify(["shame"]),
+    octGem ?? JSON.stringify({ worths: oct.gem?.worths, lead: oct.gem?.lead }));
+  check("path_month_wrap: domains ranked (family first) and fine emotions per family",
+    oct.domains?.length === 11 && oct.domains[0].domain_id === domainFor["Family"] && oct.domains[0].count === 7
+      && oct.fine_emotions?.length === 6 && oct.fine_emotions[0].family === "joy",
+    JSON.stringify({ domains: oct.domains?.slice(0, 1), fine: oct.fine_emotions?.map((f) => f.family) }));
+  check("path_month_wrap: the tone per day and its verdict (bright two to one, opened heavy, closed bright)",
+    oct.tone?.verdict === "bright_two_to_one" && oct.tone.first === -1 && oct.tone.last === 1 && oct.tone.days.length === 31
+      && JSON.stringify(oct.tone.days[0]) === "[0,0,3]" && JSON.stringify(oct.tone.days[4]) === "[5,0,0]",
+    JSON.stringify({ verdict: oct.tone?.verdict, first: oct.tone?.first, last: oct.tone?.last, d0: oct.tone?.days[0], d4: oct.tone?.days[4] }));
+  check("path_month_wrap: every pebble in the hours, and the busiest collecting window",
+    oct.hours?.items.length === 24 && oct.hours.busiest.count === 24 && oct.hours.busiest.start >= 0 && oct.hours.busiest.start < 24,
+    JSON.stringify(oct.hours?.busiest));
+  const may = await mo("2026-05-01");
+  await dump("month-thin", may);
+  check("path_month_wrap: a thin month (7 pebbles) has every section, medium milestones and one new soul",
+    may.count === 7 && may.sections.length === 7
+      && JSON.stringify(may.milestones) === JSON.stringify(["Finished the pottery bowl", "Lunch with Inès", "Argument replayed in my head"].map((t) => mMoment[`05:${t}`]))
+      && may.persons?.length === 1 && name(may.persons[0].soul_id) === "ines" && may.persons[0].new_since_previous === true,
+    JSON.stringify({ sections: may.sections, milestones: may.milestones, persons: may.persons }));
+  const june = await mo("2026-06-01");
+  await dump("month-quiet", june);
+  check("path_month_wrap: a quiet month (2 pebbles) keeps its cover and weeks, nothing else",
+    june.count === 2 && JSON.stringify(june.sections) === JSON.stringify(["weeks"]) && june.cover?.days.length === 2
+      && june.milestones === undefined && june.persons === undefined && june.gem === undefined,
+    JSON.stringify({ sections: june.sections, cover: june.cover?.days.length }));
+  const notFirst = await d.rpc("path_month_wrap", { p_month: "2026-10-02", p_tz: "Europe/Paris" });
+  check("path_month_wrap: a month that does not start on the 1st is refused",
+    !!notFirst.error && notFirst.error.message.includes("invalid_month"), notFirst.error?.message);
+  const anonMonth = await anon.rpc("path_month_wrap", { p_month: "2026-10-01", p_tz: "Europe/Paris" });
+  check("path_month_wrap is refused to anon", !!anonMonth.error, JSON.stringify(anonMonth.data));
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
 } finally {
-  for (const [user, label] of [[reader, "reader"], [seeded, "seeded"], [weekly, "weekly"]] as const) {
+  for (const [user, label] of [[reader, "reader"], [seeded, "seeded"], [weekly, "weekly"], [monthly, "monthly"]] as const) {
     if (!user) continue;
     const res = await deleteAccount(user.token).catch(() => null);
     console.log(`… cleanup ${label}: ${res ? res.status : "FAILED — remove path-wraps-verify-* manually"}`);

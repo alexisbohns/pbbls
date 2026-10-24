@@ -1,0 +1,18 @@
+{
+  "live": false,
+  "count": 3,
+  "tiles": [
+    "contents",
+    "persons"
+  ],
+  "persons": [],
+  "iso_week": 42,
+  "iso_year": 2026,
+  "week_start": "2026-10-12",
+  "people_count": 0,
+  "invite_moment_ids": [
+    "635ffadd-d2d8-44ea-8bb6-6391dafaacea",
+    "b816ffa7-e7e5-4664-a2fe-f31d946afb14",
+    "b2db5716-6a2e-44da-b43a-9330b0132f9b"
+  ]
+}
