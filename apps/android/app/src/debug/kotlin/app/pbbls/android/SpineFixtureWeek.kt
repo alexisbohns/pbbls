@@ -12,7 +12,9 @@ import app.pbbls.android.core.model.PathPebble
 import app.pbbls.android.core.model.PathSoul
 import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.WeekRollEntry
+import app.pbbls.android.core.model.wrap.BusiestWindow
 import app.pbbls.android.core.model.wrap.CardCount
 import app.pbbls.android.core.model.wrap.CoverDay
 import app.pbbls.android.core.model.wrap.CoverPebble
@@ -26,11 +28,15 @@ import app.pbbls.android.core.model.wrap.HourMark
 import app.pbbls.android.core.model.wrap.Kept
 import app.pbbls.android.core.model.wrap.Lead
 import app.pbbls.android.core.model.wrap.MonthCover
+import app.pbbls.android.core.model.wrap.MonthHours
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWeek
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.model.wrap.PersonStat
 import app.pbbls.android.core.model.wrap.PreviousMonth
+import app.pbbls.android.core.model.wrap.Tone
+import app.pbbls.android.core.model.wrap.ToneDay
+import app.pbbls.android.core.model.wrap.ToneVerdict
 import app.pbbls.android.core.model.wrap.WeekTile
 import app.pbbls.android.core.model.wrap.WeekWrap
 import app.pbbls.android.core.model.wrap.WeightGrid
@@ -558,7 +564,16 @@ internal object SpineFixtureWeek {
             firstWeekday = DayOfWeek.THURSDAY,
             pebbles = 13,
             people = 14,
-            sections = listOf(MonthSection.WEEKS, MonthSection.MILESTONES, MonthSection.PERSONS, MonthSection.GEM, MonthSection.DOMAINS),
+            sections =
+                listOf(
+                    MonthSection.WEEKS,
+                    MonthSection.MILESTONES,
+                    MonthSection.PERSONS,
+                    MonthSection.GEM,
+                    MonthSection.DOMAINS,
+                    MonthSection.TONE,
+                    MonthSection.HOURS,
+                ),
             cover =
                 MonthCover(
                     days =
@@ -625,8 +640,26 @@ internal object SpineFixtureWeek {
                             ),
                     )
                 },
-            tone = null,
-            hours = null,
+            // Per day [up, even, down]: Monday 5 to Sunday 11, the rest of October still.
+            tone =
+                Tone(
+                    days =
+                        List(31) { d ->
+                            when (d) {
+                                4 -> ToneDay(5, 0, 0)
+                                5 -> ToneDay(3, 0, 2)
+                                6 -> ToneDay(0, 1, 1)
+                                7 -> ToneDay(5, 0, 0)
+                                9 -> ToneDay(2, 3, 0)
+                                10 -> ToneDay(0, 1, 2)
+                                else -> ToneDay(0, 0, 0)
+                            }
+                        },
+                    verdict = ToneVerdict.BRIGHT_MORE_THAN_TWO_TO_ONE,
+                    first = ValencePolarity.HIGHLIGHT,
+                    last = ValencePolarity.NEUTRAL,
+                ),
+            hours = MonthHours(fixtureHours, BusiestWindow(17, 4)),
         )
     }
 

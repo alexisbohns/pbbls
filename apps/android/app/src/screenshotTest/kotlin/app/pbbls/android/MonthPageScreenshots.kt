@@ -21,7 +21,7 @@ import com.android.tools.screenshot.PreviewTest
 @Composable
 private fun OctoberPage() {
     Surface(color = PebblesTheme.spine.colors.ground) {
-        Box(Modifier.width(390.dp).height(2000.dp)) {
+        Box(Modifier.width(390.dp).height(3000.dp)) {
             MonthPage(
                 wrap = SpineFixtureWeek.monthWrap,
                 lookups = SpineFixtureWeek.lookups,
@@ -36,7 +36,7 @@ private fun OctoberPage() {
 }
 
 @PreviewTest
-@Preview(showBackground = true, widthDp = 390, heightDp = 2000)
+@Preview(showBackground = true, widthDp = 390, heightDp = 3000)
 @PreviewFrench
 @Composable
 fun MonthPageLight() {
@@ -44,7 +44,7 @@ fun MonthPageLight() {
 }
 
 @PreviewTest
-@Preview(showBackground = true, widthDp = 390, heightDp = 2000, uiMode = UI_MODE_NIGHT_YES)
+@Preview(showBackground = true, widthDp = 390, heightDp = 3000, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun MonthPageDark() {
     PebblesTheme { OctoberPage() }

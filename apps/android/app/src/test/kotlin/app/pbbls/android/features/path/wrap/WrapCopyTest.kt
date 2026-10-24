@@ -95,4 +95,27 @@ class WrapCopyTest {
         assertEquals("the emotions, in detail", copy.moreEmotions(3))
         assertEquals("pebbles", copy.gemPebbles(13))
     }
+
+    @Test
+    fun `the insights read the server's verdict and window`() {
+        assertEquals(
+            "Bright outweighed heavy more than two to one; it opened bright and closed even.",
+            copy.toneLine(
+                app.pbbls.android.core.model.wrap.ToneVerdict.BRIGHT_MORE_THAN_TWO_TO_ONE,
+                app.pbbls.android.core.model.ValencePolarity.HIGHLIGHT,
+                app.pbbls.android.core.model.ValencePolarity.NEUTRAL,
+            ),
+        )
+        assertEquals("Everything even this month.", copy.toneLine(app.pbbls.android.core.model.wrap.ToneVerdict.ALL_EVEN, null, null))
+        assertEquals(
+            "It opened heavy and closed bright.",
+            copy.toneLine(
+                app.pbbls.android.core.model.wrap.ToneVerdict.UNKNOWN,
+                app.pbbls.android.core.model.ValencePolarity.LOWLIGHT,
+                app.pbbls.android.core.model.ValencePolarity.HIGHLIGHT,
+            ),
+        )
+        assertEquals("8:00\u202FPM – midnight", copy.hoursWindow(20))
+        assertEquals("of 24 collected", copy.hoursOf(24))
+    }
 }

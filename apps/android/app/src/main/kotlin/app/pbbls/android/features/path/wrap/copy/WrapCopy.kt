@@ -3,6 +3,8 @@ package app.pbbls.android.features.path.wrap.copy
 import android.content.res.Resources
 import app.pbbls.android.R
 import app.pbbls.android.core.common.NumberWords
+import app.pbbls.android.core.model.ValencePolarity
+import app.pbbls.android.core.model.wrap.ToneVerdict
 import app.pbbls.android.core.model.wrap.WeekTile
 import app.pbbls.android.features.path.spine.logic.WeekWordsBuilder
 import java.time.LocalDate
@@ -263,6 +265,79 @@ class WrapCopy(
             0 -> ""
             1 -> items[0]
             else -> resources.getString(R.string.path_month_amp, items.dropLast(1).joinToString(", "), items.last())
+        }
+
+    // MARK: - The insights
+
+    fun insights(): String = resources.getString(R.string.path_insights)
+
+    fun insightsHint(): String = resources.getString(R.string.path_insights_hint)
+
+    fun toneTitle(): String = resources.getString(R.string.path_tone_title)
+
+    fun toneHint(): String = resources.getString(R.string.path_tone_hint)
+
+    /** "Bright outweighed heavy two to one; it opened heavy and closed bright." from the server's verdict. */
+    fun toneLine(
+        verdict: ToneVerdict,
+        first: ValencePolarity?,
+        last: ValencePolarity?,
+    ): String {
+        val lead =
+            when (verdict) {
+                ToneVerdict.BRIGHT_MORE_THAN_TWO_TO_ONE -> R.string.path_tone_bright_more_than_two_to_one
+                ToneVerdict.BRIGHT_TWO_TO_ONE -> R.string.path_tone_bright_two_to_one
+                ToneVerdict.BALANCE -> R.string.path_tone_balance
+                ToneVerdict.HEAVY_OUTWEIGHED -> R.string.path_tone_heavy_outweighed
+                ToneVerdict.NOTHING_HEAVY -> R.string.path_tone_nothing_heavy
+                ToneVerdict.NOTHING_BRIGHT -> R.string.path_tone_nothing_bright
+                ToneVerdict.ALL_EVEN -> R.string.path_tone_all_even
+                ToneVerdict.UNKNOWN -> null
+            }?.let(resources::getString)
+        val arc =
+            if (first != null &&
+                last != null
+            ) {
+                resources.getString(R.string.path_tone_opened_closed, polarityWord(first), polarityWord(last))
+            } else {
+                null
+            }
+        return WeekWordsBuilder.sentenceCase(listOfNotNull(lead, arc).joinToString("; ") + ".", locale)
+    }
+
+    fun polarityWord(polarity: ValencePolarity): String =
+        resources.getString(
+            when (polarity) {
+                ValencePolarity.HIGHLIGHT -> R.string.path_wrap_bright
+                ValencePolarity.NEUTRAL -> R.string.path_wrap_even
+                ValencePolarity.LOWLIGHT -> R.string.path_wrap_heavy
+            },
+        )
+
+    fun hoursTitle(): String = resources.getString(R.string.path_hours_title)
+
+    fun hoursHint(): String = resources.getString(R.string.path_hours_hint)
+
+    fun hoursSub(): String = resources.getString(R.string.path_hours_sub)
+
+    fun hoursOf(total: Int): String = resources.getQuantityString(R.plurals.path_hours_of, total, total)
+
+    /** The busiest four hours: "20:00 – midnight". */
+    fun hoursWindow(start: Int): String = resources.getString(R.string.path_hours_window, hourMark(start), hourMark(start + 4))
+
+    fun hoursDescription(
+        count: Int,
+        total: Int,
+        start: Int,
+    ): String = resources.getQuantityString(R.plurals.path_hours_a11y, total, count, total, hourMark(start), hourMark(start + 4))
+
+    private fun hourMark(hour: Int): String =
+        if (hour % 24 ==
+            0
+        ) {
+            resources.getString(R.string.path_hours_midnight)
+        } else {
+            time((hour % 24).toDouble())
         }
 
     // MARK: - The emotions gem
