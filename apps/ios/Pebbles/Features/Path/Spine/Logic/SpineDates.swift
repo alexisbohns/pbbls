@@ -45,6 +45,11 @@ enum SpineDates {
         format(date, "MMMM", calendar, locale)
     }
 
+    /// "October 5", "5 octobre": the strip's way of naming a week by its Monday (#1226).
+    static func dayMonth(_ date: Date, calendar: Calendar, locale: Locale) -> String {
+        format(date, "MMMMd", calendar, locale)
+    }
+
     /// "10:15 AM", "10:15": a moment's time on the locale's clock.
     static func time(_ date: Date, calendar: Calendar, locale: Locale) -> String {
         format(date, "jmm", calendar, locale)

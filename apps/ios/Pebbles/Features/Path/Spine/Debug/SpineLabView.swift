@@ -90,13 +90,16 @@ struct SpineLabView: View {
         }
     }
 
-    /// The fixture week and a late-August week: the roll, the pager, the links
-    /// (week 35 ↔ week 41) and the contents → press. Opens are logged on screen.
+    /// The fixture week and a late-August week: the strip (the feed's weeks
+    /// standing in, no server here), the pager, the links (week 35 ↔ week 41)
+    /// and the contents → press. Opens are logged on screen.
     @ViewBuilder
     private var pager: some View {
         if let pagerModel {
             VStack(spacing: 0) {
-                SpineWeekRoll(model: pagerModel)
+                PathStrip(items: pagerModel.stripItems, focus: pagerModel.focusedPage, calendar: pagerModel.calendar) {
+                    pagerModel.focus($0)
+                }
                 Text(verbatim: lastOpen).font(.caption.monospaced()).foregroundStyle(Color.pebbles.outline)
                 SpinePager(
                     model: pagerModel,

@@ -94,6 +94,15 @@ struct CalendarMonth: Hashable, Comparable, Sendable {
     static func < (lhs: CalendarMonth, rhs: CalendarMonth) -> Bool {
         (lhs.year, lhs.month) < (rhs.year, rhs.month)
     }
+
+    /// The month's last day, on the Gregorian calendar the wire speaks.
+    var lastDay: CalendarDay {
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = TimeZone(secondsFromGMT: 0) ?? gregorian.timeZone
+        let first = gregorian.date(from: DateComponents(year: year, month: month, day: 1)) ?? .distantPast
+        let days = gregorian.range(of: .day, in: .month, for: first)?.count ?? 28
+        return CalendarDay(year: year, month: month, day: days)
+    }
 }
 
 private extension Character {

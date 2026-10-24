@@ -1,13 +1,14 @@
 import SwiftUI
 
-/// The week pager (#1130 D5): a horizontal paging `ScrollView` over a
-/// `LazyHStack` of `SpineWeekView`s, its position bound to
-/// `PathModel.focusedWeekStart`. A settled swipe writes through `focus(_:)`; a
-/// roll tap, a link or a refocus moves the position; `focus` ignores an equal
-/// week, so the two never loop. Only the visible page and its neighbour during
-/// a swipe are realised. New pattern (it replaces `TabView(.page)`), named in
-/// the D4c PR. A page change announces the week's title (A6) and prefetches the
-/// photo ratios of the week and its neighbours.
+/// The pager (#1130 D5; months since #1226 D2): a horizontal paging
+/// `ScrollView` over a `LazyHStack` of the strip's pages, a `SpineWeekView` per
+/// week and a month page per month, its position bound to `PathModel.focusedPage`. A
+/// settled swipe writes through `focus(_:)`; a strip tap, a link or a refocus
+/// moves the position; `focus` ignores an equal page, so the two never loop.
+/// Only the visible page and its neighbour during a swipe are realised. New
+/// pattern (it replaces `TabView(.page)`), named in the D4c PR. A page change
+/// announces the page (A6) and prefetches the photo ratios of a week and its
+/// neighbours.
 struct SpinePager: View {
     let model: PathModel
     let palette: (MomentSummary) -> EmotionPalette?
@@ -18,21 +19,26 @@ struct SpinePager: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(SnapAspectCache.self) private var aspects: SnapAspectCache?
-    @State private var position: Date?
+    @State private var position: PathPage?
 
     var body: some View {
         ScrollView(.horizontal) {
             LazyHStack(spacing: 0) {
-                ForEach(model.entries) { entry in
+                ForEach(model.pages, id: \.self) { page in
                     Group {
-                        if let page = model.page(for: entry.weekStart) {
-                            SpineWeekView(page: page, model: model, palette: palette, ratio: ratio, onOpen: onOpen,
-                                          onDelete: onDelete, onCreate: onCreate,
-                                          scrollToTopToken: scrollToTopToken)
+                        switch page {
+                        case let .week(weekStart):
+                            if let spinePage = model.page(for: weekStart) {
+                                SpineWeekView(page: spinePage, model: model, palette: palette, ratio: ratio,
+                                              onOpen: onOpen, onDelete: onDelete, onCreate: onCreate,
+                                              scrollToTopToken: scrollToTopToken)
+                            }
+                        case let .month(month):
+                            MonthPagePlaceholder(month: month)
                         }
                     }
                     .containerRelativeFrame(.horizontal)
-                    .id(entry.weekStart)
+                    .id(page)
                 }
             }
             .scrollTargetLayout()
@@ -40,21 +46,21 @@ struct SpinePager: View {
         .scrollTargetBehavior(.paging)
         .scrollIndicators(.hidden)
         .scrollPosition(id: $position)
-        // iOS 17 can report nil on first layout and drift when the entries
+        // iOS 17 can report nil on first layout and drift when the pages
         // change under it (§Risks): seed it, and re-assert it after each load.
-        .onAppear { position = model.focusedWeekStart }
-        .onChange(of: model.entries.map(\.weekStart)) { position = model.focusedWeekStart }
+        .onAppear { position = model.focusedPage }
+        .onChange(of: model.pages) { position = model.focusedPage }
         .onChange(of: position) { _, settled in
             if let settled { model.focus(settled) }
         }
-        .onChange(of: model.focusedWeekStart) { _, week in
-            if position != week {
-                if reduceMotion { position = week } else { withAnimation { position = week } }
+        .onChange(of: model.focusedPage) { _, page in
+            if position != page {
+                if reduceMotion { position = page } else { withAnimation { position = page } }
             }
-            announce(week)
+            announce(page)
         }
-        .task(id: model.focusedWeekStart) {
-            await aspects?.prefetch(model.photoPaths(around: model.focusedWeekStart))
+        .task(id: model.focusedPage) {
+            await aspects?.prefetch(model.photoPaths(around: model.focusedPage))
         }
     }
 
@@ -62,8 +68,15 @@ struct SpinePager: View {
         moment.firstSnapPath.flatMap { aspects?.ratio(for: $0) }
     }
 
-    private func announce(_ week: Date) {
-        guard let page = model.page(for: week) else { return }
-        AccessibilityNotification.Announcement(WeekOpeningText(page: page, locale: SpineStrings.appLocale).title).post()
+    private func announce(_ page: PathPage) {
+        let text: String
+        switch page {
+        case let .week(weekStart):
+            guard let spinePage = model.page(for: weekStart) else { return }
+            text = WeekOpeningText(page: spinePage, locale: SpineStrings.appLocale).title
+        case let .month(month):
+            text = WrapCopy.stripMonth(month, locale: SpineStrings.appLocale)
+        }
+        AccessibilityNotification.Announcement(text).post()
     }
 }
