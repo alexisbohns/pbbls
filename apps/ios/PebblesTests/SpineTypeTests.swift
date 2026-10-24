@@ -27,6 +27,7 @@ struct SpineTypeTests {
         Row(name: "title", actual: .title, expected: S(size: 40, weight: 300, trackingEm: -0.026, features: lin, lineHeight: 40.8, scaling: .text(.largeTitle))),
         Row(name: "summary", actual: .summary, expected: S(size: 18, weight: 380, italic: true, scaling: .text(.body))),
         Row(name: "sectionLabel", actual: .sectionLabel, expected: S(size: 11.5, weight: 600, trackingEm: 0.2, features: sc, scaling: .text(.caption2))),
+        Row(name: "sectionHint", actual: .sectionHint, expected: S(size: 13, weight: 380, italic: true, scaling: .text(.footnote))),
         Row(name: "masthead", actual: .masthead, expected: S(size: 11.5, weight: 400, trackingEm: 0.18, features: sc, scaling: .text(.caption2))),
         Row(name: "mastheadNumber", actual: .mastheadNumber, expected: S(size: 11.5, weight: 650, trackingEm: 0.18, features: sc, scaling: .text(.caption2))),
         Row(name: "personName", actual: .personName, expected: S(size: 15, weight: 600, trackingEm: 0.1, features: sc, scaling: .text(.subheadline))),
