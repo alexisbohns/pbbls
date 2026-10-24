@@ -23,6 +23,8 @@ import app.pbbls.android.core.data.MomentWriteService
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsService
 import app.pbbls.android.core.data.PathStatsServicing
+import app.pbbls.android.core.data.PathWrapService
+import app.pbbls.android.core.data.PathWrapServicing
 import app.pbbls.android.core.data.ProfileService
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReferenceDataService
@@ -60,6 +62,10 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindMomentReadServicing(impl: MomentReadService): MomentReadServicing
+
+    @Binds
+    @Singleton
+    fun bindPathWrapServicing(impl: PathWrapService): PathWrapServicing
 
     @Binds
     @Singleton

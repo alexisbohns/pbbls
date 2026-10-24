@@ -28,6 +28,7 @@ import app.pbbls.android.features.glyph.store.GlyphsUiState
 import app.pbbls.android.features.path.PathContent
 import app.pbbls.android.features.path.PebbleDetailContent
 import app.pbbls.android.features.path.PebbleDetailUiState
+import app.pbbls.android.features.path.strip.PathPage
 import app.pbbls.android.features.profile.CollectionDetailContent
 import app.pbbls.android.features.profile.CollectionDetailUiState
 import app.pbbls.android.features.profile.CollectionsListContent
@@ -351,8 +352,8 @@ private fun PathPebblePair() {
             val focused = populatedEntries.last().weekStart
             PathContent(
                 entries = populatedEntries,
-                initialWeekStart = focused,
-                focusedWeekStart = focused,
+                stripItems = previewStripItems(populatedEntries),
+                focus = PathPage.Week(focused),
                 today = pathPreviewToday,
                 soulsById = SpineFixtureWeek.soulsById,
                 onFocusChange = {},

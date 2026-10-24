@@ -80,7 +80,19 @@
     <string name="path_week_previous">Previous week</string>
     <string name="path_week_next">Next week</string>
     <!-- a11y label for a week-roll cairn cell: ISO week number + pebble count. -->
-    <string name="path_week_cell_a11y">Week %1$d, %2$d pebbles</string>
+    <!-- The Path's strip (#1207): a cairn per week, a dolmen per month. -->
+    <string name="path_strip_now">now</string>
+    <plurals name="path_strip_week_a11y">
+        <item quantity="one">Week of %1$s, %2$d moment</item>
+        <item quantity="other">Week of %1$s, %2$d moments</item>
+    </plurals>
+    <plurals name="path_strip_live_week_a11y">
+        <item quantity="one">This week, from %1$s, %2$d moment so far</item>
+        <item quantity="other">This week, from %1$s, %2$d moments so far</item>
+    </plurals>
+    <string name="path_strip_spacer_a11y">Week of %1$s, no moments</string>
+    <string name="path_strip_month_a11y">%1$s, the month</string>
+    <string name="path_month_placeholder">The month\'s page is on its way.</string>
     <!-- Bottom stats bar (sub-project B). "karma" and "Ripple" are product vocabulary. -->
     <string name="ripple_badge_active">Ripple level %1$d, active today</string>
     <string name="ripple_badge_inactive">Ripple level %1$d, inactive today</string>

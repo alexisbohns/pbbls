@@ -70,7 +70,21 @@
     <string name="path_empty_week_subtitle">Des galets en vue ?</string>
     <string name="path_week_previous">Semaine précédente</string>
     <string name="path_week_next">Semaine suivante</string>
-    <string name="path_week_cell_a11y">Semaine %1$d, %2$d pebbles</string>
+    <!-- The Path's strip (#1207): a cairn per week, a dolmen per month. -->
+    <string name="path_strip_now">maintenant</string>
+    <plurals name="path_strip_week_a11y">
+        <item quantity="one">Semaine du %1$s, %2$d moment</item>
+        <item quantity="many">Semaine du %1$s, %2$d moments</item>
+        <item quantity="other">Semaine du %1$s, %2$d moments</item>
+    </plurals>
+    <plurals name="path_strip_live_week_a11y">
+        <item quantity="one">Cette semaine, depuis le %1$s, %2$d moment pour l\'instant</item>
+        <item quantity="many">Cette semaine, depuis le %1$s, %2$d moments pour l\'instant</item>
+        <item quantity="other">Cette semaine, depuis le %1$s, %2$d moments pour l\'instant</item>
+    </plurals>
+    <string name="path_strip_spacer_a11y">Semaine du %1$s, aucun moment</string>
+    <string name="path_strip_month_a11y">%1$s, le mois</string>
+    <string name="path_month_placeholder">La page du mois arrive bientôt.</string>
     <!-- Barre de stats du bas (sous-projet B). « karma » et « Ripple » sont du vocabulaire produit. -->
     <string name="ripple_badge_active">Ripple niveau %1$d, actif aujourd\'hui</string>
     <string name="ripple_badge_inactive">Ripple niveau %1$d, inactif aujourd\'hui</string>

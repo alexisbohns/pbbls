@@ -11,6 +11,7 @@ import app.pbbls.android.core.data.LogsServicing
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsServicing
+import app.pbbls.android.core.data.PathWrapServicing
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SignedUrlProviding
@@ -141,6 +142,9 @@ object FakeServicesModule {
     fun fakePathStats() = FakePathStatsService()
 
     @Provides @Singleton
+    fun fakePathWraps() = FakePathWrapService()
+
+    @Provides @Singleton
     fun fakeComposerMedia() = FakeComposerMedia()
 
     @Provides @Singleton
@@ -192,6 +196,9 @@ object FakeServicesModule {
 
     @Provides
     fun pathStats(fake: FakePathStatsService): PathStatsServicing = fake
+
+    @Provides
+    fun pathWraps(fake: FakePathWrapService): PathWrapServicing = fake
 
     @Provides
     fun composerMedia(fake: FakeComposerMedia): ComposerMedia = fake
