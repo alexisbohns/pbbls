@@ -25,6 +25,8 @@ struct SignedOutPurge {
     /// `AsyncImage` loads through `URLSession.shared`, so snap photo bytes land
     /// in `URLCache.shared` (memory and disk).
     let urlCache: URLCache
+    /// The Path's wraps kept on the device (#1226).
+    var wrapCache: WrapDiskCache = .standard
 
     private static let logger = Logger(subsystem: "app.pbbls.ios", category: "signed-out-purge")
 
@@ -35,6 +37,7 @@ struct SignedOutPurge {
         snapURLs.invalidateAll()
         urlCache.removeAllCachedResponses()
         SnapImageCache.shared.removeAll()
+        wrapCache.clear()
         Self.logger.info("cleared local account state")
     }
 }

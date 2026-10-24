@@ -59,4 +59,29 @@ final class FakePathWrapService: PathWrapServicing, @unchecked Sendable {
     func monthWrap(_ month: CalendarMonth, zone: TimeZone) async throws -> MonthWrap {
         throw Failure()
     }
+
+    // MARK: - The device's copies
+
+    private var keptStrip: Strip?
+    private var keptWeeks: [CalendarDay: WeekWrap] = [:]
+
+    func keep(strip: Strip?) {
+        lock.withLock { keptStrip = strip }
+    }
+
+    func keep(week: CalendarDay, _ wrap: WeekWrap) {
+        lock.withLock { keptWeeks[week] = wrap }
+    }
+
+    func cachedStrip(zone: TimeZone) async -> Strip? {
+        lock.withLock { keptStrip }
+    }
+
+    func cachedWeekWrap(_ weekStart: CalendarDay, zone: TimeZone) async -> WeekWrap? {
+        lock.withLock { keptWeeks[weekStart] }
+    }
+
+    func cachedMonthWrap(_ month: CalendarMonth, zone: TimeZone) async -> MonthWrap? {
+        nil
+    }
 }

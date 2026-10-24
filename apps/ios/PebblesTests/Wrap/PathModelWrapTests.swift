@@ -131,4 +131,59 @@ struct PathModelWrapTests {
         #expect(model.weekWraps[F.weekStart]?.pebbles == 14)
         #expect(wraps.weekCalls.count == 2)
     }
+
+    @Test("a week not yet shown opens on its kept copy, and keeps it when the fetch fails")
+    func keptWeekShowsFirst() async throws {
+        let wraps = FakePathWrapService()
+        wraps.keep(week: thisWeek, wrap(thisWeek, pebbles: 12))
+        let model = model(wraps)
+        await model.load { F.moments }
+        await model.refreshWraps()
+        #expect(model.weekWraps[F.weekStart]?.pebbles == 12)
+        // Still stale: the next demand fetches again.
+        wraps.answer(week: thisWeek, .success(wrap(thisWeek, pebbles: 13)))
+        await model.refreshWraps()
+        #expect(model.weekWraps[F.weekStart]?.pebbles == 13)
+    }
+
+    @Test("offline, the kept strip stands in for one that never loaded")
+    func keptStripOffline() async throws {
+        let wraps = FakePathWrapService()
+        let september = CalendarMonth(year: 2026, month: 9)
+        wraps.keep(strip: Strip(items: [.month(StripMonth(month: september, pebbles: 2))]))
+        let model = model(wraps)
+        await model.load { F.moments }
+        #expect(model.pages.contains(.month(september)))
+    }
+
+    @Test("the kept copy shows while the fetch runs, then the fetched wrap replaces it")
+    func keptCopyMidFlight() async throws {
+        let wraps = FakePathWrapService()
+        wraps.keep(week: thisWeek, wrap(thisWeek, pebbles: 12))
+        wraps.answer(week: thisWeek, .success(wrap(thisWeek, pebbles: 13)))
+        wraps.weekDelay = .milliseconds(300)
+        let model = model(wraps)
+        await model.load { F.moments }
+        let refresh = Task { await model.refreshWraps() }
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(model.weekWraps[F.weekStart]?.pebbles == 12)
+        await refresh.value
+        #expect(model.weekWraps[F.weekStart]?.pebbles == 13)
+    }
+
+    @Test("a fresh strip wins over the kept one, and a kept strip never replaces one in memory")
+    func stripPrecedence() async throws {
+        let wraps = FakePathWrapService()
+        let august = CalendarMonth(year: 2026, month: 8)
+        let september = CalendarMonth(year: 2026, month: 9)
+        let fresh = Strip(items: [.month(StripMonth(month: september, pebbles: 2))])
+        wraps.keep(strip: Strip(items: [.month(StripMonth(month: august, pebbles: 1))]))
+        wraps.answer(strip: .success(fresh))
+        let model = model(wraps)
+        await model.load { F.moments }
+        #expect(model.strip == fresh)
+        wraps.answer(strip: .failure(FakePathWrapService.Failure()))
+        await model.load { F.moments }
+        #expect(model.strip == fresh)
+    }
 }

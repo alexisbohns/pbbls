@@ -45,7 +45,8 @@ struct PathView: View {
             .toolbar(.hidden, for: .navigationBar)
             .pebblesScreen()
             .task {
-                model.wraps = PathWrapService(client: supabase.client)
+                model.wraps = PathWrapService(client: supabase.client, disk: .standard,
+                                              owner: supabase.session?.user.id.uuidString.lowercased())
                 await model.load { try await service.pathMoments() }
                 onFirstLoad()
             }
