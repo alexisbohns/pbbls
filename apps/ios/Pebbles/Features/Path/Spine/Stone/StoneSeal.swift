@@ -29,8 +29,8 @@ enum SealSize: CaseIterable {
 /// A contents row's seal (#1130 R17), new on iOS: the stone's soft outline, by
 /// valence a relief (highlight: a solid spot, the glyph knocked out to the
 /// ground), a line (neutral: a 15 % tint, the rim and the glyph in the spot) or
-/// an engraving (lowlight: a 9 % wash, a hatch in the deep ink clipped to the
-/// body, the glyph with a ground halo). A blank moment's seal is the line recipe
+/// an engraving (lowlight: a 9 % wash and a hatch in the deep ink, the hatch
+/// clipped to the body, the glyph with a ground halo). A blank moment's seal is the line recipe
 /// in the blank ramp, with no glyph. The glyph's carve is a constant 1.25 pt.
 /// `size` picks the preset (#1226); the tiny and pip prints are `SealPrint`'s.
 struct StoneSeal: View {
@@ -146,7 +146,7 @@ extension GraphicsContext {
             stroke(body, with: .color(seal.spot), lineWidth: 1)
             stroke(mark, with: .color(seal.spot), style: SealGlyphs.carve(1.25))
         case .lowlight:
-            fill(body, with: .color(seal.spot.opacity(0.09)))
+            fill(body, with: .color(seal.deep.opacity(0.09)))
             var hatch = self
             hatch.clip(to: body)
             hatch.stroke(SealGlyphs.hatch(in: size, step: 2.2), with: .color(seal.deep), lineWidth: 0.6)
@@ -167,7 +167,7 @@ extension GraphicsContext {
             fill(body, with: .color(seal.spot.opacity(0.15)))
             stroke(body, with: .color(seal.spot), lineWidth: 0.7)
         case .lowlight:
-            fill(body, with: .color(seal.spot.opacity(0.09)))
+            fill(body, with: .color(seal.deep.opacity(0.09)))
             var hatch = self
             hatch.clip(to: body)
             // 45° lines: a 2.4 pt gap across them is √2 × 2.4 along the edge.
@@ -214,12 +214,13 @@ private enum SealGlyphs {
         return path
     }
 
-    /// Diagonal lines `step` pt apart along the seal's edge.
+    /// Diagonal lines `step` pt apart along the seal's edge, falling left to
+    /// right as the web's and Android's hatch does.
     static func hatch(in size: CGSize, step: CGFloat) -> Path {
         var path = Path()
         for x in stride(from: -size.height, through: size.width, by: step) {
-            path.move(to: CGPoint(x: x, y: size.height))
-            path.addLine(to: CGPoint(x: x + size.height, y: 0))
+            path.move(to: CGPoint(x: x, y: 0))
+            path.addLine(to: CGPoint(x: x + size.height, y: size.height))
         }
         return path
     }
