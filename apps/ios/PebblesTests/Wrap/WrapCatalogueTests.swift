@@ -8,7 +8,7 @@ import Testing
 @Suite("Wrap strings catalogue")
 struct WrapCatalogueTests {
     @Test("every wrap key has an English and a French value",
-          arguments: [("path.strip.", 5), ("path.wrap.", 35), ("path.month.", 24)])
+          arguments: [("path.strip.", 5), ("path.wrap.", 35), ("path.month.", 24), ("path.gem.", 10)])
     func catalogue(prefix: String, count: Int) throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().appendingPathComponent("Pebbles/Resources/Localizable.xcstrings")
