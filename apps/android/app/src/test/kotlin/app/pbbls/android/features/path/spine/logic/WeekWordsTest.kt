@@ -89,12 +89,6 @@ class WeekWordsTest {
     }
 
     @Test
-    fun `weekday letters run Monday first, lowercase`() {
-        assertEquals(listOf("m", "t", "w", "t", "f", "s", "s"), WeekWordsBuilder.weekdayLetters(w41, en))
-        assertEquals(listOf("l", "m", "m", "j", "v", "s", "d"), WeekWordsBuilder.weekdayLetters(w41, fr))
-    }
-
-    @Test
     fun `dot days name the marked days with their dates`() {
         assertEquals(
             4 to "Monday 5, Tuesday 6, Thursday 8, and Saturday 10",

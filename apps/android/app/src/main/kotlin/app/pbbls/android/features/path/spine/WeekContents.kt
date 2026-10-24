@@ -25,7 +25,9 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.CalendarLabels
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.rule
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.ui.render.stone.StoneSeal
@@ -128,7 +130,7 @@ private fun ContentsRow(
                 .atZoneSameInstant(zone)
                 .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale))
         }
-    val weekday = remember(day.date, locale) { shortWeekday(day.date.dayOfWeek, locale) }
+    val weekday = remember(day.date, locale) { CalendarLabels.shortWeekday(day.date.dayOfWeek, locale) }
     // "Monday 5", as the persons' dots name a day.
     val dayLong = remember(day.date, locale) { "${day.date.dayOfWeek.getDisplayName(TextStyle.FULL, locale)} ${day.date.dayOfMonth}" }
     val description = "${name ?: untitled}, $dayLong, $time"

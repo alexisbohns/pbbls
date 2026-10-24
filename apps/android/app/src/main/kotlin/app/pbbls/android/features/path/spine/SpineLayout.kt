@@ -70,22 +70,11 @@ internal object SpineLayout {
     val OPENING_SUMMARY_GAP = 12.dp
 
     /*
-     * The persons of the week (web `PersonsOfWeek.tsx`): the section's gap above, the label to
-     * the first row, and the row's grid `30px 1fr auto` with 10 px gaps, 44 px tall.
+     * The persons of the week (web `PersonsOfWeek.tsx`): the section's gap above and the label to
+     * the first row. The row's grid and the day dots are `SpineLayoutTokens`.
      */
     val PERSONS_TOP = 40.dp
     val PERSONS_HEADER_GAP = 9.dp
-    val PERSON_ROW_MIN = 44.dp
-    val PERSON_GLYPH_COL = 30.dp
-    val PERSON_GLYPH = 24.dp
-    val PERSON_COL_GAP = 10.dp
-
-    /** The seven day dots and the gaps between them: 79 dp in all. */
-    val DOT = 7.dp
-    val DOT_GAP = 5.dp
-
-    /** An empty dot's inset ring. */
-    val DOT_RING = 1.dp
 
     /** The fold row's indent: the web's `pl-10`. */
     val FOLD_INDENT = 40.dp
@@ -111,9 +100,6 @@ internal object SpineLayout {
     /** The reading day's dot in the contents, and how far left of the row it sits. */
     val READING_DOT = 5.dp
     val READING_DOT_OFFSET = 12.dp
-
-    /** A section's rule above or below a row. */
-    val RULE = 1.dp
 
     /** The line's last run into the mouth; the mouth's text starts under it. */
     val MOUTH_LINE = 26.dp
