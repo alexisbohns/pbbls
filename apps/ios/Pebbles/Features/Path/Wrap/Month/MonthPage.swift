@@ -61,7 +61,9 @@ struct MonthPageSections: View {
                 PersonsSection(wrap: wrap, lookups: lookups, dayView: dayView) { onMore(.persons) }
             case .domains:
                 DomainsSection(wrap: wrap, lookups: lookups) { onMore(.domains) }
-            case .gem, .tone, .hours:
+            case .gem:
+                EmotionGem(wrap: wrap, lookups: lookups) { onMore(.gem) }
+            case .tone, .hours:
                 EmptyView()
             }
         }
