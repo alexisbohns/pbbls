@@ -40,8 +40,8 @@ struct SpineLayoutTests {
         #expect(tiny.hit.width == 44 && tiny.hit.height == 44)
     }
 
-    @Test("seals are 20 / 24 / 27")
+    @Test("contents seals are 20 / 24 / 27")
     func seals() {
-        #expect([ValenceSizeGroup.small, .medium, .large].map(SpineLayout.sealWidth) == [20, 24, 27])
+        #expect([ValenceSizeGroup.small, .medium, .large].map(SealSize.contents.width) == [20, 24, 27])
     }
 }

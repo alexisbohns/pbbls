@@ -33,10 +33,7 @@ struct WeekContents: View {
     var body: some View {
         let read = readingDay ?? page.week.days.first?.index
         VStack(alignment: .leading, spacing: 0) {
-            Text(verbatim: SpineCopy.contents(locale: locale))
-                .spineType(.sectionLabel)
-                .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                .accessibilityAddTraits(.isHeader)
+            SpineSectionHeader(SpineCopy.contents(locale: locale))
                 .padding(.bottom, SpineLayout.sectionHeaderGap)
             ForEach(rows) { row in
                 // The reading day's dot sits beside its first row only, as on the web and Android.
@@ -61,7 +58,8 @@ struct WeekContents: View {
                     .spineType(.contentsDay)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .frame(width: SpineLayout.contentsDayColumn, alignment: .leading)
-                StoneSeal(moment: moment, palette: SpineColors.palette(palette(moment), isBlank: moment.pebble == nil))
+                StoneSeal(moment: moment, palette: SpineColors.palette(palette(moment), isBlank: moment.pebble == nil),
+                          size: .contents)
                     .frame(width: SpineLayout.contentsSealColumn)
                 Text(verbatim: name ?? SpineCopy.untitled(locale: locale))
                     .spineType(.contentsName(cut))

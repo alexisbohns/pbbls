@@ -57,13 +57,34 @@ enum SpineLayout {
     static let openingSummaryGap: CGFloat = 12
     static let sectionTop: CGFloat = 40
     static let sectionHeaderGap: CGFloat = 10
-    static let personRowMin: CGFloat = 44
-    static let personGlyphColumn: CGFloat = 30
-    static let personGlyph: CGFloat = 24
-    static let personGap: CGFloat = 10
+    static let foldIndent: CGFloat = 40
+
+    // The list row's grid (`MarkRow`, the web's `30px 1fr auto`) and the day dots (#1226)
+    static let rowMin: CGFloat = 44
+    /// The row's leading column, and the mark (a glyph, a seal) centred in it.
+    static let markColumn: CGFloat = 30
+    static let mark: CGFloat = 24
+    static let rowGap: CGFloat = 10
+    /// A section's rule above or below a row.
+    static let rule: CGFloat = 1
+    /// A day dot; seven of them with their gaps are 79 pt.
     static let dot: CGFloat = 7
     static let dotGap: CGFloat = 5
-    static let foldIndent: CGFloat = 40
+    /// An empty dot's inset ring.
+    static let dotRing: CGFloat = 1
+    /// The month's ring of day dots: its box, its dots and the slots it leaves open at the 1st.
+    static let dayCircle: CGFloat = 76
+    static let dayCircleDot: CGFloat = 5
+    static let dayCircleGapSlots: Double = 1.5
+
+    // Wrap tiles and bars (#1226)
+    static let tileWidth: CGFloat = 128
+    /// A tile is at least this tall; Dynamic Type grows it, never its width (D11).
+    static let tileMinHeight: CGFloat = 112
+    static let tilePad: CGFloat = 12
+    static let tileCorner: CGFloat = 12
+    static let barHeight: CGFloat = 6
+    static let barGap: CGFloat = 2
 
     // Contents (R16)
     static let contentsRowMin: CGFloat = 42
@@ -88,14 +109,6 @@ enum SpineLayout {
     static func stoneSize(_ size: ValenceSizeGroup) -> CGSize {
         let width = stoneWidth(size)
         return CGSize(width: width, height: width / CGFloat(PebbleOutlineGeometry.aspectRatio(for: size)))
-    }
-
-    static func sealWidth(_ size: ValenceSizeGroup) -> CGFloat {
-        switch size {
-        case .small: return 20
-        case .medium: return 24
-        case .large: return 27
-        }
     }
 
     /// The pad under a day's seam when the day has moments (maintainer decision,
