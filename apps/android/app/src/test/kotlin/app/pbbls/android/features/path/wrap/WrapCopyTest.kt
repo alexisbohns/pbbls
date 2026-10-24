@@ -78,4 +78,21 @@ class WrapCopyTest {
         assertEquals("Eleven emotions in six families, weighed by intensity.", copy.emotionsLead(11, 6))
         assertEquals("Seven domains; family in seven pebbles.", copy.domainsLead(7, "Family", 7))
     }
+
+    @Test
+    fun `the gem's lead reads the server's order and zeros`() {
+        assertEquals(
+            "Joy first, then peace; nothing in shame.",
+            copy.gemLead(listOf("joy", "peace", "pride"), listOf("shame"), level = false),
+        )
+        assertEquals("Joy and peace level.", copy.gemLead(listOf("joy", "peace"), emptyList(), level = true))
+        assertEquals("Only anger; nothing in the other six.", copy.gemLead(listOf("anger"), List(6) { "x$it" }, level = false))
+        assertEquals(
+            "Joy first, then fear; nothing in shame or pride.",
+            copy.gemLead(listOf("joy", "fear"), listOf("shame", "pride"), level = false),
+        )
+        assertEquals("all eleven emotions", copy.moreEmotions(11))
+        assertEquals("the emotions, in detail", copy.moreEmotions(3))
+        assertEquals("pebbles", copy.gemPebbles(13))
+    }
 }
