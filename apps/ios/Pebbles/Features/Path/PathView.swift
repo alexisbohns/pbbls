@@ -111,7 +111,8 @@ struct PathView: View {
                     onDelete: { pendingDeletion = MomentDeleteTarget(summary: $0) },
                     onCreate: { isPresentingCapture = true },
                     lookups: lookups,
-                    scrollToTopToken: nav.scrollToTop[.path, default: 0]
+                    scrollToTopToken: nav.scrollToTop[.path, default: 0],
+                    intro: IntroContext(ledger: model.introLedger, haptics: IntroHaptics.shared)
                 )
                 // The focused page's wrap and its neighbours', fetched on each focus and after each load.
                 .task(id: WrapDemand(page: model.focusedPage, revision: model.pagesRevision)) {

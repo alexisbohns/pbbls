@@ -4,7 +4,9 @@ import SwiftUI
 /// in its order. Each *more* opens the month's sheet on its list; the day view
 /// (circle or calendar) is one setting for every month. When a milestone's
 /// held card closes, VoiceOver comes back to its row (the focused page only,
-/// so a realised neighbour never takes it). Android: `MonthPage`.
+/// so a realised neighbour never takes it). With an intro context, the page
+/// plays its intro (#1241) while focused and the app active, skipped by a tap.
+/// Android: `MonthPage`.
 struct MonthPage: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
@@ -18,6 +20,26 @@ struct MonthPage: View {
     /// The list the sheet opened on; the page's own state, never the model's.
     @State private var sheet: MonthSection?
     @AccessibilityFocusState private var milestoneFocus: UUID?
+    /// The page's intro; nil without a context, and the page draws settled.
+    @State private var intro: IntroClock?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
+    @Environment(\.scenePhase) private var scenePhase
+
+    init(wrap: MonthWrap, lookups: WrapLookups, isFocused: Bool, returnFocus: Binding<UUID?>,
+         onWeek: @escaping (CalendarDay) -> Void, onOpen: @escaping (MomentSummary) -> Void,
+         intro context: IntroContext? = nil) {
+        self.wrap = wrap
+        self.lookups = lookups
+        self.isFocused = isFocused
+        _returnFocus = returnFocus
+        self.onWeek = onWeek
+        self.onOpen = onOpen
+        // Built with the page, not on appear: a first frame without it would draw settled, then blank.
+        _intro = State(initialValue: context.map {
+            IntroClock(month: wrap.month, order: IntroClock.order(wrap), ledger: $0.ledger, haptics: $0.haptics)
+        })
+    }
 
     var body: some View {
         ScrollView {
@@ -27,6 +49,11 @@ struct MonthPage: View {
             }
             .padding(.bottom, MonthLayout.pageBottom)
         }
+        .coordinateSpace(name: IntroSpace.name)
+        .environment(\.introClock, intro)
+        // A tap anywhere skips the intro, and still does its job.
+        .simultaneousGesture(TapGesture().onEnded { intro?.skip() })
+        .onChange(of: playsIntro, initial: true) { _, plays in intro?.isActive = plays }
         .onChange(of: returnFocus) { _, id in
             guard isFocused, let id else { return }
             milestoneFocus = id
@@ -35,6 +62,11 @@ struct MonthPage: View {
         .sheet(item: $sheet) { tab in
             MonthSheet(wrap: wrap, lookups: lookups, initial: tab)
         }
+    }
+
+    /// The page may play: focused, the app active, neither Reduce Motion nor VoiceOver on.
+    private var playsIntro: Bool {
+        isFocused && scenePhase == .active && IntroPolicy.plays(reduceMotion: reduceMotion, voiceOver: voiceOver)
     }
 }
 

@@ -52,6 +52,8 @@ final class PathModel {
     let pressRequests = StonePressRequests()
     /// The slot VoiceOver returns to; stack E sets it when a held card closes.
     var returnFocus: UUID?
+    /// What the month pages' intros have played this launch (#1241 D3).
+    @ObservationIgnored let introLedger = IntroLedger()
     private(set) var isDeleting = false
     /// Bumped whenever the memoised pages are dropped (a load, the reference
     /// cache's souls). `page(for:)` reads it, so a view that read a page before
