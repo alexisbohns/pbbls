@@ -5,8 +5,9 @@ import SwiftUI
 /// (circle or calendar) is one setting for every month. When a milestone's
 /// held card closes, VoiceOver comes back to its row (the focused page only,
 /// so a realised neighbour never takes it). With an intro context, the page
-/// plays its intro (#1241) while focused and the app active, skipped by a tap.
-/// Android: `MonthPage`.
+/// plays its intro (#1241) while on screen, focused and the app active,
+/// skipped by a tap; under Reduce Motion or VoiceOver it drops the intro for
+/// good. Android: `MonthPage`.
 struct MonthPage: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
@@ -20,8 +21,10 @@ struct MonthPage: View {
     /// The list the sheet opened on; the page's own state, never the model's.
     @State private var sheet: MonthSection?
     @AccessibilityFocusState private var milestoneFocus: UUID?
-    /// The page's intro; nil without a context, and the page draws settled.
+    /// The page's intro; nil without a context, or once `IntroPolicy` refused it, and the page draws settled.
     @State private var intro: IntroClock?
+    /// On screen: a tab switch or a full-screen cover hides the page without a tap on it.
+    @State private var isVisible = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @Environment(\.scenePhase) private var scenePhase
@@ -50,10 +53,18 @@ struct MonthPage: View {
             .padding(.bottom, MonthLayout.pageBottom)
         }
         .coordinateSpace(name: IntroSpace.name)
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
         .environment(\.introClock, intro)
         // A tap anywhere skips the intro, and still does its job.
         .simultaneousGesture(TapGesture().onEnded { intro?.skip() })
         .onChange(of: playsIntro, initial: true) { _, plays in intro?.isActive = plays }
+        // Refused, the intro is gone for the page's life: turning the setting off again never blanks and replays it.
+        .onChange(of: allowsIntro, initial: true) { _, allowed in
+            guard !allowed else { return }
+            intro?.settleAll()
+            intro = nil
+        }
         .onChange(of: returnFocus) { _, id in
             guard isFocused, let id else { return }
             milestoneFocus = id
@@ -64,9 +75,14 @@ struct MonthPage: View {
         }
     }
 
-    /// The page may play: focused, the app active, neither Reduce Motion nor VoiceOver on.
+    /// The page may play: on screen, focused, the app active, the intro allowed.
     private var playsIntro: Bool {
-        isFocused && scenePhase == .active && IntroPolicy.plays(reduceMotion: reduceMotion, voiceOver: voiceOver)
+        isVisible && isFocused && scenePhase == .active && allowsIntro
+    }
+
+    /// Neither Reduce Motion nor VoiceOver on.
+    private var allowsIntro: Bool {
+        IntroPolicy.plays(reduceMotion: reduceMotion, voiceOver: voiceOver)
     }
 }
 
