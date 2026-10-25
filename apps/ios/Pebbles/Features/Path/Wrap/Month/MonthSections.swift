@@ -118,28 +118,45 @@ struct PersonsSection: View {
     private var locale: Locale { SpineStrings.appLocale }
 
     var body: some View {
-        if let persons = wrap.persons {
-            let rows = persons.filter { lookups.soulName($0.soulId) != nil }
+        if wrap.persons != nil {
+            let rows = Self.rows(wrap, lookups: lookups)
             VStack(alignment: .leading, spacing: 0) {
                 let clockwise = dayView == .circle && !rows.isEmpty
                 MonthSectionHead(label: WrapCopy.tile(.persons, locale: locale),
                                  hint: clockwise ? WrapCopy.clockwiseHint(locale: locale) : nil)
+                    .introReveal(.header)
                 if rows.isEmpty {
                     SheetLead(WrapCopy.nobody(locale: locale), bottom: 0)
                         .padding(.horizontal, MonthLayout.sectionPadX)
+                        .introReveal(.lead)
                 } else {
                     VStack(spacing: 0) {
-                        ForEach(rows.prefix(WrapCopy.shown), id: \.soulId) { person in
-                            MonthPersonRow(person: person, wrap: wrap, lookups: lookups, dayView: dayView)
+                        let shown = Array(rows.prefix(WrapCopy.shown).enumerated())
+                        ForEach(shown, id: \.element.soulId) { index, person in
+                            MonthPersonRow(person: person, wrap: wrap, lookups: lookups, dayView: dayView,
+                                           introRow: index)
                         }
                     }
                     .padding(.horizontal, MonthLayout.sectionPadX)
                     MoreLink(text: WrapCopy.morePersons(rows.count, locale: locale), action: onMore)
                         .accessibilityHint(Text(verbatim: WrapCopy.tileHint(locale: locale)))
                         .padding(.horizontal, MonthLayout.sectionPadX)
+                        .introReveal(.more)
                 }
             }
+            .introSequence(.section(.persons)) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// The souls the device can name, in the server's order.
+    private static func rows(_ wrap: MonthWrap, lookups: WrapLookups) -> [PersonStat] {
+        (wrap.persons ?? []).filter { lookups.soulName($0.soulId) != nil }
+    }
+
+    /// The persons' intro (#1241): the head, then each of the five in turn, or the invitation.
+    static func introBeats(wrap: MonthWrap, lookups: WrapLookups) -> [IntroBeat] {
+        let rows = rows(wrap, lookups: lookups)
+        return IntroScore.persons(rings: rows.prefix(WrapCopy.shown).map(\.days), hasLead: rows.isEmpty)
     }
 }
 
@@ -150,6 +167,8 @@ struct MonthPersonRow: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
     let dayView: DayView
+    /// Its place in the month page's persons, for the intro (#1241); the sheet leaves it nil.
+    var introRow: Int?
 
     var body: some View {
         let locale = SpineStrings.appLocale
@@ -157,10 +176,12 @@ struct MonthPersonRow: View {
         let fresh = person.isNewSincePrevious
             ? WrapCopy.newSince(wrap.month.previous, locale: locale) : nil
         MarkRow(name, accessibilityText: [name, "\(person.count)", fresh].compactMap { $0 }.joined(separator: ", "),
-                subtitle: fresh, count: person.count) {
+                subtitle: fresh, count: person.count,
+                reveal: introRow.map { MarkRowReveal(leading: .glyph($0), text: .name($0)) }) {
             SoulMark(strokes: lookups.soulGlyph(person.soulId), side: SpineLayout.mark)
         } trailing: {
-            DaySetMarks(days: person.days, mode: wrap.dayMode(dayView), ringSize: MonthLayout.rowRing)
+            DaySetMarks(days: person.days, mode: wrap.dayMode(dayView), ringSize: MonthLayout.rowRing,
+                        introRow: introRow)
                 .dayMarksInset(dayView)
         }
     }
