@@ -38,6 +38,9 @@ struct PathStrip: View {
             // Room on either side, so the first and last items can stand in the centre too.
             .contentMargins(.horizontal, max(0, (width - StripCell.width) / 2), for: .scrollContent)
             .scrollIndicators(.hidden)
+            // As tall as its cells: a horizontal scroll view takes any height offered, and would share the
+            // Path's with the pager. The cells' height follows the text size, so no fixed frame.
+            .fixedSize(horizontal: false, vertical: true)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
             .onAppear { centre(proxy, animated: false) }
             // The margins follow the real width; the focus follows the margins.
