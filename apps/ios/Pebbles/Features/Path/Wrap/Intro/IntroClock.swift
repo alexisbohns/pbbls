@@ -77,7 +77,8 @@ final class IntroClock {
         didSet {
             guard isActive != oldValue else { return }
             if isActive {
-                haptics?.prepare()
+                // Only a page with something still to play wakes the engine.
+                if order.contains(where: { !ledger.contains(month, $0) }) { haptics?.prepare() }
                 startNext()
             } else {
                 settleAll()
@@ -192,12 +193,13 @@ final class IntroClock {
         settleAll()
     }
 
-    /// Focus lost or the app inactive: what plays lands; what waits keeps waiting, unrecorded.
+    /// Focus lost or the app inactive: what plays lands, and only its haptics stop; what waits keeps waiting,
+    /// unrecorded.
     func settleAll() {
         ending?.cancel()
         ending = nil
-        haptics?.stopAll()
         for sequence in ends.keys {
+            haptics?.stop(sequence, of: month)
             phases[sequence] = .settled
         }
         ends = [:]
@@ -217,7 +219,7 @@ final class IntroClock {
         guard ends.removeValue(forKey: sequence) != nil else { return }
         ending?.cancel()
         ending = nil
-        haptics?.stop(sequence)
+        haptics?.stop(sequence, of: month)
         phases[sequence] = .settled
         startNext()
     }
@@ -237,7 +239,7 @@ final class IntroClock {
         ends[sequence] = end
         phases[sequence] = .playing(begin)
         ledger.record(month, sequence)
-        haptics?.play(sequence, beats: beats, after: Self.lead)
+        haptics?.play(sequence, of: month, beats: beats, startingAt: begin)
         guard schedules else { return }
         let wait = end.timeIntervalSince(now())
         ending = Task { [weak self] in

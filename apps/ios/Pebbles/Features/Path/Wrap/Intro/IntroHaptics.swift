@@ -2,15 +2,15 @@ import CoreHaptics
 import Foundation
 import os
 
-/// What the intro's clock asks of the haptics (#1241 D5); the tests stand in a spy.
+/// What the intro's clock asks of the haptics (#1241 D5); the tests stand in a
+/// spy. A page's sequence is one voice, so a page stops only its own.
 @MainActor
 protocol IntroHapticPlaying: AnyObject {
     /// Starts the engine early, so a sequence's first tick is not late.
     func prepare()
-    /// Plays `beats`' ticks as one pattern, starting `lead` seconds from now.
-    func play(_ sequence: IntroSequence, beats: [IntroBeat], after lead: TimeInterval)
-    func stop(_ sequence: IntroSequence)
-    func stopAll()
+    /// Plays `beats`' ticks as one pattern, starting at `begin`, the instant the sequence's frames start.
+    func play(_ sequence: IntroSequence, of month: CalendarMonth, beats: [IntroBeat], startingAt begin: Date)
+    func stop(_ sequence: IntroSequence, of month: CalendarMonth)
 }
 
 /// One tick of a sequence's pattern.
@@ -31,9 +31,15 @@ final class IntroHaptics: IntroHapticPlaying {
     /// Two ticks closer than this blur into one buzz: the later one is dropped (its visual beat stays).
     nonisolated static let floor: TimeInterval = 0.025
 
+    /// A month page's sequence: one player each.
+    private struct Voice: Hashable {
+        let month: CalendarMonth
+        let sequence: IntroSequence
+    }
+
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "intro")
     private var engine: CHHapticEngine?
-    private var players: [IntroSequence: CHHapticAdvancedPatternPlayer] = [:]
+    private var players: [Voice: CHHapticAdvancedPatternPlayer] = [:]
 
     init() {
         guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
@@ -57,7 +63,7 @@ final class IntroHaptics: IntroHapticPlaying {
         }
     }
 
-    func play(_ sequence: IntroSequence, beats: [IntroBeat], after lead: TimeInterval) {
+    func play(_ sequence: IntroSequence, of month: CalendarMonth, beats: [IntroBeat], startingAt begin: Date) {
         guard let engine else { return }
         let events = Self.events(for: beats).map { event in
             CHHapticEvent(eventType: .hapticTransient, parameters: [
@@ -66,29 +72,25 @@ final class IntroHaptics: IntroHapticPlaying {
             ], relativeTime: event.at)
         }
         guard !events.isEmpty else { return }
-        stop(sequence)
+        stop(sequence, of: month)
         do {
             try engine.start()
             let player = try engine.makeAdvancedPlayer(with: CHHapticPattern(events: events, parameters: []))
-            players[sequence] = player
-            try player.start(atTime: engine.currentTime + lead)
+            players[Voice(month: month, sequence: sequence)] = player
+            // Timed after the engine's start and the player's making, so a cold start can't put the ticks behind
+            // the frames.
+            try player.start(atTime: engine.currentTime + max(0, begin.timeIntervalSinceNow))
         } catch {
             logger.error("intro haptic play failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 
-    func stop(_ sequence: IntroSequence) {
-        guard let player = players.removeValue(forKey: sequence) else { return }
+    func stop(_ sequence: IntroSequence, of month: CalendarMonth) {
+        guard let player = players.removeValue(forKey: Voice(month: month, sequence: sequence)) else { return }
         do {
             try player.stop(atTime: CHHapticTimeImmediate)
         } catch {
             logger.warning("intro haptic stop failed: \(error.localizedDescription, privacy: .public)")
-        }
-    }
-
-    func stopAll() {
-        for sequence in Array(players.keys) {
-            stop(sequence)
         }
     }
 

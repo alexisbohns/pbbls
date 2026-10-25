@@ -8,13 +8,21 @@ import Testing
 private final class HapticsSpy: IntroHapticPlaying {
     var prepared = 0
     var played: [IntroSequence] = []
+    var starts: [Date] = []
     var stopped: [IntroSequence] = []
-    var stoppedAll = 0
+    var stoppedMonths: [CalendarMonth] = []
 
     func prepare() { prepared += 1 }
-    func play(_ sequence: IntroSequence, beats: [IntroBeat], after lead: TimeInterval) { played.append(sequence) }
-    func stop(_ sequence: IntroSequence) { stopped.append(sequence) }
-    func stopAll() { stoppedAll += 1 }
+
+    func play(_ sequence: IntroSequence, of month: CalendarMonth, beats: [IntroBeat], startingAt begin: Date) {
+        played.append(sequence)
+        starts.append(begin)
+    }
+
+    func stop(_ sequence: IntroSequence, of month: CalendarMonth) {
+        stopped.append(sequence)
+        stoppedMonths.append(month)
+    }
 }
 
 /// #1241 D3, D4, §Lifecycle.
@@ -47,6 +55,8 @@ struct IntroClockTests {
         #expect(clock.phase(.cover) == .playing(start))
         #expect(spy.prepared == 1)
         #expect(spy.played == [.cover])
+        // The haptics start with the frames.
+        #expect(spy.starts == [start])
         #expect(ledger.contains(october, .cover))
         let reveal = clock.reveal(.cover, at: start.addingTimeInterval(0.46))
         #expect(reveal(.header) == 1)
@@ -103,8 +113,35 @@ struct IntroClockTests {
         #expect(clock.phase(.cover) == .settled)
         #expect(clock.phase(weeks) == .settled)
         #expect(ledger.contains(october, weeks))
-        #expect(spy.stoppedAll == 1)
+        #expect(spy.stopped == [.cover])
         #expect(spy.played == [.cover])
+    }
+
+    @Test("a page stops only its own haptics, never another page's")
+    func ownHaptics() {
+        let spy = HapticsSpy()
+        let september = IntroClock(month: CalendarMonth(year: 2026, month: 9), order: [.cover], ledger: IntroLedger(),
+                                   haptics: spy, now: { [base] in base }, schedules: false)
+        let clock = clock(haptics: spy)
+        clock.enter(.cover, beats: { beats })
+        september.enter(.cover, beats: { beats })
+        clock.isActive = true
+        september.isActive = true
+        clock.skip()
+        #expect(spy.stoppedMonths == [october])
+        #expect(september.isPlaying(.cover))
+    }
+
+    @Test("a page whose every sequence played this launch never wakes the engine")
+    func preparesOnlyWhatPlays() {
+        let ledger = IntroLedger()
+        for sequence in [IntroSequence.cover, weeks, .section(.persons)] {
+            ledger.record(october, sequence)
+        }
+        let spy = HapticsSpy()
+        let clock = clock(ledger, haptics: spy)
+        clock.isActive = true
+        #expect(spy.prepared == 0)
     }
 
     @Test("losing focus lands what plays; what waits stays unrecorded and plays on the next focus")
