@@ -14,7 +14,7 @@ The month page enters instead of appearing all at once. The month's name rises i
 ## Goal
 
 - The choreography in §Choreography plays on an iPhone 15. Its haptics are in step with the visuals and no tick is dropped in the garland's fast middle.
-- Every existing wrap reference PNG stays byte-identical, with no re-baseline. The settled render is today's render.
+- Every existing wrap reference passes unchanged, with no re-baseline. The settled render is today's render.
 - Three new references pin mid-intro frames at fixed clock times.
 
 ## Non-goals
@@ -71,7 +71,7 @@ Every time and strength here is a starting value, kept as a `static let` in `Int
 
 Within one voice, a transient closer than **25 ms** to the previous one is dropped from the pattern. The visual beat stays.
 
-**`IntroCurve.times(count:duration:)`.** The slow-fast-slow spacing: beat *i* of *n* lands at `duration × easeInOut⁻¹(i / (n − 1))`, with the cubic ease-in-out. Progress along the sequence then follows ease-in-out over time. One beat lands at 0.
+**`IntroCurve.times(count:duration:)`.** The slow-fast-slow spacing: beat *i* of *n* lands at `duration × easeInOut⁻¹(i / (n − 1))`, with the sine ease-in-out `(1 − cos πt) / 2`. The cubic's middle would space a 31-day garland's ticks 17 ms apart, under the 25 ms floor; the sine's are 32 ms. Progress along the sequence then follows ease-in-out over time. One beat lands at 0.
 
 **The cover (`IntroSequence.cover`)**, times from the sequence's start:
 
@@ -105,7 +105,7 @@ Within one voice, a transient closer than **25 ms** to the previous one is dropp
 struct IntroBeat: Hashable, Sendable {
     let key: IntroKey
     let at: TimeInterval          // from the sequence's start
-    var span: TimeInterval = 0    // > 0 for a sweep
+    let duration: TimeInterval    // how long it takes to land: a motion's length, or a sweep's span
     var tick: IntroTick?
 }
 
@@ -125,11 +125,13 @@ struct IntroTick: Hashable, Sendable { let intensity: Float; let sharpness: Floa
 enum IntroScore {
     static func cover(days: [CoverDay], daysInMonth: Int, numbered: [Int], souls: Int,
                       lines: [IntroKey]) -> [IntroBeat]                    // the texts drawn: ⊆ summary, names, colophon
-    static func rows(count: Int, hasLead: Bool) -> [IntroBeat]               // weeks, milestones, domains
-    static func persons(rings: [DaySet], mode: DayMode) -> [IntroBeat]
-    static func gem(runs: [(slug: String, facets: [String])]) -> [IntroBeat]  // lead order, facets already in angle order
-    static func tone(days: [ToneDay], hasInsightsHead: Bool) -> [IntroBeat]
-    static func hours(stones: Int, hasInsightsHead: Bool) -> [IntroBeat]     // stones already in time-of-day order
+    static func rows(count: Int, hasLead: Bool, more: Bool) -> [IntroBeat]   // weeks, milestones, domains
+    static func persons(rings: [DaySet], hasLead: Bool) -> [IntroBeat]       // a dot at (day + 0.5) / length of its ring
+    static func gem(runs: [IntroGemRun]) -> [IntroBeat]                       // lead order
+    static func gemRuns(order: [String], facets: [String: String?]) -> [IntroGemRun]  // facets in sweep order
+    static func tone(days: [ToneDay], insights: Bool) -> [IntroBeat]
+    static func hours(stones: Int, insights: Bool) -> [IntroBeat]            // stone(rank), `ranks(_:)` by time of day
+    static func duration(_ beats: [IntroBeat]) -> TimeInterval
 }
 
 enum IntroCurve { static func times(count: Int, duration: TimeInterval) -> [TimeInterval] }
@@ -140,14 +142,14 @@ The builders take what the views already show, after the same `lookups` filterin
 ## Runtime (`Wrap/Intro/`)
 
 - **`IntroClock`** (`@Observable @MainActor`, one per `MonthPage`):
-  - **State:** each sequence is `waiting`, `queued`, `playing(start: Date, beats:)` or `settled`.
-  - **Answers:** `progress(_ key, in sequence, at: Date) -> Double` (0 before the beat, eased to 1 after it, 1 for a key the beats don't name, 1 when settled, 0 while waiting or queued). `isPlaying(sequence)`.
+  - **State:** each sequence is `waiting`, `playing(start)` or `settled`. A waiting sequence in view is the queue.
+  - **Answers:** `reveal(sequence, at: Date) -> IntroReveal`, each key's linear progress (0 before the beat, eased to 1 after it, 1 for a key the beats don't name, 1 when settled, 0 while waiting or queued). `isPlaying(sequence)`.
   - **Calls:**
     - `enter(sequence, beats:)`: a sequence came into view; it is queued unless the ledger has it.
     - `leave(sequence)`: it left the viewport.
-    - `settle(sequence)`, `settleAll()` (the playing one settles, the queued ones go back to waiting), `skip()` (the playing and queued ones settle and are recorded).
+    - `advance(to:)` (lands the playing one at its end), `settleAll()` (the playing one settles, the queued ones go back to waiting), `skip()` (the playing and queued ones settle and are recorded).
   - It owns the queue (D4) and starts the next sequence when the playing one's last beat plus its motion has passed.
-  - Tests and references build a frozen clock: `IntroClock.frozen(_ sequence:, beats:, at: TimeInterval)`.
+  - Tests and references build a frozen clock: `IntroClock.frozen(month:sequence:beats:elapsed:)`.
 - **`IntroLedger`** (on `PathModel`): `contains(month, sequence)`, `record(month, sequence)`, `reset(month)` (the Lab).
 - **`IntroHaptics`:**
   - `prepare()` starts the engine when a month page gains focus, so the first tick is not late.
@@ -173,7 +175,7 @@ The builders take what the views already show, after the same `lookups` filterin
   - Wraps its content in `TimelineView(.animation(paused: !clock.isPlaying(sequence)))`, so only the playing sequence redraws per frame, and only while it plays.
 - **`.introReveal(_ key:, motion: .rise)`:** the opacity and the offset, from the environment's clock, sequence and timeline date.
 - **`MarkRow`** gains `reveal: MarkRowReveal?`, one key each for the leading mark, the text column and the trailing view, so a person's glyph, name and ring land apart. Nil by default.
-- **Canvas figures**, each with `reveal: IntroReveal = .settled`:
+- **Canvas figures**, each with `reveal: IntroReveal = .settled` (`DaySetMarks` takes `introRow: Int?` instead, its keys being its row's):
   - **`Garland`:** the per-slot pop, the course trimmed to the newest slot, the leaf. Its numerals use `.introReveal(.numeral(d))`.
   - **`DaySetMarks`:** the ring's line trimmed by `.ring(i)`, each dot's pop by `.dot(i, day)`, and the calendar's dots likewise.
   - **`GemStone`:** each facet's fill, interpolated from the page's paper (`Color.pebbles.surface`) to its colour by `.facet(id)`.
@@ -220,7 +222,7 @@ The builders take what the views already show, after the same `lookups` filterin
 - **`IntroHaptics.events`:** beats with ticks become events at the same times; the 25 ms floor drops the later of two close transients.
 - **`IntroPolicy`:** Reduce Motion or VoiceOver turns the intro off.
 - **References:**
-  - *Every existing `Wrap*References` PNG stays byte-identical; none is re-recorded.*
+  - *Every existing `Wrap*References` test passes unchanged; none is re-recorded.*
   - New references with a frozen clock:
     - `intro-garland-half` (Part 1): the cover at 1150 ms.
     - `intro-persons-ring` (Part 2): the persons section with row 0's ring half drawn.
@@ -243,7 +245,9 @@ The builders take what the views already show, after the same `lookups` filterin
 | 3 | **The gem**: `IntroScore.gem`, `GemStone`'s reveal, the labels and the count, `intro-gem-second-family`. | ~200 |
 | 4 | **Tone and hours**: `IntroScore.tone` and `.hours`, `ToneChart`'s mask, `HoursDial`'s reveal, the shared insights head. | ~250 |
 
-Each part builds, lints and passes the iOS tests alone. Every part keeps the existing references byte-identical.
+Each part builds, lints and passes the iOS tests alone. Every part keeps the existing references passing unchanged.
+
+**Hosting.** Each section hosts its own sequence (`.introSequence`) inside its view, so a section that draws nothing plays nothing. Tone and hours are the exception: the shared insights head lives in `MonthPageSections`, so the page hosts them there, head included, and `ToneFigure` and `HoursFigure` keep their shape where the references lay them out.
 
 **Also:**
 - **Arkaik:** one acceptance under the iOS month page view, "the month's intro plays once per launch, ticking each slot", moved to `development` when Part 1 starts.
