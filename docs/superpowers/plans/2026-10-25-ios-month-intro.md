@@ -3443,6 +3443,14 @@ The memory note "iOS device deploy recipe" holds the build, install and launch c
 
   `WrapMonthReferences`, `WrapGemReferences`, `WrapAtomsReferences` and `WrapStripReferences` pass locally and stay strict gates. CI remains the real gate.
 
+- **Part 1 review fixes (2026-10-25, `d0f425b8`…`b053168b`):**
+  - **Stacked days:** a stacked seal keeps its tick only where it clears the 25 ms floor on both sides. Elsewhere the day's slot ticks at its strongest seal, so a slot is never silent. The last day is bounded by the leaf.
+  - **When it plays:** the intro also needs the page visible (`onAppear`/`onDisappear`), so a tab switch or the capture cover stops it. A refused policy drops the clock for the page's lifetime.
+  - **Beats and order:** beats are read when a sequence starts, not on each scroll. A host leaves on disappear, and the page order follows `wrap.sections`.
+  - **Unmeasured hosts:** a host that can't measure its page settles, unrecorded, and logs.
+  - **Haptics:** players are keyed by (month, sequence), and the player starts against the clock's start instant. A failed engine restart is logged.
+  - **The course:** it finishes over the leaf's beat on months shorter than 31 days (`Garland.courseSweep`).
+
 Fill in as the parts land. List each deviation from this plan, and why:
 - the local reference baseline from Task 0
 - tuned constants

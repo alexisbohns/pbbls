@@ -152,9 +152,9 @@ The builders take what the views already show, after the same `lookups` filterin
   - Tests and references build a frozen clock: `IntroClock.frozen(month:sequence:beats:elapsed:)`.
 - **`IntroLedger`** (on `PathModel`): `contains(month, sequence)`, `record(month, sequence)`, `reset(month)` (the Lab).
 - **`IntroHaptics`:**
-  - `prepare()` starts the engine when a month page gains focus, so the first tick is not late.
-  - `play(sequence, beats, at: Date)` compiles the beats and starts the player with the clock's start instant. The clock's start is `now + 50 ms`, and the player starts at `engine.currentTime + 0.05`.
-  - `stop(sequence)` and `stopAll()` stop at `CHHapticTimeImmediate`.
+  - `prepare()` starts the engine when a month page gains focus with something left to play, so the first tick is not late.
+  - `play(sequence, of: month, beats, startingAt: Date)` compiles the beats into one player keyed by (month, sequence). The clock's start is `now + 50 ms`. The player starts at `engine.currentTime + max(0, start − now)`, computed after the engine has started and the player is made, so a cold start can't push the ticks behind the frames.
+  - `stop(sequence, of: month)` stops at `CHHapticTimeImmediate`. A page only ever stops its own sequences, never another page's.
   - The compile step, `IntroHaptics.events(for: [IntroBeat]) -> [(at: TimeInterval, tick: IntroTick)]`, applies the 25 ms floor and is a pure, tested function.
   - The engine's reset and stopped handlers restart it lazily, as `HapticsService` does.
   - There is no hardware, or the engine fails to start: it logs once with `Logger(subsystem: "app.pbbls.ios", category: "intro")` and plays nothing. The visuals still play.
@@ -265,4 +265,4 @@ Each part builds, lints and passes the iOS tests alone. Every part keeps the exi
 - **Per-frame cost.** The garland redraws up to 31 seals per frame for about 2 s, and the gem 28 facets. Measure on the iPhone 15 with Instruments. If frames drop, the settled marks are drawn once into a `drawingGroup()` layer and only the marks in motion redraw.
 - **Haptic density.** The middle of a 31-day garland runs about 25–32 ms apart. The 25 ms floor guards it, but the device pass may raise the garland's duration rather than drop ticks.
 - **Section geometry in a `LazyVStack`.** A section reports its frame only once realised. A section realised already inside the 85 % line enters on its first report, which is the intended behaviour.
-- **Engine start latency.** `prepare()` on focus covers the cover's first tick. The 50 ms lead absorbs the player's start.
+- **Engine start latency.** `prepare()` on focus covers the cover's first tick. The player's start is measured after the engine starts, against the clock's start instant.
