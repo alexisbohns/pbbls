@@ -113,15 +113,24 @@ struct MonthPageSections: View {
             case .gem:
                 EmotionGem(wrap: wrap, lookups: lookups) { onMore(.gem) }
             case .tone, .hours:
-                // One head for both figures, over whichever comes first.
-                if section == wrap.sections.first(where: { $0 == .tone || $0 == .hours }) {
-                    MonthSectionHead(label: WrapCopy.insights(locale: SpineStrings.appLocale),
-                                     hint: WrapCopy.insightsHint(locale: SpineStrings.appLocale))
+                // One head for both figures, over whichever comes first; it plays with that figure (#1241).
+                let leads = section == wrap.sections.first(where: { $0 == .tone || $0 == .hours })
+                VStack(alignment: .leading, spacing: 0) {
+                    if leads {
+                        MonthSectionHead(label: WrapCopy.insights(locale: SpineStrings.appLocale),
+                                         hint: WrapCopy.insightsHint(locale: SpineStrings.appLocale))
+                            .introReveal(.insights)
+                    }
+                    if section == .tone {
+                        ToneFigure(wrap: wrap)
+                    } else {
+                        HoursFigure(wrap: wrap, lookups: lookups)
+                    }
                 }
-                if section == .tone {
-                    ToneFigure(wrap: wrap)
-                } else {
-                    HoursFigure(wrap: wrap, lookups: lookups)
+                .introSequence(.section(section)) {
+                    section == .tone
+                        ? ToneFigure.introBeats(wrap, insights: leads)
+                        : HoursFigure.introBeats(wrap: wrap, lookups: lookups, insights: leads)
                 }
             }
         }
