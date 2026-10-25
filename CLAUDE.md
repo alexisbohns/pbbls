@@ -16,7 +16,7 @@
 | `packages/shared` | Stub — no code yet | `packages/shared/CLAUDE.md` |
 | `packages/rive` | `.riv` animation assets, copied per surface (not an npm workspace) | — |
 
-Turborepo + npm workspaces at the root. Web and admin deploy to Vercel (root directory set per app); Android ships to Play internal testing from CI (`docs/android-play-deploy.md`).
+Turborepo + npm workspaces at the root. Web and admin deploy to Vercel (root directory set per app); Android ships to Play internal testing from CI (`docs/android-play-deploy.md`); iOS ships to TestFlight internal testing from Xcode Cloud (`docs/ios-testflight-deploy.md`).
 
 ## Commands
 

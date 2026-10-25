@@ -79,3 +79,7 @@ Full production app: auth (email, Apple, Google), Path timeline with pebble crea
 - **macOS** — `swiftlint` and the full Swift Testing suite on a simulator resolved at run time.
 
 Xcode Cloud is the *build*; it runs no tests and has no SwiftLint. The Secrets.xcconfig CI writes holds placeholders, not repo secrets — the suite is offline, and `AppEnvironment` only insists the values are non-empty.
+
+## Release
+
+Every merge to `main` touching `apps/ios/` is archived by Xcode Cloud and lands in TestFlight internal testing, so the phone auto-updates; **Start Build** on a branch ships that branch. The workflow lives in App Store Connect, not here — `docs/ios-testflight-deploy.md` is its runbook. `ci_scripts/` holds the two hooks: `ci_post_clone.sh` (XcodeGen, Secrets.xcconfig, packages) and `ci_post_xcodebuild.sh` (TestFlight's *What to Test*).
