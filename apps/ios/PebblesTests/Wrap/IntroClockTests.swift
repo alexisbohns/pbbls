@@ -39,7 +39,7 @@ struct IntroClockTests {
         let ledger = IntroLedger()
         let spy = HapticsSpy()
         let clock = clock(ledger, haptics: spy)
-        clock.enter(.cover, beats: beats)
+        clock.enter(.cover, beats: { beats })
         #expect(clock.phase(.cover) == .waiting)
         #expect(clock.reveal(.cover, at: base)(.header) == 0)
         clock.isActive = true
@@ -63,8 +63,8 @@ struct IntroClockTests {
     @Test("one voice at a time, in page order, whatever order they enter in")
     func queue() {
         let clock = clock()
-        clock.enter(weeks, beats: beats)
-        clock.enter(.cover, beats: beats)
+        clock.enter(weeks, beats: { beats })
+        clock.enter(.cover, beats: { beats })
         clock.isActive = true
         #expect(clock.isPlaying(.cover))
         #expect(clock.phase(weeks) == .waiting)
@@ -77,14 +77,14 @@ struct IntroClockTests {
     func leaving() {
         let spy = HapticsSpy()
         let clock = clock(haptics: spy)
-        clock.enter(.cover, beats: beats)
-        clock.enter(weeks, beats: beats)
+        clock.enter(.cover, beats: { beats })
+        clock.enter(weeks, beats: { beats })
         clock.isActive = true
         clock.leave(weeks)
         clock.advance(to: base.addingTimeInterval(1))
         #expect(clock.phase(weeks) == .waiting)
         #expect(spy.played == [.cover])
-        clock.enter(weeks, beats: beats)
+        clock.enter(weeks, beats: { beats })
         #expect(clock.isPlaying(weeks))
         clock.leave(weeks)
         #expect(clock.phase(weeks) == .settled)
@@ -96,8 +96,8 @@ struct IntroClockTests {
         let ledger = IntroLedger()
         let spy = HapticsSpy()
         let clock = clock(ledger, haptics: spy)
-        clock.enter(.cover, beats: beats)
-        clock.enter(weeks, beats: beats)
+        clock.enter(.cover, beats: { beats })
+        clock.enter(weeks, beats: { beats })
         clock.isActive = true
         clock.skip()
         #expect(clock.phase(.cover) == .settled)
@@ -111,8 +111,8 @@ struct IntroClockTests {
     func focusLoss() {
         let ledger = IntroLedger()
         let clock = clock(ledger)
-        clock.enter(.cover, beats: beats)
-        clock.enter(weeks, beats: beats)
+        clock.enter(.cover, beats: { beats })
+        clock.enter(weeks, beats: { beats })
         clock.isActive = true
         clock.isActive = false
         #expect(clock.phase(.cover) == .settled)
@@ -128,10 +128,33 @@ struct IntroClockTests {
         ledger.record(october, .cover)
         let spy = HapticsSpy()
         let clock = clock(ledger, haptics: spy)
-        clock.enter(.cover, beats: beats)
+        clock.enter(.cover, beats: { beats })
         clock.isActive = true
         #expect(spy.played.isEmpty)
         #expect(clock.reveal(.cover, at: base)(.header) == 1)
+    }
+
+    @Test("a sequence plays the beats its closure gives as it starts, not those it had as it entered")
+    func freshBeats() {
+        var current = beats
+        let clock = clock()
+        clock.enter(.cover, beats: { current })
+        current = [IntroBeat(key: .header, at: 0, duration: 2, tick: .light)]
+        clock.isActive = true
+        clock.advance(to: base.addingTimeInterval(1))
+        #expect(clock.isPlaying(.cover))
+        #expect(abs(clock.reveal(.cover, at: base.addingTimeInterval(1.05))(.header) - 0.5) < 1e-9)
+    }
+
+    @Test("a new order plays the sections in it")
+    func reorder() {
+        let clock = clock()
+        clock.order = [weeks, .cover]
+        clock.enter(.cover, beats: { beats })
+        clock.enter(weeks, beats: { beats })
+        clock.isActive = true
+        #expect(clock.isPlaying(weeks))
+        #expect(clock.phase(.cover) == .waiting)
     }
 
     @Test("a frozen clock draws its sequence at its instant and ignores reports")
@@ -139,7 +162,7 @@ struct IntroClockTests {
         let clock = IntroClock.frozen(month: october, sequence: .cover, beats: beats, elapsed: 0.46)
         let reveal = clock.reveal(.cover, at: clock.frozenAt ?? .distantPast)
         #expect(abs(reveal(.row(0)) - 0.5) < 1e-9)
-        clock.report(.cover, beats: [], frame: CGRect(x: 0, y: -500, width: 10, height: 10), viewport: 800)
+        clock.report(.cover, beats: { [] }, frame: CGRect(x: 0, y: -500, width: 10, height: 10), viewport: 800)
         #expect(clock.isPlaying(.cover))
     }
 }

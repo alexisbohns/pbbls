@@ -82,8 +82,8 @@ extension View {
     }
 
     /// Makes this view a sequence of the intro: it reports its place in the
-    /// page, and redraws on each frame while it plays. `beats` is asked for only
-    /// when a clock listens.
+    /// page, leaves as it disappears, and redraws on each frame while it plays.
+    /// `beats` is asked for only as the sequence starts.
     func introSequence(_ sequence: IntroSequence, beats: @escaping () -> [IntroBeat]) -> some View {
         modifier(IntroSequenceHost(sequence: sequence, beats: beats))
     }
@@ -156,8 +156,10 @@ private struct IntroSequenceHost: ViewModifier {
                 IntroPlacement(frame: proxy.frame(in: .named(IntroSpace.name)),
                                viewport: proxy.bounds(of: .named(IntroSpace.name))?.height ?? 0)
             } action: { placement in
-                clock.report(sequence, beats: beats(), frame: placement.frame, viewport: placement.viewport)
+                clock.report(sequence, beats: beats, frame: placement.frame, viewport: placement.viewport)
             }
+            // Unloaded by the lazy stack, or gone with its page, it may never report `.out`.
+            .onDisappear { clock.leave(sequence) }
         } else {
             content
         }

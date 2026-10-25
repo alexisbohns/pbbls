@@ -59,6 +59,7 @@ struct MonthPage: View {
         // A tap anywhere skips the intro, and still does its job.
         .simultaneousGesture(TapGesture().onEnded { intro?.skip() })
         .onChange(of: playsIntro, initial: true) { _, plays in intro?.isActive = plays }
+        .onChange(of: wrap.sections) { intro?.order = IntroClock.order(wrap) }
         // Refused, the intro is gone for the page's life: turning the setting off again never blanks and replays it.
         .onChange(of: allowsIntro, initial: true) { _, allowed in
             guard !allowed else { return }

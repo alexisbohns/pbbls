@@ -36,8 +36,9 @@ enum IntroPolicy {
 /// which has landed. One voice at a time: a sequence in view and still waiting
 /// plays when nothing else does, in page order, and only while the page is
 /// active. A sequence plays once per launch (the ledger records it as it
-/// starts). Views read `reveal(_:at:)`; the page drives `isActive` and taps
-/// `skip()`; each sequence reports where it is.
+/// starts). Views read `reveal(_:at:)`; the page drives `isActive`, taps
+/// `skip()` and keeps `order` to its sections; each sequence reports where it
+/// is, with a closure for its beats, asked for only as it starts.
 @Observable @MainActor
 final class IntroClock {
     enum Phase: Equatable {
@@ -55,10 +56,12 @@ final class IntroClock {
 
     private var phases: [IntroSequence: Phase] = [:]
     @ObservationIgnored private var keyed: [IntroSequence: [IntroKey: IntroBeat]] = [:]
-    @ObservationIgnored private var latest: [IntroSequence: [IntroBeat]] = [:]
+    /// Each sequence's beats, from the latest wrap its host drew.
+    @ObservationIgnored private var latest: [IntroSequence: () -> [IntroBeat]] = [:]
     @ObservationIgnored private var ends: [IntroSequence: Date] = [:]
     @ObservationIgnored private var inView: Set<IntroSequence> = []
-    @ObservationIgnored private let order: [IntroSequence]
+    /// The page's sequences in order (`order(_:)`): the page sets it again when its sections change.
+    @ObservationIgnored var order: [IntroSequence]
     @ObservationIgnored private let ledger: IntroLedger
     @ObservationIgnored private let haptics: IntroHapticPlaying?
     @ObservationIgnored private let now: () -> Date
@@ -142,7 +145,7 @@ final class IntroClock {
     }
 
     /// A sequence's frame in its page: in view, it waits its turn; wholly out, it leaves.
-    func report(_ sequence: IntroSequence, beats: [IntroBeat], frame: CGRect, viewport: CGFloat) {
+    func report(_ sequence: IntroSequence, beats: @escaping () -> [IntroBeat], frame: CGRect, viewport: CGFloat) {
         guard frozenAt == nil, viewport > 0 else { return }
         switch IntroViewport.place(frame, viewport: viewport) {
         case .entered: enter(sequence, beats: beats)
@@ -151,7 +154,7 @@ final class IntroClock {
         }
     }
 
-    func enter(_ sequence: IntroSequence, beats: [IntroBeat]) {
+    func enter(_ sequence: IntroSequence, beats: @escaping () -> [IntroBeat]) {
         latest[sequence] = beats
         guard inView.insert(sequence).inserted else { return }
         startNext()
@@ -204,7 +207,7 @@ final class IntroClock {
         guard isActive, ends.isEmpty else { return }
         let rank = { (sequence: IntroSequence) in self.order.firstIndex(of: sequence) ?? self.order.count }
         guard let next = inView.filter({ phase($0) == .waiting }).min(by: { rank($0) < rank($1) }) else { return }
-        start(next, beats: latest[next] ?? [])
+        start(next, beats: latest[next]?() ?? [])
     }
 
     private func start(_ sequence: IntroSequence, beats: [IntroBeat]) {
