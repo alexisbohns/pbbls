@@ -100,12 +100,13 @@ build of a train goes through Beta App Review before external groups can have
 it.
 
 **The build number** (`CFBundleVersion`) belongs to Xcode Cloud, which stamps
-its own counter on every archive. The number only has to be unique within its
-version. The counter starts at 1, so a version that already holds hand-uploaded
-builds collides with it. Either start a new version, or set **Xcode Cloud →
-Settings → Build Number → Next build number** above the highest build in that
-version. 0.2.0 holds hand uploads 1–5 from Xcode, which is why Xcode Cloud's
-first train is 0.3.0.
+its own build number on every archive. That counter covers the whole product
+and never resets: this pipeline's first build was 29. A number only has to be
+unique within its version, so the only way to collide is to upload builds by
+hand into a version Xcode Cloud feeds. Don't. If it happens anyway, set
+**Xcode Cloud → Settings → Build Number → Next build number** above the
+highest one. 0.3.0 is the first version Xcode Cloud feeds; 0.2.0 holds the
+hand uploads 1–5.
 
 ## Step 5 — The phone
 
