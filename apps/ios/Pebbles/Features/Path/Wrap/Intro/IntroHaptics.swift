@@ -47,7 +47,14 @@ final class IntroHaptics: IntroHapticPlaying {
             let engine = try CHHapticEngine()
             engine.isAutoShutdownEnabled = true
             // The engine stops on backgrounding and route changes; restart it lazily, as `HapticsService` does.
-            engine.resetHandler = { [weak engine] in try? engine?.start() }
+            let logger = logger
+            engine.resetHandler = { @Sendable [weak engine] in
+                do {
+                    try engine?.start()
+                } catch {
+                    logger.error("intro haptic engine restart failed: \(error.localizedDescription, privacy: .public)")
+                }
+            }
             self.engine = engine
         } catch {
             logger.error("intro haptic engine init failed: \(error.localizedDescription, privacy: .public)")
