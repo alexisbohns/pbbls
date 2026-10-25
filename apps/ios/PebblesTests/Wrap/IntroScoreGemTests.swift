@@ -19,7 +19,8 @@ struct IntroScoreGemTests {
         let runs = IntroScore.gemRuns(order: ["calm", "anger", "joy"], facets: facets)
         #expect(runs.map(\.slug) == ["calm", "joy"])
         #expect(runs[0].facets == ["kite_3"])
-        #expect(Set(runs[1].facets) == ["kite_0", "star_0"])
+        // Swept clockwise: kite_0 sits at theta 0, star_0 at 0.5.
+        #expect(runs[1].facets == ["kite_0", "star_0"])
     }
 
     @Test("facets 45 ms apart, a pause between families, each name with its first facet, the count last")

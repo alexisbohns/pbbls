@@ -296,8 +296,8 @@ struct GemStone: View {
             for facet in GemGeometry.facets where facet.kind != .table {
                 let shape = path(facet.points)
                 let fill = colors.fills[facet.id] ?? colors.seam
-                // A facet no family owns lands with the stone.
-                let lit = colors.fills[facet.id] == nil ? 1 : reveal(.facet(facet.id))
+                // A facet no family owns has no beat, so it reads 1 (D2) and lands with the stone.
+                let lit = reveal(.facet(facet.id))
                 if lit < 1 {
                     stone.fill(shape, with: .color(colors.table))
                     stone.stroke(shape, with: .color(colors.table),
