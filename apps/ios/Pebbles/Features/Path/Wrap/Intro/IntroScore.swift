@@ -35,20 +35,23 @@ enum IntroScore {
         ]
         let seals = Dictionary(days.map { ($0.day, $0.pebbles) }, uniquingKeysWith: { first, _ in first })
         let numerals = Set(numbered)
-        for (day, time) in IntroCurve.times(count: daysInMonth, duration: garlandSpan).enumerated() {
-            let at = garlandAt + time
+        let slots = IntroCurve.times(count: daysInMonth, duration: garlandSpan).map { garlandAt + $0 }
+        let leafAt = garlandAt + garlandSpan + leafAfter
+        for (day, at) in slots.enumerated() {
             let pebbles = seals[day] ?? []
+            let next = day + 1 < slots.count ? slots[day + 1] : leafAt
+            let stacked = stackedSeals(pebbles, day: day, at: at, before: next)
+            // A day whose stacked seals can't all tick taps once, at its strongest seal.
+            let silenced = stacked.contains { $0.tick == nil }
+            let firmness = silenced ? pebbles.map(\.intensity).max() : pebbles.first?.intensity
             beats.append(IntroBeat(key: .slot(day), at: at, duration: IntroMotion.pop,
-                                   tick: pebbles.first.map { .seal($0.intensity) } ?? .faint))
-            for (index, pebble) in pebbles.enumerated().dropFirst() {
-                beats.append(IntroBeat(key: .seal(day, index), at: at + stackGap * Double(index),
-                                       duration: IntroMotion.pop, tick: .seal(pebble.intensity)))
-            }
+                                   tick: firmness.map { .seal($0) } ?? .faint))
+            beats += stacked
             if numerals.contains(day) {
                 beats.append(IntroBeat(key: .numeral(day), at: at, duration: IntroMotion.rise))
             }
         }
-        var at = garlandAt + garlandSpan + leafAfter
+        var at = leafAt
         beats.append(IntroBeat(key: .leaf, at: at, duration: IntroMotion.pop, tick: .knot))
         at += soulsAfter
         for soul in 0..<souls {
@@ -60,5 +63,21 @@ enum IntroScore {
             at += lineGap
         }
         return beats
+    }
+
+    /// A day's stacked seals, a step apart after its slot (#1241 I1). Each
+    /// ticks only clear of the tick before it and of the next tick in the
+    /// score (the next day's slot, or the leaf after the last day), by
+    /// `IntroHaptics.floor`: otherwise the floor would drop it or that slot.
+    private static func stackedSeals(_ pebbles: [CoverPebble], day: Int, at slot: TimeInterval,
+                                     before next: TimeInterval) -> [IntroBeat] {
+        var lastTick = slot
+        return pebbles.enumerated().dropFirst().map { index, pebble in
+            let at = slot + stackGap * Double(index)
+            let fits = at - lastTick >= IntroHaptics.floor && next - at >= IntroHaptics.floor
+            if fits { lastTick = at }
+            return IntroBeat(key: .seal(day, index), at: at, duration: IntroMotion.pop,
+                             tick: fits ? .seal(pebble.intensity) : nil)
+        }
     }
 }

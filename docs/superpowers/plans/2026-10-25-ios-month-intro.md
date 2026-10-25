@@ -3416,7 +3416,7 @@ The memory note "iOS device deploy recipe" holds the build, install and launch c
 - [ ] **Feel:** open October in the Lab, then a real month on the Path. Tune the constants in `IntroScore`, `IntroMotion` and `IntroTick` until the feel is right. Use *Replay intro* in the Lab for each try. Commit the tuned values on the part that owns them, with the `gh-stack` skill's flow for amending a lower part, and record the final values below.
 - [ ] **Haptics:**
   - Count the garland's ticks on a 31-day month. None should be lost in the fast middle.
-  - The stacked days tap twice.
+  - The stacked days near the ends tap twice; elsewhere the day taps once, at its strongest seal.
   - The gem goes ta-ta-ta-ta-ta · ta-ta-ta-ta · ta-ta-ta.
 - [ ] **System Haptics:** turn off Settings → Sounds & Haptics → System Haptics and replay.
   - If the intro still buzzes, Core Haptics ignores the switch. Switch `IntroHaptics.play` to UIKit generators fired from the clock (D1's hybrid), in a follow-up commit on Part 1, and log it as a new decision-log entry that supersedes the System Haptics consequence.

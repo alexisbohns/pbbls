@@ -22,4 +22,18 @@ struct IntroHapticsTests {
         let beats = IntroScore.cover(days: [], daysInMonth: 31, numbered: [], souls: 0, lines: [])
         #expect(IntroHaptics.events(for: beats).count == 33)
     }
+
+    @Test("a 31-day garland with two pebbles on every day still ticks every day, its name and its leaf")
+    func stackedGarland() throws {
+        let pebble = { (intensity: Int) in
+            CoverPebble(momentId: "m", emotionId: nil, intensity: intensity, polarity: .highlight)
+        }
+        let days = (0..<31).map { CoverDay(day: $0, pebbles: [pebble(1), pebble(3)]) }
+        let beats = IntroScore.cover(days: days, daysInMonth: 31, numbered: [], souls: 0, lines: [])
+        let ticked = Set(IntroHaptics.events(for: beats).map(\.at))
+        for key in (0..<31).map(IntroKey.slot) + [.monthName, .leaf] {
+            let beat = try #require(beats.first { $0.key == key })
+            #expect(ticked.contains(beat.at), "\(key) lost its tick")
+        }
+    }
 }

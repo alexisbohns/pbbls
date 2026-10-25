@@ -81,7 +81,7 @@ Within one voice, a transient closer than **25 ms** to the previous one is dropp
 | 120 ms | `.monthName` | rise | `light` |
 | 240 ms | `.year` | rise | none |
 | 400 ms + `IntroCurve.times(count: daysInMonth, duration: 1500 ms)`[d] | `.slot(d)`: the socket of an empty day, or the first seal of a day with pebbles | pop | `faint` (socket) or `seal(intensity)` |
-| slot time + 35 ms × k | `.seal(d, k)` for k ≥ 1 (a stacked day) | pop | `seal(intensity)` |
+| slot time + 35 ms × k | `.seal(d, k)` for k ≥ 1 (a stacked day) | pop | `seal(intensity)`, only if it lands at least 25 ms after the previous tick (its slot, or the previous stacked seal) and at least 25 ms before the next day's slot (the leaf, after the last day); otherwise none, and the day's `.slot(d)` ticks `seal(strongest)`, the strongest intensity among its seals. The 25 ms floor would otherwise drop the stacked tick or the next day's slot. |
 | with `.slot(d)` | `.numeral(d)` (the 1st, Mondays, the last) | rise without the offset | none |
 | span over the slots | the dotted course | trimmed to the newest slot | none |
 | last slot + 120 ms | `.leaf` | pop | `knot` |

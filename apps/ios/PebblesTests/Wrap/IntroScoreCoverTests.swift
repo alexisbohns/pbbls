@@ -20,16 +20,35 @@ struct IntroScoreCoverTests {
         #expect(times.first == IntroScore.garlandAt)
         #expect(slots[0].tick == .seal(3))
         #expect(slots[1].tick == .faint)
-        #expect(slots[4].tick == .seal(1))
         let stacked = try #require(beats.first { $0.key == .seal(4, 1) })
         #expect(abs(stacked.at - slots[4].at - IntroScore.stackGap) < 1e-12)
-        #expect(stacked.tick == .seal(2))
         let numerals = beats.compactMap { beat -> Int? in
             if case let .numeral(day) = beat.key { return day }
             return nil
         }
         #expect(numerals == [0, 4, 30])
         #expect(beats.first { $0.key == .numeral(4) }?.at == slots[4].at)
+    }
+
+    @Test("a stacked seal on the 1st, where the days are far apart, ticks on its own; the slot keeps its first seal's")
+    func stackedAtTheEnds() throws {
+        let days = [CoverDay(day: 0, pebbles: [pebble(1), pebble(3)])]
+        let beats = IntroScore.cover(days: days, daysInMonth: 31, numbered: [], souls: 0, lines: [])
+        let slot = try #require(beats.first { $0.key == .slot(0) })
+        let stacked = try #require(beats.first { $0.key == .seal(0, 1) })
+        #expect(slot.tick == .seal(1))
+        #expect(stacked.tick == .seal(3))
+    }
+
+    @Test("a stacked seal mid-garland, too close to the next day, is silent; its day ticks its strongest seal")
+    func stackedInTheMiddle() throws {
+        let days = [CoverDay(day: 15, pebbles: [pebble(1), pebble(3)])]
+        let beats = IntroScore.cover(days: days, daysInMonth: 31, numbered: [], souls: 0, lines: [])
+        let slot = try #require(beats.first { $0.key == .slot(15) })
+        let stacked = try #require(beats.first { $0.key == .seal(15, 1) })
+        #expect(stacked.tick == nil)
+        #expect(abs(stacked.at - slot.at - IntroScore.stackGap) < 1e-12)
+        #expect(slot.tick == .seal(3))
     }
 
     @Test("the name before the garland; the leaf ties it; then the souls and the lines, in order")
