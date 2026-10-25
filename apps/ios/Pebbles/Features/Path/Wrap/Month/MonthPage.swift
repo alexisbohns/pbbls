@@ -129,7 +129,7 @@ struct MonthPageSections: View {
                 }
                 .introSequence(.section(section)) {
                     section == .tone
-                        ? ToneFigure.introBeats(wrap, insights: leads)
+                        ? ToneFigure.introBeats(wrap: wrap, insights: leads)
                         : HoursFigure.introBeats(wrap: wrap, lookups: lookups, insights: leads)
                 }
             }

@@ -44,4 +44,11 @@ struct IntroScoreInsightsTests {
     func ranks() {
         #expect(IntroScore.ranks([23.5, 0.25, 12, 0.25]) == [3, 0, 2, 1])
     }
+
+    @Test("the tone's middle keeps every day's tick: 31 days and the head make 32 haptic events")
+    func toneHapticMargin() {
+        let days = Array(repeating: ToneDay(up: 1, even: 0, down: 0), count: 31)
+        let beats = IntroScore.tone(days: days, insights: false)
+        #expect(IntroHaptics.events(for: beats).count == 32)
+    }
 }

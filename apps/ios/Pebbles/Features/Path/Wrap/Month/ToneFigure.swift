@@ -39,9 +39,9 @@ struct ToneFigure: View {
 
 extension ToneFigure {
     /// The tone's intro (#1241), with the insights head's when it leads them; none when nothing shows.
-    static func introBeats(_ wrap: MonthWrap, insights: Bool) -> [IntroBeat] {
+    static func introBeats(wrap: MonthWrap, insights: Bool) -> [IntroBeat] {
         let days = wrap.tone?.days ?? []
-        guard insights || !days.isEmpty else { return [] }
+        guard !days.isEmpty else { return insights ? IntroScore.insightsHead() : [] }
         return IntroScore.tone(days: days, insights: insights)
     }
 }
@@ -73,6 +73,8 @@ private struct IntroSweep<Content: View>: View {
                 }
             }
         }
+        // The chart's days run left to right whatever the language; the mask follows them.
+        .environment(\.layoutDirection, .leftToRight)
     }
 }
 

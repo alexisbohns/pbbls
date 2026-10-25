@@ -52,7 +52,7 @@ extension HoursFigure {
     /// The hours' intro (#1241), with the insights head's when it leads them; none when nothing shows.
     static func introBeats(wrap: MonthWrap, lookups: WrapLookups, insights: Bool) -> [IntroBeat] {
         let stones = wrap.hours?.items.filter { lookups.moment($0.momentId) != nil }.count ?? 0
-        guard insights || stones > 0 else { return [] }
+        guard stones > 0 else { return insights ? IntroScore.insightsHead() : [] }
         return IntroScore.hours(stones: stones, insights: insights)
     }
 }

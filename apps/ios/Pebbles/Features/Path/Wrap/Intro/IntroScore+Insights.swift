@@ -8,6 +8,11 @@ extension IntroScore {
     static let stonesAt: TimeInterval = 0.52
     static let stonesSpan: TimeInterval = 1.2
 
+    /// The insights head alone, over a figure that draws nothing.
+    static func insightsHead() -> [IntroBeat] {
+        [IntroBeat(key: .insights, at: 0, duration: IntroMotion.rise, tick: .light)]
+    }
+
     /// The tone: its head (after the insights head when it leads them) and its
     /// sentence, then the sweep left to right, a beat on each day with pebbles
     /// as the sweep reaches it.
