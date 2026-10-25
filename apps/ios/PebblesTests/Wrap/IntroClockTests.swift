@@ -58,6 +58,8 @@ struct IntroClockTests {
         // The haptics start with the frames.
         #expect(spy.starts == [start])
         #expect(ledger.contains(october, .cover))
+        // A key reads 0 until its beat, while its sequence plays.
+        #expect(clock.reveal(.cover, at: start.addingTimeInterval(0.1))(.row(0)) == 0)
         let reveal = clock.reveal(.cover, at: start.addingTimeInterval(0.46))
         #expect(reveal(.header) == 1)
         #expect(abs(reveal(.row(0)) - 0.5) < 1e-9)
@@ -68,6 +70,36 @@ struct IntroClockTests {
         clock.advance(to: start.addingTimeInterval(0.7))
         #expect(clock.phase(.cover) == .settled)
         #expect(spy.stopped == [.cover])
+    }
+
+    @Test("a report under the entry line doesn't enter; one wholly out leaves")
+    func reports() {
+        let clock = clock()
+        clock.isActive = true
+        let report = { (sequence: IntroSequence, y: CGFloat) in
+            clock.report(sequence, beats: { beats }, frame: CGRect(x: 0, y: y, width: 10, height: 100), viewport: 800)
+        }
+        report(.cover, 600)
+        #expect(clock.isPlaying(.cover))
+        report(weeks, 700)
+        clock.advance(to: base.addingTimeInterval(1))
+        #expect(clock.phase(.cover) == .settled)
+        #expect(clock.phase(weeks) == .waiting)
+        report(weeks, 600)
+        #expect(clock.isPlaying(weeks))
+        report(weeks, 800)
+        #expect(clock.phase(weeks) == .settled)
+    }
+
+    @Test("left to its own schedule, a sequence lands at its end")
+    @MainActor
+    func scheduledEnd() async throws {
+        let clock = IntroClock(month: october, order: [.cover], ledger: IntroLedger(), haptics: nil)
+        clock.enter(.cover, beats: { [IntroBeat(key: .header, at: 0, duration: 0.05)] })
+        clock.isActive = true
+        #expect(clock.isPlaying(.cover))
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(clock.phase(.cover) == .settled)
     }
 
     @Test("one voice at a time, in page order, whatever order they enter in")
