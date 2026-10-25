@@ -3414,7 +3414,9 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 The memory note "iOS device deploy recipe" holds the build, install and launch commands and the device ids. The maintainer's phone holds their real account. The intro is read-only, so no write happens, but ask before installing.
 
 - [ ] **Feel:** open October in the Lab, then a real month on the Path. Tune the constants in `IntroScore`, `IntroMotion` and `IntroTick` until the feel is right. Use *Replay intro* in the Lab for each try. Commit the tuned values on the part that owns them, with the `gh-stack` skill's flow for amending a lower part, and record the final values below.
+  - The top domain's bar may snap 2 pt as it finishes growing; the 1st's tone pulse may clip at the sweep's edge — fix only if noticed.
 - [ ] **Haptics:**
+  - A daily soul's ring buzzes at the floor; a busy month's hours thin out — judge both.
   - Count the garland's ticks on a 31-day month. None should be lost in the fast middle.
   - The stacked days near the ends tap twice; elsewhere the day taps once, at its strongest seal.
   - The gem goes ta-ta-ta-ta-ta · ta-ta-ta-ta · ta-ta-ta.
@@ -3450,6 +3452,11 @@ The memory note "iOS device deploy recipe" holds the build, install and launch c
   - **Unmeasured hosts:** a host that can't measure its page settles, unrecorded, and logs.
   - **Haptics:** players are keyed by (month, sequence), and the player starts against the clock's start instant. A failed engine restart is logged.
   - **The course:** it finishes over the leaf's beat on months shorter than 31 days (`Garland.courseSweep`).
+
+- **Parts 2-4 review fixes (2026-10-26):**
+  - **Part 2:** `DaySetMarks` installs the `IntroReader` only with an `introRow`, so the week sheet, month sheet and Spine draw as before. The persons beats are pinned (part gap, next row, single dot, beat count, five at most). `MarkRowReveal`'s comment no longer claims the domain's bar.
+  - **Part 3:** `GemStone` reads `reveal(.facet(id))` for every facet (an unowned one has no beat and reads 1); the joy run's sweep order is pinned.
+  - **Part 4:** an empty tone or hours figure under the insights head plays only `.insights` (`IntroScore.insightsHead()`); `ToneFigure.introBeats(wrap:insights:)` matches its siblings; the tone's mask runs left to right in RTL; the 31-day tone keeps 32 haptic events.
 
 Fill in as the parts land. List each deviation from this plan, and why:
 - the local reference baseline from Task 0
