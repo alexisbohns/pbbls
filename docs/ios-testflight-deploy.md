@@ -21,7 +21,8 @@ What the repo contributes (`apps/ios/ci_scripts/`):
   from the workflow's environment variables. It **fails the build** when one is
   missing, rather than shipping a build that crashes at launch. It also escapes
   `//` in the URL, which xcconfig would otherwise read as a comment. Then it
-  generates the project and resolves the Swift packages.
+  generates the project and resolves the Swift packages, lifting Xcode Cloud's
+  resolution lock for that one step (see the script for why).
 - **`ci_post_xcodebuild.sh`** writes TestFlight's *What to Test* from the commit
   being built. `main` is squash-merged, so that text is the PR title, plus the
   branch and short SHA.
@@ -131,6 +132,7 @@ should read the last commit's title.
 |---|---|
 | Post-clone fails: "PBBLS_SUPABASE_URL and PBBLS_SUPABASE_ANON_KEY must both be set" | A variable is missing from the workflow's Environment, or was added to another workflow (step 1). |
 | Compile errors about `glassEffect` or iOS 26 symbols | The workflow's Xcode is older than 26 (step 1). |
+| Post-clone exits 74: "a resolved file is required when automatic dependency resolution is disabled" | Xcode Cloud's resolution lock bit the post-clone resolve itself. The script lifts the two `com.apple.dt.Xcode` defaults around that resolve and prints what it found first, so read that line in the post-clone log. If they were not the lock, commit a `Package.resolved` and copy it into the generated project instead. |
 | "Unable to resolve package dependencies" | The packages are pinned with `exactVersion` in `project.yml`, and post-clone resolves them. Read the post-clone log: a network blip retries cleanly, but a version that no longer exists means a `project.yml` pin moved. |
 | Upload rejected: the build number has already been used | Step 4. |
 | The build is in TestFlight but stuck in *Missing Compliance* | `ITSAppUsesNonExemptEncryption` is missing from `Info.plist` in that commit. Answer by hand once: *None of the algorithms mentioned above*. |

@@ -38,7 +38,18 @@ xcodegen generate
 # Resolve Swift Package dependencies so Xcode Cloud's build step finds Package.resolved.
 # Xcode Cloud disables automatic SPM resolution during the build phase and requires
 # Package.resolved to exist at <project>/project.xcworkspace/xcshareddata/swiftpm/.
+#
+# That lock is two Xcode defaults, and they bind this xcodebuild too: with them
+# on, the resolve meant to write the file refuses to run without it (exit 74,
+# "a resolved file is required"), and the generated project is git-ignored, so
+# a clean clone never has one. Lift them for this one resolve, then put them
+# back so the archive builds from exactly the versions written here.
+defaults read com.apple.dt.Xcode 2>/dev/null | grep -i package || true
+defaults delete com.apple.dt.Xcode IDEPackageOnlyUseVersionsFromResolvedFile 2>/dev/null || true
+defaults delete com.apple.dt.Xcode IDEDisableAutomaticPackageResolution 2>/dev/null || true
 xcodebuild -resolvePackageDependencies \
   -project Pebbles.xcodeproj \
   -scheme Pebbles \
   -clonedSourcePackagesDirPath SourcePackages
+defaults write com.apple.dt.Xcode IDEPackageOnlyUseVersionsFromResolvedFile -bool YES
+defaults write com.apple.dt.Xcode IDEDisableAutomaticPackageResolution -bool YES
