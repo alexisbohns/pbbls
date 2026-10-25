@@ -101,19 +101,34 @@ struct Garland<Inner: View>: View {
     }
 
     /// The dotted course, stopping short of the tie on each side; in the intro,
-    /// only as far as half a slot past the newest day.
+    /// only as far as `courseSweep` reaches.
     private func drawCourse(in context: GraphicsContext, center: CGPoint) {
         let drawn = reveal(.course)
         guard drawn > 0 else { return }
-        let ring = Self.ring
-        let inset = 0.55
-        let start = ring.degrees(inset)
-        let full = ring.degrees(32 - inset) - start
-        let newest = 1.5 + IntroMotion.easeInOut(drawn) * Double(max(wrap.daysInMonth - 1, 0))
-        let reach = drawn >= 1 ? full : min(full, ring.degrees(newest) - start)
+        let start = Self.ring.degrees(Self.courseInset)
+        let reach = Self.courseSweep(course: drawn, leaf: reveal(.leaf), daysInMonth: wrap.daysInMonth)
         var course = Path()
         course.addRelativeArc(center: center, radius: Self.radius, startAngle: .degrees(start), delta: .degrees(reach))
         context.stroke(course, with: .color(Color.pebbles.rule), style: StrokeStyle(lineWidth: 1, dash: [2, 3]))
+    }
+
+    /// How far the course stops short of the tie, in slots.
+    private static var courseInset: Double { 0.55 }
+
+    /// The course's sweep from its start, in degrees (#1241): while the days
+    /// land, half a slot past the newest; once they have, on to its end as the
+    /// leaf ties the ring (a month under 31 days leaves that much to draw).
+    /// Settled, exactly the whole course.
+    static func courseSweep(course drawn: Double, leaf tied: Double, daysInMonth: Int) -> Double {
+        let ring = Self.ring
+        let start = ring.degrees(courseInset)
+        let full = ring.degrees(32 - courseInset) - start
+        let span = Double(max(daysInMonth - 1, 0))
+        let newest = { (drawn: Double) in min(full, ring.degrees(1.5 + IntroMotion.easeInOut(drawn) * span) - start) }
+        if drawn < 1 { return newest(drawn) }
+        if tied >= 1 { return full }
+        let last = newest(1)
+        return last + (full - last) * IntroMotion.easeOut(tied)
     }
 
     /// The tie: a leaf at the foot, where the course parts.

@@ -1,8 +1,9 @@
 import Foundation
+import SwiftUI
 import Testing
 @testable import Pebbles
 
-/// #1241 §Choreography: the eases, the pop and the garland's spacing.
+/// #1241 §Choreography: the eases, the pop, the garland's spacing and its course.
 @Suite("Intro motion")
 struct IntroMotionTests {
     @Test("the eases run from 0 to 1, and the inverse undoes the in-out")
@@ -44,5 +45,20 @@ struct IntroMotionTests {
         // The fastest stretch still clears the haptics' 25 ms floor (`IntroHaptics.floor`).
         let fastest = try #require(gaps.min())
         #expect(fastest > 0.025)
+    }
+
+    @Test("the garland's course runs on to its end as the leaf ties it, without a jump, whatever the month's length")
+    @MainActor
+    func course() {
+        typealias Ring = Garland<EmptyView>
+        let whole = Ring.courseSweep(course: 1, leaf: 1, daysInMonth: 31)
+        for days in [28, 29, 30, 31] {
+            let drawn = Ring.courseSweep(course: 1, leaf: 0, daysInMonth: days)
+            #expect(abs(drawn - Ring.courseSweep(course: 0.999_999, leaf: 0, daysInMonth: days)) < 1e-3)
+            let tying = Ring.courseSweep(course: 1, leaf: 0.5, daysInMonth: days)
+            #expect(drawn <= tying && tying <= whole)
+            #expect(Ring.courseSweep(course: 1, leaf: 1, daysInMonth: days) == whole)
+        }
+        #expect(Ring.courseSweep(course: 1, leaf: 0, daysInMonth: 30) < whole)
     }
 }
