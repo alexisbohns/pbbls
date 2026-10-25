@@ -22,15 +22,56 @@ struct ToneFigure: View {
             let line = WrapCopy.toneLine(tone.verdict, first: tone.first, last: tone.last, locale: locale)
             VStack(alignment: .leading, spacing: 0) {
                 SpineSectionHeader(WrapCopy.toneTitle(locale: locale), hint: WrapCopy.toneHint(locale: locale))
+                    .introReveal(.header)
                 Text(verbatim: line)
                     .spineType(.still)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 6)
                     .padding(.bottom, 8)
-                ToneChart(wrap: wrap, tone: tone, summary: line)
+                    .introReveal(.lead)
+                IntroSweep { ToneChart(wrap: wrap, tone: tone, summary: line) }
             }
             .padding(.horizontal, MonthLayout.sectionPadX)
+        }
+    }
+}
+
+extension ToneFigure {
+    /// The tone's intro (#1241), with the insights head's when it leads them; none when nothing shows.
+    static func introBeats(_ wrap: MonthWrap, insights: Bool) -> [IntroBeat] {
+        let days = wrap.tone?.days ?? []
+        guard insights || !days.isEmpty else { return [] }
+        return IntroScore.tone(days: days, insights: insights)
+    }
+}
+
+/// The tone chart under the intro's sweep (#1241): hidden before it, masked
+/// from the leading edge while it runs, untouched once it has passed. The
+/// chart is a stored value, so only the mask follows the frames.
+private struct IntroSweep<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        IntroReader { reveal in
+            let sweep = reveal(.sweep)
+            if sweep >= 1 {
+                content
+            } else if sweep <= 0 {
+                content.hidden()
+            } else {
+                content.mask(alignment: .leading) {
+                    GeometryReader { geometry in
+                        Rectangle()
+                            .frame(width: ToneMetrics.sweepWidth(IntroMotion.easeInOut(sweep),
+                                                                 width: geometry.size.width))
+                    }
+                }
+            }
         }
     }
 }
@@ -73,6 +114,15 @@ struct ToneMetrics: Equatable {
 
     /// An even day's circle: its radius grows with its summed intensity.
     static func evenRadius(_ even: Int) -> CGFloat { evenBase + evenStep * CGFloat(even) }
+}
+
+extension ToneMetrics {
+    /// How much of the chart the intro's sweep shows at eased progress
+    /// `eased`: the days run from `inset` to `width - inset`, and the sweep
+    /// leads the day it reaches by half a bar.
+    static func sweepWidth(_ eased: Double, width: CGFloat) -> CGFloat {
+        inset + CGFloat(eased) * (width - 2 * inset) + bar / 2
+    }
 }
 
 /// The chart and its words; its own view so the references draw it alone.
@@ -146,6 +196,7 @@ struct ToneChart: View {
             GeometryReader { geometry in
                 let plot = proxy.plotFrame.map { geometry[$0] } ?? geometry.frame(in: .local)
                 words(proxy: proxy, plot: plot, metrics: metrics)
+                pulses(proxy: proxy, plot: plot)
             }
             .accessibilityHidden(true)
         }
@@ -153,6 +204,29 @@ struct ToneChart: View {
         // Days run left to right whatever the language, as on the dial.
         .environment(\.layoutDirection, .leftToRight)
         .frame(height: metrics.height)
+    }
+
+    /// The intro's pulse on each even day as the sweep reaches it (#1241): a
+    /// ring growing out of the circle and fading. Nothing when settled.
+    private func pulses(proxy: ChartProxy, plot: CGRect) -> some View {
+        IntroReader { reveal in
+            ZStack(alignment: .topLeading) {
+                Color.clear
+                ForEach(tone.days.indices.filter { tone.days[$0].even > 0 }, id: \.self) { index in
+                    let t = reveal(.day(index))
+                    if t > 0 && t < 1 {
+                        let radius = ToneMetrics.evenRadius(tone.days[index].even)
+                        Circle()
+                            .stroke(Color.pebbles.onSurfaceVariant, lineWidth: 1)
+                            .frame(width: radius * 2, height: radius * 2)
+                            .scaleEffect(CGFloat(1 + t))
+                            .opacity(1 - t)
+                            .position(x: plot.minX + (proxy.position(forX: index) ?? 0),
+                                      y: plot.minY + (proxy.position(forY: 0.0) ?? 0))
+                    }
+                }
+            }
+        }
     }
 
     /// The numbered days along the foot, and the two words at the start of each side.
