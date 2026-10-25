@@ -1313,3 +1313,30 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The asymmetry with Android is deliberate. Don't add an `ios-release.yml` without superseding this entry.
 - **Supersedes / Superseded-by:** none.
 - **Refs:** #1239, `apps/ios/ci_scripts/`, `apps/ios/Pebbles/Resources/Info.plist`, `docs/ios-testflight-deploy.md`, `docs/android-play-deploy.md`.
+
+## 2026-10-25 — The month's intro on iOS is one score on one clock, its haptics Core Haptics (#1241)
+
+- **Status:** taken
+- **Scope:** ios
+- **Context:**
+  - #1241 makes the iOS month page enter instead of appearing. The garland draws day by day, and each section plays as it scrolls in, with a haptic on every slot, row, facet and stone.
+  - The garland, the gem, the persons' rings and the hours dial are `Canvas` drawings, which no SwiftUI transition reaches into.
+  - A 31-day garland asks for 31 ticks in a second and a half.
+- **Decision:**
+  - **The score:** a pure `IntroScore` turns each sequence into beats: a time, a key, a duration and an optional tick.
+  - **The clock:** one `IntroClock` per month page plays them, one sequence at a time in page order, once per launch (`IntroLedger` on `PathModel`).
+  - **The views:** they read each key's progress from the clock, and every figure's reveal defaults to settled, so a figure with no clock around it draws as before.
+  - **The haptics:** the same beats compile into one Core Haptics pattern per sequence (`IntroHaptics`, its own engine). A tick closer than 25 ms to the last is dropped.
+- **Why:**
+  - One clock keeps each tick on the frame it belongs to.
+  - **Rejected:** `Task.sleep` steps with `.sensoryFeedback`. The Canvas figures would snap, the sleeps drift, and UIKit's generators merge taps about 30 ms apart.
+  - **Rejected:** UIKit generators fired from the clock, because they keep that limit.
+  - **One voice at a time:** the weeks section is on screen under the cover at load, and two tick patterns at once blur.
+  - **Sine, not cubic, ease-in-out:** the cubic's middle would space a 31-day garland's ticks 17 ms apart, under the floor.
+- **Consequences:**
+  - **System Haptics, unknown at build:** whether Core Haptics honours Settings → Sounds & Haptics → System Haptics wasn't known. The device pass records it. If it doesn't, `IntroHaptics` fires UIKit generators from the clock instead, and the score and the figures stay as they are.
+  - No intro under Reduce Motion or while VoiceOver runs.
+  - A new figure on the month page takes a reveal that defaults to settled, and gets its beats from `IntroScore`.
+  - Android (#1242) ports the score and the lifecycle, with its own haptic backend.
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #1241, #1242, `docs/superpowers/specs/2026-10-25-ios-month-intro-design.md`, `apps/ios/Pebbles/Features/Path/Wrap/Intro/`.
