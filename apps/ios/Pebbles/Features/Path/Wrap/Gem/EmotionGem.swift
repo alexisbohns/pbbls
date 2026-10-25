@@ -17,16 +17,27 @@ struct EmotionGem: View {
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(label: WrapCopy.tile(.emotions, locale: locale),
                                  hint: WrapCopy.gemHint(locale: locale))
+                    .introReveal(.header)
                 SheetLead(words.lead)
                     .padding(.horizontal, MonthLayout.sectionPadX)
+                    .introReveal(.lead)
                 GemFigure(facets: gem.facets, palette: { lookups.family($0)?.palette }, labels: words.labels,
                           count: "\(wrap.pebbles)", countLabel: WrapCopy.gemPebbles(wrap.pebbles, locale: locale),
                           description: words.description)
                 MoreLink(text: WrapCopy.moreEmotions(wrap.fineEmotions?.count ?? 0, locale: locale), action: onMore)
                     .accessibilityHint(Text(verbatim: WrapCopy.tileHint(locale: locale)))
                     .padding(.horizontal, MonthLayout.sectionPadX)
+                    .introReveal(.more)
             }
+            .introSequence(.section(.gem)) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// The gem's intro (#1241): the families in the lead's order, each with the facets the server gave it.
+    static func introBeats(wrap: MonthWrap, lookups: WrapLookups) -> [IntroBeat] {
+        guard let gem = wrap.gem else { return [] }
+        let words = GemWords(gem: gem, lookups: lookups, locale: SpineStrings.appLocale)
+        return IntroScore.gem(runs: IntroScore.gemRuns(order: words.labels.map(\.slug), facets: gem.facets))
     }
 }
 
