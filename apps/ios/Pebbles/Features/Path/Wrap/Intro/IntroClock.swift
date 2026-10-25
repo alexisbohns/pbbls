@@ -1,6 +1,7 @@
 import CoreGraphics
 import Foundation
 import Observation
+import os
 
 /// What a month page needs to play its intro: the launch's ledger and the haptics (nil: silent).
 struct IntroContext {
@@ -67,6 +68,9 @@ final class IntroClock {
     @ObservationIgnored private let now: () -> Date
     @ObservationIgnored private let schedules: Bool
     @ObservationIgnored private var ending: Task<Void, Never>?
+    /// The sequences whose host could not measure the page, logged once each.
+    @ObservationIgnored private var unmeasured: Set<IntroSequence> = []
+    @ObservationIgnored private let logger = Logger(subsystem: "app.pbbls.ios", category: "intro")
 
     /// The page is focused, the app active, and the intro allowed (`IntroPolicy`). Off lands what plays.
     var isActive = false {
@@ -144,9 +148,16 @@ final class IntroClock {
         }
     }
 
-    /// A sequence's frame in its page: in view, it waits its turn; wholly out, it leaves.
-    func report(_ sequence: IntroSequence, beats: @escaping () -> [IntroBeat], frame: CGRect, viewport: CGFloat) {
-        guard frozenAt == nil, viewport > 0 else { return }
+    /// A sequence's frame in its page: in view, it waits its turn; wholly out,
+    /// it leaves. No viewport (its host could not measure the page), it lands
+    /// at once, unrecorded, so it can never stay blank.
+    func report(_ sequence: IntroSequence, beats: @escaping () -> [IntroBeat], frame: CGRect, viewport: CGFloat?) {
+        guard frozenAt == nil else { return }
+        guard let viewport else {
+            settleUnmeasured(sequence)
+            return
+        }
+        guard viewport > 0 else { return }
         switch IntroViewport.place(frame, viewport: viewport) {
         case .entered: enter(sequence, beats: beats)
         case .out: leave(sequence)
@@ -190,6 +201,15 @@ final class IntroClock {
             phases[sequence] = .settled
         }
         ends = [:]
+    }
+
+    /// Lands `sequence` for good without recording it: its place in the page is unknown.
+    private func settleUnmeasured(_ sequence: IntroSequence) {
+        if unmeasured.insert(sequence).inserted {
+            logger.error("intro \(String(describing: sequence), privacy: .public) has no viewport; drawn settled")
+        }
+        land(sequence)
+        phases[sequence] = .settled
     }
 
     /// The playing sequence has landed (its time came, or it left the viewport): the next may start.

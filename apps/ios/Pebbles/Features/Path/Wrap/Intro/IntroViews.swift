@@ -127,10 +127,10 @@ private struct IntroLanded<Content: View>: View {
     }
 }
 
-/// A sequence's frame, and its page's viewport height.
+/// A sequence's frame, and its page's viewport height (nil: the page's space could not be measured).
 private struct IntroPlacement: Equatable {
     let frame: CGRect
-    let viewport: CGFloat
+    let viewport: CGFloat?
 }
 
 private struct IntroSequenceHost: ViewModifier {
@@ -154,7 +154,7 @@ private struct IntroSequenceHost: ViewModifier {
             .environment(\.introSequence, sequence)
             .onGeometryChange(for: IntroPlacement.self) { proxy in
                 IntroPlacement(frame: proxy.frame(in: .named(IntroSpace.name)),
-                               viewport: proxy.bounds(of: .named(IntroSpace.name))?.height ?? 0)
+                               viewport: proxy.bounds(of: .named(IntroSpace.name))?.height)
             } action: { placement in
                 clock.report(sequence, beats: beats, frame: placement.frame, viewport: placement.viewport)
             }

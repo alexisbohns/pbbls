@@ -157,6 +157,29 @@ struct IntroClockTests {
         #expect(clock.phase(.cover) == .waiting)
     }
 
+    @Test("a sequence that can't measure its page lands at once, unrecorded, and never blanks again")
+    func unmeasured() {
+        let ledger = IntroLedger()
+        let spy = HapticsSpy()
+        let clock = clock(ledger, haptics: spy)
+        let frame = CGRect(x: 0, y: 0, width: 10, height: 100)
+        clock.isActive = true
+        clock.report(.cover, beats: { beats }, frame: frame, viewport: nil)
+        #expect(clock.phase(.cover) == .settled)
+        #expect(!ledger.contains(october, .cover))
+        clock.report(.cover, beats: { beats }, frame: frame, viewport: 800)
+        #expect(clock.phase(.cover) == .settled)
+        #expect(spy.played.isEmpty)
+        // One that plays lands too, and the next starts.
+        clock.report(weeks, beats: { beats }, frame: frame, viewport: 800)
+        clock.report(.section(.persons), beats: { beats }, frame: frame, viewport: 800)
+        #expect(clock.isPlaying(weeks))
+        clock.report(weeks, beats: { beats }, frame: frame, viewport: nil)
+        #expect(clock.phase(weeks) == .settled)
+        #expect(spy.stopped == [weeks])
+        #expect(clock.isPlaying(.section(.persons)))
+    }
+
     @Test("a frozen clock draws its sequence at its instant and ignores reports")
     func frozen() {
         let clock = IntroClock.frozen(month: october, sequence: .cover, beats: beats, elapsed: 0.46)
