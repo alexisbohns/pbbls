@@ -29,8 +29,8 @@ struct IntroScoreSectionsTests {
         let name = try #require(beats.first { $0.key == .name(0) })
         let ring = try #require(beats.first { $0.key == .ring(0) })
         #expect(glyph.at == IntroScore.rowsAt)
-        #expect(name.at > glyph.at)
-        #expect(ring.at > name.at)
+        #expect(abs((name.at - glyph.at) - IntroScore.partGap) < 1e-12)
+        #expect(abs((ring.at - name.at) - IntroScore.partGap) < 1e-12)
         #expect(ring.duration == IntroScore.ringSpan)
         #expect(ring.tick == nil)
         let dots = [0, 15, 30].compactMap { day in beats.first { $0.key == .dot(0, day) } }
@@ -40,7 +40,10 @@ struct IntroScoreSectionsTests {
         #expect(abs(dots[1].at - (ring.at + IntroScore.ringSpan / 2)) < 1e-9)
         #expect(dots.allSatisfy { $0.tick == .light })
         let next = try #require(beats.first { $0.key == .glyph(1) })
-        #expect(next.at > ring.at + ring.duration)
+        #expect(abs((next.at - (ring.at + IntroScore.ringSpan)) - IntroScore.nextRow) < 1e-12)
+        #expect(beats.contains { $0.key == .dot(1, 3) })
+        // The head (no lead), then per row glyph + name + ring + its days, then the invitation to see more.
+        #expect(beats.count == 1 + rings.reduce(0) { $0 + 3 + $1.days.count } + 1)
         let more = try #require(beats.first { $0.key == .more })
         let lastRing = try #require(beats.first { $0.key == .ring(1) })
         #expect(abs(more.at - (lastRing.at + lastRing.duration)) < 1e-12)
@@ -50,5 +53,16 @@ struct IntroScoreSectionsTests {
     func nobody() {
         let beats = IntroScore.persons(rings: [], hasLead: true)
         #expect(beats.map(\.key) == [.header, .lead])
+    }
+
+    @Test("the persons section names five at most")
+    @MainActor
+    func personsCap() throws {
+        let wrap = try MonthPayloadFixture.october()
+        let lookups = MonthPayloadFixture.lookups(wrap)
+        let beats = PersonsSection.introBeats(wrap: wrap, lookups: lookups)
+        #expect(beats.contains { $0.key == .glyph(0) })
+        #expect(!beats.contains { $0.key == .glyph(5) })
+        #expect(beats.filter { if case .glyph = $0.key { true } else { false } }.count <= 5)
     }
 }

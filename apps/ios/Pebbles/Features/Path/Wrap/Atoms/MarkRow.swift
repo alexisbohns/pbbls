@@ -113,7 +113,7 @@ private struct OptionalHint: ViewModifier {
 
 /// Which intro keys land a row's columns (#1241): the mark pops; the words,
 /// the count and the rule land with `text`; a nil `trailing` lands itself (a
-/// person's ring, a domain's bar).
+/// person's ring).
 struct MarkRowReveal {
     let leading: IntroKey
     let text: IntroKey

@@ -29,17 +29,29 @@ struct DaySetMarks: View {
 
     var body: some View {
         let box = DaySetGeometry.size(length: days.length, mode: mode, ringSize: ringSize)
-        IntroReader { reveal in
-            Canvas { context, size in
-                draw(in: context, size: size, reveal: introRow == nil ? .settled : reveal)
-            }
-        }
-        .frame(width: box.width, height: box.height)
+        marks
+            .frame(width: box.width, height: box.height)
         // A week reads in the layout's direction; a ring turns clockwise whatever the language.
         .flipsForRightToLeftLayoutDirection(mode != .circle)
         .accessibilityElement()
         .accessibilityLabel(Text(verbatim: label ?? ""))
         .accessibilityHidden(label == nil)
+    }
+
+    /// Without an intro row the marks draw settled, outside the intro reader.
+    @ViewBuilder
+    private var marks: some View {
+        if introRow == nil {
+            Canvas { context, size in
+                draw(in: context, size: size, reveal: .settled)
+            }
+        } else {
+            IntroReader { reveal in
+                Canvas { context, size in
+                    draw(in: context, size: size, reveal: reveal)
+                }
+            }
+        }
     }
 
     private func draw(in context: GraphicsContext, size: CGSize, reveal: IntroReveal) {
