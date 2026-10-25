@@ -3432,6 +3432,17 @@ The memory note "iOS device deploy recipe" holds the build, install and launch c
 
 ## As built
 
+- **Local reference baseline (Task 0, 2026-10-25):** 27 existing reference tests fail locally on the untouched branch. This Mac's renders differ from CI's: fonts and sizes, macOS 26.5.1 SDK, iOS 26.3 simulator. Among them:
+  - `WrapInsightsReferences` (both)
+  - `WrapWeekReferences` (`tiles`, `tilesAx2`, `sheetPage`)
+  - `SpineFeedReferences`, `SpineSeamReferences`, `SpineCardReferences`, `HeldCard*References`, `StoneReferences`, `SpineStoneReferences`
+
+  The list is in `apps/ios/build/baseline-failures.txt`, and their rendered PNGs are in `apps/ios/build/baseline-diffs/` (gitignored, this worktree only). The local gate is therefore `build/intro-compare.sh`, run after `build/intro-test.sh … References`. It checks two things:
+  - no failure outside the baseline (bar the new `intro-*` ones)
+  - every PNG a baseline failure renders is byte-identical to the baseline's
+
+  `WrapMonthReferences`, `WrapGemReferences`, `WrapAtomsReferences` and `WrapStripReferences` pass locally and stay strict gates. CI remains the real gate.
+
 Fill in as the parts land. List each deviation from this plan, and why:
 - the local reference baseline from Task 0
 - tuned constants
