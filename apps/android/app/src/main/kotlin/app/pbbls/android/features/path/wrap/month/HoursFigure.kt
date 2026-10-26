@@ -33,6 +33,10 @@ import app.pbbls.android.core.ui.render.stone.SealSize
 import app.pbbls.android.core.ui.render.stone.drawSeal
 import app.pbbls.android.core.ui.render.stone.rememberSealPrint
 import app.pbbls.android.features.path.wrap.WrapLookups
+import app.pbbls.android.features.path.wrap.intro.IntroBeat
+import app.pbbls.android.features.path.wrap.intro.IntroScore
+import app.pbbls.android.features.path.wrap.intro.hours
+import app.pbbls.android.features.path.wrap.intro.insightsHead
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import kotlin.math.ceil
 import kotlin.math.max
@@ -173,5 +177,20 @@ internal fun HoursFigure(
                 }
             }
         }
+    }
+}
+
+/** The hours' pure parts (#1242; iOS `HoursFigure`'s statics). */
+internal object HoursFigure {
+    /** The hours' intro, with the insights head's when it leads them; none when nothing shows. */
+    fun introBeats(
+        wrap: MonthWrap,
+        lookups: WrapLookups,
+        insights: Boolean,
+    ): List<IntroBeat> {
+        val marks = wrap.hours?.items.orEmpty()
+        val stones = marks.count { lookups.moment(it.momentId) != null }
+        if (stones == 0) return if (insights) IntroScore.insightsHead() else emptyList()
+        return IntroScore.hours(stones, insights)
     }
 }

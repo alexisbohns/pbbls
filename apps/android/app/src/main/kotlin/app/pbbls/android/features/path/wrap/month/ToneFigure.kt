@@ -25,6 +25,10 @@ import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.features.path.wrap.WrapLookups
+import app.pbbls.android.features.path.wrap.intro.IntroBeat
+import app.pbbls.android.features.path.wrap.intro.IntroScore
+import app.pbbls.android.features.path.wrap.intro.insightsHead
+import app.pbbls.android.features.path.wrap.intro.tone
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 
 private val UNIT = 8.dp
@@ -123,5 +127,18 @@ internal fun ToneFigure(
             drawText(bright, topLeft = Offset(4.dp.toPx(), 0f))
             drawText(heavy, topLeft = Offset(4.dp.toPx(), y0 + maxDown * u))
         }
+    }
+}
+
+/** The tone's pure parts (#1242; iOS `ToneFigure`'s statics). */
+internal object ToneFigure {
+    /** The tone's intro, with the insights head's when it leads them; none when nothing shows. */
+    fun introBeats(
+        wrap: MonthWrap,
+        insights: Boolean,
+    ): List<IntroBeat> {
+        val days = wrap.tone?.days.orEmpty()
+        if (days.isEmpty()) return if (insights) IntroScore.insightsHead() else emptyList()
+        return IntroScore.tone(days, insights)
     }
 }
