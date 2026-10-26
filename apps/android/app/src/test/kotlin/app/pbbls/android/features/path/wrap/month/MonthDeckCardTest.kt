@@ -1,0 +1,190 @@
+package app.pbbls.android.features.path.wrap.month
+
+import android.app.Application
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import app.pbbls.android.SpineFixtureWeek
+import app.pbbls.android.core.data.DayView
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.features.path.wrap.intro.IntroSequence
+import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
+import app.pbbls.android.testing.PIXEL_TEST_SDK
+import app.pbbls.android.testing.PebblesTestHarness
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+
+/**
+ * The galley card's room (#1242 D21; iOS `MonthCardFill` and the card's fit): content that asks for the room
+ * stands its foot at the room's, content taller than the room is scaled down to it from the top, and every
+ * card the fixture deals lays out, which is the guard on "no SubcomposeLayout in a card" (the room asks its
+ * content's intrinsics, and a SubcomposeLayout throws on that).
+ */
+@RunWith(RobolectricTestRunner::class)
+@Config(application = Application::class, qualifiers = "w390dp-h800dp-xhdpi", sdk = [PIXEL_TEST_SDK])
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+class MonthDeckCardTest {
+    @get:Rule
+    val compose = createComposeRule()
+
+    private val wrap = SpineFixtureWeek.monthWrap
+    private val lookups = SpineFixtureWeek.lookups
+
+    private fun show(
+        height: Dp = HOST_HEIGHT,
+        head: MonthHead? = null,
+        content: @Composable (room: Dp) -> Unit,
+    ) {
+        compose.setContent {
+            PebblesTheme {
+                PebblesTestHarness {
+                    Box(Modifier.size(HOST_WIDTH, height)) {
+                        MonthDeckCard(MONTH, MonthDeckStep(1, 3), head, content = content)
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+    }
+
+    /** Where [coordinates]' top and bottom land in the root, through every layer: unclipped, unlike a node's bounds. */
+    private fun verticalInRoot(coordinates: LayoutCoordinates): Pair<Dp, Dp> =
+        with(compose.density) {
+            val top = coordinates.localToRoot(Offset.Zero).y
+            val bottom = coordinates.localToRoot(Offset(0f, coordinates.size.height.toFloat())).y
+            top.toDp() to bottom.toDp()
+        }
+
+    @Test
+    fun `content that asks for the room takes it whole, its foot at the room's foot`() {
+        var room = 0.dp
+        show { r ->
+            room = r
+            Column(Modifier.fillMaxHeight()) {
+                Text("top")
+                Spacer(Modifier.weight(1f))
+                Box(Modifier.size(10.dp).testTag(FOOT))
+            }
+        }
+        assertEquals(ROOM.value, room.value, 0.5f)
+        assertEquals(
+            ROOM_BOTTOM.value,
+            compose
+                .onNodeWithTag(FOOT)
+                .getBoundsInRoot()
+                .bottom.value,
+            0.5f,
+        )
+    }
+
+    @Test
+    fun `content taller than the room is scaled down to it, anchored at the top`() {
+        var content: LayoutCoordinates? = null
+        show { Box(Modifier.fillMaxWidth().height(TALL).onGloballyPositioned { content = it }) }
+        val (top, bottom) = verticalInRoot(content!!)
+        assertEquals(ROOM_TOP.value, top.value, 0.5f)
+        assertEquals(ROOM.value, (bottom - top).value, 0.5f)
+    }
+
+    @Test
+    fun `an empty room leaves the content whole, at its own size`() {
+        var content: LayoutCoordinates? = null
+        // The paper's inset takes the whole host: the room is 0 tall.
+        show(height = ROOM_TOP + INSET_BOTTOM) { Box(Modifier.fillMaxWidth().height(TALL).onGloballyPositioned { content = it }) }
+        val (top, bottom) = verticalInRoot(content!!)
+        assertEquals(ROOM_TOP.value, top.value, 0.5f)
+        assertEquals(TALL.value, (bottom - top).value, 0.5f)
+    }
+
+    @Test
+    fun `every card the fixture deals lays out within its room, the cover and each section on a card`() {
+        val cards = MonthDeck.cards(wrap, lookups)
+        val dealt = cards.filter { it != IntroSequence.End }
+        var shown by mutableStateOf(dealt.first())
+        compose.setContent {
+            PebblesTheme {
+                PebblesTestHarness {
+                    Box(Modifier.size(HOST_WIDTH, HOST_HEIGHT)) {
+                        val copy = rememberWrapCopy()
+                        val card = shown
+                        val leads = MonthDeck.leadsInsights(card, cards)
+                        val head =
+                            (card as? IntroSequence.Section)?.let {
+                                if (leads) MonthSections.insightsHead(copy) else MonthSections.head(it.section, wrap, lookups, copy)
+                            }
+                        MonthDeckCard(MONTH, MonthDeckStep.of(card, cards), head) {
+                            Box(Modifier.testTag(CONTENT)) {
+                                when (card) {
+                                    IntroSequence.Cover -> MonthCover(wrap, lookups)
+                                    is IntroSequence.Section ->
+                                        MonthSectionContent(
+                                            card.section,
+                                            wrap,
+                                            lookups,
+                                            DayView.CIRCLE,
+                                            SpineFixtureWeek.zone,
+                                            aspect = null,
+                                            onWeek = {},
+                                            onOpen = {},
+                                            onMore = {},
+                                            leadsInsights = leads,
+                                            onCard = true,
+                                        )
+                                    IntroSequence.End -> Unit
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        assertEquals(cards.size - 1, dealt.size)
+        dealt.forEach { card ->
+            compose.runOnIdle { shown = card }
+            compose.waitForIdle()
+            val bounds = compose.onNodeWithTag(CONTENT).getBoundsInRoot()
+            assertTrue("$card draws nothing", bounds.bottom > bounds.top)
+            assertTrue("$card overruns its room: ${bounds.bottom}", bounds.bottom.value <= ROOM_BOTTOM.value + 0.5f)
+        }
+    }
+
+    private companion object {
+        const val MONTH = "October 2026"
+        const val FOOT = "foot"
+        const val CONTENT = "content"
+        val HOST_WIDTH = 390.dp
+        val HOST_HEIGHT = 600.dp
+        val TALL = 2000.dp
+
+        /** With no head, the room is the paper inside its [MonthDeckLayout.INSET]. */
+        val ROOM_TOP = MonthDeckLayout.INSET.calculateTopPadding()
+        val INSET_BOTTOM = MonthDeckLayout.INSET.calculateBottomPadding()
+        val ROOM_BOTTOM = HOST_HEIGHT - INSET_BOTTOM
+        val ROOM = ROOM_BOTTOM - ROOM_TOP
+    }
+}
