@@ -65,9 +65,11 @@ struct MonthDeck: View {
                 .frame(width: page.width, height: page.height)
         }
         .onGeometryChange(for: CGSize.self) { $0.size } action: { page = $0 }
-        // Arrival: the card on top plays; the one it covered, or uncovered, lands.
-        .onChange(of: shown, initial: true) { _, card in
-            if let card { clock?.show(card) }
+        // Arrival: the card on top plays; the one it covered, or uncovered, lands. A throw lands on a tick.
+        .onChange(of: shown, initial: true) { previous, card in
+            guard let card else { return }
+            clock?.show(card)
+            if previous != card { clock?.landed(card) }
         }
         // Back on screen (a tab, the pager), the hosts registered again but left: the top card enters again.
         .onAppear {

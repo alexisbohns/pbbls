@@ -11,6 +11,8 @@ protocol IntroHapticPlaying: AnyObject {
     /// Plays `beats`' ticks as one pattern, starting at `begin`, the instant the sequence's frames start.
     func play(_ sequence: IntroSequence, of month: CalendarMonth, beats: [IntroBeat], startingAt begin: Date)
     func stop(_ sequence: IntroSequence, of month: CalendarMonth)
+    /// Plays one tick now, outside any sequence (the deck landing on a card that plays no intro, D11).
+    func tick(_ tick: IntroTick)
 }
 
 /// One tick of a sequence's pattern.
@@ -119,6 +121,21 @@ final class IntroHaptics: IntroHapticPlaying {
             try player.stop(atTime: CHHapticTimeImmediate)
         } catch {
             logger.warning("intro haptic stop failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    func tick(_ tick: IntroTick) {
+        guard let engine else { return }
+        let event = CHHapticEvent(eventType: .hapticTransient, parameters: [
+            CHHapticEventParameter(parameterID: .hapticIntensity, value: tick.intensity),
+            CHHapticEventParameter(parameterID: .hapticSharpness, value: tick.sharpness)
+        ], relativeTime: 0)
+        do {
+            try engine.start()
+            let player = try engine.makePlayer(with: CHHapticPattern(events: [event], parameters: []))
+            try player.start(atTime: CHHapticTimeImmediate)
+        } catch {
+            logger.error("intro haptic tick failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 

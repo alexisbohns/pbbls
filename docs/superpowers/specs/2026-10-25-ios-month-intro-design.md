@@ -84,6 +84,7 @@ The month page enters instead of appearing all at once. The month's name rises i
 - **Before its turn,** a card shows its title only (D8's always-drawn heads).
 - **Arrival:** a card arrives when it becomes the top card, tracked by `.scrollPosition(id:)`. The clock lands the previous card's sequence and plays this one: the arrive tick, then its content.
 - **Revisits:** the month is still a deck, with its cards settled.
+- **Every throw lands on a tick** (`IntroClock.landed`): a card that plays its intro ticks its own arrival, and one that plays none (already played, or settled) gets the same arrive tick from the clock. The Path's pager, swiped onto another week or month, plays the strip's selection haptic, as a strip tap does.
 - **Content taller than its card** scales down to fit, anchored at its top. This happens only at the larger non-accessibility text sizes or on small phones.
 - **When there is no deck:** under Reduce Motion, VoiceOver or an accessibility text size, the month is the vertical page as before, settled, with no clock. `IntroPolicy` gains the text-size condition.
 - **The clock no longer measures geometry.** The deck tells it which card is on top (`IntroClock.show(_:)`), and each section's host registers its beats when it appears. `IntroViewport`, `report` and the chapter paging are gone.

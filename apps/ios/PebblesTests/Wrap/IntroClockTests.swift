@@ -24,6 +24,10 @@ final class HapticsSpy: IntroHapticPlaying {
         stopped.append(sequence)
         stoppedMonths.append(month)
     }
+
+    var ticks: [IntroTick] = []
+
+    func tick(_ tick: IntroTick) { ticks.append(tick) }
 }
 
 /// #1241 D3, D4, §Lifecycle.
