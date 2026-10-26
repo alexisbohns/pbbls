@@ -179,6 +179,14 @@ jobs:
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "guides" db:verify:guides
 
+      # The Home tab's back-end (#1254): the first-moment and first-pebble
+      # achievements and their permanence, claim_blue_pebble's gate and
+      # exactly-once, people_prompts' filters and guard; (part 3) the wrap
+      # reveals and home_wraps' cover equality with path_month_wrap.
+      - name: Home (#1254)
+        if: '!cancelled()'
+        run: .github/scripts/verify-harness.sh "home" db:verify:home
+
       # One writer for the whole table. `always()` so it still reports when a
       # harness failed — that is precisely the run whose table is worth reading.
       - name: Write the run log
