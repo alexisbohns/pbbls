@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,8 +46,11 @@ private val LIST_SNAP = 40.dp
 /** The stone column past the largest stone: room for its rings (iOS `ringRoom`). */
 private const val RING_ROOM = 1.3f
 
+/** The stone column's width: past the largest stone, room for its rings. */
+private val COLUMN = StoneGeometry.STONE_WIDTH_DP.getValue(ValenceSizeGroup.LARGE) * LIST_STONE * RING_ROOM
+
 /** The milestones' rings, quieter than the Spine's (iOS `MilestoneStone.rings`). */
-internal const val MILESTONE_RINGS = 0.45f
+private const val MILESTONE_RINGS = 0.45f
 
 /**
  * The month's milestones (#1207, D8): the stones the server picked (large first, bright to heavy,
@@ -71,51 +75,52 @@ internal fun MilestonesSection(
         MonthSectionHead(copy.milestonesHeader(moments.size), copy.milestonesHint())
         Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
             moments.forEach { moment ->
-                val name = moment.name?.takeIf { it.isNotBlank() } ?: untitled
-                val nameType = EntryTypes.contentsName(moment.valence.intensity, moment.valence.polarity)
-                val date = copy.dateline(moment.happenedAt.atZoneSameInstant(zone).toLocalDate())
-                val souls =
-                    moment.pebble
-                        ?.souls
-                        .orEmpty()
-                        .mapNotNull { lookups.soul(it.id) }
-                val stoneWidth = StoneGeometry.STONE_WIDTH_DP.getValue(moment.valence.sizeGroup) * LIST_STONE
-                val column = StoneGeometry.STONE_WIDTH_DP.getValue(ValenceSizeGroup.LARGE) * LIST_STONE * RING_ROOM
-                val seed = remember(moment.pebble?.id, moment.id) { UuidHash.fnv1a(moment.pebble?.id ?: moment.id) }
-                val press = rememberStonePressState()
-                MarkRow(
-                    title = name,
-                    titleStyle = type.contentsName(nameType.fontWeight, nameType.italic),
-                    subtitle = date,
-                    subtitleFirst = true,
-                    minHeight = LIST_ROW,
-                    markWidth = column.dp,
-                    description = "$date, $name",
-                    leading = {
-                        Box(Modifier.width(column.dp), contentAlignment = Alignment.Center) {
-                            LitStone(
-                                valence = moment.valence,
-                                palette = lookups.paletteFor(moment),
-                                glyph = moment.pebble?.glyph,
-                                seed = seed,
-                                press = press,
-                                width = stoneWidth.dp,
-                                rings = MILESTONE_RINGS,
-                            )
-                        }
-                    },
-                    trailing = {
-                        val prefix = moment.firstSnapPath
-                        if (prefix != null) {
-                            MilestoneSnap(prefix, tint = colors.ink3, height = LIST_SNAP, aspect = aspect)
-                        } else {
-                            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                souls.take(GLYPHS).forEach { SoulMark(it.glyph, colors.ink2, Modifier.size(GLYPH)) }
+                key(moment.id) {
+                    val name = moment.name?.takeIf { it.isNotBlank() } ?: untitled
+                    val nameType = EntryTypes.contentsName(moment.valence.intensity, moment.valence.polarity)
+                    val date = copy.dateline(moment.happenedAt.atZoneSameInstant(zone).toLocalDate())
+                    val souls =
+                        moment.pebble
+                            ?.souls
+                            .orEmpty()
+                            .mapNotNull { lookups.soul(it.id) }
+                    val stoneWidth = StoneGeometry.STONE_WIDTH_DP.getValue(moment.valence.sizeGroup) * LIST_STONE
+                    val seed = remember(moment.pebble?.id, moment.id) { UuidHash.fnv1a(moment.pebble?.id ?: moment.id) }
+                    val press = rememberStonePressState()
+                    MarkRow(
+                        title = name,
+                        titleStyle = type.contentsName(nameType.fontWeight, nameType.italic),
+                        subtitle = date,
+                        subtitleFirst = true,
+                        minHeight = LIST_ROW,
+                        markWidth = COLUMN.dp,
+                        description = "$date, $name",
+                        leading = {
+                            Box(Modifier.width(COLUMN.dp), contentAlignment = Alignment.Center) {
+                                LitStone(
+                                    valence = moment.valence,
+                                    palette = lookups.paletteFor(moment),
+                                    glyph = moment.pebble?.glyph,
+                                    seed = seed,
+                                    press = press,
+                                    width = stoneWidth.dp,
+                                    rings = MILESTONE_RINGS,
+                                )
                             }
-                        }
-                    },
-                    onClick = { onOpen(moment) },
-                )
+                        },
+                        trailing = {
+                            val prefix = moment.firstSnapPath
+                            if (prefix != null) {
+                                MilestoneSnap(prefix, tint = colors.ink3, height = LIST_SNAP, aspect = aspect)
+                            } else {
+                                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    souls.take(GLYPHS).forEach { SoulMark(it.glyph, colors.ink2, Modifier.size(GLYPH)) }
+                                }
+                            }
+                        },
+                        onClick = { onOpen(moment) },
+                    )
+                }
             }
         }
     }

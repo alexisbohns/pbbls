@@ -363,6 +363,8 @@ private fun StoneRings(
             scaleY = scale()
             alpha = strength
             // The halo and rings draw past the box; an offscreen layer (alpha < 1) would clip them to it.
+            // ModulateAlpha applies the alpha per draw: iOS fades the group, and the two differ only where
+            // a ring crosses the halo, negligibly. Do not restore an offscreen layer.
             compositingStrategy = CompositingStrategy.ModulateAlpha
         },
     ) {
