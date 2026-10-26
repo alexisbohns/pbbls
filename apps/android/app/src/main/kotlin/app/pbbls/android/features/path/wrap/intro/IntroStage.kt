@@ -5,10 +5,10 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -20,7 +20,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import app.pbbls.android.core.designsystem.RevealMotion
 
 /** The clock and the card a composable belongs to (#1242 D19). UI plumbing, like `LocalSharedTransitionScope`. */
-@Immutable
+@Stable
 class IntroStage(
     val clock: IntroClock,
     val sequence: IntroSequence,
@@ -38,7 +38,8 @@ fun currentIntroReveal(): IntroReveal = LocalIntroStage.current?.reveal ?: Intro
 
 /**
  * Makes [content] a card of the intro: it registers [beats] with [clock] while composed (asked for only
- * as the card starts) and leaves as it goes. No clock: [content] as it is.
+ * as the card starts) and leaves as it goes. No clock: [content] settled, even inside another card. Either
+ * way [content] stays in the same place, so a clock coming or going never remounts it.
  */
 @Composable
 fun IntroHost(
@@ -47,16 +48,12 @@ fun IntroHost(
     beats: () -> List<IntroBeat>,
     content: @Composable () -> Unit,
 ) {
-    if (clock == null) {
-        content()
-        return
-    }
     val current by rememberUpdatedState(beats)
     DisposableEffect(clock, sequence) {
-        clock.register(sequence) { current() }
-        onDispose { clock.leave(sequence) }
+        clock?.register(sequence) { current() }
+        onDispose { clock?.leave(sequence) }
     }
-    val stage = remember(clock, sequence) { IntroStage(clock, sequence) }
+    val stage = remember(clock, sequence) { clock?.let { IntroStage(it, sequence) } }
     CompositionLocalProvider(LocalIntroStage provides stage, content = content)
 }
 
@@ -109,8 +106,11 @@ fun Modifier.introReveal(
     }
 
 /**
- * Calls [onTap] for a tap anywhere inside, observed and never consumed, so the tap still does its job
- * (a milestone opens its held card). A drag that a scroller takes, or past the touch slop, is no tap.
+ * Calls [onTap] for a tap anywhere inside. It watches the Initial pass and never consumes, so the tap still
+ * reaches the child under it and does its job (a milestone opens its held card). A drag past the touch slop
+ * is no tap, nor is a cancel: the system taking the gesture (a back swipe) releases the pointer already
+ * consumed, in the Initial pass, where a child's own click has not consumed it yet. A pointer that vanishes
+ * ends the gesture without a tap.
  */
 fun Modifier.onAnyTap(onTap: () -> Unit): Modifier =
     pointerInput(onTap) {
@@ -118,10 +118,14 @@ fun Modifier.onAnyTap(onTap: () -> Unit): Modifier =
             val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
             var tap = true
             while (true) {
-                val event = awaitPointerEvent(PointerEventPass.Final)
-                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                val change =
+                    awaitPointerEvent(PointerEventPass.Initial).changes.firstOrNull { it.id == down.id }
+                        ?: return@awaitEachGesture
                 if ((change.position - down.position).getDistance() > viewConfiguration.touchSlop) tap = false
-                if (!change.pressed) break
+                if (!change.pressed) {
+                    if (change.isConsumed) tap = false
+                    break
+                }
             }
             if (tap) onTap()
         }

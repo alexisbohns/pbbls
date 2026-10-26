@@ -156,11 +156,14 @@ class IntroClockTest {
         val ledger = IntroLedger()
         val spy = HapticsSpy()
         val clock = clock(ledger, spy)
-        clock.register(IntroSequence.Cover) { beats }
+        // On top of a focused page, its beats not registered yet: it waits.
+        clock.isActive = true
         clock.show(IntroSequence.Cover)
         clock.skip()
         assertEquals(IntroClock.Phase.Settled, clock.phase(IntroSequence.Cover))
         assertTrue(ledger.contains(october, IntroSequence.Cover))
+        // Its beats arriving after the tap start nothing.
+        clock.register(IntroSequence.Cover) { beats }
         assertTrue(spy.played.isEmpty())
         val playing = clock(IntroLedger(), spy)
         playing.register(weeks) { beats }
@@ -169,6 +172,20 @@ class IntroClockTest {
         playing.skip()
         assertEquals(IntroClock.Phase.Settled, playing.phase(weeks))
         assertEquals(listOf(weeks), spy.stopped)
+    }
+
+    @Test
+    fun `a tap on an inactive page does nothing`() {
+        val ledger = IntroLedger()
+        val clock = clock(ledger)
+        clock.register(IntroSequence.Cover) { beats }
+        clock.show(IntroSequence.Cover)
+        // Mid-settle, the page not focused yet: the tap must not count its cover as played.
+        clock.skip()
+        assertEquals(IntroClock.Phase.Waiting, clock.phase(IntroSequence.Cover))
+        assertFalse(ledger.contains(october, IntroSequence.Cover))
+        clock.isActive = true
+        assertTrue(clock.isPlaying(IntroSequence.Cover))
     }
 
     @Test

@@ -158,8 +158,12 @@ class IntroClock private constructor(
         haptics?.tick(IntroTick.arrive)
     }
 
-    /** A tap: what plays and what waits on top land now, and count as played. */
+    /**
+     * A tap: what plays and what waits on top land now, and count as played. Only on an active page, unlike
+     * iOS: a tap on a page that is not focused yet (mid-settle) must not count its cover as played.
+     */
     fun skip() {
+        if (!isActive) return
         shown?.let { top ->
             if (phase(top) == Phase.Waiting) {
                 ledger.record(month, top)
