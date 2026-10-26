@@ -348,6 +348,7 @@ fun PathContent(
                             onWeek = { onFocusChange(PathPage.Week(it)) },
                             onOpen = { moment -> onPebbleTap(moment, CardFace.RECTO) },
                             modifier = Modifier.fillMaxSize(),
+                            aspect = aspect,
                         )
                     }
                 }
