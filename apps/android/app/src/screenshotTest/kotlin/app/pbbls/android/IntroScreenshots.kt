@@ -13,6 +13,7 @@ import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.features.path.wrap.intro.IntroClock
+import app.pbbls.android.features.path.wrap.intro.IntroScore
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.intro.IntroStage
 import app.pbbls.android.features.path.wrap.intro.LocalIntroStage
@@ -22,6 +23,7 @@ import app.pbbls.android.features.path.wrap.month.MonthDeckCard
 import app.pbbls.android.features.path.wrap.month.MonthDeckStep
 import app.pbbls.android.features.path.wrap.month.MonthSectionContent
 import app.pbbls.android.features.path.wrap.month.MonthSections
+import app.pbbls.android.features.path.wrap.month.PersonsSection
 import app.pbbls.android.features.path.wrap.month.coverBeats
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import com.android.tools.screenshot.PreviewTest
@@ -38,6 +40,31 @@ fun IntroGarlandHalf() {
             Box(Modifier.width(390.dp)) {
                 CompositionLocalProvider(LocalIntroStage provides IntroStage(clock, IntroSequence.Cover)) {
                     MonthCover(wrap, SpineFixtureWeek.lookups)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The persons' entrance, frozen mid-play (#1242; iOS `intro-persons-ring`): the first row's glyph and name in,
+ * its ring half drawn from the 1st with the days it has reached; the rows after it still to come.
+ */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390, heightDp = 640)
+@Composable
+fun IntroPersonsRing() {
+    PebblesTheme {
+        val wrap = SpineFixtureWeek.monthWrap
+        val lookups = SpineFixtureWeek.lookups
+        val sequence = IntroSequence.Section(MonthSection.PERSONS)
+        // Row 0's ring starts two part gaps after the rows; half its span in, the line is half way round.
+        val elapsed = IntroScore.ROWS_AT + 2 * IntroScore.PART_GAP + IntroScore.RING_SPAN / 2
+        val clock = IntroClock.frozen(wrap.month, sequence, PersonsSection.introBeats(wrap, lookups), elapsed)
+        Surface(color = PebblesTheme.spine.colors.ground) {
+            Box(Modifier.width(390.dp)) {
+                CompositionLocalProvider(LocalIntroStage provides IntroStage(clock, sequence)) {
+                    PersonsSection(wrap, lookups, DayView.CIRCLE, onMore = {})
                 }
             }
         }

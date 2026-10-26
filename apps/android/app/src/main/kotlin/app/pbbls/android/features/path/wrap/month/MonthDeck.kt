@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isFinite
 import androidx.compose.ui.zIndex
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.data.SnapAspectCache
@@ -84,8 +85,8 @@ internal object MonthDeck {
         }
 
     /**
-     * What a card plays. The cover its garland; a section, for now, its arrival alone (its entrance lands in
-     * the parts after this one); the end card nothing yet.
+     * What a card plays. The cover its garland; the persons their rows in turn; another section, for now, its
+     * arrival alone (its entrance lands in the parts after this one); the end card nothing yet.
      */
     fun beats(
         card: IntroSequence,
@@ -95,6 +96,7 @@ internal object MonthDeck {
     ): List<IntroBeat> =
         when (card) {
             IntroSequence.Cover -> coverBeats(wrap, lookups)
+            IntroSequence.Section(MonthSection.PERSONS) -> PersonsSection.introBeats(wrap, lookups)
             is IntroSequence.Section -> IntroScore.head(hasLead = false, insights = leadsInsights)
             IntroSequence.End -> emptyList()
         }
@@ -183,7 +185,7 @@ internal fun MonthDeckPager(
                         // its page dips into the top of the deck, deepest at its left, and would take the touch there
                         // unseen.
                         .then(if (index >= pager.settledPage) Modifier.takesTouch() else Modifier),
-            ) {
+            ) { room ->
                 IntroHost(clock, card, { MonthDeck.beats(card, wrap, lookups, leads) }) {
                     when (card) {
                         IntroSequence.Cover -> MonthCover(wrap, lookups)
@@ -200,6 +202,8 @@ internal fun MonthDeckPager(
                                 onMore,
                                 leadsInsights = leads,
                                 onCard = true,
+                                // An empty room (an unbounded host) is none: the rows keep their size (iOS).
+                                room = room.takeIf { it > 0.dp && it.isFinite },
                             )
                         IntroSequence.End -> Unit
                     }

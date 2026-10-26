@@ -20,12 +20,15 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import app.pbbls.android.testing.PIXEL_TEST_SDK
@@ -137,7 +140,7 @@ class MonthDeckCardTest {
                             (card as? IntroSequence.Section)?.let {
                                 if (leads) MonthSections.insightsHead(copy) else MonthSections.head(it.section, wrap, lookups, copy)
                             }
-                        MonthDeckCard(MONTH, MonthDeckStep.of(card, cards), head) {
+                        MonthDeckCard(MONTH, MonthDeckStep.of(card, cards), head) { room ->
                             Box(Modifier.testTag(CONTENT)) {
                                 when (card) {
                                     IntroSequence.Cover -> MonthCover(wrap, lookups)
@@ -154,6 +157,7 @@ class MonthDeckCardTest {
                                             onMore = {},
                                             leadsInsights = leads,
                                             onCard = true,
+                                            room = room,
                                         )
                                     IntroSequence.End -> Unit
                                 }
@@ -171,6 +175,41 @@ class MonthDeckCardTest {
             assertTrue("$card draws nothing", bounds.bottom > bounds.top)
             assertTrue("$card overruns its room: ${bounds.bottom}", bounds.bottom.value <= ROOM_BOTTOM.value + 0.5f)
         }
+    }
+
+    @Test
+    fun `on a card the persons share the room, more at its foot`() {
+        var room = 0.dp
+        var more = ""
+        show(head = MonthHead("Persons", null)) { r ->
+            room = r
+            more = rememberWrapCopy().morePersons(MonthSections.namedPersons(wrap, lookups).size)
+            MonthSectionContent(
+                MonthSection.PERSONS,
+                wrap,
+                lookups,
+                DayView.CIRCLE,
+                SpineFixtureWeek.zone,
+                aspect = null,
+                onWeek = {},
+                onOpen = {},
+                onMore = {},
+                onCard = true,
+                room = r,
+            )
+        }
+        val first = MonthSections.namedPersons(wrap, lookups).first()
+        val name = lookups.soul(first.soulId)!!.name
+        val row = compose.onNodeWithContentDescription("$name, ${first.count}", substring = true).getBoundsInRoot()
+        assertEquals(PersonsSection.rowSize(room.value, rows = 5).height, (row.bottom - row.top).value, 0.5f)
+        assertEquals(
+            ROOM_BOTTOM.value,
+            compose
+                .onNodeWithText(more)
+                .getBoundsInRoot()
+                .bottom.value,
+            0.5f,
+        )
     }
 
     private companion object {
