@@ -157,9 +157,19 @@ struct MilestonesSection: View {
         (wrap.milestones ?? []).compactMap(lookups.moment)
     }
 
-    /// The milestones' intro (#1241): the head, then each stone.
+    /// A milestone's souls, at most.
+    static let soulLimit = 4
+
+    /// The milestones' intro (#1241 D10): the head, then each stone stamped, its date, its name and its souls.
     static func introBeats(wrap: MonthWrap, lookups: WrapLookups) -> [IntroBeat] {
-        IntroScore.rows(count: moments(wrap, lookups: lookups).count, hasLead: false, more: false)
+        IntroScore.milestones(moments(wrap, lookups: lookups).map { moment in
+            IntroMilestoneShape(intensity: moment.pebble?.intensity ?? 1,
+                                souls: SoulMarks.shown(soulIds(moment), lookups: lookups, limit: soulLimit).count)
+        })
+    }
+
+    private static func soulIds(_ moment: MomentSummary) -> [String] {
+        (moment.pebble?.souls ?? []).map { $0.id.uuidString.lowercased() }
     }
 
     private func row(_ moment: MomentSummary, index: Int) -> some View {
@@ -169,14 +179,20 @@ struct MilestonesSection: View {
                                               valence: moment.pebble?.valence.positiveness ?? 0)
         let date = WrapCopy.dateline(CalendarDay(moment.happenedAt, in: SpineCalendar.current.timeZone), locale: locale)
         let open = { onOpen(moment) }
-        return MarkRow(name, accessibilityText: "\(name), \(date)", titleType: .contentsName(cut), subtitle: date,
-                       action: open, reveal: .row(index)) {
-            StoneSeal(moment: moment,
-                      palette: SpineColors.palette(lookups.palette(moment), isBlank: moment.pebble == nil),
-                      size: .milestone)
+        // The date over the name (D12); in the intro the stone stamps, then the date, the name and the souls (D10).
+        let reveal = MarkRowReveal(leading: nil, text: .date(index), title: .name(index), subtitle: .date(index))
+        return MarkRow(name, accessibilityText: "\(date), \(name)", titleType: .contentsName(cut), subtitle: date,
+                       action: open, reveal: reveal, subtitleFirst: true) {
+            IntroReader { stage in
+                let stamped = stage(.stamp(index))
+                StoneSeal(moment: moment,
+                          palette: SpineColors.palette(lookups.palette(moment), isBlank: moment.pebble == nil),
+                          size: .milestone)
+                    .scaleEffect(IntroMotion.stampScale(stamped))
+                    .opacity(IntroMotion.stampOpacity(stamped))
+            }
         } trailing: {
-            SoulMarks(ids: (moment.pebble?.souls ?? []).map { $0.id.uuidString.lowercased() }, lookups: lookups,
-                      limit: 4)
+            SoulMarks(ids: Self.soulIds(moment), lookups: lookups, limit: Self.soulLimit, introRow: index)
         }
         .modifier(ReturnFocus(focus: focus, id: moment.id))
     }
