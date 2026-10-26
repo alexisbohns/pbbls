@@ -25,7 +25,6 @@ import app.pbbls.android.features.path.wrap.intro.IntroDrive
 import app.pbbls.android.features.path.wrap.intro.IntroHost
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.intro.onAnyTap
-import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -51,7 +50,6 @@ fun MonthPage(
 ) {
     // The sheet's open tab, kept across a rotation; never in the ViewModel (spec §7).
     var sheet by rememberSaveable(wrap.month) { mutableStateOf<String?>(null) }
-    val copy = rememberWrapCopy()
     val onMore: (MonthSection) -> Unit = { sheet = it.name }
     if (intro != null) {
         DriveWhileResumed(intro)
@@ -67,20 +65,7 @@ fun MonthPage(
             IntroHost(intro, IntroSequence.Cover, { coverBeats(wrap, lookups) }) { MonthCover(wrap, lookups) }
         }
         items(wrap.sections, key = { it.name }) { section ->
-            when (section) {
-                MonthSection.WEEKS -> WeeksSummary(wrap, lookups, onWeek)
-                MonthSection.MILESTONES -> MilestonesSection(wrap, lookups, zone, onOpen, aspect)
-                MonthSection.PERSONS -> PersonsSection(wrap, lookups, dayView, onMore)
-                MonthSection.DOMAINS -> DomainsSection(wrap, lookups, onMore)
-                MonthSection.GEM -> EmotionGem(wrap, lookups, onMore)
-                MonthSection.TONE, MonthSection.HOURS -> {
-                    // One head for both figures, over whichever comes first.
-                    if (section == wrap.sections.firstOrNull { it == MonthSection.TONE || it == MonthSection.HOURS }) {
-                        MonthSectionHead(copy.insights(), copy.insightsHint())
-                    }
-                    if (section == MonthSection.TONE) ToneFigure(wrap) else HoursFigure(wrap, lookups)
-                }
-            }
+            MonthSectionContent(section, wrap, lookups, dayView, zone, aspect, onWeek, onOpen, onMore)
         }
     }
 
