@@ -48,6 +48,18 @@ class IntroScoreCoverTest {
     }
 
     @Test
+    fun `a stacked seal on the last day ticks if it clears the floor before the leaf, the slot keeping its first seal's`() {
+        val beats = IntroScore.cover(listOf(CoverDay(30, listOf(pebble(1), pebble(3)))), 31, emptyList(), 0, emptyList())
+        val slot = beats.of(IntroKey.Slot(30))
+        val stacked = beats.of(IntroKey.Seal(30, 1))
+        val leaf = beats.of(IntroKey.Leaf)
+        // 35 ms after the slot and 85 ms before the leaf: both clear the 25 ms floor.
+        assertTrue(leaf.at - stacked.at >= IntroHaptics.FLOOR)
+        assertEquals(IntroTick.seal(3), stacked.tick)
+        assertEquals(IntroTick.seal(1), slot.tick)
+    }
+
+    @Test
     fun `the name before the garland, the leaf ties it, then the souls and the lines, in order`() {
         val beats = IntroScore.cover(emptyList(), 30, emptyList(), souls = 2, lines = listOf(IntroKey.Summary, IntroKey.Colophon))
         val name = beats.of(IntroKey.MonthName)

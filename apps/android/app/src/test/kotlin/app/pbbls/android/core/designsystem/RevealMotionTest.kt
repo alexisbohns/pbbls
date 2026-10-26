@@ -11,10 +11,9 @@ class RevealMotionTest {
         assertEquals(1.0, RevealMotion.easeOut(1.0), 0.0)
         assertEquals(0.0, RevealMotion.easeInOut(0.0), 0.0)
         assertEquals(1.0, RevealMotion.easeInOut(1.0), 1e-15)
-        var x = 0.0
-        while (x <= 1.0) {
+        for (i in 0..20) {
+            val x = i / 20.0
             assertEquals(x, RevealMotion.easeInOutInverse(RevealMotion.easeInOut(x)), 1e-9)
-            x += 0.05
         }
     }
 

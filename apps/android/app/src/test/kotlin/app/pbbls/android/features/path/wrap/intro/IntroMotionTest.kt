@@ -23,6 +23,13 @@ class IntroMotionTest {
     }
 
     @Test
+    fun `a cairn's stones tick a little firmer each, capped at 0_8`() {
+        assertEquals(0.32f, IntroTick.cairn(0).intensity, 1e-6f)
+        assertEquals(0.74f, IntroTick.cairn(6).intensity, 1e-6f)
+        assertEquals(0.8f, IntroTick.cairn(20).intensity, 0f)
+    }
+
+    @Test
     fun `a stamp comes in large and clear, presses past its size at impact, and settles`() {
         assertEquals(1.25, IntroMotion.stampScale(0.0), 0.0)
         assertTrue(IntroMotion.stampScale(IntroMotion.STAMP_IMPACT) < 1)
