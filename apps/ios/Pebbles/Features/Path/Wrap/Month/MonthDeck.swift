@@ -4,8 +4,10 @@ import SwiftUI
 /// section that shows, in the server's order. An empty section deals no
 /// card; tone and hours are a card each, the insights head on the first.
 ///
-/// A vertical paging `ScrollView`, one card per page, inset so the deck's
-/// edges show. `.scrollTransition` makes the paging read as a deck: the top
+/// A vertical `ScrollView`, one card per page, inset so the deck's edges
+/// show, snapping to the cards one per throw: `.paging` let a throw pass a
+/// card (the fifth of the Lab's October, every time). `.scrollTransition`
+/// makes the paging read as a deck: the top
 /// card leaves upward under the finger, lifted and turned a little; the next
 /// waits beneath it, held in place, a little smaller, its foot peeking below,
 /// and grows to full size as it comes on top; swiping down lays the previous
@@ -46,7 +48,7 @@ struct MonthDeck: View {
             }
             .scrollTargetLayout()
         }
-        .scrollTargetBehavior(.paging)
+        .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
         .scrollIndicators(.hidden)
         .scrollPosition(id: $top)
         .background(alignment: .bottom) {
