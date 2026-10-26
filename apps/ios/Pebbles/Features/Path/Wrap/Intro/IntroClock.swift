@@ -8,12 +8,14 @@ struct IntroContext {
     var tempo = IntroTempo.standard
 }
 
-/// Whether the intro plays at all (#1241 §Accessibility): not under Reduce
-/// Motion, not while VoiceOver runs, where hidden and moving parts would fight
-/// its focus.
+/// Whether the intro plays at all (#1241 §Accessibility, D11): not under
+/// Reduce Motion, not while VoiceOver runs, where hidden and moving parts
+/// would fight its focus, and not at an accessibility text size, where a
+/// section scaled to fit its card would read too small: the month is then
+/// the vertical page, settled.
 enum IntroPolicy {
-    static func plays(reduceMotion: Bool, voiceOver: Bool) -> Bool {
-        !reduceMotion && !voiceOver
+    static func plays(reduceMotion: Bool, voiceOver: Bool, largeText: Bool) -> Bool {
+        !reduceMotion && !voiceOver && !largeText
     }
 }
 

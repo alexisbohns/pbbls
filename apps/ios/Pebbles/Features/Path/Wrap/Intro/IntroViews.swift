@@ -33,8 +33,8 @@ extension EnvironmentValues {
 }
 
 /// Hands its content the reveal of the sequence around it at the frame's
-/// date: settled with no clock, outside a sequence, under Reduce Motion, or
-/// while VoiceOver runs.
+/// date: settled with no clock, outside a sequence, or where `IntroPolicy`
+/// refuses the intro.
 struct IntroReader<Content: View>: View {
     private let content: (IntroReveal) -> Content
 
@@ -43,6 +43,7 @@ struct IntroReader<Content: View>: View {
     @Environment(\.introNow) private var now
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(@ViewBuilder content: @escaping (IntroReveal) -> Content) {
         self.content = content
@@ -53,7 +54,9 @@ struct IntroReader<Content: View>: View {
     }
 
     private var reveal: IntroReveal {
-        guard let clock, let sequence, IntroPolicy.plays(reduceMotion: reduceMotion, voiceOver: voiceOver) else {
+        guard let clock, let sequence,
+              IntroPolicy.plays(reduceMotion: reduceMotion, voiceOver: voiceOver,
+                                largeText: dynamicTypeSize.isAccessibilitySize) else {
             return .settled
         }
         return clock.reveal(sequence, at: clock.frozenAt ?? now)

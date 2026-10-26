@@ -6,8 +6,8 @@ import SwiftUI
 /// held card closes, VoiceOver comes back to its row (the focused page only,
 /// so a realised neighbour never takes it). With an intro context, the page
 /// plays its intro (#1241) while on screen, focused and the app active,
-/// skipped by a tap; under Reduce Motion or VoiceOver it drops the intro for
-/// good. Android: `MonthPage`.
+/// skipped by a tap; under Reduce Motion, VoiceOver or an accessibility text
+/// size it drops the intro for good. Android: `MonthPage`.
 struct MonthPage: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
@@ -27,6 +27,7 @@ struct MonthPage: View {
     @State private var isVisible = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.scenePhase) private var scenePhase
 
     init(wrap: MonthWrap, lookups: WrapLookups, isFocused: Bool, returnFocus: Binding<UUID?>,
@@ -81,9 +82,10 @@ struct MonthPage: View {
         isVisible && isFocused && scenePhase == .active && allowsIntro
     }
 
-    /// Neither Reduce Motion nor VoiceOver on.
+    /// Neither Reduce Motion nor VoiceOver on, and the text below the accessibility sizes.
     private var allowsIntro: Bool {
-        IntroPolicy.plays(reduceMotion: reduceMotion, voiceOver: voiceOver)
+        IntroPolicy.plays(reduceMotion: reduceMotion, voiceOver: voiceOver,
+                          largeText: dynamicTypeSize.isAccessibilitySize)
     }
 }
 

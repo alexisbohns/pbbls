@@ -2,15 +2,16 @@ import Foundation
 import Testing
 @testable import Pebbles
 
-/// #1241 D3, §Lifecycle, §Accessibility.
+/// #1241 D3, D11, §Lifecycle, §Accessibility.
 @Suite("Intro rules")
 @MainActor
 struct IntroRulesTests {
-    @Test("no intro under Reduce Motion or while VoiceOver runs")
+    @Test("no intro under Reduce Motion, while VoiceOver runs, or at an accessibility text size")
     func policy() {
-        #expect(IntroPolicy.plays(reduceMotion: false, voiceOver: false))
-        #expect(!IntroPolicy.plays(reduceMotion: true, voiceOver: false))
-        #expect(!IntroPolicy.plays(reduceMotion: false, voiceOver: true))
+        #expect(IntroPolicy.plays(reduceMotion: false, voiceOver: false, largeText: false))
+        #expect(!IntroPolicy.plays(reduceMotion: true, voiceOver: false, largeText: false))
+        #expect(!IntroPolicy.plays(reduceMotion: false, voiceOver: true, largeText: false))
+        #expect(!IntroPolicy.plays(reduceMotion: false, voiceOver: false, largeText: true))
     }
 
     @Test("the ledger holds a month's sequence once; a reset forgets that month only")
