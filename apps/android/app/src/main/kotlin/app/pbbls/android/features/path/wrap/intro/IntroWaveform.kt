@@ -1,6 +1,7 @@
 package app.pbbls.android.features.path.wrap.intro
 
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 /** One vibration's on-off timings (ms) and amplitudes (0 off, 1…255 on), for `VibrationEffect.createWaveform`. */
 data class IntroWave(
@@ -17,38 +18,46 @@ object IntroWaveform {
         beats: List<IntroBeat>,
         leadMs: Int,
     ): IntroWave {
+        // A segment's bounds, in ms from the wave's start.
         data class Segment(
             val start: Double,
-            val length: Double,
+            val end: Double,
             val amplitude: Int,
         )
 
         // A non-finite intensity (NaN passes coerceIn, and throws in roundToInt) plays at the least amplitude.
         fun amp(intensity: Float) = if (intensity.isFinite()) (intensity * 255).roundToInt().coerceIn(1, 255) else 1
-        val pulses = IntroHaptics.events(beats).map { Segment(it.at * 1000 + leadMs, PULSE_MS.toDouble(), amp(it.tick.intensity)) }
+        val pulses =
+            IntroHaptics.events(beats).map {
+                val start = it.at * 1000 + leadMs
+                Segment(start, start + PULSE_MS, amp(it.tick.intensity))
+            }
         val steps =
             IntroHaptics.swells(beats).flatMap { swell ->
                 val count = maxOf(1, (swell.sounding * 1000 / STEP_MS).toInt())
                 List(count) { k ->
                     val f = if (count > 1) k / (count - 1f) else 1f
                     val start = swell.at * 1000 + leadMs + k * STEP_MS
-                    Segment(start, STEP_MS.toDouble(), amp(swell.swell.from + (swell.swell.to - swell.swell.from) * f))
+                    Segment(start, start + STEP_MS, amp(swell.swell.from + (swell.swell.to - swell.swell.from) * f))
                 }
             }
         val timings = mutableListOf<Long>()
         val amplitudes = mutableListOf<Int>()
-        var cursor = 0.0
+        // Each bound rounds on its own and the timings are their differences, so rounding never adds up along
+        // the wave (as IntroComposition keeps a whole-ms end). A segment overlapping the one before is cut short.
+        var cursor = 0L
         (pulses + steps).sortedBy { it.start }.forEach { s ->
-            if (s.start > cursor) {
-                timings += (s.start - cursor).roundToInt().toLong()
+            val start = s.start.roundToLong()
+            val end = s.end.roundToLong()
+            if (start > cursor) {
+                timings += start - cursor
                 amplitudes += 0
-                cursor = s.start
+                cursor = start
             }
-            val length = s.length - (cursor - s.start)
-            if (length <= 0) return@forEach
-            timings += length.roundToInt().toLong()
+            if (end <= cursor) return@forEach
+            timings += end - cursor
             amplitudes += s.amplitude
-            cursor += length
+            cursor = end
         }
         return IntroWave(timings, amplitudes)
     }

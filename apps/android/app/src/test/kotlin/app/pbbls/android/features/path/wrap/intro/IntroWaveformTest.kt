@@ -14,6 +14,18 @@ class IntroWaveformTest {
     }
 
     @Test
+    fun `each segment's bounds round on their own, so rounding never adds up along the wave`() {
+        // Pulses at 10, 50.4 and 90.8 ms: rounding each gap would land the third at 90, not 91.
+        val beats =
+            listOf(
+                IntroBeat(IntroKey.Row(0), 0.0, 0.0, IntroTick.light),
+                IntroBeat(IntroKey.Row(1), 0.0404, 0.0, IntroTick.light),
+                IntroBeat(IntroKey.Row(2), 0.0808, 0.0, IntroTick.light),
+            )
+        assertEquals(listOf(10L, 8L, 32L, 8L, 33L, 8L), IntroWaveform.of(beats, leadMs = 10).timings)
+    }
+
+    @Test
     fun `a swell ramps in 10 ms steps over its sounding time`() {
         val beats = listOf(IntroBeat(IntroKey.Gauge(0), 0.0, 0.07, swell = IntroSwell(0.2f, 0.6f, 0.3f)))
         val wave = IntroWaveform.of(beats, leadMs = 0)

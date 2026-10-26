@@ -32,7 +32,11 @@ object IntroComposition {
      * [beats]' ticks (floored, [IntroHaptics.events]) and swells (trains of back-to-back low ticks, ramping
      * from the swell's start to its end over its sounding time), in time order, each paused from the end of
      * the one before by [durations]. [leadMs] delays the whole, so it starts with the frames. [supported]
-     * holds at least [IntroPrimitiveKind.TICK]: the tier is chosen on it.
+     * holds at least [IntroPrimitiveKind.TICK]: the tier is chosen on it. Where LOW_TICK is missing, a swell's
+     * train plays as TICKs softened by [LOW_TICK_AS_TICK], like a substituted tick.
+     *
+     * It assumes swells overlap neither each other nor a tick, which the scores guarantee: overlapping
+     * primitives would play back to back, each pushed past the end of the one before.
      */
     fun of(
         beats: List<IntroBeat>,
@@ -58,14 +62,19 @@ object IntroComposition {
             }
         val trains =
             IntroHaptics.swells(beats).flatMap { swell ->
-                val kind = if (IntroPrimitiveKind.LOW_TICK in supported) IntroPrimitiveKind.LOW_TICK else IntroPrimitiveKind.TICK
+                val (kind, factor) =
+                    if (IntroPrimitiveKind.LOW_TICK in supported) {
+                        IntroPrimitiveKind.LOW_TICK to 1f
+                    } else {
+                        IntroPrimitiveKind.TICK to LOW_TICK_AS_TICK
+                    }
                 val step = maxOf(durations[kind] ?: 0, TRAIN_MIN_STEP_MS)
                 val count = maxOf(1, (swell.sounding * 1000 / step).toInt())
                 List(count) { k ->
                     val f = if (count > 1) k / (count - 1f) else 1f
                     val scale = swell.swell.from + (swell.swell.to - swell.swell.from) * f
                     // A primitive's scale outside 0…1 throws as the composition is built.
-                    Placed(swell.at * 1000 + k * step, kind, scale.coerceIn(0f, 1f))
+                    Placed(swell.at * 1000 + k * step, kind, (scale * factor).coerceIn(0f, 1f))
                 }
             }
         var end = 0.0
