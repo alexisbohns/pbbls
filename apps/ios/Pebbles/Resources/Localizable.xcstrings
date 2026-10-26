@@ -8939,6 +8939,23 @@
         }
       }
     },
+    "path.wrap.replayMonth" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replay the month"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rejouer le mois"
+          }
+        }
+      }
+    },
     "path.wrap.small" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -24,6 +24,10 @@ struct MonthPage: View {
     @AccessibilityFocusState private var milestoneFocus: UUID?
     /// The page's intro; nil without a context, or once `IntroPolicy` refused it, and the page draws settled.
     @State private var intro: IntroClock?
+    /// What builds the intro's clock, again for a replay (D14).
+    private let introContext: IntroContext?
+    /// Each replay deals the deck again, from the cover.
+    @State private var deal = 0
     /// On screen: a tab switch or a full-screen cover hides the page without a tap on it.
     @State private var isVisible = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -40,11 +44,9 @@ struct MonthPage: View {
         _returnFocus = returnFocus
         self.onWeek = onWeek
         self.onOpen = onOpen
+        introContext = context
         // Built with the page, not on appear: a first frame without it would draw settled, then blank.
-        _intro = State(initialValue: context.map {
-            IntroClock(month: wrap.month, order: IntroClock.order(wrap), ledger: $0.ledger, haptics: $0.haptics,
-                       tempo: $0.tempo)
-        })
+        _intro = State(initialValue: context.map { Self.clock(wrap, context: $0) })
     }
 
     var body: some View {
@@ -52,7 +54,9 @@ struct MonthPage: View {
             // Refused by the policy, the page never draws the deck, even for the frame before `intro` drops.
             if intro != nil, allowsIntro {
                 MonthDeck(wrap: wrap, lookups: lookups, dayView: dayView, focus: $milestoneFocus,
-                          onWeek: onWeek, onOpen: onOpen, onMore: { sheet = $0 })
+                          onWeek: onWeek, onOpen: onOpen, onMore: { sheet = $0 }, onReplay: replay)
+                    .id(deal)
+                    .transition(.opacity)
             } else {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
@@ -83,6 +87,27 @@ struct MonthPage: View {
         }
         .sheet(item: $sheet) { tab in
             MonthSheet(wrap: wrap, lookups: lookups, initial: tab)
+        }
+    }
+
+    private static func clock(_ wrap: MonthWrap, context: IntroContext) -> IntroClock {
+        IntroClock(month: wrap.month, order: IntroClock.order(wrap), ledger: context.ledger, haptics: context.haptics,
+                   tempo: context.tempo)
+    }
+
+    /// The end card's replay (D14): the month forgotten by the ledger, a fresh clock, and the deck dealt again from
+    /// the cover. A turn later, so the page's tap-to-skip, fired by the same tap, lands on the old clock.
+    private func replay() {
+        guard let context = introContext, let old = intro else { return }
+        DispatchQueue.main.async {
+            old.settleAll()
+            context.ledger.reset(wrap.month)
+            let clock = Self.clock(wrap, context: context)
+            clock.isActive = playsIntro
+            withAnimation(.easeInOut(duration: 0.3)) {
+                intro = clock
+                deal += 1
+            }
         }
     }
 

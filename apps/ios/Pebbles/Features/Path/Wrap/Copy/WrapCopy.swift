@@ -62,6 +62,9 @@ enum WrapCopy {
 
     static func soFar(locale: Locale) -> String { SpineStrings.string("path.wrap.soFar", locale: locale) }
 
+    /// The deck's end card (#1241 D14): "Replay the month".
+    static func replayMonth(locale: Locale) -> String { SpineStrings.string("path.wrap.replayMonth", locale: locale) }
+
     /// A past week of a month without a pebble (#1241 D12), "No pebble.": a month page is always a completed month.
     static func emptyWeek(locale: Locale) -> String { SpineStrings.string("path.wrap.lineNoPebbles", locale: locale) }
 

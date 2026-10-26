@@ -6,12 +6,31 @@ import Testing
 @Suite("Month deck")
 @MainActor
 struct MonthDeckTests {
-    @Test("the fixture deals the cover, then each section in the server's order")
+    @Test("the fixture deals the cover, then each section in the server's order, then the end card")
     func fixture() throws {
         let wrap = try MonthPayloadFixture.october()
         let cards = MonthDeck.cards(wrap: wrap, lookups: MonthPayloadFixture.lookups(wrap))
         #expect(cards == [.cover, .section(.weeks), .section(.milestones), .section(.persons), .section(.gem),
-                          .section(.domains), .section(.tone), .section(.hours)])
+                          .section(.domains), .section(.tone), .section(.hours), .end])
+    }
+
+    @Test("a month with nothing to deal deals no end card either")
+    func nothing() throws {
+        let october = try MonthPayloadFixture.october()
+        let wrap = MonthWrap(month: october.month, daysInMonth: october.daysInMonth,
+                             firstWeekday: october.firstWeekday, pebbles: 0, people: 0, sections: [], cover: nil,
+                             weeks: nil, milestones: nil, persons: nil, previousMonth: nil, gem: nil,
+                             fineEmotions: nil, domains: nil, tone: nil, hours: nil)
+        #expect(MonthDeck.cards(wrap: wrap, lookups: MonthPayloadFixture.lookups(wrap)).isEmpty)
+    }
+
+    @Test("the end card arrives, then its replay rises")
+    func end() throws {
+        let beats = IntroScore.end()
+        #expect(try #require(beats.first { $0.key == .header }).tick == .arrive)
+        let replay = try #require(beats.first { $0.key == .replay })
+        #expect(replay.at == IntroScore.rowsAt)
+        #expect(replay.tick == .light)
     }
 
     @Test("an emptied section deals no card", arguments: MonthSection.allCases)
@@ -19,7 +38,7 @@ struct MonthDeckTests {
         let wrap = Self.emptying(try MonthPayloadFixture.october(), section)
         let cards = MonthDeck.cards(wrap: wrap, lookups: MonthPayloadFixture.lookups(wrap))
         #expect(!cards.contains(.section(section)))
-        #expect(cards.count == 7)
+        #expect(cards.count == 8)
     }
 
     @Test("a wrap without a cover deals none")
@@ -74,11 +93,11 @@ struct MonthDeckTests {
     func step() throws {
         let wrap = try MonthPayloadFixture.october()
         let cards = MonthDeck.cards(wrap: wrap, lookups: MonthPayloadFixture.lookups(wrap))
-        #expect(MonthDeckStep.of(.cover, in: cards) == MonthDeckStep(index: 0, count: 8))
+        #expect(MonthDeckStep.of(.cover, in: cards) == MonthDeckStep(index: 0, count: 9))
         let gem = try #require(MonthDeckStep.of(.section(.gem), in: cards))
         #expect(gem.index == 4)
-        #expect((0..<gem.count).map(gem.isFilled) == [true, true, true, true, true, false, false, false])
-        #expect(MonthDeckStep.of(.section(.hours), in: cards)?.index == 7)
+        #expect((0..<gem.count).map(gem.isFilled) == [true, true, true, true, true, false, false, false, false])
+        #expect(MonthDeckStep.of(.end, in: cards)?.index == 8)
     }
 
     @Test("a deck of one has no stepper, and a card it does not deal has no place")
@@ -97,6 +116,7 @@ struct MonthDeckTests {
                            leadsInsights: MonthDeck.leadsInsights(card, in: cards))
         }
         #expect(head(.cover) == nil)
+        #expect(head(.end) == nil)
         #expect(head(.section(.weeks)) == WeeksSummary.head(wrap: wrap))
         #expect(head(.section(.persons)) == PersonsSection.head(wrap: wrap, lookups: lookups, dayView: .circle))
         #expect(head(.section(.gem)) == EmotionGem.head)

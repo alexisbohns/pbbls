@@ -27,6 +27,8 @@ struct MonthDeck: View {
     let onWeek: (CalendarDay) -> Void
     let onOpen: (MomentSummary) -> Void
     let onMore: (MonthSection) -> Void
+    /// The end card's replay (D14): the page plays the month again from the cover.
+    let onReplay: () -> Void
 
     @Environment(\.introClock) private var clock
     /// The card on top, as the paging leaves it; nil before the first swipe.
@@ -78,7 +80,8 @@ struct MonthDeck: View {
         let head = Self.head(card, wrap: wrap, lookups: lookups, dayView: dayView, leadsInsights: leadsInsights)
         return MonthDeckCard(month: Self.margin(wrap.month), step: MonthDeckStep.of(card, in: cards), head: head) {
             MonthDeckContent(card: card, wrap: wrap, lookups: lookups, dayView: dayView, focus: focus,
-                             onWeek: onWeek, onOpen: onOpen, onMore: onMore, leadsInsights: leadsInsights)
+                             onWeek: onWeek, onOpen: onOpen, onMore: onMore, onReplay: onReplay,
+                             leadsInsights: leadsInsights)
                 .environment(\.monthHeadOnCard, true)
         }
         .frame(width: page.width, height: page.height)
@@ -99,10 +102,11 @@ struct MonthDeck: View {
 }
 
 extension MonthDeck {
-    /// The cards, top first. Pure, over the same conditions the sections draw under.
+    /// The cards, top first, the end card last (D14). Pure, over the same conditions the sections draw under.
     static func cards(wrap: MonthWrap, lookups: WrapLookups) -> [IntroSequence] {
         let cover: [IntroSequence] = MonthCoverView.isShown(wrap: wrap, lookups: lookups) ? [.cover] : []
-        return cover + wrap.sections.filter { shows($0, wrap: wrap, lookups: lookups) }.map { .section($0) }
+        let dealt = cover + wrap.sections.filter { shows($0, wrap: wrap, lookups: lookups) }.map { .section($0) }
+        return dealt.isEmpty ? [] : dealt + [.end]
     }
 
     /// The first tone or hours card carries the insights head.
@@ -199,7 +203,7 @@ private struct MonthDeckEdges: View {
     }
 }
 
-/// A card's content: the cover, or one section.
+/// A card's content: the cover, one section, or the end.
 private struct MonthDeckContent: View {
     let card: IntroSequence
     let wrap: MonthWrap
@@ -209,6 +213,7 @@ private struct MonthDeckContent: View {
     let onWeek: (CalendarDay) -> Void
     let onOpen: (MomentSummary) -> Void
     let onMore: (MonthSection) -> Void
+    let onReplay: () -> Void
     let leadsInsights: Bool
 
     var body: some View {
@@ -218,6 +223,8 @@ private struct MonthDeckContent: View {
         case let .section(section):
             MonthSectionContent(section: section, wrap: wrap, lookups: lookups, dayView: dayView, focus: focus,
                                 onWeek: onWeek, onOpen: onOpen, onMore: onMore, leadsInsights: leadsInsights)
+        case .end:
+            MonthDeckEnd(month: wrap.month, onReplay: onReplay)
         }
     }
 }

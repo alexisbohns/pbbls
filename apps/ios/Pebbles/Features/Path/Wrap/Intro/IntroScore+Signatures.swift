@@ -93,6 +93,12 @@ extension IntroScore {
         return beats
     }
 
+    /// The end card (D14): its arrival, then its replay button.
+    static func end() -> [IntroBeat] {
+        [IntroBeat(key: .header, at: 0, duration: 0, tick: .arrive),
+         IntroBeat(key: .replay, at: rowsAt, duration: IntroMotion.rise, tick: .light)]
+    }
+
     /// How long a gauge fills: a fuller one takes longer.
     static func fillSpan(_ share: Double) -> TimeInterval {
         0.25 + 0.45 * IntroMotion.clamp(share)

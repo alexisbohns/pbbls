@@ -73,6 +73,8 @@ enum MonthDeckLayout {
     static let segment: CGFloat = 10
     static let segmentThickness: CGFloat = 3
     static let segmentGap: CGFloat = 3
+    /// Between the end card's month and its replay.
+    static let endGap: CGFloat = 20
 }
 
 /// A card's margin (#1241 D11): the month set upright at the top, reading
@@ -161,5 +163,42 @@ private struct MonthDeckTitle: View {
         .padding(.horizontal, MonthLayout.sectionPadX)
         .padding(.top, MonthDeckLayout.titleTop)
         .padding(.bottom, MonthDeckLayout.titleBottom)
+    }
+}
+
+/// The deck's last card (#1241 D14), the back of the deck: the month's name and
+/// a button that replays the month from the cover. Centred in the card's room.
+struct MonthDeckEnd: View {
+    let month: CalendarMonth
+    let onReplay: () -> Void
+
+    @Environment(\.monthCardRoom) private var room
+
+    var body: some View {
+        let locale = SpineStrings.appLocale
+        VStack(spacing: MonthDeckLayout.endGap) {
+            Text(verbatim: WrapCopy.monthName(month, locale: locale))
+                .spineType(.monthName)
+                .foregroundStyle(Color.pebbles.onSurface)
+                .dynamicTypeSize(...DynamicTypeSize.large)
+            Button(action: onReplay) {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.counterclockwise")
+                        .imageScale(.small)
+                        .accessibilityHidden(true)
+                    Text(verbatim: WrapCopy.replayMonth(locale: locale))
+                }
+                .spineType(.personsFold)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                .padding(.horizontal, 18)
+                .frame(minHeight: SpineLayout.minTarget)
+                .overlay { Capsule().strokeBorder(Color.pebbles.cardRule, lineWidth: SpineLayout.rule) }
+                .contentShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .introReveal(.replay)
+        }
+        .frame(maxWidth: .infinity, minHeight: room ?? 0)
+        .introSequence(.end) { IntroScore.end() }
     }
 }

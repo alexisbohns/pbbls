@@ -1,9 +1,11 @@
 import Foundation
 
-/// What enters in a month's intro (#1241): the cover, or one of its sections.
+/// What enters in a month's intro (#1241): the cover, one of its sections, or
+/// the deck's end card (D14), which plays last.
 enum IntroSequence: Hashable, Sendable {
     case cover
     case section(MonthSection)
+    case end
 }
 
 /// One element of a sequence, named by what it is; the figures ask for these.
@@ -26,6 +28,8 @@ enum IntroKey: Hashable, Sendable {
     case cairn(Int, Int), words(Int), mark(Int, Int), stamp(Int), impact(Int), date(Int)
     /// The gem's count-up, a tick per pebble (1…n); a domain's gauge filling, and its gauge full.
     case tally(Int), gauge(Int), full(Int)
+    /// The end card's replay button (D14).
+    case replay
 }
 
 /// How firmly a beat ticks: Core Haptics' intensity and sharpness, 0…1 (#1241 §Choreography).
