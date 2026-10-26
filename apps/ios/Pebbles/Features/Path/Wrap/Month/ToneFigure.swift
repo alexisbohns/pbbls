@@ -15,14 +15,23 @@ import SwiftUI
 struct ToneFigure: View {
     let wrap: MonthWrap
 
+    @Environment(\.monthHeadOnCard) private var headOnCard
+
     private var locale: Locale { SpineStrings.appLocale }
+
+    /// The figure's head, the deck's title for its card when it leads no insights head (#1241 D11).
+    static var head: MonthHead {
+        let locale = SpineStrings.appLocale
+        return MonthHead(label: WrapCopy.toneTitle(locale: locale), hint: WrapCopy.toneHint(locale: locale))
+    }
 
     var body: some View {
         if Self.isShown(wrap: wrap), let tone = wrap.tone {
             let line = WrapCopy.toneLine(tone.verdict, first: tone.first, last: tone.last, locale: locale)
             VStack(alignment: .leading, spacing: 0) {
-                SpineSectionHeader(WrapCopy.toneTitle(locale: locale), hint: WrapCopy.toneHint(locale: locale)) {
-                    MonthDeckStepper()
+                // On the deck, the card's title band draws it when no insights head comes first (#1241 D11).
+                if !headOnCard {
+                    SpineSectionHeader(Self.head.label, hint: Self.head.hint)
                 }
                 Text(verbatim: line)
                     .spineType(.still)

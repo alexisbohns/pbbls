@@ -39,16 +39,48 @@ extension View {
     }
 }
 
-/// A month section's head, with the board's spacing; on the deck, the stepper at its far end (#1241 D11).
+/// A month section's head in words (#1241 D11): the page draws it over its
+/// section, the deck as its card's title band.
+struct MonthHead: Equatable {
+    let label: String
+    var hint: String?
+}
+
+private struct MonthHeadOnCardKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// On the deck (#1241 D11), the card's title band draws its first head, and the section leaves it out.
+    var monthHeadOnCard: Bool {
+        get { self[MonthHeadOnCardKey.self] }
+        set { self[MonthHeadOnCardKey.self] = newValue }
+    }
+}
+
+/// A month section's head, with the board's spacing; on the deck, left to the card's title band.
 struct MonthSectionHead: View {
     let label: String
     var hint: String?
 
+    @Environment(\.monthHeadOnCard) private var onCard
+
+    init(label: String, hint: String? = nil) {
+        self.label = label
+        self.hint = hint
+    }
+
+    init(_ head: MonthHead) {
+        self.init(label: head.label, hint: head.hint)
+    }
+
     var body: some View {
-        SpineSectionHeader(label, hint: hint) { MonthDeckStepper() }
-            .padding(.horizontal, MonthLayout.sectionPadX)
-            .padding(.top, MonthLayout.sectionTop)
-            .padding(.bottom, MonthLayout.headGap)
+        if !onCard {
+            SpineSectionHeader(label, hint: hint)
+                .padding(.horizontal, MonthLayout.sectionPadX)
+                .padding(.top, MonthLayout.sectionTop)
+                .padding(.bottom, MonthLayout.headGap)
+        }
     }
 }
 

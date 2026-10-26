@@ -11,7 +11,15 @@ struct HoursFigure: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
 
+    @Environment(\.monthHeadOnCard) private var headOnCard
+
     private var locale: Locale { SpineStrings.appLocale }
+
+    /// The figure's head, the deck's title for its card when it leads no insights head (#1241 D11).
+    static var head: MonthHead {
+        let locale = SpineStrings.appLocale
+        return MonthHead(label: WrapCopy.hoursTitle(locale: locale), hint: WrapCopy.hoursHint(locale: locale))
+    }
 
     var body: some View {
         if Self.isShown(wrap: wrap, lookups: lookups), let hours = wrap.hours {
@@ -24,10 +32,11 @@ struct HoursFigure: View {
                                           locale: locale, dateLocale: SpineStrings.dateLocale)
             } ?? WrapCopy.hoursSub(locale: locale)
             VStack(alignment: .leading, spacing: 0) {
-                SpineSectionHeader(WrapCopy.hoursTitle(locale: locale), hint: WrapCopy.hoursHint(locale: locale)) {
-                    MonthDeckStepper()
+                // On the deck, the card's title band draws it when no insights head comes first (#1241 D11).
+                if !headOnCard {
+                    SpineSectionHeader(Self.head.label, hint: Self.head.hint)
+                        .padding(.top, 28)
                 }
-                    .padding(.top, 28)
                 Text(verbatim: WrapCopy.hoursSub(locale: locale))
                     .spineType(.still)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)

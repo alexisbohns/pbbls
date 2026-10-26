@@ -87,6 +87,24 @@ struct MonthDeckTests {
         #expect(MonthDeckStep.of(.section(.gem), in: [.cover, .section(.weeks)]) == nil)
     }
 
+    @Test("a card's title is its first head as the page draws it; the cover has none, the month being its title")
+    func titles() throws {
+        let wrap = try MonthPayloadFixture.october()
+        let lookups = MonthPayloadFixture.lookups(wrap)
+        let cards = MonthDeck.cards(wrap: wrap, lookups: lookups)
+        let head = { (card: IntroSequence) in
+            MonthDeck.head(card, wrap: wrap, lookups: lookups, dayView: .circle,
+                           leadsInsights: MonthDeck.leadsInsights(card, in: cards))
+        }
+        #expect(head(.cover) == nil)
+        #expect(head(.section(.weeks)) == WeeksSummary.head(wrap: wrap))
+        #expect(head(.section(.persons)) == PersonsSection.head(wrap: wrap, lookups: lookups, dayView: .circle))
+        #expect(head(.section(.gem)) == EmotionGem.head)
+        // The tone leads the insights: its card is titled by their head, the hours by their own.
+        #expect(head(.section(.tone)) == MonthSectionContent.insightsHead)
+        #expect(head(.section(.hours)) == HoursFigure.head)
+    }
+
     /// The wrap with `section` drawing nothing, as the server sends an empty one, and without its cover if asked.
     private static func emptying(_ wrap: MonthWrap, _ section: MonthSection? = nil, cover: Bool = false) -> MonthWrap {
         MonthWrap(month: wrap.month, daysInMonth: wrap.daysInMonth, firstWeekday: wrap.firstWeekday,

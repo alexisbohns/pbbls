@@ -14,8 +14,7 @@ struct WeeksSummary: View {
         if Self.isShown(wrap: wrap, lookups: lookups) {
             let weeks = Self.weeks(wrap)
             VStack(alignment: .leading, spacing: 0) {
-                MonthSectionHead(label: WrapCopy.weeksHeader(weeks.count, locale: locale),
-                                 hint: WrapCopy.weeksHint(wrap.month, locale: locale))
+                MonthSectionHead(Self.head(wrap: wrap))
                 VStack(spacing: 0) {
                     ForEach(Array(weeks.enumerated()), id: \.element.weekStart) { index, week in
                         let range = WrapCopy.range(wrap.month, from: week.from, to: week.to, locale: locale)
@@ -34,6 +33,13 @@ struct WeeksSummary: View {
             }
             .introSequence(.section(.weeks)) { Self.introBeats(wrap) }
         }
+    }
+
+    /// The section's head, the deck's title for its card (#1241 D11).
+    static func head(wrap: MonthWrap) -> MonthHead {
+        let locale = SpineStrings.appLocale
+        return MonthHead(label: WrapCopy.weeksHeader(weeks(wrap).count, locale: locale),
+                         hint: WrapCopy.weeksHint(wrap.month, locale: locale))
     }
 
     /// Drawn when a week of the month has pebbles; the deck deals no card otherwise (#1241 D11).
@@ -68,8 +74,7 @@ struct MilestonesSection: View {
         if Self.isShown(wrap: wrap, lookups: lookups) {
             let moments = Self.moments(wrap, lookups: lookups)
             VStack(alignment: .leading, spacing: 0) {
-                MonthSectionHead(label: WrapCopy.milestonesHeader(moments.count, locale: locale),
-                                 hint: WrapCopy.milestonesHint(locale: locale))
+                MonthSectionHead(Self.head(wrap: wrap, lookups: lookups))
                 VStack(spacing: 0) {
                     ForEach(Array(moments.enumerated()), id: \.element.id) { index, moment in
                         row(moment, index: index)
@@ -79,6 +84,13 @@ struct MilestonesSection: View {
             }
             .introSequence(.section(.milestones)) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// The section's head, the deck's title for its card (#1241 D11).
+    static func head(wrap: MonthWrap, lookups: WrapLookups) -> MonthHead {
+        let locale = SpineStrings.appLocale
+        return MonthHead(label: WrapCopy.milestonesHeader(moments(wrap, lookups: lookups).count, locale: locale),
+                         hint: WrapCopy.milestonesHint(locale: locale))
     }
 
     /// Drawn when the device knows one of the server's milestones.
@@ -129,9 +141,7 @@ struct PersonsSection: View {
         if Self.isShown(wrap: wrap, lookups: lookups) {
             let rows = Self.rows(wrap, lookups: lookups)
             VStack(alignment: .leading, spacing: 0) {
-                let clockwise = dayView == .circle && !rows.isEmpty
-                MonthSectionHead(label: WrapCopy.tile(.persons, locale: locale),
-                                 hint: clockwise ? WrapCopy.clockwiseHint(locale: locale) : nil)
+                MonthSectionHead(Self.head(wrap: wrap, lookups: lookups, dayView: dayView))
                 if rows.isEmpty {
                     SheetLead(WrapCopy.nobody(locale: locale), bottom: 0)
                         .padding(.horizontal, MonthLayout.sectionPadX)
@@ -153,6 +163,14 @@ struct PersonsSection: View {
             }
             .introSequence(.section(.persons)) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// The section's head, the deck's title for its card (#1241 D11): on the circle, the ring's reading.
+    static func head(wrap: MonthWrap, lookups: WrapLookups, dayView: DayView) -> MonthHead {
+        let locale = SpineStrings.appLocale
+        let clockwise = dayView == .circle && !rows(wrap, lookups: lookups).isEmpty
+        return MonthHead(label: WrapCopy.tile(.persons, locale: locale),
+                         hint: clockwise ? WrapCopy.clockwiseHint(locale: locale) : nil)
     }
 
     /// Drawn whenever the server sends the persons: the invitation stands in when nobody is named.
@@ -212,7 +230,7 @@ struct DomainsSection: View {
         let domains = Self.rows(wrap, lookups: lookups)
         if Self.isShown(wrap: wrap, lookups: lookups), let top = domains.map(\.stat.count).max() {
             VStack(alignment: .leading, spacing: 0) {
-                MonthSectionHead(label: WrapCopy.tile(.domains, locale: locale))
+                MonthSectionHead(Self.head)
                 VStack(spacing: 0) {
                     ForEach(Array(domains.prefix(WrapCopy.shown).enumerated()), id: \.element.id) { index, row in
                         let share = Double(row.stat.count) / Double(top)
@@ -239,6 +257,11 @@ struct DomainsSection: View {
             }
             .introSequence(.section(.domains)) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// The section's head, the deck's title for its card (#1241 D11).
+    static var head: MonthHead {
+        MonthHead(label: WrapCopy.tile(.domains, locale: SpineStrings.appLocale))
     }
 
     /// Drawn when a domain the device knows was lived this month.

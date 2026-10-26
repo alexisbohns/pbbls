@@ -135,6 +135,12 @@ struct MonthSectionContent: View {
     /// Tone or hours only: this figure carries the insights head.
     let leadsInsights: Bool
 
+    /// The head over tone and hours, the deck's title for the card that leads them.
+    static var insightsHead: MonthHead {
+        let locale = SpineStrings.appLocale
+        return MonthHead(label: WrapCopy.insights(locale: locale), hint: WrapCopy.insightsHint(locale: locale))
+    }
+
     var body: some View {
         switch section {
         case .weeks:
@@ -150,8 +156,7 @@ struct MonthSectionContent: View {
         case .tone, .hours:
             VStack(alignment: .leading, spacing: 0) {
                 if leadsInsights {
-                    MonthSectionHead(label: WrapCopy.insights(locale: SpineStrings.appLocale),
-                                     hint: WrapCopy.insightsHint(locale: SpineStrings.appLocale))
+                    MonthSectionHead(Self.insightsHead)
                 }
                 Group {
                     if section == .tone {
@@ -160,8 +165,8 @@ struct MonthSectionContent: View {
                         HoursFigure(wrap: wrap, lookups: lookups)
                     }
                 }
-                // Under the insights head, which carries the deck's stepper.
-                .transformEnvironment(\.monthDeckStep) { if leadsInsights { $0 = nil } }
+                // Under the insights head, which titles the card, the figure keeps its own.
+                .transformEnvironment(\.monthHeadOnCard) { if leadsInsights { $0 = false } }
             }
             .introSequence(.section(section)) {
                 section == .tone

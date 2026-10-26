@@ -15,8 +15,7 @@ struct EmotionGem: View {
         if Self.isShown(wrap: wrap, lookups: lookups), let gem = wrap.gem {
             let words = GemWords(gem: gem, lookups: lookups, locale: locale)
             VStack(alignment: .leading, spacing: 0) {
-                MonthSectionHead(label: WrapCopy.tile(.emotions, locale: locale),
-                                 hint: WrapCopy.gemHint(locale: locale))
+                MonthSectionHead(Self.head)
                 SheetLead(words.lead)
                     .padding(.horizontal, MonthLayout.sectionPadX)
                     .introReveal(.lead)
@@ -30,6 +29,12 @@ struct EmotionGem: View {
             }
             .introSequence(.section(.gem)) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// The section's head, the deck's title for its card (#1241 D11).
+    static var head: MonthHead {
+        let locale = SpineStrings.appLocale
+        return MonthHead(label: WrapCopy.tile(.emotions, locale: locale), hint: WrapCopy.gemHint(locale: locale))
     }
 
     /// Drawn when the server sends a gem (#1241 D11).

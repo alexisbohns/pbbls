@@ -6,9 +6,12 @@ import SwiftUI
 ///
 /// A vertical `ScrollView`, one card per page, inset so the deck's edges
 /// show, snapping to the cards one per throw: `.paging` let a throw pass a
-/// card (the fifth of the Lab's October, every time). Each card's first head
-/// carries the stepper (`MonthDeckStep`), so a card says where it lies in the
-/// deck even while it waits. `.scrollTransition` makes the paging read as a deck: the top
+/// card (the fifth of the Lab's October, every time). A card is ruled like a
+/// galley: a margin with the month and, at its foot, the stepper
+/// (`MonthDeckStep`); a title band with its first head, which its section then
+/// leaves out (`monthHeadOnCard`); the content under it. So a card says what
+/// and where it is even while it waits. `.scrollTransition` makes the paging
+/// read as a deck: the top
 /// card leaves upward under the finger, lifted and turned a little; the next
 /// waits beneath it, held in place, a little smaller, its foot peeking below,
 /// and grows to full size as it comes on top; swiping down lays the previous
@@ -40,8 +43,7 @@ struct MonthDeck: View {
                 // Dealt once the page is measured: a card laid out at zero size would measure its content wrong.
                 if page.height > 0 {
                     ForEach(Array(cards.enumerated()), id: \.element) { index, card in
-                        self.card(card, leadsInsights: Self.leadsInsights(card, in: cards))
-                            .environment(\.monthDeckStep, MonthDeckStep.of(card, in: cards))
+                        self.card(card, in: cards)
                             // An earlier card lies over a later one.
                             .zIndex(Double(cards.count - index))
                             .id(card)
@@ -70,11 +72,14 @@ struct MonthDeck: View {
 
     /// One page: the card on its paper, moving with the paging. A linear
     /// phase, so the counter-offset holds a card to come exactly in place.
-    private func card(_ card: IntroSequence, leadsInsights: Bool) -> some View {
+    private func card(_ card: IntroSequence, in cards: [IntroSequence]) -> some View {
         let height = page.height
-        return MonthDeckCard {
+        let leadsInsights = Self.leadsInsights(card, in: cards)
+        let head = Self.head(card, wrap: wrap, lookups: lookups, dayView: dayView, leadsInsights: leadsInsights)
+        return MonthDeckCard(month: Self.margin(wrap.month), step: MonthDeckStep.of(card, in: cards), head: head) {
             MonthDeckContent(card: card, wrap: wrap, lookups: lookups, dayView: dayView, focus: focus,
                              onWeek: onWeek, onOpen: onOpen, onMore: onMore, leadsInsights: leadsInsights)
+                .environment(\.monthHeadOnCard, true)
         }
         .frame(width: page.width, height: page.height)
         .scrollTransition(.interactive(timingCurve: .linear), axis: .vertical) { content, phase in
@@ -103,6 +108,26 @@ extension MonthDeck {
     /// The first tone or hours card carries the insights head.
     static func leadsInsights(_ card: IntroSequence, in cards: [IntroSequence]) -> Bool {
         card == cards.first { $0 == .section(.tone) || $0 == .section(.hours) }
+    }
+
+    /// A card's title: its first head, as the page draws it; none on the cover, whose title is the month.
+    static func head(_ card: IntroSequence, wrap: MonthWrap, lookups: WrapLookups, dayView: DayView,
+                     leadsInsights: Bool) -> MonthHead? {
+        guard case let .section(section) = card else { return nil }
+        switch section {
+        case .weeks: return WeeksSummary.head(wrap: wrap)
+        case .milestones: return MilestonesSection.head(wrap: wrap, lookups: lookups)
+        case .persons: return PersonsSection.head(wrap: wrap, lookups: lookups, dayView: dayView)
+        case .domains: return DomainsSection.head
+        case .gem: return EmotionGem.head
+        case .tone: return leadsInsights ? MonthSectionContent.insightsHead : ToneFigure.head
+        case .hours: return leadsInsights ? MonthSectionContent.insightsHead : HoursFigure.head
+        }
+    }
+
+    /// The margin's words: the month and its year.
+    private static func margin(_ month: CalendarMonth) -> String {
+        "\(WrapCopy.monthName(month, locale: SpineStrings.appLocale)) \(month.year)"
     }
 
     private static func shows(_ section: MonthSection, wrap: MonthWrap, lookups: WrapLookups) -> Bool {
@@ -154,52 +179,6 @@ enum MonthDeckMotion {
     }
 }
 
-/// A card's paper: the week tiles' radius and rule on the page's paper, inset in its page.
-private struct MonthDeckPaper: View {
-    var body: some View {
-        let shape = RoundedRectangle(cornerRadius: SpineLayout.tileCorner, style: .continuous)
-        shape
-            .fill(Color.pebbles.surface)
-            .overlay {
-                shape
-                    .inset(by: SpineLayout.rule / 2)
-                    .stroke(Color.pebbles.rule, lineWidth: SpineLayout.rule)
-            }
-            .padding(MonthDeckMotion.inset)
-    }
-}
-
-/// One card: its content top-aligned on the paper, scaled down to fit when it
-/// is taller than the card (the larger text sizes, small phones).
-private struct MonthDeckCard<Content: View>: View {
-    @ViewBuilder let content: Content
-
-    /// The content's own height, and the card's.
-    @State private var ideal: CGFloat = 0
-    @State private var room: CGFloat = 0
-
-    var body: some View {
-        ZStack(alignment: .top) {
-            MonthDeckPaper()
-            // The room is the card's, whatever the content's height: an overlay never grows its base.
-            Color.clear
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { room = $0 }
-                .overlay(alignment: .top) {
-                    content
-                        .fixedSize(horizontal: false, vertical: true)
-                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { ideal = $0 }
-                        .scaleEffect(fit, anchor: .top)
-                }
-                .clipShape(RoundedRectangle(cornerRadius: SpineLayout.tileCorner, style: .continuous))
-                .padding(MonthDeckMotion.inset)
-        }
-    }
-
-    private var fit: CGFloat {
-        ideal > room && room > 0 ? room / ideal : 1
-    }
-}
-
 /// The cards past the next one, as edges below its foot (D11): drawn behind the deck, static.
 private struct MonthDeckEdges: View {
     let count: Int
@@ -235,9 +214,7 @@ private struct MonthDeckContent: View {
     var body: some View {
         switch card {
         case .cover:
-            // The cover's title is the month itself: its head is the stepper alone.
             MonthCoverView(wrap: wrap, lookups: lookups)
-                .overlay(alignment: .top) { MonthDeckCoverHead() }
         case let .section(section):
             MonthSectionContent(section: section, wrap: wrap, lookups: lookups, dayView: dayView, focus: focus,
                                 onWeek: onWeek, onOpen: onOpen, onMore: onMore, leadsInsights: leadsInsights)
@@ -245,8 +222,8 @@ private struct MonthDeckContent: View {
     }
 }
 
-/// Where a card lies in the deck (#1241 D11), for the stepper at its head's
-/// far end. Pure, for the tests.
+/// Where a card lies in the deck (#1241 D11), for the stepper at its margin's
+/// foot. Pure, for the tests.
 struct MonthDeckStep: Equatable {
     let index: Int
     let count: Int
@@ -260,60 +237,5 @@ struct MonthDeckStep: Equatable {
     /// The segment stands for this card or one already thrown.
     func isFilled(_ segment: Int) -> Bool {
         segment <= index
-    }
-}
-
-private struct MonthDeckStepKey: EnvironmentKey {
-    static let defaultValue: MonthDeckStep? = nil
-}
-
-extension EnvironmentValues {
-    /// The card's place in the deck, for its first head; nil off the deck, and the head draws no stepper.
-    var monthDeckStep: MonthDeckStep? {
-        get { self[MonthDeckStepKey.self] }
-        set { self[MonthDeckStepKey.self] = newValue }
-    }
-}
-
-/// A head's far end on the deck (#1241 D11): a segment per card, filled up
-/// to this one, its bars at the label's mid-height. Nothing off the deck.
-/// Decorative: the deck never deals under VoiceOver, and the head names the card.
-struct MonthDeckStepper: View {
-    @Environment(\.monthDeckStep) private var step
-
-    static let segment: CGFloat = 10
-    static let thickness: CGFloat = 3
-    static let gap: CGFloat = 3
-    /// The bars' centre above the label's baseline: the small caps' mid-height.
-    static let lift: CGFloat = 3
-
-    var body: some View {
-        if let step {
-            HStack(spacing: Self.gap) {
-                ForEach(0..<step.count, id: \.self) { segment in
-                    Capsule()
-                        .fill(step.isFilled(segment) ? Color.pebbles.onSurfaceVariant : Color.pebbles.outlineVariant)
-                        .frame(width: Self.segment, height: Self.thickness)
-                }
-            }
-            .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + Self.lift }
-            .accessibilityHidden(true)
-        }
-    }
-}
-
-/// The cover's head on the deck: no label, the month being its title; the
-/// stepper where the sections' heads draw theirs.
-private struct MonthDeckCoverHead: View {
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 0) {
-            // A blank label: the baseline the sections' steppers sit on.
-            Text(verbatim: " ").spineType(.sectionLabel)
-            Spacer(minLength: 0)
-            MonthDeckStepper()
-        }
-        .padding(.horizontal, MonthLayout.sectionPadX)
-        .padding(.top, MonthLayout.sectionTop)
-        .accessibilityHidden(true)
     }
 }
