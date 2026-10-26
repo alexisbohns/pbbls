@@ -33,17 +33,21 @@ struct GemFigure: View {
         let runs = GemRun.of(labels, facets: facets)
         let colors = GemColors(facets: facets, palette: palette, environment: environment)
         GemFigureLayout(anchors: runs.map(\.anchor)) {
-            GemStone(colors: colors, ticks: runs.map(\.anchor), tick: Color.pebbles.outline)
-                .layoutValue(key: GemPart.self, value: .stone)
+            IntroReader { reveal in
+                GemStone(colors: colors, ticks: runs.map(\.anchor), tick: Color.pebbles.outline, reveal: reveal)
+            }
+            .layoutValue(key: GemPart.self, value: .stone)
             Text(verbatim: count)
                 .spineType(.dayNumeral)
                 .foregroundStyle(Color.pebbles.onSurface)
                 .dynamicTypeSize(...DynamicTypeSize.large)
+                .introReveal(.count)
                 .layoutValue(key: GemPart.self, value: .count)
             Text(verbatim: countLabel)
                 .spineType(.dayWeekday)
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .dynamicTypeSize(...DynamicTypeSize.large)
+                .introReveal(.count)
                 .layoutValue(key: GemPart.self, value: .countLabel)
             ForEach(Array(runs.enumerated()), id: \.element.label.slug) { index, run in
                 Text(verbatim: run.label.name)
@@ -51,12 +55,14 @@ struct GemFigure: View {
                     .foregroundStyle(Color.pebbles.onSurface)
                     .lineLimit(1)
                     .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                    .introReveal(.label(run.label.slug))
                     .layoutValue(key: GemPart.self, value: .name(index))
                 Text(run.label.percent, format: .percent.locale(SpineStrings.appLocale))
                     .spineType(.contentsTime)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .lineLimit(1)
                     .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                    .introReveal(.label(run.label.slug))
                     .layoutValue(key: GemPart.self, value: .share(index))
             }
         }
@@ -261,11 +267,13 @@ enum GemLabelPlacer {
 
 /// The cut itself: the facets in their fills, edged in their own colour so
 /// neighbours meet without a hairline gap, the seams in the ground, the table's
-/// window, and a hairline tick at each named run.
+/// window, and a hairline tick at each named run. In the month's intro (#1241) `reveal` lands the stone
+/// blank, then lights each facet.
 struct GemStone: View {
     let colors: GemColors
     let ticks: [Double]
     let tick: Color
+    var reveal: IntroReveal = .settled
 
     var body: some View {
         Canvas { context, size in
@@ -280,25 +288,39 @@ struct GemStone: View {
                     path.closeSubpath()
                 }
             }
+            // In the intro (#1241) the stone lands blank, then each facet takes its colour; settled, as ever.
+            let blank = reveal(.blank)
+            guard blank > 0 else { return }
+            var stone = context
+            if blank < 1 { stone.opacity = IntroMotion.easeOut(blank) }
             for facet in GemGeometry.facets where facet.kind != .table {
                 let shape = path(facet.points)
                 let fill = colors.fills[facet.id] ?? colors.seam
-                context.fill(shape, with: .color(fill))
-                context.stroke(shape, with: .color(fill),
-                               style: StrokeStyle(lineWidth: GemMetrics.edge, lineJoin: .round))
+                // A facet no family owns has no beat, so it reads 1 (D2) and lands with the stone.
+                let lit = reveal(.facet(facet.id))
+                if lit < 1 {
+                    stone.fill(shape, with: .color(colors.table))
+                    stone.stroke(shape, with: .color(colors.table),
+                                 style: StrokeStyle(lineWidth: GemMetrics.edge, lineJoin: .round))
+                }
+                guard lit > 0 else { continue }
+                var ink = stone
+                if lit < 1 { ink.opacity = stone.opacity * IntroMotion.easeOut(lit) }
+                ink.fill(shape, with: .color(fill))
+                ink.stroke(shape, with: .color(fill), style: StrokeStyle(lineWidth: GemMetrics.edge, lineJoin: .round))
             }
             for edge in GemGeometry.edges where !edge.touches("table") {
                 var seam = Path()
                 seam.move(to: at(edge.a))
                 seam.addLine(to: at(edge.b))
-                context.stroke(seam, with: .color(colors.seam),
-                               style: StrokeStyle(lineWidth: GemMetrics.seam, lineCap: .round))
+                stone.stroke(seam, with: .color(colors.seam),
+                             style: StrokeStyle(lineWidth: GemMetrics.seam, lineCap: .round))
             }
             if let table = GemGeometry.byId["table"] {
                 let window = path(table.points)
-                context.fill(window, with: .color(colors.table))
-                context.stroke(window, with: .color(colors.seam),
-                               style: StrokeStyle(lineWidth: GemMetrics.seam, lineJoin: .round))
+                stone.fill(window, with: .color(colors.table))
+                stone.stroke(window, with: .color(colors.seam),
+                             style: StrokeStyle(lineWidth: GemMetrics.seam, lineJoin: .round))
             }
             for anchor in ticks {
                 let radius = CGFloat(GemGeometry.rimRadius(anchor)) * scale
@@ -309,8 +331,8 @@ struct GemStone: View {
                                       y: centre.y + (radius + GemMetrics.tickFrom) * s))
                 line.addLine(to: CGPoint(x: centre.x + (radius + GemMetrics.tickTo) * c,
                                          y: centre.y + (radius + GemMetrics.tickTo) * s))
-                context.stroke(line, with: .color(tick),
-                               style: StrokeStyle(lineWidth: GemMetrics.tick, lineCap: .round))
+                stone.stroke(line, with: .color(tick),
+                             style: StrokeStyle(lineWidth: GemMetrics.tick, lineCap: .round))
             }
         }
         .frame(width: GemMetrics.stoneSide, height: GemMetrics.stoneSide)
