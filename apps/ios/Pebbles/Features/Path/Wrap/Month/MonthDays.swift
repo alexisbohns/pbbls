@@ -50,11 +50,22 @@ private struct MonthHeadOnCardKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+private struct MonthCardRoomKey: EnvironmentKey {
+    static let defaultValue: CGFloat? = nil
+}
+
 extension EnvironmentValues {
     /// On the deck (#1241 D11), the card's title band draws its first head, and the section leaves it out.
     var monthHeadOnCard: Bool {
         get { self[MonthHeadOnCardKey.self] }
         set { self[MonthHeadOnCardKey.self] = newValue }
+    }
+
+    /// On the deck (D13), the room under the card's title band, which the weeks and the persons share; nil on the
+    /// scrolled page, where rows keep their size.
+    var monthCardRoom: CGFloat? {
+        get { self[MonthCardRoomKey.self] }
+        set { self[MonthCardRoomKey.self] = newValue }
     }
 }
 

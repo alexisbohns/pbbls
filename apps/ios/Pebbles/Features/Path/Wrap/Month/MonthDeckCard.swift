@@ -38,6 +38,7 @@ struct MonthDeckCard<Content: View>: View {
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { room = $0 }
                         .overlay(alignment: .top) {
                             content
+                                .environment(\.monthCardRoom, room > 0 ? room : nil)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { ideal = $0 }
                                 .scaleEffect(fit, anchor: .top)
