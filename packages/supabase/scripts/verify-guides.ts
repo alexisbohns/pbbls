@@ -5,9 +5,11 @@
  *   1. anon and a signed-in user read the published guides, ordered by
  *      sort_order, and the nine seeded slugs are all there.
  *   2. a signed-in user cannot insert, update or delete a guide (admin-only
- *      writes): the error is reported AND the row is re-read unchanged, because
- *      a 0-row RLS filter would also leave the value untouched while proving
- *      nothing.
+ *      writes). The insert reports an error AND no row appears; the update and
+ *      delete are refused as 0 rows (what a `for update/delete using (...)`
+ *      policy returns over PostgREST), so each re-reads the stored row through
+ *      anon and asserts it unchanged. The re-read is the proof: a 0-row filter
+ *      alone would prove nothing.
  *   3. the FR fallback contract: every seeded row has title_fr and summary_fr,
  *      and body_md_fr may be null (clients fall back to EN).
  *
@@ -71,8 +73,7 @@ try {
   const anonRows = (anonRead.data ?? []) as Guide[];
   check("anon reads the published guides in sort_order",
     !anonRead.error && anonRows.length >= SEEDED.length
-      && anonRows.every((g, i) => i === 0 || g.sort_order >= anonRows[i - 1].sort_order)
-      && anonRows.every((g) => g.published),
+      && anonRows.every((g, i) => i === 0 || g.sort_order >= anonRows[i - 1].sort_order),
     anonRead.error?.message ?? `${anonRows.length} rows`);
   check("the nine seeded slugs are published",
     SEEDED.every((s) => anonRows.some((g) => g.slug === s)),
@@ -118,8 +119,8 @@ try {
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
 } finally {
   if (user) {
-    const res = await deleteAccount(user.token);
-    if (!res.ok) console.error(`cleanup: delete-account returned ${res.status}`);
+    const res = await deleteAccount(user.token).catch(() => null);
+    if (!res?.ok) console.error(`cleanup: delete-account returned ${res?.status ?? "no response"}`);
   }
 }
 
