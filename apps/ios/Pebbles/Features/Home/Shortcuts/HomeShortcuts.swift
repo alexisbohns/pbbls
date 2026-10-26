@@ -6,16 +6,18 @@ struct HomeShortcuts: View {
     let onCamera: () -> Void
     let onQuick: () -> Void
     let onPebble: () -> Void
+    var cameraDisabled = false
 
     var body: some View {
         HStack(spacing: Spacing.sm) {
-            tile("camera", "home.shortcut.camera", action: onCamera)
+            tile("camera", "home.shortcut.camera", disabled: cameraDisabled, action: onCamera)
             tile("clock", "home.shortcut.quick", action: onQuick)
             tile("plus.circle", "home.shortcut.pebble", action: onPebble)
         }
     }
 
-    private func tile(_ symbol: String, _ key: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+    // Not SurfaceTile: D2 bans its primaryContainer default and the spec names its own geometry.
+    private func tile(_ symbol: String, _ key: LocalizedStringKey, disabled: Bool = false, action: @escaping () -> Void) -> some View {
         Button {
             TapHaptics.play(.selection)
             action()
@@ -24,11 +26,12 @@ struct HomeShortcuts: View {
                 Image(systemName: symbol)
                     .font(.title3)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    .frame(height: 28)
                 Text(key)
                     .pebblesFont(.callout)
                     .foregroundStyle(Color.pebbles.onSurface)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity, minHeight: 72)
             .background(Color.pebbles.surfaceContainer, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -39,6 +42,8 @@ struct HomeShortcuts: View {
             .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
+        .disabled(disabled)
+        .opacity(disabled ? 0.6 : 1)
         .accessibilityLabel(Text(key))
     }
 }

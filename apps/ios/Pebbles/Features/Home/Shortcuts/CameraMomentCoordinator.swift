@@ -19,14 +19,30 @@ final class CameraMomentCoordinator {
     private(set) var error: String?
     private(set) var isSaving = false
 
-    private let client: SupabaseClient
     private let userId: UUID
+    private let makeSnaps: () -> SnapUploadCoordinator
+    private let save: (SaveMomentPayload) async throws -> UUID
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "home.camera")
 
-    init(client: SupabaseClient, userId: UUID) {
-        self.client = client
+    /// `makeSnaps` yields a fresh upload coordinator per capture, so one
+    /// capture's lifecycle never leaks into the next.
+    init(userId: UUID,
+         makeSnaps: @escaping () -> SnapUploadCoordinator,
+         save: @escaping (SaveMomentPayload) async throws -> UUID) {
         self.userId = userId
+        self.makeSnaps = makeSnaps
+        self.save = save
     }
+
+    convenience init(client: SupabaseClient, userId: UUID) {
+        self.init(
+            userId: userId,
+            makeSnaps: { SnapUploadCoordinator(repo: PebbleSnapRepository(client: client)) },
+            save: { try await MomentsService(client: client).saveMoment($0) })
+    }
+
+    /// Clears the landed moment once its toast is gone.
+    func clearLanded() { landed = nil }
 
     /// The payload: no name, the shutter floored to whole seconds.
     static func payload(shutter: Date, snaps: [SaveMomentPayload.Snap]) -> SaveMomentPayload {
@@ -36,22 +52,17 @@ final class CameraMomentCoordinator {
         return payload
     }
 
-    func capture(_ data: Data, at shutter: Date) async {
+    func capture(_ image: UIImage, at shutter: Date) async {
         guard !isSaving else { return }
         isSaving = true
         error = nil
+        landed = nil
         defer { isSaving = false }
 
-        let snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: client))
-        await snaps.handleCaptured(data, userId: userId)
-
-        // handleCaptured returns once the upload settled; the poll only covers
-        // an upload still in flight (~30 s at most).
-        var waited = 0
-        while snaps.isUploading && waited < 300 {
-            try? await Task.sleep(for: .milliseconds(100))
-            waited += 1
-        }
+        // Off the main thread: a full-size JPEG encode is long enough to hitch the UI.
+        let data = await Task.detached(priority: .userInitiated) { image.jpegData(compressionQuality: 0.9) }.value
+        let snaps = makeSnaps()
+        if let data { await snaps.handleCaptured(data, userId: userId) }
 
         guard case .pending(let snap) = snaps.formSnap, snap.state == .uploaded else {
             logger.error("camera upload did not finish; nothing saved")
@@ -64,7 +75,7 @@ final class CameraMomentCoordinator {
         let payload = Self.payload(
             shutter: shutter, snaps: SaveMomentPayload.snaps(for: snaps.formSnap, userId: userId))
         do {
-            let id = try await MomentsService(client: client).saveMoment(payload)
+            let id = try await save(payload)
             snaps.markCommitted()
             landed = LandedMoment(momentId: id, shutter: shutter, thumbnail: UIImage(data: snap.localThumb))
         } catch {

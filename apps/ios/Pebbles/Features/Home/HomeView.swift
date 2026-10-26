@@ -17,6 +17,8 @@ struct HomeView: View {
     @State private var showsCamera = false
     @State private var showsCameraUnavailable = false
     @State private var camera: CameraMomentCoordinator?
+    @State private var pendingComplete: UUID?
+    private let logger = Logger(subsystem: "app.pbbls.ios", category: "home")
     @State private var cameraError: String?
     @State private var naming: MomentDetail?
     @State private var completing: CompleteTarget?
@@ -40,8 +42,16 @@ struct HomeView: View {
                     HomeShortcuts(
                         onCamera: openCamera,
                         onQuick: { showsQuick = true },
-                        onPebble: { showsCapture = true }
+                        onPebble: { showsCapture = true },
+                        cameraDisabled: camera?.isSaving == true
                     )
+
+                    if camera?.isSaving == true {
+                        Text("home.camera.saving")
+                            .spineType(.summary)
+                            .italic()
+                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    }
 
                     if let cameraError {
                         HStack(alignment: .firstTextBaseline) {
@@ -68,10 +78,16 @@ struct HomeView: View {
         .pebblesScreen()
         // Like the Path root: the greeting is the title, so the bar stays hidden.
         .toolbar(.hidden, for: .navigationBar)
-        .sheet(isPresented: $showsQuick) {
+        .sheet(isPresented: $showsQuick, onDismiss: {
+            // Presented once the sheet is gone, so the two presentations never race.
+            if let id = pendingComplete {
+                pendingComplete = nil
+                completing = CompleteTarget(momentId: id, name: nil)
+            }
+        }) {
             QuickMomentSheet(onSaved: { id, exit in
                 revision.bump(from: .home)
-                if exit == .open { completing = CompleteTarget(momentId: id, name: nil) }
+                if exit == .open { pendingComplete = id }
             })
         }
         .fullScreenCover(item: $completing) { target in
@@ -83,9 +99,9 @@ struct HomeView: View {
         }
         .fullScreenCover(isPresented: $showsCamera) {
             CameraPicker(
-                onCapture: { data, shutter in
+                onCapture: { image, shutter in
                     showsCamera = false
-                    Task { await capture(data, at: shutter) }
+                    Task { await capture(image, at: shutter) }
                 },
                 onCancel: { showsCamera = false }
             )
@@ -134,11 +150,16 @@ struct HomeView: View {
         if CameraPicker.isAvailable { showsCamera = true } else { showsCameraUnavailable = true }
     }
 
-    private func capture(_ data: Data, at shutter: Date) async {
+    private func capture(_ image: UIImage, at shutter: Date) async {
         cameraError = nil
-        let coordinator = CameraMomentCoordinator(client: supabase.client, userId: userId)
+        guard let userId else {
+            logger.error("camera moment: no session")
+            cameraError = String(localized: "home.quick.error")
+            return
+        }
+        let coordinator = camera ?? CameraMomentCoordinator(client: supabase.client, userId: userId)
         camera = coordinator
-        await coordinator.capture(data, at: shutter)
+        await coordinator.capture(image, at: shutter)
         if coordinator.landed != nil {
             achievements.fireCheck()
             revision.bump(from: .home)
@@ -152,16 +173,15 @@ struct HomeView: View {
             do {
                 naming = try await MomentsService(client: supabase.client).moment(id: landed.momentId)
             } catch {
-                Logger(subsystem: "app.pbbls.ios", category: "home.camera")
-                    .error("moment(id:) failed: \(error.localizedDescription, privacy: .private)")
-                cameraError = String(localized: "home.quick.error")
+                logger.error("moment(id:) failed: \(error.localizedDescription, privacy: .private)")
+                cameraError = String(localized: "home.toast.openFailed")
             }
         }
     }
 
-    private func dismissToast() { camera = nil }
+    private func dismissToast() { camera?.clearLanded() }
 
-    private var userId: UUID { supabase.session?.user.id ?? UUID() }
+    private var userId: UUID? { supabase.session?.user.id }
 
     private func greetingLines(at now: Date) -> HomeGreeting.Lines {
         HomeGreeting.lines(at: now, name: model.name, zone: SpineCalendar.current.timeZone, locale: SpineStrings.appLocale)

@@ -4848,6 +4848,23 @@
         }
       }
     },
+    "home.camera.saving" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving your photo…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrement de ta photo…"
+          }
+        }
+      }
+    },
     "home.camera.unavailableBody" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4878,6 +4895,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "La photo n'a pas été envoyée. Rien n'a été enregistré."
+          }
+        }
+      }
+    },
+    "home.toast.openFailed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't open the moment. Find it on the Path."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d'ouvrir le moment. Retrouve-le sur le Chemin."
           }
         }
       }

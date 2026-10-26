@@ -6,13 +6,15 @@ struct MomentToast: View {
     let onName: () -> Void
     let onDismiss: () -> Void
 
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
+
     var body: some View {
         HStack(spacing: Spacing.sm) {
             thumbnail
                 .frame(width: 44, height: 44)
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: landed.shutter.formatted(.dateTime.hour().minute()))
+                Text(verbatim: landed.shutter.formatted(.dateTime.hour().minute().locale(SpineStrings.appLocale)))
                     .pebblesFont(.meta)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 Text("home.toast.saved")
@@ -37,7 +39,12 @@ struct MomentToast: View {
                 .strokeBorder(Color.pebbles.cardRule, lineWidth: 0.5)
         }
         .accessibilityElement(children: .combine)
+        .accessibilityAction(named: Text("home.toast.name")) { onName() }
+        .accessibilityAction(named: Text("Close")) { onDismiss() }
+        .accessibilityAction(.escape) { onDismiss() }
         .task(id: landed.id) {
+            // Under VoiceOver the toast stays until it is used or closed.
+            guard !voiceOver else { return }
             try? await Task.sleep(for: .seconds(6))
             if !Task.isCancelled { onDismiss() }
         }

@@ -110,7 +110,7 @@ struct CaptureFlowView: View {
             titleVisibility: .visible
         ) {
             if canSaveNow {
-                Button("Save moment") { Task { await save(thenComplete: chainsComplete) } }
+                Button("Save moment") { Task { await save(thenComplete: false) } }
             }
             Button("Discard", role: .destructive) { Task { await discard() } }
             Button("Keep going", role: .cancel) {}
@@ -209,7 +209,7 @@ struct CaptureFlowView: View {
         case .when:
             return .primary("Continue", enabled: true, loading: false) { model.advance() }
         case .name:
-            return .primary("Save moment", enabled: canSaveNow, loading: model.isSaving && (chainsComplete || !savingThenComplete)) {
+            return .primary(chainsComplete ? "Make it a pebble now" : "Save moment", enabled: canSaveNow, loading: model.isSaving && (chainsComplete || !savingThenComplete)) {
                 Task { await save(thenComplete: chainsComplete) }
             }
         }

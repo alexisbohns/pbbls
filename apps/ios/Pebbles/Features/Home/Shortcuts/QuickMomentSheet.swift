@@ -107,7 +107,7 @@ struct QuickMomentForm: View {
 
             VStack(spacing: Spacing.sm) {
                 Button { onSave(.open) } label: { Text("home.quick.saveOpen") }
-                    .buttonStyle(PebblesPrimaryButtonStyle(isLoading: false))
+                    .buttonStyle(PebblesPrimaryButtonStyle(isLoading: isSaving))
                     .disabled(blocked)
                 Button { onSave(.close) } label: { Text("home.quick.saveClose").frame(maxWidth: .infinity) }
                     .buttonStyle(.bordered)
