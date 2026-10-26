@@ -1881,6 +1881,46 @@ export type Database = {
           },
         ]
       }
+      wrap_reveals: {
+        Row: {
+          month: string
+          revealed_at: string
+          user_id: string
+        }
+        Insert: {
+          month: string
+          revealed_at?: string
+          user_id: string
+        }
+        Update: {
+          month?: string
+          revealed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wrap_reveals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wrap_reveals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wrap_reveals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Views: {
       v_analytics_active_users_daily: {
@@ -2615,6 +2655,7 @@ export type Database = {
         Args: { p: Database["public"]["Tables"]["pebbles"]["Row"] }
         Returns: Json
       }
+      home_wraps: { Args: { p_tz: string }; Returns: Json }
       is_admin: { Args: { p_user_id: string }; Returns: boolean }
       list_orphan_snap_files: {
         Args: { p_min_age_seconds?: number; p_owner?: string }
@@ -2634,6 +2675,10 @@ export type Database = {
           name: string
           pebble: Json
         }[]
+      }
+      path_month_cover: {
+        Args: { p_month: string; p_tz: string }
+        Returns: Json
       }
       path_month_wrap: {
         Args: { p_month: string; p_tz: string }
@@ -2691,6 +2736,7 @@ export type Database = {
         Returns: Json
       }
       resolve_pebble_glyph: { Args: { p_pebble_id: string }; Returns: Json }
+      reveal_wrap: { Args: { p_month: string; p_tz: string }; Returns: Json }
       save_moment: { Args: { payload: Json }; Returns: string }
       set_collection_glyph: {
         Args: { p_collection_id: string; p_glyph_id: string }
