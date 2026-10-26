@@ -262,8 +262,8 @@ try {
   check("the retroactive grant unlocks the whole history in one call", !ackErr, ackErr?.message);
   const unlockedSlugs = (batch1 as { slug: string }[] ?? []).map((r) => r.slug);
   check(
-    `seven badges unlock (got ${unlockedSlugs.length}: ${unlockedSlugs.join(", ")})`,
-    unlockedSlugs.length === 7,
+    `nine badges unlock (got ${unlockedSlugs.length}: ${unlockedSlugs.join(", ")})`,
+    unlockedSlugs.length === 9,
   );
 
   // ---------------------------------------------------------------------------
@@ -274,7 +274,7 @@ try {
 
   check(
     "achievements_count reports the untruncated total",
-    shelf.achievements_count === 7,
+    shelf.achievements_count === 9,
     `got ${shelf.achievements_count}`,
   );
   check(
@@ -284,7 +284,8 @@ try {
   // Batch 1 shares one unlocked_at (one insert, one now()), so the whole slice
   // is decided by the sort_order tie-break: 100 pebble-count-1, 200 ×2
   // emotion_first, 300 domain_first, 400 first-collection, 410 first-glyph —
-  // and 420 first-soul is the one that falls off.
+  // and 420 first-soul, 430 first-moment and 440 first-pebble (#1254) are the
+  // ones that fall off.
   check(
     "the tie-break drops the highest sort_order, not an arbitrary row",
     !slugs.includes("first-soul") && slugs.includes("first-glyph"),
@@ -350,7 +351,7 @@ try {
     recent.achievements[0]?.slug === "pebble-count-10",
     recent.achievements.map((b) => b.slug).join(", "),
   );
-  check("the total grows with it", recent.achievements_count === 8);
+  check("the total grows with it", recent.achievements_count === 10);
   check("the array stays capped", recent.achievements.length === 6);
 
   // Bounce reads the MOMENT's date: seven distinct happened_at days in the
