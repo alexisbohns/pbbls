@@ -9,15 +9,16 @@ struct HomeView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(TabNavigation.self) private var nav
     @State private var model = HomeModel()
-    @State private var now = Date()
-    private let minute = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
-                    HomeGreetingView(lines: greetingLines)
-                        .id(TabNavigation.scrollTopAnchor)
+                    // The greeting re-reads the clock every minute, so the band flips on the hour.
+                    TimelineView(.periodic(from: .now, by: 60)) { context in
+                        HomeGreetingView(lines: greetingLines(at: context.date))
+                    }
+                    .id(TabNavigation.scrollTopAnchor)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, Spacing.lg)
@@ -38,13 +39,22 @@ struct HomeView: View {
         }
         .task {
             if model.service == nil { model.service = HomeService(client: supabase.client) }
-            await model.load()
+            // Spec §1.6: the loader waits at most 1.5 s for the profile; the load
+            // goes on in its own Task so the name still lands after the hand-off.
+            let load = Task { await model.load() }
+            let deadline = Task { try? await Task.sleep(for: .seconds(1.5)) }
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask { await load.value }
+                group.addTask { await deadline.value }
+                await group.next()
+                group.cancelAll()
+            }
+            deadline.cancel()
             onFirstLoad()
         }
-        .onReceive(minute) { now = $0 }
     }
 
-    private var greetingLines: HomeGreeting.Lines {
+    private func greetingLines(at now: Date) -> HomeGreeting.Lines {
         HomeGreeting.lines(at: now, name: model.name, zone: SpineCalendar.current.timeZone, locale: SpineStrings.appLocale)
     }
 }
@@ -59,12 +69,13 @@ struct HomeGreetingView: View {
                 .spineType(.kicker)
                 .foregroundStyle(Color.pebbles.outline)
             Text(verbatim: lines.title)
-                .font(.largeTitle.weight(.regular))
+                .spineType(.bareTitle)
                 .foregroundStyle(Color.pebbles.onSurface)
             Text(verbatim: lines.line)
                 .spineType(.summary)
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: "\(lines.title). \(lines.line). \(lines.dateline)"))
     }
 }

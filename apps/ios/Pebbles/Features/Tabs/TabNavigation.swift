@@ -40,8 +40,11 @@ final class TabNavigation {
     /// presentation never writes another tab's stack (tabs spec §11); the
     /// destination root reads the intent on appear and acts on it once.
     func go(_ tab: AppTab, intent: TabIntent? = nil) {
-        if let intent { pendingIntent = (tab, intent) }
-        if selected != tab { selected = tab } else { popToRoot(tab) }
+        if let intent {
+            pendingIntent = (tab, intent)
+            popToRoot(tab) // the root is the only place that consumes it
+        }
+        if selected != tab { selected = tab } else if intent == nil { popToRoot(tab) }
     }
 
     /// The root of `tab` calls this on appear and acts on the result once.
@@ -140,5 +143,6 @@ final class TabNavigation {
     func reset() {
         restore(Snapshot())
         scrollToTop = [:]
+        pendingIntent = nil
     }
 }

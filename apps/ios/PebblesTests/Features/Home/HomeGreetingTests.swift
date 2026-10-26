@@ -52,4 +52,9 @@ import Testing
         let g = HomeGreeting.lines(at: Self.date("2026-11-04T09:00:00+01:00"), name: "", zone: Self.paris, locale: Self.en)
         #expect(g.title == "Morning")
     }
+
+    @Test func whitespaceOnlyNameDropsTheComma() {
+        let g = HomeGreeting.lines(at: Self.date("2026-11-04T09:00:00+01:00"), name: "  \n ", zone: Self.paris, locale: Self.en)
+        #expect(g.title == "Morning")
+    }
 }

@@ -122,6 +122,21 @@ struct TabNavigationHomeTests {
         #expect(restored.home == [.guide("stones")])
     }
 
+    @Test func anIntentPopsTheDestinationToItsRoot() {
+        let nav = TabNavigation()
+        nav.people = [.connections]
+        nav.go(.people, intent: .createSoul)
+        #expect(nav.selected == .people && nav.people.isEmpty)
+        #expect(nav.takeIntent(for: .people) == .createSoul)
+    }
+
+    @Test func resetDropsAPendingIntent() {
+        let nav = TabNavigation()
+        nav.go(.collections, intent: .createCollection)
+        nav.reset()
+        #expect(nav.takeIntent(for: .collections) == nil)
+    }
+
     @Test func anIntentIsConsumedOnce() {
         let nav = TabNavigation()
         nav.go(.people, intent: .createSoul)
