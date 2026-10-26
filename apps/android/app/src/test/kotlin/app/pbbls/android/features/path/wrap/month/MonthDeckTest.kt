@@ -4,10 +4,8 @@ import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.features.path.wrap.intro.IntroKey
-import app.pbbls.android.features.path.wrap.intro.IntroScore
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.intro.IntroTick
-import app.pbbls.android.features.path.wrap.intro.head
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -79,9 +77,7 @@ class MonthDeckTest {
     }
 
     @Test
-    fun `a section's card arrives on its head, the insights head when it leads, and the end card plays nothing yet`() {
-        val tone = MonthDeck.beats(section(MonthSection.TONE), october, lookups, leadsInsights = true)
-        assertEquals(IntroScore.head(hasLead = false, insights = true), tone)
+    fun `a section's card arrives on its head, and the end card plays nothing yet`() {
         val domains = MonthDeck.beats(section(MonthSection.DOMAINS), october, lookups, leadsInsights = false)
         assertEquals(listOf(IntroKey.Header), domains.map { it.key })
         assertEquals(IntroTick.arrive, domains.single().tick)

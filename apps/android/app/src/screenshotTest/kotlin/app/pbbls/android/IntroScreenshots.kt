@@ -27,6 +27,7 @@ import app.pbbls.android.features.path.wrap.month.MonthDeckStep
 import app.pbbls.android.features.path.wrap.month.MonthSectionContent
 import app.pbbls.android.features.path.wrap.month.MonthSections
 import app.pbbls.android.features.path.wrap.month.PersonsSection
+import app.pbbls.android.features.path.wrap.month.ToneFigure
 import app.pbbls.android.features.path.wrap.month.coverBeats
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import com.android.tools.screenshot.PreviewTest
@@ -95,6 +96,29 @@ fun IntroGemSecondFamily() {
             Box(Modifier.width(390.dp)) {
                 CompositionLocalProvider(LocalIntroStage provides IntroStage(clock, sequence)) {
                     EmotionGem(wrap, SpineFixtureWeek.lookups, onMore = {})
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The tone's sweep, frozen half way (#1242): the sentence risen, the chart shown from the left up to the sweep's
+ * eased middle, the 10th's and 11th's even circles still pulsing, and the rest of the month still to come.
+ */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390, heightDp = 640)
+@Composable
+fun IntroToneSweep() {
+    PebblesTheme {
+        val wrap = SpineFixtureWeek.monthWrap
+        val sequence = IntroSequence.Section(MonthSection.TONE)
+        val elapsed = IntroScore.SWEEP_AT + IntroScore.SWEEP_SPAN / 2
+        val clock = IntroClock.frozen(wrap.month, sequence, ToneFigure.introBeats(wrap, insights = false), elapsed)
+        Surface(color = PebblesTheme.spine.colors.ground) {
+            Box(Modifier.width(390.dp)) {
+                CompositionLocalProvider(LocalIntroStage provides IntroStage(clock, sequence)) {
+                    ToneFigure(wrap, SpineFixtureWeek.lookups)
                 }
             }
         }

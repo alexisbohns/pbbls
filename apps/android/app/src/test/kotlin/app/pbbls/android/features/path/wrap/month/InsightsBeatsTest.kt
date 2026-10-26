@@ -2,8 +2,11 @@ package app.pbbls.android.features.path.wrap.month
 
 import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.model.wrap.MonthHours
+import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.features.path.wrap.intro.IntroKey
+import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -38,5 +41,22 @@ class InsightsBeatsTest {
             assertTrue(ToneFigure.introBeats(october, insights).any { it.key == IntroKey.Sweep })
             assertTrue(HoursFigure.introBeats(october, lookups, insights).any { it.key == IntroKey.Dial })
         }
+    }
+
+    @Test
+    fun `the deck's tone and hours cards play the figures' entrances, the insights head on the one that leads`() {
+        val tone = MonthDeck.beats(IntroSequence.Section(MonthSection.TONE), october, lookups, leadsInsights = true)
+        assertEquals(ToneFigure.introBeats(october, insights = true), tone)
+        assertEquals(IntroKey.Insights, tone.first().key)
+        val hours = MonthDeck.beats(IntroSequence.Section(MonthSection.HOURS), october, lookups, leadsInsights = false)
+        assertEquals(HoursFigure.introBeats(october, lookups, insights = false), hours)
+        assertFalse(hours.any { it.key == IntroKey.Insights })
+    }
+
+    @Test
+    fun `the hours play one stone per mark the device knows`() {
+        val known = requireNotNull(october.hours).items.count { lookups.moment(it.momentId) != null }
+        val beats = HoursFigure.introBeats(october, lookups, insights = false)
+        assertEquals((0 until known).map { IntroKey.Stone(it) }, beats.map { it.key }.filterIsInstance<IntroKey.Stone>())
     }
 }
