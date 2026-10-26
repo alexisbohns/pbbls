@@ -179,12 +179,15 @@ private struct MonthDeckCard<Content: View>: View {
     var body: some View {
         ZStack(alignment: .top) {
             MonthDeckPaper()
-            content
-                .fixedSize(horizontal: false, vertical: true)
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { ideal = $0 }
-                .scaleEffect(fit, anchor: .top)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            // The room is the card's, whatever the content's height: an overlay never grows its base.
+            Color.clear
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { room = $0 }
+                .overlay(alignment: .top) {
+                    content
+                        .fixedSize(horizontal: false, vertical: true)
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { ideal = $0 }
+                        .scaleEffect(fit, anchor: .top)
+                }
                 .clipShape(RoundedRectangle(cornerRadius: SpineLayout.tileCorner, style: .continuous))
                 .padding(MonthDeckMotion.inset)
         }
