@@ -119,7 +119,8 @@ struct DaySetMarks: View {
             tick.addLine(to: CGPoint(x: center.x, y: center.y - radius + dot / 2))
             context.stroke(tick, with: .color(ring), lineWidth: SpineLayout.dotRing)
         }
-        for day in days.days {
+        // In day order: a set's own order changes with each run, and popping dots blend in the order they draw.
+        for day in days.days.sorted() {
             let shown = reveal(.dot(person, day))
             guard shown > 0 else { continue }
             var mark = context
