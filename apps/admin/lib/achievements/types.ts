@@ -25,9 +25,11 @@ export type AdminAchievement = {
 }
 
 /**
- * The eight families `check_achievements()` can evaluate. The list is a mirror
- * of the column's CHECK constraint — a ninth family needs a migration and a new
- * `case` arm in that function, so the admin can only add tiers within these.
+ * The eleven families the catalog admits. The list is a mirror of the column's
+ * CHECK constraint — a new family needs a migration and a new `case` arm in
+ * `check_achievements()`, so the admin can only add tiers within these.
+ * `first_five` (the blue pebble, #1254) is never evaluated by the check:
+ * `claim_blue_pebble()` grants it.
  */
 export const ACHIEVEMENT_FAMILIES = [
   "pebble_count",
@@ -36,6 +38,9 @@ export const ACHIEVEMENT_FAMILIES = [
   "first_collection",
   "first_glyph",
   "first_soul",
+  "first_moment",
+  "first_pebble",
+  "first_five",
   "glyph_count",
   "glyph_sales",
 ] as const
@@ -49,6 +54,9 @@ export const FAMILY_LABELS: Record<AchievementFamily, string> = {
   first_collection: "First collection",
   first_glyph: "First glyph",
   first_soul: "First soul",
+  first_moment: "First moment",
+  first_pebble: "First pebble",
+  first_five: "The blue pebble (claimed)",
   glyph_count: "Glyphs carved",
   glyph_sales: "Glyph sales",
 }
