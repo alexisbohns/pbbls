@@ -164,6 +164,8 @@ sealed interface IntroKey {
     data object Replay : IntroKey
 }
 
+private val SEAL_INTENSITIES = floatArrayOf(0.50f, 0.68f, 0.85f)
+
 /** How firmly a beat ticks, 0…1 (iOS `IntroTick`; on Android, D18 maps sharpness to a primitive and intensity to its scale). */
 data class IntroTick(
     val intensity: Float,
@@ -187,7 +189,7 @@ data class IntroTick(
         val arrive = IntroTick(0.6f, 0.15f)
 
         /** A seal on the garland, firmer with its pebble's intensity, 1…3. */
-        fun seal(intensity: Int) = IntroTick(listOf(0.50f, 0.68f, 0.85f)[(intensity - 1).coerceIn(0, 2)], 0.60f)
+        fun seal(intensity: Int) = IntroTick(SEAL_INTENSITIES[(intensity - 1).coerceIn(0, 2)], 0.60f)
 
         /** A week's cairn, stone [index] from the bottom: each a little firmer (D10). */
         fun cairn(index: Int) = IntroTick((0.32f + 0.07f * index).coerceAtMost(0.8f), 0.5f)
@@ -213,7 +215,10 @@ data class IntroBeat(
     fun scaled(factor: Double) = copy(at = at * factor, duration = duration * factor)
 }
 
-/** Each key's linear progress, 0…1, for a figure to draw (D6). The default everywhere is [settled]: today's render. */
+/**
+ * Each key's progress, linear 0…1, for a figure to draw (D6); figures apply [app.pbbls.android.core.designsystem.RevealMotion]'s curves.
+ * The default everywhere is [settled]: today's render.
+ */
 fun interface IntroReveal {
     operator fun invoke(key: IntroKey): Float
 

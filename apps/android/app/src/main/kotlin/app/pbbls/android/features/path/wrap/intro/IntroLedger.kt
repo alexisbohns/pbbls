@@ -2,7 +2,7 @@ package app.pbbls.android.features.path.wrap.intro
 
 import java.time.YearMonth
 
-/** The sequences that have played this launch (D3): a month's sequence plays once. `PathViewModel` holds the app's; the Lab its own. */
+/** The sequences that have played this launch (D3): a month's sequence plays once. Main thread only. `PathViewModel` holds the app's; the Lab its own. */
 class IntroLedger {
     private data class Entry(
         val month: YearMonth,

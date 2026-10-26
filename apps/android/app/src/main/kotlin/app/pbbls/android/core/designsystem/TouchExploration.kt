@@ -18,6 +18,7 @@ fun rememberTouchExploration(): Boolean {
     val manager = remember(context) { context.getSystemService(AccessibilityManager::class.java) }
     var on by remember(manager) { mutableStateOf(manager?.isTouchExplorationEnabled == true) }
     DisposableEffect(manager) {
+        on = manager?.isTouchExplorationEnabled == true
         val listener = AccessibilityManager.TouchExplorationStateChangeListener { on = it }
         manager?.addTouchExplorationStateChangeListener(listener)
         onDispose { manager?.removeTouchExplorationStateChangeListener(listener) }

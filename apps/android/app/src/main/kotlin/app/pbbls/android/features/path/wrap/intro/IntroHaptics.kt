@@ -43,7 +43,10 @@ object IntroHaptics {
 
 /** What the intro's clock asks of the haptics; the tests stand in a spy. A page stops only its own. */
 interface IntroHapticPlaying {
-    /** Plays [beats]' ticks and swells as one voice, starting at [startNanos] (`System.nanoTime()`'s base). */
+    /**
+     * Plays [beats]' ticks and swells as one voice, starting at [startNanos] (`System.nanoTime()`'s timebase).
+     * The beats arrive already scaled by the tempo. A second `play` for the same (sequence, month) replaces the first.
+     */
     fun play(
         sequence: IntroSequence,
         month: YearMonth,
@@ -51,6 +54,7 @@ interface IntroHapticPlaying {
         startNanos: Long,
     )
 
+    /** Stops that voice; stopping one that isn't playing does nothing. */
     fun stop(
         sequence: IntroSequence,
         month: YearMonth,
@@ -59,7 +63,10 @@ interface IntroHapticPlaying {
     /** One tick now, outside any sequence (a throw landing on a card that plays nothing, D11). */
     fun tick(tick: IntroTick)
 
-    /** A frame of the playing [sequence]: the frame-clock tier fires from here; the others ignore it. */
+    /**
+     * A frame of the playing [sequence]: the frame-clock tier fires from here; the others ignore it. [nanos] is on
+     * `System.nanoTime()`'s timebase, like [play]'s `startNanos` (Choreographer's frame time, which `withFrameNanos` reports, is in that base).
+     */
     fun frame(
         sequence: IntroSequence,
         month: YearMonth,
