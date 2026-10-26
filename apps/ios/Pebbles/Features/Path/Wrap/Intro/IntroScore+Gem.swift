@@ -6,22 +6,34 @@ struct IntroGemRun: Hashable, Sendable {
     let facets: [String]
 }
 
-/// The gem's beats (#1241 §Choreography): the stone lights family by family.
+/// The gem's beats (#1241 §Choreography, D10): the count first, then the
+/// stone lights family by family around it.
 extension IntroScore {
     static let blankAt: TimeInterval = 0.32
-    static let facetsAt: TimeInterval = 0.52
+    static let countAt: TimeInterval = 0.4
     static let facetGap: TimeInterval = 0.045
     static let familyPause: TimeInterval = 0.22
     static let countAfter: TimeInterval = 0.16
 
-    /// The gem: its head and lead, the blank stone, then each family's facets
+    /// The gem: its head and lead, the blank stone, then the count in its
+    /// table counting up to the month's pebbles on the garland's ease-in-out,
+    /// a tick per pebble and a firm one as it lands; then each family's facets
     /// in turn (its name and share with its first facet), a pause between
-    /// families, and the count in the table last, with *more*.
-    static func gem(runs: [IntroGemRun]) -> [IntroBeat] {
+    /// families, and *more* with the last.
+    static func gem(runs: [IntroGemRun], pebbles: Int) -> [IntroBeat] {
         var beats = head(hasLead: true, insights: false)
         beats.append(IntroBeat(key: .blank, at: blankAt, duration: IntroMotion.rise))
-        var at = facetsAt
-        var last = facetsAt
+        let span = countSpan(pebbles)
+        beats.append(IntroBeat(key: .count, at: countAt, duration: span))
+        if pebbles > 0 {
+            for tally in 1...pebbles {
+                let reached = span * IntroMotion.easeInOutInverse(Double(tally) / Double(pebbles))
+                beats.append(IntroBeat(key: .tally(tally), at: countAt + reached, duration: 0,
+                                       tick: tally == pebbles ? .firm : .light))
+            }
+        }
+        var at = countAt + span + countAfter
+        var last = at
         for (index, run) in runs.enumerated() {
             if index > 0 { at += familyPause }
             for (place, facet) in run.facets.enumerated() {
@@ -33,9 +45,18 @@ extension IntroScore {
                 at += facetGap
             }
         }
-        beats.append(IntroBeat(key: .count, at: last + countAfter, duration: IntroMotion.rise, tick: .firm))
-        beats.append(IntroBeat(key: .more, at: last + countAfter, duration: IntroMotion.rise))
+        beats.append(IntroBeat(key: .more, at: last, duration: IntroMotion.rise))
         return beats
+    }
+
+    /// How long the count takes: longer for a fuller month, within bounds.
+    static func countSpan(_ pebbles: Int) -> TimeInterval {
+        min(max(0.5 + 0.012 * Double(pebbles), 0.6), 1.2)
+    }
+
+    /// The count shown at `progress`, 0…1 of its beat: the pebbles the eased count has passed.
+    static func counted(_ pebbles: Int, at progress: Double) -> Int {
+        Int((Double(pebbles) * IntroMotion.easeInOut(progress) + 1e-9).rounded(.down))
     }
 
     /// The families in `order` that own facets in the server's allocation, each with its facets in sweep order.

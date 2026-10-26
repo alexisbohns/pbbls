@@ -8787,6 +8787,23 @@
         }
       }
     },
+    "path.wrap.lineNoPebbles" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pebble."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun galet."
+          }
+        }
+      }
+    },
     "path.wrap.lineNothing" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8918,6 +8935,23 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "path.wrap.replayMonth" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replay the month"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rejouer le mois"
           }
         }
       }

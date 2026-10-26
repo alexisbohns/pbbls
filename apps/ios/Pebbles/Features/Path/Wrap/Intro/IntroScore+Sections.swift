@@ -1,30 +1,15 @@
 import Foundation
 
 /// The sections' beats (#1241 §Choreography): a head, then rows; a person's
-/// row in three parts. The gem, tone and hours build on `head`.
+/// row in three parts. The signatures, the gem, tone and hours build on `head`.
 extension IntroScore {
     static let leadAt: TimeInterval = 0.16
     static let rowsAt: TimeInterval = 0.32
-    static let rowGap: TimeInterval = 0.07
     /// When the insights head leads tone or hours, the rest comes this much later.
     static let insightsShift: TimeInterval = 0.16
     static let partGap: TimeInterval = 0.09
     static let ringSpan: TimeInterval = 0.45
     static let nextRow: TimeInterval = 0.06
-
-    /// A list section (weeks, milestones, domains): its head, its lead line if
-    /// any, each row in turn, and *more* with the last when it has one.
-    static func rows(count: Int, hasLead: Bool, more: Bool) -> [IntroBeat] {
-        var beats = head(hasLead: hasLead, insights: false)
-        let times = (0..<count).map { rowsAt + rowGap * Double($0) }
-        for (row, at) in times.enumerated() {
-            beats.append(IntroBeat(key: .row(row), at: at, duration: IntroMotion.rise, tick: .light))
-        }
-        if more, let last = times.last {
-            beats.append(IntroBeat(key: .more, at: last, duration: IntroMotion.rise))
-        }
-        return beats
-    }
 
     /// The persons: per row its glyph, its name, then its ring's line drawn
     /// from the 1st, a beat on each day present as the line reaches it; the

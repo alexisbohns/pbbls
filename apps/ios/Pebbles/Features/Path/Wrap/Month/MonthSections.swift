@@ -1,37 +1,62 @@
 import SwiftUI
 
-/// The month by week (#1226, D6): each ISO week cut to the month's days, its
+/// The month by week (#1226, D6): every ISO week cut to the month's days, its
 /// cairn, its range and one line, and its souls; a tap focuses that week in the
-/// strip. Android: `WeeksSummary`.
+/// strip. An empty week is muted: a dotted stone where its cairn would stand,
+/// "No pebble.", no souls, no action (#1241 D12). On a card, a column per week
+/// instead (`WeeksColumns`, D17). Android: `WeeksSummary`.
 struct WeeksSummary: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
     let onWeek: (CalendarDay) -> Void
 
+    @Environment(\.monthCardRoom) private var room
+
     private var locale: Locale { SpineStrings.appLocale }
+
+    /// A week's souls, at most, and a list's soul glyphs' side on a card, at most.
+    static let soulLimit = 5
+    static let soulCap: CGFloat = 20
 
     var body: some View {
         if Self.isShown(wrap: wrap, lookups: lookups) {
-            let weeks = Self.weeks(wrap)
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(Self.head(wrap: wrap))
-                VStack(spacing: 0) {
-                    ForEach(Array(weeks.enumerated()), id: \.element.weekStart) { index, week in
-                        let range = WrapCopy.range(wrap.month, from: week.from, to: week.to, locale: locale)
-                        let line = WrapCopy.line(pebbles: week.pebbles, people: week.soulIds.count, live: false,
-                                                 hasMoments: true, locale: locale)
-                        let focus = { onWeek(week.weekStart) }
-                        MarkRow(line, accessibilityText: "\(range), \(line)", titleType: .mouthLine, subtitle: range,
-                                action: focus, reveal: .row(index)) {
-                            CairnMark(days: week.days, state: .settled, color: Color.pebbles.onSurfaceVariant)
-                        } trailing: {
-                            SoulMarks(ids: week.soulIds, lookups: lookups, limit: 5)
+                if let room {
+                    WeeksColumns(wrap: wrap, lookups: lookups, room: room, onWeek: onWeek)
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(Array(Self.weeks(wrap).enumerated()), id: \.element.weekStart) { index, week in
+                            row(week, index: index)
                         }
                     }
+                    .padding(.horizontal, MonthLayout.sectionPadX)
                 }
-                .padding(.horizontal, MonthLayout.sectionPadX)
             }
-            .introSequence(.section(.weeks)) { Self.introBeats(wrap) }
+            .introSequence(.section(.weeks)) { Self.introBeats(wrap: wrap) }
+        }
+    }
+
+    @ViewBuilder
+    private func row(_ week: MonthWeek, index: Int) -> some View {
+        let range = WrapCopy.range(wrap.month, from: week.from, to: week.to, locale: locale)
+        if week.pebbles == 0 {
+            let line = WrapCopy.emptyWeek(locale: locale)
+            MarkRow(line, accessibilityText: "\(range), \(line)", titleType: .mouthLine,
+                    titleColor: Color.pebbles.outline, subtitle: range) {
+                // The place a stone would stand, dotted, as the strip draws a week's next stone.
+                CairnMark(days: [], state: .live, color: Color.pebbles.outline)
+            }
+        } else {
+            let line = WrapCopy.line(pebbles: week.pebbles, people: week.soulIds.count, live: false,
+                                     hasMoments: true, locale: locale)
+            let focus = { onWeek(week.weekStart) }
+            MarkRow(line, accessibilityText: "\(range), \(line)", titleType: .mouthLine, subtitle: range,
+                    action: focus) {
+                CairnMark(days: week.days, state: .settled, color: Color.pebbles.onSurfaceVariant)
+            } trailing: {
+                SoulMarks(ids: week.soulIds, lookups: lookups, limit: Self.soulLimit)
+            }
         }
     }
 
@@ -44,23 +69,25 @@ struct WeeksSummary: View {
 
     /// Drawn when a week of the month has pebbles; the deck deals no card otherwise (#1241 D11).
     static func isShown(wrap: MonthWrap, lookups: WrapLookups) -> Bool {
-        !weeks(wrap).isEmpty
+        weeks(wrap).contains { $0.pebbles > 0 }
     }
 
-    private static func weeks(_ wrap: MonthWrap) -> [MonthWeek] {
-        (wrap.weeks ?? []).filter { $0.pebbles > 0 }
+    /// Every week of the month, the empty ones too (D12).
+    static func weeks(_ wrap: MonthWrap) -> [MonthWeek] {
+        wrap.weeks ?? []
     }
 
-    /// The weeks' intro (#1241): the head, then each week.
-    static func introBeats(_ wrap: MonthWrap) -> [IntroBeat] {
-        IntroScore.rows(count: weeks(wrap).count, hasLead: false, more: false)
+    /// The weeks' intro (#1241 D17): played only on a card, one column at a time.
+    static func introBeats(wrap: MonthWrap) -> [IntroBeat] {
+        IntroScore.weekColumns(WeekColumn.columns(wrap).map(\.shape))
     }
 }
 
 /// The month's milestones (#1226, D8): the stones the server picked (large
-/// first, bright to heavy, then medium), each a seal, its name weighted by
-/// intensity, its date and its souls; a tap opens its held card. Android:
-/// `MilestonesSection`.
+/// first, bright to heavy, then medium), each its own lit stone, its date over
+/// its name weighted by intensity (#1241 D12), and its photo framed as a small
+/// card, or its souls (D16); on a card the rows share its room (D13). A tap
+/// opens its held card. Android: `MilestonesSection`.
 struct MilestonesSection: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
@@ -68,16 +95,29 @@ struct MilestonesSection: View {
     /// Where VoiceOver lands when a milestone's held card closes (the page's).
     var focus: AccessibilityFocusState<UUID?>.Binding?
 
+    @Environment(\.monthCardRoom) private var room
+
     private var locale: Locale { SpineStrings.appLocale }
+
+    /// A milestone's row on a card: its share of the room, within the row minimum and this (D13).
+    static let rowCap: CGFloat = 104
+    /// The list's stones, about the seals' size they replace; on a card they grow to the Spine's own.
+    static let listStone: CGFloat = 0.62
+    static let listSnap: CGFloat = 40
+    /// A list row: tall enough for the stone's rings to clear its neighbours'.
+    static let listRow: CGFloat = 56
+    /// The stone column past the largest stone: room for its rings, which draw outside it.
+    private static let ringRoom: CGFloat = 1.3
 
     var body: some View {
         if Self.isShown(wrap: wrap, lookups: lookups) {
             let moments = Self.moments(wrap, lookups: lookups)
+            let size = Self.rowSize(room: room, rows: moments.count)
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(Self.head(wrap: wrap, lookups: lookups))
                 VStack(spacing: 0) {
                     ForEach(Array(moments.enumerated()), id: \.element.id) { index, moment in
-                        row(moment, index: index)
+                        row(moment, index: index, size: size)
                     }
                 }
                 .padding(.horizontal, MonthLayout.sectionPadX)
@@ -102,118 +142,60 @@ struct MilestonesSection: View {
         (wrap.milestones ?? []).compactMap(lookups.moment)
     }
 
-    /// The milestones' intro (#1241): the head, then each stone.
+    /// A milestone's souls, at most.
+    static let soulLimit = 4
+
+    /// The milestones' intro (#1241 D10): the head, then each stone stamped, its date, its name, and its photo's
+    /// card or its souls one by one.
     static func introBeats(wrap: MonthWrap, lookups: WrapLookups) -> [IntroBeat] {
-        IntroScore.rows(count: moments(wrap, lookups: lookups).count, hasLead: false, more: false)
+        IntroScore.milestones(moments(wrap, lookups: lookups).map { moment in
+            let souls = SoulMarks.shown(soulIds(moment), lookups: lookups, limit: soulLimit).count
+            return IntroMilestoneShape(intensity: moment.pebble?.intensity ?? 1,
+                                       souls: moment.firstSnapPath == nil ? souls : 1)
+        })
     }
 
-    private func row(_ moment: MomentSummary, index: Int) -> some View {
+    /// A milestone's row (D13, D16): the list's, or on a card its share of the room, the stone, the photo's card
+    /// and the souls growing with it.
+    static func rowSize(room: CGFloat?, rows: Int) -> MilestoneRowSize {
+        guard let room else {
+            return MilestoneRowSize(height: listRow, stone: listStone, snap: listSnap, soul: SoulMarks.side)
+        }
+        let height = min(max(room / CGFloat(max(rows, 1)), listRow), rowCap)
+        let stone = min(max(height / 100, listStone), 1)
+        return MilestoneRowSize(height: height, stone: stone, snap: min(max(height * 0.7, listSnap), 76),
+                                soul: min(SoulMarks.side * stone / listStone, WeeksSummary.soulCap))
+    }
+
+    private static func soulIds(_ moment: MomentSummary) -> [String] {
+        (moment.pebble?.souls ?? []).map { $0.id.uuidString.lowercased() }
+    }
+
+    private func row(_ moment: MomentSummary, index: Int, size: MilestoneRowSize) -> some View {
         let name = moment.name.flatMap { $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 }
             ?? SpineCopy.untitled(locale: locale)
         let cut = EntryTypes.contentsNameType(intensity: moment.pebble?.intensity ?? 2,
                                               valence: moment.pebble?.valence.positiveness ?? 0)
         let date = WrapCopy.dateline(CalendarDay(moment.happenedAt, in: SpineCalendar.current.timeZone), locale: locale)
         let open = { onOpen(moment) }
-        return MarkRow(name, accessibilityText: "\(name), \(date)", titleType: .contentsName(cut), subtitle: date,
-                       action: open, reveal: .row(index)) {
-            StoneSeal(moment: moment,
-                      palette: SpineColors.palette(lookups.palette(moment), isBlank: moment.pebble == nil),
-                      size: .milestone)
+        // The date over the name (D12); in the intro the stone stamps, then the date, the name and the souls (D10).
+        let reveal = MarkRowReveal(leading: nil, text: .date(index), title: .name(index), subtitle: .date(index))
+        // Its own stone, as the Spine draws it (D16), in a column as wide as the largest with its rings.
+        return MarkRow(name, accessibilityText: "\(date), \(name)", titleType: .contentsName(cut), subtitle: date,
+                       action: open, reveal: reveal, subtitleFirst: true, height: size.height,
+                       markWidth: SpineLayout.stoneWidth(.large) * size.stone * Self.ringRoom) {
+            MilestoneStone(moment: moment, palette: lookups.palette(moment), row: index, scale: size.stone)
         } trailing: {
-            SoulMarks(ids: (moment.pebble?.souls ?? []).map { $0.id.uuidString.lowercased() }, lookups: lookups,
-                      limit: 4)
+            // Its photo framed as a small card, or its souls (D16).
+            if let path = moment.firstSnapPath {
+                MilestoneSnap(path: path, tint: Color.pebbles.outline, height: size.snap)
+                    .introReveal(.mark(index, 0), .pop)
+            } else {
+                SoulMarks(ids: Self.soulIds(moment), lookups: lookups, limit: Self.soulLimit, introRow: index,
+                          side: size.soul)
+            }
         }
         .modifier(ReturnFocus(focus: focus, id: moment.id))
-    }
-}
-
-/// The month's five most present souls and a *more* to all of them (#1226,
-/// D6); the invitation when nobody is named. Android: `PersonsSection`.
-struct PersonsSection: View {
-    let wrap: MonthWrap
-    let lookups: WrapLookups
-    let dayView: DayView
-    let onMore: () -> Void
-
-    private var locale: Locale { SpineStrings.appLocale }
-
-    var body: some View {
-        if Self.isShown(wrap: wrap, lookups: lookups) {
-            let rows = Self.rows(wrap, lookups: lookups)
-            VStack(alignment: .leading, spacing: 0) {
-                MonthSectionHead(Self.head(wrap: wrap, lookups: lookups, dayView: dayView))
-                if rows.isEmpty {
-                    SheetLead(WrapCopy.nobody(locale: locale), bottom: 0)
-                        .padding(.horizontal, MonthLayout.sectionPadX)
-                        .introReveal(.lead)
-                } else {
-                    VStack(spacing: 0) {
-                        let shown = Array(rows.prefix(WrapCopy.shown).enumerated())
-                        ForEach(shown, id: \.element.soulId) { index, person in
-                            MonthPersonRow(person: person, wrap: wrap, lookups: lookups, dayView: dayView,
-                                           introRow: index)
-                        }
-                    }
-                    .padding(.horizontal, MonthLayout.sectionPadX)
-                    MoreLink(text: WrapCopy.morePersons(rows.count, locale: locale), action: onMore)
-                        .accessibilityHint(Text(verbatim: WrapCopy.tileHint(locale: locale)))
-                        .padding(.horizontal, MonthLayout.sectionPadX)
-                        .introReveal(.more)
-                }
-            }
-            .introSequence(.section(.persons)) { Self.introBeats(wrap: wrap, lookups: lookups) }
-        }
-    }
-
-    /// The section's head, the deck's title for its card (#1241 D11): on the circle, the ring's reading.
-    static func head(wrap: MonthWrap, lookups: WrapLookups, dayView: DayView) -> MonthHead {
-        let locale = SpineStrings.appLocale
-        let clockwise = dayView == .circle && !rows(wrap, lookups: lookups).isEmpty
-        return MonthHead(label: WrapCopy.tile(.persons, locale: locale),
-                         hint: clockwise ? WrapCopy.clockwiseHint(locale: locale) : nil)
-    }
-
-    /// Drawn whenever the server sends the persons: the invitation stands in when nobody is named.
-    static func isShown(wrap: MonthWrap, lookups: WrapLookups) -> Bool {
-        wrap.persons != nil
-    }
-
-    /// The souls the device can name, in the server's order.
-    private static func rows(_ wrap: MonthWrap, lookups: WrapLookups) -> [PersonStat] {
-        (wrap.persons ?? []).filter { lookups.soulName($0.soulId) != nil }
-    }
-
-    /// The persons' intro (#1241): the head, then each of the five in turn, or the invitation.
-    static func introBeats(wrap: MonthWrap, lookups: WrapLookups) -> [IntroBeat] {
-        let rows = rows(wrap, lookups: lookups)
-        return IntroScore.persons(rings: rows.prefix(WrapCopy.shown).map(\.days), hasLead: rows.isEmpty)
-    }
-}
-
-/// A soul of the month: glyph, name, its pebbles, *new since* when the server
-/// says so, and its days as a ring or a calendar. Android: `MonthPersonRow`.
-struct MonthPersonRow: View {
-    let person: PersonStat
-    let wrap: MonthWrap
-    let lookups: WrapLookups
-    let dayView: DayView
-    /// Its place in the month page's persons, for the intro (#1241); the sheet leaves it nil.
-    var introRow: Int?
-
-    var body: some View {
-        let locale = SpineStrings.appLocale
-        let name = lookups.soulName(person.soulId) ?? ""
-        let fresh = person.isNewSincePrevious
-            ? WrapCopy.newSince(wrap.month.previous, locale: locale) : nil
-        MarkRow(name, accessibilityText: [name, "\(person.count)", fresh].compactMap { $0 }.joined(separator: ", "),
-                subtitle: fresh, count: person.count,
-                reveal: introRow.map { MarkRowReveal(leading: .glyph($0), text: .name($0)) }) {
-            SoulMark(strokes: lookups.soulGlyph(person.soulId), side: SpineLayout.mark)
-        } trailing: {
-            DaySetMarks(days: person.days, mode: wrap.dayMode(dayView), ringSize: MonthLayout.rowRing,
-                        introRow: introRow)
-                .dayMarksInset(dayView)
-        }
     }
 }
 
@@ -223,6 +205,8 @@ struct DomainsSection: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
     let onMore: () -> Void
+
+    @Environment(\.monthCardRoom) private var room
 
     private var locale: Locale { SpineStrings.appLocale }
 
@@ -238,9 +222,9 @@ struct DomainsSection: View {
                                 reveal: .row(index)) {
                             EmptyView()
                         } trailing: {
-                            // The bar grows to its share as its row lands.
+                            // The track lands with its row; the bar then fills to its share on its gauge (D10).
                             IntroReader { reveal in
-                                let grown = share * IntroMotion.easeOut(reveal(.row(index)))
+                                let grown = share * IntroMotion.easeOut(reveal(.gauge(index)))
                                 ProportionBar(segments: [BarSegment(weight: grown,
                                                                     color: Color.pebbles.onSurfaceVariant),
                                                          BarSegment(weight: 1 - grown, color: Color.pebbles.rule)])
@@ -250,6 +234,8 @@ struct DomainsSection: View {
                     }
                 }
                 .padding(.horizontal, MonthLayout.sectionPadX)
+                // On a card, *more* stands at its foot (D13).
+                if room != nil { Spacer(minLength: 0) }
                 MoreLink(text: WrapCopy.moreDomains(domains.count, locale: locale), action: onMore)
                     .accessibilityHint(Text(verbatim: WrapCopy.tileHint(locale: locale)))
                     .padding(.horizontal, MonthLayout.sectionPadX)
@@ -276,26 +262,49 @@ struct DomainsSection: View {
         }
     }
 
-    /// The domains' intro (#1241): the head, the five rows, *more*.
+    /// The domains' intro (#1241 D10): the head, then each of the five, its name and its gauge filling, *more*.
     static func introBeats(wrap: MonthWrap, lookups: WrapLookups) -> [IntroBeat] {
-        IntroScore.rows(count: min(rows(wrap, lookups: lookups).count, WrapCopy.shown), hasLead: false, more: true)
+        let stats = rows(wrap, lookups: lookups).prefix(WrapCopy.shown).map(\.stat.count)
+        guard let top = stats.max(), top > 0 else { return IntroScore.domains(shares: [], more: true) }
+        return IntroScore.domains(shares: stats.map { Double($0) / Double(top) }, more: true)
     }
 }
 
-/// Souls' glyphs in a row, up to `limit`, in the given order; decorative (each row names them).
+/// Souls' glyphs in a row, up to `limit`, in the given order; decorative (each
+/// row names them). With `introRow`, each pops on its own beat (#1241 D10).
 struct SoulMarks: View {
     let ids: [String]
     let lookups: WrapLookups
     let limit: Int
+    var introRow: Int?
+    var side = Self.side
+
+    /// A glyph's side in a list row.
+    static let side: CGFloat = 14
 
     var body: some View {
         HStack(spacing: 2) {
-            ForEach(ids.filter { lookups.soulName($0) != nil }.prefix(limit), id: \.self) { id in
-                SoulMark(strokes: lookups.soulGlyph(id), side: 14)
+            ForEach(Array(Self.shown(ids, lookups: lookups, limit: limit).enumerated()), id: \.element) { index, id in
+                SoulMark(strokes: lookups.soulGlyph(id), side: side)
+                    .introReveal(introRow.map { .mark($0, index) }, .pop)
             }
         }
         .accessibilityHidden(true)
     }
+
+    /// The souls drawn: those the device can name, up to `limit`.
+    static func shown(_ ids: [String], lookups: WrapLookups, limit: Int) -> [String] {
+        Array(ids.filter { lookups.soulName($0) != nil }.prefix(limit))
+    }
+}
+
+/// A milestone's row (#1241 D13, D16): its height, its stone's scale, its photo card's height and
+/// its souls' glyph side.
+struct MilestoneRowSize: Equatable {
+    let height: CGFloat
+    let stone: CGFloat
+    let snap: CGFloat
+    let soul: CGFloat
 }
 
 /// A domain the device knows, with its name, in the server's order.

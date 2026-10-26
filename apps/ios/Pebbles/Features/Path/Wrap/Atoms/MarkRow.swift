@@ -16,12 +16,18 @@ struct MarkRow<Leading: View, Trailing: View>: View {
     var actionHint: String?
     /// Its columns' keys in the month's intro (#1241); nil, it draws as ever.
     var reveal: MarkRowReveal?
+    /// The subtitle over the title (a milestone's date, #1241 D12).
+    var subtitleFirst = false
+    /// At least this tall, past the row minimum (a card's share, D13); and its mark column this wide.
+    var height: CGFloat?
+    var markWidth: CGFloat?
     let leading: Leading
     let trailing: Trailing
 
     init(_ title: String, accessibilityText: String, titleType: SpineType.Style = .personName,
          titleColor: Color = Color.pebbles.onSurface, subtitle: String? = nil, count: Int? = nil,
          action: (() -> Void)? = nil, actionHint: String? = nil, reveal: MarkRowReveal? = nil,
+         subtitleFirst: Bool = false, height: CGFloat? = nil, markWidth: CGFloat? = nil,
          @ViewBuilder leading: () -> Leading, @ViewBuilder trailing: () -> Trailing) {
         self.title = title
         self.accessibilityText = accessibilityText
@@ -32,6 +38,9 @@ struct MarkRow<Leading: View, Trailing: View>: View {
         self.action = action
         self.actionHint = actionHint
         self.reveal = reveal
+        self.subtitleFirst = subtitleFirst
+        self.height = height
+        self.markWidth = markWidth
         self.leading = leading()
         self.trailing = trailing()
     }
@@ -54,20 +63,19 @@ struct MarkRow<Leading: View, Trailing: View>: View {
     private var row: some View {
         HStack(spacing: SpineLayout.rowGap) {
             leading
-                .frame(width: SpineLayout.markColumn)
+                .frame(width: markWidth ?? SpineLayout.markColumn)
                 .introReveal(reveal?.leading, .pop)
             VStack(alignment: .leading, spacing: 0) {
+                if subtitleFirst { subtitleText }
                 Text(verbatim: title)
                     .spineType(titleType)
                     .foregroundStyle(titleColor)
-                if let subtitle {
-                    Text(verbatim: subtitle)
-                        .spineType(.contentsTime)
-                        .foregroundStyle(Color.pebbles.outline)
-                }
+                    .introReveal(reveal?.title)
+                if !subtitleFirst { subtitleText }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .introReveal(reveal?.text)
+            // The words land as one, unless the title and the subtitle land apart.
+            .introReveal(reveal?.title == nil ? reveal?.text : nil)
             if let count {
                 Text(verbatim: "\(count)")
                     .spineType(.contentsTime)
@@ -77,7 +85,7 @@ struct MarkRow<Leading: View, Trailing: View>: View {
             trailing
                 .introReveal(reveal?.trailing)
         }
-        .frame(minHeight: SpineLayout.rowMin)
+        .frame(minHeight: max(height ?? 0, SpineLayout.rowMin))
         .overlay(alignment: .bottom) {
             Rectangle().fill(Color.pebbles.rule).frame(height: SpineLayout.rule)
                 .introReveal(reveal?.text, .fade)
@@ -86,14 +94,27 @@ struct MarkRow<Leading: View, Trailing: View>: View {
     }
 }
 
+extension MarkRow {
+    @ViewBuilder
+    private var subtitleText: some View {
+        if let subtitle {
+            Text(verbatim: subtitle)
+                .spineType(.contentsTime)
+                .foregroundStyle(Color.pebbles.outline)
+                .introReveal(reveal?.subtitle)
+        }
+    }
+}
+
 extension MarkRow where Trailing == EmptyView {
     init(_ title: String, accessibilityText: String, titleType: SpineType.Style = .personName,
          titleColor: Color = Color.pebbles.onSurface, subtitle: String? = nil, count: Int? = nil,
          action: (() -> Void)? = nil, actionHint: String? = nil, reveal: MarkRowReveal? = nil,
+         subtitleFirst: Bool = false, height: CGFloat? = nil, markWidth: CGFloat? = nil,
          @ViewBuilder leading: () -> Leading) {
         self.init(title, accessibilityText: accessibilityText, titleType: titleType, titleColor: titleColor,
                   subtitle: subtitle, count: count, action: action, actionHint: actionHint, reveal: reveal,
-                  leading: leading) {
+                  subtitleFirst: subtitleFirst, height: height, markWidth: markWidth, leading: leading) {
             EmptyView()
         }
     }
@@ -112,12 +133,15 @@ private struct OptionalHint: ViewModifier {
 }
 
 /// Which intro keys land a row's columns (#1241): the mark pops; the words,
-/// the count and the rule land with `text`; a nil `trailing` lands itself (a
-/// person's ring).
+/// the count and the rule land with `text`; a nil `leading` or `trailing`
+/// lands itself (a cairn stone by stone, a person's ring). With `title`, the
+/// title and the subtitle land apart (a milestone's name and date, D10).
 struct MarkRowReveal {
-    let leading: IntroKey
+    let leading: IntroKey?
     let text: IntroKey
     var trailing: IntroKey?
+    var title: IntroKey?
+    var subtitle: IntroKey?
 
     /// A list row landing whole on `.row(index)`.
     static func row(_ index: Int) -> MarkRowReveal {

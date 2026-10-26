@@ -15,7 +15,7 @@ import SwiftUI
 /// card leaves upward under the finger, lifted and turned a little; the next
 /// waits beneath it, held in place, a little smaller, its foot peeking below,
 /// and grows to full size as it comes on top; swiping down lays the previous
-/// card back on the pile. A card arrives when it is on top (`IntroClock.show`):
+/// card back on the pile. A card arrives once a throw leaves it on top (`IntroClock.show`):
 /// its title is drawn from the start, then the arrive tick, then its content.
 /// Only vertical, so the Path's pager still takes horizontal swipes. Drawn
 /// only with a clock (`MonthPage`). Android: to come with #1242.
@@ -27,17 +27,21 @@ struct MonthDeck: View {
     let onWeek: (CalendarDay) -> Void
     let onOpen: (MomentSummary) -> Void
     let onMore: (MonthSection) -> Void
+    /// The end card's replay (D14): the page plays the month again from the cover.
+    let onReplay: () -> Void
 
     @Environment(\.introClock) private var clock
-    /// The card on top, as the paging leaves it; nil before the first swipe.
-    @State private var top: IntroSequence?
+    /// The card on top, by its place: read off the scroll offset once a throw has settled. Never a
+    /// `scrollPosition` binding: SwiftUI restores one by scrolling to its card, and that scroll reaches the
+    /// Path's pager, which a deck left behind off screen would then pull back to its own page.
+    @State private var top = 0
     /// One page of the deck: the scroll view's size.
     @State private var page: CGSize = .zero
 
     var body: some View {
         let cards = Self.cards(wrap: wrap, lookups: lookups)
-        // A card the wrap no longer deals hands the top back to the first.
-        let shown = top.flatMap { cards.contains($0) ? $0 : nil } ?? cards.first
+        // A card the wrap no longer deals hands the top back to the last it does.
+        let shown = cards.isEmpty ? nil : cards[min(top, cards.count - 1)]
         ScrollView(.vertical) {
             LazyVStack(spacing: 0) {
                 // Dealt once the page is measured: a card laid out at zero size would measure its content wrong.
@@ -46,23 +50,26 @@ struct MonthDeck: View {
                         self.card(card, in: cards)
                             // An earlier card lies over a later one.
                             .zIndex(Double(cards.count - index))
-                            .id(card)
                     }
                 }
             }
             .scrollTargetLayout()
+            .onGeometryChange(for: CGFloat.self) { -$0.frame(in: .scrollView).minY } action: { offset in
+                if let settled = MonthDeckMotion.settled(offset: offset, page: page.height) { top = settled }
+            }
         }
         .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
         .scrollIndicators(.hidden)
-        .scrollPosition(id: $top)
         .background(alignment: .bottom) {
             MonthDeckEdges(count: MonthDeckMotion.edges(below: Self.below(shown, in: cards)))
                 .frame(width: page.width, height: page.height)
         }
         .onGeometryChange(for: CGSize.self) { $0.size } action: { page = $0 }
-        // Arrival: the card on top plays; the one it covered, or uncovered, lands.
-        .onChange(of: shown, initial: true) { _, card in
-            if let card { clock?.show(card) }
+        // Arrival: the card on top plays; the one it covered, or uncovered, lands. A throw lands on a tick.
+        .onChange(of: shown, initial: true) { previous, card in
+            guard let card else { return }
+            clock?.show(card)
+            if previous != card { clock?.landed(card) }
         }
         // Back on screen (a tab, the pager), the hosts registered again but left: the top card enters again.
         .onAppear {
@@ -78,7 +85,8 @@ struct MonthDeck: View {
         let head = Self.head(card, wrap: wrap, lookups: lookups, dayView: dayView, leadsInsights: leadsInsights)
         return MonthDeckCard(month: Self.margin(wrap.month), step: MonthDeckStep.of(card, in: cards), head: head) {
             MonthDeckContent(card: card, wrap: wrap, lookups: lookups, dayView: dayView, focus: focus,
-                             onWeek: onWeek, onOpen: onOpen, onMore: onMore, leadsInsights: leadsInsights)
+                             onWeek: onWeek, onOpen: onOpen, onMore: onMore, onReplay: onReplay,
+                             leadsInsights: leadsInsights)
                 .environment(\.monthHeadOnCard, true)
         }
         .frame(width: page.width, height: page.height)
@@ -99,10 +107,11 @@ struct MonthDeck: View {
 }
 
 extension MonthDeck {
-    /// The cards, top first. Pure, over the same conditions the sections draw under.
+    /// The cards, top first, the end card last (D14). Pure, over the same conditions the sections draw under.
     static func cards(wrap: MonthWrap, lookups: WrapLookups) -> [IntroSequence] {
         let cover: [IntroSequence] = MonthCoverView.isShown(wrap: wrap, lookups: lookups) ? [.cover] : []
-        return cover + wrap.sections.filter { shows($0, wrap: wrap, lookups: lookups) }.map { .section($0) }
+        let dealt = cover + wrap.sections.filter { shows($0, wrap: wrap, lookups: lookups) }.map { .section($0) }
+        return dealt.isEmpty ? [] : dealt + [.end]
     }
 
     /// The first tone or hours card carries the insights head.
@@ -173,6 +182,13 @@ enum MonthDeckMotion {
         value > 0 ? CGFloat(value) * (peek - page) : 0
     }
 
+    /// The card a scroll `offset` rests on, by its place, once it rests within a point of one; nil mid-throw.
+    static func settled(offset: CGFloat, page: CGFloat) -> Int? {
+        guard page > 0 else { return nil }
+        let place = (offset / page).rounded()
+        return abs(offset - place * page) < 1 ? max(0, Int(place)) : nil
+    }
+
     /// The static edges behind the deck: the cards past the next, two at most.
     static func edges(below: Int) -> Int {
         min(maxEdges, max(0, below - 1))
@@ -193,13 +209,13 @@ private struct MonthDeckEdges: View {
                     .offset(y: MonthDeckMotion.peek * depth)
             }
         }
-        // The count changes as a throw passes half way: an edge fades rather than blinks.
+        // The count changes once a throw lands: an edge fades rather than blinks.
         .animation(.easeOut(duration: 0.2), value: count)
         .accessibilityHidden(true)
     }
 }
 
-/// A card's content: the cover, or one section.
+/// A card's content: the cover, one section, or the end.
 private struct MonthDeckContent: View {
     let card: IntroSequence
     let wrap: MonthWrap
@@ -209,6 +225,7 @@ private struct MonthDeckContent: View {
     let onWeek: (CalendarDay) -> Void
     let onOpen: (MomentSummary) -> Void
     let onMore: (MonthSection) -> Void
+    let onReplay: () -> Void
     let leadsInsights: Bool
 
     var body: some View {
@@ -218,6 +235,8 @@ private struct MonthDeckContent: View {
         case let .section(section):
             MonthSectionContent(section: section, wrap: wrap, lookups: lookups, dayView: dayView, focus: focus,
                                 onWeek: onWeek, onOpen: onOpen, onMore: onMore, leadsInsights: leadsInsights)
+        case .end:
+            MonthDeckEnd(wrap: wrap, lookups: lookups, onReplay: onReplay)
         }
     }
 }

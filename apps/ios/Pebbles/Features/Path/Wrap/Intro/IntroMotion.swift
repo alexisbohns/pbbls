@@ -48,6 +48,26 @@ enum IntroMotion {
         let u = clamp(t) - 1
         return 0.4 + 0.6 * (1 + (back + 1) * u * u * u + back * u * u)
     }
+
+    /// When, 0…1 of its beat, a stamp meets the paper (#1241 D10): its tick's moment.
+    static let stampImpact = 0.6
+    /// A stamp's press past its size at impact.
+    private static let stampSquash = 0.04
+
+    /// A stamp's scale: from 1.25 down to its impact, a slight squash there, back to 1.
+    static func stampScale(_ t: Double) -> Double {
+        let t = clamp(t)
+        if t < stampImpact {
+            let u = t / stampImpact
+            return 1.25 - (0.25 + stampSquash) * u * u
+        }
+        return 1 - stampSquash * (1 - easeOut((t - stampImpact) / (1 - stampImpact)))
+    }
+
+    /// A stamp's opacity: there by its impact.
+    static func stampOpacity(_ t: Double) -> Double {
+        clamp(t / stampImpact)
+    }
 }
 
 /// The slow-fast-slow spacing of a run of beats (#1241): beat `i` of `n`

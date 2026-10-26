@@ -9,6 +9,8 @@ struct EmotionGem: View {
     let lookups: WrapLookups
     let onMore: () -> Void
 
+    @Environment(\.monthCardRoom) private var room
+
     private var locale: Locale { SpineStrings.appLocale }
 
     var body: some View {
@@ -20,8 +22,10 @@ struct EmotionGem: View {
                     .padding(.horizontal, MonthLayout.sectionPadX)
                     .introReveal(.lead)
                 GemFigure(facets: gem.facets, palette: { lookups.family($0)?.palette }, labels: words.labels,
-                          count: "\(wrap.pebbles)", countLabel: WrapCopy.gemPebbles(wrap.pebbles, locale: locale),
+                          count: wrap.pebbles, countLabel: WrapCopy.gemPebbles(wrap.pebbles, locale: locale),
                           description: words.description)
+                // On a card, *more* stands at its foot (#1241 D13).
+                if room != nil { Spacer(minLength: 0) }
                 MoreLink(text: WrapCopy.moreEmotions(wrap.fineEmotions?.count ?? 0, locale: locale), action: onMore)
                     .accessibilityHint(Text(verbatim: WrapCopy.tileHint(locale: locale)))
                     .padding(.horizontal, MonthLayout.sectionPadX)
@@ -42,11 +46,13 @@ struct EmotionGem: View {
         wrap.gem != nil
     }
 
-    /// The gem's intro (#1241): the families in the lead's order, each with the facets the server gave it.
+    /// The gem's intro (#1241): the count, then the families in the lead's order, each with the facets the server
+    /// gave it.
     static func introBeats(wrap: MonthWrap, lookups: WrapLookups) -> [IntroBeat] {
         guard let gem = wrap.gem else { return [] }
         let words = GemWords(gem: gem, lookups: lookups, locale: SpineStrings.appLocale)
-        return IntroScore.gem(runs: IntroScore.gemRuns(order: words.labels.map(\.slug), facets: gem.facets))
+        return IntroScore.gem(runs: IntroScore.gemRuns(order: words.labels.map(\.slug), facets: gem.facets),
+                              pebbles: wrap.pebbles)
     }
 }
 

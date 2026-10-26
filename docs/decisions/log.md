@@ -1366,3 +1366,25 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - **Android:** #1242 ports the deck.
 - **Supersedes / Superseded-by:** refines the 2026-10-25 intro entry, whose sections played as they scrolled in.
 - **Refs:** #1241, #1242, `docs/superpowers/specs/2026-10-25-ios-month-intro-design.md` (D7, D11), `apps/ios/Pebbles/Features/Path/Wrap/Month/MonthDeck.swift`.
+
+## 2026-10-26 — A month's weeks and milestones change on every iOS surface; Android follows (#1241)
+
+- **Status:** taken
+- **Scope:** ios (android to follow)
+- **Context:** the third device pass on #1241 asked for two changes to what the month says, not only how it enters:
+  - every week of the month listed, an empty one muted
+  - milestones in their own stones, dated first, with their photos
+- **Decision:**
+  - **What the month says, everywhere on iOS** (on the deck and on the plain page under VoiceOver or Reduce Motion):
+    - every week of the month is listed, an empty one muted with a dotted stone and "No pebble."
+    - a milestone shows its date over its name, the Spine's own lit stone (`SpineStone`, its rings at 45 % through its new `rings` strength), and its first photo as a mini polaroid (one of 1:1, 3:4 or 4:3) or, without a photo, its souls
+  - **How the month enters, only on the deck's cards:** the calendar of week columns, the rows sharing a card's room, the gem's count-up, the domains' swelling gauges, the end card.
+- **Why:**
+  - An empty week is part of the month, and a milestone is its stone and its day. A VoiceOver reader should read the same month.
+  - The choreography is presentation, and the plain page never plays it.
+- **Consequences:**
+  - iOS and Android show different months until #1242 ports these (the cross-surface rule).
+  - The `weeks-milestones` reference is re-recorded on CI.
+  - The Spine's own renders are unchanged: `rings` is 1 there.
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #1241, #1242, `docs/superpowers/specs/2026-10-25-ios-month-intro-design.md` (D12, D16, D17).

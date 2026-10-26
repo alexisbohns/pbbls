@@ -13,6 +13,9 @@ struct CairnMark: View {
     let days: [DayWeight]
     let state: CairnState
     let color: Color
+    /// The month intro's progress of each stone from the bottom, 0…1 (#1241 D10): each pops onto the stack as it
+    /// lands; nil, all are there.
+    var built: [Double]?
 
     var body: some View {
         let widths = CairnGeometry.widths(days)
@@ -25,8 +28,20 @@ struct CairnMark: View {
             for (index, width) in widths.enumerated() {
                 let height = CairnGeometry.height(width: width, aspect: stone.aspect) * squash
                 if index > 0 { bottom += height * CairnGeometry.overlap }
-                context.drawFlatStone(stone, in: CGRect(x: (size.width - width) / 2, y: bottom - height,
-                                                        width: width, height: height), color: color)
+                let rect = CGRect(x: (size.width - width) / 2, y: bottom - height, width: width, height: height)
+                let landed = built.map { index < $0.count ? $0[index] : 1 } ?? 1
+                if landed >= 1 {
+                    context.drawFlatStone(stone, in: rect, color: color)
+                } else if landed > 0 {
+                    // Popping onto the stack from its own foot.
+                    var popping = context
+                    let scale = IntroMotion.popScale(landed)
+                    popping.opacity = IntroMotion.popOpacity(landed)
+                    popping.translateBy(x: rect.midX, y: rect.maxY)
+                    popping.scaleBy(x: scale, y: scale)
+                    popping.translateBy(x: -rect.midX, y: -rect.maxY)
+                    popping.drawFlatStone(stone, in: rect, color: color)
+                }
                 bottom -= height
             }
             if live {

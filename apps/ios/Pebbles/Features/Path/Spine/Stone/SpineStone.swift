@@ -16,9 +16,12 @@ struct SpineStone: View {
     var press: StonePress?
     /// References and the lab: one instant of a press, without a timeline.
     var frozenAt: Double?
+    /// How strongly the halo, the rings and the ripple draw, 0…1: the Spine's at 1, quieter elsewhere (a month's
+    /// milestones, #1241 D16).
+    var rings: Double = 1
 
     init(valence: Valence, glyph: PebbleGlyph?, palette: EmotionPalette?, isBlank: Bool, seed: UInt32,
-         press: StonePress? = nil, frozenAt: Double? = nil) {
+         press: StonePress? = nil, frozenAt: Double? = nil, rings: Double = 1) {
         self.valence = valence
         self.glyph = glyph
         self.palette = palette
@@ -26,13 +29,15 @@ struct SpineStone: View {
         self.seed = seed
         self.press = press
         self.frozenAt = frozenAt
+        self.rings = rings
     }
 
     /// A moment's stone: its pebble's valence, glyph and seed, or the blank stone.
-    init(moment: MomentSummary, palette: EmotionPalette?, press: StonePress? = nil, frozenAt: Double? = nil) {
+    init(moment: MomentSummary, palette: EmotionPalette?, press: StonePress? = nil, frozenAt: Double? = nil,
+         rings: Double = 1) {
         self.init(valence: moment.pebble?.valence ?? .neutralMedium, glyph: moment.pebble?.glyph, palette: palette,
                   isBlank: moment.pebble == nil, seed: StableHash.seed(moment.pebble?.id ?? moment.id),
-                  press: press, frozenAt: frozenAt)
+                  press: press, frozenAt: frozenAt, rings: rings)
     }
 
     private var size: ValenceSizeGroup { valence.sizeGroup }
@@ -57,9 +62,11 @@ struct SpineStone: View {
         return ZStack {
             if let geometry {
                 StoneRings(geometry: geometry, stone: stone, scale: frame.rings, still: frame.stillRings)
+                    .opacity(rings)
                 if !frame.waves.isEmpty {
                     StoneRipple(geometry: geometry, stone: stone, waves: frame.waves,
                                 reach: StoneMotion.Wave.reach[size] ?? 5.6)
+                        .opacity(rings)
                 }
             }
             litStone

@@ -36,4 +36,31 @@ struct IntroHapticsTests {
             #expect(ticked.contains(beat.at), "\(key) lost its tick")
         }
     }
+
+    @Test("a swelling beat plays as a swell over its duration, never as a tick; its ticks stay ticks")
+    func swells() throws {
+        let beats = IntroScore.domains(shares: [1, 0.25], more: false)
+        let swells = IntroHaptics.swells(for: beats)
+        let gauges = try [0, 1].map { row in try #require(beats.first { $0.key == .gauge(row) }) }
+        #expect(swells.map(\.at) == gauges.map(\.at))
+        #expect(swells.map(\.duration) == gauges.map(\.duration))
+        #expect(swells[0].swell.to > swells[1].swell.to)
+        let ticks = IntroHaptics.events(for: beats).map(\.at)
+        #expect(!ticks.contains(gauges[0].at))
+        #expect(try ticks.contains(#require(beats.first { $0.key == .full(0) }).at))
+        // A beat with nothing to swell over plays no swell.
+        let still = IntroBeat(key: .gauge(0), at: 0, duration: 0, swell: IntroSwell(from: 0, to: 1, sharpness: 0))
+        #expect(IntroHaptics.swells(for: [still]).isEmpty)
+    }
+
+    @Test("a swell falls silent a floor before its gauge is full, and the full tick plays at its own strength")
+    func swellControl() throws {
+        let beats = IntroScore.domains(shares: [0.25], more: false)
+        let swell = try #require(IntroHaptics.swells(for: beats).first)
+        let full = try #require(beats.first { $0.key == .full(0) })
+        #expect(abs(swell.at + swell.duration - full.at) < 1e-9)
+        #expect(abs(swell.duration - swell.sounding - IntroHaptics.floor) < 1e-9)
+        #expect(swell.control.map { $0.at } == [0, swell.sounding, swell.duration])
+        #expect(swell.control.map { $0.value } == [swell.swell.from, swell.swell.to, 1])
+    }
 }

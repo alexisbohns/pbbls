@@ -1,0 +1,213 @@
+import SwiftUI
+
+/// A day of a week's column (#1241 D17): outside the month, a day without a
+/// pebble, or a day's pebbles in the cover's order.
+enum WeekColumnDay: Equatable {
+    case outside
+    case empty
+    case pebbles([CoverPebble])
+}
+
+/// A week as a column of its card: its Monday, its seven days, its cairn's days.
+struct WeekColumn: Equatable {
+    let week: MonthWeek
+    let days: [WeekColumnDay]
+
+    /// At most this many pebbles a day; a busier day shows three.
+    static let pips = 3
+
+    /// The month's weeks as columns: each day placed by its date, its pebbles from the cover.
+    static func columns(_ wrap: MonthWrap) -> [WeekColumn] {
+        let utc = TimeZone(secondsFromGMT: 0) ?? .gmt
+        let byDay = Dictionary((wrap.cover?.days ?? []).map { ($0.day, $0.pebbles) },
+                               uniquingKeysWith: { first, _ in first })
+        return (wrap.weeks ?? []).map { week in
+            let monday = week.weekStart.date(in: utc) ?? .distantPast
+            let days = (0..<7).map { offset -> WeekColumnDay in
+                let day = CalendarDay(monday.addingTimeInterval(Double(offset) * 86_400), in: utc)
+                guard CalendarMonth(day) == wrap.month else { return .outside }
+                let pebbles = byDay[day.day - 1] ?? []
+                return pebbles.isEmpty ? .empty : .pebbles(pebbles)
+            }
+            return WeekColumn(week: week, days: days)
+        }
+    }
+
+    /// The column's intro shape: each day's pebbles shown (nil outside the month), and its cairn's stones, none
+    /// for a week without a pebble, whose dotted stone the column draws even when its moments built a cairn.
+    var shape: IntroWeekColumn {
+        IntroWeekColumn(days: days.map { day in
+            switch day {
+            case .outside: nil
+            case .empty: 0
+            case let .pebbles(pebbles): min(pebbles.count, Self.pips)
+            }
+        }, stones: week.pebbles == 0 ? 0 : CairnGeometry.widths(week.days).count)
+    }
+}
+
+/// The month's weeks on a card (#1241 D17): a column per week, Monday first
+/// down it under the week's date, each day a dotted slot or up to three of its
+/// pebbles, inked as on the garland, and the week's cairn at the column's foot.
+/// The weekdays' letters stand in a margin on the left. A tap on a column
+/// focuses its week in the strip. In the intro, one week at a time: its date,
+/// its days down the column (a slot silently, each pebble with a tick), then
+/// its cairn stone by stone.
+struct WeeksColumns: View {
+    let wrap: MonthWrap
+    let lookups: WrapLookups
+    let room: CGFloat
+    let onWeek: (CalendarDay) -> Void
+
+    @Environment(\.colorScheme) private var scheme
+
+    private static let label: CGFloat = 34
+    private static let cairnRoom: CGFloat = 64
+    private static let gap: CGFloat = 8
+    private static let cellCap: CGFloat = 40
+    private static let legend: CGFloat = 16
+
+    var body: some View {
+        let columns = WeekColumn.columns(wrap)
+        let cell = min(max((room - Self.label - Self.cairnRoom - 2 * Self.gap) / 7, 18), Self.cellCap)
+        HStack(alignment: .top, spacing: 0) {
+            weekdays(cell: cell)
+            ForEach(Array(columns.enumerated()), id: \.element.week.weekStart) { index, column in
+                WeekColumnView(column: column, index: index, cell: cell, lookups: lookups, scheme: scheme,
+                               month: wrap.month, onWeek: onWeek)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .frame(height: Self.label + Self.gap + 7 * cell + Self.gap + Self.cairnRoom, alignment: .top)
+        .padding(.horizontal, MonthLayout.sectionPadX)
+    }
+
+    /// Monday first, level with the columns' days.
+    private func weekdays(cell: CGFloat) -> some View {
+        let monday = CalendarDay(year: 2026, month: 10, day: 5).date(in: SpineCalendar.current.timeZone) ?? .now
+        let letters = WeekOpening.weekdayLetters(weekStart: monday, calendar: SpineCalendar.current,
+                                                 locale: SpineStrings.appLocale)
+        return VStack(spacing: 0) {
+            ForEach(letters.indices, id: \.self) { index in
+                Text(verbatim: letters[index])
+                    .spineType(.dayLetter)
+                    .foregroundStyle(Color.pebbles.outline)
+                    .frame(height: cell)
+            }
+        }
+        .padding(.top, Self.label + Self.gap)
+        .frame(width: Self.legend)
+        .accessibilityHidden(true)
+    }
+}
+
+/// One week's column: its Monday's date, its days, its cairn.
+private struct WeekColumnView: View {
+    let column: WeekColumn
+    let index: Int
+    let cell: CGFloat
+    let lookups: WrapLookups
+    let scheme: ColorScheme
+    let month: CalendarMonth
+    let onWeek: (CalendarDay) -> Void
+
+    private static let socket: CGFloat = 6.8
+    private static let pipGap: CGFloat = 2
+
+    var body: some View {
+        let locale = SpineStrings.appLocale
+        let week = column.week
+        let range = WrapCopy.range(month, from: week.from, to: week.to, locale: locale)
+        let line = week.pebbles == 0 ? WrapCopy.emptyWeek(locale: locale)
+            : WrapCopy.line(pebbles: week.pebbles, people: week.soulIds.count, live: false, hasMoments: true,
+                            locale: locale)
+        Button { onWeek(week.weekStart) } label: {
+            IntroReader { reveal in
+                VStack(spacing: 8) {
+                    VStack(spacing: 0) {
+                        Text(verbatim: "\(week.weekStart.day)")
+                            .spineType(.dayNumeral)
+                            .foregroundStyle(Color.pebbles.onSurface)
+                        Text(verbatim: WrapCopy.weekColumnMonth(week.weekStart, locale: locale))
+                            .spineType(.dayLetter)
+                            .foregroundStyle(Color.pebbles.outline)
+                    }
+                    .frame(height: 34)
+                    .dynamicTypeSize(...DynamicTypeSize.large)
+                    .introReveal(.words(index))
+                    Canvas { context, size in
+                        draw(in: context, size: size, reveal: reveal)
+                    }
+                    .frame(height: 7 * cell)
+                    cairn(reveal: reveal)
+                        .frame(height: 64, alignment: .top)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: "\(range), \(line)"))
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private func draw(in context: GraphicsContext, size: CGSize, reveal: IntroReveal) {
+        let pip = min(cell * 0.5, (size.width - 2 * Self.pipGap) / CGFloat(WeekColumn.pips) * 0.9, 16)
+        for (day, kind) in column.days.enumerated() {
+            let center = CGPoint(x: size.width / 2, y: (CGFloat(day) + 0.5) * cell)
+            switch kind {
+            case .outside:
+                continue
+            case .empty:
+                let shown = reveal(.rest(index, day))
+                guard shown > 0 else { continue }
+                var socket = context
+                var diameter = Self.socket
+                if shown < 1 {
+                    socket.opacity = IntroMotion.popOpacity(shown)
+                    diameter *= CGFloat(IntroMotion.popScale(shown))
+                }
+                socket.dotMark(center: center, diameter: diameter, style: .socket, color: Color.pebbles.outline)
+            case let .pebbles(pebbles):
+                let shown = Array(pebbles.prefix(WeekColumn.pips))
+                let span = CGFloat(shown.count) * pip + CGFloat(shown.count - 1) * Self.pipGap
+                for (place, pebble) in shown.enumerated() {
+                    let landed = reveal(.pip(index, day, place))
+                    guard landed > 0 else { continue }
+                    let print = Self.print(pebble, lookups: lookups, scheme: scheme)
+                    let width = pip * [0.85, 1, 1.15][min(max(pebble.intensity - 1, 0), 2)]
+                    let height = width * print.frame.height / print.frame.width
+                    let x = center.x - span / 2 + CGFloat(place) * (pip + Self.pipGap) + pip / 2
+                    var seal = context
+                    seal.translateBy(x: x, y: center.y)
+                    if landed < 1 {
+                        seal.opacity = IntroMotion.popOpacity(landed)
+                        let scale = CGFloat(IntroMotion.popScale(landed))
+                        seal.scaleBy(x: scale, y: scale)
+                    }
+                    seal.drawSeal(print, in: CGRect(x: -width / 2, y: -height / 2, width: width, height: height))
+                }
+            }
+        }
+    }
+
+    /// The week's cairn, built stone by stone; an empty week's dotted stone.
+    @ViewBuilder
+    private func cairn(reveal: IntroReveal) -> some View {
+        if column.week.pebbles == 0 {
+            CairnMark(days: [], state: .live, color: Color.pebbles.outline)
+                .introReveal(.cairn(index, 0), .pop)
+        } else {
+            let stones = CairnGeometry.widths(column.week.days).indices.map { reveal(.cairn(index, $0)) }
+            CairnMark(days: column.week.days, state: .settled, color: Color.pebbles.onSurfaceVariant, built: stones)
+        }
+    }
+
+    /// A pebble's seal, inked as on the garland: an emotion the device does not know prints blank.
+    private static func print(_ pebble: CoverPebble, lookups: WrapLookups, scheme: ColorScheme) -> SealPrint {
+        let palette = pebble.emotionId.flatMap { lookups.emotion($0)?.palette }
+        return SealPrint(valence: .of(ValenceSizeGroup(intensity: pebble.intensity), pebble.polarity), glyph: nil,
+                         palette: SpineColors.palette(palette, isBlank: palette == nil), isBlank: palette == nil,
+                         size: .contents, scheme: scheme)
+    }
+}

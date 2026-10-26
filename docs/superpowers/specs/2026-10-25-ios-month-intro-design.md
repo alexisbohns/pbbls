@@ -84,6 +84,7 @@ The month page enters instead of appearing all at once. The month's name rises i
 - **Before its turn,** a card shows its title only (D8's always-drawn heads).
 - **Arrival:** a card arrives when it becomes the top card, tracked by `.scrollPosition(id:)`. The clock lands the previous card's sequence and plays this one: the arrive tick, then its content.
 - **Revisits:** the month is still a deck, with its cards settled.
+- **Every throw lands on a tick** (`IntroClock.landed`): a card that plays its intro ticks its own arrival, and one that plays none (already played, or settled) gets the same arrive tick from the clock. The Path's pager, swiped onto another week or month, plays the strip's selection haptic, as a strip tap does.
 - **Content taller than its card** scales down to fit, anchored at its top. This happens only at the larger non-accessibility text sizes or on small phones.
 - **When there is no deck:** under Reduce Motion, VoiceOver or an accessibility text size, the month is the vertical page as before, settled, with no clock. `IntroPolicy` gains the text-size condition.
 - **The clock no longer measures geometry.** The deck tells it which card is on top (`IntroClock.show(_:)`), and each section's host registers its beats when it appears. `IntroViewport`, `report` and the chapter paging are gone.
@@ -97,17 +98,24 @@ The month page enters instead of appearing all at once. The month's name rises i
 - **Domains:** for each domain, its name and count rise with a light tick. Then its gauge fills from the left, for longer the fuller it is, with a continuous vibration swelling as it fills (D15), and a light tick as it stops. Then the next domain, with *more* last.
 
 **D12. The month's content changes on every surface** (third device pass).
-- **Empty weeks:** every week of the month is listed. An empty one is muted: its mark is the strip's ground line, its line reads "No pebble." ("Aucun galet."), in outline ink, with no souls, and it isn't a button. A month page exists only for a completed month, so an empty week is always past. The weeks' head counts every week. The server already sends empty weeks.
+- **Empty weeks:** every week of the month is listed. An empty one is muted: its mark is a dotted stone where its cairn would stand (the strip's dotted next stone), its line reads "No pebble." ("Aucun galet."), in outline ink, with no souls, and it isn't a button. A month page exists only for a completed month, so an empty week is always past. The weeks' head counts every week. The server already sends empty weeks.
 - **Milestones:** a milestone shows its date above its name.
 - **Scope:** both changes reach the scrolled page too. Android follows in its own issue.
 
 **D13. Weeks and persons fill their card.** On the deck, their rows share the room under the title band: each row is `room / rows` tall, between the row minimum and a cap. The cairn and the avatar grow with their row, up to their own caps. The card passes its room down in the environment. On the scrolled page, rows keep their size.
+- **More at the foot:** on a card, the persons', emotions' and domains' *more* stands at the card's foot. Content that fits is laid out in the whole room (`MonthCardFill`), so a spacer before *more* opens; content past the room keeps its own height and scales down.
 
 **D14. The end card.** After the last section, the deck deals one more card, like the back of the deck:
-- **Layout:** the margin and stepper (the stepper counts the end card), no title band, then the month's name and a "Replay the month" button.
+- **Layout:** the margin and stepper (the stepper counts the end card), no title band, then the cover's whole garland with the month inside it, settled (`MonthCoverGarland`, shared with the cover; no clock reaches it), and a "Replay the month" button.
 - **Arrival:** it ticks, and the button rises. `IntroSequence` gains `.end`, which plays last.
 - **Replay:** a tap puts the deck back on the cover with a fresh clock, and the ledger forgets the month, so it plays from the start.
 - **The scrolled page** has no end card.
+
+**D16. Milestones in their own stones** (the same pass, later). Everywhere, a milestone draws the Spine's own lit stone (`SpineStone`) instead of the flat seal, in a column wide enough for its rings, which draw at 45 % (`SpineStone.rings`, 1 in the Spine). As its stamp meets the paper, it ripples once with the Spine's own press, at the stone's pace whatever the tempo; a card dealt settled does not ripple. On the right, its first photo as a mini polaroid (`MilestoneSnap`): the stock under a rule, the photo in a window of one of three shapes, square, 3:4 or 4:3, the nearest to its own (a 16:9 or 9:16 photo fills a 4:3 or 3:4 window, cropped), then a strip with two faint caption lines, tilted slightly clockwise, keeping within a box as tall as the row allows. Or its souls when it has no photo. In the intro, the polaroid lands as one part where the souls landed one by one. The list's rows are 56 pt, so the rings clear each other. On a card, the rows share the room (up to 104 pt) and the stone grows to the Spine's own size, with the photo's card and the souls growing alongside.
+
+**D17. The weeks card is a calendar of columns** (the same pass, later). It replaces the weeks' rows on a card and their D10 signature; the scrolled page keeps its list, which never plays an intro.
+- **Columns:** a column per week, its Monday's number over its month's abbreviation, then its seven days down it, Monday first, level with a margin of weekday letters. A day outside the month stays blank, a day without a pebble is a dotted slot (the garland's socket), and a day with pebbles shows up to three of them as small seals inked as on the garland, from the cover's pebbles. The week's cairn stands at the column's foot, or a dotted stone for an empty week. A tap on a column focuses its week.
+- **Intro:** one week at a time. Its date rises with a light tick, then its days go down the column: a slot pops silently, and each pebble pops with a light tick, three at most a day. Then its cairn builds stone by stone, each stone a little firmer, or an empty week's dotted stone pops on a faint tick. Then the next week.
 
 **D15. Continuous haptics.** `IntroBeat` gains an optional `swell` (`IntroSwell`): a continuous Core Haptics event that starts at the beat's time and lasts the swell's duration. Its intensity rises from `from` to `to` along a parameter curve. The 25 ms floor applies to transients only.
 

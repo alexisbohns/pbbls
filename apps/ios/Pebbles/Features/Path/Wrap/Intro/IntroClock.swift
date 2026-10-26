@@ -161,6 +161,14 @@ final class IntroClock {
         startNext()
     }
 
+    /// A throw came to rest on `sequence` (D11): every throw lands on a tick.
+    /// A card that plays its intro ticks its own arrival; one that plays none
+    /// (already played, or settled) gets the same tick from here.
+    func landed(_ sequence: IntroSequence) {
+        guard frozenAt == nil, isActive, !isPlaying(sequence) else { return }
+        haptics?.tick(.arrive)
+    }
+
     /// Brings `sequence` into view with its beats, beside any already there.
     func enter(_ sequence: IntroSequence, beats: @escaping () -> [IntroBeat]) {
         latest[sequence] = beats

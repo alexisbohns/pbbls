@@ -62,6 +62,12 @@ enum WrapCopy {
 
     static func soFar(locale: Locale) -> String { SpineStrings.string("path.wrap.soFar", locale: locale) }
 
+    /// The deck's end card (#1241 D14): "Replay the month".
+    static func replayMonth(locale: Locale) -> String { SpineStrings.string("path.wrap.replayMonth", locale: locale) }
+
+    /// A past week of a month without a pebble (#1241 D12), "No pebble.": a month page is always a completed month.
+    static func emptyWeek(locale: Locale) -> String { SpineStrings.string("path.wrap.lineNoPebbles", locale: locale) }
+
     static func collect(locale: Locale) -> String { SpineStrings.string("path.wrap.collect", locale: locale) }
 
     static func weightCaption(locale: Locale) -> String {
@@ -291,6 +297,11 @@ enum WrapCopy {
     /// A month's name inside a sentence: "September" in English, "septembre" in French.
     static func monthInSentence(_ month: CalendarMonth, locale: Locale) -> String {
         calendar(locale).standaloneMonthSymbols[month.month - 1]
+    }
+
+    /// A week column's month under its Monday's number (#1241 D17): "Sep", "Oct".
+    static func weekColumnMonth(_ day: CalendarDay, locale: Locale) -> String {
+        monthAbbreviation(CalendarMonth(day), locale)
     }
 
     /// "Oct" / "Oct": the abbreviation a range and a dateline print, its period dropped, capitalised.

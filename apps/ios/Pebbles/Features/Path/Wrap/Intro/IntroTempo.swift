@@ -23,6 +23,6 @@ struct IntroTempo: Hashable, Sendable {
 extension IntroBeat {
     /// The beat `factor` times slower: its time and its duration.
     func scaled(by factor: Double) -> IntroBeat {
-        IntroBeat(key: key, at: at * factor, duration: duration * factor, tick: tick)
+        IntroBeat(key: key, at: at * factor, duration: duration * factor, tick: tick, swell: swell)
     }
 }

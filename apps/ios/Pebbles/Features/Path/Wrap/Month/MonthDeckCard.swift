@@ -18,7 +18,7 @@ struct MonthDeckCard<Content: View>: View {
     let head: MonthHead?
     @ViewBuilder let content: Content
 
-    /// The content's own height, and the card's.
+    /// The content's height as laid out (its own, or the room when it fits), and the card's.
     @State private var ideal: CGFloat = 0
     @State private var room: CGFloat = 0
 
@@ -37,10 +37,11 @@ struct MonthDeckCard<Content: View>: View {
                     Color.clear
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { room = $0 }
                         .overlay(alignment: .top) {
-                            content
-                                .fixedSize(horizontal: false, vertical: true)
-                                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { ideal = $0 }
-                                .scaleEffect(fit, anchor: .top)
+                            MonthCardFill(room: room) {
+                                content.environment(\.monthCardRoom, room > 0 ? room : nil)
+                            }
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { ideal = $0 }
+                            .scaleEffect(fit, anchor: .top)
                         }
                 }
             }
@@ -51,6 +52,23 @@ struct MonthDeckCard<Content: View>: View {
 
     private var fit: CGFloat {
         ideal > room && room > 0 ? room / ideal : 1
+    }
+}
+
+/// Lays a card's content out in the room when it fits, so its spacers open
+/// and a section's *more* stands at the card's foot; past the room, at its own
+/// height, for the card to scale it down. Its height is the larger of the two.
+struct MonthCardFill: Layout {
+    let room: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let own = subviews.first?.sizeThatFits(ProposedViewSize(width: proposal.width, height: nil)) ?? .zero
+        return CGSize(width: proposal.width ?? own.width, height: max(own.height, room))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        subviews.first?.place(at: bounds.origin, anchor: .topLeading,
+                              proposal: ProposedViewSize(width: bounds.width, height: bounds.height))
     }
 }
 
@@ -72,6 +90,8 @@ enum MonthDeckLayout {
     static let segment: CGFloat = 10
     static let segmentThickness: CGFloat = 3
     static let segmentGap: CGFloat = 3
+    /// Between the end card's month and its replay.
+    static let endGap: CGFloat = 20
 }
 
 /// A card's margin (#1241 D11): the month set upright at the top, reading
@@ -160,5 +180,51 @@ private struct MonthDeckTitle: View {
         .padding(.horizontal, MonthLayout.sectionPadX)
         .padding(.top, MonthDeckLayout.titleTop)
         .padding(.bottom, MonthDeckLayout.titleBottom)
+    }
+}
+
+/// The deck's last card (#1241 D14), the back of the deck: the cover's whole
+/// garland with the month inside it, settled, and a button that replays the
+/// month from the cover; the month's name alone when it has no cover. Centred
+/// in the card's room.
+struct MonthDeckEnd: View {
+    let wrap: MonthWrap
+    let lookups: WrapLookups
+    let onReplay: () -> Void
+
+    @Environment(\.monthCardRoom) private var room
+
+    var body: some View {
+        let locale = SpineStrings.appLocale
+        VStack(spacing: MonthDeckLayout.endGap) {
+            if MonthCoverView.isShown(wrap: wrap, lookups: lookups), let cover = wrap.cover {
+                MonthCoverGarland(wrap: wrap, cover: cover, lookups: lookups)
+                    // Whole from the start, whatever the end card's turn: no clock reaches it.
+                    .environment(\.introClock, nil)
+            } else {
+                Text(verbatim: WrapCopy.monthName(wrap.month, locale: locale))
+                    .spineType(.monthName)
+                    .foregroundStyle(Color.pebbles.onSurface)
+                    .dynamicTypeSize(...DynamicTypeSize.large)
+            }
+            Button(action: onReplay) {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.counterclockwise")
+                        .imageScale(.small)
+                        .accessibilityHidden(true)
+                    Text(verbatim: WrapCopy.replayMonth(locale: locale))
+                }
+                .spineType(.personsFold)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                .padding(.horizontal, 18)
+                .frame(minHeight: SpineLayout.minTarget)
+                .overlay { Capsule().strokeBorder(Color.pebbles.cardRule, lineWidth: SpineLayout.rule) }
+                .contentShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .introReveal(.replay)
+        }
+        .frame(maxWidth: .infinity, minHeight: room ?? 0)
+        .introSequence(.end) { IntroScore.end() }
     }
 }
