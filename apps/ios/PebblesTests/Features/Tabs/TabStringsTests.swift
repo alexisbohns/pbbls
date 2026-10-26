@@ -1,12 +1,12 @@
 import Foundation
 import Testing
 
-/// #903 §2 / §8: every string the bar and the status cluster show has an FR
+/// #903 §2 / §8: every string the bar and the Path's + button show has an FR
 /// value matching Android's `tab_*` strings.
 @Suite("Tab strings")
 struct TabStringsTests {
-    private static let keys = ["Path", "People", "Collections", "You", "Circle", "Opens You", "New pebble"]
-    private static let french = ["Chemin", "Proches", "Collections", "Toi", "Cercle", "Ouvre Toi", "Nouveau galet"]
+    private static let keys = ["Path", "People", "Collections", "You", "Circle", "New pebble"]
+    private static let french = ["Chemin", "Proches", "Collections", "Toi", "Cercle", "Nouveau galet"]
 
     @Test("each tab string resolves in French", arguments: zip(keys, french))
     func frenchValue(key: String, expected: String) {

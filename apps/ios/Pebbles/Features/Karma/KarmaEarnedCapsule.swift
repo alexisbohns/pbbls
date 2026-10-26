@@ -3,8 +3,8 @@ import UIKit
 
 /// In-app "+N karma" pastille. A translucent glass capsule that pops up from
 /// the bottom-center of the screen. Works on every device (no Dynamic Island
-/// needed) and on any iOS 17+ version. Same visual language as the karma stat
-/// in `PathStatusCluster` (sparkle + accent). Tap to dismiss; VoiceOver announces.
+/// needed) and on any iOS 17+ version. Sparkle + accent, the karma stat's
+/// visual language. Tap to dismiss; VoiceOver announces.
 struct KarmaEarnedCapsule: View {
     let content: KarmaEarnedContent
     /// The pastille's on-screen lifetime; the countdown ring drains over it.
