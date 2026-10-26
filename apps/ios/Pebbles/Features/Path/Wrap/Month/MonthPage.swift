@@ -5,9 +5,10 @@ import SwiftUI
 /// (circle or calendar) is one setting for every month. When a milestone's
 /// held card closes, VoiceOver comes back to its row (the focused page only,
 /// so a realised neighbour never takes it). With an intro context, the page
-/// plays its intro (#1241) while on screen, focused and the app active,
-/// skipped by a tap; under Reduce Motion, VoiceOver or an accessibility text
-/// size it drops the intro for good. Android: `MonthPage`.
+/// is a deck of cards (`MonthDeck`, #1241 D11) and plays its intro while on
+/// screen, focused and the app active, skipped by a tap; under Reduce Motion,
+/// VoiceOver or an accessibility text size it drops the intro for good and is
+/// the vertical page, settled. Android: `MonthPage`.
 struct MonthPage: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
@@ -47,12 +48,20 @@ struct MonthPage: View {
     }
 
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                MonthPageSections(wrap: wrap, lookups: lookups, dayView: dayView, focus: $milestoneFocus,
-                                  onWeek: onWeek, onOpen: onOpen, onMore: { sheet = $0 })
+        Group {
+            // Refused by the policy, the page never draws the deck, even for the frame before `intro` drops.
+            if intro != nil, allowsIntro {
+                MonthDeck(wrap: wrap, lookups: lookups, dayView: dayView, focus: $milestoneFocus,
+                          onWeek: onWeek, onOpen: onOpen, onMore: { sheet = $0 })
+            } else {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        MonthPageSections(wrap: wrap, lookups: lookups, dayView: dayView, focus: $milestoneFocus,
+                                          onWeek: onWeek, onOpen: onOpen, onMore: { sheet = $0 })
+                    }
+                    .padding(.bottom, MonthLayout.pageBottom)
+                }
             }
-            .padding(.bottom, MonthLayout.pageBottom)
         }
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }

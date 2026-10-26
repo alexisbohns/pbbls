@@ -42,6 +42,34 @@ struct MonthDeckTests {
         #expect(MonthDeck.leadsInsights(.section(.hours), in: quiet))
     }
 
+    @Test("the top card is drawn as it is, so its settled render is the page's")
+    func topIsIdentity() {
+        #expect(MonthDeckMotion.scale(0) == 1)
+        #expect(MonthDeckMotion.turn(0) == 0)
+        #expect(MonthDeckMotion.offset(0, page: 800) == 0)
+    }
+
+    @Test("a card to come is held in place beneath the top one, a little smaller, its foot peeking")
+    func comingIsHeld() {
+        // One page down, it is drawn a foot below the top: its layout (800) plus the offset.
+        #expect(800 + MonthDeckMotion.offset(1, page: 800) == MonthDeckMotion.peek)
+        // Half way up, it has risen half the foot, not half the page.
+        #expect(400 + MonthDeckMotion.offset(0.5, page: 800) == MonthDeckMotion.peek / 2)
+        #expect(abs(MonthDeckMotion.scale(1) - (1 - MonthDeckMotion.shrink)) < 1e-9)
+    }
+
+    @Test("a leaving card lifts and turns as it goes, and is not held")
+    func leavingLifts() {
+        #expect(abs(MonthDeckMotion.scale(-1) - (1 + MonthDeckMotion.lift)) < 1e-9)
+        #expect(MonthDeckMotion.turn(-1) == -MonthDeckMotion.maxTurn)
+        #expect(MonthDeckMotion.offset(-0.5, page: 800) == 0)
+    }
+
+    @Test("the deck's static edges stand for the cards past the next, two at most")
+    func edges() {
+        #expect([0, 1, 2, 3, 7].map { MonthDeckMotion.edges(below: $0) } == [0, 0, 1, 2, 2])
+    }
+
     /// The wrap with `section` drawing nothing, as the server sends an empty one, and without its cover if asked.
     private static func emptying(_ wrap: MonthWrap, _ section: MonthSection? = nil, cover: Bool = false) -> MonthWrap {
         MonthWrap(month: wrap.month, daysInMonth: wrap.daysInMonth, firstWeekday: wrap.firstWeekday,
