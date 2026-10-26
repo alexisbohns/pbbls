@@ -206,7 +206,14 @@ struct PersonsSection: View {
     let dayView: DayView
     let onMore: () -> Void
 
+    @Environment(\.monthCardRoom) private var room
+
     private var locale: Locale { SpineStrings.appLocale }
+
+    /// A person's row on a card: its share of the room, within the row minimum and this (D13).
+    static let rowCap: CGFloat = 96
+    static let glyphCap: CGFloat = 48
+    static let ringCap: CGFloat = 60
 
     var body: some View {
         if Self.isShown(wrap: wrap, lookups: lookups) {
@@ -220,9 +227,10 @@ struct PersonsSection: View {
                 } else {
                     VStack(spacing: 0) {
                         let shown = Array(rows.prefix(WrapCopy.shown).enumerated())
+                        let size = room.map { Self.rowSize(room: $0, rows: shown.count) }
                         ForEach(shown, id: \.element.soulId) { index, person in
                             MonthPersonRow(person: person, wrap: wrap, lookups: lookups, dayView: dayView,
-                                           introRow: index)
+                                           introRow: index, size: size)
                         }
                     }
                     .padding(.horizontal, MonthLayout.sectionPadX)
@@ -234,6 +242,15 @@ struct PersonsSection: View {
             }
             .introSequence(.section(.persons)) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// A person's row on a card (D13): its share of the room left by *more*, the glyph and the ring growing with it,
+    /// each within its bounds.
+    static func rowSize(room: CGFloat, rows: Int) -> MonthPersonRowSize {
+        let height = min(max((room - MonthLayout.moreReserve) / CGFloat(max(rows, 1)), SpineLayout.rowMin), rowCap)
+        return MonthPersonRowSize(height: height,
+                                  glyph: min(max(height * 0.5, SpineLayout.mark), glyphCap),
+                                  ring: min(max(height * 0.7, MonthLayout.rowRing), ringCap))
     }
 
     /// The section's head, the deck's title for its card (#1241 D11): on the circle, the ring's reading.
@@ -270,6 +287,8 @@ struct MonthPersonRow: View {
     let dayView: DayView
     /// Its place in the month page's persons, for the intro (#1241); the sheet leaves it nil.
     var introRow: Int?
+    /// Its size on a card (#1241 D13); nil, the list's.
+    var size: MonthPersonRowSize?
 
     var body: some View {
         let locale = SpineStrings.appLocale
@@ -278,10 +297,11 @@ struct MonthPersonRow: View {
             ? WrapCopy.newSince(wrap.month.previous, locale: locale) : nil
         MarkRow(name, accessibilityText: [name, "\(person.count)", fresh].compactMap { $0 }.joined(separator: ", "),
                 subtitle: fresh, count: person.count,
-                reveal: introRow.map { MarkRowReveal(leading: .glyph($0), text: .name($0)) }) {
-            SoulMark(strokes: lookups.soulGlyph(person.soulId), side: SpineLayout.mark)
+                reveal: introRow.map { MarkRowReveal(leading: .glyph($0), text: .name($0)) },
+                height: size?.height, markWidth: size.map { max($0.glyph, SpineLayout.markColumn) }) {
+            SoulMark(strokes: lookups.soulGlyph(person.soulId), side: size?.glyph ?? SpineLayout.mark)
         } trailing: {
-            DaySetMarks(days: person.days, mode: wrap.dayMode(dayView), ringSize: MonthLayout.rowRing,
+            DaySetMarks(days: person.days, mode: wrap.dayMode(dayView), ringSize: size?.ring ?? MonthLayout.rowRing,
                         introRow: introRow)
                 .dayMarksInset(dayView)
         }
@@ -379,6 +399,13 @@ struct SoulMarks: View {
     static func shown(_ ids: [String], lookups: WrapLookups, limit: Int) -> [String] {
         Array(ids.filter { lookups.soulName($0) != nil }.prefix(limit))
     }
+}
+
+/// A person's row on a card (#1241 D13): its height, its glyph's side and its ring's.
+struct MonthPersonRowSize: Equatable {
+    let height: CGFloat
+    let glyph: CGFloat
+    let ring: CGFloat
 }
 
 /// A domain the device knows, with its name, in the server's order.

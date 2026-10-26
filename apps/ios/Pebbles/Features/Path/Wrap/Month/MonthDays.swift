@@ -30,6 +30,8 @@ enum MonthLayout {
     static let sectionTop: CGFloat = 32
     static let headGap: CGFloat = 8
     static let pageBottom: CGFloat = 96
+    /// The room a section's *more* takes under its rows, kept free when rows share a card (#1241 D13).
+    static let moreReserve: CGFloat = 56
 }
 
 extension View {
