@@ -309,7 +309,7 @@ export const dealingTheMonth: BlogPost = {
     { kind: "heading", text: "What comes next" },
     {
       kind: "paragraph",
-      text: "The passes so far were about feel. Before this ships there is a more careful one on the iPhone: counting the garland's ticks on a 31-day month to be sure none is lost in the fast middle, checking that frames stay smooth while the garland and the gem draw, and settling one question I found no clear answer to, whether Core Haptics honours the System Haptics switch in Settings. If it does not, the ticks will come from the system's simpler feedback generators, fired from the same clock, and the score and the drawings will stay exactly as they are.",
+      text: "The last pass on the iPhone settled a question I had found no clear answer to: does Core Haptics honour the System Haptics switch in Settings? It does not. With the switch off, the month still ticked. The fallback I had planned was the system's simpler feedback generators, which follow that switch, but they would have cost the gauges their swell and blurred the garland's fastest ticks. So Pebbles now carries its own switch instead, Vibrations under Haptics in its settings, and every vibration in the app asks it first. One check is still to come: making sure frames stay smooth while the garland and the gem draw.",
     },
     {
       kind: "paragraph",
