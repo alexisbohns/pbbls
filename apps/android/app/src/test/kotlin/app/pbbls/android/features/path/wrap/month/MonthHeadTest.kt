@@ -9,6 +9,7 @@ import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.Tone
 import app.pbbls.android.core.model.wrap.WeekTile
 import app.pbbls.android.features.path.wrap.copy.WrapCopy
+import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -94,6 +95,25 @@ class MonthHeadTest {
         assertEquals(copy.gemHint(), MonthSections.head(MonthSection.GEM, wrap, lookups, copy).hint)
         assertNull(MonthSections.head(MonthSection.DOMAINS, wrap, lookups, copy).hint)
         assertEquals(MonthHead(copy.insights(), copy.insightsHint()), MonthSections.insightsHead(copy))
+    }
+
+    @Test
+    fun `each card is titled by its section's head, the insights head on the one that leads them, none on the cover or the end`() {
+        val cards = MonthDeck.cards(wrap, lookups)
+        val head = { card: IntroSequence ->
+            MonthDeck.head(card, wrap, lookups, copy, DayView.CIRCLE, MonthDeck.leadsInsights(card, cards))
+        }
+        assertNull(head(IntroSequence.Cover))
+        assertNull(head(IntroSequence.End))
+        assertEquals(MonthSections.head(MonthSection.WEEKS, wrap, lookups, copy), head(IntroSequence.Section(MonthSection.WEEKS)))
+        assertEquals(
+            MonthSections.head(MonthSection.PERSONS, wrap, lookups, copy, DayView.CIRCLE),
+            head(IntroSequence.Section(MonthSection.PERSONS)),
+        )
+        assertEquals(MonthSections.head(MonthSection.GEM, wrap, lookups, copy), head(IntroSequence.Section(MonthSection.GEM)))
+        // The tone leads the insights: its card is titled by their head, the hours by their own.
+        assertEquals(MonthSections.insightsHead(copy), head(IntroSequence.Section(MonthSection.TONE)))
+        assertEquals(MonthSections.head(MonthSection.HOURS, wrap, lookups, copy), head(IntroSequence.Section(MonthSection.HOURS)))
     }
 
     @Test

@@ -28,6 +28,7 @@ import app.pbbls.android.core.model.wrap.WeekWrap
 import app.pbbls.android.features.path.strip.PathPage
 import app.pbbls.android.features.path.strip.PathPages
 import app.pbbls.android.features.path.wrap.WrapState
+import app.pbbls.android.features.path.wrap.intro.IntroLedger
 import app.pbbls.android.features.path.wrap.shown
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -167,6 +168,12 @@ class PathViewModel
 
         /** The zone the feed cuts its days in, and the one the strip is asked for (#1207). */
         private val zone = ZoneId.systemDefault()
+
+        /**
+         * The month intros played this launch (#1242 D20; iOS `PathModel`'s ledger): the Path tab's root entry
+         * lives as long as the launch, so a month plays once. A rotation keeps it; process death clears it.
+         */
+        val introLedger = IntroLedger()
 
         private var entries: List<WeekRollEntry> = emptyList()
         private var strip: Strip? = null

@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
 import android.os.Parcel
+import android.provider.Settings
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -77,6 +78,17 @@ abstract class AppUiTest {
     @Before
     fun injectFakes() {
         hilt.inject()
+    }
+
+    /**
+     * Draws a month as the plain page, never the deck (#1242 D20): the animator scale at 0 is Reduce Motion,
+     * which `rememberReduceMotion()` reads at launch. Under a Compose test rule the frame clock is virtual while
+     * the intro's clock reads `System.nanoTime`, so a deck playing here would never land and `waitForIdle`
+     * would wait on its frames for ever. A test of the deck itself drives one directly, with a test clock.
+     */
+    @Before
+    fun drawThePlainMonthPage() {
+        Settings.Global.putFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
     }
 
     @After

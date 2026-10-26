@@ -55,6 +55,9 @@ import app.pbbls.android.features.path.strip.PathPages
 import app.pbbls.android.features.path.strip.PathStrip
 import app.pbbls.android.features.path.wrap.WrapLookups
 import app.pbbls.android.features.path.wrap.WrapState
+import app.pbbls.android.features.path.wrap.intro.IntroLedger
+import app.pbbls.android.features.path.wrap.intro.rememberIntroVibrator
+import app.pbbls.android.features.path.wrap.month.MonthIntro
 import app.pbbls.android.features.path.wrap.month.MonthPage
 import app.pbbls.android.features.path.wrap.month.MonthPagePlaceholder
 import app.pbbls.android.features.path.wrap.shown
@@ -166,6 +169,7 @@ fun PathScreen(
                         onFocusChange = viewModel::onFocus,
                         paletteFor = paletteFor,
                         aspect = viewModel.snapAspect,
+                        introLedger = viewModel.introLedger,
                         onPebbleTap = { moment, face -> onOpenDetail(moment.id, face) },
                         onPebbleDelete = viewModel::requestDelete,
                         onCreatePebble = onCreatePebble,
@@ -237,6 +241,9 @@ fun PathScreen(
  *   from; a soul absent from it is skipped.
  * @param aspect the photo-ratio probe the cards read; null (previews) keeps
  *   every field square unless [ratioOverride] answers.
+ * @param introLedger the month intros played this launch (#1242 D20); with
+ *   one, a month page the policy allows is dealt as a deck and plays its
+ *   intro while it is the settled page. Null (previews): the plain page.
  * @param ratioOverride preview-only: a primed ratio by storage prefix, so a
  *   render never waits on a probe. Production passes nothing.
  */
@@ -256,6 +263,7 @@ fun PathContent(
     paletteFor: (PathMoment) -> EmotionPalette?,
     modifier: Modifier = Modifier,
     aspect: SnapAspectCache? = null,
+    introLedger: IntroLedger? = null,
     onPebbleTap: (PathMoment, CardFace) -> Unit = { _, _ -> },
     onPebbleDelete: (PathMoment) -> Unit = {},
     onCreatePebble: () -> Unit = {},
@@ -265,6 +273,8 @@ fun PathContent(
     val weeks = remember(entries) { entries.associateBy { it.weekStart } }
     val reduceMotion = rememberReduceMotion()
     val pagerState = rememberPagerState(initialPage = pages.indexOf(focus).coerceAtLeast(0)) { pages.size }
+    val introHaptics = if (introLedger != null) rememberIntroVibrator() else null
+    val intro = remember(introLedger, introHaptics) { introLedger?.let { MonthIntro(it, introHaptics) } }
 
     // Programmatic scrolls in flight. A counter, not a flag: a new focus
     // cancels the running scroll, whose cleanup can land after the next one
@@ -348,6 +358,8 @@ fun PathContent(
                             onWeek = { onFocusChange(PathPage.Week(it)) },
                             onOpen = { moment -> onPebbleTap(moment, CardFace.RECTO) },
                             modifier = Modifier.fillMaxSize(),
+                            intro = intro,
+                            focused = pagerState.settledPage == index,
                             aspect = aspect,
                         )
                     }
