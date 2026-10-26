@@ -1696,3 +1696,13 @@ git commit -m "feat(admin): link guides in the sidebar and add their playground"
 - Stacks: four parts, each one PR, each lints and tests alone → the four branches.
 
 Resolved while writing: `delete_moment(p_moment_id)`; the glyph insert shape (`{ d, width }` strokes); `LogForm`'s error classes. One check left to the implementer: `verify-account-purge.ts` asserts the purge's returned `counts` only through the zero-row loop (there is no per-key assertion), so Task 11 Step 2's last sentence is a no-op unless such an assertion exists at the time.
+
+
+## Lessons learned (2026-10-27, after the four PRs)
+
+- **The live month moves under the harness.** A seed dated in the current month is in the live month today and a finished one next month; assertions about "finished months" must seed a month that is already over and compute the live month from the clock, never hard-code it.
+- **`HOME_DUMP=1` rewrites every payload with fresh random ids.** A part that only touches one RPC should leave the other fixture out of its commit (or the dump should take a name filter).
+- **A re-emitted function keeps its grants and comment**, so a follow-up migration that only changes `security` or `search_path` needs no revoke/grant block.
+- **The spec's list-page affordances (publish switch, drag order) were simplified** to a badge and a numeric cell, with publishing and ordering on the detail page.
+- **`path_month_cover` exists so Home never runs the whole month page per month**; `path_month_wrap` adopts it at its next re-emission, the harness equality is the guard until then.
+- **A signed-in admin click-through needs a browser session**; the agents could not do it, the maintainer does it before the merge.
