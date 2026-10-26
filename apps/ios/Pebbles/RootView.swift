@@ -32,9 +32,9 @@ struct RootView: View {
     @State private var authPath = NavigationPath()
     @State private var loaderSettled = false
     @State private var loaderCeilingReached = false
-    /// For authed launches: the loader stays over `PathView` until its first
-    /// timeline load settles, so the home feed's own spinner never shows.
-    @State private var pathFeedLoaded = false
+    /// For authed launches: the loader stays over the first root (Home or
+    /// Path) until its first load settles, so its own spinner never shows.
+    @State private var firstRootLoaded = false
     /// Invite token lifted out of a universal link, presented as a sheet once
     /// there is a session to accept with (M49, design D12).
     @State private var acceptingInvite: InviteToken?
@@ -111,19 +111,19 @@ struct RootView: View {
         !supabase.isInitializing && supabase.session == nil
     }
 
-    /// Decided once, at restore: a scene restored onto People or You sets
-    /// `pathFeedLoaded` there, because `TabView` builds Path lazily and its
+    /// Decided once, at restore: a scene restored onto People, Collections or You sets
+    /// `firstRootLoaded` there, because `TabView` builds Home and Path lazily and their
     /// `onFirstLoad` would otherwise fire mid-session, under a full-screen
     /// loader on the first tap on Path.
     private var holdsLoader: Bool {
-        !pathFeedLoaded
+        !firstRootLoaded
     }
 
     var body: some View {
         ZStack {
             if canShowAuthedTabs {
                 ZStack {
-                    PebblesTabView(onPathFirstLoad: { pathFeedLoaded = true })
+                    PebblesTabView(onFirstLoad: { firstRootLoaded = true })
                         .environment(nav)
                         .environment(cardFrames)
                         .environment(heldCard)
@@ -234,7 +234,7 @@ struct RootView: View {
         .onChange(of: supabase.session == nil) { wasSignedOut, isSignedOut in
             if !wasSignedOut && isSignedOut {
                 // Re-arm the home-feed loader cover for the next sign-in.
-                pathFeedLoaded = false
+                firstRootLoaded = false
             }
         }
         .onChange(of: isResolvedSignedOut) { _, signedOut in
@@ -257,8 +257,8 @@ struct RootView: View {
             return
         }
         nav.restore(snapshot)
-        if snapshot.selected != .path {
-            pathFeedLoaded = true
+        if ![.home, .path].contains(snapshot.selected) {
+            firstRootLoaded = true
         }
     }
 
@@ -268,7 +268,7 @@ struct RootView: View {
         storedTabs = nil
         // The `session == nil` re-arm never fires on a cold launch that
         // resolves signed out, so re-arm the loader for the next sign-in here.
-        pathFeedLoaded = false
+        firstRootLoaded = false
         // No slot of the last account survives into the next one, and none
         // stays hidden by a flight the sign-out cut short (`hidden` starts nil).
         cardFrames = CardFrameRegistry()

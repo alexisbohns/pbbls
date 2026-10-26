@@ -9,15 +9,22 @@ import SwiftUI
 /// Cross-tab presentation goes through `RootView` (or, later, the card-stack
 /// host), never by setting another tab's state (§11).
 struct PebblesTabView: View {
-    var onPathFirstLoad: () -> Void = {}
+    var onFirstLoad: () -> Void = {}
 
     @Environment(TabNavigation.self) private var nav
 
     var body: some View {
         @Bindable var nav = nav
         TabView(selection: Binding(get: { nav.selected }, set: { nav.select($0) })) {
+            NavigationStack(path: $nav.home) {
+                HomeView(onFirstLoad: onFirstLoad)
+            }
+            .modifier(TabChrome())
+            .tabItem { Label("Home", systemImage: "house") }
+            .tag(AppTab.home)
+
             NavigationStack(path: $nav.path) {
-                PathView(onFirstLoad: onPathFirstLoad)
+                PathView(onFirstLoad: onFirstLoad)
             }
             .modifier(TabChrome())
             .tabItem { Label("Path", systemImage: "square.stack") }
