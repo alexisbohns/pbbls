@@ -1,8 +1,9 @@
 import type { BlogPost } from "@/lib/blog/types"
+import { dealingTheMonth } from "@/lib/blog/posts/dealing-the-month"
 import { redrawingTheWeek } from "@/lib/blog/posts/redrawing-the-week"
 
 /** Every published post, newest first. */
-export const BLOG_POSTS: readonly BlogPost[] = [redrawingTheWeek]
+export const BLOG_POSTS: readonly BlogPost[] = [dealingTheMonth, redrawingTheWeek]
 
 export function getBlogPost(slug: string): BlogPost | undefined {
   return BLOG_POSTS.find((post) => post.slug === slug)
