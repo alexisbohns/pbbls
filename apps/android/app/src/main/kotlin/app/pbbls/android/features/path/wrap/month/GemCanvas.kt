@@ -141,18 +141,19 @@ internal fun GemCanvas(
                         sc,
                     )
                 val rise = IntroMotion.riseOffset.toPx()
+                // The counting number's layout, measured again only when the number shown changes.
+                var shownValue = count
+                var shownLayout = n
 
                 onDrawBehind {
                     cut.forEach { f ->
                         // A facet no family owns has no beat: it reads 1 and lands with the stone (D2).
                         val lit = reveal(f.key)
                         val fill =
-                            if (lit <
-                                1f
-                            ) {
-                                StoneTones.mixSrgb(f.fill, RevealMotion.easeOut(lit.toDouble()).toFloat(), paper)
-                            } else {
-                                f.fill
+                            when {
+                                lit >= 1f -> f.fill
+                                lit <= 0f -> paper
+                                else -> StoneTones.mixSrgb(f.fill, RevealMotion.easeOut(lit.toDouble()).toFloat(), paper)
                             }
                         drawPath(f.path, fill)
                         drawPath(f.path, fill, style = edge)
@@ -164,7 +165,12 @@ internal fun GemCanvas(
                     val counting = reveal(IntroKey.Count)
                     val shown =
                         if (counting < 1f) {
-                            measurer.measure(IntroScore.counted(count, counting.toDouble()).toString(), numeral)
+                            val value = IntroScore.counted(count, counting.toDouble())
+                            if (value != shownValue) {
+                                shownValue = value
+                                shownLayout = measurer.measure(value.toString(), numeral)
+                            }
+                            shownLayout
                         } else {
                             n
                         }
@@ -176,7 +182,7 @@ internal fun GemCanvas(
                     } else {
                         drawCount(shown, n, l, cx, cy)
                     }
-                    drawLabels(names, reveal, rise, cx, cy, sc, colors)
+                    drawLabels(names, reveal, rise, colors)
                 }
             },
     )
@@ -201,10 +207,12 @@ private class CutFacet(
     val fill: Color,
 )
 
+/** A family's name and share beside the stone: where the spread puts them, and the tick at its run. */
 private class LabelPlace(
     val key: IntroKey,
-    val anchor: Double,
     var angle: Double,
+    val tickFrom: Offset,
+    val tickTo: Offset,
     val name: TextLayoutResult,
     val pct: TextLayoutResult,
 ) {
@@ -229,7 +237,20 @@ private fun CacheDrawScope.placeLabels(
             val ids = GemGeometry.allocated.filter { facets[it] == label.slug }
             if (ids.isEmpty()) return@mapIndexedNotNull null
             val a = GemGeometry.runAngle(ids)
-            LabelPlace(IntroKey.Label(label.slug), a, a, texts[i].first, texts[i].second)
+            // The tick stays at the run, wherever the spread takes the name.
+            val radius = GemGeometry.rimRadius(a).toFloat() * sc
+            val c = cos(a).toFloat()
+            val s = sin(a).toFloat()
+            val from = radius + TICK_FROM * density
+            val to = radius + TICK_TO * density
+            LabelPlace(
+                IntroKey.Label(label.slug),
+                a,
+                Offset(cx + from * c, cy + from * s),
+                Offset(cx + to * c, cy + to * s),
+                texts[i].first,
+                texts[i].second,
+            )
         }
     val gap = LABEL_GAP * density
     val pad = LABEL_PAD * density
@@ -286,22 +307,10 @@ private fun DrawScope.drawLabels(
     runs: List<LabelPlace>,
     reveal: IntroReveal,
     rise: Float,
-    cx: Float,
-    cy: Float,
-    sc: Float,
     colors: SpineColors,
 ) {
     runs.forEach { r ->
-        val radius = GemGeometry.rimRadius(r.anchor).toFloat() * sc
-        val c = cos(r.anchor).toFloat()
-        val s = sin(r.anchor).toFloat()
-        drawLine(
-            colors.ink3,
-            Offset(cx + (radius + TICK_FROM * density) * c, cy + (radius + TICK_FROM * density) * s),
-            Offset(cx + (radius + TICK_TO * density) * c, cy + (radius + TICK_TO * density) * s),
-            TICK.toPx(),
-            StrokeCap.Round,
-        )
+        drawLine(colors.ink3, r.tickFrom, r.tickTo, TICK.toPx(), StrokeCap.Round)
 
         fun xFor(t: TextLayoutResult) =
             when (r.align) {
