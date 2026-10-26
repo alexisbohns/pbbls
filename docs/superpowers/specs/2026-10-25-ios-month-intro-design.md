@@ -45,6 +45,34 @@ The month page enters instead of appearing all at once. The month's name rises i
 
 **D6. Canvas figures take a reveal, SwiftUI parts take a modifier.** Each `Canvas` figure gains one parameter, `reveal: IntroReveal = .settled`, a value type that maps a key to 0…1. SwiftUI parts take `.introReveal(_ key:)`, which reads the clock and the sequence from the environment. No figure's layout changes. Hidden elements keep their frames, so nothing jumps when they land.
 
+**Revision after the first device pass (2026-10-26).** The maintainer felt Parts 1–4 on the iPhone 15. The wheel was a little fast, and the sections read like lazy loading rather than a reveal. The decisions below supersede the trigger, tempo and list rows described further down, wherever they differ. They ship as Parts 5 and 6.
+
+**D7. The month page reads chapter by chapter.** Each chapter is the cover or one section.
+- **One swipe, one chapter:** a swipe moves exactly one chapter in its direction, and the scroll snaps that chapter's top to the top of the page. The next chapter's header peeks below.
+- **Tall chapters:** a chapter taller than the page scrolls freely inside itself until its bottom meets the page's bottom. The next swipe then moves on. Swiping back lands on the previous chapter's top, or on its last screen when it is tall.
+- **The landing rule:** a pure `ChapterPaging.target(from:proposed:tops:viewport:maxOffset:)` decides where each swipe lands, and a custom iOS 17 `ScrollTargetBehavior` applies it.
+- **Measuring:** chapters report their tops in a content coordinate space through a preference.
+- **Bottom space:** the page pads its bottom by one viewport, so the last chapter can reach the top.
+- **When paging applies:** only while the page has a clock, which already excludes Reduce Motion and VoiceOver. Without one, scrolling is free, as before.
+- *Considered and rejected:* `.viewAligned(limitBehavior: .always)`. It aligns to view edges, so the bottom of a chapter taller than the page (large text sizes) could not be reached.
+
+**D8. Arrival, then reveal.**
+- **Headers are always drawn:** a section's header, and the insights head over tone or hours, are part of the page, not the reveal, so you see where you're going.
+- **The arrive tick:** a chapter enters when its top reaches the top of the page, within 2 pt, or when it covers the top of the page. The 85 % line is gone. Its first beat is a single rounded *arrive* tick (`IntroTick.arrive`), with no visual.
+- **Then the reveal:** its elements begin after a pause (`rowsAt` × the tempo, about 0.8 s).
+- **Leaving:** swiping on lands it at once, as before.
+
+**D9. Tempo.**
+- **One knob per kind:** `IntroTempo` scales a sequence's beats when the clock starts it. The cover uses ×1.45, which takes the garland from 1.5 s to 2.2 s; the sections use ×2.5. Every time and every motion duration is scaled.
+- **Haptics:** the 25 ms floor applies to the scaled times, so slower means fewer dropped ticks.
+- **References:** frozen clocks (the references) use their beats unscaled.
+- **Live tuning:** the Spine Lab's Month tab has two sliders, *Garland* (seconds) and *Sections ×*, applied on *Replay intro*. The values the maintainer settles on become `IntroTempo.standard`.
+
+**D10. Each list section has a signature**, replacing the shared row reveal for these three. Each row lands in turn.
+- **Weeks:** the cairn builds from the bottom, stone by stone (`.cairnStone(row, k)`), with a light tick per stone. Then the line and the range rise and the souls fade in with `.row(row)`.
+- **Milestones:** the stone *stamps* (`.stamp(row)`). It comes in at 1.25× and transparent and presses to size with a slight squash, with a firm tick scaled by the pebble's intensity (`IntroTick.stamp(intensity)`). Then the name, the date and the souls rise with `.row(row)`.
+- **Domains:** the bar's track is drawn from the start. Its ink fills from the left (`.fill(row)`), ticking as it starts, and the name and count rise with it (`.row(row)`). The fill trims the settled layout's first rect, so it never snaps.
+
 ## Choreography
 
 Every time and strength here is a starting value, kept as a `static let` in `IntroScore` and `IntroTick` and tuned on the device.
@@ -253,6 +281,13 @@ Each part builds, lints and passes the iOS tests alone. Every part keeps the exi
 - **Arkaik:** one acceptance under the iOS month page view, "the month's intro plays once per launch, ticking each slot", moved to `development` when Part 1 starts.
 - **Decision log:** one entry in Part 1, covering D1, D4 and D5.
 - **Android:** #1242 references this spec.
+
+**Parts 5 and 6** (the revision, D7–D10), stacked on Part 4:
+
+| Part | Contents |
+|---|---|
+| 5 | `ChapterPaging` plus the behaviour, the chapter tops, the new trigger rule, the arrive tick and always-drawn headers, `IntroTempo` scaling in the clock, and the Lab's two sliders |
+| 6 | The weeks', milestones' and domains' signatures (`CairnMark` reveal, the stamp landing, `ProportionBar` fill), with their score builders |
 
 ## New patterns, raised in the PR
 
