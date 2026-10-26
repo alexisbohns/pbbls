@@ -13,10 +13,13 @@ import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.features.path.wrap.intro.IntroClock
+import app.pbbls.android.features.path.wrap.intro.IntroKey
 import app.pbbls.android.features.path.wrap.intro.IntroScore
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.intro.IntroStage
 import app.pbbls.android.features.path.wrap.intro.LocalIntroStage
+import app.pbbls.android.features.path.wrap.intro.gemRuns
+import app.pbbls.android.features.path.wrap.month.EmotionGem
 import app.pbbls.android.features.path.wrap.month.MonthCover
 import app.pbbls.android.features.path.wrap.month.MonthDeck
 import app.pbbls.android.features.path.wrap.month.MonthDeckCard
@@ -65,6 +68,33 @@ fun IntroPersonsRing() {
             Box(Modifier.width(390.dp)) {
                 CompositionLocalProvider(LocalIntroStage provides IntroStage(clock, sequence)) {
                     PersonsSection(wrap, lookups, DayView.CIRCLE, onMore = {})
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The gem's entrance, frozen mid-play (#1242; iOS `intro-gem-second-family`): the stone landed and counted, the lead
+ * family lit and named, the second half lit as its middle facet starts, and the families after it still blank.
+ */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390, heightDp = 640)
+@Composable
+fun IntroGemSecondFamily() {
+    PebblesTheme {
+        val wrap = SpineFixtureWeek.monthWrap
+        val sequence = IntroSequence.Section(MonthSection.GEM)
+        val beats = EmotionGem.introBeats(wrap)
+        val gem = requireNotNull(wrap.gem)
+        // The second family's middle facet, as it starts to light.
+        val second = IntroScore.gemRuns(gem.lead?.order.orEmpty(), gem.facets)[1].facets
+        val elapsed = beats.first { it.key == IntroKey.Facet(second[second.size / 2]) }.at
+        val clock = IntroClock.frozen(wrap.month, sequence, beats, elapsed)
+        Surface(color = PebblesTheme.spine.colors.ground) {
+            Box(Modifier.width(390.dp)) {
+                CompositionLocalProvider(LocalIntroStage provides IntroStage(clock, sequence)) {
+                    EmotionGem(wrap, SpineFixtureWeek.lookups, onMore = {})
                 }
             }
         }
