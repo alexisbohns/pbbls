@@ -8,7 +8,18 @@ struct HomeView: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(TabNavigation.self) private var nav
+    @Environment(MomentsRevision.self) private var revision
     @State private var model = HomeModel()
+    @State private var showsQuick = false
+    @State private var showsCapture = false
+    @State private var showsCameraUnavailable = false
+    @State private var completing: CompleteTarget?
+
+    private struct CompleteTarget: Identifiable, Equatable {
+        let momentId: UUID
+        let name: String?
+        var id: UUID { momentId }
+    }
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -19,6 +30,12 @@ struct HomeView: View {
                         HomeGreetingView(lines: greetingLines(at: context.date))
                     }
                     .id(TabNavigation.scrollTopAnchor)
+
+                    HomeShortcuts(
+                        onCamera: { showsCameraUnavailable = true }, // Task 6 replaces
+                        onQuick: { showsQuick = true },
+                        onPebble: { showsCapture = true }
+                    )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, Spacing.lg)
@@ -32,6 +49,23 @@ struct HomeView: View {
         .pebblesScreen()
         // Like the Path root: the greeting is the title, so the bar stays hidden.
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showsQuick) {
+            QuickMomentSheet(onSaved: { id, exit in
+                revision.bump(from: .home)
+                if exit == .open { completing = CompleteTarget(momentId: id, name: nil) }
+            })
+        }
+        .fullScreenCover(item: $completing) { target in
+            CompleteFlowView(momentId: target.momentId, momentName: target.name,
+                             onCompleted: { _ in revision.bump(from: .home) })
+        }
+        .fullScreenCover(isPresented: $showsCapture) {
+            CaptureFlowView(onMomentChanged: { _ in revision.bump(from: .home) })
+        }
+        // Task 6 replaces this with the camera flow.
+        .alert("home.camera.unavailable", isPresented: $showsCameraUnavailable) {
+            Button("OK", role: .cancel) {}
+        }
         .navigationDestination(for: HomeRoute.self) { route in
             switch route {
             case .guide(let slug): Text(verbatim: slug) // Part 5 replaces this with GuidePage
