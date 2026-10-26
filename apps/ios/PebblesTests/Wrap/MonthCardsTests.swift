@@ -50,6 +50,49 @@ struct MonthCardsTests {
         #expect(WeeksSummary.cairnScale(rowHeight: WeeksSummary.rowCap) <= WeeksSummary.cairnCap)
     }
 
+    @Test("the milestones' intro stamps each stone at its pebble's intensity, then its date, name and souls")
+    func milestonesIntro() throws {
+        let wrap = try MonthPayloadFixture.october()
+        let lookups = MonthPayloadFixture.lookups(wrap)
+        let beats = MilestonesSection.introBeats(wrap: wrap, lookups: lookups)
+        let moments = (wrap.milestones ?? []).compactMap(lookups.moment)
+        #expect(!moments.isEmpty)
+        for (row, moment) in moments.enumerated() {
+            let impact = try #require(beats.first { $0.key == .impact(row) })
+            #expect(impact.tick == .seal(moment.pebble?.intensity ?? 1))
+            let date = try #require(beats.first { $0.key == .date(row) })
+            let name = try #require(beats.first { $0.key == .name(row) })
+            #expect(date.at < name.at)
+        }
+    }
+
+    @Test("on a card, the persons share the room left by more, their glyphs and rings growing, within bounds")
+    func personsFill() {
+        let roomy = PersonsSection.rowSize(room: 500, rows: 5)
+        #expect(roomy.height == (500 - MonthLayout.moreReserve) / 5)
+        #expect(roomy.glyph > SpineLayout.mark)
+        #expect(roomy.glyph <= PersonsSection.glyphCap)
+        #expect(roomy.ring > MonthLayout.rowRing)
+        #expect(roomy.ring <= PersonsSection.ringCap)
+        let tight = PersonsSection.rowSize(room: 200, rows: 5)
+        #expect(tight.height == SpineLayout.rowMin)
+        #expect(tight.glyph == SpineLayout.mark)
+        #expect(tight.ring == MonthLayout.rowRing)
+        #expect(PersonsSection.rowSize(room: 2000, rows: 2).height == PersonsSection.rowCap)
+    }
+
+    @Test("the domains' intro fills each gauge to its share of the first, the fullest swelling most")
+    func domainsIntro() throws {
+        let wrap = try MonthPayloadFixture.october()
+        let beats = DomainsSection.introBeats(wrap: wrap, lookups: MonthPayloadFixture.lookups(wrap))
+        let first = try #require(beats.first { $0.key == .gauge(0) })
+        let second = try #require(beats.first { $0.key == .gauge(1) })
+        #expect(first.duration == IntroScore.fillSpan(1))
+        #expect(first.duration > second.duration)
+        #expect((first.swell?.to ?? 0) > (second.swell?.to ?? 1))
+        #expect(beats.contains { $0.key == .more })
+    }
+
     /// October with its second week emptied, as the server sends a week without a pebble.
     static func quietSecondWeek() throws -> MonthWrap {
         let october = try MonthPayloadFixture.october()

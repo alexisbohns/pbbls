@@ -329,9 +329,9 @@ struct DomainsSection: View {
                                 reveal: .row(index)) {
                             EmptyView()
                         } trailing: {
-                            // The bar grows to its share as its row lands.
+                            // The track lands with its row; the bar then fills to its share on its gauge (D10).
                             IntroReader { reveal in
-                                let grown = share * IntroMotion.easeOut(reveal(.row(index)))
+                                let grown = share * IntroMotion.easeOut(reveal(.gauge(index)))
                                 ProportionBar(segments: [BarSegment(weight: grown,
                                                                     color: Color.pebbles.onSurfaceVariant),
                                                          BarSegment(weight: 1 - grown, color: Color.pebbles.rule)])
@@ -367,9 +367,11 @@ struct DomainsSection: View {
         }
     }
 
-    /// The domains' intro (#1241): the head, the five rows, *more*.
+    /// The domains' intro (#1241 D10): the head, then each of the five, its name and its gauge filling, *more*.
     static func introBeats(wrap: MonthWrap, lookups: WrapLookups) -> [IntroBeat] {
-        IntroScore.rows(count: min(rows(wrap, lookups: lookups).count, WrapCopy.shown), hasLead: false, more: true)
+        let stats = rows(wrap, lookups: lookups).prefix(WrapCopy.shown).map(\.stat.count)
+        guard let top = stats.max(), top > 0 else { return IntroScore.domains(shares: [], more: true) }
+        return IntroScore.domains(shares: stats.map { Double($0) / Double(top) }, more: true)
     }
 }
 
