@@ -1410,3 +1410,23 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Android mirrors the setting (1:1 rule). It is a device preference, not a database field, so no contract changes.
 - **Supersedes / Superseded-by:** settles the 2026-10-25 intro entry's open System Haptics question, and rejects the UIKit fallback it named.
 - **Refs:** #1241, #1242, `apps/ios/Pebbles/Services/HapticsPreference.swift`.
+
+## 2026-10-26 — The iOS Path's + is a Liquid Glass circle over the tab bar, and karma leaves the Path (#1252)
+
+- **Status:** taken
+- **Scope:** ios
+- **Context:**
+  - The Path's bottom row (#903 §5) carried the karma + Ripples cluster and a square Material 3 FAB, 8 pt above the tab bar. On iOS 26 it sat over the native glass tab bar and read as a foreign component.
+  - Reference: Slack's iOS app, where a tinted glass + floats centred over the search circle beside the tab bar.
+- **Decision:**
+  - The + (`NewPebbleFab`) is a 56 pt circle in real `.glassEffect(.regular.tint(primary).interactive())` on iOS 26, behind a localized `if #available` guard, the same exception as the karma pastille. Below 26 it is a flat `primary` circle.
+  - It is centred over the tab bar's trailing end cap, 16 pt above the bar. The bar's geometry (21 pt side margin, 62 pt tall) was read from `_UITabBarPlatterView` on the iPhone 17 and 16e simulators (iOS 26.3) and is held as two constants.
+  - The karma + Ripples cluster leaves the Path. Both stay on the You tab, which matches Android's Path.
+- **Why:**
+  - Liquid Glass has no iOS 17 equivalent, so the guard is the kind the #727 entry allows.
+  - Constants over introspecting the tab bar: one fixed geometry on every iOS 26 iPhone measured, and no UIKit hierarchy walk.
+- **Consequences:**
+  - Liquid Glass now has two adopters on iOS (the karma pastille and the +). Raising the floor to 26 is still a separate decision.
+  - If a later iOS changes the floating tab bar's margin or height, the + drifts off the end cap; re-measure the platter and update the constants.
+  - Do not restore the cluster on iOS for parity. Android has none.
+- **Refs:** #1252, #903, `apps/ios/Pebbles/Features/Path/Components/NewPebbleFab.swift`.

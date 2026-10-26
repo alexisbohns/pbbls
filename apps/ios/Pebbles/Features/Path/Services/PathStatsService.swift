@@ -3,7 +3,7 @@ import os
 import Supabase
 
 /// Shared @Observable wrapper around `v_karma_summary` and `v_ripple`.
-/// PathView (`PathStatusCluster`) and ProfileView read the same instance so a
+/// PathView refreshes it and ProfileView reads the same instance, so a
 /// reload from one screen is visible to the other.
 @Observable
 @MainActor

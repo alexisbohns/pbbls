@@ -4,7 +4,7 @@ import SwiftUI
 /// Spine weeks and months (`SpinePager`); `PathModel` holds the weeks, the
 /// strip, the focused page and the pages. This view hands the environment's services to the model, and owns
 /// Capture, the detail sheet (until stack E's held card), the delete dialog and
-/// stack C's FAB row. Its `NavigationStack` lives in `PebblesTabView`.
+/// the floating + button. Its `NavigationStack` lives in `PebblesTabView`.
 struct PathView: View {
     /// Fired when the first load settles (success or failure), so `RootView`
     /// keeps the launch loader up until the home feed is ready.
@@ -31,14 +31,6 @@ struct PathView: View {
     @State private var deleteError: String?
 
     private var service: MomentsService { MomentsService(client: supabase.client) }
-
-    /// The server's `active_today` compares against UTC; a device-local check
-    /// keeps "active today" honest past local midnight (M22 follow-up).
-    private var rippleWithLocalActiveToday: RippleSummary? {
-        guard let server = stats.ripple else { return nil }
-        let activeToday = model.moments.contains { $0.isCompleted && Calendar.current.isDateInToday($0.createdAt) }
-        return RippleSummary(rippleLevel: server.rippleLevel, pebbles28d: server.pebbles28d, activeToday: activeToday)
-    }
 
     var body: some View {
         content
@@ -119,21 +111,11 @@ struct PathView: View {
                     await model.refreshWraps()
                 }
             }
-            // One row, clear background, 8 pt above the tab bar (#903 §5). The
-            // page scrolls under it; the Spine's 96 pt feed bottom clears it.
+            // The + floats over the tab bar's trailing end (#903 §5). The page
+            // scrolls under it; the Spine's 96 pt feed bottom clears it.
             .safeAreaInset(edge: .bottom) {
-                HStack(alignment: .center, spacing: 16) {
-                    PathStatusCluster(
-                        karma: stats.karma,
-                        ripple: rippleWithLocalActiveToday,
-                        onKarma: { nav.select(.you) },
-                        onRipple: { nav.select(.you) }
-                    )
-                    Spacer(minLength: 0)
-                    NewPebbleFab(onTap: { isPresentingCapture = true })
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
+                NewPebbleFab(onTap: { isPresentingCapture = true })
+                    .placed()
             }
         }
     }
