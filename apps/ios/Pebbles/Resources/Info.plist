@@ -41,6 +41,8 @@
 		<string>en</string>
 		<string>fr</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Pebbles takes the photo for the moment you are recording.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Attach a photo to a pebble.</string>
 	<key>UIAppFonts</key>

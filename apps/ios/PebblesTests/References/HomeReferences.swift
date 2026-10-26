@@ -37,5 +37,23 @@ extension References {
             ReferenceImage.assertMatches(Self.shortcuts(), named: "shortcuts",
                                          config: ReferenceConfig(scheme: scheme, locales: locales))
         }
+
+        static func toast() -> some View {
+            MomentToast(
+                landed: CameraMomentCoordinator.LandedMoment(
+                    momentId: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+                    shutter: Date(timeIntervalSince1970: 1_793_000_000), thumbnail: nil),
+                onName: {}, onDismiss: {})
+                .padding(Spacing.lg)
+                .frame(width: 393)
+                .background(Color.pebbles.surface)
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func toast(scheme: ReferenceScheme) throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(Self.toast(), named: "toast",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
     }
 }

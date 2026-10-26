@@ -4848,6 +4848,74 @@
         }
       }
     },
+    "home.camera.unavailableBody" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device has no camera. Use a quick moment instead."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cet appareil n'a pas d'appareil photo. Utilise un moment rapide."
+          }
+        }
+      }
+    },
+    "home.camera.uploadFailed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The photo didn't upload. Nothing was saved."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La photo n'a pas été envoyée. Rien n'a été enregistré."
+          }
+        }
+      }
+    },
+    "home.toast.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name it"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nommer"
+          }
+        }
+      }
+    },
+    "home.toast.saved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moment saved"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moment enregistré"
+          }
+        }
+      }
+    },
     "home.camera.unavailable" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -1,4 +1,5 @@
 import SwiftUI
+import os
 
 /// The Home tab root (spec §1): the greeting, then the sections the later
 /// parts add (shortcuts, wraps, the first five, About). Built from system
@@ -12,7 +13,12 @@ struct HomeView: View {
     @State private var model = HomeModel()
     @State private var showsQuick = false
     @State private var showsCapture = false
+    @Environment(AchievementsService.self) private var achievements
+    @State private var showsCamera = false
     @State private var showsCameraUnavailable = false
+    @State private var camera: CameraMomentCoordinator?
+    @State private var cameraError: String?
+    @State private var naming: MomentDetail?
     @State private var completing: CompleteTarget?
 
     private struct CompleteTarget: Identifiable, Equatable {
@@ -32,10 +38,23 @@ struct HomeView: View {
                     .id(TabNavigation.scrollTopAnchor)
 
                     HomeShortcuts(
-                        onCamera: { showsCameraUnavailable = true }, // Task 6 replaces
+                        onCamera: openCamera,
                         onQuick: { showsQuick = true },
                         onPebble: { showsCapture = true }
                     )
+
+                    if let cameraError {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(verbatim: cameraError)
+                                .pebblesFont(.callout)
+                                .foregroundStyle(Color.pebbles.error)
+                            Spacer(minLength: 0)
+                            Button { self.cameraError = nil } label: {
+                                Image(systemName: "xmark").foregroundStyle(Color.pebbles.onSurfaceVariant)
+                            }
+                            .accessibilityLabel(Text("Close"))
+                        }
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, Spacing.lg)
@@ -60,12 +79,35 @@ struct HomeView: View {
                              onCompleted: { _ in revision.bump(from: .home) })
         }
         .fullScreenCover(isPresented: $showsCapture) {
-            CaptureFlowView(onMomentChanged: { _ in revision.bump(from: .home) })
+            CaptureFlowView(onMomentChanged: { _ in revision.bump(from: .home) }, chainsComplete: true)
         }
-        // Task 6 replaces this with the camera flow.
+        .fullScreenCover(isPresented: $showsCamera) {
+            CameraPicker(
+                onCapture: { data, shutter in
+                    showsCamera = false
+                    Task { await capture(data, at: shutter) }
+                },
+                onCancel: { showsCamera = false }
+            )
+            .ignoresSafeArea()
+        }
         .alert("home.camera.unavailable", isPresented: $showsCameraUnavailable) {
             Button("OK", role: .cancel) {}
+        } message: {
+            Text("home.camera.unavailableBody")
         }
+        .sheet(item: $naming) { detail in
+            EditMomentSheet(detail: detail, onSaved: { revision.bump(from: .home) })
+        }
+        .safeAreaInset(edge: .bottom) {
+            if let landed = camera?.landed {
+                MomentToast(landed: landed, onName: { name(landed) }, onDismiss: { dismissToast() })
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.bottom, Spacing.sm)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.snappy, value: camera?.landed)
         .navigationDestination(for: HomeRoute.self) { route in
             switch route {
             case .guide(let slug): Text(verbatim: slug) // Part 5 replaces this with GuidePage
@@ -87,6 +129,39 @@ struct HomeView: View {
             onFirstLoad()
         }
     }
+
+    private func openCamera() {
+        if CameraPicker.isAvailable { showsCamera = true } else { showsCameraUnavailable = true }
+    }
+
+    private func capture(_ data: Data, at shutter: Date) async {
+        cameraError = nil
+        let coordinator = CameraMomentCoordinator(client: supabase.client, userId: userId)
+        camera = coordinator
+        await coordinator.capture(data, at: shutter)
+        if coordinator.landed != nil {
+            achievements.fireCheck()
+            revision.bump(from: .home)
+        }
+        cameraError = coordinator.error
+    }
+
+    private func name(_ landed: CameraMomentCoordinator.LandedMoment) {
+        dismissToast()
+        Task {
+            do {
+                naming = try await MomentsService(client: supabase.client).moment(id: landed.momentId)
+            } catch {
+                Logger(subsystem: "app.pbbls.ios", category: "home.camera")
+                    .error("moment(id:) failed: \(error.localizedDescription, privacy: .private)")
+                cameraError = String(localized: "home.quick.error")
+            }
+        }
+    }
+
+    private func dismissToast() { camera = nil }
+
+    private var userId: UUID { supabase.session?.user.id ?? UUID() }
 
     private func greetingLines(at now: Date) -> HomeGreeting.Lines {
         HomeGreeting.lines(at: now, name: model.name, zone: SpineCalendar.current.timeZone, locale: SpineStrings.appLocale)
