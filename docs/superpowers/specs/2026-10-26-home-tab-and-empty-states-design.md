@@ -168,7 +168,7 @@ The `achievements.family` check gains `first_moment`, `first_pebble` and `first_
 
 Clients compose achievement copy by family (`Achievement+Localized.swift` on iOS, `AchievementCopy.kt` on Android, `useAchievementCopy` on the web, `lib/achievements/types.ts` in the admin). The three new families need copy on every surface, or they render as their slug on the Achievements page and the public profile. iOS ships it in stack 2; Android (#1257) and web (#1258) copy are filed as follow-ups, since the public profile exposes the unlock as soon as it exists.
 
-### 4.3 `wrap_reveals`, `reveal_wrap(p_month date)`, `home_wraps(p_tz text)`
+### 4.3 `wrap_reveals`, `reveal_wrap(p_month date, p_tz text)`, `home_wraps(p_tz text)`
 
 ```sql
 create table public.wrap_reveals (
