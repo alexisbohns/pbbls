@@ -4593,6 +4593,23 @@
         }
       }
     },
+    "Every vibration in Pebbles, on this iPhone." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every vibration in Pebbles, on this iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les vibrations de Pebbles, sur cet iPhone."
+          }
+        }
+      }
+    },
     "Expires %@." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4725,6 +4742,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pseudo"
+          }
+        }
+      }
+    },
+    "Haptics" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haptics"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retours haptiques"
           }
         }
       }
@@ -10862,6 +10896,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Valence"
+          }
+        }
+      }
+    },
+    "Vibrations" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibrations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibrations"
           }
         }
       }

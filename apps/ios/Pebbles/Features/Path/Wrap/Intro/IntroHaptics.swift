@@ -80,7 +80,7 @@ final class IntroHaptics: IntroHapticPlaying {
     }
 
     func prepare() {
-        guard let engine else { return }
+        guard let engine, HapticsPreference.isOn() else { return }
         do {
             try engine.start()
         } catch {
@@ -89,7 +89,7 @@ final class IntroHaptics: IntroHapticPlaying {
     }
 
     func play(_ sequence: IntroSequence, of month: CalendarMonth, beats: [IntroBeat], startingAt begin: Date) {
-        guard let engine else { return }
+        guard let engine, HapticsPreference.isOn() else { return }
         var events = Self.events(for: beats).map { event in
             CHHapticEvent(eventType: .hapticTransient, parameters: [
                 CHHapticEventParameter(parameterID: .hapticIntensity, value: event.tick.intensity),
@@ -133,7 +133,7 @@ final class IntroHaptics: IntroHapticPlaying {
     }
 
     func tick(_ tick: IntroTick) {
-        guard let engine else { return }
+        guard let engine, HapticsPreference.isOn() else { return }
         let event = CHHapticEvent(eventType: .hapticTransient, parameters: [
             CHHapticEventParameter(parameterID: .hapticIntensity, value: tick.intensity),
             CHHapticEventParameter(parameterID: .hapticSharpness, value: tick.sharpness)
