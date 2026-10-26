@@ -17,12 +17,19 @@ class CoverBeatsTest {
         val beats = coverBeats(wrap, lookups)
         assertEquals(31, beats.count { it.key is IntroKey.Slot })
         assertTrue(beats.any { it.key == IntroKey.Leaf })
-        // The ring draws the souls the lookups resolve, at most eight: the fixture resolves all fourteen.
-        val resolved = wrap.cover!!.soulsInOrder.count { lookups.soul(it) != null }
-        assertEquals(14, resolved)
-        assertEquals(minOf(resolved, 8), beats.count { it.key is IntroKey.Soul })
+        // The ring draws at most eight souls: the fixture names fourteen.
+        assertEquals(8, beats.count { it.key is IntroKey.Soul })
         assertEquals(listOf(IntroKey.Summary, IntroKey.Names, IntroKey.Colophon), beats.map { it.key }.filter { it in lines })
         assertEquals(wrap.numberedDays(), beats.mapNotNull { (it.key as? IntroKey.Numeral)?.day })
+    }
+
+    @Test
+    fun `only the souls the lookups resolve beat in the ring, and they name the persons`() {
+        val wrap = SpineFixtureWeek.monthWrap
+        val souls = listOf("soul-nadia", "soul-unknown", "soul-elio")
+        val beats = coverBeats(wrap.copy(cover = wrap.cover!!.copy(soulsInOrder = souls)), SpineFixtureWeek.lookups)
+        assertEquals(listOf(0, 1), beats.mapNotNull { (it.key as? IntroKey.Soul)?.index })
+        assertTrue(beats.any { it.key == IntroKey.Names })
     }
 
     @Test
