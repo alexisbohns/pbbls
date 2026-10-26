@@ -44,7 +44,7 @@ final class HapticsService {
 
     /// Plays the karma-earned haptic, matched to the karma sound's waveform.
     func playKarmaEarned() {
-        guard supportsHaptics, let engine else { return }
+        guard supportsHaptics, HapticsPreference.isOn(), let engine else { return }
         do {
             let pattern = try karmaEarnedPattern()
             try engine.start()
@@ -60,7 +60,7 @@ final class HapticsService {
     /// from the pebble sound. Both intensities are then raised with
     /// `updateGlyphSlide(progress:)` as the thumb travels right.
     func beginGlyphSlide() {
-        guard supportsHaptics, let engine else { return }
+        guard supportsHaptics, HapticsPreference.isOn(), let engine else { return }
         do {
             try engine.start()
 
@@ -122,7 +122,7 @@ final class HapticsService {
 
     /// A crisp, high-sharpness transient for a completed swap.
     func playGlyphSwapSuccess() {
-        guard supportsHaptics, let engine else { return }
+        guard supportsHaptics, HapticsPreference.isOn(), let engine else { return }
         do {
             try engine.start()
             let event = CHHapticEvent(

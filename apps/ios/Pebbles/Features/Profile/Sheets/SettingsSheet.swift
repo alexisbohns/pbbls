@@ -29,6 +29,8 @@ struct SettingsSheet: View {
     @State private var isSaving = false
     @State private var saveError: String?
     @State private var presentedLegalDoc: LegalDoc?
+    /// This device's, saved as it is switched: never staged for the sheet's Save.
+    @AppStorage(HapticsPreference.storageKey) private var hapticsOn = true
     @State private var isPresentingGlyphPicker = false
     @State private var isPresentingDeleteConfirm = false
     #if DEBUG
@@ -139,6 +141,7 @@ struct SettingsSheet: View {
                             .pebblesListRow(position: .only)
                     }
                 }
+                hapticsSection
                 legalSection
                 #if DEBUG
                 developerSection
@@ -415,6 +418,21 @@ struct SettingsSheet: View {
             Text("Password").pebblesSectionHeader()
         } footer: {
             Text("Leave blank to keep your current password.")
+        }
+    }
+
+    /// Pebbles' own haptics switch (#1241): Core Haptics ignores the system's.
+    private var hapticsSection: some View {
+        Section {
+            Toggle(isOn: $hapticsOn) {
+                Text("Vibrations")
+            }
+            .tint(Color.pebbles.primary)
+            .pebblesListRow(position: .only)
+        } header: {
+            Text("Haptics").pebblesSectionHeader()
+        } footer: {
+            Text("Every vibration in Pebbles, on this iPhone.")
         }
     }
 

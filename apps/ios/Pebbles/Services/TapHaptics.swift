@@ -56,6 +56,8 @@ enum TapHaptics {
         playCount += 1
         lastPlayed = haptic
         #endif
+        // Counted above all the same: a test asks what the tap wanted, not what the setting let through.
+        guard HapticsPreference.isOn() else { return }
 
         switch haptic {
         case .selection:
