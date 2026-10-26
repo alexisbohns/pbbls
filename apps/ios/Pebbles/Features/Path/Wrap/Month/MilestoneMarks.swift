@@ -5,7 +5,7 @@ import UIKit
 /// A milestone's own stone (#1241 D16): the Spine's lit stone with its rings
 /// drawn quieter, stamped in by the intro, and rippling once as the stamp
 /// meets the paper, at the stone's own pace whatever the intro's tempo. A
-/// card dealt settled, or revisited, does not ripple.
+/// card dealt settled, revisited or skipped does not ripple.
 struct MilestoneStone: View {
     let moment: MomentSummary
     let palette: EmotionPalette?
@@ -15,6 +15,8 @@ struct MilestoneStone: View {
 
     @State private var press: StonePress?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.introClock) private var clock
+    @Environment(\.introSequence) private var sequence
 
     /// The halo, the rings and the ripple, quieter than the Spine's.
     static let rings = 0.45
@@ -27,8 +29,10 @@ struct MilestoneStone: View {
                 .scaleEffect(scale * IntroMotion.stampScale(stamped))
                 .opacity(IntroMotion.stampOpacity(stamped))
                 .frame(width: stone.width * scale, height: stone.height * scale)
+                // Struck while the milestones play: a skip, or a throw away, lands every stone at once.
                 .onChange(of: stage(.impact(row)) >= 1) { _, struck in
-                    if struck { press = .next(after: press, still: reduceMotion, now: .now) }
+                    guard struck, let sequence, clock?.isPlaying(sequence) == true else { return }
+                    press = .next(after: press, still: reduceMotion, now: .now)
                 }
         }
         .stonePressLifetime($press)
