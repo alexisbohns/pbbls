@@ -22,7 +22,6 @@ struct ToneFigure: View {
             let line = WrapCopy.toneLine(tone.verdict, first: tone.first, last: tone.last, locale: locale)
             VStack(alignment: .leading, spacing: 0) {
                 SpineSectionHeader(WrapCopy.toneTitle(locale: locale), hint: WrapCopy.toneHint(locale: locale))
-                    .introReveal(.header)
                 Text(verbatim: line)
                     .spineType(.still)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)

@@ -27,7 +27,6 @@ struct HoursFigure: View {
                 VStack(alignment: .leading, spacing: 0) {
                     SpineSectionHeader(WrapCopy.hoursTitle(locale: locale), hint: WrapCopy.hoursHint(locale: locale))
                         .padding(.top, 28)
-                        .introReveal(.header)
                     Text(verbatim: WrapCopy.hoursSub(locale: locale))
                         .spineType(.still)
                         .foregroundStyle(Color.pebbles.onSurfaceVariant)

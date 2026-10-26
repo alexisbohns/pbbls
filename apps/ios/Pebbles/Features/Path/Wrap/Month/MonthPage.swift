@@ -120,7 +120,6 @@ struct MonthPageSections: View {
                     if leads {
                         MonthSectionHead(label: WrapCopy.insights(locale: SpineStrings.appLocale),
                                          hint: WrapCopy.insightsHint(locale: SpineStrings.appLocale))
-                            .introReveal(.insights)
                     }
                     if section == .tone {
                         ToneFigure(wrap: wrap)

@@ -17,7 +17,6 @@ struct EmotionGem: View {
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(label: WrapCopy.tile(.emotions, locale: locale),
                                  hint: WrapCopy.gemHint(locale: locale))
-                    .introReveal(.header)
                 SheetLead(words.lead)
                     .padding(.horizontal, MonthLayout.sectionPadX)
                     .introReveal(.lead)

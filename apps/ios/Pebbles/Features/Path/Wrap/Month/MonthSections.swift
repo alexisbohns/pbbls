@@ -16,7 +16,6 @@ struct WeeksSummary: View {
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(label: WrapCopy.weeksHeader(weeks.count, locale: locale),
                                  hint: WrapCopy.weeksHint(wrap.month, locale: locale))
-                    .introReveal(.header)
                 VStack(spacing: 0) {
                     ForEach(Array(weeks.enumerated()), id: \.element.weekStart) { index, week in
                         let range = WrapCopy.range(wrap.month, from: week.from, to: week.to, locale: locale)
@@ -66,7 +65,6 @@ struct MilestonesSection: View {
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(label: WrapCopy.milestonesHeader(moments.count, locale: locale),
                                  hint: WrapCopy.milestonesHint(locale: locale))
-                    .introReveal(.header)
                 VStack(spacing: 0) {
                     ForEach(Array(moments.enumerated()), id: \.element.id) { index, moment in
                         row(moment, index: index)
@@ -124,7 +122,6 @@ struct PersonsSection: View {
                 let clockwise = dayView == .circle && !rows.isEmpty
                 MonthSectionHead(label: WrapCopy.tile(.persons, locale: locale),
                                  hint: clockwise ? WrapCopy.clockwiseHint(locale: locale) : nil)
-                    .introReveal(.header)
                 if rows.isEmpty {
                     SheetLead(WrapCopy.nobody(locale: locale), bottom: 0)
                         .padding(.horizontal, MonthLayout.sectionPadX)
@@ -201,7 +198,6 @@ struct DomainsSection: View {
         if let top = domains.map(\.stat.count).max(), top > 0 {
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(label: WrapCopy.tile(.domains, locale: locale))
-                    .introReveal(.header)
                 VStack(spacing: 0) {
                     ForEach(Array(domains.prefix(WrapCopy.shown).enumerated()), id: \.element.id) { index, row in
                         let share = Double(row.stat.count) / Double(top)
