@@ -17,6 +17,14 @@ struct IntroTempoTests {
         #expect(IntroTempo.standard.factor(.section(.gem)) == 2.5)
     }
 
+    /// The stacked seals' silencing is decided at ×1: a faster tempo would squeeze ticks under the floor.
+    @Test("a factor below 1 plays at the score's own pace")
+    func neverFaster() {
+        let tempo = IntroTempo(cover: 0.5, sections: 0.2)
+        #expect(tempo.factor(.cover) == 1)
+        #expect(tempo.factor(.section(.weeks)) == 1)
+    }
+
     @Test("a scaled beat starts and lands that many times later, with its key and its tick")
     func scaled() {
         let beat = IntroBeat(key: .row(0), at: 0.32, duration: 0.28, tick: .light).scaled(by: 2.5)

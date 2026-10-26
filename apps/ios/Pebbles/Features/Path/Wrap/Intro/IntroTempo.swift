@@ -4,6 +4,10 @@ import Foundation
 /// sequence's beats by its factor when it starts it: the cover by `cover`,
 /// each section by `sections`. The Spine Lab tunes it live; the app plays
 /// `.standard`.
+///
+/// Factors are 1 or more: the score decides which stacked seals tick at ×1,
+/// against the haptics' 25 ms floor, so only a slower tempo keeps those
+/// ticks clear of it. `factor(_:)` reads a smaller one as 1.
 struct IntroTempo: Hashable, Sendable {
     /// ×1.45 takes the garland from 1.5 s to about 2.2 s.
     var cover: Double = 1.45
@@ -12,7 +16,7 @@ struct IntroTempo: Hashable, Sendable {
     static let standard = IntroTempo()
 
     func factor(_ sequence: IntroSequence) -> Double {
-        sequence == .cover ? cover : sections
+        max(1, sequence == .cover ? cover : sections)
     }
 }
 

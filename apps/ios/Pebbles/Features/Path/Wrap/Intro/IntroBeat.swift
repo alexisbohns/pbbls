@@ -12,7 +12,8 @@ enum IntroKey: Hashable, Sendable {
     /// slot (its socket or its first seal), a stacked seal (day, index), a day's numeral.
     case kicker, monthName, year, course, leaf, summary, names, colophon
     case slot(Int), seal(Int, Int), numeral(Int), soul(Int)
-    /// Any section: the insights head (over tone or hours), the head, its lead line, *more*, a row.
+    /// Any section: the insights head (over tone or hours), the head, its lead line, *more*, a row. The two
+    /// heads are drawn from the start, never revealed (D8): their beats carry only the arrival's tick.
     case insights, header, lead, more, row(Int)
     /// A person's row: its glyph, its name, its ring's line, a day on its ring (row, day).
     case glyph(Int), name(Int), ring(Int), dot(Int, Int)
