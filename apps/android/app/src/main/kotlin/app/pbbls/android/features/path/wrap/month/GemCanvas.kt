@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextLayoutResult
@@ -30,6 +31,7 @@ import app.pbbls.android.core.ui.gem.GemGeometry
 import app.pbbls.android.core.ui.gem.GemPoint
 import app.pbbls.android.core.ui.render.stone.StoneTones
 import app.pbbls.android.features.path.wrap.intro.IntroKey
+import app.pbbls.android.features.path.wrap.intro.IntroLanding
 import app.pbbls.android.features.path.wrap.intro.IntroMotion
 import app.pbbls.android.features.path.wrap.intro.IntroReveal
 import app.pbbls.android.features.path.wrap.intro.IntroScore
@@ -68,9 +70,9 @@ internal class GemLabel(
  * just outside its run, pushed apart until no two names touch. The allocation is the server's
  * [facets]; this only colours it.
  *
- * In the month intro (#1242, [reveal]) the blank stone rises, its count running up from 0 to [count];
- * then each facet takes its colour over the table's paper, and each family's name and share rise with
- * its run's first facet. Settled, it draws as ever.
+ * In the month intro (#1242, [reveal]) the blank stone fades in and its count rises, running up from 0
+ * to [count]; then each facet takes its colour over the table's paper, and each family's name and share
+ * rise with its run's first facet. Settled, it draws as ever.
  */
 @Composable
 internal fun GemCanvas(
@@ -92,8 +94,8 @@ internal fun GemCanvas(
         modifier
             .fillMaxWidth()
             .height(HEIGHT)
-            // The blank stone: its seams, its table, its count and the runs' ticks land as one (iOS `.blank`).
-            .introReveal(reveal, IntroKey.Blank)
+            // The blank stone fades in, its seams, table and ticks still (iOS `GemStone`'s opacity); the count rises in the draw.
+            .introReveal(reveal, IntroKey.Blank, IntroLanding.FADE)
             .semantics { contentDescription = description }
             .drawWithCache {
                 // Built once per size and composition: a frame of the intro only reads the reveal and draws.
@@ -161,19 +163,35 @@ internal fun GemCanvas(
                     // From 0, counting up to the pebbles on its beat; settled, the number as ever.
                     val counting = reveal(IntroKey.Count)
                     val shown =
-                        if (counting <
-                            1f
-                        ) {
+                        if (counting < 1f) {
                             measurer.measure(IntroScore.counted(count, counting.toDouble()).toString(), numeral)
                         } else {
                             n
                         }
-                    drawText(shown, topLeft = Offset(cx - shown.size.width / 2f, cy - n.size.height * 0.62f))
-                    drawText(l, topLeft = Offset(cx - l.size.width / 2f, cy + n.size.height * 0.36f))
+                    // The count and its label also rise with the blank stone (iOS: each its own `.introReveal(.blank)`);
+                    // the layer has already faded them.
+                    val blank = reveal(IntroKey.Blank)
+                    if (blank < 1f) {
+                        translate(top = rise * IntroMotion.riseLift(blank.toDouble()).toFloat()) { drawCount(shown, n, l, cx, cy) }
+                    } else {
+                        drawCount(shown, n, l, cx, cy)
+                    }
                     drawLabels(names, reveal, rise, cx, cy, sc, colors)
                 }
             },
     )
+}
+
+/** The count in the table and its label under it, placed by the settled count's height so they hold still as it counts. */
+private fun DrawScope.drawCount(
+    shown: TextLayoutResult,
+    settled: TextLayoutResult,
+    label: TextLayoutResult,
+    cx: Float,
+    cy: Float,
+) {
+    drawText(shown, topLeft = Offset(cx - shown.size.width / 2f, cy - settled.size.height * 0.62f))
+    drawText(label, topLeft = Offset(cx - label.size.width / 2f, cy + settled.size.height * 0.36f))
 }
 
 /** A facet of the cut, laid out: its beat's key, its path at this size, its settled fill. */
@@ -293,7 +311,7 @@ private fun DrawScope.drawLabels(
         // Settled: no offset, and the text's own alpha (NaN is drawText's default).
         val lit = reveal(r.key)
         val eased = if (lit < 1f) RevealMotion.easeOut(lit.toDouble()).toFloat() else 1f
-        val dy = if (lit < 1f) rise * (1 - eased) else 0f
+        val dy = if (lit < 1f) rise * IntroMotion.riseLift(lit.toDouble()).toFloat() else 0f
         val alpha = if (lit < 1f) eased else Float.NaN
         drawText(r.name, topLeft = Offset(xFor(r.name), r.y0 + dy), alpha = alpha)
         drawText(r.pct, topLeft = Offset(xFor(r.pct), r.y0 + r.name.size.height + dy), alpha = alpha)

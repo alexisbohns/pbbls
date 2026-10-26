@@ -16,6 +16,9 @@ object IntroMotion {
 
     val riseOffset = 6.dp
 
+    /** How far below its place a rising part still sits at [t], 0…1 of its beat, as a fraction of [riseOffset]: 0 once landed. */
+    fun riseLift(t: Double): Double = 1 - RevealMotion.easeOut(t)
+
     /** When, 0…1 of its beat, a stamp meets the paper: its tick's moment. */
     const val STAMP_IMPACT = 0.6
 
