@@ -190,7 +190,7 @@ fun rememberStonePressState(): StonePressState = remember { StonePressState() }
  * [width] defaults to the phone width for the stone's size; the card's verso paints
  * it larger. The rings and halo scale with the box, their strokes stay hairlines;
  * the carved glyph line scales with [width], so a larger stone carves heavier.
- * A stone at another [width] mounts its `StoneRipple` at the same width: the verso's
+ * [rings] scales the halo's and the rings' strength (1 draws them in full). A stone at another [width] mounts its `StoneRipple` at the same width: the verso's
  * ripples once, when its card prints into a completed moment.
  */
 @Composable
@@ -202,6 +202,8 @@ fun LitStone(
     press: StonePressState,
     modifier: Modifier = Modifier,
     width: Dp = StoneGeometry.STONE_WIDTH_DP.getValue(valence.sizeGroup).dp,
+    /** The halo's and the rings' strength, 0…1: the Spine's 1, a month's milestone 0.45 (#1242 / iOS D16). */
+    rings: Float = 1f,
 ) {
     val colors = PebblesTheme.spine.colors
     val size = valence.sizeGroup
@@ -261,6 +263,7 @@ fun LitStone(
             color = if (press.touchedStill) colors.ink2 else colors.ring,
             halo = colors.halo,
             scale = { press.ringsScale },
+            strength = rings,
             modifier = Modifier.fillMaxSize(),
         )
         val stoneLayer =
@@ -339,6 +342,7 @@ private fun StoneRings(
     color: Color,
     halo: Color,
     scale: () -> Float,
+    strength: Float,
     modifier: Modifier,
 ) {
     val paths =
@@ -359,8 +363,8 @@ private fun StoneRings(
         val pxPerUnit = this.size.width / box.width
         val stroke = Stroke(width = RING_STROKE.toPx() / pxPerUnit)
         withTransform({ scale(pxPerUnit, pxPerUnit, Offset.Zero) }) {
-            drawPath(paths.halo, halo)
-            paths.rings.forEach { drawPath(it, color, style = stroke) }
+            drawPath(paths.halo, halo, alpha = strength)
+            paths.rings.forEach { drawPath(it, color, alpha = strength, style = stroke) }
         }
     }
 }
