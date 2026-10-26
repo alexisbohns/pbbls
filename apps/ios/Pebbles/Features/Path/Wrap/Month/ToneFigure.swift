@@ -18,7 +18,7 @@ struct ToneFigure: View {
     private var locale: Locale { SpineStrings.appLocale }
 
     var body: some View {
-        if let tone = wrap.tone, !tone.days.isEmpty {
+        if Self.isShown(wrap: wrap), let tone = wrap.tone {
             let line = WrapCopy.toneLine(tone.verdict, first: tone.first, last: tone.last, locale: locale)
             VStack(alignment: .leading, spacing: 0) {
                 SpineSectionHeader(WrapCopy.toneTitle(locale: locale), hint: WrapCopy.toneHint(locale: locale))
@@ -37,6 +37,11 @@ struct ToneFigure: View {
 }
 
 extension ToneFigure {
+    /// Drawn when the month has days to chart (#1241 D11: no card otherwise).
+    static func isShown(wrap: MonthWrap) -> Bool {
+        !(wrap.tone?.days.isEmpty ?? true)
+    }
+
     /// The tone's intro (#1241), with the insights head's when it leads them; none when nothing shows.
     static func introBeats(wrap: MonthWrap, insights: Bool) -> [IntroBeat] {
         let days = wrap.tone?.days ?? []

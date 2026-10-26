@@ -11,8 +11,8 @@ struct WeeksSummary: View {
     private var locale: Locale { SpineStrings.appLocale }
 
     var body: some View {
-        let weeks = Self.weeks(wrap)
-        if !weeks.isEmpty {
+        if Self.isShown(wrap: wrap, lookups: lookups) {
+            let weeks = Self.weeks(wrap)
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(label: WrapCopy.weeksHeader(weeks.count, locale: locale),
                                  hint: WrapCopy.weeksHint(wrap.month, locale: locale))
@@ -34,6 +34,11 @@ struct WeeksSummary: View {
             }
             .introSequence(.section(.weeks)) { Self.introBeats(wrap) }
         }
+    }
+
+    /// Drawn when a week of the month has pebbles; the deck deals no card otherwise (#1241 D11).
+    static func isShown(wrap: MonthWrap, lookups: WrapLookups) -> Bool {
+        !weeks(wrap).isEmpty
     }
 
     private static func weeks(_ wrap: MonthWrap) -> [MonthWeek] {
@@ -60,8 +65,8 @@ struct MilestonesSection: View {
     private var locale: Locale { SpineStrings.appLocale }
 
     var body: some View {
-        let moments = Self.moments(wrap, lookups: lookups)
-        if !moments.isEmpty {
+        if Self.isShown(wrap: wrap, lookups: lookups) {
+            let moments = Self.moments(wrap, lookups: lookups)
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(label: WrapCopy.milestonesHeader(moments.count, locale: locale),
                                  hint: WrapCopy.milestonesHint(locale: locale))
@@ -74,6 +79,11 @@ struct MilestonesSection: View {
             }
             .introSequence(.section(.milestones)) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// Drawn when the device knows one of the server's milestones.
+    static func isShown(wrap: MonthWrap, lookups: WrapLookups) -> Bool {
+        !moments(wrap, lookups: lookups).isEmpty
     }
 
     private static func moments(_ wrap: MonthWrap, lookups: WrapLookups) -> [MomentSummary] {
@@ -116,7 +126,7 @@ struct PersonsSection: View {
     private var locale: Locale { SpineStrings.appLocale }
 
     var body: some View {
-        if wrap.persons != nil {
+        if Self.isShown(wrap: wrap, lookups: lookups) {
             let rows = Self.rows(wrap, lookups: lookups)
             VStack(alignment: .leading, spacing: 0) {
                 let clockwise = dayView == .circle && !rows.isEmpty
@@ -143,6 +153,11 @@ struct PersonsSection: View {
             }
             .introSequence(.section(.persons)) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// Drawn whenever the server sends the persons: the invitation stands in when nobody is named.
+    static func isShown(wrap: MonthWrap, lookups: WrapLookups) -> Bool {
+        wrap.persons != nil
     }
 
     /// The souls the device can name, in the server's order.
@@ -195,7 +210,7 @@ struct DomainsSection: View {
 
     var body: some View {
         let domains = Self.rows(wrap, lookups: lookups)
-        if let top = domains.map(\.stat.count).max(), top > 0 {
+        if Self.isShown(wrap: wrap, lookups: lookups), let top = domains.map(\.stat.count).max() {
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(label: WrapCopy.tile(.domains, locale: locale))
                 VStack(spacing: 0) {
@@ -224,6 +239,11 @@ struct DomainsSection: View {
             }
             .introSequence(.section(.domains)) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// Drawn when a domain the device knows was lived this month.
+    static func isShown(wrap: MonthWrap, lookups: WrapLookups) -> Bool {
+        (rows(wrap, lookups: lookups).map(\.stat.count).max() ?? 0) > 0
     }
 
     /// The domains the device knows, with their names, in the server's order.
