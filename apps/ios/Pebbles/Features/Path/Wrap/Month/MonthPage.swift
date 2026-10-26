@@ -102,36 +102,57 @@ struct MonthPageSections: View {
     var body: some View {
         MonthCoverView(wrap: wrap, lookups: lookups)
         ForEach(wrap.sections, id: \.self) { section in
-            switch section {
-            case .weeks:
-                WeeksSummary(wrap: wrap, lookups: lookups, onWeek: onWeek)
-            case .milestones:
-                MilestonesSection(wrap: wrap, lookups: lookups, onOpen: onOpen, focus: focus)
-            case .persons:
-                PersonsSection(wrap: wrap, lookups: lookups, dayView: dayView) { onMore(.persons) }
-            case .domains:
-                DomainsSection(wrap: wrap, lookups: lookups) { onMore(.domains) }
-            case .gem:
-                EmotionGem(wrap: wrap, lookups: lookups) { onMore(.gem) }
-            case .tone, .hours:
-                // One head for both figures, over whichever comes first; it plays with that figure (#1241).
-                let leads = section == wrap.sections.first(where: { $0 == .tone || $0 == .hours })
-                VStack(alignment: .leading, spacing: 0) {
-                    if leads {
-                        MonthSectionHead(label: WrapCopy.insights(locale: SpineStrings.appLocale),
-                                         hint: WrapCopy.insightsHint(locale: SpineStrings.appLocale))
-                    }
-                    if section == .tone {
-                        ToneFigure(wrap: wrap)
-                    } else {
-                        HoursFigure(wrap: wrap, lookups: lookups)
-                    }
+            // One head for both figures, over whichever comes first.
+            MonthSectionContent(section: section, wrap: wrap, lookups: lookups, dayView: dayView, focus: focus,
+                                onWeek: onWeek, onOpen: onOpen, onMore: onMore,
+                                leadsInsights: section == wrap.sections.first(where: { $0 == .tone || $0 == .hours }))
+        }
+    }
+}
+
+/// One section of the month, as the page and the deck (#1241 D11) draw it.
+/// Tone and hours share the insights head, over the one that leads them, and
+/// play it with that figure (#1241).
+struct MonthSectionContent: View {
+    let section: MonthSection
+    let wrap: MonthWrap
+    let lookups: WrapLookups
+    let dayView: DayView
+    var focus: AccessibilityFocusState<UUID?>.Binding?
+    let onWeek: (CalendarDay) -> Void
+    let onOpen: (MomentSummary) -> Void
+    let onMore: (MonthSection) -> Void
+    /// Tone or hours only: this figure carries the insights head.
+    let leadsInsights: Bool
+
+    var body: some View {
+        switch section {
+        case .weeks:
+            WeeksSummary(wrap: wrap, lookups: lookups, onWeek: onWeek)
+        case .milestones:
+            MilestonesSection(wrap: wrap, lookups: lookups, onOpen: onOpen, focus: focus)
+        case .persons:
+            PersonsSection(wrap: wrap, lookups: lookups, dayView: dayView) { onMore(.persons) }
+        case .domains:
+            DomainsSection(wrap: wrap, lookups: lookups) { onMore(.domains) }
+        case .gem:
+            EmotionGem(wrap: wrap, lookups: lookups) { onMore(.gem) }
+        case .tone, .hours:
+            VStack(alignment: .leading, spacing: 0) {
+                if leadsInsights {
+                    MonthSectionHead(label: WrapCopy.insights(locale: SpineStrings.appLocale),
+                                     hint: WrapCopy.insightsHint(locale: SpineStrings.appLocale))
                 }
-                .introSequence(.section(section)) {
-                    section == .tone
-                        ? ToneFigure.introBeats(wrap: wrap, insights: leads)
-                        : HoursFigure.introBeats(wrap: wrap, lookups: lookups, insights: leads)
+                if section == .tone {
+                    ToneFigure(wrap: wrap)
+                } else {
+                    HoursFigure(wrap: wrap, lookups: lookups)
                 }
+            }
+            .introSequence(.section(section)) {
+                section == .tone
+                    ? ToneFigure.introBeats(wrap: wrap, insights: leadsInsights)
+                    : HoursFigure.introBeats(wrap: wrap, lookups: lookups, insights: leadsInsights)
             }
         }
     }
