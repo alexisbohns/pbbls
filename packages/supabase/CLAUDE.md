@@ -31,6 +31,7 @@ The database is the contract between four clients, and these Deno scripts are th
 | `npm run db:verify:reference` | `verify-reference-data.ts` | the committed emotion reference data still matches the project (#796) | anon, **read-only** |
 | `npm run db:verify:recent-auth` | `verify-recent-auth.ts` | recent sign-in check (#976, #977): `amr` evaluator, no over-blocking of fresh sessions; nightly (`RECENT_AUTH_STALE_CASE=1`) waits past the window and expects both gates to refuse | anon |
 | `npm run db:verify:path-wraps` | `verify-path-wraps.ts` | the Path wraps (#1207): `gem_allocate` equals the committed JS oracle (`scripts/oracles/path-wrap/`) facet by facet on fixed and seeded random months; `path_strip` weeks, spacers, cairns and month placement in two zones; `path_week_wrap` tiles, rankings, worth and thresholds on the fixture's weeks; `path_month_wrap` sections, milestones, new souls, the gem (vs the oracle), tone and hours on the fixture's months. `PATH_WRAPS_DUMP=1` writes the payload fixtures to `scripts/oracles/path-wrap/payloads/` | anon |
+| `npm run db:verify:guides` | `verify-guides.ts` | the `guides` table (#1254): published rows readable by anon in `sort_order`, the nine seeded topics, admin-only writes, drafts invisible | anon |
 | `npm run db:verify` | the anon harnesses above (plus reports and glyph), in order | — | anon |
 | `npm run db:verify:purge` | `verify-account-purge.ts` | `purge_account` contract | anon + **service role** |
 
@@ -42,7 +43,7 @@ A new harness added to `scripts/` gains a `db:verify:*` script and a workflow st
 
 **`db:verify:purge` is deliberately NOT in CI and must be run by hand** after any batch touching `purge_account`. It is the one harness needing `SUPABASE_SERVICE_ROLE_KEY`, this repo is public, and a leaked service-role key is total database access. Do not "fix" its absence by adding that secret without deciding it as such.
 
-**Orphans.** A run killed between signup and cleanup leaves a throwaway account behind. They are greppable in `auth.users` by their prefixes — `moments-verify-`, `grades-verify-`, `public-verify-`, `guard-verify-`, `recent-auth-verify-`, `path-wraps-verify-`, all `@example.test`. There is no automated sweep (deleting them needs the service role).
+**Orphans.** A run killed between signup and cleanup leaves a throwaway account behind. They are greppable in `auth.users` by their prefixes — `moments-verify-`, `grades-verify-`, `public-verify-`, `guard-verify-`, `recent-auth-verify-`, `path-wraps-verify-`, `guides-verify-`, all `@example.test`. There is no automated sweep (deleting them needs the service role).
 
 ## What CI runs on `packages/supabase/**`
 
