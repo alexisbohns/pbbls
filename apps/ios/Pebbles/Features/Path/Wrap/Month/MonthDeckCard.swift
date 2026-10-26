@@ -1,16 +1,10 @@
 import SwiftUI
 
-/// A card's paper: the week tiles' radius and rule on the page's paper, inset in its page.
+/// A card's paper: the pebble cards' own, inset in its page. Their shell
+/// without an emotion, so no painted edge: the stock, its shadow, the Night ring.
 struct MonthDeckPaper: View {
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: SpineLayout.tileCorner, style: .continuous)
-        shape
-            .fill(Color.pebbles.surface)
-            .overlay {
-                shape
-                    .inset(by: SpineLayout.rule / 2)
-                    .stroke(Color.pebbles.rule, lineWidth: SpineLayout.rule)
-            }
+        SpineCardShell(emotion: nil, polarity: .neutral, intensity: 1) { Color.clear }
             .padding(MonthDeckMotion.inset)
     }
 }
@@ -34,7 +28,7 @@ struct MonthDeckCard<Content: View>: View {
             HStack(spacing: 0) {
                 MonthDeckMargin(month: month, step: step)
                 Rectangle()
-                    .fill(Color.pebbles.rule)
+                    .fill(Color.pebbles.cardRule)
                     .frame(width: SpineLayout.rule)
                 VStack(spacing: 0) {
                     if let head { MonthDeckTitle(head: head) }
@@ -50,7 +44,7 @@ struct MonthDeckCard<Content: View>: View {
                         }
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: SpineLayout.tileCorner, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: MonthDeckLayout.corner, style: .continuous))
             .padding(MonthDeckMotion.inset)
         }
     }
@@ -62,6 +56,8 @@ struct MonthDeckCard<Content: View>: View {
 
 /// A card's chrome (#1241 D11), in points: the exploration's galley.
 enum MonthDeckLayout {
+    /// The paper's corner: the pebble cards' (`SpineCardShell`).
+    static let corner: CGFloat = 11
     /// The margin, left of its rule.
     static let margin: CGFloat = 28
     /// Above the title band, and above the margin's month.
@@ -158,7 +154,7 @@ private struct MonthDeckTitle: View {
                 }
             }
             Rectangle()
-                .fill(Color.pebbles.rule)
+                .fill(Color.pebbles.cardRule)
                 .frame(height: SpineLayout.rule)
         }
         .padding(.horizontal, MonthLayout.sectionPadX)
