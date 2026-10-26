@@ -3413,7 +3413,49 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 This is the revision after the first device pass (spec D7–D9). Create the branch on top of `feat/1241-ios-intro-insights` with `gh stack add feat/1241-ios-intro-chapters`. Commit with the same conventions as Parts 1–4.
 
-### Task 26: Where a swipe lands
+> **Superseded on 2026-10-26 by spec D11 (the deck).** The maintainer tried Tasks 26 and 29 (chapter paging) on the iPhone 15 and rejected them. They were dropped from the branch, and a backup of them is kept locally as `backup/1241-chapters-paging`. Tasks 27, 28 and 30 stay. Task 29b below replaces 26 and 29.
+
+### Task 29b: The deck (replaces Tasks 26 and 29)
+
+**Files:**
+- Create `Wrap/Month/MonthDeck.swift`.
+- Modify `Wrap/Month/MonthPage.swift`, `Wrap/Month/MonthSections.swift`, `Wrap/Gem/EmotionGem.swift`, `Wrap/Month/MonthCover.swift`, `Wrap/Month/ToneFigure.swift`, `Wrap/Month/HoursFigure.swift`, `Wrap/Intro/IntroClock.swift`, `Wrap/Intro/IntroViews.swift`.
+- Tests: `IntroClockTests`, `IntroRulesTests`, a new `MonthDeckTests`.
+
+1. **What shows.** Each section view gets `static func isShown(wrap:lookups:) -> Bool`, mirroring exactly the condition its `body` draws under. The body uses it, so the two can't drift. `MonthCoverView.isShown` is `wrap.cover != nil`. Tone and hours return `isShown` when their figure draws.
+   - `MonthDeck.cards(wrap:lookups:) -> [IntroSequence]` returns `.cover` if shown, then `.section(s)` for each `wrap.sections` entry that shows. It is pure.
+   - **Tests on `MonthPayloadFixture.october()`:** the fixture's cards, in order. A wrap with an emptied section deals no card for it.
+2. **One section's content.** Move the `switch` in `MonthPageSections` into a view `MonthSectionContent(section:wrap:lookups:dayView:focus:onWeek:onOpen:onMore:leadsInsights:)` that both `MonthPageSections` and the deck use. This is a pure move, so the references stay unchanged. The tone/hours host with the insights head stays inside it.
+3. **The clock follows the deck.**
+   - Add `func register(_ sequence:, beats: @escaping () -> [IntroBeat])`, which stores the latest beats.
+   - Add `func show(_ sequence:)`, which leaves every other sequence in view (landing a playing one) and enters this one.
+   - Remove `report`, `IntroViewport` and the unmeasured settling, together with their tests.
+   - The host drops its `onGeometryChange` report. It registers its beats in `.onAppear` and keeps the sequence environment, the `TimelineView` and `.onDisappear { leave }`.
+   - **Tests:** `show` order, `show` landing the previous card, `register` before and after `show`, and `show` of a sequence with no registered beats landing at once.
+4. **`IntroPolicy.plays(reduceMotion:voiceOver:largeText:)`.** No intro at an accessibility text size. `MonthPage` passes `dynamicTypeSize.isAccessibilitySize`. Update the tests.
+5. **`MonthDeck`.**
+   - A vertical `ScrollView` with `LazyVStack(spacing: 0)`, `.scrollTargetLayout()`, `.scrollTargetBehavior(.paging)`, `.scrollPosition(id: $top)` and hidden indicators.
+   - One page per card, with `.frame(width: page.width, height: page.height)` measured by `onGeometryChange`, and `.id(card)`.
+   - Reverse `zIndex`, so an earlier card draws above a later one.
+   - **The card:** the same paper, radius and rule border as `TileCard` (read it and reuse its fill, radius and stroke). It is inset 12 pt from the page's sides, 8 pt from the top and 22 pt from the bottom, so the deck's edges show.
+   - **Content:** top-aligned. If its measured ideal height is greater than the card's, apply `.scaleEffect(card / ideal, anchor: .top)`.
+   - **`.scrollTransition(.interactive, axis: .vertical)`:**
+     - A card still to come (`phase.value > 0`) is held in place: offset `-phase.value * page.height`, plus a little down so its foot peeks about 10 pt below the top card, and scaled `1 - 0.05 * phase.value`.
+     - A leaving card (`phase.value < 0`) scrolls off with a slight lift (scale to 1.02) and a turn of up to 3°.
+     - At phase 0 it is the identity.
+   - **Deck edges:** behind the scroll view at the bottom, up to two static card edges (offset 10 pt and 20 pt, scaled 0.95 and 0.90), as many as `min(2, remaining − 1)`.
+   - **Arrival:** `.onChange(of: top, initial: true) { clock?.show(top ?? cards.first) }`.
+   - Keep `.simultaneousGesture(TapGesture())` → `skip()`.
+6. **`MonthPage`.** With a clock (the intro allowed, including the text-size condition), draw `MonthDeck`. Otherwise draw today's vertical page with no clock. The sheet, `returnFocus`, the visibility, focus and scene-phase activity, and the Lab's tempo all carry over unchanged.
+7. **Gate.** Run the whole suite, then `build/intro-compare.sh`: no new failures and no differing PNG. Then do the simulator check, with computer-use for the swipes:
+   - The cover is the top card, with the weeks card's foot below it.
+   - Swiping up throws the cover off, and the weeks card comes on top with the arrive tick (check the clock log or the reveal), then its rows.
+   - Swiping down brings the cover back.
+   - A horizontal swipe still changes the page in the Path's pager.
+
+   Revert the temporary Lab switch. Commit: `feat(ios): deal the month's wrap as a deck of cards`.
+
+### Task 26: Where a swipe lands (superseded)
 
 **Files:**
 - Create: `apps/ios/Pebbles/Features/Path/Wrap/Intro/ChapterPaging.swift`
@@ -3631,7 +3673,7 @@ extension IntroBeat {
 - [ ] **Step 1:** Remove every `.introReveal(.header)` and `.introReveal(.insights)`. They're on the section heads of weeks, milestones, persons, domains and the gem, on the `SpineSectionHeader` in `ToneFigure` and `HoursFigure`, and on the insights `MonthSectionHead` in `MonthPageSections`. Keep `.lead`, `.more` and every other reveal.
 - [ ] **Step 2:** Run the whole suite, then `build/intro-compare.sh`. Expected: no new failures and no differing PNG. The frozen intro references show their headers already landed, so they don't move either. Commit: `feat(ios): keep the month sections' heads drawn through the intro`.
 
-### Task 29: One chapter per swipe
+### Task 29: One chapter per swipe (superseded)
 
 **Files:** `Wrap/Intro/IntroViews.swift` (`IntroSpace.content`, the chapter preference, the host), `Wrap/Intro/ChapterPaging.swift` (the behaviour), `Wrap/Month/MonthPage.swift`
 

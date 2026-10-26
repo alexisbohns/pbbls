@@ -68,6 +68,22 @@ The month page enters instead of appearing all at once. The month's name rises i
 - **References:** frozen clocks (the references) use their beats unscaled.
 - **Live tuning:** the Spine Lab's Month tab has two sliders, *Garland* (seconds) and *Sections ×*, applied on *Replay intro*. The values the maintainer settles on become `IntroTempo.standard`.
 
+**D11. The month is a deck of cards** (second device pass, 2026-10-26). It supersedes D7 and D8's trigger. On the phone, the chapter snapping felt awkward, and a section already sitting on the page before its turn felt wrong.
+- **The cards:** the cover first, then each section that shows, in the server's order. An empty section deals no card. Tone and hours are separate cards, and the insights head sits on the first of them. Each card is drawn on the same paper as the week tiles.
+- **The deck:** a vertical paging `ScrollView` of full-height pages, one card per page, inset from the page's edges. `.scrollTransition` makes the paging read as a deck:
+  - The top card leaves upward under the finger, lifted and turned a little.
+  - The next card waits beneath it. It is counter-offset so it stays in place, slightly smaller, with its foot peeking below the top card, and it grows to full size as it comes on top.
+  - A static stack of up to two more card edges below shows how many cards remain.
+  - Swiping down brings the previous card back down onto the pile.
+- **The Path's pager:** horizontal swipes still move it, because the deck only scrolls vertically.
+- **Before its turn,** a card shows its title only (D8's always-drawn heads).
+- **Arrival:** a card arrives when it becomes the top card, tracked by `.scrollPosition(id:)`. The clock lands the previous card's sequence and plays this one: the arrive tick, then its content.
+- **Revisits:** the month is still a deck, with its cards settled.
+- **Content taller than its card** scales down to fit, anchored at its top. This happens only at the larger non-accessibility text sizes or on small phones.
+- **When there is no deck:** under Reduce Motion, VoiceOver or an accessibility text size, the month is the vertical page as before, settled, with no clock. `IntroPolicy` gains the text-size condition.
+- **The clock no longer measures geometry.** The deck tells it which card is on top (`IntroClock.show(_:)`), and each section's host registers its beats when it appears. `IntroViewport`, `report` and the chapter paging are gone.
+- *Considered and rejected:* a custom `ZStack` deck driven by a drag gesture. Its vertical drag fights the pager's horizontal scroll and any scrolling inside a card, and it gives up native momentum and interruption.
+
 **D10. Each list section has a signature**, replacing the shared row reveal for these three. Each row lands in turn.
 - **Weeks:** the cairn builds from the bottom, stone by stone (`.cairnStone(row, k)`), with a light tick per stone. Then the line and the range rise and the souls fade in with `.row(row)`.
 - **Milestones:** the stone *stamps* (`.stamp(row)`). It comes in at 1.25× and transparent and presses to size with a slight squash, with a firm tick scaled by the pebble's intensity (`IntroTick.stamp(intensity)`). Then the name, the date and the souls rise with `.row(row)`.
@@ -286,7 +302,7 @@ Each part builds, lints and passes the iOS tests alone. Every part keeps the exi
 
 | Part | Contents |
 |---|---|
-| 5 | `ChapterPaging` plus the behaviour, the chapter tops, the new trigger rule, the arrive tick and always-drawn headers, `IntroTempo` scaling in the clock, and the Lab's two sliders |
+| 5 | The deck (D11): `MonthDeck`, the cards, `IntroClock.show`, the beats registered by the hosts, the text-size condition in `IntroPolicy`. Plus `IntroTempo` scaling in the clock, the arrive tick with always-drawn heads (D8), and the Lab's two sliders. The chapter paging (D7) was built, tried on the phone and dropped. |
 | 6 | The weeks', milestones' and domains' signatures (`CairnMark` reveal, the stamp landing, `ProportionBar` fill), with their score builders |
 
 ## New patterns, raised in the PR
