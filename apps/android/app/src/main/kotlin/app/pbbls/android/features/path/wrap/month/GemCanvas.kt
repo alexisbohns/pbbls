@@ -256,7 +256,8 @@ private fun CacheDrawScope.placeLabels(
         p: LabelPlace,
         q: LabelPlace,
     ) = p.x0 < q.x0 + q.w + pad && q.x0 < p.x0 + p.w + pad && p.y0 < q.y0 + q.h + pad / 2 && q.y0 < p.y0 + p.h + pad / 2
-    repeat(SPREAD_TRIES) {
+    // Until no name moves (iOS breaks there too): a pass that moves none leaves every angle, so every later pass, as it was.
+    for (attempt in 0 until SPREAD_TRIES) {
         runs.forEach(::place)
         var moved = false
         for (i in runs.indices) {
@@ -271,7 +272,7 @@ private fun CacheDrawScope.placeLabels(
                 moved = true
             }
         }
-        if (!moved) return@repeat
+        if (!moved) break
     }
     runs.forEach(::place)
     return runs
