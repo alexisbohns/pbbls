@@ -5,6 +5,7 @@ import SwiftUI
 /// week and a month page per month, its position bound to `PathModel.focusedPage`. A
 /// settled swipe writes through `focus(_:)`; a strip tap, a link or a refocus
 /// moves the position; `focus` ignores an equal page, so the two never loop.
+/// A swipe that settles on another page plays the strip's selection haptic.
 /// Only the visible page and its neighbour during a swipe are realised. New
 /// pattern (it replaces `TabView(.page)`), named in the D4c PR. A page change
 /// announces the page (A6) and prefetches the photo ratios of a week and its
@@ -61,7 +62,10 @@ struct SpinePager: View {
         .onAppear { position = model.focusedPage }
         .onChange(of: model.pages) { position = model.focusedPage }
         .onChange(of: position) { _, settled in
-            if let settled { model.focus(settled) }
+            guard let settled else { return }
+            // A swipe that settles on another page ticks as a strip tap does; a position the focus moved does not.
+            if settled != model.focusedPage { TapHaptics.play(.selection) }
+            model.focus(settled)
         }
         .onChange(of: model.focusedPage) { _, page in
             if position != page {
