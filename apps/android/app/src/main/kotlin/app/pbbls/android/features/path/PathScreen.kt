@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -250,6 +251,8 @@ fun PathScreen(
  * @param introLedger the month intros played this launch (#1242 D20); with
  *   one, a month page the policy allows is dealt as a deck and plays its
  *   intro while it is the settled page. Null (previews): the plain page.
+ * @param tapHaptics plays the swipe's and the strip's selection tick (D24);
+ *   the view's own haptics, unless a test records them.
  * @param ratioOverride preview-only: a primed ratio by storage prefix, so a
  *   render never waits on a probe. Production passes nothing.
  */
@@ -270,6 +273,7 @@ fun PathContent(
     modifier: Modifier = Modifier,
     aspect: SnapAspectCache? = null,
     introLedger: IntroLedger? = null,
+    tapHaptics: (TapHaptic) -> Unit = rememberTapHaptics(),
     onPebbleTap: (PathMoment, CardFace) -> Unit = { _, _ -> },
     onPebbleDelete: (PathMoment) -> Unit = {},
     onCreatePebble: () -> Unit = {},
@@ -286,7 +290,7 @@ fun PathContent(
     // cancels the running scroll, whose cleanup can land after the next one
     // has started. Not snapshot state: only the collector below reads it.
     val steering = remember { intArrayOf(0) }
-    val tapHaptics = rememberTapHaptics()
+    val tick by rememberUpdatedState(tapHaptics)
     // The page a focus change last steered the pager to (a strip tap, a week
     // link, a focus request): it ticked at the tap if at all, so its settle
     // does not tick again. Not snapshot state: only the collector reads it.
@@ -311,7 +315,7 @@ fun PathContent(
         snapshotFlow { pagerState.settledPage }.drop(1).collect { page ->
             val steered = page == steeredTo[0]
             steeredTo[0] = -1
-            if (!steered) tapHaptics(TapHaptic.SELECTION)
+            if (!steered) tick(TapHaptic.SELECTION)
         }
     }
     // Focus (strip tap, week link, R14 request) → pager.
