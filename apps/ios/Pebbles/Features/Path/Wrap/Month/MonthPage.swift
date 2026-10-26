@@ -50,7 +50,9 @@ struct MonthPage: View {
     }
 
     var body: some View {
-        Group {
+        // A stack, not a group: a group hands its appear and disappear to each child, and a replayed deck fading
+        // out would report the page gone after the new deck appeared.
+        ZStack {
             // Refused by the policy, the page never draws the deck, even for the frame before `intro` drops.
             if intro != nil, allowsIntro {
                 MonthDeck(wrap: wrap, lookups: lookups, dayView: dayView, focus: $milestoneFocus,
@@ -102,7 +104,8 @@ struct MonthPage: View {
     private func replay() {
         guard let context = introContext, let old = intro else { return }
         DispatchQueue.main.async {
-            old.settleAll()
+            // Settled and stopped: nothing reaching it during the fade starts a sequence on the new clock's voices.
+            old.isActive = false
             context.ledger.reset(wrap.month)
             let clock = Self.clock(wrap, context: context)
             clock.isActive = playsIntro
