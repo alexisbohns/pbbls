@@ -42,11 +42,13 @@ struct EmotionGem: View {
         wrap.gem != nil
     }
 
-    /// The gem's intro (#1241): the families in the lead's order, each with the facets the server gave it.
+    /// The gem's intro (#1241): the count, then the families in the lead's order, each with the facets the server
+    /// gave it.
     static func introBeats(wrap: MonthWrap, lookups: WrapLookups) -> [IntroBeat] {
         guard let gem = wrap.gem else { return [] }
         let words = GemWords(gem: gem, lookups: lookups, locale: SpineStrings.appLocale)
-        return IntroScore.gem(runs: IntroScore.gemRuns(order: words.labels.map(\.slug), facets: gem.facets))
+        return IntroScore.gem(runs: IntroScore.gemRuns(order: words.labels.map(\.slug), facets: gem.facets),
+                              pebbles: wrap.pebbles)
     }
 }
 
