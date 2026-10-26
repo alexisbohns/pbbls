@@ -1,12 +1,14 @@
 package app.pbbls.android.features.path.wrap.intro
 
 import androidx.annotation.VisibleForTesting
+import androidx.compose.runtime.DisallowComposableCalls
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.withFrameNanos
 import app.pbbls.android.core.designsystem.RevealMotion
 import kotlinx.coroutines.flow.first
@@ -83,8 +85,8 @@ class IntroClock private constructor(
 
     /**
      * Each key's progress in [sequence], read at the current frame when invoked (in a draw phase). Only a key
-     * with a beat in a playing card reads the frame, so settled and waiting cards, and the parts no beat names,
-     * never redraw with it.
+     * whose beat in a playing card has not ended reads the frame, so settled and waiting cards, the parts no
+     * beat names and the beats already landed never redraw with it.
      */
     fun reveal(sequence: IntroSequence): IntroReveal = IntroReveal { key -> progress(sequence, key) { frozenAt ?: frameNanos } }
 
@@ -97,12 +99,13 @@ class IntroClock private constructor(
 
     /**
      * Nothing before the sequence's turn; while it plays, its beat's progress (a key the beats don't name has
-     * landed); everything once it has landed. [at] is read only for a key with a beat in a playing card.
+     * landed); everything once it has landed. [at] is read only for a key with a beat in a playing card, and
+     * observed only until that beat ends: an ended beat can't change while its card plays.
      */
     private inline fun progress(
         sequence: IntroSequence,
         key: IntroKey,
-        at: () -> Long,
+        at: @DisallowComposableCalls () -> Long,
     ): Float =
         when (val phase = phase(sequence)) {
             Phase.Settled -> 1f
@@ -110,6 +113,8 @@ class IntroClock private constructor(
             is Phase.Playing -> {
                 val beat = keyed[sequence]?.get(key)
                 if (beat == null) {
+                    1f
+                } else if (Snapshot.withoutReadObservation { at() } >= phase.start + ((beat.at + beat.duration) * 1e9).toLong()) {
                     1f
                 } else {
                     val elapsed = (at() - phase.start) / 1e9

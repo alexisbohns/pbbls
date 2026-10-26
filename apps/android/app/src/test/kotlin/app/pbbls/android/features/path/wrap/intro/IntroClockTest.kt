@@ -1,6 +1,7 @@
 package app.pbbls.android.features.path.wrap.intro
 
 import androidx.compose.runtime.MonotonicFrameClock
+import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.core.model.wrap.MonthSection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -95,6 +96,42 @@ class IntroClockTest {
         // The frame-clock haptics hear each frame of the card, and none once it has landed.
         clock.frame(after(0.7))
         assertEquals(listOf(after(0.46), after(0.6)), spy.frames)
+    }
+
+    @Test
+    fun `an ended beat reads landed without reading the frame, while a beat in progress still advances with it`() {
+        val clock = clock()
+        clock.register(IntroSequence.Cover) { beats }
+        clock.isActive = true
+        clock.show(IntroSequence.Cover)
+        val reveal = clock.reveal(IntroSequence.Cover)
+        // 0.46 s in: the header (0 to 0.28 s) has ended, row 0 (0.32 to 0.6 s) is halfway.
+        clock.frame(after(0.46))
+        val ended = reads { assertEquals(1f, reveal(IntroKey.Header)) }
+        val landing = reads { assertEquals(0.5f, reveal(IntroKey.Row(0)), 1e-6f) }
+        // Only the beat in progress subscribes to the frame, so a figure whose beats have ended stops redrawing.
+        assertTrue(ended.isNotEmpty())
+        assertTrue(landing.containsAll(ended))
+        assertTrue((landing - ended).isNotEmpty())
+        clock.frame(after(0.53))
+        assertEquals(1f, reveal(IntroKey.Header))
+        assertEquals(0.75f, reveal(IntroKey.Row(0)), 1e-6f)
+        assertTrue(clock.isPlaying(IntroSequence.Cover))
+    }
+
+    @Test
+    fun `a frozen clock draws an ended beat landed and a beat in progress at its instant`() {
+        val clock = IntroClock.frozen(october, IntroSequence.Cover, beats, elapsed = 0.46)
+        val reveal = clock.reveal(IntroSequence.Cover)
+        assertEquals(1f, reveal(IntroKey.Header))
+        assertEquals(0.5f, reveal(IntroKey.Row(0)), 1e-6f)
+    }
+
+    /** The snapshot state [block] reads, as a draw phase would subscribe to it. */
+    private fun reads(block: () -> Unit): Set<Any> {
+        val seen = mutableSetOf<Any>()
+        Snapshot.observe(readObserver = { seen += it }) { block() }
+        return seen
     }
 
     @Test
