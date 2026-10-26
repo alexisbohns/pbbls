@@ -20,4 +20,10 @@ class IntroWaveformTest {
         assertEquals(List(4) { 10L }, wave.timings)
         assertEquals(listOf(51, 85, 119, 153), wave.amplitudes)
     }
+
+    @Test
+    fun `a tick of no finite strength pulses at the least amplitude`() {
+        val beats = listOf(IntroBeat(IntroKey.Header, 0.0, 0.0, IntroTick(Float.NaN, 0.5f)))
+        assertEquals(listOf(1), IntroWaveform.of(beats, leadMs = 0).amplitudes)
+    }
 }

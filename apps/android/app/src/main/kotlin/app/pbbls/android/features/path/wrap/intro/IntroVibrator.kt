@@ -8,7 +8,9 @@ import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import java.time.YearMonth
@@ -18,6 +20,10 @@ import java.time.YearMonth
  * primitives, else one waveform where it controls amplitude, else `performHapticFeedback` fired from the
  * clock's frames. Every vibration is `USAGE_TOUCH`, so Android's touch feedback setting governs it.
  * [enabled] is Pebbles' own switch (Part 8; on until then). [forced] is the Lab's override.
+ *
+ * A new vibration replaces the current one at the vibrator service, which is why one [sounding] slot
+ * suffices for tiers C and W. A landing [tick] never takes that slot: the clock's `landed` ticks only a
+ * card that isn't playing.
  */
 class IntroVibrator(
     private val vibrator: Vibrator?,
@@ -54,11 +60,12 @@ class IntroVibrator(
 
     private val voices = mutableMapOf<Pair<YearMonth, IntroSequence>, Voice>()
 
-    /** Tiers C and W: the card whose vibration is sounding. */
+    /** Tiers C and W: the card whose vibration is sounding, and when its score ends (`System.nanoTime()`). */
     private var sounding: Pair<YearMonth, IntroSequence>? = null
+    private var soundingEnd = 0L
 
     init {
-        Log.i(TAG, "intro haptics tier $tier, primitives $supported")
+        Log.d(TAG, "intro haptics tier $tier, primitives $supported")
     }
 
     override fun play(
@@ -68,35 +75,30 @@ class IntroVibrator(
         startNanos: Long,
     ) {
         if (!enabled()) return
-        val leadMs = ((startNanos - System.nanoTime()) / 1_000_000).toInt().coerceAtLeast(0)
+        // Clamped before narrowing: a virtual timebase can't wrap it, nor pass the HAL's longest pause.
+        val leadMs = ((startNanos - System.nanoTime()) / 1_000_000).coerceIn(0, MAX_LEAD_MS).toInt()
         when (tier) {
-            IntroHapticTier.COMPOSITION -> {
-                val prims = IntroComposition.of(beats, supported + IntroPrimitiveKind.TICK, durations, leadMs)
-                if (prims.isEmpty()) return
-                val composition = VibrationEffect.startComposition()
-                prims.forEach { composition.addPrimitive(primitiveId(it.kind), it.scale, it.pauseMs) }
-                vibrate(composition.compose())
-                sounding = month to sequence
-            }
-            IntroHapticTier.WAVEFORM -> {
-                val wave = IntroWaveform.of(beats, leadMs)
-                if (wave.timings.isEmpty()) return
-                vibrate(VibrationEffect.createWaveform(wave.timings.toLongArray(), wave.amplitudes.toIntArray(), -1))
-                sounding = month to sequence
-            }
+            IntroHapticTier.COMPOSITION, IntroHapticTier.WAVEFORM ->
+                if (vibrate { effectFor(beats, leadMs) }) {
+                    sounding = month to sequence
+                    soundingEnd = startNanos + (IntroScore.duration(beats) * 1e9).toLong()
+                }
             IntroHapticTier.VIEW -> voices[month to sequence] = Voice(IntroHaptics.events(beats), startNanos)
             IntroHapticTier.NONE -> Unit
         }
     }
 
-    /** Stops this page's own voice only: settling September never cuts October's buzz (iOS `ownHaptics`). */
+    /**
+     * Stops this page's own voice only: settling September never cuts October's buzz (iOS `ownHaptics`).
+     * A card that lands at its end rings out: only an interruption, before its score ends, cancels it.
+     */
     override fun stop(
         sequence: IntroSequence,
         month: YearMonth,
     ) {
         voices.remove(month to sequence)
         if (sounding == month to sequence) {
-            vibrator?.cancel()
+            if (System.nanoTime() < soundingEnd) vibrator?.cancel()
             sounding = null
         }
     }
@@ -104,9 +106,10 @@ class IntroVibrator(
     override fun tick(tick: IntroTick) {
         if (!enabled()) return
         when (tier) {
+            IntroHapticTier.COMPOSITION, IntroHapticTier.WAVEFORM ->
+                vibrate { effectFor(listOf(IntroBeat(IntroKey.Header, 0.0, 0.0, tick)), leadMs = 0) }
             IntroHapticTier.VIEW -> view.performHapticFeedback(constantFor(tick))
             IntroHapticTier.NONE -> Unit
-            else -> play(IntroSequence.End, NO_MONTH, listOf(IntroBeat(IntroKey.Header, 0.0, 0.0, tick)), System.nanoTime())
         }
     }
 
@@ -125,20 +128,57 @@ class IntroVibrator(
         fire?.let { view.performHapticFeedback(constantFor(it.tick)) }
     }
 
-    private fun vibrate(effect: VibrationEffect) {
-        val v = vibrator ?: return
-        try {
+    /** Tiers C and W: [beats] as this tier's one vibration, or null when they play nothing. */
+    private fun effectFor(
+        beats: List<IntroBeat>,
+        leadMs: Int,
+    ): VibrationEffect? =
+        when (tier) {
+            IntroHapticTier.COMPOSITION -> {
+                val prims = IntroComposition.of(beats, supported + IntroPrimitiveKind.TICK, durations, leadMs)
+                if (prims.isEmpty()) {
+                    null
+                } else {
+                    val composition = VibrationEffect.startComposition()
+                    prims.forEach { composition.addPrimitive(primitiveId(it.kind), it.scale, it.pauseMs) }
+                    composition.compose()
+                }
+            }
+            IntroHapticTier.WAVEFORM -> {
+                val wave = IntroWaveform.of(beats, leadMs)
+                if (wave.timings.isEmpty()) {
+                    null
+                } else {
+                    VibrationEffect.createWaveform(wave.timings.toLongArray(), wave.amplitudes.toIntArray(), -1)
+                }
+            }
+            IntroHapticTier.VIEW, IntroHapticTier.NONE -> null
+        }
+
+    /**
+     * Builds the effect and plays it under one guard: building throws on a value the framework refuses
+     * (a scale or a timing out of range), and that must never reach the main thread. True if it played.
+     */
+    private inline fun vibrate(build: () -> VibrationEffect?): Boolean {
+        val v = vibrator ?: return false
+        return try {
+            val effect = build() ?: return false
             v.vibrate(effect, TOUCH)
+            true
         } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "intro haptics refused by the vibrator", e)
+            Log.e(TAG, "intro haptics refused", e)
+            false
+        } catch (e: IllegalStateException) {
+            Log.e(TAG, "intro haptics refused", e)
+            false
         }
     }
 
     private companion object {
         const val TAG = "intro"
 
-        /** A landing tick's voice: no page's month. */
-        val NO_MONTH: YearMonth = YearMonth.of(1970, 1)
+        /** The longest lead a card's vibration waits for its frames. */
+        const val MAX_LEAD_MS = 1_000L
         val TOUCH: VibrationAttributes = VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_TOUCH).build()
 
         fun primitiveId(kind: IntroPrimitiveKind): Int =
@@ -158,7 +198,7 @@ class IntroVibrator(
     }
 }
 
-/** The intro's haptics for this view. [enabled] is Pebbles' switch; [forced] the Lab's tier override. */
+/** The intro's haptics for this view. [enabled] is Pebbles' switch, read live; [forced] the Lab's tier override. */
 @Composable
 fun rememberIntroVibrator(
     enabled: () -> Boolean = { true },
@@ -166,7 +206,8 @@ fun rememberIntroVibrator(
 ): IntroVibrator {
     val context = LocalContext.current
     val view = LocalView.current
+    val currentEnabled by rememberUpdatedState(enabled)
     return remember(context, view, forced) {
-        IntroVibrator(context.getSystemService(VibratorManager::class.java)?.defaultVibrator, view, enabled, forced)
+        IntroVibrator(context.getSystemService(VibratorManager::class.java)?.defaultVibrator, view, { currentEnabled() }, forced)
     }
 }

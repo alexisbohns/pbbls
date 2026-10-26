@@ -23,7 +23,8 @@ object IntroWaveform {
             val amplitude: Int,
         )
 
-        fun amp(intensity: Float) = (intensity * 255).roundToInt().coerceIn(1, 255)
+        // A non-finite intensity (NaN passes coerceIn, and throws in roundToInt) plays at the least amplitude.
+        fun amp(intensity: Float) = if (intensity.isFinite()) (intensity * 255).roundToInt().coerceIn(1, 255) else 1
         val pulses = IntroHaptics.events(beats).map { Segment(it.at * 1000 + leadMs, PULSE_MS.toDouble(), amp(it.tick.intensity)) }
         val steps =
             IntroHaptics.swells(beats).flatMap { swell ->
