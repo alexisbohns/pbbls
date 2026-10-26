@@ -1,10 +1,5 @@
 import SwiftUI
 
-/// The month page's coordinate space: each sequence measures its frame in it (#1241).
-enum IntroSpace {
-    static let name = "intro.page"
-}
-
 private struct IntroClockKey: EnvironmentKey {
     static let defaultValue: IntroClock? = nil
 }
@@ -81,9 +76,9 @@ extension View {
         modifier(IntroRevealModifier(key: key, landing: landing))
     }
 
-    /// Makes this view a sequence of the intro: it reports its place in the
-    /// page, leaves as it disappears, and redraws on each frame while it plays.
-    /// `beats` is asked for only as the sequence starts.
+    /// Makes this view a sequence of the intro: it registers its beats as it
+    /// appears, leaves as it disappears, and redraws on each frame while it
+    /// plays. `beats` is asked for only as the sequence starts.
     func introSequence(_ sequence: IntroSequence, beats: @escaping () -> [IntroBeat]) -> some View {
         modifier(IntroSequenceHost(sequence: sequence, beats: beats))
     }
@@ -127,12 +122,6 @@ private struct IntroLanded<Content: View>: View {
     }
 }
 
-/// A sequence's frame, and its page's viewport height (nil: the page's space could not be measured).
-private struct IntroPlacement: Equatable {
-    let frame: CGRect
-    let viewport: CGFloat?
-}
-
 private struct IntroSequenceHost: ViewModifier {
     let sequence: IntroSequence
     let beats: () -> [IntroBeat]
@@ -152,13 +141,9 @@ private struct IntroSequenceHost: ViewModifier {
                 }
             }
             .environment(\.introSequence, sequence)
-            .onGeometryChange(for: IntroPlacement.self) { proxy in
-                IntroPlacement(frame: proxy.frame(in: .named(IntroSpace.name)),
-                               viewport: proxy.bounds(of: .named(IntroSpace.name))?.height)
-            } action: { placement in
-                clock.report(sequence, beats: beats, frame: placement.frame, viewport: placement.viewport)
-            }
-            // Unloaded by the lazy stack, or gone with its page, it may never report `.out`.
+            // The deck says when it is on top (`IntroClock.show`); it plays then, with these beats.
+            .onAppear { clock.register(sequence, beats: beats) }
+            // Unloaded by the lazy stack, or gone with its page.
             .onDisappear { clock.leave(sequence) }
         } else {
             content

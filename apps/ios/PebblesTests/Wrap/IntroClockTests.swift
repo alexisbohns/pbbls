@@ -1,4 +1,3 @@
-import CoreGraphics
 import Foundation
 import Testing
 @testable import Pebbles
@@ -75,23 +74,91 @@ struct IntroClockTests {
         #expect(spy.stopped == [.cover])
     }
 
-    @Test("a report enters once its top reaches the top of the page; one wholly out leaves")
-    func reports() {
-        let clock = clock()
-        clock.isActive = true
-        let report = { (sequence: IntroSequence, y: CGFloat) in
-            clock.report(sequence, beats: { beats }, frame: CGRect(x: 0, y: y, width: 10, height: 100), viewport: 800)
+    @Test("the deck's top card plays; each card shown in turn plays in its turn")
+    func showOrder() {
+        let spy = HapticsSpy()
+        let clock = clock(haptics: spy)
+        for sequence in [IntroSequence.cover, weeks, .section(.persons)] {
+            clock.register(sequence, beats: { beats })
         }
-        report(.cover, 0)
+        clock.isActive = true
+        // Registered, a card waits until it is on top.
+        #expect(clock.phase(.cover) == .waiting)
+        clock.show(.cover)
         #expect(clock.isPlaying(.cover))
-        report(weeks, 300)
         clock.advance(to: base.addingTimeInterval(1))
         #expect(clock.phase(.cover) == .settled)
+        // The card beneath never plays on its own.
         #expect(clock.phase(weeks) == .waiting)
-        report(weeks, 1)
+        clock.show(weeks)
         #expect(clock.isPlaying(weeks))
-        report(weeks, -100)
+        clock.advance(to: base.addingTimeInterval(2))
+        clock.show(.section(.persons))
+        #expect(spy.played == [.cover, weeks, .section(.persons)])
+    }
+
+    @Test("a card thrown off mid-play lands, and the next plays; one brought back stays landed")
+    func showLandsPrevious() {
+        let ledger = IntroLedger()
+        let spy = HapticsSpy()
+        let clock = clock(ledger, haptics: spy)
+        clock.register(.cover, beats: { beats })
+        clock.register(weeks, beats: { beats })
+        clock.isActive = true
+        clock.show(.cover)
+        clock.show(weeks)
+        #expect(clock.phase(.cover) == .settled)
+        #expect(spy.stopped == [.cover])
+        #expect(clock.isPlaying(weeks))
+        // Swiping back down: the cover is settled for good, and the weeks land.
+        clock.show(.cover)
+        #expect(clock.phase(.cover) == .settled)
         #expect(clock.phase(weeks) == .settled)
+        #expect(spy.played == [.cover, weeks])
+        #expect(ledger.contains(october, weeks))
+    }
+
+    @Test("a card shown before its beats are registered plays as they arrive, with the latest")
+    func registerAfterShow() {
+        let spy = HapticsSpy()
+        let clock = clock(haptics: spy)
+        clock.isActive = true
+        clock.show(.cover)
+        #expect(clock.phase(.cover) == .waiting)
+        #expect(spy.played.isEmpty)
+        let slow = [IntroBeat(key: .header, at: 0, duration: 2, tick: .light)]
+        clock.register(.cover, beats: { slow })
+        #expect(clock.isPlaying(.cover))
+        #expect(spy.beats == [slow])
+        // Registered again while it plays (the host reappeared): the score in play stands.
+        clock.register(.cover, beats: { beats })
+        #expect(spy.played == [.cover])
+        clock.advance(to: base.addingTimeInterval(1))
+        #expect(clock.isPlaying(.cover))
+    }
+
+    @Test("a card registered before it is shown plays its beats as it comes on top")
+    func registerBeforeShow() {
+        let spy = HapticsSpy()
+        let clock = clock(haptics: spy)
+        clock.register(weeks, beats: { beats })
+        clock.isActive = true
+        #expect(spy.played.isEmpty)
+        clock.show(weeks)
+        #expect(clock.isPlaying(weeks))
+        #expect(spy.beats == [beats])
+    }
+
+    @Test("a card with no beats to play lands at once, silent")
+    func showEmpty() {
+        let spy = HapticsSpy()
+        let clock = clock(haptics: spy)
+        clock.register(weeks, beats: { [] })
+        clock.isActive = true
+        clock.show(weeks)
+        #expect(clock.phase(weeks) == .settled)
+        #expect(spy.played.isEmpty)
+        #expect(clock.reveal(weeks, at: base)(.header) == 1)
     }
 
     @Test("left to its own schedule, a sequence lands at its end")
@@ -229,35 +296,14 @@ struct IntroClockTests {
         #expect(clock.phase(.cover) == .waiting)
     }
 
-    @Test("a sequence that can't measure its page lands at once, unrecorded, and never blanks again")
-    func unmeasured() {
-        let ledger = IntroLedger()
-        let spy = HapticsSpy()
-        let clock = clock(ledger, haptics: spy)
-        let frame = CGRect(x: 0, y: 0, width: 10, height: 100)
-        clock.isActive = true
-        clock.report(.cover, beats: { beats }, frame: frame, viewport: nil)
-        #expect(clock.phase(.cover) == .settled)
-        #expect(!ledger.contains(october, .cover))
-        clock.report(.cover, beats: { beats }, frame: frame, viewport: 800)
-        #expect(clock.phase(.cover) == .settled)
-        #expect(spy.played.isEmpty)
-        // One that plays lands too, and the next starts.
-        clock.report(weeks, beats: { beats }, frame: frame, viewport: 800)
-        clock.report(.section(.persons), beats: { beats }, frame: frame, viewport: 800)
-        #expect(clock.isPlaying(weeks))
-        clock.report(weeks, beats: { beats }, frame: frame, viewport: nil)
-        #expect(clock.phase(weeks) == .settled)
-        #expect(spy.stopped == [weeks])
-        #expect(clock.isPlaying(.section(.persons)))
-    }
-
-    @Test("a frozen clock draws its sequence at its instant and ignores reports")
+    @Test("a frozen clock draws its sequence at its instant and ignores the deck")
     func frozen() {
         let clock = IntroClock.frozen(month: october, sequence: .cover, beats: beats, elapsed: 0.46)
         let reveal = clock.reveal(.cover, at: clock.frozenAt ?? .distantPast)
         #expect(abs(reveal(.row(0)) - 0.5) < 1e-9)
-        clock.report(.cover, beats: { [] }, frame: CGRect(x: 0, y: -500, width: 10, height: 10), viewport: 800)
+        clock.register(weeks, beats: { beats })
+        clock.show(weeks)
         #expect(clock.isPlaying(.cover))
+        #expect(clock.phase(weeks) == .waiting)
     }
 }

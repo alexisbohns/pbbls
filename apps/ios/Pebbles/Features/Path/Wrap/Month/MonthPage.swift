@@ -53,7 +53,6 @@ struct MonthPage: View {
             }
             .padding(.bottom, MonthLayout.pageBottom)
         }
-        .coordinateSpace(name: IntroSpace.name)
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }
         .environment(\.introClock, intro)
