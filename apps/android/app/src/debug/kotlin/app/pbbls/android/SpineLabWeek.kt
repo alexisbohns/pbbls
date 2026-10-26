@@ -61,8 +61,8 @@ internal fun SpineLabWeek(modifier: Modifier = Modifier) {
 
 /**
  * The fixture's October page (#1207): the lab's Month tab, the day view switchable but not saved. Its
- * cover plays the month's intro (#1242) with its own ledger: Replay plays it again, and the chips
- * force a haptic tier (Auto is the phone's own).
+ * cover plays the month's intro (#1242) with its own ledger: Replay plays it again, and a chip
+ * forces a haptic tier (Auto is the phone's own) and plays it again in that tier.
  */
 @Composable
 internal fun SpineLabMonth(modifier: Modifier = Modifier) {
@@ -85,7 +85,16 @@ internal fun SpineLabMonth(modifier: Modifier = Modifier) {
                 run += 1
             }) { Text("Replay") }
             listOf(null, IntroHapticTier.COMPOSITION, IntroHapticTier.WAVEFORM, IntroHapticTier.VIEW).forEach { tier ->
-                FilterChip(selected = forced == tier, onClick = { forced = tier }, label = { Text(tier?.name?.take(1) ?: "Auto") })
+                FilterChip(
+                    selected = forced == tier,
+                    onClick = {
+                        // One new clock for both changes: the tier's vibrator and the run.
+                        forced = tier
+                        ledger.reset(month)
+                        run += 1
+                    },
+                    label = { Text(tier?.name?.take(1) ?: "Auto") },
+                )
             }
         }
         Text("tier ${haptics.tier}", Modifier.padding(horizontal = 12.dp))
