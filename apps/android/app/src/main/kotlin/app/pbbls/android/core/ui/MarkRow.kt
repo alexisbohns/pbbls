@@ -32,6 +32,10 @@ import app.pbbls.android.core.designsystem.rule
  * [count] and [trailing]; at least [minHeight] tall (44 dp by default), a rule below. The row is
  * one semantics node saying [description]; with [onClick] it is a button whose action is
  * [clickLabel].
+ *
+ * The month intro (#1242; iOS `MarkRowReveal`) lands the columns apart: [leadingModifier] on the mark,
+ * [titleModifier], [subtitleModifier] and [countModifier] on the words, [trailingModifier] on the trailing
+ * view, and [ruleAlpha] fades the rule. The defaults add nothing, so the row draws as ever.
  */
 @Composable
 fun MarkRow(
@@ -52,6 +56,12 @@ fun MarkRow(
     minHeight: Dp = ROW_MIN,
     /** The mark column's width; a lit stone with its rings needs more than [MARK_COLUMN]. */
     markWidth: Dp = MARK_COLUMN,
+    leadingModifier: Modifier = Modifier,
+    titleModifier: Modifier = Modifier,
+    subtitleModifier: Modifier = Modifier,
+    countModifier: Modifier = Modifier,
+    trailingModifier: Modifier = Modifier,
+    ruleAlpha: () -> Float = { 1f },
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
@@ -60,7 +70,7 @@ fun MarkRow(
             modifier
                 .fillMaxWidth()
                 .heightIn(min = minHeight.coerceAtLeast(ROW_MIN))
-                .rule(colors.rule, above = false)
+                .rule(colors.rule, above = false, alpha = ruleAlpha)
                 .clearAndSetSemantics {
                     contentDescription = description
                     if (onClick != null) {
@@ -74,19 +84,20 @@ fun MarkRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(ROW_GAP),
     ) {
-        Box(Modifier.width(markWidth)) { leading() }
+        Box(Modifier.width(markWidth).then(leadingModifier)) { leading() }
         if (subtitle == null) {
-            Text(text = title, style = titleStyle, color = titleColor, modifier = Modifier.weight(1f))
+            Text(text = title, style = titleStyle, color = titleColor, modifier = Modifier.weight(1f).then(titleModifier))
         } else {
             Column(Modifier.weight(1f)) {
-                if (subtitleFirst) Text(text = subtitle, style = type.contentsTime, color = colors.ink3)
-                Text(text = title, style = titleStyle, color = titleColor)
-                if (!subtitleFirst) Text(text = subtitle, style = type.contentsTime, color = colors.ink3)
+                if (subtitleFirst) Text(text = subtitle, style = type.contentsTime, color = colors.ink3, modifier = subtitleModifier)
+                Text(text = title, style = titleStyle, color = titleColor, modifier = titleModifier)
+                if (!subtitleFirst) Text(text = subtitle, style = type.contentsTime, color = colors.ink3, modifier = subtitleModifier)
             }
         }
         if (count != null) {
-            Text(text = count.toString(), style = type.contentsTime, color = colors.ink2)
+            Text(text = count.toString(), style = type.contentsTime, color = colors.ink2, modifier = countModifier)
         }
-        trailing?.invoke()
+        // Its own box, wrapping it: a Row never passes a minimum height down, so the trailing view sits as it did.
+        if (trailing != null) Box(trailingModifier, propagateMinConstraints = false) { trailing() }
     }
 }
