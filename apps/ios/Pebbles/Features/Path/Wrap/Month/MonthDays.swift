@@ -39,13 +39,13 @@ extension View {
     }
 }
 
-/// A month section's head, with the board's spacing.
+/// A month section's head, with the board's spacing; on the deck, the stepper at its far end (#1241 D11).
 struct MonthSectionHead: View {
     let label: String
     var hint: String?
 
     var body: some View {
-        SpineSectionHeader(label, hint: hint)
+        SpineSectionHeader(label, hint: hint) { MonthDeckStepper() }
             .padding(.horizontal, MonthLayout.sectionPadX)
             .padding(.top, MonthLayout.sectionTop)
             .padding(.bottom, MonthLayout.headGap)

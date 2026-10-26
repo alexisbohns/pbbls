@@ -6,8 +6,9 @@ import SwiftUI
 ///
 /// A vertical `ScrollView`, one card per page, inset so the deck's edges
 /// show, snapping to the cards one per throw: `.paging` let a throw pass a
-/// card (the fifth of the Lab's October, every time). `.scrollTransition`
-/// makes the paging read as a deck: the top
+/// card (the fifth of the Lab's October, every time). Each card's first head
+/// carries the stepper (`MonthDeckStep`), so a card says where it lies in the
+/// deck even while it waits. `.scrollTransition` makes the paging read as a deck: the top
 /// card leaves upward under the finger, lifted and turned a little; the next
 /// waits beneath it, held in place, a little smaller, its foot peeking below,
 /// and grows to full size as it comes on top; swiping down lays the previous
@@ -40,6 +41,7 @@ struct MonthDeck: View {
                 if page.height > 0 {
                     ForEach(Array(cards.enumerated()), id: \.element) { index, card in
                         self.card(card, leadsInsights: Self.leadsInsights(card, in: cards))
+                            .environment(\.monthDeckStep, MonthDeckStep.of(card, in: cards))
                             // An earlier card lies over a later one.
                             .zIndex(Double(cards.count - index))
                             .id(card)
@@ -233,10 +235,85 @@ private struct MonthDeckContent: View {
     var body: some View {
         switch card {
         case .cover:
+            // The cover's title is the month itself: its head is the stepper alone.
             MonthCoverView(wrap: wrap, lookups: lookups)
+                .overlay(alignment: .top) { MonthDeckCoverHead() }
         case let .section(section):
             MonthSectionContent(section: section, wrap: wrap, lookups: lookups, dayView: dayView, focus: focus,
                                 onWeek: onWeek, onOpen: onOpen, onMore: onMore, leadsInsights: leadsInsights)
         }
+    }
+}
+
+/// Where a card lies in the deck (#1241 D11), for the stepper at its head's
+/// far end. Pure, for the tests.
+struct MonthDeckStep: Equatable {
+    let index: Int
+    let count: Int
+
+    /// The card's place; nil for a deck of one, which has nowhere to go.
+    static func of(_ card: IntroSequence, in cards: [IntroSequence]) -> MonthDeckStep? {
+        guard cards.count > 1, let index = cards.firstIndex(of: card) else { return nil }
+        return MonthDeckStep(index: index, count: cards.count)
+    }
+
+    /// The segment stands for this card or one already thrown.
+    func isFilled(_ segment: Int) -> Bool {
+        segment <= index
+    }
+}
+
+private struct MonthDeckStepKey: EnvironmentKey {
+    static let defaultValue: MonthDeckStep? = nil
+}
+
+extension EnvironmentValues {
+    /// The card's place in the deck, for its first head; nil off the deck, and the head draws no stepper.
+    var monthDeckStep: MonthDeckStep? {
+        get { self[MonthDeckStepKey.self] }
+        set { self[MonthDeckStepKey.self] = newValue }
+    }
+}
+
+/// A head's far end on the deck (#1241 D11): a segment per card, filled up
+/// to this one, its bars at the label's mid-height. Nothing off the deck.
+/// Decorative: the deck never deals under VoiceOver, and the head names the card.
+struct MonthDeckStepper: View {
+    @Environment(\.monthDeckStep) private var step
+
+    static let segment: CGFloat = 10
+    static let thickness: CGFloat = 3
+    static let gap: CGFloat = 3
+    /// The bars' centre above the label's baseline: the small caps' mid-height.
+    static let lift: CGFloat = 3
+
+    var body: some View {
+        if let step {
+            HStack(spacing: Self.gap) {
+                ForEach(0..<step.count, id: \.self) { segment in
+                    Capsule()
+                        .fill(step.isFilled(segment) ? Color.pebbles.onSurfaceVariant : Color.pebbles.outlineVariant)
+                        .frame(width: Self.segment, height: Self.thickness)
+                }
+            }
+            .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + Self.lift }
+            .accessibilityHidden(true)
+        }
+    }
+}
+
+/// The cover's head on the deck: no label, the month being its title; the
+/// stepper where the sections' heads draw theirs.
+private struct MonthDeckCoverHead: View {
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 0) {
+            // A blank label: the baseline the sections' steppers sit on.
+            Text(verbatim: " ").spineType(.sectionLabel)
+            Spacer(minLength: 0)
+            MonthDeckStepper()
+        }
+        .padding(.horizontal, MonthLayout.sectionPadX)
+        .padding(.top, MonthLayout.sectionTop)
+        .accessibilityHidden(true)
     }
 }

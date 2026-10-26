@@ -21,7 +21,9 @@ struct ToneFigure: View {
         if Self.isShown(wrap: wrap), let tone = wrap.tone {
             let line = WrapCopy.toneLine(tone.verdict, first: tone.first, last: tone.last, locale: locale)
             VStack(alignment: .leading, spacing: 0) {
-                SpineSectionHeader(WrapCopy.toneTitle(locale: locale), hint: WrapCopy.toneHint(locale: locale))
+                SpineSectionHeader(WrapCopy.toneTitle(locale: locale), hint: WrapCopy.toneHint(locale: locale)) {
+                    MonthDeckStepper()
+                }
                 Text(verbatim: line)
                     .spineType(.still)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)

@@ -24,7 +24,9 @@ struct HoursFigure: View {
                                           locale: locale, dateLocale: SpineStrings.dateLocale)
             } ?? WrapCopy.hoursSub(locale: locale)
             VStack(alignment: .leading, spacing: 0) {
-                SpineSectionHeader(WrapCopy.hoursTitle(locale: locale), hint: WrapCopy.hoursHint(locale: locale))
+                SpineSectionHeader(WrapCopy.hoursTitle(locale: locale), hint: WrapCopy.hoursHint(locale: locale)) {
+                    MonthDeckStepper()
+                }
                     .padding(.top, 28)
                 Text(verbatim: WrapCopy.hoursSub(locale: locale))
                     .spineType(.still)

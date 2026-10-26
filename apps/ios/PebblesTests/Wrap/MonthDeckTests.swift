@@ -70,6 +70,23 @@ struct MonthDeckTests {
         #expect([0, 1, 2, 3, 7].map { MonthDeckMotion.edges(below: $0) } == [0, 0, 1, 2, 2])
     }
 
+    @Test("each card knows its place in the deck, the segments filled up to it")
+    func step() throws {
+        let wrap = try MonthPayloadFixture.october()
+        let cards = MonthDeck.cards(wrap: wrap, lookups: MonthPayloadFixture.lookups(wrap))
+        #expect(MonthDeckStep.of(.cover, in: cards) == MonthDeckStep(index: 0, count: 8))
+        let gem = try #require(MonthDeckStep.of(.section(.gem), in: cards))
+        #expect(gem.index == 4)
+        #expect((0..<gem.count).map(gem.isFilled) == [true, true, true, true, true, false, false, false])
+        #expect(MonthDeckStep.of(.section(.hours), in: cards)?.index == 7)
+    }
+
+    @Test("a deck of one has no stepper, and a card it does not deal has no place")
+    func noStep() {
+        #expect(MonthDeckStep.of(.cover, in: [.cover]) == nil)
+        #expect(MonthDeckStep.of(.section(.gem), in: [.cover, .section(.weeks)]) == nil)
+    }
+
     /// The wrap with `section` drawing nothing, as the server sends an empty one, and without its cover if asked.
     private static func emptying(_ wrap: MonthWrap, _ section: MonthSection? = nil, cover: Bool = false) -> MonthWrap {
         MonthWrap(month: wrap.month, daysInMonth: wrap.daysInMonth, firstWeekday: wrap.firstWeekday,

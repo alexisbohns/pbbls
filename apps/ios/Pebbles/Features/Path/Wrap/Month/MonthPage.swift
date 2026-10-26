@@ -153,11 +153,15 @@ struct MonthSectionContent: View {
                     MonthSectionHead(label: WrapCopy.insights(locale: SpineStrings.appLocale),
                                      hint: WrapCopy.insightsHint(locale: SpineStrings.appLocale))
                 }
-                if section == .tone {
-                    ToneFigure(wrap: wrap)
-                } else {
-                    HoursFigure(wrap: wrap, lookups: lookups)
+                Group {
+                    if section == .tone {
+                        ToneFigure(wrap: wrap)
+                    } else {
+                        HoursFigure(wrap: wrap, lookups: lookups)
+                    }
                 }
+                // Under the insights head, which carries the deck's stepper.
+                .transformEnvironment(\.monthDeckStep) { if leadsInsights { $0 = nil } }
             }
             .introSequence(.section(section)) {
                 section == .tone
