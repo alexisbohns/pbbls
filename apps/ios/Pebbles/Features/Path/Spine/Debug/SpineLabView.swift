@@ -16,6 +16,9 @@ struct SpineLabView: View {
     @State private var denseModel: PathModel?
     @State private var pagerModel: PathModel?
     @State private var lastOpen = ""
+    /// The Month tab's intro: its own ledger, so *Replay intro* forgets October without touching the Path's.
+    @State private var introLedger = IntroLedger()
+    @State private var introRun = 0
     @AccessibilityFocusState private var slotFocus: UUID?
 
     var body: some View {
@@ -93,16 +96,29 @@ struct SpineLabView: View {
     }
 
     /// The harness's October as its page: the cover, the sections, the sheets.
-    /// Week taps and opens are logged on screen.
+    /// Week taps and opens are logged on screen; *Replay intro* plays the
+    /// intro again (#1241), for tuning on a device.
     @ViewBuilder
     private var month: some View {
         if let october = SpineFixtureMonth.october {
             VStack(spacing: 0) {
-                Text(verbatim: lastOpen).font(.caption.monospaced()).foregroundStyle(Color.pebbles.outline)
+                HStack {
+                    Text(verbatim: lastOpen).font(.caption.monospaced()).foregroundStyle(Color.pebbles.outline)
+                    Spacer(minLength: 8)
+                    Button {
+                        introLedger.reset(october.month)
+                        introRun += 1
+                    } label: {
+                        Text(verbatim: "Replay intro").font(.caption)
+                    }
+                }
+                .padding(.horizontal, 16)
                 MonthPage(wrap: october, lookups: SpineFixtureMonth.lookups(october), isFocused: true,
                           returnFocus: .constant(nil),
                           onWeek: { lastOpen = "week of \($0.iso)" },
-                          onOpen: { lastOpen = "open \($0.name ?? "untitled")" })
+                          onOpen: { lastOpen = "open \($0.name ?? "untitled")" },
+                          intro: IntroContext(ledger: introLedger, haptics: IntroHaptics.shared))
+                    .id(introRun)
             }
         }
     }

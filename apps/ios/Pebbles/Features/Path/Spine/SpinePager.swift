@@ -17,6 +17,8 @@ struct SpinePager: View {
     let onCreate: () -> Void
     var lookups = WrapLookups()
     var scrollToTopToken = 0
+    /// The month pages' intro (#1241): the launch's ledger and the haptics; nil draws them settled.
+    var intro: IntroContext?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(SnapAspectCache.self) private var aspects: SnapAspectCache?
@@ -39,7 +41,7 @@ struct SpinePager: View {
                                 MonthPage(wrap: wrap, lookups: lookups, isFocused: model.focusedPage == page,
                                           returnFocus: Binding(get: { model.returnFocus },
                                                                set: { model.returnFocus = $0 }),
-                                          onWeek: focusWeek, onOpen: openMilestone)
+                                          onWeek: focusWeek, onOpen: openMilestone, intro: intro)
                             } else {
                                 MonthPagePlaceholder(month: month)
                             }
