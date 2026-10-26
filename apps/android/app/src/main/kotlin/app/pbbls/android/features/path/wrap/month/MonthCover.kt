@@ -23,6 +23,12 @@ import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
 import app.pbbls.android.core.ui.SoulMark
 import app.pbbls.android.features.path.wrap.WrapLookups
+import app.pbbls.android.features.path.wrap.intro.IntroBeat
+import app.pbbls.android.features.path.wrap.intro.IntroKey
+import app.pbbls.android.features.path.wrap.intro.IntroLanding
+import app.pbbls.android.features.path.wrap.intro.IntroScore
+import app.pbbls.android.features.path.wrap.intro.currentIntroReveal
+import app.pbbls.android.features.path.wrap.intro.introReveal
 import app.pbbls.android.features.path.wrap.week.familyNames
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import app.pbbls.android.features.path.wrap.week.spotInk
@@ -37,6 +43,7 @@ private const val SOULS_IN_RING = 8
  * The month's cover (#1207, D7): the garland with the month inside it (its place in the year, its
  * name, the year, the souls' glyphs), then the summary, the persons in order of appearance and the
  * colophon of inks and papers. Only the server's numbers and orders; the words are `WrapCopy`'s.
+ * In the month's intro (#1242) it is the first card: the name, the garland, then the words.
  */
 @Composable
 internal fun MonthCover(
@@ -49,20 +56,38 @@ internal fun MonthCover(
     val copy = rememberWrapCopy()
     val cover = wrap.cover ?: return
     val souls = cover.soulsInOrder.mapNotNull(lookups.soul)
+    val reveal = currentIntroReveal()
 
     Column(
         modifier.fillMaxWidth().padding(horizontal = PAD_X).padding(top = PAD_TOP),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(GAP),
     ) {
-        Garland(wrap, lookups) {
+        Garland(wrap, lookups, reveal = reveal) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(copy.monthKicker(wrap.month), style = type.sectionLabel, color = colors.ink2)
-                Text(copy.monthName(wrap.month), style = type.monthName, color = colors.ink, modifier = Modifier.semantics { heading() })
-                Text(wrap.month.year.toString(), style = type.contentsTime, color = colors.ink2)
+                Text(
+                    copy.monthKicker(wrap.month),
+                    style = type.sectionLabel,
+                    color = colors.ink2,
+                    modifier = Modifier.introReveal(reveal, IntroKey.Kicker),
+                )
+                Text(
+                    copy.monthName(wrap.month),
+                    style = type.monthName,
+                    color = colors.ink,
+                    modifier = Modifier.introReveal(reveal, IntroKey.MonthName).semantics { heading() },
+                )
+                Text(
+                    wrap.month.year.toString(),
+                    style = type.contentsTime,
+                    color = colors.ink2,
+                    modifier = Modifier.introReveal(reveal, IntroKey.Year),
+                )
                 if (souls.isNotEmpty()) {
                     Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                        souls.take(SOULS_IN_RING).forEach { SoulMark(it.glyph, colors.ink, Modifier.size(SOUL)) }
+                        souls.take(SOULS_IN_RING).forEachIndexed { i, soul ->
+                            SoulMark(soul.glyph, colors.ink, Modifier.size(SOUL).introReveal(reveal, IntroKey.Soul(i), IntroLanding.POP))
+                        }
                     }
                 }
             }
@@ -72,15 +97,34 @@ internal fun MonthCover(
             style = type.summary,
             color = colors.ink,
             textAlign = TextAlign.Center,
+            modifier = Modifier.introReveal(reveal, IntroKey.Summary),
         )
         if (souls.isNotEmpty()) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.introReveal(reveal, IntroKey.Names), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(copy.personsInOrderLabel(), style = type.sectionHint, color = colors.ink3)
                 Text(souls.joinToString(" · ") { it.name }, style = type.soulName, color = colors.ink, textAlign = TextAlign.Center)
             }
         }
-        Colophon(wrap, lookups)
+        Colophon(wrap, lookups, Modifier.introReveal(reveal, IntroKey.Colophon))
     }
+}
+
+/** The cover's beats, over what it draws (iOS `MonthCoverView.introBeats`): the ring's souls, the lines shown. */
+internal fun coverBeats(
+    wrap: MonthWrap,
+    lookups: WrapLookups,
+): List<IntroBeat> {
+    val cover = wrap.cover ?: return emptyList()
+    val souls = cover.soulsInOrder.count { lookups.soul(it) != null }
+    // As `Colophon`: every ink is named (an unknown family by its slug), a paper only when known.
+    val colophon = cover.inks.isNotEmpty() || cover.papers.any { lookups.domain(it) != null }
+    val lines =
+        buildList {
+            add(IntroKey.Summary)
+            if (souls > 0) add(IntroKey.Names)
+            if (colophon) add(IntroKey.Colophon)
+        }
+    return IntroScore.cover(cover.days, wrap.daysInMonth, wrap.numberedDays(), minOf(souls, SOULS_IN_RING), lines)
 }
 
 /** "Printed in *joy*, *peace* & *pride*, … on family, identity & friends.", each ink in its family's colour. */
@@ -88,6 +132,7 @@ internal fun MonthCover(
 private fun Colophon(
     wrap: MonthWrap,
     lookups: WrapLookups,
+    modifier: Modifier = Modifier,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
@@ -101,7 +146,7 @@ private fun Colophon(
     if (inks.isEmpty() && papers.isEmpty()) return
     val sentence = copy.colophon(inks, papers)
     val spans = cover.inks.zip(inks).map { (slug, name) -> name to spotInk(lookups.family(slug)?.palette) }
-    Text(text = inked(sentence, spans), style = type.still, color = colors.ink2, textAlign = TextAlign.Center)
+    Text(text = inked(sentence, spans), modifier = modifier, style = type.still, color = colors.ink2, textAlign = TextAlign.Center)
 }
 
 /** Colours each name where it first appears after the previous one. */
