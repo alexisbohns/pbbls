@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,7 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -32,6 +33,7 @@ import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.SpineLayoutTokens
 import coil3.compose.AsyncImage
 import kotlin.math.sqrt
 
@@ -107,7 +109,7 @@ internal fun MilestoneSnap(
         if (ratio.isNaN() && aspect != null) aspect.ratio(prefix)?.let { ratio = it }
     }
     val box = MilestoneSnapShape.layout(height.value, ratio)
-    val shape = MaterialTheme.shapes.extraSmall
+    val shape = remember(height) { RoundedCornerShape(maxOf(2f, height.value * 0.05f).dp) }
     val caption = MaterialTheme.colorScheme.outlineVariant
     Box(
         modifier.size(height * MilestoneSnapShape.BOX, height).clearAndSetSemantics {},
@@ -118,13 +120,13 @@ internal fun MilestoneSnap(
                 .rotate(MilestoneSnapShape.TILT)
                 .size(box.cardWidth.dp, box.cardHeight.dp)
                 .background(colors.stock, shape)
-                .border(1.dp, colors.cardRule, shape)
+                .border(SpineLayoutTokens.RULE, colors.cardRule, shape)
                 .padding(start = box.margin.dp, end = box.margin.dp, top = box.margin.dp),
         ) {
             Box(
                 Modifier
                     .size(box.windowWidth.dp, box.windowHeight.dp)
-                    .clip(shape)
+                    .clipToBounds()
                     .background(tint.copy(alpha = 0.18f)),
             ) {
                 url?.let {
@@ -133,6 +135,7 @@ internal fun MilestoneSnap(
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.size(box.windowWidth.dp, box.windowHeight.dp),
+                        onError = { Log.w(TAG, "milestone photo failed for $prefix", it.result.throwable) },
                     )
                 }
             }
