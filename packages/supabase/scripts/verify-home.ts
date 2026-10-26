@@ -26,7 +26,7 @@
  * scripts/oracles/home/payloads/people-prompts.json (and home_wraps to home-wraps.json) for the clients' decoding tests.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:home --workspace=packages/supabase
- * Expected: `Summary: passed=35 failed=0`.
+ * Expected: `Summary: passed=38 failed=0`.
  * Needs NO service-role key: signs up throwaway users (home-verify-*@example.test)
  * and deletes them through the real `delete-account` edge function, even on failure.
  */
@@ -255,12 +255,14 @@ try {
     const mid = await saveMoment(b, `${name} ${runId}`, at);
     await completePebble(b, mid, r.emotionId, pos, doms, souls);
   }
+  const parisToday = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
+  const liveMonth = `${parisToday.slice(0, 7)}-01`;
   const wraps = await b.rpc("home_wraps", { p_tz: "Europe/Paris" });
   const w = wraps.data as Wraps;
   await dump("home-wraps", wraps.data);
   const sep = w.months.find((m) => m.month === "2026-09-01");
   check("home_wraps lists September 2026 with its four pebbles, folded, and not the live month",
-    !wraps.error && !!sep && sep.count === 4 && sep.revealed_at === null && !w.months.some((m) => m.month === "2026-10-01"),
+    !wraps.error && !!sep && sep.count === 4 && sep.revealed_at === null && !w.months.some((m) => m.month === liveMonth),
     wraps.error?.message ?? JSON.stringify(w.months.map((m) => [m.month, m.count, m.revealed_at])));
   const monthWrap = await b.rpc("path_month_wrap", { p_month: "2026-09-01", p_tz: "Europe/Paris" });
   check("home_wraps' cover equals path_month_wrap's cover for the same month (the transcription has not drifted)",
@@ -273,8 +275,6 @@ try {
     JSON.stringify(cover));
   check("home_wraps is newest first", w.months.every((m, i) => i === 0 || m.month < w.months[i - 1].month), JSON.stringify(w.months.map((m) => m.month)));
 
-  const parisToday = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
-  const liveMonth = `${parisToday.slice(0, 7)}-01`;
   const early2 = await b.rpc("reveal_wrap", { p_month: liveMonth, p_tz: "Europe/Paris" });
   check("reveal_wrap ignores the live month (no row, revealed_at null)",
     !early2.error && (early2.data as { revealed_at: string | null }).revealed_at === null, early2.error?.message ?? JSON.stringify(early2.data));
@@ -293,6 +293,17 @@ try {
   check("reveal_wrap refuses a non-first-of-month date", !!badMonth.error && badMonth.error.message.includes("invalid_month"), badMonth.error?.message ?? "accepted");
   const badTz = await b.rpc("home_wraps", { p_tz: "Mars/Olympus" });
   check("home_wraps refuses an unknown zone", !!badTz.error && badTz.error.message.includes("invalid_tz"), badTz.error?.message ?? "accepted");
+  const revealBadTz = await b.rpc("reveal_wrap", { p_month: "2026-09-01", p_tz: "Mars/Olympus" });
+  check("reveal_wrap refuses an unknown zone", !!revealBadTz.error && revealBadTz.error.message.includes("invalid_tz"), revealBadTz.error?.message ?? "accepted");
+  const future = await b.rpc("reveal_wrap", { p_month: "2031-01-01", p_tz: "Europe/Paris" });
+  check("reveal_wrap leaves a future month folded (no row, no error)",
+    !future.error && (future.data as { revealed_at: string | null }).revealed_at === null, future.error?.message ?? JSON.stringify(future.data));
+  const coverDirect = await b.rpc("path_month_cover", { p_month: "2026-09-01", p_tz: "Europe/Paris" });
+  const coverBad = await b.rpc("path_month_cover", { p_month: "2026-09-02", p_tz: "Europe/Paris" });
+  check("path_month_cover answers directly and refuses a non-first-of-month date",
+    !coverDirect.error && JSON.stringify(coverDirect.data) === JSON.stringify(sep?.cover)
+      && !!coverBad.error && coverBad.error.message.includes("invalid_month"),
+    coverDirect.error?.message ?? coverBad.error?.message ?? "accepted");
   const { error: directErr } = await b.from("wrap_reveals").insert({ user_id: bob.id, month: "2026-08-01" });
   const { data: direct } = await b.from("wrap_reveals").select("month").eq("month", "2026-08-01");
   check("a client cannot write wrap_reveals directly", directErr !== null && (direct ?? []).length === 0, directErr?.message ?? "accepted");
