@@ -3937,6 +3937,20 @@ The memory note "iOS device deploy recipe" holds the build, install and launch c
   - **Part 3:** `GemStone` reads `reveal(.facet(id))` for every facet (an unowned one has no beat and reads 1); the joy run's sweep order is pinned.
   - **Part 4:** an empty tone or hours figure under the insights head plays only `.insights` (`IntroScore.insightsHead()`); `ToneFigure.introBeats(wrap:insights:)` matches its siblings; the tone's mask runs left to right in RTL; the 31-day tone keeps 32 haptic events.
 
+- **Part 5 as built (2026-10-26):** the deck (D11), not the chapter paging of Tasks 26–29 (built, tried, dropped; kept as `backup/1241-chapters-paging`).
+  - **Snapping:** `.paging` let one throw pass the fifth card in a Path-like frame. The deck snaps with `.viewAligned(limitBehavior: .always)`.
+  - **Scale-to-fit:** it measured the content's own frame, so it never scaled. It now measures the room on a clear base, with the content in an overlay.
+  - **The galley card:** a margin with the month and a stepper, a title band (`MonthHead`, `monthHeadOnCard`), and the pebble cards' own shell (`SpineCardShell` without an emotion).
+  - **Tempo:** `IntroTempo.standard` stays at cover ×1.45 and sections ×2.5. The maintainer didn't retune it on the phone.
+- **Part 6 as built (2026-10-26):** the third device pass rewrote D10.
+  - **Weeks:** the cards' signatures moved from rows to a calendar of columns (D17, `WeeksColumns`).
+  - **Milestones:** they took the Spine's lit stones and photo polaroids (D16, `MilestoneMarks`), everywhere.
+  - **More links:** the persons', gem's and domains' *more* stands at the card's foot (`MonthCardFill`).
+  - **End card:** it shows the whole garland (`MonthCoverGarland`, lifted out of the cover unchanged).
+  - **Pager bug:** swiping from September's month page to August's bounced back. Every deck carried `.id(0)`, so the replay's id now names the month, and the deck reads its top card from the settled offset instead of a `scrollPosition` binding.
+  - **Landing ticks:** a throw lands on a tick even on a settled card (`IntroClock.landed`). A swipe of the Path's pager onto another page plays the strip's selection haptic.
+  - **Not yet:** the System Haptics finding and Instruments, both from Task 25's device pass.
+
 Fill in as the parts land. List each deviation from this plan, and why:
 - the local reference baseline from Task 0
 - tuned constants
