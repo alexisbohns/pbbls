@@ -23,5 +23,21 @@ extension References {
                 .environment(\.introClock, clock)
             ReferenceImage.assertMatches(view, named: "intro-garland-half", config: ReferenceConfig(scheme: .paper))
         }
+
+        /// The persons with the first ring half drawn: the first glyph and name up, the rest to come.
+        @Test
+        func personsRing() throws {
+            let wrap = try MonthPayloadFixture.october()
+            let lookups = MonthPayloadFixture.lookups(wrap)
+            let beats = PersonsSection.introBeats(wrap: wrap, lookups: lookups)
+            let ring = try #require(beats.first { $0.key == .ring(0) })
+            let clock = IntroClock.frozen(month: wrap.month, sequence: .section(.persons), beats: beats,
+                                          elapsed: ring.at + ring.duration / 2)
+            let view = PersonsSection(wrap: wrap, lookups: lookups, dayView: .circle, onMore: {})
+                .padding(.bottom, 24)
+                .background(Color.pebbles.surface)
+                .environment(\.introClock, clock)
+            ReferenceImage.assertMatches(view, named: "intro-persons-ring", config: ReferenceConfig(scheme: .paper))
+        }
     }
 }
