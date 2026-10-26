@@ -29,6 +29,13 @@ object IntroScore {
     const val RING_SPAN = 0.45
     const val NEXT_ROW = 0.06
 
+    // The gem (D10, iOS IntroScore+Gem).
+    const val BLANK_AT = 0.32
+    const val COUNT_AT = 0.4
+    const val FACET_GAP = 0.045
+    const val FAMILY_PAUSE = 0.22
+    const val COUNT_AFTER = 0.16
+
     /** When a sequence has landed: its latest beat's end. */
     fun duration(beats: List<IntroBeat>): Double = beats.maxOfOrNull { it.at + it.duration } ?: 0.0
 
