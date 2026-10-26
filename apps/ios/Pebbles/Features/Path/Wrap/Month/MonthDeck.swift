@@ -15,7 +15,7 @@ import SwiftUI
 /// card leaves upward under the finger, lifted and turned a little; the next
 /// waits beneath it, held in place, a little smaller, its foot peeking below,
 /// and grows to full size as it comes on top; swiping down lays the previous
-/// card back on the pile. A card arrives when it is on top (`IntroClock.show`):
+/// card back on the pile. A card arrives once a throw leaves it on top (`IntroClock.show`):
 /// its title is drawn from the start, then the arrive tick, then its content.
 /// Only vertical, so the Path's pager still takes horizontal swipes. Drawn
 /// only with a clock (`MonthPage`). Android: to come with #1242.
@@ -31,15 +31,17 @@ struct MonthDeck: View {
     let onReplay: () -> Void
 
     @Environment(\.introClock) private var clock
-    /// The card on top, as the paging leaves it; nil before the first swipe.
-    @State private var top: IntroSequence?
+    /// The card on top, by its place: read off the scroll offset once a throw has settled. Never a
+    /// `scrollPosition` binding: SwiftUI restores one by scrolling to its card, and that scroll reaches the
+    /// Path's pager, which a deck left behind off screen would then pull back to its own page.
+    @State private var top = 0
     /// One page of the deck: the scroll view's size.
     @State private var page: CGSize = .zero
 
     var body: some View {
         let cards = Self.cards(wrap: wrap, lookups: lookups)
-        // A card the wrap no longer deals hands the top back to the first.
-        let shown = top.flatMap { cards.contains($0) ? $0 : nil } ?? cards.first
+        // A card the wrap no longer deals hands the top back to the last it does.
+        let shown = cards.isEmpty ? nil : cards[min(top, cards.count - 1)]
         ScrollView(.vertical) {
             LazyVStack(spacing: 0) {
                 // Dealt once the page is measured: a card laid out at zero size would measure its content wrong.
@@ -48,15 +50,16 @@ struct MonthDeck: View {
                         self.card(card, in: cards)
                             // An earlier card lies over a later one.
                             .zIndex(Double(cards.count - index))
-                            .id(card)
                     }
                 }
             }
             .scrollTargetLayout()
+            .onGeometryChange(for: CGFloat.self) { -$0.frame(in: .scrollView).minY } action: { offset in
+                if let settled = MonthDeckMotion.settled(offset: offset, page: page.height) { top = settled }
+            }
         }
         .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
         .scrollIndicators(.hidden)
-        .scrollPosition(id: $top)
         .background(alignment: .bottom) {
             MonthDeckEdges(count: MonthDeckMotion.edges(below: Self.below(shown, in: cards)))
                 .frame(width: page.width, height: page.height)
@@ -175,6 +178,13 @@ enum MonthDeckMotion {
     /// A card to come is held in place beneath the top one, its foot peeking; a leaving one scrolls off.
     static func offset(_ value: Double, page: CGFloat) -> CGFloat {
         value > 0 ? CGFloat(value) * (peek - page) : 0
+    }
+
+    /// The card a scroll `offset` rests on, by its place, once it rests within a point of one; nil mid-throw.
+    static func settled(offset: CGFloat, page: CGFloat) -> Int? {
+        guard page > 0 else { return nil }
+        let place = (offset / page).rounded()
+        return abs(offset - place * page) < 1 ? max(0, Int(place)) : nil
     }
 
     /// The static edges behind the deck: the cards past the next, two at most.

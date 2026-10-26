@@ -84,6 +84,16 @@ struct MonthDeckTests {
         #expect(MonthDeckMotion.offset(-0.5, page: 800) == 0)
     }
 
+    @Test("a card is on top once a throw rests on it, within a point; mid-throw, none is")
+    func settled() {
+        #expect(MonthDeckMotion.settled(offset: 0, page: 480) == 0)
+        #expect(MonthDeckMotion.settled(offset: 960.4, page: 480) == 2)
+        #expect(MonthDeckMotion.settled(offset: 959.2, page: 480) == 2)
+        #expect(MonthDeckMotion.settled(offset: 700, page: 480) == nil)
+        #expect(MonthDeckMotion.settled(offset: -0.5, page: 480) == 0)
+        #expect(MonthDeckMotion.settled(offset: 100, page: 0) == nil)
+    }
+
     @Test("the deck's static edges stand for the cards past the next, two at most")
     func edges() {
         #expect([0, 1, 2, 3, 7].map { MonthDeckMotion.edges(below: $0) } == [0, 0, 1, 2, 2])
