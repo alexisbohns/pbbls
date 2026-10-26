@@ -190,8 +190,10 @@ fun rememberStonePressState(): StonePressState = remember { StonePressState() }
  * [width] defaults to the phone width for the stone's size; the card's verso paints
  * it larger. The rings and halo scale with the box, their strokes stay hairlines;
  * the carved glyph line scales with [width], so a larger stone carves heavier.
- * [rings] scales the halo's and the rings' strength (1 draws them in full). A stone at another [width] mounts its `StoneRipple` at the same width: the verso's
- * ripples once, when its card prints into a completed moment.
+ * A stone at another [width] mounts its `StoneRipple` at the same width: the verso's
+ * ripples once, when its card prints into a completed moment. [rings] scales the halo's and the
+ * rings' strength as one group (1 draws them in full); a caller that mounts a `StoneRipple` beside
+ * a quieter stone dims it by the same strength.
  */
 @Composable
 fun LitStone(
@@ -358,13 +360,14 @@ private fun StoneRings(
         modifier.graphicsLayer {
             scaleX = scale()
             scaleY = scale()
+            alpha = strength
         },
     ) {
         val pxPerUnit = this.size.width / box.width
         val stroke = Stroke(width = RING_STROKE.toPx() / pxPerUnit)
         withTransform({ scale(pxPerUnit, pxPerUnit, Offset.Zero) }) {
-            drawPath(paths.halo, halo, alpha = strength)
-            paths.rings.forEach { drawPath(it, color, alpha = strength, style = stroke) }
+            drawPath(paths.halo, halo)
+            paths.rings.forEach { drawPath(it, color, style = stroke) }
         }
     }
 }

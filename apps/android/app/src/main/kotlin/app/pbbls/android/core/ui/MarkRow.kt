@@ -27,10 +27,11 @@ import app.pbbls.android.core.designsystem.SpineLayoutTokens.ROW_MIN
 import app.pbbls.android.core.designsystem.rule
 
 /**
- * A list row of the wraps and the Spine (#1207): a 30 dp mark column, the title (with an optional
- * [subtitle] above or under it) taking the rest, then an optional [count] and [trailing]; at least 44 dp
- * tall, a rule below. The row is one semantics node saying [description]; with [onClick] it is a
- * button whose action is [clickLabel].
+ * A list row of the wraps and the Spine (#1207): a mark column ([markWidth], 30 dp by default),
+ * the title (with an optional [subtitle] above or under it) taking the rest, then an optional
+ * [count] and [trailing]; at least [minHeight] tall (44 dp by default), a rule below. The row is
+ * one semantics node saying [description]; with [onClick] it is a button whose action is
+ * [clickLabel].
  */
 @Composable
 fun MarkRow(
@@ -58,7 +59,7 @@ fun MarkRow(
         modifier =
             modifier
                 .fillMaxWidth()
-                .heightIn(min = maxOf(minHeight, ROW_MIN))
+                .heightIn(min = minHeight.coerceAtLeast(ROW_MIN))
                 .rule(colors.rule, above = false)
                 .clearAndSetSemantics {
                     contentDescription = description
