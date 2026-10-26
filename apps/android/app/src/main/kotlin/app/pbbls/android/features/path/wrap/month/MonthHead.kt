@@ -27,7 +27,7 @@ internal object MonthSections {
             MonthSection.WEEKS -> WeeksSummary.isShown(wrap)
             MonthSection.MILESTONES -> milestones(wrap, lookups).isNotEmpty()
             MonthSection.PERSONS -> wrap.persons != null
-            MonthSection.DOMAINS -> wrap.domains.orEmpty().any { lookups.domain(it.domainId) != null }
+            MonthSection.DOMAINS -> topDomainCount(wrap, lookups) > 0
             MonthSection.GEM -> wrap.gem != null
             MonthSection.TONE -> wrap.tone?.days?.isNotEmpty() == true
             MonthSection.HOURS ->
@@ -36,6 +36,16 @@ internal object MonthSections {
                     .orEmpty()
                     .any { lookups.moment(it.momentId) != null }
         }
+
+    /** The highest count among the domains the device knows; 0 when it knows none (iOS `DomainsSection.isShown`). */
+    fun topDomainCount(
+        wrap: MonthWrap,
+        lookups: WrapLookups,
+    ): Int =
+        wrap.domains
+            .orEmpty()
+            .filter { lookups.domain(it.domainId) != null }
+            .maxOfOrNull { it.count } ?: 0
 
     /** The milestones the lookups resolve, in the server's order. */
     fun milestones(
