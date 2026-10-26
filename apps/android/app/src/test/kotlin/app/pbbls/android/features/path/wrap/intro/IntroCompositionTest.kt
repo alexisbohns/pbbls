@@ -18,6 +18,10 @@ class IntroCompositionTest {
         assertEquals(TICK, IntroComposition.kindOf(IntroTick.light))
         assertEquals(CLICK, IntroComposition.kindOf(IntroTick.firm))
         assertEquals(LOW_TICK, IntroComposition.kindOf(IntroTick.arrive))
+        val beats = listOf(IntroBeat(IntroKey.Leaf, 0.0, 0.0, IntroTick.knot), IntroBeat(IntroKey.Count, 0.1, 0.0, IntroTick.firm))
+        val prims = IntroComposition.of(beats, all, pixel, leadMs = 0)
+        assertEquals(listOf(LOW_TICK, CLICK), prims.map { it.kind })
+        assertEquals(listOf(IntroTick.knot.intensity, IntroTick.firm.intensity), prims.map { it.scale })
     }
 
     @Test
@@ -61,5 +65,32 @@ class IntroCompositionTest {
         assertEquals(TICK, prims.last().kind)
         // The closing tick at 300 ms, after a train ending at 22 × 12 = 264 ms.
         assertEquals(36, prims.last().pauseMs)
+    }
+
+    @Test
+    fun `without low ticks a swell is a train of softer ticks, a step apart`() {
+        val beats = listOf(IntroBeat(IntroKey.Gauge(0), 0.0, 0.3, swell = IntroSwell(0.15f, 0.75f, 0.3f)))
+        val prims = IntroComposition.of(beats, setOf(TICK), pixel, leadMs = 0)
+        assertEquals(22, prims.size)
+        assertTrue(prims.all { it.kind == TICK })
+        // Each 5 ms TICK starts 12 ms after the one before: 7 ms of silence between.
+        assertTrue(prims.drop(1).all { it.pauseMs == 7 })
+        assertEquals(0.15f * IntroComposition.LOW_TICK_AS_TICK, prims.first().scale, 1e-6f)
+        assertEquals(0.75f * IntroComposition.LOW_TICK_AS_TICK, prims.last().scale, 1e-6f)
+    }
+
+    @Test
+    fun `the lead delays a swell's train as it delays a tick`() {
+        val beats = listOf(IntroBeat(IntroKey.Gauge(0), 0.0, 0.3, swell = IntroSwell(0.15f, 0.75f, 0.3f)))
+        val prims = IntroComposition.of(beats, all, pixel, leadMs = 40)
+        assertEquals(40, prims.first().pauseMs)
+        assertTrue(prims.drop(1).all { it.pauseMs == 0 })
+    }
+
+    @Test
+    fun `no beats compose no primitives`() {
+        assertTrue(IntroComposition.of(emptyList(), all, pixel, leadMs = 50).isEmpty())
+        // Beats that neither tick nor swell compose none either.
+        assertTrue(IntroComposition.of(listOf(IntroBeat(IntroKey.Lead, 0.0, 0.3)), all, pixel, leadMs = 50).isEmpty())
     }
 }

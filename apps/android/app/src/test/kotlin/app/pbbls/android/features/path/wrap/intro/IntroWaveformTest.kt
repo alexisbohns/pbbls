@@ -34,6 +34,20 @@ class IntroWaveformTest {
     }
 
     @Test
+    fun `the lead delays a swell's steps as it delays a pulse`() {
+        val beats = listOf(IntroBeat(IntroKey.Gauge(0), 0.0, 0.07, swell = IntroSwell(0.2f, 0.6f, 0.3f)))
+        val wave = IntroWaveform.of(beats, leadMs = 40)
+        assertEquals(listOf(40L) + List(4) { 10L }, wave.timings)
+        assertEquals(listOf(0, 51, 85, 119, 153), wave.amplitudes)
+    }
+
+    @Test
+    fun `no beats make an empty wave`() {
+        assertEquals(IntroWave(emptyList(), emptyList()), IntroWaveform.of(emptyList(), leadMs = 50))
+        assertEquals(IntroWave(emptyList(), emptyList()), IntroWaveform.of(listOf(IntroBeat(IntroKey.Lead, 0.0, 0.3)), leadMs = 50))
+    }
+
+    @Test
     fun `a tick of no finite strength pulses at the least amplitude`() {
         val beats = listOf(IntroBeat(IntroKey.Header, 0.0, 0.0, IntroTick(Float.NaN, 0.5f)))
         assertEquals(listOf(1), IntroWaveform.of(beats, leadMs = 0).amplitudes)

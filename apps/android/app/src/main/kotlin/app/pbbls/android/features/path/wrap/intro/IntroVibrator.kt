@@ -119,12 +119,8 @@ class IntroVibrator(
         nanos: Long,
     ) {
         val voice = voices[month to sequence] ?: return
-        val elapsed = (nanos - voice.start) / 1e9
-        var fire: IntroHapticEvent? = null
-        while (voice.next < voice.events.size && voice.events[voice.next].at <= elapsed) {
-            fire = voice.events[voice.next]
-            voice.next += 1
-        }
+        val (fire, past) = IntroHaptics.crossed(voice.events, voice.next, (nanos - voice.start) / 1e9)
+        voice.next = past
         fire?.let { view.performHapticFeedback(constantFor(it.tick)) }
     }
 

@@ -57,4 +57,33 @@ class IntroHapticsTest {
             assertTrue("$key lost its tick", beats.first { it.key == key }.at in ticked)
         }
     }
+
+    @Test
+    fun `the view tier fires nothing before the first tick's time`() {
+        val events = listOf(IntroHapticEvent(0.05, IntroTick.light), IntroHapticEvent(0.1, IntroTick.firm))
+        assertEquals(null to 0, IntroHaptics.crossed(events, next = 0, elapsed = -0.05))
+        assertEquals(null to 0, IntroHaptics.crossed(events, next = 0, elapsed = 0.04))
+    }
+
+    @Test
+    fun `a frame fires only the last tick it crossed, and moves past every one`() {
+        val events =
+            listOf(
+                IntroHapticEvent(0.0, IntroTick.faint),
+                IntroHapticEvent(0.05, IntroTick.light),
+                IntroHapticEvent(0.1, IntroTick.firm),
+                IntroHapticEvent(0.2, IntroTick.knot),
+            )
+        assertEquals(events[2] to 3, IntroHaptics.crossed(events, next = 0, elapsed = 0.12))
+        // A tick at the frame's time is crossed.
+        assertEquals(events[0] to 1, IntroHaptics.crossed(events, next = 0, elapsed = 0.0))
+    }
+
+    @Test
+    fun `a frame crossing nothing new fires nothing, and the last tick fires once`() {
+        val events = listOf(IntroHapticEvent(0.0, IntroTick.light), IntroHapticEvent(0.2, IntroTick.firm))
+        assertEquals(null to 1, IntroHaptics.crossed(events, next = 1, elapsed = 0.15))
+        assertEquals(events[1] to 2, IntroHaptics.crossed(events, next = 1, elapsed = 0.2))
+        assertEquals(null to 2, IntroHaptics.crossed(events, next = 2, elapsed = 5.0))
+    }
 }

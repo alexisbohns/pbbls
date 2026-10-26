@@ -39,6 +39,21 @@ object IntroHaptics {
         beats
             .mapNotNull { beat -> beat.swell?.takeIf { beat.duration > 0 }?.let { IntroHapticSwell(beat.at, beat.duration, it) } }
             .sortedBy { it.at }
+
+    /**
+     * Tier V's crossing (D18): from [next], the [events] whose time [elapsed] (seconds into the sequence) has
+     * reached. Returns the last of them to fire, null if none, and the index past them all: one tap a frame,
+     * however many ticks the frame crossed, and none twice.
+     */
+    fun crossed(
+        events: List<IntroHapticEvent>,
+        next: Int,
+        elapsed: Double,
+    ): Pair<IntroHapticEvent?, Int> {
+        var past = next
+        while (past < events.size && events[past].at <= elapsed) past += 1
+        return (if (past > next) events[past - 1] else null) to past
+    }
 }
 
 /** What the intro's clock asks of the haptics; the tests stand in a spy. A page stops only its own. */
