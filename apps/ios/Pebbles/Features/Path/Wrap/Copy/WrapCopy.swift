@@ -300,6 +300,11 @@ enum WrapCopy {
     }
 
     /// "Oct" / "Oct": the abbreviation a range and a dateline print, its period dropped, capitalised.
+    /// A week column's month under its Monday's number (#1241 D17): "Sep", "Oct".
+    static func weekColumnMonth(_ day: CalendarDay, locale: Locale) -> String {
+        monthAbbreviation(CalendarMonth(day), locale)
+    }
+
     private static func monthAbbreviation(_ month: CalendarMonth, _ locale: Locale) -> String {
         var short = calendar(locale).shortMonthSymbols[month.month - 1]
         if short.hasSuffix(".") { short.removeLast() }

@@ -3,8 +3,8 @@ import SwiftUI
 /// The month by week (#1226, D6): every ISO week cut to the month's days, its
 /// cairn, its range and one line, and its souls; a tap focuses that week in the
 /// strip. An empty week is muted: a dotted stone where its cairn would stand,
-/// "No pebble.", no souls, no action (#1241 D12). On a card, the weeks share its room and their cairns
-/// grow with them (D13). Android: `WeeksSummary`.
+/// "No pebble.", no souls, no action (#1241 D12). On a card, a column per week
+/// instead (`WeeksColumns`, D17). Android: `WeeksSummary`.
 struct WeeksSummary: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
@@ -14,63 +14,48 @@ struct WeeksSummary: View {
 
     private var locale: Locale { SpineStrings.appLocale }
 
-    /// A week's row on a card: its share of the room, within the row minimum and this.
-    static let rowCap: CGFloat = 112
-    static let cairnCap: CGFloat = 1.8
-    /// How much of its row a cairn fills, height for height.
-    private static let cairnFill: CGFloat = 0.8
-    /// A week's souls, at most, and their glyphs' side on a card, at most.
+    /// A week's souls, at most, and a list's soul glyphs' side on a card, at most.
     static let soulLimit = 5
     static let soulCap: CGFloat = 20
 
     var body: some View {
         if Self.isShown(wrap: wrap, lookups: lookups) {
-            let weeks = Self.weeks(wrap)
-            let height = room.map { Self.rowHeight(room: $0, weeks: weeks.count) }
-            let scale = height.map(Self.cairnScale) ?? 1
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(Self.head(wrap: wrap))
-                VStack(spacing: 0) {
-                    ForEach(Array(weeks.enumerated()), id: \.element.weekStart) { index, week in
-                        row(week, index: index, height: height, scale: scale)
+                if let room {
+                    WeeksColumns(wrap: wrap, lookups: lookups, room: room, onWeek: onWeek)
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(Array(Self.weeks(wrap).enumerated()), id: \.element.weekStart) { index, week in
+                            row(week, index: index)
+                        }
                     }
+                    .padding(.horizontal, MonthLayout.sectionPadX)
                 }
-                .padding(.horizontal, MonthLayout.sectionPadX)
             }
-            .introSequence(.section(.weeks)) { Self.introBeats(wrap: wrap, lookups: lookups) }
+            .introSequence(.section(.weeks)) { Self.introBeats(wrap: wrap) }
         }
     }
 
     @ViewBuilder
-    private func row(_ week: MonthWeek, index: Int, height: CGFloat?, scale: CGFloat) -> some View {
+    private func row(_ week: MonthWeek, index: Int) -> some View {
         let range = WrapCopy.range(wrap.month, from: week.from, to: week.to, locale: locale)
-        let markWidth = CairnGeometry.box.width * scale
         if week.pebbles == 0 {
             let line = WrapCopy.emptyWeek(locale: locale)
             MarkRow(line, accessibilityText: "\(range), \(line)", titleType: .mouthLine,
-                    titleColor: Color.pebbles.outline, subtitle: range, reveal: .row(index), height: height,
-                    markWidth: markWidth) {
+                    titleColor: Color.pebbles.outline, subtitle: range) {
                 // The place a stone would stand, dotted, as the strip draws a week's next stone.
                 CairnMark(days: [], state: .live, color: Color.pebbles.outline)
-                    .scaleEffect(scale)
-                    .frame(width: markWidth, height: CairnGeometry.box.height * scale)
             }
         } else {
             let line = WrapCopy.line(pebbles: week.pebbles, people: week.soulIds.count, live: false,
                                      hasMoments: true, locale: locale)
             let focus = { onWeek(week.weekStart) }
             MarkRow(line, accessibilityText: "\(range), \(line)", titleType: .mouthLine, subtitle: range,
-                    action: focus, reveal: MarkRowReveal(leading: nil, text: .words(index)),
-                    height: height, markWidth: markWidth) {
-                IntroReader { reveal in
-                    let stones = CairnGeometry.widths(week.days).indices.map { reveal(.cairn(index, $0)) }
-                    CairnMark(days: week.days, state: .settled, color: Color.pebbles.onSurfaceVariant, built: stones)
-                }
-                .scaleEffect(scale)
-                .frame(width: markWidth, height: CairnGeometry.box.height * scale)
+                    action: focus) {
+                CairnMark(days: week.days, state: .settled, color: Color.pebbles.onSurfaceVariant)
             } trailing: {
-                SoulMarks(ids: week.soulIds, lookups: lookups, limit: Self.soulLimit, introRow: index,
-                          side: min(SoulMarks.side * scale, Self.soulCap))
+                SoulMarks(ids: week.soulIds, lookups: lookups, limit: Self.soulLimit)
             }
         }
     }
@@ -92,23 +77,9 @@ struct WeeksSummary: View {
         wrap.weeks ?? []
     }
 
-    /// A week's row on a card (D13): its share of the room, within the row minimum and the cap.
-    static func rowHeight(room: CGFloat, weeks: Int) -> CGFloat {
-        min(max(room / CGFloat(max(weeks, 1)), SpineLayout.rowMin), rowCap)
-    }
-
-    /// How much a cairn grows in a row that tall, up to the cap.
-    static func cairnScale(rowHeight: CGFloat) -> CGFloat {
-        min(max(rowHeight * cairnFill / CairnGeometry.box.height, 1), cairnCap)
-    }
-
-    /// The weeks' intro (#1241 D10): the head, then each week in its parts.
-    static func introBeats(wrap: MonthWrap, lookups: WrapLookups) -> [IntroBeat] {
-        IntroScore.weeks(weeks(wrap).map { week in
-            week.pebbles == 0 ? IntroWeekShape(stones: 0, souls: 0)
-                : IntroWeekShape(stones: CairnGeometry.widths(week.days).count,
-                                 souls: SoulMarks.shown(week.soulIds, lookups: lookups, limit: soulLimit).count)
-        })
+    /// The weeks' intro (#1241 D17): played only on a card, one column at a time.
+    static func introBeats(wrap: MonthWrap) -> [IntroBeat] {
+        IntroScore.weekColumns(WeekColumn.columns(wrap).map(\.shape))
     }
 }
 

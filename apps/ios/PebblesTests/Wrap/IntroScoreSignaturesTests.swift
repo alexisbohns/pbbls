@@ -9,35 +9,35 @@ struct IntroScoreSignaturesTests {
         try #require(beats.first { $0.key == key })
     }
 
-    @Test("a week: its cairn stone by stone, rising firmer, then its words, then its souls, then the next week")
-    func week() throws {
-        let beats = IntroScore.weeks([IntroWeekShape(stones: 3, souls: 2), IntroWeekShape(stones: 1, souls: 0)])
+    @Test("a week's column: its date, its days down the column, a tick per pebble, none for a slot, then its cairn")
+    func weekColumn() throws {
+        let beats = IntroScore.weekColumns([IntroWeekColumn(days: [nil, 0, 2, nil, nil, nil, nil], stones: 2),
+                                            IntroWeekColumn(days: [0, 0, 0, 0, 0, 0, 1], stones: 1)])
         #expect(try beat(beats, .header).tick == .arrive)
-        let stones = try (0..<3).map { try beat(beats, .cairn(0, $0)) }
-        #expect(stones[0].at == IntroScore.rowsAt)
-        #expect(abs(stones[2].at - stones[0].at - 2 * IntroScore.stoneGap) < 1e-12)
-        #expect(stones.map(\.tick) == [.cairn(0), .cairn(1), .cairn(2)])
-        #expect(try (stones[0].tick?.intensity ?? 1) < (stones[2].tick?.intensity ?? 0))
-        let words = try beat(beats, .words(0))
-        #expect(abs(words.at - stones[2].at - IntroScore.wordsAfter) < 1e-12)
-        #expect(words.tick == .light)
-        let first = try beat(beats, .mark(0, 0))
-        let second = try beat(beats, .mark(0, 1))
-        #expect(abs(first.at - words.at - IntroScore.partGap) < 1e-12)
-        #expect(abs(second.at - first.at - IntroScore.markGap) < 1e-12)
-        #expect(abs(try beat(beats, .cairn(1, 0)).at - second.at - IntroScore.nextWeek) < 1e-12)
-        // A week without souls goes on from its words.
-        #expect(!beats.contains { $0.key == .mark(1, 0) })
+        let date = try beat(beats, .words(0))
+        #expect(date.at == IntroScore.rowsAt)
+        #expect(date.tick == .light)
+        // A day outside the month has no beat; an empty day lands silently.
+        #expect(!beats.contains { $0.key == .rest(0, 0) })
+        let rest = try beat(beats, .rest(0, 1))
+        #expect(abs(rest.at - date.at - IntroScore.partGap) < 1e-12)
+        #expect(rest.tick == nil)
+        let first = try beat(beats, .pip(0, 2, 0))
+        let second = try beat(beats, .pip(0, 2, 1))
+        #expect(abs(first.at - rest.at - IntroScore.dayGap) < 1e-12)
+        #expect(abs(second.at - first.at - IntroScore.pipGap) < 1e-12)
+        #expect(first.tick == .light && second.tick == .light)
+        let stone = try beat(beats, .cairn(0, 0))
+        #expect(abs(stone.at - second.at - IntroScore.cairnAfter) < 1e-12)
+        #expect(try beat(beats, .cairn(0, 1)).tick == .cairn(1))
+        #expect(abs(try beat(beats, .words(1)).at - beat(beats, .cairn(0, 1)).at - IntroScore.nextWeek) < 1e-12)
     }
 
-    @Test("an empty week lands whole on a faint tick, and the next week follows")
-    func emptyWeek() throws {
-        let beats = IntroScore.weeks([IntroWeekShape(stones: 0, souls: 0), IntroWeekShape(stones: 2, souls: 1)])
-        let empty = try beat(beats, .row(0))
-        #expect(empty.at == IntroScore.rowsAt)
-        #expect(empty.tick == .faint)
-        #expect(!beats.contains { $0.key == .cairn(0, 0) || $0.key == .words(0) })
-        #expect(abs(try beat(beats, .cairn(1, 0)).at - empty.at - IntroScore.nextWeek) < 1e-12)
+    @Test("an empty week's column ends on its dotted stone, on a faint tick")
+    func emptyWeekColumn() throws {
+        let beats = IntroScore.weekColumns([IntroWeekColumn(days: [0, 0, 0, 0, 0, 0, 0], stones: 0)])
+        #expect(try beat(beats, .cairn(0, 0)).tick == .faint)
+        #expect(!beats.contains { if case .pip = $0.key { true } else { false } })
     }
 
     @Test("a milestone stamps, ticking at impact as firmly as it is intense, then its date, name and souls")

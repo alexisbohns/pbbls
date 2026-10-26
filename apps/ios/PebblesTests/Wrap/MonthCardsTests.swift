@@ -23,31 +23,36 @@ struct MonthCardsTests {
         #expect(!WeeksSummary.isShown(wrap: wrap, lookups: MonthPayloadFixture.lookups(wrap)))
     }
 
-    @Test("the weeks' intro: each week its cairn's stones and its named souls; an empty week whole")
-    func weeksIntro() throws {
-        let wrap = try Self.quietSecondWeek()
-        let lookups = MonthPayloadFixture.lookups(wrap)
-        let beats = WeeksSummary.introBeats(wrap: wrap, lookups: lookups)
-        let first = try #require(WeeksSummary.weeks(wrap).first)
-        let stones = CairnGeometry.widths(first.days).count
-        #expect(beats.contains { $0.key == .cairn(0, stones - 1) })
-        #expect(!beats.contains { $0.key == .cairn(0, stones) })
-        #expect(try #require(beats.first { $0.key == .row(1) }).tick == .faint)
-        #expect(!beats.contains { $0.key == .cairn(1, 0) })
-        let second = WeeksSummary.weeks(wrap)[2]
-        let souls = SoulMarks.shown(second.soulIds, lookups: lookups, limit: WeeksSummary.soulLimit).count
-        #expect(beats.contains { $0.key == .mark(2, souls - 1) } == (souls > 0))
-        #expect(!beats.contains { $0.key == .mark(2, souls) })
+    @Test("a week's column places each day by its date: outside the month blank, then empty or its pebbles")
+    func weekColumns() throws {
+        let wrap = try MonthPayloadFixture.october()
+        let columns = WeekColumn.columns(wrap)
+        #expect(columns.count == 5)
+        // The week of 28 September: Monday to Wednesday are September's.
+        let first = try #require(columns.first)
+        #expect(first.days.prefix(3).allSatisfy { $0 == .outside })
+        #expect(first.days[3] != .outside)
+        // The week of 26 October: its Sunday is November's.
+        let last = try #require(columns.last)
+        #expect(last.days[6] == .outside)
+        #expect(last.days[5] != .outside)
+        // The 1st carries the cover's pebbles for day 0.
+        let october1 = wrap.cover?.days.first { $0.day == 0 }?.pebbles ?? []
+        #expect(first.days[3] == (october1.isEmpty ? .empty : .pebbles(october1)))
     }
 
-    @Test("on a card, the weeks share its room, within the row minimum and the cap, their cairns growing")
-    func weeksFill() {
-        #expect(WeeksSummary.rowHeight(room: 400, weeks: 5) == 80)
-        #expect(WeeksSummary.rowHeight(room: 100, weeks: 6) == SpineLayout.rowMin)
-        #expect(WeeksSummary.rowHeight(room: 900, weeks: 4) == WeeksSummary.rowCap)
-        #expect(WeeksSummary.cairnScale(rowHeight: SpineLayout.rowMin) == 1)
-        #expect(WeeksSummary.cairnScale(rowHeight: 80) > 1)
-        #expect(WeeksSummary.cairnScale(rowHeight: WeeksSummary.rowCap) <= WeeksSummary.cairnCap)
+    @Test("a column's intro shows three pebbles at most a day, and its cairn's stones")
+    func weekColumnShape() {
+        let pebble = CoverPebble(momentId: "m", emotionId: nil, intensity: 2, polarity: .neutral)
+        let quiet = DayWeight(moments: 0, topIntensity: 0)
+        let days = [DayWeight(moments: 5, topIntensity: 2)] + Array(repeating: quiet, count: 6)
+        let week = MonthWeek(weekStart: CalendarDay(year: 2026, month: 10, day: 5), from: 4, to: 10, pebbles: 5,
+                             soulIds: [], days: days)
+        let column = WeekColumn(week: week, days: [.pebbles(Array(repeating: pebble, count: 5))]
+                                    + Array(repeating: WeekColumnDay.empty, count: 6))
+        #expect(column.shape.days.first == 3)
+        #expect(column.shape.days.dropFirst().allSatisfy { $0 == 0 })
+        #expect(column.shape.stones == 1)
     }
 
     @Test("the milestones' intro stamps each stone at its pebble's intensity, then its date, name and souls")

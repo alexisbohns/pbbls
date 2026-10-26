@@ -30,6 +30,9 @@ enum IntroKey: Hashable, Sendable {
     case tally(Int), gauge(Int), full(Int)
     /// The end card's replay button (D14).
     case replay
+    /// A week's column on its card (D17): an empty day's slot (week, weekday), a pebble of a day (week, weekday,
+    /// index); the column's date is its `words`, its stack its `cairn`.
+    case rest(Int, Int), pip(Int, Int, Int)
 }
 
 /// How firmly a beat ticks: Core Haptics' intensity and sharpness, 0…1 (#1241 §Choreography).
