@@ -185,7 +185,7 @@ Owner-only RLS on select; writes only through `reveal_wrap`, which upserts for `
 
 ### 4.4 `people_prompts(p_limit int default 3)`
 
-`security definer`, `returns jsonb`: `{"pebbles": n, "souls": n, "prompts": [{"pebble_id", "moment_id", "name", "happened_at", "intensity", "valence", "emotion_id"}], "skipped": [{"name"}]}`. Prompts are the user's latest pebbles (by `happened_at desc`) with no row in `pebble_souls`, at least one domain in the outward set (D10), `valence in ('high','neutral')` and a moment that is not hidden, limited to `p_limit`. `skipped` holds the names of up to two more recent soul-less pebbles that the rule left out, so the client can say so. The outward set is a constant array in the body with a comment pointing here.
+`security invoker` like the Path wraps (RLS stays the backstop; every predicate is also scoped to the caller), `stable`, `returns jsonb`: `{"pebbles": n, "souls": n, "prompts": [{"pebble_id", "moment_id", "name", "happened_at", "intensity", "positiveness", "emotion_id"}], "skipped": [{"name"}]}` (`positiveness` is the stored integer, 1 or 0 here, the same convention as the month cover's `polarity`; `happened_at` at whole seconds UTC). Prompts are the user's latest pebbles (by `happened_at desc`) with no row in `pebble_souls`, at least one domain in the outward set (D10), `valence in ('high','neutral')` and a moment that is not hidden, limited to `p_limit`. `skipped` holds the names of up to two more recent soul-less pebbles that the rule left out, so the client can say so. The outward set is a constant array in the body with a comment pointing here.
 
 ## 5. Admin
 
@@ -221,7 +221,7 @@ Stack 2 depends on stack 1 parts 1–3; stack 3 part 1 depends on stack 1 part 2
 ## 8. Testing
 
 - **Harnesses** (`npm run db:verify --workspace=packages/supabase`): `verify-guides.ts` (anon reads published only, admin writes, FR falls back), `verify-home.ts` (the two new families unlock on the first moment and the first pebble and survive their deletion; `claim_blue_pebble` raises before the five, unlocks once, pays once, and the check never grants it; prompts honour the outward set, the valence guard, the no-soul filter and hidden moments; `home_wraps` equals `path_month_wrap.cover` per month; `reveal_wrap` ignores an unfinished month). `verify-account-purge.ts` runs manually after part 3.
-- **iOS** (Swift Testing): `HomeGreeting` per band and override, in EN and FR; the checklist rows from catalog and unlock fixtures, including the claim row and the removed section; the prompt states from fixture payloads written verbatim by the harness (`PEOPLE_PROMPTS_DUMP=1`), including explicit nulls; references for Home's four states and both empty states in Paper and Night.
+- **iOS** (Swift Testing): `HomeGreeting` per band and override, in EN and FR; the checklist rows from catalog and unlock fixtures, including the claim row and the removed section; the prompt states from fixture payloads written verbatim by the harness (`HOME_DUMP=1`), including explicit nulls; references for Home's four states and both empty states in Paper and Night.
 - **Admin**: the playground section; ESLint and Vitest as on every PR.
 
 ## 9. Risks
