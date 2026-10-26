@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   BarChart3,
+  BookOpen,
   Megaphone,
   Palette,
   Shapes,
@@ -32,6 +33,7 @@ const ANALYTICS_ITEMS = [
 const LOG_ITEMS = [
   { href: "/logs/features", label: "Features", icon: Sparkles },
   { href: "/logs/announcements", label: "Announcements", icon: Megaphone },
+  { href: "/guides", label: "Guides", icon: BookOpen },
 ] as const
 
 const PEBBLESTORE_ITEMS = [
