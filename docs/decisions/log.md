@@ -1455,3 +1455,30 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** the repo test checks the plates' shape, not the files; a plate renders text only when `NEXT_PUBLIC_SUPABASE_URL` is missing; deleting a post's plates means deleting them from the bucket.
 - **Supersedes / Superseded-by:** none; narrows the 2026-10-23 blog entry's "blog images live in `public/blog/<slug>/`" for plates.
 - **Refs:** #1292, #1209, `apps/web/components/blog/BlogPlate.tsx`, `apps/web/lib/utils/lab-asset-url.ts`.
+
+## 2026-10-26 — On Android the month's intro plays its haptics as a composition, with two fallbacks (#1242)
+
+- **Status:** taken
+- **Scope:** android
+- **Context:**
+  - #1242 ports #1241's animated, haptic month intro. iOS plays its ticks and swells through Core Haptics; Android has no single equivalent.
+  - On the maintainer's Pixel 8 (Android 17), a debug probe played the iOS presets and sequences two ways: one `VibrationEffect.Composition` per sequence, and `View.performHapticFeedback` fired from the frame clock. The composition felt more natural and closer to the iPhone, above all on the domains' swell. `dumpsys vibrator_manager` showed its pauses played as compiled.
+  - A composition holding a primitive the device lacks plays nothing, and many phones lack primitives or amplitude control.
+- **Decision:**
+  - **Tier C:** one composition per card where the vibrator plays TICK. A tick's primitive follows its sharpness (LOW_TICK, TICK, CLICK), its scale its intensity. A missing LOW_TICK or CLICK becomes a TICK. A swell is a train of back-to-back LOW_TICKs ramping in scale.
+  - **Tier W:** one waveform per card where it controls amplitude: short pulses, and the swell as an amplitude ramp.
+  - **Tier V:** otherwise, `performHapticFeedback` from the clock's frames, with no swell.
+  - Every vibration is `USAGE_TOUCH`. The app gains the normal `VIBRATE` permission.
+  - A card that lands at its end rings out its last tick. Only an interrupted card (a tap, a pause, the page leaving) has its vibration cancelled.
+  - A throw's landing tick is a one-tick vibration of its own, outside every card's voice, so it never stands in for a card or cancels one.
+- **Why:**
+  - **Rejected, V alone:** three fixed textures, frame-quantised times, no swell.
+  - **Rejected, the composition alone:** silent on phones without primitives.
+  - **Rejected, a waveform swell inside tier C:** the LOW_TICK train felt closest and keeps one voice.
+  - **Rejected, Android 16's envelopes and start-offset delays:** API 36, past minSdk 33, and the Pixel 8 reports no envelope support.
+- **Consequences:**
+  - The tier is chosen from the vibrator's capabilities, never the model. Only the Pixel 8 is felt; tiers W and V are felt there through the Spine Lab's override.
+  - Primitives run slightly past their reported durations, so a long run drifts behind its frames. The device pass measured the cover: 44 primitives scored at 4375 ms played in 4396 and 4403 ms, 21–28 ms late. That is under the 30 ms bar, so `IntroComposition` applies no correction. A longer card should be measured again.
+  - Pebbles' own haptics switch gates every tier (#1242's second comment).
+- **Supersedes / Superseded-by:** none. It answers the 2026-10-25 iOS entry's "Android ports the score and the lifecycle, with its own haptic backend".
+- **Refs:** #1242, `docs/superpowers/specs/2026-10-26-android-month-intro-design.md` (D18), `apps/android/app/src/main/kotlin/app/pbbls/android/features/path/wrap/intro/`.
