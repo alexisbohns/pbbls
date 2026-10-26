@@ -31,7 +31,7 @@ import app.pbbls.android.core.designsystem.rule
  * the title (with an optional [subtitle] above or under it) taking the rest, then an optional
  * [count] and [trailing]; at least [minHeight] tall (44 dp by default), a rule below. The row is
  * one semantics node saying [description]; with [onClick] it is a button whose action is
- * [clickLabel].
+ * [clickLabel]. [trailing] emits one root view: it sits in its own box, which would stack several.
  *
  * The month intro (#1242; iOS `MarkRowReveal`) lands the columns apart: [leadingModifier] on the mark,
  * [titleModifier], [subtitleModifier] and [countModifier] on the words, [trailingModifier] on the trailing
@@ -52,7 +52,7 @@ fun MarkRow(
     clickLabel: String? = null,
     /** The subtitle over the title (a milestone's date, #1242 / iOS D12). */
     subtitleFirst: Boolean = false,
-    /** At least this tall, past [ROW_MIN] (a milestone's 56 dp, a card's share later). */
+    /** At least this tall, past [ROW_MIN] (a milestone's 56 dp, a person's share of a card, #1242 D13). */
     minHeight: Dp = ROW_MIN,
     /** The mark column's width; a lit stone with its rings needs more than [MARK_COLUMN]. */
     markWidth: Dp = MARK_COLUMN,

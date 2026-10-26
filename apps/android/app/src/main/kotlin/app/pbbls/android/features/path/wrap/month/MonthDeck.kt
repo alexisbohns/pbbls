@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.isFinite
 import androidx.compose.ui.zIndex
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.data.SnapAspectCache
@@ -202,8 +201,7 @@ internal fun MonthDeckPager(
                                 onMore,
                                 leadsInsights = leads,
                                 onCard = true,
-                                // An empty room (an unbounded host) is none: the rows keep their size (iOS).
-                                room = room.takeIf { it > 0.dp && it.isFinite },
+                                room = room,
                             )
                         IntroSequence.End -> Unit
                     }

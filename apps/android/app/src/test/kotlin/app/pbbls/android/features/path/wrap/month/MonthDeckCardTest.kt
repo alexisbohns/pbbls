@@ -34,6 +34,7 @@ import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import app.pbbls.android.testing.PIXEL_TEST_SDK
 import app.pbbls.android.testing.PebblesTestHarness
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -61,7 +62,7 @@ class MonthDeckCardTest {
     private fun show(
         height: Dp = HOST_HEIGHT,
         head: MonthHead? = null,
-        content: @Composable (room: Dp) -> Unit,
+        content: @Composable (room: Dp?) -> Unit,
     ) {
         compose.setContent {
             PebblesTheme {
@@ -85,7 +86,7 @@ class MonthDeckCardTest {
 
     @Test
     fun `content that asks for the room takes it whole, its foot at the room's foot`() {
-        var room = 0.dp
+        var room: Dp? = null
         show { r ->
             room = r
             Column(Modifier.fillMaxHeight()) {
@@ -94,7 +95,7 @@ class MonthDeckCardTest {
                 Box(Modifier.size(10.dp).testTag(FOOT))
             }
         }
-        assertEquals(ROOM.value, room.value, 0.5f)
+        assertEquals(ROOM.value, room!!.value, 0.5f)
         assertEquals(
             ROOM_BOTTOM.value,
             compose
@@ -115,10 +116,15 @@ class MonthDeckCardTest {
     }
 
     @Test
-    fun `an empty room leaves the content whole, at its own size`() {
+    fun `an empty room is none, and leaves the content whole, at its own size`() {
         var content: LayoutCoordinates? = null
+        var room: Dp? = TALL
         // The paper's inset takes the whole host: the room is 0 tall.
-        show(height = ROOM_TOP + INSET_BOTTOM) { Box(Modifier.fillMaxWidth().height(TALL).onGloballyPositioned { content = it }) }
+        show(height = ROOM_TOP + INSET_BOTTOM) { r ->
+            room = r
+            Box(Modifier.fillMaxWidth().height(TALL).onGloballyPositioned { content = it })
+        }
+        assertNull(room)
         val (top, bottom) = verticalInRoot(content!!)
         assertEquals(ROOM_TOP.value, top.value, 0.5f)
         assertEquals(TALL.value, (bottom - top).value, 0.5f)
@@ -179,7 +185,7 @@ class MonthDeckCardTest {
 
     @Test
     fun `on a card the persons share the room, more at its foot`() {
-        var room = 0.dp
+        var room: Dp? = null
         var more = ""
         show(head = MonthHead("Persons", null)) { r ->
             room = r
@@ -201,7 +207,8 @@ class MonthDeckCardTest {
         val first = MonthSections.namedPersons(wrap, lookups).first()
         val name = lookups.soul(first.soulId)!!.name
         val row = compose.onNodeWithContentDescription("$name, ${first.count}", substring = true).getBoundsInRoot()
-        assertEquals(PersonsSection.rowSize(room.value, rows = 5).height, (row.bottom - row.top).value, 0.5f)
+        val rows = minOf(5, MonthSections.namedPersons(wrap, lookups).size)
+        assertEquals(PersonsSection.rowSize(room!!, rows).height.value, (row.bottom - row.top).value, 0.5f)
         assertEquals(
             ROOM_BOTTOM.value,
             compose

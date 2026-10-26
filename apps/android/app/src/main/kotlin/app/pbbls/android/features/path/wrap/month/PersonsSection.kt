@@ -9,11 +9,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.RevealMotion
-import app.pbbls.android.core.designsystem.SpineLayoutTokens
 import app.pbbls.android.core.designsystem.SpineLayoutTokens.MARK
 import app.pbbls.android.core.designsystem.SpineLayoutTokens.MARK_COLUMN
 import app.pbbls.android.core.designsystem.SpineLayoutTokens.ROW_MIN
@@ -75,7 +76,7 @@ internal fun PersonsSection(
             return@Column
         }
         val shown = rows.take(SHOWN)
-        val size = room?.let { PersonsSection.rowSize(it.value, shown.size) }
+        val size = room?.let { PersonsSection.rowSize(it, shown.size) }
         Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
             shown.forEachIndexed { index, person -> MonthPersonRow(person, wrap, lookups, dayView, copy, introRow = index, size = size) }
         }
@@ -107,7 +108,9 @@ internal fun MonthPersonRow(
     val row = introRow?.takeIf { reveal !== IntroReveal.settled }
     val soul = lookups.soul(person.soulId) ?: return
     val fresh = if (person.newSincePrevious) copy.newSince(wrap.month.minusMonths(1)) else null
-    val glyph = size?.glyph?.dp ?: MARK
+    val glyph = size?.glyph ?: MARK
+    val mode = wrap.dayMode(dayView)
+    val ringSize = size?.ring ?: ROW_RING
     // The glyph pops; the name, its count, *new since* and the rule land as one; the ring lands itself.
     val words = Modifier.introReveal(reveal, row?.let(IntroKey::Name))
     MarkRow(
@@ -118,14 +121,14 @@ internal fun MonthPersonRow(
         leading = { SoulMark(soul.glyph, colors.ink, Modifier.size(glyph)) },
         trailing = {
             if (row == null) {
-                DaySetMarks(person.days, wrap.dayMode(dayView), colors.ink, colors.ink3, ringSize = size?.ring?.dp ?: ROW_RING)
+                DaySetMarks(person.days, mode, colors.ink, colors.ink3, ringSize = ringSize)
             } else {
                 DaySetMarks(
                     person.days,
-                    wrap.dayMode(dayView),
+                    mode,
                     colors.ink,
                     colors.ink3,
-                    ringSize = size?.ring?.dp ?: ROW_RING,
+                    ringSize = ringSize,
                     ringProgress = { RevealMotion.easeInOut(reveal(IntroKey.Ring(row)).toDouble()).toFloat() },
                     // The row's and the calendar's empty days fade in over the ring's span (iOS).
                     gridAlpha = { RevealMotion.easeOut(reveal(IntroKey.Ring(row)).toDouble()).toFloat() },
@@ -133,9 +136,9 @@ internal fun MonthPersonRow(
                 )
             }
         },
-        minHeight = size?.height?.dp ?: ROW_MIN,
+        minHeight = size?.height ?: ROW_MIN,
         // A glyph grown past the mark column widens it (iOS).
-        markWidth = maxOf(glyph, MARK_COLUMN),
+        markWidth = max(glyph, MARK_COLUMN),
         leadingModifier = Modifier.introReveal(reveal, row?.let(IntroKey::Glyph), IntroLanding.POP),
         titleModifier = words,
         subtitleModifier = words,
@@ -145,21 +148,21 @@ internal fun MonthPersonRow(
     )
 }
 
-/** The persons' pure parts (#1242; iOS `PersonsSection`'s statics), in dp. */
+/** The persons' pure parts (#1242; iOS `PersonsSection`'s statics). */
 internal object PersonsSection {
     /** A person's row on a card: its share of the room, within the row minimum and this (D13). */
-    const val ROW_CAP = 96f
-    const val GLYPH_CAP = 48f
-    const val RING_CAP = 60f
+    val ROW_CAP = 96.dp
+    val GLYPH_CAP = 48.dp
+    val RING_CAP = 60.dp
 
     /** *more*'s room at the card's foot (iOS `MonthLayout.moreReserve`). */
-    const val MORE_RESERVE = 56f
+    val MORE_RESERVE = 56.dp
 
     /** A person's row on a card: its height, its glyph's side and its ring's. */
     data class RowSize(
-        val height: Float,
-        val glyph: Float,
-        val ring: Float,
+        val height: Dp,
+        val glyph: Dp,
+        val ring: Dp,
     )
 
     /** The persons' intro: the head, then each of the five in turn; the invitation when nobody is named. */
@@ -173,14 +176,14 @@ internal object PersonsSection {
 
     /** A person's row on a card (D13): its share of the room left by *more*, the glyph and the ring growing with it, each within its bounds. */
     fun rowSize(
-        room: Float,
+        room: Dp,
         rows: Int,
     ): RowSize {
-        val height = ((room - MORE_RESERVE) / maxOf(rows, 1)).coerceIn(SpineLayoutTokens.ROW_MIN.value, ROW_CAP)
+        val height = ((room - MORE_RESERVE) / maxOf(rows, 1)).coerceIn(ROW_MIN, ROW_CAP)
         return RowSize(
             height,
-            (height * 0.5f).coerceIn(SpineLayoutTokens.MARK.value, GLYPH_CAP),
-            (height * 0.7f).coerceIn(ROW_RING.value, RING_CAP),
+            (height * 0.5f).coerceIn(MARK, GLYPH_CAP),
+            (height * 0.7f).coerceIn(ROW_RING, RING_CAP),
         )
     }
 }

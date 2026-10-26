@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path.wrap.month
 
+import androidx.compose.ui.unit.dp
 import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.designsystem.SpineLayoutTokens
 import app.pbbls.android.core.model.wrap.MonthSection
@@ -45,14 +46,14 @@ class PersonsSectionTest {
 
     @Test
     fun `on a card the persons share the room left by more, their glyphs and rings growing, within bounds`() {
-        val roomy = PersonsSection.rowSize(room = 500f, rows = 5)
-        assertEquals((500f - PersonsSection.MORE_RESERVE) / 5, roomy.height, 1e-4f)
-        assertTrue(roomy.glyph > SpineLayoutTokens.MARK.value && roomy.glyph <= PersonsSection.GLYPH_CAP)
-        assertTrue(roomy.ring > ROW_RING.value && roomy.ring <= PersonsSection.RING_CAP)
-        val tight = PersonsSection.rowSize(room = 200f, rows = 5)
-        assertEquals(SpineLayoutTokens.ROW_MIN.value, tight.height, 0f)
-        assertEquals(SpineLayoutTokens.MARK.value, tight.glyph, 0f)
-        assertEquals(ROW_RING.value, tight.ring, 0f)
-        assertEquals(PersonsSection.ROW_CAP, PersonsSection.rowSize(room = 2000f, rows = 2).height, 0f)
+        val roomy = PersonsSection.rowSize(room = 500.dp, rows = 5)
+        assertEquals((500f - PersonsSection.MORE_RESERVE.value) / 5, roomy.height.value, 1e-4f)
+        assertTrue(roomy.glyph.value > SpineLayoutTokens.MARK.value && roomy.glyph.value <= PersonsSection.GLYPH_CAP.value)
+        assertTrue(roomy.ring.value > ROW_RING.value && roomy.ring.value <= PersonsSection.RING_CAP.value)
+        val tight = PersonsSection.rowSize(room = 200.dp, rows = 5)
+        assertEquals(SpineLayoutTokens.ROW_MIN.value, tight.height.value, 0f)
+        assertEquals(SpineLayoutTokens.MARK.value, tight.glyph.value, 0f)
+        assertEquals(ROW_RING.value, tight.ring.value, 0f)
+        assertEquals(PersonsSection.ROW_CAP.value, PersonsSection.rowSize(room = 2000.dp, rows = 2).height.value, 0f)
     }
 }
