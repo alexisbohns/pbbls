@@ -19,6 +19,16 @@ object IntroScore {
     const val SOUL_GAP = 0.06
     const val LINE_GAP = 0.14
 
+    // The sections (D8, iOS IntroScore+Sections).
+    const val LEAD_AT = 0.16
+    const val ROWS_AT = 0.32
+
+    /** When the insights head leads tone or hours, the rest comes this much later. */
+    const val INSIGHTS_SHIFT = 0.16
+    const val PART_GAP = 0.09
+    const val RING_SPAN = 0.45
+    const val NEXT_ROW = 0.06
+
     /** When a sequence has landed: its latest beat's end. */
     fun duration(beats: List<IntroBeat>): Double = beats.maxOfOrNull { it.at + it.duration } ?: 0.0
 
