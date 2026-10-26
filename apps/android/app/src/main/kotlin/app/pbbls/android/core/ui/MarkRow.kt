@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SpineLayoutTokens.MARK_COLUMN
 import app.pbbls.android.core.designsystem.SpineLayoutTokens.ROW_GAP
@@ -27,7 +28,7 @@ import app.pbbls.android.core.designsystem.rule
 
 /**
  * A list row of the wraps and the Spine (#1207): a 30 dp mark column, the title (with an optional
- * [subtitle] under it) taking the rest, then an optional [count] and [trailing]; at least 44 dp
+ * [subtitle] above or under it) taking the rest, then an optional [count] and [trailing]; at least 44 dp
  * tall, a rule below. The row is one semantics node saying [description]; with [onClick] it is a
  * button whose action is [clickLabel].
  */
@@ -44,6 +45,12 @@ fun MarkRow(
     trailing: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     clickLabel: String? = null,
+    /** The subtitle over the title (a milestone's date, #1242 / iOS D12). */
+    subtitleFirst: Boolean = false,
+    /** At least this tall, past [ROW_MIN] (a milestone's 56 dp, a card's share later). */
+    minHeight: Dp = ROW_MIN,
+    /** The mark column's width; a lit stone with its rings needs more than [MARK_COLUMN]. */
+    markWidth: Dp = MARK_COLUMN,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
@@ -51,7 +58,7 @@ fun MarkRow(
         modifier =
             modifier
                 .fillMaxWidth()
-                .heightIn(min = ROW_MIN)
+                .heightIn(min = maxOf(minHeight, ROW_MIN))
                 .rule(colors.rule, above = false)
                 .clearAndSetSemantics {
                     contentDescription = description
@@ -66,13 +73,14 @@ fun MarkRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(ROW_GAP),
     ) {
-        Box(Modifier.width(MARK_COLUMN)) { leading() }
+        Box(Modifier.width(markWidth)) { leading() }
         if (subtitle == null) {
             Text(text = title, style = titleStyle, color = titleColor, modifier = Modifier.weight(1f))
         } else {
             Column(Modifier.weight(1f)) {
+                if (subtitleFirst) Text(text = subtitle, style = type.contentsTime, color = colors.ink3)
                 Text(text = title, style = titleStyle, color = titleColor)
-                Text(text = subtitle, style = type.contentsTime, color = colors.ink3)
+                if (!subtitleFirst) Text(text = subtitle, style = type.contentsTime, color = colors.ink3)
             }
         }
         if (count != null) {
