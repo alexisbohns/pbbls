@@ -3831,7 +3831,7 @@ This covers spec D10 (third device pass), D12, D13, D14 and D15. Create it with 
 - `Localizable.xcstrings`: `path.wrap.lineNoPebbles`, "No pebble." / "Aucun galet.", inserted as text
 
 **What to build:**
-- **Every week:** all the month's weeks are listed. An empty one is muted: the strip's ground line as its mark, the outline ink, no souls, no action. The head counts every week.
+- **Every week:** all the month's weeks are listed. An empty one is muted: a dotted stone as its mark (`CairnMark` with no days, `.live`), the outline ink, no souls, no action. The head counts every week.
 - **On a card,** `monthCardRoom` gives the room:
   - `rowHeight = clamp(room / weeks, rowMin, 112)`
   - the cairn scales by `clamp(rowHeight × 0.62 / 42, 1, 1.8)`, its column widening to match
@@ -3853,7 +3853,7 @@ This covers spec D10 (third device pass), D12, D13, D14 and D15. Create it with 
 
 - **On a card:**
   - `rowHeight = clamp((room − MonthLayout.moreReserve) / rows, rowMin, 96)`
-  - the glyph is `clamp(rowHeight × 0.55, mark, 48)`
+  - the glyph is `clamp(rowHeight × 0.5, mark, 48)`
   - the ring is `clamp(rowHeight × 0.7, rowRing, 60)`
 - **The choreography** is unchanged.
 

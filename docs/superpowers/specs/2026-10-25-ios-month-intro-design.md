@@ -97,7 +97,7 @@ The month page enters instead of appearing all at once. The month's name rises i
 - **Domains:** for each domain, its name and count rise with a light tick. Then its gauge fills from the left, for longer the fuller it is, with a continuous vibration swelling as it fills (D15), and a light tick as it stops. Then the next domain, with *more* last.
 
 **D12. The month's content changes on every surface** (third device pass).
-- **Empty weeks:** every week of the month is listed. An empty one is muted: its mark is the strip's ground line, its line reads "No pebble." ("Aucun galet."), in outline ink, with no souls, and it isn't a button. A month page exists only for a completed month, so an empty week is always past. The weeks' head counts every week. The server already sends empty weeks.
+- **Empty weeks:** every week of the month is listed. An empty one is muted: its mark is a dotted stone where its cairn would stand (the strip's dotted next stone), its line reads "No pebble." ("Aucun galet."), in outline ink, with no souls, and it isn't a button. A month page exists only for a completed month, so an empty week is always past. The weeks' head counts every week. The server already sends empty weeks.
 - **Milestones:** a milestone shows its date above its name.
 - **Scope:** both changes reach the scrolled page too. Android follows in its own issue.
 
