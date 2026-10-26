@@ -23,20 +23,24 @@ internal fun MonthSectionContent(
     onWeek: (LocalDate) -> Unit,
     onOpen: (PathMoment) -> Unit,
     onMore: (MonthSection) -> Unit,
+    /** Whether this is the first of the tone and the hours: the one the insights head leads. */
+    leadsInsights: Boolean = section == wrap.sections.firstOrNull { it == MonthSection.TONE || it == MonthSection.HOURS },
+    /** On a card the title band draws the head, so the section leaves its own out. */
+    onCard: Boolean = false,
 ) {
     val copy = rememberWrapCopy()
     when (section) {
-        MonthSection.WEEKS -> WeeksSummary(wrap, lookups, onWeek)
-        MonthSection.MILESTONES -> MilestonesSection(wrap, lookups, zone, onOpen, aspect)
-        MonthSection.PERSONS -> PersonsSection(wrap, lookups, dayView, onMore)
-        MonthSection.DOMAINS -> DomainsSection(wrap, lookups, onMore)
-        MonthSection.GEM -> EmotionGem(wrap, lookups, onMore)
+        MonthSection.WEEKS -> WeeksSummary(wrap, lookups, onWeek, onCard)
+        MonthSection.MILESTONES -> MilestonesSection(wrap, lookups, zone, onOpen, aspect, onCard)
+        MonthSection.PERSONS -> PersonsSection(wrap, lookups, dayView, onMore, onCard)
+        MonthSection.DOMAINS -> DomainsSection(wrap, lookups, onMore, onCard)
+        MonthSection.GEM -> EmotionGem(wrap, lookups, onMore, onCard)
         MonthSection.TONE, MonthSection.HOURS -> {
-            // One head for both figures, over whichever comes first.
-            if (section == wrap.sections.firstOrNull { it == MonthSection.TONE || it == MonthSection.HOURS }) {
-                MonthSectionHead(copy.insights(), copy.insightsHint())
-            }
-            if (section == MonthSection.TONE) ToneFigure(wrap) else HoursFigure(wrap, lookups)
+            // One head for both figures, over whichever comes first: on the page, drawn here; on a
+            // card, the title band is that head, and the figure keeps its own (iOS).
+            if (leadsInsights && !onCard) MonthSectionHead(copy.insights(), copy.insightsHint())
+            val figureOnCard = onCard && !leadsInsights
+            if (section == MonthSection.TONE) ToneFigure(wrap, lookups, figureOnCard) else HoursFigure(wrap, lookups, figureOnCard)
         }
     }
 }

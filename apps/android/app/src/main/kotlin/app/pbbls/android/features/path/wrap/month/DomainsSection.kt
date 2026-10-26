@@ -28,14 +28,15 @@ internal fun DomainsSection(
     wrap: MonthWrap,
     lookups: WrapLookups,
     onMore: (MonthSection) -> Unit,
+    onCard: Boolean = false,
 ) {
     val colors = PebblesTheme.spine.colors
     val copy = rememberWrapCopy()
+    if (!MonthSections.isShown(MonthSection.DOMAINS, wrap, lookups)) return
     val domains = wrap.domains.orEmpty().mapNotNull { stat -> lookups.domain(stat.domainId)?.let { stat to it } }
-    if (domains.isEmpty()) return
     val max = domains.maxOf { it.first.count }.toFloat()
     Column {
-        MonthSectionHead(copy.tile(WeekTile.DOMAINS))
+        if (!onCard) MonthSectionHead(copy.tile(WeekTile.DOMAINS))
         Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
             domains.take(SHOWN).forEach { (stat, domain) ->
                 val name = ReferenceStrings.referenceName(ReferenceType.DOMAIN, domain.slug, domain.name)

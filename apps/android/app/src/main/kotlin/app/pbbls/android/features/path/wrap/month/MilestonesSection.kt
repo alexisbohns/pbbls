@@ -20,6 +20,7 @@ import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.ValenceSizeGroup
+import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.ui.MarkRow
 import app.pbbls.android.core.ui.SoulMark
@@ -64,15 +65,16 @@ internal fun MilestonesSection(
     zone: ZoneId,
     onOpen: (PathMoment) -> Unit,
     aspect: SnapAspectCache? = null,
+    onCard: Boolean = false,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val copy = rememberWrapCopy()
-    val moments = wrap.milestones.orEmpty().mapNotNull(lookups.moment)
-    if (moments.isEmpty()) return
+    if (!MonthSections.isShown(MonthSection.MILESTONES, wrap, lookups)) return
+    val moments = MonthSections.milestones(wrap, lookups)
     val untitled = stringResource(R.string.path_spine_untitled)
     Column {
-        MonthSectionHead(copy.milestonesHeader(moments.size), copy.milestonesHint())
+        if (!onCard) MonthSectionHead(copy.milestonesHeader(moments.size), copy.milestonesHint())
         Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
             moments.forEach { moment ->
                 key(moment.id) {

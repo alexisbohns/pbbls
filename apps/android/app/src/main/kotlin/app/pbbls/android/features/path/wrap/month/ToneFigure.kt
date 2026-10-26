@@ -22,7 +22,9 @@ import androidx.compose.ui.unit.min
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SpineSectionHeader
 import app.pbbls.android.core.model.ValencePolarity
+import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
+import app.pbbls.android.features.path.wrap.WrapLookups
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 
 private val UNIT = 8.dp
@@ -44,13 +46,17 @@ private const val MIN_SCALE = 3
  * sentence reads the server's verdict and the month's first and last pebbles.
  */
 @Composable
-internal fun ToneFigure(wrap: MonthWrap) {
+internal fun ToneFigure(
+    wrap: MonthWrap,
+    lookups: WrapLookups,
+    onCard: Boolean = false,
+) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val copy = rememberWrapCopy()
-    val tone = wrap.tone ?: return
+    if (!MonthSections.isShown(MonthSection.TONE, wrap, lookups)) return
+    val tone = requireNotNull(wrap.tone)
     val days = tone.days
-    if (days.isEmpty()) return
     val maxUp = maxOf(MIN_SCALE, days.maxOf { it.up })
     val maxDown = maxOf(MIN_SCALE, days.maxOf { it.down })
     // A heavy month keeps the figure within reach: the unit shrinks, never the proportions.
@@ -66,7 +72,7 @@ internal fun ToneFigure(wrap: MonthWrap) {
         }
 
     Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
-        SpineSectionHeader(label = copy.toneTitle(), hint = copy.toneHint())
+        if (!onCard) SpineSectionHeader(label = copy.toneTitle(), hint = copy.toneHint())
         Text(line, style = type.still, color = colors.ink2, modifier = Modifier.padding(top = 6.dp, bottom = 8.dp))
         Canvas(Modifier.fillMaxWidth().height(height).semantics { contentDescription = line }) {
             val u = unit.toPx()
