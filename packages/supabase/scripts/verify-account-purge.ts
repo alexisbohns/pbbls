@@ -26,6 +26,8 @@
  * Cleanup runs even on failure (service-role purge + deleteUser fallback).
  * Exits non-zero if any assertion fails.
  *
+ * wrap_reveals (#1254) is seeded through reveal_wrap and asserted below.
+ *
  * STANDING RULE (roadmap §M46): when a later milestone adds a user-owned
  * table to purge_account, extend the seed + zero-row assertions here too.
  *
@@ -324,6 +326,11 @@ try {
       cards: [{ species_id: cardType.id, value: "purge-test card", sort_order: 0 }],
     },
   }));
+
+  // #1254: a revealed wrap is a per-user row the purge must remove. January
+  // 2026 is finished in every zone, so the row is written.
+  const { error: revealErr } = await seller.rpc("reveal_wrap", { p_month: "2026-01-01", p_tz: "UTC" });
+  if (revealErr) throw new Error(`reveal_wrap (seller): ${revealErr.message}`);
 
   const { error: favSellerErr } = await admin
     .from("glyph_favourites").insert({ user_id: sellerId, glyph_id: soldGlyph.id });
@@ -819,6 +826,7 @@ try {
     ["connection_invites", 1], // the seller's live invite
     ["connection_blocks", 2], // both directions
     ["user_consents", 5], // health_data + public_profile + age_assurance + terms + privacy
+    ["wrap_reveals", 1], // the seller's one revealed month (#1254)
   ];
   for (const [key, expected] of expectedPurged) {
     check(`purge itself counted ${key} = ${expected}`, purgedCounts[key] === expected,
@@ -846,6 +854,7 @@ try {
     ["log_reactions", "user_id"],
     ["connection_invites", "inviter_id"],
     ["achievement_unlocks", "user_id"],
+    ["wrap_reveals", "user_id"],
     ["user_consents", "user_id"],
     ["content_reports", "target_user_id"],
     ["content_reports", "reporter_id"],

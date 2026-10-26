@@ -1,0 +1,67 @@
+{
+  "months": [
+    {
+      "count": 4,
+      "cover": {
+        "days": [
+          {
+            "day": 2,
+            "pebbles": [
+              {
+                "polarity": 1,
+                "intensity": 2,
+                "moment_id": "4aeb7c24-6ce3-40e5-9b98-80d7cd9d394d",
+                "emotion_id": "50a68890-f6bb-e67a-6655-e84ff0b71f49"
+              }
+            ]
+          },
+          {
+            "day": 11,
+            "pebbles": [
+              {
+                "polarity": 0,
+                "intensity": 2,
+                "moment_id": "8368be77-7342-4ce8-bec8-cae66df5144a",
+                "emotion_id": "50a68890-f6bb-e67a-6655-e84ff0b71f49"
+              }
+            ]
+          },
+          {
+            "day": 19,
+            "pebbles": [
+              {
+                "polarity": -1,
+                "intensity": 2,
+                "moment_id": "f2510e6c-e8af-44ff-a7f5-60d69ac956e0",
+                "emotion_id": "50a68890-f6bb-e67a-6655-e84ff0b71f49"
+              }
+            ]
+          },
+          {
+            "day": 27,
+            "pebbles": [
+              {
+                "polarity": 1,
+                "intensity": 2,
+                "moment_id": "9fa3f1e3-89d7-427c-a557-ab556f8a7bee",
+                "emotion_id": "50a68890-f6bb-e67a-6655-e84ff0b71f49"
+              }
+            ]
+          }
+        ],
+        "inks": [
+          "joy"
+        ],
+        "papers": [
+          "bb427d8c-3597-4e94-b18b-acc3fea8d723",
+          "01e6e592-fed6-c8f3-c3ee-42e39d89d3a7"
+        ],
+        "souls_in_order": [
+          "f1c08336-606c-4513-8f1b-12dd78fa7c58"
+        ]
+      },
+      "month": "2026-09-01",
+      "revealed_at": null
+    }
+  ]
+}

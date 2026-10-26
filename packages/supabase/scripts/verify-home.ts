@@ -16,13 +16,17 @@
  *   PAYS once (karma_reward is 0 at seed and only an admin can set it; the
  *   exactly-once is argued structurally, the unlocks PK feeding the karma CTE)
  *   and that a moderation-hidden moment is excluded (nothing can hide one).
- *   4. (part 3) wrap_reveals / reveal_wrap / home_wraps — see the section below.
+ *   4. wraps: home_wraps lists finished months newest first with the count,
+ *      the revealed flag and a cover EQUAL to path_month_wrap's for the same
+ *      month (the drift guard for path_month_cover); reveal_wrap ignores the
+ *      live month, is idempotent, emits whole-second UTC; wrap_reveals is not
+ *      client-writable and is owner-scoped; anon refused.
  *
  * HOME_DUMP=1 writes the verbatim people_prompts payload to
- * scripts/oracles/home/payloads/people-prompts.json for the clients' decoding tests.
+ * scripts/oracles/home/payloads/people-prompts.json (and home_wraps to home-wraps.json) for the clients' decoding tests.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:home --workspace=packages/supabase
- * Expected: `Summary: passed=21 failed=0` (part 2); part 3 raises it.
+ * Expected: `Summary: passed=35 failed=0`.
  * Needs NO service-role key: signs up throwaway users (home-verify-*@example.test)
  * and deletes them through the real `delete-account` edge function, even on failure.
  */
@@ -236,7 +240,66 @@ try {
     rejectsOnly.error?.message ?? JSON.stringify(ro));
 
   // 4. wraps (part 3) ----------------------------------------------------------------------
-  // (added in part 3)
+  type Wraps = { months: { month: string; count: number; revealed_at: string | null; cover: unknown }[] };
+  const none = await a.rpc("home_wraps", { p_tz: "Europe/Paris" });
+  check("home_wraps on an account with no pebble lists no month",
+    !none.error && (none.data as Wraps).months.length === 0, none.error?.message ?? JSON.stringify(none.data));
+
+  // Bob gets a finished month: three more September pebbles (section 3 already left a fourth, on the 20th), one naming Elio, with
+  // family and work domains, so the cover carries days, a soul, inks and papers.
+  for (const [name, at, pos, doms, souls] of [
+    ["sept one",   "2026-09-03T09:00:00Z", 1, [r.family], [bobSoul!.id]],
+    ["sept two",   "2026-09-12T18:00:00Z", 0, [r.work], []],
+    ["sept three", "2026-09-28T21:30:00Z", 1, [r.family, r.work], []],
+  ] as [string, string, number, string[], string[]][]) {
+    const mid = await saveMoment(b, `${name} ${runId}`, at);
+    await completePebble(b, mid, r.emotionId, pos, doms, souls);
+  }
+  const wraps = await b.rpc("home_wraps", { p_tz: "Europe/Paris" });
+  const w = wraps.data as Wraps;
+  await dump("home-wraps", wraps.data);
+  const sep = w.months.find((m) => m.month === "2026-09-01");
+  check("home_wraps lists September 2026 with its four pebbles, folded, and not the live month",
+    !wraps.error && !!sep && sep.count === 4 && sep.revealed_at === null && !w.months.some((m) => m.month === "2026-10-01"),
+    wraps.error?.message ?? JSON.stringify(w.months.map((m) => [m.month, m.count, m.revealed_at])));
+  const monthWrap = await b.rpc("path_month_wrap", { p_month: "2026-09-01", p_tz: "Europe/Paris" });
+  check("home_wraps' cover equals path_month_wrap's cover for the same month (the transcription has not drifted)",
+    !monthWrap.error && JSON.stringify(sep?.cover) === JSON.stringify((monthWrap.data as { cover: unknown }).cover),
+    monthWrap.error?.message ?? `${JSON.stringify(sep?.cover).slice(0, 160)} vs ${JSON.stringify((monthWrap.data as { cover?: unknown })?.cover).slice(0, 160)}`);
+  const cover = sep?.cover as { days: { day: number }[]; souls_in_order: string[]; inks: string[]; papers: string[] } | undefined;
+  check("the cover carries four days, Elio, one ink and two papers",
+    !!cover && cover.days.map((d) => d.day).join(",") === "2,11,19,27" && cover.souls_in_order.length === 1
+      && cover.inks.length === 1 && cover.papers.length === 2,
+    JSON.stringify(cover));
+  check("home_wraps is newest first", w.months.every((m, i) => i === 0 || m.month < w.months[i - 1].month), JSON.stringify(w.months.map((m) => m.month)));
+
+  const parisToday = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
+  const liveMonth = `${parisToday.slice(0, 7)}-01`;
+  const early2 = await b.rpc("reveal_wrap", { p_month: liveMonth, p_tz: "Europe/Paris" });
+  check("reveal_wrap ignores the live month (no row, revealed_at null)",
+    !early2.error && (early2.data as { revealed_at: string | null }).revealed_at === null, early2.error?.message ?? JSON.stringify(early2.data));
+
+  const reveal = await b.rpc("reveal_wrap", { p_month: "2026-09-01", p_tz: "Europe/Paris" });
+  const at1 = (reveal.data as { revealed_at: string | null } | null)?.revealed_at ?? null;
+  check("reveal_wrap unfolds a finished month with a whole-second UTC timestamp",
+    !reveal.error && !!at1 && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(at1), reveal.error?.message ?? JSON.stringify(reveal.data));
+  const revealAgain = await b.rpc("reveal_wrap", { p_month: "2026-09-01", p_tz: "Europe/Paris" });
+  check("a second reveal keeps the first timestamp", (revealAgain.data as { revealed_at: string | null }).revealed_at === at1, JSON.stringify(revealAgain.data));
+  const after = await b.rpc("home_wraps", { p_tz: "Europe/Paris" });
+  check("home_wraps now reports September as revealed",
+    (after.data as Wraps).months.find((m) => m.month === "2026-09-01")?.revealed_at === at1, JSON.stringify((after.data as Wraps).months.map((m) => [m.month, m.revealed_at])));
+
+  const badMonth = await b.rpc("reveal_wrap", { p_month: "2026-09-15", p_tz: "Europe/Paris" });
+  check("reveal_wrap refuses a non-first-of-month date", !!badMonth.error && badMonth.error.message.includes("invalid_month"), badMonth.error?.message ?? "accepted");
+  const badTz = await b.rpc("home_wraps", { p_tz: "Mars/Olympus" });
+  check("home_wraps refuses an unknown zone", !!badTz.error && badTz.error.message.includes("invalid_tz"), badTz.error?.message ?? "accepted");
+  const { error: directErr } = await b.from("wrap_reveals").insert({ user_id: bob.id, month: "2026-08-01" });
+  const { data: direct } = await b.from("wrap_reveals").select("month").eq("month", "2026-08-01");
+  check("a client cannot write wrap_reveals directly", directErr !== null && (direct ?? []).length === 0, directErr?.message ?? "accepted");
+  const peek = await a.from("wrap_reveals").select("*");
+  check("a user sees only their own reveals", !peek.error && (peek.data ?? []).length === 0, JSON.stringify(peek.data));
+  const anonWraps = await anon.rpc("home_wraps", { p_tz: "Europe/Paris" });
+  check("home_wraps is refused to anon", !!anonWraps.error, JSON.stringify(anonWraps.data));
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
