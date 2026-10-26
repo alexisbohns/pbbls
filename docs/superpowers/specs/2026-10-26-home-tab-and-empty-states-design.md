@@ -179,7 +179,7 @@ create table public.wrap_reveals (
 );
 ```
 
-Owner-only RLS on select; writes only through `reveal_wrap`, which upserts for `auth.uid()` and ignores a month that is not finished in `p_tz` (it returns the row either way). `home_wraps(p_tz)` returns, newest first, every finished month in the user's zone that holds at least one pebble: `{"month": "2026-09-01", "count": 18, "revealed_at": timestamptz|null, "cover": <the same object path_month_wrap returns as cover>}`. The cover is produced by the same SQL as `path_month_wrap`, factored into a shared internal function so the two cannot drift; the harness asserts byte equality for the same month.
+Owner-only RLS on select; writes only through `reveal_wrap`, which upserts for `auth.uid()` and ignores a month that is not finished in `p_tz` (it returns the row either way). `home_wraps(p_tz)` returns, newest first, every finished month in the user's zone that holds at least one pebble: `{"month": "2026-09-01", "count": 18, "revealed_at": timestamptz|null, "cover": <the same object path_month_wrap returns as cover>}`. The cover comes from `path_month_cover(p_month, p_tz)`, the cover CTE of `path_month_wrap` lifted into its own light function; `path_month_wrap` adopts it at its next re-emission, and until then the harness asserts per month that `home_wraps`' cover equals `path_month_wrap(...)->'cover'`, so drift fails CI. The list is capped at the twelve most recent finished months with a pebble.
 
 `purge_account` gains `wrap_reveals` in the same migration, appended at its in-body marker, and `verify-account-purge.ts` gains its seed and zero-row assertion. The batch is applied after a pairwise diff of any other pending `purge_account` re-emission.
 

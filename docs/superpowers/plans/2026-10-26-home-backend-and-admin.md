@@ -8,7 +8,7 @@
 
 **Tech Stack:** Postgres/PLpgSQL on Supabase (RLS, `security definer` RPCs), Deno harnesses in `packages/supabase/scripts/`, Next.js 16 App Router + shadcn (base-ui) in `apps/admin`, Vitest.
 
-**Spec:** `docs/superpowers/specs/2026-10-26-home-tab-and-empty-states-design.md` §4 and §5. One deviation, recorded in Task 10: `home_wraps` obtains each month's cover by calling `path_month_wrap(month, p_tz)->'cover'` instead of factoring a shared function. Same SQL, same equality, and no re-emission of a 270-line function.
+**Spec:** `docs/superpowers/specs/2026-10-26-home-tab-and-empty-states-design.md` §4 and §5. The cover shared between the Home cards and the month page is a light `path_month_cover` function (Task 10); `path_month_wrap` is not re-emitted in this stack, and the harness asserts the two covers equal per month (Task 11).
 
 **Read before starting:** `packages/supabase/CLAUDE.md` (harness rules, `db:types:remote`, what CI runs), the root `CLAUDE.md` "Standing cross-surface rules" (the `purge_account` re-emission rule, the purge harness rule), and the `gh-stack` skill.
 
@@ -944,13 +944,9 @@ git commit -m "feat(admin): list the first-moment, first-pebble and first-five f
 
 ## Part 3 · `wrap_reveals`, `reveal_wrap`, `home_wraps` (branch `feat/1254-wrap-reveals`)
 
-### Task 9: Spec patch for the cover source
+### Task 9: (done on the docs branch) the spec names `path_month_cover`
 
-**Files:**
-- Modify: `docs/superpowers/specs/2026-10-26-home-tab-and-empty-states-design.md` §4.3
-
-- [ ] **Step 1: Replace the sentence** "The cover is produced by the same SQL as `path_month_wrap`, factored into a shared internal function so the two cannot drift; the harness asserts byte equality for the same month." with "The cover is `path_month_wrap(month, p_tz)->'cover'`, called per month, so the two cannot drift; the harness asserts equality for the same month. The list is capped at the twelve most recent finished months with a pebble."
-- [ ] **Step 2: Commit** `docs(db): home_wraps reads its cover through path_month_wrap`.
+Nothing to do in the worktree. The spec §4.3 already says the cover comes from `path_month_cover(p_month, p_tz)`, that `path_month_wrap` adopts it at its next re-emission, and that the harness asserts the two covers equal per month.
 
 ### Task 10: Migration `20261027090300_wrap_reveals.sql`
 
@@ -1019,11 +1015,86 @@ $$;
 revoke all on function public.reveal_wrap(date, text) from public, anon;
 grant execute on function public.reveal_wrap(date, text) to authenticated;
 
--- 3. home_wraps ---------------------------------------------------------------------------
+-- 3. path_month_cover ---------------------------------------------------------------------
+-- The cover CTE of path_month_wrap (20261023230000, the `mo`, `souls`, `fams`
+-- and `doms` CTEs feeding j_cover), lifted into its own function so the Home
+-- cards do not run the whole month page per month. The body is a transcription
+-- of those CTEs and the jsonb_build_object for 'cover'; verify-home.ts asserts
+-- per month that it equals path_month_wrap(...)->'cover', so drift fails CI.
+-- path_month_wrap adopts this function at its next re-emission (not here: the
+-- re-emission rule).
+create or replace function public.path_month_cover(p_month date, p_tz text)
+returns jsonb
+language plpgsql
+stable
+security invoker
+set search_path = ''
+as $$
+declare
+  wheel constant text[] := array['joy', 'pride', 'anger', 'fear', 'shame', 'sadness', 'peace'];
+  uid uuid := (select auth.uid());
+  from_ts timestamptz;
+  to_ts timestamptz;
+  result jsonb;
+begin
+  if p_month is null or extract(day from p_month) <> 1 then
+    raise exception 'invalid_month' using errcode = '22023';
+  end if;
+  begin
+    from_ts := p_month::timestamp at time zone p_tz;
+  exception when others then
+    raise exception 'invalid_tz' using errcode = '22023';
+  end;
+  to_ts := (p_month + interval '1 month')::timestamp at time zone p_tz;
+
+  with mo as (
+    select p.id as pebble_id, m.id as moment_id, m.happened_at,
+           ((m.happened_at at time zone p_tz)::date - p_month) as dom,
+           p.intensity, p.positiveness, p.emotion_id, ec.slug as family,
+           p.intensity * case when p.positiveness = 0 then 0.5 else 1 end as worth
+    from public.moments m
+    join public.pebbles p on p.moment_id = m.id and p.user_id = uid
+    left join public.emotions e on e.id = p.emotion_id
+    left join public.emotion_categories ec on ec.id = e.category_id
+    where m.user_id = uid and m.happened_at >= from_ts and m.happened_at < to_ts
+  ),
+  souls as (
+    select ps.soul_id, count(*) as n, min(x.happened_at) as first_at
+    from mo x join public.pebble_souls ps on ps.pebble_id = x.pebble_id
+    group by ps.soul_id
+  ),
+  fams as (
+    select family, count(*) as n, sum(worth) as worth
+    from mo where family is not null
+    group by family
+  ),
+  doms as (
+    select pd.domain_id, count(*) as n, min(x.happened_at) as first_at
+    from mo x join public.pebble_domains pd on pd.pebble_id = x.pebble_id
+    group by pd.domain_id
+  )
+  select jsonb_build_object(
+    'days', (select coalesce(jsonb_agg(jsonb_build_object('day', dom, 'pebbles', pebbles) order by dom), '[]'::jsonb)
+               from (select dom, jsonb_agg(jsonb_build_object('moment_id', moment_id, 'emotion_id', emotion_id,
+                                                              'intensity', intensity, 'polarity', positiveness)
+                                           order by happened_at, moment_id) as pebbles
+                     from mo group by dom) per_day),
+    'souls_in_order', (select coalesce(jsonb_agg(soul_id order by first_at, soul_id), '[]'::jsonb) from souls),
+    'inks', (select coalesce(jsonb_agg(family order by worth desc, n desc, array_position(wheel, family)), '[]'::jsonb) from fams),
+    'papers', (select coalesce(jsonb_agg(domain_id order by n desc, first_at, domain_id), '[]'::jsonb)
+                 from (select * from doms order by n desc, first_at, domain_id limit 3) top))
+  into result;
+  return result;
+end;
+$$;
+
+revoke all on function public.path_month_cover(date, text) from public, anon;
+grant execute on function public.path_month_cover(date, text) to authenticated;
+
+-- 4. home_wraps ---------------------------------------------------------------------------
 -- The finished months (in p_tz) holding at least one pebble, newest first,
 -- twelve at most, each with its pebble count, its revealed_at (null = folded)
--- and the SAME cover object path_month_wrap returns, obtained by calling it.
--- security invoker like path_month_wrap, which reads as auth.uid().
+-- and the cover from path_month_cover. security invoker like its siblings.
 create or replace function public.home_wraps(p_tz text)
 returns jsonb
 language plpgsql
@@ -1060,7 +1131,7 @@ begin
            'count', mo.n,
            'revealed_at', case when r.revealed_at is null then null
                                else to_jsonb(to_char(r.revealed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')) end,
-           'cover', public.path_month_wrap(mo.month, p_tz) -> 'cover')
+           'cover', public.path_month_cover(mo.month, p_tz))
          order by mo.month desc), '[]'::jsonb))
   into result
   from months mo
@@ -1073,9 +1144,9 @@ revoke all on function public.home_wraps(text) from public, anon;
 grant execute on function public.home_wraps(text) to authenticated;
 
 comment on function public.home_wraps(text) is
-  'The Home tab''s month cards (#1254): finished months with a pebble, newest first (12 at most), each with count, revealed_at (null = folded) and path_month_wrap''s cover.';
+  'The Home tab''s month cards (#1254): finished months with a pebble, newest first (12 at most), each with count, revealed_at (null = folded) and the cover (path_month_cover, equal to path_month_wrap''s).';
 
--- 4. purge_account: wrap_reveals ------------------------------------------------------------
+-- 5. purge_account: wrap_reveals ------------------------------------------------------------
 -- STANDING RULE: do not re-emit the function here. The table cascades from
 -- auth.users, so the purge is belt-and-braces like its section-(4) siblings;
 -- the explicit delete keeps "all personal rows gone" true at RPC success.
@@ -1087,7 +1158,7 @@ comment on function public.home_wraps(text) is
 
 - [ ] **Step 2: Append `wrap_reveals` to `purge_account`**
 
-`create or replace` cannot append; the body must be re-emitted. In the same migration file, after section 4's comment, paste the whole `create or replace function public.purge_account(p_user_id uuid) … $$;` statement from `20261012090300_moments_split_moderation_purge.sql` verbatim, and insert these three lines right after the `achievement_unlocks` block inside section (4):
+`create or replace` cannot append; the body must be re-emitted. In the same migration file, after section 5's comment, paste the whole `create or replace function public.purge_account(p_user_id uuid) … $$;` statement from `20261012090300_moments_split_moderation_purge.sql` verbatim, and insert these three lines right after the `achievement_unlocks` block inside section (4):
 
 ```sql
   delete from public.wrap_reveals where user_id = p_user_id;
@@ -1132,7 +1203,7 @@ git commit -m "feat(db): add wrap_reveals with reveal_wrap and home_wraps"
   check("home_wraps lists October 2026 with its six pebbles, folded",
     !wraps.error && !!oct && oct.count === 6 && oct.revealed_at === null, wraps.error?.message ?? JSON.stringify(w.months));
   const monthWrap = await b.rpc("path_month_wrap", { p_month: "2026-10-01", p_tz: "Europe/Paris" });
-  check("home_wraps' cover equals path_month_wrap's cover for the same month",
+  check("home_wraps' cover equals path_month_wrap's cover for the same month (the transcription has not drifted)",
     JSON.stringify(oct?.cover) === JSON.stringify((monthWrap.data as { cover: unknown }).cover),
     JSON.stringify(oct?.cover).slice(0, 120));
   check("home_wraps is newest first", w.months.every((m, i) => i === 0 || m.month < w.months[i - 1].month), JSON.stringify(w.months.map((m) => m.month)));
@@ -1618,7 +1689,7 @@ git commit -m "feat(admin): link guides in the sidebar and add their playground"
 
 - §4.1 guides table, RLS, seed, single-table client read → Tasks 1–2. The client select needs no RPC (documented in Task 1's comment).
 - §4.2 three achievements, the widened check, the admin branch, `claim_blue_pebble`, copy on every surface → Tasks 4, 6, 7; iOS copy in stack 2; Android/web in #1257/#1258.
-- §4.3 `wrap_reveals`, `reveal_wrap`, `home_wraps`, purge append, purge harness → Tasks 9–11 (cover via `path_month_wrap`, spec patched in Task 9).
+- §4.3 `wrap_reveals`, `reveal_wrap`, `path_month_cover`, `home_wraps`, purge append, purge harness → Tasks 10–11.
 - §4.4 `people_prompts` with the outward set, the valence guard, hidden moments, `skipped`, totals → Tasks 5–6.
 - §5 admin `/guides`: list, new, edit, `GuideForm`, actions, sidebar, playground → Tasks 13–17.
 - §8 harnesses: `verify-guides.ts`, `verify-home.ts` (+ `HOME_DUMP` payloads), `verify-account-purge.ts` manual run → Tasks 2, 6, 11.
