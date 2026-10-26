@@ -105,7 +105,7 @@ The month page enters instead of appearing all at once. The month's name rises i
 - **More at the foot:** on a card, the persons', emotions' and domains' *more* stands at the card's foot. Content that fits is laid out in the whole room (`MonthCardFill`), so a spacer before *more* opens; content past the room keeps its own height and scales down.
 
 **D14. The end card.** After the last section, the deck deals one more card, like the back of the deck:
-- **Layout:** the margin and stepper (the stepper counts the end card), no title band, then the month's name and a "Replay the month" button.
+- **Layout:** the margin and stepper (the stepper counts the end card), no title band, then the cover's whole garland with the month inside it, settled (`MonthCoverGarland`, shared with the cover; no clock reaches it), and a "Replay the month" button.
 - **Arrival:** it ticks, and the button rises. `IntroSequence` gains `.end`, which plays last.
 - **Replay:** a tap puts the deck back on the cover with a fresh clock, and the ledger forgets the month, so it plays from the start.
 - **The scrolled page** has no end card.

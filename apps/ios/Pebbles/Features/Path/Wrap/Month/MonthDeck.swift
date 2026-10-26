@@ -234,7 +234,7 @@ private struct MonthDeckContent: View {
             MonthSectionContent(section: section, wrap: wrap, lookups: lookups, dayView: dayView, focus: focus,
                                 onWeek: onWeek, onOpen: onOpen, onMore: onMore, leadsInsights: leadsInsights)
         case .end:
-            MonthDeckEnd(month: wrap.month, onReplay: onReplay)
+            MonthDeckEnd(wrap: wrap, lookups: lookups, onReplay: onReplay)
         }
     }
 }

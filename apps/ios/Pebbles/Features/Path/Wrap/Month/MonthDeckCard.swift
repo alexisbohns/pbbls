@@ -183,10 +183,13 @@ private struct MonthDeckTitle: View {
     }
 }
 
-/// The deck's last card (#1241 D14), the back of the deck: the month's name and
-/// a button that replays the month from the cover. Centred in the card's room.
+/// The deck's last card (#1241 D14), the back of the deck: the cover's whole
+/// garland with the month inside it, settled, and a button that replays the
+/// month from the cover; the month's name alone when it has no cover. Centred
+/// in the card's room.
 struct MonthDeckEnd: View {
-    let month: CalendarMonth
+    let wrap: MonthWrap
+    let lookups: WrapLookups
     let onReplay: () -> Void
 
     @Environment(\.monthCardRoom) private var room
@@ -194,10 +197,16 @@ struct MonthDeckEnd: View {
     var body: some View {
         let locale = SpineStrings.appLocale
         VStack(spacing: MonthDeckLayout.endGap) {
-            Text(verbatim: WrapCopy.monthName(month, locale: locale))
-                .spineType(.monthName)
-                .foregroundStyle(Color.pebbles.onSurface)
-                .dynamicTypeSize(...DynamicTypeSize.large)
+            if MonthCoverView.isShown(wrap: wrap, lookups: lookups), let cover = wrap.cover {
+                MonthCoverGarland(wrap: wrap, cover: cover, lookups: lookups)
+                    // Whole from the start, whatever the end card's turn: no clock reaches it.
+                    .environment(\.introClock, nil)
+            } else {
+                Text(verbatim: WrapCopy.monthName(wrap.month, locale: locale))
+                    .spineType(.monthName)
+                    .foregroundStyle(Color.pebbles.onSurface)
+                    .dynamicTypeSize(...DynamicTypeSize.large)
+            }
             Button(action: onReplay) {
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.counterclockwise")

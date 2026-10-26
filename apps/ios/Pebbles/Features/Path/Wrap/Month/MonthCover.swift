@@ -20,40 +20,7 @@ struct MonthCoverView: View {
         if Self.isShown(wrap: wrap, lookups: lookups), let cover = wrap.cover {
             let souls = Self.souls(cover, lookups: lookups)
             VStack(spacing: 10) {
-                IntroReader { reveal in
-                    Garland(wrap: wrap, cover: cover, lookups: lookups, reveal: reveal) {
-                        VStack(spacing: 0) {
-                            Text(verbatim: WrapCopy.monthKicker(wrap.month, locale: locale))
-                                .spineType(.sectionLabel)
-                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                                .introReveal(.kicker)
-                            Text(verbatim: WrapCopy.monthName(wrap.month, locale: locale))
-                                .spineType(.monthName)
-                                .foregroundStyle(Color.pebbles.onSurface)
-                                .introReveal(.monthName)
-                            Text(verbatim: String(wrap.month.year))
-                                .spineType(.contentsTime)
-                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                                .introReveal(.year)
-                            if !souls.isEmpty {
-                                HStack(spacing: 2) {
-                                    ForEach(Array(souls.prefix(Self.soulMarks).enumerated()),
-                                            id: \.element) { index, id in
-                                        SoulMark(strokes: lookups.soulGlyph(id), side: 15)
-                                            .introReveal(.soul(index), .pop)
-                                    }
-                                }
-                                .padding(.top, 6)
-                                .accessibilityHidden(true)
-                            }
-                        }
-                        .dynamicTypeSize(...DynamicTypeSize.large)
-                        .multilineTextAlignment(.center)
-                        // One stop for VoiceOver: "part the tenth, October, 2026", the page's header.
-                        .accessibilityElement(children: .combine)
-                        .accessibilityAddTraits(.isHeader)
-                    }
-                }
+                MonthCoverGarland(wrap: wrap, cover: cover, lookups: lookups)
                 Text(verbatim: WrapCopy.line(pebbles: wrap.pebbles, people: wrap.people, live: false, hasMoments: true,
                                              locale: locale))
                     .spineType(.summary)
@@ -91,10 +58,10 @@ struct MonthCoverView: View {
     }
 
     /// At most this many souls' glyphs inside the ring.
-    private static let soulMarks = 8
+    static let soulMarks = 8
 
     /// The souls the device can name, in the cover's order.
-    private static func souls(_ cover: MonthCover, lookups: WrapLookups) -> [String] {
+    static func souls(_ cover: MonthCover, lookups: WrapLookups) -> [String] {
         cover.soulsInOrder.filter { lookups.soulName($0) != nil }
     }
 
@@ -135,5 +102,54 @@ struct MonthCoverView: View {
             from = range.upperBound
         }
         return text
+    }
+}
+
+/// The cover's garland with the month inside it (#1226 D7): its place in the
+/// year, its name, the year and the souls' glyphs. The cover draws it, and so
+/// does the deck's end card, settled (#1241 D14).
+struct MonthCoverGarland: View {
+    let wrap: MonthWrap
+    let cover: MonthCover
+    let lookups: WrapLookups
+
+    private var locale: Locale { SpineStrings.appLocale }
+
+    var body: some View {
+        let souls = MonthCoverView.souls(cover, lookups: lookups)
+        IntroReader { reveal in
+            Garland(wrap: wrap, cover: cover, lookups: lookups, reveal: reveal) {
+                VStack(spacing: 0) {
+                    Text(verbatim: WrapCopy.monthKicker(wrap.month, locale: locale))
+                        .spineType(.sectionLabel)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                        .introReveal(.kicker)
+                    Text(verbatim: WrapCopy.monthName(wrap.month, locale: locale))
+                        .spineType(.monthName)
+                        .foregroundStyle(Color.pebbles.onSurface)
+                        .introReveal(.monthName)
+                    Text(verbatim: String(wrap.month.year))
+                        .spineType(.contentsTime)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                        .introReveal(.year)
+                    if !souls.isEmpty {
+                        HStack(spacing: 2) {
+                            ForEach(Array(souls.prefix(MonthCoverView.soulMarks).enumerated()),
+                                    id: \.element) { index, id in
+                                SoulMark(strokes: lookups.soulGlyph(id), side: 15)
+                                    .introReveal(.soul(index), .pop)
+                            }
+                        }
+                        .padding(.top, 6)
+                        .accessibilityHidden(true)
+                    }
+                }
+                .dynamicTypeSize(...DynamicTypeSize.large)
+                .multilineTextAlignment(.center)
+                // One stop for VoiceOver: "part the tenth, October, 2026", the page's header.
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(.isHeader)
+            }
+        }
     }
 }
