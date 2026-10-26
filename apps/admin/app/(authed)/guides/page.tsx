@@ -29,7 +29,13 @@ export default async function GuidesPage() {
         </div>
         <Button render={<Link href="/guides/new" />}>New guide</Button>
       </header>
-      <GuideTable guides={guides} />
+      {error ? (
+        <p role="alert" className="text-destructive text-sm">
+          Couldn&rsquo;t load the guides: {error.message}
+        </p>
+      ) : (
+        <GuideTable guides={guides} />
+      )}
     </section>
   )
 }

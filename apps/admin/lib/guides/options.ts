@@ -12,6 +12,9 @@ export const ILLUSTRATION_OPTIONS: ReadonlyArray<{ value: GuideIllustration; lab
   { value: "karma", label: "Karma" },
 ]
 
+/** The slug shape the guides CHECK enforces (20261027090000): kebab, lowercase. */
+export const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/
+
 const ILLUSTRATION_VALUES = ILLUSTRATION_OPTIONS.map((o) => o.value)
 
 export function isGuideIllustration(value: string | undefined): value is GuideIllustration {

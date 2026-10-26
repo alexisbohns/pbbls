@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ILLUSTRATION_OPTIONS } from "@/lib/guides/options"
+import { ILLUSTRATION_OPTIONS, SLUG_PATTERN } from "@/lib/guides/options"
 import type { GuideRow } from "@/lib/guides/types"
 import { MarkdownField } from "../../logs/_components/MarkdownField"
 import type { GuideFormResult } from "../actions"
@@ -45,7 +45,7 @@ export function GuideForm({
             name="slug"
             defaultValue={guide?.slug ?? ""}
             required
-            pattern="^[a-z0-9]+(-[a-z0-9]+)*$"
+            pattern={SLUG_PATTERN.source}
           />
         </div>
         <div className="space-y-2 text-sm">
@@ -144,6 +144,8 @@ function IllustrationSelect({ defaultValue }: { defaultValue: string | undefined
           <SelectValue placeholder="None" />
         </SelectTrigger>
         <SelectContent>
+          {/* value={null} serialises to "" so the action stores null: the way back to "no illustration". */}
+          <SelectItem value={null}>None</SelectItem>
           {ILLUSTRATION_OPTIONS.map((o) => (
             <SelectItem key={o.value} value={o.value}>
               {o.label}

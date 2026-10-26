@@ -3,12 +3,11 @@
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
-import { isGuideIllustration } from "@/lib/guides/options"
+import { SLUG_PATTERN, isGuideIllustration } from "@/lib/guides/options"
 import type { GuideInsert } from "@/lib/guides/types"
 
 export type GuideFormResult = { error: string } | undefined
 
-const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/
 
 function readGuideFields(formData: FormData): { values: GuideInsert; error?: string } {
   const slug = formData.get("slug")?.toString().trim() ?? ""
@@ -25,7 +24,7 @@ function readGuideFields(formData: FormData): { values: GuideInsert; error?: str
   const published = formData.get("published") === "on"
 
   const empty = {} as GuideInsert
-  if (!SLUG.test(slug)) return { error: "Slug is lowercase words joined by hyphens.", values: empty }
+  if (!SLUG_PATTERN.test(slug)) return { error: "Slug is lowercase words joined by hyphens.", values: empty }
   if (!Number.isInteger(sort_order) || sort_order < 0 || sort_order > 32767) return { error: "Sort order is a whole number from 0 to 32767.", values: empty }
   if (!title_en) return { error: "Title (EN) is required.", values: empty }
   if (!summary_en) return { error: "Summary (EN) is required.", values: empty }
