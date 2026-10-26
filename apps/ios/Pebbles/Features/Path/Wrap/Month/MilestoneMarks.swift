@@ -36,10 +36,12 @@ struct MilestoneStone: View {
 }
 
 /// A milestone's photo as a mini polaroid (#1241 D16): the stock under a rule,
-/// the photo whole at its own ratio, a strip under it with two faint lines
-/// for a caption, a slight tilt. The card keeps within a box `height` tall:
-/// a portrait photo makes it narrow, a landscape one short. The ratio is the
-/// loaded photo's, else the Spine's cache's, else square until it loads. It
+/// the photo in a window of one of three shapes, square, 3:4 or 4:3, the
+/// nearest to its own (a 16:9 or 9:16 photo fills a 4:3 or 3:4 window,
+/// cropped), a strip under it with two faint lines for a caption, a slight
+/// clockwise tilt. The card keeps within a box `height` tall: a portrait photo
+/// makes it narrow, a landscape one short. The ratio is the loaded photo's,
+/// else the Spine's cache's, else square until it loads. It
 /// loads as the Spine's card face does: the snap source's image, the shared
 /// cache's, or its own fetch of the signed original; until then the window
 /// is a bed in the pebble's tint. Decorative: the row says the milestone.
@@ -57,7 +59,7 @@ struct MilestoneSnap: View {
     private static let box: CGFloat = 1.15
     /// The strip under the photo, of the box's height.
     private static let strip: CGFloat = 0.24
-    private static let tilt: Double = -4
+    private static let tilt: Double = 4
     private static let logger = Logger(subsystem: "app.pbbls.ios", category: "wrap")
 
     var body: some View {
@@ -84,12 +86,21 @@ struct MilestoneSnap: View {
         let margin = max(2, height * 0.06)
         let strip = height * Self.strip
         let room = CGSize(width: height * box - 2 * margin, height: height - margin - strip)
-        let safe = ratio.isFinite && ratio > 0 ? ratio : CardSizes.pendingRatio
+        let safe = shape(ratio)
         let window = safe >= room.width / room.height
             ? CGSize(width: room.width, height: room.width / safe)
             : CGSize(width: room.height * safe, height: room.height)
         let card = CGSize(width: window.width + 2 * margin, height: margin + window.height + strip)
         return MilestoneSnapLayout(card: card, window: window, margin: margin, strip: strip)
+    }
+
+    /// The window's shape for a photo of `ratio`: square, 3:4 or 4:3, whichever is nearest; square while unknown.
+    static func shape(_ ratio: CGFloat) -> CGFloat {
+        guard ratio.isFinite, ratio > 0 else { return 1 }
+        // The geometric midpoints between the three shapes.
+        if ratio >= (4 / 3 as CGFloat).squareRoot() { return 4 / 3 }
+        if ratio <= (3 / 4 as CGFloat).squareRoot() { return 3 / 4 }
+        return 1
     }
 
     private var ratio: CGFloat {
