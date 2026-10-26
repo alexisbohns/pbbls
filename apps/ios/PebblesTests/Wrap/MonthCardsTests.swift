@@ -112,6 +112,23 @@ struct MonthCardsTests {
         #expect(MilestonesSection.rowSize(room: 100, rows: 5).height == MilestonesSection.listRow)
     }
 
+    @Test("a milestone's polaroid keeps its photo's ratio within its box: narrow for a portrait, short for a landscape")
+    func polaroid() {
+        let portrait = MilestoneSnap.layout(height: 60, ratio: 0.75)
+        let landscape = MilestoneSnap.layout(height: 60, ratio: 1.5)
+        #expect(abs(portrait.window.width / portrait.window.height - 0.75) < 1e-9)
+        #expect(abs(landscape.window.width / landscape.window.height - 1.5) < 1e-9)
+        #expect(portrait.card.width < landscape.card.width)
+        #expect(landscape.card.height < portrait.card.height)
+        for card in [portrait.card, landscape.card] {
+            #expect(card.height <= 60 + 1e-9)
+            #expect(card.width <= 60 * 1.15 + 1e-9)
+        }
+        // Not known yet: square.
+        let pending = MilestoneSnap.layout(height: 60, ratio: .nan)
+        #expect(abs(pending.window.width - pending.window.height) < 1e-9)
+    }
+
     /// October with its second week emptied, as the server sends a week without a pebble.
     static func quietSecondWeek() throws -> MonthWrap {
         let october = try MonthPayloadFixture.october()

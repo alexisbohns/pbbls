@@ -210,17 +210,10 @@ struct MilestonesSection: View {
         // The date over the name (D12); in the intro the stone stamps, then the date, the name and the souls (D10).
         let reveal = MarkRowReveal(leading: nil, text: .date(index), title: .name(index), subtitle: .date(index))
         // Its own stone, as the Spine draws it (D16), in a column as wide as the largest with its rings.
-        let stone = SpineLayout.stoneSize(moment.pebble?.valence.sizeGroup ?? .medium)
         return MarkRow(name, accessibilityText: "\(date), \(name)", titleType: .contentsName(cut), subtitle: date,
                        action: open, reveal: reveal, subtitleFirst: true, height: size.height,
                        markWidth: SpineLayout.stoneWidth(.large) * size.stone * Self.ringRoom) {
-            IntroReader { stage in
-                let stamped = stage(.stamp(index))
-                SpineStone(moment: moment, palette: lookups.palette(moment))
-                    .scaleEffect(size.stone * IntroMotion.stampScale(stamped))
-                    .opacity(IntroMotion.stampOpacity(stamped))
-                    .frame(width: stone.width * size.stone, height: stone.height * size.stone)
-            }
+            MilestoneStone(moment: moment, palette: lookups.palette(moment), row: index, scale: size.stone)
         } trailing: {
             // Its photo framed as a small card, or its souls (D16).
             if let path = moment.firstSnapPath {
