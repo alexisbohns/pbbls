@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path.wrap.intro
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -16,7 +17,14 @@ import java.time.YearMonth
  * which has landed. One card is shown at a time (`show`, the deck's top card); its host registers a
  * closure for its beats, asked for only as it starts. It plays once the page is active (`isActive`),
  * once per launch (the ledger records it as it starts), at its tempo. Figures read [reveal] in their
- * draw phase; [drive] runs the frame loop while a card plays and lands it at its end.
+ * draw phase; [drive] runs the frame loop while a card plays and lands it at its end. A page drives it
+ * through `IntroDrive`, which runs [drive] and writes [isActive].
+ *
+ * - Main thread only.
+ * - One `IntroHost` per sequence: a second host of the same sequence would register over the first, and its
+ *   leaving would land the first.
+ * - [leave] clears the top card, so the deck must [show] again after a host returns.
+ * - A ledger reset (`IntroLedger.reset`) is not observed here: Replay builds a new clock.
  */
 @Stable
 class IntroClock private constructor(
@@ -33,6 +41,11 @@ class IntroClock private constructor(
         ledger: IntroLedger,
         haptics: IntroHapticPlaying?,
         tempo: IntroTempo = IntroTempo.standard,
+        /**
+         * The time a card starts from, in nanos. It must share the frame clock's timebase: `System.nanoTime` on
+         * a device, which Choreographer's frame time (what `withFrameNanos` reports) uses. A Compose test rule's
+         * frame clock is virtual, so a UI test driving a real deck injects `now = { rule.mainClock.currentTime * 1_000_000 }`.
+         */
         now: () -> Long = System::nanoTime,
     ) : this(month, ledger, haptics, tempo, now, frozenAt = null)
 
@@ -53,7 +66,10 @@ class IntroClock private constructor(
     private val latest = mutableMapOf<IntroSequence, () -> List<IntroBeat>>()
     private var shown: IntroSequence? = null
 
-    /** The page is the pager's settled page, the activity resumed, and the intro allowed. Off lands what plays. */
+    /**
+     * The page is the pager's settled page, the activity resumed, and the intro allowed. Off lands what plays.
+     * Written by `IntroDrive`; not read in composition (it is not snapshot state).
+     */
     var isActive: Boolean = false
         set(value) {
             if (field == value) return
@@ -65,38 +81,42 @@ class IntroClock private constructor(
 
     fun isPlaying(sequence: IntroSequence): Boolean = phase(sequence) is Phase.Playing
 
-    /** Each key's progress in [sequence], read at the current frame when invoked (in a draw phase). */
-    fun reveal(sequence: IntroSequence): IntroReveal = IntroReveal { key -> progress(sequence, key, frozenAt ?: frameNanos) }
+    /**
+     * Each key's progress in [sequence], read at the current frame when invoked (in a draw phase). Only a key
+     * with a beat in a playing card reads the frame, so settled and waiting cards, and the parts no beat names,
+     * never redraw with it.
+     */
+    fun reveal(sequence: IntroSequence): IntroReveal = IntroReveal { key -> progress(sequence, key) { frozenAt ?: frameNanos } }
 
-    /** Each key's progress in [sequence] at [nanos] (the tests). */
+    /** Each key's progress in [sequence] at [nanos]. */
+    @VisibleForTesting
     fun reveal(
         sequence: IntroSequence,
         nanos: Long,
-    ): IntroReveal = IntroReveal { key -> progress(sequence, key, nanos) }
+    ): IntroReveal = IntroReveal { key -> progress(sequence, key) { nanos } }
 
     /**
      * Nothing before the sequence's turn; while it plays, its beat's progress (a key the beats don't name has
-     * landed); everything once it has landed.
+     * landed); everything once it has landed. [at] is read only for a key with a beat in a playing card.
      */
-    private fun progress(
+    private inline fun progress(
         sequence: IntroSequence,
         key: IntroKey,
-        at: Long,
+        at: () -> Long,
     ): Float =
         when (val phase = phase(sequence)) {
             Phase.Settled -> 1f
             Phase.Waiting -> 0f
             is Phase.Playing -> {
                 val beat = keyed[sequence]?.get(key)
-                when {
-                    beat == null -> 1f
-                    else -> {
-                        val elapsed = (at - phase.start) / 1e9
-                        if (beat.duration <= 0) {
-                            if (elapsed >= beat.at) 1f else 0f
-                        } else {
-                            RevealMotion.clamp((elapsed - beat.at) / beat.duration).toFloat()
-                        }
+                if (beat == null) {
+                    1f
+                } else {
+                    val elapsed = (at() - phase.start) / 1e9
+                    if (beat.duration <= 0) {
+                        if (elapsed >= beat.at) 1f else 0f
+                    } else {
+                        RevealMotion.clamp((elapsed - beat.at) / beat.duration).toFloat()
                     }
                 }
             }
@@ -131,6 +151,7 @@ class IntroClock private constructor(
     /**
      * A throw came to rest on [sequence] (D11): every throw lands on a tick. A card that plays its intro
      * ticks its own arrival; one that plays none (already played, or settled) gets the same tick from here.
+     * Call it after [show], which is what starts the card that ticks its own.
      */
     fun landed(sequence: IntroSequence) {
         if (frozenAt != null || !isActive || isPlaying(sequence)) return

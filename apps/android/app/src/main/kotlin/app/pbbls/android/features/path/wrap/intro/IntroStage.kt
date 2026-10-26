@@ -6,7 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -56,6 +58,17 @@ fun IntroHost(
     }
     val stage = remember(clock, sequence) { IntroStage(clock, sequence) }
     CompositionLocalProvider(LocalIntroStage provides stage, content = content)
+}
+
+/** Frames [clock] while composed, active while [active]; leaving settles it (D20). The only way a page drives a clock. */
+@Composable
+fun IntroDrive(
+    clock: IntroClock,
+    active: Boolean,
+) {
+    LaunchedEffect(clock) { clock.drive() }
+    SideEffect { clock.isActive = active }
+    DisposableEffect(clock) { onDispose { clock.isActive = false } }
 }
 
 /** How a Compose part lands (iOS `IntroLanding`). */
