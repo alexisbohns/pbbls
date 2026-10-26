@@ -1,6 +1,15 @@
 package app.pbbls.android.features.path.wrap.intro
 
+import androidx.compose.runtime.MonotonicFrameClock
 import app.pbbls.android.core.model.wrap.MonthSection
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -8,6 +17,7 @@ import org.junit.Test
 import java.time.YearMonth
 
 /** iOS `IntroClockTests` and `IntroLandingTests` (#1241 D3, D4, D11, §Lifecycle), on the deck's clock. */
+@OptIn(ExperimentalCoroutinesApi::class)
 class IntroClockTest {
     private val october = YearMonth.of(2026, 10)
     private val base = 1_000_000_000_000L
@@ -62,6 +72,60 @@ class IntroClockTest {
         assertEquals(IntroClock.Phase.Settled, clock.phase(IntroSequence.Cover))
         assertEquals(listOf<IntroSequence>(IntroSequence.Cover), spy.stopped)
     }
+
+    @Test
+    fun `a live reveal reads each frame - nothing before the first, the beat's progress after, landed at the end`() {
+        val spy = HapticsSpy()
+        val clock = clock(haptics = spy)
+        clock.register(IntroSequence.Cover) { beats }
+        clock.isActive = true
+        clock.show(IntroSequence.Cover)
+        val reveal = clock.reveal(IntroSequence.Cover)
+        // Before the first frame, no beat has begun; a part no beat names has landed.
+        assertEquals(0f, reveal(IntroKey.Header))
+        assertEquals(0f, reveal(IntroKey.Row(0)))
+        assertEquals(1f, reveal(IntroKey.Row(1)))
+        clock.frame(after(0.46))
+        assertEquals(1f, reveal(IntroKey.Header))
+        assertEquals(0.5f, reveal(IntroKey.Row(0)), 1e-6f)
+        assertTrue(clock.isPlaying(IntroSequence.Cover))
+        clock.frame(after(0.6))
+        assertEquals(IntroClock.Phase.Settled, clock.phase(IntroSequence.Cover))
+        assertEquals(1f, reveal(IntroKey.Row(0)))
+        // The frame-clock haptics hear each frame of the card, and none once it has landed.
+        clock.frame(after(0.7))
+        assertEquals(listOf(after(0.46), after(0.6)), spy.frames)
+    }
+
+    @Test
+    fun `the frame loop draws a playing card at each frame and lands it at its end`() =
+        runTest {
+            val spy = HapticsSpy()
+            val clock =
+                IntroClock(
+                    october,
+                    IntroLedger(),
+                    spy,
+                    IntroTempo(cover = 1.0, sections = 1.0),
+                    now = { testScheduler.currentTime * 1_000_000 },
+                )
+            clock.register(IntroSequence.Cover) { beats }
+            clock.isActive = true
+            // Shown at 0 ms: it begins at 50 ms and lands at 650 ms.
+            clock.show(IntroSequence.Cover)
+            val job = launch(SixteenMillisFrames(testScheduler)) { clock.drive() }
+            advanceTimeBy(400)
+            runCurrent()
+            // The frame at 400 ms, 0.35 s in: row 0's beat (from 0.32 s, 0.28 s long) has begun.
+            assertTrue(clock.isPlaying(IntroSequence.Cover))
+            assertEquals(0.03f / 0.28f, clock.reveal(IntroSequence.Cover)(IntroKey.Row(0)), 1e-4f)
+            advanceUntilIdle()
+            assertEquals(IntroClock.Phase.Settled, clock.phase(IntroSequence.Cover))
+            // One frame every 16 ms, the last at 656 ms, past its end; the loop then idles, framing nothing.
+            assertEquals(41, spy.frames.size)
+            assertEquals(656_000_000L, spy.frames.last())
+            job.cancel()
+        }
 
     @Test
     fun `the deck's top card plays, and each card shown in turn plays in its turn`() {
@@ -125,6 +189,18 @@ class IntroClockTest {
     }
 
     @Test
+    fun `a card registered before it is shown plays its beats as it comes on top`() {
+        val spy = HapticsSpy()
+        val clock = clock(haptics = spy)
+        clock.register(weeks) { beats }
+        clock.isActive = true
+        assertTrue(spy.played.isEmpty())
+        clock.show(weeks)
+        assertTrue(clock.isPlaying(weeks))
+        assertEquals(listOf(beats), spy.beats)
+    }
+
+    @Test
     fun `a card with no beats to play lands at once, silent`() {
         val spy = HapticsSpy()
         val clock = clock(haptics = spy)
@@ -149,6 +225,26 @@ class IntroClockTest {
         assertEquals(listOf(weeks), spy.stopped)
         clock.leave(persons)
         assertFalse(ledger.contains(october, persons))
+    }
+
+    @Test
+    fun `a waiting card on top that leaves stays waiting and unrecorded, and plays only once shown again`() {
+        val ledger = IntroLedger()
+        val spy = HapticsSpy()
+        val clock = clock(ledger, spy)
+        clock.register(weeks) { beats }
+        // On top of a page not focused yet, it waits; then its host leaves.
+        clock.show(weeks)
+        clock.leave(weeks)
+        assertEquals(IntroClock.Phase.Waiting, clock.phase(weeks))
+        assertFalse(ledger.contains(october, weeks))
+        // Focused, with its host back: it is no longer on top until the deck says so.
+        clock.isActive = true
+        clock.register(weeks) { beats }
+        assertEquals(IntroClock.Phase.Waiting, clock.phase(weeks))
+        assertTrue(spy.played.isEmpty())
+        clock.show(weeks)
+        assertTrue(clock.isPlaying(weeks))
     }
 
     @Test
@@ -285,5 +381,16 @@ class IntroClockTest {
         clock.isActive = false
         clock.landed(weeks)
         assertEquals(listOf(IntroTick.arrive), spy.ticks)
+    }
+}
+
+/** A frame every 16 ms of the test's virtual time, stamped with that time in nanos: the clock's `now` base. */
+@OptIn(ExperimentalCoroutinesApi::class)
+private class SixteenMillisFrames(
+    private val scheduler: TestCoroutineScheduler,
+) : MonotonicFrameClock {
+    override suspend fun <R> withFrameNanos(onFrame: (frameTimeNanos: Long) -> R): R {
+        delay(16)
+        return onFrame(scheduler.currentTime * 1_000_000)
     }
 }

@@ -11,6 +11,9 @@ class HapticsSpy : IntroHapticPlaying {
     val stoppedMonths = mutableListOf<YearMonth>()
     val ticks = mutableListOf<IntroTick>()
 
+    /** Each frame the clock passed on, in nanos. */
+    val frames = mutableListOf<Long>()
+
     override fun play(
         sequence: IntroSequence,
         month: YearMonth,
@@ -32,5 +35,13 @@ class HapticsSpy : IntroHapticPlaying {
 
     override fun tick(tick: IntroTick) {
         ticks += tick
+    }
+
+    override fun frame(
+        sequence: IntroSequence,
+        month: YearMonth,
+        nanos: Long,
+    ) {
+        frames += nanos
     }
 }
