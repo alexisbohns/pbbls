@@ -63,6 +63,7 @@ import app.pbbls.android.features.path.wrap.month.MonthIntro
 import app.pbbls.android.features.path.wrap.month.MonthPage
 import app.pbbls.android.features.path.wrap.month.MonthPagePlaceholder
 import app.pbbls.android.features.path.wrap.shown
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
 import java.time.YearMonth
@@ -321,6 +322,10 @@ fun PathContent(
             steeredTo[0] = index
             try {
                 if (reduceMotion) pagerState.scrollToPage(index) else pagerState.animateScrollToPage(index)
+            } catch (e: CancellationException) {
+                // A drag or a newer focus cut the steer short: it no longer mutes a swipe onto its page.
+                if (steeredTo[0] == index) steeredTo[0] = -1
+                throw e
             } finally {
                 steering[0] -= 1
             }

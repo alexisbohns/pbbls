@@ -159,6 +159,9 @@ internal fun MonthDeckPager(
                     Modifier
                         // An earlier card lies over a later one.
                         .zIndex((cards.size - index).toFloat())
+                        // Only the top card speaks to Switch and Voice Access: the one beneath waits under it.
+                        // (TalkBack never sees the deck: touch exploration draws the plain page.)
+                        .then(if (index == pager.settledPage) Modifier else Modifier.clearAndSetSemantics {})
                         .graphicsLayer {
                             // The layer is the page: its height is the page's, its bottom the page's bottom.
                             val d = pager.getOffsetDistanceInPages(index)

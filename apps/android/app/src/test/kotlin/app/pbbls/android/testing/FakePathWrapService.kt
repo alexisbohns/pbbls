@@ -12,7 +12,8 @@ import java.time.ZoneId
 /**
  * In-memory [PathWrapServicing] (#1207). The strip defaults to empty, which leaves the Path on the
  * feed's own weeks; a week answers from [weeks], or with an empty wrap. Months are not armed until
- * the month page renders them, so they throw.
+ * the month page renders them, so they throw. A whole-app test that arms a month calls
+ * `AppUiTest.drawPlainMonthPages()` before `launch()`, or the month's deck plays and never lands.
  */
 class FakePathWrapService(
     var strip: Strip = Strip(emptyList()),

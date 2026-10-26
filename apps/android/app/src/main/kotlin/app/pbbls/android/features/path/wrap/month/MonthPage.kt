@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,8 +31,11 @@ import java.time.ZoneId
 
 private val PAGE_BOTTOM = 96.dp
 
-/** What a month page needs to play its intro (#1242 D20): the launch's ledger and the haptics. Null: no intro. */
-@Immutable
+/**
+ * What a month page needs to play its intro (#1242 D20): the launch's ledger and the haptics. Null: no intro.
+ * Stable, not immutable: the ledger it holds records what plays.
+ */
+@Stable
 class MonthIntro(
     val ledger: IntroLedger,
     val haptics: IntroHapticPlaying?,
