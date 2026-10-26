@@ -205,6 +205,8 @@ struct DomainsSection: View {
     let lookups: WrapLookups
     let onMore: () -> Void
 
+    @Environment(\.monthCardRoom) private var room
+
     private var locale: Locale { SpineStrings.appLocale }
 
     var body: some View {
@@ -231,6 +233,8 @@ struct DomainsSection: View {
                     }
                 }
                 .padding(.horizontal, MonthLayout.sectionPadX)
+                // On a card, *more* stands at its foot (D13).
+                if room != nil { Spacer(minLength: 0) }
                 MoreLink(text: WrapCopy.moreDomains(domains.count, locale: locale), action: onMore)
                     .accessibilityHint(Text(verbatim: WrapCopy.tileHint(locale: locale)))
                     .padding(.horizontal, MonthLayout.sectionPadX)

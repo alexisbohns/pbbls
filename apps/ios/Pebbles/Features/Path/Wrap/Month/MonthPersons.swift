@@ -36,6 +36,8 @@ struct PersonsSection: View {
                         }
                     }
                     .padding(.horizontal, MonthLayout.sectionPadX)
+                    // On a card, *more* stands at its foot (D13).
+                    if room != nil { Spacer(minLength: 0) }
                     MoreLink(text: WrapCopy.morePersons(rows.count, locale: locale), action: onMore)
                         .accessibilityHint(Text(verbatim: WrapCopy.tileHint(locale: locale)))
                         .padding(.horizontal, MonthLayout.sectionPadX)

@@ -18,7 +18,7 @@ struct MonthDeckCard<Content: View>: View {
     let head: MonthHead?
     @ViewBuilder let content: Content
 
-    /// The content's own height, and the card's.
+    /// The content's height as laid out (its own, or the room when it fits), and the card's.
     @State private var ideal: CGFloat = 0
     @State private var room: CGFloat = 0
 
@@ -37,11 +37,11 @@ struct MonthDeckCard<Content: View>: View {
                     Color.clear
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { room = $0 }
                         .overlay(alignment: .top) {
-                            content
-                                .environment(\.monthCardRoom, room > 0 ? room : nil)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { ideal = $0 }
-                                .scaleEffect(fit, anchor: .top)
+                            MonthCardFill(room: room) {
+                                content.environment(\.monthCardRoom, room > 0 ? room : nil)
+                            }
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { ideal = $0 }
+                            .scaleEffect(fit, anchor: .top)
                         }
                 }
             }
@@ -52,6 +52,23 @@ struct MonthDeckCard<Content: View>: View {
 
     private var fit: CGFloat {
         ideal > room && room > 0 ? room / ideal : 1
+    }
+}
+
+/// Lays a card's content out in the room when it fits, so its spacers open
+/// and a section's *more* stands at the card's foot; past the room, at its own
+/// height, for the card to scale it down. Its height is the larger of the two.
+struct MonthCardFill: Layout {
+    let room: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let own = subviews.first?.sizeThatFits(ProposedViewSize(width: proposal.width, height: nil)) ?? .zero
+        return CGSize(width: proposal.width ?? own.width, height: max(own.height, room))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        subviews.first?.place(at: bounds.origin, anchor: .topLeading,
+                              proposal: ProposedViewSize(width: bounds.width, height: bounds.height))
     }
 }
 

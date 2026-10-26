@@ -102,6 +102,7 @@ The month page enters instead of appearing all at once. The month's name rises i
 - **Scope:** both changes reach the scrolled page too. Android follows in its own issue.
 
 **D13. Weeks and persons fill their card.** On the deck, their rows share the room under the title band: each row is `room / rows` tall, between the row minimum and a cap. The cairn and the avatar grow with their row, up to their own caps. The card passes its room down in the environment. On the scrolled page, rows keep their size.
+- **More at the foot:** on a card, the persons', emotions' and domains' *more* stands at the card's foot. Content that fits is laid out in the whole room (`MonthCardFill`), so a spacer before *more* opens; content past the room keeps its own height and scales down.
 
 **D14. The end card.** After the last section, the deck deals one more card, like the back of the deck:
 - **Layout:** the margin and stepper (the stepper counts the end card), no title band, then the month's name and a "Replay the month" button.

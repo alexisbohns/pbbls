@@ -9,6 +9,8 @@ struct EmotionGem: View {
     let lookups: WrapLookups
     let onMore: () -> Void
 
+    @Environment(\.monthCardRoom) private var room
+
     private var locale: Locale { SpineStrings.appLocale }
 
     var body: some View {
@@ -22,6 +24,8 @@ struct EmotionGem: View {
                 GemFigure(facets: gem.facets, palette: { lookups.family($0)?.palette }, labels: words.labels,
                           count: wrap.pebbles, countLabel: WrapCopy.gemPebbles(wrap.pebbles, locale: locale),
                           description: words.description)
+                // On a card, *more* stands at its foot (#1241 D13).
+                if room != nil { Spacer(minLength: 0) }
                 MoreLink(text: WrapCopy.moreEmotions(wrap.fineEmotions?.count ?? 0, locale: locale), action: onMore)
                     .accessibilityHint(Text(verbatim: WrapCopy.tileHint(locale: locale)))
                     .padding(.horizontal, MonthLayout.sectionPadX)
