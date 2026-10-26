@@ -737,4 +737,5 @@ Illustrations (`ChecklistIllustrations`), each a small real-component compositio
 
 ## As built
 
-(filled in by the implementer: the local reference baseline list from Task 0 Step 4, and any amendment)
+- **Local reference baseline (2026-10-27, iPhone 17 home, iOS 26.3, macOS 26.5.1):** 27 of 61 fail on the untouched tree, the known local set (memory note "iOS references fail locally"): `friday`, `insights`, `insightsAx2`, `largestType`, `midPress`, `midTurn`, `monday`, `mondayAx2`, `nineStones`, `noPhoto`, `photoRecto`, `photoVerso`, `picnic`, `print`, `publicCard`, `ratios`, `saturday`, `seams`, `seamsAx2`, `sheetPage`, `states`, `stressVerso`, `sunday`, `tiles`, `tilesAx2`, `tuesday`, `wednesday`. Their PNGs are in `apps/ios/build/baseline/reference-diffs/`; every later run must fail exactly these and render them byte-identical.
+- **Task 1 as built:** `Snapshot()`'s default `selected` is `.home` (so `reset()` lands on Home) while the decode fallback for a missing `selected` stays `.path`; the three existing tests that assumed Path first were updated. No `switch` outside `Features/Tabs` needed a `.home` arm.
