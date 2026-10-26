@@ -1,23 +1,26 @@
 package app.pbbls.android.features.path.wrap.month
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
@@ -29,6 +32,7 @@ import app.pbbls.android.core.designsystem.SpineLayoutTokens
 import app.pbbls.android.core.designsystem.dotMark
 import app.pbbls.android.core.model.wrap.CoverPebble
 import app.pbbls.android.core.model.wrap.MonthWrap
+import app.pbbls.android.core.ui.render.stone.SealPrint
 import app.pbbls.android.core.ui.render.stone.SealVariant
 import app.pbbls.android.core.ui.render.stone.drawSeal
 import app.pbbls.android.core.ui.render.stone.rememberSealPrint
@@ -47,6 +51,9 @@ private val STACK_OFFSET = 10.5.dp
 private val NUMERAL_OFFSET = 20.dp
 private val TIE = 12.dp
 private val SEAL_WIDTHS = listOf(14.dp, 17.dp, 20.dp)
+
+/** How far a popping seal's layer reaches past its box: its rim, half outside the outline, and the antialiasing. */
+private val SEAL_LAYER_PAD = 2.dp
 
 /** The ring has 32 slots from the foot, clockwise: day n sits in slot n, and the tie fills slot 0. */
 private const val SLOTS = 32
@@ -95,102 +102,62 @@ internal fun Garland(
     val measurer = rememberTextMeasurer()
     val pebbled = remember(cover) { cover.days.map { it.day }.toSet() }
     val numbered = remember(wrap) { wrap.numberedDays() }
+    // The one paint a popping seal's layer fades through, so a frame allocates none.
+    val layerPaint = remember { Paint() }
 
     Box(modifier.size(GARLAND), contentAlignment = Alignment.Center) {
-        Canvas(Modifier.matchParentSize().clearAndSetSemantics {}) {
-            val ring = RadialLayout(SLOTS, startDeg = 90f)
-            val r = RADIUS.toPx()
-            val start = ring.angleDeg(COURSE_INSET)
-            // The course, only as far as the newest day while they land.
-            val drawn = reveal(IntroKey.Course)
-            if (drawn > 0f) {
-                drawArc(
-                    color = colors.rule,
-                    startAngle = start,
-                    sweepAngle = Garland.courseSweep(drawn, reveal(IntroKey.Leaf), wrap.daysInMonth),
-                    useCenter = false,
-                    topLeft = Offset(center.x - r, center.y - r),
-                    size = Size(2 * r, 2 * r),
-                    style =
-                        Stroke(
-                            COURSE.toPx(),
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(COURSE_DASH.toPx(), COURSE_GAP.toPx())),
-                        ),
-                )
-            }
-            for (day in 0 until wrap.daysInMonth) {
-                if (day in pebbled) continue
-                val shown = reveal(IntroKey.Slot(day))
-                if (shown <= 0f) continue
-                val at = ring.point(day + 1, center, r)
-                if (shown < 1f) {
-                    val p = shown.toDouble()
-                    val color = colors.ink3.copy(alpha = colors.ink3.alpha * RevealMotion.popOpacity(p).toFloat())
-                    dotMark(
-                        at,
-                        SOCKET.toPx() * RevealMotion.popScale(p).toFloat(),
-                        DotStyle.SOCKET,
-                        color,
-                        SpineLayoutTokens.DOT_RING.toPx(),
-                    )
-                } else {
-                    dotMark(at, SOCKET.toPx(), DotStyle.SOCKET, colors.ink3, SpineLayoutTokens.DOT_RING.toPx())
-                }
-            }
-            placed.forEachIndexed { index, place ->
-                // A day's first seal lands on its slot's beat, a stacked one on its own.
-                val shown = reveal(if (place.index == 0) IntroKey.Slot(place.day) else IntroKey.Seal(place.day, place.index))
-                if (shown <= 0f) return@forEachIndexed
-                val slot = place.day + 1
-                val offset = (place.index - (place.count - 1) / 2f) * -STACK_OFFSET.toPx()
-                val at = ring.point(slot, center, r + offset)
-                val print = prints[index]
-                val w = SEAL_WIDTHS[(place.pebble.intensity - 1).coerceIn(0, 2)].toPx()
-                val h = w / print.aspectRatio
-                withTransform({
-                    translate(at.x, at.y)
-                    rotate(ring.angleDeg(slot) + 90f, Offset.Zero)
-                    if (shown < 1f) {
-                        val pop = RevealMotion.popScale(shown.toDouble()).toFloat()
-                        scale(pop, pop, Offset.Zero)
+        Spacer(
+            Modifier.matchParentSize().clearAndSetSemantics {}.drawWithCache {
+                // Built once per size and composition: each frame only reads the reveal and draws.
+                val ring = RadialLayout(SLOTS, startDeg = 90f)
+                val center = size.center
+                val r = RADIUS.toPx()
+                val start = ring.angleDeg(COURSE_INSET)
+                val arcTopLeft = Offset(center.x - r, center.y - r)
+                val arcSize = Size(2 * r, 2 * r)
+                val course =
+                    Stroke(COURSE.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(COURSE_DASH.toPx(), COURSE_GAP.toPx())))
+                val socket = SOCKET.toPx()
+                val dotRing = SpineLayoutTokens.DOT_RING.toPx()
+                val sockets =
+                    (0 until wrap.daysInMonth).filter { it !in pebbled }.map { day ->
+                        Socket(IntroKey.Slot(day), ring.point(day + 1, center, r))
                     }
-                    translate(-w / 2, -h / 2)
-                }) {
-                    if (shown < 1f) {
-                        // The seal overlaps its own paths, so it fades as one: a layer, only while it pops.
-                        val fade = Paint().apply { alpha = RevealMotion.popOpacity(shown.toDouble()).toFloat() }
-                        drawContext.canvas.saveLayer(Rect(-w / 2, -h / 2, w * 1.5f, h * 1.5f), fade)
-                        drawSeal(print, w)
-                        drawContext.canvas.restore()
-                    } else {
-                        drawSeal(print, w)
+                val pad = SEAL_LAYER_PAD.toPx()
+                val seals =
+                    placed.mapIndexed { index, place ->
+                        val slot = place.day + 1
+                        val offset = (place.index - (place.count - 1) / 2f) * -STACK_OFFSET.toPx()
+                        val print = prints[index]
+                        val w = SEAL_WIDTHS[(place.pebble.intensity - 1).coerceIn(0, 2)].toPx()
+                        val h = w / print.aspectRatio
+                        SealAt(
+                            // A day's first seal lands on its slot's beat, a stacked one on its own.
+                            key = if (place.index == 0) IntroKey.Slot(place.day) else IntroKey.Seal(place.day, place.index),
+                            at = ring.point(slot, center, r + offset),
+                            turn = ring.angleDeg(slot) + 90f,
+                            print = print,
+                            width = w,
+                            height = h,
+                            layer = Rect(-pad, -pad, w + pad, h + pad),
+                        )
                     }
-                }
-            }
-            numbered.forEach { day ->
-                val shown = reveal(IntroKey.Numeral(day))
-                if (shown <= 0f) return@forEach
-                val slot = day + 1
-                val stacked =
-                    cover.days
-                        .firstOrNull { it.day == day }
-                        ?.pebbles
-                        ?.size ?: 0
-                val at = ring.point(slot, center, r + NUMERAL_OFFSET.toPx() + if (stacked > 1) STACK_OFFSET.toPx() / 2 else 0f)
-                val text = measurer.measure((day + 1).toString(), type.dayLetter.copy(color = colors.ink3))
-                val topLeft = Offset(at.x - text.size.width / 2f, at.y - text.size.height / 2f)
-                if (shown < 1f) {
-                    drawText(text, topLeft = topLeft, alpha = RevealMotion.easeOut(shown.toDouble()).toFloat())
-                } else {
-                    drawText(text, topLeft = topLeft)
-                }
-            }
-            // The tie: a leaf at the foot, where the course parts.
-            val tied = reveal(IntroKey.Leaf)
-            if (tied > 0f) {
+                val style = type.dayLetter.copy(color = colors.ink3)
+                val numerals =
+                    numbered.map { day ->
+                        val stacked =
+                            cover.days
+                                .firstOrNull { it.day == day }
+                                ?.pebbles
+                                ?.size ?: 0
+                        val at = ring.point(day + 1, center, r + NUMERAL_OFFSET.toPx() + if (stacked > 1) STACK_OFFSET.toPx() / 2 else 0f)
+                        val text = measurer.measure((day + 1).toString(), style)
+                        Numeral(IntroKey.Numeral(day), text, Offset(at.x - text.size.width / 2f, at.y - text.size.height / 2f))
+                    }
+                // The tie: a leaf at the foot, where the course parts.
                 val foot = ring.point(0, center, r)
                 val leaf = TIE.toPx()
-                val path =
+                val leafPath =
                     Path().apply {
                         moveTo(foot.x, foot.y - leaf / 2)
                         quadraticTo(foot.x + leaf / 2, foot.y, foot.x, foot.y + leaf / 2)
@@ -198,19 +165,83 @@ internal fun Garland(
                     }
                 val veinTop = Offset(foot.x, foot.y - leaf / 2.6f)
                 val veinFoot = Offset(foot.x, foot.y + leaf / 2.6f)
-                if (tied < 1f) {
-                    val pop = RevealMotion.popScale(tied.toDouble()).toFloat()
-                    val alpha = RevealMotion.popOpacity(tied.toDouble()).toFloat()
-                    withTransform({ scale(pop, pop, foot) }) {
-                        drawPath(path, colors.ink2, alpha = alpha)
-                        drawLine(colors.ground, veinTop, veinFoot, COURSE.toPx(), alpha = alpha)
+                val vein = COURSE.toPx()
+
+                onDrawBehind {
+                    // The course, only as far as the newest day while they land.
+                    val drawn = reveal(IntroKey.Course)
+                    if (drawn > 0f) {
+                        drawArc(
+                            color = colors.rule,
+                            startAngle = start,
+                            sweepAngle = Garland.courseSweep(drawn, reveal(IntroKey.Leaf), wrap.daysInMonth),
+                            useCenter = false,
+                            topLeft = arcTopLeft,
+                            size = arcSize,
+                            style = course,
+                        )
                     }
-                } else {
-                    drawPath(path, colors.ink2)
-                    drawLine(colors.ground, veinTop, veinFoot, COURSE.toPx())
+                    sockets.forEach { (key, at) ->
+                        val shown = reveal(key)
+                        if (shown <= 0f) return@forEach
+                        if (shown < 1f) {
+                            val p = shown.toDouble()
+                            val color = colors.ink3.copy(alpha = colors.ink3.alpha * RevealMotion.popOpacity(p).toFloat())
+                            dotMark(at, socket * RevealMotion.popScale(p).toFloat(), DotStyle.SOCKET, color, dotRing)
+                        } else {
+                            dotMark(at, socket, DotStyle.SOCKET, colors.ink3, dotRing)
+                        }
+                    }
+                    seals.forEach { seal ->
+                        val shown = reveal(seal.key)
+                        if (shown <= 0f) return@forEach
+                        withTransform({
+                            translate(seal.at.x, seal.at.y)
+                            rotate(seal.turn, Offset.Zero)
+                            if (shown < 1f) {
+                                val pop = RevealMotion.popScale(shown.toDouble()).toFloat()
+                                scale(pop, pop, Offset.Zero)
+                            }
+                            translate(-seal.width / 2, -seal.height / 2)
+                        }) {
+                            val opacity = RevealMotion.popOpacity(shown.toDouble()).toFloat()
+                            if (opacity < 1f) {
+                                // The seal overlaps its own paths, so it fades as one: a layer, only while it fades in.
+                                layerPaint.alpha = opacity
+                                drawContext.canvas.saveLayer(seal.layer, layerPaint)
+                                drawSeal(seal.print, seal.width)
+                                drawContext.canvas.restore()
+                            } else {
+                                drawSeal(seal.print, seal.width)
+                            }
+                        }
+                    }
+                    numerals.forEach { (key, text, topLeft) ->
+                        val shown = reveal(key)
+                        if (shown <= 0f) return@forEach
+                        if (shown < 1f) {
+                            drawText(text, topLeft = topLeft, alpha = RevealMotion.easeOut(shown.toDouble()).toFloat())
+                        } else {
+                            drawText(text, topLeft = topLeft)
+                        }
+                    }
+                    val tied = reveal(IntroKey.Leaf)
+                    if (tied > 0f) {
+                        if (tied < 1f) {
+                            val pop = RevealMotion.popScale(tied.toDouble()).toFloat()
+                            val alpha = RevealMotion.popOpacity(tied.toDouble()).toFloat()
+                            withTransform({ scale(pop, pop, foot) }) {
+                                drawPath(leafPath, colors.ink2, alpha = alpha)
+                                drawLine(colors.ground, veinTop, veinFoot, vein, alpha = alpha)
+                            }
+                        } else {
+                            drawPath(leafPath, colors.ink2)
+                            drawLine(colors.ground, veinTop, veinFoot, vein)
+                        }
+                    }
                 }
-            }
-        }
+            },
+        )
         inner()
     }
 }
@@ -253,4 +284,28 @@ private class Placed(
     val index: Int,
     val count: Int,
     val pebble: CoverPebble,
+)
+
+/** An empty day's socket on the ring: its beat's key and its centre. */
+private data class Socket(
+    val key: IntroKey,
+    val at: Offset,
+)
+
+/** A seal on the ring: its beat's key, its centre and turn, its print and size, and the box its fading layer covers. */
+private class SealAt(
+    val key: IntroKey,
+    val at: Offset,
+    val turn: Float,
+    val print: SealPrint,
+    val width: Float,
+    val height: Float,
+    val layer: Rect,
+)
+
+/** A day's numeral: its beat's key, its laid-out text and where it sits. */
+private data class Numeral(
+    val key: IntroKey,
+    val text: TextLayoutResult,
+    val topLeft: Offset,
 )

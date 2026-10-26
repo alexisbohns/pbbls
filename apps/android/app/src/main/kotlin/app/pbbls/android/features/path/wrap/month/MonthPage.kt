@@ -54,8 +54,7 @@ fun MonthPage(
     val copy = rememberWrapCopy()
     val onMore: (MonthSection) -> Unit = { sheet = it.name }
     if (intro != null) {
-        val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
-        IntroDrive(intro, active = lifecycle.isAtLeast(Lifecycle.State.RESUMED))
+        DriveWhileResumed(intro)
         // The cover is the page's only card for now: the deck's top card from the start.
         LaunchedEffect(intro) { intro.show(IntroSequence.Cover) }
     }
@@ -97,4 +96,11 @@ fun MonthPage(
             onPageChange = { sheet = it.name },
         )
     }
+}
+
+/** Drives [intro] while the activity is resumed. Its own scope, so a pause or a resume recomposes only this. */
+@Composable
+private fun DriveWhileResumed(intro: IntroClock) {
+    val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
+    IntroDrive(intro, active = lifecycle.isAtLeast(Lifecycle.State.RESUMED))
 }
