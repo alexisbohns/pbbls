@@ -40,7 +40,8 @@ struct MonthPage: View {
         self.onOpen = onOpen
         // Built with the page, not on appear: a first frame without it would draw settled, then blank.
         _intro = State(initialValue: context.map {
-            IntroClock(month: wrap.month, order: IntroClock.order(wrap), ledger: $0.ledger, haptics: $0.haptics)
+            IntroClock(month: wrap.month, order: IntroClock.order(wrap), ledger: $0.ledger, haptics: $0.haptics,
+                       tempo: $0.tempo)
         })
     }
 

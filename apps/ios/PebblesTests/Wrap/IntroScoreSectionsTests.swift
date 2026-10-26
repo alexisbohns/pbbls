@@ -5,12 +5,14 @@ import Testing
 /// #1241 §Choreography, the sections.
 @Suite("Intro score: the sections")
 struct IntroScoreSectionsTests {
-    @Test("a list: the head ticks, then each row 70 ms apart, and more with the last")
+    @Test("a list: the head ticks its arrival, then each row 70 ms apart, and more with the last")
     func rows() throws {
         let beats = IntroScore.rows(count: 3, hasLead: false, more: true)
         let header = try #require(beats.first { $0.key == .header })
         #expect(header.at == 0)
-        #expect(header.tick == .light)
+        // Drawn from the start (D8): its beat is the arrival's tick alone.
+        #expect(header.duration == 0)
+        #expect(header.tick == .arrive)
         #expect(!beats.contains { $0.key == .lead })
         let rows = (0..<3).compactMap { row in beats.first { $0.key == .row(row) } }
         #expect(rows.map(\.at) == [IntroScore.rowsAt, IntroScore.rowsAt + 0.07, IntroScore.rowsAt + 0.14])
@@ -19,6 +21,13 @@ struct IntroScoreSectionsTests {
         #expect(more.at == rows[2].at)
         #expect(more.tick == nil)
         #expect(!IntroScore.rows(count: 2, hasLead: false, more: false).contains { $0.key == .more })
+    }
+
+    @Test("a one-row list's head is the arrival alone")
+    func arrival() throws {
+        let header = try #require(IntroScore.rows(count: 1, hasLead: false, more: false).first { $0.key == .header })
+        #expect(header.duration == 0)
+        #expect(header.tick == .arrive)
     }
 
     @Test("a person: glyph, name, then the ring, a dot as the line reaches each day; the next row after")

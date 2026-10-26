@@ -57,14 +57,16 @@ extension IntroScore {
     }
 
     /// A section's head: the insights head first when it leads tone or hours,
-    /// then the head, then the lead line if any.
+    /// then the head, then the lead line if any. One arrival per chapter: the
+    /// insights head ticks it when it leads, the head otherwise.
     static func head(hasLead: Bool, insights: Bool) -> [IntroBeat] {
+        // Drawn from the start (D8): the head's beat is the arrival's tick alone.
         var beats: [IntroBeat] = []
         if insights {
-            beats.append(IntroBeat(key: .insights, at: 0, duration: IntroMotion.rise, tick: .light))
+            beats.append(IntroBeat(key: .insights, at: 0, duration: 0, tick: .arrive))
         }
         let shift = shift(insights)
-        beats.append(IntroBeat(key: .header, at: shift, duration: IntroMotion.rise, tick: .light))
+        beats.append(IntroBeat(key: .header, at: shift, duration: 0, tick: insights ? nil : .arrive))
         if hasLead {
             beats.append(IntroBeat(key: .lead, at: shift + leadAt, duration: IntroMotion.rise))
         }

@@ -3,11 +3,12 @@ import Foundation
 import Testing
 @testable import Pebbles
 
-/// A stand-in that records what the clock asked of the haptics.
+/// A stand-in that records what the clock asked of the haptics (also `IntroTempoTests`').
 @MainActor
-private final class HapticsSpy: IntroHapticPlaying {
+final class HapticsSpy: IntroHapticPlaying {
     var prepared = 0
     var played: [IntroSequence] = []
+    var beats: [[IntroBeat]] = []
     var starts: [Date] = []
     var stopped: [IntroSequence] = []
     var stoppedMonths: [CalendarMonth] = []
@@ -16,6 +17,7 @@ private final class HapticsSpy: IntroHapticPlaying {
 
     func play(_ sequence: IntroSequence, of month: CalendarMonth, beats: [IntroBeat], startingAt begin: Date) {
         played.append(sequence)
+        self.beats.append(beats)
         starts.append(begin)
     }
 
@@ -36,10 +38,11 @@ struct IntroClockTests {
     private let beats = [IntroBeat(key: .header, at: 0, duration: 0.28, tick: .light),
                          IntroBeat(key: .row(0), at: 0.32, duration: 0.28, tick: .light)]
 
+    /// At tempo 1, so the beats play at the times they name (`IntroTempoTests` pins the scaling).
     private func clock(_ ledger: IntroLedger? = nil, haptics: HapticsSpy? = nil) -> IntroClock {
         let now = base
         return IntroClock(month: october, order: [.cover, weeks, .section(.persons)], ledger: ledger ?? IntroLedger(),
-                          haptics: haptics, now: { now }, schedules: false)
+                          haptics: haptics, tempo: IntroTempo(cover: 1, sections: 1), now: { now }, schedules: false)
     }
 
     @Test("a sequence waits hidden, plays once the page is active, and lands at its end")
@@ -72,22 +75,22 @@ struct IntroClockTests {
         #expect(spy.stopped == [.cover])
     }
 
-    @Test("a report under the entry line doesn't enter; one wholly out leaves")
+    @Test("a report enters once its top reaches the top of the page; one wholly out leaves")
     func reports() {
         let clock = clock()
         clock.isActive = true
         let report = { (sequence: IntroSequence, y: CGFloat) in
             clock.report(sequence, beats: { beats }, frame: CGRect(x: 0, y: y, width: 10, height: 100), viewport: 800)
         }
-        report(.cover, 600)
+        report(.cover, 0)
         #expect(clock.isPlaying(.cover))
-        report(weeks, 700)
+        report(weeks, 300)
         clock.advance(to: base.addingTimeInterval(1))
         #expect(clock.phase(.cover) == .settled)
         #expect(clock.phase(weeks) == .waiting)
-        report(weeks, 600)
+        report(weeks, 1)
         #expect(clock.isPlaying(weeks))
-        report(weeks, 800)
+        report(weeks, -100)
         #expect(clock.phase(weeks) == .settled)
     }
 

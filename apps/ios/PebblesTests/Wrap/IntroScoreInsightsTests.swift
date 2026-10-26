@@ -20,14 +20,27 @@ struct IntroScoreInsightsTests {
         #expect(last.tick == .light)
     }
 
-    @Test("leading the insights, the head comes first and the rest shifts")
+    @Test("leading the insights, the head comes first and ticks the arrival, and the rest shifts")
     func insights() throws {
         let beats = IntroScore.tone(days: [ToneDay(up: 1, even: 0, down: 0)], insights: true)
         #expect(beats.first?.key == .insights)
+        #expect(beats.first?.tick == .arrive)
         let header = try #require(beats.first { $0.key == .header })
         #expect(header.at == IntroScore.insightsShift)
+        // One arrival per chapter: the section's own head stays silent under the insights head.
+        #expect(header.tick == nil)
         let sweep = try #require(beats.first { $0.key == .sweep })
         #expect(abs(sweep.at - IntroScore.insightsShift - IntroScore.sweepAt) < 1e-12)
+    }
+
+    @Test("the insights head alone is the arrival's tick, drawn from the start")
+    func insightsHead() throws {
+        let beats = IntroScore.insightsHead()
+        #expect(beats.count == 1)
+        let head = try #require(beats.first)
+        #expect(head.key == .insights)
+        #expect(head.tick == .arrive)
+        #expect(head.duration == 0)
     }
 
     @Test("the hours: the dial, then one stone per mark, slow-fast-slow")

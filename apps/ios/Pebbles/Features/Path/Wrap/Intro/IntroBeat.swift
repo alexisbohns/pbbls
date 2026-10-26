@@ -29,13 +29,15 @@ struct IntroTick: Hashable, Sendable {
 
     /// An empty day on the garland.
     static let faint = IntroTick(intensity: 0.22, sharpness: 0.25)
-    /// Heads, rows, texts, glyphs, ring dots, tone days, hour stones.
+    /// Rows, texts, glyphs, ring dots, tone days, hour stones.
     static let light = IntroTick(intensity: 0.40, sharpness: 0.45)
     static let facet = IntroTick(intensity: 0.60, sharpness: 0.55)
     /// The garland's leaf, tying the ring.
     static let knot = IntroTick(intensity: 0.75, sharpness: 0.35)
     /// The gem's count.
     static let firm = IntroTick(intensity: 0.90, sharpness: 0.70)
+    /// A chapter arriving at the top of the page (D8): firm, rounded.
+    static let arrive = IntroTick(intensity: 0.6, sharpness: 0.15)
 
     /// A seal on the garland, firmer with its pebble's intensity, 1…3.
     static func seal(_ intensity: Int) -> IntroTick {

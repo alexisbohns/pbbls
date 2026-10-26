@@ -8,9 +8,9 @@ extension IntroScore {
     static let stonesAt: TimeInterval = 0.52
     static let stonesSpan: TimeInterval = 1.2
 
-    /// The insights head alone, over a figure that draws nothing.
+    /// The insights head alone, over a figure that draws nothing: the arrival's tick (D8).
     static func insightsHead() -> [IntroBeat] {
-        [IntroBeat(key: .insights, at: 0, duration: IntroMotion.rise, tick: .light)]
+        [IntroBeat(key: .insights, at: 0, duration: 0, tick: .arrive)]
     }
 
     /// The tone: its head (after the insights head when it leads them) and its

@@ -3,10 +3,11 @@ import Foundation
 import Observation
 import os
 
-/// What a month page needs to play its intro: the launch's ledger and the haptics (nil: silent).
+/// What a month page needs to play its intro: the launch's ledger, the haptics (nil: silent) and the tempo.
 struct IntroContext {
     let ledger: IntroLedger
     let haptics: IntroHapticPlaying?
+    var tempo = IntroTempo.standard
 }
 
 /// Where a sequence sits in its page's viewport (#1241 §Lifecycle).
@@ -15,12 +16,13 @@ enum IntroViewport {
         case entered, between, out
     }
 
-    /// A sequence enters once its top passes this share of the viewport's height.
-    static let entryLine: CGFloat = 0.85
+    /// A chapter arrives once its top is this close to the top of the page.
+    static let arrival: CGFloat = 2
 
+    /// Entered once its top reaches the top of the page (or while it covers it); out once wholly off it.
     static func place(_ frame: CGRect, viewport: CGFloat) -> Place {
         if frame.maxY <= 0 || frame.minY >= viewport { return .out }
-        return frame.minY < viewport * entryLine ? .entered : .between
+        return frame.minY <= arrival ? .entered : .between
     }
 }
 
@@ -54,6 +56,8 @@ final class IntroClock {
     let month: CalendarMonth
     /// A reference's instant: every playing sequence is drawn at it, and nothing moves.
     @ObservationIgnored let frozenAt: Date?
+    /// How much slower than its score each sequence plays (D9); a frozen clock draws its beats as given.
+    @ObservationIgnored let tempo: IntroTempo
 
     private var phases: [IntroSequence: Phase] = [:]
     @ObservationIgnored private var keyed: [IntroSequence: [IntroKey: IntroBeat]] = [:]
@@ -88,17 +92,19 @@ final class IntroClock {
 
     /// `schedules: false` leaves the landing to `advance(to:)`, for the tests.
     convenience init(month: CalendarMonth, order: [IntroSequence], ledger: IntroLedger,
-                     haptics: IntroHapticPlaying?, now: @escaping () -> Date = Date.init, schedules: Bool = true) {
-        self.init(month: month, order: order, ledger: ledger, haptics: haptics, now: now, schedules: schedules,
-                  frozenAt: nil)
+                     haptics: IntroHapticPlaying?, tempo: IntroTempo = .standard,
+                     now: @escaping () -> Date = Date.init, schedules: Bool = true) {
+        self.init(month: month, order: order, ledger: ledger, haptics: haptics, tempo: tempo, now: now,
+                  schedules: schedules, frozenAt: nil)
     }
 
     private init(month: CalendarMonth, order: [IntroSequence], ledger: IntroLedger, haptics: IntroHapticPlaying?,
-                 now: @escaping () -> Date, schedules: Bool, frozenAt: Date?) {
+                 tempo: IntroTempo, now: @escaping () -> Date, schedules: Bool, frozenAt: Date?) {
         self.month = month
         self.order = order
         self.ledger = ledger
         self.haptics = haptics
+        self.tempo = tempo
         self.now = now
         self.schedules = schedules
         self.frozenAt = frozenAt
@@ -109,12 +115,13 @@ final class IntroClock {
         [.cover] + wrap.sections.map { .section($0) }
     }
 
-    /// A reference's clock: `sequence` playing, drawn `elapsed` seconds in.
+    /// A reference's clock: `sequence` playing, drawn `elapsed` seconds in, its beats unscaled.
     static func frozen(month: CalendarMonth, sequence: IntroSequence, beats: [IntroBeat],
                        elapsed: TimeInterval) -> IntroClock {
         let start = Date(timeIntervalSinceReferenceDate: 0)
         let clock = IntroClock(month: month, order: [sequence], ledger: IntroLedger(), haptics: nil,
-                               now: { start }, schedules: false, frozenAt: start.addingTimeInterval(elapsed))
+                               tempo: .standard, now: { start }, schedules: false,
+                               frozenAt: start.addingTimeInterval(elapsed))
         clock.keyed[sequence] = index(beats)
         clock.phases[sequence] = .playing(start)
         return clock
@@ -229,7 +236,8 @@ final class IntroClock {
         guard isActive, ends.isEmpty else { return }
         let rank = { (sequence: IntroSequence) in self.order.firstIndex(of: sequence) ?? self.order.count }
         guard let next = inView.filter({ phase($0) == .waiting }).min(by: { rank($0) < rank($1) }) else { return }
-        start(next, beats: latest[next]?() ?? [])
+        // At its tempo: the keyed beats, the end and the haptics all play the scaled score.
+        start(next, beats: latest[next]?().map { $0.scaled(by: tempo.factor(next)) } ?? [])
     }
 
     private func start(_ sequence: IntroSequence, beats: [IntroBeat]) {

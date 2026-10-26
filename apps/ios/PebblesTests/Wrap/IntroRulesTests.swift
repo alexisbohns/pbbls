@@ -7,16 +7,18 @@ import Testing
 @Suite("Intro rules")
 @MainActor
 struct IntroRulesTests {
-    @Test("a sequence enters once its top passes 85% of the viewport, and leaves once wholly off it")
+    @Test("a chapter enters once its top reaches the top of the page, or while it covers it; out once off it")
     func viewport() {
-        func place(_ y: CGFloat) -> IntroViewport.Place {
+        func place(y: CGFloat) -> IntroViewport.Place {
             IntroViewport.place(CGRect(x: 0, y: y, width: 10, height: 100), viewport: 800)
         }
-        #expect(place(600) == .entered)
-        #expect(place(-50) == .entered)
-        #expect(place(700) == .between)
-        #expect(place(800) == .out)
-        #expect(place(-100) == .out)
+        #expect(place(y: 0) == .entered)
+        #expect(place(y: 1.5) == .entered)
+        #expect(place(y: -50) == .entered)
+        #expect(place(y: 3) == .between)
+        #expect(place(y: 600) == .between)
+        #expect(place(y: 800) == .out)
+        #expect(place(y: -100) == .out)
     }
 
     @Test("no intro under Reduce Motion or while VoiceOver runs")
