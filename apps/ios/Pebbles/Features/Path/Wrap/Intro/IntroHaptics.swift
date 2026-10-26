@@ -26,6 +26,15 @@ struct IntroHapticSwell: Hashable, Sendable {
     let at: TimeInterval
     let duration: TimeInterval
     let swell: IntroSwell
+
+    /// How long it sounds: it stops a floor before its beat ends, so the tick closing the beat stands alone.
+    var sounding: TimeInterval { max(duration - IntroHaptics.floor, duration / 2) }
+
+    /// The intensity control over its life, relative to `at`: from `from` to `to` as it sounds, then back to
+    /// full by the beat's end. The control scales every event while it holds, the closing tick too.
+    var control: [(at: TimeInterval, value: Float)] {
+        [(0, swell.from), (sounding, swell.to), (duration, 1)]
+    }
 }
 
 /// The month intro's haptics (#1241 D5): each sequence as one Core Haptics
@@ -92,13 +101,12 @@ final class IntroHaptics: IntroHapticPlaying {
             events.append(CHHapticEvent(eventType: .hapticContinuous, parameters: [
                 CHHapticEventParameter(parameterID: .hapticIntensity, value: 1),
                 CHHapticEventParameter(parameterID: .hapticSharpness, value: swell.swell.sharpness)
-            ], relativeTime: swell.at, duration: swell.duration))
-            // The control scales every event while it holds: back to full once the swell is over.
-            curves.append(CHHapticParameterCurve(parameterID: .hapticIntensityControl, controlPoints: [
-                CHHapticParameterCurve.ControlPoint(relativeTime: 0, value: swell.swell.from),
-                CHHapticParameterCurve.ControlPoint(relativeTime: swell.duration, value: swell.swell.to),
-                CHHapticParameterCurve.ControlPoint(relativeTime: swell.duration + Self.floor, value: 1)
-            ], relativeTime: swell.at))
+            ], relativeTime: swell.at, duration: swell.sounding))
+            let points = swell.control.map {
+                CHHapticParameterCurve.ControlPoint(relativeTime: $0.at, value: $0.value)
+            }
+            curves.append(CHHapticParameterCurve(parameterID: .hapticIntensityControl, controlPoints: points,
+                                                 relativeTime: swell.at))
         }
         guard !events.isEmpty else { return }
         stop(sequence, of: month)

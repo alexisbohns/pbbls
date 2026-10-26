@@ -52,4 +52,15 @@ struct IntroHapticsTests {
         let still = IntroBeat(key: .gauge(0), at: 0, duration: 0, swell: IntroSwell(from: 0, to: 1, sharpness: 0))
         #expect(IntroHaptics.swells(for: [still]).isEmpty)
     }
+
+    @Test("a swell falls silent a floor before its gauge is full, and the full tick plays at its own strength")
+    func swellControl() throws {
+        let beats = IntroScore.domains(shares: [0.25], more: false)
+        let swell = try #require(IntroHaptics.swells(for: beats).first)
+        let full = try #require(beats.first { $0.key == .full(0) })
+        #expect(abs(swell.at + swell.duration - full.at) < 1e-9)
+        #expect(abs(swell.duration - swell.sounding - IntroHaptics.floor) < 1e-9)
+        #expect(swell.control.map { $0.at } == [0, swell.sounding, swell.duration])
+        #expect(swell.control.map { $0.value } == [swell.swell.from, swell.swell.to, 1])
+    }
 }
