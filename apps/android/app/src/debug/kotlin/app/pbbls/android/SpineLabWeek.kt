@@ -1,12 +1,22 @@
 package app.pbbls.android
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.PathMoment
@@ -14,6 +24,11 @@ import app.pbbls.android.features.path.spine.SpinePebble
 import app.pbbls.android.features.path.spine.SpineWeek
 import app.pbbls.android.features.path.spine.StonePressRequests
 import app.pbbls.android.features.path.spine.WeekNeighbour
+import app.pbbls.android.features.path.wrap.intro.IntroClock
+import app.pbbls.android.features.path.wrap.intro.IntroHapticTier
+import app.pbbls.android.features.path.wrap.intro.IntroLedger
+import app.pbbls.android.features.path.wrap.intro.rememberIntroAllowed
+import app.pbbls.android.features.path.wrap.intro.rememberIntroVibrator
 import app.pbbls.android.features.path.wrap.month.MonthPage
 
 /*
@@ -44,20 +59,48 @@ internal fun SpineLabWeek(modifier: Modifier = Modifier) {
     )
 }
 
-/** The fixture's October page (#1207): the lab's Month tab, the day view switchable but not saved. */
+/**
+ * The fixture's October page (#1207): the lab's Month tab, the day view switchable but not saved. Its
+ * cover plays the month's intro (#1242) with its own ledger: Replay plays it again, and the chips
+ * force a haptic tier (Auto is the phone's own).
+ */
 @Composable
 internal fun SpineLabMonth(modifier: Modifier = Modifier) {
     var view by remember { mutableStateOf(DayView.CIRCLE) }
-    Surface(color = PebblesTheme.spine.colors.ground, modifier = modifier) {
-        MonthPage(
-            wrap = SpineFixtureWeek.monthWrap,
-            lookups = SpineFixtureWeek.lookups,
-            dayView = view,
-            onDayView = { view = it },
-            onWeek = {},
-            onOpen = {},
-            zone = SpineFixtureWeek.zone,
-        )
+    val ledger = remember { IntroLedger() }
+    var run by remember { mutableIntStateOf(0) }
+    var forced by remember { mutableStateOf<IntroHapticTier?>(null) }
+    val haptics = rememberIntroVibrator(forced = forced)
+    val allowed = rememberIntroAllowed()
+    val month = SpineFixtureWeek.monthWrap.month
+    val clock = remember(run, haptics, allowed) { if (allowed) IntroClock(month, ledger, haptics) else null }
+    Column(modifier) {
+        Row(
+            Modifier.padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Button(onClick = {
+                ledger.reset(month)
+                run += 1
+            }) { Text("Replay") }
+            listOf(null, IntroHapticTier.COMPOSITION, IntroHapticTier.WAVEFORM, IntroHapticTier.VIEW).forEach { tier ->
+                FilterChip(selected = forced == tier, onClick = { forced = tier }, label = { Text(tier?.name?.take(1) ?: "Auto") })
+            }
+        }
+        Text("tier ${haptics.tier}", Modifier.padding(horizontal = 12.dp))
+        Surface(color = PebblesTheme.spine.colors.ground, modifier = Modifier.weight(1f)) {
+            MonthPage(
+                wrap = SpineFixtureWeek.monthWrap,
+                lookups = SpineFixtureWeek.lookups,
+                dayView = view,
+                onDayView = { view = it },
+                onWeek = {},
+                onOpen = {},
+                intro = clock,
+                zone = SpineFixtureWeek.zone,
+            )
+        }
     }
 }
 
