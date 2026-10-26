@@ -20,6 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
@@ -361,6 +362,8 @@ private fun StoneRings(
             scaleX = scale()
             scaleY = scale()
             alpha = strength
+            // The halo and rings draw past the box; an offscreen layer (alpha < 1) would clip them to it.
+            compositingStrategy = CompositingStrategy.ModulateAlpha
         },
     ) {
         val pxPerUnit = this.size.width / box.width
