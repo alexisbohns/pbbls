@@ -5,9 +5,10 @@ import SwiftUI
 /// (circle or calendar) is one setting for every month. When a milestone's
 /// held card closes, VoiceOver comes back to its row (the focused page only,
 /// so a realised neighbour never takes it). With an intro context, the page
-/// plays its intro (#1241) while on screen, focused and the app active,
-/// skipped by a tap; under Reduce Motion or VoiceOver it drops the intro for
-/// good. Android: `MonthPage`.
+/// is a deck of cards (`MonthDeck`, #1241 D11) and plays its intro while on
+/// screen, focused and the app active, skipped by a tap; under Reduce Motion,
+/// VoiceOver or an accessibility text size it drops the intro for good and is
+/// the vertical page, settled. Android: `MonthPage`.
 struct MonthPage: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
@@ -27,6 +28,7 @@ struct MonthPage: View {
     @State private var isVisible = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.scenePhase) private var scenePhase
 
     init(wrap: MonthWrap, lookups: WrapLookups, isFocused: Bool, returnFocus: Binding<UUID?>,
@@ -40,19 +42,27 @@ struct MonthPage: View {
         self.onOpen = onOpen
         // Built with the page, not on appear: a first frame without it would draw settled, then blank.
         _intro = State(initialValue: context.map {
-            IntroClock(month: wrap.month, order: IntroClock.order(wrap), ledger: $0.ledger, haptics: $0.haptics)
+            IntroClock(month: wrap.month, order: IntroClock.order(wrap), ledger: $0.ledger, haptics: $0.haptics,
+                       tempo: $0.tempo)
         })
     }
 
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                MonthPageSections(wrap: wrap, lookups: lookups, dayView: dayView, focus: $milestoneFocus,
-                                  onWeek: onWeek, onOpen: onOpen, onMore: { sheet = $0 })
+        Group {
+            // Refused by the policy, the page never draws the deck, even for the frame before `intro` drops.
+            if intro != nil, allowsIntro {
+                MonthDeck(wrap: wrap, lookups: lookups, dayView: dayView, focus: $milestoneFocus,
+                          onWeek: onWeek, onOpen: onOpen, onMore: { sheet = $0 })
+            } else {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        MonthPageSections(wrap: wrap, lookups: lookups, dayView: dayView, focus: $milestoneFocus,
+                                          onWeek: onWeek, onOpen: onOpen, onMore: { sheet = $0 })
+                    }
+                    .padding(.bottom, MonthLayout.pageBottom)
+                }
             }
-            .padding(.bottom, MonthLayout.pageBottom)
         }
-        .coordinateSpace(name: IntroSpace.name)
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }
         .environment(\.introClock, intro)
@@ -81,9 +91,10 @@ struct MonthPage: View {
         isVisible && isFocused && scenePhase == .active && allowsIntro
     }
 
-    /// Neither Reduce Motion nor VoiceOver on.
+    /// Neither Reduce Motion nor VoiceOver on, and the text below the accessibility sizes.
     private var allowsIntro: Bool {
-        IntroPolicy.plays(reduceMotion: reduceMotion, voiceOver: voiceOver)
+        IntroPolicy.plays(reduceMotion: reduceMotion, voiceOver: voiceOver,
+                          largeText: dynamicTypeSize.isAccessibilitySize)
     }
 }
 
@@ -101,37 +112,66 @@ struct MonthPageSections: View {
     var body: some View {
         MonthCoverView(wrap: wrap, lookups: lookups)
         ForEach(wrap.sections, id: \.self) { section in
-            switch section {
-            case .weeks:
-                WeeksSummary(wrap: wrap, lookups: lookups, onWeek: onWeek)
-            case .milestones:
-                MilestonesSection(wrap: wrap, lookups: lookups, onOpen: onOpen, focus: focus)
-            case .persons:
-                PersonsSection(wrap: wrap, lookups: lookups, dayView: dayView) { onMore(.persons) }
-            case .domains:
-                DomainsSection(wrap: wrap, lookups: lookups) { onMore(.domains) }
-            case .gem:
-                EmotionGem(wrap: wrap, lookups: lookups) { onMore(.gem) }
-            case .tone, .hours:
-                // One head for both figures, over whichever comes first; it plays with that figure (#1241).
-                let leads = section == wrap.sections.first(where: { $0 == .tone || $0 == .hours })
-                VStack(alignment: .leading, spacing: 0) {
-                    if leads {
-                        MonthSectionHead(label: WrapCopy.insights(locale: SpineStrings.appLocale),
-                                         hint: WrapCopy.insightsHint(locale: SpineStrings.appLocale))
-                            .introReveal(.insights)
-                    }
+            // One head for both figures, over whichever comes first.
+            MonthSectionContent(section: section, wrap: wrap, lookups: lookups, dayView: dayView, focus: focus,
+                                onWeek: onWeek, onOpen: onOpen, onMore: onMore,
+                                leadsInsights: section == wrap.sections.first(where: { $0 == .tone || $0 == .hours }))
+        }
+    }
+}
+
+/// One section of the month, as the page and the deck (#1241 D11) draw it.
+/// Tone and hours share the insights head, over the one that leads them, and
+/// play it with that figure (#1241).
+struct MonthSectionContent: View {
+    let section: MonthSection
+    let wrap: MonthWrap
+    let lookups: WrapLookups
+    let dayView: DayView
+    var focus: AccessibilityFocusState<UUID?>.Binding?
+    let onWeek: (CalendarDay) -> Void
+    let onOpen: (MomentSummary) -> Void
+    let onMore: (MonthSection) -> Void
+    /// Tone or hours only: this figure carries the insights head.
+    let leadsInsights: Bool
+
+    /// The head over tone and hours, the deck's title for the card that leads them.
+    static var insightsHead: MonthHead {
+        let locale = SpineStrings.appLocale
+        return MonthHead(label: WrapCopy.insights(locale: locale), hint: WrapCopy.insightsHint(locale: locale))
+    }
+
+    var body: some View {
+        switch section {
+        case .weeks:
+            WeeksSummary(wrap: wrap, lookups: lookups, onWeek: onWeek)
+        case .milestones:
+            MilestonesSection(wrap: wrap, lookups: lookups, onOpen: onOpen, focus: focus)
+        case .persons:
+            PersonsSection(wrap: wrap, lookups: lookups, dayView: dayView) { onMore(.persons) }
+        case .domains:
+            DomainsSection(wrap: wrap, lookups: lookups) { onMore(.domains) }
+        case .gem:
+            EmotionGem(wrap: wrap, lookups: lookups) { onMore(.gem) }
+        case .tone, .hours:
+            VStack(alignment: .leading, spacing: 0) {
+                if leadsInsights {
+                    MonthSectionHead(Self.insightsHead)
+                }
+                Group {
                     if section == .tone {
                         ToneFigure(wrap: wrap)
                     } else {
                         HoursFigure(wrap: wrap, lookups: lookups)
                     }
                 }
-                .introSequence(.section(section)) {
-                    section == .tone
-                        ? ToneFigure.introBeats(wrap: wrap, insights: leads)
-                        : HoursFigure.introBeats(wrap: wrap, lookups: lookups, insights: leads)
-                }
+                // Under the insights head, which titles the card, the figure keeps its own.
+                .transformEnvironment(\.monthHeadOnCard) { if leadsInsights { $0 = false } }
+            }
+            .introSequence(.section(section)) {
+                section == .tone
+                    ? ToneFigure.introBeats(wrap: wrap, insights: leadsInsights)
+                    : HoursFigure.introBeats(wrap: wrap, lookups: lookups, insights: leadsInsights)
             }
         }
     }

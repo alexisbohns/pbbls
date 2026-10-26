@@ -19,6 +19,8 @@ struct SpineLabView: View {
     /// The Month tab's intro: its own ledger, so *Replay intro* forgets October without touching the Path's.
     @State private var introLedger = IntroLedger()
     @State private var introRun = 0
+    /// The Month tab's intro tempo (#1241 D9): the page's clock takes it as it is built, on *Replay intro*.
+    @State private var introTempo = IntroTempo.standard
     @AccessibilityFocusState private var slotFocus: UUID?
 
     var body: some View {
@@ -97,7 +99,7 @@ struct SpineLabView: View {
 
     /// The harness's October as its page: the cover, the sections, the sheets.
     /// Week taps and opens are logged on screen; *Replay intro* plays the
-    /// intro again (#1241), for tuning on a device.
+    /// intro again (#1241) at the sliders' tempo, for tuning on a device.
     @ViewBuilder
     private var month: some View {
         if let october = SpineFixtureMonth.october {
@@ -113,14 +115,34 @@ struct SpineLabView: View {
                     }
                 }
                 .padding(.horizontal, 16)
+                tempo
+                    .padding(.horizontal, 16)
                 MonthPage(wrap: october, lookups: SpineFixtureMonth.lookups(october), isFocused: true,
                           returnFocus: .constant(nil),
                           onWeek: { lastOpen = "week of \($0.iso)" },
                           onOpen: { lastOpen = "open \($0.name ?? "untitled")" },
-                          intro: IntroContext(ledger: introLedger, haptics: IntroHaptics.shared))
+                          intro: IntroContext(ledger: introLedger, haptics: IntroHaptics.shared, tempo: introTempo))
                     .id(introRun)
             }
         }
+    }
+
+    /// The intro's two knobs (#1241 D9): the garland's length in seconds, and how much slower the sections play.
+    private var tempo: some View {
+        let garland = Binding(get: { introTempo.cover * IntroScore.garlandSpan },
+                              set: { introTempo.cover = $0 / IntroScore.garlandSpan })
+        return HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(verbatim: "Garland \(String(format: "%.1f", garland.wrappedValue)) s")
+                Slider(value: garland, in: 1.5...3.5)
+            }
+            VStack(alignment: .leading, spacing: 0) {
+                Text(verbatim: "Sections ×\(String(format: "%.1f", introTempo.sections))")
+                Slider(value: $introTempo.sections, in: 1...4)
+            }
+        }
+        .font(.caption.monospaced())
+        .foregroundStyle(Color.pebbles.outline)
     }
 
     /// The fixture week and a late-August week: the strip (the feed's weeks

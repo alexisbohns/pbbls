@@ -12,12 +12,10 @@ struct EmotionGem: View {
     private var locale: Locale { SpineStrings.appLocale }
 
     var body: some View {
-        if let gem = wrap.gem {
+        if Self.isShown(wrap: wrap, lookups: lookups), let gem = wrap.gem {
             let words = GemWords(gem: gem, lookups: lookups, locale: locale)
             VStack(alignment: .leading, spacing: 0) {
-                MonthSectionHead(label: WrapCopy.tile(.emotions, locale: locale),
-                                 hint: WrapCopy.gemHint(locale: locale))
-                    .introReveal(.header)
+                MonthSectionHead(Self.head)
                 SheetLead(words.lead)
                     .padding(.horizontal, MonthLayout.sectionPadX)
                     .introReveal(.lead)
@@ -31,6 +29,17 @@ struct EmotionGem: View {
             }
             .introSequence(.section(.gem)) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// The section's head, the deck's title for its card (#1241 D11).
+    static var head: MonthHead {
+        let locale = SpineStrings.appLocale
+        return MonthHead(label: WrapCopy.tile(.emotions, locale: locale), hint: WrapCopy.gemHint(locale: locale))
+    }
+
+    /// Drawn when the server sends a gem (#1241 D11).
+    static func isShown(wrap: MonthWrap, lookups: WrapLookups) -> Bool {
+        wrap.gem != nil
     }
 
     /// The gem's intro (#1241): the families in the lead's order, each with the facets the server gave it.

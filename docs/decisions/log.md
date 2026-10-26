@@ -1340,3 +1340,29 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Android (#1242) ports the score and the lifecycle, with its own haptic backend.
 - **Supersedes / Superseded-by:** none.
 - **Refs:** #1241, #1242, `docs/superpowers/specs/2026-10-25-ios-month-intro-design.md`, `apps/ios/Pebbles/Features/Path/Wrap/Intro/`.
+
+## 2026-10-26 — On iOS the month's intro plays as a deck of cards (#1241)
+
+- **Status:** taken
+- **Scope:** ios
+- **Context:**
+  - The first device passes on #1241: the month page scrolled its sections into view, and each one already sat on the page before its turn.
+  - Chapter paging (one section per swipe, its head snapped to the top) was built and tried on the phone. The snapping felt awkward.
+- **Decision:**
+  - **A deck:** when the intro may play, the month page is a deck of cards, the cover first, then a card per section that shows. It is a vertical `ScrollView`, one card per page, whose `.scrollTransition` throws the top card off and holds the next one beneath it.
+  - **One card per throw:** `.viewAligned(limitBehavior: .always)`.
+  - **The top card:** read from the settled scroll offset, never a `scrollPosition` binding. A card arrives once a throw lands on it, and every throw lands on a tick.
+  - **The cards:** galleys on the pebble cards' own shell. A margin carries the month and a stepper, a title band carries the card's first head, and a card shows its title before its turn.
+  - **No deck:** under Reduce Motion, VoiceOver or an accessibility text size, the month is the plain page, settled.
+- **Why:**
+  - Cards end the problem of sections visible before their turn.
+  - **Rejected:** chapter paging, which felt awkward on the phone.
+  - **Rejected:** a custom `ZStack` deck driven by a drag gesture. Its drag fights the Path pager's horizontal scroll, and it gives up native momentum.
+  - **Rejected:** `.paging`, which let one throw pass a card (the fifth, every time).
+  - **Rejected:** a `scrollPosition` binding. SwiftUI restores it by scrolling to its card, and that scroll can reach the Path's pager.
+- **Consequences:**
+  - **Unique explicit ids:** inside the Path's pager, every explicit `.id` under a page must be unique to that page. One shared by every month deck sent a swipe to August back to September.
+  - **The deck needs a clock:** without one, the page is drawn as before.
+  - **Android:** #1242 ports the deck.
+- **Supersedes / Superseded-by:** refines the 2026-10-25 intro entry, whose sections played as they scrolled in.
+- **Refs:** #1241, #1242, `docs/superpowers/specs/2026-10-25-ios-month-intro-design.md` (D7, D11), `apps/ios/Pebbles/Features/Path/Wrap/Month/MonthDeck.swift`.

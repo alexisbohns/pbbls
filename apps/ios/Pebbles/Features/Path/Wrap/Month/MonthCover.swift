@@ -17,7 +17,7 @@ struct MonthCoverView: View {
     private var locale: Locale { SpineStrings.appLocale }
 
     var body: some View {
-        if let cover = wrap.cover {
+        if Self.isShown(wrap: wrap, lookups: lookups), let cover = wrap.cover {
             let souls = Self.souls(cover, lookups: lookups)
             VStack(spacing: 10) {
                 IntroReader { reveal in
@@ -83,6 +83,11 @@ struct MonthCoverView: View {
             .padding(.top, 20)
             .introSequence(.cover) { Self.introBeats(wrap: wrap, lookups: lookups) }
         }
+    }
+
+    /// Drawn when the server sends a cover (#1241 D11: the deck's first card).
+    static func isShown(wrap: MonthWrap, lookups: WrapLookups) -> Bool {
+        wrap.cover != nil
     }
 
     /// At most this many souls' glyphs inside the ring.

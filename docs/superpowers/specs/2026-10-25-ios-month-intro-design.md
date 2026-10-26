@@ -68,10 +68,48 @@ The month page enters instead of appearing all at once. The month's name rises i
 - **References:** frozen clocks (the references) use their beats unscaled.
 - **Live tuning:** the Spine Lab's Month tab has two sliders, *Garland* (seconds) and *Sections ×*, applied on *Replay intro*. The values the maintainer settles on become `IntroTempo.standard`.
 
-**D10. Each list section has a signature**, replacing the shared row reveal for these three. Each row lands in turn.
-- **Weeks:** the cairn builds from the bottom, stone by stone (`.cairnStone(row, k)`), with a light tick per stone. Then the line and the range rise and the souls fade in with `.row(row)`.
-- **Milestones:** the stone *stamps* (`.stamp(row)`). It comes in at 1.25× and transparent and presses to size with a slight squash, with a firm tick scaled by the pebble's intensity (`IntroTick.stamp(intensity)`). Then the name, the date and the souls rise with `.row(row)`.
-- **Domains:** the bar's track is drawn from the start. Its ink fills from the left (`.fill(row)`), ticking as it starts, and the name and count rise with it (`.row(row)`). The fill trims the settled layout's first rect, so it never snaps.
+**D11. The month is a deck of cards** (second device pass, 2026-10-26). It supersedes D7 and D8's trigger. On the phone, the chapter snapping felt awkward, and a section already sitting on the page before its turn felt wrong.
+- **The cards:** the cover first, then each section that shows, in the server's order. An empty section deals no card. Tone and hours are separate cards, and the insights head sits on the first of them.
+- **The card** (refined the same day, from the deck exploration's galley):
+  - **Paper:** the pebble cards' own shell (`SpineCardShell` without an emotion): the stock, the card shadow and the Night ring. Its lines are printed in `cardRule`.
+  - **Margin:** ruled off on the left, with the month and year set upright at its top and the stepper down its foot, one segment per card, filled up to this one.
+  - **Title band:** the card's first head, with its label on the left, its hint in italics at the far end, and a rule under it. The section leaves that head out (`monthHeadOnCard`), and each section and figure exposes its head once (`MonthHead`).
+  - **The cover** has the margin but no title band: the month is its title.
+- **The deck:** a vertical `ScrollView` of full-height pages, one card per page, inset from the page's edges. It snaps one card per throw with `.viewAligned(limitBehavior: .always)`; `.paging` let a throw pass a card. `.scrollTransition` makes the paging read as a deck:
+  - The top card leaves upward under the finger, lifted and turned a little.
+  - The next card waits beneath it. It is counter-offset so it stays in place, slightly smaller, with its foot peeking below the top card, and it grows to full size as it comes on top.
+  - A static stack of up to two more card edges below shows how many cards remain.
+  - Swiping down brings the previous card back down onto the pile.
+- **The Path's pager:** horizontal swipes still move it, because the deck only scrolls vertically.
+- **Before its turn,** a card shows its title only (D8's always-drawn heads).
+- **Arrival:** a card arrives when it becomes the top card, tracked by `.scrollPosition(id:)`. The clock lands the previous card's sequence and plays this one: the arrive tick, then its content.
+- **Revisits:** the month is still a deck, with its cards settled.
+- **Content taller than its card** scales down to fit, anchored at its top. This happens only at the larger non-accessibility text sizes or on small phones.
+- **When there is no deck:** under Reduce Motion, VoiceOver or an accessibility text size, the month is the vertical page as before, settled, with no clock. `IntroPolicy` gains the text-size condition.
+- **The clock no longer measures geometry.** The deck tells it which card is on top (`IntroClock.show(_:)`), and each section's host registers its beats when it appears. `IntroViewport`, `report` and the chapter paging are gone.
+- *Considered and rejected:* a custom `ZStack` deck driven by a drag gesture. Its vertical drag fights the pager's horizontal scroll and any scrolling inside a card, and it gives up native momentum and interruption.
+
+**D10. Each card has a signature** (third device pass, 2026-10-26). This replaces the first D10, which was never built. Rows land one at a time, each in its parts, with a haptic per part.
+- **Weeks:** the week's cairn builds from the bottom, stone by stone, with a light tick per stone. Then its line and dates rise with a light tick, and its souls pop one by one with a light tick each. Then the next week. An empty week lands its ground line and muted words together on a faint tick.
+- **Milestones:** the stone stamps. It comes in at 1.25× and transparent, then presses to size, with a tick at impact that is firmer for a more intense pebble (`IntroTick.seal`). Then the date rises, then the name, then the souls pop one by one, each with a light tick. Then the next milestone.
+- **Persons:** unchanged: the glyph, the name, then the ring dot by dot.
+- **Gem:** the count comes first. The table's number counts up from 0 to the month's pebbles on the garland's ease-in-out, one tick per pebble, and lands on a firm tick. The 25 ms floor thins the ticks in the fast middle. Then the families' facets light around it, as before.
+- **Domains:** for each domain, its name and count rise with a light tick. Then its gauge fills from the left, for longer the fuller it is, with a continuous vibration swelling as it fills (D15), and a light tick as it stops. Then the next domain, with *more* last.
+
+**D12. The month's content changes on every surface** (third device pass).
+- **Empty weeks:** every week of the month is listed. An empty one is muted: its mark is the strip's ground line, its line reads "No pebble." ("Aucun galet."), in outline ink, with no souls, and it isn't a button. A month page exists only for a completed month, so an empty week is always past. The weeks' head counts every week. The server already sends empty weeks.
+- **Milestones:** a milestone shows its date above its name.
+- **Scope:** both changes reach the scrolled page too. Android follows in its own issue.
+
+**D13. Weeks and persons fill their card.** On the deck, their rows share the room under the title band: each row is `room / rows` tall, between the row minimum and a cap. The cairn and the avatar grow with their row, up to their own caps. The card passes its room down in the environment. On the scrolled page, rows keep their size.
+
+**D14. The end card.** After the last section, the deck deals one more card, like the back of the deck:
+- **Layout:** the margin and stepper (the stepper counts the end card), no title band, then the month's name and a "Replay the month" button.
+- **Arrival:** it ticks, and the button rises. `IntroSequence` gains `.end`, which plays last.
+- **Replay:** a tap puts the deck back on the cover with a fresh clock, and the ledger forgets the month, so it plays from the start.
+- **The scrolled page** has no end card.
+
+**D15. Continuous haptics.** `IntroBeat` gains an optional `swell` (`IntroSwell`): a continuous Core Haptics event that starts at the beat's time and lasts the swell's duration. Its intensity rises from `from` to `to` along a parameter curve. The 25 ms floor applies to transients only.
 
 ## Choreography
 
@@ -282,12 +320,12 @@ Each part builds, lints and passes the iOS tests alone. Every part keeps the exi
 - **Decision log:** one entry in Part 1, covering D1, D4 and D5.
 - **Android:** #1242 references this spec.
 
-**Parts 5 and 6** (the revision, D7–D10), stacked on Part 4:
+**Parts 5 and 6** (the revisions, D7–D15), stacked on Part 4:
 
 | Part | Contents |
 |---|---|
-| 5 | `ChapterPaging` plus the behaviour, the chapter tops, the new trigger rule, the arrive tick and always-drawn headers, `IntroTempo` scaling in the clock, and the Lab's two sliders |
-| 6 | The weeks', milestones' and domains' signatures (`CairnMark` reveal, the stamp landing, `ProportionBar` fill), with their score builders |
+| 5 | The deck (D11): `MonthDeck`, the cards, `IntroClock.show`, the beats registered by the hosts, the text-size condition in `IntroPolicy`. Plus `IntroTempo` scaling in the clock, the arrive tick with always-drawn heads (D8), and the Lab's two sliders. The chapter paging (D7) was built, tried on the phone and dropped. |
+| 6 | The cards' signatures (D10), the content changes (D12), the filled cards (D13), the end card and its replay (D14), and the swell (D15) |
 
 ## New patterns, raised in the PR
 

@@ -1,29 +1,17 @@
-import CoreGraphics
 import Foundation
 import Testing
 @testable import Pebbles
 
-/// #1241 D3, §Lifecycle, §Accessibility.
+/// #1241 D3, D11, §Lifecycle, §Accessibility.
 @Suite("Intro rules")
 @MainActor
 struct IntroRulesTests {
-    @Test("a sequence enters once its top passes 85% of the viewport, and leaves once wholly off it")
-    func viewport() {
-        func place(_ y: CGFloat) -> IntroViewport.Place {
-            IntroViewport.place(CGRect(x: 0, y: y, width: 10, height: 100), viewport: 800)
-        }
-        #expect(place(600) == .entered)
-        #expect(place(-50) == .entered)
-        #expect(place(700) == .between)
-        #expect(place(800) == .out)
-        #expect(place(-100) == .out)
-    }
-
-    @Test("no intro under Reduce Motion or while VoiceOver runs")
+    @Test("no intro under Reduce Motion, while VoiceOver runs, or at an accessibility text size")
     func policy() {
-        #expect(IntroPolicy.plays(reduceMotion: false, voiceOver: false))
-        #expect(!IntroPolicy.plays(reduceMotion: true, voiceOver: false))
-        #expect(!IntroPolicy.plays(reduceMotion: false, voiceOver: true))
+        #expect(IntroPolicy.plays(reduceMotion: false, voiceOver: false, largeText: false))
+        #expect(!IntroPolicy.plays(reduceMotion: true, voiceOver: false, largeText: false))
+        #expect(!IntroPolicy.plays(reduceMotion: false, voiceOver: true, largeText: false))
+        #expect(!IntroPolicy.plays(reduceMotion: false, voiceOver: false, largeText: true))
     }
 
     @Test("the ledger holds a month's sequence once; a reset forgets that month only")

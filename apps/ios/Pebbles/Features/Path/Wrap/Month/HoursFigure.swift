@@ -11,44 +11,57 @@ struct HoursFigure: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
 
+    @Environment(\.monthHeadOnCard) private var headOnCard
+
     private var locale: Locale { SpineStrings.appLocale }
 
+    /// The figure's head, the deck's title for its card when it leads no insights head (#1241 D11).
+    static var head: MonthHead {
+        let locale = SpineStrings.appLocale
+        return MonthHead(label: WrapCopy.hoursTitle(locale: locale), hint: WrapCopy.hoursHint(locale: locale))
+    }
+
     var body: some View {
-        if let hours = wrap.hours {
+        if Self.isShown(wrap: wrap, lookups: lookups), let hours = wrap.hours {
             let items = hours.items.compactMap { mark in
                 lookups.moment(mark.momentId).map { (mark: mark, moment: $0) }
             }
-            if !items.isEmpty {
-                let calendar = SpineCalendar.current
-                let description = hours.busiest.map {
-                    WrapCopy.hoursDescription(count: $0.count, total: items.count, start: $0.start, calendar: calendar,
-                                              locale: locale, dateLocale: SpineStrings.dateLocale)
-                } ?? WrapCopy.hoursSub(locale: locale)
-                VStack(alignment: .leading, spacing: 0) {
-                    SpineSectionHeader(WrapCopy.hoursTitle(locale: locale), hint: WrapCopy.hoursHint(locale: locale))
+            let calendar = SpineCalendar.current
+            let description = hours.busiest.map {
+                WrapCopy.hoursDescription(count: $0.count, total: items.count, start: $0.start, calendar: calendar,
+                                          locale: locale, dateLocale: SpineStrings.dateLocale)
+            } ?? WrapCopy.hoursSub(locale: locale)
+            VStack(alignment: .leading, spacing: 0) {
+                // On the deck, the card's title band draws it when no insights head comes first (#1241 D11).
+                if !headOnCard {
+                    SpineSectionHeader(Self.head.label, hint: Self.head.hint)
                         .padding(.top, 28)
-                        .introReveal(.header)
-                    Text(verbatim: WrapCopy.hoursSub(locale: locale))
-                        .spineType(.still)
-                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.top, 6)
-                        .introReveal(.lead)
-                    IntroReader { reveal in
-                        HoursDial(items: items, busiest: hours.busiest, lookups: lookups, reveal: reveal)
-                    }
-                        .frame(maxWidth: .infinity)
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(Text(verbatim: description))
-                        .accessibilityAddTraits(.isImage)
                 }
-                .padding(.horizontal, MonthLayout.sectionPadX)
+                Text(verbatim: WrapCopy.hoursSub(locale: locale))
+                    .spineType(.still)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 6)
+                    .introReveal(.lead)
+                IntroReader { reveal in
+                    HoursDial(items: items, busiest: hours.busiest, lookups: lookups, reveal: reveal)
+                }
+                    .frame(maxWidth: .infinity)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(Text(verbatim: description))
+                    .accessibilityAddTraits(.isImage)
             }
+            .padding(.horizontal, MonthLayout.sectionPadX)
         }
     }
 }
 
 extension HoursFigure {
+    /// Drawn when the device knows one of the month's moments on the dial (#1241 D11: no card otherwise).
+    static func isShown(wrap: MonthWrap, lookups: WrapLookups) -> Bool {
+        wrap.hours?.items.contains { lookups.moment($0.momentId) != nil } ?? false
+    }
+
     /// The hours' intro (#1241), with the insights head's when it leads them; none when nothing shows.
     static func introBeats(wrap: MonthWrap, lookups: WrapLookups, insights: Bool) -> [IntroBeat] {
         let stones = wrap.hours?.items.filter { lookups.moment($0.momentId) != nil }.count ?? 0

@@ -12,7 +12,8 @@ enum IntroKey: Hashable, Sendable {
     /// slot (its socket or its first seal), a stacked seal (day, index), a day's numeral.
     case kicker, monthName, year, course, leaf, summary, names, colophon
     case slot(Int), seal(Int, Int), numeral(Int), soul(Int)
-    /// Any section: the insights head (over tone or hours), the head, its lead line, *more*, a row.
+    /// Any section: the insights head (over tone or hours), the head, its lead line, *more*, a row. The two
+    /// heads are drawn from the start, never revealed (D8): their beats carry only the arrival's tick.
     case insights, header, lead, more, row(Int)
     /// A person's row: its glyph, its name, its ring's line, a day on its ring (row, day).
     case glyph(Int), name(Int), ring(Int), dot(Int, Int)
@@ -29,13 +30,15 @@ struct IntroTick: Hashable, Sendable {
 
     /// An empty day on the garland.
     static let faint = IntroTick(intensity: 0.22, sharpness: 0.25)
-    /// Heads, rows, texts, glyphs, ring dots, tone days, hour stones.
+    /// Rows, texts, glyphs, ring dots, tone days, hour stones.
     static let light = IntroTick(intensity: 0.40, sharpness: 0.45)
     static let facet = IntroTick(intensity: 0.60, sharpness: 0.55)
     /// The garland's leaf, tying the ring.
     static let knot = IntroTick(intensity: 0.75, sharpness: 0.35)
     /// The gem's count.
     static let firm = IntroTick(intensity: 0.90, sharpness: 0.70)
+    /// A chapter arriving at the top of the page (D8): firm, rounded.
+    static let arrive = IntroTick(intensity: 0.6, sharpness: 0.15)
 
     /// A seal on the garland, firmer with its pebble's intensity, 1…3.
     static func seal(_ intensity: Int) -> IntroTick {
