@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
@@ -71,10 +72,28 @@ internal object MonthDeckLayout {
     val END_GAP = 20.dp
 }
 
-/** A card's paper: the pebble cards' own shell with no emotion, so no painted edge (D21). */
+/**
+ * A card's paper, inset in its page (iOS `MonthDeckPaper`): the deck's edges show around it. A caller
+ * passes only its transform, which then applies to the whole page, as iOS's does.
+ */
 @Composable
 internal fun MonthDeckPaper(modifier: Modifier = Modifier) {
-    SpineCardShell(palette = null, polarity = ValencePolarity.NEUTRAL, intensity = 1, modifier = modifier.fillMaxSize()) {}
+    MonthDeckSheet(modifier) {}
+}
+
+/** The one place the paper is decided: the pebble cards' own shell with no emotion, so no painted edge (D21), inset in its page. */
+@Composable
+private fun MonthDeckSheet(
+    modifier: Modifier,
+    content: @Composable () -> Unit,
+) {
+    SpineCardShell(
+        palette = null,
+        polarity = ValencePolarity.NEUTRAL,
+        intensity = 1,
+        modifier = modifier.fillMaxSize().padding(MonthDeckLayout.INSET),
+        content = content,
+    )
 }
 
 /**
@@ -92,15 +111,13 @@ internal fun MonthDeckCard(
     content: @Composable (room: Dp) -> Unit,
 ) {
     val colors = PebblesTheme.spine.colors
-    Box(modifier.fillMaxSize().padding(MonthDeckLayout.INSET)) {
-        SpineCardShell(palette = null, polarity = ValencePolarity.NEUTRAL, intensity = 1, modifier = Modifier.fillMaxSize()) {
-            Row(Modifier.fillMaxSize()) {
-                MonthDeckMargin(month, step)
-                Box(Modifier.width(SpineLayoutTokens.RULE).fillMaxHeight().background(colors.cardRule))
-                Column(Modifier.weight(1f).fillMaxHeight()) {
-                    if (head != null) MonthDeckTitle(head)
-                    MonthCardRoom(Modifier.weight(1f).fillMaxWidth(), content)
-                }
+    MonthDeckSheet(modifier) {
+        Row(Modifier.fillMaxSize()) {
+            MonthDeckMargin(month, step)
+            Box(Modifier.width(SpineLayoutTokens.RULE).fillMaxHeight().background(colors.cardRule))
+            Column(Modifier.weight(1f).fillMaxHeight()) {
+                if (head != null) MonthDeckTitle(head)
+                MonthCardRoom(Modifier.weight(1f).fillMaxWidth(), content)
             }
         }
     }
@@ -110,7 +127,9 @@ internal fun MonthDeckCard(
  * Lays [content] out in the room when its intrinsic height fits, so its spacers open; past the room, at its
  * own height, scaled down from the top (iOS `MonthCardFill` + the card's fit). [content] receives the room.
  * As on iOS, where the room is a proposal, it is a bound, not a size: [content] sits in a column, as a page
- * item does, and takes the room only by asking for it (a weight, `fillMaxHeight`).
+ * item does, and takes the room only by asking for it: `fillMaxHeight()` on its root, and a weighted
+ * Spacer inside its own Column to stand its foot at the room's. An empty room (an unbounded host) leaves
+ * [content] whole at its own size, as iOS does.
  *
  * Intrinsics are safe here: nothing a card draws is a SubcomposeLayout (no BoxWithConstraints, no lazy
  * list); a figure that becomes one must move this to a SubcomposeLayout.
@@ -129,7 +148,7 @@ private fun MonthCardRoom(
             val fits = child.maxIntrinsicHeight(width) <= roomPx
             val placeable = child.measure(if (fits) Constraints.fixed(width, roomPx) else Constraints.fixedWidth(width))
             layout(width, roomPx) {
-                if (placeable.height <= roomPx) {
+                if (placeable.height <= roomPx || roomPx == 0) {
                     placeable.place(0, 0)
                 } else {
                     val fit = roomPx.toFloat() / placeable.height
@@ -153,6 +172,7 @@ private fun MonthDeckMargin(
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val density = LocalDensity.current
+    val capped = remember(density) { Density(density.density, density.fontScale.coerceAtMost(1f)) }
     Column(
         Modifier
             .width(MonthDeckLayout.MARGIN)
@@ -162,7 +182,7 @@ private fun MonthDeckMargin(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // The margin keeps its width: its month never grows past the default size (iOS caps it at `.large`).
-        CompositionLocalProvider(LocalDensity provides Density(density.density, density.fontScale.coerceAtMost(1f))) {
+        CompositionLocalProvider(LocalDensity provides capped) {
             Text(
                 month,
                 style = type.sectionLabel,
@@ -221,12 +241,12 @@ private fun MonthDeckTitle(head: MonthHead) {
 
 /**
  * Its content turned a quarter counter-clockwise and laid out as turned (iOS `MonthDeckUpright`): its width
- * the content's height, its height the content's width. The content is measured unbounded and placed so
- * its centre is the box's centre, the turn being about that centre.
+ * the content's height, its height the content's width. The content is measured as long as the box may be
+ * tall (the margin's height) and placed so its centre is the box's centre, the turn being about that centre.
  */
 private fun Modifier.uprightQuarter(): Modifier =
-    layout { measurable, _ ->
-        val p = measurable.measure(Constraints())
+    layout { measurable, constraints ->
+        val p = measurable.measure(Constraints(maxWidth = constraints.maxHeight))
         layout(p.height, p.width) {
             p.placeWithLayer(-(p.width - p.height) / 2, (p.width - p.height) / 2) { rotationZ = -90f }
         }
