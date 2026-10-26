@@ -53,6 +53,10 @@ struct MonthCardsTests {
         #expect(column.shape.days.first == 3)
         #expect(column.shape.days.dropFirst().allSatisfy { $0 == 0 })
         #expect(column.shape.stones == 1)
+        // Moments without a pebble: the column draws the dotted stone, and the intro plays it as one.
+        let unpebbled = MonthWeek(weekStart: week.weekStart, from: week.from, to: week.to, pebbles: 0, soulIds: [],
+                                  days: days)
+        #expect(WeekColumn(week: unpebbled, days: column.days).shape.stones == 0)
     }
 
     @Test("the milestones' intro stamps each stone at its pebble's intensity, then its date, name and souls")

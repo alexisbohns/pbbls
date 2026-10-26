@@ -33,7 +33,8 @@ struct WeekColumn: Equatable {
         }
     }
 
-    /// The column's intro shape: each day's pebbles shown (nil outside the month), and its cairn's stones.
+    /// The column's intro shape: each day's pebbles shown (nil outside the month), and its cairn's stones, none
+    /// for a week without a pebble, whose dotted stone the column draws even when its moments built a cairn.
     var shape: IntroWeekColumn {
         IntroWeekColumn(days: days.map { day in
             switch day {
@@ -41,7 +42,7 @@ struct WeekColumn: Equatable {
             case .empty: 0
             case let .pebbles(pebbles): min(pebbles.count, Self.pips)
             }
-        }, stones: CairnGeometry.widths(week.days).count)
+        }, stones: week.pebbles == 0 ? 0 : CairnGeometry.widths(week.days).count)
     }
 }
 
