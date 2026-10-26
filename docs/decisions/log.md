@@ -1388,3 +1388,25 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The Spine's own renders are unchanged: `rings` is 1 there.
 - **Supersedes / Superseded-by:** none.
 - **Refs:** #1241, #1242, `docs/superpowers/specs/2026-10-25-ios-month-intro-design.md` (D12, D16, D17).
+
+## 2026-10-26 — Pebbles on iOS carries its own haptics switch, because Core Haptics ignores the system's (#1241)
+
+- **Status:** taken
+- **Scope:** ios (android to follow)
+- **Context:**
+  - The device pass on the iPhone 15: with Settings → Sounds & Haptics → System Haptics off, the month's intro still vibrated. Core Haptics ignores that switch. The UIKit feedback generators follow it.
+  - The intro's haptics are Core Haptics: exact tick times and continuous swells (D5, D15). So are karma's and the glyph slider's.
+- **Decision:**
+  - Settings gains a Haptics section with one "Vibrations" toggle (`HapticsPreference`, `@AppStorage` "haptics.enabled").
+  - It is on until turned off, and kept on this device only, saved as it is switched and never staged for the sheet's Save.
+  - Every haptic the app plays asks it first: the intro, karma, the glyph slider, the record flow's taps and the long-press menu.
+- **Why:**
+  - **Kept:** Core Haptics, for the exact ticks and the swells.
+  - **Rejected:** firing UIKit generators from the clock (the fallback in the 2026-10-25 entry). It would honour the system switch, but it gives up the gauge's swell and merges ticks under about 30 ms apart.
+  - Apple's guidance for Core Haptics apps is an in-app switch.
+- **Consequences:**
+  - The system switch alone does not silence Pebbles; the app's own switch does.
+  - A new haptic must check `HapticsPreference.isOn()`.
+  - Android mirrors the setting (1:1 rule). It is a device preference, not a database field, so no contract changes.
+- **Supersedes / Superseded-by:** settles the 2026-10-25 intro entry's open System Haptics question, and rejects the UIKit fallback it named.
+- **Refs:** #1241, #1242, `apps/ios/Pebbles/Services/HapticsPreference.swift`.

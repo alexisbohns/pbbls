@@ -3949,7 +3949,8 @@ The memory note "iOS device deploy recipe" holds the build, install and launch c
   - **End card:** it shows the whole garland (`MonthCoverGarland`, lifted out of the cover unchanged).
   - **Pager bug:** swiping from September's month page to August's bounced back. Every deck carried `.id(0)`, so the replay's id now names the month, and the deck reads its top card from the settled offset instead of a `scrollPosition` binding.
   - **Landing ticks:** a throw lands on a tick even on a settled card (`IntroClock.landed`). A swipe of the Path's pager onto another page plays the strip's selection haptic.
-  - **Not yet:** the System Haptics finding and Instruments, both from Task 25's device pass.
+  - **Not yet:** Instruments, from Task 25's device pass.
+- **System Haptics (device pass, 2026-10-26):** with the switch off, the intro still vibrated on the iPhone 15, so Core Haptics ignores it. Part 7 adds Pebbles' own switch to Settings (`HapticsPreference`), which every haptic in the app asks first, rather than the UIKit fallback (decision log, 2026-10-26). The Replay fix also held on the device.
 
 Fill in as the parts land. List each deviation from this plan, and why:
 - the local reference baseline from Task 0
