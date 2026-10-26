@@ -20,7 +20,7 @@ struct EmotionGem: View {
                     .padding(.horizontal, MonthLayout.sectionPadX)
                     .introReveal(.lead)
                 GemFigure(facets: gem.facets, palette: { lookups.family($0)?.palette }, labels: words.labels,
-                          count: "\(wrap.pebbles)", countLabel: WrapCopy.gemPebbles(wrap.pebbles, locale: locale),
+                          count: wrap.pebbles, countLabel: WrapCopy.gemPebbles(wrap.pebbles, locale: locale),
                           description: words.description)
                 MoreLink(text: WrapCopy.moreEmotions(wrap.fineEmotions?.count ?? 0, locale: locale), action: onMore)
                     .accessibilityHint(Text(verbatim: WrapCopy.tileHint(locale: locale)))

@@ -23,7 +23,8 @@ struct GemFigure: View {
     let facets: [String: String?]
     let palette: (String) -> EmotionPalette?
     let labels: [GemLabel]
-    let count: String
+    /// The month's pebbles, in the table; in the intro it counts up to them (#1241 D10).
+    let count: Int
     let countLabel: String
     let description: String
 
@@ -37,17 +38,20 @@ struct GemFigure: View {
                 GemStone(colors: colors, ticks: runs.map(\.anchor), tick: Color.pebbles.outline, reveal: reveal)
             }
             .layoutValue(key: GemPart.self, value: .stone)
-            Text(verbatim: count)
-                .spineType(.dayNumeral)
-                .foregroundStyle(Color.pebbles.onSurface)
-                .dynamicTypeSize(...DynamicTypeSize.large)
-                .introReveal(.count)
-                .layoutValue(key: GemPart.self, value: .count)
+            // There with the blank stone, from 0, then counting up to the pebbles on its beat.
+            IntroReader { reveal in
+                Text(verbatim: "\(IntroScore.counted(count, at: reveal(.count)))")
+                    .spineType(.dayNumeral)
+                    .foregroundStyle(Color.pebbles.onSurface)
+                    .dynamicTypeSize(...DynamicTypeSize.large)
+            }
+            .introReveal(.blank)
+            .layoutValue(key: GemPart.self, value: .count)
             Text(verbatim: countLabel)
                 .spineType(.dayWeekday)
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .dynamicTypeSize(...DynamicTypeSize.large)
-                .introReveal(.count)
+                .introReveal(.blank)
                 .layoutValue(key: GemPart.self, value: .countLabel)
             ForEach(Array(runs.enumerated()), id: \.element.label.slug) { index, run in
                 Text(verbatim: run.label.name)
