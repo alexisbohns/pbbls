@@ -113,9 +113,10 @@ struct WeeksSummary: View {
 }
 
 /// The month's milestones (#1226, D8): the stones the server picked (large
-/// first, bright to heavy, then medium), each a seal, its date over its name
-/// weighted by intensity (#1241 D12), and its souls; a tap opens its held
-/// card. Android: `MilestonesSection`.
+/// first, bright to heavy, then medium), each its own lit stone, its date over
+/// its name weighted by intensity (#1241 D12), and its photo framed as a small
+/// card, or its souls (D16); on a card the rows share its room (D13). A tap
+/// opens its held card. Android: `MilestonesSection`.
 struct MilestonesSection: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
@@ -123,16 +124,29 @@ struct MilestonesSection: View {
     /// Where VoiceOver lands when a milestone's held card closes (the page's).
     var focus: AccessibilityFocusState<UUID?>.Binding?
 
+    @Environment(\.monthCardRoom) private var room
+
     private var locale: Locale { SpineStrings.appLocale }
+
+    /// A milestone's row on a card: its share of the room, within the row minimum and this (D13).
+    static let rowCap: CGFloat = 104
+    /// The list's stones, about the seals' size they replace; on a card they grow to the Spine's own.
+    static let listStone: CGFloat = 0.62
+    static let listSnap: CGFloat = 40
+    /// A list row: tall enough for the stone's rings to clear its neighbours'.
+    static let listRow: CGFloat = 56
+    /// The stone column past the largest stone: room for its rings, which draw outside it.
+    private static let ringRoom: CGFloat = 1.3
 
     var body: some View {
         if Self.isShown(wrap: wrap, lookups: lookups) {
             let moments = Self.moments(wrap, lookups: lookups)
+            let size = Self.rowSize(room: room, rows: moments.count)
             VStack(alignment: .leading, spacing: 0) {
                 MonthSectionHead(Self.head(wrap: wrap, lookups: lookups))
                 VStack(spacing: 0) {
                     ForEach(Array(moments.enumerated()), id: \.element.id) { index, moment in
-                        row(moment, index: index)
+                        row(moment, index: index, size: size)
                     }
                 }
                 .padding(.horizontal, MonthLayout.sectionPadX)
@@ -160,19 +174,33 @@ struct MilestonesSection: View {
     /// A milestone's souls, at most.
     static let soulLimit = 4
 
-    /// The milestones' intro (#1241 D10): the head, then each stone stamped, its date, its name and its souls.
+    /// The milestones' intro (#1241 D10): the head, then each stone stamped, its date, its name, and its photo's
+    /// card or its souls one by one.
     static func introBeats(wrap: MonthWrap, lookups: WrapLookups) -> [IntroBeat] {
         IntroScore.milestones(moments(wrap, lookups: lookups).map { moment in
-            IntroMilestoneShape(intensity: moment.pebble?.intensity ?? 1,
-                                souls: SoulMarks.shown(soulIds(moment), lookups: lookups, limit: soulLimit).count)
+            let souls = SoulMarks.shown(soulIds(moment), lookups: lookups, limit: soulLimit).count
+            return IntroMilestoneShape(intensity: moment.pebble?.intensity ?? 1,
+                                       souls: moment.firstSnapPath == nil ? souls : 1)
         })
+    }
+
+    /// A milestone's row (D13, D16): the list's, or on a card its share of the room, the stone, the photo's card
+    /// and the souls growing with it.
+    static func rowSize(room: CGFloat?, rows: Int) -> MilestoneRowSize {
+        guard let room else {
+            return MilestoneRowSize(height: listRow, stone: listStone, snap: listSnap, soul: SoulMarks.side)
+        }
+        let height = min(max(room / CGFloat(max(rows, 1)), listRow), rowCap)
+        let stone = min(max(height / 100, listStone), 1)
+        return MilestoneRowSize(height: height, stone: stone, snap: min(max(height * 0.7, listSnap), 76),
+                                soul: min(SoulMarks.side * stone / listStone, WeeksSummary.soulCap))
     }
 
     private static func soulIds(_ moment: MomentSummary) -> [String] {
         (moment.pebble?.souls ?? []).map { $0.id.uuidString.lowercased() }
     }
 
-    private func row(_ moment: MomentSummary, index: Int) -> some View {
+    private func row(_ moment: MomentSummary, index: Int, size: MilestoneRowSize) -> some View {
         let name = moment.name.flatMap { $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 }
             ?? SpineCopy.untitled(locale: locale)
         let cut = EntryTypes.contentsNameType(intensity: moment.pebble?.intensity ?? 2,
@@ -181,18 +209,27 @@ struct MilestonesSection: View {
         let open = { onOpen(moment) }
         // The date over the name (D12); in the intro the stone stamps, then the date, the name and the souls (D10).
         let reveal = MarkRowReveal(leading: nil, text: .date(index), title: .name(index), subtitle: .date(index))
+        // Its own stone, as the Spine draws it (D16), in a column as wide as the largest with its rings.
+        let stone = SpineLayout.stoneSize(moment.pebble?.valence.sizeGroup ?? .medium)
         return MarkRow(name, accessibilityText: "\(date), \(name)", titleType: .contentsName(cut), subtitle: date,
-                       action: open, reveal: reveal, subtitleFirst: true) {
+                       action: open, reveal: reveal, subtitleFirst: true, height: size.height,
+                       markWidth: SpineLayout.stoneWidth(.large) * size.stone * Self.ringRoom) {
             IntroReader { stage in
                 let stamped = stage(.stamp(index))
-                StoneSeal(moment: moment,
-                          palette: SpineColors.palette(lookups.palette(moment), isBlank: moment.pebble == nil),
-                          size: .milestone)
-                    .scaleEffect(IntroMotion.stampScale(stamped))
+                SpineStone(moment: moment, palette: lookups.palette(moment))
+                    .scaleEffect(size.stone * IntroMotion.stampScale(stamped))
                     .opacity(IntroMotion.stampOpacity(stamped))
+                    .frame(width: stone.width * size.stone, height: stone.height * size.stone)
             }
         } trailing: {
-            SoulMarks(ids: Self.soulIds(moment), lookups: lookups, limit: Self.soulLimit, introRow: index)
+            // Its photo framed as a small card, or its souls (D16).
+            if let path = moment.firstSnapPath {
+                MilestoneSnap(path: path, tint: Color.pebbles.outline, height: size.snap)
+                    .introReveal(.mark(index, 0), .pop)
+            } else {
+                SoulMarks(ids: Self.soulIds(moment), lookups: lookups, limit: Self.soulLimit, introRow: index,
+                          side: size.soul)
+            }
         }
         .modifier(ReturnFocus(focus: focus, id: moment.id))
     }
@@ -295,6 +332,15 @@ struct SoulMarks: View {
     static func shown(_ ids: [String], lookups: WrapLookups, limit: Int) -> [String] {
         Array(ids.filter { lookups.soulName($0) != nil }.prefix(limit))
     }
+}
+
+/// A milestone's row (#1241 D13, D16): its height, its stone's scale, its photo card's height and
+/// its souls' glyph side.
+struct MilestoneRowSize: Equatable {
+    let height: CGFloat
+    let stone: CGFloat
+    let snap: CGFloat
+    let soul: CGFloat
 }
 
 /// A domain the device knows, with its name, in the server's order.

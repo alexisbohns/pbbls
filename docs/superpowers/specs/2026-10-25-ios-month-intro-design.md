@@ -110,6 +110,8 @@ The month page enters instead of appearing all at once. The month's name rises i
 - **Replay:** a tap puts the deck back on the cover with a fresh clock, and the ledger forgets the month, so it plays from the start.
 - **The scrolled page** has no end card.
 
+**D16. Milestones in their own stones** (the same pass, later). Everywhere, a milestone draws the Spine's own lit stone (`SpineStone`, rings and all) instead of the flat seal, in a column wide enough for its rings. On the right, its first photo framed as a small tilted card (`MilestoneSnap`: the stock, a rule, the photo cropped to a window over a blank strip, loaded as the Spine's card loads it), or its souls when it has no photo. In the intro, the photo's card lands as one part where the souls landed one by one. The list's rows are 56 pt, so the rings clear each other. On a card, the rows share the room (up to 104 pt) and the stone grows to the Spine's own size, with the photo's card and the souls growing alongside.
+
 **D15. Continuous haptics.** `IntroBeat` gains an optional `swell` (`IntroSwell`): a continuous Core Haptics event that starts at the beat's time and lasts the swell's duration. Its intensity rises from `from` to `to` along a parameter curve. The 25 ms floor applies to transients only.
 
 ## Choreography

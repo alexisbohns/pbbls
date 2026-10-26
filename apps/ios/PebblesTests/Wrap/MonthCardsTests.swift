@@ -93,6 +93,25 @@ struct MonthCardsTests {
         #expect(beats.contains { $0.key == .more })
     }
 
+    @Test("on a card, the milestones share its room and their stones grow to the Spine's own; the list keeps its size")
+    func milestonesFill() {
+        let list = MilestonesSection.rowSize(room: nil, rows: 5)
+        #expect(list.height == MilestonesSection.listRow)
+        #expect(list.stone == MilestonesSection.listStone)
+        #expect(list.snap == MilestonesSection.listSnap)
+        #expect(list.soul == SoulMarks.side)
+        let card = MilestonesSection.rowSize(room: 400, rows: 5)
+        #expect(card.height == 80)
+        #expect(card.stone > list.stone)
+        #expect(card.snap > list.snap)
+        #expect(card.soul > list.soul)
+        let roomy = MilestonesSection.rowSize(room: 900, rows: 2)
+        #expect(roomy.height == MilestonesSection.rowCap)
+        #expect(roomy.stone == 1)
+        #expect(roomy.soul <= WeeksSummary.soulCap)
+        #expect(MilestonesSection.rowSize(room: 100, rows: 5).height == MilestonesSection.listRow)
+    }
+
     /// October with its second week emptied, as the server sends a week without a pebble.
     static func quietSecondWeek() throws -> MonthWrap {
         let october = try MonthPayloadFixture.october()
