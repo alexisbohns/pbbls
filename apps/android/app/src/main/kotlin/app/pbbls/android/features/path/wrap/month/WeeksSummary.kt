@@ -41,7 +41,7 @@ internal fun WeeksSummary(
     if (!MonthSections.isShown(MonthSection.WEEKS, wrap, lookups)) return
     val weeks = WeeksSummary.weeks(wrap)
     Column {
-        if (!onCard) MonthSectionHead(copy.weeksHeader(weeks.size), copy.weeksHint(wrap.month))
+        if (!onCard) MonthSectionHead(MonthSections.head(MonthSection.WEEKS, wrap, lookups, copy))
         Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
             weeks.forEach { week ->
                 val range = copy.range(wrap.month, week.from, week.to)

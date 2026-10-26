@@ -34,12 +34,10 @@ internal fun PersonsSection(
     val type = PebblesTheme.spine.type
     val copy = rememberWrapCopy()
     if (!MonthSections.isShown(MonthSection.PERSONS, wrap, lookups)) return
-    val persons = wrap.persons.orEmpty()
-    val rows = persons.filter { lookups.soul(it.soulId) != null }
+    val rows = MonthSections.namedPersons(wrap, lookups)
     Column {
         if (!onCard) {
-            val head = MonthSections.head(MonthSection.PERSONS, wrap, lookups, dayView, copy)
-            MonthSectionHead(head.label, head.hint)
+            MonthSectionHead(MonthSections.head(MonthSection.PERSONS, wrap, lookups, copy, dayView))
         }
         if (rows.isEmpty()) {
             Text(copy.nobody(), style = type.lead, color = colors.ink, modifier = Modifier.padding(horizontal = SECTION_PAD_X))

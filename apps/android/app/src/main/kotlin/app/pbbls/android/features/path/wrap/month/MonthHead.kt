@@ -4,11 +4,12 @@ import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
+import app.pbbls.android.core.model.wrap.PersonStat
 import app.pbbls.android.core.model.wrap.WeekTile
 import app.pbbls.android.features.path.wrap.WrapLookups
 import app.pbbls.android.features.path.wrap.copy.WrapCopy
 
-/** A section's head: its label and its hint (#1242; iOS `MonthHead`). On a card, the title band draws it (D11). */
+/** A section's head: its label and its hint (#1242; iOS `MonthHead`). On a card, the card's title band draws it. */
 internal data class MonthHead(
     val label: String,
     val hint: String?,
@@ -42,12 +43,13 @@ internal object MonthSections {
         lookups: WrapLookups,
     ): List<PathMoment> = wrap.milestones.orEmpty().mapNotNull(lookups.moment)
 
+    /** The head the page and the card's title band share: one definition, so they cannot drift. */
     fun head(
         section: MonthSection,
         wrap: MonthWrap,
         lookups: WrapLookups,
-        dayView: DayView,
         copy: WrapCopy,
+        dayView: DayView = DayView.CIRCLE,
     ): MonthHead =
         when (section) {
             MonthSection.WEEKS -> MonthHead(copy.weeksHeader(WeeksSummary.weeks(wrap).size), copy.weeksHint(wrap.month))
@@ -59,6 +61,12 @@ internal object MonthSections {
             MonthSection.HOURS -> MonthHead(copy.hoursTitle(), copy.hoursHint())
         }
 
+    /** The persons the device knows a soul for, in the server's order. */
+    fun namedPersons(
+        wrap: MonthWrap,
+        lookups: WrapLookups,
+    ): List<PersonStat> = wrap.persons.orEmpty().filter { lookups.soul(it.soulId) != null }
+
     /** The persons' hint: *clockwise*, only around a ring that names someone. */
     fun personsHint(
         wrap: MonthWrap,
@@ -66,9 +74,24 @@ internal object MonthSections {
         dayView: DayView,
         copy: WrapCopy,
     ): String? {
-        val named = wrap.persons.orEmpty().any { lookups.soul(it.soulId) != null }
+        val named = namedPersons(wrap, lookups).isNotEmpty()
         return if (dayView == DayView.CIRCLE && named) copy.clockwiseHint() else null
     }
+
+    /**
+     * Whether [section] leads the insights head among the sections that show: the deck deals only those
+     * (iOS `MonthDeck.leadsInsights` over the dealt cards). The plain page keeps iOS's own rule, over the
+     * listed sections, as [MonthSectionContent] defaults to.
+     */
+    fun leadsInsights(
+        section: MonthSection,
+        wrap: MonthWrap,
+        lookups: WrapLookups,
+    ): Boolean =
+        section ==
+            wrap.sections.firstOrNull {
+                (it == MonthSection.TONE || it == MonthSection.HOURS) && isShown(it, wrap, lookups)
+            }
 
     fun insightsHead(copy: WrapCopy) = MonthHead(copy.insights(), copy.insightsHint())
 }

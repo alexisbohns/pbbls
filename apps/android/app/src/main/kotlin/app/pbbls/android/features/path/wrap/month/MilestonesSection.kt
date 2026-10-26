@@ -74,7 +74,7 @@ internal fun MilestonesSection(
     val moments = MonthSections.milestones(wrap, lookups)
     val untitled = stringResource(R.string.path_spine_untitled)
     Column {
-        if (!onCard) MonthSectionHead(copy.milestonesHeader(moments.size), copy.milestonesHint())
+        if (!onCard) MonthSectionHead(MonthSections.head(MonthSection.MILESTONES, wrap, lookups, copy))
         Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
             moments.forEach { moment ->
                 key(moment.id) {

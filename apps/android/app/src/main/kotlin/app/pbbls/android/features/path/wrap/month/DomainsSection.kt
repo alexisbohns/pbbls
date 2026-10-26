@@ -12,7 +12,6 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.ProportionBar
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
-import app.pbbls.android.core.model.wrap.WeekTile
 import app.pbbls.android.core.ui.MarkRow
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
@@ -36,7 +35,7 @@ internal fun DomainsSection(
     val domains = wrap.domains.orEmpty().mapNotNull { stat -> lookups.domain(stat.domainId)?.let { stat to it } }
     val max = domains.maxOf { it.first.count }.toFloat()
     Column {
-        if (!onCard) MonthSectionHead(copy.tile(WeekTile.DOMAINS))
+        if (!onCard) MonthSectionHead(MonthSections.head(MonthSection.DOMAINS, wrap, lookups, copy))
         Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
             domains.take(SHOWN).forEach { (stat, domain) ->
                 val name = ReferenceStrings.referenceName(ReferenceType.DOMAIN, domain.slug, domain.name)

@@ -72,7 +72,10 @@ internal fun ToneFigure(
         }
 
     Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
-        if (!onCard) SpineSectionHeader(label = copy.toneTitle(), hint = copy.toneHint())
+        if (!onCard) {
+            val head = MonthSections.head(MonthSection.TONE, wrap, lookups, copy)
+            SpineSectionHeader(label = head.label, hint = head.hint)
+        }
         Text(line, style = type.still, color = colors.ink2, modifier = Modifier.padding(top = 6.dp, bottom = 8.dp))
         Canvas(Modifier.fillMaxWidth().height(height).semantics { contentDescription = line }) {
             val u = unit.toPx()

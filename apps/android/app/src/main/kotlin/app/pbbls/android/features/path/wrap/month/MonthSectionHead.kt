@@ -24,6 +24,10 @@ internal fun MonthSectionHead(
     )
 }
 
+/** A month section's head from the one place that defines it, [MonthSections.head]. */
+@Composable
+internal fun MonthSectionHead(head: MonthHead) = MonthSectionHead(head.label, head.hint)
+
 @Composable
 internal fun MonthMore(
     text: String,

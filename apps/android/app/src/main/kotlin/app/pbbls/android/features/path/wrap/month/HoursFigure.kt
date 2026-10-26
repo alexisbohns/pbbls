@@ -78,7 +78,10 @@ internal fun HoursFigure(
     val description = busiest?.let { copy.hoursDescription(it.count, items.size, it.start) } ?: copy.hoursSub()
 
     Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
-        if (!onCard) SpineSectionHeader(label = copy.hoursTitle(), hint = copy.hoursHint(), modifier = Modifier.padding(top = 28.dp))
+        if (!onCard) {
+            val head = MonthSections.head(MonthSection.HOURS, wrap, lookups, copy)
+            SpineSectionHeader(label = head.label, hint = head.hint, modifier = Modifier.padding(top = 28.dp))
+        }
         Text(copy.hoursSub(), style = type.still, color = colors.ink2, modifier = Modifier.padding(top = 6.dp))
         Box(Modifier.fillMaxWidth().height(HEIGHT).semantics { contentDescription = description }, contentAlignment = Alignment.Center) {
             Canvas(Modifier.fillMaxWidth().height(HEIGHT).clearAndSetSemantics {}) {

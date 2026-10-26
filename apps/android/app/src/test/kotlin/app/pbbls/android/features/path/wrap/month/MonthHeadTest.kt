@@ -28,14 +28,14 @@ class MonthHeadTest {
         MonthSection.entries.forEach { assertTrue("$it", MonthSections.isShown(it, wrap, lookups)) }
         assertEquals(
             copy.weeksHeader(wrap.weeks!!.size),
-            MonthSections.head(MonthSection.WEEKS, wrap, lookups, DayView.CIRCLE, copy).label,
+            MonthSections.head(MonthSection.WEEKS, wrap, lookups, copy, DayView.CIRCLE).label,
         )
     }
 
     @Test
     fun `the persons hint reads clockwise only around a ring`() {
-        assertEquals(copy.clockwiseHint(), MonthSections.head(MonthSection.PERSONS, wrap, lookups, DayView.CIRCLE, copy).hint)
-        assertEquals(null, MonthSections.head(MonthSection.PERSONS, wrap, lookups, DayView.CALENDAR, copy).hint)
+        assertEquals(copy.clockwiseHint(), MonthSections.head(MonthSection.PERSONS, wrap, lookups, copy, DayView.CIRCLE).hint)
+        assertEquals(null, MonthSections.head(MonthSection.PERSONS, wrap, lookups, copy, DayView.CALENDAR).hint)
     }
 
     @Test
