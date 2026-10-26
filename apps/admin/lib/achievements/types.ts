@@ -56,7 +56,7 @@ export const FAMILY_LABELS: Record<AchievementFamily, string> = {
   first_soul: "First soul",
   first_moment: "First moment",
   first_pebble: "First pebble",
-  first_five: "The blue pebble (claimed)",
+  first_five: "The blue pebble",
   glyph_count: "Glyphs carved",
   glyph_sales: "Glyph sales",
 }

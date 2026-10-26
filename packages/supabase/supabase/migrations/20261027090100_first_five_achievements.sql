@@ -125,6 +125,11 @@ $$;
 -- do nothing feeding the karma insert), gated on the five one-shot unlocks.
 -- A second call inserts nothing and returns no row. Raises 'not_ready' when a
 -- prerequisite is missing, so a client cannot claim ahead of the data.
+-- The gate keys on five SLUGS, and check_achievements grants only is_active
+-- rows: retiring any of first-moment, first-pebble, first-collection,
+-- first-soul or first-glyph in the admin makes the blue pebble unreachable for
+-- every later user. Retire the blue pebble itself instead (the claim then
+-- returns no row, which clients must not read as a success).
 create or replace function public.claim_blue_pebble()
 returns table (slug text, karma_granted integer)
 language plpgsql

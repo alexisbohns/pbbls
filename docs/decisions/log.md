@@ -1430,3 +1430,17 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - If a later iOS changes the floating tab bar's margin or height, the + drifts off the end cap; re-measure the platter and update the constants.
   - Do not restore the cluster on iOS for parity. Android has none.
 - **Refs:** #1252, #903, `apps/ios/Pebbles/Features/Path/Components/NewPebbleFab.swift`.
+
+## 2026-10-26 — The blue pebble is claimed, and its five prerequisites must never be retired (#1254)
+
+- **Status:** taken
+- **Scope:** db, ios, android (admin)
+- **Context:** the Home tab's beginner checklist needed one truth for its five tasks. Three were achievements already; counting live rows for "first moment" and "first pebble" would untick on deletion while the other three stayed ticked.
+- **Decision:**
+  - `first_moment` and `first_pebble` are new one-shot achievement families, unlocked by `check_achievements` like the others and kept whatever is deleted later.
+  - `blue-pebble` (family `first_five`) is never granted by the check. The user claims it through `claim_blue_pebble()`, which requires the five one-shot unlocks by slug and uses the check's exactly-once mechanics.
+  - The five prerequisite slugs (`first-moment`, `first-pebble`, `first-collection`, `first-soul`, `first-glyph`) are load-bearing: retiring any of them in the admin (`is_active = false`) makes the blue pebble unreachable for every later user. Retire the blue pebble itself instead.
+- **Why:** one truth for the checklist; the claim is the ceremony that ends it; a retired prerequisite would dead-end Home on a row the catalog no longer shows.
+- **Consequences:** `people_prompts` and the checklist read unlocks, not counts; iOS treats an empty claim result as "not granted", never as success; Android and web need copy for the three families (#1257, #1258).
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #1254, `docs/superpowers/specs/2026-10-26-home-tab-and-empty-states-design.md` D6, `packages/supabase/supabase/migrations/20261027090100_first_five_achievements.sql`.

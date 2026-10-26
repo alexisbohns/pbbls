@@ -12,13 +12,17 @@
  *   3. people_prompts: totals; the no-soul filter; the outward-domain rule; the
  *      valence guard (a low pebble is never asked, whatever its domain); latest
  *      first; the skipped names; the limit; anon refused.
+ *   Not provable without a service role, so not claimed here: that the claim
+ *   PAYS once (karma_reward is 0 at seed and only an admin can set it; the
+ *   exactly-once is argued structurally, the unlocks PK feeding the karma CTE)
+ *   and that a moderation-hidden moment is excluded (nothing can hide one).
  *   4. (part 3) wrap_reveals / reveal_wrap / home_wraps — see the section below.
  *
  * HOME_DUMP=1 writes the verbatim people_prompts payload to
  * scripts/oracles/home/payloads/people-prompts.json for the clients' decoding tests.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:home --workspace=packages/supabase
- * Expected: `Summary: passed=19 failed=0` (part 2); part 3 raises it.
+ * Expected: `Summary: passed=21 failed=0` (part 2); part 3 raises it.
  * Needs NO service-role key: signs up throwaway users (home-verify-*@example.test)
  * and deletes them through the real `delete-account` edge function, even on failure.
  */
@@ -76,7 +80,7 @@ type Prompts = {
 
 /** Reference rows by slug, read as the user (reference tables are public). */
 async function refs(c: SupabaseClient) {
-  const { data: emotion } = await c.from("emotions").select("id").limit(1).single();
+  const { data: emotion } = await c.from("emotions").select("id").order("slug").limit(1).single();
   const { data: domains } = await c.from("domains").select("id, slug").in("slug", ["family", "work", "health"]);
   const by = Object.fromEntries((domains ?? []).map((d: { id: string; slug: string }) => [d.slug, d.id]));
   if (!emotion || !by.family || !by.work || !by.health) throw new Error("reference data missing (emotion, family/work/health domains)");
@@ -104,6 +108,7 @@ async function unlockedSlugs(c: SupabaseClient): Promise<string[]> {
 const anon = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } });
 let alice: TestUser | null = null;
 let bob: TestUser | null = null;
+let carol: TestUser | null = null;
 
 try {
   // 1. the first five ---------------------------------------------------------------------
@@ -124,7 +129,7 @@ try {
   await completePebble(a, m1, r.emotionId, 1, [r.family]);
   const afterPebble = await a.rpc("check_achievements");
   const pebbleSlugs = ((afterPebble.data ?? []) as Unlock[]).map((u) => u.slug).sort();
-  check("the first complete_pebble unlocks first-pebble (and the catalog's pebble-count-1 tier), never blue-pebble",
+  check("the first complete_pebble unlocks first-pebble, never blue-pebble",
     !afterPebble.error && pebbleSlugs.includes("first-pebble") && !pebbleSlugs.includes("blue-pebble") && !pebbleSlugs.includes("first-moment"),
     afterPebble.error?.message ?? JSON.stringify(pebbleSlugs));
 
@@ -158,10 +163,12 @@ try {
     !five.error && ["first-soul", "first-collection", "first-glyph"].every((s) => fiveSlugs.includes(s)) && !fiveSlugs.includes("blue-pebble"),
     five.error?.message ?? JSON.stringify(fiveSlugs));
 
-  const claim = await a.rpc("claim_blue_pebble");
-  const claimed = (claim.data ?? []) as Unlock[];
-  check("claim_blue_pebble unlocks blue-pebble once the five are there",
-    !claim.error && claimed.length === 1 && claimed[0].slug === "blue-pebble", claim.error?.message ?? JSON.stringify(claim.data));
+  // Two claims race: both pass the gate, one inserts, the other hits the PK.
+  const [c1, c2] = await Promise.all([a.rpc("claim_blue_pebble"), a.rpc("claim_blue_pebble")]);
+  const rows = [...((c1.data ?? []) as Unlock[]), ...((c2.data ?? []) as Unlock[])];
+  check("two concurrent claims unlock blue-pebble exactly once between them",
+    !c1.error && !c2.error && rows.length === 1 && rows[0].slug === "blue-pebble",
+    [c1.error?.message, c2.error?.message, JSON.stringify(rows)].filter(Boolean).join(" | "));
   const again = await a.rpc("claim_blue_pebble");
   check("a second claim returns no row", !again.error && (again.data as Unlock[]).length === 0, again.error?.message ?? JSON.stringify(again.data));
   const unlocks = await unlockedSlugs(a);
@@ -182,6 +189,7 @@ try {
   // inward+bright (skipped), outward+bright with a soul (not soul-less), oldest outward+bright.
   const { data: bobSoul } = await b.from("souls").insert({ user_id: bob.id, name: `Elio ${runId}` }).select("id").single();
   const seed: [string, string, number, string[], string[]][] = [
+    ["too old to mention",    "2026-09-20T09:00:00Z", -1, [r.family], []],
     ["oldest outward bright", "2026-10-01T09:00:00Z", 1, [r.family], []],
     ["with a soul",           "2026-10-02T09:00:00Z", 1, [r.family], [bobSoul!.id]],
     ["inward bright",         "2026-10-03T09:00:00Z", 1, [r.health], []],
@@ -197,12 +205,14 @@ try {
   const p = got.data as Prompts;
   await dump("people-prompts", got.data);
   const names = p.prompts.map((x) => (x.name ?? "").replace(` ${runId}`, ""));
-  check("totals count every pebble and every soul", p.pebbles === 6 && p.souls === 1, JSON.stringify([p.pebbles, p.souls]));
+  check("totals count every pebble and every soul", p.pebbles === 7 && p.souls === 1, JSON.stringify([p.pebbles, p.souls]));
   check("prompts are the soul-less, outward, non-heavy pebbles, latest first, three at most",
     JSON.stringify(names) === JSON.stringify(["outward bright", "outward even", "oldest outward bright"]), JSON.stringify(names));
   check("a low pebble is never asked about, and an inward one neither: both are named as skipped",
     p.skipped.map((s) => (s.name ?? "").replace(` ${runId}`, "")).sort().join("|") === "inward bright|outward low",
     JSON.stringify(p.skipped));
+  check("a reject older than the oldest prompt shown is not named",
+    !p.skipped.some((s) => (s.name ?? "").startsWith("too old")), JSON.stringify(p.skipped));
   check("timestamps are whole-second UTC", p.prompts.every((x) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(x.happened_at)),
     JSON.stringify(p.prompts.map((x) => x.happened_at)));
   const limited = await b.rpc("people_prompts", { p_limit: 1 });
@@ -212,13 +222,26 @@ try {
   const anonPrompts = await anon.rpc("people_prompts");
   check("people_prompts is refused to anon", !!anonPrompts.error, JSON.stringify(anonPrompts.data));
 
+  carol = await signUp("c");
+  const c = carol.client;
+  for (const [name, at] of [["only inward", "2026-10-02T09:00:00Z"], ["only heavy", "2026-10-03T09:00:00Z"], ["older inward", "2026-10-01T09:00:00Z"]] as const) {
+    const mid = await saveMoment(c, `${name} ${runId}`, at);
+    await completePebble(c, mid, r.emotionId, name === "only heavy" ? -1 : 1, [name === "only heavy" ? r.family : r.health]);
+  }
+  const rejectsOnly = await c.rpc("people_prompts");
+  const ro = rejectsOnly.data as Prompts;
+  check("with pebbles but no eligible one, prompts are empty and the two latest rejects are named",
+    !rejectsOnly.error && ro.pebbles === 3 && ro.prompts.length === 0
+      && ro.skipped.map((s) => (s.name ?? "").replace(` ${runId}`, "")).join("|") === "only heavy|only inward",
+    rejectsOnly.error?.message ?? JSON.stringify(ro));
+
   // 4. wraps (part 3) ----------------------------------------------------------------------
   // (added in part 3)
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
 } finally {
-  for (const u of [alice, bob]) {
+  for (const u of [alice, bob, carol]) {
     if (!u) continue;
     const res = await deleteAccount(u.token).catch(() => null);
     if (!res?.ok) console.error(`cleanup: delete-account returned ${res?.status ?? "no response"}`);
