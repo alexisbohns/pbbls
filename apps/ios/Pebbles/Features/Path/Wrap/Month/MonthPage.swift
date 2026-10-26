@@ -55,7 +55,9 @@ struct MonthPage: View {
             if intro != nil, allowsIntro {
                 MonthDeck(wrap: wrap, lookups: lookups, dayView: dayView, focus: $milestoneFocus,
                           onWeek: onWeek, onOpen: onOpen, onMore: { sheet = $0 }, onReplay: replay)
-                    .id(deal)
+                    // Its month in the id: the Path's pager finds its pages by id, and two decks sharing one
+                    // sent a swipe to August back to September.
+                    .id(MonthDeckDeal(month: wrap.month, deal: deal))
                     .transition(.opacity)
             } else {
                 ScrollView {
@@ -121,6 +123,12 @@ struct MonthPage: View {
         IntroPolicy.plays(reduceMotion: reduceMotion, voiceOver: voiceOver,
                           largeText: dynamicTypeSize.isAccessibilitySize)
     }
+}
+
+/// A deck's identity on its page: dealt again on each replay (D14), and never the same as another month's.
+private struct MonthDeckDeal: Hashable {
+    let month: CalendarMonth
+    let deal: Int
 }
 
 /// The page's rows in the server's order; its own view, so the references lay
