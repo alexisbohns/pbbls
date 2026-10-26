@@ -2412,6 +2412,13 @@ export type Database = {
           slug: string
         }[]
       }
+      claim_blue_pebble: {
+        Args: never
+        Returns: {
+          karma_granted: number
+          slug: string
+        }[]
+      }
       complete_pebble: { Args: { payload: Json }; Returns: string }
       compute_karma_delta: {
         Args: {
@@ -2637,6 +2644,7 @@ export type Database = {
         Args: { p_tz: string; p_week_start: string }
         Returns: Json
       }
+      people_prompts: { Args: { p_limit?: number }; Returns: Json }
       preview_connection_invite: { Args: { p_token: string }; Returns: Json }
       publish_admin_glyph: {
         Args: {
