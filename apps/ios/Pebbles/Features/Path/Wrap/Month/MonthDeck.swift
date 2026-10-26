@@ -209,7 +209,7 @@ private struct MonthDeckEdges: View {
                     .offset(y: MonthDeckMotion.peek * depth)
             }
         }
-        // The count changes as a throw passes half way: an edge fades rather than blinks.
+        // The count changes once a throw lands: an edge fades rather than blinks.
         .animation(.easeOut(duration: 0.2), value: count)
         .accessibilityHidden(true)
     }
