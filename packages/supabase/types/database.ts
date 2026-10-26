@@ -1032,6 +1032,54 @@ export type Database = {
           },
         ]
       }
+      guides: {
+        Row: {
+          body_md_en: string
+          body_md_fr: string | null
+          created_at: string
+          id: string
+          illustration: string | null
+          published: boolean
+          slug: string
+          sort_order: number
+          summary_en: string
+          summary_fr: string | null
+          title_en: string
+          title_fr: string | null
+          updated_at: string
+        }
+        Insert: {
+          body_md_en: string
+          body_md_fr?: string | null
+          created_at?: string
+          id?: string
+          illustration?: string | null
+          published?: boolean
+          slug: string
+          sort_order?: number
+          summary_en: string
+          summary_fr?: string | null
+          title_en: string
+          title_fr?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body_md_en?: string
+          body_md_fr?: string | null
+          created_at?: string
+          id?: string
+          illustration?: string | null
+          published?: boolean
+          slug?: string
+          sort_order?: number
+          summary_en?: string
+          summary_fr?: string | null
+          title_en?: string
+          title_fr?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       karma_events: {
         Row: {
           created_at: string
