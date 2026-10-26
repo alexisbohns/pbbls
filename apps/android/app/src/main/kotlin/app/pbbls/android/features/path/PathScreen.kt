@@ -33,6 +33,8 @@ import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.SnapAspectCache
+import app.pbbls.android.core.data.TapHaptic
+import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
@@ -230,6 +232,9 @@ fun PathScreen(
  * reports the new page through [onFocusChange], a strip tap or a week link
  * changes focus and the pager moves to it (snapping under reduced motion).
  * Scrolling to the already-current page is a no-op, so the two effects settle.
+ * A swipe that settles on another page, and a strip tap on another page, play
+ * the selection tick once (#1242 D24); a page the focus steered to does not
+ * tick again as it settles.
  *
  * @param entries the feed's weeks; a week page the feed does not hold renders empty.
  * @param stripItems the strip as drawn ([PathPages.items]); its focusable items are the pages.
@@ -280,6 +285,11 @@ fun PathContent(
     // cancels the running scroll, whose cleanup can land after the next one
     // has started. Not snapshot state: only the collector below reads it.
     val steering = remember { intArrayOf(0) }
+    val tapHaptics = rememberTapHaptics()
+    // The page a focus change last steered the pager to (a strip tap, a week
+    // link, a focus request): it ticked at the tap if at all, so its settle
+    // does not tick again. Not snapshot state: only the collector reads it.
+    val steeredTo = remember { intArrayOf(-1) }
 
     // Swipe → focus. Keyed on the pages so a reload re-subscribes; the page in
     // place at (re)subscription is dropped, because a reload is not a page
@@ -292,11 +302,23 @@ fun PathContent(
             pages.getOrNull(page)?.let(onFocusChange)
         }
     }
+    // A swipe that settles on another page plays the strip's selection tick
+    // (#1242 D24; iOS `SpinePager`). The page in place at (re)subscription is
+    // dropped, as above: a reload is not a page change. Any settle clears the
+    // steer, so a steer a drag cut short never mutes a later swipe.
+    LaunchedEffect(pagerState, pages) {
+        snapshotFlow { pagerState.settledPage }.drop(1).collect { page ->
+            val steered = page == steeredTo[0]
+            steeredTo[0] = -1
+            if (!steered) tapHaptics(TapHaptic.SELECTION)
+        }
+    }
     // Focus (strip tap, week link, R14 request) → pager.
     LaunchedEffect(focus, pages) {
         val index = pages.indexOf(focus)
         if (index >= 0 && index != pagerState.currentPage) {
             steering[0] += 1
+            steeredTo[0] = index
             try {
                 if (reduceMotion) pagerState.scrollToPage(index) else pagerState.animateScrollToPage(index)
             } finally {
@@ -309,7 +331,11 @@ fun PathContent(
         PathStrip(
             items = stripItems,
             focus = focus,
-            onFocus = onFocusChange,
+            onFocus = { page ->
+                // A tap on another page ticks (D24; iOS `PathStrip`); the focused one is already there.
+                if (page != focus) tapHaptics(TapHaptic.SELECTION)
+                onFocusChange(page)
+            },
             modifier = Modifier.fillMaxWidth(),
         )
         HorizontalPager(
