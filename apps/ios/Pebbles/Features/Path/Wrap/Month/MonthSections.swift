@@ -2,8 +2,8 @@ import SwiftUI
 
 /// The month by week (#1226, D6): every ISO week cut to the month's days, its
 /// cairn, its range and one line, and its souls; a tap focuses that week in the
-/// strip. An empty week is muted: bare ground, "No pebble.", no souls, no
-/// action (#1241 D12). On a card, the weeks share its room and their cairns
+/// strip. An empty week is muted: a dotted stone where its cairn would stand,
+/// "No pebble.", no souls, no action (#1241 D12). On a card, the weeks share its room and their cairns
 /// grow with them (D13). Android: `WeeksSummary`.
 struct WeeksSummary: View {
     let wrap: MonthWrap
@@ -18,9 +18,10 @@ struct WeeksSummary: View {
     static let rowCap: CGFloat = 112
     static let cairnCap: CGFloat = 1.8
     /// How much of its row a cairn fills, height for height.
-    private static let cairnFill: CGFloat = 0.62
-    /// A week's souls, at most.
+    private static let cairnFill: CGFloat = 0.8
+    /// A week's souls, at most, and their glyphs' side on a card, at most.
     static let soulLimit = 5
+    static let soulCap: CGFloat = 20
 
     var body: some View {
         if Self.isShown(wrap: wrap, lookups: lookups) {
@@ -49,7 +50,10 @@ struct WeeksSummary: View {
             MarkRow(line, accessibilityText: "\(range), \(line)", titleType: .mouthLine,
                     titleColor: Color.pebbles.outline, subtitle: range, reveal: .row(index), height: height,
                     markWidth: markWidth) {
-                WeekGround(scale: scale)
+                // The place a stone would stand, dotted, as the strip draws a week's next stone.
+                CairnMark(days: [], state: .live, color: Color.pebbles.outline)
+                    .scaleEffect(scale)
+                    .frame(width: markWidth, height: CairnGeometry.box.height * scale)
             }
         } else {
             let line = WrapCopy.line(pebbles: week.pebbles, people: week.soulIds.count, live: false,
@@ -65,7 +69,8 @@ struct WeeksSummary: View {
                 .scaleEffect(scale)
                 .frame(width: markWidth, height: CairnGeometry.box.height * scale)
             } trailing: {
-                SoulMarks(ids: week.soulIds, lookups: lookups, limit: Self.soulLimit, introRow: index)
+                SoulMarks(ids: week.soulIds, lookups: lookups, limit: Self.soulLimit, introRow: index,
+                          side: min(SoulMarks.side * scale, Self.soulCap))
             }
         }
     }
@@ -107,24 +112,10 @@ struct WeeksSummary: View {
     }
 }
 
-/// An empty week's mark (#1241 D12): its stretch of bare ground, as the strip draws an empty past week.
-private struct WeekGround: View {
-    let scale: CGFloat
-
-    var body: some View {
-        Color.clear
-            .frame(width: CairnGeometry.box.width * scale, height: CairnGeometry.box.height * scale)
-            .overlay(alignment: .bottom) {
-                Rectangle().fill(Color.pebbles.rule).frame(height: SpineLayout.rule)
-            }
-            .accessibilityHidden(true)
-    }
-}
-
 /// The month's milestones (#1226, D8): the stones the server picked (large
-/// first, bright to heavy, then medium), each a seal, its name weighted by
-/// intensity, its date and its souls; a tap opens its held card. Android:
-/// `MilestonesSection`.
+/// first, bright to heavy, then medium), each a seal, its date over its name
+/// weighted by intensity (#1241 D12), and its souls; a tap opens its held
+/// card. Android: `MilestonesSection`.
 struct MilestonesSection: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
@@ -353,11 +344,15 @@ struct SoulMarks: View {
     let lookups: WrapLookups
     let limit: Int
     var introRow: Int?
+    var side = Self.side
+
+    /// A glyph's side in a list row.
+    static let side: CGFloat = 14
 
     var body: some View {
         HStack(spacing: 2) {
             ForEach(Array(Self.shown(ids, lookups: lookups, limit: limit).enumerated()), id: \.element) { index, id in
-                SoulMark(strokes: lookups.soulGlyph(id), side: 14)
+                SoulMark(strokes: lookups.soulGlyph(id), side: side)
                     .introReveal(introRow.map { .mark($0, index) }, .pop)
             }
         }
