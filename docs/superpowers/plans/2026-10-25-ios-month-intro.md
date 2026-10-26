@@ -3409,12 +3409,517 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 ---
 
+# Part 5: chapters and tempo (`feat/1241-ios-intro-chapters`)
+
+This is the revision after the first device pass (spec D7–D9). Create the branch on top of `feat/1241-ios-intro-insights` with `gh stack add feat/1241-ios-intro-chapters`. Commit with the same conventions as Parts 1–4.
+
+### Task 26: Where a swipe lands
+
+**Files:**
+- Create: `apps/ios/Pebbles/Features/Path/Wrap/Intro/ChapterPaging.swift`
+- Test: `apps/ios/PebblesTests/Wrap/ChapterPagingTests.swift`
+
+- [ ] **Step 1: Write the failing test**
+
+```swift
+import CoreGraphics
+import Testing
+@testable import Pebbles
+
+/// #1241 D7: one chapter per swipe; freely inside a chapter taller than the page.
+@Suite("Chapter paging")
+struct ChapterPagingTests {
+    private func land(_ from: CGFloat, _ proposed: CGFloat, _ chapters: [ClosedRange<CGFloat>],
+                      viewport: CGFloat = 600, maxOffset: CGFloat) -> CGFloat {
+        ChapterPaging.target(from: from, proposed: proposed, chapters: chapters, viewport: viewport,
+                             maxOffset: maxOffset)
+    }
+
+    @Test("a swipe moves one chapter in its direction, however far it was flung")
+    func oneStep() {
+        let chapters: [ClosedRange<CGFloat>] = [0...500, 500...900, 900...1300, 1300...1600]
+        #expect(land(0, 300, chapters, maxOffset: 1600) == 500)
+        #expect(land(500, 1400, chapters, maxOffset: 1600) == 900)
+        #expect(land(900, 100, chapters, maxOffset: 1600) == 500)
+        #expect(land(0, -50, chapters, maxOffset: 1600) == 0)
+        // The last chapter stays put.
+        #expect(land(1300, 1500, chapters, maxOffset: 1600) == 1300)
+        // No movement, no change.
+        #expect(land(500, 500, chapters, maxOffset: 1600) == 500)
+    }
+
+    @Test("a tall chapter scrolls freely to its last screen, then the next swipe moves on")
+    func tall() {
+        let chapters: [ClosedRange<CGFloat>] = [0...500, 500...1400, 1400...1800]
+        #expect(land(500, 700, chapters, maxOffset: 1800) == 700)
+        #expect(land(700, 1200, chapters, maxOffset: 1800) == 800)
+        #expect(land(800, 900, chapters, maxOffset: 1800) == 1400)
+        #expect(land(800, 600, chapters, maxOffset: 1800) == 600)
+        // Back from the next chapter: the tall one's last screen, not its top.
+        #expect(land(1400, 1000, chapters, maxOffset: 1800) == 800)
+        #expect(land(500, 200, chapters, maxOffset: 1800) == 0)
+    }
+
+    @Test("no chapters: the proposed offset, clamped")
+    func none() {
+        #expect(land(0, 300, [], maxOffset: 1000) == 300)
+        #expect(land(0, 1300, [], maxOffset: 1000) == 1000)
+    }
+}
+```
+
+- [ ] **Step 2: Run it and see it fail**
+
+Run `build/intro-test.sh --fresh ChapterPagingTests`. Expected: `cannot find 'ChapterPaging'`.
+
+- [ ] **Step 3: Implement**
+
+```swift
+import CoreGraphics
+
+/// Where a swipe on the month page lands (#1241 D7). A swipe moves one
+/// chapter in its direction. Inside a chapter taller than the page it moves
+/// freely, until the chapter's bottom meets the page's bottom. Pure, over the
+/// chapters' extents in the content and the offsets the scroll target
+/// behaviour receives.
+enum ChapterPaging {
+    /// - Parameters:
+    ///   - from: the content offset where the swipe began.
+    ///   - proposed: where the scroll would come to rest on its own.
+    ///   - chapters: each chapter's top…bottom in the content, in page order.
+    ///   - viewport: the page's visible height.
+    ///   - maxOffset: the furthest the content scrolls.
+    static func target(from: CGFloat, proposed: CGFloat, chapters: [ClosedRange<CGFloat>], viewport: CGFloat,
+                       maxOffset: CGFloat) -> CGFloat {
+        guard !chapters.isEmpty, proposed != from else { return clamp(proposed, maxOffset) }
+        let slack: CGFloat = 1
+        let current = chapters.lastIndex { $0.lowerBound <= from + slack } ?? 0
+        let chapter = chapters[current]
+        let lastScreen = max(chapter.lowerBound, chapter.upperBound - viewport)
+        if proposed > from {
+            // Inside a tall chapter, freely, as far as its last screen.
+            if from < lastScreen - slack { return clamp(min(proposed, lastScreen), maxOffset) }
+            guard current + 1 < chapters.count else { return clamp(lastScreen, maxOffset) }
+            return clamp(chapters[current + 1].lowerBound, maxOffset)
+        }
+        // Back to this chapter's top first, then to the previous chapter's last screen.
+        if from > chapter.lowerBound + slack { return clamp(max(proposed, chapter.lowerBound), maxOffset) }
+        guard current > 0 else { return 0 }
+        let previous = chapters[current - 1]
+        return clamp(max(previous.lowerBound, previous.upperBound - viewport), maxOffset)
+    }
+
+    private static func clamp(_ offset: CGFloat, _ maxOffset: CGFloat) -> CGFloat {
+        min(max(offset, 0), max(maxOffset, 0))
+    }
+}
+```
+
+- [ ] **Step 4: Run it and see it pass.** Then commit: `feat(ios): decide where a swipe lands on the month page`.
+
+### Task 27: Tempo, arrival, the new trigger
+
+**Files:**
+- Create: `Wrap/Intro/IntroTempo.swift`
+- Modify: `Wrap/Intro/IntroBeat.swift` (`IntroTick.arrive`), `Wrap/Intro/IntroClock.swift` (`IntroContext.tempo`, the clock's `tempo`, `IntroViewport`), `Wrap/Intro/IntroScore+Sections.swift` (`head`), `Wrap/Intro/IntroScore+Insights.swift` (`insightsHead`), `Wrap/Month/MonthPage.swift` (pass the tempo)
+- Modify the tests that pin the old head ticks and the old 85 % rule: `IntroScoreSectionsTests`, `IntroScoreInsightsTests`, `IntroInsightsBeatsTests`, `IntroRulesTests`, `IntroClockTests`
+- Test: `apps/ios/PebblesTests/Wrap/IntroTempoTests.swift`
+
+- [ ] **Step 1: Write the failing tests** in `IntroTempoTests.swift`:
+  - `IntroTempo.standard.factor(.cover) == 1.45` and `factor(.section(.gem)) == 2.5`.
+  - `IntroBeat(key: .row(0), at: 0.32, duration: 0.28, tick: .light).scaled(by: 2.5)` has `at` 0.8 and `duration` 0.7 (tolerance 1e-12), and the same key and tick.
+  - A clock (the `IntroClockTests` helper pattern, `schedules: false`, a spy) built with `tempo: IntroTempo(cover: 2, sections: 3)`:
+    - after `enter(.cover) { beats }` and `isActive = true`, `reveal(.cover, at: start + 0.32 * 2 + 0.14)` reads `.row(0)` at 0.25: (0.14) / (0.28 × 2)
+    - the spy received the scaled beats; extend the spy to record `beats`
+  - **`IntroRulesTests.viewport`, rewritten for D8:**
+    - `place(y: 0)`, `place(y: 1.5)` and `place(y: -50)` are `.entered`
+    - `place(y: 3)` and `place(y: 600)` are `.between`
+    - `place(y: 800)` and `place(y: -100)` are `.out`
+    - all with height 100 and viewport 800
+  - **Head ticks:** `IntroScore.rows(count: 1, hasLead: false, more: false)`'s `.header` has duration 0 and tick `.arrive`. `IntroScore.tone(days: [ToneDay(up: 1, even: 0, down: 0)], insights: true)`'s `.insights` has tick `.arrive` and its `.header` has no tick. `IntroScore.insightsHead()`'s single beat has tick `.arrive` and duration 0.
+  - Update the existing assertions that expected `.light` on headers.
+
+- [ ] **Step 2: Run and see them fail.**
+
+- [ ] **Step 3: Implement.**
+
+`IntroTempo.swift`:
+
+```swift
+import Foundation
+
+/// How fast the month's intro plays (#1241 D9). The clock scales a
+/// sequence's beats by its factor when it starts it: the cover by `cover`,
+/// each section by `sections`. The Spine Lab tunes it live; the app plays
+/// `.standard`.
+struct IntroTempo: Hashable, Sendable {
+    /// ×1.45 takes the garland from 1.5 s to about 2.2 s.
+    var cover: Double = 1.45
+    var sections: Double = 2.5
+
+    static let standard = IntroTempo()
+
+    func factor(_ sequence: IntroSequence) -> Double {
+        sequence == .cover ? cover : sections
+    }
+}
+
+extension IntroBeat {
+    /// The beat `factor` times slower: its time and its duration.
+    func scaled(by factor: Double) -> IntroBeat {
+        IntroBeat(key: key, at: at * factor, duration: duration * factor, tick: tick)
+    }
+}
+```
+
+**`IntroTick`:** add the rounded arrival:
+
+```swift
+    /// A chapter arriving at the top of the page (D8): firm, rounded.
+    static let arrive = IntroTick(intensity: 0.6, sharpness: 0.15)
+```
+
+**`IntroContext`:** add `var tempo = IntroTempo.standard`. Its memberwise init keeps working without it.
+
+**`IntroClock`:**
+- Add `@ObservationIgnored let tempo: IntroTempo`, an init parameter `tempo: IntroTempo = .standard` (threaded through the private init; `frozen` passes `.standard`).
+- Where `start` evaluates a sequence's beats, scale them first: `let beats = latest[sequence]?().map { $0.scaled(by: tempo.factor(sequence)) } ?? []`.
+- From then on, the keyed beats, the end time and the haptics all use the scaled beats.
+- `frozen(…)` stays unscaled, so the references don't move.
+
+**`IntroViewport`** (D8). Replace `entryLine` and `place`:
+
+```swift
+    /// A chapter arrives once its top is this close to the top of the page.
+    static let arrival: CGFloat = 2
+
+    /// Entered once its top reaches the top of the page (or while it covers it); out once wholly off it.
+    static func place(_ frame: CGRect, viewport: CGFloat) -> Place {
+        if frame.maxY <= 0 || frame.minY >= viewport { return .out }
+        return frame.minY <= arrival ? .entered : .between
+    }
+```
+
+**`IntroScore.head`.** The head is drawn from the start, and its beat is the arrival's tick alone:
+
+```swift
+    static func head(hasLead: Bool, insights: Bool) -> [IntroBeat] {
+        // Drawn from the start (D8): the head's beat is the arrival's tick alone.
+        var beats: [IntroBeat] = []
+        if insights {
+            beats.append(IntroBeat(key: .insights, at: 0, duration: 0, tick: .arrive))
+        }
+        let shift = shift(insights)
+        beats.append(IntroBeat(key: .header, at: shift, duration: 0, tick: insights ? nil : .arrive))
+        if hasLead {
+            beats.append(IntroBeat(key: .lead, at: shift + leadAt, duration: IntroMotion.rise))
+        }
+        return beats
+    }
+```
+
+**`IntroScore.insightsHead()`:** its beat becomes `IntroBeat(key: .insights, at: 0, duration: 0, tick: .arrive)`.
+
+**`MonthPage.init`:** pass `tempo: $0.tempo` into the clock.
+
+- [ ] **Step 4: Run** `build/intro-test.sh --fresh IntroTempoTests IntroRulesTests IntroClockTests IntroScoreSectionsTests IntroScoreInsightsTests IntroInsightsBeatsTests IntroHapticsTests`. Expected: all pass. Commit: `feat(ios): slow the month intro to a reveal and tick each chapter's arrival`.
+
+### Task 28: Headers always drawn
+
+**Files:** `Wrap/Month/MonthSections.swift`, `Wrap/Gem/EmotionGem.swift`, `Wrap/Month/ToneFigure.swift`, `Wrap/Month/HoursFigure.swift`, `Wrap/Month/MonthPage.swift` (`MonthPageSections`)
+
+- [ ] **Step 1:** Remove every `.introReveal(.header)` and `.introReveal(.insights)`. They're on the section heads of weeks, milestones, persons, domains and the gem, on the `SpineSectionHeader` in `ToneFigure` and `HoursFigure`, and on the insights `MonthSectionHead` in `MonthPageSections`. Keep `.lead`, `.more` and every other reveal.
+- [ ] **Step 2:** Run the whole suite, then `build/intro-compare.sh`. Expected: no new failures and no differing PNG. The frozen intro references show their headers already landed, so they don't move either. Commit: `feat(ios): keep the month sections' heads drawn through the intro`.
+
+### Task 29: One chapter per swipe
+
+**Files:** `Wrap/Intro/IntroViews.swift` (`IntroSpace.content`, the chapter preference, the host), `Wrap/Intro/ChapterPaging.swift` (the behaviour), `Wrap/Month/MonthPage.swift`
+
+- [ ] **Step 1: The chapter extents.**
+  - In `IntroViews.swift` add `static let content = "intro.content"` to `IntroSpace`.
+  - Add the preference:
+
+```swift
+/// Each chapter's top…bottom in the month page's content (#1241 D7), for its paging.
+struct IntroChapterBounds: PreferenceKey {
+    static let defaultValue: [IntroSequence: ClosedRange<CGFloat>] = [:]
+
+    static func reduce(value: inout [IntroSequence: ClosedRange<CGFloat>],
+                       nextValue: () -> [IntroSequence: ClosedRange<CGFloat>]) {
+        value.merge(nextValue()) { _, new in new }
+    }
+}
+```
+
+  In `IntroSequenceHost`, inside the `if let clock` branch only, after the `.onGeometryChange`, add:
+
+```swift
+            .background {
+                GeometryReader { proxy in
+                    let frame = proxy.frame(in: .named(IntroSpace.content))
+                    Color.clear.preference(key: IntroChapterBounds.self, value: [sequence: frame.minY...frame.maxY])
+                }
+            }
+```
+
+- [ ] **Step 2: The behaviour.** In `ChapterPaging.swift` add:
+
+```swift
+import SwiftUI
+
+/// The month page's paging (#1241 D7): `ChapterPaging` over the chapters'
+/// extents. With none, as when the page plays no intro, scrolling is free.
+struct IntroChapterBehavior: ScrollTargetBehavior {
+    let chapters: [ClosedRange<CGFloat>]
+
+    func updateTarget(_ target: inout ScrollTarget, context: TargetContext) {
+        guard !chapters.isEmpty else { return }
+        let viewport = context.containerSize.height
+        let maxOffset = max(0, context.contentSize.height - viewport)
+        target.rect.origin.y = ChapterPaging.target(from: context.originalTarget.rect.minY,
+                                                     proposed: target.rect.minY, chapters: chapters,
+                                                     viewport: viewport, maxOffset: maxOffset)
+    }
+}
+```
+
+  Move `import CoreGraphics` to `import SwiftUI` if needed. `ChapterPagingTests` must still pass.
+
+- [ ] **Step 3: The page.** In `MonthPage`:
+  - Add `@State private var chapters: [IntroSequence: ClosedRange<CGFloat>] = [:]` and `@State private var viewport: CGFloat = 0`.
+  - On the `LazyVStack`, before its padding, add `.coordinateSpace(name: IntroSpace.content)`.
+  - Change its bottom padding to `.padding(.bottom, intro == nil ? MonthLayout.pageBottom : max(MonthLayout.pageBottom, viewport))`. With paging, the last chapter can reach the top.
+  - On the `ScrollView`, add:
+
+```swift
+        .scrollTargetBehavior(IntroChapterBehavior(chapters: intro == nil ? [] : chapters.values.sorted {
+            $0.lowerBound < $1.lowerBound
+        }))
+        .onPreferenceChange(IntroChapterBounds.self) { chapters.merge($0) { _, new in new } }
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewport = $0 }
+```
+
+  Add a sentence to `MonthPage`'s doc comment: "While it plays, the page moves one chapter per swipe (D7)."
+
+- [ ] **Step 4:** Run the whole suite, then `build/intro-compare.sh`. Expected: no new failures and no differing PNG. References have no clock, so there is no padding change and no behaviour.
+
+- [ ] **Step 5: Simulator check.** Install on "iPhone 17 intro" with the temporary, uncommitted `-intro-lab` launch switch from the Part 1 check:
+  - in `RootView`, `if ProcessInfo.processInfo.arguments.contains("-intro-lab") { SpineLabView() } else if canShowAuthedTabs {`
+  - the Lab's initial section `.month`
+
+  Then check:
+  - Swipe up once from the cover. Expect the weeks' head to come to rest at the top of the page; its rows reveal after a pause.
+  - Swipe up again. Expect exactly one section to pass.
+  - Swipe down. Expect the previous section to come back.
+  - If the snap lands offset from the top by an inset, or `originalTarget` turns out not to be where the swipe began (every swipe stays put, or skips several), stop and report.
+
+  Revert the switch with `git checkout -- <both files>`. Commit: `feat(ios): page the month by chapter while its intro plays`.
+
+### Task 30: The Lab's tempo
+
+**Files:** `Spine/Debug/SpineLabView.swift`
+
+- [ ] **Step 1:** Add `@State private var introTempo = IntroTempo.standard`. Under the month tab's top row (the last-open text and *Replay intro*), add a second row with two compact sliders:
+  - `Slider(value: <garland seconds>, in: 1.5...3.5)`, bound so that `introTempo.cover = seconds / IntroScore.garlandSpan`, labelled `Text(verbatim: "Garland \(String(format: "%.1f", seconds)) s")`
+  - `Slider(value: $introTempo.sections, in: 1...4)`, labelled `Text(verbatim: "Sections ×\(String(format: "%.1f", introTempo.sections))")`
+
+  Pass `IntroContext(ledger: introLedger, haptics: IntroHaptics.shared, tempo: introTempo)`. The page's clock takes the tempo when it's built, so a slider takes effect on *Replay intro*, which rebuilds the page through `.id(introRun)`.
+- [ ] **Step 2:** Build and run the whole suite. Commit: `feat(ios): tune the month intro's tempo in the spine lab`.
+
+### Task 31: Ship Part 5
+
+- [ ] **Decision log:** append one entry: "2026-10-26 — The iOS month page pages by chapter while its intro plays (#1241)". It covers D7 and D8, and records `viewAligned` as rejected because it can't reach a tall chapter's bottom. It refines the 2026-10-25 intro entry without superseding it.
+- [ ] **Gate:** lint, the whole suite plus `build/intro-compare.sh`, and the French references, as in Task 11.
+- [ ] **Review:** one independent review of the part's diff.
+- [ ] **PR:** push it with `gh stack submit --auto` after fast-forwarding any bot commits (see the memory note). Title `feat(ios): read the month wrap chapter by chapter`, labels and milestone as before, body "Part 5 for #1241". No re-baseline: no reference changes.
+
+---
+
+# Part 6: signatures (`feat/1241-ios-intro-signatures`)
+
+This is spec D10. Create it with `gh stack add feat/1241-ios-intro-signatures` on top of Part 5.
+
+### Task 32: The signatures' score
+
+**Files:** `Wrap/Intro/IntroBeat.swift` (keys, `IntroTick.stamp`), `Wrap/Intro/IntroMotion.swift` (stamp curves), create `Wrap/Intro/IntroScore+Signatures.swift`, test `PebblesTests/Wrap/IntroScoreSignaturesTests.swift`. Remove `IntroScore.rows` and its test: weeks, milestones and domains no longer use it, so it would be dead code.
+
+- [ ] **Step 1: Write the failing tests.**
+  - **`weeks(stones: [2, 1])`:**
+    - `.header` with the arrive tick
+    - `.cairnStone(0, 0)` at `rowsAt` and `.cairnStone(0, 1)` at `rowsAt + stoneGap`, both ticking `.light`
+    - `.row(0)` at `rowsAt + 2 × stoneGap + wordsAfter`, with no tick
+    - `.cairnStone(1, 0)` at `row(0).at + nextWeek`
+  - **`milestones(intensities: [3, 1])`:**
+    - `.stamp(0)` at `rowsAt`, duration `stampSpan`, no tick
+    - `.stampImpact(0)` at `rowsAt + IntroMotion.stampImpact × stampSpan`, duration 0, tick `.stamp(3)`
+    - `.row(0)` at `rowsAt + wordsAfter`
+    - row 1 `nextStamp` later, with tick `.stamp(1)`
+  - **`domains(count: 3, more: true)`:**
+    - `.fill(r)` at `rowsAt + domainGap × r`, duration `fillSpan`, tick `.light`
+    - `.row(r)` at the same time, with no tick
+    - `.more` at the last fill's end
+    - `domains(count: 0, more: true)` has no `.more`
+  - **`IntroMotion`:**
+    - `stampScale(0)` is (1.25, 1.25) and `stampScale(1)` is exactly (1, 1)
+    - just after the impact (t = 0.5) x > 1 > y
+    - `stampOpacity(IntroMotion.stampImpact) == 1`
+    - `IntroTick.stamp(3).intensity > IntroTick.stamp(1).intensity`
+
+- [ ] **Step 2: Implement.**
+
+  **Keys** (`IntroKey`, a new line under the sections' comment): `/// The signatures (D10): a week's cairn stone (row, stone), a milestone's stamp and its impact, a domain's ink.` then `case cairnStone(Int, Int), stamp(Int), stampImpact(Int), fill(Int)`.
+
+  **Tick:**
+
+```swift
+    /// A milestone's stamp meeting the paper, firmer with its pebble's intensity, 1…3.
+    static func stamp(_ intensity: Int) -> IntroTick {
+        IntroTick(intensity: [0.62, 0.8, 0.98][min(max(intensity - 1, 0), 2)], sharpness: 0.8)
+    }
+```
+
+  **Motion** (in `IntroMotion`):
+
+```swift
+    /// When a stamp's stone meets the paper, as a share of its span.
+    static let stampImpact = 0.4
+
+    /// A stamp: from 1.25× down to the paper by `stampImpact`, then pressed a
+    /// touch flat and settling back to exactly 1.
+    static func stampScale(_ t: Double) -> (x: Double, y: Double) {
+        let x = clamp(t)
+        if x < stampImpact {
+            let drop = x / stampImpact
+            let scale = 1.25 - 0.25 * drop * drop * drop
+            return (scale, scale)
+        }
+        let u = (x - stampImpact) / (1 - stampImpact)
+        let press = 0.05 * sin(Double.pi * u) * (1 - u)
+        return (1 + press, 1 - press)
+    }
+
+    /// A stamp is opaque by the time it meets the paper.
+    static func stampOpacity(_ t: Double) -> Double {
+        clamp(t / stampImpact)
+    }
+```
+
+  **Builders** (`IntroScore+Signatures.swift`, times at ×1; the clock applies the tempo):
+
+```swift
+import Foundation
+
+/// The list sections' signatures (#1241 D10): weeks build, milestones stamp, domains fill.
+extension IntroScore {
+    static let stoneGap: TimeInterval = 0.07
+    static let wordsAfter: TimeInterval = 0.06
+    static let nextWeek: TimeInterval = 0.1
+    static let stampSpan: TimeInterval = 0.18
+    static let nextStamp: TimeInterval = 0.2
+    static let fillSpan: TimeInterval = 0.32
+    static let domainGap: TimeInterval = 0.16
+
+    /// The weeks: each cairn built from the bottom, a stone and a tick at a time, then its words; week after week.
+    static func weeks(stones: [Int]) -> [IntroBeat] {
+        var beats = head(hasLead: false, insights: false)
+        var at = rowsAt
+        for (row, count) in stones.enumerated() {
+            for stone in 0..<count {
+                beats.append(IntroBeat(key: .cairnStone(row, stone), at: at + stoneGap * Double(stone),
+                                       duration: IntroMotion.pop, tick: .light))
+            }
+            let words = at + stoneGap * Double(count) + wordsAfter
+            beats.append(IntroBeat(key: .row(row), at: words, duration: IntroMotion.rise))
+            at = words + nextWeek
+        }
+        return beats
+    }
+
+    /// The milestones: each stone stamped, ticking as it meets the paper, then its words; stone after stone.
+    static func milestones(intensities: [Int]) -> [IntroBeat] {
+        var beats = head(hasLead: false, insights: false)
+        for (row, intensity) in intensities.enumerated() {
+            let at = rowsAt + nextStamp * Double(row)
+            beats.append(IntroBeat(key: .stamp(row), at: at, duration: stampSpan))
+            beats.append(IntroBeat(key: .stampImpact(row), at: at + IntroMotion.stampImpact * stampSpan, duration: 0,
+                                   tick: .stamp(intensity)))
+            beats.append(IntroBeat(key: .row(row), at: at + wordsAfter, duration: IntroMotion.rise))
+        }
+        return beats
+    }
+
+    /// The domains: each bar's ink filled from the left with its words, ticking as it starts; *more* after the last.
+    static func domains(count: Int, more: Bool) -> [IntroBeat] {
+        var beats = head(hasLead: false, insights: false)
+        for row in 0..<count {
+            let at = rowsAt + domainGap * Double(row)
+            beats.append(IntroBeat(key: .fill(row), at: at, duration: fillSpan, tick: .light))
+            beats.append(IntroBeat(key: .row(row), at: at, duration: IntroMotion.rise))
+        }
+        if more, count > 0 {
+            beats.append(IntroBeat(key: .more, at: rowsAt + domainGap * Double(count - 1) + fillSpan,
+                                   duration: IntroMotion.rise))
+        }
+        return beats
+    }
+}
+```
+
+  `wordsAfter` (0.06) is shorter than `nextStamp` (0.2), so a milestone's words come between its stamp and the next. At ×2.5 the stamp spans 0.45 s, the impact lands at 0.18 s and the next stone comes at 0.5 s.
+
+- [ ] **Step 3:** Run the tests, remove `rows` and its test, and run again. Commit: `feat(ios): score the weeks, milestones and domains signatures`.
+
+### Task 33: The signatures drawn
+
+**Files:** `Wrap/Strip/CairnMark.swift`, `Wrap/Atoms/MarkRow.swift`, `Wrap/Atoms/ProportionBar.swift`, `Wrap/Intro/IntroViews.swift` (`IntroLanding.stamp`), `Wrap/Month/MonthSections.swift`
+
+- [ ] **`IntroLanding.stamp`:** add the case, and in `IntroLanded`:
+  `case .stamp: let scale = IntroMotion.stampScale(progress); content.opacity(IntroMotion.stampOpacity(progress)).scaleEffect(x: CGFloat(scale.x), y: CGFloat(scale.y), anchor: .bottom)`.
+- [ ] **`MarkRowReveal`:**
+  - `leading` becomes `IntroKey?` and gains `var leadingLanding: IntroLanding = .pop`. `MarkRow` uses `.introReveal(reveal?.leading, reveal?.leadingLanding ?? .pop)`.
+  - Keep `MarkRowReveal.row(_:)`.
+  - Update the persons' call site if the init order changes.
+- [ ] **`CairnMark`:**
+  - Add `var introRow: Int?`. As `DaySetMarks` does, install an `IntroReader` only when it's set, and otherwise draw as today.
+  - In the draw loop, keep computing every stone's rect, including hidden ones, so the stack never moves. Then `let shown = introRow.map { reveal(.cairnStone($0, index)) } ?? 1`, and skip the stone at 0.
+  - Below 1, draw it on a context copy with `opacity = IntroMotion.popOpacity(shown)`, translated up by `6 * (1 - IntroMotion.easeOut(shown))`, so it drops onto the stack.
+  - The live week's dotted next stone is untouched; it's never in the month page.
+- [ ] **`ProportionBar`:**
+  - Add `var fill: Double = 1`. In its Canvas, when `fill < 1`, draw the first rect trimmed to `rect.width * fill`, its round cap kept by `Path(roundedRect:cornerRadius:)` on the trimmed rect, and skip it at 0.
+  - The track and the other segments draw as laid out.
+  - At 1 it's exactly today's drawing.
+- [ ] **Weeks:**
+  - The rows use `reveal: MarkRowReveal(leading: nil, text: .row(index), trailing: .row(index))`, and `CairnMark(…, introRow: index)`.
+  - `introBeats` becomes `IntroScore.weeks(stones: weeks(wrap).map { CairnGeometry.widths($0.days).count })`, so there's one stone per day with a moment, exactly what the cairn draws.
+- [ ] **Milestones:**
+  - The rows use `reveal: MarkRowReveal(leading: .stamp(index), text: .row(index), trailing: .row(index), leadingLanding: .stamp)`. Adjust the argument order to the struct's.
+  - `introBeats` becomes `IntroScore.milestones(intensities: moments(wrap, lookups:).map { $0.pebble?.intensity ?? 2 })`.
+- [ ] **Domains:**
+  - The rows use `reveal: MarkRowReveal(leading: nil, text: .row(index), trailing: nil)`.
+  - The trailing becomes `IntroReader { reveal in ProportionBar(segments: [settled share, rest], fill: IntroMotion.easeOut(reveal(.fill(index)))).frame(width: 96) }`. This replaces the old `grown` reweighting, so the 2 pt snap goes.
+  - `introBeats` becomes `IntroScore.domains(count: min(rows.count, WrapCopy.shown), more: true)`.
+- [ ] **Gate:**
+  - Run the whole suite, then `build/intro-compare.sh`. Expected: no new failures and no differing PNG. `WrapMonthReferences`, `WrapStripReferences` (the cairns) and `WrapAtomsReferences` (the bars) must pass outright.
+  - Run the simulator check from Task 29 Step 5, then revert the switch: the weeks build, the milestones stamp, the domains fill.
+  - Commit: `feat(ios): build, stamp and fill the month's weeks, milestones and domains`.
+
+### Task 34: Ship Part 6
+
+- [ ] Lint, the whole suite plus `build/intro-compare.sh`, the French references, and one independent review.
+- [ ] Push. Title `feat(ios): give the month's weeks, milestones and domains their own reveal`. Body "Part 6 for #1241". Labels and milestone as before.
+- [ ] **Move "Resolves #1241"** from #1246's body to this PR, which now completes the issue: `gh pr edit` both.
+- [ ] Install on the iPhone 15 for the maintainer's second device pass.
+
+---
+
 ## Task 25: The device pass (iPhone 15), before the stack merges
 
 The memory note "iOS device deploy recipe" holds the build, install and launch commands and the device ids. The maintainer's phone holds their real account. The intro is read-only, so no write happens, but ask before installing.
 
 - [ ] **Feel:** open October in the Lab, then a real month on the Path. Tune the constants in `IntroScore`, `IntroMotion` and `IntroTick` until the feel is right. Use *Replay intro* in the Lab for each try. Commit the tuned values on the part that owns them, with the `gh-stack` skill's flow for amending a lower part, and record the final values below.
+  - The top domain's bar may snap 2 pt as it finishes growing; the 1st's tone pulse may clip at the sweep's edge — fix only if noticed.
 - [ ] **Haptics:**
+  - A daily soul's ring buzzes at the floor; a busy month's hours thin out — judge both.
   - Count the garland's ticks on a 31-day month. None should be lost in the fast middle.
   - The stacked days near the ends tap twice; elsewhere the day taps once, at its strongest seal.
   - The gem goes ta-ta-ta-ta-ta · ta-ta-ta-ta · ta-ta-ta.
@@ -3450,6 +3955,11 @@ The memory note "iOS device deploy recipe" holds the build, install and launch c
   - **Unmeasured hosts:** a host that can't measure its page settles, unrecorded, and logs.
   - **Haptics:** players are keyed by (month, sequence), and the player starts against the clock's start instant. A failed engine restart is logged.
   - **The course:** it finishes over the leaf's beat on months shorter than 31 days (`Garland.courseSweep`).
+
+- **Parts 2-4 review fixes (2026-10-26):**
+  - **Part 2:** `DaySetMarks` installs the `IntroReader` only with an `introRow`, so the week sheet, month sheet and Spine draw as before. The persons beats are pinned (part gap, next row, single dot, beat count, five at most). `MarkRowReveal`'s comment no longer claims the domain's bar.
+  - **Part 3:** `GemStone` reads `reveal(.facet(id))` for every facet (an unowned one has no beat and reads 1); the joy run's sweep order is pinned.
+  - **Part 4:** an empty tone or hours figure under the insights head plays only `.insights` (`IntroScore.insightsHead()`); `ToneFigure.introBeats(wrap:insights:)` matches its siblings; the tone's mask runs left to right in RTL; the 31-day tone keeps 32 haptic events.
 
 Fill in as the parts land. List each deviation from this plan, and why:
 - the local reference baseline from Task 0

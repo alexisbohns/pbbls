@@ -27,12 +27,16 @@ struct HoursFigure: View {
                 VStack(alignment: .leading, spacing: 0) {
                     SpineSectionHeader(WrapCopy.hoursTitle(locale: locale), hint: WrapCopy.hoursHint(locale: locale))
                         .padding(.top, 28)
+                        .introReveal(.header)
                     Text(verbatim: WrapCopy.hoursSub(locale: locale))
                         .spineType(.still)
                         .foregroundStyle(Color.pebbles.onSurfaceVariant)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 6)
-                    HoursDial(items: items, busiest: hours.busiest, lookups: lookups)
+                        .introReveal(.lead)
+                    IntroReader { reveal in
+                        HoursDial(items: items, busiest: hours.busiest, lookups: lookups, reveal: reveal)
+                    }
                         .frame(maxWidth: .infinity)
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel(Text(verbatim: description))
@@ -44,6 +48,15 @@ struct HoursFigure: View {
     }
 }
 
+extension HoursFigure {
+    /// The hours' intro (#1241), with the insights head's when it leads them; none when nothing shows.
+    static func introBeats(wrap: MonthWrap, lookups: WrapLookups, insights: Bool) -> [IntroBeat] {
+        let stones = wrap.hours?.items.filter { lookups.moment($0.momentId) != nil }.count ?? 0
+        guard stones > 0 else { return insights ? IntroScore.insightsHead() : [] }
+        return IntroScore.hours(stones: stones, insights: insights)
+    }
+}
+
 /// The dial itself, a fixed square: the rings, the night, the ticks and the
 /// four hour numbers, the waits, the collection dots in lanes, the stones in
 /// lanes turned along the ring, and the busiest window in the middle.
@@ -51,6 +64,7 @@ struct HoursDial: View {
     let items: [(mark: HourMark, moment: MomentSummary)]
     let busiest: BusiestWindow?
     let lookups: WrapLookups
+    var reveal: IntroReveal = .settled
 
     @Environment(\.colorScheme) private var scheme
 
@@ -86,15 +100,17 @@ struct HoursDial: View {
                       size: .tiny, scheme: scheme)
         }
         let centre = CGPoint(x: Metric.side / 2, y: Metric.side / 2)
+        let ranks = IntroScore.ranks(items.map(\.mark.happened))
         ZStack {
             Canvas { context, _ in
-                draw(in: context, centre: centre, prints: prints)
+                draw(in: context, centre: centre, prints: prints, ranks: ranks)
             }
             ForEach([0, 6, 12, 18], id: \.self) { hour in
                 Text(verbatim: "\(hour)")
                     .spineType(.dayLetter)
                     .foregroundStyle(Color.pebbles.outline)
                     .fixedSize()
+                    .introReveal(.dial, .fade)
                     .position(Self.dial.point(Double(hour), center: centre, radius: Metric.outer + Metric.labelOff))
             }
             if let busiest {
@@ -111,6 +127,7 @@ struct HoursDial: View {
                         .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 }
                 .multilineTextAlignment(.center)
+                .introReveal(.dial, .fade)
             }
         }
         .dynamicTypeSize(...DynamicTypeSize.large)
@@ -123,11 +140,18 @@ struct HoursDial: View {
         Self.dial.point(hour, center: centre, radius: radius)
     }
 
-    private func draw(in context: GraphicsContext, centre: CGPoint, prints: [SealPrint]) {
-        drawFace(in: context, centre: centre)
-        drawWaits(in: context, centre: centre)
-        drawDots(in: context, centre: centre)
-        drawStones(in: context, centre: centre, prints: prints)
+    private func draw(in context: GraphicsContext, centre: CGPoint, prints: [SealPrint], ranks: [Int]) {
+        // In the intro (#1241) the face lands first, then each stone by the time of day, with its wait and dot.
+        let face = reveal(.dial)
+        if face > 0 {
+            var dial = context
+            if face < 1 { dial.opacity = IntroMotion.easeOut(face) }
+            drawFace(in: dial, centre: centre)
+        }
+        let shown = ranks.map { reveal(.stone($0)) }
+        drawWaits(in: context, centre: centre, shown: shown)
+        drawDots(in: context, centre: centre, shown: shown)
+        drawStones(in: context, centre: centre, prints: prints, shown: shown)
     }
 
     /// The night, the two rings and the ticks.
@@ -157,10 +181,10 @@ struct HoursDial: View {
     }
 
     /// The waits: a spiral from the stone's hour, clockwise, to the collection's.
-    private func drawWaits(in context: GraphicsContext, centre: CGPoint) {
+    private func drawWaits(in context: GraphicsContext, centre: CGPoint, shown: [Double]) {
         let outer = Metric.outer
         let inner = Metric.inner
-        for item in items {
+        for (index, item) in items.enumerated() where shown[index] > 0 {
             let lag = HoursLayout.forward(item.mark.happened, item.mark.collected)
             let steps = max(2, Int((lag * 3).rounded(.up)))
             let from = outer - 1.5
@@ -171,35 +195,39 @@ struct HoursDial: View {
                 let point = at(item.mark.happened + lag * t, from + (to - from) * CGFloat(t), centre)
                 if step == 0 { spiral.move(to: point) } else { spiral.addLine(to: point) }
             }
-            context.stroke(spiral, with: .color(Color.pebbles.outline.opacity(Metric.waitAlpha)),
-                           style: StrokeStyle(lineWidth: Metric.wait, lineCap: .round))
+            var wait = context
+            if shown[index] < 1 { wait.opacity = IntroMotion.popOpacity(shown[index]) }
+            wait.stroke(spiral, with: .color(Color.pebbles.outline.opacity(Metric.waitAlpha)),
+                        style: StrokeStyle(lineWidth: Metric.wait, lineCap: .round))
         }
     }
 
     /// Inside, a dot on the hour each pebble was collected, in lanes so none touch.
-    private func drawDots(in context: GraphicsContext, centre: CGPoint) {
+    private func drawDots(in context: GraphicsContext, centre: CGPoint, shown: [Double]) {
         let inner = Metric.inner
         let dot = Metric.dot
         let inLanes = HoursLayout.lanes(items.map(\.mark.collected), sizes: items.map { _ in dot * 2 + 0.6 },
                                         limit: Metric.innerLanes) { lane in
             2 * .pi * (inner - Metric.dotOff - CGFloat(lane) * Metric.laneIn) / 24
         }
-        for (item, lane) in zip(items, inLanes) {
+        for (index, (item, lane)) in zip(items, inLanes).enumerated() where shown[index] > 0 {
             let point = at(item.mark.collected, inner - Metric.dotOff - CGFloat(lane) * Metric.laneIn, centre)
-            context.fill(Path(ellipseIn: CGRect(x: point.x - dot, y: point.y - dot, width: dot * 2, height: dot * 2)),
-                         with: .color(Color.pebbles.onSurfaceVariant))
+            var mark = context
+            if shown[index] < 1 { mark.opacity = IntroMotion.popOpacity(shown[index]) }
+            mark.fill(Path(ellipseIn: CGRect(x: point.x - dot, y: point.y - dot, width: dot * 2, height: dot * 2)),
+                      with: .color(Color.pebbles.onSurfaceVariant))
         }
     }
 
     /// Outside, each stone on the hour it happened, in lanes, turned along the ring.
-    private func drawStones(in context: GraphicsContext, centre: CGPoint, prints: [SealPrint]) {
+    private func drawStones(in context: GraphicsContext, centre: CGPoint, prints: [SealPrint], shown: [Double]) {
         let outer = Metric.outer
         let widths = items.map { SealSize.tiny.width($0.moment.pebble?.valence.sizeGroup ?? .medium) }
         let outLanes = HoursLayout.lanes(items.map(\.mark.happened), sizes: widths.map { $0 + 1 },
                                          limit: Metric.outerLanes) { lane in
             2 * .pi * (outer + Metric.stoneOff + CGFloat(lane) * Metric.laneOut) / 24
         }
-        for index in items.indices {
+        for index in items.indices where shown[index] > 0 {
             let hour = items[index].mark.happened
             let point = at(hour, outer + Metric.stoneOff + CGFloat(outLanes[index]) * Metric.laneOut, centre)
             let print = prints[index]
@@ -208,6 +236,11 @@ struct HoursDial: View {
             var seal = context
             seal.translateBy(x: point.x, y: point.y)
             seal.rotate(by: .degrees((hour - 12) / 24 * 360))
+            if shown[index] < 1 {
+                seal.opacity = IntroMotion.popOpacity(shown[index])
+                let scale = CGFloat(IntroMotion.popScale(shown[index]))
+                seal.scaleBy(x: scale, y: scale)
+            }
             seal.drawSeal(print, in: CGRect(x: -width / 2, y: -height / 2, width: width, height: height))
         }
     }

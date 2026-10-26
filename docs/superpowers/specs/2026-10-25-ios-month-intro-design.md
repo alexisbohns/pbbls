@@ -45,6 +45,34 @@ The month page enters instead of appearing all at once. The month's name rises i
 
 **D6. Canvas figures take a reveal, SwiftUI parts take a modifier.** Each `Canvas` figure gains one parameter, `reveal: IntroReveal = .settled`, a value type that maps a key to 0…1. SwiftUI parts take `.introReveal(_ key:)`, which reads the clock and the sequence from the environment. No figure's layout changes. Hidden elements keep their frames, so nothing jumps when they land.
 
+**Revision after the first device pass (2026-10-26).** The maintainer felt Parts 1–4 on the iPhone 15. The wheel was a little fast, and the sections read like lazy loading rather than a reveal. The decisions below supersede the trigger, tempo and list rows described further down, wherever they differ. They ship as Parts 5 and 6.
+
+**D7. The month page reads chapter by chapter.** Each chapter is the cover or one section.
+- **One swipe, one chapter:** a swipe moves exactly one chapter in its direction, and the scroll snaps that chapter's top to the top of the page. The next chapter's header peeks below.
+- **Tall chapters:** a chapter taller than the page scrolls freely inside itself until its bottom meets the page's bottom. The next swipe then moves on. Swiping back lands on the previous chapter's top, or on its last screen when it is tall.
+- **The landing rule:** a pure `ChapterPaging.target(from:proposed:tops:viewport:maxOffset:)` decides where each swipe lands, and a custom iOS 17 `ScrollTargetBehavior` applies it.
+- **Measuring:** chapters report their tops in a content coordinate space through a preference.
+- **Bottom space:** the page pads its bottom by one viewport, so the last chapter can reach the top.
+- **When paging applies:** only while the page has a clock, which already excludes Reduce Motion and VoiceOver. Without one, scrolling is free, as before.
+- *Considered and rejected:* `.viewAligned(limitBehavior: .always)`. It aligns to view edges, so the bottom of a chapter taller than the page (large text sizes) could not be reached.
+
+**D8. Arrival, then reveal.**
+- **Headers are always drawn:** a section's header, and the insights head over tone or hours, are part of the page, not the reveal, so you see where you're going.
+- **The arrive tick:** a chapter enters when its top reaches the top of the page, within 2 pt, or when it covers the top of the page. The 85 % line is gone. Its first beat is a single rounded *arrive* tick (`IntroTick.arrive`), with no visual.
+- **Then the reveal:** its elements begin after a pause (`rowsAt` × the tempo, about 0.8 s).
+- **Leaving:** swiping on lands it at once, as before.
+
+**D9. Tempo.**
+- **One knob per kind:** `IntroTempo` scales a sequence's beats when the clock starts it. The cover uses ×1.45, which takes the garland from 1.5 s to 2.2 s; the sections use ×2.5. Every time and every motion duration is scaled.
+- **Haptics:** the 25 ms floor applies to the scaled times, so slower means fewer dropped ticks.
+- **References:** frozen clocks (the references) use their beats unscaled.
+- **Live tuning:** the Spine Lab's Month tab has two sliders, *Garland* (seconds) and *Sections ×*, applied on *Replay intro*. The values the maintainer settles on become `IntroTempo.standard`.
+
+**D10. Each list section has a signature**, replacing the shared row reveal for these three. Each row lands in turn.
+- **Weeks:** the cairn builds from the bottom, stone by stone (`.cairnStone(row, k)`), with a light tick per stone. Then the line and the range rise and the souls fade in with `.row(row)`.
+- **Milestones:** the stone *stamps* (`.stamp(row)`). It comes in at 1.25× and transparent and presses to size with a slight squash, with a firm tick scaled by the pebble's intensity (`IntroTick.stamp(intensity)`). Then the name, the date and the souls rise with `.row(row)`.
+- **Domains:** the bar's track is drawn from the start. Its ink fills from the left (`.fill(row)`), ticking as it starts, and the name and count rise with it (`.row(row)`). The fill trims the settled layout's first rect, so it never snaps.
+
 ## Choreography
 
 Every time and strength here is a starting value, kept as a `static let` in `IntroScore` and `IntroTick` and tuned on the device.
@@ -95,9 +123,9 @@ Within one voice, a transient closer than **25 ms** to the previous one is dropp
 | weeks, milestones | `.row(i)`: the leading mark pops, the text column rises, `light` |
 | domains | `.row(i)`: the row rises and its bar grows from 0 to its share over 280 ms ease-out, `light` |
 | persons | per row, strictly in sequence: `.glyph(i)` pop `light` → 90 ms → `.name(i)` (name and count) rise `light` → 90 ms → `.ring(i)` span 450 ms ease-in-out (the line draws clockwise from the 1st) → each `.dot(i, day)` pops as the line reaches it, `light`. The next row starts 60 ms after the ring closes. In calendar mode the dots pop in reading order over the same 450 ms. |
-| gem | `.lead` at 160 ms; at 320 ms `.blank` (the stone as blank paper, its seams and its ticks) rise, none; from 520 ms each family in the server's lead order: its facets in angle order, clockwise from 12 o'clock, 45 ms apart, `.facet(id)` light `facet`; its `.label(slug)` (name and share) rises with its first facet; 220 ms pause between families; `.count` 160 ms after the last facet, rise, `firm` |
+| gem | `.lead` at 160 ms; at 320 ms `.blank` (the stone as blank paper, its seams and its ticks) rise, none; blank facets fill with the table's paper (`colors.table`), so the surface-coloured seams stay visible; from 520 ms each family in the server's lead order: its facets in sweep order, clockwise, starting after the run's widest gap so a run across the top stays one sweep, 45 ms apart, `.facet(id)` light `facet`; its `.label(slug)` (name and share) rises with its first facet; 220 ms pause between families; `.count` 160 ms after the last facet, rise, `firm`; *more* lands with the count |
 | tone | `.header` and the sentence as `.lead`; `.sweep` from 320 ms, span 1200 ms ease-in-out, a mask left to right; each day with pebbles (`up + even + down > 0`) is `.day(d)`, ticking `light` when the sweep reaches it; an even day's circle gets a pulse then (a ring growing and fading over 220 ms, drawn in `chartOverlay` at the proxy's position) |
-| hours | `.header` and the sentence as `.lead`; `.dial` (rings, night wash, hour numbers) rise at 320 ms, none; from 520 ms the stones by the time of day they happened, from 00:00, `IntroCurve.times(count:, duration: 1200 ms)`, `.stone(i)` pop `light`, each with its collection dot and its wait spiral |
+| hours | `.header` and the sentence as `.lead`; `.dial` (rings, night wash, hour numbers) rise at 320 ms, none; from 520 ms the stones by the time of day they happened, from 00:00, `IntroCurve.times(count:, duration: 1200 ms)`, `.stone(i)` pop `light`, each with its collection dot and its wait spiral; the hour numbers and the busiest window fade in with `.dial`. With the figure empty under the insights head (no tone days, no known moments), only `.insights` plays |
 
 ## Score API (`Wrap/Intro/`, Foundation only)
 
@@ -254,6 +282,13 @@ Each part builds, lints and passes the iOS tests alone. Every part keeps the exi
 - **Decision log:** one entry in Part 1, covering D1, D4 and D5.
 - **Android:** #1242 references this spec.
 
+**Parts 5 and 6** (the revision, D7–D10), stacked on Part 4:
+
+| Part | Contents |
+|---|---|
+| 5 | `ChapterPaging` plus the behaviour, the chapter tops, the new trigger rule, the arrive tick and always-drawn headers, `IntroTempo` scaling in the clock, and the Lab's two sliders |
+| 6 | The weeks', milestones' and domains' signatures (`CairnMark` reveal, the stamp landing, `ProportionBar` fill), with their score builders |
+
 ## New patterns, raised in the PR
 
 - **A choreographed intro driven by a pure score and one clock**, with Core Haptics compiled from the same beats (D1, D5). It is the first of its kind in the app; the launch loader (`HandcraftedLogoView`, 2026-07-17 log entry) is the nearest relative, a timeline-driven draw-on.
@@ -263,6 +298,6 @@ Each part builds, lints and passes the iOS tests alone. Every part keeps the exi
 
 - **Core Haptics and the System Haptics switch.** I found no authoritative source on whether a `CHHapticEngine` pattern is silenced when Settings → Sounds & Haptics → System Haptics is off, and no public API to read that switch. The device pass decides. If the pattern plays anyway, `IntroHaptics` switches to UIKit generators fired from the clock (D1's hybrid). Those follow the switch, and the score, the clock and the figures stay as they are.
 - **Per-frame cost.** The garland redraws up to 31 seals per frame for about 2 s, and the gem 28 facets. Measure on the iPhone 15 with Instruments. If frames drop, the settled marks are drawn once into a `drawingGroup()` layer and only the marks in motion redraw.
-- **Haptic density.** The middle of a 31-day garland runs about 25–32 ms apart. The 25 ms floor guards it, but the device pass may raise the garland's duration rather than drop ticks.
+- **Haptic density.** The middle of a 31-day garland runs about 25–32 ms apart. The 25 ms floor guards it, but the device pass may raise the garland's duration rather than drop ticks. A person's ring with many days, a busy month's hours (from about 32 stones) and the tone's middle (25.5 ms apart on 31 days) also thin out at the floor. The visual beats stay.
 - **Section geometry in a `LazyVStack`.** A section reports its frame only once realised. A section realised already inside the 85 % line enters on its first report, which is the intended behaviour.
 - **Engine start latency.** `prepare()` on focus covers the cover's first tick. The player's start is measured after the engine starts, against the clock's start instant.
