@@ -28,6 +28,20 @@ extension PathRoute: Codable {
     }
 }
 
+/// The Home tab's pushed destinations: a guide, by slug (the catalog key the
+/// server owns; never the row id, so a snapshot survives a reseed).
+enum HomeRoute: Codable, Hashable {
+    case guide(String)
+}
+
+/// What a root does once on arrival when another tab sent the user over
+/// (Home's checklist, spec §1.4): open its add sheet, or start a carve. Handed
+/// over through `TabNavigation.go(_:intent:)`, consumed with
+/// `takeIntent(for:)`, never persisted.
+enum TabIntent: Equatable {
+    case createSoul, createCollection, carveGlyph
+}
+
 /// Routes carry ids, never models (#903 §3): `SoulWithGlyph` and `Collection`
 /// are Decodable-only and change under edits. `SoulRoute` / `CollectionRoute`
 /// resolve the id when the route is shown.
