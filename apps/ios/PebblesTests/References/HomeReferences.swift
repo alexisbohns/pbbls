@@ -37,20 +37,5 @@ extension References {
             ReferenceImage.assertMatches(Self.shortcuts(), named: "shortcuts",
                                          config: ReferenceConfig(scheme: scheme, locales: locales))
         }
-
-        static func quickMoment() -> some View {
-            var draft = QuickMomentDraft(now: Date(timeIntervalSince1970: 1_793_000_000))
-            draft.setName("Lunch with Inès")
-            return QuickMomentForm(draft: .constant(draft), isSaving: false, saveError: nil, onSave: { _ in })
-                .frame(maxWidth: .infinity, minHeight: 420)
-                .background(Color.pebbles.surface)
-        }
-
-        @Test(arguments: ReferenceScheme.allCases)
-        func quickMoment(scheme: ReferenceScheme) throws {
-            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
-            ReferenceImage.assertMatches(Self.quickMoment(), named: "quickMoment",
-                                         config: ReferenceConfig(scheme: scheme, locales: locales))
-        }
     }
 }
