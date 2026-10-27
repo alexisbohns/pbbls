@@ -229,34 +229,66 @@ class MonthDeckCardTest {
     }
 
     @Test
-    fun `on a card the milestones share the room, each row its share`() {
+    fun `on a card the milestones share the room, each row its share, all of them within it`() {
         var room: Dp? = null
         var copy: WrapCopy? = null
         show(head = MonthHead("Milestones", null)) { r ->
             room = r
             copy = rememberWrapCopy()
-            MonthSectionContent(
-                MonthSection.MILESTONES,
-                wrap,
-                lookups,
-                DayView.CIRCLE,
-                SpineFixtureWeek.zone,
-                aspect = null,
-                onWeek = {},
-                onOpen = {},
-                onMore = {},
-                onCard = true,
-                room = r,
-            )
+            MilestonesCard(r)
         }
-        val moments = MonthSections.milestones(wrap, lookups)
-        val first = moments.first()
-        val date = copy!!.dateline(first.happenedAt.atZoneSameInstant(SpineFixtureWeek.zone).toLocalDate())
-        val row = compose.onNodeWithContentDescription("$date, ${first.name}").getBoundsInRoot()
-        val size = MilestonesSection.rowSize(room!!, moments.size)
+        val heights = milestoneRowHeights(copy!!)
+        val size = MilestonesSection.rowSize(room!!, heights.size)
         assertTrue(size.height > MilestonesSection.LIST_ROW)
-        assertEquals(size.height.value, (row.bottom - row.top).value, 0.5f)
+        heights.forEach { assertEquals(size.height.value, it.value, 0.5f) }
+        assertTrue("the rows overrun the room: $heights of $room", heights.fold(0.dp) { sum, h -> sum + h } <= room!!)
     }
+
+    @Test
+    fun `on a card the milestones' rows take their share in whole pixels, never overrunning the room`() {
+        // Five rows share 501.3 dp: 100.26 dp each, 200.52 px at xhdpi. Rounded, they would take 1005 px of 1002.6.
+        val room = 501.3.dp
+        var copy: WrapCopy? = null
+        compose.setContent {
+            PebblesTheme {
+                PebblesTestHarness {
+                    copy = rememberWrapCopy()
+                    Box(Modifier.size(HOST_WIDTH, HOST_HEIGHT)) { MilestonesCard(room) }
+                }
+            }
+        }
+        compose.waitForIdle()
+        val heights = milestoneRowHeights(copy!!)
+        assertEquals(5, heights.size)
+        heights.forEach { assertEquals(100f, it.value, 0f) }
+        assertTrue("the rows overrun the room: $heights", heights.fold(0.dp) { sum, h -> sum + h } <= room)
+    }
+
+    /** The milestones as a card draws them in [room]. */
+    @Composable
+    private fun MilestonesCard(room: Dp?) {
+        MonthSectionContent(
+            MonthSection.MILESTONES,
+            wrap,
+            lookups,
+            DayView.CIRCLE,
+            SpineFixtureWeek.zone,
+            aspect = null,
+            onWeek = {},
+            onOpen = {},
+            onMore = {},
+            onCard = true,
+            room = room,
+        )
+    }
+
+    /** Each milestone row's height as laid out, found by the "date, name" it says. */
+    private fun milestoneRowHeights(copy: WrapCopy): List<Dp> =
+        MonthSections.milestones(wrap, lookups).map { moment ->
+            val date = copy.dateline(moment.happenedAt.atZoneSameInstant(SpineFixtureWeek.zone).toLocalDate())
+            val bounds = compose.onNodeWithContentDescription("$date, ${moment.name}").getBoundsInRoot()
+            bounds.bottom - bounds.top
+        }
 
     @Test
     fun `on a card the domains' more stands at the room's foot`() {

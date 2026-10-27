@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceIn
@@ -61,6 +62,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.time.ZoneId
+import kotlin.math.floor
 
 /** The stone column past the largest stone: room for its rings (iOS `ringRoom`). */
 private const val RING_ROOM = 1.3f
@@ -96,6 +98,10 @@ internal fun MilestonesSection(
     val moments = MonthSections.milestones(wrap, lookups)
     val untitled = stringResource(R.string.path_spine_untitled)
     val size = MilestonesSection.rowSize(room, moments.size)
+    // On a card, each row's share in whole pixels, floored: rounded, the rows could overrun the room by up to
+    // half a pixel each and tip the card into scaling its content down.
+    val density = LocalDensity.current
+    val rowHeight = if (room == null) size.height else with(density) { floor(size.height.toPx()).toInt().toDp() }
     // The stone column: past the largest stone, room for its rings.
     val column = (StoneGeometry.STONE_WIDTH_DP.getValue(ValenceSizeGroup.LARGE) * size.stone * RING_ROOM).dp
     Column {
@@ -114,7 +120,7 @@ internal fun MilestonesSection(
                         titleStyle = type.contentsName(nameType.fontWeight, nameType.italic),
                         subtitle = date,
                         subtitleFirst = true,
-                        minHeight = size.height,
+                        minHeight = rowHeight,
                         markWidth = column,
                         description = "$date, $name",
                         leading = { MilestoneStone(moment, lookups.paletteFor(moment), row, size.stone, column, reveal) },
