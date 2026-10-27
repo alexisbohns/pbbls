@@ -1,6 +1,7 @@
 package app.pbbls.android.features.path.wrap.month
 
 import app.pbbls.android.SpineFixtureWeek
+import app.pbbls.android.core.designsystem.RevealMotion
 import app.pbbls.android.core.model.wrap.MonthHours
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.features.path.wrap.intro.IntroKey
@@ -51,6 +52,24 @@ class InsightsBeatsTest {
         val hours = MonthDeck.beats(IntroSequence.Section(MonthSection.HOURS), october, lookups, leadsInsights = false)
         assertEquals(HoursFigure.introBeats(october, lookups, insights = false), hours)
         assertFalse(hours.any { it.key == IntroKey.Insights })
+    }
+
+    @Test
+    fun `each day's beat starts as the sweep reaches half a bar past that day`() {
+        val days = requireNotNull(october.tone).days
+        val beats = ToneFigure.introBeats(october, insights = false)
+        val sweep = beats.first { it.key == IntroKey.Sweep }
+        // A 390 dp card's figure at 3x: its width, its inset and its bar in px.
+        val width = 1038f
+        val inset = 30f
+        val bar = 15.6f
+        val step = (width - 2 * inset) / (days.size - 1)
+        val reached = beats.mapNotNull { beat -> (beat.key as? IntroKey.Day)?.let { it.day to beat.at } }
+        assertEquals(days.indices.filter { days[it].up + days[it].even + days[it].down > 0 }, reached.map { it.first })
+        reached.forEach { (i, at) ->
+            val eased = RevealMotion.easeInOut((at - sweep.at) / sweep.duration).toFloat()
+            assertEquals("day $i", inset + i * step + bar / 2, ToneFigure.sweepWidth(eased, width, inset, bar), 1e-3f)
+        }
     }
 
     @Test

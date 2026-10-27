@@ -15,6 +15,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.drawText
@@ -120,10 +121,13 @@ internal fun ToneFigure(
                     }
                 val bright = measurer.measure(brightWord, words)
                 val heavy = measurer.measure(heavyWord, words)
+                val quiet = QUIET.toPx()
+                // Each even day's circle radius, growing with its summed intensity; 0 on the other days.
+                val radii = FloatArray(days.size) { i -> if (days[i].even > 0) (EVEN_BASE + EVEN_STEP * days[i].even).toPx() else 0f }
                 // The even days, each with its beat's key, its place on the line and its circle's radius.
                 val evens =
-                    days.withIndex().filter { it.value.even > 0 }.map { (i, d) ->
-                        EvenDay(IntroKey.Day(i), Offset(inset + i * step, y0), (EVEN_BASE + EVEN_STEP * d.even).toPx())
+                    days.indices.filter { days[it].even > 0 }.map { i ->
+                        EvenDay(IntroKey.Day(i), Offset(inset + i * step, y0), radii[i])
                     }
 
                 fun DrawScope.chart() {
@@ -137,18 +141,21 @@ internal fun ToneFigure(
                             drawRoundRect(colors.ink3, Offset(x - bar / 2, y0 + gap), Size(bar, d.down * u), CornerRadius(bar / 2))
                         }
                         when {
-                            d.even > 0 -> drawCircle(colors.ink2, (EVEN_BASE + EVEN_STEP * d.even).toPx(), Offset(x, y0), style = ring)
-                            d.up == 0 && d.down == 0 -> drawCircle(colors.rule, QUIET.toPx(), Offset(x, y0))
+                            d.even > 0 -> drawCircle(colors.ink2, radii[i], Offset(x, y0), style = ring)
+                            d.up == 0 && d.down == 0 -> drawCircle(colors.rule, quiet, Offset(x, y0))
                         }
                     }
                     numerals.forEach { (t, at) -> drawText(t, topLeft = at) }
                     drawText(bright, topLeft = Offset(lineInset, 0f))
                     drawText(heavy, topLeft = Offset(lineInset, y0 + maxDown * u))
-                    // An even day's pulse as the sweep reaches it: a ring growing out of its circle and fading.
+                    // An even day's pulse as the sweep reaches it: its ring scaled about its centre and fading (iOS `scaleEffect(1 + t)`).
                     evens.forEach { even ->
                         val t = reveal(even.key)
                         if (t > 0f && t < 1f) {
-                            drawCircle(colors.ink2, even.radius * (1 + t), even.at, alpha = 1 - t, style = Stroke(stroke * (1 + t)))
+                            val grow = 1 + t
+                            withTransform({ scale(grow, grow, even.at) }) {
+                                drawCircle(colors.ink2, even.radius, even.at, alpha = 1 - t, style = ring)
+                            }
                         }
                     }
                 }

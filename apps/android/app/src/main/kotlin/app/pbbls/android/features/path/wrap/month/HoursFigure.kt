@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -21,6 +20,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.withSaveLayer
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -96,8 +96,6 @@ internal fun HoursFigure(
         }
     val widths = items.map { (_, moment) -> SealSize.TINY.width(moment.valence.sizeGroup) }
     val measurer = rememberTextMeasurer()
-    // The one paint a popping stone's layer fades through, so a frame allocates none.
-    val layerPaint = remember { Paint() }
     val busiest = hours.busiest
     val description = busiest?.let { copy.hoursDescription(it.count, items.size, it.start) } ?: copy.hoursSub()
 
@@ -180,6 +178,8 @@ internal fun HoursFigure(
                             ).toFloat()
                         }
                     val pad = SEAL_LAYER_PAD.toPx()
+                    // The one paint a popping stone's layer fades through: the layer allocates no paint.
+                    val layerPaint = Paint()
                     val stones =
                         items.mapIndexed { i, (mark, _) ->
                             val w = widths[i].toPx()
@@ -238,9 +238,7 @@ internal fun HoursFigure(
                                 if (opacity < 1f) {
                                     // The stone overlaps its own paths, so it fades as one: a layer, only while it fades in.
                                     layerPaint.alpha = opacity
-                                    drawContext.canvas.saveLayer(stone.layer, layerPaint)
-                                    drawSeal(prints[i], stone.width)
-                                    drawContext.canvas.restore()
+                                    drawContext.canvas.withSaveLayer(stone.layer, layerPaint) { drawSeal(prints[i], stone.width) }
                                 } else {
                                     drawSeal(prints[i], stone.width)
                                 }
