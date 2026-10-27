@@ -122,10 +122,10 @@ struct PebbleFormView: View {
                     )
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                     .pebblesListRow(position: .only)
+                    .id(Self.soulsAnchor)
                 } header: {
                     Text("Souls").pebblesSectionHeader()
                 }
-                .id(Self.soulsAnchor)
 
                 Section {
                     Picker("Collection", selection: $draft.collectionId) {
@@ -150,8 +150,11 @@ struct PebbleFormView: View {
                 }
             }
             .pebblesList()
-            .onAppear {
-                if scrollsToSouls { proxy.scrollTo(Self.soulsAnchor, anchor: .top) }
+            .task {
+                guard scrollsToSouls else { return }
+                // Let the list lay out its rows before asking for one of them.
+                await Task.yield()
+                withAnimation { proxy.scrollTo(Self.soulsAnchor, anchor: .top) }
             }
         }
         .sheet(isPresented: $showValencePicker) {

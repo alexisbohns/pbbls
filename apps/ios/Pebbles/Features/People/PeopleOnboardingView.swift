@@ -39,14 +39,14 @@ struct PeopleOnboardingView: View {
     private func noSouls(prompts: [PeoplePrompts.Prompt], skipped: [String]) -> some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             kicker
-            summary(PeopleOnboardingCopy.question, italic: true)
+            summary(PeopleOnboardingCopy.question)
             lines
             if !prompts.isEmpty {
                 card(title: PeopleOnboardingCopy.latest, prompts: prompts) { EmptyView() }
                     .padding(.top, Spacing.sm)
             }
             ForEach(skipped, id: \.self) { name in
-                summary(PeopleOnboardingCopy.notAsked(name), italic: true)
+                summary(PeopleOnboardingCopy.notAsked(name))
             }
             placeholder
                 .padding(.top, Spacing.lg)
@@ -59,7 +59,7 @@ struct PeopleOnboardingView: View {
 
     private func fewSouls(prompts: [PeoplePrompts.Prompt]) -> some View {
         card(title: PeopleOnboardingCopy.fewTitle, prompts: prompts) {
-            summary(PeopleOnboardingCopy.fewMutual, italic: true)
+            summary(PeopleOnboardingCopy.fewMutual)
             textLink(PeopleOnboardingCopy.notNow, action: onNotNow)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
@@ -82,10 +82,9 @@ struct PeopleOnboardingView: View {
         }
     }
 
-    /// `.summary` is the Spine's italic; `italic` here is the summary's own
-    /// slant, for the question, the skipped lines and the mutual note.
-    private func summary(_ text: String, italic: Bool = false) -> some View {
-        (italic ? Text(verbatim: text).italic() : Text(verbatim: text))
+    /// `.summary` is the Spine's italic line.
+    private func summary(_ text: String) -> some View {
+        Text(verbatim: text)
             .spineType(.summary)
             .foregroundStyle(Color.pebbles.onSurfaceVariant)
     }
@@ -121,9 +120,9 @@ struct PeopleOnboardingView: View {
         }
         .padding(Spacing.lg)
         .background(Color.pebbles.surfaceContainerLow)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: Spacing.lg))
         .overlay {
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: Spacing.lg)
                 .strokeBorder(Color.pebbles.rule, lineWidth: 1)
         }
     }

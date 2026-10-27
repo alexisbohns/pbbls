@@ -5375,6 +5375,23 @@
         }
       }
     },
+    "people.prompt.openFailed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That pebble couldn't be opened. Try again from the Path."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce galet n'a pas pu s'ouvrir. Réessaie depuis le Chemin."
+          }
+        }
+      }
+    },
     "home.firstFive.title" : {
       "extractionState" : "manual",
       "localizations" : {

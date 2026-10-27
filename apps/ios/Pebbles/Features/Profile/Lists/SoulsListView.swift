@@ -13,6 +13,7 @@ struct SoulsListView: View {
     @State private var isPresentingCreate = false
     @State private var pendingDeletion: SoulWithGlyph?
     @State private var deleteError: String?
+    @State private var promptError: String?
     // The People onboarding (spec §2, D11): read only while the grid is short
     // (D-plan-3); the device's "Not now" ends it.
     @AppStorage(PeopleOnboardingState.storageKey) private var promptsDismissed = false
@@ -120,6 +121,18 @@ struct SoulsListView: View {
             } message: { message in
                 Text(message)
             }
+            .alert(
+                "Couldn't open",
+                isPresented: Binding(
+                    get: { promptError != nil },
+                    set: { if !$0 { promptError = nil } }
+                ),
+                presenting: promptError
+            ) { _ in
+                Button("OK", role: .cancel) { promptError = nil }
+            } message: { message in
+                Text(message)
+            }
             .pebblesScreen()
             // Home's checklist sends the user here to add a first soul.
             .onAppear {
@@ -142,13 +155,19 @@ struct SoulsListView: View {
             )
         } else if items.isEmpty {
             if let prompts {
-                ScrollView {
-                    onboarding(prompts)
-                        .padding(Spacing.lg)
-                        .id(TabNavigation.scrollTopAnchor)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        onboarding(prompts)
+                            .padding(Spacing.lg)
+                            .id(TabNavigation.scrollTopAnchor)
+                    }
+                    .onChange(of: nav.scrollToTop[.people, default: 0]) {
+                        withAnimation { proxy.scrollTo(TabNavigation.scrollTopAnchor, anchor: .top) }
+                    }
                 }
-            } else if promptsFailed {
-                // The prompts could not be read: never a blank tab.
+            } else if promptsFailed || promptsDismissed {
+                // The prompts could not be read, or were dismissed before
+                // this read landed: never a blank tab, never a spinner.
                 ContentUnavailableView(
                     "No souls yet",
                     systemImage: "person.2",
@@ -213,7 +232,7 @@ struct SoulsListView: View {
                 .value
             self.items = result
             // D-plan-3: a veteran's grid pays nothing for the onboarding.
-            if result.count < 3 && !promptsDismissed {
+            if result.count < 3 {
                 await loadPrompts()
             } else {
                 prompts = nil
@@ -232,6 +251,7 @@ struct SoulsListView: View {
             prompts = try await PeopleService(client: supabase.client).prompts(limit: 3)
             promptsFailed = false
         } catch {
+            // Cancelled, not failed: `.task` reruns the read on reappear.
             guard !Task.isCancelled else { return }
             logger.error("people_prompts failed: \(error.localizedDescription, privacy: .private)")
             // Keep the last prompts, if any; the grid or the fallback stands.
@@ -247,10 +267,12 @@ struct SoulsListView: View {
                 editing = EditTarget(momentId: detail.id, pebble: pebble)
             } else {
                 logger.error("prompt \(prompt.pebbleId, privacy: .public) has no pebble on \(detail.id, privacy: .public)")
+                promptError = String(localized: "people.prompt.openFailed")
             }
         } catch {
             guard !Task.isCancelled else { return }
             logger.error("moment(id:) for a prompt failed: \(error.localizedDescription, privacy: .private)")
+            promptError = String(localized: "people.prompt.openFailed")
         }
     }
 
