@@ -26,7 +26,7 @@ import java.time.YearMonth
  * - One `IntroHost` per sequence: a second host of the same sequence would register over the first, and its
  *   leaving would land the first.
  * - [leave] clears the top card, so the deck must [show] again after a host returns.
- * - A ledger reset (`IntroLedger.reset`) is not observed here: Replay builds a new clock.
+ * - A ledger reset (`IntroLedger.reset`) is not observed here: Replay [retire]s this clock and builds a new one.
  */
 @Stable
 class IntroClock private constructor(
@@ -70,7 +70,8 @@ class IntroClock private constructor(
 
     /**
      * The page is the pager's settled page, the activity resumed, and the intro allowed. Off lands what plays.
-     * Written by `IntroDrive`; not read in composition (it is not snapshot state).
+     * Written by `IntroDrive`, and turned off for good by [retire]; not read in composition (it is not snapshot
+     * state).
      */
     var isActive: Boolean = false
         set(value) {
@@ -176,6 +177,16 @@ class IntroClock private constructor(
             }
         }
         settleAll()
+    }
+
+    /**
+     * Replay is done with this clock (D14): what plays lands and its haptics stop, and every card it has met keeps
+     * the phase it has now, so the ledger forgetting the month can't turn its landed cards back to waiting (blank)
+     * while its deck fades out. Its page drives the new clock from then on, never this one.
+     */
+    fun retire() {
+        isActive = false
+        latest.keys.forEach { phases.getOrPut(it) { phase(it) } }
     }
 
     /** Focus lost, the activity paused, the page gone: what plays lands and its haptics stop; what waits keeps waiting, unrecorded. */

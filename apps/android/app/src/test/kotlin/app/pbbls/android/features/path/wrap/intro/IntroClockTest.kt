@@ -308,6 +308,33 @@ class IntroClockTest {
     }
 
     @Test
+    fun `a retired clock lands what plays and keeps every card it met as it was, whatever the ledger forgets`() {
+        val ledger = IntroLedger()
+        val spy = HapticsSpy()
+        // The weeks played on an earlier page this launch: this clock reads them settled off the ledger.
+        ledger.record(october, weeks)
+        val clock = clock(ledger, spy)
+        clock.register(IntroSequence.Cover) { beats }
+        clock.register(weeks) { beats }
+        clock.register(persons) { beats }
+        clock.show(IntroSequence.Cover)
+        clock.isActive = true
+        assertTrue(clock.isPlaying(IntroSequence.Cover))
+
+        clock.retire()
+        assertEquals(listOf<IntroSequence>(IntroSequence.Cover), spy.stopped)
+        ledger.reset(october)
+        assertEquals(IntroClock.Phase.Settled, clock.phase(IntroSequence.Cover))
+        assertEquals(IntroClock.Phase.Settled, clock.phase(weeks))
+        // A card it met waiting stays waiting, and nothing starts on it again.
+        assertEquals(IntroClock.Phase.Waiting, clock.phase(persons))
+        clock.show(persons)
+        assertEquals(IntroClock.Phase.Waiting, clock.phase(persons))
+        assertEquals(listOf<IntroSequence>(IntroSequence.Cover), spy.played)
+        assertFalse(ledger.contains(october, persons))
+    }
+
+    @Test
     fun `a tap on an inactive page does nothing`() {
         val ledger = IntroLedger()
         val clock = clock(ledger)

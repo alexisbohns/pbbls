@@ -1,12 +1,21 @@
 package app.pbbls.android.features.path.wrap.month
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,6 +24,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -32,6 +42,7 @@ import app.pbbls.android.features.path.wrap.intro.IntroLedger
 import app.pbbls.android.features.path.wrap.intro.rememberIntroAllowed
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 
 private val PAGE_BOTTOM = 96.dp
@@ -84,22 +95,59 @@ fun MonthPage(
 
     if (clock != null) {
         // The active flag lives here, outside the replayed deck, so the new deck inherits it and nothing the deck
-        // redraws can drop it (D21's visibility trap): a replayed deck plays its cover at once.
+        // redraws can drop it (D21's visibility trap): a replayed deck plays its cover at once. It drives the
+        // newest clock only; a deck fading out keeps its own, retired.
         DriveWhileActive(clock, focused)
-        val onReplay: () -> Unit = {
-            scope.launch {
-                // The skip from this same tap lands first, on the old clock; replay on the next frame.
-                withFrameNanos { }
-                // Stopped, its haptics with it: nothing reaching it as its deck leaves starts a card on it.
-                clock.isActive = false
-                intro?.ledger?.reset(wrap.month)
-                run += 1
-            }
-        }
-        // The month in the key, as in the pager's own keys (#1241's trap: decks sharing an identity sent a swipe
-        // to August back to September); the run deals a new deck, its pager on the cover.
-        key(wrap.month, run) {
-            MonthDeckPager(wrap, lookups, clock, dayView, zone, aspect, onWeek, onOpen, onMore, onReplay, modifier)
+        val deal = remember(clock) { MonthDeal(wrap.month, run, clock) }
+        AnimatedContent(
+            targetState = deal,
+            modifier = modifier,
+            transitionSpec = {
+                // A replay cross-fades the decks (iOS: 0.3 s ease-in-out); anything else swaps at once.
+                val replay = targetState.month == initialState.month && targetState.run > initialState.run
+                val transform =
+                    if (replay) {
+                        fadeIn(tween(REPLAY_FADE_MS, easing = EaseInOut)) togetherWith
+                            fadeOut(tween(REPLAY_FADE_MS, easing = EaseInOut))
+                    } else {
+                        EnterTransition.None togetherWith ExitTransition.None
+                    }
+                // The new deck lies over the one fading out.
+                transform.apply { targetContentZIndex = targetState.run.toFloat() } using null
+            },
+            // The month in the key, as in the pager's own keys (#1241's trap: decks sharing an identity sent a swipe
+            // to August back to September), and the run, which deals a new deck, its pager on the cover. Never the
+            // clock: the key is part of the deck's saved state, which a restored page must find again.
+            contentKey = { it.month to it.run },
+            label = "MonthDeckReplay",
+        ) { dealt ->
+            // A deck fading out says nothing: its Replay is gone as soon as it is tapped.
+            val leaving = transition.targetState == EnterExitState.PostExit
+            MonthDeckPager(
+                wrap,
+                lookups,
+                // Its own clock, never the page's: on the new one, a fading deck would register its cards and show its end.
+                dealt.clock,
+                dayView,
+                zone,
+                aspect,
+                onWeek,
+                onOpen,
+                onMore,
+                onReplay = {
+                    scope.launch {
+                        // The skip from this same tap lands first, on this deck's clock; replay on the next frame.
+                        withFrameNanos { }
+                        // Once per deck: a second tap before the new deck is dealt replays nothing more.
+                        if (dealt.run != run) return@launch
+                        // Stopped, its haptics with it, and its cards kept as they are while its deck fades out.
+                        dealt.clock.retire()
+                        intro?.ledger?.reset(dealt.month)
+                        run += 1
+                    }
+                },
+                modifier = Modifier.fillMaxSize().then(if (leaving) Modifier.clearAndSetSemantics {} else Modifier),
+            )
         }
     } else {
         LazyColumn(modifier = modifier, contentPadding = PaddingValues(bottom = PAGE_BOTTOM)) {
@@ -123,6 +171,17 @@ fun MonthPage(
         )
     }
 }
+
+/** One deal of a month's deck (D14): the run Replay counts, and the clock it plays on. */
+@Stable
+private class MonthDeal(
+    val month: YearMonth,
+    val run: Int,
+    val clock: IntroClock,
+)
+
+/** The replayed deck's cross-fade (iOS `MonthPage.replay`'s `.easeInOut(duration: 0.3)`). */
+private const val REPLAY_FADE_MS = 300
 
 /**
  * Drives [clock], active while the page is [focused] and the activity resumed (D20). Its own scope, so a

@@ -11,9 +11,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -106,6 +111,7 @@ class MonthPageReplayTest {
         compose.setContent {
             PebblesTheme {
                 PebblesTestHarness {
+                    copy = rememberWrapCopy()
                     Box(Modifier.size(390.dp, 800.dp).testTag(PAGE)) {
                         MonthPage(
                             wrap = month,
@@ -188,6 +194,41 @@ class MonthPageReplayTest {
         // Back in focus, the cover has played: it does not again.
         compose.runOnIdle { focused = true }
         settle()
+        assertEquals(2, played().count { it.startsWith("play ${IntroSequence.Cover}") })
+    }
+
+    @Test
+    fun `mid-fade the leaving deck says nothing, its replay gone, and the fade completes on the new cover`() {
+        page()
+        repeat(cards.size - 1) { throwCard() }
+        compose.onNodeWithText(replay).performClick()
+        // The replay's frame, the new deal's, then about half the 300 ms fade: both decks are drawn, and only the new
+        // one speaks (what TalkBack, Switch and Voice Access read: the merged tree).
+        compose.mainClock.advanceTimeBy(HALF_FADE_MS)
+        assertEquals("play ${IntroSequence.Cover} ${wrap.month}", voices.events.last())
+        compose.onAllNodesWithText(replay).assertCountEquals(0)
+        settle()
+        compose.onAllNodesWithText(replay).assertCountEquals(0)
+        // The new deck alone, on its cover: its month's name is the one heading on the page.
+        compose.onAllNodesWithText(copy!!.monthName(wrap.month)).assertCountEquals(1)
+    }
+
+    @Test
+    fun `a tap mid-fade only skips the new cover, and replays nothing more`() {
+        page()
+        repeat(cards.size - 1) { throwCard() }
+        val button = compose.onNodeWithText(replay).getBoundsInRoot()
+        compose.onNodeWithText(replay).performClick()
+        compose.mainClock.advanceTimeBy(HALF_FADE_MS)
+        assertEquals("play ${IntroSequence.Cover} ${wrap.month}", voices.events.last())
+        val before = voices.events.size
+
+        // Where the replay was: the new deck, on top, takes the tap.
+        val at = with(compose.density) { Offset(((button.left + button.right) / 2).toPx(), ((button.top + button.bottom) / 2).toPx()) }
+        compose.onNodeWithTag(PAGE).performTouchInput { click(at) }
+        settle()
+        assertEquals(listOf("stop ${IntroSequence.Cover} ${wrap.month}"), voices.events.drop(before))
+        assertTrue(ledger.contains(wrap.month, IntroSequence.Cover))
         assertEquals(2, played().count { it.startsWith("play ${IntroSequence.Cover}") })
     }
 
@@ -275,5 +316,8 @@ class MonthPageReplayTest {
         const val SETTLE_MS = 2_000L
 
         const val FRAMES = 10
+
+        /** About half the replay's 300 ms cross-fade, past its first two frames. */
+        const val HALF_FADE_MS = 150L
     }
 }
