@@ -1482,3 +1482,30 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Pebbles' own haptics switch gates every tier (#1242's second comment).
 - **Supersedes / Superseded-by:** none. It answers the 2026-10-25 iOS entry's "Android ports the score and the lifecycle, with its own haptic backend".
 - **Refs:** #1242, `docs/superpowers/specs/2026-10-26-android-month-intro-design.md` (D18), `apps/android/app/src/main/kotlin/app/pbbls/android/features/path/wrap/intro/`.
+
+## 2026-10-27 — On Android the intro's composition re-anchors after each swell, and the system's Touch feedback silences every tier (#1242)
+
+- **Status:** taken
+- **Scope:** android
+- **Context:**
+  - The 2026-10-26 Android entry plays each card as one composition and applies no drift correction. That rested on the cover, which ran 21–28 ms late.
+  - The domains card with five full gauges is 726 primitives, 716 of them back-to-back LOW_TICKs in its swells.
+  - On the Pixel 8 it played whole, so the framework splits compositions past the HAL's 254 primitives. But it ran 11 015 ms against 11 329 ms declared: a LOW_TICK in a train plays about 0.44 ms short. The haptics ran ahead of the bars, about 60 ms per full gauge, and 314 ms by the last tick.
+  - Sparse cards drift the other way, about 2 ms late per primitive.
+- **Decision:**
+  - **Tier C cuts a card's primitives into segments,** a new one at the first primitive after each swell's train.
+  - **The first segment plays as before,** with the card's 50 ms lead.
+  - **Each later segment is fired from the clock's frames** a floor (25 ms) before its scored time, with the rest of the wait as its first pause. The score guarantees that gap after a train.
+  - **A card with no swell is one composition,** unchanged.
+  - **Pebbles' switch is asked by every segment:** read off mid-card, it stops the card.
+- **Why:**
+  - **Rejected, a per-primitive correction:** device-specific, with opposite signs for trains and sparse ticks.
+  - **Rejected, firing later segments at the card's 50 ms lead:** a new vibration replaces the sounding one, so on a vibrator whose trains keep time it would cut the swell's loudest ticks.
+- **Consequences:**
+  - On the Pixel 8 every later segment starts 1–4 ms after its score, and the last tick lands within 4 ms.
+  - Each segment of today's scores stays under 254 primitives (145 at most), so none is chunked.
+  - A later segment depends on a frame: a stalled frame plays it late by the stall, and a segment a stall passed altogether is skipped.
+  - With Android's Touch feedback off, tiers C, W and V are all silent on the Pixel 8, because `USAGE_TOUCH` follows it, unlike iOS Core Haptics. Pebbles' own switch (D23) ships anyway, for parity and for the phones where only Pebbles should be quiet.
+  - The maintainer felt tiers W and V through the Spine Lab and accepted them as fallbacks.
+- **Supersedes / Superseded-by:** refines the 2026-10-26 Android entry's "one composition per card" and "no correction". Its tiers and fallbacks stand.
+- **Refs:** #1242, `docs/superpowers/specs/2026-10-26-android-month-intro-design.md` (D18), `apps/android/app/src/main/kotlin/app/pbbls/android/features/path/wrap/intro/IntroComposition.kt`, `IntroSegmentQueue.kt`.

@@ -81,6 +81,14 @@ C felt more natural and closer to the iPhone, above all on the domains' swell. `
   - **The waveform swell inside tier C:** felt on the probe, with a separate vibration handed over at each gauge. The LOW_TICK train felt closest to the iPhone and stays one voice.
   - **Android 16's envelope effects and `DELAY_TYPE_RELATIVE_START_OFFSET`:** they need API 36 (minSdk is 33), and the Pixel 8 reports no envelope support.
 
+**As built (2026-10-27).** Tier C plays one composition per *segment* of a card, not per card:
+- A card's primitives are cut after each swell's train.
+- Each later segment fires from the clock's frames a floor (25 ms) before its scored time.
+- Why: on the Pixel 8 back-to-back LOW_TICKs play about 0.44 ms short each, so the domains card (726 primitives) ended 314 ms early as one composition. Re-anchored, every segment starts 1–4 ms after its score.
+- A card without swells is still one composition.
+- With Android's Touch feedback off, all three tiers are silent.
+- See the decision log, 2026-10-27.
+
 **D19. The engine runs on Compose's frame clock and draws in the draw phase.**
 - **The port:** `IntroScore`, `IntroCurve`, `IntroMotion`, `IntroTempo` and `IntroLedger` port as pure Kotlin under `features/path/wrap/intro/`.
 - **The types:**
@@ -250,8 +258,9 @@ The acceptance "the month's intro plays once per launch, ticking each slot" move
 - **Composition drift.** On the probe, 20 TICKs 32 ms apart played in 660 ms against 613 ms scored: about 1–2 ms per primitive past their reported durations. A 31-day garland may end about 50 ms behind its frames.
   - Part 2's device pass measures the cover with `dumpsys vibrator_manager`.
   - Past 30 ms, `IntroComposition` subtracts a measured per-primitive overhead from each pause.
+  - As built: the cover ran 21–28 ms late, so no overhead is subtracted. The swells' trains ran early instead, which the segments above re-anchor.
 - **Vendor HALs.** Primitive support and amplitude control vary widely. The tier choice reads the vibrator itself, never the model, and only the Pixel 8 is felt. Tiers W and V are felt on the Pixel through the Lab's override.
-- **The system's Touch feedback setting.** It is expected to silence `USAGE_TOUCH` compositions and waveforms. The device pass confirms it. Pebbles' own switch (D23) ships either way.
+- **The system's Touch feedback setting.** It is expected to silence `USAGE_TOUCH` compositions and waveforms. Confirmed on the Pixel 8: off, C, W and V are all silent. Pebbles' own switch (D23) ships either way.
 - **Per-frame cost.** The garland redraws up to 31 seals per frame for about 2.2 s, and the gem 28 facets.
   - Draw-phase reads keep recomposition out of it.
   - If frames drop on the Pixel (the profiler's frame timeline), the landed marks draw into a cached layer (`graphicsLayer` with `CompositingStrategy.Offscreen` around the settled ones), and only the moving ones redraw.

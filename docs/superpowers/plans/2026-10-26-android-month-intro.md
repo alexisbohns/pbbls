@@ -4794,9 +4794,67 @@ The maintainer's phone, with the real account; the intro writes nothing.
 
 ## As built
 
-Fill in as the parts land, listing each deviation from this plan and why:
-- the drift measured
-- the composition size
-- the system switch's effect per tier
-- tuned constants
-- the maintainer's feel notes
+Measured on the maintainer's Pixel 8 (Android 17) through `dumpsys vibrator_manager` and gfxinfo, Parts 1–8, 2026-10-26/27.
+
+**Haptics**
+- **Drift, the cover:** 44 primitives scored at 4375 ms played in 4396 and 4403 ms, 21–28 ms late. Under the 30 ms bar, so no per-primitive overhead is subtracted.
+- **Drift, the swells:** the domains card with five full gauges is 726 primitives (716 LOW_TICKs), not the ~600 this plan estimated.
+  - Played whole, so the framework does split compositions past 254.
+  - It ran 11 015 ms against 11 329 declared: back-to-back LOW_TICKs play about 0.44 ms short each, and the last tick came 314 ms early.
+  - Fixed in Part 7: tier C cuts a card's primitives after each swell's train. Each later segment is fired from the frame clock a floor (25 ms) before its scored time (`IntroComposition.segments`, `IntroSegmentQueue`).
+  - Measured after: every segment starts 1–4 ms after its score, 145 primitives at most.
+  - A first try fired at the card's 50 ms lead. The review showed that would cut a train's loudest ticks on a vibrator that keeps time.
+  - Decision log, 2026-10-27.
+- **The system switch:** with Touch feedback off, C, W and V are all silent (`USAGE_TOUCH` follows it, unlike iOS Core Haptics).
+- **Feel:**
+  - The maintainer chose C as the most natural, above all on the domains' swell.
+  - W and V are accepted as fallbacks.
+  - The persons and gem cards were confirmed on the device.
+  - Weeks through the end card, and the switch, await the device pass.
+- **Tuned constants:** none yet.
+
+**Frames:** gfxinfo during the cover p90 17–21 ms; the hours card p90 13 ms (0.61 % jank). No cached layer was needed.
+
+**Plan drift (the code is right; these snippets are stale)**
+- Tasks 17 and 25 hand-write the drive effects. Every clock is driven through `IntroDrive(clock, active)`.
+- `MonthDeckLayout`'s constants are CAPS (`INSET`, `END_GAP`). `MonthDeckPaper` carries its own inset.
+- Task 31's gem: the blank stone fades as one layer, and only the count and its label rise (a slide of the stone isn't iOS's). The label spread breaks out of its loop, as iOS does.
+- Line ~4453: Swift's `max(by:)` keeps the *first* of equal maxima, not the last.
+- Part 6:
+  - the tone's sweep masks the whole chart with iOS's `sweepWidth`;
+  - an even day's ring pulses as `scaleEffect(1 + t)`;
+  - both figures draw through `drawWithCache`.
+- Part 7:
+  - **Dropped:** no `MonthDeckWeeks` reference. `MonthDeckSection` renders the weeks card on its room.
+  - **Ports matching iOS:** the domains' top is the largest of the rows shown; a milestone's intensity is `pebble?.intensity ?: 1`; the ripple's gate is a `snapshotFlow(...).drop(1)` (iOS's `onChange`), tested as `IntroStage.strikes`.
+  - **Replay:** cross-fades over 0.3 s, as iOS does.
+    - Each dealt deck owns its clock (`MonthDeal`), because `AnimatedContent` keeps the outgoing deck live where SwiftUI freezes it.
+    - The old clock is retired (`IntroClock.retire()`) with its cards' phases pinned.
+    - `run` is `rememberSaveable`.
+    - The hidden Replay takes no press.
+- **Fixes placed in lower layers:**
+  - a tap on the top card fell through to the card held beneath (Part 3: each card takes the touch on its page);
+  - a person row's share is floored to whole pixels (Part 4), as the milestones' is;
+  - `PathViewModel.onFocus` ignores a page the Path doesn't hold. An empty past week's column is tappable, as on iOS, but that week is a strip spacer.
+- **Part 8:**
+  - the rows' long-press buzz (pebble, soul, collection) asks the switch too, as iOS's context menus do;
+  - with the switch read off mid-card, the intro stops the card;
+  - the Spine Lab's probes are left ungated (debug only).
+
+**Lessons learned**
+- **Offscreen layers clip.** A `graphicsLayer` with alpha below 1 draws offscreen, clipped to its bounds, so anything drawn past them (LitStone's rings and halo, a week column's two-line date) is cut.
+  - Use `CompositingStrategy.ModulateAlpha`, or put the layer on the overflowing content itself.
+- **Siblings hit-test top-down.** Compose hit-tests siblings from the top until one has pointer input at the point. A stacked card needs its own pointer input, consuming nothing, or taps reach the card beneath.
+- **A composition's timing is relative.** Each pause runs from the declared end of the primitive before, and real durations differ by device and by texture. Re-anchor long runs from the frame clock rather than correcting by a constant.
+- **`AnimatedContent` keeps the outgoing content live and recomposing.** Whatever fades out must read only its own state, never the page's.
+- **Test clocks:** under a Compose test rule the frame clock is virtual while `IntroClock` reads `System.nanoTime`. Whole-app tests opt into the plain month (`AppUiTest.drawPlainMonthPages()`), and the replay tests drive their taps knowing cards never land on their own.
+- **`{ true }` defaults hide missed callers.** A `hapticsOn: () -> Boolean = { true }` default let Edit Moment's valence picker skip the switch. Production composables take the switch without a default; previews pass `{ true }`.
+
+**Follow-ups (not in this stack)**
+- **iOS:** `PathModel.focus` should ignore a week that isn't a page (the Android guard above).
+- **Android parity:** `HoursLayout.lanes` has no lane cap (iOS: 4 inner, 3 outer), and `ToneFigure` numbers days over the month rather than over the tone's days.
+- **Lower layers:**
+  - `drawSeal` allocates a rim stroke (and a hatch path for tiny lowlight seals) per call;
+  - `ProportionBar` could take draw-phase weights;
+  - `SOCKET` and `SEAL_LAYER_PAD` are duplicated across the garland, the week columns and the hours.
+- **Baseline profiles:** they name pre-stack signatures. Regenerate them (`android-baseline-profile`).
