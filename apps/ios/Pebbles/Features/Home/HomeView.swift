@@ -22,6 +22,9 @@ struct HomeView: View {
     @State private var cameraError: String?
     @State private var naming: MomentDetail?
     @State private var completing: CompleteTarget?
+    @State private var openWrap: CalendarMonth?
+    @Environment(EmotionPaletteService.self) private var palettes
+    @Environment(ReferenceDataService.self) private var references
 
     private struct CompleteTarget: Identifiable, Equatable {
         let momentId: UUID
@@ -45,6 +48,23 @@ struct HomeView: View {
                         onPebble: { showsCapture = true },
                         cameraDisabled: camera?.isSaving == true
                     )
+
+                    if model.wraps != nil || model.wrapsError != nil {
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            HomeWrapsRow(months: model.wraps?.months ?? [], lookups: lookups,
+                                         liveMonth: liveMonth, onOpen: { openWrap = $0.month })
+                            if let wrapsError = model.wrapsError {
+                                HStack(alignment: .firstTextBaseline) {
+                                    Text(verbatim: wrapsError)
+                                        .pebblesFont(.callout)
+                                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                                    Spacer(minLength: 0)
+                                    Button("home.wraps.retry") { Task { await model.loadWraps() } }
+                                        .pebblesFont(.callout)
+                                }
+                            }
+                        }
+                    }
 
                     if camera?.isSaving == true {
                         Text("home.camera.saving")
@@ -112,6 +132,9 @@ struct HomeView: View {
         } message: {
             Text("home.camera.unavailableBody")
         }
+        .sheet(item: $openWrap) { month in
+            HomeWrapSheet(monthId: month, lookups: lookups, model: model, onWeek: { _ in nav.go(.path) })
+        }
         .sheet(item: $naming) { detail in
             EditMomentSheet(detail: detail, onSaved: { revision.bump(from: .home) })
         }
@@ -144,6 +167,14 @@ struct HomeView: View {
             deadline.cancel()
             onFirstLoad()
         }
+    }
+
+    private var lookups: WrapLookups { HomeLookups.make(palettes: palettes, refs: references) }
+
+    /// The month the clock is in, in the device's zone.
+    private var liveMonth: CalendarMonth {
+        let parts = SpineCalendar.current.dateComponents([.year, .month], from: .now)
+        return CalendarMonth(year: parts.year ?? 1970, month: parts.month ?? 1)
     }
 
     private func openCamera() {
