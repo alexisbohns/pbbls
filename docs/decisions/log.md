@@ -1450,7 +1450,7 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Status:** taken
 - **Scope:** web
 - **Context:** "Counting in stone" shows 402 concepts of a design exploration as six-frame SVG strips, about 26 MB. Kept under `apps/web/public/blog/`, they would sit in every future clone forever, and the service worker's `public/**/*.svg` precache glob would have pushed them onto every installed PWA.
-- **Decision:** a post's plates (`kind: "plate"`, `BlogPlate`) are stored in the public `lab-assets` bucket under `blog/<slug>/` and resolved with `labAssetUrl()`; only the post's light figures (the link-preview image) stay in `public/blog/<slug>/`. They are uploaded by hand with `supabase storage cp --content-type image/svg+xml` before the post deploys.
+- **Decision:** a post's plates (`kind: "plate"`, `BlogPlate`) are stored in the public `lab-assets` bucket under `blog/<slug>/` and resolved with `labAssetUrl()`; only the post's raster figures (here, the link-preview image) stay in `public/blog/<slug>/`. They are uploaded by hand with `supabase storage cp --content-type image/svg+xml` before the post deploys.
 - **Why:** repo weight is permanent; the bucket is already public-read, admin-write and CDN-served (gzip brings a strip to a few KB).
 - **Consequences:** the repo test checks the plates' shape, not the files; a plate renders text only when `NEXT_PUBLIC_SUPABASE_URL` is missing; deleting a post's plates means deleting them from the bucket.
 - **Supersedes / Superseded-by:** none; narrows the 2026-10-23 blog entry's "blog images live in `public/blog/<slug>/`" for plates.
