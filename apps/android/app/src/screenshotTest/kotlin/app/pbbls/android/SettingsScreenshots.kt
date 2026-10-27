@@ -64,6 +64,17 @@ private fun SettingsWallpaperColorsRow(checked: Boolean) {
     )
 }
 
+/** The Haptics section's one row (#1242 D23), as `SettingsScreen` draws it. */
+@Composable
+private fun SettingsHapticsRow(checked: Boolean) {
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.settings_haptics_vibrations)) },
+        supportingContent = { Text(stringResource(R.string.settings_haptics_footer)) },
+        trailingContent = { Switch(checked = checked, onCheckedChange = null) },
+        colors = settingsRowColors(),
+    )
+}
+
 @Composable
 private fun SettingsSections() {
     val colors = MaterialTheme.colorScheme
@@ -98,6 +109,16 @@ private fun SettingsSections() {
                     listOf(
                         { SettingsWallpaperColorsRow(checked = true) },
                         { SettingsWallpaperColorsRow(checked = false) },
+                    ),
+            )
+
+            PebblesListSection(
+                header = stringResource(R.string.settings_haptics_section),
+                rowPadding = PebblesListDefaults.ListItemRowPadding,
+                rows =
+                    listOf(
+                        { SettingsHapticsRow(checked = true) },
+                        { SettingsHapticsRow(checked = false) },
                     ),
             )
 

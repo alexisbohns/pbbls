@@ -3,6 +3,7 @@ package app.pbbls.android.features.path
 import android.app.Application
 import android.net.Uri
 import androidx.compose.runtime.snapshots.Snapshot
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.ProcessedImage
 import app.pbbls.android.core.model.MomentSnap
 import app.pbbls.android.core.model.PebbleSnapPayload
@@ -13,6 +14,7 @@ import app.pbbls.android.testing.FakeSnapWriteRepository
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
+import app.pbbls.android.testing.inMemorySettings
 import app.pbbls.android.testing.testSession
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.TestScope
@@ -46,7 +48,14 @@ class EditMomentPhotoSwapTest {
         val media: FakeComposerMedia = FakeComposerMedia(),
     ) {
         val viewModel =
-            EditMomentViewModel(moments = read, writes = writes, supabase = supabase, snapFiles = snapRepo, media = media)
+            EditMomentViewModel(
+                moments = read,
+                writes = writes,
+                supabase = supabase,
+                snapFiles = snapRepo,
+                media = media,
+                haptics = HapticsPreference(inMemorySettings()),
+            )
     }
 
     /** Loads a moment holding photo A, detaches it, picks photo B and lets B upload; returns B's snap id. */

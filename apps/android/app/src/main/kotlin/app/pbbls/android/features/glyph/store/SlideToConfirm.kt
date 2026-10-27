@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,6 +85,7 @@ object SlideMath {
  * verbatim iOS quirk. TalkBack's double-tap runs the same confirm directly (a
  * button with the cost as its state, mirroring iOS's activate action), and the
  * drag reads logical x, so in RTL the thumb starts at the right and slides left.
+ * Both buzzes ask Pebbles' haptics switch ([hapticsOn], #1242 D23) as they fire.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -91,11 +93,14 @@ fun SlideToConfirm(
     cost: Int,
     enabled: Boolean,
     onConfirm: suspend () -> Boolean,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
     val density = LocalDensity.current
-    val haptics = LocalHapticFeedback.current
+    val feedback = LocalHapticFeedback.current
+    // The drag's gesture outlives a recomposition, so it reads the switch's latest value.
+    val currentHapticsOn by rememberUpdatedState(hapticsOn)
     val scope = rememberCoroutineScope()
     val dragX = remember { Animatable(0f) }
     var trackWidthPx by remember { mutableIntStateOf(0) }
@@ -109,7 +114,7 @@ fun SlideToConfirm(
     // thumb, run the purchase, spring back if it failed. The haptic fires
     // before the RPC — verbatim iOS quirk.
     fun confirm(travel: Float) {
-        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+        if (currentHapticsOn) feedback.performHapticFeedback(HapticFeedbackType.Confirm)
         scope.launch {
             dragX.animateTo(travel)
             val success = onConfirm()
@@ -146,7 +151,7 @@ fun SlideToConfirm(
                         if (layoutDirection.distanceFromStart(down.position.x, trackWidthPx.toFloat()) > thumbPx) {
                             return@awaitEachGesture
                         }
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (currentHapticsOn) feedback.performHapticFeedback(HapticFeedbackType.LongPress)
                         val travel = SlideMath.travel(trackWidthPx.toFloat(), thumbPx)
                         drag(down.id) { change ->
                             val delta = layoutDirection.logicalDelta(change.position.x - change.previousPosition.x)

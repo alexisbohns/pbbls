@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.CollectionsServicing
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.ReferenceDataServicing
@@ -80,6 +81,7 @@ class CollectionDetailViewModel
         private val moments: MomentReadServicing,
         private val writes: MomentWriteServicing,
         private val refs: ReferenceDataServicing,
+        private val haptics: HapticsPreference,
     ) : ViewModel() {
         private val zone: ZoneId = ZoneId.systemDefault()
 
@@ -91,6 +93,9 @@ class CollectionDetailViewModel
 
         private val _uiState = MutableStateFlow<CollectionDetailUiState>(CollectionDetailUiState.Loading)
         val uiState: StateFlow<CollectionDetailUiState> = _uiState.asStateFlow()
+
+        /** Pebbles' haptics switch (#1242 D23), for the rows' long-press buzz (iOS `pebblesContextMenu`). */
+        val hapticsOn: Boolean get() = haptics.isOn
 
         private val _covers = MutableStateFlow(CollectionDetailCovers())
         val covers: StateFlow<CollectionDetailCovers> = _covers.asStateFlow()

@@ -1,11 +1,13 @@
 package app.pbbls.android.features.profile
 
 import app.pbbls.android.R
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.testing.FakeCollectionsService
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.inMemorySettings
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -31,7 +33,7 @@ class CollectionsListViewModelTest {
     private fun viewModel(
         collections: FakeCollectionsService = FakeCollectionsService(),
         refs: FakeReferenceDataService = FakeReferenceDataService(),
-    ) = CollectionsListViewModel(collections, refs)
+    ) = CollectionsListViewModel(collections, refs, HapticsPreference(inMemorySettings()))
 
     @Test
     fun `starts Loading and resolves to Content`() =

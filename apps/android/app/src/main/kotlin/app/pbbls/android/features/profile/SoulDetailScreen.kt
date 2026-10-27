@@ -94,6 +94,7 @@ fun SoulDetailScreen(
         onDeletePebble = viewModel::requestDelete,
         paletteFor = { moment -> moment.pebble?.emotion?.let { palettes.palette(it.id) } },
         modifier = modifier,
+        hapticsOn = viewModel.hapticsOn,
     )
 
     covers.pendingDeletion?.let { target ->
@@ -114,6 +115,7 @@ fun SoulDetailScreen(
  *
  * @param showBack False beside its list on a large screen (#940): the list is
  *   the way back, and system back still pops.
+ * @param hapticsOn Pebbles' haptics switch (#1242 D23), for the rows' long press.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -125,6 +127,7 @@ fun SoulDetailContent(
     onOpenMoment: (String) -> Unit,
     onDeletePebble: (PathMoment) -> Unit,
     paletteFor: (PathMoment) -> EmotionPalette?,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
     showBack: Boolean = true,
 ) {
@@ -211,6 +214,7 @@ fun SoulDetailContent(
                                                 palette = paletteFor(moment),
                                                 onTap = { onOpenMoment(moment.id) },
                                                 onDelete = { onDeletePebble(moment) },
+                                                hapticsOn = hapticsOn,
                                             )
                                         }
                                     },

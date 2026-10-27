@@ -62,11 +62,13 @@ import app.pbbls.android.core.model.KarmaReason
  * Takes state, not the service (#852) — [flash] is
  * [KarmaNotificationService.activeCapsule], surfaced through `RootViewModel`'s
  * `RootUiState` the same way every other surface has taken state since #849.
+ * [hapticsOn] is Pebbles' haptics switch (#1242 D23), from `RootViewModel`.
  */
 @Composable
 fun KarmaOverlayHost(
     flash: KarmaEarnedContent?,
     onDismiss: () -> Unit,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
 ) {
     // Retain the last content during the exit animation so it doesn't blank out.
@@ -85,6 +87,7 @@ fun KarmaOverlayHost(
                 content = shown,
                 onTap = onDismiss,
                 modifier = Modifier.padding(bottom = 44.dp),
+                hapticsOn = hapticsOn,
             )
         }
     }
@@ -96,12 +99,14 @@ fun KarmaOverlayHost(
  * "+N karma" label, and a countdown ring that drains over
  * [KarmaNotificationService.CAPSULE_DURATION_MS]. Fires one
  * [HapticFeedbackConstants.CONFIRM] per fresh [content] (needs a `View`, so it
- * lives here rather than in the service). Ports `KarmaEarnedCapsule.swift`.
+ * lives here rather than in the service), unless Pebbles' haptics switch
+ * ([hapticsOn], #1242 D23) is off. Ports `KarmaEarnedCapsule.swift`.
  */
 @Composable
 fun KarmaEarnedCapsule(
     content: KarmaEarnedContent,
     onTap: () -> Unit,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -111,7 +116,7 @@ fun KarmaEarnedCapsule(
     val a11y = stringResource(R.string.karma_flash_a11y, content.amount, reasonLabel)
 
     LaunchedEffect(content) {
-        view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+        if (hapticsOn) view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
     LaunchedEffect(content) {
         ring.snapTo(1f)

@@ -1,6 +1,7 @@
 package app.pbbls.android.features.path.complete
 
 import app.pbbls.android.R
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.model.CompleteSnapshot
 import app.pbbls.android.core.model.KarmaReason
@@ -18,6 +19,7 @@ import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
+import app.pbbls.android.testing.inMemorySettings
 import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
 import app.pbbls.android.testing.testSession
@@ -58,6 +60,7 @@ class CompleteFlowViewModelTest {
                 supabase = supabase,
                 media = FakeComposerMedia(),
                 focusRequests = focusRequests,
+                haptics = HapticsPreference(inMemorySettings()),
             )
 
         fun answerEverything() {

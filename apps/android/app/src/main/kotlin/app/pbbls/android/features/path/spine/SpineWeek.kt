@@ -101,6 +101,7 @@ import java.time.ZoneId
  * @param listState hoisted so a preview can open the page at a row.
  * @param zone the zone the days are cut in and the times print in; the device's by default.
  * @param ratioOverride a primed photo ratio by snap prefix, for previews with no cache.
+ * @param hapticsOn Pebbles' haptics switch (#1242 D23), handed to each stone.
  */
 @Composable
 fun SpineWeek(
@@ -115,6 +116,7 @@ fun SpineWeek(
     lookups: WrapLookups,
     nextWeek: WeekNeighbour?,
     onCreatePebble: () -> Unit,
+    hapticsOn: () -> Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     zone: ZoneId = ZoneId.systemDefault(),
@@ -236,6 +238,7 @@ fun SpineWeek(
                                             },
                                     ),
                             ratioOverride = row.moment.firstSnapPath?.let { prefix -> ratioOverride?.invoke(prefix) },
+                            hapticsOn = hapticsOn,
                         )
                     is WeekRow.Mouth ->
                         WeekMouth(

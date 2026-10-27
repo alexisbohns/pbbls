@@ -4,6 +4,7 @@ import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.data.DisplayPreferences
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.SignedUrlProviding
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.data.SnapBoundsDecoder
@@ -64,7 +65,8 @@ class PathViewModelTest {
         souls: FakeSoulsService = FakeSoulsService(),
         wraps: FakePathWrapService = FakePathWrapService(),
         display: DisplayPreferences = DisplayPreferences(inMemorySettings()),
-    ) = PathViewModel(path, stats, writes, focusRequests, souls, wraps, display, snapAspect())
+        haptics: HapticsPreference = HapticsPreference(inMemorySettings()),
+    ) = PathViewModel(path, stats, writes, focusRequests, souls, wraps, display, haptics, snapAspect())
 
     /** Never reached from a ViewModel test: the ratio probe belongs to the cards. */
     private fun snapAspect(): SnapAspectCache {
@@ -658,4 +660,14 @@ class PathViewModelTest {
             assertEquals(DayView.CALENDAR, (viewModel.uiState.value as PathUiState.Content).dayView)
             assertEquals(DayView.CALENDAR, display.dayView)
         }
+
+    @Test
+    fun `the Path reads Pebbles' haptics switch at each ask`() {
+        val haptics = HapticsPreference(inMemorySettings())
+        val viewModel = viewModel(haptics = haptics)
+        assertTrue(viewModel.hapticsOn)
+        // Switched off in Settings while the Path lives: its next vibration asks and hears off.
+        haptics.setOn(false)
+        assertFalse(viewModel.hapticsOn)
+    }
 }

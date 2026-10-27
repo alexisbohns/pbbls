@@ -20,7 +20,8 @@ import java.time.YearMonth
  * (one per segment of a card, below), else one waveform per card where it controls amplitude, else
  * `performHapticFeedback` fired from the clock's frames. Every vibration is `USAGE_TOUCH`, so Android's
  * touch feedback setting governs it.
- * [enabled] is Pebbles' own switch (Part 8; on until then). [forced] is the Lab's override.
+ * [enabled] is Pebbles' own switch (D23), asked at every vibration: a card's start, a landing tick, and each
+ * frame that would fire a later segment or a tick. [forced] is the Lab's override.
  *
  * A new vibration replaces the current one at the vibrator service, which is why one [sounding] slot
  * suffices for tiers C and W. A landing [tick] never takes that slot: the clock's `landed` ticks only a
@@ -136,12 +137,16 @@ class IntroVibrator(
      * Tier C fires the card's next segment a floor ahead of its start ([IntroSegmentQueue.SEGMENT_LEAD_NANOS]),
      * delayed to start on its scored time. It supersedes whatever still sounds: on a vibrator whose trains run
      * long, that cuts a train's tail. Tier V fires the ticks the frame crossed.
+     *
+     * With Pebbles' switch read off, the card stops as [stop] stops it: what sounds is cut, and what it still
+     * held never fires, even once the switch is back on.
      */
     override fun frame(
         sequence: IntroSequence,
         month: YearMonth,
         nanos: Long,
     ) {
+        if (!enabled()) return stop(sequence, month)
         later.due(sequence, month, nanos)?.let { segment -> vibrate { composition(segment.led(leadMs(segment.startNanos))) } }
         val voice = voices[month to sequence] ?: return
         val (fire, past) = IntroHaptics.crossed(voice.events, voice.next, (nanos - voice.start) / 1e9)
@@ -230,7 +235,7 @@ class IntroVibrator(
 /** The intro's haptics for this view. [enabled] is Pebbles' switch, read live; [forced] the Lab's tier override. */
 @Composable
 fun rememberIntroVibrator(
-    enabled: () -> Boolean = { true },
+    enabled: () -> Boolean,
     forced: IntroHapticTier? = null,
 ): IntroVibrator {
     val context = LocalContext.current

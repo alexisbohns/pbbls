@@ -80,6 +80,7 @@ class SpineWeekTest {
                 Surface(color = PebblesTheme.spine.colors.ground) {
                     Box(Modifier.size(390.dp, 800.dp)) {
                         SpineWeek(
+                            hapticsOn = { true },
                             entry = SpineFixtureWeek.entry,
                             today = SpineFixtureWeek.today,
                             soulsById = SpineFixtureWeek.soulsById,
@@ -158,6 +159,7 @@ class SpineWeekTest {
                 Surface(color = PebblesTheme.spine.colors.ground) {
                     Box(Modifier.size(390.dp, 800.dp)) {
                         SpineWeek(
+                            hapticsOn = { true },
                             entry = SpineFixtureWeek.entry,
                             today = SpineFixtureWeek.today,
                             soulsById = SpineFixtureWeek.soulsById,

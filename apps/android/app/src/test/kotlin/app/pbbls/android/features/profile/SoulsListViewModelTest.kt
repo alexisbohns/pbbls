@@ -4,11 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.inMemorySettings
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -43,7 +45,7 @@ class SoulsListViewModelTest {
     private fun viewModel(
         souls: FakeSoulsService = FakeSoulsService(),
         refs: FakeReferenceDataService = FakeReferenceDataService(),
-    ) = SoulsListViewModel(souls, refs)
+    ) = SoulsListViewModel(souls, refs, HapticsPreference(inMemorySettings()))
 
     @Test
     fun `starts Loading and resolves to Content`() =

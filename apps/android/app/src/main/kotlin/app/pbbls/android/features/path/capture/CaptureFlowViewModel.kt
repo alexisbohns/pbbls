@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.SnapUploadCoordinator
 import app.pbbls.android.core.data.SnapWriteRepositing
@@ -89,9 +90,13 @@ class CaptureFlowViewModel
         private val media: ComposerMedia,
         private val focusRequests: PathFocusRequests,
         snapRepo: SnapWriteRepositing,
+        private val haptics: HapticsPreference,
     ) : ViewModel() {
         private val effectsOut = UiEffects<CaptureFlowEffect>(viewModelScope)
         val effects: Flow<CaptureFlowEffect> = effectsOut.flow
+
+        /** Pebbles' haptics switch (#1242 D23): the screen asks it at each buzz, so Settings applies at once. */
+        val hapticsOn: Boolean get() = haptics.isOn
 
         private val model =
             CaptureFlowModel(

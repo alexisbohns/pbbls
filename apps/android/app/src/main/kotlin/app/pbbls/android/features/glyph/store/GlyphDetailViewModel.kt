@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.core.data.GlyphMarketServicing
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.GlyphGridItem
@@ -41,11 +42,15 @@ class GlyphDetailViewModel
         val market: GlyphMarketServicing,
         private val stats: PathStatsServicing,
         private val savedState: SavedStateHandle,
+        private val haptics: HapticsPreference,
     ) : ViewModel() {
         /** Path and Profile write to the same singleton, so observe it rather than copy it. */
         val balance: StateFlow<Int> =
             snapshotFlow { stats.karma ?: 0 }
                 .stateIn(viewModelScope, SharingStarted.Eagerly, stats.karma ?: 0)
+
+        /** Pebbles' haptics switch (#1242 D23): the buy's slider asks it at each buzz, so Settings applies at once. */
+        val hapticsOn: Boolean get() = haptics.isOn
 
         /**
          * A purchase of [item] landed. Runs inside the panel's uncancellable

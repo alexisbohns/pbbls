@@ -4,11 +4,13 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.SavedStateHandle
 import app.pbbls.android.core.data.AchievementMomentCard
 import app.pbbls.android.core.data.AchievementNotificationService
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.testing.FakeCompleteSnapshotStore
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.FakeWrapDiskCache
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.inMemorySettings
 import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.CoroutineScope
@@ -42,6 +44,9 @@ class RootViewModelTest {
     /** A fresh, isolated [AchievementNotificationService] — a plain constructible class, no fake needed. */
     private fun achievements() = AchievementNotificationService()
 
+    /** Pebbles' haptics switch on an in-memory store — the overlays' buzz is not under test here. */
+    private fun haptics() = HapticsPreference(inMemorySettings())
+
     private fun card(slug: String) = AchievementMomentCard(slug = slug, record = null, karmaGranted = 0)
 
     private fun session(userId: String) =
@@ -64,6 +69,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     SavedStateHandle(),
                 )
 
@@ -84,6 +90,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     SavedStateHandle(),
                 )
 
@@ -104,6 +111,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     SavedStateHandle(),
                 )
 
@@ -122,7 +130,7 @@ class RootViewModelTest {
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
             val completeSnapshots = FakeCompleteSnapshotStore()
-            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), SavedStateHandle())
+            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), haptics(), SavedStateHandle())
 
             supabase.emitResolved(session = session(userId = "u1"))
             advanceUntilIdle()
@@ -139,7 +147,7 @@ class RootViewModelTest {
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
             val completeSnapshots = FakeCompleteSnapshotStore()
-            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), SavedStateHandle())
+            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), haptics(), SavedStateHandle())
 
             supabase.emitResolved(session = null)
             advanceUntilIdle()
@@ -152,7 +160,7 @@ class RootViewModelTest {
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
             val completeSnapshots = FakeCompleteSnapshotStore()
-            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), SavedStateHandle())
+            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), haptics(), SavedStateHandle())
 
             advanceUntilIdle()
             supabase.emitResolved(session = session(userId = "u1"))
@@ -171,6 +179,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     SavedStateHandle(),
                 )
 
@@ -190,6 +199,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     handle,
                 )
 
@@ -203,6 +213,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     handle,
                 )
             assertEquals("tok-1", restored.uiState.value.pendingInvite)
@@ -218,6 +229,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     SavedStateHandle(),
                 )
             vm.onInviteTokenReceived("tok-1")
@@ -240,6 +252,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     SavedStateHandle(),
                 )
             supabase.emitResolved(session = session(userId = "u1"))
@@ -265,6 +278,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     SavedStateHandle(),
                 )
 
@@ -292,6 +306,7 @@ class RootViewModelTest {
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     SavedStateHandle(),
                 )
 
@@ -317,6 +332,7 @@ class RootViewModelTest {
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     SavedStateHandle(),
                 )
             achievementNotify.present(listOf(card("first-soul"), card("first-glyph")))
@@ -345,6 +361,7 @@ class RootViewModelTest {
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    haptics(),
                     SavedStateHandle(),
                 )
             achievementNotify.present(listOf(card("first-soul"), card("first-glyph")))
@@ -363,7 +380,7 @@ class RootViewModelTest {
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
             val wraps = FakeWrapDiskCache()
-            RootViewModel(supabase, karma(), achievements(), FakeCompleteSnapshotStore(), wraps, SavedStateHandle())
+            RootViewModel(supabase, karma(), achievements(), FakeCompleteSnapshotStore(), wraps, haptics(), SavedStateHandle())
 
             supabase.emitResolved(session = session(userId = "u1"))
             advanceUntilIdle()

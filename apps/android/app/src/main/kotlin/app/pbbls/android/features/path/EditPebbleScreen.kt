@@ -83,6 +83,7 @@ fun EditPebbleScreen(
         onRetry = viewModel::retry,
         onAchievementCheck = viewModel::onAchievementCheck,
         modifier = modifier,
+        hapticsOn = { viewModel.hapticsOn },
     )
 }
 
@@ -90,6 +91,7 @@ fun EditPebbleScreen(
  * Edit pebble without its ViewModel: the bar, the stone and the three states.
  * [EditPebbleScreen] wires it; screenshots drive it. [palette] and
  * [selectedEmotion] are the draft emotion's, resolved by the caller.
+ * [hapticsOn] is Pebbles' haptics switch (#1242 D23), for the valence picker.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -101,6 +103,7 @@ fun EditPebbleContent(
     onCancel: () -> Unit,
     onSave: () -> Unit,
     onRetry: () -> Unit,
+    hapticsOn: () -> Boolean,
     modifier: Modifier = Modifier,
     onAchievementCheck: () -> Unit = {},
 ) {
@@ -153,6 +156,7 @@ fun EditPebbleContent(
                         showPebbleFields = true,
                         modifier = Modifier.weight(1f),
                         onAchievementCheck = onAchievementCheck,
+                        hapticsOn = hapticsOn,
                     )
                     // Grade chip (M51) — mirrors iOS EditPebbleSheet's bottomBar
                     // ToolbarItemGroup.

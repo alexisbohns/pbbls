@@ -108,6 +108,7 @@ private val emptyWeekEntries: List<WeekRollEntry> =
 @Composable
 private fun ScreenPreview(entries: List<WeekRollEntry>) {
     PathContent(
+        hapticsOn = { true },
         entries = entries,
         stripItems = previewStripItems(entries),
         focus = PathPage.Week(SpineFixtureWeek.weekStart),

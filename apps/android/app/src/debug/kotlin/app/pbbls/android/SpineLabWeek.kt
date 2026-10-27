@@ -57,6 +57,8 @@ internal fun SpineLabWeek(modifier: Modifier = Modifier) {
         modifier = modifier,
         zone = SpineFixtureWeek.zone,
         ratioOverride = SpineFixtureWeek.ratios::get,
+        // The debug Lab plays regardless of Pebbles' switch.
+        hapticsOn = { true },
     )
 }
 
@@ -71,7 +73,8 @@ internal fun SpineLabMonth(modifier: Modifier = Modifier) {
     val ledger = remember { IntroLedger() }
     var run by remember { mutableIntStateOf(0) }
     var forced by remember { mutableStateOf<IntroHapticTier?>(null) }
-    val haptics = rememberIntroVibrator(forced = forced)
+    // The debug Lab probes the vibrator itself, so it plays regardless of Pebbles' switch.
+    val haptics = rememberIntroVibrator(enabled = { true }, forced = forced)
     val intro = remember(haptics) { MonthIntro(ledger, haptics) }
     val month = SpineFixtureWeek.monthWrap.month
     Column(modifier) {
@@ -139,5 +142,6 @@ internal fun FixturePebble(
         modifier = modifier,
         ratioOverride = moment.firstSnapPath?.let { SpineFixtureWeek.ratios[it] },
         photoOverride = null to null,
+        hapticsOn = { true },
     )
 }

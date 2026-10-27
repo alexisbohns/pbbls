@@ -210,6 +210,30 @@ fun SettingsScreen(
                     ),
             )
 
+            // Pebbles' own haptics switch (#1242 D23; iOS `hapticsSection`): device-local like the
+            // wallpaper row above, so it saves as it is switched and never waits for Save.
+            PebblesListSection(
+                header = stringResource(R.string.settings_haptics_section),
+                rowPadding = PebblesListDefaults.ListItemRowPadding,
+                rows =
+                    listOf(
+                        {
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.settings_haptics_vibrations)) },
+                                supportingContent = { Text(stringResource(R.string.settings_haptics_footer)) },
+                                trailingContent = { Switch(checked = viewModel.hapticsOn, onCheckedChange = null) },
+                                modifier =
+                                    Modifier.toggleable(
+                                        value = viewModel.hapticsOn,
+                                        role = Role.Switch,
+                                        onValueChange = viewModel::onHapticsChange,
+                                    ),
+                                colors = settingsRowColors(),
+                            )
+                        },
+                    ),
+            )
+
             // Editable fields are stock outlined fields under the section header (#854);
             // the bordered list keeps only rows that are not text input.
             Column(verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {

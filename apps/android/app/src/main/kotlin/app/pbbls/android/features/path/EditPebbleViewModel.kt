@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.AchievementsServicing
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
@@ -71,9 +72,13 @@ class EditPebbleViewModel
         private val writes: MomentWriteServicing,
         private val karma: KarmaNotificationService,
         private val achievements: AchievementsServicing,
+        private val haptics: HapticsPreference,
     ) : ViewModel() {
         private val effectsOut = UiEffects<EditPebbleEffect>(viewModelScope)
         val effects: Flow<EditPebbleEffect> = effectsOut.flow
+
+        /** Pebbles' haptics switch (#1242 D23): the screen asks it at each buzz, so Settings applies at once. */
+        val hapticsOn: Boolean get() = haptics.isOn
 
         private val _uiState = MutableStateFlow<EditPebbleUiState>(EditPebbleUiState.Loading)
         val uiState: StateFlow<EditPebbleUiState> = _uiState.asStateFlow()

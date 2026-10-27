@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SoulsServicing
 import app.pbbls.android.core.model.SoulWithGlyph
@@ -68,6 +69,7 @@ class SoulsListViewModel
     constructor(
         private val soulsService: SoulsServicing,
         private val refs: ReferenceDataServicing,
+        private val haptics: HapticsPreference,
     ) : ViewModel() {
         private var souls: List<SoulWithGlyph> = emptyList()
         private var hasFailed = false
@@ -75,6 +77,9 @@ class SoulsListViewModel
 
         private val _uiState = MutableStateFlow<SoulsListUiState>(SoulsListUiState.Loading)
         val uiState: StateFlow<SoulsListUiState> = _uiState.asStateFlow()
+
+        /** Pebbles' haptics switch (#1242 D23), for the rows' long-press buzz (iOS `pebblesContextMenu`). */
+        val hapticsOn: Boolean get() = haptics.isOn
 
         private val _covers = MutableStateFlow(SoulsListCovers())
         val covers: StateFlow<SoulsListCovers> = _covers.asStateFlow()

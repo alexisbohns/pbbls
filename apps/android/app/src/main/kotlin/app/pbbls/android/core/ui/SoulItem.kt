@@ -38,7 +38,9 @@ enum class SoulItemCase {
  * `Features/Shared/SoulItem.swift`: [GlyphView] on top, hand-face name
  * (selection carried by color, never weight — issue #515), optional
  * fossil-shell + pebble count line. [onLongPress] backs the list's delete
- * affordance (D7 — the caller anchors its own `DropdownMenu`).
+ * affordance (D7 — the caller anchors its own `DropdownMenu`); its buzz asks
+ * Pebbles' haptics switch ([hapticsOn], #1242 D23), which any caller passing
+ * [onLongPress] passes too.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -50,6 +52,9 @@ fun SoulItem(
     side: Dp = 96.dp,
     onTap: (() -> Unit)? = null,
     onLongPress: (() -> Unit)? = null,
+    // Defaulted on purpose: it gates only [onLongPress]'s buzz, and the cells without a long press
+    // (the pickers', the previews') have none to gate. The one host with a long press passes it.
+    hapticsOn: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
     val glyphCase =
@@ -74,7 +79,7 @@ fun SoulItem(
                 .clip(MaterialTheme.shapes.medium)
                 .let { base ->
                     if (onTap != null || onLongPress != null) {
-                        base.combinedClickable(onClick = onTap ?: {}, onLongClick = onLongPress)
+                        base.combinedClickable(onClick = onTap ?: {}, onLongClick = onLongPress, hapticFeedbackEnabled = hapticsOn)
                     } else {
                         base
                     }

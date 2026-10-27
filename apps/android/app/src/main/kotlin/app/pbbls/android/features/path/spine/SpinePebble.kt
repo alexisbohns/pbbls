@@ -111,6 +111,8 @@ internal const val CARD_GLYPH_UNITS = 4f
  * @param ratioOverride a primed photo ratio, for previews with no cache.
  * @param photoOverride `(original, thumb)` URLs for previews; `null to null`
  *   shows the tinted field and never signs.
+ * @param hapticsOn Pebbles' haptics switch (#1242 D23), from the Path's ViewModel:
+ *   asked at each press tick and for the long press's own buzz.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -124,6 +126,7 @@ internal fun SpinePebble(
     pressRequests: StonePressRequests,
     onOpen: (PathMoment, CardFace) -> Unit,
     onRequestDelete: (PathMoment) -> Unit,
+    hapticsOn: () -> Boolean,
     modifier: Modifier = Modifier,
     ratioOverride: Float? = null,
     photoOverride: Pair<String?, String?>? = null,
@@ -134,7 +137,7 @@ internal fun SpinePebble(
     val locale = LocalConfiguration.current.locales[0]
     val scope = rememberCoroutineScope()
     val reduceMotion by rememberUpdatedState(rememberReduceMotion())
-    val haptics = rememberTapHaptics()
+    val haptics = rememberTapHaptics(hapticsOn)
     val press = rememberStonePressState()
 
     val pebble = moment.pebble
@@ -263,6 +266,8 @@ internal fun SpinePebble(
             Modifier.combinedClickable(
                 role = Role.Button,
                 onLongClick = { menu = true },
+                // The long press's buzz asks the switch too (iOS `pebblesContextMenu`).
+                hapticFeedbackEnabled = hapticsOn(),
                 onClick = openNow,
             )
         Box(
