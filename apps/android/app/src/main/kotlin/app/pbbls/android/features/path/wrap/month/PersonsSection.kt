@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
@@ -35,6 +36,7 @@ import app.pbbls.android.features.path.wrap.intro.currentIntroReveal
 import app.pbbls.android.features.path.wrap.intro.introReveal
 import app.pbbls.android.features.path.wrap.intro.persons
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
+import kotlin.math.floor
 
 private const val SHOWN = 5
 
@@ -59,6 +61,7 @@ internal fun PersonsSection(
     val type = PebblesTheme.spine.type
     val copy = rememberWrapCopy()
     val reveal = currentIntroReveal()
+    val density = LocalDensity.current
     if (!MonthSections.isShown(MonthSection.PERSONS, wrap, lookups)) return
     val rows = MonthSections.namedPersons(wrap, lookups)
     // On a card the section takes the room, so its weighted spacer can stand *more* at the foot.
@@ -76,7 +79,13 @@ internal fun PersonsSection(
             return@Column
         }
         val shown = rows.take(SHOWN)
-        val size = room?.let { PersonsSection.rowSize(it, shown.size) }
+        // On a card, each row's share in whole pixels, floored: rounded, the rows could overrun the room by up to
+        // half a pixel each and tip the card into scaling its content down.
+        val size =
+            room?.let {
+                val share = PersonsSection.rowSize(it, shown.size)
+                share.copy(height = with(density) { floor(share.height.toPx()).toInt().toDp() })
+            }
         Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
             shown.forEachIndexed { index, person -> MonthPersonRow(person, wrap, lookups, dayView, copy, introRow = index, size = size) }
         }
