@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -170,6 +171,9 @@ private fun MilestoneStone(
     val press = rememberStonePressState()
     val width = (StoneGeometry.STONE_WIDTH_DP.getValue(valence.sizeGroup) * scale).dp
     val stage = LocalIntroStage.current
+    // The press runs in the stone's own scope, not the strike's: the strike restarts with a new stage (a
+    // Replay's clock) or a row shifted by a refresh, and a press cut short would leave the rings swollen.
+    val pressScope = rememberCoroutineScope()
     if (row != null && stage != null) {
         val reduceMotion by rememberUpdatedState(rememberReduceMotion())
         LaunchedEffect(stage, row) {
@@ -181,7 +185,7 @@ private fun MilestoneStone(
                 .filter { it }
                 .collect {
                     // Struck while the milestones play: a skip, or a throw away, lands every stone at once.
-                    if (stage.clock.isPlaying(stage.sequence)) launch { press.press(reduceMotion) }
+                    if (stage.clock.isPlaying(stage.sequence)) pressScope.launch { press.press(reduceMotion) }
                 }
         }
     }
