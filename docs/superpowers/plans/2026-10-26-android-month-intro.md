@@ -4852,14 +4852,14 @@ Measured on the maintainer's Pixel 8 (Android 17) through `dumpsys vibrator_mana
 - **`{ true }` defaults hide missed callers.** The switch has no default on a production composable, so the compiler finds every host. Removing the defaults surfaced Edit moment's form (moot: its valence picker never opens there) and the Spine Lab's hosts. Previews and the Lab pass `{ true }`. The one default kept is `SoulItem`'s, which only gates a long press its picker cells don't have.
 
 **Follow-ups (not in this stack)**
-- **iOS:** `PathModel.focus` should ignore a week that isn't a page (the Android guard above).
-- **Android parity:** `HoursLayout.lanes` has no lane cap (iOS: 4 inner, 3 outer), and `ToneFigure` numbers days over the month rather than over the tone's days.
-- **Lower layers:**
+- **iOS:** `PathModel.focus` should ignore a week that isn't a page (the Android guard above): #1277.
+- **Android parity**, both on #1237: `HoursLayout.lanes` has no lane cap (iOS: 4 inner, 3 outer, its item 2), and `ToneFigure` numbers days over the month rather than over the tone's days (its item 9).
+- **Lower layers** (#1278):
   - `drawSeal` allocates a rim stroke (and a hatch path for tiny lowlight seals) per call;
   - `ProportionBar` could take draw-phase weights;
   - `SOCKET` and `SEAL_LAYER_PAD` are duplicated across the garland, the week columns and the hours.
-- **Baseline profiles:** they name pre-stack signatures. Regenerate them (`android-baseline-profile`).
-- **Tests and visibility:**
+- **Baseline profiles:** they name pre-stack signatures. Regenerate them (`android-baseline-profile`) with #1132.
+- **Tests and visibility** (#1279):
   - an optional `now` on `MonthIntro`, so page-level and whole-app tests can run the intro on the test rule's clock instead of relying on `System.nanoTime` never landing a card;
   - the `wrap/intro/` package is public while `wrap/month/` is `internal`.
 - **Edge (recorded):** the Path's focus follows the current page mid-drag, while a month page plays only on the settled one (`PathContentMonthFocusTest`).
