@@ -52,6 +52,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import java.time.LocalDate
 import java.time.YearMonth
 
 /**
@@ -76,6 +77,7 @@ class MonthPageReplayTest {
     private val replay = ApplicationProvider.getApplicationContext<Application>().getString(R.string.path_wrap_replay_month)
     private var focused by mutableStateOf(true)
     private var copy: WrapCopy? = null
+    private val weeks = mutableListOf<LocalDate>()
 
     /** What the clocks asked of the haptics, in order, by card and month. */
     private class Voices : IntroHapticPlaying {
@@ -118,7 +120,7 @@ class MonthPageReplayTest {
                             lookups = lookups,
                             dayView = DayView.CIRCLE,
                             onDayView = {},
-                            onWeek = {},
+                            onWeek = { weeks += it },
                             onOpen = {},
                             modifier = Modifier.fillMaxSize(),
                             intro = intro,
@@ -236,7 +238,7 @@ class MonthPageReplayTest {
     }
 
     @Test
-    fun `a tap mid-fade only skips the new cover, and replays nothing more`() {
+    fun `a tap mid-fade only skips the new cover, reaching neither the card beneath nor a second replay`() {
         page()
         repeat(cards.size - 1) { throwCard() }
         val button = compose.onNodeWithText(replay).getBoundsInRoot()
@@ -245,13 +247,22 @@ class MonthPageReplayTest {
         assertEquals("play ${IntroSequence.Cover} ${wrap.month}", voices.events.last())
         val before = voices.events.size
 
-        // Where the replay was: the new deck, on top, takes the tap.
+        // Where the replay was, then over the cover's paper where the new deck's weeks lie beneath it: the new
+        // deck, on top, takes the taps, and its cover alone takes them.
         val at = with(compose.density) { Offset(((button.left + button.right) / 2).toPx(), ((button.top + button.bottom) / 2).toPx()) }
         compose.onNodeWithTag(PAGE).performTouchInput { click(at) }
+        compose.mainClock.advanceTimeByFrame()
+        compose.onNodeWithTag(PAGE).performTouchInput { click(Offset(OVER_WEEKS.first.dp.toPx(), OVER_WEEKS.second.dp.toPx())) }
         settle()
         assertEquals(listOf("stop ${IntroSequence.Cover} ${wrap.month}"), voices.events.drop(before))
+        assertTrue("a tap reached the weeks beneath: $weeks", weeks.isEmpty())
         assertTrue(ledger.contains(wrap.month, IntroSequence.Cover))
         assertEquals(2, played().count { it.startsWith("play ${IntroSequence.Cover}") })
+        // The new deck's weeks on top: the same tap focuses a week, so the one mid-fade was over them.
+        throwCard()
+        compose.onNodeWithTag(PAGE).performTouchInput { click(Offset(OVER_WEEKS.first.dp.toPx(), OVER_WEEKS.second.dp.toPx())) }
+        settle()
+        assertTrue(weeks.isNotEmpty())
     }
 
     /** Two month pages on the Path's pager, this month and [next], each focused once the pager settles on it. */
@@ -341,5 +352,8 @@ class MonthPageReplayTest {
 
         /** About half the replay's 300 ms cross-fade, past its first two frames. */
         const val HALF_FADE_MS = 150L
+
+        /** A point on the cover's room, in dp, over the weeks card's columns beneath it. */
+        val OVER_WEEKS = 200 to 350
     }
 }

@@ -157,6 +157,26 @@ class MonthDeckPagerTest {
         }
     }
 
+    @Test
+    fun `taps on the cover over the weeks' columns focus no week, and focus their weeks once the weeks card is on top`() {
+        val weeks = mutableListOf<LocalDate>()
+        deal(onWeek = { weeks += it })
+        // Over the cover's paper, where the weeks card held beneath it has its columns.
+        POINTS.forEach { (x, y) ->
+            compose.onNodeWithTag(DECK).performTouchInput { click(Offset(x.dp.toPx(), y.dp.toPx())) }
+            compose.waitForIdle()
+        }
+        assertTrue("a tap on the cover reached the weeks: $weeks", weeks.isEmpty())
+        // The weeks on top: the same taps focus their weeks.
+        compose.onNodeWithTag(DECK).performTouchInput { swipeUp() }
+        compose.waitForIdle()
+        POINTS.forEach { (x, y) ->
+            compose.onNodeWithTag(DECK).performTouchInput { click(Offset(x.dp.toPx(), y.dp.toPx())) }
+            compose.waitForIdle()
+        }
+        assertTrue(weeks.isNotEmpty())
+    }
+
     /** Throws to the end card, the frame clock stepping only when told from the last throw on, until it plays. */
     private fun throwToTheEnd() {
         val cards = MonthDeck.cards(wrap, lookups)
@@ -178,7 +198,7 @@ class MonthDeckPagerTest {
     @Test
     fun `a tap on the end card's replay before it shows only lands the card, and replays nothing`() {
         var replays = 0
-        deal { replays++ }
+        deal(onReplay = { replays++ })
         throwToTheEnd()
         // Half a second after the throw (the replay rises at 0.8 s): a tap in the frames just after it, as the deck
         // comes to rest, never reaches the button, gate or not, so it would prove nothing.
@@ -198,7 +218,7 @@ class MonthDeckPagerTest {
     @Test
     fun `a tap on the end card's replay as it rises replays, and still lands the card`() {
         var replays = 0
-        deal { replays++ }
+        deal(onReplay = { replays++ })
         throwToTheEnd()
         var frames = 0
         while (clock.reveal(IntroSequence.End)(IntroKey.Replay) == 0f) {
@@ -225,6 +245,9 @@ class MonthDeckPagerTest {
         const val FRAMES = 10
 
         const val AFTER_THROW_MS = 500L
+
+        /** Points on the card's room, in dp, over the weeks card's columns. */
+        val POINTS = listOf(200 to 250, 320 to 350, 200 to 450)
 
         /** Far past a throw's settle and the end card's replay beat (0.8 s at the sections' tempo). */
         const val MAX_FRAMES = 600
