@@ -5,6 +5,8 @@ import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.VerticalPager
@@ -16,6 +18,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -171,7 +174,15 @@ internal fun MonthDeckPager(
                             rotationZ = MonthDeckMotion.turn(d)
                             translationY = MonthDeckMotion.offset(d, size.height, MonthDeckMotion.PEEK.dp.toPx())
                             transformOrigin = if (d > 0) TransformOrigin(0.5f, 1f) else TransformOrigin.Center
-                        },
+                        }
+                        // The page takes the touch, as iOS's paper does: a tap anywhere on the top card's page (the
+                        // next card's peeking foot included) stops there, and never reaches the card held beneath it
+                        // (a week, a milestone). Inside the layer, so it follows the card as it moves; it consumes
+                        // nothing, so the deck's skip and the pager's throws still see every touch. Never a card
+                        // already thrown: still composed beyond the viewport, lifted and turned above the top card,
+                        // its page dips into the top of the deck, deepest at its left, and would take the touch there
+                        // unseen.
+                        .then(if (index >= pager.settledPage) Modifier.takesTouch() else Modifier),
             ) {
                 IntroHost(clock, card, { MonthDeck.beats(card, wrap, lookups, leads) }) {
                     when (card) {
@@ -197,6 +208,15 @@ internal fun MonthDeckPager(
         }
     }
 }
+
+/**
+ * Makes this a touch target that does nothing with what it gets: Compose hit-tests the siblings under a pointer
+ * from the top until one has a pointer input there, and a card's page has none of its own.
+ */
+private fun Modifier.takesTouch(): Modifier =
+    pointerInput(Unit) {
+        awaitEachGesture { awaitFirstDown(requireUnconsumed = false) }
+    }
 
 /**
  * The cards past the next, as static edges below its foot (iOS `MonthDeckEdges`), drawn behind the deck,

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -33,6 +34,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import java.time.LocalDate
 
 /**
  * The deck's arrival (#1242 D21; iOS `MonthDeck`'s `onChange(of: shown)`): the card a throw settles on is
@@ -53,7 +55,7 @@ class MonthDeckPagerTest {
     private val clock = IntroClock(wrap.month, ledger, spy, now = { compose.mainClock.currentTime * 1_000_000 })
     private val weeks = IntroSequence.Section(MonthSection.WEEKS)
 
-    private fun deal() {
+    private fun deal(onWeek: (LocalDate) -> Unit = {}) {
         compose.setContent {
             PebblesTheme {
                 PebblesTestHarness {
@@ -66,7 +68,7 @@ class MonthDeckPagerTest {
                             DayView.CIRCLE,
                             SpineFixtureWeek.zone,
                             aspect = null,
-                            onWeek = {},
+                            onWeek = onWeek,
                             onOpen = {},
                             onMore = {},
                             modifier = Modifier.fillMaxSize(),
@@ -124,8 +126,33 @@ class MonthDeckPagerTest {
         assertEquals(listOf<IntroSequence>(IntroSequence.Cover), spy.stopped)
     }
 
+    @Test
+    fun `a tap on the cover never reaches the weeks card held beneath it, whose taps focus their weeks once on top`() {
+        val focused = mutableListOf<LocalDate>()
+        deal(onWeek = { focused += it })
+        // Down the cover's paper, over the weeks card held beneath it.
+        tapDown()
+        assertTrue("a tap on the cover reached the weeks: $focused", focused.isEmpty())
+        // The weeks on top: the same taps focus their week.
+        compose.onNodeWithTag(DECK).performTouchInput { swipeUp() }
+        compose.waitForIdle()
+        tapDown()
+        assertTrue(focused.isNotEmpty())
+    }
+
+    /** Taps down the middle of the deck, from its head to below the cards' contents. */
+    private fun tapDown() {
+        DOWN.forEach { y ->
+            compose.onNodeWithTag(DECK).performTouchInput { click(Offset(centerX, y.dp.toPx())) }
+            compose.waitForIdle()
+        }
+    }
+
     private companion object {
         const val DECK = "deck"
+
+        /** Where [tapDown] taps, in dp from the deck's top. */
+        val DOWN = 100..700 step 25
 
         /** Past the clock's lead, well inside the cover's garland. */
         const val FRAMES = 10
