@@ -14,7 +14,7 @@ enum HomeFixture {
     }
 
     /// A Monday morning in Paris, the greeting's clock.
-    static let clock: Date = {
+    nonisolated static let clock: Date = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime]
         return f.date(from: "2026-11-02T08:10:00+01:00") ?? .distantPast
@@ -28,9 +28,8 @@ enum HomeFixture {
     }
 
     /// The fixture October's faces for the cover's ids; blank when it fails to decode.
-    static var lookups: WrapLookups {
+    static let lookups: WrapLookups =
         SpineFixtureMonth.october.map { SpineFixtureMonth.lookups($0) } ?? WrapLookups()
-    }
 
     private static let slugs = HomeChecklist.Task.allCases.map(\.slug) + [HomeChecklist.blueSlug]
 
@@ -119,7 +118,7 @@ struct HomeFixtureService: HomeServicing {
     func displayName() async throws -> String? { name }
     func wraps(zone: TimeZone) async throws -> HomeWraps { wraps }
     func reveal(month: CalendarMonth, zone: TimeZone) async throws -> HomeReveal {
-        await HomeReveal(month: month, revealedAt: HomeFixture.clock)
+        HomeReveal(month: month, revealedAt: HomeFixture.clock)
     }
     func guides() async throws -> [Guide] { guides }
 }
