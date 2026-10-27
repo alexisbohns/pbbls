@@ -126,5 +126,60 @@ extension References {
             ReferenceImage.assertMatches(try Self.wrapSheetFolded(), named: "wrapSheetFolded",
                                          config: ReferenceConfig(scheme: scheme, locales: locales))
         }
+
+        static func checklist(_ done: Set<HomeChecklist.Task>) -> HomeChecklist {
+            let slugs = HomeChecklist.Task.allCases.map(\.slug) + [HomeChecklist.blueSlug]
+            return HomeChecklist.make(catalog: HomeChecklistTests.catalog(slugs), unlocked: Set(done.map(\.slug)))
+        }
+
+        static func checklistView(_ checklist: HomeChecklist) -> some View {
+            HomeChecklistView(checklist: checklist, isClaiming: false, onTask: { _ in }, onClaim: {})
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.md)
+                .frame(width: 393, alignment: .leading)
+                .background(Color.pebbles.surface)
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func checklistEmpty(scheme: ReferenceScheme) throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(Self.checklistView(Self.checklist([])), named: "checklistEmpty",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func checklistThree(scheme: ReferenceScheme) throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(Self.checklistView(Self.checklist([.moment, .pebble, .soul])),
+                                         named: "checklistThree",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
+
+        @Test func checklistThreeAx2() throws {
+            ReferenceImage.assertMatches(Self.checklistView(Self.checklist([.moment, .pebble, .soul])),
+                                         named: "checklistThree",
+                                         config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func checklistClaim(scheme: ReferenceScheme) throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(Self.checklistView(Self.checklist(Set(HomeChecklist.Task.allCases))),
+                                         named: "checklistClaim",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
+
+        static func taskSoul() -> some View {
+            ChecklistTaskContent(task: .soul, onGo: {})
+                .frame(width: 393, height: 420, alignment: .top)
+                .background(Color.pebbles.surface)
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func taskSoul(scheme: ReferenceScheme) throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(Self.taskSoul(), named: "taskSoul",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
     }
 }

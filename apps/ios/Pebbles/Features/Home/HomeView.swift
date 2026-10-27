@@ -23,6 +23,9 @@ struct HomeView: View {
     @State private var naming: MomentDetail?
     @State private var completing: CompleteTarget?
     @State private var openWrap: CalendarMonth?
+    @State private var taskSheet: HomeChecklist.Task?
+    /// The task whose flow opens once its sheet is gone, so the two never race.
+    @State private var pendingTask: HomeChecklist.Task?
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(ReferenceDataService.self) private var references
 
@@ -62,6 +65,20 @@ struct HomeView: View {
                                     Button("home.wraps.retry") { Task { await model.loadWraps() } }
                                         .pebblesFont(.callout)
                                 }
+                            }
+                        }
+                    }
+
+                    // HomeChecklistView draws nothing for a done or unavailable checklist.
+                    if let checklist = model.checklist {
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            HomeChecklistView(checklist: checklist, isClaiming: model.isClaiming,
+                                              onTask: { taskSheet = $0 },
+                                              onClaim: { Task { await model.claim() } })
+                            if let claimError = model.claimError {
+                                Text(verbatim: claimError)
+                                    .pebblesFont(.callout)
+                                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
                             }
                         }
                     }
@@ -107,15 +124,22 @@ struct HomeView: View {
         }) {
             QuickMomentSheet(onSaved: { id, exit in
                 revision.bump(from: .home)
+                reloadChecklist()
                 if exit == .open { pendingComplete = id }
             })
         }
         .fullScreenCover(item: $completing) { target in
             CompleteFlowView(momentId: target.momentId, momentName: target.name,
-                             onCompleted: { _ in revision.bump(from: .home) })
+                             onCompleted: { _ in
+                                 revision.bump(from: .home)
+                                 reloadChecklist()
+                             })
         }
         .fullScreenCover(isPresented: $showsCapture) {
-            CaptureFlowView(onMomentChanged: { _ in revision.bump(from: .home) }, chainsComplete: true)
+            CaptureFlowView(onMomentChanged: { _ in
+                revision.bump(from: .home)
+                reloadChecklist()
+            }, chainsComplete: true)
         }
         .fullScreenCover(isPresented: $showsCamera) {
             CameraPicker(
@@ -135,6 +159,14 @@ struct HomeView: View {
         .sheet(item: $openWrap) { month in
             HomeWrapSheet(monthId: month, lookups: lookups, model: model, onWeek: { _ in nav.go(.path) })
         }
+        .sheet(item: $taskSheet, onDismiss: {
+            if let task = pendingTask {
+                pendingTask = nil
+                go(task)
+            }
+        }) { task in
+            ChecklistTaskSheet(task: task, onGo: { pendingTask = task })
+        }
         .sheet(item: $naming) { detail in
             EditMomentSheet(detail: detail, onSaved: { revision.bump(from: .home) })
         }
@@ -152,8 +184,12 @@ struct HomeView: View {
             case .guide(let slug): Text(verbatim: slug) // Part 5 replaces this with GuidePage
             }
         }
+        // Reselecting Home inside the TabView re-runs this task (the root re-appears), which
+        // also ticks what the user did on a tab the checklist sent them to. `onFirstLoad()`
+        // re-firing is harmless: its latch (`firstRootLoaded`) only sets once.
         .task {
             if model.service == nil { model.service = HomeService(client: supabase.client) }
+            if model.achievements == nil { model.achievements = achievements }
             // Spec §1.6: the loader waits at most 1.5 s for the profile; the load
             // goes on in its own Task so the name still lands after the hand-off.
             let load = Task { await model.load() }
@@ -194,6 +230,7 @@ struct HomeView: View {
         if coordinator.landed != nil {
             achievements.fireCheck()
             revision.bump(from: .home)
+            reloadChecklist()
         }
         cameraError = coordinator.error
     }
@@ -208,6 +245,38 @@ struct HomeView: View {
                 cameraError = String(localized: "home.toast.openFailed")
             }
         }
+    }
+
+    private func reloadChecklist() {
+        Task { await model.loadChecklist() }
+    }
+
+    /// A task sheet's call to action, run once the sheet is gone.
+    private func go(_ task: HomeChecklist.Task) {
+        switch task {
+        case .moment: showsQuick = true
+        case .pebble: Task { await completeNewestBare() }
+        case .collection: nav.go(.collections, intent: .createCollection)
+        case .soul: nav.go(.people, intent: .createSoul)
+        case .glyph: nav.go(.you, intent: .carveGlyph)
+        }
+    }
+
+    /// The pebble task completes the newest bare moment; with none (or an
+    /// unreadable Path) it records one and chains into Complete. The row is only
+    /// undone for a user who has never completed a pebble, so the first moment of
+    /// the feed is the answer and the read is bounded in practice.
+    private func completeNewestBare() async {
+        do {
+            let moments = try await MomentsService(client: supabase.client).pathMoments()
+            if let bare = moments.first(where: { !$0.isCompleted }) {
+                completing = CompleteTarget(momentId: bare.id, name: bare.name)
+                return
+            }
+        } catch {
+            logger.error("path_moments for the pebble task failed: \(error.localizedDescription, privacy: .private)")
+        }
+        showsCapture = true
     }
 
     private func dismissToast() { camera?.clearLanded() }

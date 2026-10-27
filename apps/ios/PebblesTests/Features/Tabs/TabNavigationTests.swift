@@ -130,6 +130,13 @@ struct TabNavigationHomeTests {
         #expect(nav.takeIntent(for: .people) == .createSoul)
     }
 
+    @Test func aManualTabChangeDropsAStaleIntent() {
+        let nav = TabNavigation()
+        nav.go(.you, intent: .carveGlyph)
+        nav.select(.people)
+        #expect(nav.takeIntent(for: .you) == nil)
+    }
+
     @Test func resetDropsAPendingIntent() {
         let nav = TabNavigation()
         nav.go(.collections, intent: .createCollection)
@@ -144,6 +151,16 @@ struct TabNavigationHomeTests {
         #expect(nav.takeIntent(for: .people) == .createSoul)
         #expect(nav.takeIntent(for: .people) == nil)
         #expect(nav.takeIntent(for: .collections) == nil)
+    }
+
+    @Test func peekingLeavesTheIntentForTheConsumer() {
+        let nav = TabNavigation()
+        nav.go(.you, intent: .carveGlyph)
+        #expect(nav.peekIntent(for: .people) == nil)
+        #expect(nav.peekIntent(for: .you) == .carveGlyph)
+        #expect(nav.peekIntent(for: .you) == .carveGlyph)
+        #expect(nav.takeIntent(for: .you) == .carveGlyph)
+        #expect(nav.peekIntent(for: .you) == nil)
     }
 }
 

@@ -118,6 +118,9 @@ extension SpineType.Style {
     static let masthead = Self(size: 11.5, weight: 400, trackingEm: 0.18, features: [.smallCaps], scaling: .text(.caption2))
     static let mastheadNumber = Self(size: 11.5, weight: 650, trackingEm: 0.18, features: [.smallCaps],
                                      scaling: .text(.caption2))
+    /// A Home checklist row's title and the claim label: the 17 pt semibold the
+    /// headline carried, now scaling with Dynamic Type like the italic lines beside it.
+    static let checklistTitle = Self(size: 17, weight: 600, scaling: .text(.body))
     static let personName = Self(size: 15, weight: 600, trackingEm: 0.1, features: [.smallCaps], scaling: .text(.subheadline))
     static let dayLetter = Self(size: 9.5, weight: 600, features: [.smallCaps], lineHeight: 12, scaling: .text(.caption2))
     static let contentsDay = Self(size: 10.5, weight: 600, trackingEm: 0.18, features: [.smallCaps], scaling: .text(.caption2))

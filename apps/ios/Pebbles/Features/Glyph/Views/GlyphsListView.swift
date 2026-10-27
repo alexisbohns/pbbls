@@ -6,6 +6,7 @@ import os
 struct GlyphsListView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(PathStatsService.self) private var stats
+    @Environment(TabNavigation.self) private var nav
 
     @State private var tab: GlyphTab = .mine
     @State private var itemsByTab: [GlyphTab: [GlyphGridItem]] = [:]
@@ -54,6 +55,10 @@ struct GlyphsListView: View {
                 }
             }
             .pebblesScreen()
+            // Home's checklist (through ProfileView) asks for a first carve.
+            .onAppear {
+                if nav.takeIntent(for: .you) == .carveGlyph { showCarveSheet = true }
+            }
             .alert(
                 "Rename glyph",
                 isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } }),
@@ -210,5 +215,6 @@ struct GlyphsListView: View {
         GlyphsListView()
             .environment(SupabaseService())
             .environment(PathStatsService(supabase: SupabaseService()))
+            .environment(TabNavigation())
     }
 }
