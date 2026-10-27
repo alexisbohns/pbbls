@@ -16,9 +16,10 @@ import androidx.compose.ui.platform.LocalView
 import java.time.YearMonth
 
 /**
- * The month intro's haptics on this phone (#1242 D18): one composition per card where the vibrator plays
- * primitives, else one waveform where it controls amplitude, else `performHapticFeedback` fired from the
- * clock's frames. Every vibration is `USAGE_TOUCH`, so Android's touch feedback setting governs it.
+ * The month intro's haptics on this phone (#1242 D18): compositions where the vibrator plays primitives
+ * (one per segment of a card, below), else one waveform per card where it controls amplitude, else
+ * `performHapticFeedback` fired from the clock's frames. Every vibration is `USAGE_TOUCH`, so Android's
+ * touch feedback setting governs it.
  * [enabled] is Pebbles' own switch (Part 8; on until then). [forced] is the Lab's override.
  *
  * A new vibration replaces the current one at the vibrator service, which is why one [sounding] slot
@@ -26,8 +27,8 @@ import java.time.YearMonth
  * card that isn't playing.
  *
  * Tier C plays a card as segments ([IntroComposition.segments]): the first as the card starts, each later
- * one from the clock's frames on its scored time, so a swell's train that plays short or long on this
- * vibrator never shifts what follows it.
+ * one from the clock's frames on its scored time ([IntroSegmentQueue]), so a swell's train that plays short
+ * or long on this vibrator never shifts what follows it.
  */
 class IntroVibrator(
     private val vibrator: Vibrator?,
@@ -86,10 +87,13 @@ class IntroVibrator(
         when (tier) {
             IntroHapticTier.COMPOSITION -> {
                 val segments = IntroComposition.segments(beats, supported + IntroPrimitiveKind.TICK, durations, leadMs)
-                later.hold(sequence, month, startNanos, segments.drop(1))
+                // The later segments only follow a first that plays: [stop] cancels only what [sounding] names.
                 if (vibrate { segments.firstOrNull()?.let { composition(it.primitives) } }) {
+                    later.hold(sequence, month, startNanos, segments.drop(1))
                     sounding = month to sequence
                     soundingEnd = startNanos + (IntroScore.duration(beats) * 1e9).toLong()
+                } else {
+                    later.drop(sequence, month)
                 }
             }
             IntroHapticTier.WAVEFORM ->
@@ -129,9 +133,9 @@ class IntroVibrator(
     }
 
     /**
-     * Tier C fires the card's next segment a lead ahead of its start, delayed to start on its scored time.
-     * It supersedes whatever still sounds: on a vibrator whose trains run long, that cuts a train's tail.
-     * Tier V fires the ticks the frame crossed.
+     * Tier C fires the card's next segment a floor ahead of its start ([IntroSegmentQueue.SEGMENT_LEAD_NANOS]),
+     * delayed to start on its scored time. It supersedes whatever still sounds: on a vibrator whose trains run
+     * long, that cuts a train's tail. Tier V fires the ticks the frame crossed.
      */
     override fun frame(
         sequence: IntroSequence,
