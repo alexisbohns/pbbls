@@ -11,8 +11,12 @@ struct CollectionsListView: View {
     @State private var isPresentingCreate = false
     @State private var pendingDeletion: Collection?
     @State private var deleteError: String?
+    @AppStorage(CollectionsNoteState.storageKey) private var noteDismissed = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.collections")
+
+    /// Spec §3: the card with no collection, a footnote after the first.
+    private var note: CollectionsNoteState { CollectionsNoteState.make(count: items.count, dismissed: noteDismissed) }
 
     var body: some View {
         content
@@ -97,12 +101,11 @@ struct CollectionsListView: View {
                 systemImage: "exclamationmark.triangle",
                 description: Text(loadError)
             )
-        } else if items.isEmpty {
-            ContentUnavailableView(
-                "No collections yet",
-                systemImage: "square.stack.3d.up",
-                description: Text("Your collections will appear here.")
-            )
+        } else if note == .card {
+            ScrollView {
+                CollectionsNote(onStart: { isPresentingCreate = true })
+                    .padding(Spacing.lg)
+            }
         } else {
             ScrollViewReader { proxy in
                 List {
@@ -119,6 +122,13 @@ struct CollectionsListView: View {
                             .tint(Color.pebbles.error)
                         }
                         .pebblesListRow(position: pebblesRowPosition(index: index, count: items.count))
+                    }
+                    if note == .footnote {
+                        Section {
+                            CollectionsFootnote(onDismiss: { noteDismissed = true })
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                     }
                 }
                 .pebblesList()
