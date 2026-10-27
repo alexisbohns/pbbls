@@ -1,5 +1,7 @@
 package app.pbbls.android.features.path.wrap.month
 
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -23,6 +27,7 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.features.path.wrap.WrapLookups
 import app.pbbls.android.features.path.wrap.intro.IntroKey
+import app.pbbls.android.features.path.wrap.intro.IntroReveal
 import app.pbbls.android.features.path.wrap.intro.LocalIntroStage
 import app.pbbls.android.features.path.wrap.intro.currentIntroReveal
 import app.pbbls.android.features.path.wrap.intro.introReveal
@@ -64,10 +69,28 @@ internal fun MonthDeckEnd(
                 modifier = Modifier.semantics { heading() },
             )
         }
-        OutlinedButton(onClick = onReplay, modifier = Modifier.introReveal(reveal, IntroKey.Replay)) {
+        OutlinedButton(onClick = onReplay, modifier = Modifier.introReveal(reveal, IntroKey.Replay).tapsOnceShown(reveal)) {
             Icon(painterResource(R.drawable.ic_replay), contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(copy.replayMonth())
         }
     }
 }
+
+/**
+ * The replay takes a tap only once it shows (iOS: SwiftUI never hit-tests a view at opacity 0). Before its beat
+ * the button is drawn at alpha 0 but would still hit-test, so a tap that skips the card's arrival would replay
+ * too: its down is consumed first, in the Initial pass, and the button never presses. The card's `onAnyTap`
+ * still sees the release, so the tap lands the card. Settled, it returns `this`.
+ */
+private fun Modifier.tapsOnceShown(reveal: IntroReveal): Modifier =
+    if (reveal === IntroReveal.settled) {
+        this
+    } else {
+        pointerInput(reveal) {
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                if (reveal(IntroKey.Replay) == 0f) down.consume()
+            }
+        }
+    }

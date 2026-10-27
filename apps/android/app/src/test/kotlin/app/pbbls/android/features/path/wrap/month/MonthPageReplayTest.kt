@@ -144,6 +144,16 @@ class MonthPageReplayTest {
         settle()
     }
 
+    /**
+     * Taps the end card's replay. Here the end card never lands by its time, so its replay is still hidden: the
+     * first tap lands the card and leaves the replay be, and the second, on the shown replay, replays.
+     */
+    private fun tapReplay() {
+        compose.onNodeWithText(replay).performClick()
+        settle()
+        compose.onNodeWithText(replay).performClick()
+    }
+
     private fun played(month: YearMonth = wrap.month) = voices.events.filter { it.startsWith("play") && it.endsWith("$month") }
 
     @Test
@@ -157,14 +167,14 @@ class MonthPageReplayTest {
     }
 
     @Test
-    fun `replay lands the end card on the tap, then plays the cover again at once from a forgotten month`() {
+    fun `replay plays the cover again at once from a forgotten month, the end card landed on the old clock`() {
         page()
         repeat(cards.size - 1) { throwCard() }
         assertEquals("play ${IntroSequence.End} ${wrap.month}", voices.events.last())
 
-        compose.onNodeWithText(replay).performClick()
+        tapReplay()
         settle()
-        // The tap's skip lands the end card on the old clock, and the new deck's cover plays: nothing lands it.
+        // The end card landed on the old clock, and the new deck's cover plays: nothing lands it.
         assertEquals(
             listOf("stop ${IntroSequence.End} ${wrap.month}", "play ${IntroSequence.Cover} ${wrap.month}"),
             voices.events.takeLast(2),
@@ -181,10 +191,22 @@ class MonthPageReplayTest {
     }
 
     @Test
-    fun `the replayed deck plays only while the page is focused, as the first did`() {
+    fun `a tap on the end card's hidden replay only lands the card, and replays nothing`() {
         page()
         repeat(cards.size - 1) { throwCard() }
         compose.onNodeWithText(replay).performClick()
+        settle()
+        assertEquals("stop ${IntroSequence.End} ${wrap.month}", voices.events.last())
+        assertEquals(1, played().count { it.startsWith("play ${IntroSequence.Cover}") })
+        assertTrue(ledger.contains(wrap.month, IntroSequence.Section(MonthSection.WEEKS)))
+        compose.onNodeWithText(replay).assertIsDisplayed()
+    }
+
+    @Test
+    fun `the replayed deck plays only while the page is focused, as the first did`() {
+        page()
+        repeat(cards.size - 1) { throwCard() }
+        tapReplay()
         settle()
         assertEquals("play ${IntroSequence.Cover} ${wrap.month}", voices.events.last())
 
@@ -201,7 +223,7 @@ class MonthPageReplayTest {
     fun `mid-fade the leaving deck says nothing, its replay gone, and the fade completes on the new cover`() {
         page()
         repeat(cards.size - 1) { throwCard() }
-        compose.onNodeWithText(replay).performClick()
+        tapReplay()
         // The replay's frame, the new deal's, then about half the 300 ms fade: both decks are drawn, and only the new
         // one speaks (what TalkBack, Switch and Voice Access read: the merged tree).
         compose.mainClock.advanceTimeBy(HALF_FADE_MS)
@@ -218,7 +240,7 @@ class MonthPageReplayTest {
         page()
         repeat(cards.size - 1) { throwCard() }
         val button = compose.onNodeWithText(replay).getBoundsInRoot()
-        compose.onNodeWithText(replay).performClick()
+        tapReplay()
         compose.mainClock.advanceTimeBy(HALF_FADE_MS)
         assertEquals("play ${IntroSequence.Cover} ${wrap.month}", voices.events.last())
         val before = voices.events.size
@@ -270,7 +292,7 @@ class MonthPageReplayTest {
         val august = wrap.copy(month = wrap.month.plusMonths(1))
         val pager = path(august)
         repeat(cards.size - 1) { throwCard() }
-        compose.onNodeWithText(replay).performClick()
+        tapReplay()
         settle()
         assertEquals("play ${IntroSequence.Cover} ${wrap.month}", voices.events.last())
 
@@ -289,7 +311,7 @@ class MonthPageReplayTest {
     fun `a replayed month keeps its deck where it was when the Path restores its page`() {
         val pager = path(wrap.copy(month = wrap.month.plusMonths(1)))
         repeat(cards.size - 1) { throwCard() }
-        compose.onNodeWithText(replay).performClick()
+        tapReplay()
         settle()
         throwCard()
         val weeks = MonthSections.head(MonthSection.WEEKS, wrap, lookups, copy!!).label
