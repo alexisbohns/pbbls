@@ -4810,7 +4810,7 @@ Measured on the maintainer's Pixel 8 (Android 17) through `dumpsys vibrator_mana
   - The maintainer chose C as the most natural, above all on the domains' swell.
   - W and V are accepted as fallbacks.
   - The persons and gem cards were confirmed on the device.
-  - Weeks through the end card, and the switch, await the device pass.
+  - Weeks through the end card, and the switch off (Task 40 Step 3), await the maintainer's device pass.
 - **Tuned constants:** none yet.
 
 **Frames:** gfxinfo during the cover p90 17–21 ms; the hours card p90 13 ms (0.61 % jank). No cached layer was needed.
@@ -4848,7 +4848,7 @@ Measured on the maintainer's Pixel 8 (Android 17) through `dumpsys vibrator_mana
 - **A composition's timing is relative.** Each pause runs from the declared end of the primitive before, and real durations differ by device and by texture. Re-anchor long runs from the frame clock rather than correcting by a constant.
 - **`AnimatedContent` keeps the outgoing content live and recomposing.** Whatever fades out must read only its own state, never the page's.
 - **Test clocks:** under a Compose test rule the frame clock is virtual while `IntroClock` reads `System.nanoTime`. Whole-app tests opt into the plain month (`AppUiTest.drawPlainMonthPages()`), and the replay tests drive their taps knowing cards never land on their own.
-- **`{ true }` defaults hide missed callers.** The switch has no default on a production composable, so the compiler finds every host: removing them surfaced three that had relied on one. Previews and the Lab pass `{ true }`. The one default kept is `SoulItem`'s, which only gates a long press that its pickers' cells don't have.
+- **`{ true }` defaults hide missed callers.** The switch has no default on a production composable, so the compiler finds every host. Removing the defaults surfaced Edit moment's form (moot: its valence picker never opens there) and the Spine Lab's hosts. Previews and the Lab pass `{ true }`. The one default kept is `SoulItem`'s, which only gates a long press its picker cells don't have.
 
 **Follow-ups (not in this stack)**
 - **iOS:** `PathModel.focus` should ignore a week that isn't a page (the Android guard above).

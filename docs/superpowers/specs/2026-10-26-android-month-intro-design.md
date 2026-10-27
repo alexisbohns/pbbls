@@ -189,6 +189,12 @@ C felt more natural and closer to the iPhone, above all on the domains' swell. `
   - **`View.isHapticFeedbackEnabled` on the activity's view:** it would not reach sheets, which have their own windows (the valence picker, the glyph drawer).
   - **A global mutable flag:** it bypasses Hilt.
 
+**As built (2026-10-27).** Beyond the list above:
+- the rows' long-press buzz (pebble, soul, collection) and the glyph picker's inline buy ask the switch too, as iOS's context menus do;
+- the intro asks it on every frame-fired segment and tick, and stops the card when it reads off;
+- the switch takes no default on a production composable, so the compiler finds every host. `SoulItem` keeps one: only its long press buzzes, and its picker cells have none;
+- the debug Spine Lab passes `{ true }`: its probes play regardless.
+
 **D24. Throws and swipes tick.**
 - **A deck throw:** lands on a tick (D21).
 - **A swipe of the Path's pager** that settles on another page plays `TapHaptic.SELECTION`, as iOS's `SpinePager` does.
