@@ -103,9 +103,9 @@ fun EditPebbleContent(
     onCancel: () -> Unit,
     onSave: () -> Unit,
     onRetry: () -> Unit,
+    hapticsOn: () -> Boolean,
     modifier: Modifier = Modifier,
     onAchievementCheck: () -> Unit = {},
-    hapticsOn: () -> Boolean = { true },
 ) {
     val referenceData = LocalReferenceDataService.current
     val colors = MaterialTheme.colorScheme

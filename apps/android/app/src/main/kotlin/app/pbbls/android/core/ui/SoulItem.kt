@@ -39,7 +39,8 @@ enum class SoulItemCase {
  * (selection carried by color, never weight — issue #515), optional
  * fossil-shell + pebble count line. [onLongPress] backs the list's delete
  * affordance (D7 — the caller anchors its own `DropdownMenu`); its buzz asks
- * Pebbles' haptics switch ([haptics], #1242 D23).
+ * Pebbles' haptics switch ([haptics], #1242 D23), which any caller passing
+ * [onLongPress] passes too.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -51,6 +52,8 @@ fun SoulItem(
     side: Dp = 96.dp,
     onTap: (() -> Unit)? = null,
     onLongPress: (() -> Unit)? = null,
+    // Defaulted on purpose: it gates only [onLongPress]'s buzz, and the cells without a long press
+    // (the pickers', the previews') have none to gate. The one host with a long press passes it.
     haptics: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme

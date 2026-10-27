@@ -235,7 +235,7 @@ class IntroVibrator(
 /** The intro's haptics for this view. [enabled] is Pebbles' switch, read live; [forced] the Lab's tier override. */
 @Composable
 fun rememberIntroVibrator(
-    enabled: () -> Boolean = { true },
+    enabled: () -> Boolean,
     forced: IntroHapticTier? = null,
 ): IntroVibrator {
     val context = LocalContext.current

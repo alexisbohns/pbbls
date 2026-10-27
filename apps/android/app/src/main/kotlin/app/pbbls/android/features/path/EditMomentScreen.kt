@@ -82,11 +82,15 @@ fun EditMomentScreen(
         onRetryPhoto = viewModel::onRetryPhoto,
         onRemovePhoto = viewModel::onRemovePhoto,
         onRemoveExistingSnap = viewModel::onRemoveExistingSnap,
+        hapticsOn = { viewModel.hapticsOn },
         modifier = modifier,
     )
 }
 
-/** Edit moment without its ViewModel: the bar and the three states. [EditMomentScreen] wires it; screenshots drive it. */
+/**
+ * Edit moment without its ViewModel: the bar and the three states. [EditMomentScreen] wires it; screenshots drive it.
+ * [hapticsOn] is Pebbles' haptics switch (#1242 D23), handed to the form.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun EditMomentContent(
@@ -95,6 +99,7 @@ fun EditMomentContent(
     onCancel: () -> Unit,
     onSave: () -> Unit,
     onRetry: () -> Unit,
+    hapticsOn: () -> Boolean,
     modifier: Modifier = Modifier,
     onAddPhoto: () -> Unit = {},
     onRetryPhoto: () -> Unit = {},
@@ -145,6 +150,7 @@ fun EditMomentContent(
                         onRetryPending = onRetryPhoto,
                         onRemovePending = onRemovePhoto,
                         onRemoveExistingSnap = onRemoveExistingSnap,
+                        hapticsOn = hapticsOn,
                     )
                     if (!state.hasContent) {
                         Text(

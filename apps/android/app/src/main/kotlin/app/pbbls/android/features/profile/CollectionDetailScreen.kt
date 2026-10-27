@@ -131,9 +131,9 @@ fun CollectionDetailContent(
     onOpenMoment: (String) -> Unit,
     onDeletePebble: (PathMoment) -> Unit,
     paletteFor: (PathMoment) -> EmotionPalette?,
+    haptics: Boolean,
     modifier: Modifier = Modifier,
     showBack: Boolean = true,
-    haptics: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
     val locale = Locale.getDefault()

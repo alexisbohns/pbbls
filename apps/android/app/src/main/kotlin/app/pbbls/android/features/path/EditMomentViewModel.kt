@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.SnapUploadCoordinator
@@ -67,9 +68,13 @@ class EditMomentViewModel
         private val supabase: SupabaseServicing,
         private val snapFiles: SnapWriteRepositing,
         private val media: ComposerMedia,
+        private val haptics: HapticsPreference,
     ) : ViewModel() {
         private val effectsOut = UiEffects<EditMomentEffect>(viewModelScope)
         val effects: Flow<EditMomentEffect> = effectsOut.flow
+
+        /** Pebbles' haptics switch (#1242 D23), for the form's pickers: asked at each buzz, so Settings applies at once. */
+        val hapticsOn: Boolean get() = haptics.isOn
 
         private val snaps = SnapUploadCoordinator(repo = snapFiles)
         private val _uiState = MutableStateFlow<EditMomentUiState>(EditMomentUiState.Loading)

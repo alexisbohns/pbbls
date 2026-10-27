@@ -116,8 +116,8 @@ fun SoulsListContent(
     onCreateSoul: () -> Unit,
     onRetry: () -> Unit,
     onDeleteSoul: (SoulWithGlyph) -> Unit,
+    haptics: Boolean,
     modifier: Modifier = Modifier,
-    haptics: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
 

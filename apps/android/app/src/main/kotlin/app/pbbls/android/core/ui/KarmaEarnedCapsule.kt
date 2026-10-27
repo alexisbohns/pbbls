@@ -68,8 +68,8 @@ import app.pbbls.android.core.model.KarmaReason
 fun KarmaOverlayHost(
     flash: KarmaEarnedContent?,
     onDismiss: () -> Unit,
+    haptics: Boolean,
     modifier: Modifier = Modifier,
-    haptics: Boolean = true,
 ) {
     // Retain the last content during the exit animation so it doesn't blank out.
     var lastContent by remember { mutableStateOf(KarmaEarnedContent(0, KarmaReason.PEBBLE_CREATED)) }
@@ -106,8 +106,8 @@ fun KarmaOverlayHost(
 fun KarmaEarnedCapsule(
     content: KarmaEarnedContent,
     onTap: () -> Unit,
+    haptics: Boolean,
     modifier: Modifier = Modifier,
-    haptics: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
     val view = LocalView.current

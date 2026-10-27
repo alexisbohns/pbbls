@@ -65,8 +65,8 @@ private fun StoreGallery() {
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         GlyphTabBar(selection = GlyphTab.MINE, onSelect = {})
-        SlideToConfirm(cost = 13, enabled = true, onConfirm = { true })
-        SlideToConfirm(cost = 99, enabled = false, onConfirm = { true })
+        SlideToConfirm(haptics = true, cost = 13, enabled = true, onConfirm = { true })
+        SlideToConfirm(haptics = true, cost = 99, enabled = false, onConfirm = { true })
     }
 }
 
@@ -74,6 +74,7 @@ private fun StoreGallery() {
 private fun DrawerGallery(isOwned: Boolean) {
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface).width(400.dp)) {
         GlyphDetailDrawerContent(
+            haptics = true,
             item = previewItem,
             isOwned = isOwned,
             acquiredAt = if (isOwned) OffsetDateTime.parse("2026-07-16T10:00:00+00:00") else null,

@@ -83,7 +83,8 @@ internal fun LabStone(
 ) {
     val scope = rememberCoroutineScope()
     val reduceMotion = rememberReduceMotion()
-    val haptics = rememberTapHaptics()
+    // The debug Lab probes the vibrator itself, so it plays whatever Pebbles' switch says.
+    val haptics = rememberTapHaptics { true }
     Box(
         if (pressable) {
             Modifier.clickable(interactionSource = null, indication = null) {

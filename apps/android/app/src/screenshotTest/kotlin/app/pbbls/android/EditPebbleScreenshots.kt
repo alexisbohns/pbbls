@@ -128,6 +128,7 @@ private fun EditPebblePreview(
 ) {
     CompositionLocalProvider(LocalReferenceDataService provides editRefs) {
         EditPebbleContent(
+            hapticsOn = { true },
             uiState = EditPebbleUiState.Content(draft = draft, glyph = MomentPreviewFixtures.pebbleGlyph(), saveErrorRes = saveErrorRes),
             palette = joyPalette,
             selectedEmotion = joyEmotion,
@@ -216,6 +217,7 @@ fun EditPebble_Content() {
 fun EditMoment_Content() {
     PebblesTheme {
         EditMomentContent(
+            hapticsOn = { true },
             uiState = EditMomentUiState.Content(draft = draftWith(Valence.HIGHLIGHT_MEDIUM)),
             onDraftChange = {},
             onCancel = {},
@@ -234,6 +236,7 @@ fun EditMoment_Content() {
 fun EditMoment_NeedsContent() {
     PebblesTheme {
         EditMomentContent(
+            hapticsOn = { true },
             uiState = EditMomentUiState.Content(draft = draftWith(Valence.HIGHLIGHT_MEDIUM).copy(name = "")),
             onDraftChange = {},
             onCancel = {},

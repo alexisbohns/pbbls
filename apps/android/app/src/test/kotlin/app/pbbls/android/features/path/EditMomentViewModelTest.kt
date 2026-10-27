@@ -2,6 +2,7 @@ package app.pbbls.android.features.path
 
 import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.model.MomentSavePayload
 import app.pbbls.android.core.model.MomentSnap
 import app.pbbls.android.core.model.PebbleSnapPayload
@@ -12,6 +13,7 @@ import app.pbbls.android.testing.FakeSnapWriteRepository
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
+import app.pbbls.android.testing.inMemorySettings
 import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
 import app.pbbls.android.testing.testSession
@@ -38,9 +40,17 @@ class EditMomentViewModelTest {
         val supabase: FakeSupabaseService = FakeSupabaseService(session = testSession("user-1")),
         val snapRepo: FakeSnapWriteRepository = FakeSnapWriteRepository(),
         val media: FakeComposerMedia = FakeComposerMedia(),
+        val haptics: HapticsPreference = HapticsPreference(inMemorySettings()),
     ) {
         val viewModel =
-            EditMomentViewModel(moments = read, writes = writes, supabase = supabase, snapFiles = snapRepo, media = media)
+            EditMomentViewModel(
+                moments = read,
+                writes = writes,
+                supabase = supabase,
+                snapFiles = snapRepo,
+                media = media,
+                haptics = haptics,
+            )
     }
 
     @Test
@@ -286,4 +296,13 @@ class EditMomentViewModelTest {
             assertTrue(h.writes.saved.isEmpty())
             effects.stop()
         }
+
+    @Test
+    fun `the form's pickers read Pebbles' haptics switch at each ask`() {
+        val h = Harness()
+        assertTrue(h.viewModel.hapticsOn)
+        // Switched off in Settings while the edit is open: the next buzz asks and hears off.
+        h.haptics.setOn(false)
+        assertFalse(h.viewModel.hapticsOn)
+    }
 }

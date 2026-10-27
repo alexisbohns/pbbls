@@ -126,10 +126,10 @@ internal fun SpinePebble(
     pressRequests: StonePressRequests,
     onOpen: (PathMoment, CardFace) -> Unit,
     onRequestDelete: (PathMoment) -> Unit,
+    hapticsOn: () -> Boolean,
     modifier: Modifier = Modifier,
     ratioOverride: Float? = null,
     photoOverride: Pair<String?, String?>? = null,
-    hapticsOn: () -> Boolean = { true },
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type

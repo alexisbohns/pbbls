@@ -93,8 +93,8 @@ fun SlideToConfirm(
     cost: Int,
     enabled: Boolean,
     onConfirm: suspend () -> Boolean,
+    haptics: Boolean,
     modifier: Modifier = Modifier,
-    haptics: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
     val density = LocalDensity.current

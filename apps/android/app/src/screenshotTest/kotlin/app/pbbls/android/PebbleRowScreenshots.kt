@@ -50,6 +50,7 @@ private fun PebbleRowGallery() {
                 .padding(24.dp),
     ) {
         PebbleRow(
+            haptics = true,
             moment = moment("Medium neutral", Valence.NEUTRAL_MEDIUM),
             palette = previewPalette,
             onTap = {},
@@ -57,6 +58,7 @@ private fun PebbleRowGallery() {
             modifier = Modifier.fillMaxWidth(),
         )
         PebbleRow(
+            haptics = true,
             moment = moment("Large highlight", Valence.HIGHLIGHT_LARGE),
             palette = previewPalette,
             onTap = {},
@@ -64,6 +66,7 @@ private fun PebbleRowGallery() {
             modifier = Modifier.fillMaxWidth(),
         )
         PebbleRow(
+            haptics = true,
             moment = moment(null, Valence.NEUTRAL_MEDIUM),
             palette = previewPalette,
             onTap = {},
@@ -71,6 +74,7 @@ private fun PebbleRowGallery() {
             modifier = Modifier.fillMaxWidth(),
         )
         PebbleRow(
+            haptics = true,
             moment = moment("No palette (accent fallback)", Valence.LOWLIGHT_SMALL),
             palette = null,
             onTap = {},

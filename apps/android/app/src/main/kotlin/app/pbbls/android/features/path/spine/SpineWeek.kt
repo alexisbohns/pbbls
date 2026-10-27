@@ -116,11 +116,11 @@ fun SpineWeek(
     lookups: WrapLookups,
     nextWeek: WeekNeighbour?,
     onCreatePebble: () -> Unit,
+    hapticsOn: () -> Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     zone: ZoneId = ZoneId.systemDefault(),
     ratioOverride: ((String) -> Float?)? = null,
-    hapticsOn: () -> Boolean = { true },
 ) {
     val colors = PebblesTheme.spine.colors
     val density = LocalDensity.current

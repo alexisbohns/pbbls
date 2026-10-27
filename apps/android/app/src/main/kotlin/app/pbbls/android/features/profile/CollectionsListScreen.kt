@@ -123,8 +123,8 @@ fun CollectionsListContent(
     onRetry: () -> Unit,
     onRefresh: () -> Unit,
     onDeleteCollection: (Collection) -> Unit,
+    haptics: Boolean,
     modifier: Modifier = Modifier,
-    haptics: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
 

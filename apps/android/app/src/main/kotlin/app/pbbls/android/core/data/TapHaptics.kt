@@ -90,7 +90,7 @@ object TapHaptics {
  * [enabled] is the one asked, though the closure stays the same.
  */
 @Composable
-fun rememberTapHaptics(enabled: () -> Boolean = { true }): (TapHaptic) -> Unit {
+fun rememberTapHaptics(enabled: () -> Boolean): (TapHaptic) -> Unit {
     val view = LocalView.current
     val currentEnabled by rememberUpdatedState(enabled)
     return remember(view) { TapHaptics.gated(view) { currentEnabled() } }

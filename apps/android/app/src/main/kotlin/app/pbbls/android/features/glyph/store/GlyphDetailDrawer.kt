@@ -127,7 +127,7 @@ internal fun GlyphSwapPanel(
      */
     onSwapped: (BuyGlyphResult) -> Unit = {},
     /** Pebbles' haptics switch (#1242 D23), from the host's ViewModel: the slider's buzzes ask it. */
-    haptics: Boolean = true,
+    haptics: Boolean,
 ) {
     var isOwned by remember(item.id) { mutableStateOf(item.owned) }
     var acquiredAt by remember(item.id) { mutableStateOf(item.acquiredAt) }
@@ -195,7 +195,7 @@ internal fun GlyphDetailDrawerContent(
     isBuying: Boolean,
     errorRes: Int?,
     onConfirm: suspend () -> Boolean,
-    haptics: Boolean = true,
+    haptics: Boolean,
 ) {
     val colors = MaterialTheme.colorScheme
     val canAfford = currentBalance >= item.price

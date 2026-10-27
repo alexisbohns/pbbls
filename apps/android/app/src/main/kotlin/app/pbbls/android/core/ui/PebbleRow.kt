@@ -57,8 +57,8 @@ fun PebbleRow(
     palette: EmotionPalette?,
     onTap: () -> Unit,
     onDelete: () -> Unit,
+    haptics: Boolean,
     modifier: Modifier = Modifier,
-    haptics: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
     var menuExpanded by remember { mutableStateOf(false) }

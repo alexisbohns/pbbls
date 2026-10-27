@@ -80,6 +80,7 @@ class PathContentMonthFocusTest {
                         onFocusChange = { focus = it },
                         paletteFor = { null },
                         modifier = Modifier.fillMaxSize(),
+                        hapticsOn = { true },
                         introLedger = ledger,
                         tapHaptics = {},
                     )

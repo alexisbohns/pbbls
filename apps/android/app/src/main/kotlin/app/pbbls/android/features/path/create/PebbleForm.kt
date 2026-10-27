@@ -74,6 +74,8 @@ fun PebbleForm(
     collections: List<PebbleCollection>,
     selectedEmotion: EmotionWithPalette?,
     saveError: String?,
+    /** Pebbles' haptics switch (#1242 D23), from the host's ViewModel: the valence picker asks it. */
+    hapticsOn: () -> Boolean,
     modifier: Modifier = Modifier,
     /** Above the fields: Edit pebble's stone. */
     header: (@Composable () -> Unit)? = null,
@@ -87,8 +89,6 @@ fun PebbleForm(
     onRemovePending: () -> Unit = {},
     onRemoveExistingSnap: () -> Unit = {},
     onAchievementCheck: () -> Unit = {},
-    /** Pebbles' haptics switch (#1242 D23), from the host's ViewModel: the valence picker asks it. */
-    hapticsOn: () -> Boolean = { true },
 ) {
     var activePicker by remember { mutableStateOf<PickerKind?>(null) }
 

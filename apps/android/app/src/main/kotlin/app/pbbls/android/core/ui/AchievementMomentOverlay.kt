@@ -73,8 +73,8 @@ fun AchievementMomentOverlay(
     moment: AchievementMoment?,
     onAdvance: () -> Unit,
     onDismiss: () -> Unit,
+    haptics: Boolean,
     modifier: Modifier = Modifier,
-    haptics: Boolean = true,
 ) {
     val view = LocalView.current
 

@@ -76,6 +76,7 @@ class PathContentTicksTest {
             PebblesTheme {
                 PebblesTestHarness {
                     PathContent(
+                        hapticsOn = { true },
                         entries = emptyList(),
                         stripItems = items,
                         focus = focus,

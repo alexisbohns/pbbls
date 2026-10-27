@@ -47,7 +47,7 @@ fun ValencePickerSheet(
     current: Valence?,
     onDismiss: () -> Unit,
     onSelected: (Valence) -> Unit,
-    hapticsOn: () -> Boolean = { true },
+    hapticsOn: () -> Boolean,
 ) {
     val haptic = rememberTapHaptics(hapticsOn)
     // The roll always needs a value under the finger, so an untouched sheet

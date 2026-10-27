@@ -53,6 +53,7 @@ private fun WeekPage(
     Surface(color = PebblesTheme.spine.colors.ground) {
         Box(Modifier.width(PHONE_WIDTH).height(height)) {
             SpineWeek(
+                hapticsOn = { true },
                 entry = entry,
                 today = SpineFixtureWeek.today,
                 soulsById = SpineFixtureWeek.soulsById,

@@ -196,7 +196,7 @@ private fun KarmaCapsulePreview(content: KarmaEarnedContent) {
         modifier = Modifier.fillMaxSize().background(gradient),
         contentAlignment = Alignment.Center,
     ) {
-        KarmaEarnedCapsule(content = content, onTap = {})
+        KarmaEarnedCapsule(haptics = true, content = content, onTap = {})
     }
 }
 
