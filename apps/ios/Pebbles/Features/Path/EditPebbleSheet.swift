@@ -11,6 +11,8 @@ struct EditPebbleSheet: View {
     let momentId: UUID
     let pebble: MomentDetail.Pebble
     let onSaved: () -> Void
+    /// D-plan-1: open on the Souls section (the People tab's "who?").
+    let scrollsToSouls: Bool
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(ReferenceDataService.self) private var refs
@@ -24,9 +26,11 @@ struct EditPebbleSheet: View {
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "edit-pebble")
 
-    init(momentId: UUID, pebble: MomentDetail.Pebble, onSaved: @escaping () -> Void) {
+    init(momentId: UUID, pebble: MomentDetail.Pebble, scrollsToSouls: Bool = false,
+         onSaved: @escaping () -> Void) {
         self.momentId = momentId
         self.pebble = pebble
+        self.scrollsToSouls = scrollsToSouls
         self.onSaved = onSaved
         self._draft = State(initialValue: CompleteDraft(from: pebble))
     }
@@ -38,7 +42,8 @@ struct EditPebbleSheet: View {
                 domains: refs.domains,
                 souls: refs.souls,
                 collections: refs.collections,
-                saveError: saveError
+                saveError: saveError,
+                scrollsToSouls: scrollsToSouls
             )
             .disabled(isSaving)
             .pebblesToolbarTitle("Edit pebble")
