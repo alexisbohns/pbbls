@@ -145,6 +145,16 @@ struct TabNavigationHomeTests {
         #expect(nav.takeIntent(for: .people) == nil)
         #expect(nav.takeIntent(for: .collections) == nil)
     }
+
+    @Test func peekingLeavesTheIntentForTheConsumer() {
+        let nav = TabNavigation()
+        nav.go(.you, intent: .carveGlyph)
+        #expect(nav.peekIntent(for: .people) == nil)
+        #expect(nav.peekIntent(for: .you) == .carveGlyph)
+        #expect(nav.peekIntent(for: .you) == .carveGlyph)
+        #expect(nav.takeIntent(for: .you) == .carveGlyph)
+        #expect(nav.peekIntent(for: .you) == nil)
+    }
 }
 
 /// #903 §3 / §11: restoration survives a system kill, and a snapshot from an

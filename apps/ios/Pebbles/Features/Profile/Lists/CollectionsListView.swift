@@ -78,6 +78,10 @@ struct CollectionsListView: View {
             } message: { message in
                 Text(message)
             }
+            // Home's checklist sends the user here to start a first collection.
+            .onAppear {
+                if nav.takeIntent(for: .collections) == .createCollection { isPresentingCreate = true }
+            }
     }
 
     @ViewBuilder
@@ -165,7 +169,7 @@ struct CollectionsListView: View {
 }
 
 /// Row for the collections list. Two lines: name on top, mode badge + count below.
-private struct CollectionRow: View {
+struct CollectionRow: View {
     let collection: Collection
 
     var body: some View {

@@ -54,6 +54,13 @@ final class TabNavigation {
         return pending.intent
     }
 
+    /// The intent waiting for `tab`, left in place: a root that only forwards
+    /// it (You pushes Glyphs, which consumes `.carveGlyph`) reads it here.
+    func peekIntent(for tab: AppTab) -> TabIntent? {
+        guard let pending = pendingIntent, pending.tab == tab else { return nil }
+        return pending.intent
+    }
+
     func popToRoot(_ tab: AppTab) {
         switch tab {
         case .home: home.removeAll()

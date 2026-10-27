@@ -82,6 +82,10 @@ struct ProfileView: View {
             }
         }
         .pebblesScreen()
+        // Home's checklist asks for a carve: push Glyphs, which consumes the intent.
+        .onAppear {
+            if nav.peekIntent(for: .you) == .carveGlyph, nav.you.last != .glyphs { nav.you.append(.glyphs) }
+        }
         .task {
             await stats.load()
             await loadProfile()

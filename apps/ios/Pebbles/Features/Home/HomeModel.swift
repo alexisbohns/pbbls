@@ -12,18 +12,24 @@ enum HomeModelError: Error { case noService }
     private(set) var hasLoadedOnce = false
     private(set) var wraps: HomeWraps?
     private(set) var wrapsError: String?
+    private(set) var checklist: HomeChecklist?
+    private(set) var claimError: String?
+    private(set) var isClaiming = false
     /// The decks Home has played this launch (D-plan-1): one ledger for the tab.
     @ObservationIgnored let introLedger = IntroLedger()
     @ObservationIgnored var zone: TimeZone = SpineCalendar.current.timeZone
     @ObservationIgnored var service: (any HomeServicing)?
+    @ObservationIgnored var achievements: AchievementsService?
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "home.model")
 
     func load() async {
         defer { hasLoadedOnce = true }
         guard service != nil else { return }
         async let months: Void = loadWraps()
+        async let firsts: Void = loadChecklist()
         await loadName()
         await months
+        await firsts
     }
 
     private func loadName() async {
@@ -44,6 +50,50 @@ enum HomeModelError: Error { case noService }
         } catch {
             logger.warning("home wraps failed: \(error.localizedDescription, privacy: .public)")
             wrapsError = String(localized: "home.wraps.error")
+        }
+    }
+
+    /// The first five (spec D6): the retroactive check first, so a veteran's
+    /// history is already ticked, then the catalog and the unlocks. A failed
+    /// read keeps the last checklist.
+    func loadChecklist() async {
+        guard let achievements else { return }
+        await achievements.checkIgnoringFailure()
+        do {
+            async let catalogRows = achievements.loadCatalog()
+            async let unlockRows = achievements.loadUnlocks()
+            let catalog = try await catalogRows
+            let unlocks = try await unlockRows
+            let slugById = Dictionary(catalog.map { ($0.id, $0.slug) }, uniquingKeysWith: { first, _ in first })
+            var unlockedAt: [String: Date] = [:]
+            for unlock in unlocks {
+                if let slug = slugById[unlock.achievementId] { unlockedAt[slug] = unlock.unlockedAt }
+            }
+            checklist = HomeChecklist.make(catalog: catalog, unlocked: Set(unlockedAt.keys), unlockedAt: unlockedAt)
+        } catch {
+            guard !Task.isCancelled else { return }
+            logger.warning("home checklist failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// Claims the blue pebble. An empty grant is not success (the RPC's
+    /// contract): the row stays and says so.
+    func claim() async {
+        guard let achievements, !isClaiming else { return }
+        isClaiming = true
+        claimError = nil
+        defer { isClaiming = false }
+        do {
+            let granted = try await achievements.claimBluePebble()
+            if granted.isEmpty {
+                logger.error("claim_blue_pebble granted nothing")
+                claimError = String(localized: "home.firstFive.claimFailed")
+            } else {
+                await loadChecklist()
+            }
+        } catch {
+            logger.error("claim_blue_pebble failed: \(error.localizedDescription, privacy: .public)")
+            claimError = String(localized: "home.firstFive.claimFailed")
         }
     }
 

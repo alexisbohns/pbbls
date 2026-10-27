@@ -89,6 +89,10 @@ struct SoulsListView: View {
                 Text(message)
             }
             .pebblesScreen()
+            // Home's checklist sends the user here to add a first soul.
+            .onAppear {
+                if nav.takeIntent(for: .people) == .createSoul { isPresentingCreate = true }
+            }
     }
 
     @ViewBuilder

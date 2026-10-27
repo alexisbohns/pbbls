@@ -44,3 +44,16 @@ struct Collection: Identifiable, Decodable, Hashable {
         }
     }
 }
+
+extension Collection {
+    /// Memberwise, for fixtures and illustrations (the decoder above is the
+    /// only other way in).
+    init(id: UUID, name: String, mode: CollectionMode?, glyphId: UUID? = nil, glyph: Glyph? = nil, pebbleCount: Int) {
+        self.id = id
+        self.name = name
+        self.mode = mode
+        self.glyphId = glyphId
+        self.glyph = glyph
+        self.pebbleCount = pebbleCount
+    }
+}
