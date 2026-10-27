@@ -154,6 +154,20 @@ final class AchievementsService {
         return rows
     }
 
+    /// Claims the blue pebble (#1254, spec D6): the sixth row of Home's
+    /// checklist, granted only through this call once the five firsts are
+    /// unlocked. An EMPTY result means "not granted" (already claimed, or the
+    /// catalog row retired), never success: the caller keeps its row until a
+    /// non-empty result arrives. `not_ready` surfaces as a thrown error.
+    func claimBluePebble() async throws -> [AchievementCheckResult] {
+        let results: [AchievementCheckResult] = try await client
+            .rpc("claim_blue_pebble")
+            .execute()
+            .value
+        if !results.isEmpty { presentUnlockMoment(for: results) }
+        return results
+    }
+
     /// Screen-open variant: the retroactive grant must never surface as an
     /// error — the grid renders whatever `loadUnlocks()` then returns.
     func checkIgnoringFailure() async {

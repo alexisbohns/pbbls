@@ -41,6 +41,12 @@ extension AchievementRecord {
             return catalogString("achievement.family.first_glyph.title", fallback: "First glyph")
         case "first_soul":
             return catalogString("achievement.family.first_soul.title", fallback: "First soul")
+        case "first_moment":
+            return catalogString("achievement.family.first_moment.title", fallback: "First moment")
+        case "first_pebble":
+            return catalogString("achievement.family.first_pebble.title", fallback: "First pebble")
+        case "first_five":
+            return catalogString("achievement.family.first_five.title", fallback: "The blue pebble")
         case "glyph_count":
             return String(format: catalogString("achievement.family.glyph_count.title", fallback: "%lld glyphs"), threshold ?? 0)
         case "glyph_sales":
@@ -69,6 +75,12 @@ extension AchievementRecord {
             return catalogString("achievement.family.first_glyph.description", fallback: "Carve your first glyph.")
         case "first_soul":
             return catalogString("achievement.family.first_soul.description", fallback: "Add your first soul.")
+        case "first_moment":
+            return catalogString("achievement.family.first_moment.description", fallback: "Record your first moment.")
+        case "first_pebble":
+            return catalogString("achievement.family.first_pebble.description", fallback: "Complete your first pebble.")
+        case "first_five":
+            return catalogString("achievement.family.first_five.description", fallback: "Claim it once your first five are done.")
         case "glyph_count":
             return String(format: catalogString("achievement.family.glyph_count.description", fallback: "Carve %lld glyphs of your own."), threshold ?? 0)
         case "glyph_sales":
@@ -94,6 +106,9 @@ extension AchievementRecord {
         case "first_collection": "square.stack.3d.up"
         case "first_glyph":      "scribble"
         case "first_soul":       "person.2"
+        case "first_moment":     "clock"
+        case "first_pebble":     "circle.hexagongrid"
+        case "first_five":       "drop.fill"
         case "glyph_count":      "pencil.and.outline"
         case "glyph_sales":      "storefront"
         default:                 "trophy"
