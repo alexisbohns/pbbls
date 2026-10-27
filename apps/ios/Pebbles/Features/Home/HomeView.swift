@@ -83,6 +83,9 @@ struct HomeView: View {
                         }
                     }
 
+                    // Spec §1.6: the About header is static; the rows land with the read.
+                    GuidesList(guides: model.guides)
+
                     if camera?.isSaving == true {
                         Text("home.camera.saving")
                             .spineType(.summary)
@@ -181,7 +184,7 @@ struct HomeView: View {
         .animation(.snappy, value: camera?.landed)
         .navigationDestination(for: HomeRoute.self) { route in
             switch route {
-            case .guide(let slug): Text(verbatim: slug) // Part 5 replaces this with GuidePage
+            case .guide(let slug): guideDestination(slug)
             }
         }
         // Reselecting Home inside the TabView re-runs this task (the root re-appears), which
@@ -202,6 +205,29 @@ struct HomeView: View {
             }
             deadline.cancel()
             onFirstLoad()
+        }
+    }
+
+    /// A pushed guide, by slug: the list may not have landed yet when a snapshot
+    /// restores the route, so the page waits on it rather than reporting a miss.
+    /// A failed first read is a miss, not a spinner that never ends.
+    private func guideResolution(_ slug: String) -> RouteResolution<Guide> {
+        guard let guides = model.guides else { return model.guidesFailed ? .missing : .loading }
+        return guides.first { $0.slug == slug }.map { .found($0) } ?? .missing
+    }
+
+    @ViewBuilder
+    private func guideDestination(_ slug: String) -> some View {
+        switch guideResolution(slug) {
+        case .loading:
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .pebblesScreen()
+        case .found(let guide):
+            GuidePage(guide: guide)
+        case .missing:
+            ContentUnavailableView("home.about.missing", systemImage: "book.closed")
+                .pebblesScreen()
         }
     }
 

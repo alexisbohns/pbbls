@@ -6137,6 +6137,40 @@
         }
       }
     },
+    "home.about.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About Pebbles"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À propos de Pebbles"
+          }
+        }
+      }
+    },
+    "home.about.missing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This reading isn't available"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette lecture n'est pas disponible"
+          }
+        }
+      }
+    },
     "home.wraps.retry" : {
       "extractionState" : "manual",
       "localizations" : {

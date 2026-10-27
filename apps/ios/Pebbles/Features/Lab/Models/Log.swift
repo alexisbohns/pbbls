@@ -102,9 +102,3 @@ enum LogStatus: String, Decodable {
     case inProgress = "in_progress"
     case shipped
 }
-
-private extension Locale {
-    var prefersFrench: Bool {
-        language.languageCode?.identifier == "fr"
-    }
-}

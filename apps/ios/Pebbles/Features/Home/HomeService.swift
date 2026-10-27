@@ -12,6 +12,8 @@ protocol HomeServicing: Sendable {
     func wraps(zone: TimeZone) async throws -> HomeWraps
     /// `reveal_wrap`: unfolds `month`; the server records when.
     func reveal(month: CalendarMonth, zone: TimeZone) async throws -> HomeReveal
+    /// `guides`: the published About Pebbles readings, in sort order.
+    func guides() async throws -> [Guide]
 }
 
 struct HomeService: HomeServicing {
@@ -44,5 +46,16 @@ struct HomeService: HomeServicing {
             .rpc("reveal_wrap", params: ["p_month": month.firstDay.iso, "p_tz": zone.identifier])
             .execute().data
         return try WrapDecoding.decode(HomeRevealPayload.self, from: data).model
+    }
+
+    func guides() async throws -> [Guide] {
+        let rows: LossyGuideArray = try await client
+            .from("guides")
+            .select()
+            .eq("published", value: true)
+            .order("sort_order")
+            .execute()
+            .value
+        return rows.guides
     }
 }
