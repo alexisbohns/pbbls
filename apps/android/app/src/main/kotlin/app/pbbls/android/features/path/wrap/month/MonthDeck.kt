@@ -84,8 +84,9 @@ internal object MonthDeck {
         }
 
     /**
-     * What a card plays. The cover its garland; the persons their rows in turn; another section, for now, its
-     * arrival alone (its entrance lands in the parts after this one); the end card nothing yet.
+     * What a card plays. The cover its garland; the persons their rows in turn; the gem its count, then its
+     * families; another section, for now, its arrival alone (its entrance lands in the parts after this one);
+     * the end card nothing yet.
      */
     fun beats(
         card: IntroSequence,
@@ -96,6 +97,7 @@ internal object MonthDeck {
         when (card) {
             IntroSequence.Cover -> coverBeats(wrap, lookups)
             IntroSequence.Section(MonthSection.PERSONS) -> PersonsSection.introBeats(wrap, lookups)
+            IntroSequence.Section(MonthSection.GEM) -> EmotionGem.introBeats(wrap)
             is IntroSequence.Section -> IntroScore.head(hasLead = false, insights = leadsInsights)
             IntroSequence.End -> emptyList()
         }

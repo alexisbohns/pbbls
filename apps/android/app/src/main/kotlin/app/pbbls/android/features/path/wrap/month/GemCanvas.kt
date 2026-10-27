@@ -1,11 +1,13 @@
 package app.pbbls.android.features.path.wrap.month
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.CacheDrawScope
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -13,6 +15,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextLayoutResult
@@ -20,12 +23,20 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.RevealMotion
 import app.pbbls.android.core.designsystem.SpineColors
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.ui.gem.FacetKind
 import app.pbbls.android.core.ui.gem.GemGeometry
 import app.pbbls.android.core.ui.gem.GemPoint
 import app.pbbls.android.core.ui.render.stone.StoneTones
+import app.pbbls.android.features.path.wrap.intro.IntroKey
+import app.pbbls.android.features.path.wrap.intro.IntroLanding
+import app.pbbls.android.features.path.wrap.intro.IntroMotion
+import app.pbbls.android.features.path.wrap.intro.IntroReveal
+import app.pbbls.android.features.path.wrap.intro.IntroScore
+import app.pbbls.android.features.path.wrap.intro.counted
+import app.pbbls.android.features.path.wrap.intro.introReveal
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.max
@@ -58,81 +69,150 @@ internal class GemLabel(
  * a seam of the page ("uniform"), the table a window of paper with the count, and each family named
  * just outside its run, pushed apart until no two names touch. The allocation is the server's
  * [facets]; this only colours it.
+ *
+ * In the month intro (#1242, [reveal]) the blank stone fades in and its count rises, running up from 0
+ * to [count]; then each facet takes its colour over the table's paper, and each family's name and share
+ * rise with its run's first facet. Settled, it draws as ever.
  */
 @Composable
 internal fun GemCanvas(
     facets: Map<String, String?>,
     paletteOf: (String) -> EmotionPalette?,
     labels: List<GemLabel>,
-    count: String,
+    count: Int,
     countLabel: String,
     description: String,
     modifier: Modifier = Modifier,
+    reveal: IntroReveal = IntroReveal.settled,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val fills = remember(facets, colors, paletteOf) { facetFills(facets, paletteOf, colors) }
     val measurer = rememberTextMeasurer()
 
-    Canvas(modifier.fillMaxWidth().height(HEIGHT).semantics { contentDescription = description }) {
-        val sc = SCALE * density
-        val cx = size.width / 2
-        val cy = CENTRE_Y * density
+    Spacer(
+        modifier
+            .fillMaxWidth()
+            .height(HEIGHT)
+            // The blank stone fades in, its seams, table and ticks still (iOS `GemStone`'s opacity); the count rises in the draw.
+            .introReveal(reveal, IntroKey.Blank, IntroLanding.FADE)
+            .semantics { contentDescription = description }
+            .drawWithCache {
+                // Built once per size and composition: a frame of the intro only reads the reveal and draws.
+                val sc = SCALE * density
+                val cx = size.width / 2
+                val cy = CENTRE_Y * density
 
-        fun at(q: GemPoint) = Offset(cx + q.x.toFloat() * sc, cy + q.y.toFloat() * sc)
+                fun at(q: GemPoint) = Offset(cx + q.x.toFloat() * sc, cy + q.y.toFloat() * sc)
 
-        fun path(points: List<GemPoint>) =
-            Path().apply {
-                points.forEachIndexed { i, q ->
-                    if (i ==
-                        0
-                    ) {
-                        moveTo(at(q).x, at(q).y)
-                    } else {
-                        lineTo(at(q).x, at(q).y)
+                fun path(points: List<GemPoint>) =
+                    Path().apply {
+                        points.forEachIndexed { i, q ->
+                            if (i == 0) moveTo(at(q).x, at(q).y) else lineTo(at(q).x, at(q).y)
+                        }
+                        close()
                     }
-                }
-                ; close()
-            }
 
-        GemGeometry.facets.filter { it.kind != FacetKind.TABLE }.forEach { f ->
-            val p = path(f.points)
-            val fill = fills.getValue(f.id)
-            drawPath(p, fill)
-            // Each facet edged in its own colour, so neighbours meet without a hairline gap.
-            drawPath(p, fill, style = Stroke(EDGE.toPx(), join = StrokeJoin.Round))
-        }
-        GemGeometry.edges.filter { "table" !in it.facets.toList() }.forEach { e ->
-            drawLine(colors.ground, at(e.a), at(e.b), SEAM.toPx(), StrokeCap.Round)
-        }
-        val table = path(GemGeometry.byId.getValue("table").points)
-        drawPath(table, if (colors.isNight) StoneTones.mixOklab(colors.ink, 0.07f, colors.stock) else colors.stock)
-        drawPath(table, colors.ground, style = Stroke(SEAM.toPx(), join = StrokeJoin.Round))
-        val n = measurer.measure(count, type.dayNumeral.copy(color = colors.ink))
-        val l = measurer.measure(countLabel, type.dayWeekday.copy(color = colors.ink2))
-        drawText(n, topLeft = Offset(cx - n.size.width / 2f, cy - n.size.height * 0.62f))
-        drawText(l, topLeft = Offset(cx - l.size.width / 2f, cy + n.size.height * 0.36f))
+                val cut =
+                    GemGeometry.facets.filter { it.kind != FacetKind.TABLE }.map { f ->
+                        CutFacet(IntroKey.Facet(f.id), path(f.points), fills.getValue(f.id))
+                    }
+                val seams = GemGeometry.edges.filter { "table" !in it.facets.toList() }.map { at(it.a) to at(it.b) }
+                val table = path(GemGeometry.byId.getValue("table").points)
+                // The table's paper, which a facet shows until it lights.
+                val paper = if (colors.isNight) StoneTones.mixOklab(colors.ink, 0.07f, colors.stock) else colors.stock
+                // Each facet edged in its own colour, so neighbours meet without a hairline gap.
+                val edge = Stroke(EDGE.toPx(), join = StrokeJoin.Round)
+                val seam = SEAM.toPx()
+                val rim = Stroke(SEAM.toPx(), join = StrokeJoin.Round)
+                val numeral = type.dayNumeral.copy(color = colors.ink)
+                val n = measurer.measure(count.toString(), numeral)
+                val l = measurer.measure(countLabel, type.dayWeekday.copy(color = colors.ink2))
+                val names =
+                    placeLabels(
+                        labels,
+                        facets,
+                        labels.map {
+                            measurer.measure(it.name, type.soulName.copy(color = colors.ink)) to
+                                measurer.measure("${it.percent} %", type.contentsTime.copy(color = colors.ink2))
+                        },
+                        cx,
+                        cy,
+                        sc,
+                    )
+                val rise = IntroMotion.riseOffset.toPx()
+                // The counting number's layout, measured again only when the number shown changes.
+                var shownValue = count
+                var shownLayout = n
 
-        drawLabels(
-            labels,
-            facets,
-            measurer.let { m ->
-                labels.map {
-                    m.measure(it.name, type.soulName.copy(color = colors.ink)) to
-                        m.measure("${it.percent} %", type.contentsTime.copy(color = colors.ink2))
+                onDrawBehind {
+                    cut.forEach { f ->
+                        // A facet no family owns has no beat: it reads 1 and lands with the stone (D2).
+                        val lit = reveal(f.key)
+                        val fill =
+                            when {
+                                lit >= 1f -> f.fill
+                                lit <= 0f -> paper
+                                else -> StoneTones.mixSrgb(f.fill, RevealMotion.easeOut(lit.toDouble()).toFloat(), paper)
+                            }
+                        drawPath(f.path, fill)
+                        drawPath(f.path, fill, style = edge)
+                    }
+                    seams.forEach { (a, b) -> drawLine(colors.ground, a, b, seam, StrokeCap.Round) }
+                    drawPath(table, paper)
+                    drawPath(table, colors.ground, style = rim)
+                    // From 0, counting up to the pebbles on its beat; settled, the number as ever.
+                    val counting = reveal(IntroKey.Count)
+                    val shown =
+                        if (counting < 1f) {
+                            val value = IntroScore.counted(count, counting.toDouble())
+                            if (value != shownValue) {
+                                shownValue = value
+                                shownLayout = measurer.measure(value.toString(), numeral)
+                            }
+                            shownLayout
+                        } else {
+                            n
+                        }
+                    // The count and its label also rise with the blank stone (iOS: each its own `.introReveal(.blank)`);
+                    // the layer has already faded them.
+                    val blank = reveal(IntroKey.Blank)
+                    if (blank < 1f) {
+                        translate(top = rise * IntroMotion.riseLift(blank.toDouble()).toFloat()) { drawCount(shown, n, l, cx, cy) }
+                    } else {
+                        drawCount(shown, n, l, cx, cy)
+                    }
+                    drawLabels(names, reveal, rise, colors)
                 }
             },
-            cx,
-            cy,
-            sc,
-            colors,
-        )
-    }
+    )
 }
 
+/** The count in the table and its label under it, placed by the settled count's height so they hold still as it counts. */
+private fun DrawScope.drawCount(
+    shown: TextLayoutResult,
+    settled: TextLayoutResult,
+    label: TextLayoutResult,
+    cx: Float,
+    cy: Float,
+) {
+    drawText(shown, topLeft = Offset(cx - shown.size.width / 2f, cy - settled.size.height * 0.62f))
+    drawText(label, topLeft = Offset(cx - label.size.width / 2f, cy + settled.size.height * 0.36f))
+}
+
+/** A facet of the cut, laid out: its beat's key, its path at this size, its settled fill. */
+private class CutFacet(
+    val key: IntroKey,
+    val path: Path,
+    val fill: Color,
+)
+
+/** A family's name and share beside the stone: where the spread puts them, and the tick at its run. */
 private class LabelPlace(
-    val anchor: Double,
+    val key: IntroKey,
     var angle: Double,
+    val tickFrom: Offset,
+    val tickTo: Offset,
     val name: TextLayoutResult,
     val pct: TextLayoutResult,
 ) {
@@ -143,22 +223,34 @@ private class LabelPlace(
     var align = 0
 }
 
-/** Names just outside each run, nudged along the rim until no two overlap; a hairline tick ties each to its run. */
-private fun DrawScope.drawLabels(
+/** Names just outside each run, nudged along the rim until no two overlap. Once per size: the spread is far too slow for a frame. */
+private fun CacheDrawScope.placeLabels(
     labels: List<GemLabel>,
     facets: Map<String, String?>,
     texts: List<Pair<TextLayoutResult, TextLayoutResult>>,
     cx: Float,
     cy: Float,
     sc: Float,
-    colors: SpineColors,
-) {
+): List<LabelPlace> {
     val runs =
         labels.mapIndexedNotNull { i, label ->
             val ids = GemGeometry.allocated.filter { facets[it] == label.slug }
             if (ids.isEmpty()) return@mapIndexedNotNull null
             val a = GemGeometry.runAngle(ids)
-            LabelPlace(a, a, texts[i].first, texts[i].second)
+            // The tick stays at the run, wherever the spread takes the name.
+            val radius = GemGeometry.rimRadius(a).toFloat() * sc
+            val c = cos(a).toFloat()
+            val s = sin(a).toFloat()
+            val from = radius + TICK_FROM * density
+            val to = radius + TICK_TO * density
+            LabelPlace(
+                IntroKey.Label(label.slug),
+                a,
+                Offset(cx + from * c, cy + from * s),
+                Offset(cx + to * c, cy + to * s),
+                texts[i].first,
+                texts[i].second,
+            )
         }
     val gap = LABEL_GAP * density
     val pad = LABEL_PAD * density
@@ -185,7 +277,8 @@ private fun DrawScope.drawLabels(
         p: LabelPlace,
         q: LabelPlace,
     ) = p.x0 < q.x0 + q.w + pad && q.x0 < p.x0 + p.w + pad && p.y0 < q.y0 + q.h + pad / 2 && q.y0 < p.y0 + p.h + pad / 2
-    repeat(SPREAD_TRIES) {
+    // Until no name moves (iOS breaks there too): a pass that moves none leaves every angle, so every later pass, as it was.
+    for (attempt in 0 until SPREAD_TRIES) {
         runs.forEach(::place)
         var moved = false
         for (i in runs.indices) {
@@ -200,20 +293,24 @@ private fun DrawScope.drawLabels(
                 moved = true
             }
         }
-        if (!moved) return@repeat
+        if (!moved) break
     }
     runs.forEach(::place)
+    return runs
+}
+
+/**
+ * A hairline tick ties each name to its run, with the stone; the name and its share rise with the run's
+ * first facet in the intro (#1242), and stand still once settled.
+ */
+private fun DrawScope.drawLabels(
+    runs: List<LabelPlace>,
+    reveal: IntroReveal,
+    rise: Float,
+    colors: SpineColors,
+) {
     runs.forEach { r ->
-        val radius = GemGeometry.rimRadius(r.anchor).toFloat() * sc
-        val c = cos(r.anchor).toFloat()
-        val s = sin(r.anchor).toFloat()
-        drawLine(
-            colors.ink3,
-            Offset(cx + (radius + TICK_FROM * density) * c, cy + (radius + TICK_FROM * density) * s),
-            Offset(cx + (radius + TICK_TO * density) * c, cy + (radius + TICK_TO * density) * s),
-            TICK.toPx(),
-            StrokeCap.Round,
-        )
+        drawLine(colors.ink3, r.tickFrom, r.tickTo, TICK.toPx(), StrokeCap.Round)
 
         fun xFor(t: TextLayoutResult) =
             when (r.align) {
@@ -221,8 +318,13 @@ private fun DrawScope.drawLabels(
                 1 -> r.x0 + r.w - t.size.width
                 else -> r.x0 + (r.w - t.size.width) / 2
             }
-        drawText(r.name, topLeft = Offset(xFor(r.name), r.y0))
-        drawText(r.pct, topLeft = Offset(xFor(r.pct), r.y0 + r.name.size.height))
+        // Settled: no offset, and the text's own alpha (NaN is drawText's default).
+        val lit = reveal(r.key)
+        val eased = if (lit < 1f) RevealMotion.easeOut(lit.toDouble()).toFloat() else 1f
+        val dy = if (lit < 1f) rise * IntroMotion.riseLift(lit.toDouble()).toFloat() else 0f
+        val alpha = if (lit < 1f) eased else Float.NaN
+        drawText(r.name, topLeft = Offset(xFor(r.name), r.y0 + dy), alpha = alpha)
+        drawText(r.pct, topLeft = Offset(xFor(r.pct), r.y0 + r.name.size.height + dy), alpha = alpha)
     }
 }
 

@@ -23,6 +23,15 @@ class IntroMotionTest {
     }
 
     @Test
+    fun `a rising part starts a whole rise below its place and eases up, exactly there once landed`() {
+        assertEquals(1.0, IntroMotion.riseLift(0.0), 0.0)
+        // Cubic ease-out: half way in, an eighth of the rise is left.
+        assertEquals(0.125, IntroMotion.riseLift(0.5), 1e-12)
+        assertEquals(0.0, IntroMotion.riseLift(1.0), 0.0)
+        assertEquals(0.0, IntroMotion.riseLift(1.5), 0.0)
+    }
+
+    @Test
     fun `a cairn's stones tick a little firmer each, capped at 0_8`() {
         assertEquals(0.32f, IntroTick.cairn(0).intensity, 1e-6f)
         assertEquals(0.74f, IntroTick.cairn(6).intensity, 1e-6f)
