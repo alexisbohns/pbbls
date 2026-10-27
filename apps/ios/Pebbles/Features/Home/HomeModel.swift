@@ -15,6 +15,8 @@ enum HomeModelError: Error { case noService }
     private(set) var checklist: HomeChecklist?
     private(set) var claimError: String?
     private(set) var isClaiming = false
+    /// The About Pebbles readings; nil until the first read lands (spec §1.6).
+    private(set) var guides: [Guide]?
     /// The decks Home has played this launch (D-plan-1): one ledger for the tab.
     @ObservationIgnored let introLedger = IntroLedger()
     @ObservationIgnored var zone: TimeZone = SpineCalendar.current.timeZone
@@ -30,9 +32,11 @@ enum HomeModelError: Error { case noService }
         guard service != nil else { return }
         async let months: Void = loadWraps()
         async let firsts: Void = loadChecklist()
+        async let readings: Void = loadGuides()
         await loadName()
         await months
         await firsts
+        await readings
     }
 
     private func loadName() async {
@@ -53,6 +57,17 @@ enum HomeModelError: Error { case noService }
         } catch {
             logger.warning("home wraps failed: \(error.localizedDescription, privacy: .public)")
             wrapsError = String(localized: "home.wraps.error")
+        }
+    }
+
+    /// Keeps the last readings when the reload fails; nothing is drawn under
+    /// the header for a user who has never had them (spec §1.6).
+    func loadGuides() async {
+        guard let service else { return }
+        do {
+            guides = try await service.guides()
+        } catch {
+            logger.warning("home guides failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 

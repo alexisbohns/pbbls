@@ -181,5 +181,50 @@ extension References {
             ReferenceImage.assertMatches(Self.taskSoul(), named: "taskSoul",
                                          config: ReferenceConfig(scheme: scheme, locales: locales))
         }
+
+        static let guideFixtures: [Guide] = [
+            Guide(slug: "stones", sortOrder: 1, illustration: .stones,
+                  titleEn: "Stones", titleFr: "Les pierres",
+                  summaryEn: "Nine shapes, by weight and light.", summaryFr: "Neuf formes, par poids et lumière.",
+                  bodyMdEn: "A pebble is a stone.\n\n## Three sizes\n\nA day event, a milestone, a turning point.",
+                  bodyMdFr: "Un pebble est une pierre.\n\n## Trois tailles\n\nUn événement, un jalon, un tournant."),
+            Guide(slug: "emotions", sortOrder: 2, illustration: .emotions,
+                  titleEn: "Emotions", titleFr: "Les émotions",
+                  summaryEn: "Seven families, each with a colour.", summaryFr: "Sept familles, chacune sa couleur.",
+                  bodyMdEn: "Seven families."),
+            Guide(slug: "souls", sortOrder: 3, illustration: .souls,
+                  titleEn: "Souls", titleFr: "Les âmes",
+                  summaryEn: "The people in your moments.", summaryFr: "Les personnes de tes moments.",
+                  bodyMdEn: "The people.")
+        ]
+
+        static func guidesList() -> some View {
+            GuidesList(guides: guideFixtures)
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.md)
+                .frame(width: 393, alignment: .leading)
+                .background(Color.pebbles.surface)
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func guidesList(scheme: ReferenceScheme) throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(Self.guidesList(), named: "guidesList",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
+
+        static func guidePageStones() -> some View {
+            GuidePageContent(guide: guideFixtures[0])
+                .padding(.vertical, Spacing.md)
+                .frame(width: 393, height: 600, alignment: .top)
+                .background(Color.pebbles.surface)
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func guidePageStones(scheme: ReferenceScheme) throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(Self.guidePageStones(), named: "guidePageStones",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
     }
 }

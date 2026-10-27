@@ -47,6 +47,33 @@ struct HomeModelTests {
         #expect(model.wraps?.months.first { $0.month == sept }?.isFolded == false)
     }
 
+    // MARK: - The guides
+
+    private static let stones = Guide(slug: "stones", sortOrder: 1, illustration: .stones,
+                                      titleEn: "Stones", summaryEn: "Nine shapes.", bodyMdEn: "Nine shapes.")
+
+    @Test func guidesLoadAndKeepTheLastListOnFailure() async {
+        let fake = FakeHomeService(answer: { "A" })
+        fake.answer(guides: .success([Self.stones]))
+        let model = HomeModel(); model.service = fake
+        #expect(model.guides == nil)
+        await model.load()
+        #expect(model.guides == [Self.stones])
+        #expect(fake.guidesCalls == 1)
+        fake.answer(guides: .failure(FakeHomeService.Failure()))
+        await model.loadGuides()
+        #expect(model.guides == [Self.stones])
+    }
+
+    @Test func aFailedFirstReadLeavesTheGuidesUnloaded() async {
+        let fake = FakeHomeService(answer: { "A" })
+        fake.answer(guides: .failure(FakeHomeService.Failure()))
+        let model = HomeModel(); model.service = fake
+        await model.load()
+        #expect(model.guides == nil)
+        #expect(fake.guidesCalls == 1)
+    }
+
     // MARK: - The claim
 
     private static func claimable() -> (FakeAchievementsProvider, HomeModel) {
