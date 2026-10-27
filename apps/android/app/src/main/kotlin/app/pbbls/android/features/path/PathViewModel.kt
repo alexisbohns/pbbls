@@ -417,7 +417,14 @@ class PathViewModel
                 }
         }
 
+        /**
+         * A strip tap, a link, a settled swipe. A page the Path doesn't hold is ignored: an empty past week is a
+         * spacer in the strip, not a page, yet a month card's column still names it (iOS `focusCurrentWeek`'s
+         * `guard pages.contains`). Focusing it would leave the pager where it was and the strip with nothing
+         * selected, and the next load would refocus somewhere else.
+         */
         fun onFocus(page: PathPage) {
+            if (page !in pages) return
             if (focus == page) return
             focus = page
             publish()
