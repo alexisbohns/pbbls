@@ -258,3 +258,14 @@ final class AchievementsService {
         return refs?.domains.first(where: { $0.id == domainId })?.localizedName
     }
 }
+
+/// The slice of `AchievementsService` Home reads, so its model can be driven by a fake.
+@MainActor
+protocol AchievementsProviding: AnyObject {
+    func checkIgnoringFailure() async
+    func loadCatalog() async throws -> [AchievementRecord]
+    func loadUnlocks() async throws -> [AchievementUnlockRecord]
+    func claimBluePebble() async throws -> [AchievementCheckResult]
+}
+
+extension AchievementsService: AchievementsProviding {}

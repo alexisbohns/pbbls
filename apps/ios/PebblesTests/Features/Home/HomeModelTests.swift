@@ -46,4 +46,42 @@ struct HomeModelTests {
         #expect(reveal.revealedAt == at)
         #expect(model.wraps?.months.first { $0.month == sept }?.isFolded == false)
     }
+
+    // MARK: - The claim
+
+    private static func claimable() -> (FakeAchievementsProvider, HomeModel) {
+        let fake = FakeAchievementsProvider()
+        fake.catalog = HomeChecklistTests.catalog(HomeChecklistTests.allSlugs)
+        fake.unlocks = unlocks(Set(HomeChecklist.Task.allCases.map(\.slug)), in: fake.catalog)
+        let model = HomeModel()
+        model.achievements = fake
+        return (fake, model)
+    }
+
+    private static func unlocks(_ slugs: Set<String>, in catalog: [AchievementRecord]) -> [AchievementUnlockRecord] {
+        catalog.filter { slugs.contains($0.slug) }
+            .map { AchievementUnlockRecord(achievementId: $0.id, unlockedAt: Date(timeIntervalSince1970: 1_793_000_000)) }
+    }
+
+    @Test func anEmptyClaimIsNotAGrant() async {
+        let (fake, model) = Self.claimable()
+        await model.loadChecklist()
+        #expect(model.checklist?.state == .claimable)
+        let catalogCalls = fake.catalogCalls
+        fake.claimAnswer = .success([])
+        await model.claim()
+        #expect(model.claimError != nil)
+        #expect(model.checklist?.state == .claimable)
+        #expect(fake.catalogCalls == catalogCalls)
+    }
+
+    @Test func aGrantReloadsToDone() async {
+        let (fake, model) = Self.claimable()
+        await model.loadChecklist()
+        fake.claimAnswer = .success([AchievementCheckResult(slug: HomeChecklist.blueSlug, karmaGranted: 50)])
+        fake.onClaim = { fake.unlocks = Self.unlocks(Set(HomeChecklistTests.allSlugs), in: fake.catalog) }
+        await model.claim()
+        #expect(model.checklist?.state == .done)
+        #expect(model.claimError == nil)
+    }
 }

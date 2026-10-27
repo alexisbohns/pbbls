@@ -19,7 +19,10 @@ enum HomeModelError: Error { case noService }
     @ObservationIgnored let introLedger = IntroLedger()
     @ObservationIgnored var zone: TimeZone = SpineCalendar.current.timeZone
     @ObservationIgnored var service: (any HomeServicing)?
-    @ObservationIgnored var achievements: AchievementsService?
+    @ObservationIgnored var achievements: (any AchievementsProviding)?
+    /// Bumped by every checklist read and by a claim, so a slower earlier read
+    /// cannot overwrite a newer state.
+    @ObservationIgnored private var loadGeneration = 0
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "home.model")
 
     func load() async {
@@ -58,6 +61,8 @@ enum HomeModelError: Error { case noService }
     /// read keeps the last checklist.
     func loadChecklist() async {
         guard let achievements else { return }
+        loadGeneration += 1
+        let generation = loadGeneration
         await achievements.checkIgnoringFailure()
         do {
             async let catalogRows = achievements.loadCatalog()
@@ -69,6 +74,7 @@ enum HomeModelError: Error { case noService }
             for unlock in unlocks {
                 if let slug = slugById[unlock.achievementId] { unlockedAt[slug] = unlock.unlockedAt }
             }
+            guard generation == loadGeneration else { return }
             checklist = HomeChecklist.make(catalog: catalog, unlocked: Set(unlockedAt.keys), unlockedAt: unlockedAt)
         } catch {
             guard !Task.isCancelled else { return }
@@ -89,6 +95,7 @@ enum HomeModelError: Error { case noService }
                 logger.error("claim_blue_pebble granted nothing")
                 claimError = String(localized: "home.firstFive.claimFailed")
             } else {
+                loadGeneration += 1 // a read begun before the grant must not land after it
                 await loadChecklist()
             }
         } catch {

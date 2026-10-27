@@ -68,7 +68,7 @@ struct HomeChecklistView: View {
                     .frame(width: 22, height: 22)
                     .accessibilityHidden(true)
                 Text("home.firstFive.claim")
-                    .pebblesFont(.headline)
+                    .spineType(.checklistTitle)
             }
             .padding(.horizontal, Spacing.lg)
         }
@@ -92,20 +92,23 @@ private struct ChecklistTaskRow: View {
                     .font(.system(size: 20))
                     .foregroundStyle(row.isDone ? Color.pebbles.onSurface : Color.pebbles.outline)
                     .frame(width: 22, height: 22)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
+                    // A done title keeps `onSurfaceVariant` for contrast; only its line goes quiet.
                     Text(row.task.title)
-                        .pebblesFont(.headline)
-                        .foregroundStyle(row.isDone ? Color.pebbles.outline : Color.pebbles.onSurface)
+                        .spineType(.checklistTitle)
+                        .foregroundStyle(row.isDone ? Color.pebbles.onSurfaceVariant : Color.pebbles.onSurface)
                     Text(row.task.line)
                         .spineType(.summary)
                         .italic()
-                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                        .foregroundStyle(row.isDone ? Color.pebbles.outline : Color.pebbles.onSurfaceVariant)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 if !row.isDone {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(Color.pebbles.outline)
+                        .accessibilityHidden(true)
                 }
             }
             .padding(.horizontal, Spacing.lg)
@@ -116,6 +119,6 @@ private struct ChecklistTaskRow: View {
         .buttonStyle(.plain)
         .disabled(row.isDone)
         .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(row.isDone ? .isSelected : [])
+        .accessibilityValue(row.isDone ? Text("home.firstFive.done") : Text(verbatim: ""))
     }
 }

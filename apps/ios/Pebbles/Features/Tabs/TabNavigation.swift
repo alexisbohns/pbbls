@@ -24,6 +24,8 @@ final class TabNavigation {
     /// Current at root → ask the root to scroll to top.
     func select(_ tab: AppTab) {
         guard tab == selected else {
+            // A manual switch away from where an intent was headed drops it.
+            if let pending = pendingIntent, pending.tab != tab { pendingIntent = nil }
             selected = tab
             return
         }
@@ -39,6 +41,8 @@ final class TabNavigation {
     /// Switches to `tab` and leaves one intent for its root. Cross-tab
     /// presentation never writes another tab's stack (tabs spec §11); the
     /// destination root reads the intent on appear and acts on it once.
+    /// A `go` to the CURRENT tab with an intent relies on that root's
+    /// `.onAppear`, which `popToRoot` re-fires only when a child was pushed.
     func go(_ tab: AppTab, intent: TabIntent? = nil) {
         if let intent {
             pendingIntent = (tab, intent)

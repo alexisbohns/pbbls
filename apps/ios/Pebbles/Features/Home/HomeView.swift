@@ -69,8 +69,8 @@ struct HomeView: View {
                         }
                     }
 
-                    if let checklist = model.checklist,
-                       checklist.state == .inProgress || checklist.state == .claimable {
+                    // HomeChecklistView draws nothing for a done or unavailable checklist.
+                    if let checklist = model.checklist {
                         VStack(alignment: .leading, spacing: Spacing.sm) {
                             HomeChecklistView(checklist: checklist, isClaiming: model.isClaiming,
                                               onTask: { taskSheet = $0 },
@@ -167,10 +167,6 @@ struct HomeView: View {
         }) { task in
             ChecklistTaskSheet(task: task, onGo: { pendingTask = task })
         }
-        .onChange(of: nav.selected) { _, tab in
-            // Back from a tab the checklist sent the user to: tick what they did there.
-            if tab == .home { reloadChecklist() }
-        }
         .sheet(item: $naming) { detail in
             EditMomentSheet(detail: detail, onSaved: { revision.bump(from: .home) })
         }
@@ -188,6 +184,9 @@ struct HomeView: View {
             case .guide(let slug): Text(verbatim: slug) // Part 5 replaces this with GuidePage
             }
         }
+        // Reselecting Home inside the TabView re-runs this task (the root re-appears), which
+        // also ticks what the user did on a tab the checklist sent them to. `onFirstLoad()`
+        // re-firing is harmless: its latch (`firstRootLoaded`) only sets once.
         .task {
             if model.service == nil { model.service = HomeService(client: supabase.client) }
             if model.achievements == nil { model.achievements = achievements }
@@ -264,7 +263,9 @@ struct HomeView: View {
     }
 
     /// The pebble task completes the newest bare moment; with none (or an
-    /// unreadable Path) it records one and chains into Complete.
+    /// unreadable Path) it records one and chains into Complete. The row is only
+    /// undone for a user who has never completed a pebble, so the first moment of
+    /// the feed is the answer and the read is bounded in practice.
     private func completeNewestBare() async {
         do {
             let moments = try await MomentsService(client: supabase.client).pathMoments()

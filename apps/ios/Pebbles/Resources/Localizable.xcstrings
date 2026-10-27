@@ -5154,6 +5154,23 @@
         }
       }
     },
+    "home.firstFive.done" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fait"
+          }
+        }
+      }
+    },
     "home.firstFive.claim" : {
       "extractionState" : "manual",
       "localizations" : {

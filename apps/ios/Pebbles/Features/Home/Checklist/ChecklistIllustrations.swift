@@ -80,6 +80,7 @@ struct ChecklistIllustration: View {
 
 /// One contents row as the week's contents draw it (`WeekContents`): the
 /// day in small caps, the seal, the name in the contents rank, the time.
+/// It mirrors the row in `WeekContents.swift`; edit the two together.
 private struct ChecklistContentsLine<Seal: View>: View {
     let name: String
     var soul: [GlyphStroke]?
