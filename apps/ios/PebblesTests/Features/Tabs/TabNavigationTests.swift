@@ -9,10 +9,11 @@ struct TabNavigationTests {
     private let soulId = UUID(uuidString: "11111111-1111-1111-1111-111111111111")!
     private let collectionId = UUID(uuidString: "22222222-2222-2222-2222-222222222222")!
 
-    @Test("starts on Path with every stack empty and no scroll requests")
+    @Test("starts on Home with every stack empty and no scroll requests")
     func defaults() {
         let nav = TabNavigation()
-        #expect(nav.selected == .path)
+        #expect(nav.selected == .home)
+        #expect(nav.home.isEmpty)
         #expect(nav.path.isEmpty)
         #expect(nav.people.isEmpty)
         #expect(nav.collections.isEmpty)
@@ -68,6 +69,7 @@ struct TabNavigationTests {
     func pathReselect() {
         let nav = TabNavigation()
         nav.select(.path)
+        nav.select(.path)
         #expect(nav.scrollToTop[.path] == 1)
     }
 
@@ -90,6 +92,58 @@ struct TabNavigationTests {
         #expect(nav.depth(of: .people) == 2)
         #expect(nav.depth(of: .you) == 0)
         #expect(nav.depth(of: .path) == 0)
+    }
+}
+
+@Suite("TabNavigation — home")
+@MainActor
+struct TabNavigationHomeTests {
+    @Test func homeIsFirstInBarOrderAndTheDefaultSelection() {
+        #expect(AppTab.allCases.first == .home)
+        #expect(TabNavigation().selected == .home)
+    }
+
+    @Test func anOldSnapshotWithoutHomeStillRestores() throws {
+        // Written before the Home tab existed: no `home` field.
+        let old = #"{"selected":"people","path":[],"people":[],"collections":[],"you":[]}"#
+        let snapshot = try #require(TabNavigation.Snapshot.decoded(from: Data(old.utf8)))
+        let nav = TabNavigation()
+        nav.restore(snapshot)
+        #expect(nav.selected == .people)
+        #expect(nav.home.isEmpty)
+    }
+
+    @Test func homeRouteRoundTrips() throws {
+        let nav = TabNavigation()
+        nav.select(.home)
+        nav.home = [.guide("stones")]
+        let data = try #require(nav.snapshot.encoded)
+        let restored = try #require(TabNavigation.Snapshot.decoded(from: data))
+        #expect(restored.home == [.guide("stones")])
+    }
+
+    @Test func anIntentPopsTheDestinationToItsRoot() {
+        let nav = TabNavigation()
+        nav.people = [.connections]
+        nav.go(.people, intent: .createSoul)
+        #expect(nav.selected == .people && nav.people.isEmpty)
+        #expect(nav.takeIntent(for: .people) == .createSoul)
+    }
+
+    @Test func resetDropsAPendingIntent() {
+        let nav = TabNavigation()
+        nav.go(.collections, intent: .createCollection)
+        nav.reset()
+        #expect(nav.takeIntent(for: .collections) == nil)
+    }
+
+    @Test func anIntentIsConsumedOnce() {
+        let nav = TabNavigation()
+        nav.go(.people, intent: .createSoul)
+        #expect(nav.selected == .people)
+        #expect(nav.takeIntent(for: .people) == .createSoul)
+        #expect(nav.takeIntent(for: .people) == nil)
+        #expect(nav.takeIntent(for: .collections) == nil)
     }
 }
 
@@ -140,7 +194,7 @@ struct TabNavigationSnapshotTests {
     @Test("missing keys decode to defaults")
     func missingKeys() throws {
         let snapshot = try #require(TabNavigation.Snapshot.decoded(from: Data("{}".utf8)))
-        #expect(snapshot == TabNavigation.Snapshot())
+        #expect(snapshot == TabNavigation.Snapshot(selected: .path))
     }
 
     @Test("a wrong-typed field falls back to its own default and keeps the rest")

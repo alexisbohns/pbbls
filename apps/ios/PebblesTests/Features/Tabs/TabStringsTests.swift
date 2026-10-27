@@ -5,8 +5,8 @@ import Testing
 /// value matching Android's `tab_*` strings.
 @Suite("Tab strings")
 struct TabStringsTests {
-    private static let keys = ["Path", "People", "Collections", "You", "Circle", "New pebble"]
-    private static let french = ["Chemin", "Proches", "Collections", "Toi", "Cercle", "Nouveau galet"]
+    private static let keys = ["Home", "Path", "People", "Collections", "You", "Circle", "New pebble"]
+    private static let french = ["Accueil", "Chemin", "Proches", "Collections", "Toi", "Cercle", "Nouveau galet"]
 
     @Test("each tab string resolves in French", arguments: zip(keys, french))
     func frenchValue(key: String, expected: String) {

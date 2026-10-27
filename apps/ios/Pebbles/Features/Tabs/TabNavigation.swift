@@ -7,7 +7,8 @@ import Observation
 /// `RootView` can read `selected` and reset everything on sign-out.
 @Observable @MainActor
 final class TabNavigation {
-    var selected: AppTab = .path
+    var selected: AppTab = .home
+    var home: [HomeRoute] = []
     var path: [PathRoute] = []
     var people: [PeopleRoute] = []
     var collections: [CollectionsRoute] = []
@@ -33,8 +34,29 @@ final class TabNavigation {
         }
     }
 
+    @ObservationIgnored private var pendingIntent: (tab: AppTab, intent: TabIntent)?
+
+    /// Switches to `tab` and leaves one intent for its root. Cross-tab
+    /// presentation never writes another tab's stack (tabs spec §11); the
+    /// destination root reads the intent on appear and acts on it once.
+    func go(_ tab: AppTab, intent: TabIntent? = nil) {
+        if let intent {
+            pendingIntent = (tab, intent)
+            popToRoot(tab) // the root is the only place that consumes it
+        }
+        if selected != tab { selected = tab } else if intent == nil { popToRoot(tab) }
+    }
+
+    /// The root of `tab` calls this on appear and acts on the result once.
+    func takeIntent(for tab: AppTab) -> TabIntent? {
+        guard let pending = pendingIntent, pending.tab == tab else { return nil }
+        pendingIntent = nil
+        return pending.intent
+    }
+
     func popToRoot(_ tab: AppTab) {
         switch tab {
+        case .home: home.removeAll()
         case .path: path.removeAll()
         case .people: people.removeAll()
         case .collections: collections.removeAll()
@@ -44,6 +66,7 @@ final class TabNavigation {
 
     func depth(of tab: AppTab) -> Int {
         switch tab {
+        case .home: home.count
         case .path: path.count
         case .people: people.count
         case .collections: collections.count
@@ -59,19 +82,22 @@ final class TabNavigation {
     /// field's default rather than failing the whole snapshot.
     struct Snapshot: Codable, Equatable {
         var selected: AppTab
+        var home: [HomeRoute]
         var path: [PathRoute]
         var people: [PeopleRoute]
         var collections: [CollectionsRoute]
         var you: [YouRoute]
 
         init(
-            selected: AppTab = .path,
+            selected: AppTab = .home,
+            home: [HomeRoute] = [],
             path: [PathRoute] = [],
             people: [PeopleRoute] = [],
             collections: [CollectionsRoute] = [],
             you: [YouRoute] = []
         ) {
             self.selected = selected
+            self.home = home
             self.path = path
             self.people = people
             self.collections = collections
@@ -82,6 +108,7 @@ final class TabNavigation {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self.init(
                 selected: (try? container.decode(AppTab.self, forKey: .selected)) ?? .path,
+                home: (try? container.decodeIfPresent([HomeRoute].self, forKey: .home)) ?? [],
                 path: (try? container.decode([PathRoute].self, forKey: .path)) ?? [],
                 people: (try? container.decode([PeopleRoute].self, forKey: .people)) ?? [],
                 collections: (try? container.decode([CollectionsRoute].self, forKey: .collections)) ?? [],
@@ -100,11 +127,12 @@ final class TabNavigation {
     }
 
     var snapshot: Snapshot {
-        Snapshot(selected: selected, path: path, people: people, collections: collections, you: you)
+        Snapshot(selected: selected, home: home, path: path, people: people, collections: collections, you: you)
     }
 
     func restore(_ snapshot: Snapshot) {
         selected = snapshot.selected
+        home = snapshot.home
         path = snapshot.path
         people = snapshot.people
         collections = snapshot.collections
@@ -115,5 +143,6 @@ final class TabNavigation {
     func reset() {
         restore(Snapshot())
         scrollToTop = [:]
+        pendingIntent = nil
     }
 }
