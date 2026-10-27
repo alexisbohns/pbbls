@@ -72,8 +72,10 @@ fun MonthPage(
     var sheet by rememberSaveable(wrap.month) { mutableStateOf<String?>(null) }
     val onMore: (MonthSection) -> Unit = { sheet = it.name }
     val allowed = rememberIntroAllowed()
-    // Each Replay deals the deck again, from the cover, on a fresh clock (D14).
-    var run by remember(wrap.month) { mutableIntStateOf(0) }
+    // Each Replay deals the deck again, from the cover, on a fresh clock (D14). Saved, like the sheet: the Path's
+    // pager disposes a page it scrolls past and restores it, and the run is in the deck's key, so a run back at 0
+    // would lose the deck's place and reopen a replayed month on its cover.
+    var run by rememberSaveable(wrap.month) { mutableIntStateOf(0) }
     val clock =
         remember(wrap.month, intro, allowed, run) {
             if (intro != null && allowed) IntroClock(wrap.month, intro.ledger, intro.haptics) else null

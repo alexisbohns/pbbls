@@ -19,6 +19,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeRight
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
@@ -28,11 +29,13 @@ import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
+import app.pbbls.android.features.path.wrap.copy.WrapCopy
 import app.pbbls.android.features.path.wrap.intro.IntroBeat
 import app.pbbls.android.features.path.wrap.intro.IntroHapticPlaying
 import app.pbbls.android.features.path.wrap.intro.IntroLedger
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.intro.IntroTick
+import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import app.pbbls.android.testing.PIXEL_TEST_SDK
 import app.pbbls.android.testing.PebblesTestHarness
 import org.junit.Assert.assertEquals
@@ -67,6 +70,7 @@ class MonthPageReplayTest {
     private val intro = MonthIntro(ledger, voices)
     private val replay = ApplicationProvider.getApplicationContext<Application>().getString(R.string.path_wrap_replay_month)
     private var focused by mutableStateOf(true)
+    private var copy: WrapCopy? = null
 
     /** What the clocks asked of the haptics, in order, by card and month. */
     private class Voices : IntroHapticPlaying {
@@ -187,20 +191,20 @@ class MonthPageReplayTest {
         assertEquals(2, played().count { it.startsWith("play ${IntroSequence.Cover}") })
     }
 
-    @Test
-    fun `a swipe to the next month after a replay stays there`() {
-        val august = wrap.copy(month = wrap.month.plusMonths(1))
+    /** Two month pages on the Path's pager, this month and [next], each focused once the pager settles on it. */
+    private fun path(next: MonthWrap): () -> PagerState {
         var pager: PagerState? = null
         compose.mainClock.autoAdvance = false
         compose.setContent {
             PebblesTheme {
                 PebblesTestHarness {
+                    copy = rememberWrapCopy()
                     val state = rememberPagerState { 2 }
                     pager = state
                     HorizontalPager(state, Modifier.size(390.dp, 800.dp).testTag(PATH)) { index ->
                         Box(Modifier.fillMaxSize().testTag(if (index == 0) PAGE else NEXT)) {
                             MonthPage(
-                                wrap = if (index == 0) wrap else august,
+                                wrap = if (index == 0) wrap else next,
                                 lookups = lookups,
                                 dayView = DayView.CIRCLE,
                                 onDayView = {},
@@ -217,6 +221,13 @@ class MonthPageReplayTest {
             }
         }
         settle()
+        return { pager!! }
+    }
+
+    @Test
+    fun `a swipe to the next month after a replay stays there`() {
+        val august = wrap.copy(month = wrap.month.plusMonths(1))
+        val pager = path(august)
         repeat(cards.size - 1) { throwCard() }
         compose.onNodeWithText(replay).performClick()
         settle()
@@ -224,13 +235,35 @@ class MonthPageReplayTest {
 
         compose.onNodeWithTag(PATH).performTouchInput { swipeLeft() }
         settle()
-        assertEquals(1, pager!!.settledPage)
+        assertEquals(1, pager().settledPage)
         // Leaving lands the replayed cover; August's plays, and the Path stays on it.
         assertTrue("stop ${IntroSequence.Cover} ${wrap.month}" in voices.events)
         assertEquals("play ${IntroSequence.Cover} ${august.month}", voices.events.last())
         repeat(3) { settle() }
-        assertEquals(1, pager!!.settledPage)
-        assertEquals(1, pager!!.currentPage)
+        assertEquals(1, pager().settledPage)
+        assertEquals(1, pager().currentPage)
+    }
+
+    @Test
+    fun `a replayed month keeps its deck where it was when the Path restores its page`() {
+        val pager = path(wrap.copy(month = wrap.month.plusMonths(1)))
+        repeat(cards.size - 1) { throwCard() }
+        compose.onNodeWithText(replay).performClick()
+        settle()
+        throwCard()
+        val weeks = MonthSections.head(MonthSection.WEEKS, wrap, lookups, copy!!).label
+        compose.onNodeWithText(weeks).assertIsDisplayed()
+
+        // The Path scrolls past the page, which leaves the composition, then restores it.
+        compose.onNodeWithTag(PATH).performTouchInput { swipeLeft() }
+        settle()
+        assertEquals(1, pager().settledPage)
+        compose.onNodeWithTag(PAGE).assertDoesNotExist()
+        compose.onNodeWithTag(PATH).performTouchInput { swipeRight() }
+        settle()
+        assertEquals(0, pager().settledPage)
+        // Still on the weeks, not back on the cover.
+        compose.onNodeWithText(weeks).assertIsDisplayed()
     }
 
     private companion object {
