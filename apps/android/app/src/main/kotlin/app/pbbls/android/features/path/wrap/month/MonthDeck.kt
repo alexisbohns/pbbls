@@ -84,8 +84,8 @@ internal object MonthDeck {
         }
 
     /**
-     * What a card plays. The cover its garland; the weeks their columns, one at a time; the persons their rows
-     * in turn; the gem its count, then its families; the tone its sweep and the hours their stones, under the
+     * What a card plays. The cover its garland; the weeks their columns, one at a time; the milestones their
+     * stones stamped, each with its words; the persons their rows in turn; the gem its count, then its families; the tone its sweep and the hours their stones, under the
      * insights head when they lead it; another section, for now, its arrival alone (its entrance lands in the
      * parts after this one); the end card nothing yet.
      */
@@ -98,6 +98,7 @@ internal object MonthDeck {
         when (card) {
             IntroSequence.Cover -> coverBeats(wrap, lookups)
             IntroSequence.Section(MonthSection.WEEKS) -> WeeksSummary.introBeats(wrap)
+            IntroSequence.Section(MonthSection.MILESTONES) -> MilestonesSection.introBeats(wrap, lookups)
             IntroSequence.Section(MonthSection.PERSONS) -> PersonsSection.introBeats(wrap, lookups)
             IntroSequence.Section(MonthSection.GEM) -> EmotionGem.introBeats(wrap)
             IntroSequence.Section(MonthSection.TONE) -> ToneFigure.introBeats(wrap, leadsInsights)

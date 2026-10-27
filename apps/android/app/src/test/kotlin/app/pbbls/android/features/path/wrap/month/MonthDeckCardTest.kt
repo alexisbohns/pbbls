@@ -229,6 +229,36 @@ class MonthDeckCardTest {
     }
 
     @Test
+    fun `on a card the milestones share the room, each row its share`() {
+        var room: Dp? = null
+        var copy: WrapCopy? = null
+        show(head = MonthHead("Milestones", null)) { r ->
+            room = r
+            copy = rememberWrapCopy()
+            MonthSectionContent(
+                MonthSection.MILESTONES,
+                wrap,
+                lookups,
+                DayView.CIRCLE,
+                SpineFixtureWeek.zone,
+                aspect = null,
+                onWeek = {},
+                onOpen = {},
+                onMore = {},
+                onCard = true,
+                room = r,
+            )
+        }
+        val moments = MonthSections.milestones(wrap, lookups)
+        val first = moments.first()
+        val date = copy!!.dateline(first.happenedAt.atZoneSameInstant(SpineFixtureWeek.zone).toLocalDate())
+        val row = compose.onNodeWithContentDescription("$date, ${first.name}").getBoundsInRoot()
+        val size = MilestonesSection.rowSize(room!!, moments.size)
+        assertTrue(size.height > MilestonesSection.LIST_ROW)
+        assertEquals(size.height.value, (row.bottom - row.top).value, 0.5f)
+    }
+
+    @Test
     fun `on a card the weeks stand as a column each, one button saying its week, a tap focusing it`() {
         var focused: LocalDate? = null
         var copy: WrapCopy? = null

@@ -21,9 +21,9 @@ import java.time.ZoneId
  * @param onCard whether a card draws this section. The card's title band then draws the section's head,
  * so the section leaves its own out; the one exception is the leading tone or hours figure, which keeps
  * its own head under the insights band (iOS), while a following one leaves its head to its card's band.
- * @param room on a card, the room under its title band, which the persons share and at whose foot the
- * persons' and the gem's *more* stand (D13), and where the weeks stand as columns (D17); null on the
- * page, where rows keep their size.
+ * @param room on a card, the room under its title band, which the persons and the milestones share and at
+ * whose foot the persons' and the gem's *more* stand (D13), and where the weeks stand as columns (D17);
+ * null on the page, where rows keep their size.
  */
 @Composable
 internal fun MonthSectionContent(
@@ -42,7 +42,7 @@ internal fun MonthSectionContent(
 ) {
     when (section) {
         MonthSection.WEEKS -> WeeksSummary(wrap, lookups, onWeek, onCard, room)
-        MonthSection.MILESTONES -> MilestonesSection(wrap, lookups, zone, onOpen, aspect, onCard)
+        MonthSection.MILESTONES -> MilestonesSection(wrap, lookups, zone, onOpen, aspect, onCard, room)
         MonthSection.PERSONS -> PersonsSection(wrap, lookups, dayView, onMore, onCard, room)
         MonthSection.DOMAINS -> DomainsSection(wrap, lookups, onMore, onCard)
         MonthSection.GEM -> EmotionGem(wrap, lookups, onMore, onCard, room)
