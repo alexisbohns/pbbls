@@ -24,6 +24,10 @@ import java.time.YearMonth
  * A new vibration replaces the current one at the vibrator service, which is why one [sounding] slot
  * suffices for tiers C and W. A landing [tick] never takes that slot: the clock's `landed` ticks only a
  * card that isn't playing.
+ *
+ * Tier C plays a card as segments ([IntroComposition.segments]): the first as the card starts, each later
+ * one from the clock's frames on its scored time, so a swell's train that plays short or long on this
+ * vibrator never shifts what follows it.
  */
 class IntroVibrator(
     private val vibrator: Vibrator?,
@@ -60,6 +64,9 @@ class IntroVibrator(
 
     private val voices = mutableMapOf<Pair<YearMonth, IntroSequence>, Voice>()
 
+    /** Tier C: each playing card's segments after its first, fired from [frame]. */
+    private val later = IntroSegmentQueue()
+
     /** Tiers C and W: the card whose vibration is sounding, and when its score ends (`System.nanoTime()`). */
     private var sounding: Pair<YearMonth, IntroSequence>? = null
     private var soundingEnd = 0L
@@ -75,10 +82,17 @@ class IntroVibrator(
         startNanos: Long,
     ) {
         if (!enabled()) return
-        // Clamped before narrowing: a virtual timebase can't wrap it, nor pass the HAL's longest pause.
-        val leadMs = ((startNanos - System.nanoTime()) / 1_000_000).coerceIn(0, MAX_LEAD_MS).toInt()
+        val leadMs = leadMs(startNanos)
         when (tier) {
-            IntroHapticTier.COMPOSITION, IntroHapticTier.WAVEFORM ->
+            IntroHapticTier.COMPOSITION -> {
+                val segments = IntroComposition.segments(beats, supported + IntroPrimitiveKind.TICK, durations, leadMs)
+                later.hold(sequence, month, startNanos, segments.drop(1))
+                if (vibrate { segments.firstOrNull()?.let { composition(it.primitives) } }) {
+                    sounding = month to sequence
+                    soundingEnd = startNanos + (IntroScore.duration(beats) * 1e9).toLong()
+                }
+            }
+            IntroHapticTier.WAVEFORM ->
                 if (vibrate { effectFor(beats, leadMs) }) {
                     sounding = month to sequence
                     soundingEnd = startNanos + (IntroScore.duration(beats) * 1e9).toLong()
@@ -97,6 +111,7 @@ class IntroVibrator(
         month: YearMonth,
     ) {
         voices.remove(month to sequence)
+        later.drop(sequence, month)
         if (sounding == month to sequence) {
             if (System.nanoTime() < soundingEnd) vibrator?.cancel()
             sounding = null
@@ -113,11 +128,17 @@ class IntroVibrator(
         }
     }
 
+    /**
+     * Tier C fires the card's next segment a lead ahead of its start, delayed to start on its scored time.
+     * It supersedes whatever still sounds: on a vibrator whose trains run long, that cuts a train's tail.
+     * Tier V fires the ticks the frame crossed.
+     */
     override fun frame(
         sequence: IntroSequence,
         month: YearMonth,
         nanos: Long,
     ) {
+        later.due(sequence, month, nanos)?.let { segment -> vibrate { composition(segment.led(leadMs(segment.startNanos))) } }
         val voice = voices[month to sequence] ?: return
         val (fire, past) = IntroHaptics.crossed(voice.events, voice.next, (nanos - voice.start) / 1e9)
         voice.next = past
@@ -130,16 +151,8 @@ class IntroVibrator(
         leadMs: Int,
     ): VibrationEffect? =
         when (tier) {
-            IntroHapticTier.COMPOSITION -> {
-                val prims = IntroComposition.of(beats, supported + IntroPrimitiveKind.TICK, durations, leadMs)
-                if (prims.isEmpty()) {
-                    null
-                } else {
-                    val composition = VibrationEffect.startComposition()
-                    prims.forEach { composition.addPrimitive(primitiveId(it.kind), it.scale, it.pauseMs) }
-                    composition.compose()
-                }
-            }
+            IntroHapticTier.COMPOSITION ->
+                composition(IntroComposition.of(beats, supported + IntroPrimitiveKind.TICK, durations, leadMs))
             IntroHapticTier.WAVEFORM -> {
                 val wave = IntroWaveform.of(beats, leadMs)
                 if (wave.timings.isEmpty()) {
@@ -150,6 +163,22 @@ class IntroVibrator(
             }
             IntroHapticTier.VIEW, IntroHapticTier.NONE -> null
         }
+
+    /** Tier C: [primitives] as one composition, or null when there are none. */
+    private fun composition(primitives: List<IntroPrimitive>): VibrationEffect? =
+        if (primitives.isEmpty()) {
+            null
+        } else {
+            val composition = VibrationEffect.startComposition()
+            primitives.forEach { composition.addPrimitive(primitiveId(it.kind), it.scale, it.pauseMs) }
+            composition.compose()
+        }
+
+    /**
+     * How long a vibration waits to start at [startNanos], from now. Clamped before narrowing: a virtual
+     * timebase can't wrap it, nor pass the HAL's longest pause.
+     */
+    private fun leadMs(startNanos: Long): Int = ((startNanos - System.nanoTime()) / 1_000_000).coerceIn(0, MAX_LEAD_MS).toInt()
 
     /**
      * Builds the effect and plays it under one guard: building throws on a value the framework refuses
