@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import type { BlogBlock, BlogPost, BlogRichText } from "@/lib/blog/types"
 import { BlogFigure } from "@/components/blog/BlogFigure"
+import { BlogPlate } from "@/components/blog/BlogPlate"
 import styles from "./blog.module.css"
 
 function renderRichText(text: BlogRichText): ReactNode {
@@ -17,8 +18,12 @@ function renderBlock(slug: string, block: BlogBlock, index: number): ReactNode {
       return <p key={index} className={styles.p}>{renderRichText(block.text)}</p>
     case "heading":
       return <h2 key={index} className={styles.heading}>{block.text}</h2>
+    case "subheading":
+      return <h3 key={index} className={styles.subheading}>{block.text}</h3>
     case "figure":
       return <BlogFigure key={index} slug={slug} figure={block} />
+    case "plate":
+      return <BlogPlate key={index} slug={slug} plate={block} />
   }
 }
 

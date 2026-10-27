@@ -2,7 +2,7 @@ import { existsSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 import { BLOG_POSTS, blogImagePath, blogPostPath, formatPublishedOn, getBlogPost } from "@/lib/blog/posts"
-import type { BlogFigure } from "@/lib/blog/types"
+import type { BlogFigure, BlogPlate } from "@/lib/blog/types"
 
 const PUBLIC_DIR = fileURLToPath(new URL("../../public", import.meta.url))
 
@@ -32,6 +32,18 @@ describe("blog posts", () => {
         expect(figure.width * figure.height, figure.file).toBeGreaterThan(0)
         expect(existsSync(PUBLIC_DIR + blogImagePath(post.slug, figure.file)), figure.file).toBe(true)
       }
+    }
+  })
+
+  it("serves counting-in-stone, its finalists first and every plate an SVG strip with alt text", () => {
+    const post = getBlogPost("counting-in-stone")
+    expect(post?.publishedOn).toBe("2026-10-27")
+    const plates = post?.body.filter((block): block is BlogPlate => block.kind === "plate") ?? []
+    expect(plates.length).toBeGreaterThan(400)
+    expect(plates[0]?.name).toBe("One skyline")
+    for (const plate of plates) {
+      expect(plate.file, plate.no).toMatch(/^c\/[\w-]+\.svg$/)
+      expect(plate.alt.length, plate.no).toBeGreaterThan(0)
     }
   })
 })
