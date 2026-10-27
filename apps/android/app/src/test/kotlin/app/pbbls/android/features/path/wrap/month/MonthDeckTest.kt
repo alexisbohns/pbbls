@@ -69,16 +69,6 @@ class MonthDeckTest {
     }
 
     @Test
-    fun `the deck and the sections agree on which card leads the insights`() {
-        listOf(october, emptying(october, MonthSection.TONE), emptying(october, MonthSection.HOURS)).forEach { wrap ->
-            val cards = MonthDeck.cards(wrap, lookups)
-            wrap.sections.forEach {
-                assertEquals("$it", MonthSections.leadsInsights(it, wrap, lookups), MonthDeck.leadsInsights(section(it), cards))
-            }
-        }
-    }
-
-    @Test
     fun `a section's card arrives on its head, and the end card plays the end's score`() {
         val cards = MonthDeck.cards(october, lookups)
         MonthSection.entries.forEach { s ->

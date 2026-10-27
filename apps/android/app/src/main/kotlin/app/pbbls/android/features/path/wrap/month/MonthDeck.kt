@@ -53,8 +53,8 @@ internal object MonthDeck {
     }
 
     /**
-     * The first tone or hours card carries the insights head. Over the dealt [cards], so it agrees with
-     * [MonthSections.leadsInsights], which reads the same condition off the wrap.
+     * The first tone or hours card carries the insights head (iOS `MonthDeck.leadsInsights`). Over the dealt
+     * [cards]: a figure with nothing to show deals no card, and the head moves to the other.
      */
     fun leadsInsights(
         card: IntroSequence,

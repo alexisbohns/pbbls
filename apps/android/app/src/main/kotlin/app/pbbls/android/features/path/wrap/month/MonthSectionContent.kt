@@ -17,7 +17,7 @@ import java.time.ZoneId
  *
  * @param leadsInsights whether this is the first of the tone and the hours, the one the insights head
  * leads. The default is the plain page's rule (iOS `MonthPage`): the first of the two the server listed.
- * The deck passes [MonthSections.leadsInsights], over the sections it deals.
+ * The deck passes [MonthDeck.leadsInsights], over the cards it deals.
  * @param onCard whether a card draws this section. The card's title band then draws the section's head,
  * so the section leaves its own out; the one exception is the leading tone or hours figure, which keeps
  * its own head under the insights band (iOS), while a following one leaves its head to its card's band.
