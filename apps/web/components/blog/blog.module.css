@@ -199,3 +199,73 @@
   .page { padding-block: 36px 72px; }
   .caption { font-size: 15px; }
 }
+
+/*
+ * Exploration plates: a concept's name and line in the column, then its six
+ * frames as one strip, wider than the column (up to 1180px). Below 900px the
+ * strip runs edge to edge and scrolls sideways at a size that stays legible.
+ */
+.page { overflow-x: clip; }
+.subheading {
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.3;
+  text-wrap: balance;
+  margin: 48px 0 12px;
+}
+.plate { margin: 28px 0 44px; }
+.plateHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: .6em;
+  margin: 0 0 4px;
+}
+.plateHead .n { margin-right: 0; font-variant-numeric: tabular-nums; }
+.plateName { font-weight: 500; font-size: 18px; }
+.plateTag { font-style: italic; font-size: 15px; color: var(--ink-3); }
+.plateText {
+  font-size: 16.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  margin: 0 0 14px;
+}
+.strip {
+  --strip: min(1180px, 100vw - 32px);
+  width: var(--strip);
+  margin-inline: calc((100% - var(--strip)) / 2);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.stripInner { min-width: 860px; }
+.stripImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1516 / 240;
+}
+/* The strip's own columns: six 240 frames, 12 apart, the night three 28 apart. */
+.legend {
+  display: grid;
+  grid-template-columns: 240fr 12fr 240fr 12fr 240fr 28fr 240fr 12fr 240fr 12fr 240fr;
+  margin: 0 0 6px;
+  font-family: "Ysabeau SC Variable", "Ysabeau SC", serif;
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: lowercase;
+  color: var(--ink-3);
+}
+.legend span:nth-child(1) { grid-column: 1; }
+.legend span:nth-child(2) { grid-column: 3; }
+.legend span:nth-child(3) { grid-column: 5; }
+.legend span:nth-child(4) { grid-column: 7; }
+.legend span:nth-child(5) { grid-column: 9; }
+.legend span:nth-child(6) { grid-column: 11; }
+
+@media (max-width: 900px) {
+  .strip {
+    --strip: 100vw;
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+    scroll-padding-inline: 16px;
+  }
+}
