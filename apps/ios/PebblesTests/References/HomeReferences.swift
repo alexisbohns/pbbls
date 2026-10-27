@@ -226,5 +226,38 @@ extension References {
             ReferenceImage.assertMatches(Self.guidePageStones(), named: "guidePageStones",
                                          config: ReferenceConfig(scheme: scheme, locales: locales))
         }
+
+        /// The whole page in one of the Lab's states, on its Monday-morning clock.
+        /// The wraps row's horizontal ScrollView does not render under ImageRenderer,
+        /// so the row may show empty here; the cards have their own reference above.
+        static func page(_ state: HomeFixture.State) async -> some View {
+            let model = await HomeFixture.model(state)
+            let locale = Locale(identifier: ReferenceLocale.current.rawValue)
+            return HomeContent(model: model, lookups: HomeFixture.lookups, liveMonth: HomeFixture.liveMonth,
+                               clock: HomeFixture.clock, zone: HomeFixture.zone, locale: locale)
+                .frame(width: 393, alignment: .top)
+                .background(Color.pebbles.surface)
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func pageNewUser(scheme: ReferenceScheme) async throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(await Self.page(.newUser), named: "pageNewUser",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func pageReturning(scheme: ReferenceScheme) async throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(await Self.page(.returning), named: "pageReturning",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func pageClaim(scheme: ReferenceScheme) async throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(await Self.page(.claim), named: "pageClaim",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
     }
 }
