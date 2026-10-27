@@ -17,6 +17,9 @@ enum HomeModelError: Error { case noService }
     private(set) var isClaiming = false
     /// The About Pebbles readings; nil until the first read lands (spec §1.6).
     private(set) var guides: [Guide]?
+    /// True while the last guides read failed, so a route with no list yet can
+    /// report a miss instead of waiting forever.
+    private(set) var guidesFailed = false
     /// The decks Home has played this launch (D-plan-1): one ledger for the tab.
     @ObservationIgnored let introLedger = IntroLedger()
     @ObservationIgnored var zone: TimeZone = SpineCalendar.current.timeZone
@@ -66,8 +69,10 @@ enum HomeModelError: Error { case noService }
         guard let service else { return }
         do {
             guides = try await service.guides()
+            guidesFailed = false
         } catch {
             logger.warning("home guides failed: \(error.localizedDescription, privacy: .public)")
+            guidesFailed = true
         }
     }
 

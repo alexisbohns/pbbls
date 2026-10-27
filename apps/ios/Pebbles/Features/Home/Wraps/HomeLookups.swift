@@ -22,4 +22,10 @@ enum HomeLookups {
             soulGlyph: { souls[$0.lowercased()]?.glyph.strokes }
         )
     }
+
+    /// One stone palette per emotion family, in the families' order (the gem's
+    /// wheel), each from the family's own palette; empty until the palettes load.
+    @MainActor static func familyPalettes(palettes: EmotionPaletteService) -> [StonePalette] {
+        EmotionFamilies.of(palettes.byEmotionId.values).map { SpineColors.palette($0.palette, isBlank: false) }
+    }
 }

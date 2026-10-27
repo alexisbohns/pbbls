@@ -26,6 +26,12 @@ import Testing
         #expect(g.illustration == nil)
     }
 
+    @Test func aNullIllustrationDecodesAsNil() throws {
+        let json = Self.row.replacingOccurrences(of: "\"illustration\":\"stones\"", with: "\"illustration\":null")
+        let g = try JSONDecoder().decode(Guide.self, from: Data(json.utf8))
+        #expect(g.illustration == nil)
+    }
+
     @Test func aBadRowIsSkippedNotFatal() throws {
         let json = "[\(Self.row.replacingOccurrences(of: "\"slug\":\"stones\"", with: "\"slug\":42")),\(Self.row)]"
         let rows = try JSONDecoder().decode(LossyGuideArray.self, from: Data(json.utf8)).guides

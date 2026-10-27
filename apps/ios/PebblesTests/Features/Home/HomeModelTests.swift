@@ -74,6 +74,18 @@ struct HomeModelTests {
         #expect(fake.guidesCalls == 1)
     }
 
+    @Test func aFailedFirstReadIsFlaggedUntilOneSucceeds() async {
+        let fake = FakeHomeService(answer: { "A" })
+        fake.answer(guides: .failure(FakeHomeService.Failure()))
+        let model = HomeModel(); model.service = fake
+        #expect(model.guidesFailed == false)
+        await model.load()
+        #expect(model.guides == nil && model.guidesFailed)
+        fake.answer(guides: .success([Self.stones]))
+        await model.loadGuides()
+        #expect(model.guides == [Self.stones] && !model.guidesFailed)
+    }
+
     // MARK: - The claim
 
     private static func claimable() -> (FakeAchievementsProvider, HomeModel) {

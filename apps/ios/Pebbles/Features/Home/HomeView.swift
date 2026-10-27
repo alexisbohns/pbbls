@@ -83,9 +83,8 @@ struct HomeView: View {
                         }
                     }
 
-                    if let guides = model.guides, !guides.isEmpty {
-                        GuidesList(guides: guides)
-                    }
+                    // Spec §1.6: the About header is static; the rows land with the read.
+                    GuidesList(guides: model.guides)
 
                     if camera?.isSaving == true {
                         Text("home.camera.saving")
@@ -211,8 +210,9 @@ struct HomeView: View {
 
     /// A pushed guide, by slug: the list may not have landed yet when a snapshot
     /// restores the route, so the page waits on it rather than reporting a miss.
+    /// A failed first read is a miss, not a spinner that never ends.
     private func guideResolution(_ slug: String) -> RouteResolution<Guide> {
-        guard let guides = model.guides else { return .loading }
+        guard let guides = model.guides else { return model.guidesFailed ? .missing : .loading }
         return guides.first { $0.slug == slug }.map { .found($0) } ?? .missing
     }
 

@@ -6171,23 +6171,6 @@
         }
       }
     },
-    "home.about.sample.collection" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A quiet week"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une semaine calme"
-          }
-        }
-      }
-    },
     "home.wraps.retry" : {
       "extractionState" : "manual",
       "localizations" : {

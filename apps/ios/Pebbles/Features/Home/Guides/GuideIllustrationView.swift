@@ -11,6 +11,9 @@ struct GuideIllustrationView: View {
 
     let kind: GuideIllustration?
     let size: Size
+    /// One stone palette per emotion family, in the families' order; the
+    /// `.emotions` seals wear them when given, else the brand ramp.
+    var familyPalettes: [StonePalette] = []
 
     static let markSide: CGFloat = 24
     static let pageHeight: CGFloat = 120
@@ -21,9 +24,11 @@ struct GuideIllustrationView: View {
                 switch size {
                 case .mark:
                     GuideMark(kind: kind)
+                        // Clamped so the karma mark's "+1" cannot outgrow the square.
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .frame(width: Self.markSide, height: Self.markSide)
                 case .page:
-                    GuidePagePicture(kind: kind)
+                    GuidePagePicture(kind: kind, familyPalettes: familyPalettes)
                         .frame(maxWidth: .infinity)
                         .frame(height: Self.pageHeight)
                 }
@@ -41,8 +46,8 @@ private enum GuideSeals {
                   isBlank: true, size: size)
     }
 
-    static func lit(_ valence: Valence, _ size: SealSize) -> StoneSeal {
-        StoneSeal(valence: valence, glyph: nil, palette: SpineColors.palette(nil, isBlank: false),
+    static func lit(_ valence: Valence, _ size: SealSize, palette: StonePalette? = nil) -> StoneSeal {
+        StoneSeal(valence: valence, glyph: nil, palette: palette ?? SpineColors.palette(nil, isBlank: false),
                   isBlank: false, size: size)
     }
 
@@ -59,7 +64,7 @@ private enum GuideSeals {
 
     static let sampleCollection = Collection(
         id: UUID(uuidString: "00000000-0000-0000-0000-00000000c012")!,
-        name: String(localized: "home.about.sample.collection"), mode: .stack, pebbleCount: 5)
+        name: String(localized: "home.task.sample.collection"), mode: .stack, pebbleCount: 5)
 }
 
 // MARK: - The 24 pt mark
@@ -121,7 +126,7 @@ private struct GuideMark: View {
         case .souls:
             HStack(spacing: 0) {
                 ForEach(Array(ChecklistMarks.souls.enumerated()), id: \.offset) { _, strokes in
-                    SoulMark(strokes: strokes, side: 8)
+                    SoulMark(strokes: strokes, side: 10)
                 }
             }
         case .glyphs:
@@ -149,6 +154,7 @@ private struct GuideMark: View {
 
 private struct GuidePagePicture: View {
     let kind: GuideIllustration
+    var familyPalettes: [StonePalette] = []
 
     var body: some View {
         switch kind {
@@ -170,7 +176,10 @@ private struct GuidePagePicture: View {
             }
         case .emotions:
             HStack(spacing: Spacing.sm) {
-                ForEach(0..<7, id: \.self) { _ in GuideSeals.lit(.highlightMedium, .contents) }
+                ForEach(0..<7, id: \.self) { i in
+                    GuideSeals.lit(.highlightMedium, .contents,
+                                   palette: i < familyPalettes.count ? familyPalettes[i] : nil)
+                }
             }
         case .valence:
             HStack(spacing: Spacing.md) {
