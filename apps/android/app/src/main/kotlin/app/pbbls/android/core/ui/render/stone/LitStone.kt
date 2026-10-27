@@ -20,6 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
@@ -191,7 +192,9 @@ fun rememberStonePressState(): StonePressState = remember { StonePressState() }
  * it larger. The rings and halo scale with the box, their strokes stay hairlines;
  * the carved glyph line scales with [width], so a larger stone carves heavier.
  * A stone at another [width] mounts its `StoneRipple` at the same width: the verso's
- * ripples once, when its card prints into a completed moment.
+ * ripples once, when its card prints into a completed moment. [rings] scales the halo's and the
+ * rings' strength as one group (1 draws them in full); a caller that mounts a `StoneRipple` beside
+ * a quieter stone dims it by the same strength.
  */
 @Composable
 fun LitStone(
@@ -202,6 +205,8 @@ fun LitStone(
     press: StonePressState,
     modifier: Modifier = Modifier,
     width: Dp = StoneGeometry.STONE_WIDTH_DP.getValue(valence.sizeGroup).dp,
+    /** The halo's and the rings' strength, 0…1: the Spine's 1, a month's milestone 0.45 (#1242 / iOS D16). */
+    rings: Float = 1f,
 ) {
     val colors = PebblesTheme.spine.colors
     val size = valence.sizeGroup
@@ -261,6 +266,7 @@ fun LitStone(
             color = if (press.touchedStill) colors.ink2 else colors.ring,
             halo = colors.halo,
             scale = { press.ringsScale },
+            strength = rings,
             modifier = Modifier.fillMaxSize(),
         )
         val stoneLayer =
@@ -339,6 +345,7 @@ private fun StoneRings(
     color: Color,
     halo: Color,
     scale: () -> Float,
+    strength: Float,
     modifier: Modifier,
 ) {
     val paths =
@@ -354,6 +361,11 @@ private fun StoneRings(
         modifier.graphicsLayer {
             scaleX = scale()
             scaleY = scale()
+            alpha = strength
+            // The halo and rings draw past the box; an offscreen layer (alpha < 1) would clip them to it.
+            // ModulateAlpha applies the alpha per draw: iOS fades the group, and the two differ only where
+            // a ring crosses the halo, negligibly. Do not restore an offscreen layer.
+            compositingStrategy = CompositingStrategy.ModulateAlpha
         },
     ) {
         val pxPerUnit = this.size.width / box.width

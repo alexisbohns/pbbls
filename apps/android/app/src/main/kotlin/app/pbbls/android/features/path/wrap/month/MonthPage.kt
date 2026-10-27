@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.data.DayView
+import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
@@ -35,6 +36,7 @@ fun MonthPage(
     onOpen: (PathMoment) -> Unit,
     modifier: Modifier = Modifier,
     zone: ZoneId = ZoneId.systemDefault(),
+    aspect: SnapAspectCache? = null,
 ) {
     // The sheet's open tab, kept across a rotation; never in the ViewModel (spec §7).
     var sheet by rememberSaveable(wrap.month) { mutableStateOf<String?>(null) }
@@ -46,7 +48,7 @@ fun MonthPage(
         items(wrap.sections, key = { it.name }) { section ->
             when (section) {
                 MonthSection.WEEKS -> WeeksSummary(wrap, lookups, onWeek)
-                MonthSection.MILESTONES -> MilestonesSection(wrap, lookups, zone, onOpen)
+                MonthSection.MILESTONES -> MilestonesSection(wrap, lookups, zone, onOpen, aspect)
                 MonthSection.PERSONS -> PersonsSection(wrap, lookups, dayView, onMore)
                 MonthSection.DOMAINS -> DomainsSection(wrap, lookups, onMore)
                 MonthSection.GEM -> EmotionGem(wrap, lookups, onMore)

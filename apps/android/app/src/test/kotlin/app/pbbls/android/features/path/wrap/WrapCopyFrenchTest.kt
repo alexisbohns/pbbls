@@ -62,4 +62,9 @@ class WrapCopyFrenchTest {
         )
         assertEquals("20:00 – minuit", copy.hoursWindow(20))
     }
+
+    @Test
+    fun `a past week without a pebble says so`() {
+        assertEquals("Aucun galet.", copy.emptyWeek())
+    }
 }

@@ -65,6 +65,20 @@ fun LitStoneVersoNight() {
     PebblesTheme { LitStoneVerso() }
 }
 
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun LitStoneQuietRingsLight() {
+    PebblesTheme { LitStoneQuietRings() }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun LitStoneQuietRingsNight() {
+    PebblesTheme { LitStoneQuietRings() }
+}
+
 /** The real joy and fear category palettes, as `SpineFixtureWeek` carries them. */
 private val versoJoyPalette: EmotionPalette =
     requireNotNull(
@@ -121,6 +135,25 @@ private fun LitStoneVerso() {
             seed = UuidHash.fnv1a("5b1f3a2c-9d8e-4f7a-b6c5-d4e3f2a1b0c9"),
             press = rememberStonePressState(),
             width = 150.dp,
+        )
+    }
+}
+
+/** A month milestone's stone: rings at 0.45, drawn past the stone's box rather than clipped to it. */
+@Composable
+private fun LitStoneQuietRings() {
+    Column(
+        modifier = Modifier.background(PebblesTheme.spine.colors.ground).padding(56.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        LitStone(
+            valence = Valence.HIGHLIGHT_LARGE,
+            palette = versoJoyPalette,
+            glyph = MomentPreviewFixtures.pebbleGlyph(),
+            seed = UuidHash.fnv1a("0e9d8c7b-6a5f-4e3d-8c2b-1a0f9e8d7c6b"),
+            press = rememberStonePressState(),
+            width = 90.dp,
+            rings = 0.45f,
         )
     }
 }

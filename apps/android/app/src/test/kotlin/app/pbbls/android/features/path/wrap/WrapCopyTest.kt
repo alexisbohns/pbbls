@@ -118,4 +118,9 @@ class WrapCopyTest {
         assertEquals("8:00\u202FPM – midnight", copy.hoursWindow(20))
         assertEquals("of 24 collected", copy.hoursOf(24))
     }
+
+    @Test
+    fun `a past week without a pebble says so`() {
+        assertEquals("No pebble.", copy.emptyWeek())
+    }
 }

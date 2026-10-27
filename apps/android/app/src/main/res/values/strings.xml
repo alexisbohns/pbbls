@@ -161,6 +161,7 @@
     <string name="path_wrap_so_far">so far</string>
     <string name="path_wrap_line_nothing">Nothing yet.</string>
     <string name="path_wrap_line_no_pebble">No pebble yet.</string>
+    <string name="path_wrap_line_no_pebbles">No pebble.</string>
     <string name="path_wrap_collect">Collect a pebble</string>
     <string name="path_wrap_tile_contents">contents</string>
     <string name="path_wrap_tile_persons">persons</string>
