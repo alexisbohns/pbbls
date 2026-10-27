@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AppearancePreferences
 import app.pbbls.android.core.data.DeletionState
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ReauthAccountMismatchException
 import app.pbbls.android.core.data.ReauthMethod
@@ -109,7 +110,8 @@ class SettingsViewModelTest {
         savedState: SavedStateHandle = SavedStateHandle(),
         appearance: AppearancePreferences = AppearancePreferences(inMemorySettings()),
         consents: FakeConsentService = FakeConsentService(),
-    ) = SettingsViewModel(savedState, profile, supabase, appearance, consents)
+        haptics: HapticsPreference = HapticsPreference(inMemorySettings()),
+    ) = SettingsViewModel(savedState, profile, supabase, appearance, consents, haptics)
 
     // MARK: - Appearance (#853)
 
@@ -121,6 +123,31 @@ class SettingsViewModelTest {
         assertFalse(appearance.useWallpaperColors)
         assertFalse(vm.useWallpaperColors)
     }
+
+    // MARK: - Haptics (#1242 D23)
+
+    @Test
+    fun `the vibrations switch is on until turned off`() {
+        assertTrue(viewModel().hapticsOn)
+    }
+
+    @Test
+    fun `the vibrations switch saves as it is switched, outside the form's save`() =
+        runTest {
+            val haptics = HapticsPreference(inMemorySettings())
+            val vm = viewModel(haptics = haptics)
+            advanceUntilIdle()
+
+            vm.onHapticsChange(false)
+
+            assertFalse(haptics.isOn)
+            assertFalse(vm.hapticsOn)
+            // Device-local, like the wallpaper switch: nothing for Save to send.
+            assertFalse(vm.uiState.value.isDirty)
+
+            vm.onHapticsChange(true)
+            assertTrue(haptics.isOn)
+        }
 
     // MARK: - Loading its own profile (#852)
 

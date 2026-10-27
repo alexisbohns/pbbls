@@ -13,6 +13,7 @@ import app.pbbls.android.core.data.AccountDeletionUi
 import app.pbbls.android.core.data.AppearancePreferences
 import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.data.DeletionState
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReauthPurpose
@@ -193,6 +194,7 @@ class SettingsViewModel
         private val supabase: SupabaseServicing,
         private val appearance: AppearancePreferences,
         private val consents: ConsentServicing,
+        private val haptics: HapticsPreference,
     ) : ViewModel() {
         private val effectsOut = UiEffects<SettingsEffect>(viewModelScope)
         val effects: Flow<SettingsEffect> = effectsOut.flow
@@ -209,6 +211,18 @@ class SettingsViewModel
 
         fun onUseWallpaperColorsChange(value: Boolean) {
             appearance.setUseWallpaperColors(value)
+        }
+
+        /**
+         * Pebbles' own haptics switch (#1242 D23): device-local and saved as it
+         * is switched, so it bypasses the form and the dirty/save cycle as the
+         * wallpaper switch does.
+         */
+        val hapticsOn: Boolean
+            get() = haptics.isOn
+
+        fun onHapticsChange(value: Boolean) {
+            haptics.setOn(value)
         }
 
         init {

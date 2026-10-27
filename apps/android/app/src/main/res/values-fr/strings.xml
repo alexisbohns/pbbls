@@ -249,6 +249,9 @@
     <string name="settings_appearance_section">Apparence</string>
     <string name="settings_wallpaper_colors_title">Couleurs du fond d’écran</string>
     <string name="settings_wallpaper_colors_body">Accorde Pebbles à ton fond d’écran</string>
+    <string name="settings_haptics_section">Retours haptiques</string>
+    <string name="settings_haptics_vibrations">Vibrations</string>
+    <string name="settings_haptics_footer">Toutes les vibrations de Pebbles, sur ce téléphone.</string>
     <string name="settings_informations_header">Informations</string>
     <string name="settings_name_label">Nom</string>
     <string name="settings_name_placeholder">Votre nom</string>
