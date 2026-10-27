@@ -264,4 +264,16 @@ enum PeopleOnboardingState: Equatable {
 
 ## As built
 
+- **Shipped 2026-10-27** as stack #1295: PR #1291 (People, Tasks 1–4) and PR #1294 (Collections, Tasks 5–6, `Resolves #1256`), squash-merged into main at 60ac456a. References recorded by the CI bot bottom-up (People, then Collections); the bot-pushed heads left every workflow run in `action_required`, approved through the API.
+- **Part 1 review fixes taken in-part:** the prompts read is gated on the grid count only (a "Not now" with no souls used to leave a spinner); the edit sheet scrolls to the `SelectedSoulsRow` from `.task` after a yield, not to a `Section` from `onAppear`; a failed "who?" shows a "Couldn't open" alert with `people.prompt.openFailed`; the onboarding scrolls to top on tab re-tap; `Spacing.lg` (17 pt) for the card radius, as the checklist.
+- **Part 2 review fixes taken in-part:** no `.italic()` after `.spineType(.summary)` (the rank is already italic); each step reads as one VoiceOver line; the footnote's dismiss has a 44 pt target. `.fixedSize(horizontal: false, vertical: true)` on the mode descriptions is what lets them wrap in the baseline-aligned row.
+- **Owed:** the "Not asked" line names one reason while `people_prompts.skipped` is produced by two rules (valence, outward domain) and carries no reason; a shared `SpineNoteCard` (kicker, summary, card chrome, text link are now in `HomeChecklistView`, `PeopleOnboardingView` and `CollectionsNote`); `CollectionModeBadge`'s emoji inside a D2 card and its caption truncating at accessibility sizes (#1275 adjacent); the step captions and text links do not scale (#1274); the zero-collection spinner on every tab return; Android mirrors of both states.
+
 ## Lessons learned
+
+- **Gate a server read on what the screen already knows, never on the dismissal flag.** The flag belongs to the projection (`make(_:dismissed:)`); using it to skip the read too created a state with no data and no fallback. One source of truth per decision.
+- **`ScrollViewReader.scrollTo` in a `List`: id a row, scroll from `.task` after a `Task.yield()`.** A `Section` id from `onAppear` fires before the collection view has laid out and is honoured inconsistently across iOS 17 point releases.
+- **`SpineType.summary` is italic by definition.** Layering `.italic()` on it is a no-op that reads like a design choice; the reviewers flagged it in both parts. The rank carries the style.
+- **A baseline-aligned `HStack` truncates a wrapping `Text`.** `.fixedSize(horizontal: false, vertical: true)` on the text is the fix, and the ax2 reference is what proves the word budget grows instead of clipping.
+- **Three copies of a card is the signal.** The kicker + summary + hairline card chrome now live in three features; the next one gets a shared view first.
+- **The worktree needs `apps/ios/Config/Secrets.xcconfig` too** (gitignored): without it `xcodegen generate` fails spec validation. Added to the worktree-config note.
