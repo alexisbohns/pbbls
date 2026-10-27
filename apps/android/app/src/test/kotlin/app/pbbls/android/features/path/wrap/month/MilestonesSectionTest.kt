@@ -7,14 +7,12 @@ import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.features.path.wrap.intro.IntroClock
 import app.pbbls.android.features.path.wrap.intro.IntroKey
 import app.pbbls.android.features.path.wrap.intro.IntroLedger
-import app.pbbls.android.features.path.wrap.intro.IntroMilestoneShape
 import app.pbbls.android.features.path.wrap.intro.IntroMotion
 import app.pbbls.android.features.path.wrap.intro.IntroScore
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.intro.IntroStage
 import app.pbbls.android.features.path.wrap.intro.IntroTempo
 import app.pbbls.android.features.path.wrap.intro.IntroTick
-import app.pbbls.android.features.path.wrap.intro.milestones
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -155,16 +153,25 @@ class MilestonesSectionTest {
 
     @Test
     fun `a milestone plays its photo's card as one mark, else the souls the row draws, four at most`() {
-        val shapes =
-            MonthSections.milestones(wrap, lookups).map { moment ->
-                val souls =
-                    moment.pebble
-                        ?.souls
-                        .orEmpty()
-                        .count { lookups.soul(it.id) != null }
-                IntroMilestoneShape(moment.pebble?.intensity ?: 1, if (moment.firstSnapPath == null) minOf(souls, 4) else 1)
-            }
-        assertEquals(IntroScore.milestones(shapes), MilestonesSection.introBeats(wrap, lookups))
+        val beats = MilestonesSection.introBeats(wrap, lookups)
+        // The fixture's milestones, in the server's order: the flag march, the forest walk and the rooftop
+        // birthday (each a photo, intensity 3), Elio's tooth (Elio and Mara, intensity 2), and the street's
+        // picnic (Mara, Elio, Nadia, Jules, Bruno and the neighbours, intensity 2).
+        val names = MonthSections.milestones(wrap, lookups).map { it.name }
+        assertEquals(
+            listOf(
+                "Flag march with Nadia",
+                "Forest walk, all of us",
+                "Rooftop birthday",
+                "Elio lost his first tooth",
+                "Picnic on the square, the whole street",
+            ),
+            names,
+        )
+        val marks = (0..4).map { row -> beats.count { (it.key as? IntroKey.Mark)?.row == row } }
+        assertEquals(listOf(1, 1, 1, 2, 4), marks)
+        assertEquals(listOf(3, 3, 3, 2, 2).map(IntroTick::seal), (0..4).map { row -> beats.first { it.key == IntroKey.Impact(row) }.tick })
+        assertTrue(beats.none { (it.key as? IntroKey.Mark)?.row == 5 })
     }
 
     @Test
