@@ -4832,6 +4832,7 @@ Measured on the maintainer's Pixel 8 (Android 17) through `dumpsys vibrator_mana
     - The old clock is retired (`IntroClock.retire()`) with its cards' phases pinned.
     - `run` is `rememberSaveable`.
     - The hidden Replay takes no press.
+- **Final review (Part 7):** a deck restored after the process dies reopens on its cover (the deck is keyed by the ledger's launch id); `MonthPage`'s `focused` is required; the unused `MonthSections.leadsInsights` is gone; the page's lifecycle gate, the policy (font scale, touch exploration) and the Path's settled-page focus are tested.
 - **Fixes placed in lower layers:**
   - a tap on the top card fell through to the card held beneath (Part 3: each card takes the touch on its page);
   - a person row's share is floored to whole pixels (Part 4), as the milestones' is;
@@ -4858,3 +4859,7 @@ Measured on the maintainer's Pixel 8 (Android 17) through `dumpsys vibrator_mana
   - `ProportionBar` could take draw-phase weights;
   - `SOCKET` and `SEAL_LAYER_PAD` are duplicated across the garland, the week columns and the hours.
 - **Baseline profiles:** they name pre-stack signatures. Regenerate them (`android-baseline-profile`).
+- **Tests and visibility:**
+  - an optional `now` on `MonthIntro`, so page-level and whole-app tests can run the intro on the test rule's clock instead of relying on `System.nanoTime` never landing a card;
+  - the `wrap/intro/` package is public while `wrap/month/` is `internal`.
+- **Edge (recorded):** the Path's focus follows the current page mid-drag, while a month page plays only on the settled one (`PathContentMonthFocusTest`).

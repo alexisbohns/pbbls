@@ -93,7 +93,7 @@ C felt more natural and closer to the iPhone, above all on the domains' swell. `
 - **The port:** `IntroScore`, `IntroCurve`, `IntroMotion`, `IntroTempo` and `IntroLedger` port as pure Kotlin under `features/path/wrap/intro/`.
 - **The types:**
   - `IntroKey` is a sealed interface of data objects and data classes;
-  - `IntroReveal` is a `fun interface` from a key to 0…1, with `IntroReveal.Settled` (every key 1) and `IntroReveal.Hidden`.
+  - `IntroReveal` is a `fun interface` from a key to 0…1, with `IntroReveal.settled` (every key 1) and `IntroReveal.hidden`.
 - **`IntroClock`:** a plain `@Stable` class.
   - Phases are snapshot state.
   - One `withFrameNanos` loop runs only while a sequence plays, writing the frame time to a `mutableLongStateOf`. It's the twin of iOS's paused `TimelineView`, and it lands a sequence at its end, so there is no separate timer.
@@ -102,7 +102,7 @@ C felt more natural and closer to the iPhone, above all on the domains' swell. `
 - **Reading reveals:**
   - Figures read their reveal inside `Canvas`/`drawBehind` lambdas.
   - Compose parts read theirs in a `Modifier.graphicsLayer {}` block (`Modifier.introReveal(key, landing)`: rise, fade or pop).
-  - So a playing sequence invalidates drawing once per frame and never recomposes.
+  - So a playing sequence invalidates drawing once per frame and never recomposes. As built, one exception: a domain gauge (`DomainGauge`) reads its reveal in composition while it fills, because core's `ProportionBar` takes fractions; only that small scope recomposes, and it draws through a `Canvas` (a draw-phase weights parameter on `ProportionBar` is a follow-up).
 - **`LocalIntroStage` (new):** carries the clock and the current sequence to the rows. It is UI plumbing, not a service: the same footing as `LocalSharedTransitionScope` (decision log 2026-10-20), and outside the three-locals rule for services. It is null by default, so every figure draws settled (D2).
 - **The `core/` boundary:** `core/` components never see an intro type. `MarkRow`, `DaySetMarks`, `CairnMark` and `SoulMark` take plain progress providers (`() -> Float`, or `(Int) -> Float`, defaulting to 1). The feature maps its keys onto them. `LitStone` changes only by the `rings` strength (D22). The stamp is a `graphicsLayer` at the call site.
 
@@ -222,13 +222,13 @@ Times are seconds (`Double`), as iOS's `TimeInterval`, so the Swift tests port w
   - The Android-only pure parts: the tier choice, the composition, the waveform, `MilestoneSnap.shape`, the week columns, the deck's cards, motion and step.
 - **Screenshot references (`src/screenshotTest/`), recorded by CI only:**
   - Part 1 re-baselines `MonthPage*`.
-  - Every later part keeps every existing reference unchanged and adds frozen-clock frames:
+  - Every later part adds frozen-clock frames, and keeps every existing reference unchanged except Part 7's `MonthDeckSection`, which now draws the weeks card as columns:
     - `IntroGarlandHalf` (Part 2);
     - `MonthDeckCover` and `MonthDeckSection` (Part 3);
     - `IntroPersonsRing` (Part 4);
     - `IntroGemSecondFamily` (Part 5);
     - `IntroToneSweep` (Part 6);
-    - `MonthDeckWeeks` and `MonthDeckEnd` (Part 7).
+    - `MonthDeckEnd` (Part 7; `MonthDeckSection` already renders the weeks card on its room, so no `MonthDeckWeeks`).
   - Part 8 re-baselines `Settings*`.
 - **Device pass on the Pixel 8,** after each part: the maintainer tries what the part adds. Across the stack:
   - the feel and the tiers;
@@ -250,7 +250,7 @@ Times are seconds (`Double`), as iOS's `TimeInterval`, so the Swift tests port w
 | 4 | `feat/1242-android-intro-persons` | The persons' choreography (glyph, name, ring dot by dot) and their rows filling the card (D13). `IntroPersonsRing`. |
 | 5 | `feat/1242-android-intro-gem` | The gem: the count-up, then the families' facets. `IntroGemSecondFamily`. |
 | 6 | `feat/1242-android-intro-insights` | Tone (the sweep, the pulses) and hours (the dial, the stones by time of day), the shared insights head. `IntroToneSweep`. |
-| 7 | `feat/1242-android-intro-signatures` | D17's week columns, D16's stamps and ripple, D10's domain gauges and swell, D13's rows sharing the room, D14's end card and Replay. `MonthDeckWeeks`, `MonthDeckEnd`. |
+| 7 | `feat/1242-android-intro-signatures` | D17's week columns, D16's stamps and ripple, D10's domain gauges and swell, D13's rows sharing the room, D14's end card and Replay. `MonthDeckEnd`; `MonthDeckSection` re-baselined. |
 | 8 | `feat/1242-android-haptics-switch` | D23: `HapticsPreference`, the Settings section, every haptic site gated. Resolves #1242. |
 
 Each part builds, lints (`ktlintCheck` and `lint`) and passes `testDebugUnitTest` alone.
