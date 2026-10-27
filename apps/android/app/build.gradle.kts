@@ -1,3 +1,4 @@
+import com.android.compose.screenshot.tasks.PreviewScreenshotUpdateTask
 import com.android.compose.screenshot.tasks.PreviewScreenshotValidationTask
 import java.util.Properties
 
@@ -220,6 +221,13 @@ android {
 tasks.withType<PreviewScreenshotValidationTask>().configureEach {
     testEngineInput.threshold.set(0.0005f)
 }
+
+// Both screenshot tasks render in a Gradle test worker, whose heap defaults to
+// 512 MB. The month intro's references (#1242) ran both out of it
+// (OutOfMemoryError while building the rendered images), so the renders get
+// 2 GB; the CI runner has 16.
+tasks.withType<PreviewScreenshotValidationTask>().configureEach { maxHeapSize = "2g" }
+tasks.withType<PreviewScreenshotUpdateTask>().configureEach { maxHeapSize = "2g" }
 
 // Baseline + startup profiles (#856). The profiles are generated on a device by
 // :baselineprofile and committed under src/release/generated/baselineProfiles/;
