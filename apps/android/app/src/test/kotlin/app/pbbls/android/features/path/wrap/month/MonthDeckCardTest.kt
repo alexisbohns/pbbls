@@ -192,6 +192,26 @@ class MonthDeckCardTest {
     }
 
     @Test
+    fun `the end card of a month without a cover names the month over its replay, centred in the room`() {
+        val bare = wrap.copy(cover = null)
+        var copy: WrapCopy? = null
+        show {
+            copy = rememberWrapCopy()
+            MonthDeckEnd(bare, lookups, onReplay = {})
+        }
+        val words = copy!!
+        // No garland: its kicker is nowhere, and the month's name stands in, a heading.
+        compose.onAllNodesWithText(words.monthKicker(bare.month)).assertCountEquals(0)
+        val name = compose.onNodeWithText(words.monthName(bare.month))
+        name.assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        val top = name.getBoundsInRoot()
+        val replay = compose.onNodeWithText(words.replayMonth()).getBoundsInRoot()
+        assertTrue(top.bottom < replay.top)
+        // The pair in the room's middle, within the button's touch margin.
+        assertEquals(((ROOM_TOP + ROOM_BOTTOM) / 2).value, ((top.top + replay.bottom) / 2).value, TOUCH_MARGIN)
+    }
+
+    @Test
     fun `on a card the persons share the room, more at its foot`() {
         var room: Dp? = null
         var more = ""
@@ -378,5 +398,8 @@ class MonthDeckCardTest {
         val INSET_BOTTOM = MonthDeckLayout.INSET.calculateBottomPadding()
         val ROOM_BOTTOM = HOST_HEIGHT - INSET_BOTTOM
         val ROOM = ROOM_BOTTOM - ROOM_TOP
+
+        /** How far a button's bounds sit inside its 48 dp touch target, in dp: what centring may be off by. */
+        const val TOUCH_MARGIN = 4f
     }
 }

@@ -5,8 +5,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
@@ -52,7 +51,7 @@ internal fun MonthDeckEnd(
     val reveal = currentIntroReveal()
     Column(
         // The room's whole height, so the arrangement centres the two in it.
-        modifier.fillMaxWidth().fillMaxHeight(),
+        modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(MonthDeckLayout.END_GAP, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -69,7 +68,11 @@ internal fun MonthDeckEnd(
                 modifier = Modifier.semantics { heading() },
             )
         }
-        OutlinedButton(onClick = onReplay, modifier = Modifier.introReveal(reveal, IntroKey.Replay).tapsOnceShown(reveal)) {
+        OutlinedButton(
+            onClick = onReplay,
+            contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+            modifier = Modifier.introReveal(reveal, IntroKey.Replay).tapsOnceShown(reveal),
+        ) {
             Icon(painterResource(R.drawable.ic_replay), contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(copy.replayMonth())

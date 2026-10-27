@@ -289,8 +289,8 @@ class MonthPageReplayTest {
 
     @Test
     fun `a swipe to the next month after a replay stays there`() {
-        val august = wrap.copy(month = wrap.month.plusMonths(1))
-        val pager = path(august)
+        val next = wrap.copy(month = wrap.month.plusMonths(1))
+        val pager = path(next)
         repeat(cards.size - 1) { throwCard() }
         tapReplay()
         settle()
@@ -299,9 +299,9 @@ class MonthPageReplayTest {
         compose.onNodeWithTag(PATH).performTouchInput { swipeLeft() }
         settle()
         assertEquals(1, pager().settledPage)
-        // Leaving lands the replayed cover; August's plays, and the Path stays on it.
+        // Leaving lands the replayed cover; the next month's plays, and the Path stays on it.
         assertTrue("stop ${IntroSequence.Cover} ${wrap.month}" in voices.events)
-        assertEquals("play ${IntroSequence.Cover} ${august.month}", voices.events.last())
+        assertEquals("play ${IntroSequence.Cover} ${next.month}", voices.events.last())
         repeat(3) { settle() }
         assertEquals(1, pager().settledPage)
         assertEquals(1, pager().currentPage)
