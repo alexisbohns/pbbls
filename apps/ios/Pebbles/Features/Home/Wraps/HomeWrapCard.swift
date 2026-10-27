@@ -10,6 +10,7 @@ struct HomeWrapCard: View {
 
     static let side: CGFloat = 128
     private static let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
+    @Environment(\.dynamicTypeSize) private var typeSize
     private var locale: Locale { SpineStrings.appLocale }
 
     var body: some View {
@@ -29,14 +30,17 @@ struct HomeWrapCard: View {
                 Text(verbatim: WrapCopy.monthName(month.month, locale: locale))
                     .spineType(.personName)
                     .foregroundStyle(Color.pebbles.onSurface)
-                Text(verbatim: String(month.month.year))
-                    .spineType(.kicker)
-                    .foregroundStyle(Color.pebbles.outline)
+                if !typeSize.isAccessibilitySize {
+                    Text(verbatim: String(month.month.year))
+                        .spineType(.kicker)
+                        .foregroundStyle(Color.pebbles.outline)
+                }
             }
-            .lineLimit(1)
+            .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
             .minimumScaleFactor(0.7)
         }
-        .frame(width: Self.side, height: Self.side)
+        .frame(width: Self.side)
+        .frame(minHeight: Self.side)
         .background(Color.pebbles.surfaceContainer, in: Self.shape)
         .overlay(alignment: .topTrailing) {
             if month.isFolded {

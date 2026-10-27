@@ -1,4 +1,5 @@
 import Foundation
+import os
 import Supabase
 
 /// Home's server reads, behind a protocol so the Lab and tests use fakes.
@@ -30,7 +31,12 @@ struct HomeService: HomeServicing {
 
     func wraps(zone: TimeZone) async throws -> HomeWraps {
         let data = try await client.rpc("home_wraps", params: ["p_tz": zone.identifier]).execute().data
-        return try WrapDecoding.decode(HomeWrapsPayload.self, from: data).model
+        let payload = try WrapDecoding.decode(HomeWrapsPayload.self, from: data)
+        if payload.dropped > 0 {
+            Logger(subsystem: "app.pbbls.ios", category: "home.service")
+                .warning("home_wraps: dropped \(payload.dropped) month(s) the client could not decode")
+        }
+        return payload.model
     }
 
     func reveal(month: CalendarMonth, zone: TimeZone) async throws -> HomeReveal {

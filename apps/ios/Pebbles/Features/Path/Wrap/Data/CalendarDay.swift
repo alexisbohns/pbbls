@@ -73,7 +73,8 @@ extension CalendarDay: Codable {
 }
 
 /// A month of the Path, named by its year and month (the month page's key).
-struct CalendarMonth: Hashable, Comparable, Sendable {
+struct CalendarMonth: Hashable, Comparable, Sendable, Identifiable {
+    var id: Self { self }
     let year: Int
     let month: Int
 

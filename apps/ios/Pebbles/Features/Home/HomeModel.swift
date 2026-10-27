@@ -5,6 +5,8 @@ import os
 /// render at once; the server projections load together, each section
 /// keeping its last value while it reloads (spec §1.6). Later parts add
 /// the checklist and the guides here.
+enum HomeModelError: Error { case noService }
+
 @Observable @MainActor final class HomeModel {
     private(set) var name: String = ""
     private(set) var hasLoadedOnce = false
@@ -47,8 +49,11 @@ import os
 
     /// Unfolds `month` and flips it in place, so the card and the sheet follow.
     func reveal(_ month: CalendarMonth, zone: TimeZone) async throws -> HomeReveal {
-        guard let service else { throw CancellationError() }
+        guard let service else { throw HomeModelError.noService }
         let reveal = try await service.reveal(month: month, zone: zone)
+        if reveal.revealedAt == nil {
+            logger.error("reveal_wrap returned no timestamp for \(month.firstDay.iso, privacy: .public)")
+        }
         if let at = reveal.revealedAt, let current = wraps {
             wraps = HomeWraps(months: current.months.map {
                 $0.month == month ? HomeMonth(month: $0.month, count: $0.count, revealedAt: at, cover: $0.cover) : $0

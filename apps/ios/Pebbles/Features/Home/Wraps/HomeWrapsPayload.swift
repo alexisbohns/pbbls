@@ -6,6 +6,8 @@ import Foundation
 /// that one month, never Home. Mapped to `HomeWraps` by `model`.
 struct HomeWrapsPayload: Decodable {
     let months: [HomeMonthPayload]
+    /// How many months the client could not read, so a shape drift is noticed.
+    let dropped: Int
 
     private enum CodingKeys: String, CodingKey { case months }
 
@@ -13,6 +15,7 @@ struct HomeWrapsPayload: Decodable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let items: [Lossy<HomeMonthPayload>] = try c.decode(.months, or: [])
         months = items.compactMap(\.value)
+        dropped = items.count - months.count
     }
 }
 

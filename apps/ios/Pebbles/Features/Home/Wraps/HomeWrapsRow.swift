@@ -13,14 +13,16 @@ struct HomeWrapsRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             SpineSectionHeader(String(localized: "home.wraps.title")) {
-                Text(verbatim: "\(months.count)")
-                    .spineType(.sectionLabel)
-                    .foregroundStyle(Color.pebbles.outline)
+                if !months.isEmpty {
+                    Text(verbatim: "\(months.count)")
+                        .spineType(.sectionLabel)
+                        .foregroundStyle(Color.pebbles.outline)
+                }
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: Spacing.sm) {
                     if months.isEmpty {
-                        promise
+                        HomeWrapPromise(liveMonth: liveMonth)
                     } else {
                         ForEach(months) { month in
                             Button { onOpen(month) } label: { HomeWrapCard(month: month, lookups: lookups) }
@@ -33,8 +35,6 @@ struct HomeWrapsRow: View {
             .scrollTargetBehavior(.viewAligned)
         }
     }
-
-    private var promise: some View { HomeWrapPromise(liveMonth: liveMonth) }
 }
 
 /// The dashed card that stands for a first wrap, until a month holds a pebble.
@@ -70,6 +70,6 @@ struct HomeWrapPromise: View {
         formatter.timeZone = gregorian.timeZone
         formatter.dateFormat = "d MMMM"
         return SpineStrings.format("home.wraps.empty", locale: locale,
-                                   WrapCopy.monthName(liveMonth, locale: locale), formatter.string(from: date))
+                                   formatter.string(from: date))
     }
 }

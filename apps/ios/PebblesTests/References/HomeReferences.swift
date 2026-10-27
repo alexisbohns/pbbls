@@ -97,9 +97,7 @@ extension References {
 
         static func wrapsEmpty() throws -> some View {
             VStack(alignment: .leading, spacing: Spacing.sm) {
-                SpineSectionHeader(String(localized: "home.wraps.title")) {
-                    Text(verbatim: "0").spineType(.sectionLabel)
-                }
+                SpineSectionHeader(String(localized: "home.wraps.title")) {}
                 HomeWrapPromise(liveMonth: CalendarMonth(year: 2026, month: 11))
             }
                 .padding(.horizontal, Spacing.lg)

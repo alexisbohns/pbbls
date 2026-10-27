@@ -1,10 +1,6 @@
 import SwiftUI
 import os
 
-extension CalendarMonth: Identifiable {
-    public var id: Self { self }
-}
-
 /// What opening a month on Home shows. Folded: the count and one button that
 /// unfolds it (the server records when). Revealed: the month's deck, the same
 /// `MonthPage` the Path shows, played once a launch through Home's own ledger.
@@ -43,6 +39,9 @@ struct HomeWrapSheet: View {
                     deck
                 }
             }
+            .task(id: month?.isFolded) { if month?.isFolded == false { await loadDeck() } }
+            .onAppear { if month == nil { dismiss() } }
+            .onChange(of: month == nil) { _, gone in if gone { dismiss() } }
             .pebblesToolbarTitle(WrapCopy.monthName(monthId, locale: locale))
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -70,7 +69,6 @@ struct HomeWrapSheet: View {
         } else {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .task(id: month?.isFolded) { if month?.isFolded == false { await loadDeck() } }
         }
     }
 
@@ -81,7 +79,8 @@ struct HomeWrapSheet: View {
         Task {
             defer { revealing = false }
             do {
-                _ = try await model.reveal(monthId, zone: model.zone)
+                let reveal = try await model.reveal(monthId, zone: model.zone)
+                if reveal.revealedAt == nil { revealError = String(localized: "home.wraps.error") }
             } catch {
                 logger.error("reveal failed: \(error.localizedDescription, privacy: .public)")
                 revealError = String(localized: "home.wraps.error")
@@ -125,8 +124,8 @@ struct HomeWrapFoldedView: View {
             VStack(spacing: Spacing.sm) {
                 ForEach(0..<3, id: \.self) { _ in
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .strokeBorder(Color.pebbles.outline, style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
-                        .frame(height: 120)
+                        .strokeBorder(Color.pebbles.outlineVariant, style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                        .frame(height: 72)
                 }
             }
             .accessibilityHidden(true)
