@@ -3,10 +3,12 @@ package app.pbbls.android.core.ui
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -14,6 +16,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.DotStyle
 import app.pbbls.android.core.designsystem.RadialLayout
+import app.pbbls.android.core.designsystem.RevealMotion
 import app.pbbls.android.core.designsystem.SpineLayoutTokens.DAY_CIRCLE
 import app.pbbls.android.core.designsystem.SpineLayoutTokens.DAY_CIRCLE_DOT
 import app.pbbls.android.core.designsystem.SpineLayoutTokens.DAY_CIRCLE_GAP_SLOTS
@@ -45,6 +48,15 @@ sealed interface DayMode {
  * The days a soul, a family or a domain touches (#1207): filled on a day present, an inset ring
  * otherwise. One semantics node: [contentDescription] says the days in words; without it the marks
  * are decorative (a row that speaks for itself).
+ *
+ * The month intro (#1242; iOS `DaySetMarks`' intro row) lands the marks in parts, through providers read as
+ * they draw: on the circle, the line drawn [ringProgress] of the way from the 1st, its tick once it starts;
+ * in the row and the calendar, the empty days' marks at [gridAlpha]; everywhere, each day present popping
+ * on [dotProgress]. The defaults draw the marks as ever.
+ *
+ * @param ringProgress the ring's line drawn so far, 0…1, already eased.
+ * @param gridAlpha the row's and the calendar's empty days and padding, 0…1, already eased.
+ * @param dotProgress a present day's dot, 0…1, linear: it pops through [RevealMotion].
  */
 @Composable
 fun DaySetMarks(
@@ -55,9 +67,14 @@ fun DaySetMarks(
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
     ringSize: Dp = DAY_CIRCLE,
+    ringProgress: () -> Float = { 1f },
+    gridAlpha: () -> Float = { 1f },
+    dotProgress: (day: Int) -> Float = { 1f },
 ) {
     val described = if (contentDescription != null) Modifier.semantics { this.contentDescription = contentDescription } else Modifier
     val box = DaySetGeometry.size(days.length, mode, ringSize)
+    // In day order: popping dots blend in the order they draw, and a set's own order is no promise.
+    val present = remember(days) { days.days.sorted() }
     Canvas(modifier.size(box.width, box.height).then(described)) {
         val ringWidth = DOT_RING.toPx()
         when (mode) {
@@ -66,6 +83,7 @@ fun DaySetMarks(
                 val step = dot + DOT_GAP.toPx()
                 val leading = (mode as? DayMode.Calendar)?.leading ?: 0
                 val cells = if (mode is DayMode.Calendar) DaySetGeometry.rows(days.length, leading) * WEEK else days.length
+                val grid = gridAlpha()
                 repeat(cells) { cell ->
                     val day = cell - leading
                     val column = if (mode is DayMode.Calendar) cell % WEEK else cell
@@ -76,9 +94,13 @@ fun DaySetMarks(
                             day in days -> DotStyle.FILLED
                             else -> DotStyle.RING
                         }
-                    // A calendar's padding is the empty quiet: a ring's colour, not the ink.
-                    val color = if (style == DotStyle.FILLED) ink else ring
-                    dotMark(Offset(column * step + dot / 2, row * step + dot / 2), dot, style, color, ringWidth)
+                    val at = Offset(column * step + dot / 2, row * step + dot / 2)
+                    if (style == DotStyle.FILLED) {
+                        poppingDot(at, dot, dotProgress(day), ink, ringWidth)
+                    } else if (grid > 0f) {
+                        // A calendar's padding is the empty quiet: a ring's colour, not the ink.
+                        dotMark(at, dot, style, if (grid < 1f) ring.copy(alpha = ring.alpha * grid) else ring, ringWidth)
+                    }
                 }
             }
             DayMode.Circle -> {
@@ -88,20 +110,45 @@ fun DaySetMarks(
                 val ringLayout = RadialLayout(days.length, gapSlots = DAY_CIRCLE_GAP_SLOTS)
                 val radius = size.minDimension / 2 - dot / 2
                 val start = ringLayout.angleDeg(-0.5f)
-                drawArc(
-                    color = ring,
-                    startAngle = start,
-                    sweepAngle = ringLayout.angleDeg(days.length - 0.5f) - start,
-                    useCenter = false,
-                    topLeft = Offset(center.x - radius, center.y - radius),
-                    size = Size(radius * 2, radius * 2),
-                    alpha = RING_LINE_ALPHA,
-                    style = Stroke(ringWidth),
-                )
-                drawLine(ring, Offset(center.x, center.y - radius - dot / 2), Offset(center.x, center.y - radius + dot / 2), ringWidth)
-                days.days.forEach { day -> dotMark(ringLayout.point(day, center, radius), dot, DotStyle.FILLED, ink, ringWidth) }
+                val drawn = ringProgress()
+                if (drawn > 0f) {
+                    val sweep = ringLayout.angleDeg(days.length - 0.5f) - start
+                    drawArc(
+                        color = ring,
+                        startAngle = start,
+                        sweepAngle = if (drawn < 1f) sweep * drawn else sweep,
+                        useCenter = false,
+                        topLeft = Offset(center.x - radius, center.y - radius),
+                        size = Size(radius * 2, radius * 2),
+                        alpha = RING_LINE_ALPHA,
+                        style = Stroke(ringWidth),
+                    )
+                    drawLine(ring, Offset(center.x, center.y - radius - dot / 2), Offset(center.x, center.y - radius + dot / 2), ringWidth)
+                }
+                present.forEach { day ->
+                    poppingDot(ringLayout.point(day, center, radius), dot, dotProgress(day), ink, ringWidth)
+                }
             }
         }
+    }
+}
+
+/** A day present: nothing at [shown] 0; on its way, faded in and grown from 0.4 past its size and back; whole at 1. */
+private fun DrawScope.poppingDot(
+    center: Offset,
+    diameter: Float,
+    shown: Float,
+    ink: Color,
+    ringWidth: Float,
+) {
+    when {
+        shown <= 0f -> Unit
+        shown < 1f -> {
+            val p = shown.toDouble()
+            val color = ink.copy(alpha = ink.alpha * RevealMotion.popOpacity(p).toFloat())
+            dotMark(center, diameter * RevealMotion.popScale(p).toFloat(), DotStyle.FILLED, color, ringWidth)
+        }
+        else -> dotMark(center, diameter, DotStyle.FILLED, ink, ringWidth)
     }
 }
 

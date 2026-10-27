@@ -1,6 +1,7 @@
 package app.pbbls.android.features.path.wrap.month
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.model.PathMoment
@@ -20,6 +21,8 @@ import java.time.ZoneId
  * @param onCard whether a card draws this section. The card's title band then draws the section's head,
  * so the section leaves its own out; the one exception is the leading tone or hours figure, which keeps
  * its own head under the insights band (iOS), while a following one leaves its head to its card's band.
+ * @param room on a card, the room under its title band, which the persons share (D13); null on the page,
+ * where rows keep their size.
  */
 @Composable
 internal fun MonthSectionContent(
@@ -34,11 +37,12 @@ internal fun MonthSectionContent(
     onMore: (MonthSection) -> Unit,
     leadsInsights: Boolean = section == wrap.sections.firstOrNull { it == MonthSection.TONE || it == MonthSection.HOURS },
     onCard: Boolean = false,
+    room: Dp? = null,
 ) {
     when (section) {
         MonthSection.WEEKS -> WeeksSummary(wrap, lookups, onWeek, onCard)
         MonthSection.MILESTONES -> MilestonesSection(wrap, lookups, zone, onOpen, aspect, onCard)
-        MonthSection.PERSONS -> PersonsSection(wrap, lookups, dayView, onMore, onCard)
+        MonthSection.PERSONS -> PersonsSection(wrap, lookups, dayView, onMore, onCard, room)
         MonthSection.DOMAINS -> DomainsSection(wrap, lookups, onMore, onCard)
         MonthSection.GEM -> EmotionGem(wrap, lookups, onMore, onCard)
         MonthSection.TONE, MonthSection.HOURS -> {

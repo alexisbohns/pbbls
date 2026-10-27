@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isFinite
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SpineLayoutTokens
 import app.pbbls.android.core.model.ValencePolarity
@@ -100,7 +101,8 @@ private fun MonthDeckSheet(
  * One card (#1242 D21; iOS `MonthDeckCard`): its paper, the margin ruled off on the left with [month] upright
  * and the stepper, the title band with [head] (none on the cover and the end card), and [content]
  * top-aligned in the room under it: laid out in the whole room when it fits, so a section's *more* stands
- * at the foot; scaled down, anchored at the top, when it doesn't. [content] receives the room's height.
+ * at the foot; scaled down, anchored at the top, when it doesn't. [content] receives the room's height, null
+ * when the room is empty or unbounded (iOS: `room > 0 ? room : nil`), so its rows keep their size.
  */
 @Composable
 internal fun MonthDeckCard(
@@ -108,7 +110,7 @@ internal fun MonthDeckCard(
     step: MonthDeckStep?,
     head: MonthHead?,
     modifier: Modifier = Modifier,
-    content: @Composable (room: Dp) -> Unit,
+    content: @Composable (room: Dp?) -> Unit,
 ) {
     val colors = PebblesTheme.spine.colors
     MonthDeckSheet(modifier) {
@@ -125,11 +127,11 @@ internal fun MonthDeckCard(
 
 /**
  * Lays [content] out in the room when its intrinsic height fits, so its spacers open; past the room, at its
- * own height, scaled down from the top (iOS `MonthCardFill` + the card's fit). [content] receives the room.
- * As on iOS, where the room is a proposal, it is a bound, not a size: [content] sits in a column, as a page
- * item does, and takes the room only by asking for it: `fillMaxHeight()` on its root, and a weighted
- * Spacer inside its own Column to stand its foot at the room's. An empty room (an unbounded host) leaves
- * [content] whole at its own size, as iOS does.
+ * own height, scaled down from the top (iOS `MonthCardFill` + the card's fit). [content] receives the room,
+ * null when it is empty or unbounded. As on iOS, where the room is a proposal, it is a bound, not a size:
+ * [content] sits in a column, as a page item does, and takes the room only by asking for it:
+ * `fillMaxHeight()` on its root, and a weighted Spacer inside its own Column to stand its foot at the room's.
+ * An empty room (an unbounded host) leaves [content] whole at its own size, as iOS does.
  *
  * Intrinsics are safe here: nothing a card draws is a SubcomposeLayout (no BoxWithConstraints, no lazy
  * list); a figure that becomes one must move this to a SubcomposeLayout.
@@ -137,10 +139,10 @@ internal fun MonthDeckCard(
 @Composable
 private fun MonthCardRoom(
     modifier: Modifier,
-    content: @Composable (room: Dp) -> Unit,
+    content: @Composable (room: Dp?) -> Unit,
 ) {
     BoxWithConstraints(modifier) {
-        val room = maxHeight
+        val room = maxHeight.takeIf { it > 0.dp && it.isFinite }
         Layout(content = { Column { content(room) } }) { measurables, constraints ->
             val width = constraints.maxWidth
             val roomPx = constraints.maxHeight

@@ -20,17 +20,21 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import app.pbbls.android.testing.PIXEL_TEST_SDK
 import app.pbbls.android.testing.PebblesTestHarness
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -58,7 +62,7 @@ class MonthDeckCardTest {
     private fun show(
         height: Dp = HOST_HEIGHT,
         head: MonthHead? = null,
-        content: @Composable (room: Dp) -> Unit,
+        content: @Composable (room: Dp?) -> Unit,
     ) {
         compose.setContent {
             PebblesTheme {
@@ -82,7 +86,7 @@ class MonthDeckCardTest {
 
     @Test
     fun `content that asks for the room takes it whole, its foot at the room's foot`() {
-        var room = 0.dp
+        var room: Dp? = null
         show { r ->
             room = r
             Column(Modifier.fillMaxHeight()) {
@@ -91,7 +95,7 @@ class MonthDeckCardTest {
                 Box(Modifier.size(10.dp).testTag(FOOT))
             }
         }
-        assertEquals(ROOM.value, room.value, 0.5f)
+        assertEquals(ROOM.value, room!!.value, 0.5f)
         assertEquals(
             ROOM_BOTTOM.value,
             compose
@@ -112,10 +116,15 @@ class MonthDeckCardTest {
     }
 
     @Test
-    fun `an empty room leaves the content whole, at its own size`() {
+    fun `an empty room is none, and leaves the content whole, at its own size`() {
         var content: LayoutCoordinates? = null
+        var room: Dp? = TALL
         // The paper's inset takes the whole host: the room is 0 tall.
-        show(height = ROOM_TOP + INSET_BOTTOM) { Box(Modifier.fillMaxWidth().height(TALL).onGloballyPositioned { content = it }) }
+        show(height = ROOM_TOP + INSET_BOTTOM) { r ->
+            room = r
+            Box(Modifier.fillMaxWidth().height(TALL).onGloballyPositioned { content = it })
+        }
+        assertNull(room)
         val (top, bottom) = verticalInRoot(content!!)
         assertEquals(ROOM_TOP.value, top.value, 0.5f)
         assertEquals(TALL.value, (bottom - top).value, 0.5f)
@@ -137,7 +146,7 @@ class MonthDeckCardTest {
                             (card as? IntroSequence.Section)?.let {
                                 if (leads) MonthSections.insightsHead(copy) else MonthSections.head(it.section, wrap, lookups, copy)
                             }
-                        MonthDeckCard(MONTH, MonthDeckStep.of(card, cards), head) {
+                        MonthDeckCard(MONTH, MonthDeckStep.of(card, cards), head) { room ->
                             Box(Modifier.testTag(CONTENT)) {
                                 when (card) {
                                     IntroSequence.Cover -> MonthCover(wrap, lookups)
@@ -154,6 +163,7 @@ class MonthDeckCardTest {
                                             onMore = {},
                                             leadsInsights = leads,
                                             onCard = true,
+                                            room = room,
                                         )
                                     IntroSequence.End -> Unit
                                 }
@@ -171,6 +181,42 @@ class MonthDeckCardTest {
             assertTrue("$card draws nothing", bounds.bottom > bounds.top)
             assertTrue("$card overruns its room: ${bounds.bottom}", bounds.bottom.value <= ROOM_BOTTOM.value + 0.5f)
         }
+    }
+
+    @Test
+    fun `on a card the persons share the room, more at its foot`() {
+        var room: Dp? = null
+        var more = ""
+        show(head = MonthHead("Persons", null)) { r ->
+            room = r
+            more = rememberWrapCopy().morePersons(MonthSections.namedPersons(wrap, lookups).size)
+            MonthSectionContent(
+                MonthSection.PERSONS,
+                wrap,
+                lookups,
+                DayView.CIRCLE,
+                SpineFixtureWeek.zone,
+                aspect = null,
+                onWeek = {},
+                onOpen = {},
+                onMore = {},
+                onCard = true,
+                room = r,
+            )
+        }
+        val first = MonthSections.namedPersons(wrap, lookups).first()
+        val name = lookups.soul(first.soulId)!!.name
+        val row = compose.onNodeWithContentDescription("$name, ${first.count}", substring = true).getBoundsInRoot()
+        val rows = minOf(5, MonthSections.namedPersons(wrap, lookups).size)
+        assertEquals(PersonsSection.rowSize(room!!, rows).height.value, (row.bottom - row.top).value, 0.5f)
+        assertEquals(
+            ROOM_BOTTOM.value,
+            compose
+                .onNodeWithText(more)
+                .getBoundsInRoot()
+                .bottom.value,
+            0.5f,
+        )
     }
 
     private companion object {

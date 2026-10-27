@@ -31,7 +31,8 @@ internal fun MonthSectionHead(head: MonthHead) = MonthSectionHead(head.label, he
 @Composable
 internal fun MonthMore(
     text: String,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    MoreLink(text = text, onClick = onClick, modifier = Modifier.padding(horizontal = SECTION_PAD_X))
+    MoreLink(text = text, onClick = onClick, modifier = modifier.padding(horizontal = SECTION_PAD_X))
 }
