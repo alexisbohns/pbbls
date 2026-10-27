@@ -36,6 +36,13 @@ object IntroScore {
     const val FAMILY_PAUSE = 0.22
     const val COUNT_AFTER = 0.16
 
+    // Tone and hours (iOS IntroScore+Insights).
+    const val SWEEP_AT = 0.32
+    const val SWEEP_SPAN = 1.2
+    const val DIAL_AT = 0.32
+    const val STONES_AT = 0.52
+    const val STONES_SPAN = 1.2
+
     /** When a sequence has landed: its latest beat's end. */
     fun duration(beats: List<IntroBeat>): Double = beats.maxOfOrNull { it.at + it.duration } ?: 0.0
 
