@@ -231,8 +231,12 @@ class MonthPageReplayTest {
         compose.mainClock.advanceTimeBy(HALF_FADE_MS)
         assertEquals("play ${IntroSequence.Cover} ${wrap.month}", voices.events.last())
         compose.onAllNodesWithText(replay).assertCountEquals(0)
+        // Yet still there, fading: the unmerged tree keeps a cleared deck's nodes, placed on the page. A swap would
+        // have dropped the leaving deck by now.
+        compose.onNodeWithText(replay, useUnmergedTree = true).assertIsDisplayed()
         settle()
         compose.onAllNodesWithText(replay).assertCountEquals(0)
+        compose.onAllNodesWithText(replay, useUnmergedTree = true).assertCountEquals(0)
         // The new deck alone, on its cover: its month's name is the one heading on the page.
         compose.onAllNodesWithText(copy!!.monthName(wrap.month)).assertCountEquals(1)
     }

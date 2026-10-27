@@ -335,6 +335,25 @@ class IntroClockTest {
     }
 
     @Test
+    fun `a retired clock never turns active again, and a card it never met draws settled`() {
+        val ledger = IntroLedger()
+        val spy = HapticsSpy()
+        val clock = clock(ledger, spy)
+        clock.retire()
+        ledger.reset(october)
+        // A card it never met, the ledger empty: settled, every key landed.
+        assertEquals(IntroClock.Phase.Settled, clock.phase(weeks))
+        assertEquals(1f, clock.reveal(weeks, base)(IntroKey.Header))
+        // Turned on again (a stale drive), it stays off: a card shown and registered starts nothing.
+        clock.isActive = true
+        assertFalse(clock.isActive)
+        clock.register(IntroSequence.Cover) { beats }
+        clock.show(IntroSequence.Cover)
+        assertTrue(spy.played.isEmpty())
+        assertFalse(ledger.contains(october, IntroSequence.Cover))
+    }
+
+    @Test
     fun `a tap on an inactive page does nothing`() {
         val ledger = IntroLedger()
         val clock = clock(ledger)

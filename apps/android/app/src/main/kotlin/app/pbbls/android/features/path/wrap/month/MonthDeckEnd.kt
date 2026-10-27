@@ -69,7 +69,9 @@ internal fun MonthDeckEnd(
             )
         }
         OutlinedButton(
-            onClick = onReplay,
+            // Hidden, it replays nothing however it is clicked (Switch Access, Voice Access, a keyboard): the touch
+            // gate alone would leave its click action reachable.
+            onClick = { if (reveal(IntroKey.Replay) > 0f) onReplay() },
             contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
             modifier = Modifier.introReveal(reveal, IntroKey.Replay).tapsOnceShown(reveal),
         ) {

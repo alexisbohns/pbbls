@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
@@ -211,6 +213,26 @@ class MonthDeckPagerTest {
         assertEquals(0, replays)
         // Landed, it shows: the next tap replays.
         compose.onNodeWithText(replayText()).performClick()
+        compose.mainClock.advanceTimeByFrame()
+        assertEquals(1, replays)
+    }
+
+    @Test
+    fun `the end card's hidden replay replays nothing when clicked some other way, and does once it shows`() {
+        var replays = 0
+        deal(onReplay = { replays++ })
+        throwToTheEnd()
+        // Switch Access, Voice Access and a keyboard click through the semantics, past the touch gate.
+        assertEquals(0f, clock.reveal(IntroSequence.End)(IntroKey.Replay))
+        compose.onNodeWithText(replayText()).performSemanticsAction(SemanticsActions.OnClick)
+        compose.mainClock.advanceTimeByFrame()
+        assertEquals(0, replays)
+        var frames = 0
+        while (clock.reveal(IntroSequence.End)(IntroKey.Replay) == 0f) {
+            compose.mainClock.advanceTimeByFrame()
+            check(++frames < MAX_FRAMES) { "the replay never rose" }
+        }
+        compose.onNodeWithText(replayText()).performSemanticsAction(SemanticsActions.OnClick)
         compose.mainClock.advanceTimeByFrame()
         assertEquals(1, replays)
     }
