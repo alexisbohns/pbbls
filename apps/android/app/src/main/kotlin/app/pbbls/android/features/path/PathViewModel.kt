@@ -9,6 +9,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.data.DisplayPreferences
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsServicing
@@ -157,6 +158,7 @@ class PathViewModel
         private val souls: SoulsServicing,
         private val wraps: PathWrapServicing,
         private val display: DisplayPreferences,
+        private val haptics: HapticsPreference,
         /**
          * The photo-ratio probe the Spine's cards read (#1122). Process-wide and
          * injected here rather than through a `Local…`: the screen takes its
@@ -174,6 +176,12 @@ class PathViewModel
          * lives as long as the launch, so a month plays once. A rotation keeps it; process death clears it.
          */
         val introLedger = IntroLedger()
+
+        /**
+         * Pebbles' haptics switch (#1242 D23), for the intro, the Path's ticks and the stones. A getter on
+         * the preference's Compose state, read at each vibration: a change in Settings applies at once.
+         */
+        val hapticsOn: Boolean get() = haptics.isOn
 
         private var entries: List<WeekRollEntry> = emptyList()
         private var strip: Strip? = null

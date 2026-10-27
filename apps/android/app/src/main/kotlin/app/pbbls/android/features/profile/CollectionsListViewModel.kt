@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.CollectionsServicing
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.model.Collection
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -67,6 +68,7 @@ class CollectionsListViewModel
     constructor(
         private val collectionsService: CollectionsServicing,
         private val refs: ReferenceDataServicing,
+        private val haptics: HapticsPreference,
     ) : ViewModel() {
         private var collections: List<Collection> = emptyList()
         private var isRefreshing = false
@@ -75,6 +77,9 @@ class CollectionsListViewModel
 
         private val _uiState = MutableStateFlow<CollectionsListUiState>(CollectionsListUiState.Loading)
         val uiState: StateFlow<CollectionsListUiState> = _uiState.asStateFlow()
+
+        /** Pebbles' haptics switch (#1242 D23), for the rows' long-press buzz (iOS `pebblesContextMenu`). */
+        val hapticsOn: Boolean get() = haptics.isOn
 
         private val _covers = MutableStateFlow(CollectionsListCovers())
         val covers: StateFlow<CollectionsListCovers> = _covers.asStateFlow()

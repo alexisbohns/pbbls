@@ -3,7 +3,9 @@ package app.pbbls.android.core.data
 import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalView
 
 /**
@@ -54,6 +56,15 @@ object TapHaptics {
     }
 
     /**
+     * [play] on [view] behind Pebbles' haptics switch (#1242 D23; iOS `TapHaptics.play`):
+     * [enabled] is asked at each tap, so a change in Settings applies without a restart.
+     */
+    internal fun gated(
+        view: View,
+        enabled: () -> Boolean,
+    ): (TapHaptic) -> Unit = { haptic -> if (enabled()) play(view, haptic) }
+
+    /**
      * Constant per flavor. `internal` and separate from [play] so a JVM unit
      * test can assert the mapping without a `View`.
      */
@@ -73,9 +84,14 @@ object TapHaptics {
  *
  * Remembered on the view so the model — constructed once per flow — keeps a
  * stable closure rather than one that captures a stale composition.
+ *
+ * [enabled] is Pebbles' haptics switch, read through the caller's ViewModel
+ * (#1242 D23) and asked at each tap; off, a tap plays nothing. The latest
+ * [enabled] is the one asked, though the closure stays the same.
  */
 @Composable
-fun rememberTapHaptics(): (TapHaptic) -> Unit {
+fun rememberTapHaptics(enabled: () -> Boolean = { true }): (TapHaptic) -> Unit {
     val view = LocalView.current
-    return remember(view) { { haptic: TapHaptic -> TapHaptics.play(view, haptic) } }
+    val currentEnabled by rememberUpdatedState(enabled)
+    return remember(view) { TapHaptics.gated(view) { currentEnabled() } }
 }

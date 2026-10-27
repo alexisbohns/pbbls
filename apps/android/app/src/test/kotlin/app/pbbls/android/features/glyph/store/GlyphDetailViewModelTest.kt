@@ -2,12 +2,14 @@ package app.pbbls.android.features.glyph.store
 
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.SavedStateHandle
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.inMemorySettings
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -35,7 +37,7 @@ class GlyphDetailViewModelTest {
     private fun viewModel(
         stats: FakePathStatsService = FakePathStatsService(karma = 42),
         savedState: SavedStateHandle = SavedStateHandle(),
-    ) = GlyphDetailViewModel(FakeGlyphMarketService(), stats, savedState)
+    ) = GlyphDetailViewModel(FakeGlyphMarketService(), stats, savedState, HapticsPreference(inMemorySettings()))
 
     @Test
     fun `the balance is the shared karma`() =

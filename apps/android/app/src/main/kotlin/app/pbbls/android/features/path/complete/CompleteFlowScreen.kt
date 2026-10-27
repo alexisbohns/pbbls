@@ -62,7 +62,8 @@ fun CompleteFlowScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val refs = LocalReferenceDataService.current
     val palettes = LocalEmotionPaletteService.current
-    val haptic = rememberTapHaptics()
+    // Each buzz asks Pebbles' haptics switch (#1242 D23).
+    val haptic = rememberTapHaptics { viewModel.hapticsOn }
 
     LaunchedEffect(momentId) { viewModel.start(momentId) }
 

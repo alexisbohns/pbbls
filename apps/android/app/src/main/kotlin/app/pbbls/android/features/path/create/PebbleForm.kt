@@ -87,6 +87,8 @@ fun PebbleForm(
     onRemovePending: () -> Unit = {},
     onRemoveExistingSnap: () -> Unit = {},
     onAchievementCheck: () -> Unit = {},
+    /** Pebbles' haptics switch (#1242 D23), from the host's ViewModel: the valence picker asks it. */
+    hapticsOn: () -> Boolean = { true },
 ) {
     var activePicker by remember { mutableStateOf<PickerKind?>(null) }
 
@@ -190,6 +192,7 @@ fun PebbleForm(
                     onDraftChange(draft.copy(valence = it))
                     activePicker = null
                 },
+                hapticsOn = hapticsOn,
             )
         PickerKind.SOUL ->
             SoulPickerSheet(

@@ -1,6 +1,7 @@
 package app.pbbls.android.features.glyph.picker
 
 import app.pbbls.android.R
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
@@ -8,6 +9,7 @@ import app.pbbls.android.features.glyph.store.GlyphTab
 import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.inMemorySettings
 import app.pbbls.android.testing.recordEffects
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -40,7 +42,7 @@ class GlyphPickerViewModelTest {
     private fun viewModel(
         market: FakeGlyphMarketService = FakeGlyphMarketService(),
         stats: FakePathStatsService = FakePathStatsService(),
-    ) = GlyphPickerViewModel(market, stats)
+    ) = GlyphPickerViewModel(market, stats, HapticsPreference(inMemorySettings()))
 
     // MARK: - Load
 

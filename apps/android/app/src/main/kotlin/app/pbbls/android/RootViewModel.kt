@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.core.data.AchievementMoment
 import app.pbbls.android.core.data.AchievementNotificationService
 import app.pbbls.android.core.data.CompleteSnapshotStoring
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.data.SupabaseServicing
@@ -88,6 +89,7 @@ class RootViewModel
         private val achievementNotify: AchievementNotificationService,
         private val completeSnapshots: CompleteSnapshotStoring,
         private val wrapCache: WrapDiskCaching,
+        private val haptics: HapticsPreference,
         private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
         private val _uiState =
@@ -95,6 +97,12 @@ class RootViewModel
                 RootUiState(pendingInvite = savedStateHandle[KEY_PENDING_INVITE]),
             )
         val uiState: StateFlow<RootUiState> = _uiState.asStateFlow()
+
+        /**
+         * Pebbles' haptics switch (#1242 D23), for the karma and achievement overlays' buzz. A getter on
+         * the preference's Compose state, so the overlays recompose with a change made in Settings.
+         */
+        val hapticsOn: Boolean get() = haptics.isOn
 
         /**
          * Distinguishes "signed out" from "auth has not resolved yet" to

@@ -174,6 +174,8 @@ fun PathScreen(
                         paletteFor = paletteFor,
                         aspect = viewModel.snapAspect,
                         introLedger = viewModel.introLedger,
+                        // Read at each vibration, so a change in Settings applies at once (#1242 D23).
+                        hapticsOn = { viewModel.hapticsOn },
                         onPebbleTap = { moment, face -> onOpenDetail(moment.id, face) },
                         onPebbleDelete = viewModel::requestDelete,
                         onCreatePebble = onCreatePebble,
@@ -251,8 +253,11 @@ fun PathScreen(
  * @param introLedger the month intros played this launch (#1242 D20); with
  *   one, a month page the policy allows is dealt as a deck and plays its
  *   intro while it is the settled page. Null (previews): the plain page.
+ * @param hapticsOn Pebbles' haptics switch (#1242 D23), from [PathViewModel]:
+ *   the intro, the swipe's and the strip's ticks and the stones all ask it at
+ *   each vibration. On in previews.
  * @param tapHaptics plays the swipe's and the strip's selection tick (D24);
- *   the view's own haptics, unless a test records them.
+ *   the view's own haptics behind [hapticsOn], unless a test records them.
  * @param ratioOverride preview-only: a primed ratio by storage prefix, so a
  *   render never waits on a probe. Production passes nothing.
  */
@@ -273,7 +278,8 @@ fun PathContent(
     modifier: Modifier = Modifier,
     aspect: SnapAspectCache? = null,
     introLedger: IntroLedger? = null,
-    tapHaptics: (TapHaptic) -> Unit = rememberTapHaptics(),
+    hapticsOn: () -> Boolean = { true },
+    tapHaptics: (TapHaptic) -> Unit = rememberTapHaptics(hapticsOn),
     onPebbleTap: (PathMoment, CardFace) -> Unit = { _, _ -> },
     onPebbleDelete: (PathMoment) -> Unit = {},
     onCreatePebble: () -> Unit = {},
@@ -283,7 +289,7 @@ fun PathContent(
     val weeks = remember(entries) { entries.associateBy { it.weekStart } }
     val reduceMotion = rememberReduceMotion()
     val pagerState = rememberPagerState(initialPage = pages.indexOf(focus).coerceAtLeast(0)) { pages.size }
-    val introHaptics = if (introLedger != null) rememberIntroVibrator() else null
+    val introHaptics = if (introLedger != null) rememberIntroVibrator(enabled = hapticsOn) else null
     val intro = remember(introLedger, introHaptics) { introLedger?.let { MonthIntro(it, introHaptics) } }
 
     // Programmatic scrolls in flight. A counter, not a flag: a new focus
@@ -378,6 +384,7 @@ fun PathContent(
                         onCreatePebble = onCreatePebble,
                         modifier = Modifier.fillMaxSize(),
                         ratioOverride = ratioOverride,
+                        hapticsOn = hapticsOn,
                     )
                 }
                 is PathPage.Month -> {

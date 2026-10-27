@@ -84,6 +84,7 @@ fun SoulsListScreen(
         onRetry = viewModel::retry,
         onDeleteSoul = viewModel::requestDelete,
         modifier = modifier,
+        haptics = viewModel.hapticsOn,
     )
 
     covers.pendingDeletion?.let { target ->
@@ -104,6 +105,7 @@ fun SoulsListScreen(
 /**
  * The souls grid without its ViewModel (#940): the top bar, the three states
  * and the grid. [SoulsListScreen] wires it; screenshots drive it directly.
+ * [haptics] is Pebbles' haptics switch (#1242 D23), for the cells' long press.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -115,6 +117,7 @@ fun SoulsListContent(
     onRetry: () -> Unit,
     onDeleteSoul: (SoulWithGlyph) -> Unit,
     modifier: Modifier = Modifier,
+    haptics: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -192,6 +195,7 @@ fun SoulsListContent(
                                 soul = soul,
                                 onTap = { onOpenSoul(soul) },
                                 onDelete = { onDeleteSoul(soul) },
+                                haptics = haptics,
                             )
                         }
                     }
@@ -206,6 +210,7 @@ private fun SoulCell(
     soul: SoulWithGlyph,
     onTap: () -> Unit,
     onDelete: () -> Unit,
+    haptics: Boolean,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     Box {
@@ -215,6 +220,7 @@ private fun SoulCell(
             count = soul.pebblesCount,
             onTap = onTap,
             onLongPress = { menuExpanded = true },
+            haptics = haptics,
         )
         DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
             DropdownMenuItem(

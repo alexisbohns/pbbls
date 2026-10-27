@@ -1,6 +1,7 @@
 package app.pbbls.android.features.path
 
 import app.pbbls.android.R
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.model.KarmaReason
@@ -11,6 +12,7 @@ import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
+import app.pbbls.android.testing.inMemorySettings
 import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
 import io.ktor.http.HttpStatusCode
@@ -38,7 +40,14 @@ class EditPebbleViewModelTest {
         val achievements: FakeAchievementsService = FakeAchievementsService(),
     ) {
         val karma = KarmaNotificationService(scope)
-        val viewModel = EditPebbleViewModel(moments = read, writes = writes, karma = karma, achievements = achievements)
+        val viewModel =
+            EditPebbleViewModel(
+                moments = read,
+                writes = writes,
+                karma = karma,
+                achievements = achievements,
+                haptics = HapticsPreference(inMemorySettings()),
+            )
     }
 
     @Test

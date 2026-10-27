@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.SavedStateHandle
 import app.pbbls.android.R
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.ProcessedImage
 import app.pbbls.android.core.model.MomentSavePayload
 import app.pbbls.android.core.model.PebbleSnapPayload
@@ -14,6 +15,7 @@ import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakeSnapWriteRepository
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.inMemorySettings
 import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
 import app.pbbls.android.testing.testSession
@@ -58,6 +60,7 @@ class CaptureFlowViewModelTest {
                 media = media,
                 focusRequests = focusRequests,
                 snapRepo = snapRepo,
+                haptics = HapticsPreference(inMemorySettings()),
             )
     }
 

@@ -9,6 +9,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.GlyphMarketServicing
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.Glyph
@@ -108,6 +109,7 @@ class GlyphPickerViewModel
         // buy dependency directly, rather than through a CompositionLocal (#852).
         val market: GlyphMarketServicing,
         private val stats: PathStatsServicing,
+        private val haptics: HapticsPreference,
     ) : ViewModel() {
         private val itemsByTab = mutableMapOf<GlyphTab, List<GlyphGridItem>>()
         private var tab = GlyphTab.MINE
@@ -119,6 +121,9 @@ class GlyphPickerViewModel
 
         private val effectsOut = UiEffects<GlyphPickerEffect>(viewModelScope)
         val effects: Flow<GlyphPickerEffect> = effectsOut.flow
+
+        /** Pebbles' haptics switch (#1242 D23): the inline buy's slider asks it at each buzz, so Settings applies at once. */
+        val hapticsOn: Boolean get() = haptics.isOn
 
         private var loadJob: Job? = null
 

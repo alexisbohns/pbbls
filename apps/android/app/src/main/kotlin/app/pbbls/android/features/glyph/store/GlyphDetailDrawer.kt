@@ -83,6 +83,7 @@ fun GlyphDetailScreen(
             balance = balance,
             market = viewModel.market,
             onRecorded = { result -> viewModel.onRecorded(item, result) },
+            haptics = viewModel.hapticsOn,
         )
     }
 }
@@ -125,6 +126,8 @@ internal fun GlyphSwapPanel(
      * hand control back to the caller".
      */
     onSwapped: (BuyGlyphResult) -> Unit = {},
+    /** Pebbles' haptics switch (#1242 D23), from the host's ViewModel: the slider's buzzes ask it. */
+    haptics: Boolean = true,
 ) {
     var isOwned by remember(item.id) { mutableStateOf(item.owned) }
     var acquiredAt by remember(item.id) { mutableStateOf(item.acquiredAt) }
@@ -142,6 +145,7 @@ internal fun GlyphSwapPanel(
         currentBalance = currentBalance,
         isBuying = isBuying,
         errorRes = errorRes,
+        haptics = haptics,
         onConfirm = {
             isBuying = true
             errorRes = null
@@ -191,6 +195,7 @@ internal fun GlyphDetailDrawerContent(
     isBuying: Boolean,
     errorRes: Int?,
     onConfirm: suspend () -> Boolean,
+    haptics: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
     val canAfford = currentBalance >= item.price
@@ -311,6 +316,7 @@ internal fun GlyphDetailDrawerContent(
                 cost = item.price,
                 enabled = canAfford && !isBuying,
                 onConfirm = onConfirm,
+                haptics = haptics,
             )
             if (!canAfford) {
                 Text(

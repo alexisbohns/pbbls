@@ -267,16 +267,20 @@ fun RootScreen(onboarding: OnboardingPreferences) {
 private fun CelebrationOverlays(viewModel: RootViewModel) {
     val root by viewModel.uiState.collectAsStateWithLifecycle()
     if (root.destination != RootDestination.SignedIn) return
+    // Pebbles' haptics switch (#1242 D23): Compose state, so a change in Settings reaches the next buzz.
+    val haptics = viewModel.hapticsOn
     KarmaOverlayHost(
         flash = root.karmaFlash,
         onDismiss = viewModel::onKarmaDismissed,
         modifier = Modifier.fillMaxSize(),
+        haptics = haptics,
     )
     AchievementMomentOverlay(
         moment = root.achievementMoment,
         onAdvance = viewModel::onAchievementAdvanced,
         onDismiss = viewModel::onAchievementDismissed,
         modifier = Modifier.fillMaxSize(),
+        haptics = haptics,
     )
 }
 

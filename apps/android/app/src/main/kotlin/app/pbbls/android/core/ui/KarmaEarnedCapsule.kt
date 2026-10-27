@@ -62,12 +62,14 @@ import app.pbbls.android.core.model.KarmaReason
  * Takes state, not the service (#852) — [flash] is
  * [KarmaNotificationService.activeCapsule], surfaced through `RootViewModel`'s
  * `RootUiState` the same way every other surface has taken state since #849.
+ * [haptics] is Pebbles' haptics switch (#1242 D23), from `RootViewModel`.
  */
 @Composable
 fun KarmaOverlayHost(
     flash: KarmaEarnedContent?,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    haptics: Boolean = true,
 ) {
     // Retain the last content during the exit animation so it doesn't blank out.
     var lastContent by remember { mutableStateOf(KarmaEarnedContent(0, KarmaReason.PEBBLE_CREATED)) }
@@ -85,6 +87,7 @@ fun KarmaOverlayHost(
                 content = shown,
                 onTap = onDismiss,
                 modifier = Modifier.padding(bottom = 44.dp),
+                haptics = haptics,
             )
         }
     }
@@ -96,13 +99,15 @@ fun KarmaOverlayHost(
  * "+N karma" label, and a countdown ring that drains over
  * [KarmaNotificationService.CAPSULE_DURATION_MS]. Fires one
  * [HapticFeedbackConstants.CONFIRM] per fresh [content] (needs a `View`, so it
- * lives here rather than in the service). Ports `KarmaEarnedCapsule.swift`.
+ * lives here rather than in the service), unless Pebbles' haptics switch
+ * ([haptics], #1242 D23) is off. Ports `KarmaEarnedCapsule.swift`.
  */
 @Composable
 fun KarmaEarnedCapsule(
     content: KarmaEarnedContent,
     onTap: () -> Unit,
     modifier: Modifier = Modifier,
+    haptics: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
     val view = LocalView.current
@@ -111,7 +116,7 @@ fun KarmaEarnedCapsule(
     val a11y = stringResource(R.string.karma_flash_a11y, content.amount, reasonLabel)
 
     LaunchedEffect(content) {
-        view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+        if (haptics) view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
     LaunchedEffect(content) {
         ring.snapTo(1f)

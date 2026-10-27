@@ -69,7 +69,8 @@ fun CaptureFlowScreen(
     viewModel: CaptureFlowViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val haptic = rememberTapHaptics()
+    // Each buzz asks Pebbles' haptics switch (#1242 D23).
+    val haptic = rememberTapHaptics { viewModel.hapticsOn }
 
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {

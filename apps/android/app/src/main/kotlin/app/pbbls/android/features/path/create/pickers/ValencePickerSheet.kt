@@ -37,6 +37,9 @@ import app.pbbls.android.features.path.valence.ValenceFan
  * detent — see `ValenceRoll`.
  *
  * The Complete flow's valence step renders the same fan inline instead (D5).
+ *
+ * [hapticsOn] is Pebbles' haptics switch (#1242 D23), from the host's
+ * ViewModel, asked at each detent's tick.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,8 +47,9 @@ fun ValencePickerSheet(
     current: Valence?,
     onDismiss: () -> Unit,
     onSelected: (Valence) -> Unit,
+    hapticsOn: () -> Boolean = { true },
 ) {
-    val haptic = rememberTapHaptics()
+    val haptic = rememberTapHaptics(hapticsOn)
     // The roll always needs a value under the finger, so an untouched sheet
     // shows `current` or parks on neutral-medium the way the record step does.
     var staged by remember { mutableStateOf(current ?: Valence.NEUTRAL_MEDIUM) }

@@ -1,6 +1,7 @@
 package app.pbbls.android.features.profile
 
 import app.pbbls.android.R
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.MomentDetail
@@ -11,6 +12,7 @@ import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
+import app.pbbls.android.testing.inMemorySettings
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -41,7 +43,7 @@ class SoulDetailViewModelTest {
         moments: FakeMomentReadService = FakeMomentReadService(),
         writes: FakeMomentWriteService = FakeMomentWriteService(),
         refs: FakeReferenceDataService = FakeReferenceDataService(),
-    ) = SoulDetailViewModel(souls, moments, writes, refs)
+    ) = SoulDetailViewModel(souls, moments, writes, refs, HapticsPreference(inMemorySettings()))
 
     @Test
     fun `starts Loading and resolves to Content`() =
