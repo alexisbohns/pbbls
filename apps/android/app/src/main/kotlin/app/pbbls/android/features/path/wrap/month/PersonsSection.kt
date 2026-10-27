@@ -28,23 +28,17 @@ internal fun PersonsSection(
     lookups: WrapLookups,
     dayView: DayView,
     onMore: (MonthSection) -> Unit,
+    onCard: Boolean = false,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val copy = rememberWrapCopy()
-    val persons = wrap.persons ?: return
-    val rows = persons.filter { lookups.soul(it.soulId) != null }
+    if (!MonthSections.isShown(MonthSection.PERSONS, wrap, lookups)) return
+    val rows = MonthSections.namedPersons(wrap, lookups)
     Column {
-        MonthSectionHead(
-            copy.tile(app.pbbls.android.core.model.wrap.WeekTile.PERSONS),
-            if (dayView == DayView.CIRCLE &&
-                rows.isNotEmpty()
-            ) {
-                copy.clockwiseHint()
-            } else {
-                null
-            },
-        )
+        if (!onCard) {
+            MonthSectionHead(MonthSections.head(MonthSection.PERSONS, wrap, lookups, copy, dayView))
+        }
         if (rows.isEmpty()) {
             Text(copy.nobody(), style = type.lead, color = colors.ink, modifier = Modifier.padding(horizontal = SECTION_PAD_X))
             return@Column

@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWeek
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.ui.MarkRow
@@ -32,14 +33,15 @@ internal fun WeeksSummary(
     wrap: MonthWrap,
     lookups: WrapLookups,
     onWeek: (LocalDate) -> Unit,
+    onCard: Boolean = false,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val copy = rememberWrapCopy()
-    if (!WeeksSummary.isShown(wrap)) return
+    if (!MonthSections.isShown(MonthSection.WEEKS, wrap, lookups)) return
     val weeks = WeeksSummary.weeks(wrap)
     Column {
-        MonthSectionHead(copy.weeksHeader(weeks.size), copy.weeksHint(wrap.month))
+        if (!onCard) MonthSectionHead(MonthSections.head(MonthSection.WEEKS, wrap, lookups, copy))
         Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
             weeks.forEach { week ->
                 val range = copy.range(wrap.month, week.from, week.to)

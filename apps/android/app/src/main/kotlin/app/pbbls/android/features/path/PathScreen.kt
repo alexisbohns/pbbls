@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +34,8 @@ import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.SnapAspectCache
+import app.pbbls.android.core.data.TapHaptic
+import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
@@ -55,9 +58,13 @@ import app.pbbls.android.features.path.strip.PathPages
 import app.pbbls.android.features.path.strip.PathStrip
 import app.pbbls.android.features.path.wrap.WrapLookups
 import app.pbbls.android.features.path.wrap.WrapState
+import app.pbbls.android.features.path.wrap.intro.IntroLedger
+import app.pbbls.android.features.path.wrap.intro.rememberIntroVibrator
+import app.pbbls.android.features.path.wrap.month.MonthIntro
 import app.pbbls.android.features.path.wrap.month.MonthPage
 import app.pbbls.android.features.path.wrap.month.MonthPagePlaceholder
 import app.pbbls.android.features.path.wrap.shown
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
 import java.time.YearMonth
@@ -166,6 +173,7 @@ fun PathScreen(
                         onFocusChange = viewModel::onFocus,
                         paletteFor = paletteFor,
                         aspect = viewModel.snapAspect,
+                        introLedger = viewModel.introLedger,
                         onPebbleTap = { moment, face -> onOpenDetail(moment.id, face) },
                         onPebbleDelete = viewModel::requestDelete,
                         onCreatePebble = onCreatePebble,
@@ -226,6 +234,9 @@ fun PathScreen(
  * reports the new page through [onFocusChange], a strip tap or a week link
  * changes focus and the pager moves to it (snapping under reduced motion).
  * Scrolling to the already-current page is a no-op, so the two effects settle.
+ * A swipe that settles on another page, and a strip tap on another page, play
+ * the selection tick once (#1242 D24); a page the focus steered to does not
+ * tick again as it settles.
  *
  * @param entries the feed's weeks; a week page the feed does not hold renders empty.
  * @param stripItems the strip as drawn ([PathPages.items]); its focusable items are the pages.
@@ -237,6 +248,11 @@ fun PathScreen(
  *   from; a soul absent from it is skipped.
  * @param aspect the photo-ratio probe the cards read; null (previews) keeps
  *   every field square unless [ratioOverride] answers.
+ * @param introLedger the month intros played this launch (#1242 D20); with
+ *   one, a month page the policy allows is dealt as a deck and plays its
+ *   intro while it is the settled page. Null (previews): the plain page.
+ * @param tapHaptics plays the swipe's and the strip's selection tick (D24);
+ *   the view's own haptics, unless a test records them.
  * @param ratioOverride preview-only: a primed ratio by storage prefix, so a
  *   render never waits on a probe. Production passes nothing.
  */
@@ -256,6 +272,8 @@ fun PathContent(
     paletteFor: (PathMoment) -> EmotionPalette?,
     modifier: Modifier = Modifier,
     aspect: SnapAspectCache? = null,
+    introLedger: IntroLedger? = null,
+    tapHaptics: (TapHaptic) -> Unit = rememberTapHaptics(),
     onPebbleTap: (PathMoment, CardFace) -> Unit = { _, _ -> },
     onPebbleDelete: (PathMoment) -> Unit = {},
     onCreatePebble: () -> Unit = {},
@@ -265,11 +283,18 @@ fun PathContent(
     val weeks = remember(entries) { entries.associateBy { it.weekStart } }
     val reduceMotion = rememberReduceMotion()
     val pagerState = rememberPagerState(initialPage = pages.indexOf(focus).coerceAtLeast(0)) { pages.size }
+    val introHaptics = if (introLedger != null) rememberIntroVibrator() else null
+    val intro = remember(introLedger, introHaptics) { introLedger?.let { MonthIntro(it, introHaptics) } }
 
     // Programmatic scrolls in flight. A counter, not a flag: a new focus
     // cancels the running scroll, whose cleanup can land after the next one
     // has started. Not snapshot state: only the collector below reads it.
     val steering = remember { intArrayOf(0) }
+    val tick by rememberUpdatedState(tapHaptics)
+    // The page a focus change last steered the pager to (a strip tap, a week
+    // link, a focus request): it ticked at the tap if at all, so its settle
+    // does not tick again. Not snapshot state: only the collector reads it.
+    val steeredTo = remember { intArrayOf(-1) }
 
     // Swipe → focus. Keyed on the pages so a reload re-subscribes; the page in
     // place at (re)subscription is dropped, because a reload is not a page
@@ -282,13 +307,29 @@ fun PathContent(
             pages.getOrNull(page)?.let(onFocusChange)
         }
     }
+    // A swipe that settles on another page plays the strip's selection tick
+    // (#1242 D24; iOS `SpinePager`). The page in place at (re)subscription is
+    // dropped, as above: a reload is not a page change. Any settle clears the
+    // steer, so a steer a drag cut short never mutes a later swipe.
+    LaunchedEffect(pagerState, pages) {
+        snapshotFlow { pagerState.settledPage }.drop(1).collect { page ->
+            val steered = page == steeredTo[0]
+            steeredTo[0] = -1
+            if (!steered) tick(TapHaptic.SELECTION)
+        }
+    }
     // Focus (strip tap, week link, R14 request) → pager.
     LaunchedEffect(focus, pages) {
         val index = pages.indexOf(focus)
         if (index >= 0 && index != pagerState.currentPage) {
             steering[0] += 1
+            steeredTo[0] = index
             try {
                 if (reduceMotion) pagerState.scrollToPage(index) else pagerState.animateScrollToPage(index)
+            } catch (e: CancellationException) {
+                // A drag or a newer focus cut the steer short: it no longer mutes a swipe onto its page.
+                if (steeredTo[0] == index) steeredTo[0] = -1
+                throw e
             } finally {
                 steering[0] -= 1
             }
@@ -299,7 +340,11 @@ fun PathContent(
         PathStrip(
             items = stripItems,
             focus = focus,
-            onFocus = onFocusChange,
+            onFocus = { page ->
+                // A tap on another page ticks (D24; iOS `PathStrip`); the focused one is already there.
+                if (page != focus) tapHaptics(TapHaptic.SELECTION)
+                onFocusChange(page)
+            },
             modifier = Modifier.fillMaxWidth(),
         )
         HorizontalPager(
@@ -348,6 +393,8 @@ fun PathContent(
                             onWeek = { onFocusChange(PathPage.Week(it)) },
                             onOpen = { moment -> onPebbleTap(moment, CardFace.RECTO) },
                             modifier = Modifier.fillMaxSize(),
+                            intro = intro,
+                            focused = pagerState.settledPage == index,
                             aspect = aspect,
                         )
                     }

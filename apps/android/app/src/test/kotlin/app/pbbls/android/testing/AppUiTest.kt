@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
 import android.os.Parcel
+import android.provider.Settings
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -155,6 +156,19 @@ abstract class AppUiTest {
 
     /** The intent Android delivers for an invite App Link to [token]. */
     protected fun inviteIntent(token: String) = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.pbbls.app/invite/$token"))
+
+    /**
+     * Draws every month page as the plain page, never the deck (#1242 D20). A test that arms a month in
+     * `FakePathWrapService` calls it before [launch]. The animator scale at 0 is Reduce Motion, which
+     * `rememberReduceMotion()` reads at launch, and the intro's policy then draws no deck. Without it, a deck
+     * would play here: the Compose test rule's frame clock is virtual while the intro's clock reads
+     * `System.nanoTime`, so its cover would never land and `waitForIdle` would wait on its frames for ever.
+     * Opt-in, not global: Reduce Motion changes every `rememberReduceMotion()` caller's path (the Path pager
+     * would snap where it animates). A test of the deck itself drives one directly, with a test clock.
+     */
+    protected fun drawPlainMonthPages() {
+        Settings.Global.putFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
+    }
 
     /** Onboarding is first-run only; a test that is not about it marks it seen before [launch]. */
     protected fun skipOnboarding() {

@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
-import app.pbbls.android.core.model.wrap.WeekTile
 import app.pbbls.android.features.path.wrap.WrapLookups
 import app.pbbls.android.features.path.wrap.week.familyNames
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
@@ -25,18 +24,20 @@ internal fun EmotionGem(
     wrap: MonthWrap,
     lookups: WrapLookups,
     onMore: (MonthSection) -> Unit,
+    onCard: Boolean = false,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val copy = rememberWrapCopy()
-    val gem = wrap.gem ?: return
+    if (!MonthSections.isShown(MonthSection.GEM, wrap, lookups)) return
+    val gem = requireNotNull(wrap.gem)
     val order = gem.lead?.order.orEmpty()
     val names = familyNames(order, lookups).map { it.lowercase() }
     val zero = familyNames(gem.lead?.zero.orEmpty(), lookups).map { it.lowercase() }
     val level = order.size > 1 && abs((gem.worths[order[0]] ?: 0.0) - (gem.worths[order[1]] ?: 0.0)) < 1e-9
     val labels = order.zip(names).map { (slug, name) -> GemLabel(slug, name, ((gem.shares[slug] ?: 0.0) * 100).roundToInt()) }
     Column {
-        MonthSectionHead(copy.tile(WeekTile.EMOTIONS), copy.gemHint())
+        if (!onCard) MonthSectionHead(MonthSections.head(MonthSection.GEM, wrap, lookups, copy))
         Text(
             copy.gemLead(names, zero, level),
             style = type.lead,

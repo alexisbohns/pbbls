@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.RadialLayout
 import app.pbbls.android.core.designsystem.SpineSectionHeader
+import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.ui.render.stone.SealSize
 import app.pbbls.android.core.ui.render.stone.drawSeal
@@ -59,13 +60,14 @@ private const val WAIT_ALPHA = 0.6f
 internal fun HoursFigure(
     wrap: MonthWrap,
     lookups: WrapLookups,
+    onCard: Boolean = false,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val copy = rememberWrapCopy()
-    val hours = wrap.hours ?: return
+    if (!MonthSections.isShown(MonthSection.HOURS, wrap, lookups)) return
+    val hours = requireNotNull(wrap.hours)
     val items = hours.items.mapNotNull { mark -> lookups.moment(mark.momentId)?.let { mark to it } }
-    if (items.isEmpty()) return
     val prints =
         items.map { (mark, moment) ->
             key(mark.momentId) { rememberSealPrint(moment.valence, lookups.paletteFor(moment), null, colors.ground, SealSize.TINY.variant) }
@@ -76,7 +78,10 @@ internal fun HoursFigure(
     val description = busiest?.let { copy.hoursDescription(it.count, items.size, it.start) } ?: copy.hoursSub()
 
     Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
-        SpineSectionHeader(label = copy.hoursTitle(), hint = copy.hoursHint(), modifier = Modifier.padding(top = 28.dp))
+        if (!onCard) {
+            val head = MonthSections.head(MonthSection.HOURS, wrap, lookups, copy)
+            SpineSectionHeader(label = head.label, hint = head.hint, modifier = Modifier.padding(top = 28.dp))
+        }
         Text(copy.hoursSub(), style = type.still, color = colors.ink2, modifier = Modifier.padding(top = 6.dp))
         Box(Modifier.fillMaxWidth().height(HEIGHT).semantics { contentDescription = description }, contentAlignment = Alignment.Center) {
             Canvas(Modifier.fillMaxWidth().height(HEIGHT).clearAndSetSemantics {}) {
