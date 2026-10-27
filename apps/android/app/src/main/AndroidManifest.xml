@@ -4,6 +4,8 @@
 
     <!-- supabase-kt (auth, OAuth, Postgrest) requires network access. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- The month intro's haptics (#1242 D18) play VibrationEffect compositions; a normal permission, no prompt. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- enableOnBackInvokedCallback: predictive back (a stated minSdk-33
          rationale, design D1). BackHandler call sites remain authoritative
