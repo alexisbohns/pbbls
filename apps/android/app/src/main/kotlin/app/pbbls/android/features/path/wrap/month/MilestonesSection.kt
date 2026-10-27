@@ -52,14 +52,16 @@ import app.pbbls.android.features.path.wrap.intro.IntroMilestoneShape
 import app.pbbls.android.features.path.wrap.intro.IntroMotion
 import app.pbbls.android.features.path.wrap.intro.IntroReveal
 import app.pbbls.android.features.path.wrap.intro.IntroScore
+import app.pbbls.android.features.path.wrap.intro.IntroStage
 import app.pbbls.android.features.path.wrap.intro.LocalIntroStage
 import app.pbbls.android.features.path.wrap.intro.currentIntroReveal
 import app.pbbls.android.features.path.wrap.intro.introReveal
 import app.pbbls.android.features.path.wrap.intro.milestones
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.ZoneId
 import kotlin.math.floor
@@ -183,16 +185,7 @@ private fun MilestoneStone(
     if (row != null && stage != null) {
         val reduceMotion by rememberUpdatedState(rememberReduceMotion())
         LaunchedEffect(stage, row) {
-            val impact = IntroKey.Impact(row)
-            // A change, as iOS's `onChange`: a stone already struck when the row came never strikes again.
-            snapshotFlow { stage.reveal(impact) >= 1f }
-                .distinctUntilChanged()
-                .drop(1)
-                .filter { it }
-                .collect {
-                    // Struck while the milestones play: a skip, or a throw away, lands every stone at once.
-                    if (stage.clock.isPlaying(stage.sequence)) pressScope.launch { press.press(reduceMotion) }
-                }
+            stage.strikes(row).collect { pressScope.launch { press.press(reduceMotion) } }
         }
     }
     Box(Modifier.width(column), contentAlignment = Alignment.Center) {
@@ -218,6 +211,21 @@ private fun MilestoneStone(
             rings = MILESTONE_RINGS,
         )
     }
+}
+
+/**
+ * Each strike of [row]'s stone on the paper while its card plays (iOS `MilestoneStone`'s `onChange`): its
+ * `Impact` reaching 1, never the value it held when collected, so a stone already struck when the row came
+ * strikes no more; and only while the card plays, so a skip, or a throw away, which lands every stone at
+ * once, strikes none. `snapshotFlow` emits only a changed value.
+ */
+internal fun IntroStage.strikes(row: Int): Flow<Unit> {
+    val impact = IntroKey.Impact(row)
+    return snapshotFlow { reveal(impact) >= 1f }
+        .drop(1)
+        .filter { it }
+        .filter { clock.isPlaying(sequence) }
+        .map { }
 }
 
 /**
