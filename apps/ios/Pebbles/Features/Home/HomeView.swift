@@ -1,4 +1,5 @@
 import SwiftUI
+import os
 
 /// The Home tab root (spec §1): the greeting, then the sections the later
 /// parts add (shortcuts, wraps, the first five, About). Built from system
@@ -8,7 +9,25 @@ struct HomeView: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(TabNavigation.self) private var nav
+    @Environment(MomentsRevision.self) private var revision
     @State private var model = HomeModel()
+    @State private var showsQuick = false
+    @State private var showsCapture = false
+    @Environment(AchievementsService.self) private var achievements
+    @State private var showsCamera = false
+    @State private var showsCameraUnavailable = false
+    @State private var camera: CameraMomentCoordinator?
+    @State private var pendingComplete: UUID?
+    private let logger = Logger(subsystem: "app.pbbls.ios", category: "home")
+    @State private var cameraError: String?
+    @State private var naming: MomentDetail?
+    @State private var completing: CompleteTarget?
+
+    private struct CompleteTarget: Identifiable, Equatable {
+        let momentId: UUID
+        let name: String?
+        var id: UUID { momentId }
+    }
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -19,6 +38,33 @@ struct HomeView: View {
                         HomeGreetingView(lines: greetingLines(at: context.date))
                     }
                     .id(TabNavigation.scrollTopAnchor)
+
+                    HomeShortcuts(
+                        onCamera: openCamera,
+                        onQuick: { showsQuick = true },
+                        onPebble: { showsCapture = true },
+                        cameraDisabled: camera?.isSaving == true
+                    )
+
+                    if camera?.isSaving == true {
+                        Text("home.camera.saving")
+                            .spineType(.summary)
+                            .italic()
+                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    }
+
+                    if let cameraError {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(verbatim: cameraError)
+                                .pebblesFont(.callout)
+                                .foregroundStyle(Color.pebbles.error)
+                            Spacer(minLength: 0)
+                            Button { self.cameraError = nil } label: {
+                                Image(systemName: "xmark").foregroundStyle(Color.pebbles.onSurfaceVariant)
+                            }
+                            .accessibilityLabel(Text("Close"))
+                        }
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, Spacing.lg)
@@ -32,6 +78,52 @@ struct HomeView: View {
         .pebblesScreen()
         // Like the Path root: the greeting is the title, so the bar stays hidden.
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showsQuick, onDismiss: {
+            // Presented once the sheet is gone, so the two presentations never race.
+            if let id = pendingComplete {
+                pendingComplete = nil
+                completing = CompleteTarget(momentId: id, name: nil)
+            }
+        }) {
+            QuickMomentSheet(onSaved: { id, exit in
+                revision.bump(from: .home)
+                if exit == .open { pendingComplete = id }
+            })
+        }
+        .fullScreenCover(item: $completing) { target in
+            CompleteFlowView(momentId: target.momentId, momentName: target.name,
+                             onCompleted: { _ in revision.bump(from: .home) })
+        }
+        .fullScreenCover(isPresented: $showsCapture) {
+            CaptureFlowView(onMomentChanged: { _ in revision.bump(from: .home) }, chainsComplete: true)
+        }
+        .fullScreenCover(isPresented: $showsCamera) {
+            CameraPicker(
+                onCapture: { image, shutter in
+                    showsCamera = false
+                    Task { await capture(image, at: shutter) }
+                },
+                onCancel: { showsCamera = false }
+            )
+            .ignoresSafeArea()
+        }
+        .alert("home.camera.unavailable", isPresented: $showsCameraUnavailable) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("home.camera.unavailableBody")
+        }
+        .sheet(item: $naming) { detail in
+            EditMomentSheet(detail: detail, onSaved: { revision.bump(from: .home) })
+        }
+        .safeAreaInset(edge: .bottom) {
+            if let landed = camera?.landed {
+                MomentToast(landed: landed, onName: { name(landed) }, onDismiss: { dismissToast() })
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.bottom, Spacing.sm)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.snappy, value: camera?.landed)
         .navigationDestination(for: HomeRoute.self) { route in
             switch route {
             case .guide(let slug): Text(verbatim: slug) // Part 5 replaces this with GuidePage
@@ -53,6 +145,43 @@ struct HomeView: View {
             onFirstLoad()
         }
     }
+
+    private func openCamera() {
+        if CameraPicker.isAvailable { showsCamera = true } else { showsCameraUnavailable = true }
+    }
+
+    private func capture(_ image: UIImage, at shutter: Date) async {
+        cameraError = nil
+        guard let userId else {
+            logger.error("camera moment: no session")
+            cameraError = String(localized: "home.quick.error")
+            return
+        }
+        let coordinator = camera ?? CameraMomentCoordinator(client: supabase.client, userId: userId)
+        camera = coordinator
+        await coordinator.capture(image, at: shutter)
+        if coordinator.landed != nil {
+            achievements.fireCheck()
+            revision.bump(from: .home)
+        }
+        cameraError = coordinator.error
+    }
+
+    private func name(_ landed: CameraMomentCoordinator.LandedMoment) {
+        dismissToast()
+        Task {
+            do {
+                naming = try await MomentsService(client: supabase.client).moment(id: landed.momentId)
+            } catch {
+                logger.error("moment(id:) failed: \(error.localizedDescription, privacy: .private)")
+                cameraError = String(localized: "home.toast.openFailed")
+            }
+        }
+    }
+
+    private func dismissToast() { camera?.clearLanded() }
+
+    private var userId: UUID? { supabase.session?.user.id }
 
     private func greetingLines(at now: Date) -> HomeGreeting.Lines {
         HomeGreeting.lines(at: now, name: model.name, zone: SpineCalendar.current.timeZone, locale: SpineStrings.appLocale)

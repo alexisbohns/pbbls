@@ -9,6 +9,9 @@ struct CaptureFlowView: View {
     /// Fired after the moment is saved and again after it is completed, so
     /// the Path reloads and focuses its week (A5).
     let onMomentChanged: (UUID) -> Void
+    /// Home's "New pebble": the final step saves and swaps straight to
+    /// Complete, so the save/make-a-pebble choice is not offered.
+    var chainsComplete = false
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(\.dismiss) private var dismiss
@@ -122,7 +125,7 @@ struct CaptureFlowView: View {
             action: action(for: model.step),
             // The library grid runs to the bottom, `Skip`/`Done` over it.
             contentFillsHeight: model.step == .photo,
-            secondaryAction: model.step == .name
+            secondaryAction: model.step == .name && !chainsComplete
                 ? RecordStepSecondaryAction(
                     label: "Make it a pebble now",
                     enabled: canSaveNow,
@@ -206,8 +209,8 @@ struct CaptureFlowView: View {
         case .when:
             return .primary("Continue", enabled: true, loading: false) { model.advance() }
         case .name:
-            return .primary("Save moment", enabled: canSaveNow, loading: model.isSaving && !savingThenComplete) {
-                Task { await save(thenComplete: false) }
+            return .primary(chainsComplete ? "Make it a pebble now" : "Save moment", enabled: canSaveNow, loading: model.isSaving && (chainsComplete || !savingThenComplete)) {
+                Task { await save(thenComplete: chainsComplete) }
             }
         }
     }

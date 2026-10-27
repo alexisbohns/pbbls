@@ -158,6 +158,18 @@ final class SnapUploadCoordinator {
         }
     }
 
+    /// A photo the camera just took (Home's camera moment). The bytes are in
+    /// hand, so they take `ingest`, the same path a library pick ends on.
+    func handleCaptured(_ data: Data, userId: UUID) async {
+        let uti = ImageFormatValidator.uti(of: data) ?? "public.jpeg"
+        Self.logger.notice("handleCaptured: \(data.count, privacy: .public) bytes uti=\(uti, privacy: .public)")
+        guard ImageFormatValidator.isSupported(uti) else {
+            Self.logger.warning("unsupported captured format: \(uti, privacy: .public)")
+            return
+        }
+        await ingest(data, uti: uti, userId: userId)
+    }
+
     /// Both pickers' path: counts the pick as in flight from the tap, before
     /// its bytes arrive, then hands them to `ingest`. `load` returns nil when
     /// the pick cannot be used (already logged).
