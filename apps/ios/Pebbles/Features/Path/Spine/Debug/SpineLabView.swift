@@ -6,7 +6,7 @@ import SwiftUI
 /// Verbatim text throughout, so nothing reaches the string catalogue.
 struct SpineLabView: View {
     enum Section: String, CaseIterable, Identifiable {
-        case stones, cards, feed, dense, pager, month
+        case stones, cards, feed, dense, pager, month, home
         var id: String { rawValue }
     }
 
@@ -22,6 +22,10 @@ struct SpineLabView: View {
     /// The Month tab's intro tempo (#1241 D9): the page's clock takes it as it is built, on *Replay intro*.
     @State private var introTempo = IntroTempo.standard
     @AccessibilityFocusState private var slotFocus: UUID?
+    /// The Home section's state and its loaded models, one per state (#1255).
+    @State private var homeState: HomeFixture.State = .newUser
+    @State private var homeModels: [HomeFixture.State: HomeModel] = [:]
+    @State private var homeLog = ""
 
     var body: some View {
         NavigationStack {
@@ -30,6 +34,8 @@ struct SpineLabView: View {
                     pager
                 } else if section == .month {
                     month
+                } else if section == .home {
+                    home
                 } else {
                     gallery
                 }
@@ -48,6 +54,9 @@ struct SpineLabView: View {
                 await paged.load { SpineFixtureWeek.moments + [august] }
                 paged.updateSouls(names: SpineFixtureWeek.soulNames, glyphs: SpineFixtureWeek.soulGlyphs)
                 pagerModel = paged
+                for state in HomeFixture.State.allCases {
+                    homeModels[state] = await HomeFixture.model(state)
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -76,7 +85,7 @@ struct SpineLabView: View {
                 lazyDays(model)
             case .dense:
                 lazyDays(denseModel)
-            case .pager, .month:
+            case .pager, .month, .home:
                 EmptyView()
             }
         }
@@ -123,6 +132,39 @@ struct SpineLabView: View {
                           onOpen: { lastOpen = "open \($0.name ?? "untitled")" },
                           intro: IntroContext(ledger: introLedger, haptics: IntroHaptics.shared, tempo: introTempo))
                     .id(introRun)
+            }
+        }
+    }
+
+    /// The Home page (#1255) in three fixed states, drawn with the fixture's
+    /// service on its Monday-morning clock; every action is logged on screen.
+    @ViewBuilder
+    private var home: some View {
+        VStack(spacing: 0) {
+            Picker(selection: $homeState) {
+                ForEach(HomeFixture.State.allCases) { Text(verbatim: $0.rawValue).tag($0) }
+            } label: {
+                Text(verbatim: "State")
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 16)
+            Text(verbatim: homeLog).font(.caption.monospaced()).foregroundStyle(Color.pebbles.outline)
+            if let model = homeModels[homeState] {
+                ScrollView {
+                    HomeContent(
+                        model: model, lookups: HomeFixture.lookups, liveMonth: HomeFixture.liveMonth,
+                        clock: HomeFixture.clock, zone: HomeFixture.zone, locale: SpineStrings.appLocale,
+                        onCamera: { homeLog = "camera" },
+                        onQuick: { homeLog = "quick moment" },
+                        onPebble: { homeLog = "pebble" },
+                        onOpenWrap: { homeLog = "open wrap \($0.month.firstDay.iso)" },
+                        onRetryWraps: { homeLog = "retry wraps" },
+                        onTask: { homeLog = "task \($0.slug)" },
+                        onClaim: { homeLog = "claim" },
+                        onDismissCameraError: { homeLog = "dismiss camera error" }
+                    )
+                }
+                .id(homeState)
             }
         }
     }

@@ -38,78 +38,19 @@ struct HomeView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.xl) {
-                    // The greeting re-reads the clock every minute, so the band flips on the hour.
-                    TimelineView(.periodic(from: .now, by: 60)) { context in
-                        HomeGreetingView(lines: greetingLines(at: context.date))
-                    }
-                    .id(TabNavigation.scrollTopAnchor)
-
-                    HomeShortcuts(
-                        onCamera: openCamera,
-                        onQuick: { showsQuick = true },
-                        onPebble: { showsCapture = true },
-                        cameraDisabled: camera?.isSaving == true
-                    )
-
-                    if model.wraps != nil || model.wrapsError != nil {
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            HomeWrapsRow(months: model.wraps?.months ?? [], lookups: lookups,
-                                         liveMonth: liveMonth, onOpen: { openWrap = $0.month })
-                            if let wrapsError = model.wrapsError {
-                                HStack(alignment: .firstTextBaseline) {
-                                    Text(verbatim: wrapsError)
-                                        .pebblesFont(.callout)
-                                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                                    Spacer(minLength: 0)
-                                    Button("home.wraps.retry") { Task { await model.loadWraps() } }
-                                        .pebblesFont(.callout)
-                                }
-                            }
-                        }
-                    }
-
-                    // HomeChecklistView draws nothing for a done or unavailable checklist.
-                    if let checklist = model.checklist {
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            HomeChecklistView(checklist: checklist, isClaiming: model.isClaiming,
-                                              onTask: { taskSheet = $0 },
-                                              onClaim: { Task { await model.claim() } })
-                            if let claimError = model.claimError {
-                                Text(verbatim: claimError)
-                                    .pebblesFont(.callout)
-                                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                            }
-                        }
-                    }
-
-                    // Spec §1.6: the About header is static; the rows land with the read.
-                    GuidesList(guides: model.guides)
-
-                    if camera?.isSaving == true {
-                        Text("home.camera.saving")
-                            .spineType(.summary)
-                            .italic()
-                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                    }
-
-                    if let cameraError {
-                        HStack(alignment: .firstTextBaseline) {
-                            Text(verbatim: cameraError)
-                                .pebblesFont(.callout)
-                                .foregroundStyle(Color.pebbles.error)
-                            Spacer(minLength: 0)
-                            Button { self.cameraError = nil } label: {
-                                Image(systemName: "xmark").foregroundStyle(Color.pebbles.onSurfaceVariant)
-                            }
-                            .accessibilityLabel(Text("Close"))
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, Spacing.lg)
-                .padding(.top, Spacing.md)
-                .padding(.bottom, MonthLayout.pageBottom)
+                HomeContent(
+                    model: model, lookups: lookups, liveMonth: liveMonth,
+                    zone: SpineCalendar.current.timeZone, locale: SpineStrings.appLocale,
+                    cameraSaving: camera?.isSaving == true, cameraError: cameraError,
+                    onCamera: openCamera,
+                    onQuick: { showsQuick = true },
+                    onPebble: { showsCapture = true },
+                    onOpenWrap: { openWrap = $0.month },
+                    onRetryWraps: { Task { await model.loadWraps() } },
+                    onTask: { taskSheet = $0 },
+                    onClaim: { Task { await model.claim() } },
+                    onDismissCameraError: { cameraError = nil }
+                )
             }
             .onChange(of: nav.scrollToTop[.home, default: 0]) {
                 withAnimation { proxy.scrollTo(TabNavigation.scrollTopAnchor, anchor: .top) }
@@ -308,10 +249,6 @@ struct HomeView: View {
     private func dismissToast() { camera?.clearLanded() }
 
     private var userId: UUID? { supabase.session?.user.id }
-
-    private func greetingLines(at now: Date) -> HomeGreeting.Lines {
-        HomeGreeting.lines(at: now, name: model.name, zone: SpineCalendar.current.timeZone, locale: SpineStrings.appLocale)
-    }
 }
 
 /// The greeting block alone, so the reference pins it without a service.
