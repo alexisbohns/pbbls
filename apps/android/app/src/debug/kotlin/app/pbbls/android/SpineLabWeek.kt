@@ -108,6 +108,8 @@ internal fun SpineLabMonth(modifier: Modifier = Modifier) {
                     onDayView = { view = it },
                     onWeek = {},
                     onOpen = {},
+                    // The Lab's tab is on screen whenever it composes.
+                    focused = true,
                     modifier = Modifier.fillMaxSize(),
                     intro = intro,
                     zone = SpineFixtureWeek.zone,

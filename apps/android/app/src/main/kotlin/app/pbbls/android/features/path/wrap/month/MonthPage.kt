@@ -64,7 +64,8 @@ class MonthIntro(
  * and a tap anywhere lands it. The end card's Replay (D14) forgets the month and deals the deck again from
  * the cover, on a fresh clock. Without one, or under Reduce Motion, TalkBack or a large text size, it is
  * the plain page, settled: the cover, then the sections the server listed, in its order, the tone and
- * the hours under one *insights* head.
+ * the hours under one *insights* head. [focused] is required: a host that gave an [intro] and left the page's
+ * focus to a default would play it off screen (the Path passes its settled page, the Lab `true`).
  */
 @Composable
 fun MonthPage(
@@ -74,9 +75,9 @@ fun MonthPage(
     onDayView: (DayView) -> Unit,
     onWeek: (LocalDate) -> Unit,
     onOpen: (PathMoment) -> Unit,
+    focused: Boolean,
     modifier: Modifier = Modifier,
     intro: MonthIntro? = null,
-    focused: Boolean = true,
     zone: ZoneId = ZoneId.systemDefault(),
     aspect: SnapAspectCache? = null,
 ) {
