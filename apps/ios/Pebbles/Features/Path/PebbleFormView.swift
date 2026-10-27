@@ -12,6 +12,10 @@ struct PebbleFormView: View {
     let souls: [SoulWithGlyph]
     let collections: [PebbleCollection]
     let saveError: String?
+    /// Scrolls to the Souls section once on appear (D-plan-1).
+    var scrollsToSouls = false
+
+    static let soulsAnchor = "souls"
 
     @State private var showValencePicker = false
     @State private var showEmotionPicker = false
@@ -19,131 +23,140 @@ struct PebbleFormView: View {
     @Environment(EmotionPaletteService.self) private var palettes
 
     var body: some View {
-        List {
-            Section {
-                Button {
-                    showEmotionPicker = true
-                } label: {
-                    HStack(spacing: 12) {
-                        if let id = draft.emotionId, let row = palettes.byEmotionId[id] {
-                            Text(row.emoji)
-                                .font(.system(size: 28))
-                                .frame(width: 32, height: 32)
-                                .accessibilityHidden(true)
-                        } else {
-                            RoundedRectangle(cornerRadius: 6)
-                                .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
-                                .frame(width: 32, height: 32)
-                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                        }
-                        Text("Emotion")
-                            .foregroundStyle(Color.pebbles.onSurface)
-                        Spacer()
-                        emotionRowLabel
-                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                            .accessibilityHidden(true)
-                    }
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Emotion")
-                .accessibilityValue(
-                    draft.emotionId
-                        .flatMap { palettes.byEmotionId[$0] }
-                        .map { Text(verbatim: $0.localizedName) }
-                        ?? Text("Choose")
-                )
-                .pebblesListRow(position: .top)
-
-                Picker("Domain", selection: $draft.domainId) {
-                    Text("Choose…").tag(UUID?.none)
-                    ForEach(domains) { domain in
-                        Text(domain.localizedName).tag(UUID?.some(domain.id))
-                    }
-                }
-                .pickerStyle(.menu)
-                .pebblesListRow(position: .middle)
-
-                Button {
-                    showValencePicker = true
-                } label: {
-                    HStack(spacing: 12) {
-                        if let valence = draft.valence {
-                            Image(valence.assetName)
-                                .renderingMode(.template)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 32, height: 32)
-                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                                .accessibilityHidden(true)
-                        } else {
-                            RoundedRectangle(cornerRadius: 6)
-                                .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
-                                .frame(width: 32, height: 32)
-                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                        }
-                        Text("Valence")
-                            .foregroundStyle(Color.pebbles.onSurface)
-                        Spacer()
-                        if let label = draft.valence?.label {
-                            Text(label)
-                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                        } else {
-                            Text("Choose…")
-                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                        }
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                            .accessibilityHidden(true)
-                    }
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Valence")
-                .accessibilityValue(
-                    draft.valence.map { Text($0.label) } ?? Text("Choose")
-                )
-                .pebblesListRow(position: .bottom)
-            } header: {
-                Text("Mood").pebblesSectionHeader()
-            }
-
-            Section {
-                SelectedSoulsRow(
-                    soulIds: $draft.soulIds,
-                    allSouls: souls
-                )
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                .pebblesListRow(position: .only)
-            } header: {
-                Text("Souls").pebblesSectionHeader()
-            }
-
-            Section {
-                Picker("Collection", selection: $draft.collectionId) {
-                    Text("None").tag(UUID?.none)
-                    ForEach(collections) { collection in
-                        Text(collection.name).tag(UUID?.some(collection.id))
-                    }
-                }
-                .pickerStyle(.menu)
-                .pebblesListRow(position: .only)
-            } header: {
-                Text("Optional").pebblesSectionHeader()
-            }
-
-            if let saveError {
+        ScrollViewReader { proxy in
+            List {
                 Section {
-                    Text(saveError)
-                        .foregroundStyle(Color.pebbles.error)
-                        .font(.callout)
-                        .pebblesListRow(position: .only)
+                    Button {
+                        showEmotionPicker = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            if let id = draft.emotionId, let row = palettes.byEmotionId[id] {
+                                Text(row.emoji)
+                                    .font(.system(size: 28))
+                                    .frame(width: 32, height: 32)
+                                    .accessibilityHidden(true)
+                            } else {
+                                RoundedRectangle(cornerRadius: 6)
+                                    .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
+                                    .frame(width: 32, height: 32)
+                                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                            }
+                            Text("Emotion")
+                                .foregroundStyle(Color.pebbles.onSurface)
+                            Spacer()
+                            emotionRowLabel
+                                .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                                .accessibilityHidden(true)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Emotion")
+                    .accessibilityValue(
+                        draft.emotionId
+                            .flatMap { palettes.byEmotionId[$0] }
+                            .map { Text(verbatim: $0.localizedName) }
+                            ?? Text("Choose")
+                    )
+                    .pebblesListRow(position: .top)
+
+                    Picker("Domain", selection: $draft.domainId) {
+                        Text("Choose…").tag(UUID?.none)
+                        ForEach(domains) { domain in
+                            Text(domain.localizedName).tag(UUID?.some(domain.id))
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .pebblesListRow(position: .middle)
+
+                    Button {
+                        showValencePicker = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            if let valence = draft.valence {
+                                Image(valence.assetName)
+                                    .renderingMode(.template)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 32, height: 32)
+                                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                                    .accessibilityHidden(true)
+                            } else {
+                                RoundedRectangle(cornerRadius: 6)
+                                    .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
+                                    .frame(width: 32, height: 32)
+                                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                            }
+                            Text("Valence")
+                                .foregroundStyle(Color.pebbles.onSurface)
+                            Spacer()
+                            if let label = draft.valence?.label {
+                                Text(label)
+                                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                            } else {
+                                Text("Choose…")
+                                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                            }
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                                .accessibilityHidden(true)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Valence")
+                    .accessibilityValue(
+                        draft.valence.map { Text($0.label) } ?? Text("Choose")
+                    )
+                    .pebblesListRow(position: .bottom)
+                } header: {
+                    Text("Mood").pebblesSectionHeader()
                 }
+
+                Section {
+                    SelectedSoulsRow(
+                        soulIds: $draft.soulIds,
+                        allSouls: souls
+                    )
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                    .pebblesListRow(position: .only)
+                    .id(Self.soulsAnchor)
+                } header: {
+                    Text("Souls").pebblesSectionHeader()
+                }
+
+                Section {
+                    Picker("Collection", selection: $draft.collectionId) {
+                        Text("None").tag(UUID?.none)
+                        ForEach(collections) { collection in
+                            Text(collection.name).tag(UUID?.some(collection.id))
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .pebblesListRow(position: .only)
+                } header: {
+                    Text("Optional").pebblesSectionHeader()
+                }
+
+                if let saveError {
+                    Section {
+                        Text(saveError)
+                            .foregroundStyle(Color.pebbles.error)
+                            .font(.callout)
+                            .pebblesListRow(position: .only)
+                    }
+                }
+            }
+            .pebblesList()
+            .task {
+                guard scrollsToSouls else { return }
+                // Let the list lay out its rows before asking for one of them.
+                await Task.yield()
+                withAnimation { proxy.scrollTo(Self.soulsAnchor, anchor: .top) }
             }
         }
-        .pebblesList()
         .sheet(isPresented: $showValencePicker) {
             ValencePickerSheet(
                 currentValence: draft.valence,
