@@ -140,10 +140,9 @@ class MonthDeckCardTest {
     }
 
     @Test
-    fun `every card the fixture deals lays out within its room, the cover and each section on a card`() {
+    fun `every card the fixture deals lays out within its room, the cover, each section and the end on a card`() {
         val cards = MonthDeck.cards(wrap, lookups)
-        val dealt = cards.filter { it != IntroSequence.End }
-        var shown by mutableStateOf(dealt.first())
+        var shown by mutableStateOf(cards.first())
         compose.setContent {
             PebblesTheme {
                 PebblesTestHarness {
@@ -174,7 +173,7 @@ class MonthDeckCardTest {
                                             onCard = true,
                                             room = room,
                                         )
-                                    IntroSequence.End -> Unit
+                                    IntroSequence.End -> MonthDeckEnd(wrap, lookups, onReplay = {})
                                 }
                             }
                         }
@@ -182,8 +181,8 @@ class MonthDeckCardTest {
                 }
             }
         }
-        assertEquals(cards.size - 1, dealt.size)
-        dealt.forEach { card ->
+        assertEquals(IntroSequence.End, cards.last())
+        cards.forEach { card ->
             compose.runOnIdle { shown = card }
             compose.waitForIdle()
             val bounds = compose.onNodeWithTag(CONTENT).getBoundsInRoot()

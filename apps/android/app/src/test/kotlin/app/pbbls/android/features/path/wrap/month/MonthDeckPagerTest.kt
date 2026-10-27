@@ -71,6 +71,7 @@ class MonthDeckPagerTest {
                             onWeek = onWeek,
                             onOpen = {},
                             onMore = {},
+                            onReplay = {},
                             modifier = Modifier.fillMaxSize(),
                         )
                     }

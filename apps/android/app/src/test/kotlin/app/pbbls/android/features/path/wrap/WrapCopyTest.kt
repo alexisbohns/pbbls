@@ -125,4 +125,9 @@ class WrapCopyTest {
     fun `a past week without a pebble says so`() {
         assertEquals("No pebble.", copy.emptyWeek())
     }
+
+    @Test
+    fun `the end card replays the month`() {
+        assertEquals("Replay the month", copy.replayMonth())
+    }
 }

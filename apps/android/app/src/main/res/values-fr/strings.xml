@@ -159,6 +159,7 @@
     <string name="path_wrap_line_nothing">Rien pour l\'instant.</string>
     <string name="path_wrap_line_no_pebble">Pas encore de galet.</string>
     <string name="path_wrap_line_no_pebbles">Aucun galet.</string>
+    <string name="path_wrap_replay_month">Rejouer le mois</string>
     <string name="path_wrap_collect">Ramasser un galet</string>
     <string name="path_wrap_tile_contents">sommaire</string>
     <string name="path_wrap_tile_persons">personnes</string>

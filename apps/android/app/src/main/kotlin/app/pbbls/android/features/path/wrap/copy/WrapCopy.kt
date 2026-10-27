@@ -54,6 +54,9 @@ class WrapCopy(
     /** A past week of a month without a pebble (#1242, iOS D12): a month page is always a completed month. */
     fun emptyWeek(): String = resources.getString(R.string.path_wrap_line_no_pebbles)
 
+    /** The deck's end card (#1242 D14): "Replay the month". */
+    fun replayMonth(): String = resources.getString(R.string.path_wrap_replay_month)
+
     fun weightCaption(): String = resources.getString(R.string.path_wrap_weight_caption)
 
     fun tile(tile: WeekTile): String =

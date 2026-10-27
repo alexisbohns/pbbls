@@ -79,7 +79,7 @@ class MonthDeckTest {
     }
 
     @Test
-    fun `a section's card arrives on its head, and the end card plays nothing yet`() {
+    fun `a section's card arrives on its head, and the end card plays the end's score`() {
         val cards = MonthDeck.cards(october, lookups)
         MonthSection.entries.forEach { s ->
             val leads = MonthDeck.leadsInsights(section(s), cards)
@@ -88,7 +88,7 @@ class MonthDeckTest {
             assertEquals("$s", IntroTick.arrive, first.tick)
         }
         assertEquals(coverBeats(october, lookups), MonthDeck.beats(IntroSequence.Cover, october, lookups, leadsInsights = false))
-        assertTrue(MonthDeck.beats(IntroSequence.End, october, lookups, leadsInsights = false).isEmpty())
+        assertEquals(IntroScore.end(), MonthDeck.beats(IntroSequence.End, october, lookups, leadsInsights = false))
     }
 
     @Test

@@ -6,10 +6,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -26,6 +30,7 @@ import app.pbbls.android.features.path.wrap.intro.IntroDrive
 import app.pbbls.android.features.path.wrap.intro.IntroHapticPlaying
 import app.pbbls.android.features.path.wrap.intro.IntroLedger
 import app.pbbls.android.features.path.wrap.intro.rememberIntroAllowed
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -44,7 +49,8 @@ class MonthIntro(
 /**
  * A month's page (#1207, D6). With an [intro] the policy allows, the month is a deck of cards
  * (`MonthDeckPager`, #1242 D21) whose intro plays while the page is [focused] and the activity resumed,
- * and a tap anywhere lands it. Without one, or under Reduce Motion, TalkBack or a large text size, it is
+ * and a tap anywhere lands it. The end card's Replay (D14) forgets the month and deals the deck again from
+ * the cover, on a fresh clock. Without one, or under Reduce Motion, TalkBack or a large text size, it is
  * the plain page, settled: the cover, then the sections the server listed, in its order, the tone and
  * the hours under one *insights* head.
  */
@@ -66,15 +72,33 @@ fun MonthPage(
     var sheet by rememberSaveable(wrap.month) { mutableStateOf<String?>(null) }
     val onMore: (MonthSection) -> Unit = { sheet = it.name }
     val allowed = rememberIntroAllowed()
+    // Each Replay deals the deck again, from the cover, on a fresh clock (D14).
+    var run by remember(wrap.month) { mutableIntStateOf(0) }
     val clock =
-        remember(wrap.month, intro, allowed) {
+        remember(wrap.month, intro, allowed, run) {
             if (intro != null && allowed) IntroClock(wrap.month, intro.ledger, intro.haptics) else null
         }
+    val scope = rememberCoroutineScope()
 
     if (clock != null) {
-        // The active flag lives here, outside the deck, so nothing the deck redraws can drop it (D21's visibility trap).
+        // The active flag lives here, outside the replayed deck, so the new deck inherits it and nothing the deck
+        // redraws can drop it (D21's visibility trap): a replayed deck plays its cover at once.
         DriveWhileActive(clock, focused)
-        MonthDeckPager(wrap, lookups, clock, dayView, zone, aspect, onWeek, onOpen, onMore, modifier)
+        val onReplay: () -> Unit = {
+            scope.launch {
+                // The skip from this same tap lands first, on the old clock; replay on the next frame.
+                withFrameNanos { }
+                // Stopped, its haptics with it: nothing reaching it as its deck leaves starts a card on it.
+                clock.isActive = false
+                intro?.ledger?.reset(wrap.month)
+                run += 1
+            }
+        }
+        // The month in the key, as in the pager's own keys (#1241's trap: decks sharing an identity sent a swipe
+        // to August back to September); the run deals a new deck, its pager on the cover.
+        key(wrap.month, run) {
+            MonthDeckPager(wrap, lookups, clock, dayView, zone, aspect, onWeek, onOpen, onMore, onReplay, modifier)
+        }
     } else {
         LazyColumn(modifier = modifier, contentPadding = PaddingValues(bottom = PAGE_BOTTOM)) {
             item(key = "cover") { MonthCover(wrap, lookups) }
