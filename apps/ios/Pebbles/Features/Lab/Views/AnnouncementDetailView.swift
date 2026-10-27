@@ -40,70 +40,13 @@ struct AnnouncementDetailView: View {
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
 
                 if let body = log.body(for: locale), !body.isEmpty {
-                    ForEach(Array(blocks(from: body).enumerated()), id: \.offset) { _, block in
-                        render(block)
-                    }
+                    MarkdownBlocksView(markdown: body)
                 }
             }
             .padding()
         }
         .pebblesScreen()
         .navigationBarTitleDisplayMode(.inline)
-    }
-
-    // MARK: - Markdown blocks
-
-    private enum Block: Hashable {
-        case heading(level: Int, text: String)
-        case paragraph(String)
-    }
-
-    private func blocks(from markdown: String) -> [Block] {
-        markdown
-            .components(separatedBy: "\n\n")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-            .map { para -> Block in
-                if para.hasPrefix("### ") {
-                    return .heading(level: 3, text: String(para.dropFirst(4)))
-                }
-                if para.hasPrefix("## ") {
-                    return .heading(level: 2, text: String(para.dropFirst(3)))
-                }
-                if para.hasPrefix("# ") {
-                    return .heading(level: 1, text: String(para.dropFirst(2)))
-                }
-                return .paragraph(para)
-            }
-    }
-
-    @ViewBuilder
-    private func render(_ block: Block) -> some View {
-        switch block {
-        case .heading(let level, let text):
-            Text(text)
-                .font(headingFont(for: level))
-                .foregroundStyle(Color.pebbles.onSurface)
-        case .paragraph(let text):
-            Text(attributed(text))
-                .font(.body)
-                .foregroundStyle(Color.pebbles.onSurface)
-        }
-    }
-
-    private func headingFont(for level: Int) -> Font {
-        switch level {
-        case 1: return .title.bold()
-        case 2: return .title2.bold()
-        default: return .title3.bold()
-        }
-    }
-
-    private func attributed(_ markdown: String) -> AttributedString {
-        (try? AttributedString(
-            markdown: markdown,
-            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        )) ?? AttributedString(markdown)
     }
 }
 

@@ -9,6 +9,8 @@ final class FakeHomeService: HomeServicing, @unchecked Sendable {
     private var nameAnswer: @Sendable () async throws -> String?
     private var wrapsAnswer: Result<HomeWraps, Error> = .failure(Failure())
     private var revealAnswers: [CalendarMonth: Result<HomeReveal, Error>] = [:]
+    private var guidesAnswer: Result<[Guide], Error> = .success([])
+    private var guidesCallCount = 0
     private var wrapsAsked: [TimeZone] = []
     private var revealAsked: [CalendarMonth] = []
 
@@ -30,6 +32,11 @@ final class FakeHomeService: HomeServicing, @unchecked Sendable {
         lock.withLock { revealAnswers[month] = result }
     }
 
+    func answer(guides result: Result<[Guide], Error>) {
+        lock.withLock { guidesAnswer = result }
+    }
+
+    var guidesCalls: Int { lock.withLock { guidesCallCount } }
     var wrapsZones: [TimeZone] { lock.withLock { wrapsAsked } }
     var revealCalls: [CalendarMonth] { lock.withLock { revealAsked } }
 
@@ -48,6 +55,13 @@ final class FakeHomeService: HomeServicing, @unchecked Sendable {
         try lock.withLock {
             revealAsked.append(month)
             return try (revealAnswers[month] ?? .failure(Failure())).get()
+        }
+    }
+
+    func guides() async throws -> [Guide] {
+        try lock.withLock {
+            guidesCallCount += 1
+            return try guidesAnswer.get()
         }
     }
 }
