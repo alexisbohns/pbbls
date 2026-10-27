@@ -32,9 +32,7 @@ import app.pbbls.android.features.path.wrap.copy.WrapCopy
 import app.pbbls.android.features.path.wrap.intro.IntroBeat
 import app.pbbls.android.features.path.wrap.intro.IntroClock
 import app.pbbls.android.features.path.wrap.intro.IntroHost
-import app.pbbls.android.features.path.wrap.intro.IntroScore
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
-import app.pbbls.android.features.path.wrap.intro.head
 import app.pbbls.android.features.path.wrap.intro.onAnyTap
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import java.time.LocalDate
@@ -85,9 +83,9 @@ internal object MonthDeck {
 
     /**
      * What a card plays. The cover its garland; the weeks their columns, one at a time; the milestones their
-     * stones stamped, each with its words; the persons their rows in turn; the gem its count, then its families; the tone its sweep and the hours their stones, under the
-     * insights head when they lead it; another section, for now, its arrival alone (its entrance lands in the
-     * parts after this one); the end card nothing yet.
+     * stones stamped, each with its words; the persons their rows in turn; the domains their gauges filling;
+     * the gem its count, then its families; the tone its sweep and the hours their stones, under the insights
+     * head when they lead it; the end card nothing yet.
      */
     fun beats(
         card: IntroSequence,
@@ -97,13 +95,16 @@ internal object MonthDeck {
     ): List<IntroBeat> =
         when (card) {
             IntroSequence.Cover -> coverBeats(wrap, lookups)
-            IntroSequence.Section(MonthSection.WEEKS) -> WeeksSummary.introBeats(wrap)
-            IntroSequence.Section(MonthSection.MILESTONES) -> MilestonesSection.introBeats(wrap, lookups)
-            IntroSequence.Section(MonthSection.PERSONS) -> PersonsSection.introBeats(wrap, lookups)
-            IntroSequence.Section(MonthSection.GEM) -> EmotionGem.introBeats(wrap)
-            IntroSequence.Section(MonthSection.TONE) -> ToneFigure.introBeats(wrap, leadsInsights)
-            IntroSequence.Section(MonthSection.HOURS) -> HoursFigure.introBeats(wrap, lookups, leadsInsights)
-            is IntroSequence.Section -> IntroScore.head(hasLead = false, insights = leadsInsights)
+            is IntroSequence.Section ->
+                when (card.section) {
+                    MonthSection.WEEKS -> WeeksSummary.introBeats(wrap)
+                    MonthSection.MILESTONES -> MilestonesSection.introBeats(wrap, lookups)
+                    MonthSection.PERSONS -> PersonsSection.introBeats(wrap, lookups)
+                    MonthSection.DOMAINS -> DomainsSection.introBeats(wrap, lookups)
+                    MonthSection.GEM -> EmotionGem.introBeats(wrap)
+                    MonthSection.TONE -> ToneFigure.introBeats(wrap, leadsInsights)
+                    MonthSection.HOURS -> HoursFigure.introBeats(wrap, lookups, leadsInsights)
+                }
             IntroSequence.End -> emptyList()
         }
 }

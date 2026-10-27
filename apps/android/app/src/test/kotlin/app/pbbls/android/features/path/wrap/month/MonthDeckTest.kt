@@ -80,9 +80,13 @@ class MonthDeckTest {
 
     @Test
     fun `a section's card arrives on its head, and the end card plays nothing yet`() {
-        val domains = MonthDeck.beats(section(MonthSection.DOMAINS), october, lookups, leadsInsights = false)
-        assertEquals(listOf(IntroKey.Header), domains.map { it.key })
-        assertEquals(IntroTick.arrive, domains.single().tick)
+        val cards = MonthDeck.cards(october, lookups)
+        MonthSection.entries.forEach { s ->
+            val leads = MonthDeck.leadsInsights(section(s), cards)
+            val first = MonthDeck.beats(section(s), october, lookups, leads).first()
+            assertEquals("$s", if (leads) IntroKey.Insights else IntroKey.Header, first.key)
+            assertEquals("$s", IntroTick.arrive, first.tick)
+        }
         assertEquals(coverBeats(october, lookups), MonthDeck.beats(IntroSequence.Cover, october, lookups, leadsInsights = false))
         assertTrue(MonthDeck.beats(IntroSequence.End, october, lookups, leadsInsights = false).isEmpty())
     }

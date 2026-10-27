@@ -259,6 +259,35 @@ class MonthDeckCardTest {
     }
 
     @Test
+    fun `on a card the domains' more stands at the room's foot`() {
+        var more = ""
+        show(head = MonthHead("Domains", null)) { r ->
+            more = rememberWrapCopy().moreDomains(DomainsSection.rows(wrap, lookups).size)
+            MonthSectionContent(
+                MonthSection.DOMAINS,
+                wrap,
+                lookups,
+                DayView.CIRCLE,
+                SpineFixtureWeek.zone,
+                aspect = null,
+                onWeek = {},
+                onOpen = {},
+                onMore = {},
+                onCard = true,
+                room = r,
+            )
+        }
+        assertEquals(
+            ROOM_BOTTOM.value,
+            compose
+                .onNodeWithText(more)
+                .getBoundsInRoot()
+                .bottom.value,
+            0.5f,
+        )
+    }
+
+    @Test
     fun `on a card the weeks stand as a column each, one button saying its week, a tap focusing it`() {
         var focused: LocalDate? = null
         var copy: WrapCopy? = null
