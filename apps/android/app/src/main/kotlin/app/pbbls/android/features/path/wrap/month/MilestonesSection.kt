@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -125,7 +123,7 @@ internal fun MilestonesSection(
                         minHeight = rowHeight,
                         markWidth = column,
                         description = "$date, $name",
-                        leading = { MilestoneStone(moment, lookups.paletteFor(moment), row, size.stone, column, reveal) },
+                        leading = { MilestoneStone(moment, lookups.paletteFor(moment), row, size.stone, column) },
                         trailing = {
                             val prefix = moment.firstSnapPath
                             if (prefix != null) {
@@ -160,10 +158,11 @@ internal fun MilestonesSection(
 
 /**
  * A milestone's own stone (#1242; iOS `MilestoneStone`, D16): the Spine's lit stone with its halo and rings
- * quieter, in a column [column] wide. In the intro ([row] set) it stamps in on its `Stamp`, and as the stamp
- * meets the paper on its `Impact` it is pressed once, rippling, at the stone's own pace whatever the intro's
- * tempo. Only while its card plays: a card dealt settled, revisited or skipped lands every stone at once, and
- * none ripples. Under reduced motion the press is the still one, with no ripple, as on the Spine.
+ * quieter, in a column [column] wide. In the intro ([row] set, its card's stage around it) it stamps in on its
+ * `Stamp`, and as the stamp meets the paper on its `Impact` it is pressed once, rippling, at the stone's own
+ * pace whatever the intro's tempo. Only while its card plays: a card dealt settled, revisited or skipped lands
+ * every stone at once, and none ripples. Under reduced motion the press is the still one, with no ripple, as
+ * on the Spine.
  */
 @Composable
 private fun MilestoneStone(
@@ -172,7 +171,6 @@ private fun MilestoneStone(
     row: Int?,
     scale: Float,
     column: Dp,
-    reveal: IntroReveal,
 ) {
     val valence = moment.valence
     val seed = remember(moment.pebble?.id, moment.id) { UuidHash.fnv1a(moment.pebble?.id ?: moment.id) }
@@ -182,12 +180,14 @@ private fun MilestoneStone(
     // The press runs in the stone's own scope, not the strike's: the strike restarts with a new stage (a
     // Replay's clock) or a row shifted by a refresh, and a press cut short would leave the rings swollen.
     val pressScope = rememberCoroutineScope()
+    val reduceMotion = rememberReduceMotion()
     if (row != null && stage != null) {
-        val reduceMotion by rememberUpdatedState(rememberReduceMotion())
-        LaunchedEffect(stage, row) {
+        // Keyed on the setting too, so a press never runs on a stale one; a restart strikes nothing on its own.
+        LaunchedEffect(stage, row, reduceMotion) {
             stage.strikes(row).collect { pressScope.launch { press.press(reduceMotion) } }
         }
     }
+    val stamp = remember(stage, row) { Modifier.stamp(stage?.reveal, row) }
     Box(Modifier.width(column), contentAlignment = Alignment.Center) {
         // The ripple under the stone, overflowing freely, as quiet as its rings.
         press.rippleToken?.let { token ->
@@ -206,7 +206,7 @@ private fun MilestoneStone(
             glyph = moment.pebble?.glyph,
             seed = seed,
             press = press,
-            modifier = Modifier.stamp(reveal, row),
+            modifier = stamp,
             width = width,
             rings = MILESTONE_RINGS,
         )
@@ -236,13 +236,13 @@ private val QUIETER = Modifier.graphicsLayer(alpha = MILESTONE_RINGS, compositin
 
 /**
  * The stamp on [row]'s `Stamp` (iOS `MilestoneStone`): down from past its size to the paper, a slight squash,
- * back; there by its impact. Only below 1; with no [row], no layer.
+ * back; there by its impact. Only below 1; with no [reveal] or no [row], no layer.
  */
 private fun Modifier.stamp(
-    reveal: IntroReveal,
+    reveal: IntroReveal?,
     row: Int?,
 ): Modifier {
-    if (row == null) return this
+    if (reveal == null || row == null) return this
     val key = IntroKey.Stamp(row)
     return graphicsLayer {
         val p = reveal(key).toDouble()
