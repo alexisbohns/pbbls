@@ -26,7 +26,7 @@ import java.time.YearMonth
  * - One `IntroHost` per sequence: a second host of the same sequence would register over the first, and its
  *   leaving would land the first.
  * - [leave] clears the top card, so the deck must [show] again after a host returns.
- * - A ledger reset (`IntroLedger.reset`) is not observed here: Replay builds a new clock.
+ * - A ledger reset (`IntroLedger.reset`) is not observed here: Replay [retire]s this clock and builds a new one.
  */
 @Stable
 class IntroClock private constructor(
@@ -70,16 +70,21 @@ class IntroClock private constructor(
 
     /**
      * The page is the pager's settled page, the activity resumed, and the intro allowed. Off lands what plays.
-     * Written by `IntroDrive`; not read in composition (it is not snapshot state).
+     * Written by `IntroDrive`, and turned off for good by [retire]; not read in composition (it is not snapshot
+     * state).
      */
     var isActive: Boolean = false
         set(value) {
-            if (field == value) return
+            if (field == value || (value && retired)) return
             field = value
             if (value) startNext() else settleAll()
         }
 
-    fun phase(sequence: IntroSequence): Phase = phases[sequence] ?: if (ledger.contains(month, sequence)) Phase.Settled else Phase.Waiting
+    /** Retired by Replay: never active again, and a card it never met draws settled. Not snapshot state. */
+    private var retired = false
+
+    fun phase(sequence: IntroSequence): Phase =
+        phases[sequence] ?: if (retired || ledger.contains(month, sequence)) Phase.Settled else Phase.Waiting
 
     fun isPlaying(sequence: IntroSequence): Boolean = phase(sequence) is Phase.Playing
 
@@ -176,6 +181,18 @@ class IntroClock private constructor(
             }
         }
         settleAll()
+    }
+
+    /**
+     * Replay is done with this clock (D14): what plays lands and its haptics stop, and every card it has met keeps
+     * the phase it has now, so the ledger forgetting the month can't turn its landed cards back to waiting (blank)
+     * while its deck fades out. For good: it never turns active again, and a card it never met draws settled. Its
+     * page drives the new clock from then on.
+     */
+    fun retire() {
+        isActive = false
+        latest.keys.forEach { phases.getOrPut(it) { phase(it) } }
+        retired = true
     }
 
     /** Focus lost, the activity paused, the page gone: what plays lands and its haptics stop; what waits keeps waiting, unrecorded. */

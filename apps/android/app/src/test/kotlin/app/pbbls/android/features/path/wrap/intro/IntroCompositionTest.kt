@@ -1,5 +1,9 @@
 package app.pbbls.android.features.path.wrap.intro
 
+import app.pbbls.android.core.model.ValencePolarity
+import app.pbbls.android.core.model.wrap.CoverDay
+import app.pbbls.android.core.model.wrap.CoverPebble
+import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.features.path.wrap.intro.IntroPrimitiveKind.CLICK
 import app.pbbls.android.features.path.wrap.intro.IntroPrimitiveKind.LOW_TICK
 import app.pbbls.android.features.path.wrap.intro.IntroPrimitiveKind.TICK
@@ -92,5 +96,73 @@ class IntroCompositionTest {
         assertTrue(IntroComposition.of(emptyList(), all, pixel, leadMs = 50).isEmpty())
         // Beats that neither tick nor swell compose none either.
         assertTrue(IntroComposition.of(listOf(IntroBeat(IntroKey.Lead, 0.0, 0.3)), all, pixel, leadMs = 50).isEmpty())
+        assertTrue(IntroComposition.segments(emptyList(), all, pixel, leadMs = 50).isEmpty())
+    }
+
+    /** A sequence's score at its tempo, as the clock scales it. */
+    private fun List<IntroBeat>.atTempo(sequence: IntroSequence) = map { it.scaled(IntroTempo.standard.factor(sequence)) }
+
+    @Test
+    fun `the domains split after each swell into segments that start on their full ticks`() {
+        val beats = IntroScore.domains(List(5) { 1.0 }, more = true).atTempo(IntroSequence.Section(MonthSection.DOMAINS))
+        val whole = IntroComposition.of(beats, all, pixel, leadMs = 50)
+        val segments = IntroComposition.segments(beats, all, pixel, leadMs = 50)
+        assertEquals(1 + 5, segments.size)
+        // The first segment is the composition's head, its lead included: the card's arrival at 0.
+        assertEquals(0.0, segments.first().atMs, 0.0)
+        assertEquals(whole.take(segments.first().primitives.size), segments.first().primitives)
+        segments.drop(1).forEachIndexed { row, segment ->
+            val full = beats.first { it.key == IntroKey.Full(row) }
+            assertEquals(full.at * 1000, segment.atMs, 1.0)
+            assertEquals(IntroPrimitive(TICK, IntroTick.light.intensity, 0), segment.primitives.first())
+        }
+        // Every segment fits the HAL's 254 primitives, so none is chunked.
+        assertTrue(segments.all { it.primitives.size <= 254 })
+    }
+
+    @Test
+    fun `the domains' segments hold the whole composition, only their first pauses re-anchored`() {
+        val beats = IntroScore.domains(List(5) { 1.0 }, more = true).atTempo(IntroSequence.Section(MonthSection.DOMAINS))
+        val whole = IntroComposition.of(beats, all, pixel, leadMs = 50)
+        val segments = IntroComposition.segments(beats, all, pixel, leadMs = 50)
+        val firsts =
+            segments
+                .runningFold(0) { at, segment -> at + segment.primitives.size }
+                .drop(1)
+                .dropLast(1)
+                .toSet()
+        val reanchored = whole.mapIndexed { i, p -> if (i in firsts) p.copy(pauseMs = 0) else p }
+        assertEquals(reanchored, segments.flatMap { it.primitives })
+        // Without low ticks, the softer ticks' trains split the same way.
+        val ticks = IntroComposition.segments(beats, setOf(TICK), pixel, leadMs = 50)
+        assertEquals(1 + 5, ticks.size)
+        assertEquals(IntroComposition.of(beats, setOf(TICK), pixel, leadMs = 50).size, ticks.sumOf { it.primitives.size })
+    }
+
+    @Test
+    fun `a score with no swell is one segment, the whole composition`() {
+        val pebble = CoverPebble("m", null, 2, ValencePolarity.HIGHLIGHT)
+        val days = listOf(CoverDay(0, listOf(pebble)), CoverDay(4, listOf(pebble, pebble)))
+        val beats = IntroScore.cover(days, 31, listOf(0, 4, 30), 2, emptyList()).atTempo(IntroSequence.Cover)
+        val segments = IntroComposition.segments(beats, all, pixel, leadMs = 50)
+        assertEquals(1, segments.size)
+        assertEquals(IntroComposition.of(beats, all, pixel, leadMs = 50), segments.single().primitives)
+        assertEquals(IntroHaptics.events(beats).first().at * 1000, segments.single().atMs, 0.0)
+    }
+
+    @Test
+    fun `a swell straight after another starts its own segment, and a closing swell none after it`() {
+        val swell = IntroSwell(0.15f, 0.75f, 0.3f)
+        val beats =
+            listOf(
+                IntroBeat(IntroKey.Gauge(0), 0.0, 0.3, swell = swell),
+                IntroBeat(IntroKey.Gauge(1), 0.3, 0.3, swell = swell),
+            )
+        val segments = IntroComposition.segments(beats, all, pixel, leadMs = 0)
+        assertEquals(2, segments.size)
+        assertEquals(0.0, segments[0].atMs, 0.0)
+        assertEquals(300.0, segments[1].atMs, 1e-9)
+        assertEquals(listOf(22, 22), segments.map { it.primitives.size })
+        assertEquals(0, segments[1].primitives.first().pauseMs)
     }
 }

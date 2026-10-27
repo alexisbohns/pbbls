@@ -18,17 +18,25 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.wrap.MonthSection
+import app.pbbls.android.features.path.wrap.copy.WrapCopy
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import app.pbbls.android.testing.PIXEL_TEST_SDK
@@ -42,6 +50,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import java.time.LocalDate
 
 /**
  * The galley card's room (#1242 D21; iOS `MonthCardFill` and the card's fit): content that asks for the room
@@ -131,10 +140,9 @@ class MonthDeckCardTest {
     }
 
     @Test
-    fun `every card the fixture deals lays out within its room, the cover and each section on a card`() {
+    fun `every card the fixture deals lays out within its room, the cover, each section and the end on a card`() {
         val cards = MonthDeck.cards(wrap, lookups)
-        val dealt = cards.filter { it != IntroSequence.End }
-        var shown by mutableStateOf(dealt.first())
+        var shown by mutableStateOf(cards.first())
         compose.setContent {
             PebblesTheme {
                 PebblesTestHarness {
@@ -165,7 +173,7 @@ class MonthDeckCardTest {
                                             onCard = true,
                                             room = room,
                                         )
-                                    IntroSequence.End -> Unit
+                                    IntroSequence.End -> MonthDeckEnd(wrap, lookups, onReplay = {})
                                 }
                             }
                         }
@@ -173,14 +181,34 @@ class MonthDeckCardTest {
                 }
             }
         }
-        assertEquals(cards.size - 1, dealt.size)
-        dealt.forEach { card ->
+        assertEquals(IntroSequence.End, cards.last())
+        cards.forEach { card ->
             compose.runOnIdle { shown = card }
             compose.waitForIdle()
             val bounds = compose.onNodeWithTag(CONTENT).getBoundsInRoot()
             assertTrue("$card draws nothing", bounds.bottom > bounds.top)
             assertTrue("$card overruns its room: ${bounds.bottom}", bounds.bottom.value <= ROOM_BOTTOM.value + 0.5f)
         }
+    }
+
+    @Test
+    fun `the end card of a month without a cover names the month over its replay, centred in the room`() {
+        val bare = wrap.copy(cover = null)
+        var copy: WrapCopy? = null
+        show {
+            copy = rememberWrapCopy()
+            MonthDeckEnd(bare, lookups, onReplay = {})
+        }
+        val words = copy!!
+        // No garland: its kicker is nowhere, and the month's name stands in, a heading.
+        compose.onAllNodesWithText(words.monthKicker(bare.month)).assertCountEquals(0)
+        val name = compose.onNodeWithText(words.monthName(bare.month))
+        name.assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        val top = name.getBoundsInRoot()
+        val replay = compose.onNodeWithText(words.replayMonth()).getBoundsInRoot()
+        assertTrue(top.bottom < replay.top)
+        // The pair in the room's middle, within the button's touch margin.
+        assertEquals(((ROOM_TOP + ROOM_BOTTOM) / 2).value, ((top.top + replay.bottom) / 2).value, TOUCH_MARGIN)
     }
 
     @Test
@@ -219,6 +247,144 @@ class MonthDeckCardTest {
         )
     }
 
+    @Test
+    fun `on a card the milestones share the room, each row its share, all of them within it`() {
+        var room: Dp? = null
+        var copy: WrapCopy? = null
+        show(head = MonthHead("Milestones", null)) { r ->
+            room = r
+            copy = rememberWrapCopy()
+            MilestonesCard(r)
+        }
+        val heights = milestoneRowHeights(copy!!)
+        val size = MilestonesSection.rowSize(room!!, heights.size)
+        assertTrue(size.height > MilestonesSection.LIST_ROW)
+        heights.forEach { assertEquals(size.height.value, it.value, 0.5f) }
+        assertTrue("the rows overrun the room: $heights of $room", heights.fold(0.dp) { sum, h -> sum + h } <= room!!)
+    }
+
+    @Test
+    fun `on a card the milestones' rows take their share in whole pixels, never overrunning the room`() {
+        // Five rows share 501.3 dp: 100.26 dp each, 200.52 px at xhdpi. Rounded, they would take 1005 px of 1002.6.
+        val room = 501.3.dp
+        var copy: WrapCopy? = null
+        compose.setContent {
+            PebblesTheme {
+                PebblesTestHarness {
+                    copy = rememberWrapCopy()
+                    Box(Modifier.size(HOST_WIDTH, HOST_HEIGHT)) { MilestonesCard(room) }
+                }
+            }
+        }
+        compose.waitForIdle()
+        val heights = milestoneRowHeights(copy!!)
+        assertEquals(5, heights.size)
+        heights.forEach { assertEquals(100f, it.value, 0f) }
+        assertTrue("the rows overrun the room: $heights", heights.fold(0.dp) { sum, h -> sum + h } <= room)
+    }
+
+    /** The milestones as a card draws them in [room]. */
+    @Composable
+    private fun MilestonesCard(room: Dp?) {
+        MonthSectionContent(
+            MonthSection.MILESTONES,
+            wrap,
+            lookups,
+            DayView.CIRCLE,
+            SpineFixtureWeek.zone,
+            aspect = null,
+            onWeek = {},
+            onOpen = {},
+            onMore = {},
+            onCard = true,
+            room = room,
+        )
+    }
+
+    /** Each milestone row's height as laid out, found by the "date, name" it says. */
+    private fun milestoneRowHeights(copy: WrapCopy): List<Dp> =
+        MonthSections.milestones(wrap, lookups).map { moment ->
+            val date = copy.dateline(moment.happenedAt.atZoneSameInstant(SpineFixtureWeek.zone).toLocalDate())
+            val bounds = compose.onNodeWithContentDescription("$date, ${moment.name}").getBoundsInRoot()
+            bounds.bottom - bounds.top
+        }
+
+    @Test
+    fun `on a card the domains' more stands at the room's foot`() {
+        var more = ""
+        show(head = MonthHead("Domains", null)) { r ->
+            more = rememberWrapCopy().moreDomains(DomainsSection.rows(wrap, lookups).size)
+            MonthSectionContent(
+                MonthSection.DOMAINS,
+                wrap,
+                lookups,
+                DayView.CIRCLE,
+                SpineFixtureWeek.zone,
+                aspect = null,
+                onWeek = {},
+                onOpen = {},
+                onMore = {},
+                onCard = true,
+                room = r,
+            )
+        }
+        assertEquals(
+            ROOM_BOTTOM.value,
+            compose
+                .onNodeWithText(more)
+                .getBoundsInRoot()
+                .bottom.value,
+            0.5f,
+        )
+    }
+
+    @Test
+    fun `on a card the weeks stand as a column each, one button saying its week, a tap focusing it`() {
+        var focused: LocalDate? = null
+        var copy: WrapCopy? = null
+        show(head = MonthHead("Weeks", null)) { r ->
+            copy = rememberWrapCopy()
+            MonthSectionContent(
+                MonthSection.WEEKS,
+                wrap,
+                lookups,
+                DayView.CIRCLE,
+                SpineFixtureWeek.zone,
+                aspect = null,
+                onWeek = { focused = it },
+                onOpen = {},
+                onMore = {},
+                onCard = true,
+                room = r,
+            )
+        }
+        val words = copy!!
+        val weeks = WeeksSummary.weeks(wrap)
+        val descriptions =
+            weeks.map { week ->
+                val empty = week.pebbles == 0
+                val line = if (empty) words.emptyWeek() else words.line(week.pebbles, week.soulIds.size, live = false, hasMoments = true)
+                "${words.range(wrap.month, week.from, week.to)}, $line"
+            }
+        val widths =
+            descriptions.map { description ->
+                val column = compose.onNodeWithContentDescription(description)
+                column.assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+                val bounds = column.getBoundsInRoot()
+                bounds.right - bounds.left
+            }
+        // Columns, not rows: the weeks share the card's width, each as wide as the next.
+        assertTrue("the columns overrun the card: $widths", widths.fold(0.dp) { sum, w -> sum + w } <= HOST_WIDTH)
+        assertTrue("the columns differ: $widths", widths.max() - widths.min() <= 1.dp)
+        // A column is one node: its Monday's number and month speak through it, the weekdays' letters not at all
+        // (the merged tree, as TalkBack reads it; the unmerged one keeps a cleared node's children).
+        compose.onAllNodesWithText("28").assertCountEquals(0)
+        compose.onAllNodesWithText(words.weekColumnMonth(weeks.first().weekStart)).assertCountEquals(0)
+        compose.onAllNodesWithText("m").assertCountEquals(0)
+        compose.onNodeWithContentDescription(descriptions[1]).performClick()
+        assertEquals(weeks[1].weekStart, focused)
+    }
+
     private companion object {
         const val MONTH = "October 2026"
         const val FOOT = "foot"
@@ -232,5 +398,8 @@ class MonthDeckCardTest {
         val INSET_BOTTOM = MonthDeckLayout.INSET.calculateBottomPadding()
         val ROOM_BOTTOM = HOST_HEIGHT - INSET_BOTTOM
         val ROOM = ROOM_BOTTOM - ROOM_TOP
+
+        /** How far a button's bounds sit inside its 48 dp touch target, in dp: what centring may be off by. */
+        const val TOUCH_MARGIN = 4f
     }
 }

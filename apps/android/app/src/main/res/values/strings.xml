@@ -162,6 +162,7 @@
     <string name="path_wrap_line_nothing">Nothing yet.</string>
     <string name="path_wrap_line_no_pebble">No pebble yet.</string>
     <string name="path_wrap_line_no_pebbles">No pebble.</string>
+    <string name="path_wrap_replay_month">Replay the month</string>
     <string name="path_wrap_collect">Collect a pebble</string>
     <string name="path_wrap_tile_contents">contents</string>
     <string name="path_wrap_tile_persons">persons</string>

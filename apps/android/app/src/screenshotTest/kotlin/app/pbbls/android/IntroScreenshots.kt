@@ -31,6 +31,7 @@ import app.pbbls.android.features.path.wrap.month.ToneFigure
 import app.pbbls.android.features.path.wrap.month.coverBeats
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import com.android.tools.screenshot.PreviewTest
+import app.pbbls.android.features.path.wrap.month.MonthDeckEnd as EndCard
 
 /** The month's intro, frozen mid-play (#1242; iOS `intro-garland-half`): the cover at 1150 ms, unscaled. */
 @PreviewTest
@@ -154,7 +155,10 @@ fun MonthDeckCover() {
     }
 }
 
-/** The deck's weeks card: its head in the title band, the weeks under it, the stepper on its second segment. */
+/**
+ * The deck's weeks card: its head in the title band, the weeks under it as a calendar of columns in the card's
+ * room (D17), the stepper on its second segment.
+ */
 @PreviewTest
 @Preview(showBackground = true, widthDp = 390, heightDp = 760)
 @Composable
@@ -166,7 +170,7 @@ fun MonthDeckSection() {
             month = "October 2026",
             step = MonthDeckStep.of(IntroSequence.Section(MonthSection.WEEKS), deckCards),
             head = MonthSections.head(MonthSection.WEEKS, wrap, lookups, rememberWrapCopy()),
-        ) {
+        ) { room ->
             MonthSectionContent(
                 MonthSection.WEEKS,
                 wrap,
@@ -178,7 +182,27 @@ fun MonthDeckSection() {
                 onOpen = {},
                 onMore = {},
                 onCard = true,
+                room = room,
             )
+        }
+    }
+}
+
+/**
+ * The deck's end card (D14): the margin with the stepper on its last segment, no title band, and the cover's
+ * whole garland, settled, over "Replay the month", centred in the room.
+ */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390, heightDp = 760)
+@Composable
+fun MonthDeckEnd() {
+    DeckPage {
+        MonthDeckCard(
+            month = "October 2026",
+            step = MonthDeckStep.of(IntroSequence.End, deckCards),
+            head = null,
+        ) {
+            EndCard(SpineFixtureWeek.monthWrap, SpineFixtureWeek.lookups, onReplay = {})
         }
     }
 }

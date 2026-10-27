@@ -79,7 +79,8 @@ interface IntroHapticPlaying {
     fun tick(tick: IntroTick)
 
     /**
-     * A frame of the playing [sequence]: the frame-clock tier fires from here; the others ignore it. [nanos] is on
+     * A frame of the playing [sequence]: the frame-clock tier fires its ticks from here, and the composition tier
+     * a card's later segments; the waveform tier ignores it. [nanos] is on
      * `System.nanoTime()`'s timebase, like [play]'s `startNanos` (Choreographer's frame time, which `withFrameNanos` reports, is in that base).
      */
     fun frame(

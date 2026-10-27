@@ -7,13 +7,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.dp
+import androidx.test.core.app.ApplicationProvider
+import app.pbbls.android.R
 import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -21,6 +27,7 @@ import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.features.path.wrap.intro.HapticsSpy
 import app.pbbls.android.features.path.wrap.intro.IntroClock
 import app.pbbls.android.features.path.wrap.intro.IntroDrive
+import app.pbbls.android.features.path.wrap.intro.IntroKey
 import app.pbbls.android.features.path.wrap.intro.IntroLedger
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.intro.IntroTick
@@ -55,7 +62,10 @@ class MonthDeckPagerTest {
     private val clock = IntroClock(wrap.month, ledger, spy, now = { compose.mainClock.currentTime * 1_000_000 })
     private val weeks = IntroSequence.Section(MonthSection.WEEKS)
 
-    private fun deal(onWeek: (LocalDate) -> Unit = {}) {
+    private fun deal(
+        onWeek: (LocalDate) -> Unit = {},
+        onReplay: () -> Unit = {},
+    ) {
         compose.setContent {
             PebblesTheme {
                 PebblesTestHarness {
@@ -71,6 +81,7 @@ class MonthDeckPagerTest {
                             onWeek = onWeek,
                             onOpen = {},
                             onMore = {},
+                            onReplay = onReplay,
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
@@ -148,6 +159,104 @@ class MonthDeckPagerTest {
         }
     }
 
+    @Test
+    fun `taps on the cover over the weeks' columns focus no week, and focus their weeks once the weeks card is on top`() {
+        val weeks = mutableListOf<LocalDate>()
+        deal(onWeek = { weeks += it })
+        // Over the cover's paper, where the weeks card held beneath it has its columns.
+        POINTS.forEach { (x, y) ->
+            compose.onNodeWithTag(DECK).performTouchInput { click(Offset(x.dp.toPx(), y.dp.toPx())) }
+            compose.waitForIdle()
+        }
+        assertTrue("a tap on the cover reached the weeks: $weeks", weeks.isEmpty())
+        // The weeks on top: the same taps focus their weeks.
+        compose.onNodeWithTag(DECK).performTouchInput { swipeUp() }
+        compose.waitForIdle()
+        POINTS.forEach { (x, y) ->
+            compose.onNodeWithTag(DECK).performTouchInput { click(Offset(x.dp.toPx(), y.dp.toPx())) }
+            compose.waitForIdle()
+        }
+        assertTrue(weeks.isNotEmpty())
+    }
+
+    /** Throws to the end card, the frame clock stepping only when told from the last throw on, until it plays. */
+    private fun throwToTheEnd() {
+        val cards = MonthDeck.cards(wrap, lookups)
+        repeat(cards.size - 2) {
+            compose.onNodeWithTag(DECK).performTouchInput { swipeUp() }
+            compose.waitForIdle()
+        }
+        compose.mainClock.autoAdvance = false
+        compose.onNodeWithTag(DECK).performTouchInput { swipeUp() }
+        var frames = 0
+        while (!clock.isPlaying(IntroSequence.End)) {
+            compose.mainClock.advanceTimeByFrame()
+            check(++frames < MAX_FRAMES) { "the end card never came on top" }
+        }
+        // The frame that recomposes the deck on its new top card, which alone then speaks.
+        compose.mainClock.advanceTimeByFrame()
+    }
+
+    @Test
+    fun `a tap on the end card's replay before it shows only lands the card, and replays nothing`() {
+        var replays = 0
+        deal(onReplay = { replays++ })
+        throwToTheEnd()
+        // Half a second after the throw (the replay rises at 0.8 s): a tap in the frames just after it, as the deck
+        // comes to rest, never reaches the button, gate or not, so it would prove nothing.
+        compose.mainClock.advanceTimeBy(AFTER_THROW_MS)
+        assertEquals(0f, clock.reveal(IntroSequence.End)(IntroKey.Replay))
+        compose.onNodeWithText(replayText()).performClick()
+        compose.mainClock.advanceTimeByFrame()
+        assertEquals(IntroClock.Phase.Settled, clock.phase(IntroSequence.End))
+        assertEquals(IntroSequence.End, spy.stopped.last())
+        assertEquals(0, replays)
+        // Landed, it shows: the next tap replays.
+        compose.onNodeWithText(replayText()).performClick()
+        compose.mainClock.advanceTimeByFrame()
+        assertEquals(1, replays)
+    }
+
+    @Test
+    fun `the end card's hidden replay replays nothing when clicked some other way, and does once it shows`() {
+        var replays = 0
+        deal(onReplay = { replays++ })
+        throwToTheEnd()
+        // Switch Access, Voice Access and a keyboard click through the semantics, past the touch gate.
+        assertEquals(0f, clock.reveal(IntroSequence.End)(IntroKey.Replay))
+        compose.onNodeWithText(replayText()).performSemanticsAction(SemanticsActions.OnClick)
+        compose.mainClock.advanceTimeByFrame()
+        assertEquals(0, replays)
+        var frames = 0
+        while (clock.reveal(IntroSequence.End)(IntroKey.Replay) == 0f) {
+            compose.mainClock.advanceTimeByFrame()
+            check(++frames < MAX_FRAMES) { "the replay never rose" }
+        }
+        compose.onNodeWithText(replayText()).performSemanticsAction(SemanticsActions.OnClick)
+        compose.mainClock.advanceTimeByFrame()
+        assertEquals(1, replays)
+    }
+
+    @Test
+    fun `a tap on the end card's replay as it rises replays, and still lands the card`() {
+        var replays = 0
+        deal(onReplay = { replays++ })
+        throwToTheEnd()
+        var frames = 0
+        while (clock.reveal(IntroSequence.End)(IntroKey.Replay) == 0f) {
+            compose.mainClock.advanceTimeByFrame()
+            check(++frames < MAX_FRAMES) { "the replay never rose" }
+        }
+        assertTrue(clock.isPlaying(IntroSequence.End))
+        compose.onNodeWithText(replayText()).performClick()
+        compose.mainClock.advanceTimeByFrame()
+        assertEquals(1, replays)
+        assertEquals(IntroClock.Phase.Settled, clock.phase(IntroSequence.End))
+        assertEquals(IntroSequence.End, spy.stopped.last())
+    }
+
+    private fun replayText() = ApplicationProvider.getApplicationContext<Application>().getString(R.string.path_wrap_replay_month)
+
     private companion object {
         const val DECK = "deck"
 
@@ -156,5 +265,13 @@ class MonthDeckPagerTest {
 
         /** Past the clock's lead, well inside the cover's garland. */
         const val FRAMES = 10
+
+        const val AFTER_THROW_MS = 500L
+
+        /** Points on the card's room, in dp, over the weeks card's columns. */
+        val POINTS = listOf(200 to 250, 320 to 350, 200 to 450)
+
+        /** Far past a throw's settle and the end card's replay beat (0.8 s at the sections' tempo). */
+        const val MAX_FRAMES = 600
     }
 }

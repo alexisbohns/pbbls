@@ -88,20 +88,5 @@ internal object MonthSections {
         return if (dayView == DayView.CIRCLE && named) copy.clockwiseHint() else null
     }
 
-    /**
-     * Whether [section] leads the insights head among the sections that show: the deck deals only those
-     * (iOS `MonthDeck.leadsInsights` over the dealt cards). The plain page keeps iOS's own rule, over the
-     * listed sections, as [MonthSectionContent] defaults to.
-     */
-    fun leadsInsights(
-        section: MonthSection,
-        wrap: MonthWrap,
-        lookups: WrapLookups,
-    ): Boolean =
-        section ==
-            wrap.sections.firstOrNull {
-                (it == MonthSection.TONE || it == MonthSection.HOURS) && isShown(it, wrap, lookups)
-            }
-
     fun insightsHead(copy: WrapCopy) = MonthHead(copy.insights(), copy.insightsHint())
 }

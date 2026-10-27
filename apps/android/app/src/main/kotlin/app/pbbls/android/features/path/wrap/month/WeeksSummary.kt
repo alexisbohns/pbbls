@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.wrap.MonthSection
@@ -17,6 +18,9 @@ import app.pbbls.android.core.ui.SoulMark
 import app.pbbls.android.core.ui.marks.CairnMark
 import app.pbbls.android.core.ui.marks.CairnState
 import app.pbbls.android.features.path.wrap.WrapLookups
+import app.pbbls.android.features.path.wrap.intro.IntroBeat
+import app.pbbls.android.features.path.wrap.intro.IntroScore
+import app.pbbls.android.features.path.wrap.intro.weekColumns
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import java.time.LocalDate
 
@@ -27,6 +31,8 @@ private const val GLYPHS = 5
  * The month by week (#1207, D6; #1242, iOS D12): every ISO week cut to the month's days, its cairn,
  * its range and one line, and its souls; a tap focuses that week in the strip. A week without a
  * pebble is muted: a dotted stone where its cairn would stand, "No pebble.", no souls, no tap.
+ * On a card ([room], the card's room under its title band) a column per week instead
+ * ([WeeksColumns], D17), which plays the weeks' intro; on the page, [room] is null and the rows stay.
  */
 @Composable
 internal fun WeeksSummary(
@@ -34,44 +40,48 @@ internal fun WeeksSummary(
     lookups: WrapLookups,
     onWeek: (LocalDate) -> Unit,
     onCard: Boolean = false,
+    room: Dp? = null,
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
     val copy = rememberWrapCopy()
     if (!MonthSections.isShown(MonthSection.WEEKS, wrap, lookups)) return
-    val weeks = WeeksSummary.weeks(wrap)
     Column {
         if (!onCard) MonthSectionHead(MonthSections.head(MonthSection.WEEKS, wrap, lookups, copy))
-        Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
-            weeks.forEach { week ->
-                val range = copy.range(wrap.month, week.from, week.to)
-                if (week.pebbles == 0) {
-                    val line = copy.emptyWeek()
-                    MarkRow(
-                        title = line,
-                        titleStyle = type.mouthLine,
-                        titleColor = colors.ink3,
-                        subtitle = range,
-                        description = "$range, $line",
-                        // The place a stone would stand, dotted, as the strip draws a week's next stone.
-                        leading = { CairnMark(emptyList(), CairnState.LIVE, colors.ink3) },
-                    )
-                } else {
-                    val line = copy.line(week.pebbles, week.soulIds.size, live = false, hasMoments = true)
-                    val souls = week.soulIds.mapNotNull(lookups.soul)
-                    MarkRow(
-                        title = line,
-                        titleStyle = type.mouthLine,
-                        subtitle = range,
-                        description = "$range, $line",
-                        leading = { CairnMark(week.days, CairnState.SETTLED, colors.ink2) },
-                        trailing = {
-                            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                souls.take(GLYPHS).forEach { SoulMark(it.glyph, colors.ink2, Modifier.size(GLYPH)) }
-                            }
-                        },
-                        onClick = { onWeek(week.weekStart) },
-                    )
+        if (room != null) {
+            WeeksColumns(wrap, lookups, room, onWeek)
+        } else {
+            Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
+                WeeksSummary.weeks(wrap).forEach { week ->
+                    val range = copy.range(wrap.month, week.from, week.to)
+                    if (week.pebbles == 0) {
+                        val line = copy.emptyWeek()
+                        MarkRow(
+                            title = line,
+                            titleStyle = type.mouthLine,
+                            titleColor = colors.ink3,
+                            subtitle = range,
+                            description = "$range, $line",
+                            // The place a stone would stand, dotted, as the strip draws a week's next stone.
+                            leading = { CairnMark(emptyList(), CairnState.LIVE, colors.ink3) },
+                        )
+                    } else {
+                        val line = copy.line(week.pebbles, week.soulIds.size, live = false, hasMoments = true)
+                        val souls = week.soulIds.mapNotNull(lookups.soul)
+                        MarkRow(
+                            title = line,
+                            titleStyle = type.mouthLine,
+                            subtitle = range,
+                            description = "$range, $line",
+                            leading = { CairnMark(week.days, CairnState.SETTLED, colors.ink2) },
+                            trailing = {
+                                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    souls.take(GLYPHS).forEach { SoulMark(it.glyph, colors.ink2, Modifier.size(GLYPH)) }
+                                }
+                            },
+                            onClick = { onWeek(week.weekStart) },
+                        )
+                    }
                 }
             }
         }
@@ -85,4 +95,7 @@ internal object WeeksSummary {
 
     /** Drawn when a week of the month has pebbles. */
     fun isShown(wrap: MonthWrap): Boolean = weeks(wrap).any { it.pebbles > 0 }
+
+    /** The weeks' intro (D17): played only on a card, one column at a time. */
+    fun introBeats(wrap: MonthWrap): List<IntroBeat> = IntroScore.weekColumns(WeekColumn.columns(wrap).map { it.shape })
 }

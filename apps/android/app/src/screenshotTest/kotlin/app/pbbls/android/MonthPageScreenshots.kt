@@ -29,6 +29,7 @@ private fun OctoberPage() {
                 onDayView = {},
                 onWeek = {},
                 onOpen = {},
+                focused = true,
                 zone = SpineFixtureWeek.zone,
             )
         }

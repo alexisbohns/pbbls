@@ -34,7 +34,7 @@ import app.pbbls.android.features.path.wrap.intro.IntroClock
 import app.pbbls.android.features.path.wrap.intro.IntroHost
 import app.pbbls.android.features.path.wrap.intro.IntroScore
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
-import app.pbbls.android.features.path.wrap.intro.head
+import app.pbbls.android.features.path.wrap.intro.end
 import app.pbbls.android.features.path.wrap.intro.onAnyTap
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import java.time.LocalDate
@@ -53,8 +53,8 @@ internal object MonthDeck {
     }
 
     /**
-     * The first tone or hours card carries the insights head. Over the dealt [cards], so it agrees with
-     * [MonthSections.leadsInsights], which reads the same condition off the wrap.
+     * The first tone or hours card carries the insights head (iOS `MonthDeck.leadsInsights`). Over the dealt
+     * [cards]: a figure with nothing to show deals no card, and the head moves to the other.
      */
     fun leadsInsights(
         card: IntroSequence,
@@ -84,10 +84,10 @@ internal object MonthDeck {
         }
 
     /**
-     * What a card plays. The cover its garland; the persons their rows in turn; the gem its count, then its
-     * families; the tone its sweep and the hours their stones, under the insights head when they lead it;
-     * another section, for now, its arrival alone (its entrance lands in the parts after this one); the end
-     * card nothing yet.
+     * What a card plays. The cover its garland; the weeks their columns, one at a time; the milestones their
+     * stones stamped, each with its words; the persons their rows in turn; the domains their gauges filling;
+     * the gem its count, then its families; the tone its sweep and the hours their stones, under the insights
+     * head when they lead it; the end card its arrival, then its replay rising.
      */
     fun beats(
         card: IntroSequence,
@@ -97,12 +97,17 @@ internal object MonthDeck {
     ): List<IntroBeat> =
         when (card) {
             IntroSequence.Cover -> coverBeats(wrap, lookups)
-            IntroSequence.Section(MonthSection.PERSONS) -> PersonsSection.introBeats(wrap, lookups)
-            IntroSequence.Section(MonthSection.GEM) -> EmotionGem.introBeats(wrap)
-            IntroSequence.Section(MonthSection.TONE) -> ToneFigure.introBeats(wrap, leadsInsights)
-            IntroSequence.Section(MonthSection.HOURS) -> HoursFigure.introBeats(wrap, lookups, leadsInsights)
-            is IntroSequence.Section -> IntroScore.head(hasLead = false, insights = leadsInsights)
-            IntroSequence.End -> emptyList()
+            is IntroSequence.Section ->
+                when (card.section) {
+                    MonthSection.WEEKS -> WeeksSummary.introBeats(wrap)
+                    MonthSection.MILESTONES -> MilestonesSection.introBeats(wrap, lookups)
+                    MonthSection.PERSONS -> PersonsSection.introBeats(wrap, lookups)
+                    MonthSection.DOMAINS -> DomainsSection.introBeats(wrap, lookups)
+                    MonthSection.GEM -> EmotionGem.introBeats(wrap)
+                    MonthSection.TONE -> ToneFigure.introBeats(wrap, leadsInsights)
+                    MonthSection.HOURS -> HoursFigure.introBeats(wrap, lookups, leadsInsights)
+                }
+            IntroSequence.End -> IntroScore.end()
         }
 }
 
@@ -115,7 +120,7 @@ internal object MonthDeck {
  * swipes. A tap anywhere skips, and still does its job.
  *
  * The top card is read off the pager's settled page, never driven into it (iOS: never a `scrollPosition`
- * binding). The end card has no content until the replay lands, so it is not dealt yet.
+ * binding). The end card's [onReplay] plays the month again from the cover (D14): the page deals a new deck.
  */
 @Composable
 internal fun MonthDeckPager(
@@ -128,10 +133,11 @@ internal fun MonthDeckPager(
     onWeek: (LocalDate) -> Unit,
     onOpen: (PathMoment) -> Unit,
     onMore: (MonthSection) -> Unit,
+    onReplay: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val copy = rememberWrapCopy()
-    val cards = remember(wrap, lookups) { MonthDeck.cards(wrap, lookups).filter { it != IntroSequence.End } }
+    val cards = remember(wrap, lookups) { MonthDeck.cards(wrap, lookups) }
     if (cards.isEmpty()) return
     val pager = rememberPagerState { cards.size }
     val month = remember(wrap.month, copy) { "${copy.monthName(wrap.month)} ${wrap.month.year}" }
@@ -208,7 +214,7 @@ internal fun MonthDeckPager(
                                 onCard = true,
                                 room = room,
                             )
-                        IntroSequence.End -> Unit
+                        IntroSequence.End -> MonthDeckEnd(wrap, lookups, onReplay)
                     }
                 }
             }

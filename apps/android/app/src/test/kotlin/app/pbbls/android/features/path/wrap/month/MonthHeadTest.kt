@@ -6,7 +6,6 @@ import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.model.wrap.HourMark
 import app.pbbls.android.core.model.wrap.MonthSection
-import app.pbbls.android.core.model.wrap.Tone
 import app.pbbls.android.core.model.wrap.WeekTile
 import app.pbbls.android.features.path.wrap.copy.WrapCopy
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
@@ -114,12 +113,5 @@ class MonthHeadTest {
         // The tone leads the insights: its card is titled by their head, the hours by their own.
         assertEquals(MonthSections.insightsHead(copy), head(IntroSequence.Section(MonthSection.TONE)))
         assertEquals(MonthSections.head(MonthSection.HOURS, wrap, lookups, copy), head(IntroSequence.Section(MonthSection.HOURS)))
-    }
-
-    @Test
-    fun `the deck's insights head goes to the first of tone and hours that shows`() {
-        val noTone = wrap.copy(tone = Tone(emptyList(), wrap.tone!!.verdict, null, null))
-        assertTrue(MonthSections.leadsInsights(MonthSection.HOURS, noTone, lookups))
-        assertFalse(MonthSections.leadsInsights(MonthSection.TONE, noTone, lookups))
     }
 }

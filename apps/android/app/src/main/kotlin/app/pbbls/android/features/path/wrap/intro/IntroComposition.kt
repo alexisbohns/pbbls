@@ -12,6 +12,12 @@ data class IntroPrimitive(
     val pauseMs: Int,
 )
 
+/** Primitives played as one composition from [atMs], the scored time of the first, in ms into its sequence. */
+data class IntroSegment(
+    val atMs: Double,
+    val primitives: List<IntroPrimitive>,
+)
+
 /** Tier C (D18): a sequence's beats as one composition's primitives. Pure, so the timing is tested. */
 object IntroComposition {
     /** A missing LOW_TICK plays as a softer TICK; a missing CLICK as a firmer one. */
@@ -43,12 +49,47 @@ object IntroComposition {
         supported: Set<IntroPrimitiveKind>,
         durations: Map<IntroPrimitiveKind, Int>,
         leadMs: Int,
-    ): List<IntroPrimitive> {
-        data class Placed(
-            val atMs: Double,
-            val kind: IntroPrimitiveKind,
-            val scale: Float,
-        )
+    ): List<IntroPrimitive> = paused(placed(beats, supported, durations), durations, leadMs)
+
+    /**
+     * [of]'s primitives cut into segments, each to play as its own composition from its scored time: a
+     * swell's train plays shorter or longer than its primitives' declared lengths, so a pause counted from
+     * the train's declared end drifts, and a segment re-anchors what follows. A new segment starts at the
+     * first primitive after a swell's train. The first segment is [of]'s head, [leadMs] included; a later
+     * one's first pause is 0 and the rest are [of]'s. A score with no swell is one segment, [of] whole.
+     */
+    fun segments(
+        beats: List<IntroBeat>,
+        supported: Set<IntroPrimitiveKind>,
+        durations: Map<IntroPrimitiveKind, Int>,
+        leadMs: Int,
+    ): List<IntroSegment> {
+        val placed = placed(beats, supported, durations)
+        val primitives = paused(placed, durations, leadMs)
+        val starts =
+            placed.indices.filter { i ->
+                i == 0 || placed[i - 1].swell.let { train -> train != null && placed[i].swell != train }
+            }
+        return starts.mapIndexed { n, from ->
+            val run = primitives.subList(from, starts.getOrElse(n + 1) { primitives.size })
+            IntroSegment(placed[from].atMs, if (n == 0) run.toList() else listOf(run.first().copy(pauseMs = 0)) + run.drop(1))
+        }
+    }
+
+    /** A primitive at its scored time, and the index of the swell whose train it belongs to (null for a tick). */
+    private data class Placed(
+        val atMs: Double,
+        val kind: IntroPrimitiveKind,
+        val scale: Float,
+        val swell: Int?,
+    )
+
+    /** [beats]' ticks and swells' trains at their scored times, in time order. */
+    private fun placed(
+        beats: List<IntroBeat>,
+        supported: Set<IntroPrimitiveKind>,
+        durations: Map<IntroPrimitiveKind, Int>,
+    ): List<Placed> {
         val ticks =
             IntroHaptics.events(beats).map { event ->
                 val wanted = kindOf(event.tick)
@@ -58,10 +99,10 @@ object IntroComposition {
                         wanted == IntroPrimitiveKind.LOW_TICK -> IntroPrimitiveKind.TICK to LOW_TICK_AS_TICK
                         else -> IntroPrimitiveKind.TICK to CLICK_AS_TICK
                     }
-                Placed(event.at * 1000, kind, (event.tick.intensity * factor).coerceIn(0f, 1f))
+                Placed(event.at * 1000, kind, (event.tick.intensity * factor).coerceIn(0f, 1f), swell = null)
             }
         val trains =
-            IntroHaptics.swells(beats).flatMap { swell ->
+            IntroHaptics.swells(beats).flatMapIndexed { index, swell ->
                 val (kind, factor) =
                     if (IntroPrimitiveKind.LOW_TICK in supported) {
                         IntroPrimitiveKind.LOW_TICK to 1f
@@ -74,11 +115,20 @@ object IntroComposition {
                     val f = if (count > 1) k / (count - 1f) else 1f
                     val scale = swell.swell.from + (swell.swell.to - swell.swell.from) * f
                     // A primitive's scale outside 0…1 throws as the composition is built.
-                    Placed(swell.at * 1000 + k * step, kind, (scale * factor).coerceIn(0f, 1f))
+                    Placed(swell.at * 1000 + k * step, kind, (scale * factor).coerceIn(0f, 1f), index)
                 }
             }
+        return (ticks + trains).sortedBy { it.atMs }
+    }
+
+    /** Each of [placed] paused from the end of the one before, by [durations], the whole delayed by [leadMs]. */
+    private fun paused(
+        placed: List<Placed>,
+        durations: Map<IntroPrimitiveKind, Int>,
+        leadMs: Int,
+    ): List<IntroPrimitive> {
         var end = 0.0
-        return (ticks + trains).sortedBy { it.atMs }.map { p ->
+        return placed.map { p ->
             val pause = (p.atMs + leadMs - end).roundToInt().coerceAtLeast(0)
             end += pause + (durations[p.kind] ?: 0)
             IntroPrimitive(p.kind, p.scale, pause)

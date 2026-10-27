@@ -552,9 +552,11 @@ class PathViewModelTest {
     fun `a failed wrap keeps the last good one, and the next focus retries`() =
         runTest {
             val current = moment("now")
+            // Another week to focus and come back from: a focus only moves to a page the Path holds.
+            val old = moment("old", happenedAt = now.minusWeeks(9))
             val wraps = FakePathWrapService()
             wraps.weeks[weekOf(current)] = FakePathWrapService.emptyWeek(weekOf(current)).copy(pebbles = 4)
-            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(current)), wraps = wraps)
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(current, old)), wraps = wraps)
             advanceUntilIdle()
 
             wraps.failNextWeek = IOException("offline")
@@ -564,10 +566,29 @@ class PathViewModelTest {
             assertTrue(failed is WrapState.Failed)
             assertEquals(4, failed.shown?.pebbles)
 
-            viewModel.onFocus(PathPage.Week(weekOf(current).minusWeeks(9)))
+            viewModel.onFocus(PathPage.Week(weekOf(old)))
             viewModel.onFocus(PathPage.Week(weekOf(current)))
             advanceUntilIdle()
             assertTrue((viewModel.uiState.value as PathUiState.Content).weekWraps.getValue(weekOf(current)) is WrapState.Ready)
+        }
+
+    @Test
+    fun `a focus on a week the path doesn't hold leaves the focus where it was`() =
+        runTest {
+            val current = moment("now")
+            val wraps = FakePathWrapService()
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(current)), wraps = wraps)
+            advanceUntilIdle()
+            val before = viewModel.uiState.value as PathUiState.Content
+            // An empty past week is a spacer in the strip, not a page: a month card's column still names it.
+            val absent = PathPage.Week(weekOf(current).minusWeeks(9))
+            assertFalse(absent in before.pages)
+
+            viewModel.onFocus(absent)
+            advanceUntilIdle()
+
+            assertEquals(before.focus, (viewModel.uiState.value as PathUiState.Content).focus)
+            assertFalse("no wrap is fetched for it", absent.weekStart in wraps.weekCalls)
         }
 
     @Test

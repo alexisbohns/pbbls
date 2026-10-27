@@ -26,6 +26,7 @@ import app.pbbls.android.features.path.wrap.WrapLookups
 import app.pbbls.android.features.path.wrap.intro.IntroBeat
 import app.pbbls.android.features.path.wrap.intro.IntroKey
 import app.pbbls.android.features.path.wrap.intro.IntroLanding
+import app.pbbls.android.features.path.wrap.intro.IntroReveal
 import app.pbbls.android.features.path.wrap.intro.IntroScore
 import app.pbbls.android.features.path.wrap.intro.currentIntroReveal
 import app.pbbls.android.features.path.wrap.intro.introReveal
@@ -63,35 +64,7 @@ internal fun MonthCover(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(GAP),
     ) {
-        Garland(wrap, lookups, reveal = reveal) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    copy.monthKicker(wrap.month),
-                    style = type.sectionLabel,
-                    color = colors.ink2,
-                    modifier = Modifier.introReveal(reveal, IntroKey.Kicker),
-                )
-                Text(
-                    copy.monthName(wrap.month),
-                    style = type.monthName,
-                    color = colors.ink,
-                    modifier = Modifier.introReveal(reveal, IntroKey.MonthName).semantics { heading() },
-                )
-                Text(
-                    wrap.month.year.toString(),
-                    style = type.contentsTime,
-                    color = colors.ink2,
-                    modifier = Modifier.introReveal(reveal, IntroKey.Year),
-                )
-                if (souls.isNotEmpty()) {
-                    Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                        souls.take(SOULS_IN_RING).forEachIndexed { i, soul ->
-                            SoulMark(soul.glyph, colors.ink, Modifier.size(SOUL).introReveal(reveal, IntroKey.Soul(i), IntroLanding.POP))
-                        }
-                    }
-                }
-            }
-        }
+        MonthCoverGarland(wrap, lookups, reveal)
         Text(
             copy.line(wrap.pebbles, wrap.people, live = false, hasMoments = true),
             style = type.summary,
@@ -106,6 +79,53 @@ internal fun MonthCover(
             }
         }
         Colophon(wrap, lookups, Modifier.introReveal(reveal, IntroKey.Colophon))
+    }
+}
+
+/**
+ * The cover's garland with the month inside it (#1207 D7; iOS `MonthCoverGarland`): its place in the year,
+ * its name, the year and the souls' glyphs. The cover draws it, and so does the deck's end card, settled
+ * (#1242 D14). [reveal] lands each part in the cover's intro; settled, the default, it is the garland as ever.
+ */
+@Composable
+internal fun MonthCoverGarland(
+    wrap: MonthWrap,
+    lookups: WrapLookups,
+    reveal: IntroReveal = IntroReveal.settled,
+) {
+    val colors = PebblesTheme.spine.colors
+    val type = PebblesTheme.spine.type
+    val copy = rememberWrapCopy()
+    val cover = wrap.cover ?: return
+    val souls = cover.soulsInOrder.mapNotNull(lookups.soul)
+    Garland(wrap, lookups, reveal = reveal) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                copy.monthKicker(wrap.month),
+                style = type.sectionLabel,
+                color = colors.ink2,
+                modifier = Modifier.introReveal(reveal, IntroKey.Kicker),
+            )
+            Text(
+                copy.monthName(wrap.month),
+                style = type.monthName,
+                color = colors.ink,
+                modifier = Modifier.introReveal(reveal, IntroKey.MonthName).semantics { heading() },
+            )
+            Text(
+                wrap.month.year.toString(),
+                style = type.contentsTime,
+                color = colors.ink2,
+                modifier = Modifier.introReveal(reveal, IntroKey.Year),
+            )
+            if (souls.isNotEmpty()) {
+                Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    souls.take(SOULS_IN_RING).forEachIndexed { i, soul ->
+                        SoulMark(soul.glyph, colors.ink, Modifier.size(SOUL).introReveal(reveal, IntroKey.Soul(i), IntroLanding.POP))
+                    }
+                }
+            }
+        }
     }
 }
 
