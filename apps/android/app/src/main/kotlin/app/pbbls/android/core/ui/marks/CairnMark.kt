@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.RevealMotion
 import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.core.model.wrap.DayWeight
@@ -33,6 +34,10 @@ enum class CairnState { SETTLED, LIVE }
  * A week as a cairn (#1207, D1): one flat stone per day that holds a moment, widest at the base,
  * stacked from the bottom of a 30 × 42 dp box, in one [color] (the caller inks the focused week).
  * Decorative: the strip item says the week in words.
+ *
+ * [built] is each stone's progress from the bottom, 0…1 (the month intro, #1242 D10; iOS `built`): a stone
+ * at 0 is not drawn yet, one below 1 pops onto the stack from its own foot. The default, every stone built,
+ * draws the cairn as ever. Read in the draw phase.
  */
 @Composable
 fun CairnMark(
@@ -40,6 +45,7 @@ fun CairnMark(
     state: CairnState,
     color: Color,
     modifier: Modifier = Modifier,
+    built: (stone: Int) -> Float = { 1f },
 ) {
     val outline = rememberStoneOutline(ValenceSizeGroup.MEDIUM, ValencePolarity.NEUTRAL)
     val box = StoneGeometry.outlineBox(ValenceSizeGroup.MEDIUM)
@@ -53,7 +59,18 @@ fun CairnMark(
         widths.forEachIndexed { index, w ->
             val h = CairnGeometry.height(w, aspect) * squash * density
             if (index > 0) bottom += h * CairnGeometry.OVERLAP
-            drawFlatStone(outline.path, box.width, box.height, w * density, h, bottom - h, color, stroke = null)
+            val landed = built(index)
+            if (landed >= 1f) {
+                drawFlatStone(outline.path, box.width, box.height, w * density, h, bottom - h, color, stroke = null)
+            } else if (landed > 0f) {
+                // Popping onto the stack from its own foot.
+                val p = landed.toDouble()
+                val pop = RevealMotion.popScale(p).toFloat()
+                val faded = color.copy(alpha = color.alpha * RevealMotion.popOpacity(p).toFloat())
+                withTransform({ scale(pop, pop, Offset(size.width / 2, bottom)) }) {
+                    drawFlatStone(outline.path, box.width, box.height, w * density, h, bottom - h, faded, stroke = null)
+                }
+            }
             bottom -= h
         }
         if (live) {

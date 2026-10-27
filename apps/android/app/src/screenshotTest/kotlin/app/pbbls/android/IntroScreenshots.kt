@@ -154,7 +154,10 @@ fun MonthDeckCover() {
     }
 }
 
-/** The deck's weeks card: its head in the title band, the weeks under it, the stepper on its second segment. */
+/**
+ * The deck's weeks card: its head in the title band, the weeks under it as a calendar of columns in the card's
+ * room (D17), the stepper on its second segment.
+ */
 @PreviewTest
 @Preview(showBackground = true, widthDp = 390, heightDp = 760)
 @Composable
@@ -166,7 +169,7 @@ fun MonthDeckSection() {
             month = "October 2026",
             step = MonthDeckStep.of(IntroSequence.Section(MonthSection.WEEKS), deckCards),
             head = MonthSections.head(MonthSection.WEEKS, wrap, lookups, rememberWrapCopy()),
-        ) {
+        ) { room ->
             MonthSectionContent(
                 MonthSection.WEEKS,
                 wrap,
@@ -178,6 +181,7 @@ fun MonthDeckSection() {
                 onOpen = {},
                 onMore = {},
                 onCard = true,
+                room = room,
             )
         }
     }

@@ -208,6 +208,9 @@ class WrapCopy(
         to: Int,
     ): String = resources.getString(R.string.path_month_range, from + 1, to + 1, monthShort(month))
 
+    /** A week column's month under its Monday's number (#1242, iOS D17): "Sep", "Oct", the abbreviation the range prints. */
+    fun weekColumnMonth(day: LocalDate): String = monthShort(YearMonth.from(day))
+
     /** "Mon 5 Oct". */
     fun dateline(date: LocalDate): String =
         "${date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale).trimEnd('.')} ${date.dayOfMonth} ${monthShort(YearMonth.from(date))}"

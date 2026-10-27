@@ -18,17 +18,23 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.data.DayView
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.wrap.MonthSection
+import app.pbbls.android.features.path.wrap.copy.WrapCopy
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.week.rememberWrapCopy
 import app.pbbls.android.testing.PIXEL_TEST_SDK
@@ -42,6 +48,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import java.time.LocalDate
 
 /**
  * The galley card's room (#1242 D21; iOS `MonthCardFill` and the card's fit): content that asks for the room
@@ -217,6 +224,51 @@ class MonthDeckCardTest {
                 .bottom.value,
             0.5f,
         )
+    }
+
+    @Test
+    fun `on a card the weeks stand as a column each, one button saying its week, a tap focusing it`() {
+        var focused: LocalDate? = null
+        var copy: WrapCopy? = null
+        show(head = MonthHead("Weeks", null)) { r ->
+            copy = rememberWrapCopy()
+            MonthSectionContent(
+                MonthSection.WEEKS,
+                wrap,
+                lookups,
+                DayView.CIRCLE,
+                SpineFixtureWeek.zone,
+                aspect = null,
+                onWeek = { focused = it },
+                onOpen = {},
+                onMore = {},
+                onCard = true,
+                room = r,
+            )
+        }
+        val words = copy!!
+        val weeks = WeeksSummary.weeks(wrap)
+        val descriptions =
+            weeks.map { week ->
+                val line =
+                    if (week.pebbles ==
+                        0
+                    ) {
+                        words.emptyWeek()
+                    } else {
+                        words.line(week.pebbles, week.soulIds.size, live = false, hasMoments = true)
+                    }
+                "${words.range(wrap.month, week.from, week.to)}, $line"
+            }
+        descriptions.forEach { description ->
+            val column = compose.onNodeWithContentDescription(description)
+            column.assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+            // A column, not a row: the weeks share the card's width.
+            val bounds = column.getBoundsInRoot()
+            assertTrue(description, bounds.right - bounds.left < HOST_WIDTH / weeks.size)
+        }
+        compose.onNodeWithContentDescription(descriptions[1]).performClick()
+        assertEquals(weeks[1].weekStart, focused)
     }
 
     private companion object {

@@ -70,6 +70,8 @@ class WrapCopyTest {
         assertEquals("the persons, in detail", copy.morePersons(4))
         assertEquals("5–11 Oct", copy.range(october, 4, 10))
         assertEquals("Mon 5 Oct", copy.dateline(java.time.LocalDate.of(2026, 10, 5)))
+        // A week column's month under its Monday: the range's abbreviation, the Monday's own month.
+        assertEquals("Sep", copy.weekColumnMonth(java.time.LocalDate.of(2026, 9, 28)))
         assertEquals("new since September", copy.newSince(october.minusMonths(1)))
         assertEquals(
             "Mara five times, Nadia once. Inès and Jules new since September.",
