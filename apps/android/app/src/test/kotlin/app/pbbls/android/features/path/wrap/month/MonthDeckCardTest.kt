@@ -22,8 +22,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -250,23 +252,25 @@ class MonthDeckCardTest {
         val weeks = WeeksSummary.weeks(wrap)
         val descriptions =
             weeks.map { week ->
-                val line =
-                    if (week.pebbles ==
-                        0
-                    ) {
-                        words.emptyWeek()
-                    } else {
-                        words.line(week.pebbles, week.soulIds.size, live = false, hasMoments = true)
-                    }
+                val empty = week.pebbles == 0
+                val line = if (empty) words.emptyWeek() else words.line(week.pebbles, week.soulIds.size, live = false, hasMoments = true)
                 "${words.range(wrap.month, week.from, week.to)}, $line"
             }
-        descriptions.forEach { description ->
-            val column = compose.onNodeWithContentDescription(description)
-            column.assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
-            // A column, not a row: the weeks share the card's width.
-            val bounds = column.getBoundsInRoot()
-            assertTrue(description, bounds.right - bounds.left < HOST_WIDTH / weeks.size)
-        }
+        val widths =
+            descriptions.map { description ->
+                val column = compose.onNodeWithContentDescription(description)
+                column.assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+                val bounds = column.getBoundsInRoot()
+                bounds.right - bounds.left
+            }
+        // Columns, not rows: the weeks share the card's width, each as wide as the next.
+        assertTrue("the columns overrun the card: $widths", widths.fold(0.dp) { sum, w -> sum + w } <= HOST_WIDTH)
+        assertTrue("the columns differ: $widths", widths.max() - widths.min() <= 1.dp)
+        // A column is one node: its Monday's number and month speak through it, the weekdays' letters not at all
+        // (the merged tree, as TalkBack reads it; the unmerged one keeps a cleared node's children).
+        compose.onAllNodesWithText("28").assertCountEquals(0)
+        compose.onAllNodesWithText(words.weekColumnMonth(weeks.first().weekStart)).assertCountEquals(0)
+        compose.onAllNodesWithText("m").assertCountEquals(0)
         compose.onNodeWithContentDescription(descriptions[1]).performClick()
         assertEquals(weeks[1].weekStart, focused)
     }

@@ -46,43 +46,42 @@ internal fun WeeksSummary(
     val type = PebblesTheme.spine.type
     val copy = rememberWrapCopy()
     if (!MonthSections.isShown(MonthSection.WEEKS, wrap, lookups)) return
-    val weeks = WeeksSummary.weeks(wrap)
     Column {
         if (!onCard) MonthSectionHead(MonthSections.head(MonthSection.WEEKS, wrap, lookups, copy))
         if (room != null) {
             WeeksColumns(wrap, lookups, room, onWeek)
-            return@Column
-        }
-        Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
-            weeks.forEach { week ->
-                val range = copy.range(wrap.month, week.from, week.to)
-                if (week.pebbles == 0) {
-                    val line = copy.emptyWeek()
-                    MarkRow(
-                        title = line,
-                        titleStyle = type.mouthLine,
-                        titleColor = colors.ink3,
-                        subtitle = range,
-                        description = "$range, $line",
-                        // The place a stone would stand, dotted, as the strip draws a week's next stone.
-                        leading = { CairnMark(emptyList(), CairnState.LIVE, colors.ink3) },
-                    )
-                } else {
-                    val line = copy.line(week.pebbles, week.soulIds.size, live = false, hasMoments = true)
-                    val souls = week.soulIds.mapNotNull(lookups.soul)
-                    MarkRow(
-                        title = line,
-                        titleStyle = type.mouthLine,
-                        subtitle = range,
-                        description = "$range, $line",
-                        leading = { CairnMark(week.days, CairnState.SETTLED, colors.ink2) },
-                        trailing = {
-                            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                souls.take(GLYPHS).forEach { SoulMark(it.glyph, colors.ink2, Modifier.size(GLYPH)) }
-                            }
-                        },
-                        onClick = { onWeek(week.weekStart) },
-                    )
+        } else {
+            Column(Modifier.padding(horizontal = SECTION_PAD_X)) {
+                WeeksSummary.weeks(wrap).forEach { week ->
+                    val range = copy.range(wrap.month, week.from, week.to)
+                    if (week.pebbles == 0) {
+                        val line = copy.emptyWeek()
+                        MarkRow(
+                            title = line,
+                            titleStyle = type.mouthLine,
+                            titleColor = colors.ink3,
+                            subtitle = range,
+                            description = "$range, $line",
+                            // The place a stone would stand, dotted, as the strip draws a week's next stone.
+                            leading = { CairnMark(emptyList(), CairnState.LIVE, colors.ink3) },
+                        )
+                    } else {
+                        val line = copy.line(week.pebbles, week.soulIds.size, live = false, hasMoments = true)
+                        val souls = week.soulIds.mapNotNull(lookups.soul)
+                        MarkRow(
+                            title = line,
+                            titleStyle = type.mouthLine,
+                            subtitle = range,
+                            description = "$range, $line",
+                            leading = { CairnMark(week.days, CairnState.SETTLED, colors.ink2) },
+                            trailing = {
+                                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    souls.take(GLYPHS).forEach { SoulMark(it.glyph, colors.ink2, Modifier.size(GLYPH)) }
+                                }
+                            },
+                            onClick = { onWeek(week.weekStart) },
+                        )
+                    }
                 }
             }
         }

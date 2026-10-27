@@ -175,8 +175,8 @@ private fun WeekColumnView(
 
 /**
  * The Monday's number over its month's abbreviation, never past the default text size (iOS caps it at `.large`).
- * It lands on its week's `Words` as two lines, not as the label's box: they stand past it, and a fading layer
- * is clipped to its own bounds.
+ * It lands on its week's `Words` on the lines' own column, not the label's box: they stand past it, and a fading
+ * layer clips to its bounds.
  */
 @Composable
 private fun ColumnDate(
