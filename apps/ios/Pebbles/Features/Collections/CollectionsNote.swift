@@ -18,7 +18,6 @@ struct CollectionsNote: View {
                 .accessibilityAddTraits(.isHeader)
             Text(verbatim: CollectionsNoteCopy.sentence)
                 .spineType(.summary)
-                .italic()
                 .foregroundStyle(Color.pebbles.onSurface)
             step(1, caption: CollectionsNoteCopy.step1) { seals }
             step(2, caption: CollectionsNoteCopy.step2) { modes }
@@ -58,13 +57,13 @@ struct CollectionsNote: View {
                     .accessibilityHidden(true)
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     /// `.summary` is the Spine's italic line.
     private func summary(_ text: String) -> some View {
         Text(verbatim: text)
             .spineType(.summary)
-            .italic()
             .foregroundStyle(Color.pebbles.onSurfaceVariant)
     }
 
@@ -113,14 +112,14 @@ struct CollectionsFootnote: View {
         HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
             Text(verbatim: CollectionsNoteCopy.footnote)
                 .spineType(.summary)
-                .italic()
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
                     .font(.footnote.weight(.medium))
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                    .padding(Spacing.xs)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel(CollectionsNoteCopy.footnoteDismiss)
