@@ -46,7 +46,7 @@ import java.util.Locale
  *
  * [palette] is a parameter (not a service read) so screenshot previews can
  * drive the row. The thumbnail is the outline silhouette for the pebble's
- * valence; a null name reads "Untitled" (R3). [haptics] is Pebbles' haptics
+ * valence; a null name reads "Untitled" (R3). [hapticsOn] is Pebbles' haptics
  * switch (#1242 D23), from the host's ViewModel: off, the long press opens the
  * menu without its buzz (iOS `pebblesContextMenu`).
  */
@@ -57,7 +57,7 @@ fun PebbleRow(
     palette: EmotionPalette?,
     onTap: () -> Unit,
     onDelete: () -> Unit,
-    haptics: Boolean,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -76,7 +76,7 @@ fun PebbleRow(
                 Modifier
                     .fillMaxWidth()
                     .clip(MaterialTheme.shapes.medium)
-                    .combinedClickable(onClick = onTap, onLongClick = { menuExpanded = true }, hapticFeedbackEnabled = haptics)
+                    .combinedClickable(onClick = onTap, onLongClick = { menuExpanded = true }, hapticFeedbackEnabled = hapticsOn)
                     .padding(vertical = 8.dp, horizontal = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,

@@ -26,7 +26,9 @@ import java.time.YearMonth
  * card's own vibration stops and nothing it still held fires, even once the switch is back on.
  *
  * On Robolectric's vibrator, which records the last composition it was handed; [ShadowVibrator.reset]
- * clears that record, so an empty one after a frame means the frame played nothing.
+ * clears that record, so an empty one after a frame means the frame played nothing. It also clears the
+ * shadow's supported primitives and their durations, which is harmless only because [IntroVibrator] reads
+ * both once, at construction, before any reset.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class)
@@ -60,8 +62,11 @@ class IntroVibratorSwitchTest {
             )
         }
 
-    /** A card whose score sounds well past the test: its vibration is still playing when the switch flips. */
-    private val start = System.nanoTime() + 1_000_000_000L
+    /**
+     * A card that starts 10 s from now: its score is still sounding when the switch flips, however slow the
+     * worker, so a cut is a cancel ([IntroVibrator.stop] cancels only before the score's end).
+     */
+    private val start = System.nanoTime() + 10_000_000_000L
     private val secondSegment = start + 300_000_000L
 
     @Before
@@ -114,6 +119,20 @@ class IntroVibratorSwitchTest {
         intro.frame(card, month, secondSegment + 10_000_000L)
 
         assertFalse(played())
+    }
+
+    @Test
+    fun `turned off mid-card the waveform tier cuts the card's one vibration`() {
+        val intro = intro(IntroHapticTier.WAVEFORM)
+        intro.play(card, month, swells, start)
+        assertTrue("the card's waveform plays as it starts", shadowOf(vibrator).isVibrating)
+
+        intro.frame(card, month, start + 10_000_000L)
+        assertFalse("on: a frame leaves it sounding", shadowOf(vibrator).isCancelled)
+
+        on = false
+        intro.frame(card, month, start + 20_000_000L)
+        assertTrue(shadowOf(vibrator).isCancelled)
     }
 
     @Test

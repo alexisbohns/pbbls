@@ -83,7 +83,7 @@ fun GlyphDetailScreen(
             balance = balance,
             market = viewModel.market,
             onRecorded = { result -> viewModel.onRecorded(item, result) },
-            haptics = viewModel.hapticsOn,
+            hapticsOn = viewModel.hapticsOn,
         )
     }
 }
@@ -120,14 +120,14 @@ internal fun GlyphSwapPanel(
      * navigate, dismiss or select from here.
      */
     onRecorded: (BuyGlyphResult) -> Unit,
+    /** Pebbles' haptics switch (#1242 D23), from the host's ViewModel: the slider's buzzes ask it. */
+    hapticsOn: Boolean,
     /**
      * Runs after, in the gesture's own scope, and is therefore skipped when the
      * user has walked away — which is exactly right for "select this glyph and
      * hand control back to the caller".
      */
     onSwapped: (BuyGlyphResult) -> Unit = {},
-    /** Pebbles' haptics switch (#1242 D23), from the host's ViewModel: the slider's buzzes ask it. */
-    haptics: Boolean,
 ) {
     var isOwned by remember(item.id) { mutableStateOf(item.owned) }
     var acquiredAt by remember(item.id) { mutableStateOf(item.acquiredAt) }
@@ -145,7 +145,7 @@ internal fun GlyphSwapPanel(
         currentBalance = currentBalance,
         isBuying = isBuying,
         errorRes = errorRes,
-        haptics = haptics,
+        hapticsOn = hapticsOn,
         onConfirm = {
             isBuying = true
             errorRes = null
@@ -195,7 +195,7 @@ internal fun GlyphDetailDrawerContent(
     isBuying: Boolean,
     errorRes: Int?,
     onConfirm: suspend () -> Boolean,
-    haptics: Boolean,
+    hapticsOn: Boolean,
 ) {
     val colors = MaterialTheme.colorScheme
     val canAfford = currentBalance >= item.price
@@ -316,7 +316,7 @@ internal fun GlyphDetailDrawerContent(
                 cost = item.price,
                 enabled = canAfford && !isBuying,
                 onConfirm = onConfirm,
-                haptics = haptics,
+                hapticsOn = hapticsOn,
             )
             if (!canAfford) {
                 Text(

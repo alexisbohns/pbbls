@@ -157,7 +157,7 @@ fun SoulsListDetailIdle() {
             tab = PebblesKey.People,
             list = {
                 SoulsListContent(
-                    haptics = true,
+                    hapticsOn = true,
                     uiState = SoulsListUiState.Content(souls = previewSouls),
                     onBack = {},
                     onOpenSoul = {},
@@ -182,7 +182,7 @@ fun SoulsListDetailOpen() {
             tab = PebblesKey.People,
             list = {
                 SoulsListContent(
-                    haptics = true,
+                    hapticsOn = true,
                     uiState = SoulsListUiState.Content(souls = previewSouls),
                     onBack = {},
                     onOpenSoul = {},
@@ -193,7 +193,7 @@ fun SoulsListDetailOpen() {
             },
             detail = {
                 SoulDetailContent(
-                    haptics = true,
+                    hapticsOn = true,
                     uiState = SoulDetailUiState.Content(soul = previewSouls.first(), moments = soulPebbles),
                     onBack = {},
                     onEditSoul = {},
@@ -217,7 +217,7 @@ fun SoulsListDetailOpenDark() {
             tab = PebblesKey.People,
             list = {
                 SoulsListContent(
-                    haptics = true,
+                    hapticsOn = true,
                     uiState = SoulsListUiState.Content(souls = previewSouls),
                     onBack = {},
                     onOpenSoul = {},
@@ -228,7 +228,7 @@ fun SoulsListDetailOpenDark() {
             },
             detail = {
                 SoulDetailContent(
-                    haptics = true,
+                    hapticsOn = true,
                     uiState = SoulDetailUiState.Content(soul = previewSouls.first(), moments = soulPebbles),
                     onBack = {},
                     onEditSoul = {},
@@ -255,7 +255,7 @@ fun CollectionsListDetailIdle() {
             tab = PebblesKey.Collections,
             list = {
                 CollectionsListContent(
-                    haptics = true,
+                    hapticsOn = true,
                     uiState = CollectionsListUiState.Content(collections = previewCollections),
                     onBack = {},
                     onOpenCollection = {},
@@ -281,7 +281,7 @@ fun CollectionsListDetailOpen() {
             tab = PebblesKey.Collections,
             list = {
                 CollectionsListContent(
-                    haptics = true,
+                    hapticsOn = true,
                     uiState = CollectionsListUiState.Content(collections = previewCollections),
                     onBack = {},
                     onOpenCollection = {},
@@ -293,7 +293,7 @@ fun CollectionsListDetailOpen() {
             },
             detail = {
                 CollectionDetailContent(
-                    haptics = true,
+                    hapticsOn = true,
                     uiState =
                         CollectionDetailUiState.Content(
                             collection = previewCollections.first(),
@@ -322,7 +322,7 @@ fun CollectionsListDetailOpenDark() {
             tab = PebblesKey.Collections,
             list = {
                 CollectionsListContent(
-                    haptics = true,
+                    hapticsOn = true,
                     uiState = CollectionsListUiState.Content(collections = previewCollections),
                     onBack = {},
                     onOpenCollection = {},
@@ -334,7 +334,7 @@ fun CollectionsListDetailOpenDark() {
             },
             detail = {
                 CollectionDetailContent(
-                    haptics = true,
+                    hapticsOn = true,
                     uiState =
                         CollectionDetailUiState.Content(
                             collection = previewCollections.first(),
@@ -470,7 +470,7 @@ private fun GlyphsPair(detail: @Composable () -> Unit) {
 private fun GlyphDetailPane() {
     GlyphDetailSurface {
         GlyphDetailDrawerContent(
-            haptics = true,
+            hapticsOn = true,
             item = previewItem,
             isOwned = false,
             acquiredAt = null,

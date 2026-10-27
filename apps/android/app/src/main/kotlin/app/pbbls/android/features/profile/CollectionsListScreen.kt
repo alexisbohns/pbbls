@@ -90,7 +90,7 @@ fun CollectionsListScreen(
         onRefresh = viewModel::refresh,
         onDeleteCollection = viewModel::requestDelete,
         modifier = modifier,
-        haptics = viewModel.hapticsOn,
+        hapticsOn = viewModel.hapticsOn,
     )
 
     covers.pendingDeletion?.let { target ->
@@ -111,7 +111,7 @@ fun CollectionsListScreen(
 /**
  * The collections list without its ViewModel (#940): top bar, states and the
  * pull-to-refresh list. [CollectionsListScreen] wires it; screenshots drive it.
- * [haptics] is Pebbles' haptics switch (#1242 D23), for the rows' long press.
+ * [hapticsOn] is Pebbles' haptics switch (#1242 D23), for the rows' long press.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -123,7 +123,7 @@ fun CollectionsListContent(
     onRetry: () -> Unit,
     onRefresh: () -> Unit,
     onDeleteCollection: (Collection) -> Unit,
-    haptics: Boolean,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -211,7 +211,7 @@ fun CollectionsListContent(
                                                 collection = collection,
                                                 onTap = { onOpenCollection(collection) },
                                                 onDelete = { onDeleteCollection(collection) },
-                                                haptics = haptics,
+                                                hapticsOn = hapticsOn,
                                             )
                                         }
                                     },
@@ -233,7 +233,7 @@ private fun CollectionRow(
     collection: Collection,
     onTap: () -> Unit,
     onDelete: () -> Unit,
-    haptics: Boolean,
+    hapticsOn: Boolean,
 ) {
     val colors = MaterialTheme.colorScheme
     var menuExpanded by remember { mutableStateOf(false) }
@@ -243,7 +243,7 @@ private fun CollectionRow(
                 Modifier
                     .fillMaxWidth()
                     .clip(MaterialTheme.shapes.small)
-                    .combinedClickable(onClick = onTap, onLongClick = { menuExpanded = true }, hapticFeedbackEnabled = haptics)
+                    .combinedClickable(onClick = onTap, onLongClick = { menuExpanded = true }, hapticFeedbackEnabled = hapticsOn)
                     .padding(vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {

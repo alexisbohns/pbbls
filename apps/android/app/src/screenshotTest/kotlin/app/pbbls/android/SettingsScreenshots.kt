@@ -115,7 +115,11 @@ private fun SettingsSections() {
             PebblesListSection(
                 header = stringResource(R.string.settings_haptics_section),
                 rowPadding = PebblesListDefaults.ListItemRowPadding,
-                rows = listOf({ SettingsHapticsRow(checked = true) }),
+                rows =
+                    listOf(
+                        { SettingsHapticsRow(checked = true) },
+                        { SettingsHapticsRow(checked = false) },
+                    ),
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {

@@ -135,7 +135,7 @@ fun GlyphPickerContent(
                         // their profile glyph silently changed.
                         viewModel.selectGlyph(buyingItem.glyph)
                     },
-                    haptics = viewModel.hapticsOn,
+                    hapticsOn = viewModel.hapticsOn,
                 )
             }
 

@@ -254,8 +254,10 @@ fun PathScreen(
  *   one, a month page the policy allows is dealt as a deck and plays its
  *   intro while it is the settled page. Null (previews): the plain page.
  * @param hapticsOn Pebbles' haptics switch (#1242 D23), from [PathViewModel]:
- *   the intro, the swipe's and the strip's ticks and the stones all ask it at
- *   each vibration. Required, so no host plays past it; previews pass `{ true }`.
+ *   the intro and the swipe's, strip's and stones' ticks ask it at each
+ *   vibration; a stone's long-press buzz reads it as the stone composes, and
+ *   follows a change as it recomposes. Required, so no host plays past it;
+ *   previews pass `{ true }`.
  * @param tapHaptics plays the swipe's and the strip's selection tick (D24);
  *   the view's own haptics behind [hapticsOn], unless a test records them.
  * @param ratioOverride preview-only: a primed ratio by storage prefix, so a

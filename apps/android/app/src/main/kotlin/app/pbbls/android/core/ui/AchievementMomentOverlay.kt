@@ -65,7 +65,7 @@ import app.pbbls.android.core.designsystem.rememberReduceMotion
  * Dismissal is never blocking: the scrim and the back gesture both skip the
  * rest of the queue.
  *
- * [haptics] is Pebbles' haptics switch (#1242 D23), from `RootViewModel`: off,
+ * [hapticsOn] is Pebbles' haptics switch (#1242 D23), from `RootViewModel`: off,
  * the moment arrives without its buzz.
  */
 @Composable
@@ -73,7 +73,7 @@ fun AchievementMomentOverlay(
     moment: AchievementMoment?,
     onAdvance: () -> Unit,
     onDismiss: () -> Unit,
-    haptics: Boolean,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
@@ -85,7 +85,7 @@ fun AchievementMomentOverlay(
 
     // One reward buzz per moment, not per card — the queue is a single event.
     LaunchedEffect(moment != null) {
-        if (moment != null && haptics) view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+        if (moment != null && hapticsOn) view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
 
     val reduceMotion = rememberReduceMotion()

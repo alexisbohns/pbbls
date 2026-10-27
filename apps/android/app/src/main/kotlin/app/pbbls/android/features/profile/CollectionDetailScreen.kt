@@ -98,7 +98,7 @@ fun CollectionDetailScreen(
         onDeletePebble = viewModel::requestDelete,
         paletteFor = { moment -> moment.pebble?.emotion?.let { palettes.palette(it.id) } },
         modifier = modifier,
-        haptics = viewModel.hapticsOn,
+        hapticsOn = viewModel.hapticsOn,
     )
 
     covers.pendingDeletion?.let { target ->
@@ -119,7 +119,7 @@ fun CollectionDetailScreen(
  *
  * @param showBack False beside its list on a large screen (#940): the list is
  *   the way back, and system back still pops.
- * @param haptics Pebbles' haptics switch (#1242 D23), for the rows' long press.
+ * @param hapticsOn Pebbles' haptics switch (#1242 D23), for the rows' long press.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -131,7 +131,7 @@ fun CollectionDetailContent(
     onOpenMoment: (String) -> Unit,
     onDeletePebble: (PathMoment) -> Unit,
     paletteFor: (PathMoment) -> EmotionPalette?,
-    haptics: Boolean,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
     showBack: Boolean = true,
 ) {
@@ -240,7 +240,7 @@ fun CollectionDetailContent(
                                                 palette = paletteFor(moment),
                                                 onTap = { onOpenMoment(moment.id) },
                                                 onDelete = { onDeletePebble(moment) },
-                                                haptics = haptics,
+                                                hapticsOn = hapticsOn,
                                             )
                                         }
                                     },
