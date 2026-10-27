@@ -4,6 +4,7 @@ import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.wrap.CoverDay
 import app.pbbls.android.core.model.wrap.CoverPebble
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -39,6 +40,22 @@ class IntroHapticsTest {
         assertEquals(listOf(0.32, 1.11), IntroHaptics.events(beats).map { it.at })
         // A beat with nothing to swell over plays no swell.
         assertTrue(IntroHaptics.swells(listOf(IntroBeat(IntroKey.Gauge(0), 0.0, 0.0, swell = swell))).isEmpty())
+    }
+
+    @Test
+    fun `the domains' gauges play as swells over their beats, never as ticks, and their full ticks stay ticks`() {
+        val beats = IntroScore.domains(listOf(1.0, 0.25), more = false)
+        val swells = IntroHaptics.swells(beats)
+        val gauges = listOf(0, 1).map { row -> beats.first { it.key == IntroKey.Gauge(row) } }
+        assertEquals(gauges.map { it.at }, swells.map { it.at })
+        assertEquals(gauges.map { it.duration }, swells.map { it.duration })
+        assertTrue(swells[0].swell.to > swells[1].swell.to)
+        val ticks = IntroHaptics.events(beats).map { it.at }
+        assertFalse(gauges[0].at in ticks)
+        assertTrue(beats.first { it.key == IntroKey.Full(0) }.at in ticks)
+        // A beat with nothing to swell over plays no swell.
+        val still = IntroBeat(IntroKey.Gauge(0), 0.0, 0.0, swell = IntroSwell(0f, 1f, 0f))
+        assertTrue(IntroHaptics.swells(listOf(still)).isEmpty())
     }
 
     @Test

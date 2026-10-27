@@ -43,6 +43,18 @@ object IntroScore {
     const val STONES_AT = 0.52
     const val STONES_SPAN = 1.2
 
+    // The signatures (D10, D16, D17, iOS IntroScore+Signatures).
+    const val STONE_GAP = 0.05
+    const val DAY_GAP = 0.035
+    const val PIP_GAP = 0.045
+    const val CAIRN_AFTER = 0.08
+    const val MARK_GAP = 0.05
+    const val NEXT_WEEK = 0.12
+    const val STAMP_SPAN = 0.24
+    const val NEXT_MILESTONE = 0.14
+    const val SWELL_FROM = 0.15f
+    const val SWELL_SHARPNESS = 0.3f
+
     /** When a sequence has landed: its latest beat's end. */
     fun duration(beats: List<IntroBeat>): Double = beats.maxOfOrNull { it.at + it.duration } ?: 0.0
 

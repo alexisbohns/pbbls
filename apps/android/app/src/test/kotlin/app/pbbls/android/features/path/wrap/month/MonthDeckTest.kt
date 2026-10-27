@@ -4,8 +4,10 @@ import app.pbbls.android.SpineFixtureWeek
 import app.pbbls.android.core.model.wrap.MonthSection
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.features.path.wrap.intro.IntroKey
+import app.pbbls.android.features.path.wrap.intro.IntroScore
 import app.pbbls.android.features.path.wrap.intro.IntroSequence
 import app.pbbls.android.features.path.wrap.intro.IntroTick
+import app.pbbls.android.features.path.wrap.intro.end
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -83,6 +85,15 @@ class MonthDeckTest {
         assertEquals(IntroTick.arrive, domains.single().tick)
         assertEquals(coverBeats(october, lookups), MonthDeck.beats(IntroSequence.Cover, october, lookups, leadsInsights = false))
         assertTrue(MonthDeck.beats(IntroSequence.End, october, lookups, leadsInsights = false).isEmpty())
+    }
+
+    @Test
+    fun `the end card arrives, then its replay rises`() {
+        val beats = IntroScore.end()
+        assertEquals(IntroTick.arrive, beats.first { it.key == IntroKey.Header }.tick)
+        val replay = beats.first { it.key == IntroKey.Replay }
+        assertEquals(IntroScore.ROWS_AT, replay.at, 0.0)
+        assertEquals(IntroTick.light, replay.tick)
     }
 
     /** The wrap with [section] drawing nothing, as the server sends an empty one (iOS `emptying`). */
