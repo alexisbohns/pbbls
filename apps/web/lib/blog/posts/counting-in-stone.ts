@@ -91,14 +91,14 @@ export const countingInStone: BlogPost = {
     },
     {
       kind: "paragraph",
-      text: "In the app there will be one disc per year, with twelve branches, one per month, and three levels per branch. At level zero a month's counter waits in the centre. It reaches the inner disc at level one, with fourteen moments in the month and at least one in every week. It reaches the rim at level two, with fourteen pebbles and at least one in every week. A counter can stand between two levels, so you can see a month on its way. The current year is always shown, even when it is empty. A past year is shown only if at least one moment was recorded in it.",
+      text: "In the app there will be one disc per year, with twelve branches, one per month, and three levels per branch. The levels count days, not entries. At level zero a month's counter waits in the centre. It reaches the inner circle at level one, with fourteen days that hold a moment and a moment in every full week of the month. It reaches the rim at level two, with fourteen days that hold a pebble and a pebble in every full week. A counter stays where it has docked, and the ink along its spoke shows how far it is to the next level, so you can see a month on its way. The current year is always shown, even when it is empty. A past year is shown only if at least one moment was recorded in it.",
     },
     {
       kind: "plate",
       no: "year",
       name: "The year disc",
-      text: "Twelve branches, one per month. A month's counter leaves the centre, rests on the inner disc at level one and on the rim at level two, and can stand anywhere between.",
-      file: "c/112-1.svg",
+      text: "Twelve branches, one per month. A month's counter waits in the centre, docks on the inner circle at level one and on the rim at level two; the ink along its spoke shows how far it is to the next level.",
+      file: "c/112-2.svg",
       alt: "The year disc, in six frames: paper empty, middle and complete, then night empty, middle and complete.",
       tag: "from 111·1 · twelve branches",
     },
