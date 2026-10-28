@@ -1,5 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "npx turbo-ignore @pbbls/web",
+  "git": {
+    "deploymentEnabled": {
+      "*/*-android*": false,
+      "*/*-ios*": false,
+      "dependabot/gradle/**": false
+    }
+  },
   "regions": ["cdg1"]
 }
