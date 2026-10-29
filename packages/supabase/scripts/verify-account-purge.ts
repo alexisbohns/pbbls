@@ -482,6 +482,13 @@ try {
     throw new Error("check_achievements unlocked nothing — seed should qualify several badges");
   }
 
+  // #1305: one seen row and one completion, through the service role (both
+  // tables are write-locked to clients; their RPCs land in part 3).
+  const { error: viewErr } = await admin.from("achievement_views").insert({ user_id: sellerId, card: "explorer" });
+  if (viewErr) throw new Error(`seed achievement_views: ${viewErr.message}`);
+  const { error: compErr } = await admin.from("achievement_completions").insert({ user_id: sellerId, stack: "domains" });
+  if (compErr) throw new Error(`seed achievement_completions: ${compErr.message}`);
+
   // -------------------------------------------------------------------------
   // 3. The sale: fund the buyer, buy through the real RPC, favourite.
   // -------------------------------------------------------------------------
@@ -827,6 +834,8 @@ try {
     ["connection_blocks", 2], // both directions
     ["user_consents", 5], // health_data + public_profile + age_assurance + terms + privacy
     ["wrap_reveals", 1], // the seller's one revealed month (#1254)
+    ["achievement_views", 1], // the seller's seen row (#1305)
+    ["achievement_completions", 1], // the seller's completion (#1305)
   ];
   for (const [key, expected] of expectedPurged) {
     check(`purge itself counted ${key} = ${expected}`, purgedCounts[key] === expected,
@@ -854,6 +863,8 @@ try {
     ["log_reactions", "user_id"],
     ["connection_invites", "inviter_id"],
     ["achievement_unlocks", "user_id"],
+    ["achievement_views", "user_id"],
+    ["achievement_completions", "user_id"],
     ["wrap_reveals", "user_id"],
     ["user_consents", "user_id"],
     ["content_reports", "target_user_id"],

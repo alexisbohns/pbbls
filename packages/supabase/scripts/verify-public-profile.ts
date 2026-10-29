@@ -262,8 +262,8 @@ try {
   check("the retroactive grant unlocks the whole history in one call", !ackErr, ackErr?.message);
   const unlockedSlugs = (batch1 as { slug: string }[] ?? []).map((r) => r.slug);
   check(
-    `nine badges unlock (got ${unlockedSlugs.length}: ${unlockedSlugs.join(", ")})`,
-    unlockedSlugs.length === 9,
+    `eleven badges unlock (got ${unlockedSlugs.length}: ${unlockedSlugs.join(", ")})`,
+    unlockedSlugs.length === 11,
   );
 
   // ---------------------------------------------------------------------------
@@ -274,7 +274,7 @@ try {
 
   check(
     "achievements_count reports the untruncated total",
-    shelf.achievements_count === 9,
+    shelf.achievements_count === 11,
     `got ${shelf.achievements_count}`,
   );
   check(
@@ -351,7 +351,7 @@ try {
     recent.achievements[0]?.slug === "pebble-count-10",
     recent.achievements.map((b) => b.slug).join(", "),
   );
-  check("the total grows with it", recent.achievements_count === 10);
+  check("the total grows with it", recent.achievements_count === 12);
   check("the array stays capped", recent.achievements.length === 6);
 
   // Bounce reads the MOMENT's date: seven distinct happened_at days in the
