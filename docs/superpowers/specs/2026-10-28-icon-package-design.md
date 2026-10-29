@@ -90,7 +90,7 @@ A `packages/icons/turbo.json` narrows the `build` inputs to exclude `waves/**` a
 | Elements | any child other than `<path d>`; any `transform`, `style`, `class`, `id`, `opacity`, text, mask, filter |
 | Commands | a command other than absolute `M L C Q A Z` (relative commands would hide coordinates from the range check) |
 | Range | any coordinate (end and control points; an arc's end point) outside 1.5..22.5 |
-| Fill | `fill="currentColor"` on a path in a base file; any other fill value; more than three filled paths in a twin (a filled area above 64 square units warns, it does not fail); `fill-rule` on an unfilled path, or any value but `evenodd` (a carved stone: the stone outline and the knocked-out mark in one compound path, D11) |
+| Fill | `fill="currentColor"` on a path in a base file; any other fill value; more than three filled paths in a twin (a filled area above 64 square units warns, it does not fail); `fill-rule` on an unfilled path, or any value but `evenodd` (a carved stone: the stone outline and the knocked-out mark in one compound path, D11); `stroke="none"` on an unfilled path, or any other stroke value on a path (a filled path may drop its stroke, so the 1.75 stroke does not close a carved mark) |
 | Dash | any `stroke-dasharray` (D6) |
 | Canonical | `format` would change the file |
 | Manifest | a row without `src/<name>.svg`; an `.svg` without a row; a listed variant without `src/<name>.<variant>.svg` or a twin file not listed in `variants`; a twin without its base; a variant outside `active`, `lit-1`, `lit-2`, `lit-3`; a duplicate or non-kebab name; a `wave` with no `waves/<wave>/` folder; an unknown `status` |
@@ -117,12 +117,12 @@ Every error names the file and, for geometry, the offending number, so a fix is 
 - **Order is authored**: outputs follow the manifest's order, so a diff reads like the set.
 - **`meaning`** is one sentence; it becomes the doc comment on the React component, the Swift case and the Kotlin entry, and the caption in the hub. It is not an accessibility label (labels are per use and localised).
 - **`replaces`** is a list per surface (one drawing may replace two SF Symbols). **Android lists drawable resources, not Material icons**: the app ships no icon library and draws its icons as hand-traced `ic_*` VectorDrawables (`core/designsystem/PebblesIcon.kt`), so `ic_trash` is what `trash` replaces. Web lists lucide export names.
-- **`variants`** lists the twins that exist: `[]`, `["active"]`, or `["active", "lit-1", "lit-2", "lit-3"]` (a lit series always comes whole, from the wave's `lit-families.json`).
+- **`variants`** lists the twins that exist: `[]`, `["active"]`, or `["active", "lit-1", "lit-2", "lit-3"]` (a lit series lists the stones that exist, from the wave's `lit-families.json`: some families stop at one or two).
 - The first wave enters as `candidate` with the whole saved library, not only the 23 winners: 121 drawings under the maintainer's official names (`library.json` in the wave: the 23 chosen, the specials, the runners-up and 2 derived outlined glyphs), 34 `active` twins and the lit series (1–3 stones) for the path, pouches, stones, stacks, pebbles, calendar, plants, knots and users families. `library.svg` holds every symbol under its final name; `verdict.md` records how each got there.
 
 ## 4. Waves
 
-A wave folder is the record of how a set of drawings was chosen: the briefs, the seed, each hand's sprite and notes, the game's raw picks and the verdict. `verdict.md` names the hand whose drawing moves into `src/` for each id (written 2026-10-29 from the round-3 picker: h23 ×10, h22 ×8, h21 ×5) and any per-id swap, and lists every hand edit made later to pass the lint. Two Python helpers join the moved tools: `tally.py` prints a Borda count (3/2/1) of `results-picks.json` per id and context, an input to the verdict and never a substitute for it; `extract.py <wave> --hand hNN [--take id=hMM …]` writes `src/<name>.svg` from the hand's `<symbol>`s with the canonical root. The generator never reads `waves/`.
+A wave folder is the record of how a set of drawings was chosen: the briefs, the seed, each hand's sprite and notes, the game's raw picks and the verdict. `verdict.md` names the hand whose drawing moves into `src/` for each id (written 2026-10-29 from the round-3 picker: h23 ×10, h22 ×8, h21 ×5) and any per-id swap, and lists every hand edit made later to pass the lint. Two Python helpers join the moved tools: `tally.py` prints a Borda count (3/2/1) of `results-picks.json` per id and context, an input to the verdict and never a substitute for it; `extract.py <wave> [--only name,…]` writes `src/<name>.svg`, `<name>.active.svg` and `<name>.lit-N.svg` from the wave's `library.svg` symbols with the canonical root. The generator never reads `waves/`.
 
 ## 5. Emitters
 
@@ -141,7 +141,7 @@ export function Home({ size = 24, ...props }: PbblsIconProps) {
 }
 ```
 
-`PbblsIconProps = Omit<SVGProps<SVGSVGElement>, "children"> & { size?: number | string }`. A lit shape is `<path fill="currentColor" d="…" />`, with `fillRule="evenodd"` when the source carries it. Web and admin declare `"@pbbls/icons": "*"`.
+`PbblsIconProps = Omit<SVGProps<SVGSVGElement>, "children"> & { size?: number | string }`. A lit shape is `<path fill="currentColor" d="…" />`, with `fillRule="evenodd"` and `stroke="none"` when the source carries them (`parse` exposes `filled`, `evenOdd`, `unstroked`); iOS passes the same attributes through, Android omits `strokeColor` on an unstroked path. Web and admin declare `"@pbbls/icons": "*"`.
 
 **iOS**: `apps/ios/Pebbles/Resources/Icons.xcassets/` (wholly owned) with one `pbbls-<name>.imageset` per emitted icon, holding the SVG (with `width="24" height="24"` and `currentColor` replaced by `#000000`, since a template image keeps only alpha and CoreSVG does not resolve `currentColor`) and a `Contents.json` with `preserves-vector-representation: true` and `template-rendering-intent: "template"`, written in Xcode's own JSON style (`"key" : value`, two-space indent) so opening the catalog in Xcode does not rewrite it. `project.yml` needs no edit: `Pebbles/` is a source folder, and `xcodegen generate` picks up the new catalog. The Swift file goes to **`apps/ios/Pebbles/Theme/PbblsIcon.swift`**, not `DesignSystem/`: that folder does not exist, and `Theme/` already holds `Icon+Pebbles.swift` and the other tokens. It is `enum PbblsIcon: String, CaseIterable, Sendable` (raw value = manifest name), `assetName`, `activeTwin`, and
 
