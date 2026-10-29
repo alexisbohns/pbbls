@@ -81,6 +81,20 @@ export const REFERENCE_FAMILIES: readonly AchievementFamily[] = [
 /** Seeded by migration only: the admin edits them but never creates one (#1305). */
 export const SEEDED_FAMILIES: readonly AchievementFamily[] = ["first_stone", "set_complete"]
 
+/**
+ * Contributions to a set: they never pay karma (#1305, D7). Mirrors the
+ * `achievements_silent_karma` CHECK, which stays the authority.
+ */
+export const SILENT_FAMILIES: readonly AchievementFamily[] = [
+  "emotion_first",
+  "domain_first",
+  "first_stone",
+]
+
+export function isSilentFamily(family: string): boolean {
+  return SILENT_FAMILIES.some((f) => f === family)
+}
+
 export function familyLabel(family: string): string {
   return FAMILY_LABELS[family as AchievementFamily] ?? family
 }

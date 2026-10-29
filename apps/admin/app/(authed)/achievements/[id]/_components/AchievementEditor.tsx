@@ -25,7 +25,7 @@ import {
 } from "@/lib/pebblestore/types"
 import { svgToStrokes } from "@/lib/pebblestore/svg-to-strokes"
 import { bakeAdjust } from "@/lib/pebblestore/transform-path"
-import { familyLabel, type AdminAchievement } from "@/lib/achievements/types"
+import { familyLabel, isSilentFamily, type AdminAchievement } from "@/lib/achievements/types"
 import { deleteAchievement, setAchievementGlyph, updateAchievement } from "../../actions"
 
 /**
@@ -65,9 +65,12 @@ export function AchievementEditor({ achievement }: { achievement: AdminAchieveme
 
   const previewViewBox = hasNewGlyph ? viewBox : achievement.view_box ?? GLYPH_CANVAS_VIEWBOX
 
-  const karmaValue = Number(karma)
+  // A contribution's karma stays 0 (#1305, D7): the field is locked, and 0 is sent.
+  const silent = isSilentFamily(achievement.family)
+  const karmaValue = silent ? 0 : Number(karma)
   const karmaValid =
-    karma.trim() !== "" && Number.isInteger(karmaValue) && karmaValue >= 0 && karmaValue <= 32767
+    silent ||
+    (karma.trim() !== "" && Number.isInteger(karmaValue) && karmaValue >= 0 && karmaValue <= 32767)
   const sortValue = Number(sortOrder)
   const sortValid = sortOrder.trim() !== "" && Number.isInteger(sortValue)
 
@@ -219,9 +222,13 @@ export function AchievementEditor({ achievement }: { achievement: AdminAchieveme
             type="number"
             min={0}
             max={32767}
-            value={karma}
+            value={silent ? "0" : karma}
+            disabled={silent}
             onChange={(e) => setKarma(e.target.value)}
           />
+          {silent ? (
+            <p className="text-xs text-muted-foreground">Firsts never pay karma.</p>
+          ) : null}
           {karmaValid ? null : (
             <p className="text-xs text-destructive">A whole number from 0 to 32767.</p>
           )}
