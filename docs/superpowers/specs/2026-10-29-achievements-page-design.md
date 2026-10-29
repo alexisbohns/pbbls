@@ -230,7 +230,7 @@ Plus:
 5. **Android:** the same, mirrored 1:1.
 6. **Web:** the same.
 
-Issues follow the house split: one backend issue (parts 1–3) and one issue per client (4, 5, 6), all in M65 · Achievements. On the Arkaik map, `V-achievements`, `DM-achievement` and `API-get-achievements` move to `development` as each part starts.
+Issues: #1305 back-end (parts 1–3), #1306 iOS (4), #1307 Android (5), #1308 web (6), all in M65 · Achievements. On the Arkaik map, `V-achievements`, `DM-achievement` and `API-get-achievements` move to `development` as each part starts.
 
 ---
 
