@@ -1,0 +1,26 @@
+# Final · foundation wave
+
+The maintainer's per-icon pick among the three round-3 variants (2026-10-29):
+- checkmark: h22
+- check-circle: h23
+- plus-circle: h23
+- hourglass: h22
+- camera: h21
+- home: h21
+- path: h23
+- people: h22
+- collections: h22
+- stack: h22
+- pack: h22
+- track: h23
+- user: h23
+- settings: h21
+- glyphs: h22
+- pebbles: h22
+- karma: h21
+- calendar: h23
+- trash: h23
+- success: h23
+- idea: h21
+- like: h23
+- stepper: h23

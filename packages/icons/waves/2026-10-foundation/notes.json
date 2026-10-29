@@ -1,0 +1,155 @@
+{
+ "_round": "<p><b>The round is clean but timid, and it converged.</b> Ten hands drew the same tent with a fire, the same winding path to a stone, the same two faceless figures, the same bowl of stones, the same heart, a spiral for karma, a sprout for idea, a low sun for success. The DNA paragraph listed a tent, a fire, a path, a figure without a face and a pile of stones as examples, and every hand took the list as a menu. So this round does not give ten vocabularies to compare; it gives ten line qualities on one vocabulary. Judge it as that.</p><p>On line quality, most hands are a slightly softened Lucide: closed rings, even curves, the wobble so small it reads as rendering error. Three hands actually draw: <b>Lifted Pen (h10)</b> is the only one with a signature, every ring left open where the pen lifted, and the only one with a real idea in the set (the handprint for like). <b>Riverbed Reed (h03)</b> overshoots where strokes start, which is what a pen does, and its three collection modes are the clearest in the round. <b>Cairn Ink (h09)</b> is the loosest, but its path and stack turn to mush at 24.</p><p><b>Recommendation.</b> Pick the hand, not the drawings: h10 for the line, with h03's stack/pack/track. Then run a second, narrower round in that hand with the example list removed from the DNA and a rule that forbids the obvious subject for six icons (path, collections, karma, idea, success, settings), so the vocabulary gets explored once before anything is shipped.</p>",
+ "h01": {
+  "name": "River Slate",
+  "owns": "The small leaning pebble as every node and head.",
+  "verdict": "Clean and safe. The most Lucide of the ten; the wobble is cosmetic. Its path is the best drawn S in the round.",
+  "critique": "The set is competent and reads perfectly at 24, which is also its problem: nothing here says hand. Rings close, curves are even, the tent is a triangle. The S path to a stone is the best of its kind, and the camera is the best camera in the round. Karma as an arrow curling back is a good thought, drawn too small. Like-active with a dot inside works. Not a hand to pick for character; a hand to copy for legibility."
+ },
+ "h02": {
+  "name": "Bark Reed",
+  "owns": "The near-miss: strokes that stop just short of closing.",
+  "verdict": "The near-miss is claimed in the notes and invisible on the page. Reads as h01 with a bigger S.",
+  "critique": "The hand promises that nothing quite closes, and at 48 nothing shows it: the stone rings close, the heart closes, the camera closes. The S path is large and confident but reads as the letter S. Collections-active with the whole bowl lit is the right instinct, the one hand that lit the set rather than one stone. People-active with both heads lit is strong. Idea as a sprout and success as rays are shared with half the round."
+ },
+ "h03": {
+  "name": "Riverbed Reed",
+  "owns": "The pebble that overlaps where it started, in every round thing.",
+  "verdict": "One of the three real hands. The overshoot at the start of each stone reads as a pen. Best collection modes of the round.",
+  "critique": "The stones overlap themselves where the stroke began, which is the first thing in this round that looks drawn rather than rendered. Stack (a loose cairn), pack (stones on a knotted cord) and track (three stones on a ground line) are the clearest set of modes and could ship as they are. The heart's two strokes meet below and miss above, correctly. Weak spots: karma as a curling arrow around a stone is muddled at 24, and success as rays is the stock answer."
+ },
+ "h04": {
+  "name": "Slate Scratch",
+  "owns": "The lit stone as the one meaning of active.",
+  "verdict": "Weak. The path as three floating dots reads as bubbles, and idea as a four-point star is the stock AI sparkle.",
+  "critique": "The only hand that broke from the S path, and it broke to something worse: three stones with no ground read as bubbles or a loading state. Pack as a tied sack with a frayed top is good and different. Idea as a four-point star is the thing the brief said fails the round. Collections with the stones floating above the bowl is confusing. The tipi with crossed poles is well drawn."
+ },
+ "h05": {
+  "name": "Ember Reed",
+  "owns": "Stones as the only round shape, embers as the only fill.",
+  "verdict": "Middle of the round. Collections is overworked: three stones in a bowl turn to a blot at 24.",
+  "critique": "The thesis is right (only stones are round, only embers are filled) and the drawing does not carry it: the rings are as even as any. Collections with three stones in a bowl is a dark lump in the tab bar; compare the compare sheet. Pack as a pouch with a tied neck is good. Idea as a leaf is a sprout again. Like-active with a small ember is the best-proportioned of the lit hearts."
+ },
+ "h06": {
+  "name": "Cairn Reed",
+  "owns": "Every ring, head and seed is the same lopsided pebble.",
+  "verdict": "The zigzag path is a lightning bolt. Otherwise close to h01.",
+  "critique": "The switchback path reads as a lightning bolt or an S with corners, not a walk. Pack as a bag with a handle is a handbag. The rest is the shared vocabulary drawn neatly. Karma as a stone with an arrow returning is more legible than h01's. User-active with a lit heart in the chest rather than a lit head is a nicer thought than most."
+ },
+ "h07": {
+  "name": "Reed Scratch",
+  "owns": "The stone as handle, head and lens, lit to come alive.",
+  "verdict": "Neat, and the idea icon is a sparkle with a plus: the most AI-looking mark in the round.",
+  "critique": "The set is tidy and reads at 24. Track as three stones over an arrow is the one track that says order rather than just a row. Settings with stone-handled sliders is the best settings in the round. But idea as a sparkle with a plus sign is exactly the generic mark the DNA asked to avoid, and the tent is the same triangle as everyone's."
+ },
+ "h08": {
+  "name": "Creek Reed",
+  "owns": "The closed tent that opens when active; three month-stones along the path.",
+  "verdict": "The one hand with a story in its active states, drawn too loosely to read at 24.",
+  "critique": "The best thinking about active in the round: the tent's flaps are closed at rest and tied open with a fire when active, and the path's three stones are the months you walked. At 24 the path is an illegible tangle and the people are two blobs. Stack with one stone rolled away is a good observation. Worth stealing the tent idea into whichever hand wins."
+ },
+ "h09": {
+  "name": "Cairn Ink",
+  "owns": "The pebble that never closes, lit instead of filled.",
+  "verdict": "The loosest hand and the most alive at 48; at 24 path and stack collapse.",
+  "critique": "At 48 this is the most hand-drawn set here: heavy overlaps, uneven stones, a heart that is a pebble. At 24 the path becomes a scribble and stack a cluster of commas. Pack as a bundle on a stick is the one pack that tells a story. Settings as three knotted cords is the one settings that is not sliders, and it reads. Like-active lit from inside with a kernel is the most beautiful single icon in the round."
+ },
+ "h10": {
+  "name": "Lifted Pen",
+  "owns": "Every ring stays open where the pen left the paper; only a lit stone closes.",
+  "verdict": "The hand to pick. The one signature in the round, legible at 24, and the one real idea (the handprint).",
+  "critique": "The only hand whose rule you can see without reading its notes: the check ring, the plus ring, the pebble and the camera lens all stop short of closing, and the lit stone in each active variant is the one closed shape, which makes active mean something. The handprint for like is the one icon in the round nobody else thought of, and it is more Pebbles than a heart. Weak spots: the path's stones are too small at 24, and the hourglass is the same hourglass as everyone's. Collections with three stones heaped is slightly busy."
+ },
+ "_round2": "<p><b>The list is gone and the bias moved, it did not vanish.</b> All five free hands chose knotted record-cords (four of them name the khipu). With no examples, the model's own prior for 'marks before alphabets' is the khipu, so freedom alone gave one vocabulary again. The five seeded hands are the ones that diverged: bracket fungus on buried beams, beeswax tablets, rawhide drums, felt cord, shell money. Chaos injection worked where liberty did not.</p><p><b>The price is legibility.</b> Round 1 read at 24 and said nothing; round 2 says a great deal and half of it cannot be read in a tab bar: people as tufts of cord, user as a loop, path as a knotted line. The icons that both say something and read at 24 are few: Ledge Wax's pebble, camera, collections (three comb cells) and trash; Ash Bracket's user (a thumbprint) and trash (an urn); Rawhide Beater's trash and settings; Couched Wool's people (two curls facing) and path; Pearl Jaw's people (two hooks) and calendar.</p><p><b>Recommendation.</b> No hand wins as a set. The game is the right next step: it will show whether your eye prefers the legible-but-mute round 1 or the strange round 2, icon by icon, and which hands survive the three contexts. My own bet: a third round that takes a round-1 line (Lifted Pen) and a seeded world (Ledge Wax or Ash Bracket) as its two inputs.</p>",
+ "h11": {
+  "name": "Knot Keeper",
+  "owns": "Khipu and net cord; every stroke trails, curls or crosses.",
+  "verdict": "Free hand, khipu.",
+  "critique": "Free hand, khipu. Collections as three cord tufts and user as a lollipop do not read. Home as a dome hut is the one tent that is not a tent."
+ },
+ "h12": {
+  "name": "Cord Keeper",
+  "owns": "Cords pressed into clay; knots cinch into beads.",
+  "verdict": "Free hand, khipu.",
+  "critique": "Free hand, khipu. The coiled-cord home is a snail. Like as a forked twig and success as a bow are the strongest marks here."
+ },
+ "h13": {
+  "name": "Knot Keeper",
+  "owns": "Dyed cords on a main cord, read by touch.",
+  "verdict": "Free hand, khipu.",
+  "critique": "Free hand, khipu. Pack as a bundle of cords (three cross-ties) is legible; home as a coil is a snail again. Karma as a feather-stroke is good."
+ },
+ "h14": {
+  "name": "Knot Cord",
+  "owns": "Plied cord that sags and crosses, never joins.",
+  "verdict": "Free hand, cords.",
+  "critique": "Free hand, cords. The heaviest and least legible: people as two crossed loops, home as two gates. Idea as a spiral is nice; settings as crossed cords is mush."
+ },
+ "h15": {
+  "name": "Cord Keeper",
+  "owns": "Spun cord that sags, ends loose.",
+  "verdict": "Free hand, khipu.",
+  "critique": "Free hand, khipu. Camera as a spiral and like as a sagging U do not say what they are. People as a knotted tassel is the best of the five khipu peoples."
+ },
+ "h16": {
+  "name": "Ash Bracket",
+  "owns": "Bracket fungus on buried beams; every long stroke ends in a hooked return.",
+  "verdict": "Seeded.",
+  "critique": "Seeded. The thumbprint user is the best user in both rounds; trash as an urn and karma as a stalked spore are good. People as three arches with spores is a weather chart. Home as a bracket-arch is quiet and right."
+ },
+ "h17": {
+  "name": "Ledge Wax",
+  "owns": "Beeswax tablets of cliff honey-hunters; honey pools when active.",
+  "verdict": "Seeded, and the most complete hand of the round: pebbles (an oval), camera, collections (three comb cells), pack (a ladder), trash (a bucket) all read at 24.",
+  "critique": "Seeded, and the most complete hand of the round: pebbles (an oval), camera, collections (three comb cells), pack (a ladder), trash (a bucket) all read at 24. Home as a hanging comb is new. Path as a broken ring and people as hooks are the weak ones."
+ },
+ "h18": {
+  "name": "Rawhide Beater",
+  "owns": "Hide pegged, laced, beaten; one stroke always ends in a pressed dot.",
+  "verdict": "Seeded.",
+  "critique": "Seeded. Home as a pegged hide is a document icon; people as three laced ticks does not read. Trash, settings and calendar are clean, collections as a drum is good, like as a tusk-curve is odd but ownable."
+ },
+ "h19": {
+  "name": "Couched Wool",
+  "owns": "Felt and wool cord; knots pull tight into beads.",
+  "verdict": "Seeded.",
+  "critique": "Seeded. People as two curls facing is the best people in both rounds; path as beads on a cord reads. Home as a ring with a dot is a target; calendar with a cross looks like delete. Success as a bow, idea as a cloud: stock."
+ },
+ "h20": {
+  "name": "Pearl Jaw",
+  "owns": "Shell money of an atoll; strokes swell and stop short, one hook each.",
+  "verdict": "Seeded.",
+  "critique": "Seeded. People as two hanging hooks and collections as a necklace are good; home as a hooked pole is unreadable; path as a spiral is a snail. The calendar as a lashed frame is the one calendar in twenty that is not a box."
+ },
+ "h00": {
+  "name": "Composite \u00b7 game winners",
+  "owns": "One icon per concept, the icon-points leader of the blind game, stitched from ten hands.",
+  "verdict": "Not a hand: a stitch. Four hands supply 17 of 23 (h04 \u00d75, h03 \u00d75, h18 \u00d74, h08 \u00d73).",
+  "critique": "Read it as a brief, not a set: the round-1 stone family (h03, h04, h07, h08) is one hand in all but name and stitches cleanly; the h18 wins (checkmark, camera, karma, plus-circle), h16 calendar, h17 trash and h19 user come from other worlds and would be redrawn in the chosen line."
+ },
+ "_round3": "<p><b>Round 3 is a harmonisation pass, and it worked.</b> Three hands redrew the composite in the Riverbed line and all three named themselves Shoal Reed, which says the brief left little room, as intended. The ten-hand stitch now reads as one set: every round thing is the same overshooting stone, the closed ellipses from h04, h07, h08 and h01 are gone, the rawhide dot is one mark across checkmark, plus, karma, camera and idea, and every active twin lights a stone (the heart and the flame are gone).</p><p><b>Pick: h21.</b> It is the most uniform: the user's head is a stone like every other head, the stack sits, path shrinks its stones toward the far one so it reads as distance and stays distinct from track. h23 keeps Couched Wool's spiral head on the user and leaves corners open on calendar and trash (worth stealing for the final pass). h22 enlarges calendar to the frame and its lit stone fills the tent door.</p><p>Two things to settle in the final pass rather than another round: the user figure (all three flag it; the open-armed figure reads as celebrating), and whether idea keeps the four-point star you chose in the game or takes one of the specialed alternates.</p>",
+ "h21": {
+  "name": "Shoal Reed \u00b7 one stone",
+  "owns": "Every round thing is h03's head stone; active always lights a stone.",
+  "verdict": "Pick.",
+  "critique": "Pick. The most uniform of the three; user head is a stone, stack sits, path shrinks toward the far stone."
+ },
+ "h22": {
+  "name": "Shoal Reed \u00b7 framed",
+  "owns": "Same line; calendar enlarged to the frame; hourglass gains a falling grain.",
+  "verdict": "Close second.",
+  "critique": "Close second. The lit stone fills the tent door in home-active and reads as a filled doorway."
+ },
+ "h23": {
+  "name": "Shoal Reed \u00b7 open corners",
+  "owns": "Same line; corners left open on calendar, trash and camera; user keeps the spiral head.",
+  "verdict": "Steal the open corners.",
+  "critique": "Steal the open corners. The spiral head on user curls inward and breaks the overshoot rule, as the hand itself says."
+ },
+ "h99": {
+  "name": "Final \u00b7 foundation wave",
+  "owns": "Your per-icon pick among the three round-3 variants: h23 \u00d710, h22 \u00d78, h21 \u00d75.",
+  "verdict": "The set that enters packages/icons as src/, after the final pass (user figure, open corners, glyphs without dashes).",
+  "critique": "Stitched from three hands drawn in one line, so it reads as one set already. The final pass is a nudge, not a redraw."
+ }
+}

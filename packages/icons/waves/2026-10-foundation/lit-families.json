@@ -1,0 +1,62 @@
+{
+ "path": [
+  "path",
+  "path-river",
+  "destination",
+  "yarn"
+ ],
+ "pouches": [
+  "pouch",
+  "pouch-2",
+  "pouch-dot",
+  "purse",
+  "baluchon",
+  "bag",
+  "case"
+ ],
+ "stones": [
+  "stones-stair",
+  "stones-track",
+  "stones-arrow-right",
+  "stones-aligned-bottom"
+ ],
+ "stacks": [
+  "stack",
+  "stack-sharp",
+  "abstract-stack",
+  "abstract-cairn",
+  "fall"
+ ],
+ "pebbles": [
+  "pebble-round",
+  "pebble-flat",
+  "pebble-glow-sm",
+  "pebble-glow-md",
+  "pebble-glow-lg",
+  "pebble-dotted-glyph",
+  "pebble-dotted-glyph-2",
+  "pebble-outlined-glyph",
+  "pebble-outlined-glyph-2"
+ ],
+ "calendar": [
+  "calendar-date",
+  "calendar-dot",
+  "calendar-day"
+ ],
+ "plants": [
+  "plant-sprout",
+  "plant-seedling",
+  "plant-seedling-gap"
+ ],
+ "knots": [
+  "knot-sm",
+  "knot-lg"
+ ],
+ "users": [
+  "person",
+  "user",
+  "user-heart",
+  "users",
+  "people"
+ ]
+}

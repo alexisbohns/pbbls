@@ -1,0 +1,989 @@
+[
+ {
+  "name": "checkmark-dot",
+  "hand": "h99",
+  "source": "checkmark",
+  "kind": "chosen",
+  "hasActive": false
+ },
+ {
+  "name": "checkmark",
+  "hand": "h19",
+  "source": "checkmark",
+  "kind": "runner-up",
+  "hasActive": false
+ },
+ {
+  "name": "check-circle",
+  "hand": "h99",
+  "source": "check-circle",
+  "kind": "chosen",
+  "hasActive": false
+ },
+ {
+  "name": "check-circle-dot",
+  "hand": "h18",
+  "source": "check-circle",
+  "kind": "runner-up",
+  "hasActive": false
+ },
+ {
+  "name": "plus-circle-dot",
+  "hand": "h99",
+  "source": "plus-circle",
+  "kind": "chosen",
+  "hasActive": false
+ },
+ {
+  "name": "remove",
+  "hand": "h18",
+  "source": "plus-circle",
+  "kind": "runner-up",
+  "hasActive": false
+ },
+ {
+  "name": "plus-circle",
+  "hand": "h04",
+  "source": "plus-circle",
+  "kind": "runner-up",
+  "hasActive": false
+ },
+ {
+  "name": "hourglass-end",
+  "hand": "h99",
+  "source": "hourglass",
+  "kind": "chosen",
+  "hasActive": false
+ },
+ {
+  "name": "pendulum",
+  "hand": "h11",
+  "source": "hourglass",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "abstract-pen",
+  "hand": "h14",
+  "source": "hourglass",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "abstract-leaf",
+  "hand": "h19",
+  "source": "hourglass",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "camera",
+  "hand": "h99",
+  "source": "camera",
+  "kind": "chosen",
+  "hasActive": false
+ },
+ {
+  "name": "camera-analogic",
+  "hand": "h13",
+  "source": "camera",
+  "kind": "runner-up",
+  "hasActive": false
+ },
+ {
+  "name": "camera-focus",
+  "hand": "h15",
+  "source": "camera",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "home",
+  "hand": "h99",
+  "source": "home",
+  "kind": "chosen",
+  "hasActive": true
+ },
+ {
+  "name": "home-hive",
+  "hand": "h11",
+  "source": "home",
+  "kind": "runner-up",
+  "hasActive": true
+ },
+ {
+  "name": "gate",
+  "hand": "h14",
+  "source": "home",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-home",
+  "hand": "h16",
+  "source": "home",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-spiral",
+  "hand": "h12",
+  "source": "home",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "path",
+  "hand": "h99",
+  "source": "path",
+  "kind": "chosen",
+  "hasActive": true,
+  "lit": [
+   "path-lit-1",
+   "path-lit-2",
+   "path-lit-3"
+  ]
+ },
+ {
+  "name": "yarn",
+  "hand": "h14",
+  "source": "path",
+  "kind": "special",
+  "hasActive": true,
+  "lit": [
+   "yarn-lit-1"
+  ]
+ },
+ {
+  "name": "destination",
+  "hand": "h07",
+  "source": "path",
+  "kind": "runner-up",
+  "hasActive": true,
+  "lit": [
+   "destination-lit-1"
+  ]
+ },
+ {
+  "name": "path-river",
+  "hand": "h09",
+  "source": "path",
+  "kind": "runner-up",
+  "hasActive": true,
+  "lit": [
+   "path-river-lit-1",
+   "path-river-lit-2",
+   "path-river-lit-3"
+  ]
+ },
+ {
+  "name": "people",
+  "hand": "h99",
+  "source": "people",
+  "kind": "chosen",
+  "hasActive": true,
+  "lit": [
+   "people-lit-1",
+   "people-lit-2",
+   "people-lit-3"
+  ]
+ },
+ {
+  "name": "users",
+  "hand": "h08",
+  "source": "people",
+  "kind": "runner-up",
+  "hasActive": true,
+  "lit": [
+   "users-lit-1",
+   "users-lit-2",
+   "users-lit-3"
+  ]
+ },
+ {
+  "name": "abstract-crown",
+  "hand": "h13",
+  "source": "people",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-fence",
+  "hand": "h18",
+  "source": "people",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-loki",
+  "hand": "h19",
+  "source": "people",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "exchange",
+  "hand": "h20",
+  "source": "people",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "dolmen",
+  "hand": "h11",
+  "source": "people",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "dna",
+  "hand": "h14",
+  "source": "people",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "collection",
+  "hand": "h99",
+  "source": "collections",
+  "kind": "chosen",
+  "hasActive": true
+ },
+ {
+  "name": "pearl",
+  "hand": "h13",
+  "source": "collections",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "watermelon",
+  "hand": "h14",
+  "source": "collections",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "cromlech",
+  "hand": "h16",
+  "source": "collections",
+  "kind": "runner-up",
+  "hasActive": true
+ },
+ {
+  "name": "pouch-dot",
+  "hand": "h18",
+  "source": "collections",
+  "kind": "runner-up",
+  "hasActive": true,
+  "lit": [
+   "pouch-dot-lit-1"
+  ]
+ },
+ {
+  "name": "pouch",
+  "hand": "h19",
+  "source": "collections",
+  "kind": "special",
+  "hasActive": true,
+  "lit": [
+   "pouch-lit-1"
+  ]
+ },
+ {
+  "name": "stack",
+  "hand": "h99",
+  "source": "stack",
+  "kind": "chosen",
+  "hasActive": false,
+  "lit": [
+   "stack-lit-1",
+   "stack-lit-2",
+   "stack-lit-3"
+  ]
+ },
+ {
+  "name": "abstract-cairn",
+  "hand": "h13",
+  "source": "stack",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "stack-sharp",
+  "hand": "h17",
+  "source": "stack",
+  "kind": "runner-up",
+  "hasActive": false,
+  "lit": [
+   "stack-sharp-lit-1",
+   "stack-sharp-lit-2",
+   "stack-sharp-lit-3"
+  ]
+ },
+ {
+  "name": "abstract-stack",
+  "hand": "h18",
+  "source": "stack",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "abstract-landscape",
+  "hand": "h11",
+  "source": "stack",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "fall",
+  "hand": "h16",
+  "source": "stack",
+  "kind": "runner-up",
+  "hasActive": false
+ },
+ {
+  "name": "pouch-2",
+  "hand": "h99",
+  "source": "pack",
+  "kind": "chosen",
+  "hasActive": false,
+  "lit": [
+   "pouch-2-lit-1"
+  ]
+ },
+ {
+  "name": "nechlace",
+  "hand": "h03",
+  "source": "pack",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "purse",
+  "hand": "h06",
+  "source": "pack",
+  "kind": "special",
+  "hasActive": false,
+  "lit": [
+   "purse-lit-1"
+  ]
+ },
+ {
+  "name": "baluchon",
+  "hand": "h09",
+  "source": "pack",
+  "kind": "special",
+  "hasActive": false,
+  "lit": [
+   "baluchon-lit-1"
+  ]
+ },
+ {
+  "name": "bag",
+  "hand": "h04",
+  "source": "pack",
+  "kind": "runner-up",
+  "hasActive": false,
+  "lit": [
+   "bag-lit-1"
+  ]
+ },
+ {
+  "name": "case",
+  "hand": "h11",
+  "source": "pack",
+  "kind": "special",
+  "hasActive": false,
+  "lit": [
+   "case-lit-1"
+  ]
+ },
+ {
+  "name": "stones-stair",
+  "hand": "h99",
+  "source": "track",
+  "kind": "chosen",
+  "hasActive": false,
+  "lit": [
+   "stones-stair-lit-1",
+   "stones-stair-lit-2",
+   "stones-stair-lit-3"
+  ]
+ },
+ {
+  "name": "stones-track",
+  "hand": "h02",
+  "source": "track",
+  "kind": "runner-up",
+  "hasActive": false,
+  "lit": [
+   "stones-track-lit-1",
+   "stones-track-lit-2",
+   "stones-track-lit-3"
+  ]
+ },
+ {
+  "name": "stones-arrow-right",
+  "hand": "h07",
+  "source": "track",
+  "kind": "special",
+  "hasActive": false,
+  "lit": [
+   "stones-arrow-right-lit-1",
+   "stones-arrow-right-lit-2",
+   "stones-arrow-right-lit-3"
+  ]
+ },
+ {
+  "name": "chart-double-grow",
+  "hand": "h13",
+  "source": "track",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "pan",
+  "hand": "h16",
+  "source": "track",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "scale",
+  "hand": "h17",
+  "source": "track",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "stones-aligned-bottom",
+  "hand": "h04",
+  "source": "track",
+  "kind": "runner-up",
+  "hasActive": false,
+  "lit": [
+   "stones-aligned-bottom-lit-1",
+   "stones-aligned-bottom-lit-2",
+   "stones-aligned-bottom-lit-3"
+  ]
+ },
+ {
+  "name": "person",
+  "hand": "h99",
+  "source": "user",
+  "kind": "chosen",
+  "hasActive": true,
+  "lit": [
+   "person-lit-1"
+  ]
+ },
+ {
+  "name": "barbed-wire",
+  "hand": "h11",
+  "source": "user",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-key",
+  "hand": "h13",
+  "source": "user",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "user-heart",
+  "hand": "h03",
+  "source": "user",
+  "kind": "runner-up",
+  "hasActive": true,
+  "lit": [
+   "user-heart-lit-1",
+   "user-heart-lit-2"
+  ]
+ },
+ {
+  "name": "user",
+  "hand": "h05",
+  "source": "user",
+  "kind": "runner-up",
+  "hasActive": true,
+  "lit": [
+   "user-lit-1",
+   "user-lit-2"
+  ]
+ },
+ {
+  "name": "slider",
+  "hand": "h99",
+  "source": "settings",
+  "kind": "chosen",
+  "hasActive": false
+ },
+ {
+  "name": "shelve",
+  "hand": "h09",
+  "source": "settings",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "abstract-sign",
+  "hand": "h15",
+  "source": "settings",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "radar",
+  "hand": "h19",
+  "source": "settings",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "abstract-umbrella",
+  "hand": "h20",
+  "source": "settings",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "abstract-sign-2",
+  "hand": "h13",
+  "source": "settings",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "pebble-dotted-glyph",
+  "hand": "h99",
+  "source": "glyphs",
+  "kind": "chosen",
+  "hasActive": false,
+  "lit": [
+   "pebble-dotted-glyph-lit-1"
+  ]
+ },
+ {
+  "name": "abstract-curves",
+  "hand": "h12",
+  "source": "glyphs",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "abstract-lines",
+  "hand": "h17",
+  "source": "glyphs",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "abstract-mi",
+  "hand": "h20",
+  "source": "glyphs",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "pebble-dotted-glyph-2",
+  "hand": "h06",
+  "source": "glyphs",
+  "kind": "runner-up",
+  "hasActive": false,
+  "lit": [
+   "pebble-dotted-glyph-2-lit-1"
+  ]
+ },
+ {
+  "name": "glyph-underlined",
+  "hand": "h13",
+  "source": "glyphs",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "glyph-grow-underlined",
+  "hand": "h15",
+  "source": "glyphs",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "draw-dotted",
+  "hand": "h19",
+  "source": "glyphs",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "pebble-round",
+  "hand": "h99",
+  "source": "pebbles",
+  "kind": "chosen",
+  "hasActive": false,
+  "lit": [
+   "pebble-round-lit-1"
+  ]
+ },
+ {
+  "name": "pebble-flat",
+  "hand": "h08",
+  "source": "pebbles",
+  "kind": "runner-up",
+  "hasActive": false,
+  "lit": [
+   "pebble-flat-lit-1"
+  ]
+ },
+ {
+  "name": "karma-dot",
+  "hand": "h99",
+  "source": "karma",
+  "kind": "chosen",
+  "hasActive": false
+ },
+ {
+  "name": "karma",
+  "hand": "h05",
+  "source": "karma",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "karma-double",
+  "hand": "h19",
+  "source": "karma",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "wave",
+  "hand": "h20",
+  "source": "karma",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "karma-2",
+  "hand": "h07",
+  "source": "karma",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "karma-clockwise",
+  "hand": "h08",
+  "source": "karma",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "calendar-date",
+  "hand": "h99",
+  "source": "calendar",
+  "kind": "chosen",
+  "hasActive": false
+ },
+ {
+  "name": "calendar-dot",
+  "hand": "h04",
+  "source": "calendar",
+  "kind": "runner-up",
+  "hasActive": false
+ },
+ {
+  "name": "game",
+  "hand": "h14",
+  "source": "calendar",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "pearl-jaw",
+  "hand": "h20",
+  "source": "calendar",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "calendar-day",
+  "hand": "h03",
+  "source": "calendar",
+  "kind": "runner-up",
+  "hasActive": false,
+  "lit": [
+   "calendar-day-lit-1"
+  ]
+ },
+ {
+  "name": "trash",
+  "hand": "h99",
+  "source": "trash",
+  "kind": "chosen",
+  "hasActive": false
+ },
+ {
+  "name": "trash-2",
+  "hand": "h17",
+  "source": "trash",
+  "kind": "runner-up",
+  "hasActive": false
+ },
+ {
+  "name": "broom",
+  "hand": "h19",
+  "source": "trash",
+  "kind": "runner-up",
+  "hasActive": false
+ },
+ {
+  "name": "soda",
+  "hand": "h18",
+  "source": "trash",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "pebble-glow-md",
+  "hand": "h99",
+  "source": "success",
+  "kind": "chosen",
+  "hasActive": false,
+  "lit": [
+   "pebble-glow-md-lit-1"
+  ]
+ },
+ {
+  "name": "sunshine",
+  "hand": "h01",
+  "source": "success",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "plant-sprout",
+  "hand": "h02",
+  "source": "success",
+  "kind": "special",
+  "hasActive": false,
+  "lit": [
+   "plant-sprout-lit-1",
+   "plant-sprout-lit-2"
+  ]
+ },
+ {
+  "name": "pebble-glow-sm",
+  "hand": "h03",
+  "source": "success",
+  "kind": "runner-up",
+  "hasActive": false,
+  "lit": [
+   "pebble-glow-sm-lit-1"
+  ]
+ },
+ {
+  "name": "pebble-glow-lg",
+  "hand": "h07",
+  "source": "success",
+  "kind": "runner-up",
+  "hasActive": false,
+  "lit": [
+   "pebble-glow-lg-lit-1"
+  ]
+ },
+ {
+  "name": "knot-lg",
+  "hand": "h12",
+  "source": "success",
+  "kind": "special",
+  "hasActive": false,
+  "lit": [
+   "knot-lg-lit-1",
+   "knot-lg-lit-2"
+  ]
+ },
+ {
+  "name": "knot-sm",
+  "hand": "h13",
+  "source": "success",
+  "kind": "special",
+  "hasActive": false,
+  "lit": [
+   "knot-sm-lit-1",
+   "knot-sm-lit-2"
+  ]
+ },
+ {
+  "name": "bell-ringing",
+  "hand": "h18",
+  "source": "success",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "sunrise",
+  "hand": "h09",
+  "source": "success",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "sparkle",
+  "hand": "h99",
+  "source": "idea",
+  "kind": "chosen",
+  "hasActive": false
+ },
+ {
+  "name": "karma-sparkle",
+  "hand": "h03",
+  "source": "idea",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "plant-seedling-gap",
+  "hand": "h08",
+  "source": "idea",
+  "kind": "special",
+  "hasActive": false,
+  "lit": [
+   "plant-seedling-gap-lit-1",
+   "plant-seedling-gap-lit-2",
+   "plant-seedling-gap-lit-3"
+  ]
+ },
+ {
+  "name": "abstract-drizzle",
+  "hand": "h17",
+  "source": "idea",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "abstract-tree",
+  "hand": "h19",
+  "source": "idea",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "abstract-underwater",
+  "hand": "h20",
+  "source": "idea",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "plant-seedling",
+  "hand": "h05",
+  "source": "idea",
+  "kind": "special",
+  "hasActive": false,
+  "lit": [
+   "plant-seedling-lit-1",
+   "plant-seedling-lit-2",
+   "plant-seedling-lit-3"
+  ]
+ },
+ {
+  "name": "sparkles",
+  "hand": "h07",
+  "source": "idea",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "needle",
+  "hand": "h13",
+  "source": "idea",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "loop",
+  "hand": "h18",
+  "source": "idea",
+  "kind": "special",
+  "hasActive": false
+ },
+ {
+  "name": "heart",
+  "hand": "h99",
+  "source": "like",
+  "kind": "chosen",
+  "hasActive": true
+ },
+ {
+  "name": "hand",
+  "hand": "h10",
+  "source": "like",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "node",
+  "hand": "h12",
+  "source": "like",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "orange",
+  "hand": "h13",
+  "source": "like",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "heart-heart",
+  "hand": "h07",
+  "source": "like",
+  "kind": "runner-up",
+  "hasActive": true
+ },
+ {
+  "name": "petroglyph",
+  "hand": "h17",
+  "source": "like",
+  "kind": "special",
+  "hasActive": true
+ },
+ {
+  "name": "connection",
+  "hand": "h99",
+  "source": "stepper",
+  "kind": "chosen",
+  "hasActive": false
+ },
+ {
+  "name": "timeline",
+  "hand": "h18",
+  "source": "stepper",
+  "kind": "runner-up",
+  "hasActive": false
+ },
+ {
+  "name": "pebble-outlined-glyph",
+  "hand": "L5",
+  "source": "pebble-dotted-glyph",
+  "kind": "derived",
+  "hasActive": false,
+  "lit": [
+   "pebble-outlined-glyph-lit-1"
+  ]
+ },
+ {
+  "name": "pebble-outlined-glyph-2",
+  "hand": "L5",
+  "source": "pebble-dotted-glyph-2",
+  "kind": "derived",
+  "hasActive": false,
+  "lit": [
+   "pebble-outlined-glyph-2-lit-1"
+  ]
+ }
+]

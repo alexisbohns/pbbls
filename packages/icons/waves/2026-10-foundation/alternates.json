@@ -1,0 +1,553 @@
+{
+ "trash": [
+  {
+   "hand": "h17",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h19",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h18",
+   "kind": "special",
+   "contexts": 2
+  }
+ ],
+ "path": [
+  {
+   "hand": "h14",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h07",
+   "kind": "runner-up",
+   "contexts": 2
+  },
+  {
+   "hand": "h09",
+   "kind": "runner-up",
+   "contexts": 2
+  }
+ ],
+ "calendar": [
+  {
+   "hand": "h04",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h14",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h20",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h03",
+   "kind": "runner-up",
+   "contexts": 2
+  }
+ ],
+ "like": [
+  {
+   "hand": "h10",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h12",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h13",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h07",
+   "kind": "runner-up",
+   "contexts": 2
+  },
+  {
+   "hand": "h17",
+   "kind": "special",
+   "contexts": 2
+  }
+ ],
+ "people": [
+  {
+   "hand": "h08",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h13",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h18",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h19",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h20",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h11",
+   "kind": "special",
+   "contexts": 2
+  },
+  {
+   "hand": "h14",
+   "kind": "special",
+   "contexts": 2
+  }
+ ],
+ "home": [
+  {
+   "hand": "h11",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h14",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h16",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h12",
+   "kind": "special",
+   "contexts": 2
+  }
+ ],
+ "user": [
+  {
+   "hand": "h11",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h13",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h03",
+   "kind": "runner-up",
+   "contexts": 2
+  },
+  {
+   "hand": "h05",
+   "kind": "runner-up",
+   "contexts": 2
+  }
+ ],
+ "pack": [
+  {
+   "hand": "h03",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h06",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h09",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h09",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h04",
+   "kind": "runner-up",
+   "contexts": 2
+  },
+  {
+   "hand": "h11",
+   "kind": "special",
+   "contexts": 2
+  }
+ ],
+ "collections": [
+  {
+   "hand": "h13",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h14",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h16",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h18",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h19",
+   "kind": "special",
+   "contexts": 2
+  }
+ ],
+ "track": [
+  {
+   "hand": "h02",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h07",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h13",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h16",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h17",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h04",
+   "kind": "runner-up",
+   "contexts": 2
+  }
+ ],
+ "success": [
+  {
+   "hand": "h01",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h02",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h03",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h07",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h12",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h13",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h18",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h09",
+   "kind": "special",
+   "contexts": 2
+  }
+ ],
+ "idea": [
+  {
+   "hand": "h03",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h08",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h17",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h19",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h20",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h05",
+   "kind": "special",
+   "contexts": 2
+  },
+  {
+   "hand": "h05",
+   "kind": "runner-up",
+   "contexts": 2
+  },
+  {
+   "hand": "h07",
+   "kind": "special",
+   "contexts": 2
+  },
+  {
+   "hand": "h07",
+   "kind": "runner-up",
+   "contexts": 2
+  },
+  {
+   "hand": "h13",
+   "kind": "special",
+   "contexts": 2
+  },
+  {
+   "hand": "h18",
+   "kind": "special",
+   "contexts": 2
+  }
+ ],
+ "hourglass": [
+  {
+   "hand": "h11",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h14",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h19",
+   "kind": "special",
+   "contexts": 3
+  }
+ ],
+ "karma": [
+  {
+   "hand": "h05",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h19",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h20",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h07",
+   "kind": "special",
+   "contexts": 2
+  },
+  {
+   "hand": "h08",
+   "kind": "special",
+   "contexts": 2
+  },
+  {
+   "hand": "h08",
+   "kind": "runner-up",
+   "contexts": 2
+  }
+ ],
+ "stack": [
+  {
+   "hand": "h13",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h17",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h18",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h11",
+   "kind": "special",
+   "contexts": 2
+  },
+  {
+   "hand": "h16",
+   "kind": "runner-up",
+   "contexts": 2
+  }
+ ],
+ "camera": [
+  {
+   "hand": "h13",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h15",
+   "kind": "special",
+   "contexts": 3
+  }
+ ],
+ "settings": [
+  {
+   "hand": "h09",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h15",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h19",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h20",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h13",
+   "kind": "special",
+   "contexts": 2
+  }
+ ],
+ "glyphs": [
+  {
+   "hand": "h12",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h17",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h20",
+   "kind": "special",
+   "contexts": 3
+  },
+  {
+   "hand": "h06",
+   "kind": "runner-up",
+   "contexts": 2
+  },
+  {
+   "hand": "h13",
+   "kind": "special",
+   "contexts": 2
+  },
+  {
+   "hand": "h13",
+   "kind": "runner-up",
+   "contexts": 2
+  },
+  {
+   "hand": "h15",
+   "kind": "special",
+   "contexts": 2
+  },
+  {
+   "hand": "h19",
+   "kind": "special",
+   "contexts": 2
+  }
+ ],
+ "checkmark": [
+  {
+   "hand": "h19",
+   "kind": "runner-up",
+   "contexts": 3
+  }
+ ],
+ "plus-circle": [
+  {
+   "hand": "h18",
+   "kind": "runner-up",
+   "contexts": 3
+  },
+  {
+   "hand": "h04",
+   "kind": "runner-up",
+   "contexts": 2
+  }
+ ],
+ "check-circle": [
+  {
+   "hand": "h18",
+   "kind": "runner-up",
+   "contexts": 3
+  }
+ ],
+ "pebbles": [
+  {
+   "hand": "h08",
+   "kind": "runner-up",
+   "contexts": 3
+  }
+ ],
+ "stepper": [
+  {
+   "hand": "h18",
+   "kind": "runner-up",
+   "contexts": 2
+  }
+ ]
+}
