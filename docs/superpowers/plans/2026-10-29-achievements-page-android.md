@@ -68,7 +68,7 @@
 > - **`since`** on `emotions` and on each ladder (pebbles, glyphs carved, glyph sales) is the card's "since" date.
 > - **`seen`** is a top-level map of card → last-look time, at whole seconds.
 > - **A completion carries its `pebble`.**
-> - **Celebration:** `pebble-count-1` never celebrates, because `first-pebble` celebrates that pebble once. A heavy first pebble celebrates neither.
+> - **Celebration needs no client change.** After the part 1 review, `check_achievements()` keeps its shape and returns only the rows to celebrate; there is no `celebrate` column. Drop any task here that decodes or filters on `celebrate`, and keep celebrating every returned row. Silent rows (the firsts, `pebble-count-1`, heavy crossings) are recorded but never returned.
 > - **No year "new" marks** in v1.
 > - **The dumps are verbatim response bodies,** and a keyed run adds `get-achievements-pulled.json` (a pulled completion).
 > - **The Profile shelf is served** (D18, the maintainer's call on 29 October). `get_achievements` returns `shelf` (up to six `{slug, family, threshold, unlocked_on}`, private families already removed) and `shelf_count`. Point the Profile shelf at it instead of reading `achievement_unlocks`, and keep resolving titles and glyphs from the cached catalog by slug.

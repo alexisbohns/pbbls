@@ -13,6 +13,15 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-29-achievements-page-design.md` (D1–D17). **Stack:** three branches with `gh stack`, one PR each, in this order.
 
+> **Amendments after the part 1 code review (2026-10-29).** The branch `feat/1305-achievements-model` is the source of truth for part 1. Where this plan's Tasks 1–6 and 13 differ from it, the branch wins.
+> - **No `celebrate` column.** `check_achievements()` keeps its shape, `(slug, karma_granted)`, and returns only the rows to celebrate. Silent rows (emotion, domain and stone firsts, `pebble-count-1`, heavy crossings) are recorded but not returned. Shipped clients celebrate every returned row and none read a flag, so this needs no client change.
+> - **The first-stone unlocks are backfilled for existing users,** with `unlocked_at` set to their pebble's `created_at`, and the resulting six-firsts completions too. Veterans never receive them through the mutation path.
+> - **The nine new catalog rows carry English and French titles.** The `set_complete` rows are seeded inactive, and part 3 activates them.
+> - **Partial indexes on `pebble_id`** go on `achievement_unlocks` and `achievement_completions`.
+> - **The public-profile filter (Task 13) moved into part 1** (`20261030090400`), so no private family reaches a public shelf between the parts. `verify-public-profile.ts` asserts the part 3 numbers from part 1 on.
+> - **The admin karma field is disabled** for the silent families.
+> - **The harnesses assert silent rows on the unlocks table,** not on the returned rows.
+
 **Ground rules for every task:**
 - **Migrations live in `packages/supabase/supabase/migrations/`.** Never edit an applied one; add a new file.
 - **Diff before applying.** When a migration re-emits a whole function, diff the old and new bodies before applying. This is a standing rule, because `create or replace` has no merge semantics.
