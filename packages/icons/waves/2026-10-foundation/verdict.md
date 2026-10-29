@@ -301,3 +301,20 @@ glyphs
   h20   0  A:- B:- C:-  special ABC
 23 ids, 69 steps
 ```
+
+## Lint edits (2026-10-29, Part 1 of #1311)
+
+The package lint (`npm run lint --workspace=@pbbls/icons`) ran on the 221 extracted sources (121 bases, 34 active twins, 66 lit twins). Every coordinate sat inside 1.5..22.5 and every fill was already a twin's; the only rule hit was **Dash** (DNA: no `stroke-dasharray`, VectorDrawable has none). The eight dashed strokes were redrawn as short separate strokes on the same curve by `undash.py` (kept here next to `carve.py`), in `library.svg` and in `src/`; `lit-sources.svg` and the hands' sprites keep the dashes as drawn.
+
+| Drawing | Was | Now |
+|---|---|---|
+| `pebble-dotted-glyph` | ring, `stroke-dasharray="2.4 2.8"` | 11 short cubics, one per dash |
+| `pebble-dotted-glyph-2` | ring, `2.2 2.6` | 11 short cubics |
+| `draw-dotted` | trail, `1.4 2.6` | 9 short cubics |
+| `abstract-curves` | arc, `0.1 2.9` | 5 pen dots (0.1-long strokes) |
+| `abstract-lines` | underline, `0.1 3.1` | 6 pen dots |
+| `abstract-mi` | swell, `0.01 3.3` | 6 pen dots |
+| `glyph-underlined` | underline, `0.01 3.1` | 5 pen dots |
+| `glyph-grow-underlined` | underline, `0.01 3.1` | 5 pen dots |
+
+A dash keeps SVG's default phase (a dash first, from the path's start); a trailing fragment shorter than 0.05 is dropped. The lint also warns, without failing, on 17 lit twins whose solid stone is above 64 square units (the pouches, the pebbles, the stacks' big stones): that is the whole stone lit, by design.
