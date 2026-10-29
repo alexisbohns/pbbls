@@ -1509,3 +1509,26 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The maintainer felt tiers W and V through the Spine Lab and accepted them as fallbacks.
 - **Supersedes / Superseded-by:** refines the 2026-10-26 Android entry's "one composition per card" and "no correction". Its tiers and fallbacks stand.
 - **Refs:** #1242, `docs/superpowers/specs/2026-10-26-android-month-intro-design.md` (D18), `apps/android/app/src/main/kotlin/app/pbbls/android/features/path/wrap/intro/IntroComposition.kt`, `IntroSegmentQueue.kt`.
+
+## 2026-10-29 — The icon set lives in `packages/icons`, and each surface commits what its generator emits (#1311)
+
+- **Status:** taken
+- **Scope:** cross-surface
+- **Context:**
+  - The foundation wave (`packages/icons/waves/2026-10-foundation/`) settled a hand-drawn set: 121 drawings under official names, 34 active twins and 66 lit twins, one line (Riverbed Reed). iOS draws 61 distinct SF Symbols today, Android hand-traces `ic_*` VectorDrawables, web and admin import lucide: three vocabularies for one brand, edited in three places.
+  - Xcode Cloud and Gradle never run node; Vercel builds web and admin from the workspace.
+- **Decision:**
+  - `packages/icons` (`@pbbls/icons`) is an npm workspace and the single source of truth: `src/<name>.svg` (twins `<name>.<variant>.svg`), `icons.json` (order, meaning, variants, wave, status, `replaces` per surface) and `DNA.md` (the style paragraph and the machine-checked canvas rules).
+  - A TypeScript generator (`scripts/build.ts`, tsx, `svgo` as a formatter only) lints the sources and emits React components into the package, an asset catalog and `PbblsIcon` into `apps/ios`, VectorDrawables and `PbblsIcon` into `apps/android`. **The outputs are committed** (the `database.ts` precedent) and CI fails when a committed output differs from what the generator emits.
+  - Status gates emission: `exploring` is linted, not emitted; `candidate` is emitted everywhere; `shipped` means every surface migrated and its `replaces` names are gone.
+  - The sources are one grammar: paths only, absolute `M L C Q A Z`, every point in `1.5..22.5`, no dashes (a dotted ring is short strokes), no transforms; a lit stone is `fill="currentColor"`, a carved one adds `fill-rule="evenodd"`, both `stroke="none"`. Path data passes through verbatim.
+- **Why:**
+  - **Rejected, a shared icon font or sprite served at runtime:** each surface wants native assets (template images, VectorDrawables, components), and a font loses the per-path fill a lit stone needs.
+  - **Rejected, per-surface hand-tracing:** three tracings drift; the exploration's whole point was one geometry.
+  - **Rejected, building the outputs at build time:** the native builds have no node, and a generated file the reviewer cannot diff is a file nobody checks.
+- **Consequences:**
+  - Adding an icon is one SVG, one manifest row, `format`, `generate`, commit. A removed icon leaves nothing behind: the generator owns its output paths outright.
+  - Migrating call sites is per surface (#1313 web, #1314 iOS, #1315 Android) with a lint over `replaces` (#1312); nothing user-visible changes in the package stack itself.
+  - Wave folders and the Python exploration tools live in the package; `turbo.json` keeps them out of the `build` inputs so a wave commit is not a package change (whether `turbo-ignore` honours it is verified in Part 2).
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #1311, `docs/superpowers/specs/2026-10-28-icon-package-design.md` (D1–D11), `docs/superpowers/plans/2026-10-28-icon-package.md`, `packages/icons/CLAUDE.md`.
