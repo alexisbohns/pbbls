@@ -1,0 +1,56 @@
+name: Icons
+
+# packages/icons is the one source of the hand-drawn icon set, and its outputs
+# (React components, the iOS asset catalog, the Android drawables) are committed
+# into each app so no surface needs node at build time. That only holds while the
+# committed outputs match what the generator emits, so this job regenerates in
+# memory and fails on any missing, stale or orphaned owned file. A red `fresh`
+# step is fixed by `npm run generate --workspace=@pbbls/icons` and a commit,
+# never by editing the workflow or the generated files by hand.
+#
+# No `paths:` filter, for the web.yml reason: a workflow skipped by a path filter
+# never reports a status, so a required check would stay pending forever on every
+# PR that misses the filter. The job is npm ci plus a few seconds of node.
+#
+# Each step after the first runs under `!cancelled()` so one red run names every
+# problem at once instead of stopping at the first.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: icons-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: lint · typecheck · vitest · fresh
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint the sources
+        run: npm run lint --workspace=@pbbls/icons
+
+      - name: Typecheck
+        if: '!cancelled()'
+        run: npm run build --workspace=@pbbls/icons
+
+      - name: Vitest
+        if: '!cancelled()'
+        run: npm run test --workspace=@pbbls/icons
+
+      - name: Generated outputs are fresh
+        if: '!cancelled()'
+        run: npm run check --workspace=@pbbls/icons
