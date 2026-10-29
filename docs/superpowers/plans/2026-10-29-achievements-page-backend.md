@@ -20,6 +20,8 @@
 - **Apply** with `npm run db:push --workspace=packages/supabase`. If the auto-mode classifier blocks it, hand the maintainer the command and wait.
 - **Regenerate types** after applying, with `npm run db:types:remote --workspace=packages/supabase`, and commit `packages/supabase/types/database.ts`. `db:types` targets the local stack and truncates the file on failure, so don't use it here.
 - **Harnesses run** with `set -a; . ./.env; set +a` from the repo root, then the npm script.
+- **One linked project, three PRs.** Every PR's CI runs its harnesses against the linked project, so push a part's migrations only once the part before it is merged, and merge in order. Part 3's `get_public_profile` change flips the public counts; part 1 and 2 copies of `verify-public-profile.ts` go red if their CI re-runs after part 3 is pushed.
+- **Expected harness output** is always `failed=0`. Pass totals are not asserted here, so a recount is never a false alarm.
 
 ---
 
@@ -345,7 +347,7 @@ begin
          coalesce(p.delta::integer, 0),
          case                                                                               -- #1305 (D7, D8)
            when q.family in ('emotion_first','domain_first','first_stone') then false
-           when q.family = 'pebble_count' and exists (
+           when q.family in ('pebble_count','first_pebble') and exists (
              select 1 from public.pebbles px where px.id = q.pebble_id and px.positiveness = -1) then false
            else true
          end
@@ -388,7 +390,7 @@ As a seeded user with one medium, highlight pebble, call `select * from public.c
 Expected:
 - `first-stone-medium` and `first-stone-highlight` with `celebrate = false`;
 - `emotion-first-*` and `domain-first-*` with `false`;
-- `pebble-count-1` with `true`.
+- `pebble-count-1` and `first-pebble` with `true`, since that pebble is bright. Over a heavy first pebble both are `false`: the same pebble is never celebrated twice over, or once.
 
 - [ ] **Step 4: Commit**
 
@@ -422,13 +424,31 @@ Above each body, add a header saying where it was copied from.
   v_counts := v_counts || jsonb_build_object('achievement_completions', v_n);
 ```
 
-- [ ] **Step 3: Refuse the seeded families in `admin_create_achievement`.** Insert this immediately after the `bad_karma` check:
+- [ ] **Step 3: Refuse the seeded families, and karma on contributions, in `admin_create_achievement`.** Insert this immediately after the `bad_karma` check:
 
 ```sql
   -- #1305: first_stone and set_complete are seeded only (their rules key on
   -- stone_kind and on the stack slug, which the admin cannot set).
   if p_family in ('first_stone', 'set_complete') then
     raise exception 'seeded_family';
+  end if;
+  -- #1305 (D7): contributions never pay; say so before the CHECK does.
+  if p_family in ('emotion_first', 'domain_first') and p_karma_reward > 0 then
+    raise exception 'silent_family_karma';
+  end if;
+```
+
+- [ ] **Step 3b: The same guard in `admin_update_achievement`.**
+  - Paste its body below the other two: run `sed -n '/create or replace function public.admin_update_achievement/,/^\$\$;/p' supabase/migrations/20260730150000_admin_achievement_management.sql`.
+  - Insert this right after its `bad_karma` check:
+
+```sql
+  -- #1305 (D7): contributions never pay karma.
+  if p_karma_reward > 0 and exists (
+       select 1 from public.achievements a
+        where a.id = p_achievement_id
+          and a.family in ('emotion_first', 'domain_first', 'first_stone')) then
+    raise exception 'silent_family_karma';
   end if;
 ```
 
@@ -438,13 +458,47 @@ Run: `diff <(sed -n '/create or replace function public.purge_account/,/^\$\$;/p
 
 Expected: only the six added lines.
 
-Run the same `diff` for `admin_create_achievement`. Expected: only the five added lines.
+Run the same `diff` for `admin_create_achievement`, where only the nine added lines should differ, and for `admin_update_achievement`, where only the seven added lines should differ. Its source is `20260730150000_admin_achievement_management.sql`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add packages/supabase/supabase/migrations/20261030090300_achievements_purge_admin.sql
 git commit -m "feat(db): purge the achievement views and completions, and keep seeded families out of the admin"
+```
+
+### Task 4b: The admin app knows the two new families
+
+**Files:**
+- Modify: `apps/admin/lib/achievements/types.ts`
+- Modify: `apps/admin/app/(authed)/achievements/new/_components/NewAchievementForm.tsx` (the family picker, around line 155)
+
+- [ ] **Step 1: Mirror the CHECK constraint.**
+  - In `ACHIEVEMENT_FAMILIES`, after `"glyph_sales",`, add `"first_stone",` and `"set_complete",`.
+  - Change the comment's "The eleven families" to "The thirteen families".
+  - In `FAMILY_LABELS`, add `first_stone: "First of a stone (six firsts)",` and `set_complete: "A completed set",`.
+- [ ] **Step 2: Name the seeded families and the new errors.** Add this export below `REFERENCE_FAMILIES`:
+
+```ts
+/** Seeded by migration only: the admin edits them but never creates one (#1305). */
+export const SEEDED_FAMILIES: readonly AchievementFamily[] = ["first_stone", "set_complete"]
+```
+
+In `achievementErrorMessage`, add before `default:`:
+
+```ts
+    case "seeded_family":
+      return "The six firsts and completed sets are seeded by migration and cannot be created here."
+    case "silent_family_karma":
+      return "Firsts of an emotion, a domain or a stone never pay karma."
+```
+
+- [ ] **Step 3: Keep seeded families out of the create picker.** In `NewAchievementForm.tsx`, import `SEEDED_FAMILIES` and change `{ACHIEVEMENT_FAMILIES.map((f) => (` to `{ACHIEVEMENT_FAMILIES.filter((f) => !SEEDED_FAMILIES.includes(f)).map((f) => (`.
+- [ ] **Step 4: Check and commit.** Run `npm run lint --workspace=apps/admin` and `npm run build --workspace=apps/admin`; both must be green. Then:
+
+```bash
+git add apps/admin/lib/achievements/types.ts "apps/admin/app/(authed)/achievements/new/_components/NewAchievementForm.tsx"
+git commit -m "feat(admin): know the six firsts and completed sets, and refuse karma on contributions"
 ```
 
 ### Task 5: The harness, part 1
@@ -560,7 +614,7 @@ try {
   check("the emotion and domain firsts are silent and pay nothing",
     first.filter((u) => u.slug.startsWith("emotion-first-") || u.slug.startsWith("domain-first-"))
       .every((u) => u.celebrate === false && u.karma_granted === 0), JSON.stringify(first));
-  check("first-pebble still celebrates", bySlug["first-pebble"]?.celebrate === true, JSON.stringify(bySlug["first-pebble"]));
+  check("first-pebble over a heavy pebble is quiet too", bySlug["first-pebble"]?.celebrate === false, JSON.stringify(bySlug["first-pebble"]));
 
   await pebble(a, `medium even ${runId}`, "2026-03-03T09:00:00Z", emo.id, 2, 0, [dom.id]);
   const p3 = await pebble(a, `large bright ${runId}`, "2026-03-04T09:00:00Z", emo.id, 3, 1, [dom.id]);
@@ -599,6 +653,14 @@ try {
   check("a user sees only their own completions", (peek ?? []).length === 0, JSON.stringify(peek));
   const anonCheck = await anon.rpc("check_achievements");
   check("check_achievements is refused to anon", !!anonCheck.error, JSON.stringify(anonCheck.data));
+  const { data: ladder } = await a.from("achievements").select("threshold, is_active").eq("family", "pebble_count").order("threshold");
+  const want = [1, 10, 25, 50, 100, 250, 500, 1000, ...Array.from({ length: 18 }, (_, k) => 1500 + 500 * k)];
+  check("the pebble ladder has no gap up to 10 000 and every rung is active (D3)",
+    JSON.stringify((ladder ?? []).map((r: { threshold: number }) => r.threshold)) === JSON.stringify(want)
+      && (ladder ?? []).every((r: { is_active: boolean }) => r.is_active), JSON.stringify(ladder));
+  // D3's other half, "no user within 500 of the top", needs every user's count:
+  // it cannot run anon. The maintainer runs it by hand in the SQL editor:
+  //   select max(n) from (select count(*) n from pebbles group by user_id) x;   -- must stay below 9 500
   await dump("check-achievements", first);
 } catch (err) {
   failed += 1;
@@ -646,7 +708,7 @@ Then add `achievements-verify-` to the list of orphan prefixes.
 
 Run: `set -a; . ./.env; set +a; npm run db:verify:achievements --workspace=packages/supabase`
 
-Expected: `Summary: passed=12 failed=0`
+Expected: `failed=0`.
 
 - [ ] **Step 6: Commit**
 
@@ -697,7 +759,7 @@ Add these two entries to `sellerScoped`:
 
 Leave the shelf assertions alone; they change in part 3. The shelf still projects every family until then, but the new rows sort at 460+ and fall off the six-slot shelf, so the cap check holds.
 
-Change `shelf.achievements_count === 9` to `=== 11`.
+Change `shelf.achievements_count === 9` to `=== 11`. In section 4, change `check("the total grows with it", recent.achievements_count === 10)` to `=== 12`. Its eight extra pebbles are medium and bright, so they add no first; `pebble-count-10` takes 11 to 12.
 
 - [ ] **Step 3: Run both** after the push.
 
@@ -719,7 +781,7 @@ git commit -m "test(db): purge the achievement views and completions and count t
 - [ ] **Step 3: Run the harnesses** from Tasks 5 and 6. All must be green.
 - [ ] **Step 4: Check the clients still compile against the new return type.** The `celebrate` column is additive.
   - Run `npm run lint --workspace=apps/web` and `npm test --workspace=apps/web`.
-  - Confirm the Android `AchievementsService` JSON sets `ignoreUnknownKeys`: run `grep -n "Json" apps/android/app/src/main/kotlin/app/pbbls/android/core/data/AchievementsService.kt`. If it doesn't, add `ignoreUnknownKeys = true` to that instance in this part.
+  - Android needs no change. `AchievementsService` uses supabase-kt's default serializer (`supabaseJson`), which already sets `ignoreUnknownKeys = true`, and no custom `Json` instance exists. iOS (`Decodable`, explicit CodingKeys) and web (which maps `slug` and `karma_granted`) are additive-safe too.
 - [ ] **Step 5: Commit the types and open the PR.**
   - Commit `types/database.ts` with `chore(db): regenerate types for the achievements model`.
   - Run `gh stack` to create the PR, titled `feat(db): the achievements model for the new page`.
@@ -923,12 +985,12 @@ create or replace function public.achievement_completion(p_stack text, p_tz text
 returns jsonb language sql stable security invoker set search_path = '' as $$
   select jsonb_build_object(
       'completed_at', to_char(c.completed_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
-      'offered_from', to_char(o.at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
-      'ready', c.pulled_at is null and now() >= o.at)
+      'offered_from', to_char(o.offered_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+      'ready', c.pulled_at is null and now() >= o.offered_at)
     || case when c.pulled_at is null then '{}'::jsonb
             else jsonb_build_object('pulled_at', to_char(c.pulled_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')) end
   from public.achievement_completions c
-  cross join lateral (select ((((c.completed_at at time zone p_tz)::date + 1) + time '06:00') at time zone p_tz) as at) o
+  cross join lateral (select ((((c.completed_at at time zone p_tz)::date + 1) + time '06:00') at time zone p_tz) as offered_at) o
   where c.user_id = (select auth.uid()) and c.stack = p_stack
 $$;
 
@@ -1348,7 +1410,9 @@ import { yearPayload } from "./oracles/achievements/year.js";
   let seed = parseInt(runId, 16) || 1;
   const rand = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
   const items: { date: string; pebble: boolean; family: string; intensity: number }[] = [];
-  for (let m = 1; m <= 12; m++) {
+  // Four months (March to June) keep the harness to ~40 round-trips while still
+  // covering kept, quiet and every level; the rest of 2025 is quiet by construction.
+  for (let m = 3; m <= 6; m++) {
     for (let d = 1; d <= 28; d++) {
       if (rand() > 0.35) continue;
       const date = `2025-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
@@ -1368,26 +1432,43 @@ import { yearPayload } from "./oracles/achievements/year.js";
   const firstMoment = items.map((i) => i.date).sort()[0] ?? null;
   const y2025 = await b.rpc("achievements_year", { p_year: 2025, p_tz: tz });
   const expected = yearPayload(2025, items, today, firstMoment);
-  const mismatches = (expected.months as Payload[]).filter((e, k) => JSON.stringify(e) !== JSON.stringify((y2025.data as Payload).months[k]));
+  const mismatches = (expected.months as Payload[]).filter((e, k) => !same(e, (y2025.data as Payload).months[k]));
   check("achievements_year(2025) equals the oracle month by month", !y2025.error && mismatches.length === 0,
     y2025.error?.message ?? JSON.stringify(mismatches.slice(0, 2)) + " vs " + JSON.stringify((y2025.data as Payload).months.slice(0, 2)));
-  check("the listed months equal the oracle's", JSON.stringify((y2025.data as Payload).listed) === JSON.stringify(expected.listed),
+  check("the listed months equal the oracle's", same((y2025.data as Payload).listed, expected.listed),
     JSON.stringify([(y2025.data as Payload).listed, expected.listed]));
   const yNow = await b.rpc("achievements_year", { p_year: Number(today.slice(0, 4)), p_tz: tz });
   const expNow = yearPayload(Number(today.slice(0, 4)), items, today, firstMoment);
-  check("the current year equals the oracle, next step included", JSON.stringify(yNow.data) === JSON.stringify(expNow),
+  check("the current year equals the oracle, next step included", same(yNow.data, expNow),
     JSON.stringify(yNow.data).slice(0, 300));
   const pb = (await b.rpc("get_achievements", { p_tz: tz })).data as Payload;
   check("get_achievements lists the current year and 2025, newest first",
     pb.years.map((y: Payload) => y.year).join(",") === `${today.slice(0, 4)},2025`, JSON.stringify(pb.years.map((y: Payload) => y.year)));
   await dump("get-achievements-year", pb);
+  // Coverage tiers at their boundaries (D11): one pebble per step, on a fresh user.
+  const carol = await signUp("c"); users.push(carol);
+  const { data: allDomains } = await carol.client.from("domains").select("id").order("slug");
+  const domIds = (allDomains ?? []).map((d: { id: string }) => d.id);
+  const total = domIds.length;
+  const tierAt = async (n: number) => {
+    await pebble(carol.client, `cover ${n} ${runId}`, "2026-03-10T09:00:00Z", emo.id, 2, 1, domIds.slice(0, n));
+    await carol.client.rpc("check_achievements");
+    return ((await carol.client.rpc("get_achievements", { p_tz: tz })).data as Payload).domains.coverage;
+  };
+  const expectTier = (n: number) => n === 0 ? "none" : n < total / 3 ? "few" : n < total / 2 ? "third" : n < total * 0.75 ? "half" : n < total ? "most" : "all";
+  const steps = [Math.ceil(total / 3), Math.ceil(total / 2), Math.ceil(total * 0.75), total];
+  const tiers: string[] = [];
+  for (const n of steps) tiers.push(await tierAt(n));
+  check("coverage crosses third, half, most and all at their boundaries",
+    JSON.stringify(tiers) === JSON.stringify(steps.map(expectTier)) && tiers.join(",") === "third,half,most,all",
+    JSON.stringify([steps, tiers]));
   const badTz = await b.rpc("get_achievements", { p_tz: "Mars/Olympus" });
   check("get_achievements refuses an unknown zone", !!badTz.error && badTz.error.message.includes("invalid_tz"), badTz.error?.message ?? "accepted");
   const anonRead = await anon.rpc("get_achievements", { p_tz: tz });
   check("get_achievements is refused to anon", !!anonRead.error, JSON.stringify(anonRead.data));
 ```
 
-The two whole-object comparisons rely on both sides emitting keys in the same order. `jsonb` sorts object keys (by length, then bytewise), so normalise before comparing. Add this helper near `check`, and replace each `JSON.stringify(x) === JSON.stringify(y)` above with `same(x, y)`:
+The two whole-object comparisons rely on both sides emitting keys in the same order. `jsonb` sorts object keys (by length, then bytewise), so the comparisons above already go through `same`. Add this helper near `check`:
 
 ```ts
 const canon = (v: unknown): unknown => Array.isArray(v) ? v.map(canon)
@@ -1399,7 +1480,7 @@ const same = (x: unknown, y: unknown) => JSON.stringify(canon(x)) === JSON.strin
 
 - [ ] **Step 4: Run it after pushing the part 2 migration**
 
-Run: `npm run db:verify:achievements --workspace=packages/supabase`. Expected: `Summary: passed=26 failed=0`.
+Run: `npm run db:verify:achievements --workspace=packages/supabase`. Expected: `failed=0`.
 
 Then run with `ACHIEVEMENTS_DUMP=1` once and commit the payloads under `scripts/oracles/achievements/payloads/`. The client parts replay them.
 
@@ -1497,8 +1578,10 @@ begin
     raise exception 'not_ready' using errcode = 'P0001';
   end if;
 
-  update public.achievement_completions set pulled_at = now()
-   where user_id = v_uid and stack = p_stack and pulled_at is null;
+  -- Qualified: an unqualified "stack" would clash with the OUT column of the
+  -- same name (plpgsql.variable_conflict = error).
+  update public.achievement_completions c set pulled_at = now()
+   where c.user_id = v_uid and c.stack = p_stack and c.pulled_at is null;
 
   return query
   with target as (
@@ -1585,6 +1668,7 @@ git commit -m "fix(db): keep emotion, domain and six-firsts achievements off pub
     JSON.stringify(afterLook.explorer.six_firsts.map((s: Payload) => s.new)));
   const { data: other } = await a.from("emotions").select("id").order("slug", { ascending: false }).limit(1).single();
   await pebble(a, `a new feeling ${runId}`, "2026-03-06T09:00:00Z", other!.id, 2, 1, [dom.id]);
+  await a.rpc("check_achievements");   // record it BEFORE the look, so only the third is new
   await a.rpc("mark_achievements_seen", { p_card: "emotions" });
   await new Promise((r) => setTimeout(r, 1100));
   const { data: third } = await a.from("emotions").select("id").order("slug").range(1, 1).single();
@@ -1656,11 +1740,11 @@ The unlocks are: `pebble-count-1`, two `emotion-first-*`, one `domain-first-*`, 
 
 Then delete the old check `the reference ids the clients localize by are projected`; it asserted the leak this part removes.
 
-Before editing section 4 (`Recency wins over catalog order`), read its counts. Each pebble it adds can unlock more firsts, so update any `achievements_count` it asserts to the public count only.
+In section 4 (`Recency wins over catalog order`), change `recent.achievements_count === 12` (set in part 1) to `=== 7`: the six public badges plus `pebble-count-10`.
 
 - [ ] **Step 3: Run both harnesses** after pushing the part 3 migrations.
 
-Expected: `db:verify:achievements` gives `Summary: passed=34 failed=0` in CI, without the service key. Run by hand with the key, it gives 36. `db:verify:public-profile` must show no failures.
+Expected: `db:verify:achievements` reports `failed=0`. It prints one skip line in CI, where there is no service key, and runs two more checks when run by hand with the key. `db:verify:public-profile` must show no failures.
 
 - [ ] **Step 4: Commit**
 
@@ -1727,6 +1811,14 @@ git commit -m "test(db): prove seen, pull_ceremony and the private families off 
   - D16 → Task 13.
   - D17 → whole-second UTC and omitted keys.
   - Purge → Tasks 4 and 6.
+  - The admin app → Task 4b.
+  - D3's "no user within 500 of the top" → a manual SQL query (it needs a cross-user read, so it cannot run anon).
+- **Reviewed** by a Fable 5.1 critic on 2026-10-29; its twelve findings are folded in. The main ones:
+  - the `stack` column clash in `pull_ceremony`;
+  - the seen sequence;
+  - the missed public-profile count;
+  - admin karma;
+  - a heavy first pebble going quiet.
 - **Spec deltas, folded into the spec (PR #1309):**
   - Explorer's "ready" becomes `explorer.completion`, the same shape as on emotions and domains.
   - `pull_ceremony` takes `p_tz`.
