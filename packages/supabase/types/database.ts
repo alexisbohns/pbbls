@@ -39,19 +39,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_completions: {
+        Row: {
+          completed_at: string
+          pebble_id: string | null
+          pulled_at: string | null
+          stack: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          pebble_id?: string | null
+          pulled_at?: string | null
+          stack: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          pebble_id?: string | null
+          pulled_at?: string | null
+          stack?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievement_completions_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "pebbles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievement_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "achievement_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "achievement_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       achievement_unlocks: {
         Row: {
           achievement_id: string
+          pebble_id: string | null
           unlocked_at: string
           user_id: string
         }
         Insert: {
           achievement_id: string
+          pebble_id?: string | null
           unlocked_at?: string
           user_id: string
         }
         Update: {
           achievement_id?: string
+          pebble_id?: string | null
           unlocked_at?: string
           user_id?: string
         }
@@ -61,6 +117,13 @@ export type Database = {
             columns: ["achievement_id"]
             isOneToOne: false
             referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievement_unlocks_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "pebbles"
             referencedColumns: ["id"]
           },
           {
@@ -86,6 +149,46 @@ export type Database = {
           },
         ]
       }
+      achievement_views: {
+        Row: {
+          card: string
+          seen_at: string
+          user_id: string
+        }
+        Insert: {
+          card: string
+          seen_at?: string
+          user_id: string
+        }
+        Update: {
+          card?: string
+          seen_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievement_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "achievement_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "achievement_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       achievements: {
         Row: {
           description_en: string | null
@@ -99,6 +202,7 @@ export type Database = {
           karma_reward: number
           slug: string
           sort_order: number
+          stone_kind: string | null
           threshold: number | null
           title_en: string | null
           title_fr: string | null
@@ -115,6 +219,7 @@ export type Database = {
           karma_reward?: number
           slug: string
           sort_order: number
+          stone_kind?: string | null
           threshold?: number | null
           title_en?: string | null
           title_fr?: string | null
@@ -131,6 +236,7 @@ export type Database = {
           karma_reward?: number
           slug?: string
           sort_order?: number
+          stone_kind?: string | null
           threshold?: number | null
           title_en?: string | null
           title_fr?: string | null
@@ -2288,6 +2394,21 @@ export type Database = {
     }
     Functions: {
       accept_connection_invite: { Args: { p_token: string }; Returns: Json }
+      achievement_crossing_pebble: {
+        Args: {
+          p_domain: string
+          p_emotion: string
+          p_family: string
+          p_stone: string
+          p_threshold: number
+          p_user: string
+        }
+        Returns: string
+      }
+      achievement_stone_match: {
+        Args: { p_intensity: number; p_kind: string; p_positiveness: number }
+        Returns: boolean
+      }
       admin_attribute_glyph: {
         Args: { p_glyph_id: string; p_user_id: string }
         Returns: Json
