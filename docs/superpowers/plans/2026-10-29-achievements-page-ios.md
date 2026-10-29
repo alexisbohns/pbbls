@@ -55,9 +55,9 @@
 > - **Celebration:** `pebble-count-1` never celebrates, because `first-pebble` celebrates that pebble once. A heavy first pebble celebrates neither.
 > - **No year "new" marks** in v1.
 > - **The dumps are verbatim response bodies,** and a keyed run adds `get-achievements-pulled.json` (a pulled completion).
-> - **Still open with the maintainer:**
->   - the ceremony's look and copy;
->   - whether the owner's own Profile shelf also hides the private families.
+> - **The Profile shelf is served** (D18, the maintainer's call on 29 October). `get_achievements` returns `shelf` (up to six `{slug, family, threshold, unlocked_on}`, private families already removed) and `shelf_count`. Point the Profile shelf at it instead of reading `achievement_unlocks`, and keep resolving titles and glyphs from the cached catalog by slug.
+> - **The ceremony reuses the existing unlock moment** (maintainer, 29 October).
+> - **Lab Note:** the page parts carry one (maintainer, 29 October).
 
 ---
 

@@ -1386,7 +1386,21 @@ begin
            'glyphs_carved', public.achievement_ladder('glyph_count', n_glyphs, (seen->>'pebbles')::timestamptz, p_tz),
            'glyph_sales', public.achievement_ladder('glyph_sales', public.achievement_sales_count(), (seen->>'pebbles')::timestamptz, p_tz),
            'years', j_years,
-           'seen', seen_out);   -- when each card was last looked at (D10), for copy like "new since 2 October"
+           'seen', seen_out,
+           -- D18: the owner's Profile shelf, without the private families
+           'shelf', coalesce((
+             select jsonb_agg(jsonb_build_object('slug', x.slug, 'family', x.family, 'threshold', x.threshold,
+                                                 'unlocked_on', to_char(x.unlocked_at at time zone p_tz, 'YYYY-MM-DD'))
+                              order by x.unlocked_at desc, x.sort_order)
+             from (select a.slug, a.family, a.threshold, a.sort_order, u.unlocked_at
+                     from public.achievement_unlocks u join public.achievements a on a.id = u.achievement_id
+                    where u.user_id = uid
+                      and a.family not in ('emotion_first', 'domain_first', 'first_stone', 'set_complete')
+                    order by u.unlocked_at desc, a.sort_order
+                    limit 6) x), '[]'::jsonb),
+           'shelf_count', (select count(*) from public.achievement_unlocks u join public.achievements a on a.id = u.achievement_id
+                            where u.user_id = uid
+                              and a.family not in ('emotion_first', 'domain_first', 'first_stone', 'set_complete')));   -- when each card was last looked at (D10), for copy like "new since 2 October"
 end;
 $$;
 
@@ -1466,6 +1480,10 @@ import { yearPayload } from "./oracles/achievements/year.js";
       && typeof pl.emotions.seats.find((s: Payload) => s.met)?.on === "string", JSON.stringify(pl.emotions.families));
   check("the year serves its day target and done flags", pl.years[0].days_target === 14
     && pl.years[0].months.every((m: Payload) => typeof m.done?.moments === "boolean"), JSON.stringify(pl.years[0].months[0]));
+  check("the owner's shelf leaves out the private families (D18)",
+    Array.isArray(pl.shelf) && pl.shelf.length > 0 && pl.shelf.length <= 6
+      && pl.shelf.every((s: Payload) => !["emotion_first", "domain_first", "first_stone", "set_complete"].includes(s.family))
+      && pl.shelf_count >= pl.shelf.length, JSON.stringify([pl.shelf, pl.shelf_count]));
   check("the completion carries the pebble that made it whole", typeof pl.explorer.completion?.pebble?.moment_id === "string",
     JSON.stringify(pl.explorer.completion));
   check("emotions has 38 seats with one met", pl.emotions.seats.length === 38 && pl.emotions.count === 1
@@ -1890,6 +1908,7 @@ git commit -m "test(db): prove seen, pull_ceremony and the private families off 
   - D15 → `achievement_pebble`.
   - D16 → Task 13.
   - D17 → whole-second UTC and omitted keys.
+  - D18 → `shelf` and `shelf_count` in `get_achievements`.
   - Purge → Tasks 4 and 6.
   - The admin app → Task 4b.
   - D3's "no user within 500 of the top" → a manual SQL query (it needs a cross-user read, so it cannot run anon).

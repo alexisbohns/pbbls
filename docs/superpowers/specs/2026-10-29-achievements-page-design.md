@@ -67,6 +67,7 @@ This spec extends `2026-07-29-achievements-design.md` (D1–D15 there still hold
 | D14 | **One read RPC for the page and every sheet:** `get_achievements(p_tz text) returns jsonb`. It is `security invoker`, computed on read and scoped to `auth.uid()`. The page opens with the existing `check_achievements()`, which is the retroactive grant, and then this read. Sheets read the same payload, so opening one costs no call. | One aggregation for three clients, as with the wraps (D13 there). |
 | D15 | **Snapshots for resilience.** Unlike the wraps, which return ids that the Path feed resolves, this payload carries the crossing pebble's display fields: moment id, name, `happened_at`, emotion id, intensity and positiveness. Old pebbles are not in the feed's cache, and a sheet must render from the payload alone. | Clients render with resilience. |
 | D16 | **Emotions, domains and the six firsts are never public.** `get_public_profile` drops `emotion_first`, `domain_first`, `first_stone` and `set_complete` from the shelf and from `achievements_count`. Public at most: pebbles, glyphs carved, glyph sales, the first five and the blue pebble. | Privacy consensus. Today's projection shows every family, so this is a fix as well as a rule. |
+| D18 | **The owner's Profile shelf hides the private families too, and is served.** `get_achievements` returns `shelf`, the six most recent unlocks outside `emotion_first`, `domain_first`, `first_stone` and `set_complete` (newest first, then `sort_order`), and `shelf_count`. Each client's Profile shelf renders it instead of reading `achievement_unlocks` itself. | Maintainer, 29 October (option A): a first sadness never sits on a shelf of trophies. The membership is server logic. |
 | D17 | **Timestamps cross the boundary at whole seconds**, and dates as `YYYY-MM-DD` local to `p_tz`. Absent sections omit their keys; they are never null. Unknown enum values decode to a safe fallback on every client. | Standing cross-surface rules. |
 
 **Out of scope** (open questions in §8):
@@ -143,7 +144,8 @@ An absent section omits its keys; it is never null.
     "listed": [11, 10, 9, 8, 7, 6, 5, 4, 3],                           // the table, newest first
     "next_step": {"month": 11, "needs": "moments|pebbles", "days_left": 12, "reachable": true}   // current year, below level 2
   }],
-  "seen": {"explorer": "2026-10-02T08:14:05Z"}      // when each card was last looked at
+  "seen": {"explorer": "2026-10-02T08:14:05Z"},     // when each card was last looked at
+  "shelf": [{"slug", "family", "threshold", "unlocked_on"}], "shelf_count": 9   // the Profile shelf (D18)
 }
 // {pebble} = {"moment_id", "name", "happened_at", "emotion_id", "intensity", "positiveness"}
 // "on" on every dated row is the local day its pebble happened, or the day it was recorded when that pebble is gone.
