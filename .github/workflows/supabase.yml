@@ -188,9 +188,10 @@ jobs:
         run: .github/scripts/verify-harness.sh "home" db:verify:home
 
       # The achievements page (#1305): the six firsts, the crossing pebbles, the
-      # celebrate flag and completions (part 1); get_achievements and the year
-      # disc against the oracle (part 2); seen, pull_ceremony and the private
-      # families off the public profile (part 3).
+      # silent rows (recorded, not returned) and completions (part 1);
+      # get_achievements and the year disc against the oracle (part 2); seen and
+      # pull_ceremony (part 3). The private families off the public profile are
+      # proven by the public-profile step above.
       - name: Achievements (#1305)
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "achievements" db:verify:achievements

@@ -11,7 +11,9 @@
  *
  *   1. The projection returns what it promises — and, since #688, that
  *      includes real achievements: unlocked only, most-recent first, capped at
- *      the shelf size, with the untruncated total beside them.
+ *      the shelf size, with the untruncated total beside them. Since #1305
+ *      (D16) the private families — emotion_first, domain_first, first_stone,
+ *      set_complete — are never projected, nor counted.
  *   2. The projection returns NOTHING else. The privacy contract is a key
  *      allowlist, so the assertion is on the exact key set, at both levels —
  *      a widening shows up as a new key long before it shows up as a bug.
@@ -160,6 +162,20 @@ async function fetchPublic(h: string): Promise<Projection | null> {
  * One complete pebble, the way every client writes one: save_moment, then
  * complete_pebble. Returns the first error message, or null on success.
  */
+/**
+ * What the user holds, read from the ledger itself. check_achievements returns
+ * only the rows to celebrate (#1305), so its result is not the unlocked set.
+ */
+async function unlockedSlugsOf(client: SupabaseClient): Promise<string[]> {
+  const { data, error } = await client.from("achievement_unlocks").select("achievements(slug)");
+  if (error) throw new Error(`achievement_unlocks: ${error.message}`);
+  return ((data ?? []) as unknown as { achievements: { slug: string } | null }[])
+    .map((r) => r.achievements?.slug ?? "?").sort();
+}
+
+/** The families the public shelf never carries (#1305, D16). */
+const PRIVATE_FAMILIES = ["emotion_first", "domain_first", "first_stone", "set_complete"];
+
 async function seedPebble(
   client: SupabaseClient,
   moment: Record<string, unknown>,
@@ -223,9 +239,10 @@ try {
   // ---------------------------------------------------------------------------
   // 2. Seed a shelf. One pebble carries the inline soul, collection and
   //    domain, beside a carved glyph, so a single seed qualifies for five
-  //    families at once; the second pebble adds a second emotion_first. Seven
-  //    badges against a cap of six is the point — the slice has to actually
-  //    cut something.
+  //    families at once; the second pebble adds a second emotion_first. Of the
+  //    eleven unlocks, five are private (two emotion firsts, a domain first,
+  //    the medium and highlight stone firsts), so the public shelf holds
+  //    exactly six; section 4's seventh is what the slice has to cut.
   // ---------------------------------------------------------------------------
   const now = () => new Date().toISOString();
   const basePebble = {
@@ -260,7 +277,16 @@ try {
 
   const { data: batch1, error: ackErr } = await a.rpc("check_achievements");
   check("the retroactive grant unlocks the whole history in one call", !ackErr, ackErr?.message);
-  const unlockedSlugs = (batch1 as { slug: string }[] ?? []).map((r) => r.slug);
+  const returned1 = (batch1 as { slug: string }[] ?? []).map((r) => r.slug);
+  check(
+    "the private families and pebble-count-1 are recorded, not returned (#1305)",
+    returned1.every((s) =>
+      s !== "pebble-count-1" && !s.startsWith("emotion-first-") && !s.startsWith("domain-first-")
+      && !s.startsWith("first-stone-")
+    ),
+    returned1.join(", "),
+  );
+  const unlockedSlugs = await unlockedSlugsOf(a);
   check(
     `eleven badges unlock (got ${unlockedSlugs.length}: ${unlockedSlugs.join(", ")})`,
     unlockedSlugs.length === 11,
@@ -273,22 +299,32 @@ try {
   const slugs = shelf.achievements.map((b) => b.slug);
 
   check(
-    "achievements_count reports the untruncated total",
-    shelf.achievements_count === 11,
+    "achievements_count counts the public unlocks only (D16)",
+    shelf.achievements_count === 6,
     `got ${shelf.achievements_count}`,
   );
   check(
-    `the array is capped at the shelf size (got ${shelf.achievements.length})`,
+    `the shelf holds all six public badges (got ${shelf.achievements.length})`,
     shelf.achievements.length === 6,
   );
-  // Batch 1 shares one unlocked_at (one insert, one now()), so the whole slice
-  // is decided by the sort_order tie-break: 100 pebble-count-1, 200 ×2
-  // emotion_first, 300 domain_first, 400 first-collection, 410 first-glyph —
-  // and 420 first-soul, 430 first-moment and 440 first-pebble (#1254) are the
-  // ones that fall off.
   check(
-    "the tie-break drops the highest sort_order, not an arbitrary row",
-    !slugs.includes("first-soul") && slugs.includes("first-glyph"),
+    "no private family is ever projected (D16)",
+    shelf.achievements.every((b) => !PRIVATE_FAMILIES.includes(String(b.family))),
+    shelf.achievements.map((b) => `${b.slug}:${String(b.family)}`).join(", "),
+  );
+  // Batch 1 shares one unlocked_at (one insert, one now()); with the private
+  // families gone, the six public badges are the whole shelf, in sort_order.
+  const PUBLIC_SIX = [
+    "first-collection",
+    "first-glyph",
+    "first-moment",
+    "first-pebble",
+    "first-soul",
+    "pebble-count-1",
+  ];
+  check(
+    "the shelf is exactly the six public badges, all shown",
+    JSON.stringify([...slugs].sort()) === JSON.stringify(PUBLIC_SIX),
     slugs.join(", "),
   );
   check(
@@ -311,13 +347,6 @@ try {
   check(
     "seeded badges carry a null glyph until the admin assigns one",
     shelf.achievements.every((b) => b.glyph === null),
-  );
-  check(
-    "the reference ids the clients localize by are projected",
-    shelf.achievements.some((b) => b.family === "emotion_first" && typeof b.emotion_id === "string")
-      && shelf.achievements.some((b) =>
-        b.family === "domain_first" && typeof b.domain_id === "string"
-      ),
   );
 
   // ---------------------------------------------------------------------------
@@ -351,8 +380,13 @@ try {
     recent.achievements[0]?.slug === "pebble-count-10",
     recent.achievements.map((b) => b.slug).join(", "),
   );
-  check("the total grows with it", recent.achievements_count === 12);
-  check("the array stays capped", recent.achievements.length === 6);
+  check("the total grows with it", recent.achievements_count === 7);
+  check("the array is capped at the shelf size", recent.achievements.length === 6);
+  check(
+    "still no private family on the shelf",
+    recent.achievements.every((b) => !PRIVATE_FAMILIES.includes(String(b.family))),
+    recent.achievements.map((b) => String(b.family)).join(", "),
+  );
 
   // Bounce reads the MOMENT's date: seven distinct happened_at days in the
   // window is level 2 (6–9 days). A bounce still keyed on pebbles.created_at

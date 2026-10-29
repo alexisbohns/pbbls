@@ -5,7 +5,10 @@
  *   1. The model (part 1):
  *      - the six firsts unlock independently, so three pebbles earn all six;
  *      - every pebble-backed unlock records its crossing pebble;
- *      - contributions and a heavy-crossed level return celebrate = false and pay nothing;
+ *      - check_achievements returns only the rows to celebrate: contributions,
+ *        pebble-count-1 and a heavy-crossed level are recorded in
+ *        achievement_unlocks but never returned (the shipped clients celebrate
+ *        every returned row), and contributions pay nothing;
  *      - making the six firsts whole records one completion, once;
  *      - the new tables are owner-scoped and not client-writable.
  *
@@ -51,7 +54,7 @@ async function dump(name: string, token: string, fn: string, args: Record<string
 const runId = crypto.randomUUID().slice(0, 8);
 const password = `Ach-${crypto.randomUUID()}`;
 type TestUser = { client: SupabaseClient; id: string; token: string };
-type Unlock = { slug: string; karma_granted: number; celebrate: boolean };
+type Unlock = { slug: string; karma_granted: number };
 
 async function signUp(label: string): Promise<TestUser> {
   const client = createClient(SUPABASE_URL!, ANON_KEY!, { auth: { persistSession: false } });
@@ -96,29 +99,38 @@ try {
   if (!emo || !dom) throw new Error("reference data missing");
 
   // 1. the model ----------------------------------------------------------------------------
+  // A silent row is RECORDED but NOT RETURNED: the shipped clients celebrate
+  // every returned row, so the assertions on silence read achievement_unlocks.
   // Three pebbles earn all six firsts: (small, lowlight), (medium, neutral), (large, highlight).
+  const { data: silentRows } = await a.from("achievements").select("id, slug")
+    .in("family", ["emotion_first", "domain_first", "first_stone", "set_complete"]);
+  const silentIds = (silentRows ?? []).map((r: { id: string }) => r.id);
+  const silentSlugs = new Set([...(silentRows ?? []).map((r: { slug: string }) => r.slug), "pebble-count-1"]);
+  const returnsNothingSilent = (rows: Unlock[]) => rows.every((u) => !silentSlugs.has(u.slug));
+
   const p1 = await pebble(a, `heavy small ${runId}`, "2026-03-02T09:00:00Z", emo.id, 1, -1, [dom.id]);
-  const first = (await a.rpc("check_achievements")).data as Unlock[];
-  const bySlug = Object.fromEntries(first.map((u) => [u.slug, u]));
-  check("the first, heavy pebble unlocks pebble-count-1 without a celebration (D8)",
-    bySlug["pebble-count-1"]?.celebrate === false, JSON.stringify(bySlug["pebble-count-1"]));
-  check("first-stone-small and first-stone-lowlight unlock silently (D7)",
-    bySlug["first-stone-small"]?.celebrate === false && bySlug["first-stone-lowlight"]?.celebrate === false,
-    JSON.stringify(first));
-  check("the emotion and domain firsts are silent and pay nothing",
-    first.filter((u) => u.slug.startsWith("emotion-first-") || u.slug.startsWith("domain-first-"))
-      .every((u) => u.celebrate === false && u.karma_granted === 0), JSON.stringify(first));
-  check("first-pebble over a heavy pebble is quiet too", bySlug["first-pebble"]?.celebrate === false, JSON.stringify(bySlug["first-pebble"]));
+  const firstRes = await a.rpc("check_achievements");
+  if (firstRes.error) throw new Error(`check_achievements: ${firstRes.error.message}`);
+  const first = firstRes.data as Unlock[];
+  check("the first, heavy pebble returns only first-moment, the one row celebrated (D7, D8)",
+    first.map((u) => u.slug).join(",") === "first-moment", JSON.stringify(first));
+  const heldFirst = (await unlocks(a)).map((u) => u.slug);
+  check("…and records pebble-count-1, first-pebble, both stone firsts, an emotion and a domain first",
+    ["pebble-count-1", "first-pebble", "first-stone-small", "first-stone-lowlight"].every((s) => heldFirst.includes(s))
+      && heldFirst.some((s) => s.startsWith("emotion-first-")) && heldFirst.some((s) => s.startsWith("domain-first-")),
+    JSON.stringify(heldFirst));
+  const { data: karma } = await a.from("karma_events").select("delta, ref_id").eq("reason", "grant").in("ref_id", silentIds);
+  check("the contributions pay nothing (D7)", (karma ?? []).length === 0, JSON.stringify(karma));
 
   await pebble(a, `medium even ${runId}`, "2026-03-03T09:00:00Z", emo.id, 2, 0, [dom.id]);
   const p3 = await pebble(a, `large bright ${runId}`, "2026-03-04T09:00:00Z", emo.id, 3, 1, [dom.id]);
   const second = (await a.rpc("check_achievements")).data as Unlock[];
   const six = ["small", "medium", "large", "lowlight", "neutral", "highlight"].map((k) => `first-stone-${k}`);
   const held = (await unlocks(a)).map((u) => u.slug);
+  check("the second check (medium neutral, large bright) returns nothing", (second ?? []).length === 0, JSON.stringify(second));
   check("three pebbles earn all six firsts", six.every((s) => held.includes(s)), JSON.stringify(held));
-  check("the second check returns only the four new firsts",
-    second.map((u) => u.slug).sort().join(",") === six.filter((s) => !["first-stone-small", "first-stone-lowlight"].includes(s)).sort().join(","),
-    JSON.stringify(second));
+  check("no returned row is ever a silent family", returnsNothingSilent([...first, ...(second ?? [])]),
+    JSON.stringify([...first, ...(second ?? [])]));
 
   const rows = await unlocks(a);
   const pebbleOf = (s: string) => rows.find((r) => r.slug === s)?.pebble_id ?? null;
@@ -145,6 +157,15 @@ try {
   const bob = await signUp("b"); users.push(bob);
   const { data: peek } = await bob.client.from("achievement_completions").select("*");
   check("a user sees only their own completions", (peek ?? []).length === 0, JSON.stringify(peek));
+  // A fresh bright first pebble: first-pebble celebrates it; pebble-count-1 and
+  // its stone firsts are recorded, not returned.
+  await pebble(bob.client, `bright first ${runId}`, "2026-03-05T09:00:00Z", emo.id, 2, 1, [dom.id]);
+  const bobRows = ((await bob.client.rpc("check_achievements")).data ?? []) as Unlock[];
+  const bobSlugs = bobRows.map((u) => u.slug);
+  check("a bright first pebble returns first-pebble, not pebble-count-1 nor any first-stone-*",
+    bobSlugs.includes("first-pebble") && !bobSlugs.includes("pebble-count-1")
+      && !bobSlugs.some((s) => s.startsWith("first-stone-")) && returnsNothingSilent(bobRows),
+    JSON.stringify(bobSlugs));
   const anonCheck = await anon.rpc("check_achievements");
   check("check_achievements is refused to anon", !!anonCheck.error, JSON.stringify(anonCheck.data));
   const { data: ladder } = await a.from("achievements").select("threshold, is_active").eq("family", "pebble_count").order("threshold");
