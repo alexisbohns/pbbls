@@ -4,9 +4,14 @@
 --   highlight positiveness), seeded only; stone_kind says which.
 -- * set_complete: one catalog row per completion stack, unlocked only by
 --   pull_ceremony (part 3), so a completion's karma is an admin-set catalog
---   value and is paid exactly once by the unlocks PK.
+--   value and is paid exactly once by the unlocks PK. Seeded is_active = false:
+--   part 3's migration activates them with pull_ceremony.
+-- * the nine new rows carry seeded titles (EN/FR): the shipped grids fall back
+--   to the raw slug when a row has no title and no built-in copy.
 -- * the pebble ladder continues every 500 up to 10 000 (D3).
--- * achievement_unlocks.pebble_id: the pebble that earned the row (D4).
+-- * achievement_unlocks.pebble_id: the pebble that earned the row (D4), with
+--   achievement_completions.pebble_id indexed beside it, so on delete set null
+--   stays cheap on a pebble delete and in purge_account.
 -- * achievement_views: "new since you last looked", per card (D10).
 -- * achievement_completions: a set made whole, offered later, pulled (D9).
 -- * contributions never pay karma (D7): zeroed, then constrained.
@@ -25,18 +30,19 @@ alter table public.achievements add constraint achievements_stone_kind_family
   check ((family = 'first_stone') = (stone_kind is not null));
 
 -- 2. seeds ---------------------------------------------------------------------------
-insert into public.achievements (id, slug, family, stone_kind, sort_order) values
-  (md5('achievements:first-stone-small')::uuid,     'first-stone-small',     'first_stone', 'small',     460),
-  (md5('achievements:first-stone-medium')::uuid,    'first-stone-medium',    'first_stone', 'medium',    461),
-  (md5('achievements:first-stone-large')::uuid,     'first-stone-large',     'first_stone', 'large',     462),
-  (md5('achievements:first-stone-lowlight')::uuid,  'first-stone-lowlight',  'first_stone', 'lowlight',  463),
-  (md5('achievements:first-stone-neutral')::uuid,   'first-stone-neutral',   'first_stone', 'neutral',   464),
-  (md5('achievements:first-stone-highlight')::uuid, 'first-stone-highlight', 'first_stone', 'highlight', 465);
+insert into public.achievements (id, slug, family, stone_kind, title_en, title_fr, sort_order) values
+  (md5('achievements:first-stone-small')::uuid,     'first-stone-small',     'first_stone', 'small',     'First small pebble',   'Premier petit galet', 460),
+  (md5('achievements:first-stone-medium')::uuid,    'first-stone-medium',    'first_stone', 'medium',    'First medium pebble',  'Premier galet moyen', 461),
+  (md5('achievements:first-stone-large')::uuid,     'first-stone-large',     'first_stone', 'large',     'First large pebble',   'Premier grand galet', 462),
+  (md5('achievements:first-stone-lowlight')::uuid,  'first-stone-lowlight',  'first_stone', 'lowlight',  'First lowlight',       'Premier creux',       463),
+  (md5('achievements:first-stone-neutral')::uuid,   'first-stone-neutral',   'first_stone', 'neutral',   'First neutral pebble', 'Premier galet neutre', 464),
+  (md5('achievements:first-stone-highlight')::uuid, 'first-stone-highlight', 'first_stone', 'highlight', 'First highlight',      'Premier temps fort',  465);
 
-insert into public.achievements (id, slug, family, sort_order) values
-  (md5('achievements:complete-emotions')::uuid,   'complete-emotions',   'set_complete', 700),
-  (md5('achievements:complete-domains')::uuid,    'complete-domains',    'set_complete', 710),
-  (md5('achievements:complete-six-firsts')::uuid, 'complete-six-firsts', 'set_complete', 720);
+-- Inactive until part 3 ships pull_ceremony, their only way to unlock.
+insert into public.achievements (id, slug, family, title_en, title_fr, is_active, sort_order) values
+  (md5('achievements:complete-emotions')::uuid,   'complete-emotions',   'set_complete', 'Every emotion',  'Toutes les émotions',    false, 700),
+  (md5('achievements:complete-domains')::uuid,    'complete-domains',    'set_complete', 'Every domain',   'Tous les domaines',      false, 710),
+  (md5('achievements:complete-six-firsts')::uuid, 'complete-six-firsts', 'set_complete', 'The six firsts', 'Les six premières fois', false, 720);
 
 insert into public.achievements (id, slug, family, threshold, sort_order)
 select md5('achievements:pebble-count-' || t)::uuid, 'pebble-count-' || t, 'pebble_count', t, 170 + t / 500
@@ -51,6 +57,9 @@ alter table public.achievements add constraint achievements_silent_karma
 -- 4. the crossing pebble (D4) ------------------------------------------------------------
 alter table public.achievement_unlocks
   add column pebble_id uuid references public.pebbles(id) on delete set null;
+-- on delete set null scans for referencing rows: index them (partial, since
+-- an unlock outside the pebble-backed families carries none).
+create index achievement_unlocks_pebble_id_idx on public.achievement_unlocks (pebble_id) where pebble_id is not null;
 
 -- 5. seen, per card (D10) ---------------------------------------------------------------
 create table public.achievement_views (
@@ -76,6 +85,7 @@ create table public.achievement_completions (
 alter table public.achievement_completions enable row level security;
 create policy achievement_completions_select_self on public.achievement_completions
   for select to authenticated using (user_id = auth.uid());
+create index achievement_completions_pebble_id_idx on public.achievement_completions (pebble_id) where pebble_id is not null;
 -- No write policies: check_achievements records, pull_ceremony (part 3) pulls.
 
 -- 7. helpers ------------------------------------------------------------------------------
