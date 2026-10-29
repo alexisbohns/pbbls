@@ -25,7 +25,7 @@ export type AdminAchievement = {
 }
 
 /**
- * The eleven families the catalog admits. The list is a mirror of the column's
+ * The thirteen families the catalog admits. The list is a mirror of the column's
  * CHECK constraint — a new family needs a migration and a new `case` arm in
  * `check_achievements()`, so the admin can only add tiers within these.
  * `first_five` (the blue pebble, #1254) is never evaluated by the check:
@@ -43,6 +43,8 @@ export const ACHIEVEMENT_FAMILIES = [
   "first_five",
   "glyph_count",
   "glyph_sales",
+  "first_stone",
+  "set_complete",
 ] as const
 
 export type AchievementFamily = (typeof ACHIEVEMENT_FAMILIES)[number]
@@ -59,6 +61,8 @@ export const FAMILY_LABELS: Record<AchievementFamily, string> = {
   first_five: "The blue pebble",
   glyph_count: "Glyphs carved",
   glyph_sales: "Glyph sales",
+  first_stone: "First of a stone (six firsts)",
+  set_complete: "A completed set",
 }
 
 /** Families counting up to a threshold; the rest are one-shot. */
@@ -73,6 +77,9 @@ export const REFERENCE_FAMILIES: readonly AchievementFamily[] = [
   "emotion_first",
   "domain_first",
 ]
+
+/** Seeded by migration only: the admin edits them but never creates one (#1305). */
+export const SEEDED_FAMILIES: readonly AchievementFamily[] = ["first_stone", "set_complete"]
 
 export function familyLabel(family: string): string {
   return FAMILY_LABELS[family as AchievementFamily] ?? family
@@ -101,6 +108,10 @@ export function achievementErrorMessage(code: string): string {
       return "Users have already unlocked this badge. Retire it instead of deleting it."
     case "empty_glyph":
       return "This glyph has no usable strokes to save."
+    case "seeded_family":
+      return "The six firsts and completed sets are seeded by migration and cannot be created here."
+    case "silent_family_karma":
+      return "Firsts of an emotion, a domain or a stone never pay karma."
     default:
       return "Something went wrong. Check the server console for details."
   }

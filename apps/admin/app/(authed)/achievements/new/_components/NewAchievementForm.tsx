@@ -17,6 +17,7 @@ import {
   ACHIEVEMENT_FAMILIES,
   COUNTING_FAMILIES,
   REFERENCE_FAMILIES,
+  SEEDED_FAMILIES,
   familyLabel,
   type AchievementFamily,
 } from "@/lib/achievements/types"
@@ -152,7 +153,7 @@ export function NewAchievementForm({
             <SelectValue placeholder="Select a family" />
           </SelectTrigger>
           <SelectContent>
-            {ACHIEVEMENT_FAMILIES.map((f) => (
+            {ACHIEVEMENT_FAMILIES.filter((f) => !SEEDED_FAMILIES.includes(f)).map((f) => (
               <SelectItem key={f} value={f}>
                 {familyLabel(f)}
               </SelectItem>
