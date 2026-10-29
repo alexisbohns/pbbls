@@ -66,7 +66,7 @@ This spec extends `2026-07-29-achievements-design.md` (D1–D15 there still hold
 | D13 | **The year computation has an oracle.** The board's JS (`monthStats`, `monthLevels`) is committed under `packages/supabase/scripts/oracles/achievements/`. The harness compares the SQL against it month by month on fixed and seeded random years, following the gem precedent. | One implementation, kept honest. |
 | D14 | **One read RPC for the page and every sheet:** `get_achievements(p_tz text) returns jsonb`. It is `security invoker`, computed on read and scoped to `auth.uid()`. The page opens with the existing `check_achievements()`, which is the retroactive grant, and then this read. Sheets read the same payload, so opening one costs no call. | One aggregation for three clients, as with the wraps (D13 there). |
 | D15 | **Snapshots for resilience.** Unlike the wraps, which return ids that the Path feed resolves, this payload carries the crossing pebble's display fields: moment id, name, `happened_at`, emotion id, intensity and positiveness. Old pebbles are not in the feed's cache, and a sheet must render from the payload alone. | Clients render with resilience. |
-| D16 | **Emotions, domains and the six firsts are never public.** `get_public_profile` drops `emotion_first`, `domain_first` and `first_stone` from the shelf and from `achievements_count`. Public at most: pebbles, glyphs carved, glyph sales, the first five and the blue pebble. | Privacy consensus. Today's projection shows every family, so this is a fix as well as a rule. |
+| D16 | **Emotions, domains and the six firsts are never public.** `get_public_profile` drops `emotion_first`, `domain_first`, `first_stone` and `set_complete` from the shelf and from `achievements_count`. Public at most: pebbles, glyphs carved, glyph sales, the first five and the blue pebble. | Privacy consensus. Today's projection shows every family, so this is a fix as well as a rule. |
 | D17 | **Timestamps cross the boundary at whole seconds**, and dates as `YYYY-MM-DD` local to `p_tz`. Absent sections omit their keys; they are never null. Unknown enum values decode to a safe fallback on every client. | Standing cross-surface rules. |
 
 **Out of scope** (open questions in §8):
@@ -114,12 +114,12 @@ An absent section omits its keys; it is never null.
     "six_firsts":   [{"kind": "small|medium|large|lowlight|neutral|highlight", "done", "pebble": {pebble}, "new"}],
     "twenty_five":  {"count": 25, "done": true, "pebble": {pebble}},   // the 25th; count is capped at 25
     "rings_done":   ["first_five", "six_firsts", "twenty_five"],
-    "ready": false                                  // a completion offered and not pulled
+    "completion":   {"completed_at", "offered_from", "ready", "pulled_at"}   // the six firsts; absent until whole
   },
   "emotions": {
     "count": 23, "of": 38,
     "seats": [{"seat": 0, "emotion_id", "family", "met", "pebble": {pebble}, "new"}],   // 38 seats, wheel order then slug
-    "completion": {"completed_at", "offered_from", "pulled_at"}       // absent until whole
+    "completion": {"completed_at", "offered_from", "ready", "pulled_at"}  // absent until whole; pulled_at absent until pulled
   },
   "domains": {
     "count": 14, "of": 18, "coverage": "most",
@@ -138,7 +138,7 @@ An absent section omits its keys; it is never null.
                 "moment_days": 14, "pebble_days": 13, "full_weeks": 3, "weeks_filled": 3,
                 "level": 1, "progress": 0.93}],                        // 12 entries
     "listed": [11, 10, 9, 8, 7, 6, 5, 4, 3],                           // the table, newest first
-    "next_step": {"month": 11, "needs": "moments|pebbles", "days_left": 12, "weeks_left": 0}
+    "next_step": {"month": 11, "needs": "moments|pebbles", "days_left": 12, "reachable": true}   // current year, below level 2
   }]
 }
 // {pebble} = {"moment_id", "name", "happened_at", "emotion_id", "intensity", "positiveness"}
@@ -147,13 +147,14 @@ An absent section omits its keys; it is never null.
 - `weeks_filled` counts the full weeks that hold what the month's next level needs: a moment below level 1, a pebble from level 1 on. A month on the rim counts pebbles.
 - `progress` is in [0, 1] and is 0 at level 2.
 - `new` compares the item's `unlocked_at` with that card's `seen_at`.
-- `offered_from` is 06:00 in `p_tz` on the day after `completed_at`.
+- `offered_from` is 06:00 in `p_tz` on the day after `completed_at`, and `ready` says whether that time has passed, so no client compares clocks.
+- `reachable` is false once a full week of the current month has passed without what the next level needs, because that level can no longer be reached this month.
 
 ### 3.4 Writes
 
 - `mark_achievements_seen(p_card text) returns void`: an upsert of `seen_at = now()`.
-- `pull_ceremony(p_stack text) returns table (stack text, karma_granted integer)`:
-  - it is exactly-once (it sets `pulled_at` where it is null) and pays the stack's completion karma from the catalog;
+- `pull_ceremony(p_stack text, p_tz text) returns table (stack text, karma_granted integer)`:
+  - it is exactly-once (it sets `pulled_at` where it is null) and pays the stack's completion karma from the catalog: three seeded `set_complete` rows (`complete-emotions`, `complete-domains`, `complete-six-firsts`), never unlocked by the check, and private like the contributions;
   - it raises `not_ready` before `offered_from`;
   - a second call returns no row, which clients must not read as success.
 
