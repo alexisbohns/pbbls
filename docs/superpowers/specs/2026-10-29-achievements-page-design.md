@@ -45,7 +45,7 @@ This spec extends `2026-07-29-achievements-design.md` (D1–D15 there still hold
 | D5 | **The six firsts are a new family, `first_stone`, with six catalog rows.** Each is an independent first: small, medium or large intensity (1, 2, 3), and lowlight, neutral or highlight (positiveness −1, 0, 1). They are never combinations, so three pebbles can earn all six. | Maintainer, 26 October. |
 | D6 | **The Explorer wheel, from the centre out:** the user's **first pebble** (the crossing pebble of `pebble-count-1`, drawn as its own seal); the first five; the six firsts; 25 pebbles; the domains; the emotions. There is no blue pebble on the page. The Home checklist's claim (`claim_blue_pebble`) is unchanged. | Maintainer, 28 October. |
 | D7 | **Contributions are silent.** An emotion or domain first, and each of the six firsts, is recorded quietly: it shows no unlock moment and pays no karma. Only the completion of its set is celebrated (D9). `check_achievements()` returns these rows with `celebrate = false`. Admin karma on these families is forced to 0, and existing unlocks keep what they were paid. | Safety: a first "sadness" or a first heavy stone must never be celebrated. All five round-1 boards agreed. |
-| D8 | **Counting levels celebrate lightly, and never over a heavy pebble.** A new pebble, glyph or sales level, and the first pebble, returns `celebrate = true` unless its crossing pebble is heavy (positiveness −1). A level crossed by a heavy pebble is recorded silently and appears as a "new" mark the next time the card is seen. | Consensus of the round-1 boards. |
+| D8 | **Counting levels celebrate lightly, and never over a heavy pebble.** A new pebble, glyph or sales level, and the first pebble, returns `celebrate = true` unless its crossing pebble is heavy (positiveness −1). `pebble-count-1` never celebrates: `first-pebble` celebrates that same pebble, once. A level crossed by a heavy pebble is recorded silently and appears as a "new" mark the next time the card is seen. | Consensus of the round-1 boards. |
 | D9 | **Completions are offered, then pulled.** When a set becomes whole (all emotions, all domains or the six firsts), the server records a completion. It is never shown at the moment it happens. It is offered from 06:00 the next day in the reader's zone, as a quiet "ready" mark on its card. The user starts the ceremony with `pull_ceremony(stack)`. An offer never expires. Completions pay karma; contributions never do. | Consensus; the user starts it. |
 | D10 | **"New since you last looked" is per card.** `achievement_views(user, card, seen_at)` is set when the card's sheet opens (`mark_achievements_seen(card)`). An item is new when it was recorded (`unlocked_at`) after `seen_at`. With no `seen_at` row, nothing is new, so the first visit after this ships is the baseline and a veteran's history is not flagged. | Round 2 model. |
 | D11 | **The domains card says what coverage means, never a count.** The server returns a tier: `none` (0), `few` (below ⅓), `third` (⅓ to below ½), `half` (½ to below ¾), `most` (¾ to below all) or `all`. Each client maps the tier to its sentence. The fractions keep the tiers valid if a domain is ever added. The order of the domains is the order they came: the contribution's pebble `happened_at`, then `unlocked_at`. | Maintainer, 28 October. |
@@ -59,7 +59,7 @@ This spec extends `2026-07-29-achievements-design.md` (D1–D15 there still hold
   For each month the server sends the counts, the level and the progress toward the next level. Progress is the smaller of the days over 14 and the filled weeks over the full weeks.
 
   It also sends the month's **family** and its **state**:
-  - the family is the one with the most pebbles that month; ties break on total intensity, then on the wheel order (joy · pride · anger · fear · shame · sadness · peaceful);
+  - the family is the one with the most pebbles that month; ties break on total intensity, then on the wheel order of the family slugs (`joy` · `pride` · `anger` · `fear` · `shame` · `sadness` · `peace`);
   - the state is `upcoming` (a future month), `quiet` (a past or current month with no pebble) or `kept`.
 
   The table lists the kept and quiet months from the year's first moment onward, newest first; the server sends that list. | Maintainer, 28–29 October: days not entries, docked counters, colour only for pebbles. |
@@ -113,39 +113,46 @@ An absent section omits its keys; it is never null.
     "first_five":   [{"slug", "done", "on", "subject": {"kind", "id", "name"}, "new"}],   // Home order
     "six_firsts":   [{"kind": "small|medium|large|lowlight|neutral|highlight", "done", "pebble": {pebble}, "new"}],
     "twenty_five":  {"count": 25, "done": true, "pebble": {pebble}},   // the 25th; count is capped at 25
-    "rings_done":   ["first_five", "six_firsts", "twenty_five"],
+    "rings_done":   ["first_five", "six_firsts", "twenty_five"],   // up to five: also "domains", "emotions"
     "completion":   {"completed_at", "offered_from", "ready", "pulled_at"}   // the six firsts; absent until whole
   },
   "emotions": {
     "count": 23, "of": 38,
-    "seats": [{"seat": 0, "emotion_id", "family", "met", "pebble": {pebble}, "new"}],   // 38 seats, wheel order then slug
+    "seats": [{"seat": 0, "emotion_id", "family", "met", "on", "pebble": {pebble}, "new"}],   // 38 seats, wheel order then slug
+    "families": [{"family": "joy", "met": [seats by the day met], "not_yet": [seats]}],      // the sheet's order, wheel order
+    "since": "2026-03-02",
     "completion": {"completed_at", "offered_from", "ready", "pulled_at"}  // absent until whole; pulled_at absent until pulled
   },
   "domains": {
     "count": 14, "of": 18, "coverage": "most",
-    "entered": [{"domain_id", "pebble": {pebble}, "new"}],            // newest first
+    "entered": [{"domain_id", "on", "pebble": {pebble}, "new"}],      // newest first
     "not_yet": [domain ids],
     "completion": {}
   },
   "pebbles":       {"count": 137, "levels": [{"threshold", "on", "pebble": {pebble}, "new"}],
                     "next": {"threshold": 250, "left": 113, "progress": 0.25},
-                    "ladder": [1, 10, 25, 50, 100, 250, 500, 1000], "then_every": 500},
+                    "ladder": [1, 10, 25, 50, 100, 250, 500, 1000], "then_every": 500, "since": "2026-03-02"},
   "glyphs_carved": {"count", "levels": [], "next", "ladder"},          // same shape, no then_every
   "glyph_sales":   {"count", "levels": [], "next", "ladder"},
   "years": [{
-    "year": 2026, "current": true,
+    "year": 2026, "current": true, "days_target": 14,
     "months": [{"month": 1, "state": "upcoming|quiet|kept", "family": "joy",
                 "moment_days": 14, "pebble_days": 13, "full_weeks": 3, "weeks_filled": 3,
-                "level": 1, "progress": 0.93}],                        // 12 entries
+                "level": 1, "progress": 0.93,
+                "done": {"moments": true, "pebbles": false, "weeks": true}}],   // 12 entries
     "listed": [11, 10, 9, 8, 7, 6, 5, 4, 3],                           // the table, newest first
     "next_step": {"month": 11, "needs": "moments|pebbles", "days_left": 12, "reachable": true}   // current year, below level 2
-  }]
+  }],
+  "seen": {"explorer": "2026-10-02T08:14:05Z"}      // when each card was last looked at
 }
 // {pebble} = {"moment_id", "name", "happened_at", "emotion_id", "intensity", "positiveness"}
+// "on" on every dated row is the local day its pebble happened, or the day it was recorded when that pebble is gone.
+// completion = {"completed_at", "offered_from", "ready", "pulled_at"?, "pebble"?}; first_five[].on is the day its subject was made.
 ```
 
 - `weeks_filled` counts the full weeks that hold what the month's next level needs: a moment below level 1, a pebble from level 1 on. A month on the rim counts pebbles.
-- `progress` is in [0, 1] and is 0 at level 2.
+- `progress` is in [0, 1] and is 0 at level 2. `done` says which counters reached their target, so no client compares a count with `days_target`.
+- The year has no "new" marks in v1: nothing about a month is stored to compare against (open question 3).
 - `new` compares the item's `unlocked_at` with that card's `seen_at`.
 - `offered_from` is 06:00 in `p_tz` on the day after `completed_at`, and `ready` says whether that time has passed, so no client compares clocks.
 - `reachable` is false once a full week of the current month has passed without what the next level needs, because that level can no longer be reached this month.

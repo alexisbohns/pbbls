@@ -347,6 +347,7 @@ begin
          coalesce(p.delta::integer, 0),
          case                                                                               -- #1305 (D7, D8)
            when q.family in ('emotion_first','domain_first','first_stone') then false
+           when q.slug = 'pebble-count-1' then false   -- first-pebble celebrates that pebble, once
            when q.family in ('pebble_count','first_pebble') and exists (
              select 1 from public.pebbles px where px.id = q.pebble_id and px.positiveness = -1) then false
            else true
@@ -548,10 +549,18 @@ function check(name: string, ok: boolean, detail?: string) {
 
 const DUMP = Deno.env.get("ACHIEVEMENTS_DUMP") === "1";
 const ORACLE_DIR = new URL("./oracles/achievements/", import.meta.url);
-async function dump(name: string, payload: unknown) {
+// Verbatim: the clients' tests replay the server's bytes, numeric scale and all
+// (the standing rule), so the dump re-asks PostgREST and writes its raw body.
+async function dump(name: string, token: string, fn: string, args: Record<string, unknown> = {}) {
   if (!DUMP) return;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, apikey: ANON_KEY!, "Content-Type": "application/json" },
+    body: JSON.stringify(args),
+  });
+  if (!res.ok) throw new Error(`dump ${name}: ${res.status}`);
   await Deno.mkdir(new URL("payloads/", ORACLE_DIR), { recursive: true });
-  await Deno.writeTextFile(new URL(`payloads/${name}.json`, ORACLE_DIR), JSON.stringify(payload, null, 2) + "\n");
+  await Deno.writeTextFile(new URL(`payloads/${name}.json`, ORACLE_DIR), await res.text());
 }
 
 const runId = crypto.randomUUID().slice(0, 8);
@@ -661,7 +670,9 @@ try {
   // D3's other half, "no user within 500 of the top", needs every user's count:
   // it cannot run anon. The maintainer runs it by hand in the SQL editor:
   //   select max(n) from (select count(*) n from pebbles group by user_id) x;   -- must stay below 9 500
-  await dump("check-achievements", first);
+  // check_achievements writes, so its dump is the first call's parsed rows (shape only).
+  if (DUMP) await Deno.mkdir(new URL("payloads/", ORACLE_DIR), { recursive: true });
+  if (DUMP) await Deno.writeTextFile(new URL("payloads/check-achievements.json", ORACLE_DIR), JSON.stringify(first, null, 2) + "\n");
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
@@ -849,6 +860,14 @@ Deno.test("the current year: upcoming months, the listed months and the next ste
   assertEquals(y.next_step, { month: 11, needs: "moments", days_left: 13, reachable: true });
 });
 
+Deno.test("done flags say which counters reached their target", () => {
+  const moments = days(6, [2, 3, 4, 9, 10, 11, 16, 17, 18, 23, 24, 25, 26, 27], false);
+  const june = yearPayload(2025, moments, "2026-01-10", "2025-06-02").months[5];
+  // Level 1: moments done; pebbles none; weeks_filled now counts pebbles (0 of 4), so weeks not done.
+  assertEquals(june.done, { moments: true, pebbles: false, weeks: false });
+  assertEquals(yearPayload(2025, moments, "2026-01-10", "2025-06-02").days_target, 14);
+});
+
 Deno.test("a past year before the first moment lists nothing", () => {
   assertEquals(yearPayload(2024, [], "2026-11-04", "2026-03-02").listed, []);
 });
@@ -868,6 +887,7 @@ Expected: FAIL with `Module not found "…/year.js"`.
 // against it month by month. Pure: dates are YYYY-MM-DD strings already local
 // to the reader's zone; nothing here reads a clock.
 export const WHEEL = ["joy", "pride", "anger", "fear", "shame", "sadness", "peace"];
+export const DAYS_TARGET = 14;
 
 const iso = (y, m, d) => new Date(Date.UTC(y, m - 1, d)).toISOString().slice(0, 10);
 const daysIn = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
@@ -877,7 +897,8 @@ const round3 = (x) => Math.round(x * 1000) / 1000;
 export function monthPayload(year, month, items, today) {
   const start = iso(year, month, 1);
   if (start > today) {
-    return { month, state: "upcoming", moment_days: 0, pebble_days: 0, full_weeks: 0, weeks_filled: 0, level: 0, progress: 0 };
+    return { month, state: "upcoming", moment_days: 0, pebble_days: 0, full_weeks: 0, weeks_filled: 0, level: 0, progress: 0,
+      done: { moments: false, pebbles: false, weeks: false } };
   }
   const n = daysIn(year, month);
   const inMonth = items.filter((i) => i.date.slice(0, 7) === start.slice(0, 7) && i.date <= today);
@@ -892,10 +913,12 @@ export function monthPayload(year, month, items, today) {
   const level = pDays.size >= 14 && wp === fw ? 2 : mDays.size >= 14 && wm === fw ? 1 : 0;
   const share = (days, filled) => Math.min(days / 14, fw > 0 ? filled / fw : 1);
   const progress = level === 0 ? round3(share(mDays.size, wm)) : level === 1 ? round3(share(pDays.size, wp)) : 0;
+  const filled = level === 0 ? wm : wp;
   const out = {
     month, state: pDays.size === 0 ? "quiet" : "kept",
     moment_days: mDays.size, pebble_days: pDays.size, full_weeks: fw,
-    weeks_filled: level === 0 ? wm : wp, level, progress,
+    weeks_filled: filled, level, progress,
+    done: { moments: mDays.size >= DAYS_TARGET, pebbles: pDays.size >= DAYS_TARGET, weeks: fw > 0 && filled === fw },
   };
   const tally = new Map();
   for (const i of inMonth.filter((x) => x.pebble && x.family)) {
@@ -918,7 +941,7 @@ export function yearPayload(year, items, today, firstMoment) {
       if (start <= today && start >= firstMoment.slice(0, 7) + "-01") listed.push(m);
     }
   }
-  const out = { year, current, months, listed };
+  const out = { year, current, days_target: DAYS_TARGET, months, listed };
   if (current) {
     const cur = months[Number(today.slice(5, 7)) - 1];
     if (cur.level < 2) {
@@ -935,7 +958,7 @@ export function yearPayload(year, items, today, firstMoment) {
 
 Run: `deno test scripts/oracles/achievements/year.test.js`
 
-Expected: `ok | 6 passed | 0 failed`.
+Expected: `ok | 7 passed | 0 failed`.
 
 - [ ] **Step 5: Commit**
 
@@ -971,6 +994,15 @@ returns jsonb language sql stable security invoker set search_path = '' as $$
   where p.id = p_pebble_id
 $$;
 
+-- The day a row is dated by (one rule for every sheet): the day its pebble
+-- happened, in the reader's zone; the day it was recorded when that pebble is gone.
+create or replace function public.achievement_on(p_pebble_id uuid, p_unlocked timestamptz, p_tz text)
+returns text language sql stable security invoker set search_path = '' as $$
+  select to_char(coalesce(
+           (select m.happened_at from public.pebbles p join public.moments m on m.id = p.moment_id where p.id = p_pebble_id),
+           p_unlocked) at time zone p_tz, 'YYYY-MM-DD')
+$$;
+
 -- Glyph sales need other users' entitlements, which RLS hides from the seller:
 -- a definer count scoped to the caller, as check_achievements counts them.
 create or replace function public.achievement_sales_count()
@@ -989,6 +1021,7 @@ returns jsonb language sql stable security invoker set search_path = '' as $$
       'ready', c.pulled_at is null and now() >= o.offered_at)
     || case when c.pulled_at is null then '{}'::jsonb
             else jsonb_build_object('pulled_at', to_char(c.pulled_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')) end
+    || public.achievement_opt('pebble', public.achievement_pebble(c.pebble_id, p_tz))   -- the stone that made it whole
   from public.achievement_completions c
   cross join lateral (select ((((c.completed_at at time zone p_tz)::date + 1) + time '06:00') at time zone p_tz) as offered_at) o
   where c.user_id = (select auth.uid()) and c.stack = p_stack
@@ -1028,7 +1061,7 @@ returns jsonb language sql stable security invoker set search_path = '' as $$
       'levels', coalesce((
         select jsonb_agg(jsonb_build_object(
                  'threshold', a.threshold,
-                 'on', to_char(coalesce(p.created_at, u.unlocked_at) at time zone p_tz, 'YYYY-MM-DD'),
+                 'on', public.achievement_on(u.pebble_id, u.unlocked_at, p_tz),
                  'new', coalesce(u.unlocked_at > p_seen, false))
                || public.achievement_opt('pebble', public.achievement_pebble(u.pebble_id, p_tz))
                order by a.threshold)
@@ -1049,6 +1082,13 @@ returns jsonb language sql stable security invoker set search_path = '' as $$
              where a.family = p_family and a.is_active and a.threshold <= p_count) pv
       where nx.t is not null), '{}'::jsonb)
     || case when p_family = 'pebble_count' then jsonb_build_object('then_every', 500) else '{}'::jsonb end
+    -- the card's "since": the day of its first level
+    || coalesce((
+      select jsonb_build_object('since', public.achievement_on(u.pebble_id, u.unlocked_at, p_tz))
+      from public.achievement_unlocks u
+      join public.achievements a on a.id = u.achievement_id and a.family = p_family
+      where u.user_id = (select auth.uid())
+      order by a.threshold limit 1), '{}'::jsonb)
 $$;
 
 -- One year disc (D12). Mirrors scripts/oracles/achievements/year.js exactly.
@@ -1131,7 +1171,8 @@ begin
   )
   select jsonb_agg(
            case when ms > today then jsonb_build_object('month', mo, 'state', 'upcoming', 'moment_days', 0, 'pebble_days', 0,
-                                                        'full_weeks', 0, 'weeks_filled', 0, 'level', 0, 'progress', 0)
+                                                        'full_weeks', 0, 'weeks_filled', 0, 'level', 0, 'progress', 0,
+                                                        'done', jsonb_build_object('moments', false, 'pebbles', false, 'weeks', false))
            else jsonb_build_object(
              'month', mo, 'state', case when pdays = 0 then 'quiet' else 'kept' end,
              'moment_days', mdays, 'pebble_days', pdays, 'full_weeks', fw,
@@ -1139,7 +1180,10 @@ begin
              'progress', case level
                 when 0 then round(least(mdays / 14.0, case when fw > 0 then wm::numeric / fw else 1 end), 3)
                 when 1 then round(least(pdays / 14.0, case when fw > 0 then wp::numeric / fw else 1 end), 3)
-                else 0 end)
+                else 0 end,
+             -- the done style is the server's call too (D12): no client compares a count with 14
+             'done', jsonb_build_object('moments', mdays >= 14, 'pebbles', pdays >= 14,
+                                        'weeks', fw > 0 and (case when level = 0 then wm else wp end) = fw))
              || public.achievement_opt('family', to_jsonb(family))
            end order by mo)
   into j_months from lv2;
@@ -1162,7 +1206,7 @@ begin
   end if;
 
   return jsonb_build_object('year', p_year, 'current', p_year = extract(year from today)::int,
-                            'months', j_months, 'listed', j_listed)
+                            'days_target', 14, 'months', j_months, 'listed', j_listed)
          || public.achievement_opt('next_step', j_next);
 end;
 $$;
@@ -1185,7 +1229,8 @@ declare
   uid uuid := (select auth.uid());
   today date;
   since date;
-  seen jsonb;
+  seen jsonb;        -- full precision, for the "new" comparisons
+  seen_out jsonb;    -- whole seconds, for the payload (D17)
   n_pebbles int; n_glyphs int;
   n_five int; n_six int; has25 boolean;
   n_emo int; of_emo int; n_dom int; of_dom int;
@@ -1202,7 +1247,9 @@ begin
   end;
 
   select (pr.created_at at time zone p_tz)::date into since from public.profiles pr where pr.user_id = uid;
-  select coalesce(jsonb_object_agg(v.card, to_jsonb(v.seen_at)), '{}'::jsonb) into seen
+  select coalesce(jsonb_object_agg(v.card, to_jsonb(v.seen_at)), '{}'::jsonb),
+         coalesce(jsonb_object_agg(v.card, to_char(v.seen_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')), '{}'::jsonb)
+    into seen, seen_out
     from public.achievement_views v where v.user_id = uid;
   select count(*) into n_pebbles from public.pebbles p where p.user_id = uid;
   select count(*) into n_glyphs from public.glyphs g where g.user_id = uid;
@@ -1225,30 +1272,34 @@ begin
 
   -- Explorer ------------------------------------------------------------------------
   select jsonb_build_object(
-      'first_five', (
+      'first_five', coalesce((
         select jsonb_agg(jsonb_build_object('slug', s.slug, 'done', u.user_id is not null,
                    'new', coalesce(u.unlocked_at > (seen->>'explorer')::timestamptz, false))
                  || case when u.user_id is null then '{}'::jsonb else public.achievement_first_subject(s.slug, p_tz) end
                order by s.ord)
         from unnest(array['first-moment','first-pebble','first-collection','first-soul','first-glyph']) with ordinality s(slug, ord)
         left join public.achievements a on a.slug = s.slug
-        left join public.achievement_unlocks u on u.achievement_id = a.id and u.user_id = uid),
-      'six_firsts', (
+        left join public.achievement_unlocks u on u.achievement_id = a.id and u.user_id = uid), '[]'::jsonb),
+      'six_firsts', coalesce((
         select jsonb_agg(jsonb_build_object('kind', a.stone_kind, 'done', u.user_id is not null,
                    'new', coalesce(u.unlocked_at > (seen->>'explorer')::timestamptz, false))
+                 || case when u.user_id is null then '{}'::jsonb
+                         else jsonb_build_object('on', public.achievement_on(u.pebble_id, u.unlocked_at, p_tz)) end
                  || public.achievement_opt('pebble', public.achievement_pebble(u.pebble_id, p_tz))
                order by a.sort_order)
         from public.achievements a
         left join public.achievement_unlocks u on u.achievement_id = a.id and u.user_id = uid
-        where a.family = 'first_stone'),
-      'twenty_five', (
-        select jsonb_build_object('count', least(n_pebbles, 25), 'done', u.user_id is not null,
-                 'new', coalesce(u.unlocked_at > (seen->>'explorer')::timestamptz, false))
-               || public.achievement_opt('pebble', public.achievement_pebble(u.pebble_id, p_tz))
-        from public.achievements a
-        left join public.achievement_unlocks u on u.achievement_id = a.id and u.user_id = uid
-        where a.slug = 'pebble-count-25'),
-      'rings_done', to_jsonb(rings))
+        where a.family = 'first_stone'), '[]'::jsonb),
+      'rings_done', to_jsonb(rings))     -- up to five: first_five, six_firsts, twenty_five, domains, emotions
+    || public.achievement_opt('twenty_five', (
+         select jsonb_build_object('count', least(n_pebbles, 25), 'done', u.user_id is not null,
+                  'new', coalesce(u.unlocked_at > (seen->>'explorer')::timestamptz, false))
+                || case when u.user_id is null then '{}'::jsonb
+                        else jsonb_build_object('on', public.achievement_on(u.pebble_id, u.unlocked_at, p_tz)) end
+                || public.achievement_opt('pebble', public.achievement_pebble(u.pebble_id, p_tz))
+         from public.achievements a
+         left join public.achievement_unlocks u on u.achievement_id = a.id and u.user_id = uid
+         where a.slug = 'pebble-count-25'))
     || public.achievement_opt('first_pebble', (
          select public.achievement_pebble(u.pebble_id, p_tz)
          from public.achievement_unlocks u join public.achievements a on a.id = u.achievement_id
@@ -1256,23 +1307,39 @@ begin
     || public.achievement_opt('completion', public.achievement_completion('six_firsts', p_tz))
   into j_explorer;
 
-  -- Emotions: 38 seats, wheel order then slug ------------------------------------------
+  -- Emotions: 38 seats, wheel order then slug; each family's met seats by the day met --------
   with seats as (
     select e.id, ec.slug as family,
            (row_number() over (order by array_position(wheel, ec.slug), e.slug) - 1)::int as seat
     from public.emotions e join public.emotion_categories ec on ec.id = e.category_id
+  ),
+  sm as (
+    select s.seat, s.id, s.family, u.user_id is not null as met, u.unlocked_at, u.pebble_id,
+           coalesce(m.happened_at, u.unlocked_at) as met_at
+    from seats s
+    left join public.achievements a on a.family = 'emotion_first' and a.emotion_id = s.id
+    left join public.achievement_unlocks u on u.achievement_id = a.id and u.user_id = uid
+    left join public.pebbles p on p.id = u.pebble_id
+    left join public.moments m on m.id = p.moment_id
+  ),
+  fams as (
+    select x.family,
+           coalesce(jsonb_agg(x.seat order by x.met_at, x.seat) filter (where x.met), '[]'::jsonb) as met,
+           coalesce(jsonb_agg(x.seat order by x.seat) filter (where not x.met), '[]'::jsonb) as not_yet
+    from sm x group by x.family
   )
   select jsonb_build_object('count', n_emo, 'of', of_emo,
-           'seats', coalesce(jsonb_agg(jsonb_build_object('seat', s.seat, 'emotion_id', s.id, 'family', s.family,
-                      'met', u.user_id is not null,
-                      'new', coalesce(u.unlocked_at > (seen->>'emotions')::timestamptz, false))
-                    || public.achievement_opt('pebble', public.achievement_pebble(u.pebble_id, p_tz))
-                    order by s.seat), '[]'::jsonb))
+           'seats', coalesce((select jsonb_agg(jsonb_build_object('seat', x.seat, 'emotion_id', x.id, 'family', x.family,
+                      'met', x.met, 'new', coalesce(x.unlocked_at > (seen->>'emotions')::timestamptz, false))
+                    || case when x.met then jsonb_build_object('on', public.achievement_on(x.pebble_id, x.unlocked_at, p_tz)) else '{}'::jsonb end
+                    || public.achievement_opt('pebble', public.achievement_pebble(x.pebble_id, p_tz))
+                    order by x.seat) from sm x), '[]'::jsonb),
+           -- the sheet's order (D11 for emotions): families on the wheel, met seats by the day met
+           'families', coalesce((select jsonb_agg(jsonb_build_object('family', f.family, 'met', f.met, 'not_yet', f.not_yet)
+                                                   order by array_position(wheel, f.family)) from fams f), '[]'::jsonb))
+         || public.achievement_opt('since', (select to_jsonb(to_char(min(x.met_at) at time zone p_tz, 'YYYY-MM-DD')) from sm x where x.met))
          || public.achievement_opt('completion', public.achievement_completion('emotions', p_tz))
-  into j_emotions
-  from seats s
-  left join public.achievements a on a.family = 'emotion_first' and a.emotion_id = s.id
-  left join public.achievement_unlocks u on u.achievement_id = a.id and u.user_id = uid;
+  into j_emotions;
 
   -- Domains: coverage tier, the order they came, not yet (D11) --------------------------
   select jsonb_build_object('count', n_dom, 'of', of_dom,
@@ -1284,6 +1351,7 @@ begin
                             else 'all' end,
            'entered', coalesce((
              select jsonb_agg(jsonb_build_object('domain_id', a.domain_id,
+                        'on', public.achievement_on(u.pebble_id, u.unlocked_at, p_tz),
                         'new', coalesce(u.unlocked_at > (seen->>'domains')::timestamptz, false))
                       || public.achievement_opt('pebble', public.achievement_pebble(u.pebble_id, p_tz))
                     order by m.happened_at desc nulls last, u.unlocked_at desc)
@@ -1317,10 +1385,13 @@ begin
            'pebbles', public.achievement_ladder('pebble_count', n_pebbles, (seen->>'pebbles')::timestamptz, p_tz),
            'glyphs_carved', public.achievement_ladder('glyph_count', n_glyphs, (seen->>'pebbles')::timestamptz, p_tz),
            'glyph_sales', public.achievement_ladder('glyph_sales', public.achievement_sales_count(), (seen->>'pebbles')::timestamptz, p_tz),
-           'years', j_years);
+           'years', j_years,
+           'seen', seen_out);   -- when each card was last looked at (D10), for copy like "new since 2 October"
 end;
 $$;
 
+revoke all on function public.achievement_on(uuid, timestamptz, text) from public, anon;
+grant execute on function public.achievement_on(uuid, timestamptz, text) to authenticated;
 revoke all on function public.achievement_opt(text, jsonb) from public, anon;
 revoke all on function public.achievement_pebble(uuid, text) from public, anon;
 revoke all on function public.achievement_sales_count() from public, anon;
@@ -1376,7 +1447,7 @@ import { yearPayload } from "./oracles/achievements/year.js";
   const tz = "Europe/Paris";
   const got = await a.rpc("get_achievements", { p_tz: tz });
   const pl = got.data as Payload;
-  await dump("get-achievements", pl);
+  await dump("get-achievements", alice.token, "get_achievements", { p_tz: tz });
   check("get_achievements answers with every card", !got.error
     && ["explorer", "emotions", "domains", "pebbles", "glyphs_carved", "glyph_sales", "years"].every((k) => k in pl),
     got.error?.message ?? Object.keys(pl ?? {}).join(","));
@@ -1390,6 +1461,13 @@ import { yearPayload } from "./oracles/achievements/year.js";
   check("rings_done holds six_firsts, and the completion is not ready before tomorrow 06:00",
     pl.explorer.rings_done.includes("six_firsts") && pl.explorer.completion?.ready === false,
     JSON.stringify([pl.explorer.rings_done, pl.explorer.completion]));
+  check("emotions serve the sheet's order: seven families, the met seat dated",
+    pl.emotions.families.length === 7 && pl.emotions.families.flatMap((f: Payload) => f.met).length === 1
+      && typeof pl.emotions.seats.find((s: Payload) => s.met)?.on === "string", JSON.stringify(pl.emotions.families));
+  check("the year serves its day target and done flags", pl.years[0].days_target === 14
+    && pl.years[0].months.every((m: Payload) => typeof m.done?.moments === "boolean"), JSON.stringify(pl.years[0].months[0]));
+  check("the completion carries the pebble that made it whole", typeof pl.explorer.completion?.pebble?.moment_id === "string",
+    JSON.stringify(pl.explorer.completion));
   check("emotions has 38 seats with one met", pl.emotions.seats.length === 38 && pl.emotions.count === 1
     && pl.emotions.seats.filter((s: Payload) => s.met).length === 1, JSON.stringify([pl.emotions.count, pl.emotions.of]));
   check("domains report one entered and the 'few' tier", pl.domains.count === 1 && pl.domains.coverage === "few"
@@ -1444,7 +1522,7 @@ import { yearPayload } from "./oracles/achievements/year.js";
   const pb = (await b.rpc("get_achievements", { p_tz: tz })).data as Payload;
   check("get_achievements lists the current year and 2025, newest first",
     pb.years.map((y: Payload) => y.year).join(",") === `${today.slice(0, 4)},2025`, JSON.stringify(pb.years.map((y: Payload) => y.year)));
-  await dump("get-achievements-year", pb);
+  await dump("get-achievements-year", users[1].token, "get_achievements", { p_tz: tz });
   // Coverage tiers at their boundaries (D11): one pebble per step, on a fresh user.
   const carol = await signUp("c"); users.push(carol);
   const { data: allDomains } = await carol.client.from("domains").select("id").order("slug");
@@ -1704,12 +1782,14 @@ git commit -m "fix(db): keep emotion, domain and six-firsts achievements off pub
     check("the pulled completion reports pulled_at and is no longer ready",
       typeof after.explorer.completion?.pulled_at === "string" && after.explorer.completion.ready === false,
       JSON.stringify(after.explorer.completion));
+    // Run by hand with the key and ACHIEVEMENTS_DUMP=1 to refresh this one: the clients need a pulled completion.
+    await dump("get-achievements-pulled", alice.token, "get_achievements", { p_tz: tz });
   } else {
     console.log("· pull_ceremony's ready path skipped (no SUPABASE_SERVICE_ROLE_KEY)");
   }
   const anonPull = await anon.rpc("pull_ceremony", { p_stack: "six_firsts", p_tz: tz });
   check("pull_ceremony is refused to anon", !!anonPull.error, JSON.stringify(anonPull.data));
-  await dump("get-achievements-seen", seenPl);
+  await dump("get-achievements-seen", alice.token, "get_achievements", { p_tz: tz });
 ```
 
 - [ ] **Step 2: Make the public profile harness assert the private families are gone.** In `verify-public-profile.ts`, replace the four checks after `const slugs = …` with the block below.
@@ -1813,6 +1893,17 @@ git commit -m "test(db): prove seen, pull_ceremony and the private families off 
   - Purge → Tasks 4 and 6.
   - The admin app → Task 4b.
   - D3's "no user within 500 of the top" → a manual SQL query (it needs a cross-user read, so it cannot run anon).
+- **Client planners' contract gaps** (iOS, Android, web, 2026-10-29) are folded in:
+  - no explicit nulls in `explorer`;
+  - `days_target` and per-month `done` flags;
+  - `on` on every dated row, by one rule (`achievement_on`: the pebble's happened day, else the recorded day);
+  - `emotions.families` for the sheet's order;
+  - `since` on emotions and the ladders;
+  - `seen` per card;
+  - the completion's pebble;
+  - verbatim dumps, plus a `get-achievements-pulled` dump on the keyed run;
+  - `pebble-count-1` never celebrates (`first-pebble` does).
+  The year has no "new" marks in v1 (it has no stored facts to compare against; spec open question 3).
 - **Reviewed** by a Fable 5.1 critic on 2026-10-29; its twelve findings are folded in. The main ones:
   - the `stack` column clash in `pull_ceremony`;
   - the seen sequence;
