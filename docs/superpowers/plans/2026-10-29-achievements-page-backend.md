@@ -391,7 +391,8 @@ As a seeded user with one medium, highlight pebble, call `select * from public.c
 Expected:
 - `first-stone-medium` and `first-stone-highlight` with `celebrate = false`;
 - `emotion-first-*` and `domain-first-*` with `false`;
-- `pebble-count-1` and `first-pebble` with `true`, since that pebble is bright. Over a heavy first pebble both are `false`: the same pebble is never celebrated twice over, or once.
+- `pebble-count-1` with `false` (it never celebrates: `first-pebble` celebrates that pebble, once) and `first-pebble` with `true`, since that pebble is bright. Over a heavy first pebble, `first-pebble` is `false` too.
+- `first-moment` with `true` even when its pebble is heavy: a moment has no emotion yet, so recording it is what is celebrated.
 
 - [ ] **Step 4: Commit**
 
