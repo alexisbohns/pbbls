@@ -8,6 +8,7 @@ import { readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { loadIcons, unionOwned, type Emitter } from "./lib/emit"
+import { iosEmitter } from "./lib/emit-ios"
 import { reactEmitter } from "./lib/emit-react"
 import { formatSvg } from "./lib/format"
 import { formatIssue, lint, SRC_DIR } from "./lib/lint"
@@ -19,7 +20,7 @@ export const REPO_ROOT = fileURLToPath(new URL("../../..", import.meta.url))
 export const PACKAGE_ROOT = fileURLToPath(new URL("..", import.meta.url))
 
 /** Every surface the generator emits, in the order they are written. */
-const EMITTERS: readonly Emitter[] = [reactEmitter]
+const EMITTERS: readonly Emitter[] = [reactEmitter, iosEmitter]
 
 const FIX = "run npm run generate --workspace=@pbbls/icons and commit the result"
 
