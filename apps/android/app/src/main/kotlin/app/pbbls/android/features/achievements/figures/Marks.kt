@@ -214,15 +214,29 @@ fun PebbleSealMark(
     width: Float,
     modifier: Modifier = Modifier,
     box: Dp = MARK_BOX,
+) = EmotionSealMark(pebble.valence, pebble.emotionId, lookups, width, modifier, box)
+
+/**
+ * A [valence] printed in [emotionId]'s palette, or in ink when the device does not know it: an
+ * emotion row's mark, which still prints when its pebble is gone (at medium even, as the wheel).
+ */
+@Composable
+fun EmotionSealMark(
+    valence: Valence,
+    emotionId: String?,
+    lookups: AchievementLookups,
+    width: Float,
+    modifier: Modifier = Modifier,
+    box: Dp = MARK_BOX,
 ) {
     val colors = PebblesTheme.spine.colors
-    val palette = pebble.emotionId?.let { lookups.emotion(it)?.palette }
-    val emotion = rememberEmotionSeals(listOfNotNull(palette?.let { SealKey(pebble.valence, it) }), colors.stock, SealVariant.MINI)
-    val inkSeal = pebble.valence.inkSeal()
+    val palette = emotionId?.let { lookups.emotion(it)?.palette }
+    val emotion = rememberEmotionSeals(listOfNotNull(palette?.let { SealKey(valence, it) }), colors.stock, SealVariant.MINI)
+    val inkSeal = valence.inkSeal()
     val ink = rememberInkPrints(if (palette == null) listOf(InkKey(inkSeal, colors.ink)) else emptyList(), colors.stock, SealVariant.MINI)
     Canvas(modifier.size(box).clearAndSetSemantics {}) {
         val unit = size.width / 28f
-        val print = palette?.let { emotion.getValue(SealKey(pebble.valence, it)) } ?: ink.of(inkSeal, colors.ink)
+        val print = palette?.let { emotion.getValue(SealKey(valence, it)) } ?: ink.of(inkSeal, colors.ink)
         sealAt(print, center, width * unit)
     }
 }
