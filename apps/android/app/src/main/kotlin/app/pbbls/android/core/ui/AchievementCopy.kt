@@ -92,11 +92,7 @@ fun achievementGroupName(family: String): String =
         else -> family
     }
 
-/**
- * Icon per family from the existing asset set; unknown families get the trophy. The first five's
- * new families and the page's six firsts and completions take the drawings iOS gives them
- * (`AchievementRecord.familySymbol`); their titles come from the catalog's own `title_en`/`title_fr`.
- */
+/** Icon per family from the existing asset set; unknown families get the trophy. */
 fun achievementFamilyIcon(family: String): Int =
     when (family) {
         "pebble_count" -> R.drawable.ic_fossil_shell
@@ -107,10 +103,6 @@ fun achievementFamilyIcon(family: String): Int =
         "first_soul" -> R.drawable.ic_person_pair
         "glyph_count" -> R.drawable.ic_scribble
         "glyph_sales" -> R.drawable.ic_sparkle
-        "first_moment" -> R.drawable.ic_pbbls_pebble_flat
-        "first_pebble" -> R.drawable.ic_pbbls_pebble_round
-        "first_five" -> R.drawable.ic_pbbls_stack_lit_3
-        "first_stone", "set_complete" -> R.drawable.ic_pbbls_pebble_glow_md
         else -> R.drawable.ic_trophy
     }
 

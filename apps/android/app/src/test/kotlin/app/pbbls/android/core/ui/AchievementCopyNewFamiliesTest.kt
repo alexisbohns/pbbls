@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
-import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,15 +67,5 @@ class AchievementCopyNewFamiliesTest {
         }
         compose.onNodeWithText("First lowlight").assertExists()
         compose.onNodeWithText("The six firsts").assertExists()
-    }
-
-    @Test
-    fun `the new families draw the icons iOS gives them, an unknown one the trophy`() {
-        assertEquals(R.drawable.ic_pbbls_pebble_flat, achievementFamilyIcon("first_moment"))
-        assertEquals(R.drawable.ic_pbbls_pebble_round, achievementFamilyIcon("first_pebble"))
-        assertEquals(R.drawable.ic_pbbls_stack_lit_3, achievementFamilyIcon("first_five"))
-        assertEquals(R.drawable.ic_pbbls_pebble_glow_md, achievementFamilyIcon("first_stone"))
-        assertEquals(R.drawable.ic_pbbls_pebble_glow_md, achievementFamilyIcon("set_complete"))
-        assertEquals(R.drawable.ic_trophy, achievementFamilyIcon("moons"))
     }
 }
