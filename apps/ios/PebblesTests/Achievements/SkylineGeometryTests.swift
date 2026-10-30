@@ -34,11 +34,11 @@ struct SkylineGeometryTests {
         #expect(abs(G.contour(stages: 5, end: 126).boundingRect.maxX - 126) < 0.01)
     }
 
-    @Test("a stage outside the eight draws nothing and fills nothing")
+    @Test("a stage past the eighth reuses the last; a negative one draws nothing")
     func outside() {
-        #expect(!G.isStage(-1) && !G.isStage(8) && G.isStage(0) && G.isStage(7))
-        #expect(G.stage(8).isEmpty && G.stage(-1).isEmpty)
-        #expect(G.fill(8, fraction: 0.5).isNull)
+        #expect(G.drawn(-1) == nil && G.drawn(0) == 0 && G.drawn(7) == 7 && G.drawn(8) == 7 && G.drawn(30) == 7)
+        #expect(G.stage(8).boundingRect == G.stage(7).boundingRect && G.stage(-1).isEmpty)
+        #expect(G.fill(9, fraction: 0.5) == G.fill(7, fraction: 0.5) && G.fill(-1, fraction: 0.5).isNull)
         #expect(G.contour(stages: 12, end: 224).boundingRect == G.contour(stages: 8, end: 224).boundingRect)
     }
 

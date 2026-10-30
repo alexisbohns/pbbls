@@ -29,18 +29,20 @@ enum SkylineGeometry {
     /// The stages parsed once.
     private static let stagePaths: [Path] = stages.map { SVGPathParser.parse($0).map(Path.init) ?? Path() }
 
-    /// Whether `index` names a stage; a stage outside them draws nothing.
-    static func isStage(_ index: Int) -> Bool {
-        stages.indices.contains(index)
+    /// The stage drawn for `index`: itself, the last one for an index past the
+    /// eighth (a level past the drawn ladder, as Android and web draw it), or
+    /// none for a negative index.
+    static func drawn(_ index: Int) -> Int? {
+        index < 0 ? nil : min(index, stages.count - 1)
     }
 
     static func stage(_ index: Int) -> Path {
-        isStage(index) ? stagePaths[index] : Path()
+        drawn(index).map { stagePaths[$0] } ?? Path()
     }
 
     /// The part of stage `index` a fill of `fraction` covers, from the ground up (the board's clip).
     static func fill(_ index: Int, fraction: Double) -> CGRect {
-        guard isStage(index) else { return .null }
+        guard let index = drawn(index) else { return .null }
         let span = spans[index]
         let height = (ground - tops[index]) * CGFloat(min(max(fraction, 0), 1))
         return CGRect(x: span.lowerBound - 2, y: ground - height,
