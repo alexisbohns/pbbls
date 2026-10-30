@@ -5,3 +5,16 @@ import Foundation
 enum AppTab: String, Codable, CaseIterable, Hashable {
     case home, path, people, collections, you
 }
+
+extension AppTab {
+    /// The tab's drawing; the bar lights its `activeTwin` when selected (spec D5).
+    var icon: PbblsIcon {
+        switch self {
+        case .home: .home
+        case .path: .path
+        case .people: .people
+        case .collections: .collection
+        case .you: .person
+        }
+    }
+}
