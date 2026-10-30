@@ -4,8 +4,9 @@ import SwiftUI
 /// disc"): the stone, its two inner rings, a spoke and two notches a month,
 /// then each month's counter at its level, its climb and, for a month that has
 /// begun at the centre, its goal notch. A month with pebbles wears its family's
-/// hue (the server's `family`); a rim month adds the hairline ring, a hued spoke
-/// and a hued numeral; a month without pebbles is muted.
+/// hue (the server's `family`), or ink when that family is absent or unresolved;
+/// a rim month adds the hairline ring, a hued spoke and a hued numeral; only a
+/// month the server says is upcoming or quiet is muted.
 struct YearDisc: View {
     let year: AchievementsPage.Year
     let lookups: WrapLookups
@@ -40,14 +41,19 @@ struct YearDisc: View {
         .accessibilityHidden(true)
     }
 
-    /// The month's hue: its family's, once it holds pebbles; nil while muted or unknown.
-    private func hue(_ month: AchievementsPage.Month?, _ inks: AchievementInks) -> Color? {
+    /// A month's tone: nil while muted (upcoming or quiet); a kept month wears its
+    /// family's hue, or ink when the family is absent or unresolved.
+    static func tone(_ month: AchievementsPage.Month?, lookups: WrapLookups, inks: AchievementInks) -> Color? {
         guard let month, !month.isMuted else { return nil }
-        return month.family.flatMap(lookups.family).flatMap { inks.hue($0.palette) }
+        return month.family.flatMap(lookups.family).flatMap { inks.hue($0.palette) } ?? inks.ink
+    }
+
+    private func hue(_ month: AchievementsPage.Month?, _ inks: AchievementInks) -> Color? {
+        Self.tone(month, lookups: lookups, inks: inks)
     }
 
     private func onRim(_ month: AchievementsPage.Month?) -> Bool {
-        month.map { $0.level == 2 && !$0.isMuted } ?? false
+        month.map { G.level($0) == 2 && !$0.isMuted } ?? false
     }
 
     private func numeral(_ number: Int, inks: AchievementInks, k: CGFloat) -> some View {
@@ -79,7 +85,7 @@ struct YearDisc: View {
             let inner = G.notch(G.radii[1], month: number)
             c.stroke(Path.segment(inner.0, inner.1), with: .color(inks.ink2), lineWidth: muted ? 0.6 : 1)
             let rim = G.notch(G.radii[2], month: number)
-            let quietRim = muted || (month?.level ?? 0) < 2
+            let quietRim = muted || (month.map(G.level) ?? 0) < 2
             c.stroke(Path.segment(rim.0, rim.1), with: .color(inks.ink2), lineWidth: quietRim ? 0.6 : 1)
         }
     }
@@ -87,17 +93,18 @@ struct YearDisc: View {
     private func drawMonth(_ c: GraphicsContext, _ month: AchievementsPage.Month, _ inks: AchievementInks) {
         let hue = self.hue(month, inks)
         let line = StrokeStyle(lineWidth: 1.8, lineCap: .round)
-        if month.level == 0, month.progress > 0, !month.isMuted {
+        let level = G.level(month)
+        if level == 0, month.progress > 0, !month.isMuted {
             let goal = G.goal(month: month.month)
             c.stroke(Path.segment(goal.0, goal.1), with: .color(inks.ink), style: StrokeStyle(lineWidth: 1.3, lineCap: .round))
         }
-        if month.level == 2 {
+        if level == 2 {
             let climb = G.rimClimb(month.month)
             c.stroke(Path.segment(climb.0, climb.1), with: .color(hue ?? inks.ink), style: line)
         }
         if let climb = G.climb(month) {
             // Toward the inner disc in ink (moments have no colour); from it on, in the month's hue.
-            let ink = month.level == 1 ? (hue ?? inks.ink) : inks.ink
+            let ink = level == 1 ? (hue ?? inks.ink) : inks.ink
             c.stroke(Path.segment(climb.0, climb.1), with: .color(ink), style: line)
         }
         c.drawMonthCounter(month, at: G.counter(month), hue: hue, width: 12.5, inks: inks)
@@ -111,7 +118,7 @@ extension GraphicsContext {
     func drawMonthCounter(_ month: AchievementsPage.Month?, at center: CGPoint, hue: Color?, width: CGFloat,
                           inks: AchievementInks) {
         if let hue {
-            if month?.level == 2 { stroke(Path.circle(center, width * 0.78), with: .color(inks.ink), lineWidth: 0.8) }
+            if month.map(YearDiscGeometry.level) == 2 { stroke(Path.circle(center, width * 0.78), with: .color(inks.ink), lineWidth: 0.8) }
             draw(FlatSeal(size: .medium, outline: .neutral, print: .solid, width: width), at: center, color: hue,
                  inks: inks)
         } else {

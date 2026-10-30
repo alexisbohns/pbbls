@@ -30,6 +30,11 @@ enum YearDiscGeometry {
         CGPoint(x: 203.3, y: 59.5), CGPoint(x: 213.5, y: 72.4), CGPoint(x: 220.4, y: 87.4), CGPoint(x: 222.5, y: 103.8),
     ]
 
+    /// A month's level as the disc can draw it: 0 at the centre, 1 the inner disc, 2 the rim.
+    static func level(_ month: AchievementsPage.Month) -> Int {
+        min(max(month.level, 0), 2)
+    }
+
     static func angle(_ month: Int) -> Double {
         Double(month - 1) * 30
     }
@@ -42,15 +47,16 @@ enum YearDiscGeometry {
 
     /// Where a month's counter docks: its level's radius.
     static func counter(_ month: AchievementsPage.Month) -> CGPoint {
-        point(radii[month.level], month: month.month)
+        point(radii[level(month)], month: month.month)
     }
 
     /// The way travelled toward the next level: from 6 past the docked radius,
     /// `progress` of the gap to the next radius less 12. Nil on the rim or before any.
     static func climb(_ month: AchievementsPage.Month) -> (CGPoint, CGPoint)? {
-        guard month.level < 2, month.progress > 0 else { return nil }
-        let from = radii[month.level]
-        let gap = radii[month.level + 1] - from - 12
+        let level = level(month)
+        guard level < 2, month.progress > 0 else { return nil }
+        let from = radii[level]
+        let gap = radii[level + 1] - from - 12
         return (point(from + 6, month: month.month), point(from + 6 + CGFloat(month.progress) * gap, month: month.month))
     }
 

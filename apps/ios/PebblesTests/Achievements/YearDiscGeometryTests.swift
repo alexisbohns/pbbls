@@ -57,6 +57,14 @@ struct YearDiscGeometryTests {
         #expect(abs(distance(goal.0, G.centre) - 50) < 1e-6 && abs(distance(goal.1, G.centre) - 50) < 1e-6)
     }
 
+    @Test("a level outside 0…2 is drawn at its nearest: below the centre at the centre, past the rim on the rim")
+    func clamped() {
+        #expect(abs(distance(G.counter(Self.month(5, level: 5, progress: 0)), G.centre) - 80) < 1e-6)
+        #expect(abs(distance(G.counter(Self.month(5, level: -1, progress: 0)), G.centre) - 30) < 1e-6)
+        #expect(G.climb(Self.month(5, level: 7, progress: 0.5)) == nil)
+        #expect(G.climb(Self.month(5, level: -3, progress: 0.5)) != nil)
+    }
+
     @Test("the stone has the board's forty points; twelve numerals, the long ones a point smaller")
     func base() {
         #expect(G.outline.count == 40)
