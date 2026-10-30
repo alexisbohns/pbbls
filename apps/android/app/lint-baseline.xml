@@ -355,17 +355,6 @@
 
     <issue
         id="PluralsCandidate"
-        message="Formatting %d followed by words (&quot;earned&quot;): This should probably be a plural rather than a string"
-        errorLine1="    &lt;string name=&quot;achievements_shelf_count&quot;>%1$d earned&lt;/string>"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="532"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="PluralsCandidate"
         message="Formatting %d followed by words (&quot;glyphs&quot;): This should probably be a plural rather than a string"
         errorLine1="    &lt;string name=&quot;achievement_family_glyph_count_title&quot;>%1$d glyphs&lt;/string>"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
