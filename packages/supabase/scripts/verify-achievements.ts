@@ -34,11 +34,28 @@
  *      - get_achievements serves the current year and each past year with a moment,
  *        newest first, as the oracle's yearsServed does;
  *      - an unknown zone is refused, and anon is refused.
+ *   3. The writes (part 3):
+ *      - mark_achievements_seen refuses an unknown card; an item unlocked after a look
+ *        is new and the ones before it are not, on the explorer and the emotions card;
+ *        the next look clears it, and seen is served at whole-second UTC (D10);
+ *      - the check never unlocks a set_complete row, active or not;
+ *      - pull_ceremony refuses an unknown stack, an unknown or null zone, and raises
+ *        not_ready before the offer (in two zones, agreeing with the payload's ready)
+ *        and without a completion; anon is refused (D9, §3.4);
+ *      - with SUPABASE_SERVICE_ROLE_KEY only (a run by hand; CI has no such key): the
+ *        completion is back-dated past its offer, two concurrent pulls return one row
+ *        between them, a third pull returns no row, and the payload's completion
+ *        carries pulled_at and is no longer ready. While complete-six-firsts is active,
+ *        the pull unlocks it and pays its karma at most once and as returned; while it
+ *        is inactive (until the clients ship the ceremony), the row says 0 and nothing
+ *        is unlocked or paid. Without the key a completion can never be past its offer
+ *        in the run: the offer is never less than 5 hours after completed_at.
  *
  * ACHIEVEMENTS_DUMP=1 writes the verbatim payloads to scripts/oracles/achievements/payloads/.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:achievements --workspace=packages/supabase
- * Needs NO service-role key: signs up throwaway users (achievements-verify-*@example.test)
+ * Anon in CI. With SUPABASE_SERVICE_ROLE_KEY set it also runs section 3's ready path, which
+ * writes (back-dates a completion) only to this run's own users. Signs up throwaway users (achievements-verify-*@example.test)
  * and deletes them through the real `delete-account` edge function, even on failure.
  */
 
@@ -111,6 +128,7 @@ const runId = crypto.randomUUID().slice(0, 8);
 const password = `Ach-${crypto.randomUUID()}`;
 type TestUser = { client: SupabaseClient; id: string; token: string };
 type Unlock = { slug: string; karma_granted: number };
+type Pull = { stack: string; karma_granted: number };
 // get_achievements (spec §3.3), only as far as the checks below read it.
 type Stone = { moment_id: string; name?: string; happened_at: string; emotion_id: string; intensity: number; positiveness: number };
 type Completion = { completed_at: string; offered_from: string; ready: boolean; pulled_at?: string; pebble?: Stone };
@@ -125,7 +143,8 @@ type Achievements = {
     first_five: { slug: string; done: boolean; new: boolean }[];
     six_firsts: { kind: string; done: boolean; new: boolean; pebble?: Stone }[];
   };
-  emotions: { count: number; of: number; seats: { met: boolean; on?: string }[]; families: { family: string; met: number[] }[] };
+  emotions: { count: number; of: number; seats: { emotion_id: string; met: boolean; new: boolean; on?: string }[];
+    families: { family: string; met: number[] }[]; completion?: Completion };
   domains: { count: number; of: number; coverage: string; entered: unknown[]; not_yet: string[] };
   pebbles: Ladder; glyphs_carved: Ladder; glyph_sales: Ladder;
   years: Year[];
@@ -436,6 +455,120 @@ try {
   check("get_achievements refuses an unknown zone", !!badTz.error && badTz.error.message.includes("invalid_tz"), badTz.error?.message ?? "accepted");
   const anonRead = await anon.rpc("get_achievements", { p_tz: tz });
   check("get_achievements is refused to anon", !!anonRead.error, JSON.stringify(anonRead.data));
+
+  // 3. the writes (part 3) ---------------------------------------------------------------
+  const read = async (c: SupabaseClient) => {
+    const r = await c.rpc("get_achievements", { p_tz: tz });
+    if (r.error) throw new Error(`get_achievements: ${r.error.message}`);
+    return r.data as Achievements;
+  };
+  const refused = (r: { error: { message: string } | null }, code: string) => !!r.error && r.error.message.includes(code);
+  const markBad = await a.rpc("mark_achievements_seen", { p_card: "nope" });
+  check("mark_achievements_seen refuses an unknown card", refused(markBad, "invalid_card"), markBad.error?.message ?? "accepted");
+  const look1 = await a.rpc("mark_achievements_seen", { p_card: "explorer" });
+  check("mark_achievements_seen records the card", !look1.error, look1.error?.message);
+  // A first soul after the look: new on the explorer, while everything held before stays old.
+  const { error: soulErr } = await a.from("souls").insert({ user_id: alice.id, name: `Mara ${runId}` });
+  if (soulErr) throw new Error(`soul: ${soulErr.message}`);
+  await a.rpc("check_achievements");
+  const afterSoul = await read(a);
+  const soul = afterSoul.explorer.first_five.find((s) => s.slug === "first-soul");
+  check("an explorer item unlocked after the look is new, and those unlocked before it are not (D10)",
+    soul?.done === true && soul.new === true
+      && afterSoul.explorer.first_five.filter((s) => s.slug !== "first-soul").every((s) => s.new === false)
+      && afterSoul.explorer.six_firsts.every((s) => s.done && s.new === false),
+    JSON.stringify(afterSoul.explorer.first_five) + " " + JSON.stringify(afterSoul.explorer.six_firsts.map((s) => s.new)));
+  await a.rpc("mark_achievements_seen", { p_card: "explorer" });
+  const afterLook = await read(a);
+  check("after the next look nothing on the explorer is new, and seen.explorer is whole-second UTC",
+    afterLook.explorer.first_five.every((s) => s.new === false) && afterLook.explorer.six_firsts.every((s) => s.new === false)
+      && WHOLE_SECOND.test(afterLook.seen.explorer ?? ""),
+    JSON.stringify([afterLook.explorer.first_five.map((s) => s.new), afterLook.seen]));
+  // The emotions card keeps its own look: a feeling met after it is new, the earlier one is not.
+  await a.rpc("mark_achievements_seen", { p_card: "emotions" });
+  const { data: other } = await a.from("emotions").select("id").neq("id", emo.id).order("slug").limit(1).single();
+  if (!other) throw new Error("a second emotion is missing");
+  await pebble(a, `a new feeling ${runId}`, "2026-03-06T09:00:00Z", other.id, 2, 1, [dom.id]);
+  await a.rpc("check_achievements");
+  const felt = await read(a);
+  const newSeats = felt.emotions.seats.filter((s) => s.new).map((s) => s.emotion_id);
+  check("an emotion met after the emotions card was seen is new, the one met before is not",
+    newSeats.length === 1 && newSeats[0] === other.id && felt.emotions.seats.find((s) => s.emotion_id === emo.id)?.new === false,
+    JSON.stringify(newSeats));
+
+  const { data: sets } = await a.from("achievements").select("id, slug, is_active").eq("family", "set_complete").order("slug");
+  // Not asserted: is_active. The rows launch inactive and the maintainer activates
+  // them in the admin when the clients ship the ceremony; this must hold either way.
+  const heldNow = (await unlocks(a)).map((u) => u.slug);
+  check("the check never unlocks a set_complete row (only pull_ceremony does)",
+    (sets ?? []).length === 3 && !heldNow.some((s) => s.startsWith("complete-")), JSON.stringify([sets, heldNow]));
+
+  const badStack = await a.rpc("pull_ceremony", { p_stack: "nope", p_tz: tz });
+  check("pull_ceremony refuses an unknown stack", refused(badStack, "invalid_stack"), badStack.error?.message ?? "accepted");
+  const badZone = await a.rpc("pull_ceremony", { p_stack: "six_firsts", p_tz: "Mars/Olympus" });
+  const nullZone = await a.rpc("pull_ceremony", { p_stack: "six_firsts", p_tz: null });
+  check("pull_ceremony refuses an unknown and a null zone", refused(badZone, "invalid_tz") && refused(nullZone, "invalid_tz"),
+    [badZone.error?.message, nullZone.error?.message].join(" | "));
+  // Completed seconds ago, and the offer is never less than 5 hours after completion.
+  const zones = [tz, "Pacific/Kiritimati"];
+  const early = await Promise.all(zones.map((z) => a.rpc("pull_ceremony", { p_stack: "six_firsts", p_tz: z })));
+  const readyIn = await Promise.all(zones.map(async (z) =>
+    ((await a.rpc("get_achievements", { p_tz: z })).data as Achievements | null)?.explorer.completion?.ready));
+  check("pull_ceremony raises not_ready before 06:00 the next local day, in two zones, as the payload's ready says",
+    early.every((r) => refused(r, "not_ready")) && readyIn.every((r) => r === false),
+    JSON.stringify([early.map((r) => r.error?.message ?? r.data), readyIn]));
+  const none = await a.rpc("pull_ceremony", { p_stack: "domains", p_tz: tz });
+  check("pull_ceremony raises not_ready for a stack never completed", refused(none, "not_ready"),
+    none.error?.message ?? JSON.stringify(none.data));
+  const anonPull = await anon.rpc("pull_ceremony", { p_stack: "six_firsts", p_tz: tz });
+  const anonSeen = await anon.rpc("mark_achievements_seen", { p_card: "explorer" });
+  check("pull_ceremony and mark_achievements_seen are refused to anon", !!anonPull.error && !!anonSeen.error,
+    JSON.stringify([anonPull.data, anonSeen.data]));
+  await dump("get-achievements-seen", alice.token, "get_achievements", { p_tz: tz });
+
+  // The ready path needs a completion older than its offer, which only the
+  // service role can produce: it runs when the key is present (by hand), never in CI.
+  const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (SERVICE) {
+    const admin = createClient(SUPABASE_URL!, SERVICE, { auth: { persistSession: false } });
+    const { error: backErr } = await admin.from("achievement_completions").update({ completed_at: "2026-01-01T00:00:00Z" })
+      .eq("user_id", alice.id).eq("stack", "six_firsts");
+    if (backErr) throw new Error(`back-date: ${backErr.message}`);
+    const backDated = (await read(a)).explorer.completion;
+    check("a completion past its offer is ready", backDated?.ready === true, JSON.stringify(backDated));
+    const pulls = await Promise.all([1, 2].map(() => a.rpc("pull_ceremony", { p_stack: "six_firsts", p_tz: tz })));
+    const pulled = pulls.flatMap((r) => (r.data ?? []) as Pull[]);
+    check("two concurrent pulls of a ready ceremony return one row between them",
+      pulls.every((r) => !r.error) && pulled.length === 1,
+      [...pulls.map((r) => r.error?.message), JSON.stringify(pulled)].filter(Boolean).join(" | "));
+    const again = await a.rpc("pull_ceremony", { p_stack: "six_firsts", p_tz: tz });
+    check("a third pull returns no row", !again.error && ((again.data ?? []) as unknown[]).length === 0,
+      again.error?.message ?? JSON.stringify(again.data));
+    const six: { id: string; is_active: boolean } | undefined =
+      (sets ?? []).find((r: { slug: string }) => r.slug === "complete-six-firsts");
+    const { data: paid } = await a.from("karma_events").select("delta").eq("reason", "grant").eq("ref_id", six?.id ?? "");
+    const granted = pulled[0]?.karma_granted ?? -1;
+    const sixHeld = (await unlocks(a)).some((u) => u.slug === "complete-six-firsts");
+    if (six?.is_active) {
+      check("an active complete-six-firsts is unlocked by the pull, its karma paid at most once and as returned",
+        sixHeld && granted >= 0 && (paid ?? []).length === (granted > 0 ? 1 : 0)
+          && (paid ?? []).every((k: { delta: number }) => k.delta === granted),
+        JSON.stringify([granted, paid, sixHeld]));
+    } else {
+      check("an inactive complete-six-firsts: the pull returns its row with 0 karma, unlocks and pays nothing",
+        granted === 0 && (paid ?? []).length === 0 && !sixHeld, JSON.stringify([granted, paid, sixHeld]));
+    }
+    const after = await read(a);
+    check("the pulled completion carries pulled_at at whole seconds and is no longer ready",
+      WHOLE_SECOND.test(after.explorer.completion?.pulled_at ?? "") && after.explorer.completion?.ready === false,
+      JSON.stringify(after.explorer.completion));
+    check("a set_complete row never reaches the shelf", after.shelf.every((s) => s.family !== "set_complete"),
+      JSON.stringify(after.shelf));
+    // Run by hand with the key and ACHIEVEMENTS_DUMP=1 to refresh this one: the clients need a pulled completion.
+    await dump("get-achievements-pulled", alice.token, "get_achievements", { p_tz: tz });
+  } else {
+    console.log("· pull_ceremony's ready path skipped (no SUPABASE_SERVICE_ROLE_KEY)");
+  }
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);

@@ -2422,6 +2422,10 @@ export type Database = {
         }
         Returns: Json
       }
+      achievement_offered_at: {
+        Args: { p_completed: string; p_tz: string }
+        Returns: string
+      }
       achievement_on: {
         Args: { p_pebble_id: string; p_tz: string; p_unlocked: string }
         Returns: string
@@ -2822,6 +2826,7 @@ export type Database = {
           size: number
         }[]
       }
+      mark_achievements_seen: { Args: { p_card: string }; Returns: undefined }
       path_moments: {
         Args: never
         Returns: {
@@ -2856,6 +2861,13 @@ export type Database = {
           p_view_box: string
         }
         Returns: Json
+      }
+      pull_ceremony: {
+        Args: { p_stack: string; p_tz: string }
+        Returns: {
+          karma_granted: number
+          stack: string
+        }[]
       }
       purge_account: { Args: { p_user_id: string }; Returns: Json }
       recent_auth_enforced: { Args: never; Returns: boolean }
