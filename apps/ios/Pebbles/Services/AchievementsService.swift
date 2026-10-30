@@ -108,6 +108,16 @@ final class AchievementsService {
     private weak var refs: ReferenceDataService?
     private weak var notify: AchievementNotificationService?
 
+    /// Mutation-path checks still running. `check_achievements` returns a row
+    /// only to the call that inserts it: a screen-open check racing one would
+    /// take the fresh unlock and never celebrate it, so it waits its turn out.
+    @ObservationIgnored private(set) var mutationChecksInFlight = 0
+
+    var isMutationCheckInFlight: Bool { mutationChecksInFlight > 0 }
+
+    func beginMutationCheck() { mutationChecksInFlight += 1 }
+    func endMutationCheck() { mutationChecksInFlight = max(mutationChecksInFlight - 1, 0) }
+
     init(client: SupabaseClient) {
         self.client = client
     }
@@ -171,8 +181,13 @@ final class AchievementsService {
     /// Screen-open variant: the retroactive grant must never surface as an
     /// error, and it never celebrates; the achievements page then reads
     /// `get_achievements`, which shows whatever the grant recorded. A check the
-    /// screen gave up on (it closed) is not a failure and is not logged.
+    /// screen gave up on (it closed) is not a failure and is not logged. While a
+    /// mutation-path check runs it is skipped, so that check keeps its unlock to celebrate.
     func checkIgnoringFailure() async {
+        guard !isMutationCheckInFlight else {
+            logger.notice("screen-open achievement check skipped: a mutation check is in flight")
+            return
+        }
         do {
             _ = try await check()
         } catch where AchievementsModel.isCancellation(error) {
@@ -187,8 +202,10 @@ final class AchievementsService {
     /// (mirrors web's `fireAchievementCheck`). Karma notifies stay untouched —
     /// the capsule carries its own "+N karma" line.
     func fireCheck() {
+        beginMutationCheck()
         Task { [weak self] in
             guard let self else { return }
+            defer { self.endMutationCheck() }
             do {
                 let results = try await self.check()
                 guard !results.isEmpty else { return }
