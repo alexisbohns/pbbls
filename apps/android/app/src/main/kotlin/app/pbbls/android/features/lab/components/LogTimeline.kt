@@ -10,18 +10,16 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.model.Log
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -74,11 +72,12 @@ private fun TimelineRow(
 ) {
     val colors = MaterialTheme.colorScheme
     val locale = Locale.getDefault()
-    val iconRes =
+    // Shipped is done, in progress a lit pebble, the backlog a plain one (spec D4).
+    val icon =
         when (mode) {
-            LogTimelineMode.CHANGELOG -> R.drawable.ic_check_circle
-            LogTimelineMode.IN_PROGRESS -> R.drawable.ic_circle_inset_filled
-            LogTimelineMode.BACKLOG -> R.drawable.ic_circle_dashed
+            LogTimelineMode.CHANGELOG -> PbblsIcon.CHECK_CIRCLE
+            LogTimelineMode.IN_PROGRESS -> PbblsIcon.PEBBLE_ROUND_LIT_1
+            LogTimelineMode.BACKLOG -> PbblsIcon.PEBBLE_ROUND
         }
     val iconTint = if (mode == LogTimelineMode.CHANGELOG) colors.primary else colors.onSurfaceVariant
 
@@ -97,12 +96,9 @@ private fun TimelineRow(
                         .height(12.dp)
                         .background(if (isFirst) Color.Transparent else colors.outlineVariant),
             )
-            Icon(
-                painter = painterResource(iconRes),
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(14.dp),
-            )
+            // A fixed slot (spec D6): the node column is 16dp wide whatever the
+            // font scale, so the node fills it at a fixed 16dp rather than INLINE.
+            PbblsIconImage(icon = icon, contentDescription = null, size = 16.dp, tint = iconTint)
             if (!isLast) {
                 Box(
                     modifier =
