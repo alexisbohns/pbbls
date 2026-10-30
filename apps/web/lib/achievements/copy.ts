@@ -105,6 +105,12 @@ export function achievementsWords(t: Translate, locale: Locale) {
       return sentenceCase(t(`${key}.some`, { words: cardinalWords(step.daysLeft, locale), month }), locale)
     },
 
+    error: {
+      title: () => t("error.title"),
+      body: () => t("error.body"),
+      retry: () => t("error.retry"),
+    },
+
     ceremonyTitle: (stack: CeremonyStack) => t(`ceremony.${stack}.title`),
     ceremonyBody: (stack: CeremonyStack) => t(`ceremony.${stack}.body`),
 

@@ -18,14 +18,25 @@ function hueOf(month: DiscMonth, palettes: AchievementPalettes) {
  * month, then each month's counter at its served level, its climb and, for a
  * month begun at the centre, its goal. A kept month wears its family's hue, or
  * ink; a rim month adds the hairline ring, a hued spoke and a hued numeral;
- * only a month the server says is upcoming or quiet is muted. Decorative: its
- * card's label reads the months at each place. iOS `YearDisc`.
+ * only a month the server says is upcoming or quiet is muted. Decorative in a
+ * card, whose label reads the months at each place; drawn anywhere else, give
+ * it `label` (the disc's own words) and it reads as one image. iOS `YearDisc`.
  */
-export function YearDisc({ year, palettes, size = 280 }: { year: AchievementYear; palettes: AchievementPalettes; size?: number }) {
+export function YearDisc({
+  year,
+  palettes,
+  size = 280,
+  label,
+}: {
+  year: AchievementYear
+  palettes: AchievementPalettes
+  size?: number
+  label?: string
+}) {
   const months = year.months.map(discMonth)
   return (
     <svg
-      aria-hidden
+      {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
       focusable="false"
       viewBox={`${DISC_BOX.x} ${DISC_BOX.y} ${DISC_BOX.width} ${DISC_BOX.height}`}
       className="block h-auto w-full overflow-visible"
