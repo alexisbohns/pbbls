@@ -45,7 +45,7 @@ struct ProfileAchievementsCard: View {
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .pebblesIcon(.medium)
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
                     .foregroundStyle(Color.pebbles.outline)
             }
             .contentShape(Rectangle())

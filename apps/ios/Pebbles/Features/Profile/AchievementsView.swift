@@ -133,7 +133,7 @@ struct AchievementBadgeCell: View {
                 Spacer()
                 if !isUnlocked {
                     Image(systemName: "lock")
-                        .pebblesIcon(.medium)
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
                         .foregroundStyle(Color.pebbles.outline)
                 }
             }
