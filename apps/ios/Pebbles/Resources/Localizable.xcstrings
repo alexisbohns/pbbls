@@ -14038,6 +14038,23 @@
           }
         }
       }
+    },
+    "achievements.rosace.of" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "of %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sur %@"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

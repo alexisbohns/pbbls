@@ -55,6 +55,11 @@ enum AchievementsCopy {
         tier == .unknown ? nil : SpineStrings.string("achievements.coverage.\(tier.rawValue)", locale: locale)
     }
 
+    /// "of 38", "sur 38": under the rosace's count.
+    static func rosaceOf(_ of: Int, locale: Locale) -> String {
+        format("achievements.rosace.of", locale, number(of, locale: locale))
+    }
+
     // MARK: - Pebbles
 
     /// "137 pebbles. Five stones stand; the sixth rises toward 250."
