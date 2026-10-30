@@ -65,7 +65,8 @@ struct AchievementsPageContent: View {
 
     private func ready(_ completion: AchievementsPage.Completion?) -> ReadyMark? {
         guard let completion, completion.isReady else { return nil }
-        return ReadyMark(stack: completion.stack, isPulling: pulling == completion.stack,
+        // Every mark waits while any pull runs: one ceremony at a time.
+        return ReadyMark(stack: completion.stack, isPulling: pulling != nil,
                          pull: { onPull(completion.stack) })
     }
 
