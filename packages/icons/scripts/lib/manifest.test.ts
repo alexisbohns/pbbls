@@ -1,8 +1,9 @@
 import { mkdtempSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
+import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
-import { emitted, loadManifest, parseManifest, type Manifest } from "./manifest"
+import { emitted, loadManifest, parseManifest, SURFACES, type Manifest } from "./manifest"
 
 const row = (name: string, extra: Partial<Manifest["icons"][number]> = {}) => ({
   name,
@@ -56,5 +57,23 @@ describe("manifest", () => {
     })
     expect(emitted(manifest).map((e) => e.name)).toEqual(["home", "home.active", "path", "path.active", "path.lit-1", "path.lit-2"])
     expect(emitted(manifest)[1]).toMatchObject({ base: "home", variant: "active", meaning: "home." })
+  })
+})
+
+describe("icons.json replaces", () => {
+  const manifest = loadManifest(fileURLToPath(new URL("../..", import.meta.url)))
+
+  it("lists bare symbol names, each on one row", () => {
+    const owner = new Map<string, string>()
+    for (const row of manifest.icons) {
+      for (const surface of SURFACES) {
+        for (const name of row.replaces[surface]) {
+          expect(name, `${row.name}.replaces.${surface}`).toMatch(/^[A-Za-z0-9._]+$/)
+          const key = `${surface}:${name}`
+          expect(owner.get(key), `${name} listed by ${owner.get(key)} and ${row.name}`).toBeUndefined()
+          owner.set(key, row.name)
+        }
+      }
+    }
   })
 })

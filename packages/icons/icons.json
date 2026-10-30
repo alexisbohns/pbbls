@@ -7,7 +7,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": ["ic_check"], "web": ["Check"] }
+      "replaces": { "ios": ["checkmark"], "android": ["ic_check"], "web": ["Check"] }
     },
     {
       "name": "checkmark",
@@ -25,7 +25,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": ["checkmark.circle.fill"], "android": ["ic_check_circle"], "web": ["CircleCheckBig"] }
+      "replaces": { "ios": ["checkmark.circle.fill", "checkmark.circle", "checkmark.square"], "android": ["ic_check_circle"], "web": ["CircleCheckBig"] }
     },
     {
       "name": "check-circle-dot",
@@ -34,7 +34,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["checkmark.seal", "checkmark.seal.fill"], "android": [], "web": [] }
     },
     {
       "name": "plus-circle-dot",
@@ -52,7 +52,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["xmark.circle.fill", "person.badge.minus"], "android": [], "web": [] }
     },
     {
       "name": "plus-circle",
@@ -61,7 +61,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["plus", "plus.circle"], "android": [], "web": [] }
     },
     {
       "name": "hourglass-end",
@@ -70,7 +70,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["circle.grid.2x1"], "android": [], "web": [] }
     },
     {
       "name": "pendulum",
@@ -106,7 +106,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": ["photo.badge.plus"], "android": [], "web": ["ImagePlus"] }
+      "replaces": { "ios": ["photo.badge.plus", "camera"], "android": [], "web": ["ImagePlus"] }
     },
     {
       "name": "camera-analogic",
@@ -124,7 +124,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["photo", "photo.on.rectangle.angled"], "android": [], "web": [] }
     },
     {
       "name": "home",
@@ -178,7 +178,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["square.stack", "line.3.horizontal.decrease"], "android": [], "web": [] }
     },
     {
       "name": "yarn",
@@ -214,7 +214,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": ["person.2", "person.2.fill", "person.3"], "android": ["ic_people", "ic_person_pair"], "web": ["Users"] }
+      "replaces": { "ios": ["person.2", "person.3", "person.2.badge.plus", "person.3.fill", "bubble.left.and.bubble.right.fill"], "android": ["ic_people", "ic_person_pair"], "web": ["Users"] }
     },
     {
       "name": "users",
@@ -286,7 +286,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": ["circle.hexagongrid"], "android": ["ic_pebble_collection"], "web": ["Layers"] }
+      "replaces": { "ios": ["circle.hexagongrid", "square.stack.3d.up"], "android": ["ic_pebble_collection"], "web": ["Layers"] }
     },
     {
       "name": "pearl",
@@ -340,7 +340,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["circle.grid.3x3"], "android": [], "web": [] }
     },
     {
       "name": "abstract-cairn",
@@ -475,7 +475,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["chart.bar.fill"], "android": [], "web": [] }
     },
     {
       "name": "pan",
@@ -511,7 +511,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": ["person.crop.circle", "person.circle"], "android": ["ic_person"], "web": ["CircleUser"] }
+      "replaces": { "ios": ["person.crop.circle", "person.circle", "person.fill"], "android": ["ic_person"], "web": ["CircleUser"] }
     },
     {
       "name": "barbed-wire",
@@ -610,7 +610,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": ["scribble"], "android": ["ic_scribble"], "web": [] }
+      "replaces": { "ios": ["scribble", "pencil.and.outline"], "android": ["ic_scribble"], "web": [] }
     },
     {
       "name": "abstract-curves",
@@ -673,7 +673,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["pencil"], "android": [], "web": [] }
     },
     {
       "name": "pebble-round",
@@ -682,7 +682,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": ["fossil.shell"], "android": ["ic_fossil_shell"], "web": ["Stone"] }
+      "replaces": { "ios": ["fossil.shell", "drop.fill", "circle.dashed", "circle.inset.filled", "square"], "android": ["ic_fossil_shell"], "web": ["Stone"] }
     },
     {
       "name": "pebble-flat",
@@ -691,7 +691,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["clock"], "android": [], "web": [] }
     },
     {
       "name": "karma-dot",
@@ -700,7 +700,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["sparkle", "sparkles"], "android": [], "web": [] }
     },
     {
       "name": "karma",
@@ -835,7 +835,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["trophy"], "android": [], "web": [] }
     },
     {
       "name": "sunshine",
@@ -916,7 +916,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["lightbulb.max"], "android": [], "web": [] }
     },
     {
       "name": "karma-sparkle",
@@ -979,7 +979,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "replaces": { "ios": ["square.grid.3x3"], "android": [], "web": [] }
     },
     {
       "name": "needle",
@@ -1006,7 +1006,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": ["Heart"] }
+      "replaces": { "ios": ["heart", "waveform.path.ecg"], "android": [], "web": ["Heart"] }
     },
     {
       "name": "hand",
