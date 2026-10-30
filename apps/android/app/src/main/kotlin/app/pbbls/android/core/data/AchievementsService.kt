@@ -22,8 +22,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.cancellation.CancellationException
@@ -121,6 +123,12 @@ interface AchievementsServicing {
     /** The device's last copy for the signed-in user, or null: display only, never instead of [page]. */
     suspend fun cachedPage(zone: ZoneId): AchievementsPage?
 
+    /**
+     * How old the signed-in user's page is (D18): when the device's copy was kept, or the last
+     * read in this process landed, whichever is later; null with neither.
+     */
+    suspend fun keptAt(zone: ZoneId): Instant?
+
     /** `mark_achievements_seen(p_card)`, fire-and-forget: it outlives the sheet that sent it. */
     fun markSeen(card: AchievementCard)
 
@@ -161,6 +169,9 @@ class AchievementsService
         @ApplicationScope private val scope: CoroutineScope,
         private val disk: WrapDiskCaching,
     ) : AchievementsServicing {
+        /** When each user's page last landed in this process, by zone: the shelf's fifteen minutes (D18). */
+        private val lastRead = ConcurrentHashMap<Pair<String, String>, Instant>()
+
         /**
          * Full catalog, inactive rows included — the screen filters (an inactive
          * badge stays visible once unlocked, hidden while locked).
@@ -258,6 +269,7 @@ class AchievementsService
             val page = decodeAchievementsPage(body)
             // Kept only once it has decoded, so the device never holds a body it cannot read.
             if (owner != null && supabase.session?.user?.id == owner) {
+                lastRead[owner to zone.id] = Instant.now()
                 disk.write(owner, zone, CACHE_PAGE, body)
             } else if (owner != null) {
                 Log.w(TAG, "the session changed during get_achievements; its page is not kept")
@@ -275,6 +287,11 @@ class AchievementsService
                 Log.w(TAG, "kept achievements page no longer decodes, read as a miss", e)
                 null
             }
+        }
+
+        override suspend fun keptAt(zone: ZoneId): Instant? {
+            val owner = supabase.session?.user?.id ?: return null
+            return listOfNotNull(disk.keptAt(owner, zone, CACHE_PAGE), lastRead[owner to zone.id]).maxOrNull()
         }
 
         override fun markSeen(card: AchievementCard) {

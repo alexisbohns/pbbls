@@ -5,6 +5,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -36,6 +37,17 @@ class WrapDiskCacheTest {
             assertNull("another user never reads it", cache.read("u2", paris, "week-2026-10-05"))
             assertNull("another zone never reads it", cache.read("u1", tokyo, "week-2026-10-05"))
             assertNull(cache.read("u1", paris, "week-2026-10-12"))
+        }
+
+    @Test
+    fun `a kept page knows when it was kept, a missing one does not`() =
+        runTest {
+            val root = folder.newFolder("path-wraps")
+            val cache = cache(root, StandardTestDispatcher(testScheduler))
+            assertNull(cache.keptAt("u1", paris, "achievements-page"))
+            cache.write("u1", paris, "achievements-page", "{}")
+            assertNotNull(cache.keptAt("u1", paris, "achievements-page"))
+            assertNull(cache.keptAt("u1", tokyo, "achievements-page"))
         }
 
     @Test

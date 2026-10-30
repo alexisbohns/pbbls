@@ -28,6 +28,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.Instant
 import java.time.ZoneId
 
 /**
@@ -100,6 +101,28 @@ class AchievementsServiceTest {
             val page = service.page(zone)
             assertEquals(setOf(Triple("alice", zone.id, "achievements-page")), disk.bodies.keys)
             assertEquals(page, service.cachedPage(zone))
+        }
+
+    @Test
+    fun `the page's age is its last read in this process or its kept copy, whichever is later`() =
+        runTest {
+            val (_, service) = signedIn("alice")
+            assertNull("nothing kept, nothing read", service.keptAt(zone))
+            disk.now = { Instant.parse("2026-10-30T08:00:00Z") }
+            val before = Instant.now()
+            service.page(zone)
+            val age = service.keptAt(zone)!!
+            assertTrue("the read in this process is the later", !age.isBefore(before))
+            assertNull("another zone has its own age", service.keptAt(ZoneId.of("Asia/Tokyo")))
+        }
+
+    @Test
+    fun `a kept copy from an earlier process gives the age alone`() =
+        runTest {
+            val (_, service) = signedIn("alice")
+            val kept = Instant.parse("2026-10-30T08:00:00Z")
+            disk.keptTimes[Triple("alice", zone.id, "achievements-page")] = kept
+            assertEquals(kept, service.keptAt(zone))
         }
 
     @Test

@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
+import java.time.Instant
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,6 +27,13 @@ interface WrapDiskCaching {
         page: String,
         body: String,
     )
+
+    /** When [page] was last kept for [ownerId] in [zone], or null with no copy (the achievements shelf's age, D18). */
+    suspend fun keptAt(
+        ownerId: String,
+        zone: ZoneId,
+        page: String,
+    ): Instant?
 
     /** Every user's wraps, on sign-out and account deletion. */
     fun clearAll()
@@ -92,6 +100,19 @@ class WrapDiskCache(
             } catch (e: IOException) {
                 Log.w(TAG, "could not keep wrap $page", e)
             }
+        }
+
+    override suspend fun keptAt(
+        ownerId: String,
+        zone: ZoneId,
+        page: String,
+    ): Instant? =
+        withContext(io) {
+            file(ownerId, zone, page)
+                .takeIf { it.isFile }
+                ?.lastModified()
+                ?.takeIf { it > 0L }
+                ?.let(Instant::ofEpochMilli)
         }
 
     override fun clearAll() {

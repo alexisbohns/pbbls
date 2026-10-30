@@ -9,6 +9,7 @@ import app.pbbls.android.core.model.achievements.CeremonyPull
 import app.pbbls.android.core.model.achievements.CompletionStack
 import app.pbbls.android.core.model.achievements.decodeAchievementsPage
 import kotlinx.coroutines.CompletableDeferred
+import java.time.Instant
 import java.time.ZoneId
 
 /**
@@ -49,6 +50,9 @@ class FakeAchievementsService(
 
     /** The zone of every [page], [cachedPage] and [pullCeremony] call, in order. */
     val zones = mutableListOf<ZoneId>()
+
+    /** What [keptAt] answers: the page's age for the shelf (D18). */
+    var keptAt: Instant? = null
 
     /** When set, [page] waits for it: a test can observe what shows before the read answers. */
     var pageGate: CompletableDeferred<Unit>? = null
@@ -125,6 +129,8 @@ class FakeAchievementsService(
         zones += zone
         return kept
     }
+
+    override suspend fun keptAt(zone: ZoneId): Instant? = keptAt
 
     override fun markSeen(card: AchievementCard) {
         seen += card
