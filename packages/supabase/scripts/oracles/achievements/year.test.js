@@ -97,3 +97,62 @@ Deno.test("the discs served: the current year always, past years with a moment, 
   assertEquals(yearsServed([at("2024-05-01"), at("2026-02-01"), at("2027-01-03"), at("2024-06-01")], "2026-11-04"), [2026, 2024]);
   assertEquals(yearsServed([], "2026-11-04"), [2026]);
 });
+
+// The first month (D12): in the month of the first moment, only the full weeks
+// whose Monday falls on or after that day count. November 2026 starts on a
+// Sunday; its Mondays are 2, 9, 16, 23 and 30.
+const novAt = (list) => list.map((d) => ({ date: `2026-11-${String(d).padStart(2, "0")}`, pebble: false }));
+
+Deno.test("first month: a first moment on the 22nd counts no week before it", () => {
+  // Today 24th: the weeks of 2, 9 and 16 have ended but began before the 22nd;
+  // the week of the 23rd has not ended yet.
+  const y = yearPayload(2026, novAt([22, 23, 24]), "2026-11-24", "2026-11-22");
+  const nov = y.months[10];
+  assertEquals([nov.full_weeks, nov.weeks_filled, nov.moment_days, nov.level, nov.progress, nov.done.weeks],
+    [0, 0, 3, 0, 0.214, false]);
+  // No week holds it back: only the days do. 11 needed, 6 addable (25 to 30).
+  assertEquals(y.next_step, { month: 11, needs: "moments", days_left: 11, reachable: false });
+  // The 30th: the week of the 23rd has ended and counts, filled.
+  const later = yearPayload(2026, novAt([22, 23, 24, 25, 26, 27, 28, 29, 30]), "2026-11-30", "2026-11-22");
+  assertEquals([later.months[10].full_weeks, later.months[10].weeks_filled, later.months[10].progress],
+    [1, 1, 0.643]);
+  assertEquals(later.next_step, { month: 11, needs: "moments", days_left: 5, reachable: false });
+});
+
+Deno.test("first month: a mid-month start is reachable while the days allow it", () => {
+  // First moment Wednesday 11th; today Tuesday 17th. The week of the 9th began
+  // before the 11th and no longer blocks the step (it did, empty on the 9th and 10th).
+  const y = yearPayload(2026, novAt([11, 12, 13, 16, 17]), "2026-11-17", "2026-11-11");
+  const nov = y.months[10];
+  assertEquals([nov.full_weeks, nov.weeks_filled, nov.moment_days, nov.progress], [0, 0, 5, 0.357]);
+  // 9 needed, 13 addable (18 to 30).
+  assertEquals(y.next_step, { month: 11, needs: "moments", days_left: 9, reachable: true });
+});
+
+Deno.test("first month: a first moment on a Monday counts its own week", () => {
+  const y = yearPayload(2026, novAt([9, 10, 16, 17]), "2026-11-17", "2026-11-09");
+  const nov = y.months[10];
+  // The week of the 9th counts (its Monday is the first day); the week of the 2nd does not.
+  assertEquals([nov.full_weeks, nov.weeks_filled, nov.progress], [1, 1, 0.286]);
+  assertEquals(y.next_step, { month: 11, needs: "moments", days_left: 10, reachable: true });
+});
+
+Deno.test("first month: the months after the first one keep every full week", () => {
+  const items = [{ date: "2026-10-20", pebble: false }, ...novAt([10])];
+  const y = yearPayload(2026, items, "2026-11-17", "2026-10-20");
+  // October (Mondays 5, 12, 19, 26) is the first month: no full week starts on or
+  // after the 20th inside it. November is not: the weeks of 2 and 9 both count.
+  assertEquals([y.months[9].full_weeks, y.months[9].weeks_filled], [0, 0]);
+  assertEquals([y.months[10].full_weeks, y.months[10].weeks_filled], [2, 1]);
+  assertEquals(y.next_step, { month: 11, needs: "moments", days_left: 13, reachable: false });
+  // A first moment in an earlier year changes nothing in this one.
+  const old = yearPayload(2026, items, "2026-11-17", "2025-03-04");
+  assertEquals([old.months[9].full_weeks, old.months[10].full_weeks], [3, 2]);
+});
+
+Deno.test("first month: a start in the last days, with no full week after it, measures days only", () => {
+  // First moment Wednesday 25th; the week of the 30th runs into December.
+  const y = yearPayload(2026, novAt([25, 26, 27]), "2026-12-03", "2026-11-25");
+  const nov = y.months[10];
+  assertEquals([nov.full_weeks, nov.weeks_filled, nov.level, nov.progress, nov.done.weeks], [0, 0, 0, 0.214, false]);
+});
