@@ -32,7 +32,7 @@ struct CompleteCollectionStep: View {
             model.select(collectionId: collection.id)
         } label: {
             HStack(spacing: Spacing.md) {
-                Image(systemName: "square.stack")
+                PbblsIconImage(.collection, .row)
                     .foregroundStyle(isSelected ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant)
                 // Collection names are user-authored, so never localized.
                 Text(verbatim: collection.name)
