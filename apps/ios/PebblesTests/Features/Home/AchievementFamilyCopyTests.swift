@@ -42,7 +42,11 @@ struct AchievementFamilyCopyTests {
             "achievement.family.first_five.description": ("Claim it once your first five are done.", "Réclame-le quand tes cinq premières fois sont faites."),
             "achievement.group.first_moment": ("First moment", "Premier moment"),
             "achievement.group.first_pebble": ("First pebble", "Premier galet"),
-            "achievement.group.first_five": ("The blue pebble", "Le galet bleu")
+            "achievement.group.first_five": ("The blue pebble", "Le galet bleu"),
+            // #1305: the six firsts and the set completions reached the catalog
+            // before this grid knew their group names.
+            "achievement.group.first_stone": ("Six firsts", "Six premières fois"),
+            "achievement.group.set_complete": ("Complete sets", "Ensembles complets")
         ]
         for (key, values) in expected {
             #expect(Self.resolve(key, language: "en") == values.en, "\(key) en")

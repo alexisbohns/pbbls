@@ -78,6 +78,11 @@ fun achievementGroupName(family: String): String =
         "first_soul" -> stringResource(R.string.achievement_group_first_soul)
         "glyph_count" -> stringResource(R.string.achievement_group_glyph_count)
         "glyph_sales" -> stringResource(R.string.achievement_group_glyph_sales)
+        "first_moment" -> stringResource(R.string.achievement_group_first_moment)
+        "first_pebble" -> stringResource(R.string.achievement_group_first_pebble)
+        "first_five" -> stringResource(R.string.achievement_group_first_five)
+        "first_stone" -> stringResource(R.string.achievement_group_first_stone)
+        "set_complete" -> stringResource(R.string.achievement_group_set_complete)
         else -> family
     }
 
