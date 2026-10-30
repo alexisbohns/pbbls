@@ -33,6 +33,14 @@ describe("the achievements cache", () => {
     expect(readAchievementsCache(storage, "alice", PARIS)).toBeNull()
   })
 
+  it("logs the sections a kept payload no longer decodes, and shows the rest", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const storage = new MemoryStorage()
+    writeAchievementsCache(storage, "alice", PARIS, { days_kept: 3, glyphs_carved: { count: "12" } }, achievementsCacheEpoch())
+    expect(readAchievementsCache(storage, "alice", PARIS)).toMatchObject({ daysKept: 3, glyphsCarved: null })
+    expect(warn).toHaveBeenCalledWith("[achievements] kept payload sections dropped", ["glyphs_carved"])
+  })
+
   it("survives a storage that throws, and works without one", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
     const throwing = {

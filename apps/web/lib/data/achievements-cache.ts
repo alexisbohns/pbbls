@@ -41,7 +41,11 @@ export function readAchievementsCache(storage: CacheStorage | null, userId: stri
     const entry: unknown = JSON.parse(text)
     if (typeof entry !== "object" || entry === null) return null
     if (Reflect.get(entry, "v") !== VERSION || Reflect.get(entry, "zone") !== zone) return null
-    return decodeAchievementsPage(Reflect.get(entry, "payload"))?.page ?? null
+    const decoded = decodeAchievementsPage(Reflect.get(entry, "payload"))
+    if (decoded && decoded.skipped.length > 0) {
+      console.warn("[achievements] kept payload sections dropped", decoded.skipped)
+    }
+    return decoded?.page ?? null
   } catch (err) {
     console.warn("[achievements] cache read failed", err)
     return null
