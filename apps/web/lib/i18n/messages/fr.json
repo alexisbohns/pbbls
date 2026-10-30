@@ -247,6 +247,9 @@
     "error": "Impossible de charger tes succès. Réessaie un peu plus tard.",
     "locked": "À débloquer",
     "unlockedOn": "Débloqué le {date}",
+    "rosace": {
+      "of": "sur {of}"
+    },
     "group": {
       "pebble_count": "Galets",
       "emotion_first": "Émotions",
