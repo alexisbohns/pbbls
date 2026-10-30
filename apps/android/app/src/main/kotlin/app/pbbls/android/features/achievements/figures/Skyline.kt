@@ -78,14 +78,15 @@ private const val STAGE_BOX_H = 26f
 private const val BASELINE_OVERHANG = 3f
 
 /**
- * One stage alone, as a register row's mark (the board's `stage`): solid when [fill] is 1,
- * otherwise its contour with the fill it has, on its own ground line. Stages past the eighth
- * reuse the last. Decorative.
+ * One stage alone, as a register row's mark (the board's `stage`): solid when [done] (a level the
+ * server lists), otherwise its contour with the fill it has (the server's progress), on its own
+ * ground line. Stages past the eighth reuse the last. Decorative.
  */
 @Composable
 fun SkylineStage(
     stage: Int,
     fill: Float,
+    done: Boolean,
     modifier: Modifier = Modifier,
     box: Dp = 28.dp,
     scale: Float = 1f,
@@ -106,7 +107,7 @@ fun SkylineStage(
             translate(-origin.x, -origin.y)
         }) {
             val path = STAGE_PATHS[k]
-            if (fill >= 1f) {
+            if (done) {
                 drawPath(path, colors.ink)
             } else {
                 if (fill > 0f) {
