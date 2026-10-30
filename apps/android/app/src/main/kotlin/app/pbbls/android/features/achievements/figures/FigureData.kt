@@ -3,7 +3,7 @@ package app.pbbls.android.features.achievements.figures
 import app.pbbls.android.core.model.achievements.DomainsSection
 import app.pbbls.android.core.model.achievements.EmotionSeat
 
-/** A family's consecutive seats in the server's seat order: where it starts, how many, how many met. */
+/** A family's consecutive seats in the server's order: its first seat's index, how many, how many met. */
 data class FamilyRun(
     val family: String?,
     val start: Int,
@@ -14,12 +14,12 @@ data class FamilyRun(
 /** Runs of one family, read off the seats as sent (#1307). Reading, not ordering: the order is the server's. */
 fun familyRuns(seats: List<EmotionSeat>): List<FamilyRun> {
     val runs = mutableListOf<FamilyRun>()
-    seats.forEachIndexed { i, s ->
+    seats.forEach { s ->
         val last = runs.lastOrNull()
         if (last != null && last.family == s.family) {
             runs[runs.lastIndex] = last.copy(size = last.size + 1, met = last.met + if (s.met) 1 else 0)
         } else {
-            runs += FamilyRun(s.family, i, 1, if (s.met) 1 else 0)
+            runs += FamilyRun(s.family, s.seat, 1, if (s.met) 1 else 0)
         }
     }
     return runs
