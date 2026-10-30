@@ -1,0 +1,69 @@
+import Foundation
+import Testing
+@testable import Pebbles
+
+/// The achievements page's service (#1306, spec §4): the last body that decoded
+/// is kept per owner and zone in the wraps' disk cache, which `SignedOutPurge`
+/// already wipes; a pull's empty answer is never success.
+@Suite("Achievements page service")
+@MainActor
+struct AchievementsPageServiceTests {
+    private let root = FileManager.default.temporaryDirectory.appendingPathComponent("achievements-\(UUID().uuidString)")
+
+    @Test("a body that decodes is kept for its owner and zone, and reads back as the same page")
+    func keeps() async throws {
+        let cache = WrapDiskCache(root: root)
+        defer { cache.clear() }
+        let paris = try #require(TimeZone(identifier: "Europe/Paris"))
+        let data = try AchievementsFixtures.data("design-fixture")
+        let service = AchievementsPageService(client: SupabaseService().client, disk: cache, owner: "mara")
+        let page = try service.decodeAndKeep(data, zone: paris, epoch: cache.epoch)
+        #expect(page.daysKept == 249)
+        #expect(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier) == data)
+        #expect(await service.cachedPage(zone: paris) == page)
+        let tokyo = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        #expect(await service.cachedPage(zone: tokyo) == nil)
+    }
+
+    @Test("nothing is kept without an owner, from a body that does not decode, or across a purge")
+    func keepsNothingElse() async throws {
+        let cache = WrapDiskCache(root: root)
+        defer { cache.clear() }
+        let paris = try #require(TimeZone(identifier: "Europe/Paris"))
+        let data = try AchievementsFixtures.data("design-fixture")
+        let stranger = AchievementsPageService(client: SupabaseService().client, disk: cache, owner: nil)
+        _ = try stranger.decodeAndKeep(data, zone: paris, epoch: cache.epoch)
+        #expect(await stranger.cachedPage(zone: paris) == nil)
+
+        let service = AchievementsPageService(client: SupabaseService().client, disk: cache, owner: "mara")
+        #expect(throws: DecodingError.self) {
+            try service.decodeAndKeep(Data("[]".utf8), zone: paris, epoch: cache.epoch)
+        }
+        #expect(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier) == nil)
+
+        let asked = cache.epoch
+        cache.clear()
+        _ = try service.decodeAndKeep(data, zone: paris, epoch: asked)
+        #expect(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier) == nil)
+    }
+
+    @Test("a kept body this build can no longer decode is a miss")
+    func undecodableKept() async throws {
+        let cache = WrapDiskCache(root: root)
+        defer { cache.clear() }
+        let paris = try #require(TimeZone(identifier: "Europe/Paris"))
+        cache.write(Data("not json".utf8), page: AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier)
+        let service = AchievementsPageService(client: SupabaseService().client, disk: cache, owner: "mara")
+        #expect(await service.cachedPage(zone: paris) == nil)
+    }
+
+    @Test("a pull's row is the karma it paid; no row is never success; not_ready is recognised")
+    func pullOutcome() throws {
+        let rows = try JSONDecoder().decode([AchievementsPageService.PullRow].self,
+                                            from: Data(#"[{"stack": "six_firsts", "karma_granted": 30}]"#.utf8))
+        #expect(AchievementsPageService.outcome(rows) == .pulled(karma: 30))
+        #expect(AchievementsPageService.outcome([]) == .alreadyPulled)
+        #expect(AchievementsPageService.isNotReady("not_ready"))
+        #expect(!AchievementsPageService.isNotReady("invalid_stack"))
+    }
+}
