@@ -67,7 +67,15 @@ struct InviteSheet: View {
                             UIPasteboard.general.string = invite.url.absoluteString
                             didCopy = true
                         } label: {
-                            Label(didCopy ? "Copied" : "Copy link", systemImage: didCopy ? "checkmark" : "doc.on.doc")
+                            Label {
+                                Text(didCopy ? "Copied" : "Copy link")
+                            } icon: {
+                                if didCopy {
+                                    PbblsIconImage(.checkmarkDot, .row)
+                                } else {
+                                    Image(systemName: "doc.on.doc")
+                                }
+                            }
                         }
                         .buttonStyle(.bordered)
 

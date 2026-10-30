@@ -79,11 +79,11 @@ struct ConnectionsListView: View {
                 Button("Try again") { Task { await load() } }
             }
         } else if rows.isEmpty {
-            ContentUnavailableView(
-                "No connections yet",
-                systemImage: "person.2",
-                description: Text("Share your invite link and whoever accepts shows up here.")
-            )
+            ContentUnavailableView {
+                Label { Text("No connections yet") } icon: { PbblsIconImage(.people, .hero) }
+            } description: {
+                Text("Share your invite link and whoever accepts shows up here.")
+            }
         } else {
             List {
                 ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
@@ -145,8 +145,7 @@ private struct ConnectionRow: View {
                         strokeColor: Color.pebbles.primary
                     )
                 } else {
-                    Image(systemName: "person.circle")
-                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    PbblsIconImage(.person, .row, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
                 }
             }
             .frame(width: 32, height: 32)
