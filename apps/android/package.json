@@ -9,6 +9,6 @@
     "generate:theme": "node scripts/generate-theme-export.mjs"
   },
   "devDependencies": {
-    "@material/material-color-utilities": "0.3.0"
+    "@material/material-color-utilities": "0.4.0"
   }
 }
