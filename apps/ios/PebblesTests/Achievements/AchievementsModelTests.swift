@@ -69,6 +69,34 @@ struct AchievementsModelTests {
         #expect(model.page == fresh)
     }
 
+    @Test("a slow read landing after a newer one does not bring its older page back")
+    func staleReadDropped() async throws {
+        let ready = try Self.page(daysKept: 249)
+        let fake = FakeAchievementsPageService(answers: [.success(ready), .success(try Self.pulledPage())])
+        fake.answer(pull: .success(.pulled(karma: 30)))
+        fake.hold(read: 0)
+        let model = Self.model(fake)
+        let load = Task { await model.load {} }
+        for _ in 0..<1000 where !fake.isHolding { try await Task.sleep(nanoseconds: 1_000_000) }
+        #expect(fake.isHolding)
+        _ = await model.pull(.sixFirsts)
+        #expect(model.page?.completion(.sixFirsts)?.pulledAt != nil)
+        fake.release()
+        await load.value
+        #expect(model.page?.completion(.sixFirsts)?.pulledAt != nil, "the held read's ready page came back")
+        #expect(model.page?.completion(.sixFirsts)?.isReady == false)
+    }
+
+    @Test("a cancelled read is not the error state")
+    func cancelledRead() async {
+        let fake = FakeAchievementsPageService(answers: [.failure(CancellationError())])
+        let model = Self.model(fake)
+        await model.load {}
+        #expect(model.page == nil && !model.failed)
+        #expect(AchievementsModel.isCancellation(URLError(.cancelled)))
+        #expect(!AchievementsModel.isCancellation(URLError(.timedOut)))
+    }
+
     @Test("opening a sheet marks its card seen")
     func seen() async {
         let fake = FakeAchievementsPageService()

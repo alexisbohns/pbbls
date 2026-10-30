@@ -6,8 +6,11 @@ import os
 /// at once and the read replaces it when it lands (stale-while-revalidate, no
 /// blink). A failed read keeps what is shown and logs; only a first visit with
 /// nothing kept and no answer shows the error. Opening a sheet marks its card
-/// seen, fire-and-forget; a ready mark pulls its ceremony once. The view sets
-/// `service`; the tests fake it. Android: `AchievementsViewModel`.
+/// seen, fire-and-forget; a ready mark pulls its ceremony once. Reads can
+/// overlap (the screen's load and a pull's re-read), so each takes a sequence
+/// number and only a read newer than the last one shown replaces the page. A
+/// cancelled read is neither an error nor logged. The view sets `service`; the
+/// tests fake it. Android: `AchievementsViewModel`.
 @Observable
 @MainActor
 final class AchievementsModel {
@@ -34,6 +37,10 @@ final class AchievementsModel {
     @ObservationIgnored var service: (any AchievementsPageServicing)?
     let zone: TimeZone
 
+    /// The last read asked for, and the newest one whose page is shown.
+    @ObservationIgnored private var readsAsked = 0
+    @ObservationIgnored private var readShown = 0
+
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "achievements-page")
 
     init(zone: TimeZone = SpineCalendar.current.timeZone) {
@@ -46,7 +53,7 @@ final class AchievementsModel {
         guard let service, !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
-        if page == nil, let kept = await service.cachedPage(zone: zone) { page = kept }
+        if page == nil, let kept = await service.cachedPage(zone: zone), page == nil, readShown == 0 { page = kept }
         await grant()
         await refresh(service)
     }
@@ -102,17 +109,32 @@ final class AchievementsModel {
         return outcome
     }
 
-    /// Reads the page; true when the read landed.
+    /// Reads the page; true when the read landed. A read that lands after a
+    /// newer one already shown is dropped: the page on screen is the newer.
     @discardableResult
     private func refresh(_ service: any AchievementsPageServicing) async -> Bool {
+        readsAsked += 1
+        let read = readsAsked
         do {
-            page = try await service.page(zone: zone)
-            failed = false
+            let fresh = try await service.page(zone: zone)
+            if read > readShown {
+                readShown = read
+                page = fresh
+                failed = false
+            }
             return true
+        } catch where Self.isCancellation(error) {
+            return false
         } catch {
             logger.error("get_achievements failed: \(error.localizedDescription, privacy: .public)")
             failed = page == nil
             return false
         }
+    }
+
+    /// A read the task or the session gave up on: not a failure to show or log.
+    nonisolated static func isCancellation(_ error: Error) -> Bool {
+        if error is CancellationError { return true }
+        return (error as? URLError)?.code == .cancelled
     }
 }
