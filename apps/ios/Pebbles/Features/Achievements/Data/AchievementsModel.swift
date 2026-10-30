@@ -43,6 +43,10 @@ final class AchievementsModel {
     /// init), so a zone changed between visits asks and keeps in the new one.
     @ObservationIgnored let zone: () -> TimeZone
 
+    /// The stacks this model has pulled: never asked again, so a ceremony plays
+    /// once however the reads after it land.
+    @ObservationIgnored private var pulledThisSession: Set<AchievementsPage.CeremonyStack> = []
+
     /// The last read asked for, and the newest one whose page is shown.
     @ObservationIgnored private var readsAsked = 0
     @ObservationIgnored private var readShown = 0
@@ -103,6 +107,10 @@ final class AchievementsModel {
             logger.notice("pull_ceremony(\(name, privacy: .public)) asked while \(running.rawValue, privacy: .public) is pulling")
             return .busy
         }
+        guard !pulledThisSession.contains(stack) else {
+            logger.notice("pull_ceremony(\(name, privacy: .public)) not asked: already pulled in this session")
+            return .alreadyPulled
+        }
         pulling = stack
         defer { pulling = nil }
         let zone = self.zone()
@@ -146,6 +154,13 @@ final class AchievementsModel {
             } else if outcome == .alreadyPulled {
                 logger.error("pull_ceremony(\(name, privacy: .public)) returned no row")
             }
+        }
+        switch outcome {
+        case .pulled, .pulledWithoutKarma:
+            pulledThisSession.insert(stack)
+            if page?.completion(stack)?.pulledAt == nil { page?.markPulled(stack, at: Date()) }
+        case .alreadyPulled, .notReady, .busy, .failed:
+            break
         }
         return outcome
     }

@@ -144,7 +144,25 @@ struct AchievementsModelTests {
         let model = Self.model(fake)
         #expect(await model.pull(.sixFirsts) == .pulled(karma: 30))
         #expect(fake.calls == ["read", "pull six_firsts", "read"])
-        #expect(model.page == ready && model.pulling == nil)
+        #expect(model.pulling == nil)
+        // The fake's read still says ready; the model marks what it pulled itself.
+        #expect(model.page?.completion(.sixFirsts)?.isReady == false && model.page?.completion(.sixFirsts)?.pulledAt != nil)
+        #expect(model.page?.explorer?.ringsDone == ready.explorer?.ringsDone)
+    }
+
+    @Test("a ceremony plays once: a second tap after a failed re-read is already pulled, never played again")
+    func playsOnce() async throws {
+        let fake = FakeAchievementsPageService(answers: [
+            .success(try Self.readyPage()), .failure(FakeAchievementsPageService.Failure()), .success(try Self.pulledPage())
+        ])
+        fake.answer(pull: .success(.pulled(karma: 5)))
+        let model = Self.model(fake)
+        #expect(await model.pull(.sixFirsts) == .pulled(karma: 5))
+        #expect(model.page?.completion(.sixFirsts)?.isReady == false, "the mark goes though the re-read failed")
+        #expect(model.page?.completion(.sixFirsts)?.pulledAt != nil)
+        fake.answer(pull: .success(.alreadyPulled))
+        #expect(await model.pull(.sixFirsts) == .alreadyPulled)
+        #expect(fake.calls.filter { $0.hasPrefix("pull") }.count == 1, "the second tap asks nothing")
     }
 
     @Test("a row paying no karma is still a pull")
