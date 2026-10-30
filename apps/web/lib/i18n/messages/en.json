@@ -250,6 +250,100 @@
     "rosace": {
       "of": "of {of}"
     },
+    "page": {
+      "header": {
+        "since": "since {date}",
+        "days": "{count, plural, one {day} other {days}}"
+      },
+      "card": {
+        "explorer": "Explorer",
+        "emotions": "Emotions",
+        "domains": "Domains",
+        "pebbles": "Pebbles",
+        "year": "The year",
+        "glyphsCarved": "Glyphs carved",
+        "glyphSales": "Glyph sales"
+      },
+      "hint": {
+        "explorer": "five rings",
+        "since": "since {date}",
+        "domains": "in the order they came",
+        "inProgress": "in progress"
+      },
+      "coverage": {
+        "none": "Link your pebbles to the parts of your life they touch, and your insights will start reading them.",
+        "few": "You haven't linked many pebbles to domains yet, so your insights have little to go on.",
+        "third": "Your pebbles touch a third of your life. Link a few more domains and your insights will see further.",
+        "half": "You've already linked pebbles with half of the domains. What a rich life!",
+        "most": "Your pebbles reach most parts of your life. Your insights have plenty to read.",
+        "all": "Every part of your life has a pebble in it. Your insights see the whole picture."
+      },
+      "pebbles": {
+        "kept": "{count, plural, one {# pebble} other {# pebbles}}.",
+        "none": "No stone stands yet; the first rises toward {target}.",
+        "one": "One stone stands; the {rising} rises toward {target}.",
+        "some": "{words} stones stand; the {rising} rises toward {target}.",
+        "all": "Every stone stands; the next mark is {target}.",
+        "top": "Every stone stands."
+      },
+      "year": {
+        "moments": {
+          "keep": "Keep a moment in every full week and {month} reaches the inner disc.",
+          "one": "One more day with a moment, and one in each full week, bring {month} to the inner disc.",
+          "some": "{words} more days with a moment, one in each full week, bring {month} to the inner disc.",
+          "unreachable": "{month} can't reach the inner disc this month."
+        },
+        "pebbles": {
+          "keep": "Keep a pebble in every full week and {month} reaches the rim.",
+          "one": "One more day with a pebble, and one in each full week, bring {month} to the rim.",
+          "some": "{words} more days with a pebble, one in each full week, bring {month} to the rim.",
+          "unreachable": "{month} can't reach the rim this month."
+        }
+      },
+      "ready": "ready",
+      "ceremony": {
+        "emotions": {
+          "title": "Every emotion",
+          "body": "Your pebbles have carried every feeling on the wheel."
+        },
+        "domains": {
+          "title": "Every domain",
+          "body": "Every part of your life has a pebble in it."
+        },
+        "six_firsts": {
+          "title": "The six firsts",
+          "body": "Small, medium and large; lowlight, neutral and highlight."
+        }
+      },
+      "error": {
+        "title": "Couldn't load your achievements",
+        "body": "Check your connection and try again.",
+        "retry": "Try again"
+      },
+      "a11y": {
+        "header": "{days}, {since}",
+        "explorer": "Explorer: {rings}.",
+        "join": "; ",
+        "ring": {
+          "first_five": "the first five",
+          "six_firsts": "the six firsts",
+          "twenty_five": "25 pebbles",
+          "domains": "domains",
+          "emotions": "emotions"
+        },
+        "ringDone": "{name}, done",
+        "ringPart": "{name}, {count} of {of}",
+        "new": "{count, plural, one {# new} other {# new}}.",
+        "emotions": "Emotions, {count} of {of}.",
+        "domains": "Domains, {count} of {of}.",
+        "pebbles": "Pebbles. {line}",
+        "glyphsCarved": "Glyphs carved: {count}.",
+        "glyphSales": "Glyph sales: {count}.",
+        "year": "The year {year}. On the rim: {rim}. On the inner disc: {inner}. On their way: {way}.",
+        "none": "none",
+        "ready": "{title}: the ceremony is ready."
+      }
+    },
     "group": {
       "pebble_count": "Pebbles",
       "emotion_first": "Emotions",
