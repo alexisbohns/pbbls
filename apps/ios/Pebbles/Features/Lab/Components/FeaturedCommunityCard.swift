@@ -9,9 +9,7 @@ struct FeaturedCommunityCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                Image(systemName: "bubble.left.and.bubble.right.fill")
-                    .font(.title2)
-                    .foregroundStyle(Color.pebbles.primary)
+                PbblsIconImage(.people, .tile, style: AnyShapeStyle(Color.pebbles.primary))
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Join the community")
                         .font(.headline)
