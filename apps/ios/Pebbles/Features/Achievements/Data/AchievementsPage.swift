@@ -64,6 +64,11 @@ extension AchievementsPage {
         case sixFirsts = "six_firsts"
     }
 
+    /// What a first-five task made. Nil on a row is a kind this build does not know.
+    enum SubjectKind: String, CaseIterable {
+        case moment, pebble, collection, soul, glyph
+    }
+
     struct FirstFive: Equatable {
         /// Nil for a slug this build does not know: its seat draws as a ghost and its row is left out.
         let task: HomeChecklist.Task?
@@ -71,7 +76,8 @@ extension AchievementsPage {
         /// The day its subject was made.
         let on: CalendarDay?
         let subjectName: String?
-        let subjectKind: String?
+        /// Nil for no subject, or a kind this build does not know (the row stays).
+        let subjectKind: SubjectKind?
         let subjectId: UUID?
         let isNew: Bool
     }
@@ -116,9 +122,10 @@ extension AchievementsPage {
 
     struct Seat: Equatable {
         let seat: Int
-        let emotionId: String
-        /// The family's slug; one this build cannot resolve draws in ink.
-        let family: String
+        /// Nil when the server sent none: the seat draws, its row cannot name it.
+        let emotionId: String?
+        /// The family's slug, nil when absent; one with no palette draws in ink.
+        let family: String?
         let met: Bool
         let on: CalendarDay?
         let pebble: Pebble?
@@ -128,8 +135,8 @@ extension AchievementsPage {
     /// One family of the Emotions sheet, in the server's order: its met seats by
     /// the day met, then the ones not met yet (seat indices into `seats`).
     struct EmotionFamily: Equatable {
-        /// The family's slug; one this build cannot resolve draws in ink.
-        let family: String
+        /// The family's slug, nil when absent; one with no palette draws in ink.
+        let family: String?
         let met: [Int]
         let notYet: [Int]
     }
@@ -157,7 +164,8 @@ extension AchievementsPage {
     }
 
     struct DomainEntry: Equatable {
-        let domainId: String
+        /// Nil when the server sent none: the entry draws, its row cannot name it.
+        let domainId: String?
         let on: CalendarDay?
         let pebble: Pebble?
         let isNew: Bool

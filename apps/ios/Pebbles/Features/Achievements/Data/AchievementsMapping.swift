@@ -3,8 +3,11 @@ import Foundation
 /// `get_achievements` → `AchievementsPage` (#1306): pure and one-to-one. It
 /// renames, types and clamps (a level to 0…2 and a progress to 0…1, the
 /// drawing's bounds) and puts each unknown enum on its fallback (D17): an unknown
-/// month state is `quiet`, an unknown tier says nothing, an unknown step, kind,
-/// ring, task or seen card is left out. It never counts, compares, sorts or picks.
+/// month state is `quiet`, an unknown tier says nothing, an unknown ring, step
+/// or seen card is left out, and an item with an unknown task, stone kind or
+/// subject kind is kept with that field nil, so no seat ever shifts. A year
+/// without exactly 12 months is dropped (the disc can't be drawn) and a listed
+/// month outside 1…12 is left out. It never counts, compares, sorts or picks.
 enum AchievementsMapping {
     typealias Wire = AchievementsPayload
     typealias Page = AchievementsPage
@@ -18,7 +21,7 @@ enum AchievementsMapping {
              pebbles: payload.pebbles.map(ladder),
              glyphsCarved: payload.glyphsCarved.map(ladder),
              glyphSales: payload.glyphSales.map(ladder),
-             years: (payload.years ?? []).map(year),
+             years: (payload.years ?? []).filter { $0.months.count == 12 }.map(year),
              seen: Dictionary(uniqueKeysWithValues: payload.seen.compactMap { key, date in
                  AchievementCard(rawValue: key).map { ($0, date) }
              }),
@@ -48,7 +51,8 @@ enum AchievementsMapping {
             firstFive: wire.firstFive.map { item in
                 Page.FirstFive(task: HomeChecklist.Task.allCases.first { $0.slug == item.slug },
                                done: item.done, on: item.on, subjectName: item.subject?.name,
-                               subjectKind: item.subject?.kind, subjectId: item.subject?.id, isNew: item.isNew)
+                               subjectKind: item.subject.flatMap { Page.SubjectKind(rawValue: $0.kind) },
+                               subjectId: item.subject?.id, isNew: item.isNew)
             },
             sixFirsts: wire.sixFirsts.map {
                 Page.SixFirst(kind: Page.StoneKind(rawValue: $0.kind), done: $0.done, on: $0.on,
@@ -107,7 +111,7 @@ enum AchievementsMapping {
     static func year(_ wire: Wire.Year) -> Page.Year {
         Page.Year(
             year: wire.year, isCurrent: wire.current, daysTarget: wire.daysTarget, months: wire.months.map(month),
-            listed: wire.listed,
+            listed: wire.listed.filter { (1...12).contains($0) },
             nextStep: wire.nextStep.flatMap { step in
                 Page.Needs(rawValue: step.needs).map {
                     Page.NextStep(month: step.month, needs: $0, daysLeft: step.daysLeft, reachable: step.reachable)

@@ -8,7 +8,9 @@ import Foundation
 /// never blanks the page (spec §4). Inside a section a missing or null scalar
 /// takes its default, a malformed day or id reads as absent, and a timestamp is
 /// parsed from its string through `ISO8601Flexible`, never by a decoder's date
-/// strategy. `AchievementsMapping` turns it into `AchievementsPage`.
+/// strategy. A null inside an array or map drops that element alone, and an
+/// item missing a field keeps the item with that field nil (the shared
+/// tolerance rules, spec §4). `AchievementsMapping` turns it into `AchievementsPage`.
 /// Android: `AchievementsPayload.kt`.
 struct AchievementsPayload: Decodable, Equatable {
     let since: CalendarDay?
@@ -57,16 +59,22 @@ struct AchievementsPayload: Decodable, Equatable {
         pebbles = section(.pebbles)
         glyphsCarved = section(.glyphsCarved)
         glyphSales = section(.glyphSales)
-        years = section(.years)
+        years = (section(.years) as [Year?]?)?.compactMap { $0 }
         let seenTimes: [String: String?] = section(.seen) ?? [:]
         seen = seenTimes.compactMapValues { $0.flatMap(ISO8601Flexible.parse) }
-        shelf = section(.shelf)
+        shelf = (section(.shelf) as [ShelfItem?]?)?.compactMap { $0 }
         shelfCount = section(.shelfCount)
         self.skipped = skipped
     }
 }
 
 fileprivate extension KeyedDecodingContainer {
+    /// An array whose null elements are dropped one by one, never failing the
+    /// section; empty when absent or null (the shared tolerance rules, spec §4).
+    func list<T: Decodable>(_ key: Key) throws -> [T] {
+        (try decodeIfPresent([T?].self, forKey: key) ?? []).compactMap { $0 }
+    }
+
     /// A `YYYY-MM-DD` day, or nil when absent, null or malformed.
     func day(_ key: Key) throws -> CalendarDay? {
         try decodeIfPresent(String.self, forKey: key).flatMap(CalendarDay.init(iso:))
@@ -157,10 +165,10 @@ extension AchievementsPayload {
         init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
             firstPebble = try c.decodeIfPresent(Pebble.self, forKey: .firstPebble)
-            firstFive = try c.decode(.firstFive, or: [])
-            sixFirsts = try c.decode(.sixFirsts, or: [])
+            firstFive = try c.list(.firstFive)
+            sixFirsts = try c.list(.sixFirsts)
             twentyFive = try c.decodeIfPresent(TwentyFive.self, forKey: .twentyFive)
-            ringsDone = try c.decode(.ringsDone, or: [])
+            ringsDone = try c.list(.ringsDone)
             completion = try c.decodeIfPresent(Completion.self, forKey: .completion)
         }
     }
@@ -262,8 +270,8 @@ extension AchievementsPayload {
             let c = try decoder.container(keyedBy: CodingKeys.self)
             count = try c.decode(.count, or: 0)
             of = try c.decode(.of, or: 0)
-            seats = try c.decode(.seats, or: [])
-            families = try c.decode(.families, or: [])
+            seats = try c.list(.seats)
+            families = try c.list(.families)
             since = try c.day(.since)
             completion = try c.decodeIfPresent(Completion.self, forKey: .completion)
         }
@@ -271,8 +279,8 @@ extension AchievementsPayload {
 
     struct Seat: Decodable, Equatable {
         let seat: Int
-        let emotionId: String
-        let family: String
+        let emotionId: String?
+        let family: String?
         let met: Bool
         let on: CalendarDay?
         let pebble: Pebble?
@@ -287,8 +295,8 @@ extension AchievementsPayload {
         init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
             seat = try c.decode(.seat, or: 0)
-            emotionId = try c.decode(.emotionId, or: "")
-            family = try c.decode(.family, or: "")
+            emotionId = try c.decodeIfPresent(String.self, forKey: .emotionId)
+            family = try c.decodeIfPresent(String.self, forKey: .family)
             met = try c.decode(.met, or: false)
             on = try c.day(.on)
             pebble = try c.decodeIfPresent(Pebble.self, forKey: .pebble)
@@ -299,7 +307,7 @@ extension AchievementsPayload {
     /// The Emotions sheet's order: one family on the wheel, its met seats by the
     /// day met, then the seats not met yet.
     struct Family: Decodable, Equatable {
-        let family: String
+        let family: String?
         let met: [Int]
         let notYet: [Int]
 
@@ -310,9 +318,9 @@ extension AchievementsPayload {
 
         init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
-            family = try c.decode(.family, or: "")
-            met = try c.decode(.met, or: [])
-            notYet = try c.decode(.notYet, or: [])
+            family = try c.decodeIfPresent(String.self, forKey: .family)
+            met = try c.list(.met)
+            notYet = try c.list(.notYet)
         }
     }
 
@@ -334,14 +342,14 @@ extension AchievementsPayload {
             count = try c.decode(.count, or: 0)
             of = try c.decode(.of, or: 0)
             coverage = try c.decode(.coverage, or: "")
-            entered = try c.decode(.entered, or: [])
-            notYet = try c.decode(.notYet, or: [])
+            entered = try c.list(.entered)
+            notYet = try c.list(.notYet)
             completion = try c.decodeIfPresent(Completion.self, forKey: .completion)
         }
     }
 
     struct Entered: Decodable, Equatable {
-        let domainId: String
+        let domainId: String?
         let on: CalendarDay?
         let pebble: Pebble?
         let isNew: Bool
@@ -354,7 +362,7 @@ extension AchievementsPayload {
 
         init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
-            domainId = try c.decode(.domainId, or: "")
+            domainId = try c.decodeIfPresent(String.self, forKey: .domainId)
             on = try c.day(.on)
             pebble = try c.decodeIfPresent(Pebble.self, forKey: .pebble)
             isNew = try c.decode(.isNew, or: false)
@@ -379,9 +387,9 @@ extension AchievementsPayload {
         init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
             count = try c.decode(.count, or: 0)
-            levels = try c.decode(.levels, or: [])
+            levels = try c.list(.levels)
             next = try c.decodeIfPresent(Next.self, forKey: .next)
-            ladder = try c.decode(.ladder, or: [])
+            ladder = try c.list(.ladder)
             thenEvery = try c.decodeIfPresent(Int.self, forKey: .thenEvery)
             since = try c.day(.since)
         }
@@ -449,8 +457,8 @@ extension AchievementsPayload {
             year = try c.decode(.year, or: 0)
             current = try c.decode(.current, or: false)
             daysTarget = try c.decodeIfPresent(Int.self, forKey: .daysTarget)
-            months = try c.decode(.months, or: [])
-            listed = try c.decode(.listed, or: [])
+            months = try c.list(.months)
+            listed = try c.list(.listed)
             nextStep = try c.decodeIfPresent(NextStep.self, forKey: .nextStep)
         }
     }

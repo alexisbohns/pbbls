@@ -15,7 +15,7 @@ struct AchievementsMappingTests {
         #expect(explorer.ringsDone == [.firstFive, .sixFirsts, .twentyFive])
         #expect(explorer.firstFive.compactMap(\.task) == HomeChecklist.Task.allCases)
         #expect(explorer.firstFive[1].subjectId == UUID(uuidString: "a0000000-0000-4000-8000-000000000001"))
-        #expect(explorer.firstFive[1].subjectKind == "pebble")
+        #expect(explorer.firstFive[1].subjectKind == .pebble)
         #expect(explorer.sixFirsts.compactMap(\.kind) == AchievementsPage.StoneKind.allCases)
         #expect(explorer.sixFirsts[2].pebble?.valence == .lowlightLarge)
         #expect(explorer.sixFirsts[2].on == CalendarDay(year: 2026, month: 3, day: 9))
@@ -60,22 +60,35 @@ struct AchievementsMappingTests {
         #expect(page.shelfCount == 12)
     }
 
+    /// Twelve months: `special` by month number, the rest plain.
+    static func months(_ special: [Int: String]) -> String {
+        (1...12).map { special[$0] ?? #"{"month": \#($0), "state": "quiet"}"# }.joined(separator: ", ")
+    }
+
     @Test("values this build does not know fall back safely (D17)")
     func fallbacks() throws {
+        let months = Self.months([3: #"{"month": 3, "state": "dormant", "level": 5, "progress": 1.4}"#,
+                                  4: #"{"month": 4, "state": "kept", "level": -1, "progress": -0.2}"#])
         let page = try AchievementsFixtures.json("""
-        {"explorer": {"first_five": [{"slug": "first-dance", "done": true}],
+        {"explorer": {"first_five": [{"slug": "first-dance", "done": true},
+                                     {"slug": "first-moment", "done": true,
+                                      "subject": {"kind": "boat", "id": "a0000000-0000-4000-8000-000000000001"}}],
                       "six_firsts": [{"kind": "tiny", "done": true}], "rings_done": ["constellation", "six_firsts"]},
          "domains": {"count": 1, "of": 18, "coverage": "plenty", "entered": [], "not_yet": []},
          "emotions": {"count": 0, "of": 1, "seats": [{"seat": 0, "emotion_id": "x", "family": "awe", "met": false}],
                       "families": [{"family": "awe", "met": [], "not_yet": [0]}]},
-         "years": [{"year": 2026, "current": true, "listed": [],
-                    "months": [{"month": 3, "state": "dormant", "level": 5, "progress": 1.4},
-                               {"month": 4, "state": "kept", "level": -1, "progress": -0.2}],
-                    "next_step": {"month": 3, "needs": "photos", "days_left": 2, "reachable": true}}],
+         "years": [{"year": 2026, "current": true, "listed": [0, 4, 3, 13],
+                    "months": [\(months)],
+                    "next_step": {"month": 3, "needs": "photos", "days_left": 2, "reachable": true}},
+                   {"year": 2025, "current": false, "listed": [], "months": [{"month": 1, "state": "quiet"}]}],
          "seen": {"constellation": "2026-10-02T08:14:05Z", "year": "2026-10-02T08:14:05Z"}}
         """).model
+        #expect(page.explorer?.firstFive.count == 2, "an unknown task keeps its seat")
         #expect(page.explorer?.firstFive.first?.task == nil)
-        #expect(page.explorer?.sixFirsts.first?.kind == nil)
+        let boat = try #require(page.explorer?.firstFive.last)
+        #expect(boat.task == .moment && boat.subjectKind == nil && boat.subjectId != nil,
+                "an unknown subject kind is kept, its kind nil")
+        #expect(page.explorer?.sixFirsts.count == 1 && page.explorer?.sixFirsts.first?.kind == nil)
         #expect(page.explorer?.ringsDone == [.sixFirsts])
         #expect(page.domains?.coverage == .unknown)
         #expect(page.emotions?.seats.first?.family == "awe")
@@ -85,6 +98,8 @@ struct AchievementsMappingTests {
         let april = try #require(page.years.first?.month(4))
         #expect(april.level == 0 && april.progress == 0)
         #expect(april.isMuted, "a kept month without a family has no hue to draw")
+        #expect(page.years.map(\.year) == [2026], "a year without twelve months can't be drawn")
+        #expect(page.years.first?.listed == [4, 3])
         #expect(page.years.first?.nextStep == nil)
         #expect(page.years.first?.daysTarget == nil)
         #expect(Array(page.seen.keys) == [.year])

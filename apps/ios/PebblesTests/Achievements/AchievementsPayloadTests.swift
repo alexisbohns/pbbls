@@ -121,6 +121,36 @@ struct AchievementsPayloadTests {
         #expect(payload.skipped.isEmpty)
     }
 
+    @Test("a null inside an array or map drops that element alone; the section survives")
+    func nullElements() throws {
+        let payload = try AchievementsFixtures.json("""
+        {"explorer": {"first_five": [null, {"slug": "first-moment", "done": true}],
+                      "six_firsts": [{"kind": "tiny", "done": true}, null], "rings_done": [null, "six_firsts"]},
+         "emotions": {"count": 1, "of": 2,
+                      "seats": [{"seat": 0, "family": "joy", "met": false}, null, {"seat": 1, "emotion_id": "e1", "met": true}],
+                      "families": [{"family": "joy", "met": [null, 1], "not_yet": [0, null]}, null]},
+         "domains": {"count": 0, "of": 2, "coverage": "none", "entered": [null], "not_yet": ["d1", null]},
+         "pebbles": {"count": 3, "ladder": [1, null, 10], "levels": [null]},
+         "years": [null],
+         "shelf": [null, {"slug": "first-moment", "family": "first_moment", "threshold": null}],
+         "seen": {"explorer": null, "emotions": "2026-10-02T08:14:05Z"}}
+        """)
+        #expect(payload.skipped.isEmpty)
+        #expect(payload.explorer?.firstFive.map(\.slug) == ["first-moment"])
+        #expect(payload.explorer?.sixFirsts.map(\.kind) == ["tiny"], "an unknown kind is kept")
+        #expect(payload.explorer?.ringsDone == ["six_firsts"])
+        let seats = try #require(payload.emotions?.seats)
+        #expect(seats.map(\.seat) == [0, 1])
+        #expect(seats[0].emotionId == nil && seats[1].family == nil, "a missing field is nil; the seat stays")
+        #expect(payload.emotions?.families.count == 1)
+        #expect(payload.emotions?.families.first?.met == [1] && payload.emotions?.families.first?.notYet == [0])
+        #expect(payload.domains?.entered == [] && payload.domains?.notYet == ["d1"])
+        #expect(payload.pebbles?.ladder == [1, 10] && payload.pebbles?.levels == [])
+        #expect(payload.years == [])
+        #expect(payload.shelf?.map(\.slug) == ["first-moment"])
+        #expect(payload.seen.keys.sorted() == ["emotions"], "a null seen time is left out")
+    }
+
     @Test("absent sections stay absent and are not errors")
     func absentSections() throws {
         let payload = try AchievementsFixtures.json(#"{"years": []}"#)
