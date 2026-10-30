@@ -11,6 +11,10 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
 import app.pbbls.android.core.designsystem.SpineColors
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Valence
@@ -88,6 +92,44 @@ internal fun DrawScope.newMark(
 ) {
     drawCircle(ink, width * 0.86f, center, style = Stroke(unit))
     drawCircle(ink, 1.9f * unit, center + Offset(width * 0.66f, -width * 0.66f))
+}
+
+/**
+ * How much to scale a text measured at [style] so it stands [boardSize] board units tall in a figure
+ * drawn at [unit] px per board unit. The figure's text is its art: it shrinks with the figure on a
+ * narrow screen, and since [style]'s size in px carries the font scale, dividing by it keeps the
+ * text at the board's size (a figure never draws wider than its board, so [unit] is capped there).
+ * The card says the same in words for anyone who reads at a larger size.
+ */
+internal fun DrawScope.figureTextScale(
+    style: TextStyle,
+    boardSize: Float,
+    unit: Float,
+): Float = boardSize * unit / style.fontSize.toPx()
+
+/** [layout] with its middle on [x] and its first baseline on [baseline], scaled by [scale] about that point. */
+internal fun DrawScope.drawFigureText(
+    layout: TextLayoutResult,
+    x: Float,
+    baseline: Float,
+    scale: Float,
+) {
+    withTransform({
+        translate(x, baseline)
+        scale(scale, scale, Offset.Zero)
+    }) { drawText(layout, topLeft = Offset(-layout.size.width / 2f, -layout.firstBaseline)) }
+}
+
+/** [layout] centred on [center] both ways (the board's `dominant-baseline: central`), scaled by [scale]. */
+internal fun DrawScope.drawFigureTextCentred(
+    layout: TextLayoutResult,
+    center: Offset,
+    scale: Float,
+) {
+    withTransform({
+        translate(center.x, center.y)
+        scale(scale, scale, Offset.Zero)
+    }) { drawText(layout, topLeft = Offset(-layout.size.width / 2f, -layout.size.height / 2f)) }
 }
 
 /** A seal centred on [center], [width] px wide. */

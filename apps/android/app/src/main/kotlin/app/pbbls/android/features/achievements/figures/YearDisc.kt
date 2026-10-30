@@ -19,7 +19,6 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -51,6 +50,13 @@ private const val RIM_RING = 0.78f
 private const val RIM_RING_WIDTH = 0.8f
 private const val CROSS = 1.1f
 private const val CROSS_HALF = 4f
+
+// The board's numerals: 7 units tall, 6 for the four longest (III, VII, VIII, XII), their baseline
+// 2.5 below the point on the numeral ring.
+private const val NUMERAL_SIZE = 7f
+private const val NUMERAL_SIZE_LONG = 6f
+private const val NUMERAL_DROP = 2.5f
+private const val TEXT_CACHE = 16
 
 // The board's counters are rounded neutral stones, solid in a month's hue.
 private val COUNTER_SOLID = InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF, ValencePolarity.NEUTRAL)
@@ -121,7 +127,7 @@ fun YearDisc(
     val hues = monthHues(year.months, lookups)
     val prints = rememberCounterPrints(hues)
     val marks = remember(year) { year.months.map(G::mark) }
-    val measurer = rememberTextMeasurer()
+    val measurer = rememberTextMeasurer(cacheSize = TEXT_CACHE)
 
     Canvas(
         modifier
@@ -180,9 +186,10 @@ fun YearDisc(
         marks.forEachIndexed { i, mark ->
             val hue = hues[i]
             val style = if (mark.rim && hue != null) type.discNumeralRim.copy(color = hue) else type.discNumeral.copy(color = colors.ink2)
-            val layout = measurer.measure(G.numeral(mark.month), style)
-            val at = px(G.point(G.NUMERAL_R, mark.angle))
-            drawText(layout, topLeft = at - Offset(layout.size.width / 2f, layout.size.height / 2f))
+            val numeral = G.numeral(mark.month)
+            val boardSize = if (numeral.length >= 3) NUMERAL_SIZE_LONG else NUMERAL_SIZE
+            val at = px(G.point(G.NUMERAL_R, mark.angle) + Offset(0f, NUMERAL_DROP))
+            drawFigureText(measurer.measure(numeral, style), at.x, at.y, figureTextScale(style, boardSize, unit))
             monthCounter(mark, hue, px(G.point(mark.counterR, mark.angle)), G.COUNTER_WIDTH * unit, prints, colors, unit)
         }
     }

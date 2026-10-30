@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -28,8 +27,14 @@ import app.pbbls.android.features.achievements.AchievementLookups
 
 private const val FACET_SEAM = 0.9f
 private const val FRESH_DOT_R = 2.6f
+
+// The board's text, in board units of its 270 box: the count's baseline 3 above the centre, its
+// "of 38" 15 below; the count 28 tall, the "of" and the family names 11.
 private const val CENTRE_COUNT_RISE = 3f
 private const val CENTRE_OF_DROP = 15f
+private const val COUNT_SIZE = 28f
+private const val SMALL_SIZE = 11f
+private const val TEXT_CACHE = 16
 
 private fun Path.polygon(points: List<Offset>): Path =
     apply {
@@ -94,7 +99,7 @@ fun Rosace(
                 )
             }
         }
-    val measurer = rememberTextMeasurer()
+    val measurer = rememberTextMeasurer(cacheSize = TEXT_CACHE)
 
     Canvas(
         modifier
@@ -141,17 +146,17 @@ fun Rosace(
                 val name = names[i] ?: return@forEachIndexed
                 val palette = run.family?.let { lookups.family(it)?.palette }
                 val colour = palette?.let { familyLabelColor(run.family, it, night) } ?: colors.ink
-                val layout = measurer.measure(name, type.rosaceFamily.copy(color = colour))
-                val at = g.label(run.start, run.size) * k
-                drawText(layout, topLeft = at - Offset(layout.size.width / 2f, layout.size.height / 2f))
+                val style = type.rosaceFamily.copy(color = colour)
+                val layout = measurer.measure(name, style)
+                drawFigureTextCentred(layout, g.label(run.start, run.size) * k, figureTextScale(style, SMALL_SIZE, k))
             }
         }
         centre?.let { (count, of) ->
-            val countLayout = measurer.measure(count, type.rosaceCount.copy(color = colors.ink))
-            val ofLayout = measurer.measure(of, type.rosaceOf.copy(color = colors.ink2))
-            val c = Offset(g.centre, g.centre) * k
-            drawText(countLayout, topLeft = c - Offset(countLayout.size.width / 2f, countLayout.size.height - CENTRE_COUNT_RISE * k))
-            drawText(ofLayout, topLeft = c + Offset(-ofLayout.size.width / 2f, CENTRE_OF_DROP * k - ofLayout.size.height))
+            val countStyle = type.rosaceCount.copy(color = colors.ink)
+            val ofStyle = type.rosaceOf.copy(color = colors.ink2)
+            val c = g.centre * k
+            drawFigureText(measurer.measure(count, countStyle), c, c - CENTRE_COUNT_RISE * k, figureTextScale(countStyle, COUNT_SIZE, k))
+            drawFigureText(measurer.measure(of, ofStyle), c, c + CENTRE_OF_DROP * k, figureTextScale(ofStyle, SMALL_SIZE, k))
         }
     }
 }
