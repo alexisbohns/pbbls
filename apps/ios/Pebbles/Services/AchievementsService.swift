@@ -169,10 +169,14 @@ final class AchievementsService {
     }
 
     /// Screen-open variant: the retroactive grant must never surface as an
-    /// error — the grid renders whatever `loadUnlocks()` then returns.
+    /// error, and it never celebrates; the achievements page then reads
+    /// `get_achievements`, which shows whatever the grant recorded. A check the
+    /// screen gave up on (it closed) is not a failure and is not logged.
     func checkIgnoringFailure() async {
         do {
             _ = try await check()
+        } catch where AchievementsModel.isCancellation(error) {
+            return
         } catch {
             logger.warning("achievement check on screen open failed: \(error.localizedDescription, privacy: .private)")
         }
