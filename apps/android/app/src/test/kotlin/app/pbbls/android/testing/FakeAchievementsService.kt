@@ -53,6 +53,12 @@ class FakeAchievementsService(
     /** When set, [page] waits for it: a test can observe what shows before the read answers. */
     var pageGate: CompletableDeferred<Unit>? = null
 
+    /**
+     * One gate per [page] call, taken in order ahead of [pageGate]: a test can land overlapping
+     * reads out of order. Each read answers what [served] was when it was asked.
+     */
+    val pageGates = ArrayDeque<CompletableDeferred<Unit>>()
+
     private val armed = ArmedFailure()
     private val pageFailure = ArmedFailure()
     private val pullFailure = ArmedFailure()
@@ -109,9 +115,10 @@ class FakeAchievementsService(
         pageCalls += 1
         calls += "page"
         zones += zone
-        pageGate?.await()
+        val answer = served
+        (pageGates.removeFirstOrNull() ?: pageGate)?.await()
         pageFailure.fire()
-        return served
+        return answer
     }
 
     override suspend fun cachedPage(zone: ZoneId): AchievementsPage? {

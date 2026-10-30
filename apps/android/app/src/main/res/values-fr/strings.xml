@@ -880,6 +880,7 @@
     <string name="achievements_ceremony_domains_body">Chaque part de ta vie a son galet.</string>
     <string name="achievements_ceremony_six_firsts_title">Les six premières fois</string>
     <string name="achievements_ceremony_six_firsts_body">Petit, moyen et grand ; creux, neutre et temps fort.</string>
+    <string name="achievements_ceremony_error">Impossible d\'ouvrir la cérémonie. Réessaie.</string>
     <string name="achievements_error_title">Impossible de charger tes succès</string>
     <string name="achievements_error_body">Vérifie ta connexion et réessaie.</string>
     <string name="achievements_error_retry">Réessayer</string>

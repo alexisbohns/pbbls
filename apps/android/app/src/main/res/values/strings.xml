@@ -881,6 +881,7 @@
     <string name="achievements_ceremony_domains_body">Every part of your life has a pebble in it.</string>
     <string name="achievements_ceremony_six_firsts_title">The six firsts</string>
     <string name="achievements_ceremony_six_firsts_body">Small, medium and large; lowlight, neutral and highlight.</string>
+    <string name="achievements_ceremony_error">Couldn\'t open the ceremony. Please try again.</string>
     <string name="achievements_error_title">Couldn\'t load your achievements</string>
     <string name="achievements_error_body">Check your connection and try again.</string>
     <string name="achievements_error_retry">Try again</string>

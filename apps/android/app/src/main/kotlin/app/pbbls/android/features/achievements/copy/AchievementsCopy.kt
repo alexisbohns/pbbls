@@ -3,6 +3,7 @@ package app.pbbls.android.features.achievements.copy
 import android.content.res.Resources
 import android.icu.text.ListFormatter
 import android.text.format.DateFormat
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
@@ -194,23 +195,9 @@ class AchievementsCopy(
 
     // ---- The ceremony and the error --------------------------------------------------------------
 
-    fun ceremonyTitle(stack: CompletionStack): String =
-        resources.getString(
-            when (stack) {
-                CompletionStack.EMOTIONS -> R.string.achievements_ceremony_emotions_title
-                CompletionStack.DOMAINS -> R.string.achievements_ceremony_domains_title
-                CompletionStack.SIX_FIRSTS -> R.string.achievements_ceremony_six_firsts_title
-            },
-        )
+    fun ceremonyTitle(stack: CompletionStack): String = resources.getString(ceremonyTitleRes(stack))
 
-    fun ceremonyBody(stack: CompletionStack): String =
-        resources.getString(
-            when (stack) {
-                CompletionStack.EMOTIONS -> R.string.achievements_ceremony_emotions_body
-                CompletionStack.DOMAINS -> R.string.achievements_ceremony_domains_body
-                CompletionStack.SIX_FIRSTS -> R.string.achievements_ceremony_six_firsts_body
-            },
-        )
+    fun ceremonyBody(stack: CompletionStack): String = resources.getString(ceremonyBodyRes(stack))
 
     fun errorTitle(): String = resources.getString(R.string.achievements_error_title)
 
@@ -438,6 +425,24 @@ class AchievementsCopy(
 
     private fun sentenceCase(s: String): String = s.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
 }
+
+/** A ceremony's title, by its set (iOS's `ceremonyTitle`): the unlock moment's headline. */
+@StringRes
+fun ceremonyTitleRes(stack: CompletionStack): Int =
+    when (stack) {
+        CompletionStack.EMOTIONS -> R.string.achievements_ceremony_emotions_title
+        CompletionStack.DOMAINS -> R.string.achievements_ceremony_domains_title
+        CompletionStack.SIX_FIRSTS -> R.string.achievements_ceremony_six_firsts_title
+    }
+
+/** A ceremony's line under its title. */
+@StringRes
+fun ceremonyBodyRes(stack: CompletionStack): Int =
+    when (stack) {
+        CompletionStack.EMOTIONS -> R.string.achievements_ceremony_emotions_body
+        CompletionStack.DOMAINS -> R.string.achievements_ceremony_domains_body
+        CompletionStack.SIX_FIRSTS -> R.string.achievements_ceremony_six_firsts_body
+    }
 
 @Composable
 fun rememberAchievementsCopy(): AchievementsCopy {
