@@ -7197,6 +7197,22 @@ iOS's page (`feat/1306-ios-achievements-page`) is the reference; where this plan
 - **`/sandbox/design`:** an "Achievements page" specimen draws the content from the canonical design fixture with the reference palettes, as served or with ceremonies ready.
 - **Verified in a browser:** headless Chrome over CDP on port 3100, light and dark, at 390 and 1280. The real route was checked signed out only (it renders its title and mounts the sprite, with no console error). It was not checked signed in: no throwaway account was available. The real-data pass is still owed.
 
+### Part 6 + what remained of Part 7, the sheets (`feat/1308-achievements-web-sheets`, 31 October)
+
+iOS's sheets (`feat/1306-ios-achievements-sheets`) are the reference, matching Android's; where this plan's Tasks 25–29 differ, they win.
+
+- **Copy:** `achievements.page.sheet.*`, `.kind.*` and the sheets' read-aloud keys, word for word with iOS and Android. The app's own words are reused as iOS reuses its own: `moment.untitled`, `pebble.positiveness.*`, and the first five's `achievements.family.*.title`. Unfinished rows (a first-five task or a six-firsts kind not done, the next milestone and every one beyond) read "not yet" / "pas encore" before "new since you last looked".
+- **Models:** `lib/achievements/sheets.ts` holds the stack: push on top (one already open comes back instead of opening twice), pop from a depth, and close a sheet whose section left the payload, with everything above it. `lib/achievements/sheet-rows.ts` ports iOS's `AchievementsSheetRows`.
+  - Fallback names ("A first", "An emotion", "A domain", "Other emotions") keep each row in its place, and every date is the served `on`.
+  - A row opens its pebble only with a moment id; a first-five task opens one only for a moment or pebble subject, never its collection, soul or glyph (the plan's `subjectHref` was not built).
+  - The year's counts are uncapped, with gauges over the served `days_target` and `done` from the server; "Earlier years" lists only earlier years, or the first-year line.
+- **Names:** `lib/i18n/useSheetNames.ts` names emotions and domains by id from the static configs, localized by slug, and families by slug.
+- **Components** (`components/achievements/sheets/`): `SheetParts` (band with the ready mark while offered, register rows as 44 px buttons when they open something, not-yet names read as one, the year table with colour only in the pebbles column), `AchievementSheets` (the five), and `AchievementSheetStack` (shadcn `Sheet`s nested in each other, so dismissing pops only the top; each marks its card seen once per open). Inside a sheet the band is the dialog's title.
+- **The page:** cards open their sheets (they are now buttons named by their labels); a row's pebble opens on `/pebble/<moment id>` once the sheets have closed.
+- **Part 7:** nothing left. The cards carried their ready marks from Part 5, the ceremony reuses the unlock moment, and the sheets' bands carry the marks too.
+- **Verified in a browser:** headless Chrome on port 3100, through a temporary preview (deleted) that opened each sheet over the design fixture, light and dark, at 390 and 1280.
+- **Not covered by the node suite:** `SheetTitle` (base UI's dialog title). Vitest resolves a second copy of React for `@base-ui/react`, so the render tests set the band as a plain heading outside a sheet.
+
 ## Self-review notes
 
 - **Spec coverage:**
