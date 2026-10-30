@@ -20,7 +20,10 @@ enum AchievementsA11y {
                                                               dateLocale: dateLocale))
     }
 
-    /// "Explorer: the first five, done; …; emotions, 23 of 38. 3 new."
+    /// "Explorer: the first five, done; …; emotions, 23 of 38. 3 new." A ring is
+    /// done when `rings_done` says so; an absent section is left out, never read
+    /// as 0. "N new" adds the `new` flags of everything the wheel draws: the first
+    /// five, the six firsts, the 25th, the domain entries and the emotion seats (spec §5).
     static func explorer(_ explorer: Page.Explorer, emotions: Page.Emotions?, domains: Page.Domains?,
                          locale: Locale) -> String {
         var rings = [
@@ -90,7 +93,7 @@ enum AchievementsA11y {
             names(begun.filter { YearDiscGeometry.level($0) == 0 && $0.progress > 0 }, locale))
     }
 
-    /// "Ready to open: The six firsts".
+    /// "The six firsts: the ceremony is ready."
     static func ready(_ stack: Page.CeremonyStack, locale: Locale) -> String {
         AchievementsCopy.format("achievements.a11y.ready", locale, AchievementsCopy.ceremonyTitle(stack, locale: locale))
     }

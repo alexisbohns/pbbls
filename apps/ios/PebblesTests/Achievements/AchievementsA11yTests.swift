@@ -33,7 +33,7 @@ struct AchievementsA11yTests {
         #expect(AchievementsA11y.explorer(explorer, emotions: page.emotions, domains: page.domains, locale: Self.en)
             == "Explorer: the first five, done; the six firsts, done; 25 pebbles, done; domains, 14 of 18; emotions, 23 of 38. 3 new.")
         #expect(AchievementsA11y.explorer(explorer, emotions: page.emotions, domains: page.domains, locale: Self.fr)
-            == "Explorateur : les cinq premiers, c'est fait ; les six premières fois, c'est fait ; 25 galets, c'est fait ; domaines, 14 sur 18 ; émotions, 23 sur 38. 3 nouveautés.")
+            == "Explorateur : les cinq premières fois, c'est fait ; les six premières fois, c'est fait ; 25 galets, c'est fait ; domaines, 14 sur 18 ; émotions, 23 sur 38. 3 nouveautés.")
         let fresh = try Self.newUser()
         #expect(AchievementsA11y.explorer(try #require(fresh.explorer), emotions: fresh.emotions, domains: fresh.domains,
                                           locale: Self.en)
@@ -80,8 +80,8 @@ struct AchievementsA11yTests {
 
     @Test("a ready mark says which ceremony it opens")
     func ready() {
-        #expect(AchievementsA11y.ready(.sixFirsts, locale: Self.en) == "Ready to open: The six firsts")
-        #expect(AchievementsA11y.ready(.emotions, locale: Self.fr) == "Prêt à ouvrir : Toutes les émotions")
+        #expect(AchievementsA11y.ready(.sixFirsts, locale: Self.en) == "The six firsts: the ceremony is ready.")
+        #expect(AchievementsA11y.ready(.emotions, locale: Self.fr) == "Toutes les émotions : la cérémonie est prête.")
         #expect(AchievementsCopy.ready(locale: Self.fr) == "prêt")
         #expect(AchievementsCopy.glyphsCarved(locale: Self.en) == "Glyphs carved")
     }

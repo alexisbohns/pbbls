@@ -14098,7 +14098,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "les cinq premiers"
+            "value" : "les cinq premières fois"
           }
         }
       }
@@ -14397,13 +14397,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ready to open: %@"
+            "value" : "%@: the ceremony is ready."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prêt à ouvrir : %@"
+            "value" : "%@ : la cérémonie est prête."
           }
         }
       }
