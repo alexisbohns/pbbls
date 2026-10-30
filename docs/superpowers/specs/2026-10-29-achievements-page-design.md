@@ -53,6 +53,7 @@ This spec extends `2026-07-29-achievements-design.md` (D1–D15 there still hold
   - level 1 is 14 days with a moment, and a moment in every full week of the month;
   - level 2 is 14 days with a pebble, and a pebble in every full week;
   - a full week runs Monday to Sunday and lies entirely inside the month; in the current month, only full weeks that have ended count.
+  - in the month of the user's first moment, only the full weeks starting on or after that moment's day count, so weeks that ended before the user began never hold the month (or `reachable`) back (maintainer, 30 October).
 
   Days are local days in `p_tz`. A pebble's day is its moment's `happened_at`.
 
