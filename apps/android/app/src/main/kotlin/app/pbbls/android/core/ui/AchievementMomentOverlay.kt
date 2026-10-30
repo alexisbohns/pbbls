@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -44,6 +42,9 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementMoment
 import app.pbbls.android.core.data.AchievementMomentCard
 import app.pbbls.android.core.data.AchievementNotificationService
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.rememberReduceMotion
@@ -170,11 +171,11 @@ private fun MomentCard(
                         .clip(CircleShape)
                         .background(colors.primaryContainer),
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_trophy),
+                PbblsIconImage(
+                    icon = PbblsIcon.PEBBLE_GLOW_LG,
+                    size = PbblsIconSize.HERO,
                     contentDescription = null,
                     tint = colors.onPrimaryContainer,
-                    modifier = Modifier.size(40.dp),
                 )
             }
 

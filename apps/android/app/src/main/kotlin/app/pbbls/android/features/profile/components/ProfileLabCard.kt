@@ -17,12 +17,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesTheme
 
 /**
- * The Profile "Lab" card — ports iOS `ProfileLabCard.swift`: lightbulb in
- * `primary`, "Lab" + "News & community", `onSurfaceVariant` chevron, stock `OutlinedCard`.
+ * The Profile "Lab" card — ports iOS `ProfileLabCard.swift`: the sparkle in
+ * `primary` (iOS's pick for its lightbulb), "Lab" + "News & community",
+ * `onSurfaceVariant` chevron, stock `OutlinedCard`.
  * Un-hidden in M44 (design D11) — the last deliberately-omitted M41 tile —
  * now that the Lab route exists; pushes the Lab.
  */
@@ -42,11 +46,11 @@ fun ProfileLabCard(
                     .fillMaxWidth()
                     .padding(PebblesTheme.spacing.lg),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_lightbulb),
+            PbblsIconImage(
+                icon = PbblsIcon.SPARKLE,
+                size = PbblsIconSize.TILE,
                 contentDescription = null,
                 tint = colors.primary,
-                modifier = Modifier.size(PebblesIconToken.LARGE.size),
             )
             Column(
                 modifier = Modifier.weight(1f),

@@ -22,7 +22,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
+import app.pbbls.android.core.designsystem.PbblsIcon
 import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.ui.achievementFamilyIcon
@@ -63,11 +65,11 @@ fun ProfileAchievementsCard(
                     .fillMaxWidth()
                     .padding(PebblesTheme.spacing.lg),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_trophy),
+            PbblsIconImage(
+                icon = PbblsIcon.PEBBLE_GLOW_MD,
+                size = PbblsIconSize.TILE,
                 contentDescription = null,
                 tint = colors.primary,
-                modifier = Modifier.size(PebblesIconToken.LARGE.size),
             )
             Column(
                 modifier = Modifier.weight(1f),
