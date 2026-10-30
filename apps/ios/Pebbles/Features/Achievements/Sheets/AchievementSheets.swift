@@ -227,6 +227,9 @@ struct AchievementSheetHost: View {
     let page: AchievementsPage?
     let lookups: WrapLookups
     var pulling: AchievementsPage.CeremonyStack?
+    /// A failed pull's brief line, shown over this sheet too.
+    var notice: String?
+    var dismissNotice: () -> Void = {}
     let seen: (AchievementCard) -> Void
     let pull: (AchievementsPage.CeremonyStack) -> Void
     let openMoment: (UUID) -> Void
@@ -238,6 +241,10 @@ struct AchievementSheetHost: View {
             content
         }
         .background(Color.pebbles.stock)
+        .overlay(alignment: .bottom) {
+            if let notice { AchievementsNotice(text: notice, onDismiss: dismissNotice) }
+        }
+        .animation(.easeOut(duration: 0.2), value: notice)
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         // Marked seen only when it is shown: a sheet whose section left draws nothing and marks nothing.
@@ -248,8 +255,8 @@ struct AchievementSheetHost: View {
             if let shown = pushed, !shown.isShown(by: now) { pushed = nil }
         }
         .sheet(item: $pushed) { inner in
-            AchievementSheetHost(sheet: inner, page: page, lookups: lookups, pulling: pulling, seen: seen, pull: pull,
-                                 openMoment: openMoment)
+            AchievementSheetHost(sheet: inner, page: page, lookups: lookups, pulling: pulling, notice: notice,
+                                 dismissNotice: dismissNotice, seen: seen, pull: pull, openMoment: openMoment)
         }
     }
 

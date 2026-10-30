@@ -18,9 +18,13 @@ struct AchievementsView: View {
 
     @State private var model = AchievementsModel()
     @State private var sheets = AchievementSheetState()
+    /// A brief line after a pull that failed, over the page and any sheet.
+    @State private var notice: String?
 
     var body: some View {
         content
+            .overlay(alignment: .bottom) { noticeView }
+            .animation(.easeOut(duration: 0.2), value: notice)
             .pebblesToolbarTitle("Achievements")
             .task { await load() }
             .pebblesScreen()
@@ -39,6 +43,7 @@ struct AchievementsView: View {
             .sheet(item: $sheets.sheet, onDismiss: openPendingMoment) { opened in
                 // The model's page, read when drawn: a later read reaches an open sheet.
                 AchievementSheetHost(sheet: opened, page: model.page, lookups: lookups, pulling: model.pulling,
+                                     notice: notice, dismissNotice: { notice = nil },
                                      seen: { model.opened($0) },
                                      pull: pull, openMoment: { sheets.open($0) })
             }
@@ -93,13 +98,23 @@ struct AchievementsView: View {
     /// A ready mark pulls its ceremony. A row opens the unlock moment with the
     /// karma it paid; a pull the re-read confirms opens it without a karma line
     /// (the moment hides the line at 0). Anything else is logged by the model.
+    @ViewBuilder
+    private var noticeView: some View {
+        if let notice {
+            AchievementsNotice(text: notice) { self.notice = nil }
+        }
+    }
+
     private func pull(_ stack: AchievementsPage.CeremonyStack) {
         Task {
             let karma: Int?
-            switch await model.pull(stack) {
+            let outcome = await model.pull(stack)
+            switch outcome {
             case .pulled(let paid): karma = paid
             case .pulledWithoutKarma: karma = nil
-            case .alreadyPulled, .notReady, .busy, .failed: return
+            case .alreadyPulled, .notReady, .busy, .failed:
+                notice = AchievementsCopy.pullNotice(outcome, locale: SpineStrings.appLocale)
+                return
             }
             notify.present(cards: [AchievementsCopy.ceremonyCard(stack, karma: karma, locale: SpineStrings.appLocale)])
         }

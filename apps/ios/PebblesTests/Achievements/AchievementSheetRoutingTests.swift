@@ -76,3 +76,17 @@ struct AchievementSheetStateTests {
         #expect(year.sheet == nil)
     }
 }
+
+/// A pull that failed says so briefly, in Android's words; the other outcomes stay quiet.
+@Suite("Achievements pull notice")
+struct AchievementsPullNoticeTests {
+    @Test("only a failure speaks, in English and French")
+    func notice() {
+        #expect(AchievementsCopy.pullNotice(.failed, locale: Locale(identifier: "en"))
+            == "Couldn't open the ceremony. Please try again.")
+        #expect(AchievementsCopy.pullNotice(.failed, locale: Locale(identifier: "fr"))
+            == "Impossible d'ouvrir la cérémonie. Réessaie.")
+        let quiet: [AchievementsModel.PullOutcome] = [.pulled(karma: 5), .pulledWithoutKarma, .alreadyPulled, .notReady, .busy]
+        #expect(quiet.allSatisfy { AchievementsCopy.pullNotice($0, locale: Locale(identifier: "en")) == nil })
+    }
+}

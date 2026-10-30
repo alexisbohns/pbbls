@@ -15104,6 +15104,23 @@
           }
         }
       }
+    },
+    "achievements.ceremony.error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't open the ceremony. Please try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d'ouvrir la cérémonie. Réessaie."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
