@@ -25,10 +25,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.toDp
 import app.pbbls.android.core.model.AttachedSnap
 
 /**
@@ -76,7 +81,7 @@ fun AttachedPhotoView(
                     )
                 AttachedSnap.UploadState.UPLOADED ->
                     MediaStateLabel(
-                        iconRes = R.drawable.ic_check_circle,
+                        iconRes = PbblsIcon.CHECK_CIRCLE.drawableRes,
                         text = stringResource(R.string.photo_state_ready),
                         color = colors.tertiary,
                     )
@@ -141,7 +146,11 @@ internal fun MediaThumbPlaceholder() {
     )
 }
 
-/** Icon + caption state line (the iOS `Label` analog). */
+/**
+ * Icon + caption state line (the iOS `Label` analog). [iconRes] is a kept
+ * tracing (upload, failed) or a pebbles icon's `drawableRes` (ready, saved);
+ * all draw at INLINE, the helper's one size (Android icon migration spec D6).
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun MediaStateLabel(
@@ -157,7 +166,7 @@ internal fun MediaStateLabel(
             painter = painterResource(iconRes),
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(14.dp),
+            modifier = Modifier.size(PbblsIconSize.INLINE.toDp(LocalDensity.current)),
         )
         Text(
             text = text,
@@ -171,11 +180,11 @@ internal fun MediaStateLabel(
 @Composable
 internal fun RemovePhotoButton(onRemove: () -> Unit) {
     IconButton(onClick = onRemove) {
-        Icon(
-            painter = painterResource(R.drawable.ic_x_circle),
+        PbblsIconImage(
+            icon = PbblsIcon.REMOVE,
+            size = PbblsIconSize.TOOLBAR,
             contentDescription = stringResource(R.string.photo_remove_a11y),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(22.dp),
         )
     }
 }

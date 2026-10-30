@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalSnapURLCache
+import app.pbbls.android.core.designsystem.PbblsIcon
 import coil3.compose.AsyncImage
 
 private const val TAG = "existing-snap-row"
@@ -89,7 +90,7 @@ fun ExistingSnapRow(
                 color = colors.onSurface,
             )
             MediaStateLabel(
-                iconRes = R.drawable.ic_check_circle,
+                iconRes = PbblsIcon.CHECK_CIRCLE.drawableRes,
                 text = stringResource(R.string.photo_state_saved),
                 color = colors.tertiary,
             )
