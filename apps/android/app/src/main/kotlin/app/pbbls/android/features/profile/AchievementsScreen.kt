@@ -35,7 +35,6 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
-import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
@@ -222,7 +221,7 @@ private fun AchievementBadgeCell(
                         painter = painterResource(R.drawable.ic_lock),
                         contentDescription = null,
                         tint = colors.onSurfaceVariant,
-                        modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
+                        modifier = Modifier.size(15.dp),
                     )
                 }
             }

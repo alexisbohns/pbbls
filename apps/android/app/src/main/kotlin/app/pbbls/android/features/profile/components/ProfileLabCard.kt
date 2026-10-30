@@ -20,7 +20,6 @@ import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsIcon
 import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
-import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesTheme
 
 /**
@@ -71,7 +70,7 @@ fun ProfileLabCard(
                 painter = painterResource(R.drawable.ic_chevron_right),
                 contentDescription = null,
                 tint = colors.onSurfaceVariant,
-                modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
+                modifier = Modifier.size(15.dp),
             )
         }
     }

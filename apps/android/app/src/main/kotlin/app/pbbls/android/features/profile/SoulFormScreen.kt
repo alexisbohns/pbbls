@@ -37,7 +37,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.designsystem.DashedPlaceholder
-import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesListDefaults
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
@@ -187,7 +186,7 @@ fun SoulFormScreen(
                                     Icon(
                                         painter = painterResource(R.drawable.ic_chevron_right),
                                         contentDescription = null,
-                                        modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
+                                        modifier = Modifier.size(15.dp),
                                     )
                                 },
                                 modifier = Modifier.clickable(onClick = viewModel::openPicker),

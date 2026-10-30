@@ -18,8 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesSectionHeader
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Collection
@@ -62,7 +62,7 @@ fun ProfileCollectionsCard(
                     painter = painterResource(R.drawable.ic_chevron_right),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
+                    modifier = Modifier.size(15.dp),
                 )
             }
             LazyRow(horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
