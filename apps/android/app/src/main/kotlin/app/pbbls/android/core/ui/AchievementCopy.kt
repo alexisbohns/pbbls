@@ -7,6 +7,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
+import app.pbbls.android.core.designsystem.PbblsIcon
 import java.util.Locale
 
 // Display copy for a badge (design D7): the admin's `title_*`/`description_*`
@@ -86,18 +87,23 @@ fun achievementGroupName(family: String): String =
         else -> family
     }
 
-/** Icon per family from the existing asset set; unknown families get the trophy. */
-fun achievementFamilyIcon(family: String): Int =
+/**
+ * The mark per family: exactly iOS `Achievement.familySymbol` (Android icon
+ * migration spec D4). Families with no drawing of their own (`domain_first`,
+ * `glyph_sales`) and unknown ones get the glowing pebble.
+ */
+fun achievementFamilyIcon(family: String): PbblsIcon =
     when (family) {
-        "pebble_count" -> R.drawable.ic_fossil_shell
-        "emotion_first" -> R.drawable.ic_pebble_emotion
-        "domain_first" -> R.drawable.ic_pebble_domain
-        "first_collection" -> R.drawable.ic_stack
-        "first_glyph" -> R.drawable.ic_scribble
-        "first_soul" -> R.drawable.ic_person_pair
-        "glyph_count" -> R.drawable.ic_scribble
-        "glyph_sales" -> R.drawable.ic_sparkle
-        else -> R.drawable.ic_trophy
+        "pebble_count" -> PbblsIcon.STACK
+        "emotion_first" -> PbblsIcon.HEART
+        "first_collection" -> PbblsIcon.COLLECTION
+        "first_glyph" -> PbblsIcon.PEBBLE_DOTTED_GLYPH
+        "first_soul" -> PbblsIcon.PEOPLE
+        "first_moment" -> PbblsIcon.PEBBLE_FLAT
+        "first_pebble" -> PbblsIcon.PEBBLE_ROUND
+        "first_five" -> PbblsIcon.STACK_LIT_3
+        "glyph_count" -> PbblsIcon.PEBBLE_DOTTED_GLYPH
+        else -> PbblsIcon.PEBBLE_GLOW_MD
     }
 
 @Composable

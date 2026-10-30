@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SurfaceTile
 
@@ -31,21 +31,21 @@ fun ProfileShortcutsRow(
     ) {
         if (onOpenSouls != null) {
             ShortcutTile(
-                iconRes = R.drawable.ic_person_pair,
+                icon = PbblsIcon.PEOPLE,
                 label = stringResource(R.string.souls_title),
                 onClick = onOpenSouls,
             )
         }
         if (onOpenGlyphs != null) {
             ShortcutTile(
-                iconRes = R.drawable.ic_scribble,
+                icon = PbblsIcon.PEBBLE_DOTTED_GLYPH,
                 label = stringResource(R.string.glyphs_title),
                 onClick = onOpenGlyphs,
             )
         }
         if (onOpenConnections != null) {
             ShortcutTile(
-                iconRes = R.drawable.ic_person_pair,
+                icon = PbblsIcon.PEOPLE,
                 label = stringResource(R.string.connections_title),
                 onClick = onOpenConnections,
             )
@@ -56,12 +56,12 @@ fun ProfileShortcutsRow(
 /** One tappable [SurfaceTile] — the `ProfileShortcutTile` analog (nav lambda instead of NavigationLink). */
 @Composable
 private fun RowScope.ShortcutTile(
-    iconRes: Int,
+    icon: PbblsIcon,
     label: String,
     onClick: () -> Unit,
 ) {
     SurfaceTile(
-        iconPainter = painterResource(iconRes),
+        icon = icon,
         label = label,
         modifier = Modifier.weight(1f),
         onClick = onClick,

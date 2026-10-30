@@ -4,16 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
@@ -23,11 +20,12 @@ import androidx.compose.ui.unit.dp
  * click, with the ripple and button role (the profile shortcuts); without it
  * the tile is display-only (the read page, the glyph drawer). Width comes from
  * the caller's `Modifier.weight(1f)`; content is centered. Set [muted] to
- * render a placeholder tile (e.g. the "No domain" empty state).
+ * render a placeholder tile (e.g. the "No domain" empty state). The [icon]
+ * draws at TILE (Android icon migration spec D6).
  */
 @Composable
 fun SurfaceTile(
-    iconPainter: Painter,
+    icon: PbblsIcon,
     label: String,
     modifier: Modifier = Modifier,
     muted: Boolean = false,
@@ -46,11 +44,11 @@ fun SurfaceTile(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(spacing.xs),
         ) {
-            Icon(
-                painter = iconPainter,
+            PbblsIconImage(
+                icon = icon,
+                size = PbblsIconSize.TILE,
                 contentDescription = null,
                 tint = resolvedIconTint,
-                modifier = Modifier.size(30.dp),
             )
             Text(
                 label,

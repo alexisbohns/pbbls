@@ -16,13 +16,13 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesIcon
-import app.pbbls.android.core.designsystem.PebblesIconToken
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Collection
 
@@ -80,9 +80,9 @@ fun ProfileCollectionCard(
                     .background(colors.primaryContainer, MaterialTheme.shapes.small),
             contentAlignment = Alignment.Center,
         ) {
-            PebblesIcon(
-                painter = painterResource(if (collection != null) R.drawable.ic_stack else R.drawable.ic_plus),
-                token = PebblesIconToken.SMALL,
+            PbblsIconImage(
+                icon = if (collection != null) PbblsIcon.COLLECTION else PbblsIcon.PLUS_CIRCLE,
+                size = PbblsIconSize.ROW,
                 contentDescription = null,
                 tint = colors.onPrimaryContainer,
             )

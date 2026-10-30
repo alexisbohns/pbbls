@@ -22,6 +22,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.ui.achievementFamilyIcon
@@ -62,11 +65,11 @@ fun ProfileAchievementsCard(
                     .fillMaxWidth()
                     .padding(PebblesTheme.spacing.lg),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_trophy),
+            PbblsIconImage(
+                icon = PbblsIcon.PEBBLE_GLOW_MD,
+                size = PbblsIconSize.TILE,
                 contentDescription = null,
                 tint = colors.primary,
-                modifier = Modifier.size(PebblesIconToken.LARGE.size),
             )
             Column(
                 modifier = Modifier.weight(1f),
@@ -118,11 +121,13 @@ private fun ShelfBadge(record: AchievementRecord) {
                 .clip(CircleShape)
                 .background(colors.primaryContainer),
     ) {
-        Icon(
-            painter = painterResource(achievementFamilyIcon(record.family)),
+        // A fixed slot (spec D6): the 32dp disc does not grow with the font
+        // scale, so the mark keeps a 16dp side instead of following INLINE.
+        PbblsIconImage(
+            icon = achievementFamilyIcon(record.family),
             contentDescription = achievementTitle(record),
+            size = 16.dp,
             tint = colors.onPrimaryContainer,
-            modifier = Modifier.size(16.dp),
         )
     }
 }
