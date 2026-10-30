@@ -3,8 +3,10 @@ import SwiftUI
 /// The Explorer wheel (#1306, spec D6; the board's `wheel`): the user's first
 /// pebble at the centre, then the first five, the six firsts, 25 pebbles, the
 /// domains in the order they came and the emotions on the rosace's seats. A seat
-/// the payload marks done or met draws its seal, any other a ghost, a new one its
-/// mark; a ring the server lists in `rings_done` gets the darker track.
+/// the payload marks done or met draws its seal, any other a ghost; a seat the
+/// server flags `new` gets its mark, whatever else it is; a ring the server lists
+/// in `rings_done` gets the darker track. The domains and the 25 rings are always
+/// drawn, as the board draws them.
 struct ExplorerWheel: View {
     let explorer: AchievementsPage.Explorer
     let emotions: AchievementsPage.Emotions?
@@ -52,21 +54,29 @@ struct ExplorerWheel: View {
         }
         for (index, seat) in emotions.seats.enumerated() {
             let place = G.point(G.emotions, G.emotionAngle(Double(index), of: count))
-            guard seat.met else {
+            var width = Self.ghostWidth
+            if seat.met {
+                // A met seat without its pebble draws as the even medium stone.
+                let valence = seat.pebble?.valence ?? .neutralMedium
+                let seal = FlatSeal.seat(valence)
+                let palette = seat.family.flatMap(lookups.family)?.palette
+                c.draw(seal, at: place, color: inks.sealInk(palette, polarity: valence.polarity), inks: inks)
+                width = seal.width
+            } else {
                 c.drawGhost(at: place, inks: inks)
-                continue
             }
-            let valence = seat.pebble?.valence ?? .neutralMedium
-            let seal = FlatSeal.seat(valence)
-            let palette = seat.family.flatMap(lookups.family)?.palette
-            c.draw(seal, at: place, color: inks.sealInk(palette, polarity: valence.polarity), inks: inks)
-            if seat.isNew { c.drawNewMark(at: place, sealWidth: seal.width, inks: inks) }
+            if seat.isNew { c.drawNewMark(at: place, sealWidth: width, inks: inks) }
         }
     }
 
+    /// A ghost's width for a new mark round it: the socket's diameter.
+    private static let ghostWidth: CGFloat = 6.4
+
+    /// The domains' ring is always drawn; its seats are the entered, in the order
+    /// they came, then those not yet, spaced by both lists together.
     private func drawDomains(_ c: GraphicsContext, _ inks: AchievementInks) {
-        guard let domains else { return }
         track(c, G.domains, .domains, inks)
+        guard let domains else { return }
         let entered = domains.arrival
         let count = entered.count + domains.notYet.count
         let seal = FlatSeal(size: .small, outline: .neutral, print: .solid, width: 9)
@@ -81,13 +91,14 @@ struct ExplorerWheel: View {
         }
     }
 
+    /// The 25 ring is always drawn (the board's): without the server's count, 25 ghosts.
     private func drawTwentyFive(_ c: GraphicsContext, _ inks: AchievementInks) {
-        guard let twentyFive = explorer.twentyFive else { return }
         track(c, G.twentyFive, .twentyFive, inks)
+        let inked = explorer.twentyFive?.count ?? 0
         let seal = FlatSeal(size: .small, outline: .highlight, print: .solid, width: 6.2)
         for index in 0..<G.twentyFiveSeats {
             let place = G.point(G.twentyFive, G.seatAngle(index, of: G.twentyFiveSeats))
-            if index < twentyFive.count {
+            if index < inked {
                 c.draw(seal, at: place, color: inks.ink, inks: inks)
             } else {
                 c.drawGhost(at: place, radius: 2.6, inks: inks)
@@ -99,13 +110,15 @@ struct ExplorerWheel: View {
         track(c, G.sixFirsts, .sixFirsts, inks)
         for (index, first) in explorer.sixFirsts.enumerated() {
             let place = G.point(G.sixFirsts, G.sixFirstAngle(index, of: explorer.sixFirsts.count))
-            guard first.done, let kind = first.kind else {
+            var width = Self.ghostWidth
+            if first.done, let kind = first.kind {
+                let seal = FlatSeal.sixFirst(kind)
+                c.draw(seal, at: place, color: inks.ink, inks: inks)
+                width = seal.width
+            } else {
                 c.drawGhost(at: place, inks: inks)
-                continue
             }
-            let seal = FlatSeal.sixFirst(kind)
-            c.draw(seal, at: place, color: inks.ink, inks: inks)
-            if first.isNew { c.drawNewMark(at: place, sealWidth: seal.width, inks: inks) }
+            if first.isNew { c.drawNewMark(at: place, sealWidth: width, inks: inks) }
         }
     }
 
@@ -113,12 +126,14 @@ struct ExplorerWheel: View {
         track(c, G.firstFive, .firstFive, inks)
         for (index, item) in explorer.firstFive.enumerated() {
             let place = G.point(G.firstFive, G.firstFiveAngle(index, of: explorer.firstFive.count))
-            guard item.done, let task = item.task else {
+            var width = Self.ghostWidth
+            if item.done, let task = item.task {
+                c.drawFirstFiveMark(task, at: place, inks: inks)
+                width = 10
+            } else {
                 c.drawGhost(at: place, inks: inks)
-                continue
             }
-            c.drawFirstFiveMark(task, at: place, inks: inks)
-            if item.isNew { c.drawNewMark(at: place, sealWidth: 10, inks: inks) }
+            if item.isNew { c.drawNewMark(at: place, sealWidth: width, inks: inks) }
         }
     }
 
