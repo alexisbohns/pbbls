@@ -16,6 +16,27 @@ enum CeremonyPullError: Error, Equatable {
     case notReady
 }
 
+/// When the kept achievements page went stale in this process (#1306, D18): an
+/// unlock from the mutation-path check, or a ceremony pull that landed, makes
+/// the kept copy older than the truth, so the Profile shelf reads instead of
+/// waiting out its fifteen minutes. Thread-safe; the app shares `shared`, tests
+/// make their own.
+final class AchievementsFreshness: @unchecked Sendable {
+    static let shared = AchievementsFreshness()
+
+    private let lock = NSLock()
+    private var staleSince: Date?
+
+    func markStale(at date: Date = Date()) {
+        lock.withLock { staleSince = date }
+    }
+
+    /// Whether a copy kept at `keptAt` predates the last stale mark.
+    func isStale(keptAt: Date) -> Bool {
+        lock.withLock { staleSince.map { keptAt <= $0 } ?? false }
+    }
+}
+
 /// The seam `AchievementsModel`'s tests fake (#1306).
 protocol AchievementsPageServicing: Sendable {
     func page(zone: TimeZone) async throws -> AchievementsPage
@@ -24,6 +45,8 @@ protocol AchievementsPageServicing: Sendable {
     /// When the device's last copy was kept: the last read that landed, in any
     /// session (each one rewrites it). Nil when nothing is kept.
     func keptAt(zone: TimeZone) async -> Date?
+    /// Something was unlocked or pulled: the kept copy no longer counts as fresh.
+    func markStale()
     func markSeen(_ card: AchievementCard) async throws
     func pull(_ stack: AchievementsPage.CeremonyStack, zone: TimeZone) async throws -> CeremonyPull
 }
@@ -44,6 +67,7 @@ struct AchievementsPageService: AchievementsPageServicing {
     var disk: WrapDiskCache?
     /// The signed-in user's id; nothing is kept or read without one.
     var owner: String?
+    var freshness: AchievementsFreshness = .shared
 
     func page(zone: TimeZone) async throws -> AchievementsPage {
         let epoch = disk?.epoch
@@ -63,10 +87,17 @@ struct AchievementsPageService: AchievementsPageServicing {
         }
     }
 
+    /// When the kept copy was written, or nil when there is none or it went stale since.
     func keptAt(zone: TimeZone) async -> Date? {
         guard let disk, let owner else { return nil }
         let url = disk.file(Self.cachePage, owner: owner, zone: zone.identifier)
-        return (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
+        guard let written = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date,
+              !freshness.isStale(keptAt: written) else { return nil }
+        return written
+    }
+
+    func markStale() {
+        freshness.markStale()
     }
 
     func markSeen(_ card: AchievementCard) async throws {

@@ -96,7 +96,8 @@ struct ProfileAchievementsCard: View {
             model.service = AchievementsPageService(client: supabase.client, disk: .standard,
                                                     owner: supabase.session?.user.id.uuidString.lowercased())
         }
-        await model.loadIfStale(maxAge: Self.maxAge)
+        // A read runs the retroactive grant first, as the page does; it never celebrates.
+        await model.loadIfStale(maxAge: Self.maxAge) { await achievements.checkIgnoringFailure() }
         // The catalog once per shelf, for titles and icons; the served rows stand in until it lands.
         guard catalog.isEmpty, !ProfileShelf.badges(model.page, catalog: [:]).isEmpty,
               let rows = await loadCatalog() else { return }

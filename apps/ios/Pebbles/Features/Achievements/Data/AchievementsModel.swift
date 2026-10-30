@@ -75,9 +75,12 @@ final class AchievementsModel {
     }
 
     /// The Profile shelf's read (D18): the kept copy at once, and a read only
-    /// when that copy is `maxAge` old or more (or there is none), so a visit to
-    /// You does not ask the server each time. No grant: the shelf never evaluates.
-    func loadIfStale(maxAge: TimeInterval, now: () -> Date = Date.init) async {
+    /// when that copy is `maxAge` old or more, stale, or missing, so a visit to
+    /// You does not ask the server each time. When it reads, `grant` runs first
+    /// (the screen-open `check_achievements()`, which never celebrates), so a
+    /// visitor who only opens You still gets the retroactive grant.
+    func loadIfStale(maxAge: TimeInterval, now: () -> Date = Date.init,
+                     grant: @MainActor () async -> Void = {}) async {
         guard let service, !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
@@ -87,6 +90,7 @@ final class AchievementsModel {
             let age = now().timeIntervalSince(keptAt)
             if age >= 0, age < maxAge { return }
         }
+        await grant()
         await refresh(service, zone: zone)
     }
 
@@ -152,6 +156,8 @@ final class AchievementsModel {
             switch try await service.pull(stack, zone: zone) {
             case .pulled(let karma):
                 outcome = .pulled(karma: karma)
+                // The pull changed the page: the kept copy is stale until a read rewrites it.
+                service.markStale()
             case .alreadyPulled:
                 outcome = .alreadyPulled
             }

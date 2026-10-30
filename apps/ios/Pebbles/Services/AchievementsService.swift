@@ -192,6 +192,8 @@ final class AchievementsService {
             do {
                 let results = try await self.check()
                 guard !results.isEmpty else { return }
+                // An unlock makes the kept achievements page stale: the Profile shelf reads next time.
+                AchievementsFreshness.shared.markStale()
                 self.presentUnlockMoment(for: results)
             } catch {
                 self.logger.warning("achievement check failed (self-heals on next call): \(error.localizedDescription, privacy: .private)")

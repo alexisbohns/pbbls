@@ -84,6 +84,10 @@ final class FakeAchievementsPageService: AchievementsPageServicing, @unchecked S
         lock.withLock { keptAtDate }
     }
 
+    func markStale() {
+        lock.withLock { log.append("stale") }
+    }
+
     func markSeen(_ card: AchievementCard) async throws {
         lock.withLock { seenCards.append(card) }
     }

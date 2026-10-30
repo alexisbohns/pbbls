@@ -49,6 +49,24 @@ struct AchievementsPageServiceTests {
         #expect(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier) == nil)
     }
 
+    @Test("a stale mark makes the kept copy not fresh until the next read rewrites it")
+    func staleMark() async throws {
+        let cache = WrapDiskCache(root: root)
+        defer { cache.clear() }
+        let paris = try #require(TimeZone(identifier: "Europe/Paris"))
+        let data = try AchievementsFixtures.data("design-fixture")
+        var service = AchievementsPageService(client: SupabaseService().client, disk: cache, owner: "mara")
+        service.freshness = AchievementsFreshness()
+        _ = try service.decodeAndKeep(data, zone: paris, epoch: cache.epoch)
+        #expect(await service.keptAt(zone: paris) != nil)
+        service.markStale()
+        #expect(await service.keptAt(zone: paris) == nil, "an unlock or a pull since: read again")
+        #expect(await service.cachedPage(zone: paris) != nil, "the copy still shows at once")
+        try await Task.sleep(nanoseconds: 20_000_000)
+        _ = try service.decodeAndKeep(data, zone: paris, epoch: cache.epoch)
+        #expect(await service.keptAt(zone: paris) != nil, "a read after the mark is fresh again")
+    }
+
     @Test("a kept body this build can no longer decode is a miss")
     func undecodableKept() async throws {
         let cache = WrapDiskCache(root: root)

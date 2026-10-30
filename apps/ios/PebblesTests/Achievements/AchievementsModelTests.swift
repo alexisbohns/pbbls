@@ -118,19 +118,19 @@ struct AchievementsModelTests {
         let recent = FakeAchievementsPageService(kept: kept, answers: [.success(fresh)])
         recent.keptAtDate = now.addingTimeInterval(-5 * 60)
         let shelf = Self.model(recent)
-        await shelf.loadIfStale(maxAge: 15 * 60, now: { now })
-        #expect(recent.calls == ["kept"] && shelf.page == kept)
+        await shelf.loadIfStale(maxAge: 15 * 60, now: { now }) { recent.record("grant") }
+        #expect(recent.calls == ["kept"] && shelf.page == kept, "no read, so no grant either")
 
         let old = FakeAchievementsPageService(kept: kept, answers: [.success(fresh)])
         old.keptAtDate = now.addingTimeInterval(-20 * 60)
         let stale = Self.model(old)
-        await stale.loadIfStale(maxAge: 15 * 60, now: { now })
-        #expect(old.calls == ["kept", "read"] && stale.page == fresh)
+        await stale.loadIfStale(maxAge: 15 * 60, now: { now }) { old.record("grant") }
+        #expect(old.calls == ["kept", "grant", "read"] && stale.page == fresh, "the grant runs before the read")
 
         let none = FakeAchievementsPageService(answers: [.success(fresh)])
         let first = Self.model(none)
-        await first.loadIfStale(maxAge: 15 * 60, now: { now })
-        #expect(none.calls == ["kept", "read"] && first.page == fresh)
+        await first.loadIfStale(maxAge: 15 * 60, now: { now }) { none.record("grant") }
+        #expect(none.calls == ["kept", "grant", "read"] && first.page == fresh)
     }
 
     @Test("opening a sheet marks its card seen")
@@ -167,7 +167,7 @@ struct AchievementsModelTests {
         fake.answer(pull: .success(.pulled(karma: 30)))
         let model = Self.model(fake)
         #expect(await model.pull(.sixFirsts) == .pulled(karma: 30))
-        #expect(fake.calls == ["read", "pull six_firsts", "read"])
+        #expect(fake.calls == ["read", "pull six_firsts", "stale", "read"])
         #expect(model.pulling == nil)
         // The fake's read still says ready; the model marks what it pulled itself.
         #expect(model.page?.completion(.sixFirsts)?.isReady == false && model.page?.completion(.sixFirsts)?.pulledAt != nil)
@@ -204,7 +204,7 @@ struct AchievementsModelTests {
         let model = Self.model(fake)
         await model.load {}
         #expect(await model.pull(.sixFirsts) == .pulled(karma: 30))
-        #expect(fake.calls == ["kept", "read", "pull six_firsts", "read"])
+        #expect(fake.calls == ["kept", "read", "pull six_firsts", "stale", "read"])
     }
 
     @Test("no row, then a read showing the completion pulled, plays the ceremony without karma")
