@@ -102,6 +102,8 @@ describe("the ceremony", () => {
     expect(FR.ceremonyTitle("six_firsts")).toBe("Les six premières fois")
     expect(EN.ready()).toBe("ready")
     expect(FR.ready()).toBe("prêt")
+    expect(EN.ceremonyError()).toBe("Couldn't open the ceremony. Please try again.")
+    expect(FR.ceremonyError()).toBe("Impossible d'ouvrir la cérémonie. Réessaie.")
   })
 })
 

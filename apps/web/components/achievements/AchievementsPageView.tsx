@@ -2,6 +2,7 @@
 
 import { useCallback } from "react"
 import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Button } from "@/components/ui/button"
 import { useAchievementPalettes } from "@/lib/data/useAchievementPalettes"
@@ -27,7 +28,10 @@ export function AchievementsPageView() {
 
   const onPull = useCallback(
     (stack: CeremonyStack) => {
-      void pull(stack, { title: words.ceremonyTitle(stack), description: words.ceremonyBody(stack) })
+      void pull(stack, { title: words.ceremonyTitle(stack), description: words.ceremonyBody(stack) }).then((outcome) => {
+        // A pull that failed says so briefly; one already pulled, not ready or busy says nothing.
+        if (outcome.kind === "failed") toast.error(words.ceremonyError())
+      })
     },
     [pull, words],
   )

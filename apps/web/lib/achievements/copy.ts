@@ -106,6 +106,9 @@ export function achievementsWords(t: Translate, locale: Locale) {
       retry: () => t("error.retry"),
     },
 
+    /** A pull that failed (Android's `achievements_ceremony_error`). */
+    ceremonyError: () => t("ceremonyError"),
+
     ceremonyTitle: (stack: CeremonyStack) => t(`ceremony.${stack}.title`),
     ceremonyBody: (stack: CeremonyStack) => t(`ceremony.${stack}.body`),
 

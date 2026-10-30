@@ -300,6 +300,7 @@
         }
       },
       "ready": "ready",
+      "ceremonyError": "Couldn't open the ceremony. Please try again.",
       "ceremony": {
         "emotions": {
           "title": "Every emotion",

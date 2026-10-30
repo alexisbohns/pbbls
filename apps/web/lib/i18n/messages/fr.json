@@ -300,6 +300,7 @@
         }
       },
       "ready": "prêt",
+      "ceremonyError": "Impossible d'ouvrir la cérémonie. Réessaie.",
       "ceremony": {
         "emotions": {
           "title": "Toutes les émotions",
