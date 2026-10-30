@@ -124,7 +124,7 @@ fun ExplorerWheel(
             val pebble = s.pebble
             if (!s.met || pebble == null) {
                 ghost(p, G.GHOST_R * unit, unit, colors)
-                return@forEach
+                return@forEachIndexed
             }
             val w = emotionSealWidth(pebble.valence.intensity) * unit
             val palette = s.family?.let { lookups.family(it)?.palette }
