@@ -167,7 +167,7 @@ class ProfileViewModelTest {
             assertEquals("no catalog row: the served row", "pebble_count", state.shelf[2].family)
             assertEquals(100, state.shelf[2].threshold)
             assertEquals(13, state.shelfCount)
-            assertTrue("the shelf never evaluates", achievements.calls.none { it == "check" })
+            assertEquals("a read grants first, as the page does", listOf("check", "page"), achievements.calls)
         }
 
     @Test
@@ -179,7 +179,19 @@ class ProfileViewModelTest {
             advanceUntilIdle()
 
             assertEquals(2, shelfOf(viewModel).shelfCount)
-            assertEquals(0, achievements.pageCalls)
+            assertEquals("no read, no grant", emptyList<String>(), achievements.calls)
+        }
+
+    @Test
+    fun `a copy made stale (no age) is read again at once`() =
+        runTest {
+            val achievements = FakeAchievementsService(served = served, kept = stale).apply { keptAt = null }
+            val viewModel = viewModel(achievements = achievements)
+            viewModel.now = { clock }
+            advanceUntilIdle()
+
+            assertEquals(listOf("check", "page"), achievements.calls)
+            assertEquals(13, shelfOf(viewModel).shelfCount)
         }
 
     @Test

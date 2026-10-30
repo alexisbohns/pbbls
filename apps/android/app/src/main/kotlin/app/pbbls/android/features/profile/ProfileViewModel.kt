@@ -205,9 +205,10 @@ class ProfileViewModel
 
         /**
          * The shelf (D18, iOS `loadIfStale`): the achievements page's kept copy at once, then a read
-         * only when that copy, or this process's last read, is fifteen minutes old or more. Reads
-         * only: the shelf never fires an evaluation; the page's screen-open call is the retroactive
-         * grant. A failure keeps what is shown, and with nothing the shelf just invites.
+         * only when that copy, or this process's last read, is fifteen minutes old or more, or a
+         * check or a ceremony has made it stale. A read runs `check_achievements()` first, as the
+         * page does (the retroactive grant, which never celebrates). A failure keeps what is shown,
+         * and with nothing the shelf just invites.
          */
         private suspend fun loadShelf() {
             val zone = zone()
@@ -224,6 +225,7 @@ class ProfileViewModel
             val age = keptAt?.let { Duration.between(it, now()) }
             val fresh = shelfPage != null && age != null && !age.isNegative && age < SHELF_MAX_AGE
             if (!fresh) {
+                achievementsService.checkIgnoringFailure()
                 runCatchingCancellable { achievementsService.page(zone) }
                     .fold(
                         onSuccess = { shelfPage = it },
