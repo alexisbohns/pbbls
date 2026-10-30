@@ -1,0 +1,20 @@
+[
+  {"id": "d0000000-0000-4000-8000-000000000001", "slug": "community", "name": "Community"},
+  {"id": "d0000000-0000-4000-8000-000000000002", "slug": "currentevents", "name": "Events"},
+  {"id": "d0000000-0000-4000-8000-000000000003", "slug": "dating", "name": "Dating"},
+  {"id": "d0000000-0000-4000-8000-000000000004", "slug": "education", "name": "Education"},
+  {"id": "d0000000-0000-4000-8000-000000000005", "slug": "family", "name": "Family"},
+  {"id": "d0000000-0000-4000-8000-000000000006", "slug": "fitness", "name": "Sport"},
+  {"id": "d0000000-0000-4000-8000-000000000007", "slug": "friends", "name": "Friends"},
+  {"id": "d0000000-0000-4000-8000-000000000008", "slug": "health", "name": "Health"},
+  {"id": "d0000000-0000-4000-8000-000000000009", "slug": "hobbies", "name": "Passions"},
+  {"id": "d0000000-0000-4000-8000-00000000000a", "slug": "identity", "name": "Identity"},
+  {"id": "d0000000-0000-4000-8000-00000000000b", "slug": "money", "name": "Finance"},
+  {"id": "d0000000-0000-4000-8000-00000000000c", "slug": "partner", "name": "Partner"},
+  {"id": "d0000000-0000-4000-8000-00000000000d", "slug": "selfcare", "name": "Self Care"},
+  {"id": "d0000000-0000-4000-8000-00000000000e", "slug": "spirituality", "name": "Spirituality"},
+  {"id": "d0000000-0000-4000-8000-00000000000f", "slug": "tasks", "name": "Tasks"},
+  {"id": "d0000000-0000-4000-8000-000000000010", "slug": "travel", "name": "Travel"},
+  {"id": "d0000000-0000-4000-8000-000000000011", "slug": "weather", "name": "Weather"},
+  {"id": "d0000000-0000-4000-8000-000000000012", "slug": "work", "name": "Work"}
+]
