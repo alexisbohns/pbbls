@@ -42,6 +42,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.glyphMarketErrorMessage
 import app.pbbls.android.core.data.toDataError
+import app.pbbls.android.core.designsystem.PbblsIcon
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SurfaceTile
 import app.pbbls.android.core.model.BuyGlyphResult
@@ -225,20 +226,20 @@ internal fun GlyphDetailDrawerContent(
 
         Row(horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
             SurfaceTile(
-                iconPainter = painterResource(R.drawable.ic_calendar),
+                icon = PbblsIcon.CALENDAR_DATE,
                 label =
                     item.createdAt?.format(DateTimeFormatter.ofPattern("MMM yyyy", locale))
                         ?: "—",
                 modifier = Modifier.weight(1f),
             )
             SurfaceTile(
-                iconPainter = painterResource(R.drawable.ic_alternating_current),
+                icon = PbblsIcon.CHART_DOUBLE_GROW,
                 label = stringResource(R.string.glyph_drawer_soon),
                 muted = true,
                 modifier = Modifier.weight(1f),
             )
             SurfaceTile(
-                iconPainter = painterResource(R.drawable.ic_person_pair),
+                icon = PbblsIcon.PEOPLE,
                 label = stringResource(R.string.glyph_drawer_soon),
                 muted = true,
                 modifier = Modifier.weight(1f),
