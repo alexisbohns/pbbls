@@ -49,6 +49,8 @@ final class AchievementsModel {
 
     /// The last read asked for, and the newest one whose page is shown.
     @ObservationIgnored private var readsAsked = 0
+    /// When the page on screen was kept or read: a kept copy newer than it is taken.
+    @ObservationIgnored private var shownAt: Date?
     @ObservationIgnored private var readShown = 0
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "achievements-page")
@@ -85,8 +87,15 @@ final class AchievementsModel {
         isLoading = true
         defer { isLoading = false }
         let zone = self.zone()
-        if page == nil, let kept = await service.cachedPage(zone: zone), page == nil, readShown == 0 { page = kept }
-        if page != nil, let keptAt = await service.keptAt(zone: zone) {
+        let keptAt = await service.keptAt(zone: zone)
+        // The kept copy when nothing is shown, or when another screen kept a newer one since
+        // (the page read while the shelf was away): cheap, and it never waits for the network.
+        let newer = keptAt.map { kept in shownAt.map { kept > $0 } ?? true } ?? false
+        if page == nil || newer, let kept = await service.cachedPage(zone: zone) {
+            page = kept
+            shownAt = keptAt ?? now()
+        }
+        if page != nil, let keptAt {
             let age = now().timeIntervalSince(keptAt)
             if age >= 0, age < maxAge { return }
         }
@@ -198,6 +207,7 @@ final class AchievementsModel {
             if read > readShown {
                 readShown = read
                 page = fresh
+                shownAt = Date()
                 failed = false
             }
             return true

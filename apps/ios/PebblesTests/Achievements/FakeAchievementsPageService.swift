@@ -10,7 +10,7 @@ final class FakeAchievementsPageService: AchievementsPageServicing, @unchecked S
 
     private let lock = NSLock()
     private var answers: [Result<AchievementsPage, Error>]
-    private let keptPage: AchievementsPage?
+    private var keptPage: AchievementsPage?
     private var pullAnswer: Result<CeremonyPull, Error> = .failure(Failure())
     private var log: [String] = []
     private var seenCards: [AchievementCard] = []
@@ -82,6 +82,14 @@ final class FakeAchievementsPageService: AchievementsPageServicing, @unchecked S
 
     func keptAt(zone: TimeZone) async -> Date? {
         lock.withLock { keptAtDate }
+    }
+
+    /// Another screen kept a newer copy.
+    func keep(_ page: AchievementsPage, at date: Date) {
+        lock.withLock {
+            keptPage = page
+            keptAtDate = date
+        }
     }
 
     func markStale() {

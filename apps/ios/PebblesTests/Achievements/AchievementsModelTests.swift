@@ -133,6 +133,23 @@ struct AchievementsModelTests {
         #expect(none.calls == ["kept", "grant", "read"] && first.page == fresh)
     }
 
+    @Test("the shelf comes back to a newer kept copy the page read meanwhile, without a read of its own")
+    func shelfTakesNewerKept() async throws {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let first = try Self.page(daysKept: 248)
+        let newer = try Self.page(daysKept: 249)
+        let fake = FakeAchievementsPageService(kept: first, answers: [.success(first)])
+        fake.keptAtDate = now.addingTimeInterval(-10 * 60)
+        let shelf = Self.model(fake)
+        await shelf.loadIfStale(maxAge: 15 * 60, now: { now })
+        #expect(shelf.page == first)
+        fake.keep(newer, at: now.addingTimeInterval(-60))
+        await shelf.loadIfStale(maxAge: 15 * 60, now: { now })
+        #expect(shelf.page == newer && !fake.calls.contains("read"))
+        await shelf.loadIfStale(maxAge: 15 * 60, now: { now })
+        #expect(fake.calls == ["kept", "kept"], "the same copy is not read again")
+    }
+
     @Test("opening a sheet marks its card seen")
     func seen() async {
         let fake = FakeAchievementsPageService()
