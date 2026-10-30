@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -143,12 +144,16 @@ fun YearSheet(
         ) {
             Box(Modifier.width(COUNTER_COLUMN))
             Box(Modifier.weight(1f))
+            val head = type.tableHead
             listOf(R.string.achievements_column_moments, R.string.achievements_column_pebbles, R.string.achievements_column_weeks).forEach {
+                // One line in its column at any font scale: the head shrinks to fit rather than wrap mid-word.
                 Text(
                     copy.string(it),
-                    style = type.tableHead,
+                    style = head,
                     color = colors.ink2,
                     textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    autoSize = TextAutoSize.StepBased(minFontSize = head.fontSize / 2, maxFontSize = head.fontSize),
                     modifier = Modifier.width(CELL),
                 )
             }
