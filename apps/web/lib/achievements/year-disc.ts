@@ -1,4 +1,4 @@
-import { polar, r1, type Segment } from "@/lib/achievements/geometry"
+import { polar, r1, steady, type Segment } from "@/lib/achievements/geometry"
 import type { YearMonth } from "@/lib/types"
 
 // The docked year disc (#1308, spec D12; the boards' g/112 and
@@ -67,7 +67,7 @@ function segment(p: [number, number], q: [number, number]): Segment {
 function notch(r: number, deg: number): Segment {
   const [x, y] = polar(r, deg)
   const rad = (deg * Math.PI) / 180
-  const [dx, dy] = [3 * Math.cos(rad), 3 * Math.sin(rad)]
+  const [dx, dy] = [steady(3 * Math.cos(rad)), steady(3 * Math.sin(rad))]
   return segment([r1(x + DISC_CENTRE - dx), r1(y + DISC_CENTRE - dy)], [r1(x + DISC_CENTRE + dx), r1(y + DISC_CENTRE + dy)])
 }
 

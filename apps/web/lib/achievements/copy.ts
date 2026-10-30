@@ -32,18 +32,20 @@ function served(day: string): Date {
 }
 
 export function achievementsWords(t: Translate, locale: Locale) {
-  const number = (n: number) => new Intl.NumberFormat(locale).format(n)
-  const monthInSentence = (month: number) =>
-    month >= 1 && month <= 12
-      ? new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" }).format(Date.UTC(2026, month - 1, 15, 12))
-      : String(month)
-  const list = (items: string[]) => new Intl.ListFormat(locale, { style: "long", type: "conjunction" }).format(items)
+  // Built once per language (the words are memoised on it), not per call.
+  const numbers = new Intl.NumberFormat(locale)
+  const months = new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" })
+  const lists = new Intl.ListFormat(locale, { style: "long", type: "conjunction" })
+  const fullDates = new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
+  const dayMonths = new Intl.DateTimeFormat(locale, { day: "numeric", month: "long", timeZone: "UTC" })
+  const number = (n: number) => numbers.format(n)
+  const monthInSentence = (month: number) => (month >= 1 && month <= 12 ? months.format(Date.UTC(2026, month - 1, 15, 12)) : String(month))
+  const list = (items: string[]) => lists.format(items)
 
   /** "Sunday, March 1, 2026", "dimanche 1 mars 2026". */
-  const fullDate = (day: string) =>
-    new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(served(day))
+  const fullDate = (day: string) => fullDates.format(served(day))
   /** "March 2", "2 mars". */
-  const dayMonth = (day: string) => new Intl.DateTimeFormat(locale, { day: "numeric", month: "long", timeZone: "UTC" }).format(served(day))
+  const dayMonth = (day: string) => dayMonths.format(served(day))
 
   /** " 3 new." after a label; nothing when nothing is new. */
   const fresh = (count: number) => (count > 0 ? ` ${t("a11y.new", { count })}` : "")
