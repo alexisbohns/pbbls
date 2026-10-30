@@ -157,13 +157,7 @@ fun ExplorerSheet(
         explorer.twentyFive?.let { twentyFive ->
             SheetSection(
                 copy.string(R.string.achievements_section_twenty_five),
-                if (twentyFive.done) {
-                    copy.string(
-                        R.string.achievements_twenty_five_closed,
-                    )
-                } else {
-                    copy.countOf(twentyFive.count, TWENTY_FIVE_SEATS)
-                },
+                copy.ofWords(twentyFive.count, TWENTY_FIVE_SEATS),
             )
             val pebble = twentyFive.pebble
             if (!twentyFive.done) {
