@@ -115,8 +115,6 @@ extension AchievementRecord {
         case "first_pebble":     .pebbleRound
         case "first_five":       .stackLit3
         case "glyph_count":      .pebbleDottedGlyph
-        case "first_stone":      .stonesAlignedBottom
-        case "set_complete":     .cromlech
         default:                 .pebbleGlowMd
         }
     }
