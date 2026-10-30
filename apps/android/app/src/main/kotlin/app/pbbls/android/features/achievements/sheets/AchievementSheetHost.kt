@@ -1,13 +1,17 @@
 package app.pbbls.android.features.achievements.sheets
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -60,7 +64,7 @@ fun AchievementSheetContent(
  * entry whose section left the payload after a refresh is skipped, never drawn empty. [onDismiss]
  * names the sheet the user dismissed (the top one drawn, the only one they can reach): the
  * screen's ViewModel, which owns the stack, removes it and anything above it. While [pulling],
- * every ready mark waits: one ceremony at a time.
+ * every ready mark waits: one ceremony at a time. [snackbar]'s messages show over the top sheet.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,29 +77,37 @@ fun AchievementSheetHost(
     onOpenMoment: (String) -> Unit,
     onPull: (CompletionStack) -> Unit,
     pulling: Boolean = false,
+    snackbar: SnackbarHostState? = null,
 ) {
     val colors = PebblesTheme.spine.colors
-    sheets.filter { it.isShownBy(page) }.forEachIndexed { depth, sheet ->
+    val shown = sheets.filter { it.isShownBy(page) }
+    shown.forEachIndexed { depth, sheet ->
         key(depth, sheet) {
             ModalBottomSheet(
                 onDismissRequest = { onDismiss(sheet) },
                 sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
                 containerColor = colors.stock,
             ) {
-                AchievementSheetContent(
-                    sheet = sheet,
-                    page = page,
-                    lookups = lookups,
-                    onPush = onPush,
-                    onOpenMoment = onOpenMoment,
-                    onPull = onPull,
-                    pulling = pulling,
-                    modifier =
-                        Modifier
-                            .verticalScroll(
-                                rememberScrollState(),
-                            ).padding(start = SHEET_SIDE, end = SHEET_SIDE, bottom = SHEET_BOTTOM),
-                )
+                Box {
+                    AchievementSheetContent(
+                        sheet = sheet,
+                        page = page,
+                        lookups = lookups,
+                        onPush = onPush,
+                        onOpenMoment = onOpenMoment,
+                        onPull = onPull,
+                        pulling = pulling,
+                        modifier =
+                            Modifier
+                                .verticalScroll(
+                                    rememberScrollState(),
+                                ).padding(start = SHEET_SIDE, end = SHEET_SIDE, bottom = SHEET_BOTTOM),
+                    )
+                    // The page's messages show over the top sheet, whose window covers the page's.
+                    if (snackbar != null && depth == shown.lastIndex) {
+                        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
+                    }
+                }
             }
         }
     }

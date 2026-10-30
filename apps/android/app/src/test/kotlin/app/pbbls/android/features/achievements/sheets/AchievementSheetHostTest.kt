@@ -1,10 +1,13 @@
 package app.pbbls.android.features.achievements.sheets
 
 import android.app.Application
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -15,6 +18,9 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.achievements.AchievementsPage
 import app.pbbls.android.features.achievements.AchievementSheet
 import app.pbbls.android.testing.PIXEL_TEST_SDK
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -31,10 +37,13 @@ class AchievementSheetHostTest {
 
     private var stack by mutableStateOf(listOf<AchievementSheet>(AchievementSheet.Explorer))
 
+    private val snackbar = SnackbarHostState()
+
     private fun show(page: AchievementsPage = AchievementsFixture.page) {
         compose.setContent {
             PebblesTheme {
                 AchievementSheetHost(
+                    snackbar = snackbar,
                     sheets = stack,
                     page = page,
                     lookups = AchievementsFixture.lookups,
@@ -67,5 +76,19 @@ class AchievementSheetHostTest {
         show(AchievementsFixture.page.copy(pebbles = null))
         compose.onNodeWithText("five rings").assertExists()
         compose.onNodeWithText("Milestones").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a message shows over the top sheet`() {
+        stack = listOf(AchievementSheet.Explorer, AchievementSheet.Emotions)
+        show()
+        compose.waitForIdle()
+        compose.runOnIdle {
+            CoroutineScope(
+                Dispatchers.Main,
+            ).launch { snackbar.showSnackbar("Couldn't open the ceremony. Please try again.") }
+        }
+        compose.waitForIdle()
+        compose.onAllNodesWithText("Couldn't open the ceremony. Please try again.").assertCountEquals(1)
     }
 }

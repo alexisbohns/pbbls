@@ -39,6 +39,7 @@ import app.pbbls.android.core.model.EmotionFamilies
 import app.pbbls.android.core.model.achievements.CompletionStack
 import app.pbbls.android.features.achievements.page.AchievementsPageContent
 import app.pbbls.android.features.achievements.sheets.AchievementSheetHost
+import app.pbbls.android.features.achievements.sheets.isShownBy
 import kotlinx.coroutines.launch
 
 /** The page's lookups from the app's reference data: two of the three permanent locals, read where they render. */
@@ -120,6 +121,7 @@ fun AchievementsScreen(
     snackbar: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val colors = MaterialTheme.colorScheme
+    val sheetShown = uiState is AchievementsUiState.Content && sheets.any { it.isShownBy(uiState.page) }
     PebblesScreen(
         modifier = modifier,
         topBar = {
@@ -137,7 +139,8 @@ fun AchievementsScreen(
                 },
             )
         },
-        overlay = { SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter)) },
+        // With a sheet open, the top sheet hosts the messages: its window covers this one.
+        overlay = { if (!sheetShown) SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter)) },
     ) {
         // Exhaustive with no `else`: a new case must be rendered here or the build fails.
         when (uiState) {
@@ -188,6 +191,7 @@ fun AchievementsScreen(
                     onOpenMoment = onOpenMoment,
                     onPull = onPull,
                     pulling = pulling,
+                    snackbar = snackbar,
                 )
             }
         }
