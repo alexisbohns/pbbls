@@ -1,4 +1,5 @@
 import Foundation
+import os
 @testable import Pebbles
 
 /// The achievements payloads the tests replay (#1306), read in place through
@@ -25,11 +26,16 @@ enum AchievementsFixtures {
         .deletingLastPathComponent()
         .appendingPathComponent("Fixtures")
 
-    /// `name` from the canonical design folder, else from this suite's own.
+    private static let logger = Logger(subsystem: "app.pbbls.ios.tests", category: "achievements-fixtures")
+
+    /// `name` from the canonical design folder, else from this suite's own (logged,
+    /// so a fixture that should be canonical is noticed).
     static func data(_ name: String) throws -> Data {
         let canonical = folder.appendingPathComponent("\(name).json")
         if FileManager.default.fileExists(atPath: canonical.path) { return try Data(contentsOf: canonical) }
-        return try Data(contentsOf: local.appendingPathComponent("\(name).json"))
+        let own = local.appendingPathComponent("\(name).json")
+        logger.notice("fixture \(name, privacy: .public) is not in the canonical design folder; read from \(own.path, privacy: .public)")
+        return try Data(contentsOf: own)
     }
 
     static func payload(_ name: String) throws -> AchievementsPayload {
