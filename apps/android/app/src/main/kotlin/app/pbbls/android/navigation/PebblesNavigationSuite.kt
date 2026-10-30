@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
 
 /**
  * Which navigation component the window gets (#855): the M3 adaptive
@@ -139,6 +140,16 @@ private fun PebblesKey.iconRes(): Int =
         PebblesKey.People -> R.drawable.ic_people
         PebblesKey.Collections -> R.drawable.ic_pebble_collection
         PebblesKey.You -> R.drawable.ic_person
+        else -> error("$this is not a tab")
+    }
+
+/** The tab's drawing; the bar lights its `active` twin when selected (spec D5, iOS `AppTab.icon`). */
+internal fun PebblesKey.icon(): PbblsIcon =
+    when (this) {
+        PebblesKey.Path -> PbblsIcon.PATH
+        PebblesKey.People -> PbblsIcon.PEOPLE
+        PebblesKey.Collections -> PbblsIcon.COLLECTION
+        PebblesKey.You -> PbblsIcon.PERSON
         else -> error("$this is not a tab")
     }
 
