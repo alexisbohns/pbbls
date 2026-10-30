@@ -20,7 +20,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import java.time.OffsetDateTime
@@ -266,10 +265,8 @@ class AchievementsService
             val body = disk.read(owner, zone, CACHE_PAGE) ?: return null
             return try {
                 decodeAchievementsPage(body)
-            } catch (e: SerializationException) {
-                Log.w(TAG, "kept achievements page no longer decodes, read as a miss", e)
-                null
             } catch (e: IllegalArgumentException) {
+                // SerializationException included: it is an IllegalArgumentException.
                 Log.w(TAG, "kept achievements page no longer decodes, read as a miss", e)
                 null
             }
