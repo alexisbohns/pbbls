@@ -1,6 +1,8 @@
 package app.pbbls.android.features.achievements.figures
 
+import androidx.compose.ui.graphics.Color
 import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.ui.render.stone.StoneTones
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
@@ -40,5 +42,15 @@ class FigureInkTest {
         val last = seatTone(joy, index = 4, familySize = 5, night = true, stock = stock, soft = false)
         assertNotEquals(first, last)
         assertNotEquals(last, seatTone(joy, index = 4, familySize = 5, night = true, stock = stock, soft = true))
+    }
+
+    @Test
+    fun `an unresolved family's soft star is its ink softened toward the stock, not solid ink`() {
+        val ink = Color.Black
+        val stock = Color.White
+        val soft = softTone(ink, stock)
+        assertNotEquals(ink, soft)
+        assertNotEquals(stock, soft)
+        assertEquals(StoneTones.mixOklab(stock, 0.38f, ink), soft)
     }
 }

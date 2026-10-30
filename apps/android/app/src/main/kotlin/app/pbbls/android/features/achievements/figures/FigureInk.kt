@@ -64,8 +64,14 @@ internal fun seatTone(
         } else {
             StoneTones.mixOklab(palette.shaded, (8 + t * 72).roundToInt() / 100f, palette.secondary)
         }
-    return if (soft) StoneTones.mixOklab(stock, 0.38f, base) else base
+    return if (soft) softTone(base, stock) else base
 }
+
+/** The board's soft star over [tone]: 38 % of the way to the [stock]. An unresolved family softens its ink. */
+internal fun softTone(
+    tone: Color,
+    stock: Color,
+): Color = StoneTones.mixOklab(stock, 0.38f, tone)
 
 /** "Not yet": a dotted ring in secondary ink on the paper (the board's `ghost`). [unit] is px per board px. */
 internal fun DrawScope.ghost(

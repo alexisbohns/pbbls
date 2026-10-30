@@ -138,8 +138,10 @@ fun Rosace(
                 // The star to the next seat is lit when that seat is met in the same run.
                 val next = lit.getOrNull(i + 1)
                 if (next != null && next.run === run && next.seat.met) {
-                    // An unresolved family lights in ink, its soft star too (iOS parity).
-                    val soft = palette?.let { seatTone(it, facet.inRun + 1, run.size, night, colors.stock, soft = true) } ?: colors.ink
+                    // An unresolved family lights in ink, its soft star in ink softened like any other (iOS parity).
+                    val soft =
+                        palette?.let { seatTone(it, facet.inRun + 1, run.size, night, colors.stock, soft = true) }
+                            ?: softTone(colors.ink, colors.stock)
                     drawPath(cut.stars[at], soft)
                     drawPath(cut.stars[at], colors.stock, style = Stroke(FACET_SEAM))
                 }
