@@ -325,7 +325,7 @@ class AchievementsViewModel
                 },
                 onFailure = {
                     Log.e(TAG, "get_achievements failed; keeping what is shown", it)
-                    if (shown() == null) _uiState.value = AchievementsUiState.Error(R.string.achievements_load_error)
+                    if (shown() == null) _uiState.value = AchievementsUiState.Error(R.string.achievements_error_body)
                     false
                 },
             )

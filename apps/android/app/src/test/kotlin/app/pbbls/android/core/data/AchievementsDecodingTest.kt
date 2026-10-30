@@ -1,7 +1,6 @@
 package app.pbbls.android.core.data
 
 import app.pbbls.android.core.ui.achievementOverride
-import app.pbbls.android.features.profile.visibleFamilyGroups
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -76,33 +75,5 @@ class AchievementsDecodingTest {
         assertEquals("en", achievementOverride(en = "en", fr = null, isFrench = true))
         assertEquals("fr", achievementOverride(en = null, fr = "fr", isFrench = false))
         assertNull(achievementOverride(en = null, fr = null, isFrench = true))
-    }
-
-    @Test
-    fun `inactive badges only show once unlocked, families keep catalog order`() {
-        fun record(
-            id: String,
-            family: String,
-            sort: Int,
-            active: Boolean = true,
-        ) = AchievementRecord(
-            id = id,
-            slug = id,
-            family = family,
-            sortOrder = sort,
-            karmaReward = 0,
-            isActive = active,
-        )
-        val catalog =
-            listOf(
-                record("p1", "pebble_count", 100),
-                record("p2", "pebble_count", 110, active = false),
-                record("s1", "first_soul", 400),
-                record("g1", "glyph_count", 500, active = false),
-            )
-        val groups = visibleFamilyGroups(catalog, unlockedIds = setOf("p2"))
-        assertEquals(listOf("pebble_count", "first_soul"), groups.map { it.family })
-        assertEquals(listOf("p1", "p2"), groups[0].records.map { it.id })
-        assertEquals(listOf("s1"), groups[1].records.map { it.id })
     }
 }

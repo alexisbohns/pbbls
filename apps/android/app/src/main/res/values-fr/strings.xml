@@ -677,9 +677,6 @@
     <string name="achievement_moment_next">Suivant</string>
     <string name="achievement_moment_done">Super</string>
     <string name="achievement_moment_progress">%1$d sur %2$d</string>
-    <string name="achievements_load_error">Impossible de charger tes succès. Réessaie.</string>
-    <string name="achievement_locked">À débloquer</string>
-    <string name="achievement_unlocked_on">Débloqué le %1$s</string>
     <string name="achievement_group_pebble_count">Galets</string>
     <string name="achievement_group_emotion_first">Émotions</string>
     <string name="achievement_group_domain_first">Domaines</string>

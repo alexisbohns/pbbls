@@ -109,7 +109,7 @@ class AchievementsViewModelTest {
             val service = FakeAchievementsService(served = page).apply { failNextPage = IOException("offline") }
             val viewModel = vm(service)
             advanceUntilIdle()
-            assertEquals(AchievementsUiState.Error(R.string.achievements_load_error), viewModel.uiState.value)
+            assertEquals(AchievementsUiState.Error(R.string.achievements_error_body), viewModel.uiState.value)
             viewModel.retry()
             assertEquals(AchievementsUiState.Loading, viewModel.uiState.value)
             advanceUntilIdle()
