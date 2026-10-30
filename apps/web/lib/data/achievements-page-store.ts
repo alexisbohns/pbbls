@@ -1,8 +1,9 @@
 import {
   achievementsCacheEpoch,
+  markAchievementsCachesStale,
   readAchievementsCacheEntry,
   writeAchievementsCache,
-  type CacheStorage,
+  type ListableStorage,
 } from "@/lib/data/achievements-cache"
 import { decodeAchievementsPage } from "@/lib/data/achievements-payload"
 import { CeremonyNotReadyError, type DataProvider } from "@/lib/data/data-provider"
@@ -91,8 +92,9 @@ export function withPulled(page: AchievementsPage, stack: CeremonyStack, at: Dat
 
 /**
  * How a session opens: the page (the grant, then the read), or the Profile
- * shelf (D18: no grant, and no read while the kept copy is younger than
- * `maxAgeMs`).
+ * shelf (D18: no read while the kept copy is younger than `maxAgeMs`; when it
+ * reads, the grant first, as the page does, so a visitor who only opens the
+ * Profile still gets their retroactive grants, never celebrated).
  */
 export type OpenMode = { kind: "page" } | { kind: "shelf"; maxAgeMs: number }
 
@@ -102,7 +104,7 @@ type Options = {
   owner: string
   /** The reader's IANA zone now, read as each read or pull starts. */
   zone: () => string
-  storage: CacheStorage | null
+  storage: ListableStorage | null
   /** The clock, for the shelf's kept copy's age (ms since the epoch). */
   now?: () => number
 }
@@ -165,12 +167,11 @@ export class AchievementsPageStore {
       if (mode.kind === "shelf") {
         const age = kept && kept.keptAt !== null ? (this.options.now ?? Date.now)() - kept.keptAt : null
         if (this.state.page !== null && age !== null && age >= 0 && age < mode.maxAgeMs) return
-      } else {
-        try {
-          await this.options.provider.checkAchievements()
-        } catch (err) {
-          console.warn("[achievements] check_achievements failed", err)
-        }
+      }
+      try {
+        await this.options.provider.checkAchievements()
+      } catch (err) {
+        console.warn("[achievements] check_achievements failed", err)
       }
       if (signal.aborted) return
       await this.refresh(signal)
@@ -243,6 +244,8 @@ export class AchievementsPageStore {
         }
       }
       if (outcome.kind === "pulled" || outcome.kind === "pulledWithoutKarma") {
+        // The pull unlocked a badge the shelf may show: its next open reads.
+        if (this.options.storage) markAchievementsCachesStale(this.options.storage)
         this.pulledThisSession.set(stack, new Date((this.options.now ?? Date.now)()))
         if (this.state.page) this.set({ page: this.patched(this.state.page) })
       }

@@ -17,6 +17,8 @@ import type { AchievementsPage } from "@/lib/types"
 // ---------------------------------------------------------------------------
 
 export type CacheStorage = Pick<Storage, "getItem" | "setItem">
+/** A storage whose keys can be walked: the store's, to mark every kept payload stale. */
+export type ListableStorage = CacheStorage & Pick<Storage, "length" | "key">
 export type ClearableStorage = Pick<Storage, "length" | "key" | "removeItem">
 
 const KEY_PREFIX = "pbbls-achievements:"
@@ -77,6 +79,26 @@ export function writeAchievementsCache(
   }
 }
 
+/**
+ * Every kept payload on this device marked stale (#1308, D18): an unlock
+ * happened since it was kept, so the Profile shelf's next open reads instead
+ * of trusting its age. The page itself always reads.
+ */
+export function markAchievementsCachesStale(storage: ListableStorage): void {
+  try {
+    for (let i = 0; i < storage.length; i++) {
+      const key = storage.key(i)
+      if (!key?.startsWith(KEY_PREFIX)) continue
+      const text = storage.getItem(key)
+      const entry: unknown = text ? JSON.parse(text) : null
+      if (typeof entry !== "object" || entry === null) continue
+      storage.setItem(key, JSON.stringify({ ...entry, at: null }))
+    }
+  } catch (err) {
+    console.warn("[achievements] cache could not be marked stale", err)
+  }
+}
+
 /** Every user's kept payload on this device (sign-out, account deletion). */
 export function clearAchievementsCaches(storage: ClearableStorage): void {
   epoch += 1
@@ -89,7 +111,7 @@ export function clearAchievementsCaches(storage: ClearableStorage): void {
 }
 
 /** `window.localStorage`, or null where there is none or touching it throws. */
-export function browserStorage(): CacheStorage | null {
+export function browserStorage(): Storage | null {
   try {
     return typeof window === "undefined" ? null : window.localStorage
   } catch (err) {

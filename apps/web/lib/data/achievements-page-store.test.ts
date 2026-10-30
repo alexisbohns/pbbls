@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { AchievementsPageStore, withPulled, type AchievementsPageProvider } from "./achievements-page-store"
-import { achievementsCacheEpoch, clearAchievementsCaches, writeAchievementsCache } from "./achievements-cache"
+import { achievementsCacheEpoch, clearAchievementsCaches, markAchievementsCachesStale, readAchievementsCacheEntry, writeAchievementsCache } from "./achievements-cache"
 import { CeremonyNotReadyError, type AchievementUnlockResult, type CeremonyPull } from "./data-provider"
 import { DUMPED_GET_ACHIEVEMENTS, DUMPED_GET_ACHIEVEMENTS_PULLED } from "./__fixtures__/achievements-captured"
 import { MemoryStorage } from "./__fixtures__/memory-storage"
@@ -340,6 +340,16 @@ describe("a pull that landed", () => {
     expect(fake.pullCeremony).toHaveBeenCalledTimes(1)
   })
 
+  it("marks the kept payload stale, so the shelf's next open reads", async () => {
+    const { fake } = provider([async () => READY(), async () => PULLED()], {
+      pullCeremony: vi.fn(async (): Promise<CeremonyPull | null> => ({ karmaGranted: 0 })),
+    })
+    const { store: s, storage } = store(fake)
+    await s.open()
+    await s.pull("six_firsts")
+    expect(readAchievementsCacheEntry(storage, "alice", ZONE)?.keptAt).toBeNull()
+  })
+
   it("marks only its own stack", () => {
     const page = s0()
     const out = withPulled(page, "emotions", new Date(0))
@@ -353,7 +363,7 @@ describe("the Profile shelf (D18)", () => {
     if (keptAt !== null) writeAchievementsCache(storage, "alice", ZONE, NOT_READY(), achievementsCacheEpoch(), keptAt)
     const { fake } = provider(reads)
     const s = new AchievementsPageStore({ provider: fake, owner: "alice", zone: () => ZONE, storage, now: () => now })
-    return { s, fake }
+    return { s, fake, storage }
   }
   const MIN = 60_000
 
@@ -365,11 +375,15 @@ describe("the Profile shelf (D18)", () => {
     expect(fake.checkAchievements).not.toHaveBeenCalled()
   })
 
-  it("reads once the kept copy is 15 minutes old, or when there is none", async () => {
+  it("reads once the kept copy is 15 minutes old, or when there is none, granting first as the page does", async () => {
     const old = shelfStore(0, 15 * MIN, [async () => PULLED()])
     await old.s.open({ kind: "shelf", maxAgeMs: 15 * MIN })
     expect(old.fake.getAchievementsPayload).toHaveBeenCalledTimes(1)
-    expect(old.fake.checkAchievements).not.toHaveBeenCalled()
+    expect(old.fake.checkAchievements).toHaveBeenCalledTimes(1)
+    const stale = shelfStore(0, MIN, [async () => PULLED()])
+    markAchievementsCachesStale(stale.storage)
+    await stale.s.open({ kind: "shelf", maxAgeMs: 15 * MIN })
+    expect(stale.fake.getAchievementsPayload).toHaveBeenCalledTimes(1)
     const none = shelfStore(null, 0, [async () => PULLED()])
     await none.s.open({ kind: "shelf", maxAgeMs: 15 * MIN })
     expect(none.s.getSnapshot().page?.shelfCount).toBe(4)
