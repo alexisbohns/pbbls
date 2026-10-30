@@ -14,9 +14,7 @@ struct NewPebbleFab: View {
 
     var body: some View {
         Button(action: onTap) {
-            Image(systemName: "plus")
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(Color.pebbles.onPrimary)
+            PbblsIconImage(.plusCircle, .tile, style: AnyShapeStyle(Color.pebbles.onPrimary))
                 .frame(width: Self.side, height: Self.side)
                 .contentShape(Circle())
         }

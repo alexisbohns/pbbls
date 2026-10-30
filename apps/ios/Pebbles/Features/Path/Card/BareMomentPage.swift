@@ -153,7 +153,7 @@ private struct BarePlace: View {
                     .padding(.top, 8)
                     .padding(.horizontal, 24)
                 Button(action: onComplete) {
-                    Label("Make it a pebble", systemImage: "plus")
+                    Label { Text("Make it a pebble") } icon: { PbblsIconImage(.plusCircle, .row) }
                 }
                 .buttonStyle(PebblesPrimaryButtonStyle())
                 .disabled(isDisabled)

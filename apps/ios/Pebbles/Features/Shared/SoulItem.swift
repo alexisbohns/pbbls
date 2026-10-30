@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Single soul cell used in both `SoulsListView` (always `.default`) and
 /// `SoulPickerSheet` (state-driven). Vertical stack: `GlyphView` on top,
-/// name in subhead, optional `fossil.shell` + ripple/pebble count below.
+/// name in subhead, optional `pebbleRound` + ripple/pebble count below.
 ///
 /// Visual specification table is in
 /// `docs/superpowers/specs/2026-05-17-issue-459-glyph-souls-consistency-design.md` §3.
@@ -50,9 +50,7 @@ struct SoulItem: View {
 
                 if `case` != .create, let count {
                     HStack(spacing: Spacing.xs) {
-                        Image(systemName: "fossil.shell")
-                            .font(.system(size: 11))
-                            .foregroundStyle(fossilColor)
+                        PbblsIconImage(.pebbleRound, .inline, relativeTo: .caption2, style: AnyShapeStyle(fossilColor))
                         Text("\(count)")
                             .pebblesFont(.meta)
                             .foregroundStyle(Color.pebbles.onSurfaceVariant)

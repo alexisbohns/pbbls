@@ -90,8 +90,7 @@ struct EmotionPickerContent: View {
     @ViewBuilder
     private func header(for category: EmotionCategory) -> some View {
         HStack(spacing: 6) {
-            Image(systemName: "waveform.path.ecg")
-                .foregroundStyle(category.palette.primary)
+            PbblsIconImage(.heart, .row, style: AnyShapeStyle(category.palette.primary))
             Text(category.localizedName)
                 .font(.caption2)
                 .fontWeight(.semibold)

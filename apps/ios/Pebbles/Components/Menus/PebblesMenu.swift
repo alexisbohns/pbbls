@@ -4,25 +4,25 @@ import SwiftUI
 /// items inline, so a stored `UUID` would change on every parent redraw.
 struct PebblesMenuItem {
     let title: LocalizedStringResource
-    let systemImage: String
+    let icon: PbblsIcon
     let isDestructive: Bool
     let action: () -> Void
 
     init(
         title: LocalizedStringResource,
-        systemImage: String,
+        icon: PbblsIcon,
         isDestructive: Bool = false,
         action: @escaping () -> Void
     ) {
         self.title = title
-        self.systemImage = systemImage
+        self.icon = icon
         self.isDestructive = isDestructive
         self.action = action
     }
 
     /// The orange Delete row every delete menu carries.
     static func delete(_ action: @escaping () -> Void) -> PebblesMenuItem {
-        PebblesMenuItem(title: "Delete", systemImage: "trash", isDestructive: true, action: action)
+        PebblesMenuItem(title: "Delete", icon: .trash, isDestructive: true, action: action)
     }
 }
 
@@ -82,7 +82,7 @@ private struct PebblesMenuList: View {
     let dismiss: () -> Void
 
     @AccessibilityFocusState private var focusedIndex: Int?
-    @ScaledMetric(relativeTo: .body) private var iconWidth: CGFloat = 24
+    @ScaledMetric(relativeTo: .body) private var iconWidth: CGFloat = 20
     /// Run on disappear, once the popover is gone, so a sheet or dialog the
     /// action presents is not dropped by the dismissal transaction.
     @State private var chosen: (() -> Void)?
@@ -95,7 +95,7 @@ private struct PebblesMenuList: View {
                     chosen = item.action
                     dismiss()
                 } label: {
-                    Label { Text(item.title) } icon: { Image(systemName: item.systemImage).frame(width: iconWidth) }
+                    Label { Text(item.title) } icon: { PbblsIconImage(item.icon, .row).frame(width: iconWidth) }
                         .labelStyle(.titleAndIcon)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, Spacing.lg)

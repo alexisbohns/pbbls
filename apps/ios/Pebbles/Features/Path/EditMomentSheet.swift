@@ -107,7 +107,7 @@ struct EditMomentSheet: View {
             case .none:
                 Button { isPhotoPickerPresented = true } label: {
                     HStack {
-                        Label("Add a photo", systemImage: "photo.badge.plus")
+                        Label { Text("Add a photo") } icon: { PbblsIconImage(.camera, .row) }
                         if snaps?.isProcessingPick == true {
                             Spacer()
                             ProgressView()

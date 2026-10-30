@@ -13,7 +13,12 @@ struct CollectionMark: View {
             if let strokes = glyph?.strokes, !strokes.isEmpty {
                 GlyphThumbnail(strokes: strokes, side: side, strokeColor: ink)
             } else {
-                Image(systemName: "square.stack.3d.up")
+                // 14pt by default: the one place an icon draws under the 16 floor
+                // (iOS migration spec D6), a 1.0pt stroke accepted on the band. A
+                // bare template image, not `PbblsIconImage`: the slot is fixed, like
+                // the glyph thumbnail beside it, and must not scale with Dynamic Type.
+                Image(PbblsIcon.collection.assetName)
+                    .renderingMode(.template)
                     .resizable()
                     .scaledToFit()
                     .foregroundStyle(ink)
