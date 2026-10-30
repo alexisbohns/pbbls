@@ -1,4 +1,4 @@
-import { createElement, type ReactElement } from "react"
+import { createElement, type ComponentProps, type ReactElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { NextIntlClientProvider } from "next-intl"
 import { describe, expect, it } from "vitest"
@@ -18,7 +18,8 @@ const page = designPage()
 const palettes = designPalettes()
 
 function html(element: ReactElement): string {
-  return renderToStaticMarkup(createElement(NextIntlClientProvider, { locale: "en", messages: en, timeZone: "UTC", children: element }))
+  const intl: ComponentProps<typeof NextIntlClientProvider> = { locale: "en", messages: en, timeZone: "UTC", children: element }
+  return renderToStaticMarkup(createElement(NextIntlClientProvider, intl))
 }
 
 const count = (markup: string, needle: string) => markup.split(needle).length - 1
