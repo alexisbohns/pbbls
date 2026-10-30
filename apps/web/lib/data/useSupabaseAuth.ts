@@ -112,6 +112,14 @@ export function useSupabaseAuth(): AuthContextValue {
       if (cancelled) return
 
       if (event === "SIGNED_OUT" || !session?.user) {
+        // However the session ended (an expired refresh, another tab), the
+        // achievements page's kept payload must not outlive it (#1308, D16).
+        // Synchronous localStorage only, so this callback stays deadlock-free.
+        try {
+          clearAchievementsCaches(window.localStorage)
+        } catch (err) {
+          console.warn("[auth] could not clear the achievements cache", err)
+        }
         setUser(null)
         setProfile(null)
         setIsLoading(false)
