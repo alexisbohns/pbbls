@@ -27,7 +27,7 @@ struct ExistingSnapRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Photo")
                     .font(.subheadline)
-                Label("Saved", systemImage: "checkmark.circle.fill")
+                Label { Text("Saved") } icon: { PbblsIconImage(.checkCircle, .inline, relativeTo: .caption) }
                     .labelStyle(.titleAndIcon)
                     .font(.caption)
                     .foregroundStyle(Color.pebbles.tertiary)
@@ -74,7 +74,7 @@ struct ExistingSnapRow: View {
             ProgressView()
         } else {
             Button(action: onRemove) {
-                Image(systemName: "xmark.circle.fill")
+                PbblsIconImage(.remove, .row)
                     .foregroundStyle(Color.pebbles.error)
             }
             .buttonStyle(.plain)
