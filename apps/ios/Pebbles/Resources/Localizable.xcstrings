@@ -13790,13 +13790,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In %@, a full week passed without a moment, so the month stays at the centre."
+            "value" : "%@ can't reach the inner disc this month."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En %@, une semaine complète est passée sans moment : le mois reste au centre."
+            "value" : "%@ n'atteindra pas le disque intérieur ce mois-ci."
           }
         }
       }
@@ -13858,13 +13858,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In %@, a full week passed without a pebble, so the month stays on the inner disc."
+            "value" : "%@ can't reach the rim this month."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En %@, une semaine complète est passée sans galet : le mois reste sur le disque intérieur."
+            "value" : "%@ n'atteindra pas le bord ce mois-ci."
           }
         }
       }

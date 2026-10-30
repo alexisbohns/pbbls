@@ -99,7 +99,11 @@ enum AchievementsCopy {
     static func nextStep(_ step: Page.NextStep, locale: Locale) -> String {
         let month = monthInSentence(step.month, locale: locale)
         let key = "achievements.year.\(step.needs.rawValue)"
-        guard step.reachable else { return format("\(key).unreachable", locale, month) }
+        // Out of reach this month, for whichever reason (a full week passed
+        // without it, or too few days left): the copy names neither (spec §3.3).
+        guard step.reachable else {
+            return WeekOpening.sentenceCase(format("\(key).unreachable", locale, month), locale: locale)
+        }
         switch step.daysLeft {
         case ...0:
             return format("\(key).keep", locale, month)
