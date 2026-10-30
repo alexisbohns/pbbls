@@ -162,6 +162,8 @@ export function achievementsWords(t: Translate, locale: Locale, root: Translate 
       /** A row read aloud: its parts, then "new since you last looked" when it is. */
       row: (parts: (string | null | undefined)[], isNew = false) =>
         [...parts.filter((p): p is string => typeof p === "string" && p.trim() !== ""), ...(isNew ? [t("a11y.newSince")] : [])].join(", "),
+      /** What pressing a row does, said after its label (Android's click labels). */
+      opensHint: (opens: "moment" | "sheet") => t(opens === "moment" ? "a11y.openPebble" : "a11y.openSheet"),
       /** The quiet names read as one: "Not yet: Anxious, Bitter". */
       notYet: (names: string[]) => t("a11y.notYet", { names: names.join(", ") }),
       /** A table row read aloud: the served counts as they are, each marked "reached" where `done` says so. */
