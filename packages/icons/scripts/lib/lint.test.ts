@@ -13,6 +13,7 @@ const row = (name: string, variants: string[] = [], extra: Record<string, unknow
   variants,
   wave: WAVE,
   status: "candidate",
+  migrated: [],
   replaces: { ios: [], android: [], web: [] },
   ...extra,
 })

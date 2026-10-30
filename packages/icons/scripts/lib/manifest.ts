@@ -16,6 +16,8 @@ export type IconRow = {
   variants: string[]
   wave: string
   status: string
+  /** The surfaces whose code no longer names this row's `replaces` (the migration lint reads it). */
+  migrated: Surface[]
   replaces: Record<Surface, string[]>
 }
 
@@ -38,15 +40,28 @@ const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "obj
 
 const isStringArray = (v: unknown): v is string[] => Array.isArray(v) && v.every((x) => typeof x === "string")
 
+const isSurface = (v: string): v is Surface => (SURFACES as readonly string[]).includes(v)
+
 function rowFrom(value: unknown, index: number): IconRow {
   const where = `${MANIFEST_FILE}: icons[${index}]`
   if (!isRecord(value)) throw new Error(`${where} is not an object`)
-  const { name, meaning, variants, wave, status, replaces } = value
+  const { name, meaning, variants, wave, status, migrated, replaces } = value
   if (typeof name !== "string") throw new Error(`${where}.name is not a string`)
   if (typeof meaning !== "string") throw new Error(`${where} (${name}).meaning is not a string`)
   if (!isStringArray(variants)) throw new Error(`${where} (${name}).variants is not a string array`)
   if (typeof wave !== "string") throw new Error(`${where} (${name}).wave is not a string`)
   if (typeof status !== "string") throw new Error(`${where} (${name}).status is not a string`)
+  if (!isStringArray(migrated)) throw new Error(`${where} (${name}).migrated is not a string array`)
+  const migratedSurfaces: Surface[] = []
+  for (const surface of migrated) {
+    if (!isSurface(surface)) throw new Error(`${where} (${name}).migrated: ${surface} is not a surface`)
+    if (migratedSurfaces.includes(surface)) throw new Error(`${where} (${name}).migrated: ${surface} twice`)
+    migratedSurfaces.push(surface)
+  }
+  if (status === "shipped") {
+    const missing = SURFACES.filter((s) => !migratedSurfaces.includes(s))
+    if (missing.length > 0) throw new Error(`${where} (${name}): shipped, but migrated lacks ${missing.join(", ")}`)
+  }
   if (!isRecord(replaces)) throw new Error(`${where} (${name}).replaces is not an object`)
   const lists = {} as Record<Surface, string[]>
   for (const surface of SURFACES) {
@@ -54,7 +69,7 @@ function rowFrom(value: unknown, index: number): IconRow {
     if (!isStringArray(list)) throw new Error(`${where} (${name}).replaces.${surface} is not a string array`)
     lists[surface] = list
   }
-  return { name, meaning, variants, wave, status, replaces: lists }
+  return { name, meaning, variants, wave, status, migrated: migratedSurfaces, replaces: lists }
 }
 
 /** Shape-checks a parsed `icons.json`; every failure names the row. */
