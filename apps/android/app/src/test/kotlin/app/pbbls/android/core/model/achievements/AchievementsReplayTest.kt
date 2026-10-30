@@ -164,9 +164,36 @@ class AchievementsReplayTest {
     }
 
     @Test
-    fun `the current year's next step decodes`() {
-        val step = page(AchievementPayloads.YEAR).years.first { it.current }.nextStep
-        assertNotNull(step)
+    fun `every year's next step reads exactly as served, in every dump`() {
+        for (name in listOf(AchievementPayloads.PAGE, AchievementPayloads.YEAR, AchievementPayloads.SEEN, AchievementPayloads.PULLED)) {
+            val raw = Json.parseToJsonElement(AchievementPayloads.read(name)).jsonObject
+            val years = page(name).years
+            raw["years"]!!.jsonArray.forEachIndexed { y, rawYear ->
+                val label = "$name ${years[y].year}"
+                val step = rawYear.jsonObject["next_step"]?.jsonObject
+                if (step == null) {
+                    assertNull(label, years[y].nextStep)
+                } else {
+                    assertEquals(
+                        label,
+                        NextStep(
+                            month = step.int("month"),
+                            needs = Needs.of(step["needs"]!!.jsonPrimitive.content)!!,
+                            daysLeft = step.int("days_left"),
+                            reachable = step.bool("reachable"),
+                        ),
+                        years[y].nextStep,
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `the page dump's current year carries its next step`() {
+        val current = page(AchievementPayloads.PAGE).years.single { it.current }
+        assertNotNull(current.nextStep)
+        assertEquals(14, current.daysTarget)
     }
 
     @Test
