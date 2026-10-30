@@ -10,22 +10,20 @@ struct HomeShortcuts: View {
 
     var body: some View {
         HStack(spacing: Spacing.sm) {
-            tile("camera", "home.shortcut.camera", disabled: cameraDisabled, action: onCamera)
-            tile("clock", "home.shortcut.quick", action: onQuick)
-            tile("plus.circle", "home.shortcut.pebble", action: onPebble)
+            tile(.camera, "home.shortcut.camera", disabled: cameraDisabled, action: onCamera)
+            tile(.pebbleFlat, "home.shortcut.quick", action: onQuick)
+            tile(.plusCircle, "home.shortcut.pebble", action: onPebble)
         }
     }
 
     // Not SurfaceTile: D2 bans its primaryContainer default and the spec names its own geometry.
-    private func tile(_ symbol: String, _ key: LocalizedStringKey, disabled: Bool = false, action: @escaping () -> Void) -> some View {
+    private func tile(_ icon: PbblsIcon, _ key: LocalizedStringKey, disabled: Bool = false, action: @escaping () -> Void) -> some View {
         Button {
             TapHaptics.play(.selection)
             action()
         } label: {
             VStack(spacing: 6) {
-                Image(systemName: symbol)
-                    .font(.title3)
-                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                PbblsIconImage(icon, .tile, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
                     .frame(height: 28)
                 Text(key)
                     .pebblesFont(.callout)

@@ -20,7 +20,11 @@ struct RecordWhenStep: View {
             .tint(Color.pebbles.primary)
 
             if seededFromPhoto {
-                Label("Taken from your photo", systemImage: "sparkles")
+                Label {
+                    Text("Taken from your photo")
+                } icon: {
+                    PbblsIconImage(.sparkle, .inline, relativeTo: .subheadline)
+                }
                     .pebblesFont(.subhead)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
             }

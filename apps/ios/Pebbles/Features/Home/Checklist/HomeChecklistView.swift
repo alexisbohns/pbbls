@@ -62,11 +62,8 @@ struct HomeChecklistView: View {
         Button(action: onClaim) {
             // The blue pebble's mark, in the button's own ink: the capsule is the primary fill.
             HStack(spacing: Spacing.sm) {
-                Image(systemName: "drop.fill")
-                    .font(.system(size: 18))
-                    .foregroundStyle(Color.pebbles.onPrimary)
+                PbblsIconImage(.pebbleRoundLit1, .row, style: AnyShapeStyle(Color.pebbles.onPrimary))
                     .frame(width: 22, height: 22)
-                    .accessibilityHidden(true)
                 Text("home.firstFive.claim")
                     .spineType(.checklistTitle)
             }
@@ -88,11 +85,9 @@ private struct ChecklistTaskRow: View {
     var body: some View {
         Button(action: action) {
             HStack(alignment: .center, spacing: Spacing.md) {
-                Image(systemName: row.isDone ? "checkmark.circle.fill" : "circle.dashed")
-                    .font(.system(size: 20))
-                    .foregroundStyle(row.isDone ? Color.pebbles.onSurface : Color.pebbles.outline)
+                PbblsIconImage(row.isDone ? .checkCircle : .pebbleRound, .row,
+                               style: AnyShapeStyle(row.isDone ? Color.pebbles.onSurface : Color.pebbles.outline))
                     .frame(width: 22, height: 22)
-                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     // A done title keeps `onSurfaceVariant` for contrast; only its line goes quiet.
                     Text(row.task.title)

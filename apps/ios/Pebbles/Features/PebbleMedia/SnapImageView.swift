@@ -55,8 +55,7 @@ struct SnapImageView: View {
         Rectangle()
             .fill(Color.pebbles.surfaceContainerHighest)
             .overlay(
-                Image(systemName: "photo.on.rectangle.angled")
-                    .foregroundStyle(.secondary)
+                PbblsIconImage(.cameraFocus, .tile, style: AnyShapeStyle(.secondary))
             )
     }
 }

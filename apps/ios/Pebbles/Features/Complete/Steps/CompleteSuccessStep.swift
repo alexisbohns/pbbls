@@ -33,7 +33,7 @@ struct CompleteSuccessStep: View {
 
                 if let karma = result.karmaDelta, karma > 0 {
                     HStack(spacing: 6) {
-                        Image(systemName: "sparkle")
+                        PbblsIconImage(.karmaDot, .inline, relativeTo: .headline)
                             .foregroundStyle(Color.pebbles.primary)
                         Text("+\(karma) karma")
                             .pebblesFont(.headline)

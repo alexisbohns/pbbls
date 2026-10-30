@@ -94,7 +94,7 @@ struct RecordPhotoStep: View {
                 .pebblesFont(.subhead)
                 .foregroundStyle(Color.pebbles.onPrimaryContainer)
         case .uploaded:
-            Label("Ready", systemImage: "checkmark.circle.fill")
+            Label { Text("Ready") } icon: { PbblsIconImage(.checkCircle, .inline, relativeTo: .subheadline) }
                 .pebblesFont(.subhead)
                 .foregroundStyle(Color.pebbles.onPrimaryContainer)
         case .failed:
@@ -122,7 +122,7 @@ struct RecordPhotoStep: View {
 
     private var removeButton: some View {
         Button(action: onRemove) {
-            Image(systemName: "xmark.circle.fill")
+            PbblsIconImage(.remove, .row)
                 .foregroundStyle(Color.pebbles.error)
         }
         .buttonStyle(.plain)
@@ -131,8 +131,7 @@ struct RecordPhotoStep: View {
 
     private var attachedWithoutThumb: some View {
         VStack(spacing: Spacing.sm) {
-            Image(systemName: "photo")
-                .font(.system(size: 40))
+            PbblsIconImage(.cameraFocus, .hero)
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
             Text("A photo is already attached.")
                 .pebblesFont(.subhead)
