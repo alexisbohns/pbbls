@@ -18,7 +18,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -34,13 +33,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.ui.ReferenceStrings
@@ -170,10 +170,10 @@ private fun EmotionChip(
         trailingIcon =
             if (selected) {
                 {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_check),
+                    PbblsIconImage(
+                        icon = PbblsIcon.CHECKMARK_DOT,
                         contentDescription = null,
-                        modifier = Modifier.size(FilterChipDefaults.IconSize),
+                        size = FilterChipDefaults.IconSize,
                     )
                 }
             } else {
