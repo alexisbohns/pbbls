@@ -132,3 +132,30 @@ struct AchievementsCopyTests {
         #expect(AchievementsCopy.ceremonySlug(.sixFirsts) == "complete-six-firsts")
     }
 }
+
+/// The header's full date and a card's "since" day under a region the language
+/// does not imply (#1306): both put the day and the month in the region's order.
+@Suite("Achievements dates under a region override")
+struct AchievementsDateOrderTests {
+    static var paris: Calendar {
+        var calendar = Calendar(identifier: .iso8601)
+        calendar.timeZone = TimeZone(identifier: "Europe/Paris")!
+        return calendar
+    }
+
+    @Test("English with a British region: the day before the month in both; with an American one, after")
+    func order() {
+        let day = CalendarDay(year: 2026, month: 3, day: 1)
+        let en = Locale(identifier: "en")
+        let british = SpineStrings.dateLocale(app: en, device: Locale(identifier: "en_GB"))
+        let american = SpineStrings.dateLocale(app: en, device: Locale(identifier: "en_US"))
+        let gbFull = AchievementsCopy.since(day, calendar: Self.paris, locale: en, dateLocale: british)
+        let gbDay = AchievementsCopy.sinceHint(day, calendar: Self.paris, locale: en, dateLocale: british)
+        #expect(gbFull.contains("1 March") && gbDay == "since 1 March", "\(gbFull) / \(gbDay)")
+        let usFull = AchievementsCopy.since(day, calendar: Self.paris, locale: en, dateLocale: american)
+        let usDay = AchievementsCopy.sinceHint(day, calendar: Self.paris, locale: en, dateLocale: american)
+        #expect(usFull.contains("March 1") && usDay == "since March 1", "\(usFull) / \(usDay)")
+        let french = SpineStrings.dateLocale(app: Locale(identifier: "fr"), device: Locale(identifier: "en_US"))
+        #expect(AchievementsCopy.dates(french).identifier == "fr_US")
+    }
+}

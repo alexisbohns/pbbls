@@ -9,8 +9,14 @@ extension References {
     @Suite("Achievements page references")
     @MainActor
     struct AchievementsPageReferences {
+        /// Dates in the reference's language with a fixed region, so every Mac and CI render the same.
+        static var dateLocale: Locale {
+            Locale(identifier: ReferenceLocale.current == .fr ? "fr_FR" : "en_US")
+        }
+
         static func content(_ page: AchievementsPage) throws -> some View {
             AchievementsPageContent(page: page, lookups: try AchievementsLookups.fixture())
+                .environment(\.achievementsDateLocale, dateLocale)
                 .background(Color.pebbles.surface)
         }
 

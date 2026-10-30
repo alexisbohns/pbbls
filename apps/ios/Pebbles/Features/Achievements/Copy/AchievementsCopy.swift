@@ -16,7 +16,16 @@ enum AchievementsCopy {
     static func since(_ day: CalendarDay, calendar: Calendar, locale: Locale, dateLocale: Locale) -> String {
         let date = day.date(in: calendar.timeZone) ?? .distantPast
         return format("achievements.header.since", locale,
-                      SpineDates.fullDate(date, calendar: calendar, locale: dateLocale))
+                      SpineDates.fullDate(date, calendar: calendar, locale: dates(dateLocale)))
+    }
+
+    /// The date locale as one plain `language_REGION`: a region carried as an
+    /// override is honoured by some templates and not others, so the header's
+    /// full date and a card's day could disagree on day/month order.
+    static func dates(_ locale: Locale) -> Locale {
+        guard let language = locale.language.languageCode?.identifier else { return locale }
+        guard let region = locale.region?.identifier else { return Locale(identifier: language) }
+        return Locale(identifier: "\(language)_\(region)")
     }
 
     /// "days", or "day" on the first one.
@@ -38,7 +47,7 @@ enum AchievementsCopy {
     static func sinceHint(_ day: CalendarDay, calendar: Calendar, locale: Locale, dateLocale: Locale) -> String {
         let date = day.date(in: calendar.timeZone) ?? .distantPast
         return format("achievements.hint.since", locale,
-                      SpineDates.dayMonth(date, calendar: calendar, locale: dateLocale))
+                      SpineDates.dayMonth(date, calendar: calendar, locale: dates(dateLocale)))
     }
 
     static func domainsHint(locale: Locale) -> String {

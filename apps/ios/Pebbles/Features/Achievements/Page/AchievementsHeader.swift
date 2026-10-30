@@ -7,6 +7,8 @@ struct AchievementsHeader: View {
     let since: CalendarDay?
     let daysKept: Int?
 
+    @Environment(\.achievementsDateLocale) private var dateLocale
+
     var body: some View {
         if let daysKept {
             let locale = SpineStrings.appLocale
@@ -14,7 +16,7 @@ struct AchievementsHeader: View {
             VStack(alignment: .leading, spacing: 4) {
                 if let since {
                     Text(verbatim: AchievementsCopy.since(since, calendar: calendar, locale: locale,
-                                                          dateLocale: SpineStrings.dateLocale))
+                                                          dateLocale: dateLocale ?? SpineStrings.dateLocale))
                         .spineType(.achievementsSince)
                         .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 }
@@ -34,7 +36,7 @@ struct AchievementsHeader: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text(verbatim: AchievementsA11y.header(
                 daysKept: daysKept, since: since, calendar: calendar, locale: locale,
-                dateLocale: SpineStrings.dateLocale)))
+                dateLocale: dateLocale ?? SpineStrings.dateLocale)))
             .accessibilityAddTraits(.isHeader)
         }
     }

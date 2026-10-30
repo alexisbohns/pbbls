@@ -33,12 +33,14 @@ struct EmotionsCard: View {
     var ready: ReadyMark?
     var open: (() -> Void)?
 
+    @Environment(\.achievementsDateLocale) private var dateLocale
+
     var body: some View {
         let locale = SpineStrings.appLocale
         AchievementCardShell(
             title: AchievementsCopy.title(.emotions, locale: locale),
             hint: emotions.since.map { AchievementsCopy.sinceHint($0, calendar: SpineCalendar.current, locale: locale,
-                                                                   dateLocale: SpineStrings.dateLocale) },
+                                                                   dateLocale: dateLocale ?? SpineStrings.dateLocale) },
             ladder: MarginLadders.emotions(emotions),
             accessibilityLabel: AchievementsA11y.emotions(emotions, locale: locale),
             ready: ready, action: open
@@ -84,12 +86,14 @@ struct PebblesCard: View {
     let sales: AchievementsPage.Ladder?
     var open: (() -> Void)?
 
+    @Environment(\.achievementsDateLocale) private var dateLocale
+
     var body: some View {
         let locale = SpineStrings.appLocale
         AchievementCardShell(
             title: AchievementsCopy.title(.pebbles, locale: locale),
             hint: pebbles.since.map { AchievementsCopy.sinceHint($0, calendar: SpineCalendar.current, locale: locale,
-                                                                  dateLocale: SpineStrings.dateLocale) },
+                                                                  dateLocale: dateLocale ?? SpineStrings.dateLocale) },
             ladder: MarginLadders.ladder(pebbles),
             accessibilityLabel: AchievementsA11y.pebbles(pebbles, carved: carved, sales: sales, locale: locale),
             action: open
