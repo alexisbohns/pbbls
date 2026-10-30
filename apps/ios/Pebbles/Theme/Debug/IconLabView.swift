@@ -59,6 +59,21 @@ struct IconLabView: View {
                             .frame(width: 44, alignment: .leading)
                         Slider(value: $side, in: 16...72, step: 2)
                     }
+                    HStack(spacing: Spacing.xs) {
+                        ForEach(PbblsIconSize.allCases, id: \.rawValue) { size in
+                            Button {
+                                side = size.rawValue
+                            } label: {
+                                Text(verbatim: "\(size)")
+                                    .font(.caption2.monospaced())
+                                    .padding(.horizontal, Spacing.xs)
+                                    .padding(.vertical, 2)
+                                    .background(side == size.rawValue ? Color.pebbles.primaryContainer : .clear,
+                                                in: Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                     Toggle(isOn: $onPrimary) { Text(verbatim: "On primary") }
                         .font(.caption)
                 }
