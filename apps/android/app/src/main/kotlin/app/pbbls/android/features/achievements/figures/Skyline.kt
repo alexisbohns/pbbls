@@ -6,14 +6,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -23,16 +24,10 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import kotlin.math.min
 import app.pbbls.android.features.achievements.figures.SkylineGeometry as G
 
-/** A skyline path placed: board units → px, `p' = (p − origin) × scale`. */
-private fun placed(
-    d: String,
-    scale: Float,
-    origin: Offset,
-): Path =
-    PathParser().parsePathString(d).toPath().also { p ->
-        p.translate(-origin)
-        p.transform(Matrix().apply { scale(scale, scale) })
-    }
+/** The board's stages, parsed once, in board units: drawn under the figure's transform, never re-placed. */
+private val STAGE_PATHS: List<Path> by lazy { G.STAGES.map(::parsePath) }
+
+private fun parsePath(d: String): Path = PathParser().parsePathString(d).toPath()
 
 /**
  * The skyline (g/92): [fill]'s stages in ink, the next rising from its foot, the contour over all
@@ -48,6 +43,7 @@ fun Skyline(
     width: Dp = 300.dp,
 ) {
     val colors = PebblesTheme.spine.colors
+    val contour = remember(fill.stages, viewport.end) { parsePath(G.contour(fill.stages, viewport.end)) }
     Canvas(
         modifier
             .widthIn(max = width)
@@ -55,23 +51,23 @@ fun Skyline(
             .aspectRatio(viewport.width / viewport.height)
             .clearAndSetSemantics { contentDescription = description },
     ) {
-        val scale = size.width / viewport.width
-        val origin = Offset(viewport.left, viewport.top)
-        for (k in 0 until fill.full.coerceAtMost(fill.stages)) drawPath(placed(G.STAGES[k], scale, origin), colors.ink)
-        if (fill.full < fill.stages && fill.partial > 0f) {
-            val r = G.partialClip(fill.full, fill.partial)
-            clipRect(
-                left = (r.left - origin.x) * scale,
-                top = (r.top - origin.y) * scale,
-                right = (r.right - origin.x) * scale,
-                bottom = (r.bottom - origin.y) * scale,
-            ) { drawPath(placed(G.STAGES[fill.full], scale, origin), colors.ink) }
+        val k = size.width / viewport.width
+        val stroke = 1.dp.toPx() / k
+        withTransform({
+            scale(k, k, Offset.Zero)
+            translate(-viewport.left, -viewport.top)
+        }) {
+            for (stage in 0 until fill.full.coerceAtMost(fill.stages)) drawPath(STAGE_PATHS[stage], colors.ink)
+            if (fill.full < fill.stages && fill.partial > 0f) {
+                val r = G.partialClip(fill.full, fill.partial)
+                clipRect(r.left, r.top, r.right, r.bottom) { drawPath(STAGE_PATHS[fill.full], colors.ink) }
+            }
+            drawPath(
+                contour,
+                if (fill.done) colors.ink else colors.ink2,
+                style = Stroke(stroke, cap = StrokeCap.Round, join = StrokeJoin.Round),
+            )
         }
-        drawPath(
-            placed(G.contour(fill.stages, viewport.end), scale, origin),
-            if (fill.done) colors.ink else colors.ink2,
-            style = Stroke(1.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
-        )
     }
 }
 
@@ -104,26 +100,22 @@ fun SkylineStage(
         val unit = size.width / STAGE_BOX_W
         val s = min(STAGE_BOX_W / w, STAGE_BOX_H / h) * scale * unit
         val origin = Offset((x0 + x1) / 2 - center.x / s, (G.GROUND + top) / 2 - center.y / s)
-        if (fill >= 1f) {
-            drawPath(placed(G.STAGES[k], s, origin), colors.ink)
-        } else {
-            if (fill > 0f) {
-                val r = G.partialClip(k, fill)
-                clipRect(
-                    left = (r.left - origin.x) * s,
-                    top = (r.top - origin.y) * s,
-                    right = (r.right - origin.x) * s,
-                    bottom = (r.bottom - origin.y) * s,
-                ) { drawPath(placed(G.STAGES[k], s, origin), colors.ink) }
+        val stroke = 1.dp.toPx() / s
+        withTransform({
+            scale(s, s, Offset.Zero)
+            translate(-origin.x, -origin.y)
+        }) {
+            val path = STAGE_PATHS[k]
+            if (fill >= 1f) {
+                drawPath(path, colors.ink)
+            } else {
+                if (fill > 0f) {
+                    val r = G.partialClip(k, fill)
+                    clipRect(r.left, r.top, r.right, r.bottom) { drawPath(path, colors.ink) }
+                }
+                drawPath(path, colors.ink2, style = Stroke(stroke, join = StrokeJoin.Round))
             }
-            drawPath(placed(G.STAGES[k], s, origin), colors.ink2, style = Stroke(1.dp.toPx(), join = StrokeJoin.Round))
+            drawLine(colors.ink2, Offset(x0 - BASELINE_OVERHANG, G.GROUND), Offset(x1 + BASELINE_OVERHANG, G.GROUND), stroke)
         }
-        val y = (G.GROUND - origin.y) * s
-        drawLine(
-            colors.ink2,
-            Offset((x0 - BASELINE_OVERHANG - origin.x) * s, y),
-            Offset((x1 + BASELINE_OVERHANG - origin.x) * s, y),
-            1.dp.toPx(),
-        )
     }
 }

@@ -42,6 +42,15 @@ private fun Path.polygon(points: List<Offset>): Path =
         close()
     }
 
+/** The rosace's polygons for one geometry: its silhouette, a kite and a star per seat. */
+private class RosaceCut(
+    g: RosaceGeometry,
+) {
+    val silhouette: Path = Path().polygon(g.silhouette())
+    val kites: List<Path> = (0 until g.seats).map { Path().polygon(g.kite(it)) }
+    val stars: List<Path> = (0 until g.seats).map { Path().polygon(g.star(it)) }
+}
+
 /** One seat as the rosace lights it: its run, and its place in that run (the tone's index). */
 private class Facet(
     val seat: EmotionSeat,
@@ -89,6 +98,8 @@ fun Rosace(
     val runs = remember(seats) { familyRuns(seats) }
     val lit = remember(seats, runs) { facets(seats, runs) }
     val g = remember(size, labels, seats.size) { RosaceGeometry(size.value, labels, seats.size) }
+    // The cut, built once per geometry in board units: drawn under the figure's scale.
+    val cut = remember(g) { RosaceCut(g) }
     val names =
         runs.map { run ->
             run.family?.let { slug ->
@@ -110,11 +121,11 @@ fun Rosace(
     ) {
         val k = this.size.width / g.size
         withTransform({ scale(k, k, Offset.Zero) }) {
-            drawPath(Path().polygon(g.silhouette()), colors.stock)
-            drawPath(Path().polygon(g.silhouette()), colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
+            drawPath(cut.silhouette, colors.stock)
+            drawPath(cut.silhouette, colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
             seats.indices.forEach { i ->
-                drawPath(Path().polygon(g.kite(i)), colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
-                drawPath(Path().polygon(g.star(i)), colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
+                drawPath(cut.kites[i], colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
+                drawPath(cut.stars[i], colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
             }
             lit.forEachIndexed { i, facet ->
                 if (!facet.seat.met) return@forEachIndexed
@@ -122,15 +133,15 @@ fun Rosace(
                 val palette = run.family?.let { lookups.family(it)?.palette }
                 val at = i
                 val tone = palette?.let { seatTone(it, facet.inRun, run.size, night, colors.stock, soft = false) } ?: colors.ink
-                drawPath(Path().polygon(g.kite(at)), tone)
-                drawPath(Path().polygon(g.kite(at)), colors.stock, style = Stroke(FACET_SEAM))
+                drawPath(cut.kites[at], tone)
+                drawPath(cut.kites[at], colors.stock, style = Stroke(FACET_SEAM))
                 // The star to the next seat is lit when that seat is met in the same run.
                 val next = lit.getOrNull(i + 1)
                 if (next != null && next.run === run && next.seat.met) {
                     // An unresolved family lights in ink, its soft star too (iOS parity).
                     val soft = palette?.let { seatTone(it, facet.inRun + 1, run.size, night, colors.stock, soft = true) } ?: colors.ink
-                    drawPath(Path().polygon(g.star(at)), soft)
-                    drawPath(Path().polygon(g.star(at)), colors.stock, style = Stroke(FACET_SEAM))
+                    drawPath(cut.stars[at], soft)
+                    drawPath(cut.stars[at], colors.stock, style = Stroke(FACET_SEAM))
                 }
             }
             if (ticks) {

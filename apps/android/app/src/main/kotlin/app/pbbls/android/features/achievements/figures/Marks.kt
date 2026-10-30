@@ -6,14 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
@@ -95,12 +94,12 @@ private const val GLYPH_BOX = 200f
 private const val GLYPH_STROKE = 6f * 0.19f
 private val SOUL_MARK = listOf("M30,110 Q65,55 100,110 Q135,165 170,110")
 private val GLYPH_MARK = listOf("M100,40 Q160,40 160,100 Q160,160 100,160 Q40,160 40,100 Q40,65 95,70", "M100,100 L100,101")
-private val PARSER = PathParser()
 
-private fun parse(d: String): Path = PARSER.parsePathString(d).toPath()
+private fun parse(d: String): Path = PathParser().parsePathString(d).toPath()
 
-private val SOUL_PATHS = SOUL_MARK.map(::parse)
-private val GLYPH_PATHS = GLYPH_MARK.map(::parse)
+/** Parsed once, in their 200 box: drawn under a transform, never re-placed per frame. */
+private val SOUL_PATHS: List<Path> by lazy { SOUL_MARK.map(::parse) }
+private val GLYPH_PATHS: List<Path> by lazy { GLYPH_MARK.map(::parse) }
 
 private fun DrawScope.glyphAt(
     center: Offset,
@@ -109,13 +108,14 @@ private fun DrawScope.glyphAt(
     unit: Float,
     colors: SpineColors,
 ) {
-    val scale = side / GLYPH_BOX
-    translate(center.x - side / 2, center.y - side / 2) {
-        // The paths are in a 200 box: scale them into `side` px and keep the stroke at its on-screen weight.
-        val m = Matrix().apply { scale(scale, scale) }
+    val k = side / GLYPH_BOX
+    // The paths are in a 200 box: scale them into `side` px, the stroke kept at its on-screen weight.
+    withTransform({
+        translate(center.x - side / 2, center.y - side / 2)
+        scale(k, k, Offset.Zero)
+    }) {
         paths.forEach { p ->
-            val placed = Path().apply { addPath(p) }.also { it.transform(m) }
-            drawPath(placed, colors.ink, style = Stroke(GLYPH_STROKE * unit, cap = StrokeCap.Round, join = StrokeJoin.Round))
+            drawPath(p, colors.ink, style = Stroke(GLYPH_STROKE * unit / k, cap = StrokeCap.Round, join = StrokeJoin.Round))
         }
     }
 }
