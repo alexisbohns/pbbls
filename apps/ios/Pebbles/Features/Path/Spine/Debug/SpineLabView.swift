@@ -154,7 +154,7 @@ struct SpineLabView: View {
                     HomeContent(
                         model: model, lookups: HomeFixture.lookups, liveMonth: HomeFixture.liveMonth,
                         clock: HomeFixture.clock, zone: HomeFixture.zone, locale: SpineStrings.appLocale,
-                        onCamera: { homeLog = "camera" },
+                        onCamera: { homeLog = "camera shortcut" },
                         onQuick: { homeLog = "quick moment" },
                         onPebble: { homeLog = "pebble" },
                         onOpenWrap: { homeLog = "open wrap \($0.month.firstDay.iso)" },
