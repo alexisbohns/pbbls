@@ -33,6 +33,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -206,13 +208,13 @@ private fun AchievementBadgeCell(
                     .padding(PebblesTheme.spacing.lg),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(achievementFamilyIcon(record.family)),
+                PbblsIconImage(
+                    icon = achievementFamilyIcon(record.family),
+                    size = PbblsIconSize.TILE,
                     contentDescription = null,
                     // Locked: a faint family mark. The lock and the caption below
                     // carry the state legibly, so the mark itself needn't clear 3:1.
                     tint = if (isUnlocked) colors.primary else colors.outlineVariant,
-                    modifier = Modifier.size(PebblesIconToken.LARGE.size),
                 )
                 Spacer(Modifier.weight(1f))
                 if (!isUnlocked) {
