@@ -40,7 +40,8 @@ class AchievementsPageTest : AppUiTest() {
     @Test
     fun `the page asks for the grant, then reads, and draws its cards`() {
         openAchievements()
-        assertEquals(listOf("check", "page"), achievements.calls)
+        // You's shelf may read the page first (D18); the page itself grants, then reads.
+        assertEquals(listOf("check", "page"), achievements.calls.dropWhile { it != "check" })
         compose.onNodeWithContentDescription("249 days, since Sunday, March 1, 2026").assertExists()
         compose.onNodeWithContentDescription("Explorer: the first five, done", substring = true).assertExists()
     }
