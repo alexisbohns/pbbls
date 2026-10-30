@@ -1,14 +1,16 @@
 package app.pbbls.android.features.profile.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -17,9 +19,11 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 
 /**
- * 7-column grid of the last 28 days — ports iOS `AssiduityGrid.swift`: active
- * days render the fossil-shell glyph in `primary`, inactive days the wave
- * glyph in faint `outlineVariant`. One combined a11y label; the cells are decorative.
+ * 7-column grid of the last 28 days — ports iOS `AssiduityGrid.swift`. A 7dp
+ * cell is too small for any icon (Android icon migration spec D4), so an
+ * active day is a filled `primary` dot and a day without a pebble a 1dp
+ * `surfaceContainerHighest` ring, iOS's two shapes. One combined a11y label;
+ * the cells are decorative.
  */
 @Composable
 fun AssiduityGrid(
@@ -38,14 +42,13 @@ fun AssiduityGrid(
         chunkAssiduity(data, columns).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(cellSpacing)) {
                 row.forEach { active ->
-                    Icon(
-                        painter =
-                            painterResource(
-                                if (active) R.drawable.ic_fossil_shell else R.drawable.ic_alternating_current,
-                            ),
-                        contentDescription = null,
-                        tint = if (active) colors.primary else colors.outlineVariant,
-                        modifier = Modifier.size(cellSize),
+                    Box(
+                        modifier =
+                            if (active) {
+                                Modifier.size(cellSize).background(colors.primary, CircleShape)
+                            } else {
+                                Modifier.size(cellSize).border(1.dp, colors.surfaceContainerHighest, CircleShape)
+                            },
                     )
                 }
             }

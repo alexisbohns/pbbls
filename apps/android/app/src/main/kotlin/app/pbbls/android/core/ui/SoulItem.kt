@@ -5,20 +5,20 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.SoulWithGlyph
 
@@ -37,7 +37,7 @@ enum class SoulItemCase {
  * Single soul cell shared by the souls list and the soul picker — ports iOS
  * `Features/Shared/SoulItem.swift`: [GlyphView] on top, hand-face name
  * (selection carried by color, never weight — issue #515), optional
- * fossil-shell + pebble count line. [onLongPress] backs the list's delete
+ * pebble + count line. [onLongPress] backs the list's delete
  * affordance (D7 — the caller anchors its own `DropdownMenu`); its buzz asks
  * Pebbles' haptics switch ([hapticsOn], #1242 D23), which any caller passing
  * [onLongPress] passes too.
@@ -68,7 +68,7 @@ fun SoulItem(
     // The count icon is the same pale rose in light and dark (iOS parity: it
     // was AccentSecondary in light, AccentShaded in dark). `primaryFixed` is the
     // one role that holds that tone across both, so no dark-theme branch (#853).
-    val fossilColor = colors.primaryFixed
+    val countIconColor = colors.primaryFixed
     val displayName =
         if (case == SoulItemCase.CREATE) stringResource(R.string.create_soul_add) else soul?.name.orEmpty()
 
@@ -103,11 +103,11 @@ fun SoulItem(
                     horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xs),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_fossil_shell),
+                    PbblsIconImage(
+                        icon = PbblsIcon.PEBBLE_ROUND,
+                        size = PbblsIconSize.INLINE,
                         contentDescription = null,
-                        tint = fossilColor,
-                        modifier = Modifier.size(11.dp),
+                        tint = countIconColor,
                     )
                     Text(
                         text = count.toString(),
