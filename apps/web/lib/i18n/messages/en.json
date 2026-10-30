@@ -244,7 +244,6 @@
   "achievements": {
     "title": "Achievements",
     "loading": "Loading…",
-    "error": "Couldn't load your achievements. Please try again.",
     "locked": "Locked",
     "unlockedOn": "Unlocked {date}",
     "rosace": {
@@ -343,21 +342,6 @@
         "none": "none",
         "ready": "{title}: the ceremony is ready."
       }
-    },
-    "group": {
-      "pebble_count": "Pebbles",
-      "emotion_first": "Emotions",
-      "domain_first": "Domains",
-      "first_collection": "Collections",
-      "first_glyph": "Glyphs",
-      "first_soul": "Souls",
-      "glyph_count": "Carving",
-      "glyph_sales": "Market",
-      "first_moment": "First moment",
-      "first_pebble": "First pebble",
-      "first_five": "The blue pebble",
-      "first_stone": "Six firsts",
-      "set_complete": "Complete sets"
     },
     "family": {
       "pebble_count": {

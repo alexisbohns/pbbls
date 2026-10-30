@@ -244,7 +244,6 @@
   "achievements": {
     "title": "Succès",
     "loading": "Chargement…",
-    "error": "Impossible de charger tes succès. Réessaie un peu plus tard.",
     "locked": "À débloquer",
     "unlockedOn": "Débloqué le {date}",
     "rosace": {
@@ -343,21 +342,6 @@
         "none": "aucun",
         "ready": "{title} : la cérémonie est prête."
       }
-    },
-    "group": {
-      "pebble_count": "Galets",
-      "emotion_first": "Émotions",
-      "domain_first": "Domaines",
-      "first_collection": "Collections",
-      "first_glyph": "Glyphes",
-      "first_soul": "Âmes",
-      "glyph_count": "Gravure",
-      "glyph_sales": "Marché",
-      "first_moment": "Premier moment",
-      "first_pebble": "Premier galet",
-      "first_five": "Le galet bleu",
-      "first_stone": "Six premières fois",
-      "set_complete": "Ensembles complets"
     },
     "family": {
       "pebble_count": {
