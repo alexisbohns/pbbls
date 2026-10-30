@@ -38,6 +38,14 @@ struct AchievementAtomsTests {
         #expect(!hatch.isEmpty && hatch.boundingRect.minX <= -11)
     }
 
+    @Test("a seal's strokes keep their points however the figure is scaled")
+    func strokes() {
+        #expect(FlatSeal.strokes(scale: 1) == FlatSeal.Strokes(solid: 1, rim: 1.1, hatch: 0.8))
+        let half = FlatSeal.strokes(scale: 0.5)
+        #expect(abs(half.rim - 2.2) < 1e-9 && abs(half.hatch - 1.6) < 1e-9 && abs(half.solid - 2) < 1e-9)
+        #expect(FlatSeal.strokes(scale: 0) == FlatSeal.strokes(scale: 1), "a degenerate scale draws at one")
+    }
+
     @Test("inks: a heavy pebble takes its family's deep ink; an unknown family draws in ink")
     func inks() throws {
         let palette = try #require(SpineFixtureWeek.families.first?.palette)

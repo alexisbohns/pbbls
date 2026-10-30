@@ -64,6 +64,19 @@ struct FlatSeal: Equatable {
         }
     }
 
+    /// The board's stroke widths in points (its non-scaling strokes): the solid
+    /// edge 1, the rim 1.1, the hatch 0.8, in a drawing scaled by `scale`.
+    struct Strokes: Equatable {
+        let solid: CGFloat
+        let rim: CGFloat
+        let hatch: CGFloat
+    }
+
+    static func strokes(scale: CGFloat) -> Strokes {
+        let k = scale > 0 ? scale : 1
+        return Strokes(solid: 1 / k, rim: 1.1 / k, hatch: 0.8 / k)
+    }
+
     /// 45° lines `step` apart, falling left to right, over `rect`.
     static func hatch(in rect: CGRect, step: CGFloat) -> Path {
         var path = Path()
@@ -100,7 +113,10 @@ extension Path {
 
 extension GraphicsContext {
     /// Prints `seal` in `color`, centred on `center`. `dashed` dots the rim (a month still to come).
-    func draw(_ seal: FlatSeal, at center: CGPoint, color: Color, inks: AchievementInks, dashed: Bool = false) {
+    /// Its strokes keep their width in points however the figure is scaled: `scale` is the
+    /// drawing's scale, read from this context's transform when not given.
+    func draw(_ seal: FlatSeal, at center: CGPoint, color: Color, inks: AchievementInks, dashed: Bool = false,
+              scale: CGFloat? = nil) {
         guard let art = WobbleRenderer.softBackdropArt(size: seal.size, polarity: seal.outline) else { return }
         let rect = CGRect(x: center.x - seal.width / 2, y: center.y - seal.height / 2,
                           width: seal.width, height: seal.height)
@@ -108,11 +124,12 @@ extension GraphicsContext {
         let body = WobbledBackdropShape(art: art).path(in: CGRect(origin: .zero, size: rect.size))
             .offsetBy(dx: rect.minX, dy: rect.minY)
         let dash: [CGFloat] = dashed ? [1.6, 1.7] : []
-        let rim = StrokeStyle(lineWidth: 1.1, lineJoin: .round, dash: dash)
+        let widths = FlatSeal.strokes(scale: scale ?? hypot(transform.a, transform.b))
+        let rim = StrokeStyle(lineWidth: widths.rim, lineJoin: .round, dash: dash)
         switch seal.print {
         case .solid:
             fill(body, with: .color(color))
-            stroke(body, with: .color(color), style: StrokeStyle(lineWidth: 1, lineJoin: .round, dash: dash))
+            stroke(body, with: .color(color), style: StrokeStyle(lineWidth: widths.solid, lineJoin: .round, dash: dash))
         case .tint:
             fill(body, with: .color(mixed(color, inks.tintK, over: inks.stock)))
             stroke(body, with: .color(color), style: rim)
@@ -121,7 +138,7 @@ extension GraphicsContext {
             var hatch = self
             hatch.clip(to: body)
             hatch.stroke(FlatSeal.hatch(in: rect, step: seal.hatchStep), with: .color(color.opacity(0.85)),
-                         lineWidth: 0.8)
+                         lineWidth: widths.hatch)
             stroke(body, with: .color(color), style: rim)
         case .blank:
             fill(body, with: .color(inks.stock))
