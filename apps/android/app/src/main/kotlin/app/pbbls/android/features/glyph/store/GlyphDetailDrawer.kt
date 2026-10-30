@@ -43,6 +43,8 @@ import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.glyphMarketErrorMessage
 import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SurfaceTile
 import app.pbbls.android.core.model.BuyGlyphResult
@@ -263,11 +265,11 @@ internal fun GlyphDetailDrawerContent(
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_sparkle),
+                    PbblsIconImage(
+                        icon = PbblsIcon.KARMA_DOT,
+                        size = PbblsIconSize.INLINE,
                         contentDescription = null,
                         tint = colors.primary,
-                        modifier = Modifier.size(13.dp),
                     )
                     Text(
                         text = currentBalance.toString(),
@@ -370,18 +372,18 @@ private fun DottedRuleWithBadge(
                     .padding(horizontal = PebblesTheme.spacing.sm),
         ) {
             if (isOwned) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_check_circle),
+                PbblsIconImage(
+                    icon = PbblsIcon.CHECK_CIRCLE_DOT,
+                    size = PbblsIconSize.ROW,
                     contentDescription = null,
                     tint = colors.primary,
-                    modifier = Modifier.size(18.dp),
                 )
             } else {
-                Icon(
-                    painter = painterResource(R.drawable.ic_sparkle),
+                PbblsIconImage(
+                    icon = PbblsIcon.KARMA_DOT,
+                    size = PbblsIconSize.INLINE,
                     contentDescription = null,
                     tint = colors.primary,
-                    modifier = Modifier.size(14.dp),
                 )
                 Text(
                     text = price.toString(),
