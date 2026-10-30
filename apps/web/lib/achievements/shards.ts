@@ -28,6 +28,7 @@ export function shards(count: number, width: number, height: number): Shard[] {
   return out
 }
 
-/** The band's height, and a new domain's dot 6 below its shard's middle. */
+/** The band's board geometry: 300 across, 30 high, and a new domain's dot 6 below its shard's middle. */
+export const BAND_WIDTH = 300
 export const BAND_HEIGHT = 30
 export const BAND_DOT_DROP = 6

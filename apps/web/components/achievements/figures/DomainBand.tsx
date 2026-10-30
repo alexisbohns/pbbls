@@ -1,21 +1,23 @@
 import { bandItems } from "@/lib/achievements/runs"
-import { BAND_DOT_DROP, BAND_HEIGHT, shards } from "@/lib/achievements/shards"
+import { BAND_DOT_DROP, BAND_HEIGHT, BAND_WIDTH, shards } from "@/lib/achievements/shards"
 import type { AchievementsDomains } from "@/lib/types"
 
 /**
  * The domains' mended band (#1308, D11; the boards' `shardStrip`): the domains
  * entered in the order they came, inked, then those not yet, dotted, spaced by
  * both lists together; a dot under each new one. Decorative: its card's label
- * carries the count and the coverage. iOS `DomainBand`.
+ * carries the count and the coverage. It is laid out on the board's 300 × 40
+ * and scales as one, so its seams never change with the room; `width` only
+ * caps the size it renders at. iOS `DomainBand`.
  */
-export function DomainBand({ domains, width = 300 }: { domains: AchievementsDomains; width?: number }) {
+export function DomainBand({ domains, width = BAND_WIDTH }: { domains: AchievementsDomains; width?: number }) {
   const items = bandItems(domains)
-  const pieces = shards(items.length, width, BAND_HEIGHT)
+  const pieces = shards(items.length, BAND_WIDTH, BAND_HEIGHT)
   return (
     <svg
       aria-hidden
       focusable="false"
-      viewBox={`0 0 ${width} ${BAND_HEIGHT + 10}`}
+      viewBox={`0 0 ${BAND_WIDTH} ${BAND_HEIGHT + 10}`}
       className="block h-auto w-full overflow-visible"
       style={{ maxWidth: width }}
     >
