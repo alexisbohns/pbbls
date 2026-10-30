@@ -32,7 +32,7 @@ struct GlyphsListView: View {
                 ToolbarItem(placement: .primaryAction) {
                     PebbleToolbarButton(
                         action: { showCarveSheet = true },
-                        label: { Image(systemName: "plus") }
+                        label: { PbblsIconImage(.plusCircle, .toolbar) }
                     )
                     .accessibilityLabel("Carve new glyph")
                 }

@@ -24,7 +24,7 @@ struct CollectionsListView: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     PebbleToolbarButton(action: { isPresentingCreate = true }) {
-                        Image(systemName: "plus")
+                        PbblsIconImage(.plusCircle, .toolbar)
                     }
                     .accessibilityLabel("Add collection")
                 }
