@@ -11,6 +11,11 @@ import {
 } from "@/lib/data/achievements-page-store"
 import type { AchievementCard, CeremonyStack } from "@/lib/types"
 
+/** The reader's zone, so every local day is the reader's (D12, D17). */
+function readerTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+}
+
 const SIGNED_OUT: AchievementsPageState = { page: null, loading: false, failed: false, pulling: null }
 const noSubscription = () => () => {}
 const signedOut = () => SIGNED_OUT
@@ -33,8 +38,7 @@ export function useAchievementsPage() {
         ? new AchievementsPageStore({
             provider,
             owner: userId,
-            // The reader's zone, so every local day is the reader's (D12, D17).
-            zone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+            zone: readerTimeZone,
             storage: browserStorage(),
           })
         : null,

@@ -72,7 +72,7 @@ function provider(reads: Array<() => Promise<unknown>>, overrides: Partial<Achie
 }
 
 function store(p: AchievementsPageProvider, storage = new MemoryStorage()) {
-  return { store: new AchievementsPageStore({ provider: p, owner: "alice", zone: ZONE, storage }), storage }
+  return { store: new AchievementsPageStore({ provider: p, owner: "alice", zone: () => ZONE, storage }), storage }
 }
 
 let error: ReturnType<typeof vi.spyOn>
@@ -149,6 +149,18 @@ describe("loading the page", () => {
     first.resolve(NOT_READY())
     await opened
     expect(s.getSnapshot().page?.explorer?.completion?.pulledAt).not.toBeNull()
+  })
+
+  it("reads the zone as each read starts, and keeps the body under it", async () => {
+    const { fake, calls } = provider([async () => NOT_READY(), async () => NOT_READY()])
+    const storage = new MemoryStorage()
+    let zone = ZONE
+    const s = new AchievementsPageStore({ provider: fake, owner: "alice", zone: () => zone, storage })
+    await s.open()
+    zone = "America/New_York"
+    await s.load()
+    expect(calls.filter((c) => c.startsWith("read"))).toEqual([`read ${ZONE}`, "read America/New_York"])
+    expect(JSON.parse(storage.getItem("pbbls-achievements:alice") ?? "{}").zone).toBe("America/New_York")
   })
 
   it("drops a read cancelled by close: no page, no error, nothing kept", async () => {

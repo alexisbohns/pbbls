@@ -18,8 +18,10 @@ import type { AchievementCard, AchievementCompletion, AchievementsPage, Ceremony
 //   logs). Only a first visit with nothing kept and no answer is `failed`.
 // - Reads can overlap (the page's load and a pull's re-read), so each takes a
 //   sequence number, and only a read newer than the one shown replaces it.
-// - The store belongs to one user and one zone (the hook makes a new one when
-//   either changes). `close()` aborts its reads: a read that lands after it is
+// - The store belongs to one user (the hook makes a new one when the user
+//   changes). The zone is read when each read or pull starts, as iOS does, and
+//   that read is sent and kept under it: a reader who travels gets their own
+//   local days. `close()` aborts its reads: a read that lands after it is
 //   dropped, never written to the cache, and its cancellation is no error.
 // - The ceremony pull is decided on a page read in this session, never on the
 //   kept copy (spec §3.4).
@@ -68,8 +70,8 @@ type Options = {
   provider: AchievementsPageProvider
   /** The signed-in user the store reads for; its cache entry is theirs. */
   owner: string
-  /** The reader's IANA zone, sent with every read and pull. */
-  zone: string
+  /** The reader's IANA zone now, read as each read or pull starts. */
+  zone: () => string
   storage: CacheStorage | null
 }
 
@@ -124,7 +126,7 @@ export class AchievementsPageStore {
     this.set({ loading: true })
     try {
       if (this.state.page === null && this.readShown === 0) {
-        const kept = readAchievementsCache(this.options.storage, this.options.owner, this.options.zone)
+        const kept = readAchievementsCache(this.options.storage, this.options.owner, this.options.zone())
         if (kept) this.set({ page: kept })
       }
       try {
@@ -179,7 +181,7 @@ export class AchievementsPageStore {
 
       let outcome: CeremonyPullOutcome
       try {
-        const row = await this.options.provider.pullCeremony(stack, this.options.zone)
+        const row = await this.options.provider.pullCeremony(stack, this.options.zone())
         outcome = row ? { kind: "pulled", karmaGranted: row.karmaGranted } : { kind: "alreadyPulled" }
       } catch (err) {
         if (err instanceof CeremonyNotReadyError) {
@@ -209,8 +211,9 @@ export class AchievementsPageStore {
     this.readsAsked += 1
     const read = this.readsAsked
     const epoch = achievementsCacheEpoch()
+    const zone = this.options.zone()
     try {
-      const payload = await this.options.provider.getAchievementsPayload(this.options.zone, signal)
+      const payload = await this.options.provider.getAchievementsPayload(zone, signal)
       if (signal.aborted) return false
       const decoded = decodeAchievementsPage(payload)
       if (!decoded) throw new Error("get_achievements returned no page")
@@ -219,7 +222,7 @@ export class AchievementsPageStore {
       }
       if (read > this.readShown) {
         this.readShown = read
-        writeAchievementsCache(this.options.storage, this.options.owner, this.options.zone, payload, epoch)
+        writeAchievementsCache(this.options.storage, this.options.owner, zone, payload, epoch)
         this.set({ page: decoded.page, failed: false })
       }
       return true
