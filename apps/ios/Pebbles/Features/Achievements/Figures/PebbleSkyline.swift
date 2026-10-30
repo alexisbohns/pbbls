@@ -9,6 +9,7 @@ struct PebbleSkyline: View {
     var box: CGRect = SkylineGeometry.wide
     /// Where the contour comes back to the ground.
     var end: CGFloat = 224
+    /// The board's width: the skyline takes the width it is given, up to this, at its box's aspect.
     var width: CGFloat = 300
 
     @Environment(\.colorScheme) private var scheme
@@ -35,7 +36,8 @@ struct PebbleSkyline: View {
             c.stroke(SkylineGeometry.contour(stages: count, end: end), with: .color(standing ? inks.ink : inks.ink2),
                      style: StrokeStyle(lineWidth: 1 / k, lineCap: .round, lineJoin: .round))
         }
-        .frame(width: width, height: width * box.height / box.width)
+        .aspectRatio(box.width / box.height, contentMode: .fit)
+        .frame(maxWidth: width)
         .accessibilityHidden(true)
     }
 }

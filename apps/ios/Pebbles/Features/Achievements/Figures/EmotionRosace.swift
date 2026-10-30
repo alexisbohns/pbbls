@@ -16,7 +16,18 @@ struct EmotionRosace: View {
 
     @Environment(\.colorScheme) private var scheme
 
+    /// The rosace takes the width it is given, up to `side`, square.
     var body: some View {
+        GeometryReader { proxy in
+            figure(side: min(proxy.size.width, proxy.size.height))
+        }
+        .aspectRatio(1, contentMode: .fit)
+        .frame(maxWidth: side)
+        .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private func figure(side: CGFloat) -> some View {
         let geometry = RosaceGeometry(side: side, count: emotions.seats.count, labelled: labelled)
         let runs = FamilyRun.runs(emotions.seats.map(\.family))
         let inks = AchievementInks(scheme: scheme)
@@ -48,7 +59,6 @@ struct EmotionRosace: View {
             }
         }
         .frame(width: side, height: side)
-        .accessibilityHidden(true)
     }
 
     private func draw(_ c: GraphicsContext, _ g: RosaceGeometry, _ runs: [FamilyRun], _ inks: AchievementInks) {

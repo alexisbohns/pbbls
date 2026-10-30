@@ -34,6 +34,8 @@ extension References {
                     }
                 }
             }
+            // The card's width: each figure takes it, up to its board size.
+            .frame(width: 300)
             .padding(24)
             .background(Color.pebbles.stock)
         }

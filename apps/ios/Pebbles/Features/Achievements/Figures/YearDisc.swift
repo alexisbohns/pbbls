@@ -16,7 +16,18 @@ struct YearDisc: View {
 
     private typealias G = YearDiscGeometry
 
+    /// The disc takes the width it is given, up to `side`, square.
     var body: some View {
+        GeometryReader { proxy in
+            disc(side: min(proxy.size.width, proxy.size.height))
+        }
+        .aspectRatio(1, contentMode: .fit)
+        .frame(maxWidth: side)
+        .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private func disc(side: CGFloat) -> some View {
         let inks = AchievementInks(scheme: scheme)
         let k = side / G.box.width
         ZStack(alignment: .topLeading) {
@@ -38,7 +49,6 @@ struct YearDisc: View {
             }
         }
         .frame(width: side, height: side)
-        .accessibilityHidden(true)
     }
 
     /// A month's tone: nil while muted (upcoming or quiet); a kept month wears its

@@ -12,6 +12,7 @@ struct ExplorerWheel: View {
     let emotions: AchievementsPage.Emotions?
     let domains: AchievementsPage.Domains?
     let lookups: WrapLookups
+    /// The board's size: the wheel takes the width it is given, up to this, square.
     var side: CGFloat = 300
 
     @Environment(\.colorScheme) private var scheme
@@ -31,7 +32,8 @@ struct ExplorerWheel: View {
             drawFirstFive(c, inks)
             drawCentre(c, inks)
         }
-        .frame(width: side, height: side)
+        .aspectRatio(1, contentMode: .fit)
+        .frame(maxWidth: side)
         .accessibilityHidden(true)
     }
 
