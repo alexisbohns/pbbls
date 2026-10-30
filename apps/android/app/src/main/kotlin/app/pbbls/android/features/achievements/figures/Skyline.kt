@@ -50,8 +50,8 @@ fun Skyline(
     val colors = PebblesTheme.spine.colors
     Canvas(
         modifier
-            .fillMaxWidth()
             .widthIn(max = width)
+            .fillMaxWidth()
             .aspectRatio(viewport.width / viewport.height)
             .clearAndSetSemantics { contentDescription = description },
     ) {

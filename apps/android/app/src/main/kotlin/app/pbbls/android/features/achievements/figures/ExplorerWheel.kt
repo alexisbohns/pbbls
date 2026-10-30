@@ -79,8 +79,8 @@ fun ExplorerWheel(
     // As wide as the room allows, up to [size], always square: the card and the sheet never overflow a narrow phone.
     Canvas(
         modifier
-            .fillMaxWidth()
             .widthIn(max = size)
+            .fillMaxWidth()
             .aspectRatio(1f)
             .clearAndSetSemantics { contentDescription = description },
     ) {

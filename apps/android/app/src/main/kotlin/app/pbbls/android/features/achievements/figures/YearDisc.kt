@@ -121,8 +121,8 @@ fun YearDisc(
 
     Canvas(
         modifier
-            .fillMaxWidth()
             .widthIn(max = size)
+            .fillMaxWidth()
             .aspectRatio(1f)
             .clearAndSetSemantics { contentDescription = description },
     ) {

@@ -45,8 +45,8 @@ fun ShardBand(
     // As wide as the room allows, up to [width]; the shards are cut for the width the band gets.
     Canvas(
         modifier
-            .fillMaxWidth()
             .widthIn(max = width)
+            .fillMaxWidth()
             .aspectRatio(width / (height + DOT_ROOM))
             .clearAndSetSemantics { contentDescription = description },
     ) {
