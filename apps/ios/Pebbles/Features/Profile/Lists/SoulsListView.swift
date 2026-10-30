@@ -41,13 +41,13 @@ struct SoulsListView: View {
                 // tile's icon and copy.
                 ToolbarItem(placement: .topBarLeading) {
                     PebbleToolbarButton(action: { nav.people.append(.connections) }) {
-                        Image(systemName: "person.2.badge.plus")
+                        PbblsIconImage(.people, .toolbar)
                     }
                     .accessibilityLabel("Circle")
                 }
                 ToolbarItem(placement: .primaryAction) {
                     PebbleToolbarButton(action: { isPresentingCreate = true }) {
-                        Image(systemName: "plus")
+                        PbblsIconImage(.plusCircle, .toolbar)
                     }
                     .accessibilityLabel("Add soul")
                 }
