@@ -12,8 +12,8 @@ import app.pbbls.android.core.model.achievements.CountingSection
 import app.pbbls.android.core.model.achievements.Coverage
 import app.pbbls.android.core.model.achievements.DomainEntry
 import app.pbbls.android.core.model.achievements.DomainsSection
-import app.pbbls.android.core.model.achievements.EmotionFamily
 import app.pbbls.android.core.model.achievements.EmotionSeat
+import app.pbbls.android.core.model.achievements.EmotionsFamilyGroup
 import app.pbbls.android.core.model.achievements.EmotionsSection
 import app.pbbls.android.core.model.achievements.ExplorerRing
 import app.pbbls.android.core.model.achievements.ExplorerSection
@@ -159,10 +159,10 @@ internal object AchievementsFixture {
             }
 
     /** The sheet's order as the server would send it: families on the wheel, met seats first. */
-    private val families: List<EmotionFamily> =
+    private val families: List<EmotionsFamilyGroup> =
         SPLIT.map { (family, _) ->
             val own = seats.filter { it.family == family }
-            EmotionFamily(family, met = own.filter { it.met }, notYet = own.filterNot { it.met })
+            EmotionsFamilyGroup(family, met = own.filter { it.met }, notYet = own.filterNot { it.met })
         }
 
     private fun month(
