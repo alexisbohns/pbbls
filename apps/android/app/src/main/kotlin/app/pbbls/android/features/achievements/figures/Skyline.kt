@@ -30,7 +30,7 @@ private val STAGE_PATHS: List<Path> by lazy { G.STAGES.map(::parsePath) }
 private fun parsePath(d: String): Path = PathParser().parsePathString(d).toPath()
 
 /**
- * The skyline (g/92): [fill]'s stages in ink, the next rising from its foot, the contour over all
+ * The skyline (g/92): [fill]'s lit stages in ink, the next rising from its foot, the contour over all
  * of them in secondary ink until every stage stands. [viewport] is the board's view box; the
  * height follows it. As wide as the room allows, up to [width]. One node: [description].
  */
@@ -57,10 +57,10 @@ fun Skyline(
             scale(k, k, Offset.Zero)
             translate(-viewport.left, -viewport.top)
         }) {
-            for (stage in 0 until fill.full.coerceAtMost(fill.stages)) drawPath(STAGE_PATHS[stage], colors.ink)
-            if (fill.full < fill.stages && fill.partial > 0f) {
-                val r = G.partialClip(fill.full, fill.partial)
-                clipRect(r.left, r.top, r.right, r.bottom) { drawPath(STAGE_PATHS[fill.full], colors.ink) }
+            fill.lit.forEachIndexed { stage, lit -> if (lit) drawPath(STAGE_PATHS[stage], colors.ink) }
+            fill.rising?.let { stage ->
+                val r = G.partialClip(stage, fill.partial)
+                clipRect(r.left, r.top, r.right, r.bottom) { drawPath(STAGE_PATHS[stage], colors.ink) }
             }
             drawPath(
                 contour,

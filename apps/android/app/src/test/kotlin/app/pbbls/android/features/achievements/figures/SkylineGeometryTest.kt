@@ -19,13 +19,33 @@ class SkylineGeometryTest {
 
     @Test
     fun `three pebbles - one stage stands, the second rises by the server's progress`() {
-        assertEquals(SkylineFill(stages = 8, full = 1, partial = 0.222f), stack(3, listOf(1), NextLevel(10, 7, 0.222f)).skylineFill())
+        val fill = stack(3, listOf(1), NextLevel(10, 7, 0.222f)).skylineFill()
+        assertEquals(SkylineFill(listOf(true) + List(7) { false }, rising = 1, partial = 0.222f), fill)
+        assertEquals(8, fill.stages)
+        assertEquals(1, fill.full)
+    }
+
+    @Test
+    fun `each listed level stands on its own - a skipped rung stays empty`() {
+        val fill = stack(30, listOf(1, 25), NextLevel(50, 20, 0.2f)).skylineFill()
+        assertEquals(listOf(true, false, true, false, false, false, false, false), fill.lit)
+        assertEquals(2, fill.full)
+        assertEquals(3, fill.rising)
+        assertEquals(0.2f, fill.partial)
+        assertFalse(fill.done)
+    }
+
+    @Test
+    fun `a next step the server lists as reached never rises`() {
+        val fill = stack(12, listOf(1, 10), NextLevel(10, 0, 0.5f)).skylineFill()
+        assertEquals(null, fill.rising)
+        assertEquals(0f, fill.partial)
     }
 
     @Test
     fun `glyphs read five stages, a top-of-ladder stack stands whole`() {
         val sales = stack(60, listOf(1, 5, 10, 25, 50), null, ladder = listOf(1, 5, 10, 25, 50)).skylineFill()
-        assertEquals(SkylineFill(stages = 5, full = 5, partial = 0f), sales)
+        assertEquals(SkylineFill(List(5) { true }, rising = null, partial = 0f), sales)
         assertTrue(sales.done)
     }
 
@@ -33,6 +53,7 @@ class SkylineGeometryTest {
     fun `past the ladder the skyline stands whole while the next level is beyond it`() {
         val big = stack(1200, listOf(1, 10, 25, 50, 100, 250, 500, 1000), NextLevel(1500, 300, 0.4f)).skylineFill()
         assertEquals(8, big.full)
+        assertEquals(null, big.rising)
         assertEquals(0f, big.partial)
         assertTrue(big.done)
         assertFalse(stack(3, listOf(1), NextLevel(10, 7, 0.222f)).skylineFill().done)

@@ -4,26 +4,35 @@ import androidx.compose.ui.geometry.Rect
 import app.pbbls.android.core.model.achievements.CountingSection
 import kotlin.math.min
 
-/** How much of a skyline stands: [full] stages solid, the next filled by [partial], of [stages]. */
+/**
+ * How much of a skyline stands: [lit] holds one entry per drawn stage, solid when the server lists
+ * its step; the stage at [rising] (the server's next step, never a lit one) fills by [partial].
+ */
 data class SkylineFill(
-    val stages: Int,
-    val full: Int,
+    val lit: List<Boolean>,
+    val rising: Int?,
     val partial: Float,
 ) {
-    val done: Boolean get() = full >= stages
+    val stages: Int get() = lit.size
+
+    /** How many stages stand, wherever they are on the ladder. */
+    val full: Int get() = lit.count { it }
+
+    val done: Boolean get() = lit.all { it }
 }
 
 /**
- * The skyline a counting stack draws, read off its levels and its next (never its count): a ladder
- * step the server lists as a level stands, and the server's next step rises by its progress.
+ * The skyline a counting stack draws, read off its levels and its next (never its count): each
+ * ladder step the server lists as a level stands on its own, whatever the steps below it (a
+ * skipped rung stays empty), and the server's next step rises by its progress.
  */
 fun CountingSection.skylineFill(): SkylineFill {
     val stages = min(ladder.size, SkylineGeometry.STAGES.size)
     val steps = ladder.take(stages)
-    val reached = levels.map { it.threshold }.toSet()
-    val full = steps.count { it in reached }
-    val partial = next?.takeIf { steps.indexOf(it.threshold) == full }?.progress ?: 0f
-    return SkylineFill(stages, full, partial)
+    val reached = levels.map { it.threshold }
+    val lit = steps.map { it in reached }
+    val rise = next?.takeIf { n -> n.progress > 0f && steps.indexOf(n.threshold).let { it >= 0 && !lit[it] } }
+    return SkylineFill(lit, rise?.let { steps.indexOf(it.threshold) }, rise?.progress ?: 0f)
 }
 
 /** The board's one skyline (g/92, its second section), in its own units: the ground at y = 148. */
