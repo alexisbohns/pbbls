@@ -29,7 +29,7 @@ fun AchievementsPageDto.toModel(): AchievementsPage =
                     val key = AchievementCard.of(card) ?: return@mapNotNull null
                     at?.let(::parseInstant)?.let { key to it }
                 }.toMap(),
-        shelf = shelf.mapNotNull { it.toModel() },
+        shelf = shelf.map { it.toModel() },
         shelfCount = shelfCount,
     )
 
@@ -56,68 +56,59 @@ internal fun parseDay(raw: String): LocalDate? =
         null
     }
 
-/** A snapshot without a moment to open or a time to date it cannot be drawn: dropped, its row kept. */
-private fun PebbleSnapshotDto.toModel(): PebbleSnapshot? {
-    val id = momentId ?: return null
-    val at = happenedAt?.let(::parseInstant) ?: return null
-    return PebbleSnapshot(
-        momentId = id,
+/** Kept whatever it lacks: a missing moment id or an unreadable time is null, the seal still drawn. */
+private fun PebbleSnapshotDto.toModel(): PebbleSnapshot =
+    PebbleSnapshot(
+        momentId = momentId,
         name = name,
-        happenedAt = at,
+        happenedAt = happenedAt?.let(::parseInstant),
         emotionId = emotionId,
         // Out of range is decode drift, drawn as the Path draws it (NEUTRAL_MEDIUM).
         valence = Valence.fromOrDefault(positiveness ?: 0, intensity ?: 2),
     )
-}
 
-private fun CompletionDto.toModel(): Completion? {
-    val completed = completedAt?.let(::parseInstant) ?: return null
-    val offered = offeredFrom?.let(::parseInstant) ?: return null
-    return Completion(completed, offered, ready, pulledAt?.let(::parseInstant), pebble?.toModel())
-}
+/** Kept with its unreadable times null: [Completion.ready] is the server's call, not the clock's. */
+private fun CompletionDto.toModel(): Completion =
+    Completion(
+        completedAt = completedAt?.let(::parseInstant),
+        offeredFrom = offeredFrom?.let(::parseInstant),
+        ready = ready,
+        pulledAt = pulledAt?.let(::parseInstant),
+        pebble = pebble?.toModel(),
+    )
 
 private fun ExplorerDto.toModel(): ExplorerSection =
     ExplorerSection(
         firstPebble = firstPebble?.toModel(),
         firstFive =
-            firstFive.mapNotNull { item ->
-                FirstStep.of(item.slug)?.let { step ->
-                    FirstFiveItem(
-                        step = step,
-                        done = item.done,
-                        on = item.on?.let(::parseDay),
-                        subject =
-                            item.subject?.let { s ->
-                                val kind = SubjectKind.of(s.kind)
-                                val id = s.id
-                                if (kind == null || id == null) null else FirstSubject(kind, id, s.name)
-                            },
-                        isNew = item.isNew,
-                    )
-                }
+            firstFive.map { item ->
+                FirstFiveItem(
+                    step = FirstStep.of(item.slug),
+                    done = item.done,
+                    on = item.on?.let(::parseDay),
+                    subject = item.subject?.let { s -> FirstSubject(SubjectKind.of(s.kind), s.id, s.name) },
+                    isNew = item.isNew,
+                )
             },
         sixFirsts =
-            sixFirsts.mapNotNull { item ->
-                StoneKind.of(item.kind)?.let {
-                    SixFirst(it, item.done, item.on?.let(::parseDay), item.pebble?.toModel(), item.isNew)
-                }
+            sixFirsts.map { item ->
+                SixFirst(StoneKind.of(item.kind), item.done, item.on?.let(::parseDay), item.pebble?.toModel(), item.isNew)
             },
         twentyFive =
             twentyFive?.let {
                 TwentyFive(it.count, it.done, it.on?.let(::parseDay), it.pebble?.toModel(), it.isNew)
             },
+        // A set of flags, not positions: a ring this client does not know has nothing to draw.
         ringsDone = ringsDone.filterNotNull().mapNotNull(ExplorerRing::of).toSet(),
         completion = completion?.toModel(),
     )
 
 private fun EmotionsDto.toModel(): EmotionsSection {
     // In the server's order (wheel order, then slug), never re-sorted here: the rosace places each
-    // seat by its own index. A seat the client cannot name (no emotion id) is dropped.
+    // seat by its own index. A seat without an emotion id keeps its place, as a ghost.
     val mapped =
-        seats.mapNotNull { s ->
-            s.emotionId?.let {
-                EmotionSeat(s.seat, it, s.family, s.met, s.on?.let(::parseDay), s.pebble?.toModel(), s.isNew)
-            }
+        seats.map { s ->
+            EmotionSeat(s.seat, s.emotionId, s.family, s.met, s.on?.let(::parseDay), s.pebble?.toModel(), s.isNew)
         }
     val bySeat = mapped.associateBy { it.seat }
     return EmotionsSection(
@@ -126,14 +117,12 @@ private fun EmotionsDto.toModel(): EmotionsSection {
         seats = mapped,
         // The sheet's order is the server's: families as sent, each list as sent.
         families =
-            families.mapNotNull { f ->
-                f.family?.let { family ->
-                    EmotionFamily(
-                        family,
-                        f.met.filterNotNull().mapNotNull(bySeat::get),
-                        f.notYet.filterNotNull().mapNotNull(bySeat::get),
-                    )
-                }
+            families.map { f ->
+                EmotionFamily(
+                    f.family,
+                    f.met.filterNotNull().mapNotNull(bySeat::get),
+                    f.notYet.filterNotNull().mapNotNull(bySeat::get),
+                )
             },
         since = since?.let(::parseDay),
         completion = completion?.toModel(),
@@ -146,9 +135,7 @@ private fun DomainsDto.toModel(): DomainsSection =
         of = of,
         coverage = Coverage.of(coverage),
         entered =
-            entered.mapNotNull { e ->
-                e.domainId?.let { DomainEntry(it, e.on?.let(::parseDay), e.pebble?.toModel(), e.isNew) }
-            },
+            entered.map { e -> DomainEntry(e.domainId, e.on?.let(::parseDay), e.pebble?.toModel(), e.isNew) },
         notYet = notYet.filterNotNull(),
         completion = completion?.toModel(),
     )
@@ -166,8 +153,9 @@ private fun CountingDto.toModel(): CountingSection =
         since = since?.let(::parseDay),
     )
 
-/** Twelve distinct months or nothing: the disc's geometry has twelve spokes. */
+/** Exactly twelve months, January to December, or nothing: the disc's geometry has twelve spokes. */
 private fun YearDto.toModel(): AchievementYear? {
+    if (months.size != 12) return null
     val byMonth =
         months
             .filter { it.month in 1..12 }
@@ -195,14 +183,8 @@ private fun YearDto.toModel(): AchievementYear? {
             },
         listed = listed.filterNotNull().filter { it in 1..12 },
         nextStep =
-            nextStep?.let { n ->
-                Needs.of(n.needs)?.let { NextStep(n.month, it, n.daysLeft, n.reachable) }
-            },
+            nextStep?.let { n -> NextStep(n.month, Needs.of(n.needs), n.daysLeft, n.reachable) },
     )
 }
 
-private fun ShelfRowDto.toModel(): ShelfItem? {
-    val s = slug ?: return null
-    val f = family ?: return null
-    return ShelfItem(s, f, threshold, unlockedOn?.let(::parseDay))
-}
+private fun ShelfRowDto.toModel(): ShelfItem = ShelfItem(slug, family, threshold, unlockedOn?.let(::parseDay))

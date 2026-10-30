@@ -31,12 +31,12 @@ class AchievementsToleranceTest {
             "2026-03-02 09:00:00+00",
         )) {
             val at = snapshotAt(raw)!!.happenedAt
-            assertEquals(raw, expected.epochSecond, at.epochSecond)
+            assertEquals(raw, expected.epochSecond, at!!.epochSecond)
         }
     }
 
     @Test
-    fun `a snapshot without a moment id or a readable time is dropped, the row stays`() {
+    fun `a snapshot without a moment id or a readable time is kept with those fields null, and so is its row`() {
         val page =
             decodeAchievementsPage(
                 """{"pebbles": {"count": 1, "ladder": [1, 10], "levels": [
@@ -45,7 +45,13 @@ class AchievementsToleranceTest {
             )
         val levels = page.pebbles!!.levels
         assertEquals(listOf(1, 10), levels.map { it.threshold })
-        assertTrue(levels.all { it.pebble == null })
+        val gone = levels[0].pebble!!
+        assertNull(gone.momentId)
+        assertNull(gone.happenedAt)
+        assertEquals("gone", gone.name)
+        val undated = levels[1].pebble!!
+        assertEquals("m", undated.momentId)
+        assertNull(undated.happenedAt)
         assertEquals(LocalDate.of(2026, 3, 2), levels[0].on)
     }
 
@@ -93,7 +99,7 @@ class AchievementsToleranceTest {
     }
 
     @Test
-    fun `unknown semantic values fall back, never throw`() {
+    fun `an item with an unknown value is kept with that field null, never dropped, and never throws`() {
         val page =
             decodeAchievementsPage(
                 """{"domains": {"count": 2, "of": 18, "coverage": "plenty", "entered": [], "not_yet": []},
@@ -109,17 +115,21 @@ class AchievementsToleranceTest {
             )
         assertNull(page.domains!!.coverage)
         assertEquals(setOf(ExplorerRing.FIRST_FIVE), page.explorer!!.ringsDone)
-        assertTrue(page.explorer!!.sixFirsts.isEmpty())
-        val soul = page.explorer!!.firstFive.single()
+        val tiny = page.explorer!!.sixFirsts.single()
+        assertNull(tiny.kind)
+        assertTrue(tiny.done)
+        val (moon, soul) = page.explorer!!.firstFive
+        assertNull(moon.step)
+        assertTrue(moon.done)
         assertEquals(FirstStep.SOUL, soul.step)
-        assertNull(soul.subject)
+        assertEquals(FirstSubject(kind = null, id = "s", name = null), soul.subject)
         assertEquals(setOf(AchievementCard.EXPLORER), page.seen.keys)
         val year = page.years.single()
-        assertNull(year.nextStep)
+        assertEquals(NextStep(month = 1, needs = null, daysLeft = 3, reachable = true), year.nextStep)
         assertNull(year.daysTarget)
         assertEquals(listOf(1), year.listed)
         val january = year.months.first()
-        assertEquals(MonthState.QUIET, january.state)
+        assertNull(january.state)
         assertEquals("awe", january.family)
         assertEquals(2, january.level)
         assertEquals(1f, january.progress)
@@ -127,11 +137,13 @@ class AchievementsToleranceTest {
     }
 
     @Test
-    fun `a year without twelve distinct months is dropped, a full one is kept in month order`() {
+    fun `a year without exactly twelve distinct months is dropped, a full one is kept in month order`() {
         val months = (12 downTo 1).joinToString { """{"month": $it, "state": "quiet"}""" }
         val page =
             decodeAchievementsPage(
-                """{"years": [{"year": 2026, "months": [{"month": 1}]}, {"year": 2025, "months": [$months]}]}""",
+                """{"years": [{"year": 2027, "months": [{"month": 1}]},
+                              {"year": 2026, "months": [$months, {"month": 12, "state": "kept"}]},
+                              {"year": 2025, "months": [$months]}]}""",
             )
         assertEquals(listOf(2025), page.years.map { it.year })
         assertEquals(
@@ -144,7 +156,7 @@ class AchievementsToleranceTest {
     }
 
     @Test
-    fun `a seat without an emotion id is dropped, the rest keep the server's order, and a family skips seats it cannot find`() {
+    fun `a seat without an emotion id keeps its place, an unnamed family is kept, and a family skips seats it cannot find`() {
         val page =
             decodeAchievementsPage(
                 """{"emotions": {"count": 1, "of": 3, "seats": [
@@ -154,16 +166,18 @@ class AchievementsToleranceTest {
                                  {"family": "peace", "met": [], "not_yet": [2, 9]}]}}""",
             )
         val emotions = page.emotions!!
-        assertEquals(listOf(2, 0), emotions.seats.map { it.seat })
-        assertEquals(listOf("joy", "peace"), emotions.families.map { it.family })
+        assertEquals(listOf(2, 1, 0), emotions.seats.map { it.seat })
+        assertEquals(listOf("c", null, "a"), emotions.seats.map { it.emotionId })
+        assertEquals(listOf("joy", null, "peace"), emotions.families.map { it.family })
         assertEquals(listOf("a"), emotions.families[0].met.map { it.emotionId })
-        assertTrue(emotions.families[0].notYet.isEmpty())
+        assertEquals(listOf(1), emotions.families[0].notYet.map { it.seat })
         assertEquals(listOf("c"), emotions.families[1].notYet.map { it.emotionId })
+        assertEquals(listOf("c"), emotions.families[2].notYet.map { it.emotionId })
         assertEquals(LocalDate.of(2026, 3, 2), emotions.seats.single { it.seat == 0 }.on)
     }
 
     @Test
-    fun `a ready completion and a pulled one decode, a broken one is dropped`() {
+    fun `a ready completion and a pulled one decode, one with unreadable times is kept with them null`() {
         val page =
             decodeAchievementsPage(
                 """{"emotions": {"count": 38, "of": 38, "seats": [],
@@ -172,7 +186,7 @@ class AchievementsToleranceTest {
                     "domains": {"count": 18, "of": 18, "coverage": "all",
                       "completion": {"completed_at": "2026-10-01T08:00:00Z", "offered_from": "2026-10-02T04:00:00Z",
                                      "ready": false, "pulled_at": "2026-10-03T07:30:00.5+00:00"}},
-                    "explorer": {"completion": {"ready": true}}}""",
+                    "explorer": {"completion": {"completed_at": "lately", "ready": true}}}""",
             )
         val emotions = page.emotions!!.completion!!
         assertTrue(emotions.ready)
@@ -180,7 +194,10 @@ class AchievementsToleranceTest {
         assertNotNull(page.domains!!.completion!!.pulledAt)
         assertNull(page.domains!!.completion!!.pebble)
         assertEquals(Coverage.ALL, page.domains!!.coverage)
-        assertNull(page.explorer!!.completion)
+        assertEquals(
+            Completion(completedAt = null, offeredFrom = null, ready = true, pulledAt = null, pebble = null),
+            page.explorer!!.completion,
+        )
     }
 
     @Test
@@ -211,7 +228,7 @@ class AchievementsToleranceTest {
     }
 
     @Test
-    fun `a shelf row without a slug or a family is dropped, an unreadable day kept as null`() {
+    fun `a shelf row without a slug or a family is kept with them null, an unreadable day too`() {
         val page =
             decodeAchievementsPage(
                 """{"shelf": [{"slug": "pebble-count-10", "family": "pebble_count", "threshold": 10, "unlocked_on": "2026-10-30"},
@@ -221,6 +238,7 @@ class AchievementsToleranceTest {
         assertEquals(
             listOf(
                 ShelfItem("pebble-count-10", "pebble_count", 10, LocalDate.of(2026, 10, 30)),
+                ShelfItem(null, "first_soul", null, null),
                 ShelfItem("first-soul", "first_soul", null, null),
             ),
             page.shelf,
@@ -251,5 +269,20 @@ class AchievementsToleranceTest {
         assertEquals(listOf("d1", "d2"), page.domains!!.notYet)
         assertEquals(listOf(1, 10), page.pebbles!!.ladder)
         assertEquals(listOf(10, 9), page.years.single().listed)
+    }
+
+    @Test
+    fun `a domain entry without an id keeps its place, and a next step without reachable reads as reachable`() {
+        val page =
+            decodeAchievementsPage(
+                """{"domains": {"count": 2, "of": 18, "coverage": "few", "not_yet": [],
+                      "entered": [{"domain_id": "d2", "on": "2026-03-03"}, {"on": "2026-03-02", "new": true}]},
+                    "years": [{"year": 2026, "current": true, "next_step": {"month": 3, "needs": "pebbles", "days_left": 5},
+                       "months": [${(1..12).joinToString { """{"month": $it, "state": "quiet"}""" }}]}]}""",
+            )
+        val entered = page.domains!!.entered
+        assertEquals(listOf("d2", null), entered.map { it.domainId })
+        assertTrue(entered[1].isNew)
+        assertEquals(NextStep(month = 3, needs = Needs.PEBBLES, daysLeft = 5, reachable = true), page.years.single().nextStep)
     }
 }

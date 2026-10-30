@@ -223,7 +223,8 @@ data class NextStepDto(
     val needs: String? = null,
     @SerialName("days_left")
     val daysLeft: Int = 0,
-    val reachable: Boolean = false,
+    /** Absent reads as reachable: the step's sentence stays encouraging unless the server says not. */
+    val reachable: Boolean = true,
 )
 
 @Serializable

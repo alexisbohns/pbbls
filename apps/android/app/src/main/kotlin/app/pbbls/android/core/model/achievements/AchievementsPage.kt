@@ -8,6 +8,11 @@ import java.time.LocalDate
  * The achievements page as Android draws it (#1307, spec §3.3). Every number, order, level, family
  * and flag is the server's. A null section hides its card (spec §4, resilience). Display models
  * only: nothing here is computed from counts.
+ *
+ * Tolerance, the same on every surface: an item whose enum this client does not know, or whose
+ * field is missing or unreadable, is kept with that field null and drawn as a ghost or a fallback,
+ * never dropped, so no count, seat or position shifts. A null element inside a list or a map is
+ * dropped on its own. A year without exactly twelve months is dropped (the disc has twelve spokes).
  */
 data class AchievementsPage(
     val since: LocalDate?,
@@ -26,12 +31,15 @@ data class AchievementsPage(
     val shelfCount: Int,
 )
 
-/** The crossing pebble's snapshot (D15): enough to draw its seal and open its moment. */
+/**
+ * The crossing pebble's snapshot (D15): enough to draw its seal and open its moment. [momentId]
+ * null means there is nothing to open; [happenedAt] null, nothing to date it by.
+ */
 data class PebbleSnapshot(
-    val momentId: String,
+    val momentId: String?,
     /** Absent for an unnamed moment. */
     val name: String?,
-    val happenedAt: Instant,
+    val happenedAt: Instant?,
     val emotionId: String?,
     val valence: Valence,
 )
@@ -67,16 +75,19 @@ enum class SubjectKind(
     }
 }
 
-/** What a first-five task made. For a moment or a pebble, [id] is the moment's id. */
+/**
+ * What a first-five task made. For a moment or a pebble, [id] is the moment's id. [kind] null is a
+ * kind this client does not know; [id] null, nothing to open.
+ */
 data class FirstSubject(
-    val kind: SubjectKind,
-    val id: String,
+    val kind: SubjectKind?,
+    val id: String?,
     val name: String?,
 )
 
-/** [on] is the day its subject was made. */
+/** [on] is the day its subject was made. [step] null is a task this client does not know: a ghost. */
 data class FirstFiveItem(
-    val step: FirstStep,
+    val step: FirstStep?,
     val done: Boolean,
     val on: LocalDate?,
     val subject: FirstSubject?,
@@ -102,10 +113,10 @@ enum class StoneKind(
 
 /**
  * Every dated row below carries [on] by one rule: the local day its pebble happened, or the day it
- * was recorded when that pebble is gone.
+ * was recorded when that pebble is gone. [kind] null is a first this client does not know: a ghost.
  */
 data class SixFirst(
-    val kind: StoneKind,
+    val kind: StoneKind?,
     val done: Boolean,
     val on: LocalDate?,
     val pebble: PebbleSnapshot?,
@@ -140,11 +151,11 @@ enum class ExplorerRing(
 /**
  * A set made whole (D9). [ready] is the server's clock, so no client compares times. [pulledAt]
  * set means the ceremony was pulled, from this device or another, or by a pull whose answer was
- * lost. [pebble] is the stone that made the set whole.
+ * lost. [pebble] is the stone that made the set whole. A time the client cannot read is null.
  */
 data class Completion(
-    val completedAt: Instant,
-    val offeredFrom: Instant,
+    val completedAt: Instant?,
+    val offeredFrom: Instant?,
     val ready: Boolean,
     val pulledAt: Instant?,
     val pebble: PebbleSnapshot?,
@@ -159,10 +170,13 @@ data class ExplorerSection(
     val completion: Completion?,
 )
 
-/** One of the rosace's seats: [family] is a category slug, which may be one Android does not know. */
+/**
+ * One of the rosace's seats: [family] is a category slug, which may be one Android does not know
+ * (drawn in ink). [emotionId] null keeps the seat in its place, drawn as a ghost.
+ */
 data class EmotionSeat(
     val seat: Int,
-    val emotionId: String,
+    val emotionId: String?,
     val family: String?,
     val met: Boolean,
     val on: LocalDate?,
@@ -172,10 +186,11 @@ data class EmotionSeat(
 
 /**
  * One family of the Emotions sheet, in the server's order (wheel order): [met] by the day met,
- * [notYet] by seat. The seats are the section's own, looked up by their index.
+ * [notYet] by seat. The seats are the section's own, looked up by their index. [family] null is a
+ * group the server did not name, drawn in ink.
  */
 data class EmotionFamily(
-    val family: String,
+    val family: String?,
     val met: List<EmotionSeat>,
     val notYet: List<EmotionSeat>,
 )
@@ -208,14 +223,18 @@ enum class Coverage(
     }
 }
 
+/** [domainId] null keeps the entry in the band, drawn as a ghost. */
 data class DomainEntry(
-    val domainId: String,
+    val domainId: String?,
     val on: LocalDate?,
     val pebble: PebbleSnapshot?,
     val isNew: Boolean,
 )
 
-/** [entered] is newest first, as the server sends it; the band reads it backwards. */
+/**
+ * [entered] is newest first, as the server sends it. The band's arrival order is that list
+ * reversed, never a sort by date.
+ */
 data class DomainsSection(
     val count: Int,
     val of: Int,
@@ -249,7 +268,7 @@ data class CountingSection(
     val since: LocalDate?,
 )
 
-/** An unknown state draws as [QUIET] (spec §4). */
+/** The month's state; [AchievementMonth.state] is null for one this client does not know. */
 enum class MonthState(
     val slug: String,
 ) {
@@ -259,7 +278,7 @@ enum class MonthState(
     ;
 
     companion object {
-        fun of(slug: String?): MonthState = entries.firstOrNull { it.slug == slug } ?: QUIET
+        fun of(slug: String?): MonthState? = entries.firstOrNull { it.slug == slug }
     }
 }
 
@@ -270,10 +289,13 @@ data class MonthDone(
     val weeks: Boolean,
 )
 
-/** One month of a year disc (D12). [level] is 0..2 and [progress] 0..1, clamped on decode. */
+/**
+ * One month of a year disc (D12). [level] is 0..2 and [progress] 0..1, clamped on decode. [state]
+ * null is a state this client does not know, drawn as [MonthState.QUIET] (spec §4).
+ */
 data class AchievementMonth(
     val month: Int,
-    val state: MonthState,
+    val state: MonthState?,
     val family: String?,
     val momentDays: Int,
     val pebbleDays: Int,
@@ -296,9 +318,10 @@ enum class Needs(
     }
 }
 
+/** [needs] null is a need this client does not know: the step is kept, without its sentence. */
 data class NextStep(
     val month: Int,
-    val needs: Needs,
+    val needs: Needs?,
     val daysLeft: Int,
     val reachable: Boolean,
 )
@@ -317,10 +340,13 @@ data class AchievementYear(
     val nextStep: NextStep?,
 )
 
-/** One row of the Profile shelf (D18). [threshold] is null for a family that counts nothing. */
+/**
+ * One row of the Profile shelf (D18). [threshold] is null for a family that counts nothing; a
+ * missing [slug] or [family] is null too, and the row draws as a ghost.
+ */
 data class ShelfItem(
-    val slug: String,
-    val family: String,
+    val slug: String?,
+    val family: String?,
     val threshold: Int?,
     val unlockedOn: LocalDate?,
 )

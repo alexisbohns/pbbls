@@ -30,7 +30,7 @@ class AchievementsReplayTest {
     fun `the explorer's centre is the first, heavy, small pebble, at whole seconds`() {
         val first = page(AchievementPayloads.PAGE).explorer!!.firstPebble!!
         assertEquals(Valence.LOWLIGHT_SMALL, first.valence)
-        assertTrue(wholeSecond(first.happenedAt))
+        assertTrue(wholeSecond(first.happenedAt!!))
     }
 
     @Test
@@ -56,8 +56,8 @@ class AchievementsReplayTest {
         assertFalse(completion.ready)
         assertNull(completion.pulledAt)
         assertNotNull(completion.pebble)
-        assertTrue(wholeSecond(completion.completedAt))
-        assertTrue(completion.offeredFrom.isAfter(completion.completedAt))
+        assertTrue(wholeSecond(completion.completedAt!!))
+        assertTrue(completion.offeredFrom!!.isAfter(completion.completedAt))
     }
 
     @Test
@@ -145,7 +145,7 @@ class AchievementsReplayTest {
                 val m = element.jsonObject
                 val month = year.months[m.int("month") - 1]
                 val label = "${year.year}-${month.month}"
-                assertEquals(label, m["state"]!!.jsonPrimitive.content, month.state.slug)
+                assertEquals(label, m["state"]!!.jsonPrimitive.content, month.state?.slug)
                 assertEquals(label, m["family"]?.jsonPrimitive?.content, month.family)
                 assertEquals(label, m.int("moment_days"), month.momentDays)
                 assertEquals(label, m.int("pebble_days"), month.pebbleDays)
