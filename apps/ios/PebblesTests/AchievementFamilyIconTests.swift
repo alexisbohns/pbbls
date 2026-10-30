@@ -8,7 +8,8 @@ struct AchievementFamilyIconTests {
             ("pebble_count", PbblsIcon.stack), ("emotion_first", .heart), ("domain_first", .pebbleGlowMd),
             ("first_collection", .collection), ("first_glyph", .pebbleDottedGlyph), ("first_soul", .people),
             ("first_moment", .pebbleFlat), ("first_pebble", .pebbleRound), ("first_five", .stackLit3),
-            ("glyph_count", .pebbleDottedGlyph), ("glyph_sales", .pebbleGlowMd), ("never_heard_of", .pebbleGlowMd)
+            ("glyph_count", .pebbleDottedGlyph), ("glyph_sales", .pebbleGlowMd), ("first_stone", .stonesAlignedBottom),
+            ("set_complete", .cromlech), ("never_heard_of", .pebbleGlowMd)
           ])
     func familySymbol(family: String, icon: PbblsIcon) throws {
         #expect(try AchievementsDecodingTests.record(family: family).familySymbol == icon)

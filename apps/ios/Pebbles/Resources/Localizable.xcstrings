@@ -14021,6 +14021,23 @@
           }
         }
       }
+    },
+    "achievement.family.first_stone.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One of the six firsts."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'une des six premières fois."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
