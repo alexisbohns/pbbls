@@ -24,6 +24,14 @@ struct ProfileShelfTests {
         #expect(ProfileShelf.count(page) == 13)
     }
 
+    @Test("the count is plural-aware in English and French")
+    func earned() {
+        #expect(ProfileShelf.earned(1, locale: Locale(identifier: "en")) == "1 earned")
+        #expect(ProfileShelf.earned(13, locale: Locale(identifier: "en")) == "13 earned")
+        #expect(ProfileShelf.earned(1, locale: Locale(identifier: "fr")) == "1 décroché")
+        #expect(ProfileShelf.earned(13, locale: Locale(identifier: "fr")) == "13 décrochés")
+    }
+
     @Test("no shelf served, or none earned: no badges and no count, the plain invitation")
     func missing() throws {
         #expect(ProfileShelf.badges(nil, catalog: [:]).isEmpty && ProfileShelf.count(nil) == nil)

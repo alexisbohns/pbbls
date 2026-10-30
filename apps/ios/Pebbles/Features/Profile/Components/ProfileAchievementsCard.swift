@@ -20,6 +20,11 @@ enum ProfileShelf {
     static func count(_ page: AchievementsPage?) -> Int? {
         page?.shelfCount.flatMap { $0 > 0 ? $0 : nil }
     }
+
+    /// "3 earned", "1 décroché", "3 décrochés": the count, plural by the catalog.
+    static func earned(_ count: Int, locale: Locale) -> String {
+        SpineStrings.format("achievement.shelf.unlockedCount", locale: locale, count)
+    }
 }
 
 /// The Profile achievements shelf (D14, D18): the most recent badges and their
@@ -75,10 +80,7 @@ struct ProfileAchievementsCard: View {
 
     private var subtitle: String {
         guard let count = ProfileShelf.count(model.page) else { return String(localized: "Badges along your path") }
-        return String(format: NSLocalizedString(
-            "achievement.shelf.unlockedCount",
-            value: "%lld earned", comment: ""
-        ), count)
+        return ProfileShelf.earned(count, locale: SpineStrings.appLocale)
     }
 
     /// The private families never reach the served shelf, so no emotion or domain name is needed.
