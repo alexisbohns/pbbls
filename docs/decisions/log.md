@@ -1532,3 +1532,27 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Wave folders and the Python exploration tools live in the package; `turbo.json` keeps them out of the `build` inputs so a wave commit is not a package change (whether `turbo-ignore` honours it is verified in Part 2).
 - **Supersedes / Superseded-by:** none.
 - **Refs:** #1311, `docs/superpowers/specs/2026-10-28-icon-package-design.md` (D1–D11), `docs/superpowers/plans/2026-10-28-icon-package.md`, `packages/icons/CLAUDE.md`.
+
+## 2026-10-30 — iOS draws the pebbles icons; chrome stays SF; the migration lint reads a per-surface marker (#1314)
+
+- **Status:** taken
+- **Scope:** ios, cross-surface (the marker and the lint)
+- **Context:**
+  - After #1311 the iOS app still drew 84 SF Symbols at 110 sites. 49 of them carry meaning the foundation wave draws (a pebble, a collection, a person, karma); 16 are chrome or shapes (chevrons, close, share, copy, undo, the arrow that means "go"); 19 mean something no drawing means yet (visibility, errors, upload, swap, invite, life domain, market).
+  - SF Symbols are font glyphs sized by `.font`; a pebbles icon is a template image sized by a frame. The old `PebblesIcon` tokens (13/15/17pt semibold) only ever sized symbols.
+- **Decision:**
+  - **Chrome stays SF, closed list:** `chevron.backward/down/forward/left/right`, `xmark`, `ellipsis.circle`, `square.and.arrow.up`, `doc.on.doc`, `arrow.uturn.backward`, `arrow.right`, `applelogo`, `apple.logo`, `g.circle`. A new SF Symbol outside that list needs a drawing, or a line in a wave brief (`packages/icons/waves/2026-11-chrome/brief.md` holds the 19).
+  - **Five sizes**, `PbblsIconSize`: `inline` 16 (beside text, relative to its style), `row` 20 (list rows, pills, menus), `toolbar` 22 (inside a 44 hit frame), `tile` 28 (tiles, shortcuts, card leads), `hero` 48 (empty states, celebrations). 16 is the floor; `CollectionMark`'s 14pt band mark is the one exception. A fixed slot that must not follow Dynamic Type (the band mark, the glyph cell) draws a bare template `Image(icon.assetName)`; everything else goes through `PbblsIconImage`, which scales with its text style.
+  - **Helpers carry a `PbblsIcon`, never a string:** `AppTab.icon`, `PebblesMenuItem.icon`, `SurfaceTile.icon`, `DataTile.icon`, `HomeShortcuts.tile(_:)`, `Achievement.familySymbol`, `LogTimeline.icon`, `GlyphTabBar.icon(_:)`. The tab bar lights the `active` twin of the selected tab.
+  - **The manifest marks migration per surface:** each row's `migrated` lists the surfaces whose code no longer names its `replaces`; `status: shipped` requires every surface in `migrated`. `npm run lint:replaces --workspace=@pbbls/icons` (an `Icons` CI step) greps each migrated surface's tree for the bare literal (iOS: `"<name>"` anywhere under `apps/ios/Pebbles/`, generated file excluded) and fails on a hit. A false hit is fixed by renaming the string, never by weakening the pattern. The marker flips in the same commit that deletes the last literal.
+  - `PebblesIcon` and `.pebblesIcon(_:)` are gone; the three kept symbols that used them (`lock`, two `chevron.right`) take an inline rounded 15pt medium font.
+- **Why:**
+  - **Rejected, redrawing the chrome:** a chevron is a chevron; the brand lives in the nouns, and a drawn chevron beside a system back button would read as two vocabularies.
+  - **Rejected, a lint keyed on `status: shipped` and `Image(systemName: "<name>")`:** `shipped` is a cross-surface state, and a symbol name survives in ternaries, `return`s, `case`s and comments the `systemName:` form never sees.
+  - **Rejected, one size per context derived from the font:** template images do not take a font; a named size table is what call sites can read and what the lab can show.
+- **Consequences:**
+  - Any new iOS site draws `PbblsIconImage(.name, .size)`; a new string symbol outside the chrome list fails the `Icons` job once its row is migrated.
+  - Reference images are re-recorded per part by the `rebaseline-ios-screenshots` bot; the tab bar and the glyph, connections and lab screens have no reference and are checked on the device.
+  - Web (#1313) and Android (#1315) flip their own surface in `migrated` the same way; the lint's web and Android forms are already in place.
+- **Supersedes / Superseded-by:** supersedes the status sentence of the 2026-10-29 icons entry ("`shipped` means every surface migrated and its `replaces` names are gone", now expressed by `migrated`) and the package spec's D4/D10 forms (the `shipped` key and the `systemName:` grep).
+- **Refs:** #1314, `docs/superpowers/specs/2026-10-30-ios-icon-migration-design.md` (D1–D10), `docs/superpowers/plans/2026-10-30-ios-icon-migration.md`, `packages/icons/scripts/lib/replaces.ts`, `apps/ios/Pebbles/Theme/Icon+Pebbles.swift`.
