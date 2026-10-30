@@ -48,7 +48,7 @@ screenshot = { strictly = "0.0.1-alpha16" }
 # so the OkHttp engine is pinned to the same version to avoid Ktor version skew.
 supabase = "3.8.0"
 ktor = "3.6.0"
-kotlinxSerializationJson = "1.11.0"
+kotlinxSerializationJson = "1.12.0"
 # Custom Tabs — the in-app-browser analog of iOS SFSafariViewController, used
 # for the legal document links (D15).
 browser = "1.10.0"
