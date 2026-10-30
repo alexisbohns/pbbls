@@ -51,6 +51,7 @@ class EmotionsSheetTest {
         show(emotions)
         compose.onNodeWithContentDescription("Sadness, Grandma’s call went quiet", substring = true).performScrollTo().performClick()
         compose.onAllNodesWithContentDescription("new since you last looked", substring = true).assertCountEquals(2)
+        compose.onNodeWithText("since March 2").assertExists()
         compose.onNodeWithText("Disgust").performScrollTo().assertExists()
         assertEquals(
             listOf(

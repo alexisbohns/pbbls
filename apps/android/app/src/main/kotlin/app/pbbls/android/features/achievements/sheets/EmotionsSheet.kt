@@ -71,7 +71,7 @@ fun EmotionsSheet(
             } else {
                 null
             }
-        SheetBand(title = copy.cardTitle(AchievementCard.EMOTIONS), hint = null, trailing = ready)
+        SheetBand(title = copy.cardTitle(AchievementCard.EMOTIONS), hint = emotions.since?.let(copy::sinceHint), trailing = ready)
         Box(Modifier.fillMaxWidth().padding(top = 16.dp), contentAlignment = Alignment.Center) {
             Rosace(
                 emotions,

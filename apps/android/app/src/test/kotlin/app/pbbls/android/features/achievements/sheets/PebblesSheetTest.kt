@@ -42,6 +42,7 @@ class PebblesSheetTest {
             }
         }
         compose.onNodeWithText("137 pebbles kept.").assertExists()
+        compose.onNodeWithText("since March 2").assertExists()
         compose.onNodeWithContentDescription("137 pebbles. Five stones stand; the sixth rises toward 250.").assertExists()
         compose.onNodeWithContentDescription("100, Last swim of summer", substring = true).performScrollTo().performClick()
         compose.onNodeWithContentDescription("250, 113 to go", substring = true).performScrollTo().assertExists()

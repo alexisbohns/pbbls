@@ -124,7 +124,7 @@ fun PebblesSheet(
     val type = PebblesTheme.spine.type
     val fill = pebbles.skylineFill()
     Column(modifier.fillMaxWidth()) {
-        SheetBand(copy.cardTitle(AchievementCard.PEBBLES), hint = null)
+        SheetBand(copy.cardTitle(AchievementCard.PEBBLES), hint = pebbles.since?.let(copy::sinceHint))
         Skyline(fill, copy.pebblesLine(pebbles), modifier = Modifier.padding(top = 24.dp), width = SKYLINE)
         Text(
             copy.pebblesKept(pebbles.count),
