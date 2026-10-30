@@ -21,6 +21,7 @@ type Card = {
   achievement: Achievement | undefined
   slug: string
   karmaGranted: number
+  fallback: { title: string; description: string } | undefined
 }
 
 /**
@@ -47,6 +48,7 @@ export function AchievementMomentHost() {
           achievement: bySlug.get(r.slug),
           slug: r.slug,
           karmaGranted: r.karmaGranted,
+          fallback: moment.fallback?.[r.slug],
         }))
         // Chain in the order the ladder reads, so a multi-tier unlock walks up
         // rather than arriving shuffled. Unknown slugs (a check racing a
@@ -75,8 +77,12 @@ export function AchievementMomentHost() {
   const card = cards[index]
   if (!card) return null
 
-  const copy = card.achievement ? resolveCopy(card.achievement) : undefined
-  const title = copy?.title ?? card.slug
+  const resolved = card.achievement ? resolveCopy(card.achievement) : undefined
+  const copy = {
+    title: resolved?.title ?? card.fallback?.title ?? card.slug,
+    description: resolved?.description || card.fallback?.description || "",
+  }
+  const title = copy.title
   const isLast = index + 1 >= cards.length
 
   return (
@@ -100,7 +106,7 @@ export function AchievementMomentHost() {
             {t("achievementUnlockedEyebrow")}
           </p>
           <DialogTitle>{title}</DialogTitle>
-          {copy?.description ? (
+          {copy.description ? (
             <DialogDescription>{copy.description}</DialogDescription>
           ) : null}
         </DialogHeader>
