@@ -3,6 +3,7 @@ package app.pbbls.android.features.achievements.figures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
@@ -97,28 +98,43 @@ internal fun DrawScope.sealAt(
     translate(center.x - width / 2, center.y - width / print.aspectRatio / 2) { drawSeal(print, width) }
 }
 
-/** Every ink print at every size, for one ink: the figures' fixed set (15 prints, a constant count). */
+/** One ink seal: a size and how it prints. */
+data class InkSeal(
+    val size: ValenceSizeGroup,
+    val print: InkPrint,
+)
+
+/** One ink seal in a given colour: ink for the marks, a month's hue for the year's counters. */
+internal data class InkKey(
+    val seal: InkSeal,
+    val ink: Color,
+)
+
+/** The ink prints a figure asked for, looked up by key while drawing, never iterated. */
 @Stable
-internal class InkSeals(
-    private val prints: Map<Pair<ValenceSizeGroup, InkPrint>, SealPrint>,
+internal class InkPrints(
+    private val prints: Map<InkKey, SealPrint>,
 ) {
     fun of(
-        size: ValenceSizeGroup,
-        print: InkPrint,
-    ): SealPrint = prints.getValue(size to print)
+        seal: InkSeal,
+        ink: Color,
+    ): SealPrint = prints.getValue(InkKey(seal, ink))
 }
 
+/**
+ * Only the ink prints [keys] names, each remembered under its own key so the set can change
+ * between payloads; the set itself is remembered on the keys and the prints, so a register row
+ * builds the one print it draws, not every print there is.
+ */
 @Composable
-internal fun rememberInkSeals(
-    ink: Color,
+internal fun rememberInkPrints(
+    keys: List<InkKey>,
     knockout: Color,
-    variant: SealVariant = SealVariant.TINY,
-): InkSeals {
-    val prints = HashMap<Pair<ValenceSizeGroup, InkPrint>, SealPrint>()
-    ValenceSizeGroup.entries.forEach { size ->
-        InkPrint.entries.forEach { print -> prints[size to print] = rememberInkSealPrint(size, print, ink, knockout, variant) }
-    }
-    return InkSeals(prints)
+    variant: SealVariant,
+): InkPrints {
+    val distinct = keys.distinct()
+    val prints = distinct.map { k -> key(k) { rememberInkSealPrint(k.seal.size, k.seal.print, k.ink, knockout, variant) } }
+    return remember(distinct, prints) { InkPrints(distinct.zip(prints).toMap()) }
 }
 
 /** One emotion seal: a valence printed in a family's palette. */
@@ -133,33 +149,11 @@ internal data class SealKey(
  */
 @Composable
 internal fun rememberEmotionSeals(
-    keys: Collection<SealKey>,
+    keys: List<SealKey>,
     knockout: Color,
     variant: SealVariant,
 ): Map<SealKey, SealPrint> {
-    val out = HashMap<SealKey, SealPrint>()
-    keys.distinct().forEach { k ->
-        out[k] = key(k) { rememberSealPrint(k.valence, k.palette, null, knockout, variant) }
-    }
-    return out
-}
-
-/** One ink seal in a given colour: the year's counters, inked in their month's hue. */
-internal data class InkKey(
-    val size: ValenceSizeGroup,
-    val print: InkPrint,
-    val ink: Color,
-)
-
-@Composable
-internal fun rememberInkPrints(
-    keys: Collection<InkKey>,
-    knockout: Color,
-    variant: SealVariant,
-): Map<InkKey, SealPrint> {
-    val out = HashMap<InkKey, SealPrint>()
-    keys.distinct().forEach { k ->
-        out[k] = key(k) { rememberInkSealPrint(k.size, k.print, k.ink, knockout, variant) }
-    }
-    return out
+    val distinct = keys.distinct()
+    val prints = distinct.map { k -> key(k) { rememberSealPrint(k.valence, k.palette, null, knockout, variant) } }
+    return remember(distinct, prints) { distinct.zip(prints).toMap() }
 }

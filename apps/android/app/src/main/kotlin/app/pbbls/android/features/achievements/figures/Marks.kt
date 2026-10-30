@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SpineColors
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.core.model.achievements.FirstStep
 import app.pbbls.android.core.model.achievements.PebbleSnapshot
@@ -28,10 +30,9 @@ import app.pbbls.android.core.ui.render.stone.SealVariant
 import app.pbbls.android.core.ui.render.stone.inkPrint
 import app.pbbls.android.features.achievements.AchievementLookups
 
-/** One six-firsts mark: a size, a print and a width in board px. */
+/** One six-firsts mark: its seal and a width in board px. */
 data class SixMark(
-    val size: ValenceSizeGroup,
-    val print: InkPrint,
+    val seal: InkSeal,
     val width: Float,
 )
 
@@ -42,16 +43,43 @@ data class SixMark(
  */
 val SIX_MARKS: Map<StoneKind, SixMark> =
     mapOf(
-        StoneKind.SMALL to SixMark(ValenceSizeGroup.SMALL, InkPrint.RELIEF, 9f),
-        StoneKind.MEDIUM to SixMark(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF, 12f),
-        StoneKind.LARGE to SixMark(ValenceSizeGroup.LARGE, InkPrint.RELIEF, 14f),
-        StoneKind.LOWLIGHT to SixMark(ValenceSizeGroup.MEDIUM, InkPrint.ENGRAVED, 12.5f),
-        StoneKind.NEUTRAL to SixMark(ValenceSizeGroup.MEDIUM, InkPrint.OPEN, 12.5f),
-        StoneKind.HIGHLIGHT to SixMark(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF, 12.5f),
+        StoneKind.SMALL to SixMark(InkSeal(ValenceSizeGroup.SMALL, InkPrint.RELIEF), 9f),
+        StoneKind.MEDIUM to SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF), 12f),
+        StoneKind.LARGE to SixMark(InkSeal(ValenceSizeGroup.LARGE, InkPrint.RELIEF), 14f),
+        StoneKind.LOWLIGHT to SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.ENGRAVED), 12.5f),
+        StoneKind.NEUTRAL to SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.OPEN), 12.5f),
+        StoneKind.HIGHLIGHT to SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF), 12.5f),
     )
+
+/** The six firsts' seals, in the catalog's order: what a figure drawing them asks for. */
+internal val SIX_SEALS: List<InkSeal> = StoneKind.entries.map { SIX_MARKS.getValue(it).seal }
+
+private val MOMENT_SEAL = InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.BLANK)
+private val PEBBLE_SEAL = InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF)
+private val COLLECTION_SEALS =
+    listOf(
+        InkSeal(ValenceSizeGroup.SMALL, InkPrint.RELIEF),
+        InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.OPEN),
+        InkSeal(ValenceSizeGroup.SMALL, InkPrint.ENGRAVED),
+    )
+
+/** The seals a first-five task's mark prints (a soul and a glyph are drawn, not sealed). */
+internal fun firstFiveSeals(step: FirstStep?): List<InkSeal> =
+    when (step) {
+        FirstStep.MOMENT -> listOf(MOMENT_SEAL)
+        FirstStep.PEBBLE -> listOf(PEBBLE_SEAL)
+        FirstStep.COLLECTION -> COLLECTION_SEALS
+        FirstStep.SOUL, FirstStep.GLYPH, null -> emptyList()
+    }
+
+/** Every first-five seal, for a figure that draws all five. */
+internal val FIRST_FIVE_SEALS: List<InkSeal> = FirstStep.entries.flatMap(::firstFiveSeals).distinct()
 
 /** An emotion's seal width on the wheel, in board px (`7.4 + intensity × 1.6`). */
 fun emotionSealWidth(intensity: Int): Float = 7.4f + intensity * 1.6f
+
+/** A valence's own seal in ink: its size and its polarity's print, for an emotion the device does not know. */
+internal fun Valence.inkSeal(): InkSeal = InkSeal(sizeOf(intensity), polarity.inkPrint)
 
 /** The size group an intensity prints at. */
 internal fun sizeOf(intensity: Int): ValenceSizeGroup =
@@ -97,16 +125,17 @@ internal fun DrawScope.firstFiveMark(
     step: FirstStep,
     center: Offset,
     unit: Float,
-    seals: InkSeals,
+    prints: InkPrints,
     colors: SpineColors,
 ) {
     when (step) {
-        FirstStep.MOMENT -> sealAt(seals.of(ValenceSizeGroup.MEDIUM, InkPrint.BLANK), center, 10f * unit)
-        FirstStep.PEBBLE -> sealAt(seals.of(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF), center, 10f * unit)
+        FirstStep.MOMENT -> sealAt(prints.of(MOMENT_SEAL, colors.ink), center, 10f * unit)
+        FirstStep.PEBBLE -> sealAt(prints.of(PEBBLE_SEAL, colors.ink), center, 10f * unit)
         FirstStep.COLLECTION -> {
-            sealAt(seals.of(ValenceSizeGroup.SMALL, InkPrint.RELIEF), center + Offset(-4.6f * unit, 2.4f * unit), 6f * unit)
-            sealAt(seals.of(ValenceSizeGroup.MEDIUM, InkPrint.OPEN), center + Offset(0f, -3f * unit), 6.6f * unit)
-            sealAt(seals.of(ValenceSizeGroup.SMALL, InkPrint.ENGRAVED), center + Offset(4.6f * unit, 2.4f * unit), 6f * unit)
+            val (left, top, right) = COLLECTION_SEALS
+            sealAt(prints.of(left, colors.ink), center + Offset(-4.6f * unit, 2.4f * unit), 6f * unit)
+            sealAt(prints.of(top, colors.ink), center + Offset(0f, -3f * unit), 6.6f * unit)
+            sealAt(prints.of(right, colors.ink), center + Offset(4.6f * unit, 2.4f * unit), 6f * unit)
         }
         FirstStep.SOUL -> glyphAt(center, 14f * unit, SOUL_PATHS, unit, colors)
         FirstStep.GLYPH -> {
@@ -126,10 +155,11 @@ internal fun DrawScope.sixFirstMark(
     kind: StoneKind,
     center: Offset,
     unit: Float,
-    seals: InkSeals,
+    prints: InkPrints,
+    ink: Color,
 ) {
     val mark = SIX_MARKS.getValue(kind)
-    sealAt(seals.of(mark.size, mark.print), center, mark.width * unit)
+    sealAt(prints.of(mark.seal, ink), center, mark.width * unit)
 }
 
 private val MARK_BOX = 28.dp
@@ -146,10 +176,10 @@ fun FirstFiveMark(
     box: Dp = MARK_BOX,
 ) {
     val colors = PebblesTheme.spine.colors
-    val seals = rememberInkSeals(colors.ink, colors.stock, SealVariant.MINI)
+    val prints = rememberInkPrints(firstFiveSeals(step.takeIf { done }).map { InkKey(it, colors.ink) }, colors.stock, SealVariant.MINI)
     Canvas(modifier.size(box).clearAndSetSemantics {}) {
         val unit = size.width / 28f * 1.7f
-        if (done && step != null) firstFiveMark(step, center, unit, seals, colors) else ghost(center, 3.6f * unit, unit, colors)
+        if (done && step != null) firstFiveMark(step, center, unit, prints, colors) else ghost(center, 3.6f * unit, unit, colors)
     }
 }
 
@@ -162,10 +192,11 @@ fun SixFirstMark(
     box: Dp = MARK_BOX,
 ) {
     val colors = PebblesTheme.spine.colors
-    val seals = rememberInkSeals(colors.ink, colors.stock, SealVariant.MINI)
+    val keys = listOfNotNull(kind?.takeIf { done }?.let { InkKey(SIX_MARKS.getValue(it).seal, colors.ink) })
+    val prints = rememberInkPrints(keys, colors.stock, SealVariant.MINI)
     Canvas(modifier.size(box).clearAndSetSemantics {}) {
         val unit = size.width / 28f * 1.55f
-        if (done && kind != null) sixFirstMark(kind, center, unit, seals) else ghost(center, 3.6f * unit, unit, colors)
+        if (done && kind != null) sixFirstMark(kind, center, unit, prints, colors.ink) else ghost(center, 3.6f * unit, unit, colors)
     }
 }
 
@@ -184,12 +215,11 @@ fun PebbleSealMark(
     val colors = PebblesTheme.spine.colors
     val palette = pebble.emotionId?.let { lookups.emotion(it)?.palette }
     val emotion = rememberEmotionSeals(listOfNotNull(palette?.let { SealKey(pebble.valence, it) }), colors.stock, SealVariant.MINI)
-    val ink = rememberInkSeals(colors.ink, colors.stock, SealVariant.MINI)
+    val inkSeal = pebble.valence.inkSeal()
+    val ink = rememberInkPrints(if (palette == null) listOf(InkKey(inkSeal, colors.ink)) else emptyList(), colors.stock, SealVariant.MINI)
     Canvas(modifier.size(box).clearAndSetSemantics {}) {
         val unit = size.width / 28f
-        val print =
-            palette?.let { emotion.getValue(SealKey(pebble.valence, it)) }
-                ?: ink.of(sizeOf(pebble.valence.intensity), pebble.valence.polarity.inkPrint)
+        val print = palette?.let { emotion.getValue(SealKey(pebble.valence, it)) } ?: ink.of(inkSeal, colors.ink)
         sealAt(print, center, width * unit)
     }
 }

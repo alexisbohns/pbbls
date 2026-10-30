@@ -23,10 +23,11 @@ import app.pbbls.android.core.model.achievements.ExplorerRing
 import app.pbbls.android.core.model.achievements.ExplorerSection
 import app.pbbls.android.core.ui.render.stone.InkPrint
 import app.pbbls.android.core.ui.render.stone.SealVariant
-import app.pbbls.android.core.ui.render.stone.inkPrint
 import app.pbbls.android.features.achievements.AchievementLookups
 import app.pbbls.android.features.achievements.figures.ExplorerWheelGeometry as G
 
+private val DOMAIN_SEAL = InkSeal(ValenceSizeGroup.SMALL, InkPrint.RELIEF)
+private val TWENTY_FIVE_SEAL = InkSeal(ValenceSizeGroup.SMALL, InkPrint.RELIEF)
 private const val ARC_ALPHA = 0.5f
 private const val ARC_WIDTH = 0.8f
 private const val FIRST_FIVE_WIDTH = 10f
@@ -51,7 +52,6 @@ fun ExplorerWheel(
 ) {
     val colors = PebblesTheme.spine.colors
     val night = colors.isNight
-    val ink = rememberInkSeals(colors.ink, colors.stock, SealVariant.TINY)
     val seats = emotions?.seats.orEmpty()
     val seatKeys =
         seats.mapNotNull { s ->
@@ -72,7 +72,22 @@ fun ExplorerWheel(
             colors.stock,
             SealVariant.MINI,
         )
-    val centreInk = rememberInkSeals(colors.ink, colors.stock, SealVariant.MINI)
+    val centreSeal = centre?.valence?.inkSeal()
+    val centreInk =
+        rememberInkPrints(
+            listOfNotNull(centreSeal?.takeIf { centrePalette == null }?.let { InkKey(it, colors.ink) }),
+            colors.stock,
+            SealVariant.MINI,
+        )
+    // Only the ink seals this wheel draws: the first five, the six firsts, the domains and the 25,
+    // and an emotion in ink where the device does not know its family.
+    val inkSeals =
+        FIRST_FIVE_SEALS + SIX_SEALS + listOf(DOMAIN_SEAL, TWENTY_FIVE_SEAL) +
+            seats.mapNotNull { s ->
+                val valence = s.sealValence() ?: return@mapNotNull null
+                valence.inkSeal().takeIf { s.family?.let { lookups.family(it)?.palette } == null }
+            }
+    val ink = rememberInkPrints(inkSeals.map { InkKey(it, colors.ink) }, colors.stock, SealVariant.TINY)
     val arcs = remember(emotions) { emotions?.let { G.familyArcs(familyRuns(it.seats), it.seats.size) }.orEmpty() }
     val band = remember(domains) { domains?.let(::domainBandItems).orEmpty() }
 
@@ -131,7 +146,7 @@ fun ExplorerWheel(
             val palette = s.family?.let { lookups.family(it)?.palette }
             val print =
                 palette?.let { emotionSeals[SealKey(valence, it)] }
-                    ?: ink.of(sizeOf(valence.intensity), valence.polarity.inkPrint)
+                    ?: ink.of(valence.inkSeal(), colors.ink)
             sealAt(print, p, w)
             if (s.isNew) newMark(p, w, unit, colors.ink)
         }
@@ -144,7 +159,7 @@ fun ExplorerWheel(
             if (!item.on) {
                 ghost(p, G.GHOST_R * unit, unit, colors)
             } else {
-                sealAt(ink.of(ValenceSizeGroup.SMALL, InkPrint.RELIEF), p, G.DOMAIN_WIDTH * unit)
+                sealAt(ink.of(DOMAIN_SEAL, colors.ink), p, G.DOMAIN_WIDTH * unit)
                 if (item.isNew) newMark(p, G.DOMAIN_WIDTH * unit, unit, colors.ink)
             }
         }
@@ -156,7 +171,7 @@ fun ExplorerWheel(
             for (i in 0 until TWENTY_FIVE_SEATS) {
                 val p = at(G.TWENTY_FIVE_R, G.twentyFiveAngle(i))
                 if (i < twentyFive.count) {
-                    sealAt(ink.of(ValenceSizeGroup.SMALL, InkPrint.RELIEF), p, G.TWENTY_FIVE_WIDTH * unit)
+                    sealAt(ink.of(TWENTY_FIVE_SEAL, colors.ink), p, G.TWENTY_FIVE_WIDTH * unit)
                 } else {
                     ghost(p, G.SMALL_GHOST_R * unit, unit, colors)
                 }
@@ -169,7 +184,7 @@ fun ExplorerWheel(
         sixes.forEachIndexed { i, first ->
             val p = at(G.SIX_R, G.sixAngle(i, sixes.size))
             val kind = first.kind
-            if (first.done && kind != null) sixFirstMark(kind, p, unit, ink) else ghost(p, G.GHOST_R * unit, unit, colors)
+            if (first.done && kind != null) sixFirstMark(kind, p, unit, ink, colors.ink) else ghost(p, G.GHOST_R * unit, unit, colors)
             if (first.isNew) newMark(p, (kind?.let { SIX_MARKS.getValue(it).width } ?: 2 * G.GHOST_R) * unit, unit, colors.ink)
         }
 
@@ -189,7 +204,7 @@ fun ExplorerWheel(
         } else {
             val print =
                 centrePalette?.let { centreSeals[SealKey(centre.valence, it)] }
-                    ?: centreInk.of(sizeOf(centre.valence.intensity), centre.valence.polarity.inkPrint)
+                    ?: centreInk.of(centre.valence.inkSeal(), colors.ink)
             sealAt(print, c, G.CENTRE_WIDTH * unit)
         }
     }

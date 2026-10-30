@@ -10,12 +10,12 @@ import org.junit.Test
 class MarksTest {
     @Test
     fun `intensities are solid at three sizes, valences the three prints at medium`() {
-        assertEquals(SixMark(ValenceSizeGroup.SMALL, InkPrint.RELIEF, 9f), SIX_MARKS.getValue(StoneKind.SMALL))
-        assertEquals(SixMark(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF, 12f), SIX_MARKS.getValue(StoneKind.MEDIUM))
-        assertEquals(SixMark(ValenceSizeGroup.LARGE, InkPrint.RELIEF, 14f), SIX_MARKS.getValue(StoneKind.LARGE))
-        assertEquals(SixMark(ValenceSizeGroup.MEDIUM, InkPrint.ENGRAVED, 12.5f), SIX_MARKS.getValue(StoneKind.LOWLIGHT))
-        assertEquals(SixMark(ValenceSizeGroup.MEDIUM, InkPrint.OPEN, 12.5f), SIX_MARKS.getValue(StoneKind.NEUTRAL))
-        assertEquals(SixMark(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF, 12.5f), SIX_MARKS.getValue(StoneKind.HIGHLIGHT))
+        assertEquals(SixMark(InkSeal(ValenceSizeGroup.SMALL, InkPrint.RELIEF), 9f), SIX_MARKS.getValue(StoneKind.SMALL))
+        assertEquals(SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF), 12f), SIX_MARKS.getValue(StoneKind.MEDIUM))
+        assertEquals(SixMark(InkSeal(ValenceSizeGroup.LARGE, InkPrint.RELIEF), 14f), SIX_MARKS.getValue(StoneKind.LARGE))
+        assertEquals(SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.ENGRAVED), 12.5f), SIX_MARKS.getValue(StoneKind.LOWLIGHT))
+        assertEquals(SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.OPEN), 12.5f), SIX_MARKS.getValue(StoneKind.NEUTRAL))
+        assertEquals(SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF), 12.5f), SIX_MARKS.getValue(StoneKind.HIGHLIGHT))
         assertEquals(StoneKind.entries.toSet(), SIX_MARKS.keys)
     }
 

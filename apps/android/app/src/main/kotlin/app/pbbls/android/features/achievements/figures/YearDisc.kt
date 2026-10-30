@@ -30,7 +30,6 @@ import app.pbbls.android.core.model.achievements.AchievementMonth
 import app.pbbls.android.core.model.achievements.AchievementYear
 import app.pbbls.android.core.model.achievements.MonthState
 import app.pbbls.android.core.ui.render.stone.InkPrint
-import app.pbbls.android.core.ui.render.stone.SealPrint
 import app.pbbls.android.core.ui.render.stone.SealVariant
 import app.pbbls.android.features.achievements.AchievementLookups
 import app.pbbls.android.features.achievements.figures.YearDiscGeometry as G
@@ -51,6 +50,9 @@ private const val RIM_RING = 0.78f
 private const val RIM_RING_WIDTH = 0.8f
 private const val CROSS = 1.1f
 private const val CROSS_HALF = 4f
+private val COUNTER_SOLID = InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF)
+private val COUNTER_BLANK = InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.BLANK)
+private val COUNTER_DOTTED = InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.DOTTED)
 
 /**
  * Each month's hue, in month order: a month the server calls kept takes its family's, or ink for a
@@ -69,13 +71,13 @@ internal fun monthHues(
 
 /** The counter prints a year needs: a solid seal per hue, and the blank and dotted ones in secondary ink. */
 @Composable
-internal fun rememberCounterPrints(hues: List<Color?>): Map<InkKey, SealPrint> {
+internal fun rememberCounterPrints(hues: List<Color?>): InkPrints {
     val colors = PebblesTheme.spine.colors
     val keys =
-        hues.filterNotNull().map { InkKey(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF, it) } +
+        hues.filterNotNull().map { InkKey(COUNTER_SOLID, it) } +
             listOf(
-                InkKey(ValenceSizeGroup.MEDIUM, InkPrint.BLANK, colors.ink2),
-                InkKey(ValenceSizeGroup.MEDIUM, InkPrint.DOTTED, colors.ink2),
+                InkKey(COUNTER_BLANK, colors.ink2),
+                InkKey(COUNTER_DOTTED, colors.ink2),
             )
     return rememberInkPrints(keys, colors.stock, SealVariant.MINI)
 }
@@ -86,16 +88,15 @@ internal fun DrawScope.monthCounter(
     hue: Color?,
     center: Offset,
     width: Float,
-    prints: Map<InkKey, SealPrint>,
+    prints: InkPrints,
     colors: SpineColors,
     unit: Float,
 ) {
     if (hue != null) {
         if (mark.rim) drawCircle(colors.ink, width * RIM_RING, center, style = Stroke(RIM_RING_WIDTH * unit))
-        sealAt(prints.getValue(InkKey(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF, hue)), center, width)
+        sealAt(prints.of(COUNTER_SOLID, hue), center, width)
     } else {
-        val print = if (mark.upcoming) InkPrint.DOTTED else InkPrint.BLANK
-        sealAt(prints.getValue(InkKey(ValenceSizeGroup.MEDIUM, print, colors.ink2)), center, width)
+        sealAt(prints.of(if (mark.upcoming) COUNTER_DOTTED else COUNTER_BLANK, colors.ink2), center, width)
     }
 }
 
