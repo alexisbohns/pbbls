@@ -283,7 +283,8 @@ export class SupabaseProvider implements DataProvider {
       return {
         id: r.id as string,
         slug: r.slug as string,
-        // The `family` CHECK constraint on the catalog makes this cast sound.
+        // Unchecked: the catalog's CHECK allows families the union does not
+        // list yet (see `AchievementFamily`), so consumers fall back.
         family: r.family as Achievement["family"],
         threshold: (r.threshold as number | null) ?? null,
         emotionId: (r.emotion_id as string | null) ?? null,

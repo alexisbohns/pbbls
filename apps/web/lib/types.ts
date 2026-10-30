@@ -162,6 +162,11 @@ export type ProfileEngagement = {
 // Achievements (M48) — public catalog + owner-scoped unlock ledger
 // ---------------------------------------------------------------------------
 
+// This union lags the catalog: the server also serves first_moment,
+// first_pebble, first_five (#1254), first_stone and set_complete (#1305). The
+// web icon migration (#1313) widens it together with the two `FAMILY_ICONS`
+// records it owns; until then a value outside it arrives at runtime, so every
+// consumer keyed by family must fall back (an icon, a slug, `t.has`).
 export type AchievementFamily =
   | "pebble_count"
   | "emotion_first"
@@ -624,6 +629,7 @@ export type PublicProfile = {
 export type PublicAchievement = {
   id: string
   slug: string
+  /** Unchecked: may be a family the union does not list yet (see `AchievementFamily`). */
   family: AchievementFamily
   threshold: number | null
   emotion_id: string | null
