@@ -42,7 +42,7 @@ fun ShardBand(
 ) {
     val colors = PebblesTheme.spine.colors
     val fill = remember(colors.ink, colors.stock) { StoneTones.mixOklab(colors.ink, ON_TINT, colors.stock) }
-    // As wide as the room allows, up to [width]; the shards are cut for the width the band gets.
+    // As wide as the room allows, up to [width], its height in proportion.
     Canvas(
         modifier
             .widthIn(max = width)
@@ -50,9 +50,11 @@ fun ShardBand(
             .aspectRatio(width / (height + DOT_ROOM))
             .clearAndSetSemantics { contentDescription = description },
     ) {
-        val dp = density
-        val shards = ShardBandGeometry.shards(items, size.width / dp, height.value)
-        withTransform({ scale(dp, dp, Offset.Zero) }) {
+        // Cut at the board's size and scaled whole: a narrower band is shorter too, so the new
+        // dot under it stays inside the box.
+        val k = size.width / width.value
+        val shards = ShardBandGeometry.shards(items, width.value, height.value)
+        withTransform({ scale(k, k, Offset.Zero) }) {
             shards.forEach { shard ->
                 val path =
                     Path().apply {
