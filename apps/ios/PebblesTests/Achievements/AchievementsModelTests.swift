@@ -87,6 +87,18 @@ struct AchievementsModelTests {
         #expect(model.page?.completion(.sixFirsts)?.isReady == false)
     }
 
+    @Test("the zone is read when each load starts: a zone changed between visits asks and keeps in the new one")
+    func zoneReadPerLoad() async throws {
+        let fake = FakeAchievementsPageService(answers: [.success(try Self.page(daysKept: 249))])
+        var current = try #require(TimeZone(identifier: "Europe/Paris"))
+        let model = AchievementsModel(zone: { current })
+        model.service = fake
+        await model.load {}
+        current = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        await model.load {}
+        #expect(fake.zones == ["Europe/Paris", "Europe/Paris", "Asia/Tokyo"])
+    }
+
     @Test("a cancelled read is not the error state")
     func cancelledRead() async {
         let fake = FakeAchievementsPageService(answers: [.failure(CancellationError())])

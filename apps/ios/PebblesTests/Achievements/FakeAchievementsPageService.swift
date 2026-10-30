@@ -24,6 +24,9 @@ final class FakeAchievementsPageService: AchievementsPageServicing, @unchecked S
     }
 
     var calls: [String] { lock.withLock { log } }
+    /// The zone each read, kept-copy read and pull was asked in, in order.
+    var zones: [String] { lock.withLock { askedZones } }
+    private var askedZones: [String] = []
     var seen: [AchievementCard] { lock.withLock { seenCards } }
 
     func record(_ entry: String) {
@@ -53,6 +56,7 @@ final class FakeAchievementsPageService: AchievementsPageServicing, @unchecked S
     func page(zone: TimeZone) async throws -> AchievementsPage {
         let (index, next) = lock.withLock { () -> (Int, Result<AchievementsPage, Error>) in
             log.append("read")
+            askedZones.append(zone.identifier)
             defer { reads += 1 }
             let next = answers.count > 1 ? answers.removeFirst() : (answers.first ?? .failure(Failure()))
             return (reads, next)
@@ -68,6 +72,7 @@ final class FakeAchievementsPageService: AchievementsPageServicing, @unchecked S
     func cachedPage(zone: TimeZone) async -> AchievementsPage? {
         lock.withLock {
             log.append("kept")
+            askedZones.append(zone.identifier)
             return keptPage
         }
     }
