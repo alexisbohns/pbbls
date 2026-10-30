@@ -471,7 +471,7 @@ struct SettingsSheet: View {
                 Label {
                     Text(verbatim: "Stone lab")
                 } icon: {
-                    Image(systemName: "sparkles")
+                    PbblsIconImage(.pebbleRound, .row)
                 }
             }
             .buttonStyle(.plain)
@@ -482,7 +482,7 @@ struct SettingsSheet: View {
                 Label {
                     Text(verbatim: "Spine lab")
                 } icon: {
-                    Image(systemName: "line.3.horizontal.decrease")
+                    PbblsIconImage(.path, .row)
                 }
             }
             .buttonStyle(.plain)
@@ -493,7 +493,7 @@ struct SettingsSheet: View {
                 Label {
                     Text(verbatim: "Icon lab")
                 } icon: {
-                    Image(systemName: "square.grid.3x3")
+                    PbblsIconImage(.sparkles, .row)
                 }
             }
             .buttonStyle(.plain)
@@ -511,7 +511,7 @@ struct SettingsSheet: View {
                 isPresentingDeleteConfirm = true
             } label: {
                 HStack {
-                    Label("Delete account", systemImage: "trash")
+                    Label { Text("Delete account") } icon: { PbblsIconImage(.trash, .row) }
                         .foregroundStyle(Color.pebbles.error)
                     Spacer()
                     if isDeleting {

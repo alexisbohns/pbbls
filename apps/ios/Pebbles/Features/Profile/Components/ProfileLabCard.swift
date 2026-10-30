@@ -4,9 +4,7 @@ struct ProfileLabCard: View {
     var body: some View {
         NavigationLink(value: YouRoute.lab) {
             HStack(spacing: Spacing.lg) {
-                Image(systemName: "lightbulb.max")
-                    .pebblesIcon(.large)
-                    .foregroundStyle(Color.pebbles.primary)
+                PbblsIconImage(.sparkle, .tile, style: AnyShapeStyle(Color.pebbles.primary))
                 VStack(alignment: .leading) {
                     Text("Lab")
                         .pebblesFont(.headline)
