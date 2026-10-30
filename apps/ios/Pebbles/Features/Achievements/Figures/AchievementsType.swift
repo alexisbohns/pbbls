@@ -39,6 +39,7 @@ extension SpineType.Style {
     static let achievementsRowDate = Self(size: 12.5, weight: 400, features: [.lining], scaling: .text(.caption))
     static let achievementsRowNumber = Self(size: 21, weight: 300, features: [.lining], scaling: .text(.title3))
     static let achievementsRowNumberSmall = Self(size: 17, weight: 300, features: [.lining], scaling: .text(.body))
+    static let achievementsRowNumberGhost = Self(size: 21, weight: 250, features: [.lining], scaling: .text(.title3))
     static let achievementsRegisterNumber = Self(size: 12.5, weight: 400, trackingEm: 0.03, features: [.lining],
                                                  scaling: .text(.caption))
     static let achievementsGhostName = Self(size: 15, weight: 400, scaling: .text(.subheadline))
