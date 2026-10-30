@@ -168,11 +168,11 @@ struct SoulsListView: View {
             } else if promptsFailed || promptsDismissed {
                 // The prompts could not be read, or were dismissed before
                 // this read landed: never a blank tab, never a spinner.
-                ContentUnavailableView(
-                    "No souls yet",
-                    systemImage: "person.2",
-                    description: Text("People and beings you tag on your pebbles will appear here.")
-                )
+                ContentUnavailableView {
+                    Label { Text("No souls yet") } icon: { PbblsIconImage(.people, .hero) }
+                } description: {
+                    Text("People and beings you tag on your pebbles will appear here.")
+                }
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
