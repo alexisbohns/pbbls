@@ -90,7 +90,9 @@ extension AchievementRecord {
             return catalogString("achievement.family.first_stone.description", fallback: "One of the six firsts.")
         case "set_complete":
             // The ceremony's own words (#1306); the title is the catalog's seeded one.
-            return completionStack.map { catalogString("achievements.ceremony.\($0.rawValue).body", fallback: "") }
+            // Nothing to say (an unknown stack, a missing key) is no description, never an empty line.
+            let body = completionStack.map { catalogString("achievements.ceremony.\($0.rawValue).body", fallback: "") }
+            return body?.isEmpty == false ? body : nil
         default:
             return nil
         }
