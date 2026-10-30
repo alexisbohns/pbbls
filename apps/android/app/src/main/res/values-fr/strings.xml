@@ -830,7 +830,8 @@
 
     <!-- ==== La page des succès (#1307) : les mots d'iOS pour la page, ceux d'Android pour les feuilles. ==== -->
     <string name="achievements_since">depuis le %1$s</string>
-    <plurals name="achievements_days_unit">
+    <!-- The unit beside the header's large numeral, which is drawn apart: no number of its own. -->
+    <plurals name="achievements_days_unit" tools:ignore="ImpliedQuantity">
         <item quantity="one">jour</item>
         <item quantity="many">jours</item>
         <item quantity="other">jours</item>

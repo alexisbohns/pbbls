@@ -834,7 +834,8 @@
          iOS's (Localizable.xcstrings, achievements.*), word for word; the sheets' copy is Android's
          first and iOS mirrors it. ==== -->
     <string name="achievements_since">since %1$s</string>
-    <plurals name="achievements_days_unit">
+    <!-- The unit beside the header's large numeral, which is drawn apart: no number of its own. -->
+    <plurals name="achievements_days_unit" tools:ignore="ImpliedQuantity">
         <item quantity="one">day</item>
         <item quantity="other">days</item>
     </plurals>
