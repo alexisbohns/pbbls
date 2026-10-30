@@ -34,6 +34,30 @@ extension References {
 
         static let sheets: [AchievementSheet] = [.explorer, .emotions, .domains, .pebbles, .year(2026)]
 
+        /// The Explorer sheet with its six firsts offered: the ready mark sits in the band.
+        static func readyExplorer() throws -> AnyView {
+            let page = try AchievementsFixtures.payload("design-fixture").model
+            let explorer = try #require(page.explorer)
+            let completion = try #require(explorer.completion)
+            let offered = AchievementsPage.Completion(stack: .sixFirsts, completedAt: completion.completedAt,
+                                                      offeredFrom: completion.offeredFrom, isReady: true,
+                                                      pulledAt: nil, pebble: completion.pebble)
+            let ready = sheetReadyMark(offered, pulling: nil, pull: { _ in })
+            return AnyView(ExplorerSheetContent(explorer: explorer, emotions: page.emotions, domains: page.domains,
+                                                lookups: try AchievementsLookups.fixture(), ready: ready, open: { _ in })
+                .environment(\.achievementsDateLocale, AchievementsPageReferences.dateLocale))
+        }
+
+        /// At accessibility text size: the year table's month names on their own line, the
+        /// ready mark under the title rather than over it.
+        @Test
+        func sheetsAx2() throws {
+            ReferenceImage.assertMatches(try Self.readyExplorer(), named: "sheet-explorer-ready",
+                                         config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+            ReferenceImage.assertMatches(try Self.sheet(.year(2026)), named: "sheet-year-2026",
+                                         config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+        }
+
         @Test(arguments: ReferenceScheme.allCases)
         func sheets(scheme: ReferenceScheme) throws {
             for sheet in Self.sheets {

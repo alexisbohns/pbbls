@@ -14,10 +14,7 @@ struct SheetBody<Figure: View, Sections: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .topTrailing) {
-                AchievementBand(label: band, hint: ready == nil ? hint : nil, isHeading: true)
-                if let ready { ReadyButton(mark: ready) }
-            }
+            AchievementBand(label: band, hint: hint, isHeading: true, ready: ready)
             figure()
                 .frame(maxWidth: .infinity)
                 .padding(.top, 16)
@@ -113,6 +110,8 @@ struct RegisterRow: View {
     var compact = false
     let open: (RegisterRowModel.Opens) -> Void
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
         let locale = SpineStrings.appLocale
         if let opens = row.opens {
@@ -164,18 +163,15 @@ struct RegisterRow: View {
                     Text(verbatim: next)
                         .spineType(.achievementsRowNext)
                         .foregroundStyle(Color.pebbles.onSurface)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
+                // At accessibility sizes the date takes its own line rather than the row's end.
+                if typeSize.isAccessibilitySize, row.isNew || row.date != nil { dateMark }
             }
-            Spacer(minLength: 8)
-            HStack(spacing: 6) {
-                if row.isNew { NewDot() }
-                if let date = row.date {
-                    Text(verbatim: date)
-                        .spineType(.achievementsRowDate)
-                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                        .lineLimit(1)
-                }
-            }
+            // The text takes the row's width, so a name or a line that wraps is measured where it is drawn.
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .layoutPriority(1)
+            if !typeSize.isAccessibilitySize { dateMark.fixedSize() }
             if case .sheet = row.opens {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 15, weight: .medium, design: .rounded))
@@ -186,6 +182,19 @@ struct RegisterRow: View {
         .frame(minHeight: compact ? SpineLayout.minTarget : 50)
         .overlay(alignment: .bottom) { Rectangle().fill(Color.pebbles.rule).frame(height: 1) }
         .contentShape(Rectangle())
+    }
+
+    /// The new dot and the date.
+    private var dateMark: some View {
+        HStack(spacing: 6) {
+            if row.isNew { NewDot() }
+            if let date = row.date {
+                Text(verbatim: date)
+                    .spineType(.achievementsRowDate)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    .lineLimit(1)
+            }
+        }
     }
 
     @ViewBuilder
@@ -363,19 +372,24 @@ struct GhostFlow: Layout {
     }
 }
 
-/// The year table's column heads (the board's `.yth`): one line each, shrinking rather than wrapping.
+/// The year table's column heads (the board's `.yth`): one line each. At
+/// accessibility sizes the table stacks each month's name over its cells, and
+/// the three columns share the row's width.
 struct YearColumnsHead: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
         let locale = SpineStrings.appLocale
+        let stacked = typeSize.isAccessibilitySize
         HStack(spacing: 6) {
-            Spacer(minLength: 0)
+            if !stacked { Spacer(minLength: 0) }
             ForEach(["moments", "pebbles", "weeks"], id: \.self) { key in
                 Text(verbatim: AchievementsCopy.sheet("column.\(key)", locale: locale))
                     .spineType(.achievementsColumn)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
-                    .frame(width: 58)
+                    .frame(maxWidth: stacked ? .infinity : 58)
             }
         }
         .padding(.top, 8)
@@ -387,47 +401,78 @@ struct YearColumnsHead: View {
 
 /// A month of the year table (the board's `.r.yt`): its counter, its name and
 /// three gauges, read as one line; not a button. A month without pebbles dims.
+/// The name is never shrunk or cut: at accessibility sizes every month puts it
+/// on its own line above its cells.
 struct YearRow: View {
     let row: YearRowModel
     let lookups: WrapLookups
 
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         let inks = AchievementInks(scheme: scheme)
         let hue = YearDisc.tone(row.month, lookups: lookups, inks: inks)
-        HStack(spacing: 6) {
-            Canvas { c, size in
-                c.drawMonthCounter(row.month, at: CGPoint(x: size.width / 2, y: size.height / 2), hue: hue, width: 14,
-                                   inks: inks)
+        let dim = row.month.isMuted ? 0.55 : 1
+        Group {
+            if typeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        counter(hue, inks)
+                        name(inks).opacity(dim)
+                    }
+                    HStack(spacing: 6) {
+                        YearCellView(cell: row.moments, hue: nil, inks: inks, width: nil)
+                        YearCellView(cell: row.pebbles, hue: hue, inks: inks, width: nil)
+                        YearCellView(cell: row.weeks, hue: nil, inks: inks, width: nil)
+                    }
+                    .opacity(dim)
+                }
+                .padding(.vertical, 8)
+            } else {
+                HStack(spacing: 6) {
+                    counter(hue, inks)
+                    name(inks).opacity(dim)
+                    Spacer(minLength: 4)
+                    HStack(spacing: 6) {
+                        YearCellView(cell: row.moments, hue: nil, inks: inks)
+                        YearCellView(cell: row.pebbles, hue: hue, inks: inks)
+                        YearCellView(cell: row.weeks, hue: nil, inks: inks)
+                    }
+                    .opacity(dim)
+                }
             }
-            .frame(width: 30, height: 28)
-            Group {
-                Text(verbatim: row.name)
-                    .spineType(.achievementsRowName)
-                    .foregroundStyle(inks.ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-                Spacer(minLength: 4)
-                YearCellView(cell: row.moments, hue: nil, inks: inks)
-                YearCellView(cell: row.pebbles, hue: hue, inks: inks)
-                YearCellView(cell: row.weeks, hue: nil, inks: inks)
-            }
-            .opacity(row.month.isMuted ? 0.55 : 1)
         }
         .frame(minHeight: 48)
         .overlay(alignment: .bottom) { Rectangle().fill(inks.rule).frame(height: 1) }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: row.accessibilityLabel))
     }
+
+    private func counter(_ hue: Color?, _ inks: AchievementInks) -> some View {
+        Canvas { c, size in
+            c.drawMonthCounter(row.month, at: CGPoint(x: size.width / 2, y: size.height / 2), hue: hue, width: 14,
+                               inks: inks)
+        }
+        .frame(width: 30, height: 28)
+    }
+
+    private func name(_ inks: AchievementInks) -> some View {
+        Text(verbatim: row.name)
+            .spineType(.achievementsRowName)
+            .foregroundStyle(inks.ink)
+            .fixedSize(horizontal: false, vertical: true)
+    }
 }
 
 /// One gauge (the board's `cell`): the served number, in the done style when
 /// the server says so, over a hairline and its fill (capped in the drawing).
+/// `width` nil shares the row's width with its neighbours.
 struct YearCellView: View {
     let cell: YearCell
     let hue: Color?
     let inks: AchievementInks
+    var width: CGFloat? = 58
 
     var body: some View {
         let tone = cell.usesHue ? (hue ?? inks.ink) : inks.ink
@@ -443,15 +488,19 @@ struct YearCellView: View {
                 }
             }
             .lineLimit(1)
-            .minimumScaleFactor(0.6)
-            ZStack(alignment: .leading) {
-                Rectangle().fill(inks.ink2.opacity(0.55)).frame(height: 1)
-                if let fill = cell.fill, fill > 0 {
-                    Capsule().fill(tone).frame(width: 52 * CGFloat(min(fill, 1)), height: 2.5)
+            GeometryReader { proxy in
+                ZStack(alignment: .leading) {
+                    Rectangle().fill(inks.ink2.opacity(0.55)).frame(height: 1)
+                    if let fill = cell.fill, fill > 0 {
+                        Capsule().fill(tone).frame(width: proxy.size.width * CGFloat(min(fill, 1)), height: 2.5)
+                    }
                 }
+                .frame(maxHeight: .infinity)
             }
-            .frame(width: 52, height: 4)
+            .frame(height: 4)
+            .padding(.horizontal, 3)
         }
-        .frame(width: 58)
+        .frame(maxWidth: width ?? .infinity)
+        .frame(width: width)
     }
 }

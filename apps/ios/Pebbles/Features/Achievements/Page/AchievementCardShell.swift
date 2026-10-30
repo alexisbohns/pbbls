@@ -96,17 +96,20 @@ struct AchievementBand: View {
     var hint: String?
     /// A sheet's own title is a VoiceOver heading; a page card's band is part of its button.
     var isHeading = false
+    /// A sheet's ready mark, in the hint's place: laid out with the title, so at
+    /// large text it drops under it rather than overlapping it.
+    var ready: ReadyMark?
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
                 title
                 Spacer(minLength: 0)
-                if let hint { hintText(hint) }
+                end
             }
             VStack(alignment: .leading, spacing: 4) {
                 title
-                if let hint { hintText(hint) }
+                end
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -114,6 +117,15 @@ struct AchievementBand: View {
         .padding(.bottom, 9)
         .overlay(alignment: .bottom) {
             Rectangle().fill(Color.pebbles.cardRule).frame(height: 1)
+        }
+    }
+
+    @ViewBuilder
+    private var end: some View {
+        if let ready {
+            ReadyButton(mark: ready)
+        } else if let hint {
+            hintText(hint)
         }
     }
 
