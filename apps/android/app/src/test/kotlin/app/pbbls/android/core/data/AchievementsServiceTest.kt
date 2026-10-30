@@ -32,7 +32,8 @@ import java.time.ZoneId
 
 /**
  * The real [AchievementsService] over a [MockEngine] client (#1307): the page is kept on the
- * device only for the user who asked for it, and read back only by that user.
+ * device only for the user who asked for it, and read back only by that user; the check's rows
+ * decode through the client exactly as the shipped `check()` decodes them.
  */
 class AchievementsServiceTest {
     private val zone = ZoneId.of("Europe/Paris")
@@ -118,5 +119,12 @@ class AchievementsServiceTest {
             assertNotNull(service.page(zone))
             assertTrue(disk.bodies.isEmpty())
             assertNull(service.cachedPage(zone))
+        }
+
+    @Test
+    fun `check decodes the dumped rows through the client's own serializer, as production does`() =
+        runTest {
+            val (_, service) = signedIn("alice")
+            assertEquals(listOf(AchievementCheckResult(slug = "first-moment", karmaGranted = 0)), service.check())
         }
 }

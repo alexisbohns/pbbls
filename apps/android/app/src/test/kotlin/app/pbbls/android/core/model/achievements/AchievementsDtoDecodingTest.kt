@@ -1,6 +1,5 @@
 package app.pbbls.android.core.model.achievements
 
-import app.pbbls.android.core.data.AchievementCheckResult
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -56,11 +55,5 @@ class AchievementsDtoDecodingTest {
         val shelf = AchievementPayloads.dto(AchievementPayloads.PAGE).shelf
         assertNull(shelf.first { it.slug == "first-moment" }.threshold)
         assertEquals(1, shelf.first { it.slug == "pebble-count-1" }.threshold)
-    }
-
-    @Test
-    fun `the check rows are slug and karma only, as the shipped service decodes them`() {
-        val rows = AchievementsJson.decodeFromString<List<AchievementCheckResult>>(AchievementPayloads.read(AchievementPayloads.CHECK))
-        assertEquals(listOf(AchievementCheckResult(slug = "first-moment", karmaGranted = 0)), rows)
     }
 }
