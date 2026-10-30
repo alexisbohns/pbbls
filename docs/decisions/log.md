@@ -1585,3 +1585,27 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The pebble ladder is seeded to 10 000 (extend it before anyone nears it).
 - **Supersedes / Superseded-by:** narrows the 2026-07-30 achievements entry (#664) for the public shelf and for karma on contributions.
 - **Refs:** #1305, `docs/superpowers/specs/2026-10-29-achievements-page-design.md` (D1–D18), `docs/superpowers/plans/2026-10-29-achievements-page-backend.md`, `packages/supabase/supabase/migrations/20261030090000_achievements_page_model.sql` … `20261030110000_achievements_writes.sql`, `packages/supabase/scripts/verify-achievements.ts`.
+
+## 2026-10-30 — Android draws the pebbles icons; chrome and the wave stay hand-traced; a drawable goes when its last reference does (#1315)
+
+- **Status:** taken
+- **Scope:** android, cross-surface (the marker and the lint)
+- **Context:**
+  - After #1311 the Android app drew 38 hand-traced `ic_*` VectorDrawables at 113 references, most of them tracings of SF Symbols iOS had just retired (#1314). It drew no Material icon. `PebblesIconToken` (13/15/17dp) sized them.
+  - Android Lint runs `UnusedResources` under `warningsAsErrors`, so an orphaned drawable fails the build.
+- **Decision:**
+  - **Chrome stays hand-traced, closed list:** `ic_arrow_back`, `ic_chevron_right`, `ic_arrow_right` (the three keep `autoMirrored` and are never swapped for an `ic_pbbls_*` drawable, which mirrors nothing), `ic_more_vert`, `ic_share`, `ic_undo`, `ic_x_circle` at the Record flow's close; and the four brand marks `ic_google_g`, `ic_launcher_foreground`, `ic_launcher_monochrome`, `pbbls_logo`. Eleven tracings wait for `packages/icons/waves/2026-11-chrome/` (visibility, errors, upload, upvote, again, swap, locked, life domain, the time of day). A new hand-traced drawable outside these lists needs a drawing or a wave-brief line.
+  - **Five sizes in dp,** `PbblsIconSize`: `INLINE` 16, `ROW` 20, `TOOLBAR` 22, `TILE` 28, `HERO` 48, iOS's values. **`INLINE` alone follows the font scale** (`value.sp.toDp()`, the platform's non-linear curve: 28dp at 200%); this narrows the package spec's D9 ("icons do not follow font scale") for one size. An M3 slot with its own icon token keeps it; a fixed dp slot (the band mark at 14, the glyph cells, the shelf badge, the Lab timeline nodes) passes a `Dp` with a comment saying why.
+  - **Helpers carry a `PbblsIcon`:** `SurfaceTile`, `DetailPlaceholder`, `DataTile`, `GlyphTab`, `achievementFamilyIcon` (iOS's `familySymbol` table), `PebblesKey.icon()`. The three that still draw a kept tracing (`MediaStateLabel`, `WhenPill`, `CarvePillButton`) keep `iconRes: Int` and their Pebbles callers pass `PbblsIcon.X.drawableRes`. The navigation bar lights the selected tab's `active` twin over the M3 indicator.
+  - **A drawable is deleted in the commit that removes its last reference,** not at the end of the stack (the `UnusedResources` gate). `replaces.android` lists exactly the 20 deleted drawables; `migrated` gained `android` on the 24 rows Android draws in the commit that deleted the last of them.
+  - `PebblesIconToken` and `PebblesIcon(painter, token, …)` are gone; the seven kept tracings that used `MEDIUM` take `Modifier.size(15.dp)` inline.
+- **Why:**
+  - **Rejected, drawing the back arrow:** it sits beside the system back gesture and predictive back; a wobbly one reads as a bug.
+  - **Rejected, all sizes following the font scale:** the M3 slots around an icon (48dp `IconButton`, 24dp navigation item) do not grow; an inline stone beside doubled text does need to.
+  - **Rejected, deleting every drawable in the last part:** every part in between would fail `./gradlew lint`.
+- **Consequences:**
+  - Any new Android site draws `PbblsIconImage(icon = PbblsIcon.X, size = PbblsIconSize.Y, …)`; naming a replaced drawable fails to compile (the file is gone) and fails the `Icons` job's `replaces` step.
+  - Screenshot references were re-recorded per part by the `rebaseline-screenshots` bot.
+  - Web (#1313) flips its own surface in `migrated` the same way.
+- **Supersedes / Superseded-by:** narrows the package spec's D9 for `INLINE` (above); extends the 2026-10-30 iOS entry's marker and lint to Android, no change to their rules.
+- **Refs:** #1315, `docs/superpowers/specs/2026-10-30-android-icon-migration-design.md` (D1–D11), `docs/superpowers/plans/2026-10-30-android-icon-migration.md`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsIconSize.kt`, `packages/icons/scripts/lib/replaces.ts`.
