@@ -97,7 +97,7 @@ struct AchievementsMappingTests {
         #expect(march.state == .quiet && march.level == 2 && march.progress == 1)
         let april = try #require(page.years.first?.month(4))
         #expect(april.level == 0 && april.progress == 0)
-        #expect(april.isMuted, "a kept month without a family has no hue to draw")
+        #expect(!april.isMuted, "a kept month without a family still draws, in ink")
         #expect(page.years.map(\.year) == [2026], "a year without twelve months can't be drawn")
         #expect(page.years.first?.listed == [4, 3])
         #expect(page.years.first?.nextStep == nil)

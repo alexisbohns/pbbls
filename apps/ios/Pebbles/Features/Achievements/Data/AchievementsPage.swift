@@ -243,8 +243,10 @@ extension AchievementsPage {
         /// The gauges' done style, as served.
         let done: MonthDone
 
-        /// Drawn quietly: a month with no pebble to colour it (NOTES, "quieter disc").
-        var isMuted: Bool { state != .kept || family == nil }
+        /// Drawn quietly: a month with no pebble (NOTES, "quieter disc"), by its
+        /// served state alone. A kept month whose family is absent or unresolved
+        /// still draws, in ink.
+        var isMuted: Bool { state != .kept }
     }
 
     enum Needs: String {
