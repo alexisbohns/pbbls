@@ -8,20 +8,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import app.pbbls.android.core.designsystem.PebblesIcon
-import app.pbbls.android.core.designsystem.PebblesIconToken
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 
 /**
  * Single value/icon/label tile inside the Profile Stats card — ports iOS
  * `DataTile.swift`: large counter number (tabular figures) over a small
  * `primary` icon + `onSurfaceVariant` label. "—" while the value is loading.
+ * The icon sits in the label's line, so it draws at INLINE (Android icon
+ * migration spec D6; iOS draws it at `tile`).
  */
 @Composable
 fun DataTile(
     value: Int?,
-    iconRes: Int,
+    icon: PbblsIcon,
     label: String,
     modifier: Modifier = Modifier,
 ) {
@@ -40,9 +42,9 @@ fun DataTile(
             horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xs),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PebblesIcon(
-                painter = painterResource(iconRes),
-                token = PebblesIconToken.SMALL,
+            PbblsIconImage(
+                icon = icon,
+                size = PbblsIconSize.INLINE,
                 contentDescription = null,
                 tint = colors.primary,
             )

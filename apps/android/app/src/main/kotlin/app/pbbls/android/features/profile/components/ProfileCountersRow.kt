@@ -7,6 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
 
 /**
  * Days / Pebbles / Karma counter tiles — ports iOS `ProfileCountersRow.swift`.
@@ -24,19 +25,19 @@ fun ProfileCountersRow(
     ) {
         DataTile(
             value = daysPracticed,
-            iconRes = R.drawable.ic_calendar,
+            icon = PbblsIcon.CALENDAR_DATE,
             label = stringResource(R.string.profile_counter_days),
             modifier = Modifier.weight(1f),
         )
         DataTile(
             value = pebbles,
-            iconRes = R.drawable.ic_fossil_shell,
+            icon = PbblsIcon.PEBBLE_ROUND,
             label = stringResource(R.string.profile_counter_pebbles),
             modifier = Modifier.weight(1f),
         )
         DataTile(
             value = karma,
-            iconRes = R.drawable.ic_sparkle,
+            icon = PbblsIcon.KARMA_DOT,
             label = stringResource(R.string.profile_counter_karma),
             modifier = Modifier.weight(1f),
         )
