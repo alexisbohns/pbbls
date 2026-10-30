@@ -2605,23 +2605,6 @@
         }
       }
     },
-    "Couldn't load achievements" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Couldn't load achievements"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible de charger tes succès"
-          }
-        }
-      }
-    },
     "Couldn't load collections" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7071,23 +7054,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chargement…"
-          }
-        }
-      }
-    },
-    "Locked" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Locked"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À débloquer"
           }
         }
       }
@@ -12642,23 +12608,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler"
-          }
-        }
-      }
-    },
-    "Unlocked" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unlocked"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Débloqué le"
           }
         }
       }

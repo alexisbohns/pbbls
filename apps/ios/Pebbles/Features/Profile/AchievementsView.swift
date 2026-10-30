@@ -1,25 +1,21 @@
 import SwiftUI
-import os
 
-/// Achievements grid (M48, D8): badges grouped by family in catalog
-/// `sort_order`, locked ones greyed alongside the unlocked. Opening the screen
-/// fires `check_achievements()` first — that call *is* the retroactive grant
-/// for existing users — then reads catalog + unlocks, so history appears
-/// unlocked on first visit with no celebration chain (the capsule is for the
-/// mutation path only, D13 territory).
+/// You → Achievements (#1306, spec D1): the days kept and five cards, drawn
+/// from `get_achievements`. Opening the screen fires `check_achievements()`
+/// first: that call is the retroactive grant, so a veteran's history is there
+/// on the first visit, and it never celebrates. The device's last page shows at
+/// once while the read runs (stale-while-revalidate); a failed read keeps it and
+/// logs, and only a first visit with nothing kept shows the error. A ready mark
+/// pulls its ceremony through the model, which decides on a fresh read; the
+/// ceremony is the existing unlock moment.
 struct AchievementsView: View {
+    @Environment(SupabaseService.self) private var supabase
     @Environment(AchievementsService.self) private var achievements
+    @Environment(AchievementNotificationService.self) private var notify
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(ReferenceDataService.self) private var refs
 
-    @State private var catalog: [AchievementRecord] = []
-    @State private var unlockedAt: [UUID: Date] = [:]
-    @State private var isLoading = true
-    @State private var loadError: String?
-
-    private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.achievements")
-
-    private let columns = [GridItem(.adaptive(minimum: 148), spacing: Spacing.lg)]
+    @State private var model = AchievementsModel()
 
     var body: some View {
         content
@@ -30,149 +26,55 @@ struct AchievementsView: View {
 
     @ViewBuilder
     private var content: some View {
-        if isLoading {
+        let locale = SpineStrings.appLocale
+        if let page = model.page {
+            ScrollView {
+                AchievementsPageContent(page: page, lookups: HomeLookups.make(palettes: palettes, refs: refs),
+                                        pulling: model.pulling, onPull: pull)
+                    .padding(.top, Spacing.sm)
+            }
+        } else if model.failed {
+            ContentUnavailableView {
+                Label {
+                    Text(verbatim: AchievementsCopy.errorTitle(locale: locale))
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle")
+                }
+            } description: {
+                Text(verbatim: AchievementsCopy.errorBody(locale: locale))
+            } actions: {
+                Button {
+                    Task { await load() }
+                } label: {
+                    Text(verbatim: AchievementsCopy.retry(locale: locale))
+                }
+            }
+        } else {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if let loadError {
-            ContentUnavailableView(
-                "Couldn't load achievements",
-                systemImage: "exclamationmark.triangle",
-                description: Text(loadError)
-            )
-        } else {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: Spacing.xl) {
-                    ForEach(familyGroups, id: \.family) { group in
-                        VStack(alignment: .leading, spacing: Spacing.md) {
-                            Text(AchievementRecord.localizedGroupName(family: group.family))
-                                .pebblesFont(.headline)
-                                .foregroundStyle(Color.pebbles.onSurface)
-                            LazyVGrid(columns: columns, spacing: Spacing.lg) {
-                                ForEach(group.records) { record in
-                                    AchievementBadgeCell(
-                                        record: record,
-                                        unlockedAt: unlockedAt[record.id],
-                                        emotionName: emotionName(for: record),
-                                        domainName: domainName(for: record)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                .padding(Spacing.lg)
-            }
         }
-    }
-
-    /// Families in first-appearance order (the catalog is already sorted by
-    /// `sort_order`, which the migration blocks per family). Inactive badges
-    /// only show once earned — retiring one hides it from the ladder without
-    /// revoking anyone's unlock.
-    private var familyGroups: [(family: String, records: [AchievementRecord])] {
-        let visible = catalog.filter { $0.isActive || unlockedAt[$0.id] != nil }
-        var order: [String] = []
-        var byFamily: [String: [AchievementRecord]] = [:]
-        for record in visible {
-            if byFamily[record.family] == nil { order.append(record.family) }
-            byFamily[record.family, default: []].append(record)
-        }
-        return order.map { (family: $0, records: byFamily[$0] ?? []) }
-    }
-
-    private func emotionName(for record: AchievementRecord) -> String? {
-        guard let emotionId = record.emotionId else { return nil }
-        return palettes.byEmotionId[emotionId]?.localizedName
-    }
-
-    private func domainName(for record: AchievementRecord) -> String? {
-        guard let domainId = record.domainId else { return nil }
-        return refs.domains.first(where: { $0.id == domainId })?.localizedName
     }
 
     private func load() async {
-        isLoading = true
-        loadError = nil
-        // The retroactive grant precedes the read so a veteran's history is
-        // already unlocked by the time the grid renders; its errors are
-        // deliberately non-fatal (the next call self-heals).
-        await achievements.checkIgnoringFailure()
-        do {
-            async let catalogRows = achievements.loadCatalog()
-            async let unlockRows = achievements.loadUnlocks()
-            let loadedCatalog = try await catalogRows
-            let loadedUnlocks = try await unlockRows
-            self.catalog = loadedCatalog
-            self.unlockedAt = Dictionary(
-                loadedUnlocks.map { ($0.achievementId, $0.unlockedAt) },
-                uniquingKeysWith: { first, _ in first }
-            )
-        } catch {
-            logger.error("achievements fetch failed: \(error.localizedDescription, privacy: .private)")
-            self.loadError = "Something went wrong. Please try again."
+        if model.service == nil {
+            model.service = AchievementsPageService(client: supabase.client, disk: .standard,
+                                                    owner: supabase.session?.user.id.uuidString.lowercased())
         }
-        self.isLoading = false
+        await model.load { await achievements.checkIgnoringFailure() }
     }
-}
 
-/// One badge tile. Locked state reads through more than colour: muted styling
-/// plus a lock mark and an explicit caption, mirroring the web grid.
-struct AchievementBadgeCell: View {
-    let record: AchievementRecord
-    let unlockedAt: Date?
-    let emotionName: String?
-    let domainName: String?
-
-    private var isUnlocked: Bool { unlockedAt != nil }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            HStack {
-                PbblsIconImage(record.familySymbol, .tile,
-                               style: AnyShapeStyle(isUnlocked ? Color.pebbles.primary : Color.pebbles.outline))
-                Spacer()
-                if !isUnlocked {
-                    Image(systemName: "lock")
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundStyle(Color.pebbles.outline)
-                }
+    /// A ready mark pulls its ceremony. A row opens the unlock moment with the
+    /// karma it paid; a pull the re-read confirms opens it without a karma line
+    /// (the moment hides the line at 0). Anything else is logged by the model.
+    private func pull(_ stack: AchievementsPage.CeremonyStack) {
+        Task {
+            let karma: Int?
+            switch await model.pull(stack) {
+            case .pulled(let paid): karma = paid
+            case .pulledWithoutKarma: karma = nil
+            case .alreadyPulled, .notReady, .busy, .failed: return
             }
-            Text(record.localizedTitle(emotionName: emotionName, domainName: domainName))
-                .pebblesFont(.headline)
-                .foregroundStyle(isUnlocked ? Color.pebbles.onSurface : Color.pebbles.onSurfaceVariant)
-                .multilineTextAlignment(.leading)
-            if let description = record.localizedDescription(emotionName: emotionName, domainName: domainName) {
-                Text(description)
-                    .pebblesFont(.subhead)
-                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                    .multilineTextAlignment(.leading)
-            }
-            if let unlockedAt {
-                HStack(spacing: 4) {
-                    Text("Unlocked")
-                    Text(unlockedAt, format: .dateTime.day().month().year())
-                }
-                .pebblesFont(.subhead)
-                .foregroundStyle(Color.pebbles.primary)
-            } else {
-                Text("Locked")
-                    .pebblesFont(.subhead)
-                    .foregroundStyle(Color.pebbles.outline)
-            }
+            notify.present(cards: [AchievementsCopy.ceremonyCard(stack, karma: karma, locale: SpineStrings.appLocale)])
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .profileCard()
-        .opacity(isUnlocked ? 1 : 0.72)
-        .accessibilityElement(children: .combine)
-    }
-}
-
-#Preview {
-    let supabase = SupabaseService()
-    return NavigationStack {
-        AchievementsView()
-            .environment(AchievementsService(client: supabase.client))
-            .environment(EmotionPaletteService(client: supabase.client))
-            .environment(ReferenceDataService(client: supabase.client))
     }
 }
