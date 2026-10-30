@@ -33,7 +33,14 @@ export function achievementsCacheEpoch(): number {
   return epoch
 }
 
+/** A kept page, and when it was kept (ms since the epoch; null for an entry kept before this was recorded). */
+export type KeptAchievements = { page: AchievementsPage; keptAt: number | null }
+
 export function readAchievementsCache(storage: CacheStorage | null, userId: string, zone: string): AchievementsPage | null {
+  return readAchievementsCacheEntry(storage, userId, zone)?.page ?? null
+}
+
+export function readAchievementsCacheEntry(storage: CacheStorage | null, userId: string, zone: string): KeptAchievements | null {
   if (!storage) return null
   try {
     const text = storage.getItem(achievementsCacheKey(userId))
@@ -45,7 +52,9 @@ export function readAchievementsCache(storage: CacheStorage | null, userId: stri
     if (decoded && decoded.skipped.length > 0) {
       console.warn("[achievements] kept payload sections dropped", decoded.skipped)
     }
-    return decoded?.page ?? null
+    if (!decoded) return null
+    const at: unknown = Reflect.get(entry, "at")
+    return { page: decoded.page, keptAt: typeof at === "number" && Number.isFinite(at) ? at : null }
   } catch (err) {
     console.warn("[achievements] cache read failed", err)
     return null
@@ -58,10 +67,11 @@ export function writeAchievementsCache(
   zone: string,
   payload: unknown,
   readEpoch: number,
+  keptAt: number = Date.now(),
 ): void {
   if (!storage || readEpoch !== epoch) return
   try {
-    storage.setItem(achievementsCacheKey(userId), JSON.stringify({ v: VERSION, zone, payload }))
+    storage.setItem(achievementsCacheKey(userId), JSON.stringify({ v: VERSION, zone, at: keptAt, payload }))
   } catch (err) {
     console.warn("[achievements] cache write failed", err)
   }
