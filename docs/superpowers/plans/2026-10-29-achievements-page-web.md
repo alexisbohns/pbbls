@@ -7163,6 +7163,20 @@ The back-end shipped first, so the stack was re-cut: its first PR is Task 3, Par
   - Known window, as on iOS: a pull that times out client-side but lands on the server after the re-read reads as `failed`; the next read shows it pulled.
   - No hook test: the web suite runs in node with no React renderer (jsdom is only the admin's, and `vitest.config.ts` keeps the web suite DOM-free); the store's tests cover what a closed store must not do.
 
+### Parts 3 + 4, as one PR (`feat/1308-achievements-web-figures`, 30 October)
+
+The figures follow the parity settled with iOS (`Figures/*`) and Android (`features/achievements/figures/*`, `StoneSeal.kt`), not this plan's code where they differ.
+
+- **Fixture:** `packages/supabase/scripts/oracles/achievements/design/` (the canonical design fixture and its domains), byte for byte from the iOS branch, replaces VETERAN/NEWCOMER in the figures' tests; palettes come from `packages/supabase/reference/`.
+- **Modules** (`lib/achievements/`): `geometry`, `seals`, `palette`, `runs` (family runs, the band's arrival order), `wheel` (geometry and model in one), `rosace`, `shards`, `skyline`, `year-disc`, `ladders` (the margin ladders as `LadderBar { fill, done }`). Not built here: `copy.ts` (Task 15), `CountCell`, `milestoneRows`, `domainRows`, `emotionRegister`, `yearRows`: they are the page's words and the sheets' rows, and move to those parts.
+- **Seals** keep the outline apart from the print; the six firsts' intensities, the domains' ring and the year's counters are a solid print on the neutral outline. Tint and wash are 15 %/9 % on Paper, 18 %/12 % at Night. Strokes stay at the boards' screen widths (the sprite's bodies are non-scaling).
+- **The wheel** places seats by list index, spreads the first five by `i·360/n` and the six firsts, the 25 and the domains by `(i+0.5)·360/n` of the served count; the domains by `entered + not_yet`; the 25 ring always (25 ghosts without `twenty_five`); a ghost at the centre before the first pebble; a met seat without its pebble as the even medium stone; new marks from the served flag alone; an unknown task or kind a ghost.
+- **The rosace** lights an unresolved family's kites, soft stars and name in ink; names fall back to the slug; labels use the boards' `tx` (shame's shaded on Paper).
+- **The year disc** carries the 40 grains, mutes a month on its state alone, hues a kept month by its family or ink, rings the rim. A rim month whose family does not resolve keeps its ring, in ink.
+- **Done styles** come only from served facts: `rings_done`, a family with an empty `not_yet`, `coverage == all`, listed levels, level 2. The skyline stands per listed level (iOS), and an empty ladder stands (iOS, Android).
+- **The band** keeps its aspect up to the board's 300 (iOS fills the width at a fixed height).
+- **Tests:** the boards' own strings (`figures.test.ts`), the models on the design fixture and on counts and families the board never drew (`models.test.ts`), and the organisms rendered to markup with `react-dom/server` (`figures-render.test.ts`, no DOM). The figures are not yet seen in a browser: Part 5's `/sandbox/design` does that.
+
 ## Self-review notes
 
 - **Spec coverage:**
