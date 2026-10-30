@@ -51,9 +51,10 @@ data class AchievementMoment(
  * where karma flashes a pastille that times out, an unlock opens a chained card
  * per badge that the user taps through, so there is no auto-dismiss here.
  *
- * Only the mutation path celebrates: the screen-open call in `AchievementsScreen`
- * is the retroactive grant and can return a veteran's whole history at once, so
- * it renders in the grid instead of chaining twenty cards.
+ * Only the mutation path and a pulled ceremony celebrate: the screen-open call
+ * on the achievements page (and the Profile shelf's) is the retroactive grant and
+ * can return a veteran's whole history at once, so it shows on the page instead
+ * of chaining twenty cards.
  */
 @Singleton
 class AchievementNotificationService
