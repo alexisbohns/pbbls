@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 /**
  * `get_achievements(p_tz)` as the server sends it (#1305, spec §3.3). Every field has a default:
  * an absent section or optional field omits its key (D17), and an explicit null is coerced to the
- * default. [toModel] maps it to [AchievementsPage] and drops what cannot be drawn.
+ * default. A null inside a list or a map is not a field, so nothing coerces it: every element type
+ * is nullable, and the mapping drops the nulls. [toModel] maps it to [AchievementsPage] and drops what cannot be drawn.
  */
 @Serializable
 data class AchievementsPageDto(
@@ -23,7 +24,7 @@ data class AchievementsPageDto(
     val glyphSales: CountingDto? = null,
     val years: List<YearDto> = emptyList(),
     /** Card slug → when its sheet was last opened, whole-second UTC (D10). */
-    val seen: Map<String, String> = emptyMap(),
+    val seen: Map<String, String?> = emptyMap(),
     /** The owner's Profile shelf, private families already removed (D18). */
     val shelf: List<ShelfRowDto> = emptyList(),
     @SerialName("shelf_count")
@@ -105,7 +106,7 @@ data class ExplorerDto(
     @SerialName("twenty_five")
     val twentyFive: TwentyFiveDto? = null,
     @SerialName("rings_done")
-    val ringsDone: List<String> = emptyList(),
+    val ringsDone: List<String?> = emptyList(),
     val completion: CompletionDto? = null,
 )
 
@@ -126,9 +127,9 @@ data class SeatDto(
 @Serializable
 data class EmotionFamilyDto(
     val family: String? = null,
-    val met: List<Int> = emptyList(),
+    val met: List<Int?> = emptyList(),
     @SerialName("not_yet")
-    val notYet: List<Int> = emptyList(),
+    val notYet: List<Int?> = emptyList(),
 )
 
 @Serializable
@@ -158,7 +159,7 @@ data class DomainsDto(
     val coverage: String? = null,
     val entered: List<EnteredDto> = emptyList(),
     @SerialName("not_yet")
-    val notYet: List<String> = emptyList(),
+    val notYet: List<String?> = emptyList(),
     val completion: CompletionDto? = null,
 )
 
@@ -184,7 +185,7 @@ data class CountingDto(
     val count: Int = 0,
     val levels: List<LevelDto> = emptyList(),
     val next: NextLevelDto? = null,
-    val ladder: List<Int> = emptyList(),
+    val ladder: List<Int?> = emptyList(),
     @SerialName("then_every")
     val thenEvery: Int? = null,
     val since: String? = null,
@@ -232,7 +233,7 @@ data class YearDto(
     @SerialName("days_target")
     val daysTarget: Int? = null,
     val months: List<MonthDto> = emptyList(),
-    val listed: List<Int> = emptyList(),
+    val listed: List<Int?> = emptyList(),
     @SerialName("next_step")
     val nextStep: NextStepDto? = null,
 )

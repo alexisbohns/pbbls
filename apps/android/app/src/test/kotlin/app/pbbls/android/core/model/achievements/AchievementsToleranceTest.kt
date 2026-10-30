@@ -227,4 +227,29 @@ class AchievementsToleranceTest {
         )
         assertEquals(9, page.shelfCount)
     }
+
+    @Test
+    fun `a null inside a list or a map is dropped, its neighbours kept`() {
+        val page =
+            decodeAchievementsPage(
+                """{"seen": {"explorer": null, "emotions": "2026-10-02T08:14:05Z"},
+                    "explorer": {"rings_done": [null, "six_firsts"]},
+                    "emotions": {"count": 1, "of": 2, "seats": [
+                        {"seat": 0, "emotion_id": "a", "family": "joy", "met": true},
+                        {"seat": 1, "emotion_id": "b", "family": "joy"}],
+                      "families": [{"family": "joy", "met": [null, 0], "not_yet": [1, null]}]},
+                    "domains": {"count": 0, "of": 2, "coverage": "none", "entered": [], "not_yet": ["d1", null, "d2"]},
+                    "pebbles": {"count": 0, "ladder": [1, null, 10], "levels": []},
+                    "years": [{"year": 2026, "current": true, "listed": [10, null, 9],
+                       "months": [${(1..12).joinToString { """{"month": $it, "state": "quiet"}""" }}]}]}""",
+            )
+        assertEquals(setOf(AchievementCard.EMOTIONS), page.seen.keys)
+        assertEquals(setOf(ExplorerRing.SIX_FIRSTS), page.explorer!!.ringsDone)
+        val joy = page.emotions!!.families.single()
+        assertEquals(listOf("a"), joy.met.map { it.emotionId })
+        assertEquals(listOf("b"), joy.notYet.map { it.emotionId })
+        assertEquals(listOf("d1", "d2"), page.domains!!.notYet)
+        assertEquals(listOf(1, 10), page.pebbles!!.ladder)
+        assertEquals(listOf(10, 9), page.years.single().listed)
+    }
 }

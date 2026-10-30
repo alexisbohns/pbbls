@@ -27,7 +27,7 @@ fun AchievementsPageDto.toModel(): AchievementsPage =
             seen.entries
                 .mapNotNull { (card, at) ->
                     val key = AchievementCard.of(card) ?: return@mapNotNull null
-                    parseInstant(at)?.let { key to it }
+                    at?.let(::parseInstant)?.let { key to it }
                 }.toMap(),
         shelf = shelf.mapNotNull { it.toModel() },
         shelfCount = shelfCount,
@@ -106,7 +106,7 @@ private fun ExplorerDto.toModel(): ExplorerSection =
             twentyFive?.let {
                 TwentyFive(it.count, it.done, it.on?.let(::parseDay), it.pebble?.toModel(), it.isNew)
             },
-        ringsDone = ringsDone.mapNotNull(ExplorerRing::of).toSet(),
+        ringsDone = ringsDone.filterNotNull().mapNotNull(ExplorerRing::of).toSet(),
         completion = completion?.toModel(),
     )
 
@@ -129,7 +129,11 @@ private fun EmotionsDto.toModel(): EmotionsSection {
         families =
             families.mapNotNull { f ->
                 f.family?.let { family ->
-                    EmotionFamily(family, f.met.mapNotNull(bySeat::get), f.notYet.mapNotNull(bySeat::get))
+                    EmotionFamily(
+                        family,
+                        f.met.filterNotNull().mapNotNull(bySeat::get),
+                        f.notYet.filterNotNull().mapNotNull(bySeat::get),
+                    )
                 }
             },
         since = since?.let(::parseDay),
@@ -146,7 +150,7 @@ private fun DomainsDto.toModel(): DomainsSection =
             entered.mapNotNull { e ->
                 e.domainId?.let { DomainEntry(it, e.on?.let(::parseDay), e.pebble?.toModel(), e.isNew) }
             },
-        notYet = notYet,
+        notYet = notYet.filterNotNull(),
         completion = completion?.toModel(),
     )
 
@@ -158,7 +162,7 @@ private fun CountingDto.toModel(): CountingSection =
                 StackLevel(l.threshold, l.on?.let(::parseDay), l.pebble?.toModel(), l.isNew)
             },
         next = next?.let { NextLevel(it.threshold, it.left, it.progress.toFloat().coerceIn(0f, 1f)) },
-        ladder = ladder,
+        ladder = ladder.filterNotNull(),
         thenEvery = thenEvery,
         since = since?.let(::parseDay),
     )
@@ -190,7 +194,7 @@ private fun YearDto.toModel(): AchievementYear? {
                     done = MonthDone(d.done.moments, d.done.pebbles, d.done.weeks),
                 )
             },
-        listed = listed.filter { it in 1..12 },
+        listed = listed.filterNotNull().filter { it in 1..12 },
         nextStep =
             nextStep?.let { n ->
                 Needs.of(n.needs)?.let { NextStep(n.month, it, n.daysLeft, n.reachable) }
