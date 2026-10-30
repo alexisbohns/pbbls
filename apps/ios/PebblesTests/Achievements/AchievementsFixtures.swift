@@ -20,8 +20,16 @@ enum AchievementsFixtures {
     /// The canonical design fixture and its domains.
     static let folder = oracles.appendingPathComponent("design")
 
+    /// This suite's own payloads (a new user's first day), excluded from the bundle.
+    static let local = URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent()
+        .appendingPathComponent("Fixtures")
+
+    /// `name` from the canonical design folder, else from this suite's own.
     static func data(_ name: String) throws -> Data {
-        try Data(contentsOf: folder.appendingPathComponent("\(name).json"))
+        let canonical = folder.appendingPathComponent("\(name).json")
+        if FileManager.default.fileExists(atPath: canonical.path) { return try Data(contentsOf: canonical) }
+        return try Data(contentsOf: local.appendingPathComponent("\(name).json"))
     }
 
     static func payload(_ name: String) throws -> AchievementsPayload {

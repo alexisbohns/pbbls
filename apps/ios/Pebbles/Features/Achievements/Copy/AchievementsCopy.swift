@@ -166,6 +166,13 @@ enum AchievementsCopy {
     static func errorBody(locale: Locale) -> String { SpineStrings.string("achievements.error.body", locale: locale) }
     static func retry(locale: Locale) -> String { SpineStrings.string("achievements.error.retry", locale: locale) }
 
+    // MARK: - The page's small labels
+
+    /// "ready": a set whose ceremony can be pulled.
+    static func ready(locale: Locale) -> String { SpineStrings.string("achievements.ready", locale: locale) }
+    static func glyphsCarved(locale: Locale) -> String { SpineStrings.string("achievements.card.glyphsCarved", locale: locale) }
+    static func glyphSales(locale: Locale) -> String { SpineStrings.string("achievements.card.glyphSales", locale: locale) }
+
     // MARK: - Helpers
 
     /// The format for `key` in `locale`, its plurals resolved by the catalog's variations.
