@@ -58,6 +58,13 @@ export type CeremonyPullOutcome =
   | { kind: "busy" }
   | { kind: "failed" }
 
+/** The `set_complete` catalog row a stack pays from. */
+export const CEREMONY_SLUG: Record<CeremonyStack, string> = {
+  emotions: "complete-emotions",
+  domains: "complete-domains",
+  six_firsts: "complete-six-firsts",
+}
+
 /** The completion a ceremony stack pulls, wherever its card carries it. */
 export function completionOf(page: AchievementsPage | null, stack: CeremonyStack): AchievementCompletion | null {
   if (!page) return null

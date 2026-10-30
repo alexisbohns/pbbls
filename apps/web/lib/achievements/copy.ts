@@ -25,13 +25,6 @@ import type {
 /** A translator rooted at `achievements.page`. */
 export type Translate = (key: string, values?: Record<string, string | number>) => string
 
-/** The `set_complete` catalog row a stack pays from. */
-export const CEREMONY_SLUG: Record<CeremonyStack, string> = {
-  emotions: "complete-emotions",
-  domains: "complete-domains",
-  six_firsts: "complete-six-firsts",
-}
-
 const RINGS: readonly ExplorerRing[] = ["first_five", "six_firsts", "twenty_five", "domains", "emotions"]
 
 function served(day: string): Date {

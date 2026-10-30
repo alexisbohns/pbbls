@@ -6,10 +6,10 @@ import { useDataProvider } from "@/lib/data/provider-context"
 import { browserStorage } from "@/lib/data/achievements-cache"
 import {
   AchievementsPageStore,
+  CEREMONY_SLUG,
   type AchievementsPageState,
   type CeremonyPullOutcome,
 } from "@/lib/data/achievements-page-store"
-import { CEREMONY_SLUG } from "@/lib/achievements/copy"
 import { presentCeremony } from "@/lib/activity/present-ceremony"
 import type { AchievementCard, CeremonyStack } from "@/lib/types"
 
@@ -28,8 +28,8 @@ const signedOut = () => SIGNED_OUT
  * revalidate, spec §4). The sheets read the same page, so opening one costs no
  * call (D14). A store belongs to one user: a new user gets a new store, and
  * the old one is closed, so nothing it reads afterwards is shown or kept.
- * `shelfMaxAgeMs` opens it for the Profile shelf instead (D18): no grant, and
- * no read while the kept copy is younger than that.
+ * `shelfMaxAgeMs` opens it for the Profile shelf instead (D18): no read while
+ * the kept copy is younger than that (and not marked stale by an unlock).
  */
 export function useAchievementsPage(shelfMaxAgeMs?: number) {
   const { provider } = useDataProvider()
@@ -70,17 +70,17 @@ export function useAchievementsPage(shelfMaxAgeMs?: number) {
    */
   const pull = useCallback(
     async (stack: CeremonyStack, words: { title: string; description: string }): Promise<CeremonyPullOutcome> => {
-      if (!store || !provider) {
+      if (!store) {
         console.error(`[achievements] pull_ceremony(${stack}) asked while signed out`)
         return { kind: "failed" }
       }
       const outcome = await store.pull(stack)
       if (outcome.kind === "pulled" || outcome.kind === "pulledWithoutKarma") {
-        void presentCeremony(provider, CEREMONY_SLUG[stack], outcome.kind === "pulled" ? outcome.karmaGranted : 0, words)
+        presentCeremony(CEREMONY_SLUG[stack], outcome.kind === "pulled" ? outcome.karmaGranted : 0, words)
       }
       return outcome
     },
-    [store, provider],
+    [store],
   )
 
   const retry = useCallback(() => {
