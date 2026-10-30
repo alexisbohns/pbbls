@@ -24,6 +24,32 @@ extension AchievementSheet {
     }
 }
 
+/// The page's sheets (#1306): which one is open, and a row's moment to open on
+/// the held card once the sheets are down. Every sheet is closed by its owner's
+/// binding (never by `dismiss()` from a sheet that may be presenting another),
+/// and the moment opens once, whichever way the dismissal reports.
+struct AchievementSheetState: Equatable {
+    var sheet: AchievementSheet?
+    private(set) var pendingMoment: UUID?
+
+    /// A row's moment: close the sheets, keep the moment for when they are down.
+    mutating func open(_ moment: UUID) {
+        pendingMoment = moment
+        sheet = nil
+    }
+
+    /// The moment to open now, once: a second call has nothing.
+    mutating func takePending() -> UUID? {
+        defer { pendingMoment = nil }
+        return pendingMoment
+    }
+
+    /// Closes the open sheet (and whatever it presents) when its section left the payload.
+    mutating func close(ifGoneFrom page: AchievementsPage?) {
+        if let open = sheet, !open.isShown(by: page) { sheet = nil }
+    }
+}
+
 /// A set's ready mark on its sheet's band, while it is offered; every mark waits during a pull.
 @MainActor
 func sheetReadyMark(_ completion: AchievementsPage.Completion?, pulling: AchievementsPage.CeremonyStack?,
@@ -206,7 +232,6 @@ struct AchievementSheetHost: View {
     let openMoment: (UUID) -> Void
 
     @State private var pushed: AchievementSheet?
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ScrollView {
@@ -216,8 +241,10 @@ struct AchievementSheetHost: View {
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .onAppear { seen(sheet.card) }
-        .onChange(of: sheet.isShown(by: page), initial: true) { _, shown in
-            if !shown { dismiss() }
+        // What this sheet presents is closed here, by its owner, when its section leaves the payload;
+        // this sheet itself is closed by its own owner the same way.
+        .onChange(of: page) { _, now in
+            if let shown = pushed, !shown.isShown(by: now) { pushed = nil }
         }
         .sheet(item: $pushed) { inner in
             AchievementSheetHost(sheet: inner, page: page, lookups: lookups, pulling: pulling, seen: seen, pull: pull,

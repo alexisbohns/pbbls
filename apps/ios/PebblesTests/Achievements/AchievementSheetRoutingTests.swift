@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import Pebbles
 
@@ -43,5 +44,35 @@ struct AchievementSheetRoutingTests {
         let ctx = AchievementsSheetRows.Context.current(try AchievementsLookups.fixture())
         #expect(ctx.calendar.timeZone == SpineCalendar.current.timeZone)
         #expect(ctx.locale == SpineStrings.appLocale)
+    }
+}
+
+/// The page's sheet state (#1306): a row's moment closes the sheets and opens
+/// once, whichever way the dismissal reports; a sheet whose section left closes.
+@Suite("Achievement sheet state")
+struct AchievementSheetStateTests {
+    @Test("a row's moment closes the sheets and is taken once")
+    func pendingOnce() throws {
+        var state = AchievementSheetState(sheet: .explorer)
+        let id = try #require(UUID(uuidString: "a0000000-0000-4000-8000-000000000001"))
+        state.open(id)
+        #expect(state.sheet == nil && state.pendingMoment == id)
+        #expect(state.takePending() == id)
+        #expect(state.takePending() == nil, "onDismiss and the fallback both ask: only the first opens it")
+    }
+
+    @Test("the open sheet closes when its section leaves the payload, and stays while it is there")
+    func closesWhenGone() throws {
+        let page = try AchievementsFixtures.payload("design-fixture").model
+        var state = AchievementSheetState(sheet: .domains)
+        state.close(ifGoneFrom: page)
+        #expect(state.sheet == .domains)
+        var gone = page
+        gone.domains = nil
+        state.close(ifGoneFrom: gone)
+        #expect(state.sheet == nil)
+        var year = AchievementSheetState(sheet: .year(2025))
+        year.close(ifGoneFrom: page)
+        #expect(year.sheet == nil)
     }
 }

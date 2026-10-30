@@ -17,9 +17,7 @@ struct AchievementsView: View {
     @Environment(HeldCardHostModel.self) private var heldCard
 
     @State private var model = AchievementsModel()
-    @State private var sheet: AchievementSheet?
-    /// A row's moment, opened once the sheets have closed.
-    @State private var pendingMoment: UUID?
+    @State private var sheets = AchievementSheetState()
 
     var body: some View {
         content
@@ -35,17 +33,25 @@ struct AchievementsView: View {
             let lookups = HomeLookups.make(palettes: palettes, refs: refs)
             ScrollView {
                 AchievementsPageContent(page: page, lookups: lookups, pulling: model.pulling, onPull: pull,
-                                        onOpen: { sheet = $0 })
+                                        onOpen: { sheets.sheet = $0 })
                     .padding(.top, Spacing.sm)
             }
-            .sheet(item: $sheet, onDismiss: openPendingMoment) { opened in
+            .sheet(item: $sheets.sheet, onDismiss: openPendingMoment) { opened in
                 // The model's page, read when drawn: a later read reaches an open sheet.
                 AchievementSheetHost(sheet: opened, page: model.page, lookups: lookups, pulling: model.pulling,
-                                     seen: { model.opened($0) }, pull: pull,
-                                     openMoment: { id in
-                                         pendingMoment = id
-                                         sheet = nil
-                                     })
+                                     seen: { model.opened($0) },
+                                     pull: pull, openMoment: { sheets.open($0) })
+            }
+            // A sheet whose section left the payload is closed by its owner, with what it presents.
+            .onChange(of: model.page) { _, now in sheets.close(ifGoneFrom: now) }
+            // `onDismiss` may not report when a nested sheet went down with its parent: open the
+            // pending moment once the dismissal has had time to finish, if nothing opened it yet.
+            .onChange(of: sheets.sheet == nil) { _, closed in
+                guard closed, sheets.pendingMoment != nil else { return }
+                Task {
+                    try? await Task.sleep(for: .milliseconds(450))
+                    openPendingMoment()
+                }
             }
         } else if model.failed {
             ContentUnavailableView {
@@ -80,8 +86,7 @@ struct AchievementsView: View {
     /// The held card is drawn above the tabs, under any sheet: a row's moment
     /// opens once the sheets are down, and a change on the card reads the page again.
     private func openPendingMoment() {
-        guard let id = pendingMoment else { return }
-        pendingMoment = nil
+        guard let id = sheets.takePending() else { return }
         heldCard.open(HeldCardRequest(momentId: id, origin: .you, onChanged: { Task { await load() } }))
     }
 
