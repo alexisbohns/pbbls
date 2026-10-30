@@ -163,10 +163,14 @@ export class AchievementsPageStore {
     this.set({ loading: true })
     try {
       const kept = readAchievementsCacheEntry(this.options.storage, this.options.owner, this.options.zone())
-      if (kept && this.state.page === null && this.readShown === 0) this.set({ page: kept.page })
       if (mode.kind === "shelf") {
+        // The kept copy is the latest the device holds (every read writes it), so the
+        // shelf shows it over an older one in memory, whether or not it then reads.
+        if (kept) this.set({ page: this.patched(kept.page) })
         const age = kept && kept.keptAt !== null ? (this.options.now ?? Date.now)() - kept.keptAt : null
         if (this.state.page !== null && age !== null && age >= 0 && age < mode.maxAgeMs) return
+      } else if (kept && this.state.page === null && this.readShown === 0) {
+        this.set({ page: kept.page })
       }
       try {
         await this.options.provider.checkAchievements()

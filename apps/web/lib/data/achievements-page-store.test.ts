@@ -390,3 +390,22 @@ describe("the Profile shelf (D18)", () => {
   })
 })
 
+describe("the Profile shelf, reopened", () => {
+  const MIN = 60_000
+
+  it("shows the latest kept copy when it skips the read, not an older one in memory", async () => {
+    const storage = new MemoryStorage()
+    writeAchievementsCache(storage, "alice", ZONE, NOT_READY(), achievementsCacheEpoch(), 0)
+    const { fake } = provider([])
+    const s = new AchievementsPageStore({ provider: fake, owner: "alice", zone: () => ZONE, storage, now: () => MIN })
+    await s.open({ kind: "shelf", maxAgeMs: 15 * MIN })
+    expect(s.getSnapshot().page?.shelfCount).toBe(3)
+    s.close()
+    // The page, elsewhere, kept a newer payload meanwhile.
+    writeAchievementsCache(storage, "alice", ZONE, PULLED(), achievementsCacheEpoch(), MIN)
+    await s.open({ kind: "shelf", maxAgeMs: 15 * MIN })
+    expect(s.getSnapshot().page?.shelfCount).toBe(4)
+    expect(fake.getAchievementsPayload).not.toHaveBeenCalled()
+  })
+})
+
