@@ -17,6 +17,8 @@ import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
@@ -24,6 +26,7 @@ import kotlinx.serialization.json.put
 import java.time.Instant
 import java.time.ZoneId
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.cancellation.CancellationException
@@ -156,12 +159,24 @@ class AchievementsService
         private val lastRead = ConcurrentHashMap<Pair<String, String>, Instant>()
 
         /**
-         * Set when the kept page no longer says what the server would (a check unlocked something, a
-         * ceremony was pulled): the next shelf open reads rather than wait out its fifteen minutes.
-         * The copy itself stays, for display. A read that lands clears it.
+         * Reads overlap (the page, its resume, a pull's re-read, the shelf): each takes a number when
+         * it leaves, and only one newer than the last kept is kept, so a slow old answer never
+         * overwrites a newer copy.
          */
+        private val readsStarted = AtomicLong(0)
+        private var lastKeptRead = 0L
+        private val keepLock = Mutex()
+
+        /**
+         * Bumped when the kept page no longer says what the server would (a check unlocked
+         * something, a ceremony was pulled): the next shelf open reads rather than wait out its
+         * fifteen minutes. The copy itself stays, for display. Only a read that left after the bump
+         * makes the page fresh again; one already in flight may not have seen the change.
+         */
+        private val staleGeneration = AtomicLong(0)
+
         @Volatile
-        private var pageStale = false
+        private var freshGeneration = 0L
 
         /**
          * Full catalog, inactive rows included: the unlock moment and the Profile
@@ -247,6 +262,8 @@ class AchievementsService
             // was before the call, so a session that swaps while it is in flight never files one
             // user's page under the next one.
             val owner = supabase.session?.user?.id
+            val read = readsStarted.incrementAndGet()
+            val generation = staleGeneration.get()
             val body =
                 supabase.client.postgrest
                     .rpc("get_achievements", buildJsonObject { put("p_tz", zone.id) })
@@ -254,9 +271,16 @@ class AchievementsService
             val page = decodeAchievementsPage(body)
             // Kept only once it has decoded, so the device never holds a body it cannot read.
             if (owner != null && supabase.session?.user?.id == owner) {
-                pageStale = false
-                lastRead[owner to zone.id] = Instant.now()
-                disk.write(owner, zone, CACHE_PAGE, body)
+                keepLock.withLock {
+                    if (read > lastKeptRead) {
+                        lastKeptRead = read
+                        lastRead[owner to zone.id] = Instant.now()
+                        disk.write(owner, zone, CACHE_PAGE, body)
+                    } else {
+                        Log.i(TAG, "an older get_achievements landed after a newer one was kept; not kept")
+                    }
+                }
+                if (generation == staleGeneration.get()) freshGeneration = maxOf(freshGeneration, generation)
             } else if (owner != null) {
                 Log.w(TAG, "the session changed during get_achievements; its page is not kept")
             }
@@ -276,7 +300,7 @@ class AchievementsService
         }
 
         override suspend fun keptAt(zone: ZoneId): Instant? {
-            if (pageStale) return null
+            if (freshGeneration < staleGeneration.get()) return null
             val owner = supabase.session?.user?.id ?: return null
             return listOfNotNull(disk.keptAt(owner, zone, CACHE_PAGE), lastRead[owner to zone.id]).maxOrNull()
         }
@@ -310,7 +334,7 @@ class AchievementsService
         }
 
         private fun markPageStale() {
-            pageStale = true
+            staleGeneration.incrementAndGet()
             lastRead.clear()
         }
 

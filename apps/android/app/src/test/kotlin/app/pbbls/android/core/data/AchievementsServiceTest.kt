@@ -18,7 +18,9 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -33,6 +35,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Instant
 import java.time.ZoneId
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * The real [AchievementsService] over a [MockEngine] client (#1307): the page is kept on the
@@ -45,10 +49,10 @@ class AchievementsServiceTest {
     private lateinit var client: SupabaseClient
 
     /** Answers a request whose path ends with the key, ahead of the dumps. */
-    private val answers = mutableMapOf<String, String>()
+    private val answers = ConcurrentHashMap<String, String>()
 
     /** Runs before each answer to a request whose path ends with the key. */
-    private val beforeAnswer = mutableMapOf<String, suspend () -> Unit>()
+    private val beforeAnswer = ConcurrentHashMap<String, suspend () -> Unit>()
 
     @OptIn(SupabaseInternal::class)
     private fun newClient(): SupabaseClient =
@@ -184,5 +188,54 @@ class AchievementsServiceTest {
             answers["/rpc/pull_ceremony"] = """[{"stack":"six_firsts","karma_granted":30}]"""
             assertEquals(CeremonyPull.Pulled(CompletionStack.SIX_FIRSTS, 30), service.pullCeremony(CompletionStack.SIX_FIRSTS, zone))
             assertNull(service.keptAt(zone))
+        }
+
+    @Test
+    fun `an older read landing after a newer one was kept is not kept`() =
+        runTest {
+            val (_, service) = signedIn("alice")
+            val gate = CompletableDeferred<Unit>()
+            val calls = AtomicInteger(0)
+            val older = AchievementPayloads.read(AchievementPayloads.PAGE)
+            val newer = AchievementPayloads.read(AchievementPayloads.PULLED)
+            beforeAnswer["/rpc/get_achievements"] = {
+                if (calls.incrementAndGet() == 1) {
+                    gate.await()
+                    answers["/rpc/get_achievements"] = older
+                } else {
+                    answers["/rpc/get_achievements"] = newer
+                }
+            }
+            withContext(Dispatchers.Default) {
+                val first = async { service.page(zone) }
+                withTimeout(5_000) { while (calls.get() < 1) delay(5) }
+                service.page(zone)
+                gate.complete(Unit)
+                first.await()
+            }
+            assertEquals(newer, disk.bodies[Triple("alice", zone.id, "achievements-page")])
+        }
+
+    @Test
+    fun `only a read that left after the page went stale makes it fresh again`() =
+        runTest {
+            val (_, service) = signedIn("alice")
+            service.page(zone)
+            val gate = CompletableDeferred<Unit>()
+            val waiting = AtomicInteger(0)
+            beforeAnswer["/rpc/get_achievements"] = {
+                if (waiting.incrementAndGet() == 1) gate.await()
+            }
+            answers["/rpc/pull_ceremony"] = """[{"stack":"six_firsts","karma_granted":30}]"""
+            withContext(Dispatchers.Default) {
+                val inFlight = async { service.page(zone) }
+                withTimeout(5_000) { while (waiting.get() < 1) delay(5) }
+                service.pullCeremony(CompletionStack.SIX_FIRSTS, zone)
+                gate.complete(Unit)
+                inFlight.await()
+            }
+            assertNull("the read in flight may not have seen the pull", service.keptAt(zone))
+            service.page(zone)
+            assertNotNull(service.keptAt(zone))
         }
 }
