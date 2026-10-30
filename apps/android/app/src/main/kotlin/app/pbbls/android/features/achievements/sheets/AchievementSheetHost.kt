@@ -19,6 +19,16 @@ import app.pbbls.android.features.achievements.AchievementSheet
 private val SHEET_SIDE = 20.dp
 private val SHEET_BOTTOM = 34.dp
 
+/** Whether [page] still holds what this sheet shows: a sheet whose section left the payload is not drawn. */
+fun AchievementSheet.isShownBy(page: AchievementsPage): Boolean =
+    when (this) {
+        AchievementSheet.Explorer -> page.explorer != null
+        AchievementSheet.Emotions -> page.emotions != null
+        AchievementSheet.Domains -> page.domains != null
+        AchievementSheet.Pebbles -> page.pebbles != null
+        is AchievementSheet.Year -> page.years.any { it.year == year }
+    }
+
 /** One sheet's content for its identity; null-safe on the payload (a section that left hides). */
 @Composable
 fun AchievementSheetContent(
@@ -45,9 +55,10 @@ fun AchievementSheetContent(
 }
 
 /**
- * The stacked sheets (#1307): one `ModalBottomSheet` per entry of [sheets], the last on top.
- * [onDismiss] pops the top one, which is the only one the user can reach. The stack itself
- * belongs to the screen's ViewModel.
+ * The stacked sheets (#1307): one `ModalBottomSheet` per entry of [sheets], the last on top. An
+ * entry whose section left the payload after a refresh is skipped, never drawn empty. [onDismiss]
+ * names the sheet the user dismissed (the top one drawn, the only one they can reach): the
+ * screen's ViewModel, which owns the stack, removes it and anything above it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,15 +67,15 @@ fun AchievementSheetHost(
     page: AchievementsPage,
     lookups: AchievementLookups,
     onPush: (AchievementSheet) -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: (AchievementSheet) -> Unit,
     onOpenMoment: (String) -> Unit,
     onPull: (CompletionStack) -> Unit,
 ) {
     val colors = PebblesTheme.spine.colors
-    sheets.forEachIndexed { depth, sheet ->
+    sheets.filter { it.isShownBy(page) }.forEachIndexed { depth, sheet ->
         key(depth, sheet) {
             ModalBottomSheet(
-                onDismissRequest = onDismiss,
+                onDismissRequest = { onDismiss(sheet) },
                 sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
                 containerColor = colors.stock,
             ) {
