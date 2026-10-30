@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -117,15 +117,16 @@ private fun CardShell(
             // intrinsic measurement ever reaches the figures.
             Box(Modifier.fillMaxWidth().heightIn(min = SpineLayoutTokens.TOUCH_MIN)) {
                 Column(Modifier.fillMaxWidth().padding(start = MARGIN + RULE_WIDTH + BODY_PAD, end = BODY_PAD, bottom = 16.dp)) {
-                    Row(
+                    // The title and the hint share a line; when they cannot (large text), the hint
+                    // goes under the title rather than either being cut (iOS `AchievementBand`).
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth().rule(colors.cardRule, above = false).padding(top = 14.dp, bottom = 9.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        itemVerticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(title, style = type.cardBand, color = colors.ink, modifier = Modifier.weight(1f, fill = false))
-                        Spacer(Modifier.weight(1f).widthIn(min = 8.dp))
-                        if (hint != null && ready == null) {
-                            Text(hint, style = type.cardHint, color = colors.ink2, textAlign = TextAlign.End)
-                        }
+                        Text(title, style = type.cardBand, color = colors.ink, modifier = Modifier.padding(end = 8.dp))
+                        if (hint != null && ready == null) Text(hint, style = type.cardHint, color = colors.ink2)
                     }
                     content()
                 }
@@ -281,21 +282,30 @@ private fun StackLine(
 ) {
     val colors = PebblesTheme.spine.colors
     val type = PebblesTheme.spine.type
-    Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = SpineLayoutTokens.ROW_MIN).rule(colors.rule, above = false),
-        verticalAlignment = Alignment.CenterVertically,
+    // When the label cannot keep its column (large text), it takes its own line above the skyline
+    // and the count rather than being cut (iOS `subRow`).
+    FlowRow(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = SpineLayoutTokens.ROW_MIN)
+                .rule(colors.rule, above = false)
+                .padding(vertical = 4.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, style = type.stackLabel, color = colors.ink2, modifier = Modifier.widthIn(max = STACK_LABEL))
-        Box(Modifier.weight(1f).padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
-            Skyline(stack.skylineFill(), description = "", viewport = SkylineGeometry.MINI, width = MINI_SKYLINE)
+        Text(label, style = type.stackLabel, color = colors.ink2, modifier = Modifier.widthIn(min = STACK_LABEL))
+        Row(Modifier.weight(1f).widthIn(min = MINI_SKYLINE + STACK_COUNT + 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f).padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
+                Skyline(stack.skylineFill(), description = "", viewport = SkylineGeometry.MINI, width = MINI_SKYLINE)
+            }
+            Text(
+                copy.number(stack.count),
+                style = type.stackCount,
+                color = colors.ink,
+                textAlign = TextAlign.End,
+                modifier = Modifier.widthIn(min = STACK_COUNT),
+            )
         }
-        Text(
-            copy.number(stack.count),
-            style = type.stackCount,
-            color = colors.ink,
-            textAlign = TextAlign.End,
-            modifier = Modifier.widthIn(min = STACK_COUNT),
-        )
     }
 }
 
