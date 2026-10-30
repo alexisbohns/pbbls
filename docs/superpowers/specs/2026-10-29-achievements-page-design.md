@@ -210,8 +210,13 @@ Components are factored once per platform:
 
 ## 5. Accessibility and i18n
 
-- **Cards** are buttons; their labels are assembled from the payload, for example "Explorer: first five done, six firsts done, …".
-- **The disc** reads as the server's lists: "On the rim: August. On the inner circle: …".
+- **Cards** are buttons; their labels are assembled from the payload, for example "Explorer: the first five, done; the six firsts, done; …; emotions, 23 of 38. 3 new.":
+  - a ring reads "done" only when `rings_done` lists it; otherwise "N of M" from the served counts, rings separated by "; ";
+  - an absent section or stack is left out of the label, never read as 0 (Explorer's rings, Emotions, Domains, the Pebbles card's glyph stacks);
+  - a card ends with its "N new" count. Explorer's adds the `new` flags of everything the wheel draws: the first five, the six firsts, the 25th, the domain entries and the emotion seats. Emotions counts its seats, Domains its entries, Pebbles the levels of its three stacks;
+  - a ready mark reads "<ceremony title>: the ceremony is ready." / "<titre> : la cérémonie est prête." (no gender agreement); its visible word stays lowercase "ready" / "prêt";
+  - the sheets' rows say "new since you last looked" / "nouveau depuis ta dernière visite".
+- **The disc** reads as the server's lists, wherever it is drawn: "The year 2026. On the rim: August. On the inner disc: …. On their way: November.", the months joined by the locale's list formatter.
 - **Copy:**
   - Every sentence lives in each surface's catalog, in English and French.
   - Months and numerals are localised.
