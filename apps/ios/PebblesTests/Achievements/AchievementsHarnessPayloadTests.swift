@@ -75,9 +75,37 @@ struct AchievementsHarnessPayloadTests {
             #expect(year.months.allSatisfy { $0.state != .kept || $0.family != nil })
             #expect(year.months.allSatisfy { $0.state != .upcoming || $0.family == nil })
         }
-        let june = try #require(years[1].month(6))
-        #expect(june.level == 2 && june.done == AchievementsPage.MonthDone(moments: true, pebbles: true, weeks: true))
-        #expect(years[1].month(4)?.done == AchievementsPage.MonthDone(moments: false, pebbles: false, weeks: true))
+    }
+
+    /// The past year's months come from a seeded random fixture, so their values
+    /// are not asserted; each decoded month must equal its raw JSON instead.
+    @Test("every decoded month equals the dump's raw values", arguments: H.reads)
+    func monthsMatchRaw(dump: String) throws {
+        let raw = try #require(try JSONSerialization.jsonObject(with: H.data(dump)) as? [String: Any])
+        let rawYears = try #require(raw["years"] as? [[String: Any]])
+        let years = try H.payload(dump).model.years
+        #expect(years.map(\.year) == rawYears.compactMap { $0["year"] as? Int })
+        for (year, rawYear) in zip(years, rawYears) {
+            let rawMonths = try #require(rawYear["months"] as? [[String: Any]])
+            #expect(year.months.count == rawMonths.count)
+            for (month, rawMonth) in zip(year.months, rawMonths) {
+                let done = try #require(rawMonth["done"] as? [String: Bool])
+                #expect(month.month == rawMonth["month"] as? Int)
+                #expect(month.state.rawValue == rawMonth["state"] as? String)
+                #expect(month.family == rawMonth["family"] as? String)
+                #expect(month.momentDays == rawMonth["moment_days"] as? Int)
+                #expect(month.pebbleDays == rawMonth["pebble_days"] as? Int)
+                #expect(month.fullWeeks == rawMonth["full_weeks"] as? Int)
+                #expect(month.weeksFilled == rawMonth["weeks_filled"] as? Int)
+                #expect(month.level == rawMonth["level"] as? Int)
+                #expect(month.progress == (rawMonth["progress"] as? NSNumber)?.doubleValue)
+                #expect(month.done == AchievementsPage.MonthDone(moments: done["moments"] ?? false,
+                                                                  pebbles: done["pebbles"] ?? false,
+                                                                  weeks: done["weeks"] ?? false))
+            }
+            #expect(year.listed == rawYear["listed"] as? [Int])
+            #expect(year.daysTarget == rawYear["days_target"] as? Int)
+        }
     }
 
     @Test("after the emotions card was seen, the one emotion first recorded since is new")
