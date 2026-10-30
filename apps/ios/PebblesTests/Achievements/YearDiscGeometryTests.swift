@@ -65,6 +65,13 @@ struct YearDiscGeometryTests {
         #expect(G.climb(Self.month(5, level: -3, progress: 0.5)) != nil)
     }
 
+    @Test("the stone's grain is the board's forty dots, all on the stone")
+    func grain() {
+        #expect(G.grain.count == 40)
+        #expect(G.grain.allSatisfy { G.box.contains(CGPoint(x: $0.x, y: $0.y)) && $0.r > 0 && $0.r < 1.5 })
+        #expect(G.grain.first == G.Grain(x: 217.6, y: 135.5, r: 0.7))
+    }
+
     @Test("the stone has the board's forty points; twelve numerals, the long ones a point smaller")
     func base() {
         #expect(G.outline.count == 40)

@@ -12,6 +12,8 @@ struct AchievementInks {
     let ink2 = Color.pebbles.onSurfaceVariant
     let rule = Color.pebbles.rule
     let cardRule = Color.pebbles.cardRule
+    /// The board's third ink (`--ink-3`, the disc's grain): Android's `ink3`, the scheme's outline.
+    let ink3 = Color.pebbles.outline
     let scheme: ColorScheme
 
     init(scheme: ColorScheme) {

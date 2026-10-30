@@ -71,6 +71,9 @@ struct YearDisc: View {
         let stone = Path.polygon(G.outline)
         c.fill(stone, with: .color(inks.stock))
         c.stroke(stone, with: .color(inks.ink2.opacity(0.85)), style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
+        var grain = Path()
+        for dot in G.grain { grain.addPath(Path.circle(CGPoint(x: dot.x, y: dot.y), dot.r)) }
+        c.fill(grain, with: .color(inks.ink3))
         c.stroke(Path.circle(G.centre, 52), with: .color(inks.ink2.opacity(0.5)), lineWidth: 1)
         c.stroke(Path.circle(G.centre, 48.5), with: .color(inks.ink2.opacity(0.45)), lineWidth: 0.5)
         for number in 1...12 {
