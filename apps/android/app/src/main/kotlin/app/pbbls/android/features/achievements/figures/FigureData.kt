@@ -36,7 +36,7 @@ fun familyRuns(seats: List<EmotionSeat>): List<FamilyRun> {
  */
 fun EmotionSeat.sealValence(): Valence? = if (!met) null else pebble?.valence ?: Valence.NEUTRAL_MEDIUM
 
-/** One shard or seat of the domains: a domain id (null draws a ghost), whether it came, whether it is new. */
+/** One shard or seat of the domains: a domain id (null when the server sent none; it still inks as one that came), whether it came, whether it is new. */
 data class BandItem(
     val domainId: String?,
     val on: Boolean,
