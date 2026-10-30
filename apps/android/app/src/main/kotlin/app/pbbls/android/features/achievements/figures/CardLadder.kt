@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.achievements.AchievementYear
 import app.pbbls.android.core.model.achievements.CountingSection
+import app.pbbls.android.core.model.achievements.Coverage
 import app.pbbls.android.core.model.achievements.DomainsSection
 import app.pbbls.android.core.model.achievements.EmotionsSection
 import app.pbbls.android.core.model.achievements.ExplorerRing
@@ -27,21 +28,33 @@ import app.pbbls.android.core.model.achievements.ExplorerSection
 const val TWENTY_FIVE_SEATS = 25
 
 /**
- * Each card's margin ladder, as fill fractions read off the payload (the board's `ladder`,
- * `fracLadder`). A bar is full where the server says so (a ring done, a level listed); otherwise
- * it is the server's progress, or the served count over its served whole. Bar lengths only:
- * nothing here compares a count with a threshold.
+ * One bar of a margin ladder: how far it is filled, and whether it wears the done style (solid
+ * ink). [done] is always a served fact (a ring the server lists as done, a listed level, a whole
+ * set, a month on the rim); a fill that happens to reach 1 never shows it on its own.
+ */
+data class LadderBar(
+    val fill: Float,
+    val done: Boolean,
+)
+
+/**
+ * Each card's margin ladder, read off the payload (the board's `ladder`, `fracLadder`). A bar's fill
+ * is the server's progress, or the served count over its served whole; its done style is the
+ * server's say. Bar lengths only: nothing here compares a count with a threshold.
  */
 object CardLadders {
     fun explorer(
         explorer: ExplorerSection,
         emotions: EmotionsSection?,
         domains: DomainsSection?,
-    ): List<Float> {
+    ): List<LadderBar> {
         fun ring(
             ring: ExplorerRing,
             fraction: Float,
-        ) = if (ring in explorer.ringsDone) 1f else fraction
+        ): LadderBar {
+            val done = ring in explorer.ringsDone
+            return LadderBar(if (done) 1f else fraction, done)
+        }
         return listOf(
             ring(ExplorerRing.FIRST_FIVE, fraction(explorer.firstFive.count { it.done }, explorer.firstFive.size)),
             ring(ExplorerRing.SIX_FIRSTS, fraction(explorer.sixFirsts.count { it.done }, explorer.sixFirsts.size)),
@@ -51,23 +64,30 @@ object CardLadders {
         )
     }
 
-    fun emotions(emotions: EmotionsSection): List<Float> = familyRuns(emotions.seats).map { fraction(it.met, it.size) }
+    /** One bar per served family, in its order; done when the server lists nothing not yet met in it. */
+    fun emotions(emotions: EmotionsSection): List<LadderBar> =
+        emotions.families.map { f ->
+            LadderBar(fraction(f.met.size, f.met.size + f.notYet.size), done = f.met.isNotEmpty() && f.notYet.isEmpty())
+        }
 
-    fun domains(domains: DomainsSection): Float = fraction(domains.count, domains.of)
+    /** The domains' one tall bar: done when the server's coverage is `all`. */
+    fun domains(domains: DomainsSection): LadderBar =
+        LadderBar(fraction(domains.count, domains.of), done = domains.coverage == Coverage.ALL)
 
-    fun counting(stack: CountingSection): List<Float> {
+    fun counting(stack: CountingSection): List<LadderBar> {
         val reached = stack.levels.map { it.threshold }.toSet()
         return stack.ladder.map { t ->
             when {
-                t in reached -> 1f
-                t == stack.next?.threshold -> stack.next.progress
-                else -> 0f
+                t in reached -> LadderBar(1f, done = true)
+                t == stack.next?.threshold -> LadderBar(stack.next.progress, done = false)
+                else -> LadderBar(0f, done = false)
             }
         }
     }
 
-    /** Each month at `(level + progress) / 2`: the inner disc is half way, the rim the top. */
-    fun year(year: AchievementYear): List<Float> = year.months.map { (it.level + if (it.level >= 2) 0f else it.progress) / 2f }
+    /** Each month at `(level + progress) / 2`: the inner disc is half way, the rim the top and done. */
+    fun year(year: AchievementYear): List<LadderBar> =
+        year.months.map { LadderBar((it.level + if (it.level >= 2) 0f else it.progress) / 2f, done = it.level >= 2) }
 
     private fun fraction(
         n: Int,
@@ -81,13 +101,13 @@ private val BAR_GAP = 4.dp
 private val BAR_RING = 1.dp
 
 /**
- * The card's margin ladder (the board's `.lad`): one 4 dp bar per step. A full bar is solid ink;
+ * The card's margin ladder (the board's `.lad`): one 4 dp bar per step. A done bar is solid ink;
  * any other bar is a secondary-ink ring, filled from the top by its fraction. A [long] bar is
  * the domains' single tall one. Decorative: the card's label says it in words.
  */
 @Composable
 fun CardLadder(
-    fills: List<Float>,
+    bars: List<LadderBar>,
     modifier: Modifier = Modifier,
     long: Dp? = null,
 ) {
@@ -97,13 +117,13 @@ fun CardLadder(
         verticalArrangement = Arrangement.spacedBy(BAR_GAP),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        fills.forEach { fill ->
+        bars.forEach { bar ->
             Canvas(Modifier.size(BAR_WIDTH, long ?: BAR_HEIGHT)) {
                 val radius = CornerRadius(size.width / 2)
-                if (fill >= 1f) {
+                if (bar.done) {
                     drawRoundRect(colors.ink, cornerRadius = radius)
                 } else {
-                    if (fill > 0f) clipRect(bottom = size.height * fill) { drawRoundRect(colors.ink, cornerRadius = radius) }
+                    if (bar.fill > 0f) clipRect(bottom = size.height * bar.fill) { drawRoundRect(colors.ink, cornerRadius = radius) }
                     val inset = BAR_RING.toPx() / 2
                     drawRoundRect(
                         colors.ink2,
