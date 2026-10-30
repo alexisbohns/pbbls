@@ -1,3 +1,4 @@
+import { steady } from "@/lib/achievements/geometry"
 import { familyRuns } from "@/lib/achievements/runs"
 import type { Segment } from "@/lib/achievements/geometry"
 import type { EmotionSeat } from "@/lib/types"
@@ -40,7 +41,7 @@ export function rosaceGeometry(side: number, count: number, labelled: boolean): 
   const inner = outer * 0.47
   const step = (2 * Math.PI) / Math.max(count, 1)
   const angle = (k: number) => -Math.PI / 2 + (k - 2.5) * step
-  const point = (r: number, a: number): [number, number] => [centre + Math.cos(a) * r, centre + Math.sin(a) * r]
+  const point = (r: number, a: number): [number, number] => [steady(centre + Math.cos(a) * r), steady(centre + Math.sin(a) * r)]
   const at = (r: number, a: number) => {
     const [x, y] = point(r, a)
     return `${x.toFixed(2)},${y.toFixed(2)}`

@@ -13,10 +13,20 @@ export function r1(n: number): number {
   return Math.round(n * 10) / 10
 }
 
+/**
+ * A trigonometric result rounded to a millionth. `Math.sin` and `Math.cos`
+ * may differ in their last bit between the server's engine and the
+ * browser's, which would make a server-rendered figure fail to hydrate; a
+ * millionth is far below anything drawn, and the same on both.
+ */
+export function steady(n: number): number {
+  return Math.round(n * 1e6) / 1e6
+}
+
 /** The boards' `polar`: a point at radius `r` and `deg` degrees clockwise from twelve. */
 export function polar(r: number, deg: number): [number, number] {
   const a = (deg * Math.PI) / 180
-  return [r * Math.sin(a), -r * Math.cos(a)]
+  return [steady(r * Math.sin(a)), steady(-r * Math.cos(a))]
 }
 
 /** The boards' `arcD`: a circular arc from `a0` to `a1` degrees, coordinates at one decimal. */
