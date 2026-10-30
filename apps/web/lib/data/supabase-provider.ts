@@ -13,6 +13,8 @@ import {
   type ConnectionInvite,
   type AcceptConnectionInviteResult,
   type AchievementUnlockResult,
+  type CeremonyPull,
+  CeremonyNotReadyError,
 } from "@/lib/data/data-provider"
 import type {
   Moment,
@@ -28,10 +30,14 @@ import type {
   RippleSummary,
   ProfileEngagement,
   Achievement,
+  AchievementCard,
   AchievementUnlock,
+  CeremonyStack,
   SharedConnectionPebble,
 } from "@/lib/types"
 import { unlockResultsFrom } from "@/lib/data/achievement-results"
+import { ceremonyPullFrom } from "@/lib/data/achievements-payload"
+import { withTimeout } from "@/lib/utils/with-timeout"
 import { toConnectionPeer } from "@/lib/data/invite-api"
 import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
@@ -315,6 +321,40 @@ export class SupabaseProvider implements DataProvider {
     const { data, error } = await this.supabase.rpc("check_achievements")
     if (error) throw new Error(`check_achievements failed: ${error.message}`)
     return unlockResultsFrom(data)
+  }
+
+  // ---------------------------------------------------------------------------
+  // The achievements page (#1308) — get_achievements, mark_achievements_seen,
+  // pull_ceremony (spec 2026-10-29 §3.3, §3.4).
+  // ---------------------------------------------------------------------------
+
+  async getAchievementsPayload(tz: string, signal?: AbortSignal): Promise<unknown> {
+    const call = this.supabase.rpc("get_achievements", { p_tz: tz })
+    const { data, error } = await withTimeout(signal ? call.abortSignal(signal) : call, 10000, "get_achievements")
+    if (error) throw new Error(`get_achievements failed: ${error.message}`)
+    return data
+  }
+
+  async markAchievementsSeen(card: AchievementCard): Promise<void> {
+    const { error } = await withTimeout(
+      this.supabase.rpc("mark_achievements_seen", { p_card: card }),
+      10000,
+      "mark_achievements_seen",
+    )
+    if (error) throw new Error(`mark_achievements_seen failed: ${error.message}`)
+  }
+
+  async pullCeremony(stack: CeremonyStack, tz: string): Promise<CeremonyPull | null> {
+    const { data, error } = await withTimeout(
+      this.supabase.rpc("pull_ceremony", { p_stack: stack, p_tz: tz }),
+      10000,
+      "pull_ceremony",
+    )
+    if (error) {
+      if (error.message.includes("not_ready")) throw new CeremonyNotReadyError(stack)
+      throw new Error(`pull_ceremony failed: ${error.message}`)
+    }
+    return ceremonyPullFrom(data)
   }
 
   // ---------------------------------------------------------------------------
