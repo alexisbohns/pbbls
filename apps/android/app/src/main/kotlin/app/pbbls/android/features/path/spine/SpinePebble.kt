@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +30,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -51,6 +49,9 @@ import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.CalendarLabels
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.CardFace
@@ -356,8 +357,9 @@ internal fun SpinePebble(
                         )
                     },
                     leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_trash),
+                        PbblsIconImage(
+                            icon = PbblsIcon.TRASH,
+                            size = PbblsIconSize.ROW,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.error,
                         )

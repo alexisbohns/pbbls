@@ -11,12 +11,10 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,7 +38,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -53,6 +50,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SpineTypography
 import app.pbbls.android.core.model.MomentDetail
@@ -302,10 +301,10 @@ private fun BarePlace(
             contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
             modifier = Modifier.padding(top = BODY_TO_CTA),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_plus),
+            PbblsIconImage(
+                icon = PbblsIcon.PLUS_CIRCLE,
                 contentDescription = null,
-                modifier = Modifier.size(ButtonDefaults.IconSize),
+                size = ButtonDefaults.IconSize,
             )
             Text(stringResource(R.string.complete_cta), modifier = Modifier.padding(start = ButtonDefaults.IconSpacing))
         }

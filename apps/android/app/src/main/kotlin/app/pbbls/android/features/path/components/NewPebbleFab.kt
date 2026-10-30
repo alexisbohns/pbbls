@@ -5,17 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
 
 /**
  * The Path tab's create affordance, now a Path-only FAB (#852, D3) — the bar
@@ -42,11 +42,11 @@ fun NewPebbleFab(
                 .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_plus),
+        // The FAB's 24dp icon slot: the generated default (spec D6).
+        PbblsIconImage(
+            icon = PbblsIcon.PLUS_CIRCLE,
             contentDescription = label,
             tint = colors.onPrimary,
-            modifier = Modifier.size(24.dp),
         )
     }
 }
