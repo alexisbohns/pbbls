@@ -150,7 +150,7 @@ struct PebblesSheetContent: View {
         SheetBody(band: AchievementsCopy.title(.pebbles, locale: locale),
                   hint: pebbles.since.map { AchievementsCopy.sinceHint($0, calendar: ctx.calendar, locale: locale,
                                                                        dateLocale: ctx.dateLocale) },
-                  lead: AchievementsCopy.pebblesLead(pebbles, locale: locale)) {
+                  lead: AchievementsCopy.pebblesLead(pebbles, locale: locale), centresLead: true) {
             PebbleSkyline(ladder: pebbles, width: 350)
         } sections: {
             SheetSectionView(
@@ -170,7 +170,7 @@ struct PebblesSheetContent: View {
                     section: AchievementsSheetRows.ladder(
                         sales, id: "glyph-sales", title: AchievementsCopy.glyphSales(locale: locale),
                         note: AchievementsCopy.number(sales.count, locale: locale),
-                        trailing: AchievementsCopy.sheet("buyerNeverNamed", locale: locale), ctx),
+                        closing: AchievementsCopy.sheet("buyerNeverNamed", locale: locale), ctx),
                     lookups: lookups, compact: true, open: open)
             }
         }

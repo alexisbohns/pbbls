@@ -135,6 +135,21 @@ struct AchievementsSheetRowsTests {
         #expect(carved.rows.map(\.name) == ["10", "25", "50", "75", "100"])
         #expect(carved.rows[0].sub == nil && carved.rows[0].date == "Sep 21" && carved.rows[0].opens == nil)
         #expect(carved.trailing == nil)
+        let sales = Rows.ladder(try #require(page.glyphSales), id: "sales", title: "Glyph sales", note: "3",
+                                closing: "The buyer is never named.", ctx)
+        #expect(sales.closing == "The buyer is never named." && sales.trailing == nil,
+                "a closing line, never a row and never in the tail's place")
+    }
+
+    @Test("a stack with no ladder draws no stage for its levels")
+    func emptyLadder() throws {
+        let page = try AchievementsFixtures.json("""
+        {"pebbles": {"count": 3, "levels": [{"threshold": 1, "on": "2026-03-02"}], "ladder": [],
+                     "next": {"threshold": 10, "left": 7, "progress": 0.2}}}
+        """).model
+        let section = Rows.ladder(try #require(page.pebbles), id: "milestones", title: "Milestones", note: nil, Self.context())
+        #expect(section.rows.map(\.mark) == [.stage(index: -1, fill: 1), .stage(index: -1, fill: 0.2)])
+        #expect(SkylineGeometry.drawn(-1) == nil)
     }
 
     @Test("the year: the listed months newest first, the served counts uncapped, done from the server")

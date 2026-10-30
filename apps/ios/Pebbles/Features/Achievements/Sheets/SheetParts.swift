@@ -8,6 +8,8 @@ struct SheetBody<Figure: View, Sections: View>: View {
     let band: String
     var hint: String?
     var lead: String?
+    /// The Pebbles sheet centres its lead under the skyline.
+    var centresLead = false
     var ready: ReadyMark?
     @ViewBuilder let figure: () -> Figure
     @ViewBuilder let sections: () -> Sections
@@ -22,7 +24,9 @@ struct SheetBody<Figure: View, Sections: View>: View {
                 Text(verbatim: lead)
                     .spineType(.achievementsLead)
                     .foregroundStyle(Color.pebbles.onSurface)
+                    .multilineTextAlignment(centresLead ? .center : .leading)
                     .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: centresLead ? .center : .leading)
                     .padding(.top, 14)
             }
             sections()
@@ -88,6 +92,13 @@ struct SheetSectionView: View {
                     .padding(.leading, 44)
                     .frame(maxWidth: .infinity, minHeight: SpineLayout.minTarget, alignment: .leading)
                     .overlay(alignment: .bottom) { Rectangle().fill(inks.rule).frame(height: 1) }
+            }
+            if let closing = section.closing {
+                Text(verbatim: closing)
+                    .spineType(.achievementsQuiet)
+                    .foregroundStyle(inks.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 10)
             }
             if let quiet = section.quiet {
                 Text(verbatim: quiet)

@@ -58,10 +58,12 @@ struct RegisterSection: Equatable, Identifiable {
     var rows: [RegisterRowModel] = []
     /// What is not yet, as dotted names, read aloud as one.
     var notYet: [String] = []
-    /// A closing line ("then every 500", "The buyer is never named.").
+    /// The ladder's tail, a row of its own ("then every 500").
     var trailing: String?
     /// A quiet line in place of rows ("The 25th pebble is still to come.").
     var quiet: String?
+    /// A quiet line closing the section after its rows ("The buyer is never named.").
+    var closing: String?
 }
 
 /// One gauge of the year table (the board's `cell`): the served count, an "/n"
@@ -248,10 +250,11 @@ enum AchievementsSheetRows {
     /// A stack's milestones: the levels the server lists (dated, opening their
     /// pebble), its next (what is left, never a date), the ladder's other steps,
     /// then the ladder's tail.
-    static func ladder(_ ladder: Page.Ladder, id: String, title: String, note: String?, trailing: String? = nil,
+    static func ladder(_ ladder: Page.Ladder, id: String, title: String, note: String?, closing: String? = nil,
                        _ ctx: Context) -> RegisterSection {
         let locale = ctx.locale
-        func stage(_ threshold: Int) -> Int { ladder.ladder.firstIndex(of: threshold) ?? max(ladder.ladder.count - 1, 0) }
+        // A step past the ladder stands on the last stage; with no ladder at all, on none (drawn as nothing).
+        func stage(_ threshold: Int) -> Int { ladder.ladder.firstIndex(of: threshold) ?? ladder.ladder.count - 1 }
         var rows = ladder.levels.map { level in
             let name = Copy.number(level.threshold, locale: locale)
             let sub = level.pebble.map { Copy.momentName($0.name, locale: locale) }
@@ -275,7 +278,7 @@ enum AchievementsSheetRows {
                                          style: .ghostNumber, accessibilityLabel: name))
         }
         return RegisterSection(id: id, title: title, note: note, rows: rows,
-                               trailing: trailing ?? ladder.thenEvery.map { Copy.thenEvery($0, locale: locale) })
+                               trailing: ladder.thenEvery.map { Copy.thenEvery($0, locale: locale) }, closing: closing)
     }
 
     // MARK: - The year
