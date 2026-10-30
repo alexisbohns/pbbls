@@ -39,12 +39,13 @@ fun AchievementSheetContent(
     onOpenMoment: (String) -> Unit,
     onPull: (CompletionStack) -> Unit,
     modifier: Modifier = Modifier,
+    pulling: Boolean = false,
 ) {
     when (sheet) {
         AchievementSheet.Explorer ->
-            page.explorer?.let { ExplorerSheet(it, page.emotions, page.domains, lookups, onPush, onOpenMoment, onPull, modifier) }
-        AchievementSheet.Emotions -> page.emotions?.let { EmotionsSheet(it, lookups, onOpenMoment, onPull, modifier) }
-        AchievementSheet.Domains -> page.domains?.let { DomainsSheet(it, lookups, onOpenMoment, onPull, modifier) }
+            page.explorer?.let { ExplorerSheet(it, page.emotions, page.domains, lookups, onPush, onOpenMoment, onPull, modifier, pulling) }
+        AchievementSheet.Emotions -> page.emotions?.let { EmotionsSheet(it, lookups, onOpenMoment, onPull, modifier, pulling) }
+        AchievementSheet.Domains -> page.domains?.let { DomainsSheet(it, lookups, onOpenMoment, onPull, modifier, pulling) }
         AchievementSheet.Pebbles -> page.pebbles?.let { PebblesSheet(it, page.glyphsCarved, page.glyphSales, onOpenMoment, modifier) }
         is AchievementSheet.Year ->
             page.years.firstOrNull { it.year == sheet.year }?.let { year ->
@@ -58,7 +59,8 @@ fun AchievementSheetContent(
  * The stacked sheets (#1307): one `ModalBottomSheet` per entry of [sheets], the last on top. An
  * entry whose section left the payload after a refresh is skipped, never drawn empty. [onDismiss]
  * names the sheet the user dismissed (the top one drawn, the only one they can reach): the
- * screen's ViewModel, which owns the stack, removes it and anything above it.
+ * screen's ViewModel, which owns the stack, removes it and anything above it. While [pulling],
+ * every ready mark waits: one ceremony at a time.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +72,7 @@ fun AchievementSheetHost(
     onDismiss: (AchievementSheet) -> Unit,
     onOpenMoment: (String) -> Unit,
     onPull: (CompletionStack) -> Unit,
+    pulling: Boolean = false,
 ) {
     val colors = PebblesTheme.spine.colors
     sheets.filter { it.isShownBy(page) }.forEachIndexed { depth, sheet ->
@@ -86,6 +89,7 @@ fun AchievementSheetHost(
                     onPush = onPush,
                     onOpenMoment = onOpenMoment,
                     onPull = onPull,
+                    pulling = pulling,
                     modifier =
                         Modifier
                             .verticalScroll(

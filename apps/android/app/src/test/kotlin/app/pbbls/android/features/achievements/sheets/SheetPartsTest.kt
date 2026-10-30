@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -57,5 +58,17 @@ class SheetPartsTest {
         }
         compose.onNodeWithContentDescription("Every emotion: the ceremony is ready.").assertHeightIsAtLeast(48.dp).performClick()
         assertEquals(1, pulled)
+    }
+
+    @Test
+    fun `a ready mark waits, disabled, while a pull runs`() {
+        var pulled = 0
+        compose.setContent {
+            PebblesTheme {
+                ReadyMark(label = "ready", description = "Every emotion: the ceremony is ready.", onClick = { pulled++ }, enabled = false)
+            }
+        }
+        compose.onNodeWithContentDescription("Every emotion: the ceremony is ready.").assertIsNotEnabled().performClick()
+        assertEquals(0, pulled)
     }
 }
