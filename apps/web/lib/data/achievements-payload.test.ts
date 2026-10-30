@@ -329,6 +329,23 @@ describe("tolerance: the variants no harness run produces", () => {
   })
 })
 
+describe("ids that open something", () => {
+  it("reads a malformed moment or subject id as null, keeping the item", () => {
+    const decoded = decodeAchievementsPage({
+      explorer: {
+        first_pebble: { moment_id: "not-a-uuid", happened_at: "2026-03-02T09:00:00Z", intensity: 2, positiveness: 1 },
+        first_five: [{ slug: "first-soul", done: true, subject: { kind: "soul", id: "42", name: "Mara" } }],
+        six_firsts: [{ kind: "small", done: true, pebble: { moment_id: "1357B116-055A-444E-B773-54EF3ED7D1B6" } }],
+      },
+    })
+    const e = decoded?.page.explorer
+    expect(e?.firstPebble).toMatchObject({ momentId: null, happenedAt: at("2026-03-02T09:00:00Z"), positiveness: 1 })
+    expect(e?.firstFive[0].subject).toEqual({ kind: "soul", id: null, name: "Mara" })
+    // A reference-data id that is not RFC 4122 v4, in any case, still opens.
+    expect(e?.sixFirsts[0].pebble?.momentId).toBe("1357B116-055A-444E-B773-54EF3ED7D1B6")
+  })
+})
+
 describe("instantFrom", () => {
   it("reads every spelling the surfaces emit, and refuses a zoneless or unreadable one", () => {
     expect(instantFrom("2026-03-02T09:00:00Z")).toEqual(at("2026-03-02T09:00:00Z"))
@@ -346,6 +363,9 @@ describe("calendarDayFrom", () => {
     expect(calendarDayFrom("2026-03-02")).toBe("2026-03-02")
     expect(calendarDayFrom("2026-3-2")).toBeNull()
     expect(calendarDayFrom("2026-13-02")).toBeNull()
+    expect(calendarDayFrom("2026-02-31")).toBeNull()
+    expect(calendarDayFrom("2025-02-29")).toBeNull()
+    expect(calendarDayFrom("2024-02-29")).toBe("2024-02-29")
     expect(calendarDayFrom("2026-03-02T00:00:00Z")).toBeNull()
   })
 })

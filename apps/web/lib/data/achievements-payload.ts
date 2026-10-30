@@ -154,13 +154,22 @@ function oneOf<T extends string>(o: Json, key: string, values: readonly T[]): T 
 
 const DAY = /^(\d{4})-(\d{2})-(\d{2})$/
 
-/** A `YYYY-MM-DD` local day (D17), or null when absent or malformed. */
+/** A `YYYY-MM-DD` local day (D17), or null when absent, malformed or impossible (`2026-02-31`). */
 export function calendarDayFrom(raw: string | null): string | null {
   const m = raw === null ? null : DAY.exec(raw.trim())
   if (!m) return null
-  const month = Number(m[2])
-  const day = Number(m[3])
-  return month >= 1 && month <= 12 && day >= 1 && day <= 31 ? `${m[1]}-${m[2]}-${m[3]}` : null
+  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  const date = new Date(Date.UTC(year, month - 1, day))
+  const real = date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
+  return real ? `${m[1]}-${m[2]}-${m[3]}` : null
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** An id that opens something (a moment, a first-five subject), or null when malformed, as iOS's `UUID(uuidString:)`. */
+function uuid(o: Json, key: string): string | null {
+  const raw = optString(o, key)
+  return raw !== null && UUID.test(raw) ? raw : null
 }
 
 const INSTANT = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}(?::\d{2})?)(?:\.(\d+))?(Z|[+-]\d{2}(?::?\d{2})?)$/i
@@ -200,7 +209,7 @@ function valence(intensity: number, positiveness: number): { intensity: Intensit
 function pebbleFrom(p: Json | null): CrossingPebble | null {
   if (!p) return null
   return {
-    momentId: optString(p, "moment_id"),
+    momentId: uuid(p, "moment_id"),
     name: optString(p, "name"),
     happenedAt: instant(p, "happened_at"),
     emotionId: optString(p, "emotion_id"),
@@ -222,7 +231,7 @@ function completionFrom(c: Json | null, stack: CeremonyStack): AchievementComple
 
 function subjectFrom(s: Json | null): FirstFiveSubject | null {
   if (!s) return null
-  return { kind: oneOf(s, "kind", SUBJECT_KINDS), id: optString(s, "id"), name: optString(s, "name") }
+  return { kind: oneOf(s, "kind", SUBJECT_KINDS), id: uuid(s, "id"), name: optString(s, "name") }
 }
 
 function firstFiveFrom(raw: unknown): FirstFiveItem {
