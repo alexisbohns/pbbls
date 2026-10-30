@@ -927,9 +927,10 @@
     <string name="achievements_pebbles_a11y">Pebbles: %1$s. Glyphs carved: %2$s. Glyph sales: %3$s.</string>
     <string name="achievements_disc_a11y">%1$d. On the rim: %2$s. On the inner circle: %3$s. On their way: %4$s.</string>
     <string name="achievements_none">none</string>
-    <string name="achievements_month_a11y">%1$s. Days with a moment: %2$s. With a pebble: %3$s. %4$s</string>
-    <string name="achievements_weeks_filled">Full weeks filled: %1$s of %2$s.</string>
-    <string name="achievements_no_full_week">No full week yet.</string>
+    <string name="achievements_month_a11y">%1$s. Days with a moment: %2$s. With a pebble: %3$s. %4$s.</string>
+    <string name="achievements_weeks_filled">Full weeks filled: %1$s of %2$s</string>
+    <string name="achievements_no_full_week">No full week yet</string>
+    <string name="achievements_reached">%1$s, reached</string>
     <string name="achievements_new_a11y">new since you last looked</string>
     <string name="achievements_not_yet_a11y">Not yet: %1$s</string>
     <string name="achievements_open_pebble">Open the pebble</string>

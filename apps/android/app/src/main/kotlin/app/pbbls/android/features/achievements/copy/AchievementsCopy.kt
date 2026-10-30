@@ -308,19 +308,29 @@ class AchievementsCopy(
         )
     }
 
-    /** A table row read aloud: the served counts as they are, never against a target. */
-    fun monthDescription(month: AchievementMonth): String =
-        resources.getString(
-            R.string.achievements_month_a11y,
-            monthHeading(month.month),
-            number(month.momentDays),
-            number(month.pebbleDays),
+    /**
+     * A table row read aloud: the served counts as they are, never against a target, each marked
+     * "reached" where the server's `done` flag says so (the done style the table draws).
+     */
+    fun monthDescription(month: AchievementMonth): String {
+        fun reached(
+            text: String,
+            done: Boolean,
+        ) = if (done) resources.getString(R.string.achievements_reached, text) else text
+        val weeks =
             if (month.fullWeeks > 0) {
                 resources.getString(R.string.achievements_weeks_filled, number(month.weeksFilled), number(month.fullWeeks))
             } else {
                 resources.getString(R.string.achievements_no_full_week)
-            },
+            }
+        return resources.getString(
+            R.string.achievements_month_a11y,
+            monthHeading(month.month),
+            reached(number(month.momentDays), month.done.moments),
+            reached(number(month.pebbleDays), month.done.pebbles),
+            reached(weeks, month.done.weeks),
         )
+    }
 
     /** The quiet names read as one: "Not yet: Anxiety, Shame". */
     fun notYetDescription(names: List<String>): String = resources.getString(R.string.achievements_not_yet_a11y, names.joinToString(", "))

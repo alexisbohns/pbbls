@@ -39,7 +39,7 @@ class YearSheetTest {
         }
         compose
             .onNodeWithContentDescription(
-                "August. Days with a moment: 19. With a pebble: 17. Full weeks filled: 4 of 4.",
+                "August. Days with a moment: 19, reached. With a pebble: 17, reached. Full weeks filled: 4 of 4, reached.",
             ).performScrollTo()
             .assertExists()
         compose
@@ -67,5 +67,20 @@ class YearSheetTest {
         }
         compose.onNodeWithContentDescription("2025", substring = true).performScrollTo().performClick()
         assertEquals(listOf<AchievementSheet>(AchievementSheet.Year(2025)), pushed)
+    }
+
+    @Test
+    fun `a month reads reached only for the counters the server marks done`() {
+        compose.setContent {
+            PebblesTheme {
+                YearSheet(year, otherYears = emptyList(), lookups = AchievementsFixture.lookups, onPush = {
+                }, modifier = Modifier.verticalScroll(rememberScrollState()))
+            }
+        }
+        // March: 17 days with a moment (done), 12 with a pebble (not), its 4 full weeks filled (done).
+        compose
+            .onNodeWithContentDescription("March. Days with a moment: 17, reached. With a pebble: 12. Full weeks filled: 4 of 4, reached.")
+            .performScrollTo()
+            .assertExists()
     }
 }

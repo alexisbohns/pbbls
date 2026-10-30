@@ -134,12 +134,12 @@ class AchievementsCopyTest {
             copy.discDescription(AchievementYear(2026, true, 14, months, emptyList(), null)),
         )
         assertEquals(
-            "August. Days with a moment: 16. With a pebble: 14. Full weeks filled: 4 of 4.",
+            "August. Days with a moment: 16, reached. With a pebble: 14, reached. Full weeks filled: 4 of 4, reached.",
             copy.monthDescription(months[7]),
         )
         assertEquals(
-            "November. Days with a moment: 16. With a pebble: 14. No full week yet.",
-            copy.monthDescription(months[10].copy(fullWeeks = 0, weeksFilled = 0)),
+            "November. Days with a moment: 16, reached. With a pebble: 14. No full week yet.",
+            copy.monthDescription(months[10].copy(fullWeeks = 0, weeksFilled = 0, done = MonthDone(true, false, false))),
         )
     }
 }
