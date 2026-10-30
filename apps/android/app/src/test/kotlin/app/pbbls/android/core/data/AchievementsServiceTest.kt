@@ -1,6 +1,8 @@
 package app.pbbls.android.core.data
 
 import app.pbbls.android.core.model.achievements.AchievementPayloads
+import app.pbbls.android.core.model.achievements.CeremonyPull
+import app.pbbls.android.core.model.achievements.CompletionStack
 import app.pbbls.android.testing.FakeWrapDiskCache
 import app.pbbls.android.testing.testSession
 import io.github.jan.supabase.SupabaseClient
@@ -20,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -41,6 +44,9 @@ class AchievementsServiceTest {
     private val disk = FakeWrapDiskCache()
     private lateinit var client: SupabaseClient
 
+    /** Answers a request whose path ends with the key, ahead of the dumps. */
+    private val answers = mutableMapOf<String, String>()
+
     /** Runs before each answer to a request whose path ends with the key. */
     private val beforeAnswer = mutableMapOf<String, suspend () -> Unit>()
 
@@ -55,7 +61,7 @@ class AchievementsServiceTest {
                         ?.value
                         ?.invoke()
                     val body =
-                        when {
+                        answers.entries.firstOrNull { path.endsWith(it.key) }?.value ?: when {
                             path.endsWith("/rpc/get_achievements") -> AchievementPayloads.read(AchievementPayloads.PAGE)
                             path.endsWith("/rpc/check_achievements") -> AchievementPayloads.read(AchievementPayloads.CHECK)
                             else -> "[]"
@@ -149,5 +155,34 @@ class AchievementsServiceTest {
         runTest {
             val (_, service) = signedIn("alice")
             assertEquals(listOf(AchievementCheckResult(slug = "first-moment", karmaGranted = 0)), service.check())
+        }
+
+    @Test
+    fun `a check that unlocks something makes the kept page stale until the next read`() =
+        runTest {
+            val (_, service) = signedIn("alice")
+            service.page(zone)
+            assertNotNull(service.keptAt(zone))
+            service.fireCheck()
+            var tries = 0
+            while (service.keptAt(zone) != null && tries++ < 1_000) {
+                runCurrent()
+                Thread.sleep(5)
+            }
+            assertNull("the shelf reads on its next open", service.keptAt(zone))
+            service.page(zone)
+            assertNotNull("a read makes it fresh again", service.keptAt(zone))
+        }
+
+    @Test
+    fun `a pulled ceremony makes the kept page stale, an empty answer does not`() =
+        runTest {
+            val (_, service) = signedIn("alice")
+            service.page(zone)
+            assertEquals(CeremonyPull.AlreadyPulled, service.pullCeremony(CompletionStack.SIX_FIRSTS, zone))
+            assertNotNull(service.keptAt(zone))
+            answers["/rpc/pull_ceremony"] = """[{"stack":"six_firsts","karma_granted":30}]"""
+            assertEquals(CeremonyPull.Pulled(CompletionStack.SIX_FIRSTS, 30), service.pullCeremony(CompletionStack.SIX_FIRSTS, zone))
+            assertNull(service.keptAt(zone))
         }
 }

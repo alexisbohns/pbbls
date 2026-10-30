@@ -107,7 +107,8 @@ interface AchievementsServicing {
 
     /**
      * How old the signed-in user's page is (D18): when the device's copy was kept, or the last
-     * read in this process landed, whichever is later; null with neither.
+     * read in this process landed, whichever is later; null with neither, or once a check that
+     * unlocked something or a pulled ceremony has made the page stale, until the next read.
      */
     suspend fun keptAt(zone: ZoneId): Instant?
 
@@ -155,6 +156,14 @@ class AchievementsService
         private val lastRead = ConcurrentHashMap<Pair<String, String>, Instant>()
 
         /**
+         * Set when the kept page no longer says what the server would (a check unlocked something, a
+         * ceremony was pulled): the next shelf open reads rather than wait out its fifteen minutes.
+         * The copy itself stays, for display. A read that lands clears it.
+         */
+        @Volatile
+        private var pageStale = false
+
+        /**
          * Full catalog, inactive rows included: the unlock moment and the Profile
          * shelf title badges from it by slug.
          */
@@ -200,6 +209,7 @@ class AchievementsService
                 try {
                     val results = check()
                     if (results.isEmpty()) return@launch
+                    markPageStale()
                     val bySlug =
                         try {
                             loadCatalog().associateBy { it.slug }
@@ -244,6 +254,7 @@ class AchievementsService
             val page = decodeAchievementsPage(body)
             // Kept only once it has decoded, so the device never holds a body it cannot read.
             if (owner != null && supabase.session?.user?.id == owner) {
+                pageStale = false
                 lastRead[owner to zone.id] = Instant.now()
                 disk.write(owner, zone, CACHE_PAGE, body)
             } else if (owner != null) {
@@ -265,6 +276,7 @@ class AchievementsService
         }
 
         override suspend fun keptAt(zone: ZoneId): Instant? {
+            if (pageStale) return null
             val owner = supabase.session?.user?.id ?: return null
             return listOfNotNull(disk.keptAt(owner, zone, CACHE_PAGE), lastRead[owner to zone.id]).maxOrNull()
         }
@@ -291,7 +303,15 @@ class AchievementsService
                             put("p_tz", zone.id)
                         },
                     ).data
-            return ceremonyPullOf(stack, AchievementsJson.decodeFromString<List<CeremonyRowDto>>(body))
+            val pull = ceremonyPullOf(stack, AchievementsJson.decodeFromString<List<CeremonyRowDto>>(body))
+            // A pull that landed changed the page (and may have paid karma): the shelf reads again.
+            if (pull is CeremonyPull.Pulled) markPageStale()
+            return pull
+        }
+
+        private fun markPageStale() {
+            pageStale = true
+            lastRead.clear()
         }
 
         private companion object {
