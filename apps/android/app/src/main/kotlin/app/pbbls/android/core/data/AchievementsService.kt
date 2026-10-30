@@ -243,16 +243,21 @@ class AchievementsService
         }
 
         override suspend fun page(zone: ZoneId): AchievementsPage {
+            // The body is the caller's, as RLS saw them when the request left: capture who that
+            // was before the call, so a session that swaps while it is in flight never files one
+            // user's page under the next one.
+            val owner = supabase.session?.user?.id
             val body =
                 supabase.client.postgrest
                     .rpc("get_achievements", buildJsonObject { put("p_tz", zone.id) })
                     .data
             val page = decodeAchievementsPage(body)
             // Kept only once it has decoded, so the device never holds a body it cannot read.
-            supabase.session
-                ?.user
-                ?.id
-                ?.let { owner -> disk.write(owner, zone, CACHE_PAGE, body) }
+            if (owner != null && supabase.session?.user?.id == owner) {
+                disk.write(owner, zone, CACHE_PAGE, body)
+            } else if (owner != null) {
+                Log.w(TAG, "the session changed during get_achievements; its page is not kept")
+            }
             return page
         }
 
