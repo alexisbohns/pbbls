@@ -14,8 +14,12 @@ struct AchievementsView: View {
     @Environment(AchievementNotificationService.self) private var notify
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(ReferenceDataService.self) private var refs
+    @Environment(HeldCardHostModel.self) private var heldCard
 
     @State private var model = AchievementsModel()
+    @State private var sheet: AchievementSheet?
+    /// A row's moment, opened once the sheets have closed.
+    @State private var pendingMoment: UUID?
 
     var body: some View {
         content
@@ -28,10 +32,20 @@ struct AchievementsView: View {
     private var content: some View {
         let locale = SpineStrings.appLocale
         if let page = model.page {
+            let lookups = HomeLookups.make(palettes: palettes, refs: refs)
             ScrollView {
-                AchievementsPageContent(page: page, lookups: HomeLookups.make(palettes: palettes, refs: refs),
-                                        pulling: model.pulling, onPull: pull)
+                AchievementsPageContent(page: page, lookups: lookups, pulling: model.pulling, onPull: pull,
+                                        onOpen: { sheet = $0 })
                     .padding(.top, Spacing.sm)
+            }
+            .sheet(item: $sheet, onDismiss: openPendingMoment) { opened in
+                // The model's page, read when drawn: a later read reaches an open sheet.
+                AchievementSheetHost(sheet: opened, page: model.page, lookups: lookups, pulling: model.pulling,
+                                     seen: { model.opened($0) }, pull: pull,
+                                     openMoment: { id in
+                                         pendingMoment = id
+                                         sheet = nil
+                                     })
             }
         } else if model.failed {
             ContentUnavailableView {
@@ -61,6 +75,14 @@ struct AchievementsView: View {
                                                     owner: supabase.session?.user.id.uuidString.lowercased())
         }
         await model.load { await achievements.checkIgnoringFailure() }
+    }
+
+    /// The held card is drawn above the tabs, under any sheet: a row's moment
+    /// opens once the sheets are down, and a change on the card reads the page again.
+    private func openPendingMoment() {
+        guard let id = pendingMoment else { return }
+        pendingMoment = nil
+        heldCard.open(HeldCardRequest(momentId: id, origin: .you, onChanged: { Task { await load() } }))
     }
 
     /// A ready mark pulls its ceremony. A row opens the unlock moment with the
