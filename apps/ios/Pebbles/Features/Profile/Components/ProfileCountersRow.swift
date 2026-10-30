@@ -7,9 +7,9 @@ struct ProfileCountersRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
-            DataTile(value: daysPracticed, icon: "calendar",     label: "Days")
-            DataTile(value: pebbles,       icon: "fossil.shell", label: "Pebbles")
-            DataTile(value: karma,         icon: "sparkles",     label: "Karma")
+            DataTile(value: daysPracticed, icon: .calendarDate, label: "Days")
+            DataTile(value: pebbles,       icon: .pebbleRound,  label: "Pebbles")
+            DataTile(value: karma,         icon: .karmaDot,     label: "Karma")
         }
     }
 }

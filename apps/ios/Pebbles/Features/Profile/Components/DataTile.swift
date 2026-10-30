@@ -3,10 +3,10 @@ import SwiftUI
 /// Single value/icon/label tile used inside the Profile Stats card.
 /// vstack(xs) of:
 ///   - large counter number (counter.lg)
-///   - hstack(xs) of icon (icon.small, accent.primary) and label (subhead, system.secondary)
+///   - hstack(xs) of icon (pebbles icon at tile, accent.primary) and label (subhead, system.secondary)
 struct DataTile: View {
     let value: Int?
-    let icon: String
+    let icon: PbblsIcon
     let label: LocalizedStringResource
 
     var body: some View {
@@ -16,9 +16,7 @@ struct DataTile: View {
                 .foregroundStyle(Color.pebbles.onSurface)
                 .monospacedDigit()
             HStack(spacing: Spacing.xs) {
-                Image(systemName: icon)
-                    .pebblesIcon(.small)
-                    .foregroundStyle(Color.pebbles.primary)
+                PbblsIconImage(icon, .tile, relativeTo: .subheadline, style: AnyShapeStyle(Color.pebbles.primary))
                 Text(label)
                     .pebblesFont(.subhead)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
@@ -30,9 +28,9 @@ struct DataTile: View {
 
 #Preview {
     HStack {
-        DataTile(value: 42, icon: "calendar", label: "Days")
-        DataTile(value: 137, icon: "fossil.shell", label: "Pebbles")
-        DataTile(value: 1200, icon: "sparkles", label: "Karma")
+        DataTile(value: 42, icon: .calendarDate, label: "Days")
+        DataTile(value: 137, icon: .pebbleRound, label: "Pebbles")
+        DataTile(value: 1200, icon: .karmaDot, label: "Karma")
     }
     .padding()
 }
