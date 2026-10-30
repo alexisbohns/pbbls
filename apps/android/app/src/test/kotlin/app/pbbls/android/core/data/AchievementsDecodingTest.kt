@@ -9,9 +9,8 @@ import org.junit.Test
 
 /**
  * Achievements row contracts (M48) — foreign payloads in the shapes PostgREST
- * actually emits, mirroring iOS `AchievementsDecodingTests.swift`, including
- * the timestamp precision variants that motivated the OffsetDateTime rule
- * (#651): microseconds with `+00:00`, web milliseconds with `Z`, whole seconds.
+ * actually emits, mirroring iOS `AchievementsDecodingTests.swift`. The unlock
+ * rows' timestamp variants left with the last `achievement_unlocks` read (#1307).
  */
 class AchievementsDecodingTest {
     private val json = Json { ignoreUnknownKeys = true }
@@ -38,22 +37,6 @@ class AchievementsDecodingTest {
         assertNull(rows[0].emotionId)
         assertEquals(5, rows[1].karmaReward)
         assertEquals("Titre perso", rows[1].titleFr)
-    }
-
-    @Test
-    fun `unlock rows decode every timestamp precision`() {
-        for (raw in listOf(
-            "2026-07-30T09:15:42.123456+00:00",
-            "2026-07-30T09:15:42.123Z",
-            "2026-07-30T09:15:42Z",
-        )) {
-            val rows =
-                json.decodeFromString<List<AchievementUnlockRecord>>(
-                    """[{ "achievement_id": "a1", "unlocked_at": "$raw" }]""",
-                )
-            assertEquals("a1", rows[0].achievementId)
-            assertEquals(1_785_402_942L, rows[0].unlockedAt.toEpochSecond())
-        }
     }
 
     @Test

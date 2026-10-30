@@ -2,7 +2,6 @@ package app.pbbls.android.core.data
 
 import android.util.Log
 import app.pbbls.android.core.common.runCatchingCancellable
-import app.pbbls.android.core.model.OffsetDateTimeSerializer
 import app.pbbls.android.core.model.achievements.AchievementCard
 import app.pbbls.android.core.model.achievements.AchievementsJson
 import app.pbbls.android.core.model.achievements.AchievementsPage
@@ -23,7 +22,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import java.time.Instant
-import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -66,20 +64,6 @@ data class AchievementRecord(
 )
 
 /**
- * One of the caller's `achievement_unlocks` rows (owner-scoped by RLS).
- * `unlocked_at` stays an [OffsetDateTime] through [OffsetDateTimeSerializer] —
- * PostgREST emits `+00:00` offsets that `Instant.parse` rejects (#651).
- */
-@Serializable
-data class AchievementUnlockRecord(
-    @SerialName("achievement_id")
-    val achievementId: String,
-    @SerialName("unlocked_at")
-    @Serializable(with = OffsetDateTimeSerializer::class)
-    val unlockedAt: OffsetDateTime,
-)
-
-/**
  * One newly unlocked badge as `check_achievements()` reports it: the karma is
  * what the server actually emitted at unlock time, never the catalog's
  * current value.
@@ -107,8 +91,6 @@ data class AchievementCheckResult(
  */
 interface AchievementsServicing {
     suspend fun loadCatalog(): List<AchievementRecord>
-
-    suspend fun loadUnlocks(): List<AchievementUnlockRecord>
 
     suspend fun checkIgnoringFailure()
 
@@ -173,8 +155,8 @@ class AchievementsService
         private val lastRead = ConcurrentHashMap<Pair<String, String>, Instant>()
 
         /**
-         * Full catalog, inactive rows included — the screen filters (an inactive
-         * badge stays visible once unlocked, hidden while locked).
+         * Full catalog, inactive rows included: the unlock moment and the Profile
+         * shelf title badges from it by slug.
          */
         override suspend fun loadCatalog(): List<AchievementRecord> =
             supabase.client
@@ -182,13 +164,6 @@ class AchievementsService
                 .select(Columns.raw(CATALOG_COLUMNS)) {
                     order("sort_order", Order.ASCENDING)
                 }.decodeList()
-
-        /** The caller's unlocks; RLS scopes to `auth.uid()`. */
-        override suspend fun loadUnlocks(): List<AchievementUnlockRecord> =
-            supabase.client
-                .from("achievement_unlocks")
-                .select(Columns.raw("achievement_id, unlocked_at"))
-                .decodeList()
 
         /**
          * Runs the evaluation. SETOF-returning RPC, so PostgREST yields an array
@@ -201,7 +176,7 @@ class AchievementsService
 
         /**
          * Screen-open variant: the retroactive grant must never surface as an
-         * error — the grid renders whatever `loadUnlocks()` then returns.
+         * error — the page renders whatever `get_achievements` then returns.
          */
         override suspend fun checkIgnoringFailure() {
             runCatchingCancellable { check() }

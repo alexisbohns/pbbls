@@ -679,7 +679,10 @@
     <!-- Achievements (M48) -->
     <string name="achievements_title">Achievements</string>
     <string name="achievements_card_subtitle">Badges along your path</string>
-    <string name="achievements_shelf_count">%1$d earned</string>
+    <plurals name="achievements_shelf_count">
+        <item quantity="one">%1$d earned</item>
+        <item quantity="other">%1$d earned</item>
+    </plurals>
     <string name="achievement_moment_eyebrow">Achievement unlocked</string>
     <string name="achievement_moment_next">Next</string>
     <string name="achievement_moment_done">Nice</string>

@@ -1,7 +1,6 @@
 package app.pbbls.android.testing
 
 import app.pbbls.android.core.data.AchievementRecord
-import app.pbbls.android.core.data.AchievementUnlockRecord
 import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.model.achievements.AchievementCard
 import app.pbbls.android.core.model.achievements.AchievementsPage
@@ -13,15 +12,13 @@ import java.time.Instant
 import java.time.ZoneId
 
 /**
- * In-memory [AchievementsServicing] (#849, #1307): the grid's catalog and unlocks, and the page's
+ * In-memory [AchievementsServicing] (#849, #1307): the catalog, and the page's
  * read, device copy, seen marks and pulls, drivable without a live project. See
  * [PebblesTestHarness] for where these live and why.
  */
 class FakeAchievementsService(
     /** What [loadCatalog] returns on a successful call. Settable mid-test. */
     var catalog: List<AchievementRecord> = emptyList(),
-    /** What [loadUnlocks] returns on a successful call. Settable mid-test. */
-    var unlocks: List<AchievementUnlockRecord> = emptyList(),
     /** What [page] returns. An empty page by default: every card hidden. */
     var served: AchievementsPage = decodeAchievementsPage("{}"),
     /** What [cachedPage] returns: the device's copy. */
@@ -68,7 +65,7 @@ class FakeAchievementsService(
     private val pullFailure = ArmedFailure()
 
     /**
-     * Thrown by the next [loadCatalog] or [loadUnlocks], then cleared.
+     * Thrown by the next [loadCatalog], then cleared.
      *
      * Deliberately not armed on [checkIgnoringFailure]: its contract is that it
      * swallows everything, so a fake that could throw from it would let a test
@@ -99,11 +96,6 @@ class FakeAchievementsService(
         catalogLoadCount += 1
         armed.fire()
         return catalog
-    }
-
-    override suspend fun loadUnlocks(): List<AchievementUnlockRecord> {
-        armed.fire()
-        return unlocks
     }
 
     override suspend fun checkIgnoringFailure() {

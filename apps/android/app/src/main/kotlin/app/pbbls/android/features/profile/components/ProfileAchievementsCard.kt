@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
@@ -30,25 +31,17 @@ import app.pbbls.android.core.ui.achievementFamilyIcon
 import app.pbbls.android.core.ui.achievementTitle
 
 /**
- * The Profile achievements shelf (D14) — ports web `AchievementsShelf` and iOS
- * `ProfileAchievementsCard`: the most recently unlocked badges, the total
- * count, and a way into the full grid. It reads the same two queries the grid
- * does — no new endpoint, no new RLS.
+ * The Profile achievements shelf (D14, D18; iOS `ProfileAchievementsCard`): the most recent badges
+ * and their count, as `get_achievements` serves them (`shelf`, `shelf_count`), and a way into the
+ * page. The server picks, orders and counts; [ProfileViewModel] titles them from the catalog. With
+ * no [count] served (nothing earned yet, or nothing read), it falls back to a plain invitation.
  *
- * The shelf shows what you have EARNED; the grid shows the whole ladder. So
- * locked badges never appear here, and a profile with nothing unlocked yet
- * falls back to a plain invitation rather than an empty row.
- *
- * Stateless since #852 — [ProfileViewModel] owns the load (mirroring every
- * other Profile card) and reports [recent]/[unlockedCount]/[hasLoaded]; this
- * used to read the achievements CompositionLocal and fetch for itself via a
- * bare `LaunchedEffect(Unit)`, which never fired again after the first resume.
+ * Stateless since #852: [ProfileViewModel] owns the load, mirroring every other Profile card.
  */
 @Composable
 fun ProfileAchievementsCard(
-    recent: List<AchievementRecord>,
-    unlockedCount: Int,
-    hasLoaded: Boolean,
+    badges: List<AchievementRecord>,
+    count: Int?,
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -81,20 +74,17 @@ fun ProfileAchievementsCard(
                 )
                 Text(
                     text =
-                        if (hasLoaded && unlockedCount > 0) {
-                            stringResource(R.string.achievements_shelf_count, unlockedCount)
-                        } else {
-                            stringResource(R.string.achievements_card_subtitle)
-                        },
+                        count?.let { pluralStringResource(R.plurals.achievements_shelf_count, it, it) }
+                            ?: stringResource(R.string.achievements_card_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.onSurfaceVariant,
                 )
-                if (recent.isNotEmpty()) {
+                if (badges.isNotEmpty()) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm),
                         modifier = Modifier.padding(top = 4.dp),
                     ) {
-                        recent.forEach { record -> ShelfBadge(record) }
+                        badges.forEach { record -> ShelfBadge(record) }
                     }
                 }
             }
@@ -124,7 +114,8 @@ private fun ShelfBadge(record: AchievementRecord) {
         // scale, so the mark keeps a 16dp side instead of following INLINE.
         PbblsIconImage(
             icon = achievementFamilyIcon(record.family),
-            contentDescription = achievementTitle(record),
+            // A served row with no slug and no family has no title of its own.
+            contentDescription = achievementTitle(record).ifBlank { stringResource(R.string.achievements_title) },
             size = 16.dp,
             tint = colors.onPrimaryContainer,
         )

@@ -1,8 +1,8 @@
 package app.pbbls.android.features.profile
 
+import app.pbbls.android.AchievementsFixture
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
-import app.pbbls.android.core.data.AchievementUnlockRecord
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakePathStatsService
@@ -17,7 +17,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
+import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.ZoneId
 
 /**
  * Profile's three-part load, its covers, and the save fold-back (#849).
@@ -135,52 +137,103 @@ class ProfileViewModelTest {
             assertEquals(1, profile.loadProfileCount)
         }
 
-    /** The shelf's load (#852) — hoisted here from the card's own `LaunchedEffect`. */
+    // MARK: - The achievements shelf (D18), loaded here since #852
+
+    private val served = AchievementsFixture.page
+    private val stale = AchievementsFixture.page.copy(shelfCount = 2)
+    private val clock = Instant.parse("2026-10-30T12:00:00Z")
+
+    private fun shelfOf(viewModel: ProfileViewModel) = viewModel.uiState.value as ProfileUiState.Content
+
+    private fun record(
+        slug: String,
+        family: String,
+    ) = AchievementRecord(id = slug, slug = slug, family = family, sortOrder = 0, karmaReward = 10, isActive = true, titleEn = "Carved")
+
     @Test
-    fun `achievements shelf loads alongside the profile`() =
+    fun `the shelf is the served six in the server's order and count, titled from the catalog by slug`() =
         runTest {
-            val badge =
-                AchievementRecord(
-                    id = "a1",
-                    slug = "first-pebble",
-                    family = "milestone",
-                    sortOrder = 0,
-                    karmaReward = 10,
-                    isActive = true,
-                )
-            val achievements =
-                FakeAchievementsService(
-                    catalog = listOf(badge),
-                    unlocks =
-                        listOf(
-                            AchievementUnlockRecord(
-                                achievementId = "a1",
-                                unlockedAt = OffsetDateTime.parse("2026-01-02T00:00:00Z"),
-                            ),
-                        ),
-                )
+            val carved = record("first-glyph", "first_glyph")
+            val achievements = FakeAchievementsService(served = served, catalog = listOf(carved))
             val viewModel = viewModel(achievements = achievements)
             advanceUntilIdle()
 
-            val state = viewModel.uiState.value as ProfileUiState.Content
-            assertTrue(state.achievementsLoaded)
-            assertEquals(1, state.unlockedAchievementCount)
-            assertEquals(listOf(badge), state.recentAchievements)
+            val state = shelfOf(viewModel)
+            assertEquals(
+                listOf("glyph-sales-1", "glyph-count-10", "pebble-count-100", "pebble-count-50", "blue-pebble", "first-glyph"),
+                state.shelf.map { it.slug },
+            )
+            assertEquals(carved, state.shelf.last())
+            assertEquals("no catalog row: the served row", "pebble_count", state.shelf[2].family)
+            assertEquals(100, state.shelf[2].threshold)
+            assertEquals(13, state.shelfCount)
+            assertTrue("the shelf never evaluates", achievements.calls.none { it == "check" })
         }
 
-    /** A failed shelf fetch must not take the whole profile down (mirrors collections). */
     @Test
-    fun `a failed achievements fetch still shows the profile`() =
+    fun `the kept copy shows at once, and a copy under fifteen minutes old is not read again`() =
         runTest {
-            val achievements = FakeAchievementsService()
-            achievements.failNext = IOException("offline")
+            val achievements = FakeAchievementsService(served = served, kept = stale).apply { keptAt = clock.minusSeconds(14 * 60) }
             val viewModel = viewModel(achievements = achievements)
+            viewModel.now = { clock }
             advanceUntilIdle()
 
-            val state = viewModel.uiState.value as ProfileUiState.Content
-            assertEquals("Pebbler", state.profile?.displayName)
-            assertTrue(state.recentAchievements.isEmpty())
-            assertTrue(state.achievementsLoaded)
+            assertEquals(2, shelfOf(viewModel).shelfCount)
+            assertEquals(0, achievements.pageCalls)
+        }
+
+    @Test
+    fun `a copy fifteen minutes old or more is read again`() =
+        runTest {
+            val achievements = FakeAchievementsService(served = served, kept = stale).apply { keptAt = clock.minusSeconds(15 * 60) }
+            val viewModel = viewModel(achievements = achievements)
+            viewModel.now = { clock }
+            advanceUntilIdle()
+
+            assertEquals(1, achievements.pageCalls)
+            assertEquals(13, shelfOf(viewModel).shelfCount)
+        }
+
+    @Test
+    fun `a failed read keeps the kept copy, and with nothing the shelf just invites`() =
+        runTest {
+            val kept = FakeAchievementsService(served = served, kept = stale).apply { failNextPage = IOException("offline") }
+            val keptModel = viewModel(achievements = kept)
+            advanceUntilIdle()
+            assertEquals(2, shelfOf(keptModel).shelfCount)
+
+            val none = FakeAchievementsService(served = served).apply { failNextPage = IOException("offline") }
+            val noneModel = viewModel(achievements = none)
+            advanceUntilIdle()
+            assertEquals("Pebbler", shelfOf(noneModel).profile?.displayName)
+            assertTrue(shelfOf(noneModel).shelf.isEmpty())
+            assertNull(shelfOf(noneModel).shelfCount)
+        }
+
+    @Test
+    fun `none earned is no count, and a failed catalog keeps the served rows`() =
+        runTest {
+            val empty = FakeAchievementsService(served = served.copy(shelf = emptyList(), shelfCount = 0))
+            val emptyModel = viewModel(achievements = empty)
+            advanceUntilIdle()
+            assertNull(shelfOf(emptyModel).shelfCount)
+            assertEquals("no badges, no catalog read", 0, empty.catalogLoadCount)
+
+            val failing = FakeAchievementsService(served = served).apply { failNext = IOException("offline") }
+            val failingModel = viewModel(achievements = failing)
+            advanceUntilIdle()
+            assertEquals(6, shelfOf(failingModel).shelf.size)
+            assertEquals("first_glyph", shelfOf(failingModel).shelf.last().family)
+        }
+
+    @Test
+    fun `the zone is read at each load`() =
+        runTest {
+            val achievements = FakeAchievementsService(served = served)
+            val viewModel = viewModel(achievements = achievements)
+            viewModel.zone = { ZoneId.of("Asia/Tokyo") }
+            advanceUntilIdle()
+            assertEquals(setOf(ZoneId.of("Asia/Tokyo")), achievements.zones.toSet())
         }
 
     @Test
