@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +25,14 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.IntrinsicMeasurable
+import androidx.compose.ui.layout.IntrinsicMeasureScope
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.LayoutModifier
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -71,13 +79,88 @@ private val STACK_LABEL = 104.dp
 private val STACK_COUNT = 34.dp
 private val MINI_SKYLINE = 103.dp
 private val RULE_WIDTH = 1.dp
+private val BAND_TOP = 14.dp
 
-/** The board's margin title: set on its side, reading bottom to top. */
-private fun Modifier.vertical(): Modifier =
-    layout { measurable, _ ->
+/**
+ * The board's margin title: set on its side, reading bottom to top. Its intrinsics are the turned
+ * text's, so the card can ask the margin how tall it must be.
+ */
+private object Upright : LayoutModifier {
+    override fun MeasureScope.measure(
+        measurable: Measurable,
+        constraints: Constraints,
+    ): MeasureResult {
         val p = measurable.measure(Constraints())
-        layout(p.height, p.width) { p.placeWithLayer(x = (p.height - p.width) / 2, y = (p.width - p.height) / 2) { rotationZ = -90f } }
+        return layout(
+            p.height,
+            p.width,
+        ) { p.placeWithLayer(x = (p.height - p.width) / 2, y = (p.width - p.height) / 2) { rotationZ = -90f } }
     }
+
+    override fun IntrinsicMeasureScope.minIntrinsicHeight(
+        measurable: IntrinsicMeasurable,
+        width: Int,
+    ): Int = measurable.maxIntrinsicWidth(Constraints.Infinity)
+
+    override fun IntrinsicMeasureScope.maxIntrinsicHeight(
+        measurable: IntrinsicMeasurable,
+        width: Int,
+    ): Int = measurable.maxIntrinsicWidth(Constraints.Infinity)
+
+    override fun IntrinsicMeasureScope.minIntrinsicWidth(
+        measurable: IntrinsicMeasurable,
+        height: Int,
+    ): Int = measurable.minIntrinsicHeight(Constraints.Infinity)
+
+    override fun IntrinsicMeasureScope.maxIntrinsicWidth(
+        measurable: IntrinsicMeasurable,
+        height: Int,
+    ): Int = measurable.maxIntrinsicHeight(Constraints.Infinity)
+}
+
+/** A completion's ready mark, as the band draws it: the label, what it reads aloud, its pull, whether it waits. */
+private class Ready(
+    val label: String,
+    val description: String,
+    val enabled: Boolean,
+    val onPull: () -> Unit,
+)
+
+@Composable
+private fun ReadyButton(
+    ready: Ready,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = ready.enabled,
+) {
+    ReadyMark(ready.label, ready.description, ready.onPull, modifier, enabled = enabled)
+}
+
+/**
+ * The card's two columns: the body sets the height, and the margin (its rotated title over its
+ * ladder) grows the card when it is the taller, as the Domains' long bar is. Only the margin is
+ * asked for its intrinsic height: the figures are never measured that way.
+ */
+@Composable
+private fun CardColumns(
+    margin: @Composable () -> Unit,
+    body: @Composable () -> Unit,
+) {
+    val marginWidth = MARGIN + RULE_WIDTH
+    val touchMin = SpineLayoutTokens.TOUCH_MIN
+    Layout(contents = listOf(margin, body)) { (marginParts, bodyParts), constraints ->
+        val side = marginWidth.roundToPx()
+        val bodyWidth = (constraints.maxWidth - side).coerceAtLeast(0)
+        val bodies = bodyParts.map { it.measure(Constraints(maxWidth = bodyWidth)) }
+        val bodyHeight = bodies.maxOfOrNull { it.height } ?: 0
+        val marginHeight = marginParts.maxOfOrNull { it.minIntrinsicHeight(side) } ?: 0
+        val height = maxOf(bodyHeight, marginHeight, touchMin.roundToPx(), constraints.minHeight)
+        val margins = marginParts.map { it.measure(Constraints.fixed(side, height)) }
+        layout(constraints.maxWidth, height) {
+            margins.forEach { it.place(0, 0) }
+            bodies.forEach { it.place(side, 0) }
+        }
+    }
+}
 
 /**
  * The card shell (pick 6, iOS `AchievementCardShell`): the margin with the card's name and its
@@ -93,7 +176,7 @@ private fun CardShell(
     description: String,
     onClick: () -> Unit,
     ladder: @Composable () -> Unit,
-    ready: (@Composable () -> Unit)?,
+    ready: Ready?,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = PebblesTheme.spine.colors
@@ -113,37 +196,50 @@ private fun CardShell(
             shape = MaterialTheme.shapes.medium,
             colors = CardDefaults.elevatedCardColors(containerColor = colors.stock),
         ) {
-            // The body sets the card's height; the margin takes it after (matchParentSize), so no
-            // intrinsic measurement ever reaches the figures.
-            Box(Modifier.fillMaxWidth().heightIn(min = SpineLayoutTokens.TOUCH_MIN)) {
-                Column(Modifier.fillMaxWidth().padding(start = MARGIN + RULE_WIDTH + BODY_PAD, end = BODY_PAD, bottom = 16.dp)) {
-                    // The title and the hint share a line; when they cannot (large text), the hint
-                    // goes under the title rather than either being cut (iOS `AchievementBand`).
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth().rule(colors.cardRule, above = false).padding(top = 14.dp, bottom = 9.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        itemVerticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(title, style = type.cardBand, color = colors.ink, modifier = Modifier.padding(end = 8.dp))
-                        if (hint != null && ready == null) Text(hint, style = type.cardHint, color = colors.ink2)
+            CardColumns(
+                margin = {
+                    Row {
+                        Column(
+                            modifier = Modifier.width(MARGIN).fillMaxHeight().padding(top = 16.dp, bottom = 14.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(marginTitle, style = type.cardMargin, color = colors.ink2, maxLines = 1, modifier = Modifier.then(Upright))
+                            Spacer(Modifier.weight(1f).heightIn(min = 14.dp))
+                            ladder()
+                        }
+                        VerticalDivider(thickness = RULE_WIDTH, color = colors.cardRule)
                     }
-                    content()
-                }
-                Row(Modifier.matchParentSize()) {
-                    Column(
-                        modifier = Modifier.width(MARGIN).fillMaxHeight().padding(top = 16.dp, bottom = 14.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(marginTitle, style = type.cardMargin, color = colors.ink2, maxLines = 1, modifier = Modifier.vertical())
-                        ladder()
+                },
+                body = {
+                    Column(Modifier.fillMaxWidth().padding(start = BODY_PAD, end = BODY_PAD, bottom = 16.dp)) {
+                        val band = Modifier.fillMaxWidth().rule(colors.cardRule, above = false).padding(top = BAND_TOP, bottom = 9.dp)
+                        if (ready != null) {
+                            // The mark keeps its place on the title's line: a stand-in, unseen, unheard and
+                            // inert, under the real mark the card lays over it.
+                            Row(band, verticalAlignment = Alignment.CenterVertically) {
+                                Text(title, style = type.cardBand, color = colors.ink, modifier = Modifier.weight(1f).padding(end = 8.dp))
+                                ReadyButton(ready, Modifier.alpha(0f).clearAndSetSemantics {}, enabled = false)
+                            }
+                        } else {
+                            // The title and the hint share a line; when they cannot (large text), the hint
+                            // goes under the title rather than either being cut (iOS `AchievementBand`).
+                            FlowRow(
+                                modifier = band,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                itemVerticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(title, style = type.cardBand, color = colors.ink, modifier = Modifier.padding(end = 8.dp))
+                                if (hint != null) Text(hint, style = type.cardHint, color = colors.ink2)
+                            }
+                        }
+                        content()
                     }
-                    VerticalDivider(thickness = RULE_WIDTH, color = colors.cardRule)
-                }
-            }
+                },
+            )
         }
-        ready?.let { Box(Modifier.align(Alignment.TopEnd).padding(end = 4.dp)) { it() } }
+        // Over its stand-in: the body's start past the margin, the band's top, the body's end.
+        ready?.let { ReadyButton(it, Modifier.align(Alignment.TopEnd).padding(top = BAND_TOP, end = BODY_PAD)) }
     }
 }
 
@@ -154,9 +250,9 @@ private fun readyFor(
     copy: AchievementsCopy,
     pulling: Boolean,
     onPull: (CompletionStack) -> Unit,
-): (@Composable () -> Unit)? =
+): Ready? =
     if (completion?.ready == true) {
-        { ReadyMark(copy.string(R.string.achievements_ready), copy.readyDescription(stack), { onPull(stack) }, enabled = !pulling) }
+        Ready(copy.string(R.string.achievements_ready), copy.readyDescription(stack), enabled = !pulling) { onPull(stack) }
     } else {
         null
     }

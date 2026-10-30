@@ -45,7 +45,8 @@ private val ready: AchievementsPage =
 
 @PreviewTest
 @Preview(showBackground = true, widthDp = 390, heightDp = 2000)
-@PreviewFrench
+// The French page, tall enough for every card (`@PreviewFrench` wraps to a phone's height).
+@Preview(name = "fr", showBackground = true, locale = "fr", widthDp = 390, heightDp = 2100)
 @Composable
 fun AchievementsPageLight() {
     PageAt(content)
@@ -88,6 +89,28 @@ fun AchievementsPageReady() {
 @Composable
 fun AchievementsPagePulling() {
     PageAt(AchievementsUiState.Content(ready), pulling = true)
+}
+
+/** The ready mark keeps its place on the title's line at the narrowest, largest and longest. */
+@PreviewTest
+@Preview(name = "fs2-fr", showBackground = true, locale = "fr", fontScale = 2f, widthDp = 360, heightDp = 1400)
+@Composable
+fun AchievementsPageReadyNarrowLarge() {
+    PageAt(AchievementsUiState.Content(ready))
+}
+
+/** Domains alone, without a coverage sentence: the long bar and the margin's title still fit. */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390, heightDp = 520)
+@PreviewLargeFontTall
+@Composable
+fun AchievementsPageDomainsWithoutCoverage() {
+    val page = AchievementsFixture.page
+    PageAt(
+        AchievementsUiState.Content(
+            page.copy(explorer = null, emotions = null, pebbles = null, years = emptyList(), domains = page.domains?.copy(coverage = null)),
+        ),
+    )
 }
 
 @PreviewTest
