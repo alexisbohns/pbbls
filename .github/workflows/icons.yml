@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   check:
-    name: lint · typecheck · vitest · fresh
+    name: lint · typecheck · vitest · fresh · replaces
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -54,3 +54,7 @@ jobs:
       - name: Generated outputs are fresh
         if: '!cancelled()'
         run: npm run check --workspace=@pbbls/icons
+
+      - name: Migrated surfaces name no replaced symbol
+        if: '!cancelled()'
+        run: npm run lint:replaces --workspace=@pbbls/icons
