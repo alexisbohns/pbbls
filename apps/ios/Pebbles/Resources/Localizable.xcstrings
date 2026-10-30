@@ -1386,6 +1386,23 @@
         }
       }
     },
+    "achievement.group.first_stone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Six firsts"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Six premières fois"
+          }
+        }
+      }
+    },
     "achievement.group.first_soul" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1450,6 +1467,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Galets"
+          }
+        }
+      }
+    },
+    "achievement.group.set_complete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complete sets"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensembles complets"
           }
         }
       }
