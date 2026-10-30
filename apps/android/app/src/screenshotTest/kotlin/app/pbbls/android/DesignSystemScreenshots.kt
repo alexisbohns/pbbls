@@ -15,13 +15,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.ContrastLevel
-import app.pbbls.android.core.designsystem.PebblesIcon
-import app.pbbls.android.core.designsystem.PebblesIconToken
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesMaterialTypography
 import app.pbbls.android.core.designsystem.PebblesShapes
@@ -34,9 +35,9 @@ import com.android.tools.screenshot.PreviewTest
 /**
  * Design-system pass 2 previews (#565): the shared top bar (iOS-idiom defaults
  * and the shipped create-bar overrides), the bordered list-section chrome, the
- * profile-card chrome, and the milestone icon batch at every size token —
- * light and dark. These are the maintainer's visual review surface for the
- * idiom kit before Profile screens compose from it.
+ * profile-card chrome, and six pebbles icons at each of the five
+ * [PbblsIconSize]s (Android icon migration spec D6), light and dark. These are
+ * the maintainer's visual review surface for the idiom kit and the icon sizes.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -94,27 +95,27 @@ private fun ChromeGallery() {
 
 @Composable
 private fun IconGallery() {
+    // One row per size, the same six drawings in each: a toolbar action, a
+    // soul, karma, a date, a pebble and the create mark.
     val icons =
         listOf(
-            R.drawable.ic_gear,
-            R.drawable.ic_person,
-            R.drawable.ic_person_pair,
-            R.drawable.ic_sparkle,
-            R.drawable.ic_calendar,
-            R.drawable.ic_fossil_shell,
-            R.drawable.ic_alternating_current,
-            R.drawable.ic_chevron_right,
-            R.drawable.ic_stack,
-            R.drawable.ic_scribble,
-            R.drawable.ic_plus,
+            PbblsIcon.SLIDER,
+            PbblsIcon.PEOPLE,
+            PbblsIcon.KARMA_DOT,
+            PbblsIcon.CALENDAR_DATE,
+            PbblsIcon.PEBBLE_ROUND,
+            PbblsIcon.PLUS_CIRCLE,
         )
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        PebblesIconToken.entries.forEach { token ->
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                icons.forEach { resId ->
-                    PebblesIcon(
-                        painter = painterResource(resId),
-                        token = token,
+        PbblsIconSize.entries.forEach { size ->
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                icons.forEach { icon ->
+                    PbblsIconImage(
+                        icon = icon,
+                        size = size,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
