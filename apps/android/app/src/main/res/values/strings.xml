@@ -718,6 +718,12 @@
     <string name="achievement_family_first_glyph_description">Carve your first glyph.</string>
     <string name="achievement_family_first_soul_title">First soul</string>
     <string name="achievement_family_first_soul_description">Add your first soul.</string>
+    <string name="achievement_family_first_moment_title">First moment</string>
+    <string name="achievement_family_first_moment_description">Record your first moment.</string>
+    <string name="achievement_family_first_pebble_title">First pebble</string>
+    <string name="achievement_family_first_pebble_description">Complete your first pebble.</string>
+    <string name="achievement_family_first_five_title">The blue pebble</string>
+    <string name="achievement_family_first_five_description">Claim it once your first five are done.</string>
     <string name="achievement_family_glyph_count_title">%1$d glyphs</string>
     <string name="achievement_family_glyph_count_description">Carve %1$d glyphs of your own.</string>
     <plurals name="achievement_family_glyph_sales_title">
