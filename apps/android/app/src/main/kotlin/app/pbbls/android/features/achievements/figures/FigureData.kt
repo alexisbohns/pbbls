@@ -1,5 +1,6 @@
 package app.pbbls.android.features.achievements.figures
 
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.achievements.DomainsSection
 import app.pbbls.android.core.model.achievements.EmotionSeat
 
@@ -28,6 +29,12 @@ fun familyRuns(seats: List<EmotionSeat>): List<FamilyRun> {
     }
     return runs
 }
+
+/**
+ * The valence a seat's seal prints at: its pebble's, or medium even when that pebble is gone (a met
+ * seat stays met, as on iOS); null for a seat not met, which draws a ghost.
+ */
+fun EmotionSeat.sealValence(): Valence? = if (!met) null else pebble?.valence ?: Valence.NEUTRAL_MEDIUM
 
 /** One shard or seat of the domains: a domain id (null draws a ghost), whether it came, whether it is new. */
 data class BandItem(

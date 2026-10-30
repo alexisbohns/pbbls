@@ -1,10 +1,14 @@
 package app.pbbls.android.features.achievements.figures
 
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.achievements.DomainEntry
 import app.pbbls.android.core.model.achievements.DomainsSection
 import app.pbbls.android.core.model.achievements.EmotionSeat
+import app.pbbls.android.core.model.achievements.PebbleSnapshot
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
+import java.time.Instant
 
 /** The payload readings the figures share (#1307): runs of a family, and the band's arrival order. */
 class FigureDataTest {
@@ -46,5 +50,14 @@ class FigureDataTest {
             ),
             domainBandItems(domains),
         )
+    }
+
+    @Test
+    fun `a met seat whose pebble is gone prints at medium even, a seat not met prints nothing`() {
+        val gone = EmotionSeat(0, "e0", "joy", met = true, on = null, pebble = null, isNew = false)
+        assertEquals(Valence.NEUTRAL_MEDIUM, gone.sealValence())
+        val kept = gone.copy(pebble = PebbleSnapshot("m", null, Instant.EPOCH, "e0", Valence.LOWLIGHT_LARGE))
+        assertEquals(Valence.LOWLIGHT_LARGE, kept.sealValence())
+        assertNull(seat(1, "joy", met = false).sealValence())
     }
 }

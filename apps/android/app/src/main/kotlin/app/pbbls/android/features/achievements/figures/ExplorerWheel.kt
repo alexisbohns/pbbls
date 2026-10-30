@@ -55,9 +55,9 @@ fun ExplorerWheel(
     val seats = emotions?.seats.orEmpty()
     val seatKeys =
         seats.mapNotNull { s ->
-            val pebble = s.pebble ?: return@mapNotNull null
+            val valence = s.sealValence() ?: return@mapNotNull null
             val palette = s.family?.let { lookups.family(it)?.palette } ?: return@mapNotNull null
-            if (s.met) SealKey(pebble.valence, palette) else null
+            SealKey(valence, palette)
         }
     val emotionSeals = rememberEmotionSeals(seatKeys, colors.stock, SealVariant.TINY)
     val centre = explorer.firstPebble
@@ -121,16 +121,17 @@ fun ExplorerWheel(
         }
         seats.forEachIndexed { i, s ->
             val p = at(G.EMOTIONS_R, G.seatAngle(i, seats.size))
-            val pebble = s.pebble
-            if (!s.met || pebble == null) {
+            // A met seat whose pebble is gone still prints, at medium even; only a seat not met is a ghost.
+            val valence = s.sealValence()
+            if (valence == null) {
                 ghost(p, G.GHOST_R * unit, unit, colors)
                 return@forEachIndexed
             }
-            val w = emotionSealWidth(pebble.valence.intensity) * unit
+            val w = emotionSealWidth(valence.intensity) * unit
             val palette = s.family?.let { lookups.family(it)?.palette }
             val print =
-                palette?.let { emotionSeals[SealKey(pebble.valence, it)] }
-                    ?: ink.of(sizeOf(pebble.valence.intensity), pebble.valence.polarity.inkPrint)
+                palette?.let { emotionSeals[SealKey(valence, it)] }
+                    ?: ink.of(sizeOf(valence.intensity), valence.polarity.inkPrint)
             sealAt(print, p, w)
             if (s.isNew) newMark(p, w, unit, colors.ink)
         }
