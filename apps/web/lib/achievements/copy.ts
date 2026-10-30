@@ -54,6 +54,7 @@ export function achievementsWords(t: Translate, locale: Locale, root: Translate 
   const lists = new Intl.ListFormat(locale, { style: "long", type: "conjunction" })
   const fullDates = new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
   const dayMonths = new Intl.DateTimeFormat(locale, { day: "numeric", month: "long", timeZone: "UTC" })
+  const shortDays = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "UTC" })
   const number = (n: number) => numbers.format(n)
   const monthInSentence = (month: number) => (month >= 1 && month <= 12 ? months.format(Date.UTC(2026, month - 1, 15, 12)) : String(month))
   const list = (items: string[]) => lists.format(items)
@@ -155,8 +156,7 @@ export function achievementsWords(t: Translate, locale: Locale, root: Translate 
       /** A moment's name in a row, or the app's untitled word for one the server sends without a name. */
       momentName: (name: string | null) => name ?? root("moment.untitled"),
       /** "Apr 21", "21 avr.": a served local day in the register. */
-      day: (day: string | null) =>
-        day ? new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "UTC" }).format(served(day)) : null,
+      day: (day: string | null) => (day ? shortDays.format(served(day)) : null),
       /** "November", "Novembre": a month heading a row. */
       monthHeading: (month: number) => sentenceCase(monthInSentence(month), locale),
       /** A row read aloud: its parts, then "new since you last looked" when it is. */
