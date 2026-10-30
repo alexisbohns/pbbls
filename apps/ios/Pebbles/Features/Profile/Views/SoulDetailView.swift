@@ -109,11 +109,11 @@ struct SoulDetailView: View {
             VStack(spacing: 0) {
                 header
                 if moments.isEmpty {
-                    ContentUnavailableView(
-                        "No pebbles yet",
-                        systemImage: "circle.grid.2x1",
-                        description: Text("Pebbles you tag with this soul will appear here.")
-                    )
+                    ContentUnavailableView {
+                        Label { Text("No pebbles yet") } icon: { PbblsIconImage(.hourglassEnd, .hero) }
+                    } description: {
+                        Text("Pebbles you tag with this soul will appear here.")
+                    }
                     .frame(maxHeight: .infinity)
                 } else {
                     List {

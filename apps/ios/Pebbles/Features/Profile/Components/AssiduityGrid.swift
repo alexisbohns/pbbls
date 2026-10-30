@@ -32,9 +32,12 @@ struct AssiduityGrid: View {
             ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
                 HStack(spacing: cellSpacing) {
                     ForEach(Array(row.enumerated()), id: \.offset) { _, active in
-                        Image(systemName: active ? "fossil.shell.fill" : "alternatingcurrent")
-                            .font(.system(size: cellSize))
-                            .foregroundStyle(active ? Color.pebbles.primary : Color.pebbles.surfaceContainerHighest)
+                        // 7pt cells: no icon draws this small (spec D4); a lit
+                        // stone is a filled dot, a day without one an outline.
+                        Circle()
+                            .fill(active ? Color.pebbles.primary : Color.clear)
+                            .overlay(Circle().strokeBorder(Color.pebbles.surfaceContainerHighest,
+                                                           lineWidth: active ? 0 : 1))
                             .frame(width: cellSize, height: cellSize)
                     }
                 }

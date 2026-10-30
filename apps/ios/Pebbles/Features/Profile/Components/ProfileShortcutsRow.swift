@@ -5,7 +5,7 @@ import SwiftUI
 struct ProfileShortcutsRow: View {
     var body: some View {
         HStack(spacing: Spacing.sm) {
-            ProfileShortcutTile(title: "Glyphs", systemImage: "scribble", route: .glyphs)
+            ProfileShortcutTile(title: "Glyphs", icon: .pebbleDottedGlyph, route: .glyphs)
         }
     }
 }

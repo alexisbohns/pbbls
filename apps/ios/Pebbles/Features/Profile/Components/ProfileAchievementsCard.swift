@@ -26,9 +26,7 @@ struct ProfileAchievementsCard: View {
     var body: some View {
         NavigationLink(value: YouRoute.achievements) {
             HStack(spacing: Spacing.lg) {
-                Image(systemName: "trophy")
-                    .pebblesIcon(.large)
-                    .foregroundStyle(Color.pebbles.primary)
+                PbblsIconImage(.pebbleGlowMd, .tile, style: AnyShapeStyle(Color.pebbles.primary))
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text("Achievements")
                         .pebblesFont(.headline)
@@ -68,9 +66,7 @@ struct ProfileAchievementsCard: View {
 
     @ViewBuilder
     private func badge(_ record: AchievementRecord) -> some View {
-        Image(systemName: record.familySymbol)
-            .pebblesIcon(.medium)
-            .foregroundStyle(Color.pebbles.primary)
+        PbblsIconImage(record.familySymbol, .row, style: AnyShapeStyle(Color.pebbles.primary))
             .frame(width: 32, height: 32)
             .background(Circle().fill(Color.pebbles.primary.opacity(0.12)))
             .accessibilityLabel(

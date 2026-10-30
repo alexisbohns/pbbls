@@ -97,21 +97,20 @@ extension AchievementRecord {
         NSLocalizedString("achievement.group.\(family)", value: family, comment: "")
     }
 
-    /// SF Symbol per family; unknown families get the trophy.
-    var familySymbol: String {
+    /// The family's pebbles icon (spec D7). `domain_first` and `glyph_sales`
+    /// wait for the chrome wave (life domain, market) and take the family default.
+    var familySymbol: PbblsIcon {
         switch family {
-        case "pebble_count":     "circle.grid.3x3"
-        case "emotion_first":    "heart"
-        case "domain_first":     "safari"
-        case "first_collection": "square.stack.3d.up"
-        case "first_glyph":      "scribble"
-        case "first_soul":       "person.2"
-        case "first_moment":     "clock"
-        case "first_pebble":     "circle.hexagongrid"
-        case "first_five":       "drop.fill"
-        case "glyph_count":      "pencil.and.outline"
-        case "glyph_sales":      "storefront"
-        default:                 "trophy"
+        case "pebble_count":     .stack
+        case "emotion_first":    .heart
+        case "first_collection": .collection
+        case "first_glyph":      .pebbleDottedGlyph
+        case "first_soul":       .people
+        case "first_moment":     .pebbleFlat
+        case "first_pebble":     .pebbleRound
+        case "first_five":       .stackLit3
+        case "glyph_count":      .pebbleDottedGlyph
+        default:                 .pebbleGlowMd
         }
     }
 

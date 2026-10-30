@@ -117,7 +117,7 @@ struct CollectionsListView: View {
                             Button {
                                 pendingDeletion = collection
                             } label: {
-                                Label("Delete", systemImage: "trash")
+                                Label { Text("Delete") } icon: { PbblsIconImage(.trash, .row) }
                             }
                             .tint(Color.pebbles.error)
                         }

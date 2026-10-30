@@ -98,11 +98,11 @@ struct CollectionDetailView: View {
                 description: Text(loadError)
             )
         } else if moments.isEmpty {
-            ContentUnavailableView(
-                "No pebbles yet",
-                systemImage: "circle.grid.2x1",
-                description: Text("Pebbles added to this collection will appear here.")
-            )
+            ContentUnavailableView {
+                Label { Text("No pebbles yet") } icon: { PbblsIconImage(.hourglassEnd, .hero) }
+            } description: {
+                Text("Pebbles added to this collection will appear here.")
+            }
         } else {
             List {
                 Section {

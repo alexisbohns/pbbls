@@ -16,8 +16,7 @@ struct KarmaEarnedCapsule: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Image(systemName: "sparkle")
-                .foregroundStyle(Color.pebbles.primary)
+            PbblsIconImage(.karmaDot, .inline, style: AnyShapeStyle(Color.pebbles.primary))
             Text("+\(content.amount) karma")
                 .font(.ysabeauSemibold(16))
                 .foregroundStyle(Color.pebbles.onSurface)

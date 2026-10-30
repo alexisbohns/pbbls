@@ -89,9 +89,9 @@ struct GlyphDetailDrawer: View {
 
     private var statCards: some View {
         HStack(spacing: Spacing.sm) {
-            SurfaceTile(systemImage: "calendar") { createdText }                    // 📅 created
-            SurfaceTile(systemImage: "chart.bar.fill", muted: true) { Text("Soon") } // 🐚 usage
-            SurfaceTile(systemImage: "person.2.fill", muted: true) { Text("Soon") }  // 👥 owners
+            SurfaceTile(icon: .calendarDate) { createdText }                        // 📅 created
+            SurfaceTile(icon: .chartDoubleGrow, muted: true) { Text("Soon") }       // 🐚 usage
+            SurfaceTile(icon: .people, muted: true) { Text("Soon") }                // 👥 owners
         }
     }
 
