@@ -59,7 +59,7 @@ fun DomainsSheet(
                 {
                     ReadyMark(
                         copy.string(R.string.achievements_ready),
-                        copy.readyDescription(AchievementCard.DOMAINS),
+                        copy.readyDescription(CompletionStack.DOMAINS),
                         { onPull(CompletionStack.DOMAINS) },
                     )
                 }

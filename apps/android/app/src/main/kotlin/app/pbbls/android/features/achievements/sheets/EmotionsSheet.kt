@@ -64,7 +64,7 @@ fun EmotionsSheet(
                 {
                     ReadyMark(
                         copy.string(R.string.achievements_ready),
-                        copy.readyDescription(AchievementCard.EMOTIONS),
+                        copy.readyDescription(CompletionStack.EMOTIONS),
                         { onPull(CompletionStack.EMOTIONS) },
                     )
                 }

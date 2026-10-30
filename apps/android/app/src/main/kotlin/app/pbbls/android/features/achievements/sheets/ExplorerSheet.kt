@@ -88,7 +88,7 @@ fun ExplorerSheet(
                 {
                     ReadyMark(
                         copy.string(R.string.achievements_ready),
-                        copy.readyDescription(AchievementCard.EXPLORER),
+                        copy.readyDescription(CompletionStack.SIX_FIRSTS),
                         { onPull(CompletionStack.SIX_FIRSTS) },
                     )
                 }

@@ -101,7 +101,7 @@ class ExplorerSheetTest {
         val page = AchievementsFixture.page
         val explorer = page.explorer!!
         show(page.copy(explorer = explorer.copy(completion = explorer.completion!!.copy(ready = true, pulledAt = null))))
-        compose.onNodeWithContentDescription("Explorer is complete. Open the ceremony.").performClick()
+        compose.onNodeWithContentDescription("The six firsts: complete. Open the ceremony.").performClick()
         assertEquals(listOf(CompletionStack.SIX_FIRSTS), pulled)
     }
 }

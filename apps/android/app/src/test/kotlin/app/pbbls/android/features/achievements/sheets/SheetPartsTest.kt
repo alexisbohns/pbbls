@@ -53,9 +53,9 @@ class SheetPartsTest {
     fun `the ready mark is a 48 dp button`() {
         var pulled = 0
         compose.setContent {
-            PebblesTheme { ReadyMark(label = "Ready", description = "Emotions is complete. Open the ceremony.", onClick = { pulled++ }) }
+            PebblesTheme { ReadyMark(label = "Ready", description = "Every emotion: complete. Open the ceremony.", onClick = { pulled++ }) }
         }
-        compose.onNodeWithContentDescription("Emotions is complete. Open the ceremony.").assertHeightIsAtLeast(48.dp).performClick()
+        compose.onNodeWithContentDescription("Every emotion: complete. Open the ceremony.").assertHeightIsAtLeast(48.dp).performClick()
         assertEquals(1, pulled)
     }
 }

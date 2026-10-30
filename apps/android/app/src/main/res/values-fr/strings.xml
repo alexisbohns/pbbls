@@ -936,5 +936,5 @@
     <string name="achievements_open_pebble">Ouvrir le galet</string>
     <string name="achievements_open_sheet">Ouvrir</string>
     <string name="achievements_ready">Prêt</string>
-    <string name="achievements_ready_a11y">%1$s est complet. Ouvrir la cérémonie.</string>
+    <string name="achievements_ready_a11y">%1$s : c\'est complet. Ouvrir la cérémonie.</string>
 </resources>
