@@ -28,7 +28,7 @@ describe("the explorer wheel, on the design fixture", () => {
   const w = wheelModel(s.explorer, s.emotions, s.domains)
 
   it("darkens the tracks the server lists as done", () => {
-    expect(w.tracks).toEqual({ first_five: true, six_firsts: true, twenty_five: true, domains: false, emotions: false })
+    expect(w.tracks).toEqual({ first_five: true, six_firsts: true, twenty_five: true, domains: false })
   })
 
   it("prints the first pebble at the centre in its own seal and emotion", () => {

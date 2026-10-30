@@ -1,6 +1,6 @@
 import type { AchievementPalettes } from "@/lib/achievements/palette"
-import { WHEEL_RADII, WHEEL_SIDE, wheelModel, type SealTone, type WheelMark } from "@/lib/achievements/wheel"
-import type { AchievementsDomains, AchievementsEmotions, AchievementsExplorer, ExplorerRing } from "@/lib/types"
+import { WHEEL_RADII, WHEEL_SIDE, wheelModel, type SealTone, type TrackRing, type WheelMark } from "@/lib/achievements/wheel"
+import type { AchievementsDomains, AchievementsEmotions, AchievementsExplorer } from "@/lib/types"
 import { FirstFiveMark } from "./FirstFiveMark"
 import { FlatSeal } from "./FlatSeal"
 import { Ghost } from "./Ghost"
@@ -43,7 +43,7 @@ function Mark({ mark, palettes }: { mark: WheelMark; palettes: AchievementPalett
 export function ExplorerWheel({ explorer, emotions, domains, palettes, size = WHEEL_SIDE }: ExplorerWheelProps) {
   const w = wheelModel(explorer, emotions, domains)
   const half = WHEEL_SIDE / 2
-  const track = (ring: ExplorerRing) => (
+  const track = (ring: TrackRing) => (
     <circle r={WHEEL_RADII[ring]} fill="none" stroke={w.tracks[ring] ? "var(--spine-ink-2)" : "var(--spine-rule)"} strokeWidth={1} />
   )
   const marks = (list: WheelMark[]) => list.map((mark, i) => <Mark key={i} mark={mark} palettes={palettes} />)

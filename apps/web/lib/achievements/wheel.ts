@@ -59,10 +59,14 @@ export type WheelMark =
   | (Place & { kind: "seal"; seal: PlacedSeal; tone: SealTone })
   | (Place & { kind: "first-five"; task: FirstFiveTask })
 
+/** The rings the wheel draws a track for. */
+export type TrackRing = Exclude<ExplorerRing, "emotions">
+
 export type WheelFamily = { family: string | null; arc: string; tick: Segment }
 
 export type WheelModel = {
-  tracks: Record<ExplorerRing, boolean>
+  /** The four drawn tracks (the emotions ring has none: its family arcs stand for it). */
+  tracks: Record<TrackRing, boolean>
   families: WheelFamily[]
   emotions: WheelMark[]
   domains: WheelMark[]
@@ -100,7 +104,6 @@ export function wheelModel(
       six_firsts: explorer.ringsDone.includes("six_firsts"),
       twenty_five: explorer.ringsDone.includes("twenty_five"),
       domains: explorer.ringsDone.includes("domains"),
-      emotions: explorer.ringsDone.includes("emotions"),
     },
     families: familyRuns(seats).map((run) => {
       const half = step(seats.length) / 2
