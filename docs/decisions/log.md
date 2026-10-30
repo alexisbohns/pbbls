@@ -1556,3 +1556,31 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Web (#1313) and Android (#1315) flip their own surface in `migrated` the same way; the lint's web and Android forms are already in place.
 - **Supersedes / Superseded-by:** supersedes the status sentence of the 2026-10-29 icons entry ("`shipped` means every surface migrated and its `replaces` names are gone", now expressed by `migrated`) and the package spec's D4/D10 forms (the `shipped` key and the `systemName:` grep).
 - **Refs:** #1314, `docs/superpowers/specs/2026-10-30-ios-icon-migration-design.md` (D1–D10), `docs/superpowers/plans/2026-10-30-ios-icon-migration.md`, `packages/icons/scripts/lib/replaces.ts`, `apps/ios/Pebbles/Theme/Icon+Pebbles.swift`.
+
+## 2026-10-30 — The achievements page is served whole; contributions are silent, completions are pulled, private families never leave the owner (#1305)
+
+- **Status:** taken
+- **Scope:** db (ios, android, web render)
+- **Context:**
+  - The new achievements page (spec 2026-10-29) shows levels, firsts, completions, "new" marks and a year disc on three clients.
+  - The public profile projected every unlocked family, including emotion and domain firsts.
+  - Every shipped client celebrates every row `check_achievements()` returns.
+- **Decision:**
+  - **One read:** `get_achievements(p_tz)` (security invoker, computed on read) serves the page and its five sheets, with a snapshot of each crossing pebble, and the owner's Profile shelf (D18).
+  - **The year disc:** `achievements_year` computes it and matches the committed JS oracle (`packages/supabase/scripts/oracles/achievements/`).
+  - **Celebration is the return set:** `check_achievements()` keeps its shape, `(slug, karma_granted)`, and returns only the rows to celebrate. Contributions (emotion, domain and stone firsts), `pebble-count-1` and a level crossed by a heavy pebble are recorded but not returned. Contributions pay no karma: `achievements_silent_karma` constrains the catalog and the admin RPCs refuse it with `silent_family_karma`. No `celebrate` column, so no client changed.
+  - **"New" is per card:** `mark_achievements_seen(p_card)` stores `seen_at` at full precision; the read compares `unlocked_at` with it and serves it at whole seconds.
+  - **Completions** are recorded by the check, offered from 06:00 in the reader's zone the day after (`achievement_offered_at`, the one expression the read and the pull share), and pulled with `pull_ceremony(p_stack, p_tz)`: the completion row is locked and `pulled_at` set where it is null, so a second or concurrent call returns no row. The pull unlocks the stack's `set_complete` catalog row (`complete-emotions`, `complete-domains`, `complete-six-firsts`), which pays its `karma_reward` once through the unlocks PK. The check never unlocks that family.
+  - **Privacy:** `get_public_profile` (since part 1, `20261030090400`) and the owner's shelf drop `emotion_first`, `domain_first`, `first_stone` and `set_complete`.
+- **Why:**
+  - Clients compute nothing, so the three surfaces cannot disagree.
+  - A first sadness or a first heavy stone must never be celebrated.
+  - Emotions and domains are disclosures.
+  - One offer expression: a "ready" mark the pull then refuses would be a broken ceremony.
+- **Consequences:**
+  - The `set_complete` rows go live with `karma_reward = 0`, on the 2026-07-30 rule (karma is priced in the admin, applies to future unlocks only, never retro-paid). **Price them before the clients ship the ceremony**: a pull before that pays 0 for good.
+  - The offer follows the zone the client sends, so a client in a far-east zone sees it up to a day sooner; it is still never before the next local morning.
+  - Client unit tests replay `scripts/oracles/achievements/payloads/`; the pulled payload (`get-achievements-pulled`) and the exactly-once pull run only by hand, with the service-role key, since an anon run cannot age a completion past its offer.
+  - The pebble ladder is seeded to 10 000 (extend it before anyone nears it).
+- **Supersedes / Superseded-by:** narrows the 2026-07-30 achievements entry (#664) for the public shelf and for karma on contributions.
+- **Refs:** #1305, `docs/superpowers/specs/2026-10-29-achievements-page-design.md` (D1–D18), `docs/superpowers/plans/2026-10-29-achievements-page-backend.md`, `packages/supabase/supabase/migrations/20261030090000_achievements_page_model.sql` … `20261030110000_achievements_writes.sql`, `packages/supabase/scripts/verify-achievements.ts`.
