@@ -50,6 +50,9 @@ val SIX_MARKS: Map<StoneKind, SixMark> =
         StoneKind.HIGHLIGHT to SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF), 12.5f),
     )
 
+/** A domain that came: a small solid seal on the neutral outline, as the board prints the domains. */
+internal val DOMAIN_SEAL = InkSeal(ValenceSizeGroup.SMALL, InkPrint.RELIEF, ValencePolarity.NEUTRAL)
+
 /** The six firsts' seals, in the catalog's order: what a figure drawing them asks for. */
 internal val SIX_SEALS: List<InkSeal> = StoneKind.entries.map { SIX_MARKS.getValue(it).seal }
 
@@ -221,5 +224,19 @@ fun PebbleSealMark(
         val unit = size.width / 28f
         val print = palette?.let { emotion.getValue(SealKey(pebble.valence, it)) } ?: ink.of(inkSeal, colors.ink)
         sealAt(print, center, width * unit)
+    }
+}
+
+/** A domain row's mark: its small inked seal, [width] board px in a 28 dp box. Decorative. */
+@Composable
+fun DomainSealMark(
+    modifier: Modifier = Modifier,
+    box: Dp = MARK_BOX,
+    width: Float = 14.4f,
+) {
+    val colors = PebblesTheme.spine.colors
+    val prints = rememberInkPrints(listOf(InkKey(DOMAIN_SEAL, colors.ink)), colors.stock, SealVariant.MINI)
+    Canvas(modifier.size(box).clearAndSetSemantics {}) {
+        sealAt(prints.of(DOMAIN_SEAL, colors.ink), center, width * size.width / 28f)
     }
 }
