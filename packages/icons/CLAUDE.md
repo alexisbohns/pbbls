@@ -17,7 +17,7 @@ The hand-drawn Pebbles icon set and its generator. `src/<name>.svg` (and `<name>
 The generator owns these paths outright and clears them before writing. Fix the source or the emitter, then `generate`:
 
 - `packages/icons/react/` (`<Name>.tsx` per icon, `types.ts`, `index.ts`)
-- `apps/ios/Pebbles/Resources/Icons.xcassets/`, `apps/ios/Pebbles/Theme/PbblsIcon.swift` (Part 3)
+- `apps/ios/Pebbles/Resources/Icons.xcassets/`, `apps/ios/Pebbles/Theme/PbblsIcon.swift`
 - `apps/android/app/src/main/res/drawable/ic_pbbls_*.xml`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsIcons.kt` (Part 4)
 
 ## Adding or redrawing an icon

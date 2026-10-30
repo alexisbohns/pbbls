@@ -36,6 +36,7 @@ struct SettingsSheet: View {
     #if DEBUG
     @State private var isPresentingStoneLab = false
     @State private var isPresentingSpineLab = false
+    @State private var isPresentingIconLab = false
     #endif
     @State private var isDeleting = false
     @State private var deleteError: String?
@@ -189,6 +190,9 @@ struct SettingsSheet: View {
             }
             .fullScreenCover(isPresented: $isPresentingSpineLab) {
                 SpineLabView()
+            }
+            .fullScreenCover(isPresented: $isPresentingIconLab) {
+                IconLabView()
             }
             #endif
             .confirmationDialog(
@@ -479,6 +483,17 @@ struct SettingsSheet: View {
                     Text(verbatim: "Spine lab")
                 } icon: {
                     Image(systemName: "line.3.horizontal.decrease")
+                }
+            }
+            .buttonStyle(.plain)
+            .pebblesListRow(position: .middle)
+            Button {
+                isPresentingIconLab = true
+            } label: {
+                Label {
+                    Text(verbatim: "Icon lab")
+                } icon: {
+                    Image(systemName: "square.grid.3x3")
                 }
             }
             .buttonStyle(.plain)
