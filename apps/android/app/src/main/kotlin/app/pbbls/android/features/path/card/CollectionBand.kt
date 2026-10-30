@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -23,13 +22,14 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.designsystem.SpineTypography
 
 private const val BAND_HAIRLINE_ALPHA = 0.35f
@@ -88,11 +88,13 @@ internal fun CollectionBand(
         BandFlow(Modifier.padding(horizontal = BAND_PADDING_H, vertical = BAND_PADDING_V)) {
             names.forEach { name ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_pebble_collection),
+                    // A fixed slot (spec D6): the band is laid out in dp and does not grow with
+                    // the font scale, so the mark passes its Dp; 14dp is the one size under the 16 floor.
+                    PbblsIconImage(
+                        icon = PbblsIcon.COLLECTION,
                         contentDescription = null,
+                        size = BAND_MARK,
                         tint = ink,
-                        modifier = Modifier.size(BAND_MARK),
                     )
                     Spacer(Modifier.width(BAND_MARK_GAP))
                     Text(
