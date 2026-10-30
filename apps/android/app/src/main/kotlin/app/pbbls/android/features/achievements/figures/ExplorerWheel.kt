@@ -166,17 +166,16 @@ fun ExplorerWheel(
             }
         }
 
-        // 25 pebbles: the server's count (capped at 25) lights that many seats. No ring when the
-        // server sends none (its catalog row is missing), as on iOS.
-        explorer.twentyFive?.let { twentyFive ->
-            track(G.TWENTY_FIVE_R, ExplorerRing.TWENTY_FIVE in explorer.ringsDone)
-            for (i in 0 until TWENTY_FIVE_SEATS) {
-                val p = at(G.TWENTY_FIVE_R, G.twentyFiveAngle(i))
-                if (i < twentyFive.count) {
-                    sealAt(ink.of(TWENTY_FIVE_SEAL, colors.ink), p, G.TWENTY_FIVE_WIDTH * unit)
-                } else {
-                    ghost(p, G.SMALL_GHOST_R * unit, unit, colors)
-                }
+        // 25 pebbles: the server's count (capped at 25) lights that many seats. The board always
+        // draws the ring: with no `twenty_five` served, it is 25 ghosts.
+        track(G.TWENTY_FIVE_R, ExplorerRing.TWENTY_FIVE in explorer.ringsDone)
+        val kept = explorer.twentyFive?.count ?: 0
+        for (i in 0 until TWENTY_FIVE_SEATS) {
+            val p = at(G.TWENTY_FIVE_R, G.twentyFiveAngle(i))
+            if (i < kept) {
+                sealAt(ink.of(TWENTY_FIVE_SEAL, colors.ink), p, G.TWENTY_FIVE_WIDTH * unit)
+            } else {
+                ghost(p, G.SMALL_GHOST_R * unit, unit, colors)
             }
         }
 
