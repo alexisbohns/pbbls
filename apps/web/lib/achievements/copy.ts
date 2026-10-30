@@ -11,6 +11,8 @@ import type {
   CountingLadder,
   DomainCoverage,
   ExplorerRing,
+  FirstFiveTask,
+  StoneKind,
   YearMonth,
   YearNextStep,
 } from "@/lib/types"
@@ -31,7 +33,21 @@ function served(day: string): Date {
   return new Date(`${day}T12:00:00Z`)
 }
 
-export function achievementsWords(t: Translate, locale: Locale) {
+/** A first-five task's catalog family, whose title names its row (the shelf's names). */
+const FIRST_FIVE_FAMILY: Record<FirstFiveTask, string> = {
+  "first-moment": "first_moment",
+  "first-pebble": "first_pebble",
+  "first-collection": "first_collection",
+  "first-soul": "first_soul",
+  "first-glyph": "first_glyph",
+}
+
+/**
+ * `t` is rooted at `achievements.page`; `root` at the catalog's top, for the
+ * app's own words the sheets reuse as iOS does (untitled, the valences, the
+ * first five's titles).
+ */
+export function achievementsWords(t: Translate, locale: Locale, root: Translate = t) {
   // Built once per language (the words are memoised on it), not per call.
   const numbers = new Intl.NumberFormat(locale)
   const months = new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" })
@@ -109,8 +125,58 @@ export function achievementsWords(t: Translate, locale: Locale) {
     /** A pull that failed (Android's `achievements_ceremony_error`). */
     ceremonyError: () => t("ceremonyError"),
 
+    /** "137 pebbles kept.": the Pebbles sheet's lead. */
+    pebblesLead: (stack: CountingLadder) => t("pebbles.keptLead", { count: stack.count }),
+
     ceremonyTitle: (stack: CeremonyStack) => t(`ceremony.${stack}.title`),
     ceremonyBody: (stack: CeremonyStack) => t(`ceremony.${stack}.body`),
+
+    /** The sheets' words (#1308), word for word iOS's `AchievementsCopy+Sheets` and Android's. */
+    sheet: {
+      text: (key: string, values?: Record<string, string | number>) => t(`sheet.${key}`, values),
+      /** A first-five task's title, as the shelf names it; one this build does not know reads "A first". */
+      firstFiveTitle: (task: FirstFiveTask | null) =>
+        task ? root(`achievements.family.${FIRST_FIVE_FAMILY[task]}.title`) : t("sheet.unknownFirst"),
+      /** The app's words for the six firsts; one this build does not know reads "A first". */
+      kind: (kind: StoneKind | null) => {
+        if (kind === "small" || kind === "medium" || kind === "large") return t(`kind.${kind}`)
+        if (kind) return root(`pebble.positiveness.${kind}`)
+        return t("sheet.unknownFirst")
+      },
+      /** "five of five": a ring's section note, in words. */
+      ofWords: (count: number, total: number) => t("sheet.of", { count: cardinalWords(count, locale), total: cardinalWords(total, locale) }),
+      /** "14 of 18": a count beside its whole, in figures. */
+      countOf: (count: number, total: number) => t("sheet.of", { count: number(count), total: number(total) }),
+      /** "No. 03": a domain's place in the order they came. */
+      registerNumber: (place: number) => t("sheet.number", { number: String(place).padStart(2, "0") }),
+      toGo: (left: number) => t("sheet.toGo", { left: number(left) }),
+      thenEvery: (step: number) => t("sheet.thenEvery", { step: number(step) }),
+      firstYear: (year: number) => t("sheet.firstYear", { year: String(year) }),
+      /** A moment's name in a row, or the app's untitled word for one the server sends without a name. */
+      momentName: (name: string | null) => name ?? root("moment.untitled"),
+      /** "Apr 21", "21 avr.": a served local day in the register. */
+      day: (day: string | null) =>
+        day ? new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "UTC" }).format(served(day)) : null,
+      /** "November", "Novembre": a month heading a row. */
+      monthHeading: (month: number) => sentenceCase(monthInSentence(month), locale),
+      /** A row read aloud: its parts, then "new since you last looked" when it is. */
+      row: (parts: (string | null | undefined)[], isNew = false) =>
+        [...parts.filter((p): p is string => typeof p === "string" && p.trim() !== ""), ...(isNew ? [t("a11y.newSince")] : [])].join(", "),
+      /** The quiet names read as one: "Not yet: Anxious, Bitter". */
+      notYet: (names: string[]) => t("a11y.notYet", { names: names.join(", ") }),
+      /** A table row read aloud: the served counts as they are, each marked "reached" where `done` says so. */
+      monthRow: (month: YearMonth) => {
+        const reached = (text: string, done: boolean) => (done ? t("a11y.reached", { value: text }) : text)
+        const weeks =
+          month.fullWeeks > 0 ? t("a11y.weeksFilled", { count: number(month.weeksFilled), total: number(month.fullWeeks) }) : t("a11y.noFullWeek")
+        return t("a11y.month", {
+          month: sentenceCase(monthInSentence(month.month), locale),
+          moments: reached(number(month.momentDays), month.done.moments),
+          pebbles: reached(number(month.pebbleDays), month.done.pebbles),
+          weeks: reached(weeks, month.done.weeks),
+        })
+      },
+    },
 
     a11y: {
       /** "249 days, since Sunday, March 1, 2026". */

@@ -9,6 +9,7 @@ import { useLocale } from "./useLocale"
 export function useAchievementsWords(): AchievementsWords {
   // Untyped access: the words pick their keys at runtime (a tier, a need, a stack).
   const t = useTranslations("achievements.page") as unknown as Translate
+  const root = useTranslations() as unknown as Translate
   const { locale } = useLocale()
-  return useMemo(() => achievementsWords(t, locale), [t, locale])
+  return useMemo(() => achievementsWords(t, locale, root), [t, locale, root])
 }

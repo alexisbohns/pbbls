@@ -279,6 +279,7 @@
       },
       "pebbles": {
         "kept": "{count, plural, one {# galet} other {# galets}}.",
+        "keptLead": "{count, plural, one {# galet gardé} other {# galets gardés}}.",
         "none": "Aucune pierre ne se dresse encore ; la première s'élève vers {target}.",
         "one": "Une pierre se dresse ; la {rising} s'élève vers {target}.",
         "some": "{words} pierres se dressent ; la {rising} s'élève vers {target}.",
@@ -298,6 +299,41 @@
           "some": "{words} jours de plus avec un galet, un dans chaque semaine complète : {month} atteindra le bord.",
           "unreachable": "{month} n'atteindra pas le bord ce mois-ci."
         }
+      },
+      "sheet": {
+        "buyerNeverNamed": "L'acheteur n'est jamais nommé.",
+        "column": {
+          "moments": "moments",
+          "pebbles": "galets",
+          "weeks": "semaines"
+        },
+        "domainsEmotions": "Domaines et émotions",
+        "earlierYears": "Années précédentes",
+        "entered": "Entrés",
+        "firstFive": "Les cinq premières fois",
+        "firstYear": "Aucune pour l'instant. {year} est ta première année ici.",
+        "milestones": "Jalons",
+        "months": "Les mois",
+        "newestFirst": "du plus récent au plus ancien",
+        "notYet": "Pas encore dans ces pages",
+        "number": "N° {number}",
+        "of": "{count} sur {total}",
+        "register": "le registre",
+        "sixFirsts": "Les six premières fois",
+        "thenEvery": "puis tous les {step}",
+        "toGo": "encore {left}",
+        "twentyFifth": "Le 25e",
+        "twentyFive": "25 galets",
+        "twentyFiveWaiting": "Le 25e galet reste à venir.",
+        "unknownDomain": "Un domaine",
+        "unknownEmotion": "Une émotion",
+        "unknownFamily": "Autres émotions",
+        "unknownFirst": "Une première fois"
+      },
+      "kind": {
+        "small": "Petit",
+        "medium": "Moyen",
+        "large": "Grand"
       },
       "ready": "prêt",
       "ceremonyError": "Impossible d'ouvrir la cérémonie. Réessaie.",
@@ -341,6 +377,14 @@
         "glyphSales": "Ventes de glyphes : {count}.",
         "year": "L'année {year}. Au bord : {rim}. Sur le disque intérieur : {inner}. En chemin : {way}.",
         "none": "aucun",
+        "month": "{month}. Jours avec un moment : {moments}. Avec un galet : {pebbles}. {weeks}.",
+        "newSince": "nouveau depuis ta dernière visite",
+        "noFullWeek": "Pas encore de semaine complète",
+        "notYet": "Pas encore : {names}",
+        "openPebble": "Ouvrir le galet",
+        "openSheet": "Ouvrir",
+        "reached": "{value}, atteint",
+        "weeksFilled": "Semaines complètes remplies : {count} sur {total}",
         "ready": "{title} : la cérémonie est prête."
       }
     },

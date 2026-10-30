@@ -279,6 +279,7 @@
       },
       "pebbles": {
         "kept": "{count, plural, one {# pebble} other {# pebbles}}.",
+        "keptLead": "{count, plural, one {# pebble kept} other {# pebbles kept}}.",
         "none": "No stone stands yet; the first rises toward {target}.",
         "one": "One stone stands; the {rising} rises toward {target}.",
         "some": "{words} stones stand; the {rising} rises toward {target}.",
@@ -298,6 +299,41 @@
           "some": "{words} more days with a pebble, one in each full week, bring {month} to the rim.",
           "unreachable": "{month} can't reach the rim this month."
         }
+      },
+      "sheet": {
+        "buyerNeverNamed": "The buyer is never named.",
+        "column": {
+          "moments": "moments",
+          "pebbles": "pebbles",
+          "weeks": "weeks"
+        },
+        "domainsEmotions": "Domains and emotions",
+        "earlierYears": "Earlier years",
+        "entered": "Entered",
+        "firstFive": "The first five",
+        "firstYear": "None yet. {year} is your first year here.",
+        "milestones": "Milestones",
+        "months": "The months",
+        "newestFirst": "newest first",
+        "notYet": "Not yet in these pages",
+        "number": "No. {number}",
+        "of": "{count} of {total}",
+        "register": "the register",
+        "sixFirsts": "The six firsts",
+        "thenEvery": "then every {step}",
+        "toGo": "{left} to go",
+        "twentyFifth": "The 25th",
+        "twentyFive": "25 pebbles",
+        "twentyFiveWaiting": "The 25th pebble is still to come.",
+        "unknownDomain": "A domain",
+        "unknownEmotion": "An emotion",
+        "unknownFamily": "Other emotions",
+        "unknownFirst": "A first"
+      },
+      "kind": {
+        "small": "Small",
+        "medium": "Medium",
+        "large": "Large"
       },
       "ready": "ready",
       "ceremonyError": "Couldn't open the ceremony. Please try again.",
@@ -341,6 +377,14 @@
         "glyphSales": "Glyph sales: {count}.",
         "year": "The year {year}. On the rim: {rim}. On the inner disc: {inner}. On their way: {way}.",
         "none": "none",
+        "month": "{month}. Days with a moment: {moments}. With a pebble: {pebbles}. {weeks}.",
+        "newSince": "new since you last looked",
+        "noFullWeek": "No full week yet",
+        "notYet": "Not yet: {names}",
+        "openPebble": "Open the pebble",
+        "openSheet": "Open",
+        "reached": "{value}, reached",
+        "weeksFilled": "Full weeks filled: {count} of {total}",
         "ready": "{title}: the ceremony is ready."
       }
     },
