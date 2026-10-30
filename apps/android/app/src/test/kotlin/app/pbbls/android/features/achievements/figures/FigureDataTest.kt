@@ -25,6 +25,13 @@ class FigureDataTest {
     }
 
     @Test
+    fun `a star lights between two met seats of one family, round past the last seat to seat 0`() {
+        val seats = listOf(seat(0, "joy", true), seat(1, "pride", true), seat(2, "pride", true), seat(3, "joy", true))
+        assertEquals(listOf(false, true, false, true), litStars(seats))
+        assertEquals(listOf(false, false, false, false), litStars(seats.map { it.copy(met = it.seat != 0 && it.seat != 2) }))
+    }
+
+    @Test
     fun `the band reads the entered domains reversed, oldest first, then the not yet, a nameless one kept`() {
         val domains =
             DomainsSection(

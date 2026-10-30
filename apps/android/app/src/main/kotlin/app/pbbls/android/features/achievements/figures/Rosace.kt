@@ -97,6 +97,7 @@ fun Rosace(
     val seats = emotions.seats
     val runs = remember(seats) { familyRuns(seats) }
     val lit = remember(seats, runs) { facets(seats, runs) }
+    val stars = remember(seats) { litStars(seats) }
     val g = remember(size, labels, seats.size) { RosaceGeometry(size.value, labels, seats.size) }
     // The cut, built once per geometry in board units: drawn under the figure's scale.
     val cut = remember(g) { RosaceCut(g) }
@@ -127,23 +128,21 @@ fun Rosace(
                 drawPath(cut.kites[i], colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
                 drawPath(cut.stars[i], colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
             }
+            // Each seat's tone in its run, an unresolved family's in ink: the kite's, and the soft star's before it.
+            val tones =
+                lit.map { facet ->
+                    facet.run.family
+                        ?.let { lookups.family(it)?.palette }
+                        ?.let { seatTone(it, facet.inRun, facet.run.size, night, colors.stock, soft = false) } ?: colors.ink
+                }
             lit.forEachIndexed { i, facet ->
                 if (!facet.seat.met) return@forEachIndexed
-                val run = facet.run
-                val palette = run.family?.let { lookups.family(it)?.palette }
-                val at = i
-                val tone = palette?.let { seatTone(it, facet.inRun, run.size, night, colors.stock, soft = false) } ?: colors.ink
-                drawPath(cut.kites[at], tone)
-                drawPath(cut.kites[at], colors.stock, style = Stroke(FACET_SEAM))
-                // The star to the next seat is lit when that seat is met in the same run.
-                val next = lit.getOrNull(i + 1)
-                if (next != null && next.run === run && next.seat.met) {
-                    // An unresolved family lights in ink, its soft star in ink softened like any other (iOS parity).
-                    val soft =
-                        palette?.let { seatTone(it, facet.inRun + 1, run.size, night, colors.stock, soft = true) }
-                            ?: softTone(colors.ink, colors.stock)
-                    drawPath(cut.stars[at], soft)
-                    drawPath(cut.stars[at], colors.stock, style = Stroke(FACET_SEAM))
+                drawPath(cut.kites[i], tones[i])
+                drawPath(cut.kites[i], colors.stock, style = Stroke(FACET_SEAM))
+                // The star to the next seat (seat 0 after the last): the next seat's tone, softened.
+                if (stars[i]) {
+                    drawPath(cut.stars[i], softTone(tones[(i + 1) % lit.size], colors.stock))
+                    drawPath(cut.stars[i], colors.stock, style = Stroke(FACET_SEAM))
                 }
             }
             if (ticks) {

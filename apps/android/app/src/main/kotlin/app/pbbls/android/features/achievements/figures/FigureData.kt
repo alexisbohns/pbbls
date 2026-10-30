@@ -31,6 +31,17 @@ fun familyRuns(seats: List<EmotionSeat>): List<FamilyRun> {
 }
 
 /**
+ * Which of the rosace's stars are lit (#1307, iOS and web parity): star k, between seat k and the
+ * next, when both are met and of one family. The ring closes, so the last seat's star reaches seat 0
+ * and a family the server seats at both ends lights across it.
+ */
+fun litStars(seats: List<EmotionSeat>): List<Boolean> =
+    seats.indices.map { k ->
+        val next = seats[(k + 1) % seats.size]
+        seats[k].met && next.met && next.family == seats[k].family
+    }
+
+/**
  * The valence a seat's seal prints at: its pebble's, or medium even when that pebble is gone (a met
  * seat stays met, as on iOS); null for a seat not met, which draws a ghost.
  */
