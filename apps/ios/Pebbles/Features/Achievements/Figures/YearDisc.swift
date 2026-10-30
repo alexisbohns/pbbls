@@ -23,7 +23,11 @@ struct YearDisc: View {
         }
         .aspectRatio(1, contentMode: .fit)
         .frame(maxWidth: side)
-        .accessibilityHidden(true)
+        // The disc reads as the server's lists wherever it is drawn (spec §5);
+        // inside a card's button the card's own label speaks for it.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: AchievementsA11y.disc(year, locale: SpineStrings.appLocale)))
+        .accessibilityAddTraits(.isImage)
     }
 
     @ViewBuilder
