@@ -122,7 +122,8 @@ fun Rosace(
                 // The star to the next seat is lit when that seat is met in the same run.
                 val next = lit.getOrNull(i + 1)
                 if (next != null && next.run === run && next.seat.met) {
-                    val soft = palette?.let { seatTone(it, facet.inRun + 1, run.size, night, colors.stock, soft = true) } ?: colors.ink2
+                    // An unresolved family lights in ink, its soft star too (iOS parity).
+                    val soft = palette?.let { seatTone(it, facet.inRun + 1, run.size, night, colors.stock, soft = true) } ?: colors.ink
                     drawPath(Path().polygon(g.star(at)), soft)
                     drawPath(Path().polygon(g.star(at)), colors.stock, style = Stroke(FACET_SEAM))
                 }
@@ -139,7 +140,7 @@ fun Rosace(
             runs.forEachIndexed { i, run ->
                 val name = names[i] ?: return@forEachIndexed
                 val palette = run.family?.let { lookups.family(it)?.palette }
-                val colour = palette?.let { familyLabelColor(run.family, it, night) } ?: colors.ink2
+                val colour = palette?.let { familyLabelColor(run.family, it, night) } ?: colors.ink
                 val layout = measurer.measure(name, type.rosaceFamily.copy(color = colour))
                 val at = g.label(run.start, run.size) * k
                 drawText(layout, topLeft = at - Offset(layout.size.width / 2f, layout.size.height / 2f))
