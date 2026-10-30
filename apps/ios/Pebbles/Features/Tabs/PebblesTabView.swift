@@ -20,38 +20,46 @@ struct PebblesTabView: View {
                 HomeView(onFirstLoad: onFirstLoad)
             }
             .modifier(TabChrome())
-            .tabItem { Label("Home", systemImage: "house") }
+            .tabItem { Label { Text("Home") } icon: { tabImage(.home) } }
             .tag(AppTab.home)
 
             NavigationStack(path: $nav.path) {
                 PathView(onFirstLoad: onFirstLoad)
             }
             .modifier(TabChrome())
-            .tabItem { Label("Path", systemImage: "square.stack") }
+            .tabItem { Label { Text("Path") } icon: { tabImage(.path) } }
             .tag(AppTab.path)
 
             NavigationStack(path: $nav.people) {
                 SoulsListView()
             }
             .modifier(TabChrome())
-            .tabItem { Label("People", systemImage: "person.2") }
+            .tabItem { Label { Text("People") } icon: { tabImage(.people) } }
             .tag(AppTab.people)
 
             NavigationStack(path: $nav.collections) {
                 CollectionsListView()
             }
             .modifier(TabChrome())
-            .tabItem { Label("Collections", systemImage: "circle.hexagongrid") }
+            .tabItem { Label { Text("Collections") } icon: { tabImage(.collections) } }
             .tag(AppTab.collections)
 
             NavigationStack(path: $nav.you) {
                 ProfileView()
             }
             .modifier(TabChrome())
-            .tabItem { Label("You", systemImage: "person.crop.circle") }
+            .tabItem { Label { Text("You") } icon: { tabImage(.you) } }
             .tag(AppTab.you)
         }
         .tint(Color.pebbles.primary)
+    }
+
+    /// The selected tab draws the lit seal (D5). UIKit renders a tab image as a
+    /// template and never scales it; the asset is 24×24 with its vector kept,
+    /// so no frame and no rendering mode are set here.
+    private func tabImage(_ tab: AppTab) -> Image {
+        let icon = nav.selected == tab ? (tab.icon.activeTwin ?? tab.icon) : tab.icon
+        return Image(icon.assetName)
     }
 }
 
