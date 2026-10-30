@@ -98,7 +98,8 @@ fun DomainsSheet(
 
         if (domains.notYet.isNotEmpty()) {
             SheetSection(copy.string(R.string.achievements_section_not_yet), hint = null)
-            NotYetNames(domains.notYet.map { domainName(it, lookups, unknown) })
+            val notYet = domains.notYet.map { domainName(it, lookups, unknown) }
+            NotYetNames(notYet, copy.notYetDescription(notYet))
         }
     }
 }

@@ -931,6 +931,7 @@
     <string name="achievements_weeks_filled">Semaines complètes remplies : %1$s sur %2$s.</string>
     <string name="achievements_no_full_week">Pas encore de semaine complète.</string>
     <string name="achievements_new_a11y">nouveau depuis ta dernière visite</string>
+    <string name="achievements_not_yet_a11y">Pas encore : %1$s</string>
     <string name="achievements_open_pebble">Ouvrir le galet</string>
     <string name="achievements_open_sheet">Ouvrir</string>
     <string name="achievements_ready">Prêt</string>

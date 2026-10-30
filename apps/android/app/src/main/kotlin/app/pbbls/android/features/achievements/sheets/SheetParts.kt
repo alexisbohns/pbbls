@@ -138,15 +138,24 @@ fun RegisterRow(
     )
 }
 
-/** What is not yet there, set quietly (the board's `.rest`): a ghost before each name. */
+/**
+ * What is not yet there, set quietly (the board's `.rest`): a ghost before each name. One node,
+ * read as [description] ("Not yet: Anxiety, Shame"), so the ghosts' meaning is said, not only drawn.
+ */
 @Composable
 fun NotYetNames(
     names: List<String>,
+    description: String,
     modifier: Modifier = Modifier,
 ) {
     val colors = PebblesTheme.spine.colors
     FlowRow(
-        modifier = modifier.fillMaxWidth().rule(colors.rule, above = false).padding(top = 10.dp, bottom = 12.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .rule(colors.rule, above = false)
+                .padding(top = 10.dp, bottom = 12.dp)
+                .clearAndSetSemantics { contentDescription = description },
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {

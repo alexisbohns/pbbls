@@ -322,6 +322,9 @@ class AchievementsCopy(
             },
         )
 
+    /** The quiet names read as one: "Not yet: Anxiety, Shame". */
+    fun notYetDescription(names: List<String>): String = resources.getString(R.string.achievements_not_yet_a11y, names.joinToString(", "))
+
     fun readyDescription(card: AchievementCard): String = resources.getString(R.string.achievements_ready_a11y, cardTitle(card))
 
     /** A row read aloud: its parts, then "new since you last looked" when it is. */

@@ -131,7 +131,7 @@ fun EmotionsSheet(
                 )
             }
             val notYet = group.notYet.map { emotionName(it, lookups, unknownEmotion) }
-            if (notYet.isNotEmpty()) NotYetNames(notYet)
+            if (notYet.isNotEmpty()) NotYetNames(notYet, copy.notYetDescription(notYet))
         }
     }
 }

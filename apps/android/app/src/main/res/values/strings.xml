@@ -931,6 +931,7 @@
     <string name="achievements_weeks_filled">Full weeks filled: %1$s of %2$s.</string>
     <string name="achievements_no_full_week">No full week yet.</string>
     <string name="achievements_new_a11y">new since you last looked</string>
+    <string name="achievements_not_yet_a11y">Not yet: %1$s</string>
     <string name="achievements_open_pebble">Open the pebble</string>
     <string name="achievements_open_sheet">Open</string>
     <string name="achievements_ready">Ready</string>

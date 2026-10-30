@@ -47,7 +47,7 @@ class DomainsSheetTest {
             opened,
         )
         compose.onNodeWithContentDescription("No. 01", substring = true).performScrollTo().assertExists()
-        compose.onNodeWithText("Spirituality").performScrollTo().assertExists()
+        compose.onNodeWithContentDescription("Not yet: Dating, Education, Sport, Spirituality").performScrollTo().assertExists()
     }
 
     @Test
