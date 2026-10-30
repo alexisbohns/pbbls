@@ -49,6 +49,25 @@ struct AchievementsPageServiceTests {
         #expect(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier) == nil)
     }
 
+    @Test("an older read landing after a newer one never overwrites the kept copy")
+    func olderReadKeepsNewer() async throws {
+        let cache = WrapDiskCache(root: root)
+        defer { cache.clear() }
+        let paris = try #require(TimeZone(identifier: "Europe/Paris"))
+        var service = AchievementsPageService(client: SupabaseService().client, disk: cache, owner: "mara")
+        service.freshness = AchievementsFreshness()
+        let older = service.freshness.beginRead()
+        let newer = service.freshness.beginRead()
+        let newerBody = Data(#"{"days_kept": 249}"#.utf8)
+        _ = try service.decodeAndKeep(newerBody, zone: paris, epoch: cache.epoch, read: newer)
+        _ = try service.decodeAndKeep(Data(#"{"days_kept": 248}"#.utf8), zone: paris, epoch: cache.epoch, read: older)
+        #expect(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier) == newerBody)
+        let tokyo = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        _ = try service.decodeAndKeep(newerBody, zone: tokyo, epoch: cache.epoch, read: older)
+        #expect(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: tokyo.identifier) == newerBody,
+                "each zone keeps its own order")
+    }
+
     @Test("a stale mark makes the kept copy not fresh until the next read rewrites it")
     func staleMark() async throws {
         let cache = WrapDiskCache(root: root)

@@ -26,6 +26,26 @@ final class AchievementsFreshness: @unchecked Sendable {
 
     private let lock = NSLock()
     private var staleSince: Date?
+    private var readsStarted = 0
+    private var lastWritten: [String: Int] = [:]
+
+    /// A read's place in the order reads started, taken before its request.
+    func beginRead() -> Int {
+        lock.withLock {
+            readsStarted += 1
+            return readsStarted
+        }
+    }
+
+    /// Whether `read` may write the kept copy at `key`: only a read that started
+    /// after the last one written there, so an older body never overwrites a newer one.
+    func claimWrite(_ read: Int, key: String) -> Bool {
+        lock.withLock {
+            guard read > lastWritten[key, default: 0] else { return false }
+            lastWritten[key] = read
+            return true
+        }
+    }
 
     func markStale(at date: Date = Date()) {
         lock.withLock { staleSince = date }
@@ -71,8 +91,9 @@ struct AchievementsPageService: AchievementsPageServicing {
 
     func page(zone: TimeZone) async throws -> AchievementsPage {
         let epoch = disk?.epoch
+        let read = freshness.beginRead()
         let data = try await client.rpc("get_achievements", params: ["p_tz": zone.identifier]).execute().data
-        return try decodeAndKeep(data, zone: zone, epoch: epoch)
+        return try decodeAndKeep(data, zone: zone, epoch: epoch, read: read)
     }
 
     func cachedPage(zone: TimeZone) async -> AchievementsPage? {
@@ -117,13 +138,14 @@ struct AchievementsPageService: AchievementsPageServicing {
     }
 
     /// Decodes `data`, logs any section it had to drop, and keeps the body once it decoded.
-    func decodeAndKeep(_ data: Data, zone: TimeZone, epoch: Int?) throws -> AchievementsPage {
+    /// `read` is the read's place in the order reads started (nil writes regardless).
+    func decodeAndKeep(_ data: Data, zone: TimeZone, epoch: Int?, read: Int? = nil) throws -> AchievementsPage {
         let payload = try WrapDecoding.decode(AchievementsPayload.self, from: data)
         if !payload.skipped.isEmpty {
             Self.logger.error(
                 "get_achievements sections dropped: \(payload.skipped.joined(separator: ","), privacy: .public)")
         }
-        if let disk, let owner {
+        if let disk, let owner, read.map({ freshness.claimWrite($0, key: "\(owner)|\(zone.identifier)") }) ?? true {
             disk.write(data, page: Self.cachePage, owner: owner, zone: zone.identifier, epoch: epoch)
         }
         return payload.model
