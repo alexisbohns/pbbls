@@ -38,7 +38,8 @@ fun AchievementSheetContent(
         AchievementSheet.Pebbles -> page.pebbles?.let { PebblesSheet(it, page.glyphsCarved, page.glyphSales, onOpenMoment, modifier) }
         is AchievementSheet.Year ->
             page.years.firstOrNull { it.year == sheet.year }?.let { year ->
-                YearSheet(year, page.years.map { it.year }.filter { it != year.year }, lookups, onPush, modifier)
+                // Only the years before this one: from the earliest, the sheet says it is the first year.
+                YearSheet(year, page.years.map { it.year }.filter { it < year.year }, lookups, onPush, modifier)
             }
     }
 }

@@ -2,8 +2,12 @@ package app.pbbls.android.features.achievements.sheets
 
 import android.app.Application
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
 import app.pbbls.android.AchievementsFixture
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.features.achievements.AchievementSheet
@@ -36,5 +40,21 @@ class AchievementSheetContentTest {
         compose.onNodeWithText("Domains").assertExists()
         compose.onNodeWithText("Pebbles").assertDoesNotExist()
         compose.onNodeWithText("2019").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a year lists only the earlier years, and the earliest says it is the first`() {
+        val page = AchievementsFixture.page
+        val y2026 = page.years.single()
+        val withPast = page.copy(years = listOf(y2026, y2026.copy(year = 2025, current = false, nextStep = null)))
+        compose.setContent {
+            PebblesTheme {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    AchievementSheetContent(AchievementSheet.Year(2025), withPast, AchievementsFixture.lookups, {}, {}, {})
+                }
+            }
+        }
+        compose.onNodeWithText("None yet. 2025 is your first year here.").performScrollTo().assertExists()
+        compose.onNodeWithText("2026").assertDoesNotExist()
     }
 }
