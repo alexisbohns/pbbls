@@ -98,6 +98,7 @@ fun AchievementSheetPebblesDark() {
 @PreviewTest
 @Preview(showBackground = true, widthDp = 390, heightDp = 1300)
 @PreviewLargeFont
+@PreviewFrench
 @Composable
 fun AchievementSheetYearLight() {
     PebblesTheme { Sheet(AchievementSheet.Year(2026)) }
