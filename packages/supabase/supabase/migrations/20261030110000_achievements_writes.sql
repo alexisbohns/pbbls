@@ -17,10 +17,17 @@
 
 -- 1. the offer (D9) -----------------------------------------------------------------
 -- Null for an unknown zone is impossible (at time zone raises), and null for a
--- null zone: callers refuse a null zone first.
+-- null zone: callers refuse a null zone first. The floor: at time zone also
+-- takes POSIX zone strings, so a crafted p_tz could put "06:00 the next day"
+-- seconds after completion. In the IANA zones the offer is more than 5 hours
+-- away (at worst 23:59:59 local before a one-hour spring-forward night), with
+-- one exception: Antarctica/Troll springs forward two hours, so a completion
+-- in the last local hour before that night is moved by at most an hour.
 create or replace function public.achievement_offered_at(p_completed timestamptz, p_tz text)
 returns timestamptz language sql stable set search_path = '' as $$
-  select ((((p_completed at time zone p_tz)::date + 1) + time '06:00') at time zone p_tz)
+  select greatest(
+    ((((p_completed at time zone p_tz)::date + 1) + time '06:00') at time zone p_tz),
+    p_completed + interval '5 hours')
 $$;
 
 -- achievement_completion: body copied from 20261030100000_achievements_read.sql;
