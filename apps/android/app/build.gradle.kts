@@ -152,6 +152,8 @@ android {
         getByName("test") {
             resources.srcDir("../../../packages/supabase/scripts/oracles/path-wrap/payloads")
             resources.srcDir("../../../packages/supabase/scripts/oracles/achievements/payloads")
+            // The board's page in the served shape, shared with iOS: the previews' fixture is checked against it.
+            resources.srcDir("../../../packages/supabase/scripts/oracles/achievements/design")
         }
     }
 

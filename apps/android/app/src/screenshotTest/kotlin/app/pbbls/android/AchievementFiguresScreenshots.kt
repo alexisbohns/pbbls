@@ -75,6 +75,8 @@ private val tolerance: AchievementsPage =
         val explorer = page.explorer!!
         val emotions = page.emotions!!
         val year = page.years.single()
+        // The first met seat past the renamed family: its pebble is gone.
+        val gone = emotions.seats.indexOfFirst { it.met && it.seat >= 9 }
         page.copy(
             explorer =
                 explorer.copy(
@@ -88,7 +90,7 @@ private val tolerance: AchievementsPage =
                         emotions.seats.mapIndexed { i, s ->
                             when {
                                 i < 9 -> s.copy(family = "awe")
-                                s.met && i == 12 -> s.copy(pebble = null)
+                                i == gone -> s.copy(pebble = null)
                                 else -> s
                             }
                         },

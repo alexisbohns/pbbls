@@ -47,7 +47,7 @@ private fun Marks() {
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(Valence.LOWLIGHT_SMALL, Valence.NEUTRAL_MEDIUM, Valence.HIGHLIGHT_LARGE).forEach { valence ->
-                    val known = PebbleSnapshot("m", null, Instant.EPOCH, "emotion-joyful", valence)
+                    val known = PebbleSnapshot("m", null, Instant.EPOCH, "50a68890-f6bb-e67a-6655-e84ff0b71f49", valence)
                     PebbleSealMark(known, lookups, emotionSealWidth(valence.intensity) * 2)
                     PebbleSealMark(known.copy(emotionId = "emotion-unknown"), lookups, emotionSealWidth(valence.intensity) * 2)
                 }
