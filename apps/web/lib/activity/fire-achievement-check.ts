@@ -1,4 +1,5 @@
 import { presentAchievementMoment } from "@/lib/activity/achievement-moment"
+import { beginAchievementCheck, endAchievementCheck } from "@/lib/activity/achievement-check-flight"
 import { browserStorage, markAchievementsCachesStale } from "@/lib/data/achievements-cache"
 import type { DataProvider } from "@/lib/data/data-provider"
 
@@ -21,9 +22,12 @@ import type { DataProvider } from "@/lib/data/data-provider"
  * Something unlocked, so the kept achievements payload no longer shows it:
  * it is marked stale, and the Profile shelf's next open reads (D18).
  */
-export function fireAchievementCheck(provider: DataProvider): void {
+export function fireAchievementCheck(provider: Pick<DataProvider, "checkAchievements" | "getAchievements">): void {
+  // While it runs, the Profile shelf's grant waits its turn (achievement-check-flight).
+  beginAchievementCheck()
   void provider
     .checkAchievements()
+    .finally(endAchievementCheck)
     .then(async (results) => {
       if (results.length === 0) return
       const storage = browserStorage()

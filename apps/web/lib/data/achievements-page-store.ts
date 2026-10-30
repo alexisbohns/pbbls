@@ -6,6 +6,7 @@ import {
   type ListableStorage,
 } from "@/lib/data/achievements-cache"
 import { decodeAchievementsPage } from "@/lib/data/achievements-payload"
+import { achievementCheckInFlight } from "@/lib/activity/achievement-check-flight"
 import { CeremonyNotReadyError, type DataProvider } from "@/lib/data/data-provider"
 import type { AchievementCard, AchievementCompletion, AchievementsPage, CeremonyStack } from "@/lib/types"
 
@@ -107,6 +108,8 @@ type Options = {
   storage: ListableStorage | null
   /** The clock, for the shelf's kept copy's age (ms since the epoch). */
   now?: () => number
+  /** Whether a mutation's check is running: the shelf's grant then skips its own. */
+  checkInFlight?: () => boolean
 }
 
 export class AchievementsPageStore {
@@ -172,10 +175,15 @@ export class AchievementsPageStore {
       } else if (kept && this.state.page === null && this.readShown === 0) {
         this.set({ page: kept.page })
       }
-      try {
-        await this.options.provider.checkAchievements()
-      } catch (err) {
-        console.warn("[achievements] check_achievements failed", err)
+      // A mutation's check in flight would return a fresh unlock to whichever check
+      // asks first: the shelf leaves it to the mutation path, which celebrates it.
+      const skipGrant = mode.kind === "shelf" && (this.options.checkInFlight ?? achievementCheckInFlight)()
+      if (!skipGrant) {
+        try {
+          await this.options.provider.checkAchievements()
+        } catch (err) {
+          console.warn("[achievements] check_achievements failed", err)
+        }
       }
       if (signal.aborted) return
       await this.refresh(signal)

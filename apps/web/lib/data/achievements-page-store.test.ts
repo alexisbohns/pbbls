@@ -407,5 +407,20 @@ describe("the Profile shelf, reopened", () => {
     expect(s.getSnapshot().page?.shelfCount).toBe(4)
     expect(fake.getAchievementsPayload).not.toHaveBeenCalled()
   })
+
+  it("leaves the grant to a mutation's check in flight, and still reads", async () => {
+    const { fake } = provider([async () => PULLED()])
+    const s = new AchievementsPageStore({ provider: fake, owner: "alice", zone: () => ZONE, storage: new MemoryStorage(), checkInFlight: () => true })
+    await s.open({ kind: "shelf", maxAgeMs: 15 * MIN })
+    expect(fake.checkAchievements).not.toHaveBeenCalled()
+    expect(fake.getAchievementsPayload).toHaveBeenCalledTimes(1)
+  })
+
+  it("still grants on the page, whatever is in flight", async () => {
+    const { fake } = provider([async () => PULLED()])
+    const s = new AchievementsPageStore({ provider: fake, owner: "alice", zone: () => ZONE, storage: new MemoryStorage(), checkInFlight: () => true })
+    await s.open()
+    expect(fake.checkAchievements).toHaveBeenCalledTimes(1)
+  })
 })
 
