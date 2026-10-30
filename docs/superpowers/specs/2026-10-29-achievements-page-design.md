@@ -187,6 +187,14 @@ The same rule holds on iOS, Android and web.
   - A failed read keeps the cached page and logs it.
   - A missing section hides its card; it never shows an error.
   - An unknown enum falls back: an unknown family draws in ink, an unknown state draws `quiet`.
+  - Tolerance rules, the same on every client:
+    - a missing `reachable` reads as `true`;
+    - a null element inside an array or a map is dropped on its own, never failing its section;
+    - an item with an unknown enum (first-five slug, six-firsts kind, subject kind, family, state) is kept with that field unknown and drawn as a ghost or a fallback, never dropped, so seat counts never shift;
+    - an item missing a usable field is kept with that field empty (a pebble snapshot without `moment_id` draws but does not open);
+    - a year that does not carry exactly 12 months is dropped, since its disc can't be drawn, and `listed` values outside 1…12 are left out;
+    - the subject's `kind` maps to an enum with a fallback, never a raw string.
+  - The Domains sheet's arrival order is the served `entered` list reversed (it is served newest first).
 - **Interaction:**
   - Opening a sheet calls `mark_achievements_seen`, fire-and-forget.
   - A "ready" mark opens the ceremony, which calls `pull_ceremony`.
