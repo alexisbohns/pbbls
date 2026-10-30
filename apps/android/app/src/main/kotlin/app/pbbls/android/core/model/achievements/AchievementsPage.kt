@@ -180,6 +180,7 @@ data class EmotionFamily(
     val notYet: List<EmotionSeat>,
 )
 
+/** [seats] are in the server's order (wheel order, then slug); each carries its own index. */
 data class EmotionsSection(
     val count: Int,
     val of: Int,

@@ -111,15 +111,14 @@ private fun ExplorerDto.toModel(): ExplorerSection =
     )
 
 private fun EmotionsDto.toModel(): EmotionsSection {
-    // The seat index is the rosace's position, not an order the client chooses: the seats are
-    // laid out by it, and a seat the client cannot place (no emotion id) is dropped.
+    // In the server's order (wheel order, then slug), never re-sorted here: the rosace places each
+    // seat by its own index. A seat the client cannot name (no emotion id) is dropped.
     val mapped =
-        seats
-            .mapNotNull { s ->
-                s.emotionId?.let {
-                    EmotionSeat(s.seat, it, s.family, s.met, s.on?.let(::parseDay), s.pebble?.toModel(), s.isNew)
-                }
-            }.sortedBy { it.seat }
+        seats.mapNotNull { s ->
+            s.emotionId?.let {
+                EmotionSeat(s.seat, it, s.family, s.met, s.on?.let(::parseDay), s.pebble?.toModel(), s.isNew)
+            }
+        }
     val bySeat = mapped.associateBy { it.seat }
     return EmotionsSection(
         count = count,

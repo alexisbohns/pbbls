@@ -144,7 +144,7 @@ class AchievementsToleranceTest {
     }
 
     @Test
-    fun `a seat without an emotion id is dropped, the rest keep their seat, and a family skips seats it cannot find`() {
+    fun `a seat without an emotion id is dropped, the rest keep the server's order, and a family skips seats it cannot find`() {
         val page =
             decodeAchievementsPage(
                 """{"emotions": {"count": 1, "of": 3, "seats": [
@@ -154,12 +154,12 @@ class AchievementsToleranceTest {
                                  {"family": "peace", "met": [], "not_yet": [2, 9]}]}}""",
             )
         val emotions = page.emotions!!
-        assertEquals(listOf(0, 2), emotions.seats.map { it.seat })
+        assertEquals(listOf(2, 0), emotions.seats.map { it.seat })
         assertEquals(listOf("joy", "peace"), emotions.families.map { it.family })
         assertEquals(listOf("a"), emotions.families[0].met.map { it.emotionId })
         assertTrue(emotions.families[0].notYet.isEmpty())
         assertEquals(listOf("c"), emotions.families[1].notYet.map { it.emotionId })
-        assertEquals(LocalDate.of(2026, 3, 2), emotions.seats[0].on)
+        assertEquals(LocalDate.of(2026, 3, 2), emotions.seats.single { it.seat == 0 }.on)
     }
 
     @Test
