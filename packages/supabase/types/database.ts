@@ -2394,6 +2394,10 @@ export type Database = {
     }
     Functions: {
       accept_connection_invite: { Args: { p_token: string }; Returns: Json }
+      achievement_completion: {
+        Args: { p_stack: string; p_tz: string }
+        Returns: Json
+      }
       achievement_crossing_pebble: {
         Args: {
           p_domain: string
@@ -2405,9 +2409,40 @@ export type Database = {
         }
         Returns: string
       }
+      achievement_first_subject: {
+        Args: { p_slug: string; p_tz: string }
+        Returns: Json
+      }
+      achievement_ladder: {
+        Args: {
+          p_count: number
+          p_family: string
+          p_seen: string
+          p_tz: string
+        }
+        Returns: Json
+      }
+      achievement_on: {
+        Args: { p_pebble_id: string; p_tz: string; p_unlocked: string }
+        Returns: string
+      }
+      achievement_opt: { Args: { p_key: string; p_value: Json }; Returns: Json }
+      achievement_pebble: {
+        Args: { p_pebble_id: string; p_tz: string }
+        Returns: Json
+      }
+      achievement_sales_count: { Args: never; Returns: number }
       achievement_stone_match: {
         Args: { p_intensity: number; p_kind: string; p_positiveness: number }
         Returns: boolean
+      }
+      achievement_year_disc: {
+        Args: { p_first: string; p_today: string; p_tz: string; p_year: number }
+        Returns: Json
+      }
+      achievements_year: {
+        Args: { p_tz: string; p_year: number }
+        Returns: Json
       }
       admin_attribute_glyph: {
         Args: { p_glyph_id: string; p_user_id: string }
@@ -2596,6 +2631,7 @@ export type Database = {
       delete_moment_media: { Args: { p_snap_id: string }; Returns: string }
       delete_pebble: { Args: { p_pebble_id: string }; Returns: undefined }
       gem_allocate: { Args: { p_families: Json }; Returns: Json }
+      get_achievements: { Args: { p_tz: string }; Returns: Json }
       get_active_users_series: {
         Args: { p_end: string; p_start: string }
         Returns: {
