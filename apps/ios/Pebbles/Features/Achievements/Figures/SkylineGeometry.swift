@@ -26,24 +26,45 @@ enum SkylineGeometry {
     static let wide = CGRect(x: 12, y: 104, width: 216, height: 48)
     static let narrow = CGRect(x: 18, y: 118, width: 110, height: 32)
 
+    /// The stages parsed once.
+    private static let stagePaths: [Path] = stages.map { SVGPathParser.parse($0).map(Path.init) ?? Path() }
+
+    /// Whether `index` names a stage; a stage outside them draws nothing.
+    static func isStage(_ index: Int) -> Bool {
+        stages.indices.contains(index)
+    }
+
     static func stage(_ index: Int) -> Path {
-        SVGPathParser.parse(stages[index]).map(Path.init) ?? Path()
+        isStage(index) ? stagePaths[index] : Path()
     }
 
     /// The part of stage `index` a fill of `fraction` covers, from the ground up (the board's clip).
     static func fill(_ index: Int, fraction: Double) -> CGRect {
+        guard isStage(index) else { return .null }
         let span = spans[index]
         let height = (ground - tops[index]) * CGFloat(min(max(fraction, 0), 1))
         return CGRect(x: span.lowerBound - 2, y: ground - height,
                       width: span.upperBound - span.lowerBound + 4, height: height + 1)
     }
 
-    /// The contour over the first `count` stages, from x 16 to `end` on the ground.
+    /// The contour over the first `count` stages, from x 16 to `end` on the ground:
+    /// each parsed stage joined by a line, its close left out.
     static func contour(stages count: Int, end: CGFloat) -> Path {
-        let body = stages.prefix(count)
-            .map { "L" + String($0.dropFirst()).replacingOccurrences(of: " Z", with: "") }
-            .joined(separator: " ")
-        return SVGPathParser.parse("M16 148 \(body) L\(end) 148").map(Path.init) ?? Path()
+        var path = Path()
+        path.move(to: CGPoint(x: 16, y: ground))
+        for stage in stagePaths.prefix(max(count, 0)) {
+            stage.forEach { element in
+                switch element {
+                case .move(let to), .line(let to): path.addLine(to: to)
+                case .quadCurve(let to, let control): path.addQuadCurve(to: to, control: control)
+                case .curve(let to, let control1, let control2):
+                    path.addCurve(to: to, control1: control1, control2: control2)
+                case .closeSubpath: break
+                }
+            }
+        }
+        path.addLine(to: CGPoint(x: end, y: ground))
+        return path
     }
 
     /// The stage a step stands on: its place on the ladder, or the last stage for

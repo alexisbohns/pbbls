@@ -54,6 +54,8 @@ struct SkylineStage: View {
     var body: some View {
         let inks = AchievementInks(scheme: scheme)
         Canvas { context, size in
+            // A stage this build does not draw leaves its box empty.
+            guard SkylineGeometry.isStage(index) else { return }
             var c = context
             let span = SkylineGeometry.spans[index]
             let top = SkylineGeometry.tops[index]

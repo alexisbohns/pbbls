@@ -34,6 +34,19 @@ struct SkylineGeometryTests {
         #expect(abs(G.contour(stages: 5, end: 126).boundingRect.maxX - 126) < 0.01)
     }
 
+    @Test("a stage outside the eight draws nothing and fills nothing")
+    func outside() {
+        #expect(!G.isStage(-1) && !G.isStage(8) && G.isStage(0) && G.isStage(7))
+        #expect(G.stage(8).isEmpty && G.stage(-1).isEmpty)
+        #expect(G.fill(8, fraction: 0.5).isNull)
+        #expect(G.contour(stages: 12, end: 224).boundingRect == G.contour(stages: 8, end: 224).boundingRect)
+    }
+
+    @Test("the marks are parsed once and whole")
+    func marks() {
+        #expect(FirstFiveMarks.soulPaths.count == 1 && FirstFiveMarks.glyphPaths.count == 2)
+    }
+
     @Test("a stage's index on the ladder: the step itself, or the last stage for a level past the ladder")
     func stageIndex() {
         let ladder = [1, 10, 25, 50, 100, 250, 500, 1000]

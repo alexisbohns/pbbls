@@ -7,6 +7,14 @@ import SwiftUI
 enum FirstFiveMarks {
     static let soul = ["M30,110 Q65,55 100,110 Q135,165 170,110"]
     static let glyph = ["M100,40 Q160,40 160,100 Q160,160 100,160 Q40,160 40,100 Q40,65 95,70", "M100,100 L100,101"]
+
+    /// The marks parsed once.
+    static let soulPaths = parse(soul)
+    static let glyphPaths = parse(glyph)
+
+    private static func parse(_ strokes: [String]) -> [Path] {
+        strokes.compactMap { SVGPathParser.parse($0).map(Path.init) }
+    }
 }
 
 extension GraphicsContext {
@@ -28,22 +36,21 @@ extension GraphicsContext {
             draw(FlatSeal(size: .small, outline: .lowlight, print: .wash, width: 6 * scale), at: at(4.6, 2.4),
                  color: inks.ink, inks: inks)
         case .soul:
-            strokeMark(FirstFiveMarks.soul, side: 14 * scale, at: center, color: inks.ink)
+            strokeMark(FirstFiveMarks.soulPaths, side: 14 * scale, at: center, color: inks.ink)
         case .glyph:
             stroke(Path.circle(center, 7.2 * scale), with: .color(inks.ink2),
                    style: StrokeStyle(lineWidth: 1, dash: [1.6, 1.6]))
-            strokeMark(FirstFiveMarks.glyph, side: 9.5 * scale, at: center, color: inks.ink)
+            strokeMark(FirstFiveMarks.glyphPaths, side: 9.5 * scale, at: center, color: inks.ink)
         }
     }
 
     /// A mark drawn in a 200-unit box, set `side` wide on `center`, at the glyph's 1.14 pt carve.
-    private func strokeMark(_ strokes: [String], side: CGFloat, at center: CGPoint, color: Color) {
+    private func strokeMark(_ strokes: [Path], side: CGFloat, at center: CGPoint, color: Color) {
         let transform = CGAffineTransform(translationX: center.x - side / 2, y: center.y - side / 2)
             .scaledBy(x: side / 200, y: side / 200)
-        for stroke in strokes {
-            guard let path = SVGPathParser.parse(stroke) else { continue }
-            self.stroke(Path(path).applying(transform), with: .color(color),
-                        style: StrokeStyle(lineWidth: 1.14, lineCap: .round, lineJoin: .round))
+        for path in strokes {
+            stroke(path.applying(transform), with: .color(color),
+                   style: StrokeStyle(lineWidth: 1.14, lineCap: .round, lineJoin: .round))
         }
     }
 }
