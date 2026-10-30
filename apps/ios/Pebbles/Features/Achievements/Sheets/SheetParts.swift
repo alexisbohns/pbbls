@@ -184,8 +184,9 @@ struct RegisterRow: View {
             .layoutPriority(1)
             if !typeSize.isAccessibilitySize { dateMark.fixedSize() }
             if case .sheet = row.opens {
+                // Sized by a text style, so it scales with the row's text.
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                    .font(.system(.subheadline, design: .rounded).weight(.medium))
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
             }
         }
