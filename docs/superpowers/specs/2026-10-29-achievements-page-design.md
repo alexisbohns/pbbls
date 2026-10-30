@@ -156,7 +156,7 @@ An absent section omits its keys; it is never null. An optional field inside an 
 - `progress` is in [0, 1] and is 0 at level 2. `done` says which counters reached their target, so no client compares a count with `days_target`.
 - The year has no "new" marks in v1: nothing about a month is stored to compare against (open question 3).
 - `new` compares the item's `unlocked_at` with that card's `seen_at`.
-- `offered_from` is 06:00 in `p_tz` on the day after `completed_at`, and `ready` says whether that time has passed, so no client compares clocks.
+- `offered_from` is 06:00 in `p_tz` on the day after `completed_at`, and never less than 5 hours after it (a floor against crafted POSIX zone strings; among the IANA zones it moves only Antarctica/Troll's, by at most an hour, on its two-hour spring-forward night), and `ready` says whether that time has passed, so no client compares clocks.
 - `reachable` is false once a full week of the current month has ended without what the next level needs, or when `days_left` exceeds the days the month can still add (the rest of the month, today included unless today already counts), because that level can no longer be reached this month.
 
 ### 3.4 Writes
@@ -164,8 +164,10 @@ An absent section omits its keys; it is never null. An optional field inside an 
 - `mark_achievements_seen(p_card text) returns void`: an upsert of `seen_at = now()`.
 - `pull_ceremony(p_stack text, p_tz text) returns table (stack text, karma_granted integer)`:
   - it is exactly-once (it sets `pulled_at` where it is null) and pays the stack's completion karma from the catalog: three seeded `set_complete` rows (`complete-emotions`, `complete-domains`, `complete-six-firsts`), never unlocked by the check, and private like the contributions;
+  - those rows ship inactive and unpriced; when the clients ship the ceremony, the maintainer prices and then activates them in the admin, before any client can pull. A pull while a row is inactive records `pulled_at` but unlocks and pays nothing, for good;
   - it raises `not_ready` before `offered_from`;
-  - a second call returns no row, which clients must not read as success.
+  - a second call returns no row, which clients must not read as success;
+  - a repeated pull returns no row: a client whose first pull's response was lost re-reads `get_achievements`, and if the completion now carries `pulled_at` it plays the ceremony without a karma line.
 
 ### 3.5 Freshness
 
@@ -217,7 +219,7 @@ There is a new anon harness, `verify-achievements.ts`, with its `db:verify:achie
 It proves:
 - **Six firsts:** each `first_stone` row unlocks independently, so three pebbles earn all six.
 - **Crossing pebbles:** pebble ids follow D4, and so does the backfill.
-- **Silent families:** `celebrate` is false for them and for a heavy crossing.
+- **Silent families:** `check_achievements()` records them, and a level crossed by a heavy pebble, but never returns them; it returns only the rows to celebrate.
 - **Karma:** none for contributions.
 - **Completions:** recorded once; `pull_ceremony` is gated by `offered_from` and runs exactly once.
 - **"New" flags:** the baseline holds with no `seen_at`, and items count as new after `mark_achievements_seen`.
@@ -236,7 +238,7 @@ Plus:
 1. **db: the model.** The family, the ladder seed, `pebble_id` and its backfill, the views and completions tables, the purge append and its harness, the admin one-shot list and forced karma, and the `check_achievements()` re-emission. Then regenerate types.
 2. **db: the read.** `get_achievements`, the oracle, the harness and the payload dump.
 3. **db: the writes and the public profile.** `mark_achievements_seen`, `pull_ceremony`, and `get_public_profile` without the private families. This part's harness covers them.
-4. **iOS:** the page, the five sheets, the ceremony pull, and the celebration filter on `celebrate`.
+4. **iOS:** the page, the five sheets and the ceremony pull. Celebration needs no filter: `check_achievements()` returns only the rows to celebrate, and the client celebrates every row it returns.
 5. **Android:** the same, mirrored 1:1.
 6. **Web:** the same.
 
