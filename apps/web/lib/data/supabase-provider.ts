@@ -317,8 +317,9 @@ export class SupabaseProvider implements DataProvider {
 
   async checkAchievements(): Promise<AchievementUnlockResult[]> {
     // The RPC `returns table(...)`, so PostgREST yields an array of rows —
-    // empty when nothing newly unlocked.
-    const { data, error } = await this.supabase.rpc("check_achievements")
+    // empty when nothing newly unlocked. Under a timeout: the achievements
+    // page awaits it before its read, and a hung check must not hold that up.
+    const { data, error } = await withTimeout(this.supabase.rpc("check_achievements"), 10000, "check_achievements")
     if (error) throw new Error(`check_achievements failed: ${error.message}`)
     return unlockResultsFrom(data)
   }
