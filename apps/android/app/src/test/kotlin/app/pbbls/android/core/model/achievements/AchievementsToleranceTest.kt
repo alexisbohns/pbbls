@@ -285,4 +285,25 @@ class AchievementsToleranceTest {
         assertTrue(entered[1].isNew)
         assertEquals(NextStep(month = 3, needs = Needs.PEBBLES, daysLeft = 5, reachable = true), page.years.single().nextStep)
     }
+
+    @Test
+    fun `a family slug this client does not know is kept as its string, only a missing one is null`() {
+        val page =
+            decodeAchievementsPage(
+                """{"emotions": {"count": 1, "of": 2, "seats": [
+                        {"seat": 0, "emotion_id": "a", "family": "awe", "met": true},
+                        {"seat": 1, "emotion_id": "b"}],
+                      "families": [{"family": "awe", "met": [0], "not_yet": []}, {"met": [], "not_yet": [1]}]},
+                    "years": [{"year": 2026, "current": true,
+                       "months": [${(1..12).joinToString {
+                    if (it == 1) """{"month": 1, "state": "kept", "family": "awe"}""" else """{"month": $it, "state": "quiet"}"""
+                }}]}]}""",
+            )
+        val emotions = page.emotions!!
+        assertEquals(listOf("awe", null), emotions.seats.map { it.family })
+        assertEquals(listOf("awe", null), emotions.families.map { it.family })
+        val months = page.years.single().months
+        assertEquals("awe", months[0].family)
+        assertNull(months[1].family)
+    }
 }
