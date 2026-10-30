@@ -87,4 +87,15 @@ class FakeAchievementsServiceTest {
             }
             assertEquals(listOf(CompletionStack.SIX_FIRSTS, CompletionStack.SIX_FIRSTS), fake.pulls)
         }
+
+    @Test
+    fun `the zone of every read, kept read and pull is recorded`() =
+        runTest {
+            val tokyo = ZoneId.of("Asia/Tokyo")
+            val fake = FakeAchievementsService()
+            fake.page(zone)
+            fake.cachedPage(tokyo)
+            fake.pullCeremony(CompletionStack.EMOTIONS, zone)
+            assertEquals(listOf(zone, tokyo, zone), fake.zones)
+        }
 }

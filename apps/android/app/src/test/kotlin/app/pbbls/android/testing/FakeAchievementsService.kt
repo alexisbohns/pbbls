@@ -47,6 +47,9 @@ class FakeAchievementsService(
 
     val pulls = mutableListOf<CompletionStack>()
 
+    /** The zone of every [page], [cachedPage] and [pullCeremony] call, in order. */
+    val zones = mutableListOf<ZoneId>()
+
     /** When set, [page] waits for it: a test can observe what shows before the read answers. */
     var pageGate: CompletableDeferred<Unit>? = null
 
@@ -105,12 +108,16 @@ class FakeAchievementsService(
     override suspend fun page(zone: ZoneId): AchievementsPage {
         pageCalls += 1
         calls += "page"
+        zones += zone
         pageGate?.await()
         pageFailure.fire()
         return served
     }
 
-    override suspend fun cachedPage(zone: ZoneId): AchievementsPage? = kept
+    override suspend fun cachedPage(zone: ZoneId): AchievementsPage? {
+        zones += zone
+        return kept
+    }
 
     override fun markSeen(card: AchievementCard) {
         seen += card
@@ -121,6 +128,7 @@ class FakeAchievementsService(
         zone: ZoneId,
     ): CeremonyPull {
         pulls += stack
+        zones += zone
         pullFailure.fire()
         return pullResult
     }
