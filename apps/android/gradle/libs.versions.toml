@@ -43,6 +43,10 @@ coroutines = "1.11.0"
 # Bumping it is a deliberate, isolated commit that re-runs the re-baseline job —
 # see "Screenshot validation gate" in apps/android/CLAUDE.md.
 screenshot = { strictly = "0.0.1-alpha16" }
+# The validation API moved to alpha17 on 2026-10-30 before the plugin did (#1341):
+# Android Lint's GradleDependency check fails the build on the older library,
+# so it is pinned on its own until the plugin catches up.
+screenshotValidationApi = { strictly = "0.0.1-alpha17" }
 # Entry funnel (sub-project C). supabase-kt is the auth/data client; it needs a
 # Ktor engine on the classpath — supabase-kt 3.1.4 is built against Ktor 3.1.2,
 # so the OkHttp engine is pinned to the same version to avoid Ktor version skew.
@@ -144,7 +148,7 @@ androidx-compose-material3-adaptive = { group = "androidx.compose.material3.adap
 androidx-window-core = { group = "androidx.window", name = "window-core", version.ref = "windowCore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
-screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
+screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshotValidationApi" }
 
 # Compose (BOM-managed; no version here). foundation supplies HorizontalPager.
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
