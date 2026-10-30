@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,11 +25,13 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.AttachedSnap
 import app.pbbls.android.core.model.FormSnap
@@ -102,11 +103,11 @@ private fun AddTile(onPick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_image),
+        PbblsIconImage(
+            icon = PbblsIcon.CAMERA_FOCUS,
+            size = PbblsIconSize.HERO,
             contentDescription = null,
             tint = colors.onSurfaceVariant,
-            modifier = Modifier.size(40.dp),
         )
         Text(
             text = stringResource(R.string.photo_add),
@@ -216,11 +217,11 @@ private fun AttachedWithoutThumb(onRemove: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_image),
+            PbblsIconImage(
+                icon = PbblsIcon.CAMERA_FOCUS,
+                size = PbblsIconSize.HERO,
                 contentDescription = null,
                 tint = colors.onSurfaceVariant,
-                modifier = Modifier.size(40.dp),
             )
             Text(
                 text = stringResource(R.string.record_photo_attached),
