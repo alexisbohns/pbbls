@@ -2,10 +2,15 @@ import SwiftUI
 
 /// The domains' mended band (#1306, the board's `shardStrip`): the domains
 /// entered in the order they came, inked, then those not yet, dotted; a dot
-/// under each new one. It fills the width it is given.
+/// under each new one. It keeps the board's box, 300 by 40 (the band 30 high,
+/// room for the dots under it), and scales as a whole up to its board width,
+/// as Android and web draw it: never a stretched band at a fixed height.
 struct DomainBand: View {
     let domains: AchievementsPage.Domains
-    var height: CGFloat = 30
+
+    /// The board's box, the band inside it, and where the dots sit.
+    static let box = CGSize(width: 300, height: 40)
+    static let bandHeight: CGFloat = 30
 
     @Environment(\.colorScheme) private var scheme
 
@@ -13,8 +18,11 @@ struct DomainBand: View {
         let inks = AchievementInks(scheme: scheme)
         let entered = domains.arrival
         let count = entered.count + domains.notYet.count
-        Canvas { c, size in
-            let g = ShardBandGeometry(width: size.width, height: height, count: count)
+        Canvas { context, size in
+            var c = context
+            let k = size.width / Self.box.width
+            c.scaleBy(x: k, y: k)
+            let g = ShardBandGeometry(width: Self.box.width, height: Self.bandHeight, count: count)
             let paper = c.mixed(inks.ink, 0.08, over: inks.stock)
             for index in 0..<count {
                 let shard = Path.polygon(g.shard(index))
@@ -32,7 +40,8 @@ struct DomainBand: View {
                 c.fill(dot, with: .color(inks.ink))
             }
         }
-        .frame(height: height + 10)
+        .aspectRatio(Self.box.width / Self.box.height, contentMode: .fit)
+        .frame(maxWidth: Self.box.width)
         .accessibilityHidden(true)
     }
 }

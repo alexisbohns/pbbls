@@ -28,6 +28,15 @@ struct ShardBandGeometryTests {
         #expect(ShardBandGeometry.unit("R3b") >= 0 && ShardBandGeometry.unit("R3b") < 1)
     }
 
+    @Test("the band keeps the board's 300 by 40 box; a new dot, stroke and all, stays inside it")
+    func box() {
+        #expect(DomainBand.box == CGSize(width: 300, height: 40) && DomainBand.bandHeight == 30)
+        let band = ShardBandGeometry(width: DomainBand.box.width, height: DomainBand.bandHeight, count: 17)
+        for index in 0..<17 {
+            #expect(band.dot(index).y + 2.4 + 0.8 <= DomainBand.box.height)
+        }
+    }
+
     @Test("a new domain's dot sits under its shard's middle")
     func dot() {
         #expect(nearly(g.dot(13), CGPoint(x: 13.5 * 300 / 18, y: 36)))
