@@ -112,18 +112,18 @@ struct GlyphPickerContent: View {
         case .mine:
             EmptyView()
         case .owned:
-            ContentUnavailableView(
-                "Nothing owned yet",
-                systemImage: "checkmark.seal",
-                description: Text("Swap a community glyph to see it here.")
-            )
+            ContentUnavailableView {
+                Label { Text("Nothing owned yet") } icon: { PbblsIconImage(.checkCircleDot, .hero) }
+            } description: {
+                Text("Swap a community glyph to see it here.")
+            }
             .frame(maxWidth: .infinity)
         case .commu:
-            ContentUnavailableView(
-                "No community glyphs",
-                systemImage: "person.3",
-                description: Text("Check back soon.")
-            )
+            ContentUnavailableView {
+                Label { Text("No community glyphs") } icon: { PbblsIconImage(.people, .hero) }
+            } description: {
+                Text("Check back soon.")
+            }
             .frame(maxWidth: .infinity)
         }
     }
@@ -168,7 +168,7 @@ struct GlyphPickerContent: View {
                 }
                 if tab == .commu, item.price > 0 {
                     HStack(spacing: 2) {
-                        Image(systemName: "sparkle")
+                        PbblsIconImage(.karmaDot, .inline, relativeTo: .caption2)
                         Text("\(item.price)")
                     }
                     .font(.caption2)
