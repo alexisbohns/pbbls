@@ -7,25 +7,7 @@ import {
   writeAchievementsCache,
 } from "./achievements-cache"
 import { DUMPED_GET_ACHIEVEMENTS } from "./__fixtures__/achievements-captured"
-
-class MemoryStorage {
-  private items = new Map<string, string>()
-  get length() {
-    return this.items.size
-  }
-  key(i: number) {
-    return [...this.items.keys()][i] ?? null
-  }
-  getItem(k: string) {
-    return this.items.get(k) ?? null
-  }
-  setItem(k: string, v: string) {
-    this.items.set(k, v)
-  }
-  removeItem(k: string) {
-    this.items.delete(k)
-  }
-}
+import { MemoryStorage } from "./__fixtures__/memory-storage"
 
 const PAYLOAD: unknown = JSON.parse(DUMPED_GET_ACHIEVEMENTS)
 const PARIS = "Europe/Paris"

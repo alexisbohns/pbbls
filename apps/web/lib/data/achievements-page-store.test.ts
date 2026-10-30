@@ -3,25 +3,7 @@ import { AchievementsPageStore, type AchievementsPageProvider } from "./achievem
 import { achievementsCacheEpoch, clearAchievementsCaches, writeAchievementsCache } from "./achievements-cache"
 import { CeremonyNotReadyError, type AchievementUnlockResult, type CeremonyPull } from "./data-provider"
 import { DUMPED_GET_ACHIEVEMENTS, DUMPED_GET_ACHIEVEMENTS_PULLED } from "./__fixtures__/achievements-captured"
-
-class MemoryStorage {
-  private items = new Map<string, string>()
-  get length() {
-    return this.items.size
-  }
-  key(i: number) {
-    return [...this.items.keys()][i] ?? null
-  }
-  getItem(k: string) {
-    return this.items.get(k) ?? null
-  }
-  setItem(k: string, v: string) {
-    this.items.set(k, v)
-  }
-  removeItem(k: string) {
-    this.items.delete(k)
-  }
-}
+import { MemoryStorage } from "./__fixtures__/memory-storage"
 
 type Deferred<T> = { promise: Promise<T>; resolve: (value: T) => void; reject: (err: unknown) => void }
 function deferred<T>(): Deferred<T> {
