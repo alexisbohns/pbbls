@@ -317,8 +317,9 @@ jobs:
         if: '!cancelled()'
         run: npm run lint --workspace=packages/supabase
 
-      # The orphan-sweep unit tests. They are here rather than in `verify`
-      # because they need no database. (The render engine and its #829 markup
+      # The orphan-sweep unit tests and the oracles' own tests (the achievements
+      # year disc under deno, the path-wrap gem under node). They are here rather
+      # than in `verify` because they need no database. (The render engine and its #829 markup
       # tests left with the moments split, #1046: clients draw the glyph.)
       - name: deno test
         if: '!cancelled()'

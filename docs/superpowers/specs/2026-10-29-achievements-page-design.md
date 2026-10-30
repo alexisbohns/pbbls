@@ -98,13 +98,13 @@ Each of those three function bodies is re-emitted whole, so diff each pairwise a
 - **Crossing pebble:** each insert records `pebble_id` by the rule of D4.
 - **Completions:** a statement after the unlocks records a set the first time it becomes whole.
 - **Karma:** none for the silent families.
-- **Return type** becomes `table (slug text, karma_granted integer, celebrate boolean)`. Changing OUT columns needs `drop function` then `create`, and the grants are re-issued.
+- **Return type** stays `table (slug text, karma_granted integer)`, and only the rows to celebrate are returned. Silent rows (the contributions, `pebble-count-1`, a level crossed by a heavy pebble) are recorded but not returned, because shipped clients celebrate every row they get. (Amended after the part 1 review; this replaced a `celebrate` column.)
 
 Clients that ignore unknown keys keep working. iOS `Decodable` ignores them, and Android's JSON configs set `ignoreUnknownKeys`; check the one `AchievementsService` uses. The web TypeScript decoder must be checked too.
 
 ### 3.3 `get_achievements(p_tz text) returns jsonb` (part 2)
 
-An absent section omits its keys; it is never null.
+An absent section omits its keys; it is never null. An optional field inside an object is omitted too (an unnamed moment has no `name`). One exception: `shelf[].threshold` is an explicit `null` for the families that count nothing, so the row matches `get_public_profile`'s shelf row and each client keeps one decoder for both.
 
 ```jsonc
 {
@@ -157,7 +157,7 @@ An absent section omits its keys; it is never null.
 - The year has no "new" marks in v1: nothing about a month is stored to compare against (open question 3).
 - `new` compares the item's `unlocked_at` with that card's `seen_at`.
 - `offered_from` is 06:00 in `p_tz` on the day after `completed_at`, and `ready` says whether that time has passed, so no client compares clocks.
-- `reachable` is false once a full week of the current month has passed without what the next level needs, because that level can no longer be reached this month.
+- `reachable` is false once a full week of the current month has ended without what the next level needs, or when `days_left` exceeds the days the month can still add (the rest of the month, today included unless today already counts), because that level can no longer be reached this month.
 
 ### 3.4 Writes
 
@@ -189,7 +189,7 @@ The same rule holds on iOS, Android and web.
   - Opening a sheet calls `mark_achievements_seen`, fire-and-forget.
   - A "ready" mark opens the ceremony, which calls `pull_ceremony`.
   - Explorer's Domains and Emotions rows push their own sheet on top.
-- **Celebration:** the unlock moment (achievements design D13) shows only the rows where `celebrate` is true.
+- **Celebration:** the unlock moment (achievements design D13) shows every row `check_achievements()` returns; the server returns only the rows to celebrate.
 
 Components are factored once per platform:
 - **Atoms:** the flat seal, the gauge, the skyline stage, the count cell.
