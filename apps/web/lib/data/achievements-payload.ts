@@ -389,16 +389,21 @@ function nextStepFrom(n: Json | null): YearNextStep | null {
   }
 }
 
-/** Twelve months, one per month of the year, or the disc cannot be drawn. */
-function hasTwelveMonths(months: YearMonth[]): boolean {
-  const seen = new Set(months.map((m) => m.month))
-  return months.length === 12 && Array.from({ length: 12 }, (_, i) => i + 1).every((m) => seen.has(m))
+/**
+ * January to December, indexed by each month's own number, or null when the
+ * served list is not exactly one entry per month: the disc cannot be drawn.
+ */
+function twelveMonths(served: YearMonth[]): YearMonth[] | null {
+  if (served.length !== 12) return null
+  const byNumber = new Map(served.map((m) => [m.month, m]))
+  const months = Array.from({ length: 12 }, (_, i) => byNumber.get(i + 1))
+  return months.every((m) => m !== undefined) ? months.filter((m) => m !== undefined) : null
 }
 
 function yearFrom(raw: unknown): AchievementYear[] {
   const y = object(raw, "years")
-  const months = list(y, "months").map(monthFrom)
-  if (!hasTwelveMonths(months)) return []
+  const months = twelveMonths(list(y, "months").map(monthFrom))
+  if (!months) return []
   return [
     {
       year: int(y, "year", 0),

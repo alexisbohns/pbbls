@@ -346,6 +346,14 @@ describe("ids that open something", () => {
   })
 })
 
+describe("a year's months", () => {
+  it("are placed January to December by their own number, whatever the served order", () => {
+    const months = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((month) => ({ month, state: "quiet" }))
+    const decoded = decodeAchievementsPage({ years: [{ year: 2026, current: true, months, listed: [] }] })
+    expect(decoded?.page.years[0].months.map((m) => m.month)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+  })
+})
+
 describe("instantFrom", () => {
   it("reads every spelling the surfaces emit, and refuses a zoneless or unreadable one", () => {
     expect(instantFrom("2026-03-02T09:00:00Z")).toEqual(at("2026-03-02T09:00:00Z"))

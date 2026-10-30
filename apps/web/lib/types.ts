@@ -437,7 +437,7 @@ export type AchievementYear = {
   current: boolean
   /** The days a level needs, as served. */
   daysTarget: number | null
-  /** Exactly twelve, January to December: a year without them is dropped. */
+  /** January to December, placed by each month's served number; a year without one entry per month is dropped. */
   months: YearMonth[]
   /** The table's months, newest first, as served (values outside 1…12 left out). */
   listed: number[]
