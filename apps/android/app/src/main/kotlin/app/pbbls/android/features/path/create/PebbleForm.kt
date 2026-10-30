@@ -35,6 +35,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.DashedPlaceholder
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionWithPalette
@@ -274,11 +277,11 @@ private fun AddPhotoRow(onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_image),
+        PbblsIconImage(
+            icon = PbblsIcon.CAMERA,
+            size = PbblsIconSize.ROW,
             contentDescription = null,
             tint = colors.primary,
-            modifier = Modifier.size(24.dp),
         )
         Text(
             text = stringResource(R.string.photo_add),
@@ -400,11 +403,11 @@ private fun CollectionRow(
     Box {
         FormRow(
             leading = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_pebble_collection),
+                PbblsIconImage(
+                    icon = PbblsIcon.COLLECTION,
+                    size = PbblsIconSize.TILE,
                     contentDescription = null,
                     tint = colors.primary,
-                    modifier = Modifier.size(28.dp),
                 )
             },
             label = stringResource(R.string.create_collection_label),

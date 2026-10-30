@@ -17,9 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,7 +40,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -50,6 +47,9 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.KarmaReason
 
@@ -95,7 +95,7 @@ fun KarmaOverlayHost(
 
 /**
  * The pastille itself: a `surfaceContainerHigh` [Surface] capsule (lift from
- * the container ladder, not a `surfaceTint` wash — #853) with a sparkle, the
+ * the container ladder, not a `surfaceTint` wash — #853) with the karma dot, the
  * "+N karma" label, and a countdown ring that drains over
  * [KarmaNotificationService.CAPSULE_DURATION_MS]. Fires one
  * [HapticFeedbackConstants.CONFIRM] per fresh [content] (needs a `View`, so it
@@ -145,11 +145,11 @@ fun KarmaEarnedCapsule(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 11.dp),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_sparkle),
+            PbblsIconImage(
+                icon = PbblsIcon.KARMA_DOT,
+                size = PbblsIconSize.INLINE,
                 contentDescription = null,
                 tint = colors.primary,
-                modifier = Modifier.size(16.dp),
             )
             Text(
                 text = stringResource(R.string.karma_flash_amount, content.amount),

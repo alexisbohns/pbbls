@@ -30,12 +30,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.Spacing
+import app.pbbls.android.core.designsystem.toDp
 import app.pbbls.android.features.path.create.WhenDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -83,7 +87,7 @@ fun RecordWhenStep(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         WhenPill(
-            iconRes = R.drawable.ic_calendar,
+            iconRes = PbblsIcon.CALENDAR_DATE.drawableRes,
             label = dateLabel,
             onClick = { picker = WhenPicker.DATE },
         )
@@ -99,11 +103,11 @@ fun RecordWhenStep(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_sparkle),
+                PbblsIconImage(
+                    icon = PbblsIcon.SPARKLE,
+                    size = PbblsIconSize.INLINE,
                     contentDescription = null,
                     tint = colors.onSurfaceVariant,
-                    modifier = Modifier.size(14.dp),
                 )
                 Text(
                     text = stringResource(R.string.record_when_from_photo),
@@ -198,7 +202,11 @@ fun RecordWhenStep(
     }
 }
 
-/** One large, centred tap target carrying half the answer. */
+/**
+ * One large, centred tap target carrying half the answer. [iconRes] is the
+ * date's pebbles icon (`PbblsIcon.CALENDAR_DATE.drawableRes`) or the time's kept
+ * tracing; both draw at ROW (Android icon migration spec D6).
+ */
 @Composable
 private fun WhenPill(
     iconRes: Int,
@@ -221,7 +229,7 @@ private fun WhenPill(
             painter = painterResource(iconRes),
             contentDescription = null,
             tint = colors.primary,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(PbblsIconSize.ROW.toDp(LocalDensity.current)),
         )
         Text(
             text = label,

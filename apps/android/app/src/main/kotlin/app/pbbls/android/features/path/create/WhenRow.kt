@@ -1,12 +1,10 @@
 package app.pbbls.android.features.path.create
 
 import android.text.format.DateFormat
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,10 +19,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import java.time.OffsetDateTime
 import java.time.ZoneId
 
@@ -55,11 +54,11 @@ fun WhenRow(
 
     FormRow(
         leading = {
-            Icon(
-                painter = painterResource(R.drawable.ic_pebble_when),
+            PbblsIconImage(
+                icon = PbblsIcon.CALENDAR_DATE,
+                size = PbblsIconSize.TILE,
                 contentDescription = null,
                 tint = colors.primary,
-                modifier = Modifier.size(28.dp),
             )
         },
         label = stringResource(R.string.create_when_label),
