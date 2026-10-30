@@ -1,0 +1,972 @@
+{
+  "icons": [
+    {
+      "name": "checkmark-dot",
+      "meaning": "Done: a tick with the pen's dot pressed just past its end.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": ["ic_check"], "web": ["Check"] }
+    },
+    {
+      "name": "checkmark",
+      "meaning": "Done: a plain tick that hooks where the pen landed.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "check-circle",
+      "meaning": "Done, inside the stone ring: a tick in a pebble.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": ["checkmark.circle.fill"], "android": ["ic_check_circle"], "web": ["CircleCheckBig"] }
+    },
+    {
+      "name": "check-circle-dot",
+      "meaning": "Done, inside the stone ring, with a dot pressed on the rim.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "plus-circle-dot",
+      "meaning": "Create a pebble: a plus inside the stone ring, with a dot pressed on the rim.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": ["CirclePlus"] }
+    },
+    {
+      "name": "remove",
+      "meaning": "Take one away: a minus inside the stone ring.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "plus-circle",
+      "meaning": "Create a pebble: a plus inside the stone ring.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "hourglass-end",
+      "meaning": "Not yet: an hourglass with its last grain falling through the neck.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pendulum",
+      "meaning": "Not yet: a weight hanging from a bar, still in mid-swing.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-pen",
+      "meaning": "Not yet: a leaning stylus crossed by a loose cord.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-leaf",
+      "meaning": "Not yet: a stem with a curl of cord thrown around it.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "camera",
+      "meaning": "Take a photo now: a camera body with a stone for a lens and a dot for the flash.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": ["photo.badge.plus"], "android": [], "web": ["ImagePlus"] }
+    },
+    {
+      "name": "camera-analogic",
+      "meaning": "Take a photo now: a boxy film camera with a round lens and a winder on top.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "camera-focus",
+      "meaning": "Take a photo now: a lens drawn as a loose spiral between two bracket strokes.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "home",
+      "meaning": "Where you land: a tipi with crossed poles and an arched door.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": ["house"], "android": [], "web": [] }
+    },
+    {
+      "name": "home-hive",
+      "meaning": "Where you land: a domed hut of two lashed ribs over a low door.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "gate",
+      "meaning": "Where you land: a doorway hung from a sagging lintel cord with a pull-string in the middle.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-home",
+      "meaning": "Where you land: a boat-shed arch half-buried in the ground line.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-spiral",
+      "meaning": "Where you land: a cord coiled at rest on the ground.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "path",
+      "meaning": "Your months in order: three stepping stones climbing in a zigzag, smaller toward the far one.",
+      "variants": ["active", "lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "yarn",
+      "meaning": "Your months in order: a ball of wound thread with its free end trailing out to now.",
+      "variants": ["active", "lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "destination",
+      "meaning": "Your months in order: a winding trail that leads up to one stone on the horizon.",
+      "variants": ["active", "lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "path-river",
+      "meaning": "Your months in order: a river line with three stones beside its bends.",
+      "variants": ["active", "lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "people",
+      "meaning": "The souls in your life: two faceless figures, stone heads, one a step behind the other.",
+      "variants": ["active", "lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": ["person.2", "person.2.fill", "person.3"], "android": ["ic_people", "ic_person_pair"], "web": ["Users"] }
+    },
+    {
+      "name": "users",
+      "meaning": "The souls in your life: two faceless figures side by side, one half behind the other.",
+      "variants": ["active", "lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-crown",
+      "meaning": "The souls in your life: three strands from one tie, each looping into a head.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-fence",
+      "meaning": "The souls in your life: three figures of falling height bound by one thong.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-loki",
+      "meaning": "The souls in your life: two coiled souls whose cords cross below into a heart.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "exchange",
+      "meaning": "The souls in your life: two hooks with lashing eyes, interlocked head to foot.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "dolmen",
+      "meaning": "The souls in your life: three loops of different sizes hitched onto one cord.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "dna",
+      "meaning": "The souls in your life: two strands plied around each other.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "collection",
+      "meaning": "Your pebbles gathered into sets: a shallow bowl holding three stones, one heaped on top.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": ["circle.hexagongrid"], "android": ["ic_pebble_collection"], "web": ["Layers"] }
+    },
+    {
+      "name": "pearl",
+      "meaning": "Your pebbles gathered into sets: a main cord with three pendants hanging from it.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "watermelon",
+      "meaning": "Your pebbles gathered into sets: a net bag gathered at the neck by a drawstring.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "cromlech",
+      "meaning": "Your pebbles gathered into sets: a fairy ring of five small caps.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pouch-dot",
+      "meaning": "Your pebbles gathered into sets: a hide pouch with a frilled mouth, cinched by a thong.",
+      "variants": ["active", "lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pouch",
+      "meaning": "Your pebbles gathered into sets: a drawstring pouch, its string curled loose.",
+      "variants": ["active", "lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stack",
+      "meaning": "A loose pile, no order: three stones, the top one resting on the pair.",
+      "variants": ["lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-cairn",
+      "meaning": "A loose pile, no order: one open spiral of stone under a cap arch.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stack-sharp",
+      "meaning": "A loose pile, no order: three faceted stones, two below and one tucked above.",
+      "variants": ["lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-stack",
+      "meaning": "A loose pile, no order: two bands of ash under an arc, a dot on top.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-landscape",
+      "meaning": "A loose pile, no order: ash strata pierced by one thread, a curl on the crest.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "fall",
+      "meaning": "A loose pile, no order: a slope with three stones tumbling off it.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pouch-2",
+      "meaning": "A bound set that travels together: a tied pouch with a frilled mouth.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "nechlace",
+      "meaning": "A bound set that travels together: three beads strung on a loop of cord.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "purse",
+      "meaning": "A bound set that travels together: a flap purse with a clasp.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "baluchon",
+      "meaning": "A bound set that travels together: a bundle tied to a stick.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "bag",
+      "meaning": "A bound set that travels together: a sack cinched by a gathered neck.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "case",
+      "meaning": "A bound set that travels together: a case with a handle, its lid in two halves.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-stair",
+      "meaning": "An ordered sequence: three stones climbing one after another.",
+      "variants": ["lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-track",
+      "meaning": "An ordered sequence: three stones on one leaning ground line.",
+      "variants": ["lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-arrow-right",
+      "meaning": "An ordered sequence: three stones in a row over an arrow pointing right.",
+      "variants": ["lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "chart-double-grow",
+      "meaning": "An ordered sequence: a line notched by rising ticks.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pan",
+      "meaning": "An ordered sequence: pipes of falling length hung from one bar.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "scale",
+      "meaning": "An ordered sequence: a rope ladder of four rungs.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-aligned-bottom",
+      "meaning": "An ordered sequence: three stones sitting on one ground line.",
+      "variants": ["lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "person",
+      "meaning": "You, your own account: a figure with lifted arms and a spiral for a head.",
+      "variants": ["active", "lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": ["person.crop.circle", "person.circle"], "android": ["ic_person"], "web": ["CircleUser"] }
+    },
+    {
+      "name": "barbed-wire",
+      "meaning": "You, your own account: one strand looping into a head, with a wrap below.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-key",
+      "meaning": "You, your own account: a cord with an eye splice and its whipping.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "user-heart",
+      "meaning": "You, your own account: a stone head over a shoulder arch, drawn with a heart's weight.",
+      "variants": ["active", "lit-1", "lit-2"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "user",
+      "meaning": "You, your own account: a stone head over a shoulder arch.",
+      "variants": ["active", "lit-1", "lit-2"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "slider",
+      "meaning": "Adjust things: two rails that stop at their stone knobs.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": ["gear"], "android": ["ic_gear"], "web": ["Settings"] }
+    },
+    {
+      "name": "shelve",
+      "meaning": "Adjust things: cords knotted at different heights, shelved one above the other.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-sign",
+      "meaning": "Adjust things: a bar crossed by rings, a signpost of cord.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "radar",
+      "meaning": "Adjust things: a stone ring with four ticks and a dot at its centre.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-umbrella",
+      "meaning": "Adjust things: an arrowhead over a bar, like a drill pumped by hand.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-sign-2",
+      "meaning": "Adjust things: a stylus crossed by three rings of cord.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-dotted-glyph",
+      "meaning": "The marks a user scribbles on a stone: a dotted stone ring around a small scribble.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": ["scribble"], "android": ["ic_scribble"], "web": [] }
+    },
+    {
+      "name": "abstract-curves",
+      "meaning": "The marks a user scribbles on a stone: a dotted arc, a hooked stroke and a short tail.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-lines",
+      "meaning": "The marks a user scribbles on a stone: a zigzag over a row of dots.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-mi",
+      "meaning": "The marks a user scribbles on a stone: a zigzag and a bar over a dotted swell.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-dotted-glyph-2",
+      "meaning": "The marks a user scribbles on a stone: a dotted stone ring around a small scribble, the ring open on one side.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "glyph-underlined",
+      "meaning": "The marks a user scribbles on a stone: a scribble over a dotted line.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "glyph-grow-underlined",
+      "meaning": "The marks a user scribbles on a stone: a scribble that grows taller, over a dotted line.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "draw-dotted",
+      "meaning": "The marks a user scribbles on a stone: a stylus leaving a dotted trail.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-round",
+      "meaning": "A recorded moment, the unit of the app: one round stone with a shine.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": ["fossil.shell"], "android": ["ic_fossil_shell"], "web": ["Stone"] }
+    },
+    {
+      "name": "pebble-flat",
+      "meaning": "A recorded moment, the unit of the app: one flat stone with a shine.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "karma-dot",
+      "meaning": "Good you gave, that comes back: a spiral with the pen's dot pressed past its end.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "karma",
+      "meaning": "Good you gave, that comes back: a petroglyph spiral.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "karma-double",
+      "meaning": "Good you gave, that comes back: two curls hooked into each other.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "wave",
+      "meaning": "Good you gave, that comes back: a swell that turns into a hook.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "karma-2",
+      "meaning": "Good you gave, that comes back: a spiral wound inward.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "karma-clockwise",
+      "meaning": "Good you gave, that comes back: a spiral wound clockwise.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "calendar-date",
+      "meaning": "A date, a day: a calendar page with hooked rings and a 1 on it.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": ["calendar"], "android": ["ic_calendar"], "web": ["CalendarDays"] }
+    },
+    {
+      "name": "calendar-dot",
+      "meaning": "A date, a day: a calendar page with a dot pressed in its corner.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "game",
+      "meaning": "A date, a day: a grid of crossed cords with a stone at its centre.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pearl-jaw",
+      "meaning": "A date, a day: a bored disc hung on a cord between two posts.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "calendar-day",
+      "meaning": "A date, a day: a calendar page with a stone ring for the day.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "trash",
+      "meaning": "Remove: a bin with a curled knob, its body starting below the lid.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": ["trash"], "android": ["ic_trash"], "web": ["Trash2"] }
+    },
+    {
+      "name": "trash-2",
+      "meaning": "Remove: a bin with a lid and a curled knob.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "broom",
+      "meaning": "Remove: a broom with a hooked handle.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "soda",
+      "meaning": "Remove: a bin with a wax-cut zigzag on its side.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-glow-md",
+      "meaning": "It worked: a stone with three rays of light rising from it.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sunshine",
+      "meaning": "It worked: a low sun with rays over a ground line.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "plant-sprout",
+      "meaning": "It worked: a sprout with two leaves rising from the ground.",
+      "variants": ["lit-1", "lit-2"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-glow-sm",
+      "meaning": "It worked: a small stone with three rays rising from it.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-glow-lg",
+      "meaning": "It worked: a large stone with three rays rising from it.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "knot-lg",
+      "meaning": "It worked: a bow knot pulled tight, large loops.",
+      "variants": ["lit-1", "lit-2"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "knot-sm",
+      "meaning": "It worked: a bow knot pulled tight, small loops.",
+      "variants": ["lit-1", "lit-2"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "bell-ringing",
+      "meaning": "It worked: a bell seen from below, ringing between two brackets.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sunrise",
+      "meaning": "It worked: a sunrise over a ground line.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sparkle",
+      "meaning": "A thought, a suggestion: a four-point star with the pen's dot beside it.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "karma-sparkle",
+      "meaning": "A thought, a suggestion: a spiral with three sparks flying off it.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "plant-seedling-gap",
+      "meaning": "A thought, a suggestion: a seed with a sprout leaving a gap above it.",
+      "variants": ["lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-drizzle",
+      "meaning": "A thought, a suggestion: a wavy thread rising to a bead.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-tree",
+      "meaning": "A thought, a suggestion: a bracket fungus crown on a short stem.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-underwater",
+      "meaning": "A thought, a suggestion: bubbles rising from a cord under a swell.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "plant-seedling",
+      "meaning": "A thought, a suggestion: a seed with a sprout growing from it.",
+      "variants": ["lit-1", "lit-2", "lit-3"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sparkles",
+      "meaning": "A thought, a suggestion: a four-point star with a small plus beside it.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "needle",
+      "meaning": "A thought, a suggestion: a needle threaded with a hooked cord.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "loop",
+      "meaning": "A thought, a suggestion: a cord tied in one loose loop, a dot pressed past its end.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "heart",
+      "meaning": "I liked this: a heart in two strokes that meet below.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": ["Heart"] }
+    },
+    {
+      "name": "hand",
+      "meaning": "I liked this: a petroglyph handprint.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "node",
+      "meaning": "I liked this: two cords hooked into each other.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "orange",
+      "meaning": "I liked this: a round fruit with a crossed stem.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "heart-heart",
+      "meaning": "I liked this: a heart drawn in one stroke that almost meets.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "petroglyph",
+      "meaning": "I liked this: a spiral inside a stone ring.",
+      "variants": ["active"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "connection",
+      "meaning": "Ordered steps: a rail with two stone nodes.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "timeline",
+      "meaning": "Ordered steps: a tally strap with two notches.",
+      "variants": [],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-outlined-glyph",
+      "meaning": "The marks a user scribbles on a stone: a stone ring around a small scribble.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-outlined-glyph-2",
+      "meaning": "The marks a user scribbles on a stone: a stone ring around a small scribble, drawn with an open start.",
+      "variants": ["lit-1"],
+      "wave": "2026-10-foundation",
+      "status": "candidate",
+      "replaces": { "ios": [], "android": [], "web": [] }
+    }
+  ]
+}

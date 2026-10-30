@@ -1,0 +1,32 @@
+{
+  "name": "@pbbls/icons",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "main": "./react/index.ts",
+  "types": "./react/index.ts",
+  "exports": {
+    ".": "./react/index.ts",
+    "./icons.json": "./icons.json"
+  },
+  "scripts": {
+    "generate": "tsx scripts/build.ts",
+    "lint": "tsx scripts/build.ts --lint",
+    "check": "tsx scripts/build.ts --check",
+    "format": "tsx scripts/build.ts --format",
+    "build": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19",
+    "svgo": "4.1.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7",
+    "vitest": "^5.0.5"
+  }
+}

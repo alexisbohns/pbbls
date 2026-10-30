@@ -13,6 +13,7 @@
 | `apps/android` | `@pbbls/android` — Kotlin + Compose, minSdk 33; mirrors iOS 1:1 | `apps/android/CLAUDE.md` (also routes the two Android skill sets) |
 | `apps/admin` | `@pbbls/admin` — Next.js back-office (analytics, Lab logs, moderation), port 3001 | `apps/admin/CLAUDE.md` |
 | `packages/supabase` | Migrations, generated `database.ts`, edge functions, DB verify harnesses | `packages/supabase/CLAUDE.md` |
+| `packages/icons` | `@pbbls/icons` — the hand-drawn icon set and its generator (outputs committed per surface) | `packages/icons/CLAUDE.md` |
 | `packages/shared` | Stub — no code yet | `packages/shared/CLAUDE.md` |
 | `packages/rive` | `.riv` animation assets, copied per surface (not an npm workspace) | — |
 
