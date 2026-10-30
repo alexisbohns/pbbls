@@ -55,9 +55,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.toDp
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.ui.render.GlyphImage
@@ -184,7 +187,7 @@ fun GlyphCarveScreen(
                     onClick = { viewModel.onStrokesChange(uiState.strokes.dropLast(1)) },
                 )
                 CarvePillButton(
-                    iconRes = R.drawable.ic_trash,
+                    iconRes = PbblsIcon.TRASH.drawableRes,
                     label = stringResource(R.string.carve_clear),
                     enabled = uiState.strokes.isNotEmpty(),
                     onClick = { viewModel.onStrokesChange(emptyList()) },
@@ -315,6 +318,8 @@ internal fun CarveCanvas(
 /**
  * Undo/Clear pill — `onPrimaryContainer` label + icon on a `primaryContainer`
  * capsule (iOS chrome); disabled content drops to the 38% `onSurface` ink.
+ * [iconRes] is the kept undo tracing or `PbblsIcon.TRASH.drawableRes`; both
+ * draw at ROW (Android icon migration spec D6).
  */
 @Composable
 private fun CarvePillButton(
@@ -339,7 +344,7 @@ private fun CarvePillButton(
             painter = painterResource(iconRes),
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(PbblsIconSize.ROW.toDp(LocalDensity.current)),
         )
         Text(
             text = label,

@@ -298,11 +298,11 @@ private fun GlyphStoreCell(
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_sparkle),
+                PbblsIconImage(
+                    icon = PbblsIcon.KARMA_DOT,
+                    size = PbblsIconSize.INLINE,
                     contentDescription = null,
                     tint = colors.onSurfaceVariant,
-                    modifier = Modifier.size(11.dp),
                 )
                 Text(
                     text = item.price.toString(),

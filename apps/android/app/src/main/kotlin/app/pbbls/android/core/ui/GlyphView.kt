@@ -3,7 +3,6 @@ package app.pbbls.android.core.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,10 +14,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.ui.render.GlyphImage
 
@@ -31,8 +30,8 @@ import app.pbbls.android.core.ui.render.GlyphImage
  */
 enum class GlyphViewCase {
     PROFILE, // no frame; glyph in primary
-    CARVE, // dashed 2dp outlineVariant; scribble in onSurfaceVariant
-    CREATE, // dashed 2dp outlineVariant; plus in outline
+    CARVE, // dashed 2dp outlineVariant; the dotted-glyph mark in onSurfaceVariant
+    CREATE, // dashed 2dp outlineVariant; the plus stone in outline
     SELECTED, // no frame; glyph in primary
     UNSELECTED, // no frame; glyph in outlineVariant — faint, but still tappable, so not the 38% disabled ink
     DEFAULT, // no frame; glyph in onSurfaceVariant
@@ -42,7 +41,7 @@ enum class GlyphViewCase {
  * Canonical glyph chrome component — ports iOS
  * `Features/Glyph/Views/GlyphView.swift`. Renders either the glyph [strokes]
  * (through the existing [GlyphImage] pipeline) or a placeholder icon overlay
- * (scribble for [GlyphViewCase.CARVE], plus for [GlyphViewCase.CREATE]).
+ * (`pebble-dotted-glyph` for [GlyphViewCase.CARVE], `plus-circle` for [GlyphViewCase.CREATE]).
  * Named `GlyphView` for iOS symmetry; the model type owns `Glyph`.
  */
 @Composable
@@ -90,9 +89,9 @@ fun GlyphView(
     ) {
         when (case) {
             GlyphViewCase.CARVE ->
-                PlaceholderIcon(R.drawable.ic_scribble, side, tint = colors.onSurfaceVariant)
+                PlaceholderIcon(PbblsIcon.PEBBLE_DOTTED_GLYPH, side, tint = colors.onSurfaceVariant)
             GlyphViewCase.CREATE ->
-                PlaceholderIcon(R.drawable.ic_plus, side, tint = colors.outline)
+                PlaceholderIcon(PbblsIcon.PLUS_CIRCLE, side, tint = colors.outline)
             GlyphViewCase.PROFILE, GlyphViewCase.SELECTED ->
                 GlyphStrokes(strokes, viewBox, colors.primary)
             GlyphViewCase.UNSELECTED ->
@@ -105,18 +104,14 @@ fun GlyphView(
 
 @Composable
 private fun PlaceholderIcon(
-    resId: Int,
+    icon: PbblsIcon,
     side: Dp,
     tint: Color,
 ) {
-    // iOS sizes the SF Symbol at max(side * 0.4, 18pt).
+    // A fixed slot (spec D6): the cell is a dp square that does not follow the
+    // font scale, so the mark takes iOS's max(side * 0.4, 18) as a Dp.
     val iconSide = if (side * 0.4f > 18.dp) side * 0.4f else 18.dp
-    Icon(
-        painter = painterResource(resId),
-        contentDescription = null,
-        tint = tint,
-        modifier = Modifier.size(iconSide),
-    )
+    PbblsIconImage(icon = icon, contentDescription = null, size = iconSide, tint = tint)
 }
 
 @Composable

@@ -5,22 +5,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 
 /**
- * The WhatsApp community card — ports iOS `FeaturedCommunityCard`: chat
- * bubbles + copy, then a full-width primary button. Always the Lab's
+ * The WhatsApp community card — ports iOS `FeaturedCommunityCard`: the
+ * people mark + copy, then a full-width primary button. Always the Lab's
  * first block regardless of feed outcomes (design D8); [onOpen] fires the
  * external `ACTION_VIEW` on `LabConfig.WHATSAPP_INVITE_URL` at the caller.
  */
@@ -38,11 +38,11 @@ fun FeaturedCommunityCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_chat_bubbles),
+            PbblsIconImage(
+                icon = PbblsIcon.PEOPLE,
+                size = PbblsIconSize.TILE,
                 contentDescription = null,
                 tint = colors.primary,
-                modifier = Modifier.size(24.dp),
             )
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
