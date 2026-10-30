@@ -9,6 +9,7 @@ import { ExplorerWheel } from "@/components/achievements/figures/ExplorerWheel"
 import { PebbleSkyline } from "@/components/achievements/figures/PebbleSkyline"
 import { YearDisc } from "@/components/achievements/figures/YearDisc"
 import { designPage, designPalettes } from "./__fixtures__/design"
+import { UNRESOLVED_KITE, UNRESOLVED_STAR, facets } from "./rosace"
 import type { AchievementsEmotions } from "@/lib/types"
 
 // The figures rendered to markup from the canonical design fixture (no DOM:
@@ -64,7 +65,11 @@ describe("the figures, drawn from the design fixture", () => {
     const markup = html(createElement(EmotionRosace, { emotions, palettes }))
     expect(markup).toContain(">awe<")
     expect(markup).toMatch(/class="[^"]*fill-spine-ink[^"]*"[^>]*>awe</)
-    expect(count(markup, 'class="fill-spine-ink"')).toBeGreaterThanOrEqual(5)
+    // Awe's five met kites in ink, and each star between two of them ink 38 % toward the stock.
+    const bridged = facets(emotions.seats).filter((f) => f.family === "awe" && f.bridged).length
+    expect(bridged).toBeGreaterThan(0)
+    expect(count(markup, `fill="${UNRESOLVED_KITE}" stroke="var(--spine-stock)"`)).toBe(5)
+    expect(count(markup, `fill="${UNRESOLVED_STAR}" stroke="var(--spine-stock)"`)).toBe(bridged)
   })
 
   it("the band inks the 14 that came and dots the 4 not yet", () => {

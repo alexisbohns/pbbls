@@ -1,9 +1,9 @@
 "use client"
 
-import type { CSSProperties } from "react"
+import { useMemo, type CSSProperties } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import type { AchievementPalettes } from "@/lib/achievements/palette"
-import { facetTone, facets, rosaceGeometry } from "@/lib/achievements/rosace"
+import { UNRESOLVED_KITE, UNRESOLVED_STAR, facetTone, facets, rosaceGeometry } from "@/lib/achievements/rosace"
 import { familyRuns } from "@/lib/achievements/runs"
 import { stonePaletteVars, type StonePalette } from "@/lib/config/stone-tones"
 import type { AchievementsEmotions } from "@/lib/types"
@@ -44,21 +44,23 @@ export function EmotionRosace({ emotions, palettes, size = 270, labelled = true,
   const name = useFamilyName()
   const locale = useLocale()
   const seats = emotions.seats
-  const g = rosaceGeometry(size, seats.length, labelled)
-  const runs = familyRuns(seats)
+  const g = useMemo(() => rosaceGeometry(size, seats.length, labelled), [size, seats.length, labelled])
+  const runs = useMemo(() => familyRuns(seats), [seats])
+  const lights = useMemo(() => facets(seats), [seats])
   const lit = "fill-(--tone-paper) dark:fill-(--tone-night)"
   return (
     <svg aria-hidden focusable="false" viewBox={`0 0 ${size} ${size}`} className="block h-auto w-full overflow-visible" style={{ maxWidth: size }}>
       <path d={g.silhouette} fill="var(--spine-stock)" stroke="var(--spine-ink-2)" strokeWidth={1} strokeLinejoin="round" />
       <path d={g.outline} fill="none" stroke="var(--spine-ink-2)" strokeWidth={1} strokeLinejoin="round" />
-      {facets(seats).map((f) => {
+      {lights.map((f) => {
         if (!f.seat.met) return null
         const palette = palettes.family(f.family)
         return (
           <g key={f.k}>
             <path
               d={g.kite(f.k)}
-              className={palette ? lit : "fill-spine-ink"}
+              className={palette ? lit : undefined}
+              fill={palette ? undefined : UNRESOLVED_KITE}
               style={palette ? tones(palette, f.place, false) : undefined}
               stroke="var(--spine-stock)"
               strokeWidth={0.9}
@@ -66,7 +68,8 @@ export function EmotionRosace({ emotions, palettes, size = 270, labelled = true,
             {f.bridged && (
               <path
                 d={g.star(f.k)}
-                className={palette ? lit : "fill-spine-ink"}
+                className={palette ? lit : undefined}
+                fill={palette ? undefined : UNRESOLVED_STAR}
                 style={palette ? tones(palette, f.nextPlace, true) : undefined}
                 stroke="var(--spine-stock)"
                 strokeWidth={0.9}

@@ -129,3 +129,7 @@ export function facetTone(place: number, soft: boolean): { paper: string; night:
   const wash = (c: string) => `color-mix(in oklab, var(--spine-stock) 38%, ${c})`
   return soft ? { paper: wash(paper), night: wash(night) } : { paper, night }
 }
+
+/** A lit facet of a family this build cannot resolve: ink; its soft star, ink 38 % toward the stock (iOS). */
+export const UNRESOLVED_KITE = "var(--spine-ink)"
+export const UNRESOLVED_STAR = "color-mix(in oklab, var(--spine-stock) 38%, var(--spine-ink))"
