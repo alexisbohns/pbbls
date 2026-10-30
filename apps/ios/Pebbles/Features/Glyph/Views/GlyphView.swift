@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Canonical glyph chrome component. Renders either the user's glyph strokes
-/// or an SF Symbol overlay (scribble for `.carve`, plus for `.create`). Only
+/// or a pebbles icon (`pebble-dotted-glyph` for `.carve`, `plus-circle` for `.create`). Only
 /// the carving/empty states (`.carve`, `.create`) draw a dashed 2XL-radius
 /// (34pt) frame; glyph-bearing states render chromeless (issue #515).
 ///
@@ -14,8 +14,8 @@ import SwiftUI
 struct GlyphView: View {
     enum Case {
         case profile      // no frame; glyph in primary role
-        case carve        // dashed 2pt outline; sf.scribble in onSurfaceVariant
-        case create       // dashed 2pt outline; sf.plus in outline
+        case carve        // dashed 2pt outline; pebble-dotted-glyph in onSurfaceVariant
+        case create       // dashed 2pt outline; plus-circle in outline
         case selected     // no frame; glyph in primary role
         case unselected   // no frame; glyph in outline
         case `default`    // no frame; glyph in onSurfaceVariant
@@ -61,13 +61,9 @@ struct GlyphView: View {
     private var content: some View {
         switch `case` {
         case .carve:
-            Image(systemName: "scribble")
-                .font(.system(size: max(side * 0.4, 18), weight: .regular))
-                .foregroundStyle(Color.pebbles.onSurfaceVariant)
+            mark(.pebbleDottedGlyph, Color.pebbles.onSurfaceVariant)
         case .create:
-            Image(systemName: "plus")
-                .font(.system(size: max(side * 0.4, 18), weight: .regular))
-                .foregroundStyle(Color.pebbles.outline)
+            mark(.plusCircle, Color.pebbles.outline)
         case .profile, .selected:
             GlyphThumbnail(strokes: strokes ?? [], side: side, strokeColor: Color.pebbles.primary)
         case .unselected:
@@ -75,6 +71,19 @@ struct GlyphView: View {
         case .default:
             GlyphThumbnail(strokes: strokes ?? [], side: side, strokeColor: Color.pebbles.onSurfaceVariant)
         }
+    }
+
+    /// The mark inside the dashed frame, 40% of the cell, 18 at least. A bare
+    /// template image, not `PbblsIconImage`: the cell is a fixed `side` and must
+    /// not scale with Dynamic Type (the same choice as `CollectionMark`).
+    private func mark(_ icon: PbblsIcon, _ ink: Color) -> some View {
+        let s = max(side * 0.4, 18)
+        return Image(icon.assetName)
+            .renderingMode(.template)
+            .resizable()
+            .scaledToFit()
+            .frame(width: s, height: s)
+            .foregroundStyle(ink)
     }
 }
 

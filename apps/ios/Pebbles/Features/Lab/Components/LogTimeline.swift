@@ -80,9 +80,7 @@ struct LogTimeline<Trailing: View>: View {
             Rectangle()
                 .fill(isFirst ? Color.clear : Color.pebbles.rule)
                 .frame(width: 1, height: 12)
-            Image(systemName: iconName)
-                .font(.system(size: 14, weight: .regular))
-                .foregroundStyle(iconColor)
+            PbblsIconImage(icon, .inline, relativeTo: .footnote, style: AnyShapeStyle(iconColor))
             if !isLast {
                 Rectangle()
                     .fill(Color.pebbles.rule)
@@ -94,11 +92,11 @@ struct LogTimeline<Trailing: View>: View {
         .frame(width: 16)
     }
 
-    private var iconName: String {
+    private var icon: PbblsIcon {
         switch mode {
-        case .changelog:  return "checkmark.circle"
-        case .inProgress: return "circle.inset.filled"
-        case .backlog:    return "circle.dashed"
+        case .changelog:  .checkCircle
+        case .inProgress: .pebbleRoundLit1
+        case .backlog:    .pebbleRound
         }
     }
 

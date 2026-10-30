@@ -24,8 +24,7 @@ struct GlyphTabBar: View {
             withAnimation(.snappy) { selection = tab }
         } label: {
             VStack(spacing: 2) {
-                Image(systemName: symbol(tab))
-                    .font(.system(size: 15, weight: .medium))
+                PbblsIconImage(icon(tab), .row)
                 Text(title(tab))
                     .font(.caption2.weight(.medium))
             }
@@ -52,11 +51,11 @@ struct GlyphTabBar: View {
         }
     }
 
-    private func symbol(_ tab: GlyphTab) -> String {
+    private func icon(_ tab: GlyphTab) -> PbblsIcon {
         switch tab {
-        case .mine: return "person.fill"
-        case .owned: return "checkmark.seal"
-        case .commu: return "person.3.fill"
+        case .mine: .person
+        case .owned: .checkCircleDot
+        case .commu: .people
         }
     }
 }

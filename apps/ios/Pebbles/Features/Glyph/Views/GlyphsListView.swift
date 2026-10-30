@@ -106,14 +106,23 @@ struct GlyphsListView: View {
     private var emptyState: some View {
         switch tab {
         case .mine:
-            return ContentUnavailableView("No glyphs yet", systemImage: "scribble",
-                description: Text("Tap + to carve your first glyph."))
+            return ContentUnavailableView {
+                Label { Text("No glyphs yet") } icon: { PbblsIconImage(.pebbleDottedGlyph, .hero) }
+            } description: {
+                Text("Tap + to carve your first glyph.")
+            }
         case .owned:
-            return ContentUnavailableView("Nothing owned yet", systemImage: "checkmark.seal",
-                description: Text("Swap a community glyph to see it here."))
+            return ContentUnavailableView {
+                Label { Text("Nothing owned yet") } icon: { PbblsIconImage(.checkCircleDot, .hero) }
+            } description: {
+                Text("Swap a community glyph to see it here.")
+            }
         case .commu:
-            return ContentUnavailableView("No community glyphs", systemImage: "person.3",
-                description: Text("Check back soon."))
+            return ContentUnavailableView {
+                Label { Text("No community glyphs") } icon: { PbblsIconImage(.people, .hero) }
+            } description: {
+                Text("Check back soon.")
+            }
         }
     }
 
@@ -136,7 +145,7 @@ struct GlyphsListView: View {
                 }
                 if item.price > 0 {
                     HStack(spacing: 2) {
-                        Image(systemName: "sparkle")
+                        PbblsIconImage(.karmaDot, .inline, relativeTo: .caption2)
                         Text("\(item.price)")
                     }
                     .font(.caption2)
