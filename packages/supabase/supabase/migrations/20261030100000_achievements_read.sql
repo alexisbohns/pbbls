@@ -1,5 +1,9 @@
 -- Achievements page, the read (#1305, spec D10–D15, §3.3). Computed on read,
--- security invoker, scoped by RLS and auth.uid(). An absent value omits its key.
+-- security invoker, scoped by RLS and auth.uid(). An absent value omits its key,
+-- and a snapshot drops its null fields (D17); the one null served is
+-- shelf[].threshold, the same row get_public_profile's shelf serves. Every
+-- order ends on a unique key, so two calls never disagree. "Whole" counts the
+-- family's active catalog rows, as check_achievements' completions do.
 
 create or replace function public.achievement_opt(p_key text, p_value jsonb)
 returns jsonb language sql immutable set search_path = '' as $$
@@ -9,10 +13,10 @@ $$;
 -- The crossing pebble's display snapshot (D15). Null when it no longer exists.
 create or replace function public.achievement_pebble(p_pebble_id uuid, p_tz text)
 returns jsonb language sql stable security invoker set search_path = '' as $$
-  select jsonb_build_object(
+  select jsonb_strip_nulls(jsonb_build_object(   -- an unnamed moment omits name
     'moment_id', m.id, 'name', m.name,
     'happened_at', to_char(m.happened_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
-    'emotion_id', p.emotion_id, 'intensity', p.intensity, 'positiveness', p.positiveness)
+    'emotion_id', p.emotion_id, 'intensity', p.intensity, 'positiveness', p.positiveness))
   from public.pebbles p join public.moments m on m.id = p.moment_id
   where p.id = p_pebble_id
 $$;
@@ -54,8 +58,8 @@ $$;
 create or replace function public.achievement_first_subject(p_slug text, p_tz text)
 returns jsonb language sql stable security invoker set search_path = '' as $$
   select coalesce((
-    select jsonb_build_object('on', to_char(x.created_at at time zone p_tz, 'YYYY-MM-DD'),
-                              'subject', jsonb_build_object('kind', x.kind, 'id', x.id, 'name', x.name))
+    select jsonb_strip_nulls(jsonb_build_object('on', to_char(x.created_at at time zone p_tz, 'YYYY-MM-DD'),
+                              'subject', jsonb_build_object('kind', x.kind, 'id', x.id, 'name', x.name)))
     from (
       select 'moment' as kind, m.id, m.name, m.created_at from public.moments m
        where p_slug = 'first-moment' and m.user_id = (select auth.uid())
@@ -87,10 +91,9 @@ returns jsonb language sql stable security invoker set search_path = '' as $$
                  'on', public.achievement_on(u.pebble_id, u.unlocked_at, p_tz),
                  'new', coalesce(u.unlocked_at > p_seen, false))
                || public.achievement_opt('pebble', public.achievement_pebble(u.pebble_id, p_tz))
-               order by a.threshold)
+               order by a.threshold, a.slug)
         from public.achievement_unlocks u
         join public.achievements a on a.id = u.achievement_id and a.family = p_family
-        left join public.pebbles p on p.id = u.pebble_id
         where u.user_id = (select auth.uid())), '[]'::jsonb),
       'ladder', coalesce((
         select jsonb_agg(a.threshold order by a.threshold) from public.achievements a
@@ -118,11 +121,14 @@ returns jsonb language sql stable security invoker set search_path = '' as $$
       from public.achievement_unlocks u
       join public.achievements a on a.id = u.achievement_id and a.family = p_family
       where u.user_id = (select auth.uid())
-      order by a.threshold limit 1), '{}'::jsonb)
+      order by a.threshold, a.slug limit 1), '{}'::jsonb)
 $$;
 
--- One year disc (D12). Mirrors scripts/oracles/achievements/year.js exactly.
-create or replace function public.achievements_year(p_year int, p_tz text)
+-- One year disc (D12) as of p_today, for a user whose first moment fell on
+-- p_first. Mirrors scripts/oracles/achievements/year.js exactly. The callers
+-- check the zone and hoist today and the first day, so get_achievements works
+-- them out once for every disc.
+create or replace function public.achievement_year_disc(p_year int, p_tz text, p_today date, p_first date)
 returns jsonb
 language plpgsql
 stable
@@ -132,29 +138,20 @@ as $$
 declare
   wheel constant text[] := array['joy','pride','anger','fear','shame','sadness','peace'];
   uid uuid := (select auth.uid());
-  today date;
-  first_day date;
   j_months jsonb;
   j_listed jsonb;
   j_next jsonb;
+  cur jsonb;
+  v_needs text;
+  v_left int;
+  v_room int;
 begin
   if uid is null then
     raise exception 'not_authenticated' using errcode = '42501';
   end if;
-  begin
-    today := (now() at time zone p_tz)::date;
-  exception when others then
-    raise exception 'invalid_tz' using errcode = '22023';
-  end;
-  if today is null then
-    raise exception 'invalid_tz' using errcode = '22023';
-  end if;
-  if p_year is null or p_year < 1970 or p_year > 9999 then
+  if p_year is null or p_year < 1 or p_year > 9999 then
     raise exception 'invalid_year' using errcode = '22023';
   end if;
-
-  select min((m.happened_at at time zone p_tz)::date) into first_day
-  from public.moments m where m.user_id = uid;
 
   with items as (
     select (m.happened_at at time zone p_tz)::date as d, p.id is not null as is_pebble, ec.slug as family, p.intensity
@@ -172,27 +169,35 @@ begin
   ),
   dys as (
     select mo.mo,
-           count(distinct i.d) filter (where i.d <= today) as mdays,
-           count(distinct i.d) filter (where i.d <= today and i.is_pebble) as pdays
+           count(distinct i.d) filter (where i.d <= p_today) as mdays,
+           count(distinct i.d) filter (where i.d <= p_today and i.is_pebble) as pdays
     from mon mo left join items i on i.d between mo.ms and mo.me
     group by mo.mo
   ),
+  -- A full week runs Monday to Sunday inside the month, and counts once it has
+  -- ended: from the Monday after its Sunday.
   fw as (
     select mo.mo, w.ws::date as ws
     from mon mo cross join lateral generate_series(mo.ms::timestamp, mo.me::timestamp, interval '1 day') w(ws)
-    where extract(isodow from w.ws) = 1 and w.ws::date + 6 <= mo.me and w.ws::date + 6 <= today
+    where extract(isodow from w.ws) = 1 and w.ws::date + 6 <= mo.me and w.ws::date + 6 < p_today
+  ),
+  -- Each item's week (its Monday), bucketed once; a full week lies inside its
+  -- month, so inside the year, and has ended, so it holds no future item.
+  wi as (
+    select i.d - (extract(isodow from i.d)::int - 1) as ws, bool_or(i.is_pebble) as has_pebble
+    from items i group by 1
   ),
   wk as (
-    select fw.mo, count(*) as full_weeks,
-           count(*) filter (where exists (select 1 from items i where i.d between fw.ws and fw.ws + 6)) as wm,
-           count(*) filter (where exists (select 1 from items i where i.is_pebble and i.d between fw.ws and fw.ws + 6)) as wp
-    from fw group by fw.mo
+    select fw.mo, count(*) as full_weeks, count(wi.ws) as wm, count(*) filter (where wi.has_pebble) as wp
+    from fw left join wi on wi.ws = fw.ws
+    group by fw.mo
   ),
   fam as (
     select distinct on (mo.mo) mo.mo, i.family
-    from mon mo join items i on i.is_pebble and i.family is not null and i.d between mo.ms and mo.me and i.d <= today
+    from mon mo join items i on i.is_pebble and i.family is not null and i.d between mo.ms and mo.me and i.d <= p_today
     group by mo.mo, i.family
-    order by mo.mo, count(*) desc, sum(i.intensity) desc, array_position(wheel, i.family)
+    -- off the wheel sorts last (a null position), then by slug, as in the oracle
+    order by mo.mo, count(*) desc, sum(i.intensity) desc, array_position(wheel, i.family), i.family collate "C"
   ),
   lv as (
     select mo.mo, mo.ms, coalesce(d.mdays, 0) as mdays, coalesce(d.pdays, 0) as pdays,
@@ -203,9 +208,9 @@ begin
     select *, case when pdays >= 14 and wp = fw then 2 when mdays >= 14 and wm = fw then 1 else 0 end as level from lv
   )
   select jsonb_agg(
-           case when ms > today then jsonb_build_object('month', mo, 'state', 'upcoming', 'moment_days', 0, 'pebble_days', 0,
-                                                        'full_weeks', 0, 'weeks_filled', 0, 'level', 0, 'progress', 0,
-                                                        'done', jsonb_build_object('moments', false, 'pebbles', false, 'weeks', false))
+           case when ms > p_today then jsonb_build_object('month', mo, 'state', 'upcoming', 'moment_days', 0, 'pebble_days', 0,
+                                                          'full_weeks', 0, 'weeks_filled', 0, 'level', 0, 'progress', 0,
+                                                          'done', jsonb_build_object('moments', false, 'pebbles', false, 'weeks', false))
            else jsonb_build_object(
              'month', mo, 'state', case when pdays = 0 then 'quiet' else 'kept' end,
              'moment_days', mdays, 'pebble_days', pdays, 'full_weeks', fw,
@@ -223,24 +228,68 @@ begin
 
   select coalesce(jsonb_agg(g.mo order by g.mo desc), '[]'::jsonb) into j_listed
   from generate_series(1, 12) g(mo)
-  where first_day is not null
-    and make_date(p_year, g.mo, 1) <= today
-    and make_date(p_year, g.mo, 1) >= date_trunc('month', first_day)::date;
+  where p_first is not null
+    and make_date(p_year, g.mo, 1) <= p_today
+    and make_date(p_year, g.mo, 1) >= make_date(extract(year from p_first)::int, extract(month from p_first)::int, 1);
 
-  if p_year = extract(year from today)::int then
-    select case when (x->>'level')::int = 2 then null else jsonb_build_object(
-             'month', (x->>'month')::int,
-             'needs', case when (x->>'level')::int = 0 then 'moments' else 'pebbles' end,
-             'days_left', greatest(0, 14 - case when (x->>'level')::int = 0 then (x->>'moment_days')::int else (x->>'pebble_days')::int end),
-             'reachable', (x->>'weeks_filled')::int = (x->>'full_weeks')::int) end
-    into j_next
-    from jsonb_array_elements(j_months) x
-    where (x->>'month')::int = extract(month from today)::int;
+  if p_year = extract(year from p_today)::int then
+    select x.value into cur from jsonb_array_elements(j_months) x(value)
+     where (x.value->>'month')::int = extract(month from p_today)::int;
+    if (cur->>'level')::int < 2 then
+      v_needs := case when (cur->>'level')::int = 0 then 'moments' else 'pebbles' end;
+      v_left := greatest(0, 14 - (case when v_needs = 'moments' then cur->>'moment_days' else cur->>'pebble_days' end)::int);
+      -- The days the month can still add: the rest of it, today included unless
+      -- today already counts. Fewer than needed, and the level is out of reach.
+      v_room := (make_date(p_year, extract(month from p_today)::int, 1) + interval '1 month - 1 day')::date - p_today + 1
+                - case when exists (
+                    select 1 from public.moments m
+                    left join public.pebbles p on p.moment_id = m.id and p.user_id = uid
+                    where m.user_id = uid
+                      and m.happened_at >= p_today::timestamp at time zone p_tz
+                      and m.happened_at <  (p_today + 1)::timestamp at time zone p_tz
+                      and (v_needs = 'moments' or p.id is not null)) then 1 else 0 end;
+      j_next := jsonb_build_object(
+        'month', (cur->>'month')::int, 'needs', v_needs, 'days_left', v_left,
+        'reachable', (cur->>'weeks_filled')::int = (cur->>'full_weeks')::int and v_left <= v_room);
+    end if;
   end if;
 
-  return jsonb_build_object('year', p_year, 'current', p_year = extract(year from today)::int,
+  return jsonb_build_object('year', p_year, 'current', p_year = extract(year from p_today)::int,
                             'days_target', 14, 'months', j_months, 'listed', j_listed)
          || public.achievement_opt('next_step', j_next);
+end;
+$$;
+
+-- One year disc for the caller, today in p_tz (D12).
+create or replace function public.achievements_year(p_year int, p_tz text)
+returns jsonb
+language plpgsql
+stable
+security invoker
+set search_path = ''
+as $$
+declare
+  uid uuid := (select auth.uid());
+  today date;
+  first_day date;
+begin
+  if uid is null then
+    raise exception 'not_authenticated' using errcode = '42501';
+  end if;
+  begin
+    today := (now() at time zone p_tz)::date;
+  exception when others then
+    raise exception 'invalid_tz' using errcode = '22023';
+  end;
+  if today is null then
+    raise exception 'invalid_tz' using errcode = '22023';
+  end if;
+  if p_year is null or p_year < 1 or p_year > 9999 then
+    raise exception 'invalid_year' using errcode = '22023';
+  end if;
+  -- min on the instant, then the zone: the (user_id, happened_at) index answers it
+  select (min(m.happened_at) at time zone p_tz)::date into first_day from public.moments m where m.user_id = uid;
+  return public.achievement_year_disc(p_year, p_tz, today, first_day);
 end;
 $$;
 
@@ -256,11 +305,12 @@ declare
   uid uuid := (select auth.uid());
   today date;
   since date;
+  first_day date;
   seen jsonb;        -- full precision, for the "new" comparisons
   seen_out jsonb;    -- whole seconds, for the payload (D17)
   n_pebbles int; n_glyphs int;
   n_five int; n_six int; has25 boolean;
-  n_emo int; of_emo int; n_dom int; of_dom int;
+  n_emo int; of_emo int; n_dom int; of_dom int; of_six int;
   rings text[] := '{}';
   j_explorer jsonb; j_emotions jsonb; j_domains jsonb; j_years jsonb;
 begin
@@ -284,18 +334,26 @@ begin
   select count(*) into n_pebbles from public.pebbles p where p.user_id = uid;
   select count(*) into n_glyphs from public.glyphs g where g.user_id = uid;
 
+  -- min on the instant, then the zone: the (user_id, happened_at) index answers it
+  select (min(m.happened_at) at time zone p_tz)::date into first_day from public.moments m where m.user_id = uid;
+
+  -- "Whole" is the family's active catalog rows, held over total, as in
+  -- check_achievements' completions (M3): one denominator for count/of and rings.
   select count(*) filter (where a.slug in ('first-moment','first-pebble','first-collection','first-soul','first-glyph')),
-         count(*) filter (where a.family = 'first_stone'),
+         count(*) filter (where a.family = 'first_stone' and a.is_active),
          bool_or(a.slug = 'pebble-count-25'),
-         count(*) filter (where a.family = 'emotion_first' and a.emotion_id is not null),
-         count(*) filter (where a.family = 'domain_first' and a.domain_id is not null)
+         count(*) filter (where a.family = 'emotion_first' and a.is_active),
+         count(*) filter (where a.family = 'domain_first' and a.is_active)
     into n_five, n_six, has25, n_emo, n_dom
     from public.achievement_unlocks u join public.achievements a on a.id = u.achievement_id
    where u.user_id = uid;
-  select count(*) into of_emo from public.emotions;
-  select count(*) into of_dom from public.domains;
+  select count(*) filter (where a.family = 'emotion_first'),
+         count(*) filter (where a.family = 'domain_first'),
+         count(*) filter (where a.family = 'first_stone')
+    into of_emo, of_dom, of_six
+    from public.achievements a where a.is_active;
   if n_five = 5 then rings := array_append(rings, 'first_five'); end if;
-  if n_six = 6 then rings := array_append(rings, 'six_firsts'); end if;
+  if n_six = of_six and of_six > 0 then rings := array_append(rings, 'six_firsts'); end if;
   if coalesce(has25, false) then rings := array_append(rings, 'twenty_five'); end if;
   if n_dom = of_dom and of_dom > 0 then rings := array_append(rings, 'domains'); end if;
   if n_emo = of_emo and of_emo > 0 then rings := array_append(rings, 'emotions'); end if;
@@ -316,10 +374,10 @@ begin
                  || case when u.user_id is null then '{}'::jsonb
                          else jsonb_build_object('on', public.achievement_on(u.pebble_id, u.unlocked_at, p_tz)) end
                  || public.achievement_opt('pebble', public.achievement_pebble(u.pebble_id, p_tz))
-               order by a.sort_order)
+               order by a.sort_order, a.slug)
         from public.achievements a
         left join public.achievement_unlocks u on u.achievement_id = a.id and u.user_id = uid
-        where a.family = 'first_stone'), '[]'::jsonb),
+        where a.family = 'first_stone' and a.is_active), '[]'::jsonb),
       'rings_done', to_jsonb(rings))     -- up to five: first_five, six_firsts, twenty_five, domains, emotions
     || public.achievement_opt('twenty_five', (
          select jsonb_build_object('count', least(n_pebbles, 25), 'done', u.user_id is not null,
@@ -340,14 +398,14 @@ begin
   -- Emotions: 38 seats, wheel order then slug; each family's met seats by the day met --------
   with seats as (
     select e.id, ec.slug as family,
-           (row_number() over (order by array_position(wheel, ec.slug), e.slug) - 1)::int as seat
+           (row_number() over (order by array_position(wheel, ec.slug), e.slug, e.id) - 1)::int as seat
     from public.emotions e join public.emotion_categories ec on ec.id = e.category_id
   ),
   sm as (
     select s.seat, s.id, s.family, u.user_id is not null as met, u.unlocked_at, u.pebble_id,
            coalesce(m.happened_at, u.unlocked_at) as met_at
     from seats s
-    left join public.achievements a on a.family = 'emotion_first' and a.emotion_id = s.id
+    left join public.achievements a on a.family = 'emotion_first' and a.emotion_id = s.id and a.is_active
     left join public.achievement_unlocks u on u.achievement_id = a.id and u.user_id = uid
     left join public.pebbles p on p.id = u.pebble_id
     left join public.moments m on m.id = p.moment_id
@@ -366,7 +424,7 @@ begin
                     order by x.seat) from sm x), '[]'::jsonb),
            -- the sheet's order (D11 for emotions): families on the wheel, met seats by the day met
            'families', coalesce((select jsonb_agg(jsonb_build_object('family', f.family, 'met', f.met, 'not_yet', f.not_yet)
-                                                   order by array_position(wheel, f.family)) from fams f), '[]'::jsonb))
+                                                   order by array_position(wheel, f.family), f.family collate "C") from fams f), '[]'::jsonb))
          || public.achievement_opt('since', (select to_jsonb(to_char(min(x.met_at) at time zone p_tz, 'YYYY-MM-DD')) from sm x where x.met))
          || public.achievement_opt('completion', public.achievement_completion('emotions', p_tz))
   into j_emotions;
@@ -384,27 +442,32 @@ begin
                         'on', public.achievement_on(u.pebble_id, u.unlocked_at, p_tz),
                         'new', coalesce(u.unlocked_at > (seen->>'domains')::timestamptz, false))
                       || public.achievement_opt('pebble', public.achievement_pebble(u.pebble_id, p_tz))
-                    order by m.happened_at desc nulls last, u.unlocked_at desc)
+                    order by coalesce(m.happened_at, u.unlocked_at) desc, u.unlocked_at desc, a.slug)
              from public.achievement_unlocks u
-             join public.achievements a on a.id = u.achievement_id and a.family = 'domain_first' and a.domain_id is not null
+             join public.achievements a on a.id = u.achievement_id and a.family = 'domain_first'
+                                       and a.domain_id is not null and a.is_active
              left join public.pebbles p on p.id = u.pebble_id
              left join public.moments m on m.id = p.moment_id
              where u.user_id = uid), '[]'::jsonb),
            'not_yet', coalesce((
-             select jsonb_agg(d.id order by d.slug) from public.domains d
-             where not exists (
-               select 1 from public.achievement_unlocks u join public.achievements a on a.id = u.achievement_id
-               where u.user_id = uid and a.family = 'domain_first' and a.domain_id = d.id)), '[]'::jsonb))
+             select jsonb_agg(a.domain_id order by d.slug, d.id)
+             from public.achievements a join public.domains d on d.id = a.domain_id
+             where a.family = 'domain_first' and a.is_active
+               and not exists (select 1 from public.achievement_unlocks u
+                                where u.user_id = uid and u.achievement_id = a.id)), '[]'::jsonb))
          || public.achievement_opt('completion', public.achievement_completion('domains', p_tz))
   into j_domains;
 
-  -- Years: the current one always, past ones with a moment, newest first (D12) ----------
-  select coalesce(jsonb_agg(public.achievements_year(ys.y, p_tz) order by ys.y desc), '[]'::jsonb) into j_years
+  -- Years: the current one always, past ones with a moment, newest first (D12). A
+  -- future-dated moment adds no disc, and a year before 1 is never asked for. ------
+  select coalesce(jsonb_agg(public.achievement_year_disc(ys.y, p_tz, today, first_day) order by ys.y desc), '[]'::jsonb)
+    into j_years
   from (
     select extract(year from today)::int as y
     union
     select distinct extract(year from (m.happened_at at time zone p_tz))::int from public.moments m where m.user_id = uid
-  ) ys;
+  ) ys
+  where ys.y between 1 and extract(year from today)::int;
 
   return public.achievement_opt('since', to_jsonb(to_char(since, 'YYYY-MM-DD')))
       || public.achievement_opt('days_kept', to_jsonb(today - since + 1))
@@ -421,12 +484,12 @@ begin
            'shelf', coalesce((
              select jsonb_agg(jsonb_build_object('slug', x.slug, 'family', x.family, 'threshold', x.threshold,
                                                  'unlocked_on', to_char(x.unlocked_at at time zone p_tz, 'YYYY-MM-DD'))
-                              order by x.unlocked_at desc, x.sort_order)
+                              order by x.unlocked_at desc, x.sort_order, x.slug)
              from (select a.slug, a.family, a.threshold, a.sort_order, u.unlocked_at
                      from public.achievement_unlocks u join public.achievements a on a.id = u.achievement_id
                     where u.user_id = uid
                       and a.family not in ('emotion_first', 'domain_first', 'first_stone', 'set_complete')
-                    order by u.unlocked_at desc, a.sort_order
+                    order by u.unlocked_at desc, a.sort_order, a.slug
                     limit 6) x), '[]'::jsonb),
            'shelf_count', (select count(*) from public.achievement_unlocks u join public.achievements a on a.id = u.achievement_id
                             where u.user_id = uid
@@ -442,6 +505,7 @@ revoke all on function public.achievement_sales_count() from public, anon;
 revoke all on function public.achievement_completion(text, text) from public, anon;
 revoke all on function public.achievement_first_subject(text, text) from public, anon;
 revoke all on function public.achievement_ladder(text, int, timestamptz, text) from public, anon;
+revoke all on function public.achievement_year_disc(int, text, date, date) from public, anon;
 revoke all on function public.achievements_year(int, text) from public, anon;
 revoke all on function public.get_achievements(text) from public, anon;
 grant execute on function public.achievement_opt(text, jsonb) to authenticated;
@@ -450,5 +514,6 @@ grant execute on function public.achievement_sales_count() to authenticated;
 grant execute on function public.achievement_completion(text, text) to authenticated;
 grant execute on function public.achievement_first_subject(text, text) to authenticated;
 grant execute on function public.achievement_ladder(text, int, timestamptz, text) to authenticated;
+grant execute on function public.achievement_year_disc(int, text, date, date) to authenticated;
 grant execute on function public.achievements_year(int, text) to authenticated;
 grant execute on function public.get_achievements(text) to authenticated;
