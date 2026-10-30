@@ -15087,6 +15087,23 @@
           }
         }
       }
+    },
+    "achievements.a11y.notYetPart" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pas encore"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

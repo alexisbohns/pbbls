@@ -49,6 +49,9 @@ struct AchievementsSheetCopyTests {
         #expect(AchievementsCopy.row(["No. 14", "Events", "Flag march with Nadia", "Oct 1"], isNew: true, locale: Self.en)
             == "No. 14, Events, Flag march with Nadia, Oct 1, new since you last looked")
         #expect(AchievementsCopy.row(["250", nil, "113 to go"], locale: Self.fr) == "250, 113 to go")
+        #expect(AchievementsCopy.row(["250"], notYet: true, locale: Self.fr) == "250, pas encore")
+        #expect(AchievementsCopy.row(["Small"], notYet: true, isNew: true, locale: Self.en)
+            == "Small, not yet, new since you last looked")
         #expect(AchievementsCopy.notYet(["Anxious", "Bitter"], locale: Self.fr) == "Pas encore : Anxious, Bitter")
     }
 

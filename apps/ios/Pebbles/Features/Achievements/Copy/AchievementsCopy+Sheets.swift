@@ -80,11 +80,13 @@ extension AchievementsCopy {
 
     // MARK: - Read aloud
 
-    /// A row read aloud: its parts, then "new since you last looked" when it is.
-    static func row(_ parts: [String?], isNew: Bool = false, locale: Locale) -> String {
+    /// A row read aloud: its parts, then "not yet" for what is not done, then
+    /// "new since you last looked" when it is ("250, 113 to go, not yet").
+    static func row(_ parts: [String?], notYet: Bool = false, isNew: Bool = false, locale: Locale) -> String {
         let said = parts.compactMap { $0 }.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+        let pending = notYet ? [SpineStrings.string("achievements.a11y.notYetPart", locale: locale)] : []
         let mark = isNew ? [SpineStrings.string("achievements.a11y.newSince", locale: locale)] : []
-        return (said + mark).joined(separator: ", ")
+        return (said + pending + mark).joined(separator: ", ")
     }
 
     /// The quiet names read as one: "Not yet: Anxious, Bitter".

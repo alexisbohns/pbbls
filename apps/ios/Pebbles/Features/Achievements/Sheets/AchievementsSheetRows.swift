@@ -123,8 +123,7 @@ enum AchievementsSheetRows {
                 id: "five-\(index)", mark: item.done ? item.task.map { .firstFive($0) } ?? .ghost : .ghost,
                 name: name, sub: sub, date: date, isNew: item.isNew,
                 opens: opensMoment ? item.subjectId.map { .moment($0) } : nil,
-                accessibilityLabel: item.done ? Copy.row([name, sub, date], isNew: item.isNew, locale: locale)
-                    : Copy.notYet([name], locale: locale))
+                accessibilityLabel: Copy.row([name, sub, date], notYet: !item.done, isNew: item.isNew, locale: locale))
         }
         let six = explorer.sixFirsts.enumerated().map { index, first in
             let name = Copy.kind(first.kind, locale: locale)
@@ -133,8 +132,7 @@ enum AchievementsSheetRows {
             return RegisterRowModel(
                 id: "six-\(index)", mark: first.done ? first.kind.map { .sixFirst($0) } ?? .ghost : .ghost,
                 name: name, sub: sub, date: date, isNew: first.isNew, opens: opens(first.pebble),
-                accessibilityLabel: first.done ? Copy.row([name, sub, date], isNew: first.isNew, locale: locale)
-                    : Copy.notYet([name], locale: locale))
+                accessibilityLabel: Copy.row([name, sub, date], notYet: !first.done, isNew: first.isNew, locale: locale))
         }
         var sections = [
             RegisterSection(id: "first-five", title: Copy.sheet("firstFive", locale: locale),
@@ -272,12 +270,13 @@ enum AchievementsSheetRows {
             rows.append(RegisterRowModel(id: "next-\(next.threshold)",
                                          mark: .stage(index: stage(next.threshold), fill: next.progress),
                                          name: name, next: left, style: .next,
-                                         accessibilityLabel: Copy.row([name, left], locale: locale)))
+                                         accessibilityLabel: Copy.row([name, left], notYet: true, locale: locale)))
         }
         for (index, step) in ladder.ladder.enumerated() where !ladder.isReached(step) && step != ladder.next?.threshold {
             let name = Copy.number(step, locale: locale)
             rows.append(RegisterRowModel(id: "ahead-\(step)", mark: .stage(index: index, fill: 0), name: name,
-                                         style: .ghostNumber, accessibilityLabel: Copy.notYet([name], locale: locale)))
+                                         style: .ghostNumber,
+                                         accessibilityLabel: Copy.row([name], notYet: true, locale: locale)))
         }
         return RegisterSection(id: id, title: title, note: note, rows: rows,
                                trailing: ladder.thenEvery.map { Copy.thenEvery($0, locale: locale) }, closing: closing)
