@@ -1,6 +1,9 @@
 package app.pbbls.android.core.data
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -87,5 +90,16 @@ class WrapDiskCacheTest {
 
             assertFalse(File(folder.root, "escape.json").exists())
             assertEquals("x", cache.read("../u1", paris, "../../escape"))
+        }
+
+    @Test
+    fun `writes racing on one page leave one whole body and no temp file`() =
+        runTest {
+            val root = folder.newFolder("path-wraps")
+            val cache = cache(root, Dispatchers.IO)
+            val bodies = (1..20).map { n -> "{\"n\":$n,\"pad\":\"${"x".repeat(20_000)}\"}" }
+            coroutineScope { bodies.forEach { body -> launch(Dispatchers.IO) { cache.write("u1", paris, "achievements-page", body) } } }
+            assertTrue(cache.read("u1", paris, "achievements-page") in bodies)
+            assertTrue(root.walk().none { it.name.endsWith(".partial") })
         }
 }

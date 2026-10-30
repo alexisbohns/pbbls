@@ -5,11 +5,14 @@ import android.util.Log
 import app.pbbls.android.di.IoDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.time.Instant
 import java.time.ZoneId
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -64,6 +67,10 @@ class WrapDiskCache(
     @Volatile
     private var prunedOldVersions = false
 
+    private val locks = ConcurrentHashMap<String, Mutex>()
+
+    private fun lockFor(file: File): Mutex = locks.getOrPut(file.path) { Mutex() }
+
     override suspend fun read(
         ownerId: String,
         zone: ZoneId,
@@ -87,18 +94,24 @@ class WrapDiskCache(
     ): Unit =
         withContext(io) {
             val file = file(ownerId, zone, page)
-            try {
-                pruneOldVersions()
-                file.parentFile?.mkdirs()
-                // Written beside, then renamed over, so a crash mid-write never leaves half a payload.
-                val partial = File(file.parentFile, "${file.name}.partial")
-                partial.writeText(body)
-                if (!partial.renameTo(file)) {
-                    file.delete()
-                    if (!partial.renameTo(file)) Log.w(TAG, "could not keep wrap $page")
+            // One writer per file at a time, each through its own temp file: two reads landing
+            // together never interleave their bytes or rename each other's half-written copy.
+            lockFor(file).withLock {
+                var partial: File? = null
+                try {
+                    pruneOldVersions()
+                    file.parentFile?.mkdirs()
+                    // Written beside, then renamed over, so a crash mid-write never leaves half a payload.
+                    partial = File.createTempFile("${file.name}.", ".partial", file.parentFile).also { it.writeText(body) }
+                    if (!partial.renameTo(file)) {
+                        file.delete()
+                        if (!partial.renameTo(file)) Log.w(TAG, "could not keep wrap $page")
+                    }
+                } catch (e: IOException) {
+                    Log.w(TAG, "could not keep wrap $page", e)
+                } finally {
+                    partial?.takeIf { it.exists() }?.delete()
                 }
-            } catch (e: IOException) {
-                Log.w(TAG, "could not keep wrap $page", e)
             }
         }
 
