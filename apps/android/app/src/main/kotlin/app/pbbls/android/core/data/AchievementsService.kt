@@ -124,7 +124,12 @@ interface AchievementsServicing {
     /** `mark_achievements_seen(p_card)`, fire-and-forget: it outlives the sheet that sent it. */
     fun markSeen(card: AchievementCard)
 
-    /** `pull_ceremony(p_stack, p_tz)`. Throws, `not_ready` included (a `DataError.Conflict`). */
+    /**
+     * `pull_ceremony(p_stack, p_tz)`. A refusal throws `PostgrestRestException`, and
+     * [toDataError] reads it: `not_ready` (P0001) and `invalid_stack`/`invalid_tz` (22023, a 400)
+     * as `DataError.Conflict(code)`, `not_authenticated` (42501) as `DataError.Unauthorized`; a
+     * transport failure is an `IOException`, `DataError.Network`.
+     */
     suspend fun pullCeremony(
         stack: CompletionStack,
         zone: ZoneId,
