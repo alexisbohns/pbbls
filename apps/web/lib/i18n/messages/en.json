@@ -379,6 +379,7 @@
         "none": "none",
         "month": "{month}. Days with a moment: {moments}. With a pebble: {pebbles}. {weeks}.",
         "newSince": "new since you last looked",
+        "rowNotYet": "not yet",
         "noFullWeek": "No full week yet",
         "notYet": "Not yet: {names}",
         "openPebble": "Open the pebble",

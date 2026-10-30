@@ -379,6 +379,7 @@
         "none": "aucun",
         "month": "{month}. Jours avec un moment : {moments}. Avec un galet : {pebbles}. {weeks}.",
         "newSince": "nouveau depuis ta dernière visite",
+        "rowNotYet": "pas encore",
         "noFullWeek": "Pas encore de semaine complète",
         "notYet": "Pas encore : {names}",
         "openPebble": "Ouvrir le galet",

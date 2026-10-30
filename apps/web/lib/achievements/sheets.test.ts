@@ -82,6 +82,8 @@ describe("the Explorer sheet", () => {
     expect(unknown.map((x) => x.id)).toEqual(["first-five", "six-firsts"])
     expect(unknown[0].rows[0]).toMatchObject({ name: "A first", mark: { kind: "ghost" }, date: "Mar 2" })
     expect(unknown[1].rows[0].name).toBe("A first")
+    const todo = explorerSections({ ...s.explorer, sixFirsts: [{ kind: "small", done: false, on: null, pebble: null, isNew: false }] }, null, null, EN)
+    expect(todo[1].rows[0].label).toBe("Small, not yet")
   })
 
   it("speaks French", () => {
@@ -137,6 +139,8 @@ describe("the Pebbles sheet", () => {
     expect(sec.rows[5]).toMatchObject({ next: "113 to go", mark: { kind: "stage", index: 5, fill: 0.247, done: false } })
     expect([sec.rows[5].date, sec.rows[5].opens]).toEqual([undefined, undefined])
     expect(sec.trailing).toBe("then every 500")
+    expect(sec.rows.slice(5).map((r) => r.label)).toEqual(["250, 113 to go, not yet", "500, not yet", "1,000, not yet"])
+    expect(ladderSection(s.pebbles, "milestones", "Jalons", undefined, FR).rows[5].label).toBe("250, encore 113, pas encore")
     const carved = ladderSection(s.glyphsCarved, "carved", "Glyphs carved", "12", EN)
     expect(carved.rows.map((r) => r.name)).toEqual(["10", "25", "50", "75", "100"])
     expect(carved.rows[0]).toMatchObject({ sub: undefined, date: "Sep 21", opens: undefined })

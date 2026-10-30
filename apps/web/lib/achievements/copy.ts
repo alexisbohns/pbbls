@@ -159,9 +159,17 @@ export function achievementsWords(t: Translate, locale: Locale, root: Translate 
       day: (day: string | null) => (day ? shortDays.format(served(day)) : null),
       /** "November", "Novembre": a month heading a row. */
       monthHeading: (month: number) => sentenceCase(monthInSentence(month), locale),
-      /** A row read aloud: its parts, then "new since you last looked" when it is. */
-      row: (parts: (string | null | undefined)[], isNew = false) =>
-        [...parts.filter((p): p is string => typeof p === "string" && p.trim() !== ""), ...(isNew ? [t("a11y.newSince")] : [])].join(", "),
+      /**
+       * A row read aloud: its parts, then "not yet" for what is still to do
+       * (an unfinished first, the next milestone and the ones beyond), then
+       * "new since you last looked" when it is.
+       */
+      row: (parts: (string | null | undefined)[], isNew = false, notYet = false) =>
+        [
+          ...parts.filter((p): p is string => typeof p === "string" && p.trim() !== ""),
+          ...(notYet ? [t("a11y.rowNotYet")] : []),
+          ...(isNew ? [t("a11y.newSince")] : []),
+        ].join(", "),
       /** What pressing a row does, said after its label (Android's click labels). */
       opensHint: (opens: "moment" | "sheet") => t(opens === "moment" ? "a11y.openPebble" : "a11y.openSheet"),
       /** The quiet names read as one: "Not yet: Anxious, Bitter". */

@@ -114,7 +114,7 @@ export function explorerSections(
       isNew: item.isNew,
       style: "name",
       opens: opensMoment && item.subject?.id ? { kind: "moment", momentId: item.subject.id } : undefined,
-      label: s.row([name, sub, date], item.isNew),
+      label: s.row([name, sub, date], item.isNew, !item.done),
     }
   })
   const six: RegisterRow[] = explorer.sixFirsts.map((first, index) => {
@@ -130,7 +130,7 @@ export function explorerSections(
       isNew: first.isNew,
       style: "name",
       opens: opens(first.pebble),
-      label: s.row([name, sub, date], first.isNew),
+      label: s.row([name, sub, date], first.isNew, !first.done),
     }
   })
   const sections: RegisterSection[] = [
@@ -254,12 +254,12 @@ export function ladderSection(stack: CountingLadder, id: string, title: string, 
   if (next) {
     const name = w.number(next.threshold)
     const left = s.toGo(next.left)
-    rows.push({ id: `next-${next.threshold}`, mark: { kind: "stage", index: stage(next.threshold), fill: next.progress, done: false }, name, next: left, isNew: false, style: "next", label: s.row([name, left]) })
+    rows.push({ id: `next-${next.threshold}`, mark: { kind: "stage", index: stage(next.threshold), fill: next.progress, done: false }, name, next: left, isNew: false, style: "next", label: s.row([name, left], false, true) })
   }
   stack.ladder.forEach((step, index) => {
     if (listed.has(step) || step === next?.threshold) return
     const name = w.number(step)
-    rows.push({ id: `ahead-${step}`, mark: { kind: "stage", index, fill: 0, done: false }, name, isNew: false, style: "ghostNumber", label: name })
+    rows.push({ id: `ahead-${step}`, mark: { kind: "stage", index, fill: 0, done: false }, name, isNew: false, style: "ghostNumber", label: s.row([name], false, true) })
   })
   return { id, title, note, rows, notYet: [], trailing: trailing ?? (stack.thenEvery !== null ? s.thenEvery(stack.thenEvery) : undefined) }
 }
