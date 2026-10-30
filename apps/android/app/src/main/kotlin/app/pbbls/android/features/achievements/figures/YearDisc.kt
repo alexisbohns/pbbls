@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SpineColors
+import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.core.model.achievements.AchievementMonth
 import app.pbbls.android.core.model.achievements.AchievementYear
@@ -50,7 +51,9 @@ private const val RIM_RING = 0.78f
 private const val RIM_RING_WIDTH = 0.8f
 private const val CROSS = 1.1f
 private const val CROSS_HALF = 4f
-private val COUNTER_SOLID = InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF)
+
+// The board's counters are rounded neutral stones, solid in a month's hue.
+private val COUNTER_SOLID = InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF, ValencePolarity.NEUTRAL)
 private val COUNTER_BLANK = InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.BLANK)
 private val COUNTER_DOTTED = InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.DOTTED)
 

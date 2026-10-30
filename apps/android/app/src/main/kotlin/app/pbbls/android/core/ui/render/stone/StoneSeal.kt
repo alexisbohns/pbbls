@@ -184,6 +184,10 @@ val ValencePolarity.inkPrint: InkPrint
  * A seal in [ink] rather than an emotion's spot ink (#1307): the achievements' marks are ink
  * wherever no emotion colours them. It keeps the polarity, unlike a palette-less [rememberSealPrint]
  * (a blank moment), and carries no glyph. Draw it with [drawSeal].
+ *
+ * [outline] is the silhouette it is cut on and [print] how it is inked, apart, as iOS's
+ * `FlatSeal(size:outline:print:)`: the board prints a solid seal on the neutral outline for the
+ * six firsts' intensities, the domains and the year's counters. It defaults to the print's own.
  */
 @Composable
 fun rememberInkSealPrint(
@@ -192,9 +196,10 @@ fun rememberInkSealPrint(
     ink: Color,
     knockout: Color,
     variant: SealVariant = SealVariant.MINI,
+    outline: ValencePolarity = print.polarity,
 ): SealPrint {
     val polarity = print.polarity
-    val outline = rememberStoneOutline(size, polarity)
+    val body = rememberStoneOutline(size, outline)
     val inks =
         remember(ink, knockout) {
             SealInks(
@@ -205,11 +210,12 @@ fun rememberInkSealPrint(
             )
         }
     val hatch = remember(size, polarity) { if (polarity == ValencePolarity.LOWLIGHT) hatchPath(size, HATCH_STEP.toFloat()) else null }
-    val canvasAffine = remember(size, polarity) { StoneGeometry.canvasTransform(size, polarity) }
+    // The hatch is cut in the seed canvas and placed on the outline it is clipped to.
+    val canvasAffine = remember(size, outline) { StoneGeometry.canvasTransform(size, outline) }
     val box = StoneGeometry.outlineBox(size)
-    return remember(outline, polarity, inks, knockout, hatch, canvasAffine, variant, print) {
+    return remember(body, polarity, inks, knockout, hatch, canvasAffine, variant, print) {
         SealPrint(
-            outline.path,
+            body.path,
             polarity,
             inks,
             knockout,

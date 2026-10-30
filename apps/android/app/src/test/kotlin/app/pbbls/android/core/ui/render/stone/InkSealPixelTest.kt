@@ -16,6 +16,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.testing.PIXEL_TEST_SDK
 import org.junit.Assert.assertTrue
@@ -38,8 +39,9 @@ class InkSealPixelTest {
     private fun Seal(
         print: InkPrint,
         tag: String,
+        outline: ValencePolarity = print.polarity,
     ) {
-        val seal = rememberInkSealPrint(ValenceSizeGroup.MEDIUM, print, Color.Black, Color.White)
+        val seal = rememberInkSealPrint(ValenceSizeGroup.MEDIUM, print, Color.Black, Color.White, outline = outline)
         Canvas(Modifier.size(60.dp).background(Color.White).testTag(tag)) { drawSeal(seal, size.width) }
     }
 
@@ -71,5 +73,23 @@ class InkSealPixelTest {
         assertTrue("blank centre should be paper", blank[cx, cy].red > 0.9f)
         assertTrue("blank should ink its rim", blank.dark() > 0)
         assertTrue("dotted (${dotted.dark()}) should ink less than blank (${blank.dark()})", dotted.dark() < blank.dark())
+    }
+
+    @Test
+    fun `a solid print cut on the neutral outline is a different stone from the highlight one`() {
+        compose.setContent {
+            PebblesTheme {
+                Row {
+                    Seal(InkPrint.RELIEF, "own")
+                    Seal(InkPrint.RELIEF, "neutral", outline = ValencePolarity.NEUTRAL)
+                }
+            }
+        }
+        val own = pixels("own")
+        val neutral = pixels("neutral")
+        val cx = own.width / 2
+        val cy = own.height / 3
+        assertTrue("both solid at their centre", own[cx, cy].red < 0.2f && neutral[cx, cy].red < 0.2f)
+        assertTrue("the outlines differ (${own.dark()} vs ${neutral.dark()})", own.dark() != neutral.dark())
     }
 }

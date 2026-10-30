@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SpineColors
 import app.pbbls.android.core.model.Valence
+import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.core.model.achievements.FirstStep
 import app.pbbls.android.core.model.achievements.PebbleSnapshot
@@ -37,15 +38,14 @@ data class SixMark(
 )
 
 /**
- * The board's six-firsts table. The board prints the three intensities on the neutral outline in
- * a solid print; Android's outline follows its print, so they take the highlight outline, the solid
- * print's own (a few dp of silhouette apart).
+ * The board's six-firsts table. The three intensities are a solid print cut on the neutral outline
+ * (so Medium and Highlight read apart by shape), the three valences each print on their own.
  */
 val SIX_MARKS: Map<StoneKind, SixMark> =
     mapOf(
-        StoneKind.SMALL to SixMark(InkSeal(ValenceSizeGroup.SMALL, InkPrint.RELIEF), 9f),
-        StoneKind.MEDIUM to SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF), 12f),
-        StoneKind.LARGE to SixMark(InkSeal(ValenceSizeGroup.LARGE, InkPrint.RELIEF), 14f),
+        StoneKind.SMALL to SixMark(InkSeal(ValenceSizeGroup.SMALL, InkPrint.RELIEF, ValencePolarity.NEUTRAL), 9f),
+        StoneKind.MEDIUM to SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF, ValencePolarity.NEUTRAL), 12f),
+        StoneKind.LARGE to SixMark(InkSeal(ValenceSizeGroup.LARGE, InkPrint.RELIEF, ValencePolarity.NEUTRAL), 14f),
         StoneKind.LOWLIGHT to SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.ENGRAVED), 12.5f),
         StoneKind.NEUTRAL to SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.OPEN), 12.5f),
         StoneKind.HIGHLIGHT to SixMark(InkSeal(ValenceSizeGroup.MEDIUM, InkPrint.RELIEF), 12.5f),

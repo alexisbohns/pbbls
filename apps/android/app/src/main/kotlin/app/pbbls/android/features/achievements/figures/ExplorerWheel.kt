@@ -16,6 +16,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.core.model.achievements.DomainsSection
 import app.pbbls.android.core.model.achievements.EmotionsSection
@@ -26,7 +27,8 @@ import app.pbbls.android.core.ui.render.stone.SealVariant
 import app.pbbls.android.features.achievements.AchievementLookups
 import app.pbbls.android.features.achievements.figures.ExplorerWheelGeometry as G
 
-private val DOMAIN_SEAL = InkSeal(ValenceSizeGroup.SMALL, InkPrint.RELIEF)
+// The board's domains are solid on the neutral outline; its 25 seats solid on their own.
+private val DOMAIN_SEAL = InkSeal(ValenceSizeGroup.SMALL, InkPrint.RELIEF, ValencePolarity.NEUTRAL)
 private val TWENTY_FIVE_SEAL = InkSeal(ValenceSizeGroup.SMALL, InkPrint.RELIEF)
 private const val ARC_ALPHA = 0.5f
 private const val ARC_WIDTH = 0.8f

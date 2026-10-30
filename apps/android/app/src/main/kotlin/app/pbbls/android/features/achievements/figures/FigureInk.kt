@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import app.pbbls.android.core.designsystem.SpineColors
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Valence
+import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.core.ui.render.stone.InkPrint
 import app.pbbls.android.core.ui.render.stone.SealPrint
@@ -98,10 +99,11 @@ internal fun DrawScope.sealAt(
     translate(center.x - width / 2, center.y - width / print.aspectRatio / 2) { drawSeal(print, width) }
 }
 
-/** One ink seal: a size and how it prints. */
+/** One ink seal: a size, how it prints, and the outline it is cut on (the print's own unless the board says otherwise). */
 data class InkSeal(
     val size: ValenceSizeGroup,
     val print: InkPrint,
+    val outline: ValencePolarity = print.polarity,
 )
 
 /** One ink seal in a given colour: ink for the marks, a month's hue for the year's counters. */
@@ -133,7 +135,7 @@ internal fun rememberInkPrints(
     variant: SealVariant,
 ): InkPrints {
     val distinct = keys.distinct()
-    val prints = distinct.map { k -> key(k) { rememberInkSealPrint(k.seal.size, k.seal.print, k.ink, knockout, variant) } }
+    val prints = distinct.map { k -> key(k) { rememberInkSealPrint(k.seal.size, k.seal.print, k.ink, knockout, variant, k.seal.outline) } }
     return remember(distinct, prints) { InkPrints(distinct.zip(prints).toMap()) }
 }
 
