@@ -128,9 +128,8 @@ struct AchievementBadgeCell: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             HStack {
-                Image(systemName: record.familySymbol)
-                    .pebblesIcon(.large)
-                    .foregroundStyle(isUnlocked ? Color.pebbles.primary : Color.pebbles.outline)
+                PbblsIconImage(record.familySymbol, .tile,
+                               style: AnyShapeStyle(isUnlocked ? Color.pebbles.primary : Color.pebbles.outline))
                 Spacer()
                 if !isUnlocked {
                     Image(systemName: "lock")

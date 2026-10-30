@@ -87,13 +87,14 @@ struct AchievementsDecodingTests {
         #expect(rows[1].karmaGranted == 0)
     }
 
-    @Test("unknown family degrades to slug title and trophy symbol")
-    func unknownFamilyTolerance() throws {
+    /// A catalog row decoded from the PostgREST shape with only the family
+    /// substituted; shared with `AchievementFamilyIconTests`.
+    static func record(family: String) throws -> AchievementRecord {
         let json = """
         [{
           "id": "3c2b1a0d-9e8f-4765-8493-a2b1c0d9e8f7",
           "slug": "mystery-badge",
-          "family": "brand_new_family",
+          "family": "\(family)",
           "threshold": null,
           "emotion_id": null,
           "domain_id": null,
@@ -109,9 +110,14 @@ struct AchievementsDecodingTests {
         """.data(using: .utf8)!
 
         let rows = try JSONDecoder().decode([AchievementRecord].self, from: json)
-        let record = try #require(rows.first)
+        return try #require(rows.first)
+    }
+
+    @Test("unknown family degrades to slug title and the glow icon")
+    func unknownFamilyTolerance() throws {
+        let record = try Self.record(family: "brand_new_family")
         #expect(record.localizedTitle(emotionName: nil, domainName: nil) == "mystery-badge")
         #expect(record.localizedDescription(emotionName: nil, domainName: nil) == nil)
-        #expect(record.familySymbol == "trophy")
+        #expect(record.familySymbol == .pebbleGlowMd)
     }
 }
