@@ -352,7 +352,8 @@ export class SupabaseProvider implements DataProvider {
       "pull_ceremony",
     )
     if (error) {
-      if (error.message.includes("not_ready")) throw new CeremonyNotReadyError(stack)
+      // The RPC's `raise exception 'not_ready' using errcode = 'P0001'`, exactly.
+      if (error.code === "P0001" && error.message === "not_ready") throw new CeremonyNotReadyError(stack)
       throw new Error(`pull_ceremony failed: ${error.message}`)
     }
     return ceremonyPullFrom(data)
