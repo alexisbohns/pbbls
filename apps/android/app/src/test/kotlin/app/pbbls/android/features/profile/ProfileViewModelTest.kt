@@ -183,6 +183,25 @@ class ProfileViewModelTest {
         }
 
     @Test
+    fun `back on You, the shelf shows the copy the page kept since, without a read`() =
+        runTest {
+            val achievements = FakeAchievementsService(served = served, kept = stale).apply { keptAt = clock.minusSeconds(60) }
+            val viewModel = viewModel(achievements = achievements)
+            viewModel.now = { clock }
+            advanceUntilIdle()
+            assertEquals(2, shelfOf(viewModel).shelfCount)
+
+            // The page read a newer page and kept it; then You comes back.
+            achievements.kept = served
+            viewModel.onResumed()
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(13, shelfOf(viewModel).shelfCount)
+            assertEquals(0, achievements.pageCalls)
+        }
+
+    @Test
     fun `a copy made stale (no age) is read again at once`() =
         runTest {
             val achievements = FakeAchievementsService(served = served, kept = stale).apply { keptAt = null }

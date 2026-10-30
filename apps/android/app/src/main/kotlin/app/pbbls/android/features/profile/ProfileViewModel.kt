@@ -212,15 +212,15 @@ class ProfileViewModel
          */
         private suspend fun loadShelf() {
             val zone = zone()
-            if (shelfPage == null) {
-                runCatchingCancellable { achievementsService.cachedPage(zone) }
-                    .onFailure { Log.w(TAG, "the kept achievements page could not be read", it) }
-                    .getOrNull()
-                    ?.let {
-                        shelfPage = it
-                        publish()
-                    }
-            }
+            // The kept copy every time, not only the first: the page may have read a newer one
+            // since, and the shelf then shows it without asking the server.
+            runCatchingCancellable { achievementsService.cachedPage(zone) }
+                .onFailure { Log.w(TAG, "the kept achievements page could not be read", it) }
+                .getOrNull()
+                ?.let {
+                    shelfPage = it
+                    publish()
+                }
             val keptAt = runCatchingCancellable { achievementsService.keptAt(zone) }.getOrNull()
             val age = keptAt?.let { Duration.between(it, now()) }
             val fresh = shelfPage != null && age != null && !age.isNegative && age < SHELF_MAX_AGE
