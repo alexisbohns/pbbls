@@ -52,7 +52,6 @@ import app.pbbls.android.core.data.ReauthMethod
 import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.LegalDoc
-import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesListDefaults
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
@@ -526,7 +525,7 @@ internal fun SettingsNavRow(
             Icon(
                 painter = painterResource(R.drawable.ic_chevron_right),
                 contentDescription = null,
-                modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
+                modifier = Modifier.size(15.dp),
             )
         },
         modifier = Modifier.clickable(onClick = onClick),

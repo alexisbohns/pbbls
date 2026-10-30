@@ -20,7 +20,6 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.DashedPlaceholder
-import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesListDefaults
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -68,7 +67,7 @@ internal fun CollectionGlyphSection(
                         Icon(
                             painter = painterResource(R.drawable.ic_chevron_right),
                             contentDescription = null,
-                            modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
+                            modifier = Modifier.size(15.dp),
                         )
                     },
                     modifier =
