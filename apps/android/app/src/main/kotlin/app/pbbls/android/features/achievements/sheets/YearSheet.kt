@@ -33,6 +33,7 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SpineLayoutTokens
 import app.pbbls.android.core.designsystem.rule
 import app.pbbls.android.core.model.achievements.AchievementYear
+import app.pbbls.android.core.model.achievements.MonthState
 import app.pbbls.android.features.achievements.AchievementLookups
 import app.pbbls.android.features.achievements.AchievementSheet
 import app.pbbls.android.features.achievements.copy.AchievementsCopy
@@ -169,8 +170,9 @@ fun YearSheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(Modifier.width(COUNTER_COLUMN)) { MonthCounter(month, lookups) }
-                // A month without pebbles stays quiet: no hue reaches it, its row is muted.
-                val dim = if (hue == null) Modifier.alpha(MUTED_ALPHA) else Modifier
+                // Muted on its state alone, as the disc mutes it: any month not kept. A kept month whose
+                // family this device does not know is drawn in ink, never dimmed.
+                val dim = if (month.state != MonthState.KEPT) Modifier.alpha(MUTED_ALPHA) else Modifier
                 Text(copy.monthHeading(month.month), style = type.soulName, color = colors.ink, modifier = Modifier.weight(1f).then(dim))
                 Row(dim) {
                     YearCell(
