@@ -7,8 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -93,6 +95,26 @@ class ExplorerSheetTest {
             .onNodeWithContentDescription("Small, Untitled", substring = true)
             .performScrollTo()
             .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.OnClick))
+    }
+
+    @Test
+    fun `a task or a first not done yet reads "not yet"`() {
+        val page = AchievementsFixture.page
+        val explorer = page.explorer!!
+        val open = explorer.sixFirsts[0].copy(done = false, on = null, pebble = null, isNew = false)
+        val task = explorer.firstFive[4].copy(done = false, on = null, subject = null, isNew = false)
+        show(
+            page.copy(
+                explorer =
+                    explorer.copy(
+                        firstFive = explorer.firstFive.dropLast(1) + task,
+                        sixFirsts =
+                            listOf(open) + explorer.sixFirsts.drop(1),
+                    ),
+            ),
+        )
+        compose.onNodeWithContentDescription("Small, not yet").performScrollTo().assertExists()
+        compose.onAllNodesWithContentDescription(", not yet", substring = true).assertCountEquals(2)
     }
 
     @Test

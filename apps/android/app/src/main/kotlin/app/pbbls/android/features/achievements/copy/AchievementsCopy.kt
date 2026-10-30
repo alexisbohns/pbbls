@@ -338,14 +338,21 @@ class AchievementsCopy(
     /** A ready mark read aloud, by the ceremony it opens: "The six firsts: complete. Open the ceremony." */
     fun readyDescription(stack: CompletionStack): String = resources.getString(R.string.achievements_ready_a11y, ceremonyTitle(stack))
 
-    /** A row read aloud: its parts, then "new since you last looked" when it is. */
+    /**
+     * A row read aloud: its parts, then "not yet" for a task, a first or a step still ahead (the
+     * open mark says it on screen), and "new since you last looked" when it is.
+     */
     fun row(
         vararg parts: String?,
         isNew: Boolean = false,
+        done: Boolean = true,
     ): String =
         (
             parts.filterNotNull().filter { it.isNotBlank() } +
-                listOfNotNull(if (isNew) resources.getString(R.string.achievements_new_a11y) else null)
+                listOfNotNull(
+                    if (done) null else resources.getString(R.string.achievements_row_not_yet),
+                    if (isNew) resources.getString(R.string.achievements_new_a11y) else null,
+                )
         ).joinToString(", ")
 
     private fun pattern(skeleton: String): DateTimeFormatter =

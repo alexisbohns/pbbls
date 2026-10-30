@@ -121,7 +121,7 @@ fun ExplorerSheet(
                 subtitle = name,
                 date = date,
                 isNew = item.isNew,
-                description = copy.row(title, name, date, isNew = item.isNew),
+                description = copy.row(title, name, date, isNew = item.isNew, done = item.done),
                 onClick = opens?.let { id -> { onOpenMoment(id) } },
                 clickLabel = opens?.let { openPebble },
             )
@@ -148,7 +148,7 @@ fun ExplorerSheet(
                 subtitle = name,
                 date = date,
                 isNew = first.isNew,
-                description = copy.row(title, name, date, isNew = first.isNew),
+                description = copy.row(title, name, date, isNew = first.isNew, done = first.done),
                 onClick = opens?.let { id -> { onOpenMoment(id) } },
                 clickLabel = opens?.let { openPebble },
             )

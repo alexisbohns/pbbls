@@ -60,4 +60,9 @@ class AchievementsCopyFrenchTest {
         assertEquals("Toutes les émotions", copy.ceremonyTitle(CompletionStack.EMOTIONS))
         assertEquals("Tous les domaines", copy.ceremonyTitle(CompletionStack.DOMAINS))
     }
+
+    @Test
+    fun `a row still ahead reads "pas encore"`() {
+        assertEquals("250, pas encore", copy.row("250", done = false))
+    }
 }
