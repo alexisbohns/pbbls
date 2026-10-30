@@ -240,7 +240,8 @@ struct AchievementSheetHost: View {
         .background(Color.pebbles.stock)
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
-        .onAppear { seen(sheet.card) }
+        // Marked seen only when it is shown: a sheet whose section left draws nothing and marks nothing.
+        .onAppear { if sheet.isShown(by: page) { seen(sheet.card) } }
         // What this sheet presents is closed here, by its owner, when its section leaves the payload;
         // this sheet itself is closed by its own owner the same way.
         .onChange(of: page) { _, now in
