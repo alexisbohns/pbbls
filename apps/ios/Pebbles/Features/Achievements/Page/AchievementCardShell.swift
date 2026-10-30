@@ -88,32 +88,45 @@ struct AchievementCardShell<Figure: View>: View {
     }
 }
 
-/// A band (the board's `.band`): the small-caps title, the italic hint at the far end, a rule under both.
+/// A band (the board's `.band`): the small-caps title, the italic hint at the
+/// far end, a rule under both. When the two cannot share a line (large text),
+/// the hint goes under the title rather than being cut.
 struct AchievementBand: View {
     let label: String
     var hint: String?
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(verbatim: label)
-                .spineType(.achievementsBand)
-                .foregroundStyle(Color.pebbles.onSurface)
-                .lineLimit(1)
-                .layoutPriority(1)
-            Spacer(minLength: 0)
-            if let hint {
-                Text(verbatim: hint)
-                    .spineType(.achievementsBandHint)
-                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                title
+                Spacer(minLength: 0)
+                if let hint { hintText(hint) }
             }
+            VStack(alignment: .leading, spacing: 4) {
+                title
+                if let hint { hintText(hint) }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.top, 14)
         .padding(.bottom, 9)
         .overlay(alignment: .bottom) {
             Rectangle().fill(Color.pebbles.cardRule).frame(height: 1)
         }
+    }
+
+    private var title: some View {
+        Text(verbatim: label)
+            .spineType(.achievementsBand)
+            .foregroundStyle(Color.pebbles.onSurface)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func hintText(_ hint: String) -> some View {
+        Text(verbatim: hint)
+            .spineType(.achievementsBandHint)
+            .foregroundStyle(Color.pebbles.onSurfaceVariant)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 

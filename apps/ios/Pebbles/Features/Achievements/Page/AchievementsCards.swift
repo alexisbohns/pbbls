@@ -115,20 +115,33 @@ struct PebblesCard: View {
         }
     }
 
-    /// A glyph stack's line (the board's `.srow`): its label, its small skyline, its count.
+    /// A glyph stack's line (the board's `.srow`): its label, its small skyline,
+    /// its count. When the label cannot keep its column (large text), it takes
+    /// its own line above the skyline and the count rather than being cut.
     private func subRow(_ label: String, _ ladder: AchievementsPage.Ladder, _ locale: Locale) -> some View {
-        HStack(spacing: 8) {
-            Text(verbatim: label)
-                .spineType(.achievementsSubLabel)
-                .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                .lineLimit(1)
-                .frame(width: 104, alignment: .leading)
+        let name = Text(verbatim: label)
+            .spineType(.achievementsSubLabel)
+            .foregroundStyle(Color.pebbles.onSurfaceVariant)
+        let figure = HStack(spacing: 8) {
+            // Its board size, fixed: `ViewThatFits` measures without a width to fit.
             PebbleSkyline(ladder: ladder, box: SkylineGeometry.narrow, end: 126, width: 103)
+                .frame(width: 103, height: 103 * SkylineGeometry.narrow.height / SkylineGeometry.narrow.width)
                 .frame(maxWidth: .infinity)
             Text(verbatim: AchievementsCopy.number(ladder.count, locale: locale))
                 .spineType(.achievementsSubCount)
                 .foregroundStyle(Color.pebbles.onSurface)
                 .frame(minWidth: 34, alignment: .trailing)
+        }
+        return ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) {
+                name.lineLimit(1).fixedSize().frame(minWidth: 104, alignment: .leading)
+                figure
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                name.fixedSize(horizontal: false, vertical: true)
+                figure
+            }
+            .padding(.vertical, 6)
         }
         .frame(minHeight: SpineLayout.minTarget)
         .overlay(alignment: .bottom) { Rectangle().fill(Color.pebbles.rule).frame(height: 1) }
