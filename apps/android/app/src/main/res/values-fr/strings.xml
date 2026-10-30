@@ -920,11 +920,13 @@
     <string name="achievements_unknown_emotion">Une émotion</string>
     <string name="achievements_unknown_domain">Un domaine</string>
     <string name="achievements_unknown_family">Autres émotions</string>
-    <string name="achievements_explorer_a11y">Explorateur : cinq premières fois %1$s, six premières fois %2$s, 25 galets %3$s, domaines %4$s, émotions %5$s.</string>
-    <string name="achievements_emotions_a11y">Émotions : %1$s rencontrées.</string>
-    <string name="achievements_domains_a11y">Domaines : %1$s. %2$s</string>
-    <string name="achievements_pebbles_a11y">Galets : %1$s. Glyphes gravés : %2$s. Ventes de glyphes : %3$s.</string>
-    <string name="achievements_disc_a11y">%1$d. Au bord : %2$s. Sur le cercle intérieur : %3$s. En chemin : %4$s.</string>
+    <string name="achievements_explorer_a11y">Explorateur : %1$s.</string>
+    <string name="achievements_emotions_a11y">Émotions, %1$s sur %2$s.</string>
+    <string name="achievements_domains_a11y">Domaines, %1$s sur %2$s.</string>
+    <string name="achievements_pebbles_a11y">Galets. %1$s</string>
+    <string name="achievements_glyphs_carved_a11y">Glyphes gravés : %1$s.</string>
+    <string name="achievements_glyph_sales_a11y">Ventes de glyphes : %1$s.</string>
+    <string name="achievements_disc_a11y">L\'année %1$s. Au bord : %2$s. Sur le disque intérieur : %3$s. En chemin : %4$s.</string>
     <string name="achievements_none">aucun</string>
     <string name="achievements_month_a11y">%1$s. Jours avec un moment : %2$s. Avec un galet : %3$s. %4$s.</string>
     <string name="achievements_weeks_filled">Semaines complètes remplies : %1$s sur %2$s</string>
@@ -935,6 +937,20 @@
     <string name="achievements_not_yet_a11y">Pas encore : %1$s</string>
     <string name="achievements_open_pebble">Ouvrir le galet</string>
     <string name="achievements_open_sheet">Ouvrir</string>
-    <string name="achievements_ready">Prêt</string>
-    <string name="achievements_ready_a11y">%1$s : c\'est complet. Ouvrir la cérémonie.</string>
+    <string name="achievements_ready">prêt</string>
+    <string name="achievements_ready_a11y">%1$s : la cérémonie est prête.</string>
+    <string name="achievements_header_a11y">%1$s, %2$s</string>
+    <string name="achievements_a11y_join">" ; "</string>
+    <string name="achievements_ring_first_five">les cinq premières fois</string>
+    <string name="achievements_ring_six_firsts">les six premières fois</string>
+    <string name="achievements_ring_twenty_five">25 galets</string>
+    <string name="achievements_ring_domains">domaines</string>
+    <string name="achievements_ring_emotions">émotions</string>
+    <string name="achievements_ring_done">%1$s, c\'est fait</string>
+    <string name="achievements_ring_part">%1$s, %2$s sur %3$s</string>
+    <plurals name="achievements_new_count">
+        <item quantity="one">%1$s nouveauté.</item>
+        <item quantity="many">%1$s nouveautés.</item>
+        <item quantity="other">%1$s nouveautés.</item>
+    </plurals>
 </resources>

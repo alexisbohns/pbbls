@@ -130,7 +130,7 @@ class AchievementsCopyTest {
                 )
             }
         assertEquals(
-            "2026. On the rim: August. On the inner circle: March, April, May. On their way: November.",
+            "The year 2026. On the rim: August. On the inner disc: March, April, and May. On their way: November.",
             copy.discDescription(AchievementYear(2026, true, 14, months, emptyList(), null)),
         )
         assertEquals(
