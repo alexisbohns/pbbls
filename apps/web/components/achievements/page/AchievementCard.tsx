@@ -53,7 +53,11 @@ export function AchievementCard({ title, heading, hint, ladder = [], longBar, la
           className="absolute inset-0 cursor-pointer rounded-[11px] outline-offset-2 focus-visible:outline-2 focus-visible:outline-spine-ink"
         />
       ) : (
-        <p className="sr-only">{label}</p>
+        <>
+          {/* A heading to navigate by, until the card is a button that opens its sheet. */}
+          <h2 className="sr-only">{heading ? `${title} ${heading}` : title}</h2>
+          <p className="sr-only">{label}</p>
+        </>
       )}
       {ready ? <div className="absolute top-1.5 right-1.5 z-10">{ready}</div> : null}
     </article>

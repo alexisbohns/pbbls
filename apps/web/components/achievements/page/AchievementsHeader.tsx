@@ -12,7 +12,7 @@ export function AchievementsHeader({ since, daysKept }: { since: string | null; 
   if (daysKept === null) return null
   return (
     <header className="px-1.5 pt-1.5 pb-5">
-      <p className="sr-only">{words.a11y.header(daysKept, since)}</p>
+      <h2 className="sr-only">{words.a11y.header(daysKept, since)}</h2>
       <div aria-hidden className="flex flex-col gap-1">
         {since ? <span className="font-spine-sc text-[11.5px] font-semibold tracking-[.2em] text-spine-ink-2">{words.since(since)}</span> : null}
         <span className="flex items-baseline gap-3.5">
