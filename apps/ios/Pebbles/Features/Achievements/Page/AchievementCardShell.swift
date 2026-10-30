@@ -94,6 +94,8 @@ struct AchievementCardShell<Figure: View>: View {
 struct AchievementBand: View {
     let label: String
     var hint: String?
+    /// A sheet's own title is a VoiceOver heading; a page card's band is part of its button.
+    var isHeading = false
 
     var body: some View {
         ViewThatFits(in: .horizontal) {
@@ -120,6 +122,7 @@ struct AchievementBand: View {
             .spineType(.achievementsBand)
             .foregroundStyle(Color.pebbles.onSurface)
             .fixedSize(horizontal: false, vertical: true)
+            .accessibilityAddTraits(isHeading ? .isHeader : [])
     }
 
     private func hintText(_ hint: String) -> some View {

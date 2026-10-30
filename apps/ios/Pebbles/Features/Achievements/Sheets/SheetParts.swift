@@ -15,7 +15,7 @@ struct SheetBody<Figure: View, Sections: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ZStack(alignment: .topTrailing) {
-                AchievementBand(label: band, hint: ready == nil ? hint : nil)
+                AchievementBand(label: band, hint: ready == nil ? hint : nil, isHeading: true)
                 if let ready { ReadyButton(mark: ready) }
             }
             figure()
