@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.asComposePath
@@ -111,6 +112,9 @@ class SealPrint internal constructor(
     internal val variant: SealVariant,
     internal val boxWidth: Float,
     val aspectRatio: Float,
+    /** Only the rim, on the knockout: the blank and dotted ink prints (#1307). */
+    internal val rimOnly: Boolean = false,
+    internal val dotted: Boolean = false,
 )
 
 @Composable
@@ -153,6 +157,75 @@ fun rememberSealPrint(
     }
 }
 
+/**
+ * How an ink seal prints (#1307): the Spine's three prints, plus the board's blank rim (a moment,
+ * a quiet month) and its dotted rim (a month still to come).
+ */
+enum class InkPrint(
+    internal val polarity: ValencePolarity,
+) {
+    RELIEF(ValencePolarity.HIGHLIGHT),
+    OPEN(ValencePolarity.NEUTRAL),
+    ENGRAVED(ValencePolarity.LOWLIGHT),
+    BLANK(ValencePolarity.NEUTRAL),
+    DOTTED(ValencePolarity.NEUTRAL),
+}
+
+/** The print for a valence's polarity, in ink. */
+val ValencePolarity.inkPrint: InkPrint
+    get() =
+        when (this) {
+            ValencePolarity.HIGHLIGHT -> InkPrint.RELIEF
+            ValencePolarity.NEUTRAL -> InkPrint.OPEN
+            ValencePolarity.LOWLIGHT -> InkPrint.ENGRAVED
+        }
+
+/**
+ * A seal in [ink] rather than an emotion's spot ink (#1307): the achievements' marks are ink
+ * wherever no emotion colours them. It keeps the polarity, unlike a palette-less [rememberSealPrint]
+ * (a blank moment), and carries no glyph. Draw it with [drawSeal].
+ */
+@Composable
+fun rememberInkSealPrint(
+    size: ValenceSizeGroup,
+    print: InkPrint,
+    ink: Color,
+    knockout: Color,
+    variant: SealVariant = SealVariant.MINI,
+): SealPrint {
+    val polarity = print.polarity
+    val outline = rememberStoneOutline(size, polarity)
+    val inks =
+        remember(ink, knockout) {
+            SealInks(
+                spot = ink,
+                deep = ink,
+                tint = StoneTones.mixOklab(ink, NEUTRAL_TINT, knockout),
+                wash = StoneTones.mixOklab(ink, LOWLIGHT_WASH, knockout),
+            )
+        }
+    val hatch = remember(size, polarity) { if (polarity == ValencePolarity.LOWLIGHT) hatchPath(size, HATCH_STEP.toFloat()) else null }
+    val canvasAffine = remember(size, polarity) { StoneGeometry.canvasTransform(size, polarity) }
+    val box = StoneGeometry.outlineBox(size)
+    return remember(outline, polarity, inks, knockout, hatch, canvasAffine, variant, print) {
+        SealPrint(
+            outline.path,
+            polarity,
+            inks,
+            knockout,
+            emptyList(),
+            hatch,
+            size,
+            canvasAffine,
+            variant,
+            box.width,
+            box.width / box.height,
+            rimOnly = print == InkPrint.BLANK || print == InkPrint.DOTTED,
+            dotted = print == InkPrint.DOTTED,
+        )
+    }
+}
+
 /** Prints [print] at the origin, [width] px wide (the height follows its aspect ratio). Move it with `withTransform`. */
 fun DrawScope.drawSeal(
     print: SealPrint,
@@ -165,6 +238,17 @@ fun DrawScope.drawSeal(
     withTransform({ scale(pxPerUnit, pxPerUnit, Offset.Zero) }) {
         if (print.variant == SealVariant.PIP) {
             drawPath(body, if (print.polarity == ValencePolarity.LOWLIGHT) inks.deep else inks.spot)
+            return@withTransform
+        }
+        if (print.rimOnly) {
+            drawPath(body, print.knockout)
+            val dash =
+                if (print.dotted) {
+                    PathEffect.dashPathEffect(floatArrayOf(DOT_ON.toPx() / pxPerUnit, DOT_OFF.toPx() / pxPerUnit))
+                } else {
+                    null
+                }
+            drawPath(body, inks.spot, style = Stroke(weight.rim.toPx() / pxPerUnit, pathEffect = dash))
             return@withTransform
         }
         when (print.polarity) {
@@ -248,6 +332,10 @@ private const val NEUTRAL_TINT = 0.15f
 private val TINY_HATCH_GAP = 2.4.dp
 private const val SQRT_2 = 1.4142135f
 private const val LOWLIGHT_WASH = 0.09f
+
+// The board's `stroke-dasharray="1.6 1.7"`: the dotted rim of a month still to come (#1307).
+private val DOT_ON = 1.6.dp
+private val DOT_OFF = 1.7.dp
 
 /** The engine draws strokes at this width; a thinner glyph stroke keeps its proportion. */
 private const val ENGINE_STROKE_WIDTH = 6.0
