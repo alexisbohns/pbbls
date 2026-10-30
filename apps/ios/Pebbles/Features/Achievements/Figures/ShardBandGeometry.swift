@@ -11,9 +11,9 @@ struct ShardBandGeometry {
 
     var cell: CGFloat { width / CGFloat(max(count, 1)) }
 
-    /// A number in [0, 1) from `key`.
+    /// A number in [0, 1) from `key`: the board's hash, FNV-1a modulo 100 000.
     static func unit(_ key: String) -> CGFloat {
-        CGFloat(StableHash.fnv1a(key)) / 4_294_967_296
+        CGFloat(StableHash.fnv1a(key) % 100_000) / 100_000
     }
 
     /// The lean of shard `index`'s right seam at its top (`"t"`) or bottom (`"b"`).

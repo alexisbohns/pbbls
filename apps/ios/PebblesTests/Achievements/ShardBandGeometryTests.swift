@@ -24,7 +24,8 @@ struct ShardBandGeometryTests {
             #expect(abs(g.jitter(i, "t")) <= g.cell * 0.35)
             #expect(g.jitter(i, "b") == ShardBandGeometry(width: 300, height: 30, count: 18).jitter(i, "b"))
         }
-        #expect(ShardBandGeometry.unit("R0t") == CGFloat(StableHash.fnv1a("R0t")) / 4_294_967_296)
+        #expect(ShardBandGeometry.unit("R0t") == CGFloat(StableHash.fnv1a("R0t") % 100_000) / 100_000)
+        #expect(ShardBandGeometry.unit("R3b") >= 0 && ShardBandGeometry.unit("R3b") < 1)
     }
 
     @Test("a new domain's dot sits under its shard's middle")
