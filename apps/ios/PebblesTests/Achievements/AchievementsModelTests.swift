@@ -71,7 +71,7 @@ struct AchievementsModelTests {
 
     @Test("a slow read landing after a newer one does not bring its older page back")
     func staleReadDropped() async throws {
-        let ready = try Self.page(daysKept: 249)
+        let ready = try Self.readyPage()
         let fake = FakeAchievementsPageService(answers: [.success(ready), .success(try Self.pulledPage())])
         fake.answer(pull: .success(.pulled(karma: 30)))
         fake.hold(read: 0)
@@ -106,9 +106,13 @@ struct AchievementsModelTests {
         #expect(fake.seen == [.emotions, .year])
     }
 
-    /// The design page: its Explorer completion is ready and not pulled.
+    /// The six firsts whole and offered, not yet pulled (the design's were pulled long ago).
     static func readyPage() throws -> AchievementsPage {
-        try Self.page(daysKept: 249)
+        try AchievementsFixtures.json("""
+        {"explorer": {"first_five": [], "six_firsts": [], "rings_done": ["six_firsts"],
+                      "completion": {"completed_at": "2026-03-08T18:00:00Z", "offered_from": "2026-03-09T05:00:00Z",
+                                     "ready": true}}}
+        """).model
     }
 
     /// The Explorer completion pulled, as a read after a landed pull shows it.

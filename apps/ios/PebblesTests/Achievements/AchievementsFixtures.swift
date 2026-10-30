@@ -4,12 +4,21 @@ import Foundation
 /// The achievements payloads the tests replay (#1306), read in place through
 /// `#filePath` as the wraps' payloads are (the simulator shares the host disk).
 /// `design-fixture.json` is the approved board's fixture in the exact shape
-/// `get_achievements` serves (spec §3.3); the harness's verbatim dumps are read
-/// by `AchievementsHarnessPayloads`.
+/// `get_achievements` serves (spec §3.3): one canonical copy every surface reads,
+/// beside the harness's oracles. The harness's verbatim dumps are read by
+/// `AchievementsHarnessPayloads`.
 enum AchievementsFixtures {
-    static let folder = URL(fileURLWithPath: #filePath)
-        .deletingLastPathComponent()
-        .appendingPathComponent("Fixtures")
+    /// The repository's achievements oracles.
+    static let oracles = URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent() // Achievements
+        .deletingLastPathComponent() // PebblesTests
+        .deletingLastPathComponent() // apps/ios
+        .deletingLastPathComponent() // apps
+        .deletingLastPathComponent() // the repository
+        .appendingPathComponent("packages/supabase/scripts/oracles/achievements")
+
+    /// The canonical design fixture and its domains.
+    static let folder = oracles.appendingPathComponent("design")
 
     static func data(_ name: String) throws -> Data {
         try Data(contentsOf: folder.appendingPathComponent("\(name).json"))

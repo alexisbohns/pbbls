@@ -3,14 +3,15 @@ import Testing
 @testable import Pebbles
 
 extension References {
-    /// #1306: the achievements page's five figures on the design fixture, Paper
-    /// and Night: the wheel, the rosace, the band, the three skylines, the disc.
+    /// #1306: the achievements page's five figures on the canonical design fixture,
+    /// Paper and Night, every family resolved: the wheel, the rosace, the band, the
+    /// three skylines, the disc.
     @Suite("Achievements figure references")
     @MainActor
     struct AchievementsFigureReferences {
         static func figures() throws -> some View {
             let page = try AchievementsFixtures.payload("design-fixture").model
-            let lookups = AchievementsLookups.fixture(page)
+            let lookups = try AchievementsLookups.fixture()
             let explorer = try #require(page.explorer)
             let emotions = try #require(page.emotions)
             let domains = try #require(page.domains)

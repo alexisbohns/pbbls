@@ -60,12 +60,12 @@ struct ExplorerWheelGeometryTests {
         let page = try AchievementsFixtures.payload("design-fixture").model
         let runs = FamilyRun.runs(try #require(page.emotions).seats.map(\.family))
         #expect(runs == [
-            FamilyRun(family: "joy", start: 0, length: 6), FamilyRun(family: "pride", start: 6, length: 5),
-            FamilyRun(family: "anger", start: 11, length: 6), FamilyRun(family: "fear", start: 17, length: 6),
-            FamilyRun(family: "shame", start: 23, length: 4), FamilyRun(family: "sadness", start: 27, length: 6),
-            FamilyRun(family: "peace", start: 33, length: 5)
+            FamilyRun(family: "joy", start: 0, length: 6), FamilyRun(family: "pride", start: 6, length: 3),
+            FamilyRun(family: "anger", start: 9, length: 6), FamilyRun(family: "fear", start: 15, length: 5),
+            FamilyRun(family: "shame", start: 20, length: 4), FamilyRun(family: "sadness", start: 24, length: 6),
+            FamilyRun(family: "peace", start: 30, length: 8)
         ])
-        #expect(runs[1].contains(10) && !runs[1].contains(11))
+        #expect(runs[1].contains(8) && !runs[1].contains(9))
         #expect(FamilyRun.runs([]) == [])
         #expect(FamilyRun.runs(["joy", nil, nil, "awe"]) == [
             FamilyRun(family: "joy", start: 0, length: 1), FamilyRun(family: nil, start: 1, length: 2),

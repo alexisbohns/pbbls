@@ -1,54 +1,98 @@
 import Foundation
 @testable import Pebbles
 
-/// The design fixture's ids given faces (#1306): each seat's emotion takes its
-/// family's fixture palette (`SpineFixtureWeek.families`, which has no shame
-/// family, so shame draws in ink: the unknown-family fallback, on purpose) and
-/// the board's name for that seat; the domains are named in the order they came.
+/// The canonical design fixture's ids given faces (#1306): the emotions and their
+/// seven families are the real reference rows (`packages/supabase/reference/`,
+/// every palette whole), the domains the fixture's own list beside it
+/// (`design/domains.json`). Read through `#filePath`, as the fixture is.
 @MainActor
 enum AchievementsLookups {
-    static let emotionNames = [
-        "Amused", "Cheerful", "Content", "Excited", "Grateful", "Joyful",
-        "Accomplished", "Confident", "Proud", "Respected", "Worthy",
-        "Angry", "Annoyed", "Bitter", "Frustrated", "Irritated", "Resentful",
-        "Anxious", "Insecure", "Nervous", "Overwhelmed", "Scared", "Worried",
-        "Ashamed", "Embarrassed", "Guilty", "Humiliated",
-        "Disappointed", "Hurt", "Lonely", "Melancholic", "Sad", "Tired",
-        "Calm", "Grounded", "Peaceful", "Relaxed", "Relieved"
-    ]
+    private struct CategoryRow: Decodable {
+        let id: UUID
+        let slug: String
+        let name: String
+        let primary: String
+        let secondary: String
+        let light: String
+        let surface: String
+        let shaded: String
+        let dark: String
 
-    static let domainNames = ["Family", "Friends", "Home", "Work", "Health", "Partner", "Travel", "Hobbies", "Learning",
-                              "Identity", "Nature", "Money", "Body", "Events", "Spirituality", "Community",
-                              "Creativity", "Rest"]
-
-    static func fixture(_ page: AchievementsPage) -> WrapLookups {
-        let families = Dictionary(uniqueKeysWithValues: SpineFixtureWeek.families.map { ($0.slug, $0) })
-        var emotions: [String: EmotionWithPalette] = [:]
-        for seat in page.emotions?.seats ?? [] {
-            guard let family = seat.family, let id = seat.emotionId, let category = families[family],
-                  emotionNames.indices.contains(seat.seat) else { continue }
-            emotions[id] = row(id, name: emotionNames[seat.seat], category: category)
+        enum CodingKeys: String, CodingKey {
+            case id, slug, name
+            case primary = "primary_color"
+            case secondary = "secondary_color"
+            case light = "light_color"
+            case surface = "surface_color"
+            case shaded = "shaded_color"
+            case dark = "dark_color"
         }
-        let ids = (page.domains?.arrival.compactMap(\.domainId) ?? []) + (page.domains?.notYet ?? [])
-        var domains: [String: Domain] = [:]
-        for (index, id) in ids.enumerated() {
-            let name = domainNames[index % domainNames.count]
-            // A slug no catalog entry has, so `localizedName` reads the fixture's name in every language.
-            domains[id] = Domain(id: UUID(uuidString: id) ?? UUID(), slug: "fixture-\(name.lowercased())", name: name,
-                                 label: name)
-        }
-        return WrapLookups(family: { families[$0] }, domain: { domains[$0] }, emotion: { emotions[$0] })
     }
 
-    private static func row(_ id: String, name: String, category: EmotionCategory) -> EmotionWithPalette? {
+    private struct EmotionRow: Decodable {
+        let id: String
+        let slug: String
+        let name: String
+        let emoji: String
+        let categorySlug: String
+
+        enum CodingKeys: String, CodingKey {
+            case id, slug, name, emoji
+            case categorySlug = "category_slug"
+        }
+    }
+
+    private struct DomainRow: Decodable {
+        let id: UUID
+        let slug: String
+        let name: String
+    }
+
+    static let reference = AchievementsFixtures.oracles
+        .deletingLastPathComponent() // oracles
+        .deletingLastPathComponent() // scripts
+        .appendingPathComponent("../reference")
+        .standardizedFileURL
+
+    /// The seven families, each with its real palette.
+    static func families() throws -> [EmotionCategory] {
+        let rows = try JSONDecoder().decode([CategoryRow].self,
+                                            from: Data(contentsOf: reference.appendingPathComponent("emotion-categories.json")))
+        return rows.compactMap { row in
+            EmotionPalette(primaryHex: row.primary, secondaryHex: row.secondary, lightHex: row.light,
+                           surfaceHex: row.surface, darkHex: row.dark, shadedHex: row.shaded)
+                .map { EmotionCategory(id: row.id, slug: row.slug, name: row.name, palette: $0) }
+        }
+    }
+
+    /// The fixture's lookups: every family, emotion and domain it names resolves.
+    static func fixture() throws -> WrapLookups {
+        let families = Dictionary(uniqueKeysWithValues: try Self.families().map { ($0.slug, $0) })
+        let emotionRows = try JSONDecoder().decode([EmotionRow].self,
+                                                   from: Data(contentsOf: reference.appendingPathComponent("emotions.json")))
+        var emotions: [String: EmotionWithPalette] = [:]
+        for row in emotionRows {
+            guard let category = families[row.categorySlug], let emotion = Self.row(row, category: category) else { continue }
+            emotions[row.id] = emotion
+        }
+        let domainRows = try JSONDecoder().decode([DomainRow].self, from: AchievementsFixtures.data("domains"))
+        let domains = Dictionary(uniqueKeysWithValues: domainRows.map {
+            ($0.id.uuidString.lowercased(), Domain(id: $0.id, slug: $0.slug, name: $0.name, label: $0.name))
+        })
+        return WrapLookups(family: { families[$0] }, domain: { domains[$0.lowercased()] },
+                           emotion: { emotions[$0.lowercased()] })
+    }
+
+    private static func row(_ row: EmotionRow, category: EmotionCategory) -> EmotionWithPalette? {
         let palette = category.palette
-        let json = """
-        {"id":"\(id)","slug":"fixture-\(name.lowercased())","name":"\(name)","emoji":"🙂",
-         "category_id":"\(category.id.uuidString)","category_slug":"\(category.slug)","category_name":"\(category.name)",
-         "primary_color":"\(palette.primaryHex)","secondary_color":"\(palette.secondaryHex)",
-         "light_color":"\(palette.lightHex)","surface_color":"\(palette.surfaceHex)",
-         "dark_color":"\(palette.darkHex)","shaded_color":"\(palette.shadedHex)"}
-        """
-        return try? JSONDecoder().decode(EmotionWithPalette.self, from: Data(json.utf8))
+        let json: [String: String] = [
+            "id": row.id, "slug": row.slug, "name": row.name, "emoji": row.emoji,
+            "category_id": category.id.uuidString, "category_slug": category.slug, "category_name": category.name,
+            "primary_color": palette.primaryHex, "secondary_color": palette.secondaryHex,
+            "light_color": palette.lightHex, "surface_color": palette.surfaceHex,
+            "dark_color": palette.darkHex, "shaded_color": palette.shadedHex
+        ]
+        guard let data = try? JSONEncoder().encode(json) else { return nil }
+        return try? JSONDecoder().decode(EmotionWithPalette.self, from: data)
     }
 }
