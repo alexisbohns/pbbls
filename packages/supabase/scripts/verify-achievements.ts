@@ -11,6 +11,21 @@
  *        every returned row), and contributions pay nothing;
  *      - making the six firsts whole records one completion, once;
  *      - the new tables are owner-scoped and not client-writable.
+ *   2. The read (part 2):
+ *      - get_achievements answers with every card, the first pebble at the centre;
+ *      - six_firsts and the first five come in order, rings_done holds six_firsts,
+ *        and the completion carries its pebble but is not ready before 06:00 tomorrow;
+ *      - emotions serve 38 seats and the sheet's seven families, the met seat dated;
+ *      - domains report the entered one and the 'few' tier; coverage crosses third,
+ *        half, most and all at their boundaries (D11);
+ *      - pebbles report the next level, what is left and the progress;
+ *      - nothing is new before the first look (D10); timestamps are whole-second UTC;
+ *      - the owner's shelf leaves out the private families (D18);
+ *      - the year serves its day target and done flags, and achievements_year equals
+ *        the oracle (scripts/oracles/achievements/year.js) month by month on a seeded
+ *        random 2025 and on the current year, next step and listed months included;
+ *      - get_achievements lists the current year and past years with a moment, newest first;
+ *      - an unknown zone is refused, and anon is refused.
  *
  * ACHIEVEMENTS_DUMP=1 writes the verbatim payloads to scripts/oracles/achievements/payloads/.
  *
@@ -27,6 +42,7 @@ if (!SUPABASE_URL || !ANON_KEY) {
 }
 
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { yearPayload } from "./oracles/achievements/year.js";
 
 let passed = 0;
 let failed = 0;
@@ -34,6 +50,11 @@ function check(name: string, ok: boolean, detail?: string) {
   if (ok) { passed += 1; console.log(`✓ ${name}`); }
   else { failed += 1; console.log(`✗ ${name}${detail ? ` — ${detail}` : ""}`); }
 }
+// jsonb sorts object keys (by length, then bytewise), so whole-object
+// comparisons with the oracle go through a key-sorted copy.
+const canon = (v: unknown): unknown => Array.isArray(v) ? v.map(canon)
+  : v && typeof v === "object" ? Object.fromEntries(Object.keys(v as object).sort().map((k) => [k, canon((v as Record<string, unknown>)[k])])) : v;
+const same = (x: unknown, y: unknown) => JSON.stringify(canon(x)) === JSON.stringify(canon(y));
 
 const DUMP = Deno.env.get("ACHIEVEMENTS_DUMP") === "1";
 const ORACLE_DIR = new URL("./oracles/achievements/", import.meta.url);
@@ -55,6 +76,25 @@ const runId = crypto.randomUUID().slice(0, 8);
 const password = `Ach-${crypto.randomUUID()}`;
 type TestUser = { client: SupabaseClient; id: string; token: string };
 type Unlock = { slug: string; karma_granted: number };
+// get_achievements (spec §3.3), only as far as the checks below read it.
+type Stone = { moment_id: string; name: string | null; happened_at: string; emotion_id: string; intensity: number; positiveness: number };
+type Completion = { completed_at: string; offered_from: string; ready: boolean; pulled_at?: string; pebble?: Stone };
+type Ladder = { count: number; levels: { threshold: number; on: string; new: boolean; pebble?: Stone }[];
+  next?: { threshold: number; left: number; progress: number }; ladder: number[]; then_every?: number };
+type Month = { month: number; done?: { moments: boolean; pebbles: boolean; weeks: boolean } };
+type Year = { year: number; current: boolean; days_target: number; months: Month[]; listed: number[] };
+type Achievements = {
+  explorer: {
+    first_pebble?: Stone; rings_done: string[]; completion?: Completion;
+    first_five: { slug: string; done: boolean; new: boolean }[];
+    six_firsts: { kind: string; done: boolean; new: boolean }[];
+  };
+  emotions: { count: number; of: number; seats: { met: boolean; on?: string }[]; families: { family: string; met: number[] }[] };
+  domains: { count: number; of: number; coverage: string; entered: unknown[]; not_yet: string[] };
+  pebbles: Ladder; glyphs_carved: Ladder; glyph_sales: Ladder;
+  years: Year[];
+  shelf: { slug: string; family: string }[]; shelf_count: number;
+};
 
 async function signUp(label: string): Promise<TestUser> {
   const client = createClient(SUPABASE_URL!, ANON_KEY!, { auth: { persistSession: false } });
@@ -179,6 +219,118 @@ try {
   // check_achievements writes, so its dump is the first call's parsed rows (shape only).
   if (DUMP) await Deno.mkdir(new URL("payloads/", ORACLE_DIR), { recursive: true });
   if (DUMP) await Deno.writeTextFile(new URL("payloads/check-achievements.json", ORACLE_DIR), JSON.stringify(first, null, 2) + "\n");
+
+  // 2. the read (part 2) ------------------------------------------------------------------
+  const tz = "Europe/Paris";
+  const got = await a.rpc("get_achievements", { p_tz: tz });
+  const pl = got.data as Achievements;
+  await dump("get-achievements", alice.token, "get_achievements", { p_tz: tz });
+  check("get_achievements answers with every card", !got.error && !!pl
+    && ["explorer", "emotions", "domains", "pebbles", "glyphs_carved", "glyph_sales", "years"].every((k) => k in pl),
+    got.error?.message ?? Object.keys(pl ?? {}).join(","));
+  check("the explorer's centre is the first pebble", pl.explorer.first_pebble?.moment_id === p1.momentId,
+    JSON.stringify(pl.explorer.first_pebble));
+  check("six_firsts and the first five are listed in order, the six done",
+    pl.explorer.six_firsts.map((s) => s.kind).join(",") === "small,medium,large,lowlight,neutral,highlight"
+      && pl.explorer.six_firsts.every((s) => s.done)
+      && pl.explorer.first_five.map((s) => s.slug).join(",") === "first-moment,first-pebble,first-collection,first-soul,first-glyph",
+    JSON.stringify(pl.explorer));
+  check("rings_done holds six_firsts, and the completion is not ready before tomorrow 06:00",
+    pl.explorer.rings_done.includes("six_firsts") && pl.explorer.completion?.ready === false,
+    JSON.stringify([pl.explorer.rings_done, pl.explorer.completion]));
+  check("emotions serve the sheet's order: seven families, the met seat dated",
+    pl.emotions.families.length === 7 && pl.emotions.families.flatMap((f) => f.met).length === 1
+      && typeof pl.emotions.seats.find((s) => s.met)?.on === "string", JSON.stringify(pl.emotions.families));
+  check("the year serves its day target and done flags", pl.years[0].days_target === 14
+    && pl.years[0].months.every((m) => typeof m.done?.moments === "boolean"), JSON.stringify(pl.years[0].months[0]));
+  check("the owner's shelf leaves out the private families (D18)",
+    Array.isArray(pl.shelf) && pl.shelf.length > 0 && pl.shelf.length <= 6
+      && pl.shelf.every((s) => !["emotion_first", "domain_first", "first_stone", "set_complete"].includes(s.family))
+      && pl.shelf_count >= pl.shelf.length, JSON.stringify([pl.shelf, pl.shelf_count]));
+  check("the completion carries the pebble that made it whole", typeof pl.explorer.completion?.pebble?.moment_id === "string",
+    JSON.stringify(pl.explorer.completion));
+  check("emotions has 38 seats with one met", pl.emotions.seats.length === 38 && pl.emotions.count === 1
+    && pl.emotions.seats.filter((s) => s.met).length === 1, JSON.stringify([pl.emotions.count, pl.emotions.of]));
+  check("domains report one entered and the 'few' tier", pl.domains.count === 1 && pl.domains.coverage === "few"
+    && pl.domains.entered.length === 1 && pl.domains.not_yet.length === pl.domains.of - 1, JSON.stringify(pl.domains));
+  check("pebbles: three kept, the next is 10 with 7 left and progress 0.222",
+    pl.pebbles.count === 3 && pl.pebbles.next?.threshold === 10 && pl.pebbles.next?.left === 7
+      && pl.pebbles.next?.progress === 0.222 && pl.pebbles.then_every === 500, JSON.stringify(pl.pebbles));
+  check("nothing is new before the first look (D10)",
+    pl.explorer.six_firsts.every((s) => s.new === false) && pl.pebbles.levels.every((l) => l.new === false),
+    JSON.stringify(pl.explorer.six_firsts.map((s) => s.new)));
+  check("timestamps are whole-second UTC",
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(pl.explorer.first_pebble?.happened_at ?? ""), pl.explorer.first_pebble?.happened_at);
+
+  // The year disc against the oracle: a seeded random 2025 for Bob, plus the current year.
+  const b = users[1].client;
+  const { data: emos } = await b.from("emotions").select("id, emotion_categories(slug)");
+  const fams = (emos ?? []) as unknown as { id: string; emotion_categories: { slug: string } }[];
+  const familyOf = (id: string) => fams.find((e) => e.id === id)?.emotion_categories.slug ?? "";
+  // Exact in BigInt: the LCG's product overflows a double's 53 bits.
+  let seed = BigInt(parseInt(runId, 16) || 1);
+  const rand = () => Number(seed = (seed * 1103515245n + 12345n) % 2147483648n) / 2147483648;
+  // Bob's bright first pebble from section 1 is in the current year: the oracle needs it too.
+  const items: { date: string; pebble: boolean; family: string; intensity: number }[] =
+    [{ date: "2026-03-05", pebble: true, family: familyOf(emo.id), intensity: 2 }];
+  // Four months (March to June) keep the harness to ~100 round-trips while still
+  // covering kept and quiet; May and June are denser, so most runs reach the inner
+  // circle and the rim as well. The rest of 2025 is quiet by construction.
+  for (let m = 3; m <= 6; m++) {
+    for (let d = 1; d <= 28; d++) {
+      if (rand() > ({ 5: 0.65, 6: 0.85 }[m] ?? 0.35)) continue;
+      const date = `2025-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      const isPebble = rand() > 0.3;
+      const e = fams[Math.floor(rand() * fams.length)];
+      const intensity = 1 + Math.floor(rand() * 3);
+      const { data: mid, error: mErr } = await b.rpc("save_moment", { payload: { name: `y ${date} ${runId}`, happened_at: `${date}T10:00:00Z` } });
+      if (mErr) throw new Error(`save_moment: ${mErr.message}`);
+      if (isPebble) {
+        const { error: pErr } = await b.rpc("complete_pebble", { payload: { moment_id: mid, emotion_id: e.id, intensity, positiveness: 1, domain_ids: [dom.id], soul_ids: [] } });
+        if (pErr) throw new Error(`complete_pebble: ${pErr.message}`);
+      }
+      items.push({ date, pebble: isPebble, family: e.emotion_categories.slug, intensity });
+    }
+  }
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date());
+  const firstMoment = items.map((i) => i.date).sort()[0] ?? null;
+  const y2025 = await b.rpc("achievements_year", { p_year: 2025, p_tz: tz });
+  const got2025 = y2025.data as Year | null;
+  const expected = yearPayload(2025, items, today, firstMoment);
+  const mismatches = expected.months.filter((e, k) => !same(e, got2025?.months[k]));
+  check("achievements_year(2025) equals the oracle month by month", !y2025.error && mismatches.length === 0,
+    y2025.error?.message ?? JSON.stringify(mismatches.slice(0, 2)) + " vs " + JSON.stringify(got2025?.months.slice(0, 2)));
+  check("the listed months equal the oracle's", same(got2025?.listed, expected.listed),
+    JSON.stringify([got2025?.listed, expected.listed]));
+  const yNow = await b.rpc("achievements_year", { p_year: Number(today.slice(0, 4)), p_tz: tz });
+  const expNow = yearPayload(Number(today.slice(0, 4)), items, today, firstMoment);
+  check("the current year equals the oracle, next step included", same(yNow.data, expNow),
+    JSON.stringify(yNow.data).slice(0, 300));
+  const pb = (await b.rpc("get_achievements", { p_tz: tz })).data as Achievements;
+  check("get_achievements lists the current year and 2025, newest first",
+    pb.years.map((y) => y.year).join(",") === `${today.slice(0, 4)},2025`, JSON.stringify(pb.years.map((y) => y.year)));
+  await dump("get-achievements-year", users[1].token, "get_achievements", { p_tz: tz });
+  // Coverage tiers at their boundaries (D11): one pebble per step, on a fresh user.
+  const carol = await signUp("c"); users.push(carol);
+  const { data: allDomains } = await carol.client.from("domains").select("id").order("slug");
+  const domIds = (allDomains ?? []).map((d: { id: string }) => d.id);
+  const total = domIds.length;
+  const tierAt = async (n: number) => {
+    await pebble(carol.client, `cover ${n} ${runId}`, "2026-03-10T09:00:00Z", emo.id, 2, 1, domIds.slice(0, n));
+    await carol.client.rpc("check_achievements");
+    return ((await carol.client.rpc("get_achievements", { p_tz: tz })).data as Achievements).domains.coverage;
+  };
+  const expectTier = (n: number) => n === 0 ? "none" : n < total / 3 ? "few" : n < total / 2 ? "third" : n < total * 0.75 ? "half" : n < total ? "most" : "all";
+  const steps = [Math.ceil(total / 3), Math.ceil(total / 2), Math.ceil(total * 0.75), total];
+  const tiers: string[] = [];
+  for (const n of steps) tiers.push(await tierAt(n));
+  check("coverage crosses third, half, most and all at their boundaries",
+    JSON.stringify(tiers) === JSON.stringify(steps.map(expectTier)) && tiers.join(",") === "third,half,most,all",
+    JSON.stringify([steps, tiers]));
+  const badTz = await b.rpc("get_achievements", { p_tz: "Mars/Olympus" });
+  check("get_achievements refuses an unknown zone", !!badTz.error && badTz.error.message.includes("invalid_tz"), badTz.error?.message ?? "accepted");
+  const anonRead = await anon.rpc("get_achievements", { p_tz: tz });
+  check("get_achievements is refused to anon", !!anonRead.error, JSON.stringify(anonRead.data));
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
