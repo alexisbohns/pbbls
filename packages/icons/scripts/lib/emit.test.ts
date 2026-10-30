@@ -13,6 +13,7 @@ const row = (name: string, variants: string[], status = "candidate") => ({
   variants,
   wave: "2026-10-foundation",
   status,
+  migrated: status === "shipped" ? ["ios", "android", "web"] : [],
   replaces: { ios: [], android: [], web: [] },
 })
 

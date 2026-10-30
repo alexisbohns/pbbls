@@ -10,6 +10,7 @@ The hand-drawn Pebbles icon set and its generator. `src/<name>.svg` (and `<name>
 | `npm run format --workspace=@pbbls/icons` | rewrites `src/` to the canonical form (`svgo` as a formatter only: path data passes through verbatim) |
 | `npm run generate --workspace=@pbbls/icons` | lint, then emit every registered surface and write the owned paths |
 | `npm run check --workspace=@pbbls/icons` | emit into memory and fail on any missing, stale or orphaned owned file (CI's freshness gate) |
+| `npm run lint:replaces --workspace=@pbbls/icons` | fails when a surface listed in a row's `migrated` still names one of that row's `replaces` (iOS: the bare quoted literal anywhere under `apps/ios/Pebbles/`) |
 | `npm run build` / `npm run test` | `tsc --noEmit` / Vitest over `scripts/**/*.test.ts` |
 
 ## Never hand-edit a generated file
@@ -24,7 +25,7 @@ The generator owns these paths outright and clears them before writing. Fix the 
 
 1. Draw it on the 24-unit square in the DNA's line (`DNA.md`): paths only, absolute `M L C Q A Z`, every point inside `1.5..22.5`, no dashes, no transforms.
 2. Save it as `src/<kebab-name>.svg`; a twin as `src/<name>.active.svg` or `src/<name>.lit-N.svg`.
-3. Add (or edit) its row in `icons.json`: `name`, one-sentence `meaning`, `variants`, `wave`, `status` (`exploring` is linted but not emitted; `candidate` is emitted everywhere; `shipped` means every surface migrated), `replaces` per surface (from the code, never from memory).
+3. Add (or edit) its row in `icons.json`: `name`, one-sentence `meaning`, `variants`, `wave`, `status` (`exploring` is linted but not emitted; `candidate` is emitted everywhere; `shipped` means every surface is in `migrated`, and the validator refuses it otherwise), `migrated` (the surfaces whose code no longer names the row's symbols; a surface is added in the same commit that deletes its last literal, so `lint:replaces` goes live with the code it polices) and `replaces` per surface (from the code, never from memory; one primary row per symbol, the per-site choice lives in the surface's migration spec).
 4. `npm run format --workspace=@pbbls/icons && npm run lint --workspace=@pbbls/icons`, then fix every error **in the drawing**, never in the rule.
 5. `npm run generate --workspace=@pbbls/icons` and commit the sources with the outputs.
 
@@ -38,4 +39,4 @@ A wave (`waves/<yyyy-mm-slug>/`) records how a set was chosen: briefs, seed, eac
 
 ## When `Icons` is red
 
-`.github/workflows/icons.yml` runs lint, typecheck, Vitest and `check` on every PR. A red `fresh` step means a committed output no longer matches its source: run `npm run generate --workspace=@pbbls/icons` and commit the result. Never edit the workflow or a generated file by hand to make it pass.
+`.github/workflows/icons.yml` runs lint, typecheck, Vitest, `check` and `lint:replaces` on every PR. A red `fresh` step means a committed output no longer matches its source: run `npm run generate --workspace=@pbbls/icons` and commit the result. Never edit the workflow or a generated file by hand to make it pass. A red `replaces` step names a file and line that still draws a replaced symbol: migrate the call site to `PbblsIcon`, or rename the string if it is not a symbol at all; never widen the pattern.
