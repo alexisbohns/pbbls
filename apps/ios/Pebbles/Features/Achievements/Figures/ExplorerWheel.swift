@@ -98,7 +98,7 @@ struct ExplorerWheel: View {
     private func drawSixFirsts(_ c: GraphicsContext, _ inks: AchievementInks) {
         track(c, G.sixFirsts, .sixFirsts, inks)
         for (index, first) in explorer.sixFirsts.enumerated() {
-            let place = G.point(G.sixFirsts, G.sixFirstAngle(index))
+            let place = G.point(G.sixFirsts, G.sixFirstAngle(index, of: explorer.sixFirsts.count))
             guard first.done, let kind = first.kind else {
                 c.drawGhost(at: place, inks: inks)
                 continue
@@ -112,7 +112,7 @@ struct ExplorerWheel: View {
     private func drawFirstFive(_ c: GraphicsContext, _ inks: AchievementInks) {
         track(c, G.firstFive, .firstFive, inks)
         for (index, item) in explorer.firstFive.enumerated() {
-            let place = G.point(G.firstFive, G.firstFiveAngle(index))
+            let place = G.point(G.firstFive, G.firstFiveAngle(index, of: explorer.firstFive.count))
             guard item.done, let task = item.task else {
                 c.drawGhost(at: place, inks: inks)
                 continue

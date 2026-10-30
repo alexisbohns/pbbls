@@ -22,10 +22,17 @@ struct ExplorerWheelGeometryTests {
 
     @Test("seats: the first five every 72°, the six firsts from 30° every 60°, a ring of n half a step past twelve")
     func seats() {
-        #expect((0..<5).map(G.firstFiveAngle) == [0, 72, 144, 216, 288])
-        #expect((0..<6).map(G.sixFirstAngle) == [30, 90, 150, 210, 270, 330])
+        #expect((0..<5).map { G.firstFiveAngle($0, of: 5) } == [0, 72, 144, 216, 288])
+        #expect((0..<6).map { G.sixFirstAngle($0, of: 6) } == [30, 90, 150, 210, 270, 330])
         #expect(abs(G.seatAngle(0, of: 25) - 7.2) < 0.000_001)
         #expect(abs(G.seatAngle(17, of: 18) - 350) < 0.000_001)
+    }
+
+    @Test("a ring holding another count than the board's spaces its seats by what the server sent")
+    func otherCounts() {
+        #expect((0..<6).map { G.firstFiveAngle($0, of: 6) } == [0, 60, 120, 180, 240, 300])
+        #expect((0..<4).map { G.sixFirstAngle($0, of: 4) } == [45, 135, 225, 315])
+        #expect(G.firstFiveAngle(0, of: 0) == 0 && G.sixFirstAngle(0, of: 0) == 180, "an empty ring divides by one")
     }
 
     @Test("the emotions sit on the rosace's seats: seat 2.5 at twelve")

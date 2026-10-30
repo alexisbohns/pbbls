@@ -21,14 +21,16 @@ enum ExplorerWheelGeometry {
         return CGPoint(x: radius * CGFloat(sin(radians)), y: -radius * CGFloat(cos(radians)))
     }
 
-    /// The first five, one every 72°, the first at twelve (the Home checklist's order).
-    static func firstFiveAngle(_ index: Int) -> Double {
-        Double(index) * 72
+    /// The first five round their ring, the first at twelve (the Home checklist's
+    /// order), spaced by how many the server sent: every 72° for five.
+    static func firstFiveAngle(_ index: Int, of count: Int) -> Double {
+        Double(index) * 360 / Double(max(count, 1))
     }
 
-    /// The six firsts, from 30° every 60°.
-    static func sixFirstAngle(_ index: Int) -> Double {
-        30 + Double(index) * 60
+    /// The six firsts round their ring, half a step past twelve, spaced by how
+    /// many the server sent: from 30° every 60° for six.
+    static func sixFirstAngle(_ index: Int, of count: Int) -> Double {
+        seatAngle(index, of: count)
     }
 
     /// `count` seats round a ring, the first half a step past twelve.
