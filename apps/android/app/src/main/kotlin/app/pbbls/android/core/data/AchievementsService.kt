@@ -3,6 +3,14 @@ package app.pbbls.android.core.data
 import android.util.Log
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.model.OffsetDateTimeSerializer
+import app.pbbls.android.core.model.achievements.AchievementCard
+import app.pbbls.android.core.model.achievements.AchievementsJson
+import app.pbbls.android.core.model.achievements.AchievementsPage
+import app.pbbls.android.core.model.achievements.CeremonyPull
+import app.pbbls.android.core.model.achievements.CeremonyRowDto
+import app.pbbls.android.core.model.achievements.CompletionStack
+import app.pbbls.android.core.model.achievements.ceremonyPullOf
+import app.pbbls.android.core.model.achievements.decodeAchievementsPage
 import app.pbbls.android.di.ApplicationScope
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
@@ -12,7 +20,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.cancellation.CancellationException
@@ -88,7 +100,9 @@ data class AchievementCheckResult(
  * paths would need a live project.
  *
  * [check] stays off it deliberately: no caller outside the implementation uses
- * the raw result, and the two wrappers below are the whole public contract.
+ * the raw result, and its two wrappers below are the whole check contract. The
+ * page's calls (#1307) follow them: the read, its device copy, the seen marks
+ * and the ceremony pull.
  */
 interface AchievementsServicing {
     suspend fun loadCatalog(): List<AchievementRecord>
@@ -98,6 +112,24 @@ interface AchievementsServicing {
     suspend fun checkIgnoringFailure()
 
     fun fireCheck()
+
+    /**
+     * `get_achievements(p_tz)` (#1307), decoded, and kept on the device for the signed-in user
+     * once it has decoded. Throws.
+     */
+    suspend fun page(zone: ZoneId): AchievementsPage
+
+    /** The device's last copy for the signed-in user, or null: display only, never instead of [page]. */
+    suspend fun cachedPage(zone: ZoneId): AchievementsPage?
+
+    /** `mark_achievements_seen(p_card)`, fire-and-forget: it outlives the sheet that sent it. */
+    fun markSeen(card: AchievementCard)
+
+    /** `pull_ceremony(p_stack, p_tz)`. Throws, `not_ready` included (a `DataError.Conflict`). */
+    suspend fun pullCeremony(
+        stack: CompletionStack,
+        zone: ZoneId,
+    ): CeremonyPull
 }
 
 /**
@@ -110,6 +142,11 @@ interface AchievementsServicing {
  *
  * The [scope] is constructor-injectable so `fireCheck`'s launch is
  * unit-testable on a virtual clock, mirroring [AchievementNotificationService].
+ *
+ * The page's device copy reuses the wraps' [WrapDiskCaching] (#1207 §7.1) because its contract
+ * is exactly this one: one file per page under the signed-in user and the zone, never backed up,
+ * wiped by `RootViewModel` whenever the device resolves signed out, and a format bump that drops
+ * old files. The key [CACHE_PAGE] never collides with a wrap's `strip`, `week-…` or `month-…`.
  */
 @Singleton
 class AchievementsService
@@ -118,6 +155,7 @@ class AchievementsService
         private val supabase: SupabaseService,
         private val notify: AchievementNotificationService,
         @ApplicationScope private val scope: CoroutineScope,
+        private val disk: WrapDiskCaching,
     ) : AchievementsServicing {
         /**
          * Full catalog, inactive rows included — the screen filters (an inactive
@@ -204,8 +242,62 @@ class AchievementsService
             }
         }
 
+        override suspend fun page(zone: ZoneId): AchievementsPage {
+            val body =
+                supabase.client.postgrest
+                    .rpc("get_achievements", buildJsonObject { put("p_tz", zone.id) })
+                    .data
+            val page = decodeAchievementsPage(body)
+            // Kept only once it has decoded, so the device never holds a body it cannot read.
+            supabase.session
+                ?.user
+                ?.id
+                ?.let { owner -> disk.write(owner, zone, CACHE_PAGE, body) }
+            return page
+        }
+
+        override suspend fun cachedPage(zone: ZoneId): AchievementsPage? {
+            val owner = supabase.session?.user?.id ?: return null
+            val body = disk.read(owner, zone, CACHE_PAGE) ?: return null
+            return try {
+                decodeAchievementsPage(body)
+            } catch (e: SerializationException) {
+                Log.w(TAG, "kept achievements page no longer decodes, read as a miss", e)
+                null
+            } catch (e: IllegalArgumentException) {
+                Log.w(TAG, "kept achievements page no longer decodes, read as a miss", e)
+                null
+            }
+        }
+
+        override fun markSeen(card: AchievementCard) {
+            // @ApplicationScope has no handler: catch inside (DispatchersModule's KDoc).
+            scope.launch {
+                runCatchingCancellable {
+                    supabase.client.postgrest.rpc("mark_achievements_seen", buildJsonObject { put("p_card", card.slug) })
+                }.onFailure { Log.w(TAG, "mark_achievements_seen(${card.slug}) failed; the marks stay until the next look", it) }
+            }
+        }
+
+        override suspend fun pullCeremony(
+            stack: CompletionStack,
+            zone: ZoneId,
+        ): CeremonyPull {
+            val body =
+                supabase.client.postgrest
+                    .rpc(
+                        "pull_ceremony",
+                        buildJsonObject {
+                            put("p_stack", stack.slug)
+                            put("p_tz", zone.id)
+                        },
+                    ).data
+            return ceremonyPullOf(stack, AchievementsJson.decodeFromString<List<CeremonyRowDto>>(body))
+        }
+
         private companion object {
             const val TABLE = "achievements"
+            const val CACHE_PAGE = "achievements-page"
             const val CATALOG_COLUMNS =
                 "id, slug, family, threshold, emotion_id, domain_id, sort_order, " +
                     "glyph_id, karma_reward, is_active, title_en, title_fr, description_en, description_fr"
