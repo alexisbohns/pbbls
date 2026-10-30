@@ -187,6 +187,15 @@ jobs:
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "home" db:verify:home
 
+      # The achievements page (#1305): the six firsts, the crossing pebbles, the
+      # silent rows (recorded, not returned) and completions (part 1);
+      # get_achievements and the year disc against the oracle (part 2); seen and
+      # pull_ceremony (part 3). The private families off the public profile are
+      # proven by the public-profile step above.
+      - name: Achievements (#1305)
+        if: '!cancelled()'
+        run: .github/scripts/verify-harness.sh "achievements" db:verify:achievements
+
       # One writer for the whole table. `always()` so it still reports when a
       # harness failed — that is precisely the run whose table is worth reading.
       - name: Write the run log

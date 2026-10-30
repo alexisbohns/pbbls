@@ -17,7 +17,9 @@ import {
   ACHIEVEMENT_FAMILIES,
   COUNTING_FAMILIES,
   REFERENCE_FAMILIES,
+  SEEDED_FAMILIES,
   familyLabel,
+  isSilentFamily,
   type AchievementFamily,
 } from "@/lib/achievements/types"
 import { createAchievement } from "../../actions"
@@ -64,6 +66,7 @@ export function NewAchievementForm({
 
   const needsThreshold = COUNTING_FAMILIES.includes(family)
   const needsReference = REFERENCE_FAMILIES.includes(family)
+  const silent = isSilentFamily(family)
   const references = family === "emotion_first" ? emotions : domains
 
   // Existing tiers of the chosen family, so the ladder being extended is visible
@@ -84,9 +87,10 @@ export function NewAchievementForm({
   const thresholdValid = needsThreshold
     ? threshold.trim() !== "" && Number.isInteger(thresholdValue) && thresholdValue > 0
     : true
-  const karmaValue = Number(karma)
+  const karmaValue = silent ? 0 : Number(karma)
   const karmaValid =
-    karma.trim() !== "" && Number.isInteger(karmaValue) && karmaValue >= 0 && karmaValue <= 32767
+    silent ||
+    (karma.trim() !== "" && Number.isInteger(karmaValue) && karmaValue >= 0 && karmaValue <= 32767)
   const sortValue = sortOrder.trim() === "" ? suggestedSort : Number(sortOrder)
   const sortValid = Number.isInteger(sortValue)
 
@@ -108,6 +112,7 @@ export function NewAchievementForm({
     setFamily(next)
     setReferenceId(null)
     setThreshold("")
+    if (isSilentFamily(next)) setKarma("0")
   }
 
   const onCreate = () => {
@@ -152,7 +157,7 @@ export function NewAchievementForm({
             <SelectValue placeholder="Select a family" />
           </SelectTrigger>
           <SelectContent>
-            {ACHIEVEMENT_FAMILIES.map((f) => (
+            {ACHIEVEMENT_FAMILIES.filter((f) => !SEEDED_FAMILIES.includes(f)).map((f) => (
               <SelectItem key={f} value={f}>
                 {familyLabel(f)}
               </SelectItem>
@@ -271,9 +276,13 @@ export function NewAchievementForm({
             type="number"
             min={0}
             max={32767}
-            value={karma}
+            value={silent ? "0" : karma}
+            disabled={silent}
             onChange={(e) => setKarma(e.target.value)}
           />
+          {silent ? (
+            <p className="text-xs text-muted-foreground">Firsts never pay karma.</p>
+          ) : null}
           {karmaValid ? null : (
             <p className="text-xs text-destructive">A whole number from 0 to 32767.</p>
           )}
