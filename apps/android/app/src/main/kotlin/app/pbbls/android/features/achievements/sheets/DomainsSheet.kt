@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -81,7 +82,19 @@ fun DomainsSheet(
             RegisterRow(
                 mark = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(number, style = type.registerDate, color = colors.ink2, modifier = Modifier.width(NUMBER_COLUMN))
+                        // One line at any font scale: "No. 14" shrinks to its column rather than wrap.
+                        Text(
+                            number,
+                            style = type.registerDate,
+                            color = colors.ink2,
+                            maxLines = 1,
+                            autoSize =
+                                TextAutoSize.StepBased(
+                                    minFontSize = type.registerDate.fontSize / 2,
+                                    maxFontSize = type.registerDate.fontSize,
+                                ),
+                            modifier = Modifier.width(NUMBER_COLUMN),
+                        )
                         DomainSealMark(box = SEAL_COLUMN, width = 17f * 28f / 30f)
                     }
                 },
