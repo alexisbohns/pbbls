@@ -137,9 +137,9 @@ fun ExplorerWheel(
 
         // The domains, in the order they came (the served list reversed), then the not yet.
         track(G.DOMAINS_R, ExplorerRing.DOMAINS in explorer.ringsDone)
-        val of = domains?.of?.takeIf { it > 0 } ?: band.size
+        // Spaced by what the band holds (entered and not yet), as iOS does: never by `of`.
         band.forEachIndexed { i, item ->
-            val p = at(G.DOMAINS_R, G.domainAngle(i, of))
+            val p = at(G.DOMAINS_R, G.domainAngle(i, band.size))
             if (!item.on) {
                 ghost(p, G.GHOST_R * unit, unit, colors)
             } else {
