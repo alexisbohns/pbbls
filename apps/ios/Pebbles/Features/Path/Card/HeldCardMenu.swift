@@ -7,9 +7,9 @@ import Foundation
 enum HeldCardMenu {
     static func items(hasPebble: Bool, editMoment: @escaping () -> Void, editPebble: @escaping () -> Void,
                       delete: @escaping () -> Void) -> [PebblesMenuItem] {
-        var items = [PebblesMenuItem(title: "Edit moment", systemImage: "pencil", action: editMoment)]
+        var items = [PebblesMenuItem(title: "Edit moment", icon: .drawDotted, action: editMoment)]
         if hasPebble {
-            items.append(PebblesMenuItem(title: "Edit pebble", systemImage: "circle.hexagongrid", action: editPebble))
+            items.append(PebblesMenuItem(title: "Edit pebble", icon: .pebbleRound, action: editPebble))
         }
         items.append(.delete(delete))
         return items

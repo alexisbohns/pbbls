@@ -90,7 +90,7 @@ struct ConnectionsListView: View {
                     ConnectionRow(connection: row)
                         .pebblesListRow(position: pebblesRowPosition(index: index, count: rows.count))
                         .pebblesContextMenu([
-                            PebblesMenuItem(title: "Remove", systemImage: "person.badge.minus", isDestructive: true) {
+                            PebblesMenuItem(title: "Remove", icon: .remove, isDestructive: true) {
                                 pendingRemoval = row
                             }
                         ])
