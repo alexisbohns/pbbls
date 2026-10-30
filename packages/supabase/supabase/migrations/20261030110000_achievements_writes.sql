@@ -7,12 +7,13 @@
 -- * mark_achievements_seen: "new since you last looked", per card (D10).
 -- * pull_ceremony: a completion is pulled once, and pays its stack's
 --   set_complete catalog row once (§3.4).
--- * the three set_complete rows, seeded inactive in part 1, are activated:
---   pull_ceremony is their only way to unlock (check_achievements' case says
---   false for the family). Their karma_reward is NOT set here: it stays the
---   seeded 0 until the maintainer sets it in the admin, as for the blue
---   pebble (20261027090100), so nothing is paid by accident. A pull pays the
---   catalog value at the moment of the pull, once.
+-- * the three set_complete rows, seeded inactive and unpriced in part 1, stay
+--   so here. pull_ceremony is their only way to unlock (check_achievements'
+--   case says false for the family). The shipped grids show every active row,
+--   so activating them before the clients ship the ceremony would show badges
+--   no build can earn. Launch step, in the admin, before any client can pull:
+--   price them, then activate them. A pull while a row is inactive records
+--   pulled_at but unlocks and pays nothing, for good.
 
 -- 1. the offer (D9) -----------------------------------------------------------------
 -- Null for an unknown zone is impossible (at time zone raises), and null for a
@@ -70,8 +71,9 @@ $$;
 -- which clients must not read as success. The karma rides the same mechanics
 -- as check_achievements and claim_blue_pebble (the unlocks PK + on conflict do
 -- nothing feeding the karma insert), so it is paid at most once even past the
--- lock. A retired set_complete row (is_active = false) still lets the pull
--- happen, unlocking and paying nothing.
+-- lock. An inactive set_complete row (not yet launched, or retired) still
+-- lets the pull happen: it returns its one row with karma_granted 0, and
+-- unlocks and pays nothing.
 create or replace function public.pull_ceremony(p_stack text, p_tz text)
 returns table (stack text, karma_granted integer)
 language plpgsql
@@ -147,12 +149,6 @@ begin
   select p_stack, coalesce((select p.delta::integer from paid p), 0);
 end;
 $$;
-
--- 4. the completion rows go live with their only unlock path (part 1 seeded them
--- inactive). karma_reward is left as seeded; see the header.
-update public.achievements set is_active = true
- where family = 'set_complete'
-   and slug in ('complete-emotions', 'complete-domains', 'complete-six-firsts');
 
 revoke all on function public.achievement_offered_at(timestamptz, text) from public, anon;
 revoke all on function public.mark_achievements_seen(text) from public, anon;
