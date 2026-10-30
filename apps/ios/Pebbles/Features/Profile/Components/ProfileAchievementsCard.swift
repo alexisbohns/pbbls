@@ -1,29 +1,43 @@
 import SwiftUI
 import os
 
-/// How many recent badges the shelf shows before "view all" takes over.
-private let shelfSize = 6
+/// The shelf's badges from the served row (#1306, D18): the server picks and
+/// orders them (the six most recent outside the private families) and counts
+/// them; the catalog, by slug, gives each its title and icon. A slug the catalog
+/// does not hold (a stale or failed catalog read) still shows, from the served
+/// row's family and threshold.
+enum ProfileShelf {
+    static func badges(_ page: AchievementsPage?, catalog: [String: AchievementRecord]) -> [AchievementRecord] {
+        (page?.shelf ?? []).map { item in
+            catalog[item.slug] ?? AchievementRecord(
+                id: UUID(), slug: item.slug, family: item.family, threshold: item.threshold,
+                emotionId: nil, domainId: nil, sortOrder: 0, glyphId: nil, karmaReward: 0, isActive: true,
+                titleEn: nil, titleFr: nil, descriptionEn: nil, descriptionFr: nil)
+        }
+    }
 
-/// The Profile achievements shelf (D14): the most recently unlocked badges, the
-/// total count, and a way into the full grid. It reads the same two queries the
-/// grid does — no new endpoint, no new RLS — and M50's public-profile projection
-/// reuses exactly this shape.
-///
-/// The shelf shows what you have EARNED; the grid shows the whole ladder. So
-/// locked badges never appear here, and a profile with nothing unlocked yet
-/// falls back to a plain invitation rather than an empty row.
+    /// The served count, or nil when the server sent none (the shelf then just invites).
+    static func count(_ page: AchievementsPage?) -> Int? {
+        page?.shelfCount.flatMap { $0 > 0 ? $0 : nil }
+    }
+}
+
+/// The Profile achievements shelf (D14, D18): the most recent badges and their
+/// count, as `get_achievements` serves them, and a way into the page. It shares
+/// the page's kept copy, so it draws at once, then reads; a failed read keeps
+/// what is shown, and a missing section leaves the plain invitation. It never
+/// fires an evaluation: the page's screen-open call is the retroactive grant.
 struct ProfileAchievementsCard: View {
+    @Environment(SupabaseService.self) private var supabase
     @Environment(AchievementsService.self) private var achievements
-    @Environment(EmotionPaletteService.self) private var palettes
-    @Environment(ReferenceDataService.self) private var refs
 
-    @State private var recent: [AchievementRecord] = []
-    @State private var unlockedCount = 0
-    @State private var hasLoaded = false
+    @State private var model = AchievementsModel()
+    @State private var catalog: [String: AchievementRecord] = [:]
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.achievements-shelf")
 
     var body: some View {
+        let badges = ProfileShelf.badges(model.page, catalog: catalog)
         NavigationLink(value: YouRoute.achievements) {
             HStack(spacing: Spacing.lg) {
                 PbblsIconImage(.pebbleGlowMd, .tile, style: AnyShapeStyle(Color.pebbles.primary))
@@ -34,9 +48,9 @@ struct ProfileAchievementsCard: View {
                     Text(subtitle)
                         .pebblesFont(.subhead)
                         .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                    if !recent.isEmpty {
+                    if !badges.isEmpty {
                         HStack(spacing: Spacing.sm) {
-                            ForEach(recent) { record in
+                            ForEach(badges, id: \.slug) { record in
                                 badge(record)
                             }
                         }
@@ -56,62 +70,42 @@ struct ProfileAchievementsCard: View {
     }
 
     private var subtitle: String {
-        guard hasLoaded else { return String(localized: "Badges along your path") }
-        guard unlockedCount > 0 else { return String(localized: "Badges along your path") }
+        guard let count = ProfileShelf.count(model.page) else { return String(localized: "Badges along your path") }
         return String(format: NSLocalizedString(
             "achievement.shelf.unlockedCount",
             value: "%lld earned", comment: ""
-        ), unlockedCount)
+        ), count)
     }
 
-    @ViewBuilder
+    /// The private families never reach the served shelf, so no emotion or domain name is needed.
     private func badge(_ record: AchievementRecord) -> some View {
         PbblsIconImage(record.familySymbol, .row, style: AnyShapeStyle(Color.pebbles.primary))
             .frame(width: 32, height: 32)
             .background(Circle().fill(Color.pebbles.primary.opacity(0.12)))
-            .accessibilityLabel(
-                record.localizedTitle(
-                    emotionName: emotionName(for: record),
-                    domainName: domainName(for: record)
-                )
-            )
+            .accessibilityLabel(record.localizedTitle(emotionName: nil, domainName: nil))
     }
 
-    /// Reads only — the shelf never fires an evaluation. The grid's screen-open
-    /// call is the retroactive grant; doing it here too would double the work on
-    /// every profile visit.
     private func load() async {
-        guard !hasLoaded else { return }
-        do {
-            async let catalogRows = achievements.loadCatalog()
-            async let unlockRows = achievements.loadUnlocks()
-            let catalog = try await catalogRows
-            let unlocks = try await unlockRows
-
-            let byId = Dictionary(catalog.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-            let earned = unlocks
-                .sorted { $0.unlockedAt > $1.unlockedAt }
-                .compactMap { byId[$0.achievementId] }
-
-            unlockedCount = earned.count
-            recent = Array(earned.prefix(shelfSize))
-            hasLoaded = true
-        } catch {
-            // A failed shelf is not worth an error state on the profile: the
-            // card still navigates, and the grid surfaces real failures.
-            logger.error("achievements shelf fetch failed: \(error.localizedDescription, privacy: .private)")
-            hasLoaded = true
+        if model.service == nil {
+            model.service = AchievementsPageService(client: supabase.client, disk: .standard,
+                                                    owner: supabase.session?.user.id.uuidString.lowercased())
+        }
+        async let rows = loadCatalog()
+        await model.load {}
+        if let rows = await rows {
+            catalog = Dictionary(rows.map { ($0.slug, $0) }, uniquingKeysWith: { first, _ in first })
         }
     }
 
-    private func emotionName(for record: AchievementRecord) -> String? {
-        guard let emotionId = record.emotionId else { return nil }
-        return palettes.byEmotionId[emotionId]?.localizedName
-    }
-
-    private func domainName(for record: AchievementRecord) -> String? {
-        guard let domainId = record.domainId else { return nil }
-        return refs.domains.first(where: { $0.id == domainId })?.localizedName
+    /// The catalog for titles and icons; a failed read keeps the last one and
+    /// the shelf falls back to the served rows.
+    private func loadCatalog() async -> [AchievementRecord]? {
+        do {
+            return try await achievements.loadCatalog()
+        } catch {
+            logger.error("achievements catalog fetch failed: \(error.localizedDescription, privacy: .private)")
+            return nil
+        }
     }
 }
 
@@ -119,9 +113,8 @@ struct ProfileAchievementsCard: View {
     let supabase = SupabaseService()
     return NavigationStack {
         ProfileAchievementsCard()
+            .environment(supabase)
             .environment(AchievementsService(client: supabase.client))
-            .environment(EmotionPaletteService(client: supabase.client))
-            .environment(ReferenceDataService(client: supabase.client))
             .padding()
     }
 }
