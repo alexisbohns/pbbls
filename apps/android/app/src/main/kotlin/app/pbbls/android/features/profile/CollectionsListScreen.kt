@@ -284,8 +284,9 @@ private fun CollectionRow(
                     )
                 },
                 leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_trash),
+                    PbblsIconImage(
+                        icon = PbblsIcon.TRASH,
+                        size = PbblsIconSize.ROW,
                         contentDescription = null,
                         tint = colors.error,
                     )

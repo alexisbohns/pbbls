@@ -235,8 +235,9 @@ private fun SoulCell(
                     )
                 },
                 leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_trash),
+                    PbblsIconImage(
+                        icon = PbblsIcon.TRASH,
+                        size = PbblsIconSize.ROW,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error,
                     )
