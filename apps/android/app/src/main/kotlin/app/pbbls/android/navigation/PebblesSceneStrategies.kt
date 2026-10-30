@@ -16,6 +16,7 @@ import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.DetailPlaceholder
+import app.pbbls.android.core.designsystem.PbblsIcon
 import kotlin.reflect.KClass
 
 /**
@@ -161,13 +162,12 @@ object PanePairs {
 // Internal rather than private so the list-detail screenshots render these
 // exact placeholders instead of restating them (#940).
 @Composable
-internal fun SoulsPlaceholder() =
-    DetailPlaceholder(iconRes = R.drawable.ic_people, text = stringResource(R.string.souls_detail_placeholder))
+internal fun SoulsPlaceholder() = DetailPlaceholder(icon = PbblsIcon.PEOPLE, text = stringResource(R.string.souls_detail_placeholder))
 
 @Composable
 internal fun CollectionsPlaceholder() =
-    DetailPlaceholder(iconRes = R.drawable.ic_pebble_collection, text = stringResource(R.string.collections_detail_placeholder))
+    DetailPlaceholder(icon = PbblsIcon.COLLECTION, text = stringResource(R.string.collections_detail_placeholder))
 
 @Composable
 internal fun GlyphsPlaceholder() =
-    DetailPlaceholder(iconRes = R.drawable.ic_scribble, text = stringResource(R.string.glyphs_detail_placeholder))
+    DetailPlaceholder(icon = PbblsIcon.PEBBLE_DOTTED_GLYPH, text = stringResource(R.string.glyphs_detail_placeholder))

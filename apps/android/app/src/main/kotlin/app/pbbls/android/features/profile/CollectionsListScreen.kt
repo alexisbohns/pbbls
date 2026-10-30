@@ -41,6 +41,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTopBar
@@ -145,11 +148,11 @@ fun CollectionsListContent(
                 },
                 trailing = {
                     IconButton(onClick = onCreateCollection) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_plus),
+                        PbblsIconImage(
+                            icon = PbblsIcon.PLUS_CIRCLE,
+                            size = PbblsIconSize.TOOLBAR,
                             contentDescription = stringResource(R.string.collections_add_a11y),
                             tint = colors.onSurfaceVariant,
-                            modifier = Modifier.size(22.dp),
                         )
                     }
                 },

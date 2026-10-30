@@ -1,21 +1,16 @@
 package app.pbbls.android.core.designsystem
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 
 /**
  * What a detail pane shows before anything is picked (#940): a muted icon and
@@ -23,7 +18,7 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun DetailPlaceholder(
-    @DrawableRes iconRes: Int,
+    icon: PbblsIcon,
     text: String,
     modifier: Modifier = Modifier,
 ) {
@@ -36,11 +31,11 @@ fun DetailPlaceholder(
         verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.md, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(
-            painter = painterResource(iconRes),
+        PbblsIconImage(
+            icon = icon,
+            size = PbblsIconSize.HERO,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(48.dp),
         )
         Text(
             text = text,

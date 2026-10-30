@@ -30,6 +30,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Collection
@@ -108,8 +111,9 @@ fun ProfileScreen(
                 },
                 actions = {
                     IconButton(onClick = onOpenSettings) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_gear),
+                        PbblsIconImage(
+                            icon = PbblsIcon.SLIDER,
+                            size = PbblsIconSize.TOOLBAR,
                             contentDescription = stringResource(R.string.settings_title),
                         )
                     }

@@ -1,9 +1,7 @@
 package app.pbbls.android.navigation
 
-import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationItemColors
 import androidx.compose.material3.ShortNavigationBarItemDefaults
@@ -17,10 +15,11 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
 
 /**
  * Which navigation component the window gets (#855): the M3 adaptive
@@ -57,8 +56,10 @@ fun pebblesNavigationSuiteColors(): NavigationSuiteColors {
  *
  * Colors are the #853 branding on both components: the selected tab is
  * `primary` on a `primaryContainer` indicator, the rest `onSurfaceVariant`.
- * `Icon`/`Text` read their color from `LocalContentColor`, which the item
- * sets from these colors per selection state, so neither needs its own tint.
+ * The icon and the `Text` read their color from `LocalContentColor`, which the
+ * item sets from these colors per selection state, so neither needs its own
+ * tint. The selected tab draws its icon's `active` twin, the lit stone (Android
+ * icon migration spec D5); the M3 indicator stays behind it.
  */
 @Composable
 fun PebblesNavigationItems(
@@ -73,7 +74,13 @@ fun PebblesNavigationItems(
         NavigationSuiteItem(
             selected = selected,
             onClick = { if (selected) onReselect(tab) else onSelect(tab) },
-            icon = { Icon(painter = painterResource(tab.iconRes()), contentDescription = null) },
+            icon = {
+                // The navigation icon slot is M3's 24dp (spec D6): the generated default.
+                PbblsIconImage(
+                    icon = if (selected) tab.icon().activeTwin ?: tab.icon() else tab.icon(),
+                    contentDescription = null,
+                )
+            },
             label = { NavigationLabel(tab) },
             navigationSuiteType = navigationSuiteType,
             colors = colors,
@@ -132,13 +139,13 @@ private fun pebblesNavigationItemColors(type: NavigationSuiteType): NavigationIt
     }
 }
 
-@DrawableRes
-private fun PebblesKey.iconRes(): Int =
+/** The tab's drawing; the bar lights its `active` twin when selected (spec D5, iOS `AppTab.icon`). */
+internal fun PebblesKey.icon(): PbblsIcon =
     when (this) {
-        PebblesKey.Path -> R.drawable.ic_stack
-        PebblesKey.People -> R.drawable.ic_people
-        PebblesKey.Collections -> R.drawable.ic_pebble_collection
-        PebblesKey.You -> R.drawable.ic_person
+        PebblesKey.Path -> PbblsIcon.PATH
+        PebblesKey.People -> PbblsIcon.PEOPLE
+        PebblesKey.Collections -> PbblsIcon.COLLECTION
+        PebblesKey.You -> PbblsIcon.PERSON
         else -> error("$this is not a tab")
     }
 
