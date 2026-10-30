@@ -24,6 +24,9 @@
   "devDependencies": {
     "@types/node": "^26.6.5",
     "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "react": "^19",
+    "react-dom": "^19",
     "svgo": "4.1.0",
     "tsx": "^4.23.15",
     "typescript": "^7",
