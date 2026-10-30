@@ -106,18 +106,12 @@ struct AchievementsModelTests {
         #expect(fake.seen == [.emotions, .year])
     }
 
-    @Test("a ready ceremony pulls once, reports the karma it paid and reads the page again")
-    func pull() async throws {
-        let fresh = try Self.page(daysKept: 249)
-        let fake = FakeAchievementsPageService(answers: [.success(fresh)])
-        fake.answer(pull: .success(.pulled(karma: 30)))
-        let model = Self.model(fake)
-        #expect(await model.pull(.sixFirsts) == .pulled(karma: 30))
-        #expect(fake.calls == ["pull six_firsts", "read"])
-        #expect(model.page == fresh && model.pulling == nil)
+    /// The design page: its Explorer completion is ready and not pulled.
+    static func readyPage() throws -> AchievementsPage {
+        try Self.page(daysKept: 249)
     }
 
-    /// The design page with its Explorer completion pulled, as a re-read after a landed pull shows it.
+    /// The Explorer completion pulled, as a read after a landed pull shows it.
     static func pulledPage() throws -> AchievementsPage {
         try AchievementsFixtures.json("""
         {"explorer": {"first_five": [], "six_firsts": [], "rings_done": ["six_firsts"],
@@ -126,41 +120,123 @@ struct AchievementsModelTests {
         """).model
     }
 
+    @Test("a ready ceremony is read first, pulled once, reports the karma it paid and is read again")
+    func pull() async throws {
+        let ready = try Self.readyPage()
+        let fake = FakeAchievementsPageService(answers: [.success(ready)])
+        fake.answer(pull: .success(.pulled(karma: 30)))
+        let model = Self.model(fake)
+        #expect(await model.pull(.sixFirsts) == .pulled(karma: 30))
+        #expect(fake.calls == ["read", "pull six_firsts", "read"])
+        #expect(model.page == ready && model.pulling == nil)
+    }
+
+    @Test("a row paying no karma is still a pull")
+    func pullWithoutPay() async throws {
+        let fake = FakeAchievementsPageService(answers: [.success(try Self.readyPage())])
+        fake.answer(pull: .success(.pulled(karma: 0)))
+        let model = Self.model(fake)
+        #expect(await model.pull(.sixFirsts) == .pulled(karma: 0))
+    }
+
+    @Test("a page already read this session decides the pull without reading again first")
+    func pullAfterLoad() async throws {
+        let fake = FakeAchievementsPageService(answers: [.success(try Self.readyPage())])
+        fake.answer(pull: .success(.pulled(karma: 30)))
+        let model = Self.model(fake)
+        await model.load {}
+        #expect(await model.pull(.sixFirsts) == .pulled(karma: 30))
+        #expect(fake.calls == ["kept", "read", "pull six_firsts", "read"])
+    }
+
     @Test("no row, then a read showing the completion pulled, plays the ceremony without karma")
     func emptyAnswerConfirmedByRead() async throws {
-        let fake = FakeAchievementsPageService(answers: [.success(try Self.pulledPage())])
+        let fake = FakeAchievementsPageService(answers: [.success(try Self.readyPage()), .success(try Self.pulledPage())])
         fake.answer(pull: .success(.alreadyPulled))
         let model = Self.model(fake)
         #expect(await model.pull(.sixFirsts) == .pulledWithoutKarma)
-        #expect(fake.calls == ["pull six_firsts", "read"])
+        #expect(fake.calls == ["read", "pull six_firsts", "read"])
     }
 
     @Test("a lost answer, then a read showing the completion pulled, plays the ceremony without karma")
     func lostAnswerConfirmedByRead() async throws {
-        let fake = FakeAchievementsPageService(answers: [.success(try Self.pulledPage())])
+        let fake = FakeAchievementsPageService(answers: [.success(try Self.readyPage()), .success(try Self.pulledPage())])
         fake.answer(pull: .failure(FakeAchievementsPageService.Failure()))
         let model = Self.model(fake)
         #expect(await model.pull(.sixFirsts) == .pulledWithoutKarma)
     }
 
-    @Test("a read showing another stack pulled confirms nothing")
-    func otherStackPulled() async throws {
-        let fake = FakeAchievementsPageService(answers: [.success(try Self.pulledPage())])
-        fake.answer(pull: .success(.alreadyPulled))
+    @Test("the kept copy shows ready but the server has it pulled: no call, never success")
+    func keptReadyServerPulled() async throws {
+        let fake = FakeAchievementsPageService(
+            kept: try Self.readyPage(),
+            answers: [.failure(FakeAchievementsPageService.Failure()), .success(try Self.pulledPage())])
+        fake.answer(pull: .success(.pulled(karma: 30)))
         let model = Self.model(fake)
-        #expect(await model.pull(.emotions) == .alreadyPulled)
+        await model.load {}
+        #expect(model.page?.completion(.sixFirsts)?.isReady == true, "the kept copy is on screen")
+        #expect(await model.pull(.sixFirsts) == .alreadyPulled)
+        #expect(fake.calls == ["kept", "read", "read"])
+    }
+
+    @Test("a failure over a completion already pulled before this pull is never played")
+    func failureOverOldPull() async throws {
+        let fake = FakeAchievementsPageService(answers: [.success(try Self.pulledPage())])
+        fake.answer(pull: .failure(FakeAchievementsPageService.Failure()))
+        let model = Self.model(fake)
+        await model.load {}
+        #expect(await model.pull(.sixFirsts) == .alreadyPulled)
+        #expect(!fake.calls.contains("pull six_firsts"))
+    }
+
+    @Test("a stack with no completion, or one not offered yet, is not pulled")
+    func notOffered() async throws {
+        let notYet = try AchievementsFixtures.json("""
+        {"emotions": {"count": 38, "of": 38, "seats": [],
+                      "completion": {"completed_at": "2026-10-30T20:00:00Z", "offered_from": "2026-10-31T05:00:00Z",
+                                     "ready": false}}}
+        """).model
+        let fake = FakeAchievementsPageService(answers: [.success(notYet)])
+        fake.answer(pull: .success(.pulled(karma: 30)))
+        let model = Self.model(fake)
+        #expect(await model.pull(.emotions) == .notReady)
+        #expect(await model.pull(.domains) == .notReady)
+        #expect(!fake.calls.contains { $0.hasPrefix("pull") })
     }
 
     @Test("no row, not ready and a failure are never success")
-    func pullFailures() async {
-        let fake = FakeAchievementsPageService()
+    func pullFailures() async throws {
+        let fake = FakeAchievementsPageService(answers: [.success(try Self.readyPage())])
         let model = Self.model(fake)
         fake.answer(pull: .success(.alreadyPulled))
-        #expect(await model.pull(.emotions) == .alreadyPulled)
+        #expect(await model.pull(.sixFirsts) == .alreadyPulled)
         fake.answer(pull: .failure(CeremonyPullError.notReady))
-        #expect(await model.pull(.emotions) == .notReady)
+        #expect(await model.pull(.sixFirsts) == .notReady)
         fake.answer(pull: .failure(FakeAchievementsPageService.Failure()))
-        #expect(await model.pull(.emotions) == .failed)
+        #expect(await model.pull(.sixFirsts) == .failed)
+    }
+
+    @Test("with no page read, the pull is not asked")
+    func pullWithoutRead() async {
+        let fake = FakeAchievementsPageService()
+        fake.answer(pull: .success(.pulled(karma: 30)))
+        let model = Self.model(fake)
+        #expect(await model.pull(.sixFirsts) == .failed)
+        #expect(fake.calls == ["read"])
+    }
+
+    @Test("a pull asked while another runs is busy and does nothing")
+    func busy() async throws {
+        let fake = FakeAchievementsPageService(answers: [.success(try Self.readyPage())])
+        fake.answer(pull: .success(.pulled(karma: 30)))
+        fake.hold(read: 0)
+        let model = Self.model(fake)
+        let first = Task { await model.pull(.sixFirsts) }
+        for _ in 0..<1000 where !fake.isHolding { try await Task.sleep(nanoseconds: 1_000_000) }
+        #expect(model.pulling == .sixFirsts)
+        #expect(await model.pull(.emotions) == .busy)
+        fake.release()
+        #expect(await first.value == .pulled(karma: 30))
     }
 
     @Test("without a service nothing runs")
@@ -169,5 +245,6 @@ struct AchievementsModelTests {
         await model.load {}
         #expect(model.page == nil && !model.failed)
         #expect(model.opened(.explorer) == nil)
+        #expect(await model.pull(.sixFirsts) == .failed)
     }
 }

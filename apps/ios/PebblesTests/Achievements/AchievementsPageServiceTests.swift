@@ -62,6 +62,9 @@ struct AchievementsPageServiceTests {
         let rows = try JSONDecoder().decode([AchievementsPageService.PullRow].self,
                                             from: Data(#"[{"stack": "six_firsts", "karma_granted": 30}]"#.utf8))
         #expect(AchievementsPageService.outcome(rows) == .pulled(karma: 30))
+        let unpaid = try JSONDecoder().decode([AchievementsPageService.PullRow].self,
+                                              from: Data(#"[{"stack": "emotions", "karma_granted": 0}]"#.utf8))
+        #expect(AchievementsPageService.outcome(unpaid) == .pulled(karma: 0), "a row is a pull, even unpaid")
         #expect(AchievementsPageService.outcome([]) == .alreadyPulled)
         #expect(AchievementsPageService.isNotReady("not_ready"))
         #expect(!AchievementsPageService.isNotReady("invalid_stack"))

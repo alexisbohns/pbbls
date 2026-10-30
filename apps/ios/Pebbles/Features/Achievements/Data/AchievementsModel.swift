@@ -21,9 +21,13 @@ final class AchievementsModel {
         /// `pulled_at`: this client's pull landed and its answer was lost. The
         /// ceremony plays without a karma line (spec §3.4).
         case pulledWithoutKarma
-        /// No row, and the read again does not show the completion pulled. Never success.
+        /// Already pulled (the fresh read shows `pulled_at`), or no row and the
+        /// read again does not show it pulled. Never success.
         case alreadyPulled
+        /// Not offered yet: the fresh read shows it not ready, or `not_ready`.
         case notReady
+        /// Another pull is running; this one did nothing.
+        case busy
         case failed
     }
 
@@ -75,12 +79,41 @@ final class AchievementsModel {
     }
 
     /// Pulls a ready ceremony (D9), then reads the page again so its mark goes.
-    /// An empty or lost answer is settled by that read: the completion's
-    /// `pulled_at` says the pull landed (spec §3.4).
+    /// The pull is decided on a page read in this session, never on the kept
+    /// copy: before any read has landed it reads first. Only a completion that
+    /// read shows ready and not yet pulled is pulled; one already pulled is
+    /// `.alreadyPulled` and one not offered `.notReady`, with no call. An empty
+    /// or lost answer is settled by the read after it: the completion, unpulled
+    /// before, now carrying `pulled_at` says this pull landed (spec §3.4).
     func pull(_ stack: AchievementsPage.CeremonyStack) async -> PullOutcome {
-        guard let service, pulling == nil else { return .failed }
+        let name = stack.rawValue
+        guard let service else {
+            logger.error("pull_ceremony(\(name, privacy: .public)) asked without a service")
+            return .failed
+        }
+        if let running = pulling {
+            logger.notice("pull_ceremony(\(name, privacy: .public)) asked while \(running.rawValue, privacy: .public) is pulling")
+            return .busy
+        }
         pulling = stack
         defer { pulling = nil }
+        if readShown == 0 { await refresh(service) }
+        guard readShown > 0 else {
+            logger.error("pull_ceremony(\(name, privacy: .public)) not asked: no page read to decide on")
+            return .failed
+        }
+        guard let before = page?.completion(stack), before.pulledAt == nil else {
+            if page?.completion(stack)?.pulledAt != nil {
+                logger.notice("pull_ceremony(\(name, privacy: .public)) not asked: the read shows it pulled")
+                return .alreadyPulled
+            }
+            logger.notice("pull_ceremony(\(name, privacy: .public)) not asked: no completion")
+            return .notReady
+        }
+        guard before.isReady else {
+            logger.notice("pull_ceremony(\(name, privacy: .public)) not asked: not offered yet")
+            return .notReady
+        }
         var outcome: PullOutcome
         do {
             switch try await service.pull(stack, zone: zone) {
@@ -90,20 +123,19 @@ final class AchievementsModel {
                 outcome = .alreadyPulled
             }
         } catch CeremonyPullError.notReady {
-            logger.warning("pull_ceremony(\(stack.rawValue, privacy: .public)) is not ready")
+            logger.warning("pull_ceremony(\(name, privacy: .public)) is not ready")
             outcome = .notReady
         } catch {
-            logger.error(
-                "pull_ceremony(\(stack.rawValue, privacy: .public)) failed: \(error.localizedDescription, privacy: .public)")
+            logger.error("pull_ceremony(\(name, privacy: .public)) failed: \(error.localizedDescription, privacy: .public)")
             outcome = .failed
         }
         let reread = await refresh(service)
         if outcome == .alreadyPulled || outcome == .failed {
             if reread, page?.completion(stack)?.pulledAt != nil {
-                logger.notice("pull_ceremony(\(stack.rawValue, privacy: .public)) answered nothing; the read shows it pulled")
+                logger.notice("pull_ceremony(\(name, privacy: .public)) answered nothing; the read shows it pulled")
                 outcome = .pulledWithoutKarma
             } else if outcome == .alreadyPulled {
-                logger.error("pull_ceremony(\(stack.rawValue, privacy: .public)) returned no row")
+                logger.error("pull_ceremony(\(name, privacy: .public)) returned no row")
             }
         }
         return outcome
