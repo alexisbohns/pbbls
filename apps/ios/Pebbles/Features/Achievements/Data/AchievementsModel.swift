@@ -74,6 +74,22 @@ final class AchievementsModel {
         await refresh(service, zone: zone)
     }
 
+    /// The Profile shelf's read (D18): the kept copy at once, and a read only
+    /// when that copy is `maxAge` old or more (or there is none), so a visit to
+    /// You does not ask the server each time. No grant: the shelf never evaluates.
+    func loadIfStale(maxAge: TimeInterval, now: () -> Date = Date.init) async {
+        guard let service, !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
+        let zone = self.zone()
+        if page == nil, let kept = await service.cachedPage(zone: zone), page == nil, readShown == 0 { page = kept }
+        if page != nil, let keptAt = await service.keptAt(zone: zone) {
+            let age = now().timeIntervalSince(keptAt)
+            if age >= 0, age < maxAge { return }
+        }
+        await refresh(service, zone: zone)
+    }
+
     /// Marks `card` seen (spec §4). The marks on screen stay until the next
     /// read. Returned so the tests can wait for it.
     @discardableResult

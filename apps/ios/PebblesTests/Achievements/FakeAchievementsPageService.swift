@@ -77,6 +77,13 @@ final class FakeAchievementsPageService: AchievementsPageServicing, @unchecked S
         }
     }
 
+    /// When the kept copy was kept, as `keptAt` answers it.
+    var keptAtDate: Date?
+
+    func keptAt(zone: TimeZone) async -> Date? {
+        lock.withLock { keptAtDate }
+    }
+
     func markSeen(_ card: AchievementCard) async throws {
         lock.withLock { seenCards.append(card) }
     }

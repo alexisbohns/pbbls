@@ -21,6 +21,8 @@ struct AchievementsPageServiceTests {
         #expect(page.daysKept == 249)
         #expect(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier) == data)
         #expect(await service.cachedPage(zone: paris) == page)
+        let keptAt = try #require(await service.keptAt(zone: paris))
+        #expect(abs(keptAt.timeIntervalSinceNow) < 60, "kept just now")
         let tokyo = try #require(TimeZone(identifier: "Asia/Tokyo"))
         #expect(await service.cachedPage(zone: tokyo) == nil)
     }

@@ -109,6 +109,30 @@ struct AchievementsModelTests {
         #expect(!AchievementsModel.isCancellation(URLError(.timedOut)))
     }
 
+    @Test("the shelf's read: a kept copy under fifteen minutes old is enough; an older one, or none, is read")
+    func loadIfStale() async throws {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let kept = try Self.page(daysKept: 248)
+        let fresh = try Self.page(daysKept: 249)
+
+        let recent = FakeAchievementsPageService(kept: kept, answers: [.success(fresh)])
+        recent.keptAtDate = now.addingTimeInterval(-5 * 60)
+        let shelf = Self.model(recent)
+        await shelf.loadIfStale(maxAge: 15 * 60, now: { now })
+        #expect(recent.calls == ["kept"] && shelf.page == kept)
+
+        let old = FakeAchievementsPageService(kept: kept, answers: [.success(fresh)])
+        old.keptAtDate = now.addingTimeInterval(-20 * 60)
+        let stale = Self.model(old)
+        await stale.loadIfStale(maxAge: 15 * 60, now: { now })
+        #expect(old.calls == ["kept", "read"] && stale.page == fresh)
+
+        let none = FakeAchievementsPageService(answers: [.success(fresh)])
+        let first = Self.model(none)
+        await first.loadIfStale(maxAge: 15 * 60, now: { now })
+        #expect(none.calls == ["kept", "read"] && first.page == fresh)
+    }
+
     @Test("opening a sheet marks its card seen")
     func seen() async {
         let fake = FakeAchievementsPageService()

@@ -24,9 +24,10 @@ enum ProfileShelf {
 
 /// The Profile achievements shelf (D14, D18): the most recent badges and their
 /// count, as `get_achievements` serves them, and a way into the page. It shares
-/// the page's kept copy, so it draws at once, then reads; a failed read keeps
-/// what is shown, and a missing section leaves the plain invitation. It never
-/// fires an evaluation: the page's screen-open call is the retroactive grant.
+/// the page's kept copy, so it draws at once, and reads only when that copy is
+/// fifteen minutes old or more; a failed read keeps what is shown, and a missing
+/// section leaves the plain invitation. It never fires an evaluation: the page's
+/// screen-open call is the retroactive grant.
 struct ProfileAchievementsCard: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(AchievementsService.self) private var achievements
@@ -35,6 +36,9 @@ struct ProfileAchievementsCard: View {
     @State private var catalog: [String: AchievementRecord] = [:]
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.achievements-shelf")
+
+    /// How old the kept copy may be before a visit to You reads again.
+    static let maxAge: TimeInterval = 15 * 60
 
     var body: some View {
         let badges = ProfileShelf.badges(model.page, catalog: catalog)
@@ -90,11 +94,11 @@ struct ProfileAchievementsCard: View {
             model.service = AchievementsPageService(client: supabase.client, disk: .standard,
                                                     owner: supabase.session?.user.id.uuidString.lowercased())
         }
-        async let rows = loadCatalog()
-        await model.load {}
-        if let rows = await rows {
-            catalog = Dictionary(rows.map { ($0.slug, $0) }, uniquingKeysWith: { first, _ in first })
-        }
+        await model.loadIfStale(maxAge: Self.maxAge)
+        // The catalog once per shelf, for titles and icons; the served rows stand in until it lands.
+        guard catalog.isEmpty, !ProfileShelf.badges(model.page, catalog: [:]).isEmpty,
+              let rows = await loadCatalog() else { return }
+        catalog = Dictionary(rows.map { ($0.slug, $0) }, uniquingKeysWith: { first, _ in first })
     }
 
     /// The catalog for titles and icons; a failed read keeps the last one and

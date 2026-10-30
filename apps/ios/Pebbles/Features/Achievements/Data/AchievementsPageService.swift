@@ -21,6 +21,9 @@ protocol AchievementsPageServicing: Sendable {
     func page(zone: TimeZone) async throws -> AchievementsPage
     /// The device's last copy, or nil: display only, never instead of a fetch.
     func cachedPage(zone: TimeZone) async -> AchievementsPage?
+    /// When the device's last copy was kept: the last read that landed, in any
+    /// session (each one rewrites it). Nil when nothing is kept.
+    func keptAt(zone: TimeZone) async -> Date?
     func markSeen(_ card: AchievementCard) async throws
     func pull(_ stack: AchievementsPage.CeremonyStack, zone: TimeZone) async throws -> CeremonyPull
 }
@@ -58,6 +61,12 @@ struct AchievementsPageService: AchievementsPageServicing {
             Self.logger.error("a kept achievements page no longer decodes: \(error.localizedDescription, privacy: .private)")
             return nil
         }
+    }
+
+    func keptAt(zone: TimeZone) async -> Date? {
+        guard let disk, let owner else { return nil }
+        let url = disk.file(Self.cachePage, owner: owner, zone: zone.identifier)
+        return (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
     }
 
     func markSeen(_ card: AchievementCard) async throws {
