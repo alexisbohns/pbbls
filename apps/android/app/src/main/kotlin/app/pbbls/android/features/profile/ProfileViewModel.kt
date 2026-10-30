@@ -225,7 +225,13 @@ class ProfileViewModel
             val age = keptAt?.let { Duration.between(it, now()) }
             val fresh = shelfPage != null && age != null && !age.isNegative && age < SHELF_MAX_AGE
             if (!fresh) {
-                achievementsService.checkIgnoringFailure()
+                // Not while a mutation's own check is in flight: this one could take its unlocks
+                // and leave them uncelebrated. That check grants them anyway.
+                if (achievementsService.isFiringCheck) {
+                    Log.i(TAG, "a mutation's achievement check is in flight; the shelf reads without granting")
+                } else {
+                    achievementsService.checkIgnoringFailure()
+                }
                 runCatchingCancellable { achievementsService.page(zone) }
                     .fold(
                         onSuccess = { shelfPage = it },

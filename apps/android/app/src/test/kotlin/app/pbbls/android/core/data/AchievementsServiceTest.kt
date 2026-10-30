@@ -29,6 +29,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -237,5 +238,23 @@ class AchievementsServiceTest {
             assertNull("the read in flight may not have seen the pull", service.keptAt(zone))
             service.page(zone)
             assertNotNull(service.keptAt(zone))
+        }
+
+    @Test
+    fun `a mutation's check is in flight from the call until it has finished`() =
+        runTest {
+            val (_, service) = signedIn("alice")
+            val seenDuring = AtomicInteger(-1)
+            beforeAnswer["/rpc/check_achievements"] = { seenDuring.set(if (service.isFiringCheck) 1 else 0) }
+            assertFalse(service.isFiringCheck)
+            service.fireCheck()
+            assertTrue("counted before the launch", service.isFiringCheck)
+            var tries = 0
+            while (service.isFiringCheck && tries++ < 1_000) {
+                runCurrent()
+                Thread.sleep(5)
+            }
+            assertEquals(1, seenDuring.get())
+            assertFalse(service.isFiringCheck)
         }
 }

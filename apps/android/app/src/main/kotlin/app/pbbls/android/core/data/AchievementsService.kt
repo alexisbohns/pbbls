@@ -26,6 +26,7 @@ import kotlinx.serialization.json.put
 import java.time.Instant
 import java.time.ZoneId
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -98,6 +99,12 @@ interface AchievementsServicing {
     suspend fun checkIgnoringFailure()
 
     fun fireCheck()
+
+    /**
+     * A mutation-path [fireCheck] has left and not finished. A screen-open grant run now could take
+     * its unlocks and leave them uncelebrated, so the Profile shelf skips its grant meanwhile.
+     */
+    val isFiringCheck: Boolean
 
     /**
      * `get_achievements(p_tz)` (#1307), decoded, and kept on the device for the signed-in user
@@ -219,7 +226,13 @@ class AchievementsService
          * copy; the one extra catalog read per actual unlock (rare) keeps i18n out
          * of six call sites.
          */
+        private val checksInFlight = AtomicInteger(0)
+
+        override val isFiringCheck: Boolean get() = checksInFlight.get() > 0
+
         override fun fireCheck() {
+            // Counted before the launch, so a grant asked right after this call already sees it.
+            checksInFlight.incrementAndGet()
             scope.launch {
                 try {
                     val results = check()
@@ -253,6 +266,8 @@ class AchievementsService
                     throw e
                 } catch (e: Exception) {
                     Log.w(TAG, "achievement check failed (self-heals on next call)", e)
+                } finally {
+                    checksInFlight.decrementAndGet()
                 }
             }
         }

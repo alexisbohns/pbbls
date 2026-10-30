@@ -214,6 +214,17 @@ class ProfileViewModelTest {
         }
 
     @Test
+    fun `while a mutation's check is in flight the shelf reads without granting`() =
+        runTest {
+            val achievements = FakeAchievementsService(served = served).apply { firingCheck = true }
+            val viewModel = viewModel(achievements = achievements)
+            advanceUntilIdle()
+
+            assertEquals(listOf("page"), achievements.calls)
+            assertEquals(13, shelfOf(viewModel).shelfCount)
+        }
+
+    @Test
     fun `a copy fifteen minutes old or more is read again`() =
         runTest {
             val achievements = FakeAchievementsService(served = served, kept = stale).apply { keptAt = clock.minusSeconds(15 * 60) }

@@ -107,6 +107,11 @@ class FakeAchievementsService(
         fireCheckCount += 1
     }
 
+    /** What [isFiringCheck] says: a mutation-path check in flight. */
+    var firingCheck = false
+
+    override val isFiringCheck: Boolean get() = firingCheck
+
     override suspend fun page(zone: ZoneId): AchievementsPage {
         pageCalls += 1
         calls += "page"
