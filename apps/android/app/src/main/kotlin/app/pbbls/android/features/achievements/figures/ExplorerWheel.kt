@@ -119,8 +119,8 @@ fun ExplorerWheel(
                 StrokeCap.Round,
             )
         }
-        seats.forEach { s ->
-            val p = at(G.EMOTIONS_R, G.seatAngle(s.seat, seats.size))
+        seats.forEachIndexed { i, s ->
+            val p = at(G.EMOTIONS_R, G.seatAngle(i, seats.size))
             val pebble = s.pebble
             if (!s.met || pebble == null) {
                 ghost(p, G.GHOST_R * unit, unit, colors)

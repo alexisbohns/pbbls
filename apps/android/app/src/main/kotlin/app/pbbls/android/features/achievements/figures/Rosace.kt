@@ -61,8 +61,8 @@ private fun facets(
 }
 
 /**
- * The emotions rosace (the board's `gem`, A1 pick 6): one kite per seat, placed by its served
- * index, in the server's order. A met seat is lit in its family's tone, and an unknown family in
+ * The emotions rosace (the board's `gem`, A1 pick 6): one kite per seat, placed by its position
+ * in the server's list. A met seat is lit in its family's tone, and an unknown family in
  * ink. A new seat carries a dot outside the rim. [labels] names the families around it; [centre]
  * is the count and its "of 38".
  */
@@ -107,15 +107,15 @@ fun Rosace(
         withTransform({ scale(k, k, Offset.Zero) }) {
             drawPath(Path().polygon(g.silhouette()), colors.stock)
             drawPath(Path().polygon(g.silhouette()), colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
-            seats.forEach { s ->
-                drawPath(Path().polygon(g.kite(s.seat)), colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
-                drawPath(Path().polygon(g.star(s.seat)), colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
+            seats.indices.forEach { i ->
+                drawPath(Path().polygon(g.kite(i)), colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
+                drawPath(Path().polygon(g.star(i)), colors.ink2, style = Stroke(1f, join = StrokeJoin.Round))
             }
             lit.forEachIndexed { i, facet ->
                 if (!facet.seat.met) return@forEachIndexed
                 val run = facet.run
                 val palette = run.family?.let { lookups.family(it)?.palette }
-                val at = facet.seat.seat
+                val at = i
                 val tone = palette?.let { seatTone(it, facet.inRun, run.size, night, colors.stock, soft = false) } ?: colors.ink
                 drawPath(Path().polygon(g.kite(at)), tone)
                 drawPath(Path().polygon(g.kite(at)), colors.stock, style = Stroke(FACET_SEAM))
@@ -133,7 +133,7 @@ fun Rosace(
                     drawLine(colors.ink2, a, b, 1f, StrokeCap.Round)
                 }
             }
-            seats.forEach { s -> if (s.isNew) drawCircle(colors.ink, FRESH_DOT_R, g.freshDot(s.seat)) }
+            seats.forEachIndexed { i, s -> if (s.isNew) drawCircle(colors.ink, FRESH_DOT_R, g.freshDot(i)) }
         }
         if (labels) {
             runs.forEachIndexed { i, run ->
