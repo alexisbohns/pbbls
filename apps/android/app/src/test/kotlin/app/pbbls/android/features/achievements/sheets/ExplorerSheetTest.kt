@@ -71,7 +71,7 @@ class ExplorerSheetTest {
     @Test
     fun `a six-firsts row opens its pebble`() {
         show()
-        compose.onNodeWithContentDescription("Lowlight, The first lowlight one", substring = true).performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Lowlight, Gym, finally", substring = true).performScrollTo().performClick()
         assertEquals(
             listOf(
                 AchievementsFixture.page.explorer!!
@@ -97,7 +97,10 @@ class ExplorerSheetTest {
 
     @Test
     fun `the ready mark pulls the six firsts' ceremony`() {
-        show()
+        // The design fixture's completion is already pulled; ready is the server's say.
+        val page = AchievementsFixture.page
+        val explorer = page.explorer!!
+        show(page.copy(explorer = explorer.copy(completion = explorer.completion!!.copy(ready = true, pulledAt = null))))
         compose.onNodeWithContentDescription("Explorer is complete. Open the ceremony.").performClick()
         assertEquals(listOf(CompletionStack.SIX_FIRSTS), pulled)
     }

@@ -49,13 +49,13 @@ class EmotionsSheetTest {
     fun `a met emotion opens its pebble and says it is new, an unmet one is a quiet name`() {
         val emotions = AchievementsFixture.page.emotions!!
         show(emotions)
-        compose.onNodeWithContentDescription("Sadness, A sad evening", substring = true).performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Sadness, Grandma’s call went quiet", substring = true).performScrollTo().performClick()
         compose.onAllNodesWithContentDescription("new since you last looked", substring = true).assertCountEquals(2)
-        compose.onNodeWithText("Drained").performScrollTo().assertExists()
+        compose.onNodeWithText("Disgust").performScrollTo().assertExists()
         assertEquals(
             listOf(
                 emotions.seats
-                    .first { it.emotionId == "emotion-sad" }
+                    .first { it.isNew && it.seat == 29 }
                     .pebble!!
                     .momentId,
             ),

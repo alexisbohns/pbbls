@@ -39,17 +39,17 @@ class YearSheetTest {
         }
         compose
             .onNodeWithContentDescription(
-                "August. Days with a moment: 16. With a pebble: 14. Full weeks filled: 4 of 4.",
+                "August. Days with a moment: 19. With a pebble: 17. Full weeks filled: 4 of 4.",
             ).performScrollTo()
             .assertExists()
         compose
             .onNodeWithContentDescription(
-                "November. Days with a moment: 1. With a pebble: 0. No full week yet.",
+                "November. Days with a moment: 2. With a pebble: 2. No full week yet.",
             ).performScrollTo()
             .assertExists()
         compose
             .onNodeWithText(
-                "Thirteen more days with a moment, one in each full week, bring November to the inner disc.",
+                "Twelve more days with a moment, one in each full week, bring November to the inner disc.",
             ).performScrollTo()
             .assertExists()
         compose.onNodeWithText("None yet. 2026 is your first year here.").performScrollTo().assertExists()
