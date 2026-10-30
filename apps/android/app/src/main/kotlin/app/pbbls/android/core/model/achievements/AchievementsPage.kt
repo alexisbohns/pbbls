@@ -189,7 +189,7 @@ data class EmotionSeat(
  * [notYet] by seat. The seats are the section's own, looked up by their index. [family] null is a
  * group the server did not name, drawn in ink.
  */
-data class EmotionFamily(
+data class EmotionsFamilyGroup(
     val family: String?,
     val met: List<EmotionSeat>,
     val notYet: List<EmotionSeat>,
@@ -200,7 +200,7 @@ data class EmotionsSection(
     val count: Int,
     val of: Int,
     val seats: List<EmotionSeat>,
-    val families: List<EmotionFamily>,
+    val families: List<EmotionsFamilyGroup>,
     /** The card's "since": the day the first emotion was met. */
     val since: LocalDate?,
     val completion: Completion?,

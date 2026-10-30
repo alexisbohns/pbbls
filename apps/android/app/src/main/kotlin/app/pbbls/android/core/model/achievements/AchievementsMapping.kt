@@ -118,7 +118,7 @@ private fun EmotionsDto.toModel(): EmotionsSection {
         // The sheet's order is the server's: families as sent, each list as sent.
         families =
             families.map { f ->
-                EmotionFamily(
+                EmotionsFamilyGroup(
                     f.family,
                     f.met.filterNotNull().mapNotNull(bySeat::get),
                     f.notYet.filterNotNull().mapNotNull(bySeat::get),
