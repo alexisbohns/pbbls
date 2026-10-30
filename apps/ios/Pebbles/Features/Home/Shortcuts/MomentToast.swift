@@ -57,7 +57,7 @@ struct MomentToast: View {
         } else {
             ZStack {
                 Color.pebbles.surfaceContainerHigh
-                Image(systemName: "photo").foregroundStyle(Color.pebbles.onSurfaceVariant)
+                PbblsIconImage(.cameraFocus, .tile, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
             }
         }
     }
