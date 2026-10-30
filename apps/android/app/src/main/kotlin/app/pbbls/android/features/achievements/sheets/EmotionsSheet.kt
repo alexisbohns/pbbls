@@ -85,9 +85,17 @@ fun EmotionsSheet(
         emotions.families.forEach { group ->
             val family = group.family
             val palette = family?.let { lookups.family(it)?.palette }
+            // A family this device has no word for is "Other emotions", never its raw slug.
+            val unknownFamily = copy.string(R.string.achievements_unknown_family)
             val name =
-                family?.let { ReferenceStrings.referenceName(ReferenceType.EMOTION_CATEGORY, it, lookups.family(it)?.name ?: it) }
-                    ?: copy.string(R.string.achievements_unknown_family)
+                family?.let {
+                    ReferenceStrings.referenceName(
+                        ReferenceType.EMOTION_CATEGORY,
+                        it,
+                        lookups.family(it)?.name ?: unknownFamily,
+                    )
+                }
+                    ?: unknownFamily
             Row(
                 modifier =
                     Modifier

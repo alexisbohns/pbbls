@@ -77,4 +77,13 @@ class EmotionsSheetTest {
         compose.onNodeWithText("Other emotions").performScrollTo().assertExists()
         compose.onNodeWithContentDescription("An emotion", substring = true).performScrollTo().assertExists()
     }
+
+    @Test
+    fun `a family slug this device has no word for reads as other emotions, never the slug`() {
+        val emotions = AchievementsFixture.page.emotions!!
+        val first = emotions.families.first()
+        show(emotions.copy(families = listOf(first.copy(family = "awe")) + emotions.families.drop(1)))
+        compose.onNodeWithText("Other emotions").performScrollTo().assertExists()
+        compose.onNodeWithText("awe").assertDoesNotExist()
+    }
 }

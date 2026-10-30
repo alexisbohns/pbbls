@@ -13,11 +13,13 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.achievements.EmotionSeat
 import app.pbbls.android.core.model.achievements.EmotionsSection
@@ -101,13 +103,15 @@ fun Rosace(
     val g = remember(size, labels, seats.size) { RosaceGeometry(size.value, labels, seats.size) }
     // The cut, built once per geometry in board units: drawn under the figure's scale.
     val cut = remember(g) { RosaceCut(g) }
+    // A family this device has no word for is named "Other emotions", never by its raw slug.
+    val unknownFamily = stringResource(R.string.achievements_unknown_family)
     val names =
         runs.map { run ->
             run.family?.let { slug ->
                 ReferenceStrings.referenceName(
                     ReferenceType.EMOTION_CATEGORY,
                     slug,
-                    lookups.family(slug)?.name ?: slug,
+                    lookups.family(slug)?.name ?: unknownFamily,
                 )
             }
         }
