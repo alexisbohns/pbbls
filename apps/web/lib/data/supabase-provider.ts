@@ -31,6 +31,7 @@ import type {
   AchievementUnlock,
   SharedConnectionPebble,
 } from "@/lib/types"
+import { unlockResultsFrom } from "@/lib/data/achievement-results"
 import { toConnectionPeer } from "@/lib/data/invite-api"
 import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
@@ -313,10 +314,7 @@ export class SupabaseProvider implements DataProvider {
     // empty when nothing newly unlocked.
     const { data, error } = await this.supabase.rpc("check_achievements")
     if (error) throw new Error(`check_achievements failed: ${error.message}`)
-    return ((data ?? []) as Record<string, unknown>[]).map((row) => ({
-      slug: row.slug as string,
-      karmaGranted: (row.karma_granted as number) ?? 0,
-    }))
+    return unlockResultsFrom(data)
   }
 
   // ---------------------------------------------------------------------------
