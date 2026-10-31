@@ -26,21 +26,26 @@ struct HomeContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xl) {
-            HomeMonthGrid(month: model.month, lookups: lookups,
-                          today: CalendarDay(clock ?? Date(), in: zone), onWeek: onWeek)
+            // One header group: the month's weeks, the greeting, the quick actions.
+            VStack(alignment: .leading, spacing: 0) {
+                HomeMonthGrid(month: model.month, lookups: lookups,
+                              today: CalendarDay(clock ?? Date(), in: zone), onWeek: onWeek)
+                    .id(TabNavigation.scrollTopAnchor)
 
-            // The greeting re-reads the clock every minute, so the band flips on the hour.
-            TimelineView(.periodic(from: .now, by: 60)) { context in
-                HomeGreetingView(lines: greetingLines(at: clock ?? context.date))
+                // The greeting re-reads the clock every minute, so the band flips on the hour.
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    HomeGreetingView(lines: greetingLines(at: clock ?? context.date))
+                }
+                .padding(.top, HomeLayout.belowGrid)
+
+                HomeShortcuts(
+                    onCamera: onCamera,
+                    onQuick: onQuick,
+                    onPebble: onPebble,
+                    cameraDisabled: cameraSaving
+                )
+                .padding(.top, HomeLayout.aboveActions)
             }
-            .id(TabNavigation.scrollTopAnchor)
-
-            HomeShortcuts(
-                onCamera: onCamera,
-                onQuick: onQuick,
-                onPebble: onPebble,
-                cameraDisabled: cameraSaving
-            )
 
             if model.wraps != nil || model.wrapsError != nil {
                 VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -104,4 +109,12 @@ struct HomeContent: View {
     private func greetingLines(at now: Date) -> HomeGreeting.Lines {
         HomeGreeting.lines(at: now, name: model.name, zone: zone, locale: locale)
     }
+}
+
+/// Home's vertical rhythm (#1382, the c3 mock).
+enum HomeLayout {
+    /// Between the month's weeks and the dateline.
+    static let belowGrid: CGFloat = 22
+    /// Between the greeting's line and the quick actions.
+    static let aboveActions: CGFloat = 26
 }
