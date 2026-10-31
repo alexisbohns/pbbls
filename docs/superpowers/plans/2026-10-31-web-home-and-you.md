@@ -17,7 +17,7 @@
 | 3 | `feat/1384-web-stones` | `feat(web): port the app's stone geometry and draw stones` | 10–14 |
 | 4 | `feat/1384-web-home-data` | `feat(web): read the month, the wraps, the guides and the first five for home` | 15–21 |
 | 5 | `feat/1384-web-home` | `feat(web): build home` | 22–30 |
-| 6 | `feat/1384-web-you` | `feat(web): rebuild you` | 31–37 |
+| 6 | `feat/1384-web-you` | `feat(web): rebuild you, and move log out to settings` (depends on #1386) | 31–37 |
 | 7 | `feat/1384-web-hub-nav` | `feat(web): land on home and move between the hub pages` (`Resolves #1384`) | 38–42 |
 
 Labels on every part: inherit #1384's (species `feat`, scope `ui`, `web`; confirm with the maintainer), milestone M67. Part 1 is a `chore` in substance; keep the issue's labels for the stack and add `no-lab-note` on Parts 1–4. Parts 5–7 are user-facing: the Lab Note rule applies (run the `lab-note` skill on Part 7 for the whole feature; on Parts 5 and 6 add `no-lab-note` and say in the body that Part 7 carries the note, or follow the maintainer's current Arkaik-coverage practice). PR bodies for Parts 1–6 start `Part N of #1384`, never `Resolves`. Never write a Kritik finding id in a body. Every commit message ends with the attribution trailer your session's instructions give.
@@ -34,7 +34,7 @@ cd .worktrees/home-you-build && npm ci
 Every command below runs from `.worktrees/home-you-build`. Then check the two external dependencies and note the answers in the Part 1 PR body:
 
 ```bash
-git log --oneline origin/main -- packages/icons/react/Whatsapp.tsx | head -1   # empty: the whatsapp icon has not landed (Task 36 fallback)
+git log --oneline origin/main -- packages/icons/react/Whatsapp.tsx | head -1   # empty: #1387 (chore/1387-whatsapp-icon) has not merged (Task 36 fallback)
 git log --oneline origin/main -- apps/web/lib/icons/pbbls-icon.ts | head -1    # empty: #1313 Part 1 has not landed (use raw size-* classes, spec D21)
 ```
 
@@ -368,11 +368,13 @@ Spec D1 (route only), D3 (island), D8–D14, D22, D23, §Accessibility, §i18n. 
 
 Spec D15–D21.
 
+**Depends on #1386** (back-end, shared part B: `get_profile_engagement` gains `glyphs_carved` and `glyphs_owned`, owned = `glyph_entitlements`). Before starting, check that #1386 is merged and applied to the linked project, that `packages/supabase/types/database.ts` on `main` shows the two fields in the function's return, and where its harness wrote the payload dump (read the #1386 PR; the oracles live under `packages/supabase/scripts/oracles/`). If #1386 is not merged, build Tasks 31–37 anyway (the decoder is null-tolerant) but do not open Part 6 for merge until it is. The `whatsapp` icon is #1387 (Task 36).
+
 ### Task 31: Strings
 
 **Files:** `en.json`, `fr.json` (a `"you"` block inserted as text after `"home"`), extend `home-you-keys.test.ts`.
 
-- [ ] Keys: `title` ("You" / "Toi"), `settings`, `memberSince` (`{date}`), `ripples` (`Ripples Level {level}`), `counters.{days,pebbles,karma,label}`, `glyphs.{title,mine,mineLine,owned,ownedLine,community,communityLine}` (ICU plurals for the two counts), `achievements.{title,earned}` (`{count, plural, …}` with the figure and the word as rich text), `lab.{title,kicker,allUpdates,communityTitle,communityLine,newTab,error}`.
+- [ ] Keys: `title` ("You" / "Toi"), `settings`, `memberSince` (`{date}`), `ripples` (`Ripples Level {level}`), `counters.{days,pebbles,karma,label}`, `glyphs.{title,mine,mineLine,owned,ownedLine,community,communityLine}` (ICU plurals for the two counts), `achievements.{title,earned}` (`{count, plural, …}` with the figure and the word as rich text), `lab.{title,kicker,allUpdates,communityTitle,communityLine,newTab,error}`. The two glyph lines have a numberless variant for a null count (`mineLineNoCount`, `ownedLineNoCount`). Under the existing `settings` namespace, add `signOut.title` (inserted as text inside `"settings"`); the button keeps `profile.logout` / `profile.loggingOut`.
 
 ### Task 32: `RippleBadge` one line high
 
@@ -394,8 +396,10 @@ Spec D15–D21.
 **Files:** create `apps/web/components/you/YouCounters.tsx`, `YouGlyphs.tsx`, `apps/web/components/home/LinkRow.tsx` (the chip + title + line + chevron row shared with About; move About onto it in this task, a three-line change).
 
 - [ ] `YouCounters`: `<dl>` inside `SplitStone n={3} height={88} seed="days|pebbles|karma" fill={surface-container}`; each cell `flex flex-col justify-center py-3 pr-2.5 pl-4` (later `pl-5`), `<dd className="pb-type-counter text-m3-on-surface">` visually first via `order-first`, `<dt>` icon + label (`pb-type-row-line text-m3-on-surface-variant`, icon `size-[18px] text-m3-primary`). Values `Intl.NumberFormat(locale)`, "—" while loading.
-- [ ] `YouGlyphs`: head; three `LinkRow`s (D17), counts from `useDataProvider().store.marks.length` and `.entitledMarks.length`.
-- [ ] Render test: `<dt>` precedes `<dd>` in the DOM for each counter; "1,240" in EN and "1 240" (narrow no-break space) in FR.
+- [ ] Engagement decoder (spec D17): in `lib/types.ts`, `ProfileEngagement` gains `glyphsCarved: number | null` and `glyphsOwned: number | null`. Extract the row mapping of `SupabaseProvider.getProfileEngagement` into a pure `decodeProfileEngagement(raw: unknown): ProfileEngagement` in `lib/data/profile-engagement.ts` (the provider calls it; `days_practiced`/`assiduity` behaviour unchanged), reading `glyphs_carved` / `glyphs_owned` as non-negative integers, anything else (absent, null, wrong type) → `null`. `useProfileEngagement`'s empty value gains the two nulls.
+- [ ] `lib/data/profile-engagement.test.ts`: replay #1386's real payload dump verbatim (read with `readFileSync` from its path under `packages/supabase/scripts/oracles/`, never copied); assert the two counts and that `daysPracticed`/`assiduity` decode as before. Then the same object with both keys deleted and with both set to `null`: counts `null`, no throw. If #1386 committed no dump, capture one with its harness's anon user against the linked project and commit it beside its other payloads, in this task, naming the command in the PR.
+- [ ] `YouGlyphs`: head; three `LinkRow`s (D17), counts from `useProfileEngagement().engagement.glyphsCarved` and `.glyphsOwned`; a `null` count uses the numberless line. Never count `store.marks` or `store.entitledMarks`.
+- [ ] Render test: `<dt>` precedes `<dd>` in the DOM for each counter; "1,240" in EN and "1 240" (narrow no-break space) in FR; `YouGlyphs` with `glyphsCarved: 12` reads "The 12 marks you carved." and with `null` "The marks you carved.".
 
 ### Task 35: Achievements
 
@@ -410,7 +414,7 @@ Spec D15–D21.
 
 - [ ] `useLabPreview()`: `Promise.allSettled([fetchAnnouncements(sb, { limit: 1 }), fetchChangelog(sb, { limit: 3 })])` through `settledOr`, the hook's lazy singleton, `{ announcement, changelog, loading, error, retry }`.
 - [ ] `LabAnnouncementCard`, `LabTimeline` (`<ol>`, `<time dateTime={released_at}>` formatted `{ day: "numeric", month: "short" }`, the rule line `bg-m3-rule`, newest dot `bg-m3-primary`, others `bg-background border-[1.5px] border-m3-outline`; the platform line from the log's platform label; the "All updates" outline pill `Button` rendered as `Link` via `render`), `CommunityStone` per spec D19.
-- [ ] Icon: if `Whatsapp` exists in `@pbbls/icons` on `main`, use it; otherwise use `People`, add `// TODO(#1384 follow-up): whatsapp icon` and file the follow-up issue before opening the PR.
+- [ ] Icon: the `whatsapp` icon is #1387 (`chore/1387-whatsapp-icon`). If it has merged, import `Whatsapp` from `@pbbls/icons`; otherwise use `People` with `// TODO(#1387): whatsapp icon` and say so in the PR body (#1387 then swaps it).
 - [ ] Render test: the external link has `target="_blank"`, `rel` with `noopener`, and the sr-only new-tab text; three `<li>` with `<time>`.
 
 ### Task 37: The page, gate, PR
@@ -418,15 +422,17 @@ Spec D15–D21.
 **Files:** `apps/web/app/profile/page.tsx` (rewrite), create `apps/web/app/profile/layout.tsx`.
 
 - [ ] `layout.tsx`: the italic import and `M3Island` (as Home's).
-- [ ] `page.tsx`: the loading and signed-out states keep their copy, now inside the column; the signed-in page is `YouHeader`, `YouCounters`, `YouGlyphs`, `YouAchievements`, `YouLab`, `LogoutButton` (`variant="ghost"`, at the foot) in the D22 column with `gap-11`. No `PageHeader`. `CollectionsCard` and `ShortcutsRow` are no longer imported here (they stay in the codebase, D20).
-- [ ] Part gate; visual pass as Part 5 on `/profile`; `/u/<handle>` (public profile) unchanged; `/sandbox/design` profile view unchanged.
+- [ ] `page.tsx`: the loading and signed-out states keep their copy, now inside the column; the signed-in page is `YouHeader`, `YouCounters`, `YouGlyphs`, `YouAchievements`, `YouLab` in the D22 column with `gap-11`. No `PageHeader`, no log out (spec D20). `CollectionsCard`, `ShortcutsRow` and `LogoutButton` are no longer imported here (they stay in the codebase, D20).
+- [ ] Log out in Settings (spec D20): create `apps/web/components/settings/SignOutSection.tsx` (`{ onSignOut: () => Promise<void> }`; the section title as the other settings sections set theirs, read `AppearanceSection.tsx` first; then `components/profile/LogoutButton`, imported where it is). In `app/settings/page.tsx`, render it between `<AppearanceSection />` and `<DeleteAccountSection …/>`, with `onSignOut={async () => { await logout(); router.push("/") }}` (`logout` and `router` are already in scope there). Render test `lib/home/settings-render.test.ts`: the section renders the log-out button with the `profile.logout` label.
+- [ ] Render test in `you-render.test.ts`: no element with the `profile.logout` label on You.
+- [ ] Part gate; visual pass as Part 5 on `/profile`; `/settings`: log out sits above Delete account, signs out and lands on `/`; `/u/<handle>` (public profile) unchanged; `/sandbox/design` profile view unchanged.
 - [ ] Arkaik: update the You (profile) view node's description and status `development`.
 
 ---
 
 ## Part 7 — landing and the hub bar (`feat/1384-web-hub-nav`)
 
-Spec D1, D2. **Confirm D2 with the maintainer before starting.**
+Spec D1, D2 (the hub bar and `/home` as the signed-in landing: decided by the maintainer on 2026-10-31).
 
 ### Task 38: Home is the landing
 
@@ -455,7 +461,7 @@ Spec D1, D2. **Confirm D2 with the maintainer before starting.**
 
 **Files:** `docs/decisions/log.md` (append).
 
-- [ ] One entry: `## 2026-10-31 — Web Home and You wear the brand M3 roles in an island; Inclusive Sans is bundled; Home is the web landing with a hub bar (#1384)`, with Context, Decision (D1, D2, D3–D5 in one line each), Why, Consequences (two themes until the default flips; the island selectors; `preload: false`; the dead `Sidebar` stays dead), Supersedes (extends 2026-09-28 "The web follows Android's M3-evo theme": `.m3` is no longer sandbox-only), Refs (spec, plan, files).
+- [ ] One entry: `## 2026-10-31 — Web Home and You wear the brand M3 roles in an island; Inclusive Sans is bundled; Home is the web landing with a hub bar (#1384)`, with Context, Decision (D1, D2, D3–D5 in one line each; D20, log out lives in Settings on every surface; D17, glyph counts come from `get_profile_engagement` per #1386), Why, Consequences (two themes until the default flips; the island selectors; `preload: false`; the dead `Sidebar` stays dead), Supersedes (extends 2026-09-28 "The web follows Android's M3-evo theme": `.m3` is no longer sandbox-only), Refs (spec, plan, files).
 
 ### Task 42: Gate, Lab Note, PR
 
@@ -468,8 +474,8 @@ Spec D1, D2. **Confirm D2 with the maintainer before starting.**
 
 ## Self-review against the spec
 
-- **D1** route and landing: Tasks 23, 38. **D2** hub bar, Path link, Connections: Tasks 39, 40. **D3** island: Tasks 4, 6, 8, 23, 37. **D4** blends: Task 5. **D5** fonts: Tasks 1–3, italic imports in 23, 37. **D6** type roles: Task 7. **D7** stones: Tasks 10–14. **D8** surfaces: Tasks 7, 14, 27, 28, 35. **D9** week links and `?week=`: Tasks 20, 24. **D10** month data: Tasks 16, 19, 24. **D11** quick actions: Task 26. **D12** first five and claim: Tasks 20, 21, 27. **D13** wraps: Tasks 16, 28. **D14** About and guides: Tasks 16, 29. **D15** header and ripples: Tasks 32, 33. **D16** counters: Task 34. **D17** glyphs: Task 34. **D18** achievements: Task 35. **D19** Lab: Task 36. **D20** logout, components kept: Task 37. **D21** icons: every UI task; whatsapp fallback Task 36. **D22** layout: Tasks 23, 37. **D23** loading and errors: Tasks 21, 28, 29, 36. **Accessibility:** Tasks 8 (contrast), 24, 26, 27, 28, 34, 36, 39 and each part's visual pass. **i18n:** Tasks 22, 31, 39.
-- **Names used throughout:** `M3Island`, `pb-type-*`, `pb-card`, `stoneRandom`, `stoneOutline`, `splitStone`, `toPathData`, `PENTAGON_PATH`, `Stone`, `SplitStone`, `Pentagon`, `IconChip`, `LinkRow`, `useElementSize`, `HomeMonth`, `monthColumns`, `cairnWidths`, `firstFiveState`, `parseWeekParam`, `useHomeMonth`, `useHomeWraps`, `useGuides`, `useClaimBluePebble`, `useLabPreview`.
+- **D1** route and landing: Tasks 23, 38. **D2** hub bar, Path link, Connections: Tasks 39, 40. **D3** island: Tasks 4, 6, 8, 23, 37. **D4** blends: Task 5. **D5** fonts: Tasks 1–3, italic imports in 23, 37. **D6** type roles: Task 7. **D7** stones: Tasks 10–14. **D8** surfaces: Tasks 7, 14, 27, 28, 35. **D9** week links and `?week=`: Tasks 20, 24. **D10** month data: Tasks 16, 19, 24. **D11** quick actions: Task 26. **D12** first five and claim: Tasks 20, 21, 27. **D13** wraps: Tasks 16, 28. **D14** About and guides: Tasks 16, 29. **D15** header and ripples: Tasks 32, 33. **D16** counters: Task 34. **D17** glyphs, served counts (#1386): Tasks 31, 34. **D18** achievements: Task 35. **D19** Lab: Task 36. **D20** log out in Settings, components kept: Tasks 31, 37. **D21** icons: every UI task; whatsapp fallback Task 36. **D22** layout: Tasks 23, 37. **D23** loading and errors: Tasks 21, 28, 29, 36. **Accessibility:** Tasks 8 (contrast), 24, 26, 27, 28, 34, 36, 39 and each part's visual pass. **i18n:** Tasks 22, 31, 39.
+- **Names used throughout:** `M3Island`, `pb-type-*`, `pb-card`, `stoneRandom`, `stoneOutline`, `splitStone`, `toPathData`, `PENTAGON_PATH`, `Stone`, `SplitStone`, `Pentagon`, `IconChip`, `LinkRow`, `useElementSize`, `HomeMonth`, `monthColumns`, `cairnWidths`, `firstFiveState`, `parseWeekParam`, `useHomeMonth`, `useHomeWraps`, `useGuides`, `useClaimBluePebble`, `useLabPreview`, `decodeProfileEngagement`, `SignOutSection`.
 
 ## Deviations from the spec
 
