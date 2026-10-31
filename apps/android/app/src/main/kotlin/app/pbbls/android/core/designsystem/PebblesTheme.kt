@@ -15,6 +15,8 @@ val LocalSpacing = staticCompositionLocalOf { Spacing }
 
 val LocalHandTypography = staticCompositionLocalOf { PebblesHandTypography }
 
+val LocalPageTypography = staticCompositionLocalOf { PageTypography }
+
 val LocalSpineTokens =
     staticCompositionLocalOf { SpineTokens(SpineTypography, SpineColors.from(LightScheme, night = false)) }
 
@@ -22,7 +24,8 @@ val LocalSpineTokens =
  * Pebbles' own tokens beside Material's (#853). Colour, type and shape are
  * `MaterialTheme.*`; this object keeps only what M3 has no slot for —
  * [spacing], the custom colours ([colors], #990), the handwritten faces
- * ([hand]) and the Spine's type ranks and paper ([spine]).
+ * ([hand]), the Spine's type ranks and paper ([spine]) and the type ranks of
+ * Home and You ([page]).
  */
 object PebblesTheme {
     val spacing: Spacing
@@ -36,6 +39,9 @@ object PebblesTheme {
 
     val spine: SpineTokens
         @Composable get() = LocalSpineTokens.current
+
+    val page: PageTypography
+        @Composable get() = LocalPageTypography.current
 }
 
 /**
@@ -69,6 +75,7 @@ fun PebblesTheme(
     CompositionLocalProvider(
         LocalSpacing provides Spacing,
         LocalHandTypography provides PebblesHandTypography,
+        LocalPageTypography provides PageTypography,
         LocalSpineTokens provides SpineTokens(SpineTypography, SpineColors.from(scheme, dark)),
         LocalExtendedColors provides pebblesExtendedColors(dark, contrast),
     ) {
