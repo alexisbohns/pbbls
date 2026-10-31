@@ -6,7 +6,7 @@ import { FirstFiveMark } from "@/components/achievements/figures/FirstFiveMark"
 import { FlatSeal } from "@/components/achievements/figures/FlatSeal"
 import { Ghost } from "@/components/achievements/figures/Ghost"
 import { HueGroup } from "@/components/achievements/figures/HueGroup"
-import { SheetTitle } from "@/components/ui/sheet"
+import { SheetClose, SheetTitle } from "@/components/ui/sheet"
 import { SkylineStage } from "@/components/achievements/figures/SkylineStage"
 import { polar } from "@/lib/achievements/geometry"
 import type { AchievementPalettes } from "@/lib/achievements/palette"
@@ -33,12 +33,17 @@ export const InSheetContext = createContext(false)
 /** A sheet's frame: the band, the figure, an optional lead, then its sections, on the stock. */
 export function SheetBody({ band, hint, lead, ready, figure, children }: { band: string; hint?: string | null; lead?: string | null; ready?: ReactNode; figure: ReactNode; children: ReactNode }) {
   const inSheet = useContext(InSheetContext)
+  const words = useAchievementsWords()
   const bandClass = "font-spine-sc text-[11.5px] font-semibold tracking-[.22em] text-spine-ink"
   return (
     <div className="px-1 pb-8 font-spine text-spine-ink">
       <header className="flex min-h-11 flex-wrap items-baseline justify-between gap-x-2 gap-y-1 border-b border-spine-card-rule pt-3.5 pb-2">
         {inSheet ? <SheetTitle className={bandClass}>{band}</SheetTitle> : <h2 className={bandClass}>{band}</h2>}
         {ready ?? (hint ? <em className="text-sm font-[380] text-spine-ink-2">{hint}</em> : null)}
+        {inSheet ? (
+          // For a touch screen reader with no Escape and no backdrop to tap: hidden until focused.
+          <SheetClose className="sr-only focus:not-sr-only focus:order-first">{words.sheet.text("close")}</SheetClose>
+        ) : null}
       </header>
       <div className="flex justify-center pt-4">{figure}</div>
       {lead ? <p className="pt-3.5 text-[16.5px] leading-[1.35] font-[380] italic">{lead}</p> : null}
@@ -96,6 +101,7 @@ export function SheetSection({ section, palettes, emotions = null, compact = fal
         <p className="flex min-h-11 items-center border-b border-spine-rule pl-11 text-[14.5px] font-[380] text-spine-ink-2 italic">{section.trailing}</p>
       ) : null}
       {section.quiet ? <p className="pt-2.5 text-[14.5px] font-[380] text-spine-ink-2 italic">{section.quiet}</p> : null}
+      {section.closing ? <p className="pt-2.5 text-[14.5px] font-[380] text-spine-ink-2 italic">{section.closing}</p> : null}
     </section>
   )
 }

@@ -64,8 +64,10 @@ export type RegisterSection = {
   rows: RegisterRow[]
   /** What is not yet, as dotted names, read aloud as one. */
   notYet: string[]
-  /** A closing line ("then every 500", "The buyer is never named."). */
+  /** The ladder's tail, as a row ("then every 500"). */
   trailing?: string
+  /** A quiet closing line under the rows ("The buyer is never named."). */
+  closing?: string
   /** A quiet line in place of rows ("The 25th pebble is still to come."). */
   quiet?: string
 }
@@ -237,12 +239,13 @@ export function milestonesNote(stack: CountingLadder, w: Words): string {
  * pebble), its next (what is left, never a date), the ladder's other steps,
  * then the ladder's tail.
  */
-export function ladderSection(stack: CountingLadder, id: string, title: string, note: string | undefined, w: Words, trailing?: string): RegisterSection {
+export function ladderSection(stack: CountingLadder, id: string, title: string, note: string | undefined, w: Words, closing?: string): RegisterSection {
   const s = w.sheet
   const listed = new Set(stack.levels.map((l) => l.threshold))
   const stage = (threshold: number) => {
     const at = stack.ladder.indexOf(threshold)
-    return at >= 0 ? at : Math.max(stack.ladder.length - 1, 0)
+    // A level past the drawn ladder stands on its last stage; with no ladder, on none.
+    return at >= 0 ? at : stack.ladder.length - 1
   }
   const rows: RegisterRow[] = stack.levels.map((level) => {
     const name = w.number(level.threshold)
@@ -261,7 +264,7 @@ export function ladderSection(stack: CountingLadder, id: string, title: string, 
     const name = w.number(step)
     rows.push({ id: `ahead-${step}`, mark: { kind: "stage", index, fill: 0, done: false }, name, isNew: false, style: "ghostNumber", label: s.row([name], false, true) })
   })
-  return { id, title, note, rows, notYet: [], trailing: trailing ?? (stack.thenEvery !== null ? s.thenEvery(stack.thenEvery) : undefined) }
+  return { id, title, note, rows, notYet: [], trailing: stack.thenEvery !== null ? s.thenEvery(stack.thenEvery) : undefined, closing }
 }
 
 /**

@@ -302,6 +302,7 @@
       },
       "sheet": {
         "buyerNeverNamed": "The buyer is never named.",
+        "close": "Close",
         "column": {
           "moments": "moments",
           "pebbles": "pebbles",

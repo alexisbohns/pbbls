@@ -145,6 +145,10 @@ describe("the Pebbles sheet", () => {
     expect(carved.rows.map((r) => r.name)).toEqual(["10", "25", "50", "75", "100"])
     expect(carved.rows[0]).toMatchObject({ sub: undefined, date: "Sep 21", opens: undefined })
     expect(carved.trailing).toBeUndefined()
+    const sales = ladderSection(s.glyphSales, "sales", "Glyph sales", "3", EN, "The buyer is never named.")
+    expect([sales.trailing, sales.closing]).toEqual([undefined, "The buyer is never named."])
+    const empty = ladderSection({ ...s.glyphSales, ladder: [], next: null, levels: [{ threshold: 5, on: null, pebble: null, isNew: false }] }, "e", "E", undefined, EN)
+    expect(empty.rows[0].mark).toEqual({ kind: "stage", index: -1, fill: 1, done: true })
   })
 })
 

@@ -302,6 +302,7 @@
       },
       "sheet": {
         "buyerNeverNamed": "L'acheteur n'est jamais nommé.",
+        "close": "Fermer",
         "column": {
           "moments": "moments",
           "pebbles": "galets",
