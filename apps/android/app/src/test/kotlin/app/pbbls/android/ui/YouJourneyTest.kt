@@ -1,5 +1,7 @@
 package app.pbbls.android.ui
 
+import android.app.Application
+import android.content.Intent
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -13,12 +15,14 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import app.pbbls.android.R
+import app.pbbls.android.core.model.LabConfig
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeLogsService
 import app.pbbls.android.testing.UiFixtures
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.robolectric.Shadows.shadowOf
 import javax.inject.Inject
 
 /**
@@ -110,5 +114,18 @@ class YouJourneyTest : AppUiTest() {
         // The detail loads the log by the id You passed in its key.
         assertEquals(listOf(announcement.id), logs.logCalls)
         onYou().assertDoesNotExist()
+    }
+
+    /** The callout opens the invite outside the app, one button for the whole stone (D16d, D18). */
+    @Test
+    fun `the community callout opens the WhatsApp invite`() {
+        signedIn()
+        onTab(R.string.tab_you).performClick()
+
+        onText(R.string.you_community_title).performScrollTo().performClick()
+
+        val started = shadowOf(context as Application).nextStartedActivity
+        assertEquals(Intent.ACTION_VIEW, started.action)
+        assertEquals(LabConfig.WHATSAPP_INVITE_URL, started.dataString)
     }
 }

@@ -84,6 +84,9 @@ private val RULE = 1.dp
 private val DATE_TOP = 1.dp
 private val LOG_GAP = 14.dp
 
+/** "All updates" sits 24 dp above the callout (`.morebtn` margin). */
+private val CALLOUT_GAP = 24.dp
+
 /** "All updates" (`.morebtn`): under the entries' text column, its own insets, a 16 dp chevron. */
 private val PILL_START = LOG_INSET + DATE_WIDTH + COLUMN_GAP
 private val PILL_PADDING = PaddingValues(start = 16.dp, top = 8.dp, end = 12.dp, bottom = 8.dp)
@@ -95,7 +98,8 @@ private val CHEVRON = 16.dp
  * (its cover, or the split-stone band when it has none; "Lab notes · 31 October", the title, two
  * lines of summary), which opens its detail ([onOpenAnnouncement] with the log's id); the three
  * latest shipped features as a dated timeline, not clickable; then "All updates", which opens the
- * Lab screen ([onOpenLab]), the only way left from You to the roadmap, the backlog and reactions.
+ * Lab screen ([onOpenLab]), the only way left from You to the roadmap, the backlog and reactions;
+ * last, the [YouCommunityCallout].
  *
  * No announcement (none published, or its read failed) is no card; no entries, no timeline. Dates
  * are in the device's zone and the app's locale, read in composition (D22).
@@ -131,6 +135,8 @@ internal fun YouLabSection(
             Spacer(Modifier.height(LOG_GAP))
         }
         AllUpdatesPill(onClick = onOpenLab, modifier = Modifier.padding(start = PILL_START))
+        Spacer(Modifier.height(CALLOUT_GAP))
+        YouCommunityCallout()
     }
 }
 

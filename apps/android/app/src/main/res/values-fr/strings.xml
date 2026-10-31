@@ -270,6 +270,8 @@
     <string name="you_glyphs_community_line">Les glyphes que partagent d\'autres pebblers.</string>
     <string name="you_lab_kicker">Notes du Lab · %1$s</string>
     <string name="you_lab_all_updates">Toutes les nouveautés</string>
+    <string name="you_community_title">Rejoins la communauté</string>
+    <string name="you_community_line">Parle avec d\'autres pebblers sur WhatsApp.</string>
     <string name="settings_title">Réglages</string>
     <string name="settings_appearance_section">Apparence</string>
     <string name="settings_wallpaper_colors_title">Couleurs du fond d’écran</string>
@@ -664,7 +666,6 @@
     <string name="lab_list_load_error">Couldn\'t load the list.</string>
     <string name="lab_announcement_load_error">Impossible de charger cette annonce.</string>
     <string name="lab_list_empty">Pas grand chose pour le moment.</string>
-    <string name="lab_card_subtitle">Actus &amp; communauté</string>
     <string name="lab_reaction_upvote_a11y">Voter</string>
     <string name="lab_reaction_remove_a11y">Ôter mon vote</string>
     <string name="lab_reaction_count_a11y">%1$d rocks</string>
