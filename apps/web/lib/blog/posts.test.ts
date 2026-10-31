@@ -37,8 +37,17 @@ describe("blog posts", () => {
     }
   })
 
-  it("serves set-in-stone, newest first, its link preview a raster in the repo and its drawings SVG in the bucket", () => {
-    expect(BLOG_POSTS[0]?.slug).toBe("set-in-stone")
+  it("serves cut-from-one-stone, newest first, its link preview a raster in the repo and its drawings SVG in the bucket", () => {
+    expect(BLOG_POSTS[0]?.slug).toBe("cut-from-one-stone")
+    const post = getBlogPost("cut-from-one-stone")
+    const figures = post?.body.filter((block): block is BlogFigure => block.kind === "figure") ?? []
+    expect(figures[0]?.stored).toBeUndefined()
+    expect(figures[0]?.file).toMatch(/\.jpg$/)
+    expect(figures.filter((figure) => figure.stored === "bucket").length).toBe(9)
+    for (const figure of figures) expect(figure.stored === "bucket", figure.file).toBe(figure.file.endsWith(".svg"))
+  })
+
+  it("serves set-in-stone, its link preview a raster in the repo and its drawings SVG in the bucket", () => {
     const post = getBlogPost("set-in-stone")
     expect(post && formatPublishedOn(post.publishedOn)).toBe("31 October 2026")
     const figures = post?.body.filter((block): block is BlogFigure => block.kind === "figure") ?? []
