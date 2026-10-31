@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,10 +59,12 @@ private const val STEP_TRANSITION_MS = 280
  * entry (A-14). [onSaved] returns to Path, [onSavedThenComplete] hands the new
  * moment id over to Complete, and [onDismiss] is every other exit: ✕ or back
  * on the photo step, silently when nothing was entered, else through the
- * close dialog (R2).
+ * close dialog (R2). [chainsComplete] (Home's New pebble, #1383 D7) makes the
+ * name step's one save "Make it a pebble now", always followed by Complete.
  */
 @Composable
 fun CaptureFlowScreen(
+    chainsComplete: Boolean,
     onDismiss: () -> Unit,
     onSaved: () -> Unit,
     onSavedThenComplete: (momentId: String) -> Unit,
@@ -69,6 +72,7 @@ fun CaptureFlowScreen(
     viewModel: CaptureFlowViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel, chainsComplete) { viewModel.start(chainsComplete) }
     // Each buzz asks Pebbles' haptics switch (#1242 D23).
     val haptic = rememberTapHaptics { viewModel.hapticsOn }
 
@@ -99,7 +103,7 @@ fun CaptureFlowScreen(
         },
         onRetryPhoto = viewModel::onRetryPhoto,
         onRemovePhoto = viewModel::onRemovePhoto,
-        onSave = { viewModel.save(thenComplete = false) },
+        onSave = viewModel::saveFromNameStep,
         onSaveThenComplete = { viewModel.save(thenComplete = true) },
         onClose = viewModel::onCloseRequested,
         onSaveFromClose = viewModel::onSaveFromClose,
@@ -170,7 +174,16 @@ fun CaptureFlowContent(
             RecordStepScaffold(
                 title = stringResource(step.titleRes),
                 subtitle = step.subtitleRes?.let { stringResource(it) },
-                action = actionFor(flow.copy(step = step), uiState.canSaveNow, model, labels, onSave, onSaveThenComplete),
+                action =
+                    actionFor(
+                        flow.copy(step = step),
+                        uiState.canSaveNow,
+                        uiState.chainsComplete,
+                        model,
+                        labels,
+                        onSave,
+                        onSaveThenComplete,
+                    ),
             ) {
                 when (step) {
                     CaptureStep.PHOTO ->
@@ -272,11 +285,13 @@ private fun CaptureCloseDialog(
 /**
  * The step's actions (A-1): the photo is optional (Skip, then Done once
  * attached; a pick never advances), when always has an answer, and the name
- * step carries R1's two saves.
+ * step carries R1's two saves, or, when it [chainsComplete] (#1383 D7), the
+ * one that leads to Complete: [onSave] then asks the ViewModel for that chain.
  */
 private fun actionFor(
     state: CaptureFlowState,
     canSaveNow: Boolean,
+    chainsComplete: Boolean,
     model: CaptureFlowModel,
     labels: CaptureLabels,
     onSave: () -> Unit,
@@ -296,18 +311,37 @@ private fun actionFor(
                 onClick = model::advance,
             )
         CaptureStep.NAME ->
-            RecordStepAction.PrimaryWithSecondary(
-                primary =
-                    RecordStepAction.Primary(
-                        label = labels.save,
-                        enabled = canSaveNow,
-                        isLoading = state.isSaving,
-                        onClick = onSave,
-                    ),
-                secondaryLabel = labels.makePebbleNow,
-                onSecondary = onSaveThenComplete,
-            )
+            if (chainsComplete) {
+                RecordStepAction.Primary(
+                    label = labels.makePebbleNow,
+                    enabled = canSaveNow,
+                    isLoading = state.isSaving,
+                    onClick = onSave,
+                )
+            } else {
+                nameStepSaves(state, canSaveNow, labels, onSave, onSaveThenComplete)
+            }
     }
+
+/** R1's two saves on the name step: Save moment, and "Make it a pebble now" beneath it. */
+private fun nameStepSaves(
+    state: CaptureFlowState,
+    canSaveNow: Boolean,
+    labels: CaptureLabels,
+    onSave: () -> Unit,
+    onSaveThenComplete: () -> Unit,
+): RecordStepAction =
+    RecordStepAction.PrimaryWithSecondary(
+        primary =
+            RecordStepAction.Primary(
+                label = labels.save,
+                enabled = canSaveNow,
+                isLoading = state.isSaving,
+                onClick = onSave,
+            ),
+        secondaryLabel = labels.makePebbleNow,
+        onSecondary = onSaveThenComplete,
+    )
 
 /** Resolved strings, so the action builder stays a pure function. */
 private data class CaptureLabels(

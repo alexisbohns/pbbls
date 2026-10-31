@@ -106,6 +106,51 @@ class CaptureFlowViewModelTest {
         }
 
     @Test
+    fun `the name step's save is a plain save by default`() =
+        runTest {
+            val h = Harness()
+            val effects = recordEffects(h.viewModel.effects)
+            h.viewModel.start(chainsComplete = false)
+            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().setName("Walk")
+            h.viewModel.saveFromNameStep()
+            advanceUntilIdle()
+            assertEquals(listOf(CaptureFlowEffect.Saved), effects.values.filterNot { it is CaptureFlowEffect.Haptic })
+            effects.stop()
+        }
+
+    @Test
+    fun `opened as Home's new pebble, the name step's save chains into complete`() =
+        runTest {
+            val h = Harness()
+            val effects = recordEffects(h.viewModel.effects)
+            h.writes.nextMomentId = "m-7"
+            h.viewModel.start(chainsComplete = true)
+            assertTrue(h.viewModel.uiState.value.chainsComplete)
+            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().setName("Walk")
+            h.viewModel.saveFromNameStep()
+            advanceUntilIdle()
+            assertEquals(listOf(CaptureFlowEffect.SavedThenComplete("m-7")), effects.values.filterNot { it is CaptureFlowEffect.Haptic })
+            effects.stop()
+        }
+
+    @Test
+    fun `opened as Home's new pebble, the close dialog's save is still a plain save`() =
+        runTest {
+            val h = Harness()
+            val effects = recordEffects(h.viewModel.effects)
+            h.viewModel.start(chainsComplete = true)
+            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().setName("Walk")
+            h.viewModel.onCloseRequested()
+            h.viewModel.onSaveFromClose()
+            advanceUntilIdle()
+            assertEquals(listOf(CaptureFlowEffect.Saved), effects.values.filterNot { it is CaptureFlowEffect.Haptic })
+            effects.stop()
+        }
+
+    @Test
     fun `a saved capture asks the path to focus its week`() =
         runTest {
             val h = Harness()
