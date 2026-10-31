@@ -16,14 +16,15 @@ import SwiftUI
 /// weight.
 enum SpineType {
     enum Face: Equatable {
-        case ysabeau, caveat
+        case ysabeau, caveat, inclusive
 
         /// The heaviest weight Bold Text may reach: the spec's 800 for Ysabeau
-        /// (its axis runs to 1000), Caveat's axis maximum, 700.
+        /// (its axis runs to 1000), Caveat's and Inclusive Sans's axis maximum, 700.
         var maxWeight: Int {
             switch self {
-            case .ysabeau: return 800
-            case .caveat:  return 700
+            case .ysabeau:   return 800
+            case .caveat:    return 700
+            case .inclusive: return 700
             }
         }
     }
@@ -66,6 +67,8 @@ enum SpineType {
         var scaling: Scaling
         var face: Face = .ysabeau
         var isLowercase: Bool = false
+        /// Capitals, set by the modifier (the Inclusive caps tokens, #1382 D3).
+        var isUppercase: Bool = false
         /// Horizontal room the ink needs past its advance (Caveat only).
         var inkOverhang: CGFloat = 0
     }

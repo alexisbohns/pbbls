@@ -85,6 +85,26 @@ struct SpineTypeResolveTests {
         #expect(SpineType.Face.caveat.maxWeight == maximum.intValue)
     }
 
+    @Test("Bold Text takes an Inclusive rank from 600 to 700 and stops there")
+    func boldTextCapsInclusive() {
+        let semibold = SpineType.Style(size: 17, weight: 600, scaling: .text(.body), face: .inclusive)
+        let bold = SpineType.Style(size: 17, weight: 700, scaling: .text(.body), face: .inclusive)
+        let thickened = SpineType.resolve(semibold, dynamicTypeSize: .large, legibilityWeight: .bold)
+        #expect(thickened.weight == 700)
+        #expect(thickened.uiFont.familyName == "Inclusive Sans")
+        #expect(SpineType.resolve(bold, dynamicTypeSize: .large, legibilityWeight: .bold).weight == 700)
+    }
+
+    @Test("a capitals rank resolves unchanged: the case is the modifier's")
+    func uppercaseIsTheModifiers() {
+        let plain = SpineType.Style(size: 12, weight: 500, trackingEm: 0.08, scaling: .text(.caption), face: .inclusive)
+        var caps = plain
+        caps.isUppercase = true
+        let a = SpineType.resolve(plain, dynamicTypeSize: .large, legibilityWeight: nil)
+        let b = SpineType.resolve(caps, dynamicTypeSize: .large, legibilityWeight: nil)
+        #expect(a.size == b.size && a.weight == b.weight && a.tracking == b.tracking && a.uiFont === b.uiFont)
+    }
+
     @Test("lockupWord resolves through the Caveat descriptor at 700")
     func lockupFace() {
         let resolved = SpineType.resolve(.lockupWord(.medium), dynamicTypeSize: .large, legibilityWeight: nil)
