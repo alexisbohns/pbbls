@@ -42,6 +42,9 @@ fun achievementTitle(record: AchievementRecord): String {
         "first_collection" -> stringResource(R.string.achievement_family_first_collection_title)
         "first_glyph" -> stringResource(R.string.achievement_family_first_glyph_title)
         "first_soul" -> stringResource(R.string.achievement_family_first_soul_title)
+        "first_moment" -> stringResource(R.string.achievement_family_first_moment_title)
+        "first_pebble" -> stringResource(R.string.achievement_family_first_pebble_title)
+        "first_five" -> stringResource(R.string.achievement_family_first_five_title)
         "glyph_count" -> stringResource(R.string.achievement_family_glyph_count_title, threshold)
         "glyph_sales" -> pluralStringResource(R.plurals.achievement_family_glyph_sales_title, threshold, threshold)
         else -> record.slug
@@ -60,32 +63,15 @@ fun achievementDescription(record: AchievementRecord): String? {
         "first_collection" -> stringResource(R.string.achievement_family_first_collection_description)
         "first_glyph" -> stringResource(R.string.achievement_family_first_glyph_description)
         "first_soul" -> stringResource(R.string.achievement_family_first_soul_description)
+        "first_moment" -> stringResource(R.string.achievement_family_first_moment_description)
+        "first_pebble" -> stringResource(R.string.achievement_family_first_pebble_description)
+        "first_five" -> stringResource(R.string.achievement_family_first_five_description)
         "glyph_count" -> stringResource(R.string.achievement_family_glyph_count_description, threshold)
         "glyph_sales" ->
             pluralStringResource(R.plurals.achievement_family_glyph_sales_description, threshold, threshold)
         else -> null
     }
 }
-
-/** Group heading for a family section; unknown families show their raw value. */
-@Composable
-fun achievementGroupName(family: String): String =
-    when (family) {
-        "pebble_count" -> stringResource(R.string.achievement_group_pebble_count)
-        "emotion_first" -> stringResource(R.string.achievement_group_emotion_first)
-        "domain_first" -> stringResource(R.string.achievement_group_domain_first)
-        "first_collection" -> stringResource(R.string.achievement_group_first_collection)
-        "first_glyph" -> stringResource(R.string.achievement_group_first_glyph)
-        "first_soul" -> stringResource(R.string.achievement_group_first_soul)
-        "glyph_count" -> stringResource(R.string.achievement_group_glyph_count)
-        "glyph_sales" -> stringResource(R.string.achievement_group_glyph_sales)
-        "first_moment" -> stringResource(R.string.achievement_group_first_moment)
-        "first_pebble" -> stringResource(R.string.achievement_group_first_pebble)
-        "first_five" -> stringResource(R.string.achievement_group_first_five)
-        "first_stone" -> stringResource(R.string.achievement_group_first_stone)
-        "set_complete" -> stringResource(R.string.achievement_group_set_complete)
-        else -> family
-    }
 
 /**
  * The mark per family: exactly iOS `Achievement.familySymbol` (Android icon

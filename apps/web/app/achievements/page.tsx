@@ -1,5 +1,5 @@
-import { AchievementsView } from "@/components/achievements/AchievementsView"
+import { AchievementsPageView } from "@/components/achievements/AchievementsPageView"
 
 export default function AchievementsPage() {
-  return <AchievementsView />
+  return <AchievementsPageView />
 }

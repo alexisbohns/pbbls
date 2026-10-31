@@ -244,18 +244,151 @@
   "achievements": {
     "title": "Achievements",
     "loading": "Loading…",
-    "error": "Couldn't load your achievements. Please try again.",
     "locked": "Locked",
     "unlockedOn": "Unlocked {date}",
-    "group": {
-      "pebble_count": "Pebbles",
-      "emotion_first": "Emotions",
-      "domain_first": "Domains",
-      "first_collection": "Collections",
-      "first_glyph": "Glyphs",
-      "first_soul": "Souls",
-      "glyph_count": "Carving",
-      "glyph_sales": "Market"
+    "rosace": {
+      "of": "of {of}"
+    },
+    "page": {
+      "header": {
+        "since": "since {date}",
+        "days": "{count, plural, one {day} other {days}}"
+      },
+      "card": {
+        "explorer": "Explorer",
+        "emotions": "Emotions",
+        "domains": "Domains",
+        "pebbles": "Pebbles",
+        "year": "The year",
+        "glyphsCarved": "Glyphs carved",
+        "glyphSales": "Glyph sales"
+      },
+      "hint": {
+        "explorer": "five rings",
+        "since": "since {date}",
+        "domains": "in the order they came",
+        "inProgress": "in progress"
+      },
+      "coverage": {
+        "none": "Link your pebbles to the parts of your life they touch, and your insights will start reading them.",
+        "few": "You haven't linked many pebbles to domains yet, so your insights have little to go on.",
+        "third": "Your pebbles touch a third of your life. Link a few more domains and your insights will see further.",
+        "half": "You've already linked pebbles with half of the domains. What a rich life!",
+        "most": "Your pebbles reach most parts of your life. Your insights have plenty to read.",
+        "all": "Every part of your life has a pebble in it. Your insights see the whole picture."
+      },
+      "pebbles": {
+        "kept": "{count, plural, one {# pebble} other {# pebbles}}.",
+        "keptLead": "{count, plural, one {# pebble kept} other {# pebbles kept}}.",
+        "none": "No stone stands yet; the first rises toward {target}.",
+        "one": "One stone stands; the {rising} rises toward {target}.",
+        "some": "{words} stones stand; the {rising} rises toward {target}.",
+        "all": "Every stone stands; the next mark is {target}.",
+        "top": "Every stone stands."
+      },
+      "year": {
+        "moments": {
+          "keep": "Keep a moment in every full week and {month} reaches the inner disc.",
+          "one": "One more day with a moment, and one in each full week, bring {month} to the inner disc.",
+          "some": "{words} more days with a moment, one in each full week, bring {month} to the inner disc.",
+          "unreachable": "{month} can't reach the inner disc this month."
+        },
+        "pebbles": {
+          "keep": "Keep a pebble in every full week and {month} reaches the rim.",
+          "one": "One more day with a pebble, and one in each full week, bring {month} to the rim.",
+          "some": "{words} more days with a pebble, one in each full week, bring {month} to the rim.",
+          "unreachable": "{month} can't reach the rim this month."
+        }
+      },
+      "sheet": {
+        "buyerNeverNamed": "The buyer is never named.",
+        "close": "Close",
+        "column": {
+          "moments": "moments",
+          "pebbles": "pebbles",
+          "weeks": "weeks"
+        },
+        "domainsEmotions": "Domains and emotions",
+        "earlierYears": "Earlier years",
+        "entered": "Entered",
+        "firstFive": "The first five",
+        "firstYear": "None yet. {year} is your first year here.",
+        "milestones": "Milestones",
+        "months": "The months",
+        "newestFirst": "newest first",
+        "notYet": "Not yet in these pages",
+        "number": "No. {number}",
+        "of": "{count} of {total}",
+        "register": "the register",
+        "sixFirsts": "The six firsts",
+        "thenEvery": "then every {step}",
+        "toGo": "{left} to go",
+        "twentyFifth": "The 25th",
+        "twentyFive": "25 pebbles",
+        "twentyFiveWaiting": "The 25th pebble is still to come.",
+        "unknownDomain": "A domain",
+        "unknownEmotion": "An emotion",
+        "unknownFamily": "Other emotions",
+        "unknownFirst": "A first"
+      },
+      "kind": {
+        "small": "Small",
+        "medium": "Medium",
+        "large": "Large"
+      },
+      "ready": "ready",
+      "ceremonyError": "Couldn't open the ceremony. Please try again.",
+      "ceremony": {
+        "emotions": {
+          "title": "Every emotion",
+          "body": "Your pebbles have carried every feeling on the wheel."
+        },
+        "domains": {
+          "title": "Every domain",
+          "body": "Every part of your life has a pebble in it."
+        },
+        "six_firsts": {
+          "title": "The six firsts",
+          "body": "Small, medium and large; lowlight, neutral and highlight."
+        }
+      },
+      "error": {
+        "title": "Couldn't load your achievements",
+        "body": "Check your connection and try again.",
+        "retry": "Try again"
+      },
+      "a11y": {
+        "header": "{days}, {since}",
+        "explorer": "Explorer: {rings}.",
+        "join": "; ",
+        "ring": {
+          "first_five": "the first five",
+          "six_firsts": "the six firsts",
+          "twenty_five": "25 pebbles",
+          "domains": "domains",
+          "emotions": "emotions"
+        },
+        "ringDone": "{name}, done",
+        "ringPart": "{name}, {count} of {of}",
+        "new": "{count, plural, one {# new} other {# new}}.",
+        "emotions": "Emotions, {count} of {of}.",
+        "domains": "Domains, {count} of {of}.",
+        "pebbles": "Pebbles. {line}",
+        "glyphsCarved": "Glyphs carved: {count}.",
+        "glyphSales": "Glyph sales: {count}.",
+        "year": "The year {year}. On the rim: {rim}. On the inner disc: {inner}. On their way: {way}.",
+        "none": "none",
+        "month": "{month}. Days with a moment: {moments}. With a pebble: {pebbles}. {weeks}.",
+        "newSince": "new since you last looked",
+        "rowNotYet": "not yet",
+        "noFullWeek": "No full week yet",
+        "notYet": "Not yet: {names}",
+        "openPebble": "Open the pebble",
+        "openSheet": "Open",
+        "reached": "{value}, reached",
+        "weeksFilled": "Full weeks filled: {count} of {total}",
+        "ready": "{title}: the ceremony is ready."
+      }
     },
     "family": {
       "pebble_count": {
@@ -289,6 +422,18 @@
       "glyph_sales": {
         "title": "{threshold, plural, one {First sale} other {# sales}}",
         "description": "{threshold, plural, one {Sell your first glyph in the market.} other {Make # glyph sales in the market.}}"
+      },
+      "first_moment": {
+        "title": "First moment",
+        "description": "Record your first moment."
+      },
+      "first_pebble": {
+        "title": "First pebble",
+        "description": "Complete your first pebble."
+      },
+      "first_five": {
+        "title": "The blue pebble",
+        "description": "Claim it once your first five are done."
       }
     }
   },

@@ -187,9 +187,8 @@ fun ProfileScreen(
                         karma = content.karma,
                     )
                     ProfileAchievementsCard(
-                        recent = content.recentAchievements,
-                        unlockedCount = content.unlockedAchievementCount,
-                        hasLoaded = content.achievementsLoaded,
+                        badges = content.shelf,
+                        count = content.shelfCount,
                         onOpen = onOpenAchievements,
                     )
                     ProfileCollectionsCard(

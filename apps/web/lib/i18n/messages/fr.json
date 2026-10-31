@@ -244,18 +244,151 @@
   "achievements": {
     "title": "Succès",
     "loading": "Chargement…",
-    "error": "Impossible de charger tes succès. Réessaie un peu plus tard.",
     "locked": "À débloquer",
     "unlockedOn": "Débloqué le {date}",
-    "group": {
-      "pebble_count": "Galets",
-      "emotion_first": "Émotions",
-      "domain_first": "Domaines",
-      "first_collection": "Collections",
-      "first_glyph": "Glyphes",
-      "first_soul": "Âmes",
-      "glyph_count": "Gravure",
-      "glyph_sales": "Marché"
+    "rosace": {
+      "of": "sur {of}"
+    },
+    "page": {
+      "header": {
+        "since": "depuis le {date}",
+        "days": "{count, plural, one {jour} other {jours}}"
+      },
+      "card": {
+        "explorer": "Explorateur",
+        "emotions": "Émotions",
+        "domains": "Domaines",
+        "pebbles": "Galets",
+        "year": "L'année",
+        "glyphsCarved": "Glyphes gravés",
+        "glyphSales": "Ventes de glyphes"
+      },
+      "hint": {
+        "explorer": "cinq anneaux",
+        "since": "depuis le {date}",
+        "domains": "dans l'ordre d'arrivée",
+        "inProgress": "en cours"
+      },
+      "coverage": {
+        "none": "Relie tes galets aux parts de ta vie qu'ils touchent, et tes aperçus commenceront à les lire.",
+        "few": "Tu as encore relié peu de galets à des domaines : tes aperçus ont peu de matière.",
+        "third": "Tes galets touchent un tiers de ta vie. Relie quelques domaines de plus et tes aperçus verront plus loin.",
+        "half": "Tu as déjà relié des galets à la moitié des domaines. Quelle vie riche !",
+        "most": "Tes galets touchent la plupart des parts de ta vie. Tes aperçus ont de quoi lire.",
+        "all": "Chaque part de ta vie a son galet. Tes aperçus voient tout le tableau."
+      },
+      "pebbles": {
+        "kept": "{count, plural, one {# galet} other {# galets}}.",
+        "keptLead": "{count, plural, one {# galet gardé} other {# galets gardés}}.",
+        "none": "Aucune pierre ne se dresse encore ; la première s'élève vers {target}.",
+        "one": "Une pierre se dresse ; la {rising} s'élève vers {target}.",
+        "some": "{words} pierres se dressent ; la {rising} s'élève vers {target}.",
+        "all": "Toutes les pierres se dressent ; le prochain cap est {target}.",
+        "top": "Toutes les pierres se dressent."
+      },
+      "year": {
+        "moments": {
+          "keep": "Garde un moment dans chaque semaine complète et {month} rejoindra le disque intérieur.",
+          "one": "Un jour de plus avec un moment, et un dans chaque semaine complète : {month} rejoindra le disque intérieur.",
+          "some": "{words} jours de plus avec un moment, un dans chaque semaine complète : {month} rejoindra le disque intérieur.",
+          "unreachable": "{month} n'atteindra pas le disque intérieur ce mois-ci."
+        },
+        "pebbles": {
+          "keep": "Garde un galet dans chaque semaine complète et {month} atteindra le bord.",
+          "one": "Un jour de plus avec un galet, et un dans chaque semaine complète : {month} atteindra le bord.",
+          "some": "{words} jours de plus avec un galet, un dans chaque semaine complète : {month} atteindra le bord.",
+          "unreachable": "{month} n'atteindra pas le bord ce mois-ci."
+        }
+      },
+      "sheet": {
+        "buyerNeverNamed": "L'acheteur n'est jamais nommé.",
+        "close": "Fermer",
+        "column": {
+          "moments": "moments",
+          "pebbles": "galets",
+          "weeks": "semaines"
+        },
+        "domainsEmotions": "Domaines et émotions",
+        "earlierYears": "Années précédentes",
+        "entered": "Entrés",
+        "firstFive": "Les cinq premières fois",
+        "firstYear": "Aucune pour l'instant. {year} est ta première année ici.",
+        "milestones": "Jalons",
+        "months": "Les mois",
+        "newestFirst": "du plus récent au plus ancien",
+        "notYet": "Pas encore dans ces pages",
+        "number": "N° {number}",
+        "of": "{count} sur {total}",
+        "register": "le registre",
+        "sixFirsts": "Les six premières fois",
+        "thenEvery": "puis tous les {step}",
+        "toGo": "encore {left}",
+        "twentyFifth": "Le 25e",
+        "twentyFive": "25 galets",
+        "twentyFiveWaiting": "Le 25e galet reste à venir.",
+        "unknownDomain": "Un domaine",
+        "unknownEmotion": "Une émotion",
+        "unknownFamily": "Autres émotions",
+        "unknownFirst": "Une première fois"
+      },
+      "kind": {
+        "small": "Petit",
+        "medium": "Moyen",
+        "large": "Grand"
+      },
+      "ready": "prêt",
+      "ceremonyError": "Impossible d'ouvrir la cérémonie. Réessaie.",
+      "ceremony": {
+        "emotions": {
+          "title": "Toutes les émotions",
+          "body": "Tes galets ont porté chaque émotion de la roue."
+        },
+        "domains": {
+          "title": "Tous les domaines",
+          "body": "Chaque part de ta vie a son galet."
+        },
+        "six_firsts": {
+          "title": "Les six premières fois",
+          "body": "Petit, moyen et grand ; creux, neutre et temps fort."
+        }
+      },
+      "error": {
+        "title": "Impossible de charger tes succès",
+        "body": "Vérifie ta connexion et réessaie.",
+        "retry": "Réessayer"
+      },
+      "a11y": {
+        "header": "{days}, {since}",
+        "explorer": "Explorateur : {rings}.",
+        "join": " ; ",
+        "ring": {
+          "first_five": "les cinq premières fois",
+          "six_firsts": "les six premières fois",
+          "twenty_five": "25 galets",
+          "domains": "domaines",
+          "emotions": "émotions"
+        },
+        "ringDone": "{name}, c'est fait",
+        "ringPart": "{name}, {count} sur {of}",
+        "new": "{count, plural, one {# nouveauté} other {# nouveautés}}.",
+        "emotions": "Émotions, {count} sur {of}.",
+        "domains": "Domaines, {count} sur {of}.",
+        "pebbles": "Galets. {line}",
+        "glyphsCarved": "Glyphes gravés : {count}.",
+        "glyphSales": "Ventes de glyphes : {count}.",
+        "year": "L'année {year}. Au bord : {rim}. Sur le disque intérieur : {inner}. En chemin : {way}.",
+        "none": "aucun",
+        "month": "{month}. Jours avec un moment : {moments}. Avec un galet : {pebbles}. {weeks}.",
+        "newSince": "nouveau depuis ta dernière visite",
+        "rowNotYet": "pas encore",
+        "noFullWeek": "Pas encore de semaine complète",
+        "notYet": "Pas encore : {names}",
+        "openPebble": "Ouvrir le galet",
+        "openSheet": "Ouvrir",
+        "reached": "{value}, atteint",
+        "weeksFilled": "Semaines complètes remplies : {count} sur {total}",
+        "ready": "{title} : la cérémonie est prête."
+      }
     },
     "family": {
       "pebble_count": {
@@ -289,6 +422,18 @@
       "glyph_sales": {
         "title": "{threshold, plural, one {Première vente} other {# ventes}}",
         "description": "{threshold, plural, one {Un pebbler adopte l'un de tes glyphes.} other {Tes glyphes trouvent preneur # fois.}}"
+      },
+      "first_moment": {
+        "title": "Premier moment",
+        "description": "Enregistre ton premier moment."
+      },
+      "first_pebble": {
+        "title": "Premier galet",
+        "description": "Complète ton premier galet."
+      },
+      "first_five": {
+        "title": "Le galet bleu",
+        "description": "Réclame-le quand tes cinq premières fois sont faites."
       }
     }
   },

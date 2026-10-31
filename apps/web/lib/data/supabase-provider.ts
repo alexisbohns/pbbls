@@ -13,6 +13,8 @@ import {
   type ConnectionInvite,
   type AcceptConnectionInviteResult,
   type AchievementUnlockResult,
+  type CeremonyPull,
+  CeremonyNotReadyError,
 } from "@/lib/data/data-provider"
 import type {
   Moment,
@@ -28,9 +30,14 @@ import type {
   RippleSummary,
   ProfileEngagement,
   Achievement,
+  AchievementCard,
   AchievementUnlock,
+  CeremonyStack,
   SharedConnectionPebble,
 } from "@/lib/types"
+import { unlockResultsFrom } from "@/lib/data/achievement-results"
+import { ceremonyPullFrom } from "@/lib/data/achievements-payload"
+import { withTimeout } from "@/lib/utils/with-timeout"
 import { toConnectionPeer } from "@/lib/data/invite-api"
 import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
@@ -276,7 +283,8 @@ export class SupabaseProvider implements DataProvider {
       return {
         id: r.id as string,
         slug: r.slug as string,
-        // The `family` CHECK constraint on the catalog makes this cast sound.
+        // Unchecked: the catalog's CHECK allows families the union does not
+        // list yet (see `AchievementFamily`), so consumers fall back.
         family: r.family as Achievement["family"],
         threshold: (r.threshold as number | null) ?? null,
         emotionId: (r.emotion_id as string | null) ?? null,
@@ -310,13 +318,46 @@ export class SupabaseProvider implements DataProvider {
 
   async checkAchievements(): Promise<AchievementUnlockResult[]> {
     // The RPC `returns table(...)`, so PostgREST yields an array of rows —
-    // empty when nothing newly unlocked.
-    const { data, error } = await this.supabase.rpc("check_achievements")
+    // empty when nothing newly unlocked. Under a timeout: the achievements
+    // page awaits it before its read, and a hung check must not hold that up.
+    const { data, error } = await withTimeout(this.supabase.rpc("check_achievements"), 10000, "check_achievements")
     if (error) throw new Error(`check_achievements failed: ${error.message}`)
-    return ((data ?? []) as Record<string, unknown>[]).map((row) => ({
-      slug: row.slug as string,
-      karmaGranted: (row.karma_granted as number) ?? 0,
-    }))
+    return unlockResultsFrom(data)
+  }
+
+  // ---------------------------------------------------------------------------
+  // The achievements page (#1308) — get_achievements, mark_achievements_seen,
+  // pull_ceremony (spec 2026-10-29 §3.3, §3.4).
+  // ---------------------------------------------------------------------------
+
+  async getAchievementsPayload(tz: string, signal?: AbortSignal): Promise<unknown> {
+    const call = this.supabase.rpc("get_achievements", { p_tz: tz })
+    const { data, error } = await withTimeout(signal ? call.abortSignal(signal) : call, 10000, "get_achievements")
+    if (error) throw new Error(`get_achievements failed: ${error.message}`)
+    return data
+  }
+
+  async markAchievementsSeen(card: AchievementCard): Promise<void> {
+    const { error } = await withTimeout(
+      this.supabase.rpc("mark_achievements_seen", { p_card: card }),
+      10000,
+      "mark_achievements_seen",
+    )
+    if (error) throw new Error(`mark_achievements_seen failed: ${error.message}`)
+  }
+
+  async pullCeremony(stack: CeremonyStack, tz: string): Promise<CeremonyPull | null> {
+    const { data, error } = await withTimeout(
+      this.supabase.rpc("pull_ceremony", { p_stack: stack, p_tz: tz }),
+      10000,
+      "pull_ceremony",
+    )
+    if (error) {
+      // The RPC's `raise exception 'not_ready' using errcode = 'P0001'`, exactly.
+      if (error.code === "P0001" && error.message === "not_ready") throw new CeremonyNotReadyError(stack)
+      throw new Error(`pull_ceremony failed: ${error.message}`)
+    }
+    return ceremonyPullFrom(data)
   }
 
   // ---------------------------------------------------------------------------

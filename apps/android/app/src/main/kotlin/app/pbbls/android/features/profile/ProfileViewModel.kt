@@ -2,6 +2,7 @@ package app.pbbls.android.features.profile
 
 import android.util.Log
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,18 +17,22 @@ import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.RippleSummary
+import app.pbbls.android.core.model.achievements.AchievementsPage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
 import javax.inject.Inject
 
 private const val TAG = "profile"
 
-/** How many recent badges the shelf shows before "view all" takes over. */
-private const val ACHIEVEMENTS_SHELF_SIZE = 6
+/** How old the achievements page may be before a visit to You reads it again (D18, iOS's fifteen minutes). */
+private val SHELF_MAX_AGE: Duration = Duration.ofMinutes(15)
 
 /** What the Profile screen can be showing (#849). */
 sealed interface ProfileUiState {
@@ -56,14 +61,10 @@ sealed interface ProfileUiState {
         val email: String?,
         /** SSO brand labels, rendered verbatim and never localized. */
         val providers: List<String>,
-        /** Most recently unlocked badges, newest first — the shelf's row. */
-        val recentAchievements: List<AchievementRecord>,
-        val unlockedAchievementCount: Int,
-        /**
-         * Distinct from an empty list for the same reason [collectionsLoaded]
-         * is: "nothing unlocked yet" and "still loading" render differently.
-         */
-        val achievementsLoaded: Boolean,
+        /** The shelf's badges as `get_achievements` serves them (D18): the server's picks, in its order. */
+        val shelf: List<AchievementRecord>,
+        /** The served count of badges earned; null when none is served, and the shelf invites instead. */
+        val shelfCount: Int?,
     ) : ProfileUiState
 }
 
@@ -97,9 +98,15 @@ class ProfileViewModel
         private var glyphStrokes: List<GlyphStroke>? = null
         private var collections: List<Collection> = emptyList()
         private var collectionsLoaded = false
-        private var recentAchievements: List<AchievementRecord> = emptyList()
-        private var unlockedAchievementCount = 0
-        private var achievementsLoaded = false
+        private var shelfPage: AchievementsPage? = null
+        private var catalogBySlug: Map<String, AchievementRecord> = emptyMap()
+
+        /** The reader's zone, read at each load: the shelf shares the page's copy, kept by zone. */
+        @VisibleForTesting
+        internal var zone: () -> ZoneId = { ZoneId.systemDefault() }
+
+        @VisibleForTesting
+        internal var now: () -> Instant = { Instant.now() }
         private var hasFailed = false
         private var isLoaded = false
 
@@ -193,26 +200,54 @@ class ProfileViewModel
             collectionsLoaded = true
             publish()
 
-            // Reads only — the shelf never fires an evaluation. The grid's
-            // screen-open call is the retroactive grant; doing it here too
-            // would double the work on every profile visit. A failure is not
-            // worth taking the screen down for: the card still navigates, and
-            // the grid surfaces real failures.
-            runCatchingCancellable {
-                val catalog = achievementsService.loadCatalog().associateBy { it.id }
-                achievementsService
-                    .loadUnlocks()
-                    .sortedByDescending { it.unlockedAt }
-                    .mapNotNull { catalog[it.achievementId] }
-            }.fold(
-                onSuccess = {
-                    unlockedAchievementCount = it.size
-                    recentAchievements = it.take(ACHIEVEMENTS_SHELF_SIZE)
-                },
-                onFailure = { Log.e(TAG, "achievements shelf fetch failed", it) },
-            )
-            achievementsLoaded = true
-            publish()
+            loadShelf()
+        }
+
+        /**
+         * The shelf (D18, iOS `loadIfStale`): the achievements page's kept copy at once, then a read
+         * only when that copy, or this process's last read, is fifteen minutes old or more, or a
+         * check or a ceremony has made it stale. A read runs `check_achievements()` first, as the
+         * page does (the retroactive grant, which never celebrates). A failure keeps what is shown,
+         * and with nothing the shelf just invites.
+         */
+        private suspend fun loadShelf() {
+            val zone = zone()
+            // The kept copy every time, not only the first: the page may have read a newer one
+            // since, and the shelf then shows it without asking the server.
+            runCatchingCancellable { achievementsService.cachedPage(zone) }
+                .onFailure { Log.w(TAG, "the kept achievements page could not be read", it) }
+                .getOrNull()
+                ?.let {
+                    shelfPage = it
+                    publish()
+                }
+            val keptAt = runCatchingCancellable { achievementsService.keptAt(zone) }.getOrNull()
+            val age = keptAt?.let { Duration.between(it, now()) }
+            val fresh = shelfPage != null && age != null && !age.isNegative && age < SHELF_MAX_AGE
+            if (!fresh) {
+                // Not while a mutation's own check is in flight: this one could take its unlocks
+                // and leave them uncelebrated. That check grants them anyway.
+                if (achievementsService.isFiringCheck) {
+                    Log.i(TAG, "a mutation's achievement check is in flight; the shelf reads without granting")
+                } else {
+                    achievementsService.checkIgnoringFailure()
+                }
+                runCatchingCancellable { achievementsService.page(zone) }
+                    .fold(
+                        onSuccess = { shelfPage = it },
+                        onFailure = { Log.e(TAG, "achievements shelf read failed; keeping what is shown", it) },
+                    )
+                publish()
+            }
+            // The catalog once, for titles and icons; the served rows stand in until it lands.
+            if (catalogBySlug.isEmpty() && shelfPage?.shelf?.isNotEmpty() == true) {
+                runCatchingCancellable { achievementsService.loadCatalog() }
+                    .fold(
+                        onSuccess = { rows -> catalogBySlug = rows.distinctBy { it.slug }.associateBy { it.slug } },
+                        onFailure = { Log.e(TAG, "achievements catalog read failed; the shelf shows the served rows", it) },
+                    )
+                publish()
+            }
         }
 
         private fun publish() {
@@ -239,9 +274,8 @@ class ProfileViewModel
                                         ?.identities
                                         ?.map { it.provider },
                                 ),
-                            recentAchievements = recentAchievements,
-                            unlockedAchievementCount = unlockedAchievementCount,
-                            achievementsLoaded = achievementsLoaded,
+                            shelf = ProfileShelf.badges(shelfPage, catalogBySlug),
+                            shelfCount = ProfileShelf.count(shelfPage),
                         )
                 }
         }

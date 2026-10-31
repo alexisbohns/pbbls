@@ -5,10 +5,14 @@ import android.util.Log
 import app.pbbls.android.di.IoDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
+import java.time.Instant
 import java.time.ZoneId
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,6 +31,13 @@ interface WrapDiskCaching {
         body: String,
     )
 
+    /** When [page] was last kept for [ownerId] in [zone], or null with no copy (the achievements shelf's age, D18). */
+    suspend fun keptAt(
+        ownerId: String,
+        zone: ZoneId,
+        page: String,
+    ): Instant?
+
     /** Every user's wraps, on sign-out and account deletion. */
     fun clearAll()
 }
@@ -38,6 +49,9 @@ interface WrapDiskCaching {
  * the old tree. It is private journal content, so it is never backed up and is wiped whenever the
  * device resolves signed-out. Display only: the server stays the truth, and a failure here is
  * logged and read as a miss.
+ *
+ * It also holds the achievements page (#1307, `AchievementsService`, page `achievements-page`),
+ * under the same owner and zone, so the same sign-out wipe covers it.
  */
 @Singleton
 class WrapDiskCache(
@@ -52,6 +66,10 @@ class WrapDiskCache(
 
     @Volatile
     private var prunedOldVersions = false
+
+    private val locks = ConcurrentHashMap<String, Mutex>()
+
+    private fun lockFor(file: File): Mutex = locks.getOrPut(file.path) { Mutex() }
 
     override suspend fun read(
         ownerId: String,
@@ -76,19 +94,38 @@ class WrapDiskCache(
     ): Unit =
         withContext(io) {
             val file = file(ownerId, zone, page)
-            try {
-                pruneOldVersions()
-                file.parentFile?.mkdirs()
-                // Written beside, then renamed over, so a crash mid-write never leaves half a payload.
-                val partial = File(file.parentFile, "${file.name}.partial")
-                partial.writeText(body)
-                if (!partial.renameTo(file)) {
-                    file.delete()
-                    if (!partial.renameTo(file)) Log.w(TAG, "could not keep wrap $page")
+            // One writer per file at a time, each through its own temp file: two reads landing
+            // together never interleave their bytes or rename each other's half-written copy.
+            lockFor(file).withLock {
+                var partial: File? = null
+                try {
+                    pruneOldVersions()
+                    file.parentFile?.mkdirs()
+                    // Written beside, then renamed over, so a crash mid-write never leaves half a payload.
+                    partial = File.createTempFile("${file.name}.", ".partial", file.parentFile).also { it.writeText(body) }
+                    if (!partial.renameTo(file)) {
+                        file.delete()
+                        if (!partial.renameTo(file)) Log.w(TAG, "could not keep wrap $page")
+                    }
+                } catch (e: IOException) {
+                    Log.w(TAG, "could not keep wrap $page", e)
+                } finally {
+                    partial?.takeIf { it.exists() }?.delete()
                 }
-            } catch (e: IOException) {
-                Log.w(TAG, "could not keep wrap $page", e)
             }
+        }
+
+    override suspend fun keptAt(
+        ownerId: String,
+        zone: ZoneId,
+        page: String,
+    ): Instant? =
+        withContext(io) {
+            file(ownerId, zone, page)
+                .takeIf { it.isFile }
+                ?.lastModified()
+                ?.takeIf { it > 0L }
+                ?.let(Instant::ofEpochMilli)
         }
 
     override fun clearAll() {
@@ -113,7 +150,10 @@ class WrapDiskCache(
     private fun safe(part: String): String = part.replace(Regex("[^A-Za-z0-9._-]"), "_")
 
     companion object {
-        /** Bump when the payload DTOs change shape incompatibly: the old files are dropped, never misread. */
+        /**
+         * Bump when the payload DTOs change shape incompatibly: the old files are dropped, never
+         * misread. It governs every page kept here, the wraps' and the achievements page alike.
+         */
         const val SCHEMA_VERSION = 1
         private const val DIRECTORY = "path-wraps"
         private const val TAG = "wrap-cache"
