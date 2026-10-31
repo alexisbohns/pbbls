@@ -3,6 +3,7 @@ package app.pbbls.android
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.GlyphStroke
@@ -14,8 +15,8 @@ import java.time.OffsetDateTime
 
 /**
  * You (#1383, spec D14): the header (pentagon avatar, under the top bar's settings action, the name in the hand,
- * "Member since", the Ripples line), the counters cut from one stone and the three Glyphs rows,
- * above the achievements shelf and the Lab card the next part rebuilds. Paper (with 2 × font, where
+ * "Member since", the Ripples line), the counters cut from one stone, the three Glyphs rows and
+ * the achievements as cards (four badges, "12 earned"; the invitation when nothing is served). Paper (with 2 × font, where
  * the counters stack, and French), Night, wide (the readable column holding), the dotted pebble
  * with the counts not served yet (the count-free lines), and a long name at 1 × shrinking to hold
  * its line (D18). Every value is pinned: a mid-month join date, so no zone moves the month.
@@ -27,6 +28,25 @@ private val previewStrokes =
             width = 6.0,
         ),
     )
+
+/** Four badges of families whose titles need no reference data, newest first (the server's order). */
+private val previewShelf =
+    listOf(
+        "pebble_count" to 10,
+        "first_soul" to null,
+        "first_collection" to null,
+        "first_glyph" to null,
+    ).mapIndexed { i, (family, threshold) ->
+        AchievementRecord(
+            id = "a$i",
+            slug = "$family-$i",
+            family = family,
+            threshold = threshold,
+            sortOrder = i,
+            karmaReward = 0,
+            isActive = true,
+        )
+    }
 
 private fun content(
     name: String = "Alexis",
@@ -48,8 +68,8 @@ private fun content(
     glyphsOwned = if (served) 5 else null,
     email = null,
     providers = emptyList(),
-    shelf = emptyList(),
-    shelfCount = null,
+    shelf = if (served) previewShelf else emptyList(),
+    shelfCount = if (served) 12 else null,
 )
 
 @Composable

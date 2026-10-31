@@ -139,7 +139,8 @@ class NavigationTest : AppUiTest() {
         val pushes =
             listOf(
                 R.string.you_glyphs_mine to R.string.glyphs_title,
-                R.string.achievements_title to R.string.achievements_title,
+                // Nothing earned on the fakes: the shelf's one card invites (#1383, D14.6).
+                R.string.achievements_card_subtitle to R.string.achievements_title,
                 R.string.lab_title to R.string.lab_title,
             )
         for ((tap, title) in pushes) {

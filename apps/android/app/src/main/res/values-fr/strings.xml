@@ -704,10 +704,10 @@
     <!-- Achievements (M48) -->
     <string name="achievements_title">Succès</string>
     <string name="achievements_card_subtitle">Tes badges le long du chemin</string>
-    <plurals name="achievements_shelf_count">
-        <item quantity="one">%1$d décroché</item>
-        <item quantity="many">%1$d décrochés</item>
-        <item quantity="other">%1$d décrochés</item>
+    <plurals name="you_achievements_earned">
+        <item quantity="one">%1$d obtenu</item>
+        <item quantity="many">%1$d obtenus</item>
+        <item quantity="other">%1$d obtenus</item>
     </plurals>
     <string name="achievement_moment_eyebrow">Succès débloqué</string>
     <string name="achievement_moment_next">Suivant</string>

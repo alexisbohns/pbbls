@@ -706,7 +706,7 @@
     <!-- Achievements (M48) -->
     <string name="achievements_title">Achievements</string>
     <string name="achievements_card_subtitle">Badges along your path</string>
-    <plurals name="achievements_shelf_count">
+    <plurals name="you_achievements_earned">
         <item quantity="one">%1$d earned</item>
         <item quantity="other">%1$d earned</item>
     </plurals>
