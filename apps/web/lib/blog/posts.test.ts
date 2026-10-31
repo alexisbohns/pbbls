@@ -30,9 +30,23 @@ describe("blog posts", () => {
       for (const figure of figures) {
         expect(figure.alt.length, figure.file).toBeGreaterThan(0)
         expect(figure.width * figure.height, figure.file).toBeGreaterThan(0)
-        expect(existsSync(PUBLIC_DIR + blogImagePath(post.slug, figure.file)), figure.file).toBe(true)
+        // A bucket drawing is uploaded by hand, so only its shape can be checked here.
+        if (figure.stored === "bucket") expect(figure.file, figure.file).toMatch(/^[\w-]+\.svg$/)
+        else expect(existsSync(PUBLIC_DIR + blogImagePath(post.slug, figure.file)), figure.file).toBe(true)
       }
     }
+  })
+
+  it("serves set-in-stone, newest first, its link preview a raster in the repo and its drawings SVG in the bucket", () => {
+    expect(BLOG_POSTS[0]?.slug).toBe("set-in-stone")
+    const post = getBlogPost("set-in-stone")
+    expect(post && formatPublishedOn(post.publishedOn)).toBe("31 October 2026")
+    const figures = post?.body.filter((block): block is BlogFigure => block.kind === "figure") ?? []
+    expect(figures[0]?.stored).toBeUndefined()
+    expect(figures[0]?.file).toMatch(/\.jpg$/)
+    const drawings = figures.filter((figure) => figure.stored === "bucket")
+    expect(drawings.length).toBeGreaterThanOrEqual(10)
+    for (const figure of figures) expect(figure.stored === "bucket", figure.file).toBe(figure.file.endsWith(".svg"))
   })
 
   it("serves counting-in-stone, its finalists first and every plate an SVG strip with alt text", () => {
