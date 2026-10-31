@@ -7753,7 +7753,8 @@ fun AchievementSheetContent(
         AchievementSheet.Pebbles -> page.pebbles?.let { PebblesSheet(it, page.glyphsCarved, page.glyphSales, zone, onOpenMoment, modifier) }
         is AchievementSheet.Year ->
             page.years.firstOrNull { it.year == sheet.year }?.let { year ->
-                YearSheet(year, page.years.map { it.year }.filter { it != year.year }, lookups, onPush, modifier)
+                // Only the years before this one: from the earliest, the sheet says it is the first year.
+                YearSheet(year, page.years.map { it.year }.filter { it < year.year }, lookups, onPush, modifier)
             }
     }
 }
@@ -9370,7 +9371,7 @@ The client copes with each of these today, as described in the tasks above. Each
    - `mark_achievements_seen('year')` records a `seen_at` that no field reads, while the board marks "October reaching the rim" as new.
    - Adding `months[].new` needs a stored time at which the month reached its level. That ties into the spec's open question 3 (a month that can lose its level).
    - Until then, the client sends the mark and draws nothing.
-5. **No per-card "since" date.** The board's Emotions and Pebbles bands read "since 2 March". Nothing in the payload carries it, and a client should not take a minimum over the snapshots, so Android leaves those hints out.
+5. **No per-card "since" date.** *Settled:* the server now serves `emotions.since` and each ladder's `since` (the day of its first level), and the Emotions and Pebbles sheets' bands read them through `AchievementsCopy.sinceHint` ("since March 2"). The board's Emotions and Pebbles bands read "since 2 March"; a client never takes a minimum over the snapshots.
 6. **A completion has no pebble.**
    - `achievement_completions.pebble_id` is stored, but `achievement_completion()` does not serve it.
    - So the ceremony cannot draw the stone that made the set whole.

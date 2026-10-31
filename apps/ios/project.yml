@@ -127,6 +127,8 @@ targets:
           - "References/__References__/**"
           # The Spine fixture photos are read through #filePath too (SpineFixturePhotos).
           - "Spine/Fixtures/**"
+          # The achievements payload fixtures are read through #filePath too (AchievementsFixtures).
+          - "Achievements/Fixtures/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.pbbls.ios.tests

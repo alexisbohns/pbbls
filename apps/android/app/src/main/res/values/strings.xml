@@ -718,6 +718,12 @@
     <string name="achievement_family_first_glyph_description">Carve your first glyph.</string>
     <string name="achievement_family_first_soul_title">First soul</string>
     <string name="achievement_family_first_soul_description">Add your first soul.</string>
+    <string name="achievement_family_first_moment_title">First moment</string>
+    <string name="achievement_family_first_moment_description">Record your first moment.</string>
+    <string name="achievement_family_first_pebble_title">First pebble</string>
+    <string name="achievement_family_first_pebble_description">Complete your first pebble.</string>
+    <string name="achievement_family_first_five_title">The blue pebble</string>
+    <string name="achievement_family_first_five_description">Claim it once your first five are done.</string>
     <string name="achievement_family_glyph_count_title">%1$d glyphs</string>
     <string name="achievement_family_glyph_count_description">Carve %1$d glyphs of your own.</string>
     <plurals name="achievement_family_glyph_sales_title">
@@ -823,4 +829,112 @@
     <string name="path_spine_stone_large_lowlight">Large lava stone</string>
     <string name="path_spine_stone_large_neutral">Large river pebble</string>
     <string name="path_spine_stone_large_highlight">Large gem</string>
+
+    <!-- ==== The achievements page (#1307): the server's semantic values in words. Page copy is
+         iOS's (Localizable.xcstrings, achievements.*), word for word; the sheets' copy is Android's
+         first and iOS mirrors it. ==== -->
+    <string name="achievements_since">since %1$s</string>
+    <!-- The unit beside the header's large numeral, which is drawn apart: no number of its own. -->
+    <plurals name="achievements_days_unit" tools:ignore="ImpliedQuantity">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <string name="achievements_card_explorer">Explorer</string>
+    <string name="achievements_card_emotions">Emotions</string>
+    <string name="achievements_card_domains">Domains</string>
+    <string name="achievements_card_pebbles">Pebbles</string>
+    <string name="achievements_card_year">The year</string>
+    <string name="achievements_explorer_hint">five rings</string>
+    <string name="achievements_domains_hint">in the order they came</string>
+    <string name="achievements_year_in_progress">in progress</string>
+    <string name="achievements_coverage_none">Link your pebbles to the parts of your life they touch, and your insights will start reading them.</string>
+    <string name="achievements_coverage_few">You haven\'t linked many pebbles to domains yet, so your insights have little to go on.</string>
+    <string name="achievements_coverage_third">Your pebbles touch a third of your life. Link a few more domains and your insights will see further.</string>
+    <string name="achievements_coverage_half">You\'ve already linked pebbles with half of the domains. What a rich life!</string>
+    <string name="achievements_coverage_most">Your pebbles reach most parts of your life. Your insights have plenty to read.</string>
+    <string name="achievements_coverage_all">Every part of your life has a pebble in it. Your insights see the whole picture.</string>
+    <string name="achievements_rosace_of">of %1$s</string>
+    <plurals name="achievements_pebbles_count">
+        <item quantity="one">%1$s pebble.</item>
+        <item quantity="other">%1$s pebbles.</item>
+    </plurals>
+    <plurals name="achievements_pebbles_kept">
+        <item quantity="one">%1$s pebble kept.</item>
+        <item quantity="other">%1$s pebbles kept.</item>
+    </plurals>
+    <string name="achievements_stones_top">Every stone stands.</string>
+    <string name="achievements_stones_all">Every stone stands; the next mark is %1$s.</string>
+    <string name="achievements_stones_none">No stone stands yet; the first rises toward %1$s.</string>
+    <string name="achievements_stones_one">One stone stands; the %1$s rises toward %2$s.</string>
+    <string name="achievements_stones_some">%1$s stones stand; the %2$s rises toward %3$s.</string>
+    <string name="achievements_next_moments_keep">Keep a moment in every full week and %1$s reaches the inner disc.</string>
+    <string name="achievements_next_moments_one">One more day with a moment, and one in each full week, bring %1$s to the inner disc.</string>
+    <string name="achievements_next_moments_some">%1$s more days with a moment, one in each full week, bring %2$s to the inner disc.</string>
+    <string name="achievements_next_moments_unreachable">%1$s can\'t reach the inner disc this month.</string>
+    <string name="achievements_next_pebbles_keep">Keep a pebble in every full week and %1$s reaches the rim.</string>
+    <string name="achievements_next_pebbles_one">One more day with a pebble, and one in each full week, bring %1$s to the rim.</string>
+    <string name="achievements_next_pebbles_some">%1$s more days with a pebble, one in each full week, bring %2$s to the rim.</string>
+    <string name="achievements_next_pebbles_unreachable">%1$s can\'t reach the rim this month.</string>
+    <string name="achievements_ceremony_emotions_title">Every emotion</string>
+    <string name="achievements_ceremony_emotions_body">Your pebbles have carried every feeling on the wheel.</string>
+    <string name="achievements_ceremony_domains_title">Every domain</string>
+    <string name="achievements_ceremony_domains_body">Every part of your life has a pebble in it.</string>
+    <string name="achievements_ceremony_six_firsts_title">The six firsts</string>
+    <string name="achievements_ceremony_six_firsts_body">Small, medium and large; lowlight, neutral and highlight.</string>
+    <string name="achievements_error_title">Couldn\'t load your achievements</string>
+    <string name="achievements_error_body">Check your connection and try again.</string>
+    <string name="achievements_error_retry">Try again</string>
+    <!-- The sheets (#1307): Android's first, for iOS to mirror. -->
+    <string name="achievements_domains_register">the register</string>
+    <string name="achievements_kind_small">Small</string>
+    <string name="achievements_kind_medium">Medium</string>
+    <string name="achievements_kind_large">Large</string>
+    <string name="achievements_section_first_five">The first five</string>
+    <string name="achievements_section_six_firsts">The six firsts</string>
+    <string name="achievements_section_twenty_five">25 pebbles</string>
+    <string name="achievements_twenty_fifth">The 25th</string>
+    <string name="achievements_twenty_five_waiting">The 25th pebble is still to come.</string>
+    <string name="achievements_section_domains_emotions">Domains and emotions</string>
+    <string name="achievements_section_entered">Entered</string>
+    <string name="achievements_newest_first">newest first</string>
+    <string name="achievements_register_number">No. %1$02d</string>
+    <string name="achievements_section_not_yet">Not yet in these pages</string>
+    <string name="achievements_section_milestones">Milestones</string>
+    <string name="achievements_section_glyphs_carved">Glyphs carved</string>
+    <string name="achievements_section_glyph_sales">Glyph sales</string>
+    <string name="achievements_buyer_never_named">The buyer is never named.</string>
+    <string name="achievements_section_months">The months</string>
+    <string name="achievements_column_moments">moments</string>
+    <string name="achievements_column_pebbles">pebbles</string>
+    <string name="achievements_column_weeks">weeks</string>
+    <string name="achievements_section_earlier_years">Earlier years</string>
+    <string name="achievements_first_year">None yet. %1$d is your first year here.</string>
+    <string name="achievements_of_words">%1$s of %2$s</string>
+    <string name="achievements_count_of">%1$s of %2$s</string>
+    <plurals name="achievements_to_go">
+        <item quantity="one">%1$s to go</item>
+        <item quantity="other">%1$s to go</item>
+    </plurals>
+    <string name="achievements_then_every">then every %1$s</string>
+    <string name="achievements_unknown_first">A first</string>
+    <string name="achievements_unknown_emotion">An emotion</string>
+    <string name="achievements_unknown_domain">A domain</string>
+    <string name="achievements_unknown_family">Other emotions</string>
+    <string name="achievements_explorer_a11y">Explorer: first five %1$s, six firsts %2$s, 25 pebbles %3$s, domains %4$s, emotions %5$s.</string>
+    <string name="achievements_emotions_a11y">Emotions: %1$s met.</string>
+    <string name="achievements_domains_a11y">Domains: %1$s. %2$s</string>
+    <string name="achievements_pebbles_a11y">Pebbles: %1$s. Glyphs carved: %2$s. Glyph sales: %3$s.</string>
+    <string name="achievements_disc_a11y">%1$d. On the rim: %2$s. On the inner circle: %3$s. On their way: %4$s.</string>
+    <string name="achievements_none">none</string>
+    <string name="achievements_month_a11y">%1$s. Days with a moment: %2$s. With a pebble: %3$s. %4$s.</string>
+    <string name="achievements_weeks_filled">Full weeks filled: %1$s of %2$s</string>
+    <string name="achievements_no_full_week">No full week yet</string>
+    <string name="achievements_reached">%1$s, reached</string>
+    <string name="achievements_new_a11y">new since you last looked</string>
+    <string name="achievements_row_not_yet">not yet</string>
+    <string name="achievements_not_yet_a11y">Not yet: %1$s</string>
+    <string name="achievements_open_pebble">Open the pebble</string>
+    <string name="achievements_open_sheet">Open</string>
+    <string name="achievements_ready">Ready</string>
+    <string name="achievements_ready_a11y">%1$s: complete. Open the ceremony.</string>
 </resources>

@@ -38,6 +38,9 @@ interface WrapDiskCaching {
  * the old tree. It is private journal content, so it is never backed up and is wiped whenever the
  * device resolves signed-out. Display only: the server stays the truth, and a failure here is
  * logged and read as a miss.
+ *
+ * It also holds the achievements page (#1307, `AchievementsService`, page `achievements-page`),
+ * under the same owner and zone, so the same sign-out wipe covers it.
  */
 @Singleton
 class WrapDiskCache(
@@ -113,7 +116,10 @@ class WrapDiskCache(
     private fun safe(part: String): String = part.replace(Regex("[^A-Za-z0-9._-]"), "_")
 
     companion object {
-        /** Bump when the payload DTOs change shape incompatibly: the old files are dropped, never misread. */
+        /**
+         * Bump when the payload DTOs change shape incompatibly: the old files are dropped, never
+         * misread. It governs every page kept here, the wraps' and the achievements page alike.
+         */
         const val SCHEMA_VERSION = 1
         private const val DIRECTORY = "path-wraps"
         private const val TAG = "wrap-cache"

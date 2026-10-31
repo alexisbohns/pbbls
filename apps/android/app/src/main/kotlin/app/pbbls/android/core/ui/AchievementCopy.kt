@@ -42,6 +42,9 @@ fun achievementTitle(record: AchievementRecord): String {
         "first_collection" -> stringResource(R.string.achievement_family_first_collection_title)
         "first_glyph" -> stringResource(R.string.achievement_family_first_glyph_title)
         "first_soul" -> stringResource(R.string.achievement_family_first_soul_title)
+        "first_moment" -> stringResource(R.string.achievement_family_first_moment_title)
+        "first_pebble" -> stringResource(R.string.achievement_family_first_pebble_title)
+        "first_five" -> stringResource(R.string.achievement_family_first_five_title)
         "glyph_count" -> stringResource(R.string.achievement_family_glyph_count_title, threshold)
         "glyph_sales" -> pluralStringResource(R.plurals.achievement_family_glyph_sales_title, threshold, threshold)
         else -> record.slug
@@ -60,6 +63,9 @@ fun achievementDescription(record: AchievementRecord): String? {
         "first_collection" -> stringResource(R.string.achievement_family_first_collection_description)
         "first_glyph" -> stringResource(R.string.achievement_family_first_glyph_description)
         "first_soul" -> stringResource(R.string.achievement_family_first_soul_description)
+        "first_moment" -> stringResource(R.string.achievement_family_first_moment_description)
+        "first_pebble" -> stringResource(R.string.achievement_family_first_pebble_description)
+        "first_five" -> stringResource(R.string.achievement_family_first_five_description)
         "glyph_count" -> stringResource(R.string.achievement_family_glyph_count_description, threshold)
         "glyph_sales" ->
             pluralStringResource(R.plurals.achievement_family_glyph_sales_description, threshold, threshold)
