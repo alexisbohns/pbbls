@@ -38,6 +38,13 @@ git log --oneline origin/main -- packages/icons/react/Whatsapp.tsx | head -1   #
 git log --oneline origin/main -- apps/web/lib/icons/pbbls-icon.ts | head -1    # empty: #1313 Part 1 has not landed (use raw size-* classes, spec D21)
 ```
 
+**Coordination with the web icon migration (#1313), decided 2026-10-31.** Both stacks touch two files: `app/profile/page.tsx` (#1313 Part 2, Task 11: the settings button's `Settings` → `Slider`) and `components/layout/BottomNav.tsx` (#1313 Part 2, Task 8 Step 2: the nav drawings at `PBBLS_ICON_SIZE`). The order is fixed rather than left to whichever merges second:
+
+- **#1313's stack merges first.** It is a pure icon swap and its plan is already on `main`. Part 6 and Part 7 of this stack do not start until `git log --oneline origin/main -- apps/web/lib/icons/pbbls-icon.ts` is non-empty and #1313 Part 2 has merged; Parts 1–5 do not touch either file and run in parallel with #1313.
+- **Part 6 rewrites `app/profile/page.tsx` from #1313's version**: the settings button keeps `Slider` from `@pbbls/icons`, sized through `PBBLS_ICON_SIZE`. Part 7 builds `BottomNav` on #1313's version and keeps its Pebbles nav drawings and sizes; the Home item uses `home` / `home.active`.
+- **No lucide import is added by this stack.** Once #1313 Part 6 arms the `replaces` lint, a lucide symbol in Home or You fails CI; every icon here comes from `@pbbls/icons`.
+- If #1313 stalls, its Task 11 Step 1 and Task 8 Step 2 move into this stack's Part 6 and Part 7 respectively (same edits, same commit messages' intent), and #1313's plan is amended in the same PR so the two never both apply.
+
 **The part gate, run at the end of every part:**
 
 ```bash
