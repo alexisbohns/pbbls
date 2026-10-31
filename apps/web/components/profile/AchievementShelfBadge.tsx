@@ -1,21 +1,21 @@
 "use client"
 
-import { Compass, Gem, Heart, Layers, PenTool, Shapes, Store, Trophy, Users } from "lucide-react"
-import type { LucideIcon } from "lucide-react"
+import { Collection, Heart, PebbleDottedGlyph, PebbleGlowMd, People, Stack } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE, type PbblsIconComponent } from "@/lib/icons/pbbls-icon"
 import { useAchievementCopy } from "@/lib/i18n"
 import type { AchievementDisplay, AchievementFamily } from "@/lib/types"
 
 // Same family mapping as the grid's badge; unknown families degrade to the
-// trophy so a server ahead of this build can't break the shelf.
-const FAMILY_ICONS: Record<AchievementFamily, LucideIcon> = {
-  pebble_count: Gem,
+// glow so a server ahead of this build can't break the shelf.
+const FAMILY_ICONS: Record<AchievementFamily, PbblsIconComponent> = {
+  pebble_count: Stack,
   emotion_first: Heart,
-  domain_first: Compass,
-  first_collection: Layers,
-  first_glyph: PenTool,
-  first_soul: Users,
-  glyph_count: Shapes,
-  glyph_sales: Store,
+  domain_first: PebbleGlowMd,
+  first_collection: Collection,
+  first_glyph: PebbleDottedGlyph,
+  first_soul: People,
+  glyph_count: PebbleDottedGlyph,
+  glyph_sales: PebbleGlowMd,
 }
 
 /**
@@ -25,7 +25,7 @@ const FAMILY_ICONS: Record<AchievementFamily, LucideIcon> = {
  */
 export function AchievementShelfBadge({ achievement }: { achievement: AchievementDisplay }) {
   const resolveCopy = useAchievementCopy()
-  const Icon = FAMILY_ICONS[achievement.family] ?? Trophy
+  const Icon = FAMILY_ICONS[achievement.family] ?? PebbleGlowMd
   const { title } = resolveCopy(achievement)
 
   return (
@@ -33,7 +33,7 @@ export function AchievementShelfBadge({ achievement }: { achievement: Achievemen
       title={title}
       className="grid size-9 place-items-center rounded-full bg-primary/10 text-primary"
     >
-      <Icon className="size-4" aria-hidden />
+      <Icon className={PBBLS_ICON_SIZE.inline} />
       <span className="sr-only">{title}</span>
     </li>
   )
