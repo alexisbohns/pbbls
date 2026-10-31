@@ -10,7 +10,7 @@ import type { StoneFill } from "./stone-fill"
 
 type SplitStoneProps = {
   n: number
-  /** The rock's height in px. */
+  /** The rock's height in px; it grows when its content needs more (a larger text size). */
   height: number
   seed?: string
   options?: StoneOptions
@@ -37,11 +37,10 @@ export function SplitStone({ n, height, seed = DEFAULT_SPLIT_SEED, options, fill
   const list = isFillList(fill) ? fill : [fill]
   const fills = Array.from({ length: n }, (_, k) => list[Math.min(k, list.length - 1)])
   const gutter = options?.gutter ?? 8
+  const h = Math.max(height, size?.height ?? 0)
   const pieces =
     size && size.width > 0
-      ? cachedStone("split", stoneKey(seed, size.width, height, [n, options]), () =>
-          splitStone(size.width, height, n, seed, options),
-        )
+      ? cachedStone("split", stoneKey(seed, size.width, h, [n, options]), () => splitStone(size.width, h, n, seed, options))
       : null
   const drawn = pieces !== null && pieces.every((d) => d !== "")
 
@@ -49,15 +48,15 @@ export function SplitStone({ n, height, seed = DEFAULT_SPLIT_SEED, options, fill
     <div
       ref={ref}
       className={cn("relative isolate grid", className)}
-      style={{ height, gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, columnGap: gutter }}
+      style={{ minHeight: height, gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, columnGap: gutter }}
     >
       {drawn && size && (
         <svg
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-10 overflow-visible"
           width={size.width}
-          height={height}
-          viewBox={`0 0 ${size.width} ${height}`}
+          height={h}
+          viewBox={`0 0 ${size.width} ${h}`}
         >
           {pieces.map((d, k) => (
             <path key={k} d={d} className={fills[k].fill} />
