@@ -14,6 +14,8 @@ import app.pbbls.android.core.data.AppearancePreferences
 import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.data.DeletionState
 import app.pbbls.android.core.data.HapticsPreference
+import app.pbbls.android.core.data.HomeShortcutsLayout
+import app.pbbls.android.core.data.HomeShortcutsPreference
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReauthPurpose
@@ -195,6 +197,7 @@ class SettingsViewModel
         private val appearance: AppearancePreferences,
         private val consents: ConsentServicing,
         private val haptics: HapticsPreference,
+        private val homeShortcuts: HomeShortcutsPreference,
     ) : ViewModel() {
         private val effectsOut = UiEffects<SettingsEffect>(viewModelScope)
         val effects: Flow<SettingsEffect> = effectsOut.flow
@@ -223,6 +226,25 @@ class SettingsViewModel
 
         fun onHapticsChange(value: Boolean) {
             haptics.setOn(value)
+        }
+
+        /**
+         * How Home's quick actions look on this phone (#1383 D6, #1376; iOS `homeSection`): a row or
+         * a bento, pebble shapes or plain tiles. Device-local and saved as they are switched, like
+         * the haptics switch, so they bypass the form and the dirty/save cycle.
+         */
+        val shortcutsLayout: HomeShortcutsLayout
+            get() = homeShortcuts.layout
+
+        fun onShortcutsLayoutChange(value: HomeShortcutsLayout) {
+            homeShortcuts.setLayout(value)
+        }
+
+        val shortcutsStones: Boolean
+            get() = homeShortcuts.stones
+
+        fun onShortcutsStonesChange(value: Boolean) {
+            homeShortcuts.setStones(value)
         }
 
         init {

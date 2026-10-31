@@ -23,6 +23,9 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,6 +51,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.DataError
 import app.pbbls.android.core.data.DeletionState
+import app.pbbls.android.core.data.HomeShortcutsLayout
 import app.pbbls.android.core.data.ReauthMethod
 import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
@@ -207,6 +211,13 @@ fun SettingsScreen(
                             )
                         },
                     ),
+            )
+
+            SettingsHomeSection(
+                layout = viewModel.shortcutsLayout,
+                stones = viewModel.shortcutsStones,
+                onLayoutChange = viewModel::onShortcutsLayoutChange,
+                onStonesChange = viewModel::onShortcutsStonesChange,
             )
 
             // Pebbles' own haptics switch (#1242 D23; iOS `hapticsSection`): device-local like the
@@ -532,6 +543,69 @@ internal fun SettingsNavRow(
         colors = settingsRowColors(),
     )
 }
+
+/**
+ * Settings → Home (#1383 D6, #1376; iOS `homeSection`): the quick actions as a row or a bento, and
+ * as pebble shapes or plain tiles. Device-local like the haptics switch, so each choice saves as it
+ * is made and never waits for Save. Shared with `SettingsScreenshots`.
+ */
+@Composable
+internal fun SettingsHomeSection(
+    layout: HomeShortcutsLayout,
+    stones: Boolean,
+    onLayoutChange: (HomeShortcutsLayout) -> Unit,
+    onStonesChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val layouts = HomeShortcutsLayout.entries
+    PebblesListSection(
+        header = stringResource(R.string.settings_home_section),
+        rowPadding = PebblesListDefaults.ListItemRowPadding,
+        modifier = modifier,
+        rows =
+            listOf(
+                {
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.settings_home_quick_actions)) },
+                        supportingContent = {
+                            Column {
+                                Text(stringResource(R.string.settings_home_footer))
+                                SingleChoiceSegmentedButtonRow(
+                                    modifier = Modifier.fillMaxWidth().padding(top = PebblesTheme.spacing.md),
+                                ) {
+                                    layouts.forEachIndexed { index, option ->
+                                        SegmentedButton(
+                                            selected = option == layout,
+                                            onClick = { onLayoutChange(option) },
+                                            shape = SegmentedButtonDefaults.itemShape(index, layouts.size),
+                                        ) {
+                                            Text(stringResource(option.labelRes))
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        colors = settingsRowColors(),
+                    )
+                },
+                {
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.settings_home_stones)) },
+                        trailingContent = { Switch(checked = stones, onCheckedChange = null) },
+                        modifier = Modifier.toggleable(value = stones, role = Role.Switch, onValueChange = onStonesChange),
+                        colors = settingsRowColors(),
+                    )
+                },
+            ),
+    )
+}
+
+private val HomeShortcutsLayout.labelRes: Int
+    get() =
+        when (this) {
+            HomeShortcutsLayout.ROW -> R.string.settings_home_layout_row
+            HomeShortcutsLayout.BENTO -> R.string.settings_home_layout_bento
+        }
 
 /**
  * The health-data consent row (#972, mirrors web's `ConsentSection`): what was

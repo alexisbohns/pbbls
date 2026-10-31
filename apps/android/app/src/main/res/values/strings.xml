@@ -247,6 +247,13 @@
     <string name="settings_appearance_section">Appearance</string>
     <string name="settings_wallpaper_colors_title">Use wallpaper colours</string>
     <string name="settings_wallpaper_colors_body">Match Pebbles to your wallpaper</string>
+    <!-- Settings → Home (#1376, iOS homeSection): how the quick actions look on this phone. -->
+    <string name="settings_home_section">Home</string>
+    <string name="settings_home_quick_actions">Quick actions</string>
+    <string name="settings_home_layout_row">Row</string>
+    <string name="settings_home_layout_bento">Bento</string>
+    <string name="settings_home_stones">Pebble shapes</string>
+    <string name="settings_home_footer">The quick actions at the top of Home, on this phone.</string>
     <string name="settings_haptics_section">Haptics</string>
     <string name="settings_haptics_vibrations">Vibrations</string>
     <string name="settings_haptics_footer">Every vibration in Pebbles, on this phone.</string>
