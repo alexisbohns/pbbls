@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus } from "lucide-react"
+import { PlusCircle } from "@pbbls/icons"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -57,11 +57,11 @@ export function PrimitivesSection() {
                 ))}
                 {ICON_SIZES.map((size) => (
                   <Button key={size} variant={variant} size={size} aria-label={`${variant} ${size}`}>
-                    <Plus />
+                    <PlusCircle />
                   </Button>
                 ))}
                 <Button variant={variant}>
-                  <Plus data-icon="inline-start" />
+                  <PlusCircle data-icon="inline-start" />
                   With icon
                 </Button>
                 <Button variant={variant} disabled>

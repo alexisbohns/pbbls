@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Settings } from "lucide-react"
+import { Slider } from "@pbbls/icons"
 import { useTranslations } from "next-intl"
 import { buttonVariants } from "@/components/ui/button"
 import { PageHeader } from "@/components/layout/PageHeader"
@@ -39,7 +39,7 @@ export function ProfileView() {
           backHref="/path"
           rightSlot={
             <Link href="/settings" aria-label={t("settingsAria")} className={buttonVariants({ variant: "outline", size: "icon" })}>
-              <Settings />
+              <Slider />
             </Link>
           }
         />

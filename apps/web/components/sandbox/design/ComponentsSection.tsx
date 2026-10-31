@@ -1,6 +1,9 @@
 "use client"
 
-import { Flame, Gem, Leaf, Settings, Sparkles, UserRound } from "lucide-react"
+import { Flame, Leaf, UserRound } from "lucide-react"
+import { KarmaDot, PebbleRound, People, Slider, Sparkles, Stack, Trash } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE, type PbblsIconComponent } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { EmptyState } from "@/components/layout/EmptyState"
@@ -33,6 +36,15 @@ import { Specimen } from "./Specimen"
 import { AchievementSpecimens } from "./AchievementSpecimens"
 import { SpineWeekSpecimen } from "./SpineWeekSpecimen"
 import { StoneSpecimens } from "./StoneSpecimens"
+
+/** The four drawings the sizes specimen shows at every size (spec D7). */
+const SIZE_SAMPLES: readonly { key: string; Icon: PbblsIconComponent }[] = [
+  { key: "pebble-round", Icon: PebbleRound },
+  { key: "people", Icon: People },
+  { key: "karma-dot", Icon: KarmaDot },
+  { key: "trash", Icon: Trash },
+]
+const SIZE_TEXT = ["text-xs", "text-sm", "text-base"] as const
 
 function markOf(id: string | undefined | null) {
   return id ? SANDBOX_MARK_MAP.get(id) : undefined
@@ -81,7 +93,7 @@ export function ComponentsSection() {
           dialogDescription="Days in a row with at least one pebble."
         />
         <GamificationBlock
-          icon={Gem}
+          icon={Stack}
           label="Karma"
           value={42}
           dialogTitle="Karma"
@@ -172,7 +184,7 @@ export function ComponentsSection() {
 
       <Specimen id="shortcut-tile">
         <ShortcutTile href="/souls" icon={UserRound} label="Souls" />
-        <ShortcutTile href="/settings" icon={Settings} label="Settings" />
+        <ShortcutTile href="/settings" icon={Slider} label="Settings" />
       </Specimen>
 
       <Specimen id="section-card">
@@ -215,6 +227,27 @@ export function ComponentsSection() {
             action={<Button>Do the thing</Button>}
           />
         </div>
+      </Specimen>
+
+      <Specimen
+        id="pbbls-icon-sizes"
+        note="Four drawings at the five PBBLS_ICON_SIZE classes beside 12, 14 and 16 px text. The classes are rem: every size follows the browser's font size, none follows the line, so inline is 16 beside text-xs and text-base alike."
+        className="flex-col"
+      >
+        {SIZE_TEXT.map((text) => (
+          <div key={text} className={cn("flex flex-col gap-2", text)}>
+            {Object.entries(PBBLS_ICON_SIZE).map(([size, sizeClass]) => (
+              <div key={size} className="flex items-center gap-3">
+                {SIZE_SAMPLES.map(({ key, Icon }) => (
+                  <Icon key={key} className={sizeClass} />
+                ))}
+                <span>
+                  {size} · {text}
+                </span>
+              </div>
+            ))}
+          </div>
+        ))}
       </Specimen>
     </DesignSection>
   )
