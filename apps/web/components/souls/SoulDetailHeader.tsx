@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, type FormEvent, type KeyboardEvent } from "react"
-import { Pencil } from "lucide-react"
+import { DrawDotted } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -107,7 +108,7 @@ export function SoulDetailHeader({
               }}
               aria-label={tDetail("editAria")}
             >
-              <Pencil className="size-3.5" />
+              <DrawDotted className={PBBLS_ICON_SIZE.inline} />
             </Button>
           </div>
         )}

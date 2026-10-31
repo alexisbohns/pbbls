@@ -1,7 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { Stone } from "lucide-react"
+import { PebbleRound } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import type { Mark, Soul } from "@/lib/types"
 import { SoulGlyphThumbnail } from "@/components/souls/SoulGlyphThumbnail"
@@ -27,10 +29,7 @@ export function SoulCard({ soul, mark, pebbleCount }: SoulCardProps) {
         {soul.name}
       </span>
       <span className="flex items-center gap-1 text-xs text-foreground">
-        <Stone
-          className="size-3 text-primary"
-          aria-hidden="true"
-        />
+        <PebbleRound className={cn(PBBLS_ICON_SIZE.inline, "text-primary")} />
         <span aria-label={t("pebbleCount", { count: pebbleCount })}>
           {pebbleCount}
         </span>
