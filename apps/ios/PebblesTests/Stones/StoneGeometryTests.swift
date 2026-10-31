@@ -74,4 +74,24 @@ struct StoneGeometryTests {
         let second = StoneGeometry.split(size: size, count: 5, seed: "first-five", options: options)
         #expect(first == second)
     }
+
+    @Test("a single stone fills its box")
+    func singleFills() throws {
+        let size = CGSize(width: 48, height: 46)
+        let outline = StoneGeometry.single(size: size, seed: "chip-Stones", options: StoneOptions(corner: 16))
+        let xs = outline.map(\.x), ys = outline.map(\.y)
+        let minX = try #require(xs.min()), maxX = try #require(xs.max())
+        let minY = try #require(ys.min()), maxY = try #require(ys.max())
+        #expect(abs(minX) <= 0.5 && abs(maxX - size.width) <= 0.5)
+        #expect(abs(minY) <= 0.5 && abs(maxY - size.height) <= 0.5)
+    }
+
+    @Test("the squircle pentagon stands on its axis, its top corner rounded just below the vertex")
+    func pentagon() {
+        let bounds = SquirclePentagon().path(in: CGRect(x: 0, y: 0, width: 128, height: 122)).boundingRect
+        #expect(abs((bounds.minX + bounds.maxX) / 2 - 64) <= 0.5, "\(bounds)")
+        // The vertex is at y = 2; the corner's cubic over 28 % of each side rounds it to about 6.
+        #expect(bounds.minY >= 2 && bounds.minY <= 8, "\(bounds)")
+        #expect(bounds.maxY <= 122)
+    }
 }
