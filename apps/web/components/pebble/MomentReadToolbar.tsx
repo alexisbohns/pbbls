@@ -1,7 +1,8 @@
 "use client"
 
 import { useCallback } from "react"
-import { MoreHorizontal, Pencil, Share2, Shapes, Trash2, X } from "lucide-react"
+import { MoreHorizontal, Share2, X } from "lucide-react"
+import { DrawDotted, PebbleRound, Trash } from "@pbbls/icons"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import type { Moment } from "@/lib/types"
@@ -82,12 +83,12 @@ export function MomentReadToolbar({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-[180px]">
             <DropdownMenuItem onClick={onEditMoment}>
-              <Pencil aria-hidden />
+              <DrawDotted />
               {t("editMoment")}
             </DropdownMenuItem>
             {pebble && (
               <DropdownMenuItem onClick={onEditPebble}>
-                <Shapes aria-hidden />
+                <PebbleRound />
                 {t("editPebble")}
               </DropdownMenuItem>
             )}
@@ -96,7 +97,7 @@ export function MomentReadToolbar({
               onClick={onDelete}
               className="text-destructive data-highlighted:bg-destructive/10 data-highlighted:text-destructive"
             >
-              <Trash2 aria-hidden />
+              <Trash />
               {t("delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>

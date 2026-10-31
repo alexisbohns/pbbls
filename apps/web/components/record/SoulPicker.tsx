@@ -1,7 +1,8 @@
 "use client"
 
 import { useMemo, useRef, useState } from "react"
-import { Plus, Search, X } from "lucide-react"
+import { Search, X } from "lucide-react"
+import { PlusCircle } from "@pbbls/icons"
 import { useTranslations } from "next-intl"
 import { useSouls } from "@/lib/data/useSouls"
 import { useComboboxFilter } from "@/lib/hooks/useComboboxFilter"
@@ -174,7 +175,7 @@ export function SoulPicker({ value, onChange }: SoulPickerProps) {
                 isAdding && "pointer-events-none opacity-50",
               )}
             >
-              <Plus className="size-4 shrink-0" aria-hidden="true" />
+              <PlusCircle className="size-4 shrink-0" aria-hidden="true" />
               {isAdding ? t("adding") : t("addNew", { name: trimmed })}
             </li>
           )}

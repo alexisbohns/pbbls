@@ -1,6 +1,7 @@
 "use client"
 
-import { Layers } from "lucide-react"
+import { Collection as CollectionIcon } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import type { Collection } from "@/lib/types"
 import { PickerSheet } from "@/components/ui/PickerSheet"
@@ -45,7 +46,7 @@ export function CollectionSheet({ value, onChange, collections, variant = "tile"
         )}
         aria-label={value.length > 0 ? t("selectedAria", { names: selectedNames.join(", ") }) : t("pickAria")}
       >
-        <Layers className="size-3.5" aria-hidden />
+        <CollectionIcon className={PBBLS_ICON_SIZE.inline} />
         {selectedNames.length > 0 ? selectedNames.join(", ") : t("label")}
       </SheetTrigger>
     ) : (
@@ -63,7 +64,7 @@ export function CollectionSheet({ value, onChange, collections, variant = "tile"
             {value.length}
           </span>
         ) : (
-          <Layers className="size-5 text-muted-foreground/50" aria-hidden />
+          <CollectionIcon className={cn(PBBLS_ICON_SIZE.row, "text-muted-foreground/50")} />
         )}
       </SheetTrigger>
     )

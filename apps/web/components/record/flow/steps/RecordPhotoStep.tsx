@@ -1,6 +1,8 @@
 "use client"
 
-import { ImagePlus, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
+import { CameraFocus } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useRef } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
@@ -83,7 +85,7 @@ export function RecordPhotoStep({
           onClick={() => inputRef.current?.click()}
           className="flex h-64 w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-muted-foreground/30 text-muted-foreground outline-none transition-colors hover:border-muted-foreground/50 hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <ImagePlus className="size-10" aria-hidden />
+          <CameraFocus className={PBBLS_ICON_SIZE.hero} />
           <span className="text-sm font-medium">{t("add")}</span>
         </button>
       )}

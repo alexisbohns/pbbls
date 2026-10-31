@@ -1,7 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { ImagePlus, Loader2, AlertCircle } from "lucide-react"
+import { Loader2, AlertCircle } from "lucide-react"
+import { Camera } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import type { PebbleSnap } from "@/lib/types"
 import { Sheet, SheetContent, SheetClose } from "@/components/ui/sheet"
@@ -187,7 +189,7 @@ export function useSnapStaging({
 // ---------------------------------------------------------------------------
 // PebbleEditPicture — the hero picture slot in Edit mode.
 // 200×193 slot, image at 150×150, rotated -5°, radius 17. When no picture
-// is staged the slot renders a dashed placeholder with a `ImagePlus` icon.
+// is staged the slot renders a dashed placeholder with a `Camera` icon.
 // Tapping a filled picture opens an action sheet with Replace / Remove.
 // ---------------------------------------------------------------------------
 
@@ -295,7 +297,7 @@ export function PebbleEditPicture({
           aria-label={t("pictureEmptyAria")}
           className="grid size-[150px] -rotate-5 place-items-center rounded-[17px] border-2 border-dashed border-muted-foreground/30 text-muted-foreground/70 transition-colors hover:border-muted-foreground/60 hover:text-foreground active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <ImagePlus className="size-7" aria-hidden />
+          <Camera className={PBBLS_ICON_SIZE.tile} />
         </button>
       )}
       <input

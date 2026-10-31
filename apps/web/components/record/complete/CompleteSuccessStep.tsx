@@ -1,6 +1,8 @@
 "use client"
 
-import { Sparkle } from "lucide-react"
+import { KarmaDot } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import type { CompleteDraft } from "@/lib/data/moment-payloads"
 import { momentDisplayName } from "@/lib/data/moment-row"
@@ -54,7 +56,7 @@ export function CompleteSuccessStep({
         )}
         {karma > 0 && (
           <p className="flex items-center gap-1.5 text-sm font-medium">
-            <Sparkle className="size-4 text-primary" aria-hidden />
+            <KarmaDot className={cn(PBBLS_ICON_SIZE.inline, "text-primary")} />
             <span aria-hidden>{t("karma", { count: karma })}</span>
             <span className="sr-only">{tComplete("karmaAria", { count: karma })}</span>
           </p>
