@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Clock, Sparkles, Route } from "lucide-react"
+import { Path, PebbleFlat, Sparkles } from "@pbbls/icons"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
 import { buttonVariants } from "@/components/ui/button"
@@ -11,7 +11,8 @@ import { SEED_PEBBLES } from "@/lib/seed/seed-data"
 import { EMOTIONS, type Emotion } from "@/lib/config/emotions"
 import { useEmotionLocalized } from "@/lib/i18n"
 
-import type { LucideIcon } from "lucide-react"
+import { PBBLS_ICON_SIZE, type PbblsIconComponent } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 
 const PREVIEW_PEBBLE_IDS = ["pbl-sunrise", "pbl-luna-purr", "pbl-bread"]
 const PREVIEW_PEBBLES = SEED_PEBBLES.filter((p) =>
@@ -25,10 +26,10 @@ const PREVIEW_PEBBLES = SEED_PEBBLES.filter((p) =>
 
 const FEATURE_KEYS = ["record", "enrich", "grow"] as const
 type FeatureKey = (typeof FEATURE_KEYS)[number]
-const FEATURE_ICONS: Record<FeatureKey, LucideIcon> = {
-  record: Clock,
+const FEATURE_ICONS: Record<FeatureKey, PbblsIconComponent> = {
+  record: PebbleFlat,
   enrich: Sparkles,
-  grow: Route,
+  grow: Path,
 }
 
 function PreviewPebbleRow({ name, emotion }: { name: string; emotion: Emotion | undefined }) {
@@ -82,10 +83,7 @@ export function LandingPage() {
           const Icon = FEATURE_ICONS[key]
           return (
             <li key={key} className="flex items-start gap-3">
-              <Icon
-                aria-hidden="true"
-                className="mt-0.5 size-5 shrink-0 text-primary"
-              />
+              <Icon className={cn(PBBLS_ICON_SIZE.row, "mt-0.5 shrink-0 text-primary")} />
               <div>
                 <p className="text-sm font-semibold">{t(`features.${key}.title`)}</p>
                 <p className="text-sm text-muted-foreground">
