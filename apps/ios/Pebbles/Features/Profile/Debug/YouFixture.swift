@@ -17,7 +17,8 @@ enum YouFixture {
         GlyphStroke(d: "M40,60 C70,40 90,80 120,60 C140,48 150,52 165,60", width: 6)
     ]
 
-    static let stats = YouStats(rippleLevel: 3, activeToday: true, daysPracticed: 112, pebbles: 318, karma: 1240)
+    static let stats = YouStats(rippleLevel: 3, activeToday: true, daysPracticed: 112, pebbles: 318, karma: 1240,
+                                glyphsCarved: 12, glyphsOwned: 5)
 
     /// A loaded model; `glyph: false` draws the header's empty mark.
     static func model(glyph: Bool = true) async -> YouModel {

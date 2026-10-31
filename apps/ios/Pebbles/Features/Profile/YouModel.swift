@@ -58,12 +58,15 @@ struct YouStats: Equatable {
     var daysPracticed: Int?
     var pebbles: Int?
     var karma: Int?
+    var glyphsCarved: Int?
+    var glyphsOwned: Int?
 }
 
 extension YouStats {
     @MainActor init(_ stats: PathStatsService) {
         self.init(rippleLevel: stats.ripple?.rippleLevel, activeToday: stats.ripple?.activeToday ?? false,
-                  daysPracticed: stats.daysPracticed, pebbles: stats.pebbles, karma: stats.karma)
+                  daysPracticed: stats.daysPracticed, pebbles: stats.pebbles, karma: stats.karma,
+                  glyphsCarved: stats.glyphsCarved, glyphsOwned: stats.glyphsOwned)
     }
 }
 
