@@ -70,6 +70,16 @@ sealed interface PebblesKey : NavKey {
     ) : PebblesKey,
         BarKey
 
+    /**
+     * One month's wrap from Home (#1383 D12): a docked sheet over Home, folded or revealed. [month] is the
+     * month's `YearMonth` text ("2026-10"), so the key stays a plain string across process death.
+     */
+    @Serializable
+    data class HomeWrap(
+        val month: String,
+    ) : PebblesKey,
+        BarKey
+
     @Serializable
     data object Achievements : PebblesKey, BarKey
 
