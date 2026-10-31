@@ -31,8 +31,8 @@ export function UnfoldDialog({ month, onUnfold, onClose }: UnfoldDialogProps) {
         {month && (
           <>
             <DialogHeader>
-              <DialogTitle className="pb-type-card-title">{t("unfoldTitle", { month: month.label })}</DialogTitle>
-              <DialogDescription className="pb-type-row-line">{t("unfoldBody", { count: month.count })}</DialogDescription>
+              <DialogTitle className="pb-type-card-title text-[1.625rem] font-[340]">{t("unfoldTitle", { month: month.label })}</DialogTitle>
+              <DialogDescription className="pb-type-row-line text-[0.9375rem] text-m3-on-surface-variant">{t("unfoldBody", { count: month.count })}</DialogDescription>
             </DialogHeader>
             {failed && (
               <p role="alert" className="pb-type-row-line italic text-m3-on-surface-variant">
