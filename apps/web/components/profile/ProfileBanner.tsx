@@ -1,6 +1,8 @@
 "use client"
 
-import { Fingerprint } from "lucide-react"
+import { PebbleDottedGlyph } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import type { Mark } from "@/lib/types"
 import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
@@ -27,7 +29,7 @@ export function ProfileBanner({ displayName, memberSince, glyph }: ProfileBanner
         <GlyphPreview mark={glyph} className="size-24" />
       ) : (
         <div className="flex size-24 items-center justify-center rounded-2xl border border-dashed border-border">
-          <Fingerprint className="size-8 text-muted-foreground" aria-hidden />
+          <PebbleDottedGlyph className={cn(PBBLS_ICON_SIZE.hero, "text-muted-foreground")} />
         </div>
       )}
 
