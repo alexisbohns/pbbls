@@ -94,7 +94,8 @@ extension References {
 
         @Test(arguments: ReferenceScheme.allCases)
         func cardAndBox(scheme: ReferenceScheme) throws {
-            ReferenceImage.assertMatches(Self.cardAndBox(), named: "cardAndBox", config: ReferenceConfig(scheme: scheme))
+            ReferenceImage.assertMatches(Self.cardAndBox(), named: "cardAndBox",
+                                         config: ReferenceConfig(scheme: scheme))
         }
 
         /// The head plain, with a ratio and with a counted word, in the pass's language.
