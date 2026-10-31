@@ -50,11 +50,13 @@ private fun caveat(
 private fun reenieBeanie(
     size: TextUnit,
     tracking: TextUnit,
+    lineHeight: TextUnit = TextUnit.Unspecified,
 ) = TextStyle(
     fontFamily = ReenieBeanieFamily,
     fontSize = size,
     fontWeight = FontWeight.Normal,
     letterSpacing = tracking,
+    lineHeight = lineHeight,
 )
 
 /**
@@ -67,6 +69,9 @@ object PebblesHandTypography {
     // values). Any user/soul/creator name renders in the hand font.
     val bodyLeadHand = reenieBeanie(size = 22.sp, tracking = (-0.045f).em)
     val largeTitleHand = reenieBeanie(size = 41.sp, tracking = (-0.049f).em)
+
+    /** The name on You (spec 2026-10-31 D3): 60 sp, line height 0.9. */
+    val profileName = reenieBeanie(size = 60.sp, tracking = (-0.075f).em, lineHeight = 54.sp)
 
     /**
      * Handwritten (Caveat) input face, 36sp. The moment name field in the
