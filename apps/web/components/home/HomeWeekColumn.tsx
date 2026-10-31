@@ -17,7 +17,9 @@ type HomeWeekColumnProps = {
  * One week of Home's month (#1384, spec D9, §Accessibility): a single link to
  * that week on the Path, named by its range and its pebbles. Everything drawn
  * inside (Monday's date, the days' sockets and seals, the cairn) is hidden
- * from assistive technology; the name says it.
+ * from assistive technology; the name says it. Every column is a full week:
+ * a day outside the month is a faint socket, so a week that straddles two
+ * months never reads as a ragged column.
  */
 export function HomeWeekColumn({ column, month, locale, paletteFor }: HomeWeekColumnProps) {
   const t = useTranslations("home.month")
@@ -36,6 +38,7 @@ export function HomeWeekColumn({ column, month, locale, paletteFor }: HomeWeekCo
         </div>
         {column.days.map((day, k) => (
           <div key={k} className="flex h-(--cell) items-center justify-center gap-0.5">
+            {day.kind === "outside" && <span className="size-[6.8px] rounded-full border-[1.1px] border-m3-outline-variant" />}
             {day.kind === "empty" && <span className="size-[6.8px] rounded-full border-[1.1px] border-m3-outline opacity-70" />}
             {day.kind === "pebbles" && <DaySeals pebbles={day.pebbles} paletteFor={paletteFor} />}
           </div>
