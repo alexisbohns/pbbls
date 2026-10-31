@@ -1,17 +1,15 @@
 import Link from "next/link"
+import type { ComponentType } from "react"
 import {
   Apple,
   Bot,
-  CircleCheckBig,
-  CircleDotDashed,
-  CircleFadingArrowUp,
-  CirclePile,
   DatabaseZap,
   Monitor,
   MonitorSmartphone,
   Telescope,
   type LucideIcon,
 } from "lucide-react"
+import { CheckCircle, HourglassEnd, PebbleRound, PebbleRoundLit1, type PbblsIconProps } from "@pbbls/icons"
 import {
   Table,
   TableBody,
@@ -32,7 +30,7 @@ export type LogSectionVariant =
 type DateField = "updated_at" | "released_at" | "published_at"
 
 type VariantConfig = {
-  icon: LucideIcon | null
+  icon: ComponentType<PbblsIconProps> | null
   iconClass: string
   dateField: DateField
   dateLabel: string
@@ -40,25 +38,25 @@ type VariantConfig = {
 
 const VARIANTS: Record<LogSectionVariant, VariantConfig> = {
   in_progress: {
-    icon: CircleDotDashed,
+    icon: PebbleRoundLit1,
     iconClass: "text-blue-500",
     dateField: "updated_at",
     dateLabel: "Updated",
   },
   planned: {
-    icon: CircleFadingArrowUp,
+    icon: HourglassEnd,
     iconClass: "text-yellow-500",
     dateField: "updated_at",
     dateLabel: "Updated",
   },
   backlog: {
-    icon: CirclePile,
+    icon: PebbleRound,
     iconClass: "text-muted-foreground",
     dateField: "updated_at",
     dateLabel: "Updated",
   },
   shipped: {
-    icon: CircleCheckBig,
+    icon: CheckCircle,
     iconClass: "text-green-600",
     dateField: "released_at",
     dateLabel: "Released",

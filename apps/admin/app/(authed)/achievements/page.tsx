@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Plus } from "lucide-react"
+import { PlusCircle } from "@pbbls/icons"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -46,7 +46,7 @@ export default async function AchievementsPage({
           </p>
         </div>
         <Button size="sm" render={<Link href="/achievements/new" />}>
-          <Plus aria-hidden />
+          <PlusCircle className="size-4" />
           New tier
         </Button>
       </header>
