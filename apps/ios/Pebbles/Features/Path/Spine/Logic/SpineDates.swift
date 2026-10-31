@@ -50,6 +50,16 @@ enum SpineDates {
         format(date, "MMMMd", calendar, locale)
     }
 
+    /// "Sunday, March 1, 2026", "dimanche 1 mars 2026": the achievements header (#1306).
+    static func fullDate(_ date: Date, calendar: Calendar, locale: Locale) -> String {
+        format(date, "EEEEdMMMMy", calendar, locale)
+    }
+
+    /// "Mar 2", "2 mars": a register row's date (#1306).
+    static func shortDayMonth(_ date: Date, calendar: Calendar, locale: Locale) -> String {
+        format(date, "dMMM", calendar, locale)
+    }
+
     /// "10:15 AM", "10:15": a moment's time on the locale's clock.
     static func time(_ date: Date, calendar: Calendar, locale: Locale) -> String {
         format(date, "jmm", calendar, locale)
