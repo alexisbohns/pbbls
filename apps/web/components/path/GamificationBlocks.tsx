@@ -1,6 +1,7 @@
 "use client"
 
-import { CirclePile, Sparkle, Stone } from "lucide-react"
+import { CirclePile } from "lucide-react"
+import { KarmaDot, PebbleRound } from "@pbbls/icons"
 import { motion, useReducedMotion } from "framer-motion"
 import { useBounce } from "@/lib/data/useBounce"
 import { useKarma } from "@/lib/data/useKarma"
@@ -33,7 +34,7 @@ export function GamificationBlocks() {
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
       <GamificationBlock
-        icon={Stone}
+        icon={PebbleRound}
         label={pebblesCount === 1 ? "pebble" : "pebbles"}
         value={pebblesCount}
         dialogTitle="Pebbles"
@@ -73,7 +74,7 @@ export function GamificationBlocks() {
       />
 
       <GamificationBlock
-        icon={Sparkle}
+        icon={KarmaDot}
         label="karma"
         value={karma}
         dialogTitle="Karma"
