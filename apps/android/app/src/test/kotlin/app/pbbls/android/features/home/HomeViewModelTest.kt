@@ -175,6 +175,23 @@ class HomeViewModelTest {
             assertEquals(2, wraps.monthCalls.size)
         }
 
+    @Test
+    fun `a moment saved from Home reads the month again, without a resume`() =
+        runTest {
+            wraps.months[YearMonth.now()] = month(pebbles = 2)
+            val viewModel = viewModel()
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            val after = month(pebbles = 3)
+            wraps.months[YearMonth.now()] = after
+            viewModel.onMomentSaved()
+            advanceUntilIdle()
+
+            assertEquals(HomeSection.Ready(after), viewModel.uiState.value.month)
+            assertEquals(2, wraps.monthCalls.size)
+        }
+
     // MARK: - The week tap (D10)
 
     @Test
