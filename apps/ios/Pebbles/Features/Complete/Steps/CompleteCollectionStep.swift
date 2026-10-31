@@ -33,17 +33,17 @@ struct CompleteCollectionStep: View {
         } label: {
             HStack(spacing: Spacing.md) {
                 PbblsIconImage(.collection, .row)
-                    .foregroundStyle(isSelected ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant)
+                    .foregroundStyle(isSelected ? Color.pebbles.onPrimaryContainer : Color.pebbles.onSurfaceVariant)
                 // Collection names are user-authored, so never localized.
                 Text(verbatim: collection.name)
                     .pebblesFont(.body)
-                    .foregroundStyle(isSelected ? Color.pebbles.primary : Color.pebbles.onSurface)
+                    .foregroundStyle(isSelected ? Color.pebbles.onPrimaryContainer : Color.pebbles.onSurface)
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, Spacing.md)
             .padding(.vertical, Spacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(isSelected ? Color.pebbles.primary.opacity(0.12) : Color.pebbles.surfaceContainerHighest)
+            .background(isSelected ? Color.pebbles.primaryContainer : Color.pebbles.surfaceContainerHighest)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .buttonStyle(.plain)
