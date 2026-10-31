@@ -581,6 +581,42 @@
 @utility m3-type-label-small { font-family: var(--m3-font-plain); font-size: 0.6875rem; line-height: 1rem; letter-spacing: 0.5px; font-weight: 500; }
 
 /* ============================================================
+   Home and You type roles (#1384, spec D6), in rem (px ÷ 16).
+   Ysabeau carries every figure (lining where marked; its default figures are
+   old-style, which the dates want); Inclusive Sans carries what you read in rows.
+   ============================================================ */
+@utility pb-type-greeting { font-family: var(--font-heading); font-size: 2.5rem; font-weight: 270; line-height: 1.04; letter-spacing: -0.024em; text-wrap: balance; }
+@utility pb-type-lead { font-family: var(--font-heading); font-size: 1.3125rem; font-weight: 360; font-style: italic; line-height: 1.25; }
+@utility pb-type-date { font-family: var(--font-heading); font-size: 1.0625rem; font-weight: 540; letter-spacing: 0.005em; }
+@utility pb-type-section { font-family: var(--font-heading); font-size: 1.875rem; font-weight: 300; line-height: 1.05; letter-spacing: -0.018em; }
+@utility pb-type-figure { font-family: var(--font-heading); font-size: 1.875rem; font-weight: 300; line-height: 1.05; letter-spacing: -0.01em; font-variant-numeric: lining-nums proportional-nums; white-space: nowrap; }
+@utility pb-type-figure-small { font-family: var(--font-heading); font-size: 1.1875rem; font-weight: 380; font-style: italic; letter-spacing: 0; }
+@utility pb-type-counter { font-family: var(--font-heading); font-size: 2.25rem; font-weight: 280; line-height: 1; letter-spacing: -0.025em; font-variant-numeric: lining-nums proportional-nums; }
+@utility pb-type-day { font-family: var(--font-heading); font-size: 1.5625rem; font-weight: 330; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: lining-nums proportional-nums; }
+@utility pb-type-annotation { font-family: var(--font-heading); font-size: 0.625rem; font-weight: 650; line-height: 1; letter-spacing: 0.06em; text-transform: uppercase; }
+@utility pb-type-card-title { font-family: var(--font-heading); font-size: 1.625rem; font-weight: 340; line-height: 1.1; letter-spacing: -0.015em; }
+@utility pb-type-card-month { font-family: var(--font-heading); font-size: 1.4375rem; font-weight: 400; line-height: 1.1; letter-spacing: -0.005em; }
+@utility pb-type-kicker { font-family: var(--font-heading); font-size: 0.9375rem; font-weight: 400; font-style: italic; }
+@utility pb-type-since { font-family: var(--font-heading); font-size: 1.1875rem; font-weight: 380; font-style: italic; }
+@utility pb-type-hand { font-family: var(--font-script); font-size: 3.75rem; font-weight: 400; line-height: 0.9; letter-spacing: -0.075em; }
+@utility pb-type-row-title { font-family: var(--m3-font-plain); font-size: 1.0625rem; font-weight: 600; line-height: 1.25; }
+@utility pb-type-row-line { font-family: var(--m3-font-plain); font-size: 0.9375rem; font-weight: 400; line-height: 1.4; text-wrap: pretty; }
+@utility pb-type-label { font-family: var(--m3-font-plain); font-size: 0.9375rem; font-weight: 600; line-height: 1.15; }
+@utility pb-type-caption { font-family: var(--m3-font-plain); font-size: 0.78125rem; font-weight: 500; line-height: 1.2; }
+
+/* The card (#1384 D8): white stock, 18px radius, a soft shadow on Paper and a
+   hairline at Night. Applied with the shadcn Card primitive, which it resets. */
+@utility pb-card {
+  background-color: var(--m3-stock);
+  border-radius: 18px;
+  border-width: 0;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 8px 22px rgb(0 0 0 / 0.07);
+  &:is(.dark *) {
+    box-shadow: 0 0 0 1px var(--m3-rule), 0 8px 22px rgb(0 0 0 / 0.35);
+  }
+}
+
+/* ============================================================
    THE SPINE — the web Path's paper (#1052)
    Values lifted from the final mock (spec: 2026-10-11-web-path-spine-design.md).
    Paper is :root, Night is .dark. Deliberately NOT redefined by the colour
