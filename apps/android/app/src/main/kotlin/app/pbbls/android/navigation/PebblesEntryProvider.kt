@@ -266,6 +266,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             // parent picks them up on its own resume refresh instead (#852).
             onSaved = { _, _, _, _ -> navigator.goBack() },
             glyphPicker = glyphPicker,
+            onSignOut = onSignOut,
         )
     }
 
