@@ -261,6 +261,9 @@
     <string name="you_glyphs_owned_line_none">The glyphs you collected from others.</string>
     <string name="you_glyphs_community">Community</string>
     <string name="you_glyphs_community_line">Glyphs other pebblers share.</string>
+    <!-- You's Lab (#1383, spec D16): the announcement's kicker takes its day and month ("31 October"). -->
+    <string name="you_lab_kicker">Lab notes · %1$s</string>
+    <string name="you_lab_all_updates">All updates</string>
     <string name="settings_title">Settings</string>
     <string name="settings_appearance_section">Appearance</string>
     <string name="settings_wallpaper_colors_title">Use wallpaper colours</string>

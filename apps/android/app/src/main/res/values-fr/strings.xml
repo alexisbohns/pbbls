@@ -268,6 +268,8 @@
     <string name="you_glyphs_owned_line_none">Les glyphes que tu as reçus d\'autres.</string>
     <string name="you_glyphs_community">Communauté</string>
     <string name="you_glyphs_community_line">Les glyphes que partagent d\'autres pebblers.</string>
+    <string name="you_lab_kicker">Notes du Lab · %1$s</string>
+    <string name="you_lab_all_updates">Toutes les nouveautés</string>
     <string name="settings_title">Réglages</string>
     <string name="settings_appearance_section">Apparence</string>
     <string name="settings_wallpaper_colors_title">Couleurs du fond d’écran</string>

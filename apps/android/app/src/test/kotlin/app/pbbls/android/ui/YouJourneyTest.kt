@@ -9,22 +9,29 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import app.pbbls.android.R
 import app.pbbls.android.testing.AppUiTest
+import app.pbbls.android.testing.FakeLogsService
+import app.pbbls.android.testing.UiFixtures
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import javax.inject.Inject
 
 /**
  * What leaves You keeps a home (#1383, spec D14), through the real UI: Connections
  * is reached from People's top bar ("Circle", where iOS has it), and Log out from
  * Settings. Both land before the You rebuild, so no build of the stack orphans them.
- * And You's glyph rows open the store on their own shelf (D17).
+ * And You's glyph rows open the store on their own shelf (D17), and its Lab reaches the Lab
+ * screen and an announcement's detail (D16).
  */
 @HiltAndroidTest
 class YouJourneyTest : AppUiTest() {
+    @Inject lateinit var logs: FakeLogsService
+
     private fun signedIn() {
         skipOnboarding()
         launch()
@@ -74,5 +81,34 @@ class YouJourneyTest : AppUiTest() {
         onText(R.string.welcome_log_in).assertIsDisplayed()
         onText(R.string.tab_you).assertIsNotDisplayed()
         onText(R.string.settings_title).assertDoesNotExist()
+    }
+
+    /** "All updates" opens the Lab screen, the only way from You to the roadmap and the backlog (D16c). */
+    @Test
+    fun `All updates opens the Lab`() {
+        signedIn()
+        onTab(R.string.tab_you).performClick()
+
+        onText(R.string.you_lab_all_updates).performScrollTo().performClick()
+
+        // The Lab screen's own first block, which You does not draw.
+        onText(R.string.lab_community_button).assertIsDisplayed()
+        onYou().assertDoesNotExist()
+    }
+
+    @Test
+    fun `the announcement opens its detail`() {
+        val announcement = UiFixtures.log(title = "Cut from one stone")
+        logs.announcements = listOf(announcement)
+        logs.log = announcement
+        signedIn()
+        onTab(R.string.tab_you).performClick()
+
+        compose.onNodeWithText("Cut from one stone").performScrollTo().performClick()
+
+        compose.onNodeWithText("Cut from one stone, in short.").assertIsDisplayed()
+        // The detail loads the log by the id You passed in its key.
+        assertEquals(listOf(announcement.id), logs.logCalls)
+        onYou().assertDoesNotExist()
     }
 }

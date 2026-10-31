@@ -129,6 +129,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         ProfileScreen(
             onOpenGlyphs = { navigator.navigate(PebblesKey.Glyphs(it)) },
             onOpenLab = { navigator.navigate(PebblesKey.Lab) },
+            onOpenAnnouncement = { navigator.navigate(PebblesKey.LabAnnouncement(it)) },
             onOpenAchievements = { navigator.navigate(PebblesKey.Achievements) },
             onOpenSettings = { navigator.navigate(PebblesKey.Settings) },
         )

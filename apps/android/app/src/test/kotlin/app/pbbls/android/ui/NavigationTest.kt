@@ -141,7 +141,7 @@ class NavigationTest : AppUiTest() {
                 R.string.you_glyphs_mine to R.string.glyphs_title,
                 // Nothing earned on the fakes: the shelf's one card invites (#1383, D14.6).
                 R.string.achievements_card_subtitle to R.string.achievements_title,
-                R.string.lab_title to R.string.lab_title,
+                R.string.you_lab_all_updates to R.string.lab_title,
             )
         for ((tap, title) in pushes) {
             onTab(R.string.tab_you).performClick()
@@ -284,7 +284,7 @@ class NavigationTest : AppUiTest() {
         logs.log = announcement
         signedIn()
         onTab(R.string.tab_you).performClick()
-        onText(R.string.lab_title).performScrollTo().performClick()
+        onText(R.string.you_lab_all_updates).performScrollTo().performClick()
 
         compose.onNodeWithText("Pebbles on Android").performClick()
 
@@ -296,7 +296,7 @@ class NavigationTest : AppUiTest() {
         logs.changelog = listOf(UiFixtures.log(species = LogSpecies.FEATURE, title = "Faster Path"))
         signedIn()
         onTab(R.string.tab_you).performClick()
-        onText(R.string.lab_title).performScrollTo().performClick()
+        onText(R.string.you_lab_all_updates).performScrollTo().performClick()
 
         onText(R.string.lab_see_all).performScrollTo().performClick()
 
