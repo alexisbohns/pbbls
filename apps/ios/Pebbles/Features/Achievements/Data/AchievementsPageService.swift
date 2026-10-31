@@ -101,20 +101,54 @@ struct AchievementsPageService: AchievementsPageServicing {
             return nil
         }
         do {
-            return try WrapDecoding.decode(AchievementsPayload.self, from: data).model
+            return try Self.keptPayload(data).model
         } catch {
             Self.logger.error("a kept achievements page no longer decodes: \(error.localizedDescription, privacy: .private)")
             return nil
         }
     }
 
-    /// When the kept copy was written, or nil when there is none or it went stale since.
+    // MARK: - The kept copy
+
+    /// What is kept: the server's body as it came, with when it was kept, in one
+    /// file (`{"kept_at": seconds, "body": …}`). The kept time is our own record,
+    /// never a file's timestamp. A body kept before the envelope still shows,
+    /// with no kept time, so it never counts as fresh.
+    private struct Envelope: Decodable {
+        let keptAt: Double?
+        enum CodingKeys: String, CodingKey { case keptAt = "kept_at" }
+    }
+
+    private struct KeptBody: Decodable {
+        let body: AchievementsPayload
+    }
+
+    static func envelope(_ body: Data, keptAt: Date) -> Data {
+        var data = Data(#"{"kept_at":"#.utf8)
+        data.append(Data(String(keptAt.timeIntervalSince1970).utf8))
+        data.append(Data(#","body":"#.utf8))
+        data.append(body)
+        data.append(Data("}".utf8))
+        return data
+    }
+
+    /// The kept payload, from the envelope or, kept before it, the bare body.
+    static func keptPayload(_ data: Data) throws -> AchievementsPayload {
+        if let kept = try? WrapDecoding.decode(KeptBody.self, from: data) { return kept.body }
+        return try WrapDecoding.decode(AchievementsPayload.self, from: data)
+    }
+
+    /// When `data` was kept, by its own record; nil without one.
+    static func keptTime(_ data: Data) -> Date? {
+        (try? WrapDecoding.decode(Envelope.self, from: data))?.keptAt.map(Date.init(timeIntervalSince1970:))
+    }
+
+    /// When the kept copy was kept, by the time recorded in it; nil when there is
+    /// none, it carries no time, or it went stale since.
     func keptAt(zone: TimeZone) async -> Date? {
-        guard let disk, let owner else { return nil }
-        let url = disk.file(Self.cachePage, owner: owner, zone: zone.identifier)
-        guard let written = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date,
-              !freshness.isStale(keptAt: written) else { return nil }
-        return written
+        guard let disk, let owner, let data = disk.read(Self.cachePage, owner: owner, zone: zone.identifier),
+              let kept = Self.keptTime(data), !freshness.isStale(keptAt: kept) else { return nil }
+        return kept
     }
 
     func markStale() {
@@ -146,7 +180,8 @@ struct AchievementsPageService: AchievementsPageServicing {
                 "get_achievements sections dropped: \(payload.skipped.joined(separator: ","), privacy: .public)")
         }
         if let disk, let owner, read.map({ freshness.claimWrite($0, key: "\(owner)|\(zone.identifier)") }) ?? true {
-            disk.write(data, page: Self.cachePage, owner: owner, zone: zone.identifier, epoch: epoch)
+            disk.write(Self.envelope(data, keptAt: Date()), page: Self.cachePage, owner: owner, zone: zone.identifier,
+                       epoch: epoch)
         }
         return payload.model
     }
