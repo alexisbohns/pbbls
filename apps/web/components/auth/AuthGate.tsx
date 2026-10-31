@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/lib/data/auth-context"
 
 const PROTECTED_PREFIXES = [
+  "/home",
+  "/guides",
   "/path",
   "/record",
   "/pebble",
