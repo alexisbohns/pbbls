@@ -312,4 +312,26 @@ extension References.HomeReferences {
         ReferenceImage.assertMatches(Self.greetingLongFr(), named: "greetingLongFr",
                                      config: ReferenceConfig(scheme: .paper, locales: [.fr], width: nil))
     }
+
+    /// The month's weeks at Home's size (#1382 D8): the fixture October on the
+    /// mock's Saturday, so the last week is the live one.
+    static func monthGrid() -> some View {
+        HomeMonthGrid(month: HomeFixture.month, lookups: HomeFixture.lookups,
+                      today: CalendarDay(year: 2026, month: 10, day: 31), onWeek: { _ in })
+            .padding(Spacing.lg)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.pebbles.surface)
+    }
+
+    @Test(arguments: ReferenceScheme.allCases)
+    func monthGrid(scheme: ReferenceScheme) throws {
+        let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+        ReferenceImage.assertMatches(Self.monthGrid(), named: "monthGrid",
+                                     config: ReferenceConfig(scheme: scheme, locales: locales))
+    }
+
+    @Test func monthGridAx2() throws {
+        ReferenceImage.assertMatches(Self.monthGrid(), named: "monthGrid",
+                                     config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+    }
 }
