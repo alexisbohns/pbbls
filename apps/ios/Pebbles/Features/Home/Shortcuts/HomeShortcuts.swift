@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The three Home shortcuts (spec D3): camera, quick moment, new pebble, in
-/// soft primary. Settings picks a row or a bento, and plain tiles or pebble
+/// The three Home shortcuts (spec D3): camera, quick moment, new pebble, on
+/// the accent surface (`primaryContainer`, #1382 D11). Settings picks a row or a bento, and plain tiles or pebble
 /// shapes (`HomeShortcutsPreference`); the bento's square goes to the shortcut
 /// used last.
 struct HomeShortcuts: View {
@@ -13,7 +13,6 @@ struct HomeShortcuts: View {
     @AppStorage private var layout: HomeShortcutsLayout
     @AppStorage private var stones: Bool
     @AppStorage private var lastUsed: HomeShortcut
-    @Environment(\.colorScheme) private var colorScheme
 
     /// `defaults` lets the references draw each style without touching the device's.
     init(onCamera: @escaping () -> Void, onQuick: @escaping () -> Void, onPebble: @escaping () -> Void,
@@ -27,7 +26,7 @@ struct HomeShortcuts: View {
         _lastUsed = AppStorage(wrappedValue: .camera, HomeShortcutsPreference.lastUsedKey, store: defaults)
     }
 
-    private static let rowMinHeight: CGFloat = 84
+    static let rowMinHeight: CGFloat = 100
     private static let tileRadius: CGFloat = 18
 
     var body: some View {
@@ -64,12 +63,9 @@ struct HomeShortcuts: View {
 
     // MARK: - Colour
 
-    private var ink: Color { Color.pebbles.primary }
-
-    /// Soft primary: the ink washed over the page, 13 % on Paper, 20 % on Night.
-    private var field: Color {
-        Color.pebbles.primary.opacity(colorScheme == .dark ? 0.2 : 0.13)
-    }
+    /// The accent surface's ink and fill: opaque roles, so they follow Increase Contrast.
+    private var ink: Color { Color.pebbles.onPrimaryContainer }
+    private var field: Color { Color.pebbles.primaryContainer }
 
     // MARK: - Fields
 
@@ -127,21 +123,23 @@ struct HomeShortcuts: View {
 
     private func label(_ shortcut: HomeShortcut, alignment: TextAlignment) -> some View {
         Text(shortcut.title)
-            .pebblesFont(.callout)
+            .spineType(.actionLabel)
             .foregroundStyle(ink)
             .lineLimit(2)
             .multilineTextAlignment(alignment)
     }
 
-    /// Icon over label, centred in a column.
+    /// The icon top-left, the label bottom-left (c3). The second and third
+    /// cells sit 20 pt in on the leading side, clear of the leaning cut.
     private func rowContent(_ shortcut: HomeShortcut) -> some View {
-        VStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 0) {
             PbblsIconImage(shortcut.icon, .tile, style: AnyShapeStyle(ink))
-            label(shortcut, alignment: .center)
+            Spacer(minLength: 8)
+            label(shortcut, alignment: .leading)
         }
-        .padding(.horizontal, 9)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, minHeight: Self.rowMinHeight, maxHeight: .infinity)
+        .padding(EdgeInsets(top: 15, leading: shortcut == HomeShortcut.allCases.first ? 16 : 20,
+                            bottom: 14, trailing: 12))
+        .frame(maxWidth: .infinity, minHeight: Self.rowMinHeight, maxHeight: .infinity, alignment: .leading)
     }
 
     /// The square's larger icon over its label.

@@ -11,6 +11,11 @@ struct HomeShortcutsTests {
         #expect(HomeShortcut.bento(lead: .pebble) == [.pebble, .camera, .quick])
     }
 
+    /// c3's row (#1382 D11): icon top, label bottom, at least 100 pt tall.
+    @Test func theRowIsAtLeastAHundredPointsTall() {
+        #expect(HomeShortcuts.rowMinHeight == 100)
+    }
+
     /// The stored values: renaming one would reset every device's choice.
     @Test func storedValuesAreStable() {
         #expect(HomeShortcutsLayout.allCases.map(\.rawValue) == ["row", "bento"])
