@@ -14,13 +14,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
-import app.pbbls.android.core.model.Collection
-import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.RippleSummary
-import app.pbbls.android.features.profile.components.ProfileCollectionsCard
-import app.pbbls.android.features.profile.components.ProfileLogoutButton
-import app.pbbls.android.features.profile.components.ProfileStatsCard
+import app.pbbls.android.features.profile.components.YouCounters
+import app.pbbls.android.features.profile.components.YouGlyphsSection
 import app.pbbls.android.features.profile.components.YouHeader
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
@@ -38,13 +35,6 @@ private val previewStrokes =
             d = "M40,40 C80,20 120,20 160,40 S180,120 160,160 S80,180 40,160 S20,80 40,40",
             width = 6.0,
         ),
-    )
-
-private val previewCollections =
-    listOf(
-        Collection(id = "c1", name = "Reading list", mode = CollectionMode.PACK, pebbleCount = 7),
-        Collection(id = "c2", name = "Trips", mode = null, pebbleCount = 1),
-        Collection(id = "c3", name = "Wins", mode = CollectionMode.TRACK, pebbleCount = 23),
     )
 
 @Composable
@@ -70,24 +60,12 @@ private fun ProfileGallery() {
             ripple = null,
             onOpenSettings = {},
         )
-        ProfileStatsCard(
-            ripple = RippleSummary(rippleLevel = 3, pebbles28d = 11, activeToday = true),
-            assiduity = List(28) { it % 3 != 0 },
-            daysPracticed = 42,
-            pebbles = 137,
-            karma = 1200,
-        )
-        // Loading state: em-dashes, level-0 badge, empty grid.
-        ProfileStatsCard(
-            ripple = null,
-            assiduity = null,
-            daysPracticed = null,
-            pebbles = null,
-            karma = null,
-        )
-        ProfileCollectionsCard(collections = previewCollections, hasLoaded = true)
-        ProfileCollectionsCard(collections = emptyList(), hasLoaded = true)
-        ProfileLogoutButton(onClick = {}, modifier = Modifier.fillMaxWidth())
+        YouCounters(daysPracticed = 112, pebbles = 318, karma = 1240)
+        // Loading state: em-dashes.
+        YouCounters(daysPracticed = null, pebbles = null, karma = null)
+        YouGlyphsSection(glyphsCarved = 12, glyphsOwned = 5, textInset = 4.dp, onOpen = {})
+        // Counts not served yet: the lines read without a number.
+        YouGlyphsSection(glyphsCarved = null, glyphsOwned = null, textInset = 4.dp, onOpen = {})
     }
 }
 

@@ -33,11 +33,11 @@ import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Collection
+import app.pbbls.android.core.model.GlyphShelf
 import app.pbbls.android.features.profile.components.ProfileAchievementsCard
 import app.pbbls.android.features.profile.components.ProfileLabCard
-import app.pbbls.android.features.profile.components.ProfileLogoutButton
-import app.pbbls.android.features.profile.components.ProfileShortcutsRow
-import app.pbbls.android.features.profile.components.ProfileStatsCard
+import app.pbbls.android.features.profile.components.YouCounters
+import app.pbbls.android.features.profile.components.YouGlyphsSection
 import app.pbbls.android.features.profile.components.YouHeader
 
 /**
@@ -65,7 +65,7 @@ fun ProfileScreen(
     onOpenSouls: () -> Unit,
     onOpenCollections: () -> Unit,
     onOpenCollection: (Collection) -> Unit,
-    onOpenGlyphs: () -> Unit,
+    onOpenGlyphs: (GlyphShelf) -> Unit,
     onOpenConnections: () -> Unit,
     onOpenLab: () -> Unit,
     onOpenAchievements: () -> Unit,
@@ -163,17 +163,16 @@ fun ProfileScreen(
                         ripple = content.ripple,
                         onOpenSettings = onOpenSettings,
                     )
-                    ProfileShortcutsRow(
-                        onOpenSouls = onOpenSouls,
-                        onOpenGlyphs = onOpenGlyphs,
-                        onOpenConnections = onOpenConnections,
-                    )
-                    ProfileStatsCard(
-                        ripple = content.ripple,
-                        assiduity = null,
+                    YouCounters(
                         daysPracticed = content.daysPracticed,
                         pebbles = content.pebbles,
                         karma = content.karma,
+                    )
+                    YouGlyphsSection(
+                        glyphsCarved = content.glyphsCarved,
+                        glyphsOwned = content.glyphsOwned,
+                        textInset = 4.dp,
+                        onOpen = onOpenGlyphs,
                     )
                     ProfileAchievementsCard(
                         badges = content.shelf,
@@ -181,7 +180,6 @@ fun ProfileScreen(
                         onOpen = onOpenAchievements,
                     )
                     ProfileLabCard(onOpen = onOpenLab)
-                    ProfileLogoutButton(onClick = onSignOut)
                 }
             }
         }

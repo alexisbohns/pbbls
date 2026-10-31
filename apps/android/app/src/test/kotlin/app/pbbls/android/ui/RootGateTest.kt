@@ -68,22 +68,6 @@ class RootGateTest : AppUiTest() {
     }
 
     @Test
-    fun `logging out from Profile replaces the stack with Welcome`() {
-        skipOnboarding()
-        launch()
-        signIn()
-        onText(R.string.tab_you).performClick()
-        onText(R.string.profile_title).assertIsDisplayed()
-
-        onText(R.string.profile_log_out).performScrollTo().performClick()
-
-        assertEquals(1, supabase.signOutCount)
-        onText(R.string.welcome_log_in).assertIsDisplayed()
-        onText(R.string.tab_you).assertIsNotDisplayed()
-        onText(R.string.profile_title).assertDoesNotExist()
-    }
-
-    @Test
     fun `an invite parked before sign-in opens after Home`() {
         skipOnboarding()
         launch(inviteIntent("tok-1"))

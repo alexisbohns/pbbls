@@ -223,15 +223,7 @@
     <string name="profile_title">Profil</string>
     <string name="profile_back_a11y">Retour</string>
     <string name="profile_member_since">Membre depuis %1$s</string>
-    <string name="profile_stats_header">Stats</string>
     <string name="profile_ripples_level">Ripples niveau %1$d</string>
-    <plurals name="profile_ripples_progress">
-        <item quantity="one">Encore %1$d pebble avant le niveau %2$d</item>
-        <item quantity="other">Encore %1$d pebbles avant le niveau %2$d</item>
-    </plurals>
-    <string name="profile_ripples_max">Niveau maximum atteint</string>
-    <string name="profile_ripples_loading">Chargement…</string>
-    <string name="profile_assiduity_a11y">Grille d\'assiduité, 28 derniers jours</string>
     <string name="profile_counter_days">Jours</string>
     <string name="profile_counter_pebbles">Pebbles</string>
     <string name="profile_counter_karma">Karma</string>
@@ -242,9 +234,41 @@
         <item quantity="other">%1$d pebbles</item>
     </plurals>
     <string name="profile_collection_new">Nouvelle collection</string>
-    <string name="profile_log_out">Se déconnecter</string>
     <string name="profile_load_error">Impossible de charger votre profil.</string>
     <string name="profile_retry">Réessayer</string>
+    <!-- Toi (#1383, spec D14.4–5) : chaque compteur est un seul nœud lu (« 112 jours »), puis les lignes Glyphes.
+         Une ligne se lit sans nombre tant que le compte n'est pas servi (ou vaut zéro). -->
+    <plurals name="you_counter_days_a11y">
+        <item quantity="one">%1$s jour</item>
+        <item quantity="many">%1$s de jours</item>
+        <item quantity="other">%1$s jours</item>
+    </plurals>
+    <plurals name="you_counter_pebbles_a11y">
+        <item quantity="one">%1$s pebble</item>
+        <item quantity="many">%1$s de pebbles</item>
+        <item quantity="other">%1$s pebbles</item>
+    </plurals>
+    <plurals name="you_counter_karma_a11y">
+        <item quantity="one">%1$s karma</item>
+        <item quantity="many">%1$s de karma</item>
+        <item quantity="other">%1$s karma</item>
+    </plurals>
+    <string name="you_glyphs_mine">Mes glyphes</string>
+    <plurals name="you_glyphs_mine_line">
+        <item quantity="one">La %1$d marque que tu as gravée.</item>
+        <item quantity="many">Les %1$d de marques que tu as gravées.</item>
+        <item quantity="other">Les %1$d marques que tu as gravées.</item>
+    </plurals>
+    <string name="you_glyphs_mine_line_none">Les marques que tu as gravées.</string>
+    <string name="you_glyphs_owned">Glyphes acquis</string>
+    <plurals name="you_glyphs_owned_line">
+        <item quantity="one">Le %1$d glyphe que tu as reçu d\'autres.</item>
+        <item quantity="many">Les %1$d de glyphes que tu as reçus d\'autres.</item>
+        <item quantity="other">Les %1$d que tu as reçus d\'autres.</item>
+    </plurals>
+    <string name="you_glyphs_owned_line_none">Les glyphes que tu as reçus d\'autres.</string>
+    <string name="you_glyphs_community">Communauté</string>
+    <string name="you_glyphs_community_line">Les glyphes que partagent d\'autres pebblers.</string>
     <string name="settings_title">Réglages</string>
     <string name="settings_appearance_section">Apparence</string>
     <string name="settings_wallpaper_colors_title">Couleurs du fond d’écran</string>

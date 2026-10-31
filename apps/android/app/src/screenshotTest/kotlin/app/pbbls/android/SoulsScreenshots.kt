@@ -18,13 +18,12 @@ import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.SystemGlyph
 import app.pbbls.android.core.ui.SoulItem
 import app.pbbls.android.core.ui.SoulItemCase
-import app.pbbls.android.features.profile.components.ProfileShortcutsRow
 import com.android.tools.screenshot.PreviewTest
 
 /**
  * Souls-management previews (#568): the shared [SoulItem] in all four #459
- * cases (the same gallery iOS previews) and the Profile shortcuts row —
- * light and dark. The souls screens themselves read services, so the review
+ * cases (the same gallery iOS previews), light and dark. (The Profile
+ * shortcuts row left with the You rebuild, #1383.) The souls screens themselves read services, so the review
  * surface is this pure-component gallery plus the on-device pass.
  */
 private val previewSoul =
@@ -65,7 +64,6 @@ private fun SoulsGallery() {
             SoulItem(case = SoulItemCase.DEFAULT, soul = previewSoul, count = 3)
             SoulItem(case = SoulItemCase.CREATE, soul = null, count = null)
         }
-        ProfileShortcutsRow(onOpenSouls = {})
     }
 }
 
