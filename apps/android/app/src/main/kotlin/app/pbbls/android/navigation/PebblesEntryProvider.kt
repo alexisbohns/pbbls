@@ -67,14 +67,14 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 ) {
     entry<PebblesKey.Home>(metadata = NavTransitions.forKey(PebblesKey.Home)) {
         val reselected = remember(navigator) { navigator.reselectEvents.filter { it == PebblesKey.Home }.map {} }
-        // The three quick actions open Capture until their own flows land (#1383 Part 8).
+        // The camera and quick moments are Home's own; New pebble chains Capture into Complete (#1383 D7).
         HomeScreen(
             reselected = reselected,
             monthSlot = homeMonth,
             onOpenPath = { navigator.navigate(PebblesKey.Path) },
-            onCamera = { navigator.navigate(PebblesKey.Capture) },
-            onQuick = { navigator.navigate(PebblesKey.Capture) },
-            onPebble = { navigator.navigate(PebblesKey.Capture) },
+            onPebble = { navigator.navigate(PebblesKey.Capture(chainsComplete = true)) },
+            onOpenComplete = { navigator.navigate(PebblesKey.CompletePebble(it)) },
+            onNameMoment = { navigator.navigate(PebblesKey.EditMoment(it)) },
         )
     }
 
@@ -83,7 +83,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     ) {
         PathScreen(
             onOpenDetail = { momentId, face -> navigator.navigateToDetail(PebblesKey.PebbleDetail(momentId, face)) },
-            onCreatePebble = { navigator.navigate(PebblesKey.Capture) },
+            onCreatePebble = { navigator.navigate(PebblesKey.Capture()) },
             onDeleteConfirmed = { navigator.closeMomentDetail(it) },
         )
     }
@@ -291,12 +291,14 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         EditPebbleScreen(momentId = key.momentId, onDismiss = navigator::goBack, onSaved = navigator::goBack)
     }
 
-    entry<PebblesKey.Capture>(metadata = NavTransitions.forKey(PebblesKey.Capture)) {
+    entry<PebblesKey.Capture>(metadata = NavTransitions.forKey(PebblesKey.Capture())) { key ->
         CaptureFlowScreen(
+            chainsComplete = key.chainsComplete,
             onDismiss = navigator::goBack,
             // Path's resume refresh shows the new blank stone; no detail is opened (A-14).
             onSaved = navigator::goBack,
-            // Replace Capture with Complete rather than stacking it, so Complete's exit lands on Path.
+            // Replace Capture with Complete rather than stacking it, so Complete's exit lands where
+            // Capture was opened from: Path, or Home for its New pebble (#1383 D7).
             onSavedThenComplete = { momentId ->
                 navigator.goBack()
                 navigator.navigate(PebblesKey.CompletePebble(momentId))

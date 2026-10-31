@@ -94,6 +94,16 @@ class HomeViewModel
         }
 
         /**
+         * One of Home's own flows wrote a moment (#1383 D7): the live month is read again, so the grid shows
+         * it without waiting for a resume. The Path re-reads on its own resume (#852), which stands for iOS's
+         * revision bump; the first five's checklist reload (Part 9) joins here.
+         */
+        fun onMomentSaved() {
+            monthJob?.cancel()
+            monthJob = viewModelScope.launch { loadMonth() }
+        }
+
+        /**
          * A tap on a week of the grid (D10): leaves the Path a focus on [weekStart], which it takes on its
          * next resume. The screen then switches to the Path tab.
          */

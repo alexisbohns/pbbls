@@ -38,6 +38,8 @@ import app.pbbls.android.core.data.SupabaseService
 import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.WrapDiskCache
 import app.pbbls.android.core.data.WrapDiskCaching
+import app.pbbls.android.features.home.camera.AndroidCameraPhotos
+import app.pbbls.android.features.home.camera.CameraPhotos
 import app.pbbls.android.features.path.AndroidComposerMedia
 import app.pbbls.android.features.path.ComposerMedia
 import dagger.Binds
@@ -102,6 +104,10 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindComposerMedia(impl: AndroidComposerMedia): ComposerMedia
+
+    @Binds
+    @Singleton
+    fun bindCameraPhotos(impl: AndroidCameraPhotos): CameraPhotos
 
     @Binds
     @Singleton
