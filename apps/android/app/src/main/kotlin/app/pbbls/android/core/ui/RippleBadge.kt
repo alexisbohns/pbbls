@@ -17,15 +17,21 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 
 /**
- * 44×44 ring-and-digit badge representing the user's Ripples level — ports
+ * Ring-and-digit badge representing the user's Ripples level, 44×44 by default — ports
  * iOS `RippleBadge.swift`. See `docs/superpowers/specs/2026-05-15-ripples-design.md`
  * and issue #442 for the full color/state semantics. Outermost rings draw
  * first so inner rings paint on top; ring opacity steps 0.33 / 0.66 / 1.0
  * from outside in.
+ *
+ * [size] scales the rings and their stroke from the 44-unit drawing (spec
+ * 2026-10-31 D15). Below 32 dp the digit cannot be read, so a small badge
+ * passes `showsLevel = false` and lets the text beside it say the level; the
+ * spoken label is the same either way.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -33,6 +39,8 @@ fun RippleBadge(
     level: Int,
     activeToday: Boolean,
     modifier: Modifier = Modifier,
+    size: Dp = 44.dp,
+    showsLevel: Boolean = true,
 ) {
     val clampedLevel = level.coerceIn(0, 6)
     // Resolve the scheme in composition; the tone→color mapping is a pure
@@ -46,19 +54,22 @@ fun RippleBadge(
             stringResource(R.string.ripple_badge_inactive, clampedLevel)
         }
 
+    // The 2 dp stroke of the 44 dp badge, scaled with it.
+    val strokeWidth = 2.dp * (size / 44.dp)
+
     Box(
         modifier =
             modifier
-                .size(44.dp)
+                .size(size)
                 .clearAndSetSemantics { contentDescription = label },
         contentAlignment = Alignment.Center,
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val stroke = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
+            val stroke = Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Round)
             // Uniform scale from the 44-unit source viewBox into the canvas.
             scale(
-                scaleX = size.width / RIPPLE_VIEWBOX_SIDE,
-                scaleY = size.height / RIPPLE_VIEWBOX_SIDE,
+                scaleX = this.size.width / RIPPLE_VIEWBOX_SIDE,
+                scaleY = this.size.height / RIPPLE_VIEWBOX_SIDE,
                 pivot = Offset.Zero,
             ) {
                 listOf(
@@ -80,10 +91,12 @@ fun RippleBadge(
             }
         }
         // The Box's clearAndSetSemantics carries the combined a11y label.
-        Text(
-            text = clampedLevel.toString(),
-            style = MaterialTheme.typography.labelMediumEmphasized,
-            color = digitColor,
-        )
+        if (showsLevel) {
+            Text(
+                text = clampedLevel.toString(),
+                style = MaterialTheme.typography.labelMediumEmphasized,
+                color = digitColor,
+            )
+        }
     }
 }
