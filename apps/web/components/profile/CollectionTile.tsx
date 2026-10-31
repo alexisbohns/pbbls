@@ -1,7 +1,8 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Layers, Plus } from "lucide-react"
+import { Collection, PlusCircle } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { cn } from "@/lib/utils"
 
 type CollectionTileProps =
@@ -28,9 +29,9 @@ export function CollectionTile(props: CollectionTileProps) {
     >
       <div className="flex size-[34px] items-center justify-center rounded-[10px] bg-accent">
         {empty ? (
-          <Plus className="size-3.5 text-primary" aria-hidden />
+          <PlusCircle className={cn(PBBLS_ICON_SIZE.inline, "text-primary")} />
         ) : (
-          <Layers className="size-3.5 text-primary" aria-hidden />
+          <Collection className={cn(PBBLS_ICON_SIZE.inline, "text-primary")} />
         )}
       </div>
       <div className="flex min-w-0 flex-col gap-1">

@@ -2,7 +2,10 @@
 
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { ChevronRight, FlaskConical } from "lucide-react"
+import { ChevronRight } from "lucide-react"
+import { Sparkle } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { SectionCard } from "@/components/profile/SectionCard"
 
 /**
@@ -15,7 +18,7 @@ export function LabCard() {
     <Link href="/lab" className="block transition-opacity hover:opacity-90">
       <SectionCard>
         <div className="flex items-center gap-3">
-          <FlaskConical className="size-[18px] shrink-0 text-primary" aria-hidden />
+          <Sparkle className={cn(PBBLS_ICON_SIZE.row, "shrink-0 text-primary")} />
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="text-base font-semibold text-foreground">{t("title")}</span>
             <span className="text-sm text-muted-foreground">{t("subtitle")}</span>
