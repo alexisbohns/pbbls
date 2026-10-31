@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CircleUser } from "lucide-react"
+import { Person } from "@pbbls/icons"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { useNavItems } from "@/lib/hooks/useNavItems"
@@ -63,7 +63,7 @@ export function Sidebar() {
             aria-label={aria("profile")}
             aria-current={pathname.startsWith("/profile") ? "page" : undefined}
           >
-            <CircleUser className="size-4" />
+            <Person className="size-4" />
           </Link>
         )}
         <div className="flex-1" />

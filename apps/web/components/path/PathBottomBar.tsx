@@ -1,7 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { CircleUser, CirclePile, Sparkle } from "lucide-react"
+import { CirclePile } from "lucide-react"
+import { KarmaDot, Person } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
 import { useBounce } from "@/lib/data/useBounce"
@@ -21,7 +23,7 @@ function Stat({
 }) {
   return (
     <span className="flex items-baseline gap-1.5">
-      <Icon className="size-3.5 self-center text-(--spine-ink-2)" aria-hidden />
+      <Icon className={cn(PBBLS_ICON_SIZE.inline, "self-center text-(--spine-ink-2)")} />
       <span className="font-spine text-[15px] font-semibold text-(--spine-ink) [font-variant-numeric:lining-nums_tabular-nums]">
         {value}
       </span>
@@ -58,7 +60,7 @@ export function PathBottomBar({ className }: { className?: string }) {
         {glyph && glyph.strokes.length > 0 ? (
           <GlyphPreview mark={glyph} className="size-6" strokeClassName="text-(--spine-ink)" />
         ) : (
-          <CircleUser className="size-6" />
+          <Person className={PBBLS_ICON_SIZE.toolbar} />
         )}
       </Link>
       <Link
@@ -67,7 +69,7 @@ export function PathBottomBar({ className }: { className?: string }) {
         className="flex min-h-10 items-center gap-4"
       >
         <Stat icon={CirclePile} value={bounceLoading ? "—" : bounce} label={t("stats.bounce")} />
-        <Stat icon={Sparkle} value={karmaLoading ? "—" : karma} label={t("stats.karma")} />
+        <Stat icon={KarmaDot} value={karmaLoading ? "—" : karma} label={t("stats.karma")} />
       </Link>
     </nav>
   )
