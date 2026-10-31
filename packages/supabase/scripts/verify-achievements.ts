@@ -31,6 +31,8 @@
  *        days (zone, week, DST and month boundaries, the current month around today)
  *        plus a seeded random 2025 (ACHIEVEMENTS_SEED replays one), and on the current
  *        year, next step and listed months included; today is the server's;
+ *      - in a fresh user's first month only the full weeks from the first moment's
+ *        day on count, and the current year equals the oracle;
  *      - get_achievements serves the current year and each past year with a moment,
  *        newest first, as the oracle's yearsServed does;
  *      - an unknown zone is refused, and anon is refused.
@@ -414,6 +416,41 @@ try {
   const bobStray = stray(bobRaw);
   check("Bob's raw body holds no null but shelf[].threshold (D17)", bobStray.length === 0, JSON.stringify(bobStray));
   await dump("get-achievements-year", users[1].token, "get_achievements", { p_tz: tz });
+
+  // The first month (D12): a fresh user who began a few days ago, in this month,
+  // and has kept every day since. Only the full weeks starting on or after the
+  // first moment's day count, so no week from before it holds the month back.
+  const erin = await signUp("e"); users.push(erin);
+  const ePl = (await erin.client.rpc("get_achievements", { p_tz: tz })).data as Achievements;
+  if (!ePl.since || typeof ePl.days_kept !== "number") throw new Error("get_achievements: no since/days_kept for Erin");
+  const eToday = addDays(ePl.since, ePl.days_kept - 1);
+  const eMonthStart = `${eToday.slice(0, 8)}01`;
+  const eFrom = addDays(eToday, -9) < eMonthStart ? eMonthStart : addDays(eToday, -9);
+  const eItems: { date: string; pebble: boolean; family: string; intensity: number }[] = [];
+  for (let d = eFrom; d <= eToday; d = addDays(d, 1)) {
+    // today's moment a minute ago at the latest, so it is never in the future
+    const at = d < eToday ? zonedToUtc(d, 10, 0, tz) : new Date(Math.min(Date.now() - 60_000, zonedToUtc(d, 0, 30, tz).getTime()));
+    await pebble(erin.client, `first month ${d} ${runId}`, at.toISOString(), emo.id, 2, 1, [dom.id]);
+    eItems.push({ date: localDate(at, tz), pebble: true, family: familyOf(emo.id), intensity: 2 });
+  }
+  const eFirst = eItems.map((i) => i.date).sort()[0];
+  // The weeks that count, worked out by hand: Mondays on or after the first day
+  // whose Sunday is inside the month and before today.
+  const eMonthEnd = addDays(`${addDays(eMonthStart, 31).slice(0, 8)}01`, -1);
+  let eWeeks = 0;
+  for (let d = eMonthStart; d <= eMonthEnd; d = addDays(d, 1)) {
+    const monday = new Date(`${d}T00:00:00Z`).getUTCDay() === 1;
+    if (monday && d >= eFirst && addDays(d, 6) <= eMonthEnd && addDays(d, 6) < eToday) eWeeks += 1;
+  }
+  const eYear = await erin.client.rpc("achievements_year", { p_year: Number(eToday.slice(0, 4)), p_tz: tz });
+  const eGot = eYear.data as (Year & { months: (Month & { full_weeks: number; weeks_filled: number })[]; next_step?: unknown }) | null;
+  const eCur = eGot?.months[Number(eToday.slice(5, 7)) - 1];
+  check("in the first month, full_weeks counts only the weeks from the first moment's day on",
+    !eYear.error && eCur?.full_weeks === eWeeks && eCur?.weeks_filled === eWeeks,
+    eYear.error?.message ?? JSON.stringify([eFirst, eToday, eWeeks, eCur]));
+  const eExp = yearPayload(Number(eToday.slice(0, 4)), eItems, eToday, eFirst);
+  check("…and the fresh user's current year equals the oracle, next step included", same(eGot, eExp),
+    JSON.stringify([eGot?.next_step, eExp.next_step, eCur, eExp.months[Number(eToday.slice(5, 7)) - 1]]));
 
   // Coverage tiers at their boundaries (D11): one pebble per step, on a fresh user.
   const carol = await signUp("c"); users.push(carol);
