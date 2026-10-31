@@ -2,6 +2,7 @@ import type { DesignTheme } from "@/lib/theme/design-theme"
 import { DesignSection } from "../DesignSection"
 import { BridgeTable } from "./BridgeTable"
 import { ColorSwatch } from "./ColorSwatch"
+import { HomeYouSpecimen } from "./HomeYouSpecimen"
 import { M3Roles } from "./M3Roles"
 import { ShapeScale } from "./ShapeScale"
 import { TypeScale } from "./TypeScale"
@@ -59,6 +60,7 @@ export function FoundationsSection({ theme, themeKey }: FoundationsSectionProps)
         </p>
       )}
       <TypeScale />
+      <HomeYouSpecimen />
       <ShapeScale />
     </DesignSection>
   )
