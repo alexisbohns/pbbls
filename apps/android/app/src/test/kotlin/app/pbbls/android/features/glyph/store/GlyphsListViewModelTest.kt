@@ -7,6 +7,7 @@ import app.pbbls.android.core.data.TabIntents
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
+import app.pbbls.android.core.model.GlyphShelf
 import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.FakeGlyphService
 import app.pbbls.android.testing.FakePathStatsService
@@ -51,7 +52,7 @@ class GlyphsListViewModelTest {
         glyphs: FakeGlyphService = FakeGlyphService(),
         stats: FakePathStatsService = FakePathStatsService(),
         tabIntents: TabIntents = TabIntents(),
-    ) = GlyphsListViewModel(market, glyphs, stats, tabIntents)
+    ) = GlyphsListViewModel(market, glyphs, stats, tabIntents).also { it.start(GlyphShelf.MINE) }
 
     // MARK: - Tabs
 
@@ -68,6 +69,40 @@ class GlyphsListViewModelTest {
             assertEquals(GlyphTab.MINE, state.tab)
             assertEquals(listOf("a"), state.items.map { it.id })
             assertEquals(1, market.mineCount)
+        }
+
+    /** You's glyph rows open the store on their shelf (#1383 D17), without loading Mine first. */
+    @Test
+    fun `starting on Owned selects and loads Owned only`() =
+        runTest {
+            val market = FakeGlyphMarketService(mine = listOf(item("a")), owned = listOf(item("o", owned = true)))
+            val viewModel = GlyphsListViewModel(market, FakeGlyphService(), FakePathStatsService(), TabIntents())
+
+            viewModel.start(GlyphShelf.OWNED)
+            assertEquals(GlyphsUiState.Loading(GlyphTab.OWNED), viewModel.uiState.value)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as GlyphsUiState.Content
+            assertEquals(GlyphTab.OWNED, state.tab)
+            assertEquals(listOf("o"), state.items.map { it.id })
+            assertEquals(0, market.mineCount)
+        }
+
+    /** A second start (a recomposition, a rotation) never takes back a tab the user picked since. */
+    @Test
+    fun `start runs once and keeps the tab the user picked`() =
+        runTest {
+            val market = FakeGlyphMarketService(owned = listOf(item("o", owned = true)), community = listOf(item("c")))
+            val viewModel = GlyphsListViewModel(market, FakeGlyphService(), FakePathStatsService(), TabIntents())
+            viewModel.start(GlyphShelf.OWNED)
+            advanceUntilIdle()
+            viewModel.onSelectTab(GlyphTab.COMMU)
+            advanceUntilIdle()
+
+            viewModel.start(GlyphShelf.OWNED)
+            advanceUntilIdle()
+
+            assertEquals(GlyphTab.COMMU, (viewModel.uiState.value as GlyphsUiState.Content).tab)
         }
 
     @Test
@@ -508,6 +543,29 @@ class GlyphsListViewModelTest {
             assertEquals(1, requests.values.size)
             assertEquals(GlyphTab.MINE, (viewModel.uiState.value as GlyphsUiState.Content).tab)
             assertNull(tabIntents.pending.value)
+            requests.stop()
+        }
+
+    /**
+     * Home's intent reaching a store that has not started yet (its resume ran before the key's start):
+     * the intent still wins, Mine and the studio, and the key's shelf cannot take it back.
+     */
+    @Test
+    fun `Home's carve glyph wins over a start that lands after it`() =
+        runTest {
+            val tabIntents = TabIntents()
+            val market = FakeGlyphMarketService(mine = listOf(item("a")), owned = listOf(item("o", owned = true)))
+            val viewModel = GlyphsListViewModel(market, FakeGlyphService(), FakePathStatsService(), tabIntents)
+            val requests = recordEffects(viewModel.carveRequests)
+            tabIntents.post(TabIntent.CarveGlyph)
+
+            viewModel.onResumed()
+            viewModel.start(GlyphShelf.OWNED)
+            advanceUntilIdle()
+
+            assertEquals(1, requests.values.size)
+            assertEquals(GlyphTab.MINE, (viewModel.uiState.value as GlyphsUiState.Content).tab)
+            assertEquals(0, market.ownedCount)
             requests.stop()
         }
 }

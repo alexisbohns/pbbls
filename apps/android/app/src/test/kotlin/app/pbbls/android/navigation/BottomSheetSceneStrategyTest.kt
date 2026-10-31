@@ -37,7 +37,7 @@ class BottomSheetSceneStrategyTest {
 
     @Test
     fun `a sheet entry on top becomes an overlay over what is below`() {
-        val below = entry(PebblesKey.Glyphs, sheet = false)
+        val below = entry(PebblesKey.Glyphs(), sheet = false)
         val sheet = entry(glyph, sheet = true)
 
         val scene = sceneFor(listOf(below, sheet))
@@ -53,7 +53,7 @@ class BottomSheetSceneStrategyTest {
     fun `the same entries give an equal scene`() {
         // NavDisplay keeps an overlay's composition, and so the sheet's state,
         // across recalculations only while the scenes compare equal.
-        val entries = listOf(entry(PebblesKey.Glyphs, sheet = false), entry(glyph, sheet = true))
+        val entries = listOf(entry(PebblesKey.Glyphs(), sheet = false), entry(glyph, sheet = true))
 
         val first = sceneFor(entries)
         val second = sceneFor(entries)
@@ -64,7 +64,7 @@ class BottomSheetSceneStrategyTest {
 
     @Test
     fun `anything else is left to the next strategy`() {
-        assertNull(sceneFor(listOf(entry(PebblesKey.Glyphs, sheet = false))))
+        assertNull(sceneFor(listOf(entry(PebblesKey.Glyphs(), sheet = false))))
     }
 
     @Test
@@ -72,7 +72,7 @@ class BottomSheetSceneStrategyTest {
         val scene =
             sceneFor(
                 listOf(
-                    entry(PebblesKey.Glyphs, sheet = false),
+                    entry(PebblesKey.Glyphs(), sheet = false),
                     entry(glyph, sheet = true),
                     entry(PebblesKey.Settings, sheet = false),
                 ),

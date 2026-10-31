@@ -151,7 +151,7 @@ class PebblesSceneStrategiesTest {
 
     @Test
     fun `two panes put a glyph beside the store`() {
-        val entries = listOf(PebblesKey.You, PebblesKey.Glyphs, glyph).map(::entry)
+        val entries = listOf(PebblesKey.You, PebblesKey.Glyphs(), glyph).map(::entry)
         val scene = with(SceneStrategyScope<NavKey>()) { with(pebblesListDetailStrategy(directive(2))) { calculateScene(entries) } }
 
         assertEquals(PanePair.GLYPHS, scene!!.key)
@@ -162,7 +162,7 @@ class PebblesSceneStrategiesTest {
 
     @Test
     fun `two panes show an idle store with its placeholder`() {
-        val scene = pebblesListDetailStrategy(directive(2)).sceneFor(PebblesKey.You, PebblesKey.Glyphs)
+        val scene = pebblesListDetailStrategy(directive(2)).sceneFor(PebblesKey.You, PebblesKey.Glyphs())
 
         assertEquals(PanePair.GLYPHS, scene!!.key)
         assertEquals(1, scene.entries.size)
@@ -170,8 +170,8 @@ class PebblesSceneStrategiesTest {
 
     @Test
     fun `the store keeps its placeholder pane when idle`() {
-        assertFalse(PanePairs.isFullWidthWhenIdle(entry(PebblesKey.Glyphs)))
-        assertTrue(PanePairs.isList(entry(PebblesKey.Glyphs)))
+        assertFalse(PanePairs.isFullWidthWhenIdle(entry(PebblesKey.Glyphs())))
+        assertTrue(PanePairs.isList(entry(PebblesKey.Glyphs())))
         assertFalse(PanePairs.isList(entry(glyph)))
     }
 
