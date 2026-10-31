@@ -47,6 +47,51 @@ struct HomeModelTests {
         #expect(model.wraps?.months.first { $0.month == sept }?.isFolded == false)
     }
 
+    // MARK: - The month (#1382 D8)
+
+    private static func emptyMonth(_ month: CalendarMonth) -> MonthWrap {
+        MonthWrap(month: month, daysInMonth: 30, firstWeekday: 6, pebbles: 0, people: 0, sections: [], cover: nil,
+                  weeks: [], milestones: nil, persons: nil, previousMonth: nil, gem: nil, fineEmotions: nil,
+                  domains: nil, tone: nil, hours: nil)
+    }
+
+    @Test func theMonthShowsTheKeptCopyThenTheFetch() async throws {
+        let october = try #require(SpineFixtureMonth.october)
+        let kept = Self.emptyMonth(october.month)
+        let fake = FakeHomeService()
+        let model = HomeModel(); model.service = fake
+        fake.answer(month: .failure(FakeHomeService.Failure()), cached: kept)
+        await model.loadMonth(october.month)
+        #expect(model.month == kept)
+        fake.answer(month: .success(october), cached: kept)
+        await model.loadMonth(october.month)
+        #expect(model.month == october)
+        #expect(fake.monthCalls == [october.month, october.month])
+    }
+
+    @Test func aFailedMonthKeepsTheLastOne() async throws {
+        let october = try #require(SpineFixtureMonth.october)
+        let fake = FakeHomeService()
+        let model = HomeModel(); model.service = fake
+        fake.answer(month: .success(october))
+        await model.loadMonth(october.month)
+        fake.answer(month: .failure(FakeHomeService.Failure()))
+        await model.loadMonth(october.month)
+        #expect(model.month == october)
+    }
+
+    @Test func aNewMonthReplacesTheLastOne() async throws {
+        let october = try #require(SpineFixtureMonth.october)
+        let november = Self.emptyMonth(CalendarMonth(year: 2026, month: 11))
+        let fake = FakeHomeService()
+        let model = HomeModel(); model.service = fake
+        fake.answer(month: .success(october))
+        await model.loadMonth(october.month)
+        fake.answer(month: .success(november))
+        await model.loadMonth(november.month)
+        #expect(model.month == november)
+    }
+
     // MARK: - The guides
 
     private static let stones = Guide(slug: "stones", sortOrder: 1, illustration: .stones,

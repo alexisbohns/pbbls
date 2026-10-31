@@ -14,10 +14,27 @@ protocol HomeServicing: Sendable {
     func reveal(month: CalendarMonth, zone: TimeZone) async throws -> HomeReveal
     /// `guides`: the published About Pebbles readings, in sort order.
     func guides() async throws -> [Guide]
+    /// `path_month_wrap` for Home's week columns (#1382 D8), through the Path's
+    /// service so the device's copy is the one the Path keeps.
+    func month(_ month: CalendarMonth, zone: TimeZone) async throws -> MonthWrap
+    /// The device's last copy of `month`, or nil: display only, never instead of a fetch.
+    func cachedMonth(_ month: CalendarMonth, zone: TimeZone) async -> MonthWrap?
 }
 
 struct HomeService: HomeServicing {
     let client: SupabaseClient
+    /// The signed-in user's id, so the month's disk copy is the Path's.
+    var owner: String?
+
+    private var pathWraps: PathWrapService { PathWrapService(client: client, disk: .standard, owner: owner) }
+
+    func month(_ month: CalendarMonth, zone: TimeZone) async throws -> MonthWrap {
+        try await pathWraps.monthWrap(month, zone: zone)
+    }
+
+    func cachedMonth(_ month: CalendarMonth, zone: TimeZone) async -> MonthWrap? {
+        await pathWraps.cachedMonthWrap(month, zone: zone)
+    }
 
     func displayName() async throws -> String? {
         struct Row: Decodable { let display_name: String? }

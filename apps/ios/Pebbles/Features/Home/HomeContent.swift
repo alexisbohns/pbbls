@@ -17,6 +17,8 @@ struct HomeContent: View {
     var onQuick: () -> Void = {}
     var onPebble: () -> Void = {}
     var onOpenWrap: (HomeMonth) -> Void = { _ in }
+    /// A week column tapped (#1382 D9): its Monday.
+    var onWeek: (CalendarDay) -> Void = { _ in }
     var onRetryWraps: () -> Void = {}
     var onTask: (HomeChecklist.Task) -> Void = { _ in }
     var onClaim: () -> Void = {}
@@ -24,6 +26,9 @@ struct HomeContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xl) {
+            HomeMonthGrid(month: model.month, lookups: lookups,
+                          today: CalendarDay(clock ?? Date(), in: zone), onWeek: onWeek)
+
             // The greeting re-reads the clock every minute, so the band flips on the hour.
             TimelineView(.periodic(from: .now, by: 60)) { context in
                 HomeGreetingView(lines: greetingLines(at: clock ?? context.date))
