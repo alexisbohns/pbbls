@@ -1951,6 +1951,23 @@
         }
       }
     },
+    "Bento" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bento"
+          }
+        }
+      }
+    },
     "Blocking also stops them joining again through your invite link." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11123,6 +11140,23 @@
         }
       }
     },
+    "Pebble shapes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebble shapes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formes de galet"
+          }
+        }
+      }
+    },
     "Pebbles" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11431,6 +11465,23 @@
         }
       }
     },
+    "Quick actions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick actions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actions rapides"
+          }
+        }
+      }
+    },
     "Read our [Terms](pebbles://legal/terms) and [Privacy](pebbles://legal/privacy) before creating an account with Apple or Google." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11719,6 +11770,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Niveau Ripples %lld"
+          }
+        }
+      }
+    },
+    "Row" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Row"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rangée"
           }
         }
       }
@@ -12383,6 +12451,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le caractère « + » n’est pas autorisé dans les adresses e-mail."
+          }
+        }
+      }
+    },
+    "The quick actions at the top of Home, on this iPhone." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The quick actions at the top of Home, on this iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les actions rapides en haut de l’accueil, sur cet iPhone."
           }
         }
       }

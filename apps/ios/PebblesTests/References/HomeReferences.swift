@@ -24,17 +24,49 @@ extension References {
                                          config: ReferenceConfig(scheme: scheme, locales: locales))
         }
 
-        static func shortcuts() -> some View {
-            HomeShortcuts(onCamera: {}, onQuick: {}, onPebble: {})
+        /// One style, from its own defaults so the device's choice never leaks in.
+        static func shortcuts(_ layout: HomeShortcutsLayout, stones: Bool, lead: HomeShortcut) -> some View {
+            let name = "HomeReferences.shortcuts.\(layout.rawValue).\(stones).\(lead.rawValue)"
+            let defaults = UserDefaults(suiteName: name)!
+            defaults.removePersistentDomain(forName: name)
+            defaults.set(layout.rawValue, forKey: HomeShortcutsPreference.layoutKey)
+            defaults.set(stones, forKey: HomeShortcutsPreference.stonesKey)
+            defaults.set(lead.rawValue, forKey: HomeShortcutsPreference.lastUsedKey)
+            return HomeShortcuts(onCamera: {}, onQuick: {}, onPebble: {}, defaults: defaults)
                 .padding(Spacing.lg)
                 .frame(maxWidth: .infinity)
                 .background(Color.pebbles.surface)
         }
 
+        /// The default: the pebble-shaped row.
         @Test(arguments: ReferenceScheme.allCases)
         func shortcuts(scheme: ReferenceScheme) throws {
             let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
-            ReferenceImage.assertMatches(Self.shortcuts(), named: "shortcuts",
+            ReferenceImage.assertMatches(Self.shortcuts(.row, stones: true, lead: .camera), named: "shortcuts",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func shortcutsStonesBento(scheme: ReferenceScheme) throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(Self.shortcuts(.bento, stones: true, lead: .quick),
+                                         named: "shortcutsStonesBento",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func shortcutsTilesRow(scheme: ReferenceScheme) throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(Self.shortcuts(.row, stones: false, lead: .camera),
+                                         named: "shortcutsTilesRow",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func shortcutsTilesBento(scheme: ReferenceScheme) throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(Self.shortcuts(.bento, stones: false, lead: .pebble),
+                                         named: "shortcutsTilesBento",
                                          config: ReferenceConfig(scheme: scheme, locales: locales))
         }
 

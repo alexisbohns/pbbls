@@ -31,6 +31,8 @@ struct SettingsSheet: View {
     @State private var presentedLegalDoc: LegalDoc?
     /// This device's, saved as it is switched: never staged for the sheet's Save.
     @AppStorage(HapticsPreference.storageKey) private var hapticsOn = true
+    @AppStorage(HomeShortcutsPreference.layoutKey) private var shortcutsLayout = HomeShortcutsLayout.row
+    @AppStorage(HomeShortcutsPreference.stonesKey) private var shortcutsStones = true
     @State private var isPresentingGlyphPicker = false
     @State private var isPresentingDeleteConfirm = false
     #if DEBUG
@@ -142,6 +144,7 @@ struct SettingsSheet: View {
                             .pebblesListRow(position: .only)
                     }
                 }
+                homeSection
                 hapticsSection
                 legalSection
                 #if DEBUG
@@ -422,6 +425,30 @@ struct SettingsSheet: View {
             Text("Password").pebblesSectionHeader()
         } footer: {
             Text("Leave blank to keep your current password.")
+        }
+    }
+
+    /// How the Home shortcuts look on this device, saved as it is switched.
+    private var homeSection: some View {
+        Section {
+            Picker(selection: $shortcutsLayout) {
+                ForEach(HomeShortcutsLayout.allCases) { layout in
+                    Text(layout.title).tag(layout)
+                }
+            } label: {
+                Text("Quick actions")
+            }
+            .tint(Color.pebbles.primary)
+            .pebblesListRow(position: .top)
+            Toggle(isOn: $shortcutsStones) {
+                Text("Pebble shapes")
+            }
+            .tint(Color.pebbles.primary)
+            .pebblesListRow(position: .bottom)
+        } header: {
+            Text("Home").pebblesSectionHeader()
+        } footer: {
+            Text("The quick actions at the top of Home, on this iPhone.")
         }
     }
 
