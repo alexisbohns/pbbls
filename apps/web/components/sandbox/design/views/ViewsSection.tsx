@@ -1,6 +1,7 @@
 import { DesignSection } from "../DesignSection"
 import { Specimen } from "../Specimen"
 import { DeviceFrame } from "./DeviceFrame"
+import { HomeView } from "./HomeView"
 import { PathView } from "./PathView"
 import { PebbleDetailView } from "./PebbleDetailView"
 import { ProfileView } from "./ProfileView"
@@ -13,6 +14,14 @@ export function ViewsSection() {
       title="Views"
       description="Whole screens composed the way their app/ pages compose them, fed by the fixture store. Writes do nothing, links are inert."
     >
+      <Specimen
+        id="view-home"
+        note="Fixtures stand in for the month, the wraps and the guides (the mock's October 2026). Camera and Quick moment cannot save here: there is no session."
+      >
+        <DeviceFrame>
+          <HomeView />
+        </DeviceFrame>
+      </Specimen>
       <Specimen
         id="view-path"
         note="Tapping a pebble opens the peek; its emotion and domain tiles share the Pebble detail limitation below, and its Edit button navigates to the real (empty) edit route rather than through a link."
