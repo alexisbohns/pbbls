@@ -605,13 +605,18 @@
 @utility pb-type-caption { font-family: var(--m3-font-plain); font-size: 0.78125rem; font-weight: 500; line-height: 1.2; }
 
 /* The card (#1384 D8): white stock, 18px radius, a soft shadow on Paper and a
-   hairline at Night. Applied with the shadcn Card primitive, which it resets. */
+   hairline at Night. Applied with the shadcn Card primitive, whose bg-card,
+   rounded-xl and border it resets: the doubled class outranks those single-class
+   utilities whatever order Tailwind emits them in. Padding and gap stay with the
+   call site (twMerge resolves them against the Card's own). */
 @utility pb-card {
-  background-color: var(--m3-stock);
-  border-radius: 18px;
-  border-width: 0;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 8px 22px rgb(0 0 0 / 0.07);
-  &:is(.dark *) {
+  &.pb-card {
+    background-color: var(--m3-stock);
+    border-radius: 18px;
+    border-width: 0;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 8px 22px rgb(0 0 0 / 0.07);
+  }
+  &.pb-card:is(.dark *) {
     box-shadow: 0 0 0 1px var(--m3-rule), 0 8px 22px rgb(0 0 0 / 0.35);
   }
 }
