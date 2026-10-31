@@ -1,5 +1,7 @@
 package app.pbbls.android.features.home
 
+import app.pbbls.android.core.model.wrap.MonthWrap
+
 /**
  * What Home draws (#1383). Not the app's sealed `Loading`/`Error`/`Content`: Home has no page-wide
  * spinner or error (iOS), and its sections load on their own, so it is one value whose sections
@@ -7,9 +9,12 @@ package app.pbbls.android.features.home
  *
  * @property name the signed-in user's display name, trimmed; "" until one lands (or when unset),
  *   which the greeting reads as "no name" and drops the comma.
+ * @property month the live month's wrap for the grid at the top (D8, D9): the device's copy first, then
+ *   the network's; [HomeSection.Failed] (no copy, no network) and [HomeSection.Loading] draw no grid.
  */
 data class HomeUiState(
     val name: String = "",
+    val month: HomeSection<MonthWrap> = HomeSection.Loading,
 )
 
 /**

@@ -4,8 +4,10 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.ui.HomeMonthSlot
 import app.pbbls.android.features.home.HomeContent
 import app.pbbls.android.features.home.HomeUiState
+import app.pbbls.android.features.path.wrap.month.HomeMonthGrid
 import com.android.tools.screenshot.PreviewTest
 import java.time.LocalDateTime
 
@@ -17,9 +19,12 @@ import java.time.LocalDateTime
  */
 private val previewNow: LocalDateTime = LocalDateTime.of(2026, 10, 31, 21, 0)
 
+/** The entry provider's filler, over the fixture's palettes (a preview has no palette service). */
+private val previewMonth: HomeMonthSlot = { wrap, onWeek, modifier -> HomeMonthGrid(wrap, SpineFixtureWeek.lookups, onWeek, modifier) }
+
 @Composable
 private fun HomePreview(name: String = "Alexis") {
-    PebblesTheme { HomeContent(state = HomeUiState(name = name), now = previewNow) }
+    PebblesTheme { HomeContent(state = HomeUiState(name = name), now = previewNow, monthSlot = previewMonth, onWeek = {}) }
 }
 
 @PreviewTest
