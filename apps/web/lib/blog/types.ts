@@ -16,8 +16,14 @@ export type BlogFigure = {
   kind: "figure"
   /** The figure number printed before the caption ("fig. 1"). */
   n: number
-  /** File name under `public/blog/<slug>/`. */
+  /** File name under `public/blog/<slug>/`, or under `blog/<slug>/` in the bucket when `stored` says so. */
   file: string
+  /**
+   * `bucket`: an SVG drawing kept in the public `lab-assets` bucket, as the
+   * plates are, rather than in the repo. Raster figures, and the first one
+   * (the post's link preview), stay in `public/`.
+   */
+  stored?: "bucket"
   alt: string
   /** The image's intrinsic size in pixels. */
   width: number

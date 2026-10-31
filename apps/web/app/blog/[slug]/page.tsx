@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { BLOG_POSTS, blogImagePath, blogPostPath, getBlogPost } from "@/lib/blog/posts"
 import { BlogArticle } from "@/components/blog/BlogArticle"
+import type { BlogFigure } from "@/lib/blog/types"
 
 type BlogPostPageProps = { params: Promise<{ slug: string }> }
 
@@ -16,7 +17,8 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   const { slug } = await params
   const post = getBlogPost(slug)
   if (!post) return {}
-  const cover = post.body.find((block) => block.kind === "figure")
+  // The link preview is the first figure kept in the repo: a raster, never a bucket drawing.
+  const cover = post.body.find((block): block is BlogFigure => block.kind === "figure" && block.stored !== "bucket")
   return {
     title: post.documentTitle,
     description: post.standfirst,

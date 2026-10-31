@@ -2,6 +2,7 @@ import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { blogImagePath } from "@/lib/blog/posts"
 import type { BlogFigure as BlogFigureBlock, BlogFigureSize } from "@/lib/blog/types"
+import { labAssetUrl } from "@/lib/utils/lab-asset-url"
 import styles from "./blog.module.css"
 
 /** The widest the image renders at, per size: the column, or the draft's caps. */
@@ -23,16 +24,21 @@ type BlogFigureProps = {
 
 export function BlogFigure({ slug, figure }: BlogFigureProps) {
   const max = MAX_WIDTH[figure.size]
+  const bucket = figure.stored === "bucket"
+  const src = bucket ? labAssetUrl(`blog/${slug}/${figure.file}`) : blogImagePath(slug, figure.file)
+  if (!src) return null
   return (
     <figure className={cn(styles.figure, SIZE_CLASS[figure.size])}>
       <Image
         className={styles.img}
-        src={blogImagePath(slug, figure.file)}
+        src={src}
         alt={figure.alt}
         width={figure.width}
         height={figure.height}
         sizes={`(max-width: ${max + GUTTERS}px) calc(100vw - ${GUTTERS}px), ${max}px`}
         loading="lazy"
+        // A drawing from the bucket is served as drawn: there is nothing for the optimiser to do.
+        unoptimized={bucket}
         // Pin the box to the original's ratio: an optimised rendition's height
         // is rounded (1077×1400 served at 384 wide is 384×499), and the browser
         // would otherwise size the box from it, nudging everything below.
