@@ -1,7 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { CalendarDays, Fingerprint, Shell, Waves } from "lucide-react"
+import { Waves } from "lucide-react"
+import { CalendarDate, PebbleDottedGlyph, PebbleRound } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import type { PublicProfile } from "@/lib/types"
 import { useFormatDate } from "@/lib/i18n"
@@ -54,7 +57,7 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
             />
           ) : (
             <div className="flex size-24 items-center justify-center rounded-2xl border border-dashed border-border">
-              <Fingerprint className="size-8 text-muted-foreground" aria-hidden />
+              <PebbleDottedGlyph className={cn(PBBLS_ICON_SIZE.hero, "text-muted-foreground")} />
             </div>
           )}
 
@@ -91,12 +94,12 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
           <div className="flex items-start">
             <DataTile
               value={profile.days_practiced}
-              icon={CalendarDays}
+              icon={CalendarDate}
               label={t("days")}
             />
             <DataTile
               value={profile.pebbles_count}
-              icon={Shell}
+              icon={PebbleRound}
               label={t("pebbles")}
             />
           </div>
