@@ -1,6 +1,7 @@
 "use client"
 
-import { Pencil } from "lucide-react"
+import { DrawDotted } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import type { Collection } from "@/lib/types"
 import { ModeBadge } from "@/components/collections/ModeBadge"
@@ -33,7 +34,7 @@ export function CollectionDetailHeader({
               size="icon-xs"
               aria-label={tDetail("editAria")}
             >
-              <Pencil />
+              <DrawDotted className={PBBLS_ICON_SIZE.inline} />
             </Button>
           }
           title={tForm("editTitle")}

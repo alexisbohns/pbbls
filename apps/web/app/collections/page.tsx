@@ -1,7 +1,8 @@
 "use client"
 
 import { useCallback } from "react"
-import { Plus } from "lucide-react"
+import { PlusCircle } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import { useCollections } from "@/lib/data/useCollections"
 import { CollectionList } from "@/components/collections/CollectionList"
@@ -33,7 +34,7 @@ export default function CollectionsPage() {
             <CollectionFormDialog
               trigger={
                 <Button variant="outline" size="sm">
-                  <Plus data-icon="inline-start" />
+                  <PlusCircle data-icon="inline-start" className={PBBLS_ICON_SIZE.inline} />
                   {t("newCta")}
                 </Button>
               }
