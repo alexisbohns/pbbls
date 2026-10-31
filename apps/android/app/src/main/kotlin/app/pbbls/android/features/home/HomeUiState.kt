@@ -1,6 +1,7 @@
 package app.pbbls.android.features.home
 
 import app.pbbls.android.core.model.wrap.MonthWrap
+import app.pbbls.android.features.home.shortcuts.HomeShortcutsStyle
 
 /**
  * What Home draws (#1383). Not the app's sealed `Loading`/`Error`/`Content`: Home has no page-wide
@@ -11,10 +12,12 @@ import app.pbbls.android.core.model.wrap.MonthWrap
  *   which the greeting reads as "no name" and drops the comma.
  * @property month the live month's wrap for the grid at the top (D8, D9): the device's copy first, then
  *   the network's; [HomeSection.Failed] (no copy, no network) and [HomeSection.Loading] draw no grid.
+ * @property shortcuts how the quick actions look on this device (Settings → Home), never loading.
  */
 data class HomeUiState(
     val name: String = "",
     val month: HomeSection<MonthWrap> = HomeSection.Loading,
+    val shortcuts: HomeShortcutsStyle = HomeShortcutsStyle(),
 )
 
 /**
