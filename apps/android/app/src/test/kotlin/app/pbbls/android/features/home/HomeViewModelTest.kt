@@ -1,14 +1,21 @@
 package app.pbbls.android.features.home
 
+import androidx.compose.runtime.snapshots.Snapshot
+import app.pbbls.android.core.data.HapticsPreference
+import app.pbbls.android.core.data.HomeShortcut
+import app.pbbls.android.core.data.HomeShortcutsLayout
+import app.pbbls.android.core.data.HomeShortcutsPreference
 import app.pbbls.android.core.data.TabIntent
 import app.pbbls.android.core.data.TabIntents
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.model.wrap.MonthWrapDto
 import app.pbbls.android.core.model.wrap.WrapJson
 import app.pbbls.android.core.model.wrap.toModel
+import app.pbbls.android.features.home.shortcuts.HomeShortcutsStyle
 import app.pbbls.android.testing.FakeHomeService
 import app.pbbls.android.testing.FakePathWrapService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.inMemorySettings
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -27,7 +34,10 @@ class HomeViewModelTest {
     private val wraps = FakePathWrapService()
     private val tabIntents = TabIntents()
 
-    private fun viewModel() = HomeViewModel(home, wraps, tabIntents)
+    private val settings = inMemorySettings()
+    private val shortcuts = HomeShortcutsPreference(settings)
+
+    private fun viewModel() = HomeViewModel(home, wraps, tabIntents, shortcuts, HapticsPreference(settings))
 
     /** The server's own month, moved to the live one, [pebbles] telling two reads apart. */
     private fun month(pebbles: Int): MonthWrap =
@@ -176,5 +186,47 @@ class HomeViewModelTest {
             viewModel.onWeek(monday)
 
             assertEquals(TabIntent.FocusWeek(monday), tabIntents.pending.value)
+        }
+
+    // MARK: - Quick actions (#1376)
+
+    @Test
+    fun `the quick actions open in the stored style`() =
+        runTest {
+            shortcuts.setLayout(HomeShortcutsLayout.BENTO)
+            shortcuts.setStones(false)
+            shortcuts.setLastUsed(HomeShortcut.PEBBLE)
+
+            val viewModel = viewModel()
+
+            assertEquals(
+                HomeShortcutsStyle(HomeShortcutsLayout.BENTO, stones = false, lastUsed = HomeShortcut.PEBBLE),
+                viewModel.uiState.value.shortcuts,
+            )
+        }
+
+    @Test
+    fun `a tapped quick action becomes the last used, stored and shown`() =
+        runTest {
+            val viewModel = viewModel()
+            advanceUntilIdle()
+
+            viewModel.onShortcutUsed(HomeShortcut.QUICK)
+
+            assertEquals(HomeShortcut.QUICK, shortcuts.lastUsed)
+            assertEquals(HomeShortcut.QUICK, viewModel.uiState.value.shortcuts.lastUsed)
+        }
+
+    @Test
+    fun `a change made in settings reaches home while it is alive`() =
+        runTest {
+            val viewModel = viewModel()
+            advanceUntilIdle()
+
+            shortcuts.setLayout(HomeShortcutsLayout.BENTO)
+            Snapshot.sendApplyNotifications()
+            advanceUntilIdle()
+
+            assertEquals(HomeShortcutsLayout.BENTO, viewModel.uiState.value.shortcuts.layout)
         }
 }

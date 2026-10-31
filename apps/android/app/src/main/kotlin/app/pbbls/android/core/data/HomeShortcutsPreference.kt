@@ -23,6 +23,15 @@ enum class HomeShortcut(
     CAMERA("camera"),
     QUICK("quick"),
     PEBBLE("pebble"),
+    ;
+
+    companion object {
+        /**
+         * The bento's order (iOS `HomeShortcut.bento(lead:)`): [lead] takes the square, the other two
+         * stack beside it in the fixed order.
+         */
+        fun bento(lead: HomeShortcut): List<HomeShortcut> = listOf(lead) + entries.filter { it != lead }
+    }
 }
 
 /**

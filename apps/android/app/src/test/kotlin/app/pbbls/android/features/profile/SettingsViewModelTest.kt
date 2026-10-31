@@ -8,6 +8,8 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.AppearancePreferences
 import app.pbbls.android.core.data.DeletionState
 import app.pbbls.android.core.data.HapticsPreference
+import app.pbbls.android.core.data.HomeShortcutsLayout
+import app.pbbls.android.core.data.HomeShortcutsPreference
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ReauthAccountMismatchException
 import app.pbbls.android.core.data.ReauthMethod
@@ -17,6 +19,7 @@ import app.pbbls.android.core.model.HealthDataConsent
 import app.pbbls.android.testing.FakeConsentService
 import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSupabaseService
+import app.pbbls.android.testing.InMemoryPreferencesStore
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.accessTokenSignedInAt
 import app.pbbls.android.testing.authRestException
@@ -111,7 +114,8 @@ class SettingsViewModelTest {
         appearance: AppearancePreferences = AppearancePreferences(inMemorySettings()),
         consents: FakeConsentService = FakeConsentService(),
         haptics: HapticsPreference = HapticsPreference(inMemorySettings()),
-    ) = SettingsViewModel(savedState, profile, supabase, appearance, consents, haptics)
+        homeShortcuts: HomeShortcutsPreference = HomeShortcutsPreference(inMemorySettings()),
+    ) = SettingsViewModel(savedState, profile, supabase, appearance, consents, haptics, homeShortcuts)
 
     // MARK: - Appearance (#853)
 
@@ -147,6 +151,34 @@ class SettingsViewModelTest {
 
             vm.onHapticsChange(true)
             assertTrue(haptics.isOn)
+        }
+
+    // MARK: - Home (#1383 D6, #1376)
+
+    @Test
+    fun `the home section opens on a pebble-shaped row`() {
+        val vm = viewModel()
+        assertEquals(HomeShortcutsLayout.ROW, vm.shortcutsLayout)
+        assertTrue(vm.shortcutsStones)
+    }
+
+    @Test
+    fun `the quick actions choices save as they are switched, outside the form's save`() =
+        runTest {
+            val store = InMemoryPreferencesStore()
+            val vm = viewModel(homeShortcuts = HomeShortcutsPreference(inMemorySettings(store)))
+            advanceUntilIdle()
+
+            vm.onShortcutsLayoutChange(HomeShortcutsLayout.BENTO)
+            vm.onShortcutsStonesChange(false)
+
+            assertEquals(HomeShortcutsLayout.BENTO, vm.shortcutsLayout)
+            assertFalse(vm.shortcutsStones)
+            assertFalse(vm.uiState.value.isDirty)
+            // Persisted: a fresh preference over the same file reads them back.
+            val reread = HomeShortcutsPreference(inMemorySettings(store))
+            assertEquals(HomeShortcutsLayout.BENTO, reread.layout)
+            assertFalse(reread.stones)
         }
 
     // MARK: - Loading its own profile (#852)

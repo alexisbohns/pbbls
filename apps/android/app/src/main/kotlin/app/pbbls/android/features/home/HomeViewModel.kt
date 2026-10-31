@@ -1,13 +1,18 @@
 package app.pbbls.android.features.home
 
 import android.util.Log
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.HomeServicing
+import app.pbbls.android.core.data.HomeShortcut
+import app.pbbls.android.core.data.HomeShortcutsPreference
 import app.pbbls.android.core.data.PathWrapServicing
 import app.pbbls.android.core.data.TabIntent
 import app.pbbls.android.core.data.TabIntents
+import app.pbbls.android.features.home.shortcuts.HomeShortcutsStyle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,9 +52,35 @@ class HomeViewModel
         private val wraps: PathWrapServicing,
         /** Where a week tap leaves its focus for the Path (D10). */
         private val tabIntents: TabIntents,
+        private val shortcuts: HomeShortcutsPreference,
+        private val haptics: HapticsPreference,
     ) : ViewModel() {
-        private val _uiState = MutableStateFlow(HomeUiState())
+        private val _uiState = MutableStateFlow(HomeUiState(shortcuts = shortcutsStyle()))
         val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+        /** Pebbles' haptics switch, asked at each tap (#1242 D23). */
+        val hapticsOn: Boolean get() = haptics.isOn
+
+        init {
+            // The quick actions' settings are Compose state on `SettingsStore`: a change made in
+            // Settings reaches Home while it is alive, without waiting for a resume.
+            viewModelScope.launch {
+                snapshotFlow { shortcutsStyle() }
+                    .collect { style -> _uiState.update { it.copy(shortcuts = style) } }
+            }
+        }
+
+        /**
+         * A quick action was tapped (#1376): it becomes the last used one, so the bento's square
+         * goes to it next time (iOS `lastUsed = shortcut`). Shown at once, not only after the store
+         * reports back.
+         */
+        fun onShortcutUsed(shortcut: HomeShortcut) {
+            shortcuts.setLastUsed(shortcut)
+            _uiState.update { it.copy(shortcuts = it.shortcuts.copy(lastUsed = shortcut)) }
+        }
+
+        private fun shortcutsStyle() = HomeShortcutsStyle(shortcuts.layout, shortcuts.stones, shortcuts.lastUsed)
 
         private var nameJob: Job? = null
         private var monthJob: Job? = null

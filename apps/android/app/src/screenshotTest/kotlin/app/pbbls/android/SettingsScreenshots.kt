@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.data.HomeShortcutsLayout
 import app.pbbls.android.core.designsystem.PebblesListDefaults
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
@@ -29,6 +30,7 @@ import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
 import app.pbbls.android.features.profile.HealthConsentRow
 import app.pbbls.android.features.profile.HealthConsentStatus
+import app.pbbls.android.features.profile.SettingsHomeSection
 import app.pbbls.android.features.profile.SettingsNavRow
 import app.pbbls.android.features.profile.settingsRowColors
 import com.android.tools.screenshot.PreviewTest
@@ -265,4 +267,36 @@ fun SettingsConsentSectionLight() {
 @Composable
 fun SettingsConsentSectionDark() {
     PebblesTheme { SettingsConsentSection() }
+}
+
+/**
+ * The Home section (#1383 D6, #1376): the quick actions' Row / Bento choice and the pebble shapes
+ * switch, on its own so the whole-form previews above keep their references. Two sections, one
+ * per state: the defaults (row, shapes on) and the other choice of each.
+ */
+@Composable
+private fun SettingsHomeSections() {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xl),
+    ) {
+        SettingsHomeSection(layout = HomeShortcutsLayout.ROW, stones = true, onLayoutChange = {}, onStonesChange = {})
+        SettingsHomeSection(layout = HomeShortcutsLayout.BENTO, stones = false, onLayoutChange = {}, onStonesChange = {})
+    }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@Preview(name = "fs2", showBackground = true, fontScale = 2f)
+@Preview(name = "fr", showBackground = true, locale = "fr")
+@Composable
+fun SettingsHomeSectionLight() {
+    PebblesTheme { SettingsHomeSections() }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun SettingsHomeSectionDark() {
+    PebblesTheme { SettingsHomeSections() }
 }
