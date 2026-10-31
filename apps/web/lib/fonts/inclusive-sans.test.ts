@@ -27,3 +27,19 @@ describe("Inclusive Sans files", () => {
     expect(readFileSync(path.join(fontDir, "OFL.txt"), "utf8")).toContain("SIL OPEN FONT LICENSE")
   })
 })
+
+describe("Inclusive Sans wiring", () => {
+  it("is loaded by next/font/local from both files, not preloaded", () => {
+    const fonts = readFileSync(path.join(webRoot, "app/fonts.ts"), "utf8")
+    for (const [name] of FILES) expect(fonts).toContain(`./fonts/inclusive-sans/${name}`)
+    expect(fonts.match(/weight: "300 700"/g)).toHaveLength(2)
+    expect(fonts).toContain("preload: false")
+    expect(fonts).toContain('variable: "--font-inclusive-sans"')
+  })
+
+  it("is the face --m3-font-plain names", () => {
+    const css = readFileSync(path.join(webRoot, "app/globals.css"), "utf8")
+    expect(css).toContain("var(--font-inclusive-sans)")
+    expect(css).not.toContain('"Inclusive Sans Variable"')
+  })
+})
