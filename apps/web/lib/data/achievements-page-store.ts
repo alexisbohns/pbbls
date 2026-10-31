@@ -1,10 +1,12 @@
 import {
   achievementsCacheEpoch,
-  readAchievementsCache,
+  markAchievementsCachesStale,
+  readAchievementsCacheEntry,
   writeAchievementsCache,
-  type CacheStorage,
+  type ListableStorage,
 } from "@/lib/data/achievements-cache"
 import { decodeAchievementsPage } from "@/lib/data/achievements-payload"
+import { achievementCheckInFlight } from "@/lib/activity/achievement-check-flight"
 import { CeremonyNotReadyError, type DataProvider } from "@/lib/data/data-provider"
 import type { AchievementCard, AchievementCompletion, AchievementsPage, CeremonyStack } from "@/lib/types"
 
@@ -58,6 +60,13 @@ export type CeremonyPullOutcome =
   | { kind: "busy" }
   | { kind: "failed" }
 
+/** The `set_complete` catalog row a stack pays from. */
+export const CEREMONY_SLUG: Record<CeremonyStack, string> = {
+  emotions: "complete-emotions",
+  domains: "complete-domains",
+  six_firsts: "complete-six-firsts",
+}
+
 /** The completion a ceremony stack pulls, wherever its card carries it. */
 export function completionOf(page: AchievementsPage | null, stack: CeremonyStack): AchievementCompletion | null {
   if (!page) return null
@@ -66,13 +75,41 @@ export function completionOf(page: AchievementsPage | null, stack: CeremonyStack
   return page.domains?.completion ?? null
 }
 
+/**
+ * `stack`'s completion marked pulled at `at` and no longer ready: what the
+ * server says after a landed pull, set at once so the ready mark goes even
+ * when the read after the pull fails (iOS `markPulled`). A completion that
+ * already carries `pulled_at` keeps it.
+ */
+export function withPulled(page: AchievementsPage, stack: CeremonyStack, at: Date): AchievementsPage {
+  const before = completionOf(page, stack)
+  if (!before || (before.pulledAt && !before.ready)) return page
+  const completion: AchievementCompletion = { ...before, ready: false, pulledAt: before.pulledAt ?? at }
+  if (stack === "six_firsts" && page.explorer) return { ...page, explorer: { ...page.explorer, completion } }
+  if (stack === "emotions" && page.emotions) return { ...page, emotions: { ...page.emotions, completion } }
+  if (stack === "domains" && page.domains) return { ...page, domains: { ...page.domains, completion } }
+  return page
+}
+
+/**
+ * How a session opens: the page (the grant, then the read), or the Profile
+ * shelf (D18: no read while the kept copy is younger than `maxAgeMs`; when it
+ * reads, the grant first, as the page does, so a visitor who only opens the
+ * Profile still gets their retroactive grants, never celebrated).
+ */
+export type OpenMode = { kind: "page" } | { kind: "shelf"; maxAgeMs: number }
+
 type Options = {
   provider: AchievementsPageProvider
   /** The signed-in user the store reads for; its cache entry is theirs. */
   owner: string
   /** The reader's IANA zone now, read as each read or pull starts. */
   zone: () => string
-  storage: CacheStorage | null
+  storage: ListableStorage | null
+  /** The clock, for the shelf's kept copy's age (ms since the epoch). */
+  now?: () => number
+  /** Whether a mutation's check is running: a screen-open grant then skips its own. */
+  checkInFlight?: () => boolean
 }
 
 export class AchievementsPageStore {
@@ -85,6 +122,8 @@ export class AchievementsPageStore {
   /** The last read asked for, and the newest one whose page is shown. */
   private readsAsked = 0
   private readShown = 0
+  /** The stacks pulled in this session: never asked again, and kept marked pulled whatever the reads say. */
+  private readonly pulledThisSession = new Map<CeremonyStack, Date>()
 
   constructor(private readonly options: Options) {}
 
@@ -97,11 +136,11 @@ export class AchievementsPageStore {
 
   readonly getSnapshot = (): AchievementsPageState => this.state
 
-  /** Starts a session and loads the page. Idempotent while open. */
-  open(): Promise<void> {
+  /** Starts a session and loads the page (or the shelf). Idempotent while open. */
+  open(mode: OpenMode = { kind: "page" }): Promise<void> {
     if (this.controller) return Promise.resolve()
     this.controller = new AbortController()
-    return this.load()
+    return this.load(mode)
   }
 
   /** Ends the session: reads in flight are aborted and their answers dropped. */
@@ -117,22 +156,35 @@ export class AchievementsPageStore {
   /**
    * The kept copy when nothing is shown yet, then `check_achievements()` (the
    * retroactive grant, never celebrated here), then the read (D14). A failed
-   * check is logged and the read still runs: the next check self-heals.
+   * check is logged and the read still runs: the next check self-heals. The
+   * shelf skips the grant, and the read while its kept copy is fresh.
    */
-  async load(): Promise<void> {
+  async load(mode: OpenMode = { kind: "page" }): Promise<void> {
     const signal = this.controller?.signal
     if (!signal || this.loadingFor === signal) return
     this.loadingFor = signal
     this.set({ loading: true })
     try {
-      if (this.state.page === null && this.readShown === 0) {
-        const kept = readAchievementsCache(this.options.storage, this.options.owner, this.options.zone())
-        if (kept) this.set({ page: kept })
+      const kept = readAchievementsCacheEntry(this.options.storage, this.options.owner, this.options.zone())
+      if (mode.kind === "shelf") {
+        // The kept copy is the latest the device holds (every read writes it), so the
+        // shelf shows it over an older one in memory, whether or not it then reads.
+        if (kept) this.set({ page: this.patched(kept.page) })
+        const age = kept && kept.keptAt !== null ? (this.options.now ?? Date.now)() - kept.keptAt : null
+        if (this.state.page !== null && age !== null && age >= 0 && age < mode.maxAgeMs) return
+      } else if (kept && this.state.page === null && this.readShown === 0) {
+        this.set({ page: kept.page })
       }
-      try {
-        await this.options.provider.checkAchievements()
-      } catch (err) {
-        console.warn("[achievements] check_achievements failed", err)
+      // A mutation's check in flight would return a fresh unlock to whichever check
+      // asks first: every screen-open grant (the page's and the shelf's) leaves it to
+      // the mutation path, which celebrates it, as iOS and Android do.
+      const skipGrant = (this.options.checkInFlight ?? achievementCheckInFlight)()
+      if (!skipGrant) {
+        try {
+          await this.options.provider.checkAchievements()
+        } catch (err) {
+          console.warn("[achievements] check_achievements failed", err)
+        }
       }
       if (signal.aborted) return
       await this.refresh(signal)
@@ -168,6 +220,10 @@ export class AchievementsPageStore {
       console.error(`[achievements] pull_ceremony(${stack}) asked with the page closed`)
       return { kind: "failed" }
     }
+    if (this.pulledThisSession.has(stack)) {
+      console.info(`[achievements] pull_ceremony(${stack}) not asked: already pulled in this session`)
+      return { kind: "alreadyPulled" }
+    }
     this.set({ pulling: stack })
     try {
       if (this.readShown === 0) await this.refresh(signal)
@@ -200,6 +256,12 @@ export class AchievementsPageStore {
           console.error(`[achievements] pull_ceremony(${stack}) returned no row, and the read does not show it pulled`)
         }
       }
+      if (outcome.kind === "pulled" || outcome.kind === "pulledWithoutKarma") {
+        // The pull unlocked a badge the shelf may show: its next open reads.
+        if (this.options.storage) markAchievementsCachesStale(this.options.storage)
+        this.pulledThisSession.set(stack, new Date((this.options.now ?? Date.now)()))
+        if (this.state.page) this.set({ page: this.patched(this.state.page) })
+      }
       return outcome
     } finally {
       this.set({ pulling: null })
@@ -222,8 +284,8 @@ export class AchievementsPageStore {
       }
       if (read > this.readShown) {
         this.readShown = read
-        writeAchievementsCache(this.options.storage, this.options.owner, zone, payload, epoch)
-        this.set({ page: decoded.page, failed: false })
+        writeAchievementsCache(this.options.storage, this.options.owner, zone, payload, epoch, (this.options.now ?? Date.now)())
+        this.set({ page: this.patched(decoded.page), failed: false })
       }
       return true
     } catch (err) {
@@ -233,6 +295,13 @@ export class AchievementsPageStore {
       this.set({ failed: this.state.page === null })
       return false
     }
+  }
+
+  /** A page with every stack pulled in this session marked pulled. */
+  private patched(page: AchievementsPage): AchievementsPage {
+    let out = page
+    for (const [stack, at] of this.pulledThisSession) out = withPulled(out, stack, at)
+    return out
   }
 
   private set(patch: Partial<AchievementsPageState>): void {

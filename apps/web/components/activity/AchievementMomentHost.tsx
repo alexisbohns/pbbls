@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Trophy } from "lucide-react"
 import {
@@ -21,6 +21,7 @@ type Card = {
   achievement: Achievement | undefined
   slug: string
   karmaGranted: number
+  fallback: { title: string; description: string } | undefined
 }
 
 /**
@@ -34,6 +35,9 @@ type Card = {
  */
 export function AchievementMomentHost() {
   const router = useRouter()
+  const pathname = usePathname()
+  // On the achievements page already (a pulled ceremony), there is nowhere to go.
+  const onAchievements = pathname === "/achievements"
   const t = useTranslations("activity")
   const resolveCopy = useAchievementCopy()
   const [cards, setCards] = useState<Card[]>([])
@@ -47,6 +51,7 @@ export function AchievementMomentHost() {
           achievement: bySlug.get(r.slug),
           slug: r.slug,
           karmaGranted: r.karmaGranted,
+          fallback: moment.fallback?.[r.slug],
         }))
         // Chain in the order the ladder reads, so a multi-tier unlock walks up
         // rather than arriving shuffled. Unknown slugs (a check racing a
@@ -75,8 +80,12 @@ export function AchievementMomentHost() {
   const card = cards[index]
   if (!card) return null
 
-  const copy = card.achievement ? resolveCopy(card.achievement) : undefined
-  const title = copy?.title ?? card.slug
+  const resolved = card.achievement ? resolveCopy(card.achievement) : undefined
+  const copy = {
+    title: resolved?.title ?? card.fallback?.title ?? card.slug,
+    description: resolved?.description || card.fallback?.description || "",
+  }
+  const title = copy.title
   const isLast = index + 1 >= cards.length
 
   return (
@@ -100,7 +109,7 @@ export function AchievementMomentHost() {
             {t("achievementUnlockedEyebrow")}
           </p>
           <DialogTitle>{title}</DialogTitle>
-          {copy?.description ? (
+          {copy.description ? (
             <DialogDescription>{copy.description}</DialogDescription>
           ) : null}
         </DialogHeader>
@@ -123,14 +132,16 @@ export function AchievementMomentHost() {
               <Button variant="outline" onClick={close}>
                 {t("achievementMomentDone")}
               </Button>
-              <Button
-                onClick={() => {
-                  close()
-                  router.push("/achievements")
-                }}
-              >
-                {t("viewAchievements")}
-              </Button>
+              {onAchievements ? null : (
+                <Button
+                  onClick={() => {
+                    close()
+                    router.push("/achievements")
+                  }}
+                >
+                  {t("viewAchievements")}
+                </Button>
+              )}
             </>
           ) : (
             <Button onClick={advance}>{t("achievementMomentNext")}</Button>

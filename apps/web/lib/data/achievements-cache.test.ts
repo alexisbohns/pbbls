@@ -4,6 +4,7 @@ import {
   achievementsCacheKey,
   clearAchievementsCaches,
   readAchievementsCache,
+  readAchievementsCacheEntry,
   writeAchievementsCache,
 } from "./achievements-cache"
 import { DUMPED_GET_ACHIEVEMENTS } from "./__fixtures__/achievements-captured"
@@ -66,6 +67,14 @@ describe("the achievements cache", () => {
     clearAchievementsCaches(storage)
     expect(storage.length).toBe(1)
     expect(storage.getItem("pbbls-consent-gate")).toBe("alice|v3")
+  })
+
+  it("remembers when a payload was kept", () => {
+    const storage = new MemoryStorage()
+    writeAchievementsCache(storage, "alice", PARIS, PAYLOAD, achievementsCacheEpoch(), 1_000)
+    expect(readAchievementsCacheEntry(storage, "alice", PARIS)?.keptAt).toBe(1_000)
+    storage.setItem(achievementsCacheKey("alice"), JSON.stringify({ v: 1, zone: PARIS, payload: PAYLOAD }))
+    expect(readAchievementsCacheEntry(storage, "alice", PARIS)).toMatchObject({ keptAt: null })
   })
 
   it("drops a write from a read that started before a clear", () => {

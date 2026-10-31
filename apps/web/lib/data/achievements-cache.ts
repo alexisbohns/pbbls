@@ -17,6 +17,8 @@ import type { AchievementsPage } from "@/lib/types"
 // ---------------------------------------------------------------------------
 
 export type CacheStorage = Pick<Storage, "getItem" | "setItem">
+/** A storage whose keys can be walked: the store's, to mark every kept payload stale. */
+export type ListableStorage = CacheStorage & Pick<Storage, "length" | "key">
 export type ClearableStorage = Pick<Storage, "length" | "key" | "removeItem">
 
 const KEY_PREFIX = "pbbls-achievements:"
@@ -33,7 +35,14 @@ export function achievementsCacheEpoch(): number {
   return epoch
 }
 
+/** A kept page, and when it was kept (ms since the epoch; null for an entry kept before this was recorded). */
+export type KeptAchievements = { page: AchievementsPage; keptAt: number | null }
+
 export function readAchievementsCache(storage: CacheStorage | null, userId: string, zone: string): AchievementsPage | null {
+  return readAchievementsCacheEntry(storage, userId, zone)?.page ?? null
+}
+
+export function readAchievementsCacheEntry(storage: CacheStorage | null, userId: string, zone: string): KeptAchievements | null {
   if (!storage) return null
   try {
     const text = storage.getItem(achievementsCacheKey(userId))
@@ -45,7 +54,9 @@ export function readAchievementsCache(storage: CacheStorage | null, userId: stri
     if (decoded && decoded.skipped.length > 0) {
       console.warn("[achievements] kept payload sections dropped", decoded.skipped)
     }
-    return decoded?.page ?? null
+    if (!decoded) return null
+    const at: unknown = Reflect.get(entry, "at")
+    return { page: decoded.page, keptAt: typeof at === "number" && Number.isFinite(at) ? at : null }
   } catch (err) {
     console.warn("[achievements] cache read failed", err)
     return null
@@ -58,12 +69,33 @@ export function writeAchievementsCache(
   zone: string,
   payload: unknown,
   readEpoch: number,
+  keptAt: number = Date.now(),
 ): void {
   if (!storage || readEpoch !== epoch) return
   try {
-    storage.setItem(achievementsCacheKey(userId), JSON.stringify({ v: VERSION, zone, payload }))
+    storage.setItem(achievementsCacheKey(userId), JSON.stringify({ v: VERSION, zone, at: keptAt, payload }))
   } catch (err) {
     console.warn("[achievements] cache write failed", err)
+  }
+}
+
+/**
+ * Every kept payload on this device marked stale (#1308, D18): an unlock
+ * happened since it was kept, so the Profile shelf's next open reads instead
+ * of trusting its age. The page itself always reads.
+ */
+export function markAchievementsCachesStale(storage: ListableStorage): void {
+  try {
+    for (let i = 0; i < storage.length; i++) {
+      const key = storage.key(i)
+      if (!key?.startsWith(KEY_PREFIX)) continue
+      const text = storage.getItem(key)
+      const entry: unknown = text ? JSON.parse(text) : null
+      if (typeof entry !== "object" || entry === null) continue
+      storage.setItem(key, JSON.stringify({ ...entry, at: null }))
+    }
+  } catch (err) {
+    console.warn("[achievements] cache could not be marked stale", err)
   }
 }
 
@@ -79,7 +111,7 @@ export function clearAchievementsCaches(storage: ClearableStorage): void {
 }
 
 /** `window.localStorage`, or null where there is none or touching it throws. */
-export function browserStorage(): CacheStorage | null {
+export function browserStorage(): Storage | null {
   try {
     return typeof window === "undefined" ? null : window.localStorage
   } catch (err) {

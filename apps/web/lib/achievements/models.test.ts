@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { designPage, designPalettes } from "./__fixtures__/design"
 import { countingLadder, domainsLadder, emotionsLadder, explorerLadder, yearLadder } from "./ladders"
+import { palettesFromReference } from "./palette"
 import { facets } from "./rosace"
 import { bandItems, familyRuns } from "./runs"
 import { SIX_FIRST_SEALS, pebbleSeal } from "./seals"
@@ -275,3 +276,15 @@ describe("seals", () => {
     expect(Object.values(SIX_FIRST_SEALS).map((x) => x.width)).toEqual([9, 12, 14, 12.5, 12.5, 12.5])
   })
 })
+
+describe("palettes from the reference reads", () => {
+  it("give a family the palette its emotions carry, and an emotion its own", () => {
+    const joy = { primary_color: "#1", secondary_color: "#2", light_color: "#3", shaded_color: "#4", dark_color: "#5" }
+    const p = palettesFromReference([{ id: "A1", category_slug: "joy" }], new Map([["A1", joy]]))
+    expect(p.family("joy")).toBe(joy)
+    expect(p.emotion("a1")).toBe(joy)
+    expect(p.family("awe")).toBeNull()
+    expect(p.emotion(null)).toBeNull()
+  })
+})
+
