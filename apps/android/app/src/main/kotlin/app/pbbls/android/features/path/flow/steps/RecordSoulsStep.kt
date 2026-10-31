@@ -1,6 +1,7 @@
 package app.pbbls.android.features.path.flow.steps
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,10 @@ fun RecordSoulsStep(
     val refs = LocalReferenceDataService.current
     val scope = rememberCoroutineScope()
     var showCreate by remember { mutableStateOf(false) }
+
+    // The cache refreshes only on soul mutations, so the counts would lag every
+    // pebble recorded since launch (#1370).
+    LaunchedEffect(Unit) { refs.refreshSouls() }
 
     SoulPickerBody(
         souls = refs.souls,

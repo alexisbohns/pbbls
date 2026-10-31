@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +56,10 @@ fun SoulPickerSheet(
     val scope = rememberCoroutineScope()
     var selection by remember { mutableStateOf(currentSelection.toSet()) }
     var showCreate by remember { mutableStateOf(false) }
+
+    // The cache refreshes only on soul mutations, so the counts would lag every
+    // pebble recorded since launch (#1370).
+    LaunchedEffect(Unit) { refs.refreshSouls() }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
