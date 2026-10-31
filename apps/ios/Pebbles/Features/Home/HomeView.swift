@@ -46,6 +46,7 @@ struct HomeView: View {
                     onQuick: { showsQuick = true },
                     onPebble: { showsCapture = true },
                     onOpenWrap: { openWrap = $0.month },
+                    onWeek: { nav.go(.path, intent: .focusWeek($0)) },
                     onRetryWraps: { Task { await model.loadWraps() } },
                     onTask: { taskSheet = $0 },
                     onClaim: { Task { await model.claim() } },
@@ -101,7 +102,8 @@ struct HomeView: View {
             Text("home.camera.unavailableBody")
         }
         .sheet(item: $openWrap) { month in
-            HomeWrapSheet(monthId: month, lookups: lookups, model: model, onWeek: { _ in nav.go(.path) })
+            HomeWrapSheet(monthId: month, lookups: lookups, model: model,
+                          onWeek: { nav.go(.path, intent: .focusWeek($0)) })
         }
         .sheet(item: $taskSheet, onDismiss: {
             if let task = pendingTask {
@@ -128,11 +130,20 @@ struct HomeView: View {
             case .guide(let slug): guideDestination(slug)
             }
         }
+        // The month's weeks (#1382 D8): again when the clock crosses into a new month…
+        .task(id: liveMonth) {
+            attachService()
+            await model.loadMonth(liveMonth)
+        }
+        // …and whenever a pebble is saved, here or on another tab.
+        .onChange(of: revision.value) {
+            Task { await model.loadMonth(liveMonth) }
+        }
         // Reselecting Home inside the TabView re-runs this task (the root re-appears), which
         // also ticks what the user did on a tab the checklist sent them to. `onFirstLoad()`
         // re-firing is harmless: its latch (`firstRootLoaded`) only sets once.
         .task {
-            if model.service == nil { model.service = HomeService(client: supabase.client) }
+            attachService()
             if model.achievements == nil { model.achievements = achievements }
             // Spec §1.6: the loader waits at most 1.5 s for the profile; the load
             // goes on in its own Task so the name still lands after the hand-off.
@@ -173,6 +184,11 @@ struct HomeView: View {
     }
 
     private var lookups: WrapLookups { HomeLookups.make(palettes: palettes, refs: references) }
+
+    private func attachService() {
+        guard model.service == nil else { return }
+        model.service = HomeService(client: supabase.client, owner: supabase.session?.user.id.uuidString.lowercased())
+    }
 
     /// The month the clock is in, in the device's zone.
     private var liveMonth: CalendarMonth {
@@ -252,19 +268,26 @@ struct HomeView: View {
 }
 
 /// The greeting block alone, so the reference pins it without a service.
+/// Ysabeau's display cut (#1382 D10): the dateline in `primary`, the greeting
+/// on one line (shrinking to 75 %) until accessibility sizes, where it may take
+/// two lines instead of shrinking further, then the italic line.
 struct HomeGreetingView: View {
     let lines: HomeGreeting.Lines
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(verbatim: lines.dateline)
-                .spineType(.kicker)
-                .foregroundStyle(Color.pebbles.outline)
+                .spineType(.homeDateline)
+                .foregroundStyle(Color.pebbles.primary)
             Text(verbatim: lines.title)
-                .spineType(.bareTitle)
+                .spineType(.greeting)
                 .foregroundStyle(Color.pebbles.onSurface)
+                .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
+                .minimumScaleFactor(typeSize.isAccessibilitySize ? 1 : 0.75)
             Text(verbatim: lines.line)
-                .spineType(.summary)
+                .spineType(.greetingLine)
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
         }
         .accessibilityElement(children: .ignore)

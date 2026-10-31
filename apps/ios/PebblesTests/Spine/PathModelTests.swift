@@ -74,6 +74,19 @@ struct PathModelTests {
         #expect(model.focusedWeekStart == F.weekStart)
     }
 
+    @Test("Home's week opens its page, or the current week when the Path has none")
+    func focusWeekStarting() async {
+        let older = MomentSummary(id: UUID(), name: nil, happenedAt: Vectors.at("2026-09-02T10:00:00Z"),
+                                  createdAt: Vectors.at("2026-09-02T10:00:00Z"), firstSnapPath: nil, pebble: nil)
+        let model = model()
+        await model.load { F.moments + [older] }
+        let olderWeek = WeekRollBuilder.weekStart(for: older.happenedAt, calendar: F.calendar)
+        model.focus(weekStarting: CalendarDay(olderWeek, in: F.calendar.timeZone))
+        #expect(model.focusedWeekStart == olderWeek)
+        model.focus(weekStarting: CalendarDay(year: 1999, month: 1, day: 4))
+        #expect(model.focusedWeekStart == F.weekStart)
+    }
+
     @Test("a page carries its days, words, soul names and contents in reading order")
     func page() async throws {
         let model = model()

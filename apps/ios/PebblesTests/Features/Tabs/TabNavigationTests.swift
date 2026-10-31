@@ -153,6 +153,16 @@ struct TabNavigationHomeTests {
         #expect(nav.takeIntent(for: .collections) == nil)
     }
 
+    @Test func aWeekIntentSelectsThePathAndIsTakenOnce() {
+        let nav = TabNavigation()
+        let monday = CalendarDay(year: 2026, month: 10, day: 26)
+        nav.go(.path, intent: .focusWeek(monday))
+        #expect(nav.selected == .path)
+        #expect(nav.peekIntent(for: .path) == .focusWeek(monday))
+        #expect(nav.takeIntent(for: .path) == .focusWeek(monday))
+        #expect(nav.takeIntent(for: .path) == nil)
+    }
+
     @Test func peekingLeavesTheIntentForTheConsumer() {
         let nav = TabNavigation()
         nav.go(.you, intent: .carveGlyph)

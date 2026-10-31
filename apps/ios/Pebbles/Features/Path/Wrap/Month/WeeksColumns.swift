@@ -57,29 +57,57 @@ struct WeeksColumns: View {
     let wrap: MonthWrap
     let lookups: WrapLookups
     let room: CGFloat
+    var metrics: Metrics = .card
+    /// Whether a week's column is a button (#1382 D9: Home's weeks after today are not).
+    var opens: (MonthWeek) -> Bool = { _ in true }
+    /// What a week that opens says it does (Home: "Opens this week on the Path").
+    var weekHint: Text?
     let onWeek: (CalendarDay) -> Void
 
     @Environment(\.colorScheme) private var scheme
 
-    private static let label: CGFloat = 34
-    private static let cairnRoom: CGFloat = 64
-    private static let gap: CGFloat = 8
-    private static let cellCap: CGFloat = 40
-    private static let legend: CGFloat = 16
+    /// The grid's measures: the wrap card's (the cell fills the room, capped)
+    /// or Home's (#1382 D8: a fixed 28 pt cell, a shorter cairn, flush sides).
+    struct Metrics: Equatable {
+        var label: CGFloat = 34
+        var gap: CGFloat = 8
+        var cairnRoom: CGFloat = 64
+        var cellCap: CGFloat = 40
+        var legend: CGFloat = 16
+        var pipCap: CGFloat = 16
+        var sidePadding: CGFloat = MonthLayout.sectionPadX
+        /// A fixed cell; nil fills the room up to `cellCap`.
+        var cell: CGFloat?
+        /// A fixed pip; nil sizes it from the cell, up to `pipCap`.
+        var pip: CGFloat?
+
+        static let card = Metrics()
+        static let home = Metrics(cairnRoom: 46, sidePadding: 0, cell: 28, pip: 15)
+
+        /// The grid's height at `cell`.
+        func height(cell: CGFloat) -> CGFloat {
+            label + gap + 7 * cell + gap + cairnRoom
+        }
+
+        /// The height at the fixed cell (or the cap): Home's is 292.
+        var height: CGFloat { height(cell: cell ?? cellCap) }
+    }
 
     var body: some View {
         let columns = WeekColumn.columns(wrap)
-        let cell = min(max((room - Self.label - Self.cairnRoom - 2 * Self.gap) / 7, 18), Self.cellCap)
+        let cell = metrics.cell
+            ?? min(max((room - metrics.label - metrics.cairnRoom - 2 * metrics.gap) / 7, 18), metrics.cellCap)
         HStack(alignment: .top, spacing: 0) {
             weekdays(cell: cell)
             ForEach(Array(columns.enumerated()), id: \.element.week.weekStart) { index, column in
-                WeekColumnView(column: column, index: index, cell: cell, lookups: lookups, scheme: scheme,
-                               month: wrap.month, onWeek: onWeek)
+                WeekColumnView(column: column, index: index, cell: cell, metrics: metrics, lookups: lookups,
+                               scheme: scheme, month: wrap.month, opens: opens(column.week), hint: weekHint,
+                               onWeek: onWeek)
                     .frame(maxWidth: .infinity)
             }
         }
-        .frame(height: Self.label + Self.gap + 7 * cell + Self.gap + Self.cairnRoom, alignment: .top)
-        .padding(.horizontal, MonthLayout.sectionPadX)
+        .frame(height: metrics.height(cell: cell), alignment: .top)
+        .padding(.horizontal, metrics.sidePadding)
     }
 
     /// Monday first, level with the columns' days.
@@ -95,8 +123,8 @@ struct WeeksColumns: View {
                     .frame(height: cell)
             }
         }
-        .padding(.top, Self.label + Self.gap)
-        .frame(width: Self.legend)
+        .padding(.top, metrics.label + metrics.gap)
+        .frame(width: metrics.legend)
         .accessibilityHidden(true)
     }
 }
@@ -106,9 +134,12 @@ private struct WeekColumnView: View {
     let column: WeekColumn
     let index: Int
     let cell: CGFloat
+    let metrics: WeeksColumns.Metrics
     let lookups: WrapLookups
     let scheme: ColorScheme
     let month: CalendarMonth
+    let opens: Bool
+    let hint: Text?
     let onWeek: (CalendarDay) -> Void
 
     private static let socket: CGFloat = 6.8
@@ -121,38 +152,50 @@ private struct WeekColumnView: View {
         let line = week.pebbles == 0 ? WrapCopy.emptyWeek(locale: locale)
             : WrapCopy.line(pebbles: week.pebbles, people: week.soulIds.count, live: false, hasMoments: true,
                             locale: locale)
-        Button { onWeek(week.weekStart) } label: {
-            IntroReader { reveal in
-                VStack(spacing: 8) {
-                    VStack(spacing: 0) {
-                        Text(verbatim: "\(week.weekStart.day)")
-                            .spineType(.dayNumeral)
-                            .foregroundStyle(Color.pebbles.onSurface)
-                        Text(verbatim: WrapCopy.weekColumnMonth(week.weekStart, locale: locale))
-                            .spineType(.dayLetter)
-                            .foregroundStyle(Color.pebbles.outline)
-                    }
-                    .frame(height: 34)
-                    .dynamicTypeSize(...DynamicTypeSize.large)
-                    .introReveal(.words(index))
-                    Canvas { context, size in
-                        draw(in: context, size: size, reveal: reveal)
-                    }
-                    .frame(height: 7 * cell)
-                    cairn(reveal: reveal)
-                        .frame(height: 64, alignment: .top)
-                }
-            }
-            .contentShape(Rectangle())
+        let label = Text(verbatim: "\(range), \(line)")
+        if opens {
+            Button { onWeek(week.weekStart) } label: { stack(week, locale: locale) }
+                .buttonStyle(.plain)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(label)
+                .accessibilityAddTraits(.isButton)
+                .accessibilityHint(hint ?? Text(verbatim: ""))
+        } else {
+            // A week after today on Home: drawn, read as text, not a button.
+            stack(week, locale: locale)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(label)
         }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(verbatim: "\(range), \(line)"))
-        .accessibilityAddTraits(.isButton)
+    }
+
+    private func stack(_ week: MonthWeek, locale: Locale) -> some View {
+        IntroReader { reveal in
+            VStack(spacing: metrics.gap) {
+                VStack(spacing: 0) {
+                    Text(verbatim: "\(week.weekStart.day)")
+                        .spineType(.dayNumeral)
+                        .foregroundStyle(Color.pebbles.onSurface)
+                    Text(verbatim: WrapCopy.weekColumnMonth(week.weekStart, locale: locale))
+                        .spineType(.dayLetter)
+                        .foregroundStyle(Color.pebbles.outline)
+                }
+                .frame(height: metrics.label)
+                .dynamicTypeSize(...DynamicTypeSize.large)
+                .introReveal(.words(index))
+                Canvas { context, size in
+                    draw(in: context, size: size, reveal: reveal)
+                }
+                .frame(height: 7 * cell)
+                cairn(reveal: reveal)
+                    .frame(height: metrics.cairnRoom, alignment: .top)
+            }
+        }
+        .contentShape(Rectangle())
     }
 
     private func draw(in context: GraphicsContext, size: CGSize, reveal: IntroReveal) {
-        let pip = min(cell * 0.5, (size.width - 2 * Self.pipGap) / CGFloat(WeekColumn.pips) * 0.9, 16)
+        let pip = metrics.pip ?? min(cell * 0.5, (size.width - 2 * Self.pipGap) / CGFloat(WeekColumn.pips) * 0.9,
+                                     metrics.pipCap)
         for (day, kind) in column.days.enumerated() {
             let center = CGPoint(x: size.width / 2, y: (CGFloat(day) + 0.5) * cell)
             switch kind {
