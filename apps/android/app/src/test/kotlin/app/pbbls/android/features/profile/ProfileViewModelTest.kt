@@ -5,11 +5,14 @@ import app.pbbls.android.AchievementsFixture
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.data.ProfileRow
+import app.pbbls.android.core.model.LogSpecies
 import app.pbbls.android.testing.FakeAchievementsService
+import app.pbbls.android.testing.FakeLogsService
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.UiFixtures
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -45,7 +48,8 @@ class ProfileViewModelTest {
         stats: FakePathStatsService = FakePathStatsService(),
         supabase: FakeSupabaseService = FakeSupabaseService(),
         achievements: FakeAchievementsService = FakeAchievementsService(),
-    ) = ProfileViewModel(profile, stats, supabase, achievements)
+        logs: FakeLogsService = FakeLogsService(),
+    ) = ProfileViewModel(profile, stats, supabase, achievements, logs)
 
     // MARK: - Load
 
@@ -360,5 +364,114 @@ class ProfileViewModelTest {
 
             viewModel.onResumed()
             assertTrue(viewModel.uiState.value is ProfileUiState.Content)
+        }
+
+    // MARK: - Lab (#1383, spec D16)
+
+    private val post = UiFixtures.log(id = "00000000-0000-0000-0000-0000000000a1", title = "Cut from one stone")
+    private val entries =
+        (1..3).map { UiFixtures.log(id = "00000000-0000-0000-0000-00000000000$it", species = LogSpecies.FEATURE, title = "Entry $it") }
+
+    private fun labLogs() = FakeLogsService(announcements = listOf(post), changelog = entries)
+
+    @Test
+    fun `You reads the latest announcement and three changelog entries`() =
+        runTest {
+            val logs = labLogs()
+            val viewModel = viewModel(logs = logs)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as ProfileUiState.Content
+            assertEquals(post, state.announcement)
+            assertEquals(entries, state.labEntries)
+            assertEquals(listOf<Int?>(1), logs.announcementLimits)
+            assertEquals(listOf<Int?>(3), logs.changelogLimits)
+        }
+
+    @Test
+    fun `the announcement's cover is its public url, and none without a path`() =
+        runTest {
+            val covered = post.copy(coverImagePath = "covers/stone.png")
+            val viewModel = viewModel(logs = FakeLogsService(announcements = listOf(covered)))
+            advanceUntilIdle()
+            assertEquals(
+                "https://project.test/storage/v1/object/public/lab/covers/stone.png",
+                (viewModel.uiState.value as ProfileUiState.Content).announcementCoverUrl,
+            )
+
+            val bare = viewModel(logs = labLogs())
+            advanceUntilIdle()
+            assertNull((bare.uiState.value as ProfileUiState.Content).announcementCoverUrl)
+        }
+
+    @Test
+    fun `a failed announcements read hides the card and keeps the entries`() =
+        runTest {
+            val logs = labLogs().apply { announcementsFailure = IOException("offline") }
+            val viewModel = viewModel(logs = logs)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as ProfileUiState.Content
+            assertNull(state.announcement)
+            assertEquals(entries, state.labEntries)
+        }
+
+    @Test
+    fun `a failed changelog read hides the timeline and keeps the announcement`() =
+        runTest {
+            val logs = labLogs().apply { changelogFailure = IOException("offline") }
+            val viewModel = viewModel(logs = logs)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as ProfileUiState.Content
+            assertEquals(post, state.announcement)
+            assertEquals(emptyList<Any>(), state.labEntries)
+        }
+
+    @Test
+    fun `none published is no card`() =
+        runTest {
+            val viewModel = viewModel(logs = FakeLogsService(changelog = entries))
+            advanceUntilIdle()
+
+            assertNull((viewModel.uiState.value as ProfileUiState.Content).announcement)
+        }
+
+    /** The Lab is You's last section, not the screen: both feeds down still shows the profile. */
+    @Test
+    fun `both Lab feeds failing still shows the profile`() =
+        runTest {
+            val logs =
+                labLogs().apply {
+                    announcementsFailure = IOException("offline")
+                    changelogFailure = IOException("offline")
+                }
+            val viewModel = viewModel(logs = logs)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as ProfileUiState.Content
+            assertEquals("Pebbler", state.profile?.displayName)
+            assertNull(state.announcement)
+            assertEquals(emptyList<Any>(), state.labEntries)
+        }
+
+    /** A reload whose feed fails keeps what is on screen (#849's rule), and returning re-reads the Lab. */
+    @Test
+    fun `returning re-reads the Lab and a failed re-read keeps what is shown`() =
+        runTest {
+            val logs = labLogs()
+            val viewModel = viewModel(logs = logs)
+            advanceUntilIdle()
+            viewModel.onResumed()
+
+            logs.announcementsFailure = IOException("offline")
+            logs.changelog = entries.take(1)
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as ProfileUiState.Content
+            assertEquals(post, state.announcement)
+            assertEquals(entries.take(1), state.labEntries)
+            assertEquals(2, logs.changelogLimits.size)
         }
 }
