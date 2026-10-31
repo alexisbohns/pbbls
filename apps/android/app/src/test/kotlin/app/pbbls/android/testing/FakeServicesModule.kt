@@ -28,6 +28,7 @@ import app.pbbls.android.di.IoApplicationScope
 import app.pbbls.android.di.ServiceBindings
 import app.pbbls.android.di.ServiceModule
 import app.pbbls.android.di.SupabaseModule
+import app.pbbls.android.features.home.camera.CameraPhotos
 import app.pbbls.android.features.path.ComposerMedia
 import dagger.Module
 import dagger.Provides
@@ -190,6 +191,9 @@ object FakeServicesModule {
     @Provides @Singleton
     fun fakeSnapWrite() = FakeSnapWriteRepository()
 
+    @Provides @Singleton
+    fun fakeCameraPhotos() = FakeCameraPhotos()
+
     // ---- The seams, bound to the same instances ----
 
     @Provides
@@ -221,6 +225,9 @@ object FakeServicesModule {
 
     @Provides
     fun composerMedia(fake: FakeComposerMedia): ComposerMedia = fake
+
+    @Provides
+    fun cameraPhotos(fake: FakeCameraPhotos): CameraPhotos = fake
 
     @Provides
     fun souls(fake: FakeSoulsService): SoulsServicing = fake

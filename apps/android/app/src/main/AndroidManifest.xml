@@ -7,6 +7,14 @@
     <!-- The month intro's haptics (#1242 D18) play VibrationEffect compositions; a normal permission, no prompt. -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- Home's camera moment (#1383 D7) asks whether a camera app answers ACTION_IMAGE_CAPTURE
+         before launching one; from API 30 that lookup only sees apps declared here. -->
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
+
     <!-- enableOnBackInvokedCallback: predictive back (a stated minSdk-33
          rationale, design D1). BackHandler call sites remain authoritative
          for in-app back handling. -->
@@ -113,6 +121,22 @@
                     android:pathPrefix="/auth/callback" />
             </intent-filter>
         </activity>
+
+        <!--
+          Home's camera moment (#1383 D7): the system camera writes its photo into
+          cache/camera/ through this provider's URI (res/xml/camera_paths.xml), so the
+          app declares no CAMERA permission; the camera app holds it. Not exported:
+          TakePicture grants the camera app write access to the one URI it is handed.
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.camera"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/camera_paths" />
+        </provider>
     </application>
 
 </manifest>
