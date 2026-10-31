@@ -11,13 +11,9 @@ struct YouContent: View {
 
     var body: some View {
         VStack(spacing: Spacing.xl) {
-            HStack {
-                Spacer()
-                Button(action: onSettings) { PbblsIconImage(.slider, .toolbar) }
-                    .accessibilityLabel(Text("Settings"))
-            }
-            ProfileBanner(displayName: model.profile?.displayName, memberSince: model.profile?.createdAt,
-                          glyphStrokes: model.glyphStrokes)
+            YouHeader(name: model.profile?.displayName, memberSince: model.profile?.createdAt,
+                      glyphStrokes: model.glyphStrokes, rippleLevel: stats.rippleLevel,
+                      activeToday: stats.activeToday, onSettings: onSettings)
             ProfileShortcutsRow()
             ProfileStatsCard(ripple: stats.rippleLevel.map {
                                  RippleSummary(rippleLevel: $0, pebbles28d: 0, activeToday: stats.activeToday)

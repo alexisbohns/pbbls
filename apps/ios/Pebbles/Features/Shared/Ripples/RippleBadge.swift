@@ -1,11 +1,19 @@
 import SwiftUI
 
-/// 44×44 ring-and-digit badge representing the user's Ripples level.
-/// See `docs/superpowers/specs/2026-05-15-ripples-design.md` and
-/// issue #442 for full color/state semantics.
+/// Ring-and-digit badge representing the user's Ripples level, 44×44 unless
+/// told otherwise. See `docs/superpowers/specs/2026-05-15-ripples-design.md` and
+/// issue #442 for full color/state semantics. The rings scale from the 44 pt
+/// viewBox; below 32 pt the digit goes (You's line says the level, #1382 D17).
 struct RippleBadge: View {
     let level: Int
     let activeToday: Bool
+    var side: CGFloat = 44
+
+    /// The digit only fits from 32 pt.
+    static func showsDigit(side: CGFloat) -> Bool { side >= 32 }
+
+    /// The 2 pt stroke at 44, scaled with the side, never under 1.25.
+    static func strokeWidth(side: CGFloat) -> CGFloat { max(1.25, 2 * side / 44) }
 
     private var clampedLevel: Int { min(max(level, 0), 6) }
 
@@ -34,20 +42,23 @@ struct RippleBadge: View {
             RippleStroke1()
                 .stroke(tone(forStroke: 1).color, style: stroke)
 
-            Text(verbatim: "\(clampedLevel)")
-                .pebblesFont(.captionEmphasized)
-                .foregroundStyle(Color.pebbles.onSurface)
+            if Self.showsDigit(side: side) {
+                Text(verbatim: "\(clampedLevel)")
+                    .pebblesFont(.captionEmphasized)
+                    .foregroundStyle(Color.pebbles.onSurface)
+            }
         }
-        .frame(width: 44, height: 44)
+        .frame(width: side, height: side)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
     }
 
     private var stroke: StrokeStyle {
-        StrokeStyle(lineWidth: 2, lineCap: .round)
+        StrokeStyle(lineWidth: Self.strokeWidth(side: side), lineCap: .round)
     }
 
-    private var accessibilityLabel: LocalizedStringResource {
+    /// "Ripple level 3, active today": You's Ripples line speaks it too.
+    var accessibilityLabel: LocalizedStringResource {
         activeToday
             ? LocalizedStringResource("Ripple level \(clampedLevel), active today")
             : LocalizedStringResource("Ripple level \(clampedLevel), inactive today")

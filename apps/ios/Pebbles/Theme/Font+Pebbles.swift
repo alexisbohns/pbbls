@@ -25,7 +25,7 @@ enum PebblesFont: CaseIterable {
     /// Handwritten (Reenie Beanie) name label, 22pt. Any user's name — soul,
     /// creator — renders in the hand font. See issue #515.
     case bodyLeadHand
-    /// Handwritten (Reenie Beanie) large title, 41pt. Profile display name.
+    /// Handwritten (Reenie Beanie) large title, 60pt. You's name (#1382 D17).
     case largeTitleHand
     /// Handwritten (Caveat) input face, 36pt. The pebble name field in the
     /// record flow — the one place the user writes on a bare page.
@@ -118,7 +118,7 @@ extension PebblesFont {
         switch self {
         case .title:             YsabeauFace.uiFont(size: 28, weight: 600, italic: false, features: [.lining])
         case .bodyLeadHand:      UIFont.bundled("ReenieBeanie", size: 22)
-        case .largeTitleHand:    UIFont.bundled("ReenieBeanie", size: 41)
+        case .largeTitleHand:    UIFont.bundled("ReenieBeanie", size: 60)
         case .nameInputHand:     UIFont.bundled("Caveat-Regular", size: 36)
         case .valenceWordSmall:  UIFont.pebblesCaveat(size: 34, weight: 700)
         case .valenceWordMedium: UIFont.pebblesCaveat(size: 44, weight: 700)
@@ -174,7 +174,7 @@ private extension PebblesFont {
         // Reenie Beanie sits loose by default; these tighten it toward
         // connected handwriting (issue #515 speced -2%, dialed in on review).
         case .bodyLeadHand:                                       return -1.0   // 22pt
-        case .largeTitleHand:                                     return -2.0   // 41pt
+        case .largeTitleHand:                                     return -4.5   // 60pt, -0.075 em
         // Caveat is already tightly connected; no extra tracking.
         default:                                                  return 0
         }
