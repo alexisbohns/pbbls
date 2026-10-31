@@ -173,7 +173,8 @@ class RootViewModel
             // reaches here through its own `signOut()`. The store's owner check
             // covers a session that swaps without passing through signed-out.
             // The Path's kept wraps (#1207) are the same: private journal content at rest, nobody's
-            // once the device is signed out.
+            // once the device is signed out. The same cache keeps the achievements page (#1307),
+            // so this one wipe covers it too.
             if (!isInitializing && userId == null) {
                 completeSnapshots.clearAll()
                 wrapCache.clearAll()

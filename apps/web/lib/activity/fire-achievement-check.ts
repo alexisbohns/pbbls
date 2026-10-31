@@ -1,4 +1,6 @@
 import { presentAchievementMoment } from "@/lib/activity/achievement-moment"
+import { beginAchievementCheck, endAchievementCheck } from "@/lib/activity/achievement-check-flight"
+import { browserStorage, markAchievementsCachesStale } from "@/lib/data/achievements-cache"
 import type { DataProvider } from "@/lib/data/data-provider"
 
 /**
@@ -12,15 +14,24 @@ import type { DataProvider } from "@/lib/data/data-provider"
  * from family i18n + admin overrides inside React — no translator plumbing
  * needed at the six call sites.
  *
- * This is the MUTATION path, and only it celebrates (D13): the screen-open
- * call in `useAchievements` is the retroactive grant and can return a
- * veteran's entire history at once, so it renders in the grid instead.
+ * This is the MUTATION path, and only it celebrates (D13). The screen-open
+ * calls (the achievements page's and the Profile shelf's reads, through
+ * `AchievementsPageStore`) are the retroactive grant: they can return a
+ * veteran's entire history at once, and never celebrate.
+ *
+ * Something unlocked, so the kept achievements payload no longer shows it:
+ * it is marked stale, and the Profile shelf's next open reads (D18).
  */
-export function fireAchievementCheck(provider: DataProvider): void {
+export function fireAchievementCheck(provider: Pick<DataProvider, "checkAchievements" | "getAchievements">): void {
+  // While it runs, the Profile shelf's grant waits its turn (achievement-check-flight).
+  beginAchievementCheck()
   void provider
     .checkAchievements()
+    .finally(endAchievementCheck)
     .then(async (results) => {
       if (results.length === 0) return
+      const storage = browserStorage()
+      if (storage) markAchievementsCachesStale(storage)
       const catalog = await provider.getAchievements()
       presentAchievementMoment({ results, catalog })
     })
