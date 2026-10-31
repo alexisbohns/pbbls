@@ -21,8 +21,8 @@ struct HomeChecklistView: View {
         if checklist.state == .inProgress || checklist.state == .claimable {
             let title = String(localized: "home.firstFive.title")
             VStack(alignment: .leading, spacing: 0) {
-                PebblesSectionHead(title, figure: .ratio(done: checklist.doneCount, total: checklist.rows.count,
-                                                         word: SpineStrings.string("home.firstFive.of", locale: locale)))
+                let of = SpineStrings.string("home.firstFive.of", locale: locale)
+                PebblesSectionHead(title, figure: .ratio(done: checklist.doneCount, total: checklist.rows.count, word: of))
                     .accessibilityLabel(Text(verbatim:
                         "\(title), \(Self.figureLabel(done: checklist.doneCount, locale: locale))"))
                 stepper
