@@ -803,6 +803,11 @@
     <string name="home_quick_save_open">Save &amp; open</string>
     <string name="home_quick_save_close">Save &amp; close</string>
     <string name="home_quick_error">Couldn\'t save the moment. Try again.</string>
+    <!-- Home's camera moment (#1383 D7, iOS home.camera.*): the system camera, an upload, then save_moment. -->
+    <string name="home_camera_saving">Saving your photo…</string>
+    <string name="home_camera_unavailable">No camera yet</string>
+    <string name="home_camera_unavailable_body">This device has no camera. Use a quick moment instead.</string>
+    <string name="home_camera_upload_failed">The photo didn\'t upload. Nothing was saved.</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">

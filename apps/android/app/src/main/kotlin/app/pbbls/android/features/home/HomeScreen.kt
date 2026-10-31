@@ -1,5 +1,9 @@
 package app.pbbls.android.features.home
 
+import android.content.ActivityNotFoundException
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,12 +19,15 @@ import app.pbbls.android.core.data.HomeShortcut
 import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.ui.HomeMonthSlot
+import app.pbbls.android.features.home.camera.CameraUnavailableDialog
 import app.pbbls.android.features.home.quick.QuickMomentExit
 import app.pbbls.android.features.home.quick.QuickMomentSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+
+private const val TAG = "home"
 
 /**
  * The Home tab (#1383 D1): the first of five, where a signed-in launch lands. Reads again on every
@@ -30,16 +37,16 @@ import java.time.temporal.ChronoUnit
  * [monthSlot] is the Path's month grid (D8), filled by the entry provider; a tap on one of its weeks
  * leaves the Path that focus and calls [onOpenPath] (D10).
  *
- * A quick action is stored as the last used one, then opens its flow: [onCamera], the quick moment
- * sheet (#1383 D7, held by [moments]) or [onPebble]. A quick moment saved with "Save & open" calls
- * [onOpenComplete] with its id.
+ * A quick action is stored as the last used one, then opens its flow (#1383 D7): the camera moment
+ * (the system camera through `TakePicture`) and the quick moment sheet are Home's own, held by
+ * [moments]; [onPebble] opens Capture chained into Complete. A quick moment saved with "Save & open"
+ * calls [onOpenComplete] with its id.
  */
 @Composable
 fun HomeScreen(
     reselected: Flow<Unit>,
     monthSlot: HomeMonthSlot,
     onOpenPath: () -> Unit,
-    onCamera: () -> Unit,
     onPebble: () -> Unit,
     onOpenComplete: (momentId: String) -> Unit,
     modifier: Modifier = Modifier,
@@ -48,7 +55,9 @@ fun HomeScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val quickForm by moments.quick.sheet.collectAsStateWithLifecycle()
+    val camera by moments.camera.state.collectAsStateWithLifecycle()
     val haptic = rememberTapHaptics { viewModel.hapticsOn }
+    val takePicture = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture(), moments.camera::onResult)
     ObserveUiEffects(moments.effects) { effect ->
         when (effect) {
             is HomeMomentEffect.QuickSaved -> {
@@ -56,10 +65,19 @@ fun HomeScreen(
                 viewModel.onMomentSaved()
                 if (effect.exit == QuickMomentExit.OPEN) onOpenComplete(effect.momentId)
             }
+            is HomeMomentEffect.LaunchCamera ->
+                try {
+                    takePicture.launch(effect.uri)
+                } catch (e: ActivityNotFoundException) {
+                    Log.e(TAG, "no activity for the camera after all", e)
+                    moments.camera.onLaunchFailed()
+                }
+            is HomeMomentEffect.CameraLanded -> viewModel.onMomentSaved()
         }
     }
-    LifecycleResumeEffect(viewModel) {
+    LifecycleResumeEffect(viewModel, moments) {
         viewModel.onResumed()
+        moments.onResumed()
         onPauseOrDispose {}
     }
     val listState = rememberLazyListState()
@@ -80,13 +98,16 @@ fun HomeScreen(
         onShortcut = { shortcut ->
             viewModel.onShortcutUsed(shortcut)
             when (shortcut) {
-                HomeShortcut.CAMERA -> onCamera()
+                HomeShortcut.CAMERA -> moments.onCamera()
                 HomeShortcut.QUICK -> moments.quick.open()
                 HomeShortcut.PEBBLE -> onPebble()
             }
         },
         hapticsOn = { viewModel.hapticsOn },
+        camera = camera,
+        onDismissCameraError = moments.camera::dismissError,
     )
+    if (camera.isUnavailable) CameraUnavailableDialog(onDismiss = moments.camera::dismissUnavailable)
     quickForm?.let { form ->
         QuickMomentSheet(
             form = form,

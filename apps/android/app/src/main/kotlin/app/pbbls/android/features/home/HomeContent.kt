@@ -19,7 +19,10 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.data.HomeShortcut
 import app.pbbls.android.core.designsystem.PebblesScreen
+import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.ui.HomeMonthSlot
+import app.pbbls.android.features.home.camera.CameraMomentStatus
+import app.pbbls.android.features.home.camera.CameraMomentUiState
 import app.pbbls.android.features.home.components.HomeGreetingBlock
 import app.pbbls.android.features.home.shortcuts.HomeShortcuts
 import java.time.LocalDate
@@ -49,6 +52,9 @@ private val SECTION_GAP = 44.dp
  * gets a tapped column's Monday. It shares the greeting's item, so a grid landing while the page is at
  * its top shows rather than being inserted above the list's anchor.
  *
+ * Under the quick actions, the camera moment's progress and failure lines ([camera], #1383 D7); its
+ * piece is off while it saves (D6).
+ *
  * The date is formatted in the app's locale, read here in composition (D22), never `Locale.getDefault()`.
  */
 @Composable
@@ -61,6 +67,8 @@ fun HomeContent(
     listState: LazyListState = rememberLazyListState(),
     onShortcut: (HomeShortcut) -> Unit = {},
     hapticsOn: () -> Boolean = { true },
+    camera: CameraMomentUiState = CameraMomentUiState(),
+    onDismissCameraError: () -> Unit = {},
 ) {
     val resources = LocalResources.current
     val locale = LocalConfiguration.current.locales[0]
@@ -86,7 +94,14 @@ fun HomeContent(
                         lastUsed = state.shortcuts.lastUsed,
                         onShortcut = onShortcut,
                         hapticsOn = hapticsOn,
+                        cameraEnabled = !camera.isSaving,
                         modifier = Modifier.padding(top = SHORTCUTS_GAP),
+                    )
+                    // Under the piece that was tapped, where the eye is, rather than at the foot of the page.
+                    CameraMomentStatus(
+                        state = camera,
+                        onDismissError = onDismissCameraError,
+                        modifier = Modifier.padding(top = Spacing.md, start = TEXT_INSET, end = TEXT_INSET),
                     )
                 }
             }
