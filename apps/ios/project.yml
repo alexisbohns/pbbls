@@ -129,6 +129,8 @@ targets:
           - "Spine/Fixtures/**"
           # The achievements payload fixtures are read through #filePath too (AchievementsFixtures).
           - "Achievements/Fixtures/**"
+          # The stone goldens are read and written through #filePath too (StoneGeometryTests).
+          - "Stones/Fixtures/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.pbbls.ios.tests
