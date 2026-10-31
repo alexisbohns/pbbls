@@ -30,18 +30,15 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.features.profile.components.ProfileAchievementsCard
-import app.pbbls.android.features.profile.components.ProfileBanner
 import app.pbbls.android.features.profile.components.ProfileLabCard
 import app.pbbls.android.features.profile.components.ProfileLogoutButton
 import app.pbbls.android.features.profile.components.ProfileShortcutsRow
 import app.pbbls.android.features.profile.components.ProfileStatsCard
+import app.pbbls.android.features.profile.components.YouHeader
 
 /**
  * The Profile screen — ports iOS `ProfileView.swift` (sub-project C): banner,
@@ -108,15 +105,6 @@ fun ProfileScreen(
                         )
                     }
                 },
-                actions = {
-                    IconButton(onClick = onOpenSettings) {
-                        PbblsIconImage(
-                            icon = PbblsIcon.SLIDER,
-                            size = PbblsIconSize.TOOLBAR,
-                            contentDescription = stringResource(R.string.settings_title),
-                        )
-                    }
-                },
                 colors =
                     TopAppBarDefaults.topAppBarColors(
                         containerColor = colors.surface,
@@ -168,10 +156,12 @@ fun ProfileScreen(
                             .padding(bottom = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xl),
                 ) {
-                    ProfileBanner(
+                    YouHeader(
                         displayName = content.profile?.displayName,
                         memberSince = content.profile?.createdAt,
                         glyphStrokes = content.glyphStrokes,
+                        ripple = content.ripple,
+                        onOpenSettings = onOpenSettings,
                     )
                     ProfileShortcutsRow(
                         onOpenSouls = onOpenSouls,

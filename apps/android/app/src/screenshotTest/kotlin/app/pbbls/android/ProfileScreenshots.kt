@@ -18,10 +18,10 @@ import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.RippleSummary
-import app.pbbls.android.features.profile.components.ProfileBanner
 import app.pbbls.android.features.profile.components.ProfileCollectionsCard
 import app.pbbls.android.features.profile.components.ProfileLogoutButton
 import app.pbbls.android.features.profile.components.ProfileStatsCard
+import app.pbbls.android.features.profile.components.YouHeader
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 
@@ -56,15 +56,19 @@ private fun ProfileGallery() {
                 .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        ProfileBanner(
+        YouHeader(
             displayName = "Alexis",
             memberSince = OffsetDateTime.parse("2026-04-12T09:00:00+00:00"),
             glyphStrokes = previewStrokes,
+            ripple = RippleSummary(rippleLevel = 3, pebbles28d = 11, activeToday = true),
+            onOpenSettings = {},
         )
-        ProfileBanner(
+        YouHeader(
             displayName = "Pebbler",
             memberSince = OffsetDateTime.parse("2026-07-01T09:00:00+00:00"),
             glyphStrokes = null,
+            ripple = null,
+            onOpenSettings = {},
         )
         ProfileStatsCard(
             ripple = RippleSummary(rippleLevel = 3, pebbles28d = 11, activeToday = true),
