@@ -63,6 +63,8 @@ enum YouRoute: Codable, Hashable {
     case glyphTab(GlyphTab)
     case achievements
     case lab
+    /// One Lab announcement, from You's Lab section (#1382 D21); resolved by id.
+    case announcement(UUID)
 }
 
 /// What a resolver view found for its id.
