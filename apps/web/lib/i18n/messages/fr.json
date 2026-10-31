@@ -28,6 +28,74 @@
     "connections": "Connexions",
     "lab": "Lab"
   },
+  "home": {
+    "greeting": {
+      "morning": { "title": "Bonjour", "line": "Une nouvelle journée à garder." },
+      "afternoon": { "title": "Bon après-midi", "line": "La journée est à moitié écrite. Quelque chose à garder ?" },
+      "evening": { "title": "Bonsoir", "line": "Qu'est-ce qui te reste de la journée ?" },
+      "monday-morning": { "title": "Bonjour", "line": "Belle semaine à toi !" },
+      "sunday-evening": { "title": "Bonsoir", "line": "Comment s'est passée ta semaine ?" }
+    },
+    "month": {
+      "weekAria": "{range}, {count, plural, one {# galet} other {# galets}}",
+      "weekAriaEmpty": "{range}, pas encore de galet",
+      "error": "Impossible de charger ton mois."
+    },
+    "actions": {
+      "camera": "Appareil photo",
+      "quick": "Moment rapide",
+      "pebble": "Nouveau galet",
+      "cameraSaving": "Enregistrement de ta photo…",
+      "cameraSaved": "Moment enregistré",
+      "nameIt": "Nommer",
+      "cameraFailed": "La photo n'a pas été envoyée. Rien n'a été enregistré."
+    },
+    "quick": {
+      "title": "Moment rapide",
+      "name": "Que s'est-il passé ?",
+      "when": "Quand",
+      "save": "Enregistrer et fermer",
+      "saveAndComplete": "Enregistrer et compléter",
+      "saved": "Moment enregistré"
+    },
+    "firstFive": {
+      "title": "Tes cinq premières fois",
+      "count": "{count} <of>sur</of> 5",
+      "tasks": {
+        "moment": { "title": "Enregistre ton premier moment", "line": "Une heure et un nom. Rien de plus." },
+        "pebble": { "title": "Complète ton premier galet", "line": "Donne à un moment son poids et sa couleur." },
+        "collection": { "title": "Commence ta première collection", "line": "Rassemble des galets qui vont ensemble." },
+        "soul": { "title": "Ajoute ta première âme", "line": "Quelqu'un qui partage tes moments." },
+        "glyph": { "title": "Grave ton premier glyphe", "line": "Une marque à toi, pour une âme ou une collection." }
+      },
+      "done": "Fait",
+      "claim": "Réclamer le galet bleu",
+      "claimLine": "Les cinq sont faites. Le galet bleu est à toi.",
+      "claimFailed": "Impossible de le réclamer pour l'instant. Réessaie."
+    },
+    "wraps": {
+      "title": "Bilans du mois",
+      "folded": "plié",
+      "unfold": "Déplier",
+      "unfoldTitle": "Déplier {month} ?",
+      "unfoldBody": "{count, plural, one {# galet est plié} other {# galets sont pliés}} à l'intérieur.",
+      "unfoldFailed": "Impossible de le déplier. Réessaie.",
+      "cardAria": "{month}, {count, plural, one {# galet} other {# galets}}",
+      "cardAriaFolded": "{month}, {count, plural, one {# galet} other {# galets}}, plié",
+      "empty": "Ton premier bilan se pliera le {date}.",
+      "error": "Impossible de charger tes mois."
+    },
+    "about": {
+      "title": "À propos de Pebbles"
+    },
+    "guide": {
+      "back": "Accueil",
+      "missingTitle": "Cette lecture n'est pas disponible",
+      "missingBody": "Elle a peut-être changé de place, ou n'est pas encore publiée.",
+      "missingLink": "Retour à l'accueil"
+    },
+    "retry": "Réessayer"
+  },
   "profile": {
     "title": "Profil",
     "appSectionsAria": "Sections de l'application",
