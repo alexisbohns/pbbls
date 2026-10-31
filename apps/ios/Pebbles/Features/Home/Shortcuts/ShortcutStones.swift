@@ -77,27 +77,7 @@ enum ShortcutStones {
     /// One wide rock, split by two parallel leaning cuts. Each cut leaves an
     /// 8pt gutter and a 20pt fillet on both sides, so the pieces fit back.
     static func splitRow(width: CGFloat, height: CGFloat) -> [[CGPoint]] {
-        guard width > 3 * gutter, height > 0 else { return [[], [], []] }
-        var r = StoneRandom("camera|fixed|rock|q11")
-        let rock = StoneGeometry.rockOutline(width: width, height: height, random: &r)
-        let leanDraw = r.next()
-        let rockSdf = StoneGeometry.polygonSdf(StoneGeometry.resample(rock, step: 4))
-        let lean = 0.11 + StoneGeometry.jitter(leanDraw, 0.03)
-        let w3 = (width - 2 * gutter) / 3
-        let g1 = w3 + gutter / 2, g2 = 2 * w3 + 1.5 * gutter
-        func cut(_ gx: CGFloat, _ side: CGFloat) -> (CGPoint) -> CGFloat {
-            StoneGeometry.halfSpace(through: CGPoint(x: gx, y: height / 2),
-                                    direction: CGPoint(x: lean * height, y: -height), side: side, gap: gutter)
-        }
-        let reach = hypot(width, height)
-        return [
-            StoneGeometry.piece(rockSdf, cuts: [cut(g1, 1)],
-                                centre: CGPoint(x: w3 / 2, y: height / 2), fillet: 20, reach: reach),
-            StoneGeometry.piece(rockSdf, cuts: [cut(g1, -1), cut(g2, 1)],
-                                centre: CGPoint(x: g1 + w3 / 2 + gutter / 2, y: height / 2), fillet: 20, reach: reach),
-            StoneGeometry.piece(rockSdf, cuts: [cut(g2, -1)],
-                                centre: CGPoint(x: g2 + w3 / 2 + gutter / 2, y: height / 2), fillet: 20, reach: reach)
-        ]
+        StoneGeometry.split(size: CGSize(width: width, height: height), count: 3, seed: "camera|fixed|rock|q11")
     }
 
 }

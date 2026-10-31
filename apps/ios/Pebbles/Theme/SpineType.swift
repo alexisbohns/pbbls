@@ -142,6 +142,37 @@ extension SpineType.Style {
                                   scaling: .text(.footnote))
     static let still = Self(size: 15, weight: 380, italic: true, scaling: .text(.subheadline))
 
+    // MARK: - Home and You (#1382)
+
+    // Ysabeau: the editorial voice (D22). Figures are always Ysabeau, lining
+    // where a number stands alone; the dates keep the face's old-style default.
+    static let homeDateline = Self(size: 17, weight: 540, scaling: .text(.body))
+    static let greeting = Self(size: 40, weight: 270, trackingEm: -0.024, lineHeight: 41.6, scaling: .text(.largeTitle))
+    static let greetingLine = Self(size: 21, weight: 360, italic: true, scaling: .text(.title3))
+    static let sectionTitle = Self(size: 30, weight: 300, trackingEm: -0.018, scaling: .text(.title))
+    static let sectionFigure = Self(size: 30, weight: 300, features: [.lining], scaling: .text(.title))
+    static let sectionFigureWord = Self(size: 19, weight: 380, italic: true, scaling: .text(.body))
+    static let wrapCount = Self(size: 34, weight: 280, features: [.lining], scaling: .text(.largeTitle))
+    static let wrapMonth = Self(size: 23, weight: 400, scaling: .text(.title2))
+    static let wrapYear = Self(size: 16, weight: 400, italic: true, scaling: .text(.body))
+    static let counterFigure = Self(size: 36, weight: 280, trackingEm: -0.025, features: [.lining], scaling: .text(.largeTitle))
+    static let memberSince = Self(size: 19, weight: 380, italic: true, scaling: .text(.body))
+    static let labKicker = Self(size: 15, weight: 400, italic: true, scaling: .text(.subheadline))
+    static let labTitle = Self(size: 26, weight: 340, scaling: .text(.title2))
+    static let labDate = Self(size: 15, weight: 500, scaling: .text(.subheadline))
+    static let communityTitle = Self(size: 22, weight: 420, scaling: .text(.title2))
+
+    // Inclusive Sans: every row you read (D22). Labels at 12 or more, body at 15 or more.
+    static let actionLabel = Self(size: 15, weight: 600, lineHeight: 17.25, scaling: .text(.subheadline), face: .inclusive)
+    static let rowTitle = Self.inclusive(17, 600)
+    static let rowTitleDone = Self.inclusive(17, 500)
+    static let rowLine = Self(size: 15, weight: 400, lineHeight: 21, scaling: .text(.subheadline), face: .inclusive)
+    static let rowLabel = Self.inclusive(15, 600)
+    static let badgeLabel = Self.inclusive(12.5, 500)
+    static let labEntry = Self.inclusive(16, 600)
+    static let labEntryLine = Self.inclusive(14, 400)
+    static let pillLabel = Self.inclusive(15, 600)
+
     // MARK: - Ranks that take a name's cut
 
     static func contentsName(_ cut: SpineType.Cut) -> Self {
