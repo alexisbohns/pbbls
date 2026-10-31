@@ -1609,3 +1609,23 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Web (#1313) flips its own surface in `migrated` the same way.
 - **Supersedes / Superseded-by:** narrows the package spec's D9 for `INLINE` (above); extends the 2026-10-30 iOS entry's marker and lint to Android, no change to their rules.
 - **Refs:** #1315, `docs/superpowers/specs/2026-10-30-android-icon-migration-design.md` (D1–D11), `docs/superpowers/plans/2026-10-30-android-icon-migration.md`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsIconSize.kt`, `packages/icons/scripts/lib/replaces.ts`.
+
+## 2026-10-31 — Android gets a fifth tab, Home, first; the app opens on it (#1383)
+
+- **Status:** taken
+- **Scope:** android, ui
+- **Context:**
+  - The 2026-09-21 entry gave Android four tabs (Path, People, Collections, You), Path first and the start route. iOS converged on the same four (#903, 2026-10-20), then added a Home tab first in #1255; Android had no landing surface for the greeting, the month, the quick actions, the first five, the wraps or About Pebbles.
+  - The maintainer approved spec D1 on 2026-10-31 (`docs/superpowers/specs/2026-10-31-android-home-and-you-design.md`).
+- **Decision:**
+  - `PebblesKey.Home : TopLevelKey` joins `PebblesKey.tabs` first: **Home, Path, People, Collections, You**. It is the start route, so `rootAt(Home)` is the auth gate's signed-in root, onboarding is pushed over Home, and back exits through Home.
+  - Icon `home` / `home.active`, label "Home" / "Accueil". The New pebble FAB stays a Path-only control.
+  - No splash hold for Home: the greeting needs no read, and Android's splash already lets go on auth (iOS's 1.5 s hand-off has nothing to cover).
+  - Tests and the baseline-profile journey that assumed Path is where the app opens now tap the Path tab first (`AppUiTest.openPath()`, `JourneyTags.TAB_PATH`).
+- **Why:** iOS has had Home since #1255, and the 1:1 rule is about behaviour; a Home that lived inside Path, or as a page above it, would not be iOS's Home. M3 allows five bar destinations, and the bar is where Android users look for one. The labels already ellipsize at 200 % font, which five tabs keep.
+- **Consequences:**
+  - The IA divergence narrows to presentation: Android has an M3 bar (a rail on large screens), iOS a floating tab bar; both have the same five tabs. The divergence row of `apps/android/CLAUDE.md` says so.
+  - A test or journey that means "the Path" must open the Path tab; landing on the Path after sign-in is no longer a given.
+  - The five-tab bar and rail re-record their screenshot references (`NavigationSuiteScreenshots`, the `ListDetailScreenshots` rail).
+- **Supersedes / Superseded-by:** Supersedes the four-tab half of **2026-09-21 — Android gets a four-tab bottom bar, a deliberate break from the 1:1 iOS mirror (#852)** (its bar, back and visibility rules stand). Does not amend any cross-surface contract.
+- **Refs:** #1383, #1255, #852, #903, `docs/superpowers/specs/2026-10-31-android-home-and-you-design.md` (D1), `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/PebblesKeys.kt`, `apps/android/app/src/main/kotlin/app/pbbls/android/RootScreen.kt`, `apps/android/app/src/main/kotlin/app/pbbls/android/features/home/`.
