@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Plus } from "lucide-react"
+import { PlusCircle } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import type { Mark, Soul } from "@/lib/types"
 import { SoulGlyphThumbnail } from "@/components/souls/SoulGlyphThumbnail"
@@ -82,7 +83,7 @@ export function PebbleEditSoulsGrid({
             className="flex w-full items-center gap-3 rounded-2xl border-2 border-dashed border-muted-foreground/30 px-3 py-2.5 text-left text-muted-foreground transition-colors hover:border-muted-foreground/60 hover:text-foreground active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <span className="grid size-10 shrink-0 place-items-center">
-              <Plus className="size-5" aria-hidden />
+              <PlusCircle className={PBBLS_ICON_SIZE.row} />
             </span>
             <span className="text-xs font-medium uppercase tracking-[0.1em]">
               {t("addSoul")}
