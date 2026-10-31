@@ -501,8 +501,10 @@
 
 /* ============================================================
    Material 3 (M3-evo, seed #CE7E8A) — the bridge (#986)
-   Only /sandbox/design applies `.m3`, and it removes the color-world class
-   first, so this never stacks with a world. The role values come from the
+   /sandbox/design applies `.m3` to <html>, and it removes the color-world
+   class first, so this never stacks with a world there. Home and You render an
+   `.m3` island (#1384): the same tokens, redeclared on the island element, win
+   over the world's inherited values below it. The role values come from the
    generated m3-theme.css; this block points every shadcn token at a role so
    untuned components render M3 as-is.
 
@@ -520,7 +522,7 @@
    chart-1…5                 → primary, tertiary, secondary, error, outline
    sidebar-*                 → surface-container, primary, secondary-container
    ============================================================ */
-:root.m3 {
+:root.m3, :root .m3 {
   --app-font-sans: var(--m3-font-plain);
   --radius: 0.75rem; /* M3 medium (12px); shadcn's rounded-* scale derives from it */
 
