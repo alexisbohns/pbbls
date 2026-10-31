@@ -36,7 +36,7 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.model.LabMarkdown
 import app.pbbls.android.core.model.Log
-import app.pbbls.android.features.lab.components.LabMarkdownBody
+import app.pbbls.android.core.ui.MarkdownBody
 import coil3.compose.AsyncImage
 import java.util.Locale
 
@@ -162,7 +162,7 @@ fun AnnouncementDetailContent(
         )
         val body = log.body(locale)
         if (!body.isNullOrEmpty()) {
-            LabMarkdownBody(blocks = LabMarkdown.parse(body))
+            MarkdownBody(blocks = LabMarkdown.parse(body))
         }
     }
 }

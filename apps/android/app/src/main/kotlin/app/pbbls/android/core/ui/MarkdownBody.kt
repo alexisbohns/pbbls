@@ -1,4 +1,4 @@
-package app.pbbls.android.features.lab.components
+package app.pbbls.android.core.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,7 +30,7 @@ import app.pbbls.android.core.model.LabMarkdown
  * (`LinkAnnotation.Url` → `LocalUriHandler`).
  */
 @Composable
-fun LabMarkdownBody(
+fun MarkdownBody(
     blocks: List<LabMarkdown.Block>,
     modifier: Modifier = Modifier,
 ) {
