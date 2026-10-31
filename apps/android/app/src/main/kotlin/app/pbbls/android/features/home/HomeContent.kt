@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
@@ -53,7 +56,7 @@ private val SECTION_GAP = 44.dp
  * its top shows rather than being inserted above the list's anchor.
  *
  * Under the quick actions, the camera moment's progress and failure lines ([camera], #1383 D7); its
- * piece is off while it saves (D6).
+ * piece is off while it saves (D6). [snackbar] hosts "Moment saved · 14:32" once one lands.
  *
  * The date is formatted in the app's locale, read here in composition (D22), never `Locale.getDefault()`.
  */
@@ -69,11 +72,16 @@ fun HomeContent(
     hapticsOn: () -> Boolean = { true },
     camera: CameraMomentUiState = CameraMomentUiState(),
     onDismissCameraError: () -> Unit = {},
+    snackbar: SnackbarHostState? = null,
 ) {
     val resources = LocalResources.current
     val locale = LocalConfiguration.current.locales[0]
     val greeting = remember(now, state.name, resources, locale) { HomeGreeting.lines(now, state.name, resources, locale) }
-    PebblesScreen(modifier = modifier.testTag(JourneyTags.HOME)) {
+    PebblesScreen(
+        modifier = modifier.testTag(JourneyTags.HOME),
+        // The camera moment's snackbar (D7), at the foot of the window over the page.
+        overlay = { snackbar?.let { SnackbarHost(it, Modifier.align(Alignment.BottomCenter)) } },
+    ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),

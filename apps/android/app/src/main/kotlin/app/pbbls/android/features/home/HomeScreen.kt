@@ -5,26 +5,37 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalResources
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.HomeShortcut
 import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.ui.HomeMonthSlot
 import app.pbbls.android.features.home.camera.CameraUnavailableDialog
+import app.pbbls.android.features.home.camera.cameraToastTime
 import app.pbbls.android.features.home.quick.QuickMomentExit
 import app.pbbls.android.features.home.quick.QuickMomentSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 private const val TAG = "home"
@@ -40,7 +51,8 @@ private const val TAG = "home"
  * A quick action is stored as the last used one, then opens its flow (#1383 D7): the camera moment
  * (the system camera through `TakePicture`) and the quick moment sheet are Home's own, held by
  * [moments]; [onPebble] opens Capture chained into Complete. A quick moment saved with "Save & open"
- * calls [onOpenComplete] with its id.
+ * calls [onOpenComplete] with its id. A saved camera moment shows a snackbar, "Moment saved · 14:32",
+ * whose "Name it" calls [onNameMoment] (Edit moment); `Long`, which TalkBack extends.
  */
 @Composable
 fun HomeScreen(
@@ -49,6 +61,7 @@ fun HomeScreen(
     onOpenPath: () -> Unit,
     onPebble: () -> Unit,
     onOpenComplete: (momentId: String) -> Unit,
+    onNameMoment: (momentId: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     moments: HomeMomentsViewModel = hiltViewModel(),
@@ -58,6 +71,10 @@ fun HomeScreen(
     val camera by moments.camera.state.collectAsStateWithLifecycle()
     val haptic = rememberTapHaptics { viewModel.hapticsOn }
     val takePicture = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture(), moments.camera::onResult)
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val resources = LocalResources.current
+    val locale = LocalConfiguration.current.locales[0]
     ObserveUiEffects(moments.effects) { effect ->
         when (effect) {
             is HomeMomentEffect.QuickSaved -> {
@@ -72,7 +89,22 @@ fun HomeScreen(
                     Log.e(TAG, "no activity for the camera after all", e)
                     moments.camera.onLaunchFailed()
                 }
-            is HomeMomentEffect.CameraLanded -> viewModel.onMomentSaved()
+            is HomeMomentEffect.CameraLanded -> {
+                viewModel.onMomentSaved()
+                val time = cameraToastTime(effect.shutter, ZoneId.systemDefault(), locale)
+                // A snackbar is UI, not a write: the composition's scope is the right one for it.
+                scope.launch {
+                    // A newer moment replaces the one still showing.
+                    snackbar.currentSnackbarData?.dismiss()
+                    val result =
+                        snackbar.showSnackbar(
+                            message = resources.getString(R.string.home_toast_saved, time),
+                            actionLabel = resources.getString(R.string.home_toast_name),
+                            duration = SnackbarDuration.Long,
+                        )
+                    if (result == SnackbarResult.ActionPerformed) onNameMoment(effect.momentId)
+                }
+            }
         }
     }
     LifecycleResumeEffect(viewModel, moments) {
@@ -106,6 +138,7 @@ fun HomeScreen(
         hapticsOn = { viewModel.hapticsOn },
         camera = camera,
         onDismissCameraError = moments.camera::dismissError,
+        snackbar = snackbar,
     )
     if (camera.isUnavailable) CameraUnavailableDialog(onDismiss = moments.camera::dismissUnavailable)
     quickForm?.let { form ->
