@@ -37,6 +37,12 @@ interface PathStatsServicing {
 
     val assiduity: List<Boolean>?
 
+    /** The caller's carved glyphs (`get_profile_engagement.glyphs_carved`); null until served. */
+    val glyphsCarved: Int?
+
+    /** The glyphs the caller owns from others (`glyphs_owned`); null until served. */
+    val glyphsOwned: Int?
+
     val hasLoaded: Boolean
 
     /** Idempotent: a no-op once loaded, so every screen may call it on open. */
@@ -79,6 +85,12 @@ class PathStatsService
             private set
 
         override var assiduity: List<Boolean>? by mutableStateOf(null)
+            private set
+
+        override var glyphsCarved: Int? by mutableStateOf(null)
+            private set
+
+        override var glyphsOwned: Int? by mutableStateOf(null)
             private set
 
         override var hasLoaded: Boolean by mutableStateOf(false)
@@ -162,6 +174,8 @@ class PathStatsService
                             rows.firstOrNull()?.let {
                                 daysPracticed = it.daysPracticed
                                 assiduity = it.assiduity
+                                glyphsCarved = it.glyphsCarved
+                                glyphsOwned = it.glyphsOwned
                             }
                         },
                         onFailure = { Log.e(TAG, "engagement fetch failed", it) },

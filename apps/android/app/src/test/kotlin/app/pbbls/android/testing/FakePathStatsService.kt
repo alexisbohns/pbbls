@@ -29,6 +29,10 @@ class FakePathStatsService(
 
     override var assiduity: List<Boolean>? by mutableStateOf(null)
 
+    override var glyphsCarved: Int? by mutableStateOf(null)
+
+    override var glyphsOwned: Int? by mutableStateOf(null)
+
     override var hasLoaded: Boolean by mutableStateOf(false)
 
     var loadCount = 0
