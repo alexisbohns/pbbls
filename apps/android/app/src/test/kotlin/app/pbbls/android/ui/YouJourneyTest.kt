@@ -3,9 +3,11 @@ package app.pbbls.android.ui
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -19,6 +21,7 @@ import org.junit.Test
  * What leaves You keeps a home (#1383, spec D14), through the real UI: Connections
  * is reached from People's top bar ("Circle", where iOS has it), and Log out from
  * Settings. Both land before the You rebuild, so no build of the stack orphans them.
+ * And You's glyph rows open the store on their own shelf (D17).
  */
 @HiltAndroidTest
 class YouJourneyTest : AppUiTest() {
@@ -43,6 +46,18 @@ class YouJourneyTest : AppUiTest() {
         onText(R.string.connections_title).assertIsDisplayed()
         // A push inside People, not a tab switch.
         onTab(R.string.tab_people).assertIsSelected()
+    }
+
+    @Test
+    fun `Owned glyphs opens the store on the Owned tab`() {
+        signedIn()
+        onTab(R.string.tab_you).performClick()
+
+        onText(R.string.you_glyphs_owned).performScrollTo().performClick()
+
+        onText(R.string.glyphs_title).assertIsDisplayed()
+        compose.onNode(hasText(string(R.string.glyph_tab_owned)) and isToggleable()).assertIsOn()
+        onText(R.string.glyphs_empty_owned_title).assertIsDisplayed()
     }
 
     @Test

@@ -127,17 +127,10 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     entry<PebblesKey.You>(metadata = NavTransitions.forKey(PebblesKey.You)) {
         ProfileScreen(
-            onBack = navigator::goBack,
-            onSignOut = onSignOut,
-            onOpenSouls = { navigator.navigate(PebblesKey.People) },
-            onOpenCollections = { navigator.navigate(PebblesKey.Collections) },
-            onOpenCollection = { navigator.navigate(PebblesKey.CollectionDetail(it.id)) },
             onOpenGlyphs = { navigator.navigate(PebblesKey.Glyphs(it)) },
-            onOpenConnections = { navigator.navigate(PebblesKey.Connections) },
             onOpenLab = { navigator.navigate(PebblesKey.Lab) },
             onOpenAchievements = { navigator.navigate(PebblesKey.Achievements) },
             onOpenSettings = { navigator.navigate(PebblesKey.Settings) },
-            onCreateCollection = { navigator.navigate(PebblesKey.CollectionForm()) },
         )
     }
 

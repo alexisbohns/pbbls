@@ -218,7 +218,6 @@
     <string name="ripple_badge_active">Ripple level %1$d, active today</string>
     <string name="ripple_badge_inactive">Ripple level %1$d, inactive today</string>
     <!-- ==== Profile + Settings (sub-project C). "Pebbles"/"Karma"/"Ripples" are product vocabulary. ==== -->
-    <string name="profile_title">Profile</string>
     <string name="profile_back_a11y">Back</string>
     <string name="profile_member_since">Member since %1$s</string>
     <string name="profile_ripples_level">Ripples Level %1$d</string>

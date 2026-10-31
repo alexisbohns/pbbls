@@ -12,6 +12,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
@@ -240,6 +241,12 @@ abstract class AppUiTest {
         @StringRes id: Int,
         vararg args: Any,
     ): String = context.getString(id, *args)
+
+    /**
+     * You, told by its settings stone: the page has no title since the rebuild (#1383, spec D14),
+     * and the stone is at its top, so it is on screen whenever You is.
+     */
+    protected fun onYou(): SemanticsNodeInteraction = compose.onNodeWithContentDescription(string(R.string.settings_title))
 
     /** The node showing the string [id] — one merged node, so the text must be unique on screen. */
     protected fun onText(

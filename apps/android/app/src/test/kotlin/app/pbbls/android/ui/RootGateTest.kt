@@ -135,7 +135,7 @@ class RootGateTest : AppUiTest() {
         launch()
         signIn()
         onText(R.string.tab_you).performClick()
-        onText(R.string.profile_title).assertIsDisplayed()
+        onYou().assertIsDisplayed()
 
         // A different account, with nothing on record, lands on the same
         // stack; NavDisplay's Back would take it from You to Home.
@@ -145,7 +145,7 @@ class RootGateTest : AppUiTest() {
 
         onText(R.string.consent_gate_title).assertIsDisplayed()
         acceptEveryConsent()
-        onText(R.string.profile_title).assertIsDisplayed()
+        onYou().assertIsDisplayed()
     }
 
     @Test

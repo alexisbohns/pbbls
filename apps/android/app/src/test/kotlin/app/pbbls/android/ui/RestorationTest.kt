@@ -35,7 +35,7 @@ class RestorationTest : AppUiTest() {
 
         onText(R.string.settings_title).assertIsDisplayed()
         pressBack()
-        onText(R.string.profile_title).assertIsDisplayed()
+        onYou().assertIsDisplayed()
     }
 
     /**
