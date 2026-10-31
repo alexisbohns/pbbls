@@ -1,6 +1,6 @@
 "use client"
 
-import { Lock, Users, Globe } from "lucide-react"
+import { Lock, UsersRound, Globe } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Visibility } from "@/lib/types"
@@ -8,7 +8,7 @@ import { SelectableItem } from "@/components/ui/SelectableItem"
 
 export const VISIBILITY_ICONS: Record<Visibility, LucideIcon> = {
   secret: Lock,
-  private: Users,
+  private: UsersRound,
   public: Globe,
 }
 
