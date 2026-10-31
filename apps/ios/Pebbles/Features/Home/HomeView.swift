@@ -101,7 +101,8 @@ struct HomeView: View {
             Text("home.camera.unavailableBody")
         }
         .sheet(item: $openWrap) { month in
-            HomeWrapSheet(monthId: month, lookups: lookups, model: model, onWeek: { _ in nav.go(.path) })
+            HomeWrapSheet(monthId: month, lookups: lookups, model: model,
+                          onWeek: { nav.go(.path, intent: .focusWeek($0)) })
         }
         .sheet(item: $taskSheet, onDismiss: {
             if let task = pendingTask {

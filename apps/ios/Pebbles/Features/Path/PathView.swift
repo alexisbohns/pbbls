@@ -32,6 +32,13 @@ struct PathView: View {
 
     private var service: MomentsService { MomentsService(client: supabase.client) }
 
+    /// Peeked until the pages exist, so a cold Path does not drop Home's week.
+    private func takeWeekIntent() {
+        guard case let .focusWeek(day)? = nav.peekIntent(for: .path), !model.pages.isEmpty else { return }
+        _ = nav.takeIntent(for: .path)
+        model.focus(weekStarting: day)
+    }
+
     var body: some View {
         content
             .toolbar(.hidden, for: .navigationBar)
@@ -50,6 +57,9 @@ struct PathView: View {
             }
             // Path reselected at its root (#903 §4): "top of Path" means now.
             .onChange(of: nav.scrollToTop[.path, default: 0]) { model.focusCurrentWeek() }
+            // Home asked for a week (#1382 D9): taken on arrival, or once the pages land.
+            .onAppear { takeWeekIntent() }
+            .onChange(of: model.pages.isEmpty) { takeWeekIntent() }
             // #903 D5: a moment changed from another tab or a sheet.
             .onChange(of: revision.value) {
                 guard revision.changedOutside(.path) else { return }
