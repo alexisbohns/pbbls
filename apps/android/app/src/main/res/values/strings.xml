@@ -679,27 +679,14 @@
     <!-- Achievements (M48) -->
     <string name="achievements_title">Achievements</string>
     <string name="achievements_card_subtitle">Badges along your path</string>
-    <string name="achievements_shelf_count">%1$d earned</string>
+    <plurals name="achievements_shelf_count">
+        <item quantity="one">%1$d earned</item>
+        <item quantity="other">%1$d earned</item>
+    </plurals>
     <string name="achievement_moment_eyebrow">Achievement unlocked</string>
     <string name="achievement_moment_next">Next</string>
     <string name="achievement_moment_done">Nice</string>
     <string name="achievement_moment_progress">%1$d of %2$d</string>
-    <string name="achievements_load_error">Couldn\'t load your achievements. Please try again.</string>
-    <string name="achievement_locked">Locked</string>
-    <string name="achievement_unlocked_on">Unlocked %1$s</string>
-    <string name="achievement_group_pebble_count">Pebbles</string>
-    <string name="achievement_group_emotion_first">Emotions</string>
-    <string name="achievement_group_domain_first">Domains</string>
-    <string name="achievement_group_first_collection">Collections</string>
-    <string name="achievement_group_first_glyph">Glyphs</string>
-    <string name="achievement_group_first_soul">Souls</string>
-    <string name="achievement_group_glyph_count">Carving</string>
-    <string name="achievement_group_glyph_sales">Market</string>
-    <string name="achievement_group_first_moment">First moment</string>
-    <string name="achievement_group_first_pebble">First pebble</string>
-    <string name="achievement_group_first_five">The blue pebble</string>
-    <string name="achievement_group_first_stone">Six firsts</string>
-    <string name="achievement_group_set_complete">Complete sets</string>
     <plurals name="achievement_family_pebble_count_title">
         <item quantity="one">First pebble</item>
         <item quantity="other">%1$d pebbles</item>
@@ -881,6 +868,7 @@
     <string name="achievements_ceremony_domains_body">Every part of your life has a pebble in it.</string>
     <string name="achievements_ceremony_six_firsts_title">The six firsts</string>
     <string name="achievements_ceremony_six_firsts_body">Small, medium and large; lowlight, neutral and highlight.</string>
+    <string name="achievements_ceremony_error">Couldn\'t open the ceremony. Please try again.</string>
     <string name="achievements_error_title">Couldn\'t load your achievements</string>
     <string name="achievements_error_body">Check your connection and try again.</string>
     <string name="achievements_error_retry">Try again</string>
@@ -920,11 +908,13 @@
     <string name="achievements_unknown_emotion">An emotion</string>
     <string name="achievements_unknown_domain">A domain</string>
     <string name="achievements_unknown_family">Other emotions</string>
-    <string name="achievements_explorer_a11y">Explorer: first five %1$s, six firsts %2$s, 25 pebbles %3$s, domains %4$s, emotions %5$s.</string>
-    <string name="achievements_emotions_a11y">Emotions: %1$s met.</string>
-    <string name="achievements_domains_a11y">Domains: %1$s. %2$s</string>
-    <string name="achievements_pebbles_a11y">Pebbles: %1$s. Glyphs carved: %2$s. Glyph sales: %3$s.</string>
-    <string name="achievements_disc_a11y">%1$d. On the rim: %2$s. On the inner circle: %3$s. On their way: %4$s.</string>
+    <string name="achievements_explorer_a11y">Explorer: %1$s.</string>
+    <string name="achievements_emotions_a11y">Emotions, %1$s of %2$s.</string>
+    <string name="achievements_domains_a11y">Domains, %1$s of %2$s.</string>
+    <string name="achievements_pebbles_a11y">Pebbles. %1$s</string>
+    <string name="achievements_glyphs_carved_a11y">Glyphs carved: %1$s.</string>
+    <string name="achievements_glyph_sales_a11y">Glyph sales: %1$s.</string>
+    <string name="achievements_disc_a11y">The year %1$s. On the rim: %2$s. On the inner disc: %3$s. On their way: %4$s.</string>
     <string name="achievements_none">none</string>
     <string name="achievements_month_a11y">%1$s. Days with a moment: %2$s. With a pebble: %3$s. %4$s.</string>
     <string name="achievements_weeks_filled">Full weeks filled: %1$s of %2$s</string>
@@ -935,6 +925,19 @@
     <string name="achievements_not_yet_a11y">Not yet: %1$s</string>
     <string name="achievements_open_pebble">Open the pebble</string>
     <string name="achievements_open_sheet">Open</string>
-    <string name="achievements_ready">Ready</string>
-    <string name="achievements_ready_a11y">%1$s: complete. Open the ceremony.</string>
+    <string name="achievements_ready">ready</string>
+    <string name="achievements_ready_a11y">%1$s: the ceremony is ready.</string>
+    <string name="achievements_header_a11y">%1$s, %2$s</string>
+    <string name="achievements_a11y_join">"; "</string>
+    <string name="achievements_ring_first_five">the first five</string>
+    <string name="achievements_ring_six_firsts">the six firsts</string>
+    <string name="achievements_ring_twenty_five">25 pebbles</string>
+    <string name="achievements_ring_domains">domains</string>
+    <string name="achievements_ring_emotions">emotions</string>
+    <string name="achievements_ring_done">%1$s, done</string>
+    <string name="achievements_ring_part">%1$s, %2$s of %3$s</string>
+    <plurals name="achievements_new_count">
+        <item quantity="one">%1$s new.</item>
+        <item quantity="other">%1$s new.</item>
+    </plurals>
 </resources>

@@ -1,7 +1,6 @@
 package app.pbbls.android.testing
 
 import app.pbbls.android.core.data.AchievementRecord
-import app.pbbls.android.core.data.AchievementUnlockRecord
 import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.model.achievements.AchievementCard
 import app.pbbls.android.core.model.achievements.AchievementsPage
@@ -9,18 +8,17 @@ import app.pbbls.android.core.model.achievements.CeremonyPull
 import app.pbbls.android.core.model.achievements.CompletionStack
 import app.pbbls.android.core.model.achievements.decodeAchievementsPage
 import kotlinx.coroutines.CompletableDeferred
+import java.time.Instant
 import java.time.ZoneId
 
 /**
- * In-memory [AchievementsServicing] (#849, #1307): the grid's catalog and unlocks, and the page's
+ * In-memory [AchievementsServicing] (#849, #1307): the catalog, and the page's
  * read, device copy, seen marks and pulls, drivable without a live project. See
  * [PebblesTestHarness] for where these live and why.
  */
 class FakeAchievementsService(
     /** What [loadCatalog] returns on a successful call. Settable mid-test. */
     var catalog: List<AchievementRecord> = emptyList(),
-    /** What [loadUnlocks] returns on a successful call. Settable mid-test. */
-    var unlocks: List<AchievementUnlockRecord> = emptyList(),
     /** What [page] returns. An empty page by default: every card hidden. */
     var served: AchievementsPage = decodeAchievementsPage("{}"),
     /** What [cachedPage] returns: the device's copy. */
@@ -50,15 +48,24 @@ class FakeAchievementsService(
     /** The zone of every [page], [cachedPage] and [pullCeremony] call, in order. */
     val zones = mutableListOf<ZoneId>()
 
+    /** What [keptAt] answers: the page's age for the shelf (D18). */
+    var keptAt: Instant? = null
+
     /** When set, [page] waits for it: a test can observe what shows before the read answers. */
     var pageGate: CompletableDeferred<Unit>? = null
+
+    /**
+     * One gate per [page] call, taken in order ahead of [pageGate]: a test can land overlapping
+     * reads out of order. Each read answers what [served] was when it was asked.
+     */
+    val pageGates = ArrayDeque<CompletableDeferred<Unit>>()
 
     private val armed = ArmedFailure()
     private val pageFailure = ArmedFailure()
     private val pullFailure = ArmedFailure()
 
     /**
-     * Thrown by the next [loadCatalog] or [loadUnlocks], then cleared.
+     * Thrown by the next [loadCatalog], then cleared.
      *
      * Deliberately not armed on [checkIgnoringFailure]: its contract is that it
      * swallows everything, so a fake that could throw from it would let a test
@@ -91,11 +98,6 @@ class FakeAchievementsService(
         return catalog
     }
 
-    override suspend fun loadUnlocks(): List<AchievementUnlockRecord> {
-        armed.fire()
-        return unlocks
-    }
-
     override suspend fun checkIgnoringFailure() {
         checkCount += 1
         calls += "check"
@@ -105,19 +107,27 @@ class FakeAchievementsService(
         fireCheckCount += 1
     }
 
+    /** What [isFiringCheck] says: a mutation-path check in flight. */
+    var firingCheck = false
+
+    override val isFiringCheck: Boolean get() = firingCheck
+
     override suspend fun page(zone: ZoneId): AchievementsPage {
         pageCalls += 1
         calls += "page"
         zones += zone
-        pageGate?.await()
+        val answer = served
+        (pageGates.removeFirstOrNull() ?: pageGate)?.await()
         pageFailure.fire()
-        return served
+        return answer
     }
 
     override suspend fun cachedPage(zone: ZoneId): AchievementsPage? {
         zones += zone
         return kept
     }
+
+    override suspend fun keptAt(zone: ZoneId): Instant? = keptAt
 
     override fun markSeen(card: AchievementCard) {
         seen += card

@@ -1,5 +1,6 @@
 package app.pbbls.android.core.data
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -14,12 +15,19 @@ import javax.inject.Singleton
  *
  * [record] carries the catalog row so the card can resolve its localized copy
  * in the composition (`achievementTitle` is `@Composable`); it is null only
- * when a check raced a catalog change, in which case [slug] headlines the card.
+ * when a check raced a catalog change, in which case [slug] headlines the card. A karma of 0
+ * shows no karma line (a pull whose answer was lost plays without one).
  */
 data class AchievementMomentCard(
     val slug: String,
     val record: AchievementRecord?,
     val karmaGranted: Int,
+    /**
+     * A title and body the caller names, ahead of [record]'s: the achievements page's ceremony
+     * (#1307) is titled by its set, as iOS's `ceremonyCard` titles it, not by a catalog row.
+     */
+    @StringRes val titleRes: Int? = null,
+    @StringRes val bodyRes: Int? = null,
 )
 
 /**
@@ -43,9 +51,10 @@ data class AchievementMoment(
  * where karma flashes a pastille that times out, an unlock opens a chained card
  * per badge that the user taps through, so there is no auto-dismiss here.
  *
- * Only the mutation path celebrates: the screen-open call in `AchievementsScreen`
- * is the retroactive grant and can return a veteran's whole history at once, so
- * it renders in the grid instead of chaining twenty cards.
+ * Only the mutation path and a pulled ceremony celebrate: the screen-open call
+ * on the achievements page (and the Profile shelf's) is the retroactive grant and
+ * can return a veteran's whole history at once, so it shows on the page instead
+ * of chaining twenty cards.
  */
 @Singleton
 class AchievementNotificationService

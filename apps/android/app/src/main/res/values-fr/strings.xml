@@ -672,27 +672,15 @@
     <!-- Achievements (M48) -->
     <string name="achievements_title">Succès</string>
     <string name="achievements_card_subtitle">Tes badges le long du chemin</string>
-    <string name="achievements_shelf_count">%1$d décrochés</string>
+    <plurals name="achievements_shelf_count">
+        <item quantity="one">%1$d décroché</item>
+        <item quantity="many">%1$d décrochés</item>
+        <item quantity="other">%1$d décrochés</item>
+    </plurals>
     <string name="achievement_moment_eyebrow">Succès débloqué</string>
     <string name="achievement_moment_next">Suivant</string>
     <string name="achievement_moment_done">Super</string>
     <string name="achievement_moment_progress">%1$d sur %2$d</string>
-    <string name="achievements_load_error">Impossible de charger tes succès. Réessaie.</string>
-    <string name="achievement_locked">À débloquer</string>
-    <string name="achievement_unlocked_on">Débloqué le %1$s</string>
-    <string name="achievement_group_pebble_count">Galets</string>
-    <string name="achievement_group_emotion_first">Émotions</string>
-    <string name="achievement_group_domain_first">Domaines</string>
-    <string name="achievement_group_first_collection">Collections</string>
-    <string name="achievement_group_first_glyph">Glyphes</string>
-    <string name="achievement_group_first_soul">Âmes</string>
-    <string name="achievement_group_glyph_count">Gravure</string>
-    <string name="achievement_group_glyph_sales">Marché</string>
-    <string name="achievement_group_first_moment">Premier moment</string>
-    <string name="achievement_group_first_pebble">Premier galet</string>
-    <string name="achievement_group_first_five">Le galet bleu</string>
-    <string name="achievement_group_first_stone">Six premières fois</string>
-    <string name="achievement_group_set_complete">Ensembles complets</string>
     <plurals name="achievement_family_pebble_count_title">
         <item quantity="one">Premier galet</item>
         <item quantity="other">%1$d galets</item>
@@ -880,6 +868,7 @@
     <string name="achievements_ceremony_domains_body">Chaque part de ta vie a son galet.</string>
     <string name="achievements_ceremony_six_firsts_title">Les six premières fois</string>
     <string name="achievements_ceremony_six_firsts_body">Petit, moyen et grand ; creux, neutre et temps fort.</string>
+    <string name="achievements_ceremony_error">Impossible d\'ouvrir la cérémonie. Réessaie.</string>
     <string name="achievements_error_title">Impossible de charger tes succès</string>
     <string name="achievements_error_body">Vérifie ta connexion et réessaie.</string>
     <string name="achievements_error_retry">Réessayer</string>
@@ -920,11 +909,13 @@
     <string name="achievements_unknown_emotion">Une émotion</string>
     <string name="achievements_unknown_domain">Un domaine</string>
     <string name="achievements_unknown_family">Autres émotions</string>
-    <string name="achievements_explorer_a11y">Explorateur : cinq premières fois %1$s, six premières fois %2$s, 25 galets %3$s, domaines %4$s, émotions %5$s.</string>
-    <string name="achievements_emotions_a11y">Émotions : %1$s rencontrées.</string>
-    <string name="achievements_domains_a11y">Domaines : %1$s. %2$s</string>
-    <string name="achievements_pebbles_a11y">Galets : %1$s. Glyphes gravés : %2$s. Ventes de glyphes : %3$s.</string>
-    <string name="achievements_disc_a11y">%1$d. Au bord : %2$s. Sur le cercle intérieur : %3$s. En chemin : %4$s.</string>
+    <string name="achievements_explorer_a11y">Explorateur : %1$s.</string>
+    <string name="achievements_emotions_a11y">Émotions, %1$s sur %2$s.</string>
+    <string name="achievements_domains_a11y">Domaines, %1$s sur %2$s.</string>
+    <string name="achievements_pebbles_a11y">Galets. %1$s</string>
+    <string name="achievements_glyphs_carved_a11y">Glyphes gravés : %1$s.</string>
+    <string name="achievements_glyph_sales_a11y">Ventes de glyphes : %1$s.</string>
+    <string name="achievements_disc_a11y">L\'année %1$s. Au bord : %2$s. Sur le disque intérieur : %3$s. En chemin : %4$s.</string>
     <string name="achievements_none">aucun</string>
     <string name="achievements_month_a11y">%1$s. Jours avec un moment : %2$s. Avec un galet : %3$s. %4$s.</string>
     <string name="achievements_weeks_filled">Semaines complètes remplies : %1$s sur %2$s</string>
@@ -935,6 +926,20 @@
     <string name="achievements_not_yet_a11y">Pas encore : %1$s</string>
     <string name="achievements_open_pebble">Ouvrir le galet</string>
     <string name="achievements_open_sheet">Ouvrir</string>
-    <string name="achievements_ready">Prêt</string>
-    <string name="achievements_ready_a11y">%1$s : c\'est complet. Ouvrir la cérémonie.</string>
+    <string name="achievements_ready">prêt</string>
+    <string name="achievements_ready_a11y">%1$s : la cérémonie est prête.</string>
+    <string name="achievements_header_a11y">%1$s, %2$s</string>
+    <string name="achievements_a11y_join">" ; "</string>
+    <string name="achievements_ring_first_five">les cinq premières fois</string>
+    <string name="achievements_ring_six_firsts">les six premières fois</string>
+    <string name="achievements_ring_twenty_five">25 galets</string>
+    <string name="achievements_ring_domains">domaines</string>
+    <string name="achievements_ring_emotions">émotions</string>
+    <string name="achievements_ring_done">%1$s, c\'est fait</string>
+    <string name="achievements_ring_part">%1$s, %2$s sur %3$s</string>
+    <plurals name="achievements_new_count">
+        <item quantity="one">%1$s nouveauté.</item>
+        <item quantity="many">%1$s nouveautés.</item>
+        <item quantity="other">%1$s nouveautés.</item>
+    </plurals>
 </resources>

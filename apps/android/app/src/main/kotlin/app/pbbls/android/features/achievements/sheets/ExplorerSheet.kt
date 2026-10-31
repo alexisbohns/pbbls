@@ -77,6 +77,7 @@ fun ExplorerSheet(
     onOpenMoment: (String) -> Unit,
     onPull: (CompletionStack) -> Unit,
     modifier: Modifier = Modifier,
+    pulling: Boolean = false,
 ) {
     val copy = rememberAchievementsCopy()
     val colors = PebblesTheme.spine.colors
@@ -90,6 +91,7 @@ fun ExplorerSheet(
                         copy.string(R.string.achievements_ready),
                         copy.readyDescription(CompletionStack.SIX_FIRSTS),
                         { onPull(CompletionStack.SIX_FIRSTS) },
+                        enabled = !pulling,
                     )
                 }
             } else {

@@ -7,6 +7,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.core.ui.GlyphPickerSlot
+import app.pbbls.android.features.achievements.AchievementsScreen
 import app.pbbls.android.features.auth.AuthScreen
 import app.pbbls.android.features.connections.AcceptInviteScreen
 import app.pbbls.android.features.connections.ConnectionsScreen
@@ -27,7 +28,6 @@ import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.path.PebbleDetailScreen
 import app.pbbls.android.features.path.capture.CaptureFlowScreen
 import app.pbbls.android.features.path.complete.CompleteFlowScreen
-import app.pbbls.android.features.profile.AchievementsScreen
 import app.pbbls.android.features.profile.CollectionDetailScreen
 import app.pbbls.android.features.profile.CollectionFormScreen
 import app.pbbls.android.features.profile.CollectionsListScreen
@@ -175,7 +175,11 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     }
 
     entry<PebblesKey.Achievements>(metadata = NavTransitions.forKey(PebblesKey.Achievements)) {
-        AchievementsScreen(onBack = navigator::goBack)
+        AchievementsScreen(
+            onBack = navigator::goBack,
+            // A sheet's row opens its pebble: the held card, as the soul and collection details do.
+            onOpenMoment = { navigator.navigate(PebblesKey.PebbleDetail(it)) },
+        )
     }
 
     // ---- Modal covers promoted to entries (#852) ----

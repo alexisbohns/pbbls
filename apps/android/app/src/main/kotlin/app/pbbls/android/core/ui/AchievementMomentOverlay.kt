@@ -189,20 +189,19 @@ private fun MomentCard(
                     color = colors.onSurfaceVariant,
                 )
                 Text(
-                    text = card.record?.let { achievementTitle(it) } ?: card.slug,
+                    text = card.titleRes?.let { stringResource(it) } ?: card.record?.let { achievementTitle(it) } ?: card.slug,
                     style = type.titleMediumEmphasized,
                     color = colors.onSurface,
                     textAlign = TextAlign.Center,
                 )
-                card.record?.let { record ->
-                    achievementDescription(record)?.let { description ->
-                        Text(
-                            text = description,
-                            style = type.bodyMedium,
-                            color = colors.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
+                val description = card.bodyRes?.let { stringResource(it) } ?: card.record?.let { achievementDescription(it) }
+                description?.let {
+                    Text(
+                        text = it,
+                        style = type.bodyMedium,
+                        color = colors.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
                 }
             }
 

@@ -15,9 +15,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
@@ -179,22 +181,34 @@ fun ReadyMark(
     description: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val colors = PebblesTheme.spine.colors
     TextButton(
         onClick = onClick,
+        enabled = enabled,
         modifier =
-            modifier.heightIn(min = SpineLayoutTokens.TOUCH_MIN).clearAndSetSemantics {
-                contentDescription = description
-                role = Role.Button
-                onClick {
-                    onClick()
-                    true
-                }
-            },
+            modifier
+                .heightIn(min = SpineLayoutTokens.TOUCH_MIN)
+                .alpha(if (enabled) 1f else DISABLED_MARK_ALPHA)
+                .clearAndSetSemantics {
+                    contentDescription = description
+                    role = Role.Button
+                    if (enabled) {
+                        onClick {
+                            onClick()
+                            true
+                        }
+                    } else {
+                        disabled()
+                    }
+                },
     ) {
         Canvas(Modifier.size(6.dp)) { drawCircle(colors.ink) }
         Spacer(Modifier.width(7.dp))
         Text(label, style = PebblesTheme.spine.type.cardHint, color = colors.ink)
     }
 }
+
+/** A ready mark waiting on another pull: half seen, as iOS dims it. */
+private const val DISABLED_MARK_ALPHA = 0.5f

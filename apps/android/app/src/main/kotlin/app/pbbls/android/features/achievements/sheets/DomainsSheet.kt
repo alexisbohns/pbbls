@@ -47,6 +47,7 @@ fun DomainsSheet(
     onOpenMoment: (String) -> Unit,
     onPull: (CompletionStack) -> Unit,
     modifier: Modifier = Modifier,
+    pulling: Boolean = false,
 ) {
     val copy = rememberAchievementsCopy()
     val colors = PebblesTheme.spine.colors
@@ -61,6 +62,7 @@ fun DomainsSheet(
                         copy.string(R.string.achievements_ready),
                         copy.readyDescription(CompletionStack.DOMAINS),
                         { onPull(CompletionStack.DOMAINS) },
+                        enabled = !pulling,
                     )
                 }
             } else {

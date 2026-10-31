@@ -73,26 +73,6 @@ fun achievementDescription(record: AchievementRecord): String? {
     }
 }
 
-/** Group heading for a family section; unknown families show their raw value. */
-@Composable
-fun achievementGroupName(family: String): String =
-    when (family) {
-        "pebble_count" -> stringResource(R.string.achievement_group_pebble_count)
-        "emotion_first" -> stringResource(R.string.achievement_group_emotion_first)
-        "domain_first" -> stringResource(R.string.achievement_group_domain_first)
-        "first_collection" -> stringResource(R.string.achievement_group_first_collection)
-        "first_glyph" -> stringResource(R.string.achievement_group_first_glyph)
-        "first_soul" -> stringResource(R.string.achievement_group_first_soul)
-        "glyph_count" -> stringResource(R.string.achievement_group_glyph_count)
-        "glyph_sales" -> stringResource(R.string.achievement_group_glyph_sales)
-        "first_moment" -> stringResource(R.string.achievement_group_first_moment)
-        "first_pebble" -> stringResource(R.string.achievement_group_first_pebble)
-        "first_five" -> stringResource(R.string.achievement_group_first_five)
-        "first_stone" -> stringResource(R.string.achievement_group_first_stone)
-        "set_complete" -> stringResource(R.string.achievement_group_set_complete)
-        else -> family
-    }
-
 /**
  * The mark per family: exactly iOS `Achievement.familySymbol` (Android icon
  * migration spec D4). Families with no drawing of their own (`domain_first`,

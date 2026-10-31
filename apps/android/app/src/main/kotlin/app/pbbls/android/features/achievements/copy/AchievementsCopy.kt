@@ -1,7 +1,9 @@
 package app.pbbls.android.features.achievements.copy
 
 import android.content.res.Resources
+import android.icu.text.ListFormatter
 import android.text.format.DateFormat
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
@@ -16,8 +18,10 @@ import app.pbbls.android.core.model.achievements.CountingSection
 import app.pbbls.android.core.model.achievements.Coverage
 import app.pbbls.android.core.model.achievements.DomainsSection
 import app.pbbls.android.core.model.achievements.EmotionsSection
+import app.pbbls.android.core.model.achievements.ExplorerRing
 import app.pbbls.android.core.model.achievements.ExplorerSection
 import app.pbbls.android.core.model.achievements.FirstStep
+import app.pbbls.android.core.model.achievements.MonthState
 import app.pbbls.android.core.model.achievements.Needs
 import app.pbbls.android.core.model.achievements.NextStep
 import app.pbbls.android.core.model.achievements.StoneKind
@@ -191,23 +195,9 @@ class AchievementsCopy(
 
     // ---- The ceremony and the error --------------------------------------------------------------
 
-    fun ceremonyTitle(stack: CompletionStack): String =
-        resources.getString(
-            when (stack) {
-                CompletionStack.EMOTIONS -> R.string.achievements_ceremony_emotions_title
-                CompletionStack.DOMAINS -> R.string.achievements_ceremony_domains_title
-                CompletionStack.SIX_FIRSTS -> R.string.achievements_ceremony_six_firsts_title
-            },
-        )
+    fun ceremonyTitle(stack: CompletionStack): String = resources.getString(ceremonyTitleRes(stack))
 
-    fun ceremonyBody(stack: CompletionStack): String =
-        resources.getString(
-            when (stack) {
-                CompletionStack.EMOTIONS -> R.string.achievements_ceremony_emotions_body
-                CompletionStack.DOMAINS -> R.string.achievements_ceremony_domains_body
-                CompletionStack.SIX_FIRSTS -> R.string.achievements_ceremony_six_firsts_body
-            },
-        )
+    fun ceremonyBody(stack: CompletionStack): String = resources.getString(ceremonyBodyRes(stack))
 
     fun errorTitle(): String = resources.getString(R.string.achievements_error_title)
 
@@ -258,55 +248,126 @@ class AchievementsCopy(
 
     // ---- Read aloud (spec §5) -------------------------------------------------------------------
 
+    /** The header read as one: "249 days, since Sunday, March 1, 2026"; the days alone without a `since`. */
+    fun headerDescription(
+        daysKept: Int,
+        since: LocalDate?,
+    ): String {
+        val days = number(daysKept) + " " + daysUnit(daysKept)
+        return since?.let { resources.getString(R.string.achievements_header_a11y, days, since(it)) } ?: days
+    }
+
+    /**
+     * "Explorer: the first five, done; …; emotions, 23 of 38. 3 new.": each ring the server calls
+     * done, or how many of how many; a ring whose section is absent is left out. The count of new
+     * adds the `new` flags of everything the wheel draws.
+     */
     fun explorerDescription(
         explorer: ExplorerSection,
         emotions: EmotionsSection?,
         domains: DomainsSection?,
-    ): String =
-        resources.getString(
-            R.string.achievements_explorer_a11y,
-            countOf(explorer.firstFive.count { it.done }, explorer.firstFive.size),
-            countOf(explorer.sixFirsts.count { it.done }, explorer.sixFirsts.size),
-            countOf(explorer.twentyFive?.count ?: 0, TWENTY_FIVE_SEATS),
-            countOf(domains?.count ?: 0, domains?.of ?: 0),
-            countOf(emotions?.count ?: 0, emotions?.of ?: 0),
-        )
+    ): String {
+        fun ring(
+            ring: ExplorerRing,
+            name: Int,
+            count: Int,
+            of: Int,
+        ) = if (ring in explorer.ringsDone) {
+            resources.getString(R.string.achievements_ring_done, resources.getString(name))
+        } else {
+            resources.getString(R.string.achievements_ring_part, resources.getString(name), number(count), number(of))
+        }
+        val rings =
+            listOfNotNull(
+                ring(
+                    ExplorerRing.FIRST_FIVE,
+                    R.string.achievements_ring_first_five,
+                    explorer.firstFive.count { it.done },
+                    explorer.firstFive.size,
+                ),
+                ring(
+                    ExplorerRing.SIX_FIRSTS,
+                    R.string.achievements_ring_six_firsts,
+                    explorer.sixFirsts.count { it.done },
+                    explorer.sixFirsts.size,
+                ),
+                explorer.twentyFive?.let {
+                    ring(
+                        ExplorerRing.TWENTY_FIVE,
+                        R.string.achievements_ring_twenty_five,
+                        it.count,
+                        TWENTY_FIVE_SEATS,
+                    )
+                },
+                domains?.let { ring(ExplorerRing.DOMAINS, R.string.achievements_ring_domains, it.count, it.of) },
+                emotions?.let { ring(ExplorerRing.EMOTIONS, R.string.achievements_ring_emotions, it.count, it.of) },
+            )
+        val fresh =
+            explorer.firstFive.count { it.isNew } +
+                explorer.sixFirsts.count { it.isNew } +
+                (if (explorer.twentyFive?.isNew == true) 1 else 0) +
+                (emotions?.seats?.count { it.isNew } ?: 0) +
+                (domains?.entered?.count { it.isNew } ?: 0)
+        val body = rings.joinToString(resources.getString(R.string.achievements_a11y_join))
+        return resources.getString(R.string.achievements_explorer_a11y, body) + newSuffix(fresh)
+    }
 
+    /** "Emotions, 23 of 38. 2 new." */
     fun emotionsDescription(emotions: EmotionsSection): String =
-        resources.getString(R.string.achievements_emotions_a11y, countOf(emotions.count, emotions.of))
+        resources.getString(R.string.achievements_emotions_a11y, number(emotions.count), number(emotions.of)) +
+            newSuffix(emotions.seats.count { it.isNew })
 
+    /** "Domains, 14 of 18. <what the coverage means> 1 new." */
     fun domainsDescription(domains: DomainsSection): String =
-        resources
-            .getString(
-                R.string.achievements_domains_a11y,
-                countOf(domains.count, domains.of),
-                coverage(domains.coverage).orEmpty(),
-            ).trim()
+        listOfNotNull(
+            resources.getString(R.string.achievements_domains_a11y, number(domains.count), number(domains.of)),
+            coverage(domains.coverage),
+        ).joinToString(" ") + newSuffix(domains.entered.count { it.isNew })
 
+    /**
+     * "Pebbles. 137 pebbles. Five stones stand; … Glyphs carved: 12. Glyph sales: 3.": a glyph stack
+     * the server omits is left out, never read as 0.
+     */
     fun pebblesDescription(
-        pebbles: CountingSection?,
+        pebbles: CountingSection,
         carved: CountingSection?,
         sales: CountingSection?,
-    ): String =
-        resources.getString(
-            R.string.achievements_pebbles_a11y,
-            number(pebbles?.count ?: 0),
-            number(carved?.count ?: 0),
-            number(sales?.count ?: 0),
-        )
+    ): String {
+        val parts =
+            listOfNotNull(
+                resources.getString(R.string.achievements_pebbles_a11y, pebblesLine(pebbles)),
+                carved?.let { resources.getString(R.string.achievements_glyphs_carved_a11y, number(it.count)) },
+                sales?.let { resources.getString(R.string.achievements_glyph_sales_a11y, number(it.count)) },
+            )
+        val fresh = listOfNotNull(pebbles, carved, sales).sumOf { stack -> stack.levels.count { it.isNew } }
+        return parts.joinToString(" ") + newSuffix(fresh)
+    }
 
-    /** "2026. On the rim: August. On the inner circle: March, April. On their way: November." */
+    /**
+     * The disc as the server's lists, wherever it is drawn: "The year 2026. On the rim: August. On
+     * the inner disc: March, April, and May. On their way: November." An upcoming month is in none.
+     */
     fun discDescription(year: AchievementYear): String {
+        val begun = year.months.filter { it.state != MonthState.UPCOMING }
+
         fun list(months: List<Int>) =
-            if (months.isEmpty()) resources.getString(R.string.achievements_none) else months.joinToString(", ") { monthHeading(it) }
+            if (months.isEmpty()) {
+                resources.getString(R.string.achievements_none)
+            } else {
+                ListFormatter.getInstance(locale).format(months.map(::monthInSentence))
+            }
         return resources.getString(
             R.string.achievements_disc_a11y,
-            year.year,
-            list(YearDiscGeometry.onRim(year.months)),
-            list(YearDiscGeometry.onInner(year.months)),
-            list(YearDiscGeometry.onTheirWay(year.months)),
+            year.year.toString(),
+            list(YearDiscGeometry.onRim(begun)),
+            list(YearDiscGeometry.onInner(begun)),
+            list(YearDiscGeometry.onTheirWay(begun)),
         )
     }
+
+    /** The year's card: the disc, then the next step's sentence when the server sends one. */
+    fun yearDescription(year: AchievementYear): String =
+        listOfNotNull(discDescription(year), year.nextStep?.let(::nextStep)).joinToString(" ")
 
     /**
      * A table row read aloud: the served counts as they are, never against a target, each marked
@@ -335,7 +396,7 @@ class AchievementsCopy(
     /** The quiet names read as one: "Not yet: Anxiety, Shame". */
     fun notYetDescription(names: List<String>): String = resources.getString(R.string.achievements_not_yet_a11y, names.joinToString(", "))
 
-    /** A ready mark read aloud, by the ceremony it opens: "The six firsts: complete. Open the ceremony." */
+    /** A ready mark read aloud, by the ceremony it opens: "The six firsts: the ceremony is ready." */
     fun readyDescription(stack: CompletionStack): String = resources.getString(R.string.achievements_ready_a11y, ceremonyTitle(stack))
 
     /**
@@ -355,11 +416,33 @@ class AchievementsCopy(
                 )
         ).joinToString(", ")
 
+    /** " 3 new." after a card's label; nothing when nothing is new. */
+    private fun newSuffix(count: Int): String =
+        if (count > 0) " " + resources.getQuantityString(R.plurals.achievements_new_count, count, number(count)) else ""
+
     private fun pattern(skeleton: String): DateTimeFormatter =
         DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, skeleton), locale)
 
     private fun sentenceCase(s: String): String = s.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
 }
+
+/** A ceremony's title, by its set (iOS's `ceremonyTitle`): the unlock moment's headline. */
+@StringRes
+fun ceremonyTitleRes(stack: CompletionStack): Int =
+    when (stack) {
+        CompletionStack.EMOTIONS -> R.string.achievements_ceremony_emotions_title
+        CompletionStack.DOMAINS -> R.string.achievements_ceremony_domains_title
+        CompletionStack.SIX_FIRSTS -> R.string.achievements_ceremony_six_firsts_title
+    }
+
+/** A ceremony's line under its title. */
+@StringRes
+fun ceremonyBodyRes(stack: CompletionStack): Int =
+    when (stack) {
+        CompletionStack.EMOTIONS -> R.string.achievements_ceremony_emotions_body
+        CompletionStack.DOMAINS -> R.string.achievements_ceremony_domains_body
+        CompletionStack.SIX_FIRSTS -> R.string.achievements_ceremony_six_firsts_body
+    }
 
 @Composable
 fun rememberAchievementsCopy(): AchievementsCopy {
