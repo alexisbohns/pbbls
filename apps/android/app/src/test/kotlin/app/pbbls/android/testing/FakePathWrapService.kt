@@ -4,6 +4,7 @@ import app.pbbls.android.core.data.PathWrapServicing
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.model.wrap.Strip
 import app.pbbls.android.core.model.wrap.WeekWrap
+import kotlinx.coroutines.CompletableDeferred
 import java.io.IOException
 import java.time.LocalDate
 import java.time.YearMonth
@@ -27,6 +28,10 @@ class FakePathWrapService(
     /** The device's copies, as `WrapDiskCache` would return them. */
     var keptStrip: Strip? = null
     val keptWeeks: MutableMap<LocalDate, WeekWrap> = mutableMapOf()
+    val keptMonths: MutableMap<YearMonth, MonthWrap> = mutableMapOf()
+
+    /** When set, a month wrap call waits for it: a test reads what shows while the fetch runs. */
+    var monthGate: CompletableDeferred<Unit>? = null
 
     override suspend fun cachedStrip(zone: ZoneId): Strip? = keptStrip
 
@@ -38,7 +43,7 @@ class FakePathWrapService(
     override suspend fun cachedMonthWrap(
         month: YearMonth,
         zone: ZoneId,
-    ): MonthWrap? = null
+    ): MonthWrap? = keptMonths[month]
 
     private val weekFailure = ArmedFailure()
 
@@ -87,6 +92,7 @@ class FakePathWrapService(
         zone: ZoneId,
     ): MonthWrap {
         monthCalls += month
+        monthGate?.await()
         return months[month] ?: throw IOException("no month wrap armed in the fake")
     }
 

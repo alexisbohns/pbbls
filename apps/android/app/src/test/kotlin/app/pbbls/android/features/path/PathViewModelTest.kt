@@ -10,6 +10,8 @@ import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.data.SnapBoundsDecoder
 import app.pbbls.android.core.data.SnapURLCache
 import app.pbbls.android.core.data.SnapUrls
+import app.pbbls.android.core.data.TabIntent
+import app.pbbls.android.core.data.TabIntents
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.RippleSummary
@@ -66,7 +68,8 @@ class PathViewModelTest {
         wraps: FakePathWrapService = FakePathWrapService(),
         display: DisplayPreferences = DisplayPreferences(inMemorySettings()),
         haptics: HapticsPreference = HapticsPreference(inMemorySettings()),
-    ) = PathViewModel(path, stats, writes, focusRequests, souls, wraps, display, haptics, snapAspect())
+        tabIntents: TabIntents = TabIntents(),
+    ) = PathViewModel(path, stats, writes, focusRequests, souls, wraps, display, haptics, tabIntents, snapAspect())
 
     /** Never reached from a ViewModel test: the ratio probe belongs to the cards. */
     private fun snapAspect(): SnapAspectCache {
@@ -122,6 +125,61 @@ class PathViewModelTest {
             advanceUntilIdle()
 
             assertEquals(focused, (viewModel.uiState.value as PathUiState.Content).focus)
+        }
+
+    // MARK: - A week from Home (#1383 D10)
+
+    @Test
+    fun `a week posted from Home focuses that week on the next resume, once`() =
+        runTest {
+            val old = moment("old", happenedAt = now.minusWeeks(3))
+            val tabIntents = TabIntents()
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(moment("new"), old)), tabIntents = tabIntents)
+            viewModel.onResumed()
+            advanceUntilIdle()
+            val before = viewModel.uiState.value as PathUiState.Content
+            val oldWeek = weekOf(old)
+            assertTrue("starts on the current week", before.focus != PathPage.Week(oldWeek))
+
+            tabIntents.post(TabIntent.FocusWeek(oldWeek))
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(PathPage.Week(oldWeek), (viewModel.uiState.value as PathUiState.Content).focus)
+            assertNull("the intent is consumed", tabIntents.pending.value)
+
+            viewModel.onFocus(before.focus)
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals("a later resume does not focus it again", before.focus, (viewModel.uiState.value as PathUiState.Content).focus)
+        }
+
+    @Test
+    fun `a Path opened by a week tap lands on that week once its first load is in`() =
+        runTest {
+            val old = moment("old", happenedAt = now.minusWeeks(3))
+            val tabIntents = TabIntents()
+            tabIntents.post(TabIntent.FocusWeek(weekOf(old)))
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(moment("new"), old)), tabIntents = tabIntents)
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(PathPage.Week(weekOf(old)), (viewModel.uiState.value as PathUiState.Content).focus)
+            assertNull(tabIntents.pending.value)
+        }
+
+    @Test
+    fun `an intent for another tab is left for it`() =
+        runTest {
+            val tabIntents = TabIntents()
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(moment("new"))), tabIntents = tabIntents)
+            tabIntents.post(TabIntent.CreateSoul)
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(TabIntent.CreateSoul, tabIntents.pending.value)
         }
 
     // MARK: - Returning from a pushed screen
