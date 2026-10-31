@@ -17,11 +17,11 @@
 | 3 | `feat/1382-surface-kit-ios` | `feat(ios): add the stones, cards, heads and ranks home and you share` | 8–12 |
 | 4 | `feat/1382-home-head-ios` | `feat(ios): open home on the month's weeks, the greeting and the cut quick actions` | 13–17 |
 | 5 | `feat/1382-home-body-ios` | `feat(ios): box the first five, card the wraps and list about pebbles` | 18–21 |
-| B | `feat/<B>-profile-glyph-counts` | `feat(db): count carved and owned glyphs in get_profile_engagement` | B1–B3 |
+| B | `feat/1386-profile-glyph-counts` | `feat(db): count carved and owned glyphs in get_profile_engagement` | B1–B3 |
 | 6 | `feat/1382-you-header-ios` | `feat(ios): draw you's header, counters and glyphs` | 22–27 |
 | 7 | `feat/1382-you-achievements-lab-ios` | `feat(ios): card the achievements and bring the lab onto you` (`Resolves #1382`) | 28–33 |
 
-`<B>` is the back-end issue, filed at the start under M67 with labels `feat`, `db`, `supabase` (one back-end issue for the three clients, per root CLAUDE.md). Labels on the iOS parts: `feat`, `ui`, `ios` (Part 2: `chore`, `ios`). Milestone: `M67 · Home & You`. PR bodies for Parts 1–6 say `Part N of #1382`, never `Resolves`; Part 7 says `Resolves #1382`. Lab Note: one, on Part 7, written with the repo `lab-note` skill; Parts 1–6 carry `no-lab-note` (confirm with the maintainer when Part 1 opens: if the Arkaik coverage replaces the note, Part 7 takes `no-lab-note` too). Never write a Kritik finding id in a body.
+Part B is #1386, the one back-end issue for the three clients (per root CLAUDE.md); whichever surface reaches it first builds it. Labels on the iOS parts: `feat`, `ui`, `ios` (Part 2: `chore`, `ios`). Milestone: `M67 · Home & You`. PR bodies for Parts 1–6 say `Part N of #1382`, never `Resolves`; Part 7 says `Resolves #1382`. Lab Note: one, on Part 7, written with the repo `lab-note` skill; Parts 1–6 carry `no-lab-note` (confirm with the maintainer when Part 1 opens: if the Arkaik coverage replaces the note, Part 7 takes `no-lab-note` too). Never write a Kritik finding id in a body.
 
 **Before Part 1:**
 - Work in a worktree with the gitignored config copied in (`project_worktree_gitignored_config`). Branch from an updated `main`: `git fetch origin && git switch -c feat/1382-inclusive-sans-ios origin/main`.
@@ -400,7 +400,7 @@ Cases: `(".font(.system(size: 15, weight: .medium, design: .rounded))", true)`, 
 
 ---
 
-## Part B — the glyph counts (back-end issue `<B>`, own PR on `main`)
+## Part B — the glyph counts (#1386, own PR on `main`)
 
 ### Task B1: The migration
 
@@ -470,7 +470,7 @@ grant execute on function public.get_profile_engagement(text) to authenticated;
 - Create (by `HOME_DUMP=1`): `packages/supabase/scripts/oracles/home/payloads/profile-engagement.json`
 
 - [ ] **Step 1:** Section 5: a throwaway user sees `glyphs_carved = 0, glyphs_owned = 0`; after carving one glyph (the `glyphs` insert the clients make), `1, 0`; a second user's carve does not move the first user's count; `days_practiced` and the 28 `assiduity` booleans are unchanged in shape; anon is refused. With `HOME_DUMP=1` the authenticated row is written verbatim to the payload file.
-- [ ] **Step 2:** `npm run db:verify:home --workspace=packages/supabase` green against the linked project; PR `feat(db): …` with `Resolves #<B>`, labels `feat`, `db`, `supabase`, M67. It merges before Part 6 opens.
+- [ ] **Step 2:** `npm run db:verify:home --workspace=packages/supabase` green against the linked project; PR `feat(db): …` with `Resolves #1386`, labels `feat`, `db`, `supabase`, M67. It merges before Part 6 opens.
 
 ---
 
@@ -547,7 +547,7 @@ grant execute on function public.get_profile_engagement(text) to authenticated;
 
 ## Part 7 — Achievements and the Lab on You (`feat/1382-you-achievements-lab-ios`)
 
-**Before Part 7:** `PbblsIcon.whatsapp` is on `main` (the `feat/icon-whatsapp` PR merged and `apps/ios/Pebbles/Theme/PbblsIcon.swift` regenerated). If not, stop here: Parts 1–6 can merge without it.
+**Before Part 7:** `PbblsIcon.whatsapp` is on `main` (#1387, branch `chore/1387-whatsapp-icon`, merged and `apps/ios/Pebbles/Theme/PbblsIcon.swift` regenerated). If not, stop here: Parts 1–6 can merge without it.
 
 ### Task 28: Achievements
 
@@ -598,7 +598,7 @@ grant execute on function public.get_profile_engagement(text) to authenticated;
 - Modify: this plan (`## Lessons learned`)
 
 - [ ] **Step 1:** References: `achievements` (four, empty, AX2), `lab` (drawn band, no announcement), `community`; `page*` re-baselined.
-- [ ] **Step 2:** Append one entry: `## 2026-11-xx — iOS sets its body text in Inclusive Sans; Home and You speak in stones, cards and one box (#1382)`. Decision bullets: SF Pro Rounded and SF Compact Rounded are retired and a theme rule keeps them out; the former SF tokens are Spine ranks on the Inclusive face and scale with Dynamic Type; the vocabulary (stones for actions and side-by-side tiles, flat; cards for content you browse, `stock` with shadow on Paper and a hairline at Night; one box for a list); a Home week column opens its week on the Path (`TabIntent.focusWeek`); the glyph counts live in `get_profile_engagement`; Log out lives in Settings. **Refs:** #1382, part B's issue, the spec, this plan.
+- [ ] **Step 2:** Append one entry: `## 2026-11-xx — iOS sets its body text in Inclusive Sans; Home and You speak in stones, cards and one box (#1382)`. Decision bullets: SF Pro Rounded and SF Compact Rounded are retired and a theme rule keeps them out; the former SF tokens are Spine ranks on the Inclusive face and scale with Dynamic Type; the vocabulary (stones for actions and side-by-side tiles, flat; cards for content you browse, `stock` with shadow on Paper and a hairline at Night; one box for a list); a Home week column opens its week on the Path (`TabIntent.focusWeek`); the glyph counts live in `get_profile_engagement`; Log out lives in Settings, on all three surfaces. **Refs:** #1382, #1386, #1387, the spec, this plan.
 - [ ] **Step 3:** Lessons learned in this plan (left empty until here): what the device pass changed (AX2 caps added in Part 1, the card shadow, the greeting's scale floor), the measured `path_month_wrap` time on Home and whether the slim projection issue was filed, how many references each part re-baselined.
 - [ ] **Step 4:** Commit: `git add docs && git commit -m "docs: log inclusive sans and the home and you vocabulary"`
 
