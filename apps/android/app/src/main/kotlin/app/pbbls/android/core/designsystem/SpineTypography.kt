@@ -79,6 +79,29 @@ object SpineTypography {
     val rollNumeral = ysabeau(14.sp, 600, 0.1f.em, features = SMALL_CAPS + ", " + LINING)
     val still = ysabeau(15.sp, 380, italic = true)
 
+    // The achievements page (#1307): the approved board's rule set (`final/_build/style.css`, `sheets.css`).
+    val daysKept = ysabeau(78.sp, 230, (-0.025f).em, features = LINING, lineHeight = 66.sp)
+    val daysUnit = ysabeau(15.sp, 560, 0.16f.em, features = SMALL_CAPS)
+    val sinceLine = ysabeau(11.5.sp, 600, 0.2f.em, features = SMALL_CAPS)
+    val cardMargin = ysabeau(11.sp, 600, 0.26f.em, features = SMALL_CAPS)
+    val cardBand = ysabeau(11.5.sp, 600, 0.22f.em, features = SMALL_CAPS)
+    val cardHint = ysabeau(14.sp, 380, italic = true)
+    val cardLine = ysabeau(16.sp, 380, italic = true, lineHeight = 21.6.sp)
+    val stackLabel = ysabeau(11.sp, 600, 0.14f.em, features = SMALL_CAPS)
+    val stackCount = ysabeau(20.sp, 300, features = LINING)
+    val registerSub = ysabeau(14.5.sp, 420, lineHeight = 18.sp)
+    val registerDate = ysabeau(12.5.sp, 400, 0.03f.em, features = TABULAR)
+    val milestone = ysabeau(21.sp, 300, features = LINING)
+    val milestoneSmall = ysabeau(17.sp, 300, features = LINING)
+    val cellNumber = ysabeau(14.sp, 400, features = TABULAR)
+    val cellNumberDone = ysabeau(14.sp, 560, features = TABULAR)
+    val tableHead = ysabeau(10.5.sp, 600, 0.14f.em, features = SMALL_CAPS)
+    val discNumeral = ysabeau(9.sp, 400, features = LINING)
+    val discNumeralRim = ysabeau(9.sp, 600, features = LINING)
+    val rosaceCount = ysabeau(28.sp, 300, features = LINING)
+    val rosaceOf = ysabeau(11.sp, 600, 0.2f.em, features = SMALL_CAPS)
+    val rosaceFamily = ysabeau(11.sp, 600, 0.14f.em, features = SMALL_CAPS)
+
     fun contentsName(
         weight: Int,
         italic: Boolean,
