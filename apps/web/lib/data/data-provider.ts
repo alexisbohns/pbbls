@@ -16,6 +16,9 @@ import type {
   AchievementCard,
   AchievementUnlock,
   CeremonyStack,
+  Guide,
+  HomeMonth,
+  HomeWrap,
   SharedConnectionPebble,
 } from "@/lib/types"
 import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment-payloads"
@@ -168,6 +171,20 @@ export interface DataProvider {
    * success on its own. Throws `CeremonyNotReadyError` on `not_ready`.
    */
   pullCeremony(stack: CeremonyStack, tz: string): Promise<CeremonyPull | null>
+
+  // Home (#1384, spec D10–D14): the current month as week columns, the
+  // finished months' wraps and their unfolding, the About guides, and the
+  // first five's claim. Decoded in lib/data/home-payloads.
+  /** `path_month_wrap(p_month, p_tz)`, `p_month` as `YYYY-MM-01`. Null when the body has no month. */
+  getHomeMonth(month: string, tz: string): Promise<HomeMonth | null>
+  /** `home_wraps(p_tz)`: finished months with a pebble, newest first. */
+  getHomeWraps(tz: string): Promise<HomeWrap[]>
+  /** `reveal_wrap(p_month, p_tz)`: unfolds a month once. */
+  revealWrap(month: string, tz: string): Promise<void>
+  /** The published guides by `sort_order`, in the reader's language. */
+  getGuides(locale: "en" | "fr"): Promise<Guide[]>
+  /** `claim_blue_pebble()`: the granted row, or null when nothing was granted. */
+  claimBluePebble(): Promise<AchievementUnlockResult | null>
 
   // Moments (#1050): the four definer RPCs, called directly, one per user
   // action (R5). Each returns once its RPC succeeded, then reloads the store

@@ -33,10 +33,14 @@ import type {
   AchievementCard,
   AchievementUnlock,
   CeremonyStack,
+  Guide,
+  HomeMonth,
+  HomeWrap,
   SharedConnectionPebble,
 } from "@/lib/types"
 import { unlockResultsFrom } from "@/lib/data/achievement-results"
 import { ceremonyPullFrom } from "@/lib/data/achievements-payload"
+import { decodeClaim, decodeGuides, decodeHomeMonth, decodeHomeWraps } from "@/lib/data/home-payloads"
 import { withTimeout } from "@/lib/utils/with-timeout"
 import { toConnectionPeer } from "@/lib/data/invite-api"
 import { peerIdOf } from "@/lib/data/connection-peer"
@@ -358,6 +362,57 @@ export class SupabaseProvider implements DataProvider {
       throw new Error(`pull_ceremony failed: ${error.message}`)
     }
     return ceremonyPullFrom(data)
+  }
+
+  // ---------------------------------------------------------------------------
+  // Home (#1384, spec D10–D14): reads and the two writes it makes. Bodies are
+  // decoded tolerantly in lib/data/home-payloads.
+  // ---------------------------------------------------------------------------
+
+  async getHomeMonth(month: string, tz: string): Promise<HomeMonth | null> {
+    const { data, error } = await withTimeout(
+      this.supabase.rpc("path_month_wrap", { p_month: month, p_tz: tz }),
+      10000,
+      "path_month_wrap",
+    )
+    if (error) throw new Error(`path_month_wrap failed: ${error.message}`)
+    return decodeHomeMonth(data)
+  }
+
+  async getHomeWraps(tz: string): Promise<HomeWrap[]> {
+    const { data, error } = await withTimeout(this.supabase.rpc("home_wraps", { p_tz: tz }), 10000, "home_wraps")
+    if (error) throw new Error(`home_wraps failed: ${error.message}`)
+    return decodeHomeWraps(data)
+  }
+
+  async revealWrap(month: string, tz: string): Promise<void> {
+    const { error } = await withTimeout(
+      this.supabase.rpc("reveal_wrap", { p_month: month, p_tz: tz }),
+      10000,
+      "reveal_wrap",
+    )
+    if (error) throw new Error(`reveal_wrap failed: ${error.message}`)
+  }
+
+  async getGuides(locale: "en" | "fr"): Promise<Guide[]> {
+    // A single-table read (AGENTS.md: no RPC needed); RLS hides unpublished rows too.
+    const { data, error } = await withTimeout(
+      this.supabase
+        .from("guides")
+        .select("slug, illustration, sort_order, title_en, title_fr, summary_en, summary_fr, body_md_en, body_md_fr")
+        .eq("published", true)
+        .order("sort_order"),
+      10000,
+      "guides",
+    )
+    if (error) throw new Error(`guides failed: ${error.message}`)
+    return decodeGuides(data, locale)
+  }
+
+  async claimBluePebble(): Promise<AchievementUnlockResult | null> {
+    const { data, error } = await withTimeout(this.supabase.rpc("claim_blue_pebble"), 10000, "claim_blue_pebble")
+    if (error) throw new Error(`claim_blue_pebble failed: ${error.message}`)
+    return decodeClaim(data)
   }
 
   // ---------------------------------------------------------------------------
