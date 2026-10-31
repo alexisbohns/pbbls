@@ -83,13 +83,15 @@ class AchievementsServiceTest {
         }
 
     /** A signed-in [SupabaseService] whose session follows the client's, as in the app. */
+    private val notify = AchievementNotificationService()
+
     private suspend fun TestScope.signedIn(userId: String?): Pair<SupabaseService, AchievementsService> {
         client = newClient()
         val supabase = SupabaseService(client, backgroundScope)
         // Unconfined: the collector runs as the status changes, wherever that happens.
         backgroundScope.launch(Dispatchers.Unconfined) { supabase.start() }
         if (userId != null) signInAs(supabase, userId)
-        return supabase to AchievementsService(supabase, AchievementNotificationService(), backgroundScope, disk)
+        return supabase to AchievementsService(supabase, notify, backgroundScope, disk)
     }
 
     private suspend fun signInAs(
@@ -160,6 +162,39 @@ class AchievementsServiceTest {
         runTest {
             val (_, service) = signedIn("alice")
             assertEquals(listOf(AchievementCheckResult(slug = "first-moment", karmaGranted = 0)), service.check())
+        }
+
+    @Test
+    fun `an empty claim decodes to nothing granted and plays no moment`() =
+        runTest {
+            val (_, service) = signedIn("alice")
+            answers["/rpc/claim_blue_pebble"] = "[]"
+            service.page(zone)
+            assertEquals(emptyList<AchievementCheckResult>(), service.claimBluePebble())
+            assertNull(notify.moment)
+            assertNotNull("nothing changed, the page stays fresh", service.keptAt(zone))
+        }
+
+    @Test
+    fun `a granted claim decodes its row, plays the moment and makes the page stale`() =
+        runTest {
+            val (_, service) = signedIn("alice")
+            // The claim answers in check_achievements' shape: the harness's dumped row.
+            answers["/rpc/claim_blue_pebble"] = AchievementPayloads.read(AchievementPayloads.CHECK)
+            service.page(zone)
+            assertEquals(listOf(AchievementCheckResult(slug = "first-moment", karmaGranted = 0)), service.claimBluePebble())
+            assertEquals("first-moment", notify.moment?.card?.slug)
+            assertNull(service.keptAt(zone))
+        }
+
+    @Test
+    fun `unlocks read the achievement ids, whatever the timestamp's precision`() =
+        runTest {
+            val (_, service) = signedIn("alice")
+            answers["/achievement_unlocks"] =
+                """[{"achievement_id":"a1","unlocked_at":"2026-10-27T09:00:00.123456+00:00"},""" +
+                """{"achievement_id":"a2","unlocked_at":"2026-10-27T09:00:00Z"}]"""
+            assertEquals(setOf("a1", "a2"), service.loadUnlocks())
         }
 
     @Test
