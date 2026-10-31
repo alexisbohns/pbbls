@@ -5,10 +5,12 @@ import { GROUND, STAGES, stageAlone, stageClip, stageIndex } from "@/lib/achieve
  * One stage of the skyline alone, a register row's mark (#1308, the boards'
  * `stage`): solid when `done` (a level the server lists), otherwise its contour
  * with the fill it has (the server's progress), on its own ground line. Stages
- * past the eighth reuse the last. Decorative. Android `SkylineStage`.
+ * past the eighth reuse the last; a stage before the first (a ladder with no
+ * steps) draws nothing. Decorative. Android `SkylineStage`.
  */
 export function SkylineStage({ stage, fill, done, scale = 1 }: { stage: number; fill: number; done: boolean; scale?: number }) {
   const clipId = useId()
+  if (stage < 0) return <svg aria-hidden focusable="false" width={28} height={28} className="block" />
   const k = stageIndex(stage)
   const { transform, baseline } = stageAlone(k, scale)
   return (

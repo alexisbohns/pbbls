@@ -1,6 +1,7 @@
 "use client"
 
 import type { AchievementPalettes } from "@/lib/achievements/palette"
+import type { SheetKey } from "@/lib/achievements/sheets"
 import { useAchievementsWords } from "@/lib/i18n/useAchievementsWords"
 import type { AchievementCompletion, AchievementsPage, CeremonyStack } from "@/lib/types"
 import { AchievementsHeader } from "./AchievementsHeader"
@@ -13,6 +14,8 @@ type AchievementsPageContentProps = {
   /** The stack being pulled: every ready mark waits while any pull runs. */
   pulling?: CeremonyStack | null
   onPull?: (stack: CeremonyStack) => void
+  /** Opens a card's sheet; without it the cards are still. */
+  onOpen?: (key: SheetKey) => void
 }
 
 /**
@@ -21,7 +24,8 @@ type AchievementsPageContentProps = {
  * card (spec §4). A completion the server marks ready puts its mark on its
  * card. One column on a phone, two from `md`. iOS `AchievementsPageContent`.
  */
-export function AchievementsPageContent({ page, palettes, pulling = null, onPull }: AchievementsPageContentProps) {
+export function AchievementsPageContent({ page, palettes, pulling = null, onPull, onOpen }: AchievementsPageContentProps) {
+  const opens = (key: SheetKey) => (onOpen ? () => onOpen(key) : undefined)
   const words = useAchievementsWords()
   const ready = (completion: AchievementCompletion | null) =>
     completion?.ready && onPull ? (
@@ -43,13 +47,18 @@ export function AchievementsPageContent({ page, palettes, pulling = null, onPull
             domains={page.domains}
             palettes={palettes}
             ready={ready(page.explorer.completion)}
+            onOpen={opens({ card: "explorer" })}
           />
         ) : null}
-        {page.emotions ? <EmotionsCard emotions={page.emotions} palettes={palettes} ready={ready(page.emotions.completion)} /> : null}
-        {page.domains ? <DomainsCard domains={page.domains} ready={ready(page.domains.completion)} /> : null}
-        {page.pebbles ? <PebblesCard pebbles={page.pebbles} carved={page.glyphsCarved} sales={page.glyphSales} /> : null}
+        {page.emotions ? (
+          <EmotionsCard emotions={page.emotions} palettes={palettes} ready={ready(page.emotions.completion)} onOpen={opens({ card: "emotions" })} />
+        ) : null}
+        {page.domains ? <DomainsCard domains={page.domains} ready={ready(page.domains.completion)} onOpen={opens({ card: "domains" })} /> : null}
+        {page.pebbles ? (
+          <PebblesCard pebbles={page.pebbles} carved={page.glyphsCarved} sales={page.glyphSales} onOpen={opens({ card: "pebbles" })} />
+        ) : null}
         {page.years.map((year) => (
-          <YearCard key={year.year} year={year} palettes={palettes} />
+          <YearCard key={year.year} year={year} palettes={palettes} onOpen={opens({ card: "year", year: year.year })} />
         ))}
       </div>
     </>

@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs"
 import { decodeAchievementsPage } from "@/lib/data/achievements-payload"
 import { achievementPalettes, type AchievementPalettes } from "@/lib/achievements/palette"
 import type { StonePalette } from "@/lib/config/stone-tones"
+import type { SheetNames } from "@/lib/achievements/sheet-rows"
+import { EMOTIONS } from "@/lib/config/emotions"
 import type { AchievementsPage } from "@/lib/types"
 
 // The canonical design fixture (#1308): the approved board's page in the shape
@@ -50,3 +52,15 @@ export function designPalettes(): AchievementPalettes {
   }
   return achievementPalettes(families, emotions)
 }
+
+/** Names as the page gives them, the fixture's domains from its own list (design/domains.json). */
+export function designNames(): SheetNames {
+  const domains = new Map(records(json("scripts/oracles/achievements/design/domains.json")).map((r) => [text(r.id), text(r.name)]))
+  const families = new Map(records(json("reference/emotion-categories.json")).map((r) => [text(r.slug), text(r.name)]))
+  return {
+    emotion: (id) => EMOTIONS.find((e) => e.id === id)?.name ?? null,
+    domain: (id) => (id === null ? null : (domains.get(id) ?? null)),
+    family: (slug) => (slug === null ? null : (families.get(slug) ?? null)),
+  }
+}
+
