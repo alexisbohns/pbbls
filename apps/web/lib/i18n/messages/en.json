@@ -255,7 +255,12 @@
       "first_glyph": "Glyphs",
       "first_soul": "Souls",
       "glyph_count": "Carving",
-      "glyph_sales": "Market"
+      "glyph_sales": "Market",
+      "first_moment": "First moment",
+      "first_pebble": "First pebble",
+      "first_five": "The blue pebble",
+      "first_stone": "Six firsts",
+      "set_complete": "Complete sets"
     },
     "family": {
       "pebble_count": {
@@ -289,6 +294,18 @@
       "glyph_sales": {
         "title": "{threshold, plural, one {First sale} other {# sales}}",
         "description": "{threshold, plural, one {Sell your first glyph in the market.} other {Make # glyph sales in the market.}}"
+      },
+      "first_moment": {
+        "title": "First moment",
+        "description": "Record your first moment."
+      },
+      "first_pebble": {
+        "title": "First pebble",
+        "description": "Complete your first pebble."
+      },
+      "first_five": {
+        "title": "The blue pebble",
+        "description": "Claim it once your first five are done."
       }
     }
   },

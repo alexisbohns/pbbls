@@ -711,6 +711,12 @@
     <string name="achievement_family_first_glyph_description">Grave ton tout premier glyphe.</string>
     <string name="achievement_family_first_soul_title">Première âme</string>
     <string name="achievement_family_first_soul_description">Ajoute ta toute première âme.</string>
+    <string name="achievement_family_first_moment_title">Premier moment</string>
+    <string name="achievement_family_first_moment_description">Enregistre ton premier moment.</string>
+    <string name="achievement_family_first_pebble_title">Premier galet</string>
+    <string name="achievement_family_first_pebble_description">Complète ton premier galet.</string>
+    <string name="achievement_family_first_five_title">Le galet bleu</string>
+    <string name="achievement_family_first_five_description">Réclame-le quand tes cinq premières fois sont faites.</string>
     <string name="achievement_family_glyph_count_title">%1$d glyphes</string>
     <string name="achievement_family_glyph_count_description">Grave %1$d glyphes de ta main.</string>
     <plurals name="achievement_family_glyph_sales_title">

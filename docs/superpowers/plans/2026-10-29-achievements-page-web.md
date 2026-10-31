@@ -7138,6 +7138,31 @@ Do this as soon as `packages/supabase/scripts/oracles/achievements/payloads/` ex
 
 Record here, during execution, anything that differs from this plan: a contrast fallback, a focus-return fix, a copy change the maintainer asked for.
 
+### Part 1 + Part 2, as one PR (`feat/1308-achievements-web-contract`, 30 October)
+
+The back-end shipped first, so the stack was re-cut: its first PR is Task 3, Part 2 (Tasks 5–11) and Task 34.
+
+- **Tasks 1, 2 and 4 dropped.** `check_achievements()` has no `celebrate` column; it returns only the rows to celebrate, and the unlock moment keeps celebrating every returned row. Its row mapping did move out of the provider (`lib/data/achievement-results.ts`, `unlockResultsFrom`) so the dumped rows replay; a null row or one without a slug is now dropped instead of cast. The call runs under a 10 s `withTimeout`, so a hung check cannot hold the page's read.
+- **Task 3: copy only, in iOS's words.**
+  - Group names for the five families. Titles and descriptions for `first_moment`, `first_pebble` and `first_five`.
+  - No family keys for `first_stone` or `set_complete`: their titles are the catalog's seeded `title_en/fr`, and they have no description, as on iOS. The plan's `stoneKind`/`completion` blocks and its slug parsing were not built.
+  - `useAchievementCopy` falls back to the slug and an empty description for a family without copy, never to a message-key path. The unlock moment already hides an empty description.
+  - **The `AchievementFamily` union and the icons are deferred to the web icon migration (#1313).** Widening the union breaks the typecheck on the two `FAMILY_ICONS` records that migration rewrites, so it widens both together. Until then the union lags the catalog (its comment says so) and every family-keyed consumer must fall back.
+- **Task 6 replaced by Task 34.** The harness's five dumps are embedded byte for byte (`DUMPED_*`), and a test pins each to its file. The `get-achievements*.json` bodies are verbatim (gap 4 is fixed); `check-achievements.json` is still re-serialised by the harness. VETERAN and NEWCOMER were not generated. One hand-written `GET_ACHIEVEMENTS_VARIANTS` holds the tolerance cases.
+- **Tasks 5 and 7 follow the served payload and the shared tolerance rules (spec §4), not this plan's TypeScript.**
+  - Added: `on` on every dated row, `emotions.families` and `since`, each ladder's `since`, `done`, `seen`, `shelf`/`shelf_count`, the completion's `pebble` and `stack`.
+  - A family stays the served string (palette lookup, else ink). An unknown stone kind, first-five slug, subject kind, coverage or `needs` is null and its item kept. Unknown rings and seen cards are left out.
+  - Instants are `Date`, read in every spelling the surfaces emit; days are `YYYY-MM-DD`, impossible ones null. A `moment_id` or subject `id` that is not a UUID is null and its item kept. `seat` is null when absent.
+  - Missing counts are 0, flags false, `reachable` true (iOS's defaults). A section present but mistyped is dropped whole and its key logged (`skipped`), on the fresh read and on the kept copy.
+  - A year without one entry per month is dropped; its months are placed January to December by their own number (as Android does). `listed` outside 1…12 is filtered.
+- **Parity departures from iOS:** a `next_step` with an unknown `needs` is kept with `needs: null` (iOS drops it, Android keeps it). **Parts 5–6: the views must hide the next-step sentence and gauge when `needs` is null.** The cache is written only by the newest read (iOS writes every decoded read).
+- **Tasks 10–11: a store replaces the loader.** `lib/data/achievements-page-store.ts` (`AchievementsPageStore`, framework-free and tested in node) is the twin of iOS's `AchievementsModel`; `useAchievementsPage` is a `useSyncExternalStore` shell that makes one store per user and closes it on unmount or a change of user.
+  - Stale-while-revalidate from the per-user cache; a read sequence so an older answer never replaces a newer page; `close()` aborts the session's reads (their cancellation is no error, their body never kept).
+  - The zone is read as each read or pull starts, as on iOS, and the body is kept under that zone. The cache is cleared at logout, account deletion and any `SIGNED_OUT`/sessionless auth event, and each clear bumps an epoch so a read in flight across it never writes back.
+  - Pull outcomes: `pulled{karmaGranted}`, `pulledWithoutKarma`, `alreadyPulled`, `notReady`, `busy`, `failed`, gated exactly as iOS on a read made in this session. `not_ready` is matched on `code === "P0001"` and `message === "not_ready"`.
+  - Known window, as on iOS: a pull that times out client-side but lands on the server after the re-read reads as `failed`; the next read shows it pulled.
+  - No hook test: the web suite runs in node with no React renderer (jsdom is only the admin's, and `vitest.config.ts` keeps the web suite DOM-free); the store's tests cover what a closed store must not do.
+
 ## Self-review notes
 
 - **Spec coverage:**
