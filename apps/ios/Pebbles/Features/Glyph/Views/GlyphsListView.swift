@@ -8,7 +8,7 @@ struct GlyphsListView: View {
     @Environment(PathStatsService.self) private var stats
     @Environment(TabNavigation.self) private var nav
 
-    @State private var tab: GlyphTab = .mine
+    @State private var tab: GlyphTab
     @State private var itemsByTab: [GlyphTab: [GlyphGridItem]] = [:]
     @State private var isLoading = false
     @State private var loadError: String?
@@ -24,6 +24,11 @@ struct GlyphsListView: View {
     private let columns = [GridItem(.adaptive(minimum: 96), spacing: 12)]
 
     private var items: [GlyphGridItem] { itemsByTab[tab] ?? [] }
+
+    /// You's Glyphs rows open their own tab (#1382 D19).
+    init(initialTab: GlyphTab = .mine) {
+        _tab = State(initialValue: initialTab)
+    }
 
     var body: some View {
         content

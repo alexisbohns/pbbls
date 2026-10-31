@@ -25,7 +25,8 @@ struct ProfileView: View {
         }
         .navigationDestination(for: YouRoute.self) { route in
             switch route {
-            case .glyphs: GlyphsListView()
+            case .glyphs: GlyphsListView(initialTab: .mine)
+            case .glyphTab(let tab): GlyphsListView(initialTab: tab)
             case .achievements: AchievementsView()
             case .lab: LabView()
             }

@@ -16,7 +16,7 @@ struct YouContent: View {
                       activeToday: stats.activeToday, onSettings: onSettings)
             YouCounters(stats: stats)
                 .padding(.top, YouLayout.countersRise)
-            ProfileShortcutsRow()
+            YouGlyphsSection(carved: stats.glyphsCarved, owned: stats.glyphsOwned)
             ProfileAchievementsCard()
             ProfileLabCard()
             ProfileLogoutButton(action: onLogOut)

@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Public models
 
 /// The three tabs on the glyph page.
-enum GlyphTab: String, CaseIterable, Identifiable {
+enum GlyphTab: String, CaseIterable, Identifiable, Codable {
     case mine, owned, commu
     var id: String { rawValue }
 }

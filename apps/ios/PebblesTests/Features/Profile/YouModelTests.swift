@@ -65,4 +65,17 @@ struct YouModelTests {
         #expect(model.profile?.displayName == "Alex" && model.glyphStrokes == Self.strokes)
         #expect(model.profile?.publicProfile == false)
     }
+
+    // MARK: - Glyphs lines (#1382 D19)
+
+    @Test func glyphLinesCountInviteOrStayPlain() {
+        let en = Locale(identifier: "en")
+        #expect(YouGlyphsSection.line("you.glyphs.mine", 12, locale: en) == "The 12 marks you carved.")
+        #expect(YouGlyphsSection.line("you.glyphs.mine", 1, locale: en) == "The mark you carved.")
+        #expect(YouGlyphsSection.line("you.glyphs.mine", 0, locale: en) == "Carve your first mark.")
+        #expect(YouGlyphsSection.line("you.glyphs.mine", nil, locale: en) == "The marks you carved.")
+        let fr = Locale(identifier: "fr")
+        #expect(YouGlyphsSection.line("you.glyphs.owned", 5, locale: fr) == "Les 5 que tu as reçus des autres.")
+        #expect(YouGlyphsSection.line("you.glyphs.owned", 1, locale: fr) == "Celui que tu as reçu des autres.")
+    }
 }
