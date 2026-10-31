@@ -85,6 +85,16 @@ The database is the contract between four clients. These are hardened rules prom
 - **A table added to `purge_account` gains its seed and its zero-row assertion in `verify-account-purge.ts` in the same change.** Run that harness (`npm run db:verify:purge --workspace=packages/supabase`) against the linked project after any batch touching `purge_account` — it is the one harness CI does not run for you.
 - **Any migration or admin RPC that inserts an emotion or a domain re-runs `sync_achievement_catalog()` in the same transaction**, or the achievement catalog drifts from the reference tables.
 
+## Build journal — one pebble per task
+
+The maintainer's journal account (a non-admin Pebbles account, their public blog) holds one pebble per moment spent building Pebbles. **At the end of every session task that changed something** (a merged or opened PR, a shipped fix, an exploration, a release), drop one pebble with `node scripts/journal/drop-pebble.mjs` (usage in its header). Skip it for pure Q&A or aborted work, and drop one per task, not per commit.
+
+- `--size small` by default; `medium` for an intermediate feature or a release, `large` only for a milestone.
+- `--valence highlight` for something new, `neutral` for chores, refactors, quality and Kritik improvements, `lowlight` for bugs, incidents and critical findings.
+- `--emotion`: one live slug chosen honestly for how the day felt. `--collection`: the surface (`Web`, `iOS`, `Android`) and/or `Releases`, `Milestones`, `Back-end & data`, `Brand & design`, `Admin & Lab`, `Quality & tooling`. `--image`: a screenshot reference that shows the change, when one exists.
+- `--title` ≤ 50 chars; `--journal` first person, 1–3 short sentences in plain words a reader gets. No PR numbers, file names, finding ids, secrets or user data: it is published.
+- If it fails on sign-in, tell the maintainer to check the journal credentials in `.env.journal` (see the script header). Never fall back to an admin account or the service role.
+
 ## Editing CLAUDE.md / AGENTS.md
 
 These files load into every agent context, so they are the most token-precious docs in the repo — they must hold only durable, action-guiding rules, not a junk drawer of observations.
