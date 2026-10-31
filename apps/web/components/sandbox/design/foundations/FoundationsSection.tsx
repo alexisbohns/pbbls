@@ -5,6 +5,7 @@ import { ColorSwatch } from "./ColorSwatch"
 import { HomeYouSpecimen } from "./HomeYouSpecimen"
 import { M3Roles } from "./M3Roles"
 import { ShapeScale } from "./ShapeScale"
+import { StonesSpecimen } from "./StonesSpecimen"
 import { TypeScale } from "./TypeScale"
 
 const APP_TOKENS: readonly (readonly [background: string, foreground?: string])[] = [
@@ -61,6 +62,7 @@ export function FoundationsSection({ theme, themeKey }: FoundationsSectionProps)
       )}
       <TypeScale />
       <HomeYouSpecimen />
+      <StonesSpecimen />
       <ShapeScale />
     </DesignSection>
   )
