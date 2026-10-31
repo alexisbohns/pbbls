@@ -67,14 +67,14 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 ) {
     entry<PebblesKey.Home>(metadata = NavTransitions.forKey(PebblesKey.Home)) {
         val reselected = remember(navigator) { navigator.reselectEvents.filter { it == PebblesKey.Home }.map {} }
-        // The three quick actions open Capture until their own flows land (#1383 Part 8).
+        // The quick moment is Home's own sheet; New pebble chains Capture into Complete (#1383 D7).
         HomeScreen(
             reselected = reselected,
             monthSlot = homeMonth,
             onOpenPath = { navigator.navigate(PebblesKey.Path) },
             onCamera = { navigator.navigate(PebblesKey.Capture()) },
-            onQuick = { navigator.navigate(PebblesKey.Capture()) },
             onPebble = { navigator.navigate(PebblesKey.Capture(chainsComplete = true)) },
+            onOpenComplete = { navigator.navigate(PebblesKey.CompletePebble(it)) },
         )
     }
 
