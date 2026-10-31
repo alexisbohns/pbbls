@@ -74,6 +74,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onOpenPath = { navigator.navigate(PebblesKey.Path) },
             onPebble = { navigator.navigate(PebblesKey.Capture(chainsComplete = true)) },
             onOpenComplete = { navigator.navigate(PebblesKey.CompletePebble(it)) },
+            onNameMoment = { navigator.navigate(PebblesKey.EditMoment(it)) },
         )
     }
 

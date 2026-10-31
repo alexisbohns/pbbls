@@ -808,6 +808,9 @@
     <string name="home_camera_unavailable">No camera yet</string>
     <string name="home_camera_unavailable_body">This device has no camera. Use a quick moment instead.</string>
     <string name="home_camera_upload_failed">The photo didn\'t upload. Nothing was saved.</string>
+    <!-- The snackbar after a camera moment (#1383 D7, iOS home.toast.*): "Moment saved · 14:32", the time in the locale's short form. -->
+    <string name="home_toast_saved">Moment saved · %1$s</string>
+    <string name="home_toast_name">Name it</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">
