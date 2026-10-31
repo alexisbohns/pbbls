@@ -710,3 +710,47 @@ export type LoginInput = { email: string; password: string }
 export type UpdateProfileInput = Partial<
   Omit<Profile, "id" | "user_id" | "handle" | "created_at" | "updated_at">
 >
+
+// ---------------------------------------------------------------------------
+// Home (#1384, spec D10–D14): what the web reads of path_month_wrap,
+// home_wraps and the guides table. Decoded tolerantly in lib/data/home-payloads.
+// ---------------------------------------------------------------------------
+
+/** One pebble of `path_month_wrap`'s `cover.days[]`. Out-of-range valence reads as the Path's neutral medium (2, 0). */
+export type MonthWrapPebble = { momentId: string; emotionId: string | null; intensity: Intensity; positiveness: Positiveness }
+/** A day of the cover; `day` is the 0-based index in the month. */
+export type MonthWrapDay = { day: number; pebbles: MonthWrapPebble[] }
+/** A week of `weeks[]`: its Monday, the month's day indices it spans, its pebbles and souls, and seven [moments, topIntensity] pairs. */
+export type MonthWrapWeek = {
+  weekStart: string
+  from: number
+  to: number
+  count: number
+  soulCount: number
+  days: [moments: number, topIntensity: number][]
+}
+/** The slice of `path_month_wrap` Home reads (D10). `days` is empty and `weeks` null below one pebble (the RPC omits them). */
+export type HomeMonth = {
+  month: string
+  daysInMonth: number
+  /** Monday = 0. */
+  firstWeekday: number
+  count: number
+  days: MonthWrapDay[]
+  weeks: MonthWrapWeek[] | null
+}
+/** A finished month on Home (D13). `days`: the indices that hold a pebble. Folded while `revealedAt` is null. */
+export type HomeWrap = { month: string; count: number; revealedAt: Date | null; days: number[] }
+/** The illustrations the guides table may name (D14). */
+export type GuideIllustration =
+  | "pebbles"
+  | "stones"
+  | "emotions"
+  | "valence"
+  | "domains"
+  | "collections"
+  | "souls"
+  | "glyphs"
+  | "karma"
+/** A published guide in the reader's language, EN filling any FR gap (D14). */
+export type Guide = { slug: string; illustration: GuideIllustration | null; title: string; summary: string; bodyMd: string }
