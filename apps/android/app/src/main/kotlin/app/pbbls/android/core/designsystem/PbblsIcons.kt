@@ -684,6 +684,9 @@ enum class PbblsIcon(
 
     /** The marks a user scribbles on a stone: a stone ring around a small scribble, drawn with an open start. (the `lit-1` twin) */
     PEBBLE_OUTLINED_GLYPH_2_LIT_1("pebble-outlined-glyph-2.lit-1", R.drawable.ic_pbbls_pebble_outlined_glyph_2_lit_1),
+
+    /** Join the community: a speech bubble with its tail at the lower left and a handset inside, the WhatsApp mark in the set's line. */
+    WHATSAPP("whatsapp", R.drawable.ic_pbbls_whatsapp),
     ;
 
     /** The manifest row this entry belongs to: its own name, or its base's for a twin. */

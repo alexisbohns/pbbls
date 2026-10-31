@@ -1088,6 +1088,15 @@
       "status": "candidate",
       "migrated": [],
       "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "whatsapp",
+      "meaning": "Join the community: a speech bubble with its tail at the lower left and a handset inside, the WhatsApp mark in the set's line.",
+      "variants": [],
+      "wave": "2026-10-community",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
     }
   ]
 }
