@@ -80,9 +80,12 @@ struct WeeksColumns: View {
         var cell: CGFloat?
         /// A fixed pip; nil sizes it from the cell, up to `pipCap`.
         var pip: CGFloat?
+        /// Whether a day outside the month draws a faint socket (Home: every
+        /// column reads as a full week) or nothing (the wrap card).
+        var outsideSockets = false
 
         static let card = Metrics()
-        static let home = Metrics(cairnRoom: 46, sidePadding: 0, cell: 28, pip: 15)
+        static let home = Metrics(cairnRoom: 46, sidePadding: 0, cell: 28, pip: 15, outsideSockets: true)
 
         /// The grid's height at `cell`.
         func height(cell: CGFloat) -> CGFloat {
@@ -200,7 +203,10 @@ private struct WeekColumnView: View {
             let center = CGPoint(x: size.width / 2, y: (CGFloat(day) + 0.5) * cell)
             switch kind {
             case .outside:
-                continue
+                // Home only: the day before or after the month, a faint socket, never a pebble.
+                guard metrics.outsideSockets else { continue }
+                context.dotMark(center: center, diameter: Self.socket, style: .socket,
+                                color: Color.pebbles.outlineVariant)
             case .empty:
                 let shown = reveal(.rest(index, day))
                 guard shown > 0 else { continue }

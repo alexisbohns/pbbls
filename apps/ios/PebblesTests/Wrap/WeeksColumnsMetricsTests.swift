@@ -13,6 +13,7 @@ struct WeeksColumnsMetricsTests {
         #expect(card.label == 34 && card.gap == 8 && card.cairnRoom == 64 && card.cellCap == 40)
         #expect(card.legend == 16 && card.pipCap == 16 && card.sidePadding == MonthLayout.sectionPadX)
         #expect(card.cell == nil && card.pip == nil)
+        #expect(!card.outsideSockets, "the wrap card leaves a day outside the month blank")
     }
 
     @Test("Home's grid is a fixed 28 pt cell, a 15 pt pip, a 46 pt cairn, flush sides")
@@ -20,6 +21,7 @@ struct WeeksColumnsMetricsTests {
         let home = WeeksColumns.Metrics.home
         #expect(home.label == 34 && home.gap == 8 && home.cairnRoom == 46 && home.legend == 16)
         #expect(home.cell == 28 && home.pip == 15 && home.sidePadding == 0)
+        #expect(home.outsideSockets, "Home draws every column as a full week")
     }
 
     @Test("Home's grid holds 292 pt, so nothing jumps while the month loads")
