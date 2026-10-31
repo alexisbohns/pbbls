@@ -15,6 +15,9 @@ struct CompleteSoulsStep: View {
             onToggle: { model.toggleSoul($0) },
             onCreate: { isPresentingCreate = true }
         )
+        // The cache only refreshes on soul mutations, so the counts would lag
+        // every pebble recorded since launch.
+        .task { await refs.refreshSouls() }
         .sheet(isPresented: $isPresentingCreate) {
             CreateSoulSheet { inserted in
                 // Created for this pebble, so it arrives selected.

@@ -1,0 +1,70 @@
+package app.pbbls.android.features.achievements.figures
+
+import app.pbbls.android.core.model.Valence
+import app.pbbls.android.core.model.achievements.DomainEntry
+import app.pbbls.android.core.model.achievements.DomainsSection
+import app.pbbls.android.core.model.achievements.EmotionSeat
+import app.pbbls.android.core.model.achievements.PebbleSnapshot
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+import java.time.Instant
+
+/** The payload readings the figures share (#1307): runs of a family, and the band's arrival order. */
+class FigureDataTest {
+    private fun seat(
+        k: Int,
+        family: String?,
+        met: Boolean = false,
+    ) = EmotionSeat(k, "e$k", family, met, on = null, pebble = null, isNew = false)
+
+    @Test
+    fun `a family's run is its consecutive seats, met counted, in the order sent`() {
+        val runs = familyRuns(listOf(seat(0, "joy", true), seat(1, "joy"), seat(2, "pride", true), seat(3, null)))
+        assertEquals(listOf(FamilyRun("joy", 0, 2, 1), FamilyRun("pride", 2, 1, 1), FamilyRun(null, 3, 1, 0)), runs)
+    }
+
+    @Test
+    fun `a star lights between two met seats of one family, round past the last seat to seat 0`() {
+        val seats = listOf(seat(0, "joy", true), seat(1, "pride", true), seat(2, "pride", true), seat(3, "joy", true))
+        assertEquals(listOf(false, true, false, true), litStars(seats))
+        assertEquals(listOf(false, false, false, false), litStars(seats.map { it.copy(met = it.seat != 0 && it.seat != 2) }))
+    }
+
+    @Test
+    fun `the band reads the entered domains reversed, oldest first, then the not yet, a nameless one kept`() {
+        val domains =
+            DomainsSection(
+                count = 3,
+                of = 5,
+                coverage = null,
+                entered =
+                    listOf(
+                        DomainEntry("newest", on = null, pebble = null, isNew = true),
+                        DomainEntry(null, on = null, pebble = null, isNew = false),
+                        DomainEntry("oldest", on = null, pebble = null, isNew = false),
+                    ),
+                notYet = listOf("a", "b"),
+                completion = null,
+            )
+        assertEquals(
+            listOf(
+                BandItem("oldest", on = true, isNew = false),
+                BandItem(null, on = true, isNew = false),
+                BandItem("newest", on = true, isNew = true),
+                BandItem("a", on = false, isNew = false),
+                BandItem("b", on = false, isNew = false),
+            ),
+            domainBandItems(domains),
+        )
+    }
+
+    @Test
+    fun `a met seat whose pebble is gone prints at medium even, a seat not met prints nothing`() {
+        val gone = EmotionSeat(0, "e0", "joy", met = true, on = null, pebble = null, isNew = false)
+        assertEquals(Valence.NEUTRAL_MEDIUM, gone.sealValence())
+        val kept = gone.copy(pebble = PebbleSnapshot("m", null, Instant.EPOCH, "e0", Valence.LOWLIGHT_LARGE))
+        assertEquals(Valence.LOWLIGHT_LARGE, kept.sealValence())
+        assertNull(seat(1, "joy", met = false).sealValence())
+    }
+}

@@ -144,12 +144,16 @@ android {
     // Compose UI test renders the real strings.xml, fonts and raw SVGs — and
     // `onNodeWithText(context.getString(...))` means what it says. Plain JVM
     // tests never read it.
-    // The wraps' decoding tests (#1207) replay the server's own payloads, captured by
-    // packages/supabase/scripts/verify-path-wraps.ts (PATH_WRAPS_DUMP=1): one copy, owned by the
-    // harness that produced it, never a hand-edited duplicate here.
+    // The wraps' decoding tests (#1207) and the achievements' (#1307) replay the server's own
+    // payloads, captured by packages/supabase/scripts/verify-path-wraps.ts (PATH_WRAPS_DUMP=1) and
+    // verify-achievements.ts (ACHIEVEMENTS_DUMP=1): one copy each, owned by the harness that
+    // produced it, never a hand-edited duplicate here.
     sourceSets {
         getByName("test") {
             resources.srcDir("../../../packages/supabase/scripts/oracles/path-wrap/payloads")
+            resources.srcDir("../../../packages/supabase/scripts/oracles/achievements/payloads")
+            // The board's page in the served shape, shared with iOS: the previews' fixture is checked against it.
+            resources.srcDir("../../../packages/supabase/scripts/oracles/achievements/design")
         }
     }
 
