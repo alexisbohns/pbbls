@@ -7,7 +7,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["checkmark"], "android": ["ic_check"], "web": ["Check"] }
+      "replaces": { "ios": ["checkmark"], "android": ["ic_check"], "web": [] }
     },
     {
       "name": "checkmark",
@@ -43,7 +43,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": ["CirclePlus"] }
+      "replaces": { "ios": [], "android": [], "web": [] }
     },
     {
       "name": "remove",
@@ -52,7 +52,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["xmark.circle.fill", "person.badge.minus"], "android": [], "web": [] }
+      "replaces": { "ios": ["xmark.circle.fill", "person.badge.minus"], "android": [], "web": ["UserRoundMinus"] }
     },
     {
       "name": "plus-circle",
@@ -61,7 +61,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["plus", "plus.circle"], "android": ["ic_plus"], "web": [] }
+      "replaces": { "ios": ["plus", "plus.circle"], "android": ["ic_plus"], "web": ["Plus", "CirclePlus"] }
     },
     {
       "name": "hourglass-end",
@@ -178,7 +178,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["square.stack", "line.3.horizontal.decrease"], "android": [], "web": [] }
+      "replaces": { "ios": ["square.stack", "line.3.horizontal.decrease"], "android": [], "web": ["Route"] }
     },
     {
       "name": "yarn",
@@ -214,7 +214,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["person.2", "person.3", "person.2.badge.plus", "person.3.fill", "bubble.left.and.bubble.right.fill"], "android": ["ic_person_pair", "ic_chat_bubbles"], "web": ["Users"] }
+      "replaces": { "ios": ["person.2", "person.3", "person.2.badge.plus", "person.3.fill", "bubble.left.and.bubble.right.fill"], "android": ["ic_person_pair", "ic_chat_bubbles"], "web": ["Users", "MessagesSquare"] }
     },
     {
       "name": "users",
@@ -286,7 +286,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["circle.hexagongrid", "square.stack.3d.up"], "android": ["ic_pebble_collection", "ic_stack"], "web": ["Layers"] }
+      "replaces": { "ios": ["circle.hexagongrid", "square.stack.3d.up"], "android": ["ic_pebble_collection", "ic_stack"], "web": ["Layers", "FolderOpen"] }
     },
     {
       "name": "pearl",
@@ -340,7 +340,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["circle.grid.3x3"], "android": [], "web": [] }
+      "replaces": { "ios": ["circle.grid.3x3"], "android": [], "web": ["Gem"] }
     },
     {
       "name": "abstract-cairn",
@@ -610,7 +610,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["scribble", "pencil.and.outline"], "android": ["ic_scribble"], "web": [] }
+      "replaces": { "ios": ["scribble", "pencil.and.outline"], "android": ["ic_scribble"], "web": ["Fingerprint", "PenTool"] }
     },
     {
       "name": "abstract-curves",
@@ -673,7 +673,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios"],
-      "replaces": { "ios": ["pencil"], "android": [], "web": [] }
+      "replaces": { "ios": ["pencil"], "android": [], "web": ["Pencil"] }
     },
     {
       "name": "pebble-round",
@@ -682,7 +682,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["fossil.shell", "drop.fill", "circle.dashed", "circle.inset.filled", "square"], "android": ["ic_fossil_shell", "ic_circle_dashed", "ic_circle_inset_filled"], "web": ["Stone"] }
+      "replaces": { "ios": ["fossil.shell", "drop.fill", "circle.dashed", "circle.inset.filled", "square"], "android": ["ic_fossil_shell", "ic_circle_dashed", "ic_circle_inset_filled"], "web": ["Stone", "Shell", "CircleDashed", "CircleDot"] }
     },
     {
       "name": "pebble-flat",
@@ -691,7 +691,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["clock"], "android": [], "web": [] }
+      "replaces": { "ios": ["clock"], "android": [], "web": ["Clock"] }
     },
     {
       "name": "karma-dot",
@@ -700,7 +700,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["sparkle", "sparkles"], "android": ["ic_sparkle"], "web": [] }
+      "replaces": { "ios": ["sparkle", "sparkles"], "android": ["ic_sparkle"], "web": ["Sparkle"] }
     },
     {
       "name": "karma",
@@ -835,7 +835,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["trophy"], "android": ["ic_trophy"], "web": [] }
+      "replaces": { "ios": ["trophy"], "android": ["ic_trophy"], "web": ["Trophy"] }
     },
     {
       "name": "sunshine",
@@ -916,7 +916,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios", "android"],
-      "replaces": { "ios": ["lightbulb.max"], "android": ["ic_lightbulb"], "web": [] }
+      "replaces": { "ios": ["lightbulb.max"], "android": ["ic_lightbulb"], "web": ["FlaskConical"] }
     },
     {
       "name": "karma-sparkle",
@@ -979,7 +979,7 @@
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": ["ios"],
-      "replaces": { "ios": ["square.grid.3x3"], "android": [], "web": [] }
+      "replaces": { "ios": ["square.grid.3x3"], "android": [], "web": ["Sparkles"] }
     },
     {
       "name": "needle",

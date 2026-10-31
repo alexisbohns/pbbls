@@ -10,7 +10,7 @@ The hand-drawn Pebbles icon set and its generator. `src/<name>.svg` (and `<name>
 | `npm run format --workspace=@pbbls/icons` | rewrites `src/` to the canonical form (`svgo` as a formatter only: path data passes through verbatim) |
 | `npm run generate --workspace=@pbbls/icons` | lint, then emit every registered surface and write the owned paths |
 | `npm run check --workspace=@pbbls/icons` | emit into memory and fail on any missing, stale or orphaned owned file (CI's freshness gate) |
-| `npm run lint:replaces --workspace=@pbbls/icons` | fails when a surface listed in a row's `migrated` still names one of that row's `replaces` (iOS: the bare quoted literal anywhere under `apps/ios/Pebbles/`) |
+| `npm run lint:replaces --workspace=@pbbls/icons` | fails when a surface listed in a row's `migrated` still names one of that row's `replaces` (iOS: the bare quoted literal anywhere under `apps/ios/Pebbles/`; web: a listed name in a `lucide-react` import or re-export under `apps/web` or `apps/admin` outside `components/ui/`, in any spelling — `Trash2Icon`, `LucideTrash2`, `Trash2 as Bin` — and any deep, dynamic, namespace or default lucide import) |
 | `npm run build` / `npm run test` | `tsc --noEmit` / Vitest over `scripts/**/*.test.ts` |
 
 ## Never hand-edit a generated file
@@ -39,4 +39,4 @@ A wave (`waves/<yyyy-mm-slug>/`) records how a set was chosen: briefs, seed, eac
 
 ## When `Icons` is red
 
-`.github/workflows/icons.yml` runs lint, typecheck, Vitest, `check` and `lint:replaces` on every PR. A red `fresh` step means a committed output no longer matches its source: run `npm run generate --workspace=@pbbls/icons` and commit the result. Never edit the workflow or a generated file by hand to make it pass. A red `replaces` step names a file and line that still draws a replaced symbol: migrate the call site to `PbblsIcon`, or rename the string if it is not a symbol at all; never widen the pattern.
+`.github/workflows/icons.yml` runs lint, typecheck, Vitest, `check` and `lint:replaces` on every PR. A red `fresh` step means a committed output no longer matches its source: run `npm run generate --workspace=@pbbls/icons` and commit the result. Never edit the workflow or a generated file by hand to make it pass. A red `replaces` step names a file and line that still draws a replaced symbol: migrate the call site to `PbblsIcon`, or rename the string if it is not a symbol at all; never widen the pattern. On web the line is an import specifier: import the Pebbles component from `@pbbls/icons` instead and size it with `PBBLS_ICON_SIZE` (`apps/web/lib/icons/pbbls-icon.ts`); never edit the import scan to let it through.
