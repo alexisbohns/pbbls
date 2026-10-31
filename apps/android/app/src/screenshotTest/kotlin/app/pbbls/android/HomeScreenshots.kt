@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.data.HomeShortcut
 import app.pbbls.android.core.data.HomeShortcutsLayout
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.home.Guide
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.ui.HomeMonthSlot
 import app.pbbls.android.features.home.ClaimStatus
@@ -34,10 +35,10 @@ import java.time.LocalDateTime
 /**
  * Home (#1383): the shell, the greeting and the quick actions (the default pebble row; the greeting
  * alone is also what a month read that failed with no copy draws, D9), and the month's grid over it
- * (D8), your first five (D11) and its task sheets, until the later parts add About. The monthly wraps
- * (D12): three months, the oldest folded; the promise card before the first; and a failed read keeping
- * its months. Paper, Night, French and 2 × font, plus a long name at 1 × to show the greeting shrinking
- * to hold its line (D18). The clock and the name are pinned,
+ * (D8), your first five (D11) and its task sheets. The monthly wraps (D12): three months, the oldest
+ * folded; the promise card before the first; and a failed read keeping its months. About Pebbles
+ * (D13): the nine readings under the greeting. Paper, Night, French and 2 × font, plus a long name at
+ * 1 × to show the greeting shrinking to hold its line (D18). The clock and the name are pinned,
  * so a render never depends on when it ran: Saturday 31 October 2026, 21:00, an ordinary evening.
  */
 private val previewNow: LocalDateTime = LocalDateTime.of(2026, 10, 31, 21, 0)
@@ -51,10 +52,11 @@ private fun HomePreview(
     month: HomeSection<MonthWrap> = HomeSection.Loading,
     checklist: HomeChecklist? = null,
     wraps: HomeSection<HomeWraps> = HomeSection.Loading,
+    guides: HomeSection<List<Guide>> = HomeSection.Loading,
 ) {
     PebblesTheme {
         HomeContent(
-            state = HomeUiState(name = name, month = month, checklist = checklist, wraps = wraps),
+            state = HomeUiState(name = name, month = month, checklist = checklist, wraps = wraps, guides = guides),
             now = previewNow,
             monthSlot = previewMonth,
             onWeek = {},
@@ -309,4 +311,27 @@ fun HomeWrapsStale() {
 @Composable
 fun HomeWrapsLargeFont() {
     HomePreview(wraps = HomeSection.Ready(HomeWraps(HomeWrapFixtures.three)))
+}
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = 1300)
+@PreviewFrench
+@Composable
+fun HomeAboutPaper() {
+    HomePreview(guides = HomeSection.Ready(GuideFixtures.all))
+}
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = 1300, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun HomeAboutNight() {
+    HomePreview(guides = HomeSection.Ready(GuideFixtures.all))
+}
+
+/** 2 × font: the rows grow with their two lines, the chips keep their size. */
+@PreviewTest
+@Preview(name = "fs2", showBackground = true, fontScale = 2f, heightDp = 2600)
+@Composable
+fun HomeAboutLargeFont() {
+    HomePreview(guides = HomeSection.Ready(GuideFixtures.all))
 }
