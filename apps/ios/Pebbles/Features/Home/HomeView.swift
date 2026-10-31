@@ -268,19 +268,26 @@ struct HomeView: View {
 }
 
 /// The greeting block alone, so the reference pins it without a service.
+/// Ysabeau's display cut (#1382 D10): the dateline in `primary`, the greeting
+/// on one line (shrinking to 75 %) until accessibility sizes, where it may take
+/// two lines instead of shrinking further, then the italic line.
 struct HomeGreetingView: View {
     let lines: HomeGreeting.Lines
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(verbatim: lines.dateline)
-                .spineType(.kicker)
-                .foregroundStyle(Color.pebbles.outline)
+                .spineType(.homeDateline)
+                .foregroundStyle(Color.pebbles.primary)
             Text(verbatim: lines.title)
-                .spineType(.bareTitle)
+                .spineType(.greeting)
                 .foregroundStyle(Color.pebbles.onSurface)
+                .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
+                .minimumScaleFactor(typeSize.isAccessibilitySize ? 1 : 0.75)
             Text(verbatim: lines.line)
-                .spineType(.summary)
+                .spineType(.greetingLine)
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
         }
         .accessibilityElement(children: .ignore)

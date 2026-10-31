@@ -24,6 +24,23 @@ extension References {
                                          config: ReferenceConfig(scheme: scheme, locales: locales))
         }
 
+        /// The evening greeting with a long name in French, at the mock's 358 pt
+        /// (#1382 D10): it must hold one line.
+        static func greetingLongFr() -> some View {
+            let paris = TimeZone(identifier: "Europe/Paris")!
+            let locale = Locale(identifier: ReferenceLocale.current.rawValue)
+            return HomeGreetingView(lines: HomeGreeting.lines(at: HomeFixture.clock, name: "Alexandrine",
+                                                              zone: paris, locale: locale))
+                .frame(width: 358, alignment: .leading)
+                .padding(Spacing.lg)
+                .background(Color.pebbles.surface)
+        }
+
+        @Test func greetingLongFr() throws {
+            ReferenceImage.assertMatches(Self.greetingLongFr(), named: "greetingLongFr",
+                                         config: ReferenceConfig(scheme: .paper, locales: [.fr], width: nil))
+        }
+
         /// One style, from its own defaults so the device's choice never leaks in.
         static func shortcuts(_ layout: HomeShortcutsLayout, stones: Bool, lead: HomeShortcut) -> some View {
             let name = "HomeReferences.shortcuts.\(layout.rawValue).\(stones).\(lead.rawValue)"
