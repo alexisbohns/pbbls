@@ -86,6 +86,13 @@ extension AchievementRecord {
         case "glyph_sales":
             if threshold == 1 { return catalogString("achievement.family.glyph_sales.description.one", fallback: "Sell your first glyph in the market.") }
             return String(format: catalogString("achievement.family.glyph_sales.description.other", fallback: "Make %lld glyph sales in the market."), threshold ?? 0)
+        case "first_stone":
+            return catalogString("achievement.family.first_stone.description", fallback: "One of the six firsts.")
+        case "set_complete":
+            // The ceremony's own words (#1306); the title is the catalog's seeded one.
+            // Nothing to say (an unknown stack, a missing key) is no description, never an empty line.
+            let body = completionStack.map { catalogString("achievements.ceremony.\($0.rawValue).body", fallback: "") }
+            return body?.isEmpty == false ? body : nil
         default:
             return nil
         }
@@ -112,6 +119,11 @@ extension AchievementRecord {
         case "glyph_count":      .pebbleDottedGlyph
         default:                 .pebbleGlowMd
         }
+    }
+
+    /// A `set_complete` row's stack, as `pull_ceremony` names it (`complete-six-firsts` → `six_firsts`).
+    private var completionStack: AchievementsPage.CeremonyStack? {
+        AchievementsPage.CeremonyStack.allCases.first { AchievementsCopy.ceremonySlug($0) == slug }
     }
 
     private func catalogString(_ key: String, fallback: String) -> String {

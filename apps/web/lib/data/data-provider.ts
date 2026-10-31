@@ -13,7 +13,9 @@ import type {
   RippleSummary,
   ProfileEngagement,
   Achievement,
+  AchievementCard,
   AchievementUnlock,
+  CeremonyStack,
   SharedConnectionPebble,
 } from "@/lib/types"
 import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment-payloads"
@@ -83,6 +85,21 @@ export type AchievementUnlockResult = {
   karmaGranted: number
 }
 
+// The row `pull_ceremony` returns on the pull that landed (#1308, spec §3.4):
+// the karma the stack's completion paid, 0 while its catalog row is unpriced
+// or inactive.
+export type CeremonyPull = {
+  karmaGranted: number
+}
+
+/** `pull_ceremony` raised `not_ready`: before the offer, or no completion at all. */
+export class CeremonyNotReadyError extends Error {
+  constructor(stack: CeremonyStack) {
+    super(`pull_ceremony(${stack}) is not ready`)
+    this.name = "CeremonyNotReadyError"
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Connections (M49) — operation results for the definer-RPC wire contract.
 // See docs/superpowers/specs/2026-07-29-mutual-connections-design.md.
@@ -137,6 +154,20 @@ export interface DataProvider {
   getAchievements(): Promise<Achievement[]>
   getAchievementUnlocks(): Promise<AchievementUnlock[]>
   checkAchievements(): Promise<AchievementUnlockResult[]>
+
+  // The achievements page (#1308): one read serves the page and its five
+  // sheets. It returns the raw body, so the page caches exactly what the
+  // server sent and decodes it in one place (`decodeAchievementsPage`). The
+  // signal cancels a read the page no longer wants.
+  getAchievementsPayload(tz: string, signal?: AbortSignal): Promise<unknown>
+  /** Records that a card's sheet was opened, for its "new" marks (D10). */
+  markAchievementsSeen(card: AchievementCard): Promise<void>
+  /**
+   * Pulls a completed set's ceremony (D9). Null when no row came back (already
+   * pulled, perhaps by this very call whose first answer was lost): never a
+   * success on its own. Throws `CeremonyNotReadyError` on `not_ready`.
+   */
+  pullCeremony(stack: CeremonyStack, tz: string): Promise<CeremonyPull | null>
 
   // Moments (#1050): the four definer RPCs, called directly, one per user
   // action (R5). Each returns once its RPC succeeded, then reloads the store

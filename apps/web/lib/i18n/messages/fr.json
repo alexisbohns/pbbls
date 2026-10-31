@@ -247,6 +247,9 @@
     "error": "Impossible de charger tes succès. Réessaie un peu plus tard.",
     "locked": "À débloquer",
     "unlockedOn": "Débloqué le {date}",
+    "rosace": {
+      "of": "sur {of}"
+    },
     "group": {
       "pebble_count": "Galets",
       "emotion_first": "Émotions",
@@ -255,7 +258,12 @@
       "first_glyph": "Glyphes",
       "first_soul": "Âmes",
       "glyph_count": "Gravure",
-      "glyph_sales": "Marché"
+      "glyph_sales": "Marché",
+      "first_moment": "Premier moment",
+      "first_pebble": "Premier galet",
+      "first_five": "Le galet bleu",
+      "first_stone": "Six premières fois",
+      "set_complete": "Ensembles complets"
     },
     "family": {
       "pebble_count": {
@@ -289,6 +297,18 @@
       "glyph_sales": {
         "title": "{threshold, plural, one {Première vente} other {# ventes}}",
         "description": "{threshold, plural, one {Un pebbler adopte l'un de tes glyphes.} other {Tes glyphes trouvent preneur # fois.}}"
+      },
+      "first_moment": {
+        "title": "Premier moment",
+        "description": "Enregistre ton premier moment."
+      },
+      "first_pebble": {
+        "title": "Premier galet",
+        "description": "Complète ton premier galet."
+      },
+      "first_five": {
+        "title": "Le galet bleu",
+        "description": "Réclame-le quand tes cinq premières fois sont faites."
       }
     }
   },

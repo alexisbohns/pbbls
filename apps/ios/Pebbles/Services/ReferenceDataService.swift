@@ -27,6 +27,11 @@ final class ReferenceDataService {
     /// The collections' columns (#1145 D9): the glyph embedded as the souls
     /// query embeds a soul's, so the held card's band can draw it.
     nonisolated static let collectionsSelect = "id, name, glyph_id, glyphs(id, name, strokes, view_box)"
+    /// The souls' columns: the pebble count rides along because the record
+    /// flow's souls step renders it from this cache — without it every soul
+    /// decoded as 0 (Android's #563). Matches `SoulRoute.columns`.
+    nonisolated static let soulsSelect =
+        "id, name, glyph_id, glyphs(id, name, strokes, view_box), pebbles_count:pebble_souls(count)"
 
     private(set) var souls: [SoulWithGlyph] = []
     private(set) var collections: [PebbleCollection] = []
@@ -69,7 +74,7 @@ final class ReferenceDataService {
                 .value
             async let soulsQuery: [SoulWithGlyph] = client
                 .from("souls")
-                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box)")
+                .select(Self.soulsSelect)
                 .order("name")
                 .execute()
                 .value
@@ -129,7 +134,7 @@ final class ReferenceDataService {
         do {
             let rows: [SoulWithGlyph] = try await client
                 .from("souls")
-                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box)")
+                .select(Self.soulsSelect)
                 .order("name")
                 .execute()
                 .value

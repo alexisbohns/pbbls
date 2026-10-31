@@ -162,6 +162,11 @@ export type ProfileEngagement = {
 // Achievements (M48) — public catalog + owner-scoped unlock ledger
 // ---------------------------------------------------------------------------
 
+// This union lags the catalog: the server also serves first_moment,
+// first_pebble, first_five (#1254), first_stone and set_complete (#1305). The
+// web icon migration (#1313) widens it together with the two `FAMILY_ICONS`
+// records it owns; until then a value outside it arrives at runtime, so every
+// consumer keyed by family must fall back (an icon, a slug, `t.has`).
 export type AchievementFamily =
   | "pebble_count"
   | "emotion_first"
@@ -216,6 +221,255 @@ export type AchievementDisplay = Pick<
 export type AchievementUnlock = {
   achievementId: string
   unlockedAt: string
+}
+
+// ---------------------------------------------------------------------------
+// The achievements page (#1308): `get_achievements(p_tz)` decoded (spec
+// 2026-10-29 §3.3, §4). The server decides every number, order, level, family
+// and flag; these types only carry them. An absent section is null and its
+// card is hidden. Inside a section the shared tolerance rules hold: an
+// unknown enum is kept as null (drawn as a ghost or a fallback, so seats never
+// shift), a missing id, day or instant is null, and a missing count or flag
+// takes iOS's default (0, false). Instants are parsed tolerantly into `Date`;
+// days stay `YYYY-MM-DD`, local to the zone the page was read in.
+// ---------------------------------------------------------------------------
+
+/** The five cards whose sheets `mark_achievements_seen` records (D10). */
+export type AchievementCard = "explorer" | "emotions" | "domains" | "pebbles" | "year"
+
+/** The three sets whose completion is offered, then pulled (D9). */
+export type CeremonyStack = "emotions" | "domains" | "six_firsts"
+
+/** The six firsts (D5): three intensities, three valences. */
+export type StoneKind = "small" | "medium" | "large" | "lowlight" | "neutral" | "highlight"
+
+/** The Explorer wheel's five rings, centre out (D6). */
+export type ExplorerRing = "first_five" | "six_firsts" | "twenty_five" | "domains" | "emotions"
+
+/** The first five's tasks, as the Home checklist names them. */
+export type FirstFiveTask = "first-moment" | "first-pebble" | "first-collection" | "first-soul" | "first-glyph"
+
+/** What a first-five task made. */
+export type FirstFiveSubjectKind = "moment" | "pebble" | "collection" | "soul" | "glyph"
+
+/** What the domains' coverage means (D11), never a count. */
+export type DomainCoverage = "none" | "few" | "third" | "half" | "most" | "all"
+
+/** A month as the year disc draws it (D12). An unknown state reads as quiet. */
+export type MonthState = "upcoming" | "quiet" | "kept"
+
+/** What the current month's next level needs (D12). */
+export type YearNeeds = "moments" | "pebbles"
+
+/** The crossing pebble's snapshot (D15). One without a moment id draws but does not open. */
+export type CrossingPebble = {
+  momentId: string | null
+  /** Absent for an unnamed moment. */
+  name: string | null
+  happenedAt: Date | null
+  emotionId: string | null
+  /** Out of range reads as the Path's neutral medium (2, 0). */
+  intensity: Intensity
+  positiveness: Positiveness
+}
+
+/** A set made whole (D9). `ready` is the server's clock, so no client compares one. */
+export type AchievementCompletion = {
+  stack: CeremonyStack
+  completedAt: Date | null
+  offeredFrom: Date | null
+  ready: boolean
+  /** Null until pulled. */
+  pulledAt: Date | null
+  /** The stone that made the set whole. */
+  pebble: CrossingPebble | null
+}
+
+export type FirstFiveSubject = {
+  /** Null for a kind this build does not know: the row stays. */
+  kind: FirstFiveSubjectKind | null
+  id: string | null
+  name: string | null
+}
+
+export type FirstFiveItem = {
+  /** Null for a slug this build does not know: its seat draws as a ghost. */
+  task: FirstFiveTask | null
+  done: boolean
+  /** The day its subject was made. */
+  on: string | null
+  subject: FirstFiveSubject | null
+  isNew: boolean
+}
+
+export type SixFirst = {
+  /** Null for a kind this build does not know: its seat draws as a ghost. */
+  kind: StoneKind | null
+  done: boolean
+  on: string | null
+  pebble: CrossingPebble | null
+  isNew: boolean
+}
+
+export type TwentyFive = {
+  /** Capped at 25 by the server. */
+  count: number
+  done: boolean
+  on: string | null
+  pebble: CrossingPebble | null
+  isNew: boolean
+}
+
+export type AchievementsExplorer = {
+  /** The wheel's centre: the crossing pebble of `pebble-count-1`. */
+  firstPebble: CrossingPebble | null
+  /** Home order, as served. */
+  firstFive: FirstFiveItem[]
+  /** Catalog order, as served. */
+  sixFirsts: SixFirst[]
+  twentyFive: TwentyFive | null
+  /** A set of flags: a ring this build does not know has nothing to draw, so it is left out. */
+  ringsDone: ExplorerRing[]
+  completion: AchievementCompletion | null
+}
+
+export type EmotionSeat = {
+  /** The seat's index on the wheel; null when the server sent none. */
+  seat: number | null
+  emotionId: string | null
+  /** The family's slug as served; one with no palette draws in ink. */
+  family: string | null
+  met: boolean
+  on: string | null
+  pebble: CrossingPebble | null
+  isNew: boolean
+}
+
+/** One family of the Emotions sheet: its met seats by the day met, then the rest (seat indices). */
+export type EmotionFamilyGroup = {
+  family: string | null
+  met: number[]
+  notYet: number[]
+}
+
+export type AchievementsEmotions = {
+  count: number
+  of: number
+  /** Wheel order, then slug, as served. */
+  seats: EmotionSeat[]
+  /** The sheet's order: families on the wheel, as served. */
+  families: EmotionFamilyGroup[]
+  /** The card's "since": the first emotion's day. */
+  since: string | null
+  completion: AchievementCompletion | null
+}
+
+export type DomainEntry = {
+  domainId: string | null
+  on: string | null
+  pebble: CrossingPebble | null
+  isNew: boolean
+}
+
+export type AchievementsDomains = {
+  count: number
+  of: number
+  /** Null for a tier this build does not know: its sentence is hidden. */
+  coverage: DomainCoverage | null
+  /** Newest first, as served. */
+  entered: DomainEntry[]
+  notYet: string[]
+  completion: AchievementCompletion | null
+}
+
+export type LadderLevel = { threshold: number; on: string | null; pebble: CrossingPebble | null; isNew: boolean }
+
+export type LadderNext = {
+  threshold: number
+  left: number
+  /** Toward `threshold` from the level before it, clamped to [0, 1]. */
+  progress: number
+}
+
+/** One counting stack (D3): pebbles, glyphs carved or glyph sales. */
+export type CountingLadder = {
+  count: number
+  levels: LadderLevel[]
+  next: LadderNext | null
+  /** The steps the figure draws. */
+  ladder: number[]
+  /** Pebbles only. */
+  thenEvery: number | null
+  /** The card's "since": the day of its first level. */
+  since: string | null
+}
+
+/** Which of a month's counters reached their target: the done style is the server's call (D12). */
+export type MonthDone = { moments: boolean; pebbles: boolean; weeks: boolean }
+
+export type YearMonth = {
+  month: number
+  state: MonthState
+  /** The month's colour (D12) as served; null without a pebble. */
+  family: string | null
+  momentDays: number
+  pebbleDays: number
+  fullWeeks: number
+  weeksFilled: number
+  /** 0 at the centre, 1 on the inner disc, 2 on the rim (clamped). */
+  level: 0 | 1 | 2
+  /** Toward the next level, clamped to [0, 1]; 0 on the rim. */
+  progress: number
+  done: MonthDone
+}
+
+export type YearNextStep = {
+  month: number
+  /** Null for a need this build does not know: its sentence is hidden. */
+  needs: YearNeeds | null
+  daysLeft: number
+  /** Absent reads as true. */
+  reachable: boolean
+}
+
+export type AchievementYear = {
+  year: number
+  current: boolean
+  /** The days a level needs, as served. */
+  daysTarget: number | null
+  /** January to December, placed by each month's served number; a year without one entry per month is dropped. */
+  months: YearMonth[]
+  /** The table's months, newest first, as served (values outside 1…12 left out). */
+  listed: number[]
+  nextStep: YearNextStep | null
+}
+
+/** One badge on the owner's Profile shelf (D18); titles and icons resolve from the catalog by slug. */
+export type ShelfItem = {
+  slug: string
+  family: string
+  /** An explicit null for the families that count nothing. */
+  threshold: number | null
+  unlockedOn: string | null
+}
+
+export type AchievementsPage = {
+  /** The account's first day, local to the reader (D2). */
+  since: string | null
+  daysKept: number | null
+  explorer: AchievementsExplorer | null
+  emotions: AchievementsEmotions | null
+  domains: AchievementsDomains | null
+  pebbles: CountingLadder | null
+  glyphsCarved: CountingLadder | null
+  glyphSales: CountingLadder | null
+  /** Newest first, as served. */
+  years: AchievementYear[]
+  /** When each card was last looked at (D10). */
+  seen: Partial<Record<AchievementCard, Date>>
+  /** Newest first, as served. */
+  shelf: ShelfItem[]
+  shelfCount: number | null
 }
 
 export type MarkStroke = {
@@ -375,6 +629,7 @@ export type PublicProfile = {
 export type PublicAchievement = {
   id: string
   slug: string
+  /** Unchecked: may be a family the union does not list yet (see `AchievementFamily`). */
   family: AchievementFamily
   threshold: number | null
   emotion_id: string | null
