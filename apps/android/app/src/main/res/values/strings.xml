@@ -785,6 +785,10 @@
     <string name="home_greeting_sunday_evening_line">How was your week?</string>
     <!-- A greeting and the user's name: "Good evening, Alexis". -->
     <string name="home_greeting_named">%1$s, %2$s</string>
+    <!-- Home's quick actions (#1376, iOS home.shortcut.*): each one's label and spoken name. -->
+    <string name="home_shortcut_camera">Camera</string>
+    <string name="home_shortcut_quick">Quick moment</string>
+    <string name="home_shortcut_pebble">New pebble</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">
