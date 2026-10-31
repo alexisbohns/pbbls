@@ -67,6 +67,11 @@ data class CaptureFlowUiState(
     val isCloseConfirmPresented: Boolean = false,
     /** The close dialog offers Save moment only when the moment is savable now (R2). */
     val closeOffersSave: Boolean = false,
+    /**
+     * Home's New pebble (#1383 D7): the name step's one save is "Make it a pebble now", which
+     * chains into Complete, and the save-only choice is not offered (iOS `chainsComplete`).
+     */
+    val chainsComplete: Boolean = false,
 ) {
     /**
      * The name step's two saves (A-1): a trimmed name or an uploaded photo, and
@@ -159,6 +164,15 @@ class CaptureFlowViewModel
 
         /** Every tap goes through the machine (M58 D4). */
         fun machine(): CaptureFlowModel = model
+
+        /** The key's argument (#1383 D7), from the screen's `LaunchedEffect`. */
+        fun start(chainsComplete: Boolean) = _uiState.update { it.copy(chainsComplete = chainsComplete) }
+
+        /**
+         * The name step's main save: a plain save, or, opened as Home's New pebble, the save that
+         * hands the moment to Complete. The close dialog's Save moment stays a plain save either way.
+         */
+        fun saveFromNameStep() = save(thenComplete = _uiState.value.chainsComplete)
 
         fun onPhotoPicked(uri: Uri) {
             if (model.isFrozen) return

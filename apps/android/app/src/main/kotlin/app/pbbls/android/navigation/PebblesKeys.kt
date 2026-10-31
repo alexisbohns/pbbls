@@ -114,9 +114,16 @@ sealed interface PebblesKey : NavKey {
 
     // ---- Modal: full-screen, the bar is covered ----
 
-    /** Capture: a new moment in three steps, saved with `save_moment` (#1048). What New pebble opens. */
+    /**
+     * Capture: a new moment in three steps, saved with `save_moment` (#1048). What New pebble opens.
+     * [chainsComplete] is Home's New pebble (#1383 D7, iOS `CaptureFlowView(chainsComplete:)`): the
+     * last step saves and hands the moment straight to [CompletePebble], with no "make it a pebble
+     * now" choice. Defaulted, so a stack saved while this was a `data object` still decodes.
+     */
     @Serializable
-    data object Capture : PebblesKey
+    data class Capture(
+        val chainsComplete: Boolean = false,
+    ) : PebblesKey
 
     /** Edit pebble: the pebble fields of [momentId]'s pebble, written with `complete_pebble` (R5). */
     @Serializable

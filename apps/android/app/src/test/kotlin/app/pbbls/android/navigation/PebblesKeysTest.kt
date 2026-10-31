@@ -63,7 +63,8 @@ class PebblesKeysTest {
                 PebblesKey.Lab,
                 PebblesKey.LabAnnouncement("log-1"),
                 PebblesKey.LabLogList("announcements"),
-                PebblesKey.Capture,
+                PebblesKey.Capture(),
+                PebblesKey.Capture(chainsComplete = true),
                 PebblesKey.PebbleDetail(momentId = "m-1"),
                 PebblesKey.PebbleDetail(momentId = "m-1", face = CardFace.VERSO),
                 PebblesKey.PebbleDetail(momentId = "m-1", face = CardFace.RECTO, request = 3),
@@ -116,6 +117,13 @@ class PebblesKeysTest {
     }
 
     @Test
+    fun `a capture saved while Capture was an object decodes as the plain capture`() {
+        // What `rememberNavBackStack` wrote for the `data object` before #1383 D7: the type alone.
+        val saved = """{"type":"app.pbbls.android.navigation.PebblesKey.Capture"}"""
+        assertEquals(PebblesKey.Capture(chainsComplete = false), Json.decodeFromString(PebblesKey.serializer(), saved))
+    }
+
+    @Test
     fun `the five tabs, Home first, are TopLevelKeys and every TopLevelKey is a BarKey`() {
         val tabs = listOf(PebblesKey.Home, PebblesKey.Path, PebblesKey.People, PebblesKey.Collections, PebblesKey.You)
         tabs.forEach {
@@ -129,7 +137,8 @@ class PebblesKeysTest {
     fun `modal keys are not BarKeys`() {
         val modals: List<PebblesKey> =
             listOf(
-                PebblesKey.Capture,
+                PebblesKey.Capture(),
+                PebblesKey.Capture(chainsComplete = true),
                 PebblesKey.EditPebble(momentId = "m-1"),
                 PebblesKey.EditMoment(momentId = "m-1"),
                 PebblesKey.CompletePebble(momentId = "m-1"),
