@@ -51,9 +51,13 @@ function Layer(props: StackProps & { depth: number }) {
   const popup = useRef<HTMLDivElement>(null)
   const key = entry.key
 
+  // This layer belongs to one open (it is keyed by it); the ref holds across a
+  // development double-run of the effect, before the reducer's seen ids update.
+  const marked = useRef(false)
   useEffect(() => {
     // Once per open: a sheet re-rendered by a later read is the same open.
-    if (!isOpen || sheets.seen.includes(entry.open)) return
+    if (!isOpen || marked.current || sheets.seen.includes(entry.open)) return
+    marked.current = true
     dispatch({ type: "seen", open: entry.open })
     onSeen(key.card)
   }, [isOpen, sheets.seen, entry.open, key.card, dispatch, onSeen])
