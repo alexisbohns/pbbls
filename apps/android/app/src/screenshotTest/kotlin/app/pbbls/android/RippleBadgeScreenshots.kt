@@ -72,3 +72,37 @@ fun RippleBadgesLight() {
 fun RippleBadgesDark() {
     PebblesTheme { RippleGallery() }
 }
+
+/** The You line's badge (spec 2026-10-31 D15): 24 dp, rings only, every level, active then inactive. */
+@Composable
+private fun SmallRippleGallery() {
+    Column(
+        modifier =
+            Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        listOf(true, false).forEach { active ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                (0..6).forEach { level ->
+                    RippleBadge(level = level, activeToday = active, size = 24.dp, showsLevel = false)
+                }
+            }
+        }
+    }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun RippleBadgesSmallLight() {
+    PebblesTheme { SmallRippleGallery() }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun RippleBadgesSmallDark() {
+    PebblesTheme { SmallRippleGallery() }
+}
