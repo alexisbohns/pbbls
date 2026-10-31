@@ -21,12 +21,23 @@
  *      month (the drift guard for path_month_cover); reveal_wrap ignores the
  *      live month, is idempotent, emits whole-second UTC; wrap_reveals is not
  *      client-writable and is owner-scoped; anon refused.
+ *   5. get_profile_engagement's glyph counts (#1386): a fresh account reads
+ *      glyphs_carved = 0, glyphs_owned = 0 beside days_practiced 0 and a 28-day
+ *      assiduity; carving one glyph (the `glyphs` insert the clients make) reads
+ *      1, 0; another user's carve does not move it; a user with pebbles keeps
+ *      days_practiced and the 28 booleans; anon is refused.
+ *   Not provable anon-only, so not claimed here: glyphs_owned above zero. An
+ *   entitlement needs buy_glyph on a listed glyph and karma to pay for it, and a
+ *   seed account has neither without the service role (verify-account-purge
+ *   grants the karma that way). The count is the same `user_id = auth.uid()`
+ *   shape as glyphs_carved, over glyph_entitlements.
  *
  * HOME_DUMP=1 writes the verbatim people_prompts payload to
- * scripts/oracles/home/payloads/people-prompts.json (and home_wraps to home-wraps.json) for the clients' decoding tests.
+ * scripts/oracles/home/payloads/people-prompts.json (and home_wraps to home-wraps.json,
+ * get_profile_engagement to profile-engagement.json) for the clients' decoding tests.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:home --workspace=packages/supabase
- * Expected: `Summary: passed=38 failed=0`.
+ * Expected: `Summary: passed=43 failed=0`.
  * Needs NO service-role key: signs up throwaway users (home-verify-*@example.test)
  * and deletes them through the real `delete-account` edge function, even on failure.
  */
@@ -113,6 +124,20 @@ const anon = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: fals
 let alice: TestUser | null = null;
 let bob: TestUser | null = null;
 let carol: TestUser | null = null;
+let dave: TestUser | null = null;
+
+type Engagement = { days_practiced: number; assiduity: boolean[]; glyphs_carved: number; glyphs_owned: number };
+const STROKES = [{ d: "M20,20 L180,180", width: 6 }];
+
+async function engagement(c: SupabaseClient): Promise<{ row: Engagement | null; raw: unknown; error: string | null }> {
+  const { data, error } = await c.rpc("get_profile_engagement", { p_tz: "Europe/Paris" });
+  const row = Array.isArray(data) && data.length === 1 ? data[0] as Engagement : null;
+  return { row, raw: data, error: error?.message ?? null };
+}
+async function carve(user: TestUser, name: string): Promise<void> {
+  const { error } = await user.client.from("glyphs").insert({ user_id: user.id, name, strokes: STROKES, view_box: "0 0 200 200" });
+  if (error) throw new Error(`carve ${name}: ${error.message}`);
+}
 
 try {
   // 1. the first five ---------------------------------------------------------------------
@@ -311,11 +336,41 @@ try {
   check("a user sees only their own reveals", !peek.error && (peek.data ?? []).length === 0, JSON.stringify(peek.data));
   const anonWraps = await anon.rpc("home_wraps", { p_tz: "Europe/Paris" });
   check("home_wraps is refused to anon", !!anonWraps.error, JSON.stringify(anonWraps.data));
+
+  // 5. glyph counts on get_profile_engagement (#1386) --------------------------------------
+  dave = await signUp("d");
+  const fresh5 = await engagement(dave.client);
+  check("a fresh account reads no glyph, no day, and 28 empty days",
+    !!fresh5.row && fresh5.row.glyphs_carved === 0 && fresh5.row.glyphs_owned === 0 && fresh5.row.days_practiced === 0
+      && fresh5.row.assiduity.length === 28 && fresh5.row.assiduity.every((d) => d === false),
+    fresh5.error ?? JSON.stringify(fresh5.raw));
+
+  await carve(dave, `carved ${runId}`);
+  const carved5 = await engagement(dave.client);
+  check("carving one glyph reads glyphs_carved = 1, glyphs_owned = 0",
+    carved5.row?.glyphs_carved === 1 && carved5.row?.glyphs_owned === 0, carved5.error ?? JSON.stringify(carved5.raw));
+
+  const bobBefore = await engagement(b);
+  await carve(bob, `bob carved ${runId}`);
+  const daveAfter = await engagement(dave.client);
+  const bobAfter = await engagement(b);
+  await dump("profile-engagement", bobAfter.raw);
+  check("another user's carve moves their count, not this one's",
+    daveAfter.row?.glyphs_carved === 1 && !!bobBefore.row && bobAfter.row?.glyphs_carved === bobBefore.row.glyphs_carved + 1,
+    `${JSON.stringify(daveAfter.raw)} / ${JSON.stringify(bobBefore.raw)} -> ${JSON.stringify(bobAfter.raw)}`);
+  // Bob saved every pebble today (created_at is the insert time), so today is the one lit day.
+  check("a user with pebbles keeps days_practiced and the 28 booleans, today lit",
+    (bobAfter.row?.days_practiced ?? 0) >= 1 && !!bobAfter.row && bobAfter.row.assiduity.length === 28
+      && bobAfter.row.assiduity.every((d) => typeof d === "boolean") && bobAfter.row.assiduity[27] === true,
+    bobAfter.error ?? JSON.stringify(bobAfter.raw));
+
+  const anon5 = await anon.rpc("get_profile_engagement", { p_tz: "Europe/Paris" });
+  check("get_profile_engagement is refused to anon", !!anon5.error, JSON.stringify(anon5.data));
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
 } finally {
-  for (const u of [alice, bob, carol]) {
+  for (const u of [alice, bob, carol, dave]) {
     if (!u) continue;
     const res = await deleteAccount(u.token).catch(() => null);
     if (!res?.ok) console.error(`cleanup: delete-account returned ${res?.status ?? "no response"}`);
