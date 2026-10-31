@@ -15,6 +15,8 @@ import app.pbbls.android.core.data.GlyphMarketService
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.GlyphService
 import app.pbbls.android.core.data.GlyphServicing
+import app.pbbls.android.core.data.HomeService
+import app.pbbls.android.core.data.HomeServicing
 import app.pbbls.android.core.data.LogsService
 import app.pbbls.android.core.data.LogsServicing
 import app.pbbls.android.core.data.MomentReadService
@@ -128,6 +130,10 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindConsentServicing(impl: ConsentService): ConsentServicing
+
+    @Binds
+    @Singleton
+    fun bindHomeServicing(impl: HomeService): HomeServicing
 
     @Binds
     @Singleton

@@ -7,6 +7,7 @@ import app.pbbls.android.core.data.ConnectionsServicing
 import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.GlyphServicing
+import app.pbbls.android.core.data.HomeServicing
 import app.pbbls.android.core.data.LogsServicing
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
@@ -181,6 +182,9 @@ object FakeServicesModule {
     fun fakeLogs() = FakeLogsService()
 
     @Provides @Singleton
+    fun fakeHome() = FakeHomeService()
+
+    @Provides @Singleton
     fun fakeCompleteSnapshotStore() = FakeCompleteSnapshotStore()
 
     @Provides @Singleton
@@ -238,6 +242,9 @@ object FakeServicesModule {
 
     @Provides
     fun logs(fake: FakeLogsService): LogsServicing = fake
+
+    @Provides
+    fun home(fake: FakeHomeService): HomeServicing = fake
 
     @Provides
     fun completeSnapshotStore(fake: FakeCompleteSnapshotStore): CompleteSnapshotStoring = fake
