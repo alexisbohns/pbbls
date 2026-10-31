@@ -5,12 +5,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
 import app.pbbls.android.core.data.HapticsPreference
+import app.pbbls.android.core.data.TabIntent
+import app.pbbls.android.core.data.TabIntents
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.inMemorySettings
+import app.pbbls.android.testing.recordEffects
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -45,7 +48,8 @@ class SoulsListViewModelTest {
     private fun viewModel(
         souls: FakeSoulsService = FakeSoulsService(),
         refs: FakeReferenceDataService = FakeReferenceDataService(),
-    ) = SoulsListViewModel(souls, refs, HapticsPreference(inMemorySettings()))
+        tabIntents: TabIntents = TabIntents(),
+    ) = SoulsListViewModel(souls, refs, HapticsPreference(inMemorySettings()), tabIntents)
 
     @Test
     fun `starts Loading and resolves to Content`() =
@@ -285,5 +289,40 @@ class SoulsListViewModelTest {
 
             val state = viewModel.uiState.value as SoulsListUiState.Content
             assertEquals(listOf("a"), state.souls.map { it.id })
+        }
+
+    // MARK: - Home's first five (#1383 D11)
+
+    @Test
+    fun `Home's create soul opens the sheet once`() =
+        runTest {
+            val tabIntents = TabIntents()
+            val viewModel = viewModel(tabIntents = tabIntents)
+            val requests = recordEffects(viewModel.createRequests)
+            tabIntents.post(TabIntent.CreateSoul)
+
+            viewModel.onResumed()
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(1, requests.values.size)
+            assertNull(tabIntents.pending.value)
+            requests.stop()
+        }
+
+    @Test
+    fun `another tab's intent is left for it`() =
+        runTest {
+            val tabIntents = TabIntents()
+            val viewModel = viewModel(tabIntents = tabIntents)
+            val requests = recordEffects(viewModel.createRequests)
+            tabIntents.post(TabIntent.CreateCollection)
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertTrue(requests.values.isEmpty())
+            assertEquals(TabIntent.CreateCollection, tabIntents.pending.value)
+            requests.stop()
         }
 }

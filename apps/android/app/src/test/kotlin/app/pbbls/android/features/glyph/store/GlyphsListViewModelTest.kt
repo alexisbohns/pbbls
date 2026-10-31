@@ -2,6 +2,8 @@ package app.pbbls.android.features.glyph.store
 
 import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
+import app.pbbls.android.core.data.TabIntent
+import app.pbbls.android.core.data.TabIntents
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
@@ -9,6 +11,7 @@ import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.FakeGlyphService
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.recordEffects
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -47,7 +50,8 @@ class GlyphsListViewModelTest {
         market: FakeGlyphMarketService = FakeGlyphMarketService(),
         glyphs: FakeGlyphService = FakeGlyphService(),
         stats: FakePathStatsService = FakePathStatsService(),
-    ) = GlyphsListViewModel(market, glyphs, stats)
+        tabIntents: TabIntents = TabIntents(),
+    ) = GlyphsListViewModel(market, glyphs, stats, tabIntents)
 
     // MARK: - Tabs
 
@@ -481,5 +485,29 @@ class GlyphsListViewModelTest {
             advanceUntilIdle()
 
             assertTrue(glyphs.updateNameCalls.isEmpty())
+        }
+
+    // MARK: - Home's first five (#1383 D11)
+
+    @Test
+    fun `Home's carve glyph returns to Mine and opens the studio once`() =
+        runTest {
+            val tabIntents = TabIntents()
+            val market = FakeGlyphMarketService(community = listOf(item("c")))
+            val viewModel = viewModel(market, tabIntents = tabIntents)
+            val requests = recordEffects(viewModel.carveRequests)
+            advanceUntilIdle()
+            viewModel.onSelectTab(GlyphTab.COMMU)
+            advanceUntilIdle()
+            tabIntents.post(TabIntent.CarveGlyph)
+
+            viewModel.onResumed()
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(1, requests.values.size)
+            assertEquals(GlyphTab.MINE, (viewModel.uiState.value as GlyphsUiState.Content).tab)
+            assertNull(tabIntents.pending.value)
+            requests.stop()
         }
 }

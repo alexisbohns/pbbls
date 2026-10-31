@@ -118,6 +118,18 @@ class NavigatorTest {
     }
 
     @Test
+    fun `opening a tab at its root closes what was left open there`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigate(PebblesKey.SoulDetail("s1"))
+        navigator.navigate(PebblesKey.Home)
+
+        navigator.openAtRoot(PebblesKey.People)
+
+        assertEquals(listOf<NavKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
+        assertEquals(PebblesKey.People, state.topLevelRoute)
+    }
+
+    @Test
     fun `replaceAll clears every stack and seeds the target`() {
         navigator.navigate(PebblesKey.People)
         navigator.navigate(PebblesKey.SoulDetail("s1"))

@@ -820,6 +820,24 @@
     <string name="home_task_soul_line">Quelqu\'un qui partage tes moments.</string>
     <string name="home_task_glyph_title">Grave ton premier glyphe</string>
     <string name="home_task_glyph_line">Une marque à toi, pour une âme ou une collection.</string>
+    <!-- A first-five task sheet (#1383 D11, iOS home.task.*.body/cta/illustration and the pictures' samples). -->
+    <string name="home_task_moment_body">Un moment, c\'est juste une heure et un nom. Attrape-le maintenant, tu lui donneras son poids plus tard.</string>
+    <string name="home_task_moment_cta">Enregistrer un moment</string>
+    <string name="home_task_moment_illustration">Un moment dans le sommaire de la semaine</string>
+    <string name="home_task_pebble_body">Un galet, c\'est un moment sur lequel tu reviens. Choisis son émotion, son intensité et ce qu\'il t\'a laissé.</string>
+    <string name="home_task_pebble_cta">Compléter un galet</string>
+    <string name="home_task_pebble_illustration">Un moment nu qui devient un galet</string>
+    <string name="home_task_collection_body">Une collection garde des galets côte à côte : un voyage, une saison, un projet. Nomme-la, puis ajoutes-y des galets quand ils y ont leur place.</string>
+    <string name="home_task_collection_cta">Commencer une collection</string>
+    <string name="home_task_collection_illustration">Trois galets réunis dans une collection</string>
+    <string name="home_task_soul_body">Les âmes sont les personnes et les êtres qui partagent tes moments. Ajoutes-en une, puis associe-la à tes galets.</string>
+    <string name="home_task_soul_cta">Ajouter une âme</string>
+    <string name="home_task_soul_illustration">Trois âmes et un moment partagé avec l\'une d\'elles</string>
+    <string name="home_task_glyph_body">Un glyphe est un petit dessin bien à toi. Grave-le du bout du doigt, puis offre-le à une âme ou à une collection.</string>
+    <string name="home_task_glyph_cta">Graver un glyphe</string>
+    <string name="home_task_glyph_illustration">Un glyphe gravé dans un cercle</string>
+    <string name="home_task_sample_moment">Déjeuner avec Inès</string>
+    <string name="home_task_sample_collection">L\'automne avec Elio</string>
     <string name="home_first_five_of">sur</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
