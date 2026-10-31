@@ -68,7 +68,7 @@ struct ProfileAchievementsCard: View {
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                    .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(Color.pebbles.outline)
             }
             .contentShape(Rectangle())

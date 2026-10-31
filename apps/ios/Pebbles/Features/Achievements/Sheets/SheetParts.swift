@@ -186,7 +186,7 @@ struct RegisterRow: View {
             if case .sheet = row.opens {
                 // Sized by a text style, so it scales with the row's text.
                 Image(systemName: "chevron.right")
-                    .font(.system(.subheadline, design: .rounded).weight(.medium))
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
             }
         }
