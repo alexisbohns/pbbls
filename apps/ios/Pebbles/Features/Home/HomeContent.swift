@@ -25,7 +25,9 @@ struct HomeContent: View {
     var onDismissCameraError: () -> Void = {}
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.xl) {
+        // The order (#1382 D12–D14): the header group, the first five, the month
+        // wraps, About, then the camera's states.
+        VStack(alignment: .leading, spacing: HomeLayout.sectionGap) {
             // One header group: the month's weeks, the greeting, the quick actions.
             VStack(alignment: .leading, spacing: 0) {
                 HomeMonthGrid(month: model.month, lookups: lookups,
@@ -47,6 +49,19 @@ struct HomeContent: View {
                 .padding(.top, HomeLayout.aboveActions)
             }
 
+            // HomeChecklistView draws nothing for a done or unavailable checklist.
+            if let checklist = model.checklist {
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    HomeChecklistView(checklist: checklist, isClaiming: model.isClaiming,
+                                      onTask: onTask, onClaim: onClaim)
+                    if let claimError = model.claimError {
+                        Text(verbatim: claimError)
+                            .pebblesFont(.callout)
+                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    }
+                }
+            }
+
             if model.wraps != nil || model.wrapsError != nil {
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     HomeWrapsRow(months: model.wraps?.months ?? [], lookups: lookups,
@@ -60,19 +75,6 @@ struct HomeContent: View {
                             Button("home.wraps.retry", action: onRetryWraps)
                                 .pebblesFont(.callout)
                         }
-                    }
-                }
-            }
-
-            // HomeChecklistView draws nothing for a done or unavailable checklist.
-            if let checklist = model.checklist {
-                VStack(alignment: .leading, spacing: Spacing.sm) {
-                    HomeChecklistView(checklist: checklist, isClaiming: model.isClaiming,
-                                      onTask: onTask, onClaim: onClaim)
-                    if let claimError = model.claimError {
-                        Text(verbatim: claimError)
-                            .pebblesFont(.callout)
-                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     }
                 }
             }
@@ -113,6 +115,8 @@ struct HomeContent: View {
 
 /// Home's vertical rhythm (#1382, the c3 mock).
 enum HomeLayout {
+    /// Between two sections.
+    static let sectionGap: CGFloat = 44
     /// Between the month's weeks and the dateline.
     static let belowGrid: CGFloat = 22
     /// Between the greeting's line and the quick actions.
