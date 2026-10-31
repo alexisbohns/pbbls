@@ -60,6 +60,8 @@ struct WeeksColumns: View {
     var metrics: Metrics = .card
     /// Whether a week's column is a button (#1382 D9: Home's weeks after today are not).
     var opens: (MonthWeek) -> Bool = { _ in true }
+    /// What a week that opens says it does (Home: "Opens this week on the Path").
+    var weekHint: Text?
     let onWeek: (CalendarDay) -> Void
 
     @Environment(\.colorScheme) private var scheme
@@ -99,7 +101,8 @@ struct WeeksColumns: View {
             weekdays(cell: cell)
             ForEach(Array(columns.enumerated()), id: \.element.week.weekStart) { index, column in
                 WeekColumnView(column: column, index: index, cell: cell, metrics: metrics, lookups: lookups,
-                               scheme: scheme, month: wrap.month, opens: opens(column.week), onWeek: onWeek)
+                               scheme: scheme, month: wrap.month, opens: opens(column.week), hint: weekHint,
+                               onWeek: onWeek)
                     .frame(maxWidth: .infinity)
             }
         }
@@ -136,6 +139,7 @@ private struct WeekColumnView: View {
     let scheme: ColorScheme
     let month: CalendarMonth
     let opens: Bool
+    let hint: Text?
     let onWeek: (CalendarDay) -> Void
 
     private static let socket: CGFloat = 6.8
@@ -155,6 +159,7 @@ private struct WeekColumnView: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(label)
                 .accessibilityAddTraits(.isButton)
+                .accessibilityHint(hint ?? Text(verbatim: ""))
         } else {
             // A week after today on Home: drawn, read as text, not a button.
             stack(week, locale: locale)

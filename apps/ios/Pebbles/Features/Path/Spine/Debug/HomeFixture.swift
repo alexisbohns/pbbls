@@ -13,14 +13,17 @@ enum HomeFixture {
         var id: String { rawValue }
     }
 
-    /// A Monday morning in Paris, the greeting's clock.
+    /// A Saturday evening in Paris, the greeting's clock (the c3 mock's, #1382).
     nonisolated static let clock: Date = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime]
-        return f.date(from: "2026-11-02T08:10:00+01:00") ?? .distantPast
+        return f.date(from: "2026-10-31T19:30:00+01:00") ?? .distantPast
     }()
     static let zone = TimeZone(identifier: "Europe/Paris")!
-    static let liveMonth = CalendarMonth(year: 2026, month: 11)
+    static let liveMonth = CalendarMonth(year: 2026, month: 10)
+
+    /// The live month the week columns draw: the harness's October.
+    static var month: MonthWrap? { SpineFixtureMonth.october }
 
     /// The harness's months as `home_wraps` returned them (minified).
     static var wraps: HomeWraps? {
@@ -96,9 +99,10 @@ enum HomeFixture {
             months = wraps ?? HomeWraps(months: [])
             unlocked = Set(HomeChecklist.Task.allCases.map(\.slug))
         }
-        model.service = HomeFixtureService(name: "Alexis", wraps: months, guides: guides)
+        model.service = HomeFixtureService(name: "Alexis", wraps: months, guides: guides, month: month)
         model.achievements = HomeFixtureAchievements(catalog: catalog, unlocks: unlocks(unlocked))
         await model.load()
+        await model.loadMonth(liveMonth)
         return model
     }
 
@@ -114,8 +118,16 @@ struct HomeFixtureService: HomeServicing {
     let name: String
     let wraps: HomeWraps
     let guides: [Guide]
+    var month: MonthWrap?
+
+    struct NoMonth: Error {}
 
     func displayName() async throws -> String? { name }
+    func month(_ month: CalendarMonth, zone: TimeZone) async throws -> MonthWrap {
+        guard let wrap = self.month else { throw NoMonth() }
+        return wrap
+    }
+    func cachedMonth(_ month: CalendarMonth, zone: TimeZone) async -> MonthWrap? { self.month }
     func wraps(zone: TimeZone) async throws -> HomeWraps { wraps }
     func reveal(month: CalendarMonth, zone: TimeZone) async throws -> HomeReveal {
         HomeReveal(month: month, revealedAt: HomeFixture.clock)

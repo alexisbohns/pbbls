@@ -10,6 +10,8 @@ enum HomeModelError: Error { case noService }
 @Observable @MainActor final class HomeModel {
     private(set) var name: String = ""
     private(set) var hasLoadedOnce = false
+    /// The live month for the week columns (#1382 D8); nil until the first copy lands.
+    private(set) var month: MonthWrap?
     private(set) var wraps: HomeWraps?
     private(set) var wrapsError: String?
     private(set) var checklist: HomeChecklist?
@@ -29,6 +31,7 @@ enum HomeModelError: Error { case noService }
     /// cannot overwrite a newer state.
     @ObservationIgnored private var loadGeneration = 0
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "home.model")
+    private let monthLogger = Logger(subsystem: "app.pbbls.ios", category: "home.month")
 
     func load() async {
         defer { hasLoadedOnce = true }
@@ -48,6 +51,26 @@ enum HomeModelError: Error { case noService }
             name = try await service.displayName() ?? ""
         } catch {
             logger.warning("display name failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// The live month: the device's copy first (a Path visit warms it), then
+    /// the fetch, timed for spec D8's measurement. A failed fetch keeps the last
+    /// month and logs; a new month replaces it once it lands.
+    func loadMonth(_ live: CalendarMonth) async {
+        guard let service else { return }
+        if month?.month != live, let kept = await service.cachedMonth(live, zone: zone) {
+            month = kept
+        }
+        let clock = ContinuousClock()
+        let start = clock.now
+        do {
+            month = try await service.month(live, zone: zone)
+            let milliseconds = Int((start.duration(to: clock.now) / .milliseconds(1)).rounded())
+            monthLogger.info("path_month_wrap \(live.firstDay.iso, privacy: .public) in \(milliseconds) ms")
+        } catch {
+            guard !Task.isCancelled else { return }
+            monthLogger.warning("home month failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 

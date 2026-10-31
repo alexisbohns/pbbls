@@ -46,6 +46,7 @@ struct HomeView: View {
                     onQuick: { showsQuick = true },
                     onPebble: { showsCapture = true },
                     onOpenWrap: { openWrap = $0.month },
+                    onWeek: { nav.go(.path, intent: .focusWeek($0)) },
                     onRetryWraps: { Task { await model.loadWraps() } },
                     onTask: { taskSheet = $0 },
                     onClaim: { Task { await model.claim() } },
@@ -129,11 +130,20 @@ struct HomeView: View {
             case .guide(let slug): guideDestination(slug)
             }
         }
+        // The month's weeks (#1382 D8): again when the clock crosses into a new month…
+        .task(id: liveMonth) {
+            attachService()
+            await model.loadMonth(liveMonth)
+        }
+        // …and whenever a pebble is saved, here or on another tab.
+        .onChange(of: revision.value) {
+            Task { await model.loadMonth(liveMonth) }
+        }
         // Reselecting Home inside the TabView re-runs this task (the root re-appears), which
         // also ticks what the user did on a tab the checklist sent them to. `onFirstLoad()`
         // re-firing is harmless: its latch (`firstRootLoaded`) only sets once.
         .task {
-            if model.service == nil { model.service = HomeService(client: supabase.client) }
+            attachService()
             if model.achievements == nil { model.achievements = achievements }
             // Spec §1.6: the loader waits at most 1.5 s for the profile; the load
             // goes on in its own Task so the name still lands after the hand-off.
@@ -174,6 +184,11 @@ struct HomeView: View {
     }
 
     private var lookups: WrapLookups { HomeLookups.make(palettes: palettes, refs: references) }
+
+    private func attachService() {
+        guard model.service == nil else { return }
+        model.service = HomeService(client: supabase.client, owner: supabase.session?.user.id.uuidString.lowercased())
+    }
 
     /// The month the clock is in, in the device's zone.
     private var liveMonth: CalendarMonth {
