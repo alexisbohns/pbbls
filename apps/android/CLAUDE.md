@@ -21,7 +21,7 @@ and none crosses a data contract:
 | Divergence | Since |
 | --- | --- |
 | Architecture: Hilt, a ViewModel per screen, Navigation 3 (M38 D4 and D5 superseded) | #848, #849, #852 |
-| Four-tab navigation bar; iOS has a Profile hub (#903 asks whether iOS follows) | #852 |
+| Five-tab M3 navigation bar, Home first; iOS has the same five tabs in a floating tab bar | #852, #1383 |
 | `core/` vs `features/` package split; iOS groups by feature all the way down | #851 |
 | M3-evo Material 3 Expressive theme: palette, orange error (was amber, now `sand`), type (#921 asks whether iOS follows) | #853, #990 |
 | Stock Material 3 controls instead of ports of the iOS ones | #854 |
