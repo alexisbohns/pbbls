@@ -41,7 +41,6 @@ struct FontTokensTests {
         Row(token: .metaEmphasized, size: 12, weight: 700, trackingEm: 0.08, uppercase: true),
         Row(token: .cardHeading, size: 15, weight: 600, trackingEm: 0.08, uppercase: true),
         Row(token: .cardHeadingEmphasized, size: 15, weight: 700, trackingEm: 0.08, uppercase: true),
-        Row(token: .counterLg, size: 17, weight: 600, trackingEm: 0, uppercase: false),
         Row(token: .captionEmphasized, size: 12, weight: 600, trackingEm: 0, uppercase: false)
     ]
 
@@ -56,7 +55,7 @@ struct FontTokensTests {
         #expect(style.scaling == .text(SpineType.textStyle(forSize: row.size)))
     }
 
-    @Test("only the fourteen former SF tokens are Inclusive")
+    @Test("only the former SF tokens are Inclusive")
     func inclusiveSet() {
         let inclusive = PebblesFont.allCases.filter { $0.inclusiveStyle != nil }
         #expect(inclusive.count == Self.table.count)

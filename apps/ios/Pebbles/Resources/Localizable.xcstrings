@@ -484,23 +484,6 @@
         }
       }
     },
-    "%lld more pebbles to level %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld more pebbles to level %lld"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pebbles avant le niveau %lld"
-          }
-        }
-      }
-    },
     "%lld of %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7352,23 +7335,6 @@
         }
       }
     },
-    "Loading…" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loading…"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chargement…"
-          }
-        }
-      }
-    },
     "Log in" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7552,23 +7518,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rendre mon profil public"
-          }
-        }
-      }
-    },
-    "Max level reached" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Max level reached"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Niveau max atteint"
           }
         }
       }
@@ -11628,23 +11577,6 @@
         }
       }
     },
-    "Profile" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Profile"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Profil"
-          }
-        }
-      }
-    },
     "Providers" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12465,23 +12397,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Commencer mon chemin"
-          }
-        }
-      }
-    },
-    "Stats" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stats"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Statistiques"
           }
         }
       }

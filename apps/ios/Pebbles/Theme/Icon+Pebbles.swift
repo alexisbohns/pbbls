@@ -12,7 +12,7 @@ import SwiftUI
 /// - `inline`: beside text (karma amounts, "taken from your photo"), relative to that text's style.
 /// - `row`: a list row's leading icon, a segmented pill, a menu item.
 /// - `toolbar`: toolbar and chrome buttons inside their 44×44 hit frame.
-/// - `tile`: `SurfaceTile`, `DataTile`, the Home shortcuts, card leading icons.
+/// - `tile`: `SurfaceTile`, the Home shortcuts, card leading icons.
 /// - `hero`: `ContentUnavailableView` images, the achievement celebration, the invalid-invite page.
 enum PbblsIconSize: CGFloat, CaseIterable {
     case inline = 16

@@ -15,8 +15,7 @@ struct ProfileView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 YouContent(model: model, stats: YouStats(stats),
-                           onSettings: { isPresentingSettings = true },
-                           onLogOut: { Task { await supabase.signOut() } })
+                           onSettings: { isPresentingSettings = true })
                     .id(TabNavigation.scrollTopAnchor)
             }
             .onChange(of: nav.scrollToTop[.you, default: 0]) {

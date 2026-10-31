@@ -18,7 +18,6 @@ enum PebblesFont: CaseIterable {
     case metaEmphasized
     case cardHeading
     case cardHeadingEmphasized
-    case counterLg
     case captionEmphasized
     case title
     case buttonLabel
@@ -145,7 +144,6 @@ extension PebblesFont {
         case .metaEmphasized:        .inclusive(12, 700, caps: true)
         case .cardHeading:           .inclusive(15, 600, caps: true)
         case .cardHeadingEmphasized: .inclusive(15, 700, caps: true)
-        case .counterLg:             .inclusive(17, 600)
         case .captionEmphasized:     .inclusive(12, 600)
         default:                     nil
         }

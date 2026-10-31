@@ -534,6 +534,17 @@ struct SettingsSheet: View {
     /// Store-mandated account deletion entry (Apple 5.1.1(v): easy to find).
     private var deleteAccountSection: some View {
         Section {
+            // Moved here from the foot of You (#1382 D16): Settings is where iOS users look for it.
+            Button {
+                dismiss()
+                Task { await supabase.signOut() }
+            } label: {
+                Label { Text("Log out") } icon: { PbblsIconImage(.remove, .row) }
+                    .foregroundStyle(Color.pebbles.onSurface)
+            }
+            .buttonStyle(.plain)
+            .disabled(isDeleting)
+            .pebblesListRow(position: .top)
             Button {
                 isPresentingDeleteConfirm = true
             } label: {
@@ -548,7 +559,7 @@ struct SettingsSheet: View {
             }
             .buttonStyle(.plain)
             .disabled(isDeleting)
-            .pebblesListRow(position: .only)
+            .pebblesListRow(position: .bottom)
         } header: {
             Text("Account").pebblesSectionHeader()
         }

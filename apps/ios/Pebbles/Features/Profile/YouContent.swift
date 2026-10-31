@@ -7,7 +7,6 @@ struct YouContent: View {
     let model: YouModel
     let stats: YouStats
     var onSettings: () -> Void = {}
-    var onLogOut: () -> Void = {}
 
     var body: some View {
         VStack(spacing: YouLayout.sectionGap) {
@@ -19,10 +18,10 @@ struct YouContent: View {
             YouGlyphsSection(carved: stats.glyphsCarved, owned: stats.glyphsOwned)
             ProfileAchievementsCard()
             ProfileLabCard()
-            ProfileLogoutButton(action: onLogOut)
         }
         .padding(.horizontal, 16)
-        .padding(.bottom, 32)
+        .padding(.top, Spacing.md)
+        .padding(.bottom, 40)
     }
 }
 

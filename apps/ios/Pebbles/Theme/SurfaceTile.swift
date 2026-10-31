@@ -1,8 +1,7 @@
 import SwiftUI
 
 /// Presentational tile: a pebbles icon above a short label on a `primaryContainer`
-/// rounded card. The shared visual for the profile shortcuts row
-/// (`ProfileShortcutTile`) and the glyph drawer's stat cards.
+/// rounded card: the glyph drawer's stat cards.
 ///
 /// `muted` renders the icon + label in `outline` for placeholder values
 /// (e.g. the "Soon" stats we don't source yet).
