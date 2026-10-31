@@ -12,7 +12,7 @@
 
 | Part | Branch | PR title | Tasks |
 |---|---|---|---|
-| B | `feat/<issue>-glyph-counts` | `feat(db): count carved and owned glyphs in get_profile_engagement` | B1–B3 |
+| B | `feat/1386-glyph-counts` (#1386) | `feat(db): count carved and owned glyphs in get_profile_engagement` | B1–B3 |
 | 1 | `feat/1383-inclusive-sans-android` | `chore(android): bundle the same inclusive sans files as ios and web` | 1–2 |
 | 2 | `feat/1383-stones-android` | `feat(android): port the stone geometry and the squircle pentagon` | 3–7 |
 | 3 | `feat/1383-page-kit-android` | `feat(android): add the page type set, the card and the section parts` | 8–12 |
@@ -52,9 +52,19 @@ Expected: no ktlint violation, `BUILD SUCCESSFUL`. Do not run `updateDebugScreen
 
 ---
 
-## Part B — glyph counts on `get_profile_engagement` (back-end, own issue)
+## Task 0 — the shipped build tolerates unknown engagement keys (before #1386 is pushed)
 
-File the issue first: `[Feat] Count carved and owned glyphs in get_profile_engagement`, labels `feat`, `db`, `supabase`, milestone M67, body naming #1382, #1383, #1384 as consumers. Whichever surface reaches its You header first builds it; skip this part if it has merged.
+#1386 adds two keys to `get_profile_engagement`'s rows. The Android build already on Play internal testing decodes them with `decodeList<ProfileEngagement>()` (`core/data/PathStatsService.kt:145`) through supabase-kt's default serializer: `di/SupabaseModule.kt` installs Auth, Postgrest, Storage and Functions and sets no `defaultSerializer`. If that serializer rejects unknown keys, the push turns every installed app's counters and Ripples line blank. This is checked before Part B's `db:push`, independently of the stack.
+
+**Files:** create `apps/android/app/src/test/kotlin/app/pbbls/android/core/data/ProfileEngagementDecodingTest.kt`; modify, only if the test fails, `di/SupabaseModule.kt`.
+
+- [ ] **Step 1: The test.** Build a client the way `SupabaseModule` does (or take `testing/FakeServicesModule`'s `MockEngine` client, which must be built by the same function, so read it first) and decode, through `supabase.postgrest.rpc(...).decodeList<ProfileEngagement>()` over a `MockEngine` response, the row `[{"days_practiced":112,"assiduity":[true,false,…28],"glyphs_carved":12,"glyphs_owned":5}]`. Also decode it through `supabase.defaultSerializer` directly, so the test names the layer that decides. Expected: one `ProfileEngagement(112, …)`.
+- [ ] **Step 2: Run it** (`./gradlew :app:testDebugUnitTest --tests '*ProfileEngagementDecodingTest'`). Green: keep the test (it guards the contract), commit `test(android): pin that engagement rows tolerate unknown keys`, report on #1386 that Android is safe, and stop here.
+- [ ] **Step 3: Red only.** Set the client's serializer explicitly: `defaultSerializer = KotlinXSerializer(Json { ignoreUnknownKeys = true })` in `SupabaseModule`'s builder (one place, so every decode gains it; check `FakeServicesModule` builds through it too). Run the whole `testDebugUnitTest` suite: a decode that relied on failing on an unknown key would surface here. Commit `fix(android): decode server rows tolerantly of unknown keys`, open it as its own PR (`fix`, `android`, `api`, milestone M67, body naming #1386), and tell the maintainer that #1386's migration waits until a build carrying it is on Play internal testing.
+
+## Part B — glyph counts on `get_profile_engagement` (back-end, #1386)
+
+The issue is **#1386** (labels `feat`, `db`, `supabase`, consumers #1382, #1383, #1384). Whichever surface reaches its You header first builds it; skip this part if it has merged. Task 0 above (and the iOS and web equivalents #1386 asks for) must be green before Step 3's push.
 
 ### Task B1: The migration
 
@@ -74,7 +84,7 @@ File the issue first: `[Feat] Count carved and owned glyphs in get_profile_engag
 
 ### Task B3: PR
 
-- [ ] Commit (`feat(db): count carved and owned glyphs in get_profile_engagement`), push, PR with labels and milestone; `supabase.yml` replays the chain and runs the harness.
+- [ ] Commit (`feat(db): count carved and owned glyphs in get_profile_engagement`), push, PR (`Resolves #1386`) with labels and milestone; `supabase.yml` replays the chain and runs the harness.
 
 ---
 
@@ -458,7 +468,7 @@ All files under `apps/android/app/src/main/kotlin/app/pbbls/android/core/designs
 
 ## Part 14 — You header, counters, glyphs (`feat/1383-you-header-android`)
 
-Needs Part B merged (or render the count-free lines, spec R5).
+Needs Part B (#1386) merged (or render the count-free lines, spec R5).
 
 ### Task 54: Engagement counts
 
@@ -488,7 +498,7 @@ Needs Part B merged (or render the count-free lines, spec R5).
 
 ## Part 15 — Achievements and Lab on You (`feat/1383-you-sections-android`, `Resolves #1383`)
 
-Needs the `whatsapp` icon in `PbblsIcons.kt` (spec R4).
+Needs the `whatsapp` icon in `PbblsIcons.kt`: #1387 (`chore/1387-whatsapp-icon`) merged and the Android outputs regenerated (spec R4).
 
 ### Task 59: Achievements cards
 
