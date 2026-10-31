@@ -64,6 +64,7 @@ export const SPECIMENS = [
   { id: "page-header", name: "PageHeader", source: "components/layout/PageHeader.tsx", section: "components", m3: "bridged" },
   { id: "empty-state", name: "EmptyState", source: "components/layout/EmptyState.tsx", section: "components", m3: "bridged" },
   // views: composed from their feature components, fed by the fixture store
+  { id: "view-home", name: "Home", source: "app/home/page.tsx", section: "views", m3: "tuned" },
   { id: "view-path", name: "Path", source: "app/path/page.tsx", section: "views", m3: "bridged" },
   { id: "view-pebble", name: "Pebble detail", source: "app/pebble/[id]/page.tsx", section: "views", m3: "bridged" },
   { id: "view-profile", name: "Profile", source: "app/profile/page.tsx", section: "views", m3: "bridged" },

@@ -30,6 +30,12 @@ type PathScreenProps = {
    * holds it, then drop the parameter. Null or absent: today's week.
    */
   focusMomentId?: string | null
+  /**
+   * `?week=` (#1384, spec D9): a Monday at UTC midnight. Opens on the closest
+   * week the Path has once the store settles, then drops the parameter, the
+   * way `focusMomentId` is consumed. `focusMomentId` wins when both are given.
+   */
+  focusWeek?: Date | null
 }
 
 /**
@@ -46,7 +52,7 @@ function closestEntry(entries: WeekRollEntry[], preferred: Date): WeekRollEntry 
   }, entries[0])
 }
 
-export function PathScreen({ moments, souls, loading, focusMomentId = null }: PathScreenProps) {
+export function PathScreen({ moments, souls, loading, focusMomentId = null, focusWeek = null }: PathScreenProps) {
   const t = useTranslations("path")
   const router = useRouter()
   // today is frozen at mount; the failure mode (user leaves the tab open past
@@ -77,6 +83,23 @@ export function PathScreen({ moments, souls, loading, focusMomentId = null }: Pa
   useEffect(() => {
     if (focusMomentId !== null && focusMomentId === appliedFocus) router.replace("/path")
   }, [focusMomentId, appliedFocus, router])
+
+  // #1384 D9: a `?week=` Monday pages to the closest week once the store has
+  // settled, adjusted during render like the focus above; the URL is cleaned
+  // below, which re-arms it for the next `?week=`.
+  const weekParam = focusWeek ? focusWeek.toISOString().slice(0, 10) : null
+  const [appliedWeek, setAppliedWeek] = useState<string | null>(null)
+  if (weekParam === null && appliedWeek !== null) setAppliedWeek(null)
+  if (weekParam !== null && weekParam !== appliedWeek && focusMomentId === null && !loading) {
+    setAppliedWeek(weekParam)
+    if (focusWeek && entries.length > 0) {
+      const monday = new Date(focusWeek.getUTCFullYear(), focusWeek.getUTCMonth(), focusWeek.getUTCDate())
+      setFocusedKey(closestEntry(entries, isoWeekStart(monday)).weekStartIso)
+    }
+  }
+  useEffect(() => {
+    if (weekParam !== null && weekParam === appliedWeek) router.replace("/path")
+  }, [weekParam, appliedWeek, router])
 
   const focusedEntry = entries.find((e) => e.weekStartIso === focusedKey)
     ?? (entries.length > 0 ? closestEntry(entries, isoWeekStart(today)) : undefined)
