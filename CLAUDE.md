@@ -93,7 +93,7 @@ The maintainer's journal account (a non-admin Pebbles account, their public blog
 - `--valence highlight` for something new, `neutral` for chores, refactors, quality and Kritik improvements, `lowlight` for bugs, incidents and critical findings.
 - `--emotion`: one live slug chosen honestly for how the day felt. `--collection`: the surface (`Web`, `iOS`, `Android`) and/or `Releases`, `Milestones`, `Back-end & data`, `Brand & design`, `Admin & Lab`, `Quality & tooling`. `--image`: a screenshot reference that shows the change, when one exists.
 - `--title` ≤ 50 chars; `--journal` first person, 1–3 short sentences in plain words a reader gets. No PR numbers, file names, finding ids, secrets or user data: it is published.
-- If it fails on auth, tell the maintainer to re-bootstrap (`--init`, see the script header). Never work around it with the service role.
+- If it fails on sign-in, tell the maintainer to check the journal credentials in `.env.journal` (see the script header). Never fall back to an admin account or the service role.
 
 ## Editing CLAUDE.md / AGENTS.md
 
