@@ -132,10 +132,7 @@ struct AchievementsHarnessPayloadTests {
 
     @Test("every key the server sends is one the design fixture carries")
     func shape() throws {
-        // The board's Explorer completion is ready, so not pulled: `pulled_at` is
-        // carried by the pulled dump alone (and asserted in `pulled`).
         let design = try H.keyPaths(AchievementsFixtures.data("design-fixture"))
-            .union(["explorer.completion.pulled_at"])
         for dump in H.reads {
             let unknown = try H.keyPaths(H.data(dump)).subtracting(design)
             #expect(unknown.isEmpty, "\(dump) sends keys the fixture lacks: \(unknown.sorted())")

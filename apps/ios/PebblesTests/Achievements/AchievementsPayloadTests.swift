@@ -2,7 +2,8 @@ import Foundation
 import Testing
 @testable import Pebbles
 
-/// `get_achievements` decoded from the board's fixture (#1306): the design's values
+/// `get_achievements` decoded from the board's fixture (#1306), the canonical one
+/// every surface shares (`packages/supabase/scripts/oracles/achievements/design/`),
 /// in the shape the server serves (spec §3.3), the precisions every surface emits,
 /// omitted sections and a section that does not decode. The contract itself is
 /// proved on the server's own bodies in `AchievementsHarnessPayloadTests`; this
@@ -20,32 +21,33 @@ struct AchievementsPayloadTests {
         let explorer = try #require(payload.explorer)
         #expect(explorer.firstFive.map(\.slug)
             == ["first-moment", "first-pebble", "first-collection", "first-soul", "first-glyph"])
-        #expect(explorer.firstFive[2].on == CalendarDay(year: 2026, month: 3, day: 14))
+        #expect(explorer.firstFive[2].on == CalendarDay(year: 2026, month: 4, day: 10))
         #expect(explorer.firstFive[2].subject?.kind == "collection")
-        #expect(explorer.firstFive[2].subject?.name == "Summer")
+        #expect(explorer.firstFive[2].subject?.name == "Elio, year one")
+        #expect(explorer.firstFive[0].subject?.name == nil, "an unnamed first moment omits its name")
         #expect(explorer.sixFirsts.map(\.kind) == ["small", "medium", "large", "lowlight", "neutral", "highlight"])
-        #expect(explorer.sixFirsts[2].pebble?.positiveness == -1)
-        #expect(explorer.sixFirsts[2].on == CalendarDay(year: 2026, month: 3, day: 9))
+        #expect(explorer.sixFirsts[3].pebble?.positiveness == -1)
+        #expect(explorer.sixFirsts[3].on == CalendarDay(year: 2026, month: 3, day: 8))
         #expect(explorer.twentyFive?.count == 25)
-        #expect(explorer.twentyFive?.on == CalendarDay(year: 2026, month: 4, day: 2))
+        #expect(explorer.twentyFive?.on == CalendarDay(year: 2026, month: 4, day: 21))
         #expect(explorer.ringsDone == ["first_five", "six_firsts", "twenty_five"])
-        #expect(explorer.completion?.ready == true)
-        #expect(explorer.completion?.pulledAt == nil)
-        #expect(explorer.completion?.offeredFrom == ISO8601Flexible.parse("2026-03-10T05:00:00Z"))
-        #expect(explorer.completion?.pebble?.name == "Argument about money")
+        #expect(explorer.completion?.ready == false)
+        #expect(explorer.completion?.pulledAt == ISO8601Flexible.parse("2026-03-09T07:30:00Z"))
+        #expect(explorer.completion?.offeredFrom == ISO8601Flexible.parse("2026-03-09T05:00:00Z"))
+        #expect(explorer.completion?.pebble?.name == "Gym, finally")
         #expect(explorer.firstPebble?.name == "Mara moves in")
-        #expect(explorer.firstPebble?.happenedAt == ISO8601Flexible.parse("2026-03-02T09:30:00Z"))
+        #expect(explorer.firstPebble?.happenedAt == ISO8601Flexible.parse("2026-03-02T10:00:00Z"))
 
         let emotions = try #require(payload.emotions)
         #expect(emotions.count == 23 && emotions.of == 38)
         #expect(emotions.seats.count == 38)
         #expect(emotions.seats.filter(\.met).count == 23)
-        #expect(emotions.seats.filter(\.isNew).map(\.seat) == [31, 35])
-        #expect(emotions.seats[5].pebble?.momentId == UUID(uuidString: "a0000000-0000-4000-8000-000000000001"))
-        #expect(emotions.seats[5].on == CalendarDay(year: 2026, month: 3, day: 2))
-        #expect(emotions.seats[4].on == nil && emotions.seats[4].pebble == nil)
+        #expect(emotions.seats.filter(\.isNew).map(\.seat) == [29, 34])
+        #expect(emotions.seats[29].on == CalendarDay(year: 2026, month: 10, day: 6))
+        #expect(emotions.seats[5].on == nil && emotions.seats[5].pebble == nil && !emotions.seats[5].met)
         #expect(emotions.families.map(\.family) == ["joy", "pride", "anger", "fear", "shame", "sadness", "peace"])
-        #expect(emotions.families[0].met == [5, 2, 0, 1, 3] && emotions.families[0].notYet == [4])
+        #expect(emotions.families.map { $0.met.count + $0.notYet.count } == [6, 3, 6, 5, 4, 6, 8])
+        #expect(emotions.families[0].met == [3, 4, 1, 2, 0] && emotions.families[0].notYet == [5])
         #expect(emotions.since == CalendarDay(year: 2026, month: 3, day: 2))
         #expect(emotions.completion == nil)
 
@@ -53,7 +55,8 @@ struct AchievementsPayloadTests {
         #expect(domains.coverage == "most")
         #expect(domains.entered.count == 14 && domains.notYet.count == 4)
         #expect(domains.entered.first?.isNew == true)
-        #expect(domains.entered.first?.on == CalendarDay(year: 2026, month: 10, day: 17))
+        #expect(domains.entered.first?.on == CalendarDay(year: 2026, month: 10, day: 1))
+        #expect(domains.entered.first?.pebble?.emotionId == nil, "the board names no emotion for this pebble")
         #expect(domains.completion == nil)
 
         #expect(payload.pebbles?.count == 137)
@@ -62,9 +65,9 @@ struct AchievementsPayloadTests {
         #expect(payload.pebbles?.thenEvery == 500)
         #expect(payload.pebbles?.since == CalendarDay(year: 2026, month: 3, day: 2))
         #expect(payload.glyphsCarved?.thenEvery == nil)
-        #expect(payload.glyphsCarved?.since == CalendarDay(year: 2026, month: 6, day: 12))
+        #expect(payload.glyphsCarved?.since == CalendarDay(year: 2026, month: 9, day: 21))
         #expect(payload.glyphSales?.levels.first?.pebble == nil)
-        #expect(payload.glyphSales?.levels.first?.on == CalendarDay(year: 2026, month: 5, day: 30))
+        #expect(payload.glyphSales?.levels.first?.on == CalendarDay(year: 2026, month: 10, day: 2))
 
         let year = try #require(payload.years?.first)
         #expect(year.year == 2026 && year.current)
@@ -72,17 +75,17 @@ struct AchievementsPayloadTests {
         #expect(year.months.count == 12)
         #expect(year.months[7].level == 2 && year.months[7].family == "joy")
         #expect(year.months[7].done == AchievementsPayload.Done(moments: true, pebbles: true, weeks: true))
-        #expect(year.months[6].done == AchievementsPayload.Done(moments: true, pebbles: true, weeks: false))
+        #expect(year.months[2].done == AchievementsPayload.Done(moments: true, pebbles: false, weeks: true))
         #expect(year.months[11].state == "upcoming" && year.months[11].family == nil)
         #expect(year.listed == [11, 10, 9, 8, 7, 6, 5, 4, 3])
         #expect(year.nextStep == AchievementsPayload.NextStep(month: 11, needs: "moments", daysLeft: 12, reachable: true))
 
-        let seen = try #require(ISO8601Flexible.parse("2026-10-02T08:14:05Z"))
+        let seen = try #require(ISO8601Flexible.parse("2026-10-02T19:00:00Z"))
         #expect(payload.seen == ["explorer": seen, "emotions": seen, "domains": seen, "pebbles": seen])
-        #expect(payload.shelf?.count == 6 && payload.shelfCount == 12)
+        #expect(payload.shelf?.count == 6 && payload.shelfCount == 13)
         #expect(payload.shelf?.first == AchievementsPayload.ShelfItem(
-            slug: "pebble-count-100", family: "pebble_count", threshold: 100,
-            unlockedOn: CalendarDay(year: 2026, month: 8, day: 1)))
+            slug: "glyph-sales-1", family: "glyph_sales", threshold: 1,
+            unlockedOn: CalendarDay(year: 2026, month: 10, day: 2)))
         #expect(payload.shelf?.last?.threshold == nil && payload.shelf?.last?.family == "first_glyph")
     }
 

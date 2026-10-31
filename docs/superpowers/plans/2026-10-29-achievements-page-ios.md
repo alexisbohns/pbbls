@@ -1184,7 +1184,7 @@ struct AchievementsMappingTests {
         #expect(march.state == .quiet && march.level == 2 && march.progress == 1)
         let april = try #require(page.years.first?.month(4))
         #expect(april.level == 0 && april.progress == 0)
-        #expect(april.isMuted, "a kept month without a family has no hue to draw")
+        #expect(!april.isMuted, "a kept month without a family still draws, in ink")
         #expect(page.years.first?.nextStep == nil)
     }
 
@@ -1409,8 +1409,10 @@ extension AchievementsPage {
         /// Toward the next level, in [0, 1]; 0 on the rim.
         let progress: Double
 
-        /// Drawn quietly: a month with no pebble to colour it (NOTES, "quieter disc").
-        var isMuted: Bool { state != .kept || family == nil }
+        /// Drawn quietly: a month with no pebble (NOTES, "quieter disc"), by its
+        /// served state alone. A kept month whose family is absent or unresolved
+        /// still draws, in ink.
+        var isMuted: Bool { state != .kept }
     }
 
     enum Needs: String {
@@ -4491,8 +4493,9 @@ import SwiftUI
 /// disc"): the stone, its two inner rings, a spoke and two notches a month,
 /// then each month's counter at its level, its climb and, for a month that has
 /// begun at the centre, its goal notch. A month with pebbles wears its family's
-/// hue (the server's `family`); a rim month adds the hairline ring, a hued spoke
-/// and a hued numeral; a month without pebbles is muted.
+/// hue (the server's `family`), or ink when that family is absent or unresolved;
+/// a rim month adds the hairline ring, a hued spoke and a hued numeral; only a
+/// month the server says is upcoming or quiet is muted.
 struct YearDisc: View {
     let year: AchievementsPage.Year
     let lookups: WrapLookups
@@ -4527,10 +4530,15 @@ struct YearDisc: View {
         .accessibilityHidden(true)
     }
 
-    /// The month's hue: its family's, once it holds pebbles; nil while muted or unknown.
-    private func hue(_ month: AchievementsPage.Month?, _ inks: AchievementInks) -> Color? {
+    /// A month's tone: nil while muted (upcoming or quiet); a kept month wears its
+    /// family's hue, or ink when the family is absent or unresolved.
+    static func tone(_ month: AchievementsPage.Month?, lookups: WrapLookups, inks: AchievementInks) -> Color? {
         guard let month, !month.isMuted else { return nil }
-        return month.family.flatMap(lookups.family).flatMap { inks.hue($0.palette) }
+        return month.family.flatMap(lookups.family).flatMap { inks.hue($0.palette) } ?? inks.ink
+    }
+
+    private func hue(_ month: AchievementsPage.Month?, _ inks: AchievementInks) -> Color? {
+        Self.tone(month, lookups: lookups, inks: inks)
     }
 
     private func onRim(_ month: AchievementsPage.Month?) -> Bool {
