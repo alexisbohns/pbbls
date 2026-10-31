@@ -305,8 +305,14 @@ class AchievementsViewModel
                             .getOrNull()
                             ?.let { kept -> if (shown() == null && readShown == 0) show(kept) }
                     }
-                    // The retroactive grant first (D14), so a veteran's history is there on the read.
-                    achievements.checkIgnoringFailure()
+                    // The retroactive grant first (D14), so a veteran's history is there on the read; but
+                    // not while a mutation's own check is in flight, which this one could rob of its
+                    // celebration (that check grants the unlocks anyway).
+                    if (achievements.isFiringCheck) {
+                        Log.i(TAG, "a mutation's achievement check is in flight; the page reads without granting")
+                    } else {
+                        achievements.checkIgnoringFailure()
+                    }
                     refresh(zone)
                 }
         }

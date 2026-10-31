@@ -82,6 +82,16 @@ class AchievementsViewModelTest {
         }
 
     @Test
+    fun `while a mutation's check is in flight the page reads without granting`() =
+        runTest {
+            val service = FakeAchievementsService(served = page).apply { firingCheck = true }
+            val viewModel = vm(service)
+            advanceUntilIdle()
+            assertEquals(AchievementsUiState.Content(page), viewModel.uiState.value)
+            assertEquals(listOf("page"), service.calls)
+        }
+
+    @Test
     fun `the device copy shows at once, then the fresh page replaces it`() =
         runTest {
             val gate = CompletableDeferred<Unit>()
