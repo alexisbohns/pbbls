@@ -5694,6 +5694,40 @@
         }
       }
     },
+    "home.firstFive.of" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "of"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sur"
+          }
+        }
+      }
+    },
+    "home.firstFive.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld of 5 done"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sur 5 faites"
+          }
+        }
+      }
+    },
     "home.firstFive.title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5707,23 +5741,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tes cinq premières fois"
-          }
-        }
-      }
-    },
-    "home.firstFive.count" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld of 5"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld sur 5"
           }
         }
       }

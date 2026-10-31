@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// Home's "Your first five" (spec §1.4): a header with five dots and the
-/// count, then the five tasks in a hairline card; once all five are ticked, a
-/// sixth row claims the blue pebble. Draws nothing when the checklist is done
-/// or unavailable.
+/// Home's "Your first five" (spec §1.4, #1382 D12): one box holding the head
+/// ("2 of 5"), a stone cut in five that lights a piece per task done, and the
+/// five tasks; once all five are ticked, a sixth row claims the blue pebble.
+/// Draws nothing when the checklist is done or unavailable.
 struct HomeChecklistView: View {
     let checklist: HomeChecklist
     let isClaiming: Bool
@@ -12,50 +12,40 @@ struct HomeChecklistView: View {
 
     private var locale: Locale { SpineStrings.appLocale }
 
+    /// What VoiceOver reads for the head's figure: "2 of 5 done".
+    static func figureLabel(done: Int, locale: Locale) -> String {
+        SpineStrings.format("home.firstFive.a11y", locale: locale, done)
+    }
+
     var body: some View {
         if checklist.state == .inProgress || checklist.state == .claimable {
-            VStack(alignment: .leading, spacing: Spacing.sm) {
-                SpineSectionHeader(String(localized: "home.firstFive.title")) {
-                    HStack(alignment: .center, spacing: 8) {
-                        HStack(spacing: 4) {
-                            ForEach(checklist.rows, id: \.task) { row in
-                                dot(done: row.isDone)
-                            }
-                        }
-                        .accessibilityHidden(true)
-                        Text(verbatim: SpineStrings.format("home.firstFive.count", locale: locale, checklist.doneCount))
-                            .spineType(.sectionLabel)
-                            .foregroundStyle(Color.pebbles.outline)
-                            .lineLimit(1)
-                            .fixedSize()
-                    }
+            let title = String(localized: "home.firstFive.title")
+            VStack(alignment: .leading, spacing: 0) {
+                PebblesSectionHead(title, figure: .ratio(done: checklist.doneCount, total: checklist.rows.count,
+                                                         word: SpineStrings.string("home.firstFive.of", locale: locale)))
+                    .accessibilityLabel(Text(verbatim:
+                        "\(title), \(Self.figureLabel(done: checklist.doneCount, locale: locale))"))
+                stepper
+                    .padding(.top, 18)
+                    .padding(.bottom, 8)
+                ForEach(checklist.rows, id: \.task) { row in
+                    ChecklistTaskRow(row: row) { onTask(row.task) }
                 }
-                VStack(spacing: 0) {
-                    ForEach(Array(checklist.rows.enumerated()), id: \.element.task) { index, row in
-                        if index > 0 { Divider().overlay(Color.pebbles.rule) }
-                        ChecklistTaskRow(row: row) { onTask(row.task) }
-                    }
-                    if checklist.canClaim {
-                        Divider().overlay(Color.pebbles.rule)
-                        claimRow
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: Spacing.lg))
-                .overlay {
-                    RoundedRectangle(cornerRadius: Spacing.lg)
-                        .strokeBorder(Color.pebbles.rule, lineWidth: 1)
-                }
+                if checklist.canClaim { claimRow }
             }
+            .pebblesBox()
         }
     }
 
-    @ViewBuilder
-    private func dot(done: Bool) -> some View {
-        if done {
-            Circle().fill(Color.pebbles.onSurface).frame(width: 6, height: 6)
-        } else {
-            Circle().strokeBorder(Color.pebbles.outline, lineWidth: 1).frame(width: 6, height: 6)
+    /// One thin stone cut in five: the tasks done lit in `primary`, in row order.
+    private var stepper: some View {
+        let fills = checklist.rows.map { $0.isDone ? Color.pebbles.primary : Color.pebbles.surfaceContainerHighest }
+        return SplitStone(count: fills.count, seed: "first-five",
+                          options: StoneOptions(corner: 3, lean: 0.9, gutter: 5, fillet: 2),
+                          fills: fills, minHeight: 6) { _ in
+            Color.clear.frame(height: 6)
         }
+        .accessibilityHidden(true)
     }
 
     private var claimRow: some View {
@@ -71,12 +61,11 @@ struct HomeChecklistView: View {
         }
         .buttonStyle(PebblesPrimaryButtonStyle(isLoading: isClaiming))
         .disabled(isClaiming)
-        .padding(Spacing.sm)
-        .background(Color.pebbles.surfaceContainer)
+        .padding(.vertical, Spacing.sm)
     }
 }
 
-/// One task: its mark, title and italic line, and a chevron while it is still
+/// One task: its mark, title and line, and a chevron while it is still
 /// to do. A done row is disabled and reads as such through its mark and ink.
 private struct ChecklistTaskRow: View {
     let row: HomeChecklist.Row
@@ -84,18 +73,16 @@ private struct ChecklistTaskRow: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(alignment: .center, spacing: Spacing.md) {
+            HStack(alignment: .center, spacing: 12) {
                 PbblsIconImage(row.isDone ? .checkCircle : .pebbleRound, .row,
-                               style: AnyShapeStyle(row.isDone ? Color.pebbles.onSurface : Color.pebbles.outline))
+                               style: AnyShapeStyle(row.isDone ? Color.pebbles.primary : Color.pebbles.outline))
                     .frame(width: 22, height: 22)
                 VStack(alignment: .leading, spacing: 2) {
-                    // A done title keeps `onSurfaceVariant` for contrast; only its line goes quiet.
                     Text(row.task.title)
-                        .spineType(.checklistTitle)
+                        .spineType(row.isDone ? .rowTitleDone : .rowTitle)
                         .foregroundStyle(row.isDone ? Color.pebbles.onSurfaceVariant : Color.pebbles.onSurface)
                     Text(row.task.line)
-                        .spineType(.summary)
-                        .italic()
+                        .spineType(.rowLine)
                         .foregroundStyle(row.isDone ? Color.pebbles.outline : Color.pebbles.onSurfaceVariant)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -106,9 +93,7 @@ private struct ChecklistTaskRow: View {
                         .accessibilityHidden(true)
                 }
             }
-            .padding(.horizontal, Spacing.lg)
-            .padding(.vertical, Spacing.sm)
-            .frame(minHeight: 56)
+            .padding(.vertical, 13)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
