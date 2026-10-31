@@ -105,7 +105,8 @@ struct PeopleOnboardingView: View {
             .accessibilityHidden(true)
     }
 
-    /// The hairline card `HomeChecklistView` draws, around a header and the rows.
+    /// A hairline card around a header and the rows (the one Home's first five
+    /// drew before it moved into a box, #1382 D12; People keeps its own).
     private func card<Footer: View>(title: String, prompts: [PeoplePrompts.Prompt],
                                     @ViewBuilder footer: () -> Footer) -> some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {

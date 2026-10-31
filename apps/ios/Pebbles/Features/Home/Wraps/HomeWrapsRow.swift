@@ -10,17 +10,15 @@ struct HomeWrapsRow: View {
 
     private var locale: Locale { SpineStrings.appLocale }
 
+    /// Room under the cards for their shadow, given back to the page below.
+    private static let shadowRoom: CGFloat = 22
+
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            SpineSectionHeader(String(localized: "home.wraps.title")) {
-                if !months.isEmpty {
-                    Text(verbatim: "\(months.count)")
-                        .spineType(.sectionLabel)
-                        .foregroundStyle(Color.pebbles.outline)
-                }
-            }
+        VStack(alignment: .leading, spacing: 18) {
+            PebblesSectionHead(String(localized: "home.wraps.title"),
+                               figure: months.isEmpty ? nil : .count(months.count))
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: Spacing.sm) {
+                HStack(spacing: 12) {
                     if months.isEmpty {
                         HomeWrapPromise(liveMonth: liveMonth)
                     } else {
@@ -31,8 +29,13 @@ struct HomeWrapsRow: View {
                     }
                 }
                 .scrollTargetLayout()
+                // The row runs to the screen's edges, and leaves its shadow room.
+                .padding(.horizontal, Spacing.lg)
+                .padding(.bottom, Self.shadowRoom)
             }
             .scrollTargetBehavior(.viewAligned)
+            .padding(.horizontal, -Spacing.lg)
+            .padding(.bottom, -Self.shadowRoom)
         }
     }
 }
@@ -45,7 +48,7 @@ struct HomeWrapPromise: View {
 
     var body: some View {
         let dashed = StrokeStyle(lineWidth: 1, dash: [4, 4])
-        let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
         return VStack(spacing: 8) {
             Circle().strokeBorder(Color.pebbles.outline, style: dashed).frame(width: 64, height: 64)
             Text(verbatim: promiseLine)
@@ -55,7 +58,7 @@ struct HomeWrapPromise: View {
                 .minimumScaleFactor(0.8)
         }
         .padding(.horizontal, 8)
-        .frame(width: 2 * HomeWrapCard.side + Spacing.sm, height: HomeWrapCard.side)
+        .frame(width: 2 * HomeWrapCard.width + 12, height: HomeWrapCard.promiseHeight)
         .overlay(shape.strokeBorder(Color.pebbles.outline, style: dashed))
         .accessibilityElement(children: .combine)
     }
