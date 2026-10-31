@@ -45,6 +45,7 @@ class PebbleDeleteTest : AppUiTest() {
         skipOnboarding()
         launch()
         signIn()
+        openPath()
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performTouchInput { longClick() }
         onText(R.string.pebble_delete).performClick()
     }
@@ -126,6 +127,7 @@ class PebbleDeleteTest : AppUiTest() {
         skipOnboarding()
         launch()
         signIn()
+        openPath()
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performClick()
         compose.onNodeWithContentDescription(string(R.string.more_actions_a11y)).performClick()
         onText(R.string.action_delete).performClick()
@@ -146,6 +148,7 @@ class PebbleDeleteTest : AppUiTest() {
         skipOnboarding()
         launch()
         signIn()
+        openPath()
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performClick()
         compose.onNodeWithContentDescription(string(R.string.more_actions_a11y)).performClick()
         onText(R.string.action_delete).performClick()

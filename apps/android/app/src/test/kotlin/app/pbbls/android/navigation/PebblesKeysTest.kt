@@ -50,6 +50,7 @@ class PebblesKeysTest {
     fun `every key round-trips through the polymorphic serializer`() {
         val keys: List<PebblesKey> =
             listOf(
+                PebblesKey.Home,
                 PebblesKey.Path,
                 PebblesKey.People,
                 PebblesKey.Collections,
@@ -115,8 +116,8 @@ class PebblesKeysTest {
     }
 
     @Test
-    fun `the four tabs are TopLevelKeys and every TopLevelKey is a BarKey`() {
-        val tabs = listOf(PebblesKey.Path, PebblesKey.People, PebblesKey.Collections, PebblesKey.You)
+    fun `the five tabs, Home first, are TopLevelKeys and every TopLevelKey is a BarKey`() {
+        val tabs = listOf(PebblesKey.Home, PebblesKey.Path, PebblesKey.People, PebblesKey.Collections, PebblesKey.You)
         tabs.forEach {
             assertTrue("$it should be a TopLevelKey", it is TopLevelKey)
             assertTrue("$it should be a BarKey", it is BarKey)
