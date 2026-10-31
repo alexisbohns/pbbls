@@ -312,6 +312,7 @@
     <!-- ==== Gestion des âmes (M41 sous-projet D). -->
     <string name="souls_title">Âmes</string>
     <string name="souls_add_a11y">Ajouter une âme</string>
+    <string name="people_circle_a11y">Cercle</string>
     <string name="souls_empty_title">Pas encore d\'âmes</string>
     <string name="souls_empty_message">Les personnes et les êtres que vous associez à vos pebbles apparaîtront ici.</string>
     <string name="souls_load_error">Impossible de charger les âmes.</string>

@@ -147,6 +147,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onBack = navigator::goBack,
             onOpenSoul = { navigator.navigateToDetail(PebblesKey.SoulDetail(it.id)) },
             onCreateSoul = { navigator.navigate(PebblesKey.SoulForm()) },
+            onOpenCircle = { navigator.navigate(PebblesKey.Connections) },
             onDeleteConfirmed = { navigator.closeDetail(PebblesKey.SoulDetail(it)) },
         )
     }

@@ -311,6 +311,7 @@
          but localizes ("Âmes"), unlike "Pebbles". ==== -->
     <string name="souls_title">Souls</string>
     <string name="souls_add_a11y">Add soul</string>
+    <string name="people_circle_a11y">Circle</string>
     <string name="souls_empty_title">No souls yet</string>
     <string name="souls_empty_message">People and beings you tag on your pebbles will appear here.</string>
     <string name="souls_load_error">Couldn\'t load souls.</string>
