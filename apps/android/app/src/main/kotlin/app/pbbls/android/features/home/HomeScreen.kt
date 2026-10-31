@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.pbbls.android.core.data.HomeShortcut
 import app.pbbls.android.core.ui.HomeMonthSlot
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -23,12 +24,18 @@ import java.time.temporal.ChronoUnit
  *
  * [monthSlot] is the Path's month grid (D8), filled by the entry provider; a tap on one of its weeks
  * leaves the Path that focus and calls [onOpenPath] (D10).
+ *
+ * A quick action is stored as the last used one, then opens its flow: [onCamera], [onQuick] or
+ * [onPebble].
  */
 @Composable
 fun HomeScreen(
     reselected: Flow<Unit>,
     monthSlot: HomeMonthSlot,
     onOpenPath: () -> Unit,
+    onCamera: () -> Unit,
+    onQuick: () -> Unit,
+    onPebble: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -52,6 +59,15 @@ fun HomeScreen(
         },
         modifier = modifier,
         listState = listState,
+        onShortcut = { shortcut ->
+            viewModel.onShortcutUsed(shortcut)
+            when (shortcut) {
+                HomeShortcut.CAMERA -> onCamera()
+                HomeShortcut.QUICK -> onQuick()
+                HomeShortcut.PEBBLE -> onPebble()
+            }
+        },
+        hapticsOn = { viewModel.hapticsOn },
     )
 }
 
