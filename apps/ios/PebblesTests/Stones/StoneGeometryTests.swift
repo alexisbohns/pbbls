@@ -39,4 +39,39 @@ struct StoneGeometryTests {
             }
         }
     }
+
+    @Test("split returns count closed outlines inside the box", arguments: [2, 3, 5])
+    func splitCount(count: Int) {
+        let size = CGSize(width: 358, height: 88)
+        let pieces = StoneGeometry.split(size: size, count: count, seed: "days|pebbles|karma")
+        #expect(pieces.count == count)
+        for piece in pieces {
+            #expect(piece.count > 2)
+            for point in piece {
+                let inside = point.x >= -0.5 && point.x <= size.width + 0.5
+                    && point.y >= -0.5 && point.y <= size.height + 0.5
+                #expect(inside, "\(point) outside \(size)")
+            }
+        }
+    }
+
+    @Test("neighbouring pieces keep the gutter apart", arguments: [2, 3, 5])
+    func splitGutter(count: Int) {
+        let options = StoneOptions(gutter: 8)
+        let pieces = StoneGeometry.split(size: CGSize(width: 358, height: 100), count: count, seed: "kit",
+                                         options: options)
+        for k in 1..<pieces.count {
+            let gap = pieces[k - 1].flatMap { a in pieces[k].map { b in hypot(a.x - b.x, a.y - b.y) } }.min() ?? 0
+            #expect(gap >= options.gutter - 0.5, "pieces \(k - 1) and \(k) are \(gap) pt apart")
+        }
+    }
+
+    @Test("a seed always cuts the same stone")
+    func splitIsSeeded() {
+        let size = CGSize(width: 324, height: 6)
+        let options = StoneOptions(corner: 3, lean: 0.9, gutter: 5, fillet: 2)
+        let first = StoneGeometry.split(size: size, count: 5, seed: "first-five", options: options)
+        let second = StoneGeometry.split(size: size, count: 5, seed: "first-five", options: options)
+        #expect(first == second)
+    }
 }
