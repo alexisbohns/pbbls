@@ -18,7 +18,7 @@ import app.pbbls.android.navigation.pebblesNavigationSuiteColors
 import com.android.tools.screenshot.PreviewTest
 
 /**
- * The four-tab navigation (#852) in both of its forms (#855): the short bottom
+ * The five-tab navigation (#852, Home since #1383) in both of its forms (#855): the short bottom
  * bar on a phone and the collapsed wide rail from 600 dp. The type is passed
  * explicitly rather than read from the window, so each render pins the
  * component it is named for whatever width layoutlib reports.
