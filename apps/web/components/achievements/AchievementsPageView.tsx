@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useReducer } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
@@ -10,7 +10,7 @@ import { useAchievementPalettes } from "@/lib/data/useAchievementPalettes"
 import { useAchievementsPage } from "@/lib/data/useAchievementsPage"
 import { useAchievementsWords } from "@/lib/i18n/useAchievementsWords"
 import { useSheetNames } from "@/lib/i18n/useSheetNames"
-import { closeSheet, pushSheet, shownStack, type SheetKey } from "@/lib/achievements/sheets"
+import { NO_SHEETS, needsPrune, sheetsReducer, type SheetKey } from "@/lib/achievements/sheets"
 import type { CeremonyStack } from "@/lib/types"
 import { AchievementsPageContent } from "./page/AchievementsPageContent"
 import { AchievementSheetStack } from "./sheets/AchievementSheetStack"
@@ -32,18 +32,11 @@ export function AchievementsPageView() {
   const palettes = useAchievementPalettes()
   const names = useSheetNames()
   const router = useRouter()
-  const [opened, setOpened] = useState<SheetKey[]>([])
-  // A sheet whose section left the payload closes, with everything above it.
-  const stack = shownStack(opened, page)
-  const open = useCallback((key: SheetKey) => setOpened((s) => pushSheet(shownStack(s, page), key)), [page])
-  const close = useCallback((depth: number) => setOpened((s) => closeSheet(shownStack(s, page), depth)), [page])
-  const openMoment = useCallback(
-    (momentId: string) => {
-      setOpened([])
-      router.push(`/pebble/${momentId}`)
-    },
-    [router],
-  )
+  const [sheets, dispatch] = useReducer(sheetsReducer, NO_SHEETS)
+  // A sheet whose section left the payload closes for good, with everything above it.
+  if (needsPrune(sheets, page)) dispatch({ type: "prune", page })
+  const open = useCallback((key: SheetKey) => dispatch({ type: "open", key }), [])
+  const openMoment = useCallback((momentId: string) => router.push(`/pebble/${momentId}`), [router])
 
   const onPull = useCallback(
     (stack: CeremonyStack) => {
@@ -63,16 +56,15 @@ export function AchievementsPageView() {
           <>
             <AchievementsPageContent page={page} palettes={palettes} pulling={pulling} onPull={onPull} onOpen={open} />
             <AchievementSheetStack
-              stack={stack}
+              sheets={sheets}
+              dispatch={dispatch}
               page={page}
               palettes={palettes}
               names={names}
               pulling={pulling}
               onPull={onPull}
-              onPush={open}
-              onClose={close}
-              onOpenMoment={openMoment}
               onSeen={markSeen}
+              onMoment={openMoment}
             />
           </>
         ) : loading ? (

@@ -5,7 +5,7 @@ import fr from "@/lib/i18n/messages/fr.json"
 import { designNames, designPage } from "./__fixtures__/design"
 import { achievementsWords, type Translate } from "./copy"
 import { domainSections, earlierYears, emotionSections, explorerSections, ladderSection, milestonesNote, yearRows } from "./sheet-rows"
-import { closeSheet, isShown, pushSheet, sameSheet, shownStack, type SheetKey } from "./sheets"
+import { NO_SHEETS, closeSheet, isShown, needsPrune, pushSheet, sameSheet, sheetsReducer, shownStack, type SheetKey, type SheetsState } from "./sheets"
 import type { AchievementsPage } from "@/lib/types"
 
 // The sheets against iOS's own tests (AchievementsSheetRowsTests,
@@ -173,5 +173,56 @@ describe("the sheets read aloud", () => {
   it("say what is new, and what is not yet as one", () => {
     expect(EN.sheet.row(["Joy", null, "Mar 2"], true)).toBe("Joy, Mar 2, new since you last looked")
     expect(FR.sheet.notYet(["Anxieux", "Amer"])).toBe("Pas encore : Anxieux, Amer")
+  })
+})
+
+describe("the stack's state", () => {
+  const open = (state: SheetsState, key: SheetKey) => sheetsReducer(state, { type: "open", key })
+
+  it("opens on top, and closes with everything above it, drawn until each close has played", () => {
+    let st = open(open(NO_SHEETS, explorer), domains)
+    expect(st.opened.map((e) => e.key)).toEqual([explorer, domains])
+    st = sheetsReducer(st, { type: "close", depth: 0 })
+    expect(st.opened).toEqual([])
+    expect(st.rendered).toHaveLength(2)
+    st = sheetsReducer(st, { type: "closed", open: st.rendered[1].open })
+    expect(st.rendered).toHaveLength(1)
+    st = sheetsReducer(st, { type: "closed", open: st.rendered[0].open })
+    expect(st.rendered).toEqual([])
+  })
+
+  it("closes only the top on its own dismissal, and ignores a close-played for a sheet still open", () => {
+    let st = open(open(NO_SHEETS, explorer), domains)
+    st = sheetsReducer(st, { type: "close", depth: 1 })
+    expect(st.opened.map((e) => e.key)).toEqual([explorer])
+    expect(sheetsReducer(st, { type: "closed", open: st.opened[0].open })).toBe(st)
+  })
+
+  it("marks a card seen once per open, and again on a new open", () => {
+    let st = open(NO_SHEETS, explorer)
+    const first = st.opened[0].open
+    st = sheetsReducer(sheetsReducer(st, { type: "seen", open: first }), { type: "seen", open: first })
+    expect(st.seen).toEqual([first])
+    st = sheetsReducer(st, { type: "close", depth: 0 })
+    st = open(st, explorer)
+    expect(st.opened[0].open).not.toBe(first)
+    expect(st.seen.includes(st.opened[0].open)).toBe(false)
+  })
+
+  it("prunes a sheet whose section left the payload, so it never comes back by itself", () => {
+    let st = open(open(open(NO_SHEETS, explorer), domains), { card: "emotions" })
+    const gone: AchievementsPage = { ...page, domains: null }
+    expect(needsPrune(st, gone)).toBe(true)
+    st = sheetsReducer(st, { type: "prune", page: gone })
+    expect(st.opened.map((e) => e.key)).toEqual([explorer])
+    expect(needsPrune(st, page)).toBe(false)
+    expect(sheetsReducer(st, { type: "prune", page })).toBe(st)
+  })
+
+  it("holds a pebble until the sheets have closed", () => {
+    let st = sheetsReducer(open(NO_SHEETS, explorer), { type: "openMoment", momentId: "m1" })
+    expect([st.opened, st.pendingMoment]).toEqual([[], "m1"])
+    st = sheetsReducer(st, { type: "movedOn" })
+    expect(st.pendingMoment).toBeNull()
   })
 })
