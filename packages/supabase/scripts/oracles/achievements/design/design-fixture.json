@@ -1,0 +1,221 @@
+{
+  "since": "2026-03-01",
+  "days_kept": 249,
+  "explorer": {
+    "first_pebble": {
+      "moment_id": "a0000000-0000-4000-8000-000000000001",
+      "name": "Mara moves in",
+      "happened_at": "2026-03-02T10:00:00Z",
+      "emotion_id": "f1b09d24-3c2e-414b-a751-fc91da51fcdb",
+      "intensity": 2,
+      "positiveness": 1
+    },
+    "first_five": [
+      {"slug": "first-moment", "done": true, "new": false, "on": "2026-03-01", "subject": {"kind": "moment", "id": "a0000000-0000-4000-8000-000000000000"}},
+      {"slug": "first-pebble", "done": true, "new": false, "on": "2026-03-02", "subject": {"kind": "pebble", "id": "a0000000-0000-4000-8000-000000000001", "name": "Mara moves in"}},
+      {"slug": "first-collection", "done": true, "new": false, "on": "2026-04-10", "subject": {"kind": "collection", "id": "c0000000-0000-4000-8000-000000000001", "name": "Elio, year one"}},
+      {"slug": "first-soul", "done": true, "new": false, "on": "2026-03-02", "subject": {"kind": "soul", "id": "50000000-0000-4000-8000-000000000001", "name": "Mara"}},
+      {"slug": "first-glyph", "done": true, "new": false, "on": "2026-05-14", "subject": {"kind": "glyph", "id": "90000000-0000-4000-8000-000000000001", "name": "carved for Bruno"}}
+    ],
+    "six_firsts": [
+      {"kind": "small", "done": true, "new": false, "on": "2026-03-02", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000003", "name": "A slow morning", "happened_at": "2026-03-02T10:00:00Z", "emotion_id": "5ff5cd1c-6739-6143-537f-85a2dbbd8841", "intensity": 1, "positiveness": 0}},
+      {"kind": "medium", "done": true, "new": false, "on": "2026-03-02", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000001", "name": "Mara moves in", "happened_at": "2026-03-02T10:00:00Z", "emotion_id": "f1b09d24-3c2e-414b-a751-fc91da51fcdb", "intensity": 2, "positiveness": 1}},
+      {"kind": "large", "done": true, "new": false, "on": "2026-03-02", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000002", "name": "Argument about money", "happened_at": "2026-03-02T10:00:00Z", "emotion_id": "21d79e4c-9482-40d3-bf73-53adfb452e5a", "intensity": 3, "positiveness": 1}},
+      {"kind": "lowlight", "done": true, "new": false, "on": "2026-03-08", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000004", "name": "Gym, finally", "happened_at": "2026-03-08T10:00:00Z", "emotion_id": "5d5e346a-c5c5-4fcb-99e9-2951213c3ff3", "intensity": 2, "positiveness": -1}},
+      {"kind": "neutral", "done": true, "new": false, "on": "2026-03-02", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000003", "name": "A slow morning", "happened_at": "2026-03-02T10:00:00Z", "emotion_id": "5ff5cd1c-6739-6143-537f-85a2dbbd8841", "intensity": 1, "positiveness": 0}},
+      {"kind": "highlight", "done": true, "new": false, "on": "2026-03-02", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000001", "name": "Mara moves in", "happened_at": "2026-03-02T10:00:00Z", "emotion_id": "f1b09d24-3c2e-414b-a751-fc91da51fcdb", "intensity": 2, "positiveness": 1}}
+    ],
+    "twenty_five": {
+      "count": 25,
+      "done": true,
+      "new": false,
+      "on": "2026-04-21",
+      "pebble": {
+        "moment_id": "a0000000-0000-4000-8000-000000000019",
+        "name": "Elio climbs the stairs",
+        "happened_at": "2026-04-21T10:00:00Z",
+        "emotion_id": "50a68890-f6bb-e67a-6655-e84ff0b71f49",
+        "intensity": 1,
+        "positiveness": 1
+      }
+    },
+    "rings_done": ["first_five", "six_firsts", "twenty_five"],
+    "completion": {
+      "completed_at": "2026-03-08T18:00:00Z",
+      "offered_from": "2026-03-09T05:00:00Z",
+      "ready": false,
+      "pulled_at": "2026-03-09T07:30:00Z",
+      "pebble": {
+        "moment_id": "a0000000-0000-4000-8000-000000000004",
+        "name": "Gym, finally",
+        "happened_at": "2026-03-08T10:00:00Z",
+        "emotion_id": "5d5e346a-c5c5-4fcb-99e9-2951213c3ff3",
+        "intensity": 2,
+        "positiveness": -1
+      }
+    }
+  },
+  "emotions": {
+    "count": 23,
+    "of": 38,
+    "seats": [
+      {"seat": 0, "emotion_id": "50a68890-f6bb-e67a-6655-e84ff0b71f49", "family": "joy", "met": true, "new": false, "on": "2026-07-18", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f3", "name": "Night sky at Sarlat", "happened_at": "2026-07-18T10:00:00Z", "emotion_id": "50a68890-f6bb-e67a-6655-e84ff0b71f49", "intensity": 3, "positiveness": 1}},
+      {"seat": 1, "emotion_id": "f14ca000-32c7-4cf3-9aa5-ad5dc84c5285", "family": "joy", "met": true, "new": false, "on": "2026-04-19", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003ed", "name": "Bruno vs the hose", "happened_at": "2026-04-19T10:00:00Z", "emotion_id": "f14ca000-32c7-4cf3-9aa5-ad5dc84c5285", "intensity": 1, "positiveness": 1}},
+      {"seat": 2, "emotion_id": "98bdc543-6b26-e1c8-da1d-50ae8b9973ff", "family": "joy", "met": true, "new": false, "on": "2026-06-02", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f0", "name": "Tickets to Lisbon", "happened_at": "2026-06-02T10:00:00Z", "emotion_id": "98bdc543-6b26-e1c8-da1d-50ae8b9973ff", "intensity": 2, "positiveness": 1}},
+      {"seat": 3, "emotion_id": "f1b09d24-3c2e-414b-a751-fc91da51fcdb", "family": "joy", "met": true, "new": false, "on": "2026-03-02", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000001", "name": "Mara moves in", "happened_at": "2026-03-02T10:00:00Z", "emotion_id": "f1b09d24-3c2e-414b-a751-fc91da51fcdb", "intensity": 2, "positiveness": 1}},
+      {"seat": 4, "emotion_id": "3ffd6ca6-e033-6926-fa1f-ddf8f90bfd8c", "family": "joy", "met": true, "new": false, "on": "2026-03-21", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003ea", "name": "Spring at the lake", "happened_at": "2026-03-21T10:00:00Z", "emotion_id": "3ffd6ca6-e033-6926-fa1f-ddf8f90bfd8c", "intensity": 2, "positiveness": 1}},
+      {"seat": 5, "emotion_id": "6b22ff42-67d4-ea3d-f35b-f71e49ae94cb", "family": "joy", "met": false, "new": false},
+      {"seat": 6, "emotion_id": "70e70f6a-237b-4e2d-8f4c-8043df889b36", "family": "pride", "met": true, "new": false, "on": "2026-08-22", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f5", "name": "Told dad", "happened_at": "2026-08-22T10:00:00Z", "emotion_id": "70e70f6a-237b-4e2d-8f4c-8043df889b36", "intensity": 3, "positiveness": 0}},
+      {"seat": 7, "emotion_id": "3e14e406-90e8-41fd-a967-30fa545c47dc", "family": "pride", "met": true, "new": false, "on": "2026-06-14", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f1", "name": "First talk on stage", "happened_at": "2026-06-14T10:00:00Z", "emotion_id": "3e14e406-90e8-41fd-a967-30fa545c47dc", "intensity": 3, "positiveness": 1}},
+      {"seat": 8, "emotion_id": "ed9fbe9f-6a93-22bb-d5d5-35f42164c120", "family": "pride", "met": true, "new": false, "on": "2026-03-28", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003eb", "name": "Shipped the bakery site", "happened_at": "2026-03-28T10:00:00Z", "emotion_id": "ed9fbe9f-6a93-22bb-d5d5-35f42164c120", "intensity": 2, "positiveness": 1}},
+      {"seat": 9, "emotion_id": "8a851a45-d1c5-92fd-fd50-098c4e86eaef", "family": "anger", "met": false, "new": false},
+      {"seat": 10, "emotion_id": "25d98464-bc3d-417f-ae12-a3a996e5dee1", "family": "anger", "met": true, "new": false, "on": "2026-03-12", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000006", "name": "Late train, again", "happened_at": "2026-03-12T10:00:00Z", "emotion_id": "25d98464-bc3d-417f-ae12-a3a996e5dee1", "intensity": 1, "positiveness": -1}},
+      {"seat": 11, "emotion_id": "332cabe9-c76d-d737-bba6-f2d7024de808", "family": "anger", "met": false, "new": false},
+      {"seat": 12, "emotion_id": "fab5fa1f-ad54-4705-a205-f8a0b2b31806", "family": "anger", "met": true, "new": false, "on": "2026-05-15", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000021", "name": "Rent went up", "happened_at": "2026-05-15T10:00:00Z", "emotion_id": "fab5fa1f-ad54-4705-a205-f8a0b2b31806", "intensity": 2, "positiveness": -1}},
+      {"seat": 13, "emotion_id": "df630582-0846-4ebf-be75-166595513840", "family": "anger", "met": true, "new": false, "on": "2026-09-17", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f7", "name": "Neighbour’s drill", "happened_at": "2026-09-17T10:00:00Z", "emotion_id": "df630582-0846-4ebf-be75-166595513840", "intensity": 1, "positiveness": -1}},
+      {"seat": 14, "emotion_id": "c32faae1-46ac-411b-987f-e32e572259bb", "family": "anger", "met": false, "new": false},
+      {"seat": 15, "emotion_id": "b4216f65-f0a6-2a26-ca1a-9dfa839fbbeb", "family": "fear", "met": true, "new": false, "on": "2026-04-03", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000011", "name": "Waiting for the scan", "happened_at": "2026-04-03T10:00:00Z", "emotion_id": "b4216f65-f0a6-2a26-ca1a-9dfa839fbbeb", "intensity": 3, "positiveness": -1}},
+      {"seat": 16, "emotion_id": "afd28421-b994-475c-ad49-75ecae570ee5", "family": "fear", "met": false, "new": false},
+      {"seat": 17, "emotion_id": "8b2993f3-4043-7bdf-388d-c0e3d5c96f02", "family": "fear", "met": false, "new": false},
+      {"seat": 18, "emotion_id": "93694d2b-41a7-4dfc-8582-7cce835ca9fe", "family": "fear", "met": false, "new": false},
+      {"seat": 19, "emotion_id": "2d45e136-cee7-4bf1-b5fa-a3a79f26feab", "family": "fear", "met": false, "new": false},
+      {"seat": 20, "emotion_id": "0c98e05e-cf64-3b6f-929f-8bb6d0449b5f", "family": "shame", "met": false, "new": false},
+      {"seat": 21, "emotion_id": "52301a19-4b27-4432-9d0b-281f6341bb95", "family": "shame", "met": true, "new": false, "on": "2026-10-01", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000077", "name": "Wrong name at the party", "happened_at": "2026-10-01T10:00:00Z", "emotion_id": "52301a19-4b27-4432-9d0b-281f6341bb95", "intensity": 1, "positiveness": -1}},
+      {"seat": 22, "emotion_id": "648b1092-820c-b19a-8a27-07072b068724", "family": "shame", "met": false, "new": false},
+      {"seat": 23, "emotion_id": "59f68361-3443-4352-a119-b0daaf864bca", "family": "shame", "met": false, "new": false},
+      {"seat": 24, "emotion_id": "f76b1274-04ab-4a9c-858d-4da26f8d124d", "family": "sadness", "met": true, "new": false, "on": "2026-06-30", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f2", "name": "Lisbon cancelled", "happened_at": "2026-06-30T10:00:00Z", "emotion_id": "f76b1274-04ab-4a9c-858d-4da26f8d124d", "intensity": 2, "positiveness": -1}},
+      {"seat": 25, "emotion_id": "8a79a265-5dcd-4d42-b8de-8c1ff5d7e505", "family": "sadness", "met": false, "new": false},
+      {"seat": 26, "emotion_id": "ce828ce7-78ad-4a39-bfe6-0c843cfb2838", "family": "sadness", "met": true, "new": false, "on": "2026-04-27", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003ee", "name": "Night shift week", "happened_at": "2026-04-27T10:00:00Z", "emotion_id": "ce828ce7-78ad-4a39-bfe6-0c843cfb2838", "intensity": 2, "positiveness": -1}},
+      {"seat": 27, "emotion_id": "5d5e346a-c5c5-4fcb-99e9-2951213c3ff3", "family": "sadness", "met": false, "new": false},
+      {"seat": 28, "emotion_id": "f99d4e11-5a81-101b-07a3-6fc89a7aa1d9", "family": "sadness", "met": true, "new": false, "on": "2026-08-09", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f4", "name": "Everyone away", "happened_at": "2026-08-09T10:00:00Z", "emotion_id": "f99d4e11-5a81-101b-07a3-6fc89a7aa1d9", "intensity": 2, "positiveness": -1}},
+      {"seat": 29, "emotion_id": "075ec40d-f27c-033d-a498-850947e4e887", "family": "sadness", "met": true, "new": true, "on": "2026-10-06", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f8", "name": "Grandma’s call went quiet", "happened_at": "2026-10-06T10:00:00Z", "emotion_id": "075ec40d-f27c-033d-a498-850947e4e887", "intensity": 3, "positiveness": -1}},
+      {"seat": 30, "emotion_id": "5ff5cd1c-6739-6143-537f-85a2dbbd8841", "family": "peace", "met": true, "new": false, "on": "2026-03-04", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003e9", "name": "Sunday market", "happened_at": "2026-03-04T10:00:00Z", "emotion_id": "5ff5cd1c-6739-6143-537f-85a2dbbd8841", "intensity": 1, "positiveness": 0}},
+      {"seat": 31, "emotion_id": "b0230f83-c4e4-4cdc-bf9f-2d650509658c", "family": "peace", "met": true, "new": false, "on": "2026-04-11", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003ec", "name": "Bread that rose", "happened_at": "2026-04-11T10:00:00Z", "emotion_id": "b0230f83-c4e4-4cdc-bf9f-2d650509658c", "intensity": 1, "positiveness": 1}},
+      {"seat": 32, "emotion_id": "b5c925f9-ed7d-5b87-2dc2-d3857e736235", "family": "peace", "met": true, "new": false, "on": "2026-03-09", "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000005", "name": "Elio’s first word", "happened_at": "2026-03-09T10:00:00Z", "emotion_id": "b5c925f9-ed7d-5b87-2dc2-d3857e736235", "intensity": 3, "positiveness": 1}},
+      {"seat": 33, "emotion_id": "b4102799-3d5f-45f2-bfa9-28d72fb89bec", "family": "peace", "met": true, "new": false, "on": "2026-05-06", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003ef", "name": "The offer letter", "happened_at": "2026-05-06T10:00:00Z", "emotion_id": "b4102799-3d5f-45f2-bfa9-28d72fb89bec", "intensity": 2, "positiveness": 1}},
+      {"seat": 34, "emotion_id": "21d79e4c-9482-40d3-bf73-53adfb452e5a", "family": "peace", "met": true, "new": true, "on": "2026-10-31", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f9", "name": "Coffee by the fountain", "happened_at": "2026-10-31T10:00:00Z", "emotion_id": "21d79e4c-9482-40d3-bf73-53adfb452e5a", "intensity": 2, "positiveness": 0}},
+      {"seat": 35, "emotion_id": "0312c804-7656-4f33-950c-a70a5b08b842", "family": "peace", "met": true, "new": false, "on": "2026-09-03", "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f6", "name": "The scan was clear", "happened_at": "2026-09-03T10:00:00Z", "emotion_id": "0312c804-7656-4f33-950c-a70a5b08b842", "intensity": 3, "positiveness": 1}},
+      {"seat": 36, "emotion_id": "776d210e-29f3-4f14-acb3-9787518aa53d", "family": "peace", "met": false, "new": false},
+      {"seat": 37, "emotion_id": "a9b0625b-8a77-06cf-ba9c-a348ab58b12c", "family": "peace", "met": false, "new": false}
+    ],
+    "families": [
+      {"family": "joy", "met": [3, 4, 1, 2, 0], "not_yet": [5]},
+      {"family": "pride", "met": [8, 7, 6], "not_yet": []},
+      {"family": "anger", "met": [10, 12, 13], "not_yet": [9, 11, 14]},
+      {"family": "fear", "met": [15], "not_yet": [16, 17, 18, 19]},
+      {"family": "shame", "met": [21], "not_yet": [20, 22, 23]},
+      {"family": "sadness", "met": [26, 24, 28, 29], "not_yet": [25, 27]},
+      {"family": "peace", "met": [30, 32, 31, 33, 35, 34], "not_yet": [36, 37]}
+    ],
+    "since": "2026-03-02"
+  },
+  "domains": {
+    "count": 14,
+    "of": 18,
+    "coverage": "most",
+    "entered": [
+      {"domain_id": "d0000000-0000-4000-8000-000000000002", "on": "2026-10-01", "new": true, "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003fc", "name": "Flag march with Nadia", "happened_at": "2026-10-01T10:00:00Z", "intensity": 2, "positiveness": 0}},
+      {"domain_id": "d0000000-0000-4000-8000-000000000001", "on": "2026-09-12", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003fb", "name": "Street dinner", "happened_at": "2026-09-12T10:00:00Z", "intensity": 2, "positiveness": 0}},
+      {"domain_id": "d0000000-0000-4000-8000-000000000011", "on": "2026-07-18", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f3", "name": "Night sky at Sarlat", "happened_at": "2026-07-18T10:00:00Z", "emotion_id": "50a68890-f6bb-e67a-6655-e84ff0b71f49", "intensity": 3, "positiveness": 1}},
+      {"domain_id": "d0000000-0000-4000-8000-00000000000d", "on": "2026-07-04", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003fa", "name": "A morning off", "happened_at": "2026-07-04T10:00:00Z", "intensity": 2, "positiveness": 0}},
+      {"domain_id": "d0000000-0000-4000-8000-00000000000a", "on": "2026-06-14", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f1", "name": "First talk on stage", "happened_at": "2026-06-14T10:00:00Z", "emotion_id": "3e14e406-90e8-41fd-a967-30fa545c47dc", "intensity": 3, "positiveness": 1}},
+      {"domain_id": "d0000000-0000-4000-8000-000000000010", "on": "2026-06-02", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003f0", "name": "Tickets to Lisbon", "happened_at": "2026-06-02T10:00:00Z", "emotion_id": "98bdc543-6b26-e1c8-da1d-50ae8b9973ff", "intensity": 2, "positiveness": 1}},
+      {"domain_id": "d0000000-0000-4000-8000-00000000000b", "on": "2026-05-15", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000021", "name": "Rent went up", "happened_at": "2026-05-15T10:00:00Z", "emotion_id": "fab5fa1f-ad54-4705-a205-f8a0b2b31806", "intensity": 2, "positiveness": -1}},
+      {"domain_id": "d0000000-0000-4000-8000-000000000007", "on": "2026-04-19", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003ed", "name": "Bruno vs the hose", "happened_at": "2026-04-19T10:00:00Z", "emotion_id": "f14ca000-32c7-4cf3-9aa5-ad5dc84c5285", "intensity": 1, "positiveness": 1}},
+      {"domain_id": "d0000000-0000-4000-8000-000000000008", "on": "2026-04-03", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000011", "name": "Waiting for the scan", "happened_at": "2026-04-03T10:00:00Z", "emotion_id": "b4216f65-f0a6-2a26-ca1a-9dfa839fbbeb", "intensity": 3, "positiveness": -1}},
+      {"domain_id": "d0000000-0000-4000-8000-000000000012", "on": "2026-03-28", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003eb", "name": "Shipped the bakery site", "happened_at": "2026-03-28T10:00:00Z", "emotion_id": "ed9fbe9f-6a93-22bb-d5d5-35f42164c120", "intensity": 2, "positiveness": 1}},
+      {"domain_id": "d0000000-0000-4000-8000-00000000000f", "on": "2026-03-12", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000006", "name": "Late train, again", "happened_at": "2026-03-12T10:00:00Z", "emotion_id": "25d98464-bc3d-417f-ae12-a3a996e5dee1", "intensity": 1, "positiveness": -1}},
+      {"domain_id": "d0000000-0000-4000-8000-000000000009", "on": "2026-03-04", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-0000000003e9", "name": "Sunday market", "happened_at": "2026-03-04T10:00:00Z", "emotion_id": "5ff5cd1c-6739-6143-537f-85a2dbbd8841", "intensity": 1, "positiveness": 0}},
+      {"domain_id": "d0000000-0000-4000-8000-000000000005", "on": "2026-03-02", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000001", "name": "Mara moves in", "happened_at": "2026-03-02T10:00:00Z", "emotion_id": "f1b09d24-3c2e-414b-a751-fc91da51fcdb", "intensity": 2, "positiveness": 1}},
+      {"domain_id": "d0000000-0000-4000-8000-00000000000c", "on": "2026-03-02", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000001", "name": "Mara moves in", "happened_at": "2026-03-02T10:00:00Z", "emotion_id": "f1b09d24-3c2e-414b-a751-fc91da51fcdb", "intensity": 2, "positiveness": 1}}
+    ],
+    "not_yet": ["d0000000-0000-4000-8000-000000000003", "d0000000-0000-4000-8000-000000000004", "d0000000-0000-4000-8000-000000000006", "d0000000-0000-4000-8000-00000000000e"]
+  },
+  "pebbles": {
+    "count": 137,
+    "levels": [
+      {"threshold": 1, "on": "2026-03-02", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000001", "name": "Mara moves in", "happened_at": "2026-03-02T10:00:00Z", "emotion_id": "f1b09d24-3c2e-414b-a751-fc91da51fcdb", "intensity": 2, "positiveness": 1}},
+      {"threshold": 10, "on": "2026-03-19", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-00000000000a", "name": "Choir, first rehearsal", "happened_at": "2026-03-19T10:00:00Z", "emotion_id": "70e70f6a-237b-4e2d-8f4c-8043df889b36", "intensity": 2, "positiveness": 1}},
+      {"threshold": 25, "on": "2026-04-21", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000019", "name": "Elio climbs the stairs", "happened_at": "2026-04-21T10:00:00Z", "emotion_id": "50a68890-f6bb-e67a-6655-e84ff0b71f49", "intensity": 1, "positiveness": 1}},
+      {"threshold": 50, "on": "2026-06-08", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000032", "name": "Rooftop with Jules", "happened_at": "2026-06-08T10:00:00Z", "emotion_id": "70e70f6a-237b-4e2d-8f4c-8043df889b36", "intensity": 1, "positiveness": 1}},
+      {"threshold": 100, "on": "2026-08-30", "new": false, "pebble": {"moment_id": "a0000000-0000-4000-8000-000000000064", "name": "Last swim of summer", "happened_at": "2026-08-30T10:00:00Z", "emotion_id": "ed9fbe9f-6a93-22bb-d5d5-35f42164c120", "intensity": 3, "positiveness": 1}}
+    ],
+    "ladder": [1, 10, 25, 50, 100, 250, 500, 1000],
+    "next": {
+      "threshold": 250,
+      "left": 113,
+      "progress": 0.247
+    },
+    "then_every": 500,
+    "since": "2026-03-02"
+  },
+  "glyphs_carved": {
+    "count": 12,
+    "levels": [
+      {"threshold": 10, "on": "2026-09-21", "new": false}
+    ],
+    "ladder": [10, 25, 50, 75, 100],
+    "next": {
+      "threshold": 25,
+      "left": 13,
+      "progress": 0.133
+    },
+    "since": "2026-09-21"
+  },
+  "glyph_sales": {
+    "count": 3,
+    "levels": [
+      {"threshold": 1, "on": "2026-10-02", "new": false}
+    ],
+    "ladder": [1, 5, 10, 25, 50],
+    "next": {
+      "threshold": 5,
+      "left": 2,
+      "progress": 0.5
+    },
+    "since": "2026-10-02"
+  },
+  "years": [
+    {
+      "year": 2026,
+      "current": true,
+      "days_target": 14,
+      "months": [
+        {"month": 1, "state": "quiet", "moment_days": 0, "pebble_days": 0, "full_weeks": 3, "weeks_filled": 0, "level": 0, "progress": 0, "done": {"moments": false, "pebbles": false, "weeks": false}},
+        {"month": 2, "state": "quiet", "moment_days": 0, "pebble_days": 0, "full_weeks": 3, "weeks_filled": 0, "level": 0, "progress": 0, "done": {"moments": false, "pebbles": false, "weeks": false}},
+        {"month": 3, "state": "kept", "moment_days": 17, "pebble_days": 12, "full_weeks": 4, "weeks_filled": 4, "level": 1, "progress": 0.857, "done": {"moments": true, "pebbles": false, "weeks": true}, "family": "peace"},
+        {"month": 4, "state": "kept", "moment_days": 14, "pebble_days": 11, "full_weeks": 3, "weeks_filled": 3, "level": 1, "progress": 0.786, "done": {"moments": true, "pebbles": false, "weeks": true}, "family": "joy"},
+        {"month": 5, "state": "kept", "moment_days": 16, "pebble_days": 13, "full_weeks": 4, "weeks_filled": 4, "level": 1, "progress": 0.929, "done": {"moments": true, "pebbles": false, "weeks": true}, "family": "joy"},
+        {"month": 6, "state": "kept", "moment_days": 14, "pebble_days": 12, "full_weeks": 4, "weeks_filled": 4, "level": 1, "progress": 0.857, "done": {"moments": true, "pebbles": false, "weeks": true}, "family": "joy"},
+        {"month": 7, "state": "kept", "moment_days": 14, "pebble_days": 12, "full_weeks": 3, "weeks_filled": 3, "level": 1, "progress": 0.857, "done": {"moments": true, "pebbles": false, "weeks": true}, "family": "joy"},
+        {"month": 8, "state": "kept", "moment_days": 19, "pebble_days": 17, "full_weeks": 4, "weeks_filled": 4, "level": 2, "progress": 0, "done": {"moments": true, "pebbles": true, "weeks": true}, "family": "joy"},
+        {"month": 9, "state": "kept", "moment_days": 16, "pebble_days": 13, "full_weeks": 3, "weeks_filled": 3, "level": 1, "progress": 0.929, "done": {"moments": true, "pebbles": false, "weeks": true}, "family": "peace"},
+        {"month": 10, "state": "kept", "moment_days": 15, "pebble_days": 13, "full_weeks": 3, "weeks_filled": 3, "level": 1, "progress": 0.929, "done": {"moments": true, "pebbles": false, "weeks": true}, "family": "joy"},
+        {"month": 11, "state": "kept", "moment_days": 2, "pebble_days": 2, "full_weeks": 0, "weeks_filled": 0, "level": 0, "progress": 0.143, "done": {"moments": false, "pebbles": false, "weeks": false}, "family": "peace"},
+        {"month": 12, "state": "upcoming", "moment_days": 0, "pebble_days": 0, "full_weeks": 0, "weeks_filled": 0, "level": 0, "progress": 0, "done": {"moments": false, "pebbles": false, "weeks": false}}
+      ],
+      "listed": [11, 10, 9, 8, 7, 6, 5, 4, 3],
+      "next_step": {
+        "month": 11,
+        "needs": "moments",
+        "days_left": 12,
+        "reachable": true
+      }
+    }
+  ],
+  "seen": {
+    "explorer": "2026-10-02T19:00:00Z",
+    "emotions": "2026-10-02T19:00:00Z",
+    "domains": "2026-10-02T19:00:00Z",
+    "pebbles": "2026-10-02T19:00:00Z"
+  },
+  "shelf": [
+    {"slug": "glyph-sales-1", "family": "glyph_sales", "threshold": 1, "unlocked_on": "2026-10-02"},
+    {"slug": "glyph-count-10", "family": "glyph_count", "threshold": 10, "unlocked_on": "2026-09-21"},
+    {"slug": "pebble-count-100", "family": "pebble_count", "threshold": 100, "unlocked_on": "2026-08-30"},
+    {"slug": "pebble-count-50", "family": "pebble_count", "threshold": 50, "unlocked_on": "2026-06-08"},
+    {"slug": "blue-pebble", "family": "first_five", "threshold": null, "unlocked_on": "2026-05-14"},
+    {"slug": "first-glyph", "family": "first_glyph", "threshold": null, "unlocked_on": "2026-05-14"}
+  ],
+  "shelf_count": 13
+}

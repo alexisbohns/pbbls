@@ -247,6 +247,9 @@
     "error": "Couldn't load your achievements. Please try again.",
     "locked": "Locked",
     "unlockedOn": "Unlocked {date}",
+    "rosace": {
+      "of": "of {of}"
+    },
     "group": {
       "pebble_count": "Pebbles",
       "emotion_first": "Emotions",
