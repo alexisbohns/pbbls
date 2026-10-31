@@ -73,6 +73,7 @@ class DetailScrollTest : AppUiTest() {
         skipOnboarding()
         launch()
         signIn()
+        openPath()
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performClick()
         compose.onNode(scrollable).performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, Float.MAX_VALUE) }
         compose.waitForIdle()

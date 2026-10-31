@@ -26,6 +26,8 @@ private const val AUTH_EMAIL = "auth_email"
 private const val AUTH_PASSWORD = "auth_password"
 private const val AUTH_SUBMIT = "auth_submit"
 private const val ONBOARDING_SKIP = "onboarding_skip"
+private const val HOME = "home"
+private const val TAB_PATH = "tab_path"
 private const val PATH_WEEK_PAGER = "path_week_pager"
 private const val PATH_WEEK_LIST = "path_week_list"
 private const val PATH_PEBBLE_ROW = "path_pebble_row"
@@ -33,7 +35,7 @@ private const val NEW_PEBBLE = "new_pebble"
 
 private const val UI_TIMEOUT_MS = 15_000L
 
-/** Sign-in is a network round trip, then Path's own load. */
+/** Sign-in is a network round trip, then Home's own load. */
 private const val SIGN_IN_TIMEOUT_MS = 30_000L
 
 /**
@@ -43,10 +45,10 @@ private const val SIGN_IN_TIMEOUT_MS = 30_000L
  */
 private const val DETAIL_SETTLE_MS = 2_000L
 
-/** Where a cold start lands: Welcome when signed out, Path when signed in. */
-private val LANDING = Pattern.compile("$WELCOME_LOG_IN|$PATH_WEEK_PAGER")
+/** Where a cold start lands: Welcome when signed out, Home when signed in (#1383 D1). */
+private val LANDING = Pattern.compile("$WELCOME_LOG_IN|$HOME")
 
-private val AFTER_SIGN_IN = Pattern.compile("$ONBOARDING_SKIP|$PATH_WEEK_PAGER")
+private val AFTER_SIGN_IN = Pattern.compile("$ONBOARDING_SKIP|$HOME")
 
 internal data class TestAccount(
     val email: String,
@@ -68,19 +70,19 @@ internal fun testAccount(): TestAccount? {
 /** Waits for the first real screen after the system splash lets go. */
 internal fun MacrobenchmarkScope.awaitLanding() {
     checkNotNull(device.wait(Until.findObject(By.res(LANDING)), UI_TIMEOUT_MS)) {
-        "Neither Welcome nor Path appeared — is the app built with Supabase config?"
+        "Neither Welcome nor Home appeared — is the app built with Supabase config?"
     }
 }
 
 /**
- * Leaves the app on Path, signing in through Welcome → Auth when the session is
+ * Leaves the app on Home, signing in through Welcome → Auth when the session is
  * gone (the first iteration, or after `pm clear`). Onboarding, shown once per
  * install, is skipped. Returns false without an [account]: Welcome and Auth are
  * still walked, so the signed-out funnel is profiled either way.
  */
 internal fun MacrobenchmarkScope.ensureSignedIn(account: TestAccount?): Boolean {
     awaitLanding()
-    if (device.hasObject(By.res(PATH_WEEK_PAGER))) return true
+    if (device.hasObject(By.res(HOME))) return true
 
     device.findObject(By.res(WELCOME_LOG_IN)).click()
     val email =
@@ -97,24 +99,27 @@ internal fun MacrobenchmarkScope.ensureSignedIn(account: TestAccount?): Boolean 
 
     val next =
         checkNotNull(device.wait(Until.findObject(By.res(AFTER_SIGN_IN)), SIGN_IN_TIMEOUT_MS)) {
-            "Sign-in never reached Path — check BENCHMARK_EMAIL / BENCHMARK_PASSWORD"
+            "Sign-in never reached Home — check BENCHMARK_EMAIL / BENCHMARK_PASSWORD"
         }
     if (next.resourceName == ONBOARDING_SKIP) {
         next.click()
-        checkNotNull(device.wait(Until.findObject(By.res(PATH_WEEK_PAGER)), UI_TIMEOUT_MS)) {
-            "Skipping onboarding did not reach Path"
+        checkNotNull(device.wait(Until.findObject(By.res(HOME)), UI_TIMEOUT_MS)) {
+            "Skipping onboarding did not reach Home"
         }
     }
     return true
 }
 
 /**
- * The Path loop a returning user repeats: scroll the week, swipe to the week
+ * The Path loop a returning user repeats, from the Path tab: scroll the week, swipe to the week
  * before and back, open a pebble, open Capture. Every step is optional so an
  * account with an empty week still runs; Capture is left on its photo step,
  * where back with nothing entered closes it without asking and writes nothing.
  */
 internal fun MacrobenchmarkScope.browsePath() {
+    // The app opens on Home (#1383 D1); Path is the second tab.
+    if (clickFresh(TAB_PATH)) device.wait(Until.hasObject(By.res(PATH_WEEK_PAGER)), UI_TIMEOUT_MS)
+
     device.wait(Until.findObject(By.res(PATH_WEEK_LIST)), UI_TIMEOUT_MS)?.let { list ->
         // Keep the fling clear of the system gesture areas at the edges.
         list.setGestureMargin(device.displayHeight / 10)

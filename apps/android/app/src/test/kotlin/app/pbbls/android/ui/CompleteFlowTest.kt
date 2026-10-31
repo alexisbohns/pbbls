@@ -59,6 +59,7 @@ class CompleteFlowTest : AppUiTest() {
         skipOnboarding()
         launch()
         signIn()
+        openPath()
 
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performClick()
         onText(R.string.complete_cta).performClick()

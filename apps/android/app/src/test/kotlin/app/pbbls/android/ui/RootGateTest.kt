@@ -43,28 +43,28 @@ class RootGateTest : AppUiTest() {
 
         onText(R.string.welcome_log_in).assertIsDisplayed()
         // The suite keeps a hidden bar composed, slid off the bottom edge.
-        onText(R.string.tab_path).assertIsNotDisplayed()
+        onText(R.string.tab_home).assertIsNotDisplayed()
     }
 
     @Test
-    fun `signed in lands on Path with the bar`() {
+    fun `signed in lands on Home with the bar`() {
         skipOnboarding()
         launch()
         signIn()
 
-        onText(R.string.tab_path).assertIsSelected()
-        compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).assertIsDisplayed()
+        onText(R.string.tab_home).assertIsSelected()
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
         onText(R.string.welcome_log_in).assertDoesNotExist()
     }
 
     @Test
-    fun `a first sign-in shows onboarding over Path`() {
+    fun `a first sign-in shows onboarding over Home`() {
         launch()
         signIn()
 
         onText(R.string.onboarding_skip).performClick()
 
-        compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).assertIsDisplayed()
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
     }
 
     @Test
@@ -84,7 +84,7 @@ class RootGateTest : AppUiTest() {
     }
 
     @Test
-    fun `an invite parked before sign-in opens after Path`() {
+    fun `an invite parked before sign-in opens after Home`() {
         skipOnboarding()
         launch(inviteIntent("tok-1"))
         signOut()
@@ -115,7 +115,7 @@ class RootGateTest : AppUiTest() {
         signIn()
 
         onText(R.string.consent_gate_title).assertDoesNotExist()
-        compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).assertIsDisplayed()
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
     }
 
     @Test
@@ -129,7 +129,7 @@ class RootGateTest : AppUiTest() {
         acceptEveryConsent()
 
         onText(R.string.consent_gate_title).assertDoesNotExist()
-        compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).assertIsDisplayed()
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
         assertEquals(4, consents.recordCalls.size)
     }
 
@@ -154,7 +154,7 @@ class RootGateTest : AppUiTest() {
         onText(R.string.profile_title).assertIsDisplayed()
 
         // A different account, with nothing on record, lands on the same
-        // stack; NavDisplay's Back would take it from You to Path.
+        // stack; NavDisplay's Back would take it from You to Home.
         consents.rows.clear()
         signIn("user-2")
         pressBack()
@@ -188,13 +188,13 @@ class RootGateTest : AppUiTest() {
         signIn()
 
         onText(R.string.consent_gate_retry).assertIsDisplayed()
-        compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).assertIsNotDisplayed()
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsNotDisplayed()
 
         consents.activeFailure = null
         onText(R.string.consent_gate_retry).performClick()
         compose.waitForIdle()
 
-        compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).assertIsDisplayed()
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
     }
 
     @Test

@@ -15,6 +15,12 @@ object JourneyTags {
     const val AUTH_PASSWORD = "auth_password"
     const val AUTH_SUBMIT = "auth_submit"
     const val ONBOARDING_SKIP = "onboarding_skip"
+
+    /** The Home page, where a signed-in launch lands (#1383 D1). */
+    const val HOME = "home"
+
+    /** The Path item of the navigation bar or rail: Path is no longer where the app opens. */
+    const val TAB_PATH = "tab_path"
     const val PATH_WEEK_PAGER = "path_week_pager"
     const val PATH_WEEK_LIST = "path_week_list"
     const val PATH_PEBBLE_ROW = "path_pebble_row"

@@ -16,6 +16,7 @@ import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
 import app.pbbls.android.features.glyph.picker.GlyphPickerContent
 import app.pbbls.android.features.glyph.store.GlyphDetailScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
+import app.pbbls.android.features.home.HomeScreen
 import app.pbbls.android.features.lab.AnnouncementDetailScreen
 import app.pbbls.android.features.lab.LabScreen
 import app.pbbls.android.features.lab.LogListMode
@@ -59,6 +60,10 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     welcomeContentRevealed: () -> Boolean,
     onOnboardingFinished: () -> Unit,
 ) {
+    entry<PebblesKey.Home>(metadata = NavTransitions.forKey(PebblesKey.Home)) {
+        HomeScreen()
+    }
+
     entry<PebblesKey.Path>(
         metadata = NavTransitions.forKey(PebblesKey.Path) + PanePairs.metadataFor(PebblesKey.Path),
     ) {

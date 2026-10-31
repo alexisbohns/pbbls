@@ -24,8 +24,8 @@ class NavigatorTest {
     fun setUp() {
         state =
             NavigationState(
-                startRoute = PebblesKey.Path,
-                topLevelRoute = mutableStateOf(PebblesKey.Path),
+                startRoute = PebblesKey.Home,
+                topLevelRoute = mutableStateOf(PebblesKey.Home),
                 backStacks = PebblesKey.tabs.associateWith { NavBackStack<NavKey>(it) },
             )
         navigator = Navigator(state)
@@ -71,7 +71,7 @@ class NavigatorTest {
 
         navigator.goBack()
 
-        assertEquals(PebblesKey.Path, state.topLevelRoute)
+        assertEquals(PebblesKey.Home, state.topLevelRoute)
         // People's stack is RETAINED, just no longer in the back path.
         assertEquals(listOf<NavKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
     }
@@ -80,8 +80,8 @@ class NavigatorTest {
     fun `back at the start root is a no-op so the system can exit`() {
         navigator.goBack()
 
-        assertEquals(PebblesKey.Path, state.topLevelRoute)
-        assertEquals(listOf<NavKey>(PebblesKey.Path), state.backStacks[PebblesKey.Path]!!.toList())
+        assertEquals(PebblesKey.Home, state.topLevelRoute)
+        assertEquals(listOf<NavKey>(PebblesKey.Home), state.backStacks[PebblesKey.Home]!!.toList())
     }
 
     @Test
@@ -90,7 +90,7 @@ class NavigatorTest {
         navigator.navigate(PebblesKey.People)
 
         // You is skipped: the back path is bounded (D4).
-        assertEquals(listOf(PebblesKey.Path, PebblesKey.People), state.topLevelRoutesInUse())
+        assertEquals(listOf(PebblesKey.Home, PebblesKey.People), state.topLevelRoutesInUse())
     }
 
     @Test
@@ -126,8 +126,9 @@ class NavigatorTest {
 
         navigator.replaceAll(PebblesKey.Welcome)
 
-        assertEquals(PebblesKey.Path, state.topLevelRoute)
-        assertEquals(listOf<NavKey>(PebblesKey.Welcome), state.backStacks[PebblesKey.Path]!!.toList())
+        assertEquals(PebblesKey.Home, state.topLevelRoute)
+        assertEquals(listOf<NavKey>(PebblesKey.Welcome), state.backStacks[PebblesKey.Home]!!.toList())
+        assertEquals(listOf<NavKey>(PebblesKey.Path), state.backStacks[PebblesKey.Path]!!.toList())
         assertEquals(listOf<NavKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
         assertEquals(listOf<NavKey>(PebblesKey.You), state.backStacks[PebblesKey.You]!!.toList())
         assertEquals(listOf<NavKey>(PebblesKey.Collections), state.backStacks[PebblesKey.Collections]!!.toList())
@@ -175,8 +176,8 @@ class NavigatorTest {
         navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
 
         assertEquals(
-            listOf<NavKey>(PebblesKey.Path, PebblesKey.SoulDetail("s1")),
-            state.backStacks[PebblesKey.Path]!!.toList(),
+            listOf<NavKey>(PebblesKey.Home, PebblesKey.SoulDetail("s1")),
+            state.backStacks[PebblesKey.Home]!!.toList(),
         )
     }
 
@@ -215,6 +216,7 @@ class NavigatorTest {
 
     @Test
     fun `pressing the open moment again is a new request`() {
+        navigator.navigate(PebblesKey.Path)
         navigator.navigateToDetail(PebblesKey.PebbleDetail("m1"))
         navigator.navigateToDetail(PebblesKey.PebbleDetail("m1"))
         navigator.navigateToDetail(PebblesKey.PebbleDetail("m1", CardFace.VERSO))
@@ -227,6 +229,7 @@ class NavigatorTest {
 
     @Test
     fun `pressing another moment replaces the detail as its first request`() {
+        navigator.navigate(PebblesKey.Path)
         navigator.navigateToDetail(PebblesKey.PebbleDetail("m1"))
         navigator.navigateToDetail(PebblesKey.PebbleDetail("m1", CardFace.VERSO))
 

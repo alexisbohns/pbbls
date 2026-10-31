@@ -20,7 +20,7 @@ import org.junit.Test
  */
 class NavigatorRootAtTest {
     private fun navigatorOver(
-        startRoute: PebblesKey = PebblesKey.Path,
+        startRoute: PebblesKey = PebblesKey.Home,
         topLevelRoute: PebblesKey = startRoute,
         stacks: Map<PebblesKey, List<PebblesKey>> = emptyMap(),
     ): Pair<Navigator, NavigationState> {
@@ -41,18 +41,18 @@ class NavigatorRootAtTest {
     fun `rootAt re-roots when the start tab is rooted elsewhere`() {
         val (navigator, state) =
             navigatorOver(
-                stacks = mapOf(PebblesKey.Path to listOf(PebblesKey.Welcome, PebblesKey.Auth(AuthMode.LOGIN))),
+                stacks = mapOf(PebblesKey.Home to listOf(PebblesKey.Welcome, PebblesKey.Auth(AuthMode.LOGIN))),
             )
 
-        navigator.rootAt(PebblesKey.Path)
+        navigator.rootAt(PebblesKey.Home)
 
-        assertEquals(listOf<NavKey>(PebblesKey.Path), state.backStacks[PebblesKey.Path]!!.toList())
-        assertEquals(PebblesKey.Path, state.topLevelRoute)
+        assertEquals(listOf<NavKey>(PebblesKey.Home), state.backStacks[PebblesKey.Home]!!.toList())
+        assertEquals(PebblesKey.Home, state.topLevelRoute)
     }
 
     @Test
     fun `rootAt leaves a restored authed stack completely alone`() {
-        // What a cold restore looks like: already rooted at Path, the user
+        // What a cold restore looks like: already rooted at Home, the user
         // parked on another tab, with the screen they were on still on top.
         val (navigator, state) =
             navigatorOver(
@@ -60,7 +60,7 @@ class NavigatorRootAtTest {
                 stacks = mapOf(PebblesKey.People to listOf(PebblesKey.People, PebblesKey.SoulDetail("s1"))),
             )
 
-        navigator.rootAt(PebblesKey.Path)
+        navigator.rootAt(PebblesKey.Home)
 
         assertEquals(PebblesKey.People, state.topLevelRoute)
         assertEquals(
@@ -77,25 +77,27 @@ class NavigatorRootAtTest {
                 topLevelRoute = PebblesKey.People,
                 stacks =
                     mapOf(
-                        PebblesKey.Path to listOf(PebblesKey.Path, PebblesKey.Settings),
+                        PebblesKey.Home to listOf(PebblesKey.Home, PebblesKey.Settings),
+                        PebblesKey.Path to listOf(PebblesKey.Path, PebblesKey.PebbleDetail("m1")),
                         PebblesKey.People to listOf(PebblesKey.People, PebblesKey.SoulDetail("s1")),
                     ),
             )
 
         navigator.rootAt(PebblesKey.Welcome)
 
-        assertEquals(PebblesKey.Path, state.topLevelRoute)
-        assertEquals(listOf<NavKey>(PebblesKey.Welcome), state.backStacks[PebblesKey.Path]!!.toList())
+        assertEquals(PebblesKey.Home, state.topLevelRoute)
+        assertEquals(listOf<NavKey>(PebblesKey.Welcome), state.backStacks[PebblesKey.Home]!!.toList())
+        assertEquals(listOf<NavKey>(PebblesKey.Path), state.backStacks[PebblesKey.Path]!!.toList())
         assertEquals(listOf<NavKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
     }
 
     @Test
     fun `replaceAll still clears unconditionally`() {
         val (navigator, state) =
-            navigatorOver(stacks = mapOf(PebblesKey.Path to listOf(PebblesKey.Path, PebblesKey.Settings)))
+            navigatorOver(stacks = mapOf(PebblesKey.Home to listOf(PebblesKey.Home, PebblesKey.Settings)))
 
-        navigator.replaceAll(PebblesKey.Path)
+        navigator.replaceAll(PebblesKey.Home)
 
-        assertEquals(listOf<NavKey>(PebblesKey.Path), state.backStacks[PebblesKey.Path]!!.toList())
+        assertEquals(listOf<NavKey>(PebblesKey.Home), state.backStacks[PebblesKey.Home]!!.toList())
     }
 }
