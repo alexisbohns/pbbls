@@ -22,7 +22,9 @@ private val HOME_ROOM = 310.dp
  * The month's weeks at the top of Home (#1383, spec D8): the month card's own [WeeksColumns], handed to
  * Home through `HomeMonthSlot` by the entry provider. It has no intro host, so every reveal reads settled
  * (`currentIntroReveal()` falls back to [app.pbbls.android.features.path.wrap.intro.IntroReveal.settled]).
- * Each column is one button saying its week; [onWeek] gets its Monday.
+ * Each column is one button saying its week; [onWeek] gets its Monday. Unlike the month card, every column
+ * is a full week: the days outside the month draw faint sockets (the maintainer's call, 2026-11-01, mirroring
+ * iOS), so a week straddling the month does not read as one day and six blanks.
  *
  * The ids resolve as the Path resolves them (`PathScreen`), from the ambient palettes and reference data,
  * minus the feed's moments and souls: Home holds no feed, and the columns only ink their pebbles by emotion.
@@ -60,6 +62,6 @@ internal fun HomeMonthGrid(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier) {
-        WeeksColumns(wrap = wrap, lookups = lookups, room = HOME_ROOM, onWeek = onWeek)
+        WeeksColumns(wrap = wrap, lookups = lookups, room = HOME_ROOM, onWeek = onWeek, outsideSockets = true)
     }
 }
