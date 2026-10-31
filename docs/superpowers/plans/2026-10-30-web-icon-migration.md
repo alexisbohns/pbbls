@@ -2360,4 +2360,13 @@ gh pr edit "$(gh pr view --json number -q .number)" \
 
 ## Lessons learned
 
-(Written in Part 6, Task 39, after the stack is executed.)
+Executed 2026-10-31 as stack #1417 (PRs #1415, #1416, #1418, #1419, #1422 and Part 6), by an agent, before the maintainer's visual passes.
+
+- **Count drift is in the summary line, not the inventory.** The 98 files, 204 sites and the preview's 89 → 68 → 51 → 19 → 5 → 0 matched `ffbc1aff` exactly on `91d07416`; three files had moved lines only. What moved was Android arming its own lint (#1350) between the plan and the build: the summary read `27 rows, 69 names` from Part 1 (not 49) and `97 names` after the flip (not 77), and most rows carried `"migrated": ["ios", "android"]`, so Task 38's script, which matched `["ios"]` exactly, had to append `"web"` to whatever was there. A plan that hard-codes a shared counter should say which surfaces it counted. The chrome brief had also gained Android's `15. hour`, so the web figures are 16–20.
+- **The preview caught nothing a task missed.** Every task's quoted lines matched once; no site was found late. Matching quoted text (a replace that fails on 0 or 2 hits) instead of line numbers made the moved files harmless.
+- **Task 36's fallback was not needed:** the admin sidebar's `as const` arrays mixing a Pebbles and a lucide component typecheck as they are.
+- **The import scan false-hit nothing and missed nothing** on the real tree: 0 web hits once the four admin files moved, while 60 files still import lucide.
+- **`next build`'s TypeScript pass is incremental and fast** (under a second after the first build); a probe file importing a missing name confirmed `tsc --noEmit` in `apps/web` still fails, so the type gate is real.
+- **`next dev` writes an untracked `apps/web/AGENTS.md`** in a fresh worktree; delete it before committing.
+- **Owed to the maintainer:** R1 (does `inline` read faint at 16), R2 (16 beside `text-xs` in `SoulCard` and `DataTile`), and every signed-in route of the parts table; the agent only confirmed, signed out, that `/sandbox/design` draws the 60 specimen icons with the five classes and `/` draws the three feature icons at `size-5`.
+- **Rows now migrated on all three surfaces stay `candidate`.** `shipped` means every surface is in `migrated`; flipping the status is a separate decision for the package, not this stack.
