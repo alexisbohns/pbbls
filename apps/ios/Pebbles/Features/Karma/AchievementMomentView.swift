@@ -31,9 +31,9 @@ struct AchievementMomentView: View {
     @ViewBuilder
     private func cardBody(_ card: AchievementMomentCard) -> some View {
         VStack(spacing: Spacing.lg) {
-            PbblsIconImage(.pebbleGlowLg, .hero, style: AnyShapeStyle(Color.pebbles.primary))
+            PbblsIconImage(.pebbleGlowLg, .hero, style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
                 .padding(Spacing.lg)
-                .background(Circle().fill(Color.pebbles.primary.opacity(0.12)))
+                .background(Circle().fill(Color.pebbles.primaryContainer))
 
             VStack(spacing: Spacing.xs) {
                 Text("Achievement unlocked")
