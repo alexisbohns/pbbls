@@ -19,8 +19,13 @@ struct AchievementsPageServiceTests {
         let service = AchievementsPageService(client: SupabaseService().client, disk: cache, owner: "mara")
         let page = try service.decodeAndKeep(data, zone: paris, epoch: cache.epoch)
         #expect(page.daysKept == 249)
-        #expect(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier) == data)
+        let kept = try #require(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier))
+        #expect(try AchievementsPageService.keptPayload(kept) == WrapDecoding.decode(AchievementsPayload.self, from: data))
+        #expect(AchievementsPageService.keptTime(kept).map { abs($0.timeIntervalSinceNow) < 60 } == true,
+                "the kept time is recorded in what is kept")
         #expect(await service.cachedPage(zone: paris) == page)
+        let keptAt = try #require(await service.keptAt(zone: paris))
+        #expect(abs(keptAt.timeIntervalSinceNow) < 60, "kept just now")
         let tokyo = try #require(TimeZone(identifier: "Asia/Tokyo"))
         #expect(await service.cachedPage(zone: tokyo) == nil)
     }
@@ -45,6 +50,57 @@ struct AchievementsPageServiceTests {
         cache.clear()
         _ = try service.decodeAndKeep(data, zone: paris, epoch: asked)
         #expect(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier) == nil)
+    }
+
+    @Test("an older read landing after a newer one never overwrites the kept copy")
+    func olderReadKeepsNewer() async throws {
+        let cache = WrapDiskCache(root: root)
+        defer { cache.clear() }
+        let paris = try #require(TimeZone(identifier: "Europe/Paris"))
+        var service = AchievementsPageService(client: SupabaseService().client, disk: cache, owner: "mara")
+        service.freshness = AchievementsFreshness()
+        let older = service.freshness.beginRead()
+        let newer = service.freshness.beginRead()
+        let newerBody = Data(#"{"days_kept": 249}"#.utf8)
+        _ = try service.decodeAndKeep(newerBody, zone: paris, epoch: cache.epoch, read: newer)
+        _ = try service.decodeAndKeep(Data(#"{"days_kept": 248}"#.utf8), zone: paris, epoch: cache.epoch, read: older)
+        let keptParis = try #require(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: paris.identifier))
+        #expect(try AchievementsPageService.keptPayload(keptParis).daysKept == 249)
+        let tokyo = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        _ = try service.decodeAndKeep(newerBody, zone: tokyo, epoch: cache.epoch, read: older)
+        let keptTokyo = try #require(cache.read(AchievementsPageService.cachePage, owner: "mara", zone: tokyo.identifier))
+        #expect(try AchievementsPageService.keptPayload(keptTokyo).daysKept == 249, "each zone keeps its own order")
+    }
+
+    @Test("a stale mark makes the kept copy not fresh until the next read rewrites it")
+    func staleMark() async throws {
+        let cache = WrapDiskCache(root: root)
+        defer { cache.clear() }
+        let paris = try #require(TimeZone(identifier: "Europe/Paris"))
+        let data = try AchievementsFixtures.data("design-fixture")
+        var service = AchievementsPageService(client: SupabaseService().client, disk: cache, owner: "mara")
+        service.freshness = AchievementsFreshness()
+        _ = try service.decodeAndKeep(data, zone: paris, epoch: cache.epoch)
+        #expect(await service.keptAt(zone: paris) != nil)
+        service.markStale()
+        #expect(await service.keptAt(zone: paris) == nil, "an unlock or a pull since: read again")
+        #expect(await service.cachedPage(zone: paris) != nil, "the copy still shows at once")
+        try await Task.sleep(nanoseconds: 20_000_000)
+        _ = try service.decodeAndKeep(data, zone: paris, epoch: cache.epoch)
+        #expect(await service.keptAt(zone: paris) != nil, "a read after the mark is fresh again")
+    }
+
+    @Test("a body kept before the envelope still shows, but with no kept time it is never fresh")
+    func legacyBody() async throws {
+        let cache = WrapDiskCache(root: root)
+        defer { cache.clear() }
+        let paris = try #require(TimeZone(identifier: "Europe/Paris"))
+        cache.write(try AchievementsFixtures.data("design-fixture"), page: AchievementsPageService.cachePage,
+                    owner: "mara", zone: paris.identifier)
+        var service = AchievementsPageService(client: SupabaseService().client, disk: cache, owner: "mara")
+        service.freshness = AchievementsFreshness()
+        #expect(await service.cachedPage(zone: paris)?.daysKept == 249)
+        #expect(await service.keptAt(zone: paris) == nil)
     }
 
     @Test("a kept body this build can no longer decode is a miss")

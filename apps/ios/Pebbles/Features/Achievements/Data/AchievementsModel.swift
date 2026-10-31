@@ -39,16 +39,29 @@ final class AchievementsModel {
     private(set) var pulling: AchievementsPage.CeremonyStack?
 
     @ObservationIgnored var service: (any AchievementsPageServicing)?
-    let zone: TimeZone
+    /// The reader's zone, read when each load or pull starts (not frozen at
+    /// init), so a zone changed between visits asks and keeps in the new one.
+    @ObservationIgnored let zone: () -> TimeZone
+
+    /// The stacks this model has pulled: never asked again, so a ceremony plays
+    /// once however the reads after it land.
+    @ObservationIgnored private var pulledThisSession: Set<AchievementsPage.CeremonyStack> = []
 
     /// The last read asked for, and the newest one whose page is shown.
     @ObservationIgnored private var readsAsked = 0
+    /// When the page on screen was kept or read: a kept copy newer than it is taken.
+    @ObservationIgnored private var shownAt: Date?
     @ObservationIgnored private var readShown = 0
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "achievements-page")
 
-    init(zone: TimeZone = SpineCalendar.current.timeZone) {
+    init(zone: @escaping () -> TimeZone = { SpineCalendar.current.timeZone }) {
         self.zone = zone
+    }
+
+    /// A fixed zone, for previews and tests.
+    convenience init(zone: TimeZone) {
+        self.init(zone: { zone })
     }
 
     /// The kept copy when nothing is shown yet, then `grant` (the screen-open
@@ -57,9 +70,37 @@ final class AchievementsModel {
         guard let service, !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
+        let zone = self.zone()
         if page == nil, let kept = await service.cachedPage(zone: zone), page == nil, readShown == 0 { page = kept }
         await grant()
-        await refresh(service)
+        await refresh(service, zone: zone)
+    }
+
+    /// The Profile shelf's read (D18): the kept copy at once, and a read only
+    /// when that copy is `maxAge` old or more, stale, or missing, so a visit to
+    /// You does not ask the server each time. When it reads, `grant` runs first
+    /// (the screen-open `check_achievements()`, which never celebrates), so a
+    /// visitor who only opens You still gets the retroactive grant.
+    func loadIfStale(maxAge: TimeInterval, now: () -> Date = Date.init,
+                     grant: @MainActor () async -> Void = {}) async {
+        guard let service, !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
+        let zone = self.zone()
+        let keptAt = await service.keptAt(zone: zone)
+        // The kept copy when nothing is shown, or when another screen kept a newer one since
+        // (the page read while the shelf was away): cheap, and it never waits for the network.
+        let newer = keptAt.map { kept in shownAt.map { kept > $0 } ?? true } ?? false
+        if page == nil || newer, let kept = await service.cachedPage(zone: zone) {
+            page = kept
+            shownAt = keptAt ?? now()
+        }
+        if page != nil, let keptAt {
+            let age = now().timeIntervalSince(keptAt)
+            if age >= 0, age < maxAge { return }
+        }
+        await grant()
+        await refresh(service, zone: zone)
     }
 
     /// Marks `card` seen (spec §4). The marks on screen stay until the next
@@ -95,9 +136,14 @@ final class AchievementsModel {
             logger.notice("pull_ceremony(\(name, privacy: .public)) asked while \(running.rawValue, privacy: .public) is pulling")
             return .busy
         }
+        guard !pulledThisSession.contains(stack) else {
+            logger.notice("pull_ceremony(\(name, privacy: .public)) not asked: already pulled in this session")
+            return .alreadyPulled
+        }
         pulling = stack
         defer { pulling = nil }
-        if readShown == 0 { await refresh(service) }
+        let zone = self.zone()
+        if readShown == 0 { await refresh(service, zone: zone) }
         guard readShown > 0 else {
             logger.error("pull_ceremony(\(name, privacy: .public)) not asked: no page read to decide on")
             return .failed
@@ -119,6 +165,8 @@ final class AchievementsModel {
             switch try await service.pull(stack, zone: zone) {
             case .pulled(let karma):
                 outcome = .pulled(karma: karma)
+                // The pull changed the page: the kept copy is stale until a read rewrites it.
+                service.markStale()
             case .alreadyPulled:
                 outcome = .alreadyPulled
             }
@@ -129,7 +177,7 @@ final class AchievementsModel {
             logger.error("pull_ceremony(\(name, privacy: .public)) failed: \(error.localizedDescription, privacy: .public)")
             outcome = .failed
         }
-        let reread = await refresh(service)
+        let reread = await refresh(service, zone: zone)
         if outcome == .alreadyPulled || outcome == .failed {
             if reread, page?.completion(stack)?.pulledAt != nil {
                 logger.notice("pull_ceremony(\(name, privacy: .public)) answered nothing; the read shows it pulled")
@@ -138,13 +186,20 @@ final class AchievementsModel {
                 logger.error("pull_ceremony(\(name, privacy: .public)) returned no row")
             }
         }
+        switch outcome {
+        case .pulled, .pulledWithoutKarma:
+            pulledThisSession.insert(stack)
+            if page?.completion(stack)?.pulledAt == nil { page?.markPulled(stack, at: Date()) }
+        case .alreadyPulled, .notReady, .busy, .failed:
+            break
+        }
         return outcome
     }
 
     /// Reads the page; true when the read landed. A read that lands after a
     /// newer one already shown is dropped: the page on screen is the newer.
     @discardableResult
-    private func refresh(_ service: any AchievementsPageServicing) async -> Bool {
+    private func refresh(_ service: any AchievementsPageServicing, zone: TimeZone) async -> Bool {
         readsAsked += 1
         let read = readsAsked
         do {
@@ -152,6 +207,7 @@ final class AchievementsModel {
             if read > readShown {
                 readShown = read
                 page = fresh
+                shownAt = Date()
                 failed = false
             }
             return true

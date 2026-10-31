@@ -87,6 +87,18 @@ struct AchievementsModelTests {
         #expect(model.page?.completion(.sixFirsts)?.isReady == false)
     }
 
+    @Test("the zone is read when each load starts: a zone changed between visits asks and keeps in the new one")
+    func zoneReadPerLoad() async throws {
+        let fake = FakeAchievementsPageService(answers: [.success(try Self.page(daysKept: 249))])
+        var current = try #require(TimeZone(identifier: "Europe/Paris"))
+        let model = AchievementsModel(zone: { current })
+        model.service = fake
+        await model.load {}
+        current = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        await model.load {}
+        #expect(fake.zones == ["Europe/Paris", "Europe/Paris", "Asia/Tokyo"])
+    }
+
     @Test("a cancelled read is not the error state")
     func cancelledRead() async {
         let fake = FakeAchievementsPageService(answers: [.failure(CancellationError())])
@@ -95,6 +107,47 @@ struct AchievementsModelTests {
         #expect(model.page == nil && !model.failed)
         #expect(AchievementsModel.isCancellation(URLError(.cancelled)))
         #expect(!AchievementsModel.isCancellation(URLError(.timedOut)))
+    }
+
+    @Test("the shelf's read: a kept copy under fifteen minutes old is enough; an older one, or none, is read")
+    func loadIfStale() async throws {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let kept = try Self.page(daysKept: 248)
+        let fresh = try Self.page(daysKept: 249)
+
+        let recent = FakeAchievementsPageService(kept: kept, answers: [.success(fresh)])
+        recent.keptAtDate = now.addingTimeInterval(-5 * 60)
+        let shelf = Self.model(recent)
+        await shelf.loadIfStale(maxAge: 15 * 60, now: { now }) { recent.record("grant") }
+        #expect(recent.calls == ["kept"] && shelf.page == kept, "no read, so no grant either")
+
+        let old = FakeAchievementsPageService(kept: kept, answers: [.success(fresh)])
+        old.keptAtDate = now.addingTimeInterval(-20 * 60)
+        let stale = Self.model(old)
+        await stale.loadIfStale(maxAge: 15 * 60, now: { now }) { old.record("grant") }
+        #expect(old.calls == ["kept", "grant", "read"] && stale.page == fresh, "the grant runs before the read")
+
+        let none = FakeAchievementsPageService(answers: [.success(fresh)])
+        let first = Self.model(none)
+        await first.loadIfStale(maxAge: 15 * 60, now: { now }) { none.record("grant") }
+        #expect(none.calls == ["kept", "grant", "read"] && first.page == fresh)
+    }
+
+    @Test("the shelf comes back to a newer kept copy the page read meanwhile, without a read of its own")
+    func shelfTakesNewerKept() async throws {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let first = try Self.page(daysKept: 248)
+        let newer = try Self.page(daysKept: 249)
+        let fake = FakeAchievementsPageService(kept: first, answers: [.success(first)])
+        fake.keptAtDate = now.addingTimeInterval(-10 * 60)
+        let shelf = Self.model(fake)
+        await shelf.loadIfStale(maxAge: 15 * 60, now: { now })
+        #expect(shelf.page == first)
+        fake.keep(newer, at: now.addingTimeInterval(-60))
+        await shelf.loadIfStale(maxAge: 15 * 60, now: { now })
+        #expect(shelf.page == newer && !fake.calls.contains("read"))
+        await shelf.loadIfStale(maxAge: 15 * 60, now: { now })
+        #expect(fake.calls == ["kept", "kept"], "the same copy is not read again")
     }
 
     @Test("opening a sheet marks its card seen")
@@ -131,8 +184,26 @@ struct AchievementsModelTests {
         fake.answer(pull: .success(.pulled(karma: 30)))
         let model = Self.model(fake)
         #expect(await model.pull(.sixFirsts) == .pulled(karma: 30))
-        #expect(fake.calls == ["read", "pull six_firsts", "read"])
-        #expect(model.page == ready && model.pulling == nil)
+        #expect(fake.calls == ["read", "pull six_firsts", "stale", "read"])
+        #expect(model.pulling == nil)
+        // The fake's read still says ready; the model marks what it pulled itself.
+        #expect(model.page?.completion(.sixFirsts)?.isReady == false && model.page?.completion(.sixFirsts)?.pulledAt != nil)
+        #expect(model.page?.explorer?.ringsDone == ready.explorer?.ringsDone)
+    }
+
+    @Test("a ceremony plays once: a second tap after a failed re-read is already pulled, never played again")
+    func playsOnce() async throws {
+        let fake = FakeAchievementsPageService(answers: [
+            .success(try Self.readyPage()), .failure(FakeAchievementsPageService.Failure()), .success(try Self.pulledPage())
+        ])
+        fake.answer(pull: .success(.pulled(karma: 5)))
+        let model = Self.model(fake)
+        #expect(await model.pull(.sixFirsts) == .pulled(karma: 5))
+        #expect(model.page?.completion(.sixFirsts)?.isReady == false, "the mark goes though the re-read failed")
+        #expect(model.page?.completion(.sixFirsts)?.pulledAt != nil)
+        fake.answer(pull: .success(.alreadyPulled))
+        #expect(await model.pull(.sixFirsts) == .alreadyPulled)
+        #expect(fake.calls.filter { $0.hasPrefix("pull") }.count == 1, "the second tap asks nothing")
     }
 
     @Test("a row paying no karma is still a pull")
@@ -150,7 +221,7 @@ struct AchievementsModelTests {
         let model = Self.model(fake)
         await model.load {}
         #expect(await model.pull(.sixFirsts) == .pulled(karma: 30))
-        #expect(fake.calls == ["kept", "read", "pull six_firsts", "read"])
+        #expect(fake.calls == ["kept", "read", "pull six_firsts", "stale", "read"])
     }
 
     @Test("no row, then a read showing the completion pulled, plays the ceremony without karma")

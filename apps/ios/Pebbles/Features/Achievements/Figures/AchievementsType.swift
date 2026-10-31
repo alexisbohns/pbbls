@@ -8,7 +8,7 @@ extension SpineType.Style {
     // MARK: The header
 
     static let achievementsSince = Self(size: 11.5, weight: 600, trackingEm: 0.2, features: [.smallCaps],
-                                        scaling: .text(.caption2))
+                                        scaling: .text(.caption2), isLowercase: true)
     static let achievementsDays = Self(size: 78, weight: 230, trackingEm: -0.025, features: [.lining],
                                        scaling: .text(.largeTitle))
     static let achievementsDaysUnit = Self(size: 15, weight: 560, trackingEm: 0.16, features: [.smallCaps],

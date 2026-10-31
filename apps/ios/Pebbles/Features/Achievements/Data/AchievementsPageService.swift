@@ -16,11 +16,57 @@ enum CeremonyPullError: Error, Equatable {
     case notReady
 }
 
+/// When the kept achievements page went stale in this process (#1306, D18): an
+/// unlock from the mutation-path check, or a ceremony pull that landed, makes
+/// the kept copy older than the truth, so the Profile shelf reads instead of
+/// waiting out its fifteen minutes. Thread-safe; the app shares `shared`, tests
+/// make their own.
+final class AchievementsFreshness: @unchecked Sendable {
+    static let shared = AchievementsFreshness()
+
+    private let lock = NSLock()
+    private var staleSince: Date?
+    private var readsStarted = 0
+    private var lastWritten: [String: Int] = [:]
+
+    /// A read's place in the order reads started, taken before its request.
+    func beginRead() -> Int {
+        lock.withLock {
+            readsStarted += 1
+            return readsStarted
+        }
+    }
+
+    /// Whether `read` may write the kept copy at `key`: only a read that started
+    /// after the last one written there, so an older body never overwrites a newer one.
+    func claimWrite(_ read: Int, key: String) -> Bool {
+        lock.withLock {
+            guard read > lastWritten[key, default: 0] else { return false }
+            lastWritten[key] = read
+            return true
+        }
+    }
+
+    func markStale(at date: Date = Date()) {
+        lock.withLock { staleSince = date }
+    }
+
+    /// Whether a copy kept at `keptAt` predates the last stale mark.
+    func isStale(keptAt: Date) -> Bool {
+        lock.withLock { staleSince.map { keptAt <= $0 } ?? false }
+    }
+}
+
 /// The seam `AchievementsModel`'s tests fake (#1306).
 protocol AchievementsPageServicing: Sendable {
     func page(zone: TimeZone) async throws -> AchievementsPage
     /// The device's last copy, or nil: display only, never instead of a fetch.
     func cachedPage(zone: TimeZone) async -> AchievementsPage?
+    /// When the device's last copy was kept: the last read that landed, in any
+    /// session (each one rewrites it). Nil when nothing is kept.
+    func keptAt(zone: TimeZone) async -> Date?
+    /// Something was unlocked or pulled: the kept copy no longer counts as fresh.
+    func markStale()
     func markSeen(_ card: AchievementCard) async throws
     func pull(_ stack: AchievementsPage.CeremonyStack, zone: TimeZone) async throws -> CeremonyPull
 }
@@ -41,11 +87,13 @@ struct AchievementsPageService: AchievementsPageServicing {
     var disk: WrapDiskCache?
     /// The signed-in user's id; nothing is kept or read without one.
     var owner: String?
+    var freshness: AchievementsFreshness = .shared
 
     func page(zone: TimeZone) async throws -> AchievementsPage {
         let epoch = disk?.epoch
+        let read = freshness.beginRead()
         let data = try await client.rpc("get_achievements", params: ["p_tz": zone.identifier]).execute().data
-        return try decodeAndKeep(data, zone: zone, epoch: epoch)
+        return try decodeAndKeep(data, zone: zone, epoch: epoch, read: read)
     }
 
     func cachedPage(zone: TimeZone) async -> AchievementsPage? {
@@ -53,11 +101,58 @@ struct AchievementsPageService: AchievementsPageServicing {
             return nil
         }
         do {
-            return try WrapDecoding.decode(AchievementsPayload.self, from: data).model
+            return try Self.keptPayload(data).model
         } catch {
             Self.logger.error("a kept achievements page no longer decodes: \(error.localizedDescription, privacy: .private)")
             return nil
         }
+    }
+
+    // MARK: - The kept copy
+
+    /// What is kept: the server's body as it came, with when it was kept, in one
+    /// file (`{"kept_at": seconds, "body": …}`). The kept time is our own record,
+    /// never a file's timestamp. A body kept before the envelope still shows,
+    /// with no kept time, so it never counts as fresh.
+    private struct Envelope: Decodable {
+        let keptAt: Double?
+        enum CodingKeys: String, CodingKey { case keptAt = "kept_at" }
+    }
+
+    private struct KeptBody: Decodable {
+        let body: AchievementsPayload
+    }
+
+    static func envelope(_ body: Data, keptAt: Date) -> Data {
+        var data = Data(#"{"kept_at":"#.utf8)
+        data.append(Data(String(keptAt.timeIntervalSince1970).utf8))
+        data.append(Data(#","body":"#.utf8))
+        data.append(body)
+        data.append(Data("}".utf8))
+        return data
+    }
+
+    /// The kept payload, from the envelope or, kept before it, the bare body.
+    static func keptPayload(_ data: Data) throws -> AchievementsPayload {
+        if let kept = try? WrapDecoding.decode(KeptBody.self, from: data) { return kept.body }
+        return try WrapDecoding.decode(AchievementsPayload.self, from: data)
+    }
+
+    /// When `data` was kept, by its own record; nil without one.
+    static func keptTime(_ data: Data) -> Date? {
+        (try? WrapDecoding.decode(Envelope.self, from: data))?.keptAt.map(Date.init(timeIntervalSince1970:))
+    }
+
+    /// When the kept copy was kept, by the time recorded in it; nil when there is
+    /// none, it carries no time, or it went stale since.
+    func keptAt(zone: TimeZone) async -> Date? {
+        guard let disk, let owner, let data = disk.read(Self.cachePage, owner: owner, zone: zone.identifier),
+              let kept = Self.keptTime(data), !freshness.isStale(keptAt: kept) else { return nil }
+        return kept
+    }
+
+    func markStale() {
+        freshness.markStale()
     }
 
     func markSeen(_ card: AchievementCard) async throws {
@@ -77,14 +172,16 @@ struct AchievementsPageService: AchievementsPageServicing {
     }
 
     /// Decodes `data`, logs any section it had to drop, and keeps the body once it decoded.
-    func decodeAndKeep(_ data: Data, zone: TimeZone, epoch: Int?) throws -> AchievementsPage {
+    /// `read` is the read's place in the order reads started (nil writes regardless).
+    func decodeAndKeep(_ data: Data, zone: TimeZone, epoch: Int?, read: Int? = nil) throws -> AchievementsPage {
         let payload = try WrapDecoding.decode(AchievementsPayload.self, from: data)
         if !payload.skipped.isEmpty {
             Self.logger.error(
                 "get_achievements sections dropped: \(payload.skipped.joined(separator: ","), privacy: .public)")
         }
-        if let disk, let owner {
-            disk.write(data, page: Self.cachePage, owner: owner, zone: zone.identifier, epoch: epoch)
+        if let disk, let owner, read.map({ freshness.claimWrite($0, key: "\(owner)|\(zone.identifier)") }) ?? true {
+            disk.write(Self.envelope(data, keptAt: Date()), page: Self.cachePage, owner: owner, zone: zone.identifier,
+                       epoch: epoch)
         }
         return payload.model
     }

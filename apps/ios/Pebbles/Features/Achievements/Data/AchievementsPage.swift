@@ -25,6 +25,32 @@ struct AchievementsPage: Equatable {
     var shelf: [ShelfItem]
     var shelfCount: Int?
 
+    /// Marks `stack`'s completion pulled at `date` and no longer ready: what the
+    /// server will say after a landed pull, set at once so the ready mark goes
+    /// even when the read after the pull fails. A later read replaces it.
+    mutating func markPulled(_ stack: CeremonyStack, at date: Date) {
+        func pulled(_ completion: Completion?) -> Completion? {
+            completion.map {
+                Completion(stack: $0.stack, completedAt: $0.completedAt, offeredFrom: $0.offeredFrom, isReady: false,
+                           pulledAt: $0.pulledAt ?? date, pebble: $0.pebble)
+            }
+        }
+        switch stack {
+        case .sixFirsts:
+            guard let e = explorer else { return }
+            explorer = Explorer(firstPebble: e.firstPebble, firstFive: e.firstFive, sixFirsts: e.sixFirsts,
+                                twentyFive: e.twentyFive, ringsDone: e.ringsDone, completion: pulled(e.completion))
+        case .emotions:
+            guard let e = emotions else { return }
+            emotions = Emotions(count: e.count, of: e.of, seats: e.seats, families: e.families, since: e.since,
+                                completion: pulled(e.completion))
+        case .domains:
+            guard let d = domains else { return }
+            domains = Domains(count: d.count, of: d.of, coverage: d.coverage, entered: d.entered, notYet: d.notYet,
+                              completion: pulled(d.completion))
+        }
+    }
+
     /// The completion a ceremony stack pulls, wherever its card carries it.
     func completion(_ stack: CeremonyStack) -> Completion? {
         switch stack {
