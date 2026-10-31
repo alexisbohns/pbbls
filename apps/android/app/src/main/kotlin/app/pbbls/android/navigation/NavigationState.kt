@@ -60,7 +60,7 @@ class NavigationState(
     /**
      * "Exit through home" (D4): the start route is always first, and at most one
      * other tab is active. Back therefore unwinds the current tab, falls back to
-     * Path, then exits — and the back path cannot grow without bound however
+     * Home, then exits — and the back path cannot grow without bound however
      * much the user taps around the bar.
      *
      * A tab that is not in use still RETAINS its stack; it is simply not in the
@@ -89,16 +89,16 @@ class NavigationState(
 /**
  * @param seed what the **start tab** is rooted at on a first composition, which
  *   is not always the start tab's own key. The auth gate seeds [PebblesKey.Welcome]
- *   there and lets [Navigator.rootAt] swap it for [PebblesKey.Path] once a session
+ *   there and lets [Navigator.rootAt] swap it for [PebblesKey.Home] once a session
  *   resolves — and that seed is load-bearing, not cosmetic. `rootAt` decides
  *   "is this a cold restore?" by asking whether the start tab is already rooted at
- *   `Path`, so seeding `Path` here would make every cold launch look like a restore
+ *   `Home`, so seeding `Home` here would make every cold launch look like a restore
  *   and silently skip the first-run onboarding push. Restores are unaffected:
  *   `rememberNavBackStack` only uses the seed when it has nothing saved.
  */
 @Composable
 fun rememberNavigationState(
-    startRoute: PebblesKey = PebblesKey.Path,
+    startRoute: PebblesKey = PebblesKey.Home,
     tabs: List<PebblesKey> = PebblesKey.tabs,
     seed: PebblesKey = startRoute,
 ): NavigationState {

@@ -3,6 +3,7 @@ package app.pbbls.android.navigation
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.LocalListDetailSceneScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
@@ -16,6 +17,7 @@ import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
 import app.pbbls.android.features.glyph.picker.GlyphPickerContent
 import app.pbbls.android.features.glyph.store.GlyphDetailScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
+import app.pbbls.android.features.home.HomeScreen
 import app.pbbls.android.features.lab.AnnouncementDetailScreen
 import app.pbbls.android.features.lab.LabScreen
 import app.pbbls.android.features.lab.LogListMode
@@ -37,6 +39,8 @@ import app.pbbls.android.features.profile.SoulDetailScreen
 import app.pbbls.android.features.profile.SoulFormScreen
 import app.pbbls.android.features.profile.SoulsListScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 /**
  * Key → screen (#852).
@@ -59,6 +63,11 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     welcomeContentRevealed: () -> Boolean,
     onOnboardingFinished: () -> Unit,
 ) {
+    entry<PebblesKey.Home>(metadata = NavTransitions.forKey(PebblesKey.Home)) {
+        val reselected = remember(navigator) { navigator.reselectEvents.filter { it == PebblesKey.Home }.map {} }
+        HomeScreen(reselected = reselected)
+    }
+
     entry<PebblesKey.Path>(
         metadata = NavTransitions.forKey(PebblesKey.Path) + PanePairs.metadataFor(PebblesKey.Path),
     ) {

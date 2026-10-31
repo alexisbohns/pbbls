@@ -29,6 +29,7 @@ class CaptureFlowTest : AppUiTest() {
         skipOnboarding()
         launch()
         signIn()
+        openPath()
         compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).performClick()
         onText(R.string.record_photo_title).assertIsDisplayed()
         onText(R.string.record_action_skip).performClick()

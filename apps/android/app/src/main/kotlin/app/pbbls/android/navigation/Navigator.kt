@@ -114,7 +114,7 @@ class Navigator(
      * stack.
      *
      * The start tab is the right one to read because [replaceAll] is what seeds
-     * a root, and it always seeds into the start tab. The other three tabs are
+     * a root, and it always seeds into the start tab. The other four tabs are
      * rooted at their own tab key by construction and say nothing about whether
      * the user is signed in.
      */
@@ -143,13 +143,13 @@ class Navigator(
      * and the distinction is not cosmetic. The gate runs on every resolution of
      * the session, including a **cold restore** — and by then the saveable
      * per-tab stacks have already restored themselves. An unconditional
-     * `replaceAll(Path)` at that moment throws away the very thing process-death
+     * `replaceAll(Home)` at that moment throws away the very thing process-death
      * restoration exists to preserve: a user killed on `People › SoulDetail`
-     * comes back to Path, silently, with every test still green.
+     * comes back to Home, silently, with every test still green.
      *
      * Rooting is the right signal because it distinguishes the two cases exactly:
      * a genuine sign-in has the start tab rooted at `Welcome` (so it re-roots),
-     * while a cold restore of an authed session is already rooted at `Path` (so
+     * while a cold restore of an authed session is already rooted at `Home` (so
      * it is left alone — every tab's stack, and the selected tab, intact).
      */
     fun rootAt(key: PebblesKey) {

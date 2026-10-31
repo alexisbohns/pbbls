@@ -48,6 +48,7 @@ class PathScreenTest : AppUiTest() {
         skipOnboarding()
         launch()
         signIn()
+        openPath()
     }
 
     @Test

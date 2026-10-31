@@ -9,10 +9,14 @@ import android.os.Parcel
 import android.provider.Settings
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import app.pbbls.android.MainActivity
+import app.pbbls.android.R
 import app.pbbls.android.core.data.OnboardingPreferences
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltTestApplication
@@ -168,6 +172,15 @@ abstract class AppUiTest {
      */
     protected fun drawPlainMonthPages() {
         Settings.Global.putFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
+    }
+
+    /**
+     * Switches to the Path tab. The app opens on Home (#1383 D1), so a test about the Path taps
+     * its tab after signing in. The bar item, told apart from same-named text by being selectable.
+     */
+    protected fun openPath() {
+        compose.onNode(hasText(string(R.string.tab_path)) and isSelectable()).performClick()
+        compose.waitForIdle()
     }
 
     /** Onboarding is first-run only; a test that is not about it marks it seen before [launch]. */

@@ -766,10 +766,25 @@
     <string name="record_signed_out_error">You must be signed in to save.</string>
 
     <!-- Bottom navigation bar (#852) -->
+    <string name="tab_home">Home</string>
     <string name="tab_path">Path</string>
     <string name="tab_people">People</string>
     <string name="tab_collections">Collections</string>
     <string name="tab_you">You</string>
+
+    <!-- Home greeting (#1383; iOS home.greeting.*) -->
+    <string name="home_greeting_morning_title">Morning</string>
+    <string name="home_greeting_morning_line">A new day to keep something from.</string>
+    <string name="home_greeting_afternoon_title">Good afternoon</string>
+    <string name="home_greeting_afternoon_line">Halfway through the day. Anything worth keeping?</string>
+    <string name="home_greeting_evening_title">Good evening</string>
+    <string name="home_greeting_evening_line">What stays with you from today?</string>
+    <string name="home_greeting_monday_morning_title">Morning</string>
+    <string name="home_greeting_monday_morning_line">Hope you\'ll have a pleasant week!</string>
+    <string name="home_greeting_sunday_evening_title">Good evening</string>
+    <string name="home_greeting_sunday_evening_line">How was your week?</string>
+    <!-- A greeting and the user's name: "Good evening, Alexis". -->
+    <string name="home_greeting_named">%1$s, %2$s</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">
