@@ -2757,6 +2757,8 @@ export type Database = {
         Returns: {
           assiduity: boolean[]
           days_practiced: number
+          glyphs_carved: number
+          glyphs_owned: number
         }[]
       }
       get_public_profile: { Args: { p_handle: string }; Returns: Json }
