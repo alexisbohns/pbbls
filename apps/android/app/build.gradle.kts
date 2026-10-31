@@ -154,6 +154,8 @@ android {
             resources.srcDir("../../../packages/supabase/scripts/oracles/achievements/payloads")
             // The board's page in the served shape, shared with iOS: the previews' fixture is checked against it.
             resources.srcDir("../../../packages/supabase/scripts/oracles/achievements/design")
+            // Home's payloads (#1383), dumped by verify-home.ts (HOME_DUMP=1); read verbatim, as iOS reads them.
+            resources.srcDir("../../../packages/supabase/scripts/oracles/home/payloads")
         }
     }
 
