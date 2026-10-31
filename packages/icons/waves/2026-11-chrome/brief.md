@@ -21,3 +21,15 @@ Sets travel together: the visibility trio and the error family are drawn as a se
 13. life domain — a compass, a territory, an area of one's life (`safari`; Android `ic_pebble_domain`)
 14. market — where glyphs are traded (`storefront`)
 15. hour — a time of day, beside a date (Android `ic_pebble_when`, the time pill on Capture's When step; iOS draws no icon there)
+
+## Web (#1313)
+
+Web and admin still draw these as lucide icons (web migration spec D2, `docs/superpowers/specs/2026-10-30-web-icon-migration-design.md`). Judge them at 16 px beside 14 px text and at 20 px in a settings row.
+
+Already briefed above, with the lucide names they also replace: 1 again (`RotateCcw`, `RefreshCw`), 4 upvote (`ArrowUpCircle`), 5 something went wrong (`AlertCircle`), 6 document (`FileText`, `Scale`), 7 privacy (`HeartHandshake`), 8 secret and 11 locked (`Lock`), 9 private (`UsersRound`), 10 public (`Globe` in the visibility menu), 12 invite (`UserRoundPlus`), 13 life domain (`Compass`, `Tag`).
+
+16. block — stop someone from reaching you (`Ban`)
+17. language — the tongue the app speaks (`Globe` in Appearance and the locale switcher); must read apart from 10
+18. appearance — light, dark, follow the device (`Sun`, `Moon`, `Monitor`): a trio drawn together or not at all
+19. colour world — the palette the app wears (`Palette`)
+20. bounce — regularity over the last 28 days, a rhythm kept (`CirclePile`, `Waves`)
