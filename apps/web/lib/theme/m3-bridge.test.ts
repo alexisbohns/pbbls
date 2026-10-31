@@ -8,9 +8,9 @@ import { ANDROID_SCHEMES_FROM_WEB, parseColorSchemes } from "./m3-schemes"
 const webRoot = fileURLToPath(new URL("../..", import.meta.url))
 
 describe("M3_BRIDGE", () => {
-  it("mirrors the :root.m3 block in globals.css, in order", () => {
+  it("mirrors the :root.m3, :root .m3 block in globals.css, in order", () => {
     const css = readFileSync(path.join(webRoot, "app/globals.css"), "utf8")
-    const block = css.match(/:root\.m3 \{([\s\S]*?)\n\}/)?.[1] ?? ""
+    const block = css.match(/:root\.m3, :root \.m3 \{([\s\S]*?)\n\}/)?.[1] ?? ""
     const pairs = [...block.matchAll(/--([\w-]+): var\(--m3-([\w-]+)\);/g)]
       .map(([, token, role]) => [token, role])
       // The font indirection also reads an --m3-* variable; it is not a colour role.

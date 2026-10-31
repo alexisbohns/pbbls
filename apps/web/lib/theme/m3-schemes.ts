@@ -4,6 +4,8 @@
  * Pure string-in/string-out so the drift test can run it in Vitest's node env.
  */
 
+import { SPINE_TOKENS } from "./ios-colorsets"
+
 export type M3Mode = "light" | "dark"
 export type M3Contrast = "standard" | "medium" | "high"
 
@@ -105,7 +107,31 @@ export function parseColorSchemes(kotlin: string): M3Scheme[] {
 }
 
 export function schemeSelector(mode: M3Mode, contrast: M3Contrast): string {
-  return `.m3${mode === "dark" ? ".dark" : ""}${contrast === "standard" ? "" : `.m3-contrast-${contrast}`}`
+  const c = contrast === "standard" ? "" : `.m3-contrast-${contrast}`
+  // .dark sits on <html> (next-themes): an .m3 island below it needs the descendant form (#1384 D3).
+  return mode === "dark" ? `.m3.dark${c}, .dark .m3${c}` : `.m3${c}`
+}
+
+/**
+ * The blends the Home and You cards read (#1384 D4): the same `SPINE_TOKENS`
+ * rows iOS's stock/rule/cardRule colorsets are generated from, written as CSS
+ * over the scheme's own roles. Paper for the light schemes, Night for the dark.
+ */
+const BLENDS = ["stock", "rule", "cardRule"] as const
+
+function blendDeclarations(mode: M3Mode): string[] {
+  return BLENDS.map((name) => {
+    const token = SPINE_TOKENS.find((t) => t.name === name)
+    if (!token) throw new Error(`SPINE_TOKENS has no ${name} row`)
+    const source = mode === "light" ? token.paper : token.night
+    if ("hex" in source) throw new Error(`${name} is a constant, not a blend of an M3 role`)
+    const [role, alpha] = source
+    const value =
+      alpha === 1
+        ? `var(--m3-${toKebab(role)})`
+        : `color-mix(in srgb, var(--m3-${toKebab(role)}) ${Math.round(alpha * 100)}%, transparent)`
+    return `  --m3-${toKebab(name)}: ${value};`
+  })
 }
 
 const HEADER = `/* GENERATED from apps/android/.../core/designsystem/ColorSchemes.kt by
@@ -114,7 +140,9 @@ const HEADER = `/* GENERATED from apps/android/.../core/designsystem/ColorScheme
    the Kotlin disagree.
 
    Each scheme's selector is one class more specific than the last axis it adds,
-   so exactly one block wins for any combination of .m3 / .dark / .m3-contrast-*.
+   so exactly one block wins for any combination of .m3 / .dark / .m3-contrast-*,
+   whether .dark sits on the .m3 element itself or on an ancestor (an .m3
+   element below .dark, the Home and You island).
    The bridge that points shadcn tokens at these roles lives in globals.css. */
 `
 
@@ -123,12 +151,14 @@ export function renderM3ThemeCss(schemes: M3Scheme[]): string {
   const theme = [
     "@theme inline {",
     ...roles.map((r) => `  --color-m3-${r}: var(--m3-${r});`),
+    ...BLENDS.map((b) => `  --color-m3-${toKebab(b)}: var(--m3-${toKebab(b)});`),
     "}",
   ].join("\n")
   const blocks = schemes.map((s) =>
     [
       `${schemeSelector(s.mode, s.contrast)} {`,
       ...s.roles.map(([r, hex]) => `  --m3-${r}: ${hex};`),
+      ...blendDeclarations(s.mode),
       "}",
     ].join("\n"),
   )
