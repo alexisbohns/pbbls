@@ -4,6 +4,12 @@ import type { Achievement } from "@/lib/types"
 export type AchievementMoment = {
   results: AchievementUnlockResult[]
   catalog: Achievement[]
+  /**
+   * Words for a slug the catalog cannot fully name: its title when the row is
+   * missing, its description when the row has none (a pulled ceremony, whose
+   * set_complete row carries a title only).
+   */
+  fallback?: Record<string, { title: string; description: string }>
 }
 
 type Listener = (moment: AchievementMoment) => void

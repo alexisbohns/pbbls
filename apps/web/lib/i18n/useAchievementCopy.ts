@@ -44,11 +44,16 @@ export function useAchievementCopy(): (achievement: AchievementDisplay) => Achie
         threshold: achievement.threshold ?? 0,
         name: referenceName(achievement, t),
       }
+      // A family this build has no copy for (the server ahead of the client,
+      // or one whose words only the catalog carries, as first_stone and
+      // set_complete do) degrades to its slug and no description, never to a
+      // bare message-key path. iOS does the same.
+      const titleKey = `achievements.family.${achievement.family}.title`
+      const descriptionKey = `achievements.family.${achievement.family}.description`
       return {
-        title: override.title ?? t(`achievements.family.${achievement.family}.title`, values),
+        title: override.title ?? (t.has(titleKey) ? t(titleKey, values) : achievement.slug),
         description:
-          override.description ??
-          t(`achievements.family.${achievement.family}.description`, values),
+          override.description ?? (t.has(descriptionKey) ? t(descriptionKey, values) : ""),
       }
     },
     [locale, t],

@@ -8,6 +8,7 @@ import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
 import { signupConsentMetadata } from "@/lib/auth/signup-metadata"
 import { isRecentSignIn, REAUTH_REQUIRED } from "@/lib/auth/recent-auth"
 import { clearAllCompleteDrafts } from "@/lib/record/complete-draft-store"
+import { clearAchievementsCaches } from "@/lib/data/achievements-cache"
 
 import type {
   Account,
@@ -27,15 +28,21 @@ function getSupabase() {
 }
 
 /**
- * Complete-flow autosaves are per account (#1050); none outlives the session
- * that wrote it. Best-effort: storage can be unavailable, and that must never
- * fail a sign-out.
+ * Complete-flow autosaves (#1050) and the achievements page's kept payload
+ * (#1308, private families) are per account; none outlives the session that
+ * wrote it. Best-effort: storage can be unavailable, and that must never fail
+ * a sign-out.
  */
 function clearDeviceDrafts() {
   try {
     clearAllCompleteDrafts(window.localStorage)
   } catch (err) {
     console.warn("[auth] could not clear complete drafts", err)
+  }
+  try {
+    clearAchievementsCaches(window.localStorage)
+  } catch (err) {
+    console.warn("[auth] could not clear the achievements cache", err)
   }
 }
 
@@ -105,6 +112,14 @@ export function useSupabaseAuth(): AuthContextValue {
       if (cancelled) return
 
       if (event === "SIGNED_OUT" || !session?.user) {
+        // However the session ended (an expired refresh, another tab), the
+        // achievements page's kept payload must not outlive it (#1308, D16).
+        // Synchronous localStorage only, so this callback stays deadlock-free.
+        try {
+          clearAchievementsCaches(window.localStorage)
+        } catch (err) {
+          console.warn("[auth] could not clear the achievements cache", err)
+        }
         setUser(null)
         setProfile(null)
         setIsLoading(false)

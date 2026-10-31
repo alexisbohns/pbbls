@@ -29,10 +29,12 @@ const wheelRank = (f) => (WHEEL.indexOf(f) < 0 ? WHEEL.length : WHEEL.indexOf(f)
 const byWheel = (a, b) => wheelRank(a) - wheelRank(b) || (a < b ? -1 : a > b ? 1 : 0);
 
 /**
+ * firstMoment: the user's first moment ever (local YYYY-MM-DD) or null.
  * @param {number} year @param {number} month @param {Item[]} items @param {string} today
+ * @param {string | null} [firstMoment]
  * @returns {MonthPayload}
  */
-export function monthPayload(year, month, items, today) {
+export function monthPayload(year, month, items, today, firstMoment = null) {
   const start = iso(year, month, 1);
   if (start > today) {
     return { month, state: "upcoming", moment_days: 0, pebble_days: 0, full_weeks: 0, weeks_filled: 0, level: 0, progress: 0,
@@ -43,10 +45,13 @@ export function monthPayload(year, month, items, today) {
   const mDays = new Set(inMonth.map((i) => Number(i.date.slice(8))));
   const pDays = new Set(inMonth.filter((i) => i.pebble).map((i) => Number(i.date.slice(8))));
   // A full week runs Monday to Sunday inside the month, and counts once it has
-  // ended: from the Monday after its Sunday.
+  // ended: from the Monday after its Sunday. In the first moment's month, only
+  // the weeks starting on or after that day count.
+  const firstMonth = firstMoment !== null && firstMoment.slice(0, 7) === start.slice(0, 7);
   const weeks = [];
   for (let d = 1; d + 6 <= n; d++) {
-    if (new Date(Date.UTC(year, month - 1, d)).getUTCDay() === 1 && iso(year, month, d + 6) < today) weeks.push(d);
+    if (new Date(Date.UTC(year, month - 1, d)).getUTCDay() === 1 && iso(year, month, d + 6) < today
+      && (!firstMonth || iso(year, month, d) >= firstMoment)) weeks.push(d);
   }
   const covered = (set) => weeks.filter((w) => [0, 1, 2, 3, 4, 5, 6].some((k) => set.has(w + k))).length;
   const wm = covered(mDays), wp = covered(pDays), fw = weeks.length;
@@ -77,7 +82,7 @@ export function monthPayload(year, month, items, today) {
  * @returns {YearPayload}
  */
 export function yearPayload(year, items, today, firstMoment) {
-  const months = Array.from({ length: 12 }, (_, k) => monthPayload(year, k + 1, items, today));
+  const months = Array.from({ length: 12 }, (_, k) => monthPayload(year, k + 1, items, today, firstMoment));
   const current = Number(today.slice(0, 4)) === year;
   const listed = [];
   if (firstMoment) {
