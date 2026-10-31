@@ -80,6 +80,13 @@ sealed interface PebblesKey : NavKey {
     ) : PebblesKey,
         BarKey
 
+    /** One About Pebbles reading from Home (#1383 D13): a page, the bar kept. [slug] is the `guides` row's slug. */
+    @Serializable
+    data class Guide(
+        val slug: String,
+    ) : PebblesKey,
+        BarKey
+
     @Serializable
     data object Achievements : PebblesKey, BarKey
 

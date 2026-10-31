@@ -866,6 +866,7 @@
 
     <!-- Home · About Pebbles (#1383 D13; iOS home.about.*) -->
     <string name="home_about_title">About Pebbles</string>
+    <string name="home_about_missing">This reading isn\'t available</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">

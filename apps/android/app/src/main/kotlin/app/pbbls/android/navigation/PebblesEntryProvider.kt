@@ -21,6 +21,7 @@ import app.pbbls.android.features.glyph.picker.GlyphPickerContent
 import app.pbbls.android.features.glyph.store.GlyphDetailScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
 import app.pbbls.android.features.home.HomeScreen
+import app.pbbls.android.features.home.guides.GuideScreen
 import app.pbbls.android.features.home.wraps.HomeWrapScreen
 import app.pbbls.android.features.lab.AnnouncementDetailScreen
 import app.pbbls.android.features.lab.LabScreen
@@ -88,7 +89,13 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
                 navigator.navigate(PebblesKey.Glyphs)
             },
             onOpenWrap = { month -> navigator.navigate(PebblesKey.HomeWrap(month.toString())) },
+            onOpenGuide = { slug -> navigator.navigate(PebblesKey.Guide(slug)) },
         )
+    }
+
+    // A page pushed over Home, the bar kept (#1383 D13).
+    entry<PebblesKey.Guide>(metadata = NavTransitions.forKey(PebblesKey.Guide(""))) { key ->
+        GuideScreen(slug = key.slug, onBack = navigator::goBack)
     }
 
     // A docked sheet over Home on every window (#1383 D12): Home has no list-detail pair to make it a pane.

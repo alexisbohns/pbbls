@@ -71,6 +71,7 @@ class PebblesKeysTest {
                 PebblesKey.GlyphDetail(sampleItem),
                 PebblesKey.GlyphDetail(ownedItem),
                 PebblesKey.HomeWrap("2026-10"),
+                PebblesKey.Guide("stones"),
                 PebblesKey.EditPebble(momentId = "m-1"),
                 PebblesKey.EditMoment(momentId = "m-1"),
                 PebblesKey.CompletePebble(momentId = "m-1"),
@@ -171,6 +172,7 @@ class PebblesKeysTest {
                 PebblesKey.PebbleDetail("p"),
                 PebblesKey.GlyphDetail(sampleItem),
                 PebblesKey.HomeWrap("2026-10"),
+                PebblesKey.Guide("stones"),
             )
         pushes.forEach {
             assertTrue("$it should render the bar", it is BarKey)

@@ -22,6 +22,7 @@ import androidx.compose.ui.test.performTextInput
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.data.AchievementRecord
+import app.pbbls.android.core.model.home.GuideIllustration
 import app.pbbls.android.core.model.home.HomeWrapMonth
 import app.pbbls.android.core.model.wrap.DayWeight
 import app.pbbls.android.core.model.wrap.MonthWeek
@@ -37,6 +38,7 @@ import app.pbbls.android.testing.FakeHomeService
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakePathWrapService
+import app.pbbls.android.testing.TestGuides
 import app.pbbls.android.testing.UiFixtures
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert.assertEquals
@@ -46,9 +48,9 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 /**
- * Home through the real app (#1383): a tap on a week of the month grid opens the Path on that week
- * (D8–D10), the quick moment and New pebble chain into Complete (D7), and a first-five task opens
- * its tab's create flow (D11).
+ * Home through the real app (#1383): a tap on a week of the grid opens the Path on that week (D8–D10),
+ * the quick moment and New pebble chain into Complete (D7), a first-five task opens its tab's create flow
+ * (D11), a wrap unfolds in its sheet (D12), and a guide opens its page (D13).
  */
 @HiltAndroidTest
 class HomeJourneyTest : AppUiTest() {
@@ -209,6 +211,22 @@ class HomeJourneyTest : AppUiTest() {
         scrollHomeTo(open)
         compose.onNode(open).assertIsDisplayed()
         compose.onNode(folded).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a tap on a guide opens its page`() {
+        home.guideRows = listOf(TestGuides.guide("stones", 1, GuideIllustration.STONES), TestGuides.guide("souls", 2))
+        skipOnboarding()
+        launch()
+        signIn()
+
+        val row = hasText("Title of souls")
+        scrollHomeTo(row)
+        compose.onNode(row).performClick()
+        compose.waitForIdle()
+
+        compose.onNodeWithText("Body of souls.").assertIsDisplayed()
+        compose.onNodeWithText("Body of stones.").assertDoesNotExist()
     }
 
     /** Scrolls Home's page (the outer list, not the wraps' row) until [matcher] is composed. */
