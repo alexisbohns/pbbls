@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -16,16 +17,21 @@ import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
+import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.model.wrap.DayWeight
 import app.pbbls.android.core.model.wrap.MonthWeek
 import app.pbbls.android.core.model.wrap.MonthWrapDto
 import app.pbbls.android.core.model.wrap.WrapJson
 import app.pbbls.android.core.model.wrap.toModel
+import app.pbbls.android.features.home.checklist.ChecklistTask
+import app.pbbls.android.features.home.checklist.HomeChecklist
 import app.pbbls.android.features.path.WeekRollBuilder
 import app.pbbls.android.testing.AppUiTest
+import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakePathWrapService
@@ -39,7 +45,8 @@ import javax.inject.Inject
 
 /**
  * Home through the real app (#1383): a tap on a week of the month grid opens the Path on that week
- * (D8–D10), and the quick moment and New pebble chain into Complete (D7).
+ * (D8–D10), the quick moment and New pebble chain into Complete (D7), and a first-five task opens
+ * its tab's create flow (D11).
  */
 @HiltAndroidTest
 class HomeJourneyTest : AppUiTest() {
@@ -48,6 +55,8 @@ class HomeJourneyTest : AppUiTest() {
     @Inject lateinit var wraps: FakePathWrapService
 
     @Inject lateinit var writes: FakeMomentWriteService
+
+    @Inject lateinit var achievements: FakeAchievementsService
 
     private fun onTab(id: Int): SemanticsNodeInteraction = compose.onNode(hasText(string(id)) and isSelectable())
 
@@ -136,6 +145,34 @@ class HomeJourneyTest : AppUiTest() {
         // Complete replaced Capture, so leaving it lands back on Home.
         pressBack()
         compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
+    }
+
+    @Test
+    fun `Add your first soul opens People's create sheet`() {
+        // The six rows of the first five, nothing unlocked: the box shows, every task open.
+        achievements.catalog =
+            (ChecklistTask.entries.map { it.slug } + HomeChecklist.BLUE_SLUG).mapIndexed { k, slug ->
+                AchievementRecord(id = "id-$slug", slug = slug, family = "first", sortOrder = k, karmaReward = 0, isActive = true)
+            }
+        skipOnboarding()
+        launch()
+        signIn()
+
+        compose
+            .onNode(hasAnyAncestor(hasTestTag(JourneyTags.HOME)) and hasScrollAction())
+            .performScrollToNode(hasText(string(R.string.home_task_soul_title)))
+        onText(R.string.home_task_soul_title).performClick()
+        onText(R.string.home_task_soul_body).assertIsDisplayed()
+        onText(R.string.home_task_soul_cta).performClick()
+        compose.waitForIdle()
+
+        onTab(R.string.tab_people).assertIsSelected()
+        onText(R.string.create_soul_title).assertIsDisplayed()
+
+        // Taken once: closing the form leaves People's list, and it does not open again.
+        pressBack()
+        compose.waitForIdle()
+        onText(R.string.create_soul_title).assertDoesNotExist()
     }
 
     /** The week line's "week 41" (#1207, D3): what names the page a moment is on. */

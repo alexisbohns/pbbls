@@ -15,9 +15,16 @@ import app.pbbls.android.core.data.HomeShortcutsLayout
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.ui.HomeMonthSlot
+import app.pbbls.android.features.home.ClaimStatus
 import app.pbbls.android.features.home.HomeContent
 import app.pbbls.android.features.home.HomeSection
 import app.pbbls.android.features.home.HomeUiState
+import app.pbbls.android.features.home.checklist.ChecklistRow
+import app.pbbls.android.features.home.checklist.ChecklistState
+import app.pbbls.android.features.home.checklist.ChecklistTask
+import app.pbbls.android.features.home.checklist.ChecklistTaskContent
+import app.pbbls.android.features.home.checklist.FirstFiveBox
+import app.pbbls.android.features.home.checklist.HomeChecklist
 import app.pbbls.android.features.home.shortcuts.HomeShortcuts
 import app.pbbls.android.features.path.wrap.month.HomeMonthGrid
 import com.android.tools.screenshot.PreviewTest
@@ -26,7 +33,7 @@ import java.time.LocalDateTime
 /**
  * Home (#1383): the shell, the greeting and the quick actions (the default pebble row; the greeting
  * alone is also what a month read that failed with no copy draws, D9), and the month's grid over it
- * (D8), until the later parts add the first five, the wraps and About. Paper, Night, French and
+ * (D8), your first five (D11) and its task sheets, until the later parts add the wraps and About. Paper, Night, French and
  * 2 × font, plus a long name at 1 × to show the greeting shrinking to hold its line (D18). The clock
  * and the name are pinned,
  * so a render never depends on when it ran: Saturday 31 October 2026, 21:00, an ordinary evening.
@@ -40,8 +47,16 @@ private val previewMonth: HomeMonthSlot = { wrap, onWeek, modifier -> HomeMonthG
 private fun HomePreview(
     name: String = "Alexis",
     month: HomeSection<MonthWrap> = HomeSection.Loading,
+    checklist: HomeChecklist? = null,
 ) {
-    PebblesTheme { HomeContent(state = HomeUiState(name = name, month = month), now = previewNow, monthSlot = previewMonth, onWeek = {}) }
+    PebblesTheme {
+        HomeContent(
+            state = HomeUiState(name = name, month = month, checklist = checklist),
+            now = previewNow,
+            monthSlot = previewMonth,
+            onWeek = {},
+        )
+    }
 }
 
 @PreviewTest
@@ -125,4 +140,130 @@ fun HomeQuickActionsPaper() {
 @Composable
 fun HomeQuickActionsNight() {
     HomeQuickActionsStyles()
+}
+
+// MARK: - Your first five (D11)
+
+/** The first [done] tasks ticked, in the fixed order: a deterministic checklist, no catalog. */
+private fun checklist(
+    done: Int,
+    state: ChecklistState,
+) = HomeChecklist(ChecklistTask.entries.mapIndexed { k, task -> ChecklistRow(task, k < done) }, state)
+
+private val inProgress = checklist(done = 2, state = ChecklistState.IN_PROGRESS)
+private val claimable = checklist(done = 5, state = ChecklistState.CLAIMABLE)
+
+@Composable
+private fun FirstFivePreview(content: @Composable () -> Unit) {
+    PebblesTheme {
+        Column(
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface).padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+        ) { content() }
+    }
+}
+
+/** The box in progress: two of five done (moment, pebble), three open with their chevrons. */
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewLargeFont
+@PreviewFrench
+@Composable
+fun HomeFirstFiveProgressPaper() {
+    FirstFivePreview { FirstFiveBox(inProgress, ClaimStatus.IDLE, onTask = {}, onClaim = {}) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun HomeFirstFiveProgressNight() {
+    FirstFivePreview { FirstFiveBox(inProgress, ClaimStatus.IDLE, onTask = {}, onClaim = {}) }
+}
+
+/** All five done: the claim row, then the same box after a claim that was not granted. */
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun HomeFirstFiveClaimablePaper() {
+    FirstFivePreview {
+        FirstFiveBox(claimable, ClaimStatus.IDLE, onTask = {}, onClaim = {})
+        FirstFiveBox(claimable, ClaimStatus.FAILED, onTask = {}, onClaim = {})
+    }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun HomeFirstFiveClaimableNight() {
+    FirstFivePreview { FirstFiveBox(claimable, ClaimStatus.IDLE, onTask = {}, onClaim = {}) }
+}
+
+/** The page with the box under the quick actions, as a first run shows it. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 1100)
+@Composable
+fun HomeFirstFivePage() {
+    HomePreview(checklist = inProgress)
+}
+
+/** A task sheet's content on the sheet's own ground (the sheet itself is stock). */
+@Composable
+private fun TaskSheetPreview(task: ChecklistTask) {
+    PebblesTheme {
+        val ground = MaterialTheme.colorScheme.surfaceContainerLow
+        ChecklistTaskContent(
+            task = task,
+            knockout = ground,
+            onGo = {},
+            modifier = Modifier.background(ground).padding(vertical = 16.dp),
+        )
+    }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun HomeTaskSheetMoment() {
+    TaskSheetPreview(ChecklistTask.MOMENT)
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun HomeTaskSheetPebble() {
+    TaskSheetPreview(ChecklistTask.PEBBLE)
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun HomeTaskSheetCollection() {
+    TaskSheetPreview(ChecklistTask.COLLECTION)
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun HomeTaskSheetSoul() {
+    TaskSheetPreview(ChecklistTask.SOUL)
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun HomeTaskSheetGlyph() {
+    TaskSheetPreview(ChecklistTask.GLYPH)
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun HomeTaskSheetNight() {
+    TaskSheetPreview(ChecklistTask.SOUL)
 }
