@@ -3,7 +3,8 @@
 import { use, useMemo } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Trash2 } from "lucide-react"
+import { Trash } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import { useSoul } from "@/lib/data/useSoul"
 import { useMoments } from "@/lib/data/useMoments"
@@ -83,7 +84,7 @@ export default function SoulDetailPage({
             <ConfirmDialog
               trigger={
                 <Button variant="outline" size="sm">
-                  <Trash2 className="size-4" aria-hidden="true" />
+                  <Trash className={PBBLS_ICON_SIZE.inline} />
                   {tSouls("deleteCta")}
                 </Button>
               }

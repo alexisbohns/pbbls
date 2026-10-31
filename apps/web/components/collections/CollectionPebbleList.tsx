@@ -1,6 +1,7 @@
 "use client"
 
-import { X } from "lucide-react"
+import { Remove } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import type { CompletedMoment, Soul } from "@/lib/types"
@@ -50,7 +51,7 @@ export function CollectionPebbleList({
               })}
               onClick={() => onRemove(moment.pebble.id)}
             >
-              <X />
+              <Remove className={PBBLS_ICON_SIZE.inline} />
             </Button>
           )}
         </li>
