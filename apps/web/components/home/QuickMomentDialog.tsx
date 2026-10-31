@@ -70,7 +70,7 @@ function QuickMomentForm({ onDone }: { onDone: () => void }) {
       }}
     >
       <DialogHeader>
-        <DialogTitle className="pb-type-card-title">{t("title")}</DialogTitle>
+        <DialogTitle className="pb-type-card-title text-[1.625rem] font-[340]">{t("title")}</DialogTitle>
       </DialogHeader>
       <div className="flex flex-col gap-1.5">
         <label htmlFor={nameId} className="pb-type-row-title">
