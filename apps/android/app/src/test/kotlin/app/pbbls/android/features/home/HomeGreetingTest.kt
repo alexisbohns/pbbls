@@ -84,7 +84,7 @@ class HomeGreetingTest {
 
     @Test
     fun `TalkBack reads the title, the line, then the dateline`() {
-        assertEquals("Good evening, Alexis. What stays with you from today?. Saturday 31 October", lines("2026-10-31T21:00").spoken)
+        assertEquals("Good evening, Alexis. What stays with you from today? Saturday 31 October.", lines("2026-10-31T21:00").spoken)
     }
 
     @Test

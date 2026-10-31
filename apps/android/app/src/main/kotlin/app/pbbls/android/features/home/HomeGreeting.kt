@@ -21,8 +21,13 @@ internal object HomeGreeting {
         val line: String,
         val dateline: String,
     ) {
-        /** One TalkBack node, title first, as iOS reads it. */
-        val spoken: String get() = "$title. $line. $dateline"
+        /**
+         * One TalkBack node, title first, as iOS reads it. A part that already ends in its own
+         * punctuation ("What stays with you from today?") takes no extra period.
+         */
+        val spoken: String get() = listOf(title, line, dateline).joinToString(" ") { it.sentence() }
+
+        private fun String.sentence(): String = if (isEmpty() || last() in ".?!…") this else "$this."
     }
 
     enum class Band { MORNING, AFTERNOON, EVENING }
