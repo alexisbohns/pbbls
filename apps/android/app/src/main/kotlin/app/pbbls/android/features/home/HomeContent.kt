@@ -30,8 +30,10 @@ import app.pbbls.android.features.home.checklist.ChecklistTask
 import app.pbbls.android.features.home.checklist.FirstFiveBox
 import app.pbbls.android.features.home.components.HomeGreetingBlock
 import app.pbbls.android.features.home.shortcuts.HomeShortcuts
+import app.pbbls.android.features.home.wraps.HomeWrapsSection
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 /** The page's gutters: 16 dp to the sections, 4 more to the greeting's text (the mock's). */
 private val GUTTER = 16.dp
@@ -63,6 +65,9 @@ private val SECTION_GAP = 44.dp
  * Then your first five (D11) while it is in progress or claimable: [onTask] opens a task's sheet,
  * [onClaim] claims the blue pebble.
  *
+ * Then the monthly wraps (D12) once their first read is back; [onOpenWrap] gets the month of a
+ * card tapped, [onRetryWraps] the section's Try again.
+ *
  * The date is formatted in the app's locale, read here in composition (D22), never `Locale.getDefault()`.
  */
 @Composable
@@ -80,6 +85,8 @@ fun HomeContent(
     snackbar: SnackbarHostState? = null,
     onTask: (ChecklistTask) -> Unit = {},
     onClaim: () -> Unit = {},
+    onOpenWrap: (YearMonth) -> Unit = {},
+    onRetryWraps: () -> Unit = {},
 ) {
     val resources = LocalResources.current
     val locale = LocalConfiguration.current.locales[0]
@@ -123,6 +130,18 @@ fun HomeContent(
             state.checklist?.takeIf { it.isShown }?.let { checklist ->
                 item(key = "first-five") {
                     FirstFiveBox(checklist = checklist, claim = state.claim, onTask = onTask, onClaim = onClaim)
+                }
+            }
+            if (state.wraps !is HomeSection.Loading) {
+                item(key = "wraps") {
+                    HomeWrapsSection(
+                        wraps = state.wraps,
+                        liveMonth = YearMonth.from(now),
+                        gutter = GUTTER,
+                        textInset = TEXT_INSET,
+                        onOpen = onOpenWrap,
+                        onRetry = onRetryWraps,
+                    )
                 }
             }
         }

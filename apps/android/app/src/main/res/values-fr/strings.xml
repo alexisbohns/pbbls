@@ -840,6 +840,24 @@
     <string name="home_task_sample_collection">L\'automne avec Elio</string>
     <string name="home_first_five_of">sur</string>
 
+    <!-- Home · monthly wraps (#1383 D12; iOS home.wraps.* / home.wrap.*) -->
+    <string name="home_wraps_title">Bilans du mois</string>
+    <string name="home_wraps_error">Impossible de charger tes mois.</string>
+    <string name="home_wraps_retry">Réessayer</string>
+    <string name="home_wraps_empty">Ton premier bilan se pliera le %1$s.</string>
+    <string name="home_wrap_folded">plié</string>
+    <string name="home_wrap_unfold">Déplier</string>
+    <plurals name="home_wrap_a11y_open">
+        <item quantity="one">%1$s, %2$d galet</item>
+        <item quantity="many">%1$s, %2$d galets</item>
+        <item quantity="other">%1$s, %2$d galets</item>
+    </plurals>
+    <plurals name="home_wrap_a11y_folded">
+        <item quantity="one">%1$s, %2$d galet, plié</item>
+        <item quantity="many">%1$s, %2$d galets, plié</item>
+        <item quantity="other">%1$s, %2$d galets, plié</item>
+    </plurals>
+
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">
         <item quantity="one">%1$s galet</item>

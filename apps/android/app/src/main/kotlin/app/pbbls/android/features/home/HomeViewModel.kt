@@ -101,6 +101,7 @@ class HomeViewModel
 
         private var nameJob: Job? = null
         private var monthJob: Job? = null
+        private var wrapsJob: Job? = null
 
         /** The zone the month's days are cut in, as the Path asks for it. */
         private val zone = ZoneId.systemDefault()
@@ -110,6 +111,12 @@ class HomeViewModel
             if (monthJob?.isActive != true) monthJob = viewModelScope.launch { loadMonth() }
             // Every resume, as iOS's `.task`: a trip to the tab a task sent the user to ticks it here.
             viewModelScope.launch { loadChecklist() }
+            retryWraps()
+        }
+
+        /** Reads the months again (D12): every resume, and the row's Try again. A read in flight is not doubled. */
+        fun retryWraps() {
+            if (wrapsJob?.isActive != true) wrapsJob = viewModelScope.launch { loadWraps() }
         }
 
         /**
@@ -246,6 +253,33 @@ class HomeViewModel
                 onFailure = { error ->
                     Log.e(TAG, "path_month_wrap for $month failed", error)
                     if (shownMonth() != month) _uiState.update { it.copy(month = HomeSection.Failed) }
+                },
+            )
+        }
+
+        /**
+         * The monthly wraps (D12). A failure keeps the months shown, marked [HomeWraps.stale]; with none shown
+         * the section says it failed ([HomeSection.Failed]). An unfold in the wrap sheet reaches the card here,
+         * through the server, on the resume that follows the sheet.
+         */
+        private suspend fun loadWraps() {
+            runCatchingCancellable { home.wraps(zone) }.fold(
+                onSuccess = { months -> _uiState.update { it.copy(wraps = HomeSection.Ready(HomeWraps(months))) } },
+                onFailure = { error ->
+                    Log.e(TAG, "home_wraps failed", error)
+                    _uiState.update { state ->
+                        val shown = state.wraps
+                        state.copy(
+                            wraps =
+                                if (shown is HomeSection.Ready) {
+                                    HomeSection.Ready(
+                                        shown.value.copy(stale = true),
+                                    )
+                                } else {
+                                    HomeSection.Failed
+                                },
+                        )
+                    }
                 },
             )
         }

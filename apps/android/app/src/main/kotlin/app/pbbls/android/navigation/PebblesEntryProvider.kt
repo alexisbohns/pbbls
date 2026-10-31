@@ -82,6 +82,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
                 navigator.openAtRoot(PebblesKey.You)
                 navigator.navigate(PebblesKey.Glyphs)
             },
+            onOpenWrap = {},
         )
     }
 

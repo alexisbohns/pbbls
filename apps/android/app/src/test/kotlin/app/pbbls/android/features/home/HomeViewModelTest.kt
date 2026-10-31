@@ -9,6 +9,7 @@ import app.pbbls.android.core.data.HomeShortcutsLayout
 import app.pbbls.android.core.data.HomeShortcutsPreference
 import app.pbbls.android.core.data.TabIntent
 import app.pbbls.android.core.data.TabIntents
+import app.pbbls.android.core.model.home.HomeWrapMonth
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.model.wrap.MonthWrapDto
 import app.pbbls.android.core.model.wrap.WrapJson
@@ -34,6 +35,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
+import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
@@ -525,5 +527,53 @@ class HomeViewModelTest {
 
             assertNull(viewModel.uiState.value.checklist)
             assertTrue(achievements.calls.isEmpty())
+        }
+
+    // MARK: - The monthly wraps (D12)
+
+    private val october = HomeWrapMonth(YearMonth.of(2026, 10), count = 23, revealedAt = null, cover = null)
+    private val september =
+        HomeWrapMonth(YearMonth.of(2026, 9), count = 41, revealedAt = Instant.parse("2026-10-01T08:00:00Z"), cover = null)
+
+    @Test
+    fun `the months land on resume`() =
+        runTest {
+            home.months = listOf(october, september)
+            val viewModel = viewModel()
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(HomeSection.Ready(HomeWraps(listOf(october, september))), viewModel.uiState.value.wraps)
+        }
+
+    @Test
+    fun `a failed first read says so`() =
+        runTest {
+            home.failNextWraps = RuntimeException("offline")
+            val viewModel = viewModel()
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(HomeSection.Failed, viewModel.uiState.value.wraps)
+        }
+
+    @Test
+    fun `a failed later read keeps the months, marked stale, and Try again reads them back`() =
+        runTest {
+            home.months = listOf(october)
+            val viewModel = viewModel()
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            home.failNextWraps = RuntimeException("offline")
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(HomeSection.Ready(HomeWraps(listOf(october), stale = true)), viewModel.uiState.value.wraps)
+
+            viewModel.retryWraps()
+            advanceUntilIdle()
+            assertEquals(HomeSection.Ready(HomeWraps(listOf(october))), viewModel.uiState.value.wraps)
         }
 }

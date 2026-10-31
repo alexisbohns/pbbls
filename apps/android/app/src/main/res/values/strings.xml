@@ -846,6 +846,24 @@
     <string name="home_task_sample_collection">Autumn with Elio</string>
     <string name="home_first_five_of">of</string>
 
+    <!-- Home · monthly wraps (#1383 D12; iOS home.wraps.* / home.wrap.*) -->
+    <string name="home_wraps_title">Monthly wraps</string>
+    <string name="home_wraps_error">Couldn\'t load your months.</string>
+    <string name="home_wraps_retry">Try again</string>
+    <!-- The live month's last day, "30 November". -->
+    <string name="home_wraps_empty">Your first wrap folds on %1$s.</string>
+    <string name="home_wrap_folded">folded</string>
+    <string name="home_wrap_unfold">Unfold</string>
+    <!-- A wrap card for TalkBack: "October 2026, 23 pebbles". -->
+    <plurals name="home_wrap_a11y_open">
+        <item quantity="one">%1$s, %2$d pebble</item>
+        <item quantity="other">%1$s, %2$d pebbles</item>
+    </plurals>
+    <plurals name="home_wrap_a11y_folded">
+        <item quantity="one">%1$s, %2$d pebble, folded</item>
+        <item quantity="other">%1$s, %2$d pebbles, folded</item>
+    </plurals>
+
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">
         <item quantity="one">%1$s pebble</item>
