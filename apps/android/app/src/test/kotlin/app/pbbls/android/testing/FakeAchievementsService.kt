@@ -1,5 +1,6 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.AchievementCheckResult
 import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.model.achievements.AchievementCard
@@ -25,7 +26,17 @@ class FakeAchievementsService(
     var kept: AchievementsPage? = null,
     /** What [pullCeremony] returns when it does not throw. */
     var pullResult: CeremonyPull = CeremonyPull.AlreadyPulled,
+    /** What [loadUnlocks] returns: the unlocked achievement ids. */
+    var unlocks: Set<String> = emptySet(),
+    /** What [claimBluePebble] returns when it does not throw; empty is "not granted". */
+    var claimResult: List<AchievementCheckResult> = emptyList(),
 ) : AchievementsServicing {
+    var unlocksLoadCount = 0
+        private set
+
+    var claimCount = 0
+        private set
+
     var catalogLoadCount = 0
         private set
 
@@ -63,6 +74,22 @@ class FakeAchievementsService(
     private val armed = ArmedFailure()
     private val pageFailure = ArmedFailure()
     private val pullFailure = ArmedFailure()
+    private val unlocksFailure = ArmedFailure()
+    private val claimFailure = ArmedFailure()
+
+    /** Thrown by the next [loadUnlocks], then cleared. */
+    var failNextUnlocks: Exception?
+        get() = unlocksFailure.next
+        set(value) {
+            unlocksFailure.next = value
+        }
+
+    /** Thrown by the next [claimBluePebble], then cleared. */
+    var failNextClaim: Exception?
+        get() = claimFailure.next
+        set(value) {
+            claimFailure.next = value
+        }
 
     /**
      * Thrown by the next [loadCatalog], then cleared.
@@ -96,6 +123,19 @@ class FakeAchievementsService(
         catalogLoadCount += 1
         armed.fire()
         return catalog
+    }
+
+    override suspend fun loadUnlocks(): Set<String> {
+        unlocksLoadCount += 1
+        unlocksFailure.fire()
+        return unlocks
+    }
+
+    override suspend fun claimBluePebble(): List<AchievementCheckResult> {
+        claimCount += 1
+        calls += "claim"
+        claimFailure.fire()
+        return claimResult
     }
 
     override suspend fun checkIgnoringFailure() {
