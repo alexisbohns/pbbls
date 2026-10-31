@@ -811,6 +811,22 @@
     <!-- The snackbar after a camera moment (#1383 D7, iOS home.toast.*): "Moment saved · 14:32", the time in the locale's short form. -->
     <string name="home_toast_saved">Moment saved · %1$s</string>
     <string name="home_toast_name">Name it</string>
+    <!-- Your first five on Home (#1383 D11, iOS home.firstFive.* and home.task.*.title/line). -->
+    <string name="home_first_five_title">Your first five</string>
+    <string name="home_first_five_done">Done</string>
+    <string name="home_first_five_claim">Claim the blue pebble</string>
+    <string name="home_first_five_claim_failed">Couldn\'t claim it yet. Try again.</string>
+    <string name="home_task_moment_title">Record your first moment</string>
+    <string name="home_task_moment_line">A time and a name. Nothing more.</string>
+    <string name="home_task_pebble_title">Complete your first pebble</string>
+    <string name="home_task_pebble_line">Give a moment its weight and colour.</string>
+    <string name="home_task_collection_title">Start your first collection</string>
+    <string name="home_task_collection_line">Gather pebbles that belong together.</string>
+    <string name="home_task_soul_title">Add your first soul</string>
+    <string name="home_task_soul_line">Someone who shares your moments.</string>
+    <string name="home_task_glyph_title">Carve your first glyph</string>
+    <string name="home_task_glyph_line">A mark of your own, for a soul or a collection.</string>
+    <string name="home_first_five_of">of</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">

@@ -805,6 +805,22 @@
     <!-- The snackbar after a camera moment (#1383 D7, iOS home.toast.*): "Moment saved · 14:32", the time in the locale's short form. -->
     <string name="home_toast_saved">Moment enregistré · %1$s</string>
     <string name="home_toast_name">Nommer</string>
+    <!-- Your first five on Home (#1383 D11, iOS home.firstFive.* and home.task.*.title/line). -->
+    <string name="home_first_five_title">Tes cinq premières fois</string>
+    <string name="home_first_five_done">Fait</string>
+    <string name="home_first_five_claim">Réclamer le galet bleu</string>
+    <string name="home_first_five_claim_failed">Impossible de le réclamer pour l\'instant. Réessaie.</string>
+    <string name="home_task_moment_title">Enregistre ton premier moment</string>
+    <string name="home_task_moment_line">Une heure et un nom. Rien de plus.</string>
+    <string name="home_task_pebble_title">Complète ton premier galet</string>
+    <string name="home_task_pebble_line">Donne à un moment son poids et sa couleur.</string>
+    <string name="home_task_collection_title">Commence ta première collection</string>
+    <string name="home_task_collection_line">Rassemble des galets qui vont ensemble.</string>
+    <string name="home_task_soul_title">Ajoute ta première âme</string>
+    <string name="home_task_soul_line">Quelqu\'un qui partage tes moments.</string>
+    <string name="home_task_glyph_title">Grave ton premier glyphe</string>
+    <string name="home_task_glyph_line">Une marque à toi, pour une âme ou une collection.</string>
+    <string name="home_first_five_of">sur</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">

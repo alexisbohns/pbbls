@@ -139,6 +139,7 @@ fun HomeScreen(
         camera = camera,
         onDismissCameraError = moments.camera::dismissError,
         snackbar = snackbar,
+        onClaim = viewModel::claim,
     )
     if (camera.isUnavailable) CameraUnavailableDialog(onDismiss = moments.camera::dismissUnavailable)
     quickForm?.let { form ->

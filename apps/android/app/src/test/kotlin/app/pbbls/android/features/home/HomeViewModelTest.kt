@@ -53,8 +53,7 @@ class HomeViewModelTest {
     private val achievements = FakeAchievementsService()
     private val moments = FakeMomentReadService()
 
-    private fun viewModel() =
-        HomeViewModel(home, wraps, tabIntents, shortcuts, HapticsPreference(settings), achievements, moments)
+    private fun viewModel() = HomeViewModel(home, wraps, tabIntents, shortcuts, HapticsPreference(settings), achievements, moments)
 
     /** The server's own month, moved to the live one, [pebbles] telling two reads apart. */
     private fun month(pebbles: Int): MonthWrap =
@@ -330,11 +329,19 @@ class HomeViewModelTest {
 
             second.complete(Unit)
             advanceUntilIdle()
-            assertEquals(2, viewModel.uiState.value.checklist?.doneCount)
+            assertEquals(
+                2,
+                viewModel.uiState.value.checklist
+                    ?.doneCount,
+            )
 
             first.complete(Unit)
             advanceUntilIdle()
-            assertEquals(2, viewModel.uiState.value.checklist?.doneCount)
+            assertEquals(
+                2,
+                viewModel.uiState.value.checklist
+                    ?.doneCount,
+            )
         }
 
     @Test
@@ -344,13 +351,21 @@ class HomeViewModelTest {
             val viewModel = viewModel()
             viewModel.onResumed()
             advanceUntilIdle()
-            assertEquals(0, viewModel.uiState.value.checklist?.doneCount)
+            assertEquals(
+                0,
+                viewModel.uiState.value.checklist
+                    ?.doneCount,
+            )
 
             achievements.unlocks = ids(ChecklistTask.MOMENT)
             viewModel.onMomentSaved()
             advanceUntilIdle()
 
-            assertEquals(1, viewModel.uiState.value.checklist?.doneCount)
+            assertEquals(
+                1,
+                viewModel.uiState.value.checklist
+                    ?.doneCount,
+            )
             assertEquals(2, achievements.unlocksLoadCount)
         }
 
@@ -362,14 +377,22 @@ class HomeViewModelTest {
             val viewModel = viewModel()
             viewModel.onResumed()
             advanceUntilIdle()
-            assertEquals(ChecklistState.CLAIMABLE, viewModel.uiState.value.checklist?.state)
+            assertEquals(
+                ChecklistState.CLAIMABLE,
+                viewModel.uiState.value.checklist
+                    ?.state,
+            )
 
             achievements.claimResult = listOf(AchievementCheckResult(HomeChecklist.BLUE_SLUG, 50))
             achievements.unlocks = achievements.unlocks + "id-${HomeChecklist.BLUE_SLUG}"
             viewModel.claim()
             advanceUntilIdle()
 
-            assertEquals(ChecklistState.DONE, viewModel.uiState.value.checklist?.state)
+            assertEquals(
+                ChecklistState.DONE,
+                viewModel.uiState.value.checklist
+                    ?.state,
+            )
             assertEquals(ClaimStatus.IDLE, viewModel.uiState.value.claim)
             assertEquals(1, achievements.claimCount)
         }
@@ -387,7 +410,11 @@ class HomeViewModelTest {
             advanceUntilIdle()
 
             assertEquals(ClaimStatus.FAILED, viewModel.uiState.value.claim)
-            assertEquals(ChecklistState.CLAIMABLE, viewModel.uiState.value.checklist?.state)
+            assertEquals(
+                ChecklistState.CLAIMABLE,
+                viewModel.uiState.value.checklist
+                    ?.state,
+            )
         }
 
     @Test

@@ -26,6 +26,8 @@ import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.ui.HomeMonthSlot
 import app.pbbls.android.features.home.camera.CameraMomentStatus
 import app.pbbls.android.features.home.camera.CameraMomentUiState
+import app.pbbls.android.features.home.checklist.ChecklistTask
+import app.pbbls.android.features.home.checklist.FirstFiveBox
 import app.pbbls.android.features.home.components.HomeGreetingBlock
 import app.pbbls.android.features.home.shortcuts.HomeShortcuts
 import java.time.LocalDate
@@ -58,6 +60,9 @@ private val SECTION_GAP = 44.dp
  * Under the quick actions, the camera moment's progress and failure lines ([camera], #1383 D7); its
  * piece is off while it saves (D6). [snackbar] hosts "Moment saved · 14:32" once one lands.
  *
+ * Then your first five (D11) while it is in progress or claimable: [onTask] opens a task's sheet,
+ * [onClaim] claims the blue pebble.
+ *
  * The date is formatted in the app's locale, read here in composition (D22), never `Locale.getDefault()`.
  */
 @Composable
@@ -73,6 +78,8 @@ fun HomeContent(
     camera: CameraMomentUiState = CameraMomentUiState(),
     onDismissCameraError: () -> Unit = {},
     snackbar: SnackbarHostState? = null,
+    onTask: (ChecklistTask) -> Unit = {},
+    onClaim: () -> Unit = {},
 ) {
     val resources = LocalResources.current
     val locale = LocalConfiguration.current.locales[0]
@@ -111,6 +118,11 @@ fun HomeContent(
                         onDismissError = onDismissCameraError,
                         modifier = Modifier.padding(top = Spacing.md, start = TEXT_INSET, end = TEXT_INSET),
                     )
+                }
+            }
+            state.checklist?.takeIf { it.isShown }?.let { checklist ->
+                item(key = "first-five") {
+                    FirstFiveBox(checklist = checklist, claim = state.claim, onTask = onTask, onClaim = onClaim)
                 }
             }
         }
