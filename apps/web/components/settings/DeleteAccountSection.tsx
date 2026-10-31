@@ -1,7 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Trash2 } from "lucide-react"
+import { Trash } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
@@ -91,7 +93,7 @@ export function DeleteAccountSection({ onDeleted, resumeAfterReauth = false, rea
       <SettingsGroup aria-labelledby="settings-account">
         <SettingsRow onClick={() => setOpen(true)}>
           <span className="flex items-center gap-3 text-destructive">
-            <Trash2 className="size-5 shrink-0" aria-hidden />
+            <Trash className={cn(PBBLS_ICON_SIZE.row, "shrink-0")} />
             {t("deleteAccount")}
           </span>
         </SettingsRow>
