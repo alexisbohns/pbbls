@@ -4,7 +4,9 @@
    the Kotlin disagree.
 
    Each scheme's selector is one class more specific than the last axis it adds,
-   so exactly one block wins for any combination of .m3 / .dark / .m3-contrast-*.
+   so exactly one block wins for any combination of .m3 / .dark / .m3-contrast-*,
+   whether .dark sits on the .m3 element itself or on an ancestor (an .m3
+   element below .dark, the Home and You island).
    The bridge that points shadcn tokens at these roles lives in globals.css. */
 
 @theme inline {
@@ -60,6 +62,9 @@
   --color-m3-on-sand: var(--m3-on-sand);
   --color-m3-sand-container: var(--m3-sand-container);
   --color-m3-on-sand-container: var(--m3-on-sand-container);
+  --color-m3-stock: var(--m3-stock);
+  --color-m3-rule: var(--m3-rule);
+  --color-m3-card-rule: var(--m3-card-rule);
 }
 :root {
   --pbbls-error: #9B4500;
@@ -122,6 +127,9 @@
   --m3-on-sand: #FFFFFF;
   --m3-sand-container: #FFDDB2;
   --m3-on-sand-container: #624000;
+  --m3-stock: var(--m3-surface-container-lowest);
+  --m3-rule: color-mix(in srgb, var(--m3-on-surface) 14%, transparent);
+  --m3-card-rule: color-mix(in srgb, var(--m3-on-surface) 22%, transparent);
 }
 .m3.m3-contrast-medium {
   --m3-primary: #5D222E;
@@ -176,6 +184,9 @@
   --m3-on-sand: #FFFFFF;
   --m3-sand-container: #90651E;
   --m3-on-sand-container: #FFFFFF;
+  --m3-stock: var(--m3-surface-container-lowest);
+  --m3-rule: color-mix(in srgb, var(--m3-on-surface) 14%, transparent);
+  --m3-card-rule: color-mix(in srgb, var(--m3-on-surface) 22%, transparent);
 }
 .m3.m3-contrast-high {
   --m3-primary: #501824;
@@ -230,8 +241,11 @@
   --m3-on-sand: #FFFFFF;
   --m3-sand-container: #654200;
   --m3-on-sand-container: #FFFFFF;
+  --m3-stock: var(--m3-surface-container-lowest);
+  --m3-rule: color-mix(in srgb, var(--m3-on-surface) 14%, transparent);
+  --m3-card-rule: color-mix(in srgb, var(--m3-on-surface) 22%, transparent);
 }
-.m3.dark {
+.m3.dark, .dark .m3 {
   --m3-primary: #FFB2BC;
   --m3-surface-tint: #FFB2BC;
   --m3-on-primary: #561D28;
@@ -284,8 +298,11 @@
   --m3-on-sand: #442B00;
   --m3-sand-container: #624000;
   --m3-on-sand-container: #FFDDB2;
+  --m3-stock: var(--m3-surface-container-low);
+  --m3-rule: color-mix(in srgb, var(--m3-on-surface) 12%, transparent);
+  --m3-card-rule: color-mix(in srgb, var(--m3-on-surface) 18%, transparent);
 }
-.m3.dark.m3-contrast-medium {
+.m3.dark.m3-contrast-medium, .dark .m3.m3-contrast-medium {
   --m3-primary: #FFD1D6;
   --m3-surface-tint: #FFB2BC;
   --m3-on-primary: #48121E;
@@ -338,8 +355,11 @@
   --m3-on-sand: #362100;
   --m3-sand-container: #B8883F;
   --m3-on-sand-container: #000000;
+  --m3-stock: var(--m3-surface-container-low);
+  --m3-rule: color-mix(in srgb, var(--m3-on-surface) 12%, transparent);
+  --m3-card-rule: color-mix(in srgb, var(--m3-on-surface) 18%, transparent);
 }
-.m3.dark.m3-contrast-high {
+.m3.dark.m3-contrast-high, .dark .m3.m3-contrast-high {
   --m3-primary: #FFEBED;
   --m3-surface-tint: #FFB2BC;
   --m3-on-primary: #000000;
@@ -392,4 +412,7 @@
   --m3-on-sand: #000000;
   --m3-sand-container: #EFB96B;
   --m3-on-sand-container: #130900;
+  --m3-stock: var(--m3-surface-container-low);
+  --m3-rule: color-mix(in srgb, var(--m3-on-surface) 12%, transparent);
+  --m3-card-rule: color-mix(in srgb, var(--m3-on-surface) 18%, transparent);
 }
