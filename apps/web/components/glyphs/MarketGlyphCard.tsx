@@ -1,7 +1,9 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Heart } from "lucide-react"
+import { Heart, HeartActive } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import type { MarketGlyph } from "@/lib/types"
 import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 import { Button } from "@/components/ui/button"
@@ -35,7 +37,11 @@ export function MarketGlyphCard({ glyph, onBuy, onFavourite }: MarketGlyphCardPr
         aria-pressed={glyph.favourited}
         className="rounded-full p-2 text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <Heart className={`size-4 ${glyph.favourited ? "fill-current text-rose-500" : ""}`} />
+        {glyph.favourited ? (
+          <HeartActive className={cn(PBBLS_ICON_SIZE.inline, "text-rose-500")} />
+        ) : (
+          <Heart className={PBBLS_ICON_SIZE.inline} />
+        )}
       </button>
 
       {glyph.owned ? (

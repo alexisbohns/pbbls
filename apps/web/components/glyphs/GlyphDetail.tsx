@@ -6,7 +6,8 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react"
-import { Pencil, Trash2 } from "lucide-react"
+import { DrawDotted, Trash } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import type { Mark } from "@/lib/types"
 import { useFormatDate } from "@/lib/i18n"
@@ -104,7 +105,7 @@ export function GlyphDetail({
                 }}
                 aria-label={tDetail("editAria")}
               >
-                <Pencil className="size-3.5" />
+                <DrawDotted className={PBBLS_ICON_SIZE.inline} />
               </Button>
             )}
             {submitSlot}
@@ -131,7 +132,7 @@ export function GlyphDetail({
           <ConfirmDialog
             trigger={
               <Button variant="outline" size="sm">
-                <Trash2 className="size-4" aria-hidden="true" />
+                <Trash className={PBBLS_ICON_SIZE.inline} />
                 {tDetail("deleteCta")}
               </Button>
             }
