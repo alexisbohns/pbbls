@@ -87,7 +87,7 @@ The database is the contract between four clients. These are hardened rules prom
 
 ## Build journal — one pebble per task
 
-The maintainer's own Pebbles account is their public blog: one pebble per moment spent building Pebbles. **At the end of every session task that changed something** (a merged or opened PR, a shipped fix, an exploration, a release), drop one pebble with `node scripts/journal/drop-pebble.mjs` (usage in its header). Skip it for pure Q&A or aborted work, and drop one per task, not per commit.
+The maintainer's journal account (a non-admin Pebbles account, their public blog) holds one pebble per moment spent building Pebbles. **At the end of every session task that changed something** (a merged or opened PR, a shipped fix, an exploration, a release), drop one pebble with `node scripts/journal/drop-pebble.mjs` (usage in its header). Skip it for pure Q&A or aborted work, and drop one per task, not per commit.
 
 - `--size small` by default; `medium` for an intermediate feature or a release, `large` only for a milestone.
 - `--valence highlight` for something new, `neutral` for chores, refactors, quality and Kritik improvements, `lowlight` for bugs, incidents and critical findings.

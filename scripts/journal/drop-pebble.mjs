@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Drop one build-journal pebble on the maintainer's own Pebbles account (their public blog).
+// Drop one build-journal pebble on the maintainer's journal account (their public blog), a NON-admin account.
+// The script refuses to run as an admin, since its rotating token sits on disk for every agent session.
 // See the "Build journal" rule in the root CLAUDE.md for when and how agents call it.
 //
 //   node scripts/journal/drop-pebble.mjs \
@@ -75,6 +76,12 @@ const sb = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_P
   auth: { persistSession: false, autoRefreshToken: false },
 });
 const { session } = must(await sb.auth.refreshSession({ refresh_token: refreshToken }), "sign-in (re-bootstrap with --init if the token was revoked)");
+// Never keep an admin session on disk: the journal account must be a plain user.
+if (must(await sb.rpc("is_admin", { p_user_id: session.user.id }), "admin check")) {
+  saveEnv({ SB_REFRESH_TOKEN: null, SB_AUTH_COOKIE: null, SB_AUTH_COOKIE_0: null, SB_AUTH_COOKIE_1: null });
+  await sb.auth.signOut({ scope: "local" });
+  fail(`${session.user.email} is an admin account; use a non-admin journal account (nothing stored)`);
+}
 saveEnv({ SB_REFRESH_TOKEN: session.refresh_token, SB_AUTH_COOKIE: null, SB_AUTH_COOKIE_0: null, SB_AUTH_COOKIE_1: null });
 const uid = session.user.id;
 if (a.init) { console.log(`drop-pebble: signed in as ${session.user.email}; token stored in ${ENV_FILE}`); process.exit(0); }
