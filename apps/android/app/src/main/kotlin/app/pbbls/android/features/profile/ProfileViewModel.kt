@@ -14,7 +14,6 @@ import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.SupabaseServicing
-import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.core.model.achievements.AchievementsPage
@@ -45,18 +44,14 @@ sealed interface ProfileUiState {
     data class Content(
         val profile: ProfileRow?,
         val glyphStrokes: List<GlyphStroke>?,
-        val collections: List<Collection>,
-        /**
-         * Distinct from an empty list: the carousel shows a skeleton until the
-         * fetch settles, and an empty result is a real "no collections yet"
-         * tile. Collapsing the two would flash the empty state on every open.
-         */
-        val collectionsLoaded: Boolean,
         val karma: Int?,
         val pebbles: Int?,
         val daysPracticed: Int?,
-        val assiduity: List<Boolean>?,
         val ripple: RippleSummary?,
+        /** The caller's carved glyphs (#1386); null until served, and the Glyphs line reads without a number. */
+        val glyphsCarved: Int?,
+        /** The glyphs the caller owns from others (#1386); null until served. */
+        val glyphsOwned: Int?,
         /** The account's own identity, for the Settings cover. */
         val email: String?,
         /** SSO brand labels, rendered verbatim and never localized. */
@@ -71,15 +66,16 @@ sealed interface ProfileUiState {
 /**
  * State holder for the Profile screen (#849).
  *
- * The load has three parts with deliberately different failure behaviour, which
+ * The load has two parts with deliberately different failure behaviour, which
  * is why it is not one `runCatching`:
  *
  * - **the profile row** is the screen — its failure is the error state (D13,
  *   Android's named deviation from iOS's silent empty banner);
  * - **the glyph strokes** are decoration hanging off that row, so a failure
- *   logs and the banner renders without a glyph;
- * - **the collections** are their own card, so a failure leaves that card
- *   empty rather than taking the screen down.
+ *   logs and the avatar renders the dotted pebble instead.
+ *
+ * Collections are no longer read here: You lost its collections card (#1383,
+ * spec D14), and the Collections tab is their home.
  *
  * Stats come from the shared [PathStatsServicing] singleton, observed through
  * `snapshotFlow` for the same reason the Path does it: Settings and the glyph
@@ -96,8 +92,6 @@ class ProfileViewModel
     ) : ViewModel() {
         private var profile: ProfileRow? = null
         private var glyphStrokes: List<GlyphStroke>? = null
-        private var collections: List<Collection> = emptyList()
-        private var collectionsLoaded = false
         private var shelfPage: AchievementsPage? = null
         private var catalogBySlug: Map<String, AchievementRecord> = emptyMap()
 
@@ -121,7 +115,7 @@ class ProfileViewModel
             viewModelScope.launch { stats.load() }
             viewModelScope.launch {
                 snapshotFlow {
-                    listOf(stats.karma, stats.pebbles, stats.daysPracticed, stats.assiduity, stats.ripple)
+                    listOf(stats.karma, stats.pebbles, stats.daysPracticed, stats.ripple, stats.glyphsCarved, stats.glyphsOwned)
                 }.collect { publish() }
             }
         }
@@ -165,6 +159,9 @@ class ProfileViewModel
         private fun refresh() {
             loadJob?.cancel()
             loadJob = viewModelScope.launch { fetch() }
+            // The counters and the glyph counts live in the shared stats singleton, which only
+            // the Path refreshes; a glyph carved or bought on the way out must show on return.
+            viewModelScope.launch { stats.refresh() }
         }
 
         private suspend fun fetch() {
@@ -191,14 +188,6 @@ class ProfileViewModel
                     )
                 publish()
             }
-
-            runCatchingCancellable { profileService.loadCollections() }
-                .fold(
-                    onSuccess = { collections = it },
-                    onFailure = { Log.e(TAG, "collections fetch failed", it) },
-                )
-            collectionsLoaded = true
-            publish()
 
             loadShelf()
         }
@@ -259,13 +248,12 @@ class ProfileViewModel
                         ProfileUiState.Content(
                             profile = profile,
                             glyphStrokes = glyphStrokes,
-                            collections = collections,
-                            collectionsLoaded = collectionsLoaded,
                             karma = stats.karma,
                             pebbles = stats.pebbles,
                             daysPracticed = stats.daysPracticed,
-                            assiduity = stats.assiduity,
                             ripple = stats.ripple,
+                            glyphsCarved = stats.glyphsCarved,
+                            glyphsOwned = stats.glyphsOwned,
                             email = supabase.session?.user?.email,
                             providers =
                                 linkedProviders(

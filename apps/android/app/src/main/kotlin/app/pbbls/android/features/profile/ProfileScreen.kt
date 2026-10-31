@@ -38,7 +38,6 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.features.profile.components.ProfileAchievementsCard
 import app.pbbls.android.features.profile.components.ProfileBanner
-import app.pbbls.android.features.profile.components.ProfileCollectionsCard
 import app.pbbls.android.features.profile.components.ProfileLabCard
 import app.pbbls.android.features.profile.components.ProfileLogoutButton
 import app.pbbls.android.features.profile.components.ProfileShortcutsRow
@@ -181,7 +180,7 @@ fun ProfileScreen(
                     )
                     ProfileStatsCard(
                         ripple = content.ripple,
-                        assiduity = content.assiduity,
+                        assiduity = null,
                         daysPracticed = content.daysPracticed,
                         pebbles = content.pebbles,
                         karma = content.karma,
@@ -190,13 +189,6 @@ fun ProfileScreen(
                         badges = content.shelf,
                         count = content.shelfCount,
                         onOpen = onOpenAchievements,
-                    )
-                    ProfileCollectionsCard(
-                        collections = content.collections,
-                        hasLoaded = content.collectionsLoaded,
-                        onOpenList = onOpenCollections,
-                        onOpenCollection = onOpenCollection,
-                        onCreate = onCreateCollection,
                     )
                     ProfileLabCard(onOpen = onOpenLab)
                     ProfileLogoutButton(onClick = onSignOut)
