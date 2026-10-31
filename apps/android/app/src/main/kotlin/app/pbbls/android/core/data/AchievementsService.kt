@@ -80,6 +80,18 @@ data class AchievementCheckResult(
 )
 
 /**
+ * One of the caller's `achievement_unlocks` rows. The time stays a string (Postgres sends
+ * microseconds): only the id is used, so no timestamp precision can fail the row.
+ */
+@Serializable
+private data class UnlockRow(
+    @SerialName("achievement_id")
+    val achievementId: String,
+    @SerialName("unlocked_at")
+    val unlockedAt: String? = null,
+)
+
+/**
  * The achievements seam (#849).
  *
  * Extracted because `AchievementsViewModel` has a test, which is the standing
@@ -95,6 +107,17 @@ data class AchievementCheckResult(
  */
 interface AchievementsServicing {
     suspend fun loadCatalog(): List<AchievementRecord>
+
+    /** The ids of the caller's unlocked achievements (`achievement_unlocks`, owner-scoped by RLS). Throws. */
+    suspend fun loadUnlocks(): Set<String>
+
+    /**
+     * `claim_blue_pebble()` (#1254, #1383): the sixth row of Home's first five, granted only through
+     * this call once the five firsts are unlocked. An EMPTY list means not granted (already claimed,
+     * or the catalog row retired), never success. A grant plays the unlock moment, as a mutation's
+     * check does. `not_ready` throws (`DataError.Conflict("not_ready")` through `toDataError()`).
+     */
+    suspend fun claimBluePebble(): List<AchievementCheckResult>
 
     suspend fun checkIgnoringFailure()
 
@@ -195,6 +218,42 @@ class AchievementsService
                 .select(Columns.raw(CATALOG_COLUMNS)) {
                     order("sort_order", Order.ASCENDING)
                 }.decodeList()
+
+        override suspend fun loadUnlocks(): Set<String> =
+            supabase.client
+                .from(UNLOCKS_TABLE)
+                .select(Columns.raw("achievement_id, unlocked_at"))
+                .decodeList<UnlockRow>()
+                .map { it.achievementId }
+                .toSet()
+
+        override suspend fun claimBluePebble(): List<AchievementCheckResult> {
+            val results =
+                supabase.client.postgrest
+                    .rpc("claim_blue_pebble")
+                    .decodeList<AchievementCheckResult>()
+            if (results.isNotEmpty()) {
+                markPageStale()
+                notify.present(unlockCards(results))
+            }
+            return results
+        }
+
+        /**
+         * The moment's cards for [results], in the order the ladder reads. A catalog that fails to
+         * load still celebrates, headlined by the slug (iOS `presentUnlockMoment`).
+         */
+        private suspend fun unlockCards(results: List<AchievementCheckResult>): List<AchievementMomentCard> {
+            val bySlug =
+                runCatchingCancellable { loadCatalog().associateBy { it.slug } }
+                    .getOrElse {
+                        Log.w(TAG, "catalog fetch for the unlock moment failed", it)
+                        emptyMap()
+                    }
+            return results
+                .sortedBy { bySlug[it.slug]?.sortOrder ?: Int.MAX_VALUE }
+                .map { AchievementMomentCard(slug = it.slug, record = bySlug[it.slug], karmaGranted = it.karmaGranted) }
+        }
 
         /**
          * Runs the evaluation. SETOF-returning RPC, so PostgREST yields an array
@@ -355,6 +414,7 @@ class AchievementsService
 
         private companion object {
             const val TABLE = "achievements"
+            const val UNLOCKS_TABLE = "achievement_unlocks"
             const val CACHE_PAGE = "achievements-page"
             const val CATALOG_COLUMNS =
                 "id, slug, family, threshold, emotion_id, domain_id, sort_order, " +
