@@ -101,6 +101,65 @@ extension YouStats {
         }
     }
 
+    // MARK: - Achievements (#1382 D20)
+
+    /// The shelf: the achievements page's kept copy, read only when fifteen minutes old.
+    let shelf = AchievementsModel()
+    /// The catalog by slug, for the badges' titles and icons; empty until it lands.
+    private(set) var catalog: [String: AchievementRecord] = [:]
+    @ObservationIgnored var achievements: (any AchievementsProviding)?
+
+    /// How old the kept copy may be before a visit to You reads again.
+    static let shelfMaxAge: TimeInterval = 15 * 60
+
+    /// The served badges, titled from the catalog (or from the served rows without it).
+    var badges: [AchievementRecord] { ProfileShelf.badges(shelf.page, catalog: catalog) }
+    /// The served count; nil when none is earned (the section then invites).
+    var earnedCount: Int? { ProfileShelf.count(shelf.page) }
+
+    /// Moved from `ProfileAchievementsCard` as it was: the kept copy, a read only
+    /// when stale (the retroactive grant first, which never celebrates), then
+    /// the catalog once. A failed catalog read keeps the served rows.
+    func loadShelf(now: () -> Date = Date.init) async {
+        let achievements = self.achievements
+        await shelf.loadIfStale(maxAge: Self.shelfMaxAge, now: now) { await achievements?.checkIgnoringFailure() }
+        guard catalog.isEmpty, !ProfileShelf.badges(shelf.page, catalog: [:]).isEmpty, let achievements else {
+            return
+        }
+        do {
+            let rows = try await achievements.loadCatalog()
+            catalog = Dictionary(rows.map { ($0.slug, $0) }, uniquingKeysWith: { first, _ in first })
+        } catch {
+            logger.error("achievements catalog fetch failed: \(error.localizedDescription, privacy: .private)")
+        }
+    }
+
+    // MARK: - The Lab (#1382 D21)
+
+    /// The latest announcement and the three latest shipped features; each read fails alone.
+    private(set) var announcement: Log?
+    private(set) var changelog: [Log] = []
+    @ObservationIgnored var lab: (any YouLabServicing)?
+
+    func loadLab() async {
+        guard let lab else { return }
+        async let latest = Self.attempt("announcements", logger) { try await lab.announcements(limit: 1) }
+        async let shipped = Self.attempt("changelog", logger) { try await lab.changelog(limit: 3) }
+        if let logs = await latest { announcement = logs.first }
+        if let logs = await shipped { changelog = Array(logs.prefix(3)) }
+    }
+
+    /// The read's rows, or nil (logged): a failed read keeps what is shown.
+    private static func attempt(_ feed: String, _ logger: Logger,
+                                _ read: () async throws -> [Log]) async -> [Log]? {
+        do {
+            return try await read()
+        } catch {
+            logger.error("lab \(feed, privacy: .public) failed: \(error.localizedDescription, privacy: .private)")
+            return nil
+        }
+    }
+
     /// What Settings saved, applied without a read.
     func applySettings(name: String?, glyph: (id: UUID, strokes: [GlyphStroke])?, handle: String?,
                        isPublic: Bool) {
