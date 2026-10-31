@@ -1,5 +1,6 @@
 package app.pbbls.android.features.home
 
+import app.pbbls.android.core.model.home.Guide
 import app.pbbls.android.core.model.home.HomeWrapMonth
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.features.home.checklist.HomeChecklist
@@ -20,6 +21,8 @@ import app.pbbls.android.features.home.shortcuts.HomeShortcutsStyle
  * @property claim the blue pebble's claim row: idle, sending, or "Couldn't claim it yet".
  * @property wraps the monthly wraps (D12): [HomeSection.Loading] draws no section, [HomeSection.Failed] (no
  *   months yet) the head with the error and Try again.
+ * @property guides the About Pebbles readings (D13), by sort order: the head draws in every state, the rows only
+ *   once [HomeSection.Ready]; a failed later read keeps them, a failed first read ([HomeSection.Failed]) draws none.
  */
 data class HomeUiState(
     val name: String = "",
@@ -28,6 +31,7 @@ data class HomeUiState(
     val checklist: HomeChecklist? = null,
     val claim: ClaimStatus = ClaimStatus.IDLE,
     val wraps: HomeSection<HomeWraps> = HomeSection.Loading,
+    val guides: HomeSection<List<Guide>> = HomeSection.Loading,
 )
 
 /**

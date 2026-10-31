@@ -9,6 +9,7 @@ import app.pbbls.android.core.data.HomeShortcutsLayout
 import app.pbbls.android.core.data.HomeShortcutsPreference
 import app.pbbls.android.core.data.TabIntent
 import app.pbbls.android.core.data.TabIntents
+import app.pbbls.android.core.model.home.GuideIllustration
 import app.pbbls.android.core.model.home.HomeWrapMonth
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.core.model.wrap.MonthWrapDto
@@ -23,6 +24,7 @@ import app.pbbls.android.testing.FakeHomeService
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakePathWrapService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.TestGuides
 import app.pbbls.android.testing.UiFixtures
 import app.pbbls.android.testing.inMemorySettings
 import app.pbbls.android.testing.recordEffects
@@ -575,5 +577,51 @@ class HomeViewModelTest {
             viewModel.retryWraps()
             advanceUntilIdle()
             assertEquals(HomeSection.Ready(HomeWraps(listOf(october))), viewModel.uiState.value.wraps)
+        }
+
+    // MARK: - About Pebbles (D13)
+
+    private val stones = TestGuides.guide("stones", 1, GuideIllustration.STONES)
+    private val souls = TestGuides.guide("souls", 2, GuideIllustration.SOULS)
+
+    @Test
+    fun `the guides land on resume, in the server's order`() =
+        runTest {
+            home.guideRows = listOf(stones, souls)
+            val viewModel = viewModel()
+            assertEquals(HomeSection.Loading, viewModel.uiState.value.guides)
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(HomeSection.Ready(listOf(stones, souls)), viewModel.uiState.value.guides)
+        }
+
+    @Test
+    fun `a failed first read of the guides draws no rows`() =
+        runTest {
+            home.failNextGuides = RuntimeException("offline")
+            val viewModel = viewModel()
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(HomeSection.Failed, viewModel.uiState.value.guides)
+        }
+
+    @Test
+    fun `a failed later read keeps the guides shown`() =
+        runTest {
+            home.guideRows = listOf(stones, souls)
+            val viewModel = viewModel()
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            home.failNextGuides = RuntimeException("offline")
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(HomeSection.Ready(listOf(stones, souls)), viewModel.uiState.value.guides)
+            assertEquals(2, home.guidesCalls)
         }
 }

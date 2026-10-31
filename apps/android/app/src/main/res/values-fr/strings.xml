@@ -858,6 +858,9 @@
         <item quantity="other">%1$s, %2$d galets, plié</item>
     </plurals>
 
+    <!-- Home · About Pebbles (#1383 D13; iOS home.about.*) -->
+    <string name="home_about_title">À propos de Pebbles</string>
+
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">
         <item quantity="one">%1$s galet</item>
