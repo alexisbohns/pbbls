@@ -451,6 +451,9 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// The marks a user scribbles on a stone: a stone ring around a small scribble, drawn with an open start. (the
     /// `lit-1` twin)
     case pebbleOutlinedGlyph2Lit1 = "pebble-outlined-glyph-2.lit-1"
+    /// Join the community: a speech bubble with its tail at the lower left and a handset inside, the WhatsApp mark in
+    /// the set's line.
+    case whatsapp = "whatsapp"
 
     /// The image's name in `Icons.xcassets`: `pbbls-<name>-<variant>`.
     var assetName: String {
