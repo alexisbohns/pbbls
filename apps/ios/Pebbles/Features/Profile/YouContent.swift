@@ -10,16 +10,13 @@ struct YouContent: View {
     var onLogOut: () -> Void = {}
 
     var body: some View {
-        VStack(spacing: Spacing.xl) {
+        VStack(spacing: YouLayout.sectionGap) {
             YouHeader(name: model.profile?.displayName, memberSince: model.profile?.createdAt,
                       glyphStrokes: model.glyphStrokes, rippleLevel: stats.rippleLevel,
                       activeToday: stats.activeToday, onSettings: onSettings)
+            YouCounters(stats: stats)
+                .padding(.top, YouLayout.countersRise)
             ProfileShortcutsRow()
-            ProfileStatsCard(ripple: stats.rippleLevel.map {
-                                 RippleSummary(rippleLevel: $0, pebbles28d: 0, activeToday: stats.activeToday)
-                             },
-                             assiduity: nil, daysPracticed: stats.daysPracticed, pebbles: stats.pebbles,
-                             karma: stats.karma)
             ProfileAchievementsCard()
             ProfileLabCard()
             ProfileLogoutButton(action: onLogOut)
@@ -27,4 +24,12 @@ struct YouContent: View {
         .padding(.horizontal, 16)
         .padding(.bottom, 32)
     }
+}
+
+/// You's vertical rhythm (#1382, the c3 mock).
+enum YouLayout {
+    /// Between two sections.
+    static let sectionGap: CGFloat = 44
+    /// The counters sit closer under the header (c3's `closer`): 44 − 10.
+    static let countersRise: CGFloat = -10
 }
