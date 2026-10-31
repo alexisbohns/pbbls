@@ -19,6 +19,7 @@ import app.pbbls.android.features.home.ClaimStatus
 import app.pbbls.android.features.home.HomeContent
 import app.pbbls.android.features.home.HomeSection
 import app.pbbls.android.features.home.HomeUiState
+import app.pbbls.android.features.home.HomeWraps
 import app.pbbls.android.features.home.checklist.ChecklistRow
 import app.pbbls.android.features.home.checklist.ChecklistState
 import app.pbbls.android.features.home.checklist.ChecklistTask
@@ -33,9 +34,10 @@ import java.time.LocalDateTime
 /**
  * Home (#1383): the shell, the greeting and the quick actions (the default pebble row; the greeting
  * alone is also what a month read that failed with no copy draws, D9), and the month's grid over it
- * (D8), your first five (D11) and its task sheets, until the later parts add the wraps and About. Paper, Night, French and
- * 2 × font, plus a long name at 1 × to show the greeting shrinking to hold its line (D18). The clock
- * and the name are pinned,
+ * (D8), your first five (D11) and its task sheets, until the later parts add About. The monthly wraps
+ * (D12): three months, the oldest folded; the promise card before the first; and a failed read keeping
+ * its months. Paper, Night, French and 2 × font, plus a long name at 1 × to show the greeting shrinking
+ * to hold its line (D18). The clock and the name are pinned,
  * so a render never depends on when it ran: Saturday 31 October 2026, 21:00, an ordinary evening.
  */
 private val previewNow: LocalDateTime = LocalDateTime.of(2026, 10, 31, 21, 0)
@@ -48,10 +50,11 @@ private fun HomePreview(
     name: String = "Alexis",
     month: HomeSection<MonthWrap> = HomeSection.Loading,
     checklist: HomeChecklist? = null,
+    wraps: HomeSection<HomeWraps> = HomeSection.Loading,
 ) {
     PebblesTheme {
         HomeContent(
-            state = HomeUiState(name = name, month = month, checklist = checklist),
+            state = HomeUiState(name = name, month = month, checklist = checklist, wraps = wraps),
             now = previewNow,
             monthSlot = previewMonth,
             onWeek = {},
@@ -266,4 +269,44 @@ fun HomeTaskSheetGlyph() {
 @Composable
 fun HomeTaskSheetNight() {
     TaskSheetPreview(ChecklistTask.SOUL)
+}
+
+// MARK: - The monthly wraps (D12)
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = 1100)
+@PreviewFrench
+@Composable
+fun HomeWrapsPaper() {
+    HomePreview(month = HomeSection.Ready(HomeMonthFixtures.full), wraps = HomeSection.Ready(HomeWraps(HomeWrapFixtures.three)))
+}
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = 1100, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun HomeWrapsNight() {
+    HomePreview(month = HomeSection.Ready(HomeMonthFixtures.full), wraps = HomeSection.Ready(HomeWraps(HomeWrapFixtures.three)))
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun HomeWrapsPromise() {
+    HomePreview(wraps = HomeSection.Ready(HomeWraps(emptyList())))
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun HomeWrapsStale() {
+    HomePreview(wraps = HomeSection.Ready(HomeWraps(HomeWrapFixtures.three, stale = true)))
+}
+
+/** 2 × font, without the grid so the row is in view: the cards widen for "September" rather than break it. */
+@PreviewTest
+@Preview(name = "fs2", showBackground = true, fontScale = 2f, heightDp = 1100)
+@Composable
+fun HomeWrapsLargeFont() {
+    HomePreview(wraps = HomeSection.Ready(HomeWraps(HomeWrapFixtures.three)))
 }
