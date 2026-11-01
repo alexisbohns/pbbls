@@ -29,6 +29,7 @@ import { LegalSection } from "@/components/settings/LegalSection"
 import { ConsentSection } from "@/components/settings/ConsentSection"
 import { AppearanceSection } from "@/components/settings/AppearanceSection"
 import { DeleteAccountSection } from "@/components/settings/DeleteAccountSection"
+import { SignOutSection } from "@/components/settings/SignOutSection"
 import { ReauthDialog } from "@/components/settings/ReauthDialog"
 
 /** Where a provider re-auth comes back to (the callback's validated `next`). */
@@ -309,6 +310,12 @@ export default function SettingsPage() {
             onWithdrawn={() => router.push("/")}
           />
           <AppearanceSection />
+          <SignOutSection
+            onSignOut={async () => {
+              await logout()
+              router.push("/")
+            }}
+          />
           <DeleteAccountSection
             key={resumeDelete ? "resume" : "idle"}
             onDeleted={() => router.push("/")}

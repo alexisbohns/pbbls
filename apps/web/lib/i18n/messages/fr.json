@@ -96,6 +96,45 @@
     },
     "retry": "Réessayer"
   },
+  "you": {
+    "title": "Toi",
+    "settings": "Réglages",
+    "memberSince": "Membre depuis {date}",
+    "ripples": "Niveau Ripples {level}",
+    "counters": {
+      "label": "Tes chiffres",
+      "days": "Jours",
+      "pebbles": "Galets",
+      "karma": "Karma"
+    },
+    "glyphs": {
+      "title": "Glyphes",
+      "mine": "Mes glyphes",
+      "mineLine": "{count, plural, =0 {Grave ta première marque.} one {La marque que tu as gravée.} other {Les # marques que tu as gravées.}}",
+      "mineLineNoCount": "Les marques que tu as gravées.",
+      "owned": "Glyphes acquis",
+      "ownedLine": "{count, plural, =0 {Les glyphes échangés contre du karma arrivent ici.} one {Celui que tu as reçu des autres.} other {Les # que tu as reçus des autres.}}",
+      "ownedLineNoCount": "Ceux que tu as reçus des autres.",
+      "community": "Communauté",
+      "communityLine": "Les glyphes que d'autres partagent."
+    },
+    "achievements": {
+      "title": "Succès",
+      "earned": "{count, plural, one {# <word>décroché</word>} other {# <word>décrochés</word>}}",
+      "empty": "Des badges le long de ton chemin"
+    },
+    "lab": {
+      "title": "Lab",
+      "kicker": "Notes du Lab · {date}",
+      "allUpdates": "Toutes les nouveautés",
+      "communityTitle": "Rejoindre la communauté",
+      "communityLine": "Discute avec d'autres personnes sur WhatsApp.",
+      "newTab": "(s'ouvre dans un nouvel onglet)",
+      "error": "Impossible de charger les nouvelles du Lab."
+    },
+    "error": "Impossible de charger tes chiffres.",
+    "retry": "Réessayer"
+  },
   "profile": {
     "title": "Profil",
     "appSectionsAria": "Sections de l'application",
@@ -201,6 +240,9 @@
     "language": "Langue",
     "colorWorld": "Univers de couleurs",
     "account": "Compte",
+    "signOut": {
+      "title": "Session"
+    },
     "deleteAccount": "Supprimer le compte",
     "deleteAccountTitle": "Supprimer votre compte ?",
     "deleteAccountBody": "Votre compte et tout ce qu'il contient seront supprimés définitivement : galets, photos, âmes, collections, glyphes et karma. Les glyphes achetés par d'autres personnes restent disponibles pour elles, sans votre nom. Cette action est irréversible.",

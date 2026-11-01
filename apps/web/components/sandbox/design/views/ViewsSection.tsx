@@ -6,6 +6,7 @@ import { PathView } from "./PathView"
 import { PebbleDetailView } from "./PebbleDetailView"
 import { ProfileView } from "./ProfileView"
 import { SettingsView } from "./SettingsView"
+import { YouView } from "./YouView"
 
 export function ViewsSection() {
   return (
@@ -20,6 +21,14 @@ export function ViewsSection() {
       >
         <DeviceFrame>
           <HomeView />
+        </DeviceFrame>
+      </Specimen>
+      <Specimen
+        id="view-you"
+        note="Fixtures stand in for the served counts, the achievements shelf and the Lab. Settings and every row link to the real routes."
+      >
+        <DeviceFrame>
+          <YouView />
         </DeviceFrame>
       </Specimen>
       <Specimen
@@ -40,7 +49,7 @@ export function ViewsSection() {
       </Specimen>
       <Specimen
         id="view-profile"
-        note="The achievements shelf reads through provider methods, not the store, so it shows its empty state."
+        note="The profile before You (#1384): its components stay for the public profile and this sandbox. The achievements shelf reads through provider methods, not the store, so it shows its empty state."
       >
         <DeviceFrame>
           <ProfileView />

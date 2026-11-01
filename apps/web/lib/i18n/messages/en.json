@@ -96,6 +96,45 @@
     },
     "retry": "Try again"
   },
+  "you": {
+    "title": "You",
+    "settings": "Settings",
+    "memberSince": "Member since {date}",
+    "ripples": "Ripples Level {level}",
+    "counters": {
+      "label": "Your numbers",
+      "days": "Days",
+      "pebbles": "Pebbles",
+      "karma": "Karma"
+    },
+    "glyphs": {
+      "title": "Glyphs",
+      "mine": "My glyphs",
+      "mineLine": "{count, plural, =0 {Carve your first mark.} one {The mark you carved.} other {The # marks you carved.}}",
+      "mineLineNoCount": "The marks you carved.",
+      "owned": "Owned glyphs",
+      "ownedLine": "{count, plural, =0 {Glyphs you swap for karma land here.} one {The one you collected from others.} other {The # you collected from others.}}",
+      "ownedLineNoCount": "The ones you collected from others.",
+      "community": "Community",
+      "communityLine": "Glyphs other people share."
+    },
+    "achievements": {
+      "title": "Achievements",
+      "earned": "{count, plural, one {# <word>earned</word>} other {# <word>earned</word>}}",
+      "empty": "Badges along your path"
+    },
+    "lab": {
+      "title": "Lab",
+      "kicker": "Lab notes · {date}",
+      "allUpdates": "All updates",
+      "communityTitle": "Join the community",
+      "communityLine": "Talk with other people on WhatsApp.",
+      "newTab": "(opens in a new tab)",
+      "error": "Couldn't load the Lab's news."
+    },
+    "error": "Couldn't load your numbers.",
+    "retry": "Try again"
+  },
   "profile": {
     "title": "Profile",
     "appSectionsAria": "App sections",
@@ -201,6 +240,9 @@
     "language": "Language",
     "colorWorld": "Color world",
     "account": "Account",
+    "signOut": {
+      "title": "Session"
+    },
     "deleteAccount": "Delete account",
     "deleteAccountTitle": "Delete your account?",
     "deleteAccountBody": "This permanently deletes your account and everything in it: pebbles, snaps, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. This cannot be undone.",

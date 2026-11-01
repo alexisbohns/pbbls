@@ -153,9 +153,14 @@ export type RippleSummary = {
 
 // Read-only engagement stats projected from the get_profile_engagement RPC.
 // `assiduity` is a 28-element window (index 0 = 27 days ago … index 27 = today).
+// The glyph counts are served since #1386 (carved = your own marks, owned =
+// your glyph_entitlements); null when the server sent none (a server from
+// before #1386, or an explicit null), never a count made up here (#1384 D17).
 export type ProfileEngagement = {
   daysPracticed: number
   assiduity: boolean[]
+  glyphsCarved: number | null
+  glyphsOwned: number | null
 }
 
 // ---------------------------------------------------------------------------

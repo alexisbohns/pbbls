@@ -14,7 +14,7 @@ import type { AchievementCopy } from "@/lib/i18n"
 // the rewarding-moment satellite — deliberately not built here.
 // `domain_first` and `glyph_sales` take the family default until the chrome
 // wave draws life domain and market (iOS `familySymbol`).
-const FAMILY_ICONS: Record<AchievementFamily, PbblsIconComponent> = {
+export const FAMILY_ICONS: Record<AchievementFamily, PbblsIconComponent> = {
   pebble_count: Stack,
   emotion_first: Heart,
   domain_first: PebbleGlowMd,
