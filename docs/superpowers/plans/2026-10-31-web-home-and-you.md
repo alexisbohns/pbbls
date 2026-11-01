@@ -513,3 +513,14 @@ Spec D1, D2 (the hub bar and `/home` as the signed-in landing: decided by the ma
 - **The sandbox frame does not move breakpoints.** A `max-sm:` or `rail:` rule follows the window's width, so check a phone layout at a phone-sized window and a rail at a wide one ("Fill"), and pass route-dependent chrome its route explicitly.
 - **Next 16's `next dev` writes `apps/web/AGENTS.md`** in a fresh worktree; delete it before committing.
 - **Render tests stand in for `next/link`, lucide and the shadcn button** (two React copies resolve); the button stand-in must honour `render` (clone the element) or every Base UI link-button test sees a `<button>`.
+
+### Parts 8–14, the two-area layout (plan `2026-11-01-web-two-area-layout.md`, docs PR #1479)
+
+- **A `default.tsx` does not close a parallel slot on a soft navigation.** Next keeps the slot's previous page; a null root page and a null catch-all are what close it. Next refuses an optional catch-all (`[[...rest]]`) beside the root page, so it is `page.tsx` plus `[...rest]/page.tsx`.
+- **Put a slot's frame in a route group's layout inside the slot** (`@detail/(pane)/layout.tsx`): the null pages sit outside it, so a closed slot draws no frame, and the frame stays mounted from one detail to the next.
+- **An intercepting page and a plain page for the same path coexist in one slot** (Next 16.4): soft navigations take the interception (the left area stays), hard loads the plain page. Prove it with a throwaway pair before building on it.
+- **A route group's layout draws under every route below it.** Immersive flows (record, carve, the pebble edit flows) stay outside the groups, and `TabArea` steps aside on a group route that is not the tab or one of its details.
+- **`useSelectedLayoutSegment("detail")` in a client component under the root layout tells the shell whether a detail is open**, which is simpler and more honest than CSS `:has()` for `inert`, the scroll lock and the landmark's name.
+- **A shared-element morph needs its source to leave.** The Spine stays mounted under the pebble's pane, so a `<ViewTransition name>` pair would share a name at once and be skipped; the pane's own motion stands in.
+- **Check the shell's route table in the same part as a moved page.** Part 12 shipped Settings in the slot without its `DETAILS` row (a command chain stopped before the edit); a part-level test that every slot page has a table row (`detail-slot-source.test.ts`) catches it, and the fix belongs in that part, not on top.
+- **`shadcn add` can write a wrong import alias** (`import { cn } from "cn"`) and install that npm package; read its diff before keeping it. Here the M3 switch is built on Base UI directly.
