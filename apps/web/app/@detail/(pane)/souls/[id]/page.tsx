@@ -1,7 +1,6 @@
 "use client"
 
 import { use, useMemo } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Trash } from "@pbbls/icons"
 import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
@@ -14,10 +13,11 @@ import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { SoulDetailHeader } from "@/components/souls/SoulDetailHeader"
 import { SoulPebbleList } from "@/components/souls/SoulPebbleList"
 import { SoulNotFound } from "@/components/souls/SoulNotFound"
-import { PageLayout } from "@/components/layout/PageLayout"
+import { DetailTopBar } from "@/components/layout/DetailTopBar"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 
+/** A soul, in the detail area beside People (#1384, two-area spec D2, D6). */
 export default function SoulDetailPage({
   params,
 }: {
@@ -29,7 +29,7 @@ export default function SoulDetailPage({
   const router = useRouter()
   const { soul, loading: soulLoading, updateSoul } = useSoul(id)
   const { moments, loading: momentsLoading } = useMoments()
-  const { souls, loading: soulsLoading, removeSoul } = useSouls()
+  const { loading: soulsLoading, removeSoul } = useSouls()
   const { glyphs: marks } = useUsableGlyphs()
 
   const loading = soulLoading || momentsLoading || soulsLoading
@@ -50,42 +50,15 @@ export default function SoulDetailPage({
   }
 
   return (
-    <PageLayout>
-      <section>
-      <nav className="mb-6">
-        <Link
-          href="/souls"
-          className="text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          {t("back")}
-        </Link>
-      </nav>
-
-      {loading ? (
-        <p className="text-sm text-muted-foreground">{tSouls("loading")}</p>
-      ) : soul ? (
-        <>
-          <SoulDetailHeader
-            soul={soul}
-            pebbleCount={relatedMoments.length}
-            marks={marks}
-            onUpdateName={handleUpdateName}
-            onUpdateGlyph={handleUpdateGlyph}
-          />
-          {relatedMoments.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">
-              {t("noPebbles")}
-            </p>
-          ) : (
-            <SoulPebbleList moments={relatedMoments} souls={souls} />
-          )}
-
-          <div className="mt-8 flex justify-center">
+    <>
+      <DetailTopBar
+        title={soul?.name ?? ""}
+        actions={
+          soul && (
             <ConfirmDialog
               trigger={
-                <Button variant="outline" size="sm">
-                  <Trash className={PBBLS_ICON_SIZE.inline} />
-                  {tSouls("deleteCta")}
+                <Button variant="ghost" size="icon" className="size-11 rounded-full text-m3-on-surface-variant" aria-label={tSouls("deleteCta")}>
+                  <Trash className={PBBLS_ICON_SIZE.toolbar} />
                 </Button>
               }
               title={tSouls("deleteTitle")}
@@ -93,12 +66,31 @@ export default function SoulDetailPage({
               confirmLabel={tSouls("deleteConfirm")}
               onConfirm={handleDelete}
             />
-          </div>
-        </>
-      ) : (
-        <SoulNotFound />
-      )}
-      </section>
-    </PageLayout>
+          )
+        }
+      />
+      <div className="mx-auto w-full max-w-2xl px-4 pt-2 pb-12">
+        {loading ? (
+          <p className="m3-type-body-medium text-m3-on-surface-variant">{tSouls("loading")}</p>
+        ) : soul ? (
+          <>
+            <SoulDetailHeader
+              soul={soul}
+              pebbleCount={relatedMoments.length}
+              marks={marks}
+              onUpdateName={handleUpdateName}
+              onUpdateGlyph={handleUpdateGlyph}
+            />
+            {relatedMoments.length === 0 ? (
+              <p className="m3-type-body-medium py-10 text-center text-m3-on-surface-variant">{t("noPebbles")}</p>
+            ) : (
+              <SoulPebbleList moments={relatedMoments} />
+            )}
+          </>
+        ) : (
+          <SoulNotFound />
+        )}
+      </div>
+    </>
   )
 }

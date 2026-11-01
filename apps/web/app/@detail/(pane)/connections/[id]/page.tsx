@@ -1,9 +1,9 @@
 "use client"
 
 import { use } from "react"
-import { PageLayout } from "@/components/layout/PageLayout"
 import { ConnectionDetail } from "@/components/connections/ConnectionDetail"
 
+/** A connection, nested under Connections in the detail area (#1384, two-area spec D2). */
 export default function ConnectionDetailPage({
   params,
 }: {
@@ -11,9 +11,5 @@ export default function ConnectionDetailPage({
 }) {
   const { id } = use(params)
 
-  return (
-    <PageLayout>
-      <ConnectionDetail connectionId={id} />
-    </PageLayout>
-  )
+  return <ConnectionDetail connectionId={id} />
 }

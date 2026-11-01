@@ -24,32 +24,23 @@ export function CollectionDetailHeader({
   const tDetail = useTranslations("collections.detail")
 
   return (
-    <header className="mb-6">
-      <div className="flex items-center gap-2">
-        <h1 className="text-2xl font-semibold">{collection.name}</h1>
-        <CollectionFormDialog
-          trigger={
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-label={tDetail("editAria")}
-            >
-              <DrawDotted className={PBBLS_ICON_SIZE.inline} />
-            </Button>
-          }
-          title={tForm("editTitle")}
-          submitLabel={tForm("submitSave")}
-          initialName={collection.name}
-          initialMode={collection.mode}
-          initialGlyphId={collection.glyph_id}
-          onSubmit={onEdit}
-        />
-      </div>
-
-      <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-        <ModeBadge mode={collection.mode} />
-        <span>{t("pebbleCount", { count: pebbleCount })}</span>
-      </div>
-    </header>
+    <div className="mb-6 flex flex-wrap items-center gap-2">
+      {/* The name is the detail's title and the edit is its top bar action (#1384, two-area spec D6). */}
+      <ModeBadge mode={collection.mode} />
+      <span className="m3-type-body-large text-m3-on-surface-variant">{t("pebbleCount", { count: pebbleCount })}</span>
+      <CollectionFormDialog
+        trigger={
+          <Button variant="ghost" size="icon" className="ms-auto size-11 rounded-full text-m3-on-surface-variant" aria-label={tDetail("editAria")}>
+            <DrawDotted className={PBBLS_ICON_SIZE.toolbar} />
+          </Button>
+        }
+        title={tForm("editTitle")}
+        submitLabel={tForm("submitSave")}
+        initialName={collection.name}
+        initialMode={collection.mode}
+        initialGlyphId={collection.glyph_id}
+        onSubmit={onEdit}
+      />
+    </div>
   )
 }

@@ -98,10 +98,12 @@ export function SoulDetailHeader({
           </form>
         ) : (
           <div className="flex flex-1 items-center gap-2">
-            <h1 className="text-2xl font-semibold">{soul.name}</h1>
+            {/* The name is the detail's title, in the top bar (#1384, two-area spec D6). */}
+            <p className="m3-type-body-large text-m3-on-surface-variant">{t("pebbleCount", { count: pebbleCount })}</p>
             <Button
               variant="ghost"
-              size="icon-xs"
+              size="icon"
+              className="size-11 rounded-full text-m3-on-surface-variant"
               onClick={() => {
                 setEditValue(soul.name)
                 setIsEditing(true)
@@ -113,10 +115,6 @@ export function SoulDetailHeader({
           </div>
         )}
       </div>
-
-      <p className="mt-2 text-sm text-muted-foreground">
-        {t("pebbleCount", { count: pebbleCount })}
-      </p>
 
       <GlyphPickerDialog
         open={pickerOpen}

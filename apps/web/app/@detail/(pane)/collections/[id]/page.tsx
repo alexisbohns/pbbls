@@ -1,7 +1,6 @@
 "use client"
 
 import { use, useMemo, useCallback } from "react"
-import Link from "next/link"
 import { useTranslations } from "next-intl"
 import type { Collection } from "@/lib/types"
 import { useCollection } from "@/lib/data/useCollection"
@@ -12,8 +11,9 @@ import { useSouls } from "@/lib/data/useSouls"
 import { CollectionDetailHeader } from "@/components/collections/CollectionDetailHeader"
 import { CollectionPebbleList } from "@/components/collections/CollectionPebbleList"
 import { CollectionNotFound } from "@/components/collections/CollectionNotFound"
-import { PageLayout } from "@/components/layout/PageLayout"
+import { DetailTopBar } from "@/components/layout/DetailTopBar"
 
+/** A collection, in the detail area beside Collections (#1384, two-area spec D2, D6). */
 export default function CollectionDetailPage({
   params,
 }: {
@@ -25,7 +25,7 @@ export default function CollectionDetailPage({
   const { collection, loading: collectionLoading } = useCollection(id)
   const { updateCollection } = useCollections()
   const { moments, loading: momentsLoading } = useMoments()
-  const { souls, loading: soulsLoading } = useSouls()
+  const { loading: soulsLoading } = useSouls()
 
   const loading = collectionLoading || momentsLoading || soulsLoading
 
@@ -52,42 +52,24 @@ export default function CollectionDetailPage({
   )
 
   return (
-    <PageLayout>
-      <section>
-      <nav className="mb-6">
-        <Link
-          href="/collections"
-          className="text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          {tDetail("back")}
-        </Link>
-      </nav>
-
-      {loading ? (
-        <p className="text-sm text-muted-foreground">{t("loading")}</p>
-      ) : collection ? (
-        <>
-          <CollectionDetailHeader
-            collection={collection}
-            pebbleCount={collectionMoments.length}
-            onEdit={handleEdit}
-          />
-          {collectionMoments.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">
-              {tDetail("noPebbles")}
-            </p>
-          ) : (
-            <CollectionPebbleList
-              moments={collectionMoments}
-              souls={souls}
-              onRemove={handleRemovePebble}
-            />
-          )}
-        </>
-      ) : (
-        <CollectionNotFound />
-      )}
-      </section>
-    </PageLayout>
+    <>
+      <DetailTopBar title={collection?.name ?? ""} />
+      <div className="mx-auto w-full max-w-2xl px-4 pt-2 pb-12">
+        {loading ? (
+          <p className="m3-type-body-medium text-m3-on-surface-variant">{t("loading")}</p>
+        ) : collection ? (
+          <>
+            <CollectionDetailHeader collection={collection} pebbleCount={collectionMoments.length} onEdit={handleEdit} />
+            {collectionMoments.length === 0 ? (
+              <p className="m3-type-body-medium py-10 text-center text-m3-on-surface-variant">{tDetail("noPebbles")}</p>
+            ) : (
+              <CollectionPebbleList moments={collectionMoments} onRemove={handleRemovePebble} />
+            )}
+          </>
+        ) : (
+          <CollectionNotFound />
+        )}
+      </div>
+    </>
   )
 }
