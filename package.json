@@ -14,7 +14,8 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "test:arkaik-shots": "node --test scripts/arkaik/android-shots-manifest.test.mjs"
   },
   "devDependencies": {
     "turbo": "^2"
