@@ -109,6 +109,6 @@ export async function GET(request: Request) {
   // caught and signed out. Sending it to onboarding would skip the check.
   const isReauthReturn = next !== null && new URL(next, origin).searchParams.has(REAUTH_RETURN_PARAM)
   const destination =
-    profile?.onboarding_completed || isReauthReturn ? next ?? "/path" : "/onboarding"
+    profile?.onboarding_completed || isReauthReturn ? next ?? "/home" : "/onboarding"
   return NextResponse.redirect(`${origin}${destination}`)
 }

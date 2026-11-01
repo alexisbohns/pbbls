@@ -17,7 +17,7 @@ export function useOnboarding(
     } catch (err) {
       console.error("[onboarding] Failed to complete:", err)
     }
-    router.push("/path")
+    router.push("/home")
   }, [onComplete, router])
 
   const skip = useCallback(async () => {
@@ -26,7 +26,7 @@ export function useOnboarding(
     } catch (err) {
       console.error("[onboarding] Failed to skip:", err)
     }
-    router.push("/path")
+    router.push("/home")
   }, [onComplete, router])
 
   return {

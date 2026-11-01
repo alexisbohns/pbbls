@@ -41,7 +41,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && !isProfileLoading && isAuthenticated) {
-      router.replace(profile?.onboarding_completed ? next ?? "/path" : "/onboarding")
+      router.replace(profile?.onboarding_completed ? next ?? "/home" : "/onboarding")
     }
   }, [isLoading, isProfileLoading, isAuthenticated, profile, router, next])
 
