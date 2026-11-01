@@ -723,6 +723,23 @@
         }
       }
     },
+    "About" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À propos"
+          }
+        }
+      }
+    },
     "Account" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7364,7 +7381,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mentions légales"
+            "value" : "Légal"
           }
         }
       }
@@ -12499,6 +12516,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Étape %lld sur %lld"
+          }
+        }
+      }
+    },
+    "Support" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Support"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aide"
           }
         }
       }
