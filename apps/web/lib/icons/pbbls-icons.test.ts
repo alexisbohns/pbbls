@@ -12,4 +12,17 @@ describe("@pbbls/icons", () => {
     expect(markup).toContain('stroke="currentColor"')
     expect(markup).toContain('aria-hidden="true"')
   })
+
+  it("names itself an image only when labelled (spec D8)", () => {
+    const markup = renderToStaticMarkup(createElement(CheckCircle, { "aria-label": "Done" }))
+    expect(markup).toContain('role="img"')
+    expect(markup).toContain('aria-label="Done"')
+    expect(markup).not.toContain("aria-hidden")
+    expect(markup).toContain('focusable="false"')
+  })
+
+  it("puts a className on the svg, so a size class opts out of the shadcn slot default (spec D7)", () => {
+    const markup = renderToStaticMarkup(createElement(CheckCircle, { className: "size-4 text-primary" }))
+    expect(markup).toContain('class="size-4 text-primary"')
+  })
 })
