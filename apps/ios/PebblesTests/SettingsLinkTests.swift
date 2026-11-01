@@ -51,4 +51,29 @@ struct SettingsLinkTests {
         #expect(groups.map(\.section) == [.legal, .about, .support])
         #expect(groups.first?.links.map(\.key) == ["terms", "privacy", "legal-notice"])
     }
+
+    @Test func keepsTheLastPayloadOnDisk() throws {
+        let suite = "settings-links-test"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = SettingsLinksStore(defaults: defaults)
+        #expect(store.current().map(\.key) == SettingsLink.builtIn.map(\.key))
+        try store.save(fixture("settings-links-edge"))
+        // Only the credits row (title_fr null) survives; the beta and ftp rows are dropped.
+        #expect(store.current().map(\.key) == ["credits"])
+    }
+
+    @Test func refusesAPayloadItCannotRead() throws {
+        let suite = "settings-links-test-unreadable"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = SettingsLinksStore(defaults: defaults)
+        try store.save(fixture("settings-links"))
+        // Cut short, the payload is no longer JSON: the kept copy must stay.
+        let truncated = try fixture("settings-links-edge").prefix(40)
+        #expect(throws: (any Error).self) { try store.save(Data(truncated)) }
+        #expect(store.current().map(\.key) == ["credits", "terms", "privacy", "legal-notice", "support"])
+    }
 }
