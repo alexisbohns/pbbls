@@ -92,7 +92,7 @@ class PebblesSceneChainTest {
 
     @Test
     fun `an open glyph on one pane is a sheet over the store`() {
-        val entries = listOf(PebblesKey.You, PebblesKey.Glyphs, glyph).map(::entry)
+        val entries = listOf(PebblesKey.You, PebblesKey.Glyphs(), glyph).map(::entry)
         val scene = resolve(1, entries)
 
         assertTrue(scene is OverlayScene<*>)
@@ -102,7 +102,7 @@ class PebblesSceneChainTest {
 
     @Test
     fun `an open glyph on two panes is the pair, not a sheet`() {
-        val entries = listOf(PebblesKey.You, PebblesKey.Glyphs, glyph).map(::entry)
+        val entries = listOf(PebblesKey.You, PebblesKey.Glyphs(), glyph).map(::entry)
         val scene = resolve(2, entries)
 
         assertFalse(scene is OverlayScene<*>)
@@ -112,6 +112,6 @@ class PebblesSceneChainTest {
 
     @Test
     fun `the store alone on one pane is the default single pane`() {
-        assertNull(resolve(1, listOf(PebblesKey.You, PebblesKey.Glyphs).map(::entry)))
+        assertNull(resolve(1, listOf(PebblesKey.You, PebblesKey.Glyphs()).map(::entry)))
     }
 }

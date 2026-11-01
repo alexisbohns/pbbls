@@ -31,6 +31,7 @@ import app.pbbls.android.core.ui.GlyphViewCase
 import app.pbbls.android.features.profile.HealthConsentRow
 import app.pbbls.android.features.profile.HealthConsentStatus
 import app.pbbls.android.features.profile.SettingsHomeSection
+import app.pbbls.android.features.profile.SettingsLogOutRow
 import app.pbbls.android.features.profile.SettingsNavRow
 import app.pbbls.android.features.profile.settingsRowColors
 import com.android.tools.screenshot.PreviewTest
@@ -197,6 +198,7 @@ private fun SettingsSections() {
                 rowPadding = PebblesListDefaults.ListItemRowPadding,
                 rows =
                     listOf(
+                        { SettingsLogOutRow(onClick = {}) },
                         {
                             ListItem(
                                 headlineContent = { Text(stringResource(R.string.settings_delete_account), color = colors.error) },

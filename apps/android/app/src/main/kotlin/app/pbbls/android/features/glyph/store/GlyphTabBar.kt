@@ -24,6 +24,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsIcon
 import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.designsystem.Spacing
+import app.pbbls.android.core.model.GlyphShelf
 
 /** The three store tabs — ports iOS `GlyphTab` (rawValues mine/owned/commu) and its icons. */
 enum class GlyphTab(
@@ -34,6 +35,14 @@ enum class GlyphTab(
     OWNED(R.string.glyph_tab_owned, PbblsIcon.CHECK_CIRCLE_DOT),
     COMMU(R.string.glyph_tab_commu, PbblsIcon.PEOPLE),
 }
+
+/** The tab a navigation key's shelf opens on (#1383 D17). The key names the `core/model` shelf, never this enum. */
+internal fun GlyphShelf.toGlyphTab(): GlyphTab =
+    when (this) {
+        GlyphShelf.MINE -> GlyphTab.MINE
+        GlyphShelf.OWNED -> GlyphTab.OWNED
+        GlyphShelf.COMMU -> GlyphTab.COMMU
+    }
 
 /**
  * The store's three tabs as an M3 Expressive floating toolbar of toggle

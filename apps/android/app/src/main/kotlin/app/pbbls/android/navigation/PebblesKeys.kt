@@ -4,6 +4,7 @@ import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.GlyphGridItem
+import app.pbbls.android.core.model.GlyphShelf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -56,8 +57,16 @@ sealed interface PebblesKey : NavKey {
     @Serializable
     data object Connections : PebblesKey, BarKey
 
+    /**
+     * The glyph store, opened on [tab] (#1383 D17: You's three glyph rows each open
+     * their shelf). Defaulted so a stack saved while this was an object still
+     * decodes, on Mine.
+     */
     @Serializable
-    data object Glyphs : PebblesKey, BarKey
+    data class Glyphs(
+        val tab: GlyphShelf = GlyphShelf.MINE,
+    ) : PebblesKey,
+        BarKey
 
     /**
      * One glyph's swap/owned panel (#940): a docked sheet on phones, a pane

@@ -16,6 +16,7 @@ import app.pbbls.android.core.data.TabIntent
 import app.pbbls.android.core.data.TabIntents
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
+import app.pbbls.android.core.model.GlyphShelf
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -150,6 +151,7 @@ class GlyphsListViewModel
 
         private var loadJob: Job? = null
         private var resumeCount = 0
+        private var started = false
 
         init {
             viewModelScope.launch { stats.load() }
@@ -158,7 +160,18 @@ class GlyphsListViewModel
             // rather than copying it, as they do.
             viewModelScope.launch { snapshotFlow { stats.karma }.collect { publish() } }
             viewModelScope.launch { market.purchases.collect { recordPurchase(it.glyphId) } }
-            loadTab(GlyphTab.MINE)
+        }
+
+        /**
+         * Opens the store on [shelf] (#1383 D17: You's glyph rows each open their own) and
+         * loads it. Runs once per entry: a later call, from a recomposition or a rotation,
+         * never takes back a tab the user has picked since.
+         */
+        fun start(shelf: GlyphShelf) {
+            if (started) return
+            started = true
+            tab = shelf.toGlyphTab()
+            loadTab(tab)
         }
 
         fun onSelectTab(next: GlyphTab) {
@@ -174,12 +187,13 @@ class GlyphsListViewModel
          * [loadTab] already does for a tab switch, just re-run on the tab you
          * never left. This is what picks up a glyph carved in `GlyphCarve`
          * (#852 removed the optimistic prepend-and-switch). The first
-         * resume is skipped because `init` has already loaded Mine.
+         * resume is skipped because [start] has already loaded the opening tab.
          */
         fun onResumed() {
-            // Home's first five (#1383 D11): on Mine, then the studio, taken once.
+            // Home's first five (#1383 D11): on Mine, then the studio, taken once. A resume that runs
+            // before the key's start opens the store on Mine itself, so that start cannot take it back.
             tabIntents.take<TabIntent.CarveGlyph>()?.let {
-                onSelectTab(GlyphTab.MINE)
+                if (started) onSelectTab(GlyphTab.MINE) else start(GlyphShelf.MINE)
                 _carveRequests.emit(Unit)
             }
             resumeCount += 1

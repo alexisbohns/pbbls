@@ -91,6 +91,8 @@ private const val TAG = "settings"
  *
  * @param glyphPicker The glyph picker's body. It is glyph's, so the entry
  *   provider hands it in rather than this screen importing it (#914).
+ * @param onSignOut The app's sign-out, the one You's Log out calls. Log out is
+ *   the Account section's first row, above "Sign out of all devices" (#1383 D14).
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -98,6 +100,7 @@ fun SettingsScreen(
     onDismiss: () -> Unit,
     onSaved: (displayName: String, glyph: Glyph?, handle: String?, isPublic: Boolean) -> Unit,
     glyphPicker: GlyphPickerSlot,
+    onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -414,6 +417,7 @@ fun SettingsScreen(
                 rowPadding = PebblesListDefaults.ListItemRowPadding,
                 rows =
                     listOf(
+                        { SettingsLogOutRow(onClick = onSignOut) },
                         {
                             val isWorking = uiState.signOutEverywhere == SignOutEverywhereState.WORKING
                             ListItem(
@@ -539,6 +543,16 @@ internal fun SettingsNavRow(
                 modifier = Modifier.size(15.dp),
             )
         },
+        modifier = Modifier.clickable(onClick = onClick),
+        colors = settingsRowColors(),
+    )
+}
+
+/** Log out (#1383 D14): this device only, no confirmation, as it was on You. */
+@Composable
+internal fun SettingsLogOutRow(onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.settings_log_out)) },
         modifier = Modifier.clickable(onClick = onClick),
         colors = settingsRowColors(),
     )

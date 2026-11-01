@@ -4,6 +4,7 @@ import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
+import app.pbbls.android.core.model.GlyphShelf
 import app.pbbls.android.core.model.GlyphStroke
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -58,7 +59,9 @@ class PebblesKeysTest {
                 PebblesKey.SoulDetail("soul-1"),
                 PebblesKey.CollectionDetail("col-1"),
                 PebblesKey.Connections,
-                PebblesKey.Glyphs,
+                PebblesKey.Glyphs(),
+                PebblesKey.Glyphs(GlyphShelf.OWNED),
+                PebblesKey.Glyphs(GlyphShelf.COMMU),
                 PebblesKey.Achievements,
                 PebblesKey.Lab,
                 PebblesKey.LabAnnouncement("log-1"),
@@ -97,6 +100,13 @@ class PebblesKeysTest {
         val saved = """{"type":"app.pbbls.android.navigation.PebblesKey.PebbleDetail","pebbleId":"m-1"}"""
         val key = Json.decodeFromString(PebblesKey.serializer(), saved)
         assertEquals(PebblesKey.PebbleDetail(momentId = "m-1"), key)
+    }
+
+    /** Glyphs was an object until it took a shelf (#1383 D17); a stack saved then reopens on Mine. */
+    @Test
+    fun `a Glyphs key saved before shelves decodes on Mine`() {
+        val saved = """{"type":"app.pbbls.android.navigation.PebblesKey.Glyphs"}"""
+        assertEquals(PebblesKey.Glyphs(GlyphShelf.MINE), Json.decodeFromString(PebblesKey.serializer(), saved))
     }
 
     @Test
@@ -164,7 +174,7 @@ class PebblesKeysTest {
                 PebblesKey.SoulDetail("s"),
                 PebblesKey.CollectionDetail("c"),
                 PebblesKey.Connections,
-                PebblesKey.Glyphs,
+                PebblesKey.Glyphs(),
                 PebblesKey.Achievements,
                 PebblesKey.Lab,
                 PebblesKey.LabAnnouncement("l"),

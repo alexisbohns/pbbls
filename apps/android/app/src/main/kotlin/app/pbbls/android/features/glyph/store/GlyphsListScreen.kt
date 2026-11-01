@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +49,7 @@ import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.designsystem.isWideWindow
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
+import app.pbbls.android.core.model.GlyphShelf
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
 
@@ -62,10 +64,14 @@ private const val TAG = "glyphs-store"
  * D7), Owned/Commu cells → [onOpenGlyph], the glyph detail entry (#940). A
  * swap drops the item from Commu and invalidates Owned: the view model hears
  * of it from the market service, whichever host ran the buy.
+ *
+ * [initialTab] is the shelf the key asked for (#1383 D17); the store opens on it
+ * once, and the user's own switches stand after that.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GlyphsListScreen(
+    initialTab: GlyphShelf,
     onBack: () -> Unit,
     onCarve: () -> Unit,
     onOpenGlyph: (GlyphGridItem) -> Unit,
@@ -79,6 +85,8 @@ fun GlyphsListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
+
+    LaunchedEffect(initialTab) { viewModel.start(initialTab) }
 
     // Returning from the carve studio must re-read the current tab: the
     // ViewModel is scoped to the back stack entry, which survives the round

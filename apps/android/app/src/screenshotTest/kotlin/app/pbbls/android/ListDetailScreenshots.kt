@@ -162,6 +162,7 @@ fun SoulsListDetailIdle() {
                     onBack = {},
                     onOpenSoul = {},
                     onCreateSoul = {},
+                    onOpenCircle = {},
                     onRetry = {},
                     onDeleteSoul = {},
                 )
@@ -187,6 +188,7 @@ fun SoulsListDetailOpen() {
                     onBack = {},
                     onOpenSoul = {},
                     onCreateSoul = {},
+                    onOpenCircle = {},
                     onRetry = {},
                     onDeleteSoul = {},
                 )
@@ -222,6 +224,7 @@ fun SoulsListDetailOpenDark() {
                     onBack = {},
                     onOpenSoul = {},
                     onCreateSoul = {},
+                    onOpenCircle = {},
                     onRetry = {},
                     onDeleteSoul = {},
                 )

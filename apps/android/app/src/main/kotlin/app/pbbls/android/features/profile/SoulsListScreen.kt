@@ -55,6 +55,9 @@ import app.pbbls.android.core.ui.SoulItemCase
  * pebble-form picker in sync — and owns the delete dialogs; [SoulsListContent]
  * renders (#940).
  *
+ * @param onOpenCircle Opens Connections, the People tab's way to your circle
+ *   (#1383 D14), where iOS has it (`SoulsListView`'s leading toolbar item).
+ *
  * @param onDeleteConfirmed Called with the deleted item's id once the user
  *   confirms, so a detail open beside this list can close (#940). It runs on
  *   confirm, not on success: if the delete fails, the error dialog says so and
@@ -65,6 +68,7 @@ fun SoulsListScreen(
     onBack: () -> Unit,
     onOpenSoul: (SoulWithGlyph) -> Unit,
     onCreateSoul: () -> Unit,
+    onOpenCircle: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteConfirmed: (id: String) -> Unit = {},
     viewModel: SoulsListViewModel = hiltViewModel(),
@@ -87,6 +91,7 @@ fun SoulsListScreen(
         onBack = onBack,
         onOpenSoul = onOpenSoul,
         onCreateSoul = onCreateSoul,
+        onOpenCircle = onOpenCircle,
         onRetry = viewModel::retry,
         onDeleteSoul = viewModel::requestDelete,
         modifier = modifier,
@@ -120,6 +125,7 @@ fun SoulsListContent(
     onBack: () -> Unit,
     onOpenSoul: (SoulWithGlyph) -> Unit,
     onCreateSoul: () -> Unit,
+    onOpenCircle: () -> Unit,
     onRetry: () -> Unit,
     onDeleteSoul: (SoulWithGlyph) -> Unit,
     hapticsOn: Boolean,
@@ -139,6 +145,14 @@ fun SoulsListContent(
                             contentDescription = stringResource(R.string.profile_back_a11y),
                             tint = colors.onSurfaceVariant,
                             modifier = Modifier.size(24.dp),
+                        )
+                    }
+                    IconButton(onClick = onOpenCircle) {
+                        PbblsIconImage(
+                            icon = PbblsIcon.PEOPLE,
+                            size = PbblsIconSize.TOOLBAR,
+                            contentDescription = stringResource(R.string.people_circle_a11y),
+                            tint = colors.onSurfaceVariant,
                         )
                     }
                 },

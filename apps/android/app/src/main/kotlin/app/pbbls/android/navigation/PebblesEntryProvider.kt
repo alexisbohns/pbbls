@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
+import app.pbbls.android.core.model.GlyphShelf
 import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.core.ui.HomeMonthSlot
 import app.pbbls.android.core.ui.HomeWrapLineSlot
@@ -86,7 +87,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onOpenPeople = { navigator.openAtRoot(PebblesKey.People) },
             onOpenGlyphs = {
                 navigator.openAtRoot(PebblesKey.You)
-                navigator.navigate(PebblesKey.Glyphs)
+                navigator.navigate(PebblesKey.Glyphs(GlyphShelf.MINE))
             },
             onOpenWrap = { month -> navigator.navigate(PebblesKey.HomeWrap(month.toString())) },
             onOpenGuide = { slug -> navigator.navigate(PebblesKey.Guide(slug)) },
@@ -131,7 +132,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onOpenSouls = { navigator.navigate(PebblesKey.People) },
             onOpenCollections = { navigator.navigate(PebblesKey.Collections) },
             onOpenCollection = { navigator.navigate(PebblesKey.CollectionDetail(it.id)) },
-            onOpenGlyphs = { navigator.navigate(PebblesKey.Glyphs) },
+            onOpenGlyphs = { navigator.navigate(PebblesKey.Glyphs()) },
             onOpenConnections = { navigator.navigate(PebblesKey.Connections) },
             onOpenLab = { navigator.navigate(PebblesKey.Lab) },
             onOpenAchievements = { navigator.navigate(PebblesKey.Achievements) },
@@ -147,6 +148,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onBack = navigator::goBack,
             onOpenSoul = { navigator.navigateToDetail(PebblesKey.SoulDetail(it.id)) },
             onCreateSoul = { navigator.navigate(PebblesKey.SoulForm()) },
+            onOpenCircle = { navigator.navigate(PebblesKey.Connections) },
             onDeleteConfirmed = { navigator.closeDetail(PebblesKey.SoulDetail(it)) },
         )
     }
@@ -196,9 +198,10 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     }
 
     entry<PebblesKey.Glyphs>(
-        metadata = NavTransitions.forKey(PebblesKey.Glyphs) + PanePairs.metadataFor(PebblesKey.Glyphs),
-    ) {
+        metadata = NavTransitions.forKey(PebblesKey.Glyphs()) + PanePairs.metadataFor<PebblesKey.Glyphs>(),
+    ) { key ->
         GlyphsListScreen(
+            initialTab = key.tab,
             onBack = navigator::goBack,
             onCarve = { navigator.navigate(PebblesKey.GlyphCarve) },
             onOpenGlyph = { navigator.navigateToDetail(PebblesKey.GlyphDetail(it)) },
@@ -265,6 +268,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             // parent picks them up on its own resume refresh instead (#852).
             onSaved = { _, _, _, _ -> navigator.goBack() },
             glyphPicker = glyphPicker,
+            onSignOut = onSignOut,
         )
     }
 

@@ -96,11 +96,11 @@ class NavigatorTest {
     @Test
     fun `a visited tab retains its stack even when out of the back path`() {
         navigator.navigate(PebblesKey.You)
-        navigator.navigate(PebblesKey.Glyphs)
+        navigator.navigate(PebblesKey.Glyphs())
         navigator.navigate(PebblesKey.People)
 
         assertEquals(
-            listOf<NavKey>(PebblesKey.You, PebblesKey.Glyphs),
+            listOf<NavKey>(PebblesKey.You, PebblesKey.Glyphs()),
             state.backStacks[PebblesKey.You]!!.toList(),
         )
     }
@@ -134,7 +134,7 @@ class NavigatorTest {
         navigator.navigate(PebblesKey.People)
         navigator.navigate(PebblesKey.SoulDetail("s1"))
         navigator.navigate(PebblesKey.You)
-        navigator.navigate(PebblesKey.Glyphs)
+        navigator.navigate(PebblesKey.Glyphs())
 
         navigator.replaceAll(PebblesKey.Welcome)
 
