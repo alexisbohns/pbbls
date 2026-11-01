@@ -29,6 +29,7 @@ import app.pbbls.android.features.home.camera.CameraMomentUiState
 import app.pbbls.android.features.home.checklist.ChecklistTask
 import app.pbbls.android.features.home.checklist.FirstFiveBox
 import app.pbbls.android.features.home.components.HomeGreetingBlock
+import app.pbbls.android.features.home.guides.GuidesSection
 import app.pbbls.android.features.home.shortcuts.HomeShortcuts
 import app.pbbls.android.features.home.wraps.HomeWrapsSection
 import java.time.LocalDate
@@ -68,6 +69,8 @@ private val SECTION_GAP = 44.dp
  * Then the monthly wraps (D12) once their first read is back; [onOpenWrap] gets the month of a
  * card tapped, [onRetryWraps] the section's Try again.
  *
+ * Last, About Pebbles (D13): its head always, its rows once the readings are in; [onOpenGuide] gets the slug tapped.
+ *
  * The date is formatted in the app's locale, read here in composition (D22), never `Locale.getDefault()`.
  */
 @Composable
@@ -87,6 +90,7 @@ fun HomeContent(
     onClaim: () -> Unit = {},
     onOpenWrap: (YearMonth) -> Unit = {},
     onRetryWraps: () -> Unit = {},
+    onOpenGuide: (String) -> Unit = {},
 ) {
     val resources = LocalResources.current
     val locale = LocalConfiguration.current.locales[0]
@@ -143,6 +147,9 @@ fun HomeContent(
                         onRetry = onRetryWraps,
                     )
                 }
+            }
+            item(key = "about") {
+                GuidesSection(guides = state.guides, textInset = TEXT_INSET, onOpen = onOpenGuide)
             }
         }
     }

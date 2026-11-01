@@ -52,7 +52,8 @@ private const val TAG = "home"
  * scrolls the page back to the greeting (iOS `scrollToTop`).
  *
  * [monthSlot] is the Path's month grid (D8), filled by the entry provider; a tap on one of its weeks
- * leaves the Path that focus and calls [onOpenPath] (D10). [onOpenWrap] opens a month's wrap sheet (D12).
+ * leaves the Path that focus and calls [onOpenPath] (D10). [onOpenWrap] opens a month's wrap sheet (D12),
+ * [onOpenGuide] an About Pebbles reading by its slug (D13).
  *
  * A quick action is stored as the last used one, then opens its flow (#1383 D7): the camera moment
  * (the system camera through `TakePicture`) and the quick moment sheet are Home's own, held by
@@ -76,6 +77,7 @@ fun HomeScreen(
     onOpenPeople: () -> Unit,
     onOpenGlyphs: () -> Unit,
     onOpenWrap: (YearMonth) -> Unit,
+    onOpenGuide: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     moments: HomeMomentsViewModel = hiltViewModel(),
@@ -168,6 +170,7 @@ fun HomeScreen(
         onClaim = viewModel::claim,
         onOpenWrap = onOpenWrap,
         onRetryWraps = viewModel::retryWraps,
+        onOpenGuide = onOpenGuide,
     )
     taskSheet?.let { task ->
         ChecklistTaskSheet(task = task, onGo = { viewModel.onTaskGo(task) }, onDismiss = { taskSheet = null })

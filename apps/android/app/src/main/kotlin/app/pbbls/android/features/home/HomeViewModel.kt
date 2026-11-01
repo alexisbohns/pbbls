@@ -102,6 +102,7 @@ class HomeViewModel
         private var nameJob: Job? = null
         private var monthJob: Job? = null
         private var wrapsJob: Job? = null
+        private var guidesJob: Job? = null
 
         /** The zone the month's days are cut in, as the Path asks for it. */
         private val zone = ZoneId.systemDefault()
@@ -112,6 +113,7 @@ class HomeViewModel
             // Every resume, as iOS's `.task`: a trip to the tab a task sent the user to ticks it here.
             viewModelScope.launch { loadChecklist() }
             retryWraps()
+            if (guidesJob?.isActive != true) guidesJob = viewModelScope.launch { loadGuides() }
         }
 
         /** Reads the months again (D12): every resume, and the row's Try again. A read in flight is not doubled. */
@@ -280,6 +282,20 @@ class HomeViewModel
                                 },
                         )
                     }
+                },
+            )
+        }
+
+        /**
+         * The About Pebbles readings (D13; iOS `HomeModel.loadGuides`). A failure keeps the readings shown; with none
+         * shown the section keeps its head and draws no rows ([HomeSection.Failed]), as iOS draws nothing under it.
+         */
+        private suspend fun loadGuides() {
+            runCatchingCancellable { home.guides() }.fold(
+                onSuccess = { guides -> _uiState.update { it.copy(guides = HomeSection.Ready(guides)) } },
+                onFailure = { error ->
+                    Log.e(TAG, "guides read failed", error)
+                    _uiState.update { state -> if (state.guides is HomeSection.Ready) state else state.copy(guides = HomeSection.Failed) }
                 },
             )
         }
