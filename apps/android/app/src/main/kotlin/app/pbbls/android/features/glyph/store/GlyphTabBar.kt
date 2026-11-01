@@ -39,7 +39,7 @@ enum class GlyphTab(
  * The store's three tabs as an M3 Expressive floating toolbar of toggle
  * buttons, floating over the grid's bottom edge — the iOS `GlyphTabBar` capsule
  * mapped onto the stock component (#854). Not a `NavigationBar`: the store
- * already sits inside the app's four-tab bar, and the same control lives in the
+ * already sits inside the app's five-tab bar, and the same control lives in the
  * glyph picker sheet. The toggles form a `selectableGroup` with the radio
  * role, so TalkBack reads "Owned, selected, 2 of 3".
  *

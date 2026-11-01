@@ -70,7 +70,8 @@ class NavigationTest : AppUiTest() {
     @Test
     fun `every tab is reachable from the bar`() {
         signedIn()
-        for (tab in listOf(R.string.tab_people, R.string.tab_collections, R.string.tab_you, R.string.tab_path)) {
+        onTab(R.string.tab_home).assertIsSelected()
+        for (tab in listOf(R.string.tab_path, R.string.tab_people, R.string.tab_collections, R.string.tab_you, R.string.tab_home)) {
             onTab(tab).performClick()
             onTab(tab).assertIsSelected()
         }
@@ -83,6 +84,7 @@ class NavigationTest : AppUiTest() {
         moments.path = listOf(UiFixtures.pathMoment(happenedAt = UiFixtures.thisWeek()))
         moments.moments = mapOf("moment-1" to UiFixtures.momentDetail())
         signedIn()
+        openPath()
 
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performClick()
         onDescription(R.string.more_actions_a11y).assertIsDisplayed().performClick()
@@ -104,6 +106,7 @@ class NavigationTest : AppUiTest() {
         moments.path = listOf(UiFixtures.pathMoment(pebble = null, happenedAt = UiFixtures.thisWeek()))
         moments.moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = null))
         signedIn()
+        openPath()
 
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performClick()
         onDescription(R.string.more_actions_a11y).performClick()
@@ -115,6 +118,7 @@ class NavigationTest : AppUiTest() {
     @Test
     fun `new pebble opens the capture flow`() {
         signedIn()
+        openPath()
 
         compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).performClick()
 

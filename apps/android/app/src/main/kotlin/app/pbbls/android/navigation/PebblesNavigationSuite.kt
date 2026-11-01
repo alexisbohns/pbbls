@@ -15,9 +15,12 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import app.pbbls.android.R
+import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PbblsIcon
 import app.pbbls.android.core.designsystem.PbblsIconImage
 
@@ -46,8 +49,9 @@ fun pebblesNavigationSuiteColors(): NavigationSuiteColors {
 }
 
 /**
- * The four top-level destinations (#852, D2), as [NavigationSuiteItem]s for
- * the `NavigationSuiteScaffold` in `RootScreen` (#855). The same four items
+ * The five top-level destinations (#852 D2, Home first since #1383 D1), as
+ * [NavigationSuiteItem]s for the `NavigationSuiteScaffold` in `RootScreen`
+ * (#855). The same five items
  * render as a bottom bar on phones and a rail on large screens.
  *
  * Tapping a tab you are not on switches to it, retaining that tab's stack;
@@ -82,6 +86,8 @@ fun PebblesNavigationItems(
                 )
             },
             label = { NavigationLabel(tab) },
+            // Path keeps a tag for the baseline-profile journey, which now lands on Home.
+            modifier = if (tab == PebblesKey.Path) Modifier.testTag(JourneyTags.TAB_PATH) else Modifier,
             navigationSuiteType = navigationSuiteType,
             colors = colors,
         )
@@ -142,6 +148,7 @@ private fun pebblesNavigationItemColors(type: NavigationSuiteType): NavigationIt
 /** The tab's drawing; the bar lights its `active` twin when selected (spec D5, iOS `AppTab.icon`). */
 internal fun PebblesKey.icon(): PbblsIcon =
     when (this) {
+        PebblesKey.Home -> PbblsIcon.HOME
         PebblesKey.Path -> PbblsIcon.PATH
         PebblesKey.People -> PbblsIcon.PEOPLE
         PebblesKey.Collections -> PbblsIcon.COLLECTION
@@ -152,6 +159,7 @@ internal fun PebblesKey.icon(): PbblsIcon =
 @StringRes
 private fun PebblesKey.labelRes(): Int =
     when (this) {
+        PebblesKey.Home -> R.string.tab_home
         PebblesKey.Path -> R.string.tab_path
         PebblesKey.People -> R.string.tab_people
         PebblesKey.Collections -> R.string.tab_collections

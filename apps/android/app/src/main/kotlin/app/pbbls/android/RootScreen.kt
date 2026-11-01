@@ -62,8 +62,10 @@ import kotlinx.coroutines.withContext
  * [RootDestination.Unresolved] leaves the initial `Welcome` seed on the back
  * stack, unrevealed. The system splash ([MainActivity]) covers the whole
  * activity on the same `isInitializing` signal this gate reads. There is no
- * fixed splash duration here (#846): a warm signed-in launch lands on Path
- * immediately.
+ * fixed splash duration here (#846): a warm signed-in launch lands on Home
+ * immediately (#1383 D1). Home draws its greeting without waiting on a read,
+ * so it needs no splash hold of its own (iOS's 1.5 s hand-off has nothing to
+ * cover here).
  *
  * **Welcome's reveal flag is passed down as a lambda, and must stay one
  * (#856).** Nav 3 remembers each `NavEntry` per back-stack key, so a value the
@@ -100,10 +102,10 @@ fun RootScreen(onboarding: OnboardingPreferences) {
 
     val hasSeenOnboarding = onboarding.hasSeenOnboarding
 
-    // Four per-tab back stacks (#852, D4). Welcome is the initial seed of the
-    // START tab for both real sign-outs and the Unresolved splash hold — see the
-    // class doc above for why that is safe, and `rememberNavigationState`'s
-    // `seed` doc for why it must not be Path.
+    // Five per-tab back stacks (#852 D4, Home since #1383). Welcome is the initial
+    // seed of the START tab (Home) for both real sign-outs and the Unresolved splash
+    // hold — see the class doc above for why that is safe, and
+    // `rememberNavigationState`'s `seed` doc for why it must not be Home.
     val navState = rememberNavigationState(seed = PebblesKey.Welcome)
     val navigator = remember(navState) { Navigator(navState) }
 
@@ -173,11 +175,11 @@ fun RootScreen(onboarding: OnboardingPreferences) {
                 // rootAt, NOT replaceAll: this effect also runs on a cold
                 // restore, by which point the saveable back stack has already
                 // restored where the user was. Re-rooting unconditionally would
-                // throw that away and land everyone back on Path.
-                val wasAlreadyAuthed = navigator.rootKey == PebblesKey.Path
-                navigator.rootAt(PebblesKey.Path)
+                // throw that away and land everyone back on Home.
+                val wasAlreadyAuthed = navigator.rootKey == PebblesKey.Home
+                navigator.rootAt(PebblesKey.Home)
                 // First-run gate: push Onboarding on top of the freshly-seeded
-                // Path so a pending invite (below) waits behind it. Skipped on a
+                // Home so a pending invite (below) waits behind it. Skipped on a
                 // restore that was already authed — the restored stack is
                 // authoritative there, and re-pushing would stack a second
                 // Onboarding over whatever the user was doing.

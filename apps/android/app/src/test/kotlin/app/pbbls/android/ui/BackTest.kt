@@ -34,6 +34,7 @@ class BackTest : AppUiTest() {
         skipOnboarding()
         launch()
         signIn()
+        openPath()
     }
 
     private fun openCapture() {

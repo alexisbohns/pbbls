@@ -21,7 +21,11 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 sealed interface PebblesKey : NavKey {
-    // ---- Top level: the four tabs (D2) ----
+    // ---- Top level: the five tabs (D2; Home since #1383) ----
+
+    /** Where a signed-in launch lands (#1383 D1): the greeting and the sections the later parts add. */
+    @Serializable
+    data object Home : PebblesKey, TopLevelKey
 
     @Serializable
     data object Path : PebblesKey, TopLevelKey
@@ -180,11 +184,11 @@ sealed interface PebblesKey : NavKey {
 
     companion object {
         /** Bar order, left to right. Also the tab set [NavigationState] keys on. */
-        val tabs: List<PebblesKey> = listOf(Path, People, Collections, You)
+        val tabs: List<PebblesKey> = listOf(Home, Path, People, Collections, You)
     }
 }
 
-/** A key that is one of the four bar destinations. Always also a [BarKey]. */
+/** A key that is one of the five bar destinations. Always also a [BarKey]. */
 sealed interface TopLevelKey : BarKey
 
 /**
