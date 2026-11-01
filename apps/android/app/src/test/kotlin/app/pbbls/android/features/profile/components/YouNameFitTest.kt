@@ -47,7 +47,6 @@ class YouNameFitTest {
                             memberSince = OffsetDateTime.parse("2026-03-02T09:00:00Z"),
                             glyphStrokes = null,
                             ripple = null,
-                            onOpenSettings = {},
                             onNameLayout = { layout = it },
                         )
                     }

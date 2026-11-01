@@ -243,8 +243,8 @@ abstract class AppUiTest {
     ): String = context.getString(id, *args)
 
     /**
-     * You, told by its settings stone: the page has no title since the rebuild (#1383, spec D14),
-     * and the stone is at its top, so it is on screen whenever You is.
+     * You, told by its top bar's settings action: the page has no title since the rebuild (#1383, spec D14),
+     * and the action sits in its top bar, so it is on screen whenever You is.
      */
     protected fun onYou(): SemanticsNodeInteraction = compose.onNodeWithContentDescription(string(R.string.settings_title))
 

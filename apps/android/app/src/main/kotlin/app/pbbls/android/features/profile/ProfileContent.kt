@@ -8,17 +8,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.model.GlyphShelf
 import app.pbbls.android.features.profile.components.ProfileAchievementsCard
@@ -41,15 +48,16 @@ private val COUNTERS_GAP = 34.dp
 
 /**
  * You's page (#1383, spec D14), stateless over [ProfileUiState]: what the screenshot tests render.
- * No top bar, as on iOS: the header carries the settings stone. In order, on `surface` in the
- * readable column ([PebblesScreen]): the [YouHeader], the [YouCounters], the [YouGlyphsSection]
+ * Settings opens from a standard top app bar action, as on main (an `IconButton` with `slider`,
+ * labelled "Settings"); the bar has no title or back, You being a tab root. In order, on `surface`
+ * in the readable column ([PebblesScreen]): the [YouHeader], the [YouCounters], the [YouGlyphsSection]
  * ([onOpenGlyphs] gets the shelf of the row tapped), then the achievements shelf and the Lab card,
  * which the next part rebuilds.
  *
  * A failed profile read shows the standard error and [onRetry] (design D13, Android's named
  * deviation from iOS's silent empty banner).
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ProfileContent(
     state: ProfileUiState,
@@ -61,7 +69,28 @@ fun ProfileContent(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
-    PebblesScreen(modifier = modifier) {
+    PebblesScreen(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = {},
+                actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        PbblsIconImage(
+                            icon = PbblsIcon.SLIDER,
+                            size = PbblsIconSize.TOOLBAR,
+                            contentDescription = stringResource(R.string.settings_title),
+                        )
+                    }
+                },
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = colors.surface,
+                        scrolledContainerColor = colors.surfaceContainer,
+                    ),
+            )
+        },
+    ) {
         // Exhaustive with no `else`: a new ProfileUiState case must be rendered.
         when (state) {
             ProfileUiState.Loading ->
@@ -106,7 +135,6 @@ fun ProfileContent(
                         memberSince = state.profile?.createdAt,
                         glyphStrokes = state.glyphStrokes,
                         ripple = state.ripple,
-                        onOpenSettings = onOpenSettings,
                         modifier = Modifier.padding(horizontal = TEXT_INSET),
                     )
                     Spacer(Modifier.height(COUNTERS_GAP))

@@ -10,7 +10,7 @@ import app.pbbls.android.core.model.GlyphShelf
 
 /**
  * The You screen (#1383, spec D14): [ProfileContent] over [ProfileViewModel]'s state. No top bar
- * and no back: You is a tab root, and its settings stone opens [SettingsScreen]. Souls, Collections,
+ * and no back: You is a tab root, and its top bar's settings action opens [SettingsScreen]. Souls, Collections,
  * Connections and Log out left You with the rebuild; each has its home (the People and Collections
  * tabs, People's Circle button, Settings).
  *

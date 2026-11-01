@@ -13,7 +13,7 @@ import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 
 /**
- * You (#1383, spec D14): the header (settings stone, pentagon avatar, the name in the hand,
+ * You (#1383, spec D14): the header (pentagon avatar, under the top bar's settings action, the name in the hand,
  * "Member since", the Ripples line), the counters cut from one stone and the three Glyphs rows,
  * above the achievements shelf and the Lab card the next part rebuilds. Paper (with 2 × font, where
  * the counters stack, and French), Night, wide (the readable column holding), the dotted pebble
