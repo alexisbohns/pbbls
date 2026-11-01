@@ -3,8 +3,6 @@ package app.pbbls.android.ui
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -20,7 +18,6 @@ import app.pbbls.android.testing.FakeCollectionsService
 import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.FakeLogsService
 import app.pbbls.android.testing.FakeMomentReadService
-import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.UiFixtures
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -43,8 +40,6 @@ import javax.inject.Inject
 @HiltAndroidTest
 class NavigationTest : AppUiTest() {
     @Inject lateinit var moments: FakeMomentReadService
-
-    @Inject lateinit var profile: FakeProfileService
 
     @Inject lateinit var souls: FakeSoulsService
 
@@ -139,71 +134,23 @@ class NavigationTest : AppUiTest() {
     }
 
     @Test
-    fun `Profile's Souls tile switches to the People tab`() {
-        signedIn()
-        onTab(R.string.tab_you).performClick()
-
-        onText(R.string.souls_title).performClick()
-
-        onTab(R.string.tab_people).assertIsSelected()
-        onDescription(R.string.souls_add_a11y).assertIsDisplayed()
-    }
-
-    @Test
-    fun `Profile's Collections header switches to the Collections tab`() {
-        signedIn()
-        onTab(R.string.tab_you).performClick()
-
-        compose
-            .onNode(hasText(string(R.string.profile_collections_header)) and hasAnyAncestor(hasScrollAction()))
-            .performScrollTo()
-            .performClick()
-
-        onTab(R.string.tab_collections).assertIsSelected()
-        onDescription(R.string.collections_add_a11y).assertIsDisplayed()
-    }
-
-    @Test
-    fun `Profile opens Glyphs, Connections, Achievements and Lab`() {
+    fun `You opens Glyphs, Achievements and Lab`() {
         signedIn()
         val pushes =
             listOf(
-                R.string.glyphs_title,
-                R.string.connections_title,
-                R.string.achievements_title,
-                R.string.lab_title,
+                R.string.you_glyphs_mine to R.string.glyphs_title,
+                R.string.achievements_title to R.string.achievements_title,
+                R.string.lab_title to R.string.lab_title,
             )
-        for (title in pushes) {
+        for ((tap, title) in pushes) {
             onTab(R.string.tab_you).performClick()
-            onText(title).performScrollTo().performClick()
+            onText(tap).performScrollTo().performClick()
             onText(title).assertIsDisplayed()
-            onText(R.string.profile_title).assertDoesNotExist()
+            onYou().assertDoesNotExist()
             pressBack()
-            onText(R.string.profile_title).assertIsDisplayed()
+            // Back on You, still scrolled to the row that was tapped: the stone is composed, not in view.
+            onYou().assertExists()
         }
-    }
-
-    @Test
-    fun `Profile opens a collection's detail`() {
-        profile.collections = listOf(UiFixtures.collection(name = "Summer"))
-        collections.collections = profile.collections
-        signedIn()
-        onTab(R.string.tab_you).performClick()
-
-        compose.onNodeWithText("Summer").performScrollTo().performClick()
-
-        onText(R.string.collection_detail_empty_message).assertIsDisplayed()
-    }
-
-    @Test
-    fun `Profile with no collections opens the collection form`() {
-        signedIn()
-        onTab(R.string.tab_you).performClick()
-
-        onText(R.string.profile_collection_new).performScrollTo().performClick()
-
-        onText(R.string.action_cancel).assertIsDisplayed()
-        onText(R.string.profile_collection_new).assertIsDisplayed()
     }
 
     // ---- People ----
@@ -294,7 +241,7 @@ class NavigationTest : AppUiTest() {
     fun `Glyphs opens the carve screen`() {
         signedIn()
         onTab(R.string.tab_you).performClick()
-        onText(R.string.glyphs_title).performClick()
+        onText(R.string.you_glyphs_mine).performScrollTo().performClick()
 
         onDescription(R.string.glyphs_carve_a11y).performClick()
 
@@ -306,7 +253,7 @@ class NavigationTest : AppUiTest() {
         glyphMarket.community = listOf(UiFixtures.communityGlyph(name = "Spiral"))
         signedIn()
         onTab(R.string.tab_you).performClick()
-        onText(R.string.glyphs_title).performClick()
+        onText(R.string.you_glyphs_mine).performScrollTo().performClick()
         onText(R.string.glyph_tab_commu).performClick()
 
         compose.onNodeWithText("Spiral").performClick()
@@ -319,8 +266,8 @@ class NavigationTest : AppUiTest() {
     @Test
     fun `Connections opens Invite`() {
         signedIn()
-        onTab(R.string.tab_you).performClick()
-        onText(R.string.connections_title).performClick()
+        onTab(R.string.tab_people).performClick()
+        onDescription(R.string.people_circle_a11y).performClick()
 
         onText(R.string.connections_invite_action).performClick()
 

@@ -80,7 +80,7 @@ class SettingsSaveTest : AppUiTest() {
 
         assertEquals(1, profile.saveSettingsCalls.size)
         assertEquals(listOf(true), profile.setPublicProfileCalls)
-        onText(R.string.profile_title).assertIsDisplayed()
+        onYou().assertIsDisplayed()
     }
 
     @Test
@@ -106,7 +106,7 @@ class SettingsSaveTest : AppUiTest() {
         onText(R.string.action_save).performClick()
 
         pressBack()
-        onText(R.string.profile_title).assertIsDisplayed()
+        onYou().assertIsDisplayed()
         compose.runOnIdle { gate.complete(Unit) }
         compose.waitForIdle()
 

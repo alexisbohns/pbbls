@@ -92,7 +92,7 @@ class BackTest : AppUiTest() {
 
         pressBack()
 
-        onText(R.string.profile_title).assertIsDisplayed()
+        onYou().assertIsDisplayed()
     }
 
     @Test
@@ -139,6 +139,6 @@ class BackTest : AppUiTest() {
 
         pressBack()
 
-        onText(R.string.profile_title).assertIsDisplayed()
+        onYou().assertIsDisplayed()
     }
 }

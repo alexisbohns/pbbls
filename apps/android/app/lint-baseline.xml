@@ -92,17 +92,6 @@
     <issue
         id="NonObservableLocale"
         message="Reading locale in a non-observable way in a composable function"
-        errorLine1="                    .format(DateTimeFormatter.ofPattern(&quot;MMMM yyyy&quot;, Locale.getDefault()))"
-        errorLine2="                                                                     ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/kotlin/app/pbbls/android/features/profile/components/ProfileBanner.kt"
-            line="33"
-            column="70"/>
-    </issue>
-
-    <issue
-        id="NonObservableLocale"
-        message="Reading locale in a non-observable way in a composable function"
         errorLine1="    val cased = if (valence.sizeGroup == ValenceSizeGroup.SMALL) raw.lowercase(Locale.getDefault()) else raw"
         errorLine2="                                                                               ~~~~~~~~~~~~~~~~~~~">
         <location
@@ -174,17 +163,6 @@
         <location
             file="src/main/kotlin/app/pbbls/android/features/path/components/WeekPebbleList.kt"
             line="71"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="MissingQuantity"
-        message="For locale &quot;fr&quot; (French) the following quantity should also be defined: `many` (e.g. &quot;1000000 de jours&quot;)"
-        errorLine1="    &lt;plurals name=&quot;profile_ripples_progress&quot;>"
-        errorLine2="    ^">
-        <location
-            file="src/main/res/values-fr/strings.xml"
-            line="83"
             column="5"/>
     </issue>
 

@@ -218,18 +218,9 @@
     <string name="ripple_badge_active">Ripple level %1$d, active today</string>
     <string name="ripple_badge_inactive">Ripple level %1$d, inactive today</string>
     <!-- ==== Profile + Settings (sub-project C). "Pebbles"/"Karma"/"Ripples" are product vocabulary. ==== -->
-    <string name="profile_title">Profile</string>
     <string name="profile_back_a11y">Back</string>
     <string name="profile_member_since">Member since %1$s</string>
-    <string name="profile_stats_header">Stats</string>
     <string name="profile_ripples_level">Ripples Level %1$d</string>
-    <plurals name="profile_ripples_progress">
-        <item quantity="one">%1$d more pebble to level %2$d</item>
-        <item quantity="other">%1$d more pebbles to level %2$d</item>
-    </plurals>
-    <string name="profile_ripples_max">Max level reached</string>
-    <string name="profile_ripples_loading">Loading…</string>
-    <string name="profile_assiduity_a11y">Assiduity grid, last 28 days</string>
     <string name="profile_counter_days">Days</string>
     <string name="profile_counter_pebbles">Pebbles</string>
     <string name="profile_counter_karma">Karma</string>
@@ -240,9 +231,36 @@
         <item quantity="other">%1$d pebbles</item>
     </plurals>
     <string name="profile_collection_new">New collection</string>
-    <string name="profile_log_out">Log out</string>
     <string name="profile_load_error">Couldn\'t load your profile.</string>
     <string name="profile_retry">Retry</string>
+    <!-- You (#1383, spec D14.4–5): each counter is one spoken node ("112 days"), and the Glyphs rows.
+         A row's line reads without a number while the count is not served (or is zero). -->
+    <plurals name="you_counter_days_a11y">
+        <item quantity="one">%1$s day</item>
+        <item quantity="other">%1$s days</item>
+    </plurals>
+    <plurals name="you_counter_pebbles_a11y">
+        <item quantity="one">%1$s pebble</item>
+        <item quantity="other">%1$s pebbles</item>
+    </plurals>
+    <plurals name="you_counter_karma_a11y">
+        <item quantity="one">%1$s karma</item>
+        <item quantity="other">%1$s karma</item>
+    </plurals>
+    <string name="you_glyphs_mine">My glyphs</string>
+    <plurals name="you_glyphs_mine_line">
+        <item quantity="one">The %1$d mark you carved.</item>
+        <item quantity="other">The %1$d marks you carved.</item>
+    </plurals>
+    <string name="you_glyphs_mine_line_none">The marks you carved.</string>
+    <string name="you_glyphs_owned">Owned glyphs</string>
+    <plurals name="you_glyphs_owned_line">
+        <item quantity="one">The %1$d glyph you collected from others.</item>
+        <item quantity="other">The %1$d you collected from others.</item>
+    </plurals>
+    <string name="you_glyphs_owned_line_none">The glyphs you collected from others.</string>
+    <string name="you_glyphs_community">Community</string>
+    <string name="you_glyphs_community_line">Glyphs other pebblers share.</string>
     <string name="settings_title">Settings</string>
     <string name="settings_appearance_section">Appearance</string>
     <string name="settings_wallpaper_colors_title">Use wallpaper colours</string>

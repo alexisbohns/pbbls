@@ -1,85 +1,32 @@
 package app.pbbls.android.features.profile
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeFlexibleTopAppBar
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
-import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.model.Collection
-import app.pbbls.android.features.profile.components.ProfileAchievementsCard
-import app.pbbls.android.features.profile.components.ProfileBanner
-import app.pbbls.android.features.profile.components.ProfileCollectionsCard
-import app.pbbls.android.features.profile.components.ProfileLabCard
-import app.pbbls.android.features.profile.components.ProfileLogoutButton
-import app.pbbls.android.features.profile.components.ProfileShortcutsRow
-import app.pbbls.android.features.profile.components.ProfileStatsCard
+import app.pbbls.android.core.model.GlyphShelf
 
 /**
- * The Profile screen — ports iOS `ProfileView.swift` (sub-project C): banner,
- * shortcuts row (tiles appear as their destinations land — D11), stats card,
- * collections carousel (header → list, card → detail, empty tile → the create
- * form as a cover), and log out, with the gear button opening [SettingsScreen]
- * as a full-screen cover (the D5 surface pattern), and the Lab card (M44 —
- * the last M41 D11 reversal) pushing the Lab.
+ * The You screen (#1383, spec D14): [ProfileContent] over [ProfileViewModel]'s state. No top bar
+ * and no back: You is a tab root, and its top bar's settings action opens [SettingsScreen]. Souls, Collections,
+ * Connections and Log out left You with the rebuild; each has its home (the People and Collections
+ * tabs, People's Circle button, Settings).
  *
- * Returning from a pushed screen refreshes through [ProfileViewModel.onResumed].
- * This comment used to say navigating away disposed the destination so returning
- * re-ran the load — true while the state lived in `remember`, and false from
- * #893 onward: the ViewModel is scoped to the `NavBackStackEntry`, which
- * survives the round trip.
- *
- * Deviation from iOS (design D13): a failed profile fetch shows the standard
- * error + Retry treatment instead of iOS's silent empty banner.
+ * Returning from a pushed screen refreshes through [ProfileViewModel.onResumed]: the ViewModel is
+ * scoped to the `NavBackStackEntry`, which survives the round trip (#893).
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ProfileScreen(
-    onBack: () -> Unit,
-    onSignOut: () -> Unit,
-    onOpenSouls: () -> Unit,
-    onOpenCollections: () -> Unit,
-    onOpenCollection: (Collection) -> Unit,
-    onOpenGlyphs: () -> Unit,
-    onOpenConnections: () -> Unit,
+    onOpenGlyphs: (GlyphShelf) -> Unit,
     onOpenLab: () -> Unit,
     onOpenAchievements: () -> Unit,
     onOpenSettings: () -> Unit,
-    onCreateCollection: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val colors = MaterialTheme.colorScheme
 
     // Coming back from a pushed screen must re-read the page: the ViewModel is
     // scoped to the back stack entry, which survives that round trip.
@@ -88,122 +35,15 @@ fun ProfileScreen(
         onPauseOrDispose {}
     }
 
-    // The Expressive large flexible bar: the title sits large over the page and
-    // collapses into the bar as the column scrolls (#854).
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    PebblesScreen(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            LargeFlexibleTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.profile_title),
-                        modifier = Modifier.semantics { heading() },
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = stringResource(R.string.profile_back_a11y),
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onOpenSettings) {
-                        PbblsIconImage(
-                            icon = PbblsIcon.SLIDER,
-                            size = PbblsIconSize.TOOLBAR,
-                            contentDescription = stringResource(R.string.settings_title),
-                        )
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = colors.surface,
-                        scrolledContainerColor = colors.surfaceContainer,
-                    ),
-                scrollBehavior = scrollBehavior,
-            )
-        },
-    ) {
-        // Exhaustive with no `else`: a new ProfileUiState case must be rendered.
-        when (uiState) {
-            ProfileUiState.Loading ->
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    LoadingIndicator()
-                }
-
-            is ProfileUiState.Error ->
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        text = stringResource((uiState as ProfileUiState.Error).messageRes),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = colors.onSurfaceVariant,
-                    )
-                    TextButton(onClick = viewModel::retry) {
-                        Text(
-                            text = stringResource(R.string.profile_retry),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = colors.primary,
-                        )
-                    }
-                }
-
-            is ProfileUiState.Content -> {
-                val content = uiState as ProfileUiState.Content
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 16.dp)
-                            .padding(bottom = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xl),
-                ) {
-                    ProfileBanner(
-                        displayName = content.profile?.displayName,
-                        memberSince = content.profile?.createdAt,
-                        glyphStrokes = content.glyphStrokes,
-                    )
-                    ProfileShortcutsRow(
-                        onOpenSouls = onOpenSouls,
-                        onOpenGlyphs = onOpenGlyphs,
-                        onOpenConnections = onOpenConnections,
-                    )
-                    ProfileStatsCard(
-                        ripple = content.ripple,
-                        assiduity = content.assiduity,
-                        daysPracticed = content.daysPracticed,
-                        pebbles = content.pebbles,
-                        karma = content.karma,
-                    )
-                    ProfileAchievementsCard(
-                        badges = content.shelf,
-                        count = content.shelfCount,
-                        onOpen = onOpenAchievements,
-                    )
-                    ProfileCollectionsCard(
-                        collections = content.collections,
-                        hasLoaded = content.collectionsLoaded,
-                        onOpenList = onOpenCollections,
-                        onOpenCollection = onOpenCollection,
-                        onCreate = onCreateCollection,
-                    )
-                    ProfileLabCard(onOpen = onOpenLab)
-                    ProfileLogoutButton(onClick = onSignOut)
-                }
-            }
-        }
-    }
+    ProfileContent(
+        state = uiState,
+        onRetry = viewModel::retry,
+        onOpenSettings = onOpenSettings,
+        onOpenGlyphs = onOpenGlyphs,
+        onOpenAchievements = onOpenAchievements,
+        onOpenLab = onOpenLab,
+        modifier = modifier,
+    )
 }
 
 /**

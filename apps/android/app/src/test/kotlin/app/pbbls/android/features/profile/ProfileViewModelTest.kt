@@ -1,5 +1,6 @@
 package app.pbbls.android.features.profile
 
+import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.AchievementsFixture
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
@@ -24,9 +25,9 @@ import java.time.ZoneId
 /**
  * Profile's three-part load, its covers, and the save fold-back (#849).
  *
- * The load is the interesting half: the profile row, its glyph and the
- * collections fail independently on purpose, and before this ViewModel that
- * behaviour lived in nested `try`/`catch` inside a `LaunchedEffect`.
+ * The load is the interesting half: the profile row and its glyph fail
+ * independently on purpose, and before this ViewModel that behaviour lived in
+ * nested `try`/`catch` inside a `LaunchedEffect`.
  */
 class ProfileViewModelTest {
     @get:Rule
@@ -58,7 +59,17 @@ class ProfileViewModelTest {
 
             val state = viewModel.uiState.value as ProfileUiState.Content
             assertEquals("Pebbler", state.profile?.displayName)
-            assertTrue(state.collectionsLoaded)
+        }
+
+    /** You lost its collections card (#1383, spec D14): the Collections tab is their home. */
+    @Test
+    fun `collections are not read`() =
+        runTest {
+            val profile = FakeProfileService(profile = row)
+            viewModel(profile)
+            advanceUntilIdle()
+
+            assertEquals(0, profile.loadCollectionsCount)
         }
 
     @Test
@@ -90,23 +101,6 @@ class ProfileViewModelTest {
             val state = viewModel.uiState.value as ProfileUiState.Content
             assertEquals("Pebbler", state.profile?.displayName)
             assertNull(state.glyphStrokes)
-        }
-
-    /** Likewise the collections card, which is its own card on the page. */
-    @Test
-    fun `a failed collections fetch still shows the profile`() =
-        runTest {
-            val profile = FakeProfileService(profile = row)
-            profile.collectionsFailure = IOException("offline")
-            val viewModel = viewModel(profile)
-            advanceUntilIdle()
-
-            val state = viewModel.uiState.value as ProfileUiState.Content
-            assertEquals("Pebbler", state.profile?.displayName)
-            assertTrue(state.collections.isEmpty())
-            // Still "loaded", so the carousel shows its empty tile rather than
-            // a skeleton that never resolves.
-            assertTrue(state.collectionsLoaded)
         }
 
     @Test
@@ -289,6 +283,29 @@ class ProfileViewModelTest {
             assertEquals(42, (viewModel.uiState.value as ProfileUiState.Content).karma)
         }
 
+    /** The glyph counts (#1386) ride the stats singleton; null until served, then live. */
+    @Test
+    fun `glyph counts follow the stats`() =
+        runTest {
+            val stats = FakePathStatsService()
+            val viewModel = viewModel(stats = stats)
+            advanceUntilIdle()
+            val before = viewModel.uiState.value as ProfileUiState.Content
+            assertNull(before.glyphsCarved)
+            assertNull(before.glyphsOwned)
+
+            stats.glyphsCarved = 12
+            stats.glyphsOwned = 5
+            // The ViewModel observes through `snapshotFlow`; outside a composition a write is only
+            // seen once the global snapshot is applied.
+            Snapshot.sendApplyNotifications()
+            advanceUntilIdle()
+
+            val after = viewModel.uiState.value as ProfileUiState.Content
+            assertEquals(12, after.glyphsCarved)
+            assertEquals(5, after.glyphsOwned)
+        }
+
     // MARK: - Returning from a pushed screen
 
     /**
@@ -314,6 +331,23 @@ class ProfileViewModelTest {
             viewModel.onResumed()
             advanceUntilIdle()
             assertEquals(loadsAfterInit + 1, profile.loadProfileCount)
+        }
+
+    /** A glyph carved or bought on the way out shows in the counts on return. */
+    @Test
+    fun `returning to You refreshes the stats`() =
+        runTest {
+            val stats = FakePathStatsService()
+            val viewModel = viewModel(stats = stats)
+            advanceUntilIdle()
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(0, stats.refreshCount)
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(1, stats.refreshCount)
         }
 
     /** The refresh is silent — it must not blank the page to a spinner. */

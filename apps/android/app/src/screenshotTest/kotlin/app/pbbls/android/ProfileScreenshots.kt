@@ -1,36 +1,24 @@
 package app.pbbls.android
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.readableWidth
-import app.pbbls.android.core.model.Collection
-import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.RippleSummary
-import app.pbbls.android.features.profile.components.ProfileBanner
-import app.pbbls.android.features.profile.components.ProfileCollectionsCard
-import app.pbbls.android.features.profile.components.ProfileLogoutButton
-import app.pbbls.android.features.profile.components.ProfileStatsCard
+import app.pbbls.android.features.profile.ProfileContent
+import app.pbbls.android.features.profile.ProfileUiState
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 
 /**
- * Profile surface previews (#567): banner (glyph + carve-placeholder
- * variants), the Stats card in loaded and loading states, the Collections
- * carousel (filled + empty variants), and the logout pill — light and dark.
- * ProfileScreen/SettingsScreen themselves read services, so the review
- * surface is this pure-component gallery plus the on-device pass.
+ * You (#1383, spec D14): the header (pentagon avatar, under the top bar's settings action, the name in the hand,
+ * "Member since", the Ripples line), the counters cut from one stone and the three Glyphs rows,
+ * above the achievements shelf and the Lab card the next part rebuilds. Paper (with 2 × font, where
+ * the counters stack, and French), Night, wide (the readable column holding), the dotted pebble
+ * with the counts not served yet (the count-free lines), and a long name at 1 × shrinking to hold
+ * its line (D18). Every value is pinned: a mid-month join date, so no zone moves the month.
  */
 private val previewStrokes =
     listOf(
@@ -40,78 +28,83 @@ private val previewStrokes =
         ),
     )
 
-private val previewCollections =
-    listOf(
-        Collection(id = "c1", name = "Reading list", mode = CollectionMode.PACK, pebbleCount = 7),
-        Collection(id = "c2", name = "Trips", mode = null, pebbleCount = 1),
-        Collection(id = "c3", name = "Wins", mode = CollectionMode.TRACK, pebbleCount = 23),
-    )
+private fun content(
+    name: String = "Alexis",
+    strokes: List<GlyphStroke>? = previewStrokes,
+    served: Boolean = true,
+) = ProfileUiState.Content(
+    profile =
+        ProfileRow(
+            displayName = name,
+            createdAt = OffsetDateTime.parse("2026-03-15T12:00:00Z"),
+            glyphId = strokes?.let { "glyph-1" },
+        ),
+    glyphStrokes = strokes,
+    karma = if (served) 1240 else null,
+    pebbles = if (served) 318 else null,
+    daysPracticed = if (served) 112 else null,
+    ripple = if (served) RippleSummary(rippleLevel = 3, pebbles28d = 11, activeToday = true) else null,
+    glyphsCarved = if (served) 12 else null,
+    glyphsOwned = if (served) 5 else null,
+    email = null,
+    providers = emptyList(),
+    shelf = emptyList(),
+    shelfCount = null,
+)
 
 @Composable
-private fun ProfileGallery() {
-    Column(
-        modifier =
-            Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-    ) {
-        ProfileBanner(
-            displayName = "Alexis",
-            memberSince = OffsetDateTime.parse("2026-04-12T09:00:00+00:00"),
-            glyphStrokes = previewStrokes,
-        )
-        ProfileBanner(
-            displayName = "Pebbler",
-            memberSince = OffsetDateTime.parse("2026-07-01T09:00:00+00:00"),
-            glyphStrokes = null,
-        )
-        ProfileStatsCard(
-            ripple = RippleSummary(rippleLevel = 3, pebbles28d = 11, activeToday = true),
-            assiduity = List(28) { it % 3 != 0 },
-            daysPracticed = 42,
-            pebbles = 137,
-            karma = 1200,
-        )
-        // Loading state: em-dashes, level-0 badge, empty grid.
-        ProfileStatsCard(
-            ripple = null,
-            assiduity = null,
-            daysPracticed = null,
-            pebbles = null,
-            karma = null,
-        )
-        ProfileCollectionsCard(collections = previewCollections, hasLoaded = true)
-        ProfileCollectionsCard(collections = emptyList(), hasLoaded = true)
-        ProfileLogoutButton(onClick = {}, modifier = Modifier.fillMaxWidth())
-    }
-}
-
-@PreviewTest
-@Preview(showBackground = true)
-@PreviewLargeFont
-@Composable
-fun ProfileComponentsLight() {
-    PebblesTheme { ProfileGallery() }
-}
-
-@PreviewTest
-@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun ProfileComponentsDark() {
-    PebblesTheme { ProfileGallery() }
-}
-
-// The real ProfileScreen hosts these in PebblesScreen's readable column
-// (#855). The gallery wraps its width, so the wide renders place it in that
-// column explicitly; the phone renders above stay untouched.
-@PreviewTest
-@PreviewWide
-@Composable
-fun ProfileComponentsWide() {
+private fun YouPreview(state: ProfileUiState) {
     PebblesTheme {
-        Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
-            Box(Modifier.readableWidth()) { ProfileGallery() }
-        }
+        ProfileContent(
+            state = state,
+            onRetry = {},
+            onOpenSettings = {},
+            onOpenGlyphs = {},
+            onOpenAchievements = {},
+            onOpenLab = {},
+        )
     }
 }
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = YOU_HEIGHT)
+@Preview(name = "fs2", showBackground = true, fontScale = 2f, heightDp = YOU_HEIGHT_LARGE_FONT)
+@Preview(name = "fr", showBackground = true, locale = "fr", heightDp = YOU_HEIGHT)
+@Composable
+fun YouPaper() {
+    YouPreview(content())
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES, heightDp = YOU_HEIGHT)
+@Composable
+fun YouNight() {
+    YouPreview(content())
+}
+
+@PreviewTest
+@Preview(name = "w840", showBackground = true, widthDp = 840, heightDp = YOU_HEIGHT)
+@Preview(name = "w1024", showBackground = true, widthDp = 1024, heightDp = YOU_HEIGHT)
+@Composable
+fun YouWide() {
+    YouPreview(content())
+}
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = YOU_HEIGHT)
+@Preview(name = "fr", showBackground = true, locale = "fr", heightDp = YOU_HEIGHT)
+@Composable
+fun YouNotServed() {
+    YouPreview(content(strokes = null, served = false))
+}
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = YOU_HEIGHT)
+@Composable
+fun YouLongName() {
+    YouPreview(content(name = "Alexandrine Delacroix-Beaumont"))
+}
+
+/** Tall enough for the whole page, the Lab card included, at 1 × and at 2 × font. */
+private const val YOU_HEIGHT = 1100
+private const val YOU_HEIGHT_LARGE_FONT = 1800
