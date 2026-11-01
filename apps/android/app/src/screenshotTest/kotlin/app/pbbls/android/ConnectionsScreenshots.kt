@@ -53,7 +53,9 @@ private val sampleInvite =
     ConnectionInvite(token = "iH8sK2mQ4tZ9pL3vB6nX1cR5wY7dF0gJ2kM", expiresAt = "2026-08-06T10:00:00+00:00")
 
 @PreviewTest
-@Preview(name = "Connections · list", showBackground = true)
+// No `name`: it would land in the reference file name, and this render is
+// mapped to V-connections-list in apps/android/arkaik-shots.json by its stem.
+@Preview(showBackground = true)
 @PreviewLargeFont
 @Composable
 private fun ConnectionsListPreview() {

@@ -618,7 +618,7 @@ skill. The rules that never bend:
   host-platform difference, and keep the plugin's `strictly` pin.
 - **A mapped preview keeps its name, or the mapping moves with it.**
   `apps/android/arkaik-shots.json` maps Arkaik node ids to reference stems
-  (16 entries today); the check step in `android.yml`, right after checkout and
+  (18 entries today); the check step in `android.yml`, right after checkout and
   before Gradle, fails when a stem no longer resolves to exactly one PNG.
   Renaming a preview, adding a variant to it, or deleting it means editing the
   mapping in the same PR. Only Light/Paper, default-size, English renders fill a

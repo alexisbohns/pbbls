@@ -13,10 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.features.profile.CollectionModePicker
+import app.pbbls.android.features.profile.CollectionsListContent
+import app.pbbls.android.features.profile.CollectionsListUiState
 import app.pbbls.android.features.profile.components.CollectionGlyphSection
 import app.pbbls.android.features.profile.components.CollectionModeBadge
 import com.android.tools.screenshot.PreviewTest
@@ -24,9 +27,9 @@ import com.android.tools.screenshot.PreviewTest
 /**
  * Collections-management previews (#569): the mode badge in all three modes
  * (null renders nothing) and the form's mode picker in none-selected and
- * mode-selected states — light and dark. The collections screens themselves
- * read services, so the review surface is this pure-component gallery plus
- * the on-device pass.
+ * mode-selected states — light and dark — plus the list screen's stateless
+ * [CollectionsListContent] at phone height, the render Arkaik shows for
+ * `V-collections-list` (the two-pane renders live in `ListDetailScreenshots.kt`).
  */
 @Composable
 private fun CollectionsGallery() {
@@ -103,4 +106,30 @@ fun CollectionForm_WithGlyph() {
 @Composable
 fun CollectionForm_NoGlyph() {
     PebblesTheme { CollectionGlyphPreview(null) }
+}
+
+private val previewCollections =
+    listOf(
+        Collection(id = "c1", name = "Wins", mode = CollectionMode.STACK, pebbleCount = 14),
+        Collection(id = "c2", name = "Travel", mode = CollectionMode.PACK, pebbleCount = 6),
+        Collection(id = "c3", name = "Growth", mode = CollectionMode.TRACK, pebbleCount = 2),
+    )
+
+/** The Collections list on a phone: one pane, the rows and the create action. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Composable
+fun CollectionsListLight() {
+    PebblesTheme {
+        CollectionsListContent(
+            hapticsOn = true,
+            uiState = CollectionsListUiState.Content(collections = previewCollections),
+            onBack = {},
+            onOpenCollection = {},
+            onCreateCollection = {},
+            onRetry = {},
+            onRefresh = {},
+            onDeleteCollection = {},
+        )
+    }
 }

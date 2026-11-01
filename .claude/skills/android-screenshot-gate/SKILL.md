@@ -59,7 +59,7 @@ fails the PR and uploads the reference/actual/diff triptych as
 ## The Arkaik mapping
 
 `apps/android/arkaik-shots.json` maps Arkaik node ids to reference stems, so the
-hosted map can show each Android view's render. It has 16 entries today.
+hosted map can show each Android view's render. It has 18 entries today.
 
 - **A mapped preview keeps its name, or the mapping moves with it.** Renaming a
   preview, adding a variant to it, or deleting it means editing the mapping in
@@ -70,6 +70,8 @@ hosted map can show each Android view's render. It has 16 entries today.
   Gradle, and fails when a stem no longer resolves to exactly one PNG.
 - **A re-baseline on `main` records itself** through
   `.github/workflows/android-screenshots-record.yml`; nothing to do by hand.
-- **Owed:** two previews could not be mapped yet. The Collections list has only
-  a wide two-pane render, and Connections carries a `name = "Connections · list"`
-  on its preview that bakes a space into the file name.
+- **Keep `name =` off a mapped preview.** The plugin appends a preview's
+  `name` to the reference file name, spaces and `·` included, which a stem
+  cannot match. `ConnectionsListPreview` dropped its name for exactly this
+  when it was mapped; the Collections list gained a phone-height
+  `CollectionsListLight` because only its wide two-pane render existed.
