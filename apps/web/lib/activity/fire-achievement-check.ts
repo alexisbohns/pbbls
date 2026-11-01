@@ -1,7 +1,24 @@
 import { presentAchievementMoment } from "@/lib/activity/achievement-moment"
 import { beginAchievementCheck, endAchievementCheck } from "@/lib/activity/achievement-check-flight"
 import { browserStorage, markAchievementsCachesStale } from "@/lib/data/achievements-cache"
-import type { DataProvider } from "@/lib/data/data-provider"
+import type { AchievementUnlockResult, DataProvider } from "@/lib/data/data-provider"
+
+/**
+ * Presents rows a write just granted: marks the kept achievements payloads
+ * stale (they no longer show the grant), then joins the slugs to the catalog
+ * and fires the unlock moment. Nothing granted, nothing happens. Shared by the
+ * mutation check below and Home's blue-pebble claim (#1384 D12).
+ */
+export async function presentGrantedAchievements(
+  provider: Pick<DataProvider, "getAchievements">,
+  results: AchievementUnlockResult[],
+): Promise<void> {
+  if (results.length === 0) return
+  const storage = browserStorage()
+  if (storage) markAchievementsCachesStale(storage)
+  const catalog = await provider.getAchievements()
+  presentAchievementMoment({ results, catalog })
+}
 
 /**
  * Fire-and-forget achievement evaluation after a count-changing mutation (D5).
@@ -28,13 +45,7 @@ export function fireAchievementCheck(provider: Pick<DataProvider, "checkAchievem
   void provider
     .checkAchievements()
     .finally(endAchievementCheck)
-    .then(async (results) => {
-      if (results.length === 0) return
-      const storage = browserStorage()
-      if (storage) markAchievementsCachesStale(storage)
-      const catalog = await provider.getAchievements()
-      presentAchievementMoment({ results, catalog })
-    })
+    .then((results) => presentGrantedAchievements(provider, results))
     .catch((err) => {
       console.warn("[achievements] check_achievements failed", err)
     })
