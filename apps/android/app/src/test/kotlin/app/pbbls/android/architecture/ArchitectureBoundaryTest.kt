@@ -19,6 +19,11 @@ import org.junit.Test
  *    slot or owns the route. #851 left ten exceptions that no move could reach;
  *    #914 inverted them and deleted the exception list.
  *
+ * And one narrower rule: **the stone geometry (`core/designsystem/stone`)
+ * imports only `androidx` and `kotlin`.** It is pure geometry shared by Home
+ * and You and ported from iOS (spec 2026-10-31 Android Home and You, D5), so
+ * it stays free of Pebbles types and of the rest of the app.
+ *
  * Scoped to `main` deliberately. A test that exercises one package's logic from
  * another package's fixtures is not an architecture violation, and making the
  * test sources obey the production graph would mean splitting test files to no
@@ -61,6 +66,25 @@ class ArchitectureBoundaryTest {
         )
     }
 
+    @Test
+    fun `the stone geometry imports only androidx and kotlin`() {
+        val offenders =
+            productionFiles()
+                .filter { it.packageName == STONE }
+                .flatMap { file ->
+                    file.imports
+                        .filterNot { it.startsWith("androidx.") || it.startsWith("kotlin.") }
+                        .map { "${file.packageName} -> $it" }
+                }.distinct()
+                .sorted()
+
+        assertTrue(
+            "core/designsystem/stone imports only androidx and kotlin, found:\n" +
+                offenders.joinToString("\n") { "  $it" },
+            offenders.isEmpty(),
+        )
+    }
+
     private fun productionFiles() =
         Konsist
             .scopeFromProject(sourceSetName = "main")
@@ -83,6 +107,7 @@ class ArchitectureBoundaryTest {
         const val ROOT = "app.pbbls.android"
         const val CORE = "$ROOT.core"
         const val FEATURES = "$ROOT.features"
+        const val STONE = "$CORE.designsystem.stone"
 
         /** `app.pbbls.android.features.path.create.X` -> `path`. */
         fun String.featureOf() = removePrefix("$FEATURES.").substringBefore('.')
