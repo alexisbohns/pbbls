@@ -66,9 +66,10 @@ export const SPECIMENS = [
   { id: "pbbls-icon-sizes", name: "Pebbles icon sizes", source: "lib/icons/pbbls-icon.ts", section: "components", m3: "bridged" },
   // views: composed from their feature components, fed by the fixture store
   { id: "view-home", name: "Home", source: "app/home/page.tsx", section: "views", m3: "tuned" },
+  { id: "view-you", name: "You", source: "app/profile/page.tsx", section: "views", m3: "tuned" },
   { id: "view-path", name: "Path", source: "app/path/page.tsx", section: "views", m3: "bridged" },
   { id: "view-pebble", name: "Pebble detail", source: "app/pebble/[id]/page.tsx", section: "views", m3: "bridged" },
-  { id: "view-profile", name: "Profile", source: "app/profile/page.tsx", section: "views", m3: "bridged" },
+  { id: "view-profile", name: "Profile (before You)", source: "components/sandbox/design/views/ProfileView.tsx", section: "views", m3: "bridged" },
   { id: "view-settings", name: "Settings", source: "app/settings/page.tsx", section: "views", m3: "bridged" },
 ] as const satisfies readonly SpecimenEntry[]
 
