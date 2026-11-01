@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { ChevronDown, ChevronLeft } from "lucide-react"
+import { ArrowLeft, ChevronDown, ChevronLeft } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -89,16 +89,26 @@ export function DocsSidebar({ pages }: DocsSidebarProps) {
         {t("back")}
       </Link>
 
-      {/* Phones: language and pages fold behind the current page's title. */}
-      <Collapsible open={open} onOpenChange={setOpen} className="rounded-xl bg-card md:hidden">
-        <CollapsibleTrigger className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl px-4 text-left text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&[data-panel-open]>svg]:rotate-180">
-          <span className="truncate">{current ? current.titles[locale] : t("title")}</span>
-          <ChevronDown aria-hidden className="size-4 shrink-0 text-muted-foreground transition-transform" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="flex flex-col gap-4 px-1 pb-3">
-          <DocsMenu pages={pages} onNavigate={() => setOpen(false)} />
-        </CollapsibleContent>
-      </Collapsible>
+      {/* Phones: an arrow back to the app, then language and pages folded
+          behind the current page's title. */}
+      <div className="flex items-start gap-2 md:hidden">
+        <Link
+          href="/path"
+          aria-label={t("back")}
+          className={buttonVariants({ variant: "ghost", size: "icon-lg", className: "size-12 shrink-0 rounded-xl" })}
+        >
+          <ArrowLeft />
+        </Link>
+        <Collapsible open={open} onOpenChange={setOpen} className="min-w-0 flex-1 rounded-xl bg-card">
+          <CollapsibleTrigger className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl px-4 text-left text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&[data-panel-open]>svg]:rotate-180">
+            <span className="truncate">{current ? current.titles[locale] : t("title")}</span>
+            <ChevronDown aria-hidden className="size-4 shrink-0 text-muted-foreground transition-transform" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="flex flex-col gap-4 px-1 pb-3">
+            <DocsMenu pages={pages} onNavigate={() => setOpen(false)} />
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
 
       <div className="hidden flex-col gap-4 md:flex">
         <DocsMenu pages={pages} />
