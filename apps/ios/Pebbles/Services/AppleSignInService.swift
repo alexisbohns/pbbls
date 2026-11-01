@@ -12,6 +12,9 @@ struct AppleSignInResult {
     let idToken: String
     let rawNonce: String
     let fullName: PersonNameComponents?
+    /// Single-use, valid five minutes. Only account deletion uses it: the
+    /// delete-account function exchanges it and revokes the grant (#1456).
+    let authorizationCode: String?
 }
 
 /// Wraps `ASAuthorizationController` with an async / throwing API.
@@ -86,7 +89,8 @@ private final class AppleAuthDelegate: NSObject,
         continuation?.resume(returning: AppleSignInResult(
             idToken: idToken,
             rawNonce: rawNonce,
-            fullName: credential.fullName
+            fullName: credential.fullName,
+            authorizationCode: credential.authorizationCode.flatMap { String(data: $0, encoding: .utf8) }
         ))
     }
 

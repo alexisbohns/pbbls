@@ -111,6 +111,12 @@ struct SettingsSheet: View {
         ReauthMethod(providers: (supabase.session?.user.identities ?? []).map(\.provider))
     }
 
+    /// Deleting an account with an Apple identity revokes the Apple grant
+    /// (#1456), which needs a fresh authorization code from the Apple sheet.
+    private var hasAppleIdentity: Bool {
+        (supabase.session?.user.identities ?? []).contains { $0.provider == "apple" }
+    }
+
     private var isDirty: Bool {
         let nameChanged = trimmedDisplayName != initialDisplayName && !trimmedDisplayName.isEmpty
         let glyphChanged = pickedGlyph != nil && pickedGlyph?.id != initialGlyphId
@@ -610,11 +616,27 @@ struct SettingsSheet: View {
     /// Full erasure via the delete-account edge function (purge + storage +
     /// auth user), then a local sign-out: the server session is already gone,
     /// and the session stream flipping to signed-out swaps RootView to Welcome.
-    private func deleteAccount() async {
+    ///
+    /// An Apple account also sends a fresh Apple authorization code so the
+    /// server revokes the grant (#1456). An Apple re-auth already produced one;
+    /// otherwise the Apple sheet runs once here, and closing it abandons the
+    /// deletion.
+    private func deleteAccount(appleCode: String? = nil) async {
         guard !isDeleting else { return }
         isDeleting = true
         do {
-            try await supabase.client.functions.invoke("delete-account")
+            var code = appleCode
+            if code == nil && hasAppleIdentity {
+                code = try await supabase.appleAuthorizationCodeForDeletion()
+            }
+            if let code {
+                try await supabase.client.functions.invoke(
+                    "delete-account",
+                    options: FunctionInvokeOptions(body: ["apple_authorization_code": code])
+                )
+            } else {
+                try await supabase.client.functions.invoke("delete-account")
+            }
             await supabase.signOut()
             dismiss()
         } catch let error where RecentAuth.isReauthRequired(error) {
@@ -622,6 +644,8 @@ struct SettingsSheet: View {
             logger.info("delete-account wants a recent sign-in")
             isDeleting = false
             requestReauth(for: .delete)
+        } catch is CancellationError {
+            isDeleting = false
         } catch {
             logger.error("account deletion failed: \(error.localizedDescription, privacy: .private)")
             deleteError = String(localized: "We couldn't delete your account. Nothing was removed. Please try again.")
@@ -677,8 +701,9 @@ struct SettingsSheet: View {
         case .save: isSaving = true
         case .delete: isDeleting = true
         }
+        let appleCode: String?
         do {
-            try await reauthenticate(with: method)
+            appleCode = try await reauthenticate(with: method)
         } catch {
             isSaving = false
             isDeleting = false
@@ -690,15 +715,21 @@ struct SettingsSheet: View {
         isDeleting = false
         switch purpose {
         case .save: await performSave()
-        case .delete: await deleteAccount()
+        case .delete: await deleteAccount(appleCode: appleCode)
         }
     }
 
-    private func reauthenticate(with method: ReauthMethod) async throws {
+    /// Returns Apple's authorization code for an Apple re-auth, nil otherwise.
+    private func reauthenticate(with method: ReauthMethod) async throws -> String? {
         switch method {
-        case .password: try await supabase.reauthenticate(password: currentPassword)
-        case .google: try await supabase.reauthenticateWithGoogle()
-        case .apple: try await supabase.reauthenticateWithApple()
+        case .password:
+            try await supabase.reauthenticate(password: currentPassword)
+            return nil
+        case .google:
+            try await supabase.reauthenticateWithGoogle()
+            return nil
+        case .apple:
+            return try await supabase.reauthenticateWithApple()
         }
     }
 
