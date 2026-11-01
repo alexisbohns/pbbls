@@ -45,4 +45,9 @@ describe("the detail slot", () => {
       for (const p of under) expect(readFileSync(p, "utf8"), p).toMatch(/return null/)
     }
   })
+
+  it("intercepts the pebble with the very module its plain page renders", () => {
+    const intercept = readFileSync(path.join(slot, "(pane)", "(.)pebble", "[id]", "page.tsx"), "utf8")
+    expect(intercept).toContain('export { default } from "../../pebble/[id]/page"')
+  })
 })
