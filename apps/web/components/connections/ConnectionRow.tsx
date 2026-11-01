@@ -2,7 +2,10 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Ban, UserRoundMinus } from "lucide-react"
+import { Ban } from "lucide-react"
+import { Remove } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import type { Connection } from "@/lib/types"
@@ -94,7 +97,7 @@ export function ConnectionRow({ connection, onRemove }: ConnectionRowProps) {
       <ConfirmDialog
         trigger={
           <Button variant="ghost" size="icon" aria-label={t("removeAria", { name })}>
-            <UserRoundMinus className="size-4 text-muted-foreground" aria-hidden />
+            <Remove className={cn(PBBLS_ICON_SIZE.inline, "text-muted-foreground")} />
           </Button>
         }
         title={t("removeTitle", { name })}

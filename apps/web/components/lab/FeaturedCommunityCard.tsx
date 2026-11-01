@@ -1,6 +1,8 @@
 "use client"
 
-import { MessagesSquare } from "lucide-react"
+import { People } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,7 +17,7 @@ export function FeaturedCommunityCard() {
     <Card>
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-start gap-3">
-          <MessagesSquare className="size-5 shrink-0 text-primary" aria-hidden />
+          <People className={cn(PBBLS_ICON_SIZE.row, "shrink-0 text-primary")} />
           <div className="flex flex-col gap-0.5">
             <h2 className="text-sm font-medium">{t("title")}</h2>
             <p className="text-xs text-muted-foreground">

@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
-import { Plus } from "lucide-react"
+import { PlusCircle } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -66,7 +67,7 @@ export function AddSoulForm({ marks, onAdd }: AddSoulFormProps) {
           disabled={!name.trim() || submitting}
           aria-label={t("addAria")}
         >
-          <Plus className="size-4" />
+          <PlusCircle className={PBBLS_ICON_SIZE.inline} />
           {t("addCta")}
         </Button>
       </form>
