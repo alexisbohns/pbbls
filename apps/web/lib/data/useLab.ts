@@ -17,6 +17,7 @@ import {
 import type { Log } from "@/lib/types"
 import { LAB_CONFIG } from "@/lib/config/lab"
 import { allFailedError, settledOr } from "@/lib/data/settled-feed"
+import { withTimeout } from "@/lib/utils/with-timeout"
 
 // Lazy module-level singleton — `createClient()` reads env vars and must
 // not run during SSR/static prerender (where they're absent). Mirrors the
@@ -257,4 +258,48 @@ export function useAnnouncement(id: string) {
   }, [id])
 
   return { log, loading, error }
+}
+
+// ---------------------------------------------------------------------------
+// useLabPreview — You's Lab section (#1384 D19): the latest announcement and
+// the three latest shipped features. Each half settles alone; the error is
+// reserved for both failing.
+// ---------------------------------------------------------------------------
+
+export function useLabPreview() {
+  const [announcement, setAnnouncement] = useState<Log | null>(null)
+  const [changelog, setChangelog] = useState<Log[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [attempt, setAttempt] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+
+    void (async () => {
+      await Promise.resolve()
+      if (cancelled) return
+      const supabase = getSupabase()
+      if (!supabase) return
+      setLoading(true)
+      setError(null)
+      const [ann, chg] = await Promise.allSettled([
+        withTimeout(fetchAnnouncements(supabase, { limit: 1 }), 10000, "you lab announcement"),
+        withTimeout(fetchChangelog(supabase, { limit: 3 }), 10000, "you lab changelog"),
+      ])
+      if (cancelled) return
+      setAnnouncement(settledOr(ann, [], "you:lab-announcement")[0] ?? null)
+      setChangelog(settledOr(chg, [], "you:lab-changelog"))
+      setError(allFailedError([ann, chg], "Failed to load the Lab preview"))
+      setLoading(false)
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [attempt])
+
+  const retry = useCallback(() => setAttempt((n) => n + 1), [])
+
+  return { announcement, changelog, loading, error, retry }
 }
