@@ -28,11 +28,14 @@ enum StoneGeometry {
 
     /// The rock filling exactly `w × h`: four unequal superelliptic corners
     /// (fullest top-left) joined by gently bowed sides. Takes nine draws.
-    static func rockOutline(width w: CGFloat, height h: CGFloat, random r: inout StoneRandom) -> [CGPoint] {
+    /// `corner` is the base corner radius and `bow` scales the sides' bulge; the
+    /// defaults are the quick actions' rock, draw for draw.
+    static func rockOutline(width w: CGFloat, height h: CGFloat, corner base: CGFloat = 34, bow bowScale: CGFloat = 1,
+                            random r: inout StoneRandom) -> [CGPoint] {
         let corners: [CGFloat] = [1.15, 0.95, 0.8, 1.05], bows: [CGFloat] = [1.0, 1.4, 0.4, 1.4]
         let most = min(w, h) / 2
-        let e = corners.map { min(most, 34 * $0 * (1 + jitter(r.next(), 0.1))) }
-        let bow = bows.map { $0 + jitter(r.next(), 0.3) }
+        let e = corners.map { min(most, base * $0 * (1 + jitter(r.next(), 0.1))) }
+        let bow = bows.map { ($0 + jitter(r.next(), 0.3)) * bowScale }
         let n = 2.5 + jitter(r.next(), 0.15)
         var pts: [CGPoint] = []
 
@@ -63,6 +66,50 @@ enum StoneGeometry {
         corner(d, h - d, d, .pi / 2)
         side(from: CGPoint(x: 0, y: h - d), to: CGPoint(x: 0, y: a), normal: CGPoint(x: -1, y: 0), bow: bow[3])
         return fit(pts, in: CGRect(x: 0, y: 0, width: w, height: h))
+    }
+
+    // MARK: - The kit: one stone, and one stone cut in n
+
+    /// One stone filling exactly `size` (the kit's `d(w, h, seed, opt)`): the
+    /// rock outline on its own seed. Only `corner` and `bow` of `options` apply.
+    static func single(size: CGSize, seed: String, options: StoneOptions = StoneOptions()) -> [CGPoint] {
+        guard size.width > 0, size.height > 0 else { return [] }
+        var r = StoneRandom(seed)
+        return rockOutline(width: size.width, height: size.height, corner: options.corner, bow: options.bow,
+                           random: &r)
+    }
+
+    /// One rock cut into `count` pieces by parallel leaning cuts (the kit's
+    /// `split(w, h, n, seed, opt)`), left to right. Each cut leaves `gutter`
+    /// between neighbours and rounds both fresh edges by `fillet`, so the pieces
+    /// fit back. The lean is drawn after the rock (0.11 ± 0.03) unless `options`
+    /// gives one; the quick actions' row is `count` 3 on the defaults.
+    static func split(size: CGSize, count n: Int, seed: String,
+                      options o: StoneOptions = StoneOptions()) -> [[CGPoint]] {
+        let w = size.width, h = size.height
+        guard n > 0 else { return [] }
+        guard w > CGFloat(n - 1) * o.gutter, h > 0 else { return Array(repeating: [], count: n) }
+        var r = StoneRandom(seed)
+        let rock = rockOutline(width: w, height: h, corner: o.corner, bow: o.bow, random: &r)
+        let lean = o.lean ?? 0.11 + jitter(r.next(), 0.03)
+        let rockSdf = polygonSdf(resample(rock, step: 4))
+        let wn = (w - CGFloat(n - 1) * o.gutter) / CGFloat(n)
+        let lines: [CGFloat] = (0..<max(n - 1, 0)).map { index in
+            let k = CGFloat(index)
+            return (k + 1) * wn + (k + 0.5) * o.gutter
+        }
+        func cut(_ gx: CGFloat, _ side: CGFloat) -> (CGPoint) -> CGFloat {
+            halfSpace(through: CGPoint(x: gx, y: h / 2), direction: CGPoint(x: lean * h, y: -h),
+                      side: side, gap: o.gutter)
+        }
+        let reach = hypot(w, h)
+        return (0..<n).map { k in
+            var cuts: [(CGPoint) -> CGFloat] = []
+            if k > 0 { cuts.append(cut(lines[k - 1], -1)) }
+            if k < n - 1 { cuts.append(cut(lines[k], 1)) }
+            let centre = CGPoint(x: CGFloat(k) * (wn + o.gutter) + wn / 2, y: h / 2)
+            return piece(rockSdf, cuts: cuts, centre: centre, fillet: o.fillet, reach: reach)
+        }
     }
 
     /// Signed distance to a closed polygon: negative inside.
@@ -176,6 +223,17 @@ enum StoneGeometry {
             return CGPoint(x: nx, y: ny)
         }
     }
+}
+
+/// A stone's cut (the kit's `opt`): the base corner radius, the sides' bulge,
+/// the cuts' lean (drawn when nil), the gutter between pieces and the fillet
+/// that rounds a fresh cut.
+struct StoneOptions: Hashable {
+    var corner: CGFloat = 34
+    var bow: CGFloat = 1
+    var lean: CGFloat?
+    var gutter: CGFloat = 8
+    var fillet: CGFloat = 20
 }
 
 /// The exploration harness's seeded generator, bit for bit (a murmur-style
