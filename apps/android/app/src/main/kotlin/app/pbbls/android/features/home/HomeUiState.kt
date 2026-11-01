@@ -1,5 +1,6 @@
 package app.pbbls.android.features.home
 
+import app.pbbls.android.core.model.home.HomeWrapMonth
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.features.home.checklist.HomeChecklist
 import app.pbbls.android.features.home.shortcuts.HomeShortcutsStyle
@@ -17,6 +18,8 @@ import app.pbbls.android.features.home.shortcuts.HomeShortcutsStyle
  * @property checklist your first five (D11), null until its first read lands; a failed read keeps
  *   the last one, as on iOS. The box draws only while [HomeChecklist.isShown].
  * @property claim the blue pebble's claim row: idle, sending, or "Couldn't claim it yet".
+ * @property wraps the monthly wraps (D12): [HomeSection.Loading] draws no section, [HomeSection.Failed] (no
+ *   months yet) the head with the error and Try again.
  */
 data class HomeUiState(
     val name: String = "",
@@ -24,6 +27,16 @@ data class HomeUiState(
     val shortcuts: HomeShortcutsStyle = HomeShortcutsStyle(),
     val checklist: HomeChecklist? = null,
     val claim: ClaimStatus = ClaimStatus.IDLE,
+    val wraps: HomeSection<HomeWraps> = HomeSection.Loading,
+)
+
+/**
+ * Home's months, newest first (D12; iOS `HomeWraps`). [stale]: the last read failed, so these are the
+ * months before it, and the row says so under them with Try again (iOS keeps its months on a failure).
+ */
+data class HomeWraps(
+    val months: List<HomeWrapMonth>,
+    val stale: Boolean = false,
 )
 
 /** The claim row's state (D11): one value, so "claiming" and "failed" can never both hold. */

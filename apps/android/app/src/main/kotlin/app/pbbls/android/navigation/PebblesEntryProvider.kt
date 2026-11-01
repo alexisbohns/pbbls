@@ -9,6 +9,8 @@ import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.core.ui.HomeMonthSlot
+import app.pbbls.android.core.ui.HomeWrapLineSlot
+import app.pbbls.android.core.ui.HomeWrapSlot
 import app.pbbls.android.features.achievements.AchievementsScreen
 import app.pbbls.android.features.auth.AuthScreen
 import app.pbbls.android.features.connections.AcceptInviteScreen
@@ -19,6 +21,7 @@ import app.pbbls.android.features.glyph.picker.GlyphPickerContent
 import app.pbbls.android.features.glyph.store.GlyphDetailScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
 import app.pbbls.android.features.home.HomeScreen
+import app.pbbls.android.features.home.wraps.HomeWrapScreen
 import app.pbbls.android.features.lab.AnnouncementDetailScreen
 import app.pbbls.android.features.lab.LabScreen
 import app.pbbls.android.features.lab.LogListMode
@@ -32,6 +35,8 @@ import app.pbbls.android.features.path.PebbleDetailScreen
 import app.pbbls.android.features.path.capture.CaptureFlowScreen
 import app.pbbls.android.features.path.complete.CompleteFlowScreen
 import app.pbbls.android.features.path.wrap.month.HomeMonthGrid
+import app.pbbls.android.features.path.wrap.month.HomeWrapPage
+import app.pbbls.android.features.path.wrap.month.homeWrapLine
 import app.pbbls.android.features.profile.CollectionDetailScreen
 import app.pbbls.android.features.profile.CollectionFormScreen
 import app.pbbls.android.features.profile.CollectionsListScreen
@@ -81,6 +86,23 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onOpenGlyphs = {
                 navigator.openAtRoot(PebblesKey.You)
                 navigator.navigate(PebblesKey.Glyphs)
+            },
+            onOpenWrap = { month -> navigator.navigate(PebblesKey.HomeWrap(month.toString())) },
+        )
+    }
+
+    // A docked sheet over Home on every window (#1383 D12): Home has no list-detail pair to make it a pane.
+    entry<PebblesKey.HomeWrap>(
+        metadata = NavTransitions.push + BottomSheetSceneStrategy.bottomSheet(),
+    ) { key ->
+        HomeWrapScreen(
+            month = key.month,
+            wrapSlot = homeWrapSlot,
+            wrapLine = homeWrapLineSlot,
+            onClose = navigator::goBack,
+            onOpenPath = {
+                navigator.goBack()
+                navigator.navigate(PebblesKey.Path)
             },
         )
     }
@@ -368,6 +390,14 @@ private val glyphPicker: GlyphPickerSlot = { currentGlyphId, onSelected, state, 
  * [glyphPicker]: a feature may not import another, so this file fills the slot.
  */
 private val homeMonth: HomeMonthSlot = { wrap, onWeek, modifier -> HomeMonthGrid(wrap, onWeek, modifier) }
+
+/** Home's revealed wrap (#1383 D12): the Path's month page, intro once per launch. Same reason as [glyphPicker]. */
+private val homeWrapSlot: HomeWrapSlot = { wrap, dayView, onDayView, hapticsOn, onWeek, modifier ->
+    HomeWrapPage(wrap, dayView, onDayView, hapticsOn, onWeek, modifier)
+}
+
+/** A folded month's line in Home's wrap sheet (#1383 D12): the Path's words. */
+private val homeWrapLineSlot: HomeWrapLineSlot = { pebbles, people -> homeWrapLine(pebbles, people) }
 
 /**
  * Whether this entry is being shown as a pane of a list-detail scene (#940).

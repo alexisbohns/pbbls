@@ -15,7 +15,7 @@ class FakeHomeService(
     var name: String = "",
     var months: List<HomeWrapMonth> = emptyList(),
     var guideRows: List<Guide> = emptyList(),
-    /** What [reveal] answers when it does not throw. */
+    /** What [reveal] answers when it does not throw, and what it records on the month in [months]. */
     var revealedAt: Instant = Instant.parse("2026-10-26T22:24:21Z"),
 ) : HomeServicing {
     var wrapsCalls = 0
@@ -71,6 +71,8 @@ class FakeHomeService(
         reveals += month
         zones += zone
         revealFailure.fire()
+        // As the server records it: the next read of the months has this one unfolded.
+        months = months.map { if (it.month == month) it.copy(revealedAt = revealedAt) else it }
         return revealedAt
     }
 

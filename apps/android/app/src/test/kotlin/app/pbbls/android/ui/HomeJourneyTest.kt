@@ -9,7 +9,7 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -22,6 +22,7 @@ import androidx.compose.ui.test.performTextInput
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.data.AchievementRecord
+import app.pbbls.android.core.model.home.HomeWrapMonth
 import app.pbbls.android.core.model.wrap.DayWeight
 import app.pbbls.android.core.model.wrap.MonthWeek
 import app.pbbls.android.core.model.wrap.MonthWrapDto
@@ -32,6 +33,7 @@ import app.pbbls.android.features.home.checklist.HomeChecklist
 import app.pbbls.android.features.path.WeekRollBuilder
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeAchievementsService
+import app.pbbls.android.testing.FakeHomeService
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakePathWrapService
@@ -57,6 +59,8 @@ class HomeJourneyTest : AppUiTest() {
     @Inject lateinit var writes: FakeMomentWriteService
 
     @Inject lateinit var achievements: FakeAchievementsService
+
+    @Inject lateinit var home: FakeHomeService
 
     private fun onTab(id: Int): SemanticsNodeInteraction = compose.onNode(hasText(string(id)) and isSelectable())
 
@@ -158,9 +162,7 @@ class HomeJourneyTest : AppUiTest() {
         launch()
         signIn()
 
-        compose
-            .onNode(hasAnyAncestor(hasTestTag(JourneyTags.HOME)) and hasScrollAction())
-            .performScrollToNode(hasText(string(R.string.home_task_soul_title)))
+        scrollHomeTo(hasText(string(R.string.home_task_soul_title)))
         onText(R.string.home_task_soul_title).performClick()
         onText(R.string.home_task_soul_body).assertIsDisplayed()
         onText(R.string.home_task_soul_cta).performClick()
@@ -173,6 +175,48 @@ class HomeJourneyTest : AppUiTest() {
         pressBack()
         compose.waitForIdle()
         onText(R.string.create_soul_title).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a folded wrap unfolds in its sheet, and Home's card unfolds with it`() {
+        val month = YearMonth.now().minusMonths(1)
+        home.months = listOf(HomeWrapMonth(month, count = 23, revealedAt = null, cover = null))
+        wraps.months[month] =
+            WrapJson
+                .decodeFromString<MonthWrapDto>(requireNotNull(javaClass.getResource("/month-full.json")).readText())
+                .toModel()
+                .copy(month = month)
+        drawPlainMonthPages()
+        skipOnboarding()
+        launch()
+        signIn()
+
+        val folded = hasContentDescription(", folded", substring = true)
+        scrollHomeTo(folded)
+        compose.onNode(folded).performClick()
+        compose.waitForIdle()
+
+        onText(R.string.home_wrap_unfold).performClick()
+        compose.waitForIdle()
+
+        assertEquals(listOf(month), home.reveals)
+        onText(R.string.home_wrap_unfold).assertDoesNotExist()
+
+        onText(R.string.action_done).performClick()
+        compose.waitForIdle()
+
+        val open = hasContentDescription("23 ", substring = true)
+        scrollHomeTo(open)
+        compose.onNode(open).assertIsDisplayed()
+        compose.onNode(folded).assertDoesNotExist()
+    }
+
+    /** Scrolls Home's page (the outer list, not the wraps' row) until [matcher] is composed. */
+    private fun scrollHomeTo(matcher: SemanticsMatcher) {
+        compose
+            .onNode(hasScrollToNodeAction() and hasAnyAncestor(hasTestTag(JourneyTags.HOME)) and !hasAnyAncestor(hasScrollToNodeAction()))
+            .performScrollToNode(matcher)
+        compose.waitForIdle()
     }
 
     /** The week line's "week 41" (#1207, D3): what names the page a moment is on. */
