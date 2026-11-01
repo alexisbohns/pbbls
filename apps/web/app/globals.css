@@ -32,6 +32,8 @@
   --color-spine-line: var(--spine-line);
   --color-spine-halo: var(--spine-halo);
   --breakpoint-spread: 900px;
+  /* The navigation becomes a rail (#1384), at Android's Medium width class (600 dp). */
+  --breakpoint-rail: 600px;
   --breakpoint-spread-wide: 1240px;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -91,6 +93,8 @@
   --safe-area-right: env(safe-area-inset-right, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
+  /* The foot a tab root leaves the navigation bar (#1384); see app-nav-room. */
+  --app-nav-room: 0px;
   --app-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   /* M3 faces (Typography.kt): Ysabeau for display/headline/title, Inclusive
      Sans for body/label. Defined globally so the m3-type-* utilities render the
@@ -618,6 +622,20 @@
   }
   &.pb-card:is(.dark *) {
     box-shadow: 0 0 0 1px var(--m3-rule), 0 8px 22px rgb(0 0 0 / 0.35);
+  }
+}
+
+/* The room a tab root leaves the app navigation (#1384), set once by the
+   shell on <main>. Below the rail breakpoint the bar sits over the foot and
+   carries the bottom safe area itself, so the page reads a zero inset and
+   pads by --app-nav-room; from the breakpoint the rail is a column beside the
+   page and takes nothing from it. */
+@utility app-nav-room {
+  --app-nav-room: calc(4rem + env(safe-area-inset-bottom, 0px));
+  --safe-area-bottom: 0px;
+  @media (width >= 600px) {
+    --app-nav-room: 0px;
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 

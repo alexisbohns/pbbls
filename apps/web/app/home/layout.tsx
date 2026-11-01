@@ -7,7 +7,7 @@ import { StoneSprite } from "@/components/pebble/stone/StoneSprite"
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
   return (
-    <M3Island className="pb-[calc(6rem+var(--safe-area-bottom))]">
+    <M3Island>
       {children}
       <StoneSprite />
     </M3Island>

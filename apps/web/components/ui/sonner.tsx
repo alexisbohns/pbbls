@@ -11,8 +11,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       position="bottom-center"
-      // Lift toasts above the mobile BottomNav (fixed bottom-0, ~64px + safe area).
-      // On desktop there is no bottom nav, so the default desktop offset is fine.
+      // Lift toasts above the navigation bar (AppNavigation, 64px + safe area; a rail from 600 px, sonner's own mobile breakpoint).
+      // From there the rail sits beside the page, so the default offset is fine.
       mobileOffset={{ bottom: "calc(80px + env(safe-area-inset-bottom))" }}
       className="toaster group"
       icons={{

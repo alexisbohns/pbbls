@@ -20,6 +20,9 @@
     }
   },
   "nav": {
+    "home": "Accueil",
+    "people": "Proches",
+    "you": "Toi",
     "path": "Chemin",
     "record": "Capturer",
     "collections": "Collections",

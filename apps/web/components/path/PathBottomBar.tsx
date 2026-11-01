@@ -2,14 +2,11 @@
 
 import Link from "next/link"
 import { CirclePile } from "lucide-react"
-import { KarmaDot, Person } from "@pbbls/icons"
+import { KarmaDot } from "@pbbls/icons"
 import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
-import { useAuth } from "@/lib/data/auth-context"
 import { useBounce } from "@/lib/data/useBounce"
 import { useKarma } from "@/lib/data/useKarma"
-import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
-import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 import { cn } from "@/lib/utils"
 
 function Stat({
@@ -32,45 +29,27 @@ function Stat({
   )
 }
 
-/** Profile, bounce and karma on a translucent pill of card stock (#1052). */
+/**
+ * Bounce and karma on a translucent pill of card stock (#1052), a link to the
+ * wallet. The tabs (Home and You among them) live in the app navigation since
+ * #1384, so the pill is no longer a navigation of its own.
+ */
 export function PathBottomBar({ className }: { className?: string }) {
   const t = useTranslations("path")
-  const { profile } = useAuth()
-  const { glyphs } = useUsableGlyphs()
   const { bounce, loading: bounceLoading } = useBounce()
   const { karma, loading: karmaLoading } = useKarma()
 
-  const glyph = profile?.glyph_id
-    ? glyphs.find((g) => g.id === profile.glyph_id) ?? null
-    : null
-
   return (
-    <nav
-      aria-label={t("bottomBar.label")}
+    <Link
+      href="/wallet"
+      aria-label={t("bottomBar.walletAria")}
       className={cn(
-        "flex items-center gap-3 rounded-full border border-(--spine-rule) bg-[color-mix(in_oklab,var(--spine-stock)_88%,transparent)] py-0.5 pr-4 pl-1 backdrop-blur-[8px]",
+        "flex min-h-11 items-center gap-4 rounded-full border border-(--spine-rule) bg-[color-mix(in_oklab,var(--spine-stock)_88%,transparent)] px-4 backdrop-blur-[8px]",
         className,
       )}
     >
-      <Link
-        href="/profile"
-        aria-label={t("bottomBar.profileAria")}
-        className="inline-flex size-10 items-center justify-center rounded-full text-(--spine-ink)"
-      >
-        {glyph && glyph.strokes.length > 0 ? (
-          <GlyphPreview mark={glyph} className="size-6" strokeClassName="text-(--spine-ink)" />
-        ) : (
-          <Person className={PBBLS_ICON_SIZE.toolbar} />
-        )}
-      </Link>
-      <Link
-        href="/wallet"
-        aria-label={t("bottomBar.walletAria")}
-        className="flex min-h-10 items-center gap-4"
-      >
-        <Stat icon={CirclePile} value={bounceLoading ? "—" : bounce} label={t("stats.bounce")} />
-        <Stat icon={KarmaDot} value={karmaLoading ? "—" : karma} label={t("stats.karma")} />
-      </Link>
-    </nav>
+      <Stat icon={CirclePile} value={bounceLoading ? "—" : bounce} label={t("stats.bounce")} />
+      <Stat icon={KarmaDot} value={karmaLoading ? "—" : karma} label={t("stats.karma")} />
+    </Link>
   )
 }

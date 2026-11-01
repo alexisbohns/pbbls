@@ -20,6 +20,9 @@
     }
   },
   "nav": {
+    "home": "Home",
+    "people": "People",
+    "you": "You",
     "path": "Path",
     "record": "Record",
     "collections": "Collections",
