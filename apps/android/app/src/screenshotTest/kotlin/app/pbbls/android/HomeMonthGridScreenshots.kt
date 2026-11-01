@@ -13,7 +13,9 @@ import app.pbbls.android.core.model.wrap.MonthWeek
 import app.pbbls.android.core.model.wrap.MonthWrap
 import app.pbbls.android.features.path.wrap.month.HomeMonthGrid
 import com.android.tools.screenshot.PreviewTest
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.YearMonth
 
 /**
  * Home's month grid (#1383 D8) on the fixture's October, at Home's gutter: Paper, Night, French and 2 × font,
@@ -50,6 +52,19 @@ internal object HomeMonthFixtures {
             weeks = listOf(emptyWeek(LocalDate.of(2026, 9, 28), 0, 3), emptyWeek(LocalDate.of(2026, 10, 5), 4, 10)) + quietWeeks,
         )
     }
+
+    /** November 2026 as the server sends it below one pebble: no weeks, no cover, only its frame (a Sunday 1st). */
+    val emptyNovember: MonthWrap by lazy {
+        full.copy(
+            month = YearMonth.of(2026, 11),
+            daysInMonth = 30,
+            firstWeekday = DayOfWeek.SUNDAY,
+            pebbles = 0,
+            people = 0,
+            cover = null,
+            weeks = null,
+        )
+    }
 }
 
 @Composable
@@ -82,4 +97,11 @@ fun HomeMonthGridNight() {
 @Composable
 fun HomeMonthGridQuiet() {
     GridPreview(HomeMonthFixtures.quiet)
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390)
+@Composable
+fun HomeMonthGridEmptyMonth() {
+    GridPreview(HomeMonthFixtures.emptyNovember)
 }

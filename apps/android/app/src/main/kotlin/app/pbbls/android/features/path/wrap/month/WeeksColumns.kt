@@ -97,7 +97,8 @@ private const val DAYS = 7
  *
  * [outsideSockets] is Home's (#1383): every column reads as a full week, a day outside the month drawing a faint
  * socket in `outlineVariant` (an empty day's mark and size, never a pebble). The month card leaves those days
- * blank. Either way a column's spoken label counts only the month's days.
+ * blank. Either way a column's spoken label counts only the month's days. It also lays out a month the server
+ * sent without weeks (no pebble yet) as empty weeks, where the month card draws no columns.
  */
 @Composable
 internal fun WeeksColumns(
@@ -107,7 +108,7 @@ internal fun WeeksColumns(
     onWeek: (LocalDate) -> Unit,
     outsideSockets: Boolean = false,
 ) {
-    val columns = remember(wrap) { WeekColumn.columns(wrap) }
+    val columns = remember(wrap, outsideSockets) { WeekColumn.columns(wrap, layOutEmptyMonth = outsideSockets) }
     val cell = ((room - LABEL - CAIRN_ROOM - GAP * 2) / DAYS).coerceIn(CELL_MIN, CELL_CAP)
     Row(
         Modifier
