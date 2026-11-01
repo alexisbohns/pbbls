@@ -28,6 +28,74 @@
     "connections": "Connections",
     "lab": "Lab"
   },
+  "home": {
+    "greeting": {
+      "morning": { "title": "Morning", "line": "A new day to keep something from." },
+      "afternoon": { "title": "Good afternoon", "line": "Halfway through the day. Anything worth keeping?" },
+      "evening": { "title": "Good evening", "line": "What stays with you from today?" },
+      "monday-morning": { "title": "Morning", "line": "Hope you'll have a pleasant week!" },
+      "sunday-evening": { "title": "Good evening", "line": "How was your week?" }
+    },
+    "month": {
+      "weekAria": "{range}, {count, plural, one {# pebble} other {# pebbles}}",
+      "weekAriaEmpty": "{range}, no pebble yet",
+      "error": "Couldn't load your month."
+    },
+    "actions": {
+      "camera": "Camera",
+      "quick": "Quick moment",
+      "pebble": "New pebble",
+      "cameraSaving": "Saving your photo…",
+      "cameraSaved": "Moment saved",
+      "nameIt": "Name it",
+      "cameraFailed": "The photo didn't upload. Nothing was saved."
+    },
+    "quick": {
+      "title": "Quick moment",
+      "name": "What happened?",
+      "when": "When",
+      "save": "Save & close",
+      "saveAndComplete": "Save & complete",
+      "saved": "Moment saved"
+    },
+    "firstFive": {
+      "title": "Your first five",
+      "count": "{count} <of>of</of> 5",
+      "tasks": {
+        "moment": { "title": "Record your first moment", "line": "A time and a name. Nothing more." },
+        "pebble": { "title": "Complete your first pebble", "line": "Give a moment its weight and colour." },
+        "collection": { "title": "Start your first collection", "line": "Gather pebbles that belong together." },
+        "soul": { "title": "Add your first soul", "line": "Someone who shares your moments." },
+        "glyph": { "title": "Carve your first glyph", "line": "A mark of your own, for a soul or a collection." }
+      },
+      "done": "Done",
+      "claim": "Claim the blue pebble",
+      "claimLine": "All five are done. The blue pebble is yours.",
+      "claimFailed": "Couldn't claim it yet. Try again."
+    },
+    "wraps": {
+      "title": "Monthly wraps",
+      "folded": "folded",
+      "unfold": "Unfold",
+      "unfoldTitle": "Unfold {month}?",
+      "unfoldBody": "{count, plural, one {# pebble is} other {# pebbles are}} folded inside.",
+      "unfoldFailed": "Couldn't unfold it. Try again.",
+      "cardAria": "{month}, {count, plural, one {# pebble} other {# pebbles}}",
+      "cardAriaFolded": "{month}, {count, plural, one {# pebble} other {# pebbles}}, folded",
+      "empty": "Your first wrap folds on {date}.",
+      "error": "Couldn't load your months."
+    },
+    "about": {
+      "title": "About Pebbles"
+    },
+    "guide": {
+      "back": "Home",
+      "missingTitle": "This reading isn't available",
+      "missingBody": "It may have moved, or it isn't published yet.",
+      "missingLink": "Back to Home"
+    },
+    "retry": "Try again"
+  },
   "profile": {
     "title": "Profile",
     "appSectionsAria": "App sections",

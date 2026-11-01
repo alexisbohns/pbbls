@@ -32,6 +32,10 @@ export function MainContent({ children }: MainContentProps) {
   const isRecord = pathname.startsWith("/record")
   const isCarve = pathname.startsWith("/carve")
   const isImmersive = isRecord || isCarve
+  // Home and the guides wear the brand M3 roles (#1384, spec D3): their layout
+  // renders an .m3 island, and <body> carries it too, so the overscroll, the
+  // safe areas and portalled dialogs and toasts stand on the same ground.
+  const isM3 = pathname === "/home" || pathname.startsWith("/guides/")
 
   // Body bg is normally --background (brand-light); /path is set on the
   // Spine's paper. Toggle a route-aware class on <body> so the ground fills
@@ -40,6 +44,11 @@ export function MainContent({ children }: MainContentProps) {
     if (typeof document === "undefined") return
     document.body.classList.toggle("path-route", isPath)
   }, [isPath])
+
+  useEffect(() => {
+    if (typeof document === "undefined") return
+    document.body.classList.toggle("m3", isM3)
+  }, [isM3])
 
   return (
     <main
