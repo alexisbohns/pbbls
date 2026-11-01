@@ -2,7 +2,10 @@ import { DesignSection } from "../DesignSection"
 import { Specimen } from "../Specimen"
 import { DeviceFrame } from "./DeviceFrame"
 import { CollectionOpenView } from "./CollectionOpenView"
+import { AchievementsOpenView } from "./AchievementsOpenView"
+import { GlyphsOpenView } from "./GlyphsOpenView"
 import { GuideOpenView } from "./GuideOpenView"
+import { LabOpenView } from "./LabOpenView"
 import { SoulOpenView } from "./SoulOpenView"
 import { WalletOpenView } from "./WalletOpenView"
 import { HomeView } from "./HomeView"
@@ -71,6 +74,21 @@ export function ViewsSection() {
       <Specimen id="view-collection-open" note="A collection beside Collections, from the fixture store. Writes do nothing.">
         <DeviceFrame>
           <CollectionOpenView />
+        </DeviceFrame>
+      </Specimen>
+      <Specimen id="view-glyphs-open" note="Glyphs beside You, from the fixture store.">
+        <DeviceFrame>
+          <GlyphsOpenView />
+        </DeviceFrame>
+      </Specimen>
+      <Specimen id="view-achievements-open" note="Achievements beside You. They read the network, so they show their loading or empty state here.">
+        <DeviceFrame>
+          <AchievementsOpenView />
+        </DeviceFrame>
+      </Specimen>
+      <Specimen id="view-lab-open" note="The Lab beside You. It reads the network, so it shows its loading or error state here.">
+        <DeviceFrame>
+          <LabOpenView />
         </DeviceFrame>
       </Specimen>
       <Specimen id="view-wallet-open" note="The wallet over the Path's line. It reads the network, so it shows its empty state here.">
