@@ -1,36 +1,19 @@
 import SwiftUI
 
-/// You's head (#1382 D17): the settings stone top-right, the profile glyph in
-/// a squircle pentagon, the name in the hand, "Member since", and the Ripples
-/// level on one line. The pentagon is decorative; the name is the screen's
-/// header; the Ripples line is one element that speaks the badge's phrase.
+/// You's head (#1382 D17): the profile glyph in a squircle pentagon, the name
+/// in the hand, "Member since", and the Ripples level on one line. Settings is
+/// the navigation bar's toolbar button (`ProfileView`), not part of the header.
+/// The pentagon is decorative; the name is the screen's header; the Ripples
+/// line is one element that speaks the badge's phrase.
 struct YouHeader: View {
     let name: String?
     let memberSince: Date?
     let glyphStrokes: [GlyphStroke]?
     let rippleLevel: Int?
     let activeToday: Bool
-    var onSettings: () -> Void = {}
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                Button(action: onSettings) {
-                    PbblsIconImage(.slider, .toolbar, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
-                        .frame(width: 46, height: 44)
-                        .background {
-                            StoneShape(seed: "settings", options: StoneOptions(corner: 16))
-                                .fill(Color.pebbles.surfaceContainerHigh)
-                        }
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(Text("Settings"))
-            }
-            // c3 pulls the pentagon up under the button.
-            .padding(.bottom, -18)
-
             pentagon
             nameLine.padding(.top, 14)
             if let memberSince {

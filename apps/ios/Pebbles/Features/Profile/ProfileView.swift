@@ -1,8 +1,9 @@
 import SwiftUI
 
 /// The You tab root (#1382 D16): the routes, the Settings sheet and Home's
-/// carve intent around `YouContent`. The bar is hidden, as on Home: the page
-/// carries its own Settings button.
+/// carve intent around `YouContent`. Settings opens from the platform's own
+/// toolbar button in the navigation bar, as before the redesign; the header
+/// starts below the bar.
 struct ProfileView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(PathStatsService.self) private var stats
@@ -14,8 +15,7 @@ struct ProfileView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                YouContent(model: model, stats: YouStats(stats),
-                           onSettings: { isPresentingSettings = true })
+                YouContent(model: model, stats: YouStats(stats))
                     .id(TabNavigation.scrollTopAnchor)
             }
             .onChange(of: nav.scrollToTop[.you, default: 0]) {
@@ -30,7 +30,14 @@ struct ProfileView: View {
             case .lab: LabView()
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                PebbleToolbarButton(action: { isPresentingSettings = true }) {
+                    PbblsIconImage(.slider, .toolbar)
+                }
+                .accessibilityLabel(Text("Settings"))
+            }
+        }
         .pebblesScreen()
         // Home's checklist asks for a carve: push Glyphs, which consumes the intent.
         .onAppear {

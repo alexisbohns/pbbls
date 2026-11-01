@@ -6,13 +6,12 @@ import SwiftUI
 struct YouContent: View {
     let model: YouModel
     let stats: YouStats
-    var onSettings: () -> Void = {}
 
     var body: some View {
         VStack(spacing: YouLayout.sectionGap) {
             YouHeader(name: model.profile?.displayName, memberSince: model.profile?.createdAt,
                       glyphStrokes: model.glyphStrokes, rippleLevel: stats.rippleLevel,
-                      activeToday: stats.activeToday, onSettings: onSettings)
+                      activeToday: stats.activeToday)
             YouCounters(stats: stats)
                 .padding(.top, YouLayout.countersRise)
             YouGlyphsSection(carved: stats.glyphsCarved, owned: stats.glyphsOwned)
