@@ -20,6 +20,15 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Settings' links (#1489): a seam because `SettingsViewModelTest` needs a fake of it. */
+interface SettingsLinksServicing {
+    /** The kept links, else the built-in ones. Never throws. */
+    suspend fun current(): List<SettingsLink>
+
+    /** Fetches, keeps and returns the published links; on failure returns [current]. Never throws. */
+    suspend fun refresh(): List<SettingsLink>
+}
+
 /**
  * Settings' links (#1489; iOS `SettingsLinksStore` + `SettingsLinksService`): the last good
  * `settings_links` payload, kept in the app's one Preferences DataStore ([SettingsDataStores.of],
@@ -33,7 +42,7 @@ class SettingsLinksService internal constructor(
     private val store: DataStore<Preferences>,
     private val io: CoroutineDispatcher,
     private val builtIn: () -> String,
-) {
+) : SettingsLinksServicing {
     @Inject
     constructor(
         supabase: SupabaseService,
@@ -51,8 +60,7 @@ class SettingsLinksService internal constructor(
         },
     )
 
-    /** The kept links, else the built-in ones. */
-    suspend fun current(): List<SettingsLink> {
+    override suspend fun current(): List<SettingsLink> {
         val kept =
             runCatchingCancellable { store.data.first()[PAYLOAD] }
                 .onFailure { Log.e(TAG, "kept settings links unreadable", it) }
@@ -66,8 +74,7 @@ class SettingsLinksService internal constructor(
         return links ?: builtInLinks()
     }
 
-    /** Fetches, keeps and returns the published links; on failure returns [current]. */
-    suspend fun refresh(): List<SettingsLink> {
+    override suspend fun refresh(): List<SettingsLink> {
         runCatchingCancellable {
             val body =
                 supabase.client

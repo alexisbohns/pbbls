@@ -2,6 +2,7 @@ package app.pbbls.android.features.profile
 
 import android.content.Context
 import android.content.Intent
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.DeletionState
 import app.pbbls.android.core.data.HomeShortcutsLayout
-import app.pbbls.android.core.designsystem.LegalDoc
 import app.pbbls.android.core.designsystem.ListGroup
 import app.pbbls.android.core.designsystem.ListGroupItemScope
 import app.pbbls.android.core.designsystem.ListGroupPanel
@@ -53,7 +53,9 @@ import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.openLegalDoc
+import app.pbbls.android.core.designsystem.openSettingsLink
+import app.pbbls.android.core.model.SettingsLinkSection
+import app.pbbls.android.core.model.groupSettingsLinks
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
 import java.time.ZoneId
@@ -385,7 +387,7 @@ internal fun SettingsSignInSections(
     }
 }
 
-/** Legal, Consent, Account, and Log out on its own at the end. */
+/** The links (Legal, About, Support), Consent, Account, and Log out on its own at the end. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun SettingsAccountSections(
@@ -394,24 +396,23 @@ internal fun SettingsAccountSections(
 ) {
     val context = LocalContext.current
 
-    ListGroup(
-        header = stringResource(R.string.settings_legal_header),
-        items =
-            listOf(
-                {
-                    SettingsLinkItem(
-                        text = stringResource(R.string.auth_consent_terms_link),
-                        onClick = { openLegalDoc(context, LegalDoc.TERMS) },
-                    )
+    // The admin-edited links (#1489): Legal, About and Support, each shown when it has a row. The
+    // titles follow the app's locale, French falling back to English (like the guides).
+    val locale = LocalConfiguration.current.locales[0]
+    groupSettingsLinks(state.links).forEach { (section, links) ->
+        ListGroup(
+            header = stringResource(section.headerRes),
+            items =
+                links.map { link ->
+                    {
+                        SettingsLinkItem(
+                            text = link.title(locale),
+                            onClick = { openSettingsLink(context, link) },
+                        )
+                    }
                 },
-                {
-                    SettingsLinkItem(
-                        text = stringResource(R.string.auth_consent_privacy_link),
-                        onClick = { openLegalDoc(context, LegalDoc.PRIVACY) },
-                    )
-                },
-            ),
-    )
+        )
+    }
 
     // Art. 9 consent and the Art. 7(3) right to take it back (#972).
     // Health data only: terms, privacy and age assurance cannot be
@@ -484,6 +485,15 @@ internal fun SettingsAccountSections(
             },
     )
 }
+
+/** Each links section's header (#1489; iOS `SettingsSheet`). */
+private val SettingsLinkSection.headerRes: Int
+    @StringRes get() =
+        when (this) {
+            SettingsLinkSection.LEGAL -> R.string.settings_legal_header
+            SettingsLinkSection.ABOUT -> R.string.settings_about_header
+            SettingsLinkSection.SUPPORT -> R.string.settings_support_header
+        }
 
 /** A row that opens something (a document, the share sheet): a plain headline, one target. */
 @Composable

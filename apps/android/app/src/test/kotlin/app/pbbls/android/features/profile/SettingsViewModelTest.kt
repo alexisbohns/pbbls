@@ -18,6 +18,7 @@ import app.pbbls.android.core.data.ReauthRequiredException
 import app.pbbls.android.core.model.HealthDataConsent
 import app.pbbls.android.testing.FakeConsentService
 import app.pbbls.android.testing.FakeProfileService
+import app.pbbls.android.testing.FakeSettingsLinksService
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.InMemoryPreferencesStore
 import app.pbbls.android.testing.MainDispatcherRule
@@ -26,6 +27,7 @@ import app.pbbls.android.testing.authRestException
 import app.pbbls.android.testing.inMemorySettings
 import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
+import app.pbbls.android.testing.settingsLinksFixture
 import io.github.jan.supabase.auth.user.Identity
 import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.auth.user.UserSession
@@ -115,7 +117,46 @@ class SettingsViewModelTest {
         consents: FakeConsentService = FakeConsentService(),
         haptics: HapticsPreference = HapticsPreference(inMemorySettings()),
         homeShortcuts: HomeShortcutsPreference = HomeShortcutsPreference(inMemorySettings()),
-    ) = SettingsViewModel(savedState, profile, supabase, appearance, consents, haptics, homeShortcuts)
+        links: FakeSettingsLinksService = FakeSettingsLinksService(),
+    ) = SettingsViewModel(savedState, profile, supabase, appearance, consents, haptics, homeShortcuts, links)
+
+    // MARK: - Links (#1489)
+
+    @Test
+    fun `the links show the kept list at once, then the fresh one`() =
+        runTest {
+            val links =
+                FakeSettingsLinksService(
+                    kept = settingsLinksFixture(),
+                    published = settingsLinksFixture("settings-links-edge.json"),
+                ).apply { refreshGate = CompletableDeferred() }
+            val vm = viewModel(links = links)
+            advanceUntilIdle()
+            assertEquals(
+                listOf("credits", "terms", "privacy", "legal-notice", "support"),
+                vm.uiState.value.links
+                    .map { it.key },
+            )
+
+            links.refreshGate?.complete(Unit)
+            advanceUntilIdle()
+            assertEquals(
+                listOf("credits"),
+                vm.uiState.value.links
+                    .map { it.key },
+            )
+            assertEquals(1, links.refreshCalls)
+        }
+
+    @Test
+    fun `a failed refresh leaves the kept links`() =
+        runTest {
+            val links = FakeSettingsLinksService(kept = settingsLinksFixture(), published = null)
+            val vm = viewModel(links = links)
+            advanceUntilIdle()
+            assertEquals(5, vm.uiState.value.links.size)
+            assertEquals(1, links.refreshCalls)
+        }
 
     // MARK: - Appearance (#853)
 
