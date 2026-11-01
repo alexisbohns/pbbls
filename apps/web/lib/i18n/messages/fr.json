@@ -31,6 +31,10 @@
     "connections": "Connexions",
     "lab": "Lab"
   },
+  "detail": {
+    "close": "Fermer",
+    "back": "Retour"
+  },
   "home": {
     "greeting": {
       "morning": { "title": "Bonjour", "line": "Une nouvelle journée à garder." },

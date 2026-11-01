@@ -2,43 +2,23 @@
 
 import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { Moment, Soul } from "@/lib/types"
-import { StoneSprite } from "@/components/pebble/stone/StoneSprite"
 import { WeekRoll } from "@/components/path/WeekRoll"
 import { WeekPager } from "@/components/path/WeekPager"
 import { PathBottomDock } from "@/components/path/PathBottomDock"
-import { PathFocusProvider } from "@/components/path/PathFocusProvider"
 import { PebblePeek } from "@/components/path/PebblePeek"
 import { usePathFocus } from "@/lib/hooks/usePathFocus"
 import { cn } from "@/lib/utils"
 import { isoWeekNumber } from "@/lib/utils/week-roll-entries"
 
-type PathScreenProps = {
-  /** Bare and completed (#1050): a bare moment is a blank stone on the path. */
-  moments: Moment[]
-  souls: Soul[]
-  loading: boolean
-  /** `?focus=<momentId>` (R14), consumed once by the focus provider. */
-  focusMomentId?: string | null
-  /** `?week=` (#1384, spec D9), consumed once by the focus provider. */
-  focusWeek?: Date | null
-}
-
 /**
- * The whole Path in one place (#1052): the roll, the week pager with each
+ * The whole Path in one area (#1052): the roll, the week pager with each
  * week's verso and recto (side by side as a spread from 900 px), the dock and
- * the peek. Its focus lives in `PathFocusProvider`, which the two-area layout
- * shares between a verso and a recto drawn apart (#1384, two-area spec D4).
+ * the peek. It is the Path tab below 1024 px; from there the tab shows the
+ * verso alone and the line runs in the right area (#1384, two-area spec D4).
+ * Its focus is the app shell's `PathFocusProvider`, and the stones' sprite is
+ * mounted once by the shell.
  */
-export function PathScreen({ moments, souls, loading, focusMomentId = null, focusWeek = null }: PathScreenProps) {
-  return (
-    <PathFocusProvider moments={moments} souls={souls} loading={loading} focusMomentId={focusMomentId} focusWeek={focusWeek}>
-      <PathBook />
-    </PathFocusProvider>
-  )
-}
-
-function PathBook() {
+export function PathScreen() {
   const t = useTranslations("path")
   const focus = usePathFocus()
 
@@ -78,8 +58,6 @@ function PathBook() {
           onOpen={focus.openMoment}
         />
       </div>
-      {/* The stones' shared shapes and filters, once for every week the pager holds. */}
-      <StoneSprite />
       <PathBottomDock className="spread:right-auto spread:left-(--spine-verso-x) spread:w-(--spine-verso-w)" />
       <PebblePeek momentId={focus.openMomentId} onClose={focus.closeMoment} />
     </div>

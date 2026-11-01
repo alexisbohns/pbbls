@@ -9,7 +9,6 @@ import { CollectionList } from "@/components/collections/CollectionList"
 import { CollectionsEmptyState } from "@/components/collections/CollectionsEmptyState"
 import { CollectionFormDialog } from "@/components/collections/CollectionFormDialog"
 import { Button } from "@/components/ui/button"
-import { M3Island } from "@/components/layout/M3Island"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { PageHeader } from "@/components/layout/PageHeader"
 import type { Collection } from "@/lib/types"
@@ -28,36 +27,34 @@ export function CollectionsScreen() {
   )
 
   return (
-    <M3Island>
-      <PageLayout>
-        <section>
-          <PageHeader
-            title={t("title")}
-            backHref={null}
-            rightSlot={
-              <CollectionFormDialog
-                trigger={
-                  <Button variant="outline" size="sm">
-                    <PlusCircle data-icon="inline-start" className={PBBLS_ICON_SIZE.inline} />
-                    {t("newCta")}
-                  </Button>
-                }
-                title={tForm("newTitle")}
-                submitLabel={tForm("submitCreate")}
-                onSubmit={handleCreate}
-              />
-            }
-          />
+    <PageLayout>
+      <section>
+        <PageHeader
+          title={t("title")}
+          backHref={null}
+          rightSlot={
+            <CollectionFormDialog
+              trigger={
+                <Button variant="outline" size="sm">
+                  <PlusCircle data-icon="inline-start" className={PBBLS_ICON_SIZE.inline} />
+                  {t("newCta")}
+                </Button>
+              }
+              title={tForm("newTitle")}
+              submitLabel={tForm("submitCreate")}
+              onSubmit={handleCreate}
+            />
+          }
+        />
 
-          {loading ? (
-            <p className="text-sm text-muted-foreground">{t("loading")}</p>
-          ) : collections.length === 0 ? (
-            <CollectionsEmptyState />
-          ) : (
-            <CollectionList collections={collections} />
-          )}
-        </section>
-      </PageLayout>
-    </M3Island>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">{t("loading")}</p>
+        ) : collections.length === 0 ? (
+          <CollectionsEmptyState />
+        ) : (
+          <CollectionList collections={collections} />
+        )}
+      </section>
+    </PageLayout>
   )
 }

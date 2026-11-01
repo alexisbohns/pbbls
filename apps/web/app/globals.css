@@ -34,6 +34,8 @@
   --breakpoint-spread: 900px;
   /* The navigation becomes a rail (#1384), at Android's Medium width class (600 dp). */
   --breakpoint-rail: 600px;
+  /* Two areas from here (#1384, two-area spec D1): the tab page left, the Path's line or a detail right. */
+  --breakpoint-panes: 1024px;
   --breakpoint-spread-wide: 1240px;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -636,6 +638,52 @@
   @media (width >= 600px) {
     --app-nav-room: 0px;
     --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+/* A detail's motion (#1384, two-area spec D9), through React's <ViewTransition>
+   on DetailPane. M3's emphasized curves: in over 300 ms decelerating, out over
+   200 ms accelerating; a 150 ms fade-through from one detail to the next. The
+   right area takes the detail in place; the overlay comes in from the inline
+   end. The root cross-fade a view transition adds by default is turned off:
+   only the pane moves. Reduced motion: an instant swap. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+::view-transition-new(.detail-enter) {
+  animation: detail-rise 300ms cubic-bezier(0.05, 0.7, 0.1, 1) both;
+}
+::view-transition-old(.detail-exit),
+::view-transition-old(.overlay-exit) {
+  animation: detail-fade-out 200ms cubic-bezier(0.3, 0, 0.8, 0.15) both;
+}
+::view-transition-new(.overlay-enter) {
+  animation: detail-slide-in 300ms cubic-bezier(0.05, 0.7, 0.1, 1) both;
+}
+::view-transition-old(.detail-swap) {
+  animation: detail-fade-out 150ms linear both;
+}
+::view-transition-new(.detail-swap) {
+  animation: detail-fade-in 150ms linear both;
+}
+@keyframes detail-rise {
+  from { opacity: 0; transform: translateY(24px); }
+}
+@keyframes detail-slide-in {
+  from { transform: translateX(100%); }
+}
+@keyframes detail-fade-in {
+  from { opacity: 0; }
+}
+@keyframes detail-fade-out {
+  to { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 

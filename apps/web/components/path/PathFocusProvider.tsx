@@ -2,47 +2,33 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
-import type { Moment, Soul } from "@/lib/types"
+import { useMoments } from "@/lib/data/useMoments"
+import { useSouls } from "@/lib/data/useSouls"
 import { PathFocusContext, PathReadingContext, type PathFocus } from "@/lib/hooks/usePathFocus"
 import { SpinePressContext, useSpinePresses } from "@/lib/hooks/useSpinePresses"
 import { focusedEntryOf, steppedKey, weekParamKey } from "@/lib/path/path-focus"
 import { buildWeekRollEntries, isoWeekKey, isoWeekStart, nextFocusStep } from "@/lib/utils/week-roll-entries"
 
-type PathFocusProviderProps = {
-  /** Bare and completed (#1050): a bare moment is a blank stone on the path. */
-  moments: Moment[]
-  souls: Soul[]
-  loading: boolean
-  /**
-   * `?focus=<momentId>` (R14): open on the week of that moment once the store
-   * holds it, then drop the parameter. Null or absent: today's week.
-   */
-  focusMomentId?: string | null
-  /**
-   * `?week=` (#1384, spec D9): a Monday at UTC midnight. Opens on the closest
-   * week the Path has once the store settles, then drops the parameter, the
-   * way `focusMomentId` is consumed. `focusMomentId` wins when both are given.
-   */
-  focusWeek?: Date | null
-  children: ReactNode
-}
-
 /**
- * The Path's focus, shared by its two halves (#1384, two-area spec D4). It
+ * The Path's focus, shared by its two halves (#1384, two-area spec D4). The
+ * app shell holds it above both areas, so the verso on the left and the line
+ * on the right stay on one week. It reads the moments and souls itself and
  * holds what `PathScreen` held: the focused week (by ISO key, resolved at
  * render so a vanished week falls back to the closest one), the one-time
  * `?focus=` and `?week=`, the arrow keys, the peek's moment, and the stones'
  * presses, so a contents row on one half presses its stone on the other.
  */
-export function PathFocusProvider({
-  moments,
-  souls,
-  loading,
-  focusMomentId = null,
-  focusWeek = null,
-  children,
-}: PathFocusProviderProps) {
+export function PathFocusProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
+  const { moments, loading: momentsLoading } = useMoments()
+  const { souls, loading: soulsLoading } = useSouls()
+  const loading = momentsLoading || soulsLoading
+  // `?focus=<momentId>` (R14) and `?week=<Monday>` (#1384 D9), handed over by
+  // the Path tab's `PathFocusParams` (the URL is read under a Suspense
+  // boundary there). Each is consumed once below, then dropped from the URL.
+  const [params, setParams] = useState<{ focus: string | null; week: Date | null }>({ focus: null, week: null })
+  const focusMomentId = params.focus
+  const focusWeek = params.week
   // today is frozen at mount; the failure mode (user leaves the tab open past
   // midnight) is acceptable — navigation back to /path remounts the provider.
   const today = useMemo(() => new Date(), [])
@@ -108,6 +94,7 @@ export function PathFocusProvider({
   const focusOn = useCallback((date: Date) => setFocusedKey(isoWeekKey(date)), [])
   const openMoment = useCallback((momentId: string) => setOpenMomentId(momentId), [])
   const closeMoment = useCallback(() => setOpenMomentId(null), [])
+  const applyParams = useCallback((focus: string | null, week: Date | null) => setParams({ focus, week }), [])
 
   const value = useMemo(
     (): PathFocus => ({
@@ -121,8 +108,9 @@ export function PathFocusProvider({
       openMomentId,
       openMoment,
       closeMoment,
+      applyParams,
     }),
-    [today, entries, souls, loading, moments.length, focusedEntry, focusedWeekStart, focusOn, openMomentId, openMoment, closeMoment],
+    [today, entries, souls, loading, moments.length, focusedEntry, focusedWeekStart, focusOn, openMomentId, openMoment, closeMoment, applyParams],
   )
   const reading = useMemo(() => ({ readingDay, setReadingDay }), [readingDay])
 
