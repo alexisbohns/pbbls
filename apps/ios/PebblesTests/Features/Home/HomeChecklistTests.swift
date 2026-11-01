@@ -17,6 +17,13 @@ import Testing
 
     static var allSlugs: [String] { HomeChecklist.Task.allCases.map(\.slug) + [HomeChecklist.blueSlug] }
 
+    /// #1382 D12: the head's figure reads as a sentence, in both languages.
+    @Test func theHeadFigureReadsTwoOfFiveDone() {
+        let c = HomeChecklist.make(catalog: Self.catalog(Self.allSlugs), unlocked: ["first-moment", "first-soul"])
+        #expect(HomeChecklistView.figureLabel(done: c.doneCount, locale: Locale(identifier: "en")) == "2 of 5 done")
+        #expect(HomeChecklistView.figureLabel(done: c.doneCount, locale: Locale(identifier: "fr")) == "2 sur 5 faites")
+    }
+
     @Test func rowsFollowTheFixedOrderAndTickFromUnlocks() {
         let c = HomeChecklist.make(catalog: Self.catalog(Self.allSlugs), unlocked: ["first-moment", "first-soul"])
         #expect(c.rows.map(\.task) == [.moment, .pebble, .collection, .soul, .glyph])
