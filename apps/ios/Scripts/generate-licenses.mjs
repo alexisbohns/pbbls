@@ -20,8 +20,34 @@ const TITLES = { "InclusiveSans-OFL": "Inclusive Sans", "Ysabeau-OFL": "Ysabeau"
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 const plist = (body) => `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n${body}</dict>\n</plist>\n`
 
+// Licence files are hard-wrapped near 80 columns; the Settings app wraps again, which breaks
+// every line in mid-sentence. Join the lines of each paragraph (blank-line separated) and keep
+// the paragraph breaks. Separator lines (----, ====) stay on their own.
+const RULE = /^[-=_*]{4,}$/
+const ITEM = /^([*\u2022-]\s|\(?[0-9]+[.)]\s|\(?[a-z][.)]\s)/ // bullets, 1. 2) (a) a)
+const WRAPPED = 50 // hard-wrapped lines run near 80 columns with indentation; shorter ones end on purpose
+let rawPrev = ""
+const reflow = (raw) =>
+  raw.replace(/\r\n?/g, "\n").trim().split(/\n\s*\n/)
+    .map((para) => para.split("\n").filter((l) => l.trim() !== "")
+      .reduce((out, rawLine) => {
+        const line = rawLine.trim()
+        const prev = out.length ? rawPrev : ""
+        const keepBreak =
+          out.length === 0 ||
+          RULE.test(line) || RULE.test(prev) ||
+          prev.length < WRAPPED || // a short line was meant to end there (titles, headings)
+          ITEM.test(line) || /^Copyright (\(c\)|©|[0-9])/i.test(line) ||
+          /^https?:\/\/\S+$/.test(line) || /^\S+\.(ttf|otf):\s/i.test(line)
+        if (keepBreak) out.push(line)
+        else out[out.length - 1] += " " + line
+        rawPrev = rawLine.trimEnd() // indentation counts: an indented wrapped line is still full
+        return out
+      }, []).join("\n"))
+    .join("\n\n")
+
 const entries = readdirSync(licensesDir).filter((f) => f.endsWith(".txt")).sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))
-  .map((file) => { const id = file.replace(/\.txt$/, ""); return { id, title: TITLES[id] ?? id, text: readFileSync(path.join(licensesDir, file), "utf8").trim() } })
+  .map((file) => { const id = file.replace(/\.txt$/, ""); return { id, title: TITLES[id] ?? id, text: reflow(readFileSync(path.join(licensesDir, file), "utf8")) } })
 
 const files = {
   "Root.plist": plist(`\t<key>StringsTable</key>\n\t<string>Root</string>\n\t<key>PreferenceSpecifiers</key>\n\t<array>\n\t\t<dict>\n\t\t\t<key>Type</key>\n\t\t\t<string>PSGroupSpecifier</string>\n\t\t\t<key>Title</key>\n\t\t\t<string>Pebbles</string>\n\t\t\t<key>FooterText</key>\n\t\t\t<string>Copyright © 2026 Pebbles</string>\n\t\t</dict>\n\t\t<dict>\n\t\t\t<key>Type</key>\n\t\t\t<string>PSChildPaneSpecifier</string>\n\t\t\t<key>Title</key>\n\t\t\t<string>Licenses</string>\n\t\t\t<key>File</key>\n\t\t\t<string>Licenses</string>\n\t\t</dict>\n\t</array>\n`),
