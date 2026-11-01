@@ -42,7 +42,8 @@ describe("routeShell", () => {
     expect(routeShell("/collections/x")).toMatchObject({ detail: true, parentTab: "/collections" })
     expect(routeShell("/connections")).toMatchObject({ detail: true, parentTab: "/souls" })
     expect(routeShell("/connections/x")).toMatchObject({ detail: true, parentTab: "/souls" })
-    for (const p of ["/settings", "/pebble/1", "/pebble/1/edit", "/record/complete/1", "/p/1", "/u/x", "/blog", "/docs"]) {
+    expect(routeShell("/settings")).toMatchObject({ detail: true, parentTab: "/profile", m3: true })
+    for (const p of [ "/pebble/1", "/pebble/1/edit", "/record/complete/1", "/p/1", "/u/x", "/blog", "/docs"]) {
       expect(routeShell(p).detail, p).toBe(false)
     }
     expect(routeShell("/record").parentTab).toBeNull()

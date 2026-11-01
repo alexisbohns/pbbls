@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { Link2 } from "lucide-react"
-import { SectionLabel } from "@/components/ui/SectionLabel"
+import { ListGroupHeader } from "@/components/m3/ListGroupHeader"
 import { SettingsGroup } from "@/components/settings/SettingsGroup"
 import { SettingsRow } from "@/components/settings/SettingsRow"
 
@@ -30,7 +30,7 @@ export function ProvidersSection({ providers }: ProvidersSectionProps) {
 
   return (
     <section className="flex flex-col gap-2">
-      <SectionLabel id="settings-providers">{t("providers")}</SectionLabel>
+      <ListGroupHeader id="settings-providers">{t("providers")}</ListGroupHeader>
       <SettingsGroup aria-labelledby="settings-providers">
         {sso.map((provider) => (
           <SettingsRow key={provider} icon={Link2}>

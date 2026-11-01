@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
-import { SectionLabel } from "@/components/ui/SectionLabel"
+import { ListGroupHeader } from "@/components/m3/ListGroupHeader"
 import { SettingsGroup } from "@/components/settings/SettingsGroup"
 import { SettingsRow } from "@/components/settings/SettingsRow"
 
@@ -21,7 +21,7 @@ export function InformationsSection({ name, onNameChange, email }: InformationsS
 
   return (
     <section className="flex flex-col gap-2">
-      <SectionLabel id="settings-informations">{t("informations")}</SectionLabel>
+      <ListGroupHeader id="settings-informations">{t("informations")}</ListGroupHeader>
       <SettingsGroup aria-labelledby="settings-informations">
         <SettingsRow>
           <label htmlFor="settings-name" className="sr-only">

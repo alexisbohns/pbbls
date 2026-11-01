@@ -20,14 +20,14 @@ type SettingsRowProps = {
   className?: string
 }
 
-const INNER =
-  "flex w-full items-center gap-3 px-4 py-3 text-left first:rounded-t-xl last:rounded-b-xl"
-const INTERACTIVE = "transition-colors hover:bg-muted/50"
+const INNER = "m3-type-body-large flex min-h-14 w-full items-center gap-4 bg-m3-surface-container px-4 py-2 text-left text-m3-on-surface"
+const INTERACTIVE =
+  "outline-none transition-colors hover:bg-m3-surface-container-high focus-visible:ring-2 focus-visible:ring-m3-primary focus-visible:ring-inset motion-reduce:transition-none"
 
 /**
- * A single row inside a `SettingsGroup`. Renders as a link (`href`), a button
- * (`onClick`), or a static container. The web analog of the iOS
- * `.pebblesListRow`. Layout: optional leading icon, flexible main content, and
+ * A single row inside a `SettingsGroup`: an M3 list item since #1384 (two-area
+ * spec D7). Renders as a link (`href`), a button (`onClick`), or a static
+ * container. Layout: optional leading icon, flexible main content, and
  * an optional trailing control.
  */
 export function SettingsRow({
@@ -41,8 +41,8 @@ export function SettingsRow({
 }: SettingsRowProps) {
   const content = (
     <>
-      {Icon ? <Icon className="size-5 shrink-0 text-muted-foreground" aria-hidden /> : null}
-      <span className="min-w-0 flex-1 text-sm font-medium">{children}</span>
+      {Icon ? <Icon className="size-5 shrink-0 text-m3-on-surface-variant" aria-hidden /> : null}
+      <span className="min-w-0 flex-1">{children}</span>
       {trailing}
     </>
   )

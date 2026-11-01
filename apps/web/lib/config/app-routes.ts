@@ -43,10 +43,11 @@ export const DETAILS: readonly { prefix: string; tab: string; /** Only the route
   { prefix: "/souls", tab: "/souls", below: true },
   { prefix: "/collections", tab: "/collections", below: true },
   { prefix: "/connections", tab: "/souls" },
+  { prefix: "/settings", tab: "/profile" },
 ]
 
 /** Beyond the tabs and the details, the routes on the M3 ground. Deeper pages keep the colour world for now. */
-const M3_PREFIXES = ["/settings"] as const
+const M3_PREFIXES: readonly string[] = []
 
 const FULL_SCREEN_EXACT = ["/", "/login", "/register"] as const
 const FULL_SCREEN_PREFIXES = ["/onboarding", "/path", "/blog"] as const

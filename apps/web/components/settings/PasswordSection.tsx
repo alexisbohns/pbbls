@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
-import { SectionLabel } from "@/components/ui/SectionLabel"
+import { ListGroupHeader } from "@/components/m3/ListGroupHeader"
 import { SettingsGroup } from "@/components/settings/SettingsGroup"
 import { SettingsRow } from "@/components/settings/SettingsRow"
 
@@ -20,7 +20,7 @@ export function PasswordSection({ value, onChange }: PasswordSectionProps) {
 
   return (
     <section className="flex flex-col gap-2">
-      <SectionLabel id="settings-password">{t("password")}</SectionLabel>
+      <ListGroupHeader id="settings-password">{t("password")}</ListGroupHeader>
       <SettingsGroup aria-labelledby="settings-password">
         <SettingsRow>
           <label htmlFor="settings-password-input" className="sr-only">

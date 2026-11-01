@@ -246,6 +246,7 @@
     "theme": "Thème",
     "language": "Langue",
     "colorWorld": "Univers de couleurs",
+    "colorWorldScope": "S'applique à la capture, à la gravure et à la modification d'un galet.",
     "account": "Compte",
     "signOut": {
       "title": "Session"

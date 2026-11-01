@@ -3,10 +3,10 @@
 import { Copy, Share2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
-import { SectionLabel } from "@/components/ui/SectionLabel"
+import { ListGroupHeader } from "@/components/m3/ListGroupHeader"
 import { SettingsGroup } from "@/components/settings/SettingsGroup"
 import { SettingsRow } from "@/components/settings/SettingsRow"
-import { Checkbox } from "@/components/ui/checkbox"
+import { M3Switch } from "@/components/m3/M3Switch"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
@@ -76,7 +76,7 @@ export function PublicProfileSection({
 
   return (
     <section className="flex flex-col gap-2">
-      <SectionLabel id="settings-public-profile">{t("publicProfile")}</SectionLabel>
+      <ListGroupHeader id="settings-public-profile">{t("publicProfile")}</ListGroupHeader>
       <SettingsGroup aria-labelledby="settings-public-profile">
         {/* SettingsRow wraps children in a <span>, so everything here stays
             inline-level — a block <div> inside a <span> is invalid HTML. */}
@@ -122,10 +122,10 @@ export function PublicProfileSection({
         </SettingsRow>
         <SettingsRow
           trailing={
-            <Checkbox
+            <M3Switch
               checked={isPublic}
               disabled={!savedHandle}
-              onCheckedChange={(checked) => onPublicChange(checked === true)}
+              onCheckedChange={(checked) => onPublicChange(checked)}
               aria-label={t("publicProfileConsent")}
             />
           }

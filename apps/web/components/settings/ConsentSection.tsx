@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
 import { useFormatDate } from "@/lib/i18n/format"
-import { SectionLabel } from "@/components/ui/SectionLabel"
+import { ListGroupHeader } from "@/components/m3/ListGroupHeader"
 import { SettingsGroup } from "@/components/settings/SettingsGroup"
 import { SettingsRow } from "@/components/settings/SettingsRow"
 import { Button } from "@/components/ui/button"
@@ -86,7 +86,7 @@ export function ConsentSection({ consent, onGrant, onWithdrawn }: ConsentSection
 
   return (
     <section className="flex flex-col gap-2">
-      <SectionLabel id="settings-consent">{t("title")}</SectionLabel>
+      <ListGroupHeader id="settings-consent">{t("title")}</ListGroupHeader>
       <SettingsGroup aria-labelledby="settings-consent">
         <SettingsRow
           icon={HeartHandshake}
