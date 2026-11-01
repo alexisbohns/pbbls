@@ -31,6 +31,10 @@
     "connections": "Connections",
     "lab": "Lab"
   },
+  "detail": {
+    "close": "Close",
+    "back": "Back"
+  },
   "home": {
     "greeting": {
       "morning": { "title": "Morning", "line": "A new day to keep something from." },

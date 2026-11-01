@@ -10,7 +10,6 @@ import { AddSoulForm } from "@/components/souls/AddSoulForm"
 import { SoulList } from "@/components/souls/SoulList"
 import { SoulsEmptyState } from "@/components/souls/SoulsEmptyState"
 import { ConnectionsRow } from "@/components/souls/ConnectionsRow"
-import { M3Island } from "@/components/layout/M3Island"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { PageHeader } from "@/components/layout/PageHeader"
 
@@ -30,28 +29,26 @@ export function PeopleScreen() {
   }
 
   return (
-    <M3Island>
-      <PageLayout>
-        <section>
-          <PageHeader title={t("title")} backHref={null} />
+    <PageLayout>
+      <section>
+        <PageHeader title={t("title")} backHref={null} />
 
-          <ConnectionsRow />
+        <ConnectionsRow />
 
-          <AddSoulForm marks={marks} onAdd={handleAdd} />
+        <AddSoulForm marks={marks} onAdd={handleAdd} />
 
-          {loading ? (
-            <p className="text-sm text-muted-foreground">{t("loading")}</p>
-          ) : souls.length === 0 ? (
-            <SoulsEmptyState />
-          ) : (
-            <SoulList
-              souls={souls}
-              marks={marks}
-              pebbleCounts={pebbleCounts}
-            />
-          )}
-        </section>
-      </PageLayout>
-    </M3Island>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">{t("loading")}</p>
+        ) : souls.length === 0 ? (
+          <SoulsEmptyState />
+        ) : (
+          <SoulList
+            souls={souls}
+            marks={marks}
+            pebbleCounts={pebbleCounts}
+          />
+        )}
+      </section>
+    </PageLayout>
   )
 }

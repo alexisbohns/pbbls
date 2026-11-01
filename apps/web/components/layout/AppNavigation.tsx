@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useNavItems } from "@/lib/hooks/useNavItems"
+import { routeShell } from "@/lib/config/app-routes"
 import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 
 /**
@@ -23,6 +24,8 @@ export function AppNavigation({ at }: { at?: string }) {
   const route = usePathname()
   const pathname = at ?? route
   const items = useNavItems()
+  // A detail marks the tab it belongs to (Settings marks You, two-area spec D11).
+  const parentTab = routeShell(pathname).parentTab ?? pathname
   const t = useTranslations("common.aria")
 
   return (
@@ -32,7 +35,7 @@ export function AppNavigation({ at }: { at?: string }) {
     >
       <ul className="mx-auto flex h-16 max-w-xl rail:h-auto rail:flex-col rail:gap-3">
         {items.map(({ href, label, icon: Icon }) => {
-          const current = pathname === href || pathname.startsWith(href + "/")
+          const current = parentTab === href
           return (
             <li key={href} className="min-w-0 flex-1 rail:flex-none">
               <Link

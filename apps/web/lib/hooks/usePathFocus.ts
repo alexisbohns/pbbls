@@ -25,6 +25,8 @@ export type PathFocus = {
   openMomentId: string | null
   openMoment: (momentId: string) => void
   closeMoment: () => void
+  /** Hands over the URL's `?focus=` and `?week=` (the Path tab reads them); each is consumed once. */
+  applyParams: (focusMomentId: string | null, focusWeek: Date | null) => void
 }
 
 /**

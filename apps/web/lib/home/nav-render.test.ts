@@ -52,6 +52,11 @@ describe("the app navigation (#1384 D2)", () => {
     }
   })
 
+  it("marks the tab a detail belongs to", () => {
+    expect(html("/wallet")).toContain('<a href="/path" aria-current="page"')
+    expect(html("/guides/stones")).toContain('<a href="/home" aria-current="page"')
+  })
+
   it("is the same component on every tab: one markup up to the current mark, always on the M3 roles", () => {
     const strip = (m: string) => m.replace(/ aria-current="page"/g, "")
     expect(strip(html("/path"))).toBe(strip(html("/home")))

@@ -10,7 +10,7 @@ const GAP = 2
 /**
  * A day's pebbles in the month grid (#1384, spec D10): up to three of the
  * Spine's flat seals side by side, sized by intensity from the 15 px pip and
- * inked by emotion. Needs `StoneSprite` on the page (the Home layout mounts it).
+ * inked by emotion. Needs `StoneSprite` on the page (the app shell mounts it once).
  */
 export function DaySeals({
   pebbles,

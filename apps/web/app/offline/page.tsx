@@ -12,6 +12,7 @@ export default function OfflinePage() {
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <p className="text-sm text-muted-foreground">{t("description")}</p>
         {/* A plain <a>, not next/link: offline, the page must reload from the network. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- offline, the page must reload from the network */}
         <a href="/home" className={buttonVariants({ variant: "outline" })}>
           {t("cta")}
         </a>

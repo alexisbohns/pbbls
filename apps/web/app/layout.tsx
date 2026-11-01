@@ -70,8 +70,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  detail,
 }: Readonly<{
   children: React.ReactNode;
+  /** The `@detail` slot (#1384, two-area spec D2): the right area's detail, or nothing. */
+  detail: React.ReactNode;
 }>) {
   return (
     <html
@@ -100,7 +103,7 @@ export default function RootLayout({
                     <Toaster />
                     <AchievementMomentHost />
                     <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
-                      <MainContent>{children}</MainContent>
+                      <MainContent detail={detail}>{children}</MainContent>
                     </div>
                   </ThemeProvider>
                 </ColorWorldProvider>
