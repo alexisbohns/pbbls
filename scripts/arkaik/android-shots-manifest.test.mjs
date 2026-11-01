@@ -33,8 +33,10 @@ test("checkMapping names every failure and passes a clean mapping", () => {
       "V-dark": "SettingsScreenshotsKt/SettingsPageDark",
       "V-gone": "SettingsScreenshotsKt/Nope",
       "settings": "SettingsScreenshotsKt/SettingsPageLight",
+      "V-escape": "SettingsScreenshotsKt/../x",
     });
-    assert.deepEqual(bad.map((f) => f.key).sort(), ["V-dark", "V-gone", "settings"]);
+    assert.deepEqual(bad.map((f) => f.key).sort(), ["V-dark", "V-escape", "V-gone", "settings"]);
+    assert.equal(bad.find((f) => f.key === "V-escape").message, 'V-escape: "SettingsScreenshotsKt/../x" is not a stem (<File>Kt/<Function>[_<variant>])');
     assert.match(bad.find((f) => f.key === "V-dark").message, /2 files/);
     assert.match(bad.find((f) => f.key === "V-gone").message, /no file/);
     assert.match(bad.find((f) => f.key === "settings").message, /V-|AC-/);

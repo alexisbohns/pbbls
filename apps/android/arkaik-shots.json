@@ -1,0 +1,20 @@
+{
+  "V-achievements": "AchievementsPageScreenshotsKt/AchievementsPageLight",
+  "V-announcement-detail": "LabScreenshotsKt/AnnouncementDetailLight",
+  "V-capture-a-moment": "CaptureFlowScreenshotsKt/Capture_Photo",
+  "V-collections-list": "CollectionsScreenshotsKt/CollectionsGalleryLight",
+  "V-complete-a-pebble": "CompleteFlowScreenshotsKt/Complete_Valence",
+  "V-consent-gate": "ConsentGateScreenshotsKt/ConsentGateAllFour",
+  "V-edit-moment": "EditPebbleScreenshotsKt/EditMoment_Content",
+  "V-home": "HomeScreenshotsKt/HomeShellPaper",
+  "V-lab": "LabScreenshotsKt/LabContentLight",
+  "V-login": "FunnelScreenshotsKt/AuthScreenLogin",
+  "V-monthly-cairn": "MonthPageScreenshotsKt/MonthPageLight",
+  "V-onboarding-intro": "FunnelScreenshotsKt/OnboardingScreenLight",
+  "V-pebble-detail": "PebbleDetailScreenshotsKt/PebbleDetailCardLight",
+  "V-pebble-edit": "EditPebbleScreenshotsKt/EditPebble_Content",
+  "V-profile": "ProfileScreenshotsKt/YouPaper",
+  "V-settings": "SettingsScreenshotsKt/SettingsPageLight",
+  "V-timeline": "PathScreenScreenshotsKt/PathScreenPopulatedLight",
+  "V-welcome": "FunnelScreenshotsKt/WelcomeScreenLight"
+}

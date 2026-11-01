@@ -21,6 +21,7 @@ export const MAPPING_FILE = "apps/android/arkaik-shots.json";
 const RAW_ORIGIN = "https://raw.githubusercontent.com/alexisbohns/pbbls";
 const NODE_ID = /^(V|AC)-[A-Za-z0-9._-]+$/;
 const SUFFIX = /_[0-9a-f]{8}_\d+\.png$/;
+const STEM = /^[A-Za-z0-9]+Kt\/[A-Za-z0-9_-]+$/;
 
 /** The files in `root` whose name is `<stem>_<8 hex>_<index>.png`, as `<dir>/<file>` paths. */
 function matches(root, stem) {
@@ -50,6 +51,7 @@ export function checkMapping(root, mapping) {
   for (const [key, stem] of Object.entries(mapping)) {
     if (!NODE_ID.test(key)) failures.push({ key, message: `${key}: not a node id (expected V-… or AC-…)` });
     if (typeof stem !== "string" || stem === "") { failures.push({ key, message: `${key}: the stem must be a non-empty string` }); continue; }
+    if (!STEM.test(stem)) { failures.push({ key, message: `${key}: "${stem}" is not a stem (<File>Kt/<Function>[_<variant>])` }); continue; }
     try { resolveStem(root, stem); } catch (e) { failures.push({ key, message: e.message }); }
   }
   return failures;
@@ -82,4 +84,6 @@ function main() {
   console.log(`arkaik-shots: wrote ${manifest.length} entr${manifest.length === 1 ? "y" : "ies"} to ${values.out}`);
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) main();
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  try { main(); } catch (e) { console.error(`arkaik-shots: ${e.message}`); process.exit(1); }
+}
