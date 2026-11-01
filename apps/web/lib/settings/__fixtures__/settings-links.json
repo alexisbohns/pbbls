@@ -1,0 +1,42 @@
+[
+  {
+    "key": "credits",
+    "section": "about",
+    "sort_order": 10,
+    "title_en": "Credits",
+    "title_fr": "Crédits",
+    "url": "https://www.pbbls.app/docs/credits"
+  },
+  {
+    "key": "terms",
+    "section": "legal",
+    "sort_order": 10,
+    "title_en": "Terms of Service",
+    "title_fr": "Conditions générales d'utilisation",
+    "url": "https://www.pbbls.app/docs/terms"
+  },
+  {
+    "key": "privacy",
+    "section": "legal",
+    "sort_order": 20,
+    "title_en": "Privacy Policy",
+    "title_fr": "Politique de confidentialité",
+    "url": "https://www.pbbls.app/docs/privacy"
+  },
+  {
+    "key": "legal-notice",
+    "section": "legal",
+    "sort_order": 30,
+    "title_en": "Legal Notice",
+    "title_fr": "Mentions légales",
+    "url": "https://www.pbbls.app/docs/legal-notice"
+  },
+  {
+    "key": "support",
+    "section": "support",
+    "sort_order": 10,
+    "title_en": "Contact support",
+    "title_fr": "Contacter le support",
+    "url": "mailto:ciao@pbbls.app"
+  }
+]
