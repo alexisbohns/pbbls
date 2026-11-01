@@ -28,11 +28,20 @@
  * as a no-op until `recent_auth_enforced()` flips (#977).
  * If a user's JWT expires mid-failure, the service role can finish the job
  * manually (purge_account + auth.admin.deleteUser).
+ *
+ * Sign in with Apple (#1456, guideline 5.1.1(v)): an account with an Apple
+ * identity sends a fresh `apple_authorization_code` in the JSON body, and the
+ * Apple grant is revoked (apple-revoke.ts) between the gate and step 1. It
+ * runs first because once the auth row is gone nothing can retry it, and a
+ * revoke that lands before a failed purge is harmless: the next Apple sign-in
+ * is simply a first authorization. It is best-effort: erasure never hinges on
+ * Apple being reachable, so a failure is logged and the deletion carries on.
  */
 
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
 import { createAuthForwardedClient, createAdminClient } from "../_shared/supabase-client.ts";
+import { appleConfigFromEnv, appleSubject, revokeAppleAuthorization } from "./apple-revoke.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -71,6 +80,24 @@ serve(async (req: Request) => {
     }
     console.error("delete-account: assert_recent_auth failed:", recentAuthError);
     return json({ error: `recent auth check failed: ${recentAuthError.message}` }, 500);
+  }
+
+  // Apple grant revocation — best-effort, before anything irreversible.
+  const appleCode = await readAppleCode(req);
+  const appleSub = appleSubject(userData.user.identities);
+  if (appleCode && appleSub) {
+    const outcome = await revokeAppleAuthorization({
+      code: appleCode,
+      expectedSub: appleSub,
+      config: appleConfigFromEnv((name) => Deno.env.get(name)),
+      fetch,
+      nowSeconds: Math.floor(Date.now() / 1000),
+    });
+    if (outcome.status !== "revoked") {
+      console.error("delete-account: Apple revocation did not happen:", JSON.stringify(outcome));
+    }
+  } else if (appleSub) {
+    console.error("delete-account: Apple account deleted without an authorization code; grant not revoked");
   }
 
   const admin = createAdminClient();
@@ -118,6 +145,17 @@ serve(async (req: Request) => {
 
   return json({ ok: true, purged }, 200);
 });
+
+/** The optional `apple_authorization_code` from a JSON body; null otherwise. */
+async function readAppleCode(req: Request): Promise<string | null> {
+  try {
+    const body = await req.json();
+    const code = body?.apple_authorization_code;
+    return typeof code === "string" && code.length > 0 ? code : null;
+  } catch {
+    return null; // no body or not JSON — older clients send none
+  }
+}
 
 // deno-lint-ignore no-explicit-any
 async function listAllFiles(admin: any, userId: string): Promise<string[]> {
