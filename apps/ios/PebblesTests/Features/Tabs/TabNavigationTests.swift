@@ -131,6 +131,16 @@ struct TabNavigationHomeTests {
         #expect(restored.you == [.glyphTab(.owned)])
     }
 
+    @Test func anAnnouncementRouteRoundTrips() throws {
+        let nav = TabNavigation()
+        nav.select(.you)
+        let id = UUID(uuidString: "00000000-0000-0000-0004-000000000001")!
+        nav.you = [.lab, .announcement(id)]
+        let data = try #require(nav.snapshot.encoded)
+        let restored = try #require(TabNavigation.Snapshot.decoded(from: data))
+        #expect(restored.you == [.lab, .announcement(id)])
+    }
+
     @Test func anUnknownGlyphTabFallsBackToAnEmptyStack() throws {
         let json = #"{"selected":"you","you":[{"glyphTab":{"_0":"swapped"}}]}"#
         let restored = try #require(TabNavigation.Snapshot.decoded(from: Data(json.utf8)))

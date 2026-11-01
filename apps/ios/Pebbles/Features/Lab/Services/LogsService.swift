@@ -29,6 +29,19 @@ struct LogsService {
         return wrapper.logs
     }
 
+    /// One published announcement by id (You's `YouRoute.announcement`, #1382 D21);
+    /// nil when it is gone or unpublished.
+    func announcement(id: UUID) async throws -> Log? {
+        let wrapper: LossyLogArray = try await supabase.client
+            .from("v_logs_with_counts")
+            .select()
+            .eq("id", value: id.uuidString)
+            .eq("published", value: true)
+            .limit(1)
+            .execute().value
+        return wrapper.logs.first
+    }
+
     /// Shipped features, most recent first.
     func changelog(limit: Int? = nil) async throws -> [Log] {
         let base = supabase.client
@@ -156,3 +169,12 @@ enum LogsServiceError: Error, LocalizedError {
         }
     }
 }
+
+/// The two feeds You's Lab section reads (#1382 D21), so its tests fake them.
+@MainActor
+protocol YouLabServicing {
+    func announcements(limit: Int?) async throws -> [Log]
+    func changelog(limit: Int?) async throws -> [Log]
+}
+
+extension LogsService: YouLabServicing {}

@@ -1488,6 +1488,40 @@
         }
       }
     },
+    "achievement.shelf.earnedWord.one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "earned"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "décroché"
+          }
+        }
+      }
+    },
+    "achievement.shelf.earnedWord.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "earned"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "décrochés"
+          }
+        }
+      }
+    },
     "achievement.shelf.unlockedCount" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5941,6 +5975,57 @@
         }
       }
     },
+    "you.lab.kicker" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lab notes · %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes du Lab · %@"
+          }
+        }
+      }
+    },
+    "you.lab.allUpdates" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All updates"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les nouveautés"
+          }
+        }
+      }
+    },
+    "you.lab.community.line" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Talk with other people on WhatsApp."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discute avec d'autres personnes sur WhatsApp."
+          }
+        }
+      }
+    },
     "home.firstFive.title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7858,23 +7943,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouvelle âme"
-          }
-        }
-      }
-    },
-    "News & community" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "News & community"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actus & communauté"
           }
         }
       }

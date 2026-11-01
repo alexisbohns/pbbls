@@ -115,6 +115,10 @@ final class AchievementsService {
 
     var isMutationCheckInFlight: Bool { mutationChecksInFlight > 0 }
 
+    /// Screen-open checks that went to the server. Tests read it to prove a
+    /// skipped check asked nothing, without timing the main actor.
+    @ObservationIgnored private(set) var screenChecksSent = 0
+
     func beginMutationCheck() { mutationChecksInFlight += 1 }
     func endMutationCheck() { mutationChecksInFlight = max(mutationChecksInFlight - 1, 0) }
 
@@ -188,6 +192,7 @@ final class AchievementsService {
             logger.notice("screen-open achievement check skipped: a mutation check is in flight")
             return
         }
+        screenChecksSent += 1
         do {
             _ = try await check()
         } catch where AchievementsModel.isCancellation(error) {

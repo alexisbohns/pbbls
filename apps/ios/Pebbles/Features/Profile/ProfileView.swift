@@ -8,6 +8,7 @@ struct ProfileView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(PathStatsService.self) private var stats
     @Environment(TabNavigation.self) private var nav
+    @Environment(AchievementsService.self) private var achievements
 
     @State private var model = YouModel()
     @State private var isPresentingSettings = false
@@ -15,7 +16,8 @@ struct ProfileView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                YouContent(model: model, stats: YouStats(stats))
+                YouContent(model: model, stats: YouStats(stats),
+                           onAchievements: { nav.you.append(.achievements) })
                     .id(TabNavigation.scrollTopAnchor)
             }
             .onChange(of: nav.scrollToTop[.you, default: 0]) {
@@ -28,6 +30,7 @@ struct ProfileView: View {
             case .glyphTab(let tab): GlyphsListView(initialTab: tab)
             case .achievements: AchievementsView()
             case .lab: LabView()
+            case .announcement(let id): AnnouncementRoute(id: id)
             }
         }
         .toolbar {
@@ -44,9 +47,17 @@ struct ProfileView: View {
             if nav.peekIntent(for: .you) == .carveGlyph, nav.you.last != .glyphs { nav.you.append(.glyphs) }
         }
         .task {
-            if model.service == nil { model.service = YouService(client: supabase.client) }
+            attachServices()
             await stats.load()
             await model.loadProfile()
+        }
+        .task {
+            attachServices()
+            await model.loadShelf()
+        }
+        .task {
+            attachServices()
+            await model.loadLab()
         }
         .sheet(isPresented: $isPresentingSettings) {
             SettingsSheet(
@@ -63,6 +74,16 @@ struct ProfileView: View {
             )
         }
     }
+
+    private func attachServices() {
+        if model.service == nil { model.service = YouService(client: supabase.client) }
+        if model.achievements == nil { model.achievements = achievements }
+        if model.shelf.service == nil {
+            model.shelf.service = AchievementsPageService(client: supabase.client, disk: .standard,
+                                                          owner: supabase.session?.user.id.uuidString.lowercased())
+        }
+        if model.lab == nil { model.lab = LogsService(supabase: supabase) }
+    }
 }
 
 #Preview {
@@ -72,5 +93,6 @@ struct ProfileView: View {
             .environment(supabase)
             .environment(PathStatsService(supabase: supabase))
             .environment(TabNavigation())
+            .environment(AchievementsService(client: supabase.client))
     }
 }

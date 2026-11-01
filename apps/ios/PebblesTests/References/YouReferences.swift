@@ -63,12 +63,9 @@ extension References {
 
         static func wholePage() async -> some View {
             let model = await YouFixture.model()
-            let supabase = SupabaseService()
             return YouContent(model: model, stats: YouFixture.stats)
                 .frame(width: 393, alignment: .top)
                 .background(Color.pebbles.surface)
-                .environment(supabase)
-                .environment(AchievementsService(client: supabase.client))
         }
 
         @Test(arguments: ReferenceScheme.allCases)
@@ -81,6 +78,55 @@ extension References {
         @Test func pageAx2() async throws {
             ReferenceImage.assertMatches(await Self.wholePage(), named: "page",
                                          config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+        }
+
+        // MARK: - Achievements and the Lab (#1382 D20, D21)
+
+        static func achievements(shelf: Bool) async -> some View {
+            let model = await YouFixture.model(shelf: shelf)
+            return page(YouAchievementsSection(badges: model.badges, count: model.earnedCount))
+        }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func achievements(scheme: ReferenceScheme) async throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(await Self.achievements(shelf: true), named: "achievements",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
+
+        @Test func achievementsEmpty() async throws {
+            ReferenceImage.assertMatches(await Self.achievements(shelf: false), named: "achievementsEmpty",
+                                         config: ReferenceConfig(scheme: .paper, locales: [.en, .fr]))
+        }
+
+        @Test func achievementsAx2() async throws {
+            ReferenceImage.assertMatches(await Self.achievements(shelf: true), named: "achievements",
+                                         config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+        }
+
+        static func lab(announcement: Bool) async -> some View {
+            let model = await YouFixture.model(announcement: announcement)
+            return page(YouLabSection(announcement: model.announcement, changelog: model.changelog))
+        }
+
+        /// The drawn band (the fixture's announcement has no cover), the timeline and the community stone.
+        @Test(arguments: ReferenceScheme.allCases)
+        func lab(scheme: ReferenceScheme) async throws {
+            let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+            ReferenceImage.assertMatches(await Self.lab(announcement: true), named: "lab",
+                                         config: ReferenceConfig(scheme: scheme, locales: locales))
+        }
+
+        @Test func labWithoutAnnouncement() async throws {
+            ReferenceImage.assertMatches(await Self.lab(announcement: false), named: "labWithoutAnnouncement",
+                                         config: ReferenceConfig(scheme: .paper))
+        }
+
+        /// Both feeds failed: only the community stone stays.
+        @Test(arguments: ReferenceScheme.allCases)
+        func community(scheme: ReferenceScheme) throws {
+            ReferenceImage.assertMatches(Self.page(YouLabSection(announcement: nil, changelog: [])),
+                                         named: "community", config: ReferenceConfig(scheme: scheme))
         }
     }
 }

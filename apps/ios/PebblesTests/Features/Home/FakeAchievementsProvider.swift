@@ -7,6 +7,8 @@ final class FakeAchievementsProvider: AchievementsProviding {
     struct Failure: Error {}
 
     var catalog: [AchievementRecord] = []
+    /// When set, the catalog read fails with it.
+    var catalogError: Error?
     var unlocks: [AchievementUnlockRecord] = []
     var claimAnswer: Result<[AchievementCheckResult], Error> = .success([])
     /// Runs when a claim is answered, so a test can change the unlocks as the server would.
@@ -21,6 +23,7 @@ final class FakeAchievementsProvider: AchievementsProviding {
 
     func loadCatalog() async throws -> [AchievementRecord] {
         catalogCalls += 1
+        if let catalogError { throw catalogError }
         return catalog
     }
 

@@ -6,6 +6,7 @@ import SwiftUI
 struct YouContent: View {
     let model: YouModel
     let stats: YouStats
+    var onAchievements: () -> Void = {}
 
     var body: some View {
         VStack(spacing: YouLayout.sectionGap) {
@@ -15,8 +16,9 @@ struct YouContent: View {
             YouCounters(stats: stats)
                 .padding(.top, YouLayout.countersRise)
             YouGlyphsSection(carved: stats.glyphsCarved, owned: stats.glyphsOwned)
-            ProfileAchievementsCard()
-            ProfileLabCard()
+            YouAchievementsSection(badges: model.badges, count: model.earnedCount, onOpen: onAchievements)
+            YouLabSection(announcement: model.announcement, changelog: model.changelog,
+                          coverURL: LabConfig.coverURL(for:))
         }
         .padding(.horizontal, 16)
         .padding(.top, Spacing.md)

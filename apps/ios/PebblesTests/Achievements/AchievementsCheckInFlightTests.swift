@@ -20,13 +20,12 @@ struct AchievementsCheckInFlightTests {
         #expect(!service.isMutationCheckInFlight && service.mutationChecksInFlight == 0)
     }
 
-    @Test("a screen-open check while one is in flight asks nothing and returns at once")
+    @Test("a screen-open check while one is in flight asks nothing")
     func skipped() async {
         let service = AchievementsService(client: SupabaseService().client)
         service.beginMutationCheck()
-        let clock = ContinuousClock()
-        let took = await clock.measure { await service.checkIgnoringFailure() }
-        #expect(took < .milliseconds(50), "no request went out")
+        await service.checkIgnoringFailure()
+        #expect(service.screenChecksSent == 0, "no request went out")
         service.endMutationCheck()
     }
 }

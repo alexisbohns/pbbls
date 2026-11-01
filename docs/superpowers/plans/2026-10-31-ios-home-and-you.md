@@ -617,4 +617,13 @@ grant execute on function public.get_profile_engagement(text) to authenticated;
 
 ## Lessons learned
 
-(Written in Part 7, Task 32.)
+- **The device pass at AX2 (Part 1) was not done by the agent:** the phone stayed locked and `devicectl` cannot capture its screen. No AX2 cap was added; the maintainer checked Part 5 on the iPhone 15 and found it right. The card shadow and the greeting's 75 % floor were not retuned.
+- **`path_month_wrap` on Home:** the fetch is logged under `home.month` from the TestFlight build; no time was measured before merge, and no slim-projection issue was filed.
+- **References re-baselined per part (CI, `rebaseline-ios-screenshots`):** Part 1 37 PNGs (Home, Collections, People), Part 2 none, Part 3 10 new (`SurfaceKitReferences`), Part 4 29 (24 re-baselined, 5 new), Part 5 28, Part 6 17 new (`YouReferences`), Part 7 12 new and 4 `page*`. Each part was first recorded locally and diffed byte for byte against the part below; the CI red list matched it every time.
+- **Never run `gh stack submit` or `gh stack push` before fetching:** a stack push force-pushes every branch, and one push in Part 5 overwrote the bot's re-baseline commit on Part 1. It was recovered by its SHA (`git fetch origin <sha>`, `git branch -f`, `gh stack rebase --no-trunk`).
+- **A plural variation must show its number** (Xcode refuses the catalog otherwise): "earned" / "décroché(s)" beside a count is two top-level keys, `achievement.shelf.earnedWord.one` and `.other`, not one plural. A plural where only the `one` form drops the number ("The mark you carved.") compiles.
+- **ImageRenderer draws a `NavigationLink` outside a `NavigationStack` as disabled** (faded), and a horizontal `ScrollView` empty: the `page*` references show both, on `main` too. Judge those rows on the component references.
+- **A scratchpad shared with other agents is not private:** a gate script there was overwritten mid-stack by another agent's web gate. Prefix scripts per workspace.
+- **Part 6 was built before #1400 (the glyph counts) was live:** its decoding test first ran on a hand-built payload in the harness's exact shape, then switched to `oracles/home/payloads/profile-engagement.json` once #1400 merged. Decoding both counts as optional let the page ship against either server.
+- **Home's month grid drew a week that straddles two months as one socket and six blanks** (seen on 1 November, a Sunday). On Home only, days outside the month now draw a faint `outlineVariant` socket (`WeeksColumns.Metrics.outsideSockets`); the Path's wrap card keeps its blanks.
+- **A label still on a PR does not fire the re-baseline again:** the workflow runs on `labeled`, so remove and re-add `rebaseline-ios-screenshots` for a second round.

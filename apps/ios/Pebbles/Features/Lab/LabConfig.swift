@@ -9,4 +9,13 @@ enum LabConfig {
 
     /// Supabase storage bucket where announcement cover images live.
     static let assetsBucket = "lab-assets"
+
+    /// A log's public cover image, or nil without one. Shared by the Lab and You.
+    static func coverURL(for log: Log) -> URL? {
+        guard let path = log.coverImagePath, !path.isEmpty else { return nil }
+        return AppEnvironment.supabaseURL
+            .appending(path: "storage/v1/object/public")
+            .appending(path: assetsBucket)
+            .appending(path: path)
+    }
 }

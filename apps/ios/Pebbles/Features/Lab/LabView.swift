@@ -51,12 +51,12 @@ struct LabView: View {
                             NavigationLink {
                                 AnnouncementDetailView(
                                     log: log,
-                                    coverImageURL: coverURL(for: log)
+                                    coverImageURL: LabConfig.coverURL(for: log)
                                 )
                             } label: {
                                 AnnouncementRow(
                                     log: log,
-                                    coverImageURL: coverURL(for: log)
+                                    coverImageURL: LabConfig.coverURL(for: log)
                                 )
                             }
                             .listRowBackground(Color.clear)
@@ -180,14 +180,6 @@ struct LabView: View {
     private func adjustBacklogCount(for id: UUID, by delta: Int) {
         guard let idx = backlog.firstIndex(where: { $0.id == id }) else { return }
         backlog[idx] = backlog[idx].withAdjustedCount(by: delta)
-    }
-
-    private func coverURL(for log: Log) -> URL? {
-        guard let path = log.coverImagePath, !path.isEmpty else { return nil }
-        return AppEnvironment.supabaseURL
-            .appending(path: "storage/v1/object/public")
-            .appending(path: LabConfig.assetsBucket)
-            .appending(path: path)
     }
 }
 

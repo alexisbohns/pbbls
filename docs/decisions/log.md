@@ -1689,3 +1689,26 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - A follow-up issue asks whether the M3 scale should follow the page sizes.
 - **Supersedes / Superseded-by:** narrows the type half of **2026-09-24** (#853) for Home and You, the way `SpineTypography` does for the Path. Does not amend any cross-surface contract.
 - **Refs:** #1383, #853, `docs/superpowers/specs/2026-10-31-android-home-and-you-design.md` (D3), `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PageTypography.kt`.
+
+## 2026-10-31 — iOS sets its body text in Inclusive Sans; Home and You speak in stones, cards and one box (#1382)
+
+- **Status:** taken
+- **Scope:** ios (the column tap and the glyph counts are cross-surface)
+- **Context:**
+  - Fourteen `PebblesFont` tokens drew SF Pro Rounded (and an "SF Compact Rounded" that never shipped) at fixed sizes, so they did not follow Dynamic Type. Home and You mixed hairline cards, profile cards, tinted tiles and plain rows with no rule for which is which.
+- **Decision:**
+  - **SF Pro Rounded and SF Compact Rounded are retired.** `ThemeLiteralsTests` fails on `design: .rounded`, `fontDesign(.rounded)` and `withDesign(.rounded)` under `Features/` and `Components/`; `FontTokensTests` holds every token to Inclusive Sans, Ysabeau, Reenie Beanie or Caveat.
+  - **The former SF tokens are Spine ranks on a third face, `.inclusive`,** resolved by `SpineType.resolve`: they scale with Dynamic Type to `.accessibility2` and thicken under Bold Text (ceiling 700). Inclusive Sans ships with its OFL in `Resources/Licenses/`. Figures stay Ysabeau.
+  - **The vocabulary:** stones (`StoneShape`, `SplitStone`, `StoneGeometry.split`) for actions and side-by-side tiles, flat; cards (`.pebblesCard()`: `stock`, 18 pt, a `shadowInk` shadow on Paper, a `rule` hairline at Night) for content you browse; one box (`.pebblesBox()`) for a list. `PebblesSectionHead` and `PebblesLinkRow` are Home's and You's only head and row; `SpineSectionHeader` stays for the Path, the wraps and People.
+  - **A Home week column opens its week on the Path** through `TabIntent.focusWeek(CalendarDay)`; a week that has not begun is not a button. The wrap sheet's week goes through the same intent.
+  - **The glyph counts live in `get_profile_engagement`** (`glyphs_carved`, `glyphs_owned`, #1386); iOS decodes them as optional and falls back to count-free lines.
+  - **Log out lives in Settings,** at the top of the Account section, on all three surfaces.
+- **Why:**
+  - **Rejected, a second font modifier beside `pebblesFont`:** two ways to set the same text. **Rejected, keeping fixed sizes:** it would carry the old non-scaling into the new face.
+  - **Rejected, a slim `home_month` projection now:** `path_month_wrap` and its disk copy are already there; Home logs the call's time under `home.month` and the projection is filed only if it shows on first paint.
+- **Consequences:**
+  - A new rounded font fails CI. A frame that cannot grow with an Inclusive rank takes `.dynamicTypeSize(...)` on that view.
+  - The plain SF text styles move to ranks in #1399.
+  - Android (#1383) and web (#1384) mirror the column tap and the glyph counts.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #1382, #1386, #1387, `docs/superpowers/specs/2026-10-31-ios-home-and-you-design.md` (D1–D22), `docs/superpowers/plans/2026-10-31-ios-home-and-you.md`.
