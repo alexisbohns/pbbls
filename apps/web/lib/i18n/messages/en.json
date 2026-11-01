@@ -207,6 +207,7 @@
     "madeWith": "Made with Pebbles"
   },
   "settings": {
+    "linkSections": { "legal": "Legal", "about": "About", "support": "Support" },
     "title": "Settings",
     "save": "Save",
     "saving": "Saving…",

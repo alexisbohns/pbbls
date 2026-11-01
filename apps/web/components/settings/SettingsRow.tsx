@@ -13,6 +13,8 @@ type SettingsRowProps = {
   trailing?: ReactNode
   /** When set, the whole row becomes a link. */
   href?: string
+  /** With `href`: an absolute URL — `https` opens in a new tab, `mailto:` in the mail app. */
+  external?: boolean
   /** When set, the whole row becomes a button. */
   onClick?: () => void
   /** Accessible label for interactive rows whose content is not descriptive. */
@@ -35,6 +37,7 @@ export function SettingsRow({
   children,
   trailing,
   href,
+  external,
   onClick,
   ariaLabel,
   className,
@@ -48,7 +51,19 @@ export function SettingsRow({
   )
 
   let inner: ReactNode
-  if (href) {
+  if (href && external) {
+    const newTab = href.startsWith("https://")
+    inner = (
+      <a
+        href={href}
+        aria-label={ariaLabel}
+        className={cn(INNER, INTERACTIVE)}
+        {...(newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
+        {content}
+      </a>
+    )
+  } else if (href) {
     inner = (
       <Link href={href} aria-label={ariaLabel} className={cn(INNER, INTERACTIVE)}>
         {content}
