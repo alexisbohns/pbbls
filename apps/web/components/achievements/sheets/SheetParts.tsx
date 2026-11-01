@@ -1,12 +1,11 @@
 "use client"
 
-import { createContext, useContext, useId, type CSSProperties, type ReactNode } from "react"
+import { useId, type CSSProperties, type ReactNode } from "react"
 import { EmotionRosace } from "@/components/achievements/figures/EmotionRosace"
 import { FirstFiveMark } from "@/components/achievements/figures/FirstFiveMark"
 import { FlatSeal } from "@/components/achievements/figures/FlatSeal"
 import { Ghost } from "@/components/achievements/figures/Ghost"
 import { HueGroup } from "@/components/achievements/figures/HueGroup"
-import { SheetClose, SheetTitle } from "@/components/ui/sheet"
 import { SkylineStage } from "@/components/achievements/figures/SkylineStage"
 import { polar } from "@/lib/achievements/geometry"
 import type { AchievementPalettes } from "@/lib/achievements/palette"
@@ -25,25 +24,19 @@ import { cn } from "@/lib/utils"
 // button of at least 44 px, read as its assembled label.
 
 /**
- * Whether the band is set in a sheet: there it is the dialog's own title, so
- * the sheet is named by it; elsewhere (a preview, a test) a plain heading.
+ * A sheet's frame: the band, the figure, an optional lead, then its sections.
+ * In its detail (#1384, two-area spec D5) the top bar's title names it, so the
+ * band is drawn, not read again.
  */
-export const InSheetContext = createContext(false)
-
-/** A sheet's frame: the band, the figure, an optional lead, then its sections, on the stock. */
 export function SheetBody({ band, hint, lead, ready, figure, children }: { band: string; hint?: string | null; lead?: string | null; ready?: ReactNode; figure: ReactNode; children: ReactNode }) {
-  const inSheet = useContext(InSheetContext)
-  const words = useAchievementsWords()
   const bandClass = "font-spine-sc text-[11.5px] font-semibold tracking-[.22em] text-spine-ink"
   return (
     <div className="px-1 pb-8 font-spine text-spine-ink">
       <header className="flex min-h-11 flex-wrap items-baseline justify-between gap-x-2 gap-y-1 border-b border-spine-card-rule pt-3.5 pb-2">
-        {inSheet ? <SheetTitle className={bandClass}>{band}</SheetTitle> : <h2 className={bandClass}>{band}</h2>}
+        <p aria-hidden="true" className={bandClass}>
+          {band}
+        </p>
         {ready ?? (hint ? <em className="text-sm font-[380] text-spine-ink-2">{hint}</em> : null)}
-        {inSheet ? (
-          // For a touch screen reader with no Escape and no backdrop to tap: hidden until focused.
-          <SheetClose className="sr-only focus:not-sr-only focus:order-first">{words.sheet.text("close")}</SheetClose>
-        ) : null}
       </header>
       <div className="flex justify-center pt-4">{figure}</div>
       {lead ? <p className="pt-3.5 text-[16.5px] leading-[1.35] font-[380] italic">{lead}</p> : null}

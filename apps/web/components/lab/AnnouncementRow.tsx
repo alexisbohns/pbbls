@@ -18,7 +18,7 @@ export function AnnouncementRow({ log, locale }: AnnouncementRowProps) {
   return (
     <Link
       href={`/lab/announcements/${log.id}`}
-      className="block overflow-hidden rounded-xl border border-border transition-all duration-100 hover:bg-muted/50 active:scale-[0.99] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+      className="pb-card block overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-m3-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       {coverUrl && (
         // eslint-disable-next-line @next/next/no-img-element -- public Supabase storage URL, next/image domain config not wired

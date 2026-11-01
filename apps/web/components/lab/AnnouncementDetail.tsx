@@ -64,9 +64,9 @@ export function AnnouncementDetail({ id }: AnnouncementDetailProps) {
       )}
 
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold leading-tight">
+        <h3 className="m3-type-headline-small leading-tight text-m3-on-surface">
           {logTitle(log, locale)}
-        </h1>
+        </h3>
         <p className="text-base text-muted-foreground">
           {logSummary(log, locale)}
         </p>

@@ -3,27 +3,9 @@
 import { useMemo, useState } from "react"
 import { AchievementsPageContent } from "@/components/achievements/page/AchievementsPageContent"
 import { Button } from "@/components/ui/button"
-import { palettesFromReference } from "@/lib/achievements/palette"
-import type { StonePalette } from "@/lib/config/stone-tones"
-import { decodeAchievementsPage } from "@/lib/data/achievements-payload"
 import type { AchievementsPage } from "@/lib/types"
-import fixture from "../../../../../packages/supabase/scripts/oracles/achievements/design/design-fixture.json"
-import categories from "../../../../../packages/supabase/reference/emotion-categories.json"
-import emotions from "../../../../../packages/supabase/reference/emotions.json"
+import { DESIGN_ACHIEVEMENTS as DESIGN, DESIGN_ACHIEVEMENT_PALETTES as PALETTES } from "@/lib/seed/design-achievements"
 import { Specimen } from "./Specimen"
-
-const DESIGN = decodeAchievementsPage(fixture)?.page ?? null
-
-/** The reference palettes, as the page builds them from its reads: every family the fixture names resolves. */
-const PALETTES = palettesFromReference(
-  emotions,
-  new Map(
-    emotions.flatMap((e): [string, StonePalette][] => {
-      const c = categories.find((x) => x.slug === e.category_slug)
-      return c ? [[e.id, c]] : []
-    }),
-  ),
-)
 
 /** The design fixture with every set's completion ready to pull. */
 function ready(page: AchievementsPage): AchievementsPage {

@@ -1,9 +1,11 @@
+import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
 import { createElement, type ComponentProps, type ReactElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { NextIntlClientProvider } from "next-intl"
 import { describe, expect, it } from "vitest"
 import en from "@/lib/i18n/messages/en.json"
-import AchievementsLayout from "@/app/(you)/achievements/layout"
+import AchievementsLayout from "@/app/@detail/(pane)/achievements/layout"
 import { AchievementsPageContent } from "@/components/achievements/page/AchievementsPageContent"
 import { YearDisc } from "@/components/achievements/figures/YearDisc"
 import { stoneBodyId } from "@/lib/utils/spine/stone-ids"
@@ -24,11 +26,13 @@ function html(element: ReactElement): string {
 const count = (markup: string, needle: string) => markup.split(needle).length - 1
 
 describe("the achievements layout", () => {
-  it("mounts the Spine's stone sprite once, for every seal on the page", () => {
+  it("leaves the Spine's stone sprite to the app shell, which mounts it once beside every detail (#1384)", () => {
     const props: ComponentProps<typeof AchievementsLayout> = { children: createElement("main") }
     const markup = renderToStaticMarkup(createElement(AchievementsLayout, props))
-    expect(count(markup, `id="${stoneBodyId("medium", "neutral")}"`)).toBe(1)
-    expect(markup).toContain(`id="${stoneBodyId("small", "lowlight")}"`)
+    expect(markup).toBe("<main></main>")
+    expect(count(markup, `id="${stoneBodyId("medium", "neutral")}"`)).toBe(0)
+    const shell = readFileSync(fileURLToPath(new URL("../../components/layout/MainContent.tsx", import.meta.url)), "utf8")
+    expect(count(shell, "<StoneSprite />")).toBe(1)
   })
 })
 

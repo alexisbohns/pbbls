@@ -44,6 +44,9 @@ export const DETAILS: readonly { prefix: string; tab: string; /** Only the route
   { prefix: "/collections", tab: "/collections", below: true },
   { prefix: "/connections", tab: "/souls" },
   { prefix: "/settings", tab: "/profile" },
+  { prefix: "/glyphs", tab: "/profile" },
+  { prefix: "/achievements", tab: "/profile" },
+  { prefix: "/lab", tab: "/profile" },
 ]
 
 /** Beyond the tabs and the details, the routes on the M3 ground. Deeper pages keep the colour world for now. */
