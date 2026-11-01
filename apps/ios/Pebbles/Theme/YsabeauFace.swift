@@ -17,6 +17,7 @@ import UIKit
 ///
 /// New pattern (raised in the B1 PR): one memoised `UIFont` per
 /// (face, size, weight, features), bridged to SwiftUI as `Font(UIFont)`.
+/// The same builder serves Inclusive Sans (`InclusiveFace`, #1382).
 enum YsabeauFace {
     static let romanName = "Ysabeau-Bold"
     static let italicName = "Ysabeau-BoldItalic"

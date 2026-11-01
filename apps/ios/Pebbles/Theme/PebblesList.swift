@@ -99,8 +99,8 @@ private struct PebblesListRowModifier: ViewModifier {
 // MARK: - Section header
 
 /// Section header typography matching profile cards (Stats, Collections):
-/// `.pebblesFont(.cardHeading)` (SF Compact Rounded 15 semibold, uppercase,
-/// 10% tracking) in `onSurfaceVariant`.
+/// `.pebblesFont(.cardHeading)` (Inclusive Sans 15 / 600, capitals, 0.08 em
+/// tracking) in `onSurfaceVariant`.
 extension Text {
     func pebblesSectionHeader() -> some View {
         self

@@ -5,7 +5,7 @@ import UIKit
 
 /// Typography tokens used across Pebbles iOS. Apply via `View.pebblesFont(_:)`
 /// so that font + tracking + textCase are bundled at the call site.
-enum PebblesFont {
+enum PebblesFont: CaseIterable {
     case body
     case bodyEmphasized
     case subhead
@@ -89,71 +89,94 @@ extension View {
 private struct PebblesFontModifier: ViewModifier {
     let token: PebblesFont
 
+    @ViewBuilder
     func body(content: Content) -> some View {
-        content
-            .font(token.font)
-            .tracking(token.tracking)
-            .textCase(token.isUppercase ? .uppercase : nil)
+        if let style = token.inclusiveStyle {
+            // Inclusive Sans ranks scale with Dynamic Type and thicken under Bold Text (#1382 D1).
+            content.spineType(style)
+        } else {
+            content
+                .font(token.font)
+                .tracking(token.tracking)
+        }
+    }
+}
+
+// MARK: - The Inclusive Sans tokens
+
+extension PebblesFont {
+    /// The token's face at `dynamicTypeSize`: the Inclusive ranks through the
+    /// Spine resolver, the others at their fixed size. What `FontTokensTests` reads.
+    func resolvedUIFont(dynamicTypeSize: DynamicTypeSize = .large) -> UIFont {
+        guard let style = inclusiveStyle else { return fixedUIFont }
+        return SpineType.resolve(style, dynamicTypeSize: dynamicTypeSize, legibilityWeight: nil).uiFont
+    }
+
+    /// The Ysabeau and handwritten tokens, which keep a fixed size; the
+    /// Inclusive ones go through `inclusiveStyle` (never read for them).
+    var fixedUIFont: UIFont {
+        switch self {
+        case .title:             YsabeauFace.uiFont(size: 28, weight: 600, italic: false, features: [.lining])
+        case .bodyLeadHand:      UIFont.bundled("ReenieBeanie", size: 22)
+        case .largeTitleHand:    UIFont.bundled("ReenieBeanie", size: 41)
+        case .nameInputHand:     UIFont.bundled("Caveat-Regular", size: 36)
+        case .valenceWordSmall:  UIFont.pebblesCaveat(size: 34, weight: 700)
+        case .valenceWordMedium: UIFont.pebblesCaveat(size: 44, weight: 700)
+        case .valenceWordLarge:  UIFont.pebblesCaveat(size: 56, weight: 700)
+        case .buttonLabel:       YsabeauFace.uiFont(size: 17, weight: 600, italic: false, features: [.lining])
+        // The Inclusive tokens resolve through `inclusiveStyle` and never read this.
+        default:                 YsabeauFace.uiFont(size: 17, weight: 600, italic: false, features: [.lining])
+        }
+    }
+
+    /// The Inclusive Sans tokens (spec D3) as Spine ranks: scaled by the resolver,
+    /// thickened by Bold Text. Nil for the Ysabeau and handwritten tokens.
+    var inclusiveStyle: SpineType.Style? {
+        switch self {
+        case .body:                  .inclusive(17, 400)
+        case .bodyEmphasized:        .inclusive(17, 600)
+        case .subhead:               .inclusive(15, 400)
+        case .subheadEmphasized:     .inclusive(15, 600)
+        case .headline:              .inclusive(17, 600)
+        case .headlineEmphasized:    .inclusive(17, 700)
+        case .callout:               .inclusive(16, 500)
+        case .calloutEmphasized:     .inclusive(16, 600)
+        case .meta:                  .inclusive(12, 500, caps: true)
+        case .metaEmphasized:        .inclusive(12, 700, caps: true)
+        case .cardHeading:           .inclusive(15, 600, caps: true)
+        case .cardHeadingEmphasized: .inclusive(15, 700, caps: true)
+        case .counterLg:             .inclusive(17, 600)
+        case .captionEmphasized:     .inclusive(12, 600)
+        default:                     nil
+        }
+    }
+}
+
+extension SpineType.Style {
+    /// An Inclusive Sans rank at `size` / `weight`, scaling with its size band;
+    /// capitals carry 0.08 em.
+    static func inclusive(_ size: CGFloat, _ weight: Int, caps: Bool = false) -> Self {
+        Self(size: size, weight: weight, trackingEm: caps ? 0.08 : 0,
+             scaling: .text(SpineType.textStyle(forSize: size)), face: .inclusive, isUppercase: caps)
     }
 }
 
 // MARK: - Token → font / tracking / case mapping
 
 private extension PebblesFont {
-    var font: Font {
-        switch self {
-        case .body:                  return .sfProRounded(17, .regular)
-        case .bodyEmphasized:        return .sfProRounded(17, .semibold)
-        case .subhead:               return .sfProRounded(15, .regular)
-        case .subheadEmphasized:     return .sfProRounded(15, .semibold)
-        case .headline:              return .sfProRounded(17, .semibold)
-        case .headlineEmphasized:    return .sfProRounded(17, .bold)
-        case .callout:               return .sfProRounded(16, .medium)
-        case .calloutEmphasized:     return .sfProRounded(16, .semibold)
-        case .meta:                  return .sfCompactRounded(12, .medium)
-        case .metaEmphasized:        return .sfCompactRounded(12, .bold)
-        case .cardHeading:           return .sfCompactRounded(15, .semibold)
-        case .cardHeadingEmphasized: return .sfCompactRounded(15, .bold)
-        case .counterLg:             return .sfProRounded(17, .semibold)
-        case .captionEmphasized:     return .sfProRounded(12, .semibold)
-        case .title:                 return .ysabeauSemibold(28)
-        case .buttonLabel:           return .ysabeauSemibold(17)
-        case .bodyLeadHand:          return .reenieBeanie(22)
-        case .largeTitleHand:        return .reenieBeanie(41)
-        case .nameInputHand:         return .caveat(36)
-        case .valenceWordSmall:      return .caveatBold(34)
-        case .valenceWordMedium:     return .caveatBold(44)
-        case .valenceWordLarge:      return .caveatBold(56)
-        }
-    }
+    var font: Font { Font(fixedUIFont) }
 
     /// Tracking in points (the spec is in % of font size; converted here).
     var tracking: CGFloat {
         switch self {
-        case .body, .bodyEmphasized, .headline, .headlineEmphasized,
-             .buttonLabel, .counterLg:                            return 0.34   // 2% of 17
-        case .subhead, .subheadEmphasized:                        return 0.30   // 2% of 15
-        case .callout, .calloutEmphasized:                        return 0.32   // 2% of 16
-        case .meta, .metaEmphasized:                              return 1.20   // 10% of 12
-        case .cardHeading, .cardHeadingEmphasized:                return 1.50   // 10% of 15
-        case .captionEmphasized:                                  return 0.24   // 2% of 12
+        case .buttonLabel:                                        return 0.34   // 2% of 17
         case .title:                                              return -0.56  // -2% of 28
         // Reenie Beanie sits loose by default; these tighten it toward
         // connected handwriting (issue #515 speced -2%, dialed in on review).
         case .bodyLeadHand:                                       return -1.0   // 22pt
         case .largeTitleHand:                                     return -2.0   // 41pt
         // Caveat is already tightly connected; no extra tracking.
-        case .nameInputHand:                                      return 0
-        case .valenceWordSmall, .valenceWordMedium, .valenceWordLarge: return 0
-        }
-    }
-
-    var isUppercase: Bool {
-        switch self {
-        case .meta, .metaEmphasized, .cardHeading, .cardHeadingEmphasized:
-            return true
-        default:
-            return false
+        default:                                                  return 0
         }
     }
 }
@@ -173,66 +196,18 @@ extension Font {
     static func ysabeauSemiboldItalic(_ size: CGFloat) -> Font {
         Font(YsabeauFace.uiFont(size: size, weight: 600, italic: true, features: [.lining]))
     }
-
-    /// Reenie Beanie — handwritten display face used for names (souls,
-    /// creators, profile). Bundled TTF (`Resources/ReenieBeanie-Regular.ttf`,
-    /// registered in Info.plist `UIAppFonts`). Falls back to the system font
-    /// if the face is missing from the build.
-    fileprivate static func reenieBeanie(_ size: CGFloat) -> Font {
-        if let custom = UIFont(name: "ReenieBeanie", size: size) {
-            return Font(custom)
-        }
-        return Font(UIFont.systemFont(ofSize: size))
-    }
-
-    /// Caveat — handwritten face used for the pebble name input in the record
-    /// flow. Bundled variable TTF (`Resources/Caveat-VariableFont_wght.ttf`,
-    /// registered in Info.plist `UIAppFonts`); `UIFont(name:)` resolves the
-    /// default instance (weight 400). Falls back to the system font if the
-    /// face is missing from the build.
-    fileprivate static func caveat(_ size: CGFloat) -> Font {
-        if let custom = UIFont(name: "Caveat-Regular", size: size) {
-            return Font(custom)
-        }
-        return Font(UIFont.systemFont(ofSize: size))
-    }
-
-    /// Caveat at weight 700. `UIFont(name:)` only ever resolves a variable
-    /// font's default instance, so the weight axis has to be set explicitly —
-    /// `Caveat-Bold` is not a resolvable name for this file. Falls back to the
-    /// regular instance, then to the system font.
-    fileprivate static func caveatBold(_ size: CGFloat) -> Font {
-        Font(UIFont.pebblesCaveat(size: size, weight: 700))
-    }
-
-    /// SF Pro Rounded — system rounded design.
-    fileprivate static func sfProRounded(_ size: CGFloat, _ weight: UIFont.Weight) -> Font {
-        let base = UIFont.systemFont(ofSize: size, weight: weight)
-        if let descriptor = base.fontDescriptor.withDesign(.rounded) {
-            return Font(UIFont(descriptor: descriptor, size: size))
-        }
-        return Font(base)
-    }
-
-    /// SF Compact Rounded — bundled OTFs (see Resources/Fonts/).
-    /// Falls back to SF Pro Rounded if the named font is missing (e.g. the
-    /// OTFs were not bundled in a given build).
-    fileprivate static func sfCompactRounded(_ size: CGFloat, _ weight: UIFont.Weight) -> Font {
-        let name: String
-        switch weight {
-        case .medium:   name = "SFCompactRounded-Medium"
-        case .semibold: name = "SFCompactRounded-Semibold"
-        case .bold:     name = "SFCompactRounded-Bold"
-        default:        name = "SFCompactRounded-Medium"
-        }
-        if let custom = UIFont(name: name, size: size) {
-            return Font(custom)
-        }
-        return sfProRounded(size, weight)
-    }
 }
 
 extension UIFont {
+    /// A bundled face by PostScript name: Reenie Beanie (names: souls, creators,
+    /// profile) and Caveat (the record flow's name input), both registered in
+    /// Info.plist `UIAppFonts`. `UIFont(name:)` resolves a variable file's default
+    /// instance only (Caveat's 400). Falls back to the system font if the face is
+    /// missing from the build.
+    static func bundled(_ name: String, size: CGFloat) -> UIFont {
+        UIFont(name: name, size: size) ?? UIFont.systemFont(ofSize: size)
+    }
+
     /// Caveat at an exact `wght`. `UIFont(name:)` only resolves the variable
     /// file's default instance (400), so the axis is set explicitly; `Caveat-Bold`
     /// is not a resolvable name. One descriptor for `PebblesFont.valenceWord*`

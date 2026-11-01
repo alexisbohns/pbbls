@@ -44,6 +44,8 @@ extension SpineType {
             uiFont = YsabeauFace.uiFont(size: size, weight: weight, italic: style.italic, features: style.features)
         case .caveat:
             uiFont = UIFont.pebblesCaveat(size: size, weight: weight)
+        case .inclusive:
+            uiFont = InclusiveFace.uiFont(size: size, weight: weight, italic: style.italic)
         }
         let factor = style.size > 0 ? size / style.size : 1
         let lineSpacing = style.lineHeight.map { $0 * factor - uiFont.lineHeight } ?? 0
@@ -96,6 +98,6 @@ private struct SpineTypeModifier: ViewModifier {
             .font(Font(resolved.uiFont))
             .tracking(resolved.tracking)
             .lineSpacing(resolved.lineSpacing)
-            .textCase(style.isLowercase ? .lowercase : nil)
+            .textCase(style.isLowercase ? .lowercase : style.isUppercase ? .uppercase : nil)
     }
 }

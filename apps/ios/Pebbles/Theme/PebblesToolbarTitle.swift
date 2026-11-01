@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Adds a centered toolbar title rendered in the Pebbles `meta` typography
-/// token (uppercase, SF Compact Rounded, 12pt) and `onSurfaceVariant` color.
+/// token (Inclusive Sans 12 / 500, capitals) and `onSurfaceVariant` color.
 ///
 /// Coexists with `.navigationTitle(...)` so VoiceOver and the back stack still
 /// see the page name; the system inline title slot is taken by this

@@ -46,7 +46,9 @@ struct ThemeLiteralsTests {
         Rule(#"Color\(\s*(uiColor:\s*)?\."#
                 + #"(system\w+|label|secondaryLabel|tertiaryLabel|separator|\w*[Ss]ystem\w*Background)"#,
              "a UIKit system colour via Color(_:): use a Color.pebbles role"),
-        Rule(#"role:\s*\.destructive"#, "a destructive role outside a system .alert / .confirmationDialog")
+        Rule(#"role:\s*\.destructive"#, "a destructive role outside a system .alert / .confirmationDialog"),
+        Rule(#"design:\s*\.rounded|fontDesign\(\s*\.rounded|withDesign\(\s*\.rounded"#,
+             "SF Pro Rounded is retired: use pebblesFont or spineType")
     ]
 
     static let scannedFolders = ["Features", "Components"]
@@ -175,7 +177,12 @@ struct ThemeLiteralsTests {
         (".background(Color(.secondarySystemBackground))", true),
         ("Color(uiColor: UIColor.pebbles(.surface).resolvedColor(with: traits))", false),
         ("Link(\"Terms\", destination: URL(string: \"https://pbbls.app\")!).tint(.blue)", true),
-        ("Text(\"Use .red sparingly\")", false)
+        ("Text(\"Use .red sparingly\")", false),
+        (".font(.system(size: 15, weight: .medium, design: .rounded))", true),
+        (".fontDesign(.rounded)", true),
+        ("base.fontDescriptor.withDesign(.rounded)", true),
+        (".clipShape(RoundedRectangle(cornerRadius: 8))", false),
+        ("let n = (x * 4).rounded()", false)
     ])
     func rule(line: String, offends: Bool) {
         #expect(Self.offendingLines(in: line).isEmpty != offends, "\(line)")
