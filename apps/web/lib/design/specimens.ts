@@ -71,6 +71,8 @@ export const SPECIMENS = [
   { id: "view-people", name: "People", source: "app/(people)/souls/page.tsx", section: "views", m3: "tuned" },
   { id: "view-collections", name: "Collections", source: "app/(collections)/collections/page.tsx", section: "views", m3: "tuned" },
   { id: "view-guide-open", name: "Guide open", source: "app/@detail/(pane)/guides/[slug]/page.tsx", section: "views", m3: "tuned" },
+  { id: "view-soul-open", name: "Soul open", source: "app/@detail/(pane)/souls/[id]/page.tsx", section: "views", m3: "tuned" },
+  { id: "view-collection-open", name: "Collection open", source: "app/@detail/(pane)/collections/[id]/page.tsx", section: "views", m3: "tuned" },
   { id: "view-wallet-open", name: "Wallet open", source: "app/@detail/(pane)/wallet/page.tsx", section: "views", m3: "tuned" },
   { id: "view-pebble", name: "Pebble detail", source: "app/(path)/pebble/[id]/page.tsx", section: "views", m3: "bridged" },
   { id: "view-profile", name: "Profile (before You)", source: "components/sandbox/design/views/ProfileView.tsx", section: "views", m3: "bridged" },
