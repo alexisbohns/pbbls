@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useNavItems } from "@/lib/hooks/useNavItems"
 import { routeShell } from "@/lib/config/app-routes"
+import { useLastTab } from "@/lib/hooks/useLastTab"
 import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 
 /**
@@ -24,8 +25,11 @@ export function AppNavigation({ at }: { at?: string }) {
   const route = usePathname()
   const pathname = at ?? route
   const items = useNavItems()
-  // A detail marks the tab it belongs to (Settings marks You, two-area spec D11).
-  const parentTab = routeShell(pathname).parentTab ?? pathname
+  // A detail marks the tab it belongs to (Settings marks You, two-area spec
+  // D11); a pebble, the tab it opened over.
+  const shell = routeShell(pathname)
+  const lastTab = useLastTab()
+  const parentTab = (shell.overAnyTab ? lastTab : null) ?? shell.parentTab ?? pathname
   const t = useTranslations("common.aria")
 
   return (

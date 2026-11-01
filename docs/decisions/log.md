@@ -1764,3 +1764,27 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - `layout/Sidebar` stays dead. The old profile components (`CollectionsCard`, `ShortcutsRow`, `StatsCard`, `LabCard`) stay for the sandbox and the public profile (deleting them is a follow-up).
 - **Supersedes / Superseded-by:** extends **2026-09-28 — The web follows Android's M3-evo theme** (#986): `.m3` is no longer sandbox-only. Answers the consequence of **2026-10-18 — Android's brand neutrals are the Spine paper** (#1118) that the rule set is the mapping "if the web ever points `--spine-*` at roles": it now does, on the M3 ground.
 - **Refs:** #1384, #1118, #1386, #1387, `docs/superpowers/specs/2026-10-31-web-home-and-you-design.md` (D1–D23), `docs/superpowers/plans/2026-10-31-web-home-and-you.md`, `apps/web/lib/config/{navigation,app-routes}.ts`, `apps/web/components/layout/{AppNavigation,MainContent,M3Island}.tsx`, `apps/web/components/layout/main-class.ts`, `apps/web/app/globals.css` ("The Spine on Material", `app-nav-room`), `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/PebblesNavigationSuite.kt`.
+
+## 2026-11-01 — The web lays the tabs out in two areas: the tab page on the left, the Path's line or a detail on the right (#1384)
+
+- **Status:** taken
+- **Scope:** web
+- **Context:** The entry above gave the web one navigation and one ground, but a wide window still showed every tab as one centred column, details were pages of their own on the colour world, and the Path's spread was the only page in two parts. Android splits list and detail from 840 dp (#940). The maintainer asked for two areas on desktop, every page on the left, the Path on the right, and details (a pebble, a soul, a collection, Settings...) in the right area or as an overlay on a phone. Spec `docs/superpowers/specs/2026-11-01-web-two-area-layout-design.md`, approved with its five recommendations.
+- **Decision:**
+  - **One area below 1024 px, two from 1024 px.** The left area is the reading column (28 rem); the right takes the rest, on the same M3 `surface`, a hairline between. 1024, not Android's 840, because the left area is the 28 rem column and the right would be too narrow for the Spine at 840.
+  - **Route groups hold the left area:** `(home)`, `(path)`, `(people)`, `(collections)`, `(you)`, each layout rendering its tab through `TabArea`, so the tab stays mounted while a detail of it opens.
+  - **A root `@detail` slot holds the right area.** Each detail is a plain page there (a hard load and a soft navigation render the same thing, so `/souls/<id>` shared or reloaded shows People beside the soul). Null `default`, root and catch-all pages close the slot on a soft navigation. The frame (`DetailPane`, `DetailTopBar`) is the layout of a `(pane)` group inside the slot, so it stays mounted from one detail to the next and a closed slot draws nothing.
+  - **The pebble is intercepted** (`@detail/(pane)/(.)pebble/[id]` beside the plain page, proven in Next 16.4): it opens over whichever tab is showing and never moves the left area. The Path's peek is retired.
+  - **The Path's line is mounted once** in the right area from 1024 px, under any detail, on a focus the shell shares with the Path tab's verso on the left.
+  - **Details are M3 pages:** a small top app bar (close in the right area, back in the overlay, the title as an `h2`), M3 list groups and items, Settings in Android #1437's grouped items and switch, log out last. Below 1024 px a detail is a modal dialog over the tab page, which goes inert.
+  - **One route table** (`routeShell`): `detail`, `parentTab` and `overAnyTab` beside `tab`, `m3`, `fullScreen`, `immersive` and `gated`.
+- **Why:** Real URLs, hard loads that show list and detail together, no remount of the line, and Android's adaptive pattern at the web's own width.
+  - **Rejected, interception everywhere** (the photo-modal pattern): a hard load renders the standalone page with no list beside it.
+  - **Rejected, a client pane driven by `usePathname`:** it bypasses the router and ships every tab in the shell's chunk.
+  - **Rejected, the pebble card morphing from the Spine** (`<ViewTransition name>`): the line stays mounted under the pane, so the two cards would share a name at once and the transition would be skipped.
+- **Consequences:**
+  - A new detail is a `@detail/(pane)/<path>/page.tsx`, a null page under its tab's group, and a `DETAILS` row. Deleting a null slot page brings back a stale pane: `lib/config/detail-slot-source.test.ts` pins them.
+  - Record, carve and the pebble edit flows stay outside every group, immersive, on the colour world, until their own round; the colour-world switcher says so.
+  - `PageHeader`, `PageLayout` and the old profile cards are now used only by the immersive flows, the public pages and the sandbox (deleting what becomes dead is a follow-up).
+- **Supersedes / Superseded-by:** extends the entry above (one navigation, one M3 ground) and **2026-10-18 — Android's brand neutrals are the Spine paper** (#1118) on the web.
+- **Refs:** #1384, #940, #1437, the spec and plan above, `apps/web/app/@detail/`, `apps/web/app/(home|path|people|collections|you)/`, `apps/web/components/layout/{MainContent,RightArea,TabArea,DetailPane,DetailTopBar}.tsx`, `apps/web/components/m3/`, `apps/web/lib/config/app-routes.ts`.

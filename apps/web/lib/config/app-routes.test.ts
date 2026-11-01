@@ -12,7 +12,7 @@ describe("routeShell", () => {
 
   it("puts the tabs, Settings and the guides on the M3 ground, and keeps deeper pages on the colour world", () => {
     for (const p of [...TAB_ROOTS, "/settings", "/guides/stones"]) expect(routeShell(p).m3, p).toBe(true)
-    for (const p of ["/pebble/1", "/record", "/carve"]) {
+    for (const p of ["/record", "/carve"]) {
       expect(routeShell(p).m3, p).toBe(false)
     }
   })
@@ -43,6 +43,8 @@ describe("routeShell", () => {
     expect(routeShell("/connections")).toMatchObject({ detail: true, parentTab: "/souls" })
     expect(routeShell("/connections/x")).toMatchObject({ detail: true, parentTab: "/souls" })
     expect(routeShell("/settings")).toMatchObject({ detail: true, parentTab: "/profile", m3: true })
+    expect(routeShell("/pebble/1")).toMatchObject({ detail: true, parentTab: "/path", overAnyTab: true, m3: true })
+    for (const p of ["/pebble/1/edit", "/pebble/1/edit-pebble"]) expect(routeShell(p), p).toMatchObject({ detail: false, overAnyTab: false })
     for (const p of [
       "/glyphs",
       "/glyphs/x",
@@ -59,7 +61,7 @@ describe("routeShell", () => {
     ]) {
       expect(routeShell(p), p).toMatchObject({ detail: true, parentTab: "/profile", m3: true })
     }
-    for (const p of [ "/pebble/1", "/pebble/1/edit", "/record/complete/1", "/p/1", "/u/x", "/blog", "/docs"]) {
+    for (const p of ["/pebble/1/edit", "/record/complete/1", "/p/1", "/u/x", "/blog", "/docs"]) {
       expect(routeShell(p).detail, p).toBe(false)
     }
     expect(routeShell("/record").parentTab).toBeNull()

@@ -513,3 +513,5 @@ Spec D1, D2 (the hub bar and `/home` as the signed-in landing: decided by the ma
 - **The sandbox frame does not move breakpoints.** A `max-sm:` or `rail:` rule follows the window's width, so check a phone layout at a phone-sized window and a rail at a wide one ("Fill"), and pass route-dependent chrome its route explicitly.
 - **Next 16's `next dev` writes `apps/web/AGENTS.md`** in a fresh worktree; delete it before committing.
 - **Render tests stand in for `next/link`, lucide and the shadcn button** (two React copies resolve); the button stand-in must honour `render` (clone the element) or every Base UI link-button test sees a `<button>`.
+
+The two-area layout (Parts 8–14) keeps its lessons in its own plan, `2026-11-01-web-two-area-layout.md`.

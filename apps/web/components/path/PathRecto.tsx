@@ -1,7 +1,6 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { PebblePeek } from "@/components/path/PebblePeek"
 import { WeekPager } from "@/components/path/WeekPager"
 import { WeekRoll } from "@/components/path/WeekRoll"
 import { usePathFocus, usePathReading } from "@/lib/hooks/usePathFocus"
@@ -12,8 +11,8 @@ import { isoWeekNumber } from "@/lib/utils/week-roll-entries"
  * roll over the pager of lines, each week's stones, cards and mouth. It is the
  * right area's default on wide windows, beside whatever tab is on the left,
  * and publishes the day it is reading for a verso drawn elsewhere. A stone
- * opens the peek, as on the whole Path, until the pebble moves into the
- * detail area (two-area spec D5). Needs `StoneSprite` once on the page.
+ * opens its pebble over the right area (two-area spec D5). Needs
+ * `StoneSprite` once on the page.
  */
 export function PathRecto() {
   const t = useTranslations("path")
@@ -38,7 +37,6 @@ export function PathRecto() {
           onReadingDay={setReadingDay}
         />
       </div>
-      <PebblePeek momentId={focus.openMomentId} onClose={focus.closeMoment} />
     </div>
   )
 }

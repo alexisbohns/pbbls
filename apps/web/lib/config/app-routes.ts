@@ -24,6 +24,8 @@ export type RouteShell = {
   detail: boolean
   /** The tab a detail belongs to (its left area, the navigation's current item); a tab root's own href. */
   parentTab: string | null
+  /** A detail that opens over whichever tab is showing (the pebble); `parentTab` is its hard load's tab. */
+  overAnyTab: boolean
 }
 
 /** Two areas from here (two-area spec D1): the tab page on the left, the Path's line or a detail on the right. */
@@ -37,7 +39,16 @@ export const TAB_ROOTS: readonly string[] = NAV_ITEMS.map((item) => item.href)
  * page stays beside them (two-area spec D2). A route joins this table in the
  * part that moves its page into the slot.
  */
-export const DETAILS: readonly { prefix: string; tab: string; /** Only the routes below the prefix (a tab root's own details). */ below?: boolean }[] = [
+export const DETAILS: readonly {
+  prefix: string
+  tab: string
+  /** Only the routes below the prefix (a tab root's own details). */
+  below?: boolean
+  /** Only one segment below the prefix (the pebble, not its edit flows). */
+  one?: boolean
+  /** Opens over whichever tab is showing (the pebble); `tab` is the hard load's. */
+  overAnyTab?: boolean
+}[] = [
   { prefix: "/guides", tab: "/home" },
   { prefix: "/wallet", tab: "/path" },
   { prefix: "/souls", tab: "/souls", below: true },
@@ -47,6 +58,7 @@ export const DETAILS: readonly { prefix: string; tab: string; /** Only the route
   { prefix: "/glyphs", tab: "/profile" },
   { prefix: "/achievements", tab: "/profile" },
   { prefix: "/lab", tab: "/profile" },
+  { prefix: "/pebble", tab: "/path", one: true, overAnyTab: true },
 ]
 
 /** Beyond the tabs and the details, the routes on the M3 ground. Deeper pages keep the colour world for now. */
@@ -67,11 +79,18 @@ export function underPrefix(pathname: string, prefix: string): boolean {
 export function routeShell(pathname: string): RouteShell {
   const tab = TAB_ROOTS.includes(pathname)
   const path = underPrefix(pathname, "/path")
-  const detailOf = DETAILS.find((d) => (d.below ? pathname.startsWith(d.prefix + "/") : underPrefix(pathname, d.prefix)))
+  const detailOf = DETAILS.find((d) =>
+    d.one
+      ? pathname.startsWith(d.prefix + "/") && !pathname.slice(d.prefix.length + 1).includes("/")
+      : d.below
+        ? pathname.startsWith(d.prefix + "/")
+        : underPrefix(pathname, d.prefix),
+  )
   return {
     tab,
     detail: detailOf !== undefined,
     parentTab: tab ? pathname : (detailOf?.tab ?? null),
+    overAnyTab: detailOf?.overAnyTab ?? false,
     m3: tab || detailOf !== undefined || M3_PREFIXES.some((p) => underPrefix(pathname, p)),
     path,
     fullScreen: FULL_SCREEN_EXACT.some((p) => pathname === p) || FULL_SCREEN_PREFIXES.some((p) => underPrefix(pathname, p)),

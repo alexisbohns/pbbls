@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import type { Collection, Mark, Moment, Soul } from "@/lib/types"
-import { stoneLookOf } from "@/lib/data/moment-row"
+import { momentDisplayName, stoneLookOf } from "@/lib/data/moment-row"
 import { useFormatPeekDate } from "@/lib/i18n"
 import { Button } from "@/components/ui/button"
 import { VISIBILITY_ICONS } from "@/components/record/VisibilityMenu"
@@ -11,6 +11,7 @@ import { MomentDeleteDialog } from "@/components/pebble/MomentDeleteDialog"
 import { MomentName } from "@/components/pebble/MomentName"
 import { MomentReadTiles } from "@/components/pebble/MomentReadTiles"
 import { MomentReadToolbar } from "@/components/pebble/MomentReadToolbar"
+import { DetailTopBar } from "@/components/layout/DetailTopBar"
 import { PebbleDetailSoulsGrid } from "@/components/pebble/PebbleDetailSoulsGrid"
 import { PebbleFramed } from "@/components/pebble/PebbleFramed"
 
@@ -19,19 +20,18 @@ type MomentReadProps = {
   souls: Soul[]
   collections: Collection[]
   marks: Mark[]
-  /** Leaves to another screen: the page pushes, the peek closes first. */
+  /** Leaves to another screen (an edit flow, Complete). */
   onNavigate: (href: string) => void
-  /** The peek's Close, or the page's way back. */
-  onClose?: () => void
-  /** The moment was deleted: the page leaves for the Path, the peek closes. */
+  /** The moment was deleted: the detail closes. */
   onDeleted: () => void
-  /** The id of the moment's name heading, for a host that names itself after it. */
-  titleId?: string
 }
 
 /**
- * The read page of a moment (#1050, R7, PD-W2), on `/pebble/[id]` and in the
- * Path's peek. Read-only: every edit goes through Edit moment or Edit pebble.
+ * The read page of a moment (#1050, R7, PD-W2), on `/pebble/[id]`: a detail
+ * over the whole right area from 1024 px, the overlay below (#1384, two-area
+ * spec D5). Its actions sit on the detail's top bar, whose title names it for
+ * assistive tech while the name shows large here. Read-only: every edit goes
+ * through Edit moment or Edit pebble.
  * A moment carrying the caller's pebble shows its privacy, tiles and souls; a
  * bare one shows a blank stone and "Make it a pebble".
  */
@@ -41,11 +41,10 @@ export function MomentRead({
   collections,
   marks,
   onNavigate,
-  onClose,
   onDeleted,
-  titleId,
 }: MomentReadProps) {
   const t = useTranslations("moment.read")
+  const tMoment = useTranslations("moment")
   const tVisibility = useTranslations("record.visibility")
   const formatPeekDate = useFormatPeekDate()
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -65,15 +64,21 @@ export function MomentRead({
   const VisibilityIcon = pebble ? VISIBILITY_ICONS[pebble.visibility] : null
 
   return (
-    <article>
-      <MomentReadToolbar
-        moment={moment}
-        busy={deleting}
-        onEditMoment={() => onNavigate(`/pebble/${moment.id}/edit`)}
-        onEditPebble={() => onNavigate(`/pebble/${moment.id}/edit-pebble`)}
-        onDelete={() => setDeleteOpen(true)}
-        onClose={onClose}
+    <>
+      <DetailTopBar
+        quietTitle
+        title={momentDisplayName(moment.name) ?? tMoment("untitled")}
+        actions={
+          <MomentReadToolbar
+            moment={moment}
+            busy={deleting}
+            onEditMoment={() => onNavigate(`/pebble/${moment.id}/edit`)}
+            onEditPebble={() => onNavigate(`/pebble/${moment.id}/edit-pebble`)}
+            onDelete={() => setDeleteOpen(true)}
+          />
+        }
       />
+    <article className="mx-auto w-full max-w-2xl px-5 pb-16">
 
       <div className="mt-8 mb-4">
         {photo ? (
@@ -87,12 +92,10 @@ export function MomentRead({
         )}
       </div>
 
-      <MomentName
-        as="h1"
-        id={titleId}
-        name={moment.name}
-        className="block text-center font-heading text-2xl font-semibold text-foreground"
-      />
+      {/* The top bar's h2 names the pebble; the name shows here, large. */}
+      <div aria-hidden="true">
+        <MomentName as="p" name={moment.name} className="block text-center font-heading text-2xl font-semibold text-m3-on-surface" />
+      </div>
 
       <p className="mt-2 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
         <time dateTime={moment.happened_at}>{formatPeekDate(moment.happened_at)}</time>
@@ -135,5 +138,6 @@ export function MomentRead({
         onPendingChange={setDeleting}
       />
     </article>
+    </>
   )
 }

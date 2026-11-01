@@ -45,4 +45,15 @@ describe("the detail slot", () => {
       for (const p of under) expect(readFileSync(p, "utf8"), p).toMatch(/return null/)
     }
   })
+
+  it("intercepts the pebble with the very module its plain page renders", () => {
+    const intercept = readFileSync(path.join(slot, "(pane)", "(.)pebble", "[id]", "page.tsx"), "utf8")
+    expect(intercept).toContain('export { default } from "../../pebble/[id]/page"')
+  })
+
+  it("has a route-table row for every detail in the slot", () => {
+    const routes = readdirSync(path.join(slot, "(pane)")).filter((name) => !name.includes(".") && !name.startsWith("("))
+    const prefixes = DETAILS.map((d) => d.prefix.slice(1))
+    for (const route of routes) expect(prefixes, route).toContain(route)
+  })
 })
