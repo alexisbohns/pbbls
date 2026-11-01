@@ -1,9 +1,14 @@
+import { cn } from "@/lib/utils"
 import { RIPPLE_STROKES } from "./ripple-strokes"
 import { rippleStrokeTone, RIPPLE_TONE_CLASS } from "./ripple-tone"
 
 type RippleBadgeProps = {
   level: number
   activeToday: boolean
+  /** The badge's box; 44 px by default. You sets it at one line's height (#1384 D15). */
+  className?: string
+  /** The level digit in the centre; off where a line beside the badge states the level. */
+  showLevel?: boolean
 }
 
 /**
@@ -11,11 +16,11 @@ type RippleBadgeProps = {
  * iOS `RippleBadge`: strokes are tinted by tone (default/active/inactive) via
  * theme token classes; the digit is always the foreground color.
  */
-export function RippleBadge({ level, activeToday }: RippleBadgeProps) {
+export function RippleBadge({ level, activeToday, className, showLevel = true }: RippleBadgeProps) {
   const clamped = Math.min(Math.max(level, 0), 6)
 
   return (
-    <div className="relative size-11 shrink-0" aria-hidden>
+    <div className={cn("relative size-11 shrink-0", className)} aria-hidden>
       <svg viewBox="0 0 44 44" fill="none" className="size-full">
         {RIPPLE_STROKES.map((stroke) => (
           <path
@@ -29,9 +34,11 @@ export function RippleBadge({ level, activeToday }: RippleBadgeProps) {
           />
         ))}
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-foreground">
-        {clamped}
-      </span>
+      {showLevel && (
+        <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-foreground">
+          {clamped}
+        </span>
+      )}
     </div>
   )
 }
