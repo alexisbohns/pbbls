@@ -75,6 +75,13 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onPebble = { navigator.navigate(PebblesKey.Capture(chainsComplete = true)) },
             onOpenComplete = { navigator.navigate(PebblesKey.CompletePebble(it)) },
             onNameMoment = { navigator.navigate(PebblesKey.EditMoment(it)) },
+            // The first five's tab tasks (D11): their intent is taken by the tab's root, so it opens there.
+            onOpenCollections = { navigator.openAtRoot(PebblesKey.Collections) },
+            onOpenPeople = { navigator.openAtRoot(PebblesKey.People) },
+            onOpenGlyphs = {
+                navigator.openAtRoot(PebblesKey.You)
+                navigator.navigate(PebblesKey.Glyphs)
+            },
         )
     }
 

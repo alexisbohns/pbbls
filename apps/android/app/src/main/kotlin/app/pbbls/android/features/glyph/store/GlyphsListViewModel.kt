@@ -6,16 +6,20 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
+import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.GlyphService
 import app.pbbls.android.core.data.GlyphServicing
 import app.pbbls.android.core.data.PathStatsServicing
+import app.pbbls.android.core.data.TabIntent
+import app.pbbls.android.core.data.TabIntents
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -117,7 +121,14 @@ class GlyphsListViewModel
         private val market: GlyphMarketServicing,
         private val glyphService: GlyphServicing,
         private val stats: PathStatsServicing,
+        /** Home's "Carve your first glyph" leaves [TabIntent.CarveGlyph] here (#1383 D11). */
+        private val tabIntents: TabIntents,
     ) : ViewModel() {
+        private val _carveRequests = UiEffects<Unit>(viewModelScope)
+
+        /** Open the carve studio: Home asked for it (once per intent). */
+        val carveRequests: Flow<Unit> = _carveRequests.flow
+
         private val itemsByTab = mutableMapOf<GlyphTab, List<GlyphGridItem>>()
         private var tab = GlyphTab.MINE
         private var isLoadingTab = false
@@ -166,6 +177,11 @@ class GlyphsListViewModel
          * resume is skipped because `init` has already loaded Mine.
          */
         fun onResumed() {
+            // Home's first five (#1383 D11): on Mine, then the studio, taken once.
+            tabIntents.take<TabIntent.CarveGlyph>()?.let {
+                onSelectTab(GlyphTab.MINE)
+                _carveRequests.emit(Unit)
+            }
             resumeCount += 1
             if (resumeCount > 1) loadTab(tab)
         }

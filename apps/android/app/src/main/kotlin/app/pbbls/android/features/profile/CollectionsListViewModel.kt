@@ -5,14 +5,18 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
+import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.CollectionsServicing
 import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.ReferenceDataServicing
+import app.pbbls.android.core.data.TabIntent
+import app.pbbls.android.core.data.TabIntents
 import app.pbbls.android.core.model.Collection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -69,7 +73,14 @@ class CollectionsListViewModel
         private val collectionsService: CollectionsServicing,
         private val refs: ReferenceDataServicing,
         private val haptics: HapticsPreference,
+        /** Home's "Start your first collection" leaves [TabIntent.CreateCollection] here (#1383 D11). */
+        private val tabIntents: TabIntents,
     ) : ViewModel() {
+        private val _createRequests = UiEffects<Unit>(viewModelScope)
+
+        /** Open the create form: Home asked for it (once per intent). */
+        val createRequests: Flow<Unit> = _createRequests.flow
+
         private var collections: List<Collection> = emptyList()
         private var isRefreshing = false
         private var hasFailed = false
@@ -181,6 +192,8 @@ class CollectionsListViewModel
          * silent reload.
          */
         fun onResumed() {
+            // Home's first five (#1383 D11): taken once, so a later resume never reopens the form.
+            tabIntents.take<TabIntent.CreateCollection>()?.let { _createRequests.emit(Unit) }
             resumeCount += 1
             if (resumeCount > 1) reload()
         }

@@ -12,9 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
@@ -29,6 +32,8 @@ import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.ui.HomeMonthSlot
 import app.pbbls.android.features.home.camera.CameraUnavailableDialog
 import app.pbbls.android.features.home.camera.cameraToastTime
+import app.pbbls.android.features.home.checklist.ChecklistTask
+import app.pbbls.android.features.home.checklist.ChecklistTaskSheet
 import app.pbbls.android.features.home.quick.QuickMomentExit
 import app.pbbls.android.features.home.quick.QuickMomentSheet
 import kotlinx.coroutines.delay
@@ -53,6 +58,10 @@ private const val TAG = "home"
  * [moments]; [onPebble] opens Capture chained into Complete. A quick moment saved with "Save & open"
  * calls [onOpenComplete] with its id. A saved camera moment shows a snackbar, "Moment saved · 14:32",
  * whose "Name it" calls [onNameMoment] (Edit moment); `Long`, which TalkBack extends.
+ *
+ * Your first five (D11): a task opens its sheet, whose call to action goes where the task is done
+ * once the sheet is gone: the quick moment sheet, Complete or Capture ([onOpenComplete], [onPebble]),
+ * or a tab left an intent ([onOpenCollections], [onOpenPeople], [onOpenGlyphs]).
  */
 @Composable
 fun HomeScreen(
@@ -62,6 +71,9 @@ fun HomeScreen(
     onPebble: () -> Unit,
     onOpenComplete: (momentId: String) -> Unit,
     onNameMoment: (momentId: String) -> Unit,
+    onOpenCollections: () -> Unit,
+    onOpenPeople: () -> Unit,
+    onOpenGlyphs: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     moments: HomeMomentsViewModel = hiltViewModel(),
@@ -107,6 +119,17 @@ fun HomeScreen(
             }
         }
     }
+    var taskSheet by rememberSaveable { mutableStateOf<ChecklistTask?>(null) }
+    ObserveUiEffects(viewModel.effects) { effect ->
+        when (effect) {
+            HomeEffect.OpenQuickMoment -> moments.quick.open()
+            is HomeEffect.OpenComplete -> onOpenComplete(effect.momentId)
+            HomeEffect.OpenCapture -> onPebble()
+            HomeEffect.OpenCollections -> onOpenCollections()
+            HomeEffect.OpenPeople -> onOpenPeople()
+            HomeEffect.OpenGlyphs -> onOpenGlyphs()
+        }
+    }
     LifecycleResumeEffect(viewModel, moments) {
         viewModel.onResumed()
         moments.onResumed()
@@ -139,7 +162,12 @@ fun HomeScreen(
         camera = camera,
         onDismissCameraError = moments.camera::dismissError,
         snackbar = snackbar,
+        onTask = { taskSheet = it },
+        onClaim = viewModel::claim,
     )
+    taskSheet?.let { task ->
+        ChecklistTaskSheet(task = task, onGo = { viewModel.onTaskGo(task) }, onDismiss = { taskSheet = null })
+    }
     if (camera.isUnavailable) CameraUnavailableDialog(onDismiss = moments.camera::dismissUnavailable)
     quickForm?.let { form ->
         QuickMomentSheet(

@@ -32,6 +32,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.PbblsIcon
@@ -78,6 +79,8 @@ fun SoulsListScreen(
         viewModel.onResumed()
         onPauseOrDispose {}
     }
+    // Home's first five asked for it (#1383 D11), taken once by the ViewModel on resume.
+    ObserveUiEffects(viewModel.createRequests) { onCreateSoul() }
 
     SoulsListContent(
         uiState = uiState,

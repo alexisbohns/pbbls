@@ -811,6 +811,40 @@
     <!-- The snackbar after a camera moment (#1383 D7, iOS home.toast.*): "Moment saved · 14:32", the time in the locale's short form. -->
     <string name="home_toast_saved">Moment saved · %1$s</string>
     <string name="home_toast_name">Name it</string>
+    <!-- Your first five on Home (#1383 D11, iOS home.firstFive.* and home.task.*.title/line). -->
+    <string name="home_first_five_title">Your first five</string>
+    <string name="home_first_five_done">Done</string>
+    <string name="home_first_five_claim">Claim the blue pebble</string>
+    <string name="home_first_five_claim_failed">Couldn\'t claim it yet. Try again.</string>
+    <string name="home_task_moment_title">Record your first moment</string>
+    <string name="home_task_moment_line">A time and a name. Nothing more.</string>
+    <string name="home_task_pebble_title">Complete your first pebble</string>
+    <string name="home_task_pebble_line">Give a moment its weight and colour.</string>
+    <string name="home_task_collection_title">Start your first collection</string>
+    <string name="home_task_collection_line">Gather pebbles that belong together.</string>
+    <string name="home_task_soul_title">Add your first soul</string>
+    <string name="home_task_soul_line">Someone who shares your moments.</string>
+    <string name="home_task_glyph_title">Carve your first glyph</string>
+    <string name="home_task_glyph_line">A mark of your own, for a soul or a collection.</string>
+    <!-- A first-five task sheet (#1383 D11, iOS home.task.*.body/cta/illustration and the pictures' samples). -->
+    <string name="home_task_moment_body">A moment is just a time and a name. Catch it now and give it its weight later.</string>
+    <string name="home_task_moment_cta">Record a moment</string>
+    <string name="home_task_moment_illustration">A moment in the week\'s contents</string>
+    <string name="home_task_pebble_body">A pebble is a moment you come back to. Pick its emotion, how strong it was and how it felt.</string>
+    <string name="home_task_pebble_cta">Complete a pebble</string>
+    <string name="home_task_pebble_illustration">A bare moment becoming a pebble</string>
+    <string name="home_task_collection_body">A collection keeps pebbles side by side: a trip, a season, a project. Name it, then add pebbles whenever they fit.</string>
+    <string name="home_task_collection_cta">Start a collection</string>
+    <string name="home_task_collection_illustration">Three pebbles gathered in a collection</string>
+    <string name="home_task_soul_body">Souls are the people and beings who share your moments. Add one, then tag them on your pebbles.</string>
+    <string name="home_task_soul_cta">Add a soul</string>
+    <string name="home_task_soul_illustration">Three souls and a moment shared with one</string>
+    <string name="home_task_glyph_body">A glyph is a small drawing of your own. Carve one with your finger, then give it to a soul or a collection.</string>
+    <string name="home_task_glyph_cta">Carve a glyph</string>
+    <string name="home_task_glyph_illustration">A glyph carved in a circle</string>
+    <string name="home_task_sample_moment">Lunch with Inès</string>
+    <string name="home_task_sample_collection">Autumn with Elio</string>
+    <string name="home_first_five_of">of</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">

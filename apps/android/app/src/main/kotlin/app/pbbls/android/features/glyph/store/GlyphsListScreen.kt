@@ -38,6 +38,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.designsystem.PbblsIcon
 import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
@@ -86,6 +87,8 @@ fun GlyphsListScreen(
         viewModel.onResumed()
         onPauseOrDispose {}
     }
+    // Home's first five asked for it (#1383 D11), taken once by the ViewModel on resume.
+    ObserveUiEffects(viewModel.carveRequests) { onCarve() }
 
     GlyphsListContent(
         uiState = uiState,

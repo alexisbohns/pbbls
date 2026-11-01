@@ -2,12 +2,15 @@ package app.pbbls.android.features.profile
 
 import app.pbbls.android.R
 import app.pbbls.android.core.data.HapticsPreference
+import app.pbbls.android.core.data.TabIntent
+import app.pbbls.android.core.data.TabIntents
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.testing.FakeCollectionsService
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.inMemorySettings
+import app.pbbls.android.testing.recordEffects
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -33,7 +36,8 @@ class CollectionsListViewModelTest {
     private fun viewModel(
         collections: FakeCollectionsService = FakeCollectionsService(),
         refs: FakeReferenceDataService = FakeReferenceDataService(),
-    ) = CollectionsListViewModel(collections, refs, HapticsPreference(inMemorySettings()))
+        tabIntents: TabIntents = TabIntents(),
+    ) = CollectionsListViewModel(collections, refs, HapticsPreference(inMemorySettings()), tabIntents)
 
     @Test
     fun `starts Loading and resolves to Content`() =
@@ -247,5 +251,24 @@ class CollectionsListViewModelTest {
 
             val state = viewModel.uiState.value as CollectionsListUiState.Content
             assertEquals(listOf("a"), state.collections.map { it.id })
+        }
+
+    // MARK: - Home's first five (#1383 D11)
+
+    @Test
+    fun `Home's create collection opens the form once`() =
+        runTest {
+            val tabIntents = TabIntents()
+            val viewModel = viewModel(tabIntents = tabIntents)
+            val requests = recordEffects(viewModel.createRequests)
+            tabIntents.post(TabIntent.CreateCollection)
+
+            viewModel.onResumed()
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(1, requests.values.size)
+            assertNull(tabIntents.pending.value)
+            requests.stop()
         }
 }

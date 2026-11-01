@@ -101,6 +101,17 @@ class Navigator(
         }
     }
 
+    /**
+     * Switches to [tab] popped to its root, for a tab left an intent (#1383 D10, iOS `nav.go(_, intent:)`):
+     * the root is the only screen that takes it, so whatever the user left open there is closed. No
+     * reselect event: nothing scrolls.
+     */
+    fun openAtRoot(tab: PebblesKey) {
+        val stack = state.backStacks[tab] ?: return
+        while (stack.size > 1) stack.removeAt(stack.lastIndex)
+        state.topLevelRoute = tab
+    }
+
     /** Reselecting a tab pops it to its root and signals anyone resetting scroll. */
     fun onReselect(key: PebblesKey) {
         val stack = state.backStacks[key] ?: return

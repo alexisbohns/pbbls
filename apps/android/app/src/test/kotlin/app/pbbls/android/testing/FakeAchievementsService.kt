@@ -125,10 +125,18 @@ class FakeAchievementsService(
         return catalog
     }
 
+    /**
+     * One gate per [loadUnlocks] call, taken in order: a test can land overlapping checklist reads
+     * out of order. Each read answers what [unlocks] was when it was asked.
+     */
+    val unlocksGates = ArrayDeque<CompletableDeferred<Unit>>()
+
     override suspend fun loadUnlocks(): Set<String> {
         unlocksLoadCount += 1
+        val answer = unlocks
+        unlocksGates.removeFirstOrNull()?.await()
         unlocksFailure.fire()
-        return unlocks
+        return answer
     }
 
     override suspend fun claimBluePebble(): List<AchievementCheckResult> {
