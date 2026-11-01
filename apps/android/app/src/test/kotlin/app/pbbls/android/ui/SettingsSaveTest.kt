@@ -84,14 +84,14 @@ class SettingsSaveTest : AppUiTest() {
     }
 
     @Test
-    fun `cancel is ignored while a save is in flight`() {
+    fun `the back arrow is ignored while a save is in flight`() {
         val gate = CompletableDeferred<Unit>()
         profile.setHandleGate = gate
         openSettings()
         editHandleAndGoPublic()
         onText(R.string.action_save).performClick()
 
-        onText(R.string.action_cancel).performClick()
+        compose.onNodeWithContentDescription(string(R.string.profile_back_a11y)).performClick()
 
         onText(R.string.settings_title).assertIsDisplayed()
         compose.runOnIdle { gate.complete(Unit) }
