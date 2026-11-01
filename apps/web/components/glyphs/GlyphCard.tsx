@@ -19,7 +19,7 @@ export function GlyphCard({ mark }: GlyphCardProps) {
     <article>
       <Link
         href={`/glyphs/${mark.id}`}
-        className="flex items-center gap-4 rounded-lg border border-border px-4 py-3 transition-all duration-100 hover:bg-muted/50 active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        className="flex items-center gap-4 rounded-2xl bg-m3-surface-container px-4 py-3 outline-none transition-colors hover:bg-m3-surface-container-high focus-visible:ring-2 focus-visible:ring-m3-primary motion-reduce:transition-none"
       >
         <GlyphPreview
           mark={mark}

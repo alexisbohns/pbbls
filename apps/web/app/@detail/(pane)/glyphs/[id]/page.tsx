@@ -2,7 +2,6 @@
 
 import { use } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useMark } from "@/lib/data/useMark"
 import { useMarks } from "@/lib/data/useMarks"
@@ -10,8 +9,9 @@ import { useGlyphSubmissions } from "@/lib/data/useGlyphSubmissions"
 import { GlyphDetail } from "@/components/glyphs/GlyphDetail"
 import { GlyphNotFound } from "@/components/glyphs/GlyphNotFound"
 import { SubmitToCommunity } from "@/components/glyphs/SubmitToCommunity"
-import { PageLayout } from "@/components/layout/PageLayout"
+import { DetailTopBar } from "@/components/layout/DetailTopBar"
 
+/** A glyph, nested under Glyphs in the detail area (#1384, two-area spec D2). */
 export default function GlyphDetailPage({
   params,
 }: {
@@ -19,7 +19,6 @@ export default function GlyphDetailPage({
 }) {
   const { id } = use(params)
   const t = useTranslations("glyphs")
-  const tDetail = useTranslations("glyphs.detail")
   const { mark, loading } = useMark(id)
   const { removeMark, updateMark } = useMarks()
   const { submissions, submit } = useGlyphSubmissions()
@@ -39,17 +38,9 @@ export default function GlyphDetailPage({
   }
 
   return (
-    <PageLayout>
-      <section>
-      <nav className="mb-6">
-        <Link
-          href="/glyphs"
-          className="text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          {tDetail("back")}
-        </Link>
-      </nav>
-
+    <>
+      <DetailTopBar title={mark ? mark.name || t("untitled") : ""} backHref="/glyphs" />
+      <section className="mx-auto w-full max-w-2xl px-4 pt-2 pb-12">
       {loading ? (
         <p className="text-sm text-muted-foreground">{t("loading")}</p>
       ) : mark ? (
@@ -70,6 +61,6 @@ export default function GlyphDetailPage({
         <GlyphNotFound />
       )}
       </section>
-    </PageLayout>
+    </>
   )
 }

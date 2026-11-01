@@ -5,16 +5,14 @@ import { ArrowRight } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useLocale } from "@/lib/i18n"
 import { useLabFeed } from "@/lib/data/useLab"
-import { FeaturedCommunityCard } from "@/components/lab/FeaturedCommunityCard"
+import { CommunityStone } from "@/components/you/CommunityStone"
 import { AnnouncementRow } from "@/components/lab/AnnouncementRow"
 import { LogTimeline } from "@/components/lab/LogTimeline"
 import { ReactionButton } from "@/components/lab/ReactionButton"
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-      {children}
-    </h2>
+    <h3 className="m3-type-label-large mb-2 px-1 text-m3-primary">{children}</h3>
   )
 }
 
@@ -57,7 +55,7 @@ export function LabFeed() {
 
   return (
     <div className="flex flex-col gap-8">
-      <FeaturedCommunityCard />
+      <CommunityStone />
 
       {announcements.length > 0 && (
         <section>

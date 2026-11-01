@@ -18,17 +18,19 @@ export function GlyphTabs({ active }: { active: GlyphTab }) {
   }
 
   return (
-    <nav className="mb-6 flex gap-1 rounded-lg bg-muted p-1" role="tablist">
+    <nav className="mb-6 flex border-b border-m3-outline-variant" role="tablist">
       {TABS.map((tab) => (
         <button
           key={tab}
           role="tab"
           aria-selected={active === tab}
           onClick={() => select(tab)}
-          className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+          // M3 secondary tabs (#1384, two-area spec D6): the label, a 2 px
+          // indicator under the active one.
+          className={`m3-type-title-small -mb-px min-h-12 flex-1 border-b-2 px-3 outline-none transition-colors focus-visible:bg-m3-surface-container-high motion-reduce:transition-none ${
             active === tab
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
+              ? "border-m3-primary text-m3-on-surface"
+              : "border-transparent text-m3-on-surface-variant hover:bg-m3-surface-container-low hover:text-m3-on-surface"
           }`}
         >
           {t(tab)}

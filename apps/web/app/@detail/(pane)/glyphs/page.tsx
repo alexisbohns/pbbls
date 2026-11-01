@@ -10,8 +10,8 @@ import { GlyphsEmptyState } from "@/components/glyphs/GlyphsEmptyState"
 import { GlyphTabs, type GlyphTab } from "@/components/glyphs/GlyphTabs"
 import { MarketGlyphs } from "@/components/glyphs/MarketGlyphs"
 import { FavouriteGlyphs } from "@/components/glyphs/FavouriteGlyphs"
-import { PageLayout } from "@/components/layout/PageLayout"
-import { PageHeader } from "@/components/layout/PageHeader"
+import { DetailTopBar } from "@/components/layout/DetailTopBar"
+import { Button } from "@/components/ui/button"
 
 function GlyphsView() {
   const params = useSearchParams()
@@ -20,18 +20,16 @@ function GlyphsView() {
   const { marks, loading } = useMarks()
 
   return (
-    <section>
-      <PageHeader
+    <>
+      <DetailTopBar
         title={t("title")}
-        rightSlot={
-          <Link
-            href="/carve"
-            className="text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
+        actions={
+          <Button variant="ghost" nativeButton={false} render={<Link href="/carve" />} className="m3-type-label-large h-10 rounded-full px-3 text-m3-primary">
             {t("carveNew")}
-          </Link>
+          </Button>
         }
       />
+      <section className="mx-auto w-full max-w-2xl px-4 pt-2 pb-12">
       <GlyphTabs active={tab} />
 
       {tab === "market" ? (
@@ -45,16 +43,16 @@ function GlyphsView() {
       ) : (
         <GlyphList marks={marks} />
       )}
-    </section>
+      </section>
+    </>
   )
 }
 
+/** Glyphs, in the detail area beside You (#1384, two-area spec D2, D6). */
 export default function GlyphsPage() {
   return (
-    <PageLayout>
-      <Suspense>
-        <GlyphsView />
-      </Suspense>
-    </PageLayout>
+    <Suspense>
+      <GlyphsView />
+    </Suspense>
   )
 }

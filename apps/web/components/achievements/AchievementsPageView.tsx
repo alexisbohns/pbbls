@@ -4,7 +4,7 @@ import { useCallback, useReducer } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
-import { PageHeader } from "@/components/layout/PageHeader"
+import { DetailTopBar } from "@/components/layout/DetailTopBar"
 import { Button } from "@/components/ui/button"
 import { useAchievementPalettes } from "@/lib/data/useAchievementPalettes"
 import { useAchievementsPage } from "@/lib/data/useAchievementsPage"
@@ -49,9 +49,9 @@ export function AchievementsPageView() {
   )
 
   return (
-    <div className="min-h-dvh bg-spine-ground font-spine text-spine-ink">
-      <div className="mx-auto w-full max-w-md px-4 pt-4 pb-24 md:max-w-3xl md:px-6 md:pt-8">
-        <PageHeader title={t("title")} backHref="/profile" />
+    <div className="min-h-full bg-spine-ground font-spine text-spine-ink">
+      <DetailTopBar title={t("title")} />
+      <div className="mx-auto w-full max-w-2xl px-4 pt-2 pb-24">
         {page ? (
           <>
             <AchievementsPageContent page={page} palettes={palettes} pulling={pulling} onPull={onPull} onOpen={open} />

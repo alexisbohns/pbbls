@@ -1,12 +1,11 @@
 "use client"
 
 import { use } from "react"
-import Link from "next/link"
-import { ChevronLeft } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { AnnouncementDetail } from "@/components/lab/AnnouncementDetail"
-import { PageLayout } from "@/components/layout/PageLayout"
+import { DetailTopBar } from "@/components/layout/DetailTopBar"
 
+/** An announcement, nested under the Lab in the detail area (#1384, two-area spec D2). */
 export default function AnnouncementPage({
   params,
 }: {
@@ -16,19 +15,11 @@ export default function AnnouncementPage({
   const t = useTranslations("lab")
 
   return (
-    <PageLayout>
-      <section>
-        <nav className="mb-6">
-          <Link
-            href="/lab"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ChevronLeft className="size-4" aria-hidden />
-            {t("back")}
-          </Link>
-        </nav>
+    <>
+      <DetailTopBar title={t("title")} backHref="/lab" />
+      <div className="mx-auto w-full max-w-2xl px-4 pt-2 pb-12">
         <AnnouncementDetail id={id} />
-      </section>
-    </PageLayout>
+      </div>
+    </>
   )
 }

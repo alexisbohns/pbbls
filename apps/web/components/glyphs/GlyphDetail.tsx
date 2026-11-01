@@ -32,7 +32,6 @@ export function GlyphDetail({
   locked,
   submitSlot,
 }: GlyphDetailProps) {
-  const t = useTranslations("glyphs")
   const tDetail = useTranslations("glyphs.detail")
   const tSubmit = useTranslations("glyphs.submit")
   const tCard = useTranslations("glyphs.card")
@@ -92,20 +91,18 @@ export function GlyphDetail({
           </form>
         ) : (
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold">
-              {mark.name || t("untitled")}
-            </h1>
+            {/* The name is the detail's title, in the top bar (#1384, two-area spec D6): here, only its edit. */}
             {!locked && (
               <Button
                 variant="ghost"
-                size="icon-xs"
+                className="h-10 rounded-full px-3 text-m3-primary"
                 onClick={() => {
                   setEditValue(mark.name ?? "")
                   setIsEditing(true)
                 }}
-                aria-label={tDetail("editAria")}
               >
                 <DrawDotted className={PBBLS_ICON_SIZE.inline} />
+                {tDetail("editAria")}
               </Button>
             )}
             {submitSlot}
