@@ -2,7 +2,10 @@
 
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { ChevronRight, Trophy } from "lucide-react"
+import { ChevronRight } from "lucide-react"
+import { PebbleGlowMd } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { SectionCard } from "@/components/profile/SectionCard"
 import { AchievementShelfBadge } from "@/components/profile/AchievementShelfBadge"
 import { shelfDisplays } from "@/lib/achievements/shelf"
@@ -30,7 +33,7 @@ export function AchievementsShelf() {
       <SectionCard>
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
-            <Trophy className="size-[18px] shrink-0 text-primary" aria-hidden />
+            <PebbleGlowMd className={cn(PBBLS_ICON_SIZE.row, "shrink-0 text-primary")} />
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="text-base font-semibold text-foreground">{t("title")}</span>
               <span className="text-sm text-muted-foreground">

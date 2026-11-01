@@ -1,8 +1,9 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Compass, Gem, Heart, Layers, Lock, PenTool, Shapes, Store, Trophy, Users } from "lucide-react"
-import type { LucideIcon } from "lucide-react"
+import { Lock } from "lucide-react"
+import { Collection, Heart, PebbleDottedGlyph, PebbleGlowMd, People, Stack } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE, type PbblsIconComponent } from "@/lib/icons/pbbls-icon"
 import { cn } from "@/lib/utils"
 import { useFormatDate } from "@/lib/i18n"
 import type { Achievement, AchievementFamily } from "@/lib/types"
@@ -11,15 +12,17 @@ import type { AchievementCopy } from "@/lib/i18n"
 // Seeded rows carry no glyph_id today, so every badge renders its family's
 // fallback icon (D12). Glyph rendering for admin-assigned visuals ships with
 // the rewarding-moment satellite — deliberately not built here.
-const FAMILY_ICONS: Record<AchievementFamily, LucideIcon> = {
-  pebble_count: Gem,
+// `domain_first` and `glyph_sales` take the family default until the chrome
+// wave draws life domain and market (iOS `familySymbol`).
+const FAMILY_ICONS: Record<AchievementFamily, PbblsIconComponent> = {
+  pebble_count: Stack,
   emotion_first: Heart,
-  domain_first: Compass,
-  first_collection: Layers,
-  first_glyph: PenTool,
-  first_soul: Users,
-  glyph_count: Shapes,
-  glyph_sales: Store,
+  domain_first: PebbleGlowMd,
+  first_collection: Collection,
+  first_glyph: PebbleDottedGlyph,
+  first_soul: People,
+  glyph_count: PebbleDottedGlyph,
+  glyph_sales: PebbleGlowMd,
 }
 
 type AchievementBadgeProps = {
@@ -35,7 +38,7 @@ export function AchievementBadge({ achievement, copy, unlockedAt }: AchievementB
   // The DB types family as string and the provider narrows it with a cast, so
   // a server ahead of this build can ship families we don't know yet. Degrade
   // to a generic icon instead of crashing the grid on an undefined component.
-  const Icon = FAMILY_ICONS[achievement.family] ?? Trophy
+  const Icon = FAMILY_ICONS[achievement.family] ?? PebbleGlowMd
   const locked = unlockedAt === undefined
 
   // Locked state is never color-only: the greyed treatment is paired with a
@@ -53,7 +56,7 @@ export function AchievementBadge({ achievement, copy, unlockedAt }: AchievementB
           locked ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary",
         )}
       >
-        <Icon aria-hidden className="size-6" />
+        <Icon className={PBBLS_ICON_SIZE.tile} />
       </div>
       <span className="text-sm font-semibold text-foreground">{copy.title}</span>
       <span className="text-xs text-muted-foreground">{copy.description}</span>

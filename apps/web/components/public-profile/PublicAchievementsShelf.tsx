@@ -1,6 +1,8 @@
 "use client"
 
-import { Trophy } from "lucide-react"
+import { PebbleGlowMd } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import { SectionCard } from "@/components/profile/SectionCard"
 import { AchievementShelfBadge } from "@/components/profile/AchievementShelfBadge"
@@ -32,7 +34,7 @@ export function PublicAchievementsShelf({
   return (
     <SectionCard>
       <div className="flex items-center gap-3">
-        <Trophy className="size-[18px] shrink-0 text-primary" aria-hidden />
+        <PebbleGlowMd className={cn(PBBLS_ICON_SIZE.row, "shrink-0 text-primary")} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="text-base font-semibold text-foreground">{t("achievements")}</span>
           <span className="text-sm text-muted-foreground">

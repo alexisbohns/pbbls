@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Sparkle } from "lucide-react"
+import { KarmaDot } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import type { KarmaReason } from "@/lib/types"
 
@@ -32,7 +34,7 @@ export function KarmaActivityPill({ toastId, amount, reason }: KarmaActivityPill
       aria-label={label}
       className="flex items-center gap-2 rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-lg ring-1 ring-white/10 transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 dark:bg-neutral-800 motion-reduce:transition-none motion-reduce:active:scale-100"
     >
-      <Sparkle aria-hidden className="size-4 text-amber-300" />
+      <KarmaDot className={cn(PBBLS_ICON_SIZE.inline, "text-amber-300")} />
       <span aria-hidden>{t("amount", { amount })}</span>
     </button>
   )

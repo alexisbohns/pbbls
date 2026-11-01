@@ -1,7 +1,8 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Sparkle } from "lucide-react"
+import { KarmaDot } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useWallet } from "@/lib/data/useWallet"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -19,7 +20,7 @@ export function WalletView() {
         <PageHeader title={t("title")} backHref="/path" />
         <Card className="flex flex-col gap-2 p-6">
         <div className="flex items-center gap-2">
-          <Sparkle className="size-5" aria-hidden />
+          <KarmaDot className={PBBLS_ICON_SIZE.row} />
           <span className="text-3xl font-bold tabular-nums">{loading ? "—" : balance}</span>
           <span className="text-sm text-muted-foreground">{t("balance")}</span>
         </div>

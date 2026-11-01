@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { CalendarDays, Shell, Sparkles } from "lucide-react"
+import { CalendarDate, KarmaDot, PebbleRound } from "@pbbls/icons"
 import type { RippleSummary } from "@/lib/types"
 import { SectionCard } from "@/components/profile/SectionCard"
 import { SectionLabel } from "@/components/ui/SectionLabel"
@@ -35,9 +35,9 @@ export function StatsCard({
       <RipplesRow ripple={ripple} assiduity={assiduity} />
       <div className="h-px bg-border" />
       <div className="flex items-start">
-        <DataTile value={daysPracticed} icon={CalendarDays} label={t("days")} />
-        <DataTile value={pebbles} icon={Shell} label={t("pebbles")} />
-        <DataTile value={karma} icon={Sparkles} label={t("karma")} />
+        <DataTile value={daysPracticed} icon={CalendarDate} label={t("days")} />
+        <DataTile value={pebbles} icon={PebbleRound} label={t("pebbles")} />
+        <DataTile value={karma} icon={KarmaDot} label={t("karma")} />
       </div>
     </SectionCard>
   )

@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Trophy } from "lucide-react"
+import { PebbleGlowLg } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import {
   Dialog,
   DialogContent,
@@ -103,7 +104,7 @@ export function AchievementMomentHost() {
             aria-hidden
             className="mb-2 grid size-20 place-items-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-300"
           >
-            <Trophy className="size-10" />
+            <PebbleGlowLg className={PBBLS_ICON_SIZE.hero} />
           </span>
           <p className="text-sm font-medium text-muted-foreground">
             {t("achievementUnlockedEyebrow")}
