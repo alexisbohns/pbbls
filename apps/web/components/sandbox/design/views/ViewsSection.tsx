@@ -2,7 +2,9 @@ import { DesignSection } from "../DesignSection"
 import { Specimen } from "../Specimen"
 import { DeviceFrame } from "./DeviceFrame"
 import { HomeView } from "./HomeView"
+import { CollectionsView } from "./CollectionsView"
 import { PathView } from "./PathView"
+import { PeopleView } from "./PeopleView"
 import { PebbleDetailView } from "./PebbleDetailView"
 import { ProfileView } from "./ProfileView"
 import { SettingsView } from "./SettingsView"
@@ -37,6 +39,16 @@ export function ViewsSection() {
       >
         <DeviceFrame>
           <PathView />
+        </DeviceFrame>
+      </Specimen>
+      <Specimen id="view-people" note="The tab root on the M3 ground, with the app navigation. Fed by the fixture store.">
+        <DeviceFrame>
+          <PeopleView />
+        </DeviceFrame>
+      </Specimen>
+      <Specimen id="view-collections" note="The tab root on the M3 ground, with the app navigation. Fed by the fixture store.">
+        <DeviceFrame>
+          <CollectionsView />
         </DeviceFrame>
       </Specimen>
       <Specimen

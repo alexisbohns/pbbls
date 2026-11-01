@@ -67,10 +67,12 @@ export const SPECIMENS = [
   // views: composed from their feature components, fed by the fixture store
   { id: "view-home", name: "Home", source: "app/home/page.tsx", section: "views", m3: "tuned" },
   { id: "view-you", name: "You", source: "app/profile/page.tsx", section: "views", m3: "tuned" },
-  { id: "view-path", name: "Path", source: "app/path/page.tsx", section: "views", m3: "bridged" },
+  { id: "view-path", name: "Path", source: "app/path/page.tsx", section: "views", m3: "tuned" },
+  { id: "view-people", name: "People", source: "app/souls/page.tsx", section: "views", m3: "tuned" },
+  { id: "view-collections", name: "Collections", source: "app/collections/page.tsx", section: "views", m3: "tuned" },
   { id: "view-pebble", name: "Pebble detail", source: "app/pebble/[id]/page.tsx", section: "views", m3: "bridged" },
   { id: "view-profile", name: "Profile (before You)", source: "components/sandbox/design/views/ProfileView.tsx", section: "views", m3: "bridged" },
-  { id: "view-settings", name: "Settings", source: "app/settings/page.tsx", section: "views", m3: "bridged" },
+  { id: "view-settings", name: "Settings", source: "app/settings/page.tsx", section: "views", m3: "tuned" },
 ] as const satisfies readonly SpecimenEntry[]
 
 export type SpecimenId = (typeof SPECIMENS)[number]["id"]

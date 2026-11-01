@@ -1734,3 +1734,33 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The client issues #1462, #1463 and #1464 need no code.
 - **Supersedes / Superseded-by:** narrows D9 of `docs/superpowers/specs/2026-10-29-achievements-page-design.md` to the six firsts, and reverses the #1372 launch step for `complete-emotions` and `complete-domains`.
 - **Refs:** #1458, #1462, #1463, #1464, `packages/supabase/supabase/migrations/20261101090000_defer_emotion_domain_ceremonies.sql`, `packages/supabase/scripts/verify-achievements.ts`.
+
+## 2026-11-01 — The web's five tabs share one M3 ground and one navigation, a bar or a rail as on Android; Home is the landing; Inclusive Sans is bundled (#1384)
+
+- **Status:** taken
+- **Scope:** web (the column tap, the glyph counts and log out in Settings are cross-surface)
+- **Context:**
+  - The web had no Home: signed-in users landed on the Path, and `/profile` was a stack of shadcn cards on the colour-world theme. The M3 roles existed only on `/sandbox/design`. `layout/BottomNav` and `layout/Sidebar` were dead code, and You's shortcuts row was the web's only link to `/connections`.
+  - A first cut gave Home and You an M3 island and the other hub roots a floating pill styled per route, beside the Path's own pill. The maintainer rejected it on 2026-11-01: three grounds (M3 surface, the Spine's `#ECE8DF`, the colour world) and two navigations, styled differently per page, and no desktop layout.
+  - Android already answers both: the Spine paper is M3 `surface` (#1118, D2), and one `NavigationSuiteScaffold` shows a bar on Compact windows and a rail from Medium (600 dp).
+- **Decision:**
+  - **D1, Home is `/home` and the signed-in landing;** You keeps `/profile`. The landing redirect, the login and callback fallbacks, onboarding's two pushes and the offline link go to `/home`; an explicit `next` still wins.
+  - **One `AppNavigation`** (Home · Path · People · Collections · You), rendered once by the shell on the five tab roots, the Path included. An M3 navigation bar under 600 px and an M3 rail on the start edge from 600 px (Android's Medium width class), switched by CSS alone; always on the M3 roles (`.m3`), the current tab on a `primaryContainer` indicator with `aria-current="page"`, as Android colours it. `<main>` leaves it room through one utility, `app-nav-room`.
+  - **One route table,** `lib/config/app-routes.ts` (`routeShell`): which routes are tabs, which wear the M3 ground, which are full-screen or immersive, which run the onboarding and invite gates. The shell, the navigation and the sandbox read it.
+  - **One M3 ground on the tabs:** Home, the Path, People, Collections, You, Settings and the guides render in an `.m3` island (`M3Island`, server-rendered). Inside it the Spine's paper tokens are M3 roles by the #1118 rule set (ground `surface`, stock `stock`, inks `onSurface` / `onSurfaceVariant` / `outline`, hairlines `onSurface` at the web's alphas), and the page grain is dropped as on Android; the rake stays. Deeper pages (soul and collection detail, record, carve, wallet, a pebble) keep the colour world for now.
+  - **The Path's pill keeps bounce and karma** (a link to the wallet); its Profile link goes, since the navigation carries You. On a tab root a `PageHeader` has no back button.
+  - **D17, the glyph counts are served** (`glyphs_carved`, `glyphs_owned`); a missing or null count shows the line without a number. **D20, log out lives in Settings** on every surface (web: a Session section above Delete account). **D5,** Inclusive Sans comes from the maintainer's files through `next/font/local` (`preload: false`).
+  - **You's settings control is a platform-standard icon button** (shadcn `Button`, ghost, icon, as a link, 44 × 44), not the drawn stone of D15: chrome stays platform-native on every surface; stones, cards and Ysabeau are for content.
+- **Why:**
+  - **Rejected, a floating pill styled per route:** the same control looked different on each tab and the Path kept a second one.
+  - **Rejected, keeping the Spine's own hex paper on the Path:** the ground changed between two tabs; Android already maps the Spine onto `surface`.
+  - **Rejected, choosing bar or rail in JavaScript:** a width read after hydration flashes the wrong layout; a CSS breakpoint does not.
+  - **Rejected, flipping the whole web to M3 now:** deeper pages would all move in one change; the tabs ship without that decision.
+- **Consequences:**
+  - Two themes still coexist: the M3 ground on the tabs, Settings and the guides; the colour world one tap deeper. The colour-world switch in Settings now changes deeper pages only.
+  - On the M3 ground the Path's paper is `#FEF9EF` / `#131315` (M3 `surface`), not `#ECE8DF` / `#141416`; the stone palettes were tuned on the old paper.
+  - A new route that needs the navigation or the M3 ground is a line in `app-routes.ts`, never a flag in `MainContent`.
+  - The island needs the generator's descendant selectors: an M3 rule written for `.m3.dark` alone misses every tab.
+  - `layout/Sidebar` stays dead. The old profile components (`CollectionsCard`, `ShortcutsRow`, `StatsCard`, `LabCard`) stay for the sandbox and the public profile (deleting them is a follow-up).
+- **Supersedes / Superseded-by:** extends **2026-09-28 — The web follows Android's M3-evo theme** (#986): `.m3` is no longer sandbox-only. Answers the consequence of **2026-10-18 — Android's brand neutrals are the Spine paper** (#1118) that the rule set is the mapping "if the web ever points `--spine-*` at roles": it now does, on the M3 ground.
+- **Refs:** #1384, #1118, #1386, #1387, `docs/superpowers/specs/2026-10-31-web-home-and-you-design.md` (D1–D23), `docs/superpowers/plans/2026-10-31-web-home-and-you.md`, `apps/web/lib/config/{navigation,app-routes}.ts`, `apps/web/components/layout/{AppNavigation,MainContent,M3Island}.tsx`, `apps/web/components/layout/main-class.ts`, `apps/web/app/globals.css` ("The Spine on Material", `app-nav-room`), `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/PebblesNavigationSuite.kt`.

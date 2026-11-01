@@ -63,7 +63,7 @@ export function LandingPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace("/path")
+      router.replace("/home")
     }
   }, [isLoading, isAuthenticated, router])
 

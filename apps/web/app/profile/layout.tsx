@@ -4,5 +4,5 @@ import "@fontsource-variable/ysabeau/wght-italic.css"
 import { M3Island } from "@/components/layout/M3Island"
 
 export default function ProfileLayout({ children }: { children: React.ReactNode }) {
-  return <M3Island className="pb-[calc(6rem+var(--safe-area-bottom))]">{children}</M3Island>
+  return <M3Island>{children}</M3Island>
 }

@@ -20,6 +20,9 @@
     }
   },
   "nav": {
+    "home": "Accueil",
+    "people": "Proches",
+    "you": "Toi",
     "path": "Chemin",
     "record": "Capturer",
     "collections": "Collections",
@@ -784,6 +787,10 @@
   },
   "souls": {
     "title": "Âmes",
+    "connectionsRow": {
+      "title": "Connexions",
+      "line": "Les personnes avec qui tu partages ton chemin."
+    },
     "loading": "Chargement…",
     "addAria": "Ajouter une âme",
     "addPlaceholder": "Nom de la nouvelle âme…",

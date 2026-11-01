@@ -20,6 +20,9 @@
     }
   },
   "nav": {
+    "home": "Home",
+    "people": "People",
+    "you": "You",
     "path": "Path",
     "record": "Record",
     "collections": "Collections",
@@ -784,6 +787,10 @@
   },
   "souls": {
     "title": "Souls",
+    "connectionsRow": {
+      "title": "Connections",
+      "line": "The people you share your path with."
+    },
     "loading": "Loading…",
     "addAria": "Add soul",
     "addPlaceholder": "New soul name…",

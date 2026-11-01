@@ -4,6 +4,7 @@ import { isStoreBackedRoute } from "./store-routes"
 describe("isStoreBackedRoute", () => {
   it("matches store-backed routes and their children", () => {
     for (const pathname of [
+      "/home",
       "/path",
       "/path/2026-W19",
       "/souls",

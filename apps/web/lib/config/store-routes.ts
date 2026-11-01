@@ -9,6 +9,7 @@
  * reach the store through components rather than through app/*\/page.tsx).
  */
 export const STORE_BACKED_PREFIXES = [
+  "/home",
   "/path",
   "/record",
   "/pebble",

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/layout/PageHeader"
+import { M3Island } from "@/components/layout/M3Island"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { ConsentSection } from "@/components/settings/ConsentSection"
 import { DeleteAccountSection } from "@/components/settings/DeleteAccountSection"
@@ -33,37 +34,39 @@ export function SettingsView() {
   const glyph = glyphs.find((g) => g.id === glyphId) ?? null
 
   return (
-    <PageLayout>
-      <section>
-        <PageHeader
-          title={t("title")}
-          backHref="/profile"
-          rightSlot={
-            <Button size="sm" disabled>
-              {t("save")}
-            </Button>
-          }
-        />
-        <div className="flex flex-col gap-6">
-          <GlyphHeader glyph={glyph} glyphs={glyphs} selectedGlyphId={glyphId} onSelect={setGlyphId} />
-          <InformationsSection name={name} onNameChange={setName} email={DESIGN_ACCOUNT.email} />
-          <PublicProfileSection
-            handle={handle}
-            onHandleChange={setHandle}
-            handleError={null}
-            isPublic={isPublic}
-            onPublicChange={setIsPublic}
-            savedHandle={DESIGN_PROFILE.handle}
-            savedPublic={DESIGN_PROFILE.public_profile}
+    <M3Island>
+      <PageLayout>
+        <section>
+          <PageHeader
+            title={t("title")}
+            backHref="/profile"
+            rightSlot={
+              <Button size="sm" disabled>
+                {t("save")}
+              </Button>
+            }
           />
-          <ProvidersSection providers={DESIGN_ACCOUNT.providers ?? []} />
-          <PasswordSection value={password} onChange={setPassword} />
-          <LegalSection />
-          <ConsentSection consent={DESIGN_CONSENT} onGrant={async () => {}} onWithdrawn={() => {}} />
-          <SignOutSection onSignOut={async () => {}} />
-          <DeleteAccountSection onDeleted={() => {}} reauthReturnTo="/sandbox/design" />
-        </div>
-      </section>
-    </PageLayout>
+          <div className="flex flex-col gap-6">
+            <GlyphHeader glyph={glyph} glyphs={glyphs} selectedGlyphId={glyphId} onSelect={setGlyphId} />
+            <InformationsSection name={name} onNameChange={setName} email={DESIGN_ACCOUNT.email} />
+            <PublicProfileSection
+              handle={handle}
+              onHandleChange={setHandle}
+              handleError={null}
+              isPublic={isPublic}
+              onPublicChange={setIsPublic}
+              savedHandle={DESIGN_PROFILE.handle}
+              savedPublic={DESIGN_PROFILE.public_profile}
+            />
+            <ProvidersSection providers={DESIGN_ACCOUNT.providers ?? []} />
+            <PasswordSection value={password} onChange={setPassword} />
+            <LegalSection />
+            <ConsentSection consent={DESIGN_CONSENT} onGrant={async () => {}} onWithdrawn={() => {}} />
+            <SignOutSection onSignOut={async () => {}} />
+            <DeleteAccountSection onDeleted={() => {}} reauthReturnTo="/sandbox/design" />
+          </div>
+        </section>
+      </PageLayout>
+    </M3Island>
   )
 }
