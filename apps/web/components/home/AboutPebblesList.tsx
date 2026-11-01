@@ -1,9 +1,7 @@
-import Link from "next/link"
-import { ChevronRight } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { GUIDE_ICONS } from "@/lib/config/guides"
 import type { Guide } from "@/lib/types"
-import { IconChip } from "./IconChip"
+import { LinkRow } from "./LinkRow"
 
 /**
  * About Pebbles (#1384, spec D14): the head, then one row per published guide
@@ -21,17 +19,13 @@ export function AboutPebblesList({ guides }: { guides: readonly Guide[] }) {
         <ul>
           {guides.map((guide, i) => (
             <li key={guide.slug}>
-              <Link
+              <LinkRow
                 href={`/guides/${guide.slug}`}
-                className="flex items-center gap-3.5 rounded-xl px-1 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <IconChip seed={`chip-${i}`} icon={guide.illustration ? GUIDE_ICONS[guide.illustration] : null} />
-                <span className="min-w-0 flex-1">
-                  <span className="pb-type-row-title block text-m3-on-surface">{guide.title}</span>
-                  <span className="pb-type-row-line mt-0.5 block text-m3-on-surface-variant">{guide.summary}</span>
-                </span>
-                <ChevronRight aria-hidden="true" className="size-[18px] shrink-0 text-m3-outline" />
-              </Link>
+                seed={`chip-${i}`}
+                icon={guide.illustration ? GUIDE_ICONS[guide.illustration] : null}
+                title={guide.title}
+                line={guide.summary}
+              />
             </li>
           ))}
         </ul>
