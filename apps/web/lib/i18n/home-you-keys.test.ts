@@ -19,6 +19,13 @@ describe("Home and You strings", () => {
     expect(keys(fr.settings.signOut).sort()).toEqual(keys(en.settings.signOut).sort())
   })
 
+  it("has the navigation's labels and People's Connections row in both", () => {
+    for (const catalogue of [en, fr]) {
+      expect([catalogue.nav.home, catalogue.nav.people, catalogue.nav.you].every((v) => v.trim() !== "")).toBe(true)
+    }
+    expect(keys(fr.souls.connectionsRow).sort()).toEqual(keys(en.souls.connectionsRow).sort())
+  })
+
   it("has no empty string under home or you", () => {
     for (const catalogue of [en.home, fr.home, en.you, fr.you]) {
       for (const key of keys(catalogue)) {

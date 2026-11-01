@@ -8,7 +8,8 @@ import { buttonVariants } from "@/components/ui/button"
 
 type PageHeaderProps = {
   title: string
-  backHref?: string
+  /** Where back goes; `null` on a tab root, where the navigation stands in for it (#1384). */
+  backHref?: string | null
   rightSlot?: ReactNode
 }
 
@@ -16,13 +17,15 @@ export function PageHeader({ title, backHref = "/profile", rightSlot }: PageHead
   const t = useTranslations("common")
   return (
     <header className="mb-6 flex items-center gap-3">
-      <Link
-        href={backHref}
-        aria-label={t("back")}
-        className={buttonVariants({ variant: "outline", size: "icon" })}
-      >
-        <ChevronLeft />
-      </Link>
+      {backHref !== null && (
+        <Link
+          href={backHref}
+          aria-label={t("back")}
+          className={buttonVariants({ variant: "outline", size: "icon" })}
+        >
+          <ChevronLeft />
+        </Link>
+      )}
       <h1 className="flex-1 font-heading text-2xl font-semibold">{title}</h1>
       {rightSlot}
     </header>
