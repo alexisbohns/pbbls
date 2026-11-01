@@ -122,6 +122,22 @@ struct TabNavigationHomeTests {
         #expect(restored.home == [.guide("stones")])
     }
 
+    @Test func aGlyphTabRouteRoundTrips() throws {
+        let nav = TabNavigation()
+        nav.select(.you)
+        nav.you = [.glyphTab(.owned)]
+        let data = try #require(nav.snapshot.encoded)
+        let restored = try #require(TabNavigation.Snapshot.decoded(from: data))
+        #expect(restored.you == [.glyphTab(.owned)])
+    }
+
+    @Test func anUnknownGlyphTabFallsBackToAnEmptyStack() throws {
+        let json = #"{"selected":"you","you":[{"glyphTab":{"_0":"swapped"}}]}"#
+        let restored = try #require(TabNavigation.Snapshot.decoded(from: Data(json.utf8)))
+        #expect(restored.you.isEmpty)
+        #expect(restored.selected == .you)
+    }
+
     @Test func anIntentPopsTheDestinationToItsRoot() {
         let nav = TabNavigation()
         nav.people = [.connections]

@@ -13,6 +13,9 @@ final class PathStatsService {
     var pebbles: Int?
     var daysPracticed: Int?
     var assiduity: [Bool]?
+    /// You's Glyphs lines (#1382 D19); nil until the server sends them.
+    var glyphsCarved: Int?
+    var glyphsOwned: Int?
 
     private var isLoading = false
     private(set) var hasLoaded = false
@@ -49,6 +52,8 @@ final class PathStatsService {
         pebbles = nil
         daysPracticed = nil
         assiduity = nil
+        glyphsCarved = nil
+        glyphsOwned = nil
         hasLoaded = false
         // A fetch still in flight belongs to the ended session. Releasing the
         // guard lets the next user's first `load()` start instead of no-oping.
@@ -95,6 +100,8 @@ final class PathStatsService {
             if let row {
                 self.daysPracticed = row.daysPracticed
                 self.assiduity     = row.assiduity
+                self.glyphsCarved  = row.glyphsCarved
+                self.glyphsOwned   = row.glyphsOwned
             }
         } catch {
             logger.error("engagement fetch failed: \(error.localizedDescription, privacy: .private)")

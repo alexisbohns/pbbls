@@ -1,9 +1,8 @@
 import SwiftUI
 
-/// Centered identity banner: a glyph above a title + optional subtitle. Shared by
-/// the profile header (`ProfileBanner` — glyph, display name, "Member since …")
-/// and the glyph swap drawer (glyph, name, creator handle). Falls back to the
-/// `.carve` placeholder when there are no strokes.
+/// Centered identity banner: a glyph above a title + optional subtitle, as the
+/// glyph swap drawer shows it (glyph, name, creator handle); You draws its own
+/// header since #1382. Falls back to the `.carve` placeholder when there are no strokes.
 struct GlyphBanner: View {
     /// A byline renders its name half in the handwritten face (a name is
     /// always hand — issue #515); meta is a plain small-caps line.
@@ -14,8 +13,8 @@ struct GlyphBanner: View {
 
     let strokes: [GlyphStroke]?
     let title: String
-    /// Token for the title. Profile uses `.largeTitleHand`; the glyph swap
-    /// drawer keeps the serif `.title` for the glyph name.
+    /// Token for the title; the glyph swap drawer keeps the serif `.title`
+    /// for the glyph name.
     var titleFont: PebblesFont = .title
     let subtitle: Subtitle?
 

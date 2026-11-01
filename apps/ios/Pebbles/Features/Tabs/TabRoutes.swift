@@ -57,7 +57,10 @@ enum CollectionsRoute: Codable, Hashable {
 }
 
 enum YouRoute: Codable, Hashable {
+    /// Glyphs on its first tab: the carve intent and restored stacks.
     case glyphs
+    /// Glyphs on one tab, from You's Glyphs rows (#1382 D19).
+    case glyphTab(GlyphTab)
     case achievements
     case lab
 }

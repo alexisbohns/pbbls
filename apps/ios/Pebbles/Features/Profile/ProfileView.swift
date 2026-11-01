@@ -1,65 +1,22 @@
 import SwiftUI
-import os
 
-private struct ProfileRow: Decodable {
-    var displayName: String?
-    let createdAt: Date
-    var glyphId: UUID?
-    var handle: String?
-    var publicProfile: Bool
-
-    enum CodingKeys: String, CodingKey {
-        case displayName   = "display_name"
-        case createdAt     = "created_at"
-        case glyphId       = "glyph_id"
-        case handle        = "handle"
-        case publicProfile = "public_profile"
-    }
-}
-
+/// The You tab root (#1382 D16): the routes, the Settings sheet and Home's
+/// carve intent around `YouContent`. Settings opens from the platform's own
+/// toolbar button in the navigation bar, as before the redesign; the header
+/// starts below the bar.
 struct ProfileView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(PathStatsService.self) private var stats
     @Environment(TabNavigation.self) private var nav
 
-    @State private var profile: ProfileRow?
-    @State private var glyphStrokes: [GlyphStroke]?
+    @State private var model = YouModel()
     @State private var isPresentingSettings = false
-    @State private var hasLoadedProfile = false
-
-    private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile-view")
 
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                VStack(spacing: Spacing.xl) {
-                    ProfileBanner(
-                        displayName: profile?.displayName,
-                        memberSince: profile?.createdAt,
-                        glyphStrokes: glyphStrokes
-                    )
-
-                    ProfileShortcutsRow()
-
-                    ProfileStatsCard(
-                        ripple: stats.ripple,
-                        assiduity: stats.assiduity,
-                        daysPracticed: stats.daysPracticed,
-                        pebbles: stats.pebbles,
-                        karma: stats.karma
-                    )
-
-                    ProfileAchievementsCard()
-
-                    ProfileLabCard()
-
-                    ProfileLogoutButton {
-                        Task { await supabase.signOut() }
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 32)
-                .id(TabNavigation.scrollTopAnchor)
+                YouContent(model: model, stats: YouStats(stats))
+                    .id(TabNavigation.scrollTopAnchor)
             }
             .onChange(of: nav.scrollToTop[.you, default: 0]) {
                 withAnimation { proxy.scrollTo(TabNavigation.scrollTopAnchor, anchor: .top) }
@@ -67,12 +24,12 @@ struct ProfileView: View {
         }
         .navigationDestination(for: YouRoute.self) { route in
             switch route {
-            case .glyphs: GlyphsListView()
+            case .glyphs: GlyphsListView(initialTab: .mine)
+            case .glyphTab(let tab): GlyphsListView(initialTab: tab)
             case .achievements: AchievementsView()
             case .lab: LabView()
             }
         }
-        .pebblesToolbarTitle("Profile")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 PebbleToolbarButton(action: { isPresentingSettings = true }) {
@@ -87,66 +44,23 @@ struct ProfileView: View {
             if nav.peekIntent(for: .you) == .carveGlyph, nav.you.last != .glyphs { nav.you.append(.glyphs) }
         }
         .task {
+            if model.service == nil { model.service = YouService(client: supabase.client) }
             await stats.load()
-            await loadProfile()
+            await model.loadProfile()
         }
         .sheet(isPresented: $isPresentingSettings) {
             SettingsSheet(
-                initialDisplayName: profile?.displayName ?? "",
-                initialGlyphId: profile?.glyphId,
-                initialGlyphStrokes: glyphStrokes,
-                initialHandle: profile?.handle,
-                initialPublicProfile: profile?.publicProfile ?? false,
+                initialDisplayName: model.profile?.displayName ?? "",
+                initialGlyphId: model.profile?.glyphId,
+                initialGlyphStrokes: model.glyphStrokes,
+                initialHandle: model.profile?.handle,
+                initialPublicProfile: model.profile?.publicProfile ?? false,
                 email: supabase.session?.user.email,
                 onSaved: { newName, newGlyph, newHandle, isPublic in
-                    if var current = profile {
-                        current.displayName = newName
-                        current.glyphId = newGlyph?.id ?? current.glyphId
-                        current.handle = newHandle
-                        current.publicProfile = isPublic
-                        profile = current
-                    }
-                    if let strokes = newGlyph?.strokes {
-                        glyphStrokes = strokes
-                    }
+                    model.applySettings(name: newName, glyph: newGlyph.map { ($0.id, $0.strokes) },
+                                        handle: newHandle, isPublic: isPublic)
                 }
             )
-        }
-    }
-
-    private func loadProfile() async {
-        guard !hasLoadedProfile else { return }
-        do {
-            let row: ProfileRow = try await supabase.client
-                .from("profiles")
-                .select("display_name, created_at, glyph_id, handle, public_profile")
-                .single().execute().value
-            self.profile = row
-            self.hasLoadedProfile = true
-
-            if let glyphId = row.glyphId {
-                await loadGlyphStrokes(glyphId)
-            }
-        } catch {
-            logger.error("profile fetch failed: \(error.localizedDescription, privacy: .private)")
-            self.hasLoadedProfile = true
-        }
-    }
-
-    private func loadGlyphStrokes(_ glyphId: UUID) async {
-        // GlyphService.list() confirms the column name is "strokes" (a JSONB array
-        // decoding into [GlyphStroke]). We follow the same shape here for a
-        // single-row fetch by id.
-        struct GlyphRow: Decodable { let strokes: [GlyphStroke] }
-        do {
-            let row: GlyphRow = try await supabase.client
-                .from("glyphs")
-                .select("strokes")
-                .eq("id", value: glyphId.uuidString)
-                .single().execute().value
-            self.glyphStrokes = row.strokes
-        } catch {
-            logger.error("glyph fetch failed: \(error.localizedDescription, privacy: .private)")
         }
     }
 }
