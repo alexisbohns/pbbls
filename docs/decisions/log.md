@@ -1788,3 +1788,25 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - `PageHeader`, `PageLayout` and the old profile cards are now used only by the immersive flows, the public pages and the sandbox (deleting what becomes dead is a follow-up).
 - **Supersedes / Superseded-by:** extends the entry above (one navigation, one M3 ground) and **2026-10-18 — Android's brand neutrals are the Spine paper** (#1118) on the web.
 - **Refs:** #1384, #940, #1437, the spec and plan above, `apps/web/app/@detail/`, `apps/web/app/(home|path|people|collections|you)/`, `apps/web/components/layout/{MainContent,RightArea,TabArea,DetailPane,DetailTopBar}.tsx`, `apps/web/components/m3/`, `apps/web/lib/config/app-routes.ts`.
+
+## 2026-11-01 — Settings links are remote, consent links stay built in (#1489)
+
+- **Status:** taken
+- **Scope:** cross-surface (database, admin, web, iOS, Android)
+- **Context:**
+  - Each client hardcoded its Settings legal links, so adding a page (credits, support) or changing a URL meant three releases.
+- **Decision:**
+  - A typed `settings_links` table (section `legal | about | support`, EN/FR title, `https://` or `mailto:` URL, published), edited in the admin, read directly by every client. Each client shows its kept or built-in list at once and refreshes when Settings opens.
+  - Only the Settings group is remote. Sign-up, welcome, the consent gate and web re-consent keep their built-in Terms and Privacy URLs.
+  - Licences: iOS ships a generated `Settings.bundle` Licenses pane; Android bundles the font OFL files with no screen; `/docs/credits` lists the libraries the apps ship.
+- **Why:**
+  - Consent is bound to a document version; it must never depend on admin data that can be unpublished or mistyped.
+  - **Rejected, a generic key/value config table:** no other remote flag exists, and an untyped JSON blob loses the column checks.
+  - **Rejected, a static JSON on the web:** every change would still need a deploy.
+  - **Rejected, a native Android licences screen:** no store requires one; the OFL is met by shipping the files, and the browser covers viewing.
+- **Consequences:**
+  - Unpublishing every row empties the Settings links on all surfaces (an empty successful payload is data, not failure).
+  - A new section needs a migration (the CHECK) and a client release; new rows in existing sections need neither.
+  - The iOS licences pane fails CI when a resolved Swift package has no licence text.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #1489, #1491, #1492, #1493, #1395, stack #1500 (#1494–#1499), `docs/superpowers/specs/2026-11-01-settings-links-design.md`.
