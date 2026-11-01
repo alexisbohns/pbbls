@@ -9,6 +9,8 @@
     "lint": "swiftlint",
     "test": "xcodegen generate && xcodebuild test -scheme Pebbles -destination 'platform=iOS Simulator,name=iPhone 17'",
     "verify:contrast": "node Scripts/verify-color-contrast.mjs",
-    "verify:privacy": "node Scripts/verify-privacy-manifests.mjs"
+    "verify:privacy": "node Scripts/verify-privacy-manifests.mjs",
+    "generate:licenses": "node Scripts/generate-licenses.mjs",
+    "verify:licenses": "node Scripts/generate-licenses.mjs --check"
   }
 }

@@ -205,6 +205,14 @@ jobs:
             -quiet \
             CODE_SIGNING_ALLOWED=NO
 
+      # The tests above resolved the packages, so Package.resolved exists. Fails
+      # when Settings.bundle is stale against Licenses/*.txt, or when a resolved
+      # package has no licence text (spec 2026-11-01-settings-links §4).
+      - name: Verify licences
+        if: ${{ !cancelled() }}
+        working-directory: apps/ios
+        run: node Scripts/generate-licenses.mjs --check
+
       # `String(localized:)` ignores the SwiftUI environment, so French is a
       # second process-level pass over the references only. Each reference
       # declares its locales and returns without a check in the other pass.
