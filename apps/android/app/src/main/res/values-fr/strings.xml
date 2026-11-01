@@ -790,6 +790,21 @@
     <string name="home_shortcut_camera">Appareil photo</string>
     <string name="home_shortcut_quick">Moment rapide</string>
     <string name="home_shortcut_pebble">Nouveau galet</string>
+    <!-- Home's quick moment sheet (#1383 D7, iOS home.quick.*): a name and a time, then save_moment. -->
+    <string name="home_quick_title">Moment rapide</string>
+    <string name="home_quick_name">Que s\'est-il passé ?</string>
+    <string name="home_quick_when">Quand</string>
+    <string name="home_quick_save_open">Enregistrer et ouvrir</string>
+    <string name="home_quick_save_close">Enregistrer et fermer</string>
+    <string name="home_quick_error">Impossible d\'enregistrer le moment. Réessaie.</string>
+    <!-- Home's camera moment (#1383 D7, iOS home.camera.*): the system camera, an upload, then save_moment. -->
+    <string name="home_camera_saving">Enregistrement de ta photo…</string>
+    <string name="home_camera_unavailable">Pas encore d\'appareil photo</string>
+    <string name="home_camera_unavailable_body">Cet appareil n\'a pas d\'appareil photo. Utilise un moment rapide.</string>
+    <string name="home_camera_upload_failed">La photo n\'a pas été envoyée. Rien n\'a été enregistré.</string>
+    <!-- The snackbar after a camera moment (#1383 D7, iOS home.toast.*): "Moment saved · 14:32", the time in the locale's short form. -->
+    <string name="home_toast_saved">Moment enregistré · %1$s</string>
+    <string name="home_toast_name">Nommer</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">

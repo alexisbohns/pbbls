@@ -38,6 +38,7 @@ private fun CapturePreview(
     @StringRes errorRes: Int? = null,
     closeConfirm: Boolean = false,
     closeOffersSave: Boolean = false,
+    chainsComplete: Boolean = false,
 ) {
     val flow =
         CaptureFlowState(
@@ -56,6 +57,7 @@ private fun CapturePreview(
                 seededFromPhoto = seededFromPhoto,
                 isCloseConfirmPresented = closeConfirm,
                 closeOffersSave = closeOffersSave,
+                chainsComplete = chainsComplete,
             ),
         model = model,
         onPickPhoto = {},
@@ -124,6 +126,16 @@ fun Capture_NameEmptyDark() {
 @Composable
 fun Capture_NamePhotoOnly() {
     PebblesTheme { CapturePreview(CaptureStep.NAME, snap = pendingSnap(AttachedSnap.UploadState.UPLOADED)) }
+}
+
+/** Home's New pebble (#1383 D7): one save, "Make it a pebble now", and no save-only choice. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun Capture_NameChainsComplete() {
+    PebblesTheme { CapturePreview(CaptureStep.NAME, name = "Swim at dawn", chainsComplete = true) }
 }
 
 /** A refused save stays on the step with the R10 copy. */

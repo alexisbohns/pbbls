@@ -796,6 +796,21 @@
     <string name="home_shortcut_camera">Camera</string>
     <string name="home_shortcut_quick">Quick moment</string>
     <string name="home_shortcut_pebble">New pebble</string>
+    <!-- Home's quick moment sheet (#1383 D7, iOS home.quick.*): a name and a time, then save_moment. -->
+    <string name="home_quick_title">Quick moment</string>
+    <string name="home_quick_name">What happened?</string>
+    <string name="home_quick_when">When</string>
+    <string name="home_quick_save_open">Save &amp; open</string>
+    <string name="home_quick_save_close">Save &amp; close</string>
+    <string name="home_quick_error">Couldn\'t save the moment. Try again.</string>
+    <!-- Home's camera moment (#1383 D7, iOS home.camera.*): the system camera, an upload, then save_moment. -->
+    <string name="home_camera_saving">Saving your photo…</string>
+    <string name="home_camera_unavailable">No camera yet</string>
+    <string name="home_camera_unavailable_body">This device has no camera. Use a quick moment instead.</string>
+    <string name="home_camera_upload_failed">The photo didn\'t upload. Nothing was saved.</string>
+    <!-- The snackbar after a camera moment (#1383 D7, iOS home.toast.*): "Moment saved · 14:32", the time in the locale's short form. -->
+    <string name="home_toast_saved">Moment saved · %1$s</string>
+    <string name="home_toast_name">Name it</string>
 
     <!-- Path · Spine (#1122): the week's opening, persons, contents, stones, cards and mouth. -->
     <plurals name="path_spine_summary_pebbles">

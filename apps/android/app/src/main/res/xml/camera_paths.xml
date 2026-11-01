@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The one folder Home's camera moment shares with the camera app (#1383 D7); see AndroidManifest.xml. -->
+<paths>
+    <cache-path name="camera" path="camera/" />
+</paths>
