@@ -1,6 +1,8 @@
 import { DesignSection } from "../DesignSection"
 import { Specimen } from "../Specimen"
 import { DeviceFrame } from "./DeviceFrame"
+import { GuideOpenView } from "./GuideOpenView"
+import { WalletOpenView } from "./WalletOpenView"
 import { HomeView } from "./HomeView"
 import { CollectionsView } from "./CollectionsView"
 import { PathView } from "./PathView"
@@ -49,6 +51,19 @@ export function ViewsSection() {
       <Specimen id="view-collections" note="The tab root on the M3 ground, with the app navigation. Fed by the fixture store.">
         <DeviceFrame>
           <CollectionsView />
+        </DeviceFrame>
+      </Specimen>
+      <Specimen
+        id="view-guide-open"
+        note="A detail beside its tab: from 1024 px it covers the right area (choose Fill); below, it is the overlay. Close does nothing here."
+      >
+        <DeviceFrame>
+          <GuideOpenView />
+        </DeviceFrame>
+      </Specimen>
+      <Specimen id="view-wallet-open" note="The wallet over the Path's line. It reads the network, so it shows its empty state here.">
+        <DeviceFrame>
+          <WalletOpenView />
         </DeviceFrame>
       </Specimen>
       <Specimen
