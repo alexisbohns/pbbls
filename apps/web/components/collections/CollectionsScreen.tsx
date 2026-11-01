@@ -14,7 +14,8 @@ import { PageLayout } from "@/components/layout/PageLayout"
 import { PageHeader } from "@/components/layout/PageHeader"
 import type { Collection } from "@/lib/types"
 
-export default function CollectionsPage() {
+/** Collections (#1384): the list and a new collection, on the M3 ground. */
+export function CollectionsScreen() {
   const { collections, loading, addCollection } = useCollections()
   const t = useTranslations("collections")
   const tForm = useTranslations("collections.form")

@@ -14,7 +14,8 @@ import { M3Island } from "@/components/layout/M3Island"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { PageHeader } from "@/components/layout/PageHeader"
 
-export default function SoulsPage() {
+/** People (#1384): the souls list, the Connections row and adding a soul, on the M3 ground. */
+export function PeopleScreen() {
   const { souls, loading: soulsLoading, addSoul } = useSouls()
   const { moments, loading: momentsLoading } = useMoments()
   const { glyphs: marks } = useUsableGlyphs()

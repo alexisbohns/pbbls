@@ -37,7 +37,8 @@ function PathContent() {
   )
 }
 
-export default function PathPage() {
+/** The Path tab's route content (#1384): the URL's `focus` and `week` read under a Suspense boundary. */
+export function PathRoute() {
   return (
     <Suspense fallback={null}>
       <PathContent />
