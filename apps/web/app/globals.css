@@ -641,6 +641,27 @@
   }
 }
 
+/* An M3 list group (#1384, two-area spec D7, as Android #1437): items on
+   surface-container a 2 px gap apart, 16 px corners at the group's ends and
+   4 px between. Put it on the <ul>; each <li> is one item (its own box clipped to the corners). */
+@utility m3-list-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  & > li {
+    overflow: hidden;
+    border-radius: 4px;
+  }
+  & > li:first-child {
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+  }
+  & > li:last-child {
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+  }
+}
+
 /* A detail's motion (#1384, two-area spec D9), through React's <ViewTransition>
    on DetailPane. M3's emphasized curves: in over 300 ms decelerating, out over
    200 ms accelerating; a 150 ms fade-through from one detail to the next. The
