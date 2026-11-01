@@ -56,3 +56,20 @@ fails the PR and uploads the reference/actual/diff triptych as
   name is unaffected, so adding a variant never re-baselines what was already
   there.
 
+## The Arkaik mapping
+
+`apps/android/arkaik-shots.json` maps Arkaik node ids to reference stems, so the
+hosted map can show each Android view's render. It has 16 entries today.
+
+- **A mapped preview keeps its name, or the mapping moves with it.** Renaming a
+  preview, adding a variant to it, or deleting it means editing the mapping in
+  the same PR. Only Light/Paper, default-size, English renders fill a view's
+  slot; a variant goes in only when mapped to an acceptance id.
+- **Check it locally** with `node scripts/arkaik/android-shots-manifest.mjs
+  --check`. `android.yml` runs the same check right after checkout, before
+  Gradle, and fails when a stem no longer resolves to exactly one PNG.
+- **A re-baseline on `main` records itself** through
+  `.github/workflows/android-screenshots-record.yml`; nothing to do by hand.
+- **Owed:** two previews could not be mapped yet. The Collections list has only
+  a wide two-pane render, and Connections carries a `name = "Connections · list"`
+  on its preview that bakes a space into the file name.
