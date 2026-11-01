@@ -5,15 +5,14 @@ import { useTranslations } from "next-intl"
 import { WeekRoll } from "@/components/path/WeekRoll"
 import { WeekPager } from "@/components/path/WeekPager"
 import { PathBottomDock } from "@/components/path/PathBottomDock"
-import { PebblePeek } from "@/components/path/PebblePeek"
 import { usePathFocus } from "@/lib/hooks/usePathFocus"
 import { cn } from "@/lib/utils"
 import { isoWeekNumber } from "@/lib/utils/week-roll-entries"
 
 /**
  * The whole Path in one area (#1052): the roll, the week pager with each
- * week's verso and recto (side by side as a spread from 900 px), the dock and
- * the peek. It is the Path tab below 1024 px; from there the tab shows the
+ * week's verso and recto (side by side as a spread from 900 px) and the dock.
+ * A stone opens its pebble as a detail, over the Path. It is the Path tab below 1024 px; from there the tab shows the
  * verso alone and the line runs in the right area (#1384, two-area spec D4).
  * Its focus is the app shell's `PathFocusProvider`, and the stones' sprite is
  * mounted once by the shell.
@@ -59,7 +58,6 @@ export function PathScreen() {
         />
       </div>
       <PathBottomDock className="spread:right-auto spread:left-(--spine-verso-x) spread:w-(--spine-verso-w)" />
-      <PebblePeek momentId={focus.openMomentId} onClose={focus.closeMoment} />
     </div>
   )
 }

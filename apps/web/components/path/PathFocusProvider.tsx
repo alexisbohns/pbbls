@@ -34,7 +34,6 @@ export function PathFocusProvider({ children }: { children: ReactNode }) {
   const today = useMemo(() => new Date(), [])
   const entries = useMemo(() => buildWeekRollEntries(moments, today), [moments, today])
   const [focusedKey, setFocusedKey] = useState<string>(() => isoWeekKey(today))
-  const [openMomentId, setOpenMomentId] = useState<string | null>(null)
   const [readingDay, setReadingDay] = useState<number | undefined>(undefined)
   const presses = useSpinePresses()
 
@@ -92,8 +91,9 @@ export function PathFocusProvider({ children }: { children: ReactNode }) {
   }, [entries, resolvedFocusedKey])
 
   const focusOn = useCallback((date: Date) => setFocusedKey(isoWeekKey(date)), [])
-  const openMoment = useCallback((momentId: string) => setOpenMomentId(momentId), [])
-  const closeMoment = useCallback(() => setOpenMomentId(null), [])
+  // A pebble opens as a detail (two-area spec D5): beside the line from
+  // 1024 px, over the Path below. The peek is gone.
+  const openMoment = useCallback((momentId: string) => router.push(`/pebble/${momentId}`), [router])
   const applyParams = useCallback((focus: string | null, week: Date | null) => setParams({ focus, week }), [])
 
   const value = useMemo(
@@ -105,12 +105,10 @@ export function PathFocusProvider({ children }: { children: ReactNode }) {
       focusedEntry,
       focusedWeekStart,
       focusOn,
-      openMomentId,
       openMoment,
-      closeMoment,
       applyParams,
     }),
-    [today, entries, souls, loading, moments.length, focusedEntry, focusedWeekStart, focusOn, openMomentId, openMoment, closeMoment, applyParams],
+    [today, entries, souls, loading, moments.length, focusedEntry, focusedWeekStart, focusOn, openMoment, applyParams],
   )
   const reading = useMemo(() => ({ readingDay, setReadingDay }), [readingDay])
 

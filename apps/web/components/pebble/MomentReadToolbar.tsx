@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback } from "react"
-import { MoreHorizontal, Share2, X } from "lucide-react"
+import { MoreHorizontal, Share2 } from "lucide-react"
 import { DrawDotted, PebbleRound, Trash } from "@pbbls/icons"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
@@ -21,17 +21,18 @@ type MomentReadToolbarProps = {
   onEditMoment: () => void
   onEditPebble: () => void
   onDelete: () => void
-  /** Shown only when given (the peek, and the page's way back). */
-  onClose?: () => void
 }
 
+// M3 standard icon buttons (#1384, two-area spec D5): 44 px, the state layer
+// on hover, the ring on focus.
 const ICON_BUTTON =
-  "grid size-10 place-items-center rounded-full bg-surface text-muted-foreground transition-colors hover:bg-primary hover:text-surface active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+  "grid size-11 place-items-center rounded-full text-m3-on-surface-variant transition-colors hover:bg-m3-surface-container-high outline-none focus-visible:ring-2 focus-visible:ring-m3-primary disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none"
 
 /**
- * The read page's top bar (R7, PD-W3): Share for a public pebble (the PEBBLE's
- * share URL, `/p/<pebbleId>`), then the overflow menu (Edit moment, Edit
- * pebble when the caller's pebble exists, Delete) and Close.
+ * The read page's actions (R7, PD-W3), on the detail's top bar since #1384:
+ * Share for a public pebble (the PEBBLE's share URL, `/p/<pebbleId>`), then
+ * the overflow menu (Edit moment, Edit pebble when the caller's pebble
+ * exists, Delete). The pane's own control closes it.
  */
 export function MomentReadToolbar({
   moment,
@@ -39,7 +40,6 @@ export function MomentReadToolbar({
   onEditMoment,
   onEditPebble,
   onDelete,
-  onClose,
 }: MomentReadToolbarProps) {
   const t = useTranslations("moment.read")
   const tPebble = useTranslations("pebble")
@@ -66,48 +66,37 @@ export function MomentReadToolbar({
   }, [shareId, tPebble])
 
   return (
-    <header className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        {shareId ? (
-          <button type="button" aria-label={tPebble("shareAria")} onClick={() => void handleShare()} className={ICON_BUTTON}>
-            <Share2 className="size-4" aria-hidden />
-          </button>
-        ) : (
-          <span className="size-10" aria-hidden />
-        )}
-      </div>
-      <div className="flex items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger aria-label={t("more")} disabled={busy} className={ICON_BUTTON}>
-            <MoreHorizontal className="size-4" aria-hidden />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-[180px]">
-            <DropdownMenuItem onClick={onEditMoment}>
-              <DrawDotted />
-              {t("editMoment")}
+    <div className="flex items-center">
+      {shareId && (
+        <button type="button" aria-label={tPebble("shareAria")} onClick={() => void handleShare()} className={ICON_BUTTON}>
+          <Share2 className="size-5" aria-hidden />
+        </button>
+      )}
+      <DropdownMenu>
+        <DropdownMenuTrigger aria-label={t("more")} disabled={busy} className={ICON_BUTTON}>
+          <MoreHorizontal className="size-5" aria-hidden />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[180px]">
+          <DropdownMenuItem onClick={onEditMoment}>
+            <DrawDotted />
+            {t("editMoment")}
+          </DropdownMenuItem>
+          {pebble && (
+            <DropdownMenuItem onClick={onEditPebble}>
+              <PebbleRound />
+              {t("editPebble")}
             </DropdownMenuItem>
-            {pebble && (
-              <DropdownMenuItem onClick={onEditPebble}>
-                <PebbleRound />
-                {t("editPebble")}
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={onDelete}
-              className="text-destructive data-highlighted:bg-destructive/10 data-highlighted:text-destructive"
-            >
-              <Trash />
-              {t("delete")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {onClose && (
-          <button type="button" onClick={onClose} aria-label={tPebble("peek.close")} className={ICON_BUTTON}>
-            <X className="size-4" aria-hidden />
-          </button>
-        )}
-      </div>
-    </header>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={onDelete}
+            className="text-destructive data-highlighted:bg-destructive/10 data-highlighted:text-destructive"
+          >
+            <Trash />
+            {t("delete")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }

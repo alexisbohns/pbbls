@@ -5,8 +5,8 @@ import type { Soul } from "@/lib/types"
 import type { WeekRollEntry } from "@/lib/utils/week-roll-entries"
 
 /**
- * The Path's shared state (#1384, two-area spec D4): the focused week, the
- * moment open in the peek and (apart) the day being read on the line. One provider
+ * The Path's shared state (#1384, two-area spec D4): the focused week, how a
+ * stone opens its pebble and (apart) the day being read on the line. One provider
  * (`PathFocusProvider`) holds it, so the Path's two halves (the verso with the
  * opening, persons and contents; the recto with the line) can sit in
  * different places and stay on one week.
@@ -21,10 +21,8 @@ export type PathFocus = {
   focusedEntry: WeekRollEntry | undefined
   focusedWeekStart: Date
   focusOn: (date: Date) => void
-  /** The moment open in the peek (by MOMENT id, #1050), or null. */
-  openMomentId: string | null
+  /** Opens a moment's pebble (by MOMENT id, #1050) as a detail. */
   openMoment: (momentId: string) => void
-  closeMoment: () => void
   /** Hands over the URL's `?focus=` and `?week=` (the Path tab reads them); each is consumed once. */
   applyParams: (focusMomentId: string | null, focusWeek: Date | null) => void
 }

@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { DETAIL_TITLE_ID, useDetailPane } from "@/lib/hooks/useDetailPane"
 import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 
 type DetailTopBarProps = {
   title: string
@@ -16,6 +17,8 @@ type DetailTopBarProps = {
   onBack?: () => void
   /** Trailing actions: icon buttons or a menu. */
   actions?: ReactNode
+  /** The detail shows its own name large (the pebble): the title still names it, for assistive tech only. */
+  quietTitle?: boolean
 }
 
 /**
@@ -24,7 +27,7 @@ type DetailTopBarProps = {
  * it), the title as the detail's heading (`h2`, below the left area's `h1`),
  * then the page's actions. It stays at the top while the detail scrolls.
  */
-export function DetailTopBar({ title, backHref, onBack, actions }: DetailTopBarProps) {
+export function DetailTopBar({ title, backHref, onBack, actions, quietTitle = false }: DetailTopBarProps) {
   const t = useTranslations("detail")
   const { wide, close } = useDetailPane()
   const control = "size-11 shrink-0 rounded-full text-m3-on-surface"
@@ -44,7 +47,11 @@ export function DetailTopBar({ title, backHref, onBack, actions }: DetailTopBarP
           {wide ? <X className={PBBLS_ICON_SIZE.toolbar} /> : <ChevronLeft className={PBBLS_ICON_SIZE.toolbar} />}
         </Button>
       )}
-      <h2 id={DETAIL_TITLE_ID} tabIndex={-1} className="m3-type-title-large min-w-0 flex-1 truncate px-1 text-m3-on-surface outline-none">
+      <h2
+        id={DETAIL_TITLE_ID}
+        tabIndex={-1}
+        className={cn("m3-type-title-large min-w-0 flex-1 truncate px-1 text-m3-on-surface outline-none", quietTitle && "opacity-0")}
+      >
         {title}
       </h2>
       {actions}
