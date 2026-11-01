@@ -1,19 +1,4 @@
-"use client"
-
-import { use } from "react"
-import { PageLayout } from "@/components/layout/PageLayout"
-import { ConnectionDetail } from "@/components/connections/ConnectionDetail"
-
-export default function ConnectionDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = use(params)
-
-  return (
-    <PageLayout>
-      <ConnectionDetail connectionId={id} />
-    </PageLayout>
-  )
+/** A connection opens in the `@detail` slot (`app/@detail/(pane)/connections/[id]`); here, under it, People stays (#1384, two-area spec D2). */
+export default function ConnectionUnder() {
+  return null
 }

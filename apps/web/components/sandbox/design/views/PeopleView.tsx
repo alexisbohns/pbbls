@@ -1,12 +1,13 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { PeopleScreen } from "@/components/souls/PeopleScreen"
 import { ShellFrame } from "./ShellFrame"
 
-/** app/souls/page.tsx (People) in the shell, fed by the fixture store. */
-export function PeopleView() {
+/** People's tab in the shell, fed by the fixture store; optionally with one of its details open. */
+export function PeopleView({ at = "/souls", detail }: { at?: string; detail?: ReactNode }) {
   return (
-    <ShellFrame at="/souls">
+    <ShellFrame at={at} detail={detail}>
       <PeopleScreen />
     </ShellFrame>
   )

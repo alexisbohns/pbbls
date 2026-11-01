@@ -65,7 +65,7 @@ export function ConnectionRow({ connection, onRemove }: ConnectionRowProps) {
   }
 
   return (
-    <li className="flex items-center gap-3 rounded-xl border border-muted px-3 py-2.5 dark:border-accent">
+    <li className="flex min-h-14 items-center gap-3 bg-m3-surface-container px-3 py-2">
       <Link
         href={`/connections/${connection.id}`}
         aria-label={t("openDetailAria", { name })}

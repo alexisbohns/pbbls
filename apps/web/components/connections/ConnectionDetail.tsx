@@ -1,8 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { ChevronLeft, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
+import type { ReactNode } from "react"
 import { useTranslations } from "next-intl"
+import { DetailTopBar } from "@/components/layout/DetailTopBar"
 import { useConnections } from "@/lib/data/useConnections"
 import { useConnectionPebbles } from "@/lib/data/useConnectionPebbles"
 import { PeerGlyphIcon } from "@/components/connections/PeerGlyphIcon"
@@ -21,8 +23,8 @@ type ConnectionDetailProps = {
  * shared list; `notFound` from the latter and "missing from the former list"
  * are indistinguishable by design (foreign vs. removed connection id).
  *
- * No shared back-nav primitive exists in components/ui, so the back
- * affordance is a plain `nav > Link` with a chevron.
+ * A detail nested under Connections (#1384, two-area spec D5): its top bar
+ * goes back to the list, and carries the peer's name as the title.
  */
 export function ConnectionDetail({ connectionId }: ConnectionDetailProps) {
   const t = useTranslations("connections")
@@ -44,16 +46,25 @@ export function ConnectionDetail({ connectionId }: ConnectionDetailProps) {
   const connection = connections.find((c) => c.id === connectionId)
   const notFound = pebblesNotFound || (!connectionsLoading && !connectionsError && !connection)
 
+  const frame = (title: string, content: ReactNode) => (
+    <>
+      <DetailTopBar title={title} backHref="/connections" />
+      <div className="mx-auto w-full max-w-2xl px-4 pt-2 pb-12">{content}</div>
+    </>
+  )
+
   if (loading) {
-    return (
+    return frame(
+      "",
       <div className="flex justify-center py-12" aria-live="polite">
         <Loader2 className="size-5 animate-spin text-muted-foreground" aria-label={t("loading")} />
-      </div>
+      </div>,
     )
   }
 
   if (notFound) {
-    return (
+    return frame(
+      t("title"),
       <div className="flex flex-col items-center gap-4 py-12 text-center">
         <p className="text-sm text-muted-foreground">{t("detailNotFound")}</p>
         <Link
@@ -62,32 +73,25 @@ export function ConnectionDetail({ connectionId }: ConnectionDetailProps) {
         >
           {t("backToConnections")}
         </Link>
-      </div>
+      </div>,
     )
   }
 
   if (error || !connection) {
-    return (
+    return frame(
+      t("title"),
       <p role="alert" className="py-12 text-center text-sm text-destructive">
         {t("loadError")}
-      </p>
+      </p>,
     )
   }
 
   const name = connection.peer.displayName
   const connectedAgo = formatRelative(connection.connectedAt)
 
-  return (
+  return frame(
+    name,
     <section>
-      <nav className="mb-6">
-        <Link
-          href="/connections"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <ChevronLeft className="size-4" aria-hidden />
-          {t("backToConnections")}
-        </Link>
-      </nav>
 
       <header className="mb-8 flex items-center gap-3">
         {connection.peer.glyph ? (
@@ -106,14 +110,13 @@ export function ConnectionDetail({ connectionId }: ConnectionDetailProps) {
           </span>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-semibold text-foreground">{name}</h1>
           <p className="truncate text-xs text-muted-foreground">
             {t("connectedAgo", { ago: connectedAgo })}
           </p>
         </div>
       </header>
 
-      <h2 className="mb-4 text-sm font-medium text-foreground">{t("sharedTitle")}</h2>
+      <h3 className="m3-type-label-large mb-4 px-1 text-m3-primary">{t("sharedTitle")}</h3>
       {pebbles.length === 0 ? (
         <p className="py-10 text-center text-sm text-muted-foreground">{t("sharedEmpty")}</p>
       ) : (
@@ -123,6 +126,6 @@ export function ConnectionDetail({ connectionId }: ConnectionDetailProps) {
           ))}
         </ul>
       )}
-    </section>
+    </section>,
   )
 }

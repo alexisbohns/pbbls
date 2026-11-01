@@ -41,7 +41,7 @@ export function ConnectionsList({ connections, loading, error, onRemove }: Conne
   }
 
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="m3-list-group">
       {connections.map((connection) => (
         <ConnectionRow key={connection.id} connection={connection} onRemove={onRemove} />
       ))}

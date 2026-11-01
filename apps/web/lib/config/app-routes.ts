@@ -37,9 +37,12 @@ export const TAB_ROOTS: readonly string[] = NAV_ITEMS.map((item) => item.href)
  * page stays beside them (two-area spec D2). A route joins this table in the
  * part that moves its page into the slot.
  */
-export const DETAILS: readonly { prefix: string; tab: string }[] = [
+export const DETAILS: readonly { prefix: string; tab: string; /** Only the routes below the prefix (a tab root's own details). */ below?: boolean }[] = [
   { prefix: "/guides", tab: "/home" },
   { prefix: "/wallet", tab: "/path" },
+  { prefix: "/souls", tab: "/souls", below: true },
+  { prefix: "/collections", tab: "/collections", below: true },
+  { prefix: "/connections", tab: "/souls" },
 ]
 
 /** Beyond the tabs and the details, the routes on the M3 ground. Deeper pages keep the colour world for now. */
@@ -60,7 +63,7 @@ export function underPrefix(pathname: string, prefix: string): boolean {
 export function routeShell(pathname: string): RouteShell {
   const tab = TAB_ROOTS.includes(pathname)
   const path = underPrefix(pathname, "/path")
-  const detailOf = DETAILS.find((d) => underPrefix(pathname, d.prefix))
+  const detailOf = DETAILS.find((d) => (d.below ? pathname.startsWith(d.prefix + "/") : underPrefix(pathname, d.prefix)))
   return {
     tab,
     detail: detailOf !== undefined,

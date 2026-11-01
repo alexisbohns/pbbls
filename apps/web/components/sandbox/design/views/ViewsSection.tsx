@@ -1,7 +1,9 @@
 import { DesignSection } from "../DesignSection"
 import { Specimen } from "../Specimen"
 import { DeviceFrame } from "./DeviceFrame"
+import { CollectionOpenView } from "./CollectionOpenView"
 import { GuideOpenView } from "./GuideOpenView"
+import { SoulOpenView } from "./SoulOpenView"
 import { WalletOpenView } from "./WalletOpenView"
 import { HomeView } from "./HomeView"
 import { CollectionsView } from "./CollectionsView"
@@ -59,6 +61,16 @@ export function ViewsSection() {
       >
         <DeviceFrame>
           <GuideOpenView />
+        </DeviceFrame>
+      </Specimen>
+      <Specimen id="view-soul-open" note="A soul beside People, from the fixture store. Writes do nothing.">
+        <DeviceFrame>
+          <SoulOpenView />
+        </DeviceFrame>
+      </Specimen>
+      <Specimen id="view-collection-open" note="A collection beside Collections, from the fixture store. Writes do nothing.">
+        <DeviceFrame>
+          <CollectionOpenView />
         </DeviceFrame>
       </Specimen>
       <Specimen id="view-wallet-open" note="The wallet over the Path's line. It reads the network, so it shows its empty state here.">
