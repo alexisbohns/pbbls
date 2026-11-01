@@ -16,7 +16,10 @@ type Props = { children?: React.ReactNode } & Record<string, unknown>
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: Props & { href: string }) => createElement("a", { href, ...rest }, children),
 }))
-vi.mock("lucide-react", () => ({
+// The rest of lucide stays real: the right area imports the Path's peek, which
+// never renders here (the line mounts only from 1024 px).
+vi.mock("lucide-react", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
   ChevronLeft: () => createElement("svg", { "data-icon": "back" }),
   X: () => createElement("svg", { "data-icon": "close" }),
 }))
