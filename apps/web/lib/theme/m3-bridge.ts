@@ -1,6 +1,6 @@
 /**
  * The shadcn token → M3 role bridge, as data for the design page's bridge
- * table. The CSS in globals.css (`:root.m3`) is what actually applies it;
+ * table. The CSS in globals.css (`:root.m3, :root .m3`) is what actually applies it;
  * m3-bridge.test.ts fails if the two ever disagree.
  */
 export const M3_BRIDGE: readonly (readonly [token: string, role: string])[] = [

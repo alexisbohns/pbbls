@@ -137,8 +137,16 @@ describe("schemeSelector", () => {
   it("gives each scheme a unique, contrast-and-mode-specific selector", () => {
     expect(schemeSelector("light", "standard")).toBe(".m3")
     expect(schemeSelector("light", "medium")).toBe(".m3.m3-contrast-medium")
-    expect(schemeSelector("dark", "standard")).toBe(".m3.dark")
-    expect(schemeSelector("dark", "high")).toBe(".m3.dark.m3-contrast-high")
+    expect(schemeSelector("dark", "standard")).toBe(".m3.dark, .dark .m3")
+    expect(schemeSelector("dark", "medium")).toBe(".m3.dark.m3-contrast-medium, .dark .m3.m3-contrast-medium")
+    expect(schemeSelector("dark", "high")).toBe(".m3.dark.m3-contrast-high, .dark .m3.m3-contrast-high")
+  })
+
+  it("never gives two schemes the same selector", () => {
+    const modes = ["light", "dark"] as const
+    const contrasts = ["standard", "medium", "high"] as const
+    const all = modes.flatMap((m) => contrasts.flatMap((c) => schemeSelector(m, c).split(", ")))
+    expect(new Set(all).size).toBe(all.length)
   })
 })
 
@@ -157,7 +165,25 @@ describe("renderM3ThemeCss", () => {
 
   it("writes each scheme's values under its selector", () => {
     expect(css).toContain(".m3 {\n  --m3-primary: #8E4955;")
-    expect(css).toContain(".m3.dark.m3-contrast-high {\n  --m3-primary: #FFEBED;")
+    expect(css).toContain(".m3.dark.m3-contrast-high, .dark .m3.m3-contrast-high {\n  --m3-primary: #FFEBED;")
+  })
+
+  // #1384 D4: the card's stock and the hairlines, from the SPINE_TOKENS rows iOS reads.
+  it("writes the stock, rule and card rule blends into every scheme block", () => {
+    const blocks = css.split(/\n(?=\.m3)/).slice(1)
+    expect(blocks).toHaveLength(6)
+    for (const block of blocks) {
+      const dark = block.startsWith(".m3.dark")
+      expect(block).toContain(`--m3-stock: var(--m3-surface-container-${dark ? "low" : "lowest"});`)
+      expect(block).toContain(`--m3-rule: color-mix(in srgb, var(--m3-on-surface) ${dark ? 12 : 14}%, transparent);`)
+      expect(block).toContain(`--m3-card-rule: color-mix(in srgb, var(--m3-on-surface) ${dark ? 18 : 22}%, transparent);`)
+    }
+  })
+
+  it("exposes the blends as Tailwind colours", () => {
+    for (const name of ["stock", "rule", "card-rule"]) {
+      expect(css).toContain(`  --color-m3-${name}: var(--m3-${name});`)
+    }
   })
 
   it("ends with a single newline", () => {
