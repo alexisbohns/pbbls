@@ -201,6 +201,15 @@ final class PathModel {
         focus(entry.weekStart)
     }
 
+    /// Home's week columns (#1382 D9): the Monday's page, or now when the Path has none.
+    func focus(weekStarting day: CalendarDay) {
+        guard let start = day.date(in: calendar.timeZone), pages.contains(.week(start)) else {
+            focusCurrentWeek()
+            return
+        }
+        focus(.week(start))
+    }
+
     /// The Path tab reselected at its root: "top of Path" means now.
     func focusCurrentWeek() {
         let current = PathPage.week(currentWeekStart)

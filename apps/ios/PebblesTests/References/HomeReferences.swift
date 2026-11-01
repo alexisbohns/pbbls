@@ -293,3 +293,65 @@ extension References {
         }
     }
 }
+
+// The c3 greeting's checks (#1382 D10), beside the suite so its body stays in bounds.
+extension References.HomeReferences {
+    /// The evening greeting with a long name in French, at the mock's 358 pt
+    /// (#1382 D10): it must hold one line.
+    static func greetingLongFr() -> some View {
+        let paris = TimeZone(identifier: "Europe/Paris")!
+        let locale = Locale(identifier: ReferenceLocale.current.rawValue)
+        return HomeGreetingView(lines: HomeGreeting.lines(at: HomeFixture.clock, name: "Alexandrine",
+                                                          zone: paris, locale: locale))
+            .frame(width: 358, alignment: .leading)
+            .padding(Spacing.lg)
+            .background(Color.pebbles.surface)
+    }
+
+    @Test func greetingLongFr() throws {
+        ReferenceImage.assertMatches(Self.greetingLongFr(), named: "greetingLongFr",
+                                     config: ReferenceConfig(scheme: .paper, locales: [.fr], width: nil))
+    }
+
+    /// The month's weeks at Home's size (#1382 D8): the fixture October on the
+    /// mock's Saturday, so the last week is the live one.
+    static func monthGrid() -> some View {
+        HomeMonthGrid(month: HomeFixture.month, lookups: HomeFixture.lookups,
+                      today: CalendarDay(year: 2026, month: 10, day: 31), onWeek: { _ in })
+            .padding(Spacing.lg)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.pebbles.surface)
+    }
+
+    @Test(arguments: ReferenceScheme.allCases)
+    func monthGrid(scheme: ReferenceScheme) throws {
+        let locales: Set<ReferenceLocale> = scheme == .paper ? [.en, .fr] : [.en]
+        ReferenceImage.assertMatches(Self.monthGrid(), named: "monthGrid",
+                                     config: ReferenceConfig(scheme: scheme, locales: locales))
+    }
+
+    @Test func monthGridAx2() throws {
+        ReferenceImage.assertMatches(Self.monthGrid(), named: "monthGrid",
+                                     config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+    }
+
+    /// November 2026 before its first pebble: the server sends no weeks, so the
+    /// columns are laid out from the month alone (today Sunday the 1st).
+    static func monthGridEmpty() -> some View {
+        let november = MonthWrap(month: CalendarMonth(year: 2026, month: 11), daysInMonth: 30, firstWeekday: 6,
+                                 pebbles: 0, people: 0, sections: [], cover: nil, weeks: nil, milestones: nil,
+                                 persons: nil, previousMonth: nil, gem: nil, fineEmotions: nil, domains: nil,
+                                 tone: nil, hours: nil)
+        return HomeMonthGrid(month: november, lookups: HomeFixture.lookups,
+                             today: CalendarDay(year: 2026, month: 11, day: 1), onWeek: { _ in })
+            .padding(Spacing.lg)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.pebbles.surface)
+    }
+
+    @Test(arguments: ReferenceScheme.allCases)
+    func monthGridEmpty(scheme: ReferenceScheme) throws {
+        ReferenceImage.assertMatches(Self.monthGridEmpty(), named: "monthGridEmpty",
+                                     config: ReferenceConfig(scheme: scheme))
+    }
+}

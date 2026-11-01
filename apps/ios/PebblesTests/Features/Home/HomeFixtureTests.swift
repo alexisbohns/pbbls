@@ -16,5 +16,6 @@ struct HomeFixtureTests {
         #expect(back.wraps?.months.count == 1 && back.checklist?.state == .done)
         let claim = await HomeFixture.model(.claim)
         #expect(claim.checklist?.state == .claimable)
+        #expect(claim.month?.month == HomeFixture.liveMonth)
     }
 }

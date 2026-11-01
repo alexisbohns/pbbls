@@ -40,6 +40,8 @@ enum HomeRoute: Codable, Hashable {
 /// `takeIntent(for:)`, never persisted.
 enum TabIntent: Equatable {
     case createSoul, createCollection, carveGlyph
+    /// Home's week columns and the wrap sheet (#1382 D9): open the Path on the week starting that Monday.
+    case focusWeek(CalendarDay)
 }
 
 /// Routes carry ids, never models (#903 §3): `SoulWithGlyph` and `Collection`
