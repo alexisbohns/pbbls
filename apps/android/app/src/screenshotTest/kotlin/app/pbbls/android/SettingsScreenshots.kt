@@ -1,253 +1,213 @@
 package app.pbbls.android
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.data.HomeShortcutsLayout
-import app.pbbls.android.core.designsystem.PebblesListDefaults
-import app.pbbls.android.core.designsystem.PebblesListSection
-import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesSectionHeader
+import app.pbbls.android.core.designsystem.ListGroup
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTopBar
-import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.model.HealthDataConsent
-import app.pbbls.android.core.ui.GlyphView
-import app.pbbls.android.core.ui.GlyphViewCase
 import app.pbbls.android.features.profile.HealthConsentRow
 import app.pbbls.android.features.profile.HealthConsentStatus
+import app.pbbls.android.features.profile.SettingsAccountSections
+import app.pbbls.android.features.profile.SettingsActions
+import app.pbbls.android.features.profile.SettingsContent
+import app.pbbls.android.features.profile.SettingsDeviceChoices
+import app.pbbls.android.features.profile.SettingsDeviceSections
+import app.pbbls.android.features.profile.SettingsForm
 import app.pbbls.android.features.profile.SettingsHomeSection
-import app.pbbls.android.features.profile.SettingsLogOutRow
-import app.pbbls.android.features.profile.SettingsNavRow
-import app.pbbls.android.features.profile.settingsRowColors
+import app.pbbls.android.features.profile.SettingsIdentitySections
+import app.pbbls.android.features.profile.SettingsInitial
+import app.pbbls.android.features.profile.SettingsSignInSections
+import app.pbbls.android.features.profile.SettingsUiState
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 
-/**
- * Settings previews (#847). `SettingsScreen` itself reads `LocalProfileService`
- * and `LocalSupabaseService`, and neither can be provided here: `ProfileService`
- * needs a `SupabaseService`, whose constructor goes through `AppEnvironment` and
- * throws whenever `BuildConfig.SUPABASE_URL` is blank — which is every fork PR
- * and every screenshot job that runs without the repo secrets. So this renders
- * the screen's *sections* against the real `PebblesListSection`, `PebblesScreen`
- * and `PebblesTopBar`, with the real string resources, rather than the screen.
+/*
+ * Settings previews (#847), in Android's own Settings form: M3 Expressive segmented list
+ * groups under primary headers, stock switches (#1383). They render the screen's stateless
+ * layer, `SettingsContent`, and its three runs of sections with the real string resources, so
+ * a label clipping at `fontScale = 2f` or a French string squeezing its row shows up.
  *
- * What that buys and what it does not: every field and row here is the one
- * `SettingsScreen` renders — the outlined fields with their labels and
- * supporting text, and the `ListItem` rows (`SettingsNavRow`,
- * `settingsRowColors`, shared with the screen) — so a control that clips its
- * own text at `fontScale = 2f`, or a French label that squeezes its row, shows
- * up. A regression in the screen's
- * own scroll column, its IME padding or its dirty-state top bar does not. That
- * gap closes when Settings grows a stateless content layer the way `PathScreen`
- * has `PathContent`; #848/#849 own that screen's architecture, so it is not
- * pulled forward here.
+ * The whole page is taller than the renderer's frame, so the page preview shows its head (the
+ * top bar, the glyph, the first groups) and each run of sections has a preview of its own, short
+ * enough that its large-font variant stays inside the renderer's 2400 px frame.
  */
+
+/** Noon UTC keeps the localized date the same in any zone the job runs in. */
+private val GivenConsent =
+    HealthConsentStatus.Given(HealthDataConsent("1.4.0", OffsetDateTime.parse("2026-10-01T12:00:00Z")))
+
+/** An email account with a live public profile: the share row shows, Save is enabled. */
+private val EmailAccount =
+    SettingsUiState(
+        initial =
+            SettingsInitial(
+                displayName = "Alexis",
+                handle = "alexis",
+                publicProfile = true,
+                email = "alexis@example.com",
+            ),
+        form = SettingsForm(displayName = "Alexis B.", handle = "alexis", isPublicProfile = true),
+        healthConsent = GivenConsent,
+        isLoading = false,
+    )
+
+/** A Google account with no handle yet: the public switch is disabled, providers replace the password. */
+private val SsoAccount =
+    SettingsUiState(
+        initial = SettingsInitial(displayName = "Alexis", email = "alexis@example.com", providers = listOf("Google")),
+        form = SettingsForm(displayName = "Alexis"),
+        healthConsent = HealthConsentStatus.NotRecorded,
+        isLoading = false,
+    )
+
+private val Device = SettingsDeviceChoices()
+
+/** A run of sections as the page lays it out: the page's gutter and its gap between groups. */
 @Composable
-private fun SettingsWallpaperColorsRow(checked: Boolean) {
-    ListItem(
-        headlineContent = { Text(stringResource(R.string.settings_wallpaper_colors_title)) },
-        supportingContent = { Text(stringResource(R.string.settings_wallpaper_colors_body)) },
-        trailingContent = { Switch(checked = checked, onCheckedChange = null) },
-        colors = settingsRowColors(),
+private fun SectionsFrame(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier =
+            Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xl),
+        content = content,
     )
 }
 
-/** The Haptics section's one row (#1242 D23), as `SettingsScreen` draws it. */
+// The page at phone height: top bar with the back arrow and Save, the glyph, the first groups.
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@PreviewLargeFontTall
+@PreviewWideTall
 @Composable
-private fun SettingsHapticsRow(checked: Boolean) {
-    ListItem(
-        headlineContent = { Text(stringResource(R.string.settings_haptics_vibrations)) },
-        supportingContent = { Text(stringResource(R.string.settings_haptics_footer)) },
-        trailingContent = { Switch(checked = checked, onCheckedChange = null) },
-        colors = settingsRowColors(),
-    )
+fun SettingsPageLight() {
+    PebblesTheme { SettingsContent(state = EmailAccount, device = Device, actions = SettingsActions()) }
 }
 
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-private fun SettingsSections() {
-    val colors = MaterialTheme.colorScheme
-    PebblesScreen(
-        topBar = {
-            PebblesTopBar(
-                title = stringResource(R.string.settings_title),
-                leading = {
-                    PebblesTopBarTextButton(text = stringResource(R.string.action_cancel), onClick = {})
-                },
-                trailing = {
-                    PebblesTopBarTextButton(text = stringResource(R.string.action_save), onClick = {})
-                },
-            )
-        },
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xl),
-        ) {
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                GlyphView(case = GlyphViewCase.CARVE, strokes = null, side = 120.dp)
-            }
+fun SettingsPageDark() {
+    PebblesTheme { SettingsContent(state = EmailAccount, device = Device, actions = SettingsActions()) }
+}
 
-            PebblesListSection(
-                header = stringResource(R.string.settings_appearance_section),
-                rowPadding = PebblesListDefaults.ListItemRowPadding,
-                rows =
-                    listOf(
-                        { SettingsWallpaperColorsRow(checked = true) },
-                        { SettingsWallpaperColorsRow(checked = false) },
+// Appearance, Home and Haptics, switches both on and off so both thumbs are on file.
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@PreviewLargeFont
+@Composable
+fun SettingsDeviceSectionsLight() {
+    PebblesTheme {
+        SectionsFrame {
+            SettingsDeviceSections(
+                device =
+                    SettingsDeviceChoices(
+                        useWallpaperColors = false,
+                        hapticsOn = true,
+                        shortcutsLayout = HomeShortcutsLayout.BENTO,
+                        shortcutsStones = false,
                     ),
-            )
-
-            PebblesListSection(
-                header = stringResource(R.string.settings_haptics_section),
-                rowPadding = PebblesListDefaults.ListItemRowPadding,
-                rows =
-                    listOf(
-                        { SettingsHapticsRow(checked = true) },
-                        { SettingsHapticsRow(checked = false) },
-                    ),
-            )
-
-            Column(verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
-                PebblesSectionHeader(text = stringResource(R.string.settings_informations_header))
-                OutlinedTextField(
-                    value = "Alexis",
-                    onValueChange = {},
-                    label = { Text(stringResource(R.string.settings_name_label)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                OutlinedTextField(
-                    value = "alexis@example.com",
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(R.string.settings_email_label)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
-                PebblesSectionHeader(text = stringResource(R.string.settings_public_profile_header))
-                OutlinedTextField(
-                    value = "alexis",
-                    onValueChange = {},
-                    label = { Text(stringResource(R.string.settings_handle_label)) },
-                    prefix = { Text("@") },
-                    supportingText = { Text(stringResource(R.string.settings_handle_footer)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                PebblesListSection(
-                    rowPadding = PebblesListDefaults.ListItemRowPadding,
-                    rows =
-                        listOf(
-                            {
-                                ListItem(
-                                    headlineContent = { Text(stringResource(R.string.settings_public_profile_toggle)) },
-                                    trailingContent = { Switch(checked = true, onCheckedChange = null) },
-                                    colors = settingsRowColors(),
-                                )
-                            },
-                            { SettingsNavRow(text = stringResource(R.string.settings_public_profile_share), onClick = {}) },
-                        ),
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
-                PebblesSectionHeader(text = stringResource(R.string.settings_password_header))
-                OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
-                    label = { Text(stringResource(R.string.settings_password_placeholder)) },
-                    supportingText = { Text(stringResource(R.string.settings_password_footer)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-
-            PebblesListSection(
-                header = stringResource(R.string.settings_legal_header),
-                rowPadding = PebblesListDefaults.ListItemRowPadding,
-                rows =
-                    listOf(
-                        { SettingsNavRow(text = stringResource(R.string.auth_consent_terms_link), onClick = {}) },
-                        { SettingsNavRow(text = stringResource(R.string.auth_consent_privacy_link), onClick = {}) },
-                    ),
-            )
-
-            PebblesListSection(
-                header = stringResource(R.string.settings_account_header),
-                rowPadding = PebblesListDefaults.ListItemRowPadding,
-                rows =
-                    listOf(
-                        { SettingsLogOutRow(onClick = {}) },
-                        {
-                            ListItem(
-                                headlineContent = { Text(stringResource(R.string.settings_delete_account), color = colors.error) },
-                                colors = settingsRowColors(),
-                            )
-                        },
-                    ),
+                actions = SettingsActions(),
             )
         }
     }
 }
 
-// heightDp pins the window so the whole form is in frame at 1.0x. The variants
-// keep the same height on purpose: at 2x the column runs past the bottom, and
-// that overflow is the finding, not an artifact of the preview.
 @PreviewTest
-@Preview(showBackground = true, heightDp = 1400)
-@Preview(name = "fs2", showBackground = true, heightDp = 1400, fontScale = 2f)
-@Preview(name = "fr", showBackground = true, heightDp = 1400, locale = "fr")
-@Preview(name = "w840", showBackground = true, widthDp = 840, heightDp = 1400)
-@Preview(name = "w1024", showBackground = true, widthDp = 1024, heightDp = 1400)
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun SettingsSectionsLight() {
-    PebblesTheme { SettingsSections() }
+fun SettingsDeviceSectionsDark() {
+    PebblesTheme { SectionsFrame { SettingsDeviceSections(device = Device, actions = SettingsActions()) } }
+}
+
+// Informations and Public profile for an email account with a live public profile.
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@PreviewLargeFont
+@Composable
+fun SettingsIdentitySectionsLight() {
+    PebblesTheme { SectionsFrame { SettingsIdentitySections(state = EmailAccount, actions = SettingsActions()) } }
 }
 
 @PreviewTest
-@Preview(showBackground = true, heightDp = 1400, uiMode = UI_MODE_NIGHT_YES)
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun SettingsSectionsDark() {
-    PebblesTheme { SettingsSections() }
+fun SettingsIdentitySectionsDark() {
+    PebblesTheme { SectionsFrame { SettingsIdentitySections(state = EmailAccount, actions = SettingsActions()) } }
 }
 
-/**
- * The Consent section (#972), every state of its one row, on its own so the
- * whole-form previews above keep their references. Noon UTC keeps the
- * localized date the same in any zone the job runs in.
- */
+// The same run for an SSO account with no handle yet: the public switch is disabled.
+@PreviewTest
+@Preview(showBackground = true)
+@Preview(name = "dark", showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun SettingsIdentitySectionsSso() {
+    PebblesTheme { SectionsFrame { SettingsIdentitySections(state = SsoAccount, actions = SettingsActions()) } }
+}
+
+// The password field, under it the save error a failed save leaves.
+@PreviewTest
+@Preview(showBackground = true)
+@Preview(name = "dark", showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@PreviewFrench
+@PreviewLargeFont
+@Composable
+fun SettingsSignInSectionsPassword() {
+    PebblesTheme {
+        SectionsFrame { SettingsSignInSections(state = EmailAccount.copy(didSaveFail = true), actions = SettingsActions()) }
+    }
+}
+
+// An SSO account's providers, in place of the password.
+@PreviewTest
+@Preview(showBackground = true)
+@Preview(name = "dark", showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun SettingsSignInSectionsProviders() {
+    PebblesTheme { SectionsFrame { SettingsSignInSections(state = SsoAccount, actions = SettingsActions()) } }
+}
+
+// Legal, Consent, Account, and Log out in its own group at the end.
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@PreviewLargeFont
+@Composable
+fun SettingsAccountSectionsLight() {
+    PebblesTheme { SectionsFrame { SettingsAccountSections(state = EmailAccount, actions = SettingsActions()) } }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun SettingsAccountSectionsDark() {
+    PebblesTheme { SectionsFrame { SettingsAccountSections(state = EmailAccount, actions = SettingsActions()) } }
+}
+
+/** The Consent group (#972) with every state of its one row, one item each. */
 @Composable
 private fun SettingsConsentSection() {
-    val given =
-        HealthConsentStatus.Given(HealthDataConsent("1.4.0", OffsetDateTime.parse("2026-10-01T12:00:00Z")))
-    Column(modifier = Modifier.padding(16.dp)) {
-        PebblesListSection(
+    SectionsFrame {
+        ListGroup(
             header = stringResource(R.string.settings_consent_header),
-            rowPadding = PebblesListDefaults.ListItemRowPadding,
-            rows =
+            items =
                 listOf(
-                    { HealthConsentRow(status = given, canWithdraw = true, onWithdraw = {}) },
+                    { HealthConsentRow(status = GivenConsent, canWithdraw = true, onWithdraw = {}) },
                     { HealthConsentRow(status = HealthConsentStatus.NotRecorded, canWithdraw = true, onWithdraw = {}) },
                     { HealthConsentRow(status = HealthConsentStatus.Unavailable, canWithdraw = true, onWithdraw = {}) },
                 ),
@@ -257,8 +217,8 @@ private fun SettingsConsentSection() {
 
 @PreviewTest
 @Preview(showBackground = true)
-@Preview(name = "fs2", showBackground = true, fontScale = 2f)
-@Preview(name = "fr", showBackground = true, locale = "fr")
+@PreviewLargeFont
+@PreviewFrench
 @Composable
 fun SettingsConsentSectionLight() {
     PebblesTheme { SettingsConsentSection() }
@@ -272,16 +232,12 @@ fun SettingsConsentSectionDark() {
 }
 
 /**
- * The Home section (#1383 D6, #1376): the quick actions' Row / Bento choice and the pebble shapes
- * switch, on its own so the whole-form previews above keep their references. Two sections, one
- * per state: the defaults (row, shapes on) and the other choice of each.
+ * The Home group (#1383 D6, #1376): the quick actions' Row / Bento choice and the pebble shapes
+ * switch, twice: the defaults (row, shapes on) and the other choice of each.
  */
 @Composable
 private fun SettingsHomeSections() {
-    Column(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xl),
-    ) {
+    SectionsFrame {
         SettingsHomeSection(layout = HomeShortcutsLayout.ROW, stones = true, onLayoutChange = {}, onStonesChange = {})
         SettingsHomeSection(layout = HomeShortcutsLayout.BENTO, stones = false, onLayoutChange = {}, onStonesChange = {})
     }
@@ -289,8 +245,8 @@ private fun SettingsHomeSections() {
 
 @PreviewTest
 @Preview(showBackground = true)
-@Preview(name = "fs2", showBackground = true, fontScale = 2f)
-@Preview(name = "fr", showBackground = true, locale = "fr")
+@PreviewLargeFont
+@PreviewFrench
 @Composable
 fun SettingsHomeSectionLight() {
     PebblesTheme { SettingsHomeSections() }

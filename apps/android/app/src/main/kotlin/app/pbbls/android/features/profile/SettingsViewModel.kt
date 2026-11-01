@@ -177,7 +177,7 @@ sealed interface SettingsEffect {
  * The writes run in [viewModelScope], and the whole sequence is wrapped in
  * `withContext(NonCancellable)`. Wrapping the *whole* sequence rather than its
  * tail is deliberate: there is no point at which stopping leaves the account
- * consistent, and the screen already blocks Cancel while saving, so nothing is
+ * consistent, and the screen already ignores its back arrow while saving, so nothing is
  * being taken away from the user.
  *
  * **[SavedStateHandle] deliberately excludes the password.** The handle is
