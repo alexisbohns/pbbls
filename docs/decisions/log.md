@@ -1712,3 +1712,25 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Android (#1383) and web (#1384) mirror the column tap and the glyph counts.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #1382, #1386, #1387, `docs/superpowers/specs/2026-10-31-ios-home-and-you-design.md` (D1–D22), `docs/superpowers/plans/2026-10-31-ios-home-and-you.md`.
+
+## 2026-11-01 — The emotions and domains completion ceremonies are deferred past V1 (#1458)
+
+- **Status:** taken
+- **Scope:** cross-surface, done in the back-end alone
+- **Context:**
+  - The V1 launch plan removes the achievement ceremony for emotions and domains on every surface, badges earned silently.
+  - The contributions were already silent (#1305, D7): `check_achievements()` records an emotion first or a domain first and never returns it. What was left was the completion of each set (D9): a "ready" mark on its card the day after the set is whole, then `pull_ceremony`, paying 50 karma (#1372).
+- **Decision:**
+  - Both completions are still recorded but never offered. `achievement_completion` returns nothing for `emotions` and `domains`, so `get_achievements` omits `completion` on both cards. `pull_ceremony` raises `not_ready` for both stacks, before it locks or writes anything.
+  - `complete-emotions` and `complete-domains` are inactive again and keep their 50 karma. The six firsts keep their ceremony.
+  - No client changes: every shipped client shows the ready mark only from `completion.ready`, and already decodes an absent completion ("absent until whole").
+- **Why:**
+  - At launch, a reward never hangs on what someone felt or where it happened in their life. Filling the emotion wheel means meeting every hard emotion. Domains follow the same rule, as the launch plan decided.
+  - **Rejected, a "silent" catalog flag read by each client** (the plan's first shape, one back-end and three client issues): three releases for a behaviour the server already owns. A card without a completion has no ceremony to show.
+  - **Rejected, deactivating the two rows alone:** a pull against an inactive row records `pulled_at` and pays nothing, for good, so the reward would be lost on the day it comes back.
+- **Consequences:**
+  - To bring them back, re-emit both functions without the `#1458` lines and re-activate the two rows. Every completion recorded in the meantime is then offered at once, since its offer time is long past.
+  - `rings_done` still lists a whole emotions or domains set: the ring closes on the explorer wheel, quietly.
+  - The client issues #1462, #1463 and #1464 need no code.
+- **Supersedes / Superseded-by:** narrows D9 of `docs/superpowers/specs/2026-10-29-achievements-page-design.md` to the six firsts, and reverses the #1372 launch step for `complete-emotions` and `complete-domains`.
+- **Refs:** #1458, #1462, #1463, #1464, `packages/supabase/supabase/migrations/20261101090000_defer_emotion_domain_ceremonies.sql`, `packages/supabase/scripts/verify-achievements.ts`.
