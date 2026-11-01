@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>StringsTable</key>
+	<string>Root</string>
+	<key>PreferenceSpecifiers</key>
+	<array>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Caveat</string>
+			<key>File</key>
+			<string>License-Caveat-OFL</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Inclusive Sans</string>
+			<key>File</key>
+			<string>License-InclusiveSans-OFL</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Reenie Beanie</string>
+			<key>File</key>
+			<string>License-ReenieBeanie-OFL</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Rive</string>
+			<key>File</key>
+			<string>License-rive-ios</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Supabase Swift</string>
+			<key>File</key>
+			<string>License-supabase-swift</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>SVGView</string>
+			<key>File</key>
+			<string>License-svgview</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Swift ASN.1</string>
+			<key>File</key>
+			<string>License-swift-asn1</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Swift Clocks</string>
+			<key>File</key>
+			<string>License-swift-clocks</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Swift Concurrency Extras</string>
+			<key>File</key>
+			<string>License-swift-concurrency-extras</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Swift Crypto</string>
+			<key>File</key>
+			<string>License-swift-crypto</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Swift HTTP Types</string>
+			<key>File</key>
+			<string>License-swift-http-types</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>XCTest Dynamic Overlay</string>
+			<key>File</key>
+			<string>License-xctest-dynamic-overlay</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSChildPaneSpecifier</string>
+			<key>Title</key>
+			<string>Ysabeau</string>
+			<key>File</key>
+			<string>License-Ysabeau-OFL</string>
+		</dict>
+	</array>
+</dict>
+</plist>
