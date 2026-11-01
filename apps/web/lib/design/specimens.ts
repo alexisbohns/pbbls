@@ -75,6 +75,8 @@ export const SPECIMENS = [
   { id: "view-collection-open", name: "Collection open", source: "app/@detail/(pane)/collections/[id]/page.tsx", section: "views", m3: "tuned" },
   { id: "view-glyphs-open", name: "Glyphs open", source: "app/@detail/(pane)/glyphs/page.tsx", section: "views", m3: "tuned" },
   { id: "view-achievements-open", name: "Achievements open", source: "app/@detail/(pane)/achievements/page.tsx", section: "views", m3: "tuned" },
+  { id: "view-achievement-sheet-open", name: "Achievement sheet open", source: "app/@detail/(pane)/achievements/[sheet]/page.tsx", section: "views", m3: "tuned" },
+  { id: "view-achievement-drill", name: "Achievement drill-down", source: "app/@detail/(pane)/achievements/[sheet]/page.tsx", section: "views", m3: "tuned" },
   { id: "view-lab-open", name: "Lab open", source: "app/@detail/(pane)/lab/page.tsx", section: "views", m3: "tuned" },
   { id: "view-wallet-open", name: "Wallet open", source: "app/@detail/(pane)/wallet/page.tsx", section: "views", m3: "tuned" },
   { id: "view-pebble", name: "Pebble detail", source: "app/(path)/pebble/[id]/page.tsx", section: "views", m3: "bridged" },
