@@ -14,8 +14,7 @@ import {
   stashPendingReauth,
   takePendingReauth,
 } from "@/lib/auth/pending-reauth"
-import { PageLayout } from "@/components/layout/PageLayout"
-import { PageHeader } from "@/components/layout/PageHeader"
+import { DetailTopBar } from "@/components/layout/DetailTopBar"
 import { Button } from "@/components/ui/button"
 import { GlyphHeader } from "@/components/settings/GlyphHeader"
 import { InformationsSection } from "@/components/settings/InformationsSection"
@@ -35,6 +34,7 @@ import { ReauthDialog } from "@/components/settings/ReauthDialog"
 /** Where a provider re-auth comes back to (the callback's validated `next`). */
 const REAUTH_RETURN_TO = `/settings?${REAUTH_RETURN_PARAM}=1`
 
+/** Settings, in the detail area beside You (#1384, two-area spec D2, D7). */
 export default function SettingsPage() {
   const {
     user,
@@ -112,25 +112,14 @@ export default function SettingsPage() {
   }, [user, profile, router, logout, t])
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  if (isLoading) {
+  if (isLoading || !isAuthenticated || !user || !profile) {
     return (
-      <PageLayout>
-        <section>
-          <PageHeader title={t("title")} backHref="/profile" />
-          <p className="text-sm text-muted-foreground">{tProfile("loading")}</p>
-        </section>
-      </PageLayout>
-    )
-  }
-
-  if (!isAuthenticated || !user || !profile) {
-    return (
-      <PageLayout>
-        <section>
-          <PageHeader title={t("title")} backHref="/profile" />
-          <p className="text-sm text-muted-foreground">{tProfile("signedOut")}</p>
-        </section>
-      </PageLayout>
+      <>
+        <DetailTopBar title={t("title")} />
+        <p className="m3-type-body-medium mx-auto w-full max-w-2xl px-5 pt-2 text-m3-on-surface-variant">
+          {isLoading ? tProfile("loading") : tProfile("signedOut")}
+        </p>
+      </>
     )
   }
 
@@ -263,17 +252,18 @@ export default function SettingsPage() {
     }
   }
 
+  // Save is the top bar's action, an M3 text button (as Android, #1437).
   const saveButton = (
-    <Button size="sm" onClick={handleSave} disabled={!dirty || saving}>
+    <Button variant="ghost" onClick={handleSave} disabled={!dirty || saving} className="m3-type-label-large h-10 rounded-full px-3 text-m3-primary">
       {saving ? t("saving") : t("save")}
     </Button>
   )
 
   return (
-    <PageLayout>
-      <section>
-        <PageHeader title={t("title")} backHref="/profile" rightSlot={saveButton} />
-        <div className="flex flex-col gap-6">
+    <>
+      <DetailTopBar title={t("title")} actions={saveButton} />
+      <section className="mx-auto w-full max-w-2xl px-4 pt-2 pb-12">
+        <div className="flex flex-col gap-7">
           <GlyphHeader
             glyph={glyph}
             glyphs={glyphs}
@@ -310,17 +300,18 @@ export default function SettingsPage() {
             onWithdrawn={() => router.push("/")}
           />
           <AppearanceSection />
-          <SignOutSection
-            onSignOut={async () => {
-              await logout()
-              router.push("/")
-            }}
-          />
           <DeleteAccountSection
             key={resumeDelete ? "resume" : "idle"}
             onDeleted={() => router.push("/")}
             resumeAfterReauth={resumeDelete}
             reauthReturnTo={REAUTH_RETURN_TO}
+          />
+          {/* Log out last, in its own group (#1384, as Android #1437). */}
+          <SignOutSection
+            onSignOut={async () => {
+              await logout()
+              router.push("/")
+            }}
           />
         </div>
         <ReauthDialog
@@ -350,6 +341,6 @@ export default function SettingsPage() {
           }}
         />
       </section>
-    </PageLayout>
+    </>
   )
 }
