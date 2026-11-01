@@ -8,6 +8,8 @@
 name: android-screenshots-record
 
 on:
+  # By hand: re-record the current main after a fix on either side.
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
