@@ -17,9 +17,11 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.common.JourneyTags
+import app.pbbls.android.core.data.HomeShortcut
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.ui.HomeMonthSlot
 import app.pbbls.android.features.home.components.HomeGreetingBlock
+import app.pbbls.android.features.home.shortcuts.HomeShortcuts
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -31,6 +33,9 @@ private val BOTTOM = 40.dp
 
 /** Under the month's grid, to the greeting (the mock's 22 px). */
 private val MONTH_GAP = 22.dp
+
+/** From the greeting's line to the quick actions (the mock's 26 px). */
+private val SHORTCUTS_GAP = 26.dp
 
 /** Between two sections (the mock's 44 px gap). */
 private val SECTION_GAP = 44.dp
@@ -54,6 +59,8 @@ fun HomeContent(
     onWeek: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
+    onShortcut: (HomeShortcut) -> Unit = {},
+    hapticsOn: () -> Boolean = { true },
 ) {
     val resources = LocalResources.current
     val locale = LocalConfiguration.current.locales[0]
@@ -72,6 +79,15 @@ fun HomeContent(
                         monthSlot(month.value, onWeek, Modifier.fillMaxWidth().padding(bottom = MONTH_GAP))
                     }
                     HomeGreetingBlock(lines = greeting, modifier = Modifier.padding(horizontal = TEXT_INSET))
+                    // The quick actions sit with the greeting, 26 dp under its line (the mock's header).
+                    HomeShortcuts(
+                        layout = state.shortcuts.layout,
+                        stones = state.shortcuts.stones,
+                        lastUsed = state.shortcuts.lastUsed,
+                        onShortcut = onShortcut,
+                        hapticsOn = hapticsOn,
+                        modifier = Modifier.padding(top = SHORTCUTS_GAP),
+                    )
                 }
             }
         }
