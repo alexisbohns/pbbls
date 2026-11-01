@@ -12,6 +12,8 @@ type DetailTopBarProps = {
   title: string
   /** A detail inside a detail (the changelog in the Lab) goes back to it at every size. */
   backHref?: string
+  /** Or goes back by this (an achievement's sheet: to where it was opened from). */
+  onBack?: () => void
   /** Trailing actions: icon buttons or a menu. */
   actions?: ReactNode
 }
@@ -22,14 +24,18 @@ type DetailTopBarProps = {
  * it), the title as the detail's heading (`h2`, below the left area's `h1`),
  * then the page's actions. It stays at the top while the detail scrolls.
  */
-export function DetailTopBar({ title, backHref, actions }: DetailTopBarProps) {
+export function DetailTopBar({ title, backHref, onBack, actions }: DetailTopBarProps) {
   const t = useTranslations("detail")
   const { wide, close } = useDetailPane()
   const control = "size-11 shrink-0 rounded-full text-m3-on-surface"
 
   return (
     <header className="sticky top-0 z-10 flex min-h-16 items-center gap-1 bg-background px-1 pt-[var(--safe-area-top)]">
-      {backHref ? (
+      {onBack ? (
+        <Button variant="ghost" size="icon" onClick={onBack} aria-label={t("back")} className={control}>
+          <ChevronLeft className={PBBLS_ICON_SIZE.toolbar} />
+        </Button>
+      ) : backHref ? (
         <Button variant="ghost" size="icon" nativeButton={false} render={<Link href={backHref} />} aria-label={t("back")} className={control}>
           <ChevronLeft className={PBBLS_ICON_SIZE.toolbar} />
         </Button>

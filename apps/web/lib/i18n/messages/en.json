@@ -421,6 +421,7 @@
       "sheet": {
         "buyerNeverNamed": "The buyer is never named.",
         "close": "Close",
+        "gone": "This isn't on your achievements any more.",
         "column": {
           "moments": "moments",
           "pebbles": "pebbles",

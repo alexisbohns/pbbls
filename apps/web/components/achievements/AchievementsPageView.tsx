@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useReducer } from "react"
+import { useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
@@ -9,11 +9,9 @@ import { Button } from "@/components/ui/button"
 import { useAchievementPalettes } from "@/lib/data/useAchievementPalettes"
 import { useAchievementsPage } from "@/lib/data/useAchievementsPage"
 import { useAchievementsWords } from "@/lib/i18n/useAchievementsWords"
-import { useSheetNames } from "@/lib/i18n/useSheetNames"
-import { NO_SHEETS, needsPrune, sheetsReducer, type SheetKey } from "@/lib/achievements/sheets"
+import { sheetHref, type SheetKey } from "@/lib/achievements/sheets"
 import type { CeremonyStack } from "@/lib/types"
 import { AchievementsPageContent } from "./page/AchievementsPageContent"
-import { AchievementSheetStack } from "./sheets/AchievementSheetStack"
 
 /**
  * You → Achievements (#1308, spec 2026-10-29 D1): the days kept, then
@@ -22,21 +20,16 @@ import { AchievementSheetStack } from "./sheets/AchievementSheetStack"
  * it; a failed read keeps what is shown, and only a first visit with nothing
  * kept and no answer shows the error. Every number, order and flag is the
  * server's. A ready mark pulls its ceremony, which plays in the unlock moment;
- * the screen-open check never celebrates. A card opens its sheet, marked seen
- * as it opens; a sheet's row opens its pebble once the sheets have closed.
+ * the screen-open check never celebrates. A card opens its sheet as a nested
+ * detail at its own URL (#1384, two-area spec D5), marked seen there.
  */
 export function AchievementsPageView() {
   const t = useTranslations("achievements")
   const words = useAchievementsWords()
-  const { page, loading, failed, pulling, pull, retry, markSeen } = useAchievementsPage()
+  const { page, loading, failed, pulling, pull, retry } = useAchievementsPage()
   const palettes = useAchievementPalettes()
-  const names = useSheetNames()
   const router = useRouter()
-  const [sheets, dispatch] = useReducer(sheetsReducer, NO_SHEETS)
-  // A sheet whose section left the payload closes for good, with everything above it.
-  if (needsPrune(sheets, page)) dispatch({ type: "prune", page })
-  const open = useCallback((key: SheetKey) => dispatch({ type: "open", key }), [])
-  const openMoment = useCallback((momentId: string) => router.push(`/pebble/${momentId}`), [router])
+  const open = useCallback((key: SheetKey) => router.push(sheetHref(key)), [router])
 
   const onPull = useCallback(
     (stack: CeremonyStack) => {
@@ -53,20 +46,7 @@ export function AchievementsPageView() {
       <DetailTopBar title={t("title")} />
       <div className="mx-auto w-full max-w-2xl px-4 pt-2 pb-24">
         {page ? (
-          <>
-            <AchievementsPageContent page={page} palettes={palettes} pulling={pulling} onPull={onPull} onOpen={open} />
-            <AchievementSheetStack
-              sheets={sheets}
-              dispatch={dispatch}
-              page={page}
-              palettes={palettes}
-              names={names}
-              pulling={pulling}
-              onPull={onPull}
-              onSeen={markSeen}
-              onMoment={openMoment}
-            />
-          </>
+          <AchievementsPageContent page={page} palettes={palettes} pulling={pulling} onPull={onPull} onOpen={open} />
         ) : loading ? (
           <p aria-live="polite" className="text-sm text-spine-ink-2">
             {t("loading")}

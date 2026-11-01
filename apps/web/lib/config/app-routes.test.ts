@@ -43,7 +43,20 @@ describe("routeShell", () => {
     expect(routeShell("/connections")).toMatchObject({ detail: true, parentTab: "/souls" })
     expect(routeShell("/connections/x")).toMatchObject({ detail: true, parentTab: "/souls" })
     expect(routeShell("/settings")).toMatchObject({ detail: true, parentTab: "/profile", m3: true })
-    for (const p of ["/glyphs", "/glyphs/x", "/achievements", "/lab", "/lab/changelog", "/lab/backlog", "/lab/announcements/x"]) {
+    for (const p of [
+      "/glyphs",
+      "/glyphs/x",
+      "/achievements",
+      "/achievements/explorer",
+      "/achievements/emotions",
+      "/achievements/domains",
+      "/achievements/pebbles",
+      "/achievements/year/2026",
+      "/lab",
+      "/lab/changelog",
+      "/lab/backlog",
+      "/lab/announcements/x",
+    ]) {
       expect(routeShell(p), p).toMatchObject({ detail: true, parentTab: "/profile", m3: true })
     }
     for (const p of [ "/pebble/1", "/pebble/1/edit", "/record/complete/1", "/p/1", "/u/x", "/blog", "/docs"]) {
