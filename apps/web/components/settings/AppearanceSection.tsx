@@ -2,7 +2,7 @@
 
 import { Sun, Globe, Palette } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { SectionLabel } from "@/components/ui/SectionLabel"
+import { ListGroupHeader } from "@/components/m3/ListGroupHeader"
 import { SettingsGroup } from "@/components/settings/SettingsGroup"
 import { SettingsRow } from "@/components/settings/SettingsRow"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
@@ -18,7 +18,7 @@ export function AppearanceSection() {
 
   return (
     <section className="flex flex-col gap-2">
-      <SectionLabel id="settings-appearance">{t("appearance")}</SectionLabel>
+      <ListGroupHeader id="settings-appearance">{t("appearance")}</ListGroupHeader>
       <SettingsGroup aria-labelledby="settings-appearance">
         <SettingsRow icon={Sun} trailing={<ThemeToggle />}>
           {t("theme")}
@@ -27,7 +27,8 @@ export function AppearanceSection() {
           {t("language")}
         </SettingsRow>
         <SettingsRow icon={Palette} trailing={<ColorWorldSwitcher />}>
-          {t("colorWorld")}
+          <span className="block">{t("colorWorld")}</span>
+          <span className="m3-type-body-medium block text-m3-on-surface-variant">{t("colorWorldScope")}</span>
         </SettingsRow>
       </SettingsGroup>
     </section>

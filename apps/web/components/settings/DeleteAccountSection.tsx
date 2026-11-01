@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
-import { SectionLabel } from "@/components/ui/SectionLabel"
+import { ListGroupHeader } from "@/components/m3/ListGroupHeader"
 import { SettingsGroup } from "@/components/settings/SettingsGroup"
 import { SettingsRow } from "@/components/settings/SettingsRow"
 import { Button } from "@/components/ui/button"
@@ -89,7 +89,7 @@ export function DeleteAccountSection({ onDeleted, resumeAfterReauth = false, rea
 
   return (
     <section className="flex flex-col gap-2">
-      <SectionLabel id="settings-account">{t("account")}</SectionLabel>
+      <ListGroupHeader id="settings-account">{t("account")}</ListGroupHeader>
       <SettingsGroup aria-labelledby="settings-account">
         <SettingsRow onClick={() => setOpen(true)}>
           <span className="flex items-center gap-3 text-destructive">

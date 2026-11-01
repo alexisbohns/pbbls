@@ -1,8 +1,8 @@
 "use client"
 
-import { Scale, ChevronRight } from "lucide-react"
+import { Scale } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { SectionLabel } from "@/components/ui/SectionLabel"
+import { ListGroupHeader } from "@/components/m3/ListGroupHeader"
 import { SettingsGroup } from "@/components/settings/SettingsGroup"
 import { SettingsRow } from "@/components/settings/SettingsRow"
 
@@ -22,14 +22,13 @@ export function LegalSection() {
 
   return (
     <section className="flex flex-col gap-2">
-      <SectionLabel id="settings-legal">{tSettings("legal")}</SectionLabel>
+      <ListGroupHeader id="settings-legal">{tSettings("legal")}</ListGroupHeader>
       <SettingsGroup aria-labelledby="settings-legal">
         {LEGAL_LINKS.map((link) => (
           <SettingsRow
             key={link.href}
             href={link.href}
             icon={Scale}
-            trailing={<ChevronRight className="size-4 text-muted-foreground" aria-hidden />}
           >
             {t(link.key)}
           </SettingsRow>

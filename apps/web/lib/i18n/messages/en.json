@@ -246,6 +246,7 @@
     "theme": "Theme",
     "language": "Language",
     "colorWorld": "Color world",
+    "colorWorldScope": "Applies to recording, carving and editing a pebble.",
     "account": "Account",
     "signOut": {
       "title": "Session"
