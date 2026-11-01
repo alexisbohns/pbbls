@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/layout/PageHeader"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { ConsentSection } from "@/components/settings/ConsentSection"
 import { DeleteAccountSection } from "@/components/settings/DeleteAccountSection"
+import { SignOutSection } from "@/components/settings/SignOutSection"
 import { GlyphHeader } from "@/components/settings/GlyphHeader"
 import { InformationsSection } from "@/components/settings/InformationsSection"
 import { LegalSection } from "@/components/settings/LegalSection"
@@ -59,6 +60,7 @@ export function SettingsView() {
           <PasswordSection value={password} onChange={setPassword} />
           <LegalSection />
           <ConsentSection consent={DESIGN_CONSENT} onGrant={async () => {}} onWithdrawn={() => {}} />
+          <SignOutSection onSignOut={async () => {}} />
           <DeleteAccountSection onDeleted={() => {}} reauthReturnTo="/sandbox/design" />
         </div>
       </section>
