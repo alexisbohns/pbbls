@@ -62,6 +62,7 @@ import {
 import { collectionFromRow, collectionInsertRow, collectionUpdateRow } from "@/lib/data/collection-row"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 import { MomentWriteError } from "@/lib/data/moment-write-error"
+import { decodeProfileEngagement } from "@/lib/data/profile-engagement"
 import type { CompletePebblePayload, SaveMomentPayload } from "@/lib/data/moment-payloads"
 
 const PEBBLE_MEDIA_BUCKET = "pebbles-media"
@@ -264,11 +265,7 @@ export class SupabaseProvider implements DataProvider {
       p_tz: tz,
     })
     if (error) throw new Error(`getProfileEngagement failed: ${error.message}`)
-    const row = Array.isArray(data) ? data[0] : data
-    return {
-      daysPracticed: (row?.days_practiced as number) ?? 0,
-      assiduity: (row?.assiduity as boolean[]) ?? [],
-    }
+    return decodeProfileEngagement(data)
   }
 
   // ---------------------------------------------------------------------------
