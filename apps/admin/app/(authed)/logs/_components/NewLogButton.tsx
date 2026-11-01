@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Plus } from "lucide-react"
+import { PlusCircle } from "@pbbls/icons"
 import { buttonVariants } from "@/components/ui/button"
 import { LAB_NOTE_PREFILL_KEY, parseLabNoteYaml } from "@/lib/logs/parse-lab-note"
 import type { LogSpecies } from "@/lib/logs/types"
@@ -37,7 +37,7 @@ export function NewLogButton({ species }: { species: LogSpecies }) {
 
   return (
     <a href={href} onClick={handleClick} className={buttonVariants()}>
-      <Plus className="size-4" aria-hidden />
+      <PlusCircle className="size-4" />
       New log
     </a>
   )

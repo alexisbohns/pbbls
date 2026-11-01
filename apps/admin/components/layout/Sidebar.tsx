@@ -10,10 +10,9 @@ import {
   Shapes,
   ShieldAlert,
   Smile,
-  Sparkles,
   Store,
-  Trophy,
 } from "lucide-react"
+import { PebbleGlowMd, Sparkles } from "@pbbls/icons"
 import {
   Sidebar,
   SidebarContent,
@@ -48,7 +47,7 @@ const REFERENCE_ITEMS = [
   { href: "/domains", label: "Domains", icon: Shapes },
   { href: "/emotions/palettes", label: "Palettes", icon: Palette },
   { href: "/emotions/emojis", label: "Emojis", icon: Smile },
-  { href: "/achievements", label: "Achievements", icon: Trophy },
+  { href: "/achievements", label: "Achievements", icon: PebbleGlowMd },
 ] as const
 
 export function AppSidebar() {

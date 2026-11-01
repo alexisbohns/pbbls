@@ -1609,3 +1609,27 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Web (#1313) flips its own surface in `migrated` the same way.
 - **Supersedes / Superseded-by:** narrows the package spec's D9 for `INLINE` (above); extends the 2026-10-30 iOS entry's marker and lint to Android, no change to their rules.
 - **Refs:** #1315, `docs/superpowers/specs/2026-10-30-android-icon-migration-design.md` (D1–D11), `docs/superpowers/plans/2026-10-30-android-icon-migration.md`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsIconSize.kt`, `packages/icons/scripts/lib/replaces.ts`.
+
+## 2026-10-31 — Web and admin draw the pebbles icons; chrome stays lucide; the web lint reads the lucide import (#1313)
+
+- **Status:** taken
+- **Scope:** web, admin, cross-surface (the lint's web form)
+- **Context:**
+  - After #1311, #1314 and #1315, web and admin imported 85 lucide symbols at 204 sites in 98 files outside `components/ui/`. About half carry meaning the foundation wave draws (a pebble, a collection, a person, karma, a glyph, create, edit, delete); the rest are platform chrome, admin's own tools, or meanings no drawing has yet.
+  - The lint's original web form (an identifier anywhere in a file that imports lucide) would have hit correct code once 60 files keep lucide: a Pebbles `Heart` beside a lucide `Tag`, a `label="Settings"`, a doc comment.
+- **Decision:**
+  - **Chrome stays lucide, closed list:** `ChevronLeft`, `ChevronRight`, `ChevronDown`, `X` (close, the chip ×), `MoreHorizontal`, `Share2`, `Copy`, `Undo2`, `ArrowRight`, `ArrowUpRight`, `ArrowDownLeft` (wallet out and in), `Check` (a menu's selection mark only, as shadcn's own menus draw it), `Search` (the field glyph), `Loader2` (spinners); brand slots `Link2` (a linked sign-in provider) and `Apple` (admin's platform mark). Admin's own tools (trend arrows, platform marks, sidebar tools, the error block) and the sandbox placeholders `Flame`, `Leaf`, `UserRound` stay too. Any other lucide icon needs a Pebbles drawing or a line in `packages/icons/waves/2026-11-chrome/brief.md` (`## Web (#1313)`).
+  - **The visibility trio stays one vocabulary:** private is lucide `UsersRound` until the wave draws secret, private and public together.
+  - **Five sizes, `PBBLS_ICON_SIZE`** (`apps/web/lib/icons/pbbls-icon.ts`): `inline` `size-4`, `row` `size-5`, `toolbar` `size-5.5`, `tile` `size-7`, `hero` `size-12` (16, 20, 22, 28, 48 px at the default root, the iOS values). Classes in rem, never the `size` prop (shadcn slots' CSS beats the attribute) and never em (it would drop below the floor beside `text-xs`). 16 is the floor: under a shadcn `xs`, `sm` or `icon-xs` slot the icon carries `inline`. Admin keeps its existing classes and honours the floor.
+  - **Accessibility lives in the component:** a generated icon is `aria-hidden` unless it gets `aria-label`/`aria-labelledby` (then `role="img"`); an icon-only control is named on the control; colour only through `text-*`, never `fill-*`, `stroke-*` or `strokeWidth`; a favourited heart is the `heart.active` twin.
+  - **The web lint reads lucide declarations:** for each `import … from` / `export … from` whose source is `lucide-react` or `lucide-react/…`, a deep, dynamic, namespace or default import is a hit by itself, and each specifier's imported name, stripped of `Lucide` and `Icon`, is a hit when a row migrated for web lists it. 21 rows list 28 web names; `migrated` gains `web` on them (`replaces: 27 rows, 97 names, 0 hits`).
+- **Why:**
+  - **Rejected, migrating the selection tick:** a Pebbles tick on two menus beside shadcn's lucide tick on every other menu is two vocabularies in one component family.
+  - **Rejected, ESLint `no-restricted-imports` with `importNames`:** a second copy of the manifest that drifts.
+  - **Rejected, keeping the identifier grep:** a TypeScript identifier reaches a file only through an import, so the clause is the whole evidence; the grep fails on correct code and misses `Trash2Icon`, `LucideTrash2` and deep imports.
+- **Consequences:**
+  - A new web or admin icon is `import { Name } from "@pbbls/icons"` sized with `PBBLS_ICON_SIZE`; a listed lucide import fails the `Icons` job.
+  - The web lint differs in kind from iOS's and Android's (imports, not literals); a future surface states which kind it needs.
+  - Eight files nothing renders were migrated in place or left as they were (`layout/MobileHeader`, `layout/Sidebar`, `layout/ResetDataButton`, `layout/HapticsToggle`, `path/GamificationBlocks`, `record/CustomizationTile`, `record/SoulPicker`, `record/CollectionSheet`); deleting them is a follow-up issue.
+- **Supersedes / Superseded-by:** supersedes the package spec's D10 web form (an identifier anywhere in a lucide-importing file) and, for web, the 2026-10-30 iOS icons entry's consequence that "the lint's web and Android forms are already in place"; completes the 2026-10-30 Android entry's "Web (#1313) flips its own surface in `migrated` the same way".
+- **Refs:** #1313, `docs/superpowers/specs/2026-10-30-web-icon-migration-design.md` (D1–D13), `docs/superpowers/plans/2026-10-30-web-icon-migration.md`, `packages/icons/scripts/lib/replaces.ts`, `apps/web/lib/icons/pbbls-icon.ts`.
