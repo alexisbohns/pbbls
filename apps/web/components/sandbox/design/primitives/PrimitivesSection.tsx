@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
 import { EmotionBadge } from "@/components/ui/EmotionBadge"
 import { SearchableList } from "@/components/ui/SearchableList"
@@ -111,6 +112,21 @@ export function PrimitivesSection() {
         </SpecimenState>
         <SpecimenState label="disabled · on">
           <Checkbox aria-label="Disabled on" disabled defaultChecked />
+        </SpecimenState>
+      </Specimen>
+
+      <Specimen id="collapsible">
+        <SpecimenState label="closed">
+          <Collapsible className="w-56 rounded-xl bg-card text-sm">
+            <CollapsibleTrigger className="w-full px-4 py-3 text-left font-medium">Privacy Policy</CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-3 text-muted-foreground">Pages and language</CollapsibleContent>
+          </Collapsible>
+        </SpecimenState>
+        <SpecimenState label="open">
+          <Collapsible defaultOpen className="w-56 rounded-xl bg-card text-sm">
+            <CollapsibleTrigger className="w-full px-4 py-3 text-left font-medium">Privacy Policy</CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-3 text-muted-foreground">Pages and language</CollapsibleContent>
+          </Collapsible>
         </SpecimenState>
       </Specimen>
 

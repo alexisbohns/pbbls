@@ -65,5 +65,6 @@ describe("routeShell", () => {
       expect(routeShell(p).detail, p).toBe(false)
     }
     expect(routeShell("/record").parentTab).toBeNull()
+    for (const p of ["/docs", "/docs/credits"]) expect(routeShell(p).m3, p).toBe(true)
   })
 })

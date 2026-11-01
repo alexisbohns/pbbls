@@ -23,7 +23,7 @@ export function DocsContent({ content }: DocsContentProps) {
         </p>
       )}
       <div
-        className="prose prose-sm dark:prose-invert max-w-none"
+        className="prose prose-sm dark:prose-invert max-w-none [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_li]:marker:text-primary"
         dangerouslySetInnerHTML={{ __html: page.html }}
       />
     </article>

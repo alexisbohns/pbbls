@@ -25,6 +25,7 @@ export const SPECIMENS = [
   { id: "badge", name: "Badge", source: "components/ui/badge.tsx", section: "primitives", m3: "bridged" },
   { id: "card", name: "Card", source: "components/ui/card.tsx", section: "primitives", m3: "bridged" },
   { id: "checkbox", name: "Checkbox", source: "components/ui/checkbox.tsx", section: "primitives", m3: "bridged" },
+  { id: "collapsible", name: "Collapsible", source: "components/ui/collapsible.tsx", section: "primitives", m3: "bridged" },
   { id: "input", name: "Input", source: "components/ui/input.tsx", section: "primitives", m3: "bridged" },
   { id: "calendar", name: "Calendar", source: "components/ui/calendar.tsx", section: "primitives", m3: "bridged" },
   { id: "dialog", name: "Dialog", source: "components/ui/dialog.tsx", section: "primitives", m3: "bridged" },
