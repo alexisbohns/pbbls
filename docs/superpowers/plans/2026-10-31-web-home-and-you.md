@@ -486,8 +486,30 @@ Spec D1, D2 (the hub bar and `/home` as the signed-in landing: decided by the ma
 
 ## Deviations from the spec
 
-(Written during execution.)
+(Parts 1–5 recorded theirs in their PR bodies; #1411 lists Part 5's.)
 
+- **Part 6, You's settings control is a standard icon button, not a stone** (D15, Task 33). The maintainer rejected custom-drawn navigation chrome on every surface after the plan was written: `SettingsButton` is shadcn `Button` (ghost, icon, 44 × 44) rendered as a `Link` to `/settings`, drawing `Slider` at `PBBLS_ICON_SIZE.toolbar`. Logged with the 2026-11-01 decision.
+- **Part 6, the counters are one `<dl>` per piece**, not one `<dl>` around the split stone: `SplitStone` wraps each cell in a `div`, and a `div` holding a `div` is not a valid `<dl>` group. Each piece reads "Days, 19" in order.
+- **Part 6, the counter figure fits its piece.** At 36 px "1 240" ran past the third piece below ~360 px and at a 20 px root font; the figure is `min(2.25rem, 100cqi / 2.4)` on a container-query piece, so it keeps its size on a 390 px phone and shrinks below that. The label drops under its icon when it has to.
+- **Part 6, the Lab timeline's second line is the log's summary** (one line), as iOS ships it, not a platform label: on the web every log is already `webapp` or `all`.
+- **Part 6, dates on You put the day first** ("Lab notes · 31 October", "29 Oct"), as Home's dateline does, through `lib/utils/day-month.ts`; plain `Intl` "en" would say "October 31".
+- **Part 6, the glyph lines have a zero form** from iOS ("Carve your first mark.", "Glyphs you swap for karma land here.") beside the count and count-free forms.
+- **Part 6, `FAMILY_ICONS` is exported from `AchievementBadge`** (one keyword) so You's cards draw the same family icons as the page, rather than a third copy of the map.
+- **Part 7, the offline page's button says "Go to Home"** now that it links there ("Go to timeline" would be wrong). `/home` joins the store-backed routes; `/guides` does not read the store.
+- **Part 7, one navigation and one ground instead of the hub bar** (D2, Tasks 39–40). The plan's floating pill on four hub roots, styled per route, beside the Path's own pill, was built and rejected by the maintainer on 2026-11-01. In its place: `AppNavigation`, Android's navigation suite on the web (a bar under 600 px, a rail from 600 px, CSS only), rendered once by the shell on the five tabs, the Path included; a route table (`lib/config/app-routes.ts`) the shell, the navigation and the sandbox read; `app-nav-room` as the one place the page leaves it room; and the Path, People, Collections and Settings on the M3 ground with Home and You, the Spine's paper pointed at `surface` by the #1118 rule set.
+- **Part 7, the Path's pill keeps bounce and karma** (a link to the wallet) and loses its Profile link. Android's Path shows neither bounce nor karma; keeping them is the conservative call, since the pill is the web's only way to the wallet besides the karma toast.
+- **Part 7, the navigation's current tab draws the plain icon**, not Android's lit `active` twin: web icon migration D11 (#1313) marks the current entry by colour and `aria-current`, and that logged decision stands until it is revisited.
+- **Part 7, People's Connections row is a settings-style row** at the top of `/souls` (iOS has a toolbar button there), and on a tab root `PageHeader` takes `backHref={null}`: the navigation stands in for back.
+- **Part 7, the sandbox draws the navigation** through `ShellFrame` (the shell's arrangement, `mainClass`) and an `at` prop on `AppNavigation`, and gains People and Collections views.
 ## Lessons learned
 
-(Written in Part 7, Task 42, after the stack is executed.)
+- **Chrome is not content.** The plan drew the settings control as a stone and the hub bar as a brand pill styled per page; both were rejected. Stones, cards and the brand faces carry what a page says; buttons, bars, rails and toolbars stay the platform's, and look the same on every page.
+- **Mirror the surface that already solved it.** Android had answered "one ground or three" (#1118: the Spine on `surface`) and "bar or rail" (`NavigationSuiteScaffold`, 600 dp) before this plan; the plan re-decided both per page and got them wrong. Read the sibling surface's shell before designing a web one.
+- **One table for route behaviour.** `MainContent` had grown a flag per route, and the first hub bar duplicated its route list; `routeShell` is the single answer the shell, the navigation and the sandbox share, and a test pins it.
+- **A breakpoint, not a width read.** Bar ↔ rail by CSS needs no hydration-safe placeholder and cannot flash.
+- **Wrap a split stone's cells, don't wrap the stone, in list semantics.** `SplitStone` owns its grid and a `div` per piece, so `<dl>`, `<ul>` or `<ol>` belongs inside each cell. The same applies to `<p>`: `RippleBadge` is a `div`, so a line holding it is a `div` too (React warns on `<p><div>` in dev, not in a server render test).
+- **Measure figures against the piece, not the viewport.** A display figure inside a measured stone needs a container-query size (`100cqi` is the content box, padding already out); viewport breakpoints miss both the 20 px root font and the sandbox's frame.
+- **`Intl` "en" is month-first.** Every day-and-month string on Home and You goes through a parts-based formatter to read "31 October" in both languages.
+- **The sandbox frame does not move breakpoints.** A `max-sm:` or `rail:` rule follows the window's width, so check a phone layout at a phone-sized window and a rail at a wide one ("Fill"), and pass route-dependent chrome its route explicitly.
+- **Next 16's `next dev` writes `apps/web/AGENTS.md`** in a fresh worktree; delete it before committing.
+- **Render tests stand in for `next/link`, lucide and the shadcn button** (two React copies resolve); the button stand-in must honour `render` (clone the element) or every Base UI link-button test sees a `<button>`.
