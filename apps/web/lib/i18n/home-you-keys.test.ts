@@ -14,8 +14,13 @@ describe("Home and You strings", () => {
     expect(keys(fr.home).sort()).toEqual(keys(en.home).sort())
   })
 
-  it("has no empty string under home", () => {
-    for (const catalogue of [en.home, fr.home]) {
+  it("has the same you keys, and the same sign-out section, in English and French", () => {
+    expect(keys(fr.you).sort()).toEqual(keys(en.you).sort())
+    expect(keys(fr.settings.signOut).sort()).toEqual(keys(en.settings.signOut).sort())
+  })
+
+  it("has no empty string under home or you", () => {
+    for (const catalogue of [en.home, fr.home, en.you, fr.you]) {
       for (const key of keys(catalogue)) {
         const value = key.split(".").reduce<unknown>((o, k) => (typeof o === "object" && o !== null ? Reflect.get(o, k) : undefined), catalogue)
         expect(typeof value === "string" && value.trim() !== "", key).toBe(true)
