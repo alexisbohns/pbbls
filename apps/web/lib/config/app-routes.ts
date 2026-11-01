@@ -62,7 +62,8 @@ export const DETAILS: readonly {
 ]
 
 /** Beyond the tabs and the details, the routes on the M3 ground. Deeper pages keep the colour world for now. */
-const M3_PREFIXES: readonly string[] = []
+// The docs site (/docs) wears the M3 roles and Inclusive Sans too (#1483).
+const M3_PREFIXES: readonly string[] = ["/docs"]
 
 const FULL_SCREEN_EXACT = ["/", "/login", "/register"] as const
 const FULL_SCREEN_PREFIXES = ["/onboarding", "/path", "/blog"] as const
