@@ -41,6 +41,9 @@
  *        is new and the ones before it are not, on the explorer and the emotions card;
  *        the next look clears it, and seen is served at whole-second UTC (D10);
  *      - the check never unlocks a set_complete row, active or not;
+ *      - the emotions and domains ceremonies are deferred past V1 (#1458): their
+ *        set_complete rows are inactive, and a domains set made whole is recorded
+ *        but its card carries no completion and its pull says not_ready;
  *      - pull_ceremony refuses an unknown stack, an unknown or null zone, and raises
  *        not_ready before the offer (in two zones, agreeing with the payload's ready)
  *        and without a completion; anon is refused (D9, §3.4);
@@ -50,8 +53,10 @@
  *        carries pulled_at and is no longer ready. While complete-six-firsts is active,
  *        the pull unlocks it and pays its karma at most once and as returned; while it
  *        is inactive (until the clients ship the ceremony), the row says 0 and nothing
- *        is unlocked or paid. Without the key a completion can never be past its offer
- *        in the run: the offer is never less than 5 hours after completed_at.
+ *        is unlocked or paid. Past their offer, an emotions and a domains completion
+ *        stay off their cards, refuse the pull and stay unpulled (#1458). Without the
+ *        key a completion can never be past its offer in the run: the offer is never
+ *        less than 5 hours after completed_at.
  *
  * ACHIEVEMENTS_DUMP=1 writes the verbatim payloads to scripts/oracles/achievements/payloads/.
  *
@@ -147,7 +152,7 @@ type Achievements = {
   };
   emotions: { count: number; of: number; seats: { emotion_id: string; met: boolean; new: boolean; on?: string }[];
     families: { family: string; met: number[] }[]; completion?: Completion };
-  domains: { count: number; of: number; coverage: string; entered: unknown[]; not_yet: string[] };
+  domains: { count: number; of: number; coverage: string; entered: unknown[]; not_yet: string[]; completion?: Completion };
   pebbles: Ladder; glyphs_carved: Ladder; glyph_sales: Ladder;
   years: Year[];
   shelf: { slug: string; family: string }[]; shelf_count: number;
@@ -534,11 +539,15 @@ try {
     JSON.stringify(newSeats));
 
   const { data: sets } = await a.from("achievements").select("id, slug, is_active").eq("family", "set_complete").order("slug");
-  // Not asserted: is_active. The rows launch inactive and the maintainer activates
-  // them in the admin when the clients ship the ceremony; this must hold either way.
+  // Not asserted: complete-six-firsts' is_active, the maintainer's switch in the admin;
+  // this must hold either way.
   const heldNow = (await unlocks(a)).map((u) => u.slug);
   check("the check never unlocks a set_complete row (only pull_ceremony does)",
     (sets ?? []).length === 3 && !heldNow.some((s) => s.startsWith("complete-")), JSON.stringify([sets, heldNow]));
+  check("complete-emotions and complete-domains are inactive while their ceremony is deferred (#1458)",
+    ["complete-emotions", "complete-domains"].every((slug) =>
+      (sets ?? []).find((r: { slug: string }) => r.slug === slug)?.is_active === false),
+    JSON.stringify(sets));
 
   const badStack = await a.rpc("pull_ceremony", { p_stack: "nope", p_tz: tz });
   check("pull_ceremony refuses an unknown stack", refused(badStack, "invalid_stack"), badStack.error?.message ?? "accepted");
@@ -557,6 +566,15 @@ try {
   const none = await a.rpc("pull_ceremony", { p_stack: "domains", p_tz: tz });
   check("pull_ceremony raises not_ready for a stack never completed", refused(none, "not_ready"),
     none.error?.message ?? JSON.stringify(none.data));
+  // Carol made every domain whole above: recorded, so it can be offered once the
+  // ceremony comes back, but deferred past V1 (#1458).
+  const { data: carolDone } = await carol.client.from("achievement_completions").select("stack");
+  const carolDomains = (await read(carol.client)).domains;
+  const carolPull = await carol.client.rpc("pull_ceremony", { p_stack: "domains", p_tz: tz });
+  check("a domains set made whole is recorded, but its card carries no completion and its pull says not_ready (#1458)",
+    (carolDone ?? []).some((c: { stack: string }) => c.stack === "domains") && carolDomains.completion === undefined
+      && refused(carolPull, "not_ready"),
+    JSON.stringify([carolDone, carolDomains.completion, carolPull.error?.message ?? carolPull.data]));
   const anonPull = await anon.rpc("pull_ceremony", { p_stack: "six_firsts", p_tz: tz });
   const anonSeen = await anon.rpc("mark_achievements_seen", { p_card: "explorer" });
   check("pull_ceremony and mark_achievements_seen are refused to anon", !!anonPull.error && !!anonSeen.error,
@@ -601,6 +619,26 @@ try {
       JSON.stringify(after.explorer.completion));
     check("a set_complete row never reaches the shelf", after.shelf.every((s) => s.family !== "set_complete"),
       JSON.stringify(after.shelf));
+    // #1458: Carol's domains completion back-dated, and an emotions one written
+    // beside it, so both are past their offer and only the deferral holds them.
+    const { error: domErr } = await admin.from("achievement_completions").update({ completed_at: "2026-01-01T00:00:00Z" })
+      .eq("user_id", carol.id).eq("stack", "domains");
+    const { error: emoErr } = await admin.from("achievement_completions")
+      .insert({ user_id: carol.id, stack: "emotions", completed_at: "2026-01-01T00:00:00Z" });
+    if (domErr || emoErr) throw new Error(`deferred completions: ${(domErr ?? emoErr)?.message}`);
+    const deferredPulls = await Promise.all(["emotions", "domains"].map((stack) =>
+      carol.client.rpc("pull_ceremony", { p_stack: stack, p_tz: tz })));
+    const deferredCards = await read(carol.client);
+    const carolHeld = (await unlocks(carol.client)).map((u) => u.slug);
+    const { data: carolOpen } = await carol.client.from("achievement_completions").select("stack, pulled_at");
+    check("past their offer, the emotions and domains completions stay off their cards, refuse the pull and stay unpulled (#1458)",
+      deferredPulls.every((r) => refused(r, "not_ready"))
+        && deferredCards.emotions.completion === undefined && deferredCards.domains.completion === undefined
+        && !carolHeld.some((slug) => slug.startsWith("complete-"))
+        && ["emotions", "domains"].every((stack) => (carolOpen ?? [])
+          .some((c: { stack: string; pulled_at: string | null }) => c.stack === stack && c.pulled_at === null)),
+      JSON.stringify([deferredPulls.map((r) => r.error?.message ?? r.data), deferredCards.emotions.completion,
+        deferredCards.domains.completion, carolHeld, carolOpen]));
     // Run by hand with the key and ACHIEVEMENTS_DUMP=1 to refresh this one: the clients need a pulled completion.
     await dump("get-achievements-pulled", alice.token, "get_achievements", { p_tz: tz });
   } else {
