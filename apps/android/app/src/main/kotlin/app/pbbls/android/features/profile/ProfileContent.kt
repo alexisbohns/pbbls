@@ -28,11 +28,11 @@ import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.model.GlyphShelf
-import app.pbbls.android.features.profile.components.ProfileAchievementsCard
-import app.pbbls.android.features.profile.components.ProfileLabCard
+import app.pbbls.android.features.profile.components.YouAchievementsSection
 import app.pbbls.android.features.profile.components.YouCounters
 import app.pbbls.android.features.profile.components.YouGlyphsSection
 import app.pbbls.android.features.profile.components.YouHeader
+import app.pbbls.android.features.profile.components.YouLabSection
 
 /** The page's gutters: 16 dp to the sections, 4 more to the header's and the heads' text (the mock's). */
 private val GUTTER = 16.dp
@@ -51,8 +51,9 @@ private val COUNTERS_GAP = 34.dp
  * Settings opens from a standard top app bar action, as on main (an `IconButton` with `slider`,
  * labelled "Settings"); the bar has no title or back, You being a tab root. In order, on `surface`
  * in the readable column ([PebblesScreen]): the [YouHeader], the [YouCounters], the [YouGlyphsSection]
- * ([onOpenGlyphs] gets the shelf of the row tapped), then the achievements shelf and the Lab card,
- * which the next part rebuilds.
+ * ([onOpenGlyphs] gets the shelf of the row tapped), the [YouAchievementsSection], then the
+ * [YouLabSection] (the announcement opens through [onOpenAnnouncement], "All updates" through
+ * [onOpenLab]).
  *
  * A failed profile read shows the standard error and [onRetry] (design D13, Android's named
  * deviation from iOS's silent empty banner).
@@ -66,6 +67,7 @@ fun ProfileContent(
     onOpenGlyphs: (GlyphShelf) -> Unit,
     onOpenAchievements: () -> Unit,
     onOpenLab: () -> Unit,
+    onOpenAnnouncement: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -147,9 +149,21 @@ fun ProfileContent(
                         onOpen = onOpenGlyphs,
                     )
                     Spacer(Modifier.height(SECTION_GAP))
-                    ProfileAchievementsCard(badges = state.shelf, count = state.shelfCount, onOpen = onOpenAchievements)
+                    YouAchievementsSection(
+                        badges = state.shelf,
+                        count = state.shelfCount,
+                        textInset = TEXT_INSET,
+                        onOpen = onOpenAchievements,
+                    )
                     Spacer(Modifier.height(SECTION_GAP))
-                    ProfileLabCard(onOpen = onOpenLab)
+                    YouLabSection(
+                        announcement = state.announcement,
+                        coverUrl = state.announcementCoverUrl,
+                        entries = state.labEntries,
+                        textInset = TEXT_INSET,
+                        onOpenAnnouncement = onOpenAnnouncement,
+                        onOpenLab = onOpenLab,
+                    )
                 }
         }
     }

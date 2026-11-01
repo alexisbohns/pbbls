@@ -5,6 +5,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.espresso.Espresso
@@ -19,7 +20,7 @@ import org.junit.Test
 import javax.inject.Inject
 
 /**
- * The page through the real app (#1307): You → Achievements, the retroactive grant before the read,
+ * The page through the real app (#1307): You → a shelf badge → Achievements, the retroactive grant before the read,
  * a card opens its sheet and marks it seen, Explorer's Emotions row pushes a second sheet, and back
  * pops one sheet at a time. Back goes through Espresso, to the focused window: a sheet's dialog.
  */
@@ -33,7 +34,9 @@ class AchievementsPageTest : AppUiTest() {
         launch()
         signIn()
         compose.onNode(hasText(string(R.string.tab_you)) and isSelectable()).performClick()
-        onText(R.string.achievements_title).performScrollTo().performClick()
+        // You's shelf is badge cards since #1383 (D14.6); the fixture's third is "100 pebbles".
+        val badge = context.resources.getQuantityString(R.plurals.achievement_family_pebble_count_title, 100, 100)
+        compose.onNodeWithText(badge).performScrollTo().performClick()
         compose.waitForIdle()
     }
 

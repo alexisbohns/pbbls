@@ -10,6 +10,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.data.AchievementsServicing
+import app.pbbls.android.core.data.LogsServicing
 import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ProfileServicing
@@ -19,6 +20,8 @@ import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.core.model.achievements.AchievementsPage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,11 +30,16 @@ import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import javax.inject.Inject
+import app.pbbls.android.core.model.Log as LabLog
 
 private const val TAG = "profile"
 
 /** How old the achievements page may be before a visit to You reads it again (D18, iOS's fifteen minutes). */
 private val SHELF_MAX_AGE: Duration = Duration.ofMinutes(15)
+
+/** You shows the latest announcement and the three latest shipped features (#1383, spec D16). */
+private const val LAB_ANNOUNCEMENTS = 1
+private const val LAB_ENTRIES = 3
 
 /** What the Profile screen can be showing (#849). */
 sealed interface ProfileUiState {
@@ -60,6 +68,12 @@ sealed interface ProfileUiState {
         val shelf: List<AchievementRecord>,
         /** The served count of badges earned; null when none is served, and the shelf invites instead. */
         val shelfCount: Int?,
+        /** The latest published announcement; null when none is published or its read failed (D16). */
+        val announcement: LabLog? = null,
+        /** [announcement]'s public cover, or null to draw the split-stone band instead. */
+        val announcementCoverUrl: String? = null,
+        /** The three latest shipped features, newest first; empty when the read failed (D16). */
+        val labEntries: List<LabLog> = emptyList(),
     ) : ProfileUiState
 }
 
@@ -73,6 +87,10 @@ sealed interface ProfileUiState {
  *   Android's named deviation from iOS's silent empty banner);
  * - **the glyph strokes** are decoration hanging off that row, so a failure
  *   logs and the avatar renders the dotted pebble instead.
+ *
+ * - **the Lab's two feeds** (#1383, spec D16), the latest announcement and the three latest
+ *   shipped features, are read in parallel with the rest and fail alone: a failed feed logs and
+ *   hides its block (or, on a reload, keeps what is shown).
  *
  * Collections are no longer read here: You lost its collections card (#1383,
  * spec D14), and the Collections tab is their home.
@@ -89,11 +107,14 @@ class ProfileViewModel
         private val stats: PathStatsServicing,
         private val supabase: SupabaseServicing,
         private val achievementsService: AchievementsServicing,
+        private val logsService: LogsServicing,
     ) : ViewModel() {
         private var profile: ProfileRow? = null
         private var glyphStrokes: List<GlyphStroke>? = null
         private var shelfPage: AchievementsPage? = null
         private var catalogBySlug: Map<String, AchievementRecord> = emptyMap()
+        private var announcement: LabLog? = null
+        private var labEntries: List<LabLog> = emptyList()
 
         /** The reader's zone, read at each load: the shelf shares the page's copy, kept by zone. */
         @VisibleForTesting
@@ -164,7 +185,15 @@ class ProfileViewModel
             viewModelScope.launch { stats.refresh() }
         }
 
-        private suspend fun fetch() {
+        private suspend fun fetch() =
+            coroutineScope {
+                // The Lab is not the screen: it runs beside the profile and publishes when it lands.
+                val lab = async { loadLab() }
+                fetchProfile()
+                lab.await()
+            }
+
+        private suspend fun fetchProfile() {
             runCatchingCancellable { profileService.loadProfile() }
                 .fold(
                     onSuccess = {
@@ -191,6 +220,27 @@ class ProfileViewModel
 
             loadShelf()
         }
+
+        /**
+         * The Lab's two feeds, in parallel, each failing alone (D16): a failure logs and leaves
+         * that block as it was, hidden on a first load.
+         */
+        private suspend fun loadLab() =
+            coroutineScope {
+                val posts = async { labFeed("announcements") { logsService.announcements(LAB_ANNOUNCEMENTS) } }
+                val shipped = async { labFeed("changelog") { logsService.changelog(LAB_ENTRIES) } }
+                posts.await()?.let { announcement = it.firstOrNull() }
+                shipped.await()?.let { labEntries = it.take(LAB_ENTRIES) }
+                publish()
+            }
+
+        private suspend fun <T> labFeed(
+            label: String,
+            read: suspend () -> T,
+        ): T? =
+            runCatchingCancellable { read() }
+                .onFailure { Log.e(TAG, "lab $label read failed; its block keeps what is shown", it) }
+                .getOrNull()
 
         /**
          * The shelf (D18, iOS `loadIfStale`): the achievements page's kept copy at once, then a read
@@ -264,6 +314,9 @@ class ProfileViewModel
                                 ),
                             shelf = ProfileShelf.badges(shelfPage, catalogBySlug),
                             shelfCount = ProfileShelf.count(shelfPage),
+                            announcement = announcement,
+                            announcementCoverUrl = announcement?.let(logsService::coverImageUrl),
+                            labEntries = labEntries,
                         )
                 }
         }

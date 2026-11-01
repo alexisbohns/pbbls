@@ -31,7 +31,8 @@ class FakeLogsService(
     var logFailure: Exception? = null
     val logCalls = mutableListOf<String>()
 
-    /** Every limit the Lab asked each capped feed for, oldest first. */
+    /** Every limit the Lab (or You) asked each capped feed for, oldest first. */
+    val announcementLimits = mutableListOf<Int?>()
     val changelogLimits = mutableListOf<Int?>()
     val backlogLimits = mutableListOf<Int?>()
 
@@ -63,6 +64,7 @@ class FakeLogsService(
     }
 
     override suspend fun announcements(limit: Int?): List<Log> {
+        announcementLimits += limit
         announcementsFailure?.let { throw it }
         return announcements
     }

@@ -1653,3 +1653,39 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The five-tab bar and rail re-record their screenshot references (`NavigationSuiteScreenshots`, the `ListDetailScreenshots` rail).
 - **Supersedes / Superseded-by:** Supersedes the four-tab half of **2026-09-21 — Android gets a four-tab bottom bar, a deliberate break from the 1:1 iOS mirror (#852)** (its bar, back and visibility rules stand). Does not amend any cross-surface contract.
 - **Refs:** #1383, #1255, #852, #903, `docs/superpowers/specs/2026-10-31-android-home-and-you-design.md` (D1), `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/PebblesKeys.kt`, `apps/android/app/src/main/kotlin/app/pbbls/android/RootScreen.kt`, `apps/android/app/src/main/kotlin/app/pbbls/android/features/home/`.
+
+## 2026-11-01 — You keeps no hub tiles; Connections lives on People and Log out in Settings (#1383)
+
+- **Status:** taken
+- **Scope:** android, ui
+- **Context:**
+  - Android's You was a hub: a banner and a top app bar, a stats card with the assiduity grid, Souls, Glyphs and Connections tiles, a collections carousel, the achievements and Lab cards, and Log out at the foot. iOS's redesigned You (the c3 look approved for #1382–#1384) has none of the tiles, and iOS reaches Connections from People (`SoulsListView`).
+  - Spec D14 rebuilt You top to bottom on the rule that nothing it reached becomes unreachable.
+- **Decision:**
+  - You is, in order: the settings stone (no top bar), the pentagon avatar, the name in the hand, "Member since", the Ripples line; the three counters as one split stone; Glyphs as three rows opening the store on a tab (`PebblesKey.Glyphs(tab)`); Achievements as badge cards with "N earned" (a single invitation card when nothing is earned); the Lab as the latest announcement, a three-entry changelog, "All updates" and the WhatsApp callout.
+  - What left goes where the other surfaces have it: **Souls** and **Collections** to their tabs; **Connections** to a "Circle" action in People's top bar; **Log out** to a row of Settings, just above "Sign out everywhere". The assiduity grid and the ripples progress line are dropped.
+  - "All updates" opens the **Lab screen**, not the changelog list: once the Lab card left, the Lab screen is the only way from You to the roadmap, the backlog and reactions.
+- **Why:** the hub tiles duplicated tabs that exist (People, Collections), and Connections on You was Android drift from iOS. Moving each before the rebuild kept every build of the stack free of an orphaned screen.
+- **Consequences:**
+  - A new destination does not get a tile on You by default; it goes where its tab or Settings puts it.
+  - iOS and web place Log out and Circle the same way (flagged on #1382 and #1384).
+  - `ProfileAchievementsCard` and `ProfileLabCard` are gone; `features/profile` still imports nothing from `features/lab` (the callout is its own code; `FeaturedCommunityCard` stays the Lab's).
+- **Supersedes / Superseded-by:** narrows the M41/M44 Profile layout (the hub tiles and the Lab card, M44 D11). No data contract changes.
+- **Refs:** #1383, #1382, #1384, `docs/superpowers/specs/2026-10-31-android-home-and-you-design.md` (D14, D16), `apps/android/app/src/main/kotlin/app/pbbls/android/features/profile/ProfileContent.kt`, `apps/android/app/src/main/kotlin/app/pbbls/android/features/profile/components/`.
+
+## 2026-11-01 — Home and You use a page type set beside M3's scale (#1383)
+
+- **Status:** taken
+- **Scope:** android, ui
+- **Context:**
+  - The type bench (Type Bench, 2026-10) judged Home and You "too small" at M3's baseline sizes (`bodyLarge` 16, `bodyMedium` 14, `titleMedium` 16), and the approved c3 look needs ranks M3 has no slot for: a 40 sp light greeting, a 36 sp counter figure, 30 sp section heads, an italic figure word.
+  - The 2026-09-24 theme entry (#853) says app code reads `MaterialTheme.typography`, and `ThemeLiteralsTest` keeps font sizes out of `features/` and `core/ui`.
+- **Decision:**
+  - `PageTypography` in `core/designsystem` (read through `PebblesTheme.page`, built like `SpineTypography`) holds every rank of the two pages, at the mock's sizes in sp: Ysabeau for the editorial voice (greeting, heads, figures, dates, the post), Inclusive Sans for rows, labels and actions; none below 12 sp. One hand rank (`PebblesTheme.hand.profileName`) joins it.
+  - M3's scale is untouched: every other screen keeps `MaterialTheme.typography`.
+- **Why:** raising `bodyLarge`/`bodyMedium` app-wide would move every screen and every screenshot reference, a theme decision this milestone did not take; and the pages' display ranks have no M3 slot to raise. A set beside the scale, like the Spine's, gives the pages their sizes without re-scaling the app.
+- **Consequences:**
+  - A page built in the c3 look reads `PebblesTheme.page`; anything else reads `MaterialTheme.typography`. Two sizes coexist (a 15 sp line on You, a 14 sp `bodyMedium` elsewhere) until the follow-up decides.
+  - A follow-up issue asks whether the M3 scale should follow the page sizes.
+- **Supersedes / Superseded-by:** narrows the type half of **2026-09-24** (#853) for Home and You, the way `SpineTypography` does for the Path. Does not amend any cross-surface contract.
+- **Refs:** #1383, #853, `docs/superpowers/specs/2026-10-31-android-home-and-you-design.md` (D3), `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PageTypography.kt`.

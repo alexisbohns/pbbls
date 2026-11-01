@@ -21,6 +21,7 @@ import app.pbbls.android.core.model.GlyphShelf
 fun ProfileScreen(
     onOpenGlyphs: (GlyphShelf) -> Unit,
     onOpenLab: () -> Unit,
+    onOpenAnnouncement: (String) -> Unit,
     onOpenAchievements: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
@@ -42,6 +43,7 @@ fun ProfileScreen(
         onOpenGlyphs = onOpenGlyphs,
         onOpenAchievements = onOpenAchievements,
         onOpenLab = onOpenLab,
+        onOpenAnnouncement = onOpenAnnouncement,
         modifier = modifier,
     )
 }
