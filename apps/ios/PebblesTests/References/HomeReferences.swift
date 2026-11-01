@@ -334,4 +334,24 @@ extension References.HomeReferences {
         ReferenceImage.assertMatches(Self.monthGrid(), named: "monthGrid",
                                      config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
     }
+
+    /// November 2026 before its first pebble: the server sends no weeks, so the
+    /// columns are laid out from the month alone (today Sunday the 1st).
+    static func monthGridEmpty() -> some View {
+        let november = MonthWrap(month: CalendarMonth(year: 2026, month: 11), daysInMonth: 30, firstWeekday: 6,
+                                 pebbles: 0, people: 0, sections: [], cover: nil, weeks: nil, milestones: nil,
+                                 persons: nil, previousMonth: nil, gem: nil, fineEmotions: nil, domains: nil,
+                                 tone: nil, hours: nil)
+        return HomeMonthGrid(month: november, lookups: HomeFixture.lookups,
+                             today: CalendarDay(year: 2026, month: 11, day: 1), onWeek: { _ in })
+            .padding(Spacing.lg)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.pebbles.surface)
+    }
+
+    @Test(arguments: ReferenceScheme.allCases)
+    func monthGridEmpty(scheme: ReferenceScheme) throws {
+        ReferenceImage.assertMatches(Self.monthGridEmpty(), named: "monthGridEmpty",
+                                     config: ReferenceConfig(scheme: scheme))
+    }
 }

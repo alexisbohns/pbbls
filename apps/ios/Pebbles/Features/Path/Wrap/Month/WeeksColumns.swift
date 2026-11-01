@@ -17,11 +17,13 @@ struct WeekColumn: Equatable {
     static let pips = 3
 
     /// The month's weeks as columns: each day placed by its date, its pebbles from the cover.
+    /// Below one pebble the server sends no weeks; they are then laid out from the month alone.
     static func columns(_ wrap: MonthWrap) -> [WeekColumn] {
         let utc = TimeZone(secondsFromGMT: 0) ?? .gmt
         let byDay = Dictionary((wrap.cover?.days ?? []).map { ($0.day, $0.pebbles) },
                                uniquingKeysWith: { first, _ in first })
-        return (wrap.weeks ?? []).map { week in
+        let weeks = wrap.weeks.flatMap { $0.isEmpty ? nil : $0 } ?? laidOutWeeks(wrap)
+        return weeks.map { week in
             let monday = week.weekStart.date(in: utc) ?? .distantPast
             let days = (0..<7).map { offset -> WeekColumnDay in
                 let day = CalendarDay(monday.addingTimeInterval(Double(offset) * 86_400), in: utc)
@@ -30,6 +32,21 @@ struct WeekColumn: Equatable {
                 return pebbles.isEmpty ? .empty : .pebbles(pebbles)
             }
             return WeekColumn(week: week, days: days)
+        }
+    }
+
+    /// A month the server sent without weeks (`path_month_wrap` omits them below
+    /// one pebble), laid out from `days_in_month` and `first_weekday` (0 = Monday)
+    /// alone: one week per Monday, from the Monday on or before the 1st to the week
+    /// holding the last day, each without a pebble. Placement only, dates in UTC
+    /// from the served month; web's `monthColumns` does the same (#1384).
+    static func laidOutWeeks(_ wrap: MonthWrap) -> [MonthWeek] {
+        let utc = TimeZone(secondsFromGMT: 0) ?? .gmt
+        guard wrap.daysInMonth > 0, let first = wrap.month.firstDay.date(in: utc) else { return [] }
+        return stride(from: -wrap.firstWeekday, to: wrap.daysInMonth, by: 7).map { start in
+            let monday = first.addingTimeInterval(Double(start) * 86_400)
+            return MonthWeek(weekStart: CalendarDay(monday, in: utc), from: max(0, start),
+                             to: min(wrap.daysInMonth - 1, start + 6), pebbles: 0, soulIds: [], days: [])
         }
     }
 
