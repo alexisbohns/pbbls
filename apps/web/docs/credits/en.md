@@ -46,6 +46,53 @@ Copyright (c) 2010 Typeco (james@typeco.com). All rights reserved.
 
 ---
 
+## Libraries
+
+The open source libraries the apps ship. Licences are those published by each project.
+
+**Web**
+
+- **Next.js** · MIT — [github.com/vercel/next.js](https://github.com/vercel/next.js)
+- **React** · MIT — [github.com/facebook/react](https://github.com/facebook/react)
+- **Base UI** · MIT — [github.com/mui/base-ui](https://github.com/mui/base-ui)
+- **next-intl** · MIT — [github.com/amannn/next-intl](https://github.com/amannn/next-intl)
+- **Serwist** · MIT — [github.com/serwist/serwist](https://github.com/serwist/serwist)
+- **supabase-js** · MIT — [github.com/supabase/supabase-js](https://github.com/supabase/supabase-js)
+- **Rive React** · MIT — [github.com/rive-app/rive-react](https://github.com/rive-app/rive-react)
+- **Motion (framer-motion)** · MIT — [github.com/motiondivision/motion](https://github.com/motiondivision/motion)
+- **Lucide** · ISC — [lucide.dev](https://lucide.dev)
+- **date-fns** · MIT — [github.com/date-fns/date-fns](https://github.com/date-fns/date-fns)
+- **React DayPicker** · MIT — [github.com/gpbl/react-day-picker](https://github.com/gpbl/react-day-picker)
+- **Sonner** · MIT — [github.com/emilkowalski/sonner](https://github.com/emilkowalski/sonner)
+- **class-variance-authority** · Apache License 2.0 — [github.com/joe-bell/cva](https://github.com/joe-bell/cva)
+
+**iOS**
+
+- **Rive** · MIT — [github.com/rive-app/rive-ios](https://github.com/rive-app/rive-ios)
+- **Supabase Swift** · MIT — [github.com/supabase/supabase-swift](https://github.com/supabase/supabase-swift)
+- **SVGView (Exyte)** · MIT — [github.com/exyte/SVGView](https://github.com/exyte/SVGView)
+- **Swift Clocks (Point-Free)** · MIT — [github.com/pointfreeco/swift-clocks](https://github.com/pointfreeco/swift-clocks)
+- **Swift Concurrency Extras (Point-Free)** · MIT — [github.com/pointfreeco/swift-concurrency-extras](https://github.com/pointfreeco/swift-concurrency-extras)
+- **XCTest Dynamic Overlay (Point-Free)** · MIT — [github.com/pointfreeco/xctest-dynamic-overlay](https://github.com/pointfreeco/xctest-dynamic-overlay)
+- **Swift Crypto (Apple)** · Apache License 2.0 — [github.com/apple/swift-crypto](https://github.com/apple/swift-crypto)
+- **Swift ASN.1 (Apple)** · Apache License 2.0 — [github.com/apple/swift-asn1](https://github.com/apple/swift-asn1)
+- **Swift HTTP Types (Apple)** · Apache License 2.0 — [github.com/apple/swift-http-types](https://github.com/apple/swift-http-types)
+
+**Android**
+
+- **Jetpack Compose, Material 3 and Navigation 3** · Apache License 2.0 — [developer.android.com/jetpack/androidx](https://developer.android.com/jetpack/androidx)
+- **AndroidX (Core, Activity, Lifecycle, DataStore, Browser, Splash Screen, Window, Navigation Event)** · Apache License 2.0 — [developer.android.com/jetpack/androidx](https://developer.android.com/jetpack/androidx)
+- **Hilt (Google)** · Apache License 2.0 — [github.com/google/dagger](https://github.com/google/dagger)
+- **supabase-kt** · MIT — [github.com/supabase-community/supabase-kt](https://github.com/supabase-community/supabase-kt)
+- **Ktor (JetBrains)** · Apache License 2.0 — [github.com/ktorio/ktor](https://github.com/ktorio/ktor)
+- **OkHttp (Square)** · Apache License 2.0 — [github.com/square/okhttp](https://github.com/square/okhttp)
+- **kotlinx.coroutines and kotlinx.serialization (JetBrains)** · Apache License 2.0 — [github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
+- **Coil** · Apache License 2.0 — [github.com/coil-kt/coil](https://github.com/coil-kt/coil)
+- **AndroidSVG** · Apache License 2.0 — [github.com/BigBadaboom/androidsvg](https://github.com/BigBadaboom/androidsvg)
+- **ZXing** · Apache License 2.0 — [github.com/zxing/zxing](https://github.com/zxing/zxing)
+
+---
+
 ## Intellectual inspirations
 
 Pebbles would not exist without the work of the following people, who have deeply influenced the product's design:
