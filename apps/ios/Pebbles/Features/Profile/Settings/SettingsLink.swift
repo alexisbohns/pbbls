@@ -25,25 +25,12 @@ struct SettingsLink: Identifiable, Hashable {
 
     func title(for locale: Locale) -> String { locale.prefersFrench ? (titleFr ?? titleEn) : titleEn }
 
-    private struct Row: Decodable {
-        let key: String?
-        let section: String?
-        let titleEn: String?
-        let titleFr: String?
-        let url: String?
-
-        enum CodingKeys: String, CodingKey {
-            case key, section, url
-            case titleEn = "title_en", titleFr = "title_fr"
-        }
-    }
-
     private static let logger = Logger(subsystem: "app.pbbls.ios", category: "settings-links")
     private static let schemes: Set<String> = ["https", "mailto"]
 
     /// Rows this build cannot show (unknown section, other scheme, missing EN title) are dropped.
     static func decodeList(_ data: Data) throws -> [SettingsLink] {
-        try JSONDecoder().decode([Row].self, from: data).compactMap { row in
+        try JSONDecoder().decode([SettingsLinkRow].self, from: data).compactMap { row in
             guard let key = row.key,
                   let section = row.section.flatMap(Section.init(rawValue:)),
                   let titleEn = row.titleEn, !titleEn.trimmingCharacters(in: .whitespaces).isEmpty,
@@ -74,5 +61,20 @@ struct SettingsLink: Identifiable, Hashable {
             let rows = links.filter { $0.section == section }
             return rows.isEmpty ? nil : Group(section: section, links: rows)
         }
+    }
+}
+
+/// A `settings_links` row as the database sends it; every field optional so one
+/// bad row is dropped instead of failing the whole list.
+private struct SettingsLinkRow: Decodable {
+    let key: String?
+    let section: String?
+    let titleEn: String?
+    let titleFr: String?
+    let url: String?
+
+    enum CodingKeys: String, CodingKey {
+        case key, section, url
+        case titleEn = "title_en", titleFr = "title_fr"
     }
 }

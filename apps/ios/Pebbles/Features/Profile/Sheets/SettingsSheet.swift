@@ -17,6 +17,8 @@ struct SettingsSheet: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
+    @Environment(\.locale) private var locale
 
     @State private var displayName: String
     @State private var pickedGlyph: Glyph?
@@ -28,7 +30,9 @@ struct SettingsSheet: View {
     @State private var handleError: String?
     @State private var isSaving = false
     @State private var saveError: String?
-    @State private var presentedLegalDoc: LegalDoc?
+    /// The kept (or built-in) links at once, refreshed from `settings_links` when the sheet opens (#1489).
+    @State private var links: [SettingsLink] = SettingsLinksStore(defaults: .standard).current()
+    @State private var presentedLink: SettingsLink?
     /// This device's, saved as it is switched: never staged for the sheet's Save.
     @AppStorage(HapticsPreference.storageKey) private var hapticsOn = true
     @AppStorage(HomeShortcutsPreference.layoutKey) private var shortcutsLayout = HomeShortcutsLayout.row
@@ -146,7 +150,7 @@ struct SettingsSheet: View {
                 }
                 homeSection
                 hapticsSection
-                legalSection
+                linkSections
                 #if DEBUG
                 developerSection
                 #endif
@@ -183,9 +187,12 @@ struct SettingsSheet: View {
                     pickedGlyph = glyph
                 }
             }
-            .sheet(item: $presentedLegalDoc) { doc in
-                LegalDocumentSheet(url: doc.url)
+            .sheet(item: $presentedLink) { link in
+                LegalDocumentSheet(url: link.url)
                     .ignoresSafeArea()
+            }
+            .task {
+                links = await SettingsLinksService(client: supabase.client).refresh()
             }
             #if DEBUG
             .fullScreenCover(isPresented: $isPresentingStoneLab) {
@@ -467,20 +474,44 @@ struct SettingsSheet: View {
         }
     }
 
-    private var legalSection: some View {
-        Section {
-            Button { presentedLegalDoc = .terms } label: {
-                Label("Terms of Service", systemImage: "doc.text")
+    /// The admin-edited links (#1489), one section per non-empty group in the
+    /// fixed order legal, about, support. `https` opens in the in-app Safari
+    /// sheet; `mailto` goes to the system.
+    private var linkSections: some View {
+        ForEach(SettingsLink.grouped(links)) { group in
+            Section {
+                ForEach(Array(group.links.enumerated()), id: \.element.id) { index, link in
+                    Button {
+                        if link.opensInApp {
+                            presentedLink = link
+                        } else {
+                            openURL(link.url)
+                        }
+                    } label: {
+                        Label(link.title(for: locale), systemImage: Self.icon(for: group.section))
+                    }
+                    .buttonStyle(.plain)
+                    .pebblesListRow(position: pebblesRowPosition(index: index, count: group.links.count))
+                }
+            } header: {
+                Text(Self.title(for: group.section)).pebblesSectionHeader()
             }
-            .buttonStyle(.plain)
-            .pebblesListRow(position: .top)
-            Button { presentedLegalDoc = .privacy } label: {
-                Label("Privacy Policy", systemImage: "hand.raised")
-            }
-            .buttonStyle(.plain)
-            .pebblesListRow(position: .bottom)
-        } header: {
-            Text("Legal").pebblesSectionHeader()
+        }
+    }
+
+    private static func title(for section: SettingsLink.Section) -> LocalizedStringKey {
+        switch section {
+        case .legal: return "Legal"
+        case .about: return "About"
+        case .support: return "Support"
+        }
+    }
+
+    private static func icon(for section: SettingsLink.Section) -> String {
+        switch section {
+        case .legal: return "doc.text"
+        case .about: return "info.circle"
+        case .support: return "lifepreserver"
         }
     }
 
