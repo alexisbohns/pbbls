@@ -179,6 +179,13 @@ jobs:
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "guides" db:verify:guides
 
+      # The settings_links table (#1489): published rows readable by anon in
+      # section then sort_order, the five seeded keys present, https/mailto
+      # urls only, writes admin-only.
+      - name: Settings links (#1489)
+        if: '!cancelled()'
+        run: .github/scripts/verify-harness.sh "settings-links" db:verify:settings-links
+
       # The Home tab's back-end (#1254): the first-moment and first-pebble
       # achievements and their permanence, claim_blue_pebble's gate and
       # exactly-once, people_prompts' filters and guard; (part 3) the wrap
