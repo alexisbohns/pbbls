@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/ysabeau";
 import "@fontsource/reenie-beanie";
 import "@fontsource-variable/caveat";
-import "@fontsource-variable/inclusive-sans";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { ColorWorldProvider } from "@/components/layout/ColorWorldProvider";
 import { ThemeColorSync } from "@/components/layout/ThemeColorSync";
@@ -13,6 +12,8 @@ import { MainContent } from "@/components/layout/MainContent";
 import { Toaster } from "@/components/ui/sonner";
 import { AchievementMomentHost } from "@/components/activity/AchievementMomentHost";
 import { LocaleProvider } from "@/lib/i18n/LocaleProvider";
+import { cn } from "@/lib/utils";
+import { inclusiveSans } from "./fonts";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -75,7 +76,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased"
+      className={cn("h-full antialiased", inclusiveSans.variable)}
       suppressHydrationWarning
     >
       <head>

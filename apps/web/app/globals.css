@@ -96,7 +96,7 @@
      Sans for body/label. Defined globally so the m3-type-* utilities render the
      same on the design page under either theme. */
   --m3-font-brand: "Ysabeau Variable", system-ui, sans-serif;
-  --m3-font-plain: "Inclusive Sans Variable", system-ui, sans-serif;
+  --m3-font-plain: var(--font-inclusive-sans), system-ui, sans-serif;
 
   --background: #FFFFFF;
   --foreground: #2E2024;
