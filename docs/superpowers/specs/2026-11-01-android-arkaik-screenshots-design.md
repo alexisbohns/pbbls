@@ -65,9 +65,10 @@ arkaik door takes, and a workflow that posts it on every push to `main`.
    It is tested with `node --test` against a fixture reference tree. It never
    calls the network: posting is the arkaik workflow's job.
 
-6. **Two workflow touches.** `android.yml` gains one step after the screenshot
-   validation: `node scripts/arkaik/android-shots-manifest.mjs --check`, so a
-   pull request that renames a preview without updating the mapping goes red.
+6. **Two workflow touches.** `android.yml` gains one step right after checkout, before
+   any Gradle work: `node scripts/arkaik/android-shots-manifest.mjs --check`, so
+   a pull request that renames a preview without updating the mapping goes red
+   in seconds (the check needs the committed files only, not a render).
    A new `.github/workflows/android-screenshots-record.yml` runs on `push` to
    `main` when the reference directory, the mapping or the script changed:
    job `manifest` writes `shots.json` for `github.sha` and uploads it as
