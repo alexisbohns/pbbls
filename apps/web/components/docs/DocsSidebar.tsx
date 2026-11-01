@@ -84,7 +84,7 @@ export function DocsSidebar({ pages }: DocsSidebarProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href="/path" className={buttonVariants({ variant: "outline", className: "hidden md:flex self-end" })}>
+      <Link href="/path" className={cn(buttonVariants({ variant: "outline" }), "hidden self-end md:inline-flex")}>
         <ChevronLeft />
         {t("back")}
       </Link>
@@ -95,7 +95,7 @@ export function DocsSidebar({ pages }: DocsSidebarProps) {
         <Link
           href="/path"
           aria-label={t("back")}
-          className={buttonVariants({ variant: "ghost", size: "icon-lg", className: "size-12 shrink-0 rounded-xl" })}
+          className={cn(buttonVariants({ variant: "secondary" }), "size-12 shrink-0 rounded-full [&_svg:not([class*='size-'])]:size-6")}
         >
           <ArrowLeft />
         </Link>
