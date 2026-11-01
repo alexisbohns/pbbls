@@ -16,6 +16,8 @@ import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.PathWrapServicing
 import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.data.SoulsServicing
+import app.pbbls.android.core.data.TabIntent
+import app.pbbls.android.core.data.TabIntents
 import app.pbbls.android.core.data.delete
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
@@ -159,6 +161,8 @@ class PathViewModel
         private val wraps: PathWrapServicing,
         private val display: DisplayPreferences,
         private val haptics: HapticsPreference,
+        /** What another tab asks the Path to show on arrival: Home's week tap (#1383 D10). */
+        private val tabIntents: TabIntents,
         /**
          * The photo-ratio probe the Spine's cards read (#1122). Process-wide and
          * injected here rather than through a `Local…`: the screen takes its
@@ -205,6 +209,9 @@ class PathViewModel
         private var loadJob: Job? = null
         private var resumeCount = 0
 
+        /** A week Home asked for before the timeline was in; the next successful load focuses it. */
+        private var pendingWeek: LocalDate? = null
+
         init {
             load()
             // Stats rides its own coroutine so a slow or failed stats fetch never
@@ -243,8 +250,17 @@ class PathViewModel
          * same gap was fixed for the souls and collections lists.
          */
         fun onResumed() {
+            tabIntents.take<TabIntent.FocusWeek>()?.let { focusWeek(it.weekStart) }
             resumeCount += 1
             if (resumeCount > 1) reload()
+        }
+
+        /**
+         * Home's week tap (#1383 D10), taken once on resume: focused at once when the timeline is up, else kept
+         * for the load that brings it. A week the Path doesn't hold is ignored, as [onFocus] ignores it.
+         */
+        private fun focusWeek(weekStart: LocalDate) {
+            if (isLoaded) onFocus(PathPage.Week(weekStart)) else pendingWeek = weekStart
         }
 
         // MARK: - Loading
@@ -316,7 +332,9 @@ class PathViewModel
                                 .firstOrNull { entry -> entry.moments.any { it.id.equals(id, ignoreCase = true) } }
                                 ?.let { PathPage.Week(it.weekStart) }
                         }
-                    focus = requested ?: PathPages.refocused(pages, focus, today)
+                    val posted = pendingWeek?.let { PathPage.Week(it) }?.takeIf { it in pages }
+                    pendingWeek = null
+                    focus = requested ?: posted ?: PathPages.refocused(pages, focus, today)
                     hasFailed = false
                     isLoaded = true
                 },

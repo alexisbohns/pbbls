@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.core.ui.GlyphPickerSlot
+import app.pbbls.android.core.ui.HomeMonthSlot
 import app.pbbls.android.features.achievements.AchievementsScreen
 import app.pbbls.android.features.auth.AuthScreen
 import app.pbbls.android.features.connections.AcceptInviteScreen
@@ -30,6 +31,7 @@ import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.path.PebbleDetailScreen
 import app.pbbls.android.features.path.capture.CaptureFlowScreen
 import app.pbbls.android.features.path.complete.CompleteFlowScreen
+import app.pbbls.android.features.path.wrap.month.HomeMonthGrid
 import app.pbbls.android.features.profile.CollectionDetailScreen
 import app.pbbls.android.features.profile.CollectionFormScreen
 import app.pbbls.android.features.profile.CollectionsListScreen
@@ -65,7 +67,11 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 ) {
     entry<PebblesKey.Home>(metadata = NavTransitions.forKey(PebblesKey.Home)) {
         val reselected = remember(navigator) { navigator.reselectEvents.filter { it == PebblesKey.Home }.map {} }
-        HomeScreen(reselected = reselected)
+        HomeScreen(
+            reselected = reselected,
+            monthSlot = homeMonth,
+            onOpenPath = { navigator.navigate(PebblesKey.Path) },
+        )
     }
 
     entry<PebblesKey.Path>(
@@ -343,6 +349,12 @@ private val glyphPicker: GlyphPickerSlot = { currentGlyphId, onSelected, state, 
         state = state,
     )
 }
+
+/**
+ * Home's month grid (#1383 D8): the Path's week columns, for the Home tab that hosts them. Same reason as
+ * [glyphPicker]: a feature may not import another, so this file fills the slot.
+ */
+private val homeMonth: HomeMonthSlot = { wrap, onWeek, modifier -> HomeMonthGrid(wrap, onWeek, modifier) }
 
 /**
  * Whether this entry is being shown as a pane of a list-detail scene (#940).

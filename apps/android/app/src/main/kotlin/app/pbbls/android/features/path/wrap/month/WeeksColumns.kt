@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -93,6 +94,11 @@ private const val DAYS = 7
  * the strip. In the intro, one week at a time: its date, its days down the column (a slot silently, each pebble
  * with a tick), then its cairn stone by stone. [room] is the card's: the days' cells share what the date and the
  * cairn leave of it, within their bounds.
+ *
+ * [outsideSockets] is Home's (#1383): every column reads as a full week, a day outside the month drawing a faint
+ * socket in `outlineVariant` (an empty day's mark and size, never a pebble). The month card leaves those days
+ * blank. Either way a column's spoken label counts only the month's days. It also lays out a month the server
+ * sent without weeks (no pebble yet) as empty weeks, where the month card draws no columns.
  */
 @Composable
 internal fun WeeksColumns(
@@ -100,8 +106,9 @@ internal fun WeeksColumns(
     lookups: WrapLookups,
     room: Dp,
     onWeek: (LocalDate) -> Unit,
+    outsideSockets: Boolean = false,
 ) {
-    val columns = remember(wrap) { WeekColumn.columns(wrap) }
+    val columns = remember(wrap, outsideSockets) { WeekColumn.columns(wrap, layOutEmptyMonth = outsideSockets) }
     val cell = ((room - LABEL - CAIRN_ROOM - GAP * 2) / DAYS).coerceIn(CELL_MIN, CELL_CAP)
     Row(
         Modifier
@@ -113,7 +120,7 @@ internal fun WeeksColumns(
         WeekdayMargin(cell)
         columns.forEachIndexed { index, column ->
             key(column.week.weekStart) {
-                WeekColumnView(column, index, cell, lookups, wrap.month, onWeek, Modifier.weight(1f))
+                WeekColumnView(column, index, cell, lookups, wrap.month, onWeek, outsideSockets, Modifier.weight(1f))
             }
         }
     }
@@ -145,6 +152,7 @@ private fun WeekColumnView(
     lookups: WrapLookups,
     month: YearMonth,
     onWeek: (LocalDate) -> Unit,
+    outsideSockets: Boolean,
     modifier: Modifier,
 ) {
     val copy = rememberWrapCopy()
@@ -168,7 +176,7 @@ private fun WeekColumnView(
         verticalArrangement = Arrangement.spacedBy(GAP),
     ) {
         ColumnDate(week.weekStart, copy, reveal, index)
-        ColumnDays(column, index, cell, lookups, reveal)
+        ColumnDays(column, index, cell, lookups, reveal, outsideSockets)
         Box(Modifier.height(CAIRN_ROOM), contentAlignment = Alignment.TopCenter) { ColumnCairn(column, index, reveal) }
     }
 }
@@ -215,8 +223,11 @@ private fun ColumnDays(
     cell: Dp,
     lookups: WrapLookups,
     reveal: IntroReveal,
+    outsideSockets: Boolean,
 ) {
     val colors = PebblesTheme.spine.colors
+    // Home's days outside the month: an empty day's socket, faint, settled (Home plays no intro).
+    val outsideInk = MaterialTheme.colorScheme.outlineVariant
     val placed =
         remember(column) {
             column.days.flatMapIndexed { day, kind ->
@@ -252,6 +263,14 @@ private fun ColumnDays(
                 column.days.withIndex().filter { it.value == WeekColumnDay.Empty }.map { (day, _) ->
                     ColumnSocket(IntroKey.Rest(index, day), Offset(middle, (day + 0.5f) * cellPx))
                 }
+            val outside =
+                if (!outsideSockets) {
+                    emptyList()
+                } else {
+                    column.days.withIndex().filter { it.value == WeekColumnDay.Outside }.map { (day, _) ->
+                        Offset(middle, (day + 0.5f) * cellPx)
+                    }
+                }
             val pad = SEAL_LAYER_PAD.toPx()
             val seals =
                 placed.mapIndexed { i, place ->
@@ -269,6 +288,7 @@ private fun ColumnDays(
                     )
                 }
             onDrawBehind {
+                outside.forEach { at -> dotMark(at, socket, DotStyle.SOCKET, outsideInk, dotRing) }
                 sockets.forEach { (key, at) ->
                     val shown = reveal(key)
                     if (shown <= 0f) return@forEach

@@ -1,8 +1,13 @@
 package app.pbbls.android.features.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.HomeServicing
+import app.pbbls.android.core.data.PathWrapServicing
+import app.pbbls.android.core.data.TabIntent
+import app.pbbls.android.core.data.TabIntents
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +15,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.ZoneId
 import javax.inject.Inject
+
+private const val TAG = "home"
 
 /**
  * Home's state (#1383; iOS `HomeModel`).
@@ -33,15 +43,31 @@ class HomeViewModel
     @Inject
     constructor(
         private val home: HomeServicing,
+        /** The month grid's read (D9): `path_month_wrap`, the same cache entry as the Path's month page. */
+        private val wraps: PathWrapServicing,
+        /** Where a week tap leaves its focus for the Path (D10). */
+        private val tabIntents: TabIntents,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(HomeUiState())
         val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
         private var nameJob: Job? = null
+        private var monthJob: Job? = null
+
+        /** The zone the month's days are cut in, as the Path asks for it. */
+        private val zone = ZoneId.systemDefault()
 
         fun onResumed() {
-            if (nameJob?.isActive == true) return
-            nameJob = viewModelScope.launch { loadName() }
+            if (nameJob?.isActive != true) nameJob = viewModelScope.launch { loadName() }
+            if (monthJob?.isActive != true) monthJob = viewModelScope.launch { loadMonth() }
+        }
+
+        /**
+         * A tap on a week of the grid (D10): leaves the Path a focus on [weekStart], which it takes on its
+         * next resume. The screen then switches to the Path tab.
+         */
+        fun onWeek(weekStart: LocalDate) {
+            tabIntents.post(TabIntent.FocusWeek(weekStart))
         }
 
         /**
@@ -53,4 +79,25 @@ class HomeViewModel
             val name = home.displayName()
             if (name.isNotBlank()) _uiState.update { it.copy(name = name) }
         }
+
+        /**
+         * The live month (D9): the device's copy paints first when nothing of this month is shown, then the
+         * network's read replaces it. A failure keeps what is shown; with nothing shown, the grid hides
+         * ([HomeSection.Failed]): there is no error row for a decorative header.
+         */
+        private suspend fun loadMonth() {
+            val month = YearMonth.now(zone)
+            if (shownMonth() != month) {
+                wraps.cachedMonthWrap(month, zone)?.let { kept -> _uiState.update { it.copy(month = HomeSection.Ready(kept)) } }
+            }
+            runCatchingCancellable { wraps.monthWrap(month, zone) }.fold(
+                onSuccess = { wrap -> _uiState.update { it.copy(month = HomeSection.Ready(wrap)) } },
+                onFailure = { error ->
+                    Log.e(TAG, "path_month_wrap for $month failed", error)
+                    if (shownMonth() != month) _uiState.update { it.copy(month = HomeSection.Failed) }
+                },
+            )
+        }
+
+        private fun shownMonth(): YearMonth? = (_uiState.value.month as? HomeSection.Ready)?.value?.month
     }
