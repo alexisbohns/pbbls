@@ -1,7 +1,6 @@
 "use client"
 
-import type { LucideIcon } from "lucide-react"
-import type { ReactNode } from "react"
+import type { ComponentType, ReactNode } from "react"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -21,7 +20,8 @@ export function GamificationBlock({
   dialogTitle,
   dialogDescription,
 }: {
-  icon: LucideIcon
+  /** Structural, like `DataTile`'s: the sandbox hands it lucide `Flame`, the blocks Pebbles icons (spec D10). */
+  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>
   label: string
   value: string | number
   dialogTitle: string

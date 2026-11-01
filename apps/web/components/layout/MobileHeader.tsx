@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CircleUser } from "lucide-react"
+import { Person } from "@pbbls/icons"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/data/auth-context"
@@ -37,7 +37,7 @@ export function MobileHeader() {
           aria-label={aria("profile")}
           aria-current={pathname.startsWith("/profile") ? "page" : undefined}
         >
-          <CircleUser className="size-5" />
+          <Person className="size-5" />
         </Link>
       )}
     </header>

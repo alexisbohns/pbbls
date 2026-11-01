@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { useNavItems } from "@/lib/hooks/useNavItems"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 
 export function BottomNav() {
   const pathname = usePathname()
@@ -38,7 +39,7 @@ export function BottomNav() {
                 aria-current={isActive ? "page" : undefined}
                 tabIndex={hidden ? -1 : undefined}
               >
-                <Icon className="size-5" />
+                <Icon className={PBBLS_ICON_SIZE.row} />
                 {label}
               </Link>
             </li>

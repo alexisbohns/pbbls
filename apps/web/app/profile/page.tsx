@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Settings } from "lucide-react"
+import { Slider } from "@pbbls/icons"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
@@ -44,7 +44,7 @@ export default function ProfilePage() {
       aria-label={t("settingsAria")}
       className={buttonVariants({ variant: "outline", size: "icon" })}
     >
-      <Settings />
+      <Slider />
     </Link>
   )
 

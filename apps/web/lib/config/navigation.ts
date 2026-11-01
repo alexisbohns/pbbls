@@ -1,11 +1,13 @@
-import { Route, CirclePlus, FolderOpen, Users, Fingerprint, FlaskConical } from "lucide-react"
+import { Collection, Path, PebbleDottedGlyph, People, PlusCircle, Sparkle } from "@pbbls/icons"
+import type { PbblsIconComponent } from "@/lib/icons/pbbls-icon"
 
 export type NavItemKey = "path" | "record" | "collections" | "souls" | "glyphs" | "lab"
 
 export type NavItem = {
   key: NavItemKey
   href: string
-  icon: typeof Route
+  /** Drawn plain: the nav marks the current entry by colour and `aria-current`, never by an `active` twin (spec D11). */
+  icon: PbblsIconComponent
 }
 
 /**
@@ -13,10 +15,10 @@ export type NavItem = {
  * (`nav.<key>`) — see `useNavItems` for the localized form.
  */
 export const NAV_ITEMS: ReadonlyArray<NavItem> = [
-  { key: "path",        href: "/path",        icon: Route },
-  { key: "record",      href: "/record",      icon: CirclePlus },
-  { key: "collections", href: "/collections", icon: FolderOpen },
-  { key: "souls",       href: "/souls",       icon: Users },
-  { key: "glyphs",      href: "/glyphs",      icon: Fingerprint },
-  { key: "lab",         href: "/lab",         icon: FlaskConical },
+  { key: "path",        href: "/path",        icon: Path },
+  { key: "record",      href: "/record",      icon: PlusCircle },
+  { key: "collections", href: "/collections", icon: Collection },
+  { key: "souls",       href: "/souls",       icon: People },
+  { key: "glyphs",      href: "/glyphs",      icon: PebbleDottedGlyph },
+  { key: "lab",         href: "/lab",         icon: Sparkle },
 ]
