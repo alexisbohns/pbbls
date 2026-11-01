@@ -1763,6 +1763,45 @@ export type Database = {
         }
         Relationships: []
       }
+      settings_links: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          published: boolean
+          section: string
+          sort_order: number
+          title_en: string
+          title_fr: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          published?: boolean
+          section: string
+          sort_order?: number
+          title_en: string
+          title_fr?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          published?: boolean
+          section?: string
+          sort_order?: number
+          title_en?: string
+          title_fr?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       snaps: {
         Row: {
           created_at: string
