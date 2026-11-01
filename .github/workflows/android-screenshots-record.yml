@@ -1,0 +1,47 @@
+# Record the mapped Android screenshot references on the hosted Arkaik map
+# (docs/superpowers/specs/2026-11-01-android-arkaik-screenshots-design.md).
+# The references are committed PNGs, so there is nothing to render: this builds
+# the manifest for the pushed sha (raw GitHub URLs, immutable by sha) and hands
+# it to arkaik's reusable workflow, which computes the order, refuses a sha not
+# on main, and skips an unchanged URL. Needs the ARKAIK_SCREENSHOT_TOKEN secret
+# (a screenshot:append token from https://arkaik.app/settings/tokens).
+name: android-screenshots-record
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/android/app/src/screenshotTestDebug/reference/**"
+      - "apps/android/arkaik-shots.json"
+      - "scripts/arkaik/android-shots-manifest.mjs"
+      - ".github/workflows/android-screenshots-record.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build the manifest for this sha
+        run: node scripts/arkaik/android-shots-manifest.mjs --sha "$GITHUB_SHA" --out shots.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shots
+          path: shots.json
+          retention-days: 7
+
+  record:
+    needs: manifest
+    uses: alexisbohns/arkaik/.github/workflows/record-screenshots.yml@main
+    with:
+      manifest_artifact: shots
+    secrets:
+      ARKAIK_SCREENSHOT_TOKEN: ${{ secrets.ARKAIK_SCREENSHOT_TOKEN }}

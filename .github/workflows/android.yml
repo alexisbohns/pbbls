@@ -129,6 +129,14 @@ jobs:
             apps/android/app/build/outputs/screenshotTest-results/preview/debug/**
           if-no-files-found: warn
 
+      # The committed references are what the hosted Arkaik map shows, so a
+      # mapping that points at a missing or renamed reference fails here.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check the arkaik screenshot mapping
+        run: node scripts/arkaik/android-shots-manifest.mjs --check
+
       # Android Lint with `warningsAsErrors` + a committed baseline
       # (apps/android/app/lint-baseline.xml). Anything already in the baseline is
       # filtered out; anything new fails the PR. Regenerate the baseline with
