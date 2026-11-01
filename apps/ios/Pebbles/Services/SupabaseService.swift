@@ -176,11 +176,14 @@ final class SupabaseService {
     /// Re-runs Sign in with Apple. Same cancel and mismatch contract as
     /// `reauthenticateWithGoogle`. Apple answers with the device's Apple ID,
     /// so an account created under another Apple ID ends in a mismatch.
-    func reauthenticateWithApple() async throws {
+    /// Returns Apple's authorization code, which account deletion forwards.
+    @discardableResult
+    func reauthenticateWithApple() async throws -> String? {
         guard let before = session?.user else { throw AuthError.sessionMissing }
         let returned: Session
+        let result: AppleSignInResult
         do {
-            let result = try await AppleSignInService.authorize()
+            result = try await AppleSignInService.authorize()
             returned = try await client.auth.signInWithIdToken(
                 credentials: .init(provider: .apple, idToken: result.idToken, nonce: result.rawNonce)
             )
@@ -191,6 +194,22 @@ final class SupabaseService {
             throw error
         }
         try await requireSameUser(returned.user.id, as: before.id)
+        return result.authorizationCode
+    }
+
+    /// A fresh Sign in with Apple authorization code for account deletion
+    /// (#1456), without touching the session: the server exchanges it and
+    /// revokes the app's Apple grant. Throws `CancellationError` when the
+    /// person closes the sheet.
+    func appleAuthorizationCodeForDeletion() async throws -> String? {
+        do {
+            return try await AppleSignInService.authorize().authorizationCode
+        } catch AppleSignInService.Failure.canceled {
+            throw CancellationError()
+        } catch {
+            logger.error("apple authorization for deletion failed: \(error.localizedDescription, privacy: .private)")
+            throw error
+        }
     }
 
     private func requireSameUser(_ returned: UUID, as expected: UUID) async throws {
