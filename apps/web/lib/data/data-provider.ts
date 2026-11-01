@@ -183,6 +183,8 @@ export interface DataProvider {
   revealWrap(month: string, tz: string): Promise<void>
   /** The published guides by `sort_order`, in the reader's language. */
   getGuides(locale: "en" | "fr"): Promise<Guide[]>
+  /** The published `settings_links` rows, raw: decoded by `decodeSettingsLinks`. */
+  getSettingsLinks(): Promise<unknown>
   /** `claim_blue_pebble()`: the granted row, or null when nothing was granted. */
   claimBluePebble(): Promise<AchievementUnlockResult | null>
 

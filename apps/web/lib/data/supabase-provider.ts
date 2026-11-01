@@ -391,6 +391,22 @@ export class SupabaseProvider implements DataProvider {
     if (error) throw new Error(`reveal_wrap failed: ${error.message}`)
   }
 
+  async getSettingsLinks(): Promise<unknown> {
+    // A single-table read (AGENTS.md: no RPC needed); RLS hides unpublished rows too.
+    const { data, error } = await withTimeout(
+      this.supabase
+        .from("settings_links")
+        .select("key, section, sort_order, title_en, title_fr, url")
+        .eq("published", true)
+        .order("section")
+        .order("sort_order"),
+      10000,
+      "settings_links",
+    )
+    if (error) throw new Error(`settings_links failed: ${error.message}`)
+    return data
+  }
+
   async getGuides(locale: "en" | "fr"): Promise<Guide[]> {
     // A single-table read (AGENTS.md: no RPC needed); RLS hides unpublished rows too.
     const { data, error } = await withTimeout(
