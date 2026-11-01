@@ -1,5 +1,6 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { M3Island } from "@/components/layout/M3Island"
 import { ShellFrame } from "./ShellFrame"
 import { YouAchievementsList } from "@/components/you/YouAchievementsList"
@@ -13,13 +14,13 @@ import { DESIGN_ACCOUNT, DESIGN_PROFILE, DESIGN_RIPPLE } from "@/lib/seed/design
 import { DESIGN_LAB_ANNOUNCEMENT, DESIGN_LAB_CHANGELOG, DESIGN_YOU_BADGES, DESIGN_YOU_COUNTS } from "@/lib/seed/design-you"
 
 /** app/profile's tree since #1384 (You), in its island and the shell, with fixtures where You reads the network. */
-export function YouView() {
+export function YouView({ at = "/profile", detail }: { at?: string; detail?: ReactNode } = {}) {
   const { locale } = useLocale()
   const { glyphs } = useUsableGlyphs()
   const glyph = glyphs.find((g) => g.id === DESIGN_PROFILE.glyph_id) ?? null
   const { days, pebbles, karma, glyphsCarved, glyphsOwned } = DESIGN_YOU_COUNTS
   return (
-    <ShellFrame at="/profile">
+    <ShellFrame at={at} detail={detail}>
       <M3Island>
         <div className="mx-auto flex max-w-md flex-col gap-11 px-4 pt-[1.375rem]">
           <div className="flex flex-col gap-7">

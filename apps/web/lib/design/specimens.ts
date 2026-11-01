@@ -76,7 +76,7 @@ export const SPECIMENS = [
   { id: "view-wallet-open", name: "Wallet open", source: "app/@detail/(pane)/wallet/page.tsx", section: "views", m3: "tuned" },
   { id: "view-pebble", name: "Pebble detail", source: "app/(path)/pebble/[id]/page.tsx", section: "views", m3: "bridged" },
   { id: "view-profile", name: "Profile (before You)", source: "components/sandbox/design/views/ProfileView.tsx", section: "views", m3: "bridged" },
-  { id: "view-settings", name: "Settings", source: "app/(you)/settings/page.tsx", section: "views", m3: "tuned" },
+  { id: "view-settings", name: "Settings", source: "app/@detail/(pane)/settings/page.tsx", section: "views", m3: "tuned" },
 ] as const satisfies readonly SpecimenEntry[]
 
 export type SpecimenId = (typeof SPECIMENS)[number]["id"]
