@@ -31,6 +31,8 @@ import app.pbbls.android.core.data.ProfileService
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReferenceDataService
 import app.pbbls.android.core.data.ReferenceDataServicing
+import app.pbbls.android.core.data.SettingsLinksService
+import app.pbbls.android.core.data.SettingsLinksServicing
 import app.pbbls.android.core.data.SnapBoundsDecoder
 import app.pbbls.android.core.data.SoulsService
 import app.pbbls.android.core.data.SoulsServicing
@@ -140,6 +142,10 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindHomeServicing(impl: HomeService): HomeServicing
+
+    @Binds
+    @Singleton
+    fun bindSettingsLinksServicing(impl: SettingsLinksService): SettingsLinksServicing
 
     @Binds
     @Singleton

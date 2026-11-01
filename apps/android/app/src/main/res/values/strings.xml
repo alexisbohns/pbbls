@@ -299,6 +299,8 @@
     <string name="settings_handle_error_reserved">That handle is reserved.</string>
     <string name="settings_providers_header">Providers</string>
     <string name="settings_legal_header">Legal</string>
+    <string name="settings_about_header">About</string>
+    <string name="settings_support_header">Support</string>
     <string name="settings_save_error">Couldn\'t save your changes. Please try again.</string>
     <string name="settings_load_error">Couldn\'t load your settings. Please try again.</string>
     <string name="settings_consent_header">Consent</string>

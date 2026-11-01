@@ -16,6 +16,8 @@ import app.pbbls.android.core.data.HomeShortcutsLayout
 import app.pbbls.android.core.designsystem.ListGroup
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.HealthDataConsent
+import app.pbbls.android.core.model.SettingsLink
+import app.pbbls.android.core.model.SettingsLinkSection
 import app.pbbls.android.features.profile.HealthConsentRow
 import app.pbbls.android.features.profile.HealthConsentStatus
 import app.pbbls.android.features.profile.SettingsAccountSections
@@ -47,6 +49,34 @@ import java.time.OffsetDateTime
 private val GivenConsent =
     HealthConsentStatus.Given(HealthDataConsent("1.4.0", OffsetDateTime.parse("2026-10-01T12:00:00Z")))
 
+/** The seed links (`assets/settings-links-default.json`, #1489): what Settings shows before a refresh. */
+private val SeedLinks =
+    listOf(
+        SettingsLink("credits", SettingsLinkSection.ABOUT, "Credits", "Crédits", "https://www.pbbls.app/docs/credits"),
+        SettingsLink(
+            "terms",
+            SettingsLinkSection.LEGAL,
+            "Terms of Service",
+            "Conditions générales d'utilisation",
+            "https://www.pbbls.app/docs/terms",
+        ),
+        SettingsLink(
+            "privacy",
+            SettingsLinkSection.LEGAL,
+            "Privacy Policy",
+            "Politique de confidentialité",
+            "https://www.pbbls.app/docs/privacy",
+        ),
+        SettingsLink(
+            "legal-notice",
+            SettingsLinkSection.LEGAL,
+            "Legal Notice",
+            "Mentions légales",
+            "https://www.pbbls.app/docs/legal-notice",
+        ),
+        SettingsLink("support", SettingsLinkSection.SUPPORT, "Contact support", "Contacter le support", "mailto:ciao@pbbls.app"),
+    )
+
 /** An email account with a live public profile: the share row shows, Save is enabled. */
 private val EmailAccount =
     SettingsUiState(
@@ -60,6 +90,7 @@ private val EmailAccount =
         form = SettingsForm(displayName = "Alexis B.", handle = "alexis", isPublicProfile = true),
         healthConsent = GivenConsent,
         isLoading = false,
+        links = SeedLinks,
     )
 
 /** A Google account with no handle yet: the public switch is disabled, providers replace the password. */
@@ -182,7 +213,7 @@ fun SettingsSignInSectionsProviders() {
     PebblesTheme { SectionsFrame { SettingsSignInSections(state = SsoAccount, actions = SettingsActions()) } }
 }
 
-// Legal, Consent, Account, and Log out in its own group at the end.
+// The links (Legal, About, Support), Consent, Account, and Log out in its own group at the end.
 @PreviewTest
 @Preview(showBackground = true)
 @PreviewFrench

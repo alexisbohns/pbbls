@@ -20,12 +20,14 @@ import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReauthPurpose
 import app.pbbls.android.core.data.ReauthUi
+import app.pbbls.android.core.data.SettingsLinksServicing
 import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.isReauthRequired
 import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.HealthDataConsent
+import app.pbbls.android.core.model.SettingsLink
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
@@ -93,6 +95,8 @@ data class SettingsUiState(
     val isLoading: Boolean = true,
     /** Set when that fetch fails — the screen shows this instead of an empty form. */
     @StringRes val loadErrorRes: Int? = null,
+    /** The admin-edited links (#1489): the kept or built-in list, then the fresh one. */
+    val links: List<SettingsLink> = emptyList(),
 ) {
     /** Handles are stored normalized (DB CHECK), so compare and write that form. */
     val normalizedHandle: String
@@ -198,6 +202,7 @@ class SettingsViewModel
         private val consents: ConsentServicing,
         private val haptics: HapticsPreference,
         private val homeShortcuts: HomeShortcutsPreference,
+        private val links: SettingsLinksServicing,
     ) : ViewModel() {
         private val effectsOut = UiEffects<SettingsEffect>(viewModelScope)
         val effects: Flow<SettingsEffect> = effectsOut.flow
@@ -250,6 +255,7 @@ class SettingsViewModel
         init {
             load()
             loadHealthConsent()
+            loadLinks()
         }
 
         /**
@@ -292,6 +298,19 @@ class SettingsViewModel
                         },
                     )
                 _uiState.update { it.copy(healthConsent = status) }
+            }
+        }
+
+        /**
+         * Settings' links (#1489, iOS `SettingsSheet`): what is kept shows at once, then a refresh
+         * each time Settings opens replaces it. Neither call throws; a failed refresh answers
+         * what is kept, and the service logs it.
+         */
+        private fun loadLinks() {
+            viewModelScope.launch {
+                _uiState.update { it.copy(links = links.current()) }
+                val fresh = links.refresh()
+                _uiState.update { it.copy(links = fresh) }
             }
         }
 
