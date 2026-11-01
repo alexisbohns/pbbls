@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useId, useMemo, useRef } from "react"
+import { useCallback, useContext, useEffect, useId, useMemo, useRef } from "react"
 import { useTranslations } from "next-intl"
 import { useLocale } from "@/lib/i18n"
 import { useReadingDay } from "@/lib/hooks/useReadingDay"
@@ -29,6 +29,16 @@ type SpineWeekProps = {
   onPreviousWeek?: () => void
   /** Absent on the last week there is. */
   onNextWeek?: () => void
+  /**
+   * One half only (#1384, two-area spec D4): the verso (opening, persons,
+   * contents) or the recto (the line and the mouth), each a plain column, for a
+   * Path whose halves sit in different areas. Absent: the whole book.
+   */
+  only?: "verso" | "recto"
+  /** The verso drawn alone follows the day its recto is reading. */
+  readingDay?: number
+  /** The recto drawn alone publishes the day it is reading. */
+  onReadingDay?: (day: number | undefined) => void
   className?: string
 }
 
@@ -70,13 +80,20 @@ export function SpineWeek({
   onOpen,
   onPreviousWeek,
   onNextWeek,
+  only,
+  readingDay: readingDayFromRecto,
+  onReadingDay,
   className,
 }: SpineWeekProps) {
   const t = useTranslations("path.spine")
   const { locale } = useLocale()
   const titleId = useId()
   const hostRef = useRef<HTMLElement>(null)
-  const presses = useSpinePresses()
+  // A Path that draws its halves apart shares one set of presses above them,
+  // so a contents row on the verso presses its stone on the recto.
+  const sharedPresses = useContext(SpinePressContext)
+  const ownPresses = useSpinePresses()
+  const presses = sharedPresses ?? ownPresses
 
   const week = useMemo(() => spineWeek(entry, today), [entry, today])
   const persons = useMemo(
@@ -86,10 +103,14 @@ export function SpineWeek({
   const order = useMemo(() => persons.map((p) => p.soul.id), [persons])
   const words = useMemo(() => weekWords(entry.weekStart, locale), [entry.weekStart, locale])
   const current = isoWeekKey(today) === entry.weekStartIso
-  const readingDay = useReadingDay(
+  const lineReadingDay = useReadingDay(
     hostRef,
     useMemo(() => week.days.map((d) => d.index), [week]),
   )
+  const readingDay = only === "verso" ? readingDayFromRecto : lineReadingDay
+  useEffect(() => {
+    onReadingDay?.(lineReadingDay)
+  }, [onReadingDay, lineReadingDay])
 
   const goTimers = useRef<ReturnType<typeof setTimeout>[]>([])
   useEffect(() => () => goTimers.current.forEach(clearTimeout), [])
@@ -118,31 +139,35 @@ export function SpineWeek({
     <SpinePressContext value={presses}>
       <article
         ref={hostRef}
-        aria-labelledby={titleId}
-        className={cn("spine-spread font-spine text-base leading-[1.4] text-(--spine-ink)", className)}
+        aria-labelledby={only === "recto" ? undefined : titleId}
+        className={cn(only === undefined && "spine-spread", "font-spine text-base leading-[1.4] text-(--spine-ink)", className)}
       >
-        <aside
-          aria-label={t("glanceAria")}
-          className={cn(
-            "px-5 pt-[max(18px,env(safe-area-inset-top))] pb-2",
-            // The verso stays put while the recto scrolls, and scrolls itself
-            // without a bar when the contents outgrow it. A Path that lays its
-            // roll and dock over this column says how much room they take.
-            "spread:sticky spread:top-0 spread:max-h-(--spine-page-h,100dvh) spread:overflow-y-auto spread:[scrollbar-width:none] spread:[&::-webkit-scrollbar]:hidden",
-            "spread:pt-[calc(34px+var(--spine-verso-top,0px))] spread:pr-12 spread:pb-[calc(40px+var(--spine-verso-foot,0px))] spread:pl-9",
-          )}
-        >
-          <WeekOpening
-            words={words}
-            titleId={titleId}
-            pebbleCount={entry.pebbleCount}
-            peopleCount={persons.length}
-            onPreviousWeek={onPreviousWeek}
-          />
-          <PersonsOfWeek persons={persons} weekStart={entry.weekStart} markMap={markMap} readingDay={readingDay} />
-          <WeekContents week={week} readingDay={readingDay} onGo={go} />
-        </aside>
-        {entry.moments.length === 0 ? (
+        {only !== "recto" && (
+          <aside
+            aria-label={t("glanceAria")}
+            className={cn(
+              "px-5 pt-[max(18px,env(safe-area-inset-top))] pb-2",
+              // The verso stays put while the recto scrolls, and scrolls itself
+              // without a bar when the contents outgrow it. A Path that lays its
+              // roll and dock over this column says how much room they take.
+              only === undefined &&
+                "spread:sticky spread:top-0 spread:max-h-(--spine-page-h,100dvh) spread:overflow-y-auto spread:[scrollbar-width:none] spread:[&::-webkit-scrollbar]:hidden",
+              only === undefined &&
+                "spread:pt-[calc(34px+var(--spine-verso-top,0px))] spread:pr-12 spread:pb-[calc(40px+var(--spine-verso-foot,0px))] spread:pl-9",
+            )}
+          >
+            <WeekOpening
+              words={words}
+              titleId={titleId}
+              pebbleCount={entry.pebbleCount}
+              peopleCount={persons.length}
+              onPreviousWeek={onPreviousWeek}
+            />
+            <PersonsOfWeek persons={persons} weekStart={entry.weekStart} markMap={markMap} readingDay={readingDay} />
+            <WeekContents week={week} readingDay={readingDay} onGo={go} />
+          </aside>
+        )}
+        {only === "verso" ? null : entry.moments.length === 0 ? (
           // Only the current week can be empty (the roll lists weeks with
           // moments, plus this one): the recto is the fresh-week invitation.
           <section className="spread:pt-[34px]">

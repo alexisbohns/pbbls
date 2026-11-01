@@ -21,6 +21,10 @@ type WeekPagerProps = {
   onFocusChange: (weekStart: Date) => void
   /** Opens the read page, with the MOMENT id (#1050). */
   onOpen: (momentId: string) => void
+  /** The recto alone, for a Path whose verso sits in another area (#1384, two-area spec D4). */
+  only?: "recto"
+  /** With `only`, the focused week publishes the day it is reading. */
+  onReadingDay?: (day: number | undefined) => void
 }
 
 export function WeekPager({
@@ -30,6 +34,8 @@ export function WeekPager({
   souls,
   onFocusChange,
   onOpen,
+  only,
+  onReadingDay,
 }: WeekPagerProps) {
   const focusedIndex = weekIndex(entries, focused)
   const { marks } = useMarks()
@@ -109,6 +115,8 @@ export function WeekPager({
                   onOpen={onOpen}
                   onPreviousWeek={previous ? () => onFocusChange(previous.weekStart) : undefined}
                   onNextWeek={next ? () => onFocusChange(next.weekStart) : undefined}
+                  only={only}
+                  onReadingDay={distance === 0 ? onReadingDay : undefined}
                 />
               ) : null}
             </div>
