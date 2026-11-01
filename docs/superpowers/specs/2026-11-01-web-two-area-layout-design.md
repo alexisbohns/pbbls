@@ -21,6 +21,8 @@
 
 ## Questions for the maintainer
 
+**Answered 2026-11-01:** the maintainer took every recommendation: two areas from 1024 px (Q1), Home's weeks keep linking to `/path?week=` (Q2), a pebble on a phone is the full-screen overlay (Q3), the colour-world switcher stays with a line saying where it applies (Q5). Q4 follows the maintainer's standing direction that Settings mirror Android #1437: Log out in its own last group.
+
 1. **When do two areas start?** The recommendation is **1024 px** (Q1, D1). Android splits at 840 dp, but our left area is the 28 rem reading column. Rail + left at 840 px leaves 296 px, under the Spine's 180 px card floor plus its 82 px margin. At 1024 px it leaves 480 px, which is a phone-width Spine.
 2. **Home's week columns on desktop.** They link `/path?week=` today, which moves the left area to the Path tab. The alternative: focus the right-area Path on that week and keep Home on the left. The recommendation is to keep the link (D4): the same on every size, and a real URL.
 3. **A pebble on a phone.** Today the Path opens a bottom-sheet peek. The recommendation is the full-screen overlay every other detail uses (D5), as Android's #1135 made the pebble a page of its own on one pane. The alternative keeps the sheet for the pebble only.
