@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useRef } from "react"
-import { Minus, Plus } from "lucide-react"
+import { PlusCircle, Remove } from "@pbbls/icons"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 
@@ -53,7 +53,7 @@ export function TimeStepPicker({ value, onChange }: TimeStepPickerProps) {
         aria-label={t("subtract15")}
         onClick={() => step(-1)}
       >
-        <Minus />
+        <Remove />
       </Button>
 
       <button
@@ -80,7 +80,7 @@ export function TimeStepPicker({ value, onChange }: TimeStepPickerProps) {
         aria-label={t("add15")}
         onClick={() => step(1)}
       >
-        <Plus />
+        <PlusCircle />
       </Button>
     </div>
   )

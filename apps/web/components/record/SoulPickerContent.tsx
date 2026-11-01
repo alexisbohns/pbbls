@@ -1,7 +1,9 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Plus, X } from "lucide-react"
+import { X } from "lucide-react"
+import { PlusCircle } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import type { Mark, Soul } from "@/lib/types"
 import { SearchableList } from "@/components/ui/SearchableList"
@@ -147,7 +149,7 @@ export function SoulPickerContent({
           onClick={() => void handleAdd()}
           className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground"
         >
-          <Plus className="size-4 shrink-0" />
+          <PlusCircle className={cn(PBBLS_ICON_SIZE.inline, "shrink-0")} />
           {t("addNew", { name: query.trim() })}
         </button>
       )}

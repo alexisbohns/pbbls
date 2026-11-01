@@ -1,6 +1,7 @@
 "use client"
 
-import { Sparkles } from "lucide-react"
+import { Sparkle } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { InlineDatePicker } from "@/components/record/InlineDatePicker"
@@ -46,7 +47,7 @@ export function RecordWhenStep({ happenedAt, seededFromPhoto, onChange }: Record
       </div>
       {seededFromPhoto && (
         <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Sparkles className="size-4" aria-hidden />
+          <Sparkle className={PBBLS_ICON_SIZE.inline} />
           {t("fromPhoto")}
         </p>
       )}

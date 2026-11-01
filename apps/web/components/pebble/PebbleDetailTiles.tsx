@@ -1,7 +1,9 @@
 "use client"
 
 import { useMemo, useState, type ReactNode } from "react"
-import { Heart, Tag, Layers } from "lucide-react"
+import { Tag } from "lucide-react"
+import { Collection as CollectionIcon, Heart } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import type { Collection } from "@/lib/types"
 import { useDomainLocalized } from "@/lib/i18n"
@@ -100,7 +102,7 @@ export function EmotionTile({ value, onChange, editing, className }: EmotionTile
           {selected ? (
             <span className="text-lg leading-none">{selected.emoji}</span>
           ) : (
-            <Heart className="size-5" />
+            <Heart className={PBBLS_ICON_SIZE.row} />
           )}
         </span>
         <span className="text-sm font-medium text-foreground line-clamp-1">
@@ -273,7 +275,7 @@ export function CollectionTile({
   return (
     <Popover>
       <TileTrigger
-        icon={<Layers className="size-5" />}
+        icon={<CollectionIcon className={PBBLS_ICON_SIZE.row} />}
         label={tileLabel}
         unset={editing && selected.length === 0}
         className={className}

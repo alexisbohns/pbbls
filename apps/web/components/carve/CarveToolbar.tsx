@@ -1,6 +1,9 @@
 "use client"
 
-import { Undo2, Trash2, Check } from "lucide-react"
+import { Undo2 } from "lucide-react"
+import { CheckmarkDot, Trash } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 
@@ -45,7 +48,7 @@ export function CarveToolbar({
         disabled={strokeCount === 0}
         aria-label={t("clear")}
       >
-        <Trash2 className="h-4 w-4" />
+        <Trash className={PBBLS_ICON_SIZE.inline} />
       </Button>
 
       {showSave && (
@@ -58,7 +61,7 @@ export function CarveToolbar({
             aria-label={t("saveAria")}
             className="h-11 px-4 md:h-8 md:px-2.5"
           >
-            <Check className="mr-1.5 h-4 w-4" />
+            <CheckmarkDot className={cn(PBBLS_ICON_SIZE.inline, "mr-1.5")} />
             {saving ? t("saving") : t("save")}
           </Button>
         </>

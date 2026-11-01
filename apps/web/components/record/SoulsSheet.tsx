@@ -1,6 +1,7 @@
 "use client"
 
-import { Check } from "lucide-react"
+import { CheckmarkDot } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import type { Mark, Soul } from "@/lib/types"
 import { PickerSheet } from "@/components/ui/PickerSheet"
@@ -47,7 +48,7 @@ export function SoulsSheet({
             size="icon-lg"
             className="rounded-full shadow-lg"
           >
-            <Check className="size-5" aria-hidden />
+            <CheckmarkDot className={PBBLS_ICON_SIZE.row} />
           </SheetClose>
         )
       }

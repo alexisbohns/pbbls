@@ -1,7 +1,9 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { Heart, Layers, Tag } from "lucide-react"
+import { Tag } from "lucide-react"
+import { Collection as CollectionIcon, Heart } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { useTranslations } from "next-intl"
 import type { Collection, MomentPebble } from "@/lib/types"
 import { useDomains, type DomainRow } from "@/lib/data/useDomains"
@@ -44,7 +46,7 @@ export function MomentReadTiles({ pebble, collections }: MomentReadTilesProps) {
 
   return (
     <ul className={cn("grid gap-3", inCollections.length > 0 ? "grid-cols-3" : "grid-cols-2")}>
-      <ReadTile icon={emotion ? <span className="text-lg leading-none">{emotion.emoji}</span> : <Heart className="size-5" />}>
+      <ReadTile icon={emotion ? <span className="text-lg leading-none">{emotion.emoji}</span> : <Heart className={PBBLS_ICON_SIZE.row} />}>
         {emotion ? emotion.name : tEmotion("label")}
       </ReadTile>
       <ReadTile icon={<Tag className="size-5" />}>
@@ -60,7 +62,7 @@ export function MomentReadTiles({ pebble, collections }: MomentReadTilesProps) {
         )}
       </ReadTile>
       {inCollections.length > 0 && (
-        <ReadTile icon={<Layers className="size-5" />}>{inCollections.map((c) => c.name).join(", ")}</ReadTile>
+        <ReadTile icon={<CollectionIcon className={PBBLS_ICON_SIZE.row} />}>{inCollections.map((c) => c.name).join(", ")}</ReadTile>
       )}
     </ul>
   )
