@@ -46,13 +46,17 @@ android {
         applicationId = "app.pbbls.android"
         minSdk = 33
         targetSdk = 37
-        // Derive the version from the CI run number so every uploaded debug APK
-        // is a strictly-increasing, distinct version. A static versionCode makes
+        // versionCode derives from the CI run number so every upload is a
+        // strictly-increasing, distinct version. A static versionCode makes
         // Android treat a reinstall as the same version and silently keep the old
         // code — the "I installed it but nothing changed" trap. Local builds (no
-        // GITHUB_RUN_NUMBER) fall back to 1 / "0.1.0".
+        // GITHUB_RUN_NUMBER) fall back to 1.
         versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
-        versionName = System.getenv("GITHUB_RUN_NUMBER")?.let { "0.1.0.$it" } ?: "0.1.0"
+        // versionName is the user-facing release number, set by hand in
+        // gradle.properties (`pbbls.versionName`) and bumped in the PR that
+        // prepares a release. It stays the same across the internal builds of
+        // one release; the versionCode tells those builds apart.
+        versionName = providers.gradleProperty("pbbls.versionName").get()
 
         buildConfigField("String", "SUPABASE_URL", "\"${secret("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${secret("SUPABASE_ANON_KEY")}\"")
