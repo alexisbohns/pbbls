@@ -4,7 +4,7 @@ locale: fr
 slug: privacy
 version: 1.4.0
 effective_date: 2026-10-07
-last_updated: 2026-10-07
+last_updated: 2026-11-02
 ---
 
 # Politique de Confidentialité de Pebbles
@@ -129,6 +129,7 @@ Conformément à l'article 28 du RGPD, nous travaillons avec les sous-traitants 
 - **Fonction :** Hébergement et distribution de l'application web et du back-office.
 - **Localisation :** Les fonctions serveur sont fixées sur la région de Paris, France (`cdg1`). Les requêtes sont acheminées et déchiffrées (terminaison TLS) par le réseau edge mondial de Vercel, exploité depuis les États-Unis.
 - **Traitement :** Rendu des pages et traitement des requêtes côté serveur. Transitent à ce titre votre adresse IP, l'adresse de la page demandée, votre cookie de session et les données affichées sur la page.
+- **Contrat :** Vercel est lié par son contrat de traitement des données, conforme au RGPD, qui intègre les clauses contractuelles types de la Commission européenne.
 - **Encadrement du transfert :** Vercel Inc. est certifiée au titre du Data Privacy Framework UE-États-Unis.
 
 ## 6. Transferts Internationaux de Données
@@ -141,7 +142,7 @@ Vos données sont stockées par Supabase sur des serveurs situés à Paris (Fran
 
 Un traitement implique les États-Unis.
 
-**Distribution de l'application.** Chaque requête vers Pebbles est acheminée par le réseau edge mondial de Vercel, qui en assure la terminaison TLS, avant d'atteindre la région parisienne. Votre adresse IP, l'adresse de la page demandée et votre cookie de session transitent donc par une infrastructure exploitée depuis les États-Unis. Nous nous appuyons sur la certification de Vercel Inc. au titre du Data Privacy Framework UE-États-Unis.
+**Distribution de l'application.** Chaque requête vers Pebbles est acheminée par le réseau edge mondial de Vercel, qui en assure la terminaison TLS, avant d'atteindre la région parisienne. Votre adresse IP, l'adresse de la page demandée et votre cookie de session transitent donc par une infrastructure exploitée depuis les États-Unis. Nous nous appuyons sur la certification de Vercel Inc. au titre du Data Privacy Framework UE-États-Unis, ainsi que sur les clauses contractuelles types prévues par notre contrat de traitement des données avec Vercel.
 
 ### 6.3 Polices de Caractères et Ressources Statiques
 

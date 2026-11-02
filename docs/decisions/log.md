@@ -1810,3 +1810,22 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The iOS licences pane fails CI when a resolved Swift package has no licence text.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #1489, #1491, #1492, #1493, #1395, stack #1500 (#1494–#1499), `docs/superpowers/specs/2026-11-01-settings-links-design.md`.
+
+## 2026-11-02 — Vercel moves to Pro, and its DPA closes the Art. 28 gap accepted on 2026-09-04 (#1503)
+
+- **Status:** taken
+- **Scope:** legal, web, admin
+- **Context:** The 2026-09-04 entry (#754) found that Vercel hosts `apps/web` and `apps/admin` with no Art. 28(3) contract, because Vercel's DPA scope clause covers "Customers who are on Enterprise and Pro plans" and the projects were on Hobby. The maintainer weighed the ~$20/month upgrade, declined it, and recorded the gap as an accepted risk with explicit revisit triggers. On 2026-11-02, ahead of the 2026-12-06 store launch (which counts as "leaving beta"), the maintainer upgraded the hosting team to Pro.
+- **Decision:**
+  - **Vercel's DPA is the Art. 28 contract.** The version in force (last updated 2026-03-17, effective 2026-03-31, https://vercel.com/legal/dpa) "shall become legally binding upon Customer entering into the Agreement": there is nothing to sign or request. The maintainer keeps a dated PDF of that page and the first Pro invoice **outside this public repository** as the record. A countersigned copy can be asked of privacy@vercel.com, but the DPA describes no such process and none is needed.
+  - **Transfers now have two bases.** The DPA incorporates the 2021 standard contractual clauses (Decision 2021/914, Modules One to Three, Irish law) plus the UK addendum, on top of Vercel's EU-U.S. DPF certification. Privacy policy §5.2 gains an "Agreement" line, mirroring Supabase's, and §6.2 cites both bases, in EN and FR.
+  - **The privacy version stays `1.4.0`; only `last_updated` moves.** The edit adds a safeguard and changes no data, purpose, recipient or right, and every `privacy` bump re-prompts all web and Android users for four consent kinds (2026-10-07 entry). A version bump is kept for changes to what is processed or why.
+- **Why:** The 2026-09-04 entry said closing the gap was a cost decision, to revisit on the first of several triggers. Leaving beta is one of them, and a launch on the stores with a known, unremedied Art. 28 gap is a liability no longer worth $20/month. Adding the SCCs to the policy is accurate rather than necessary: the DPF alone satisfies Chapter V, but naming the contractual clauses means §6.2 stays true if the DPF is ever struck down.
+- **Consequences:**
+  - The DPA covers only projects owned by the **Pro team**. A Pebbles project created or left under a Hobby account is outside it; keep both `pbbls` and `pbbls-admin` on the Pro team, and downgrading that team re-opens this gap.
+  - The DPA makes **no residency commitment**: §13.1 says Vercel's "primary processing facilities are in the United States", and logs and platform data live there. Functions stay pinned to `cdg1` by `vercel.json`, and the policy keeps stating that the edge network is operated from the US.
+  - Vercel may revise the DPA. Check it at each policy review, alongside the DPF re-certification due **2027-04-29** recorded in the 2026-09-04 entry, which still applies.
+  - Hobby's non-commercial-use restriction and its no-notice termination clause no longer apply to these projects.
+  - Pro bills usage beyond its $20 monthly credit, and the first day went over it. Build cost and the spend cap are a separate open question, not part of this entry.
+- **Supersedes / Superseded-by:** Supersedes the **Consequences** of **2026-09-04 — Vercel is named as a processor and the transfer clause corrected; the missing Art. 28 contract is accepted as a documented risk** (#754) in so far as they accept the missing contract. That entry's DPF facts and re-check date stand.
+- **Refs:** #1503, #754, `F-2026-08-GDP-admin-01`, `apps/web/docs/privacy/{en,fr}.md`, `apps/web/vercel.json`, `apps/admin/vercel.json`, https://vercel.com/legal/dpa, https://vercel.com/docs/plans/pro-plan.
