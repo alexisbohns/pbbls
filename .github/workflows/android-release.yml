@@ -1,13 +1,21 @@
 name: Android Release
 
-# Builds a SIGNED release AAB and publishes it to Google Play internal testing,
-# so the maintainer's phone auto-updates via the Play Store instead of the manual
-# download/unzip/upload/verify/install loop.
+# Builds a SIGNED release AAB and publishes it to Google Play. Every merge goes
+# to internal testing, so the maintainer's phone auto-updates via the Play Store
+# instead of the manual download/unzip/upload/verify/install loop.
 #
 # Three ways in:
 #   • push to main (apps/android/**)  → auto-publish to internal testing
 #   • a PR labelled `deploy-beta`     → publish THAT branch to the phone (opt-in)
-#   • manual "Run workflow"           → workflow_dispatch, pick any branch
+#   • manual "Run workflow"           → workflow_dispatch, pick a branch and a track
+#
+# Tracks (#1452). Only a manual run picks one; everything else is internal.
+#   • internal    → rolled out at once (status: completed), any branch
+#   • closed      → Play's closed-testing track `alpha`, uploaded as a DRAFT
+#   • production  → uploaded as a DRAFT
+# A draft is a release waiting in the Console: write its notes there and press
+# "Start rollout" yourself. Closed and production only run from main, so what the
+# testers and the store get is always something that was merged.
 #
 # The AAB is minified and shrunk by R8 (#845); its mapping file is uploaded to
 # Play so Console crashes deobfuscate, and kept as a workflow artifact too.
@@ -32,9 +40,17 @@ on:
     paths:
       - 'apps/android/**'
   workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play track. closed and production upload a draft you roll out from the Console (main only).'
+        type: choice
+        options: [internal, closed, production]
+        default: internal
 
+# The track is part of the group so a manual closed or production run never
+# cancels the internal publish of the merge it was started from, or vice versa.
 concurrency:
-  group: android-release-${{ github.ref }}
+  group: android-release-${{ github.ref }}-${{ inputs.track || 'internal' }}
   cancel-in-progress: true
 
 permissions:
@@ -42,7 +58,7 @@ permissions:
 
 jobs:
   release:
-    name: bundle · sign · publish (internal)
+    name: bundle · sign · publish (${{ inputs.track || 'internal' }})
     runs-on: ubuntu-latest
     # PRs only build when they carry the `deploy-beta` label; push and manual
     # dispatch always run. (A `labeled` event for any other label starts the
@@ -55,7 +71,17 @@ jobs:
       # can gate on them — a step `if:` can read `env.*` but not `secrets.*`.
       KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
       PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+      # The Play API's names: the Console's "Closed testing - Alpha" track is
+      # `alpha`. Push and PR runs have no inputs, so they fall through to internal.
+      PLAY_TRACK: ${{ inputs.track == 'closed' && 'alpha' || inputs.track || 'internal' }}
+      PLAY_STATUS: ${{ (inputs.track == 'closed' || inputs.track == 'production') && 'draft' || 'completed' }}
     steps:
+      - name: Refuse a public track from a branch other than main
+        if: ${{ env.PLAY_TRACK != 'internal' && github.ref != 'refs/heads/main' }}
+        run: |
+          echo "::error::The ${{ inputs.track }} track only publishes from main (this run is on ${{ github.ref_name }})."
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@v7
 
@@ -76,9 +102,11 @@ jobs:
         run: echo "$KEYSTORE_BASE64" | base64 -d > upload-keystore.jks
 
       # bundleRelease reads the Supabase config (baked into BuildConfig, same as
-      # the debug APK) and the upload key. versionCode/versionName derive from
+      # the debug APK) and the upload key. versionCode derives from
       # GITHUB_RUN_NUMBER — monotonic within this workflow, which is exactly what
       # Play requires (every upload must have a strictly higher versionCode).
+      # versionName is `pbbls.versionName` in apps/android/gradle.properties,
+      # bumped by hand in the PR that prepares a release (#1451).
       - name: Assemble signed release AAB
         working-directory: apps/android
         env:
@@ -88,10 +116,10 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          # Bake the petroglyph wobble experiment (#555) into internal-testing
-          # builds — the maintainer's only on-device channel (2026-07-14
-          # decisions-log entry). Flip to 'false' (or delete) before promoting
-          # a build to any public track.
+          # The petroglyph wobble (#555) is a shipped visual on iOS and web since
+          # #727/#729, so every track carries it, closed and production included
+          # (decision log 2026-11-02, superseding the "flip it off before a
+          # public track" note of 2026-07-14).
           WOBBLE_ENABLED: 'true'
         run: ./gradlew bundleRelease
 
@@ -115,8 +143,8 @@ jobs:
 
       # Skips until the Play service-account secret exists, so the pre-setup runs
       # still hand you the AAB artifact to seed the first release manually without
-      # failing the job. Once the secret is set, every run publishes to internal.
-      - name: Publish to Play internal testing
+      # failing the job. Once the secret is set, every run publishes to its track.
+      - name: Publish to Play (${{ env.PLAY_TRACK }}, ${{ env.PLAY_STATUS }})
         if: ${{ env.PLAY_SERVICE_ACCOUNT_JSON != '' }}
         uses: r0adkll/upload-google-play@v1
         with:
@@ -126,5 +154,5 @@ jobs:
           # Ships the R8 mapping alongside the bundle so Play Console deobfuscates
           # crashes and ANRs for this versionCode instead of showing bare frames.
           mappingFile: apps/android/app/build/outputs/mapping/release/mapping.txt
-          track: internal
-          status: completed
+          track: ${{ env.PLAY_TRACK }}
+          status: ${{ env.PLAY_STATUS }}

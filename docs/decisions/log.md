@@ -1829,3 +1829,17 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Pro bills usage beyond its $20 monthly credit, and the first day went over it. Build cost and the spend cap are a separate open question, not part of this entry.
 - **Supersedes / Superseded-by:** Supersedes the **Consequences** of **2026-09-04 — Vercel is named as a processor and the transfer clause corrected; the missing Art. 28 contract is accepted as a documented risk** (#754) in so far as they accept the missing contract. That entry's DPF facts and re-check date stand.
 - **Refs:** #1503, #754, `F-2026-08-GDP-admin-01`, `apps/web/docs/privacy/{en,fr}.md`, `apps/web/vercel.json`, `apps/admin/vercel.json`, https://vercel.com/legal/dpa, https://vercel.com/docs/plans/pro-plan.
+
+## 2026-11-02 — Android public tracks ship the wobble, from main only, as Play drafts (#1451, #1452)
+
+- **Status:** taken
+- **Scope:** android, infra
+- **Context:** `android-release.yml` could only publish to internal testing, and its build carried a `0.1.0.<run>` versionName. The V1 launch needs a closed test (Play's 12 testers × 14 days for a personal account) and then production. The 2026-07-14 entry told whoever promoted a build to a public track to flip `WOBBLE_ENABLED` to `false` first, while the wobble was an Android-only experiment. Since then the wobble shipped in Release on iOS (#727) and in production on web (#729): it is the brand's drawn look, and turning it off would make Android the one smooth surface.
+- **Decision:**
+  - **`WOBBLE_ENABLED` stays `'true'` on every track**, closed and production included.
+  - **A manual run picks the track** (`internal`, `closed` → Play API `alpha`, `production`); push and `deploy-beta` runs stay internal. **Closed and production upload a draft** that the maintainer rolls out from the Console with its release notes, and **they refuse any branch but `main`**.
+  - **versionName is release-controlled**: `pbbls.versionName` in `apps/android/gradle.properties`, bumped by hand in the PR that prepares a release. versionCode stays on `GITHUB_RUN_NUMBER`.
+- **Why:** A draft keeps the last step (notes, rollout, staged percentage) in a human's hands without a second workflow. Main-only means testers and the store only ever get merged code. A property file is the smallest release-controlled source that local builds and CI read the same way.
+- **Consequences:** Every internal build of a release shows the same versionName; tell them apart by versionCode. The `alpha` mapping assumes the Console's default closed track. The service account needs the production release permission before the first production run.
+- **Supersedes / Superseded-by:** Supersedes the **Consequences** of **2026-07-14 — Android internal-testing releases bake the wobble experiment in** in so far as they ask for the wobble to be turned off before a public track. Its decision (the `WOBBLE_ENABLED` BuildConfig chain) stands.
+- **Refs:** #1451, #1452, #1453, #727, #729, `.github/workflows/android-release.yml`, `apps/android/gradle.properties`, `apps/android/app/build.gradle.kts`, `docs/android-play-deploy.md`.

@@ -183,7 +183,37 @@ Give it a few minutes to propagate.
 - **Label a PR `deploy-beta`** → that branch goes to your phone (remove the
   label or merge to `main` to revert). Create the label once: repo → *Issues* or
   *Pull requests* → *Labels* → *New label* → `deploy-beta`.
-- **Actions → Android Release → Run workflow** → any branch, on demand.
+- **Actions → Android Release → Run workflow** → any branch, on demand
+  (track `internal`, the default).
+
+## Closed testing and production (#1451, #1452)
+
+The same *Run workflow* button takes a **track** input:
+
+| Track | Play track | What CI does | What you do |
+|---|---|---|---|
+| `internal` (default) | `internal` | Rolls the build out at once | Nothing |
+| `closed` | `alpha` (*Closed testing - Alpha*) | Uploads a **draft** release | Console → Closed testing → the draft → release notes → *Start rollout* |
+| `production` | `production` | Uploads a **draft** release | Console → Production → the draft → release notes → *Start rollout* (then Google's review) |
+
+`closed` and `production` refuse to run from any branch but `main`.
+
+- **Version.** The store-facing number is `pbbls.versionName` in
+  `apps/android/gradle.properties` (1.0.0 for the launch). Bump it in the PR
+  that prepares the next release; every internal build of that release shares
+  it, and the `versionCode` (the run number) tells them apart.
+- **One-time Console prep for closed testing.** Create the *Closed testing -
+  Alpha* track's tester list (or Google Group) before the first `closed` run.
+  If you renamed the track or made a custom one, the Play API name differs from
+  `alpha`: change the `PLAY_TRACK` mapping in `android-release.yml`.
+- **Production needs a permission the testing setup did not grant.** Step 5.4
+  gave the service account *Release to testing tracks*; add *Release to
+  production, exclude devices, and use Play App Signing* before the first
+  `production` run, which also needs Play's production access (granted after the
+  closed test, #1453).
+- **A draft is cheap to discard.** If you change your mind, delete the draft in
+  the Console; its `versionCode` stays consumed, so the next run is simply
+  higher.
 
 ---
 
