@@ -31,6 +31,17 @@ export type RouteShell = {
 /** Two areas from here (two-area spec D1): the tab page on the left, the Path's line or a detail on the right. */
 export const PANES_QUERY = "(width >= 1024px)"
 
+/**
+ * Whether a detail is open, from the `@detail` slot's segments
+ * (`useSelectedLayoutSegments("detail")`). The details live in the slot's
+ * `(pane)` group and its null pages do not, so the first segment says it.
+ * Never `useSelectedLayoutSegment("detail")`: for a slot, Next gives its last
+ * segment ("settings", a pebble's id), so no detail ever opened below 1024 px.
+ */
+export function isDetailOpen(slotSegments: readonly string[] | null): boolean {
+  return slotSegments?.[0] === "(pane)"
+}
+
 /** The tab roots, from the navigation's own items. */
 export const TAB_ROOTS: readonly string[] = NAV_ITEMS.map((item) => item.href)
 

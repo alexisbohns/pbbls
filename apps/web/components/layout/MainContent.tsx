@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { usePathname, useSelectedLayoutSegment } from "next/navigation"
+import { usePathname, useSelectedLayoutSegments } from "next/navigation"
 import { AuthGate } from "@/components/auth/AuthGate"
 import { StoreGate } from "@/components/layout/StoreGate"
 import { AppNavigation } from "@/components/layout/AppNavigation"
@@ -14,7 +14,7 @@ import { ReconsentGate } from "@/components/consent/ReconsentGate"
 import { PathFocusProvider } from "@/components/path/PathFocusProvider"
 import { StoneSprite } from "@/components/pebble/stone/StoneSprite"
 import { useAuth } from "@/lib/data/auth-context"
-import { PANES_QUERY, routeShell } from "@/lib/config/app-routes"
+import { isDetailOpen, PANES_QUERY, routeShell } from "@/lib/config/app-routes"
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery"
 import { cn } from "@/lib/utils"
 
@@ -43,8 +43,7 @@ export function MainContent({ children, detail }: MainContentProps) {
   const { isAuthenticated } = useAuth()
   const showNavigation = (shell.tab || shell.detail) && isAuthenticated
   const wide = useMediaQuery(PANES_QUERY)
-  // The slot's details live in its `(pane)` group; its null pages do not.
-  const detailOpen = useSelectedLayoutSegment("detail") === "(pane)"
+  const detailOpen = isDetailOpen(useSelectedLayoutSegments("detail"))
   const overlay = detailOpen && !wide
 
   // <body> carries the route's ground, so the overscroll, the safe areas and
