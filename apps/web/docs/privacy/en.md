@@ -4,7 +4,7 @@ locale: en
 slug: privacy
 version: 1.4.0
 effective_date: 2026-10-07
-last_updated: 2026-10-07
+last_updated: 2026-11-02
 ---
 
 # Privacy Policy for Pebbles
@@ -145,6 +145,7 @@ In accordance with Article 28 of the GDPR, we work with the following sub-proces
 - **Role :** Hosting and delivery of the web application and the back office.
 - **Location :** Server-side functions are pinned to the Paris, France region (`cdg1`). Requests are routed and TLS-terminated by Vercel's global edge network, which is operated from the United States.
 - **Processing :** Page rendering and server-side request handling. Your IP address, the address of the page requested, your session cookie and the data shown on the page pass through it.
+- **Agreement :** Vercel is bound by its data processing agreement, compliant with the GDPR, which includes the European Commission's standard contractual clauses.
 - **Transfer mechanism :** Vercel Inc. is certified under the EU-U.S. Data Privacy Framework.
 
 ---
@@ -159,7 +160,7 @@ Your data is stored by Supabase on servers in Paris (France, EU), and the server
 
 One form of processing involves the United States.
 
-**Delivery of the application.** Every request to Pebbles is routed by Vercel's global edge network, which terminates TLS, before reaching the Paris region. Your IP address, the address of the page requested and your session cookie therefore transit infrastructure operated from the United States. We rely on Vercel Inc.'s certification under the EU-U.S. Data Privacy Framework.
+**Delivery of the application.** Every request to Pebbles is routed by Vercel's global edge network, which terminates TLS, before reaching the Paris region. Your IP address, the address of the page requested and your session cookie therefore transit infrastructure operated from the United States. We rely on Vercel Inc.'s certification under the EU-U.S. Data Privacy Framework, and on the standard contractual clauses in our data processing agreement with Vercel.
 
 ### 6.3 Fonts and Static Assets
 
