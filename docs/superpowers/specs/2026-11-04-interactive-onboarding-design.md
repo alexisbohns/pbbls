@@ -26,7 +26,7 @@ Pebbles' value sits mostly in the emotional and life-changing tiers of Bain's el
 | D4 | **Reasons are multi-select, six tiles of equal size.** Slugs: `notice-feelings`, `keep-people`, `hard-season`, `good-days`, `own-patterns`, `keep-record`. The sixth tile exists for the grid and for the heirloom proposition. |
 | D5 | **One RPC, `complete_onboarding`,** writes everything the flow collected in one transaction: display name, glyph, reasons, pace, up to three souls, and `onboarding_completed = true`. Clients never stitch these writes. Consent acts are the exception: they are recorded at step 2, as they happen, so a user who quits at step 3 still has a valid ledger. |
 | D6 | **Answers live on `profiles`** as two nullable columns (`onboarding_reasons text[]`, `pace text`) rather than a new table: they are per-user, single-valued, and read by every surface on every launch. Skipped steps leave null. |
-| D7 | **Souls created in the flow are ordinary souls** (`souls` rows with `name` and `glyph_id`), nothing marks them as "onboarding souls". The glyph picker is the same picker the app already has; the starter grid is the nine system glyphs (`glyphs.is_system`). |
+| D7 | **Souls created in the flow are ordinary souls** (`souls` rows with `name` and `glyph_id`), nothing marks them as "onboarding souls". The glyph picker is the same picker the app already has; the starter grid shows eight system glyphs (`glyphs.is_system`) plus the dashed "Draw" tile, a 3×3 grid on both the You step and the soul picker. |
 | D8 | **Draw-your-own glyph reuses the existing carve flow** on each surface as a satellite; it is not rebuilt for onboarding. |
 | D9 | **The hand-off is not a screen.** After `complete_onboarding`, the client lands on Home and opens the quick-moment composer once, with the first soul pre-attached and a prompt chosen from the reasons. Dismissing it is fine. |
 | D10 | **Quitting mid-flow restarts the flow next launch** (profile stays `onboarding_completed = false`); each client may keep the typed answers locally between launches but is not required to. Consent acts already recorded are not re-asked (the gate's existing rule). |
@@ -95,7 +95,7 @@ create function public.complete_onboarding(
 language plpgsql security definer set search_path = public
 ```
 
-Owner-checked on `auth.uid()`. In one transaction: updates `display_name` and `glyph_id` when given (same validation as `update_profile`, which it calls or shares), sets the two new columns, inserts each soul (`name` trimmed, non-empty, `glyph_id` must be a system glyph or one owned by the caller), and sets `onboarding_completed = true`. Rejects more than three souls, duplicate names within the payload, and a second call on an already-completed profile with a no-op rather than an error (idempotent). Consent is **not** in this RPC.
+Owner-checked on `auth.uid()`. In one transaction: updates `display_name` and `glyph_id` when given, by calling `update_profile` so the two share one validation, sets the two new columns, inserts each soul (`name` trimmed, non-empty, `glyph_id` must be a system glyph or one owned by the caller), and sets `onboarding_completed = true`. Rejects more than three souls, duplicate names within the payload, and a second call on an already-completed profile with a no-op rather than an error (idempotent). Consent is **not** in this RPC.
 
 The web's current `updateProfile({ onboarding_completed: true })` call is replaced by the RPC; `onboarding_completed` stays writable only through it and the admin.
 
