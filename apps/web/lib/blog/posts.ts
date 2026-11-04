@@ -1,4 +1,5 @@
 import type { BlogPost } from "@/lib/blog/types"
+import { beforeAnythingElse } from "@/lib/blog/posts/before-anything-else"
 import { countingInStone } from "@/lib/blog/posts/counting-in-stone"
 import { cutFromOneStone } from "@/lib/blog/posts/cut-from-one-stone"
 import { inOneVoice } from "@/lib/blog/posts/in-one-voice"
@@ -6,7 +7,14 @@ import { redrawingTheWeek } from "@/lib/blog/posts/redrawing-the-week"
 import { setInStone } from "@/lib/blog/posts/set-in-stone"
 
 /** Every published post, newest first. */
-export const BLOG_POSTS: readonly BlogPost[] = [inOneVoice, cutFromOneStone, setInStone, countingInStone, redrawingTheWeek]
+export const BLOG_POSTS: readonly BlogPost[] = [
+  beforeAnythingElse,
+  inOneVoice,
+  cutFromOneStone,
+  setInStone,
+  countingInStone,
+  redrawingTheWeek,
+]
 
 export function getBlogPost(slug: string): BlogPost | undefined {
   return BLOG_POSTS.find((post) => post.slug === slug)
