@@ -1,7 +1,7 @@
 # Record flow redesign — design
 
 **Date:** 2026-11-04
-**Issues:** one per client, iOS first, Android mirror, web last (numbers in the PR body). No back-end issue: every contract this flow needs already exists.
+**Issues:** #1514 iOS (reference), #1515 Android (mirror), #1516 web. No back-end issue: every contract this flow needs already exists.
 **Milestone:** M70 · Record flow
 **Design:** the 2026-11-04 exploration. Synthesis (diagnosis, six proposals, the merge): https://claude.ai/artifact/E9GLg6LXthGf9gMdpid1wy. Visual variants gallery with the maintainer's picks: https://claude.ai/artifact/1jXYWFkevwjcyhLj48wVJS. Both private.
 **Inventory:** counted on `main` at `b35488b18` (2026-11-04). iOS Capture is 3 counted steps (`Features/Capture/CaptureStep.swift`), Complete 6 plus success (`Features/Complete/CompleteStep.swift`). A moment costs 5 taps, a full pebble 12 taps over 10 screens.
