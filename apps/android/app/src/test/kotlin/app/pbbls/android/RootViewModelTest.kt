@@ -6,7 +6,9 @@ import app.pbbls.android.core.data.AchievementMomentCard
 import app.pbbls.android.core.data.AchievementNotificationService
 import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.KarmaNotificationService
+import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.testing.FakeCompleteSnapshotStore
+import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.FakeWrapDiskCache
 import app.pbbls.android.testing.MainDispatcherRule
@@ -22,6 +24,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.time.OffsetDateTime
 
 /**
  * `RootViewModel`'s session→destination transitions and the parked-invite
@@ -65,6 +68,7 @@ class RootViewModelTest {
             val vm =
                 RootViewModel(
                     supabase,
+                    FakeProfileService(),
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
@@ -86,6 +90,7 @@ class RootViewModelTest {
             val vm =
                 RootViewModel(
                     supabase,
+                    FakeProfileService(),
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
@@ -107,6 +112,7 @@ class RootViewModelTest {
             val vm =
                 RootViewModel(
                     supabase,
+                    FakeProfileService(),
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
@@ -130,7 +136,7 @@ class RootViewModelTest {
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
             val completeSnapshots = FakeCompleteSnapshotStore()
-            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), haptics(), SavedStateHandle())
+            RootViewModel(supabase, FakeProfileService(), karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), haptics(), SavedStateHandle())
 
             supabase.emitResolved(session = session(userId = "u1"))
             advanceUntilIdle()
@@ -147,7 +153,7 @@ class RootViewModelTest {
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
             val completeSnapshots = FakeCompleteSnapshotStore()
-            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), haptics(), SavedStateHandle())
+            RootViewModel(supabase, FakeProfileService(), karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), haptics(), SavedStateHandle())
 
             supabase.emitResolved(session = null)
             advanceUntilIdle()
@@ -160,7 +166,7 @@ class RootViewModelTest {
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
             val completeSnapshots = FakeCompleteSnapshotStore()
-            RootViewModel(supabase, karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), haptics(), SavedStateHandle())
+            RootViewModel(supabase, FakeProfileService(), karma(), achievements(), completeSnapshots, FakeWrapDiskCache(), haptics(), SavedStateHandle())
 
             advanceUntilIdle()
             supabase.emitResolved(session = session(userId = "u1"))
@@ -175,6 +181,7 @@ class RootViewModelTest {
             val vm =
                 RootViewModel(
                     FakeSupabaseService(),
+                    FakeProfileService(),
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
@@ -195,6 +202,7 @@ class RootViewModelTest {
             val vm =
                 RootViewModel(
                     FakeSupabaseService(),
+                    FakeProfileService(),
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
@@ -209,6 +217,7 @@ class RootViewModelTest {
             val restored =
                 RootViewModel(
                     FakeSupabaseService(),
+                    FakeProfileService(),
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
@@ -225,6 +234,7 @@ class RootViewModelTest {
             val vm =
                 RootViewModel(
                     FakeSupabaseService(),
+                    FakeProfileService(),
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
@@ -248,6 +258,7 @@ class RootViewModelTest {
             val vm =
                 RootViewModel(
                     supabase,
+                    FakeProfileService(),
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
@@ -274,6 +285,7 @@ class RootViewModelTest {
             val vm =
                 RootViewModel(
                     supabase,
+                    FakeProfileService(),
                     karma(),
                     achievements(),
                     FakeCompleteSnapshotStore(),
@@ -302,6 +314,7 @@ class RootViewModelTest {
             val vm =
                 RootViewModel(
                     FakeSupabaseService(),
+                    FakeProfileService(),
                     karma(),
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
@@ -328,6 +341,7 @@ class RootViewModelTest {
             val vm =
                 RootViewModel(
                     FakeSupabaseService(),
+                    FakeProfileService(),
                     karma(),
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
@@ -357,6 +371,7 @@ class RootViewModelTest {
             val vm =
                 RootViewModel(
                     FakeSupabaseService(),
+                    FakeProfileService(),
                     karma(),
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
@@ -376,11 +391,47 @@ class RootViewModelTest {
         }
 
     @Test
+    fun `a sign-in reads the profile's onboarding flag`() =
+        runTest(rule.dispatcher) {
+            val supabase = FakeSupabaseService()
+            val profile =
+                FakeProfileService(
+                    profile = ProfileRow(displayName = "P", createdAt = OffsetDateTime.parse("2026-01-01T00:00:00Z"), onboardingCompleted = false),
+                )
+            val vm = RootViewModel(supabase, profile, karma(), achievements(), FakeCompleteSnapshotStore(), FakeWrapDiskCache(), haptics(), SavedStateHandle())
+
+            assertNull(vm.uiState.value.onboardingCompleted)
+            supabase.emitResolved(session = session(userId = "user-1"))
+            advanceUntilIdle()
+            assertEquals(false, vm.uiState.value.onboardingCompleted)
+            assertEquals(1, profile.loadProfileCount)
+
+            supabase.emitResolved(session = null)
+            advanceUntilIdle()
+            assertNull(vm.uiState.value.onboardingCompleted)
+        }
+
+    @Test
+    fun `a failed profile read leaves the flag unknown, and finishing the flow sets it`() =
+        runTest(rule.dispatcher) {
+            val supabase = FakeSupabaseService()
+            val profile = FakeProfileService().apply { failNext = java.io.IOException("offline") }
+            val vm = RootViewModel(supabase, profile, karma(), achievements(), FakeCompleteSnapshotStore(), FakeWrapDiskCache(), haptics(), SavedStateHandle())
+
+            supabase.emitResolved(session = session(userId = "user-1"))
+            advanceUntilIdle()
+            assertNull(vm.uiState.value.onboardingCompleted)
+
+            vm.onOnboardingCompleted()
+            assertEquals(true, vm.uiState.value.onboardingCompleted)
+        }
+
+    @Test
     fun `signing out drops the Path's kept wraps`() =
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
             val wraps = FakeWrapDiskCache()
-            RootViewModel(supabase, karma(), achievements(), FakeCompleteSnapshotStore(), wraps, haptics(), SavedStateHandle())
+            RootViewModel(supabase, FakeProfileService(), karma(), achievements(), FakeCompleteSnapshotStore(), wraps, haptics(), SavedStateHandle())
 
             supabase.emitResolved(session = session(userId = "u1"))
             advanceUntilIdle()

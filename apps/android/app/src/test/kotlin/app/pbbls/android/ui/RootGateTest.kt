@@ -59,11 +59,23 @@ class RootGateTest : AppUiTest() {
 
     @Test
     fun `a first sign-in shows onboarding over Home`() {
+        profile.profile = profile.profile.copy(onboardingCompleted = false)
         launch()
         signIn()
 
-        onText(R.string.onboarding_skip).performClick()
+        onText(R.string.onboarding_promise_title).assertIsDisplayed()
+        onText(R.string.onboarding_promise_cta).performClick()
 
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
+    }
+
+    @Test
+    fun `a completed profile never sees onboarding, even on a fresh device`() {
+        profile.profile = profile.profile.copy(onboardingCompleted = true)
+        launch()
+        signIn()
+
+        onText(R.string.onboarding_promise_title).assertDoesNotExist()
         compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
     }
 
@@ -84,10 +96,10 @@ class RootGateTest : AppUiTest() {
         launch(inviteIntent("tok-1"))
         signOut()
         signIn()
-        onText(R.string.onboarding_skip).assertIsDisplayed()
+        onText(R.string.onboarding_promise_title).assertIsDisplayed()
         onText(R.string.connections_accept_title).assertDoesNotExist()
 
-        onText(R.string.onboarding_skip).performClick()
+        onText(R.string.onboarding_promise_cta).performClick()
 
         onText(R.string.connections_accept_title).assertIsDisplayed()
     }
@@ -118,15 +130,21 @@ class RootGateTest : AppUiTest() {
     }
 
     @Test
-    fun `the gate comes before onboarding`() {
+    fun `the gate stands down for onboarding and checks again when it ends`() {
+        // The promise comes before the consent (#1510 D2): the flow's step 2
+        // collects the acts, and the overlay only decides once the flow is done.
         consents.rows.clear()
         launch()
         signIn()
 
+        onText(R.string.onboarding_promise_title).assertIsDisplayed()
+        onText(R.string.consent_gate_title).assertDoesNotExist()
+
+        onText(R.string.onboarding_promise_cta).performClick()
+
         onText(R.string.consent_gate_title).assertIsDisplayed()
         acceptEveryConsent()
-
-        onText(R.string.onboarding_skip).assertIsDisplayed()
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
     }
 
     @Test

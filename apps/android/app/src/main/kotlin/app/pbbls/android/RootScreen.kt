@@ -118,11 +118,19 @@ fun RootScreen(onboarding: OnboardingPreferences) {
     val userId = root.userId
     LaunchedEffect(userId) { consentViewModel.start(userId) }
 
+    // Onboarding gate: pure composition over the device flag MainActivity hands in (#1207: on DataStore,
+    // read as Compose state, loaded before the splash lifts) and the profile's server flag (#1510 D10),
+    // which RootViewModel reads on sign-in and which arrives after the destination.
+    val shouldPresentOnboarding = OnboardingGate.shouldPresent(userId, hasSeenOnboarding, root.onboardingCompleted)
+
     // Gated unless THIS user passed. Keyed on the id, so the frame between a
     // user switch and start() re-checking can never show the app to the new
-    // user on the old user's pass. Fails closed while Idle/Checking.
+    // user on the old user's pass. Fails closed while Idle/Checking. Stands
+    // down while the onboarding is due (#1510 D2): its step 2 collects the
+    // acts, promise first, and the flow's end restarts this gate's check.
     val isConsentGated =
         root.destination == RootDestination.SignedIn &&
+            !shouldPresentOnboarding &&
             consent != ConsentGateUiState.Satisfied(userId ?: "")
     val welcomeContentRevealed = { root.destination == RootDestination.SignedOut }
 
@@ -155,9 +163,6 @@ fun RootScreen(onboarding: OnboardingPreferences) {
         if (userId != null) referenceData.load()
     }
 
-    // Onboarding gate stays pure composition over the flag MainActivity hands in (#1207: on DataStore,
-    // read as Compose state, loaded before the splash lifts).
-    val shouldPresentOnboarding = OnboardingGate.shouldPresent(userId, hasSeenOnboarding)
     // The splash hides the screen, not the composition: until the settings' first read (#1207) the
     // gate below would decide on a default, and a pushed (or skipped) onboarding stays that way.
     val settingsLoaded = onboarding.isLoaded
@@ -166,7 +171,7 @@ fun RootScreen(onboarding: OnboardingPreferences) {
     // `if (canShowAuthedTabs) … else …` composition branch this task deletes.
     // `when` over the sealed type with no `else`, so a new case is a compile
     // error.
-    LaunchedEffect(root.destination, settingsLoaded) {
+    LaunchedEffect(root.destination, settingsLoaded, shouldPresentOnboarding) {
         if (!settingsLoaded) return@LaunchedEffect
         when (root.destination) {
             RootDestination.Unresolved -> Unit // the splash still owns the screen
@@ -176,14 +181,15 @@ fun RootScreen(onboarding: OnboardingPreferences) {
                 // restore, by which point the saveable back stack has already
                 // restored where the user was. Re-rooting unconditionally would
                 // throw that away and land everyone back on Home.
-                val wasAlreadyAuthed = navigator.rootKey == PebblesKey.Home
                 navigator.rootAt(PebblesKey.Home)
-                // First-run gate: push Onboarding on top of the freshly-seeded
-                // Home so a pending invite (below) waits behind it. Skipped on a
-                // restore that was already authed — the restored stack is
-                // authoritative there, and re-pushing would stack a second
-                // Onboarding over whatever the user was doing.
-                if (shouldPresentOnboarding && !wasAlreadyAuthed) {
+                // First-run gate: push Onboarding on top of Home so a pending
+                // invite (below) waits behind it. The server flag lands after
+                // the destination (#1510 D10), so this effect runs again when
+                // it does; the stack check is what keeps a recomposition, or a
+                // restore that already holds the entry, from pushing a second
+                // Onboarding over whatever the user was doing. A restore whose
+                // flow is still incomplete is pushed again on purpose (D10).
+                if (shouldPresentOnboarding && navigator.rootKey == PebblesKey.Home && !navigator.isOnStack(PebblesKey.Onboarding)) {
                     navigator.navigate(PebblesKey.Onboarding)
                 }
             }
@@ -228,6 +234,8 @@ fun RootScreen(onboarding: OnboardingPreferences) {
                     welcomeContentRevealed = welcomeContentRevealed,
                     onOnboardingFinished = {
                         onboarding.setHasSeenOnboarding(true)
+                        viewModel.onOnboardingCompleted()
+                        consentViewModel.restart(userId)
                         navigator.goBack()
                     },
                 )

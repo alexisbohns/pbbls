@@ -63,6 +63,8 @@
     <string name="onboarding_skip">Passer</string>
     <string name="onboarding_close">Fermer l\'introduction</string>
     <string name="onboarding_start">Commencer votre chemin</string>
+    <string name="onboarding_promise_title">Une promesse, écrite une fois</string>
+    <string name="onboarding_promise_cta">Je t\'en tiendrai responsable</string>
     <string name="onboarding_reason_notice_feelings">Remarquer ce que je ressens</string>
     <string name="onboarding_reason_keep_people">Garder les gens</string>
     <string name="onboarding_reason_hard_season">Traverser une période difficile</string>

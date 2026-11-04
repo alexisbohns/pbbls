@@ -71,6 +71,8 @@
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_close">Close onboarding</string>
     <string name="onboarding_start">Start your path</string>
+    <string name="onboarding_promise_title">A promise, written once</string>
+    <string name="onboarding_promise_cta">I\'ll hold you to it</string>
     <string name="onboarding_reason_notice_feelings">Notice what I feel</string>
     <string name="onboarding_reason_keep_people">Keep the people</string>
     <string name="onboarding_reason_hard_season">Get through a hard season</string>

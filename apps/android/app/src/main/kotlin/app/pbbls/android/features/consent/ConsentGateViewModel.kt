@@ -117,6 +117,16 @@ class ConsentGateViewModel
             userId?.let { check(it) }
         }
 
+        /**
+         * The onboarding's step 2 recorded acts behind this gate's back (#1510 D2): forget the verdict
+         * and run [start] again, so a satisfied cache (marked by the flow) or a fresh ledger read decides.
+         */
+        fun restart(userId: String?) {
+            this.userId = null
+            _uiState.value = ConsentGateUiState.Idle
+            start(userId)
+        }
+
         fun onToggle(
             kind: ConsentKind,
             checked: Boolean,
