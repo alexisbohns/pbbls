@@ -42,13 +42,13 @@ After the three client issues ship:
 
 **D6. Save paths.** "Just save" calls `save_moment` and returns to the origin (Path week scrolled to the new stone, or Home) with a snackbar "Moment saved · Make it a pebble". "Save & make it a pebble" calls `save_moment`, then opens the pebble stage on the saved moment, so the existing per-moment autosave and restore keep working. The final "Make it a pebble" calls `complete_pebble`. If that second write fails, the moment stays saved and the Life screen shows, in orange, "Moment saved, pebble not made yet · Try again". One write per button, as the one-write rule requires.
 
-**D7. Valence keeps its control and loses its defaults.** No preselection: Continue is disabled until a pick. The fan gets axis labels in the margins (columns Lowlight · In-between · Highlight, rows Month · Week · Day) and a ghost stone with "Swipe or tap to choose" until the first touch. The neutral word "Moment" becomes **"In-between"** (FR "Entre-deux"), which ends the collision with the new meaning of "moment" (assumption to confirm). The lockup becomes one sentence, "A highlight of my week", built from two localised strings, never concatenated, so French agreement holds.
+**D7. Valence keeps its control and loses its defaults.** No preselection: Continue is disabled until a pick. The fan gets axis labels in the margins (columns Lowlight · Neutral · Highlight, rows Month · Week · Day) and a ghost stone with "Swipe or tap to choose" until the first touch. The neutral word "Moment" becomes **"Neutral"** (FR "Neutre"), which ends the collision with the new meaning of "moment" (confirmed 2026-11-05; "In-between / Entre-deux" was the first draft). The lockup becomes one sentence, "A highlight of my week", built from two localised strings, never concatenated, so French agreement holds.
 
 **D8. The help sheet and the callout.** On the first valence step of an account with zero completed pebbles (the count Home already loads), a medium sheet opens over the step: an annotated fan with the lit stone and four lines: "Two questions, one stone." / "Left to right: lowlight, in-between, highlight." / "Bottom to top: did it fill your day, your week, your month? Bigger moment, bigger stone." / "No wrong stone. You can change it later.", then "Got it". A local seen-flag stops it reopening after a back-out. Afterwards a caption-size "(i) How to read this" sits under the lockup, permanently. iOS: a medium-detent sheet; Android: `ModalBottomSheet`.
 
 **D9. Emotion keeps its picker.** Same 38 chips, categories ordered by valence. Tap commits and advances after a visible 0.3 s selection. A failed palette load shows "Couldn't load feelings · Retry" instead of a spinner. The summary pill under the headline (D11) replaces the current subtitle.
 
-**D10. Life: domains and people on one screen (Margin treatment).** Title "What part of life?", a RECENT row of the user's last domains, then ALL 18 as a two-column list of glyph + name with the one-line description of the last tap in a caption bar. Multi-select, cap 3, the sticky button reads "Make it a pebble (2)". Karma counts "any domain" once, so the cap cannot be farmed. Under the list, "Who was there?" with five recent-soul avatars and "+ More"; the strip is sticky above the button so people are never scrolled out of reach. Souls stay in the stage because of the north star ("life with five people"); the end-screen alternative is the A/B to run if attach rate drops (assumption to confirm). The glyph is derived by the server from the first domain by slug, not by tap order, so the end screen must visibly light the stone it got.
+**D10. Life: domains and people on one screen (Margin treatment).** Title "What part of life?", a RECENT row of the user's last domains, then ALL 18 as a two-column list of glyph + name with the one-line description of the last tap in a caption bar. Multi-select, cap 3, the sticky button reads "Make it a pebble (2)". Karma counts "any domain" once, so the cap cannot be farmed. Under the list, "Who was there?" with the four most-tagged souls as tiles and a "More" tile; the strip is sticky above the button so people are never scrolled out of reach. "Recent" was the first draft: recency needs an RPC (`pebble_souls` has no timestamp), the pebble count is already fetched, and the picker ranks by count too, so the strip and the picker's Usual rows show the same people. Tapping a tile toggles it; More opens the souls picker sheet of the souls spec (`2026-11-05-souls-picker-and-people-design.md`), whose Done returns here. Souls stay in the stage because of the north star ("life with five people"); the end-screen alternative is the A/B to run if attach rate drops (confirmed 2026-11-05). The glyph is derived by the server from the first domain by slug, not by tap order, so the end screen must visibly light the stone it got.
 
 **D11. The summary pill.** From the emotion step on, a tonal pill under the headline carries the answers so far ("Highlight · week", then "Highlight · week · Joyful") with an "Edit" link back to that step. This is the Ledger pill from the gallery and replaces the per-step subtitles.
 
@@ -58,7 +58,7 @@ After the three client issues ship:
 
 **D14. The bare moment page.** Keeps "Make it a pebble", which opens the pebble stage at the valence step, and gains "Add a few words" when the description is empty. When a Complete draft exists for that moment, the card says "You started this · continue" instead of restoring silently.
 
-**D15. Copy, EN and FR.** All strings in `Localizable.xcstrings` and the Android resources, FR with "tu". New strings: Just write, Just save, Save & make it a pebble, Moment saved · Make it a pebble, Moment saved · 3 questions to make it a pebble, In-between / Entre-deux, the four help lines and Got it, How to read this, Couldn't load feelings · Retry, Make it richer, Add a few words, Record another, You started this · continue, the partial-failure line. One copy pass on the 18 domain labels rides with this (Events, Weather and Tasks next to Identity and Spirituality).
+**D15. Copy, EN and FR.** All strings in `Localizable.xcstrings` and the Android resources, FR with "tu". New strings: Just write, Just save, Save & make it a pebble, Moment saved · Make it a pebble, Moment saved · 3 questions to make it a pebble, Neutral / Neutre, the four help lines and Got it, How to read this, Couldn't load feelings · Retry, Make it richer, Add a few words, Record another, You started this · continue, the partial-failure line. One copy pass on the 18 domain labels rides with this (Events, Weather and Tasks next to Identity and Spirituality).
 
 **D16. Measurement.** Already-logged events give: moments completed within 24 h, share of pebbles edited within a day from the end screen, distribution across the nine valence cells, souls attach rate. Compare the four weeks before and after.
 
@@ -86,8 +86,8 @@ Taps, counted every tap and typing excluded: (a) + · pick · Just save = **3** 
 
 ### iOS (reference)
 - `Features/Capture`: steps become photo and moment page; `CaptureDraft` gains `description` and persists (D2); the When step and `RecordWhenStep` move into a chip + sheet; `RecordPhotoStep` re-enables `collectionNavigation` and the top accessory, adds the two fixed-slot controls, and auto-advances on selection.
-- `Features/Complete`: steps become valence, emotion, life; souls merge into `CompleteDomainStep`'s screen; collection and privacy steps are deleted; `CompleteSuccessStep` becomes Make it richer; the pill (D11) lives in `RecordStepScaffold`'s subtitle slot.
-- `Features/Path/Valence`: no seed (`seedValenceIfNeeded` goes), axis labels, ghost stone, the help sheet and the callout, "In-between".
+- `Features/Complete`: steps become valence, emotion, life; souls merge into `CompleteDomainStep`'s screen as the Usual strip, with the souls spec's picker behind More (`CompleteSoulsStep` and the grid go); collection and privacy steps are deleted; `CompleteSuccessStep` becomes Make it richer; the pill (D11) lives in `RecordStepScaffold`'s subtitle slot.
+- `Features/Path/Valence`: no seed (`seedValenceIfNeeded` goes), axis labels, ghost stone, the help sheet and the callout, "Neutral".
 - `Features/Path/EmotionPickerContent`: Retry state.
 - Home and Path entry points per D13; `BareMomentPage` per D14.
 - Tests: Swift Testing on the flow models (tap counts as step transitions, no seed, partial-failure state, draft persistence round-trip, the pill's strings in both languages); reference renders for the six screens in both schemes.
@@ -103,9 +103,13 @@ Taps, counted every tap and typing excluded: (a) + · pick · Just save = **3** 
 
 iOS as one stack, in dependency order: (1) Capture draft persistence + moment page, (2) photo step, (3) valence labels, help, no seed, rename, (4) Life screen + pill, (5) Make it richer + entry points + bare page, (6) copy pass and reference renders. Android as one stack mirroring the same parts. Web as one PR. Each part lints and tests alone; the device pass at XXL Dynamic Type in French on an iPhone SE-size device gates part 4.
 
-## Open questions (assumptions taken, to confirm)
+## Open questions
 
-1. D2: unsaved preview after capture, not a saved page.
-2. D7: "In-between / Entre-deux" for the neutral word, not "Neutral / Neutre".
-3. D10: souls inside the Life screen, not after the reward.
-4. D13: Quick moment re-pointed at the moment page, not retired.
+All four assumptions were confirmed on 2026-11-05, with one change: the neutral word is "Neutral / Neutre", not "In-between / Entre-deux".
+
+1. D2: unsaved preview after capture, not a saved page. Confirmed.
+2. D7: "Neutral / Neutre" for the neutral word. Changed.
+3. D10: souls inside the Life screen, not after the reward. Confirmed.
+4. D13: Quick moment re-pointed at the moment page, not retired. Confirmed.
+
+The iOS build ships this flow and the souls picker in one stack, souls parts first, because the Life screen hosts the picker: see the Plan of `2026-11-05-souls-picker-and-people-design.md`.
