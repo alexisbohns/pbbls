@@ -1,7 +1,7 @@
 # Souls picker and People tab — design
 
 **Date:** 2026-11-05
-**Issues:** iOS (reference), Android (mirror), web, filed with this spec on M70 · Record flow. No back-end issue: counts already ride on the souls fetch.
+**Issues:** #1518 iOS (reference), #1519 Android (mirror), #1520 web, on M70 · Record flow. No back-end issue: counts already ride on the souls fetch.
 **Design:** the 2026-11-04 souls exploration, canvas https://claude.ai/artifact/JYd7fitbmeoZRvtULQdh7o (private), page "Converged": screens 01–06 the iOS picker, 07 and 09 the iOS People tab, 10, 11 and 13 Android.
 **Companion:** `2026-11-04-record-flow-redesign-design.md`, whose Life screen (D10) hosts this picker. The iOS build ships both in one stack (Plan below).
 **Inventory:** counted on `main` at `b35488b18`. iOS has a grid sheet (`Features/Path/SoulPickerSheet.swift`, `SoulPickerContent.swift`) used by the edit pebble form (`SelectedSoulsRow.swift`) and the record flow's souls step (`Complete/Steps/CompleteSoulsStep.swift`), and a souls list on the People tab (`Profile/Lists/SoulsListView.swift`) with the "who?" prompts (`People/PeoplePrompts.swift`). Every picker sorts A–Z, selects by colour alone, and shows 96 pt tiles.
