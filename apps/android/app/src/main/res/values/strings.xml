@@ -71,6 +71,16 @@
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_close">Close onboarding</string>
     <string name="onboarding_start">Start your path</string>
+    <string name="onboarding_reason_notice_feelings">Notice what I feel</string>
+    <string name="onboarding_reason_keep_people">Keep the people</string>
+    <string name="onboarding_reason_hard_season">Get through a hard season</string>
+    <string name="onboarding_reason_good_days">Keep the good days</string>
+    <string name="onboarding_reason_own_patterns">See my own patterns</string>
+    <string name="onboarding_reason_keep_record">Keep a record for later</string>
+    <string name="onboarding_pace_daily">Every day</string>
+    <string name="onboarding_pace_few_a_week">A few times a week</string>
+    <string name="onboarding_pace_when_it_matters">Only when it matters</string>
+    <string name="onboarding_pace_weekly_wrap">Wrapping the end of the week</string>
 
     <!-- ==== Path timeline (sub-project D) ==== -->
     <!-- iOS never localized the load-error copy (plain String literal) — Android does. -->

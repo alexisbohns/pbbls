@@ -63,6 +63,16 @@
     <string name="onboarding_skip">Passer</string>
     <string name="onboarding_close">Fermer l\'introduction</string>
     <string name="onboarding_start">Commencer votre chemin</string>
+    <string name="onboarding_reason_notice_feelings">Remarquer ce que je ressens</string>
+    <string name="onboarding_reason_keep_people">Garder les gens</string>
+    <string name="onboarding_reason_hard_season">Traverser une période difficile</string>
+    <string name="onboarding_reason_good_days">Garder les bons jours</string>
+    <string name="onboarding_reason_own_patterns">Voir mes propres schémas</string>
+    <string name="onboarding_reason_keep_record">Garder une trace pour plus tard</string>
+    <string name="onboarding_pace_daily">Tous les jours</string>
+    <string name="onboarding_pace_few_a_week">Quelques fois par semaine</string>
+    <string name="onboarding_pace_when_it_matters">Seulement quand ça compte</string>
+    <string name="onboarding_pace_weekly_wrap">En bouclant la fin de semaine</string>
 
     <!-- ==== Path timeline (sub-project D) ==== -->
     <string name="path_load_error">Impossible de charger vos pebbles.</string>
