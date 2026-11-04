@@ -186,6 +186,10 @@ jobs:
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "settings-links" db:verify:settings-links
 
+      - name: Interactive onboarding (promise letter, complete_onboarding)
+        if: '!cancelled()'
+        run: .github/scripts/verify-harness.sh "onboarding" db:verify:onboarding
+
       # The Home tab's back-end (#1254): the first-moment and first-pebble
       # achievements and their permanence, claim_blue_pebble's gate and
       # exactly-once, people_prompts' filters and guard; (part 3) the wrap
