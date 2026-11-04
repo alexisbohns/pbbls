@@ -34,6 +34,8 @@ The database is the contract between four clients, and these Deno scripts are th
 | `npm run db:verify:guides` | `verify-guides.ts` | the `guides` table (#1254): published rows readable by anon in `sort_order`, the nine seeded topics, admin-only writes, drafts invisible | anon |
 | `npm run db:verify:home` | `verify-home.ts` | the Home tab's back-end (#1254): first-moment / first-pebble unlock and survive deletion, `claim_blue_pebble` gate and exactly-once, `people_prompts` filters and valence guard, `wrap_reveals` and `home_wraps`' cover equality with `path_month_wrap`. `HOME_DUMP=1` writes the payload fixtures to `scripts/oracles/home/payloads/` | anon |
 | `npm run db:verify:achievements` | `verify-achievements.ts` | the achievements page (#1305): the six firsts, crossing pebbles, silent rows recorded but never returned by `check_achievements`, completions; `get_achievements` and `achievements_year` against the oracle (`scripts/oracles/achievements/`); seen, `pull_ceremony`, private families off the public profile. `ACHIEVEMENTS_DUMP=1` writes the payloads to `scripts/oracles/achievements/payloads/` | anon in CI; with `SUPABASE_SERVICE_ROLE_KEY` set it also runs `pull_ceremony`'s ready path (it back-dates a completion, writing only to the harness's own users) |
+| `npm run db:verify:settings-links` | `verify-settings-links.ts` | the `settings_links` table (#1489): published rows readable by anon in section and sort order, the five seeded keys, admin-only writes | anon |
+| `npm run db:verify:onboarding` | `verify-onboarding.ts` | the interactive onboarding (#1510): the promise letter readable by anon and admin-only to write, `complete_onboarding`'s happy path, idempotence and named refusals, the answers kept off `get_public_profile`. `ONBOARDING_DUMP=1` writes the payload to `scripts/oracles/onboarding/payloads/` | anon |
 | `npm run db:verify` | the anon harnesses above (plus reports and glyph), in order | — | anon |
 | `npm run db:verify:purge` | `verify-account-purge.ts` | `purge_account` contract | anon + **service role** |
 
@@ -45,7 +47,7 @@ A new harness added to `scripts/` gains a `db:verify:*` script and a workflow st
 
 **`db:verify:purge` is deliberately NOT in CI and must be run by hand** after any batch touching `purge_account`. It is the one harness needing `SUPABASE_SERVICE_ROLE_KEY`, this repo is public, and a leaked service-role key is total database access. Do not "fix" its absence by adding that secret without deciding it as such.
 
-**Orphans.** A run killed between signup and cleanup leaves a throwaway account behind. They are greppable in `auth.users` by their prefixes — `moments-verify-`, `grades-verify-`, `public-verify-`, `guard-verify-`, `recent-auth-verify-`, `path-wraps-verify-`, `guides-verify-`, `home-verify-`, `achievements-verify-`, all `@example.test`. There is no automated sweep (deleting them needs the service role).
+**Orphans.** A run killed between signup and cleanup leaves a throwaway account behind. They are greppable in `auth.users` by their prefixes — `moments-verify-`, `grades-verify-`, `public-verify-`, `guard-verify-`, `recent-auth-verify-`, `path-wraps-verify-`, `guides-verify-`, `home-verify-`, `achievements-verify-`, `onboarding-verify-`, all `@example.test`. There is no automated sweep (deleting them needs the service role).
 
 ## What CI runs on `packages/supabase/**`
 
