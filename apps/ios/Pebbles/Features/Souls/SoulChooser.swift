@@ -20,6 +20,8 @@ struct SoulChooser<Header: View>: View {
     /// A soul was created inline; the host decides what follows (a picker
     /// selects it, the People tab opens it).
     var onCreated: (SoulWithGlyph) -> Void = { _ in }
+    /// Reference renders only: `ImageRenderer` draws neither ScrollView content nor TextFields.
+    var scrolls = true
     @ViewBuilder var header: () -> Header
 
     @Environment(SupabaseService.self) private var supabase
@@ -32,48 +34,26 @@ struct SoulChooser<Header: View>: View {
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "souls.chooser")
 
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) {
-                if let title {
-                    Text(title)
-                        .pebblesFont(.title)
-                        .foregroundStyle(Color.pebbles.onSurface)
-                        .padding(.horizontal, Spacing.lg)
-                        .padding(.bottom, Spacing.md)
+        Group {
+            if scrolls {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) { list }
+                        .padding(.bottom, Spacing.xxl)
                 }
-                header()
-                if model.isSearching && !model.trimmedQuery.isEmpty {
-                    results
-                } else {
-                    usual
-                    sections
+                .scrollDismissesKeyboard(.interactively)
+                .safeAreaInset(edge: .bottom, spacing: 0) { bottomBar }
+            } else {
+                VStack(spacing: 0) {
+                    // A flexible frame grows to a taller child; the clear canvas keeps the remaining height.
+                    Color.clear
+                        .overlay(alignment: .top) {
+                            VStack(alignment: .leading, spacing: 0) { list }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .clipped()
+                    bottomBar
                 }
             }
-            .padding(.bottom, Spacing.xxl)
-        }
-        .scrollDismissesKeyboard(.interactively)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            VStack(spacing: Spacing.sm) {
-                if let label = model.buttonLabel {
-                    SoulPillTray(
-                        selected: model.selection.compactMap { id in model.souls.first { $0.id == id } },
-                        label: label,
-                        onRemove: { model.remove($0) },
-                        onConfirm: onConfirm
-                    )
-                    .padding(.horizontal, Spacing.lg)
-                }
-                SoulChooserBottomBar(model: model, onAdd: { name in Task { await add(name) } }, addError: addError)
-                    .disabled(isAdding)
-            }
-            .padding(.vertical, Spacing.sm)
-            .background(
-                LinearGradient(colors: [Color.pebbles.surface.opacity(0), Color.pebbles.surface],
-                               startPoint: .top, endPoint: .bottom)
-                    .frame(height: 24),
-                alignment: .top
-            )
-            .background(Color.pebbles.surface.opacity(0.92).ignoresSafeArea(edges: .bottom))
         }
         .task {
             await refs.refreshSouls()
@@ -83,6 +63,50 @@ struct SoulChooser<Header: View>: View {
     }
 
     // MARK: Sections
+
+    @ViewBuilder
+    private var list: some View {
+        if let title {
+            Text(title)
+                .pebblesFont(.title)
+                .foregroundStyle(Color.pebbles.onSurface)
+                .padding(.horizontal, Spacing.lg)
+                .padding(.bottom, Spacing.md)
+        }
+        header()
+        if model.isSearching && !model.trimmedQuery.isEmpty {
+            results
+        } else {
+            usual
+            sections
+        }
+    }
+
+    private var bottomBar: some View {
+        VStack(spacing: Spacing.sm) {
+            if let label = model.buttonLabel {
+                SoulPillTray(
+                    selected: model.selection.compactMap { id in model.souls.first { $0.id == id } },
+                    label: label,
+                    onRemove: { model.remove($0) },
+                    onConfirm: onConfirm,
+                    scrolls: scrolls
+                )
+                .padding(.horizontal, Spacing.lg)
+            }
+            SoulChooserBottomBar(model: model, onAdd: { name in Task { await add(name) } }, addError: addError,
+                                 rendersStatic: !scrolls)
+                .disabled(isAdding)
+        }
+        .padding(.vertical, Spacing.sm)
+        .background(
+            LinearGradient(colors: [Color.pebbles.surface.opacity(0), Color.pebbles.surface],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(height: 24),
+            alignment: .top
+        )
+        .background(Color.pebbles.surface.opacity(0.92).ignoresSafeArea(edges: .bottom))
+    }
 
     @ViewBuilder
     private var usual: some View {
@@ -183,8 +207,10 @@ extension SoulChooser where Header == EmptyView {
     init(model: SoulChooserModel, title: LocalizedStringResource?,
          onOpen: @escaping (SoulWithGlyph) -> Void = { _ in },
          onConfirm: @escaping () -> Void = {},
-         onCreated: @escaping (SoulWithGlyph) -> Void = { _ in }) {
-        self.init(model: model, title: title, onOpen: onOpen, onConfirm: onConfirm, onCreated: onCreated) {
+         onCreated: @escaping (SoulWithGlyph) -> Void = { _ in },
+         scrolls: Bool = true) {
+        self.init(model: model, title: title, onOpen: onOpen, onConfirm: onConfirm, onCreated: onCreated,
+                  scrolls: scrolls) {
             EmptyView()
         }
     }

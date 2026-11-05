@@ -9,7 +9,7 @@ extension References {
     struct SoulChooserReferences {
         private static func host(_ model: SoulChooserModel, title: LocalizedStringResource?) -> some View {
             let supabase = SupabaseService()
-            return SoulChooser(model: model, title: title)
+            return SoulChooser(model: model, title: title, scrolls: false)
                 .frame(width: ReferenceConfig.phoneWidth, height: 760)
                 .background(Color.pebbles.surface)
                 .environment(supabase)

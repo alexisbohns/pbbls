@@ -11,6 +11,8 @@ struct SoulChooserBottomBar: View {
     /// Fired with the trimmed query; the host inserts the row.
     let onAdd: (String) -> Void
     var addError: String?
+    /// Reference renders only: `ImageRenderer` draws neither ScrollView content nor TextFields.
+    var rendersStatic = false
 
     @FocusState private var fieldFocused: Bool
 
@@ -45,12 +47,16 @@ struct SoulChooserBottomBar: View {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .accessibilityHidden(true)
-            TextField("Search souls", text: Binding(get: { model.query }, set: { model.query = $0 }))
-                .pebblesFont(.body)
-                .focused($fieldFocused)
-                .submitLabel(.done)
-                .autocorrectionDisabled()
-                .onSubmit { if model.canAdd { onAdd(model.trimmedQuery) } }
+            if rendersStatic {
+                staticField
+            } else {
+                TextField("Search souls", text: Binding(get: { model.query }, set: { model.query = $0 }))
+                    .pebblesFont(.body)
+                    .focused($fieldFocused)
+                    .submitLabel(.done)
+                    .autocorrectionDisabled()
+                    .onSubmit { if model.canAdd { onAdd(model.trimmedQuery) } }
+            }
             Button {
                 model.query = ""
                 model.isSearching = false
@@ -68,6 +74,21 @@ struct SoulChooserBottomBar: View {
         .frame(minHeight: 52)
         .frame(maxWidth: .infinity)
         .glassCapsule()
+    }
+
+    @ViewBuilder
+    private var staticField: some View {
+        if model.query.isEmpty {
+            Text("Search souls")
+                .pebblesFont(.body)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            Text(verbatim: model.query)
+                .pebblesFont(.body)
+                .foregroundStyle(Color.pebbles.onSurface)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     private func orb(systemName: String, label: LocalizedStringResource, lit: Bool,

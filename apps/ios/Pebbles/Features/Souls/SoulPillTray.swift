@@ -8,14 +8,16 @@ struct SoulPillTray: View {
     let label: SoulChooserModel.ButtonLabel
     let onRemove: (UUID) -> Void
     let onConfirm: () -> Void
+    /// Reference renders only: `ImageRenderer` draws neither ScrollView content nor TextFields.
+    var scrolls = true
 
     var body: some View {
         HStack(spacing: Spacing.sm) {
-            if !selected.isEmpty {
+            if selected.isEmpty {
+                Spacer(minLength: 0)
+            } else if scrolls {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        ForEach(selected) { soul in pill(soul) }
-                    }
+                    pills
                 }
                 .contentMargins(.trailing, 28, for: .scrollContent)
                 .mask(
@@ -23,11 +25,18 @@ struct SoulPillTray: View {
                                    startPoint: .leading, endPoint: .trailing)
                 )
             } else {
+                pills
                 Spacer(minLength: 0)
             }
             button
         }
         .frame(minHeight: 48)
+    }
+
+    private var pills: some View {
+        HStack(spacing: 6) {
+            ForEach(selected) { soul in pill(soul) }
+        }
     }
 
     private func pill(_ soul: SoulWithGlyph) -> some View {
