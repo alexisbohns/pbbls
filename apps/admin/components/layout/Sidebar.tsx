@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import {
   BarChart3,
   BookOpen,
+  Feather,
   Link2,
   Megaphone,
   Palette,
@@ -34,6 +35,7 @@ const LOG_ITEMS = [
   { href: "/logs/features", label: "Features", icon: Sparkles },
   { href: "/logs/announcements", label: "Announcements", icon: Megaphone },
   { href: "/guides", label: "Guides", icon: BookOpen },
+  { href: "/promise", label: "Promise", icon: Feather },
   { href: "/settings-links", label: "Settings links", icon: Link2 },
 ] as const
 

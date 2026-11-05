@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { dateRangeFor, periodLengthDays, shiftIsoDate } from "./date"
+import { isOnboardingAnswerKind } from "./types"
 import type {
   ActiveUsersDailyRow,
   BounceDistributionRow,
@@ -7,6 +8,7 @@ import type {
   EmotionShareWeeklyRow,
   IsoDate,
   KpiDailyRow,
+  OnboardingAnswerRow,
   PebbleEnrichmentRow,
   PebbleVolumeRow,
   QualitySignalRow,
@@ -246,4 +248,23 @@ export async function getRetentionCohorts(): Promise<RetentionCohortRow[]> {
     throw new Error(error.message)
   }
   return data ?? []
+}
+
+/**
+ * The onboarding answers' distribution (#1510). The RPC enforces
+ * `is_admin(auth.uid())`. Its generated type carries `kind: string`, so rows
+ * with an unknown kind are dropped rather than cast.
+ */
+export async function getOnboardingAnswers(): Promise<OnboardingAnswerRow[]> {
+  const supabase = await createServerSupabaseClient()
+  const { data, error } = await supabase.rpc("get_onboarding_answers")
+  if (error) {
+    console.error("[analytics] getOnboardingAnswers failed:", error.message)
+    throw new Error(error.message)
+  }
+  const rows: OnboardingAnswerRow[] = []
+  for (const row of data ?? []) {
+    if (isOnboardingAnswerKind(row.kind)) rows.push({ kind: row.kind, value: row.value, users: row.users })
+  }
+  return rows
 }
