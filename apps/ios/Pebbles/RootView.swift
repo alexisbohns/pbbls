@@ -25,6 +25,7 @@ struct RootView: View {
     @Environment(ReferenceDataService.self) private var refs
     @Environment(PathStatsService.self) private var stats
     @Environment(CompleteDraftStore.self) private var completeDrafts
+    @Environment(CaptureDraftStore.self) private var captureDrafts
     @Environment(SnapURLCache.self) private var snapURLs
     @Environment(ConnectionsService.self) private var connections
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
@@ -242,6 +243,7 @@ struct RootView: View {
             resetAuthedSceneState()
             SignedOutPurge(
                 completeDrafts: completeDrafts,
+                captureDrafts: captureDrafts,
                 refs: refs,
                 stats: stats,
                 snapURLs: snapURLs,
@@ -297,6 +299,7 @@ struct RootView: View {
         .environment(ReferenceDataService(client: supabase.client))
         .environment(PathStatsService(supabase: supabase))
         .environment(CompleteDraftStore())
+        .environment(CaptureDraftStore())
         .environment(snapURLs)
         .environment(KarmaNotificationService())
         .environment(ConnectionsService(supabase: supabase))

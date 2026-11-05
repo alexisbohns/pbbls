@@ -32,8 +32,11 @@ struct SignedOutPurgeTests {
         let urlCache = URLCache(memoryCapacity: 1_000_000, diskCapacity: 0)
         let wrapCache = WrapDiskCache(root: FileManager.default.temporaryDirectory
             .appendingPathComponent("signed-out-purge-wraps-\(UUID().uuidString)"))
+        let captureDrafts = CaptureDraftStore(directory: FileManager.default.temporaryDirectory
+            .appendingPathComponent("signed-out-purge-capture-\(UUID().uuidString)"))
         let purge = SignedOutPurge(
             completeDrafts: completeDrafts,
+            captureDrafts: captureDrafts,
             refs: refs,
             stats: stats,
             snapURLs: SnapURLCache(provider: FakeSignedURLProvider(), now: { Date() }),
