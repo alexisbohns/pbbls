@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
@@ -34,8 +35,7 @@ import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.stone.StoneGridLayout
 import app.pbbls.android.core.model.Glyph
-import app.pbbls.android.core.ui.GlyphView
-import app.pbbls.android.core.ui.GlyphViewCase
+import app.pbbls.android.core.ui.render.GlyphImage
 
 /** The starter grid's seed, the same on every surface (D7). */
 const val GLYPH_STONE_SEED = "onboarding-glyphs"
@@ -141,22 +141,25 @@ fun GlyphStoneGrid(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterVertically),
                     ) {
-                        PbblsIconImage(PbblsIcon.PLUS_CIRCLE, PbblsIconSize.TILE, contentDescription = null, tint = colors.onSurfaceVariant)
-                        if (!folded) {
-                            Text(
-                                drawLabel,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = colors.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
+                        PbblsIconImage(
+                            PbblsIcon.PLUS_CIRCLE,
+                            if (folded) PbblsIconSize.ROW else PbblsIconSize.TILE,
+                            contentDescription = null,
+                            tint = colors.onSurfaceVariant,
+                        )
+                        Text(
+                            if (folded) stringResource(R.string.onboarding_you_draw_short) else drawLabel,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colors.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
                     }
                 glyph != null ->
-                    GlyphView(
-                        case = if (selected) GlyphViewCase.SELECTED else GlyphViewCase.DEFAULT,
+                    GlyphImage(
                         strokes = glyph.strokes,
                         viewBox = glyph.viewBox,
-                        side = if (folded) FOLDED_GLYPH_SIDE else GLYPH_SIDE,
+                        strokeColor = if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant,
+                        modifier = Modifier.size(if (folded) FOLDED_GLYPH_SIDE else GLYPH_SIDE),
                     )
             }
         }

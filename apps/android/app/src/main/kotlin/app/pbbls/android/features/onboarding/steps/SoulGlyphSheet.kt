@@ -58,7 +58,17 @@ fun SoulGlyphSheet(
                 if (shown != null) {
                     GlyphView(case = GlyphViewCase.PROFILE, strokes = shown.strokes, viewBox = shown.viewBox, side = HEADER_GLYPH_SIDE)
                 }
-                Text(stringResource(R.string.onboarding_people_glyph_sheet_title, personName), style = MaterialTheme.typography.titleLarge)
+                Column {
+                    Text(
+                        stringResource(R.string.onboarding_people_glyph_sheet_title, personName),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    Text(
+                        stringResource(R.string.onboarding_people_glyph_sheet_body, personName),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             GlyphStoneGrid(
                 glyphs = glyphs,

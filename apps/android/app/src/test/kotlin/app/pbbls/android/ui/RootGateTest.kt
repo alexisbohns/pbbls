@@ -72,7 +72,7 @@ class RootGateTest : AppUiTest() {
         signIn()
 
         // 1. promise
-        onText(R.string.onboarding_promise_title).assertIsDisplayed()
+        onText(R.string.onboarding_promise_cta).assertIsDisplayed()
         compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performClick()
         // 2. consent: the fake ledger is satisfied by default, so every switch is on and locked
         onText(R.string.onboarding_consent_title).assertIsDisplayed()
@@ -89,7 +89,7 @@ class RootGateTest : AppUiTest() {
         compose.waitForIdle()
 
         compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
-        onText(R.string.onboarding_promise_title).assertDoesNotExist()
+        onText(R.string.onboarding_promise_cta).assertDoesNotExist()
         val answers = onboardingService.completeCalls.single()
         assertEquals(listOf(OnboardingReason.KEEP_PEOPLE), answers.reasons)
         assertEquals(OnboardingPace.WEEKLY_WRAP, answers.pace)
@@ -101,7 +101,7 @@ class RootGateTest : AppUiTest() {
         launch()
         signIn()
 
-        onText(R.string.onboarding_promise_title).assertDoesNotExist()
+        onText(R.string.onboarding_promise_cta).assertDoesNotExist()
         compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
     }
 
@@ -122,7 +122,7 @@ class RootGateTest : AppUiTest() {
         launch(inviteIntent("tok-1"))
         signOut()
         signIn()
-        onText(R.string.onboarding_promise_title).assertIsDisplayed()
+        onText(R.string.onboarding_promise_cta).assertIsDisplayed()
         onText(R.string.connections_accept_title).assertDoesNotExist()
 
         walkOnboardingWithEverySkip()
@@ -163,18 +163,20 @@ class RootGateTest : AppUiTest() {
         launch()
         signIn()
 
-        onText(R.string.onboarding_promise_title).assertIsDisplayed()
+        onText(R.string.onboarding_promise_cta).assertIsDisplayed()
         onText(R.string.consent_gate_title).assertDoesNotExist()
 
-        // Step 2 asks for every act and records each one; the gate's re-check after the flow
+        // Step 2 asks for every act and records them on Continue; the gate's re-check after the flow
         // finds the ledger satisfied and stands down without asking again.
         compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performClick()
         onText(R.string.onboarding_consent_title).assertIsDisplayed()
         onText(R.string.consent_gate_title).assertDoesNotExist()
         ConsentGateLogic.REQUIRED.forEach { compose.onNodeWithTag(onboardingConsentTag(it)).performScrollTo().performClick() }
         compose.waitForIdle()
-        assertEquals(4, consents.recordCalls.size)
+        assertEquals("a switch alone writes nothing", 0, consents.recordCalls.size)
         compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performScrollTo().performClick()
+        compose.waitForIdle()
+        assertEquals(4, consents.recordCalls.size)
         repeat(4) { compose.onNodeWithTag(JourneyTags.ONBOARDING_SKIP).performClick() }
         compose.waitForIdle()
 
@@ -193,7 +195,7 @@ class RootGateTest : AppUiTest() {
         launch()
         signIn()
 
-        onText(R.string.onboarding_promise_title).assertIsDisplayed()
+        onText(R.string.onboarding_promise_cta).assertIsDisplayed()
         onText(R.string.consent_gate_retry).assertDoesNotExist()
         compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performClick()
         onText(R.string.onboarding_consent_title).assertIsDisplayed()
@@ -203,7 +205,7 @@ class RootGateTest : AppUiTest() {
         repeat(4) { compose.onNodeWithTag(JourneyTags.ONBOARDING_SKIP).performClick() }
         compose.waitForIdle()
 
-        onText(R.string.onboarding_promise_title).assertDoesNotExist()
+        onText(R.string.onboarding_promise_cta).assertDoesNotExist()
         onText(R.string.consent_gate_title).assertIsDisplayed()
         acceptEveryConsent()
         compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()

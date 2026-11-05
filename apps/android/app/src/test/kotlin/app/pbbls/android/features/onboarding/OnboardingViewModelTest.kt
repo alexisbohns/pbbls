@@ -58,7 +58,7 @@ class OnboardingViewModelTest {
         }
 
     @Test
-    fun `consent asks only the missing acts and records each as it is switched on`() =
+    fun `consent asks only the missing acts and records them on Continue`() =
         runTest {
             consents.rows.add(ActiveConsent(ConsentKind.TERMS.wire, ConsentGateLogic.versionFor(ConsentKind.TERMS)))
             val vm = vm()
@@ -68,45 +68,122 @@ class OnboardingViewModelTest {
             val consent = vm.uiState.value.consent
             assertEquals(setOf(ConsentKind.TERMS), consent.recorded)
             assertFalse(consent.canContinue)
-            vm.onConsentToggle(ConsentKind.HEALTH_DATA, true)
-            advanceUntilIdle()
-            assertEquals(
-                listOf(Triple(ConsentKind.HEALTH_DATA, ConsentGateLogic.versionFor(ConsentKind.HEALTH_DATA), ConsentGateLogic.SOURCE)),
-                consents.recordCalls,
-            )
-            vm.onConsentToggle(ConsentKind.PRIVACY, true)
-            vm.onConsentToggle(ConsentKind.AGE_ASSURANCE, true)
+            listOf(ConsentKind.HEALTH_DATA, ConsentKind.PRIVACY, ConsentKind.AGE_ASSURANCE).forEach { vm.onConsentToggle(it, true) }
             advanceUntilIdle()
             assertTrue(vm.uiState.value.consent.canContinue)
+            assertTrue("a switch alone writes nothing", consents.recordCalls.isEmpty())
+            vm.next()
+            advanceUntilIdle()
+            assertEquals(
+                listOf(ConsentKind.HEALTH_DATA, ConsentKind.PRIVACY, ConsentKind.AGE_ASSURANCE),
+                consents.recordCalls.map { it.first },
+            )
+            assertEquals("reasons", vm.uiState.value.step.id)
             assertTrue(cache.isSatisfied("user-1", ConsentGateLogic.fingerprint()))
         }
 
     @Test
-    fun `a recorded act is locked on, so a further toggle writes nothing`() =
+    fun `a switch turns back off, and an act on record stays on`() =
         runTest {
+            consents.rows.add(ActiveConsent(ConsentKind.TERMS.wire, ConsentGateLogic.versionFor(ConsentKind.TERMS)))
             val vm = vm()
             advanceUntilIdle()
             vm.next()
             vm.onConsentToggle(ConsentKind.HEALTH_DATA, true)
-            advanceUntilIdle()
             vm.onConsentToggle(ConsentKind.HEALTH_DATA, false)
-            vm.onConsentToggle(ConsentKind.HEALTH_DATA, true)
-            advanceUntilIdle()
-            assertTrue(ConsentKind.HEALTH_DATA in vm.uiState.value.consent.on)
-            assertEquals(1, consents.recordCalls.size)
+            vm.onConsentToggle(ConsentKind.TERMS, false)
+            assertFalse(ConsentKind.HEALTH_DATA in vm.uiState.value.consent.on)
+            assertTrue(ConsentKind.TERMS in vm.uiState.value.consent.recorded)
+            assertTrue(consents.recordCalls.isEmpty())
         }
 
     @Test
-    fun `a failed record keeps the switch off with an error`() =
+    fun `a failed record stays on the step with an error, and the retry sends only what is missing`() =
         runTest {
-            consents.recordFailure = IOException("offline")
             val vm = vm()
             advanceUntilIdle()
             vm.next()
-            vm.onConsentToggle(ConsentKind.HEALTH_DATA, true)
+            ConsentKind.entries.forEach { vm.onConsentToggle(it, true) }
+            consents.recordFailure = IOException("offline")
+            vm.next()
             advanceUntilIdle()
-            assertFalse(ConsentKind.HEALTH_DATA in vm.uiState.value.consent.on)
+            assertEquals("consent", vm.uiState.value.step.id)
             assertEquals(R.string.onboarding_consent_error, vm.uiState.value.consent.errorRes)
+            consents.recordFailure = null
+            vm.next()
+            advanceUntilIdle()
+            assertEquals("reasons", vm.uiState.value.step.id)
+            assertNull(vm.uiState.value.consent.errorRes)
+        }
+
+    @Test
+    fun `the glyphs and the ledger are read only after the session is live`() =
+        runTest {
+            val vm = vm()
+            advanceUntilIdle()
+            assertTrue(service.sessionAwaited)
+            assertEquals(8, vm.uiState.value.systemGlyphs.size)
+        }
+
+    @Test
+    fun `an empty glyph read is retried on the step that shows them`() =
+        runTest {
+            val all = service.glyphs
+            service.glyphs = emptyList()
+            val vm = vm()
+            advanceUntilIdle()
+            assertTrue(
+                vm.uiState.value.systemGlyphs
+                    .isEmpty(),
+            )
+            service.glyphs = all
+            vm.next() // consent
+            ConsentKind.entries.forEach { vm.onConsentToggle(it, true) }
+            vm.next() // reasons
+            advanceUntilIdle()
+            vm.skip() // you
+            advanceUntilIdle()
+            assertEquals(8, vm.uiState.value.systemGlyphs.size)
+        }
+
+    @Test
+    fun `a person is never sent without a glyph`() =
+        runTest {
+            service.glyphs = emptyList()
+            val vm = vm()
+            advanceUntilIdle()
+            vm.next()
+            ConsentKind.entries.forEach { vm.onConsentToggle(it, true) }
+            vm.next()
+            advanceUntilIdle()
+            vm.skip() // you
+            vm.skip() // people
+            vm.onPersonAdd()
+            vm.onPersonNameChange(0, "Noé")
+            vm.onPersonCommit(0)
+            vm.next() // people → pace
+            advanceUntilIdle()
+            vm.next() // send
+            advanceUntilIdle()
+            assertTrue(service.completeCalls.isEmpty())
+            assertEquals(R.string.onboarding_complete_error, vm.uiState.value.errorRes)
+        }
+
+    @Test
+    fun `each new person wears a different glyph until a pick`() =
+        runTest {
+            val vm = vm()
+            advanceUntilIdle()
+            repeat(2) { i ->
+                vm.onPersonAdd()
+                vm.onPersonNameChange(i, "P$i")
+                vm.onPersonCommit(i)
+            }
+            assertEquals(
+                listOf("sys-0", "sys-1"),
+                vm.uiState.value.answers.souls
+                    .map { it.glyphId },
+            )
         }
 
     @Test
@@ -118,6 +195,7 @@ class OnboardingViewModelTest {
             ConsentKind.entries.forEach { vm.onConsentToggle(it, true) }
             advanceUntilIdle()
             vm.next() // consent → reasons
+            advanceUntilIdle()
             vm.onReasonToggle(OnboardingReason.KEEP_PEOPLE)
             vm.skip() // reasons → you, reasons dropped
             assertEquals("you", vm.uiState.value.step.id)
@@ -151,6 +229,7 @@ class OnboardingViewModelTest {
             ConsentKind.entries.forEach { vm.onConsentToggle(it, true) }
             advanceUntilIdle()
             vm.next()
+            advanceUntilIdle()
             vm.onReasonToggle(OnboardingReason.GOOD_DAYS)
             vm.onReasonToggle(OnboardingReason.KEEP_PEOPLE)
             vm.next()
@@ -187,6 +266,7 @@ class OnboardingViewModelTest {
             ConsentKind.entries.forEach { vm.onConsentToggle(it, true) }
             advanceUntilIdle()
             vm.next() // consent → reasons
+            advanceUntilIdle()
             repeat(4) { vm.skip() } // reasons, you, people (Later), pace
             advanceUntilIdle()
             assertEquals("pace", vm.uiState.value.step.id)
@@ -203,6 +283,7 @@ class OnboardingViewModelTest {
             ConsentKind.entries.forEach { vm.onConsentToggle(it, true) }
             advanceUntilIdle()
             vm.next() // consent → reasons
+            advanceUntilIdle()
             vm.next() // reasons → you
             vm.next() // you → people
             assertEquals("people", vm.uiState.value.step.id)
@@ -246,7 +327,9 @@ class OnboardingViewModelTest {
                     .map { it.id },
             )
             assertNull(vm.uiState.value.carvingFor)
-            vm.onPersonRemove(0)
+            vm.onPersonEdit(0)
+            vm.onPersonNameChange(0, "")
+            vm.onPersonCommit(0)
             assertEquals(
                 listOf("P1", "P2"),
                 vm.uiState.value.people
@@ -282,8 +365,9 @@ class OnboardingViewModelTest {
             advanceUntilIdle()
             vm.next()
             ConsentKind.entries.forEach { vm.onConsentToggle(it, true) }
+            vm.next() // → reasons, once the acts are recorded
             advanceUntilIdle()
-            repeat(3) { vm.next() } // → people
+            repeat(2) { vm.next() } // → people
             vm.onPersonAdd()
             vm.onPersonNameChange(0, " Noé ")
             vm.next() // Continue with the field still open

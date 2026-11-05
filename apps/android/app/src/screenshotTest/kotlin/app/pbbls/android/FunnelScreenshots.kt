@@ -117,7 +117,7 @@ private fun OnboardingStepPreview(state: OnboardingUiState) {
             onPersonAdd = {},
             onPersonNameChange = { _, _ -> },
             onPersonCommit = {},
-            onPersonRemove = {},
+            onPersonEdit = {},
             onPersonGlyphSheet = {},
             onPersonGlyphPick = { _, _ -> },
             onDrawForPerson = {},

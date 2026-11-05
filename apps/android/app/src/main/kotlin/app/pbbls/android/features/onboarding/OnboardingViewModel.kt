@@ -28,6 +28,9 @@ import javax.inject.Inject
 
 private const val TAG = "onboarding"
 
+/** The steps that draw the system glyphs. */
+private val GLYPH_STEPS = setOf("you", "people")
+
 /**
  * The seven-step flow (#1510), one ViewModel scoped to the `Onboarding` entry. Answers live here
  * until the hand-off sends them in one `complete_onboarding` (D5); consent acts are the exception,
@@ -64,11 +67,10 @@ class OnboardingViewModel internal constructor(
                 }
         }
         viewModelScope.launch {
-            runCatchingCancellable { service.systemGlyphs() }
-                .onSuccess { glyphs -> _uiState.update { it.copy(systemGlyphs = glyphs) } }
-                .onFailure { Log.e(TAG, "system glyphs failed", it) }
-        }
-        viewModelScope.launch {
+            // The letter is public; these two are not. Read before the session is live they come back
+            // empty with no error, which shows blank stones and re-asks acts already on record.
+            service.awaitSession()
+            loadSystemGlyphs()
             runCatchingCancellable { consents.active() }
                 .onSuccess { active ->
                     val missing = ConsentGateLogic.missing(active).toSet()
@@ -77,12 +79,26 @@ class OnboardingViewModel internal constructor(
         }
     }
 
+    private suspend fun loadSystemGlyphs() {
+        runCatchingCancellable { service.systemGlyphs() }
+            .onSuccess { glyphs ->
+                if (glyphs.isEmpty()) Log.e(TAG, "system glyphs came back empty")
+                _uiState.update { it.copy(systemGlyphs = glyphs) }
+            }.onFailure { Log.e(TAG, "system glyphs failed", it) }
+    }
+
     // MARK: - Stepping
 
     fun next() {
         val state = _uiState.value
         when (state.step.id) {
-            "consent" -> if (!state.consent.canContinue) return
+            "consent" -> {
+                if (!state.consent.canContinue) return
+                if (state.consent.toRecord.isNotEmpty()) {
+                    recordConsents()
+                    return
+                }
+            }
             "people" -> commitEditingPeople()
             "pace" -> {
                 complete()
@@ -122,33 +138,51 @@ class OnboardingViewModel internal constructor(
             val index = (state.stepIndex + delta).coerceIn(0, steps.lastIndex)
             state.copy(step = steps[index], errorRes = null, glyphSheetFor = null, carvingFor = null)
         }
+        val state = _uiState.value
+        if (state.systemGlyphs.isEmpty() && state.step.id in GLYPH_STEPS) viewModelScope.launch { loadSystemGlyphs() }
     }
 
     // MARK: - Step 2
 
+    /** A switch is the user's until Continue: nothing reaches the ledger, so nothing has to be undone. */
     fun onConsentToggle(
         kind: ConsentKind,
         checked: Boolean,
-    ) {
-        val state = _uiState.value.consent
-        // An act on record, recorded here, or being recorded is locked on: nothing is withdrawn in
-        // this flow, and a second write at the same version is pointless.
-        if (!checked || kind in state.recorded || kind in state.on || kind in state.saving) return
-        _uiState.update { it.copy(consent = it.consent.copy(saving = it.consent.saving + kind, errorRes = null)) }
+    ) = _uiState.update {
+        val consent = it.consent
+        // An act already on record is withdrawn in Settings, not by leaving this step.
+        if (kind in consent.recorded || consent.isSaving) return@update it
+        it.copy(consent = consent.copy(on = if (checked) consent.on + kind else consent.on - kind, errorRes = null))
+    }
+
+    /** Continue: every act switched on here goes in the ledger, then the flow moves on. */
+    private fun recordConsents() {
+        val toRecord = _uiState.value.consent.toRecord
+        _uiState.update { it.copy(consent = it.consent.copy(isSaving = true, errorRes = null)) }
         viewModelScope.launch {
             withContext(NonCancellable) {
-                runCatchingCancellable { consents.record(kind, ConsentGateLogic.versionFor(kind), ConsentGateLogic.SOURCE) }
-                    .onSuccess {
-                        _uiState.update { it.copy(consent = it.consent.copy(on = it.consent.on + kind, saving = it.consent.saving - kind)) }
-                        markGateSatisfiedIfComplete()
-                    }.onFailure { e ->
-                        Log.e(TAG, "record consent failed", e)
-                        _uiState.update {
-                            it.copy(
-                                consent = it.consent.copy(saving = it.consent.saving - kind, errorRes = R.string.onboarding_consent_error),
-                            )
+                var failed = false
+                for (kind in toRecord) {
+                    runCatchingCancellable { consents.record(kind, ConsentGateLogic.versionFor(kind), ConsentGateLogic.SOURCE) }
+                        .onSuccess { _uiState.update { it.copy(consent = it.consent.copy(recorded = it.consent.recorded + kind)) } }
+                        .onFailure { e ->
+                            Log.e(TAG, "record consent failed", e)
+                            failed = true
                         }
-                    }
+                }
+                _uiState.update {
+                    it.copy(
+                        consent =
+                            it.consent.copy(
+                                isSaving = false,
+                                errorRes = if (failed) R.string.onboarding_consent_error else null,
+                            ),
+                    )
+                }
+                if (!failed) {
+                    markGateSatisfiedIfComplete()
+                    move(+1)
+                }
             }
         }
     }
@@ -156,10 +190,8 @@ class OnboardingViewModel internal constructor(
     /** Every act on record: the gate's cache says so, so `restart` after the flow never re-asks. */
     private fun markGateSatisfiedIfComplete() {
         val uid = userId ?: return
-        val consent = _uiState.value.consent
-        if ((consent.recorded + consent.on).containsAll(
-                ConsentKind.entries,
-            )
+        if (_uiState.value.consent.recorded
+                .containsAll(ConsentKind.entries)
         ) {
             consentCache.markSatisfied(uid, ConsentGateLogic.fingerprint())
         }
@@ -212,7 +244,15 @@ class OnboardingViewModel internal constructor(
             )
         }
 
-    fun onPersonRemove(index: Int) = _uiState.update { it.copy(people = it.people.filterIndexed { i, _ -> i != index }) }
+    /** Tapping a name reopens its field; emptying it removes the place. */
+    fun onPersonEdit(index: Int) =
+        _uiState.update {
+            if (it.people.any { p -> p.editing }) {
+                it
+            } else {
+                it.copy(people = it.people.mapIndexed { i, p -> if (i == index) p.copy(editing = true) else p })
+            }
+        }
 
     fun onPersonGlyphSheet(index: Int?) = _uiState.update { it.copy(glyphSheetFor = index) }
 
@@ -250,20 +290,27 @@ class OnboardingViewModel internal constructor(
         _uiState.update { it.copy(isCompleting = true, errorRes = null) }
         viewModelScope.launch {
             withContext(NonCancellable) {
-                val answers = state.answers
-                runCatchingCancellable { service.complete(answers) }
-                    .onSuccess {
-                        handoff.leave(
-                            OnboardingHandoffNote(
-                                userId = userId,
-                                reason = answers.reasons?.firstOrNull(),
-                            ),
-                        )
-                        _uiState.update { it.copy(isCompleting = false, isDone = true) }
-                    }.onFailure { e ->
-                        Log.e(TAG, "complete_onboarding failed", e)
-                        _uiState.update { it.copy(isCompleting = false, errorRes = R.string.onboarding_complete_error) }
-                    }
+                // A person with no pick wears a system glyph, and `souls.glyph_id` is not null: never send
+                // an empty one. A failed first load gets one more try here.
+                if (_uiState.value.systemGlyphs.isEmpty() && state.answers.souls.any { it.glyphId.isEmpty() }) {
+                    loadSystemGlyphs()
+                }
+                val answers = _uiState.value.answers
+                runCatchingCancellable {
+                    check(answers.souls.none { it.glyphId.isEmpty() }) { "a person has no glyph: the system glyphs did not load" }
+                    service.complete(answers)
+                }.onSuccess {
+                    handoff.leave(
+                        OnboardingHandoffNote(
+                            userId = userId,
+                            reason = answers.reasons?.firstOrNull(),
+                        ),
+                    )
+                    _uiState.update { it.copy(isCompleting = false, isDone = true) }
+                }.onFailure { e ->
+                    Log.e(TAG, "complete_onboarding failed", e)
+                    _uiState.update { it.copy(isCompleting = false, errorRes = R.string.onboarding_complete_error) }
+                }
             }
         }
     }

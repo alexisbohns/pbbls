@@ -15,6 +15,12 @@ class FakeOnboardingService(
     var glyphsFailure: Exception? = null
     var completeFailure: Exception? = null
 
+    var sessionAwaited = false
+
+    override suspend fun awaitSession() {
+        sessionAwaited = true
+    }
+
     override suspend fun promiseLetter(): PromiseLetter? {
         letterFailure?.let { throw it }
         return letter
