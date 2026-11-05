@@ -305,6 +305,8 @@
     <string name="settings_handle_error_reserved">Ce pseudo est réservé.</string>
     <string name="settings_providers_header">Fournisseurs</string>
     <string name="settings_legal_header">Légal</string>
+    <string name="settings_support_get_header">Trouver du soutien</string>
+    <string name="settings_support_get_row">Lignes d’écoute, gratuites et confidentielles</string>
     <string name="settings_about_header">À propos</string>
     <string name="settings_support_header">Aide</string>
     <string name="settings_save_error">Impossible d\'enregistrer vos modifications. Veuillez réessayer.</string>
@@ -794,6 +796,12 @@
     <string name="record_close_discard">Abandonner</string>
     <string name="record_karma">+%1$d karma</string>
     <string name="record_karma_a11y">%1$d karma gagné</string>
+    <string name="record_success_quiet">Merci d’avoir gardé ce moment. Si la journée est lourde, un soutien est à un geste.</string>
+    <string name="record_success_get_support">Trouver du soutien</string>
+    <string name="crisis_intro">Si tu es en danger ou que tu penses à te faire du mal, appelle maintenant. Ces lignes sont gratuites et confidentielles.</string>
+    <string name="crisis_country">Pays</string>
+    <string name="crisis_worldwide">Ailleurs</string>
+    <string name="crisis_verified_on">Numéros vérifiés le %1$s</string>
     <string name="record_signed_out_error">Tu dois être connecté pour enregistrer.</string>
 
     <!-- Barre de navigation (#852) -->

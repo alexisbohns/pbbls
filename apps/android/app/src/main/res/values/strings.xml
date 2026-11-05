@@ -299,6 +299,8 @@
     <string name="settings_handle_error_reserved">That handle is reserved.</string>
     <string name="settings_providers_header">Providers</string>
     <string name="settings_legal_header">Legal</string>
+    <string name="settings_support_get_header">Get support</string>
+    <string name="settings_support_get_row">Helplines, free and confidential</string>
     <string name="settings_about_header">About</string>
     <string name="settings_support_header">Support</string>
     <string name="settings_save_error">Couldn\'t save your changes. Please try again.</string>
@@ -796,6 +798,12 @@
     <string name="record_close_discard">Discard</string>
     <string name="record_karma">+%1$d karma</string>
     <string name="record_karma_a11y">Earned %1$d karma</string>
+    <string name="record_success_quiet">Thank you for keeping this. If today is heavy, support is one tap away.</string>
+    <string name="record_success_get_support">Get support</string>
+    <string name="crisis_intro">If you are in danger or thinking about hurting yourself, call now. These lines are free and confidential.</string>
+    <string name="crisis_country">Country</string>
+    <string name="crisis_worldwide">Anywhere else</string>
+    <string name="crisis_verified_on">Numbers checked on %1$s</string>
     <string name="record_signed_out_error">You must be signed in to save.</string>
 
     <!-- Bottom navigation bar (#852) -->
