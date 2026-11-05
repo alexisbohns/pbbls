@@ -3750,5 +3750,6 @@ Built the same day as subagent-driven execution: nine PRs #1535, #1536, #1543, #
 - Fixed heights (tiles, rows, the Life clearance) broke under Dynamic Type until expressed as `@ScaledMetric`; two-column grids need one column at accessibility sizes.
 - `ThemeLiteralsTests` rejects `.black` in a mask gradient: the fix on part 1 forced a rebase of five branches, and the classifier refuses `--force-with-lease`, so the maintainer pushes.
 - The plan's week-row fixture epoch was a Friday labelled Wednesday; the implementer checked `date -r`.
+- CI's first pass on the stack: the icons `lint:replaces` rejects SF `checkmark`/`plus` where the set has `checkmark-dot`/`plus-circle` (a `Menu` item takes `Image(PbblsIcon.x.assetName)`); a lockup test outside the suites the parts ran still expected "Moment"; and every PNG recorded on the Mac differed from CI by 0.2–0.8 %, so the tip gets the `rebaseline-ios-screenshots` label. The bot refused its first run: the lit stone's appearance sweep is clocked from `.now`, so two recordings differ; `\.stoneSweeps` (an environment key, default true) is set false by the flow suite.
 
 Still owed: the signed-in device pass across the stack; Android (#1515, #1519) and web (#1516, #1520) mirrors; a cheaper first-pebble read than `path_moments`; `UsualSoulsStrip` names at accessibility sizes.
