@@ -54,7 +54,7 @@ check_marker public.handle_new_user '>>> APPEND later signup-metadata'
 body_of() {
   awk -v fn="$1" '
     { l = tolower($0) }
-    on && l ~ /\$[a-z_]*\$[[:space:]]*(;|language|$)/ { print; on = 0; next }
+    on && l ~ /^[[:space:]]*(end[[:space:]]*;?[[:space:]]*)?\$[a-z_]*\$[[:space:]]*(;|language)/ { print; on = 0; next }
     l ~ /create (or replace )?function / { on = (index(l, "function " fn "(") > 0 || index(l, "function " fn " ") > 0) }
     on { print }
   '
