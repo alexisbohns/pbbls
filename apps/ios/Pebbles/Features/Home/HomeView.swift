@@ -32,6 +32,8 @@ struct HomeView: View {
     private struct CompleteTarget: Identifiable, Equatable {
         let momentId: UUID
         let name: String?
+        /// For the end screen's week row; the quick sheet does not know it.
+        var happenedAt: Date?
         var id: UUID { momentId }
     }
 
@@ -78,7 +80,8 @@ struct HomeView: View {
                              onCompleted: { _ in
                                  revision.bump(from: .home)
                                  reloadChecklist()
-                             })
+                             },
+                             momentHappenedAt: target.happenedAt)
         }
         .fullScreenCover(isPresented: $showsCapture) {
             CaptureFlowView(onMomentChanged: { _ in
@@ -253,7 +256,7 @@ struct HomeView: View {
         do {
             let moments = try await MomentsService(client: supabase.client).pathMoments()
             if let bare = moments.first(where: { !$0.isCompleted }) {
-                completing = CompleteTarget(momentId: bare.id, name: bare.name)
+                completing = CompleteTarget(momentId: bare.id, name: bare.name, happenedAt: bare.happenedAt)
                 return
             }
         } catch {

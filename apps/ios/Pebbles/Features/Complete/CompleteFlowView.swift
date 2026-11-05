@@ -5,14 +5,22 @@ import os
 /// Full-screen; presented from the read page and chained from Capture.
 struct CompleteFlowView: View {
     let momentId: UUID
-    /// For the success screen's title line.
+    /// For the end screen's title line.
     let momentName: String?
-    /// Fired as soon as `complete_pebble` succeeds, while the success step is
-    /// up, so the parent reloads behind the cover.
+    /// Fired as soon as `complete_pebble` succeeds, while the end screen is
+    /// up, and again after each of its edits, so the parent reloads behind
+    /// the cover.
     let onCompleted: (UUID) -> Void
     /// Chained from Capture: the valence step says the moment is already
     /// saved and what the three questions are for (D1).
     var afterSave = false
+    /// For the end screen's week row; hidden when the host does not know.
+    var momentHappenedAt: Date?
+    /// The end screen offers "Add a few words" only when the moment has none.
+    var momentHasWords = false
+    /// "Record another" on the end screen; nil where the host cannot start a
+    /// fresh capture (the held card, Home's chained Complete).
+    var onRecordAnother: (() -> Void)?
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(ReferenceDataService.self) private var refs
@@ -93,12 +101,16 @@ struct CompleteFlowView: View {
     private var stepBody: some View {
         Group {
             if model.step == .success, let result = model.completed {
-                CompleteSuccessStep(
+                CompleteRicherStep(
+                    momentId: momentId,
                     name: momentName,
+                    happenedAt: momentHappenedAt,
                     result: result,
-                    valence: model.draft.valence ?? .neutralMedium,
-                    emotionId: model.draft.emotionId,
-                    onExit: { dismiss() }
+                    draft: model.draft,
+                    hasWords: momentHasWords,
+                    onExit: { dismiss() },
+                    onRecordAnother: onRecordAnother,
+                    onEdited: { onCompleted(momentId) }
                 )
             } else {
                 RecordStepScaffold(
@@ -202,7 +214,7 @@ struct CompleteFlowView: View {
             let karmaAfter = await karmaTotal(service, refId: pebbleId)
             var karmaDelta: Int?
             if let karmaBefore, let karmaAfter { karmaDelta = karmaAfter - karmaBefore }
-            // The success screen shows `+N`, so no capsule (A4).
+            // The end screen shows `+N`, so no capsule (A4).
             karma.notifyEarned(amount: karmaDelta ?? 0, reason: .pebbleCreated, presentsCapsule: false)
             achievements.fireCheck()
             autosave?.clear()

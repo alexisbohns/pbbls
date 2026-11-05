@@ -104,10 +104,16 @@ struct HeldCardPage: View {
             }
         }
         .fullScreenCover(isPresented: $isPresentingComplete) {
-            CompleteFlowView(momentId: request.momentId, momentName: model.detail?.name, onCompleted: { _ in
-                // In place, behind the success screen.
-                saved()
-            })
+            CompleteFlowView(
+                momentId: request.momentId,
+                momentName: model.detail?.name,
+                onCompleted: { _ in
+                    // In place, behind the end screen.
+                    saved()
+                },
+                momentHappenedAt: model.detail?.happenedAt,
+                momentHasWords: !(model.detail?.description ?? "").trimmingCharacters(in: .whitespaces).isEmpty
+            )
         }
         .momentDeleteDialog(target: $pendingDeletion) { target, option in
             Task { await delete(option, on: target) }

@@ -69,7 +69,10 @@ struct CaptureFlowView: View {
                     momentId: completing.momentId,
                     momentName: completing.name,
                     onCompleted: onMomentChanged,
-                    afterSave: true
+                    afterSave: true,
+                    momentHappenedAt: model.draft.happenedAt,
+                    momentHasWords: !model.draft.description.trimmingCharacters(in: .whitespaces).isEmpty,
+                    onRecordAnother: { startAnother() }
                 )
             } else {
                 capture
@@ -269,6 +272,15 @@ struct CaptureFlowView: View {
     }
 
     // MARK: - Save
+
+    /// "Record another" on the end screen (D12): the same cover, a fresh grid.
+    private func startAnother() {
+        completing = nil
+        model = CaptureFlowModel()
+        pickedPhoto = nil
+        snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
+        hasRestored = true
+    }
 
     private func save(thenComplete: Bool) async {
         guard !model.isSaving else { return }
