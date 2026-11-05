@@ -15487,6 +15487,40 @@
           }
         }
       }
+    },
+    "I agree that Pebbles stores the emotions I record (health data)." : {
+      "comment" : "Signup consent checkbox: the Art. 9 health-data consent.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I agree that Pebbles stores the emotions I record (health data)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'accepte que Pebbles conserve les émotions que j'enregistre (données de santé)."
+          }
+        }
+      }
+    },
+    "I am 16 years old or over." : {
+      "comment" : "Signup consent checkbox: the 16+ age attestation.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I am 16 years old or over."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'ai 16 ans ou plus."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
