@@ -12,7 +12,7 @@
  *   6. ONBOARDING_DUMP=1 writes the verbatim payload sent in 2 to scripts/oracles/onboarding/payloads/complete_onboarding.json,
  *      which the clients' foreign-payload tests replay byte for byte.
  * Run: set -a; . ./.env; set +a; npm run db:verify:onboarding --workspace=packages/supabase
- * Expected: `Summary: passed=25 failed=0`
+ * Expected: `Summary: passed=26 failed=0`
  * Signs up throwaway users (onboarding-verify-*@example.test) and deletes them through the real
  * `delete-account` edge function, even on failure.
  */
@@ -61,14 +61,27 @@ async function systemGlyphs(u: TestUser): Promise<string[]> {
   if (error) throw new Error(`glyphs: ${error.message}`);
   return (data ?? []).map((g) => g.id as string);
 }
-/** A refused call must leave the profile incomplete and soulless. */
-async function refused(u: TestUser, name: string, args: Record<string, unknown>, expect: string) {
+/**
+ * A refused call must leave the profile incomplete and soulless. A call that lands by mistake
+ * completes the profile, and every later call would be answered by the idempotent no-op, so the
+ * fresh user is replaced after such a slip (the slip itself is the reported failure).
+ */
+let fresh: TestUser | undefined;
+let freshLabel = 0;
+async function refused(name: string, args: Record<string, unknown>, expect: string) {
+  const u = fresh!;
   const { error } = await u.client.rpc("complete_onboarding", args);
   const p = await profile(u);
   const s = await souls(u);
   check(`${name} is refused (${expect})`, error !== null && error.message.includes(expect) && !p.onboarding_completed && s.length === 0,
     error?.message ?? "no error");
+  if (p.onboarding_completed) {
+    freshLabel += 1;
+    fresh = await signUp(`b${freshLabel}`);
+    extras.push(fresh);
+  }
 }
+const extras: TestUser[] = [];
 
 const DUMP = Deno.env.get("ONBOARDING_DUMP") === "1";
 const anon = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } });
@@ -120,23 +133,26 @@ try {
   check("a second call is a no-op", again.error === null && pa2.display_name === "Maya" && (await souls(alice)).length === 3, again.error?.message);
 
   // 4. refusals (bob stays fresh between them: each refusal rolls back)
+  // The stroke shape every client requires (glyphs_strokes_shape, 20260918200000).
   const { data: carolGlyph, error: carveError } = await carol.client.from("glyphs")
-    .insert({ user_id: carol.id, strokes: [[{ x: 10, y: 10 }, { x: 190, y: 190 }]], view_box: "0 0 200 200", name: `verify-${runId}` })
+    .insert({ user_id: carol.id, strokes: [{ d: "M10 10 L190 190", width: 6 }], view_box: "0 0 200 200", name: `verify-${runId}` })
     .select("id").single();
   check("carol carves a glyph of her own", carveError === null && !!carolGlyph?.id, carveError?.message);
-  const foreign = carolGlyph?.id ?? g1;
-  await refused(bob, "a fourth soul", { p_souls: [{ name: "A", glyph_id: g1 }, { name: "B", glyph_id: g1 }, { name: "C", glyph_id: g1 }, { name: "D", glyph_id: g1 }] }, "too_many_souls");
-  await refused(bob, "a soul without a glyph", { p_souls: [{ name: "A", glyph_id: null }] }, "invalid_soul_glyph");
-  await refused(bob, "another user's glyph on a soul", { p_souls: [{ name: "A", glyph_id: foreign }] }, "glyph_not_usable");
-  await refused(bob, "another user's glyph on the profile", { p_glyph_id: foreign }, "glyph_not_usable");
-  await refused(bob, "a duplicate name", { p_souls: [{ name: "Ana", glyph_id: g1 }, { name: " ana ", glyph_id: g2 }] }, "duplicate_soul");
-  await refused(bob, "a blank name", { p_souls: [{ name: "   ", glyph_id: g1 }] }, "invalid_soul_name");
-  await refused(bob, "an unknown reason", { p_reasons: ["notice-feelings", "get-rich"] }, "invalid_reason");
-  await refused(bob, "an empty reasons array", { p_reasons: [] }, "invalid_reason");
-  await refused(bob, "an unknown pace", { p_pace: "hourly" }, "invalid_pace");
-  await refused(bob, "a non-array souls payload", { p_souls: { name: "A" } }, "invalid_souls");
-  const skipped = await bob.client.rpc("complete_onboarding", {});
-  const pb = await profile(bob);
+  fresh = bob;
+  await refused("a fourth soul", { p_souls: [{ name: "A", glyph_id: g1 }, { name: "B", glyph_id: g1 }, { name: "C", glyph_id: g1 }, { name: "D", glyph_id: g1 }] }, "too_many_souls");
+  await refused("a soul without a glyph", { p_souls: [{ name: "A", glyph_id: null }] }, "invalid_soul_glyph");
+  if (carolGlyph?.id) {
+    await refused("another user's glyph on a soul", { p_souls: [{ name: "A", glyph_id: carolGlyph.id }] }, "glyph_not_usable");
+    await refused("another user's glyph on the profile", { p_glyph_id: carolGlyph.id }, "glyph_not_usable");
+  }
+  await refused("a duplicate name", { p_souls: [{ name: "Ana", glyph_id: g1 }, { name: " ana ", glyph_id: g2 }] }, "duplicate_soul");
+  await refused("a blank name", { p_souls: [{ name: "   ", glyph_id: g1 }] }, "invalid_soul_name");
+  await refused("an unknown reason", { p_reasons: ["notice-feelings", "get-rich"] }, "invalid_reason");
+  await refused("an empty reasons array", { p_reasons: [] }, "invalid_reason");
+  await refused("an unknown pace", { p_pace: "hourly" }, "invalid_pace");
+  await refused("a non-array souls payload", { p_souls: { name: "A" } }, "invalid_souls");
+  const skipped = await fresh!.client.rpc("complete_onboarding", {});
+  const pb = await profile(fresh!);
   check("everything skipped still completes", skipped.error === null && pb.onboarding_completed && pb.onboarding_reasons === null && pb.pace === null, skipped.error?.message);
 
   // 5. anon and the public projection
@@ -150,7 +166,7 @@ try {
   const body = JSON.stringify(pub.data ?? {});
   check("get_public_profile does not project the answers", pub.error === null && !body.includes("onboarding_reasons") && !body.includes("\"pace\""), pub.error?.message ?? body.slice(0, 200));
 } finally {
-  for (const u of [alice, bob, carol]) {
+  for (const u of [alice, bob, carol, ...extras]) {
     if (!u) continue;
     const res = await deleteAccount(u.token).catch(() => undefined);
     if (!res?.ok) console.error(`cleanup: delete-account returned ${res?.status ?? "no response"}`);
