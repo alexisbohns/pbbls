@@ -3,6 +3,7 @@ package app.pbbls.android.features.path.complete
 import app.pbbls.android.R
 import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.KarmaNotificationService
+import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.model.CompleteSnapshot
 import app.pbbls.android.core.model.KarmaReason
 import app.pbbls.android.core.model.PebbleAnswers
@@ -107,11 +108,16 @@ class CompleteFlowViewModelTest {
         runTest {
             val h = Harness(backgroundScope)
             h.write.karma = 5
+            val effects = recordEffects(h.viewModel.effects)
             h.viewModel.start("m-1")
             advanceUntilIdle()
             h.answerEverything(Valence.LOWLIGHT_LARGE)
             h.viewModel.complete()
             advanceUntilIdle()
+
+            // The quiet flag reached the model: no success buzz.
+            assertTrue(CompleteFlowEffect.Haptic(TapHaptic.SUCCESS) !in effects.values)
+            effects.stop()
 
             assertEquals(0, h.achievements.fireCheckCount)
             val flow = h.viewModel.uiState.value.flow
