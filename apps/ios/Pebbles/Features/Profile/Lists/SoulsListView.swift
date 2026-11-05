@@ -12,12 +12,13 @@ struct SoulsListView: View {
     @State private var chooser = SoulChooserModel(mode: .browse, souls: [])
     @State private var isLoading = true
     @State private var loadError: String?
+    @State private var pendingDeletion: SoulWithGlyph?
+    @State private var deleteError: String?
     @State private var promptError: String?
     // The People onboarding (spec §2, D11): read only while the grid is short
     // (D-plan-3); the device's "Not now" ends it.
     @AppStorage(PeopleOnboardingState.storageKey) private var promptsDismissed = false
     @State private var prompts: PeoplePrompts?
-    @State private var promptsFailed = false
     @State private var quickMoment = false
     @State private var editing: EditTarget?
 
@@ -73,6 +74,37 @@ struct SoulsListView: View {
                                     }
                                 })
             }
+            .confirmationDialog(
+                pendingDeletion.map { "Delete \($0.name)?" } ?? "",
+                isPresented: Binding(
+                    get: { pendingDeletion != nil },
+                    set: { if !$0 { pendingDeletion = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: pendingDeletion
+            ) { soul in
+                Button("Delete", role: .destructive) {
+                    TapHaptics.play(.warning)
+                    Task { await delete(soul) }
+                }
+                Button("Cancel", role: .cancel) {
+                    pendingDeletion = nil
+                }
+            } message: { _ in
+                Text("Linked pebbles stay; only the soul and its links are removed.")
+            }
+            .alert(
+                "Couldn't delete",
+                isPresented: Binding(
+                    get: { deleteError != nil },
+                    set: { if !$0 { deleteError = nil } }
+                ),
+                presenting: deleteError
+            ) { _ in
+                Button("OK", role: .cancel) { deleteError = nil }
+            } message: { message in
+                Text(message)
+            }
             .alert(
                 "Couldn't open",
                 isPresented: Binding(
@@ -115,15 +147,17 @@ struct SoulsListView: View {
                     title: nil,
                     onOpen: { nav.people.append(.soul($0.id)) },
                     onCreated: { nav.people.append(.soul($0.id)) },
+                    onDeleteRequest: { pendingDeletion = $0 },
                     header: {
-                        if let prompts {
-                            // Draws nothing unless the state is `.fewSouls`.
-                            onboarding(prompts)
+                        let state = prompts.map { PeopleOnboardingState.make($0, dismissed: promptsDismissed) }
+                        if let state, state != .done {
+                            onboarding(state)
                                 .padding(.horizontal, Spacing.lg)
                                 .padding(.bottom, Spacing.md)
-                        } else if chooser.souls.isEmpty && (promptsFailed || promptsDismissed) {
-                            // The prompts could not be read, or were dismissed before
-                            // this read landed: never a blank tab, never a spinner.
+                        } else if chooser.souls.isEmpty {
+                            // Nothing to draw and nothing to list (the prompts
+                            // failed, were dismissed, or are done): never a
+                            // blank tab, never a spinner.
                             ContentUnavailableView {
                                 Label { Text("No souls yet") } icon: { PbblsIconImage(.people, .hero) }
                             } description: {
@@ -140,9 +174,9 @@ struct SoulsListView: View {
         }
     }
 
-    private func onboarding(_ prompts: PeoplePrompts) -> some View {
+    private func onboarding(_ state: PeopleOnboardingState) -> some View {
         PeopleOnboardingView(
-            state: PeopleOnboardingState.make(prompts, dismissed: promptsDismissed),
+            state: state,
             palette: { id in id.flatMap { palettes.palette(for: $0) } },
             onRecord: { quickMoment = true },
             onWho: { prompt in Task { await openPebble(of: prompt) } },
@@ -153,6 +187,8 @@ struct SoulsListView: View {
     private func load() async {
         isLoading = true
         loadError = nil
+        // A warm tab shows the cache while its own fetch (with counts) lands.
+        if chooser.souls.isEmpty, !refs.souls.isEmpty { chooser.replaceSouls(refs.souls) }
         do {
             let result: [SoulWithGlyph] = try await supabase.client
                 .from("souls")
@@ -179,13 +215,11 @@ struct SoulsListView: View {
     private func loadPrompts() async {
         do {
             prompts = try await PeopleService(client: supabase.client).prompts(limit: 3)
-            promptsFailed = false
         } catch {
             // Cancelled, not failed: `.task` reruns the read on reappear.
             guard !Task.isCancelled else { return }
             logger.error("people_prompts failed: \(error.localizedDescription, privacy: .private)")
-            // Keep the last prompts, if any; the grid or the fallback stands.
-            promptsFailed = true
+            // Keep the last prompts, if any; the list or the empty state stands.
         }
     }
 
@@ -203,6 +237,22 @@ struct SoulsListView: View {
             guard !Task.isCancelled else { return }
             logger.error("moment(id:) for a prompt failed: \(error.localizedDescription, privacy: .private)")
             promptError = String(localized: "people.prompt.openFailed")
+        }
+    }
+
+    private func delete(_ soul: SoulWithGlyph) async {
+        pendingDeletion = nil
+        do {
+            try await supabase.client
+                .from("souls")
+                .delete()
+                .eq("id", value: soul.id)
+                .execute()
+            await load()
+            await refs.refreshSouls()
+        } catch {
+            logger.error("delete soul failed: \(error.localizedDescription, privacy: .private)")
+            deleteError = "Something went wrong. Please try again."
         }
     }
 }
