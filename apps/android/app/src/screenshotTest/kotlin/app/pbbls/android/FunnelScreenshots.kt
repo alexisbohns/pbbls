@@ -5,10 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.AuthMode
+import app.pbbls.android.core.model.PromiseLetter
 import app.pbbls.android.features.auth.AuthContent
 import app.pbbls.android.features.auth.AuthUiState
-import app.pbbls.android.features.onboarding.OnboardingScreen
-import app.pbbls.android.features.onboarding.OnboardingSteps
+import app.pbbls.android.features.onboarding.OnboardingContent
+import app.pbbls.android.features.onboarding.OnboardingUiState
 import app.pbbls.android.features.welcome.WelcomeContent
 import app.pbbls.android.features.welcome.WelcomeUiState
 import com.android.tools.screenshot.PreviewTest
@@ -103,6 +104,22 @@ fun AuthScreenSignup() {
 @Composable
 fun OnboardingScreenLight() {
     PebblesTheme {
-        OnboardingScreen(steps = OnboardingSteps.all, onFinish = {})
+        OnboardingContent(
+            state =
+                OnboardingUiState(
+                    letter =
+                        PromiseLetter(
+                            bodyEn = "There will never be a feed here.\n\nWhat you write stays yours.",
+                            bodyFr = "Il n'y aura jamais de fil ici.\n\nCe que tu écris reste à toi.",
+                            signedByEn = "The Pebbles team",
+                            signedByFr = "L'équipe Pebbles",
+                        ),
+                ),
+            onBack = {},
+            onSkip = {},
+            onNext = {},
+            onConsentToggle = { _, _ -> },
+            onReasonToggle = {},
+        )
     }
 }

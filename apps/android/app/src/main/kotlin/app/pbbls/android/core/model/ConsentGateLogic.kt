@@ -1,8 +1,4 @@
-package app.pbbls.android.features.consent
-
-import app.pbbls.android.core.model.ActiveConsent
-import app.pbbls.android.core.model.ConsentKind
-import app.pbbls.android.core.model.LegalVersions
+package app.pbbls.android.core.model
 
 /**
  * What the consent gate asks for, and whether a ledger already answers it.

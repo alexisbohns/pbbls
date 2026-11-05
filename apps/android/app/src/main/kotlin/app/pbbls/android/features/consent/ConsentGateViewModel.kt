@@ -14,6 +14,7 @@ import app.pbbls.android.core.data.DataError
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.toDataError
+import app.pbbls.android.core.model.ConsentGateLogic
 import app.pbbls.android.core.model.ConsentKind
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
