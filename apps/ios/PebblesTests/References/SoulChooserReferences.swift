@@ -23,7 +23,7 @@ extension References {
 
         @Test(arguments: ReferenceScheme.allCases)
         func pickerTwoChosen(scheme: ReferenceScheme) {
-            let souls = SoulFixtures.eleven
+            let souls = SoulFixtures.sixteen
             let model = SoulChooserModel(mode: .pick(allowsSkip: true), souls: souls,
                                          selection: [souls[0].id, souls[1].id])
             ReferenceImage.assertMatches(Self.host(model, title: "Who was there?"), named: "pickerTwoChosen",
@@ -32,14 +32,14 @@ extension References {
 
         @Test(arguments: ReferenceScheme.allCases)
         func pickerEmpty(scheme: ReferenceScheme) {
-            let model = SoulChooserModel(mode: .pick(allowsSkip: true), souls: SoulFixtures.eleven)
+            let model = SoulChooserModel(mode: .pick(allowsSkip: true), souls: SoulFixtures.sixteen)
             ReferenceImage.assertMatches(Self.host(model, title: "Who was there?"), named: "pickerEmpty",
                                          config: ReferenceConfig(scheme: scheme, locales: Self.locales(scheme)))
         }
 
         @Test(arguments: ReferenceScheme.allCases)
         func pickerNobodyByThatName(scheme: ReferenceScheme) {
-            let souls = SoulFixtures.eleven
+            let souls = SoulFixtures.sixteen
             let model = SoulChooserModel(mode: .pick(allowsSkip: true), souls: souls,
                                          selection: [souls[0].id, souls[1].id])
             model.isSearching = true
@@ -50,7 +50,7 @@ extension References {
 
         @Test(arguments: ReferenceScheme.allCases)
         func browse(scheme: ReferenceScheme) {
-            let model = SoulChooserModel(mode: .browse, souls: SoulFixtures.eleven)
+            let model = SoulChooserModel(mode: .browse, souls: SoulFixtures.sixteen)
             ReferenceImage.assertMatches(Self.host(model, title: nil), named: "browse",
                                          config: ReferenceConfig(scheme: scheme, locales: Self.locales(scheme)))
         }

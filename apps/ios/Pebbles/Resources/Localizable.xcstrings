@@ -13418,6 +13418,23 @@
         }
       }
     },
+    "Who was there?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who was there?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qui était là ?"
+          }
+        }
+      }
+    },
     "You" : {
       "extractionState" : "manual",
       "localizations" : {

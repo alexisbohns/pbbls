@@ -14,7 +14,7 @@ enum SoulFixtures {
                       name: name, glyphId: glyph.id, glyph: glyph, pebblesCount: count)
     }
 
-    static let eleven: [SoulWithGlyph] = [
+    static let sixteen: [SoulWithGlyph] = [
         soul("Maman", 41, 1), soul("Théo", 33, 2), soul("Léa", 30, 3), soul("Papa", 28, 4),
         soul("Inès", 19, 5), soul("Sam", 12, 6), soul("Mamie Jo", 9, 7), soul("Nour", 8, 8),
         soul("Adèle", 2, 9), soul("Alex", 24, 10), soul("Alex", 22, 11), soul("Antoine", 6, 12),

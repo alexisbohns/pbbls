@@ -37,7 +37,7 @@ struct SoulChooser<Header: View>: View {
         Group {
             if scrolls {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0, pinnedViews: []) { list }
+                    LazyVStack(alignment: .leading, spacing: 0) { list }
                         .padding(.bottom, Spacing.xxl)
                 }
                 .scrollDismissesKeyboard(.interactively)
@@ -57,9 +57,13 @@ struct SoulChooser<Header: View>: View {
         }
         .task {
             await refs.refreshSouls()
-            model.replaceSouls(refs.souls)
+            // A failed refetch with an empty cache must not wipe a host-seeded selection.
+            if !refs.souls.isEmpty { model.replaceSouls(refs.souls) }
         }
         .onChange(of: refs.souls) { _, souls in model.replaceSouls(souls) }
+        .onChange(of: model.isSearching) { _, searching in
+            if !searching { addError = nil }
+        }
     }
 
     // MARK: Sections
@@ -112,7 +116,7 @@ struct SoulChooser<Header: View>: View {
     private var usual: some View {
         let people = model.usual
         if !people.isEmpty {
-            sectionTitle("Usual")
+            sectionTitle(Text("Usual"))
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 4), spacing: 4) {
                 ForEach(people) { soul in
                     SoulTile(soul: soul, isSelected: model.isSelected(soul.id), showsSelection: model.mode != .browse) {
@@ -128,7 +132,7 @@ struct SoulChooser<Header: View>: View {
     @ViewBuilder
     private var sections: some View {
         ForEach(model.sections) { section in
-            sectionTitle(LocalizedStringResource(stringLiteral: section.letter))
+            sectionTitle(Text(verbatim: section.letter))
             VStack(spacing: 0) {
                 ForEach(section.souls) { soul in
                     row(soul)
@@ -164,8 +168,8 @@ struct SoulChooser<Header: View>: View {
         return model.isSelected(soul.id) ? .tick : .plus
     }
 
-    private func sectionTitle(_ text: LocalizedStringResource) -> some View {
-        Text(text)
+    private func sectionTitle(_ text: Text) -> some View {
+        text
             .pebblesFont(.cardHeading)
             .foregroundStyle(Color.pebbles.onSurfaceVariant)
             .padding(.horizontal, Spacing.lg)
@@ -186,7 +190,11 @@ struct SoulChooser<Header: View>: View {
     }
 
     private func add(_ name: String) async {
-        guard !isAdding, let userId = supabase.session?.user.id else { return }
+        guard !isAdding else { return }
+        guard let userId = supabase.session?.user.id else {
+            logger.error("inline soul create without a session")
+            return
+        }
         isAdding = true
         addError = nil
         do {
