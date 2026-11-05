@@ -1847,3 +1847,13 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The Arkaik view `V-crisis-resources` composes from Settings and Record Success on the three platforms.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #1457, #1459, #1460, #1461, PRs #1527, #1550, #1551, #1552, `docs/superpowers/plans/2026-11-05-kritik-launch-night.md`.
+
+## 2026-11-05 — The onboarding gate reads the profile, and consent moves into the flow on Android (#1510)
+
+- **Status:** taken
+- **Scope:** cross-surface contract (database), Android
+- **Context:** Android gated its four-slide onboarding on a device flag alone and never wrote `onboarding_completed`; the consent gate overlay stood above everything, so a new OAuth account met the consent before any promise.
+- **Decision:** `complete_onboarding` is the only client write path to `onboarding_completed`, `onboarding_reasons` and `pace`. Android presents the flow when the profile says not completed (and once per device), and the consent gate overlay stands down while the Onboarding entry is on the stack (not on the pending flag): step 2 records the acts through `record_consent`, an act already on record is shown on and locked, and the gate re-checks when the flow ends. `ConsentGateLogic` moved to `core/model` so the flow and the gate share one rule. A soul created in the flow always carries a glyph (`souls.glyph_id` is not null); the client assigns the first system glyph when none was picked. The drawing satellite is a content swap inside the onboarding entry, a `GlyphCarveSlot` the entry provider fills, not a pushed key, because a pushed entry cannot hand its result back.
+- **Why:** D2 (promise before consent) is impossible with the overlay above the flow; the device flag alone re-onboards nobody on a reinstall and cannot restart an abandoned flow (D10).
+- **Consequences:** iOS and web follow the same gate and the same step-2 rule in their own plans. A pre-flow Android account that reinstalls sees the new flow once.
+- **Refs:** #1510, #1521, #1522, `docs/superpowers/specs/2026-11-04-interactive-onboarding-design.md`, `docs/superpowers/plans/2026-11-05-interactive-onboarding-android.md`.
