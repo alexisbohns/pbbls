@@ -1,6 +1,8 @@
 package app.pbbls.android.core.model
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ValenceTest {
@@ -15,6 +17,15 @@ class ValenceTest {
         assertEquals(Valence.HIGHLIGHT_SMALL, Valence.fromOrDefault(1, 1))
         assertEquals(Valence.HIGHLIGHT_MEDIUM, Valence.fromOrDefault(1, 2))
         assertEquals(Valence.HIGHLIGHT_LARGE, Valence.fromOrDefault(1, 3))
+    }
+
+    @Test
+    fun `only the full-intensity lowlight is a quiet success`() {
+        assertTrue(Valence.LOWLIGHT_LARGE.quietSuccess)
+        assertFalse(Valence.LOWLIGHT_MEDIUM.quietSuccess)
+        assertFalse(Valence.LOWLIGHT_SMALL.quietSuccess)
+        assertFalse(Valence.HIGHLIGHT_LARGE.quietSuccess)
+        assertFalse(Valence.NEUTRAL_LARGE.quietSuccess)
     }
 
     @Test
