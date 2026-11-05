@@ -21,8 +21,13 @@ struct SoulPillTray: View {
                 }
                 .contentMargins(.trailing, 28, for: .scrollContent)
                 .mask(
-                    LinearGradient(stops: [.init(color: .black, location: 0.86), .init(color: .clear, location: 1)],
-                                   startPoint: .leading, endPoint: .trailing)
+                    LinearGradient(
+                        stops: [
+                            .init(color: Color.pebbles.onSurface, location: 0.86),
+                            .init(color: .clear, location: 1)
+                        ],
+                        startPoint: .leading, endPoint: .trailing
+                    )
                 )
             } else {
                 pills
