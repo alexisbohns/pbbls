@@ -9,34 +9,28 @@ import SwiftUI
 /// process — the app asks for no photo-library authorization and sees nothing
 /// but the one image that gets tapped.
 ///
-/// Does **not** auto-advance on pick (D3): the upload runs in the background
-/// and its state belongs on screen while the user is still looking at the
-/// grid. Picking swaps `Skip` for `Done` and waits. Changing your mind is a
-/// second tap in the grid — the coordinator swaps the snap and takes the
-/// replaced one's bytes with it.
+/// Auto-advances on pick (D3): `CaptureFlowView` moves to the moment page a
+/// beat after the thumbnail lands, and the page shows the upload's state. The
+/// controls above the grid ("Just write", the camera) are the scaffold's
+/// fixed slot, owned by the flow. Changing your mind is "Change photo" on the
+/// page, which comes back here — a second pick swaps the snap and the
+/// coordinator takes the replaced one's bytes with it.
 struct RecordPhotoStep: View {
     let snap: FormSnap?
     /// The picker's selection. Owned by `CaptureFlowView` so it survives
     /// stepping away and back, and so loading the bytes stays with the
     /// orchestration rather than the view.
     @Binding var selection: PhotosPickerItem?
-    let onRetry: () -> Void
     let onRemove: () -> Void
 
     var body: some View {
-        VStack(spacing: Spacing.sm) {
-            if case .pending(let attached) = snap {
-                statusCard(thumb: attached.localThumb, state: attached.state)
-            }
-
-            if case .existing = snap {
-                // Only reachable when resuming a draft that already carries a
-                // snap; the bytes live in Storage, so the step just confirms
-                // one is attached rather than re-rendering it.
-                attachedWithoutThumb
-            } else {
-                picker
-            }
+        if case .existing = snap {
+            // Only reachable when resuming a draft that already carries a
+            // snap; the bytes live in Storage, so the step just confirms
+            // one is attached rather than re-rendering it.
+            attachedWithoutThumb
+        } else {
+            picker
         }
     }
 
@@ -50,84 +44,16 @@ struct RecordPhotoStep: View {
             label: { Text("Add a photo") }
         )
         .photosPickerStyle(.inline)
-        // Everything the picker wraps around the grid belongs to the modal it
-        // is no longer: no search field, no album switcher, no selection bar.
-        .photosPickerDisabledCapabilities([.search, .collectionNavigation, .selectionActions, .stagingArea])
-        .photosPickerAccessoryVisibility(.hidden, edges: .all)
+        // The album switcher stays (Recents ▾ / Albums); search, the
+        // selection bar and the staging area belong to the modal it is not.
+        .photosPickerDisabledCapabilities([.search, .selectionActions, .stagingArea])
+        .photosPickerAccessoryVisibility(.visible, edges: .top)
+        .photosPickerAccessoryVisibility(.hidden, edges: .bottom)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipShape(RoundedRectangle(cornerRadius: Spacing.xxl, style: .continuous))
     }
 
     // MARK: - Attached snap
-
-    private func statusCard(thumb: Data, state: AttachedSnap.UploadState) -> some View {
-        HStack(spacing: Spacing.sm) {
-            thumbnail(thumb)
-            stateLabel(state)
-            Spacer(minLength: Spacing.sm)
-            trailingControl(state)
-        }
-        .padding(Spacing.sm)
-        .background(
-            RoundedRectangle(cornerRadius: Spacing.xl, style: .continuous)
-                .fill(Color.pebbles.primaryContainer)
-        )
-    }
-
-    @ViewBuilder
-    private func thumbnail(_ thumb: Data) -> some View {
-        if let image = UIImage(data: thumb) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 52, height: 52)
-                .clipShape(RoundedRectangle(cornerRadius: Spacing.md, style: .continuous))
-                .accessibilityHidden(true)
-        }
-    }
-
-    @ViewBuilder
-    private func stateLabel(_ state: AttachedSnap.UploadState) -> some View {
-        switch state {
-        case .uploading:
-            Text("Uploading…")
-                .pebblesFont(.subhead)
-                .foregroundStyle(Color.pebbles.onPrimaryContainer)
-        case .uploaded:
-            Label { Text("Ready") } icon: { PbblsIconImage(.checkCircle, .inline, relativeTo: .subheadline) }
-                .pebblesFont(.subhead)
-                .foregroundStyle(Color.pebbles.onPrimaryContainer)
-        case .failed:
-            Text("Upload failed")
-                .pebblesFont(.subhead)
-                .foregroundStyle(Color.pebbles.error)
-        }
-    }
-
-    @ViewBuilder
-    private func trailingControl(_ state: AttachedSnap.UploadState) -> some View {
-        switch state {
-        case .uploading:
-            ProgressView()
-        case .uploaded:
-            removeButton
-        case .failed:
-            HStack(spacing: Spacing.md) {
-                Button("Retry", action: onRetry)
-                removeButton
-            }
-            .pebblesFont(.subhead)
-        }
-    }
-
-    private var removeButton: some View {
-        Button(action: onRemove) {
-            PbblsIconImage(.remove, .row)
-                .foregroundStyle(Color.pebbles.error)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Remove photo")
-    }
 
     private var attachedWithoutThumb: some View {
         VStack(spacing: Spacing.sm) {

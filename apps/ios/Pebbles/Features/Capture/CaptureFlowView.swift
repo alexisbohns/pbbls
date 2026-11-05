@@ -23,6 +23,8 @@ struct CaptureFlowView: View {
     @State private var model = CaptureFlowModel()
     @State private var snaps: SnapUploadCoordinator?
     @State private var pickedPhoto: PhotosPickerItem?
+    /// The in-flow camera (D3), presented over the photo step.
+    @State private var showsCamera = false
     @State private var isCloseConfirmPresented = false
     /// Drives the step transition direction so back slides back.
     @State private var isMovingBack = false
@@ -123,9 +125,33 @@ struct CaptureFlowView: View {
         .onChange(of: model.draft) { _, _ in scheduleAutosave() }
         .onChange(of: model.hasEditedDate) { _, _ in scheduleAutosave() }
         .onChange(of: snaps?.formSnap) { _, _ in scheduleAutosave() }
+        // D3: the thumbnail lands, a beat, the moment page. Photo step only: a
+        // restore seeds a pending snap too but moves to the page first. Back
+        // via "Change photo", a new pick swaps the snap and advances again.
+        .onChange(of: snaps?.formSnap) { _, snap in
+            guard model.step == .photo, case .pending = snap else { return }
+            Task {
+                try? await Task.sleep(for: .milliseconds(400))
+                if model.step == .photo { model.advance() }
+            }
+        }
         .onChange(of: scenePhase) { _, phase in
             // Last reliable moment before a process kill.
             if phase != .active { flushAutosave() }
+        }
+        .fullScreenCover(isPresented: $showsCamera) {
+            CameraPicker(
+                onCapture: { image, shutter in
+                    showsCamera = false
+                    guard let userId = currentUserId, let snaps,
+                          let data = image.jpegData(compressionQuality: 0.9) else { return }
+                    // The shutter is when, until the user says otherwise.
+                    model.applyCaptureDate(shutter)
+                    Task { await snaps.handleCaptured(data, userId: userId) }
+                },
+                onCancel: { showsCamera = false }
+            )
+            .ignoresSafeArea()
         }
         .confirmationDialog(
             "Keep this moment?",
@@ -146,8 +172,10 @@ struct CaptureFlowView: View {
             title: model.step.title,
             subtitle: model.step.subtitle,
             action: action(for: model.step),
-            // The library grid runs to the bottom, `Skip`/`Done` over it.
+            // The library grid runs to the bottom under the two controls;
+            // nothing floats over it.
             contentFillsHeight: model.step == .photo,
+            fixedSlot: model.step == .photo ? AnyView(photoControls) : nil,
             secondaryAction: model.step == .moment && !chainsComplete
                 ? RecordStepSecondaryAction(
                     label: "Just save",
@@ -174,11 +202,6 @@ struct CaptureFlowView: View {
             RecordPhotoStep(
                 snap: snaps?.formSnap,
                 selection: $pickedPhoto,
-                onRetry: {
-                    if let userId = currentUserId, let snaps {
-                        Task { await snaps.retryCurrent(userId: userId) }
-                    }
-                },
                 onRemove: {
                     pickedPhoto = nil
                     if let userId = currentUserId, let snaps {
@@ -211,14 +234,12 @@ struct CaptureFlowView: View {
         }
     }
 
-    /// The one action a step offers. "Just write" is the floating pill until
-    /// the photo step gets its own fixed-slot controls (D3).
-    private func action(for step: CaptureStep) -> RecordStepAction {
+    /// The one action a step offers. The photo step has none: its controls
+    /// are the fixed slot above the grid.
+    private func action(for step: CaptureStep) -> RecordStepAction? {
         switch step {
         case .photo:
-            return .primary("Just write", enabled: true, loading: false) {
-                model.advance()
-            }
+            return nil
         case .moment:
             return .primary(
                 "Save & make it a pebble",
@@ -302,6 +323,29 @@ struct CaptureFlowView: View {
     private func failSave(_ message: String) {
         if model.step != .moment { model.go(to: .moment) }
         model.fail(message)
+    }
+}
+
+// MARK: - Photo step (D3)
+
+extension CaptureFlowView {
+    /// The photo step's two controls in the scaffold's fixed slot (D3): the way
+    /// past the grid without a picture, and the camera — shown only where there
+    /// is one (not on a simulator), since the system picker needs it.
+    private var photoControls: some View {
+        HStack(spacing: Spacing.sm) {
+            Button("Just write") { model.advance() }
+                .buttonStyle(PebblesTonalButtonStyle())
+            if CameraPicker.isAvailable {
+                Button { showsCamera = true } label: {
+                    PbblsIconImage(.camera, size: 22, style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
+                        .frame(width: 48, height: 48)
+                        .background(Circle().fill(Color.pebbles.primaryContainer))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Take a photo")
+            }
+        }
     }
 }
 

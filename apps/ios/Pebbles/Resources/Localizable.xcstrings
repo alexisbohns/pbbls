@@ -12775,6 +12775,23 @@
         }
       }
     },
+    "Take a photo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take a photo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prendre une photo"
+          }
+        }
+      }
+    },
     "Tap + to carve your first glyph." : {
       "extractionState" : "manual",
       "localizations" : {
