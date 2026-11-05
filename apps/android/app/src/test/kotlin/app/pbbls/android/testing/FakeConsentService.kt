@@ -26,6 +26,9 @@ class FakeConsentService(
     /** Thrown by every [active] call until cleared. */
     var activeFailure: Exception? = null
 
+    /** With [activeFailure]: thrown once, then cleared, so one caller fails and the next reads the ledger. */
+    var activeFailsOnce = false
+
     /** Thrown by every [record] call until cleared. */
     var recordFailure: Exception? = null
 
@@ -37,7 +40,10 @@ class FakeConsentService(
 
     override suspend fun active(): List<ActiveConsent> {
         activeCalls += 1
-        activeFailure?.let { throw it }
+        activeFailure?.let {
+            if (activeFailsOnce) activeFailure = null
+            throw it
+        }
         return rows.toList()
     }
 
