@@ -27,6 +27,7 @@ struct CrisisResourcesSheet: View {
         NavigationStack {
             List {
                 Section {
+                    // swiftlint:disable:next line_length
                     Text("If you are in danger or thinking about hurting yourself, call now. These lines are free and confidential.")
                         .pebblesListRow(position: .only)
                 }
