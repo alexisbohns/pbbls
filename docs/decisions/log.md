@@ -1885,3 +1885,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Every internal build of a release shows the same versionName; tell them apart by versionCode. The `alpha` mapping assumes the Console's default closed track. The service account needs the production release permission before the first production run.
 - **Supersedes / Superseded-by:** Supersedes the **Consequences** of **2026-07-14 — Android internal-testing releases bake the wobble experiment in** in so far as they ask for the wobble to be turned off before a public track. Its decision (the `WOBBLE_ENABLED` BuildConfig chain) stands.
 - **Refs:** #1451, #1452, #1453, #727, #729, `.github/workflows/android-release.yml`, `apps/android/gradle.properties`, `apps/android/app/build.gradle.kts`, `docs/android-play-deploy.md`.
+
+## 2026-11-06 — Rive is gone from every surface
+
+- **Status:** taken
+- **Scope:** ios, web, docs
+- **Context:** The last Rive drawing had already left the apps: iOS's Welcome logo is `HandcraftedLogoView` and its cairn is native, Android dropped Rive earlier, and web imported nothing from its dependency. iOS still linked `RiveRuntime`, a binary package fetched at resolve time, so a GitHub release timeout could fail an iOS CI run that the app's code had nothing to do with (#1561).
+- **Decision:** Remove `RiveRuntime`, `@rive-app/react-canvas`, every `.riv` asset, `packages/rive`, and the licence and credits entries. `Color+Rive.swift` has no replacement: its contrast-aware resolution only existed for Rive data binding.
+- **Why:** An unused binary dependency adds a network failure to every clean iOS build and an entry to the licences and privacy inventory, for nothing drawn on screen.
+- **Consequences:** A future animation on any surface is native (SwiftUI, Compose, or CSS and Motion on web). Bringing Rive back is a new decision, and its source assets are only in git history. Earlier specs and plans still mention Rive as a record of their time.
+- **Supersedes / Superseded-by:** Supersedes the "iOS and web still use Rive" consequence of the Android Rive removal entry and the `rive-android` clause of the native Android entry.
+- **Refs:** #1561.

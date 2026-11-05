@@ -14,8 +14,8 @@ version: 2
 #
 # apps/ios is absent: its packages are declared in project.yml and resolved
 # into the generated Xcode project, and Dependabot's swift support only reads
-# a Package.swift-based SPM package. Those three (supabase-swift, SVGView,
-# rive-ios) stay a manual bump at milestone boundaries.
+# a Package.swift-based SPM package. Those two (supabase-swift, SVGView)
+# stay a manual bump at milestone boundaries.
 updates:
   # One root lockfile covers every npm workspace (apps/*, packages/*).
   - package-ecosystem: npm
