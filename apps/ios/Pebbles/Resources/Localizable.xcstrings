@@ -859,23 +859,6 @@
         }
       }
     },
-    "A photo is already attached." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A photo is already attached."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une photo est déjà jointe."
-          }
-        }
-      }
-    },
     "About" : {
       "extractionState" : "manual",
       "localizations" : {
