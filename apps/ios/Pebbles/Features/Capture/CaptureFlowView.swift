@@ -33,8 +33,13 @@ struct CaptureFlowView: View {
     @State private var savingThenComplete = false
     /// The debounced device-local autosave of the page (D2).
     @State private var autosaveTask: Task<Void, Never>?
-    /// Gates the autosave so the restore itself is never written back.
+    /// One-time guard: the restore is attempted once per presentation.
     @State private var hasRestored = false
+    /// The autosave only runs once the restore has been attempted, and never
+    /// again after a discard or a successful save: both clear the file, and a
+    /// late `onChange` (the coordinator nils its snap before its own await)
+    /// must not write the discarded page back.
+    @State private var autosaveEnabled = false
 
     private struct CompleteTarget: Equatable {
         let momentId: UUID
@@ -76,6 +81,9 @@ struct CaptureFlowView: View {
             if snaps == nil {
                 snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
             }
+            // After the coordinator exists, so a restored photo has somewhere
+            // to land: one place, one order.
+            restoreIfNeeded()
         }
     }
 
@@ -112,7 +120,6 @@ struct CaptureFlowView: View {
         // Seed the when step as soon as the photo's date is read, before its
         // upload finishes; the model keeps a date the user set.
         .onChange(of: snaps?.pickedCaptureDate) { _, date in model.applyCaptureDate(date) }
-        .task { restoreIfNeeded() }
         .onChange(of: model.draft) { _, _ in scheduleAutosave() }
         .onChange(of: model.hasEditedDate) { _, _ in scheduleAutosave() }
         .onChange(of: snaps?.formSnap) { _, _ in scheduleAutosave() }
@@ -195,12 +202,8 @@ struct CaptureFlowView: View {
                 },
                 onRemove: {
                     pickedPhoto = nil
-                    guard let snaps else { return }
-                    // A restored draft carries an `.existing` snap; only a
-                    // pending one has files of its own to delete.
-                    if case .existing = snaps.formSnap {
-                        snaps.detachExisting()
-                    } else if let userId = currentUserId {
+                    // A restored photo is pending too, so this deletes its files.
+                    if let userId = currentUserId, let snaps {
                         Task { await snaps.removePending(userId: userId) }
                     }
                 }
@@ -240,8 +243,11 @@ struct CaptureFlowView: View {
         }
     }
 
-    /// The only path that deletes the uploaded photo's files (A2).
+    /// The only path that deletes the uploaded photo's files (A2), a restored
+    /// one included: it is re-seeded as a pending upload, so the coordinator
+    /// deletes it by id like a fresh pick.
     private func discard() async {
+        autosaveEnabled = false
         autosaveTask?.cancel()
         if let userId = currentUserId, let snaps {
             await snaps.cancelAndCleanup(userId: userId)
@@ -275,6 +281,7 @@ struct CaptureFlowView: View {
             snaps?.markCommitted()
             autosaveTask?.cancel()
             drafts.clear(ownerId: userId)
+            autosaveEnabled = false
             model.succeed()
             onMomentChanged(momentId)
             if thenComplete {
@@ -316,7 +323,7 @@ extension CaptureFlowView {
     }
 
     private func scheduleAutosave() {
-        guard hasRestored else { return }
+        guard autosaveEnabled else { return }
         autosaveTask?.cancel()
         autosaveTask = Task {
             try? await Task.sleep(for: .milliseconds(800))
@@ -327,18 +334,23 @@ extension CaptureFlowView {
 
     private func flushAutosave() {
         autosaveTask?.cancel()
-        guard let userId = currentUserId, completing == nil else { return }
+        guard autosaveEnabled, let userId = currentUserId, completing == nil else { return }
         drafts.save(.init(draft: model.draft, hasEditedDate: model.hasEditedDate, snap: savedSnap), ownerId: userId)
     }
 
     /// A page the user was on when the app died comes back as it was (D2).
+    /// Its photo comes back as a pending, already-uploaded snap (no thumbnail
+    /// bytes), so Discard, Remove and a new pick delete its Storage files by
+    /// id exactly as for a fresh upload; `savedSnap` reads it back through
+    /// `storagePrefix`.
     private func restoreIfNeeded() {
         guard !hasRestored else { return }
         hasRestored = true
+        defer { autosaveEnabled = true }
         guard let userId = currentUserId, let saved = drafts.load(ownerId: userId) else { return }
         model.restore(saved.draft, hasEditedDate: saved.hasEditedDate)
         if let snap = saved.snap {
-            snaps?.seedExisting(.existing(id: snap.id, storagePath: snap.storagePath))
+            snaps?.seedExisting(.pending(AttachedSnap(id: snap.id, localThumb: Data(), state: .uploaded)))
         }
     }
 }

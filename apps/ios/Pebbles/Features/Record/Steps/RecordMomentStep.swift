@@ -148,18 +148,9 @@ struct RecordMomentStep: View {
                 .accessibilityLabel("Remove photo")
             }
         case .existing:
-            // A restored draft's snap: the bytes live in Storage, so the page
-            // confirms one is attached rather than re-rendering it.
-            HStack(spacing: Spacing.md) {
-                PbblsIconImage(.cameraFocus, size: 32, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
-                Text("A photo is attached.")
-                    .pebblesFont(.subhead)
-                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                Spacer(minLength: 0)
-                Button("Remove", action: onRemove)
-                    .pebblesFont(.subhead)
-                    .foregroundStyle(Color.pebbles.error)
-            }
+            // Unreachable from Capture: a restored photo is re-seeded as a
+            // pending upload (see `CaptureFlowView.restoreIfNeeded`).
+            EmptyView()
         case .none:
             Button(action: onChangePhoto) {
                 Label { Text("Add a photo") } icon: { PbblsIconImage(.camera, size: 20, relativeTo: .subheadline) }
@@ -170,7 +161,8 @@ struct RecordMomentStep: View {
         }
     }
 
-    /// The upload ring is a static 270° arc over the thumbnail.
+    /// The upload ring is a static 270° arc over the thumbnail. A restored
+    /// snap has no thumbnail bytes: the slot stays an empty rounded square.
     private func thumbnail(_ attached: AttachedSnap) -> some View {
         ZStack {
             if let image = UIImage(data: attached.localThumb) {

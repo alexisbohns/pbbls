@@ -68,8 +68,8 @@ struct CaptureDraftSnapshot: Codable, Equatable {
         var snap: Snap?
 
         var isEmpty: Bool {
-            draft.name.trimmingCharacters(in: .whitespaces).isEmpty
-                && draft.description.trimmingCharacters(in: .whitespaces).isEmpty
+            draft.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                && draft.description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                 && snap == nil
         }
     }
