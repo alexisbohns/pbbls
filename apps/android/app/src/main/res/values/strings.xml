@@ -113,13 +113,13 @@
     <string name="onboarding_pace_footer">No streaks, no guilt.</string>
     <string name="onboarding_finish">Start</string>
     <string name="onboarding_complete_error">Couldn\'t finish. Check your connection and try again.</string>
-    <string name="onboarding_handoff_prompt_notice_feelings" tools:ignore="UnusedResources">What did you feel today?</string>
-    <string name="onboarding_handoff_prompt_keep_people" tools:ignore="UnusedResources">Who were you with today?</string>
-    <string name="onboarding_handoff_prompt_hard_season" tools:ignore="UnusedResources">What was hard today?</string>
-    <string name="onboarding_handoff_prompt_good_days" tools:ignore="UnusedResources">What was good today?</string>
-    <string name="onboarding_handoff_prompt_own_patterns" tools:ignore="UnusedResources">What happened today?</string>
-    <string name="onboarding_handoff_prompt_keep_record" tools:ignore="UnusedResources">What do you want to remember from today?</string>
-    <string name="onboarding_handoff_prompt_default" tools:ignore="UnusedResources">What happened today?</string>
+    <string name="onboarding_handoff_prompt_notice_feelings">What did you feel today?</string>
+    <string name="onboarding_handoff_prompt_keep_people">Who were you with today?</string>
+    <string name="onboarding_handoff_prompt_hard_season">What was hard today?</string>
+    <string name="onboarding_handoff_prompt_good_days">What was good today?</string>
+    <string name="onboarding_handoff_prompt_own_patterns">What happened today?</string>
+    <string name="onboarding_handoff_prompt_keep_record">What do you want to remember from today?</string>
+    <string name="onboarding_handoff_prompt_default">What happened today?</string>
     <!-- ==== Path timeline (sub-project D) ==== -->
     <!-- iOS never localized the load-error copy (plain String literal) — Android does. -->
     <string name="path_load_error">Couldn\'t load your pebbles.</string>

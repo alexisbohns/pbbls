@@ -48,6 +48,31 @@ class QuickMomentTest {
         }
 
     @Test
+    fun `a prefilled open attaches the soul and shows the prompt`() =
+        runTest {
+            val quick = quick()
+            quick.open(QuickMomentPrefill(soulId = "soul-1", promptRes = R.string.onboarding_handoff_prompt_good_days))
+            assertEquals(listOf("soul-1"), quick.sheet.value?.soulIds)
+            assertEquals(R.string.onboarding_handoff_prompt_good_days, quick.sheet.value?.promptRes)
+            quick.setName("Coffee with Noé")
+            quick.save(QuickMomentExit.CLOSE)
+            advanceUntilIdle()
+            assertEquals(listOf("soul-1"), writes.saved.single().soulIds)
+        }
+
+    @Test
+    fun `a plain open attaches nobody and leaves soul_ids out of the save`() =
+        runTest {
+            val quick = quick().apply { open() }
+            assertTrue(requireNotNull(quick.sheet.value).soulIds.isEmpty())
+            assertNull(requireNotNull(quick.sheet.value).promptRes)
+            quick.setName("Walk")
+            quick.save(QuickMomentExit.CLOSE)
+            advanceUntilIdle()
+            assertNull(writes.saved.single().soulIds)
+        }
+
+    @Test
     fun `a blank or whitespace name saves nothing`() =
         runTest {
             val quick = quick().apply { open() }

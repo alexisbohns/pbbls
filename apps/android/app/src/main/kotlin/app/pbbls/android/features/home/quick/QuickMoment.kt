@@ -29,15 +29,25 @@ enum class QuickMomentExit {
     CLOSE,
 }
 
+/** What the onboarding hands the composer (#1510 D9): a person to attach and the prompt the reasons chose. */
+data class QuickMomentPrefill(
+    val soulId: String? = null,
+    @StringRes val promptRes: Int? = null,
+)
+
 /**
  * The open quick moment sheet's form (#1383 D7; iOS `QuickMomentDraft`). [name] is what the field
  * shows, clamped to Capture's limit; what is saved is it trimmed. [happenedAt] starts at now.
+ * [soulIds] and [promptRes] come from a [QuickMomentPrefill] (the onboarding hand-off) and are
+ * otherwise empty and null: the sheet has no souls picker of its own.
  */
 data class QuickMomentUiState(
     val name: String = "",
     val happenedAt: OffsetDateTime,
     val isSaving: Boolean = false,
     @StringRes val errorRes: Int? = null,
+    val soulIds: List<String> = emptyList(),
+    @StringRes val promptRes: Int? = null,
 ) {
     /** A savable name: trimmed, not blank (iOS `canSave`). */
     val trimmedName: String get() = name.trim()
@@ -68,9 +78,16 @@ class QuickMoment(
     /** The open sheet's form, or null while the sheet is closed. */
     val sheet: StateFlow<QuickMomentUiState?> = _sheet.asStateFlow()
 
-    /** A fresh form at now, each time the sheet opens. A sheet already open keeps its form. */
-    fun open() {
-        if (_sheet.value == null) _sheet.value = QuickMomentUiState(happenedAt = now())
+    /** A fresh form at now, each time the sheet opens, carrying [prefill] if any. A sheet already open keeps its form. */
+    fun open(prefill: QuickMomentPrefill? = null) {
+        if (_sheet.value == null) {
+            _sheet.value =
+                QuickMomentUiState(
+                    happenedAt = now(),
+                    soulIds = listOfNotNull(prefill?.soulId),
+                    promptRes = prefill?.promptRes,
+                )
+        }
     }
 
     /** The sheet went away (swipe, scrim, back). A save in flight still lands and reports. */
@@ -88,7 +105,12 @@ class QuickMoment(
         if (!form.canSave) return
         _sheet.value = form.copy(isSaving = true, errorRes = null)
         // Whole seconds: the cross-surface timestamp rule (iOS floors the same way).
-        val payload = MomentSavePayload(name = form.trimmedName, happenedAt = form.happenedAt.truncatedTo(ChronoUnit.SECONDS))
+        val payload =
+            MomentSavePayload(
+                name = form.trimmedName,
+                happenedAt = form.happenedAt.truncatedTo(ChronoUnit.SECONDS),
+                soulIds = form.soulIds.takeIf { it.isNotEmpty() },
+            )
         scope.launch {
             withContext(NonCancellable) {
                 runCatchingCancellable { writes.saveMoment(payload) }.fold(

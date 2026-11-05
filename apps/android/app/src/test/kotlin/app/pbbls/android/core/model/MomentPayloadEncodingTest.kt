@@ -42,6 +42,18 @@ class MomentPayloadEncodingTest {
     }
 
     @Test
+    fun `the quick composer's hand-off sends soul_ids, and no souls leaves the key out`() {
+        assertEquals(
+            Json.parseToJsonElement("""{"name":"Walk","happened_at":"2026-10-12T06:40:00Z","soul_ids":["s-1"]}"""),
+            encoded(MomentSavePayload(name = "Walk", happenedAt = at, soulIds = listOf("s-1"))),
+        )
+        assertEquals(
+            Json.parseToJsonElement("""{"name":"Walk","happened_at":"2026-10-12T06:40:00Z"}"""),
+            encoded(MomentSavePayload(name = "Walk", happenedAt = at, soulIds = null)),
+        )
+    }
+
+    @Test
     fun `an edit sends every moment key, empty strings to clear, and the whole snap set`() {
         val expected =
             """{"id":"m-1","name":"","description":"","happened_at":"2026-10-12T06:40:00Z","snaps":[]}"""
