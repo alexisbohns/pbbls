@@ -22,6 +22,9 @@ struct CompleteFlowView: View {
     @State private var model = CompleteFlowModel()
     @State private var autosave: CompleteAutosave?
     @State private var hasRestored = false
+    /// No completed pebble on the account yet: the valence step opens its
+    /// help sheet (D8). Read once in `.task`; a failed read keeps it closed.
+    @State private var isFirstPebble = false
     /// Drives the step transition direction so back slides back.
     @State private var isMovingBack = false
 
@@ -61,6 +64,9 @@ struct CompleteFlowView: View {
                     ownerId: { [supabase] in supabase.session?.user.id }
                 )
             }
+            if let moments = try? await MomentsService(client: supabase.client).pathMoments() {
+                isFirstPebble = !moments.contains(where: \.isCompleted)
+            }
             restoreIfReady()
         }
         // `.task` may run before the reference fetch settles (#647).
@@ -97,7 +103,7 @@ struct CompleteFlowView: View {
                     // its bar above the keyboard; a scaffold ScrollView would unpin it.
                     contentFillsHeight: model.step == .souls
                 ) {
-                    CompleteStepContent(step: model.step, model: model)
+                    CompleteStepContent(step: model.step, model: model, isFirstPebble: isFirstPebble)
                 }
             }
         }
