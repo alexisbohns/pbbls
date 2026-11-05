@@ -92,7 +92,7 @@
     <string name="onboarding_you_title" tools:ignore="UnusedResources">This is you</string>
     <string name="onboarding_you_name_hint" tools:ignore="UnusedResources">Your name</string>
     <string name="onboarding_you_glyph_body" tools:ignore="UnusedResources">Pick a glyph, or draw your own.</string>
-    <string name="onboarding_you_draw" tools:ignore="UnusedResources">Draw my own</string>
+    <string name="onboarding_you_draw">Draw my own</string>
     <string name="onboarding_people_title" tools:ignore="UnusedResources">Three places</string>
     <string name="onboarding_people_body" tools:ignore="UnusedResources">Who would you call first with good news?</string>
     <string name="onboarding_people_add" tools:ignore="UnusedResources">Add one</string>
@@ -101,7 +101,7 @@
     <string name="onboarding_people_remove" tools:ignore="UnusedResources">Remove %1$s</string>
     <string name="onboarding_people_glyph_sheet_title" tools:ignore="UnusedResources">A glyph for %1$s</string>
     <string name="onboarding_people_glyph_use" tools:ignore="UnusedResources">Use for %1$s</string>
-    <string name="onboarding_people_glyph_draw" tools:ignore="UnusedResources">Draw one</string>
+    <string name="onboarding_people_glyph_draw">Draw one</string>
     <string name="onboarding_pace_title" tools:ignore="UnusedResources">What pace suits you?</string>
     <string name="onboarding_pace_body" tools:ignore="UnusedResources">We\'ll read this when reminders arrive.</string>
     <string name="onboarding_pace_daily">Every day</string>
