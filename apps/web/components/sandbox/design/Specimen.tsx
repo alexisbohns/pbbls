@@ -1,7 +1,10 @@
+"use client"
+
 import type { ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import { getSpecimen, type SpecimenId } from "@/lib/design/specimens"
 import { cn } from "@/lib/utils"
+import { useSpecimenScope } from "./SpecimenScope"
 
 type SpecimenProps = {
   id: SpecimenId
@@ -12,8 +15,10 @@ type SpecimenProps = {
 }
 
 /** One registry entry on the design page: name, source, M3 status, then the rendered states. */
-export function Specimen({ id, note, className, children }: SpecimenProps) {
+export function Specimen({ id, note = getSpecimen(id).note, className, children }: SpecimenProps) {
+  const scope = useSpecimenScope()
   const entry = getSpecimen(id)
+  if (scope && !scope.has(id)) return null
   return (
     <article id={`specimen-${id}`} aria-labelledby={`specimen-${id}-title`} className="flex flex-col gap-3">
       <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1">

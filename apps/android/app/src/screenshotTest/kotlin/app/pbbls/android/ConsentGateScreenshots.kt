@@ -4,9 +4,9 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.ConsentGateLogic
 import app.pbbls.android.core.model.ConsentKind
 import app.pbbls.android.features.consent.ConsentGateContent
-import app.pbbls.android.features.consent.ConsentGateLogic
 import app.pbbls.android.features.consent.ConsentGateUiState
 import com.android.tools.screenshot.PreviewTest
 

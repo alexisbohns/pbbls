@@ -14,6 +14,7 @@ import app.pbbls.android.core.data.DataError
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.toDataError
+import app.pbbls.android.core.model.ConsentGateLogic
 import app.pbbls.android.core.model.ConsentKind
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -115,6 +116,16 @@ class ConsentGateViewModel
 
         fun retry() {
             userId?.let { check(it) }
+        }
+
+        /**
+         * The onboarding's step 2 recorded acts behind this gate's back (#1510 D2): forget the verdict
+         * and run [start] again, so a satisfied cache (marked by the flow) or a fresh ledger read decides.
+         */
+        fun restart(userId: String?) {
+            this.userId = null
+            _uiState.value = ConsentGateUiState.Idle
+            start(userId)
         }
 
         fun onToggle(

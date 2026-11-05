@@ -18,15 +18,21 @@ import { defineConfig } from "vitest/config"
 // 20 (the version every workflow in .github/workflows pins). The failure is not
 // a version warning — the worker dies with `webidl.util.markAsUncloneable is
 // not a function` from jsdom's bundled undici, which reads as a Vitest bug.
+//
+// `promise-letter-form.test.ts` renders a real form. Admin pins its own React while
+// Base UI hoists to the root's, and two copies break hooks, so Base UI is inlined
+// and React deduped to this workspace's copy.
 export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL(".", import.meta.url)),
     },
+    dedupe: ["react", "react-dom"],
   },
   test: {
     pool: "threads",
     environment: "node",
     include: ["lib/**/*.test.ts"],
+    server: { deps: { inline: [/@base-ui\//] } },
   },
 })

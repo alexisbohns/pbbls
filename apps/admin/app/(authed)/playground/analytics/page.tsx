@@ -1,8 +1,10 @@
 import { ActiveUsersChart } from "@/components/analytics/ActiveUsersChart"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BounceDistribution } from "@/components/analytics/BounceDistribution"
 import { DomainShare } from "@/components/analytics/DomainShare"
 import { EmotionShare } from "@/components/analytics/EmotionShare"
 import { KpiCard } from "@/components/analytics/KpiCard"
+import { OnboardingAnswers } from "@/components/analytics/OnboardingAnswers"
 import { PebbleEnrichment } from "@/components/analytics/PebbleEnrichment"
 import { PebbleVolumeChart } from "@/components/analytics/PebbleVolumeChart"
 import { QualitySignalsTable } from "@/components/analytics/QualitySignalsTable"
@@ -15,6 +17,11 @@ import {
   sparseFixture,
 } from "@/components/analytics/__fixtures__/activeUsers"
 import { kpiFixture } from "@/components/analytics/__fixtures__/kpi"
+import {
+  onboardingAnswersDense,
+  onboardingAnswersEmpty,
+  onboardingAnswersSparse,
+} from "@/components/analytics/__fixtures__/onboardingAnswers"
 import {
   bareMomentsEnrichmentFixture,
   denseEnrichmentFixture,
@@ -395,6 +402,36 @@ export default function AnalyticsPlaygroundPage() {
         </h2>
         <div className="max-w-2xl">
           <QualitySignalsTable rows={emptyQualitySignalsFixture} />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">Onboarding answers</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Dense</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <OnboardingAnswers rows={onboardingAnswersDense} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Sparse</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <OnboardingAnswers rows={onboardingAnswersSparse} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Empty</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <OnboardingAnswers rows={onboardingAnswersEmpty} />
+            </CardContent>
+          </Card>
         </div>
       </section>
     </div>

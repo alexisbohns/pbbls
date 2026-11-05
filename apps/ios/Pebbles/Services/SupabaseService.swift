@@ -63,20 +63,19 @@ final class SupabaseService {
         }
     }
 
-    /// Sign up with email + password. Consent timestamps are captured now and
-    /// passed through `auth.users.raw_user_meta_data`. Note: the current
-    /// `handle_new_user` DB trigger does not copy them into `public.profiles`
-    /// — this mirrors web behavior and will be fixed in a separate `fix(db)` issue.
+    /// Sign up with email + password. Every consent act (terms, privacy, the
+    /// Art. 9 health-data consent and the 16+ attestation) travels in
+    /// `auth.users.raw_user_meta_data`, versioned and stamped with one
+    /// whole-second instant; `handle_new_user` writes them to `profiles` and
+    /// the `user_consents` ledger. `signup_surface: "ios"` must be in the
+    /// payload, or the trigger stamps the rows `web_register` (`ConsentMetadata`).
     func signUp(email: String, password: String) async throws {
-        let now = ISO8601DateFormatter().string(from: Date())
+        let metadata = ConsentMetadata.signup(now: Date()).mapValues { AnyJSON.string($0) }
         do {
             try await client.auth.signUp(
                 email: email,
                 password: password,
-                data: [
-                    "terms_accepted_at": .string(now),
-                    "privacy_accepted_at": .string(now)
-                ]
+                data: metadata
             )
         } catch {
             logger.error("signUp failed: \(error.localizedDescription, privacy: .private)")

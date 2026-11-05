@@ -6,6 +6,7 @@ import { DomainShareCard } from "@/components/analytics/DomainShareCard"
 import { EmotionShareCard } from "@/components/analytics/EmotionShareCard"
 import { KpiStrip } from "@/components/analytics/KpiStrip"
 import { KpiStripSkeleton } from "@/components/analytics/KpiStripSkeleton"
+import { OnboardingAnswersCard } from "@/components/analytics/OnboardingAnswersCard"
 import { PebbleEnrichmentCard } from "@/components/analytics/PebbleEnrichmentCard"
 import { PebbleVolumeChartCard } from "@/components/analytics/PebbleVolumeChartCard"
 import { QualitySignalsTableCard } from "@/components/analytics/QualitySignalsTableCard"
@@ -74,6 +75,11 @@ export default async function AnalyticsPage({
         <div className="lg:col-span-6">
           <Suspense fallback={<ChartCardSkeleton />}>
             <DomainShareCard range={range} />
+          </Suspense>
+        </div>
+        <div className="lg:col-span-6">
+          <Suspense fallback={<ChartCardSkeleton />}>
+            <OnboardingAnswersCard />
           </Suspense>
         </div>
         <div className="lg:col-span-12">

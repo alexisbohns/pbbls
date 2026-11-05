@@ -1,0 +1,1765 @@
+{
+  "$comment": "RLS denial registry (#1523). One entry per live public table and view and per SECURITY DEFINER function in public/private; read by scripts/verify-rls-denial.ts. 'authenticated' is what a signed-in user who does NOT own the row may do. '$name' resolves to the harness fixture, '@first' to the table's first row.",
+  "tables": {
+    "public.achievement_completions": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "none",
+      "note": "Completed stacks. A completion needs every achievement of a family; too heavy to seed here, only the blanket read is probed."
+    },
+    "public.achievement_unlocks": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "complete_pebble"
+      },
+      "key": {
+        "user_id": "$A"
+      },
+      "forge": {
+        "user_id": "$A",
+        "achievement_id": "$any_achievement"
+      },
+      "update": {
+        "pebble_id": null
+      },
+      "note": "Written by the achievement engine (definer)."
+    },
+    "public.achievement_views": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "mark_achievements_seen"
+      },
+      "key": {
+        "user_id": "$A"
+      },
+      "forge": {
+        "user_id": "$A",
+        "card": "year"
+      },
+      "update": {
+        "seen_at": "2026-01-01T00:00:00Z"
+      },
+      "note": "Written by mark_achievements_seen."
+    },
+    "public.achievements": {
+      "anon": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "reference",
+      "key": {
+        "id": "@first"
+      },
+      "forge": {
+        "slug": "rls-probe",
+        "family": "firsts",
+        "sort_order": 0
+      },
+      "update": {
+        "sort_order": 999
+      },
+      "note": "Reference catalog; written by admin RPCs and sync_achievement_catalog."
+    },
+    "public.bounces": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "trigger",
+        "name": "apply_karma_event_to_bounce"
+      },
+      "key": {
+        "user_id": "$A"
+      },
+      "forge": {
+        "user_id": "$A",
+        "score": 1000
+      },
+      "update": {
+        "score": 1000
+      },
+      "note": "Maintained by the karma trigger."
+    },
+    "public.card_types": {
+      "anon": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "reference",
+      "key": {
+        "id": "@first"
+      },
+      "forge": {
+        "slug": "rls-probe",
+        "name": "x",
+        "prompt": "x"
+      },
+      "update": {
+        "name": "rls-probe"
+      },
+      "note": "Reference data."
+    },
+    "public.collection_pebbles": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "own",
+        "update": "none",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "complete_pebble"
+      },
+      "key": {
+        "collection_id": "$collection"
+      },
+      "forge": {
+        "collection_id": "$collection",
+        "pebble_id": "$pebble"
+      },
+      "update": {
+        "pebble_id": "$pebble"
+      },
+      "note": "Ownership through the parent collection; no update policy."
+    },
+    "public.collections": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "own",
+        "update": "own",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "insert",
+        "name": "collections"
+      },
+      "key": {
+        "id": "$collection"
+      },
+      "forge": {
+        "user_id": "$A",
+        "name": "rls-probe"
+      },
+      "update": {
+        "name": "rls-probe"
+      },
+      "note": "Owner only."
+    },
+    "public.connection_blocks": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "remove_connection"
+      },
+      "key": {
+        "blocker_id": "$A"
+      },
+      "forge": {
+        "blocker_id": "$A",
+        "blocked_id": "$B"
+      },
+      "update": {
+        "created_at": "2026-01-01T00:00:00Z"
+      },
+      "note": "Readable by the blocker only; the blocked user must not learn of it."
+    },
+    "public.connection_invites": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "create_connection_invite"
+      },
+      "key": {
+        "inviter_id": "$A"
+      },
+      "forge": {
+        "inviter_id": "$A",
+        "token": "rls-probe-token"
+      },
+      "update": {
+        "revoked_at": "2026-01-01T00:00:00Z"
+      },
+      "note": "Readable by the inviter only; strangers resolve a token through preview_connection_invite."
+    },
+    "public.connections": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "accept_connection_invite"
+      },
+      "key": {
+        "id": "$connection"
+      },
+      "forge": {
+        "user_a": "$A",
+        "user_b": "$B"
+      },
+      "update": {
+        "created_at": "2026-01-01T00:00:00Z"
+      },
+      "note": "Readable by its two parties only; writes through the invite and remove RPCs."
+    },
+    "public.content_reports": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "report_content"
+      },
+      "key": {
+        "reporter_id": "$A"
+      },
+      "forge": {
+        "reporter_id": "$A",
+        "target_kind": "pebble",
+        "target_id": "$public_pebble",
+        "target_user_id": "$C",
+        "reason": "spam"
+      },
+      "update": {
+        "status": "dismissed"
+      },
+      "note": "RLS on and NO policy: deny-all to every client role, the reporter included. Read and written only through report_content and the admin RPCs."
+    },
+    "public.domains": {
+      "anon": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "reference",
+      "key": {
+        "id": "@first"
+      },
+      "forge": {
+        "slug": "rls-probe",
+        "name": "x",
+        "label": "x"
+      },
+      "update": {
+        "label": "rls-probe"
+      },
+      "note": "Reference data; admin_update_domain writes it."
+    },
+    "public.emotion_categories": {
+      "anon": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "reference",
+      "key": {
+        "id": "@first"
+      },
+      "forge": {
+        "slug": "rls-probe",
+        "name": "x",
+        "primary_color": "#000",
+        "secondary_color": "#000",
+        "light_color": "#000",
+        "surface_color": "#000",
+        "shaded_color": "#000",
+        "dark_color": "#000"
+      },
+      "update": {
+        "name": "rls-probe"
+      },
+      "note": "Reference data; admin_update_emotion_palette writes it."
+    },
+    "public.emotions": {
+      "anon": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "reference",
+      "key": {
+        "id": "@first"
+      },
+      "forge": {
+        "slug": "rls-probe",
+        "name": "x",
+        "color": "#000",
+        "category_id": "$emotion_category",
+        "emoji": "x"
+      },
+      "update": {
+        "emoji": "x"
+      },
+      "note": "Reference data; admin_update_emotion_emoji writes it."
+    },
+    "public.glyph_entitlements": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "none",
+      "note": "Bought glyphs. Not seedable without an admin approving a submission first; only the blanket read is probed."
+    },
+    "public.glyph_favourites": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "own",
+        "update": "own",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "insert",
+        "name": "glyph_favourites"
+      },
+      "key": {
+        "user_id": "$A"
+      },
+      "forge": {
+        "user_id": "$A",
+        "glyph_id": "$system_glyph"
+      },
+      "update": {
+        "glyph_id": "$system_glyph"
+      },
+      "note": "Owner only (one ALL policy)."
+    },
+    "public.glyph_submissions": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "public-rows",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "submit_glyph"
+      },
+      "key": {
+        "id": "$submission"
+      },
+      "forge": {
+        "glyph_id": "$glyph",
+        "submitter_id": "$A"
+      },
+      "update": {
+        "price": 1
+      },
+      "note": "Approved submissions are the market and readable by everyone signed in; the seed is pending. Writes only through submit_glyph and the admin RPCs."
+    },
+    "public.glyphs": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "public-rows",
+        "insert": "own",
+        "update": "own",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "insert",
+        "name": "glyphs"
+      },
+      "key": {
+        "id": "$glyph"
+      },
+      "forge": {
+        "user_id": "$A",
+        "name": "rls-probe",
+        "strokes": [],
+        "view_box": "0 0 100 100"
+      },
+      "update": {
+        "name": "rls-probe"
+      },
+      "note": "Strangers see system glyphs, glyphs with an approved submission, and glyphs they are entitled to. The seed is an unsubmitted private drawing."
+    },
+    "public.guides": {
+      "anon": {
+        "select": "public-rows",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "public-rows",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "reference",
+      "key": {
+        "id": "@first"
+      },
+      "row_is_public": true,
+      "forge": {
+        "slug": "rls-probe",
+        "title_en": "x",
+        "summary_en": "x",
+        "body_md_en": "x"
+      },
+      "update": {
+        "title_en": "rls-probe"
+      },
+      "note": "Published guides are public; drafts and writes are admin-only. The probed row is a published one."
+    },
+    "public.karma_events": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "complete_pebble"
+      },
+      "key": {
+        "user_id": "$A"
+      },
+      "forge": {
+        "user_id": "$A",
+        "delta": 1000,
+        "reason": "rls-probe"
+      },
+      "update": {
+        "delta": 1000
+      },
+      "note": "Ledger written only by definer RPCs."
+    },
+    "public.log_reactions": {
+      "anon": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "all",
+        "insert": "own",
+        "update": "none",
+        "delete": "own"
+      },
+      "seed": "none",
+      "note": "Lab log reactions. Everyone, anon included, reads every reaction (user_id included). Not seedable without an admin publishing a log; only the blanket read is probed."
+    },
+    "public.logs": {
+      "anon": {
+        "select": "public-rows",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "public-rows",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "none",
+      "note": "Lab logs: published rows are public, drafts and writes admin-only. A fresh database holds none; only the blanket read is probed (a published log would be visible, so anon/stranger 'reads nothing' holds only while empty)."
+    },
+    "public.moments": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "public-rows",
+        "insert": "own",
+        "update": "own",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "save_moment"
+      },
+      "key": {
+        "id": "$moment"
+      },
+      "forge": {
+        "user_id": "$A",
+        "name": "rls-probe"
+      },
+      "update": {
+        "name": "rls-probe"
+      },
+      "note": "A stranger reads another user's moment only when one of its pebbles is public (or private to a connection) and nobody is blocked; the seed's pebble is secret."
+    },
+    "public.pebble_cards": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "own",
+        "update": "own",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "complete_pebble"
+      },
+      "key": {
+        "pebble_id": "$pebble"
+      },
+      "forge": {
+        "pebble_id": "$pebble",
+        "species_id": "$card_type",
+        "value": "rls-probe"
+      },
+      "update": {
+        "value": "rls-probe"
+      },
+      "note": "Ownership through the parent pebble."
+    },
+    "public.pebble_domains": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "own",
+        "update": "none",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "complete_pebble"
+      },
+      "key": {
+        "pebble_id": "$pebble"
+      },
+      "forge": {
+        "pebble_id": "$pebble",
+        "domain_id": "$domain"
+      },
+      "update": {
+        "domain_id": "$domain"
+      },
+      "note": "Ownership through the parent pebble; no update policy (rows are replaced)."
+    },
+    "public.pebble_souls": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "own",
+        "update": "none",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "complete_pebble"
+      },
+      "key": {
+        "pebble_id": "$pebble"
+      },
+      "forge": {
+        "pebble_id": "$pebble",
+        "soul_id": "$soul"
+      },
+      "update": {
+        "soul_id": "$soul"
+      },
+      "note": "Ownership through the parent pebble; no update policy."
+    },
+    "public.pebbles": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "public-rows",
+        "insert": "own",
+        "update": "own",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "complete_pebble"
+      },
+      "key": {
+        "id": "$pebble"
+      },
+      "forge": {
+        "user_id": "$A",
+        "moment_id": "$moment",
+        "emotion_id": "$emotion",
+        "intensity": 1,
+        "positiveness": 0
+      },
+      "update": {
+        "intensity": 3
+      },
+      "note": "Grade RLS: public to everyone signed in, private to connections, secret to the owner. The seed is secret."
+    },
+    "public.profiles": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "own",
+        "update": "own",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "trigger",
+        "name": "handle_new_user"
+      },
+      "key": {
+        "user_id": "$A"
+      },
+      "forge": {
+        "user_id": "$A",
+        "display_name": "rls-probe"
+      },
+      "update": {
+        "display_name": "rls-probe"
+      },
+      "note": "One row per user. Strangers read profiles only through get_public_profile (the jsonb allowlist), never the table."
+    },
+    "public.promise_letters": {
+      "anon": {
+        "select": "public-rows",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "public-rows",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "reference",
+      "key": {
+        "id": "@first"
+      },
+      "row_is_public": true,
+      "forge": {
+        "body_md_en": "rls-probe"
+      },
+      "update": {
+        "body_md_en": "rls-probe"
+      },
+      "note": "The onboarding's promise letter (#1510): published rows are public, writes admin-only."
+    },
+    "public.reserved_handles": {
+      "anon": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "all",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "reference",
+      "key": {
+        "handle": "@first"
+      },
+      "forge": {
+        "handle": "rlsprobe"
+      },
+      "update": {
+        "handle": "rlsprobe"
+      },
+      "note": "Readable by everyone so clients can validate a handle; admin-only insert/delete."
+    },
+    "public.settings_links": {
+      "anon": {
+        "select": "public-rows",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "public-rows",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "reference",
+      "key": {
+        "id": "@first"
+      },
+      "row_is_public": true,
+      "forge": {
+        "key": "rls-probe",
+        "section": "x",
+        "title_en": "x",
+        "url": "https://example.test"
+      },
+      "update": {
+        "title_en": "rls-probe"
+      },
+      "note": "Published links are public; drafts and writes are admin-only. The probed row is a published one."
+    },
+    "public.snaps": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "own",
+        "update": "own",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "save_moment"
+      },
+      "key": {
+        "id": "$snap"
+      },
+      "forge": {
+        "user_id": "$A",
+        "moment_id": "$moment",
+        "storage_path": "rls-probe.jpg"
+      },
+      "update": {
+        "sort_order": 5
+      },
+      "note": "Moment media rows; owner only (the files' bucket has its own policies)."
+    },
+    "public.souls": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "own",
+        "update": "own",
+        "delete": "own"
+      },
+      "seed": {
+        "via": "insert",
+        "name": "souls"
+      },
+      "key": {
+        "id": "$soul"
+      },
+      "forge": {
+        "user_id": "$A",
+        "name": "rls-probe"
+      },
+      "update": {
+        "name": "rls-probe"
+      },
+      "note": "People in the owner's life; owner only."
+    },
+    "public.user_consents": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "record_consent"
+      },
+      "key": {
+        "user_id": "$A"
+      },
+      "forge": {
+        "user_id": "$A",
+        "kind": "privacy",
+        "document_version": "9.9.9",
+        "source": "web_register"
+      },
+      "update": {
+        "withdrawn_at": "2026-01-01T00:00:00Z"
+      },
+      "note": "Consent ledger; written by record_consent / withdraw_consent only."
+    },
+    "public.wallet_balances": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "trigger",
+        "name": "apply_karma_event_to_wallet"
+      },
+      "key": {
+        "user_id": "$A"
+      },
+      "forge": {
+        "user_id": "$A",
+        "balance": 1000
+      },
+      "update": {
+        "balance": 1000
+      },
+      "note": "Maintained by the karma trigger."
+    },
+    "public.wrap_reveals": {
+      "anon": {
+        "select": "none",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "own",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": {
+        "via": "rpc",
+        "name": "reveal_wrap"
+      },
+      "key": {
+        "user_id": "$A"
+      },
+      "forge": {
+        "user_id": "$A",
+        "month": "2025-01-01"
+      },
+      "update": {
+        "month": "2025-02-01"
+      },
+      "note": "Written by reveal_wrap."
+    }
+  },
+  "views": {
+    "public.v_analytics_active_users_daily": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "none",
+      "note": "Admin analytics; select revoked from anon and authenticated, read only through the admin get_* RPCs."
+    },
+    "public.v_analytics_bounce_distribution_today": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "none",
+      "note": "Admin analytics; select revoked from anon and authenticated, read only through the admin get_* RPCs."
+    },
+    "public.v_analytics_domain_share_weekly": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "none",
+      "note": "Admin analytics; select revoked from anon and authenticated, read only through the admin get_* RPCs."
+    },
+    "public.v_analytics_emotion_share_weekly": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "none",
+      "note": "Admin analytics; select revoked from anon and authenticated, read only through the admin get_* RPCs."
+    },
+    "public.v_analytics_kpi_daily": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "none",
+      "note": "Admin analytics; select revoked from anon and authenticated, read only through the admin get_* RPCs."
+    },
+    "public.v_analytics_pebble_enrichment_daily": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "none",
+      "note": "Admin analytics; select revoked from anon and authenticated, read only through the admin get_* RPCs."
+    },
+    "public.v_analytics_pebble_volume_daily": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "none",
+      "note": "Admin analytics; select revoked from anon and authenticated, read only through the admin get_* RPCs."
+    },
+    "public.v_analytics_quality_signals_today": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "none",
+      "note": "Admin analytics; select revoked from anon and authenticated, read only through the admin get_* RPCs."
+    },
+    "public.v_analytics_retention_cohorts_weekly": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "none",
+      "note": "Admin analytics; select revoked from anon and authenticated, read only through the admin get_* RPCs."
+    },
+    "public.v_analytics_user_averages_weekly": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "none",
+      "note": "Admin analytics; select revoked from anon and authenticated, read only through the admin get_* RPCs."
+    },
+    "public.v_bounce": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "own",
+      "key": {
+        "user_id": "$A"
+      },
+      "note": "Definer view over auth.users filtered by auth.uid(): one row, the caller's."
+    },
+    "public.v_domains_with_glyph": {
+      "security_invoker": true,
+      "anon": "all",
+      "authenticated": "all",
+      "note": "Reference data with glyph strokes."
+    },
+    "public.v_emotions_with_palette": {
+      "security_invoker": false,
+      "anon": "all",
+      "authenticated": "all",
+      "note": "Reference data only (emotions + categories), so the definer read leaks nothing."
+    },
+    "public.v_glyph_market": {
+      "security_invoker": true,
+      "anon": "none",
+      "authenticated": "public-rows",
+      "key": {
+        "id": "$glyph"
+      },
+      "note": "Invoker view over glyphs RLS; the owner's unsubmitted glyph must not appear."
+    },
+    "public.v_karma_summary": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "own",
+      "key": {
+        "user_id": "$A"
+      },
+      "note": "Definer view over auth.users filtered by auth.uid(): one row, the caller's."
+    },
+    "public.v_logs_with_counts": {
+      "security_invoker": true,
+      "anon": "public-rows",
+      "authenticated": "public-rows",
+      "note": "Invoker view over logs RLS (published only)."
+    },
+    "public.v_moments_full": {
+      "security_invoker": true,
+      "anon": "none",
+      "authenticated": "public-rows",
+      "key": {
+        "id": "$moment"
+      },
+      "note": "Invoker view over moments RLS; the seed's pebble is secret."
+    },
+    "public.v_ripple": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "own",
+      "key": {
+        "user_id": "$A"
+      },
+      "note": "Definer view over auth.users filtered by auth.uid(): one row, the caller's."
+    },
+    "public.v_wallet_summary": {
+      "security_invoker": false,
+      "anon": "none",
+      "authenticated": "own",
+      "key": {
+        "user_id": "$A"
+      },
+      "note": "Definer view filtered by auth.uid(); select revoked from anon."
+    }
+  },
+  "functions": {
+    "private.is_blocked_with": {
+      "kind": "internal",
+      "args": {
+        "p_other": "$A"
+      },
+      "note": "RLS helper (pebbles/moments select); private schema is not exposed by PostgREST."
+    },
+    "private.moment_is_hidden": {
+      "kind": "internal",
+      "args": {
+        "p_moment_id": "$moment"
+      },
+      "note": "RLS helper; not exposed."
+    },
+    "private.resolve_pebble_glyph": {
+      "kind": "internal",
+      "args": {
+        "p_pebble_id": "$pebble"
+      },
+      "note": "Glyph resolver behind the pebble computed field; not exposed. It resolves any pebble id, so it must stay out of the API schema."
+    },
+    "public.accept_connection_invite": {
+      "kind": "owner-only",
+      "args": {
+        "p_token": "$token"
+      },
+      "note": "Token is a capability: any signed-in holder may accept by design. Only anon refusal is asserted."
+    },
+    "public.achievement_sales_count": {
+      "kind": "owner-only",
+      "args": {},
+      "note": "Counts the caller's own sales."
+    },
+    "public.admin_attribute_glyph": {
+      "kind": "admin-only",
+      "args": {
+        "p_glyph_id": "$glyph",
+        "p_user_id": "$B"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_create_achievement": {
+      "kind": "admin-only",
+      "args": {
+        "p_slug": "rls-probe",
+        "p_family": "firsts",
+        "p_title_en": "x",
+        "p_title_fr": "x",
+        "p_karma_reward": 0,
+        "p_sort_order": 0,
+        "p_threshold": null,
+        "p_emotion_id": null,
+        "p_domain_id": null,
+        "p_description_en": null,
+        "p_description_fr": null
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_delete_achievement": {
+      "kind": "admin-only",
+      "args": {
+        "p_achievement_id": "$any_achievement"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_delete_glyph": {
+      "kind": "admin-only",
+      "args": {
+        "p_glyph_id": "$glyph"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_find_user": {
+      "kind": "admin-only",
+      "args": {
+        "p_email": "nobody@example.test"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_list_achievements": {
+      "kind": "admin-only",
+      "args": {},
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_list_content_reports": {
+      "kind": "admin-only",
+      "args": {
+        "p_status": "open"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_list_domains": {
+      "kind": "admin-only",
+      "args": {},
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_list_emotion_categories": {
+      "kind": "admin-only",
+      "args": {},
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_list_emotions": {
+      "kind": "admin-only",
+      "args": {},
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_list_glyph_submissions": {
+      "kind": "admin-only",
+      "args": {
+        "p_status": "pending"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_release_handle": {
+      "kind": "admin-only",
+      "args": {
+        "p_user_id": "$A",
+        "p_note": "rls-probe"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_set_achievement_glyph": {
+      "kind": "admin-only",
+      "args": {
+        "p_achievement_id": "$any_achievement",
+        "p_strokes": [],
+        "p_view_box": "0 0 100 100"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_set_content_hidden": {
+      "kind": "admin-only",
+      "args": {
+        "p_target_kind": "pebble",
+        "p_target_id": "$pebble",
+        "p_hidden": true,
+        "p_note": "rls-probe"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_set_domain_glyph": {
+      "kind": "admin-only",
+      "args": {
+        "p_domain_id": "$domain",
+        "p_strokes": [],
+        "p_view_box": "0 0 100 100"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_update_achievement": {
+      "kind": "admin-only",
+      "args": {
+        "p_achievement_id": "$any_achievement",
+        "p_title_en": "x",
+        "p_title_fr": "x",
+        "p_karma_reward": 0,
+        "p_description_en": null,
+        "p_description_fr": null,
+        "p_sort_order": 0,
+        "p_is_active": true
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_update_domain": {
+      "kind": "admin-only",
+      "args": {
+        "p_domain_id": "$domain",
+        "p_name": "x",
+        "p_label": "x"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_update_emotion_emoji": {
+      "kind": "admin-only",
+      "args": {
+        "p_emotion_id": "$emotion",
+        "p_emoji": "x"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.admin_update_emotion_palette": {
+      "kind": "admin-only",
+      "args": {
+        "p_category_id": "$emotion_category",
+        "p_primary": "#000",
+        "p_secondary": "#000",
+        "p_light": "#000",
+        "p_shaded": "#000",
+        "p_dark": "#000"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.apply_karma_event_to_bounce": {
+      "kind": "trigger",
+      "note": "Trigger function; never called as an RPC."
+    },
+    "public.apply_karma_event_to_wallet": {
+      "kind": "trigger",
+      "note": "Trigger function; never called as an RPC."
+    },
+    "public.approve_glyph": {
+      "kind": "admin-only",
+      "args": {
+        "p_submission_id": "$submission",
+        "p_price": 1
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.buy_glyph": {
+      "kind": "owner-only",
+      "args": {
+        "p_glyph_id": "$glyph"
+      },
+      "note": "Buys for the caller; a private glyph is not for sale."
+    },
+    "public.can_use_glyph": {
+      "kind": "public-read",
+      "args": {
+        "p_glyph_id": "$glyph",
+        "p_user": "$A"
+      },
+      "note": "Glyph-usability helper behind the enforce_*_glyph_usable triggers. Callable by anon for ANY (glyph, user) pair: it discloses whether a user owns or bought a glyph."
+    },
+    "public.check_achievements": {
+      "kind": "owner-only",
+      "args": {},
+      "note": "Acts on auth.uid() only; takes no foreign id."
+    },
+    "public.claim_blue_pebble": {
+      "kind": "owner-only",
+      "args": {},
+      "note": "Acts on auth.uid() only; takes no foreign id."
+    },
+    "public.complete_onboarding": {
+      "kind": "owner-only",
+      "args": {},
+      "note": "Acts on auth.uid() only; takes no foreign id, and refuses another user's glyph."
+    },
+    "public.complete_pebble": {
+      "kind": "owner-only",
+      "args": {
+        "payload": {
+          "moment_id": "$moment",
+          "intensity": 3
+        }
+      },
+      "intact": [
+        "pebbles"
+      ],
+      "note": "Takes an id; a stranger passing the owner's id is refused and the owner's row is untouched."
+    },
+    "public.create_connection_invite": {
+      "kind": "owner-only",
+      "args": {
+        "p_rotate": false
+      },
+      "note": "Acts on auth.uid() only; takes no foreign id."
+    },
+    "public.delete_moment": {
+      "kind": "owner-only",
+      "args": {
+        "p_moment_id": "$moment"
+      },
+      "intact": [
+        "moments"
+      ],
+      "note": "Takes an id; a stranger passing the owner's id is refused and the owner's row is untouched."
+    },
+    "public.delete_moment_media": {
+      "kind": "owner-only",
+      "args": {
+        "p_snap_id": "$snap"
+      },
+      "intact": [
+        "snaps"
+      ],
+      "note": "Takes an id; a stranger passing the owner's id is refused and the owner's row is untouched."
+    },
+    "public.delete_pebble": {
+      "kind": "owner-only",
+      "args": {
+        "p_pebble_id": "$pebble"
+      },
+      "intact": [
+        "pebbles"
+      ],
+      "note": "Takes an id; a stranger passing the owner's id is refused and the owner's row is untouched."
+    },
+    "public.enforce_collection_glyph_usable": {
+      "kind": "trigger",
+      "note": "Trigger function; never called as an RPC."
+    },
+    "public.enforce_glyph_system_flag": {
+      "kind": "trigger",
+      "note": "Trigger function; never called as an RPC."
+    },
+    "public.enforce_profile_glyph_usable": {
+      "kind": "trigger",
+      "note": "Trigger function; never called as an RPC."
+    },
+    "public.enforce_reserved_handle": {
+      "kind": "trigger",
+      "note": "Trigger function; never called as an RPC."
+    },
+    "public.enforce_soul_glyph_usable": {
+      "kind": "trigger",
+      "note": "Trigger function; never called as an RPC."
+    },
+    "public.get_active_users_series": {
+      "kind": "admin-only",
+      "args": {
+        "p_start": "2026-01-01",
+        "p_end": "2026-12-31"
+      },
+      "note": "Admin analytics; executable by anon (grant never revoked) but the body refuses non-admins with 42501."
+    },
+    "public.get_bounce_distribution_today": {
+      "kind": "admin-only",
+      "args": {},
+      "note": "Admin analytics; executable by anon (grant never revoked) but the body refuses non-admins with 42501."
+    },
+    "public.get_connections": {
+      "kind": "owner-only",
+      "args": {},
+      "note": "Acts on auth.uid() only; takes no foreign id."
+    },
+    "public.get_domain_share": {
+      "kind": "admin-only",
+      "args": {
+        "p_start": "2026-01-01",
+        "p_end": "2026-12-31"
+      },
+      "note": "Admin analytics; executable by anon (grant never revoked) but the body refuses non-admins with 42501."
+    },
+    "public.get_emotion_share": {
+      "kind": "admin-only",
+      "args": {
+        "p_start": "2026-01-01",
+        "p_end": "2026-12-31"
+      },
+      "note": "Admin analytics; executable by anon (grant never revoked) but the body refuses non-admins with 42501."
+    },
+    "public.get_kpi_daily": {
+      "kind": "admin-only",
+      "args": {
+        "p_range": "30d"
+      },
+      "note": "Admin analytics; executable by anon (grant never revoked) but the body refuses non-admins with 42501."
+    },
+    "public.get_onboarding_answers": {
+      "kind": "admin-only",
+      "args": {},
+      "note": "Admin analytics: distribution counts only; the body refuses non-admins with 42501."
+    },
+    "public.get_pebble_enrichment": {
+      "kind": "admin-only",
+      "args": {
+        "p_start": "2026-01-01",
+        "p_end": "2026-12-31"
+      },
+      "note": "Admin analytics; executable by anon (grant never revoked) but the body refuses non-admins with 42501."
+    },
+    "public.get_pebble_volume_series": {
+      "kind": "admin-only",
+      "args": {
+        "p_start": "2026-01-01",
+        "p_end": "2026-12-31",
+        "p_bucket": "day"
+      },
+      "note": "Admin analytics; executable by anon (grant never revoked) but the body refuses non-admins with 42501."
+    },
+    "public.get_public_profile": {
+      "kind": "public-read",
+      "args": {
+        "p_handle": "$handle_A"
+      },
+      "note": "The cross-user profile projection (explicit jsonb allowlist)."
+    },
+    "public.get_quality_signals_today": {
+      "kind": "admin-only",
+      "args": {},
+      "note": "Admin analytics; executable by anon (grant never revoked) but the body refuses non-admins with 42501."
+    },
+    "public.get_retention_cohorts": {
+      "kind": "admin-only",
+      "args": {},
+      "note": "Admin analytics; executable by anon (grant never revoked) but the body refuses non-admins with 42501."
+    },
+    "public.get_shared_pebble": {
+      "kind": "public-read",
+      "args": {
+        "p_pebble_id": "$public_pebble"
+      },
+      "null_args": {
+        "p_pebble_id": "$pebble"
+      },
+      "note": "Share-link projection of a public pebble; secret and private read as null."
+    },
+    "public.get_user_averages_series": {
+      "kind": "admin-only",
+      "args": {
+        "p_weeks": 4
+      },
+      "note": "Admin analytics; executable by anon (grant never revoked) but the body refuses non-admins with 42501."
+    },
+    "public.handle_new_user": {
+      "kind": "trigger",
+      "note": "Trigger function; never called as an RPC."
+    },
+    "public.is_admin": {
+      "kind": "public-read",
+      "args": {
+        "p_user_id": "$A"
+      },
+      "note": "RLS helper on public-role policies (logs, guides, settings_links), so anon must execute it. It answers for ANY user id: anyone can test whether a uuid is an admin."
+    },
+    "public.list_orphan_snap_files": {
+      "kind": "service-only",
+      "args": {
+        "p_min_age_seconds": 0,
+        "p_owner": "$A"
+      },
+      "note": "Edge functions / migrations only; execute revoked from anon and authenticated."
+    },
+    "public.mark_achievements_seen": {
+      "kind": "owner-only",
+      "args": {
+        "p_card": "year"
+      },
+      "note": "Acts on auth.uid() only; takes no foreign id."
+    },
+    "public.preview_connection_invite": {
+      "kind": "public-read",
+      "args": {
+        "p_token": "$token"
+      },
+      "note": "Invite card shown before accepting a token."
+    },
+    "public.publish_admin_glyph": {
+      "kind": "admin-only",
+      "args": {
+        "p_name": "rls-probe",
+        "p_strokes": [],
+        "p_view_box": "0 0 100 100",
+        "p_price": 1
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.pull_ceremony": {
+      "kind": "owner-only",
+      "args": {
+        "p_stack": "emotions",
+        "p_tz": "UTC"
+      },
+      "note": "Acts on auth.uid() only; takes no foreign id."
+    },
+    "public.purge_account": {
+      "kind": "service-only",
+      "args": {
+        "p_user_id": "$A"
+      },
+      "note": "Edge functions / migrations only; execute revoked from anon and authenticated."
+    },
+    "public.record_consent": {
+      "kind": "owner-only",
+      "args": {
+        "p_kind": "privacy",
+        "p_document_version": "1.0.0",
+        "p_source": "web_register"
+      },
+      "note": "Acts on auth.uid() only; takes no foreign id."
+    },
+    "public.refund_karma": {
+      "kind": "service-only",
+      "args": {
+        "p_amount": 1,
+        "p_ref_id": "$pebble"
+      },
+      "note": "Edge functions / migrations only; execute revoked from anon and authenticated."
+    },
+    "public.reject_glyph": {
+      "kind": "admin-only",
+      "args": {
+        "p_submission_id": "$submission",
+        "p_note": "rls-probe"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.remove_connection": {
+      "kind": "owner-only",
+      "args": {
+        "p_connection_id": "$connection",
+        "p_block": true
+      },
+      "intact": [
+        "connections"
+      ],
+      "note": "Takes an id; a stranger passing the owner's id is refused and the owner's row is untouched."
+    },
+    "public.report_content": {
+      "kind": "owner-only",
+      "args": {
+        "p_target_kind": "pebble",
+        "p_target_id": "$pebble",
+        "p_reason": "spam",
+        "p_detail": null
+      },
+      "intact": [
+        "pebbles"
+      ],
+      "note": "Takes an id; a stranger passing the owner's id is refused and the owner's row is untouched."
+    },
+    "public.resolve_content_report": {
+      "kind": "admin-only",
+      "args": {
+        "p_report_id": "$report",
+        "p_outcome": "dismissed",
+        "p_note": "rls-probe"
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.reveal_wrap": {
+      "kind": "owner-only",
+      "args": {
+        "p_month": "2025-01-01",
+        "p_tz": "UTC"
+      },
+      "note": "Acts on auth.uid() only; takes no foreign id."
+    },
+    "public.save_moment": {
+      "kind": "owner-only",
+      "args": {
+        "payload": {
+          "id": "$moment",
+          "name": "rls-probe"
+        }
+      },
+      "intact": [
+        "moments"
+      ],
+      "note": "Takes an id; a stranger passing the owner's id is refused and the owner's row is untouched."
+    },
+    "public.set_collection_glyph": {
+      "kind": "owner-only",
+      "args": {
+        "p_collection_id": "$collection",
+        "p_glyph_id": "$system_glyph"
+      },
+      "intact": [
+        "collections"
+      ],
+      "note": "Takes an id; a stranger passing the owner's id is refused and the owner's row is untouched."
+    },
+    "public.set_glyph_listed": {
+      "kind": "admin-only",
+      "args": {
+        "p_submission_id": "$submission",
+        "p_listed": false
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.set_glyph_price": {
+      "kind": "admin-only",
+      "args": {
+        "p_submission_id": "$submission",
+        "p_price": 1
+      },
+      "note": "Admin back-office; refuses any caller whose profile is not is_admin."
+    },
+    "public.spend_karma": {
+      "kind": "owner-only",
+      "args": {
+        "p_amount": 1,
+        "p_reason": "rls-probe",
+        "p_ref_id": null
+      },
+      "note": "Acts on auth.uid() only; takes no foreign id."
+    },
+    "public.submit_glyph": {
+      "kind": "owner-only",
+      "args": {
+        "p_glyph_id": "$glyph"
+      },
+      "intact": [
+        "glyphs"
+      ],
+      "note": "Takes an id; a stranger passing the owner's id is refused and the owner's row is untouched."
+    },
+    "public.sync_achievement_catalog": {
+      "kind": "service-only",
+      "args": {},
+      "note": "Edge functions / migrations only; execute revoked from anon and authenticated."
+    },
+    "public.withdraw_consent": {
+      "kind": "owner-only",
+      "args": {
+        "p_kind": "health_data"
+      },
+      "note": "Acts on auth.uid() only; takes no foreign id."
+    }
+  }
+}

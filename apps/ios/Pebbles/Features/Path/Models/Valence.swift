@@ -42,6 +42,10 @@ enum Valence: String, CaseIterable, Identifiable, Hashable {
         case .lowlightLarge, .neutralLarge, .highlightLarge:    return 3
         }
     }
+
+    /// High distress (positiveness -1, intensity 3): the completion screen stays
+    /// quiet (no karma line, sound, haptic or achievement) and offers support.
+    var quietSuccess: Bool { self == .lowlightLarge }
 }
 
 extension Valence {
