@@ -45,6 +45,7 @@ fun SettingsScreen(
     onSaved: (displayName: String, glyph: Glyph?, handle: String?, isPublic: Boolean) -> Unit,
     glyphPicker: GlyphPickerSlot,
     onSignOut: () -> Unit,
+    onOpenCrisisResources: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -69,7 +70,7 @@ fun SettingsScreen(
                 shortcutsStones = viewModel.shortcutsStones,
             ),
         actions =
-            remember(viewModel, onSignOut) {
+            remember(viewModel, onSignOut, onOpenCrisisResources) {
                 SettingsActions(
                     onBack = viewModel::onDismissRequested,
                     onSave = viewModel::save,
@@ -86,6 +87,7 @@ fun SettingsScreen(
                     onSignOutEverywhere = viewModel::requestSignOutEverywhere,
                     onDeleteAccount = viewModel::requestDelete,
                     onLogOut = onSignOut,
+                    onOpenCrisisResources = onOpenCrisisResources,
                 )
             },
         modifier = modifier,

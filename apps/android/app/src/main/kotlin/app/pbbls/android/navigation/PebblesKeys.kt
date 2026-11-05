@@ -174,6 +174,10 @@ sealed interface PebblesKey : NavKey {
     @Serializable
     data object Settings : PebblesKey
 
+    /** Helplines by country (#1461), from Settings and from a high-distress pebble's success step. A modal. */
+    @Serializable
+    data object CrisisResources : PebblesKey
+
     /** [soulId] null means "create". */
     @Serializable
     data class SoulForm(

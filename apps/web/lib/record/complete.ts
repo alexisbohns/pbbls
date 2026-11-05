@@ -219,3 +219,8 @@ export function successLook(
     },
   }
 }
+
+/** A lowlight at full intensity: the one state where celebrating would be wrong. Mirrors Valence.quietSuccess on iOS and Android. */
+export function quietSuccess(draft: Pick<CompleteDraft, "positiveness" | "intensity">): boolean {
+  return draft.positiveness === -1 && draft.intensity === 3
+}

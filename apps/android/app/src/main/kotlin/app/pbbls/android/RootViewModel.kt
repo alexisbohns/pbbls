@@ -1,15 +1,18 @@
 package app.pbbls.android
 
+import android.util.Log
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.AchievementMoment
 import app.pbbls.android.core.data.AchievementNotificationService
 import app.pbbls.android.core.data.CompleteSnapshotStoring
 import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
+import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.WrapDiskCaching
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +25,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private const val KEY_PENDING_INVITE = "root_pending_invite"
+private const val TAG = "root"
 
 /**
  * Where [RootViewModel] wants the top-level stack, replacing `RootScreen`'s
@@ -52,6 +56,8 @@ data class RootUiState(
     val destination: RootDestination = RootDestination.Unresolved,
     /** Mirrors [SupabaseServicing.session]'s user id — data only, never used to call the service. */
     val userId: String? = null,
+    /** `profiles.onboarding_completed` for [userId]; null until read, and after a sign-out. */
+    val onboardingCompleted: Boolean? = null,
     val pendingInvite: String? = null,
     /** The "+N karma" pastille content, or null when idle. Mirrors [KarmaNotificationService.activeCapsule]. */
     val karmaFlash: KarmaEarnedContent? = null,
@@ -85,6 +91,7 @@ class RootViewModel
     @Inject
     constructor(
         private val supabase: SupabaseServicing,
+        private val profile: ProfileServicing,
         private val karma: KarmaNotificationService,
         private val achievementNotify: AchievementNotificationService,
         private val completeSnapshots: CompleteSnapshotStoring,
@@ -182,8 +189,29 @@ class RootViewModel
             // Only a resolved status updates hasHadSession — Unresolved must
             // never be mistaken for a session, real or absent.
             if (!isInitializing) hasHadSession = userId != null
-            _uiState.update { it.copy(destination = destination, userId = userId) }
+            // The onboarding gate's server flag (#1510 D10) belongs to one user: a new id forgets the
+            // last one's answer and reads its own; a sign-out forgets it too.
+            val userChanged = userId != _uiState.value.userId
+            _uiState.update {
+                it.copy(
+                    destination = destination,
+                    userId = userId,
+                    onboardingCompleted = if (userChanged) null else it.onboardingCompleted,
+                )
+            }
+            if (userId != null && userChanged) readOnboardingCompleted(userId)
         }
+
+        private fun readOnboardingCompleted(userId: String) {
+            viewModelScope.launch {
+                runCatchingCancellable { profile.loadProfile().onboardingCompleted }
+                    .onSuccess { done -> _uiState.update { s -> if (s.userId == userId) s.copy(onboardingCompleted = done) else s } }
+                    .onFailure { Log.e(TAG, "profile read for the onboarding gate failed", it) }
+            }
+        }
+
+        /** The flow just completed on this device: the gate stands down without waiting for a re-read. */
+        fun onOnboardingCompleted() = _uiState.update { it.copy(onboardingCompleted = true) }
 
         /**
          * Parks an invite App Link token (D8). Called from `MainActivity`'s

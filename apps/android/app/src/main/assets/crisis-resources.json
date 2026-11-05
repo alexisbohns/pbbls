@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "verified_on": "2026-11-05",
+  "worldwide": { "label": { "en": "Find a helpline anywhere", "fr": "Trouver une ligne d'écoute partout" }, "url": "https://findahelpline.com" },
+  "countries": [
+    { "code": "FR", "name": { "en": "France", "fr": "France" }, "lines": [
+      { "label": { "en": "3114, national suicide prevention line", "fr": "3114, numéro national de prévention du suicide" }, "number": "3114", "tel": "3114", "note": { "en": "Free, 24/7", "fr": "Gratuit, 24h/24" } },
+      { "label": { "en": "Emergency services", "fr": "Urgences" }, "number": "112", "tel": "112" }
+    ] },
+    { "code": "US", "name": { "en": "United States", "fr": "États-Unis" }, "lines": [ { "label": { "en": "988 Suicide and Crisis Lifeline", "fr": "988, ligne de crise et de prévention du suicide" }, "number": "988", "tel": "988", "note": { "en": "Call or text, 24/7", "fr": "Appel ou SMS, 24h/24" } } ] },
+    { "code": "CA", "name": { "en": "Canada", "fr": "Canada" }, "lines": [ { "label": { "en": "988 Suicide Crisis Helpline", "fr": "988, ligne d'aide en cas de crise" }, "number": "988", "tel": "988", "note": { "en": "Call or text, 24/7", "fr": "Appel ou SMS, 24h/24" } } ] },
+    { "code": "GB", "name": { "en": "United Kingdom", "fr": "Royaume-Uni" }, "lines": [ { "label": { "en": "Samaritans", "fr": "Samaritans" }, "number": "116 123", "tel": "116123", "note": { "en": "Free, 24/7", "fr": "Gratuit, 24h/24" } } ] },
+    { "code": "IE", "name": { "en": "Ireland", "fr": "Irlande" }, "lines": [ { "label": { "en": "Samaritans", "fr": "Samaritans" }, "number": "116 123", "tel": "116123", "note": { "en": "Free, 24/7", "fr": "Gratuit, 24h/24" } } ] },
+    { "code": "BE", "name": { "en": "Belgium", "fr": "Belgique" }, "lines": [ { "label": { "en": "Centre de prévention du suicide", "fr": "Centre de prévention du suicide" }, "number": "0800 32 123", "tel": "080032123", "note": { "en": "Free, 24/7", "fr": "Gratuit, 24h/24" } } ] },
+    { "code": "CH", "name": { "en": "Switzerland", "fr": "Suisse" }, "lines": [ { "label": { "en": "La Main Tendue", "fr": "La Main Tendue" }, "number": "143", "tel": "143", "note": { "en": "24/7", "fr": "24h/24" } } ] }
+  ]
+}
