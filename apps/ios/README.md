@@ -29,7 +29,7 @@ Native iOS app for Pebbles. SwiftUI, iOS 17+, iPhone-only.
 
 4. Select an iOS 17 iPhone simulator and hit ⌘R.
 
-You should see the Welcome screen (Rive logo + carousel); after signing in you land on the Path timeline.
+You should see the Welcome screen (logo + carousel); after signing in you land on the Path timeline.
 
 ## Project structure
 
@@ -41,7 +41,7 @@ apps/ios/
     RootView.swift         Auth gate + root composition
     Features/              One folder per feature (Path, Profile, Auth, Welcome, Onboarding, Glyph, …)
     Services/              SupabaseService, AppEnvironment, palette/reference-data services
-    Resources/             Info.plist, Assets.xcassets, fonts, Rive/SVG assets
+    Resources/             Info.plist, Assets.xcassets, fonts, SVG assets
     Pebbles.entitlements   Sign in with Apple
   PebblesWidget/           Widget extension (Live Activity, retained for future use)
   PebblesTests/            Unit tests (Swift Testing)

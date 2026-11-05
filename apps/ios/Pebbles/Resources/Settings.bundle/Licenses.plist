@@ -34,14 +34,6 @@
 			<key>Type</key>
 			<string>PSChildPaneSpecifier</string>
 			<key>Title</key>
-			<string>Rive</string>
-			<key>File</key>
-			<string>License-rive-ios</string>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSChildPaneSpecifier</string>
-			<key>Title</key>
 			<string>Supabase Swift</string>
 			<key>File</key>
 			<string>License-supabase-swift</string>
