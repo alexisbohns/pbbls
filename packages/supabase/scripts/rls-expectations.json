@@ -797,6 +797,32 @@
       },
       "note": "One row per user. Strangers read profiles only through get_public_profile (the jsonb allowlist), never the table."
     },
+    "public.promise_letters": {
+      "anon": {
+        "select": "public-rows",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "authenticated": {
+        "select": "public-rows",
+        "insert": "none",
+        "update": "none",
+        "delete": "none"
+      },
+      "seed": "reference",
+      "key": {
+        "id": "@first"
+      },
+      "row_is_public": true,
+      "forge": {
+        "body_md_en": "rls-probe"
+      },
+      "update": {
+        "body_md_en": "rls-probe"
+      },
+      "note": "The onboarding's promise letter (#1510): published rows are public, writes admin-only."
+    },
     "public.reserved_handles": {
       "anon": {
         "select": "all",
@@ -1368,6 +1394,11 @@
       "args": {},
       "note": "Acts on auth.uid() only; takes no foreign id."
     },
+    "public.complete_onboarding": {
+      "kind": "owner-only",
+      "args": {},
+      "note": "Acts on auth.uid() only; takes no foreign id, and refuses another user's glyph."
+    },
     "public.complete_pebble": {
       "kind": "owner-only",
       "args": {
@@ -1478,6 +1509,11 @@
         "p_range": "30d"
       },
       "note": "Admin analytics; executable by anon (grant never revoked) but the body refuses non-admins with 42501."
+    },
+    "public.get_onboarding_answers": {
+      "kind": "admin-only",
+      "args": {},
+      "note": "Admin analytics: distribution counts only; the body refuses non-admins with 42501."
     },
     "public.get_pebble_enrichment": {
       "kind": "admin-only",
