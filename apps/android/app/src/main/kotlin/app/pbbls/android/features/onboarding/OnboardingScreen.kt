@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,9 +42,11 @@ import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.ConsentKind
 import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.OnboardingPace
 import app.pbbls.android.core.model.OnboardingReason
 import app.pbbls.android.core.ui.GlyphCarveSlot
 import app.pbbls.android.features.onboarding.steps.ConsentStep
+import app.pbbls.android.features.onboarding.steps.PaceStep
 import app.pbbls.android.features.onboarding.steps.PeopleStep
 import app.pbbls.android.features.onboarding.steps.ProgressStones
 import app.pbbls.android.features.onboarding.steps.PromiseStep
@@ -97,10 +99,11 @@ fun OnboardingScreen(
         onPersonAdd = viewModel::onPersonAdd,
         onPersonNameChange = viewModel::onPersonNameChange,
         onPersonCommit = viewModel::onPersonCommit,
-        onPersonRemove = viewModel::onPersonRemove,
+        onPersonEdit = viewModel::onPersonEdit,
         onPersonGlyphSheet = viewModel::onPersonGlyphSheet,
         onPersonGlyphPick = viewModel::onPersonGlyphPick,
         onDrawForPerson = viewModel::onDrawForPerson,
+        onPaceSelect = viewModel::onPaceSelect,
         modifier = modifier,
     )
 }
@@ -120,19 +123,18 @@ fun OnboardingContent(
     onPersonAdd: () -> Unit,
     onPersonNameChange: (Int, String) -> Unit,
     onPersonCommit: (Int) -> Unit,
-    onPersonRemove: (Int) -> Unit,
+    onPersonEdit: (Int) -> Unit,
     onPersonGlyphSheet: (Int?) -> Unit,
     onPersonGlyphPick: (Int, String) -> Unit,
     onDrawForPerson: (Int) -> Unit,
+    onPaceSelect: (OnboardingPace) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
     val steps = OnboardingSteps.visible
-    Box(
-        modifier
-            .fillMaxSize()
-            .background(colors.surface),
-    ) {
+    // A Surface, not a painted Box: it sets the content colour to `onSurface`, so the step
+    // titles and the Back arrow (which take `LocalContentColor`) read in dark mode too.
+    Surface(modifier.fillMaxSize(), color = colors.surface) {
         Column(
             Modifier
                 .fillMaxSize()
@@ -146,19 +148,24 @@ fun OnboardingContent(
                     .padding(horizontal = Spacing.xs, vertical = Spacing.xs),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(
-                    onClick = onBack,
-                    enabled = state.stepIndex > 0 && !state.isCompleting,
-                    modifier = Modifier.testTag(JourneyTags.ONBOARDING_BACK),
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_arrow_back),
-                        contentDescription = stringResource(R.string.onboarding_back),
-                        modifier = Modifier.size(24.dp),
-                    )
+                if (state.stepIndex == 0) {
+                    // Nowhere to go back to: the same width, so the stones stay centred.
+                    Box(Modifier.size(48.dp))
+                } else {
+                    IconButton(
+                        onClick = onBack,
+                        enabled = !state.isCompleting,
+                        modifier = Modifier.testTag(JourneyTags.ONBOARDING_BACK),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_arrow_back),
+                            contentDescription = stringResource(R.string.onboarding_back),
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
                 }
                 Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    ProgressStones(count = steps.size, current = state.stepIndex)
+                    ProgressStones(count = OnboardingSteps.all.size, current = state.stepIndex)
                 }
                 when (state.step.skip) {
                     // The Back button's width, so the stones stay centred on a step with no skip.
@@ -179,6 +186,7 @@ fun OnboardingContent(
                                         R.string.onboarding_later
                                     },
                                 ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                 }
@@ -217,11 +225,13 @@ fun OnboardingContent(
                             onAdd = onPersonAdd,
                             onNameChange = onPersonNameChange,
                             onCommit = onPersonCommit,
-                            onRemove = onPersonRemove,
+                            onEdit = onPersonEdit,
                             onChangeGlyph = onPersonGlyphSheet,
                             onContinue = onNext,
                         )
-                    else -> Box(Modifier.fillMaxSize()) // step 6 lands in part 6
+                    "pace" -> PaceStep(state.pace, state.isCompleting, state.errorRes, onPaceSelect, onNext)
+                    // `handoff` has no screen (D9): `isDone` pops the entry before it is ever the step.
+                    else -> Box(Modifier.fillMaxSize())
                 }
             }
         }
@@ -231,7 +241,7 @@ fun OnboardingContent(
             SoulGlyphSheet(
                 personName = person.name,
                 glyphs = state.systemGlyphs + state.carved,
-                currentGlyphId = person.glyphId,
+                currentGlyphId = person.glyphId ?: state.defaultGlyphId(index),
                 onUse = { onPersonGlyphPick(index, it) },
                 onDraw = { onDrawForPerson(index) },
                 onDismiss = { onPersonGlyphSheet(null) },

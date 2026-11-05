@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,8 +43,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
+import app.pbbls.android.core.designsystem.PageTypography
 import app.pbbls.android.core.designsystem.PbblsIcon
 import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
@@ -58,8 +59,7 @@ import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.stone.SplitStone
 import app.pbbls.android.core.designsystem.stone.StoneGeometry
 import app.pbbls.android.core.model.Glyph
-import app.pbbls.android.core.ui.GlyphView
-import app.pbbls.android.core.ui.GlyphViewCase
+import app.pbbls.android.core.ui.render.GlyphImage
 import app.pbbls.android.features.onboarding.OnboardingPerson
 
 /** The empty place at [index], for the tests. */
@@ -88,7 +88,7 @@ fun PeopleStep(
     onAdd: () -> Unit,
     onNameChange: (Int, String) -> Unit,
     onCommit: (Int) -> Unit,
-    onRemove: (Int) -> Unit,
+    onEdit: (Int) -> Unit,
     onChangeGlyph: (Int) -> Unit,
     onContinue: () -> Unit,
     modifier: Modifier = Modifier,
@@ -96,7 +96,7 @@ fun PeopleStep(
     val colors = MaterialTheme.colorScheme
     val fills =
         List(PLACES) { index ->
-            if (people.getOrNull(index)?.editing == false) colors.primaryContainer else Color.Transparent
+            if (people.getOrNull(index) != null) colors.primaryContainer else Color.Transparent
         }
     val dashColor = colors.outline
     val dashCorner = MaterialTheme.shapes.extraLarge.topStart
@@ -108,15 +108,14 @@ fun PeopleStep(
             .padding(horizontal = Spacing.xl, vertical = Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {
-        Text(
-            stringResource(R.string.onboarding_people_title),
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.semantics { heading() },
-        )
-        Text(stringResource(R.string.onboarding_people_body), style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant)
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            StepTitle(stringResource(R.string.onboarding_people_title))
+            Text(stringResource(R.string.onboarding_people_body), style = PageTypography.lead, color = colors.onSurfaceVariant)
+        }
+        Text(stringResource(R.string.onboarding_people_note), style = MaterialTheme.typography.bodyMedium, color = colors.onSurface)
         SplitStone(n = PLACES, seed = StoneGeometry.QUICK_ACTIONS_SEED, fills = fills, minHeight = PIECE_HEIGHT) { index ->
             val person = people.getOrNull(index)
-            val glyph = person?.glyphId?.let { id -> glyphs.firstOrNull { it.id == id } } ?: glyphs.firstOrNull()
+            val glyph = person?.glyphId?.let { id -> glyphs.firstOrNull { it.id == id } } ?: glyphs.getOrNull(index) ?: glyphs.firstOrNull()
             Box(
                 Modifier
                     .fillMaxSize()
@@ -154,11 +153,15 @@ fun PeopleStep(
                                 tint = colors.onSurfaceVariant,
                             )
                         }
-                    person.editing ->
-                        PbblsIconImage(PbblsIcon.PEBBLE_ROUND, PbblsIconSize.TILE, contentDescription = null, tint = colors.outline)
                     else ->
                         if (glyph != null) {
-                            GlyphView(case = GlyphViewCase.SELECTED, strokes = glyph.strokes, viewBox = glyph.viewBox, side = GLYPH_SIDE)
+                            // The carve in the piece's own ink, as dark as the mock's: `primary` on its container is too faint.
+                            GlyphImage(
+                                strokes = glyph.strokes,
+                                viewBox = glyph.viewBox,
+                                strokeColor = colors.onPrimaryContainer,
+                                modifier = Modifier.size(GLYPH_SIDE),
+                            )
                         }
                 }
             }
@@ -176,31 +179,32 @@ fun PeopleStep(
                         person == null ->
                             Text(
                                 stringResource(R.string.onboarding_people_add),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = colors.onSurfaceVariant,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = colors.primary,
                                 textAlign = TextAlign.Center,
                             )
-                        person.editing -> PersonNameField(person.name, index, onNameChange, onCommit)
+                        person.editing -> {
+                            PersonNameField(person.name, index, onNameChange, onCommit)
+                            HorizontalDivider(thickness = 2.dp, color = colors.primary)
+                        }
                         else -> {
+                            // Tapping the name reopens it; emptying the field removes the place.
                             Text(
                                 person.name,
-                                style = MaterialTheme.typography.titleSmall,
+                                style = MaterialTheme.typography.titleMedium,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 textAlign = TextAlign.Center,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .clickable(role = Role.Button, onClick = { onEdit(index) }),
                             )
                             TextButton(onClick = { onChangeGlyph(index) }, modifier = Modifier.testTag(onboardingPersonGlyphTag(index))) {
-                                Text(stringResource(R.string.onboarding_people_change_glyph), style = MaterialTheme.typography.labelMedium)
-                            }
-                            // A short word in a third-width column; the full "Remove <name>" is what TalkBack reads.
-                            val removeLabel = stringResource(R.string.onboarding_people_remove, person.name)
-                            TextButton(onClick = { onRemove(index) }, modifier = Modifier.semantics { contentDescription = removeLabel }) {
                                 Text(
-                                    stringResource(R.string.onboarding_people_remove_short),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = colors.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
+                                    stringResource(R.string.onboarding_people_change_glyph),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    textAlign = TextAlign.Center,
                                 )
                             }
                         }
@@ -208,15 +212,32 @@ fun PeopleStep(
                 }
             }
         }
+        Text(
+            stringResource(R.string.onboarding_people_later),
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
         Spacer(
             Modifier
                 .weight(1f)
                 .height(Spacing.lg),
         )
         PebblesPrimaryButton(
-            text = stringResource(R.string.onboarding_continue),
+            text =
+                if (people.size == PLACES && people.all { it.name.isNotBlank() }) {
+                    stringResource(
+                        R.string.onboarding_people_cta_three,
+                        people[0].name.trim(),
+                        people[1].name.trim(),
+                        people[2].name.trim(),
+                    )
+                } else {
+                    stringResource(R.string.onboarding_people_cta)
+                },
             onClick = onContinue,
-            enabled = people.any { !it.editing },
+            enabled = people.any { it.name.isNotBlank() },
             modifier =
                 Modifier
                     .fillMaxWidth()

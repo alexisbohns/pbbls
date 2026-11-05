@@ -10,24 +10,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.LegalDoc
+import app.pbbls.android.core.designsystem.ListGroup
+import app.pbbls.android.core.designsystem.ListGroupItemScope
+import app.pbbls.android.core.designsystem.ListGroupSwitchItem
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.openLegalDoc
@@ -38,9 +35,9 @@ import app.pbbls.android.features.onboarding.OnboardingConsentState
 fun onboardingConsentTag(kind: ConsentKind): String = "onboarding_consent_${kind.wire}"
 
 /**
- * Step 2 (#1510 D3): four switches, one per act, health first; an act already on record is on and
- * locked ("Already on record"), the rest are off until the user flips them, and Continue waits for
- * all four. Each flip records through `record_consent` before the switch settles.
+ * Step 2 (#1510 D3): one switch per act, on the app's own settings rows. A switch turns on and off
+ * freely; Continue waits for all four and records them, so nothing has to be taken back. An act
+ * already on record stays on: withdrawing one is a Settings action, not a side effect of this step.
  */
 @Composable
 fun ConsentStep(
@@ -58,33 +55,48 @@ fun ConsentStep(
             .padding(horizontal = Spacing.xl, vertical = Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {
-        Text(
-            stringResource(R.string.onboarding_consent_title),
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.semantics { heading() },
-        )
+        StepTitle(stringResource(R.string.onboarding_consent_title))
         Text(stringResource(R.string.onboarding_consent_body), style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant)
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-            ConsentSwitchRow(
-                ConsentKind.HEALTH_DATA,
-                R.string.onboarding_consent_health,
-                R.string.onboarding_consent_health_hint,
-                state,
-                onToggle,
-            )
-            ConsentSwitchRow(ConsentKind.TERMS, R.string.onboarding_consent_terms, null, state, onToggle)
-            ConsentSwitchRow(ConsentKind.PRIVACY, R.string.onboarding_consent_privacy, null, state, onToggle)
-            ConsentSwitchRow(ConsentKind.AGE_ASSURANCE, R.string.onboarding_consent_age, null, state, onToggle)
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            AssistChip(
-                onClick = { openLegalDoc(context, LegalDoc.TERMS) },
-                label = { Text(stringResource(R.string.onboarding_consent_read_terms)) },
-            )
-            AssistChip(
-                onClick = { openLegalDoc(context, LegalDoc.PRIVACY) },
-                label = { Text(stringResource(R.string.onboarding_consent_read_policy)) },
-            )
+        ListGroup(
+            items =
+                listOf(
+                    consentRow(
+                        ConsentKind.HEALTH_DATA,
+                        R.string.onboarding_consent_health,
+                        R.string.onboarding_consent_health_detail,
+                        state,
+                        onToggle,
+                    ),
+                    consentRow(
+                        ConsentKind.TERMS,
+                        R.string.onboarding_consent_terms,
+                        R.string.onboarding_consent_terms_detail,
+                        state,
+                        onToggle,
+                    ),
+                    consentRow(
+                        ConsentKind.PRIVACY,
+                        R.string.onboarding_consent_privacy,
+                        R.string.onboarding_consent_privacy_detail,
+                        state,
+                        onToggle,
+                    ),
+                    consentRow(
+                        ConsentKind.AGE_ASSURANCE,
+                        R.string.onboarding_consent_age,
+                        R.string.onboarding_consent_age_detail,
+                        state,
+                        onToggle,
+                    ),
+                ),
+        )
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            OutlinedButton(onClick = { openLegalDoc(context, LegalDoc.TERMS) }, modifier = Modifier.weight(1f)) {
+                Text(stringResource(R.string.onboarding_consent_read_terms))
+            }
+            OutlinedButton(onClick = { openLegalDoc(context, LegalDoc.PRIVACY) }, modifier = Modifier.weight(1f)) {
+                Text(stringResource(R.string.onboarding_consent_read_policy))
+            }
         }
         state.errorRes?.let { Text(stringResource(it), style = MaterialTheme.typography.bodyMedium, color = colors.error) }
         Spacer(
@@ -92,52 +104,42 @@ fun ConsentStep(
                 .weight(1f)
                 .height(Spacing.lg),
         )
-        PebblesPrimaryButton(
-            text = stringResource(R.string.onboarding_continue),
-            onClick = onContinue,
-            enabled = state.canContinue,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .testTag(JourneyTags.ONBOARDING_NEXT),
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            if (!state.canContinue && !state.isSaving) {
+                Text(
+                    stringResource(R.string.onboarding_consent_needed),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.primary,
+                )
+            }
+            PebblesPrimaryButton(
+                text = stringResource(R.string.onboarding_continue),
+                onClick = onContinue,
+                enabled = state.canContinue,
+                isLoading = state.isSaving,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .testTag(JourneyTags.ONBOARDING_NEXT),
+            )
+        }
     }
 }
 
-@Composable
-private fun ConsentSwitchRow(
+private fun consentRow(
     kind: ConsentKind,
     @StringRes labelRes: Int,
-    @StringRes hintRes: Int?,
+    @StringRes detailRes: Int,
     state: OnboardingConsentState,
     onToggle: (ConsentKind, Boolean) -> Unit,
-) {
-    val colors = MaterialTheme.colorScheme
-    val recorded = kind in state.recorded
-    val checked = recorded || kind in state.on
-    // The whole row is the switch: one accessible node that names the act, one touch target. An act
-    // on record, or recorded here, is locked on: nothing is withdrawn in this flow.
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .toggleable(
-                value = checked,
-                enabled = !checked && kind !in state.saving,
-                role = Role.Switch,
-                onValueChange = { onToggle(kind, it) },
-            ).testTag(onboardingConsentTag(kind)),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(stringResource(labelRes), style = MaterialTheme.typography.bodyLarge)
-            val hint = if (recorded) stringResource(R.string.onboarding_consent_recorded) else hintRes?.let { stringResource(it) }
-            if (hint != null) Text(hint, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-        }
-        Switch(
-            checked = checked,
-            onCheckedChange = null,
-            enabled = !checked && kind !in state.saving,
+): @Composable ListGroupItemScope.() -> Unit =
+    {
+        val recorded = kind in state.recorded
+        ListGroupSwitchItem(
+            headline = stringResource(labelRes),
+            checked = recorded || kind in state.on,
+            onCheckedChange = { onToggle(kind, it) },
+            supporting = stringResource(if (recorded) R.string.onboarding_consent_recorded else detailRes),
+            modifier = Modifier.testTag(onboardingConsentTag(kind)),
         )
     }
-}

@@ -18,6 +18,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- Debug builds only (#1510): resets the signed-in account's onboarding flags, then opens the app. -->
+        <activity
+            android:name=".ReplayOnboardingActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:label="Replay onboarding"
+            android:taskAffinity="app.pbbls.android.replay"
+            android:theme="@style/Theme.Pebbles">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

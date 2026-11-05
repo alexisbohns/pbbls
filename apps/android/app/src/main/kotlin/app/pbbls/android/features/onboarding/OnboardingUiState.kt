@@ -13,10 +13,13 @@ import app.pbbls.android.core.model.PromiseLetter
 data class OnboardingConsentState(
     val recorded: Set<ConsentKind> = emptySet(),
     val on: Set<ConsentKind> = emptySet(),
-    val saving: Set<ConsentKind> = emptySet(),
+    val isSaving: Boolean = false,
     @StringRes val errorRes: Int? = null,
 ) {
-    val canContinue: Boolean get() = saving.isEmpty() && (recorded + on).containsAll(ConsentKind.entries)
+    val canContinue: Boolean get() = !isSaving && (recorded + on).containsAll(ConsentKind.entries)
+
+    /** Switched on here and not yet in the ledger: what Continue records. */
+    val toRecord: Set<ConsentKind> get() = on - recorded
 }
 
 /** One piece of step 5's stone: a named person, or the empty place being typed into. */
@@ -52,6 +55,9 @@ data class OnboardingUiState(
 ) {
     val stepIndex: Int get() = OnboardingSteps.visible.indexOf(step)
 
+    /** The glyph place [index] wears until a pick: a different one per place, so three people never look alike. */
+    fun defaultGlyphId(index: Int): String? = systemGlyphs.getOrNull(index)?.id ?: systemGlyphs.firstOrNull()?.id
+
     /** The answers as they would be sent now; null where a step was skipped or left blank. */
     val answers: OnboardingAnswers
         get() =
@@ -64,6 +70,6 @@ data class OnboardingUiState(
                 souls =
                     people
                         .filter { !it.editing && it.name.isNotBlank() }
-                        .map { OnboardingSoulDraft(it.name.trim(), it.glyphId ?: systemGlyphs.firstOrNull()?.id ?: "") },
+                        .map { OnboardingSoulDraft(it.name.trim(), it.glyphId ?: defaultGlyphId(people.indexOf(it)) ?: "") },
             )
 }

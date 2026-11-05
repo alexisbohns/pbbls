@@ -47,11 +47,18 @@ enum class OnboardingReason(
 enum class OnboardingPace(
     val slug: String,
     @StringRes val labelRes: Int,
+    @StringRes val detailRes: Int,
+    val icon: PbblsIcon,
 ) {
-    DAILY("daily", R.string.onboarding_pace_daily),
-    FEW_A_WEEK("few-a-week", R.string.onboarding_pace_few_a_week),
-    WHEN_IT_MATTERS("when-it-matters", R.string.onboarding_pace_when_it_matters),
-    WEEKLY_WRAP("weekly-wrap", R.string.onboarding_pace_weekly_wrap),
+    DAILY("daily", R.string.onboarding_pace_daily, R.string.onboarding_pace_daily_detail, PbblsIcon.SUNSHINE),
+    FEW_A_WEEK("few-a-week", R.string.onboarding_pace_few_a_week, R.string.onboarding_pace_few_a_week_detail, PbblsIcon.PATH),
+    WHEN_IT_MATTERS(
+        "when-it-matters",
+        R.string.onboarding_pace_when_it_matters,
+        R.string.onboarding_pace_when_it_matters_detail,
+        PbblsIcon.PEBBLE_ROUND,
+    ),
+    WEEKLY_WRAP("weekly-wrap", R.string.onboarding_pace_weekly_wrap, R.string.onboarding_pace_weekly_wrap_detail, PbblsIcon.CALENDAR_DAY),
 }
 
 /** One first person (step 5): a name as typed and the glyph on their piece. Always a glyph: `souls.glyph_id` is not null. */
