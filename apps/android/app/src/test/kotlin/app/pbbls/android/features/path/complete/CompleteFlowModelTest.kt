@@ -91,4 +91,15 @@ class CompleteFlowModelTest {
         assertEquals(CompleteStep.SUCCESS, model.step)
         assertEquals(listOf(TapHaptic.WARNING, TapHaptic.SUCCESS), haptics)
     }
+
+    @Test
+    fun `a quiet success moves to success without the success buzz`() {
+        model.goTo(CompleteStep.PRIVACY)
+        model.beginComplete()
+        model.fail(R.string.pebble_error_soul_gone)
+        model.beginComplete()
+        model.succeed(CompleteResult(pebbleId = "p-1", karmaDelta = 5, glyph = null), quiet = true)
+        assertEquals(CompleteStep.SUCCESS, model.step)
+        assertEquals(listOf(TapHaptic.WARNING), haptics)
+    }
 }

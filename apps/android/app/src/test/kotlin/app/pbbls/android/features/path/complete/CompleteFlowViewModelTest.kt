@@ -63,10 +63,10 @@ class CompleteFlowViewModelTest {
                 haptics = HapticsPreference(inMemorySettings()),
             )
 
-        fun answerEverything() {
+        fun answerEverything(valence: Valence = Valence.LOWLIGHT_MEDIUM) {
             val m = viewModel.machine()
             m.seedValenceIfNeeded()
-            m.selectValence(Valence.LOWLIGHT_LARGE)
+            m.selectValence(valence)
             m.advance()
             m.selectEmotion("e-1")
             m.selectDomain("d-1")
@@ -89,7 +89,7 @@ class CompleteFlowViewModelTest {
             advanceUntilIdle()
 
             assertEquals(
-                PebbleCompletePayload("m-1", "e-1", 3, -1, Visibility.PRIVATE, listOf("d-1"), emptyList(), emptyList()),
+                PebbleCompletePayload("m-1", "e-1", 2, -1, Visibility.PRIVATE, listOf("d-1"), emptyList(), emptyList()),
                 h.write.completed.single(),
             )
             assertTrue(h.snapshots.stored.isEmpty())
@@ -100,6 +100,24 @@ class CompleteFlowViewModelTest {
             assertEquals(CompleteStep.SUCCESS, flow.step)
             assertEquals(CompleteResult("pebble-new", 5, UiFixtures.pebbleGlyph()), flow.completed)
             assertEquals("Swim", h.viewModel.uiState.value.momentName)
+        }
+
+    @Test
+    fun `a high-distress completion still succeeds but checks no achievements`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.write.karma = 5
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            h.answerEverything(Valence.LOWLIGHT_LARGE)
+            h.viewModel.complete()
+            advanceUntilIdle()
+
+            assertEquals(0, h.achievements.fireCheckCount)
+            val flow = h.viewModel.uiState.value.flow
+            assertEquals(CompleteStep.SUCCESS, flow.step)
+            // The server still granted the karma; only the client celebration is withheld.
+            assertEquals(5, flow.completed?.karmaDelta)
         }
 
     @Test
