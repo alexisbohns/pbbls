@@ -17,6 +17,9 @@ struct CompleteRicherStep: View {
     /// Nil when the host cannot start another capture (the held card).
     let onRecordAnother: (() -> Void)?
     let onEdited: () -> Void
+    /// Reference renders only: ImageRenderer draws neither ScrollView content
+    /// nor Menus, so `false` also draws the two menu rows as plain rows.
+    var scrolls = true
 
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(ReferenceDataService.self) private var refs
@@ -33,8 +36,10 @@ struct CompleteRicherStep: View {
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "complete-richer")
 
     init(momentId: UUID, name: String?, happenedAt: Date?, result: CompletionResult, draft: CompleteDraft,
-         hasWords: Bool, onExit: @escaping () -> Void, onRecordAnother: (() -> Void)?, onEdited: @escaping () -> Void) {
+         hasWords: Bool, onExit: @escaping () -> Void, onRecordAnother: (() -> Void)?, onEdited: @escaping () -> Void,
+         scrolls: Bool = true) {
         self.momentId = momentId
+        self.scrolls = scrolls
         self.name = name
         self.happenedAt = happenedAt
         self.result = result
@@ -48,64 +53,12 @@ struct CompleteRicherStep: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: Spacing.xl) {
-                PebbleStoneView(
-                    valence: draft.valence ?? .neutralMedium,
-                    glyph: result.glyph,
-                    palette: draft.emotionId.flatMap { palettes.palette(for: $0) },
-                    followsTilt: true
-                )
-                .frame(maxWidth: .infinity)
-                .frame(height: 240)
-                .padding(.top, Spacing.lg)
-
-                VStack(spacing: Spacing.sm) {
-                    MomentNameText(name: name, untitledFont: .ysabeauSemiboldItalic(28))
-                        .pebblesFont(.title)
-                        .multilineTextAlignment(.center)
-                    if let karma = result.karmaDelta, karma > 0 {
-                        HStack(spacing: 6) {
-                            PbblsIconImage(.karmaDot, size: 18, relativeTo: .headline,
-                                           style: AnyShapeStyle(Color.pebbles.primary))
-                            Text("+\(karma) karma").pebblesFont(.headline).foregroundStyle(Color.pebbles.onSurface)
-                        }
-                        .accessibilityElement(children: .combine)
-                        .accessibilityLabel(Text("Earned \(karma) karma"))
-                    }
-                    if let happenedAt {
-                        RicherWeekRow(date: happenedAt)
-                            .padding(.top, Spacing.sm)
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: Spacing.sm) {
-                    Text("MAKE IT RICHER")
-                        .pebblesFont(.meta)
-                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                    Group {
-                        if !refs.collections.isEmpty { collectionRow }
-                        visibilityRow
-                        if !hasWords { wordsRow }
-                    }
-                    .disabled(isEditing)
-                    if let editError {
-                        Text(verbatim: editError).pebblesFont(.subhead).foregroundStyle(Color.pebbles.error)
-                    }
-                }
-
-                VStack(spacing: Spacing.xs) {
-                    Button("Done", action: onExit).buttonStyle(PebblesPrimaryButtonStyle())
-                    if let onRecordAnother {
-                        Button("Record another", action: onRecordAnother)
-                            .pebblesFont(.bodyEmphasized)
-                            .foregroundStyle(Color.pebbles.primary)
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                    }
-                }
+        Group {
+            if scrolls {
+                ScrollView { content }
+            } else {
+                content
             }
-            .padding(.horizontal, Spacing.lg)
-            .padding(.bottom, Spacing.lg)
         }
         .sheet(item: $words) { detail in
             EditMomentSheet(detail: detail, onSaved: {
@@ -115,39 +68,107 @@ struct CompleteRicherStep: View {
         }
     }
 
-    // MARK: Rows
+    private var content: some View {
+        VStack(spacing: Spacing.xl) {
+            PebbleStoneView(
+                valence: draft.valence ?? .neutralMedium,
+                glyph: result.glyph,
+                palette: draft.emotionId.flatMap { palettes.palette(for: $0) },
+                followsTilt: true
+            )
+            .frame(maxWidth: .infinity)
+            .frame(height: 240)
+            .padding(.top, Spacing.lg)
 
-    private var collectionRow: some View {
-        Menu {
-            ForEach(refs.collections) { collection in
-                Button {
-                    Task { await edit(collectionId: collection.id) }
-                } label: {
-                    Label { Text(verbatim: collection.name) } icon: {
-                        if collection.id == collectionId { Image(PbblsIcon.checkmarkDot.assetName).renderingMode(.template) }
+            VStack(spacing: Spacing.sm) {
+                MomentNameText(name: name, untitledFont: .ysabeauSemiboldItalic(28))
+                    .pebblesFont(.title)
+                    .multilineTextAlignment(.center)
+                if let karma = result.karmaDelta, karma > 0 {
+                    HStack(spacing: 6) {
+                        PbblsIconImage(.karmaDot, size: 18, relativeTo: .headline,
+                                       style: AnyShapeStyle(Color.pebbles.primary))
+                        Text("+\(karma) karma").pebblesFont(.headline).foregroundStyle(Color.pebbles.onSurface)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(Text("Earned \(karma) karma"))
+                }
+                if let happenedAt {
+                    RicherWeekRow(date: happenedAt)
+                        .padding(.top, Spacing.sm)
                 }
             }
-            if collectionId != nil {
-                Button("Remove from collection") { Task { await edit(collectionId: nil) } }
+
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                Text("MAKE IT RICHER")
+                    .pebblesFont(.meta)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                Group {
+                    if !refs.collections.isEmpty { collectionRow }
+                    visibilityRow
+                    if !hasWords { wordsRow }
+                }
+                .disabled(isEditing)
+                if let editError {
+                    Text(verbatim: editError).pebblesFont(.subhead).foregroundStyle(Color.pebbles.error)
+                }
             }
-        } label: {
-            row(icon: .collection, title: "Add to a collection",
-                value: collectionId.flatMap { id in refs.collections.first { $0.id == id }?.name })
+
+            VStack(spacing: Spacing.xs) {
+                Button("Done", action: onExit).buttonStyle(PebblesPrimaryButtonStyle())
+                if let onRecordAnother {
+                    Button("Record another", action: onRecordAnother)
+                        .pebblesFont(.bodyEmphasized)
+                        .foregroundStyle(Color.pebbles.primary)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
+            }
+        }
+        .padding(.horizontal, Spacing.lg)
+        .padding(.bottom, Spacing.lg)
+    }
+
+    // MARK: Rows
+
+    @ViewBuilder
+    private var collectionRow: some View {
+        let label = row(icon: .collection, title: "Add to a collection",
+                        value: collectionId.flatMap { id in refs.collections.first { $0.id == id }?.name })
+        if !scrolls {
+            label
+        } else {
+            Menu {
+                ForEach(refs.collections) { collection in
+                    Button {
+                        Task { await edit(collectionId: collection.id) }
+                    } label: {
+                        Label { Text(verbatim: collection.name) } icon: {
+                            if collection.id == collectionId { Image(PbblsIcon.checkmarkDot.assetName).renderingMode(.template) }
+                        }
+                    }
+                }
+                if collectionId != nil {
+                    Button("Remove from collection") { Task { await edit(collectionId: nil) } }
+                }
+            } label: { label }
         }
     }
 
+    @ViewBuilder
     private var visibilityRow: some View {
-        Menu {
-            ForEach(Visibility.allCases) { grade in
-                Button {
-                    Task { await edit(visibility: grade) }
-                } label: {
-                    Label { Text(grade.label) } icon: { if grade == visibility { Image(PbblsIcon.checkmarkDot.assetName).renderingMode(.template) } }
+        let label = row(icon: .abstractKey, title: "Who can see it", value: String(localized: visibility.label))
+        if !scrolls {
+            label
+        } else {
+            Menu {
+                ForEach(Visibility.allCases) { grade in
+                    Button {
+                        Task { await edit(visibility: grade) }
+                    } label: {
+                        Label { Text(grade.label) } icon: { if grade == visibility { Image(PbblsIcon.checkmarkDot.assetName).renderingMode(.template) } }
+                    }
                 }
-            }
-        } label: {
-            row(icon: .abstractKey, title: "Who can see it", value: String(localized: visibility.label))
+            } label: { label }
         }
     }
 

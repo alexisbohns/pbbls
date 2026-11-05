@@ -6,6 +6,8 @@ import SwiftUI
 /// with the four most-tagged people and More.
 struct CompleteLifeStep: View {
     let model: CompleteFlowModel
+    /// Reference renders only: ImageRenderer draws neither ScrollView content nor TextFields.
+    var scrolls = true
 
     @Environment(ReferenceDataService.self) private var refs
     @Environment(SupabaseService.self) private var supabase
@@ -27,18 +29,12 @@ struct CompleteLifeStep: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.md) {
-                    if !recent.isEmpty {
-                        sectionLabel("RECENT")
-                        grid(recent)
-                    }
-                    sectionLabel("ALL")
-                    grid(refs.domains)
-                }
-                .padding(.bottom, Spacing.lg)
+            if scrolls {
+                ScrollView { domainsList }
+                    .scrollBounceBehavior(.basedOnSize)
+            } else {
+                domainsList.frame(maxHeight: .infinity, alignment: .top)
             }
-            .scrollBounceBehavior(.basedOnSize)
             captionBar
             VStack(spacing: 0) {
                 UsualSoulsStrip(souls: refs.souls, selection: model.draft.soulIds,
@@ -61,6 +57,18 @@ struct CompleteLifeStep: View {
             SoulChooserSheet(title: "Who was there?", currentSelection: model.draft.soulIds,
                              allowsSkip: true, detents: [.large], onConfirm: { model.setSouls($0) })
         }
+    }
+
+    private var domainsList: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            if !recent.isEmpty {
+                sectionLabel("RECENT")
+                grid(recent)
+            }
+            sectionLabel("ALL")
+            grid(refs.domains)
+        }
+        .padding(.bottom, Spacing.lg)
     }
 
     private func sectionLabel(_ text: LocalizedStringResource) -> some View {

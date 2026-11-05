@@ -49,6 +49,8 @@ struct RecordStepScaffold<Content: View>: View {
     /// Shown under the primary action. Ignored when `contentFillsHeight`,
     /// whose floating pill has no room beneath it.
     var secondaryAction: RecordStepSecondaryAction?
+    /// Reference renders only: ImageRenderer draws neither ScrollView content nor TextFields.
+    var scrolls = true
     @ViewBuilder let content: () -> Content
 
     var body: some View {
@@ -83,12 +85,7 @@ struct RecordStepScaffold<Content: View>: View {
                         .overlay(alignment: .bottom) { floatingAction }
                 }
             } else {
-                ScrollView {
-                    content()
-                        .padding(.horizontal, Spacing.lg)
-                        .padding(.bottom, Spacing.lg)
-                }
-                .scrollBounceBehavior(.basedOnSize)
+                scrollingContent
 
                 if let action {
                     VStack(spacing: Spacing.xs) {
@@ -103,6 +100,19 @@ struct RecordStepScaffold<Content: View>: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var scrollingContent: some View {
+        let padded = content()
+            .padding(.horizontal, Spacing.lg)
+            .padding(.bottom, Spacing.lg)
+        if scrolls {
+            ScrollView { padded }
+                .scrollBounceBehavior(.basedOnSize)
+        } else {
+            padded.frame(maxHeight: .infinity, alignment: .top)
+        }
     }
 
     /// A plain text button whose whole 44pt row takes the tap, not only the
