@@ -1,14 +1,16 @@
 package app.pbbls.android.features.onboarding
 
 /**
- * Pure gating logic for the onboarding overlay, extracted from `RootScreen` so
- * it can be unit-tested (the `RootView.onChange(of: session?.user.id)` analog).
- * Onboarding presents the first time a user id appears while the
- * `hasSeenOnboarding` flag (SharedPreferences, D5) is still false.
+ * Pure gating for the onboarding entry (#1510 D10). Present once a user id is known, this device
+ * has not completed the flow (`hasSeenOnboarding`, kept so a device that just finished never
+ * re-pushes while the profile re-reads), and the profile says `onboarding_completed = false`.
+ * While the profile is unknown (null) nothing is presented: Home shows and the push follows the
+ * read, as on web, where the auth callback reads the flag before routing.
  */
 object OnboardingGate {
     fun shouldPresent(
         userId: String?,
         hasSeenOnboarding: Boolean,
-    ): Boolean = userId != null && !hasSeenOnboarding
+        onboardingCompleted: Boolean?,
+    ): Boolean = userId != null && !hasSeenOnboarding && onboardingCompleted == false
 }

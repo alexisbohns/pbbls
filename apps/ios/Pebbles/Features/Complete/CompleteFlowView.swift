@@ -86,6 +86,7 @@ struct CompleteFlowView: View {
                     result: result,
                     valence: model.draft.valence ?? .neutralMedium,
                     emotionId: model.draft.emotionId,
+                    quiet: model.draft.valence?.quietSuccess ?? false,
                     onExit: { dismiss() }
                 )
             } else {
@@ -168,11 +169,19 @@ struct CompleteFlowView: View {
             let karmaAfter = await karmaTotal(service, refId: pebbleId)
             var karmaDelta: Int?
             if let karmaBefore, let karmaAfter { karmaDelta = karmaAfter - karmaBefore }
-            // The success screen shows `+N`, so no capsule (A4).
-            karma.notifyEarned(amount: karmaDelta ?? 0, reason: .pebbleCreated, presentsCapsule: false)
-            achievements.fireCheck()
+            // High distress stays quiet: no sound, haptic or achievement. The
+            // server still grants the karma.
+            let quiet = model.draft.valence?.quietSuccess ?? false
+            if !quiet {
+                // The success screen shows `+N`, so no capsule (A4).
+                karma.notifyEarned(amount: karmaDelta ?? 0, reason: .pebbleCreated, presentsCapsule: false)
+                achievements.fireCheck()
+            }
             autosave?.clear()
-            model.succeed(with: CompletionResult(pebbleId: pebbleId, karmaDelta: karmaDelta, glyph: resolved))
+            model.succeed(
+                with: CompletionResult(pebbleId: pebbleId, karmaDelta: karmaDelta, glyph: resolved),
+                quiet: quiet
+            )
             onCompleted(momentId)
         } catch {
             logger.error("complete_pebble failed: \(error.localizedDescription, privacy: .private)")

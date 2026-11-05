@@ -74,8 +74,12 @@ class CompleteFlowModel(
 
     fun beginComplete() = _state.update { it.copy(isCompleting = true, errorRes = null) }
 
-    fun succeed(result: CompleteResult) {
-        haptic(TapHaptic.SUCCESS)
+    /** [quiet] (a high-distress pebble) completes without the success buzz. */
+    fun succeed(
+        result: CompleteResult,
+        quiet: Boolean = false,
+    ) {
+        if (!quiet) haptic(TapHaptic.SUCCESS)
         _state.update { it.copy(isCompleting = false, completed = result, step = CompleteStep.SUCCESS) }
     }
 

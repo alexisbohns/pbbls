@@ -10,12 +10,18 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
+import app.pbbls.android.core.model.ConsentGateLogic
+import app.pbbls.android.core.model.OnboardingPace
+import app.pbbls.android.core.model.OnboardingReason
 import app.pbbls.android.features.consent.CONSENT_GATE_CONTINUE
 import app.pbbls.android.features.consent.CONSENT_GATE_DELETE
-import app.pbbls.android.features.consent.ConsentGateLogic
 import app.pbbls.android.features.consent.consentRowTag
+import app.pbbls.android.features.onboarding.steps.onboardingConsentTag
+import app.pbbls.android.features.onboarding.steps.onboardingPaceTag
+import app.pbbls.android.features.onboarding.steps.onboardingReasonTag
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeConsentService
+import app.pbbls.android.testing.FakeOnboardingService
 import app.pbbls.android.testing.FakeProfileService
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert.assertEquals
@@ -35,6 +41,8 @@ class RootGateTest : AppUiTest() {
     @Inject lateinit var consents: FakeConsentService
 
     @Inject lateinit var profile: FakeProfileService
+
+    @Inject lateinit var onboardingService: FakeOnboardingService
 
     @Test
     fun `signed out lands on Welcome`() {
@@ -58,12 +66,42 @@ class RootGateTest : AppUiTest() {
     }
 
     @Test
-    fun `a first sign-in shows onboarding over Home`() {
+    fun `a first sign-in walks the onboarding over Home and lands in Home`() {
+        profile.profile = profile.profile.copy(onboardingCompleted = false)
         launch()
         signIn()
 
-        onText(R.string.onboarding_skip).performClick()
+        // 1. promise
+        onText(R.string.onboarding_promise_cta).assertIsDisplayed()
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performClick()
+        // 2. consent: the fake ledger is satisfied by default, so every switch is on and locked
+        onText(R.string.onboarding_consent_title).assertIsDisplayed()
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performScrollTo().performClick()
+        // 3. reasons: one tile, then Continue
+        compose.onNodeWithTag(onboardingReasonTag(OnboardingReason.KEEP_PEOPLE)).performClick()
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performScrollTo().performClick()
+        // 4–5: skipped, Later
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_SKIP).performClick()
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_SKIP).performClick()
+        // 6. pace: one pace, then Start completes
+        compose.onNodeWithTag(onboardingPaceTag(OnboardingPace.WEEKLY_WRAP)).performScrollTo().performClick()
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performScrollTo().performClick()
+        compose.waitForIdle()
 
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
+        onText(R.string.onboarding_promise_cta).assertDoesNotExist()
+        val answers = onboardingService.completeCalls.single()
+        assertEquals(listOf(OnboardingReason.KEEP_PEOPLE), answers.reasons)
+        assertEquals(OnboardingPace.WEEKLY_WRAP, answers.pace)
+    }
+
+    @Test
+    fun `a completed profile never sees onboarding, even on a fresh device`() {
+        profile.profile = profile.profile.copy(onboardingCompleted = true)
+        launch()
+        signIn()
+
+        onText(R.string.onboarding_promise_cta).assertDoesNotExist()
         compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
     }
 
@@ -84,10 +122,10 @@ class RootGateTest : AppUiTest() {
         launch(inviteIntent("tok-1"))
         signOut()
         signIn()
-        onText(R.string.onboarding_skip).assertIsDisplayed()
+        onText(R.string.onboarding_promise_cta).assertIsDisplayed()
         onText(R.string.connections_accept_title).assertDoesNotExist()
 
-        onText(R.string.onboarding_skip).performClick()
+        walkOnboardingWithEverySkip()
 
         onText(R.string.connections_accept_title).assertIsDisplayed()
     }
@@ -118,15 +156,59 @@ class RootGateTest : AppUiTest() {
     }
 
     @Test
-    fun `the gate comes before onboarding`() {
+    fun `the gate stands down for onboarding and checks again when it ends`() {
+        // The promise comes before the consent (#1510 D2): the flow's step 2
+        // collects the acts, and the overlay only decides once the flow is done.
         consents.rows.clear()
         launch()
         signIn()
 
+        onText(R.string.onboarding_promise_cta).assertIsDisplayed()
+        onText(R.string.consent_gate_title).assertDoesNotExist()
+
+        // Step 2 asks for every act and records them on Continue; the gate's re-check after the flow
+        // finds the ledger satisfied and stands down without asking again.
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performClick()
+        onText(R.string.onboarding_consent_title).assertIsDisplayed()
+        onText(R.string.consent_gate_title).assertDoesNotExist()
+        ConsentGateLogic.REQUIRED.forEach { compose.onNodeWithTag(onboardingConsentTag(it)).performScrollTo().performClick() }
+        compose.waitForIdle()
+        assertEquals("a switch alone writes nothing", 0, consents.recordCalls.size)
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performScrollTo().performClick()
+        compose.waitForIdle()
+        assertEquals(4, consents.recordCalls.size)
+        repeat(4) { compose.onNodeWithTag(JourneyTags.ONBOARDING_SKIP).performClick() }
+        compose.waitForIdle()
+
+        onText(R.string.consent_gate_title).assertDoesNotExist()
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
+        assertEquals(4, consents.recordCalls.size)
+    }
+
+    @Test
+    fun `a gate that failed at sign-in checks again once the flow ends`() {
+        // Offline at sign-in: the gate's check fails behind the flow, whose own read a moment
+        // later finds every act on record, so step 2 is locked on and records nothing. The
+        // flow's end restarts the gate, and the ledger has lost an act by then.
+        consents.activeFailure = IOException("offline")
+        consents.activeFailsOnce = true
+        launch()
+        signIn()
+
+        onText(R.string.onboarding_promise_cta).assertIsDisplayed()
+        onText(R.string.consent_gate_retry).assertDoesNotExist()
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performClick()
+        onText(R.string.onboarding_consent_title).assertIsDisplayed()
+        assertEquals(0, consents.recordCalls.size)
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performScrollTo().performClick()
+        consents.rows.clear()
+        repeat(4) { compose.onNodeWithTag(JourneyTags.ONBOARDING_SKIP).performClick() }
+        compose.waitForIdle()
+
+        onText(R.string.onboarding_promise_cta).assertDoesNotExist()
         onText(R.string.consent_gate_title).assertIsDisplayed()
         acceptEveryConsent()
-
-        onText(R.string.onboarding_skip).assertIsDisplayed()
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
     }
 
     @Test
@@ -213,6 +295,14 @@ class RootGateTest : AppUiTest() {
         assertEquals(1, supabase.signOutCount)
         assertEquals(0, consents.recordCalls.size)
         onText(R.string.welcome_log_in).assertIsDisplayed()
+    }
+
+    /** Through the flow with the fake's satisfied ledger: promise, consent (locked on), then four skips. */
+    private fun walkOnboardingWithEverySkip() {
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performClick()
+        compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performScrollTo().performClick()
+        repeat(4) { compose.onNodeWithTag(JourneyTags.ONBOARDING_SKIP).performClick() }
+        compose.waitForIdle()
     }
 
     private fun acceptEveryConsent() {

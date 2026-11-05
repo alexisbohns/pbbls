@@ -46,11 +46,18 @@ struct ConsentMetadataTests {
         let files = try FileManager.default.contentsOfDirectory(atPath: dir.path)
             .filter { $0.hasSuffix(".sql") }
             .sorted()
+        // The latest migration that DEFINES the function: later ones may only
+        // name it (a `revoke execute on function public.handle_new_user()`).
+        let definition = try NSRegularExpression(
+            pattern: #"create\s+(or\s+replace\s+)?function\s+public\.handle_new_user\s*\("#,
+            options: .caseInsensitive
+        )
         let latest = try #require(files.last { name in
             let sql = (try? String(contentsOf: dir.appendingPathComponent(name), encoding: .utf8)) ?? ""
-            return sql.contains("function public.handle_new_user")
+            return definition.firstMatch(in: sql, range: NSRange(sql.startIndex..., in: sql)) != nil
         })
         let sql = try String(contentsOf: dir.appendingPathComponent(latest), encoding: .utf8)
+        try #require(sql.contains("raw_user_meta_data"), "\(latest) defines handle_new_user but reads no metadata")
         let read = try Self.quoted(in: sql, pattern: #"raw_user_meta_data->>'([a-z_]+)'"#)
             .subtracting(["full_name"]) // the display name, not a consent act
         #expect(Set(Self.payload.keys) == read, "against \(latest)")
