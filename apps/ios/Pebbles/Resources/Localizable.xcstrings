@@ -808,23 +808,6 @@
         }
       }
     },
-    "A name, a photo, or both." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A name, a photo, or both."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un nom, une photo, ou les deux."
-          }
-        }
-      }
-    },
     "A new link retires this one. Anyone still holding it won't be able to connect." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7356,6 +7339,23 @@
         }
       }
     },
+    "Just write" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just write"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juste écrire"
+          }
+        }
+      }
+    },
     "Karma" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8426,23 +8426,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Facultatif"
-          }
-        }
-      }
-    },
-    "Or skip it and write from memory." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Or skip it and write from memory."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ou passe et écris de mémoire."
           }
         }
       }
@@ -11666,6 +11649,23 @@
         }
       }
     },
+    "Pick one, or write it from memory." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick one, or write it from memory."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis-en une, ou écris de mémoire."
+          }
+        }
+      }
+    },
     "Please sign in again." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13282,23 +13282,6 @@
         }
       }
     },
-    "What do you call it?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What do you call it?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu l'appelles comment ?"
-          }
-        }
-      }
-    },
     "What part of life?" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13550,6 +13533,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ma vie est un chemin."
+          }
+        }
+      }
+    },
+    "Your moment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your moment"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton moment"
           }
         }
       }

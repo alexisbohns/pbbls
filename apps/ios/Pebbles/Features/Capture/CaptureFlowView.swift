@@ -125,7 +125,7 @@ struct CaptureFlowView: View {
             action: action(for: model.step),
             // The library grid runs to the bottom, `Skip`/`Done` over it.
             contentFillsHeight: model.step == .photo,
-            secondaryAction: model.step == .name && !chainsComplete
+            secondaryAction: model.step == .moment && !chainsComplete
                 ? RecordStepSecondaryAction(
                     label: "Make it a pebble now",
                     enabled: canSaveNow,
@@ -166,16 +166,8 @@ struct CaptureFlowView: View {
             // A save started from the close dialog sends the photo on screen;
             // neither a new pick nor Remove may change it under the save.
             .disabled(model.isSaving)
-        case .when:
-            RecordWhenStep(
-                happenedAt: Binding(
-                    get: { model.draft.happenedAt },
-                    set: { model.setHappenedAt($0) }
-                ),
-                // Only while the date on screen is still the photo's.
-                seededFromPhoto: snaps?.pickedCaptureDate != nil && !model.hasEditedDate
-            )
-        case .name:
+        case .moment:
+            // Task 4.6 replaces this.
             VStack(spacing: Spacing.md) {
                 RecordNameStep(
                     name: model.draft.name,
@@ -203,12 +195,11 @@ struct CaptureFlowView: View {
     private func action(for step: CaptureStep) -> RecordStepAction {
         switch step {
         case .photo:
-            return .primary(model.optionalButtonIsSkip ? "Skip" : "Done", enabled: true, loading: false) {
+            // Task 4.6 replaces this.
+            return .primary("Just write", enabled: true, loading: false) {
                 model.advance()
             }
-        case .when:
-            return .primary("Continue", enabled: true, loading: false) { model.advance() }
-        case .name:
+        case .moment:
             return .primary(chainsComplete ? "Make it a pebble now" : "Save moment", enabled: canSaveNow, loading: model.isSaving && (chainsComplete || !savingThenComplete)) {
                 Task { await save(thenComplete: chainsComplete) }
             }
@@ -275,9 +266,9 @@ struct CaptureFlowView: View {
     }
 
     /// A save can start from the close dialog on any step; the error lives on
-    /// the name step, so a failure lands there to be seen.
+    /// the moment page, so a failure lands there to be seen.
     private func failSave(_ message: String) {
-        if model.step != .name { model.go(to: .name) }
+        if model.step != .moment { model.go(to: .moment) }
         model.fail(message)
     }
 }

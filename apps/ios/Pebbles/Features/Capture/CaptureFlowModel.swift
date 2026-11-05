@@ -9,6 +9,10 @@ final class CaptureFlowModel {
 
     /// Front-end only, as in the M58 flow.
     static let nameLimit = 40
+    /// Front-end only, as the name. Three visible lines with a counter.
+    static let descriptionLimit = 280
+
+    enum WhenSource: Equatable { case now, photo, edited }
 
     var draft = CaptureDraft()
     private(set) var step: CaptureStep = .photo
@@ -16,9 +20,16 @@ final class CaptureFlowModel {
     var hasSnap = false
     private(set) var isSaving = false
     private(set) var saveError: String?
-    /// Set once the user changes the when step themselves: a photo's capture
-    /// date then never overrides their choice.
+    /// Set once the user changes the date themselves: a photo's capture date
+    /// then never overrides their choice.
     private(set) var hasEditedDate = false
+    /// Whether the when chip's date came from the photo.
+    private(set) var seededFromPhoto = false
+
+    var whenSource: WhenSource {
+        if hasEditedDate { return .edited }
+        return seededFromPhoto ? .photo : .now
+    }
 
     private let haptic: @MainActor (TapHaptic) -> Void
 
@@ -28,9 +39,6 @@ final class CaptureFlowModel {
 
     /// D3: a moment needs a name or a photo.
     var canSave: Bool { hasSnap || MomentName.display(draft.name) != nil }
-
-    /// `Skip` on the photo step until a photo is picked, then `Done`.
-    var optionalButtonIsSkip: Bool { step == .photo && !hasSnap }
 
     func advance() {
         guard let next = step.next else { return }
@@ -52,7 +60,18 @@ final class CaptureFlowModel {
         draft.name = String(raw.prefix(Self.nameLimit))
     }
 
-    /// The user's own edit on the when step.
+    func setDescription(_ raw: String) {
+        draft.description = String(raw.prefix(Self.descriptionLimit))
+    }
+
+    /// A draft from `CaptureDraftStore` after a kill (D2): straight to the page.
+    func restore(_ saved: CaptureDraft, hasEditedDate: Bool) {
+        draft = saved
+        self.hasEditedDate = hasEditedDate
+        step = .moment
+    }
+
+    /// The user's own edit of the when chip.
     func setHappenedAt(_ date: Date) {
         hasEditedDate = true
         draft.happenedAt = date
@@ -62,6 +81,7 @@ final class CaptureFlowModel {
     /// set it.
     func applyCaptureDate(_ date: Date?) {
         guard let date, !hasEditedDate else { return }
+        seededFromPhoto = true
         draft.happenedAt = date
     }
 
