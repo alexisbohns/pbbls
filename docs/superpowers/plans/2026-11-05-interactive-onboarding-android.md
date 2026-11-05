@@ -13,6 +13,8 @@
 - Android's sign-up already records the four consent acts, so step 2 shows an already-recorded act as a switch that is on and locked; only missing acts are asked (D3 and D10, "already recorded are not re-asked").
 - The glyph-drawing satellite is a content swap inside the onboarding entry (the way `GlyphPickerContent` hosts the carve studio), not a pushed `GlyphCarve` key: a pushed entry has no way to hand the carved glyph back.
 
+- **Correction, found on the device pass (2026-11-05):** Task 6.2 below sends `soul_ids` through `save_moment`, which ignores them: only `complete_pebble` reads `soul_ids`, and there is no moment-to-soul table. The shipped hand-off opens the composer with the prompt and attaches nobody; D9's "first soul pre-attached" is an open question on #1510. Task 6.2's payload, prefill and name lookup were removed in the build.
+
 ---
 
 ## Stack and branches
