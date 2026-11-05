@@ -33,6 +33,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
@@ -42,6 +43,11 @@ import { SANDBOX_SOULS } from "@/lib/seed/sandbox-pebbles"
 import { Specimen } from "../Specimen"
 
 /** Primitives that portal to <body>: each behind a trigger, themed through <html>. */
+const SELECT_ITEMS = [
+  { value: "fr", label: "France" },
+  { value: "us", label: "United States" },
+]
+
 export function OverlaySpecimens() {
   const [sort, setSort] = useState("newest")
   const [soulId, setSoulId] = useState(SANDBOX_SOULS[0].id)
@@ -138,6 +144,21 @@ export function OverlaySpecimens() {
           <PopoverTrigger render={<Button variant="outline" />}>Open popover</PopoverTrigger>
           <PopoverContent className="w-64 text-sm">Popovers use the popover surface.</PopoverContent>
         </Popover>
+      </Specimen>
+
+      <Specimen id="select">
+        <Select items={SELECT_ITEMS} defaultValue="fr">
+          <SelectTrigger className="w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SELECT_ITEMS.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </Specimen>
 
       <Specimen id="dropdown-menu">

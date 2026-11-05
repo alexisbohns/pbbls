@@ -208,6 +208,12 @@
   },
   "settings": {
     "linkSections": { "legal": "Legal", "about": "About", "support": "Support" },
+    "support": {
+      "title": "Get support",
+      "intro": "If you are in danger or thinking about hurting yourself, call now. These lines are free and confidential.",
+      "country": "Country",
+      "verified": "Numbers checked on {date}"
+    },
     "title": "Settings",
     "save": "Save",
     "saving": "Saving…",
@@ -1151,6 +1157,8 @@
       },
       "success": {
         "karma": "+{count} karma",
+        "quiet": "Thank you for keeping this. If today is heavy, support is one tap away.",
+        "getSupport": "Get support",
         "exit": "Back to my path"
       }
     },
