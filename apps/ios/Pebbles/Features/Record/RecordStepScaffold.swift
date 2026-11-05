@@ -32,6 +32,9 @@ struct RecordStepSecondaryAction {
 struct RecordStepScaffold<Content: View>: View {
     let title: LocalizedStringResource
     var subtitle: LocalizedStringResource?
+    /// Drawn in place of the subtitle when set: the Complete flow's summary
+    /// pill (D11), which replaces the step's words with the answers so far.
+    var pill: AnyView?
     var action: RecordStepAction?
     /// When true the content fills the space beneath the title instead of
     /// scrolling, and the action floats over its bottom edge. The photo step
@@ -56,7 +59,9 @@ struct RecordStepScaffold<Content: View>: View {
                     .foregroundStyle(Color.pebbles.onSurface)
                     .multilineTextAlignment(.center)
 
-                if let subtitle {
+                if let pill {
+                    pill
+                } else if let subtitle {
                     Text(subtitle)
                         .pebblesFont(.subhead)
                         .foregroundStyle(Color.pebbles.onSurfaceVariant)

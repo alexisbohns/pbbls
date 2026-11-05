@@ -13,6 +13,7 @@ struct CompleteFlowView: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(ReferenceDataService.self) private var refs
+    @Environment(EmotionPaletteService.self) private var palettes
     @Environment(KarmaNotificationService.self) private var karma
     @Environment(AchievementsService.self) private var achievements
     @Environment(CompleteDraftStore.self) private var drafts
@@ -100,6 +101,7 @@ struct CompleteFlowView: View {
                 RecordStepScaffold(
                     title: model.step.title,
                     subtitle: model.step.subtitle,
+                    pill: model.step == .valence ? nil : AnyView(summaryPill),
                     action: action(for: model.step),
                     // The life step scrolls itself and pins its bar; a scaffold
                     // ScrollView would unpin it.
@@ -114,6 +116,17 @@ struct CompleteFlowView: View {
             insertion: .move(edge: isMovingBack ? .leading : .trailing).combined(with: .opacity),
             removal: .move(edge: isMovingBack ? .trailing : .leading).combined(with: .opacity)
         ))
+    }
+
+    /// The answers so far (D11). On the emotion step Edit returns to the
+    /// valence; on Life, to the emotion, the last answer, unless it was
+    /// skipped by a restore and the valence is all there is to edit.
+    private var summaryPill: some View {
+        RecordSummaryPill(
+            valence: model.draft.valence,
+            emotionName: model.draft.emotionId.flatMap { palettes.byEmotionId[$0]?.localizedName },
+            onEdit: { model.go(to: model.step == .life && model.draft.emotionId != nil ? .emotion : .valence) }
+        )
     }
 
     /// The one action a step offers, if any. The emotion step offers none:
