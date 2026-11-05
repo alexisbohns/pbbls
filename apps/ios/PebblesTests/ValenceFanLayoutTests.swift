@@ -103,6 +103,18 @@ struct ValenceFanLayoutTests {
         }
     }
 
+    @Test("the row labels clear every stone, even a chosen one")
+    func rowLabelsClearStones() {
+        for size in ValenceSizeGroup.allCases {
+            let box = ValenceFanLayout.rowLabelBox(for: size)
+            #expect(box.minX >= 0 && box.maxY <= ValenceFanLayout.reference.height, "\(size) label off canvas")
+            for valence in Valence.allCases {
+                #expect(!box.intersects(ValenceFanLayout.selectedFrame(for: valence)),
+                        "\(size) label hits a chosen \(valence)")
+            }
+        }
+    }
+
     @Test("placement is deterministic")
     func placementIsDeterministic() {
         for valence in Valence.allCases {

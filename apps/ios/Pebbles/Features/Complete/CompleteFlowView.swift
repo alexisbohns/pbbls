@@ -64,10 +64,12 @@ struct CompleteFlowView: View {
                     ownerId: { [supabase] in supabase.session?.user.id }
                 )
             }
+            restoreIfReady()
+            // After the restore: a slow read must not delay it, and the step
+            // consumes the flag through `onChange(initial:)`, so order is free.
             if let moments = try? await MomentsService(client: supabase.client).pathMoments() {
                 isFirstPebble = !moments.contains(where: \.isCompleted)
             }
-            restoreIfReady()
         }
         // `.task` may run before the reference fetch settles (#647).
         .onChange(of: refs.hasLoaded) { _, _ in restoreIfReady() }

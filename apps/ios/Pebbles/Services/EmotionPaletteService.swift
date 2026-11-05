@@ -9,8 +9,8 @@ import os
 /// loader gates on `didFinishLoading`. Render surfaces look up by `emotion.id`
 /// via `palette(for:)`. A miss (cache not warm yet, or a bad row that the
 /// decoder rejected) returns `nil` — callers fall back to
-/// `Color.pebbles.primary`. No retry on failure;
-/// state recovers on next app launch.
+/// `Color.pebbles.primary`. The emotion picker offers a Retry that calls
+/// `load()` again (D9); `didFinishLoading` stays true across it.
 @Observable
 @MainActor
 final class EmotionPaletteService {

@@ -13,6 +13,8 @@ import SwiftUI
 struct ValencePickerContent: View {
     let selected: Valence?
     let onSelect: (Valence) -> Void
+    /// The help sheet shows the fan alone: its lit stone is the explanation.
+    var showsCaption = true
 
     /// The phone's lean, read by the chosen stone only. Started with the fan,
     /// stopped with it; a pick re-zeroes so the chosen stone starts level.
@@ -29,11 +31,14 @@ struct ValencePickerContent: View {
     private static let minimumHitTarget: CGFloat = 44
     /// The tallest state: the large hand word, the span, and the pyramid.
     private static let captionHeight: CGFloat = 144
+    /// How far the column labels hang below the canvas (their offset plus
+    /// one meta line), so a host that clips the fan can keep them.
+    static let columnLabelTail: CGFloat = Spacing.sm + 14
 
     var body: some View {
         VStack(spacing: Spacing.md) {
             fan
-            caption
+            if showsCaption { caption }
         }
     }
 
@@ -95,24 +100,29 @@ struct ValencePickerContent: View {
         .pebblesFont(.meta)
         .foregroundStyle(Color.pebbles.onSurfaceVariant)
         .padding(.horizontal, Spacing.sm)
-        .offset(y: Spacing.lg)
+        .offset(y: Spacing.sm)
         .accessibilityHidden(true)
     }
 
-    /// Inside the canvas, over the left margin the fan's spread leaves empty
-    /// (the nearest stone edge is ~21 pt in), so it fits the 375 pt phones too.
+    /// Inside the canvas, up the left margin, each at the box
+    /// `ValenceFanLayout.rowLabelBox(for:)` reserves between the rings —
+    /// `ValenceFanLayoutTests` keeps those clear of a selected stone.
     private var rowLabels: some View {
-        VStack(alignment: .leading) {
-            Text(ValenceSizeGroup.large.axisLabel)
-            Spacer()
-            Text(ValenceSizeGroup.medium.axisLabel)
-            Spacer()
-            Text(ValenceSizeGroup.small.axisLabel)
+        ZStack(alignment: .topLeading) {
+            ForEach(ValenceSizeGroup.allCases) { size in
+                let box = ValenceFanLayout.rowLabelBox(for: size)
+                Text(size.axisLabel)
+                    .frame(height: box.height)
+                    .offset(x: box.minX, y: box.minY)
+            }
         }
+        .frame(
+            width: ValenceFanLayout.reference.width,
+            height: ValenceFanLayout.reference.height,
+            alignment: .topLeading
+        )
         .pebblesFont(.meta)
         .foregroundStyle(Color.pebbles.onSurfaceVariant)
-        .padding(.vertical, Spacing.xl)
-        .offset(x: 4)
         .accessibilityHidden(true)
     }
 
