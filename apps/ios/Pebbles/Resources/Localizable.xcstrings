@@ -7845,23 +7845,6 @@
         }
       }
     },
-    "Make it a pebble (%lld)" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Make it a pebble (%lld)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En faire un galet (%lld)"
-          }
-        }
-      }
-    },
     "Make it richer" : {
       "extractionState" : "manual",
       "localizations" : {

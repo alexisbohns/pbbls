@@ -32,16 +32,15 @@ struct RecordStepSecondaryAction {
 struct RecordStepScaffold<Content: View>: View {
     let title: LocalizedStringResource
     var subtitle: LocalizedStringResource?
-    /// Drawn in place of the subtitle when set: the Complete flow's summary
-    /// pill (D11), which replaces the step's words with the answers so far.
-    var pill: AnyView?
     var action: RecordStepAction?
     /// When true the content fills the space beneath the title instead of
     /// scrolling, and the action floats over its bottom edge. The photo step
-    /// uses it so the library grid runs to the bottom of the screen — only
-    /// steps whose action is always enabled should, since a disabled pill is
-    /// an outline and would not read over a photo.
+    /// uses it so the library grid runs to the bottom of the screen.
     var contentFillsHeight: Bool = false
+    /// `contentFillsHeight` only. False when the content draws its own gutters
+    /// and its own bottom bar, edge to edge: the Life step, whose souls strip
+    /// and button sit in a tinted bar the scaffold's gutters would inset.
+    var contentHasGutters: Bool = true
     /// Drawn between the title and a `contentFillsHeight` content, never
     /// scrolled. The photo step's two controls. With it set and `action` nil,
     /// nothing floats over the content.
@@ -54,16 +53,14 @@ struct RecordStepScaffold<Content: View>: View {
     @ViewBuilder let content: () -> Content
 
     var body: some View {
-        VStack(spacing: Spacing.lg) {
+        VStack(spacing: contentFillsHeight ? Spacing.lg : 0) {
             VStack(spacing: Spacing.xs) {
                 Text(title)
                     .pebblesFont(.title)
                     .foregroundStyle(Color.pebbles.onSurface)
                     .multilineTextAlignment(.center)
 
-                if let pill {
-                    pill
-                } else if let subtitle {
+                if let subtitle {
                     Text(subtitle)
                         .pebblesFont(.subhead)
                         .foregroundStyle(Color.pebbles.onSurfaceVariant)
@@ -79,8 +76,8 @@ struct RecordStepScaffold<Content: View>: View {
                         fixedSlot.padding(.horizontal, Spacing.lg)
                     }
                     content()
-                        .padding(.horizontal, Spacing.lg)
-                        .padding(.bottom, Spacing.sm)
+                        .padding(.horizontal, contentHasGutters ? Spacing.lg : 0)
+                        .padding(.bottom, contentHasGutters ? Spacing.sm : 0)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .overlay(alignment: .bottom) { floatingAction }
                 }
@@ -102,16 +99,33 @@ struct RecordStepScaffold<Content: View>: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    /// The scroll region's margin at either end, also the depth of its fades:
+    /// at rest the content sits past the fade; once it moves, it dissolves
+    /// under the title and over the button rather than clipping at a line.
+    private let edgeFade: CGFloat = Spacing.xl
+
     @ViewBuilder
     private var scrollingContent: some View {
-        let padded = content()
-            .padding(.horizontal, Spacing.lg)
-            .padding(.bottom, Spacing.lg)
+        let padded = content().padding(.horizontal, Spacing.lg)
         if scrolls {
             ScrollView { padded }
+                .contentMargins(.vertical, edgeFade, for: .scrollContent)
                 .scrollBounceBehavior(.basedOnSize)
+                .mask(fadeMask)
         } else {
-            padded.frame(maxHeight: .infinity, alignment: .top)
+            padded
+                .padding(.vertical, edgeFade)
+                .frame(maxHeight: .infinity, alignment: .top)
+        }
+    }
+
+    private var fadeMask: some View {
+        VStack(spacing: 0) {
+            LinearGradient(colors: [.clear, Color.pebbles.onSurface], startPoint: .top, endPoint: .bottom)
+                .frame(height: edgeFade)
+            Color.pebbles.onSurface
+            LinearGradient(colors: [Color.pebbles.onSurface, .clear], startPoint: .top, endPoint: .bottom)
+                .frame(height: edgeFade)
         }
     }
 

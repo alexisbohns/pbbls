@@ -24,7 +24,6 @@ struct CompleteFlowView: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(ReferenceDataService.self) private var refs
-    @Environment(EmotionPaletteService.self) private var palettes
     @Environment(KarmaNotificationService.self) private var karma
     @Environment(AchievementsService.self) private var achievements
     @Environment(CompleteDraftStore.self) private var drafts
@@ -116,13 +115,15 @@ struct CompleteFlowView: View {
                 RecordStepScaffold(
                     title: model.step.title,
                     subtitle: valenceSubtitle ?? model.step.subtitle,
-                    pill: model.step == .valence ? nil : AnyView(summaryPill),
                     action: action(for: model.step),
-                    // The life step scrolls itself and pins its bar; a scaffold
-                    // ScrollView would unpin it.
-                    contentFillsHeight: model.step == .life
+                    // The life step scrolls itself and pins its own bar, edge
+                    // to edge; a scaffold ScrollView would unpin it.
+                    contentFillsHeight: model.step == .life,
+                    contentHasGutters: model.step != .life
                 ) {
-                    CompleteStepContent(step: model.step, model: model, isFirstPebble: isFirstPebble)
+                    CompleteStepContent(step: model.step, model: model, isFirstPebble: isFirstPebble) {
+                        Task { await complete() }
+                    }
                 }
             }
         }
@@ -138,35 +139,15 @@ struct CompleteFlowView: View {
         return "Moment saved · 3 questions to make it a pebble"
     }
 
-    /// The answers so far (D11). On the emotion step Edit returns to the
-    /// valence; on Life, to the emotion, the last answer, unless it was
-    /// skipped by a restore and the valence is all there is to edit.
-    private var summaryPill: some View {
-        RecordSummaryPill(
-            valence: model.draft.valence,
-            emotionName: model.draft.emotionId.flatMap { palettes.byEmotionId[$0]?.localizedName },
-            onEdit: { model.go(to: model.step == .life && model.draft.emotionId != nil ? .emotion : .valence) }
-        )
-    }
-
     /// The one action a step offers, if any. The emotion step offers none:
-    /// the pick is the advance (A1). The life step's button counts the domains
-    /// past the first (D10).
+    /// the pick is the advance (A1). The life step draws "Make it a pebble"
+    /// in its own bar, under the souls strip (D10).
     private func action(for step: CompleteStep) -> RecordStepAction? {
         switch step {
-        case .emotion, .success:
+        case .emotion, .life, .success:
             return nil
         case .valence:
             return .primary("Continue", enabled: model.isAnswered, loading: false) { model.advance() }
-        case .life:
-            let count = model.draft.domainIds.count
-            return .primary(
-                count > 1 ? "Make it a pebble (\(count))" : "Make it a pebble",
-                enabled: model.draft.isComplete,
-                loading: model.isCompleting
-            ) {
-                Task { await complete() }
-            }
         }
     }
 

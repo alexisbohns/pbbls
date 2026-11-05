@@ -117,16 +117,17 @@ extension References {
         private static func life(height: CGFloat = pageHeight) -> some View {
             let model = CompleteFlowModel(haptic: { _ in })
             model.draft.valence = .highlightMedium
+            // A complete draft, so the bar's button renders enabled.
+            model.draft.emotionId = uuid(23)
             model.draft.domainIds = [domains[0].id, domains[2].id]
             model.draft.soulIds = [SoulFixtures.sixteen[0].id]
             return host(height: height) {
                 RecordStepScaffold(
                     title: "What part of life?",
-                    pill: AnyView(RecordSummaryPill(valence: .highlightMedium, emotionName: "Joyful", onEdit: {})),
-                    action: .primary("Make it a pebble", enabled: true, loading: false) {},
-                    contentFillsHeight: true
+                    contentFillsHeight: true,
+                    contentHasGutters: false
                 ) {
-                    CompleteLifeStep(model: model, scrolls: false)
+                    CompleteLifeStep(model: model, onComplete: {}, scrolls: false)
                 }
             }
         }
@@ -167,7 +168,7 @@ extension References {
             ReferenceImage.assertMatches(Self.life(), named: "life", config: Self.config(scheme))
         }
 
-        /// The device-pass gate: two columns still hold, the strip stays clear of the pill.
+        /// The device-pass gate: one column at this size, the bar still holds the strip and the button.
         @Test
         func lifeAx2() {
             ReferenceImage.assertMatches(Self.life(height: Self.lifeAx2Height), named: "life",
