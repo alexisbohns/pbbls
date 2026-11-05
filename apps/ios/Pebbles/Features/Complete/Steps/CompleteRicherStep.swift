@@ -130,6 +130,11 @@ struct CompleteRicherStep: View {
 
     // MARK: Rows
 
+    /// The icon set's tick, as a plain `Image` so a `Menu` item can carry it.
+    private var tick: some View {
+        Image(PbblsIcon.checkmarkDot.assetName).renderingMode(.template)
+    }
+
     @ViewBuilder
     private var collectionRow: some View {
         let label = row(icon: .collection, title: "Add to a collection",
@@ -143,7 +148,7 @@ struct CompleteRicherStep: View {
                         Task { await edit(collectionId: collection.id) }
                     } label: {
                         Label { Text(verbatim: collection.name) } icon: {
-                            if collection.id == collectionId { Image(PbblsIcon.checkmarkDot.assetName).renderingMode(.template) }
+                            if collection.id == collectionId { tick }
                         }
                     }
                 }
@@ -165,7 +170,7 @@ struct CompleteRicherStep: View {
                     Button {
                         Task { await edit(visibility: grade) }
                     } label: {
-                        Label { Text(grade.label) } icon: { if grade == visibility { Image(PbblsIcon.checkmarkDot.assetName).renderingMode(.template) } }
+                        Label { Text(grade.label) } icon: { if grade == visibility { tick } }
                     }
                 }
             } label: { label }

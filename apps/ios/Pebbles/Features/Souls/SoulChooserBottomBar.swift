@@ -29,13 +29,13 @@ struct SoulChooserBottomBar: View {
                     field
                 } else {
                     Spacer(minLength: 0)
-                    orb(label: "Search souls", lit: false, action: { model.isSearching = true }) {
+                    orb(label: "Search souls", lit: false, action: { model.isSearching = true }, glyph: {
                         Image(systemName: "magnifyingglass").font(.system(size: 22, weight: .medium))
-                    }
+                    })
                 }
-                orb(label: "Add a soul", lit: model.canAdd, action: { plusTapped() }) {
+                orb(label: "Add a soul", lit: model.canAdd, action: { plusTapped() }, glyph: {
                     PbblsIconImage(.plusCircle, size: 26)
-                }
+                })
                     .accessibilityValue(Text(verbatim: model.canAdd ? model.trimmedQuery : ""))
             }
             .padding(.horizontal, Spacing.lg)
