@@ -1829,3 +1829,21 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Pro bills usage beyond its $20 monthly credit, and the first day went over it. Build cost and the spend cap are a separate open question, not part of this entry.
 - **Supersedes / Superseded-by:** Supersedes the **Consequences** of **2026-09-04 — Vercel is named as a processor and the transfer clause corrected; the missing Art. 28 contract is accepted as a documented risk** (#754) in so far as they accept the missing contract. That entry's DPF facts and re-check date stand.
 - **Refs:** #1503, #754, `F-2026-08-GDP-admin-01`, `apps/web/docs/privacy/{en,fr}.md`, `apps/web/vercel.json`, `apps/admin/vercel.json`, https://vercel.com/legal/dpa, https://vercel.com/docs/plans/pro-plan.
+
+## 2026-11-05 — Crisis resources: the quiet branch is keyed on the two sliders, lives in the clients, and never withholds karma (#1457, #1459, #1460, #1461)
+
+- **Status:** taken
+- **Scope:** core, legal, web, ios, android
+- **Context:** Every client celebrated a maximum-negative entry the way it celebrates a joyful one (karma line, sound, haptic, achievement queue) and shipped no helpline anywhere. The Kritik SAF-01 findings on web, iOS and Android were launch-gating.
+- **Decision:**
+  - **One canonical list.** `packages/shared/crisis-resources.json` (EN/FR, per country, a `verified_on` date) is copied byte-identically per surface and pinned by a parity test on each; the maintainer verifies every number against its official source before a change merges.
+  - **"High distress" is `positiveness == -1 && intensity == 3`**, named `quietSuccess` on every surface. No emotion-id heuristics: the two sliders are the only signal the person gave, and the rule must be explainable in one sentence in the privacy policy.
+  - **The quiet branch is client-side only.** It suppresses the karma line, the sound, the haptic and the achievement queue, and offers Get support within one tap. The server still grants karma: nobody loses a reward for being honest. Whether karma should be keyed to disclosure at all (SAF-02) is a separate product decision.
+  - **Get support also lives in Settings** on every surface, above the admin-edited link sections, opening the same screen.
+- **Why:** A bundled list works offline and on the success step, where a network call would be a second failure at the worst moment. A single predicate keeps the three surfaces identical and testable with four cases each.
+- **Consequences:**
+  - A new country or a changed number is one PR touching the canonical file and its three copies; the parity tests fail otherwise.
+  - The record-flow redesign (#1514–#1516) must keep the quiet branch on whatever its success step becomes.
+  - The Arkaik view `V-crisis-resources` composes from Settings and Record Success on the three platforms.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #1457, #1459, #1460, #1461, PRs #1527, #1550, #1551, #1552, `docs/superpowers/plans/2026-11-05-kritik-launch-night.md`.
