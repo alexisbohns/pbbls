@@ -17,6 +17,7 @@ struct SoulPillTray: View {
                         ForEach(selected) { soul in pill(soul) }
                     }
                 }
+                .contentMargins(.trailing, 28, for: .scrollContent)
                 .mask(
                     LinearGradient(stops: [.init(color: .black, location: 0.86), .init(color: .clear, location: 1)],
                                    startPoint: .leading, endPoint: .trailing)
@@ -43,7 +44,7 @@ struct SoulPillTray: View {
             }
             .padding(.leading, 7)
             .padding(.trailing, 8)
-            .frame(height: 44)
+            .frame(minHeight: 44)
             .background(Capsule().fill(Color.pebbles.primary.opacity(0.20)))
         }
         .buttonStyle(.plain)

@@ -10,33 +10,34 @@ struct SoulTile: View {
     var showsSelection = true
     let onTap: () -> Void
 
-    @Environment(\.dynamicTypeSize) private var typeSize
+    @ScaledMetric(relativeTo: .subheadline) private var tileHeight: CGFloat = 88
 
     var body: some View {
+        let chosen = isSelected && showsSelection
         Button(action: onTap) {
             VStack(spacing: Spacing.xs + 2) {
                 GlyphThumbnail(strokes: soul.glyph.strokes, side: 44,
-                               strokeColor: isSelected ? Color.pebbles.onPrimaryContainer : Color.pebbles.onSurface)
+                               strokeColor: chosen ? Color.pebbles.onPrimaryContainer : Color.pebbles.onSurface)
                     .overlay(alignment: .topTrailing) {
-                        if isSelected && showsSelection { badge }
+                        if chosen { badge }
                     }
                 Text(verbatim: soul.name)
-                    .pebblesFont(isSelected ? .subheadEmphasized : .subhead)
-                    .foregroundStyle(isSelected ? Color.pebbles.onPrimaryContainer : Color.pebbles.onSurface)
+                    .pebblesFont(chosen ? .subheadEmphasized : .subhead)
+                    .foregroundStyle(chosen ? Color.pebbles.onPrimaryContainer : Color.pebbles.onSurface)
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 88)
+            .frame(minHeight: tileHeight)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(isSelected && showsSelection ? Color.pebbles.primary.opacity(0.20) : Color.clear)
+                    .fill(chosen ? Color.pebbles.primary.opacity(0.20) : Color.clear)
             )
             .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Text(verbatim: soul.name))
-        .accessibilityAddTraits(isSelected && showsSelection ? [.isSelected] : [])
+        .accessibilityAddTraits(chosen ? [.isSelected] : [])
     }
 
     private var badge: some View {

@@ -32,9 +32,11 @@ struct SoulChooserBottomBar: View {
                     }
                 }
                 orb(systemName: "plus", label: "Add a soul", lit: model.canAdd) { plusTapped() }
+                    .accessibilityValue(Text(verbatim: model.canAdd ? model.trimmedQuery : ""))
             }
             .padding(.horizontal, Spacing.lg)
         }
+        .onAppear { fieldFocused = model.isSearching }
         .onChange(of: model.isSearching) { _, searching in fieldFocused = searching }
     }
 
@@ -63,7 +65,7 @@ struct SoulChooserBottomBar: View {
         }
         .padding(.leading, Spacing.lg)
         .padding(.trailing, Spacing.xs)
-        .frame(height: 52)
+        .frame(minHeight: 52)
         .frame(maxWidth: .infinity)
         .glassCapsule()
     }
@@ -113,7 +115,7 @@ struct SoulAddRow: View {
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, Spacing.md)
-            .frame(height: 64)
+            .frame(minHeight: 64)
             .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.pebbles.primary.opacity(0.20))
