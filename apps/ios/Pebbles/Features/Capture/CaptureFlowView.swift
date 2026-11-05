@@ -124,12 +124,14 @@ struct CaptureFlowView: View {
         .onChange(of: snaps?.pickedCaptureDate) { _, date in model.applyCaptureDate(date) }
         .onChange(of: model.draft) { _, _ in scheduleAutosave() }
         .onChange(of: model.hasEditedDate) { _, _ in scheduleAutosave() }
-        .onChange(of: snaps?.formSnap) { _, _ in scheduleAutosave() }
-        // D3: the thumbnail lands, a beat, the moment page. Photo step only: a
-        // restore seeds a pending snap too but moves to the page first. Back
-        // via "Change photo", a new pick swaps the snap and advances again.
-        .onChange(of: snaps?.formSnap) { _, snap in
-            guard model.step == .photo, case .pending = snap else { return }
+        // D3: a new pick lands, a beat, the moment page. Photo step only (a
+        // restore moves to the page before seeding), new snap id only (an
+        // upload state change must not bounce a "Change photo" user back).
+        // A task outliving a dismiss just advances an unrendered model.
+        .onChange(of: snaps?.formSnap) { old, new in
+            scheduleAutosave()
+            guard model.step == .photo, case .pending(let attached) = new else { return }
+            if case .pending(let previous) = old, previous.id == attached.id { return }
             Task {
                 try? await Task.sleep(for: .milliseconds(400))
                 if model.step == .photo { model.advance() }
@@ -172,8 +174,7 @@ struct CaptureFlowView: View {
             title: model.step.title,
             subtitle: model.step.subtitle,
             action: action(for: model.step),
-            // The library grid runs to the bottom under the two controls;
-            // nothing floats over it.
+            // The grid runs to the bottom under the two controls; nothing floats.
             contentFillsHeight: model.step == .photo,
             fixedSlot: model.step == .photo ? AnyView(photoControls) : nil,
             secondaryAction: model.step == .moment && !chainsComplete
@@ -329,9 +330,8 @@ struct CaptureFlowView: View {
 // MARK: - Photo step (D3)
 
 extension CaptureFlowView {
-    /// The photo step's two controls in the scaffold's fixed slot (D3): the way
-    /// past the grid without a picture, and the camera — shown only where there
-    /// is one (not on a simulator), since the system picker needs it.
+    /// The photo step's fixed-slot controls (D3): the way past the grid without
+    /// a picture, and the camera — only where there is one (not on a simulator).
     private var photoControls: some View {
         HStack(spacing: Spacing.sm) {
             Button("Just write") { model.advance() }
