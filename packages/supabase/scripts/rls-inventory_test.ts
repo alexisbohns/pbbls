@@ -1,4 +1,4 @@
-import { objectKey, parseCsv, parseInventory } from "./rls-inventory.ts";
+import { isLocalApiUrl, isLocalDatabaseUrl, objectKey, parseCsv, parseInventory } from "./rls-inventory.ts";
 
 function assertEquals(actual: unknown, expected: unknown, label: string) {
   const a = JSON.stringify(actual);
@@ -51,4 +51,24 @@ Deno.test("parseInventory refuses a drifted header or a malformed flag", () => {
   assertThrows(() => parseInventory("kind,schema\ntable,public\n"), "header");
   assertThrows(() => parseInventory(`${HEADER}\ntable,public,x,,yes,f,0,,f,f,,,,\n`), "flag");
   assertThrows(() => parseInventory(`${HEADER}\nsequence,public,x,,,,,,,,,,,\n`), "kind");
+});
+
+Deno.test("the local guard refuses libpq overrides and remote hosts", () => {
+  const db = "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+  assertEquals(isLocalDatabaseUrl(db), true, "local db");
+  assertEquals(isLocalDatabaseUrl("postgresql://postgres@localhost/postgres"), true, "localhost db");
+  for (
+    const bypass of [
+      "postgresql://postgres@127.0.0.1/db?host=prod.example.com",
+      "postgresql://postgres@127.0.0.1/db?hostaddr=203.0.113.7",
+      "postgresql://postgres@127.0.0.1/db?service=prod",
+    ]
+  ) {
+    assertEquals(isLocalDatabaseUrl(bypass), false, bypass);
+  }
+  assertEquals(isLocalDatabaseUrl("postgresql://127.0.0.1/db"), false, "no username");
+  assertEquals(isLocalDatabaseUrl("postgresql://postgres@db.example.supabase.co/postgres"), false, "remote db");
+  assertEquals(isLocalDatabaseUrl("host=127.0.0.1 dbname=postgres"), false, "keyword string");
+  assertEquals(isLocalApiUrl("http://127.0.0.1:54321"), true, "local api");
+  assertEquals(isLocalApiUrl("https://example.supabase.co"), false, "remote api");
 });

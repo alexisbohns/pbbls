@@ -147,11 +147,50 @@ export function objectKey(row: Pick<InventoryRow, "schema" | "name">): string {
   return `${row.schema}.${row.name}`;
 }
 
+function localHost(host: string): boolean {
+  return host === "127.0.0.1" || host === "localhost";
+}
+
+/** The API URL the RLS harness may talk to: http(s) on 127.0.0.1 or localhost. */
+export function isLocalApiUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  try {
+    return localHost(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The database URL the RLS harness may hold a superuser connection to.
+ *
+ * A libpq query parameter overrides the URL's host (`…@127.0.0.1/db?host=prod`
+ * connects to prod), so any query string, and any host/hostaddr/service
+ * parameter anywhere in the string, is refused outright. The psql child also
+ * runs with PGHOST/PGHOSTADDR/PGSERVICE/PGSERVICEFILE emptied (`psqlEnv`).
+ */
+export function isLocalDatabaseUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  if (/(host|hostaddr|service)\s*=/i.test(url)) return false;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "postgresql:" && u.protocol !== "postgres:") return false;
+    if (u.search !== "" || u.username === "") return false;
+    return localHost(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
+/** Environment overrides for every psql child: no ambient libpq target. */
+export const psqlEnv: Record<string, string> = { PGHOST: "", PGHOSTADDR: "", PGSERVICE: "", PGSERVICEFILE: "" };
+
 /** Runs `rls-inventory.sql` against `databaseUrl` and parses the result. */
 export async function loadInventory(databaseUrl: string): Promise<InventoryRow[]> {
   const sqlPath = new URL("./rls-inventory.sql", import.meta.url).pathname;
   const out = await new Deno.Command("psql", {
     args: [databaseUrl, "-X", "-q", "-v", "ON_ERROR_STOP=1", "-f", sqlPath],
+    env: psqlEnv,
     stdout: "piped",
     stderr: "piped",
   }).output();

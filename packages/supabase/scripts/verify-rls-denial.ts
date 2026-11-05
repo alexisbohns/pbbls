@@ -37,27 +37,24 @@
  */
 
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { type InventoryRow, loadInventory, objectKey } from "./rls-inventory.ts";
+import {
+  type InventoryRow,
+  isLocalApiUrl,
+  isLocalDatabaseUrl,
+  loadInventory,
+  objectKey,
+  psqlEnv,
+} from "./rls-inventory.ts";
 
 // ---------------------------------------------------------------------------
 // Local-only guard: before anything else touches the network.
 // ---------------------------------------------------------------------------
 
-function isLocal(url: string | undefined): boolean {
-  if (!url) return false;
-  try {
-    const host = new URL(url).hostname;
-    return host === "127.0.0.1" || host === "localhost";
-  } catch {
-    return false;
-  }
-}
-
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const DATABASE_URL = Deno.env.get("DATABASE_URL") ?? "";
 
-if (!isLocal(SUPABASE_URL) || !isLocal(DATABASE_URL)) {
+if (!isLocalApiUrl(SUPABASE_URL) || !isLocalDatabaseUrl(DATABASE_URL)) {
   console.error(
     "verify-rls-denial runs against a LOCAL stack only: SUPABASE_URL and DATABASE_URL must point at 127.0.0.1 or localhost.",
   );
@@ -256,6 +253,7 @@ function isFunctionKind(s: string): s is FunctionKind {
 async function sql(query: string): Promise<string> {
   const out = await new Deno.Command("psql", {
     args: [DATABASE_URL, "-X", "-q", "-At", "-v", "ON_ERROR_STOP=1", "-c", query],
+    env: psqlEnv,
     stdout: "piped",
     stderr: "piped",
   }).output();
@@ -692,6 +690,15 @@ async function probeFunction(
       check(`${label}: anon call succeeds`, r.error === null, r.error?.message);
       const keys = new Set<string>();
       keysDeep(r.data, keys);
+      // A null or {} result would pass the user_id check vacuously: the seeded
+      // target must come back as something. Scalar helpers (is_admin,
+      // can_use_glyph) return a boolean, which has no keys but is not empty.
+      const scalar = typeof r.data === "boolean" || typeof r.data === "number" || typeof r.data === "string";
+      check(
+        `${label}: the seeded target returns a projection`,
+        r.error === null && (scalar || keys.size > 0),
+        "returned an empty projection",
+      );
       check(`${label}: projection carries no user_id`, !keys.has("user_id"), [...keys].join(", "));
       if (entry.nullArgs) {
         const resolved = resolve(entry.nullArgs);
