@@ -42,9 +42,11 @@ import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.ConsentKind
 import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.OnboardingPace
 import app.pbbls.android.core.model.OnboardingReason
 import app.pbbls.android.core.ui.GlyphCarveSlot
 import app.pbbls.android.features.onboarding.steps.ConsentStep
+import app.pbbls.android.features.onboarding.steps.PaceStep
 import app.pbbls.android.features.onboarding.steps.PeopleStep
 import app.pbbls.android.features.onboarding.steps.ProgressStones
 import app.pbbls.android.features.onboarding.steps.PromiseStep
@@ -101,6 +103,7 @@ fun OnboardingScreen(
         onPersonGlyphSheet = viewModel::onPersonGlyphSheet,
         onPersonGlyphPick = viewModel::onPersonGlyphPick,
         onDrawForPerson = viewModel::onDrawForPerson,
+        onPaceSelect = viewModel::onPaceSelect,
         modifier = modifier,
     )
 }
@@ -124,6 +127,7 @@ fun OnboardingContent(
     onPersonGlyphSheet: (Int?) -> Unit,
     onPersonGlyphPick: (Int, String) -> Unit,
     onDrawForPerson: (Int) -> Unit,
+    onPaceSelect: (OnboardingPace) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -221,7 +225,9 @@ fun OnboardingContent(
                             onChangeGlyph = onPersonGlyphSheet,
                             onContinue = onNext,
                         )
-                    else -> Box(Modifier.fillMaxSize()) // step 6 lands in part 6
+                    "pace" -> PaceStep(state.pace, state.isCompleting, state.errorRes, onPaceSelect, onNext)
+                    // `handoff` has no screen (D9): `isDone` pops the entry before it is ever the step.
+                    else -> Box(Modifier.fillMaxSize())
                 }
             }
         }

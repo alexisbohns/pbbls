@@ -130,6 +130,7 @@ fun OnboardingScreenLight() {
             onPersonGlyphSheet = {},
             onPersonGlyphPick = { _, _ -> },
             onDrawForPerson = {},
+            onPaceSelect = {},
         )
     }
 }

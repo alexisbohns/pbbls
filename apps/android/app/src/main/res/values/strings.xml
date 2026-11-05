@@ -104,14 +104,14 @@
     <string name="onboarding_people_glyph_sheet_title">A glyph for %1$s</string>
     <string name="onboarding_people_glyph_use">Use for %1$s</string>
     <string name="onboarding_people_glyph_draw">Draw one</string>
-    <string name="onboarding_pace_title" tools:ignore="UnusedResources">What pace suits you?</string>
-    <string name="onboarding_pace_body" tools:ignore="UnusedResources">We\'ll read this when reminders arrive.</string>
+    <string name="onboarding_pace_title">What pace suits you?</string>
+    <string name="onboarding_pace_body">We\'ll read this when reminders arrive.</string>
     <string name="onboarding_pace_daily">Every day</string>
     <string name="onboarding_pace_few_a_week">A few times a week</string>
     <string name="onboarding_pace_when_it_matters">Only when it matters</string>
     <string name="onboarding_pace_weekly_wrap">Wrapping the end of the week</string>
-    <string name="onboarding_pace_footer" tools:ignore="UnusedResources">No streaks, no guilt.</string>
-    <string name="onboarding_finish" tools:ignore="UnusedResources">Start</string>
+    <string name="onboarding_pace_footer">No streaks, no guilt.</string>
+    <string name="onboarding_finish">Start</string>
     <string name="onboarding_complete_error">Couldn\'t finish. Check your connection and try again.</string>
     <string name="onboarding_handoff_prompt_notice_feelings" tools:ignore="UnusedResources">What did you feel today?</string>
     <string name="onboarding_handoff_prompt_keep_people" tools:ignore="UnusedResources">Who were you with today?</string>
