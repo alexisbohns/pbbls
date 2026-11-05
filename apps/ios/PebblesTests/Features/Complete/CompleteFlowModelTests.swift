@@ -28,7 +28,7 @@ struct CompleteFlowModelTests {
         #expect(model.step == .emotion)
     }
 
-    @Test("valence commits in place; emotion and domain commit and advance")
+    @Test("valence commits in place; emotion commits and advances to life")
     func tiles() {
         let (model, recorder) = model()
         model.select(valence: .highlightLarge)
@@ -36,10 +36,30 @@ struct CompleteFlowModelTests {
         model.advance()
         #expect(model.step == .emotion)
         model.select(emotionId: UUID())
-        #expect(model.step == .domain)
-        model.select(domainId: UUID())
-        #expect(model.step == .souls)
-        #expect(recorder.taps == [.selection, .advance, .selection, .selection])
+        #expect(model.step == .life)
+        #expect(recorder.taps == [.selection, .advance, .selection])
+    }
+
+    @Test("domains toggle up to three, in tap order; the fourth is refused with a warning")
+    func toggleDomain() {
+        let (model, recorder) = model()
+        let ids = (0..<4).map { _ in UUID() }
+        ids.forEach { model.toggleDomain($0) }
+        #expect(model.draft.domainIds == Array(ids.prefix(3)))
+        #expect(recorder.taps.last == .warning)
+        model.toggleDomain(ids[0])
+        #expect(model.draft.domainIds == [ids[1], ids[2]])
+    }
+
+    @Test("life is answered with a domain; souls are optional")
+    func lifeAnswered() {
+        let (model, _) = model()
+        model.go(to: .life)
+        #expect(!model.isAnswered)
+        model.toggleSoul(UUID())
+        #expect(!model.isAnswered)
+        model.toggleDomain(UUID())
+        #expect(model.isAnswered)
     }
 
     @Test("a mandatory step blocks advance with a warning")
@@ -50,27 +70,29 @@ struct CompleteFlowModelTests {
         #expect(recorder.taps == [.warning])
     }
 
-    @Test("souls toggle without advancing; collection commits and advances")
-    func optionalSteps() {
-        let (model, _) = model()
-        model.go(to: .souls)
-        #expect(model.optionalButtonIsSkip)
+    @Test("souls toggle on the life step without advancing; collection selects in place")
+    func optionalPicks() {
+        let (model, recorder) = model()
+        model.go(to: .life)
         let soul = UUID()
         model.toggleSoul(soul)
-        #expect(model.step == .souls)
-        #expect(!model.optionalButtonIsSkip)
+        #expect(model.step == .life)
+        #expect(model.draft.soulIds == [soul])
         model.toggleSoul(soul)
         #expect(model.draft.soulIds.isEmpty)
-        model.advance()
-        #expect(model.step == .collection)
-        model.select(collectionId: UUID())
-        #expect(model.step == .privacy)
+        let collection = UUID()
+        model.select(collectionId: collection)
+        #expect(model.step == .life)
+        #expect(model.draft.collectionId == collection)
+        model.select(collectionId: nil)
+        #expect(model.draft.collectionId == nil)
+        #expect(recorder.taps == [.selection, .selection, .selection, .selection])
     }
 
-    @Test("setSouls mirrors the chooser's order without a haptic of its own; advance still moves on")
+    @Test("setSouls mirrors the chooser's order without a haptic of its own; life never advances past itself")
     func setSouls() {
         let (model, recorder) = model()
-        model.go(to: .souls)
+        model.go(to: .life)
         let first = UUID()
         let second = UUID()
         model.setSouls([first, second])
@@ -79,18 +101,19 @@ struct CompleteFlowModelTests {
         model.setSouls([second, first])
         #expect(model.draft.soulIds == [second, first])
         #expect(recorder.taps.isEmpty)
+        model.toggleDomain(UUID())
         model.advance()
-        #expect(model.step == .collection)
+        #expect(model.step == .life)
     }
 
-    @Test("privacy selects without advancing; back preserves answers")
-    func privacyAndBack() {
+    @Test("visibility selects without advancing; back preserves answers")
+    func visibilityAndBack() {
         let (model, _) = model()
-        model.go(to: .privacy)
+        model.go(to: .life)
         model.select(visibility: .public)
-        #expect(model.step == .privacy)
+        #expect(model.step == .life)
         model.back()
-        #expect(model.step == .collection)
+        #expect(model.step == .emotion)
         #expect(model.draft.visibility == .public)
     }
 
@@ -102,11 +125,11 @@ struct CompleteFlowModelTests {
         saved.emotionId = UUID()
         saved.soulIds = [UUID()]
         model.restore(saved, known: .init(soulIds: [], collectionIds: []))
-        #expect(model.step == .domain)
+        #expect(model.step == .life)
         #expect(model.draft.soulIds.isEmpty)
-        saved.domainId = UUID()
+        saved.domainIds = [UUID()]
         model.restore(saved, known: .init(soulIds: [], collectionIds: []))
-        #expect(model.step == .privacy)
+        #expect(model.step == .life)
     }
 
     @Test("the autosave is the draft, nothing is held back")
@@ -133,10 +156,10 @@ struct CompleteFlowModelTests {
     @Test("success goes to the success step with a success haptic; failure stays put")
     func outcomes() {
         let (model, recorder) = model()
-        model.go(to: .privacy)
+        model.go(to: .life)
         model.beginCompleting()
         model.fail("nope")
-        #expect(model.step == .privacy)
+        #expect(model.step == .life)
         #expect(model.completeError == "nope")
         model.beginCompleting()
         #expect(model.completeError == nil)

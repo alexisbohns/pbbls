@@ -101,9 +101,9 @@ struct CompleteFlowView: View {
                     title: model.step.title,
                     subtitle: model.step.subtitle,
                     action: action(for: model.step),
-                    // The souls step hosts the chooser, which scrolls itself and pins
-                    // its bar above the keyboard; a scaffold ScrollView would unpin it.
-                    contentFillsHeight: model.step == .souls
+                    // The life step scrolls itself and pins its bar; a scaffold
+                    // ScrollView would unpin it.
+                    contentFillsHeight: model.step == .life
                 ) {
                     CompleteStepContent(step: model.step, model: model, isFirstPebble: isFirstPebble)
                 }
@@ -116,21 +116,22 @@ struct CompleteFlowView: View {
         ))
     }
 
-    /// The one action a step offers, if any. Tile steps offer none: the pick
-    /// is the advance (A1). The souls step offers none either: the chooser's
-    /// own tray button is its Skip / Done.
+    /// The one action a step offers, if any. The emotion step offers none:
+    /// the pick is the advance (A1). The life step's button counts the domains
+    /// past the first (D10).
     private func action(for step: CompleteStep) -> RecordStepAction? {
         switch step {
-        case .emotion, .domain, .souls, .success:
+        case .emotion, .success:
             return nil
         case .valence:
             return .primary("Continue", enabled: model.isAnswered, loading: false) { model.advance() }
-        case .collection:
-            return .primary(model.optionalButtonIsSkip ? "Skip" : "Done", enabled: true, loading: false) {
-                model.advance()
-            }
-        case .privacy:
-            return .primary("Make it a pebble", enabled: model.draft.isComplete, loading: model.isCompleting) {
+        case .life:
+            let count = model.draft.domainIds.count
+            return .primary(
+                count > 1 ? "Make it a pebble (\(count))" : "Make it a pebble",
+                enabled: model.draft.isComplete,
+                loading: model.isCompleting
+            ) {
                 Task { await complete() }
             }
         }

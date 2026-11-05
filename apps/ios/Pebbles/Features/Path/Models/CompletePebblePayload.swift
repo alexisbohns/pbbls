@@ -46,8 +46,9 @@ extension CompletePebblePayload {
     /// A full completion from the flow or Edit pebble (A2). Nil until the
     /// draft is complete, so a caller cannot send a half pebble.
     init?(momentId: UUID, draft: CompleteDraft) {
+        let domainIds = draft.domainIds
         guard draft.isComplete, let valence = draft.valence,
-              let emotionId = draft.emotionId, let domainId = draft.domainId else { return nil }
+              let emotionId = draft.emotionId, !domainIds.isEmpty else { return nil }
         self.init(momentId: momentId)
         self.emotionId = emotionId
         self.intensity = valence.intensity
@@ -57,13 +58,13 @@ extension CompletePebblePayload {
         // #1099 D8: a set Edit pebble left as prefilled is omitted, and absent
         // means keep: `complete_pebble` replaces a set only when its key is
         // present. A pre-split pebble keeps every domain and collection through
-        // an edit of its emotion; touching the field collapses it to the pick.
+        // an edit of its emotion; touching the field replaces it with the picks.
         // The explicit unwrap matters: a fresh draft has no prefill, and
         // `nil == nil` would read as "untouched".
-        if let prefill = draft.prefill, prefill.domainId == domainId {
+        if let prefill = draft.prefill, prefill.domainIds == domainIds {
             self.domainIds = nil
         } else {
-            self.domainIds = [domainId]
+            self.domainIds = domainIds
         }
         if let prefill = draft.prefill, prefill.collectionId == draft.collectionId {
             self.collectionIds = nil

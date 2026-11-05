@@ -8,6 +8,7 @@ struct CompletePebblePayloadFromDraftTests {
     private let momentId = UUID()
     private let emotion = UUID()
     private let domain = UUID()
+    private let otherDomain = UUID()
 
     @Test("an incomplete draft makes no payload")
     func incomplete() {
@@ -22,14 +23,28 @@ struct CompletePebblePayloadFromDraftTests {
         var draft = CompleteDraft()
         draft.valence = .lowlightLarge
         draft.emotionId = emotion
-        draft.domainId = domain
+        draft.domainIds = [domain, otherDomain]
         let payload = try #require(CompletePebblePayload(momentId: momentId, draft: draft))
         #expect(payload.intensity == 3)
         #expect(payload.positiveness == -1)
-        #expect(payload.domainIds == [domain])
+        #expect(payload.domainIds == [domain, otherDomain])
         #expect(payload.soulIds == [])
         #expect(payload.collectionIds == [])
         #expect(payload.visibility == .secret)
+    }
+
+    @Test("a prefilled domain set left as is is omitted, so complete_pebble keeps it")
+    func prefilledDomains() throws {
+        var draft = CompleteDraft()
+        draft.valence = .neutralSmall
+        draft.emotionId = emotion
+        draft.domainIds = [domain]
+        draft.prefill = CompleteDraft.Prefill(domainIds: [domain], collectionId: nil)
+        let payload = try #require(CompletePebblePayload(momentId: momentId, draft: draft))
+        #expect(payload.domainIds == nil)
+        draft.domainIds = [domain, otherDomain]
+        let changed = try #require(CompletePebblePayload(momentId: momentId, draft: draft))
+        #expect(changed.domainIds == [domain, otherDomain])
     }
 
     @Test("sanitizing drops souls and collections that no longer exist")
@@ -48,7 +63,7 @@ struct CompletePebblePayloadFromDraftTests {
         var draft = CompleteDraft()
         draft.visibility = .public
         #expect(draft.isEmpty)
-        draft.domainId = domain
+        draft.domainIds = [domain]
         #expect(!draft.isEmpty)
     }
 }

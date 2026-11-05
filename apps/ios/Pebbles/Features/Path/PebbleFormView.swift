@@ -62,7 +62,12 @@ struct PebbleFormView: View {
                     )
                     .pebblesListRow(position: .top)
 
-                    Picker("Domain", selection: $draft.domainId) {
+                    // Edit pebble keeps its one-domain menu; the first id stands
+                    // for the set, and a pick replaces the set with that one.
+                    Picker("Domain", selection: Binding(
+                        get: { draft.domainIds.first },
+                        set: { draft.domainIds = $0.map { [$0] } ?? [] }
+                    )) {
                         Text("Choose…").tag(UUID?.none)
                         ForEach(domains) { domain in
                             Text(domain.localizedName).tag(UUID?.some(domain.id))

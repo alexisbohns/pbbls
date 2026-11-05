@@ -1856,23 +1856,6 @@
         }
       }
     },
-    "Add it to a collection?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add it to a collection?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dans une collection ?"
-          }
-        }
-      }
-    },
     "Add soul" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1898,23 +1881,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annonces"
-          }
-        }
-      }
-    },
-    "Anyone in this one?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Anyone in this one?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il y avait quelqu'un ?"
           }
         }
       }
@@ -7365,23 +7331,6 @@
         }
       }
     },
-    "How much of your life did this take up?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How much of your life did this take up?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ça a pris quelle place dans ta vie ?"
-          }
-        }
-      }
-    },
     "How to read this" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7895,6 +7844,23 @@
         }
       }
     },
+    "Make it a pebble (%lld)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make it a pebble (%lld)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En faire un galet (%lld)"
+          }
+        }
+      }
+    },
     "Make it a pebble now" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7908,6 +7874,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En faire un galet maintenant"
+          }
+        }
+      }
+    },
+    "Make it richer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make it richer"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enrichis-le"
           }
         }
       }
@@ -13724,23 +13707,6 @@
         }
       }
     },
-    "Who can see it?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Who can see it?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Qui peut le voir ?"
-          }
-        }
-      }
-    },
     "Who was there?" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13805,23 +13771,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vous possédez déjà ce glyphe"
-          }
-        }
-      }
-    },
-    "You don't have any collections yet." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You don't have any collections yet."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu n'as pas encore de collection."
           }
         }
       }

@@ -64,11 +64,11 @@ struct CompletePebblePayloadTests {
         #expect(text.contains("\"emotion_id\""))
     }
 
-    @Test("another domain collapses the set to that one, and leaves the collections alone")
+    @Test("another domain set replaces the set, and leaves the collections alone")
     func changedDomain() throws {
         var draft = try editDraft()
         let other = UUID()
-        draft.domainId = other
+        draft.domainIds = [other]
         let payload = try #require(CompletePebblePayload(momentId: moment, draft: draft))
         #expect(payload.domainIds == [other])
         #expect(payload.collectionIds == nil)
@@ -99,7 +99,7 @@ struct CompletePebblePayloadTests {
         var draft = CompleteDraft()
         draft.valence = .neutralMedium
         draft.emotionId = UUID()
-        draft.domainId = UUID()
+        draft.domainIds = [UUID()]
         let payload = try #require(CompletePebblePayload(momentId: moment, draft: draft))
         let text = try json(payload)
         #expect(text.contains("\"domain_ids\":["))

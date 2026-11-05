@@ -1,20 +1,24 @@
 import Foundation
 
-/// The Complete flow's answers (spec §6). Complete = valence + emotion +
-/// domain (D2); souls and collection are optional; visibility defaults to
-/// secret. One domain and one collection at most (A1).
+/// The Complete flow's answers (spec §6). Complete = valence + emotion + at
+/// least one domain (D2, D10); souls and collection are optional; visibility
+/// defaults to secret. Three domains and one collection at most.
 struct CompleteDraft: Equatable {
-    /// What Edit pebble prefilled (#1099 D8): the pebble's first domain and its
+    /// How many domains a pebble carries at most (D10).
+    static let domainCap = 3
+
+    /// What Edit pebble prefilled (#1099 D8): the pebble's domains and its
     /// first collection. `CompletePebblePayload` omits a set the user left as
     /// prefilled, so `complete_pebble` keeps the pebble's whole set.
     struct Prefill: Equatable {
-        let domainId: UUID?
+        let domainIds: [UUID]
         let collectionId: UUID?
     }
 
     var valence: Valence?
     var emotionId: UUID?
-    var domainId: UUID?
+    /// In tap order, `domainCap` at most.
+    var domainIds: [UUID] = []
     var soulIds: [UUID] = []
     var collectionId: UUID?
     var visibility: Visibility = .secret
@@ -24,11 +28,11 @@ struct CompleteDraft: Equatable {
     /// autosave that did would turn an edit into a set-collapsing one.
     var prefill: Prefill?
 
-    var isComplete: Bool { valence != nil && emotionId != nil && domainId != nil }
+    var isComplete: Bool { valence != nil && emotionId != nil && !domainIds.isEmpty }
 
     /// Nothing the user picked. Visibility is defaulted, so it never counts.
     var isEmpty: Bool {
-        valence == nil && emotionId == nil && domainId == nil && soulIds.isEmpty && collectionId == nil
+        valence == nil && emotionId == nil && domainIds.isEmpty && soulIds.isEmpty && collectionId == nil
     }
 
     struct KnownIds {
@@ -47,16 +51,16 @@ struct CompleteDraft: Equatable {
 }
 
 extension CompleteDraft {
-    /// Prefill Edit pebble from the caller's pebble (R5). Keeps the first
-    /// domain and the first collection, as the pre-split edit did (A6).
+    /// Prefill Edit pebble from the caller's pebble (R5). Keeps the domains
+    /// up to the cap and the first collection, as the pre-split edit did (A6).
     init(from pebble: MomentDetail.Pebble) {
         self.init()
         valence = pebble.valence
         emotionId = pebble.emotion.id
-        domainId = pebble.domains.first?.id
+        domainIds = Array(pebble.domains.map(\.id).prefix(Self.domainCap))
         soulIds = pebble.souls.map(\.id)
         collectionId = pebble.collections.first?.id
         visibility = pebble.visibility
-        prefill = Prefill(domainId: domainId, collectionId: collectionId)
+        prefill = Prefill(domainIds: domainIds, collectionId: collectionId)
     }
 }

@@ -1,24 +1,16 @@
 import Foundation
 
-/// The Complete flow's screens (spec §6, A1). No glyph step: a pebble's glyph
-/// is derived from its collection or domain (D5).
+/// The Complete flow's screens (record-flow spec D1): three questions, then
+/// the end screen. Nothing is optional: souls and the collection live on the
+/// life step as extras, not as steps of their own. No glyph step: a pebble's
+/// glyph is derived from its collection or domain (D5).
 enum CompleteStep: Int, CaseIterable, Identifiable, Hashable {
     case valence
     case emotion
-    case domain
-    case souls
-    case collection
-    case privacy
+    case life
     case success
 
     var id: Int { rawValue }
-
-    var isOptional: Bool {
-        switch self {
-        case .souls, .collection: return true
-        case .valence, .emotion, .domain, .privacy, .success: return false
-        }
-    }
 
     static var counted: [CompleteStep] { allCases.filter { $0 != .success } }
 

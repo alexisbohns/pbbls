@@ -32,18 +32,14 @@ final class CompleteFlowModel {
     /// Exhaustive with no `default`: the one place that says what answered means.
     func hasAnswer(for step: CompleteStep) -> Bool {
         switch step {
-        case .privacy, .success: return true
+        case .success: return true
         case .valence: return draft.valence != nil
         case .emotion: return draft.emotionId != nil
-        case .domain: return draft.domainId != nil
-        case .souls: return !draft.soulIds.isEmpty
-        case .collection: return draft.collectionId != nil
+        case .life:    return !draft.domainIds.isEmpty
         }
     }
 
-    var isAnswered: Bool { step.isOptional || hasAnswer(for: step) }
-
-    var optionalButtonIsSkip: Bool { !hasAnswer(for: step) }
+    var isAnswered: Bool { hasAnswer(for: step) }
 
     // MARK: Navigation
 
@@ -83,8 +79,25 @@ final class CompleteFlowModel {
     }
 
     func select(emotionId: UUID) { commitAndAdvance { $0.emotionId = emotionId } }
-    func select(domainId: UUID) { commitAndAdvance { $0.domainId = domainId } }
-    func select(collectionId: UUID) { commitAndAdvance { $0.collectionId = collectionId } }
+
+    /// Domains toggle in tap order, `CompleteDraft.domainCap` at most (D10);
+    /// a tap past the cap is refused with a warning.
+    func toggleDomain(_ id: UUID) {
+        if let index = draft.domainIds.firstIndex(of: id) {
+            haptic(.selection)
+            draft.domainIds.remove(at: index)
+        } else if draft.domainIds.count < CompleteDraft.domainCap {
+            haptic(.selection)
+            draft.domainIds.append(id)
+        } else {
+            haptic(.warning)
+        }
+    }
+
+    func select(collectionId: UUID?) {
+        haptic(.selection)
+        draft.collectionId = collectionId
+    }
 
     func toggleSoul(_ id: UUID) {
         haptic(.selection)
@@ -113,10 +126,10 @@ final class CompleteFlowModel {
     var draftToAutosave: CompleteDraft { draft }
 
     func firstGap() -> CompleteStep {
-        for candidate in CompleteStep.counted where !candidate.isOptional {
-            if !hasAnswer(for: candidate) { return candidate }
+        for candidate in CompleteStep.counted where !hasAnswer(for: candidate) {
+            return candidate
         }
-        return .privacy
+        return .life
     }
 
     func restore(_ saved: CompleteDraft, known: CompleteDraft.KnownIds) {
