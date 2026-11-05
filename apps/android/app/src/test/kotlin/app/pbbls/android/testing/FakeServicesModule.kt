@@ -11,6 +11,7 @@ import app.pbbls.android.core.data.HomeServicing
 import app.pbbls.android.core.data.LogsServicing
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
+import app.pbbls.android.core.data.OnboardingServicing
 import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.PathWrapServicing
 import app.pbbls.android.core.data.ProfileServicing
@@ -190,6 +191,9 @@ object FakeServicesModule {
     fun fakeSettingsLinks() = FakeSettingsLinksService()
 
     @Provides @Singleton
+    fun fakeOnboarding() = FakeOnboardingService()
+
+    @Provides @Singleton
     fun fakeCompleteSnapshotStore() = FakeCompleteSnapshotStore()
 
     @Provides @Singleton
@@ -259,6 +263,9 @@ object FakeServicesModule {
 
     @Provides
     fun settingsLinks(fake: FakeSettingsLinksService): SettingsLinksServicing = fake
+
+    @Provides
+    fun onboarding(fake: FakeOnboardingService): OnboardingServicing = fake
 
     @Provides
     fun completeSnapshotStore(fake: FakeCompleteSnapshotStore): CompleteSnapshotStoring = fake

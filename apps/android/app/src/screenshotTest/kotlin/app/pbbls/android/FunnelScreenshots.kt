@@ -7,8 +7,8 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.features.auth.AuthContent
 import app.pbbls.android.features.auth.AuthUiState
-import app.pbbls.android.features.onboarding.OnboardingScreen
-import app.pbbls.android.features.onboarding.OnboardingSteps
+import app.pbbls.android.features.onboarding.OnboardingContent
+import app.pbbls.android.features.onboarding.OnboardingUiState
 import app.pbbls.android.features.welcome.WelcomeContent
 import app.pbbls.android.features.welcome.WelcomeUiState
 import com.android.tools.screenshot.PreviewTest
@@ -96,13 +96,80 @@ fun AuthScreenSignup() {
     }
 }
 
-@PreviewTest
-@Preview(showBackground = true)
-@PreviewLargeFont
-@PreviewFrench
+/**
+ * The onboarding (#1510), one preview per step over fixed states, in light, dark, French and at the
+ * largest font scale. `OnboardingPromise` (light, default size, English) fills the view's slot in
+ * `arkaik-shots.json`.
+ */
 @Composable
-fun OnboardingScreenLight() {
+private fun OnboardingStepPreview(state: OnboardingUiState) {
     PebblesTheme {
-        OnboardingScreen(steps = OnboardingSteps.all, onFinish = {})
+        OnboardingContent(
+            state = state,
+            onBack = {},
+            onSkip = {},
+            onNext = {},
+            onConsentToggle = { _, _ -> },
+            onReasonToggle = {},
+            onNameChange = {},
+            onGlyphSelect = {},
+            onDraw = {},
+            onPersonAdd = {},
+            onPersonNameChange = { _, _ -> },
+            onPersonCommit = {},
+            onPersonEdit = {},
+            onPersonGlyphSheet = {},
+            onPersonGlyphPick = { _, _ -> },
+            onDrawForPerson = {},
+            onPaceSelect = {},
+        )
     }
 }
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "dark", showBackground = true, widthDp = 390, heightDp = 844, uiMode = UI_MODE_NIGHT_YES)
+@PreviewFrench
+@PreviewLargeFontTall
+@Composable
+fun OnboardingPromise() = OnboardingStepPreview(OnboardingFixtures.promise)
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "dark", showBackground = true, widthDp = 390, heightDp = 844, uiMode = UI_MODE_NIGHT_YES)
+@PreviewFrench
+@PreviewLargeFontTall
+@Composable
+fun OnboardingConsent() = OnboardingStepPreview(OnboardingFixtures.consent)
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "dark", showBackground = true, widthDp = 390, heightDp = 844, uiMode = UI_MODE_NIGHT_YES)
+@PreviewFrench
+@PreviewLargeFontTall
+@Composable
+fun OnboardingReasons() = OnboardingStepPreview(OnboardingFixtures.reasons)
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "dark", showBackground = true, widthDp = 390, heightDp = 844, uiMode = UI_MODE_NIGHT_YES)
+@PreviewFrench
+@PreviewLargeFontTall
+@Composable
+fun OnboardingYou() = OnboardingStepPreview(OnboardingFixtures.you)
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "dark", showBackground = true, widthDp = 390, heightDp = 844, uiMode = UI_MODE_NIGHT_YES)
+@PreviewFrench
+@PreviewLargeFontTall
+@Composable
+fun OnboardingPeople() = OnboardingStepPreview(OnboardingFixtures.people)
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Preview(name = "dark", showBackground = true, widthDp = 390, heightDp = 844, uiMode = UI_MODE_NIGHT_YES)
+@PreviewFrench
+@PreviewLargeFontTall
+@Composable
+fun OnboardingPace() = OnboardingStepPreview(OnboardingFixtures.pace)

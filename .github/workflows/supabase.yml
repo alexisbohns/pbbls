@@ -186,6 +186,10 @@ jobs:
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "settings-links" db:verify:settings-links
 
+      - name: Interactive onboarding (promise letter, complete_onboarding)
+        if: '!cancelled()'
+        run: .github/scripts/verify-harness.sh "onboarding" db:verify:onboarding
+
       # The Home tab's back-end (#1254): the first-moment and first-pebble
       # achievements and their permanence, claim_blue_pebble's gate and
       # exactly-once, people_prompts' filters and guard; (part 3) the wrap
@@ -280,6 +284,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          # The re-emission guard diffs the PR against its base branch.
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v7
@@ -308,6 +315,18 @@ jobs:
             echo "::error::Duplicate migration version prefixes: $dups"
             exit 1
           fi
+
+      # `create or replace` has no merge semantics: two new migrations that
+      # re-emit one function silently drop each other's appends (purge_account
+      # once did, see 20260731090000_purge_account_union.sql).
+      - name: Re-emission guard self-test
+        run: bash .github/scripts/check-migration-reemissions.test.sh
+
+      - name: Re-emitted function bodies
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: bash .github/scripts/check-migration-reemissions.sh "origin/$BASE_REF"
 
       # `!cancelled()` throughout so a red PR names every problem at once rather
       # than one per push — the house pattern from the harness steps above.
@@ -354,6 +373,12 @@ jobs:
         uses: supabase/setup-cli@v3
         with:
           version: 2.117.0
+
+      # The RLS denial harness below is a Deno script, like every harness.
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
 
       # Excludes only what this job cannot use: no request is served, no mail is
       # sent, no function is invoked. `storage` and `auth` stay — migrations
@@ -407,6 +432,49 @@ jobs:
             exit 1
           fi
           echo "types/database.ts matches the migrations."
+
+      # Cross-user denial over the WHOLE catalog (#1523): every public table and
+      # view and every SECURITY DEFINER function must have an entry in
+      # scripts/rls-expectations.json, and anon plus a signed-in stranger are
+      # probed against a seeded owner on each. It needs no secret — the local
+      # stack's anon key and superuser URL come from `supabase status` — so it
+      # can be a required check. The harness refuses any non-local URL.
+      # After the types diff, not before: `!cancelled()` here keeps a red
+      # harness from hiding a types drift, and the reverse.
+      - name: RLS denial over the whole catalog
+        if: '!cancelled()'
+        working-directory: packages/supabase
+        run: |
+          set -uo pipefail
+          # Tolerant on purpose: CLI versions differ on the variable name
+          # (ANON_KEY / SUPABASE_ANON_KEY) and on quoting, so accept either,
+          # quoted or not, and fall back to the JSON output.
+          status_env="$(supabase status -o env 2>/dev/null || true)"
+          # `q` after the first match rather than `| head -n1`, which under
+          # pipefail could kill the step with sed's SIGPIPE.
+          anon_key="$(printf '%s\n' "$status_env" \
+            | sed -n -E '/^(SUPABASE_)?ANON_KEY=/{s/^(SUPABASE_)?ANON_KEY="?([^"]*)"?$/\2/p;q;}' || true)"
+          if [ -z "$anon_key" ]; then
+            anon_key="$(supabase status --output json 2>/dev/null \
+              | jq -r '.ANON_KEY // .SUPABASE_ANON_KEY // empty' || true)"
+          fi
+          if [ -z "$anon_key" ]; then
+            # Names only, never values: enough to fix the parse next time.
+            echo "supabase status -o env returned these names:"
+            printf '%s\n' "$status_env" | grep '=' | cut -d= -f1 || true
+            echo "::error::supabase status printed no ANON_KEY"
+            exit 1
+          fi
+          echo "::add-mask::$anon_key"
+          export SUPABASE_URL="http://127.0.0.1:54321"
+          export SUPABASE_ANON_KEY="$anon_key"
+          export DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+          # `supabase status` needs packages/supabase (its config.toml), but
+          # verify-harness.sh runs `npm --workspace=packages/supabase`, which
+          # only resolves from the repo root: from here npm --silent exits 1
+          # without a word.
+          cd "$GITHUB_WORKSPACE"
+          .github/scripts/verify-harness.sh "RLS denial" db:verify:rls
 
       # Containers are the runner's problem once the job ends, but a failed
       # `db reset` can leave the stack up long enough to hold the port on a

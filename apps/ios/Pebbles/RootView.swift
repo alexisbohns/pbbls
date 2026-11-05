@@ -56,6 +56,10 @@ struct RootView: View {
     /// `resetAuthedSceneState()`. Restored once the launch loader is down.
     @SceneStorage("heldCard") private var storedHeldCard: Data?
     @State private var heldCardRestored = false
+    /// The consent gate (#821): an overlay above everything in the authed
+    /// branch, held until the ledger carries every act at a current version.
+    @State private var consentGate = ConsentGateModel()
+    @Environment(\.scenePhase) private var scenePhase
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "root")
 
@@ -127,8 +131,8 @@ struct RootView: View {
                         .environment(nav)
                         .environment(cardFrames)
                         .environment(heldCard)
-                        // Nothing under the held card is reachable (stack C §7's slot).
-                        .accessibilityHidden(heldCard.request != nil)
+                        // Nothing under the held card or the consent gate is reachable (stack C §7's slot).
+                        .accessibilityHidden(heldCard.request != nil || !consentGate.isPassed)
                         .environment(\.spineSnapSource, .signed(snapURLs))
                         .fullScreenCover(isPresented: $isPresentingOnboarding) {
                             OnboardingView(steps: OnboardingSteps.all) {
@@ -153,7 +157,17 @@ struct RootView: View {
                         .environment(heldCard)
                         .environment(cardFrames)
                         .environment(\.spineSnapSource, .signed(snapURLs))
+                        .accessibilityHidden(!consentGate.isPassed)
+
+                    // The consent gate (#821), above every layer, the held card
+                    // included: a card restored from scene storage must not
+                    // route around it. Onboarding and invites wait for a pass.
+                    if !consentGate.isPassed {
+                        ConsentGateView(model: consentGate, onSignOut: { Task { await supabase.signOut() } })
+                            .transition(.opacity)
+                    }
                 }
+                .animation(.easeInOut(duration: 0.25), value: consentGate.isPassed)
                 .animation(.easeInOut(duration: 0.35), value: holdsLoader)
                 .sheet(item: $acceptingInvite) { invite in
                     InviteAcceptSheet(token: invite.value)
@@ -206,29 +220,38 @@ struct RootView: View {
         // Keyed on the user: souls and collections are theirs, so each sign-in
         // loads its own lists instead of keeping whatever the launch fetched.
         .task(id: supabase.session?.user.id) { await refs.load() }
-        // Relies on supabase.start() being kicked off in .task above.
-        // session?.user.id is nil when this observer is registered, so the
-        // first authStateChanges event delivers a real nil→id transition
-        // even for users already signed in from a prior launch.
+        // Keyed on the user: a sign-out or a different account re-runs the gate.
+        .task(id: supabase.session?.user.id) {
+            consentGate.service = ConsentService(client: supabase.client)
+            consentGate.start(userId: supabase.session?.user.id.uuidString.lowercased())
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // A gate that failed closed tries again when the app comes back.
+            if phase == .active, case .failed = consentGate.state { consentGate.retry() }
+        }
+        // `isPassed` is false until the gate's first verdict for the session's
+        // user, so a launch already signed in still sees a false→true flip.
+        .onChange(of: consentGate.isPassed) { _, passed in
+            guard passed, supabase.session != nil else { return }
+            if !hasSeenOnboarding {
+                isPresentingOnboarding = true
+            }
+            // Flush any invite parked before sign-in or before the pass.
+            if let parked = connections.pendingInviteToken {
+                connections.pendingInviteToken = nil
+                acceptingInvite = InviteToken(value: parked)
+            }
+        }
         .onOpenURL { url in
             // The app's only URL entry point. OAuth returns are absorbed by
             // ASWebAuthenticationSession, so nothing else lands here.
             guard let token = Self.inviteToken(from: url) else { return }
-            if supabase.session == nil {
-                // Park it: an invite can arrive before sign-in completes.
+            if supabase.session == nil || !consentGate.isPassed {
+                // Park it: an invite can arrive before sign-in completes, or
+                // before the consent gate passes.
                 connections.pendingInviteToken = token
             } else {
                 acceptingInvite = InviteToken(value: token)
-            }
-        }
-        .onChange(of: supabase.session?.user.id) { _, newUserId in
-            if newUserId != nil && !hasSeenOnboarding {
-                isPresentingOnboarding = true
-            }
-            // A session just appeared — flush any invite parked before sign-in.
-            if newUserId != nil, let parked = connections.pendingInviteToken {
-                connections.pendingInviteToken = nil
-                acceptingInvite = InviteToken(value: parked)
             }
         }
         .onChange(of: supabase.session == nil) { wasSignedOut, isSignedOut in

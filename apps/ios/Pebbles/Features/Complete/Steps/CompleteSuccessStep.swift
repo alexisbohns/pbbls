@@ -9,9 +9,12 @@ struct CompleteSuccessStep: View {
     let result: CompletionResult
     let valence: Valence
     let emotionId: UUID?
+    /// High-distress pebble: no karma line, a calm sentence and a way to support.
+    var quiet: Bool = false
     let onExit: () -> Void
 
     @Environment(EmotionPaletteService.self) private var palettes
+    @State private var showsCrisisResources = false
 
     var body: some View {
         VStack(spacing: Spacing.xl) {
@@ -31,7 +34,12 @@ struct CompleteSuccessStep: View {
                     .pebblesFont(.title)
                     .multilineTextAlignment(.center)
 
-                if let karma = result.karmaDelta, karma > 0 {
+                if quiet {
+                    Text("Thank you for keeping this. If today is heavy, support is one tap away.")
+                        .pebblesFont(.body)
+                        .foregroundStyle(Color.pebbles.onSurface)
+                        .multilineTextAlignment(.center)
+                } else if let karma = result.karmaDelta, karma > 0 {
                     HStack(spacing: 6) {
                         PbblsIconImage(.karmaDot, .inline, relativeTo: .headline)
                             .foregroundStyle(Color.pebbles.primary)
@@ -46,10 +54,19 @@ struct CompleteSuccessStep: View {
 
             Spacer(minLength: 0)
 
-            Button("Back to my path", action: onExit)
-                .buttonStyle(PebblesPrimaryButtonStyle())
+            VStack(spacing: Spacing.md) {
+                if quiet {
+                    Button("Get support") { showsCrisisResources = true }
+                        .pebblesFont(.headline)
+                }
+                Button("Back to my path", action: onExit)
+                    .buttonStyle(PebblesPrimaryButtonStyle())
+            }
         }
         .padding(.horizontal, Spacing.lg)
         .padding(.bottom, Spacing.lg)
+        .sheet(isPresented: $showsCrisisResources) {
+            CrisisResourcesSheet()
+        }
     }
 }

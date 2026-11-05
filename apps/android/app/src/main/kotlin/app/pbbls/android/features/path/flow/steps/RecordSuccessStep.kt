@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +39,9 @@ import app.pbbls.android.features.path.read.PebbleReadPetroglyph
  * emotion palette. The stone always draws: a null [glyph] is a bare stone, not
  * an absent one (R12).
  *
+ * When [quiet] (the pebble is a full-intensity lowlight) the karma line gives way to a calm
+ * sentence and a "Get support" button that calls [onOpenSupport].
+ *
  * Stateless: the palette arrives as a parameter so screenshot previews drive it
  * without a live client.
  */
@@ -50,6 +54,8 @@ fun RecordSuccessStep(
     palette: EmotionPalette?,
     onExit: () -> Unit,
     modifier: Modifier = Modifier,
+    quiet: Boolean = false,
+    onOpenSupport: () -> Unit = {},
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -83,7 +89,18 @@ fun RecordSuccessStep(
                 textAlign = TextAlign.Center,
             )
 
-            if (karmaDelta != null && karmaDelta > 0) {
+            if (quiet) {
+                // A high-distress pebble: no karma line, no celebration, support one tap away.
+                Text(
+                    text = stringResource(R.string.record_success_quiet),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+                TextButton(onClick = onOpenSupport) {
+                    Text(stringResource(R.string.record_success_get_support))
+                }
+            } else if (karmaDelta != null && karmaDelta > 0) {
                 val karmaLabel = stringResource(R.string.record_karma_a11y, karmaDelta)
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),

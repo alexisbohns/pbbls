@@ -2,7 +2,7 @@
 # Kept minimal for sub-project A (scaffold). supabase-kt,
 # AndroidSVG and Coil arrive with the design system / Path work (B/D).
 [versions]
-agp = "9.5.0"
+agp = "9.5.1"
 kotlin = "2.4.21"
 ktlint = "14.2.0"
 coreKtx = "1.19.1"
@@ -51,7 +51,7 @@ screenshotValidationApi = { strictly = "0.0.1-alpha17" }
 # Ktor engine on the classpath — supabase-kt 3.1.4 is built against Ktor 3.1.2,
 # so the OkHttp engine is pinned to the same version to avoid Ktor version skew.
 supabase = "3.8.0"
-ktor = "3.6.0"
+ktor = "3.6.1"
 kotlinxSerializationJson = "1.12.0"
 # Custom Tabs — the in-app-browser analog of iOS SFSafariViewController, used
 # for the legal document links (D15).
@@ -79,7 +79,7 @@ splashscreen = "1.2.0"
 # it is versioned independently now, so this does NOT track `kotlin` above.
 # Verified against AGP 9.4.1's built-in Kotlin, where no KGP is applied by the
 # module: `:app:assembleDebug` runs hiltCollectClasses/hiltAggregateDeps/hiltJavaCompile green.
-ksp = "2.3.12"
+ksp = "2.3.13"
 hilt = "2.60.1"
 hiltNavigationCompose = "1.4.0"
 
@@ -92,7 +92,7 @@ hiltNavigationCompose = "1.4.0"
 # (2.11.0) rather than carrying its own number: androidx ships lifecycle-* as
 # one coordinated release and mixing versions across the group is the classic
 # NoSuchMethodError.
-navigation3 = "1.2.0"
+navigation3 = "1.2.1"
 navigationEvent = "1.2.0"
 
 # Konsist (#851) — the architecture boundary test. A plain JVM unit test that
@@ -111,7 +111,7 @@ konsist = "0.18.1"
 # macrobenchmark rules on one version line, so both ride this one ref.
 profileinstaller = "1.4.1"
 benchmark = "1.5.0"
-uiautomator = "2.4.0"
+uiautomator = "2.4.1"
 androidxTestExtJunit = "1.3.0"
 
 # Compose UI tests on the JVM (#857). Robolectric runs the real framework inside

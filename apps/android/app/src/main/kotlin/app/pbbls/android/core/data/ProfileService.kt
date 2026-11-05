@@ -60,7 +60,7 @@ class ProfileService
         override suspend fun loadProfile(): ProfileRow =
             supabase.client
                 .from("profiles")
-                .select(Columns.raw("display_name, created_at, glyph_id, handle, public_profile"))
+                .select(Columns.raw("display_name, created_at, glyph_id, handle, public_profile, onboarding_completed"))
                 .decodeSingle()
 
         /** Stroke data for the profile glyph — mirrors `ProfileView.loadGlyphStrokes`. */
@@ -179,4 +179,7 @@ data class ProfileRow(
     val handle: String? = null,
     @SerialName("public_profile")
     val publicProfile: Boolean = false,
+    /** Server truth for the onboarding gate (#1510 D10); false on a pre-flow account too. */
+    @SerialName("onboarding_completed")
+    val onboardingCompleted: Boolean = false,
 )

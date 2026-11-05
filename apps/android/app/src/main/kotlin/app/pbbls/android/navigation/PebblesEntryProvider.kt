@@ -3,11 +3,14 @@ package app.pbbls.android.navigation
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.LocalListDetailSceneScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.core.model.GlyphShelf
+import app.pbbls.android.core.ui.GlyphCarveSlot
 import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.core.ui.HomeMonthSlot
 import app.pbbls.android.core.ui.HomeWrapLineSlot
@@ -18,6 +21,7 @@ import app.pbbls.android.features.connections.AcceptInviteScreen
 import app.pbbls.android.features.connections.ConnectionsScreen
 import app.pbbls.android.features.connections.InviteScreen
 import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
+import app.pbbls.android.features.glyph.carve.GlyphCarveViewModel
 import app.pbbls.android.features.glyph.picker.GlyphPickerContent
 import app.pbbls.android.features.glyph.store.GlyphDetailScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
@@ -29,7 +33,6 @@ import app.pbbls.android.features.lab.LabScreen
 import app.pbbls.android.features.lab.LogListMode
 import app.pbbls.android.features.lab.LogListScreen
 import app.pbbls.android.features.onboarding.OnboardingScreen
-import app.pbbls.android.features.onboarding.OnboardingSteps
 import app.pbbls.android.features.path.EditMomentScreen
 import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.path.PathScreen
@@ -47,6 +50,7 @@ import app.pbbls.android.features.profile.SettingsScreen
 import app.pbbls.android.features.profile.SoulDetailScreen
 import app.pbbls.android.features.profile.SoulFormScreen
 import app.pbbls.android.features.profile.SoulsListScreen
+import app.pbbls.android.features.profile.support.CrisisResourcesScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -263,7 +267,12 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onSaved = { _, _, _, _ -> navigator.goBack() },
             glyphPicker = glyphPicker,
             onSignOut = onSignOut,
+            onOpenCrisisResources = { navigator.navigate(PebblesKey.CrisisResources) },
         )
+    }
+
+    entry<PebblesKey.CrisisResources>(metadata = NavTransitions.forKey(PebblesKey.CrisisResources)) {
+        CrisisResourcesScreen(onDismiss = navigator::goBack)
     }
 
     entry<PebblesKey.GlyphCarve>(metadata = NavTransitions.forKey(PebblesKey.GlyphCarve)) {
@@ -342,7 +351,11 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     entry<PebblesKey.CompletePebble>(metadata = NavTransitions.forKey(PebblesKey.CompletePebble(""))) { key ->
         // Exit returns to whatever opened it: the read page (which reloads on resume) or Path after a capture (A-14).
-        CompleteFlowScreen(momentId = key.momentId, onDismiss = navigator::goBack)
+        CompleteFlowScreen(
+            momentId = key.momentId,
+            onDismiss = navigator::goBack,
+            onOpenSupport = { navigator.navigate(PebblesKey.CrisisResources) },
+        )
     }
 
     // ---- The unauthenticated funnel promoted to entries (#852) ----
@@ -367,7 +380,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     // this one stack instead (design §5, D8).
 
     entry<PebblesKey.Onboarding>(metadata = NavTransitions.forKey(PebblesKey.Onboarding)) {
-        OnboardingScreen(steps = OnboardingSteps.all, onFinish = onOnboardingFinished)
+        OnboardingScreen(onFinish = onOnboardingFinished, carve = glyphCarve)
     }
 
     entry<PebblesKey.AcceptInvite>(metadata = NavTransitions.forKey(PebblesKey.AcceptInvite(""))) { key ->
@@ -388,6 +401,20 @@ private val glyphPicker: GlyphPickerSlot = { currentGlyphId, onSelected, state, 
         modifier = modifier,
         state = state,
     )
+}
+
+/**
+ * The carve studio for the onboarding flow (#1510 D8), hosted as a content swap inside the
+ * `Onboarding` entry the way [glyphPicker] hosts it. Its ViewModel is the entry's, so it is
+ * released when the slot leaves composition, and an abandoned drawing never resurfaces under the
+ * next carve. Same reason as [glyphPicker]: a feature may not import another, so this file fills the slot.
+ */
+private val glyphCarve: GlyphCarveSlot = { onSaved, onCancel, modifier ->
+    val carveViewModel: GlyphCarveViewModel = hiltViewModel()
+    // The slot leaves composition on every exit (save, cancel, the host's system back), so this
+    // is the one release path; a reset on a save or discard that already reset costs nothing.
+    DisposableEffect(Unit) { onDispose { carveViewModel.reset() } }
+    GlyphCarveScreen(onSaved = onSaved, onCancel = onCancel, modifier = modifier, viewModel = carveViewModel)
 }
 
 /**

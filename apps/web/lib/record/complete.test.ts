@@ -6,6 +6,7 @@ import {
   initialCompleteState,
   isDraftComplete,
   optionalButtonIsSkip,
+  quietSuccess,
   successLook,
   type CompleteDraft,
   type CompleteFlowAction,
@@ -223,5 +224,18 @@ describe("successLook", () => {
     const { look, reloaded } = successLook(undefined, renamed, draft)
     expect(reloaded).toBe(false)
     expect(look).toMatchObject({ name: "Before the write", happened_at: bare.happened_at })
+  })
+})
+
+describe("quietSuccess", () => {
+  it("is true for a lowlight at full intensity", () => {
+    expect(quietSuccess({ positiveness: -1, intensity: 3 })).toBe(true)
+  })
+  it.each([
+    [-1, 2],
+    [1, 3],
+    [0, 3],
+  ] as const)("is false for positiveness %i at intensity %i", (positiveness, intensity) => {
+    expect(quietSuccess({ positiveness, intensity })).toBe(false)
   })
 })

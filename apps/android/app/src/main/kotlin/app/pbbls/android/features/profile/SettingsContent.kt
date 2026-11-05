@@ -92,6 +92,7 @@ class SettingsActions(
     val onSignOutEverywhere: () -> Unit = {},
     val onDeleteAccount: () -> Unit = {},
     val onLogOut: () -> Unit = {},
+    val onOpenCrisisResources: () -> Unit = {},
 )
 
 /**
@@ -395,6 +396,18 @@ internal fun SettingsAccountSections(
     actions: SettingsActions,
 ) {
     val context = LocalContext.current
+
+    // Helplines (#1461): fixed, bundled and always first, never an admin-edited row.
+    ListGroup(
+        header = stringResource(R.string.settings_support_get_header),
+        items =
+            listOf({
+                SettingsLinkItem(
+                    text = stringResource(R.string.settings_support_get_row),
+                    onClick = actions.onOpenCrisisResources,
+                )
+            }),
+    )
 
     // The admin-edited links (#1489): Legal, About and Support, each shown when it has a row. The
     // titles follow the app's locale, French falling back to English (like the guides).
