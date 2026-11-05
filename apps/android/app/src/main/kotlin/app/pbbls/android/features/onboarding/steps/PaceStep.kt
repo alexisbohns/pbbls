@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
@@ -70,8 +71,9 @@ fun PaceStep(
         ) {
             val paces = OnboardingPace.entries
             paces.forEachIndexed { index, pace ->
+                val isSelected = pace == selected
                 ToggleButton(
-                    checked = pace == selected,
+                    checked = isSelected,
                     onCheckedChange = { onSelect(pace) },
                     enabled = !isCompleting,
                     shapes =
@@ -83,8 +85,10 @@ fun PaceStep(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .semantics { role = Role.RadioButton }
-                            .testTag(onboardingPaceTag(pace)),
+                            .semantics {
+                                role = Role.RadioButton
+                                this.selected = isSelected
+                            }.testTag(onboardingPaceTag(pace)),
                 ) { Text(stringResource(pace.labelRes)) }
             }
         }

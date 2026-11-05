@@ -78,7 +78,10 @@ class QuickMoment(
     /** The open sheet's form, or null while the sheet is closed. */
     val sheet: StateFlow<QuickMomentUiState?> = _sheet.asStateFlow()
 
-    /** A fresh form at now, each time the sheet opens, carrying [prefill] if any. A sheet already open keeps its form. */
+    /**
+     * A fresh form at now, each time the sheet opens, carrying [prefill] if any. A sheet already
+     * open keeps its form and drops the prefill: the hand-off is consumed once, not deferred.
+     */
     fun open(prefill: QuickMomentPrefill? = null) {
         if (_sheet.value == null) {
             _sheet.value =

@@ -6,6 +6,8 @@ import javax.inject.Singleton
 
 /** What the onboarding leaves for Home's quick composer (#1510 D9), read once. */
 data class OnboardingHandoffNote(
+    /** Who finished the flow: Home takes the note only for the same signed-in user. */
+    val userId: String?,
     /**
      * The first person named in step 5, pre-attached to the moment; null when none. A name, not an
      * id: the souls' ids are the server's, so Home resolves it by name once its reference lists reload.
@@ -19,6 +21,10 @@ data class OnboardingHandoffNote(
  * A one-shot mailbox between the onboarding entry and Home: the flow [leave]s its note before
  * popping itself, and Home [take]s it on its next resume. Process memory only: a process death in
  * between loses the hand-off, which is fine (D9: dismissing the composer is fine too).
+ *
+ * The note is bound to its user: [take] hands it over only to the same non-null user id, and
+ * discards it otherwise, so a session that ends between the two never opens B's composer with
+ * A's person and prompt.
  */
 @Singleton
 class OnboardingHandoff
@@ -30,5 +36,10 @@ class OnboardingHandoff
             note = value
         }
 
-        fun take(): OnboardingHandoffNote? = note.also { note = null }
+        /** The note left for [userId], or null; either way the mailbox is empty afterwards. */
+        fun take(userId: String?): OnboardingHandoffNote? {
+            val taken = note
+            note = null
+            return taken?.takeIf { userId != null && it.userId == userId }
+        }
     }

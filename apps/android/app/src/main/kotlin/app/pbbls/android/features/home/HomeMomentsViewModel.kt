@@ -68,7 +68,7 @@ class HomeMomentsViewModel
         savedState: SavedStateHandle,
         writes: MomentWriteServicing,
         achievements: AchievementsServicing,
-        supabase: SupabaseServicing,
+        private val supabase: SupabaseServicing,
         snapRepo: SnapWriteRepositing,
         private val photos: CameraPhotos,
         private val handoff: OnboardingHandoff,
@@ -114,7 +114,7 @@ class HomeMomentsViewModel
          */
         fun onResumed() {
             camera.onResumed()
-            val note = handoff.take() ?: return
+            val note = handoff.take(supabase.session?.user?.id) ?: return
             viewModelScope.launch {
                 val soulId =
                     note.firstPersonName?.let { name ->

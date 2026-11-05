@@ -171,7 +171,8 @@ class OnboardingViewModelTest {
             assertEquals(OnboardingPace.DAILY, sent.pace)
             assertEquals("Noé", sent.souls.single().name)
             assertEquals("sys-0", sent.souls.single().glyphId) // the first system glyph when none was picked
-            val note = handoff.take()
+            val note = handoff.take("user-1")
+            assertEquals("user-1", note?.userId)
             assertEquals(OnboardingReason.GOOD_DAYS, note?.reason)
             assertEquals("Noé", note?.firstPersonName)
             assertTrue(vm.uiState.value.isDone)
