@@ -47,6 +47,7 @@ import app.pbbls.android.features.profile.SettingsScreen
 import app.pbbls.android.features.profile.SoulDetailScreen
 import app.pbbls.android.features.profile.SoulFormScreen
 import app.pbbls.android.features.profile.SoulsListScreen
+import app.pbbls.android.features.profile.support.CrisisResourcesScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -263,7 +264,12 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onSaved = { _, _, _, _ -> navigator.goBack() },
             glyphPicker = glyphPicker,
             onSignOut = onSignOut,
+            onOpenCrisisResources = { navigator.navigate(PebblesKey.CrisisResources) },
         )
+    }
+
+    entry<PebblesKey.CrisisResources>(metadata = NavTransitions.forKey(PebblesKey.CrisisResources)) {
+        CrisisResourcesScreen(onDismiss = navigator::goBack)
     }
 
     entry<PebblesKey.GlyphCarve>(metadata = NavTransitions.forKey(PebblesKey.GlyphCarve)) {
@@ -342,7 +348,11 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     entry<PebblesKey.CompletePebble>(metadata = NavTransitions.forKey(PebblesKey.CompletePebble(""))) { key ->
         // Exit returns to whatever opened it: the read page (which reloads on resume) or Path after a capture (A-14).
-        CompleteFlowScreen(momentId = key.momentId, onDismiss = navigator::goBack)
+        CompleteFlowScreen(
+            momentId = key.momentId,
+            onDismiss = navigator::goBack,
+            onOpenSupport = { navigator.navigate(PebblesKey.CrisisResources) },
+        )
     }
 
     // ---- The unauthenticated funnel promoted to entries (#852) ----
