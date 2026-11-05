@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc --noEmit",
     "lint": "deno check supabase/functions/*/index.ts scripts/*.ts",
-    "test": "deno test supabase/functions/sweep-orphan-snaps/ supabase/functions/delete-account/ scripts/oracles/achievements/ && node scripts/oracles/path-wrap/test.js",
+    "test": "deno test supabase/functions/sweep-orphan-snaps/ supabase/functions/delete-account/ scripts/oracles/achievements/ scripts/rls-inventory_test.ts && node scripts/oracles/path-wrap/test.js",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:status": "supabase status",
@@ -34,6 +34,7 @@
     "db:verify:settings-links": "deno run --allow-env --allow-net scripts/verify-settings-links.ts",
     "db:verify:home": "deno run --allow-env --allow-net --allow-read --allow-write scripts/verify-home.ts",
     "db:verify:achievements": "deno run --allow-env --allow-net --allow-read --allow-write scripts/verify-achievements.ts",
+    "db:verify:rls": "deno run --allow-env --allow-net --allow-read --allow-run scripts/verify-rls-denial.ts",
     "db:verify:purge": "deno run --allow-env --allow-net scripts/verify-account-purge.ts",
     "db:verify:moderation": "deno run --allow-env --allow-net scripts/verify-moderation-state.ts",
     "db:verify:sweep": "deno run --allow-env --allow-net scripts/verify-orphan-snap-sweep.ts",
