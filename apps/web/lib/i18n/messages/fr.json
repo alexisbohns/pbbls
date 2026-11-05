@@ -208,6 +208,12 @@
   },
   "settings": {
     "linkSections": { "legal": "Légal", "about": "À propos", "support": "Aide" },
+    "support": {
+      "title": "Trouver du soutien",
+      "intro": "Si tu es en danger ou que tu penses à te faire du mal, appelle maintenant. Ces lignes sont gratuites et confidentielles.",
+      "country": "Pays",
+      "verified": "Numéros vérifiés le {date}"
+    },
     "title": "Réglages",
     "save": "Enregistrer",
     "saving": "Enregistrement…",

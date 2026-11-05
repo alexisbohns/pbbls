@@ -32,6 +32,7 @@ export const SPECIMENS = [
   { id: "alert-dialog", name: "Alert dialog", source: "components/ui/alert-dialog.tsx", section: "primitives", m3: "bridged" },
   { id: "sheet", name: "Sheet", source: "components/ui/sheet.tsx", section: "primitives", m3: "bridged" },
   { id: "popover", name: "Popover", source: "components/ui/popover.tsx", section: "primitives", m3: "bridged" },
+  { id: "select", name: "Select", source: "components/ui/select.tsx", section: "primitives", m3: "bridged" },
   { id: "dropdown-menu", name: "Dropdown menu", source: "components/ui/dropdown-menu.tsx", section: "primitives", m3: "bridged" },
   { id: "toast", name: "Toast", source: "components/ui/sonner.tsx", section: "primitives", m3: "bridged" },
   { id: "confirm-dialog", name: "ConfirmDialog", source: "components/ui/ConfirmDialog.tsx", section: "primitives", m3: "bridged" },
