@@ -3734,3 +3734,21 @@ Note for the Android mirror (#1519): the inline-create error line sits *above* t
 | Tests: flow models, draft round-trip, pill strings, references | 4.2, 4.4, 6.2, 7.2, 7.4, 8.2, 1.7, 2.3, 9.3 |
 
 Known deviations, stated: RECENT domains are device-local (7.3); the souls step hosts the chooser inline with a duplicated button for parts 3–6 (3.4); the upload ring on the moment page is static (4.5); the Home "New pebble" keeps hiding "Just save" (`chainsComplete`, 4.6), as D5 allows.
+
+## Lessons learned (in flight, 2026-11-05)
+
+Built the same day as subagent-driven execution: nine PRs #1535, #1536, #1543, #1544, #1545, #1546, #1547, #1548, #1549. The two-stage review caught a real defect in almost every part, none of which the implementer's self-review saw:
+
+- The People tab lost soul deletion (the brief wrongly claimed the soul page had it): always grep before asserting a capability exists elsewhere.
+- The interim souls step nested the chooser's `ScrollView` inside the scaffold's, unpinning the bar from the keyboard.
+- Capture's discard could re-arm the autosave through the coordinator's synchronous `formSnap = nil` and resurrect the page: gate autosave on an explicit lifecycle flag, never on "has restored".
+- Two `.task` modifiers on parent and child have no defined order: restore and coordinator creation live in one task.
+- A restored photo must be a pending upload, or its Storage files are orphaned on discard.
+- The photo step advanced on upload state changes, not only on a new pick.
+- The draft restore was made to wait on a network RPC by placing it after an `await`.
+- The help sheet overflowed its medium detent (the plan's 0.8 scale was arithmetic, not a render): verify sheets with a scratch render.
+- Fixed heights (tiles, rows, the Life clearance) broke under Dynamic Type until expressed as `@ScaledMetric`; two-column grids need one column at accessibility sizes.
+- `ThemeLiteralsTests` rejects `.black` in a mask gradient: the fix on part 1 forced a rebase of five branches, and the classifier refuses `--force-with-lease`, so the maintainer pushes.
+- The plan's week-row fixture epoch was a Friday labelled Wednesday; the implementer checked `date -r`.
+
+Still owed: the signed-in device pass across the stack; Android (#1515, #1519) and web (#1516, #1520) mirrors; a cheaper first-pebble read than `path_moments`; `UsualSoulsStrip` names at accessibility sizes.
