@@ -5,8 +5,10 @@ import Supabase
 /// system default glyph, the payload `CreateSoulSheet` sends. A single-table,
 /// single-row insert, so no RPC (AGENTS.md).
 enum SoulInlineCreate {
-    static let select = "id, name, glyph_id, glyphs(id, name, strokes, view_box), pebbles_count:pebble_souls(count)"
+    static let select = SoulRoute.columns
 
+    /// The host calls `achievements.fireCheck()` after a successful create and
+    /// logs failures (the chooser view does).
     static func create(name: String, userId: UUID, client: SupabaseClient) async throws -> SoulWithGlyph {
         let payload = SoulInsertPayload(
             userId: userId,

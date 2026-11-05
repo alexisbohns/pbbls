@@ -74,7 +74,10 @@ final class SoulChooserModel {
             if grouped[letter] == nil { order.append(letter) }
             grouped[letter, default: []].append(soul)
         }
-        let letters = order.filter { $0 != "#" }.sorted() + (order.contains("#") ? ["#"] : [])
+        let named = order
+            .filter { $0 != "#" }
+            .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+        let letters = named + (order.contains("#") ? ["#"] : [])
         return letters.map { Section(letter: $0, souls: grouped[$0] ?? []) }
     }
 
@@ -83,7 +86,8 @@ final class SoulChooserModel {
     }
 
     static func letter(for name: String) -> String {
-        guard let first = folded(name.trimmingCharacters(in: .whitespaces)).first, first.isLetter else { return "#" }
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let first = folded(trimmed).first, first.isLetter else { return "#" }
         return String(first).uppercased()
     }
 
@@ -121,6 +125,7 @@ final class SoulChooserModel {
     }
 
     func remove(_ id: UUID) {
+        guard case .pick = mode else { return }
         selection.removeAll { $0 == id }
     }
 
@@ -147,8 +152,8 @@ final class SoulChooserModel {
     /// The inline create (S4): the new soul joins the list, arrives chosen in a
     /// picker, and the field closes.
     func didCreate(_ soul: SoulWithGlyph) {
-        souls.append(soul)
-        if case .pick = mode { selection.append(soul.id) }
+        if !souls.contains(where: { $0.id == soul.id }) { souls.append(soul) }
+        if case .pick = mode, !selection.contains(soul.id) { selection.append(soul.id) }
         query = ""
         isSearching = false
     }

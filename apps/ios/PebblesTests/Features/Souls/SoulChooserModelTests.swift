@@ -115,4 +115,29 @@ struct SoulChooserModelTests {
         model.replaceSouls([a])
         #expect(model.selection == [a.id])
     }
+
+    @Test("didCreate is idempotent, also after replaceSouls already carries the soul")
+    func didCreateIdempotent() {
+        let model = SoulChooserModel(mode: .pick(allowsSkip: true), souls: [])
+        let created = soul("Mathilde", 0)
+        model.didCreate(created)
+        model.didCreate(created)
+        #expect(model.souls.count == 1)
+        #expect(model.selection == [created.id])
+
+        let other = SoulChooserModel(mode: .pick(allowsSkip: true), souls: [])
+        other.replaceSouls([created])
+        other.didCreate(created)
+        #expect(other.souls.count == 1)
+        #expect(other.selection == [created.id])
+    }
+
+    @Test("toggle and remove are no-ops in browse")
+    func browseNoSelection() {
+        let a = soul("Ana", 1)
+        let model = SoulChooserModel(mode: .browse, souls: [a], selection: [a.id])
+        model.toggle(UUID())
+        model.remove(a.id)
+        #expect(model.selection == [a.id])
+    }
 }
