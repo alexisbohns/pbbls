@@ -6,8 +6,11 @@ import javax.inject.Singleton
 
 /** What the onboarding leaves for Home's quick composer (#1510 D9), read once. */
 data class OnboardingHandoffNote(
-    /** The first person named in step 5, pre-attached to the moment; null when none. */
-    val soulId: String?,
+    /**
+     * The first person named in step 5, pre-attached to the moment; null when none. A name, not an
+     * id: the souls' ids are the server's, so Home resolves it by name once its reference lists reload.
+     */
+    val firstPersonName: String?,
     /** The first reason picked in step 3, which chooses the composer's prompt; null when skipped. */
     val reason: OnboardingReason?,
 )
