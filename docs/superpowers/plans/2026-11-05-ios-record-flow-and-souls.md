@@ -3676,6 +3676,15 @@ Fix each by inserting the missing `fr` (tu, no exclamation marks, the house tone
 - [ ] The 18 domain labels: list `domain.<slug>.name` and `domain.<slug>.label` EN/FR in the PR body as a table with a "proposed" column left empty, for the maintainer's copy pass; change nothing in this task unless a label exceeds 40 characters (then shorten and say so). The spec names Events, Weather and Tasks next to Identity and Spirituality as the ones to look at.
 - [ ] Run `-only-testing:PebblesTests/LocalizationTests` → green. Commit `chore(ios): record flow and souls copy in english and french`.
 
+### Task 9.2b: Accessibility reflow of the chooser (S8)
+
+**Files:** `apps/ios/Pebbles/Features/Souls/SoulChooser.swift`, `SoulPillTray.swift`, `PebblesTests/References/SoulChooserReferences.swift`
+
+- [ ] Read `@Environment(\.dynamicTypeSize)` in `SoulChooser`; when `typeSize.isAccessibilitySize` the Usual grid uses three columns instead of four. In `SoulPillTray`, at accessibility sizes lay the pills row above the button (`VStack`) instead of beside it. Add one render `pickerTwoChosenAx2` with `ReferenceConfig(scheme: .paper, dynamicType: .accessibility2)` and record it (EN pass only).
+- [ ] Commit `feat(ios): the souls chooser reflows at accessibility sizes`.
+
+Note for the Android mirror (#1519): the inline-create error line sits *above* the lens/plus bar, not under the field, because the bar lives in the bottom safe-area inset where "under" would be hidden by the keyboard.
+
 ### Task 9.3: Flow reference renders
 
 **Files:**
