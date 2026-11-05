@@ -11,11 +11,11 @@ import app.pbbls.android.core.data.OnboardingHandoff
 import app.pbbls.android.core.data.OnboardingHandoffNote
 import app.pbbls.android.core.data.OnboardingServicing
 import app.pbbls.android.core.data.SupabaseServicing
+import app.pbbls.android.core.model.ConsentGateLogic
 import app.pbbls.android.core.model.ConsentKind
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.OnboardingPace
 import app.pbbls.android.core.model.OnboardingReason
-import app.pbbls.android.features.consent.ConsentGateLogic
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow

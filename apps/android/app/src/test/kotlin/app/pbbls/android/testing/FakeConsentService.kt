@@ -2,9 +2,9 @@ package app.pbbls.android.testing
 
 import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.model.ActiveConsent
+import app.pbbls.android.core.model.ConsentGateLogic
 import app.pbbls.android.core.model.ConsentKind
 import app.pbbls.android.core.model.HealthDataConsent
-import app.pbbls.android.features.consent.ConsentGateLogic
 
 /**
  * In-memory [ConsentServicing]. Defaults to a ledger that already satisfies the

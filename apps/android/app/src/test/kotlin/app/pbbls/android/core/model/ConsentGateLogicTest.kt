@@ -1,8 +1,5 @@
-package app.pbbls.android.features.consent
+package app.pbbls.android.core.model
 
-import app.pbbls.android.core.model.ActiveConsent
-import app.pbbls.android.core.model.ConsentKind
-import app.pbbls.android.core.model.LegalVersions
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

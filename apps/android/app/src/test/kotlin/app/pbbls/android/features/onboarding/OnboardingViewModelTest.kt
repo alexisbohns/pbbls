@@ -4,10 +4,10 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.ConsentPreferences
 import app.pbbls.android.core.data.OnboardingHandoff
 import app.pbbls.android.core.model.ActiveConsent
+import app.pbbls.android.core.model.ConsentGateLogic
 import app.pbbls.android.core.model.ConsentKind
 import app.pbbls.android.core.model.OnboardingPace
 import app.pbbls.android.core.model.OnboardingReason
-import app.pbbls.android.features.consent.ConsentGateLogic
 import app.pbbls.android.testing.FakeConsentService
 import app.pbbls.android.testing.FakeOnboardingService
 import app.pbbls.android.testing.InMemoryPrefs

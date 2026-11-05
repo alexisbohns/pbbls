@@ -10,10 +10,10 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
+import app.pbbls.android.core.model.ConsentGateLogic
 import app.pbbls.android.core.model.OnboardingReason
 import app.pbbls.android.features.consent.CONSENT_GATE_CONTINUE
 import app.pbbls.android.features.consent.CONSENT_GATE_DELETE
-import app.pbbls.android.features.consent.ConsentGateLogic
 import app.pbbls.android.features.consent.consentRowTag
 import app.pbbls.android.features.onboarding.steps.onboardingConsentTag
 import app.pbbls.android.features.onboarding.steps.onboardingReasonTag
