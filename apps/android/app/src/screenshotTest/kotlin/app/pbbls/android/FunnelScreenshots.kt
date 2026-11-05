@@ -120,6 +120,16 @@ fun OnboardingScreenLight() {
             onNext = {},
             onConsentToggle = { _, _ -> },
             onReasonToggle = {},
+            onNameChange = {},
+            onGlyphSelect = {},
+            onDraw = {},
+            onPersonAdd = {},
+            onPersonNameChange = { _, _ -> },
+            onPersonCommit = {},
+            onPersonRemove = {},
+            onPersonGlyphSheet = {},
+            onPersonGlyphPick = { _, _ -> },
+            onDrawForPerson = {},
         )
     }
 }

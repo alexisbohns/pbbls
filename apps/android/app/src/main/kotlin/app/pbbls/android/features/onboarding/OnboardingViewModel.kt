@@ -83,6 +83,7 @@ class OnboardingViewModel internal constructor(
         val state = _uiState.value
         when (state.step.id) {
             "consent" -> if (!state.consent.canContinue) return
+            "people" -> commitEditingPeople()
             "pace" -> {
                 complete()
                 return
@@ -97,6 +98,7 @@ class OnboardingViewModel internal constructor(
             OnboardingSkip.NONE -> return
             OnboardingSkip.SKIP, OnboardingSkip.LATER -> Unit
         }
+        if (state.step.id == "people") commitEditingPeople()
         _uiState.update {
             when (state.step.id) {
                 "reasons" -> it.copy(reasons = emptySet())
@@ -197,6 +199,17 @@ class OnboardingViewModel internal constructor(
             } else {
                 it.copy(people = it.people.mapIndexed { i, p -> if (i == index) p.copy(name = p.name.trim(), editing = false) else p })
             }
+        }
+
+    /** Leaving the step never strands a half-typed name: a blank place is dropped, a name is kept. */
+    private fun commitEditingPeople() =
+        _uiState.update {
+            it.copy(
+                people =
+                    it.people
+                        .filter { p -> !p.editing || p.name.isNotBlank() }
+                        .map { p -> if (p.editing) p.copy(name = p.name.trim(), editing = false) else p },
+            )
         }
 
     fun onPersonRemove(index: Int) = _uiState.update { it.copy(people = it.people.filterIndexed { i, _ -> i != index }) }
