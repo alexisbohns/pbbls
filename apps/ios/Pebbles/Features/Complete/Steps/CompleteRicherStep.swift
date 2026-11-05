@@ -124,7 +124,7 @@ struct CompleteRicherStep: View {
                     Task { await edit(collectionId: collection.id) }
                 } label: {
                     Label { Text(verbatim: collection.name) } icon: {
-                        if collection.id == collectionId { Image(systemName: "checkmark") }
+                        if collection.id == collectionId { Image(PbblsIcon.checkmarkDot.assetName).renderingMode(.template) }
                     }
                 }
             }
@@ -143,7 +143,7 @@ struct CompleteRicherStep: View {
                 Button {
                     Task { await edit(visibility: grade) }
                 } label: {
-                    Label { Text(grade.label) } icon: { if grade == visibility { Image(systemName: "checkmark") } }
+                    Label { Text(grade.label) } icon: { if grade == visibility { Image(PbblsIcon.checkmarkDot.assetName).renderingMode(.template) } }
                 }
             }
         } label: {
