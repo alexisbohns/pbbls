@@ -56,6 +56,7 @@ private const val STEP_TRANSITION_MS = 280
 fun CompleteFlowScreen(
     momentId: String,
     onDismiss: () -> Unit,
+    onOpenSupport: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CompleteFlowViewModel = hiltViewModel(),
 ) {
@@ -91,6 +92,7 @@ fun CompleteFlowScreen(
         onComplete = viewModel::complete,
         onExit = viewModel::onExit,
         onAchievementCheck = viewModel::onAchievementCheck,
+        onOpenSupport = onOpenSupport,
         modifier = modifier,
     )
 }
@@ -108,6 +110,7 @@ fun CompleteFlowContent(
     onExit: () -> Unit,
     modifier: Modifier = Modifier,
     onAchievementCheck: () -> Unit = {},
+    onOpenSupport: () -> Unit = {},
 ) {
     val flow = uiState.flow
     val labels =
@@ -161,6 +164,8 @@ fun CompleteFlowContent(
                     valence = flow.answers.valence ?: Valence.NEUTRAL_MEDIUM,
                     palette = palette,
                     onExit = onExit,
+                    quiet = flow.answers.valence?.quietSuccess == true,
+                    onOpenSupport = onOpenSupport,
                 )
             } else {
                 RecordStepScaffold(
