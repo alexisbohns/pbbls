@@ -1,4 +1,7 @@
+"use client"
+
 import type { ReactNode } from "react"
+import { useSpecimenScope } from "./SpecimenScope"
 
 type DesignSectionProps = {
   id: string
@@ -8,6 +11,8 @@ type DesignSectionProps = {
 }
 
 export function DesignSection({ id, title, description, children }: DesignSectionProps) {
+  // In a frame the canvas labels the group; the frame lays specimens out itself.
+  if (useSpecimenScope()) return <>{children}</>
   return (
     <section id={id} aria-labelledby={`${id}-title`} className="flex scroll-mt-32 flex-col gap-10">
       <header className="flex flex-col gap-1">
