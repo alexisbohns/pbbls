@@ -431,8 +431,11 @@ jobs:
           # (ANON_KEY / SUPABASE_ANON_KEY) and on quoting, so accept either,
           # quoted or not, and fall back to the JSON output.
           status_env="$(supabase status -o env 2>/dev/null || true)"
+          # `q` after the first match, not `| head -n1`: when status prints both
+          # ANON_KEY and SUPABASE_ANON_KEY, head closes the pipe, sed dies of
+          # SIGPIPE, and pipefail + `bash -e` end the step without a word.
           anon_key="$(printf '%s\n' "$status_env" \
-            | sed -n -E 's/^(SUPABASE_)?ANON_KEY="?([^"]*)"?$/\2/p' | head -n1)"
+            | sed -n -E '/^(SUPABASE_)?ANON_KEY=/{s/^(SUPABASE_)?ANON_KEY="?([^"]*)"?$/\2/p;q;}' || true)"
           if [ -z "$anon_key" ]; then
             anon_key="$(supabase status --output json 2>/dev/null \
               | jq -r '.ANON_KEY // .SUPABASE_ANON_KEY // empty' || true)"
