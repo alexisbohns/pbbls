@@ -62,7 +62,7 @@ struct CompleteFlowModelTests {
         #expect(model.step == .privacy)
     }
 
-    @Test("setSouls mirrors the chooser's order with one haptic; the same ids are a no-op")
+    @Test("setSouls mirrors the chooser's order without a haptic of its own; advance still moves on")
     func setSouls() {
         let (model, recorder) = model()
         model.go(to: .souls)
@@ -70,12 +70,12 @@ struct CompleteFlowModelTests {
         let second = UUID()
         model.setSouls([first, second])
         #expect(model.draft.soulIds == [first, second])
-        #expect(recorder.taps == [.selection])
         model.setSouls([first, second])
-        #expect(recorder.taps == [.selection])
         model.setSouls([second, first])
         #expect(model.draft.soulIds == [second, first])
-        #expect(recorder.taps == [.selection, .selection])
+        #expect(recorder.taps.isEmpty)
+        model.advance()
+        #expect(model.step == .collection)
     }
 
     @Test("privacy selects without advancing; back preserves answers")

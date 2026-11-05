@@ -1,7 +1,9 @@
 import SwiftUI
 
 /// Who was there. Until the Life screen absorbs it (record-flow D10), the step
-/// hosts the chooser inline in pick mode; the scaffold's Skip / Done advances.
+/// hosts the chooser inline in pick mode, filling the scaffold's height so the
+/// chooser's bar stays pinned; the chooser's tray button is the Skip / Done
+/// that advances.
 struct CompleteSoulsStep: View {
     let model: CompleteFlowModel
 
@@ -11,8 +13,10 @@ struct CompleteSoulsStep: View {
     var body: some View {
         Group {
             if let chooser {
-                SoulChooser(model: chooser, title: nil)
+                SoulChooser(model: chooser, title: nil, onConfirm: { model.advance() })
                     .onChange(of: chooser.selection) { _, ids in model.setSouls(ids) }
+                    // The chooser carries its own gutter; undo the scaffold's.
+                    .padding(.horizontal, -Spacing.lg)
             } else {
                 ProgressView()
             }
