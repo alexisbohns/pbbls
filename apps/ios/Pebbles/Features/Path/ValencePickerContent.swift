@@ -44,6 +44,8 @@ struct ValencePickerContent: View {
             }
         }
         .frame(width: ValenceFanLayout.reference.width, height: ValenceFanLayout.reference.height)
+        .overlay(alignment: .bottom) { columnLabels }
+        .overlay(alignment: .leading) { rowLabels }
         .animation(.snappy(duration: 0.22), value: selected)
         .onAppear { motion.start() }
         .onDisappear { motion.stop() }
@@ -79,15 +81,57 @@ struct ValencePickerContent: View {
         .accessibilityAddTraits(isActive ? [.isSelected] : [])
     }
 
+    /// Lowlight · Neutral · Highlight under the fan, Month · Week · Day up its
+    /// left margin (D7). Meta type in the variant ink; VoiceOver already hears
+    /// both axes in each stone's label, so these are decorative.
+    private var columnLabels: some View {
+        HStack {
+            Text(ValencePolarity.lowlight.axisLabel)
+            Spacer()
+            Text(ValencePolarity.neutral.axisLabel)
+            Spacer()
+            Text(ValencePolarity.highlight.axisLabel)
+        }
+        .pebblesFont(.meta)
+        .foregroundStyle(Color.pebbles.onSurfaceVariant)
+        .padding(.horizontal, Spacing.sm)
+        .offset(y: Spacing.lg)
+        .accessibilityHidden(true)
+    }
+
+    /// Inside the canvas, over the left margin the fan's spread leaves empty
+    /// (the nearest stone edge is ~21 pt in), so it fits the 375 pt phones too.
+    private var rowLabels: some View {
+        VStack(alignment: .leading) {
+            Text(ValenceSizeGroup.large.axisLabel)
+            Spacer()
+            Text(ValenceSizeGroup.medium.axisLabel)
+            Spacer()
+            Text(ValenceSizeGroup.small.axisLabel)
+        }
+        .pebblesFont(.meta)
+        .foregroundStyle(Color.pebbles.onSurfaceVariant)
+        .padding(.vertical, Spacing.xl)
+        .offset(x: 4)
+        .accessibilityHidden(true)
+    }
+
     /// Reserves the tallest lockup's height so rolling between sizes does not
-    /// shove the fan up and down the screen.
+    /// shove the fan up and down the screen. Before a pick (D7) a ghost stone
+    /// and a prompt hold the slot instead of the roll.
     @ViewBuilder
     private var caption: some View {
         Group {
-            // The step arrives already parked on a valence, so the roll always
-            // has something under the finger. `nil` only happens in previews
-            // and in the edit sheet before it stages a value.
-            ValenceRollView(valence: selected ?? .neutralMedium, onChange: onSelect)
+            if let selected {
+                ValenceRollView(valence: selected, onChange: onSelect)
+            } else {
+                VStack(spacing: Spacing.sm) {
+                    GhostStone(width: 56)
+                    Text("Swipe or tap to choose")
+                        .pebblesFont(.cardHeading)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                }
+            }
         }
         // Bottom-anchored: the pyramid and the span sit at a fixed height, and
         // the word and its overtitle grow upward into space already reserved.

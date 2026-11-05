@@ -3042,6 +3042,23 @@
         }
       }
     },
+    "Day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jour"
+          }
+        }
+      }
+    },
     "Day event" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7929,6 +7946,23 @@
         }
       }
     },
+    "Month" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mois"
+          }
+        }
+      }
+    },
     "Month event" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12792,6 +12826,23 @@
         }
       }
     },
+    "Swipe or tap to choose" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe or tap to choose"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glisse ou touche pour choisir"
+          }
+        }
+      }
+    },
     "Take a photo" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13379,6 +13430,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "semaine"
+          }
+        }
+      }
+    },
+    "Week" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semaine"
           }
         }
       }

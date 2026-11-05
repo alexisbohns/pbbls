@@ -175,6 +175,28 @@ extension Valence {
     }
 }
 
+extension ValencePolarity {
+    /// The word under the fan's column (D7).
+    var axisLabel: LocalizedStringResource {
+        switch self {
+        case .lowlight:  return "Lowlight"
+        case .neutral:   return "Neutral"
+        case .highlight: return "Highlight"
+        }
+    }
+}
+
+extension ValenceSizeGroup {
+    /// The word up the fan's left margin (D7).
+    var axisLabel: LocalizedStringResource {
+        switch self {
+        case .small:  return "Day"
+        case .medium: return "Week"
+        case .large:  return "Month"
+        }
+    }
+}
+
 extension ValenceSizeGroup {
     /// Render height in the detail / edit sheets. Scales small pebbles down
     /// so a small render doesn't visually dominate a medium or large one —
