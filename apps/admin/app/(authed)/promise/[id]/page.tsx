@@ -20,10 +20,12 @@ export default async function EditPromiseLetterPage({ params }: { params: Params
   const supabase = await createServerSupabaseClient()
   const { data, error } = await supabase.from("promise_letters").select("*").eq("id", id).single()
 
-  if (error || !data) {
-    if (error) console.error("[promise/[id]] select failed:", error.message)
-    notFound()
+  // PGRST116 is `.single()` finding no row: the only error that means "not found".
+  if (error && error.code !== "PGRST116") {
+    console.error("[promise/[id]] select failed:", error.message)
+    throw new Error(error.message)
   }
+  if (!data) notFound()
 
   const letter = data
   const openingLine = letter.body_md_en.split("\n")[0].slice(0, 80)

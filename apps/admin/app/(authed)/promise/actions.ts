@@ -36,9 +36,14 @@ export async function updatePromiseLetter(id: string, _state: PromiseLetterFormR
   const parsed = readFields(formData)
   if (!parsed.ok) return { error: parsed.error }
   const supabase = await createServerSupabaseClient()
-  const { error } = await supabase.from("promise_letters").update(parsed.values).eq("id", id)
+  const { data, error } = await supabase.from("promise_letters").update(parsed.values).eq("id", id).select("id")
   if (error) {
     console.error("[promise/updatePromiseLetter] update failed:", error.message)
+    return { error: "Could not save the letter." }
+  }
+  // RLS filters rows without raising, so a refused write comes back as zero rows.
+  if (data.length === 0) {
+    console.error("[promise/updatePromiseLetter] update touched no row:", id)
     return { error: "Could not save the letter." }
   }
   revalidatePath("/promise")
@@ -48,9 +53,14 @@ export async function updatePromiseLetter(id: string, _state: PromiseLetterFormR
 
 export async function deletePromiseLetter(id: string): Promise<void> {
   const supabase = await createServerSupabaseClient()
-  const { error } = await supabase.from("promise_letters").delete().eq("id", id)
+  const { data, error } = await supabase.from("promise_letters").delete().eq("id", id).select("id")
   if (error) {
     console.error("[promise/deletePromiseLetter] delete failed:", error.message)
+    throw new Error("Could not delete the letter.")
+  }
+  // RLS filters rows without raising, so a refused delete comes back as zero rows.
+  if (data.length === 0) {
+    console.error("[promise/deletePromiseLetter] delete touched no row:", id)
     throw new Error("Could not delete the letter.")
   }
   revalidatePath("/promise")

@@ -9,6 +9,8 @@ export default async function PromisePage() {
   const { data, error } = await supabase.from("promise_letters").select("*").order("updated_at", { ascending: false })
   if (error) console.error("[promise] select failed:", error.message)
   const letters: PromiseLetterRow[] = data ?? []
+  // Rows are ordered by updated_at desc, the same rule the apps read by.
+  const liveId = letters.find((l) => l.published)?.id
   return (
     <section className="space-y-6">
       <header className="flex items-center justify-between">
@@ -23,7 +25,14 @@ export default async function PromisePage() {
       {error ? (
         <p role="alert" className="text-destructive text-sm">Couldn&rsquo;t load the letters: {error.message}</p>
       ) : (
-        <PromiseLetterTable letters={letters} />
+        <>
+          {liveId ? null : (
+            <p role="status" className="text-sm font-medium">
+              No letter is live: none is published.
+            </p>
+          )}
+          <PromiseLetterTable letters={letters} liveId={liveId} />
+        </>
       )}
     </section>
   )
