@@ -1,4 +1,5 @@
 import Foundation
+import Supabase
 import Testing
 @testable import Pebbles
 
@@ -22,5 +23,12 @@ struct MomentWriteErrorTests {
         #expect(userMessageForMomentWriteMessage("pebble_needs_domain") == String(localized: "Pick a part of life first."))
         #expect(userMessageForMomentWriteMessage("invalid_payload") == String(localized: "Couldn't save. Please try again."))
         #expect(userMessageForMomentWriteMessage("boom") == String(localized: "Couldn't save. Please try again."))
+    }
+
+    @Test("a thrown PostgREST slug is known; a transport error is not")
+    func knownError() {
+        let postgrest = PostgrestError(code: "P0001", message: "ERROR: pebble_needs_domain (SQLSTATE P0001)")
+        #expect(knownMomentWriteError(postgrest) == .pebbleNeedsDomain)
+        #expect(knownMomentWriteError(URLError(.notConnectedToInternet)) == nil)
     }
 }

@@ -9,9 +9,13 @@ struct UsualSoulsStrip: View {
     let onToggle: (UUID) -> Void
     let onMore: () -> Void
 
+    /// Matches `SoulTile`, so the More tile sits level with the people.
+    @ScaledMetric(relativeTo: .subheadline) private var tileHeight: CGFloat = 88
+
     /// The usual four, with anyone chosen for this pebble but missing from
     /// them (a person created inline in the picker) taking the last slot, so
-    /// a fresh pick is visible on return.
+    /// a fresh pick is visible on return. Several such people share that one
+    /// slot: only the latest shows, the others stay in the draft.
     private var shown: [SoulWithGlyph] {
         var tiles = Array(SoulChooserModel.usual(from: souls).prefix(4))
         for id in selection where !tiles.contains(where: { $0.id == id }) {
@@ -51,7 +55,7 @@ struct UsualSoulsStrip: View {
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 88)
+            .frame(minHeight: tileHeight)
             .background(RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .strokeBorder(Color.pebbles.outline, style: StrokeStyle(lineWidth: 1.5, dash: [6, 6])))
             .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))

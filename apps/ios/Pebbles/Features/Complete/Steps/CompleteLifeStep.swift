@@ -13,10 +13,11 @@ struct CompleteLifeStep: View {
     @State private var showsPicker = false
 
     /// The scaffold floats the "Make it a pebble" pill over the bottom of
-    /// this content (its 52pt pill, `Spacing.lg` off the edge); the strip
-    /// keeps that height plus one more gutter clear so the pill never covers
-    /// a tile.
-    private let floatingActionClearance: CGFloat = 52 + 2 * Spacing.lg
+    /// this content, `Spacing.lg` off the edge; the strip keeps the pill's
+    /// height (scaled as `PebblesPrimaryButtonStyle` scales it) plus one more
+    /// gutter clear so the pill never covers a tile.
+    @ScaledMetric(relativeTo: .body) private var buttonHeight: CGFloat = 52
+    private var floatingActionClearance: CGFloat { buttonHeight + 2 * Spacing.lg }
 
     private var recent: [Domain] {
         guard let owner = supabase.session?.user.id else { return [] }
