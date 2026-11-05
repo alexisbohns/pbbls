@@ -20,6 +20,11 @@ struct BareMomentPage: View {
     var onPlaceFrame: (CGRect) -> Void = { _ in }
     /// The held card's VoiceOver landing on the title after the open (E4).
     var titleFocus: AccessibilityFocusState<CardFocus?>.Binding?
+    /// D14: a Complete draft waits for this moment, so the place says "You
+    /// started this" and the button reads Continue.
+    var hasDraft = false
+    /// D14: "Add a few words", offered by the host only while the moment has none.
+    var onAddWords: (() -> Void)?
 
     static let placeID = "bare-place"
 
@@ -48,7 +53,8 @@ struct BareMomentPage: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 16)
             }
-            BarePlace(onComplete: onComplete, isDisabled: isCompleteDisabled)
+            BarePlace(onComplete: onComplete, isDisabled: isCompleteDisabled,
+                      hasDraft: hasDraft, onAddWords: onAddWords)
                 .id(Self.placeID)
                 // Merged, not set: the place's dashed stone reports its own anchor beneath.
                 .transformAnchorPreference(key: PrintAnchors.self, value: .bounds) { $0[.place] = $1 }
@@ -130,17 +136,21 @@ private struct BarePhoto: View {
 
 /// "Not a pebble yet": the place kept for the card, at least the card's
 /// 1 : 1.12 and taller when its words need it (a fixed ratio would clip at a
-/// large type size), and the one call to action.
+/// large type size), and the one call to action. With a draft waiting it
+/// reads "You started this" and offers to continue; "Add a few words" sits
+/// under the button while the moment has none (D14).
 private struct BarePlace: View {
     let onComplete: () -> Void
     let isDisabled: Bool
+    let hasDraft: Bool
+    let onAddWords: (() -> Void)?
 
     var body: some View {
         MinimumRatio(ratio: 1.12) {
             VStack(spacing: 0) {
                 GhostStone()
                     .anchorPreference(key: PrintAnchors.self, value: .bounds) { [.ghost: $0] }
-                Text(CardStrings.placeKicker)
+                Text(hasDraft ? CardStrings.placeStartedKicker : CardStrings.placeKicker)
                     .spineType(.sectionLabel)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .padding(.top, 16)
@@ -153,11 +163,24 @@ private struct BarePlace: View {
                     .padding(.top, 8)
                     .padding(.horizontal, 24)
                 Button(action: onComplete) {
-                    Label { Text("Make it a pebble") } icon: { PbblsIconImage(.plusCircle, .row) }
+                    Label { Text(hasDraft ? "Continue" : "Make it a pebble") } icon: {
+                        PbblsIconImage(.plusCircle, .row)
+                    }
                 }
                 .buttonStyle(PebblesPrimaryButtonStyle())
                 .disabled(isDisabled)
                 .padding(.top, 22)
+                if let onAddWords {
+                    Button(action: onAddWords) {
+                        Label { Text("Add a few words") } icon: {
+                            PbblsIconImage(.abstractPen, size: 20, relativeTo: .subheadline)
+                        }
+                    }
+                    .pebblesFont(.subheadEmphasized)
+                    .foregroundStyle(Color.pebbles.primary)
+                    .frame(minHeight: 44)
+                    .padding(.top, Spacing.xs)
+                }
             }
             .padding(.vertical, 28)
             .padding(.horizontal, 20)

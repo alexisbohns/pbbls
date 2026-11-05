@@ -195,7 +195,14 @@ struct HeldCardPage: View {
         BareMomentPage(detail: detail, ratio: detail.snaps.first.flatMap { aspects.ratio(for: $0.storagePath) },
                        onComplete: { isPresentingComplete = true },
                        isCompleteDisabled: model.detail == nil || model.completion != nil || printStart != nil,
-                       onPlaceFrame: { placeFrame = $0 }, titleFocus: $focus)
+                       onPlaceFrame: { placeFrame = $0 }, titleFocus: $focus,
+                       hasDraft: hasCompleteDraft(for: detail),
+                       onAddWords: detail.description?.isEmpty == false ? nil : { isPresentingEditMoment = true })
+    }
+
+    /// D14: a Complete draft on the device for this moment and account.
+    private func hasCompleteDraft(for detail: MomentDetail) -> Bool {
+        supabase.session.flatMap { completeDrafts.load(momentId: detail.id, ownerId: $0.user.id) } != nil
     }
 
     private func card(_ detail: MomentDetail, _ pebble: MomentDetail.Pebble, print: Double?) -> some View {

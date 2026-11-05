@@ -26,6 +26,9 @@ enum CardStrings {
         "card.collections.a11y", defaultValue: "Collections", comment: "VoiceOver: before the band's collection names")
     static let placeKicker = LocalizedStringResource(
         "bare.place.kicker", defaultValue: "Not a pebble yet", comment: "Bare moment: the kicker over its card's place")
+    static let placeStartedKicker = LocalizedStringResource(
+        "bare.place.startedKicker", defaultValue: "You started this",
+        comment: "Bare moment: the kicker over its card's place when a Complete draft waits for it")
     static let placeBody = LocalizedStringResource(
         "bare.place.body",
         defaultValue: """

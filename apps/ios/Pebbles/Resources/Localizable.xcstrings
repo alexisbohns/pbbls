@@ -2120,6 +2120,24 @@
         }
       }
     },
+    "bare.place.startedKicker" : {
+      "comment" : "Bare moment: the kicker over its card's place when a Complete draft waits for it",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You started this"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu avais commencé"
+          }
+        }
+      }
+    },
     "Bento" : {
       "extractionState" : "manual",
       "localizations" : {
