@@ -29,9 +29,6 @@ data class MomentSavePayload(
     @Serializable(with = WholeSecondTimestampSerializer::class)
     val happenedAt: OffsetDateTime? = null,
     val snaps: List<PebbleSnapPayload>? = null,
-    /** Souls to attach, by id (`save_moment`'s `soul_ids`); null leaves the key out. The onboarding hand-off sets it (#1510 D9). */
-    @SerialName("soul_ids")
-    val soulIds: List<String>? = null,
 ) {
     companion object {
         /** Capture creates. A blank name is left out: a photo-only moment is valid (D3). */

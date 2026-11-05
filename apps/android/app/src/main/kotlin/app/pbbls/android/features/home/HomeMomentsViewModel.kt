@@ -59,7 +59,7 @@ private const val KEY_CAMERA_SHOT = "home-camera-shot"
  * [HomeViewModel.onMomentSaved]; the Path re-reads on its own resume (#852).
  *
  * The onboarding's hand-off (#1510 D9) lands here too: [onResumed] takes the flow's note once and
- * opens [quick] with the first person attached and the reasons' prompt as the placeholder.
+ * opens [quick] with the reasons' prompt as the placeholder.
  */
 @HiltViewModel
 class HomeMomentsViewModel
@@ -106,22 +106,15 @@ class HomeMomentsViewModel
         }
 
         /**
-         * The camera's resume, then the onboarding's note, once (#1510 D9). The note names the
-         * first person rather than carrying an id (the souls' ids are the server's), so the souls
-         * list is refreshed first, which also puts the flow's new souls in the Complete picker, and
-         * the person is matched by name. No match attaches nobody; the composer opens either way,
-         * with the prompt the first reason chose (the default one when step 3 was skipped).
+         * The camera's resume, then the onboarding's note, once (#1510 D9): the composer opens with
+         * the prompt the first reason chose (the default one when step 3 was skipped), and the souls
+         * list is refreshed so the flow's new souls are in the Complete picker straight away. Nobody
+         * is pre-attached: souls attach to pebbles, and `save_moment` has no way to hold one.
          */
         fun onResumed() {
             camera.onResumed()
             val note = handoff.take(supabase.session?.user?.id) ?: return
-            viewModelScope.launch {
-                val soulId =
-                    note.firstPersonName?.let { name ->
-                        reference.refreshSouls()
-                        reference.souls.firstOrNull { it.name == name }?.id
-                    }
-                quick.open(QuickMomentPrefill(soulId = soulId, promptRes = onboardingHandoffPrompt(note.reason)))
-            }
+            quick.open(QuickMomentPrefill(promptRes = onboardingHandoffPrompt(note.reason)))
+            viewModelScope.launch { reference.refreshSouls() }
         }
     }

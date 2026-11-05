@@ -29,24 +29,21 @@ enum class QuickMomentExit {
     CLOSE,
 }
 
-/** What the onboarding hands the composer (#1510 D9): a person to attach and the prompt the reasons chose. */
+/** What the onboarding hands the composer (#1510 D9): the prompt the reasons chose. */
 data class QuickMomentPrefill(
-    val soulId: String? = null,
     @StringRes val promptRes: Int? = null,
 )
 
 /**
  * The open quick moment sheet's form (#1383 D7; iOS `QuickMomentDraft`). [name] is what the field
  * shows, clamped to Capture's limit; what is saved is it trimmed. [happenedAt] starts at now.
- * [soulIds] and [promptRes] come from a [QuickMomentPrefill] (the onboarding hand-off) and are
- * otherwise empty and null: the sheet has no souls picker of its own.
+ * [promptRes] comes from a [QuickMomentPrefill] (the onboarding hand-off) and is otherwise null.
  */
 data class QuickMomentUiState(
     val name: String = "",
     val happenedAt: OffsetDateTime,
     val isSaving: Boolean = false,
     @StringRes val errorRes: Int? = null,
-    val soulIds: List<String> = emptyList(),
     @StringRes val promptRes: Int? = null,
 ) {
     /** A savable name: trimmed, not blank (iOS `canSave`). */
@@ -87,7 +84,6 @@ class QuickMoment(
             _sheet.value =
                 QuickMomentUiState(
                     happenedAt = now(),
-                    soulIds = listOfNotNull(prefill?.soulId),
                     promptRes = prefill?.promptRes,
                 )
         }
@@ -108,12 +104,7 @@ class QuickMoment(
         if (!form.canSave) return
         _sheet.value = form.copy(isSaving = true, errorRes = null)
         // Whole seconds: the cross-surface timestamp rule (iOS floors the same way).
-        val payload =
-            MomentSavePayload(
-                name = form.trimmedName,
-                happenedAt = form.happenedAt.truncatedTo(ChronoUnit.SECONDS),
-                soulIds = form.soulIds.takeIf { it.isNotEmpty() },
-            )
+        val payload = MomentSavePayload(name = form.trimmedName, happenedAt = form.happenedAt.truncatedTo(ChronoUnit.SECONDS))
         scope.launch {
             withContext(NonCancellable) {
                 runCatchingCancellable { writes.saveMoment(payload) }.fold(

@@ -256,8 +256,6 @@ class OnboardingViewModel internal constructor(
                         handoff.leave(
                             OnboardingHandoffNote(
                                 userId = userId,
-                                // The souls' ids are the server's; Home resolves the soul by name (Task 6.2).
-                                firstPersonName = answers.souls.firstOrNull()?.name,
                                 reason = answers.reasons?.firstOrNull(),
                             ),
                         )

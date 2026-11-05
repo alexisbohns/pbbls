@@ -8,11 +8,6 @@ import javax.inject.Singleton
 data class OnboardingHandoffNote(
     /** Who finished the flow: Home takes the note only for the same signed-in user. */
     val userId: String?,
-    /**
-     * The first person named in step 5, pre-attached to the moment; null when none. A name, not an
-     * id: the souls' ids are the server's, so Home resolves it by name once its reference lists reload.
-     */
-    val firstPersonName: String?,
     /** The first reason picked in step 3, which chooses the composer's prompt; null when skipped. */
     val reason: OnboardingReason?,
 )
@@ -24,7 +19,7 @@ data class OnboardingHandoffNote(
  *
  * The note is bound to its user: [take] hands it over only to the same non-null user id, and
  * discards it otherwise, so a session that ends between the two never opens B's composer with
- * A's person and prompt.
+ * A's prompt.
  */
 @Singleton
 class OnboardingHandoff
