@@ -19,6 +19,7 @@ import {
   initialCompleteState,
   isDraftComplete,
   optionalButtonIsSkip,
+  quietSuccess,
 } from "@/lib/record/complete"
 import { COMPLETE_COUNTED_STEPS, COMPLETE_STEPS, type CompleteStep } from "@/lib/record/steps"
 import { prewarmValenceArt } from "@/lib/valence/stone-art"
@@ -231,6 +232,7 @@ export function CompleteFlow({ momentId, from }: CompleteFlowProps) {
           before={completion.before}
           draft={flow.draft}
           karmaDelta={completion.karmaDelta}
+          quiet={quietSuccess(flow.draft)}
           onExit={exitToPath}
         />
       ) : (

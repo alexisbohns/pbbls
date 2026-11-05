@@ -23,6 +23,8 @@ import app.pbbls.android.core.data.MomentReadService
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteService
 import app.pbbls.android.core.data.MomentWriteServicing
+import app.pbbls.android.core.data.OnboardingService
+import app.pbbls.android.core.data.OnboardingServicing
 import app.pbbls.android.core.data.PathStatsService
 import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.PathWrapService
@@ -146,6 +148,10 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindSettingsLinksServicing(impl: SettingsLinksService): SettingsLinksServicing
+
+    @Binds
+    @Singleton
+    fun bindOnboardingServicing(impl: OnboardingService): OnboardingServicing
 
     @Binds
     @Singleton

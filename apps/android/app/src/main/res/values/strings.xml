@@ -60,18 +60,80 @@
     <string name="auth_submit_signup">Create an account</string>
 
     <!-- ==== Entry funnel — Onboarding ==== -->
-    <string name="onboarding_intro_title">Your life is a path.</string>
-    <string name="onboarding_intro_description">Every moment matters — the big ones and the quiet ones. But most of them slip away before you even notice. Pebbles helps you collect them, one by one.</string>
-    <string name="onboarding_concept_title">Drop a pebble, keep the moment.</string>
-    <string name="onboarding_concept_description">A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience.</string>
-    <string name="onboarding_qualify_title">Qualify and relate.</string>
-    <string name="onboarding_qualify_description">Associate your moment with an emotion and a domain, relate with people and add your pebble to a stack or a collection.</string>
-    <string name="onboarding_carving_title">Get your pebble.</string>
-    <string name="onboarding_carving_description">Choose or carve a glyph to mark the moment. Then reveal a unique pebble illustration to remember your moment.</string>
+    <!-- Onboarding (#1510): the seven steps. The whole catalog lands with the data layer; a string marked
+         UnusedResources is consumed by the part that builds its step, which drops the mark. -->
+    <string name="onboarding_back">Back</string>
     <string name="onboarding_skip">Skip</string>
-    <string name="onboarding_close">Close onboarding</string>
-    <string name="onboarding_start">Start your path</string>
-
+    <string name="onboarding_later">Later</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_progress">Step %1$d of %2$d</string>
+    <string name="onboarding_promise_title">Before anything else,</string>
+    <string name="onboarding_promise_cta">I\'ll hold you to it</string>
+    <string name="onboarding_promise_unavailable">Our promise could not load. It will be here in Settings.</string>
+    <string name="onboarding_consent_title">Your consent</string>
+    <string name="onboarding_consent_body">One switch for each thing you agree to.</string>
+    <string name="onboarding_consent_health">Store how I feel</string>
+    <string name="onboarding_consent_terms">Terms of Service</string>
+    <string name="onboarding_consent_privacy">Privacy Policy</string>
+    <string name="onboarding_consent_age">I am 16 or over</string>
+    <string name="onboarding_consent_read_terms">Read the terms</string>
+    <string name="onboarding_consent_read_policy">Read the policy</string>
+    <string name="onboarding_consent_recorded">Already on record</string>
+    <string name="onboarding_consent_error">Your consent could not be saved. Check your connection and try again.</string>
+    <string name="onboarding_reasons_title">What brings you here?</string>
+    <string name="onboarding_reasons_body">Pick all that fit.</string>
+    <string name="onboarding_reason_notice_feelings">Notice how I really feel</string>
+    <string name="onboarding_reason_keep_people">Keep the people who matter</string>
+    <string name="onboarding_reason_hard_season">Get through a hard season</string>
+    <string name="onboarding_reason_good_days">Remember the good days</string>
+    <string name="onboarding_reason_own_patterns">See my own patterns</string>
+    <string name="onboarding_reason_keep_record">Keep a record for later</string>
+    <string name="onboarding_you_title">This is you</string>
+    <string name="onboarding_you_draw">Draw my own</string>
+    <string name="onboarding_glyph_nth">Glyph %1$d</string>
+    <string name="onboarding_people_title">Three places</string>
+    <string name="onboarding_people_body">Who would you call first with good news?</string>
+    <string name="onboarding_people_add">Add one</string>
+    <string name="onboarding_people_name_hint">Their name</string>
+    <string name="onboarding_people_change_glyph">Change glyph</string>
+    <string name="onboarding_people_glyph_sheet_title">A glyph for %1$s</string>
+    <string name="onboarding_people_glyph_use">Use for %1$s</string>
+    <string name="onboarding_people_glyph_draw">Draw one</string>
+    <string name="onboarding_pace_title">What pace suits you?</string>
+    <string name="onboarding_pace_daily">Every day</string>
+    <string name="onboarding_pace_few_a_week">A few times a week</string>
+    <string name="onboarding_pace_when_it_matters">Only when it matters</string>
+    <string name="onboarding_pace_weekly_wrap">Wrapping the end of the week</string>
+    <string name="onboarding_pace_footer">No streaks, no guilt.</string>
+    <string name="onboarding_finish">Continue</string>
+    <string name="onboarding_complete_error">Couldn\'t finish. Check your connection and try again.</string>
+    <string name="onboarding_promise_title_em">a promise.</string>
+    <string name="onboarding_promise_rail">A promise</string>
+    <string name="onboarding_consent_health_detail">Moods, emotions and what I write. Sensitive data under GDPR art. 9.</string>
+    <string name="onboarding_consent_terms_detail">How Pebbles works and what we owe you.</string>
+    <string name="onboarding_consent_privacy_detail">What we keep, where, and for how long.</string>
+    <string name="onboarding_consent_age_detail">Pebbles is not made for younger people.</string>
+    <string name="onboarding_consent_needed">All four are needed to continue.</string>
+    <string name="onboarding_you_name_label">Your name</string>
+    <string name="onboarding_you_glyph_label">Your glyph</string>
+    <string name="onboarding_you_draw_short">Draw</string>
+    <string name="onboarding_you_cta">That\'s me</string>
+    <string name="onboarding_people_note">First names only. They are never contacted.</string>
+    <string name="onboarding_people_later">You can add more people later.</string>
+    <string name="onboarding_people_cta">These are my people</string>
+    <string name="onboarding_people_cta_three">Keep %1$s, %2$s and %3$s</string>
+    <string name="onboarding_people_glyph_sheet_body">It marks %1$s on every pebble.</string>
+    <string name="onboarding_pace_daily_detail">A small habit, evening or morning.</string>
+    <string name="onboarding_pace_few_a_week_detail">When there\'s something worth it.</string>
+    <string name="onboarding_pace_when_it_matters_detail">No rhythm at all. Also fine.</string>
+    <string name="onboarding_pace_weekly_wrap_detail">One look back, each Sunday.</string>
+    <string name="onboarding_handoff_prompt_notice_feelings">What did you feel today?</string>
+    <string name="onboarding_handoff_prompt_keep_people">Who were you with today?</string>
+    <string name="onboarding_handoff_prompt_hard_season">What was hard today?</string>
+    <string name="onboarding_handoff_prompt_good_days">What was good today?</string>
+    <string name="onboarding_handoff_prompt_own_patterns">What happened today?</string>
+    <string name="onboarding_handoff_prompt_keep_record">What do you want to remember from today?</string>
+    <string name="onboarding_handoff_prompt_default">What happened today?</string>
     <!-- ==== Path timeline (sub-project D) ==== -->
     <!-- iOS never localized the load-error copy (plain String literal) — Android does. -->
     <string name="path_load_error">Couldn\'t load your pebbles.</string>
@@ -299,6 +361,8 @@
     <string name="settings_handle_error_reserved">That handle is reserved.</string>
     <string name="settings_providers_header">Providers</string>
     <string name="settings_legal_header">Legal</string>
+    <string name="settings_support_get_header">Get support</string>
+    <string name="settings_support_get_row">Helplines, free and confidential</string>
     <string name="settings_about_header">About</string>
     <string name="settings_support_header">Support</string>
     <string name="settings_save_error">Couldn\'t save your changes. Please try again.</string>
@@ -796,6 +860,12 @@
     <string name="record_close_discard">Discard</string>
     <string name="record_karma">+%1$d karma</string>
     <string name="record_karma_a11y">Earned %1$d karma</string>
+    <string name="record_success_quiet">Thank you for keeping this. If today is heavy, support is one tap away.</string>
+    <string name="record_success_get_support">Get support</string>
+    <string name="crisis_intro">If you are in danger or thinking about hurting yourself, call now. These lines are free and confidential.</string>
+    <string name="crisis_country">Country</string>
+    <string name="crisis_worldwide">Anywhere else</string>
+    <string name="crisis_verified_on">Numbers checked on %1$s</string>
     <string name="record_signed_out_error">You must be signed in to save.</string>
 
     <!-- Bottom navigation bar (#852) -->
