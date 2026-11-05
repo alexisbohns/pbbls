@@ -129,11 +129,9 @@ class OnboardingViewModel internal constructor(
         checked: Boolean,
     ) {
         val state = _uiState.value.consent
-        if (kind in state.recorded || kind in state.saving) return
-        if (!checked) {
-            _uiState.update { it.copy(consent = it.consent.copy(on = it.consent.on - kind, errorRes = null)) }
-            return
-        }
+        // An act on record, recorded here, or being recorded is locked on: nothing is withdrawn in
+        // this flow, and a second write at the same version is pointless.
+        if (!checked || kind in state.recorded || kind in state.on || kind in state.saving) return
         _uiState.update { it.copy(consent = it.consent.copy(saving = it.consent.saving + kind, errorRes = null)) }
         viewModelScope.launch {
             withContext(NonCancellable) {

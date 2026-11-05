@@ -81,6 +81,21 @@ class OnboardingViewModelTest {
         }
 
     @Test
+    fun `a recorded act is locked on, so a further toggle writes nothing`() =
+        runTest {
+            val vm = vm()
+            advanceUntilIdle()
+            vm.next()
+            vm.onConsentToggle(ConsentKind.HEALTH_DATA, true)
+            advanceUntilIdle()
+            vm.onConsentToggle(ConsentKind.HEALTH_DATA, false)
+            vm.onConsentToggle(ConsentKind.HEALTH_DATA, true)
+            advanceUntilIdle()
+            assertTrue(ConsentKind.HEALTH_DATA in vm.uiState.value.consent.on)
+            assertEquals(1, consents.recordCalls.size)
+        }
+
+    @Test
     fun `a failed record keeps the switch off with an error`() =
         runTest {
             consents.recordFailure = IOException("offline")

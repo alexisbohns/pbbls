@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import app.pbbls.android.R
@@ -113,8 +115,17 @@ private fun ConsentSwitchRow(
     val colors = MaterialTheme.colorScheme
     val recorded = kind in state.recorded
     val checked = recorded || kind in state.on
+    // The whole row is the switch: one accessible node that names the act, one touch target. An act
+    // on record, or recorded here, is locked on: nothing is withdrawn in this flow.
     Row(
-        Modifier.fillMaxWidth(),
+        Modifier
+            .fillMaxWidth()
+            .toggleable(
+                value = checked,
+                enabled = !checked && kind !in state.saving,
+                role = Role.Switch,
+                onValueChange = { onToggle(kind, it) },
+            ).testTag(onboardingConsentTag(kind)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
@@ -125,9 +136,8 @@ private fun ConsentSwitchRow(
         }
         Switch(
             checked = checked,
-            onCheckedChange = { onToggle(kind, it) },
-            enabled = !recorded && kind !in state.saving,
-            modifier = Modifier.testTag(onboardingConsentTag(kind)),
+            onCheckedChange = null,
+            enabled = !checked && kind !in state.saving,
         )
     }
 }

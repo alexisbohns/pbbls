@@ -112,7 +112,7 @@ fun OnboardingContent(
             ) {
                 IconButton(
                     onClick = onBack,
-                    enabled = state.stepIndex > 0,
+                    enabled = state.stepIndex > 0 && !state.isCompleting,
                     modifier = Modifier.testTag(JourneyTags.ONBOARDING_BACK),
                 ) {
                     Icon(
@@ -128,7 +128,11 @@ fun OnboardingContent(
                     // The Back button's width, so the stones stay centred on a step with no skip.
                     OnboardingSkip.NONE -> Box(Modifier.size(48.dp))
                     OnboardingSkip.SKIP, OnboardingSkip.LATER ->
-                        TextButton(onClick = onSkip, modifier = Modifier.testTag(JourneyTags.ONBOARDING_SKIP)) {
+                        TextButton(
+                            onClick = onSkip,
+                            enabled = !state.isCompleting,
+                            modifier = Modifier.testTag(JourneyTags.ONBOARDING_SKIP),
+                        ) {
                             Text(
                                 stringResource(
                                     if (state.step.skip ==
