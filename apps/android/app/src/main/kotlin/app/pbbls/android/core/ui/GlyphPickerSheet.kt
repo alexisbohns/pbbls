@@ -30,6 +30,19 @@ typealias GlyphPickerSlot = @Composable (
 ) -> Unit
 
 /**
+ * The carve studio as a slot (#1510 D8), for the onboarding flow that hosts it full screen
+ * over a step: the same reason as [GlyphPickerSlot]. [onSaved] hands back the carved glyph;
+ * [onCancel] is the studio's own Cancel or Discard. The host may also drop the slot without
+ * either (its system back), so the slot's filler releases the studio when it leaves composition,
+ * not in the callbacks.
+ */
+typealias GlyphCarveSlot = @Composable (
+    onSaved: (Glyph) -> Unit,
+    onCancel: () -> Unit,
+    modifier: Modifier,
+) -> Unit
+
+/**
  * The glyph picker's content-swap state, hoisted out of the picker so its
  * host can unwind it.
  *

@@ -115,11 +115,11 @@ class BackTest : AppUiTest() {
     fun `onboarding swallows back`() {
         launch()
         signIn()
-        onText(R.string.onboarding_skip).assertIsDisplayed()
+        onText(R.string.onboarding_promise_cta).assertIsDisplayed()
 
         pressBack()
 
-        onText(R.string.onboarding_skip).assertIsDisplayed()
+        onText(R.string.onboarding_promise_cta).assertIsDisplayed()
     }
 
     @Test

@@ -150,8 +150,9 @@ final class CompleteFlowModel {
         completeError = nil
     }
 
-    func succeed(with result: CompletionResult) {
-        haptic(.success)
+    /// `quiet` (a high-distress pebble) skips the success haptic.
+    func succeed(with result: CompletionResult, quiet: Bool = false) {
+        if !quiet { haptic(.success) }
         isCompleting = false
         completed = result
         step = .success

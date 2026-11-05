@@ -33,6 +33,7 @@ struct SettingsSheet: View {
     /// The kept (or built-in) links at once, refreshed from `settings_links` when the sheet opens (#1489).
     @State private var links: [SettingsLink] = SettingsLinksStore(defaults: .standard).current()
     @State private var presentedLink: SettingsLink?
+    @State private var showsCrisisResources = false
     /// This device's, saved as it is switched: never staged for the sheet's Save.
     @AppStorage(HapticsPreference.storageKey) private var hapticsOn = true
     @AppStorage(HomeShortcutsPreference.layoutKey) private var shortcutsLayout = HomeShortcutsLayout.row
@@ -156,6 +157,7 @@ struct SettingsSheet: View {
                 }
                 homeSection
                 hapticsSection
+                supportSection
                 linkSections
                 #if DEBUG
                 developerSection
@@ -192,6 +194,9 @@ struct SettingsSheet: View {
                 GlyphPickerSheet(currentGlyphId: pickedGlyph?.id ?? initialGlyphId) { glyph in
                     pickedGlyph = glyph
                 }
+            }
+            .sheet(isPresented: $showsCrisisResources) {
+                CrisisResourcesSheet()
             }
             .sheet(item: $presentedLink) { link in
                 LegalDocumentSheet(url: link.url)
@@ -477,6 +482,19 @@ struct SettingsSheet: View {
             Text("Haptics").pebblesSectionHeader()
         } footer: {
             Text("Every vibration in Pebbles, on this iPhone.")
+        }
+    }
+
+    /// Crisis lines, one row, presented as a sheet like the other rows.
+    private var supportSection: some View {
+        Section {
+            Button {
+                showsCrisisResources = true
+            } label: {
+                Label("Get support", systemImage: "lifepreserver")
+            }
+            .buttonStyle(.plain)
+            .pebblesListRow(position: .only)
         }
     }
 
