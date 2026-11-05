@@ -185,11 +185,17 @@ struct CompleteFlowView: View {
             karma.notifyEarned(amount: karmaDelta ?? 0, reason: .pebbleCreated, presentsCapsule: false)
             achievements.fireCheck()
             autosave?.clear()
+            if let owner = supabase.session?.user.id {
+                RecentDomains().record(model.draft.domainIds, owner: owner)
+            }
             model.succeed(with: CompletionResult(pebbleId: pebbleId, karmaDelta: karmaDelta, glyph: resolved))
             onCompleted(momentId)
         } catch {
             logger.error("complete_pebble failed: \(error.localizedDescription, privacy: .private)")
-            model.fail(userMessageForMomentWriteError(error))
+            // A slug the server names keeps its own copy; anything else says
+            // what still stands: the moment is saved, the pebble is not (D6).
+            model.fail(knownMomentWriteError(error)?.userMessage
+                ?? String(localized: "Moment saved, pebble not made yet · Try again"))
         }
     }
 
