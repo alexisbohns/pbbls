@@ -196,4 +196,48 @@ struct ConsentGateModelTests {
         #expect(gate.state == .failed(.other))
         #expect(!gate.isPassed)
     }
+
+    /// Holds the first record until opened.
+    actor Latch {
+        private(set) var entered = false
+        private var continuation: CheckedContinuation<Void, Never>?
+
+        func hold() async {
+            guard !entered else { return }
+            entered = true
+            await withCheckedContinuation { continuation = $0 }
+        }
+
+        func open() {
+            continuation?.resume()
+            continuation = nil
+        }
+    }
+
+    @Test("a record in flight for one user never continues under the next")
+    func userSwitchCancelsRecords() async {
+        let consents = FakeConsentService(rows: [])
+        let latch = Latch()
+        consents.beforeRecord = { await latch.hold() }
+        let gate = model(consents)
+        gate.start(userId: "user-a")
+        await gate.work?.value
+        ConsentGateLogic.required.forEach { gate.toggle($0, true) }
+
+        gate.submit()
+        let aWork = gate.work
+        while await !latch.entered { await Task.yield() }
+
+        gate.start(userId: "user-b")
+        await gate.work?.value
+        await latch.open()
+        await aWork?.value
+
+        // Only A's first act, already in flight at the switch, reached the
+        // ledger; nothing after it did.
+        #expect(consents.recordCalls.map(\.kind) == [.terms])
+        #expect(form(gate)?.missing == ConsentGateLogic.required)
+        #expect(form(gate)?.isSubmitting == false)
+        #expect(!gate.isPassed)
+    }
 }

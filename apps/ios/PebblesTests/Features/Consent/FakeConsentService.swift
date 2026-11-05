@@ -17,6 +17,7 @@ final class FakeConsentService: ConsentServicing, @unchecked Sendable {
     private var _recordCalls: [Recorded] = []
     private var _activeFailure: Error?
     private var _recordFailure: Error?
+    private var _beforeRecord: (@Sendable () async -> Void)?
 
     static func satisfied() -> [ActiveConsent] {
         ConsentGateLogic.required.map {
@@ -39,6 +40,13 @@ final class FakeConsentService: ConsentServicing, @unchecked Sendable {
         set { lock.withLock { _recordFailure = newValue } }
     }
 
+    /// Awaited at the start of every `record`, before it lands: lets a test
+    /// hold a record in flight.
+    var beforeRecord: (@Sendable () async -> Void)? {
+        get { lock.withLock { _beforeRecord } }
+        set { lock.withLock { _beforeRecord = newValue } }
+    }
+
     func active() async throws -> [ActiveConsent] {
         try lock.withLock {
             _activeCalls += 1
@@ -48,6 +56,7 @@ final class FakeConsentService: ConsentServicing, @unchecked Sendable {
     }
 
     func record(kind: ConsentKind, documentVersion: String, source: String) async throws {
+        if let hold = beforeRecord { await hold() }
         try lock.withLock {
             if let failure = _recordFailure { throw failure }
             _recordCalls.append(Recorded(kind: kind, version: documentVersion, source: source))

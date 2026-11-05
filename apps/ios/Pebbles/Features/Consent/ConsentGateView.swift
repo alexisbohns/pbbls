@@ -18,11 +18,12 @@ struct ConsentGateView: View {
             Color.pebbles.surface.ignoresSafeArea()
 
             switch model.state {
-            // Idle and satisfied are never shown by RootView; a blank surface
-            // is the safe render if they ever are.
-            case .idle, .satisfied:
+            // Satisfied is never shown by RootView; a blank surface is the
+            // safe render if it ever is.
+            case .satisfied:
                 EmptyView()
-            case .checking:
+            // Idle shows for the frame between sign-in and the first start.
+            case .idle, .checking:
                 ProgressView()
                     .tint(Color.pebbles.primary)
             case .failed(let error):

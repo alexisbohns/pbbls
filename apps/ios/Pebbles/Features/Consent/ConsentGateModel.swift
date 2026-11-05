@@ -65,9 +65,11 @@ final class ConsentGateModel {
     /// already reached, must not restart.
     func start(userId: String?) {
         if userId == self.userId, state != .idle { return }
+        // A check or record in flight belongs to the previous user: it must
+        // never land under the next session.
+        if userId != self.userId { work?.cancel() }
         self.userId = userId
         guard let userId else {
-            work?.cancel()
             state = .idle
             return
         }
@@ -107,6 +109,7 @@ final class ConsentGateModel {
                 // invariant for a batch RPC to protect; if one fails, the
                 // re-read below shows only what is still missing.
                 for kind in missing {
+                    try Task.checkCancellation()
                     try await service.record(
                         kind: kind,
                         documentVersion: ConsentGateLogic.version(for: kind),
