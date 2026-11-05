@@ -1,14 +1,12 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { COLOR_WORLDS } from "@/lib/config/color-worlds"
 import { CANVAS_ZOOMS, type CanvasZoom, type DeviceChoice } from "@/lib/design/devices"
 import { tuningProgress } from "@/lib/design/specimens"
 import type { DesignContrast, DesignMode, DesignTheme, DesignThemeName } from "@/lib/theme/design-theme"
-import { cn } from "@/lib/utils"
-import { directoryHref } from "./DesignContext"
+import { currentPage } from "./directory-pages"
 
 type Option<T extends string | number> = { value: T; label: string }
 
@@ -34,15 +32,6 @@ const ZOOM_OPTIONS: Option<CanvasZoom>[] = CANVAS_ZOOMS.map((z) => ({
   value: z,
   label: z === "fit" ? "Fit" : `${z * 100}%`,
 }))
-
-/** The directory's pages; the canvas controls show on the ones drawn as screens. */
-export const DIRECTORY_PAGES = [
-  { path: "", label: "Overview", canvas: false },
-  { path: "/colors", label: "Colors & type", canvas: false },
-  { path: "/icons", label: "Icons", canvas: false },
-  { path: "/components", label: "Components", canvas: true },
-  { path: "/views", label: "Views", canvas: true },
-] as const
 
 function Segmented<T extends string | number>({
   label,
@@ -75,7 +64,6 @@ function Segmented<T extends string | number>({
 
 type DesignToolbarProps = {
   theme: DesignTheme
-  themeKey: string
   onChange: (patch: Partial<DesignTheme>) => void
   zoom: CanvasZoom
   onZoom: (zoom: CanvasZoom) => void
@@ -83,30 +71,17 @@ type DesignToolbarProps = {
   onDevices: (devices: DeviceChoice) => void
 }
 
-export function DesignToolbar({ theme, themeKey, onChange, zoom, onZoom, devices, onDevices }: DesignToolbarProps) {
+export function DesignToolbar({ theme, onChange, zoom, onZoom, devices, onDevices }: DesignToolbarProps) {
   const pathname = usePathname()
   const { tuned, total } = tuningProgress()
-  const current = DIRECTORY_PAGES.find((p) => pathname === `/sandbox/design${p.path}`)
+  const current = currentPage(pathname)
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-2 px-4 py-3">
+      <div className="flex flex-col gap-2 px-4 py-3">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <h1 className="font-heading text-lg">Pebbles design system</h1>
-          <nav aria-label="Design system" className="flex flex-wrap gap-1">
-            {DIRECTORY_PAGES.map((page) => (
-              <Link
-                key={page.path}
-                href={directoryHref(page.path, themeKey)}
-                aria-current={page === current ? "page" : undefined}
-                className={cn(
-                  "rounded-full px-3 py-1 text-sm transition-colors hover:bg-muted",
-                  page === current && "bg-secondary text-secondary-foreground",
-                )}
-              >
-                {page.label}
-              </Link>
-            ))}
-          </nav>
+          <h1 className="font-heading text-lg">
+            Pebbles design system{current && <span className="text-muted-foreground"> · {current.label}</span>}
+          </h1>
           <span className="text-xs text-muted-foreground">
             {tuned}/{total} tuned · <kbd>T</kbd> theme · <kbd>D</kbd> mode
           </span>

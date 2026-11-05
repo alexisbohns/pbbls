@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react"
 import type { CanvasZoom, DeviceChoice } from "@/lib/design/devices"
 import { DesignContextProvider, type DesignContextValue } from "./DesignContext"
+import { DesignRail } from "./DesignRail"
 import { DesignToolbar } from "./DesignToolbar"
 import { blockLinkNavigation } from "./link-guard"
 import { useDesignTheme } from "./useDesignTheme"
@@ -59,19 +60,22 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
 
   return (
     <DesignContextProvider value={value}>
-      <div className="min-h-dvh bg-background text-foreground">
-        <DesignToolbar
-          theme={theme}
-          themeKey={themeKey}
-          onChange={setTheme}
-          zoom={zoom}
-          onZoom={setZoom}
-          devices={devices}
-          onDevices={setDevices}
-        />
-        <div className="mx-auto max-w-[1600px] px-4 py-10">
-          <div ref={contentRef} data-theme-key={themeKey} onClickCapture={blockLinkNavigation} className="flex flex-col gap-16">
-            {children}
+      <div className="flex min-h-dvh bg-background text-foreground">
+        <DesignRail themeKey={themeKey} />
+        {/* Below the rail breakpoint the rail is a bar over the foot: leave it room. */}
+        <div className="min-w-0 flex-1 pb-20 rail:pb-0">
+          <DesignToolbar
+            theme={theme}
+            onChange={setTheme}
+            zoom={zoom}
+            onZoom={setZoom}
+            devices={devices}
+            onDevices={setDevices}
+          />
+          <div className="mx-auto max-w-[1600px] px-4 py-10">
+            <div ref={contentRef} data-theme-key={themeKey} onClickCapture={blockLinkNavigation} className="flex flex-col gap-16">
+              {children}
+            </div>
           </div>
         </div>
       </div>
