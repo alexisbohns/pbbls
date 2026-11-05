@@ -19,6 +19,7 @@ struct PebbleStoneView: View {
     var seed: UInt32?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.stoneSweeps) private var stoneSweeps
     @State private var motion = StoneMotionSource()
     @State private var sweepStart: Date?
 
@@ -79,7 +80,7 @@ struct PebbleStoneView: View {
         .onAppear {
             guard followsTilt else { return }
             motion.start()
-            if !reduceMotion { sweepStart = .now }
+            if !reduceMotion && stoneSweeps { sweepStart = .now }
         }
         .onDisappear {
             motion.stop()

@@ -64,6 +64,8 @@ extension References {
                 .environment(refs)
                 .environment(AchievementsService(client: supabase.client))
                 .environment(EmotionPaletteService(client: supabase.client))
+                // The sweep is clocked from .now: two recordings would differ.
+                .environment(\.stoneSweeps, false)
         }
 
         private static func locales(_ scheme: ReferenceScheme) -> Set<ReferenceLocale> {
