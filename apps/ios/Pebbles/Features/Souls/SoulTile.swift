@@ -41,9 +41,7 @@ struct SoulTile: View {
     }
 
     private var badge: some View {
-        Image(systemName: "checkmark")
-            .font(.system(size: 11, weight: .bold))
-            .foregroundStyle(Color.pebbles.onPrimary)
+        PbblsIconImage(.checkmarkDot, size: 13, style: AnyShapeStyle(Color.pebbles.onPrimary))
             .frame(width: 20, height: 20)
             .background(Circle().fill(Color.pebbles.primary))
             .offset(x: 8, y: -4)

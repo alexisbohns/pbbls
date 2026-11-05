@@ -29,11 +29,13 @@ struct SoulChooserBottomBar: View {
                     field
                 } else {
                     Spacer(minLength: 0)
-                    orb(systemName: "magnifyingglass", label: "Search souls", lit: false) {
-                        model.isSearching = true
+                    orb(label: "Search souls", lit: false, action: { model.isSearching = true }) {
+                        Image(systemName: "magnifyingglass").font(.system(size: 22, weight: .medium))
                     }
                 }
-                orb(systemName: "plus", label: "Add a soul", lit: model.canAdd) { plusTapped() }
+                orb(label: "Add a soul", lit: model.canAdd, action: { plusTapped() }) {
+                    PbblsIconImage(.plusCircle, size: 26)
+                }
                     .accessibilityValue(Text(verbatim: model.canAdd ? model.trimmedQuery : ""))
             }
             .padding(.horizontal, Spacing.lg)
@@ -91,11 +93,13 @@ struct SoulChooserBottomBar: View {
         }
     }
 
-    private func orb(systemName: String, label: LocalizedStringResource, lit: Bool,
-                     action: @escaping () -> Void) -> some View {
+    /// The lens keeps its SF symbol (the icon set has none); the plus is the
+    /// set's `plus-circle`, which the icons lint requires over SF `plus`.
+    private func orb<Glyph: View>(label: LocalizedStringResource, lit: Bool,
+                                  action: @escaping () -> Void,
+                                  @ViewBuilder glyph: () -> Glyph) -> some View {
         Button(action: action) {
-            Image(systemName: systemName)
-                .font(.system(size: 22, weight: .medium))
+            glyph()
                 .foregroundStyle(lit ? Color.pebbles.onPrimary : Color.pebbles.onSurface)
                 .frame(width: 52, height: 52)
                 .contentShape(Circle())
