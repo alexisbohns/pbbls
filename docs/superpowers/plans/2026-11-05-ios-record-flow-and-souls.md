@@ -3596,6 +3596,16 @@ git commit -m "feat(ios): make it richer replaces the success screen
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 ```
 
+### Task 8.2b: Split `CaptureFlowView` (it sits at the 400-line file_length limit)
+
+**Files:** `apps/ios/Pebbles/Features/Capture/CaptureFlowView.swift`, create `apps/ios/Pebbles/Features/Record/Steps/RecordPhotoControls.swift`, create `apps/ios/Pebbles/Features/Capture/CaptureDraftAutosaver.swift`
+
+`private` is file-scoped, so an extension file cannot reach the view's `@State`; extract types, not extensions:
+- [ ] `RecordPhotoControls` view: "Just write" (tonal) + the camera circle (shown when `CameraPicker.isAvailable`), with closures `onJustWrite`, `onCamera`, and a `#Preview`.
+- [ ] `CaptureDraftAutosaver` (`@MainActor final class`): the 800 ms debounce, `flush()`, `clear()`, `enabled` flag, and `savedSnap(from: FormSnap?, userId:)`; the view keeps only the `onChange` hooks. A Swift Testing suite covers: schedule then flush writes once; a disabled autosaver never writes; `savedSnap` for `.existing`, `.pending(.uploaded)`, `.pending(.uploading)` (nil).
+- [ ] Delete the unreachable `.existing` branch of `RecordPhotoStep` (`attachedWithoutThumb`, `onRemove`) and its closure in the flow view: a restored photo is seeded as `.pending`.
+- [ ] Commit `quality(ios): split the capture flow view into its controls and its autosaver`.
+
 ### Task 8.3: Entry points (D13)
 
 **Files:**
