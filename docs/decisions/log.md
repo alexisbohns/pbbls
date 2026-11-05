@@ -1857,3 +1857,17 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Why:** D2 (promise before consent) is impossible with the overlay above the flow; the device flag alone re-onboards nobody on a reinstall and cannot restart an abandoned flow (D10).
 - **Consequences:** iOS and web follow the same gate and the same step-2 rule in their own plans. A pre-flow Android account that reinstalls sees the new flow once.
 - **Refs:** #1510, #1521, #1522, `docs/superpowers/specs/2026-11-04-interactive-onboarding-design.md`, `docs/superpowers/plans/2026-11-05-interactive-onboarding-android.md`.
+
+## 2026-11-05 — The design page becomes a directory, and draws screens in real-size iframes
+
+- **Status:** taken
+- **Scope:** web
+- **Context:** `/sandbox/design` (#986) was one long page that showed views in a CSS `DeviceFrame` 390 px wide. The frame could not change what the views saw: media queries follow the browser window, so the phone frame drew the desktop layout on a desktop browser (its own caption said to narrow the window), and nothing showed the 1024 px two-area layout beside the phone one. The maintainer asked for a design system directory (icons, colors, components, views), every screen as mobile and desktop at a scaled, digestible size, and a way to pinpoint inconsistencies.
+- **Decision:**
+  - **Screens are iframes of the device's real viewport, scaled with a transform.** `/sandbox/design/frame?view=…` or `?specimens=…` renders one view or one group of specimens alone; the canvas draws it at 390×844 and 1440×900 (`lib/design/devices.ts`) and scales both by one factor, so their proportions stay true and each sees its own breakpoints. The canvas pushes theme changes by `postMessage` (`lib/design/frame-protocol.ts`) instead of reloading, and mounts a frame only near the visible area.
+  - **Components are drawn per group, not per specimen.** `SPECIMEN_GROUPS` in the registry puts related specimens on one pair of screens (nine groups, eighteen iframes) rather than ~90 iframes.
+  - **Inconsistencies are a source scan at build time.** `lib/design/audit.ts` (pure, tested) lists Lucide imports, literal colours, Tailwind default palette classes, arbitrary off-scale values and components with no specimen; `audit-source.ts` runs it over `components/` and `app/` from the prerendered pages. It is a heuristic shown to a person, never a CI gate.
+  - **Foundations and icons stay at 1:1.** Tokens and icons do not change with the viewport, and their real pixel size is the thing to judge, so they are not put in scaled frames.
+- **Why:** An iframe is the only way to give a rendered view a different viewport without changing the components (container queries would mean rewriting every breakpoint in the app for a sandbox). Computing the scan at build time keeps it always current with no generated file to commit or keep fresh.
+- **Consequences:** A view or specimen that only works under the old in-page `DeviceFrame` (relying on the page's own fixed positioning) must work standalone in the frame route. Each frame boots the app, so a zoomed-out wall of every view costs ~34 live iframes; keep groups coarse. A new view entry in `SPECIMENS` needs its renderer in `views/view-registry.tsx` (the type enforces it), and a new specimen needs a `group` (the test enforces it).
+- **Refs:** `docs/superpowers/specs/2026-11-05-design-system-directory-design.md`, `apps/web/app/sandbox/design/`, `apps/web/components/sandbox/design/`, `apps/web/lib/design/`, #986.
