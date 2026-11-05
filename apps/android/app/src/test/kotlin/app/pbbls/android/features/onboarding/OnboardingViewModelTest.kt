@@ -6,6 +6,7 @@ import app.pbbls.android.core.data.OnboardingHandoff
 import app.pbbls.android.core.model.ActiveConsent
 import app.pbbls.android.core.model.ConsentGateLogic
 import app.pbbls.android.core.model.ConsentKind
+import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.OnboardingPace
 import app.pbbls.android.core.model.OnboardingReason
 import app.pbbls.android.testing.FakeConsentService
@@ -191,5 +192,86 @@ class OnboardingViewModelTest {
             assertEquals("pace", vm.uiState.value.step.id)
             assertEquals(R.string.onboarding_complete_error, vm.uiState.value.errorRes)
             assertFalse(vm.uiState.value.isDone)
+        }
+
+    @Test
+    fun `a blank person is dropped on commit and at most three places exist`() =
+        runTest {
+            val vm = vm()
+            advanceUntilIdle()
+            vm.next() // promise → consent
+            ConsentKind.entries.forEach { vm.onConsentToggle(it, true) }
+            advanceUntilIdle()
+            vm.next() // consent → reasons
+            vm.next() // reasons → you
+            vm.next() // you → people
+            assertEquals("people", vm.uiState.value.step.id)
+            vm.onPersonAdd()
+            vm.onPersonCommit(0)
+            assertTrue(
+                vm.uiState.value.people
+                    .isEmpty(),
+            )
+            repeat(3) { i ->
+                vm.onPersonAdd()
+                vm.onPersonNameChange(i, "P$i")
+                vm.onPersonCommit(i)
+            }
+            vm.onPersonAdd()
+            assertEquals(3, vm.uiState.value.people.size)
+            assertTrue(
+                vm.uiState.value.people
+                    .none { it.editing },
+            )
+            vm.onPersonGlyphSheet(1)
+            assertEquals(1, vm.uiState.value.glyphSheetFor)
+            vm.onPersonGlyphPick(1, "sys-5")
+            assertEquals(
+                "sys-5",
+                vm.uiState.value.people[1]
+                    .glyphId,
+            )
+            assertNull(vm.uiState.value.glyphSheetFor)
+            vm.onDrawForPerson(2)
+            assertEquals(2, vm.uiState.value.carvingFor)
+            vm.onCarved(Glyph(id = "mine", strokes = emptyList(), viewBox = "0 0 200 200"))
+            assertEquals(
+                "mine",
+                vm.uiState.value.people[2]
+                    .glyphId,
+            )
+            assertEquals(
+                listOf("mine"),
+                vm.uiState.value.carved
+                    .map { it.id },
+            )
+            assertNull(vm.uiState.value.carvingFor)
+            vm.onPersonRemove(0)
+            assertEquals(
+                listOf("P1", "P2"),
+                vm.uiState.value.people
+                    .map { it.name },
+            )
+        }
+
+    @Test
+    fun `drawing for you keeps the carved glyph as the pick, and cancelling keeps the old one`() =
+        runTest {
+            val vm = vm()
+            advanceUntilIdle()
+            vm.onGlyphPick("sys-2")
+            vm.onDrawForYou()
+            assertEquals(-1, vm.uiState.value.carvingFor)
+            vm.onCarveCancelled()
+            assertNull(vm.uiState.value.carvingFor)
+            assertEquals("sys-2", vm.uiState.value.glyphId)
+            vm.onDrawForYou()
+            vm.onCarved(Glyph(id = "mine", strokes = emptyList(), viewBox = "0 0 200 200"))
+            assertEquals("mine", vm.uiState.value.glyphId)
+            assertEquals(
+                listOf("mine"),
+                vm.uiState.value.carved
+                    .map { it.id },
+            )
         }
 }

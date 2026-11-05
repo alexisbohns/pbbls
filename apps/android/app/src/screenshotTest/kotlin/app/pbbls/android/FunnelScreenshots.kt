@@ -123,6 +123,13 @@ fun OnboardingScreenLight() {
             onNameChange = {},
             onGlyphSelect = {},
             onDraw = {},
+            onPersonAdd = {},
+            onPersonNameChange = { _, _ -> },
+            onPersonCommit = {},
+            onPersonRemove = {},
+            onPersonGlyphSheet = {},
+            onPersonGlyphPick = { _, _ -> },
+            onDrawForPerson = {},
         )
     }
 }

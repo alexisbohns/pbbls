@@ -45,9 +45,11 @@ import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.OnboardingReason
 import app.pbbls.android.core.ui.GlyphCarveSlot
 import app.pbbls.android.features.onboarding.steps.ConsentStep
+import app.pbbls.android.features.onboarding.steps.PeopleStep
 import app.pbbls.android.features.onboarding.steps.ProgressStones
 import app.pbbls.android.features.onboarding.steps.PromiseStep
 import app.pbbls.android.features.onboarding.steps.ReasonsStep
+import app.pbbls.android.features.onboarding.steps.SoulGlyphSheet
 import app.pbbls.android.features.onboarding.steps.YouStep
 
 /**
@@ -92,6 +94,13 @@ fun OnboardingScreen(
         onNameChange = viewModel::onNameChange,
         onGlyphSelect = { viewModel.onGlyphPick(it.id) },
         onDraw = viewModel::onDrawForYou,
+        onPersonAdd = viewModel::onPersonAdd,
+        onPersonNameChange = viewModel::onPersonNameChange,
+        onPersonCommit = viewModel::onPersonCommit,
+        onPersonRemove = viewModel::onPersonRemove,
+        onPersonGlyphSheet = viewModel::onPersonGlyphSheet,
+        onPersonGlyphPick = viewModel::onPersonGlyphPick,
+        onDrawForPerson = viewModel::onDrawForPerson,
         modifier = modifier,
     )
 }
@@ -108,6 +117,13 @@ fun OnboardingContent(
     onNameChange: (String) -> Unit,
     onGlyphSelect: (Glyph) -> Unit,
     onDraw: () -> Unit,
+    onPersonAdd: () -> Unit,
+    onPersonNameChange: (Int, String) -> Unit,
+    onPersonCommit: (Int) -> Unit,
+    onPersonRemove: (Int) -> Unit,
+    onPersonGlyphSheet: (Int?) -> Unit,
+    onPersonGlyphPick: (Int, String) -> Unit,
+    onDrawForPerson: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -194,9 +210,32 @@ fun OnboardingContent(
                             onDraw,
                             onNext,
                         )
-                    else -> Box(Modifier.fillMaxSize()) // steps 5–6 land in task 5.4 and part 6
+                    "people" ->
+                        PeopleStep(
+                            people = state.people,
+                            glyphs = state.systemGlyphs + state.carved,
+                            onAdd = onPersonAdd,
+                            onNameChange = onPersonNameChange,
+                            onCommit = onPersonCommit,
+                            onRemove = onPersonRemove,
+                            onChangeGlyph = onPersonGlyphSheet,
+                            onContinue = onNext,
+                        )
+                    else -> Box(Modifier.fillMaxSize()) // step 6 lands in part 6
                 }
             }
+        }
+        // S2: the soul glyph sheet, over whichever step is showing (only step 5 opens it).
+        state.glyphSheetFor?.let { index ->
+            val person = state.people.getOrNull(index) ?: return@let
+            SoulGlyphSheet(
+                personName = person.name,
+                glyphs = state.systemGlyphs + state.carved,
+                currentGlyphId = person.glyphId,
+                onUse = { onPersonGlyphPick(index, it) },
+                onDraw = { onDrawForPerson(index) },
+                onDismiss = { onPersonGlyphSheet(null) },
+            )
         }
     }
 }
