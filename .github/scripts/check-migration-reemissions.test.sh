@@ -58,6 +58,18 @@ d=$(new_base_repo kept)
 printf '%s\n' 'create or replace function public.purge_account() returns void language plpgsql as $$' 'begin' '  delete from public.a;' '  delete from public.b;' '  delete from public.c;' '  -- >>> APPEND new per-user tables' 'end $$;' > "$d/m/2_new.sql"
 commit_all "$d"; expect "new body keeps all base append lines" 0 "$(run "$d")"
 
+d=$(new_base_repo hatch)
+printf '%s\n' 'create or replace function public.purge_account() returns void language plpgsql as $$' 'begin' '  delete from public.a;' '  -- reemission-guard: drop b' '  -- >>> APPEND new per-user tables' 'end $$;' > "$d/m/2_new.sql"
+commit_all "$d"; expect "hatch for the dropped table" 0 "$(run "$d")"
+
+d=$(new_base_repo hatchwrong)
+printf '%s\n' 'create or replace function public.purge_account() returns void language plpgsql as $$' 'begin' '  delete from public.a;' '  -- reemission-guard: drop c' '  -- >>> APPEND new per-user tables' 'end $$;' > "$d/m/2_new.sql"
+commit_all "$d"; expect "hatch for a different table" 1 "$(run "$d")"
+
+d=$(new_repo badref)
+echo x > "$d/m/1_a.sql"; commit_all "$d"
+expect "bad base ref fails closed" 2 "$(cd "$d" && bash "$script" nope m >/dev/null 2>&1; echo $?)"
+
 d=$(new_repo none)
 echo x > "$d/README"; commit_all "$d"; expect "no new migrations" 0 "$(run "$d")"
 

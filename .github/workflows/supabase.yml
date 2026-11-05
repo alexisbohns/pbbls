@@ -315,9 +315,14 @@ jobs:
       # `create or replace` has no merge semantics: two new migrations that
       # re-emit one function silently drop each other's appends (purge_account
       # once did, see 20260731090000_purge_account_union.sql).
+      - name: Re-emission guard self-test
+        run: bash .github/scripts/check-migration-reemissions.test.sh
+
       - name: Re-emitted function bodies
         if: github.event_name == 'pull_request'
-        run: bash .github/scripts/check-migration-reemissions.sh "origin/${{ github.base_ref }}"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: bash .github/scripts/check-migration-reemissions.sh "origin/$BASE_REF"
 
       # `!cancelled()` throughout so a red PR names every problem at once rather
       # than one per push — the house pattern from the harness steps above.
