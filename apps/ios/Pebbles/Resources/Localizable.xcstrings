@@ -15998,6 +15998,188 @@
           }
         }
       }
+    },
+    "I agree that Pebbles records how I feel: my moods, the emotions I pick and what I write. This is sensitive data about my mental well-being." : {
+      "comment" : "Signup consent checkbox: the Art. 9 health-data consent.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I agree that Pebbles records how I feel: my moods, the emotions I pick and what I write. This is sensitive data about my mental well-being."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J’accepte que Pebbles enregistre ce que je ressens : mes humeurs, les émotions que je choisis et ce que j’écris. Ce sont des données sensibles sur mon bien-être mental."
+          }
+        }
+      }
+    },
+    "I am 16 years old or over." : {
+      "comment" : "Signup consent checkbox: the 16+ age attestation.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I am 16 years old or over."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J’ai 16 ans ou plus."
+          }
+        }
+      }
+    },
+    "Get support" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get support"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouver du soutien"
+          }
+        }
+      }
+    },
+    "If you are in danger or thinking about hurting yourself, call now. These lines are free and confidential." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you are in danger or thinking about hurting yourself, call now. These lines are free and confidential."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si tu es en danger ou que tu penses à te faire du mal, appelle maintenant. Ces lignes sont gratuites et confidentielles."
+          }
+        }
+      }
+    },
+    "Country" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Country"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pays"
+          }
+        }
+      }
+    },
+    "Numbers checked on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numbers checked on %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numéros vérifiés le %@"
+          }
+        }
+      }
+    },
+    "Thank you for keeping this. If today is heavy, support is one tap away." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thank you for keeping this. If today is heavy, support is one tap away."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merci d’avoir gardé ce moment. Si la journée est lourde, un soutien est à un geste."
+          }
+        }
+      }
+    },
+    "Before you continue" : {
+      "comment" : "Consent gate title.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before you continue"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avant de continuer"
+          }
+        }
+      }
+    },
+    "Pebbles keeps a journal of how you feel, so we need your agreement on each point below. Tick them all to carry on." : {
+      "comment" : "Consent gate explanation, above the missing consent checkboxes.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebbles keeps a journal of how you feel, so we need your agreement on each point below. Tick them all to carry on."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebbles tient le journal de ce que tu ressens, alors on a besoin de ton accord sur chaque point ci-dessous. Coche-les tous pour continuer."
+          }
+        }
+      }
+    },
+    "You appear to be offline. Please check your connection." : {
+      "comment" : "Consent gate error when the network is unreachable.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You appear to be offline. Please check your connection."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu sembles hors ligne. Vérifie ta connexion."
+          }
+        }
+      }
+    },
+    "We couldn't save that. Please try again." : {
+      "comment" : "Consent gate error when the ledger cannot be read or written.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't save that. Please try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d’enregistrer ta réponse. Réessaie."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

@@ -2,6 +2,7 @@
 
 import { KarmaDot } from "@pbbls/icons"
 import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import type { CompleteDraft } from "@/lib/data/moment-payloads"
@@ -18,6 +19,8 @@ type CompleteSuccessStepProps = {
   before: Moment
   draft: CompleteDraft
   karmaDelta: number
+  /** A lowlight at full intensity: no karma line, a calm sentence and a way to support instead. */
+  quiet: boolean
   onExit: () => void
 }
 
@@ -31,6 +34,7 @@ export function CompleteSuccessStep({
   before,
   draft,
   karmaDelta,
+  quiet,
   onExit,
 }: CompleteSuccessStepProps) {
   const t = useTranslations("record.flow.success")
@@ -39,7 +43,8 @@ export function CompleteSuccessStep({
 
   const { look, reloaded } = successLook(moment, before, draft)
   const name = momentDisplayName((moment ?? before).name)
-  const karma = reloaded ? karmaDelta : 0
+  // The server still granted the karma; this screen just does not announce it.
+  const karma = reloaded && !quiet ? karmaDelta : 0
 
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 py-8">
@@ -60,6 +65,17 @@ export function CompleteSuccessStep({
             <span aria-hidden>{t("karma", { count: karma })}</span>
             <span className="sr-only">{tComplete("karmaAria", { count: karma })}</span>
           </p>
+        )}
+        {quiet && (
+          <>
+            <p className="max-w-xs text-sm text-balance text-muted-foreground">{t("quiet")}</p>
+            <Link
+              href="/settings/support"
+              className="text-sm font-medium text-primary underline underline-offset-4"
+            >
+              {t("getSupport")}
+            </Link>
+          </>
         )}
       </div>
 

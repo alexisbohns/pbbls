@@ -29,15 +29,22 @@ enum class QuickMomentExit {
     CLOSE,
 }
 
+/** What the onboarding hands the composer (#1510 D9): the prompt the reasons chose. */
+data class QuickMomentPrefill(
+    @StringRes val promptRes: Int? = null,
+)
+
 /**
  * The open quick moment sheet's form (#1383 D7; iOS `QuickMomentDraft`). [name] is what the field
  * shows, clamped to Capture's limit; what is saved is it trimmed. [happenedAt] starts at now.
+ * [promptRes] comes from a [QuickMomentPrefill] (the onboarding hand-off) and is otherwise null.
  */
 data class QuickMomentUiState(
     val name: String = "",
     val happenedAt: OffsetDateTime,
     val isSaving: Boolean = false,
     @StringRes val errorRes: Int? = null,
+    @StringRes val promptRes: Int? = null,
 ) {
     /** A savable name: trimmed, not blank (iOS `canSave`). */
     val trimmedName: String get() = name.trim()
@@ -68,9 +75,18 @@ class QuickMoment(
     /** The open sheet's form, or null while the sheet is closed. */
     val sheet: StateFlow<QuickMomentUiState?> = _sheet.asStateFlow()
 
-    /** A fresh form at now, each time the sheet opens. A sheet already open keeps its form. */
-    fun open() {
-        if (_sheet.value == null) _sheet.value = QuickMomentUiState(happenedAt = now())
+    /**
+     * A fresh form at now, each time the sheet opens, carrying [prefill] if any. A sheet already
+     * open keeps its form and drops the prefill: the hand-off is consumed once, not deferred.
+     */
+    fun open(prefill: QuickMomentPrefill? = null) {
+        if (_sheet.value == null) {
+            _sheet.value =
+                QuickMomentUiState(
+                    happenedAt = now(),
+                    promptRes = prefill?.promptRes,
+                )
+        }
     }
 
     /** The sheet went away (swipe, scrim, back). A save in flight still lands and reports. */

@@ -53,6 +53,14 @@ enum class Valence(
     HIGHLIGHT_LARGE(1, 3),
     ;
 
+    /**
+     * A lowlight at full intensity: the one state where celebrating would be wrong. Mirrors
+     * `Valence.quietSuccess` on iOS and `quietSuccess` on web; the client goes quiet, the
+     * server still grants karma.
+     */
+    val quietSuccess: Boolean
+        get() = this == LOWLIGHT_LARGE
+
     val sizeGroup: ValenceSizeGroup
         get() =
             when (intensity) {

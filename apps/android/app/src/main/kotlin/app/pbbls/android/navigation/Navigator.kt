@@ -133,6 +133,13 @@ class Navigator(
         get() = state.backStacks[state.startRoute]?.firstOrNull() as? PebblesKey
 
     /**
+     * Whether [key] sits anywhere on any tab's stack. The onboarding gate (#1510) asks before it
+     * pushes: its effect re-runs when the profile's flag lands, and on a restore the stack may
+     * already hold the entry.
+     */
+    fun isOnStack(key: PebblesKey): Boolean = state.backStacks.values.any { stack -> stack.any { it == key } }
+
+    /**
      * Resets every tab to its root, returns to the start tab, and seeds [key]
      * there. Part 5 drives the auth switch with this: sign-out must not leave a
      * signed-in user's stack sitting under the Welcome screen.

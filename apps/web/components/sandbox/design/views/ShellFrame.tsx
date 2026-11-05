@@ -15,9 +15,10 @@ import { cn } from "@/lib/utils"
  * A view inside the app shell as `MainContent` lays a tab or a detail out
  * (#1384, two-area spec D1): the navigation, the left area (the page box
  * `mainClass` gives `at`) and the right area with the Path's line and, when
- * given, a detail in its pane. Breakpoints follow the window, not the frame,
- * so a phone layout is checked at a phone-sized window and two areas with
- * the frame on "Fill". Closing the sandbox's detail does nothing.
+ * given, a detail in its pane. It renders in /sandbox/design/frame, an
+ * iframe of a device's real viewport, so the phone screen gets the phone
+ * layout and the desktop one the two areas. Closing the sandbox's detail
+ * does nothing.
  */
 export function ShellFrame({ at, children, detail }: { at: string; children: ReactNode; detail?: ReactNode }) {
   const wide = useMediaQuery(PANES_QUERY)

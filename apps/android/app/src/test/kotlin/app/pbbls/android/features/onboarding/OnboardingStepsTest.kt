@@ -1,35 +1,48 @@
 package app.pbbls.android.features.onboarding
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
-/**
- * Ports iOS `OnboardingStepsTests`: count, unique ids, and spec id order. The
- * "non-empty copy" checks become non-zero string-resource ids.
- */
+/** The step config (#1510 §3): count, ids, order and which steps can be passed. M69 inserts reminders after pace. */
 class OnboardingStepsTest {
     @Test
-    fun containsExactlyFourSteps() {
-        assertEquals(4, OnboardingSteps.all.size)
+    fun sevenStepsInSpecOrder() {
+        assertEquals(
+            listOf("promise", "consent", "reasons", "you", "people", "pace", "handoff"),
+            OnboardingSteps.all.map { it.id },
+        )
     }
 
     @Test
-    fun stepIdsAreUnique() {
-        val ids = OnboardingSteps.all.map { it.id }
-        assertEquals(ids.size, ids.toSet().size)
+    fun idsAreUnique() {
+        assertEquals(
+            OnboardingSteps.all.size,
+            OnboardingSteps.all
+                .map { it.id }
+                .toSet()
+                .size,
+        )
     }
 
     @Test
-    fun stepIdsMatchSpecOrder() {
-        assertEquals(listOf("intro", "concept", "qualify", "carving"), OnboardingSteps.all.map { it.id })
+    fun skipsMatchD1() {
+        assertEquals(
+            mapOf(
+                "promise" to OnboardingSkip.NONE,
+                "consent" to OnboardingSkip.NONE,
+                "reasons" to OnboardingSkip.SKIP,
+                "you" to OnboardingSkip.SKIP,
+                "people" to OnboardingSkip.LATER,
+                "pace" to OnboardingSkip.SKIP,
+                "handoff" to OnboardingSkip.NONE,
+            ),
+            OnboardingSteps.all.associate { it.id to it.skip },
+        )
     }
 
     @Test
-    fun everyStepHasTitleAndDescriptionResources() {
-        OnboardingSteps.all.forEach { step ->
-            assertNotEquals("title unset for ${step.id}", 0, step.titleRes)
-            assertNotEquals("description unset for ${step.id}", 0, step.descriptionRes)
-        }
+    fun sixVisibleSteps() {
+        assertEquals(6, OnboardingSteps.visible.size)
+        assertEquals("pace", OnboardingSteps.visible.last().id)
     }
 }

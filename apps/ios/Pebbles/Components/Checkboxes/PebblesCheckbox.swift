@@ -4,12 +4,32 @@ import SwiftUI
 /// checked) followed by a label that contains a tappable link fragment.
 /// Tap area on the box is at least 44×44pt regardless of the visual size,
 /// per HIG. The label tap fires `onLinkTap` (whole-label, since per-range
-/// gestures don't compose cleanly on `Text` concatenation).
+/// gestures don't compose cleanly on `Text` concatenation). The `label:`
+/// form carries a plain statement with no link; tapping it toggles the box.
 struct PebblesCheckbox: View {
     @Binding var isChecked: Bool
     let prefix: LocalizedStringResource
-    let linkText: LocalizedStringResource
-    let onLinkTap: () -> Void
+    let linkText: LocalizedStringResource?
+    let onLinkTap: (() -> Void)?
+
+    init(
+        isChecked: Binding<Bool>,
+        prefix: LocalizedStringResource,
+        linkText: LocalizedStringResource,
+        onLinkTap: @escaping () -> Void
+    ) {
+        _isChecked = isChecked
+        self.prefix = prefix
+        self.linkText = linkText
+        self.onLinkTap = onLinkTap
+    }
+
+    init(isChecked: Binding<Bool>, label: LocalizedStringResource) {
+        _isChecked = isChecked
+        self.prefix = label
+        self.linkText = nil
+        self.onLinkTap = nil
+    }
 
     @ScaledMetric(relativeTo: .body) private var boxSize: CGFloat = 44
     @ScaledMetric(relativeTo: .body) private var cornerRadius: CGFloat = 12
@@ -21,7 +41,7 @@ struct PebblesCheckbox: View {
                 .onTapGesture { isChecked.toggle() }
 
             label
-                .onTapGesture { onLinkTap() }
+                .onTapGesture { (onLinkTap ?? { isChecked.toggle() })() }
 
             Spacer(minLength: 0)
         }
@@ -29,7 +49,7 @@ struct PebblesCheckbox: View {
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityAddTraits(isChecked ? .isSelected : [])
-        .accessibilityAction(named: Text(linkText), onLinkTap)
+        .modifier(LinkAction(linkText: linkText, onLinkTap: onLinkTap))
     }
 
     private var box: some View {
@@ -46,9 +66,28 @@ struct PebblesCheckbox: View {
     }
 
     private var label: some View {
-        (Text(prefix) + Text(linkText).underline().foregroundColor(Color.pebbles.primary))
+        labelText
             .font(.subheadline)
             .foregroundStyle(Color.pebbles.onSurfaceVariant)
+    }
+
+    private var labelText: Text {
+        guard let linkText else { return Text(prefix) }
+        return Text(prefix) + Text(linkText).underline().foregroundColor(Color.pebbles.primary)
+    }
+}
+
+/// The named link action, only when the row carries a link.
+private struct LinkAction: ViewModifier {
+    let linkText: LocalizedStringResource?
+    let onLinkTap: (() -> Void)?
+
+    func body(content: Content) -> some View {
+        if let linkText, let onLinkTap {
+            content.accessibilityAction(named: Text(linkText), onLinkTap)
+        } else {
+            content
+        }
     }
 }
 
