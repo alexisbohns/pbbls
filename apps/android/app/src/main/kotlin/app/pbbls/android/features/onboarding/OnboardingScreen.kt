@@ -41,11 +41,14 @@ import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.ConsentKind
+import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.OnboardingReason
+import app.pbbls.android.core.ui.GlyphCarveSlot
 import app.pbbls.android.features.onboarding.steps.ConsentStep
 import app.pbbls.android.features.onboarding.steps.ProgressStones
 import app.pbbls.android.features.onboarding.steps.PromiseStep
 import app.pbbls.android.features.onboarding.steps.ReasonsStep
+import app.pbbls.android.features.onboarding.steps.YouStep
 
 /**
  * The onboarding entry (#1510): a top bar with Back, the progress stones and Skip or Later, and the
@@ -55,10 +58,15 @@ import app.pbbls.android.features.onboarding.steps.ReasonsStep
  * Back goes through [NavigationBackHandler], not the legacy `BackHandler`, so a completed gesture
  * never reaches `NavDisplay`'s own predictive-pop transition. It is skipped under preview and
  * screenshot rendering, where no `NavigationEventDispatcherOwner` is provided.
+ *
+ * [carve] is the glyph studio (S1, D8), a content swap over the whole shell while
+ * [OnboardingUiState.carvingFor] is set, the way the glyph picker hosts it: a pushed entry would
+ * have no way to hand the carved glyph back. Back while carving cancels the carve, not the step.
  */
 @Composable
 fun OnboardingScreen(
     onFinish: () -> Unit,
+    carve: GlyphCarveSlot,
     modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
@@ -66,7 +74,13 @@ fun OnboardingScreen(
     LaunchedEffect(state.isDone) { if (state.isDone) onFinish() }
     if (!LocalInspectionMode.current) {
         val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
-        NavigationBackHandler(state = backState) { viewModel.back() }
+        NavigationBackHandler(state = backState) {
+            if (state.carvingFor != null) viewModel.onCarveCancelled() else viewModel.back()
+        }
+    }
+    if (state.carvingFor != null) {
+        carve(viewModel::onCarved, viewModel::onCarveCancelled, modifier)
+        return
     }
     OnboardingContent(
         state = state,
@@ -75,6 +89,9 @@ fun OnboardingScreen(
         onNext = viewModel::next,
         onConsentToggle = viewModel::onConsentToggle,
         onReasonToggle = viewModel::onReasonToggle,
+        onNameChange = viewModel::onNameChange,
+        onGlyphSelect = { viewModel.onGlyphPick(it.id) },
+        onDraw = viewModel::onDrawForYou,
         modifier = modifier,
     )
 }
@@ -88,6 +105,9 @@ fun OnboardingContent(
     onNext: () -> Unit,
     onConsentToggle: (ConsentKind, Boolean) -> Unit,
     onReasonToggle: (OnboardingReason) -> Unit,
+    onNameChange: (String) -> Unit,
+    onGlyphSelect: (Glyph) -> Unit,
+    onDraw: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -164,7 +184,17 @@ fun OnboardingContent(
                     "promise" -> PromiseStep(state.letter, state.letterUnavailable, onNext)
                     "consent" -> ConsentStep(state.consent, onConsentToggle, onNext)
                     "reasons" -> ReasonsStep(state.reasons, onReasonToggle, onNext)
-                    else -> Box(Modifier.fillMaxSize()) // steps 4–6 land in parts 5 and 6
+                    "you" ->
+                        YouStep(
+                            state.name,
+                            state.systemGlyphs + state.carved,
+                            state.glyphId,
+                            onNameChange,
+                            onGlyphSelect,
+                            onDraw,
+                            onNext,
+                        )
+                    else -> Box(Modifier.fillMaxSize()) // steps 5–6 land in task 5.4 and part 6
                 }
             }
         }

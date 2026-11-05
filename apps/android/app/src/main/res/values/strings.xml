@@ -89,9 +89,9 @@
     <string name="onboarding_reason_good_days">Keep the good days</string>
     <string name="onboarding_reason_own_patterns">See my own patterns</string>
     <string name="onboarding_reason_keep_record">Keep a record for later</string>
-    <string name="onboarding_you_title" tools:ignore="UnusedResources">This is you</string>
-    <string name="onboarding_you_name_hint" tools:ignore="UnusedResources">Your name</string>
-    <string name="onboarding_you_glyph_body" tools:ignore="UnusedResources">Pick a glyph, or draw your own.</string>
+    <string name="onboarding_you_title">This is you</string>
+    <string name="onboarding_you_name_hint">Your name</string>
+    <string name="onboarding_you_glyph_body">Pick a glyph, or draw your own.</string>
     <string name="onboarding_you_draw">Draw my own</string>
     <string name="onboarding_people_title" tools:ignore="UnusedResources">Three places</string>
     <string name="onboarding_people_body" tools:ignore="UnusedResources">Who would you call first with good news?</string>
