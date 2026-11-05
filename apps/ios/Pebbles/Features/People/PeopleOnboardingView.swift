@@ -98,11 +98,18 @@ struct PeopleOnboardingView: View {
         .buttonStyle(.plain)
     }
 
-    /// Decorative here: the toolbar `+` is the real create button.
+    /// Decorative here: the toolbar `+` is the real create button. The create
+    /// cell of the retired soul grid, kept as a drawing.
     private var placeholder: some View {
-        SoulItem(case: .create, soul: nil, count: nil)
-            .frame(maxWidth: .infinity)
-            .accessibilityHidden(true)
+        VStack(spacing: Spacing.sm) {
+            GlyphView(case: .create, strokes: nil, side: 96)
+            Text("New soul")
+                .pebblesFont(.bodyLeadHand)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityHidden(true)
     }
 
     /// A hairline card around a header and the rows (the one Home's first five
