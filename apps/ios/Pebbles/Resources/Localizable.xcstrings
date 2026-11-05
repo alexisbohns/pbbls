@@ -2872,6 +2872,23 @@
         }
       }
     },
+    "Couldn't load feelings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load feelings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger les \u00e9motions"
+          }
+        }
+      }
+    },
     "Couldn't load glyphs" : {
       "extractionState" : "manual",
       "localizations" : {

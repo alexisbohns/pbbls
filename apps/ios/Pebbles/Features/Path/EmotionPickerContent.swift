@@ -16,9 +16,23 @@ struct EmotionPickerContent: View {
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 24) {
             if groups.isEmpty {
-                ProgressView()
+                // Loaded and still empty means the palette fetch failed (D9).
+                if palettes.didFinishLoading {
+                    VStack(spacing: Spacing.sm) {
+                        Text("Couldn't load feelings")
+                            .pebblesFont(.callout)
+                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                        Button("Retry") { Task { await palettes.load() } }
+                            .pebblesFont(.bodyEmphasized)
+                            .foregroundStyle(Color.pebbles.primary)
+                    }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 32)
+                } else {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 32)
+                }
             } else {
                 ForEach(groups) { group in
                     section(for: group)
