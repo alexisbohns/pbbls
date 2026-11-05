@@ -17,6 +17,23 @@ import { renderView } from "../views/view-registry"
 // /sandbox/path precedent): pebbles render tinted without a Supabase call.
 primeEmotionPalettes(SANDBOX_PALETTES)
 
+/**
+ * A view that focuses something as it mounts (a detail's heading, a dialog)
+ * would take the keyboard from the canvas: a same-origin frame's focus()
+ * moves the page's focus into it. Inside the canvas, a frame moves focus
+ * only while it already holds the canvas's focus. Module scope, so it runs
+ * before any view mounts; a frame opened on its own (1:1) keeps the app's
+ * behaviour.
+ */
+if (typeof window !== "undefined" && window.parent !== window) {
+  const focus = HTMLElement.prototype.focus
+  HTMLElement.prototype.focus = function focusWhenUsed(this: HTMLElement, options?: FocusOptions) {
+    // Same origin, so the canvas's own focus is readable: the frame holds it
+    // only when someone has clicked or tabbed into it.
+    if (window.parent.document.activeElement === window.frameElement) focus.call(this, options)
+  }
+}
+
 /** Takes the canvas's theme into this frame's own URL, where useDesignTheme reads it. */
 function useCanvasTheme() {
   useEffect(() => {
