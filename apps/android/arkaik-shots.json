@@ -10,7 +10,7 @@
   "V-home": "HomeScreenshotsKt/HomeMonthPaper",
   "V-lab": "LabScreenshotsKt/LabContentLight",
   "V-login": "FunnelScreenshotsKt/AuthScreenLogin",
-  "V-onboarding-intro": "FunnelScreenshotsKt/OnboardingScreenLight",
+  "V-onboarding-intro": "FunnelScreenshotsKt/OnboardingPromise",
   "V-pebble-detail": "PebbleDetailScreenshotsKt/PebbleDetailCardLight",
   "V-pebble-edit": "EditPebbleScreenshotsKt/EditPebble_Content",
   "V-profile": "ProfileScreenshotsKt/YouPaper",
