@@ -3025,6 +3025,23 @@
         }
       }
     },
+    "day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "day"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "jour"
+          }
+        }
+      }
+    },
     "Day event" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7895,19 +7912,19 @@
         }
       }
     },
-    "Moment" : {
+    "month" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Moment"
+            "value" : "month"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Moment"
+            "value" : "mois"
           }
         }
       }
@@ -13345,6 +13362,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible de supprimer votre compte. Rien n'a été supprimé. Veuillez réessayer."
+          }
+        }
+      }
+    },
+    "week" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "week"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "semaine"
           }
         }
       }
