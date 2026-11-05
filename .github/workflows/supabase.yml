@@ -355,6 +355,12 @@ jobs:
         with:
           version: 2.117.0
 
+      # The RLS denial harness below is a Deno script, like every harness.
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
       # Excludes only what this job cannot use: no request is served, no mail is
       # sent, no function is invoked. `storage` and `auth` stay — migrations
       # insert into `storage.buckets` and 66 of them reference `auth.users`.
@@ -407,6 +413,30 @@ jobs:
             exit 1
           fi
           echo "types/database.ts matches the migrations."
+
+      # Cross-user denial over the WHOLE catalog (#1523): every public table and
+      # view and every SECURITY DEFINER function must have an entry in
+      # scripts/rls-expectations.json, and anon plus a signed-in stranger are
+      # probed against a seeded owner on each. It needs no secret — the local
+      # stack's anon key and superuser URL come from `supabase status` — so it
+      # can be a required check. The harness refuses any non-local URL.
+      # After the types diff, not before: `!cancelled()` here keeps a red
+      # harness from hiding a types drift, and the reverse.
+      - name: RLS denial over the whole catalog
+        if: '!cancelled()'
+        working-directory: packages/supabase
+        run: |
+          set -uo pipefail
+          status_env="$(supabase status -o env 2>/dev/null)"
+          anon_key="$(printf '%s\n' "$status_env" | sed -n 's/^ANON_KEY="\(.*\)"$/\1/p')"
+          if [ -z "$anon_key" ]; then
+            echo "::error::supabase status printed no ANON_KEY"
+            exit 1
+          fi
+          export SUPABASE_URL="http://127.0.0.1:54321"
+          export SUPABASE_ANON_KEY="$anon_key"
+          export DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+          "$GITHUB_WORKSPACE/.github/scripts/verify-harness.sh" "RLS denial" db:verify:rls
 
       # Containers are the runner's problem once the job ends, but a failed
       # `db reset` can leave the stack up long enough to hold the port on a
