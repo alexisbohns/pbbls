@@ -427,12 +427,24 @@ jobs:
         working-directory: packages/supabase
         run: |
           set -uo pipefail
-          status_env="$(supabase status -o env 2>/dev/null)"
-          anon_key="$(printf '%s\n' "$status_env" | sed -n 's/^ANON_KEY="\(.*\)"$/\1/p')"
+          # Tolerant on purpose: CLI versions differ on the variable name
+          # (ANON_KEY / SUPABASE_ANON_KEY) and on quoting, so accept either,
+          # quoted or not, and fall back to the JSON output.
+          status_env="$(supabase status -o env 2>/dev/null || true)"
+          anon_key="$(printf '%s\n' "$status_env" \
+            | sed -n -E 's/^(SUPABASE_)?ANON_KEY="?([^"]*)"?$/\2/p' | head -n1)"
           if [ -z "$anon_key" ]; then
+            anon_key="$(supabase status --output json 2>/dev/null \
+              | jq -r '.ANON_KEY // .SUPABASE_ANON_KEY // empty' || true)"
+          fi
+          if [ -z "$anon_key" ]; then
+            # Names only, never values: enough to fix the parse next time.
+            echo "supabase status -o env returned these names:"
+            printf '%s\n' "$status_env" | grep '=' | cut -d= -f1 || true
             echo "::error::supabase status printed no ANON_KEY"
             exit 1
           fi
+          echo "::add-mask::$anon_key"
           export SUPABASE_URL="http://127.0.0.1:54321"
           export SUPABASE_ANON_KEY="$anon_key"
           export DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
