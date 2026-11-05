@@ -175,3 +175,17 @@ export const TIME_RANGE_LABELS: Record<TimeRange, string> = {
 export function isTimeRange(value: string | undefined): value is TimeRange {
   return value !== undefined && (TIME_RANGES as readonly string[]).includes(value)
 }
+
+export const ONBOARDING_ANSWER_KINDS = ["reason", "pace", "completed"] as const
+export type OnboardingAnswerKind = (typeof ONBOARDING_ANSWER_KINDS)[number]
+
+export function isOnboardingAnswerKind(value: string): value is OnboardingAnswerKind {
+  return (ONBOARDING_ANSWER_KINDS as readonly string[]).includes(value)
+}
+
+/** One row of get_onboarding_answers: a distribution bucket, never a user. */
+export interface OnboardingAnswerRow {
+  kind: OnboardingAnswerKind
+  value: string
+  users: number
+}

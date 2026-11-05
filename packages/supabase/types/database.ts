@@ -1650,6 +1650,8 @@ export type Database = {
           is_admin: boolean
           max_media_per_pebble: number
           onboarding_completed: boolean
+          onboarding_reasons: string[] | null
+          pace: string | null
           privacy_accepted_at: string | null
           public_profile: boolean
           terms_accepted_at: string | null
@@ -1668,6 +1670,8 @@ export type Database = {
           is_admin?: boolean
           max_media_per_pebble?: number
           onboarding_completed?: boolean
+          onboarding_reasons?: string[] | null
+          pace?: string | null
           privacy_accepted_at?: string | null
           public_profile?: boolean
           terms_accepted_at?: string | null
@@ -1686,6 +1690,8 @@ export type Database = {
           is_admin?: boolean
           max_media_per_pebble?: number
           onboarding_completed?: boolean
+          onboarding_reasons?: string[] | null
+          pace?: string | null
           privacy_accepted_at?: string | null
           public_profile?: boolean
           terms_accepted_at?: string | null
@@ -1750,6 +1756,39 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      promise_letters: {
+        Row: {
+          body_md_en: string
+          body_md_fr: string | null
+          created_at: string
+          id: string
+          published: boolean
+          signed_by_en: string
+          signed_by_fr: string | null
+          updated_at: string
+        }
+        Insert: {
+          body_md_en: string
+          body_md_fr?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          signed_by_en?: string
+          signed_by_fr?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body_md_en?: string
+          body_md_fr?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          signed_by_en?: string
+          signed_by_fr?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       reserved_handles: {
         Row: {
@@ -2658,6 +2697,16 @@ export type Database = {
           slug: string
         }[]
       }
+      complete_onboarding: {
+        Args: {
+          p_display_name?: string
+          p_glyph_id?: string
+          p_pace?: string
+          p_reasons?: string[]
+          p_souls?: Json
+        }
+        Returns: undefined
+      }
       complete_pebble: { Args: { payload: Json }; Returns: string }
       compute_karma_delta: {
         Args: {
@@ -2765,6 +2814,14 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_onboarding_answers: {
+        Args: never
+        Returns: {
+          kind: string
+          users: number
+          value: string
+        }[]
       }
       get_pebble_enrichment: {
         Args: { p_end: string; p_start: string }
@@ -2981,6 +3038,8 @@ export type Database = {
           is_admin: boolean
           max_media_per_pebble: number
           onboarding_completed: boolean
+          onboarding_reasons: string[] | null
+          pace: string | null
           privacy_accepted_at: string | null
           public_profile: boolean
           terms_accepted_at: string | null
