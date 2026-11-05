@@ -167,7 +167,7 @@ export function isLocalApiUrl(url: string | undefined): boolean {
  * A libpq query parameter overrides the URL's host (`…@127.0.0.1/db?host=prod`
  * connects to prod), so any query string, and any host/hostaddr/service
  * parameter anywhere in the string, is refused outright. The psql child also
- * runs with PGHOST/PGHOSTADDR/PGSERVICE/PGSERVICEFILE emptied (`psqlEnv`).
+ * runs with a cleared environment (`psqlEnv`), so no PG* variable redirects it.
  */
 export function isLocalDatabaseUrl(url: string | undefined): boolean {
   if (!url) return false;
@@ -182,15 +182,26 @@ export function isLocalDatabaseUrl(url: string | undefined): boolean {
   }
 }
 
-/** Environment overrides for every psql child: no ambient libpq target. */
-export const psqlEnv: Record<string, string> = { PGHOST: "", PGHOSTADDR: "", PGSERVICE: "", PGSERVICEFILE: "" };
+/**
+ * The ONLY environment a psql child gets (spawned with `clearEnv: true`): no
+ * ambient PGHOST, PGHOSTADDR, PGSERVICE or PGSERVICEFILE can redirect it. They
+ * are dropped, not emptied: libpq reads an empty PGSERVICEFILE as a path and
+ * refuses to start ("service file \"\" not found").
+ */
+export function psqlEnv(): Record<string, string> {
+  const env: Record<string, string> = { PATH: Deno.env.get("PATH") ?? "/usr/bin:/bin" };
+  const home = Deno.env.get("HOME");
+  if (home) env.HOME = home;
+  return env;
+}
 
 /** Runs `rls-inventory.sql` against `databaseUrl` and parses the result. */
 export async function loadInventory(databaseUrl: string): Promise<InventoryRow[]> {
   const sqlPath = new URL("./rls-inventory.sql", import.meta.url).pathname;
   const out = await new Deno.Command("psql", {
     args: [databaseUrl, "-X", "-q", "-v", "ON_ERROR_STOP=1", "-f", sqlPath],
-    env: psqlEnv,
+    clearEnv: true,
+    env: psqlEnv(),
     stdout: "piped",
     stderr: "piped",
   }).output();

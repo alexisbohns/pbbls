@@ -253,7 +253,8 @@ function isFunctionKind(s: string): s is FunctionKind {
 async function sql(query: string): Promise<string> {
   const out = await new Deno.Command("psql", {
     args: [DATABASE_URL, "-X", "-q", "-At", "-v", "ON_ERROR_STOP=1", "-c", query],
-    env: psqlEnv,
+    clearEnv: true,
+    env: psqlEnv(),
     stdout: "piped",
     stderr: "piped",
   }).output();
