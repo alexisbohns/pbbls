@@ -30,6 +30,16 @@ extension References {
                                          config: ReferenceConfig(scheme: scheme, locales: Self.locales(scheme)))
         }
 
+        /// S8: three tiles across and the pills above the button at accessibility2.
+        @Test
+        func pickerTwoChosenAx2() {
+            let souls = SoulFixtures.sixteen
+            let model = SoulChooserModel(mode: .pick(allowsSkip: true), souls: souls,
+                                         selection: [souls[0].id, souls[1].id])
+            ReferenceImage.assertMatches(Self.host(model, title: "Who was there?"), named: "pickerTwoChosen",
+                                         config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+        }
+
         @Test(arguments: ReferenceScheme.allCases)
         func pickerEmpty(scheme: ReferenceScheme) {
             let model = SoulChooserModel(mode: .pick(allowsSkip: true), souls: SoulFixtures.sixteen)
