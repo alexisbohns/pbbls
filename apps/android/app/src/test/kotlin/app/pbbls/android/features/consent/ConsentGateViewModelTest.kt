@@ -4,6 +4,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.ConsentPreferences
 import app.pbbls.android.core.data.DeletionState
 import app.pbbls.android.core.data.ReauthMethod
+import app.pbbls.android.core.model.ConsentGateLogic
 import app.pbbls.android.core.model.ConsentKind
 import app.pbbls.android.testing.FakeConsentService
 import app.pbbls.android.testing.FakeProfileService

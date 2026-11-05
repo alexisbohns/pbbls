@@ -48,6 +48,28 @@ class QuickMomentTest {
         }
 
     @Test
+    fun `a prefilled open shows the prompt, and the save sends only the moment`() =
+        runTest {
+            val quick = quick()
+            quick.open(QuickMomentPrefill(promptRes = R.string.onboarding_handoff_prompt_good_days))
+            assertEquals(R.string.onboarding_handoff_prompt_good_days, quick.sheet.value?.promptRes)
+            quick.setName("Coffee with Noé")
+            quick.save(QuickMomentExit.CLOSE)
+            advanceUntilIdle()
+            assertEquals(
+                MomentSavePayload(name = "Coffee with Noé", happenedAt = OffsetDateTime.parse("2026-10-31T21:04:09+01:00")),
+                writes.saved.single(),
+            )
+        }
+
+    @Test
+    fun `a plain open has no prompt`() =
+        runTest {
+            val quick = quick().apply { open() }
+            assertNull(requireNotNull(quick.sheet.value).promptRes)
+        }
+
+    @Test
     fun `a blank or whitespace name saves nothing`() =
         runTest {
             val quick = quick().apply { open() }

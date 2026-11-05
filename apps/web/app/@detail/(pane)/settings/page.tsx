@@ -24,6 +24,7 @@ import {
 } from "@/components/settings/PublicProfileSection"
 import { ProvidersSection } from "@/components/settings/ProvidersSection"
 import { PasswordSection } from "@/components/settings/PasswordSection"
+import { SupportSection } from "@/components/settings/SupportSection"
 import { LegalSection } from "@/components/settings/LegalSection"
 import { ConsentSection } from "@/components/settings/ConsentSection"
 import { AppearanceSection } from "@/components/settings/AppearanceSection"
@@ -293,6 +294,7 @@ export default function SettingsPage() {
           />
           <ProvidersSection providers={providers} />
           {showPassword && <PasswordSection value={password} onChange={setPassword} />}
+          <SupportSection />
           <LegalSection />
           <ConsentSection
             consent={healthConsent}

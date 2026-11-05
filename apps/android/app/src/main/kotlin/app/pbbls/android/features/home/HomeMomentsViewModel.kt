@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.data.MomentWriteServicing
+import app.pbbls.android.core.data.OnboardingHandoff
+import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SnapUploadCoordinator
 import app.pbbls.android.core.data.SnapWriteRepositing
 import app.pbbls.android.core.data.SupabaseServicing
@@ -14,8 +16,10 @@ import app.pbbls.android.features.home.camera.CameraMoment
 import app.pbbls.android.features.home.camera.CameraPhotos
 import app.pbbls.android.features.home.quick.QuickMoment
 import app.pbbls.android.features.home.quick.QuickMomentExit
+import app.pbbls.android.features.home.quick.QuickMomentPrefill
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 import javax.inject.Inject
 
@@ -53,6 +57,9 @@ private const val KEY_CAMERA_SHOT = "home-camera-shot"
  * plain holder, fresh each time the sheet opens; [camera] is the camera moment's ([CameraMoment]).
  * After any save, Home reloads what it shows through
  * [HomeViewModel.onMomentSaved]; the Path re-reads on its own resume (#852).
+ *
+ * The onboarding's hand-off (#1510 D9) lands here too: [onResumed] takes the flow's note once and
+ * opens [quick] with the reasons' prompt as the placeholder.
  */
 @HiltViewModel
 class HomeMomentsViewModel
@@ -61,9 +68,11 @@ class HomeMomentsViewModel
         savedState: SavedStateHandle,
         writes: MomentWriteServicing,
         achievements: AchievementsServicing,
-        supabase: SupabaseServicing,
+        private val supabase: SupabaseServicing,
         snapRepo: SnapWriteRepositing,
         private val photos: CameraPhotos,
+        private val handoff: OnboardingHandoff,
+        private val reference: ReferenceDataServicing,
     ) : ViewModel() {
         private val effectsOut = UiEffects<HomeMomentEffect>(viewModelScope)
         val effects: Flow<HomeMomentEffect> = effectsOut.flow
@@ -96,5 +105,16 @@ class HomeMomentsViewModel
             effectsOut.emit(HomeMomentEffect.LaunchCamera(photos.uriFor(shot)))
         }
 
-        fun onResumed() = camera.onResumed()
+        /**
+         * The camera's resume, then the onboarding's note, once (#1510 D9): the composer opens with
+         * the prompt the first reason chose (the default one when step 3 was skipped), and the souls
+         * list is refreshed so the flow's new souls are in the Complete picker straight away. Nobody
+         * is pre-attached: souls attach to pebbles, and `save_moment` has no way to hold one.
+         */
+        fun onResumed() {
+            camera.onResumed()
+            val note = handoff.take(supabase.session?.user?.id) ?: return
+            quick.open(QuickMomentPrefill(promptRes = onboardingHandoffPrompt(note.reason)))
+            viewModelScope.launch { reference.refreshSouls() }
+        }
     }

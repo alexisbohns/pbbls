@@ -210,9 +210,13 @@ class CompleteFlowViewModel
                                         delta.await() to glyph.await()
                                     }
                                 // The success screen shows the amount, so no capsule (M58 D10).
-                                karma.notifyEarned(delta ?: 0, KarmaReason.PEBBLE_CREATED, presentsCapsule = false)
-                                achievements.fireCheck()
-                                model.succeed(CompleteResult(pebbleId, delta, glyph))
+                                // A high-distress pebble gets no client celebration; the server still grants the karma.
+                                val quiet = answers.valence?.quietSuccess == true
+                                if (!quiet) {
+                                    karma.notifyEarned(delta ?: 0, KarmaReason.PEBBLE_CREATED, presentsCapsule = false)
+                                    achievements.fireCheck()
+                                }
+                                model.succeed(CompleteResult(pebbleId, delta, glyph), quiet)
                             },
                             onFailure = {
                                 Log.e(TAG, "complete_pebble failed", it)
