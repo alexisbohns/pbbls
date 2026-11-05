@@ -84,6 +84,7 @@
     <string name="onboarding_you_name_hint">Ton prénom</string>
     <string name="onboarding_you_glyph_body">Choisis un glyphe, ou dessine le tien.</string>
     <string name="onboarding_you_draw">Dessiner le mien</string>
+    <string name="onboarding_glyph_nth">Glyphe %1$d</string>
     <string name="onboarding_people_title">Trois places</string>
     <string name="onboarding_people_body">À qui annoncerais-tu une bonne nouvelle en premier ?</string>
     <string name="onboarding_people_add">Ajouter</string>

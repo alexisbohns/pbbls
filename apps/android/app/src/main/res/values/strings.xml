@@ -93,6 +93,7 @@
     <string name="onboarding_you_name_hint">Your name</string>
     <string name="onboarding_you_glyph_body">Pick a glyph, or draw your own.</string>
     <string name="onboarding_you_draw">Draw my own</string>
+    <string name="onboarding_glyph_nth">Glyph %1$d</string>
     <string name="onboarding_people_title">Three places</string>
     <string name="onboarding_people_body">Who would you call first with good news?</string>
     <string name="onboarding_people_add">Add one</string>

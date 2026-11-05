@@ -274,4 +274,36 @@ class OnboardingViewModelTest {
                     .map { it.id },
             )
         }
+
+    @Test
+    fun `leaving people commits a typed name and drops a blank place`() =
+        runTest {
+            val vm = vm()
+            advanceUntilIdle()
+            vm.next()
+            ConsentKind.entries.forEach { vm.onConsentToggle(it, true) }
+            advanceUntilIdle()
+            repeat(3) { vm.next() } // → people
+            vm.onPersonAdd()
+            vm.onPersonNameChange(0, " Noé ")
+            vm.next() // Continue with the field still open
+            assertEquals("pace", vm.uiState.value.step.id)
+            assertEquals(
+                listOf("Noé"),
+                vm.uiState.value.people
+                    .map { it.name },
+            )
+            assertTrue(
+                vm.uiState.value.people
+                    .none { it.editing },
+            )
+            vm.back()
+            vm.onPersonAdd()
+            vm.skip() // Later with a blank place open
+            assertEquals("pace", vm.uiState.value.step.id)
+            assertTrue(
+                vm.uiState.value.people
+                    .isEmpty(),
+            )
+        }
 }

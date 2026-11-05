@@ -20,12 +20,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -228,6 +232,9 @@ private fun PersonNameField(
 ) {
     val colors = MaterialTheme.colorScheme
     val focus = remember { FocusRequester() }
+    // Focus arrives after the first composition: only a loss after a gain commits (a blank name
+    // removes the place), so the field's initial unfocused state never drops it before a keystroke.
+    var wasFocused by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { focus.requestFocus() }
     BasicTextField(
         value = name,
@@ -253,7 +260,14 @@ private fun PersonNameField(
             Modifier
                 .fillMaxWidth()
                 .focusRequester(focus)
-                .testTag(onboardingPersonNameTag(index)),
+                .onFocusChanged {
+                    if (it.isFocused) {
+                        wasFocused = true
+                    } else if (wasFocused) {
+                        wasFocused = false
+                        onCommit(index)
+                    }
+                }.testTag(onboardingPersonNameTag(index)),
     )
 }
 

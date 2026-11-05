@@ -1,12 +1,14 @@
 package app.pbbls.android.features.onboarding.steps
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +23,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
@@ -65,14 +69,9 @@ fun GlyphStoneGrid(
     @StringRes drawLabelRes: Int = R.string.onboarding_you_draw,
 ) {
     val colors = MaterialTheme.colorScheme
-    val shown: List<Glyph?> =
-        if (folded) {
-            val chosen = glyphs.firstOrNull { it.id == selectedId }
-            val others = glyphs.filter { it.id != selectedId }.take(FOLDED_GLYPHS - (if (chosen == null) 0 else 1))
-            (listOfNotNull(chosen) + others).padTo(FOLDED_GLYPHS) + null
-        } else {
-            glyphs.takeLast(GRID_GLYPHS).padTo(GRID_GLYPHS) + null
-        }
+    // The chosen glyph first, so it is never cut off the stone once carved ones push past eight.
+    val ordered = listOfNotNull(glyphs.firstOrNull { it.id == selectedId }) + glyphs.filter { it.id != selectedId }
+    val shown: List<Glyph?> = ordered.padTo(if (folded) FOLDED_GLYPHS else GRID_GLYPHS) + null
     val rows = if (folded) 1 else GRID_ROWS
     val columns = if (folded) FOLDED_COLUMNS else GRID_COLUMNS
     val fills =
@@ -86,22 +85,36 @@ fun GlyphStoneGrid(
         columns = columns,
         seed = if (folded) "$GLYPH_STONE_SEED-folded" else GLYPH_STONE_SEED,
         fills = fills,
-        modifier = modifier,
+        modifier = modifier.selectableGroup(),
         minCellHeight = if (folded) FOLDED_CELL_HEIGHT else CELL_HEIGHT,
     ) { index, column ->
         val glyph = shown[index]
         val isDraw = index == shown.lastIndex
         val selected = glyph != null && glyph.id == selectedId
+        val drawLabel = stringResource(drawLabelRes)
+        val label =
+            when {
+                isDraw -> drawLabel
+                glyph != null -> glyph.name ?: stringResource(R.string.onboarding_glyph_nth, index + 1)
+                else -> null
+            }
         Box(
             Modifier
                 .fillMaxSize()
                 .pieceClip(column)
-                .selectable(
-                    selected = selected,
-                    role = Role.RadioButton,
-                    enabled = isDraw || glyph != null,
-                    onClick = { if (isDraw) onDraw() else glyph?.let(onSelect) },
-                ).testTag(if (isDraw) ONBOARDING_GLYPH_DRAW_TAG else onboardingGlyphTag(glyph?.id)),
+                .then(
+                    if (isDraw) {
+                        Modifier.clickable(role = Role.Button, onClick = onDraw)
+                    } else {
+                        Modifier.selectable(
+                            selected = selected,
+                            role = Role.RadioButton,
+                            enabled = glyph != null,
+                            onClick = { glyph?.let(onSelect) },
+                        )
+                    },
+                ).semantics { if (label != null) contentDescription = label }
+                .testTag(if (isDraw) ONBOARDING_GLYPH_DRAW_TAG else onboardingGlyphTag(glyph?.id)),
             contentAlignment = Alignment.Center,
         ) {
             when {
@@ -131,7 +144,7 @@ fun GlyphStoneGrid(
                         PbblsIconImage(PbblsIcon.PLUS_CIRCLE, PbblsIconSize.TILE, contentDescription = null, tint = colors.onSurfaceVariant)
                         if (!folded) {
                             Text(
-                                stringResource(drawLabelRes),
+                                drawLabel,
                                 style = MaterialTheme.typography.labelMedium,
                                 color = colors.onSurfaceVariant,
                                 textAlign = TextAlign.Center,

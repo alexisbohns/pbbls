@@ -3,6 +3,7 @@ package app.pbbls.android.navigation
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.LocalListDetailSceneScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
@@ -405,23 +406,15 @@ private val glyphPicker: GlyphPickerSlot = { currentGlyphId, onSelected, state, 
 /**
  * The carve studio for the onboarding flow (#1510 D8), hosted as a content swap inside the
  * `Onboarding` entry the way [glyphPicker] hosts it. Its ViewModel is the entry's, so it is
- * released here on save and on cancel, and an abandoned drawing never resurfaces under the next
- * carve. Same reason as [glyphPicker]: a feature may not import another, so this file fills the slot.
+ * released when the slot leaves composition, and an abandoned drawing never resurfaces under the
+ * next carve. Same reason as [glyphPicker]: a feature may not import another, so this file fills the slot.
  */
 private val glyphCarve: GlyphCarveSlot = { onSaved, onCancel, modifier ->
     val carveViewModel: GlyphCarveViewModel = hiltViewModel()
-    GlyphCarveScreen(
-        onSaved = { glyph ->
-            carveViewModel.reset()
-            onSaved(glyph)
-        },
-        onCancel = {
-            carveViewModel.reset()
-            onCancel()
-        },
-        modifier = modifier,
-        viewModel = carveViewModel,
-    )
+    // The slot leaves composition on every exit (save, cancel, the host's system back), so this
+    // is the one release path; a reset on a save or discard that already reset costs nothing.
+    DisposableEffect(Unit) { onDispose { carveViewModel.reset() } }
+    GlyphCarveScreen(onSaved = onSaved, onCancel = onCancel, modifier = modifier, viewModel = carveViewModel)
 }
 
 /**
