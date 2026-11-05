@@ -11,6 +11,7 @@ struct CompleteLifeStep: View {
 
     @Environment(ReferenceDataService.self) private var refs
     @Environment(SupabaseService.self) private var supabase
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var lastTapped: Domain?
     @State private var showsPicker = false
 
@@ -76,7 +77,9 @@ struct CompleteLifeStep: View {
     }
 
     private func grid(_ domains: [Domain]) -> some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: Spacing.sm), GridItem(.flexible(), spacing: Spacing.sm)],
+        // One column at accessibility sizes: a half-width tile truncates every name.
+        let columns = typeSize.isAccessibilitySize ? 1 : 2
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.sm), count: columns),
                   spacing: Spacing.sm) {
             ForEach(domains) { domain in
                 let isSelected = model.draft.domainIds.contains(domain.id)

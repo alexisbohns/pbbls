@@ -10,6 +10,9 @@ extension References {
     struct RecordFlowReferences {
         private static let pageHeight: CGFloat = 760
         private static let sheetHeight: CGFloat = 560
+        /// The Life screen at accessibility2 does not scroll under ImageRenderer:
+        /// one domain column and a two-line pill need a taller page to draw whole.
+        private static let lifeAx2Height: CGFloat = 1100
 
         /// A Wednesday, so the when chip and the week row never read "Today".
         private static let wednesday: Date = {
@@ -30,7 +33,7 @@ extension References {
             let ring = [GlyphStroke(d: ringPath, width: 6)]
             return [
                 Domain(id: uuid(1), slug: "health", name: "Health",
-                       label: "Your body, energy, and physical well-being", strokes: cross, viewBox: "0 0 200 200"),
+                       label: "Your body, energy, and well-being", strokes: cross, viewBox: "0 0 200 200"),
                 Domain(id: uuid(2), slug: "work", name: "Work",
                        label: "Your job, career, and professional life", strokes: nil, viewBox: nil),
                 Domain(id: uuid(3), slug: "family", name: "Family",
@@ -109,12 +112,12 @@ extension References {
             }
         }
 
-        private static func life() -> some View {
+        private static func life(height: CGFloat = pageHeight) -> some View {
             let model = CompleteFlowModel(haptic: { _ in })
             model.draft.valence = .highlightMedium
             model.draft.domainIds = [domains[0].id, domains[2].id]
             model.draft.soulIds = [SoulFixtures.sixteen[0].id]
-            return host(height: pageHeight) {
+            return host(height: height) {
                 RecordStepScaffold(
                     title: "What part of life?",
                     pill: AnyView(RecordSummaryPill(valence: .highlightMedium, emotionName: "Joyful", onEdit: {})),
@@ -165,7 +168,7 @@ extension References {
         /// The device-pass gate: two columns still hold, the strip stays clear of the pill.
         @Test
         func lifeAx2() {
-            ReferenceImage.assertMatches(Self.life(), named: "life",
+            ReferenceImage.assertMatches(Self.life(height: Self.lifeAx2Height), named: "life",
                                          config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
         }
 

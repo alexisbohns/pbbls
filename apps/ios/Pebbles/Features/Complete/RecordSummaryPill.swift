@@ -18,12 +18,16 @@ struct RecordSummaryPill: View {
         if let text = Self.text(valence: valence, emotionName: emotionName) {
             Button(action: onEdit) {
                 HStack(spacing: Spacing.xs + 2) {
-                    Text(verbatim: text).pebblesFont(.subheadEmphasized).lineLimit(1)
+                    Text(verbatim: text)
+                        .pebblesFont(.subheadEmphasized)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
                     Text("Edit").pebblesFont(.subhead).underline()
                 }
                 .foregroundStyle(Color.pebbles.onSecondaryContainer)
                 .padding(.horizontal, Spacing.md)
-                .frame(height: 32)
+                .padding(.vertical, Spacing.xs + 2)
+                .frame(minHeight: 32)
                 .background(Capsule().fill(Color.pebbles.secondaryContainer))
             }
             .buttonStyle(.plain)
