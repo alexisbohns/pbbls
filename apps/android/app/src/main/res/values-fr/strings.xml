@@ -62,7 +62,7 @@
     <string name="onboarding_promise_cta">Je t\'en tiendrai responsable</string>
     <string name="onboarding_promise_unavailable">Notre promesse n\'a pas pu se charger. Tu la retrouveras dans les réglages.</string>
     <string name="onboarding_consent_title">Ton consentement</string>
-    <string name="onboarding_consent_body">Quatre actes, chacun son interrupteur. Rien n\'est pré-coché.</string>
+    <string name="onboarding_consent_body">Quatre actes, chacun son interrupteur.</string>
     <string name="onboarding_consent_health">Pebbles peut garder ce que je ressens (données de santé au sens du RGPD).</string>
     <string name="onboarding_consent_health_hint">Les émotions et l\'intensité sont des données sensibles. C\'est l\'interrupteur qui rend l\'app possible.</string>
     <string name="onboarding_consent_terms">J\'accepte les conditions d\'utilisation.</string>
@@ -94,7 +94,7 @@
     <string name="onboarding_people_glyph_use">Utiliser pour %1$s</string>
     <string name="onboarding_people_glyph_draw">En dessiner un</string>
     <string name="onboarding_pace_title">Quel rythme te va ?</string>
-    <string name="onboarding_pace_body">On le lira quand les rappels arriveront. Pas de série, pas de culpabilité.</string>
+    <string name="onboarding_pace_body">On le lira quand les rappels arriveront.</string>
     <string name="onboarding_pace_daily">Tous les jours</string>
     <string name="onboarding_pace_few_a_week">Quelques fois par semaine</string>
     <string name="onboarding_pace_when_it_matters">Seulement quand ça compte</string>

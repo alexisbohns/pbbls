@@ -71,7 +71,7 @@
     <string name="onboarding_promise_cta">I\'ll hold you to it</string>
     <string name="onboarding_promise_unavailable" tools:ignore="UnusedResources">Our promise could not load. It will be here in Settings.</string>
     <string name="onboarding_consent_title" tools:ignore="UnusedResources">Your consent</string>
-    <string name="onboarding_consent_body" tools:ignore="UnusedResources">Four acts, each its own switch. Nothing is pre-ticked.</string>
+    <string name="onboarding_consent_body" tools:ignore="UnusedResources">Four acts, each its own switch.</string>
     <string name="onboarding_consent_health" tools:ignore="UnusedResources">Pebbles may keep what I feel (health data under the GDPR).</string>
     <string name="onboarding_consent_health_hint" tools:ignore="UnusedResources">Emotions and intensity are special-category data. This is the one switch that makes the app possible.</string>
     <string name="onboarding_consent_terms" tools:ignore="UnusedResources">I agree to the Terms of Service.</string>
@@ -103,7 +103,7 @@
     <string name="onboarding_people_glyph_use" tools:ignore="UnusedResources">Use for %1$s</string>
     <string name="onboarding_people_glyph_draw" tools:ignore="UnusedResources">Draw one</string>
     <string name="onboarding_pace_title" tools:ignore="UnusedResources">What pace suits you?</string>
-    <string name="onboarding_pace_body" tools:ignore="UnusedResources">We\'ll read this when reminders arrive. No streaks, no guilt.</string>
+    <string name="onboarding_pace_body" tools:ignore="UnusedResources">We\'ll read this when reminders arrive.</string>
     <string name="onboarding_pace_daily">Every day</string>
     <string name="onboarding_pace_few_a_week">A few times a week</string>
     <string name="onboarding_pace_when_it_matters">Only when it matters</string>
