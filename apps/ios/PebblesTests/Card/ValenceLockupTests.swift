@@ -18,9 +18,9 @@ struct ValenceLockupTests {
         (.highlightLarge, "Highlight", false, .large, "OF MY MONTH", .stoneRamp),
         (.highlightMedium, "Highlight", false, .medium, "OF MY WEEK", .stoneRamp),
         (.highlightSmall, "Highlight", true, .small, "OF MY DAY", .stoneRamp),
-        (.neutralLarge, "Moment", false, .large, "OF MY MONTH", .primary),
-        (.neutralMedium, "Moment", false, .medium, "OF MY WEEK", .primary),
-        (.neutralSmall, "Moment", true, .small, "OF MY DAY", .primary),
+        (.neutralLarge, "Neutral", false, .large, "OF MY MONTH", .primary),
+        (.neutralMedium, "Neutral", false, .medium, "OF MY WEEK", .primary),
+        (.neutralSmall, "Neutral", true, .small, "OF MY DAY", .primary),
         (.lowlightLarge, "Lowlight", false, .large, "OF MY MONTH", .ink),
         (.lowlightMedium, "Lowlight", false, .medium, "OF MY WEEK", .ink),
         (.lowlightSmall, "Lowlight", true, .small, "OF MY DAY", .ink)
