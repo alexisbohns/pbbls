@@ -1829,3 +1829,45 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Pro bills usage beyond its $20 monthly credit, and the first day went over it. Build cost and the spend cap are a separate open question, not part of this entry.
 - **Supersedes / Superseded-by:** Supersedes the **Consequences** of **2026-09-04 — Vercel is named as a processor and the transfer clause corrected; the missing Art. 28 contract is accepted as a documented risk** (#754) in so far as they accept the missing contract. That entry's DPF facts and re-check date stand.
 - **Refs:** #1503, #754, `F-2026-08-GDP-admin-01`, `apps/web/docs/privacy/{en,fr}.md`, `apps/web/vercel.json`, `apps/admin/vercel.json`, https://vercel.com/legal/dpa, https://vercel.com/docs/plans/pro-plan.
+
+## 2026-11-05 — Crisis resources: the quiet branch is keyed on the two sliders, lives in the clients, and never withholds karma (#1457, #1459, #1460, #1461)
+
+- **Status:** taken
+- **Scope:** core, legal, web, ios, android
+- **Context:** Every client celebrated a maximum-negative entry the way it celebrates a joyful one (karma line, sound, haptic, achievement queue) and shipped no helpline anywhere. The Kritik SAF-01 findings on web, iOS and Android were launch-gating.
+- **Decision:**
+  - **One canonical list.** `packages/shared/crisis-resources.json` (EN/FR, per country, a `verified_on` date) is copied byte-identically per surface and pinned by a parity test on each; the maintainer verifies every number against its official source before a change merges.
+  - **"High distress" is `positiveness == -1 && intensity == 3`**, named `quietSuccess` on every surface. No emotion-id heuristics: the two sliders are the only signal the person gave, and the rule must be explainable in one sentence in the privacy policy.
+  - **The quiet branch is client-side only.** It suppresses the karma line, the sound, the haptic and the achievement queue, and offers Get support within one tap. The server still grants karma: nobody loses a reward for being honest. Whether karma should be keyed to disclosure at all (SAF-02) is a separate product decision.
+  - **Get support also lives in Settings** on every surface, above the admin-edited link sections, opening the same screen.
+- **Why:** A bundled list works offline and on the success step, where a network call would be a second failure at the worst moment. A single predicate keeps the three surfaces identical and testable with four cases each.
+- **Consequences:**
+  - A new country or a changed number is one PR touching the canonical file and its three copies; the parity tests fail otherwise.
+  - The record-flow redesign (#1514–#1516) must keep the quiet branch on whatever its success step becomes.
+  - The Arkaik view `V-crisis-resources` composes from Settings and Record Success on the three platforms.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #1457, #1459, #1460, #1461, PRs #1527, #1550, #1551, #1552, `docs/superpowers/plans/2026-11-05-kritik-launch-night.md`.
+
+## 2026-11-05 — The onboarding gate reads the profile, and consent moves into the flow on Android (#1510)
+
+- **Status:** taken
+- **Scope:** cross-surface contract (database), Android
+- **Context:** Android gated its four-slide onboarding on a device flag alone and never wrote `onboarding_completed`; the consent gate overlay stood above everything, so a new OAuth account met the consent before any promise.
+- **Decision:** `complete_onboarding` is the only client write path to `onboarding_completed`, `onboarding_reasons` and `pace`. Android presents the flow when the profile says not completed (and once per device), and the consent gate overlay stands down while the Onboarding entry is on the stack (not on the pending flag): step 2 records the acts through `record_consent`, an act already on record is shown on and locked, and the gate re-checks when the flow ends. `ConsentGateLogic` moved to `core/model` so the flow and the gate share one rule. A soul created in the flow always carries a glyph (`souls.glyph_id` is not null); the client assigns the first system glyph when none was picked. The drawing satellite is a content swap inside the onboarding entry, a `GlyphCarveSlot` the entry provider fills, not a pushed key, because a pushed entry cannot hand its result back. The hand-off opens Home's quick composer with the prompt the first reason chose; pre-attaching the first person (D9) is not possible, because souls attach to pebbles: `save_moment` has no `soul_ids` and no moment-to-soul table exists (open question, #1510).
+- **Why:** D2 (promise before consent) is impossible with the overlay above the flow; the device flag alone re-onboards nobody on a reinstall and cannot restart an abandoned flow (D10).
+- **Consequences:** iOS and web follow the same gate and the same step-2 rule in their own plans. A pre-flow Android account that reinstalls sees the new flow once.
+- **Refs:** #1510, #1521, #1522, `docs/superpowers/specs/2026-11-04-interactive-onboarding-design.md`, `docs/superpowers/plans/2026-11-05-interactive-onboarding-android.md`.
+
+## 2026-11-05 — The design page becomes a directory, and draws screens in real-size iframes
+
+- **Status:** taken
+- **Scope:** web
+- **Context:** `/sandbox/design` (#986) was one long page that showed views in a CSS `DeviceFrame` 390 px wide. The frame could not change what the views saw: media queries follow the browser window, so the phone frame drew the desktop layout on a desktop browser (its own caption said to narrow the window), and nothing showed the 1024 px two-area layout beside the phone one. The maintainer asked for a design system directory (icons, colors, components, views), every screen as mobile and desktop at a scaled, digestible size, and a way to pinpoint inconsistencies.
+- **Decision:**
+  - **Screens are iframes of the device's real viewport, scaled with a transform.** `/sandbox/design/frame?view=…` or `?specimens=…` renders one view or one group of specimens alone; the canvas draws it at 390×844 and 1440×900 (`lib/design/devices.ts`) and scales both by one factor, so their proportions stay true and each sees its own breakpoints. The canvas pushes theme changes by `postMessage` (`lib/design/frame-protocol.ts`) instead of reloading, and mounts a frame only near the visible area.
+  - **Components are drawn per group, not per specimen.** `SPECIMEN_GROUPS` in the registry puts related specimens on one pair of screens (nine groups, eighteen iframes) rather than ~90 iframes.
+  - **Inconsistencies are a source scan at build time.** `lib/design/audit.ts` (pure, tested) lists Lucide imports, literal colours, Tailwind default palette classes, arbitrary off-scale values and components with no specimen; `audit-source.ts` runs it over `components/` and `app/` from the prerendered pages. It is a heuristic shown to a person, never a CI gate.
+  - **Foundations and icons stay at 1:1.** Tokens and icons do not change with the viewport, and their real pixel size is the thing to judge, so they are not put in scaled frames.
+- **Why:** An iframe is the only way to give a rendered view a different viewport without changing the components (container queries would mean rewriting every breakpoint in the app for a sandbox). Computing the scan at build time keeps it always current with no generated file to commit or keep fresh.
+- **Consequences:** A view or specimen that only works under the old in-page `DeviceFrame` (relying on the page's own fixed positioning) must work standalone in the frame route. Each frame boots the app, so a zoomed-out wall of every view costs ~34 live iframes; keep groups coarse. A new view entry in `SPECIMENS` needs its renderer in `views/view-registry.tsx` (the type enforces it), and a new specimen needs a `group` (the test enforces it).
+- **Refs:** `docs/superpowers/specs/2026-11-05-design-system-directory-design.md`, `apps/web/app/sandbox/design/`, `apps/web/components/sandbox/design/`, `apps/web/lib/design/`, #986.

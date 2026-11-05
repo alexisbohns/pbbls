@@ -169,4 +169,15 @@ struct CompleteFlowModelTests {
         #expect(model.completed == result)
         #expect(recorder.taps.suffix(2) == [.warning, .success])
     }
+
+    @Test("quiet success does not buzz")
+    func quietSuccessIsSilent() {
+        let (model, recorder) = model()
+        model.beginCompleting()
+        let result = CompletionResult(pebbleId: UUID(), karmaDelta: 4, glyph: nil)
+        model.succeed(with: result, quiet: true)
+        #expect(model.step == .success)
+        #expect(model.completed == result)
+        #expect(!recorder.taps.contains(.success))
+    }
 }

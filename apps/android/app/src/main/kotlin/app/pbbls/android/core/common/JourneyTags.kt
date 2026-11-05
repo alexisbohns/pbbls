@@ -14,7 +14,13 @@ object JourneyTags {
     const val AUTH_EMAIL = "auth_email"
     const val AUTH_PASSWORD = "auth_password"
     const val AUTH_SUBMIT = "auth_submit"
+
+    /** The onboarding shell's Back, and the Skip/Later of a step that has one (#1510). */
+    const val ONBOARDING_BACK = "onboarding_back"
     const val ONBOARDING_SKIP = "onboarding_skip"
+
+    /** A step's primary button: the promise's CTA, Continue on consent and reasons. */
+    const val ONBOARDING_NEXT = "onboarding_next"
 
     /** The Home page, where a signed-in launch lands (#1383 D1). */
     const val HOME = "home"

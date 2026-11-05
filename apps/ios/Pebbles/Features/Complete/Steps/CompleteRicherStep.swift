@@ -7,6 +7,8 @@ import os
 /// and visibility through `complete_pebble` (keyed on moment and caller, so
 /// a second call is an edit), words through `save_moment` (the edit sheet).
 /// Done returns to the origin; Record another starts a fresh capture.
+/// A high-distress pebble stays quiet: no karma line, a calm sentence and a
+/// way to support instead (#1551).
 struct CompleteRicherStep: View {
     let momentId: UUID
     let name: String?
@@ -29,6 +31,9 @@ struct CompleteRicherStep: View {
     @State private var editError: String?
     /// One edit at a time: the rows sit out while a write or the words fetch is in flight.
     @State private var isEditing = false
+    @State private var showsCrisisResources = false
+
+    private var quiet: Bool { draft.valence?.quietSuccess ?? false }
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "complete-richer")
 
@@ -64,7 +69,12 @@ struct CompleteRicherStep: View {
                     MomentNameText(name: name, untitledFont: .ysabeauSemiboldItalic(28))
                         .pebblesFont(.title)
                         .multilineTextAlignment(.center)
-                    if let karma = result.karmaDelta, karma > 0 {
+                    if quiet {
+                        Text("Thank you for keeping this. If today is heavy, support is one tap away.")
+                            .pebblesFont(.body)
+                            .foregroundStyle(Color.pebbles.onSurface)
+                            .multilineTextAlignment(.center)
+                    } else if let karma = result.karmaDelta, karma > 0 {
                         HStack(spacing: 6) {
                             PbblsIconImage(.karmaDot, size: 18, relativeTo: .headline,
                                            style: AnyShapeStyle(Color.pebbles.primary))
@@ -95,6 +105,12 @@ struct CompleteRicherStep: View {
                 }
 
                 VStack(spacing: Spacing.xs) {
+                    if quiet {
+                        Button("Get support") { showsCrisisResources = true }
+                            .pebblesFont(.bodyEmphasized)
+                            .foregroundStyle(Color.pebbles.primary)
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
                     Button("Done", action: onExit).buttonStyle(PebblesPrimaryButtonStyle())
                     if let onRecordAnother {
                         Button("Record another", action: onRecordAnother)
@@ -106,6 +122,9 @@ struct CompleteRicherStep: View {
             }
             .padding(.horizontal, Spacing.lg)
             .padding(.bottom, Spacing.lg)
+        }
+        .sheet(isPresented: $showsCrisisResources) {
+            CrisisResourcesSheet()
         }
         .sheet(item: $words) { detail in
             EditMomentSheet(detail: detail, onSaved: {

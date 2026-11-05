@@ -1,110 +1,77 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { usePathname } from "next/navigation"
 import { COLOR_WORLDS } from "@/lib/config/color-worlds"
+import { CANVAS_ZOOMS, type CanvasZoom, type DeviceChoice } from "@/lib/design/devices"
 import { tuningProgress } from "@/lib/design/specimens"
+import type { ColorWorld } from "@/lib/types"
 import type { DesignContrast, DesignMode, DesignTheme, DesignThemeName } from "@/lib/theme/design-theme"
+import { DesignSelect, type SelectOption } from "./DesignSelect"
+import { currentPage } from "./directory-pages"
 
-type Option<T extends string> = { value: T; label: string }
-
-const THEME_OPTIONS: Option<DesignThemeName>[] = [
+const THEME_OPTIONS: SelectOption<DesignThemeName>[] = [
   { value: "current", label: "Current" },
   { value: "m3", label: "M3" },
 ]
-const MODE_OPTIONS: Option<DesignMode>[] = [
+const MODE_OPTIONS: SelectOption<DesignMode>[] = [
   { value: "light", label: "Light" },
   { value: "dark", label: "Dark" },
 ]
-const CONTRAST_OPTIONS: Option<DesignContrast>[] = [
+const CONTRAST_OPTIONS: SelectOption<DesignContrast>[] = [
   { value: "standard", label: "Standard" },
   { value: "medium", label: "Medium" },
   { value: "high", label: "High" },
 ]
-const SECTIONS = [
-  { id: "foundations", label: "Foundations" },
-  { id: "primitives", label: "Primitives" },
-  { id: "components", label: "Components" },
-  { id: "views", label: "Views" },
+const DEVICE_OPTIONS: SelectOption<DeviceChoice>[] = [
+  { value: "both", label: "Both" },
+  { value: "mobile", label: "Mobile" },
+  { value: "desktop", label: "Desktop" },
 ]
-
-function Segmented<T extends string>({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string
-  options: Option<T>[]
-  value: T
-  onChange: (next: T) => void
-}) {
-  return (
-    <div role="group" aria-label={label} className="flex items-center gap-1">
-      <span className="mr-1 text-xs text-muted-foreground">{label}</span>
-      {options.map((option) => (
-        <Button
-          key={option.value}
-          size="xs"
-          variant={option.value === value ? "default" : "outline"}
-          aria-pressed={option.value === value}
-          onClick={() => onChange(option.value)}
-        >
-          {option.label}
-        </Button>
-      ))}
-    </div>
-  )
-}
+const WORLD_OPTIONS: SelectOption<ColorWorld>[] = COLOR_WORLDS.map((w) => ({ value: w.id, label: w.label }))
+const ZOOM_OPTIONS: SelectOption<CanvasZoom>[] = CANVAS_ZOOMS.map((z) => ({
+  value: z,
+  label: z === "fit" ? "Fit" : `${z * 100}%`,
+}))
 
 type DesignToolbarProps = {
   theme: DesignTheme
   onChange: (patch: Partial<DesignTheme>) => void
+  zoom: CanvasZoom
+  onZoom: (zoom: CanvasZoom) => void
+  devices: DeviceChoice
+  onDevices: (devices: DeviceChoice) => void
 }
 
-export function DesignToolbar({ theme, onChange }: DesignToolbarProps) {
+export function DesignToolbar({ theme, onChange, zoom, onZoom, devices, onDevices }: DesignToolbarProps) {
+  const pathname = usePathname()
   const { tuned, total } = tuningProgress()
+  const current = currentPage(pathname)
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3">
-        <h1 className="font-heading text-lg">Design</h1>
-        <Segmented label="Theme" options={THEME_OPTIONS} value={theme.theme} onChange={(v) => onChange({ theme: v })} />
-        {theme.theme === "current" ? (
-          <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            World
-            <select
-              className="h-6 rounded-md border border-border bg-card px-1 text-xs text-foreground"
-              value={theme.world}
-              onChange={(e) => {
-                const world = COLOR_WORLDS.find((w) => w.id === e.target.value)
-                if (world) onChange({ world: world.id })
-              }}
-            >
-              {COLOR_WORLDS.map((w) => (
-                <option key={w.id} value={w.id}>
-                  {w.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : (
-          <Segmented
-            label="Contrast"
-            options={CONTRAST_OPTIONS}
-            value={theme.contrast}
-            onChange={(v) => onChange({ contrast: v })}
-          />
-        )}
-        <Segmented label="Mode" options={MODE_OPTIONS} value={theme.mode} onChange={(v) => onChange({ mode: v })} />
-        <span className="text-xs text-muted-foreground">
-          {tuned}/{total} tuned · <kbd>T</kbd> theme · <kbd>D</kbd> mode
-        </span>
-        <nav aria-label="Sections" className="flex gap-3 text-xs">
-          {SECTIONS.map((s) => (
-            <a key={s.id} href={`#${s.id}`} className="underline-offset-4 hover:underline">
-              {s.label}
-            </a>
-          ))}
-        </nav>
+      <div className="flex flex-col gap-2 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <h1 className="font-heading text-lg">
+            Pebbles design system{current && <span className="text-muted-foreground"> · {current.label}</span>}
+          </h1>
+          <span className="text-xs text-muted-foreground">
+            {tuned}/{total} tuned · <kbd>T</kbd> theme · <kbd>D</kbd> mode
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <DesignSelect label="Theme" options={THEME_OPTIONS} value={theme.theme} onChange={(v) => onChange({ theme: v })} />
+          {theme.theme === "current" ? (
+            <DesignSelect label="World" options={WORLD_OPTIONS} value={theme.world} onChange={(v) => onChange({ world: v })} />
+          ) : (
+            <DesignSelect label="Contrast" options={CONTRAST_OPTIONS} value={theme.contrast} onChange={(v) => onChange({ contrast: v })} />
+          )}
+          <DesignSelect label="Mode" options={MODE_OPTIONS} value={theme.mode} onChange={(v) => onChange({ mode: v })} />
+          {current?.canvas && (
+            <>
+              <DesignSelect label="Screens" options={DEVICE_OPTIONS} value={devices} onChange={onDevices} />
+              <DesignSelect label="Zoom" options={ZOOM_OPTIONS} value={zoom} onChange={onZoom} />
+            </>
+          )}
+        </div>
       </div>
     </header>
   )

@@ -87,7 +87,8 @@ fun QuickMomentSheet(
 
 /**
  * The sheet's content without the sheet (iOS `QuickMomentForm`), so the previews pin it: the
- * title, the name field (focused on open when [autoFocus], clamped by the owner), when as two pills
+ * title, the name field (focused on open when [autoFocus], clamped by the owner; its placeholder is
+ * the hand-off's prompt when the form carries one, #1510 D9), when as two pills
  * opening Material's own date and time dialogs (as Capture's when step does), the error line, then
  * "Save & open" (filled) over "Save & close" (outlined), both off while the name is blank or a save
  * runs.
@@ -124,7 +125,7 @@ fun QuickMomentForm(
             modifier = Modifier.fillMaxWidth().focusRequester(focus),
             placeholder = {
                 Text(
-                    text = stringResource(R.string.home_quick_name),
+                    text = stringResource(form.promptRes ?: R.string.home_quick_name),
                     style = PebblesTheme.hand.nameInputHand,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
