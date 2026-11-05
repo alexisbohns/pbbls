@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -132,11 +132,9 @@ fun OnboardingContent(
 ) {
     val colors = MaterialTheme.colorScheme
     val steps = OnboardingSteps.visible
-    Box(
-        modifier
-            .fillMaxSize()
-            .background(colors.surface),
-    ) {
+    // A Surface, not a painted Box: it sets the content colour to `onSurface`, so the step
+    // titles and the Back arrow (which take `LocalContentColor`) read in dark mode too.
+    Surface(modifier.fillMaxSize(), color = colors.surface) {
         Column(
             Modifier
                 .fillMaxSize()
