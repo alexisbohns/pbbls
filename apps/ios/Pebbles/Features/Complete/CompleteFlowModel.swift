@@ -106,6 +106,13 @@ final class CompleteFlowModel {
         }
     }
 
+    /// The chooser owns the order; the draft mirrors it.
+    func setSouls(_ ids: [UUID]) {
+        guard ids != draft.soulIds else { return }
+        haptic(.selection)
+        draft.soulIds = ids
+    }
+
     func select(visibility: Visibility) {
         haptic(.selection)
         draft.visibility = visibility
