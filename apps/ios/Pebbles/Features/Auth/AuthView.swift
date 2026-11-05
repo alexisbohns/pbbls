@@ -89,7 +89,9 @@ struct AuthView: View {
                     )
                     PebblesCheckbox(
                         isChecked: $healthDataAccepted,
-                        label: "I agree that Pebbles stores the emotions I record (health data)."
+                        // Android's `auth_consent_health`, verbatim: the Art. 9 statement is identical on every surface.
+                        // swiftlint:disable:next line_length
+                        label: "I agree that Pebbles records how I feel: my moods, the emotions I pick and what I write. This is sensitive data about my mental well-being."
                     )
                     PebblesCheckbox(
                         isChecked: $ageAttested,

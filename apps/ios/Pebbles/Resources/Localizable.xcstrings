@@ -15488,19 +15488,19 @@
         }
       }
     },
-    "I agree that Pebbles stores the emotions I record (health data)." : {
+    "I agree that Pebbles records how I feel: my moods, the emotions I pick and what I write. This is sensitive data about my mental well-being." : {
       "comment" : "Signup consent checkbox: the Art. 9 health-data consent.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "I agree that Pebbles stores the emotions I record (health data)."
+            "value" : "I agree that Pebbles records how I feel: my moods, the emotions I pick and what I write. This is sensitive data about my mental well-being."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "J'accepte que Pebbles conserve les émotions que j'enregistre (données de santé)."
+            "value" : "J’accepte que Pebbles enregistre ce que je ressens : mes humeurs, les émotions que je choisis et ce que j’écris. Ce sont des données sensibles sur mon bien-être mental."
           }
         }
       }
@@ -15517,7 +15517,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "J'ai 16 ans ou plus."
+            "value" : "J’ai 16 ans ou plus."
           }
         }
       }
