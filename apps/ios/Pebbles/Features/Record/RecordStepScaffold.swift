@@ -12,8 +12,8 @@ enum RecordStepAction {
     case primary(LocalizedStringResource, enabled: Bool, loading: Bool, () -> Void)
 }
 
-/// A quieter text button under the primary one. Capture's name step uses it
-/// for "Make it a pebble now" (A1).
+/// A quieter text button under the primary one — the moment page's "Just save"
+/// beneath "Save & make it a pebble" (D5).
 struct RecordStepSecondaryAction {
     let label: LocalizedStringResource
     let enabled: Bool
