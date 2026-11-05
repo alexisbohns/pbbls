@@ -91,6 +91,7 @@
     <string name="onboarding_people_name_hint">Son prénom</string>
     <string name="onboarding_people_change_glyph">Changer le glyphe</string>
     <string name="onboarding_people_remove">Retirer %1$s</string>
+    <string name="onboarding_people_remove_short">Retirer</string>
     <string name="onboarding_people_glyph_sheet_title">Un glyphe pour %1$s</string>
     <string name="onboarding_people_glyph_use">Utiliser pour %1$s</string>
     <string name="onboarding_people_glyph_draw">En dessiner un</string>

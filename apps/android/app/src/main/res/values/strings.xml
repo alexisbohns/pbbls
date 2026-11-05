@@ -100,6 +100,7 @@
     <string name="onboarding_people_name_hint">Their name</string>
     <string name="onboarding_people_change_glyph">Change glyph</string>
     <string name="onboarding_people_remove">Remove %1$s</string>
+    <string name="onboarding_people_remove_short">Remove</string>
     <string name="onboarding_people_glyph_sheet_title">A glyph for %1$s</string>
     <string name="onboarding_people_glyph_use">Use for %1$s</string>
     <string name="onboarding_people_glyph_draw">Draw one</string>

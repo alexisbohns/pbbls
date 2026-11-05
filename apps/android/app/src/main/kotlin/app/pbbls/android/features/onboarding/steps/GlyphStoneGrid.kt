@@ -95,7 +95,7 @@ fun GlyphStoneGrid(
         val label =
             when {
                 isDraw -> drawLabel
-                glyph != null -> glyph.name ?: stringResource(R.string.onboarding_glyph_nth, index + 1)
+                glyph != null -> glyphSpokenName(glyph) ?: stringResource(R.string.onboarding_glyph_nth, index + 1)
                 else -> null
             }
         Box(
@@ -162,6 +162,9 @@ fun GlyphStoneGrid(
         }
     }
 }
+
+/** The name TalkBack may read for [glyph]: a system glyph's name is an internal key ("domain:family"), never copy. */
+internal fun glyphSpokenName(glyph: Glyph): String? = glyph.name?.takeUnless { glyph.isSystem }
 
 /** [this] with trailing empty places up to [size], so the stone keeps its cut while glyphs load. */
 private fun List<Glyph>.padTo(size: Int): List<Glyph?> = take(size) + List((size - this.size).coerceAtLeast(0)) { null }

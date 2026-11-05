@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -191,9 +192,11 @@ fun PeopleStep(
                             TextButton(onClick = { onChangeGlyph(index) }, modifier = Modifier.testTag(onboardingPersonGlyphTag(index))) {
                                 Text(stringResource(R.string.onboarding_people_change_glyph), style = MaterialTheme.typography.labelMedium)
                             }
-                            TextButton(onClick = { onRemove(index) }) {
+                            // A short word in a third-width column; the full "Remove <name>" is what TalkBack reads.
+                            val removeLabel = stringResource(R.string.onboarding_people_remove, person.name)
+                            TextButton(onClick = { onRemove(index) }, modifier = Modifier.semantics { contentDescription = removeLabel }) {
                                 Text(
-                                    stringResource(R.string.onboarding_people_remove, person.name),
+                                    stringResource(R.string.onboarding_people_remove_short),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colors.onSurfaceVariant,
                                     maxLines = 1,
