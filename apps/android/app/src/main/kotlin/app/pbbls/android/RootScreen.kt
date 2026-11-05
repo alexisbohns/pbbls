@@ -126,11 +126,14 @@ fun RootScreen(onboarding: OnboardingPreferences) {
     // Gated unless THIS user passed. Keyed on the id, so the frame between a
     // user switch and start() re-checking can never show the app to the new
     // user on the old user's pass. Fails closed while Idle/Checking. Stands
-    // down while the onboarding is due (#1510 D2): its step 2 collects the
-    // acts, promise first, and the flow's end restarts this gate's check.
+    // down while the onboarding entry is on the stack (#1510 D2): its step 2
+    // collects the acts, promise first, and the flow's end restarts this
+    // gate's check. On the stack, not `shouldPresentOnboarding`: that turns
+    // true one frame before the effect below pushes the entry, and Home must
+    // not compose un-gated for that frame.
     val isConsentGated =
         root.destination == RootDestination.SignedIn &&
-            !shouldPresentOnboarding &&
+            !navigator.isOnStack(PebblesKey.Onboarding) &&
             consent != ConsentGateUiState.Satisfied(userId ?: "")
     val welcomeContentRevealed = { root.destination == RootDestination.SignedOut }
 

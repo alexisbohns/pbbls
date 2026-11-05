@@ -29,7 +29,6 @@ import app.pbbls.android.features.lab.LabScreen
 import app.pbbls.android.features.lab.LogListMode
 import app.pbbls.android.features.lab.LogListScreen
 import app.pbbls.android.features.onboarding.OnboardingScreen
-import app.pbbls.android.features.onboarding.OnboardingSteps
 import app.pbbls.android.features.path.EditMomentScreen
 import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.path.PathScreen
@@ -377,7 +376,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     // this one stack instead (design §5, D8).
 
     entry<PebblesKey.Onboarding>(metadata = NavTransitions.forKey(PebblesKey.Onboarding)) {
-        OnboardingScreen(steps = OnboardingSteps.all, onFinish = onOnboardingFinished)
+        OnboardingScreen(onFinish = onOnboardingFinished)
     }
 
     entry<PebblesKey.AcceptInvite>(metadata = NavTransitions.forKey(PebblesKey.AcceptInvite(""))) { key ->

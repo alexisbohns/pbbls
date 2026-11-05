@@ -25,7 +25,9 @@ private const val WELCOME_LOG_IN = "welcome_log_in"
 private const val AUTH_EMAIL = "auth_email"
 private const val AUTH_PASSWORD = "auth_password"
 private const val AUTH_SUBMIT = "auth_submit"
+private const val ONBOARDING_NEXT = "onboarding_next"
 private const val ONBOARDING_SKIP = "onboarding_skip"
+private const val ONBOARDING_REASON = "onboarding_reason_keep_people"
 private const val HOME = "home"
 private const val TAB_PATH = "tab_path"
 private const val PATH_WEEK_PAGER = "path_week_pager"
@@ -48,7 +50,7 @@ private const val DETAIL_SETTLE_MS = 2_000L
 /** Where a cold start lands: Welcome when signed out, Home when signed in (#1383 D1). */
 private val LANDING = Pattern.compile("$WELCOME_LOG_IN|$HOME")
 
-private val AFTER_SIGN_IN = Pattern.compile("$ONBOARDING_SKIP|$HOME")
+private val AFTER_SIGN_IN = Pattern.compile("$ONBOARDING_NEXT|$HOME")
 
 internal data class TestAccount(
     val email: String,
@@ -76,8 +78,10 @@ internal fun MacrobenchmarkScope.awaitLanding() {
 
 /**
  * Leaves the app on Home, signing in through Welcome → Auth when the session is
- * gone (the first iteration, or after `pm clear`). Onboarding, shown once per
- * install, is skipped. Returns false without an [account]: Welcome and Auth are
+ * gone (the first iteration, or after `pm clear`). Onboarding, shown until the
+ * profile has completed it (#1510), is walked with the least input: the promise,
+ * the consent (already on record for the benchmark account, so locked on), one
+ * reason, then Skip or Later on every remaining step. Returns false without an [account]: Welcome and Auth are
  * still walked, so the signed-out funnel is profiled either way.
  */
 internal fun MacrobenchmarkScope.ensureSignedIn(account: TestAccount?): Boolean {
@@ -101,13 +105,26 @@ internal fun MacrobenchmarkScope.ensureSignedIn(account: TestAccount?): Boolean 
         checkNotNull(device.wait(Until.findObject(By.res(AFTER_SIGN_IN)), SIGN_IN_TIMEOUT_MS)) {
             "Sign-in never reached Home — check BENCHMARK_EMAIL / BENCHMARK_PASSWORD"
         }
-    if (next.resourceName == ONBOARDING_SKIP) {
-        next.click()
-        checkNotNull(device.wait(Until.findObject(By.res(HOME)), UI_TIMEOUT_MS)) {
-            "Skipping onboarding did not reach Home"
+    if (next.resourceName == ONBOARDING_NEXT) {
+        next.click() // 1. promise
+        awaitAndClick(ONBOARDING_NEXT, "consent") // 2. consent, every act locked on
+        awaitAndClick(ONBOARDING_REASON, "reasons")
+        awaitAndClick(ONBOARDING_NEXT, "reasons") // 3. reasons
+        repeat(3) { awaitAndClick(ONBOARDING_SKIP, "a skippable step") } // 4–6; the last completes
+        checkNotNull(device.wait(Until.findObject(By.res(HOME)), SIGN_IN_TIMEOUT_MS)) {
+            "Finishing onboarding did not reach Home"
         }
     }
     return true
+}
+
+private fun MacrobenchmarkScope.awaitAndClick(
+    tag: String,
+    step: String,
+) {
+    checkNotNull(device.wait(Until.findObject(By.res(tag)), UI_TIMEOUT_MS)) {
+        "Onboarding never showed $tag on $step"
+    }.click()
 }
 
 /**

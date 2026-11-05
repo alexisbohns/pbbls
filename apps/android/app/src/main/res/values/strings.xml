@@ -62,27 +62,27 @@
     <!-- ==== Entry funnel — Onboarding ==== -->
     <!-- Onboarding (#1510): the seven steps. The whole catalog lands with the data layer; a string marked
          UnusedResources is consumed by the part that builds its step, which drops the mark. -->
-    <string name="onboarding_back" tools:ignore="UnusedResources">Back</string>
-    <string name="onboarding_skip" tools:ignore="UnusedResources">Skip</string>
-    <string name="onboarding_later" tools:ignore="UnusedResources">Later</string>
-    <string name="onboarding_continue" tools:ignore="UnusedResources">Continue</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_later">Later</string>
+    <string name="onboarding_continue">Continue</string>
     <string name="onboarding_progress">Step %1$d of %2$d</string>
     <string name="onboarding_promise_title">A promise, written once</string>
     <string name="onboarding_promise_cta">I\'ll hold you to it</string>
-    <string name="onboarding_promise_unavailable" tools:ignore="UnusedResources">Our promise could not load. It will be here in Settings.</string>
-    <string name="onboarding_consent_title" tools:ignore="UnusedResources">Your consent</string>
-    <string name="onboarding_consent_body" tools:ignore="UnusedResources">Four acts, each its own switch.</string>
-    <string name="onboarding_consent_health" tools:ignore="UnusedResources">Pebbles may keep what I feel (health data under the GDPR).</string>
-    <string name="onboarding_consent_health_hint" tools:ignore="UnusedResources">Emotions and intensity are special-category data. This is the one switch that makes the app possible.</string>
-    <string name="onboarding_consent_terms" tools:ignore="UnusedResources">I agree to the Terms of Service.</string>
-    <string name="onboarding_consent_privacy" tools:ignore="UnusedResources">I have read the Privacy Policy.</string>
-    <string name="onboarding_consent_age" tools:ignore="UnusedResources">I am 16 or older.</string>
-    <string name="onboarding_consent_read_terms" tools:ignore="UnusedResources">Read the terms</string>
-    <string name="onboarding_consent_read_policy" tools:ignore="UnusedResources">Read the policy</string>
-    <string name="onboarding_consent_recorded" tools:ignore="UnusedResources">Already on record</string>
-    <string name="onboarding_consent_error" tools:ignore="UnusedResources">Your consent could not be saved. Check your connection and try again.</string>
-    <string name="onboarding_reasons_title" tools:ignore="UnusedResources">What brings you here?</string>
-    <string name="onboarding_reasons_body" tools:ignore="UnusedResources">Pick any. It changes what Pebbles shows you first.</string>
+    <string name="onboarding_promise_unavailable">Our promise could not load. It will be here in Settings.</string>
+    <string name="onboarding_consent_title">Your consent</string>
+    <string name="onboarding_consent_body">Four acts, each its own switch.</string>
+    <string name="onboarding_consent_health">Pebbles may keep what I feel (health data under the GDPR).</string>
+    <string name="onboarding_consent_health_hint">Emotions and intensity are special-category data. This is the one switch that makes the app possible.</string>
+    <string name="onboarding_consent_terms">I agree to the Terms of Service.</string>
+    <string name="onboarding_consent_privacy">I have read the Privacy Policy.</string>
+    <string name="onboarding_consent_age">I am 16 or older.</string>
+    <string name="onboarding_consent_read_terms">Read the terms</string>
+    <string name="onboarding_consent_read_policy">Read the policy</string>
+    <string name="onboarding_consent_recorded">Already on record</string>
+    <string name="onboarding_consent_error">Your consent could not be saved. Check your connection and try again.</string>
+    <string name="onboarding_reasons_title">What brings you here?</string>
+    <string name="onboarding_reasons_body">Pick any. It changes what Pebbles shows you first.</string>
     <string name="onboarding_reason_notice_feelings">Notice what I feel</string>
     <string name="onboarding_reason_keep_people">Keep the people</string>
     <string name="onboarding_reason_hard_season">Get through a hard season</string>
@@ -110,7 +110,7 @@
     <string name="onboarding_pace_weekly_wrap">Wrapping the end of the week</string>
     <string name="onboarding_pace_footer" tools:ignore="UnusedResources">No streaks, no guilt.</string>
     <string name="onboarding_finish" tools:ignore="UnusedResources">Start</string>
-    <string name="onboarding_complete_error" tools:ignore="UnusedResources">Couldn\'t finish. Check your connection and try again.</string>
+    <string name="onboarding_complete_error">Couldn\'t finish. Check your connection and try again.</string>
     <string name="onboarding_handoff_prompt_notice_feelings" tools:ignore="UnusedResources">What did you feel today?</string>
     <string name="onboarding_handoff_prompt_keep_people" tools:ignore="UnusedResources">Who were you with today?</string>
     <string name="onboarding_handoff_prompt_hard_season" tools:ignore="UnusedResources">What was hard today?</string>
