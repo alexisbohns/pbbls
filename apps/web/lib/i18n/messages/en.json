@@ -1151,6 +1151,8 @@
       },
       "success": {
         "karma": "+{count} karma",
+        "quiet": "Thank you for keeping this. If today is heavy, support is one tap away.",
+        "getSupport": "Get support",
         "exit": "Back to my path"
       }
     },
