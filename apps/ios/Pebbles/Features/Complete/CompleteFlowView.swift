@@ -136,7 +136,7 @@ struct CompleteFlowView: View {
         guard !hasRestored, refs.hasLoaded else { return }
         hasRestored = true
         // Never restore over a flow the user has already started.
-        guard !model.isValenceConfirmed, model.step == .valence else { return }
+        guard model.draft.isEmpty, model.step == .valence else { return }
         guard let owner = supabase.session?.user.id,
               let saved = drafts.load(momentId: momentId, ownerId: owner) else { return }
         model.restore(saved, known: .init(

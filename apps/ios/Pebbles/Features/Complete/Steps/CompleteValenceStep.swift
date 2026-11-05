@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// How big and how bright (A1). Commits in place and arrives parked on
-/// neutral-medium; `Continue` advances.
+/// How big and how bright (A1). Commits in place and arrives empty (D7);
+/// `Continue` advances once a stone is chosen.
 struct CompleteValenceStep: View {
     let model: CompleteFlowModel
 
@@ -9,6 +9,5 @@ struct CompleteValenceStep: View {
         ValencePickerContent(selected: model.draft.valence) { picked in
             model.select(valence: picked)
         }
-        .onAppear { model.seedValenceIfNeeded() }
     }
 }
