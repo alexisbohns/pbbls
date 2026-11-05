@@ -38,6 +38,26 @@ echo 'create or replace function public.foo() returns int language sql as $$ sel
 printf '%s\n' 'create or replace function public.purge_account() returns void language sql as $$ select 1 $$;' '-- >>> APPEND new per-user tables' > "$d/m/2_b.sql"
 commit_all "$d"; expect "clean (one foo, purge_account with marker)" 0 "$(run "$d")"
 
+# base-append fixtures: base already carries delete a + b in purge_account
+new_base_repo() {
+  local d="$root/$1"
+  mkdir -p "$d/m"
+  git -C "$d" init -q -b main
+  git -C "$d" config user.email t@t
+  git -C "$d" config user.name t
+  printf '%s\n' 'create or replace function public.purge_account() returns void language plpgsql as $$' 'begin' '  delete from public.a;' '  delete from public.b;' '  -- >>> APPEND new per-user tables' 'end $$;' > "$d/m/1_base.sql"
+  git -C "$d" add -A && git -C "$d" commit -qm base
+  git -C "$d" checkout -qb feature
+  echo "$d"
+}
+d=$(new_base_repo dropped)
+printf '%s\n' 'create or replace function public.purge_account() returns void language plpgsql as $$' 'begin' '  delete from public.a;' '  -- >>> APPEND new per-user tables' 'end $$;' > "$d/m/2_new.sql"
+commit_all "$d"; expect "new body drops a base append line" 1 "$(run "$d")"
+
+d=$(new_base_repo kept)
+printf '%s\n' 'create or replace function public.purge_account() returns void language plpgsql as $$' 'begin' '  delete from public.a;' '  delete from public.b;' '  delete from public.c;' '  -- >>> APPEND new per-user tables' 'end $$;' > "$d/m/2_new.sql"
+commit_all "$d"; expect "new body keeps all base append lines" 0 "$(run "$d")"
+
 d=$(new_repo none)
 echo x > "$d/README"; commit_all "$d"; expect "no new migrations" 0 "$(run "$d")"
 
