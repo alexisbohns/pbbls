@@ -4,28 +4,30 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Onboarding-flag gating (the `RootView.onChange(of: session?.user.id)` rule):
- * present only when a user id appears while `hasSeenOnboarding` is still false.
- */
+/** Onboarding gating (#1510 D10): a signed-in user whose profile says not completed, once per device. */
 class OnboardingGateTest {
     @Test
-    fun presentsWhenUserAppearsAndFlagUnset() {
-        assertTrue(OnboardingGate.shouldPresent(userId = "user-1", hasSeenOnboarding = false))
+    fun presentsWhenServerSaysNotCompleted() {
+        assertTrue(OnboardingGate.shouldPresent(userId = "user-1", hasSeenOnboarding = false, onboardingCompleted = false))
     }
 
     @Test
-    fun doesNotPresentWhenAlreadySeen() {
-        assertFalse(OnboardingGate.shouldPresent(userId = "user-1", hasSeenOnboarding = true))
+    fun doesNotPresentWhenServerSaysCompleted() {
+        assertFalse(OnboardingGate.shouldPresent(userId = "user-1", hasSeenOnboarding = false, onboardingCompleted = true))
+    }
+
+    @Test
+    fun doesNotPresentWhileTheProfileIsUnknown() {
+        assertFalse(OnboardingGate.shouldPresent(userId = "user-1", hasSeenOnboarding = false, onboardingCompleted = null))
+    }
+
+    @Test
+    fun doesNotPresentTwiceOnOneDevice() {
+        assertFalse(OnboardingGate.shouldPresent(userId = "user-1", hasSeenOnboarding = true, onboardingCompleted = false))
     }
 
     @Test
     fun doesNotPresentWithoutAUser() {
-        assertFalse(OnboardingGate.shouldPresent(userId = null, hasSeenOnboarding = false))
-    }
-
-    @Test
-    fun doesNotPresentWithoutAUserEvenIfUnseen() {
-        assertFalse(OnboardingGate.shouldPresent(userId = null, hasSeenOnboarding = true))
+        assertFalse(OnboardingGate.shouldPresent(userId = null, hasSeenOnboarding = false, onboardingCompleted = false))
     }
 }

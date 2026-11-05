@@ -18,6 +18,13 @@ enum class LegalDoc(
 ) {
     TERMS("https://www.pbbls.app/docs/terms"),
     PRIVACY("https://www.pbbls.app/docs/privacy"),
+    ;
+
+    /**
+     * The page in the app's language. The site otherwise follows its own stored choice or the
+     * browser's language, which need not be the app's; `?lang=` overrides both (`LangParamSync`).
+     */
+    fun urlFor(language: String): String = "$url?lang=${if (language == "fr") "fr" else "en"}"
 }
 
 /**
@@ -30,7 +37,15 @@ fun openLegalDoc(
     context: Context,
     doc: LegalDoc,
 ) {
-    CustomTabsIntent.Builder().build().launchUrl(context, Uri.parse(doc.url))
+    CustomTabsIntent.Builder().build().launchUrl(
+        context,
+        Uri.parse(
+            doc.urlFor(
+                context.resources.configuration.locales[0]
+                    .language,
+            ),
+        ),
+    )
 }
 
 /**

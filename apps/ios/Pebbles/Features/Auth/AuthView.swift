@@ -1,7 +1,9 @@
 import SwiftUI
 
 /// Email + password auth screen. Switcher toggles between Login and Signup
-/// modes. Signup mode adds two consent checkboxes. All state lives view-locally,
+/// modes. Signup mode adds four consent checkboxes (terms, privacy, the
+/// Art. 9 health-data consent, the 16+ attestation): all four gate the email
+/// submit and the Apple and Google buttons alike (#821). All state lives view-locally,
 /// including `authError` — the auth service throws on failure and this view
 /// catches and renders the message inline.
 struct AuthView: View {
@@ -26,6 +28,8 @@ struct AuthView: View {
     @State private var isSubmitting = false
     @State private var termsAccepted = false
     @State private var privacyAccepted = false
+    @State private var healthDataAccepted = false
+    @State private var ageAttested = false
     @State private var presentedLegalDoc: LegalDoc?
     @State private var authError: String?
     @State private var emailError: LocalizedStringResource?
@@ -83,6 +87,16 @@ struct AuthView: View {
                         linkText: "Privacy Policy",
                         onLinkTap: { presentedLegalDoc = .privacy }
                     )
+                    PebblesCheckbox(
+                        isChecked: $healthDataAccepted,
+                        // Android `auth_consent_health`, verbatim: one Art. 9 statement on every surface.
+                        // swiftlint:disable:next line_length
+                        label: "I agree that Pebbles records how I feel: my moods, the emotions I pick and what I write. This is sensitive data about my mental well-being."
+                    )
+                    PebblesCheckbox(
+                        isChecked: $ageAttested,
+                        label: "I am 16 years old or over."
+                    )
                 }
             }
 
@@ -104,10 +118,10 @@ struct AuthView: View {
 
             VStack(spacing: 12) {
                 AppleSignInButton(action: { Task { await runApple() } })
-                    .disabled(isSubmitting)
+                    .disabled(!canUseProvider)
 
                 GoogleSignInButton(action: { Task { await runGoogle() } })
-                    .disabled(isSubmitting)
+                    .disabled(!canUseProvider)
 
                 LegalDisclaimerText(
                     onTermsTap: { presentedLegalDoc = .terms },
@@ -127,6 +141,8 @@ struct AuthView: View {
             if newMode == .login {
                 termsAccepted = false
                 privacyAccepted = false
+                healthDataAccepted = false
+                ageAttested = false
             }
         }
         .onChange(of: email) { oldValue, newValue in
@@ -162,6 +178,19 @@ struct AuthView: View {
             password: password,
             termsAccepted: termsAccepted,
             privacyAccepted: privacyAccepted,
+            healthDataAccepted: healthDataAccepted,
+            ageAttested: ageAttested,
+            isSubmitting: isSubmitting
+        )
+    }
+
+    private var canUseProvider: Bool {
+        Self.canUseProvider(
+            mode: mode,
+            termsAccepted: termsAccepted,
+            privacyAccepted: privacyAccepted,
+            healthDataAccepted: healthDataAccepted,
+            ageAttested: ageAttested,
             isSubmitting: isSubmitting
         )
     }
@@ -173,6 +202,8 @@ struct AuthView: View {
         password: String,
         termsAccepted: Bool,
         privacyAccepted: Bool,
+        healthDataAccepted: Bool,
+        ageAttested: Bool,
         isSubmitting: Bool
     ) -> Bool {
         let trimmed = email.trimmingCharacters(in: .whitespaces)
@@ -185,10 +216,32 @@ struct AuthView: View {
         else { return false }
 
         if mode == .signup {
-            return termsAccepted && privacyAccepted
+            return termsAccepted && privacyAccepted && healthDataAccepted && ageAttested
         }
         return true
     }
+
+    // swiftlint:disable function_parameter_count
+    /// Whether the Apple and Google buttons are live. In signup mode a
+    /// provider creates the account just as the email form does, so it waits
+    /// for the same four consents (web's `canSubmitRegistration`). In login
+    /// mode an account may already exist; whatever it lacks is asked after
+    /// sign-in, never here.
+    static func canUseProvider(
+        mode: Mode,
+        termsAccepted: Bool,
+        privacyAccepted: Bool,
+        healthDataAccepted: Bool,
+        ageAttested: Bool,
+        isSubmitting: Bool
+    ) -> Bool {
+        guard !isSubmitting else { return false }
+        if mode == .signup {
+            return termsAccepted && privacyAccepted && healthDataAccepted && ageAttested
+        }
+        return true
+    }
+    // swiftlint:enable function_parameter_count
 
     /// Lowercases and strips disallowed characters from raw email input.
     /// Real-time scrubbing keeps the visible field, the submitted value, and
@@ -219,7 +272,7 @@ struct AuthView: View {
     }
 
     private func runApple() async {
-        guard !isSubmitting else { return }
+        guard canUseProvider else { return }
         isSubmitting = true
         authError = nil
         do {
@@ -231,7 +284,7 @@ struct AuthView: View {
     }
 
     private func runGoogle() async {
-        guard !isSubmitting else { return }
+        guard canUseProvider else { return }
         isSubmitting = true
         authError = nil
         do {

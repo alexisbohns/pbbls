@@ -37,8 +37,22 @@ describe("blog posts", () => {
     }
   })
 
-  it("serves in-one-voice, newest first, its screens rasters in the repo and its three drawings SVG in the bucket", () => {
-    expect(BLOG_POSTS[0]?.slug).toBe("in-one-voice")
+  it("serves before-anything-else, newest first, its screens rasters in the repo and its three drawings SVG in the bucket", () => {
+    expect(BLOG_POSTS[0]?.slug).toBe("before-anything-else")
+    const post = getBlogPost("before-anything-else")
+    expect(post && formatPublishedOn(post.publishedOn)).toBe("4 November 2026")
+    const figures = post?.body.filter((block): block is BlogFigure => block.kind === "figure") ?? []
+    expect(figures[0]?.stored).toBeUndefined()
+    expect(figures[0]?.file).toBe("01-final-first-three.jpg")
+    expect(figures.filter((figure) => figure.stored === "bucket").map((figure) => figure.file)).toEqual([
+      "08-progress-stones.svg",
+      "09-six-tiles.svg",
+      "10-shelf.svg",
+    ])
+    for (const figure of figures) expect(figure.stored === "bucket", figure.file).toBe(figure.file.endsWith(".svg"))
+  })
+
+  it("serves in-one-voice, its screens rasters in the repo and its three drawings SVG in the bucket", () => {
     const post = getBlogPost("in-one-voice")
     expect(post && formatPublishedOn(post.publishedOn)).toBe("31 October 2026")
     const figures = post?.body.filter((block): block is BlogFigure => block.kind === "figure") ?? []
