@@ -282,7 +282,10 @@ struct CaptureFlowView: View {
         model = CaptureFlowModel(startingAt: startsAtMomentPage ? .moment : .photo)
         pickedPhoto = nil
         snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
+        savingThenComplete = false
         hasRestored = true
+        // The save cleared the autosave; the restore that re-enables it is skipped here.
+        autosaver?.enabled = true
     }
 
     private func save(thenComplete: Bool) async {

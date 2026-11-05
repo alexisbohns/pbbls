@@ -36,6 +36,9 @@ struct HeldCardPage: View {
     @State private var isPresentingEditMoment = false
     @State private var isPresentingEditPebble = false
     @State private var isPresentingComplete = false
+    /// D14: a Complete draft waits for this moment. Read once per load and after
+    /// the pebble stage goes, never per body (it is a file read).
+    @State private var hasCompleteDraft = false
     @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
     /// When the print started; nil when none runs (D6). Cleared only by its last frame.
@@ -80,7 +83,10 @@ struct HeldCardPage: View {
         .task {
             await reload()
             cutShortIfRestored()
+            refreshDraftCheck()
         }
+        // A "Keep" dismissal of the pebble stage is exactly when a draft appears.
+        .onChange(of: isPresentingComplete) { _, presenting in if !presenting { refreshDraftCheck() } }
         .task(id: model.announcing) {
             guard model.announcing else { return }
             AccessibilityNotification.Announcement(String(localized: CardStrings.versoHeading)).post()
@@ -196,13 +202,8 @@ struct HeldCardPage: View {
                        onComplete: { isPresentingComplete = true },
                        isCompleteDisabled: model.detail == nil || model.completion != nil || printStart != nil,
                        onPlaceFrame: { placeFrame = $0 }, titleFocus: $focus,
-                       hasDraft: hasCompleteDraft(for: detail),
+                       hasDraft: hasCompleteDraft,
                        onAddWords: detail.description?.isEmpty == false ? nil : { isPresentingEditMoment = true })
-    }
-
-    /// D14: a Complete draft on the device for this moment and account.
-    private func hasCompleteDraft(for detail: MomentDetail) -> Bool {
-        supabase.session.flatMap { completeDrafts.load(momentId: detail.id, ownerId: $0.user.id) } != nil
     }
 
     private func card(_ detail: MomentDetail, _ pebble: MomentDetail.Pebble, print: Double?) -> some View {
@@ -358,5 +359,13 @@ private struct FlightRaster: ViewModifier {
         } else {
             content
         }
+    }
+}
+
+extension HeldCardPage {
+    /// D14: a Complete draft on the device for this moment and account.
+    fileprivate func refreshDraftCheck() {
+        hasCompleteDraft = supabase.session
+            .flatMap { completeDrafts.load(momentId: request.momentId, ownerId: $0.user.id) } != nil
     }
 }

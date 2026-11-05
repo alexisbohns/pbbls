@@ -33,6 +33,8 @@ struct HomeView: View {
         let name: String?
         /// For the end screen's week row.
         var happenedAt: Date?
+        /// The end screen offers "Add a few words" only when the moment has none.
+        var hasWords = false
         var id: UUID { momentId }
     }
 
@@ -75,7 +77,7 @@ struct HomeView: View {
                                  revision.bump(from: .home)
                                  reloadChecklist()
                              },
-                             momentHappenedAt: target.happenedAt)
+                             momentHappenedAt: target.happenedAt, momentHasWords: target.hasWords)
         }
         .fullScreenCover(isPresented: $showsCapture) {
             CaptureFlowView(onMomentChanged: { _ in
@@ -248,9 +250,13 @@ struct HomeView: View {
     /// the feed is the answer and the read is bounded in practice.
     private func completeNewestBare() async {
         do {
-            let moments = try await MomentsService(client: supabase.client).pathMoments()
+            let service = MomentsService(client: supabase.client)
+            let moments = try await service.pathMoments()
             if let bare = moments.first(where: { !$0.isCompleted }) {
-                completing = CompleteTarget(momentId: bare.id, name: bare.name, happenedAt: bare.happenedAt)
+                let detail = try await service.moment(id: bare.id)
+                completing = CompleteTarget(
+                    momentId: detail.id, name: detail.name, happenedAt: detail.happenedAt,
+                    hasWords: !(detail.description ?? "").trimmingCharacters(in: .whitespaces).isEmpty)
                 return
             }
         } catch {

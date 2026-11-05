@@ -27,6 +27,8 @@ struct CompleteRicherStep: View {
     @State private var hasWords: Bool
     @State private var words: MomentDetail?
     @State private var editError: String?
+    /// One edit at a time: the rows sit out while a write or the words fetch is in flight.
+    @State private var isEditing = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "complete-richer")
 
@@ -81,9 +83,12 @@ struct CompleteRicherStep: View {
                     Text("MAKE IT RICHER")
                         .pebblesFont(.meta)
                         .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                    if !refs.collections.isEmpty { collectionRow }
-                    visibilityRow
-                    if !hasWords { wordsRow }
+                    Group {
+                        if !refs.collections.isEmpty { collectionRow }
+                        visibilityRow
+                        if !hasWords { wordsRow }
+                    }
+                    .disabled(isEditing)
                     if let editError {
                         Text(verbatim: editError).pebblesFont(.subhead).foregroundStyle(Color.pebbles.error)
                     }
@@ -188,6 +193,8 @@ struct CompleteRicherStep: View {
 
     private func send(_ payload: CompletePebblePayload, then apply: () -> Void) async {
         editError = nil
+        isEditing = true
+        defer { isEditing = false }
         do {
             _ = try await MomentsService(client: supabase.client).completePebble(payload)
             TapHaptics.play(.selection)
@@ -201,6 +208,8 @@ struct CompleteRicherStep: View {
 
     private func openWords() async {
         editError = nil
+        isEditing = true
+        defer { isEditing = false }
         do {
             words = try await MomentsService(client: supabase.client).moment(id: momentId)
         } catch {
