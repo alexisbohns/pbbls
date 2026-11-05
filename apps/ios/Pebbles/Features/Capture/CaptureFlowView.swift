@@ -72,7 +72,8 @@ struct CaptureFlowView: View {
                 CompleteFlowView(
                     momentId: completing.momentId,
                     momentName: completing.name,
-                    onCompleted: onMomentChanged
+                    onCompleted: onMomentChanged,
+                    afterSave: true
                 )
             } else {
                 capture
@@ -83,8 +84,7 @@ struct CaptureFlowView: View {
             if snaps == nil {
                 snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
             }
-            // After the coordinator exists, so a restored photo has somewhere
-            // to land: one place, one order.
+            // After the coordinator exists, so a restored photo has a place to land.
             restoreIfNeeded()
         }
     }

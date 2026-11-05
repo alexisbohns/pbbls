@@ -10,6 +10,9 @@ struct CompleteFlowView: View {
     /// Fired as soon as `complete_pebble` succeeds, while the success step is
     /// up, so the parent reloads behind the cover.
     let onCompleted: (UUID) -> Void
+    /// Chained from Capture: the valence step says the moment is already
+    /// saved and what the three questions are for (D1).
+    var afterSave = false
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(ReferenceDataService.self) private var refs
@@ -100,7 +103,7 @@ struct CompleteFlowView: View {
             } else {
                 RecordStepScaffold(
                     title: model.step.title,
-                    subtitle: model.step.subtitle,
+                    subtitle: valenceSubtitle ?? model.step.subtitle,
                     pill: model.step == .valence ? nil : AnyView(summaryPill),
                     action: action(for: model.step),
                     // The life step scrolls itself and pins its bar; a scaffold
@@ -116,6 +119,11 @@ struct CompleteFlowView: View {
             insertion: .move(edge: isMovingBack ? .leading : .trailing).combined(with: .opacity),
             removal: .move(edge: isMovingBack ? .trailing : .leading).combined(with: .opacity)
         ))
+    }
+
+    private var valenceSubtitle: LocalizedStringResource? {
+        guard afterSave, model.step == .valence else { return nil }
+        return "Moment saved · 3 questions to make it a pebble"
     }
 
     /// The answers so far (D11). On the emotion step Edit returns to the
