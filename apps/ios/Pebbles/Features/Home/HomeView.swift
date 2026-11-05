@@ -17,7 +17,6 @@ struct HomeView: View {
     @State private var showsCamera = false
     @State private var showsCameraUnavailable = false
     @State private var camera: CameraMomentCoordinator?
-    @State private var pendingComplete: UUID?
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "home")
     @State private var cameraError: String?
     @State private var naming: MomentDetail?
@@ -32,7 +31,7 @@ struct HomeView: View {
     private struct CompleteTarget: Identifiable, Equatable {
         let momentId: UUID
         let name: String?
-        /// For the end screen's week row; the quick sheet does not know it.
+        /// For the end screen's week row.
         var happenedAt: Date?
         var id: UUID { momentId }
     }
@@ -62,18 +61,13 @@ struct HomeView: View {
         .pebblesScreen()
         // Like the Path root: the greeting is the title, so the bar stays hidden.
         .toolbar(.hidden, for: .navigationBar)
-        .sheet(isPresented: $showsQuick, onDismiss: {
-            // Presented once the sheet is gone, so the two presentations never race.
-            if let id = pendingComplete {
-                pendingComplete = nil
-                completing = CompleteTarget(momentId: id, name: nil)
-            }
-        }) {
-            QuickMomentSheet(onSaved: { id, exit in
+        // D13: the quick moment is the moment page itself, no photo screen; the
+        // flow chains into Complete on its own.
+        .fullScreenCover(isPresented: $showsQuick) {
+            CaptureFlowView(onMomentChanged: { _ in
                 revision.bump(from: .home)
                 reloadChecklist()
-                if exit == .open { pendingComplete = id }
-            })
+            }, startsAtMomentPage: true)
         }
         .fullScreenCover(item: $completing) { target in
             CompleteFlowView(momentId: target.momentId, momentName: target.name,

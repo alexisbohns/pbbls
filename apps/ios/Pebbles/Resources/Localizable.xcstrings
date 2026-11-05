@@ -5427,13 +5427,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Name it"
+            "value" : "Edit"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nommer"
+            "value" : "Modifier"
           }
         }
       }
@@ -7007,91 +7007,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible d'enregistrer le moment. Réessaie."
-          }
-        }
-      }
-    },
-    "home.quick.name" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What happened?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Que s'est-il passé ?"
-          }
-        }
-      }
-    },
-    "home.quick.saveClose" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save & close"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enregistrer et fermer"
-          }
-        }
-      }
-    },
-    "home.quick.saveOpen" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save & open"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enregistrer et ouvrir"
-          }
-        }
-      }
-    },
-    "home.quick.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quick moment"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Moment rapide"
-          }
-        }
-      }
-    },
-    "home.quick.when" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quand"
           }
         }
       }

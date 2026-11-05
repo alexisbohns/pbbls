@@ -33,8 +33,12 @@ final class CaptureFlowModel {
 
     private let haptic: @MainActor (TapHaptic) -> Void
 
-    init(haptic: @escaping @MainActor (TapHaptic) -> Void = { TapHaptics.play($0) }) {
+    /// `startingAt: .moment` is the quick moment (D13): the page without the
+    /// photo screen. A restored draft lands on the page either way.
+    init(haptic: @escaping @MainActor (TapHaptic) -> Void = { TapHaptics.play($0) },
+         startingAt step: CaptureStep = .photo) {
         self.haptic = haptic
+        self.step = step
     }
 
     /// D3: a moment needs a name or a photo.

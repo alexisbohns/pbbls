@@ -14,13 +14,16 @@ struct CaptureFlowView: View {
     /// Home's "New pebble": the final step saves and swaps straight to
     /// Complete, so the save/make-a-pebble choice is not offered.
     var chainsComplete = false
+    /// Home's "Quick moment" (D13): the page straight away, no photo screen
+    /// and no way back to it.
+    var startsAtMomentPage = false
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(CaptureDraftStore.self) private var drafts
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
 
-    @State private var model = CaptureFlowModel()
+    @State private var model: CaptureFlowModel
     @State private var snaps: SnapUploadCoordinator?
     @State private var pickedPhoto: PhotosPickerItem?
     /// The in-flow camera (D3), presented over the photo step.
@@ -98,7 +101,7 @@ struct CaptureFlowView: View {
             RecordFlowChrome(
                 dotCount: CaptureStep.allCases.count,
                 dotIndex: model.step.dotIndex,
-                canGoBack: model.step.previous != nil && !model.isSaving,
+                canGoBack: model.step.previous != nil && !model.isSaving && !startsAtMomentPage,
                 onBack: { model.back() },
                 onClose: handleClose
             )
@@ -276,7 +279,7 @@ struct CaptureFlowView: View {
     /// "Record another" on the end screen (D12): the same cover, a fresh grid.
     private func startAnother() {
         completing = nil
-        model = CaptureFlowModel()
+        model = CaptureFlowModel(startingAt: startsAtMomentPage ? .moment : .photo)
         pickedPhoto = nil
         snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
         hasRestored = true
@@ -353,5 +356,14 @@ extension CaptureFlowView {
         if let snap = saved.snap {
             snaps?.seedExisting(.pending(AttachedSnap(id: snap.id, localThumb: Data(), state: .uploaded)))
         }
+    }
+}
+
+extension CaptureFlowView {
+    init(onMomentChanged: @escaping (UUID) -> Void, chainsComplete: Bool = false, startsAtMomentPage: Bool = false) {
+        self.onMomentChanged = onMomentChanged
+        self.chainsComplete = chainsComplete
+        self.startsAtMomentPage = startsAtMomentPage
+        _model = State(initialValue: CaptureFlowModel(startingAt: startsAtMomentPage ? .moment : .photo))
     }
 }
