@@ -2,12 +2,14 @@
 title: Delete your account
 locale: en
 slug: delete-account
-last_updated: 2026-11-06
+last_updated: 2026-11-07
 ---
 
 # Delete your Pebbles account
 
 You can delete your Pebbles account and everything in it at any time, without contacting anyone. Deletion is immediate and cannot be undone.
+
+To delete only some of your data and keep your account, see [Delete some of your data](/docs/delete-data).
 
 ## How to delete it
 

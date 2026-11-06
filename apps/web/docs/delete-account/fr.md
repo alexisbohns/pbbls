@@ -2,12 +2,14 @@
 title: Supprimer votre compte
 locale: fr
 slug: delete-account
-last_updated: 2026-11-06
+last_updated: 2026-11-07
 ---
 
 # Supprimer votre compte Pebbles
 
 Vous pouvez supprimer votre compte Pebbles et tout ce qu'il contient à tout moment, sans contacter personne. La suppression est immédiate et irréversible.
+
+Pour supprimer seulement une partie de vos données et garder votre compte, consultez [Supprimer une partie de vos données](/docs/delete-data).
 
 ## Comment le supprimer
 
