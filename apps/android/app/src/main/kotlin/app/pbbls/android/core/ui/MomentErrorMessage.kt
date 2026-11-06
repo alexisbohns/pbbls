@@ -11,7 +11,14 @@ import app.pbbls.android.core.data.DataError
  * which is `moment_not_found` on these writers.
  */
 @StringRes
-fun momentWriteErrorRes(error: DataError): Int =
+fun momentWriteErrorRes(error: DataError): Int = momentWriteKnownErrorRes(error) ?: R.string.moment_save_error_generic
+
+/**
+ * The copy of a failure that has its own, and null for what reads as the generic line. The Complete flow
+ * reads the null as "the moment is saved, the pebble is not": its own, truer sentence.
+ */
+@StringRes
+fun momentWriteKnownErrorRes(error: DataError): Int? =
     when (error) {
         DataError.Quota -> R.string.moment_error_media_quota
         DataError.Unauthorized -> R.string.record_signed_out_error
@@ -25,7 +32,7 @@ fun momentWriteErrorRes(error: DataError): Int =
                 "pebble_needs_domain" -> R.string.pebble_error_needs_domain
                 "soul_not_owned" -> R.string.pebble_error_soul_gone
                 "collection_not_owned" -> R.string.pebble_error_collection_gone
-                else -> R.string.moment_save_error_generic
+                else -> null
             }
-        DataError.Network, is DataError.Unknown -> R.string.moment_save_error_generic
+        DataError.Network, is DataError.Unknown -> null
     }

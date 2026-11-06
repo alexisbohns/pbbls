@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.model.PebbleAnswers
 import app.pbbls.android.core.model.Valence
-import app.pbbls.android.core.model.Visibility
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,7 +32,8 @@ class CompleteFlowModel(
             haptic(TapHaptic.WARNING)
             return
         }
-        val next = step.next ?: return
+        // Never into SUCCESS: only a completion goes there.
+        val next = step.next?.takeIf { it != CompleteStep.SUCCESS } ?: return
         haptic(TapHaptic.ADVANCE)
         _state.update { it.copy(step = next) }
     }
@@ -52,13 +52,26 @@ class CompleteFlowModel(
 
     fun selectEmotion(emotionId: String) = commitAndAdvance { it.copy(emotionId = emotionId) }
 
-    fun selectDomain(domainId: String) = commitAndAdvance { it.copy(domainIds = listOf(domainId)) }
-
-    fun selectCollection(collectionId: String) = commitAndAdvance { it.copy(collectionId = collectionId) }
+    /**
+     * Domains toggle in tap order, [PebbleAnswers.DOMAIN_CAP] at most (D10): a tap past the cap is refused
+     * with a warning and changes nothing.
+     */
+    fun toggleDomain(id: String) {
+        val current = answers.domainIds
+        when {
+            id in current -> select { it.copy(domainIds = current - id) }
+            current.size < PebbleAnswers.DOMAIN_CAP -> select { it.copy(domainIds = current + id) }
+            else -> haptic(TapHaptic.WARNING)
+        }
+    }
 
     fun toggleSoul(id: String) = select { a -> a.copy(soulIds = if (id in a.soulIds) a.soulIds - id else a.soulIds + id) }
 
-    fun selectVisibility(visibility: Visibility) = select { it.copy(visibility = visibility) }
+    /** The chooser owns the order and plays its own tap haptics; the answers mirror it, silently. */
+    fun setSouls(ids: List<String>) {
+        if (ids == answers.soulIds) return
+        _state.update { it.copy(answers = it.answers.copy(soulIds = ids)) }
+    }
 
     /** Silent: restoring is not something the user did. */
     fun resume(restored: PebbleAnswers) =
@@ -93,6 +106,9 @@ class CompleteFlowModel(
     /** One emission for the commit and the advance, and one buzz for one tap. */
     private fun commitAndAdvance(mutate: (PebbleAnswers) -> PebbleAnswers) {
         haptic(TapHaptic.SELECTION)
-        _state.update { it.copy(answers = mutate(it.answers), step = it.step.next ?: it.step) }
+        _state.update { state ->
+            val next = state.step.next?.takeIf { it != CompleteStep.SUCCESS }
+            state.copy(answers = mutate(state.answers), step = next ?: state.step)
+        }
     }
 }

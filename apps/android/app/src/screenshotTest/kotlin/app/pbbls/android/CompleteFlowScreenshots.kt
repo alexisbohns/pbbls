@@ -4,8 +4,10 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -36,7 +38,9 @@ import app.pbbls.android.features.path.complete.CompleteFlowUiState
 import app.pbbls.android.features.path.complete.CompleteResult
 import app.pbbls.android.features.path.complete.CompleteStep
 import app.pbbls.android.features.path.create.pickers.EmotionPickerBody
+import app.pbbls.android.features.path.flow.RecordFlowChrome
 import app.pbbls.android.features.path.flow.RecordStepScaffold
+import app.pbbls.android.features.path.flow.steps.RecordLifeStep
 import app.pbbls.android.features.path.valence.ValenceHelpContent
 import app.pbbls.android.navigation.CompleteOrigin
 import com.android.tools.screenshot.PreviewTest
@@ -54,8 +58,40 @@ private val waveStrokes = listOf(GlyphStroke(d = "M 20 120 Q 100 40 180 120", wi
 
 private val completeDomains =
     listOf(
-        Domain(id = "d-health", slug = "health", name = "Health", label = "Your body, energy, and physical well-being"),
+        Domain(
+            id = "d-health",
+            slug = "health",
+            name = "Health",
+            label = "Your body, energy, and physical well-being",
+            strokes = waveStrokes,
+            viewBox = "0 0 200 200",
+        ),
         Domain(id = "d-work", slug = "work", name = "Work", label = "Your job, career, and professional life"),
+        Domain(
+            id = "d-family",
+            slug = "family",
+            name = "Family",
+            label = "The people you call home",
+            strokes = waveStrokes,
+            viewBox = "0 0 200 200",
+        ),
+        Domain(
+            id = "d-friends",
+            slug = "friends",
+            name = "Friends",
+            label = "The people you chose",
+            strokes = waveStrokes,
+            viewBox = "0 0 200 200",
+        ),
+        Domain(
+            id = "d-learning",
+            slug = "learning",
+            name = "Learning",
+            label = "What you are studying or practising",
+            strokes = waveStrokes,
+            viewBox = "0 0 200 200",
+        ),
+        Domain(id = "d-home", slug = "home", name = "Home", label = "Your place and what keeps it going"),
     )
 
 private val completeCollections =
@@ -71,12 +107,28 @@ private val completeSouls =
             name = "Alex",
             glyphId = "g-s1",
             glyph = Glyph(id = "g-s1", name = null, strokes = waveStrokes, viewBox = "0 0 200 200"),
+            pebblesCount = 7,
         ),
         SoulWithGlyph(
             id = "s2",
             name = "Sam",
             glyphId = "g-s2",
             glyph = Glyph(id = "g-s2", name = null, strokes = waveStrokes, viewBox = "0 0 200 200"),
+            pebblesCount = 4,
+        ),
+        SoulWithGlyph(
+            id = "s3",
+            name = "Camille",
+            glyphId = "g-s3",
+            glyph = Glyph(id = "g-s3", name = null, strokes = waveStrokes, viewBox = "0 0 200 200"),
+            pebblesCount = 3,
+        ),
+        SoulWithGlyph(
+            id = "s4",
+            name = "Jo",
+            glyphId = "g-s4",
+            glyph = Glyph(id = "g-s4", name = null, strokes = waveStrokes, viewBox = "0 0 200 200"),
+            pebblesCount = 2,
         ),
     )
 
@@ -100,6 +152,40 @@ private val answered =
         visibility = Visibility.SECRET,
     )
 
+private val lifeAnswered = answered.copy(domainIds = listOf("d-health", "d-family"), soulIds = listOf("s1"))
+
+/** The Life page under the flow's chrome. Not through [CompleteFlowContent]: the caption is the step's own state, seeded here. */
+@Composable
+private fun LifePreview(
+    answers: PebbleAnswers,
+    souls: List<SoulWithGlyph> = completeSouls,
+    recent: List<String> = emptyList(),
+    @StringRes errorRes: Int? = null,
+    caption: String? = null,
+    loaded: Boolean = true,
+) {
+    CompositionLocalProvider(LocalReferenceDataService provides PreviewReferenceData(domains = completeDomains, souls = souls)) {
+        Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).safeDrawingPadding()) {
+            RecordFlowChrome(position = 3, total = 3, canGoBack = true, onBack = {}, onClose = {})
+            RecordLifeStep(
+                answers = answers,
+                domains = completeDomains,
+                recent = recent.mapNotNull { id -> completeDomains.firstOrNull { it.id == id } },
+                souls = souls,
+                isSoulsLoaded = loaded,
+                error = errorRes?.let { stringResource(it) },
+                isCompleting = false,
+                hapticsOn = false,
+                onToggleDomain = {},
+                onToggleSoul = {},
+                onSetSouls = {},
+                onComplete = {},
+                initialCaptionDomainId = caption,
+            )
+        }
+    }
+}
+
 @Composable
 private fun CompletePreview(
     step: CompleteStep,
@@ -121,7 +207,8 @@ private fun CompletePreview(
             origin = origin,
             model = model,
             domains = completeDomains,
-            collections = completeCollections,
+            souls = completeSouls,
+            isSoulsLoaded = true,
             palette = completePalette,
             onClose = {},
             onComplete = {},
@@ -226,63 +313,50 @@ fun Complete_EmotionFailed() {
     }
 }
 
+/** What part of life, and who was there: two domains and one person picked, the last tap's description in the bar. */
 @PreviewTest
-@Preview(showBackground = true, heightDp = 720)
-@PreviewWideTall
-@Composable
-fun Complete_Domain() {
-    PebblesTheme { CompletePreview(CompleteStep.DOMAIN) }
-}
-
-@PreviewTest
-@Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun Complete_DomainDark() {
-    PebblesTheme { CompletePreview(CompleteStep.DOMAIN) }
-}
-
-/** One soul picked, so the optional step reads Done rather than Skip. */
-@PreviewTest
-@Preview(showBackground = true, heightDp = 720)
+@Preview(showBackground = true, heightDp = 780)
+@Preview(name = "fr", showBackground = true, heightDp = 780, locale = "fr")
+@Preview(name = "dark", showBackground = true, heightDp = 780, uiMode = UI_MODE_NIGHT_YES)
 @PreviewLargeFontTall
 @Composable
-fun Complete_Souls() {
-    PebblesTheme { CompletePreview(CompleteStep.SOULS) }
+fun Complete_Life() {
+    PebblesTheme { LifePreview(lifeAnswered, caption = "d-family") }
 }
 
-/** Nothing picked: Skip. */
+/** RECENT above ALL, a domain in both: the same selection on each copy. */
 @PreviewTest
-@Preview(showBackground = true, heightDp = 720)
-@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@Preview(showBackground = true, heightDp = 780)
 @Composable
-fun Complete_Collection() {
-    PebblesTheme { CompletePreview(CompleteStep.COLLECTION) }
+fun Complete_LifeRecent() {
+    PebblesTheme { LifePreview(lifeAnswered, recent = listOf("d-family", "d-learning"), caption = "d-family") }
 }
 
-/** The last step: "Make it a pebble" against the grade. */
+/** Nobody on the account yet: one Add people tile, no caption before a tap. */
 @PreviewTest
-@Preview(showBackground = true, heightDp = 720)
-@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@Preview(showBackground = true, heightDp = 780)
 @PreviewLargeFontTall
 @Composable
-fun Complete_Privacy() {
-    PebblesTheme { CompletePreview(CompleteStep.PRIVACY) }
+fun Complete_LifeNoSouls() {
+    PebblesTheme { LifePreview(lifeAnswered.copy(soulIds = emptyList()), souls = emptyList()) }
 }
 
+/** The moment is saved and the pebble is not: the line in the bar, the button ready to retry. */
 @PreviewTest
-@Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun Complete_PrivacyDark() {
-    PebblesTheme { CompletePreview(CompleteStep.PRIVACY) }
-}
-
-/** A refusal keeps the user on privacy with the R10 copy. */
-@PreviewTest
-@Preview(showBackground = true, heightDp = 720)
+@Preview(showBackground = true, heightDp = 780)
+@Preview(name = "fr", showBackground = true, heightDp = 780, locale = "fr")
 @PreviewLargeFontTall
 @Composable
-fun Complete_PrivacyError() {
-    PebblesTheme { CompletePreview(CompleteStep.PRIVACY, errorRes = R.string.pebble_error_collection_gone) }
+fun Complete_LifeError() {
+    PebblesTheme { LifePreview(lifeAnswered, errorRes = R.string.complete_partial_failure, caption = "d-family") }
+}
+
+/** Souls still loading: the strip keeps its height and claims nobody is missing; nothing is picked, so the button waits. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 780)
+@Composable
+fun Complete_LifeLoading() {
+    PebblesTheme { LifePreview(PebbleAnswers(), souls = emptyList(), loaded = false) }
 }
 
 @PreviewTest
