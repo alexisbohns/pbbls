@@ -231,7 +231,7 @@ fun CaptureFlowContent(
                     CaptureStep.PHOTO ->
                         RecordPhotoStep(
                             snap = uiState.snap,
-                            isPicking = uiState.snap == null && uiState.snapBlockedMessageRes != null,
+                            isPicking = uiState.isPicking,
                             enabled = !flow.isFrozen,
                             onPick = onPickPhoto,
                         )

@@ -63,6 +63,7 @@ private fun CapturePreview(
     closeOffersSave: Boolean = false,
     chainsComplete: Boolean = false,
     cameraAvailable: Boolean = false,
+    isPicking: Boolean = false,
 ) {
     val flow =
         CaptureFlowState(
@@ -84,6 +85,7 @@ private fun CapturePreview(
                 closeOffersSave = closeOffersSave,
                 chainsComplete = chainsComplete,
                 cameraAvailable = cameraAvailable,
+                isPicking = isPicking,
             ),
         model = model,
         onPickPhoto = {},
@@ -126,6 +128,31 @@ fun Capture_PhotoNoCamera() {
 fun Capture_PhotoPicked() {
     PebblesTheme {
         CapturePreview(CaptureStep.PHOTO, cameraAvailable = true, snap = pendingSnap(AttachedSnap.UploadState.UPLOADED, withThumb = true))
+    }
+}
+
+/** A first pick being read, no photo yet: the tile's busy state. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun Capture_PhotoPicking() {
+    PebblesTheme { CapturePreview(CaptureStep.PHOTO, cameraAvailable = true, isPicking = true) }
+}
+
+/** A new pick being read over the current photo: the photo, the scrim and the spinner. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun Capture_PhotoReplacing() {
+    PebblesTheme {
+        CapturePreview(
+            CaptureStep.PHOTO,
+            cameraAvailable = true,
+            isPicking = true,
+            snap = pendingSnap(AttachedSnap.UploadState.UPLOADED, withThumb = true),
+        )
     }
 }
 
