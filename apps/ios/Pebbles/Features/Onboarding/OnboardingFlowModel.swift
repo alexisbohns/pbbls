@@ -46,8 +46,8 @@ struct OnboardingHandoffNote: Equatable, Sendable {
 ///
 /// Built per user, and a new sign-in gets a new model (D10). `userId` never changes, but it only
 /// keys the gate's cache: `record` goes out under the client's ambient session. What protects the
-/// ledger is that the host calls `sessionEnded()` when the user id changes, the write loop checks
-/// before every act, and Log out is disabled while saving.
+/// ledger is that `OnboardingFlowSlot` calls `sessionEnded()` when the user id changes or the session
+/// ends, the write loop checks before every act, and Log out is disabled while saving.
 @Observable
 @MainActor
 final class OnboardingFlowModel {
@@ -266,9 +266,10 @@ final class OnboardingFlowModel {
 
     /// The session this model was built for is over. The act already sent finishes under its own
     /// token and nothing after it goes out: the next one would be sent as whoever signs in next,
-    /// and nobody's consent is given on their behalf. The host calls this when the user id
-    /// changes. A model simply dropped stops the same way, at the next act, but SwiftUI's timing
-    /// for that is no guarantee.
+    /// and nobody's consent is given on their behalf. `OnboardingFlowSlot` calls this when the user
+    /// id changes, or from `RootView` on a sign-out: the cover's content does not hear that one. A
+    /// model simply dropped stops the same way, at the next act, but SwiftUI's timing for that is no
+    /// guarantee.
     func sessionEnded() {
         sessionHasEnded = true
         consent.isSaving = false
