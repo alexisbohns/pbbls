@@ -29,6 +29,9 @@ private const val ONBOARDING_NEXT = "onboarding_next"
 private const val ONBOARDING_SKIP = "onboarding_skip"
 private const val ONBOARDING_REASON = "onboarding_reason_keep_people"
 private const val HOME = "home"
+
+/** Back presses the hand-off's moment page may need: one for the keyboard, one for the page, one spare. */
+private const val HANDOFF_BACKS = 3
 private const val TAB_PATH = "tab_path"
 private const val PATH_WEEK_PAGER = "path_week_pager"
 private const val PATH_WEEK_LIST = "path_week_list"
@@ -113,6 +116,21 @@ internal fun MacrobenchmarkScope.ensureSignedIn(account: TestAccount?): Boolean 
         repeat(3) { awaitAndClick(ONBOARDING_SKIP, "a skippable step") } // 4–6; the last completes
         checkNotNull(device.wait(Until.findObject(By.res(HOME)), SIGN_IN_TIMEOUT_MS)) {
             "Finishing onboarding did not reach Home"
+        }
+        // Home's resume then opens the moment page over it with the hand-off's prompt (record-flow D13, it
+        // was a sheet before). Its name field takes focus, so with a soft keyboard the first back only hides
+        // the IME: press back a bounded few times until Home's tag is the screen again. Closing it empty asks nothing.
+        // First wait for the page to cover Home (it may never, if the note is absent: then this just times out).
+        device.wait(Until.gone(By.res(HOME)), UI_TIMEOUT_MS)
+        device.waitForIdle()
+        repeat(HANDOFF_BACKS) {
+            if (!device.hasObject(By.res(HOME))) {
+                device.pressBack()
+                device.waitForIdle()
+            }
+        }
+        checkNotNull(device.wait(Until.findObject(By.res(HOME)), UI_TIMEOUT_MS)) {
+            "Closing the onboarding's moment page did not reach Home"
         }
     }
     return true

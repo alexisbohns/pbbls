@@ -5,12 +5,18 @@ import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.data.SnapBoundsDecoder
 import app.pbbls.android.core.data.SnapURLCache
 import app.pbbls.android.core.data.SnapUrls
+import app.pbbls.android.core.model.CompleteSnapshot
 import app.pbbls.android.core.model.MomentDeleteChoice
+import app.pbbls.android.core.model.PebbleAnswers
+import app.pbbls.android.core.model.Valence
+import app.pbbls.android.testing.FakeCompleteSnapshotStore
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
+import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
 import app.pbbls.android.testing.recordEffects
+import app.pbbls.android.testing.testSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestScope
@@ -48,7 +54,14 @@ class PebbleDetailViewModelTest {
         runTest {
             val moment = UiFixtures.momentDetail()
             val service = FakeMomentReadService(moments = mapOf("moment-1" to moment))
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val viewModel =
+                PebbleDetailViewModel(
+                    service,
+                    FakeMomentWriteService(),
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
 
             viewModel.start("moment-1")
             assertEquals(PebbleDetailUiState.Loading, viewModel.uiState.value)
@@ -63,7 +76,14 @@ class PebbleDetailViewModelTest {
         runTest {
             val bare = UiFixtures.momentDetail(pebble = null, name = null)
             val service = FakeMomentReadService(moments = mapOf("moment-1" to bare))
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val viewModel =
+                PebbleDetailViewModel(
+                    service,
+                    FakeMomentWriteService(),
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
 
             viewModel.start("moment-1")
             advanceUntilIdle()
@@ -78,7 +98,14 @@ class PebbleDetailViewModelTest {
         runTest {
             val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail()))
             service.failNext = IOException("offline")
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val viewModel =
+                PebbleDetailViewModel(
+                    service,
+                    FakeMomentWriteService(),
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
 
             viewModel.start("moment-1")
             advanceUntilIdle()
@@ -95,7 +122,14 @@ class PebbleDetailViewModelTest {
     fun `starting with the same id does not refetch`() =
         runTest {
             val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail()))
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val viewModel =
+                PebbleDetailViewModel(
+                    service,
+                    FakeMomentWriteService(),
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
 
             viewModel.start("moment-1")
             advanceUntilIdle()
@@ -113,7 +147,14 @@ class PebbleDetailViewModelTest {
     fun `resuming after the first time refetches the same moment`() =
         runTest {
             val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail(name = "A walk")))
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val viewModel =
+                PebbleDetailViewModel(
+                    service,
+                    FakeMomentWriteService(),
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
             viewModel.start("moment-1")
             advanceUntilIdle()
 
@@ -144,7 +185,14 @@ class PebbleDetailViewModelTest {
                             "moment-2" to UiFixtures.momentDetail(id = "moment-2", name = "Another"),
                         ),
                 )
-            val viewModel = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val viewModel =
+                PebbleDetailViewModel(
+                    service,
+                    FakeMomentWriteService(),
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
             viewModel.start("moment-1")
             advanceUntilIdle()
 
@@ -161,7 +209,14 @@ class PebbleDetailViewModelTest {
 
     /** A bare moment `m1` loaded and resumed once (the first resume is skipped), its pebble then saved. */
     private fun TestScope.bareThenCompleted(service: FakeMomentReadService): PebbleDetailViewModel {
-        val vm = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+        val vm =
+            PebbleDetailViewModel(
+                service,
+                FakeMomentWriteService(),
+                FakeCompleteSnapshotStore(),
+                FakeSupabaseService(session = testSession("user-1")),
+                snapAspect(),
+            )
         vm.start("m1")
         advanceUntilIdle()
         vm.onResumed()
@@ -236,7 +291,14 @@ class PebbleDetailViewModelTest {
     fun `a pebble that was already there is no completion`() =
         runTest {
             val service = FakeMomentReadService(moments = mapOf("m1" to UiFixtures.momentDetail(id = "m1")))
-            val vm = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val vm =
+                PebbleDetailViewModel(
+                    service,
+                    FakeMomentWriteService(),
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
             val effects = recordEffects(vm.effects)
             vm.start("m1")
             advanceUntilIdle()
@@ -262,7 +324,14 @@ class PebbleDetailViewModelTest {
                             "m2" to UiFixtures.momentDetail(id = "m2"),
                         ),
                 )
-            val vm = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+            val vm =
+                PebbleDetailViewModel(
+                    service,
+                    FakeMomentWriteService(),
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
             vm.start("m1")
             advanceUntilIdle()
             vm.start("m2")
@@ -278,7 +347,14 @@ class PebbleDetailViewModelTest {
         runTest {
             val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
             val write = FakeMomentWriteService()
-            val vm = PebbleDetailViewModel(read, write, snapAspect())
+            val vm =
+                PebbleDetailViewModel(
+                    read,
+                    write,
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
             val effects = recordEffects(vm.effects)
             vm.start("m-1")
             advanceUntilIdle()
@@ -299,7 +375,14 @@ class PebbleDetailViewModelTest {
         runTest {
             val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
             val write = FakeMomentWriteService()
-            val vm = PebbleDetailViewModel(read, write, snapAspect())
+            val vm =
+                PebbleDetailViewModel(
+                    read,
+                    write,
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
             val effects = recordEffects(vm.effects)
             vm.start("m-1")
             advanceUntilIdle()
@@ -322,7 +405,14 @@ class PebbleDetailViewModelTest {
         runTest {
             val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
             val write = FakeMomentWriteService()
-            val vm = PebbleDetailViewModel(read, write, snapAspect())
+            val vm =
+                PebbleDetailViewModel(
+                    read,
+                    write,
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
             val effects = recordEffects(vm.effects)
             vm.start("m-1")
             advanceUntilIdle()
@@ -346,7 +436,14 @@ class PebbleDetailViewModelTest {
         runTest {
             val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1")))
             val write = FakeMomentWriteService()
-            val vm = PebbleDetailViewModel(read, write, snapAspect())
+            val vm =
+                PebbleDetailViewModel(
+                    read,
+                    write,
+                    FakeCompleteSnapshotStore(),
+                    FakeSupabaseService(session = testSession("user-1")),
+                    snapAspect(),
+                )
             vm.start("m-1")
             advanceUntilIdle()
 
@@ -357,5 +454,111 @@ class PebbleDetailViewModelTest {
             assertFalse(vm.pendingDelete.value)
             assertTrue(write.deletedMoments.isEmpty())
             assertTrue(write.deletedPebbles.isEmpty())
+        }
+
+    // ---- D14: a bare moment with Complete answers kept on the device says "You started this" ----
+
+    private fun draftSnapshots(
+        momentId: String,
+        owner: String = "user-1",
+        answers: PebbleAnswers = PebbleAnswers(valence = Valence.HIGHLIGHT_MEDIUM),
+    ) = FakeCompleteSnapshotStore().also { it.save(momentId, owner, CompleteSnapshot.from(answers)) }
+
+    private fun detailViewModel(
+        service: FakeMomentReadService,
+        snapshots: FakeCompleteSnapshotStore,
+    ) = PebbleDetailViewModel(
+        service,
+        FakeMomentWriteService(),
+        snapshots,
+        FakeSupabaseService(session = testSession("user-1")),
+        snapAspect(),
+    )
+
+    @Test
+    fun `a bare moment with a kept draft has one, and one without does not`() =
+        runTest {
+            val bare = UiFixtures.momentDetail(pebble = null)
+            val service = FakeMomentReadService(moments = mapOf("moment-1" to bare))
+
+            val drafted = detailViewModel(service, draftSnapshots("moment-1"))
+            drafted.start("moment-1")
+            advanceUntilIdle()
+            assertTrue((drafted.uiState.value as PebbleDetailUiState.Content).hasDraft)
+
+            val plain = detailViewModel(service, FakeCompleteSnapshotStore())
+            plain.start("moment-1")
+            advanceUntilIdle()
+            assertFalse((plain.uiState.value as PebbleDetailUiState.Content).hasDraft)
+        }
+
+    @Test
+    fun `a snapshot with nothing in it is not a draft, and another account's is not mine`() =
+        runTest {
+            val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = null)))
+
+            val empty = detailViewModel(service, draftSnapshots("moment-1", answers = PebbleAnswers()))
+            empty.start("moment-1")
+            advanceUntilIdle()
+            assertFalse((empty.uiState.value as PebbleDetailUiState.Content).hasDraft)
+
+            val foreign = detailViewModel(service, draftSnapshots("moment-1", owner = "user-2"))
+            foreign.start("moment-1")
+            advanceUntilIdle()
+            assertFalse((foreign.uiState.value as PebbleDetailUiState.Content).hasDraft)
+        }
+
+    @Test
+    fun `a moment with a pebble has no draft whatever is kept`() =
+        runTest {
+            val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail()))
+            val vm = detailViewModel(service, draftSnapshots("moment-1"))
+            vm.start("moment-1")
+            advanceUntilIdle()
+            assertFalse((vm.uiState.value as PebbleDetailUiState.Content).hasDraft)
+        }
+
+    @Test
+    fun `the draft is read again on resume, once the flow has kept or dropped its answers`() =
+        runTest {
+            val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = null)))
+            val snapshots = FakeCompleteSnapshotStore()
+            val vm = detailViewModel(service, snapshots)
+            vm.start("moment-1")
+            vm.onResumed()
+            advanceUntilIdle()
+            assertFalse((vm.uiState.value as PebbleDetailUiState.Content).hasDraft)
+
+            // ✕ from Complete keeps the answers; the page comes back to the foreground.
+            snapshots.save("moment-1", "user-1", CompleteSnapshot.from(PebbleAnswers(valence = Valence.HIGHLIGHT_MEDIUM)))
+            vm.onResumed()
+            advanceUntilIdle()
+            assertTrue((vm.uiState.value as PebbleDetailUiState.Content).hasDraft)
+
+            snapshots.clear("moment-1")
+            vm.onResumed()
+            advanceUntilIdle()
+            assertFalse((vm.uiState.value as PebbleDetailUiState.Content).hasDraft)
+        }
+
+    @Test
+    fun `a resume updates the draft from the device even when the load fails`() =
+        runTest {
+            val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = null)))
+            val snapshots = FakeCompleteSnapshotStore()
+            val vm = detailViewModel(service, snapshots)
+            vm.start("moment-1")
+            vm.onResumed()
+            advanceUntilIdle()
+            assertFalse((vm.uiState.value as PebbleDetailUiState.Content).hasDraft)
+
+            snapshots.save("moment-1", "user-1", CompleteSnapshot.from(PebbleAnswers(valence = Valence.HIGHLIGHT_MEDIUM)))
+            service.failNext = IOException("offline")
+            vm.onResumed()
+
+            // Before the network answers, and after it has failed: the kicker is already right.
+            assertTrue((vm.uiState.value as PebbleDetailUiState.Content).hasDraft)
+            advanceUntilIdle()
+            assertTrue((vm.uiState.value as PebbleDetailUiState.Content).hasDraft)
         }
 }

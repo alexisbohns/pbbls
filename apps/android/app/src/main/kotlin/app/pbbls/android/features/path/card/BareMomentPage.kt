@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -128,6 +129,10 @@ private val BODY_TO_CTA = 22.dp
  * @param photoUrl the photo's signed original; null until signed, or with no photo.
  * @param ratio the photo's width / height; null until probed (the mat is square till then).
  * @param zone where the kicker's day and time fall, as the card's dateline does.
+ * @param hasDraft Complete answers are kept on this device (record-flow D14): the place's kicker reads
+ *   "You started this" and the button "Continue".
+ * @param onAddWords opens Edit moment; "Add a few words" sits under the button while the moment has
+ *   no words, and is absent once it has some or when null.
  */
 @Composable
 internal fun BareMomentPage(
@@ -140,6 +145,8 @@ internal fun BareMomentPage(
     ghostModifier: Modifier = Modifier,
     thumbUrl: String? = null,
     zone: ZoneId = ZoneId.systemDefault(),
+    hasDraft: Boolean = false,
+    onAddWords: (() -> Unit)? = null,
 ) {
     val colors = PebblesTheme.spine.colors
     val locale = LocalConfiguration.current.locales[0]
@@ -200,7 +207,13 @@ internal fun BareMomentPage(
             )
         }
         // The gap outside the caller's modifier, so the bounds it reports are the place's own.
-        BarePlace(onComplete = onComplete, modifier = Modifier.padding(top = PLACE_GAP).then(placeModifier), ghostModifier = ghostModifier)
+        BarePlace(
+            onComplete = onComplete,
+            hasDraft = hasDraft,
+            onAddWords = onAddWords.takeIf { description == null },
+            modifier = Modifier.padding(top = PLACE_GAP).then(placeModifier),
+            ghostModifier = ghostModifier,
+        )
     }
 }
 
@@ -269,6 +282,8 @@ private fun MattedPhoto(
 @Composable
 private fun BarePlace(
     onComplete: () -> Unit,
+    hasDraft: Boolean,
+    onAddWords: (() -> Unit)?,
     modifier: Modifier = Modifier,
     ghostModifier: Modifier = Modifier,
 ) {
@@ -284,7 +299,7 @@ private fun BarePlace(
     ) {
         GhostStone(ghostModifier)
         Text(
-            text = stringResource(R.string.bare_place_kicker),
+            text = stringResource(if (hasDraft) R.string.bare_place_started else R.string.bare_place_kicker),
             style = SpineTypography.sectionLabel,
             color = colors.ink2,
             textAlign = TextAlign.Center,
@@ -307,7 +322,20 @@ private fun BarePlace(
                 contentDescription = null,
                 size = ButtonDefaults.IconSize,
             )
-            Text(stringResource(R.string.complete_cta), modifier = Modifier.padding(start = ButtonDefaults.IconSpacing))
+            Text(
+                stringResource(if (hasDraft) R.string.record_action_continue else R.string.complete_cta),
+                modifier = Modifier.padding(start = ButtonDefaults.IconSpacing),
+            )
+        }
+        onAddWords?.let { addWords ->
+            TextButton(onClick = addWords, modifier = Modifier.padding(top = KICKER_TO_BODY / 2)) {
+                PbblsIconImage(
+                    icon = PbblsIcon.ABSTRACT_PEN,
+                    contentDescription = null,
+                    size = ButtonDefaults.IconSize,
+                )
+                Text(stringResource(R.string.richer_add_words), modifier = Modifier.padding(start = ButtonDefaults.IconSpacing))
+            }
         }
     }
 }

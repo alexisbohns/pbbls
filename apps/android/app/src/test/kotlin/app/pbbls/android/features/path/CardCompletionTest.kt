@@ -22,10 +22,13 @@ import app.pbbls.android.core.data.SnapURLCache
 import app.pbbls.android.core.data.SnapUrls
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.features.path.card.COMPLETION_PAGE_TAG
+import app.pbbls.android.testing.FakeCompleteSnapshotStore
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
+import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.PebblesTestHarness
 import app.pbbls.android.testing.UiFixtures
+import app.pbbls.android.testing.testSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.junit.Assert.assertFalse
@@ -176,7 +179,14 @@ class CardCompletionTest {
     ): PebbleDetailViewModel {
         val bare = UiFixtures.momentDetail(id = "m1", description = description, pebble = null)
         val service = FakeMomentReadService(moments = mapOf("m1" to bare))
-        val vm = PebbleDetailViewModel(service, FakeMomentWriteService(), snapAspect())
+        val vm =
+            PebbleDetailViewModel(
+                service,
+                FakeMomentWriteService(),
+                FakeCompleteSnapshotStore(),
+                FakeSupabaseService(session = testSession("user-1")),
+                snapAspect(),
+            )
         setContent { PebblesTheme { PebblesTestHarness { PebbleDetailScreen(momentId = "m1", viewModel = vm) } } }
         compose.onNodeWithText(cta).assertExists()
 

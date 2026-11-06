@@ -88,11 +88,18 @@ class RootGateTest : AppUiTest() {
         compose.onNodeWithTag(JourneyTags.ONBOARDING_NEXT).performScrollTo().performClick()
         compose.waitForIdle()
 
-        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
+        // The hand-off (#1510 D9, record-flow D13): the moment page opens over Home, its NAME placeholder the
+        // prompt the first reason chose; closing it empty lands in Home.
         onText(R.string.onboarding_promise_cta).assertDoesNotExist()
+        onText(R.string.onboarding_handoff_prompt_keep_people).assertIsDisplayed()
         val answers = onboardingService.completeCalls.single()
         assertEquals(listOf(OnboardingReason.KEEP_PEOPLE), answers.reasons)
         assertEquals(OnboardingPace.WEEKLY_WRAP, answers.pace)
+
+        pressBack()
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
+        // Taken once: Home's next resume opens nothing.
+        onText(R.string.onboarding_handoff_prompt_keep_people).assertDoesNotExist()
     }
 
     @Test
@@ -151,6 +158,8 @@ class RootGateTest : AppUiTest() {
         acceptEveryConsent()
 
         onText(R.string.consent_gate_title).assertDoesNotExist()
+        // The onboarding's hand-off page is open over Home (record-flow D13): close it empty.
+        pressBack()
         compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
         assertEquals(4, consents.recordCalls.size)
     }
@@ -181,6 +190,8 @@ class RootGateTest : AppUiTest() {
         compose.waitForIdle()
 
         onText(R.string.consent_gate_title).assertDoesNotExist()
+        // The onboarding's hand-off page is open over Home (record-flow D13): close it empty.
+        pressBack()
         compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
         assertEquals(4, consents.recordCalls.size)
     }
@@ -208,6 +219,8 @@ class RootGateTest : AppUiTest() {
         onText(R.string.onboarding_promise_cta).assertDoesNotExist()
         onText(R.string.consent_gate_title).assertIsDisplayed()
         acceptEveryConsent()
+        // The onboarding's hand-off page is open over Home (record-flow D13): close it empty.
+        pressBack()
         compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
     }
 

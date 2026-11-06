@@ -12,6 +12,7 @@ import app.pbbls.android.core.model.FormSnap
 import app.pbbls.android.core.model.MomentSavePayload
 import app.pbbls.android.core.model.PebbleSnapPayload
 import app.pbbls.android.features.path.PathFocusRequests
+import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakeCameraPhotos
 import app.pbbls.android.testing.FakeComposerMedia
 import app.pbbls.android.testing.FakeMomentWriteService
@@ -57,6 +58,7 @@ class CaptureFlowViewModelTest {
         val media = FakeComposerMedia().apply { processed = ProcessedImage(original = byteArrayOf(1), thumb = byteArrayOf(2)) }
         val focusRequests = PathFocusRequests()
         val photos = FakeCameraPhotos()
+        val achievements = FakeAchievementsService()
         val viewModel =
             CaptureFlowViewModel(
                 savedState = handle,
@@ -67,6 +69,7 @@ class CaptureFlowViewModelTest {
                 snapRepo = snapRepo,
                 haptics = HapticsPreference(inMemorySettings()),
                 photos = photos,
+                achievements = achievements,
             )
     }
 
@@ -95,6 +98,32 @@ class CaptureFlowViewModelTest {
             )
             assertEquals(listOf(CaptureFlowEffect.Saved), effects.values.filterNot { it is CaptureFlowEffect.Haptic })
             effects.stop()
+        }
+
+    @Test
+    fun `a plain save checks achievements once, a chained save leaves it to Complete, a failed one checks nothing`() =
+        runTest {
+            val plain = Harness()
+            plain.viewModel.machine().goTo(CaptureStep.MOMENT)
+            plain.viewModel.machine().setName("Walk")
+            plain.viewModel.save(thenComplete = false)
+            advanceUntilIdle()
+            assertEquals(1, plain.achievements.fireCheckCount)
+
+            val chained = Harness()
+            chained.viewModel.machine().goTo(CaptureStep.MOMENT)
+            chained.viewModel.machine().setName("Walk")
+            chained.viewModel.save(thenComplete = true)
+            advanceUntilIdle()
+            assertEquals(0, chained.achievements.fireCheckCount)
+
+            val failing = Harness()
+            failing.writes.failNext = java.io.IOException("offline")
+            failing.viewModel.machine().goTo(CaptureStep.MOMENT)
+            failing.viewModel.machine().setName("Walk")
+            failing.viewModel.save(thenComplete = false)
+            advanceUntilIdle()
+            assertEquals(0, failing.achievements.fireCheckCount)
         }
 
     @Test

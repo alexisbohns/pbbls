@@ -638,6 +638,7 @@
     <string name="card_domains_a11y">Domaines de vie : %1$s</string>
     <string name="card_collections_a11y">Collections : %1$s</string>
     <string name="bare_place_kicker">Pas encore un galet</string>
+    <string name="bare_place_started">Tu avais commencé</string>
     <string name="bare_place_body">Sa carte s\'imprimera ici quand tu diras ce qu\'il a compté : un sentiment et son poids, les parts de ta vie qu\'il a touchées, qui était là.</string>
     <!-- Karma-earned flash (D9). -->
     <string name="karma_flash_amount">+%1$d karma</string>
@@ -869,7 +870,6 @@
     <string name="record_success_title">Ton galet</string>
     <string name="record_action_skip">Ignorer</string>
     <string name="record_action_continue">Continuer</string>
-    <string name="record_success_exit">Retour à mon chemin</string>
     <string name="record_step_a11y">Étape %1$d sur %2$d</string>
     <string name="record_back_a11y">Retour</string>
     <string name="record_name_placeholder">Nom</string>
@@ -884,6 +884,14 @@
     <string name="record_karma_a11y">%1$d karma gagné</string>
     <string name="record_success_quiet">Merci d’avoir gardé ce moment. Si la journée est lourde, un soutien est à un geste.</string>
     <string name="record_success_get_support">Trouver du soutien</string>
+    <string name="richer_section">Enrichis-le</string>
+    <string name="richer_add_collection">Ajouter à une collection</string>
+    <string name="richer_remove_collection">Retirer de la collection</string>
+    <string name="richer_who_can_see">Qui peut le voir</string>
+    <string name="richer_add_words">Ajouter quelques mots</string>
+    <string name="richer_words_karma">+1 karma</string>
+    <string name="richer_done">Terminé</string>
+    <string name="richer_record_another">En enregistrer un autre</string>
     <string name="crisis_intro">Si tu es en danger ou que tu penses à te faire du mal, appelle maintenant. Ces lignes sont gratuites et confidentielles.</string>
     <string name="crisis_country">Pays</string>
     <string name="crisis_worldwide">Ailleurs</string>
@@ -914,12 +922,7 @@
     <string name="home_shortcut_camera">Appareil photo</string>
     <string name="home_shortcut_quick">Moment rapide</string>
     <string name="home_shortcut_pebble">Nouveau galet</string>
-    <!-- Home's quick moment sheet (#1383 D7, iOS home.quick.*): a name and a time, then save_moment. -->
-    <string name="home_quick_title">Moment rapide</string>
-    <string name="home_quick_name">Que s\'est-il passé ?</string>
-    <string name="home_quick_when">Quand</string>
-    <string name="home_quick_save_open">Enregistrer et ouvrir</string>
-    <string name="home_quick_save_close">Enregistrer et fermer</string>
+    <!-- The camera moment's refused save (the quick moment sheet that shared it is gone, record-flow D13). -->
     <string name="home_quick_error">Impossible d\'enregistrer le moment. Réessaie.</string>
     <!-- Home's camera moment (#1383 D7, iOS home.camera.*): the system camera, an upload, then save_moment. -->
     <string name="home_camera_saving">Enregistrement de ta photo…</string>
@@ -928,7 +931,7 @@
     <string name="home_camera_upload_failed">La photo n\'a pas été envoyée. Rien n\'a été enregistré.</string>
     <!-- The snackbar after a camera moment (#1383 D7, iOS home.toast.*): "Moment saved · 14:32", the time in the locale's short form. -->
     <string name="home_toast_saved">Moment enregistré · %1$s</string>
-    <string name="home_toast_name">Nommer</string>
+    <string name="home_toast_name">Modifier</string>
     <!-- Your first five on Home (#1383 D11, iOS home.firstFive.* and home.task.*.title/line). -->
     <string name="home_first_five_title">Tes cinq premières fois</string>
     <string name="home_first_five_done">Fait</string>

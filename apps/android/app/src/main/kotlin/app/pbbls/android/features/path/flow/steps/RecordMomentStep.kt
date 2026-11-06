@@ -104,6 +104,8 @@ fun RecordMomentStep(
     onRetry: () -> Unit,
     onRemove: () -> Unit,
     modifier: Modifier = Modifier,
+    /** The onboarding hand-off's prompt, shown in the empty NAME field instead of "Name" (#1510 D9). */
+    @StringRes namePromptRes: Int? = null,
 ) {
     val colors = MaterialTheme.colorScheme
     val nameFocus = remember { FocusRequester() }
@@ -131,7 +133,7 @@ fun RecordMomentStep(
                 limit = CaptureFlowModel.NAME_LIMIT,
                 onChange = onNameChange,
                 textStyle = PebblesTheme.hand.nameInputHand,
-                placeholder = stringResource(R.string.record_name_placeholder),
+                placeholder = stringResource(namePromptRes ?: R.string.record_name_placeholder),
                 minLines = 1,
                 maxLines = 2,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next),

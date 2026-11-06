@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.data.CameraPhotos
 import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.MomentWriteServicing
@@ -122,6 +123,7 @@ class CaptureFlowViewModel
         snapRepo: SnapWriteRepositing,
         private val haptics: HapticsPreference,
         private val photos: CameraPhotos,
+        private val achievements: AchievementsServicing,
     ) : ViewModel() {
         private val effectsOut = UiEffects<CaptureFlowEffect>(viewModelScope)
         val effects: Flow<CaptureFlowEffect> = effectsOut.flow
@@ -439,6 +441,9 @@ class CaptureFlowViewModel
                             snaps.reset()
                             // Path shows the moment's week when it is next on screen (R14).
                             focusRequests.request(momentId)
+                            // A first moment ticks the checklist (the old quick sheet did). Not on the chained
+                            // path: Complete fires it, and a celebration over the valence step would be wrong.
+                            if (!thenComplete) achievements.fireCheck()
                             effectsOut.emit(
                                 if (thenComplete) CaptureFlowEffect.SavedThenComplete(momentId) else CaptureFlowEffect.Saved,
                             )

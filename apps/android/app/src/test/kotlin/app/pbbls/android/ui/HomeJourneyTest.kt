@@ -49,7 +49,7 @@ import javax.inject.Inject
 
 /**
  * Home through the real app (#1383): a tap on a week of the grid opens the Path on that week (D8–D10),
- * the quick moment and New pebble chain into Complete (D7), a first-five task opens its tab's create flow
+ * the quick moment opens the moment page and New pebble chains Capture into Complete (D7), a first-five task opens its tab's create flow
  * (D11), a wrap unfolds in its sheet (D12), and a guide opens its page (D13).
  */
 @HiltAndroidTest
@@ -112,23 +112,42 @@ class HomeJourneyTest : AppUiTest() {
     }
 
     @Test
-    fun `a quick moment saved with Save and open lands on Complete, and leaving it lands on Home`() {
+    fun `Quick moment opens the moment page with no photo step, and Save and make it a pebble lands on Complete, then Home`() {
         writes.nextMomentId = "moment-quick"
         skipOnboarding()
         launch()
         signIn()
 
         onText(R.string.home_shortcut_quick).performClick()
-        compose.onNode(hasSetTextAction()).performTextInput("Coffee with Mo")
-        onText(R.string.home_quick_save_open).performClick()
+        // The page straight away: no photo step to choose from, and no way back to one.
+        onText(R.string.capture_just_write).assertDoesNotExist()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("Coffee with Mo")
+        onText(R.string.capture_save_and_pebble).performClick()
         compose.waitForIdle()
 
         onText(R.string.record_valence_title).assertIsDisplayed()
         assertEquals("Coffee with Mo", writes.saved.single().name)
 
+        // Complete replaced Capture, so leaving it lands back on Home.
         pressBack()
         compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
-        onText(R.string.home_quick_save_open).assertDoesNotExist()
+        onText(R.string.capture_save_and_pebble).assertDoesNotExist()
+    }
+
+    @Test
+    fun `Quick moment's Just save returns to Home`() {
+        writes.nextMomentId = "moment-quick"
+        skipOnboarding()
+        launch()
+        signIn()
+
+        onText(R.string.home_shortcut_quick).performClick()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("Coffee with Mo")
+        onText(R.string.capture_just_save).performClick()
+        compose.waitForIdle()
+
+        assertEquals("Coffee with Mo", writes.saved.single().name)
+        compose.onNodeWithTag(JourneyTags.HOME).assertIsDisplayed()
     }
 
     @Test

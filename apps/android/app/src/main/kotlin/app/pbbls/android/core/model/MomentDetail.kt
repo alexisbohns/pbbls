@@ -25,6 +25,9 @@ data class MomentDetail(
 ) {
     val sortedSnaps: List<MomentSnap> get() = snaps.sortedBy { it.sortOrder }
 
+    /** The moment has words of its own: a description that is more than blanks. */
+    val hasWords: Boolean get() = !description.isNullOrBlank()
+
     /** Carries no `souls` (`SoulRef` has no `glyph_id`): never feed the Spine's people line with it. */
     fun toPathMoment(): PathMoment =
         PathMoment(

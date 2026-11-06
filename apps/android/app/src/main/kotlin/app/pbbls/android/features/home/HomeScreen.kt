@@ -27,15 +27,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.HomeShortcut
-import app.pbbls.android.core.data.TapHaptic
-import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.ui.HomeMonthSlot
 import app.pbbls.android.features.home.camera.CameraUnavailableDialog
 import app.pbbls.android.features.home.camera.cameraToastTime
 import app.pbbls.android.features.home.checklist.ChecklistTask
 import app.pbbls.android.features.home.checklist.ChecklistTaskSheet
-import app.pbbls.android.features.home.quick.QuickMomentExit
-import app.pbbls.android.features.home.quick.QuickMomentSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -56,13 +52,13 @@ private const val TAG = "home"
  * [onOpenGuide] an About Pebbles reading by its slug (D13).
  *
  * A quick action is stored as the last used one, then opens its flow (#1383 D7): the camera moment
- * (the system camera through `TakePicture`) and the quick moment sheet are Home's own, held by
- * [moments]; [onPebble] opens Capture chained into Complete. A quick moment saved with "Save & open"
- * calls [onOpenComplete] with its id. A saved camera moment shows a snackbar, "Moment saved · 14:32",
- * whose "Name it" calls [onNameMoment] (Edit moment); `Long`, which TalkBack extends.
+ * (the system camera through `TakePicture`) is Home's own, held by [moments]; [onPebble] opens Capture
+ * chained into Complete, and [onQuickMoment] opens the moment page (record-flow D13), with the
+ * onboarding's prompt reason the first time. A saved camera moment shows a snackbar, "Moment saved · 14:32",
+ * whose "Edit" calls [onNameMoment] (Edit moment); `Long`, which TalkBack extends.
  *
  * Your first five (D11): a task opens its sheet, whose call to action goes where the task is done
- * once the sheet is gone: the quick moment sheet, Complete or Capture ([onOpenComplete], [onPebble]),
+ * once the sheet is gone: the moment page, Complete or Capture ([onQuickMoment], [onOpenComplete], [onPebble]),
  * or a tab left an intent ([onOpenCollections], [onOpenPeople], [onOpenGlyphs]).
  */
 @Composable
@@ -71,6 +67,7 @@ fun HomeScreen(
     monthSlot: HomeMonthSlot,
     onOpenPath: () -> Unit,
     onPebble: () -> Unit,
+    onQuickMoment: (promptReason: String?) -> Unit,
     onOpenComplete: (momentId: String) -> Unit,
     onNameMoment: (momentId: String) -> Unit,
     onOpenCollections: () -> Unit,
@@ -83,9 +80,7 @@ fun HomeScreen(
     moments: HomeMomentsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val quickForm by moments.quick.sheet.collectAsStateWithLifecycle()
     val camera by moments.camera.state.collectAsStateWithLifecycle()
-    val haptic = rememberTapHaptics { viewModel.hapticsOn }
     val takePicture = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture(), moments.camera::onResult)
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -93,11 +88,7 @@ fun HomeScreen(
     val locale = LocalConfiguration.current.locales[0]
     ObserveUiEffects(moments.effects) { effect ->
         when (effect) {
-            is HomeMomentEffect.QuickSaved -> {
-                haptic(TapHaptic.SUCCESS)
-                viewModel.onMomentSaved()
-                if (effect.exit == QuickMomentExit.OPEN) onOpenComplete(effect.momentId)
-            }
+            is HomeMomentEffect.OpenMomentPage -> onQuickMoment(effect.promptReason)
             is HomeMomentEffect.LaunchCamera ->
                 try {
                     takePicture.launch(effect.uri)
@@ -126,7 +117,7 @@ fun HomeScreen(
     var taskSheet by rememberSaveable { mutableStateOf<ChecklistTask?>(null) }
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {
-            HomeEffect.OpenQuickMoment -> moments.quick.open()
+            HomeEffect.OpenQuickMoment -> onQuickMoment(null)
             is HomeEffect.OpenComplete -> onOpenComplete(effect.momentId)
             HomeEffect.OpenCapture -> onPebble()
             HomeEffect.OpenCollections -> onOpenCollections()
@@ -158,7 +149,7 @@ fun HomeScreen(
             viewModel.onShortcutUsed(shortcut)
             when (shortcut) {
                 HomeShortcut.CAMERA -> moments.onCamera()
-                HomeShortcut.QUICK -> moments.quick.open()
+                HomeShortcut.QUICK -> onQuickMoment(null)
                 HomeShortcut.PEBBLE -> onPebble()
             }
         },
@@ -176,15 +167,6 @@ fun HomeScreen(
         ChecklistTaskSheet(task = task, onGo = { viewModel.onTaskGo(task) }, onDismiss = { taskSheet = null })
     }
     if (camera.isUnavailable) CameraUnavailableDialog(onDismiss = moments.camera::dismissUnavailable)
-    quickForm?.let { form ->
-        QuickMomentSheet(
-            form = form,
-            onNameChange = moments.quick::setName,
-            onWhenChange = moments.quick::setHappenedAt,
-            onSave = moments.quick::save,
-            onDismiss = moments.quick::dismiss,
-        )
-    }
 }
 
 /**

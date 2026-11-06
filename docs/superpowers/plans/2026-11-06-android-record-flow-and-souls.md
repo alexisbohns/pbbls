@@ -147,7 +147,13 @@ Part 7, for what follows:
 - The Life bar drops its caption at `fontScale >= 1.5`, keeping the description on each tile's click label: an Android deviation, recorded in the decision log by Part 9. `KnownDraftIds` prunes domains too, which iOS does not.
 - `CompleteStep.SUCCESS` still renders the old `RecordSuccessStep` until Part 8. `momentWriteKnownErrorRes(error): Int?` is the known half of `momentWriteErrorRes`.
 
-Follow-ups to file when the stack ships: iOS's strip names at large text; iOS does not prune a gone domain; the D7 sentence, both surfaces; Edit moment does not record a replaced saved photo's files for deletion (iOS appends to `detachedStoragePaths`); `seededFromPhoto` after a removal, both surfaces; the D6 snackbar and the D9 beat, both surfaces; People prompts on Android (`AC-people-starts-from-the-pebbles-you-have` is still `development` there); whether the moment page's fields read well under TalkBack, now that they carry a `contentDescription`; an Android embedded photo picker as a route to the 3-tap moment.
+Part 8, for what follows:
+
+- The end screen's `completed` is in memory: a re-created `CompletePebble` on a moment that already has a pebble dismisses, and `complete()` waits for the moment's load so it cannot overwrite one.
+- `CaptureFlowViewModel.save` fires `achievements.fireCheck()` on a plain save, so a first moment still celebrates. iOS's old `QuickMomentSheet` fired it and iOS's stack dropped it: a regression to file there.
+- The reason travels as `OnboardingReason.slug` on the key, `"default"` for a skipped reasons step, mapped back by `onboardingPromptForSlug` (`core/ui/OnboardingPrompt.kt`).
+
+Follow-ups to file when the stack ships: iOS lost the first-moment achievement check when Quick moment moved to the page; Arkaik: `V-record-success` is now Make it richer, the Quick moment sheet is gone, the bare page gained its D14 states; iOS's strip names at large text; iOS does not prune a gone domain; the D7 sentence, both surfaces; Edit moment does not record a replaced saved photo's files for deletion (iOS appends to `detachedStoragePaths`); `seededFromPhoto` after a removal, both surfaces; the D6 snackbar and the D9 beat, both surfaces; People prompts on Android (`AC-people-starts-from-the-pebbles-you-have` is still `development` there); whether the moment page's fields read well under TalkBack, now that they carry a `contentDescription`; an Android embedded photo picker as a route to the 3-tap moment.
 
 ---
 

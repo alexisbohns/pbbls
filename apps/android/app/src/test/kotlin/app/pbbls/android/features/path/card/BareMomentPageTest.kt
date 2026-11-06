@@ -54,6 +54,63 @@ class BareMomentPageTest {
         assertEquals(1, completes)
     }
 
+    private val wordless = f4.copy(description = null)
+
+    @Test
+    fun `a draft reads You started this and Continue, and Continue still calls onComplete`() {
+        var completes = 0
+        compose.setContent {
+            PebblesTheme {
+                BareMomentPage(detail = f4, photoUrl = null, ratio = null, onComplete = { completes++ }, hasDraft = true)
+            }
+        }
+        compose.onNodeWithText(context.getString(R.string.bare_place_started)).assertExists()
+        compose.onNodeWithText(context.getString(R.string.bare_place_kicker)).assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.complete_cta)).assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.record_action_continue)).performClick()
+        assertEquals(1, completes)
+    }
+
+    @Test
+    fun `without a draft the page keeps its kicker and Make it a pebble`() {
+        compose.setContent {
+            PebblesTheme { BareMomentPage(detail = f4, photoUrl = null, ratio = null, onComplete = {}) }
+        }
+        compose.onNodeWithText(context.getString(R.string.bare_place_kicker)).assertExists()
+        compose.onNodeWithText(context.getString(R.string.bare_place_started)).assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.record_action_continue)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `Add a few words shows while the moment has none, and opens the edit`() {
+        var adds = 0
+        compose.setContent {
+            PebblesTheme {
+                BareMomentPage(detail = wordless, photoUrl = null, ratio = null, onComplete = {}, onAddWords = { adds++ })
+            }
+        }
+        compose.onNodeWithText(context.getString(R.string.richer_add_words)).performClick()
+        assertEquals(1, adds)
+    }
+
+    @Test
+    fun `Add a few words is absent once the moment has words, and when the host offers none`() {
+        compose.setContent {
+            PebblesTheme {
+                BareMomentPage(detail = f4, photoUrl = null, ratio = null, onComplete = {}, onAddWords = {})
+            }
+        }
+        compose.onNodeWithText(context.getString(R.string.richer_add_words)).assertDoesNotExist()
+    }
+
+    @Test
+    fun `no onAddWords, no row`() {
+        compose.setContent {
+            PebblesTheme { BareMomentPage(detail = wordless, photoUrl = null, ratio = null, onComplete = {}) }
+        }
+        compose.onNodeWithText(context.getString(R.string.richer_add_words)).assertDoesNotExist()
+    }
+
     @Test
     fun `the title is a heading`() {
         compose.setContent {

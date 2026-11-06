@@ -38,8 +38,12 @@ class FakeMomentReadService(
         return path
     }
 
+    /** Parks `loadMoment` until completed, to prove what waits for its answer. */
+    var momentGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
     override suspend fun loadMoment(momentId: String): MomentDetail {
         loadedMomentIds += momentId
+        momentGate?.await()
         armed.fire()
         return moments[momentId] ?: throw NoSuchElementException(momentId)
     }
