@@ -20,10 +20,6 @@ final class CompleteFlowModel {
     private(set) var completed: CompletionResult?
     private(set) var isCompleting = false
     private(set) var completeError: String?
-    /// The valence step seeds neutral-medium on sight; that seed is what the
-    /// user sees and submits, but only a choice (a pick, Continue, or a
-    /// restored answer) is worth autosaving.
-    private(set) var isValenceConfirmed = false
 
     private let haptic: @MainActor (TapHaptic) -> Void
 
@@ -58,7 +54,6 @@ final class CompleteFlowModel {
             return
         }
         guard let next = step.next, next != .success else { return }
-        if step == .valence { isValenceConfirmed = true }
         haptic(.advance)
         step = next
     }
@@ -82,15 +77,9 @@ final class CompleteFlowModel {
         if let next = step.next, next != .success { step = next }
     }
 
-    func seedValenceIfNeeded() {
-        guard draft.valence == nil else { return }
-        draft.valence = .neutralMedium
-    }
-
     func select(valence: Valence) {
         haptic(.selection)
         draft.valence = valence
-        isValenceConfirmed = true
     }
 
     func select(emotionId: UUID) { commitAndAdvance { $0.emotionId = emotionId } }
@@ -119,14 +108,9 @@ final class CompleteFlowModel {
 
     // MARK: Autosave and restore (A3)
 
-    /// What the autosave writes: the draft minus an unconfirmed seed, so
-    /// opening and closing the flow leaves nothing behind.
-    var draftToAutosave: CompleteDraft {
-        guard !isValenceConfirmed else { return draft }
-        var unseeded = draft
-        unseeded.valence = nil
-        return unseeded
-    }
+    /// What the autosave writes: the draft as it stands. The valence step no
+    /// longer preselects (D7), so there is no seed to hold back.
+    var draftToAutosave: CompleteDraft { draft }
 
     func firstGap() -> CompleteStep {
         for candidate in CompleteStep.counted where !candidate.isOptional {
@@ -137,10 +121,7 @@ final class CompleteFlowModel {
 
     func restore(_ saved: CompleteDraft, known: CompleteDraft.KnownIds) {
         draft = saved.sanitized(known: known)
-        isValenceConfirmed = draft.valence != nil
         step = firstGap()
-        // The valence step's own seed already fired before the restore.
-        if step == .valence { seedValenceIfNeeded() }
     }
 
     // MARK: Completing

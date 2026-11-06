@@ -22,6 +22,9 @@ struct CompleteFlowView: View {
     @State private var model = CompleteFlowModel()
     @State private var autosave: CompleteAutosave?
     @State private var hasRestored = false
+    /// No completed pebble on the account yet: the valence step opens its
+    /// help sheet (D8). Read once in `.task`; a failed read keeps it closed.
+    @State private var isFirstPebble = false
     /// Drives the step transition direction so back slides back.
     @State private var isMovingBack = false
 
@@ -62,6 +65,11 @@ struct CompleteFlowView: View {
                 )
             }
             restoreIfReady()
+            // After the restore: a slow read must not delay it, and the step
+            // consumes the flag through `onChange(initial:)`, so order is free.
+            if let moments = try? await MomentsService(client: supabase.client).pathMoments() {
+                isFirstPebble = !moments.contains(where: \.isCompleted)
+            }
         }
         // `.task` may run before the reference fetch settles (#647).
         .onChange(of: refs.hasLoaded) { _, _ in restoreIfReady() }
@@ -98,7 +106,7 @@ struct CompleteFlowView: View {
                     // its bar above the keyboard; a scaffold ScrollView would unpin it.
                     contentFillsHeight: model.step == .souls
                 ) {
-                    CompleteStepContent(step: model.step, model: model)
+                    CompleteStepContent(step: model.step, model: model, isFirstPebble: isFirstPebble)
                 }
             }
         }
@@ -137,7 +145,7 @@ struct CompleteFlowView: View {
         guard !hasRestored, refs.hasLoaded else { return }
         hasRestored = true
         // Never restore over a flow the user has already started.
-        guard !model.isValenceConfirmed, model.step == .valence else { return }
+        guard model.draft.isEmpty, model.step == .valence else { return }
         guard let owner = supabase.session?.user.id,
               let saved = drafts.load(momentId: momentId, ownerId: owner) else { return }
         model.restore(saved, known: .init(

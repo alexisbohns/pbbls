@@ -13,6 +13,8 @@ import SwiftUI
 struct ValencePickerContent: View {
     let selected: Valence?
     let onSelect: (Valence) -> Void
+    /// The help sheet shows the fan alone: its lit stone is the explanation.
+    var showsCaption = true
 
     /// The phone's lean, read by the chosen stone only. Started with the fan,
     /// stopped with it; a pick re-zeroes so the chosen stone starts level.
@@ -29,11 +31,14 @@ struct ValencePickerContent: View {
     private static let minimumHitTarget: CGFloat = 44
     /// The tallest state: the large hand word, the span, and the pyramid.
     private static let captionHeight: CGFloat = 144
+    /// How far the column labels hang below the canvas (their offset plus
+    /// one meta line), so a host that clips the fan can keep them.
+    static let columnLabelTail: CGFloat = Spacing.sm + 14
 
     var body: some View {
         VStack(spacing: Spacing.md) {
             fan
-            caption
+            if showsCaption { caption }
         }
     }
 
@@ -44,6 +49,8 @@ struct ValencePickerContent: View {
             }
         }
         .frame(width: ValenceFanLayout.reference.width, height: ValenceFanLayout.reference.height)
+        .overlay(alignment: .bottom) { columnLabels }
+        .overlay(alignment: .leading) { rowLabels }
         .animation(.snappy(duration: 0.22), value: selected)
         .onAppear { motion.start() }
         .onDisappear { motion.stop() }
@@ -79,15 +86,62 @@ struct ValencePickerContent: View {
         .accessibilityAddTraits(isActive ? [.isSelected] : [])
     }
 
+    /// Lowlight · Neutral · Highlight under the fan, Month · Week · Day up its
+    /// left margin (D7). Meta type in the variant ink; VoiceOver already hears
+    /// both axes in each stone's label, so these are decorative.
+    private var columnLabels: some View {
+        HStack {
+            Text(ValencePolarity.lowlight.axisLabel)
+            Spacer()
+            Text(ValencePolarity.neutral.axisLabel)
+            Spacer()
+            Text(ValencePolarity.highlight.axisLabel)
+        }
+        .pebblesFont(.meta)
+        .foregroundStyle(Color.pebbles.onSurfaceVariant)
+        .padding(.horizontal, Spacing.sm)
+        .offset(y: Spacing.sm)
+        .accessibilityHidden(true)
+    }
+
+    /// Inside the canvas, up the left margin, each at the box
+    /// `ValenceFanLayout.rowLabelBox(for:)` reserves between the rings —
+    /// `ValenceFanLayoutTests` keeps those clear of a selected stone.
+    private var rowLabels: some View {
+        ZStack(alignment: .topLeading) {
+            ForEach(ValenceSizeGroup.allCases) { size in
+                let box = ValenceFanLayout.rowLabelBox(for: size)
+                Text(size.axisLabel)
+                    .frame(height: box.height)
+                    .offset(x: box.minX, y: box.minY)
+            }
+        }
+        .frame(
+            width: ValenceFanLayout.reference.width,
+            height: ValenceFanLayout.reference.height,
+            alignment: .topLeading
+        )
+        .pebblesFont(.meta)
+        .foregroundStyle(Color.pebbles.onSurfaceVariant)
+        .accessibilityHidden(true)
+    }
+
     /// Reserves the tallest lockup's height so rolling between sizes does not
-    /// shove the fan up and down the screen.
+    /// shove the fan up and down the screen. Before a pick (D7) a ghost stone
+    /// and a prompt hold the slot instead of the roll.
     @ViewBuilder
     private var caption: some View {
         Group {
-            // The step arrives already parked on a valence, so the roll always
-            // has something under the finger. `nil` only happens in previews
-            // and in the edit sheet before it stages a value.
-            ValenceRollView(valence: selected ?? .neutralMedium, onChange: onSelect)
+            if let selected {
+                ValenceRollView(valence: selected, onChange: onSelect)
+            } else {
+                VStack(spacing: Spacing.sm) {
+                    GhostStone(width: 56)
+                    Text("Swipe or tap to choose")
+                        .pebblesFont(.cardHeading)
+                        .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                }
+            }
         }
         // Bottom-anchored: the pyramid and the span sit at a fixed height, and
         // the word and its overtitle grow upward into space already reserved.

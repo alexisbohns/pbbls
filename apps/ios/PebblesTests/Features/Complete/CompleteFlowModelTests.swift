@@ -13,14 +13,19 @@ struct CompleteFlowModelTests {
         return (CompleteFlowModel(haptic: { recorder.taps.append($0) }), recorder)
     }
 
-    @Test("starts on valence; seeding parks on neutral-medium without a haptic")
-    func seed() {
+    @Test("the valence step arrives empty and Continue is gated on a pick")
+    func noSeed() {
         let (model, recorder) = model()
         #expect(model.step == .valence)
+        #expect(model.draft.valence == nil)
         #expect(!model.isAnswered)
-        model.seedValenceIfNeeded()
-        #expect(model.draft.valence == .neutralMedium)
-        #expect(recorder.taps.isEmpty)
+        model.advance()
+        #expect(model.step == .valence)
+        #expect(recorder.taps == [.warning])
+        model.select(valence: .highlightMedium)
+        #expect(model.isAnswered)
+        model.advance()
+        #expect(model.step == .emotion)
     }
 
     @Test("valence commits in place; emotion and domain commit and advance")
@@ -104,43 +109,25 @@ struct CompleteFlowModelTests {
         #expect(model.step == .privacy)
     }
 
-    @Test("an unconfirmed seed is not autosaved; Continue or a pick confirms it")
-    func seedNotAutosaved() {
+    @Test("the autosave is the draft, nothing is held back")
+    func autosaveIsDraft() {
         let (model, _) = model()
-        model.seedValenceIfNeeded()
-        #expect(!model.isValenceConfirmed)
         #expect(model.draftToAutosave.isEmpty)
-        #expect(model.draft.valence == .neutralMedium)
-        model.advance()
-        #expect(model.isValenceConfirmed)
-        #expect(model.draftToAutosave.valence == .neutralMedium)
-
-        let (picked, _) = self.model()
-        picked.seedValenceIfNeeded()
-        picked.select(valence: .lowlightSmall)
-        #expect(picked.isValenceConfirmed)
-        #expect(picked.draftToAutosave.valence == .lowlightSmall)
+        model.select(valence: .lowlightSmall)
+        #expect(model.draftToAutosave == model.draft)
+        #expect(model.draftToAutosave.valence == .lowlightSmall)
     }
 
-    @Test("a restored valence counts as confirmed; a restore without one re-seeds")
-    func restoreConfirmation() {
+    @Test("a restore without a valence lands on an empty valence step")
+    func restoreWithoutValence() {
         let (model, _) = model()
-        var saved = CompleteDraft()
-        saved.valence = .neutralSmall
-        model.restore(saved, known: .init(soulIds: [], collectionIds: []))
-        #expect(model.isValenceConfirmed)
-        #expect(model.draftToAutosave.valence == .neutralSmall)
-
-        let (unseeded, _) = self.model()
         var noValence = CompleteDraft()
         noValence.soulIds = [UUID()]
         let soul = noValence.soulIds[0]
-        unseeded.restore(noValence, known: .init(soulIds: [soul], collectionIds: []))
-        #expect(unseeded.step == .valence)
-        #expect(unseeded.draft.valence == .neutralMedium)
-        #expect(!unseeded.isValenceConfirmed)
-        #expect(unseeded.draftToAutosave.valence == nil)
-        #expect(unseeded.draftToAutosave.soulIds == [soul])
+        model.restore(noValence, known: .init(soulIds: [soul], collectionIds: []))
+        #expect(model.step == .valence)
+        #expect(model.draft.valence == nil)
+        #expect(model.draftToAutosave.soulIds == [soul])
     }
 
     @Test("success goes to the success step with a success haptic; failure stays put")

@@ -105,6 +105,32 @@ enum ValenceFanLayout {
         )
     }
 
+    /// How much a chosen stone grows; the row labels must clear that too.
+    static let selectedScale: CGFloat = 1.14
+
+    /// The box each row label (Month · Week · Day, D7) draws in, reference
+    /// space, up the left margin: one in the top gap above the large ring,
+    /// one between the large and medium rings, one beside the small ring.
+    /// Width is the longest translated word in meta caps with slack.
+    static func rowLabelBox(for size: ValenceSizeGroup) -> CGRect {
+        let centreY: CGFloat
+        switch size {
+        case .large:  centreY = 28
+        case .medium: centreY = 166
+        case .small:  centreY = 295
+        }
+        return CGRect(x: 4, y: centreY - 7, width: 60, height: 14)
+    }
+
+    /// A stone's frame as it draws when chosen (`selectedScale` about its centre).
+    static func selectedFrame(for valence: Valence) -> CGRect {
+        let frame = frame(for: valence)
+        return frame.insetBy(
+            dx: -frame.width * (selectedScale - 1) / 2,
+            dy: -frame.height * (selectedScale - 1) / 2
+        )
+    }
+
     /// Bounding box of a stone in reference space. Used by the hit-target
     /// padding and by the bounds invariant in the tests.
     static func frame(for valence: Valence) -> CGRect {

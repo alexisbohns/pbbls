@@ -5,10 +5,12 @@ import SwiftUI
 struct CompleteStepContent: View {
     let step: CompleteStep
     let model: CompleteFlowModel
+    /// Threaded to the valence step, which opens the help sheet on it (D8).
+    let isFirstPebble: Bool
 
     var body: some View {
         switch step {
-        case .valence:    CompleteValenceStep(model: model)
+        case .valence:    CompleteValenceStep(model: model, isFirstPebble: isFirstPebble)
         case .emotion:    CompleteEmotionStep(model: model)
         case .domain:     CompleteDomainStep(model: model)
         case .souls:      CompleteSoulsStep(model: model)

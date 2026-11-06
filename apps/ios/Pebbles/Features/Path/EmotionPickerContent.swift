@@ -12,13 +12,37 @@ struct EmotionPickerContent: View {
     let onSelect: (UUID) -> Void
 
     @Environment(EmotionPaletteService.self) private var palettes
+    /// `load()` never resets `didFinishLoading` (the splash gates on it), so
+    /// the retry carries its own in-flight state.
+    @State private var isRetrying = false
 
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 24) {
             if groups.isEmpty {
-                ProgressView()
+                // Loaded and still empty means the palette fetch failed (D9).
+                if palettes.didFinishLoading, !isRetrying {
+                    VStack(spacing: Spacing.sm) {
+                        Text("Couldn't load feelings")
+                            .pebblesFont(.callout)
+                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                        Button("Retry") {
+                            Task {
+                                isRetrying = true
+                                await palettes.load()
+                                isRetrying = false
+                            }
+                        }
+                        .pebblesFont(.bodyEmphasized)
+                        .foregroundStyle(Color.pebbles.primary)
+                        .disabled(isRetrying)
+                    }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 32)
+                } else {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 32)
+                }
             } else {
                 ForEach(groups) { group in
                     section(for: group)

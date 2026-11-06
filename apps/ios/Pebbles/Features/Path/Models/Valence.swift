@@ -141,13 +141,22 @@ extension Valence {
         Headline(word: headlineWord, span: headlineSpan)
     }
 
-    /// "Moment" rather than `shortLabel`'s "Neutral" — the lockup reads as a
-    /// phrase, and nobody calls their afternoon a neutral.
+    /// "Neutral" (D7, 2026-11-05): "Moment" now names the thing a pebble is
+    /// made from.
     private var headlineWord: LocalizedStringResource {
         switch polarity {
         case .lowlight:  return "Lowlight"
-        case .neutral:   return "Moment"
+        case .neutral:   return "Neutral"
         case .highlight: return "Highlight"
+        }
+    }
+
+    /// The size as one lowercase word, for the summary pill ("Highlight · week").
+    var spanWord: LocalizedStringResource {
+        switch sizeGroup {
+        case .small:  return "day"
+        case .medium: return "week"
+        case .large:  return "month"
         }
     }
 
@@ -166,6 +175,28 @@ extension Valence {
         case .lowlight:  return "Lowlight"
         case .neutral:   return "Neutral"
         case .highlight: return "Highlight"
+        }
+    }
+}
+
+extension ValencePolarity {
+    /// The word under the fan's column (D7).
+    var axisLabel: LocalizedStringResource {
+        switch self {
+        case .lowlight:  return "Lowlight"
+        case .neutral:   return "Neutral"
+        case .highlight: return "Highlight"
+        }
+    }
+}
+
+extension ValenceSizeGroup {
+    /// The word up the fan's left margin (D7).
+    var axisLabel: LocalizedStringResource {
+        switch self {
+        case .small:  return "Day"
+        case .medium: return "Week"
+        case .large:  return "Month"
         }
     }
 }

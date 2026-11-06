@@ -85,7 +85,7 @@ struct ValenceHelpersTests {
     @Test("headline copy matches the spec")
     func headlineCopy() {
         #expect(String(localized: Valence.lowlightSmall.headline.word) == "Lowlight")
-        #expect(String(localized: Valence.neutralMedium.headline.word) == "Moment")
+        #expect(String(localized: Valence.neutralMedium.headline.word) == "Neutral")
         #expect(String(localized: Valence.highlightLarge.headline.word) == "Highlight")
 
         #expect(String(localized: Valence.neutralSmall.headline.span) == "OF MY DAY")
