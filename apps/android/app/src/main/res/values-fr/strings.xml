@@ -473,15 +473,15 @@
 
     <!-- Domain descriptions (the `label` column), rendered by the record
          flow's domain step. Mirrors iOS `domain.<slug>.label`. -->
-    <string name="domain_community_label">Celles et ceux qui partagent tes valeurs, ta culture ou tes croyances</string>
-    <string name="domain_currentevents_label">Ce qui se passe dans le monde autour de toi</string>
-    <string name="domain_dating_label">Relations amoureuses et nouvelles rencontres</string>
-    <string name="domain_education_label">Apprentissage, croissance et quête intellectuelle</string>
-    <string name="domain_family_label">Celles et ceux qui te sont liés par le sang ou par le cœur</string>
+    <string name="domain_community_label">Les gens qui partagent tes valeurs</string>
+    <string name="domain_currentevents_label">Ce qui se passe dans le monde</string>
+    <string name="domain_dating_label">Amours et nouvelles rencontres</string>
+    <string name="domain_education_label">Apprentissage, croissance et curiosité</string>
+    <string name="domain_family_label">Liés à toi par le sang ou par le cœur</string>
     <string name="domain_fitness_label">Activité physique, jeux et compétition</string>
-    <string name="domain_friends_label">Les personnes que tu choisis d\'avoir à tes côtés</string>
-    <string name="domain_health_label">Ton corps, ton énergie et ton bien-être physique</string>
-    <string name="domain_hobbies_label">Activités créatives et choses que tu aimes faire</string>
+    <string name="domain_friends_label">Ceux que tu choisis d\'avoir à tes côtés</string>
+    <string name="domain_health_label">Ton corps, ton énergie et ton bien-être</string>
+    <string name="domain_hobbies_label">Création et tout ce que tu aimes faire</string>
     <string name="domain_identity_label">Qui tu es et qui tu deviens</string>
     <string name="domain_money_label">Argent, stabilité et sécurité matérielle</string>
     <string name="domain_partner_label">Ta moitié ou ta relation amoureuse</string>
@@ -490,7 +490,7 @@
     <string name="domain_tasks_label">Les choses que tu dois accomplir</string>
     <string name="domain_travel_label">Explorer de nouveaux lieux et horizons</string>
     <string name="domain_weather_label">Soleil ou pluie, saisons et ciels</string>
-    <string name="domain_work_label">Ton travail, ta carrière et ta vie professionnelle</string>
+    <string name="domain_work_label">Ton travail, ta carrière et ta vie pro</string>
 
     <!-- Emotions (38) -->
     <string name="emotion_amazed_name">Émerveillement</string>
@@ -564,7 +564,7 @@
 
     <!-- ==== Create pebble (M39 sub-project C) ==== -->
     <!-- Shell + shared actions. -->
-    <string name="create_new_pebble">Nouveau pebble</string>
+    <string name="create_new_pebble">Nouveau galet</string>
     <string name="action_save">Enregistrer</string>
     <string name="action_done">Valider</string>
     <string name="action_next">Suivant</string>
@@ -881,7 +881,7 @@
     <string name="record_close_keep_going">Continuer l\'édition</string>
     <string name="record_close_discard">Abandonner</string>
     <string name="record_karma">+%1$d karma</string>
-    <string name="record_karma_a11y">%1$d karma gagné</string>
+    <string name="record_karma_a11y">%1$d karma gagnés</string>
     <string name="record_success_quiet">Merci d’avoir gardé ce moment. Si la journée est lourde, un soutien est à un geste.</string>
     <string name="record_success_get_support">Trouver du soutien</string>
     <string name="richer_section">Enrichis-le</string>

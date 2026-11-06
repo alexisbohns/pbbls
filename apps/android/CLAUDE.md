@@ -27,6 +27,7 @@ and none crosses a data contract:
 | Stock Material 3 controls instead of ports of the iOS ones | #854 |
 | Large screens: readable column, navigation rail, list-detail panes | #855, #940 |
 | No Rive runtime; the Welcome logo is a static vector | #856 |
+| The system Photo Picker stays modal (Play policy): a photo moment is 4 taps, not iOS's 3 | #1515 |
 
 Anything else that differs is drift, not design. Fix it rather than documenting
 it. One known drift runs the other way: Android's pebble detail is the held
@@ -518,10 +519,11 @@ Do not bring it back for a single asset.
 
 ## Behavior that mirrors iOS on purpose
 
-- **Capture and Complete (#1048).** New pebble opens Capture (photo · when ·
-  name → `save_moment`); Complete (valence · emotion · domain · souls ·
-  collection · privacy → `complete_pebble`) opens from the detail of an
-  uncompleted moment or from Capture's "Make it a pebble now". Editing is two
+- **Capture and Complete (#1048, #1515).** New pebble opens Capture (photo ·
+  moment page → `save_moment`); Complete (valence · emotion · Life →
+  `complete_pebble`) opens from the detail of an uncompleted moment or from
+  Capture's "Save & make it a pebble". The end screen, Make it richer, edits
+  its rows through `complete_pebble` and `save_moment`. Editing is two
   screens with one write each, both from the held card's ⋮ menu:
   `EditMomentScreen` (`save_moment`) and `EditPebbleScreen` (`complete_pebble`).
   Every flow interaction goes through its state machine, so the

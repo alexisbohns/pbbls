@@ -473,18 +473,18 @@
 
     <!-- Domain descriptions (the `label` column), rendered by the record
          flow's domain step. Mirrors iOS `domain.<slug>.label`. -->
-    <string name="domain_community_label">People who share your values, culture, or beliefs</string>
+    <string name="domain_community_label">People who share your values or beliefs</string>
     <string name="domain_currentevents_label">What\'s happening in the world around you</string>
     <string name="domain_dating_label">Romantic relationships and connections</string>
-    <string name="domain_education_label">Learning, growth, and intellectual pursuits</string>
+    <string name="domain_education_label">Learning, growth, and curiosity</string>
     <string name="domain_family_label">Those connected to you by blood or soul</string>
-    <string name="domain_fitness_label">Physical activity, games, and competition</string>
+    <string name="domain_fitness_label">Exercise, games, and competition</string>
     <string name="domain_friends_label">People you choose to walk alongside</string>
-    <string name="domain_health_label">Your body, energy, and physical well-being</string>
-    <string name="domain_hobbies_label">Creative pursuits and things you love doing</string>
+    <string name="domain_health_label">Your body, energy, and well-being</string>
+    <string name="domain_hobbies_label">Creative pursuits and things you love</string>
     <string name="domain_identity_label">Who you are and who you\'re becoming</string>
     <string name="domain_money_label">Money, stability, and material security</string>
-    <string name="domain_partner_label">Your significant other or love relationship</string>
+    <string name="domain_partner_label">Your other half or your love life</string>
     <string name="domain_selfcare_label">Rituals and habits that restore you</string>
     <string name="domain_spirituality_label">Faith, meaning, and your inner life</string>
     <string name="domain_tasks_label">Things you need to get done</string>

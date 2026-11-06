@@ -31,12 +31,6 @@ import app.pbbls.android.core.designsystem.Spacing
  * `RecordStepAction`.
  */
 sealed interface RecordStepAction {
-    /** Quiet text button — Skip / Done on the optional steps (M58 D3). */
-    data class Text(
-        val label: String,
-        val onClick: () -> Unit,
-    ) : RecordStepAction
-
     /**
      * Full-width prominent button — Continue on Complete's `valence`, the saves on Capture's
      * moment page (the main one under [PrimaryWithSecondary]), Make a pebble on Complete's `privacy`.
@@ -67,7 +61,7 @@ sealed interface RecordStepAction {
  * Steps supply content and a button role and never their own layout, so the
  * title baseline and button position do not drift between screens as the user
  * moves through the flow — which is the whole reason the flow reads as one
- * motion rather than eleven pages.
+ * motion rather than separate pages.
  *
  * Scrolling content dissolves at both ends instead of clipping (never a hard edge): an overlay gradient
  * from `surface` to `surface` at zero alpha, over a content padding of the same height, so at rest nothing
@@ -146,17 +140,6 @@ fun RecordStepScaffold(
 
         when (action) {
             null -> Unit
-            is RecordStepAction.Text ->
-                TextButton(
-                    onClick = action.onClick,
-                    modifier = Modifier.padding(bottom = Spacing.sm),
-                ) {
-                    Text(
-                        text = action.label,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = colors.onSurfaceVariant,
-                    )
-                }
             is RecordStepAction.Primary -> PrimaryAction(action)
             is RecordStepAction.PrimaryWithSecondary -> {
                 PrimaryAction(action.primary)

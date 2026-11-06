@@ -12,6 +12,7 @@ import app.pbbls.android.core.model.SoulWithGlyph
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.buildJsonObject
@@ -25,6 +26,9 @@ interface ReferenceDataServicing {
     val souls: List<SoulWithGlyph>
     val collections: List<PebbleCollection>
     val hasLoaded: Boolean
+
+    /** The last [load] failed and nothing is cached: a picker shows Retry rather than spin (souls spec S7). */
+    val loadFailed: Boolean
 
     suspend fun load()
 
@@ -60,6 +64,9 @@ class ReferenceDataService
         override var hasLoaded: Boolean by mutableStateOf(false)
             private set
 
+        override var loadFailed: Boolean by mutableStateOf(false)
+            private set
+
         override suspend fun load() {
             try {
                 coroutineScope {
@@ -70,10 +77,14 @@ class ReferenceDataService
                     souls = soulsDeferred.await()
                     collections = collectionsDeferred.await()
                     hasLoaded = true
+                    loadFailed = false
                 }
                 Log.i(TAG, "loaded ${domains.size} domains, ${souls.size} souls, ${collections.size} collections")
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                Log.e(TAG, "reference data load failed — pickers empty until next launch", e)
+                Log.e(TAG, "reference data load failed; pickers offer a retry", e)
+                loadFailed = !hasLoaded
             }
         }
 

@@ -84,6 +84,7 @@ private fun People(
 @PreviewTest
 @Preview(name = "fr", showBackground = true, locale = "fr", heightDp = 720)
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun People_Light() = People(SoulsListUiState.Content(elevenPeople))
 

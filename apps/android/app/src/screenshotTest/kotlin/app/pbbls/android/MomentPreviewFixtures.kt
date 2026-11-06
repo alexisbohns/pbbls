@@ -106,6 +106,7 @@ internal class PreviewReferenceData(
     override val collections: List<PebbleCollection> = emptyList(),
 ) : ReferenceDataServicing {
     override val hasLoaded: Boolean = true
+    override val loadFailed: Boolean = false
 
     override suspend fun load() = Unit
 

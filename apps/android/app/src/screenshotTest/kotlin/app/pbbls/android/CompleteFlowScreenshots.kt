@@ -343,6 +343,7 @@ fun Complete_ValenceHelp() {
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
 @Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@PreviewLargeFontTall
 @Composable
 fun Complete_EmotionFailed() {
     PebblesTheme {
@@ -360,6 +361,7 @@ fun Complete_EmotionFailed() {
 @Preview(name = "fr", showBackground = true, heightDp = 780, locale = "fr")
 @Preview(name = "dark", showBackground = true, heightDp = 780, uiMode = UI_MODE_NIGHT_YES)
 @PreviewLargeFontTall
+@PreviewWideTall
 @Composable
 fun Complete_Life() {
     PebblesTheme { LifePreview(lifeAnswered, caption = "d-family") }

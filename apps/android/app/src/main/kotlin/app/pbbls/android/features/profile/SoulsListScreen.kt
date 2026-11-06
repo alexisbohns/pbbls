@@ -106,6 +106,10 @@ fun SoulsListScreen(
         }
     }
 
+    // Back closes the open search field first, then leaves as usual.
+    val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+    NavigationBackHandler(state = backState, isBackEnabled = chooser.isSearching) { chooser.closeSearch() }
+
     SoulsListContent(
         uiState = uiState,
         chooser = chooser,
@@ -156,10 +160,6 @@ fun SoulsListContent(
     // The soul and slot whose delete menu is open: a usual soul is a tile and a row, and only the
     // one long-pressed opens. The menu is drawn inside that item, so it anchors there.
     var menuFor by remember { mutableStateOf<Pair<String, SoulChooserSlot>?>(null) }
-
-    // Back closes the open search field first, then leaves as usual.
-    val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
-    NavigationBackHandler(state = backState, isBackEnabled = chooser.isSearching) { chooser.closeSearch() }
 
     PebblesScreen(
         modifier = modifier,

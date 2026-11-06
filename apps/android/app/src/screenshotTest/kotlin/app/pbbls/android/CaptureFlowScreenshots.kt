@@ -105,7 +105,7 @@ private fun CapturePreview(
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
 @Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
-@Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
+@Preview(name = "dark", showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
 @PreviewLargeFontTall
 @Composable
 fun Capture_Photo() {

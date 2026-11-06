@@ -130,6 +130,17 @@ class SoulChooserHostTest {
     }
 
     @Test
+    fun `a failed load offers a retry rather than a spinner`() {
+        val failed = FakeReferenceDataService(souls = emptyList(), hasLoaded = false, loadFailed = true)
+        host(failed)
+        openSheet()
+        compose.onNodeWithText(str(R.string.souls_load_error)).assertExists()
+        compose.onNodeWithText(str(R.string.profile_retry)).performClick()
+        compose.waitForIdle()
+        assertEquals(1, failed.loadCount)
+    }
+
+    @Test
     fun `back closes the search before the sheet`() {
         host()
         openSheet()
