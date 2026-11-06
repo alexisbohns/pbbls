@@ -6,7 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import app.pbbls.android.core.model.AttachedSnap
 import app.pbbls.android.core.model.FormSnap
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 private const val TAG = "snap-coordinator"
@@ -86,11 +88,21 @@ class SnapUploadCoordinator(
         processedForRetry = null
     }
 
-    /** A processed pick enters the machine: pending-uploading, then [performUpload]. */
+    /**
+     * A processed pick enters the machine: pending-uploading, then [performUpload].
+     *
+     * A pending snap it replaces takes its Storage files with it (iOS `ingest`): nobody else holds them. A saved
+     * (existing) one is untouched, since it is the host's to detach. The replaced snap's own upload, cancelled by
+     * the caller, may still land after that delete, and so may this one if it is removed or replaced while in
+     * flight: when the upload ends (or is cancelled) and the form no longer holds this snap, its files are
+     * deleted again, uncancellable (iOS `deleteFilesUncancelled`). A snap a save sent is never here: it was
+     * UPLOADED, so this call had already returned.
+     */
     suspend fun attach(
         processed: ProcessedImage,
         userId: String,
     ) {
+        val replaced = (formSnap as? FormSnap.Pending)?.snap
         val snapId = UUID.randomUUID().toString().lowercase()
         formSnap =
             FormSnap.Pending(
@@ -101,7 +113,18 @@ class SnapUploadCoordinator(
                 ),
             )
         processedForRetry = processed
-        performUpload(processed = processed, snapId = snapId, userId = userId)
+        if (replaced != null) {
+            onLog("replacing pending snap ${replaced.id}", null)
+            withContext(NonCancellable) { repo.deleteFiles(snapId = replaced.id, userId = userId) }
+        }
+        try {
+            performUpload(processed = processed, snapId = snapId, userId = userId)
+        } finally {
+            if ((formSnap as? FormSnap.Pending)?.snap?.id != snapId) {
+                onLog("late upload: deleting orphaned $snapId", null)
+                withContext(NonCancellable) { repo.deleteFiles(snapId = snapId, userId = userId) }
+            }
+        }
     }
 
     /**

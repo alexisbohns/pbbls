@@ -43,6 +43,7 @@ import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 private const val TAG = "capture-flow"
@@ -91,6 +92,8 @@ data class CaptureFlowUiState(
     val startsAtMomentPage: Boolean = false,
     /** The onboarding hand-off's reason slug (#1510 D9); Part 8 reads it for the name field's prompt. */
     val promptReason: String? = null,
+    /** A pick is being read or handed over, over a photo or not: the library tile shows its busy state. */
+    val isPicking: Boolean = false,
     /** Whether a camera app answers; false hides the camera button (D3). Read once, at construction. */
     val cameraAvailable: Boolean = false,
 ) {
@@ -116,7 +119,7 @@ class CaptureFlowViewModel
         private val supabase: SupabaseServicing,
         private val media: ComposerMedia,
         private val focusRequests: PathFocusRequests,
-        private val snapRepo: SnapWriteRepositing,
+        snapRepo: SnapWriteRepositing,
         private val haptics: HapticsPreference,
         private val photos: CameraPhotos,
     ) : ViewModel() {
@@ -198,11 +201,13 @@ class CaptureFlowViewModel
          * coordinator has a snap for it, this is the only sign of it: it counts as
          * something to keep (R2) and blocks the save like an upload (iOS).
          */
-        private var isPicking = false
+        private var pickCount = 0
             set(value) {
                 field = value
-                _uiState.update { it.copy(snapBlockedMessageRes = blockedBySnap()) }
+                _uiState.update { it.copy(isPicking = isPicking, snapBlockedMessageRes = blockedBySnap()) }
             }
+
+        private val isPicking: Boolean get() = pickCount > 0
 
         init {
             viewModelScope.launch {
@@ -315,7 +320,7 @@ class CaptureFlowViewModel
                 return
             }
             attachPhoto(cleanup = { photos.delete(shot) }) {
-                model.applyCaptureDate(OffsetDateTime.now())
+                model.applyCaptureDate(OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS))
                 photos.process(shot)
             }
         }
@@ -332,8 +337,9 @@ class CaptureFlowViewModel
         }
 
         /**
-         * One pick, from the library or the camera: [prepare] reads it, then it replaces whatever photo was attached
-         * (the replaced one's Storage files are deleted: `attach` only overwrites) and uploads. [cleanup] always runs.
+         * One pick, from the library or the camera: [prepare] reads it, and only once it has bytes does it cancel the pick
+         * before it and [SnapUploadCoordinator.attach] it, which deletes the photo it replaces. A pick that cannot be
+         * read therefore leaves the photo that was there exactly as it was, uploading or not. [cleanup] always runs.
          * ATOMIC, so a job cancelled before it starts still reaches its `finally`, and a camera shot is never left behind.
          */
         private fun attachPhoto(
@@ -342,28 +348,22 @@ class CaptureFlowViewModel
         ) {
             val id =
                 userId ?: run {
+                    Log.e(TAG, "photo pick dropped: no current user")
                     cleanup()
                     return
                 }
             val previous = photoJob
+            pickCount += 1
             photoJob =
                 viewModelScope.launch(start = CoroutineStart.ATOMIC) {
                     try {
-                        previous?.cancelAndJoin()
-                        isPicking = true
-                        try {
-                            runCatchingCancellable {
-                                val processed = prepare()
-                                // A pick over a photo: the one it replaces would otherwise be orphaned in Storage.
-                                (snaps.formSnap as? FormSnap.Pending)?.snap?.id?.let { old ->
-                                    viewModelScope.launch { snapRepo.deleteFiles(snapId = old, userId = id) }
-                                }
-                                snaps.attach(processed, id)
-                            }.onFailure { Log.e(TAG, "photo pick processing failed", it) }
-                        } finally {
-                            isPicking = false
-                        }
+                        runCatchingCancellable {
+                            val processed = prepare()
+                            previous?.cancelAndJoin()
+                            snaps.attach(processed, id)
+                        }.onFailure { Log.e(TAG, "photo pick processing failed", it) }
                     } finally {
+                        pickCount -= 1
                         cleanup()
                     }
                 }

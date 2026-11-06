@@ -1005,4 +1005,71 @@ class CaptureFlowViewModelTest {
             assertEquals(listOf("/cache/camera/shot-1.jpg"), h.photos.deleted)
             assertNull(h.viewModel.onCameraRequested())
         }
+
+    @Test
+    fun `a pick over a photo still uploading replaces it and deletes its files`() =
+        runTest {
+            val h = Harness()
+            val gate = CompletableDeferred<Unit>()
+            h.snapRepo.uploadGate = gate
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            val first = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id
+            h.snapRepo.uploadGate = null
+            h.viewModel.onPhotoPicked(pick)
+            advanceUntilIdle()
+            settle()
+            val now = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap
+            assertTrue(now.id != first)
+            assertEquals(AttachedSnap.UploadState.UPLOADED, now.state)
+            assertTrue(first in h.snapRepo.deletedSnapIds)
+            assertFalse(h.viewModel.uiState.value.isPicking)
+            assertNull(h.viewModel.uiState.value.snapBlockedMessageRes)
+        }
+
+    @Test
+    fun `a new pick that cannot be read leaves the old photo as it was, uploading`() =
+        runTest {
+            val h = Harness()
+            val gate = CompletableDeferred<Unit>()
+            h.snapRepo.uploadGate = gate
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            val first = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id
+            // The next pick is a corrupt image.
+            h.media.processed = null
+            h.viewModel.onPhotoPicked(pick)
+            advanceUntilIdle()
+            settle()
+            assertEquals(first, (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id)
+            assertTrue(h.snapRepo.deletedSnapIds.isEmpty())
+            // The old pick is still in flight, so the tile stays busy; the failed one added nothing.
+            assertTrue(h.viewModel.uiState.value.isPicking)
+            // Its upload was never cancelled: it lands, and Save is free.
+            gate.complete(Unit)
+            advanceUntilIdle()
+            settle()
+            assertFalse(h.viewModel.uiState.value.isPicking)
+            assertEquals(AttachedSnap.UploadState.UPLOADED, (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.state)
+            assertNull(h.viewModel.uiState.value.snapBlockedMessageRes)
+        }
+
+    @Test
+    fun `the picking state shows while a pick is read, and the shutter date is whole seconds`() =
+        runTest {
+            val h = Harness()
+            val read = CompletableDeferred<Unit>()
+            h.media.processGate = read
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            assertTrue(h.viewModel.uiState.value.isPicking)
+            read.complete(Unit)
+            advanceUntilIdle()
+            settle()
+            assertFalse(h.viewModel.uiState.value.isPicking)
+            h.viewModel.onCameraRequested()
+            h.viewModel.onCameraResult(taken = true)
+            advanceUntilIdle()
+            assertEquals(0, h.viewModel.uiState.value.flow.draft.happenedAt.nano)
+        }
 }
