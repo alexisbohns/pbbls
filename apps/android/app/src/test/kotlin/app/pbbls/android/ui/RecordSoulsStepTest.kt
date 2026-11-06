@@ -53,6 +53,7 @@ class RecordSoulsStepTest {
                         selectedIds = flow.answers.soulIds,
                         onToggle = model::toggleSoul,
                         onAdvance = model::advance,
+                        hapticsOn = false,
                     )
                 }
             }

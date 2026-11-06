@@ -58,7 +58,7 @@ class SoulChooserHostTest {
         vararg args: Any,
     ): String = ApplicationProvider.getApplicationContext<Application>().getString(id, *args)
 
-    private fun host() {
+    private fun host(refs: FakeReferenceDataService = this.refs) {
         compose.setContent {
             PebblesTestHarness(graph = FakeServices(referenceData = refs)) {
                 PebblesTheme {
@@ -113,6 +113,18 @@ class SoulChooserHostTest {
         openSheet()
         compose.onAllNodes(hasText("Mo") and isToggleable()).onFirst().performClick()
         compose.onNodeWithContentDescription(str(R.string.onboarding_back)).performClick()
+        compose.waitForIdle()
+        assertEquals(listOf("s2"), draft.soulIds)
+    }
+
+    @Test
+    fun `a sheet opened before the souls load keeps its seed selection`() {
+        val unloaded = FakeReferenceDataService(souls = emptyList(), hasLoaded = false)
+        host(unloaded)
+        openSheet()
+        // One id chosen, though no soul is known yet: the unloaded empty list prunes nothing.
+        compose.onNodeWithText(str(R.string.souls_done_count, 1)).assertExists()
+        compose.onNodeWithText(str(R.string.souls_done_count, 1)).performClick()
         compose.waitForIdle()
         assertEquals(listOf("s2"), draft.soulIds)
     }

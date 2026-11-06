@@ -25,9 +25,9 @@ fun CompleteStepContent(
     domains: List<Domain>,
     collections: List<PebbleCollection>,
     error: String?,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
     onAchievementCheck: () -> Unit = {},
-    hapticsOn: Boolean = true,
 ) {
     when (step) {
         CompleteStep.VALENCE ->

@@ -33,7 +33,7 @@ class SoulCountsRefreshTest {
     fun `the record flow's souls step refreshes souls when it appears`() {
         compose.setContent {
             PebblesTestHarness(graph = FakeServices(referenceData = refs)) {
-                PebblesTheme { RecordSoulsStep(selectedIds = emptyList(), onToggle = {}, onAdvance = {}) }
+                PebblesTheme { RecordSoulsStep(selectedIds = emptyList(), onToggle = {}, onAdvance = {}, hapticsOn = false) }
             }
         }
         compose.waitForIdle()

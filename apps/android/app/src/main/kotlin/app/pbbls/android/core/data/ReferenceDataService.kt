@@ -147,9 +147,9 @@ class ReferenceDataService
                     order("name", Order.ASCENDING)
                 }.decodeList<Domain>()
 
-        // The pebbles_count aggregate rides along because SoulTile renders it —
+        // The pebbles_count aggregate rides along because the chooser's tiles and rows render it —
         // omitting it showed a permanent 0 for every soul (#563). Mirrors the iOS
-        // SoulPickerSheet.load() select.
+        // ReferenceDataService select.
         private suspend fun fetchSouls(): List<SoulWithGlyph> =
             supabase.client
                 .from("souls")

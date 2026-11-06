@@ -109,10 +109,10 @@ fun CompleteFlowContent(
     onClose: () -> Unit,
     onComplete: () -> Unit,
     onExit: () -> Unit,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
     onAchievementCheck: () -> Unit = {},
     onOpenSupport: () -> Unit = {},
-    hapticsOn: Boolean = true,
 ) {
     val flow = uiState.flow
     val labels =

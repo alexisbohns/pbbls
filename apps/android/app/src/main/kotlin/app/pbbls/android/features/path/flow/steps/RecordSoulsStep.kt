@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path.flow.steps
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -8,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.ui.souls.SoulChooserBody
@@ -16,9 +14,8 @@ import app.pbbls.android.core.ui.souls.SoulChooserMode
 import app.pbbls.android.core.ui.souls.SoulChooserSearchField
 import app.pbbls.android.core.ui.souls.SoulChooserTray
 import app.pbbls.android.core.ui.souls.rememberSoulChooserState
+import app.pbbls.android.core.ui.souls.rememberSoulCreate
 import kotlinx.coroutines.launch
-
-private const val TAG = "RecordSoulsStep"
 
 /**
  * Step 6 — who was there. Interim until the Life screen's tiles and More sheet (Part 7): the souls
@@ -34,8 +31,8 @@ fun RecordSoulsStep(
     selectedIds: List<String>,
     onToggle: (String) -> Unit,
     onAdvance: () -> Unit,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
-    hapticsOn: Boolean = true,
     onAchievementCheck: () -> Unit = {},
 ) {
     val refs = LocalReferenceDataService.current
@@ -60,6 +57,8 @@ fun RecordSoulsStep(
         (answered - chosen).forEach(onToggle)
     }
 
+    val onCreate = rememberSoulCreate(state, refs, onAchievementCheck)
+
     Column(modifier = modifier.fillMaxSize()) {
         if (state.isSearching) {
             SoulChooserSearchField(
@@ -74,18 +73,7 @@ fun RecordSoulsStep(
             loadFailed = false,
             onRetry = { scope.launch { refs.refreshSouls() } },
             onOpenSoul = {},
-            onCreate = { name ->
-                scope.launch {
-                    val created = refs.createSoul(name)
-                    if (created != null) {
-                        onAchievementCheck()
-                        state.didCreate(created)
-                    } else {
-                        Log.e(TAG, "createSoul returned null")
-                        state.createErrorRes = R.string.soul_save_error
-                    }
-                }
-            },
+            onCreate = onCreate,
             onHaptic = {},
             hapticsOn = hapticsOn,
             modifier = Modifier.weight(1f),
