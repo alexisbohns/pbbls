@@ -52,7 +52,7 @@ struct GlyphStoneGrid: View {
             columns: folded ? GlyphStoneGridLayout.foldedColumns : GlyphStoneGridLayout.columns,
             seed: folded ? "onboarding-glyphs-folded" : "onboarding-glyphs",
             fills: shown.map { fill(for: $0) },
-            minCellHeight: folded ? 72 : 96
+            minCellHeight: folded ? 84 : 112
         ) { index, _ in
             cell(shown[index], index: index, isDraw: index == shown.count - 1)
         }

@@ -70,7 +70,7 @@ struct PeopleStep: View {
             seed: Self.seed,
             options: Self.options,
             fills: (0..<Self.places).map { people.indices.contains($0) ? Color.pebbles.primaryContainer : Color.clear },
-            minHeight: 104
+            minHeight: 116
         ) { index in
             piece(index)
         }
@@ -190,7 +190,10 @@ private struct PersonNameField: View {
                     Text(name.isEmpty ? "Their name" : name)
                         .foregroundStyle(name.isEmpty ? Color.pebbles.onSurfaceVariant : Color.pebbles.onSurface)
                 } else {
-                    TextField("Their name", text: Binding(get: { name }, set: { onNameChange(index, $0) }))
+                    TextField(
+                        text: Binding(get: { name }, set: { onNameChange(index, $0) }),
+                        prompt: Text("Their name").foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    ) { Text("Their name") }
                         .focused($focused)
                         .textInputAutocapitalization(.words)
                         .submitLabel(.done)
