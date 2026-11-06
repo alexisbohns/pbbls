@@ -72,7 +72,7 @@ fun SoulChooserBody(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = FAB_CLEARANCE),
                 ) {
-                    if (state.isSearching) {
+                    if (state.isSearching && state.trimmedQuery.isNotEmpty()) {
                         searchItems(state, showsSelection, tap, longTap, onCreate)
                     } else {
                         browseItems(state, perRow, showsSelection, tap, longTap)
@@ -91,13 +91,15 @@ fun SoulChooserBody(
             )
         }
         val canCreate = state.isSearching && state.canAdd
+        // Lit only when the Add row is the one thing on offer; beside matches it stays pale (mock 11).
+        val lit = canCreate && state.results.isEmpty()
         FloatingActionButton(
             onClick = {
                 if (canCreate) onCreate(state.trimmedQuery) else state.openSearch()
             },
             modifier = Modifier.align(Alignment.BottomEnd).padding(PebblesTheme.spacing.lg),
-            containerColor = if (canCreate) colors.primary else colors.primaryContainer,
-            contentColor = if (canCreate) colors.onPrimary else colors.onPrimaryContainer,
+            containerColor = if (lit) colors.primary else colors.primaryContainer,
+            contentColor = if (lit) colors.onPrimary else colors.onPrimaryContainer,
         ) {
             PbblsIconImage(icon = PbblsIcon.PLUS_CIRCLE, contentDescription = stringResource(R.string.souls_add_a11y))
         }
@@ -111,10 +113,9 @@ private fun LazyListScope.searchItems(
     longTap: ((SoulWithGlyph) -> Unit)?,
     onCreate: (String) -> Unit,
 ) {
-    if (state.canAdd) {
-        item(key = "add") { SoulAddRow(name = state.trimmedQuery, onClick = { onCreate(state.trimmedQuery) }) }
-    }
-    items(state.results, key = { it.id }) { soul ->
+    val results = state.results
+    // Matches first, so the Add row never pushes the person you typed down; alone when nobody matches.
+    items(results, key = { it.id }) { soul ->
         SoulRow(
             soul = soul,
             isSelected = state.isSelected(soul.id),
@@ -123,6 +124,9 @@ private fun LazyListScope.searchItems(
             onClick = { tap(soul) },
             onLongClick = longTap?.let { { it(soul) } },
         )
+    }
+    if (state.canAdd) {
+        item(key = "add") { SoulAddRow(name = state.trimmedQuery, onClick = { onCreate(state.trimmedQuery) }) }
     }
 }
 

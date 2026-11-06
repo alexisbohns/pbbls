@@ -15,10 +15,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -40,8 +44,9 @@ private fun SoulCount(
     count: Int,
     modifier: Modifier = Modifier,
 ) {
+    val description = pluralStringResource(R.plurals.pebbles_count, count, count)
     Row(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) { contentDescription = description },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xs),
     ) {
@@ -83,12 +88,20 @@ fun SoulRow(
                 append(soul.name.substring(range.last + 1))
             }
         }
-    val semanticsModifier = if (showsSelection) Modifier.semantics { selected = isSelected } else Modifier
+    val semanticsModifier =
+        if (showsSelection) {
+            Modifier.semantics {
+                role = Role.Checkbox
+                toggleableState = ToggleableState(isSelected)
+            }
+        } else {
+            Modifier
+        }
     ListItem(
         modifier =
             modifier
                 .then(semanticsModifier)
-                .combinedClickable(role = if (showsSelection) Role.Checkbox else Role.Button, onClick = onClick, onLongClick = onLongClick),
+                .combinedClickable(role = if (showsSelection) null else Role.Button, onClick = onClick, onLongClick = onLongClick),
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         leadingContent = { SoulMark(glyph = soul.glyph, ink = colors.onSurface, modifier = Modifier.size(ROW_GLYPH)) },
         headlineContent = {

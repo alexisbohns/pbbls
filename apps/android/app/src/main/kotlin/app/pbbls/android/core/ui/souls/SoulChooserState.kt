@@ -87,6 +87,14 @@ class SoulChooserState(
         selection = selection.filter { it in known }
     }
 
+    /** [replaceSouls] only once the list is a real fetch: an unloaded empty list must not cost a pill. */
+    fun replaceSoulsWhenLoaded(
+        fresh: List<SoulWithGlyph>,
+        isLoaded: Boolean,
+    ) {
+        if (isLoaded) replaceSouls(fresh)
+    }
+
     fun didCreate(soul: SoulWithGlyph) {
         if (souls.none { it.id == soul.id }) souls = souls + soul
         if (mode is SoulChooserMode.Pick && soul.id !in selection) selection = selection + soul.id
@@ -107,13 +115,15 @@ class SoulChooserState(
 
 /**
  * Remembers a [SoulChooserState]; a rotation keeps the selection, the query and the open field.
- * [souls] flowing in later (a refresh) goes through [SoulChooserState.replaceSouls].
+ * [souls] flowing in later (a refresh) goes through [SoulChooserState.replaceSoulsWhenLoaded]:
+ * until [isLoaded] the list is only a placeholder and the selection is left alone.
  */
 @Composable
 fun rememberSoulChooserState(
     mode: SoulChooserMode,
     souls: List<SoulWithGlyph>,
     selection: List<String> = emptyList(),
+    isLoaded: Boolean = true,
 ): SoulChooserState {
     var savedSelection by rememberSaveable { mutableStateOf(selection) }
     var savedQuery by rememberSaveable { mutableStateOf("") }
@@ -128,6 +138,6 @@ fun rememberSoulChooserState(
     savedSelection = state.selection
     savedQuery = state.query
     savedSearching = state.isSearching
-    LaunchedEffect(souls) { state.replaceSouls(souls) }
+    LaunchedEffect(souls, isLoaded) { state.replaceSoulsWhenLoaded(souls, isLoaded) }
     return state
 }

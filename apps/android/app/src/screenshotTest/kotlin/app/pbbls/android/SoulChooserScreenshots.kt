@@ -1,7 +1,6 @@
 package app.pbbls.android
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -85,39 +86,41 @@ private fun ChooserFrame(
     state: SoulChooserState,
     isLoaded: Boolean = true,
     loadFailed: Boolean = false,
-    title: String? = "Who was there?",
+    title: String? = stringResource(R.string.souls_who_was_there),
 ) {
     PebblesTheme {
-        Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
-            when {
-                state.isSearching ->
-                    SoulChooserSearchField(
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                when {
+                    state.isSearching ->
+                        SoulChooserSearchField(
+                            state = state,
+                            onClose = state::closeSearch,
+                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                        )
+                    title != null ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            Icon(painter = painterResource(R.drawable.ic_arrow_back), contentDescription = null)
+                            Text(text = title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                            SoulChooserSearchButton(state = state)
+                        }
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    SoulChooserBody(
                         state = state,
-                        onClose = state::closeSearch,
-                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                        isLoaded = isLoaded,
+                        loadFailed = loadFailed,
+                        onRetry = {},
+                        onOpenSoul = {},
+                        onCreate = {},
                     )
-                title != null ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        Icon(painter = painterResource(R.drawable.ic_arrow_back), contentDescription = null)
-                        Text(text = title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
-                        SoulChooserSearchButton(state = state)
-                    }
+                }
+                SoulChooserTray(state = state, onDone = {})
             }
-            Box(modifier = Modifier.weight(1f)) {
-                SoulChooserBody(
-                    state = state,
-                    isLoaded = isLoaded,
-                    loadFailed = loadFailed,
-                    onRetry = {},
-                    onOpenSoul = {},
-                    onCreate = {},
-                )
-            }
-            SoulChooserTray(state = state, onDone = {})
         }
     }
 }
@@ -154,6 +157,15 @@ fun SoulChooser_Search() {
     searching.openSearch()
     searching.query = "ma"
     ChooserFrame(searching, title = null)
+}
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Composable
+fun SoulChooser_SearchEmpty() {
+    val state = chosenTwo()
+    state.openSearch()
+    ChooserFrame(state, title = null)
 }
 
 @PreviewTest

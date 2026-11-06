@@ -162,4 +162,15 @@ class SoulChooserStateTest {
         chooser.remove(a.id)
         assertEquals(listOf(a.id), chooser.selection)
     }
+
+    @Test fun `an unloaded empty list leaves the selection alone, a loaded one prunes it`() {
+        val a = soul("Ana", 1)
+        val chooser = state(SoulChooserMode.Pick(allowsSkip = true), emptyList(), listOf(a.id))
+        chooser.replaceSoulsWhenLoaded(emptyList(), isLoaded = false)
+        assertEquals(listOf(a.id), chooser.selection)
+        chooser.replaceSoulsWhenLoaded(listOf(a), isLoaded = true)
+        assertEquals(listOf(a.id), chooser.selection)
+        chooser.replaceSoulsWhenLoaded(emptyList(), isLoaded = true)
+        assertTrue(chooser.selection.isEmpty())
+    }
 }

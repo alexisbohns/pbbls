@@ -16,10 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,7 +36,6 @@ private val TILE_MIN_HEIGHT = 88.dp
 private val BADGE_SIDE = 20.dp
 private val BADGE_ICON = 12.dp
 private const val CHOSEN_ALPHA = 0.20f
-private const val LARGE_FONT_SCALE = 1.5f
 
 /**
  * A soul as a tile: its glyph over its name. Chosen (pick mode) is a tinted fill, a tick badge and
@@ -54,14 +54,22 @@ fun SoulTile(
     val colors = MaterialTheme.colorScheme
     val chosen = showsSelection && isSelected
     val shape = MaterialTheme.shapes.large
-    val semanticsModifier = if (showsSelection) Modifier.semantics { selected = isSelected } else Modifier
+    val semanticsModifier =
+        if (showsSelection) {
+            Modifier.semantics {
+                role = Role.Checkbox
+                toggleableState = ToggleableState(isSelected)
+            }
+        } else {
+            Modifier
+        }
     Box(
         modifier =
             modifier
                 .clip(shape)
                 .then(if (chosen) Modifier.background(colors.primary.copy(alpha = CHOSEN_ALPHA)) else Modifier)
                 .then(semanticsModifier)
-                .combinedClickable(role = if (showsSelection) Role.Checkbox else Role.Button, onClick = onClick, onLongClick = onLongClick)
+                .combinedClickable(role = if (showsSelection) null else Role.Button, onClick = onClick, onLongClick = onLongClick)
                 .heightIn(min = TILE_MIN_HEIGHT)
                 .padding(horizontal = PebblesTheme.spacing.xs, vertical = PebblesTheme.spacing.sm),
     ) {
@@ -77,7 +85,7 @@ fun SoulTile(
                 fontWeight = if (chosen) FontWeight.Bold else null,
                 color = colors.onSurface,
                 textAlign = TextAlign.Center,
-                maxLines = if (LocalDensity.current.fontScale >= LARGE_FONT_SCALE) 2 else 1,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }
