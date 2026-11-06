@@ -150,7 +150,6 @@ struct PeopleStep: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .disabled(isEditing)
                     Button { onChangeGlyph(index) } label: {
                         Text("Change glyph")
                             .spineType(Self.captionRank)
@@ -161,7 +160,6 @@ struct PeopleStep: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .disabled(isEditing)
                     .accessibilityLabel(Text("Change glyph for \(person.name)"))
                 }
             }
