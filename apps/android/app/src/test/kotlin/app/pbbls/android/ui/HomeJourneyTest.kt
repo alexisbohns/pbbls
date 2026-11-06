@@ -139,7 +139,7 @@ class HomeJourneyTest : AppUiTest() {
         signIn()
 
         onText(R.string.home_shortcut_pebble).performClick()
-        onText(R.string.record_action_skip).performClick()
+        onText(R.string.capture_just_write).performClick()
         compose.onAllNodes(hasSetTextAction())[0].performTextInput("Walk")
         onText(R.string.capture_just_save).assertDoesNotExist()
         onText(R.string.capture_save_and_pebble).performClick()

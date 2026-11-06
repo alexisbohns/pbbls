@@ -676,6 +676,9 @@
     <string name="capture_change_photo">Changer la photo</string>
     <string name="capture_photo_uploading">Envoi en cours…</string>
     <string name="capture_just_save">Juste enregistrer</string>
+    <string name="capture_just_write">Juste écrire</string>
+    <string name="capture_take_photo_a11y">Prendre une photo</string>
+    <string name="capture_library">Galerie</string>
     <string name="capture_save_and_pebble">Enregistrer et en faire un galet</string>
     <string name="capture_when_a11y">Quand</string>
     <string name="capture_when_sheet_title">C\'était quand ?</string>
@@ -842,7 +845,7 @@
     <!-- Flow step copy (M58): the record flow's steps, shared by Capture and Complete (#1048).
          Ports the iOS `Features/Record` copy; FR keeps the informal "tu". -->
     <string name="record_photo_title">Commence par une photo</string>
-    <string name="record_photo_subtitle">Ou passe et écris de mémoire.</string>
+    <string name="record_photo_subtitle">Choisis-en une, ou écris de mémoire.</string>
     <string name="record_valence_title">Ça t\'a fait quoi ?</string>
     <string name="record_valence_subtitle">Ça a pris quelle place dans ta vie ?</string>
     <string name="record_emotion_title">Tu as ressenti quoi ?</string>
@@ -858,11 +861,7 @@
     <string name="record_back_a11y">Retour</string>
     <string name="record_name_placeholder">Nom</string>
     <string name="record_name_remaining_a11y">Il reste %1$d caractères</string>
-    <string name="record_photo_choose_another">En choisir une autre</string>
-    <string name="record_photo_upload_failed">Cette photo n\'a pas été envoyée.</string>
     <string name="record_photo_retry">Réessayer</string>
-    <string name="record_photo_remove">Retirer</string>
-    <string name="record_photo_attached">Une photo est déjà jointe.</string>
     <string name="record_collection_empty">Tu n\'as pas encore de collection.</string>
     <string name="record_privacy_secret_explanation">Toi seul peux voir celui-ci.</string>
     <string name="record_privacy_private_explanation">Tes connexions mutuelles peuvent le voir.</string>

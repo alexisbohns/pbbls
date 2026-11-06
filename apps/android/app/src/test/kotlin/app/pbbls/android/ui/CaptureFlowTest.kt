@@ -32,7 +32,7 @@ class CaptureFlowTest : AppUiTest() {
         openPath()
         compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).performClick()
         onText(R.string.record_photo_title).assertIsDisplayed()
-        onText(R.string.record_action_skip).performClick()
+        onText(R.string.capture_just_write).performClick()
         onText(R.string.capture_moment_title).assertIsDisplayed()
         compose.onAllNodes(hasSetTextAction())[0].performTextInput(name)
     }

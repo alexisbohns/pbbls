@@ -680,6 +680,9 @@
     <string name="capture_change_photo">Change photo</string>
     <string name="capture_photo_uploading">Uploading…</string>
     <string name="capture_just_save">Just save</string>
+    <string name="capture_just_write">Just write</string>
+    <string name="capture_take_photo_a11y">Take a photo</string>
+    <string name="capture_library">Library</string>
     <string name="capture_save_and_pebble">Save &amp; make it a pebble</string>
     <string name="capture_when_a11y">When</string>
     <string name="capture_when_sheet_title">When did it happen?</string>
@@ -845,7 +848,7 @@
     <!-- Flow step copy (M58): the record flow's steps, shared by Capture and Complete (#1048).
          Ports the iOS `Features/Record` copy; FR keeps the informal "tu". -->
     <string name="record_photo_title">Start with a picture</string>
-    <string name="record_photo_subtitle">Or skip it and write from memory.</string>
+    <string name="record_photo_subtitle">Pick one, or write it from memory.</string>
     <string name="record_valence_title">How did it land?</string>
     <string name="record_valence_subtitle">How much of your life did this take up?</string>
     <string name="record_emotion_title">What did you feel?</string>
@@ -861,11 +864,7 @@
     <string name="record_back_a11y">Back</string>
     <string name="record_name_placeholder">Name</string>
     <string name="record_name_remaining_a11y">%1$d characters left</string>
-    <string name="record_photo_choose_another">Choose another</string>
-    <string name="record_photo_upload_failed">That photo didn\'t upload.</string>
     <string name="record_photo_retry">Retry</string>
-    <string name="record_photo_remove">Remove</string>
-    <string name="record_photo_attached">A photo is already attached.</string>
     <string name="record_collection_empty">You don\'t have any collections yet.</string>
     <string name="record_privacy_secret_explanation">Only you can see this one.</string>
     <string name="record_privacy_private_explanation">Your mutual connections can see it.</string>

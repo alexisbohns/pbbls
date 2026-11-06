@@ -1,6 +1,11 @@
 package app.pbbls.android
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.Shader
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
@@ -14,6 +19,7 @@ import app.pbbls.android.features.path.capture.CaptureFlowState
 import app.pbbls.android.features.path.capture.CaptureFlowUiState
 import app.pbbls.android.features.path.capture.CaptureStep
 import com.android.tools.screenshot.PreviewTest
+import java.io.ByteArrayOutputStream
 import java.time.OffsetDateTime
 
 /**
@@ -26,8 +32,23 @@ import java.time.OffsetDateTime
  */
 private val capturedAt: OffsetDateTime = OffsetDateTime.parse("2026-10-11T18:05:27+02:00")
 
-private fun pendingSnap(state: AttachedSnap.UploadState) =
-    FormSnap.Pending(AttachedSnap(id = "preview-snap", localThumb = ByteArray(0), state = state))
+private fun pendingSnap(
+    state: AttachedSnap.UploadState,
+    withThumb: Boolean = false,
+) = FormSnap.Pending(AttachedSnap(id = "preview-snap", localThumb = if (withThumb) previewThumb() else ByteArray(0), state = state))
+
+/** A stand-in photo: a warm dusk gradient with a low hill, encoded the way the pipeline's thumb is (JPEG). */
+private fun previewThumb(): ByteArray {
+    val bitmap = Bitmap.createBitmap(420, 420, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    paint.shader = LinearGradient(0f, 0f, 0f, 420f, 0xFFE9C9A6.toInt(), 0xFFB9C6D2.toInt(), Shader.TileMode.CLAMP)
+    canvas.drawRect(0f, 0f, 420f, 420f, paint)
+    paint.shader = null
+    paint.color = 0xFF7F7966.toInt()
+    canvas.drawOval(-80f, 270f, 500f, 560f, paint)
+    return ByteArrayOutputStream().also { bitmap.compress(Bitmap.CompressFormat.JPEG, 90, it) }.toByteArray()
+}
 
 @Composable
 private fun CapturePreview(
@@ -41,6 +62,7 @@ private fun CapturePreview(
     closeConfirm: Boolean = false,
     closeOffersSave: Boolean = false,
     chainsComplete: Boolean = false,
+    cameraAvailable: Boolean = false,
 ) {
     val flow =
         CaptureFlowState(
@@ -61,9 +83,11 @@ private fun CapturePreview(
                 isCloseConfirmPresented = closeConfirm,
                 closeOffersSave = closeOffersSave,
                 chainsComplete = chainsComplete,
+                cameraAvailable = cameraAvailable,
             ),
         model = model,
         onPickPhoto = {},
+        onTakePhoto = {},
         onRetryPhoto = {},
         onRemovePhoto = {},
         onSave = {},
@@ -75,22 +99,45 @@ private fun CapturePreview(
     )
 }
 
-/** Nothing picked yet: the add tile and Skip. */
+/** Nothing picked yet: Just write, the camera and the Library tile. */
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
 @Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
 @PreviewLargeFontTall
 @Composable
 fun Capture_Photo() {
+    PebblesTheme { CapturePreview(CaptureStep.PHOTO, cameraAvailable = true) }
+}
+
+/** No camera app: the camera button is not drawn, and "Just write" takes the row. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Composable
+fun Capture_PhotoNoCamera() {
     PebblesTheme { CapturePreview(CaptureStep.PHOTO) }
 }
 
+/** Back here through Change photo: the tile shows the current photo. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun Capture_PhotoPicked() {
+    PebblesTheme {
+        CapturePreview(CaptureStep.PHOTO, cameraAvailable = true, snap = pendingSnap(AttachedSnap.UploadState.UPLOADED, withThumb = true))
+    }
+}
+
+/** A pick during its beat: the photo, and the spinner. */
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
 @Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun Capture_PhotoUploading() {
-    PebblesTheme { CapturePreview(CaptureStep.PHOTO, snap = pendingSnap(AttachedSnap.UploadState.UPLOADING)) }
+    PebblesTheme {
+        CapturePreview(CaptureStep.PHOTO, cameraAvailable = true, snap = pendingSnap(AttachedSnap.UploadState.UPLOADING, withThumb = true))
+    }
 }
 
 /** Nothing typed and no photo: both saves disabled, "Add a photo". */

@@ -1,5 +1,7 @@
 package app.pbbls.android.features.path.capture
 
+import android.content.ActivityNotFoundException
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -45,7 +48,10 @@ import app.pbbls.android.features.path.flow.RecordFlowChrome
 import app.pbbls.android.features.path.flow.RecordStepAction
 import app.pbbls.android.features.path.flow.RecordStepScaffold
 import app.pbbls.android.features.path.flow.steps.RecordMomentStep
+import app.pbbls.android.features.path.flow.steps.RecordPhotoControls
 import app.pbbls.android.features.path.flow.steps.RecordPhotoStep
+
+private const val TAG = "capture-flow"
 
 /** As the record flow: enough for the slide to read as one motion without holding the user up. */
 private const val STEP_TRANSITION_MS = 280
@@ -99,11 +105,32 @@ fun CaptureFlowScreen(
             uri?.let(viewModel::onPhotoPicked)
         }
 
+    // The camera is another process: its answer may reach a new ViewModel, which finds the shot in saved state.
+    val camera =
+        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { taken ->
+            viewModel.onCameraResult(taken)
+        }
+    // Results land before the resume, so a shot still out here never got its answer.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
+    }
+
     CaptureFlowContent(
         uiState = uiState,
         model = viewModel.machine(),
         onPickPhoto = {
             photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        },
+        onTakePhoto = {
+            viewModel.onCameraRequested()?.let { uri ->
+                try {
+                    camera.launch(uri)
+                } catch (e: ActivityNotFoundException) {
+                    Log.w(TAG, "no camera app answered", e)
+                    viewModel.onCameraLaunchFailed()
+                }
+            }
         },
         onRetryPhoto = viewModel::onRetryPhoto,
         onRemovePhoto = viewModel::onRemovePhoto,
@@ -123,6 +150,7 @@ fun CaptureFlowContent(
     uiState: CaptureFlowUiState,
     model: CaptureFlowModel,
     onPickPhoto: () -> Unit,
+    onTakePhoto: () -> Unit,
     onRetryPhoto: () -> Unit,
     onRemovePhoto: () -> Unit,
     onSave: () -> Unit,
@@ -136,8 +164,6 @@ fun CaptureFlowContent(
     val flow = uiState.flow
     val labels =
         CaptureLabels(
-            skip = stringResource(R.string.record_action_skip),
-            done = stringResource(R.string.action_done),
             justSave = stringResource(R.string.capture_just_save),
             saveAndPebble = stringResource(R.string.capture_save_and_pebble),
         )
@@ -177,12 +203,25 @@ fun CaptureFlowContent(
             RecordStepScaffold(
                 title = stringResource(step.titleRes),
                 subtitle = step.subtitleRes?.let { stringResource(it) },
+                contentScrolls = step != CaptureStep.PHOTO,
+                fixedSlot =
+                    if (step == CaptureStep.PHOTO) {
+                        {
+                            RecordPhotoControls(
+                                enabled = !flow.isFrozen,
+                                showsCamera = uiState.cameraAvailable,
+                                onJustWrite = model::advance,
+                                onCamera = onTakePhoto,
+                            )
+                        }
+                    } else {
+                        null
+                    },
                 action =
                     actionFor(
                         flow.copy(step = step),
                         uiState.canSaveNow,
                         uiState.chainsComplete,
-                        model,
                         labels,
                         onSave,
                         onSaveThenComplete,
@@ -190,7 +229,12 @@ fun CaptureFlowContent(
             ) {
                 when (step) {
                     CaptureStep.PHOTO ->
-                        RecordPhotoStep(snap = uiState.snap, onPick = onPickPhoto, onRetry = onRetryPhoto, onRemove = onRemovePhoto)
+                        RecordPhotoStep(
+                            snap = uiState.snap,
+                            isPicking = uiState.snap == null && uiState.snapBlockedMessageRes != null,
+                            enabled = !flow.isFrozen,
+                            onPick = onPickPhoto,
+                        )
                     CaptureStep.MOMENT ->
                         RecordMomentStep(
                             draft = flow.draft,
@@ -279,25 +323,20 @@ private fun CaptureCloseDialog(
 }
 
 /**
- * The step's actions: the photo step's controls are Part 5's, so it keeps Skip (then Done once attached;
- * a pick advances on its own only from Part 5 on). The moment page has "Save & make it a pebble" for its
+ * The step's actions: the photo step has none (its three choices are in the screen, and a pick advances
+ * on its own). The moment page has "Save & make it a pebble" for its
  * primary and "Just save" beneath it, which Home's New pebble ([chainsComplete], #1383 D7) does not offer.
  */
 private fun actionFor(
     state: CaptureFlowState,
     canSaveNow: Boolean,
     chainsComplete: Boolean,
-    model: CaptureFlowModel,
     labels: CaptureLabels,
     onSave: () -> Unit,
     onSaveThenComplete: () -> Unit,
-): RecordStepAction =
+): RecordStepAction? =
     when (state.step) {
-        CaptureStep.PHOTO ->
-            RecordStepAction.Text(
-                label = if (state.hasSnap) labels.done else labels.skip,
-                onClick = model::advance,
-            )
+        CaptureStep.PHOTO -> null
         CaptureStep.MOMENT -> {
             val primary =
                 RecordStepAction.Primary(
@@ -321,8 +360,6 @@ private fun actionFor(
 
 /** Resolved strings, so the action builder stays a pure function. */
 private data class CaptureLabels(
-    val skip: String,
-    val done: String,
     val justSave: String,
     val saveAndPebble: String,
 )

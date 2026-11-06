@@ -46,7 +46,7 @@ class BackTest : AppUiTest() {
     fun `back on a later capture step goes to the previous step, not off the cover`() {
         onPath()
         openCapture()
-        onText(R.string.record_action_skip).performClick()
+        onText(R.string.capture_just_write).performClick()
         onText(R.string.capture_moment_title).assertIsDisplayed()
 
         pressBack()
@@ -69,7 +69,7 @@ class BackTest : AppUiTest() {
     fun `back from the page goes to the photo, and only back from the photo asks before closing`() {
         onPath()
         openCapture()
-        onText(R.string.record_action_skip).performClick()
+        onText(R.string.capture_just_write).performClick()
         compose.onAllNodes(hasSetTextAction())[0].performTextInput("Coffee with Mo")
         onText(R.string.capture_moment_title).assertIsDisplayed()
 
