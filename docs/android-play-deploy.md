@@ -211,6 +211,10 @@ The same *Run workflow* button takes a **track** input:
   production, exclude devices, and use Play App Signing* before the first
   `production` run, which also needs Play's production access (granted after the
   closed test, #1453).
+- **Account-deletion URL.** Give Play `https://www.pbbls.app/docs/delete-account`
+  in the Data safety form (#1443). `closed` and `production` runs fail early if
+  that page stops answering. The contact website is
+  `https://www.pbbls.app/support` (#1442).
 - **A draft is cheap to discard.** If you change your mind, delete the draft in
   the Console; its `versionCode` stays consumed, so the next run is simply
   higher.
