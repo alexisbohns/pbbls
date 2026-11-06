@@ -78,6 +78,31 @@ struct OnboardingGateReplayTests {
         #expect(gate.shouldPresent)
     }
 
+    /// The replay's read has the same ceiling: Settings' row can't hold the app either.
+    @Test func aReplayReadThatNeverAnswersFailsAtTheCeiling() async {
+        let bounds = ManualBounds()
+        let held = Latch()
+        defer { held.open() }
+        service.onCompleted = { _ in
+            await held.wait()
+            return false
+        }
+        let timed = OnboardingGateModel(defaults: defaults, wait: bounds.wait)
+        timed.service = service
+        timed.start(userId: "a")
+        bounds.runOut(0)
+        await timed.ceiling?.value
+        timed.forgetForReplay()
+        #expect(timed.isPending)
+
+        let ceiling = timed.ceiling
+        bounds.runOut(1)
+        await ceiling?.value
+
+        #expect(timed.readFailed)
+        #expect(!timed.isPending)
+    }
+
     /// After a sign-out there is nobody to replay for.
     @Test func withNoUserNothingIsRead() async {
         gate.start(userId: "a")

@@ -252,3 +252,124 @@ struct OnboardingGateModelTests {
         #expect(!m.shouldPresent)
     }
 }
+
+/// The read holds the app, so it has a ceiling (`OnboardingBounds.flagRead`), which runs out here when
+/// the test says.
+@Suite("OnboardingGateModel ceiling")
+@MainActor
+struct OnboardingGateCeilingTests {
+    private func defaults() throws -> UserDefaults {
+        let name = "onboarding-ceiling-\(UUID().uuidString)"
+        return try #require(UserDefaults(suiteName: name))
+    }
+
+    /// A gate whose ceiling runs out when the test says, over a read held until `held` opens.
+    private func heldRead(_ held: Latch, bounds: ManualBounds) throws -> OnboardingGateModel {
+        let service = FakeOnboardingService()
+        service.onCompleted = { _ in
+            await held.wait()
+            return false
+        }
+        let m = OnboardingGateModel(defaults: try defaults(), wait: bounds.wait)
+        m.service = service
+        return m
+    }
+
+    private func layer(_ m: OnboardingGateModel, isPassed: Bool = false) -> OnboardingConsentLayer {
+        OnboardingGate.consentLayer(
+            isPassed: isPassed,
+            isPending: m.isPending,
+            shouldPresent: m.shouldPresent,
+            isPresenting: false
+        )
+    }
+
+    @Test func aReadThatNeverAnswersFailsAtTheCeiling() async throws {
+        let held = Latch()
+        defer { held.open() }
+        let bounds = ManualBounds()
+        let m = try heldRead(held, bounds: bounds)
+
+        m.start(userId: "a")
+        #expect(m.isPending)
+        #expect(layer(m) == .surface)
+
+        let ceiling = m.ceiling
+        bounds.runOutNext()
+        await ceiling?.value
+
+        #expect(m.readFailed)
+        #expect(!m.isPending)
+        #expect(!m.shouldPresent)
+        // Failing closed: the form and Log out, or the app for an account with a pass.
+        #expect(layer(m) == .gate)
+        #expect(layer(m, isPassed: true) == .open)
+        #expect(bounds.durations == [OnboardingBounds.flagRead])
+    }
+
+    @Test func aLateSuccessAfterTheCeilingChangesNothing() async throws {
+        let held = Latch()
+        let bounds = ManualBounds()
+        let m = try heldRead(held, bounds: bounds)
+        m.start(userId: "a")
+        let ceiling = m.ceiling
+        let read = m.work
+        bounds.runOutNext()
+        await ceiling?.value
+
+        held.open()
+        await read?.value
+
+        #expect(m.completed == nil)
+        #expect(m.readFailed)
+        #expect(!m.shouldPresent)
+        #expect(layer(m) == .gate)
+    }
+
+    /// The ceiling cancels the read: the SDK's own attempt does not run on behind the gate.
+    @Test func theCeilingCancelsTheRead() async throws {
+        let held = Latch()
+        defer { held.open() }
+        let bounds = ManualBounds()
+        let m = try heldRead(held, bounds: bounds)
+        m.start(userId: "a")
+        let ceiling = m.ceiling
+        let read = m.work
+        bounds.runOutNext()
+        await ceiling?.value
+        #expect(read?.isCancelled == true)
+    }
+
+    @Test func anAnswerBeforeTheCeilingStands() async throws {
+        let bounds = ManualBounds()
+        let service = FakeOnboardingService(completed: false)
+        let m = OnboardingGateModel(defaults: try defaults(), wait: bounds.wait)
+        m.service = service
+        m.start(userId: "a")
+        await m.work?.value
+
+        let ceiling = m.ceiling
+        bounds.runOutNext()
+        await ceiling?.value
+
+        #expect(!m.readFailed)
+        #expect(m.shouldPresent)
+    }
+
+    @Test func aCeilingFromAnEarlierReadDoesNotFailTheNextOne() async throws {
+        let held = Latch()
+        defer { held.open() }
+        let bounds = ManualBounds()
+        let m = try heldRead(held, bounds: bounds)
+        m.start(userId: "a")
+        let stale = m.ceiling
+        m.start(userId: nil)
+        m.start(userId: "a")
+
+        bounds.runOut(0)
+        await stale?.value
+
+        #expect(!m.readFailed)
+        #expect(m.isPending)
+    }
+}

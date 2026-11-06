@@ -56,7 +56,7 @@ enum OnboardingGate {
 enum OnboardingConsentLayer: Equatable {
     /// Consent is on record: nothing above the tabs.
     case open
-    /// The plain surface, while the flow is pending, about to present or presenting.
+    /// The loader on the plain surface, while the flow is pending, about to present or presenting.
     case surface
     /// `ConsentGateView`.
     case gate
@@ -67,6 +67,17 @@ enum OnboardingHandOff: Equatable {
     case invite(String)
     case composer(OnboardingHandoffNote)
     case nothing
+}
+
+/// Waits out a bound, and throws if it is cancelled first. Injected, so the tests decide when a bound
+/// runs out and nothing here races a clock.
+typealias OnboardingWait = @Sendable (Duration) async throws -> Void
+
+/// The waits the first run can put a person through, so nobody sits in front of nothing for long.
+enum OnboardingBounds {
+    /// The flag read, on the same idea as `RootView`'s loader ceiling: past it, the read counts as
+    /// failed and the consent gate decides.
+    static let flagRead: Duration = .seconds(8)
 }
 
 /// Owned by `RootView`, like `ConsentGateModel`.
@@ -81,15 +92,19 @@ final class OnboardingGateModel {
     @ObservationIgnored private var userId: String?
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private(set) var work: Task<Void, Never>?
-    /// Bumped whenever the answer a read would deliver is no longer wanted (user change, `finish`).
-    /// A read lands only if its token is still current, on success and on failure alike.
+    /// The read's bound, so tests can await it.
+    @ObservationIgnored private(set) var ceiling: Task<Void, Never>?
+    @ObservationIgnored private let wait: OnboardingWait
+    /// Bumped whenever a read is over (`endRead`). A read lands, and its ceiling runs out, only if its
+    /// token is still current, on success and on failure alike.
     @ObservationIgnored private var generation = 0
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "onboarding")
 
     static let hasSeenKey = "hasSeenOnboarding"
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, wait: @escaping OnboardingWait = { try await Task.sleep(for: $0) }) {
         self.defaults = defaults
+        self.wait = wait
         hasSeen = defaults.bool(forKey: Self.hasSeenKey)
     }
 
@@ -101,8 +116,7 @@ final class OnboardingGateModel {
     /// Idempotent for one user. A new id forgets the last user's answer.
     func start(userId: String?) {
         guard userId != self.userId else { return }
-        work?.cancel()
-        generation += 1
+        endRead()
         self.userId = userId
         completed = nil
         readFailed = false
@@ -121,20 +135,36 @@ final class OnboardingGateModel {
             do {
                 let done = try await service.onboardingCompleted()
                 guard token == generation else { return }
+                endRead()
                 completed = done
             } catch {
                 // A superseded or cancelled read logs nothing and changes nothing.
                 guard token == generation, !Task.isCancelled else { return }
+                endRead()
                 logger.error("onboarding flag read failed: \(error.localizedDescription, privacy: .private)")
                 readFailed = true
             }
         }
+        ceiling = Task { [wait] in
+            do { try await wait(OnboardingBounds.flagRead) } catch { return }
+            guard token == generation else { return }
+            logger.error("onboarding flag read passed its ceiling; the consent gate decides")
+            endRead()
+            readFailed = true
+        }
+    }
+
+    /// The read is over, whoever says so: an answer, its ceiling, or nobody wanting it any more. What
+    /// is still out, the read or the ceiling, can't land: the generation has moved on.
+    private func endRead() {
+        work?.cancel()
+        ceiling?.cancel()
+        generation += 1
     }
 
     /// The flow ended: this device never re-presents, whatever the profile says next.
     func finish() {
-        work?.cancel()
-        generation += 1
+        endRead()
         hasSeen = true
         defaults.set(true, forKey: Self.hasSeenKey)
         completed = true
@@ -168,8 +198,7 @@ extension OnboardingGateModel {
 
     /// The device's half: the flag and the last answer go, then the profile is read again.
     func forgetForReplay() {
-        work?.cancel()
-        generation += 1
+        endRead()
         defaults.removeObject(forKey: Self.hasSeenKey)
         hasSeen = false
         completed = nil

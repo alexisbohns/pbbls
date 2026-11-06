@@ -129,3 +129,45 @@ final class Latch: @unchecked Sendable {
         c?.resume()
     }
 }
+
+/// Bounds that run out when the test says, in the order they were asked for. A bound told to run out
+/// before anything has asked for it runs out as soon as something does, and a cancelled one still
+/// answers: the code's own tokens are what has to ignore it.
+final class ManualBounds: @unchecked Sendable {
+    private let lock = NSLock()
+    private var latches: [Latch] = []
+    private var asked: [Duration] = []
+    private var cursor = 0
+
+    /// What was asked for, in order.
+    var durations: [Duration] { lock.withLock { asked } }
+
+    var wait: OnboardingWait {
+        { [self] duration in
+            let index = lock.withLock { () -> Int in
+                asked.append(duration)
+                return asked.count - 1
+            }
+            await latch(index).wait()
+        }
+    }
+
+    /// The bound asked for at `index`.
+    func runOut(_ index: Int) { latch(index).open() }
+
+    /// The next one nobody has run out yet.
+    func runOutNext() {
+        let index = lock.withLock { () -> Int in
+            defer { cursor += 1 }
+            return cursor
+        }
+        runOut(index)
+    }
+
+    private func latch(_ index: Int) -> Latch {
+        lock.withLock {
+            while latches.count <= index { latches.append(Latch()) }
+            return latches[index]
+        }
+    }
+}
