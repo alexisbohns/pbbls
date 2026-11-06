@@ -40,7 +40,7 @@ struct SoulPill: View {
     }
 }
 
-/// Trailing dashed-border pill that opens `SoulPickerSheet`. Used only in
+/// Trailing dashed-border pill that opens `SoulChooserSheet`. Used only in
 /// the edit form — the read view has no add affordance.
 struct AddSoulPill: View {
     var body: some View {

@@ -93,7 +93,10 @@ struct CompleteFlowView: View {
                 RecordStepScaffold(
                     title: model.step.title,
                     subtitle: model.step.subtitle,
-                    action: action(for: model.step)
+                    action: action(for: model.step),
+                    // The souls step hosts the chooser, which scrolls itself and pins
+                    // its bar above the keyboard; a scaffold ScrollView would unpin it.
+                    contentFillsHeight: model.step == .souls
                 ) {
                     CompleteStepContent(step: model.step, model: model)
                 }
@@ -107,14 +110,15 @@ struct CompleteFlowView: View {
     }
 
     /// The one action a step offers, if any. Tile steps offer none: the pick
-    /// is the advance (A1).
+    /// is the advance (A1). The souls step offers none either: the chooser's
+    /// own tray button is its Skip / Done.
     private func action(for step: CompleteStep) -> RecordStepAction? {
         switch step {
-        case .emotion, .domain, .success:
+        case .emotion, .domain, .souls, .success:
             return nil
         case .valence:
             return .primary("Continue", enabled: model.isAnswered, loading: false) { model.advance() }
-        case .souls, .collection:
+        case .collection:
             return .primary(model.optionalButtonIsSkip ? "Skip" : "Done", enabled: true, loading: false) {
                 model.advance()
             }

@@ -62,6 +62,22 @@ struct CompleteFlowModelTests {
         #expect(model.step == .privacy)
     }
 
+    @Test("setSouls mirrors the chooser's order without a haptic of its own; advance still moves on")
+    func setSouls() {
+        let (model, recorder) = model()
+        model.go(to: .souls)
+        let first = UUID()
+        let second = UUID()
+        model.setSouls([first, second])
+        #expect(model.draft.soulIds == [first, second])
+        model.setSouls([first, second])
+        model.setSouls([second, first])
+        #expect(model.draft.soulIds == [second, first])
+        #expect(recorder.taps.isEmpty)
+        model.advance()
+        #expect(model.step == .collection)
+    }
+
     @Test("privacy selects without advancing; back preserves answers")
     func privacyAndBack() {
         let (model, _) = model()

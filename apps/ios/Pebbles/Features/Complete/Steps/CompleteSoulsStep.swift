@@ -1,28 +1,30 @@
 import SwiftUI
 
-/// Who was there. Multi-select and optional, with the create tile; the
-/// step's `Skip` / `Done` button advances (A1).
+/// Who was there. Until the Life screen absorbs it (record-flow D10), the step
+/// hosts the chooser inline in pick mode, filling the scaffold's height so the
+/// chooser's bar stays pinned; the chooser's tray button is the Skip / Done
+/// that advances.
 struct CompleteSoulsStep: View {
     let model: CompleteFlowModel
 
     @Environment(ReferenceDataService.self) private var refs
-    @State private var isPresentingCreate = false
+    @State private var chooser: SoulChooserModel?
 
     var body: some View {
-        SoulPickerContent(
-            souls: refs.souls,
-            selection: Set(model.draft.soulIds),
-            onToggle: { model.toggleSoul($0) },
-            onCreate: { isPresentingCreate = true }
-        )
-        // The cache only refreshes on soul mutations, so the counts would lag
-        // every pebble recorded since launch.
-        .task { await refs.refreshSouls() }
-        .sheet(isPresented: $isPresentingCreate) {
-            CreateSoulSheet { inserted in
-                // Created for this pebble, so it arrives selected.
-                model.toggleSoul(inserted.id)
-                Task { await refs.refreshSouls() }
+        Group {
+            if let chooser {
+                SoulChooser(model: chooser, title: nil, onConfirm: { model.advance() })
+                    .onChange(of: chooser.selection) { _, ids in model.setSouls(ids) }
+                    // The chooser carries its own gutter; undo the scaffold's.
+                    .padding(.horizontal, -Spacing.lg)
+            } else {
+                ProgressView()
+            }
+        }
+        .task {
+            if chooser == nil {
+                chooser = SoulChooserModel(mode: .pick(allowsSkip: true), souls: refs.souls,
+                                           selection: model.draft.soulIds)
             }
         }
     }
