@@ -252,26 +252,6 @@ struct LocalizationPatternBTests {
             #expect(!description.isEmpty, "WelcomeStep \(step.id) has empty FR description")
         }
     }
-
-    @Test("every OnboardingStep has non-empty EN title and description")
-    func onboardingStepsEnglishComplete() {
-        for step in OnboardingSteps.all {
-            let title = resolve(step.title, locale: Locale(identifier: "en"))
-            let description = resolve(step.description, locale: Locale(identifier: "en"))
-            #expect(!title.isEmpty, "OnboardingStep \(step.id) has empty EN title")
-            #expect(!description.isEmpty, "OnboardingStep \(step.id) has empty EN description")
-        }
-    }
-
-    @Test("every OnboardingStep has non-empty FR title and description")
-    func onboardingStepsFrenchComplete() {
-        for step in OnboardingSteps.all {
-            let title = resolve(step.title, locale: Locale(identifier: "fr"))
-            let description = resolve(step.description, locale: Locale(identifier: "fr"))
-            #expect(!title.isEmpty, "OnboardingStep \(step.id) has empty FR title")
-            #expect(!description.isEmpty, "OnboardingStep \(step.id) has empty FR description")
-        }
-    }
 }
 
 @Suite("Localization — catalog file coverage")

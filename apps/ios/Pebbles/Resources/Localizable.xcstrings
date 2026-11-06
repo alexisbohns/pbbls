@@ -1777,23 +1777,6 @@
         }
       }
     },
-    "A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un café avec un ami. Un concert qui t’a donné des frissons. Une conversation difficile. Conserve ces moments en quelques secondes : pas de page blanche, pas de pression, pas d'audience."
-          }
-        }
-      }
-    },
     "A FEW WORDS" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2973,23 +2956,6 @@
         }
       }
     },
-    "Associate your moment with an emotion and a domain, relate with people and add your pebble to a stack or a collection." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Associate your moment with an emotion and a domain, relate with people and add your pebble to a stack or a collection."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Associe ton moment à une émotion et un domaine, relie-le à une âme, et ajoute ton galet à une pile ou une collection."
-          }
-        }
-      }
-    },
     "Back" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3467,23 +3433,6 @@
         }
       }
     },
-    "Choose or carve a glyph to mark the moment. Then reveal a unique pebble illustration to remember your moment." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose or carve a glyph to mark the moment. Then reveal a unique pebble illustration to remember your moment."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisis ou grave un glyphe pour marquer ce moment. Révèle ensuite le galet qui immortalise ton moment."
-          }
-        }
-      }
-    },
     "Choose…" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3582,23 +3531,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fermer le clavier"
-          }
-        }
-      }
-    },
-    "Close onboarding" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close onboarding"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fermer l'introduction"
           }
         }
       }
@@ -5100,23 +5032,6 @@
         }
       }
     },
-    "Drop a pebble, keep the moment." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drop a pebble, keep the moment."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grave un galet, capture l’instant."
-          }
-        }
-      }
-    },
     "Earned %lld karma" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6068,23 +5983,6 @@
         }
       }
     },
-    "Every moment matters — the big ones and the quiet ones. But most of them slip away before you even notice. Pebbles helps you collect them, one by one." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Every moment matters — the big ones and the quiet ones. But most of them slip away before you even notice. Pebbles helps you collect them, one by one."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chaque moment compte : autant les grands que les discrets. Ne les laisse plus s’échapper : Pebbles t’aide à les collecter, un par un."
-          }
-        }
-      }
-    },
     "Every vibration in Pebbles, on this iPhone." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6166,23 +6064,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Obtenir un nouveau lien"
-          }
-        }
-      }
-    },
-    "Get your pebble." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Get your pebble."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Révèle ton galet"
           }
         }
       }
@@ -13090,23 +12971,6 @@
         }
       }
     },
-    "Qualify and relate." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Qualify and relate."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Qualifier et relier"
-          }
-        }
-      }
-    },
     "Quick actions" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13894,23 +13758,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Commence par une photo"
-          }
-        }
-      }
-    },
-    "Start your path" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start your path"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Commencer mon chemin"
           }
         }
       }
@@ -15013,23 +14860,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mes glyphes"
-          }
-        }
-      }
-    },
-    "Your life is a path." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your life is a path."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ma vie est un chemin."
           }
         }
       }
