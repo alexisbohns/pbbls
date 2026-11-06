@@ -1921,3 +1921,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Web follows in its own plan, with this gate as the reference.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #1565, #1510, #1466, `docs/superpowers/specs/2026-11-04-interactive-onboarding-design.md`, `docs/superpowers/plans/2026-11-06-interactive-onboarding-ios.md`, the 2026-11-05 entry "The onboarding gate reads the profile, and consent moves into the flow on Android (#1510)".
+
+## 2026-11-06 — Android's record flow keeps the modal photo picker, and its chooser follows the Android mocks
+
+- **Status:** taken
+- **Scope:** android
+- **Context:** iOS's record flow and souls chooser (#1515, #1519) were built first; Android mirrors them 1:1 except where the Android mocks or the platform say otherwise.
+- **Decision:** The system Photo Picker stays modal (Play's photo policy), so a photo moment costs 4 taps, 5 where the system picker asks for Done as the Pixel 8's does, and 3 for words only. The chooser's results stand alone with the match highlighted (no Usual tiles below); the Add row comes last while results exist and first when there are none, and the FAB adds whenever it can but is lit only with no results (mock 11). The picker is a `ModalBottomSheet` with its back handler inside its content, because a pushed entry cannot hand a result back. Quick moment's sheet is gone: its Home tile and the onboarding hand-off open the moment page, the hand-off's prompt as the name's placeholder and the reason travelling as a slug on the key. Device-local recents and the valence help flag live in `RecordFlowMemory` in `pebbles_prefs`, the domains cleared on sign-out. Edit pebble omits a domain or collection set left as prefilled, as iOS has since #1099. `SnapUploadCoordinator` gained iOS's commit lock and pick generation and deletes a replaced pending snap. The Life bar drops its caption from font scale 1.5, keeping the description on each tile's click label. Android prunes a gone domain from a restored draft and fires the achievement check on a plain save; iOS does neither, and both are to be raised there.
+- **Why:** See the plan's table of where the sources disagree.
+- **Consequences:** The D6 snackbar, the D9 0.3 s beat and the D7 one-sentence lockup are on neither surface; they are one finding for both. iOS lost its first-moment achievement check when Quick moment moved to the page and does not prune a gone domain.
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #1515, #1519, `docs/superpowers/plans/2026-11-06-android-record-flow-and-souls.md`.
