@@ -6,12 +6,12 @@ import Testing
 /// an untouched field from a changed one. The Complete flow never sets it.
 @Suite("CompleteDraft prefill")
 struct CompleteDraftTests {
-    @Test("init(from:) records the first domain and the first collection it prefilled")
+    @Test("init(from:) records the domains and the first collection it prefilled")
     func prefilled() throws {
         let detail = try JSONDecoder().decode(MomentDetail.self, from: MomentFixtures.completedMoment)
         let draft = CompleteDraft(from: try #require(detail.pebble))
         #expect(draft.prefill == CompleteDraft.Prefill(
-            domainId: MomentFixtures.uuid(MomentFixtures.domainId),
+            domainIds: [MomentFixtures.uuid(MomentFixtures.domainId)],
             collectionId: MomentFixtures.uuid(MomentFixtures.collectionId)
         ))
     }
@@ -20,7 +20,7 @@ struct CompleteDraftTests {
     func legacy() throws {
         let detail = try JSONDecoder().decode(MomentDetail.self, from: MomentFixtures.legacyMoment)
         let draft = CompleteDraft(from: try #require(detail.pebble))
-        #expect(draft.prefill == CompleteDraft.Prefill(domainId: nil, collectionId: nil))
+        #expect(draft.prefill == CompleteDraft.Prefill(domainIds: [], collectionId: nil))
     }
 
     @Test("a fresh draft, the Complete flow's, has no prefill")
@@ -31,7 +31,18 @@ struct CompleteDraftTests {
     @Test("isEmpty ignores the prefill")
     func emptiness() {
         var draft = CompleteDraft()
-        draft.prefill = CompleteDraft.Prefill(domainId: UUID(), collectionId: UUID())
+        draft.prefill = CompleteDraft.Prefill(domainIds: [UUID()], collectionId: UUID())
         #expect(draft.isEmpty)
+    }
+
+    @Test("complete needs a valence, an emotion and at least one domain; three domains at most")
+    func complete() {
+        var draft = CompleteDraft()
+        draft.valence = .highlightSmall
+        draft.emotionId = UUID()
+        #expect(!draft.isComplete)
+        draft.domainIds = [UUID()]
+        #expect(draft.isComplete)
+        #expect(CompleteDraft.domainCap == 3)
     }
 }

@@ -42,6 +42,14 @@ func userMessageForMomentWriteMessage(_ message: String) -> String {
     MomentWriteError.slug(in: message)?.userMessage ?? String(localized: "Couldn't save. Please try again.")
 }
 
+/// The slug a thrown PostgREST error names, nil for anything else (a network
+/// failure, a decode): callers that own a better generic line than
+/// `userMessageForMomentWriteError` keep the specific ones through this.
+func knownMomentWriteError(_ error: Error) -> MomentWriteError? {
+    guard let postgrest = error as? PostgrestError else { return nil }
+    return MomentWriteError.slug(in: postgrest.message)
+}
+
 /// Any thrown error from a moment write → copy (R10). Image pipeline errors
 /// keep the copy the old composer used.
 func userMessageForMomentWriteError(_ error: Error) -> String {

@@ -3,20 +3,17 @@ import Foundation
 extension CompleteStep {
     var title: LocalizedStringResource {
         switch self {
-        case .valence:    return "How did it land?"
-        case .emotion:    return "What did you feel?"
-        case .domain:     return "What part of life?"
-        case .souls:      return "Anyone in this one?"
-        case .collection: return "Add it to a collection?"
-        case .privacy:    return "Who can see it?"
-        case .success:    return "Your pebble"
+        case .valence: return "How did it land?"
+        case .emotion: return "What did you feel?"
+        case .life:    return "What part of life?"
+        case .success: return "Make it richer"
         }
     }
 
+    /// The summary pill replaces the subtitles (D1); the steps carry none.
     var subtitle: LocalizedStringResource? {
         switch self {
-        case .valence: return "How much of your life did this take up?"
-        case .emotion, .domain, .souls, .collection, .privacy, .success: return nil
+        case .valence, .emotion, .life, .success: return nil
         }
     }
 }

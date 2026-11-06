@@ -5,14 +5,15 @@ import Testing
 @Suite("CompleteDraft init(from: MomentDetail.Pebble)")
 struct CompleteDraftFromPebbleTests {
 
-    @Test("prefills every pebble field, first domain and first collection (R5, A6)")
+    @Test("prefills every pebble field, every domain (cap 3) and the first collection (R5, A6)")
     func prefill() throws {
         let detail = try JSONDecoder().decode(MomentDetail.self, from: MomentFixtures.completedMoment)
         let pebble = try #require(detail.pebble)
         let draft = CompleteDraft(from: pebble)
         #expect(draft.valence == .highlightMedium)
         #expect(draft.emotionId == MomentFixtures.uuid(MomentFixtures.joyId))
-        #expect(draft.domainId == MomentFixtures.uuid(MomentFixtures.domainId))
+        #expect(draft.domainIds == pebble.domains.map(\.id))
+        #expect(draft.domainIds == [MomentFixtures.uuid(MomentFixtures.domainId)])
         #expect(draft.soulIds == [MomentFixtures.uuid(MomentFixtures.soulId)])
         #expect(draft.collectionId == MomentFixtures.uuid(MomentFixtures.collectionId))
         #expect(draft.visibility == .private)
@@ -23,7 +24,7 @@ struct CompleteDraftFromPebbleTests {
     func legacy() throws {
         let detail = try JSONDecoder().decode(MomentDetail.self, from: MomentFixtures.legacyMoment)
         let draft = CompleteDraft(from: try #require(detail.pebble))
-        #expect(draft.domainId == nil)
+        #expect(draft.domainIds.isEmpty)
         #expect(!draft.isComplete)
     }
 

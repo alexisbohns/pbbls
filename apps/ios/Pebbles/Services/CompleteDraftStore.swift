@@ -163,7 +163,7 @@ struct CompleteDraftSnapshot: Codable, Equatable {
         intensity = draft.valence?.intensity
         positiveness = draft.valence?.positiveness
         emotionId = draft.emotionId
-        domainIds = draft.domainId.map { [$0] }
+        domainIds = draft.domainIds.isEmpty ? nil : draft.domainIds
         soulIds = draft.soulIds.isEmpty ? nil : draft.soulIds
         collectionIds = draft.collectionId.map { [$0] }
         visibility = draft.visibility.rawValue
@@ -175,7 +175,7 @@ struct CompleteDraftSnapshot: Codable, Equatable {
             draft.valence = Valence.from(positiveness: positiveness, intensity: intensity)
         }
         draft.emotionId = emotionId
-        draft.domainId = domainIds?.first
+        draft.domainIds = domainIds ?? []
         draft.soulIds = soulIds ?? []
         draft.collectionId = collectionIds?.first
         draft.visibility = visibility.flatMap(Visibility.init(rawValue:)) ?? .secret

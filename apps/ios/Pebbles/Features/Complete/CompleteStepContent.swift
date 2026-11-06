@@ -10,13 +10,10 @@ struct CompleteStepContent: View {
 
     var body: some View {
         switch step {
-        case .valence:    CompleteValenceStep(model: model, isFirstPebble: isFirstPebble)
-        case .emotion:    CompleteEmotionStep(model: model)
-        case .domain:     CompleteDomainStep(model: model)
-        case .souls:      CompleteSoulsStep(model: model)
-        case .collection: CompleteCollectionStep(model: model)
-        case .privacy:    CompletePrivacyStep(model: model)
-        case .success:    EmptyView()
+        case .valence: CompleteValenceStep(model: model, isFirstPebble: isFirstPebble)
+        case .emotion: CompleteEmotionStep(model: model)
+        case .life:    CompleteLifeStep(model: model)
+        case .success: EmptyView()
         }
     }
 }

@@ -10,9 +10,13 @@ struct CompleteFlowView: View {
     /// Fired as soon as `complete_pebble` succeeds, while the success step is
     /// up, so the parent reloads behind the cover.
     let onCompleted: (UUID) -> Void
+    /// Chained from Capture: the valence step says the moment is already
+    /// saved and what the three questions are for (D1).
+    var afterSave = false
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(ReferenceDataService.self) private var refs
+    @Environment(EmotionPaletteService.self) private var palettes
     @Environment(KarmaNotificationService.self) private var karma
     @Environment(AchievementsService.self) private var achievements
     @Environment(CompleteDraftStore.self) private var drafts
@@ -100,11 +104,12 @@ struct CompleteFlowView: View {
             } else {
                 RecordStepScaffold(
                     title: model.step.title,
-                    subtitle: model.step.subtitle,
+                    subtitle: valenceSubtitle ?? model.step.subtitle,
+                    pill: model.step == .valence ? nil : AnyView(summaryPill),
                     action: action(for: model.step),
-                    // The souls step hosts the chooser, which scrolls itself and pins
-                    // its bar above the keyboard; a scaffold ScrollView would unpin it.
-                    contentFillsHeight: model.step == .souls
+                    // The life step scrolls itself and pins its bar; a scaffold
+                    // ScrollView would unpin it.
+                    contentFillsHeight: model.step == .life
                 ) {
                     CompleteStepContent(step: model.step, model: model, isFirstPebble: isFirstPebble)
                 }
@@ -117,21 +122,38 @@ struct CompleteFlowView: View {
         ))
     }
 
-    /// The one action a step offers, if any. Tile steps offer none: the pick
-    /// is the advance (A1). The souls step offers none either: the chooser's
-    /// own tray button is its Skip / Done.
+    private var valenceSubtitle: LocalizedStringResource? {
+        guard afterSave, model.step == .valence else { return nil }
+        return "Moment saved · 3 questions to make it a pebble"
+    }
+
+    /// The answers so far (D11). On the emotion step Edit returns to the
+    /// valence; on Life, to the emotion, the last answer, unless it was
+    /// skipped by a restore and the valence is all there is to edit.
+    private var summaryPill: some View {
+        RecordSummaryPill(
+            valence: model.draft.valence,
+            emotionName: model.draft.emotionId.flatMap { palettes.byEmotionId[$0]?.localizedName },
+            onEdit: { model.go(to: model.step == .life && model.draft.emotionId != nil ? .emotion : .valence) }
+        )
+    }
+
+    /// The one action a step offers, if any. The emotion step offers none:
+    /// the pick is the advance (A1). The life step's button counts the domains
+    /// past the first (D10).
     private func action(for step: CompleteStep) -> RecordStepAction? {
         switch step {
-        case .emotion, .domain, .souls, .success:
+        case .emotion, .success:
             return nil
         case .valence:
             return .primary("Continue", enabled: model.isAnswered, loading: false) { model.advance() }
-        case .collection:
-            return .primary(model.optionalButtonIsSkip ? "Skip" : "Done", enabled: true, loading: false) {
-                model.advance()
-            }
-        case .privacy:
-            return .primary("Make it a pebble", enabled: model.draft.isComplete, loading: model.isCompleting) {
+        case .life:
+            let count = model.draft.domainIds.count
+            return .primary(
+                count > 1 ? "Make it a pebble (\(count))" : "Make it a pebble",
+                enabled: model.draft.isComplete,
+                loading: model.isCompleting
+            ) {
                 Task { await complete() }
             }
         }
@@ -190,6 +212,9 @@ struct CompleteFlowView: View {
                 achievements.fireCheck()
             }
             autosave?.clear()
+            if let owner = supabase.session?.user.id {
+                RecentDomains().record(model.draft.domainIds, owner: owner)
+            }
             model.succeed(
                 with: CompletionResult(pebbleId: pebbleId, karmaDelta: karmaDelta, glyph: resolved),
                 quiet: quiet
@@ -197,7 +222,10 @@ struct CompleteFlowView: View {
             onCompleted(momentId)
         } catch {
             logger.error("complete_pebble failed: \(error.localizedDescription, privacy: .private)")
-            model.fail(userMessageForMomentWriteError(error))
+            // A slug the server names keeps its own copy; anything else says
+            // what still stands: the moment is saved, the pebble is not (D6).
+            model.fail(knownMomentWriteError(error)?.userMessage
+                ?? String(localized: "Moment saved, pebble not made yet · Try again"))
         }
     }
 

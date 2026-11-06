@@ -4,21 +4,19 @@ import Testing
 @Suite("CompleteStep")
 struct CompleteStepTests {
 
-    @Test("order is valence · emotion · domain · souls · collection · privacy, then success")
+    @Test("valence, emotion, life, then success; three counted")
     func order() {
-        #expect(CompleteStep.allCases == [.valence, .emotion, .domain, .souls, .collection, .privacy, .success])
-    }
-
-    @Test("six dots; success is uncounted")
-    func dots() {
-        #expect(CompleteStep.counted.count == 6)
+        #expect(CompleteStep.allCases == [.valence, .emotion, .life, .success])
+        #expect(CompleteStep.counted == [.valence, .emotion, .life])
         #expect(CompleteStep.success.dotIndex == nil)
-        #expect(CompleteStep.privacy.dotIndex == 5)
+        #expect(CompleteStep.life.next == .success)
     }
 
-    @Test("only souls and collection are optional")
-    func optional() {
-        #expect(CompleteStep.allCases.filter(\.isOptional) == [.souls, .collection])
+    @Test("life is the last dot; success has no previous of its own in the counted run")
+    func dots() {
+        #expect(CompleteStep.life.dotIndex == 2)
+        #expect(CompleteStep.valence.previous == nil)
+        #expect(CompleteStep.success.previous == .life)
     }
 
     @Test("no glyph step exists")

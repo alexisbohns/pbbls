@@ -21,6 +21,7 @@ struct CompleteDraftStoreTests {
         var draft = CompleteDraft()
         draft.valence = .highlightSmall
         draft.emotionId = UUID()
+        draft.domainIds = [UUID(), UUID()]
         draft.soulIds = [UUID()]
         draft.visibility = .private
         return draft
@@ -34,6 +35,7 @@ struct CompleteDraftStoreTests {
         let draft = answered()
         store.save(draft, momentId: moment, ownerId: owner)
         #expect(store.load(momentId: moment, ownerId: owner) == draft)
+        #expect(store.load(momentId: moment, ownerId: owner)?.domainIds == draft.domainIds)
         #expect(store.load(momentId: other, ownerId: owner) == nil)
     }
 
@@ -68,7 +70,9 @@ struct CompleteDraftStoreTests {
         store.save(answered(), momentId: moment, ownerId: UUID())
         let data = try Data(contentsOf: file(dir, moment))
         let json = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
-        #expect(Set(json.keys) == ["owner_id", "moment_id", "intensity", "positiveness", "emotion_id", "soul_ids", "visibility"])
+        #expect(Set(json.keys) == [
+            "owner_id", "moment_id", "intensity", "positiveness", "emotion_id", "domain_ids", "soul_ids", "visibility"
+        ])
     }
 
     @Test("an empty draft clears; clear(momentId:) and clearAll scope correctly")
