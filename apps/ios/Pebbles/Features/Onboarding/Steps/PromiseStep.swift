@@ -11,6 +11,16 @@ struct PromiseStep: View {
     private static let railWidth: CGFloat = 44
     private static let ruleWidth: CGFloat = 64
 
+    /// 12 pt capitals at 0.3 em. Set on the rank itself: a `.tracking` outside `spineType` loses to
+    /// the rank's own.
+    private static let railLabel: SpineType.Style = {
+        var style = SpineType.Style.badgeLabel
+        style.size = 12
+        style.trackingEm = 0.3
+        style.isUppercase = true
+        return style
+    }()
+
     @Environment(\.locale) private var locale
 
     var body: some View {
@@ -34,8 +44,7 @@ struct PromiseStep: View {
         HStack(spacing: 0) {
             RotatedLabel {
                 Text("A promise")
-                    .pebblesFont(.meta)
-                    .tracking(3.6)
+                    .spineType(Self.railLabel)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .fixedSize()
                     .rotationEffect(.degrees(-90))
@@ -69,7 +78,8 @@ struct PromiseStep: View {
                     if index == 0 {
                         Text(paragraph).spineType(.greetingLine)
                     } else {
-                        Text(paragraph).pebblesFont(.body)
+                        // Inside `pebblesFont`: the rank sets its own line spacing, and the nearer modifier wins.
+                        Text(paragraph).lineSpacing(6).pebblesFont(.body)
                     }
                 }
                 .foregroundStyle(Color.pebbles.onSurface)
@@ -88,7 +98,7 @@ struct PromiseStep: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.leading, Spacing.lg)
+        .padding(.leading, Spacing.xl)
         .padding(.trailing, Spacing.xl)
         .padding(.top, Spacing.lg)
         .padding(.bottom, Spacing.lg)
@@ -101,13 +111,18 @@ private struct PromiseTitle: View {
     @Environment(\.legibilityWeight) private var legibilityWeight
 
     var body: some View {
-        let roman = SpineType.Style.sectionTitle
+        let roman = SpineType.Style.stepTitle
+        let spacing = SpineType.resolve(roman, dynamicTypeSize: dynamicTypeSize, legibilityWeight: legibilityWeight)
+            .lineSpacing
         var italic = roman
         italic.italic = true
         italic.weight = 340
         return (run(String(localized: "Before anything else,"), roman, Color.pebbles.onSurface)
             + Text(" ")
             + run(String(localized: "a promise."), italic, Color.pebbles.primary))
+            // SwiftUI clamps a negative `lineSpacing` to zero (measured), so the rank's 31.5 pt line
+            // height only shows where the platform honours it; the gap stays the font's natural one.
+            .lineSpacing(spacing)
     }
 
     private func run(_ text: String, _ style: SpineType.Style, _ colour: Color) -> Text {

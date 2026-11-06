@@ -79,6 +79,7 @@ struct SpineTypeTests {
         Row(name: "greeting", actual: .greeting, expected: S(size: 40, weight: 270, trackingEm: -0.024, lineHeight: 41.6, scaling: .text(.largeTitle))),
         Row(name: "greetingLine", actual: .greetingLine, expected: S(size: 21, weight: 360, italic: true, scaling: .text(.title3))),
         Row(name: "sectionTitle", actual: .sectionTitle, expected: S(size: 30, weight: 300, trackingEm: -0.018, scaling: .text(.title))),
+        Row(name: "stepTitle", actual: .stepTitle, expected: S(size: 30, weight: 300, trackingEm: -0.018, lineHeight: 31.5, scaling: .text(.title))),
         Row(name: "sectionFigure", actual: .sectionFigure, expected: S(size: 30, weight: 300, features: lin, scaling: .text(.title))),
         Row(name: "sectionFigureWord", actual: .sectionFigureWord, expected: S(size: 19, weight: 380, italic: true, scaling: .text(.body))),
         Row(name: "wrapCount", actual: .wrapCount, expected: S(size: 34, weight: 280, features: lin, scaling: .text(.largeTitle))),
