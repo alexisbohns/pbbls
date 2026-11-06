@@ -20,7 +20,7 @@ Sets travel together: the visibility trio and the error family are drawn as a se
 12. invite — bring someone into the circle (`person.badge.plus`)
 13. life domain — a compass, a territory, an area of one's life (`safari`; Android `ic_pebble_domain`)
 14. market — where glyphs are traded (`storefront`)
-15. hour — a time of day, beside a date (Android `ic_pebble_when`, the time pill on Capture's When step; iOS draws no icon there)
+15. hour — a time of day, beside a date (Android `ic_pebble_when` went with #1515, when the When step became a chip, so it has no Android consumer now; iOS draws no icon there)
 
 ## Web (#1313)
 
