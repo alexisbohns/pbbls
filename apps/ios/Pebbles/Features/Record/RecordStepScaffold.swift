@@ -39,6 +39,10 @@ struct RecordStepScaffold<Content: View>: View {
     /// steps whose action is always enabled should, since a disabled pill is
     /// an outline and would not read over a photo.
     var contentFillsHeight: Bool = false
+    /// Drawn between the title and a `contentFillsHeight` content, never
+    /// scrolled. The photo step's two controls. With it set and `action` nil,
+    /// nothing floats over the content.
+    var fixedSlot: AnyView?
     /// Shown under the primary action. Ignored when `contentFillsHeight`,
     /// whose floating pill has no room beneath it.
     var secondaryAction: RecordStepSecondaryAction?
@@ -63,11 +67,16 @@ struct RecordStepScaffold<Content: View>: View {
             .padding(.horizontal, Spacing.lg)
 
             if contentFillsHeight {
-                content()
-                    .padding(.horizontal, Spacing.lg)
-                    .padding(.bottom, Spacing.sm)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .overlay(alignment: .bottom) { floatingAction }
+                VStack(spacing: Spacing.md) {
+                    if let fixedSlot {
+                        fixedSlot.padding(.horizontal, Spacing.lg)
+                    }
+                    content()
+                        .padding(.horizontal, Spacing.lg)
+                        .padding(.bottom, Spacing.sm)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .overlay(alignment: .bottom) { floatingAction }
+                }
             } else {
                 ScrollView {
                     content()
