@@ -71,6 +71,8 @@ struct PromiseStep: View {
         let french = locale.prefersFrench
         return VStack(alignment: .leading, spacing: Spacing.lg) {
             PromiseTitle()
+                // Wraps to a second line instead of truncating when the column is not in a scroll view.
+                .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
             Rectangle().fill(Color.pebbles.outlineVariant).frame(width: Self.ruleWidth, height: 1)
             if let letter {

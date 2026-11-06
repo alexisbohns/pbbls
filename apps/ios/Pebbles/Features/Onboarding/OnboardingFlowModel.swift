@@ -33,6 +33,13 @@ struct OnboardingPerson: Equatable {
 /// Who the carve studio (S1) is open for.
 enum OnboardingCarveTarget: Equatable { case you, person(Int) }
 
+/// What the flow leaves for the first composer (D9): bound to its user and consumed once by the
+/// host, so a session ending between the two never opens B's composer with A's prompt.
+struct OnboardingHandoffNote: Equatable, Sendable {
+    let userId: String?
+    let reason: OnboardingReason?
+}
+
 /// The seven-step flow's state machine (#1510). Every interaction is a method here and fires its
 /// haptic, as in the record flow. Answers live here until `complete_onboarding` sends them in one
 /// go (D5); consent is the exception, recorded on Continue. Mirrors Android's `OnboardingViewModel`.
@@ -63,6 +70,8 @@ final class OnboardingFlowModel {
     private(set) var isCompleting = false
     private(set) var completeFailed = false
     private(set) var isDone = false
+    /// Left by a successful `complete_onboarding`; Part 5 consumes it.
+    private(set) var doneNote: OnboardingHandoffNote?
 
     /// The consent write in flight, so tests can await it. Not tied to the view: leaving the
     /// screen must not cancel a request the server may have accepted.
@@ -192,7 +201,7 @@ final class OnboardingFlowModel {
             // the error line goes too. The cache is left to the gate's own check, which marks it.
             consent.failed = false
         case .pace:
-            // `complete()` sends from here.
+            complete()
             return
         case .people:
             commitEditingPeople()
@@ -214,7 +223,7 @@ final class OnboardingFlowModel {
             people = []
         case .pace:
             pace = nil
-            // `complete()` sends from here.
+            complete()
             return
         case .promise, .consent, .handoff:
             break
@@ -263,6 +272,7 @@ final class OnboardingFlowModel {
     func sessionEnded() {
         sessionHasEnded = true
         consent.isSaving = false
+        isCompleting = false
     }
 
     /// Continue: every act switched on here goes in the ledger, then the flow moves on. The acts
@@ -354,7 +364,7 @@ final class OnboardingFlowModel {
     }
 }
 
-// Steps 4 and 5 and the carve live in an extension of their own so the class body stays readable.
+// Steps 4 to 6 and the carve live in an extension of their own so the class body stays readable.
 extension OnboardingFlowModel {
     // MARK: - Step 4
 
@@ -482,6 +492,53 @@ extension OnboardingFlowModel {
         haptic(.selection)
         glyphSheetFor = nil
         carvingFor = .person(index)
+    }
+
+    // MARK: - Step 6
+
+    /// Choosing the chosen row again keeps it: a radio set always has one, once it has any.
+    func selectPace(_ value: OnboardingPace) {
+        guard !isCompleting else { return }
+        haptic(.selection)
+        pace = value
+    }
+
+    /// The one write (D5). Refused, or failed, it keeps every answer so a retry resends. A person
+    /// is never sent without a glyph, and never fewer people than were named.
+    private func complete() {
+        guard !isCompleting, !isDone, !sessionHasEnded else { return }
+        isCompleting = true
+        completeFailed = false
+        work = Task { [weak self, logger] in
+            guard let self else { return }
+            // A failed first read gets one more try before anyone is sent without a glyph.
+            if self.systemGlyphs.isEmpty, self.hasPersonWithoutGlyph { await self.loadSystemGlyphs() }
+            guard !self.sessionHasEnded else { return }
+            let answers = self.answers
+            let named = self.people.filter(Self.isListed).count
+            guard !self.hasPersonWithoutGlyph, answers.souls.count == named else {
+                logger.error("onboarding not sent: a named person has no glyph, the system glyphs did not load")
+                self.finishCompleting(failed: true)
+                return
+            }
+            do {
+                try await self.service.complete(answers)
+                guard !self.sessionHasEnded else { return }
+                self.doneNote = OnboardingHandoffNote(userId: self.userId, reason: answers.reasons?.first)
+                self.isCompleting = false
+                self.isDone = true
+            } catch {
+                logger.error("complete_onboarding failed: \(error.localizedDescription, privacy: .private)")
+                self.finishCompleting(failed: true)
+            }
+        }
+    }
+
+    private func finishCompleting(failed: Bool) {
+        guard !sessionHasEnded else { return }
+        isCompleting = false
+        completeFailed = failed
+        if failed { haptic(.warning) }
     }
 
     // MARK: - S1, the carve studio

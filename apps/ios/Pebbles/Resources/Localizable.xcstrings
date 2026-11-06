@@ -21,6 +21,23 @@
         }
       }
     },
+    "A few times a week" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A few times a week"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelques fois par semaine"
+          }
+        }
+      }
+    },
     "A glyph for %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -68,6 +85,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "une promesse."
+          }
+        }
+      }
+    },
+    "A small habit, evening or morning." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A small habit, evening or morning."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une petite habitude, le soir ou le matin."
           }
         }
       }
@@ -310,6 +344,23 @@
         }
       }
     },
+    "Couldn't finish. Check your connection and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't finish. Check your connection and try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de terminer. Vérifie ta connexion et réessaie."
+          }
+        }
+      }
+    },
     "Couldn't process the image." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -408,6 +459,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saisis ton mot de passe pour continuer."
+          }
+        }
+      }
+    },
+    "Every day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every day"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les jours"
           }
         }
       }
@@ -565,6 +633,40 @@
         }
       }
     },
+    "No rhythm at all. Also fine." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No rhythm at all. Also fine."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun rythme. Ça va aussi."
+          }
+        }
+      }
+    },
+    "No streaks, no guilt." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No streaks, no guilt."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de série, pas de culpabilité."
+          }
+        }
+      }
+    },
     "Notice how I really feel" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -599,6 +701,23 @@
         }
       }
     },
+    "One look back, each Sunday." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One look back, each Sunday."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un regard en arrière, chaque dimanche."
+          }
+        }
+      }
+    },
     "One of those souls is gone. Remove it and try again." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -629,6 +748,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Un interrupteur pour chaque chose que tu acceptes."
+          }
+        }
+      }
+    },
+    "Only when it matters" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only when it matters"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seulement quand ça compte"
           }
         }
       }
@@ -1126,6 +1262,23 @@
         }
       }
     },
+    "What pace suits you?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What pace suits you?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quel rythme te va ?"
+          }
+        }
+      }
+    },
     "What we keep, where, and for how long." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1139,6 +1292,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ce que l'on garde, où, et combien de temps."
+          }
+        }
+      }
+    },
+    "When there's something worth it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When there's something worth it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quand quelque chose en vaut la peine."
+          }
+        }
+      }
+    },
+    "Wrapping the end of the week" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wrapping the end of the week"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En bouclant la fin de semaine"
           }
         }
       }

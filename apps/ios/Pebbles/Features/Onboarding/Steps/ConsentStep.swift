@@ -123,6 +123,9 @@ struct ConsentStep: View {
                 .pebblesFont(.callout)
                 .foregroundStyle(Color.pebbles.primary)
                 .multilineTextAlignment(.center)
+                // Wraps at accessibility sizes instead of truncating inside its capsule.
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.vertical, Spacing.sm)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .overlay(Capsule().stroke(Color.pebbles.outline, lineWidth: 1))
                 .contentShape(Capsule())
