@@ -6,19 +6,15 @@ import org.junit.Test
 
 class CaptureStepTest {
     @Test
-    fun `photo, when, name in that order`() {
-        assertEquals(listOf(CaptureStep.PHOTO, CaptureStep.WHEN, CaptureStep.NAME), CaptureStep.entries)
+    fun `two steps, the photo then the moment page`() {
+        assertEquals(listOf(CaptureStep.PHOTO, CaptureStep.MOMENT), CaptureStep.entries)
     }
 
     @Test
-    fun `only the photo is optional`() {
-        assertEquals(listOf(CaptureStep.PHOTO), CaptureStep.entries.filter { it.isOptional })
-    }
-
-    @Test
-    fun `name steps back to when, and the photo has nothing before it`() {
-        assertEquals(CaptureStep.WHEN, CaptureStep.NAME.previous)
+    fun `the page steps back to the photo, and nothing lies beyond it`() {
+        assertEquals(CaptureStep.PHOTO, CaptureStep.MOMENT.previous)
+        assertEquals(CaptureStep.MOMENT, CaptureStep.PHOTO.next)
         assertNull(CaptureStep.PHOTO.previous)
-        assertNull(CaptureStep.NAME.next)
+        assertNull(CaptureStep.MOMENT.next)
     }
 }

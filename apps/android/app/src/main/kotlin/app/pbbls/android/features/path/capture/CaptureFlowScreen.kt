@@ -14,7 +14,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,12 +25,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,26 +39,25 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.rememberTapHaptics
-import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.features.path.flow.RecordFlowChrome
 import app.pbbls.android.features.path.flow.RecordStepAction
 import app.pbbls.android.features.path.flow.RecordStepScaffold
-import app.pbbls.android.features.path.flow.steps.RecordNameStep
+import app.pbbls.android.features.path.flow.steps.RecordMomentStep
 import app.pbbls.android.features.path.flow.steps.RecordPhotoStep
-import app.pbbls.android.features.path.flow.steps.RecordWhenStep
 
 /** As the record flow: enough for the slide to read as one motion without holding the user up. */
 private const val STEP_TRANSITION_MS = 280
 
 /**
- * Capture (#1048): photo, when, name, then `save_moment`. A full-screen modal
+ * Capture (#1048, #1515): the photo, then the moment page, then `save_moment`. A full-screen modal
  * entry (A-14). [onSaved] returns to Path, [onSavedThenComplete] hands the new
  * moment id over to Complete, and [onDismiss] is every other exit: ✕ or back
- * on the photo step, silently when nothing was entered, else through the
- * close dialog (R2). [chainsComplete] (Home's New pebble, #1383 D7) makes the
- * name step's one save "Make it a pebble now", always followed by Complete.
+ * on the first reachable step, silently when nothing was entered, else through the
+ * close dialog (R2). [chainsComplete] (Home's New pebble, #1383 D7) leaves the page one save,
+ * "Save & make it a pebble", always followed by Complete. [startsAtMomentPage] is the quick moment
+ * (D13); [promptReason] is the onboarding hand-off's slug (#1510 D9).
  */
 @Composable
 fun CaptureFlowScreen(
@@ -69,10 +66,17 @@ fun CaptureFlowScreen(
     onSaved: () -> Unit,
     onSavedThenComplete: (momentId: String) -> Unit,
     modifier: Modifier = Modifier,
+    startsAtMomentPage: Boolean = false,
+    promptReason: String? = null,
     viewModel: CaptureFlowViewModel = hiltViewModel(),
 ) {
+    // Before the state is first read, so a quick moment never flashes the photo step. Idempotent. It
+    // returns a flag only because `remember` may not return Unit; nothing reads it.
+    remember(viewModel, chainsComplete, startsAtMomentPage, promptReason) {
+        viewModel.start(chainsComplete, startsAtMomentPage, promptReason)
+        true
+    }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(viewModel, chainsComplete) { viewModel.start(chainsComplete) }
     // Each buzz asks Pebbles' haptics switch (#1242 D23).
     val haptic = rememberTapHaptics { viewModel.hapticsOn }
 
@@ -103,7 +107,7 @@ fun CaptureFlowScreen(
         },
         onRetryPhoto = viewModel::onRetryPhoto,
         onRemovePhoto = viewModel::onRemovePhoto,
-        onSave = viewModel::saveFromNameStep,
+        onSave = { viewModel.save(thenComplete = false) },
         onSaveThenComplete = { viewModel.save(thenComplete = true) },
         onClose = viewModel::onCloseRequested,
         onSaveFromClose = viewModel::onSaveFromClose,
@@ -134,9 +138,8 @@ fun CaptureFlowContent(
         CaptureLabels(
             skip = stringResource(R.string.record_action_skip),
             done = stringResource(R.string.action_done),
-            continueLabel = stringResource(R.string.record_action_continue),
-            save = stringResource(R.string.capture_save),
-            makePebbleNow = stringResource(R.string.capture_make_pebble_now),
+            justSave = stringResource(R.string.capture_just_save),
+            saveAndPebble = stringResource(R.string.capture_save_and_pebble),
         )
 
     Column(
@@ -151,7 +154,7 @@ fun CaptureFlowContent(
         RecordFlowChrome(
             position = flow.step.ordinal + 1,
             total = CaptureStep.entries.size,
-            canGoBack = flow.step.previous != null,
+            canGoBack = flow.step.previous != null && !flow.isFrozen && !uiState.startsAtMomentPage,
             onBack = model::back,
             onClose = onClose,
         )
@@ -188,27 +191,21 @@ fun CaptureFlowContent(
                 when (step) {
                     CaptureStep.PHOTO ->
                         RecordPhotoStep(snap = uiState.snap, onPick = onPickPhoto, onRetry = onRetryPhoto, onRemove = onRemovePhoto)
-                    CaptureStep.WHEN ->
-                        RecordWhenStep(
-                            happenedAt = flow.draft.happenedAt,
-                            onChange = { model.setHappenedAt(it) },
-                            seededFromPhoto = uiState.seededFromPhoto,
+                    CaptureStep.MOMENT ->
+                        RecordMomentStep(
+                            draft = flow.draft,
+                            whenSource = flow.whenSource,
+                            snap = uiState.snap,
+                            blockedMessageRes = uiState.snapBlockedMessageRes,
+                            errorRes = flow.errorRes,
+                            onNameChange = { model.setName(it) },
+                            onWordsChange = { model.setDescription(it) },
+                            onWhenChange = { model.setHappenedAt(it) },
+                            // Change photo and Add a photo go back to the photo step (iOS).
+                            onChangePhoto = model::back,
+                            onRetry = onRetryPhoto,
+                            onRemove = onRemovePhoto,
                         )
-                    CaptureStep.NAME ->
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            RecordNameStep(name = flow.draft.name, limit = CaptureFlowModel.NAME_LIMIT, onChange = { model.setName(it) })
-                            flow.errorRes?.let {
-                                Text(
-                                    text = stringResource(it),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.error,
-                                    textAlign = TextAlign.Center,
-                                )
-                            }
-                        }
                 }
             }
         }
@@ -283,10 +280,9 @@ private fun CaptureCloseDialog(
 }
 
 /**
- * The step's actions (A-1): the photo is optional (Skip, then Done once
- * attached; a pick never advances), when always has an answer, and the name
- * step carries R1's two saves, or, when it [chainsComplete] (#1383 D7), the
- * one that leads to Complete: [onSave] then asks the ViewModel for that chain.
+ * The step's actions: the photo step's controls are Part 5's, so it keeps Skip (then Done once attached;
+ * a pick advances on its own only from Part 5 on). The moment page has "Save & make it a pebble" for its
+ * primary and "Just save" beneath it, which Home's New pebble ([chainsComplete], #1383 D7) does not offer.
  */
 private fun actionFor(
     state: CaptureFlowState,
@@ -300,54 +296,34 @@ private fun actionFor(
     when (state.step) {
         CaptureStep.PHOTO ->
             RecordStepAction.Text(
-                label = if (state.photoButtonIsSkip) labels.skip else labels.done,
+                label = if (state.hasSnap) labels.done else labels.skip,
                 onClick = model::advance,
             )
-        CaptureStep.WHEN ->
-            RecordStepAction.Primary(
-                label = labels.continueLabel,
-                enabled = true,
-                isLoading = false,
-                onClick = model::advance,
-            )
-        CaptureStep.NAME ->
-            if (chainsComplete) {
+        CaptureStep.MOMENT -> {
+            val primary =
                 RecordStepAction.Primary(
-                    label = labels.makePebbleNow,
+                    label = labels.saveAndPebble,
                     enabled = canSaveNow,
-                    isLoading = state.isSaving,
-                    onClick = onSave,
+                    isLoading = state.isSaving && (chainsComplete || state.savingThenComplete),
+                    onClick = onSaveThenComplete,
                 )
+            if (chainsComplete) {
+                primary
             } else {
-                nameStepSaves(state, canSaveNow, labels, onSave, onSaveThenComplete)
+                RecordStepAction.PrimaryWithSecondary(
+                    primary = primary,
+                    secondaryLabel = labels.justSave,
+                    onSecondary = onSave,
+                    secondaryIsLoading = state.isSaving && !state.savingThenComplete,
+                )
             }
+        }
     }
-
-/** R1's two saves on the name step: Save moment, and "Make it a pebble now" beneath it. */
-private fun nameStepSaves(
-    state: CaptureFlowState,
-    canSaveNow: Boolean,
-    labels: CaptureLabels,
-    onSave: () -> Unit,
-    onSaveThenComplete: () -> Unit,
-): RecordStepAction =
-    RecordStepAction.PrimaryWithSecondary(
-        primary =
-            RecordStepAction.Primary(
-                label = labels.save,
-                enabled = canSaveNow,
-                isLoading = state.isSaving,
-                onClick = onSave,
-            ),
-        secondaryLabel = labels.makePebbleNow,
-        onSecondary = onSaveThenComplete,
-    )
 
 /** Resolved strings, so the action builder stays a pure function. */
 private data class CaptureLabels(
     val skip: String,
     val done: String,
-    val continueLabel: String,
-    val save: String,
-    val makePebbleNow: String,
+    val justSave: String,
+    val saveAndPebble: String,
 )

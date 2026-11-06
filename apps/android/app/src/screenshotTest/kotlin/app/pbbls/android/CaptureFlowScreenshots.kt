@@ -17,10 +17,10 @@ import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 
 /**
- * Previews for Capture (#1048), one per step through the stateless
- * [CaptureFlowContent], plus the name step's three save states and the close
- * dialog with and without Save moment (R2). A fixed date: no clock in the
- * screenshot path.
+ * Previews for Capture (#1048, #1515), one per step through the stateless
+ * [CaptureFlowContent]: the photo step, the moment page empty, filled, uploading, failed and
+ * chaining into Complete, and the close dialog with and without Save moment (R2). A fixed
+ * date: no clock in the screenshot path.
  *
  * Render-to-view, not a regression gate — see `apps/android/CLAUDE.md`.
  */
@@ -33,18 +33,21 @@ private fun pendingSnap(state: AttachedSnap.UploadState) =
 private fun CapturePreview(
     step: CaptureStep,
     name: String = "",
+    words: String = "",
     snap: FormSnap? = null,
     seededFromPhoto: Boolean = false,
     @StringRes errorRes: Int? = null,
+    @StringRes blockedRes: Int? = null,
     closeConfirm: Boolean = false,
     closeOffersSave: Boolean = false,
     chainsComplete: Boolean = false,
 ) {
     val flow =
         CaptureFlowState(
-            draft = CaptureDraft(name = name, happenedAt = capturedAt),
+            draft = CaptureDraft(name = name, description = words, happenedAt = capturedAt),
             step = step,
             hasSnap = snap != null,
+            seededFromPhoto = seededFromPhoto,
             errorRes = errorRes,
         )
     // Previews are not interactions: the machine is there for the callbacks only, so it never buzzes.
@@ -54,7 +57,7 @@ private fun CapturePreview(
             CaptureFlowUiState(
                 flow = flow,
                 snap = snap,
-                seededFromPhoto = seededFromPhoto,
+                snapBlockedMessageRes = blockedRes,
                 isCloseConfirmPresented = closeConfirm,
                 closeOffersSave = closeOffersSave,
                 chainsComplete = chainsComplete,
@@ -90,62 +93,92 @@ fun Capture_PhotoUploading() {
     PebblesTheme { CapturePreview(CaptureStep.PHOTO, snap = pendingSnap(AttachedSnap.UploadState.UPLOADING)) }
 }
 
-/** The date seeded from the photo's EXIF, so the step says where it came from. */
-@PreviewTest
-@Preview(showBackground = true, heightDp = 720)
-@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
-@PreviewWideTall
-@Composable
-fun Capture_When_FromPhoto() {
-    PebblesTheme {
-        CapturePreview(CaptureStep.WHEN, snap = pendingSnap(AttachedSnap.UploadState.UPLOADED), seededFromPhoto = true)
-    }
-}
-
-/** No name and no photo: both saves disabled. */
+/** Nothing typed and no photo: both saves disabled, "Add a photo". */
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
 @Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
 @PreviewWideTall
 @PreviewLargeFontTall
 @Composable
-fun Capture_NameEmpty() {
-    PebblesTheme { CapturePreview(CaptureStep.NAME) }
+fun Capture_MomentEmpty() {
+    PebblesTheme { CapturePreview(CaptureStep.MOMENT) }
 }
 
+/** The page as the iOS render shows it: a name, a date, a few words. */
 @PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
 @Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
+@PreviewLargeFontTall
 @Composable
-fun Capture_NameEmptyDark() {
-    PebblesTheme { CapturePreview(CaptureStep.NAME) }
+fun Capture_MomentFilled() {
+    PebblesTheme {
+        CapturePreview(CaptureStep.MOMENT, name = "Coffee with Léa", words = "We sat by the canal and talked until the light went.")
+    }
+}
+
+/** Close to the limit: the counter shows. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Composable
+fun Capture_MomentCounter() {
+    PebblesTheme { CapturePreview(CaptureStep.MOMENT, name = "Swim at dawn", words = "w".repeat(250)) }
+}
+
+/** A photo still uploading, its date seeded from it: the ring, the label, and "From your photo". */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@PreviewWideTall
+@Composable
+fun Capture_MomentUploading() {
+    PebblesTheme {
+        CapturePreview(CaptureStep.MOMENT, snap = pendingSnap(AttachedSnap.UploadState.UPLOADING), seededFromPhoto = true)
+    }
 }
 
 /** A photo alone is a moment: both saves enabled without a name. */
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
 @Composable
-fun Capture_NamePhotoOnly() {
-    PebblesTheme { CapturePreview(CaptureStep.NAME, snap = pendingSnap(AttachedSnap.UploadState.UPLOADED)) }
+fun Capture_MomentPhotoOnly() {
+    PebblesTheme { CapturePreview(CaptureStep.MOMENT, snap = pendingSnap(AttachedSnap.UploadState.UPLOADED), seededFromPhoto = true) }
 }
 
-/** Home's New pebble (#1383 D7): one save, "Make it a pebble now", and no save-only choice. */
+/** An upload that failed: the orange label, Retry, and the saves held back. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@Composable
+fun Capture_MomentFailed() {
+    PebblesTheme {
+        CapturePreview(
+            CaptureStep.MOMENT,
+            name = "Swim at dawn",
+            snap = pendingSnap(AttachedSnap.UploadState.FAILED),
+            blockedRes = R.string.pebble_save_error_photo_failed,
+        )
+    }
+}
+
+/** Home's New pebble (#1383 D7): one save, and no "Just save". */
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
 @Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
 @Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun Capture_NameChainsComplete() {
-    PebblesTheme { CapturePreview(CaptureStep.NAME, name = "Swim at dawn", chainsComplete = true) }
+fun Capture_MomentChainsComplete() {
+    PebblesTheme { CapturePreview(CaptureStep.MOMENT, name = "Swim at dawn", chainsComplete = true) }
 }
 
-/** A refused save stays on the step with the R10 copy. */
+/** A refused save stays on the page with the R10 copy. */
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
 @Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
 @PreviewLargeFontTall
 @Composable
-fun Capture_NameError() {
-    PebblesTheme { CapturePreview(CaptureStep.NAME, name = "Swim at dawn", errorRes = R.string.moment_save_error_generic) }
+fun Capture_MomentError() {
+    PebblesTheme { CapturePreview(CaptureStep.MOMENT, name = "Swim at dawn", errorRes = R.string.moment_save_error_generic) }
 }
 
 @PreviewTest
@@ -154,7 +187,15 @@ fun Capture_NameError() {
 @Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun Capture_CloseConfirmWithSave() {
-    PebblesTheme { CapturePreview(CaptureStep.NAME, name = "Swim at dawn", closeConfirm = true, closeOffersSave = true) }
+    PebblesTheme { CapturePreview(CaptureStep.MOMENT, name = "Swim at dawn", closeConfirm = true, closeOffersSave = true) }
+}
+
+/** Words only cannot save: the dialog asks, and offers no Save moment. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Composable
+fun Capture_CloseConfirmWordsOnly() {
+    PebblesTheme { CapturePreview(CaptureStep.MOMENT, words = "We sat by the canal.", closeConfirm = true) }
 }
 
 /** A photo still uploading: the dialog offers no Save moment. */

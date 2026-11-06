@@ -47,7 +47,7 @@ class BackTest : AppUiTest() {
         onPath()
         openCapture()
         onText(R.string.record_action_skip).performClick()
-        onText(R.string.record_when_title).assertIsDisplayed()
+        onText(R.string.capture_moment_title).assertIsDisplayed()
 
         pressBack()
 
@@ -70,8 +70,7 @@ class BackTest : AppUiTest() {
         onPath()
         openCapture()
         onText(R.string.record_action_skip).performClick()
-        onText(R.string.record_action_continue).performClick()
-        compose.onNode(hasSetTextAction()).performTextInput("Coffee with Mo")
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("Coffee with Mo")
         pressBack()
         pressBack()
         onText(R.string.record_photo_title).assertIsDisplayed()

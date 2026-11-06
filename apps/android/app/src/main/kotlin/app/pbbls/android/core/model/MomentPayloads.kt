@@ -31,14 +31,19 @@ data class MomentSavePayload(
     val snaps: List<PebbleSnapPayload>? = null,
 ) {
     companion object {
-        /** Capture creates. A blank name is left out: a photo-only moment is valid (D3). */
+        /**
+         * Capture creates, as iOS `SaveMomentPayload(capture:)`. A blank name is left out: a photo-only
+         * moment is valid (D3). A blank description is left out too, and a typed one is trimmed.
+         */
         fun capture(
             name: String,
+            description: String,
             happenedAt: OffsetDateTime,
             snap: PebbleSnapPayload?,
         ): MomentSavePayload =
             MomentSavePayload(
                 name = name.trim().ifEmpty { null },
+                description = description.trim().ifEmpty { null },
                 happenedAt = happenedAt,
                 snaps = snap?.let { listOf(it) },
             )

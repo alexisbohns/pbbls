@@ -40,7 +40,7 @@ class RestorationTest : AppUiTest() {
 
     /**
      * Capture keeps what the server has not seen in its `SavedStateHandle`
-     * (A-5: no autosave): the typed name and the step come back on their own.
+     * (A-5: no autosave; D2: the page is an unsaved preview): the typed name and words and the step come back on their own.
      */
     @Test
     fun `a capture step survives process death`() {
@@ -50,15 +50,15 @@ class RestorationTest : AppUiTest() {
         openPath()
         compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).performClick()
         onText(R.string.record_action_skip).performClick()
-        onText(R.string.record_when_title).assertIsDisplayed()
-        onText(R.string.record_action_continue).performClick()
-        onText(R.string.record_name_title).assertIsDisplayed()
-        compose.onNode(hasSetTextAction()).performTextInput("Coffee with Mo")
+        onText(R.string.capture_moment_title).assertIsDisplayed()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("Coffee with Mo")
+        compose.onAllNodes(hasSetTextAction())[1].performTextInput("Along the canal.")
 
         restartAfterProcessDeath()
         signIn()
 
-        onText(R.string.record_name_title).assertIsDisplayed()
+        onText(R.string.capture_moment_title).assertIsDisplayed()
         compose.onNodeWithText("Coffee with Mo").assertIsDisplayed()
+        compose.onNodeWithText("Along the canal.").assertIsDisplayed()
     }
 }

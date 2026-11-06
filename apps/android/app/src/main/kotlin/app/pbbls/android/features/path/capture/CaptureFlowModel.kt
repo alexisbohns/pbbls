@@ -25,10 +25,6 @@ class CaptureFlowModel(
 
     fun advance() {
         if (isFrozen) return
-        if (!_state.value.isAnswered) {
-            haptic(TapHaptic.WARNING)
-            return
-        }
         val next = step.next ?: return
         haptic(TapHaptic.ADVANCE)
         _state.update { it.copy(step = next) }
@@ -47,13 +43,21 @@ class CaptureFlowModel(
     /** Front-end clamp only (M58 D3); the server does not constrain names. */
     fun setName(raw: String) = _state.update { it.copy(draft = it.draft.copy(name = raw.take(NAME_LIMIT)), errorRes = null) }
 
-    fun setHappenedAt(value: OffsetDateTime) = _state.update { it.copy(draft = it.draft.copy(happenedAt = value)) }
+    /** Front-end clamp only, like the name: three visible lines and a counter. */
+    fun setDescription(raw: String) =
+        _state.update { it.copy(draft = it.draft.copy(description = raw.take(DESCRIPTION_LIMIT)), errorRes = null) }
 
+    /** The user's own edit of the when chip: from here a photo's date never overrides it (D4). */
+    fun setHappenedAt(value: OffsetDateTime) = _state.update { it.copy(draft = it.draft.copy(happenedAt = value), hasEditedDate = true) }
+
+    /** Seeds when from a photo's date (EXIF or the shutter), unless the user already chose one. */
     fun applyCaptureDate(date: OffsetDateTime?) {
-        if (date != null) setHappenedAt(date)
+        if (date == null) return
+        _state.update { if (it.hasEditedDate) it else it.copy(draft = it.draft.copy(happenedAt = date), seededFromPhoto = true) }
     }
 
-    fun beginSave() = _state.update { it.copy(isSaving = true, errorRes = null) }
+    fun beginSave(thenComplete: Boolean = false) =
+        _state.update { it.copy(isSaving = true, savingThenComplete = thenComplete, errorRes = null) }
 
     fun saved() {
         haptic(TapHaptic.SUCCESS)
@@ -61,16 +65,14 @@ class CaptureFlowModel(
         _state.update { it.copy(isSaving = false, isSaved = true) }
     }
 
-    /**
-     * A save can start from the close dialog on any step, and its error shows
-     * only on the name step, so a failure lands there to be seen (iOS `failSave`).
-     */
+    /** A save can start from the close dialog on any step, and its error shows on the page, so a failure lands there to be seen. */
     fun fail(messageRes: Int) {
         haptic(TapHaptic.WARNING)
-        _state.update { it.copy(step = CaptureStep.NAME, isSaving = false, errorRes = messageRes) }
+        _state.update { it.copy(step = CaptureStep.MOMENT, isSaving = false, savingThenComplete = false, errorRes = messageRes) }
     }
 
     companion object {
         const val NAME_LIMIT = 40
+        const val DESCRIPTION_LIMIT = 280
     }
 }
