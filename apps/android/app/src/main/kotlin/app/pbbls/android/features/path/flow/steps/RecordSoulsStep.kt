@@ -1,66 +1,95 @@
 package app.pbbls.android.features.path.flow.steps
 
+import android.util.Log
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalReferenceDataService
-import app.pbbls.android.features.path.create.pickers.CreateSoulDialog
-import app.pbbls.android.features.path.create.pickers.SoulPickerBody
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.ui.souls.SoulChooserBody
+import app.pbbls.android.core.ui.souls.SoulChooserMode
+import app.pbbls.android.core.ui.souls.SoulChooserSearchField
+import app.pbbls.android.core.ui.souls.SoulChooserTray
+import app.pbbls.android.core.ui.souls.rememberSoulChooserState
 import kotlinx.coroutines.launch
 
+private const val TAG = "RecordSoulsStep"
+
 /**
- * Step 6 — who was there — ports iOS `RecordSoulsStep`. Multi-select, so a tap
- * never advances; the step's Skip / Done button does (M58 D3). Making souls
- * single-select to keep every step uniform would be a real capability loss, not
- * a simplification.
+ * Step 6 — who was there. Interim until the Life screen's tiles and More sheet (Part 7): the souls
+ * chooser inline, its tray's button advancing the flow ([onAdvance] reads Skip with nobody chosen).
+ * The chooser scrolls itself, so the step brings its own scroll and nothing nests.
  *
- * Reads `ReferenceDataService.souls` — already cached and already refreshed
- * after every Profile mutation — and `createSoul` updates that cache in place,
- * so an inline-created soul renders immediately.
+ * [selectedIds] is the flow's answer and [onToggle] its only writer (`CompleteFlowModel.toggleSoul`,
+ * which buzzes). The chooser keeps an editing copy for search and pills; each change in it is
+ * replayed into the model, and the chooser's own haptic is off so a tap buzzes once, from the model.
  */
 @Composable
 fun RecordSoulsStep(
     selectedIds: List<String>,
     onToggle: (String) -> Unit,
+    onAdvance: () -> Unit,
     modifier: Modifier = Modifier,
+    hapticsOn: Boolean = true,
     onAchievementCheck: () -> Unit = {},
 ) {
     val refs = LocalReferenceDataService.current
     val scope = rememberCoroutineScope()
-    var showCreate by remember { mutableStateOf(false) }
+    val state =
+        rememberSoulChooserState(
+            mode = SoulChooserMode.Pick(allowsSkip = true),
+            souls = refs.souls,
+            isLoaded = refs.hasLoaded,
+            selection = selectedIds,
+        )
 
     // The cache refreshes only on soul mutations, so the counts would lag every
     // pebble recorded since launch (#1370).
     LaunchedEffect(Unit) { refs.refreshSouls() }
 
-    SoulPickerBody(
-        souls = refs.souls,
-        selection = selectedIds.toSet(),
-        onToggle = onToggle,
-        onCreateTap = { showCreate = true },
-        modifier = modifier,
-    )
+    // The model is the source of truth: replay what the chooser changed into it, one toggle each.
+    LaunchedEffect(state.selection) {
+        val chosen = state.selection.toSet()
+        val answered = selectedIds.toSet()
+        (chosen - answered).forEach(onToggle)
+        (answered - chosen).forEach(onToggle)
+    }
 
-    if (showCreate) {
-        CreateSoulDialog(
-            onDismiss = { showCreate = false },
+    Column(modifier = modifier.fillMaxSize()) {
+        if (state.isSearching) {
+            SoulChooserSearchField(
+                state = state,
+                onClose = state::closeSearch,
+                modifier = Modifier.padding(bottom = PebblesTheme.spacing.sm),
+            )
+        }
+        SoulChooserBody(
+            state = state,
+            isLoaded = refs.hasLoaded,
+            loadFailed = false,
+            onRetry = { scope.launch { refs.refreshSouls() } },
+            onOpenSoul = {},
             onCreate = { name ->
                 scope.launch {
                     val created = refs.createSoul(name)
                     if (created != null) {
                         onAchievementCheck()
-                        // Select it immediately — the user created it *for* this
-                        // pebble, so making them tap it again is friction.
-                        onToggle(created.id)
-                        showCreate = false
+                        state.didCreate(created)
+                    } else {
+                        Log.e(TAG, "createSoul returned null")
+                        state.createErrorRes = R.string.soul_save_error
                     }
                 }
             },
+            onHaptic = {},
+            hapticsOn = hapticsOn,
+            modifier = Modifier.weight(1f),
         )
+        SoulChooserTray(state = state, onDone = onAdvance, onHaptic = {})
     }
 }

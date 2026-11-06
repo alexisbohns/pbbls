@@ -404,7 +404,7 @@
     <string name="souls_empty_title">No souls yet</string>
     <string name="souls_empty_message">People and beings you tag on your pebbles will appear here.</string>
     <string name="souls_load_error">Couldn\'t load souls.</string>
-    <string name="souls_who_was_there" tools:ignore="UnusedResources">Who was there?</string>
+    <string name="souls_who_was_there">Who was there?</string>
     <string name="souls_search">Search souls</string>
     <string name="souls_add_named">Add %1$s</string>
     <string name="souls_add_caption">A drawing can wait</string>
@@ -591,8 +591,6 @@
     <string name="glyph_banner_by">By</string>
     <!-- Souls section + inline create. -->
     <string name="create_souls_header">Souls</string>
-    <string name="create_souls_title">Choose souls</string>
-    <string name="create_souls_empty">Add the first soul to tag this pebble with</string>
     <string name="create_soul_add">New soul</string>
     <string name="create_soul_title">New soul</string>
     <string name="create_soul_name_placeholder">Name</string>

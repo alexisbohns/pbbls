@@ -27,6 +27,7 @@ fun CompleteStepContent(
     error: String?,
     modifier: Modifier = Modifier,
     onAchievementCheck: () -> Unit = {},
+    hapticsOn: Boolean = true,
 ) {
     when (step) {
         CompleteStep.VALENCE ->
@@ -57,6 +58,8 @@ fun CompleteStepContent(
             RecordSoulsStep(
                 selectedIds = answers.soulIds,
                 onToggle = { model.toggleSoul(it) },
+                onAdvance = model::advance,
+                hapticsOn = hapticsOn,
                 modifier = modifier,
                 onAchievementCheck = onAchievementCheck,
             )

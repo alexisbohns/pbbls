@@ -196,7 +196,7 @@ private fun EmotionChip(
  * Cancel · centered title · Done for the sheet pickers — a stock
  * `CenterAlignedTopAppBar` with no window insets (the sheet owns those) on the
  * sheet's own container colour (#854). `internal` so the sibling
- * [SoulPickerSheet] and [ValencePickerSheet] reuse it without a second copy.
+ * [ValencePickerSheet] reuse it without a second copy.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

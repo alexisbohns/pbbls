@@ -18,20 +18,17 @@ import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.KarmaReason
-import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.ui.KarmaEarnedCapsule
 import app.pbbls.android.features.glyph.picker.GlyphPickerGrid
 import app.pbbls.android.features.path.create.CategoryGroup
-import app.pbbls.android.features.path.create.pickers.CreateSoulDialog
 import app.pbbls.android.features.path.create.pickers.EmotionPickerBody
-import app.pbbls.android.features.path.create.pickers.SoulPickerBody
 import com.android.tools.screenshot.PreviewTest
 
 /**
  * Previews for the pickers the edit form and the Complete steps still use, kept
  * from the retired create funnel's gallery (#541) under their original names:
- * the picker bodies ([EmotionPickerBody], [SoulPickerBody], [GlyphPickerGrid]),
- * the inline [CreateSoulDialog], and the [KarmaEarnedCapsule] flash — light and
+ * the picker bodies ([EmotionPickerBody], [GlyphPickerGrid]),
+ * and the [KarmaEarnedCapsule] flash — light and
  * dark, driven with fixtures so no services are needed. The valence fan and the
  * edit form itself are previewed in `CompleteFlowScreenshots` and
  * `EditPebbleScreenshots`.
@@ -78,27 +75,6 @@ private fun glyphOf(
     name: String?,
     strokes: List<GlyphStroke>,
 ): Glyph = Glyph(id = id, name = name, strokes = strokes, viewBox = "0 0 200 200")
-
-private fun soul(
-    id: String,
-    name: String,
-    strokes: List<GlyphStroke>,
-    count: Int,
-): SoulWithGlyph =
-    SoulWithGlyph(
-        id = id,
-        name = name,
-        glyphId = "g-$id",
-        glyph = glyphOf("g-$id", null, strokes),
-        pebblesCount = count,
-    )
-
-private val souls =
-    listOf(
-        soul("s1", "Alex", listOf(waveStroke), 12),
-        soul("s2", "Sam", crossStrokes, 5),
-        soul("s3", "Robin", listOf(peakStroke), 3),
-    )
 
 private val glyphs =
     listOf(
@@ -164,17 +140,6 @@ private fun EmotionBodyPreview() {
 }
 
 @Composable
-private fun SoulBodyPreview() {
-    SoulPickerBody(
-        souls = souls,
-        selection = setOf("s1", "s3"),
-        onToggle = {},
-        onCreateTap = {},
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
-    )
-}
-
-@Composable
 private fun GlyphBodyPreview() {
     GlyphPickerGrid(
         items =
@@ -219,21 +184,6 @@ fun EmotionPickerDark() {
 @Preview(showBackground = true)
 @PreviewLargeFont
 @Composable
-fun SoulPickerLight() {
-    PebblesTheme { SoulBodyPreview() }
-}
-
-@PreviewTest
-@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun SoulPickerDark() {
-    PebblesTheme { SoulBodyPreview() }
-}
-
-@PreviewTest
-@Preview(showBackground = true)
-@PreviewLargeFont
-@Composable
 fun GlyphPickerLight() {
     PebblesTheme { GlyphBodyPreview() }
 }
@@ -243,21 +193,6 @@ fun GlyphPickerLight() {
 @Composable
 fun GlyphPickerDark() {
     PebblesTheme { GlyphBodyPreview() }
-}
-
-@PreviewTest
-@Preview(showBackground = true)
-@PreviewLargeFont
-@Composable
-fun CreateSoulDialogLight() {
-    PebblesTheme { CreateSoulDialog(onDismiss = {}, onCreate = {}) }
-}
-
-@PreviewTest
-@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun CreateSoulDialogDark() {
-    PebblesTheme { CreateSoulDialog(onDismiss = {}, onCreate = {}) }
 }
 
 @PreviewTest

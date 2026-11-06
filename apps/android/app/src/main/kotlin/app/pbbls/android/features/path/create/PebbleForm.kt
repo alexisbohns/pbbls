@@ -51,8 +51,8 @@ import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
 import app.pbbls.android.core.ui.render.GlyphImage
 import app.pbbls.android.core.ui.render.ValenceGlyph
+import app.pbbls.android.core.ui.souls.SoulChooserSheet
 import app.pbbls.android.features.path.create.pickers.EmotionPickerSheet
-import app.pbbls.android.features.path.create.pickers.SoulPickerSheet
 import app.pbbls.android.features.path.create.pickers.ValencePickerSheet
 
 /** Which picker sheet is open — exactly one `ModalBottomSheet` at a time (D5). */
@@ -198,8 +198,12 @@ fun PebbleForm(
                 hapticsOn = hapticsOn,
             )
         PickerKind.SOUL ->
-            SoulPickerSheet(
+            SoulChooserSheet(
+                title = draft.name.ifBlank { stringResource(R.string.souls_who_was_there) },
                 currentSelection = draft.soulIds,
+                allowsSkip = false,
+                startsPartial = true,
+                hapticsOn = hapticsOn(),
                 onDismiss = { activePicker = null },
                 onConfirm = {
                     onDraftChange(draft.copy(soulIds = it))
