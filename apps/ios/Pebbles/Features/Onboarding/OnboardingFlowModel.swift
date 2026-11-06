@@ -1,3 +1,5 @@
+// The state machine reads as one file; steps 4 and 5 are in the extension at the bottom.
+// swiftlint:disable file_length
 import Foundation
 import Observation
 import os
@@ -97,15 +99,24 @@ final class OnboardingFlowModel {
     var chromeDisabled: Bool { consent.isSaving || isCompleting }
 
     /// The answers as they would be sent now; nil where a step was skipped or left blank.
-    /// `souls` arrives with the people members.
+    /// A person with no glyph at all is left out here and flagged by `hasPersonWithoutGlyph`.
     var answers: OnboardingAnswers {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         return OnboardingAnswers(
             displayName: trimmedName.isEmpty ? nil : trimmedName,
             glyphId: glyphId,
             reasons: reasons.isEmpty ? nil : reasons,
-            pace: pace
+            pace: pace,
+            souls: souls
         )
+    }
+
+    private var souls: [OnboardingSoulDraft] {
+        people.enumerated().compactMap { index, person in
+            guard Self.isListed(person), let glyph = person.glyphId ?? defaultGlyphId(index) else { return nil }
+            let name = person.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            return OnboardingSoulDraft(name: name, glyphId: glyph)
+        }
     }
 
     // MARK: - Loading
@@ -183,7 +194,9 @@ final class OnboardingFlowModel {
         case .pace:
             // `complete()` sends from here.
             return
-        case .promise, .reasons, .you, .people, .handoff:
+        case .people:
+            commitEditingPeople()
+        case .promise, .reasons, .you, .handoff:
             break
         }
         move(+1)
@@ -339,4 +352,144 @@ final class OnboardingFlowModel {
         self.isCompleting = isCompleting
         self.completeFailed = completeFailed
     }
+}
+
+// Steps 4 and 5 and the carve live in an extension of their own so the class body stays readable.
+extension OnboardingFlowModel {
+    // MARK: - Step 4
+
+    /// Settings' display-name limit; a person's name shares it.
+    static let nameLimit = 40
+
+    /// What step 4's stone offers: the system glyphs, then any carved in the flow.
+    var glyphChoices: [Glyph] { systemGlyphs + carved }
+
+    /// A name or a glyph is an answer; either alone is enough.
+    var canContinueYou: Bool { !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || glyphId != nil }
+
+    func setName(_ value: String) {
+        name = String(value.prefix(Self.nameLimit))
+    }
+
+    func pickGlyph(_ id: UUID) {
+        haptic(.selection)
+        glyphId = id
+    }
+
+    func drawForYou() {
+        haptic(.selection)
+        carvingFor = .you
+    }
+
+    // MARK: - Step 5
+
+    var canContinuePeople: Bool { people.contains { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } }
+
+    /// Three named people name the button; anything less is the plain line.
+    var peopleCTA: LocalizedStringResource {
+        let names = people.map { $0.name.trimmingCharacters(in: .whitespacesAndNewlines) }
+        guard names.count == 3, names.allSatisfy({ !$0.isEmpty }) else { return "These are my people" }
+        return "Keep \(names[0]), \(names[1]) and \(names[2])"
+    }
+
+    /// True when a named, closed person would be sent with no glyph, because none loaded
+    /// (`souls.glyph_id` is not null). `complete()` refuses that rather than send an empty id.
+    var hasPersonWithoutGlyph: Bool {
+        people.enumerated().contains { index, person in
+            Self.isListed(person) && (person.glyphId ?? defaultGlyphId(index)) == nil
+        }
+    }
+
+    private static func isListed(_ person: OnboardingPerson) -> Bool {
+        !person.isEditing && !person.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// No-op at three people, or while one is being typed.
+    func addPerson() {
+        guard people.count < 3, !people.contains(where: \.isEditing) else { return }
+        haptic(.selection)
+        people.append(OnboardingPerson())
+    }
+
+    func setPersonName(_ index: Int, _ value: String) {
+        guard people.indices.contains(index) else { return }
+        people[index].name = String(value.prefix(Self.nameLimit))
+    }
+
+    /// The keyboard's done: a blank name removes the place, a name closes the field.
+    func commitPerson(_ index: Int) {
+        guard people.indices.contains(index) else { return }
+        let trimmed = people[index].name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            people.remove(at: index)
+        } else {
+            people[index].name = trimmed
+            people[index].isEditing = false
+        }
+    }
+
+    /// Tapping a name reopens its field; emptying it removes the place. No-op while another is open.
+    func editPerson(_ index: Int) {
+        guard people.indices.contains(index), !people.contains(where: \.isEditing) else { return }
+        haptic(.selection)
+        people[index].isEditing = true
+    }
+
+    /// Leaving the step never strands a half-typed name: a blank place is dropped, a name is kept.
+    private func commitEditingPeople() {
+        people = people.compactMap { person in
+            guard person.isEditing else { return person }
+            let trimmed = person.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { return nil }
+            var closed = person
+            closed.name = trimmed
+            closed.isEditing = false
+            return closed
+        }
+    }
+
+    /// The glyph place `index` wears until a pick: a different one per place, so three people never
+    /// look alike. By the enumerated index, never a lookup by value, which gives two equal people one.
+    func defaultGlyphId(_ index: Int) -> UUID? {
+        systemGlyphs.indices.contains(index) ? systemGlyphs[index].id : systemGlyphs.first?.id
+    }
+
+    func openGlyphSheet(_ index: Int) {
+        guard people.indices.contains(index) else { return }
+        haptic(.selection)
+        glyphSheetFor = index
+    }
+
+    func closeGlyphSheet() { glyphSheetFor = nil }
+
+    func pickPersonGlyph(_ index: Int, _ glyphId: UUID) {
+        guard people.indices.contains(index) else { return }
+        haptic(.selection)
+        people[index].glyphId = glyphId
+        glyphSheetFor = nil
+    }
+
+    func drawForPerson(_ index: Int) {
+        guard people.indices.contains(index) else { return }
+        haptic(.selection)
+        glyphSheetFor = nil
+        carvingFor = .person(index)
+    }
+
+    // MARK: - S1, the carve studio
+
+    /// The carve saved a glyph: it joins the stone and becomes the pick of whoever it was drawn for.
+    func carved(_ glyph: Glyph) {
+        guard let target = carvingFor else { return }
+        carved.append(glyph)
+        carvingFor = nil
+        switch target {
+        case .you:
+            glyphId = glyph.id
+        case .person(let index):
+            if people.indices.contains(index) { people[index].glyphId = glyph.id }
+        }
+    }
+
+    func carveCancelled() { carvingFor = nil }
 }

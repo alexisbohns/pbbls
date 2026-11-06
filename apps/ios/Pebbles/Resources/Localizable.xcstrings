@@ -21,6 +21,23 @@
         }
       }
     },
+    "A glyph for %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A glyph for %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un glyphe pour %@"
+          }
+        }
+      }
+    },
     "A promise" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -106,6 +123,23 @@
         }
       }
     },
+    "Add one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add one"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter"
+          }
+        }
+      }
+    },
     "All four are needed to continue." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -153,6 +187,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avant toute chose,"
+          }
+        }
+      }
+    },
+    "Change glyph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change glyph"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer le glyphe"
           }
         }
       }
@@ -412,6 +463,23 @@
         }
       }
     },
+    "Keep %@, %@ and %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep %@, %@ and %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder %1$@, %2$@ et %3$@"
+          }
+        }
+      }
+    },
     "Keep a record for later" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -493,6 +561,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Remarquer ce que je ressens vraiment"
+          }
+        }
+      }
+    },
+    "onboarding.you.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your name"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton prénom"
           }
         }
       }
@@ -854,6 +939,74 @@
         }
       }
     },
+    "That's me" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That's me"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C'est moi"
+          }
+        }
+      }
+    },
+    "Their name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Their name"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son prénom"
+          }
+        }
+      }
+    },
+    "These are my people" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These are my people"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce sont mes proches"
+          }
+        }
+      }
+    },
+    "This is you" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is you"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C'est toi"
+          }
+        }
+      }
+    },
     "This moment no longer exists." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -884,6 +1037,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sans titre"
+          }
+        }
+      }
+    },
+    "Use for %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use for %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utiliser pour %@"
           }
         }
       }
@@ -952,6 +1122,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ce que l'on garde, où, et combien de temps."
+          }
+        }
+      }
+    },
+    "You can add more people later." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can add more people later."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu pourras en ajouter d'autres plus tard."
           }
         }
       }
@@ -5622,6 +5809,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Expire %@."
+          }
+        }
+      }
+    },
+    "First names only. They are never contacted." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First names only. They are never contacted."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les prénoms seulement. Ces personnes ne sont jamais contactées."
           }
         }
       }
@@ -13876,6 +14080,23 @@
         }
       }
     },
+    "Three places" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Three places"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trois places"
+          }
+        }
+      }
+    },
     "Today" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14452,6 +14673,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mes collections apparaîtront ici."
+          }
+        }
+      }
+    },
+    "Your glyph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your glyph"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton glyphe"
           }
         }
       }
@@ -16592,6 +16830,23 @@
         }
       }
     },
+    "It marks %@ on every pebble." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It marks %@ on every pebble."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il marque %@ sur chaque galet."
+          }
+        }
+      }
+    },
     "Country" : {
       "localizations" : {
         "en" : {
@@ -16704,6 +16959,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible d’enregistrer ta réponse. Réessaie."
+          }
+        }
+      }
+    },
+    "Who would you call first with good news?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who would you call first with good news?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À qui annoncerais-tu une bonne nouvelle en premier ?"
           }
         }
       }
