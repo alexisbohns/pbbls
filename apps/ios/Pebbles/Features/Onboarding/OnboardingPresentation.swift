@@ -50,6 +50,10 @@ final class OnboardingPresentation {
     /// The flow has ended and Home has not been told. Apart from the note, which an invite can spend.
     @ObservationIgnored private var homeIsStale = false
     @ObservationIgnored private let wait: OnboardingWait
+    /// Unlock cards wait while the flow is up (#1565). Held from the cover going up; released by
+    /// every exit: the flow ending with no composer, the composer (through `handoff`), the flow
+    /// standing down, and a sign-out (which also clears them).
+    @ObservationIgnored private weak var cards: AchievementNotificationService?
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "onboarding")
 
     /// Not a default argument for the gate: those are evaluated outside the main actor.
@@ -92,8 +96,14 @@ final class OnboardingPresentation {
 
     // MARK: - Up, or not
 
+    func bind(cards: AchievementNotificationService) {
+        self.cards = cards
+        handoff.cards = cards
+    }
+
     /// The flag says the flow is wanted: ask for the cover, and start watching for it.
     func presentCover() {
+        cards?.hold()
         hasRetried = false
         askForCover()
     }
@@ -119,6 +129,7 @@ final class OnboardingPresentation {
         isPresenting = false
         guard gate.shouldPresent else {
             phase = .idle
+            cards?.release()
             return
         }
         guard !hasRetried else {
@@ -139,6 +150,7 @@ final class OnboardingPresentation {
         phase = .idle
         slot.end()
         gate.standDown()
+        cards?.release()
     }
 
     private func arm(_ bound: Duration) {
@@ -163,6 +175,7 @@ final class OnboardingPresentation {
         case .retrying:
             guard gate.shouldPresent else {
                 phase = .idle
+                cards?.release()
                 return
             }
             askForCover()
@@ -225,9 +238,11 @@ final class OnboardingPresentation {
             return nil
         case .invite(let token):
             if homeWasStale { handoff.dropNote() }
+            cards?.release()
             return token
         case .nothing:
             if homeWasStale { handoff.dropNote() }
+            cards?.release()
             return nil
         }
     }
@@ -244,5 +259,6 @@ final class OnboardingPresentation {
         homeIsStale = false
         _ = handoff.take(userId: nil)
         slot.end()
+        cards?.reset()
     }
 }

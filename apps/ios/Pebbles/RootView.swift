@@ -28,6 +28,7 @@ struct RootView: View {
     @Environment(CaptureDraftStore.self) private var captureDrafts
     @Environment(SnapURLCache.self) private var snapURLs
     @Environment(ConnectionsService.self) private var connections
+    @Environment(AchievementNotificationService.self) private var achievementNotify
     /// The first-run gate and its cover (#1510 D10). Owned here, like the consent gate, because the
     /// two decide together what stands above the tabs.
     @State private var onboarding = OnboardingPresentation()
@@ -261,7 +262,10 @@ struct RootView: View {
             consentGate.start(userId: userId)
         }
         .onChange(of: canShowAuthedTabs && onboarding.gate.shouldPresent, initial: true) { _, present in
-            if present { onboarding.presentCover() }
+            if present {
+                onboarding.bind(cards: achievementNotify)
+                onboarding.presentCover()
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             // A gate that failed closed tries again when the app comes back.
@@ -349,6 +353,8 @@ struct RootView: View {
         heldCard.reset()
         storedHeldCard = nil
         heldCardRestored = false
+        // Also clears what the last account's flow held back, which must not show for the next.
+        onboarding.bind(cards: achievementNotify)
         onboarding.reset()
         // Left set, the next sign-in would present it above the consent layer and drop the flow's cover.
         // Not `connections.pendingInviteToken`: this also runs on a cold launch that resolves signed
@@ -379,6 +385,7 @@ struct RootView: View {
         .environment(CaptureDraftStore())
         .environment(snapURLs)
         .environment(KarmaNotificationService())
+        .environment(AchievementNotificationService())
         .environment(ConnectionsService(supabase: supabase))
         .environment(MomentsRevision())
         .environment(SnapAspectCache(urls: snapURLs))

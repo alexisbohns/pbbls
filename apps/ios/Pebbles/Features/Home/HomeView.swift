@@ -15,6 +15,9 @@ struct HomeView: View {
     @State private var showsQuick = false
     /// The composer's first title after the onboarding (#1510 D9); gone when it closes.
     @State private var quickPrompt: LocalizedStringResource?
+    /// The quick composer on screen is the hand-off's: the unlock cards the flow held come back
+    /// with its first save or its close (#1565). A later Quick moment leaves this false.
+    @State private var quickIsHandoff = false
     @State private var showsCapture = false
     @Environment(AchievementsService.self) private var achievements
     @State private var showsCamera = false
@@ -69,8 +72,13 @@ struct HomeView: View {
         // D13: the quick moment is the moment page itself, no photo screen; the
         // flow chains into Complete on its own.
         // The capture list reads the prompt in `body`, so the content never holds a stale one.
-        .fullScreenCover(isPresented: $showsQuick, onDismiss: { quickPrompt = nil }, content: { [quickPrompt] in
+        .fullScreenCover(isPresented: $showsQuick, onDismiss: {
+            quickPrompt = nil
+            if quickIsHandoff { handoff.composerClosed() }
+            quickIsHandoff = false
+        }, content: { [quickPrompt] in
             CaptureFlowView(onMomentChanged: { _ in
+                if quickIsHandoff { handoff.composerSaved() }
                 revision.bump(from: .home)
                 reloadChecklist()
             }, startsAtMomentPage: true, prompt: quickPrompt)
@@ -141,6 +149,7 @@ struct HomeView: View {
             attachService()
             if let note = handoff.take(userId: OnboardingGate.userKey(userId)) {
                 quickPrompt = note.prompt
+                quickIsHandoff = true
                 showsQuick = true
             }
             await model.reloadName()

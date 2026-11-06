@@ -11,6 +11,15 @@ final class OnboardingHandoff {
     private(set) var revision = 0
     @ObservationIgnored private var note: OnboardingHandoffNote?
 
+    /// The unlock cards the flow held back (#1565); the hand-off's composer is where they come back.
+    @ObservationIgnored weak var cards: AchievementNotificationService?
+
+    /// The hand-off composer saved its first moment: a pebble made there gets its card behind the held ones.
+    func composerSaved() { cards?.release() }
+
+    /// The hand-off composer closed. A no-op when nothing is held, so a later Quick moment may call it.
+    func composerClosed() { cards?.release() }
+
     func leave(_ value: OnboardingHandoffNote) {
         note = value
         revision += 1
@@ -27,7 +36,11 @@ final class OnboardingHandoff {
     func take(userId: String?) -> OnboardingHandoffNote? {
         let taken = note
         note = nil
-        guard let userId, taken?.userId == userId else { return nil }
+        guard let userId, taken?.userId == userId else {
+            // No composer will open, so nothing is left to hold the cards for.
+            cards?.release()
+            return nil
+        }
         return taken
     }
 }
