@@ -16,8 +16,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -88,6 +90,7 @@ fun EmotionPickerSheet(
                 stagedId = staged,
                 onToggle = { id -> staged = if (staged == id) null else id },
                 loadFailed = palettes.loadFailed,
+                isRetrying = palettes.isLoading,
                 onRetry = { scope.launch { palettes.load() } },
             )
         }
@@ -101,6 +104,7 @@ fun EmotionPickerBody(
     onToggle: (String) -> Unit,
     modifier: Modifier = Modifier,
     loadFailed: Boolean = false,
+    isRetrying: Boolean = false,
     onRetry: () -> Unit = {},
 ) {
     val colors = MaterialTheme.colorScheme
@@ -120,7 +124,7 @@ fun EmotionPickerBody(
     ) {
         // Loaded and still empty means the fetch failed (D9). Before it settles the body draws nothing, as it always did.
         if (groups.isEmpty() && loadFailed) {
-            EmotionLoadError(onRetry = onRetry)
+            EmotionLoadError(isRetrying = isRetrying, onRetry = onRetry)
         }
         groups.forEach { group ->
             val header =
@@ -159,19 +163,28 @@ fun EmotionPickerBody(
 }
 
 /** "Couldn't load feelings" and its Retry (D9). */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun EmotionLoadError(onRetry: () -> Unit) {
+private fun EmotionLoadError(
+    isRetrying: Boolean,
+    onRetry: () -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        Text(
-            text = stringResource(R.string.emotion_load_error),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        TextButton(onClick = onRetry) { Text(stringResource(R.string.record_photo_retry)) }
+        if (isRetrying) {
+            // The error line gives way to progress, so Retry visibly did something.
+            LoadingIndicator(color = MaterialTheme.colorScheme.primary)
+        } else {
+            Text(
+                text = stringResource(R.string.emotion_load_error),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            TextButton(onClick = onRetry) { Text(stringResource(R.string.record_photo_retry)) }
+        }
     }
 }
 

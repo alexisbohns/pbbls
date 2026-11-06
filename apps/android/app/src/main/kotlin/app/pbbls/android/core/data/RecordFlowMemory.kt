@@ -27,6 +27,9 @@ interface RecordFlowMemorying {
     /** Newest first, [RECENT_DOMAIN_CAP] at most. Unreadable data reads as none. */
     fun recentDomainIds(ownerId: String): List<String>
 
+    /** Forgets every account's recent domains: they say which domains someone tagged (sign-out, GDP-07). The help flag stays. */
+    fun clearDomains()
+
     /** [picked] go first, then the ones already remembered, each id once. */
     fun recordDomains(
         picked: List<String>,
@@ -73,6 +76,11 @@ class RecordFlowMemory internal constructor(
         prefs.edit { putString(domainsKey(ownerId), json.encodeToString(ids, ordered)) }
     }
 
+    override fun clearDomains() {
+        val keys = prefs.all.keys.filter { it.startsWith(DOMAINS_PREFIX) }
+        prefs.edit { keys.forEach { remove(it) } }
+    }
+
     companion object {
         private const val TAG = "record-flow-memory"
         private const val PREFS_NAME = "pebbles_prefs"
@@ -81,6 +89,8 @@ class RecordFlowMemory internal constructor(
 
         fun helpKey(ownerId: String): String = "valenceHelpSeen.${ownerId.lowercase()}"
 
-        fun domainsKey(ownerId: String): String = "recentDomains.${ownerId.lowercase()}"
+        private const val DOMAINS_PREFIX = "recentDomains."
+
+        fun domainsKey(ownerId: String): String = DOMAINS_PREFIX + ownerId.lowercase()
     }
 }

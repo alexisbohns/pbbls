@@ -20,7 +20,10 @@ internal class InMemoryPrefs : SharedPreferences {
                 value: Boolean,
             ) = apply { pending[key!!] = value }
 
+            private val removed = mutableSetOf<String>()
+
             override fun apply() {
+                removed.forEach { values.remove(it) }
                 values.putAll(pending)
             }
 
@@ -51,7 +54,7 @@ internal class InMemoryPrefs : SharedPreferences {
                 value: Float,
             ) = this
 
-            override fun remove(key: String?) = this
+            override fun remove(key: String?) = apply { removed += key!! }
 
             override fun clear() = this
         }

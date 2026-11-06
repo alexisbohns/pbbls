@@ -37,6 +37,7 @@ fun RecordEmotionStep(
         onToggle = onSelect,
         modifier = modifier,
         loadFailed = palettes.loadFailed,
+        isRetrying = palettes.isLoading,
         // `load()` never resets `hasLoaded`, and the failed flag clears as it starts, so this is the whole retry state.
         onRetry = { scope.launch { palettes.load() } },
     )

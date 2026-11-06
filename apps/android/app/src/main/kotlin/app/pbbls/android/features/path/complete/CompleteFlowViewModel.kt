@@ -143,8 +143,12 @@ class CompleteFlowViewModel
             val owner = userId ?: return
             if (memory.isValenceHelpSeen(owner)) return
             runCatchingCancellable { reads.loadPath() }
-                .onSuccess { moments -> _uiState.update { it.copy(isFirstPebble = moments.none { m -> m.isCompleted }) } }
-                .onFailure { Log.w(TAG, "first-pebble read failed; the help stays closed", it) }
+                .onSuccess { moments ->
+                    val first = moments.none { m -> m.isCompleted }
+                    // A settled read with a completed pebble settles it for good: no more whole-Path reads on every open.
+                    if (!first) memory.markValenceHelpSeen(owner)
+                    _uiState.update { it.copy(isFirstPebble = first) }
+                }.onFailure { Log.w(TAG, "first-pebble read failed; the help stays closed", it) }
         }
 
         /**
@@ -154,6 +158,8 @@ class CompleteFlowViewModel
          */
         fun showFirstPebbleHelp() {
             val owner = userId ?: return
+            // An exiting valence composable can still run its effect after a restore jumped ahead: never open over another step, and mark nothing.
+            if (model.step != CompleteStep.VALENCE) return
             if (!_uiState.value.isFirstPebble || memory.isValenceHelpSeen(owner)) return
             memory.markValenceHelpSeen(owner)
             _uiState.update { it.copy(valenceHelpOpen = true) }

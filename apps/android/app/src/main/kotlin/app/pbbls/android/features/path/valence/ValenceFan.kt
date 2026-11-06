@@ -126,7 +126,8 @@ fun ValenceFan(
 
             // The canvas with the column labels hung under it: the labels' own height decides the
             // column's, so a larger font never overlaps what follows.
-            Column(modifier = Modifier.align(Alignment.Center)) {
+            // A picture, not a control: its nine stones would otherwise stay focusable and announce a selection.
+            Column(modifier = Modifier.align(Alignment.Center).then(if (interactive) Modifier else Modifier.clearAndSetSemantics {})) {
                 Box(
                     modifier =
                         Modifier.size(

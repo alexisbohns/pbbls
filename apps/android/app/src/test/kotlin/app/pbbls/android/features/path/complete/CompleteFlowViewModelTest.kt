@@ -43,7 +43,7 @@ class CompleteFlowViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private class Harness(
-        scope: CoroutineScope,
+        private val scope: CoroutineScope,
     ) {
         val read = FakeMomentReadService(moments = mapOf("m-1" to UiFixtures.momentDetail(id = "m-1", name = "Swim", pebble = null)))
         val write = FakeMomentWriteService()
@@ -53,7 +53,8 @@ class CompleteFlowViewModelTest {
         val supabase = FakeSupabaseService(session = testSession("user-1"))
         val focusRequests = PathFocusRequests()
         val memory = FakeRecordFlowMemory()
-        val viewModel =
+
+        fun newViewModel() =
             CompleteFlowViewModel(
                 reads = read,
                 writes = write,
@@ -67,6 +68,8 @@ class CompleteFlowViewModelTest {
                 haptics = HapticsPreference(inMemorySettings()),
                 memory = memory,
             )
+
+        val viewModel = newViewModel()
 
         fun answerEverything(valence: Valence = Valence.LOWLIGHT_MEDIUM) {
             val m = viewModel.machine()
@@ -330,7 +333,7 @@ class CompleteFlowViewModelTest {
             assertFalse(h.viewModel.uiState.value.isFirstPebble)
             h.viewModel.showFirstPebbleHelp()
             assertFalse(h.viewModel.uiState.value.valenceHelpOpen)
-            assertFalse(h.memory.isValenceHelpSeen("user-1"))
+            assertTrue(h.memory.isValenceHelpSeen("user-1")) // settled for good by the read
         }
 
     @Test
@@ -385,6 +388,54 @@ class CompleteFlowViewModelTest {
             gate.complete(Unit)
             advanceUntilIdle()
             assertTrue(h.viewModel.uiState.value.isFirstPebble)
+        }
+
+    @Test
+    fun `the help never opens over another step, and opens on the way back if still unseen`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.snapshots.save("m-1", "user-1", CompleteSnapshot.from(PebbleAnswers(valence = Valence.HIGHLIGHT_SMALL)))
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            // The restore jumped to emotion; the read landed after. The exiting valence step's effect fires now.
+            assertEquals(CompleteStep.EMOTION, h.viewModel.uiState.value.flow.step)
+            assertTrue(h.viewModel.uiState.value.isFirstPebble)
+            h.viewModel.showFirstPebbleHelp()
+            assertFalse(h.viewModel.uiState.value.valenceHelpOpen)
+            assertFalse(h.memory.isValenceHelpSeen("user-1"))
+
+            // Back on valence the step's effect fires on entry, and the sheet opens.
+            h.viewModel.machine().back()
+            h.viewModel.showFirstPebbleHelp()
+            assertTrue(h.viewModel.uiState.value.valenceHelpOpen)
+            assertTrue(h.memory.isValenceHelpSeen("user-1"))
+        }
+
+    @Test
+    fun `a settled read that finds a completed pebble settles it for good`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.read.path = listOf(UiFixtures.pathMoment(id = "old", name = "Old"))
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            assertEquals(1, h.read.loadPathCount)
+            assertTrue(h.memory.isValenceHelpSeen("user-1"))
+
+            // The next flow open reads nothing at all.
+            val second = h.newViewModel()
+            second.start("m-1")
+            advanceUntilIdle()
+            assertEquals(1, h.read.loadPathCount)
+            assertFalse(second.uiState.value.isFirstPebble)
+        }
+
+    @Test
+    fun `an empty settled read leaves the flag for the sheet to mark on open`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            assertFalse(h.memory.isValenceHelpSeen("user-1"))
         }
 
     @Test

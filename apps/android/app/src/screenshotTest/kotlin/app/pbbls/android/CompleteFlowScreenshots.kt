@@ -145,6 +145,14 @@ fun Complete_Valence() {
     PebblesTheme { CompletePreview(CompleteStep.VALENCE, answers = PebbleAnswers()) }
 }
 
+/** The Pixel 8's height: the whole fan, the prompt and the "How to read this" callout above Continue. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 915)
+@Composable
+fun Complete_ValenceTall() {
+    PebblesTheme { CompletePreview(CompleteStep.VALENCE, answers = PebbleAnswers()) }
+}
+
 @PreviewTest
 @Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
 @Composable

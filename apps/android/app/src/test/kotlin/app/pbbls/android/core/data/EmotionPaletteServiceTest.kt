@@ -13,6 +13,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -34,11 +36,19 @@ class EmotionPaletteServiceTest {
 
     private val requests = AtomicInteger()
 
+    /** Parks every answer until completed, to hold a load in flight. */
+    private var gate: CompletableDeferred<Unit>? = null
+
+    /** Completes when a request reaches the engine. */
+    private var arrived = CompletableDeferred<Unit>()
+
     @OptIn(SupabaseInternal::class)
     private fun client(respond: (Int) -> Pair<HttpStatusCode, String>): SupabaseClient =
         createSupabaseClient(supabaseUrl = "https://fake.supabase.test", supabaseKey = "not-a-real-key") {
             httpEngine =
                 MockEngine {
+                    arrived.complete(Unit)
+                    gate?.await()
                     val (status, body) = respond(requests.incrementAndGet())
                     respond(body, status, headersOf(HttpHeaders.ContentType, "application/json"))
                 }
@@ -98,5 +108,40 @@ class EmotionPaletteServiceTest {
             } catch (e: CancellationException) {
                 assertFalse(service.loadFailed)
             }
+        }
+
+    @Test
+    fun `a retry cancelled mid-flight leaves the failure set, so the next visit still offers Retry`() =
+        runTest {
+            val service =
+                service { n -> if (n == 1) HttpStatusCode.InternalServerError to """{"message":"boom"}""" else HttpStatusCode.OK to row }
+            service.load()
+            assertTrue(service.loadFailed)
+
+            gate = CompletableDeferred()
+            arrived = CompletableDeferred()
+            val retry = launch { service.load() }
+            arrived.await()
+            assertTrue(service.isLoading)
+            retry.cancel()
+            retry.join()
+
+            assertTrue(service.loadFailed)
+            assertFalse(service.isLoading)
+            assertFalse(service.hasLoaded)
+        }
+
+    @Test
+    fun `a second tap while a load is in flight loads once`() =
+        runTest {
+            val service = service { HttpStatusCode.OK to row }
+            gate = CompletableDeferred()
+            val first = launch { service.load() }
+            arrived.await()
+            service.load()
+            gate?.complete(Unit)
+            first.join()
+            assertEquals(1, requests.get())
+            assertTrue(service.hasLoaded)
         }
 }

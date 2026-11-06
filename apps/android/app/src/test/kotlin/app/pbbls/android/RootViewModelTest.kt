@@ -9,6 +9,7 @@ import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.testing.FakeCompleteSnapshotStore
 import app.pbbls.android.testing.FakeProfileService
+import app.pbbls.android.testing.FakeRecordFlowMemory
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.FakeWrapDiskCache
 import app.pbbls.android.testing.MainDispatcherRule
@@ -73,6 +74,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -95,6 +97,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -117,6 +120,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -132,6 +136,36 @@ class RootViewModelTest {
         }
 
     @Test
+    fun `signing out forgets which domains were tagged, and keeps the help flag`() =
+        runTest(rule.dispatcher) {
+            val supabase = FakeSupabaseService()
+            val memory = FakeRecordFlowMemory()
+            memory.recordDomains(listOf("d-1"), "u1")
+            memory.markValenceHelpSeen("u1")
+            RootViewModel(
+                supabase,
+                FakeProfileService(),
+                karma(),
+                achievements(),
+                FakeCompleteSnapshotStore(),
+                FakeWrapDiskCache(),
+                memory,
+                haptics(),
+                SavedStateHandle(),
+            )
+
+            supabase.emitResolved(session = session(userId = "u1"))
+            advanceUntilIdle()
+            assertEquals(listOf("d-1"), memory.recentDomainIds("u1"))
+
+            supabase.emitResolved(session = null)
+            advanceUntilIdle()
+
+            assertEquals(emptyList<String>(), memory.recentDomainIds("u1"))
+            assertEquals(true, memory.isValenceHelpSeen("u1"))
+        }
+
+    @Test
     fun `signing out drops every completion autosave`() =
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
@@ -143,6 +177,7 @@ class RootViewModelTest {
                 achievements(),
                 completeSnapshots,
                 FakeWrapDiskCache(),
+                FakeRecordFlowMemory(),
                 haptics(),
                 SavedStateHandle(),
             )
@@ -169,6 +204,7 @@ class RootViewModelTest {
                 achievements(),
                 completeSnapshots,
                 FakeWrapDiskCache(),
+                FakeRecordFlowMemory(),
                 haptics(),
                 SavedStateHandle(),
             )
@@ -191,6 +227,7 @@ class RootViewModelTest {
                 achievements(),
                 completeSnapshots,
                 FakeWrapDiskCache(),
+                FakeRecordFlowMemory(),
                 haptics(),
                 SavedStateHandle(),
             )
@@ -213,6 +250,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -234,6 +272,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     handle,
                 )
@@ -249,6 +288,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     handle,
                 )
@@ -266,6 +306,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -290,6 +331,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -317,6 +359,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -346,6 +389,7 @@ class RootViewModelTest {
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -373,6 +417,7 @@ class RootViewModelTest {
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -403,6 +448,7 @@ class RootViewModelTest {
                     achievementNotify,
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -438,6 +484,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -466,6 +513,7 @@ class RootViewModelTest {
                     achievements(),
                     FakeCompleteSnapshotStore(),
                     FakeWrapDiskCache(),
+                    FakeRecordFlowMemory(),
                     haptics(),
                     SavedStateHandle(),
                 )
@@ -490,6 +538,7 @@ class RootViewModelTest {
                 achievements(),
                 FakeCompleteSnapshotStore(),
                 wraps,
+                FakeRecordFlowMemory(),
                 haptics(),
                 SavedStateHandle(),
             )

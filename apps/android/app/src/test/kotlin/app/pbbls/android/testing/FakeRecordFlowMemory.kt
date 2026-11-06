@@ -15,6 +15,10 @@ class FakeRecordFlowMemory : RecordFlowMemorying {
 
     override fun recentDomainIds(ownerId: String): List<String> = domains[ownerId].orEmpty()
 
+    override fun clearDomains() {
+        domains.clear()
+    }
+
     override fun recordDomains(
         picked: List<String>,
         ownerId: String,

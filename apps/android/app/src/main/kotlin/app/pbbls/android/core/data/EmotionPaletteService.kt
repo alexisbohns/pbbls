@@ -36,9 +36,14 @@ class EmotionPaletteService
 
         /**
          * The last [load] failed and nothing has loaded since. The emotion picker draws Retry on it
-         * instead of waiting for a launch that will not come (D9). Cleared when a load starts.
+         * instead of waiting for a launch that will not come (D9). Cleared only by a success, so a
+         * retry cancelled mid-flight (the screen left) leaves it set and the next visit still offers Retry.
          */
         var loadFailed: Boolean by mutableStateOf(false)
+            private set
+
+        /** A [load] is in flight: the picker shows progress for it, and a second call returns at once. */
+        var isLoading: Boolean by mutableStateOf(false)
             private set
 
         /**
@@ -48,7 +53,16 @@ class EmotionPaletteService
          * was; there is no retry loop, the picker offers one button (mirrors iOS).
          */
         suspend fun load() {
-            loadFailed = false
+            if (isLoading) return
+            isLoading = true
+            try {
+                fetch()
+            } finally {
+                isLoading = false
+            }
+        }
+
+        private suspend fun fetch() {
             runCatchingCancellable {
                 val rows =
                     supabase.client
@@ -65,6 +79,7 @@ class EmotionPaletteService
             }.onSuccess { valid ->
                 byEmotionId = valid.associateBy { it.id }
                 hasLoaded = true
+                loadFailed = false
                 Log.i(TAG, "loaded ${valid.size} palette rows")
             }.onFailure {
                 loadFailed = true

@@ -47,6 +47,17 @@ class RecordFlowMemoryTest {
     }
 
     @Test
+    fun `clearing forgets every account's domains and keeps the help flag`() {
+        memory.recordDomains(listOf("a"), "user-1")
+        memory.recordDomains(listOf("b"), "user-2")
+        memory.markValenceHelpSeen("user-1")
+        memory.clearDomains()
+        assertEquals(emptyList<String>(), memory.recentDomainIds("user-1"))
+        assertEquals(emptyList<String>(), memory.recentDomainIds("user-2"))
+        assertTrue(memory.isValenceHelpSeen("user-1"))
+    }
+
+    @Test
     fun `domains are per account`() {
         memory.recordDomains(listOf("a"), "user-1")
         assertEquals(emptyList<String>(), memory.recentDomainIds("user-2"))
