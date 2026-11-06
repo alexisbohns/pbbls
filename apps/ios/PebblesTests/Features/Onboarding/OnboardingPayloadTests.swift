@@ -60,4 +60,10 @@ struct OnboardingPayloadTests {
         #expect(fr.paragraphs(french: true) == ["Un", "Deux"])
         #expect(fr.signedBy(french: true) == "B")
     }
+
+    @Test func paragraphsTolerateCRLFFromAFormSubmission() {
+        let letter = PromiseLetter(bodyEn: "One\r\n\r\n Two \r\n\r\nThree\r\nstill three", bodyFr: nil,
+                                   signedByEn: "A", signedByFr: nil)
+        #expect(letter.paragraphs(french: false) == ["One", "Two", "Three\nstill three"])
+    }
 }

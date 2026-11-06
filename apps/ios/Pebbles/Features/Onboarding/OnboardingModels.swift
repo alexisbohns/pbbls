@@ -18,7 +18,11 @@ struct PromiseLetter: Decodable, Equatable, Sendable {
     /// Plain paragraphs: the seeded letter uses no Markdown and the admin form says
     /// "one paragraph per blank line".
     func paragraphs(french: Bool) -> [String] {
-        body(french: french).components(separatedBy: "\n\n")
+        // A browser form submits textarea newlines as CRLF.
+        body(french: french)
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+            .components(separatedBy: "\n\n")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
     }
