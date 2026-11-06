@@ -28,7 +28,7 @@ struct OnboardingStepScaffold<Content: View, Footer: View>: View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(title)
-                    .spineType(.stepTitle)
+                    .spineType(.sectionTitle)
                     .foregroundStyle(Color.pebbles.onSurface)
                     .accessibilityAddTraits(.isHeader)
                 if let lead {

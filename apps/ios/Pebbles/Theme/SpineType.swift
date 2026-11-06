@@ -150,9 +150,6 @@ extension SpineType.Style {
     static let greeting = Self(size: 40, weight: 270, trackingEm: -0.024, lineHeight: 41.6, scaling: .text(.largeTitle))
     static let greetingLine = Self(size: 21, weight: 360, italic: true, scaling: .text(.title3))
     static let sectionTitle = Self(size: 30, weight: 300, trackingEm: -0.018, scaling: .text(.title))
-    /// An onboarding step's title (#1510): `sectionTitle` with Android's 31.5 line height
-    /// (`PageTypography.sectionHead`), so a two-line title sits as tight as the mock's.
-    static let stepTitle = Self(size: 30, weight: 300, trackingEm: -0.018, lineHeight: 31.5, scaling: .text(.title))
     static let sectionFigure = Self(size: 30, weight: 300, features: [.lining], scaling: .text(.title))
     static let sectionFigureWord = Self(size: 19, weight: 380, italic: true, scaling: .text(.body))
     static let wrapCount = Self(size: 34, weight: 280, features: [.lining], scaling: .text(.largeTitle))

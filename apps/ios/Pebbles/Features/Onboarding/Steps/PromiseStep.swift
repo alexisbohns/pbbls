@@ -111,7 +111,7 @@ private struct PromiseTitle: View {
     @Environment(\.legibilityWeight) private var legibilityWeight
 
     var body: some View {
-        let roman = SpineType.Style.stepTitle
+        let roman = SpineType.Style.sectionTitle
         let spacing = SpineType.resolve(roman, dynamicTypeSize: dynamicTypeSize, legibilityWeight: legibilityWeight)
             .lineSpacing
         var italic = roman
@@ -120,8 +120,8 @@ private struct PromiseTitle: View {
         return (run(String(localized: "Before anything else,"), roman, Color.pebbles.onSurface)
             + Text(" ")
             + run(String(localized: "a promise."), italic, Color.pebbles.primary))
-            // SwiftUI clamps a negative `lineSpacing` to zero (measured), so the rank's 31.5 pt line
-            // height only shows where the platform honours it; the gap stays the font's natural one.
+            // SwiftUI clamps a negative `lineSpacing` to zero (measured), so a rank's line height
+            // below the font's natural one never shows; the gap stays the font's natural one.
             .lineSpacing(spacing)
     }
 
