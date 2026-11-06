@@ -170,8 +170,7 @@ fun CompleteFlowContent(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface)
                 // Top and sides only: the bottom is each step's own, so Life's bar can tint down to the screen's edge.
-                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
-                .readableWidth(),
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
     ) {
         if (flow.step != CompleteStep.SUCCESS) {
             RecordFlowChrome(
@@ -180,6 +179,7 @@ fun CompleteFlowContent(
                 canGoBack = flow.step.previous != null,
                 onBack = model::back,
                 onClose = onClose,
+                modifier = Modifier.readableWidth(),
             )
         }
 
@@ -200,7 +200,7 @@ fun CompleteFlowContent(
         ) { step ->
             val completed = flow.completed
             if (step == CompleteStep.SUCCESS && completed != null) {
-                Box(Modifier.fillMaxSize().then(bottomInset)) {
+                Box(Modifier.readableWidth().fillMaxSize().then(bottomInset)) {
                     RecordRicherStep(
                         pebbleId = completed.pebbleId,
                         name = uiState.momentName,
@@ -248,10 +248,11 @@ fun CompleteFlowContent(
                     )
                 }
                 if (step == CompleteStep.LIFE) {
-                    // Draws its own title and its bar down to the edge: no scaffold, no bottom inset here.
+                    // Draws its own title and its bar down to the edge: no scaffold, no bottom inset here. It
+                    // caps its own column, so the bar's tint can run the window's width on a tablet.
                     body()
                 } else {
-                    Box(Modifier.fillMaxSize().then(bottomInset)) {
+                    Box(Modifier.readableWidth().fillMaxSize().then(bottomInset)) {
                         RecordStepScaffold(
                             title = stringResource(step.titleRes),
                             // Only the valence step, and only when the moment was saved a moment ago (D1).

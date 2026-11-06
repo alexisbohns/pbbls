@@ -50,6 +50,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.PebbleAnswers
 import app.pbbls.android.core.model.SoulWithGlyph
@@ -111,9 +112,9 @@ fun RecordLifeStep(
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = PebblesTheme.spacing.lg),
+            modifier = Modifier.readableWidth().padding(horizontal = PebblesTheme.spacing.lg),
         )
-        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+        Box(modifier = Modifier.readableWidth().weight(1f)) {
             DomainGrid(
                 answers = answers,
                 domains = domains,
@@ -271,6 +272,7 @@ private fun Bar(
         Column(
             modifier =
                 Modifier
+                    .readableWidth()
                     .windowInsetsPadding(WindowInsets.navigationBars.exclude(WindowInsets.ime))
                     .padding(horizontal = space.lg)
                     .padding(top = space.sm, bottom = space.sm),
