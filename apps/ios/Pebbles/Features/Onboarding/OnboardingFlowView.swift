@@ -49,7 +49,8 @@ struct OnboardingFlowView: View {
         }, content: {
             GlyphCarveSheet(onSaved: model.carved)
         })
-        .onChange(of: model.isDone) { _, done in
+        // `initial`: a cover asked for again (`OnboardingPresentation`) can find the write already landed.
+        .onChange(of: model.isDone, initial: true) { _, done in
             if done { onFinish() }
         }
         .task { await model.load() }

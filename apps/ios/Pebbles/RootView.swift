@@ -156,11 +156,21 @@ struct RootView: View {
                         .environment(\.spineSnapSource, .signed(snapURLs))
                         // `onDismiss`, not the flow's end: anything opened after it can't be
                         // dropped by a dismissal still in progress.
-                        .fullScreenCover(isPresented: $onboarding.isPresenting, onDismiss: handOffAfterOnboarding) {
-                            OnboardingFlowHost(slot: onboarding.slot, onLogOut: signOut) { note in
-                                onboarding.finish(note: note, consentGate: consentGate)
+                        .fullScreenCover(isPresented: $onboarding.coverBinding, onDismiss: {
+                            onboarding.coverDismissed()
+                        }, content: {
+                            OnboardingFlowHost(
+                                slot: onboarding.slot,
+                                onLogOut: signOut,
+                                onCoverUp: onboarding.coverAppeared
+                            ) { note in
+                                onboarding.finish(
+                                    note: note,
+                                    consentGate: consentGate,
+                                    onClosed: handOffAfterOnboarding
+                                )
                             }
-                        }
+                        })
 
                     if holdsLoader {
                         // Hold the loader over the home feed load so its own
@@ -251,7 +261,7 @@ struct RootView: View {
             consentGate.start(userId: userId)
         }
         .onChange(of: canShowAuthedTabs && onboarding.gate.shouldPresent, initial: true) { _, present in
-            if present { onboarding.isPresenting = true }
+            if present { onboarding.presentCover() }
         }
         .onChange(of: scenePhase) { _, phase in
             // A gate that failed closed tries again when the app comes back.
@@ -300,9 +310,9 @@ struct RootView: View {
     }
 
     /// The cover is gone, and that lets `isClearOfGates` turn on, now if the gate has passed or when
-    /// it does. Home first, and the people named in the flow into the lists Complete reads.
+    /// it does. Home first, and the people named in the flow into the lists Complete reads. Called
+    /// once per flow's end, by `OnboardingPresentation`.
     private func handOffAfterOnboarding() {
-        guard onboarding.coverDismissed() else { return }
         nav.popToRoot(.home)
         nav.go(.home)
         Task { await refs.load() }

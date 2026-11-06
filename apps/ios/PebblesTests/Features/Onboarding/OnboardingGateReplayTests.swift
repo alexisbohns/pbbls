@@ -120,7 +120,7 @@ struct OnboardingGateReplayTests {
 
     /// The presentation's half: after the replay the next cover gets a new flow, not the finished one.
     @Test func theNextCoverGetsAFreshFlow() async throws {
-        let presentation = OnboardingPresentation(gate: gate)
+        let presentation = OnboardingPresentation(gate: gate, wait: ManualBounds().wait)
         let harness = OnboardingFlowHarness()
         let consentGate = ConsentGateModel()
         let suite = "onboarding-replay-consent-\(UUID().uuidString)"
@@ -129,7 +129,7 @@ struct OnboardingGateReplayTests {
         let first = presentation.slot.model
         gate.start(userId: "a")
         await gate.work?.value
-        presentation.isPresenting = true
+        presentation.presentCover()
 
         presentation.finish(note: nil, consentGate: consentGate)
         #expect(presentation.coverDismissed())

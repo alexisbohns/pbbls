@@ -78,6 +78,13 @@ enum OnboardingBounds {
     /// The flag read, on the same idea as `RootView`'s loader ceiling: past it, the read counts as
     /// failed and the consent gate decides.
     static let flagRead: Duration = .seconds(8)
+    /// The cover saying it is up, each of the two times it is asked for.
+    static let coverUp: Duration = .seconds(2)
+    /// From taking the cover down to asking again: SwiftUI has to see the `false`, and a dismissal in
+    /// progress has to end, or the next presentation is dropped as well.
+    static let coverRetry: Duration = .seconds(1)
+    /// From the flow's end to the cover's `onDismiss`. A dismissal takes about half a second.
+    static let closing: Duration = .seconds(2)
 }
 
 /// Owned by `RootView`, like `ConsentGateModel`.
@@ -160,6 +167,15 @@ final class OnboardingGateModel {
         work?.cancel()
         ceiling?.cancel()
         generation += 1
+    }
+
+    /// The cover couldn't be kept up (`OnboardingPresentation`). From here it is a failed read: nothing
+    /// is presented this launch, and the consent gate decides, failing closed. The device flag stays
+    /// as it was, so the flow gets another go next launch.
+    func standDown() {
+        endRead()
+        completed = nil
+        readFailed = true
     }
 
     /// The flow ended: this device never re-presents, whatever the profile says next.

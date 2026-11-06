@@ -31,6 +31,8 @@ final class OnboardingFlowSlot {
 struct OnboardingFlowHost: View {
     let slot: OnboardingFlowSlot
     let onLogOut: () -> Void
+    /// The cover made it: a presentation can be dropped without a word (`OnboardingPresentation`).
+    let onCoverUp: () -> Void
     let onFinish: (OnboardingHandoffNote?) -> Void
 
     @Environment(SupabaseService.self) private var supabase
@@ -48,6 +50,10 @@ struct OnboardingFlowHost: View {
                 Color.pebbles.surface.ignoresSafeArea()
             }
         }
+        // The flow ends by finishing or logging out: VoiceOver's two-finger escape must not close it.
+        .accessibilityElement(children: .contain)
+        .accessibilityAction(.escape) {}
+        .onAppear(perform: onCoverUp)
         .onChange(of: userId, initial: true) { _, id in
             slot.sync(userId: id) { user in
                 OnboardingFlowModel(

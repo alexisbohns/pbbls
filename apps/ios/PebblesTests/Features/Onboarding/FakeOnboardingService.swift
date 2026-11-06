@@ -132,7 +132,8 @@ final class Latch: @unchecked Sendable {
 
 /// Bounds that run out when the test says, in the order they were asked for. A bound told to run out
 /// before anything has asked for it runs out as soon as something does, and a cancelled one still
-/// answers: the code's own tokens are what has to ignore it.
+/// answers: the code's own tokens are what has to ignore it. One nobody runs out goes by itself, late,
+/// so a test awaiting the wrong one fails instead of hanging the whole run.
 final class ManualBounds: @unchecked Sendable {
     private let lock = NSLock()
     private var latches: [Latch] = []
@@ -148,7 +149,22 @@ final class ManualBounds: @unchecked Sendable {
                 asked.append(duration)
                 return asked.count - 1
             }
-            await latch(index).wait()
+            let latch = latch(index)
+            let expiry = Task {
+                try? await Task.sleep(for: .seconds(60))
+                latch.open()
+            }
+            await latch.wait()
+            expiry.cancel()
+        }
+    }
+
+    /// Until `count` bounds have been asked for. They hop off the main actor to ask, so a test telling
+    /// an earlier bound from a later one has to let the earlier one arrive first.
+    func reached(_ count: Int) async {
+        let deadline = ContinuousClock.now + .seconds(10)
+        while durations.count < count, ContinuousClock.now < deadline {
+            try? await Task.sleep(for: .milliseconds(1))
         }
     }
 

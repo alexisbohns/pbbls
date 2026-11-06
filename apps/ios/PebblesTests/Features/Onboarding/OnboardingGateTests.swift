@@ -363,6 +363,7 @@ struct OnboardingGateCeilingTests {
         let m = try heldRead(held, bounds: bounds)
         m.start(userId: "a")
         let stale = m.ceiling
+        await bounds.reached(1)
         m.start(userId: nil)
         m.start(userId: "a")
 

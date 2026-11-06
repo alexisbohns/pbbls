@@ -19,7 +19,7 @@ struct OnboardingPresentationTests {
         let defaults = try #require(UserDefaults(suiteName: suite))
         cache = ConsentPreferences(defaults: defaults)
         consentGate.cache = cache
-        presentation = OnboardingPresentation(gate: OnboardingGateModel(defaults: defaults))
+        presentation = OnboardingPresentation(gate: OnboardingGateModel(defaults: defaults), wait: ManualBounds().wait)
         presentation.gate.service = service
     }
 
@@ -30,7 +30,7 @@ struct OnboardingPresentationTests {
         consentGate.start(userId: Self.user)
         await presentation.gate.work?.value
         await consentGate.work?.value
-        presentation.isPresenting = true
+        presentation.presentCover()
     }
 
     @Test func theLayerReadsTheCover() async {
@@ -131,7 +131,7 @@ struct OnboardingPresentationHandOffTests {
         let suite = "onboarding-presentation-handoff-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         consentGate.cache = ConsentPreferences(defaults: defaults)
-        presentation = OnboardingPresentation(gate: OnboardingGateModel(defaults: defaults))
+        presentation = OnboardingPresentation(gate: OnboardingGateModel(defaults: defaults), wait: ManualBounds().wait)
     }
 
     /// The flow's end and the cover's `onDismiss`.
@@ -203,7 +203,7 @@ struct OnboardingPresentationFlowTests {
         let suite = "onboarding-presentation-flow-\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         consentGate.cache = ConsentPreferences(defaults: defaults)
-        presentation = OnboardingPresentation(gate: OnboardingGateModel(defaults: defaults))
+        presentation = OnboardingPresentation(gate: OnboardingGateModel(defaults: defaults), wait: ManualBounds().wait)
     }
 
     private func sync(_ userId: String?) {
