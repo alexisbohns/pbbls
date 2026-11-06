@@ -12,9 +12,16 @@ final class OnboardingFlowSlot {
 
     func sync(userId: String?, make: (String) -> OnboardingFlowModel) {
         guard userId != self.userId else { return }
-        model?.sessionEnded()
+        end()
         self.userId = userId
         model = userId.map(make)
+    }
+
+    /// No flow until the next `sync`, whoever that is for.
+    func end() {
+        model?.sessionEnded()
+        userId = nil
+        model = nil
     }
 }
 
@@ -22,11 +29,11 @@ final class OnboardingFlowSlot {
 /// The id is lowercased here and only here (`OnboardingGate.userKey`): it keys the consent gate's
 /// cache and binds the hand-off note, and both are compared to the same form elsewhere.
 struct OnboardingFlowHost: View {
+    let slot: OnboardingFlowSlot
     let onLogOut: () -> Void
     let onFinish: (OnboardingHandoffNote?) -> Void
 
     @Environment(SupabaseService.self) private var supabase
-    @State private var slot = OnboardingFlowSlot()
 
     private var userId: String? { OnboardingGate.userKey(supabase.session?.user.id) }
 

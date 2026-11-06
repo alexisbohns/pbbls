@@ -7,6 +7,9 @@ import Observation
 @MainActor
 final class OnboardingPresentation {
     let gate: OnboardingGateModel
+    /// The flow's model, here and not in the cover's content: this object is always alive, and SwiftUI
+    /// gives no guarantee the content hears a sign-out before the branch presenting it goes.
+    let slot = OnboardingFlowSlot()
     /// What Home reads when the flow has ended.
     let handoff = OnboardingHandoff()
     /// The cover's binding.
@@ -56,6 +59,7 @@ final class OnboardingPresentation {
     func coverDismissed() -> Bool {
         guard isClosing else { return false }
         isClosing = false
+        slot.end()
         return true
     }
 
@@ -87,5 +91,6 @@ final class OnboardingPresentation {
         note = nil
         homeIsStale = false
         _ = handoff.take(userId: nil)
+        slot.end()
     }
 }

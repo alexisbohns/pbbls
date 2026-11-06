@@ -188,3 +188,79 @@ struct OnboardingPresentationHandOffTests {
         #expect(presentation.handoff.take(userId: "user-1") == nil)
     }
 }
+
+/// `RootView` is always alive and the cover's content may not be: SwiftUI gives no guarantee the host
+/// hears a sign-out before the branch that presents it goes. So the presentation ends the flow too.
+@Suite("Onboarding presentation flow")
+@MainActor
+struct OnboardingPresentationFlowTests {
+    private let note = OnboardingHandoffNote(userId: "a", reason: nil)
+    private let harness = OnboardingFlowHarness()
+    private let consentGate = ConsentGateModel()
+    private let presentation: OnboardingPresentation
+
+    init() throws {
+        let suite = "onboarding-presentation-flow-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        consentGate.cache = ConsentPreferences(defaults: defaults)
+        presentation = OnboardingPresentation(gate: OnboardingGateModel(defaults: defaults))
+    }
+
+    private func sync(_ userId: String?) {
+        presentation.slot.sync(userId: userId) { harness.model(userId: $0) }
+    }
+
+    @Test func aSignOutEndsTheFlowWhetherOrNotTheCoverHeardIt() async {
+        let entered = Latch()
+        let release = Latch()
+        harness.consents.beforeRecord = {
+            entered.open()
+            await release.wait()
+        }
+        sync("a")
+        let flow = presentation.slot.model
+        await flow?.loadToConsent()
+        flow?.switchEveryActOn()
+        flow?.next()
+        #expect(await entered.reached())
+
+        presentation.reset()
+        release.open()
+        await flow?.work?.value
+
+        #expect(presentation.slot.model == nil)
+        // Only the act already in flight landed.
+        #expect(harness.consents.recordCalls.count == 1)
+    }
+
+    /// The pace step stays drawn while the cover slides down.
+    @Test func theFlowStaysOnScreenWhileTheCoverCloses() {
+        sync("a")
+        let flow = presentation.slot.model
+        presentation.finish(note: note, consentGate: consentGate)
+        #expect(presentation.slot.model === flow)
+    }
+
+    @Test func aReplayGetsAFreshFlowForTheSameUser() {
+        sync("a")
+        let flow = presentation.slot.model
+        flow?.setName("Léa")
+        presentation.finish(note: note, consentGate: consentGate)
+        #expect(presentation.coverDismissed())
+        #expect(presentation.slot.model == nil)
+
+        sync("a")
+        #expect(presentation.slot.model != nil)
+        #expect(presentation.slot.model !== flow)
+        #expect(presentation.slot.model?.name == "")
+    }
+
+    @Test func signingBackInAfterASignOutGetsAFreshFlow() {
+        sync("a")
+        let flow = presentation.slot.model
+        presentation.reset()
+        sync("a")
+        #expect(presentation.slot.model != nil)
+        #expect(presentation.slot.model !== flow)
+    }
+}

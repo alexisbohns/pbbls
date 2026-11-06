@@ -153,7 +153,7 @@ struct RootView: View {
                         // `onDismiss`, not the flow's end: anything opened after it can't be
                         // dropped by a dismissal still in progress.
                         .fullScreenCover(isPresented: $onboarding.isPresenting, onDismiss: handOffAfterOnboarding) {
-                            OnboardingFlowHost(onLogOut: signOut) { note in
+                            OnboardingFlowHost(slot: onboarding.slot, onLogOut: signOut) { note in
                                 onboarding.finish(note: note, consentGate: consentGate)
                             }
                         }
