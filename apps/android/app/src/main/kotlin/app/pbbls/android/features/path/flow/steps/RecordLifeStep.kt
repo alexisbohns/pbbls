@@ -276,8 +276,10 @@ private fun Bar(
                     .padding(top = space.sm, bottom = space.sm),
             verticalArrangement = Arrangement.spacedBy(space.sm),
         ) {
-            // Absent until the first tap rather than a blank line holding its height: the bar is tall enough.
-            if (caption != null) {
+            // Absent until the first tap rather than a blank line holding its height. At large text it
+            // would truncate to a stub and cost the list a line: the description stays on each tile's
+            // semantics (its click label) and the bar stays under half the screen.
+            if (caption != null && LocalDensity.current.fontScale < ONE_COLUMN_FONT_SCALE) {
                 Text(
                     text = ReferenceStrings.domainLabel(caption.slug, caption.label),
                     style = MaterialTheme.typography.bodyMedium,
