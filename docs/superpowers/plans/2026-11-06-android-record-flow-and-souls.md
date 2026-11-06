@@ -854,3 +854,30 @@ Every review is run against the mocks: the first reviewer opens the mock, the iO
 | D15 copy, D16 measurement (no client work) | copy table + 9 |
 
 Known deviations, stated: the table at the top; the upload ring is static, as iOS's; `SavedStateHandle` covers process death but not a user swipe-kill, as the spec accepts; words count as something to keep on Android (a small improvement to raise for iOS).
+
+## Lessons learned (in flight, 2026-11-06)
+
+Built in one session as subagent-driven development, nine PRs #1575–#1583, stack #1584. The controller held the device, the side-by-sides and the shipping; a fresh implementer per part; one reviewer doing both stages on most parts, opening the pictures before the diff. That review shape held: every part's review found something real.
+
+**Only the device found these, and Robolectric passed all three:**
+- The half sheet hid its tray: Done was off screen until a drag. A half sheet is laid out at full height and offset down, and the first fix, computed from window coordinates, did nothing inside the sheet's own window.
+- Back ignored the open search. A `ModalBottomSheet` is its own window with its own dispatcher, and a handler around it never fires.
+- The moment page's field lost letters typed quickly (26 typed, up to 4 lost, while a same-state field lost none), because it resynced from a model that lags the keyboard. `main`'s `RecordNameStep` had the same pattern. A review had called it a Minor and it was set aside until `adb input text` showed it: a Minor that names a mechanism deserves one test before it is dropped.
+
+**Review found these, each a real defect:**
+- The plan said `SnapUploadCoordinator.attach` deleted a replaced snap. It did not. The first fix moved the delete into the coordinator and so opened a data-loss path on Edit moment (pick B, save A while B is read, A's files deleted under a saved moment). Asking the reviewer the sharpest possible question ("can this ever delete a saved photo?") found it. The cure was already written on iOS: the commit lock and the pick generation.
+- A re-created Complete entry offered a blank valence step on a finished pebble, which would have overwritten its souls and collection.
+- The help sheet could open over the wrong step: a step composable outlives its step for 280 ms in `AnimatedContent`.
+- A whole-Path read on every flow open, for ever, for any account that never saw the help.
+- Retry stranding a blank step; two delete menus for a soul shown as both a tile and a row.
+
+**The plan's table of disagreements earned its place.** It let implementers stop re-deciding what iOS, the mocks and the spec each said. Where it contradicted itself (the Add row against mock 11), the side-by-side caught it within the first part. Three spec items turned out to be on neither surface (the D6 snackbar, the D9 beat, the D7 sentence): checking what iOS shipped, not what the spec says it shipped, is what showed it. iOS's old `QuickMomentSheet` fired an achievement check its stack dropped: "iOS does not do it" and "iOS never did it" are different claims.
+
+**Shipping:**
+- The first re-baseline failed: six `ListDetail` previews render `SoulsListContent`, whose back handler needs a dispatcher previews lack, and an earlier stand-in had fixed People's previews only. A failed local render shows as a 1×1 PNG in a run that is red anyway, so grep for `ScreenshotRenderException` rather than reading the red. Back handling belongs on the screen wrapper, not on the content layer that previews render.
+- The Arkaik manifest check passes before a re-baseline and can fail right after it, once a new render exists. An unnamed variant on a mapped preview made `Capture_Photo` two files: name every variant on a mapped preview, and run the check again after the bot.
+- `$?` after a pipe to `tail` is `tail`'s; a wrapper in `run_in_background` reported success while Gradle had printed `exit=127`. Read the status the command itself printed.
+- The classifier refused the first device save on a signed-in production account until the maintainer said yes in this session, and refused adding `Resolves #1194` to a body (closing an issue nobody asked about): both are the maintainer's call.
+- A generated test image with a label-checked first cell avoids uploading anyone's real photos through the system picker, and it has to come off afterwards.
+
+**Owed:** #1194 is fixed by #1581 but unlinked; #1585, #1586, #1587; the maintainer's eye on the Library tile and on People's centred title; TalkBack on the moment page's fields; the baseline-profile journey; Arkaik's `V-record-success` still describes the old screen; a camera shot was never pressed on the maintainer's phone.
