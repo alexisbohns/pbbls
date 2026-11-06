@@ -97,6 +97,7 @@ struct GlyphStoneGrid: View {
             .disabled(glyph == nil)
             .accessibilityLabel(label(for: glyph, index: index))
             .accessibilityAddTraits(chosen ? .isSelected : [])
+            .accessibilityHidden(glyph == nil)
         }
     }
 

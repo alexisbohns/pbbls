@@ -416,11 +416,25 @@ extension OnboardingFlowModel {
         people[index].name = String(value.prefix(Self.nameLimit))
     }
 
-    /// The keyboard's done: a blank name removes the place, a name closes the field.
+    /// The server refuses two souls whose `lower(btrim(name))` collide, which would fail the whole send.
+    /// Trimmed and lower-cased like Postgres does for ordinary letters; accents are not folded.
+    private static func folded(_ name: String) -> String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+
+    private func isDuplicate(_ index: Int) -> Bool {
+        let mine = Self.folded(people[index].name)
+        return people.enumerated().contains { $0.offset != index && Self.folded($0.element.name) == mine }
+    }
+
+    /// The keyboard's done: a blank or duplicate name removes the place, a name closes the field.
     func commitPerson(_ index: Int) {
         guard people.indices.contains(index) else { return }
         let trimmed = people[index].name.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
+            people.remove(at: index)
+        } else if isDuplicate(index) {
+            haptic(.warning)
             people.remove(at: index)
         } else {
             people[index].name = trimmed
@@ -435,17 +449,9 @@ extension OnboardingFlowModel {
         people[index].isEditing = true
     }
 
-    /// Leaving the step never strands a half-typed name: a blank place is dropped, a name is kept.
+    /// Leaving the step never strands a half-typed name: a blank or duplicate place is dropped, a name is kept.
     private func commitEditingPeople() {
-        people = people.compactMap { person in
-            guard person.isEditing else { return person }
-            let trimmed = person.name.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { return nil }
-            var closed = person
-            closed.name = trimmed
-            closed.isEditing = false
-            return closed
-        }
+        while let index = people.firstIndex(where: \.isEditing) { commitPerson(index) }
     }
 
     /// The glyph place `index` wears until a pick: a different one per place, so three people never
@@ -454,8 +460,10 @@ extension OnboardingFlowModel {
         systemGlyphs.indices.contains(index) ? systemGlyphs[index].id : systemGlyphs.first?.id
     }
 
+    /// No-op while any field is open: presenting the sheet would take its focus, and a blank commit
+    /// would then remove a place and shift the index the sheet targets.
     func openGlyphSheet(_ index: Int) {
-        guard people.indices.contains(index) else { return }
+        guard people.indices.contains(index), !people.contains(where: \.isEditing) else { return }
         haptic(.selection)
         glyphSheetFor = index
     }

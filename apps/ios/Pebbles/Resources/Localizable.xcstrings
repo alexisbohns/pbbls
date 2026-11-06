@@ -208,6 +208,23 @@
         }
       }
     },
+    "Change glyph for %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change glyph for %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer le glyphe de %@"
+          }
+        }
+      }
+    },
     "Close search" : {
       "extractionState" : "manual",
       "localizations" : {

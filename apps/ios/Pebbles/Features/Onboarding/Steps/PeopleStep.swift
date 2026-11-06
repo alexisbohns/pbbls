@@ -30,6 +30,8 @@ struct PeopleStep: View {
     private static let captionRank = SpineType.Style.inclusive(12, 400)
     private static let addRank = SpineType.Style.inclusive(14, 500)
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     private var isEditing: Bool { people.contains(where: \.isEditing) }
 
     var body: some View {
@@ -142,11 +144,13 @@ struct PeopleStep: View {
                         Text(verbatim: person.name)
                             .spineType(.communityTitle)
                             .foregroundStyle(Color.pebbles.onSurface)
-                            .lineLimit(1)
+                            .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
+                            .minimumScaleFactor(typeSize.isAccessibilitySize ? 1 : 0.75)
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .bottom)
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .disabled(isEditing)
                     Button { onChangeGlyph(index) } label: {
                         Text("Change glyph")
                             .spineType(Self.captionRank)
@@ -157,6 +161,8 @@ struct PeopleStep: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .disabled(isEditing)
+                    .accessibilityLabel(Text("Change glyph for \(person.name)"))
                 }
             }
         } else {

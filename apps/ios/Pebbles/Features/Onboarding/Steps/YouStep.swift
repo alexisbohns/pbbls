@@ -79,6 +79,7 @@ struct YouStep: View {
                 .spineType(Self.captionRank)
                 .foregroundStyle(nameIsFocused ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant)
                 .padding(.top, Spacing.xs)
+                .accessibilityHidden(true)
         }
     }
 }

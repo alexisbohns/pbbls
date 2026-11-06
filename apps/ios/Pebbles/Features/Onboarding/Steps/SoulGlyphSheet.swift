@@ -9,11 +9,14 @@ struct SoulGlyphSheet: View {
     let currentGlyphId: UUID?
     let onUse: (UUID) -> Void
     let onDraw: () -> Void
+    /// `ImageRenderer` draws no `ScrollView` content, so references turn this off.
+    var scrolls = true
 
     @State private var picked: UUID?
 
     init(personName: String, glyphs: [Glyph], currentGlyphId: UUID?,
-         onUse: @escaping (UUID) -> Void, onDraw: @escaping () -> Void) {
+         onUse: @escaping (UUID) -> Void, onDraw: @escaping () -> Void, scrolls: Bool = true) {
+        self.scrolls = scrolls
         self.personName = personName
         self.glyphs = glyphs
         self.currentGlyphId = currentGlyphId
@@ -26,15 +29,15 @@ struct SoulGlyphSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
-            header
-            GlyphStoneGrid(
-                glyphs: glyphs,
-                selectedId: picked,
-                onSelect: { picked = $0.id },
-                onDraw: onDraw,
-                drawLabel: "Draw one"
-            )
-            Spacer(minLength: Spacing.lg)
+            if scrolls {
+                ScrollView {
+                    content
+                }
+                .scrollBounceBehavior(.basedOnSize)
+            } else {
+                content
+                Spacer(minLength: Spacing.lg)
+            }
             Button { if let picked { onUse(picked) } } label: { Text("Use for \(personName)") }
                 .buttonStyle(PebblesPrimaryButtonStyle())
                 .disabled(picked == nil)
@@ -46,6 +49,20 @@ struct SoulGlyphSheet: View {
         .background(Color.pebbles.surface.ignoresSafeArea())
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+    }
+
+    private var content: some View {
+        VStack(alignment: .leading, spacing: Spacing.lg) {
+            header
+            GlyphStoneGrid(
+                glyphs: glyphs,
+                selectedId: picked,
+                onSelect: { picked = $0.id },
+                onDraw: onDraw,
+                drawLabel: "Draw one"
+            )
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var header: some View {

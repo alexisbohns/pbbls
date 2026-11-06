@@ -53,16 +53,6 @@ struct OnboardingFlowPeopleTests {
         #expect(model.answers.souls.map(\.glyphId) == expected)
     }
 
-    @Test("two people with identical names and no pick still wear different glyphs")
-    func identicalPeopleDiffer() {
-        let model = modelAtPeople()
-        addPerson(model, "Sam")
-        addPerson(model, "Sam")
-        let glyphs = model.answers.souls.map(\.glyphId)
-        #expect(glyphs.count == 2)
-        #expect(glyphs[0] != glyphs[1])
-    }
-
     @Test("a place past the last system glyph wears the first one")
     func defaultGlyphFallsBack() {
         let model = modelAtPeople()
@@ -232,5 +222,79 @@ struct OnboardingFlowPeopleTests {
         let mine = Glyph(id: UUID(), name: "Mine", strokes: [], viewBox: "0 0 200 200", userId: UUID())
         model.carved(mine)
         #expect(model.glyphChoices.map(\.id) == OnboardingFlowHarness.glyphs.map(\.id) + [mine.id])
+    }
+}
+
+extension OnboardingFlowPeopleTests {
+    @Test("the glyph sheet does not open while another person's field is open")
+    func sheetRefusedWhileEditing() {
+        let model = modelAtPeople()
+        addPerson(model, "A")
+        addPerson(model, "B")
+        addPerson(model, "C")
+        model.editPerson(1)
+        model.openGlyphSheet(2)
+        #expect(model.glyphSheetFor == nil)
+        model.commitPerson(1)
+        model.openGlyphSheet(2)
+        #expect(model.glyphSheetFor == 2)
+    }
+
+    @Test("glyph actions on an index that is gone do nothing")
+    func staleIndexes() {
+        let model = modelAtPeople()
+        addPerson(model, "A")
+        model.pickPersonGlyph(5, OnboardingFlowHarness.glyphs[1].id)
+        model.drawForPerson(5)
+        #expect(model.people[0].glyphId == nil)
+        #expect(model.carvingFor == nil)
+        model.seed(step: .people, letter: nil, systemGlyphs: OnboardingFlowHarness.glyphs,
+                   consent: OnboardingConsentState(), people: [], carvingFor: .person(0))
+        let mine = Glyph(id: UUID(), name: "Mine", strokes: [], viewBox: "0 0 200 200", userId: UUID())
+        model.carved(mine)
+        #expect(model.people.isEmpty)
+    }
+
+    @Test("a name equal to another's, trimmed and ignoring case, is refused like a blank")
+    func duplicateRefused() {
+        let harness = OnboardingFlowHarness()
+        let model = harness.model()
+        model.seedStep(.people)
+        addPerson(model, "Ana")
+        harness.forgetTaps()
+        addPerson(model, " ana ")
+        #expect(model.people.map(\.name) == ["Ana"])
+        #expect(harness.taps.contains(.warning))
+    }
+
+    @Test("accents are not folded: Lea and Léa both stay")
+    func accentsStay() {
+        let model = modelAtPeople()
+        addPerson(model, "Léa")
+        addPerson(model, "Lea")
+        #expect(model.people.map(\.name) == ["Léa", "Lea"])
+    }
+
+    @Test("editing a person to match another removes the place")
+    func editedToDuplicate() {
+        let model = modelAtPeople()
+        addPerson(model, "Ana")
+        addPerson(model, "Bo")
+        model.editPerson(1)
+        model.setPersonName(1, "ANA")
+        model.commitPerson(1)
+        #expect(model.people.map(\.name) == ["Ana"])
+    }
+
+    @Test("leaving the step drops an open duplicate, so the answers never collide")
+    func leavingDropsDuplicate() {
+        let model = modelAtPeople()
+        addPerson(model, "Ana")
+        model.addPerson()
+        model.setPersonName(1, "ana")
+        model.next()
+        #expect(model.people.map(\.name) == ["Ana"])
+        let names = model.answers.souls.map { $0.name.lowercased() }
+        #expect(Set(names).count == names.count)
     }
 }
