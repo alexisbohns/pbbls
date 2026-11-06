@@ -9,6 +9,7 @@ import app.pbbls.android.core.data.TabIntent
 import app.pbbls.android.core.data.TabIntents
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.MainDispatcherRule
@@ -49,7 +50,8 @@ class SoulsListViewModelTest {
         souls: FakeSoulsService = FakeSoulsService(),
         refs: FakeReferenceDataService = FakeReferenceDataService(),
         tabIntents: TabIntents = TabIntents(),
-    ) = SoulsListViewModel(souls, refs, HapticsPreference(inMemorySettings()), tabIntents)
+        achievements: FakeAchievementsService = FakeAchievementsService(),
+    ) = SoulsListViewModel(souls, refs, HapticsPreference(inMemorySettings()), tabIntents, achievements)
 
     @Test
     fun `starts Loading and resolves to Content`() =
@@ -324,5 +326,62 @@ class SoulsListViewModelTest {
             assertTrue(requests.values.isEmpty())
             assertEquals(TabIntent.CreateCollection, tabIntents.pending.value)
             requests.stop()
+        }
+
+    // MARK: - Inline create (S4)
+
+    @Test
+    fun `a created soul is reported, the list refreshed and the achievements checked`() =
+        runTest {
+            val service = FakeSoulsService(souls = listOf(soul("a")))
+            val refs = FakeReferenceDataService()
+            val achievements = FakeAchievementsService()
+            val viewModel = viewModel(souls = service, refs = refs, achievements = achievements)
+            advanceUntilIdle()
+            val outcomes = recordEffects(viewModel.createOutcomes)
+
+            viewModel.createSoul("Nour")
+            advanceUntilIdle()
+
+            assertEquals(listOf("Nour"), refs.createSoulCalls)
+            assertEquals(listOf<SoulCreateOutcome>(SoulCreateOutcome.Created(refs.createSoulResult("Nour")!!)), outcomes.values)
+            assertEquals(2, service.listCount)
+            assertEquals(1, achievements.fireCheckCount)
+            outcomes.stop()
+        }
+
+    @Test
+    fun `a failed create reports and leaves the list alone`() =
+        runTest {
+            val service = FakeSoulsService(souls = listOf(soul("a")))
+            val refs = FakeReferenceDataService()
+            refs.createSoulResult = { null }
+            val achievements = FakeAchievementsService()
+            val viewModel = viewModel(souls = service, refs = refs, achievements = achievements)
+            advanceUntilIdle()
+            val outcomes = recordEffects(viewModel.createOutcomes)
+
+            viewModel.createSoul("Nour")
+            advanceUntilIdle()
+
+            assertEquals(listOf<SoulCreateOutcome>(SoulCreateOutcome.Failed), outcomes.values)
+            assertEquals(1, service.listCount)
+            assertEquals(0, achievements.fireCheckCount)
+            assertEquals(listOf("a"), (viewModel.uiState.value as SoulsListUiState.Content).souls.map { it.id })
+            outcomes.stop()
+        }
+
+    @Test
+    fun `a second create before the first finishes is ignored`() =
+        runTest {
+            val refs = FakeReferenceDataService()
+            val viewModel = viewModel(refs = refs)
+            advanceUntilIdle()
+
+            viewModel.createSoul("Nour")
+            viewModel.createSoul("Nour")
+            advanceUntilIdle()
+
+            assertEquals(listOf("Nour"), refs.createSoulCalls)
         }
 }

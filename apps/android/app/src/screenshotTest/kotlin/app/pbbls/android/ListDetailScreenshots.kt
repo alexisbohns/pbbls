@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.pbbls.android.core.data.LocalReferenceDataService
@@ -20,6 +21,8 @@ import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
+import app.pbbls.android.core.ui.souls.SoulChooserMode
+import app.pbbls.android.core.ui.souls.SoulChooserState
 import app.pbbls.android.features.glyph.store.GlyphDetailDrawerContent
 import app.pbbls.android.features.glyph.store.GlyphDetailSurface
 import app.pbbls.android.features.glyph.store.GlyphTab
@@ -159,9 +162,9 @@ fun SoulsListDetailIdle() {
                 SoulsListContent(
                     hapticsOn = true,
                     uiState = SoulsListUiState.Content(souls = previewSouls),
-                    onBack = {},
+                    chooser = remember { SoulChooserState(SoulChooserMode.Browse, previewSouls) },
                     onOpenSoul = {},
-                    onCreateSoul = {},
+                    onCreate = {},
                     onOpenCircle = {},
                     onRetry = {},
                     onDeleteSoul = {},
@@ -185,9 +188,9 @@ fun SoulsListDetailOpen() {
                 SoulsListContent(
                     hapticsOn = true,
                     uiState = SoulsListUiState.Content(souls = previewSouls),
-                    onBack = {},
+                    chooser = remember { SoulChooserState(SoulChooserMode.Browse, previewSouls) },
                     onOpenSoul = {},
-                    onCreateSoul = {},
+                    onCreate = {},
                     onOpenCircle = {},
                     onRetry = {},
                     onDeleteSoul = {},
@@ -221,9 +224,9 @@ fun SoulsListDetailOpenDark() {
                 SoulsListContent(
                     hapticsOn = true,
                     uiState = SoulsListUiState.Content(souls = previewSouls),
-                    onBack = {},
+                    chooser = remember { SoulChooserState(SoulChooserMode.Browse, previewSouls) },
                     onOpenSoul = {},
-                    onCreateSoul = {},
+                    onCreate = {},
                     onOpenCircle = {},
                     onRetry = {},
                     onDeleteSoul = {},

@@ -171,12 +171,13 @@ class HomeJourneyTest : AppUiTest() {
         compose.waitForIdle()
 
         onTab(R.string.tab_people).assertIsSelected()
-        onText(R.string.create_soul_title).assertIsDisplayed()
+        // The ask opens People's search field, where a name adds the soul.
+        onText(R.string.souls_search).assertIsDisplayed()
 
-        // Taken once: closing the form leaves People's list, and it does not open again.
+        // Taken once: closing the field leaves People's list, and it does not open again.
         pressBack()
         compose.waitForIdle()
-        onText(R.string.create_soul_title).assertDoesNotExist()
+        onText(R.string.souls_search).assertDoesNotExist()
     }
 
     @Test
