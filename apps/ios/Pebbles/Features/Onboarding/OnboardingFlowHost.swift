@@ -26,8 +26,8 @@ final class OnboardingFlowSlot {
 }
 
 /// What `RootView`'s cover shows: builds the flow from the environment, keyed by the session's user.
-/// The id is lowercased here and only here (`OnboardingGate.userKey`): it keys the consent gate's
-/// cache and binds the hand-off note, and both are compared to the same form elsewhere.
+/// The id takes the gates' one form (`OnboardingGate.userKey`, as in `RootView` and `HomeView`): it
+/// keys the consent gate's cache and binds the hand-off note, and both are compared by string.
 struct OnboardingFlowHost: View {
     let slot: OnboardingFlowSlot
     let onLogOut: () -> Void

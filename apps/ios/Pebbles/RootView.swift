@@ -190,8 +190,8 @@ struct RootView: View {
                         .environment(\.spineSnapSource, .signed(snapURLs))
                         .accessibilityHidden(!consentPassed)
 
-                    // The consent gate (#821), or the plain surface while the onboarding
-                    // collects the consent itself. Invites and the composer wait for a pass.
+                    // The consent gate (#821), or the loader while the onboarding collects
+                    // the consent itself. Invites and the composer wait for a pass.
                     ConsentLayerView(
                         layer: onboarding.consentLayer(isPassed: consentPassed),
                         gate: consentGate,
