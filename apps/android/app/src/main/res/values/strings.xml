@@ -405,6 +405,13 @@
     <string name="souls_empty_title">No souls yet</string>
     <string name="souls_empty_message">People and beings you tag on your pebbles will appear here.</string>
     <string name="souls_load_error">Couldn\'t load souls.</string>
+    <string name="souls_who_was_there" tools:ignore="UnusedResources">Who was there?</string>
+    <string name="souls_search">Search souls</string>
+    <string name="souls_add_named">Add %1$s</string>
+    <string name="souls_add_caption">A drawing can wait</string>
+    <string name="souls_done_count">Done · %1$d</string>
+    <string name="souls_done">Done</string>
+    <string name="souls_remove_named">Remove %1$s</string>
     <string name="souls_delete_message">Linked pebbles stay; only the soul and its links are removed.</string>
     <string name="souls_detail_placeholder">Pick a soul to see the pebbles you share.</string>
     <string name="soul_detail_empty_title">No pebbles yet</string>

@@ -33,3 +33,4 @@ Already briefed above, with the lucide names they also replace: 1 again (`Rotate
 18. appearance — light, dark, follow the device (`Sun`, `Moon`, `Monitor`): a trio drawn together or not at all
 19. colour world — the palette the app wears (`Palette`)
 20. bounce — regularity over the last 28 days, a rhythm kept (`CirclePile`, `Waves`)
+21. search — look a person up by name, a lens (Android `ic_search`, the souls chooser's search field and lens; iOS draws `magnifyingglass`)

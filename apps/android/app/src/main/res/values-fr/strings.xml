@@ -409,6 +409,13 @@
     <string name="souls_empty_title">Pas encore d\'âmes</string>
     <string name="souls_empty_message">Les personnes et les êtres que vous associez à vos pebbles apparaîtront ici.</string>
     <string name="souls_load_error">Impossible de charger les âmes.</string>
+    <string name="souls_who_was_there">Qui était là ?</string>
+    <string name="souls_search">Chercher une âme</string>
+    <string name="souls_add_named">Ajouter %1$s</string>
+    <string name="souls_add_caption">Le dessin peut attendre</string>
+    <string name="souls_done_count">OK · %1$d</string>
+    <string name="souls_done">Terminé</string>
+    <string name="souls_remove_named">Retirer %1$s</string>
     <string name="souls_delete_message">Les pebbles liés restent ; seuls l\'âme et ses liens sont supprimés.</string>
     <string name="souls_detail_placeholder">Choisissez une âme pour voir les pebbles que vous partagez.</string>
     <string name="soul_detail_empty_title">Pas encore de pebbles</string>
