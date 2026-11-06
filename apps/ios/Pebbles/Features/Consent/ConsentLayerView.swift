@@ -29,6 +29,9 @@ struct ConsentLayerView: View {
                 }
             }
             .contentShape(Rectangle())
+            // Nothing beneath is reachable, whichever state it is in.
+            .accessibilityElement(children: .contain)
+            .accessibilityAddTraits(.isModal)
             .transition(.asymmetric(insertion: .identity, removal: .opacity))
         }
     }

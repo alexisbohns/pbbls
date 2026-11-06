@@ -22,8 +22,8 @@ struct OnboardingFlowView: View {
                 .background(Color.pebbles.surface.ignoresSafeArea())
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { toolbar }
+                .pebblesScreen()
         }
-        .pebblesScreen()
         .animation(.snappy(duration: 0.28), value: model.step)
         .onChange(of: model.step) { old, new in
             let steps = OnboardingFlowSteps.all

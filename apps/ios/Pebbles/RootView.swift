@@ -350,6 +350,10 @@ struct RootView: View {
         storedHeldCard = nil
         heldCardRestored = false
         onboarding.reset()
+        // Left set, the next sign-in would present it above the consent layer and drop the flow's cover.
+        // Not `connections.pendingInviteToken`: this also runs on a cold launch that resolves signed
+        // out, and that token may be the link that launched the app.
+        acceptingInvite = nil
     }
 
     private func restoreHeldCard() {
