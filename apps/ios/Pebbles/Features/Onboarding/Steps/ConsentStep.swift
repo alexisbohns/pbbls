@@ -91,7 +91,7 @@ struct ConsentStep: View {
             } else {
                 Toggle(isOn: binding) { labels }
                     .tint(Color.pebbles.primary)
-                    .disabled(recorded)
+                    .disabled(recorded || state.isSaving)
             }
         }
         .padding(.horizontal, Spacing.lg)
@@ -151,11 +151,15 @@ struct ConsentStep: View {
                 .disabled(!state.canContinue)
             if state.hasMissingActs {
                 // The exit the gate offers today: declining is Log out.
-                Button(action: onLogOut) { Text("Log out") }
-                    .spineType(Self.logOutRank)
-                    .foregroundStyle(Color.pebbles.primary)
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .disabled(state.isSaving)
+                Button(action: onLogOut) {
+                    Text("Log out")
+                        .spineType(Self.logOutRank)
+                        .foregroundStyle(Color.pebbles.primary)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(state.isSaving)
             }
         }
     }

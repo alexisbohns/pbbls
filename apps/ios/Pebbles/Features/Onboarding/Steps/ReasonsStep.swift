@@ -8,6 +8,8 @@ struct ReasonsStep: View {
     let onContinue: () -> Void
     var scrolls = true
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     private static let rows: [[OnboardingReason]] = stride(from: 0, to: OnboardingReason.allCases.count, by: 2).map {
         Array(OnboardingReason.allCases[$0..<$0 + 2])
     }
@@ -15,11 +17,19 @@ struct ReasonsStep: View {
     var body: some View {
         OnboardingStepScaffold(title: "What brings you here?", lead: "Pick all that fit.", scrolls: scrolls) {
             VStack(spacing: Spacing.sm) {
-                ForEach(Self.rows, id: \.first) { pair in
-                    HStack(spacing: Spacing.sm) {
-                        ForEach(pair, id: \.self) { tile($0) }
+                // At accessibility sizes two columns leave too little width: long French
+                // labels would break inside a word.
+                if typeSize.isAccessibilitySize {
+                    ForEach(OnboardingReason.allCases, id: \.self) { reason in
+                        tile(reason).fixedSize(horizontal: false, vertical: true)
                     }
-                    .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    ForEach(Self.rows, id: \.first) { pair in
+                        HStack(spacing: Spacing.sm) {
+                            ForEach(pair, id: \.self) { tile($0) }
+                        }
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
             .padding(.top, Spacing.xs)
