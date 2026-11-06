@@ -71,6 +71,7 @@ private val ChevronSize = 16.dp
  * tap up ([onEditCollection] with null removes), so previews drive it without a client. [nameLoaded] is false
  * until the moment has been read, so a name that is still on its way is not drawn as "Untitled".
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RecordRicherStep(
     pebbleId: String,
@@ -145,7 +146,7 @@ fun RecordRicherStep(
                     )
                     Text(
                         text = stringResource(R.string.record_karma, karmaDelta),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleMediumEmphasized,
                         color = colors.onSurface,
                     )
                 }
@@ -202,6 +203,9 @@ private fun StoneBlock(
             seed = remember(pebbleId) { UuidHash.fnv1a(pebbleId) },
             press = press,
             width = StoneHeight * (box.width / box.height),
+            // The Spine's halo and rings overhang their row; here they would run under the name. The
+            // iOS render has none either.
+            rings = 0f,
         )
     }
 }
