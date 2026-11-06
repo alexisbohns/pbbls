@@ -23,22 +23,38 @@ class MomentPayloadEncodingTest {
             {"name":"Swim at dawn","happened_at":"2026-10-12T06:40:00Z",
              "snaps":[{"id":"9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d","storage_path":"3f0a9c1e-5b7d-4e21-8c44-0a1b2c3d4e5f/9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d","sort_order":0}]}
             """.trimIndent()
-        assertEquals(Json.parseToJsonElement(expected), encoded(MomentSavePayload.capture("  Swim at dawn ", at, snap)))
+        assertEquals(Json.parseToJsonElement(expected), encoded(MomentSavePayload.capture("  Swim at dawn ", "", at, snap)))
     }
 
     @Test
     fun `a photo-only capture leaves the name out entirely`() {
         val expected =
             """{"happened_at":"2026-10-12T06:40:00Z","snaps":[{"id":"9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d","storage_path":"3f0a9c1e-5b7d-4e21-8c44-0a1b2c3d4e5f/9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d","sort_order":0}]}"""
-        assertEquals(Json.parseToJsonElement(expected), encoded(MomentSavePayload.capture("   ", at, snap)))
+        assertEquals(Json.parseToJsonElement(expected), encoded(MomentSavePayload.capture("   ", "  ", at, snap)))
     }
 
     @Test
     fun `a name-only capture leaves snaps out`() {
         assertEquals(
             Json.parseToJsonElement("""{"name":"Walk","happened_at":"2026-10-12T06:40:00Z"}"""),
-            encoded(MomentSavePayload.capture("Walk", at, null)),
+            encoded(MomentSavePayload.capture("Walk", "", at, null)),
         )
+    }
+
+    @Test
+    fun `capture sends the words trimmed, between the name and the date`() {
+        val expected =
+            """{"name":"Coffee with Léa","description":"We sat by the canal.\nUntil the light went.","happened_at":"2026-10-12T06:40:00Z"}"""
+        assertEquals(
+            Json.parseToJsonElement(expected),
+            encoded(MomentSavePayload.capture("Coffee with Léa", "  We sat by the canal.\nUntil the light went.\n ", at, null)),
+        )
+    }
+
+    @Test
+    fun `a blank description is left out, even beside a photo`() {
+        val json = encoded(MomentSavePayload.capture("Walk", " \n ", at, snap)).toString()
+        assertEquals(false, json.contains("description"))
     }
 
     @Test

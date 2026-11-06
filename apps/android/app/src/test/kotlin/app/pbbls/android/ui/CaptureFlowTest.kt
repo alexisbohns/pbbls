@@ -16,9 +16,9 @@ import org.junit.Test
 import javax.inject.Inject
 
 /**
- * Capture end to end (#1048): New pebble opens it, the three steps are walked
+ * Capture end to end (#1048): New pebble opens it, the two steps are walked
  * by tapping, `save_moment` gets the name, and the two saves land where A-14
- * says: Save moment back on Path, "Make it a pebble now" on Complete's first
+ * says: Just save back on Path, "Save & make it a pebble" on Complete's first
  * step for the new moment.
  */
 @HiltAndroidTest
@@ -33,22 +33,21 @@ class CaptureFlowTest : AppUiTest() {
         compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).performClick()
         onText(R.string.record_photo_title).assertIsDisplayed()
         onText(R.string.record_action_skip).performClick()
-        onText(R.string.record_when_title).assertIsDisplayed()
-        onText(R.string.record_action_continue).performClick()
-        onText(R.string.record_name_title).assertIsDisplayed()
-        compose.onNode(hasSetTextAction()).performTextInput(name)
+        onText(R.string.capture_moment_title).assertIsDisplayed()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput(name)
     }
 
     @Test
     fun `saving a capture returns to the path`() {
         onCaptureNameStep("Walk")
 
-        onText(R.string.capture_save).performClick()
+        onText(R.string.capture_just_save).performClick()
 
         compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).assertIsDisplayed()
-        onText(R.string.record_name_title).assertDoesNotExist()
+        onText(R.string.capture_moment_title).assertDoesNotExist()
         val saved = writes.saved.single()
         assertEquals("Walk", saved.name)
+        assertNull(saved.description)
         assertNull(saved.snaps)
     }
 
@@ -57,7 +56,7 @@ class CaptureFlowTest : AppUiTest() {
         writes.nextMomentId = "moment-9"
         onCaptureNameStep("Walk")
 
-        onText(R.string.capture_make_pebble_now).performClick()
+        onText(R.string.capture_save_and_pebble).performClick()
 
         onText(R.string.record_valence_title).assertIsDisplayed()
         assertEquals("Walk", writes.saved.single().name)
@@ -65,6 +64,6 @@ class CaptureFlowTest : AppUiTest() {
         // Complete replaced Capture, so leaving it lands on Path, not back on the name step.
         pressBack()
         compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).assertIsDisplayed()
-        onText(R.string.record_name_title).assertDoesNotExist()
+        onText(R.string.capture_moment_title).assertDoesNotExist()
     }
 }

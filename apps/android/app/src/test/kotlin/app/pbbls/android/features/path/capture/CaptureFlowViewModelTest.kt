@@ -7,6 +7,8 @@ import androidx.lifecycle.SavedStateHandle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.ProcessedImage
+import app.pbbls.android.core.model.AttachedSnap
+import app.pbbls.android.core.model.FormSnap
 import app.pbbls.android.core.model.MomentSavePayload
 import app.pbbls.android.core.model.PebbleSnapPayload
 import app.pbbls.android.features.path.PathFocusRequests
@@ -79,7 +81,7 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             val effects = recordEffects(h.viewModel.effects)
             h.viewModel.machine().setHappenedAt(OffsetDateTime.parse("2026-10-12T08:40:00.5+02:00"))
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Swim at dawn")
             h.viewModel.save(thenComplete = false)
             advanceUntilIdle()
@@ -97,7 +99,7 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             val effects = recordEffects(h.viewModel.effects)
             h.writes.nextMomentId = "m-9"
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
             h.viewModel.save(thenComplete = true)
             advanceUntilIdle()
@@ -106,30 +108,30 @@ class CaptureFlowViewModelTest {
         }
 
     @Test
-    fun `the name step's save is a plain save by default`() =
+    fun `a plain save by default does not chain into complete`() =
         runTest {
             val h = Harness()
             val effects = recordEffects(h.viewModel.effects)
             h.viewModel.start(chainsComplete = false)
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
-            h.viewModel.saveFromNameStep()
+            h.viewModel.save(thenComplete = h.viewModel.uiState.value.chainsComplete)
             advanceUntilIdle()
             assertEquals(listOf(CaptureFlowEffect.Saved), effects.values.filterNot { it is CaptureFlowEffect.Haptic })
             effects.stop()
         }
 
     @Test
-    fun `opened as Home's new pebble, the name step's save chains into complete`() =
+    fun `opened as Home's new pebble, the primary save chains into complete`() =
         runTest {
             val h = Harness()
             val effects = recordEffects(h.viewModel.effects)
             h.writes.nextMomentId = "m-7"
             h.viewModel.start(chainsComplete = true)
             assertTrue(h.viewModel.uiState.value.chainsComplete)
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
-            h.viewModel.saveFromNameStep()
+            h.viewModel.save(thenComplete = h.viewModel.uiState.value.chainsComplete)
             advanceUntilIdle()
             assertEquals(listOf(CaptureFlowEffect.SavedThenComplete("m-7")), effects.values.filterNot { it is CaptureFlowEffect.Haptic })
             effects.stop()
@@ -141,7 +143,7 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             val effects = recordEffects(h.viewModel.effects)
             h.viewModel.start(chainsComplete = true)
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
             h.viewModel.onCloseRequested()
             h.viewModel.onSaveFromClose()
@@ -155,7 +157,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             h.writes.nextMomentId = "M-9"
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
             h.viewModel.save(thenComplete = false)
             advanceUntilIdle()
@@ -167,13 +169,13 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             h.writes.failNext = postgrestException("moment_empty")
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
             h.viewModel.save(thenComplete = false)
             advanceUntilIdle()
             assertNull(h.focusRequests.consume())
             assertEquals(R.string.moment_error_empty, h.viewModel.uiState.value.flow.errorRes)
-            assertEquals(CaptureStep.NAME, h.viewModel.uiState.value.flow.step)
+            assertEquals(CaptureStep.MOMENT, h.viewModel.uiState.value.flow.step)
         }
 
     @Test
@@ -185,7 +187,7 @@ class CaptureFlowViewModelTest {
             settle()
             val state = h.viewModel.uiState.value
             assertEquals(OffsetDateTime.parse("2026-10-11T18:05:27Z"), state.flow.draft.happenedAt)
-            assertTrue(state.seededFromPhoto)
+            assertEquals(WhenSource.PHOTO, state.flow.whenSource)
             assertTrue(state.flow.hasSnap)
         }
 
@@ -195,7 +197,7 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             h.viewModel.onPhotoPicked(pick)
             settle()
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.save(thenComplete = false)
             advanceUntilIdle()
             val saved = h.writes.saved.single()
@@ -213,7 +215,7 @@ class CaptureFlowViewModelTest {
             h.viewModel.onPhotoPicked(pick)
             settle()
             h.writes.failNext = postgrestException("media_quota_exceeded")
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.save(thenComplete = false)
             advanceUntilIdle()
             assertEquals(R.string.moment_error_media_quota, h.viewModel.uiState.value.flow.errorRes)
@@ -258,7 +260,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             val effects = recordEffects(h.viewModel.effects)
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
             h.viewModel.onCloseRequested()
             assertTrue(h.viewModel.uiState.value.closeOffersSave)
@@ -303,7 +305,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             val effects = recordEffects(h.viewModel.effects)
-            h.viewModel.machine().goTo(CaptureStep.WHEN)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.onSystemBack()
             assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
             h.viewModel.onSystemBack()
@@ -319,7 +321,7 @@ class CaptureFlowViewModelTest {
             h.snapRepo.uploadGate = CompletableDeferred()
             h.viewModel.onPhotoPicked(pick)
             settle()
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
             h.viewModel.save(thenComplete = false)
             runCurrent()
@@ -335,7 +337,7 @@ class CaptureFlowViewModelTest {
             h.snapRepo.uploadGate = gate
             h.viewModel.onPhotoPicked(pick)
             settle()
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             settle()
             assertFalse(h.viewModel.uiState.value.canSaveNow)
             gate.complete(Unit)
@@ -354,14 +356,14 @@ class CaptureFlowViewModelTest {
             h.snapRepo.failNext = IllegalStateException("upload refused again")
             advanceUntilIdle()
             settle()
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             settle()
             assertEquals(R.string.pebble_save_error_photo_failed, h.viewModel.uiState.value.snapBlockedMessageRes)
             assertFalse(h.viewModel.uiState.value.canSaveNow)
         }
 
     @Test
-    fun `a save from the close dialog that fails lands on the name step to be seen`() =
+    fun `a save from the close dialog that fails lands on the page to be seen`() =
         runTest {
             val h = Harness()
             h.writes.failNext = postgrestException("moment_empty")
@@ -370,22 +372,22 @@ class CaptureFlowViewModelTest {
             h.viewModel.onSaveFromClose()
             advanceUntilIdle()
             val flow = h.viewModel.uiState.value.flow
-            assertEquals(CaptureStep.NAME, flow.step)
+            assertEquals(CaptureStep.MOMENT, flow.step)
             assertEquals(R.string.moment_error_empty, flow.errorRes)
         }
 
     @Test
-    fun `a save refused before the write still lands on the name step`() =
+    fun `a save refused before the write still lands on the page`() =
         runTest {
             val h = Harness()
             h.snapRepo.uploadGate = CompletableDeferred()
             h.viewModel.onPhotoPicked(pick)
             settle()
-            h.viewModel.machine().goTo(CaptureStep.WHEN)
+            h.viewModel.machine().goTo(CaptureStep.PHOTO)
             h.viewModel.save(thenComplete = false)
             runCurrent()
             val flow = h.viewModel.uiState.value.flow
-            assertEquals(CaptureStep.NAME, flow.step)
+            assertEquals(CaptureStep.MOMENT, flow.step)
             assertEquals(R.string.pebble_save_error_photo_uploading, flow.errorRes)
         }
 
@@ -394,7 +396,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             val effects = recordEffects(h.viewModel.effects)
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
             h.viewModel.save(thenComplete = false)
             advanceUntilIdle()
@@ -412,7 +414,7 @@ class CaptureFlowViewModelTest {
             assertEquals(1, h.writes.saved.size)
             assertEquals(listOf(CaptureFlowEffect.Saved), effects.values.filterNot { it is CaptureFlowEffect.Haptic })
             assertFalse(h.viewModel.uiState.value.isCloseConfirmPresented)
-            assertEquals(CaptureStep.NAME, h.viewModel.uiState.value.flow.step)
+            assertEquals(CaptureStep.MOMENT, h.viewModel.uiState.value.flow.step)
             assertTrue(h.snapRepo.uploaded.isEmpty())
             effects.stop()
         }
@@ -467,7 +469,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             h.media.processGate = CompletableDeferred()
-            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
             h.viewModel.onPhotoPicked(pick)
             settle()
@@ -479,18 +481,258 @@ class CaptureFlowViewModelTest {
         }
 
     @Test
-    fun `name, date and step survive process death`() =
+    fun `name, words, date, its source and step survive process death`() =
         runTest {
             val handle = SavedStateHandle()
             val first = Harness(handle)
             first.viewModel.machine().setName("Walk")
+            first.viewModel.machine().setDescription("Along the canal.")
             first.viewModel.machine().setHappenedAt(OffsetDateTime.parse("2026-10-12T06:40:00Z"))
-            first.viewModel.machine().goTo(CaptureStep.NAME)
+            first.viewModel.machine().goTo(CaptureStep.MOMENT)
             advanceUntilIdle()
             val second = Harness(handle)
             val state = second.viewModel.uiState.value.flow
             assertEquals("Walk", state.draft.name)
+            assertEquals("Along the canal.", state.draft.description)
             assertEquals(OffsetDateTime.parse("2026-10-12T06:40:00Z").toInstant(), state.draft.happenedAt.toInstant())
-            assertEquals(CaptureStep.NAME, state.step)
+            assertEquals(WhenSource.EDITED, state.whenSource)
+            assertEquals(CaptureStep.MOMENT, state.step)
+        }
+
+    @Test
+    fun `a step saved by an older build resolves to the photo`() =
+        runTest {
+            val handle = SavedStateHandle(mapOf("capture-step" to "WHEN"))
+            assertEquals(
+                CaptureStep.PHOTO,
+                Harness(handle)
+                    .viewModel.uiState.value.flow.step,
+            )
+        }
+
+    @Test
+    fun `an uploaded photo survives process death as a pending upload, on the page, with no network`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val first = Harness(handle)
+            first.viewModel.onPhotoPicked(pick)
+            settle()
+            val snapId = first.snapRepo.uploaded.single()
+            assertEquals(snapId, handle.get<String>("capture-snap-id"))
+
+            val second = Harness(handle)
+            // Straight away: no collector has run, nothing was awaited.
+            val ui = second.viewModel.uiState.value
+            assertEquals(CaptureStep.MOMENT, ui.flow.step)
+            assertTrue(ui.flow.hasSnap)
+            val restored = (ui.snap as FormSnap.Pending).snap
+            assertEquals(snapId, restored.id)
+            assertEquals(AttachedSnap.UploadState.UPLOADED, restored.state)
+            assertTrue(ui.canSaveNow)
+        }
+
+    @Test
+    fun `a photo still uploading is not kept across a kill`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            h.snapRepo.uploadGate = CompletableDeferred()
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            assertNull(handle.get<String>("capture-snap-id"))
+        }
+
+    @Test
+    fun `discarding a restored photo deletes its files, and nothing is written back`() =
+        runTest {
+            val handle = SavedStateHandle(mapOf("capture-snap-id" to "snap-restored", "capture-words" to "Hello"))
+            val h = Harness(handle)
+            val effects = recordEffects(h.viewModel.effects)
+            h.viewModel.onCloseRequested()
+            h.viewModel.onDiscard()
+            advanceUntilIdle()
+            settle()
+            assertEquals(listOf("snap-restored"), h.snapRepo.deletedSnapIds)
+            assertTrue(CaptureFlowEffect.Dismiss in effects.values)
+            // A write after the discard must not bring the draft back.
+            h.viewModel.machine().setDescription("late")
+            h.viewModel.machine().setName("late")
+            advanceUntilIdle()
+            settle()
+            assertNull(handle.get<String>("capture-snap-id"))
+            assertNull(handle.get<String>("capture-words"))
+            assertNull(handle.get<String>("capture-name"))
+            effects.stop()
+        }
+
+    @Test
+    fun `a saved moment leaves no draft behind`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            h.viewModel.machine().setName("Walk")
+            h.viewModel.machine().setDescription("Words")
+            advanceUntilIdle()
+            assertEquals("Words", handle.get<String>("capture-words"))
+            h.viewModel.save(thenComplete = false)
+            advanceUntilIdle()
+            assertNull(handle.get<String>("capture-words"))
+            assertNull(handle.get<String>("capture-name"))
+        }
+
+    @Test
+    fun `the words are sent with the save, trimmed`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.machine().setName("Walk")
+            h.viewModel.machine().setDescription("  Along the canal.  ")
+            h.viewModel.save(thenComplete = true)
+            advanceUntilIdle()
+            assertEquals(
+                "Along the canal.",
+                h.writes.saved
+                    .single()
+                    .description,
+            )
+        }
+
+    @Test
+    fun `a words-only draft cannot save, and closing it asks without offering Save`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
+            h.viewModel.machine().setDescription("We sat by the canal.")
+            settle()
+            assertFalse(h.viewModel.uiState.value.canSaveNow)
+            h.viewModel.save(thenComplete = false)
+            runCurrent()
+            assertTrue(h.writes.saved.isEmpty())
+            h.viewModel.onCloseRequested()
+            assertTrue(h.viewModel.uiState.value.isCloseConfirmPresented)
+            assertFalse(h.viewModel.uiState.value.closeOffersSave)
+        }
+
+    @Test
+    fun `a quick moment opens on the page with no way back to the photo`() =
+        runTest {
+            val h = Harness()
+            val effects = recordEffects(h.viewModel.effects)
+            h.viewModel.start(chainsComplete = false, startsAtMomentPage = true, promptReason = "remember")
+            assertEquals(CaptureStep.MOMENT, h.viewModel.uiState.value.flow.step)
+            assertEquals("remember", h.viewModel.uiState.value.promptReason)
+            h.viewModel.onSystemBack()
+            advanceUntilIdle()
+            // Back is close: nothing was typed, so it leaves at once.
+            assertTrue(CaptureFlowEffect.Dismiss in effects.values)
+            assertEquals(CaptureStep.MOMENT, h.viewModel.machine().step)
+            effects.stop()
+        }
+
+    @Test
+    fun `a quick moment sent back to the photo stays there after process death`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val first = Harness(handle)
+            first.viewModel.start(chainsComplete = false, startsAtMomentPage = true)
+            first.viewModel.machine().back()
+            advanceUntilIdle()
+            assertEquals(CaptureStep.PHOTO, first.viewModel.uiState.value.flow.step)
+
+            val second = Harness(handle)
+            second.viewModel.start(chainsComplete = false, startsAtMomentPage = true)
+            assertEquals(CaptureStep.PHOTO, second.viewModel.uiState.value.flow.step)
+            assertEquals(CaptureStep.PHOTO, second.viewModel.machine().step)
+        }
+
+    @Test
+    fun `a fresh quick moment goes to the page, once`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.start(chainsComplete = false, startsAtMomentPage = true)
+            assertEquals(CaptureStep.MOMENT, h.viewModel.uiState.value.flow.step)
+            h.viewModel.machine().back()
+            // A second start (the key's remember recomputed) must not drag it forward again.
+            h.viewModel.start(chainsComplete = false, startsAtMomentPage = true)
+            assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
+        }
+
+    @Test
+    fun `the name and the words never end on half an emoji`() =
+        runTest {
+            val h = Harness()
+            // A pair is two chars: 39 letters then the pair straddles the limit of 40.
+            h.viewModel.machine().setName("a".repeat(39) + "\uD83D\uDE00")
+            assertEquals(
+                "a".repeat(39),
+                h.viewModel
+                    .machine()
+                    .draft.name,
+            )
+            h.viewModel.machine().setDescription("b".repeat(279) + "\uD83D\uDE00")
+            assertEquals(
+                "b".repeat(279),
+                h.viewModel
+                    .machine()
+                    .draft.description,
+            )
+            h.viewModel.machine().setName("a".repeat(38) + "\uD83D\uDE00")
+            assertEquals(
+                40,
+                h.viewModel
+                    .machine()
+                    .draft.name.length,
+            )
+        }
+
+    @Test
+    fun `saving from a restored photo sends the original upload's storage path`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val first = Harness(handle)
+            first.viewModel.onPhotoPicked(pick)
+            settle()
+            val snapId = first.snapRepo.uploaded.single()
+
+            val second = Harness(handle)
+            second.viewModel.save(thenComplete = false)
+            advanceUntilIdle()
+            val sent =
+                second.writes.saved
+                    .single()
+                    .snaps
+            assertEquals(listOf(PebbleSnapPayload(snapId, "user-1/$snapId", 0)), sent)
+        }
+
+    @Test
+    fun `a failed save then a discard deletes the files and leaves no draft`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            h.viewModel.machine().setName("Walk")
+            h.writes.failNext = postgrestException("moment_empty")
+            h.viewModel.save(thenComplete = false)
+            advanceUntilIdle()
+            assertTrue(h.snapRepo.deletedSnapIds.isEmpty())
+            h.viewModel.onCloseRequested()
+            h.viewModel.onDiscard()
+            advanceUntilIdle()
+            settle()
+            assertEquals(1, h.snapRepo.deletedSnapIds.size)
+            assertNull(handle.get<String>("capture-snap-id"))
+            assertNull(handle.get<String>("capture-name"))
+        }
+
+    @Test
+    fun `once saved, the screen keeps the photo it showed`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            h.viewModel.save(thenComplete = false)
+            advanceUntilIdle()
+            settle()
+            assertTrue(h.viewModel.uiState.value.snap is FormSnap.Pending)
         }
 }

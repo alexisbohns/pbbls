@@ -68,6 +68,7 @@ class PebblesKeysTest {
                 PebblesKey.LabLogList("announcements"),
                 PebblesKey.Capture(),
                 PebblesKey.Capture(chainsComplete = true),
+                PebblesKey.Capture(startsAtMomentPage = true, promptReason = "remember"),
                 PebblesKey.PebbleDetail(momentId = "m-1"),
                 PebblesKey.PebbleDetail(momentId = "m-1", face = CardFace.VERSO),
                 PebblesKey.PebbleDetail(momentId = "m-1", face = CardFace.RECTO, request = 3),
@@ -78,6 +79,7 @@ class PebblesKeysTest {
                 PebblesKey.EditPebble(momentId = "m-1"),
                 PebblesKey.EditMoment(momentId = "m-1"),
                 PebblesKey.CompletePebble(momentId = "m-1"),
+                PebblesKey.CompletePebble(momentId = "m-1", origin = CompleteOrigin.QUICK_MOMENT),
                 PebblesKey.Settings,
                 PebblesKey.CrisisResources,
                 PebblesKey.SoulForm(soulId = null),
@@ -134,6 +136,17 @@ class PebblesKeysTest {
         // What `rememberNavBackStack` wrote for the `data object` before #1383 D7: the type alone.
         val saved = """{"type":"app.pbbls.android.navigation.PebblesKey.Capture"}"""
         assertEquals(PebblesKey.Capture(chainsComplete = false), Json.decodeFromString(PebblesKey.serializer(), saved))
+    }
+
+    @Test
+    fun `a stack saved before the record flow redesign decodes with its defaults`() {
+        val capture = """{"type":"app.pbbls.android.navigation.PebblesKey.Capture","chainsComplete":true}"""
+        assertEquals(PebblesKey.Capture(chainsComplete = true), Json.decodeFromString(PebblesKey.serializer(), capture))
+        val complete = """{"type":"app.pbbls.android.navigation.PebblesKey.CompletePebble","momentId":"m1"}"""
+        assertEquals(
+            PebblesKey.CompletePebble("m1", CompleteOrigin.CARD),
+            Json.decodeFromString(PebblesKey.serializer(), complete),
+        )
     }
 
     @Test

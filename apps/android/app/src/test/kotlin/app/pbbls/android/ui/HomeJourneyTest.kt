@@ -140,10 +140,9 @@ class HomeJourneyTest : AppUiTest() {
 
         onText(R.string.home_shortcut_pebble).performClick()
         onText(R.string.record_action_skip).performClick()
-        onText(R.string.record_action_continue).performClick()
-        compose.onNode(hasSetTextAction()).performTextInput("Walk")
-        onText(R.string.capture_save).assertDoesNotExist()
-        onText(R.string.capture_make_pebble_now).performClick()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("Walk")
+        onText(R.string.capture_just_save).assertDoesNotExist()
+        onText(R.string.capture_save_and_pebble).performClick()
 
         onText(R.string.record_valence_title).assertIsDisplayed()
         assertEquals("Walk", writes.saved.single().name)

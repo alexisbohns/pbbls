@@ -169,7 +169,7 @@ class ServiceFakesTest {
     fun `an armed moment write failure throws once, then clears so the retry succeeds`() =
         runTest {
             val write = FakeMomentWriteService()
-            val payload = MomentSavePayload.capture("Walk", OffsetDateTime.parse("2026-10-12T06:40:00Z"), null)
+            val payload = MomentSavePayload.capture("Walk", "", OffsetDateTime.parse("2026-10-12T06:40:00Z"), null)
             write.failNext = IOException("network down")
 
             val thrown =

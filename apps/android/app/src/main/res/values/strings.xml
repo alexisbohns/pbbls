@@ -669,10 +669,23 @@
     <string name="delete_moment_too">Delete the moment too</string>
     <string name="delete_moment">Delete moment</string>
     <string name="complete_cta">Make it a pebble</string>
-    <string name="capture_name_subtitle">A name, a photo, or both.</string>
     <string name="capture_save">Save moment</string>
-    <string name="capture_make_pebble_now">Make it a pebble now</string>
     <string name="capture_close_title">Keep this moment?</string>
+    <string name="capture_moment_title">Your moment</string>
+    <string name="capture_field_name">NAME</string>
+    <string name="capture_field_when">WHEN</string>
+    <string name="capture_field_words">A FEW WORDS</string>
+    <string name="capture_words_placeholder">What happened?</string>
+    <string name="capture_words_karma">+1 karma as a pebble</string>
+    <string name="capture_change_photo">Change photo</string>
+    <string name="capture_photo_uploading">Uploading…</string>
+    <string name="capture_just_save">Just save</string>
+    <string name="capture_save_and_pebble">Save &amp; make it a pebble</string>
+    <string name="capture_when_a11y">When</string>
+    <string name="capture_when_sheet_title">When did it happen?</string>
+    <string name="capture_when_today">Today</string>
+    <string name="capture_when_yesterday">Yesterday</string>
+    <string name="capture_when_from_photo">From your photo · %1$s</string>
 
     <!-- ==== Glyph carve studio (M43 · Android Glyph Studio &amp; Store) ==== -->
     <string name="carve_title">New glyph</string>
@@ -833,8 +846,6 @@
          Ports the iOS `Features/Record` copy; FR keeps the informal "tu". -->
     <string name="record_photo_title">Start with a picture</string>
     <string name="record_photo_subtitle">Or skip it and write from memory.</string>
-    <string name="record_when_title">When did it happen?</string>
-    <string name="record_name_title">What do you call it?</string>
     <string name="record_valence_title">How did it land?</string>
     <string name="record_valence_subtitle">How much of your life did this take up?</string>
     <string name="record_emotion_title">What did you feel?</string>
@@ -848,7 +859,6 @@
     <string name="record_success_exit">Back to my path</string>
     <string name="record_step_a11y">Step %1$d of %2$d</string>
     <string name="record_back_a11y">Back</string>
-    <string name="record_when_from_photo">Taken from your photo</string>
     <string name="record_name_placeholder">Name</string>
     <string name="record_name_remaining_a11y">%1$d characters left</string>
     <string name="record_photo_choose_another">Choose another</string>

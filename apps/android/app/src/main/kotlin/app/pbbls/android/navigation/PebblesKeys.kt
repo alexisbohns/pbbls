@@ -141,14 +141,18 @@ sealed interface PebblesKey : NavKey {
     // ---- Modal: full-screen, the bar is covered ----
 
     /**
-     * Capture: a new moment in three steps, saved with `save_moment` (#1048). What New pebble opens.
-     * [chainsComplete] is Home's New pebble (#1383 D7, iOS `CaptureFlowView(chainsComplete:)`): the
-     * last step saves and hands the moment straight to [CompletePebble], with no "make it a pebble
-     * now" choice. Defaulted, so a stack saved while this was a `data object` still decodes.
+     * Capture: a photo, then the moment page, saved with `save_moment` (#1048, #1515). What New pebble opens.
+     * [chainsComplete] is Home's New pebble (#1383 D7, iOS `CaptureFlowView(chainsComplete:)`): the page's
+     * one save hands the moment straight to [CompletePebble], with no "Just save". Defaulted, so a stack
+     * saved while this was a `data object` still decodes.
      */
     @Serializable
     data class Capture(
         val chainsComplete: Boolean = false,
+        /** Quick moment (D13): the page straight away, no photo screen and no way back to it. */
+        val startsAtMomentPage: Boolean = false,
+        /** The onboarding hand-off's reason, a stable slug: picks the name field's prompt (#1510 D9). */
+        val promptReason: String? = null,
     ) : PebblesKey
 
     /** Edit pebble: the pebble fields of [momentId]'s pebble, written with `complete_pebble` (R5). */
@@ -165,10 +169,14 @@ sealed interface PebblesKey : NavKey {
         val momentId: String,
     ) : PebblesKey
 
-    /** The Complete flow for one moment (#1048). Full-screen, like the edit forms. */
+    /**
+     * The Complete flow for one moment (#1048). Full-screen, like the edit forms. [origin] is defaulted so a
+     * stack saved before it existed still decodes, as a card.
+     */
     @Serializable
     data class CompletePebble(
         val momentId: String,
+        val origin: CompleteOrigin = CompleteOrigin.CARD,
     ) : PebblesKey
 
     @Serializable
@@ -224,6 +232,10 @@ sealed interface PebblesKey : NavKey {
         val tabs: List<PebblesKey> = listOf(Home, Path, People, Collections, You)
     }
 }
+
+/** Where a Complete flow came from: says "Moment saved" and how Record another restarts (D1, D12). */
+@Serializable
+enum class CompleteOrigin { CARD, CAPTURE, HOME_NEW_PEBBLE, QUICK_MOMENT }
 
 /** A key that is one of the five bar destinations. Always also a [BarKey]. */
 sealed interface TopLevelKey : BarKey

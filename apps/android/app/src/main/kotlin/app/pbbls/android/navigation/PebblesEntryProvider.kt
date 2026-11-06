@@ -333,8 +333,17 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     }
 
     entry<PebblesKey.Capture>(metadata = NavTransitions.forKey(PebblesKey.Capture())) { key ->
+        // Says where Complete came from: Home's New pebble, the quick moment, or Path's + (D12).
+        val origin =
+            when {
+                key.chainsComplete -> CompleteOrigin.HOME_NEW_PEBBLE
+                key.startsAtMomentPage -> CompleteOrigin.QUICK_MOMENT
+                else -> CompleteOrigin.CAPTURE
+            }
         CaptureFlowScreen(
             chainsComplete = key.chainsComplete,
+            startsAtMomentPage = key.startsAtMomentPage,
+            promptReason = key.promptReason,
             onDismiss = navigator::goBack,
             // Path's resume refresh shows the new blank stone; no detail is opened (A-14).
             onSaved = navigator::goBack,
@@ -342,7 +351,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             // Capture was opened from: Path, or Home for its New pebble (#1383 D7).
             onSavedThenComplete = { momentId ->
                 navigator.goBack()
-                navigator.navigate(PebblesKey.CompletePebble(momentId))
+                navigator.navigate(PebblesKey.CompletePebble(momentId, origin))
             },
         )
     }

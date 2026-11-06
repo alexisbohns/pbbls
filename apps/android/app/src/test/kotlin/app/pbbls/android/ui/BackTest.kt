@@ -47,7 +47,7 @@ class BackTest : AppUiTest() {
         onPath()
         openCapture()
         onText(R.string.record_action_skip).performClick()
-        onText(R.string.record_when_title).assertIsDisplayed()
+        onText(R.string.capture_moment_title).assertIsDisplayed()
 
         pressBack()
 
@@ -66,20 +66,22 @@ class BackTest : AppUiTest() {
     }
 
     @Test
-    fun `back on the first capture step with a name typed asks before closing`() {
+    fun `back from the page goes to the photo, and only back from the photo asks before closing`() {
         onPath()
         openCapture()
         onText(R.string.record_action_skip).performClick()
-        onText(R.string.record_action_continue).performClick()
-        compose.onNode(hasSetTextAction()).performTextInput("Coffee with Mo")
-        pressBack()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("Coffee with Mo")
+        onText(R.string.capture_moment_title).assertIsDisplayed()
+
         pressBack()
         onText(R.string.record_photo_title).assertIsDisplayed()
+        onText(R.string.capture_close_title).assertDoesNotExist()
 
         pressBack()
-
         onText(R.string.capture_close_title).assertIsDisplayed()
+
         onText(R.string.record_close_keep_going).performClick()
+        onText(R.string.capture_close_title).assertDoesNotExist()
         onText(R.string.record_photo_title).assertIsDisplayed()
     }
 
