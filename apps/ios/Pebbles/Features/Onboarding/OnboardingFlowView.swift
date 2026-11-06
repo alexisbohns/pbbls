@@ -68,9 +68,13 @@ struct OnboardingFlowView: View {
             PromiseStep(letter: model.letter, unavailable: model.letterUnavailable, onContinue: model.next)
         case .reasons:
             ReasonsStep(selected: model.reasons, onToggle: model.toggleReason, onContinue: model.next)
-        // Task 2.3 replaces this with the consent step.
         case .consent:
-            placeholder("consent")
+            ConsentStep(
+                state: model.consent,
+                onToggle: model.toggleConsent,
+                onContinue: model.next,
+                onLogOut: onLogOut
+            )
         // Task 3.2 replaces this with the you step.
         case .you:
             placeholder("you")

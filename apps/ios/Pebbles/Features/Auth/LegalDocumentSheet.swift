@@ -9,11 +9,17 @@ enum LegalDoc: String, Identifiable {
 
     var id: String { rawValue }
 
-    var url: URL {
+    /// The page in the app's language: the site otherwise follows its own stored choice, and
+    /// `?lang=` overrides it. Anything but French falls to English.
+    var url: URL { url(french: Locale.current.prefersFrench) }
+
+    func url(french: Bool) -> URL {
+        let path: String
         switch self {
-        case .terms:   return URL(string: "https://www.pbbls.app/docs/terms")!
-        case .privacy: return URL(string: "https://www.pbbls.app/docs/privacy")!
+        case .terms: path = "terms"
+        case .privacy: path = "privacy"
         }
+        return URL(string: "https://www.pbbls.app/docs/\(path)?lang=\(french ? "fr" : "en")")!
     }
 }
 
