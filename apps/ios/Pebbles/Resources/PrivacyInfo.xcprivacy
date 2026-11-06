@@ -10,7 +10,7 @@
     <key>NSPrivacyAccessedAPITypes</key>
     <array>
         <dict>
-            <!-- @AppStorage("hasSeenOnboarding") — RootView.swift.
+            <!-- "hasSeenOnboarding" — OnboardingGate.swift.
                  CA92.1 = access info from the same app, no data sent off device. -->
             <key>NSPrivacyAccessedAPIType</key>
             <string>NSPrivacyAccessedAPICategoryUserDefaults</string>

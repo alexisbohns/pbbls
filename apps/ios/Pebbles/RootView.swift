@@ -28,8 +28,9 @@ struct RootView: View {
     @Environment(CaptureDraftStore.self) private var captureDrafts
     @Environment(SnapURLCache.self) private var snapURLs
     @Environment(ConnectionsService.self) private var connections
-    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
-    @State private var isPresentingOnboarding = false
+    /// The first-run gate and its cover (#1510 D10). Owned here, like the consent gate, because the
+    /// two decide together what stands above the tabs.
+    @State private var onboarding = OnboardingPresentation()
     @State private var authPath = NavigationPath()
     @State private var loaderSettled = false
     @State private var loaderCeilingReached = false
@@ -119,12 +120,25 @@ struct RootView: View {
     /// Decided once, at restore: a scene restored onto People, Collections or You sets
     /// `firstRootLoaded` there, because `TabView` builds Home and Path lazily and their
     /// `onFirstLoad` would otherwise fire mid-session, under a full-screen
-    /// loader on the first tap on Path.
+    /// loader on the first tap on Path. It also holds while the onboarding flag is unknown, so
+    /// neither Home nor a restored card shows before the promise (#1510 D2).
     private var holdsLoader: Bool {
-        !firstRootLoaded
+        !firstRootLoaded || onboarding.gate.isPending
+    }
+
+    /// The session's user has passed the consent gate. Keyed on the session, not on the gate's last
+    /// `start`, so a change of user can't open the app on the previous user's pass for a frame.
+    private var consentPassed: Bool {
+        consentGate.isPassed(for: OnboardingGate.userKey(supabase.session?.user.id))
+    }
+
+    /// Past every gate, with the flow's cover gone: an invite may open, and the composer.
+    private var isClearOfGates: Bool {
+        supabase.session != nil && consentPassed && !onboarding.invitesWait
     }
 
     var body: some View {
+        @Bindable var onboarding = onboarding
         ZStack {
             if canShowAuthedTabs {
                 ZStack {
@@ -133,12 +147,13 @@ struct RootView: View {
                         .environment(cardFrames)
                         .environment(heldCard)
                         // Nothing under the held card or the consent gate is reachable (stack C §7's slot).
-                        .accessibilityHidden(heldCard.request != nil || !consentGate.isPassed)
+                        .accessibilityHidden(heldCard.request != nil || !consentPassed)
                         .environment(\.spineSnapSource, .signed(snapURLs))
-                        .fullScreenCover(isPresented: $isPresentingOnboarding) {
-                            OnboardingView(steps: OnboardingSteps.all) {
-                                hasSeenOnboarding = true
-                                isPresentingOnboarding = false
+                        // `onDismiss`, not the flow's end: anything opened after it can't be
+                        // dropped by a dismissal still in progress.
+                        .fullScreenCover(isPresented: $onboarding.isPresenting, onDismiss: handOffAfterOnboarding) {
+                            OnboardingFlowHost(onLogOut: signOut) { note in
+                                onboarding.finish(note: note, consentGate: consentGate)
                             }
                         }
 
@@ -158,17 +173,17 @@ struct RootView: View {
                         .environment(heldCard)
                         .environment(cardFrames)
                         .environment(\.spineSnapSource, .signed(snapURLs))
-                        .accessibilityHidden(!consentGate.isPassed)
+                        .accessibilityHidden(!consentPassed)
 
-                    // The consent gate (#821), above every layer, the held card
-                    // included: a card restored from scene storage must not
-                    // route around it. Onboarding and invites wait for a pass.
-                    if !consentGate.isPassed {
-                        ConsentGateView(model: consentGate, onSignOut: { Task { await supabase.signOut() } })
-                            .transition(.opacity)
-                    }
+                    // The consent gate (#821), or the plain surface while the onboarding
+                    // collects the consent itself. Invites and the composer wait for a pass.
+                    ConsentLayerView(
+                        layer: onboarding.consentLayer(isPassed: consentPassed),
+                        gate: consentGate,
+                        onSignOut: signOut
+                    )
                 }
-                .animation(.easeInOut(duration: 0.25), value: consentGate.isPassed)
+                .animation(.easeInOut(duration: 0.25), value: consentPassed)
                 .animation(.easeInOut(duration: 0.35), value: holdsLoader)
                 .sheet(item: $acceptingInvite) { invite in
                     InviteAcceptSheet(token: invite.value)
@@ -221,38 +236,38 @@ struct RootView: View {
         // Keyed on the user: souls and collections are theirs, so each sign-in
         // loads its own lists instead of keeping whatever the launch fetched.
         .task(id: supabase.session?.user.id) { await refs.load() }
-        // Keyed on the user: a sign-out or a different account re-runs the gate.
+        // Keyed on the user: a sign-out or a different account re-runs both gates. In one turn, so
+        // the consent form can't show between them to an account the promise is about to greet.
         .task(id: supabase.session?.user.id) {
+            let userId = OnboardingGate.userKey(supabase.session?.user.id)
+            onboarding.gate.service = OnboardingService(client: supabase.client)
+            onboarding.gate.start(userId: userId)
             consentGate.service = ConsentService(client: supabase.client)
-            consentGate.start(userId: supabase.session?.user.id.uuidString.lowercased())
+            consentGate.start(userId: userId)
+        }
+        .onChange(of: canShowAuthedTabs && onboarding.gate.shouldPresent, initial: true) { _, present in
+            if present { onboarding.isPresenting = true }
         }
         .onChange(of: scenePhase) { _, phase in
             // A gate that failed closed tries again when the app comes back.
             if phase == .active, case .failed = consentGate.state { consentGate.retry() }
         }
-        // `isPassed` is false until the gate's first verdict for the session's
-        // user, so a launch already signed in still sees a false→true flip.
-        .onChange(of: consentGate.isPassed) { _, passed in
-            guard passed, supabase.session != nil else { return }
-            if !hasSeenOnboarding {
-                isPresentingOnboarding = true
-            }
-            // Flush any invite parked before sign-in or before the pass.
-            if let parked = connections.pendingInviteToken {
-                connections.pendingInviteToken = nil
-                acceptingInvite = InviteToken(value: parked)
-            }
+        // The pass is false until the gate's first verdict for the session's user, so a launch
+        // already signed in still sees a false→true flip. Keyed on all of it, not on the pass alone:
+        // an invite parked while the flag was unknown must still open when the flag says no flow.
+        .onChange(of: isClearOfGates) { _, clear in
+            if clear { openWhatWasWaiting() }
         }
         .onOpenURL { url in
             // The app's only URL entry point. OAuth returns are absorbed by
             // ASWebAuthenticationSession, so nothing else lands here.
             guard let token = Self.inviteToken(from: url) else { return }
-            if supabase.session == nil || !consentGate.isPassed {
-                // Park it: an invite can arrive before sign-in completes, or
-                // before the consent gate passes.
-                connections.pendingInviteToken = token
-            } else {
+            if isClearOfGates {
                 acceptingInvite = InviteToken(value: token)
+            } else {
+                // Park it: an invite can arrive before sign-in completes, before
+                // the consent gate passes, or before the onboarding ends.
+                connections.pendingInviteToken = token
             }
         }
         .onChange(of: supabase.session == nil) { wasSignedOut, isSignedOut in
@@ -273,6 +288,25 @@ struct RootView: View {
                 urlCache: .shared
             ).run()
         }
+    }
+
+    private func signOut() {
+        Task { await supabase.signOut() }
+    }
+
+    /// The cover is gone, and that lets `isClearOfGates` turn on, now if the gate has passed or when
+    /// it does. Home first, and the people named in the flow into the lists Complete reads.
+    private func handOffAfterOnboarding() {
+        guard onboarding.coverDismissed() else { return }
+        nav.popToRoot(.home)
+        nav.go(.home)
+        Task { await refs.load() }
+    }
+
+    private func openWhatWasWaiting() {
+        guard let token = onboarding.openWaiting(parkedInvite: connections.pendingInviteToken) else { return }
+        connections.pendingInviteToken = nil
+        acceptingInvite = InviteToken(value: token)
     }
 
     private func restoreTabs() {
@@ -300,6 +334,7 @@ struct RootView: View {
         heldCard.reset()
         storedHeldCard = nil
         heldCardRestored = false
+        onboarding.reset()
     }
 
     private func restoreHeldCard() {

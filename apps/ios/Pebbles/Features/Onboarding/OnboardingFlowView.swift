@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The seven-step flow's shell (#1510): a real `NavigationStack` whose toolbar carries Back, the
 /// progress stones and Skip or Later, over a surface the flow paints itself. Mirrors Android's
-/// `OnboardingScreen`. Nothing presents it yet; the root gate does in Part 5.
+/// `OnboardingScreen`. `OnboardingFlowHost` builds it, inside `RootView`'s cover.
 struct OnboardingFlowView: View {
     let model: OnboardingFlowModel
     let onLogOut: () -> Void

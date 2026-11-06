@@ -16,6 +16,54 @@ enum OnboardingGate {
     static func isPending(userId: String?, hasSeen: Bool, completed: Bool?, readFailed: Bool) -> Bool {
         userId != nil && !hasSeen && completed == nil && !readFailed
     }
+
+    /// What stands above the tabs. Fails closed: anything but a pass leaves something opaque there.
+    /// The flow collects the consent itself, promise first (D2), so while it is in play nobody meets
+    /// the gate; everyone else's gate is unchanged.
+    static func consentLayer(
+        isPassed: Bool,
+        isPending: Bool,
+        shouldPresent: Bool,
+        isPresenting: Bool
+    ) -> OnboardingConsentLayer {
+        if isPassed { return .open }
+        return isPending || shouldPresent || isPresenting ? .surface : .gate
+    }
+
+    /// An invite waits for the flow's end, and past it until the cover is gone (`isClosing`): a sheet
+    /// presented while a cover is going is dropped.
+    static func invitesWait(isPending: Bool, shouldPresent: Bool, isPresenting: Bool, isClosing: Bool) -> Bool {
+        isPending || shouldPresent || isPresenting || isClosing
+    }
+
+    /// One presentation once everything is out of the way. A parked invite wins: missing the composer
+    /// is fine (D9), and an invite comes from someone who is waiting on it.
+    static func handOff(parkedInvite: String?, note: OnboardingHandoffNote?) -> OnboardingHandOff {
+        if let parkedInvite { return .invite(parkedInvite) }
+        if let note { return .composer(note) }
+        return .nothing
+    }
+
+    /// The one form a user id takes in the gates: the consent cache and the hand-off note are compared
+    /// by string, so every side has to build it the same way.
+    static func userKey(_ id: UUID?) -> String? { id?.uuidString.lowercased() }
+}
+
+/// What `OnboardingGate.consentLayer` chose.
+enum OnboardingConsentLayer: Equatable {
+    /// Consent is on record: nothing above the tabs.
+    case open
+    /// The plain surface, while the flow is pending, about to present or presenting.
+    case surface
+    /// `ConsentGateView`.
+    case gate
+}
+
+/// What `OnboardingGate.handOff` chose.
+enum OnboardingHandOff: Equatable {
+    case invite(String)
+    case composer(OnboardingHandoffNote)
+    case nothing
 }
 
 /// Owned by `RootView`, like `ConsentGateModel`.

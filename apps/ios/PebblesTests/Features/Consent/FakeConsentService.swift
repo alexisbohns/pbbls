@@ -20,6 +20,7 @@ final class FakeConsentService: ConsentServicing, @unchecked Sendable {
     private var _failingKinds: Set<ConsentKind> = []
     private var _beforeRecord: (@Sendable () async -> Void)?
     private var _afterActiveRead: (@Sendable () async -> Void)?
+    private var _beforeActiveRead: (@Sendable () async -> Void)?
 
     static func satisfied() -> [ActiveConsent] {
         ConsentGateLogic.required.map {
@@ -62,7 +63,15 @@ final class FakeConsentService: ConsentServicing, @unchecked Sendable {
         set { lock.withLock { _afterActiveRead = newValue } }
     }
 
+    /// Awaited before `active` reads the ledger: lets a test decide what a read
+    /// in flight comes back with, a failure included.
+    var beforeActiveRead: (@Sendable () async -> Void)? {
+        get { lock.withLock { _beforeActiveRead } }
+        set { lock.withLock { _beforeActiveRead = newValue } }
+    }
+
     func active() async throws -> [ActiveConsent] {
+        if let hold = beforeActiveRead { await hold() }
         let read = try lock.withLock { () throws -> [ActiveConsent] in
             _activeCalls += 1
             if let failure = _activeFailure { throw failure }

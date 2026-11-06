@@ -70,7 +70,7 @@ final class OnboardingFlowModel {
     private(set) var isCompleting = false
     private(set) var completeFailed = false
     private(set) var isDone = false
-    /// Left by a successful `complete_onboarding`; Part 5 consumes it.
+    /// Left by a successful `complete_onboarding`; `OnboardingFlowHost` hands it up when `isDone` fires.
     private(set) var doneNote: OnboardingHandoffNote?
 
     /// The consent write in flight, so tests can await it. Not tied to the view: leaving the
