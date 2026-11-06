@@ -4,7 +4,7 @@ locale: en
 slug: privacy
 version: 1.4.0
 effective_date: 2026-10-07
-last_updated: 2026-11-02
+last_updated: 2026-11-06
 ---
 
 # Privacy Policy for Pebbles
@@ -29,7 +29,7 @@ This privacy policy complies with the General Data Protection Regulation (GDPR) 
 
 - **Data Controller :** Alexis Bohn, founder and developer of Pebbles
 - **Location :** France
-- **Email :** hello@bohns.design
+- **Email :** ciao@pbbls.app
 
 Alexis Bohn acts as the data controller within the meaning of Article 4(7) of the GDPR and is responsible for compliance with this policy.
 
@@ -233,7 +233,7 @@ You may withdraw your consent at any time. Because the processing of your moods,
 
 To exercise any of these rights, send a request to:
 
-**Email :** hello@bohns.design
+**Email :** ciao@pbbls.app
 
 We will process your request within 30 days. If your request is complex, we may request an extension of 2 additional months.
 
@@ -259,7 +259,7 @@ We do not ask for your date of birth, and we do not store one. Where we ask you 
 
 ### 9.3 If We Learn Otherwise
 
-If we learn that an account belongs to someone under 16, we close it and erase the data. A parent or legal guardian who believes their child holds an account can tell us at hello@bohns.design and we will do the same.
+If we learn that an account belongs to someone under 16, we close it and erase the data. A parent or legal guardian who believes their child holds an account can tell us at ciao@pbbls.app and we will do the same.
 
 ---
 
@@ -280,7 +280,7 @@ If we learn that an account belongs to someone under 16, we close it and erase t
 
 ### 10.3 User Responsibility
 
-You are responsible for keeping your password confidential. Never share your login credentials. If you believe your account is compromised, contact hello@bohns.design immediately.
+You are responsible for keeping your password confidential. Never share your login credentials. If you believe your account is compromised, contact ciao@pbbls.app immediately.
 
 ---
 
@@ -345,13 +345,13 @@ Please also consult:
 For any questions, requests, or concerns about this privacy policy or your personal data:
 
 - **Alexis Bohn**
-- **Email :** hello@bohns.design
+- **Email :** ciao@pbbls.app
 
 ---
 
 - **Version :** 1.4.0
 - **Effective Date :** October 7, 2026
-- **Last Updated :** October 7, 2026
+- **Last Updated :** November 6, 2026
 
 ---
 

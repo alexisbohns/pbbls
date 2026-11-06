@@ -4,7 +4,7 @@ locale: en
 slug: terms
 version: 1.2.0
 effective_date: 2026-10-07
-last_updated: 2026-10-07
+last_updated: 2026-11-06
 ---
 
 # Terms of Service - Pebbles
@@ -20,7 +20,7 @@ These Terms of Service (the "Terms") govern your access to and use of Pebbles, a
 **Service Provider:**
 - Name: Pebbles
 - Responsible Party: Alexis Bohn
-- Email: hello@bohns.design
+- Email: ciao@pbbls.app
 - Status: Independent Project / Independent Publisher
 
 **Hosting:**
@@ -263,7 +263,7 @@ Pebbles makes reasonable efforts to back up your data but cannot guarantee compl
 
 ### 10.1 Right to Data Portability
 
-You have the right to receive your personal data in a structured, commonly used and machine-readable format (JSON), in accordance with Article 20 of the GDPR. Pebbles does not yet offer a self-service export: send your request to hello@bohns.design and we will respond within one month.
+You have the right to receive your personal data in a structured, commonly used and machine-readable format (JSON), in accordance with Article 20 of the GDPR. Pebbles does not yet offer a self-service export: send your request to ciao@pbbls.app and we will respond within one month.
 
 ### 10.2 Account Deletion
 
@@ -345,7 +345,7 @@ These Terms are governed by French law, regardless of conflicts of law principle
 
 ### 14.2 Amicable Resolution
 
-Pebbles is a free, non-commercial service. Before taking any legal action, please send a written description of the dispute to hello@bohns.design. Pebbles will respond within 30 days and will look for an amicable solution with you.
+Pebbles is a free, non-commercial service. Before taking any legal action, please send a written description of the dispute to ciao@pbbls.app. Pebbles will respond within 30 days and will look for an amicable solution with you.
 
 ### 14.3 Competent Courts
 
@@ -377,8 +377,8 @@ Pebbles' failure to enforce any provision does not constitute a waiver of that p
 
 ---
 
-**Last Updated: October 7, 2026**
+**Last Updated: November 6, 2026**
 
 These Terms of Service apply as of the effective date noted above. By using Pebbles after this date, you accept these Terms.
 
-For questions, contact: **hello@bohns.design**
+For questions, contact: **ciao@pbbls.app**

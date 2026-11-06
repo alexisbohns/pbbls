@@ -4,7 +4,7 @@ locale: fr
 slug: privacy
 version: 1.4.0
 effective_date: 2026-10-07
-last_updated: 2026-11-02
+last_updated: 2026-11-06
 ---
 
 # Politique de Confidentialité de Pebbles
@@ -21,7 +21,7 @@ Cette politique de confidentialité est conforme au Règlement Général sur la 
 
 - **Responsable du traitement :** Alexis Bohn, fondatrice et développeuse de Pebbles
 - **Localisation :** France
-- **Email :** hello@bohns.design
+- **Email :** ciao@pbbls.app
 
 Alexis Bohn agit en tant que responsable du traitement au sens de l'article 4(7) du RGPD et est responsable du respect de cette politique.
 
@@ -211,7 +211,7 @@ Vous pouvez retirer votre consentement à tout moment. Le traitement de vos hume
 
 Pour exercer l'un de ces droits, envoyez une demande à :
 
-**Email :** hello@bohns.design
+**Email :** ciao@pbbls.app
 
 Nous traiterons votre demande dans les 30 jours. Si votre demande est complexe, nous pouvons demander une prolongation de 2 mois supplémentaires.
 
@@ -235,7 +235,7 @@ Nous ne demandons pas votre date de naissance et nous n'en conservons aucune. Lo
 
 ### 9.3 Si Nous Apprenons le Contraire
 
-Si nous apprenons qu'un compte appartient à une personne de moins de 16 ans, nous le fermons et effaçons les données. Un parent ou représentant légal qui pense que son enfant détient un compte peut nous l'indiquer à hello@bohns.design et nous ferons de même.
+Si nous apprenons qu'un compte appartient à une personne de moins de 16 ans, nous le fermons et effaçons les données. Un parent ou représentant légal qui pense que son enfant détient un compte peut nous l'indiquer à ciao@pbbls.app et nous ferons de même.
 
 ## 10. Sécurité des Données
 
@@ -254,7 +254,7 @@ Si nous apprenons qu'un compte appartient à une personne de moins de 16 ans, no
 
 ### 10.3 Responsabilité Utilisateur
 
-Vous êtes responsable de la confidentialité de votre mot de passe. Ne partagez jamais vos identifiants de connexion. Si vous pensez que votre compte est compromis, contactez immédiatement hello@bohns.design.
+Vous êtes responsable de la confidentialité de votre mot de passe. Ne partagez jamais vos identifiants de connexion. Si vous pensez que votre compte est compromis, contactez immédiatement ciao@pbbls.app.
 
 ## 11. Cookies et Suivi
 
@@ -309,13 +309,13 @@ Veuillez consulter également :
 Pour toute question, demande ou préoccupation concernant cette politique de confidentialité ou vos données personnelles :
 
 - **Alexis Bohn**
-- **Email :** hello@bohns.design
+- **Email :** ciao@pbbls.app
 
 ---
 
 - **Version :** 1.4.0
 - **Date d'entrée en vigueur :** 7 octobre 2026
-- **Dernière mise à jour :** 7 octobre 2026
+- **Dernière mise à jour :** 6 novembre 2026
 
 ---
 
