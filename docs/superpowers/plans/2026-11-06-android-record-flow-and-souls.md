@@ -113,6 +113,16 @@ Part 3, for every sheet and every step after it:
 - `hapticsOn` is required on `CompleteFlowContent`, `CompleteStepContent`: no defaults, so the compiler asks every host.
 - `RecordSoulsStep`'s replay into `model.toggleSoul` is interim and leaves in Part 7, where `model.setSouls` takes the chooser's result.
 
+Part 4, for the flow's later parts:
+
+- `String.takeSafely(limit)` (`core/common/TextClamp.kt`) clamps without splitting an emoji: a lone surrogate makes Postgres refuse the JSON. Never `take` user text.
+- `CaptureFlowViewModel.start` runs from a `remember` so the first frame is right. It is guarded by `hasRestoredStep`, computed at construction before the state collector writes the key. A restored step always wins over the key's.
+- `RecordStepScaffold`'s fades apply only with `contentScrolls = true`. A step that scrolls itself draws its own.
+- `LocalResources.current`, not `LocalContext.current.resources` (lint). `souls_done` is the flow's "Done" / "Terminé"; `action_done` is "Valider" in French.
+- The moment page's strings reuse `photo_add`, `photo_state_ready`, `photo_state_failed`, `photo_remove_a11y`, `record_photo_retry`.
+- `seededFromPhoto` stays after the photo is removed, on both surfaces: left as is, one finding for both.
+- **Driving the device:** the page's two save buttons sit at y≈2100–2260 on this Pixel 8. Tap one coordinate at a time and check the screen between taps, or a tap meant for a closed sheet saves a moment.
+
 ---
 
 ## Copy (from iOS, verbatim)
