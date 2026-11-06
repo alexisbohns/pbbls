@@ -52,7 +52,7 @@ class CompleteFlowModel(
 
     fun selectEmotion(emotionId: String) = commitAndAdvance { it.copy(emotionId = emotionId) }
 
-    fun selectDomain(domainId: String) = commitAndAdvance { it.copy(domainId = domainId) }
+    fun selectDomain(domainId: String) = commitAndAdvance { it.copy(domainIds = listOf(domainId)) }
 
     fun selectCollection(collectionId: String) = commitAndAdvance { it.copy(collectionId = collectionId) }
 

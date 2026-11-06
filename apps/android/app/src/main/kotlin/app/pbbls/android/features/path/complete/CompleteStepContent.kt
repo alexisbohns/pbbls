@@ -58,7 +58,7 @@ fun CompleteStepContent(
         CompleteStep.DOMAIN ->
             RecordDomainStep(
                 domains = domains,
-                selectedId = answers.domainId,
+                selectedId = answers.domainIds.firstOrNull(),
                 onSelect = { model.selectDomain(it) },
                 modifier = modifier,
             )

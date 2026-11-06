@@ -14,7 +14,7 @@ class CompleteSnapshotTest {
         PebbleAnswers(
             valence = Valence.LOWLIGHT_SMALL,
             emotionId = "e-1",
-            domainId = "d-1",
+            domainIds = listOf("d-1", "d-2"),
             soulIds = listOf("s-1", "s-gone"),
             collectionId = "c-gone",
             visibility = Visibility.PUBLIC,
@@ -23,6 +23,16 @@ class CompleteSnapshotTest {
     @Test
     fun `answers round-trip through the snapshot`() {
         assertEquals(answers, CompleteSnapshot.from(answers).toAnswers(known = null))
+    }
+
+    @Test
+    fun `a snapshot stored with the old single domain_id restores it`() {
+        val old = """{"emotion_id":"e-1","domain_id":"d1","soul_ids":["s-1"]}"""
+        val snapshot = Json.decodeFromString(CompleteSnapshot.serializer(), old)
+        assertFalse(snapshot.isEmpty)
+        assertEquals(listOf("d1"), snapshot.toAnswers(known = null).domainIds)
+        val rewritten = CompleteSnapshot.from(snapshot.toAnswers(known = null))
+        assertFalse(Json.encodeToString(CompleteSnapshot.serializer(), rewritten).contains("\"domain_id\""))
     }
 
     @Test
@@ -76,7 +86,7 @@ class CompleteSnapshotTest {
         assertEquals(
             Json.parseToJsonElement(
                 """
-                {"ownerId":"user-1","snapshot":{"intensity":1,"positiveness":-1,"emotion_id":"e-1","domain_id":"d-1",
+                {"ownerId":"user-1","snapshot":{"intensity":1,"positiveness":-1,"emotion_id":"e-1","domain_ids":["d-1","d-2"],
                  "soul_ids":["s-1","s-gone"],"collection_id":"c-gone","visibility":"public"}}
                 """.trimIndent(),
             ),

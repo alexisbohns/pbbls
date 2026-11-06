@@ -72,41 +72,62 @@ data class MomentSavePayload(
 
 /**
  * `complete_pebble(payload)`: inserts or updates the caller's one pebble on
- * [momentId]. Every key is always sent, so an update rewrites the join tables
- * to exactly the answers (an empty list clears). `new_souls`,
- * `new_collections` and `cards` are never sent (A-6).
+ * [momentId]. A key left null is omitted from the JSON, and the server keeps
+ * what it is not sent; an empty list clears. [from] sends every key so a first
+ * completion ends up exactly as answered; [edit] omits a set the user left as
+ * prefilled. `new_souls`, `new_collections` and `cards` are never sent (A-6).
  */
 @Serializable
 data class PebbleCompletePayload(
     @SerialName("moment_id")
     val momentId: String,
     @SerialName("emotion_id")
-    val emotionId: String,
-    val intensity: Int,
-    val positiveness: Int,
-    val visibility: Visibility,
+    val emotionId: String? = null,
+    val intensity: Int? = null,
+    val positiveness: Int? = null,
+    val visibility: Visibility? = null,
     @SerialName("domain_ids")
-    val domainIds: List<String>,
+    val domainIds: List<String>? = null,
     @SerialName("soul_ids")
-    val soulIds: List<String>,
+    val soulIds: List<String>? = null,
     @SerialName("collection_ids")
-    val collectionIds: List<String>,
+    val collectionIds: List<String>? = null,
 ) {
     companion object {
+        /** A first completion: every key, so the join tables end up exactly as answered. */
         fun from(
             momentId: String,
             answers: PebbleAnswers,
         ): PebbleCompletePayload {
             val valence = requireNotNull(answers.valence) { "complete without a valence" }
+            require(answers.domainIds.isNotEmpty()) { "complete without a domain" }
             return PebbleCompletePayload(
                 momentId = momentId,
                 emotionId = requireNotNull(answers.emotionId) { "complete without an emotion" },
                 intensity = valence.intensity,
                 positiveness = valence.positiveness,
                 visibility = answers.visibility,
-                domainIds = listOf(requireNotNull(answers.domainId) { "complete without a domain" }),
+                domainIds = answers.domainIds,
                 soulIds = answers.soulIds,
                 collectionIds = listOfNotNull(answers.collectionId),
+            )
+        }
+
+        /**
+         * Edit pebble (#1099 D8, as iOS): a set left as prefilled is omitted, and absent means keep,
+         * so a pebble with three domains survives an edit of its emotion. Touching the field replaces
+         * the set with the pick. A draft with no prefill (nothing loaded) always sends.
+         */
+        fun edit(
+            momentId: String,
+            draft: PebbleDraft,
+        ): PebbleCompletePayload {
+            val full = from(momentId, draft.answers)
+            val domainsUntouched = draft.prefilled && draft.domainId == draft.prefillDomainId
+            val collectionUntouched = draft.prefilled && draft.collectionId == draft.prefillCollectionId
+            return full.copy(
+                domainIds = if (domainsUntouched) null else full.domainIds,
+                collectionIds = if (collectionUntouched) null else full.collectionIds,
             )
         }
     }

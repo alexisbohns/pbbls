@@ -94,7 +94,7 @@ private val answered =
     PebbleAnswers(
         valence = Valence.HIGHLIGHT_MEDIUM,
         emotionId = "e-joy",
-        domainId = "d-health",
+        domainIds = listOf("d-health"),
         soulIds = listOf("s1"),
         collectionId = null,
         visibility = Visibility.SECRET,

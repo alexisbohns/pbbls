@@ -94,7 +94,7 @@ class PebbleDraftTest {
                 visibility = Visibility.PRIVATE,
             )
         assertEquals(
-            PebbleAnswers(Valence.NEUTRAL_SMALL, "emotion-1", "domain-1", listOf("soul-1"), "collection-1", Visibility.PRIVATE),
+            PebbleAnswers(Valence.NEUTRAL_SMALL, "emotion-1", listOf("domain-1"), listOf("soul-1"), "collection-1", Visibility.PRIVATE),
             draft.answers,
         )
     }

@@ -98,7 +98,7 @@ class CompleteFlowModelTest {
     fun `a restored flow lands on its first gap`() {
         model.resume(PebbleAnswers(valence = Valence.LOWLIGHT_SMALL, emotionId = "e-1"))
         assertEquals(CompleteStep.DOMAIN, model.step)
-        model.resume(PebbleAnswers(valence = Valence.LOWLIGHT_SMALL, emotionId = "e-1", domainId = "d-1"))
+        model.resume(PebbleAnswers(valence = Valence.LOWLIGHT_SMALL, emotionId = "e-1", domainIds = listOf("d-1")))
         assertEquals(CompleteStep.PRIVACY, model.step)
     }
 

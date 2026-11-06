@@ -23,7 +23,7 @@ data class CompleteFlowState(
             CompleteStep.PRIVACY, CompleteStep.SUCCESS -> true
             CompleteStep.VALENCE -> answers.valence != null
             CompleteStep.EMOTION -> answers.emotionId != null
-            CompleteStep.DOMAIN -> answers.domainId != null
+            CompleteStep.DOMAIN -> answers.domainIds.isNotEmpty()
             CompleteStep.SOULS -> answers.soulIds.isNotEmpty()
             CompleteStep.COLLECTION -> answers.collectionId != null
         }
