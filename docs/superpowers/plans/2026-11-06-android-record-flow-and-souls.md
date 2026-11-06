@@ -47,7 +47,7 @@ Pure logic is given as code and tests. **UI is not re-described in prose**: each
 | Step dots | dots in every mock | dots | `LinearWavyProgressIndicator` in `RecordFlowChrome` (#854), unchanged |
 | Photo grid (D3) | inline | inline `PhotosPicker` | modal `PickVisualMedia` + a Library tile (recorded exception) |
 
-**Tap counts on Android**, because of the modal: a photo moment is + · Library · pick · Just save = **4**, a words-only moment + · Just write · Just save = **3**, a full pebble with a photo **10** with the fan's Continue. Report them honestly; do not reach for an auto-opening picker, which would cost Just write users a dismiss and which the spec does not ask for.
+**Tap counts on Android**, because of the modal: a photo moment is + · Library · pick · Just save = **4**, a words-only moment + · Just write · Just save = **3**, a full pebble with a photo **10** with the fan's Continue. Add one to the photo counts where the system picker asks for Done after the pick, which it does on the Pixel 8 (Google Photos picker, seen 2026-11-06); the app does not control that. Report them honestly; do not reach for an auto-opening picker, which would cost Just write users a dismiss and which the spec does not ask for.
 
 ---
 
