@@ -23,6 +23,16 @@ struct CaptureFlowModelTests {
         #expect(recorder.taps == [.advance])
     }
 
+    @Test("the quick moment starts on the page, and a restore still lands there")
+    func startsAtMomentPage() {
+        let quick = CaptureFlowModel(haptic: { _ in }, startingAt: .moment)
+        #expect(quick.step == .moment)
+        let (model, _) = model()
+        #expect(model.step == .photo)
+        model.restore(CaptureDraft(), hasEditedDate: false)
+        #expect(model.step == .moment)
+    }
+
     @Test("the words are clamped to the description limit")
     func descriptionClamp() {
         let (model, _) = model()

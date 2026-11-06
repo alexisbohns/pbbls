@@ -58,11 +58,11 @@ struct SoulsListView: View {
                 }
             }
             .task { await load() }
-            .sheet(isPresented: $quickMoment) {
-                QuickMomentSheet(onSaved: { _, _ in
+            .fullScreenCover(isPresented: $quickMoment) {
+                CaptureFlowView(onMomentChanged: { _ in
                     revision.bump(from: .people)
                     Task { await load() }
-                })
+                }, startsAtMomentPage: true)
             }
             .sheet(item: $editing) { target in
                 EditPebbleSheet(momentId: target.momentId, pebble: target.pebble, scrollsToSouls: true,

@@ -14,13 +14,16 @@ struct CaptureFlowView: View {
     /// Home's "New pebble": the final step saves and swaps straight to
     /// Complete, so the save/make-a-pebble choice is not offered.
     var chainsComplete = false
+    /// Home's "Quick moment" (D13): the page straight away, no photo screen
+    /// and no way back to it.
+    var startsAtMomentPage = false
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(CaptureDraftStore.self) private var drafts
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
 
-    @State private var model = CaptureFlowModel()
+    @State private var model: CaptureFlowModel
     @State private var snaps: SnapUploadCoordinator?
     @State private var pickedPhoto: PhotosPickerItem?
     /// The in-flow camera (D3), presented over the photo step.
@@ -33,15 +36,11 @@ struct CaptureFlowView: View {
     @State private var completing: CompleteTarget?
     /// Which button started the save in flight, so only that one spins.
     @State private var savingThenComplete = false
-    /// The debounced device-local autosave of the page (D2).
-    @State private var autosaveTask: Task<Void, Never>?
+    /// The debounced device-local autosave of the page (D2), built in `.task`
+    /// so it has the store and the session.
+    @State private var autosaver: CaptureDraftAutosaver?
     /// One-time guard: the restore is attempted once per presentation.
     @State private var hasRestored = false
-    /// The autosave only runs once the restore has been attempted, and never
-    /// again after a discard or a successful save: both clear the file, and a
-    /// late `onChange` (the coordinator nils its snap before its own await)
-    /// must not write the discarded page back.
-    @State private var autosaveEnabled = false
 
     private struct CompleteTarget: Equatable {
         let momentId: UUID
@@ -73,7 +72,10 @@ struct CaptureFlowView: View {
                     momentId: completing.momentId,
                     momentName: completing.name,
                     onCompleted: onMomentChanged,
-                    afterSave: true
+                    afterSave: true,
+                    momentHappenedAt: model.draft.happenedAt,
+                    momentHasWords: !model.draft.description.trimmingCharacters(in: .whitespaces).isEmpty,
+                    onRecordAnother: { startAnother() }
                 )
             } else {
                 capture
@@ -83,6 +85,9 @@ struct CaptureFlowView: View {
             TapHaptics.prepare()
             if snaps == nil {
                 snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
+            }
+            if autosaver == nil {
+                autosaver = CaptureDraftAutosaver(store: drafts, ownerId: { [supabase] in supabase.session?.user.id })
             }
             // After the coordinator exists, so a restored photo has a place to land.
             restoreIfNeeded()
@@ -96,7 +101,7 @@ struct CaptureFlowView: View {
             RecordFlowChrome(
                 dotCount: CaptureStep.allCases.count,
                 dotIndex: model.step.dotIndex,
-                canGoBack: model.step.previous != nil && !model.isSaving,
+                canGoBack: model.step.previous != nil && !model.isSaving && !startsAtMomentPage,
                 onBack: { model.back() },
                 onClose: handleClose
             )
@@ -139,7 +144,7 @@ struct CaptureFlowView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             // Last reliable moment before a process kill.
-            if phase != .active { flushAutosave() }
+            if phase != .active { autosaver?.flush() }
         }
         .fullScreenCover(isPresented: $showsCamera) {
             CameraPicker(
@@ -176,7 +181,9 @@ struct CaptureFlowView: View {
             action: action(for: model.step),
             // The grid runs to the bottom under the two controls; nothing floats.
             contentFillsHeight: model.step == .photo,
-            fixedSlot: model.step == .photo ? AnyView(photoControls) : nil,
+            fixedSlot: model.step == .photo
+                ? AnyView(RecordPhotoControls(onJustWrite: { model.advance() }, onCamera: { showsCamera = true }))
+                : nil,
             secondaryAction: model.step == .moment && !chainsComplete
                 ? RecordStepSecondaryAction(
                     label: "Just save",
@@ -200,16 +207,7 @@ struct CaptureFlowView: View {
     private var stepContent: some View {
         switch model.step {
         case .photo:
-            RecordPhotoStep(
-                snap: snaps?.formSnap,
-                selection: $pickedPhoto,
-                onRemove: {
-                    pickedPhoto = nil
-                    if let userId = currentUserId, let snaps {
-                        Task { await snaps.removePending(userId: userId) }
-                    }
-                }
-            )
+            RecordPhotoStep(selection: $pickedPhoto)
             // A save started from the close dialog sends the photo on screen;
             // neither a new pick nor Remove may change it under the save.
             .disabled(model.isSaving)
@@ -269,16 +267,26 @@ struct CaptureFlowView: View {
     /// one included: it is re-seeded as a pending upload, so the coordinator
     /// deletes it by id like a fresh pick.
     private func discard() async {
-        autosaveEnabled = false
-        autosaveTask?.cancel()
+        autosaver?.clear()
         if let userId = currentUserId, let snaps {
             await snaps.cancelAndCleanup(userId: userId)
         }
-        if let userId = currentUserId { drafts.clear(ownerId: userId) }
         dismiss()
     }
 
     // MARK: - Save
+
+    /// "Record another" on the end screen (D12): the same cover, a fresh grid.
+    private func startAnother() {
+        completing = nil
+        model = CaptureFlowModel(startingAt: startsAtMomentPage ? .moment : .photo)
+        pickedPhoto = nil
+        snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
+        savingThenComplete = false
+        hasRestored = true
+        // The save cleared the autosave; the restore that re-enables it is skipped here.
+        autosaver?.enabled = true
+    }
 
     private func save(thenComplete: Bool) async {
         guard !model.isSaving else { return }
@@ -301,9 +309,7 @@ struct CaptureFlowView: View {
             let momentId = try await MomentsService(client: supabase.client).saveMoment(payload)
             // The photo is the saved moment's now; a late pick must not touch it.
             snaps?.markCommitted()
-            autosaveTask?.cancel()
-            drafts.clear(ownerId: userId)
-            autosaveEnabled = false
+            autosaver?.clear()
             model.succeed()
             onMomentChanged(momentId)
             if thenComplete {
@@ -327,59 +333,16 @@ struct CaptureFlowView: View {
     }
 }
 
-// MARK: - Photo step (D3)
-
-extension CaptureFlowView {
-    /// The photo step's fixed-slot controls (D3): the way past the grid without
-    /// a picture, and the camera — only where there is one (not on a simulator).
-    private var photoControls: some View {
-        HStack(spacing: Spacing.sm) {
-            Button("Just write") { model.advance() }
-                .buttonStyle(PebblesTonalButtonStyle())
-            if CameraPicker.isAvailable {
-                Button { showsCamera = true } label: {
-                    PbblsIconImage(.camera, size: 22, style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
-                        .frame(width: 48, height: 48)
-                        .background(Circle().fill(Color.pebbles.primaryContainer))
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Take a photo")
-            }
-        }
-    }
-}
-
 // MARK: - Draft (D2)
 
 extension CaptureFlowView {
-    /// The snap reference worth keeping across a kill: one that already lives
-    /// in Storage. A pick still uploading is re-picked after a restore.
-    private var savedSnap: CaptureDraftSnapshot.Snap? {
-        guard let userId = currentUserId else { return nil }
-        switch snaps?.formSnap {
-        case .existing(let id, let path):
-            return .init(id: id, storagePath: path)
-        case .pending(let attached) where attached.state == .uploaded:
-            return .init(id: attached.id, storagePath: attached.storagePrefix(userId: userId))
-        default:
-            return nil
-        }
-    }
-
     private func scheduleAutosave() {
-        guard autosaveEnabled else { return }
-        autosaveTask?.cancel()
-        autosaveTask = Task {
-            try? await Task.sleep(for: .milliseconds(800))
-            guard !Task.isCancelled else { return }
-            flushAutosave()
-        }
-    }
-
-    private func flushAutosave() {
-        autosaveTask?.cancel()
-        guard autosaveEnabled, let userId = currentUserId, completing == nil else { return }
-        drafts.save(.init(draft: model.draft, hasEditedDate: model.hasEditedDate, snap: savedSnap), ownerId: userId)
+        guard let userId = currentUserId, completing == nil else { return }
+        autosaver?.schedule(.init(
+            draft: model.draft,
+            hasEditedDate: model.hasEditedDate,
+            snap: CaptureDraftAutosaver.savedSnap(from: snaps?.formSnap, userId: userId)
+        ))
     }
 
     /// A page the user was on when the app died comes back as it was (D2).
@@ -390,11 +353,20 @@ extension CaptureFlowView {
     private func restoreIfNeeded() {
         guard !hasRestored else { return }
         hasRestored = true
-        defer { autosaveEnabled = true }
+        defer { autosaver?.enabled = true }
         guard let userId = currentUserId, let saved = drafts.load(ownerId: userId) else { return }
         model.restore(saved.draft, hasEditedDate: saved.hasEditedDate)
         if let snap = saved.snap {
             snaps?.seedExisting(.pending(AttachedSnap(id: snap.id, localThumb: Data(), state: .uploaded)))
         }
+    }
+}
+
+extension CaptureFlowView {
+    init(onMomentChanged: @escaping (UUID) -> Void, chainsComplete: Bool = false, startsAtMomentPage: Bool = false) {
+        self.onMomentChanged = onMomentChanged
+        self.chainsComplete = chainsComplete
+        self.startsAtMomentPage = startsAtMomentPage
+        _model = State(initialValue: CaptureFlowModel(startingAt: startsAtMomentPage ? .moment : .photo))
     }
 }

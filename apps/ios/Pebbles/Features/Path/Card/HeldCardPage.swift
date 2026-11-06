@@ -36,6 +36,9 @@ struct HeldCardPage: View {
     @State private var isPresentingEditMoment = false
     @State private var isPresentingEditPebble = false
     @State private var isPresentingComplete = false
+    /// D14: a Complete draft waits for this moment. Read once per load and after
+    /// the pebble stage goes, never per body (it is a file read).
+    @State private var hasCompleteDraft = false
     @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
     /// When the print started; nil when none runs (D6). Cleared only by its last frame.
@@ -80,7 +83,10 @@ struct HeldCardPage: View {
         .task {
             await reload()
             cutShortIfRestored()
+            refreshDraftCheck()
         }
+        // A "Keep" dismissal of the pebble stage is exactly when a draft appears.
+        .onChange(of: isPresentingComplete) { _, presenting in if !presenting { refreshDraftCheck() } }
         .task(id: model.announcing) {
             guard model.announcing else { return }
             AccessibilityNotification.Announcement(String(localized: CardStrings.versoHeading)).post()
@@ -104,10 +110,16 @@ struct HeldCardPage: View {
             }
         }
         .fullScreenCover(isPresented: $isPresentingComplete) {
-            CompleteFlowView(momentId: request.momentId, momentName: model.detail?.name, onCompleted: { _ in
-                // In place, behind the success screen.
-                saved()
-            })
+            CompleteFlowView(
+                momentId: request.momentId,
+                momentName: model.detail?.name,
+                onCompleted: { _ in
+                    // In place, behind the end screen.
+                    saved()
+                },
+                momentHappenedAt: model.detail?.happenedAt,
+                momentHasWords: !(model.detail?.description ?? "").trimmingCharacters(in: .whitespaces).isEmpty
+            )
         }
         .momentDeleteDialog(target: $pendingDeletion) { target, option in
             Task { await delete(option, on: target) }
@@ -189,7 +201,9 @@ struct HeldCardPage: View {
         BareMomentPage(detail: detail, ratio: detail.snaps.first.flatMap { aspects.ratio(for: $0.storagePath) },
                        onComplete: { isPresentingComplete = true },
                        isCompleteDisabled: model.detail == nil || model.completion != nil || printStart != nil,
-                       onPlaceFrame: { placeFrame = $0 }, titleFocus: $focus)
+                       onPlaceFrame: { placeFrame = $0 }, titleFocus: $focus,
+                       hasDraft: hasCompleteDraft,
+                       onAddWords: detail.description?.isEmpty == false ? nil : { isPresentingEditMoment = true })
     }
 
     private func card(_ detail: MomentDetail, _ pebble: MomentDetail.Pebble, print: Double?) -> some View {
@@ -345,5 +359,13 @@ private struct FlightRaster: ViewModifier {
         } else {
             content
         }
+    }
+}
+
+extension HeldCardPage {
+    /// D14: a Complete draft on the device for this moment and account.
+    fileprivate func refreshDraftCheck() {
+        hasCompleteDraft = supabase.session
+            .flatMap { completeDrafts.load(momentId: request.momentId, ownerId: $0.user.id) } != nil
     }
 }
