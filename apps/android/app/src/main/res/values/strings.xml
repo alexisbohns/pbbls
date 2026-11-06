@@ -873,7 +873,6 @@
     <string name="record_success_title">Your pebble</string>
     <string name="record_action_skip">Skip</string>
     <string name="record_action_continue">Continue</string>
-    <string name="record_success_exit">Back to my path</string>
     <string name="record_step_a11y">Step %1$d of %2$d</string>
     <string name="record_back_a11y">Back</string>
     <string name="record_name_placeholder">Name</string>
@@ -888,6 +887,14 @@
     <string name="record_karma_a11y">Earned %1$d karma</string>
     <string name="record_success_quiet">Thank you for keeping this. If today is heavy, support is one tap away.</string>
     <string name="record_success_get_support">Get support</string>
+    <string name="richer_section">Make it richer</string>
+    <string name="richer_add_collection">Add to a collection</string>
+    <string name="richer_remove_collection">Remove from collection</string>
+    <string name="richer_who_can_see">Who can see it</string>
+    <string name="richer_add_words">Add a few words</string>
+    <string name="richer_words_karma">+1 karma</string>
+    <string name="richer_done">Done</string>
+    <string name="richer_record_another">Record another</string>
     <string name="crisis_intro">If you are in danger or thinking about hurting yourself, call now. These lines are free and confidential.</string>
     <string name="crisis_country">Country</string>
     <string name="crisis_worldwide">Anywhere else</string>

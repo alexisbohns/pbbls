@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -41,22 +42,26 @@ import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.PebbleCollection
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
+import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.features.path.flow.RecordFlowChrome
 import app.pbbls.android.features.path.flow.RecordStepAction
 import app.pbbls.android.features.path.flow.RecordStepScaffold
-import app.pbbls.android.features.path.flow.steps.RecordSuccessStep
+import app.pbbls.android.features.path.flow.steps.RecordRicherStep
 import app.pbbls.android.navigation.CompleteOrigin
+import java.time.ZoneId
 
 /** As the record flow: enough for the slide to read as one motion without holding the user up. */
 private const val STEP_TRANSITION_MS = 280
 
 /**
  * The Complete flow (#1048): a moment becomes a pebble in six steps, then a
- * success screen. A full-screen modal entry (A-14). ✕ never asks (A-4); the
+ * end screen. A full-screen modal entry (A-14). ✕ never asks (A-4); the
  * answers stay in the per-moment autosave. [onDismiss] is every exit: ✕, back
- * on the first step, and the success screen's button.
+ * on the first step, and the end screen's Done. [onAddWords] opens Edit moment and
+ * [onRecordAnother] a fresh capture (null for a pebble made from the card).
  */
 @Composable
 fun CompleteFlowScreen(
@@ -64,7 +69,9 @@ fun CompleteFlowScreen(
     origin: CompleteOrigin,
     onDismiss: () -> Unit,
     onOpenSupport: () -> Unit,
+    onAddWords: () -> Unit,
     modifier: Modifier = Modifier,
+    onRecordAnother: (() -> Unit)? = null,
     viewModel: CompleteFlowViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -80,6 +87,12 @@ fun CompleteFlowScreen(
             is CompleteFlowEffect.Haptic -> haptic(effect.flavor)
             CompleteFlowEffect.Dismiss -> onDismiss()
         }
+    }
+
+    // Words may have been added in Edit moment: the end screen re-reads when it comes back.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
     }
 
     // Always enabled, as in the record flow: back walks the steps, closes on
@@ -106,6 +119,11 @@ fun CompleteFlowScreen(
         onFirstPebbleHelp = viewModel::showFirstPebbleHelp,
         onOpenValenceHelp = viewModel::openValenceHelp,
         onCloseValenceHelp = viewModel::closeValenceHelp,
+        collections = refs.collections,
+        onEditCollection = viewModel::editCollection,
+        onEditVisibility = viewModel::editVisibility,
+        onAddWords = onAddWords,
+        onRecordAnother = onRecordAnother,
         modifier = modifier,
     )
 }
@@ -130,6 +148,11 @@ fun CompleteFlowContent(
     onFirstPebbleHelp: () -> Unit = {},
     onOpenValenceHelp: () -> Unit = {},
     onCloseValenceHelp: () -> Unit = {},
+    collections: List<PebbleCollection> = emptyList(),
+    onEditCollection: (String?) -> Unit = {},
+    onEditVisibility: (Visibility) -> Unit = {},
+    onAddWords: () -> Unit = {},
+    onRecordAnother: (() -> Unit)? = null,
 ) {
     val flow = uiState.flow
     val labels =
@@ -137,6 +160,7 @@ fun CompleteFlowContent(
             continueLabel = stringResource(R.string.record_action_continue),
         )
     val error = flow.errorRes?.let { stringResource(it) }
+    val editError = uiState.editErrorRes?.let { stringResource(it) }
     val recent = uiState.recentDomainIds.mapNotNull { id -> domains.firstOrNull { it.id == id } }
     val bottomInset = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
 
@@ -177,15 +201,28 @@ fun CompleteFlowContent(
             val completed = flow.completed
             if (step == CompleteStep.SUCCESS && completed != null) {
                 Box(Modifier.fillMaxSize().then(bottomInset)) {
-                    RecordSuccessStep(
+                    RecordRicherStep(
+                        pebbleId = completed.pebbleId,
                         name = uiState.momentName,
+                        nameLoaded = uiState.isMomentLoaded,
+                        happenedAt = uiState.happenedAt?.atZoneSameInstant(ZoneId.systemDefault())?.toLocalDate(),
                         glyph = completed.glyph,
                         karmaDelta = completed.karmaDelta,
                         valence = flow.answers.valence ?: Valence.NEUTRAL_MEDIUM,
                         palette = palette,
-                        onExit = onExit,
+                        collections = collections,
+                        collectionId = flow.answers.collectionId,
+                        visibility = flow.answers.visibility,
+                        hasWords = uiState.hasWords,
+                        isEditing = uiState.isEditing,
+                        editError = editError,
                         quiet = flow.answers.valence?.quietSuccess == true,
+                        onEditCollection = onEditCollection,
+                        onEditVisibility = onEditVisibility,
+                        onAddWords = onAddWords,
+                        onDone = onExit,
                         onOpenSupport = onOpenSupport,
+                        onRecordAnother = onRecordAnother,
                     )
                 }
             } else {

@@ -363,6 +363,15 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             origin = key.origin,
             onDismiss = navigator::goBack,
             onOpenSupport = { navigator.navigate(PebblesKey.CrisisResources) },
+            onAddWords = { navigator.navigate(PebblesKey.EditMoment(key.momentId)) },
+            // Replaces this entry, so leaving the fresh capture lands where the first one was opened.
+            onRecordAnother =
+                key.origin.restart()?.let { next ->
+                    {
+                        navigator.goBack()
+                        navigator.navigate(next)
+                    }
+                },
         )
     }
 

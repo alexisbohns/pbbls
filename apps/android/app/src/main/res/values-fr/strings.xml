@@ -869,7 +869,6 @@
     <string name="record_success_title">Ton galet</string>
     <string name="record_action_skip">Ignorer</string>
     <string name="record_action_continue">Continuer</string>
-    <string name="record_success_exit">Retour à mon chemin</string>
     <string name="record_step_a11y">Étape %1$d sur %2$d</string>
     <string name="record_back_a11y">Retour</string>
     <string name="record_name_placeholder">Nom</string>
@@ -884,6 +883,14 @@
     <string name="record_karma_a11y">%1$d karma gagné</string>
     <string name="record_success_quiet">Merci d’avoir gardé ce moment. Si la journée est lourde, un soutien est à un geste.</string>
     <string name="record_success_get_support">Trouver du soutien</string>
+    <string name="richer_section">Enrichis-le</string>
+    <string name="richer_add_collection">Ajouter à une collection</string>
+    <string name="richer_remove_collection">Retirer de la collection</string>
+    <string name="richer_who_can_see">Qui peut le voir</string>
+    <string name="richer_add_words">Ajouter quelques mots</string>
+    <string name="richer_words_karma">+1 karma</string>
+    <string name="richer_done">Terminé</string>
+    <string name="richer_record_another">En enregistrer un autre</string>
     <string name="crisis_intro">Si tu es en danger ou que tu penses à te faire du mal, appelle maintenant. Ces lignes sont gratuites et confidentielles.</string>
     <string name="crisis_country">Pays</string>
     <string name="crisis_worldwide">Ailleurs</string>

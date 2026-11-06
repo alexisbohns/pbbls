@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.Spacing
@@ -44,6 +45,8 @@ import app.pbbls.android.features.path.flow.steps.RecordLifeStep
 import app.pbbls.android.features.path.valence.ValenceHelpContent
 import app.pbbls.android.navigation.CompleteOrigin
 import com.android.tools.screenshot.PreviewTest
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 /**
  * Previews for the Complete flow (#1048), one per step through the stateless
@@ -194,6 +197,9 @@ private fun CompletePreview(
     completed: CompleteResult? = null,
     momentName: String? = "Swim at the lake",
     origin: CompleteOrigin = CompleteOrigin.CARD,
+    ui: (CompleteFlowUiState) -> CompleteFlowUiState = { it },
+    collections: List<PebbleCollection> = completeCollections,
+    onRecordAnother: (() -> Unit)? = null,
 ) {
     val flow = CompleteFlowState(answers = answers, step = step, completed = completed, errorRes = errorRes)
     // Previews are not interactions: the machine is there for the callbacks only, so it never buzzes.
@@ -203,7 +209,7 @@ private fun CompletePreview(
             PreviewReferenceData(domains = completeDomains, souls = completeSouls, collections = completeCollections),
     ) {
         CompleteFlowContent(
-            uiState = CompleteFlowUiState(flow = flow, momentName = momentName),
+            uiState = ui(CompleteFlowUiState(flow = flow, momentName = momentName, isMomentLoaded = true)),
             origin = origin,
             model = model,
             domains = completeDomains,
@@ -214,6 +220,41 @@ private fun CompletePreview(
             onComplete = {},
             onExit = {},
             hapticsOn = false,
+            collections = collections,
+            onRecordAnother = onRecordAnother,
+        )
+    }
+}
+
+/** Wednesday 14 October 2026 (checked with `date`), noon in the host's own zone, so the dot lands on W wherever it renders. */
+private val richerDay = LocalDateTime.of(2026, 10, 14, 12, 0).atZone(ZoneId.systemDefault()).toOffsetDateTime()
+
+private fun CompleteFlowUiState.richer(
+    hasWords: Boolean = false,
+    editErrorRes: Int? = null,
+    isEditing: Boolean = false,
+) = copy(happenedAt = richerDay, hasWords = hasWords, editErrorRes = editErrorRes, isEditing = isEditing)
+
+@Composable
+private fun RicherPreview(
+    answers: PebbleAnswers = answered,
+    karma: Int? = 3,
+    momentName: String? = "Coffee with Léa",
+    collections: List<PebbleCollection> = completeCollections,
+    hasWords: Boolean = false,
+    @StringRes editErrorRes: Int? = null,
+    origin: CompleteOrigin = CompleteOrigin.CAPTURE,
+) {
+    PebblesTheme {
+        CompletePreview(
+            CompleteStep.SUCCESS,
+            answers = answers,
+            completed = success(karma, MomentPreviewFixtures.pebbleGlyph()),
+            momentName = momentName,
+            origin = origin,
+            collections = collections,
+            ui = { it.richer(hasWords = hasWords, editErrorRes = editErrorRes) },
+            onRecordAnother = if (origin == CompleteOrigin.CARD) null else ({}),
         )
     }
 }
@@ -359,26 +400,45 @@ fun Complete_LifeLoading() {
     PebblesTheme { LifePreview(PebbleAnswers(), souls = emptyList(), loaded = false) }
 }
 
+/** Make it richer (D12): the stone, the name and karma, the week, three rows, Done and Record another. */
 @PreviewTest
-@Preview(showBackground = true, heightDp = 720)
-@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
-@Composable
-fun Complete_Success() {
-    PebblesTheme { CompletePreview(CompleteStep.SUCCESS, completed = success(4, MomentPreviewFixtures.pebbleGlyph())) }
-}
-
-@PreviewTest
-@Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun Complete_SuccessDark() {
-    PebblesTheme { CompletePreview(CompleteStep.SUCCESS, completed = success(4, MomentPreviewFixtures.pebbleGlyph())) }
-}
-
-/** No karma row and no derived glyph: no karma line, a bare stone, and a photo-only moment's "Untitled" (R3, R12). */
-@PreviewTest
-@Preview(showBackground = true, heightDp = 720)
+@Preview(showBackground = true, heightDp = 915)
+@Preview(name = "fr", showBackground = true, heightDp = 915, locale = "fr")
+@Preview(name = "dark", showBackground = true, heightDp = 915, uiMode = UI_MODE_NIGHT_YES)
 @PreviewLargeFontTall
 @Composable
-fun Complete_SuccessNoKarmaNoGlyph() {
-    PebblesTheme { CompletePreview(CompleteStep.SUCCESS, completed = success(null, null), momentName = null) }
+fun Complete_Richer() {
+    RicherPreview()
+}
+
+/** A high-distress pebble: the calm sentence, no karma, Get support above Done; the rows still show. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 915)
+@Preview(name = "fr", showBackground = true, heightDp = 915, locale = "fr")
+@Composable
+fun Complete_RicherQuiet() {
+    RicherPreview(answers = answered.copy(valence = Valence.LOWLIGHT_LARGE), karma = 5)
+}
+
+/** An account with no collections: that row is gone. A pebble from the card offers no Record another. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 915)
+@Composable
+fun Complete_RicherNoCollections() {
+    RicherPreview(collections = emptyList(), origin = CompleteOrigin.CARD)
+}
+
+/** The moment already has words (or just got them): that row is gone; a collection is set; the last edit failed. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 915)
+@PreviewLargeFontTall
+@Composable
+fun Complete_RicherWordsDone() {
+    RicherPreview(
+        answers = answered.copy(collectionId = "c-wins", visibility = Visibility.PUBLIC),
+        hasWords = true,
+        karma = null,
+        momentName = null,
+        editErrorRes = R.string.moment_save_error_generic,
+    )
 }

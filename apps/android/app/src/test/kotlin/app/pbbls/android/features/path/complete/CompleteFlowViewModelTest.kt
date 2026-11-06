@@ -533,4 +533,179 @@ class CompleteFlowViewModelTest {
             advanceUntilIdle()
             assertEquals(listOf("m-1"), h.read.loadedMomentIds)
         }
+
+    // ---- Make it richer: the end screen's rows edit a finished pebble, one write per tap ----
+
+    private suspend fun kotlinx.coroutines.test.TestScope.finished(
+        h: Harness,
+        valence: Valence = Valence.LOWLIGHT_MEDIUM,
+    ) {
+        h.viewModel.start("m-1")
+        advanceUntilIdle()
+        h.answerEverything(valence)
+        h.viewModel.complete()
+        advanceUntilIdle()
+        h.write.completed.clear()
+    }
+
+    @Test
+    fun `the moment's name, day and words arrive with the load, and the words row waits for it`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            assertEquals(true, h.viewModel.uiState.value.hasWords)
+            assertEquals(false, h.viewModel.uiState.value.isMomentLoaded)
+
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+
+            val ui = h.viewModel.uiState.value
+            assertEquals(true, ui.isMomentLoaded)
+            assertEquals("Swim", ui.momentName)
+            assertEquals(false, ui.hasWords)
+            assertEquals(
+                h.read.moments
+                    .getValue("m-1")
+                    .happenedAt,
+                ui.happenedAt,
+            )
+        }
+
+    @Test
+    fun `editing the visibility sends only that key and updates the answers`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            finished(h)
+
+            h.viewModel.editVisibility(Visibility.PUBLIC)
+            advanceUntilIdle()
+
+            assertEquals(listOf(PebbleCompletePayload("m-1", visibility = Visibility.PUBLIC)), h.write.completed)
+            assertEquals(Visibility.PUBLIC, h.viewModel.uiState.value.flow.answers.visibility)
+            assertEquals(false, h.viewModel.uiState.value.isEditing)
+        }
+
+    @Test
+    fun `editing the collection sends that one id, and null sends an empty set`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            finished(h)
+
+            h.viewModel.editCollection("c-1")
+            advanceUntilIdle()
+            h.viewModel.editCollection(null)
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf(
+                    PebbleCompletePayload("m-1", collectionIds = listOf("c-1")),
+                    PebbleCompletePayload("m-1", collectionIds = emptyList()),
+                ),
+                h.write.completed,
+            )
+            assertNull(h.viewModel.uiState.value.flow.answers.collectionId)
+        }
+
+    @Test
+    fun `a successful edit buzzes a selection and a failed one keeps the old value with its line`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            finished(h)
+            val effects = recordEffects(h.viewModel.effects)
+
+            h.viewModel.editVisibility(Visibility.PRIVATE)
+            advanceUntilIdle()
+            assertTrue(CompleteFlowEffect.Haptic(TapHaptic.SELECTION) in effects.values)
+
+            h.write.failOnComplete = java.io.IOException("offline")
+            h.viewModel.editVisibility(Visibility.PUBLIC)
+            advanceUntilIdle()
+            effects.stop()
+
+            val ui = h.viewModel.uiState.value
+            assertEquals(Visibility.PRIVATE, ui.flow.answers.visibility)
+            assertEquals(R.string.moment_save_error_generic, ui.editErrorRes)
+            assertEquals(false, ui.isEditing)
+
+            // The next edit clears the line.
+            h.viewModel.editVisibility(Visibility.PUBLIC)
+            advanceUntilIdle()
+            assertNull(h.viewModel.uiState.value.editErrorRes)
+            assertEquals(Visibility.PUBLIC, h.viewModel.uiState.value.flow.answers.visibility)
+        }
+
+    @Test
+    fun `a second edit while one runs is ignored`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            finished(h)
+            val gate = CompletableDeferred<Unit>()
+            h.write.gate = gate
+
+            h.viewModel.editVisibility(Visibility.PUBLIC)
+            advanceUntilIdle()
+            assertTrue(h.viewModel.uiState.value.isEditing)
+            h.viewModel.editCollection("c-1")
+            h.viewModel.editVisibility(Visibility.PRIVATE)
+            gate.complete(Unit)
+            advanceUntilIdle()
+
+            assertEquals(listOf(PebbleCompletePayload("m-1", visibility = Visibility.PUBLIC)), h.write.completed)
+            assertEquals(Visibility.PUBLIC, h.viewModel.uiState.value.flow.answers.visibility)
+        }
+
+    @Test
+    fun `an edit before the moment is known writes nothing`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.viewModel.editVisibility(Visibility.PUBLIC)
+            advanceUntilIdle()
+            assertTrue(h.write.completed.isEmpty())
+        }
+
+    @Test
+    fun `resume re-reads whether the moment has words, but not the first time`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            h.viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(listOf("m-1"), h.read.loadedMomentIds)
+            assertEquals(false, h.viewModel.uiState.value.hasWords)
+
+            h.read.moments =
+                mapOf("m-1" to UiFixtures.momentDetail(id = "m-1", name = "Swim", description = "Cold, and lovely", pebble = null))
+            h.viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(listOf("m-1", "m-1"), h.read.loadedMomentIds)
+            assertEquals(true, h.viewModel.uiState.value.hasWords)
+        }
+
+    @Test
+    fun `a quiet pebble stays quiet through an edit too`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.write.karma = 5
+            finished(h, Valence.LOWLIGHT_LARGE)
+            val karmaChecks = h.achievements.fireCheckCount
+            val effects = recordEffects(h.viewModel.effects)
+
+            h.viewModel.editVisibility(Visibility.PUBLIC)
+            advanceUntilIdle()
+            effects.stop()
+
+            assertEquals(0, karmaChecks)
+            assertEquals(0, h.achievements.fireCheckCount)
+            assertEquals(
+                5,
+                h.viewModel.uiState.value.flow.completed
+                    ?.karmaDelta,
+            )
+            assertEquals(
+                true,
+                h.viewModel.uiState.value.flow.answers.valence
+                    ?.quietSuccess,
+            )
+        }
 }

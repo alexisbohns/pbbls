@@ -140,9 +140,9 @@ class CompleteFlowTest : AppUiTest() {
         assertEquals(emptyList<String>(), sent.collectionIds)
         compose.onNodeWithContentDescription(string(R.string.record_karma_a11y, 4)).assertIsDisplayed()
 
-        onText(R.string.record_success_exit).performClick()
+        onText(R.string.richer_done).performClick()
 
-        onText(R.string.record_success_exit).assertDoesNotExist()
+        onText(R.string.richer_done).assertDoesNotExist()
         compose.onNodeWithContentDescription(string(R.string.more_actions_a11y)).assertIsDisplayed()
     }
 
@@ -188,7 +188,7 @@ class CompleteFlowTest : AppUiTest() {
         compose.onNodeWithText("Otherland").performClick()
         onText(R.string.complete_cta).performClick()
         assertEquals(listOf("domain-2"), memory.recentDomainIds("user-1"))
-        onText(R.string.record_success_exit).performClick()
+        onText(R.string.richer_done).performClick()
 
         // A second flow, from the read page the first one returned to (the fake still serves the moment bare):
         // Otherland now sits in RECENT and in ALL.

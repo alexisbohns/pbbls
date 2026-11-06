@@ -235,7 +235,25 @@ sealed interface PebblesKey : NavKey {
 
 /** Where a Complete flow came from: says "Moment saved" and how Record another restarts (D1, D12). */
 @Serializable
-enum class CompleteOrigin { CARD, CAPTURE, HOME_NEW_PEBBLE, QUICK_MOMENT }
+enum class CompleteOrigin {
+    CARD,
+    CAPTURE,
+    HOME_NEW_PEBBLE,
+    QUICK_MOMENT,
+    ;
+
+    /**
+     * What "Record another" opens on the end screen: a fresh capture of the kind that started this one. A
+     * pebble made from the held card has no capture behind it, so it offers none.
+     */
+    fun restart(): PebblesKey? =
+        when (this) {
+            CARD -> null
+            CAPTURE -> PebblesKey.Capture()
+            HOME_NEW_PEBBLE -> PebblesKey.Capture(chainsComplete = true)
+            QUICK_MOMENT -> PebblesKey.Capture(startsAtMomentPage = true)
+        }
+}
 
 /** A key that is one of the five bar destinations. Always also a [BarKey]. */
 sealed interface TopLevelKey : BarKey

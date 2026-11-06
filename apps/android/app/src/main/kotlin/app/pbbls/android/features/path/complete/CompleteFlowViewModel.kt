@@ -1,6 +1,7 @@
 package app.pbbls.android.features.path.complete
 
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
@@ -22,6 +23,8 @@ import app.pbbls.android.core.model.KarmaReason
 import app.pbbls.android.core.model.KnownDraftIds
 import app.pbbls.android.core.model.PebbleAnswers
 import app.pbbls.android.core.model.PebbleCompletePayload
+import app.pbbls.android.core.model.Visibility
+import app.pbbls.android.core.ui.momentWriteErrorRes
 import app.pbbls.android.core.ui.momentWriteKnownErrorRes
 import app.pbbls.android.features.path.ComposerMedia
 import app.pbbls.android.features.path.PathFocusRequests
@@ -40,6 +43,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.OffsetDateTime
 import javax.inject.Inject
 
 private const val TAG = "complete-flow"
@@ -57,8 +61,21 @@ sealed interface CompleteFlowEffect {
 
 data class CompleteFlowUiState(
     val flow: CompleteFlowState = CompleteFlowState(),
-    /** For the success screen. Null until loaded, and on a photo-only moment. */
+    /** For the end screen. Null until loaded, and on a photo-only moment: [isMomentLoaded] tells which. */
     val momentName: String? = null,
+    /** The moment has been read: until then the end screen shows no name at all, never "Untitled" for a beat. */
+    val isMomentLoaded: Boolean = false,
+    /** The moment's day, for the end screen's week. Null until loaded. */
+    val happenedAt: OffsetDateTime? = null,
+    /**
+     * The moment already has words. True until the read says otherwise, so "Add a few words" is never
+     * offered on a guess: it shows only once the moment has loaded and has none.
+     */
+    val hasWords: Boolean = true,
+    /** One edit of the finished pebble is in flight: the end screen's rows sit out. */
+    val isEditing: Boolean = false,
+    /** The last edit failed; the old value stays. Cleared by the next edit. */
+    @StringRes val editErrorRes: Int? = null,
     /**
      * No completed pebble on the account, read once after the restore (D8). False until that read
      * settles, and false for good when there is no session, the flag says the sheet was seen, or the
@@ -127,8 +144,16 @@ class CompleteFlowViewModel
             userId?.let { owner -> _uiState.update { it.copy(recentDomainIds = memory.recentDomainIds(owner)) } }
             viewModelScope.launch {
                 runCatchingCancellable { reads.loadMoment(id) }
-                    .onSuccess { detail -> _uiState.update { it.copy(momentName = detail.name) } }
-                    .onFailure { Log.w(TAG, "moment load failed; success will say untitled", it) }
+                    .onSuccess { detail ->
+                        _uiState.update {
+                            it.copy(
+                                momentName = detail.name,
+                                isMomentLoaded = true,
+                                happenedAt = detail.happenedAt,
+                                hasWords = detail.hasWords,
+                            )
+                        }
+                    }.onFailure { Log.w(TAG, "moment load failed; the end screen shows no name, week or words row", it) }
             }
             viewModelScope.launch {
                 restore(id)
@@ -227,6 +252,64 @@ class CompleteFlowViewModel
         }
 
         fun onExit() = effectsOut.emit(CompleteFlowEffect.Dismiss)
+
+        private var hasResumed = false
+
+        /**
+         * The screen's resume. The first one is the screen opening; every later one is a return from Edit
+         * moment, where words may have been added: re-read, so "Add a few words" goes once there are some.
+         */
+        fun onResumed() {
+            if (!hasResumed) {
+                hasResumed = true
+                return
+            }
+            val id = momentId ?: return
+            viewModelScope.launch {
+                runCatchingCancellable { reads.loadMoment(id) }
+                    .onSuccess { detail -> _uiState.update { it.copy(hasWords = detail.hasWords) } }
+                    .onFailure { Log.w(TAG, "moment re-read after Edit moment failed; the words row keeps its state", it) }
+            }
+        }
+
+        /** The end screen's collection row (null removes): one `complete_pebble` carrying only that key. */
+        fun editCollection(collectionId: String?) {
+            val id = momentId ?: return
+            edit(PebbleCompletePayload(id, collectionIds = listOfNotNull(collectionId))) { a -> a.copy(collectionId = collectionId) }
+        }
+
+        /** The end screen's visibility row: one `complete_pebble` carrying only that key. */
+        fun editVisibility(visibility: Visibility) {
+            val id = momentId ?: return
+            edit(PebbleCompletePayload(id, visibility = visibility)) { a -> a.copy(visibility = visibility) }
+        }
+
+        /**
+         * One edit at a time: a second tap while one runs is ignored (the rows are greyed meanwhile). A
+         * failure keeps the old value and shows the line. It runs in [viewModelScope], as every write of this
+         * flow's end screen: the rows are edits of a pebble that already exists, so nothing is lost by leaving.
+         */
+        private fun edit(
+            payload: PebbleCompletePayload,
+            apply: (PebbleAnswers) -> PebbleAnswers,
+        ) {
+            if (_uiState.value.isEditing) return
+            _uiState.update { it.copy(isEditing = true, editErrorRes = null) }
+            viewModelScope.launch {
+                runCatchingCancellable { writes.completePebble(payload) }.fold(
+                    onSuccess = {
+                        model.applyEdit(apply)
+                        effectsOut.emit(CompleteFlowEffect.Haptic(TapHaptic.SELECTION))
+                        _uiState.update { it.copy(isEditing = false) }
+                    },
+                    onFailure = { error ->
+                        Log.e(TAG, "end-screen edit failed", error)
+                        effectsOut.emit(CompleteFlowEffect.Haptic(TapHaptic.WARNING))
+                        _uiState.update { it.copy(isEditing = false, editErrorRes = momentWriteErrorRes(error.toDataError())) }
+                    },
+                )
+            }
+        }
 
         fun onSystemBack() {
             when {

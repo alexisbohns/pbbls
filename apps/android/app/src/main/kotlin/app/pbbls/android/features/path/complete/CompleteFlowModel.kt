@@ -80,6 +80,12 @@ class CompleteFlowModel(
             hydrated.copy(step = hydrated.firstGap())
         }
 
+    /**
+     * Silent: the finished pebble's edit from the end screen, applied once the server took it (the
+     * answers become what the pebble now is). The buzz is the caller's, because it follows the write.
+     */
+    fun applyEdit(mutate: (PebbleAnswers) -> PebbleAnswers) = _state.update { it.copy(answers = mutate(it.answers)) }
+
     fun beginComplete() = _state.update { it.copy(isCompleting = true, errorRes = null) }
 
     /** [quiet] (a high-distress pebble) completes without the success buzz. */
