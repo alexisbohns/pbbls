@@ -35,8 +35,10 @@ enum OnboardingCarveTarget: Equatable { case you, person(Int) }
 /// haptic, as in the record flow. Answers live here until `complete_onboarding` sends them in one
 /// go (D5); consent is the exception, recorded on Continue. Mirrors Android's `OnboardingViewModel`.
 ///
-/// Built per user, and a new sign-in gets a new model (D10): `userId` never changes, and nothing
-/// here can land under another session's name.
+/// Built per user, and a new sign-in gets a new model (D10). `userId` never changes, but it only
+/// keys the gate's cache: `record` goes out under the client's ambient session. What protects the
+/// ledger is that the host calls `sessionEnded()` when the user id changes, the write loop checks
+/// before every act, and Log out is disabled while saving.
 @Observable
 @MainActor
 final class OnboardingFlowModel {
@@ -175,6 +177,9 @@ final class OnboardingFlowModel {
                 recordConsents()
                 return
             }
+            // All four are on record, perhaps by a read that covered what a write failed on, so
+            // the error line goes too. The cache is left to the gate's own check, which marks it.
+            consent.failed = false
         case .pace:
             // `complete()` sends from here.
             return
@@ -225,7 +230,7 @@ final class OnboardingFlowModel {
     // MARK: - Step 2
 
     /// A switch is the user's until Continue: nothing reaches the ledger, so nothing has to be
-    /// undone. An act already on record is withdrawn in Settings, not by leaving this step.
+    /// undone. An act already on record stays on and locked: this step never withdraws one.
     func toggleConsent(_ kind: ConsentKind, _ isOn: Bool) {
         guard !consent.recorded.contains(kind), !consent.isSaving else { return }
         haptic(.selection)
@@ -254,10 +259,15 @@ final class OnboardingFlowModel {
         let toRecord = consent.toRecord
         consent.isSaving = true
         consent.failed = false
-        work = Task { [weak self] in
+        // `logger` is captured on its own: the early exit has to log when `self` is already gone.
+        work = Task { [weak self, logger] in
             var failed = false
-            for kind in toRecord {
-                guard let self, !self.sessionHasEnded else { return }
+            for (index, kind) in toRecord.enumerated() {
+                guard let self, !self.sessionHasEnded else {
+                    let unsent = toRecord.count - index
+                    logger.notice("session over, consent write stopped: \(unsent, privacy: .public) acts left unsent")
+                    return
+                }
                 do {
                     try await self.consents.record(
                         kind: kind,
@@ -266,7 +276,7 @@ final class OnboardingFlowModel {
                     )
                     self.consent.recorded.insert(kind)
                 } catch {
-                    self.logger.error("record consent failed: \(error.localizedDescription, privacy: .private)")
+                    logger.error("record consent failed: \(error.localizedDescription, privacy: .private)")
                     failed = true
                 }
             }

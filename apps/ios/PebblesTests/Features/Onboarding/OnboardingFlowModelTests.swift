@@ -56,6 +56,41 @@ struct OnboardingFlowModelTests {
         #expect(!model.letterUnavailable)
     }
 
+    @Test("a held ledger read holds up neither the letter nor the glyphs")
+    func heldLedgerReadHoldsNothingElse() async {
+        let harness = OnboardingFlowHarness()
+        let reached = Latch()
+        let release = Latch()
+        harness.consents.afterActiveRead = {
+            reached.open()
+            await release.wait()
+        }
+        let model = harness.model()
+        let loading = Task { await model.load() }
+        #expect(await reached.reached())
+
+        let deadline = ContinuousClock.now + .seconds(10)
+        while model.letter == nil || model.systemGlyphs.isEmpty, ContinuousClock.now < deadline {
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+        #expect(model.letter == OnboardingFlowHarness.letter)
+        #expect(model.systemGlyphs.count == 8)
+
+        release.open()
+        await loading.value
+    }
+
+    @Test("a failed reload keeps the letter on screen")
+    func failedReloadKeepsTheLetter() async {
+        let harness = OnboardingFlowHarness()
+        let model = harness.model()
+        await model.load()
+        harness.service.letterFailure = Boom()
+        await model.load()
+        #expect(model.letter == OnboardingFlowHarness.letter)
+        #expect(!model.letterUnavailable)
+    }
+
     // MARK: Glyph retries
 
     @Test("an empty glyph read is retried on the step that shows them")
