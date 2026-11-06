@@ -20,17 +20,13 @@ data class CompleteFlowState(
     /** Exhaustive with no `else`: a new step must say what "answered" means. */
     fun hasAnswer(forStep: CompleteStep): Boolean =
         when (forStep) {
-            CompleteStep.PRIVACY, CompleteStep.SUCCESS -> true
+            CompleteStep.SUCCESS -> true
             CompleteStep.VALENCE -> answers.valence != null
             CompleteStep.EMOTION -> answers.emotionId != null
-            CompleteStep.DOMAIN -> answers.domainId != null
-            CompleteStep.SOULS -> answers.soulIds.isNotEmpty()
-            CompleteStep.COLLECTION -> answers.collectionId != null
+            CompleteStep.LIFE -> answers.domainIds.isNotEmpty()
         }
 
-    val isAnswered: Boolean get() = step.isOptional || hasAnswer(step)
+    val isAnswered: Boolean get() = hasAnswer(step)
 
-    val optionalButtonIsSkip: Boolean get() = !hasAnswer(step)
-
-    fun firstGap(): CompleteStep = CompleteStep.counted.firstOrNull { !it.isOptional && !hasAnswer(it) } ?: CompleteStep.PRIVACY
+    fun firstGap(): CompleteStep = CompleteStep.counted.firstOrNull { !hasAnswer(it) } ?: CompleteStep.LIFE
 }

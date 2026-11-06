@@ -11,10 +11,15 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +41,7 @@ import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.PebbleCollection
+import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.flow.RecordFlowChrome
 import app.pbbls.android.features.path.flow.RecordStepAction
@@ -87,7 +92,8 @@ fun CompleteFlowScreen(
         origin = origin,
         model = viewModel.machine(),
         domains = refs.domains,
-        collections = refs.collections,
+        souls = refs.souls,
+        isSoulsLoaded = refs.hasLoaded,
         palette =
             uiState.flow.answers.emotionId
                 ?.let(palettes::palette),
@@ -111,7 +117,8 @@ fun CompleteFlowContent(
     origin: CompleteOrigin,
     model: CompleteFlowModel,
     domains: List<Domain>,
-    collections: List<PebbleCollection>,
+    souls: List<SoulWithGlyph>,
+    isSoulsLoaded: Boolean,
     palette: EmotionPalette?,
     onClose: () -> Unit,
     onComplete: () -> Unit,
@@ -128,18 +135,18 @@ fun CompleteFlowContent(
     val labels =
         CompleteLabels(
             continueLabel = stringResource(R.string.record_action_continue),
-            skip = stringResource(R.string.record_action_skip),
-            done = stringResource(R.string.action_done),
-            makePebble = stringResource(R.string.complete_cta),
         )
     val error = flow.errorRes?.let { stringResource(it) }
+    val recent = uiState.recentDomainIds.mapNotNull { id -> domains.firstOrNull { it.id == id } }
+    val bottomInset = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
 
     Column(
         modifier =
             modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface)
-                .safeDrawingPadding()
+                // Top and sides only: the bottom is each step's own, so Life's bar can tint down to the screen's edge.
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
                 .readableWidth(),
     ) {
         if (flow.step != CompleteStep.SUCCESS) {
@@ -169,29 +176,20 @@ fun CompleteFlowContent(
         ) { step ->
             val completed = flow.completed
             if (step == CompleteStep.SUCCESS && completed != null) {
-                RecordSuccessStep(
-                    name = uiState.momentName,
-                    glyph = completed.glyph,
-                    karmaDelta = completed.karmaDelta,
-                    valence = flow.answers.valence ?: Valence.NEUTRAL_MEDIUM,
-                    palette = palette,
-                    onExit = onExit,
-                    quiet = flow.answers.valence?.quietSuccess == true,
-                    onOpenSupport = onOpenSupport,
-                )
+                Box(Modifier.fillMaxSize().then(bottomInset)) {
+                    RecordSuccessStep(
+                        name = uiState.momentName,
+                        glyph = completed.glyph,
+                        karmaDelta = completed.karmaDelta,
+                        valence = flow.answers.valence ?: Valence.NEUTRAL_MEDIUM,
+                        palette = palette,
+                        onExit = onExit,
+                        quiet = flow.answers.valence?.quietSuccess == true,
+                        onOpenSupport = onOpenSupport,
+                    )
+                }
             } else {
-                RecordStepScaffold(
-                    title = stringResource(step.titleRes),
-                    // Only the valence step, and only when the moment was saved a moment ago (D1).
-                    subtitle =
-                        if (step == CompleteStep.VALENCE && origin != CompleteOrigin.CARD) {
-                            stringResource(R.string.complete_after_save)
-                        } else {
-                            null
-                        },
-                    action = actionFor(flow.copy(step = step), model, labels, onComplete),
-                    contentScrolls = !step.bringsOwnScroll,
-                ) {
+                val body: @Composable () -> Unit = {
                     CompleteStepContent(
                         step = step,
                         answers = flow.answers,
@@ -202,11 +200,35 @@ fun CompleteFlowContent(
                         onCloseValenceHelp = onCloseValenceHelp,
                         model = model,
                         domains = domains,
-                        collections = collections,
+                        recent = recent,
+                        souls = souls,
+                        isSoulsLoaded = isSoulsLoaded,
                         error = error,
+                        isCompleting = flow.isCompleting,
+                        onComplete = onComplete,
                         onAchievementCheck = onAchievementCheck,
                         hapticsOn = hapticsOn,
                     )
+                }
+                if (step == CompleteStep.LIFE) {
+                    // Draws its own title and its bar down to the edge: no scaffold, no bottom inset here.
+                    body()
+                } else {
+                    Box(Modifier.fillMaxSize().then(bottomInset)) {
+                        RecordStepScaffold(
+                            title = stringResource(step.titleRes),
+                            // Only the valence step, and only when the moment was saved a moment ago (D1).
+                            subtitle =
+                                if (step == CompleteStep.VALENCE && origin != CompleteOrigin.CARD) {
+                                    stringResource(R.string.complete_after_save)
+                                } else {
+                                    null
+                                },
+                            action = actionFor(flow.copy(step = step), model, labels),
+                            contentScrolls = !step.bringsOwnScroll,
+                            content = body,
+                        )
+                    }
                 }
             }
         }
@@ -214,15 +236,13 @@ fun CompleteFlowContent(
 }
 
 /**
- * The one action a step offers. Tile steps offer none: the pick is the
- * advance (A-1). Valence commits in place, so it needs Continue; the optional
- * steps read Skip while empty and Done once answered.
+ * The one action a step offers. Valence commits in place, so it needs Continue; the emotion pick is its
+ * own advance (A-1), and Life carries its own button in its bar.
  */
 private fun actionFor(
     state: CompleteFlowState,
     model: CompleteFlowModel,
     labels: CompleteLabels,
-    onComplete: () -> Unit,
 ): RecordStepAction? =
     when (state.step) {
         CompleteStep.VALENCE ->
@@ -233,28 +253,10 @@ private fun actionFor(
                 onClick = model::advance,
             )
 
-        // Souls hosts the chooser inline, whose tray carries the one button (Skip or Done).
-        CompleteStep.EMOTION, CompleteStep.DOMAIN, CompleteStep.SOULS, CompleteStep.SUCCESS -> null
-
-        CompleteStep.COLLECTION ->
-            RecordStepAction.Text(
-                label = if (state.optionalButtonIsSkip) labels.skip else labels.done,
-                onClick = model::advance,
-            )
-
-        CompleteStep.PRIVACY ->
-            RecordStepAction.Primary(
-                label = labels.makePebble,
-                enabled = !state.isCompleting,
-                isLoading = state.isCompleting,
-                onClick = onComplete,
-            )
+        CompleteStep.EMOTION, CompleteStep.LIFE, CompleteStep.SUCCESS -> null
     }
 
 /** Resolved strings, so the action builder stays a pure function. */
 private data class CompleteLabels(
     val continueLabel: String,
-    val skip: String,
-    val done: String,
-    val makePebble: String,
 )

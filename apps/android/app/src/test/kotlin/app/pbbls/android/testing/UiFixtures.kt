@@ -149,6 +149,7 @@ object UiFixtures {
         visibility: Visibility = Visibility.SECRET,
         souls: List<SoulRef> = emptyList(),
         collections: List<PebbleCollection> = emptyList(),
+        domains: List<DomainRef> = listOf(DomainRef(id = "domain-1", slug = "health", name = "Health")),
     ) = MomentPebble(
         id = id,
         intensity = valence.intensity,
@@ -157,7 +158,7 @@ object UiFixtures {
         emotion = joy,
         glyph = pebbleGlyph(),
         souls = souls,
-        domains = listOf(DomainRef(id = "domain-1", slug = "health", name = "Health")),
+        domains = domains,
         collections = collections,
     )
 }

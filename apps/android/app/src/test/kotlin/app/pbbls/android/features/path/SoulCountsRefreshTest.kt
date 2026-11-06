@@ -3,8 +3,9 @@ package app.pbbls.android.features.path
 import android.app.Application
 import androidx.compose.ui.test.junit4.createComposeRule
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.PebbleAnswers
 import app.pbbls.android.core.ui.souls.SoulChooserSheet
-import app.pbbls.android.features.path.flow.steps.RecordSoulsStep
+import app.pbbls.android.features.path.flow.steps.RecordLifeStep
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeServices
 import app.pbbls.android.testing.PIXEL_TEST_SDK
@@ -30,10 +31,25 @@ class SoulCountsRefreshTest {
     private val refs = FakeReferenceDataService(hasLoaded = true)
 
     @Test
-    fun `the record flow's souls step refreshes souls when it appears`() {
+    fun `the record flow's Life step refreshes souls when it appears`() {
         compose.setContent {
             PebblesTestHarness(graph = FakeServices(referenceData = refs)) {
-                PebblesTheme { RecordSoulsStep(selectedIds = emptyList(), onToggle = {}, onAdvance = {}, hapticsOn = false) }
+                PebblesTheme {
+                    RecordLifeStep(
+                        answers = PebbleAnswers(),
+                        domains = emptyList(),
+                        recent = emptyList(),
+                        souls = emptyList(),
+                        isSoulsLoaded = true,
+                        error = null,
+                        isCompleting = false,
+                        hapticsOn = false,
+                        onToggleDomain = {},
+                        onToggleSoul = {},
+                        onSetSouls = {},
+                        onComplete = {},
+                    )
+                }
             }
         }
         compose.waitForIdle()

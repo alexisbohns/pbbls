@@ -6,23 +6,14 @@ import org.junit.Test
 
 class CompleteStepTest {
     @Test
-    fun `six counted steps in the decided order, then success`() {
-        assertEquals(
-            listOf(
-                CompleteStep.VALENCE,
-                CompleteStep.EMOTION,
-                CompleteStep.DOMAIN,
-                CompleteStep.SOULS,
-                CompleteStep.COLLECTION,
-                CompleteStep.PRIVACY,
-            ),
-            CompleteStep.counted,
-        )
+    fun `three counted steps in the decided order, then success`() {
+        assertEquals(listOf(CompleteStep.VALENCE, CompleteStep.EMOTION, CompleteStep.LIFE), CompleteStep.counted)
         assertNull(CompleteStep.SUCCESS.dotIndex)
+        assertEquals(CompleteStep.SUCCESS, CompleteStep.LIFE.next)
     }
 
     @Test
-    fun `only souls and collection are optional`() {
-        assertEquals(setOf(CompleteStep.SOULS, CompleteStep.COLLECTION), CompleteStep.entries.filter { it.isOptional }.toSet())
+    fun `emotion and life scroll themselves`() {
+        assertEquals(setOf(CompleteStep.EMOTION, CompleteStep.LIFE), CompleteStep.entries.filter { it.bringsOwnScroll }.toSet())
     }
 }

@@ -2,6 +2,7 @@ package app.pbbls.android.core.model
 
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import java.time.OffsetDateTime
 
@@ -73,7 +74,7 @@ class MomentPayloadEncodingTest {
             PebbleAnswers(
                 valence = Valence.LOWLIGHT_LARGE,
                 emotionId = "e-1",
-                domainId = "d-1",
+                domainIds = listOf("d-1", "d-2"),
                 soulIds = listOf("s-1", "s-2"),
                 collectionId = null,
                 visibility = Visibility.PRIVATE,
@@ -81,11 +82,67 @@ class MomentPayloadEncodingTest {
         val expected =
             """
             {"moment_id":"m-1","emotion_id":"e-1","intensity":3,"positiveness":-1,"visibility":"private",
-             "domain_ids":["d-1"],"soul_ids":["s-1","s-2"],"collection_ids":[]}
+             "domain_ids":["d-1","d-2"],"soul_ids":["s-1","s-2"],"collection_ids":[]}
             """.trimIndent()
         assertEquals(
             Json.parseToJsonElement(expected),
             MomentWireJson.encodeToJsonElement(PebbleCompletePayload.serializer(), PebbleCompletePayload.from("m-1", answers)),
         )
+    }
+
+    private val draft =
+        PebbleDraft(
+            emotionId = "e-1",
+            valence = Valence.LOWLIGHT_LARGE,
+            domainId = "d-1",
+            collectionId = "c-1",
+            visibility = Visibility.PRIVATE,
+            prefillDomainId = "d-1",
+            prefillCollectionId = "c-1",
+            prefilled = true,
+        )
+
+    private fun wire(p: PebbleCompletePayload) = MomentWireJson.encodeToString(PebbleCompletePayload.serializer(), p)
+
+    @Test
+    fun `an edit that left domains and collection alone omits both keys`() {
+        assertEquals(
+            """{"moment_id":"m","emotion_id":"e-1","intensity":3,"positiveness":-1,"visibility":"private","soul_ids":[]}""",
+            wire(PebbleCompletePayload.edit("m", draft)),
+        )
+    }
+
+    @Test
+    fun `an edit that changed the domain replaces the set with the pick`() {
+        assertEquals(
+            """{"moment_id":"m","emotion_id":"e-1","intensity":3,"positiveness":-1,"visibility":"private","domain_ids":["d9"],"soul_ids":[]}""",
+            wire(PebbleCompletePayload.edit("m", draft.copy(domainId = "d9"))),
+        )
+    }
+
+    @Test
+    fun `an end-screen visibility edit sends only that key`() {
+        assertEquals(
+            """{"moment_id":"m","visibility":"private"}""",
+            wire(PebbleCompletePayload(momentId = "m", visibility = Visibility.PRIVATE)),
+        )
+    }
+
+    @Test
+    fun `a removed collection sends an empty list`() {
+        assertEquals(
+            """{"moment_id":"m","collection_ids":[]}""",
+            wire(PebbleCompletePayload(momentId = "m", collectionIds = emptyList())),
+        )
+        val removed = PebbleCompletePayload.edit("m", draft.copy(collectionId = null))
+        assertEquals(emptyList<String>(), removed.collectionIds)
+        assertNull(removed.domainIds)
+    }
+
+    @Test
+    fun `a draft with no prefill always sends both sets`() {
+        val fresh = PebbleCompletePayload.edit("m", draft.copy(prefilled = false, prefillDomainId = null, prefillCollectionId = null))
+        assertEquals(listOf("d-1"), fresh.domainIds)
+        assertEquals(listOf("c-1"), fresh.collectionIds)
     }
 }

@@ -405,6 +405,8 @@
     <string name="souls_empty_message">People and beings you tag on your pebbles will appear here.</string>
     <string name="souls_load_error">Couldn\'t load souls.</string>
     <string name="souls_who_was_there">Who was there?</string>
+    <string name="souls_more">More</string>
+    <string name="souls_add_people">Add people</string>
     <string name="souls_search">Search souls</string>
     <string name="souls_add_named">Add %1$s</string>
     <string name="souls_add_caption">A drawing can wait</string>
@@ -864,10 +866,10 @@
     <string name="record_photo_subtitle">Pick one, or write it from memory.</string>
     <string name="record_valence_title">How did it land?</string>
     <string name="record_emotion_title">What did you feel?</string>
-    <string name="record_domain_title">What part of life?</string>
-    <string name="record_souls_title">Anyone in this one?</string>
-    <string name="record_collection_title">Add it to a collection?</string>
-    <string name="record_privacy_title">Who can see it?</string>
+    <string name="record_life_title">What part of life?</string>
+    <string name="record_life_recent">RECENT</string>
+    <string name="record_life_all">ALL</string>
+    <string name="complete_partial_failure">Moment saved, pebble not made yet · Try again</string>
     <string name="record_success_title">Your pebble</string>
     <string name="record_action_skip">Skip</string>
     <string name="record_action_continue">Continue</string>
@@ -877,7 +879,6 @@
     <string name="record_name_placeholder">Name</string>
     <string name="record_name_remaining_a11y">%1$d characters left</string>
     <string name="record_photo_retry">Retry</string>
-    <string name="record_collection_empty">You don\'t have any collections yet.</string>
     <string name="record_privacy_secret_explanation">Only you can see this one.</string>
     <string name="record_privacy_private_explanation">Your mutual connections can see it.</string>
     <string name="record_privacy_public_explanation">Anyone with the link can see it.</string>

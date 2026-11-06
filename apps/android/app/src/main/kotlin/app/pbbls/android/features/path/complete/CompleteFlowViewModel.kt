@@ -22,7 +22,7 @@ import app.pbbls.android.core.model.KarmaReason
 import app.pbbls.android.core.model.KnownDraftIds
 import app.pbbls.android.core.model.PebbleAnswers
 import app.pbbls.android.core.model.PebbleCompletePayload
-import app.pbbls.android.core.ui.momentWriteErrorRes
+import app.pbbls.android.core.ui.momentWriteKnownErrorRes
 import app.pbbls.android.features.path.ComposerMedia
 import app.pbbls.android.features.path.PathFocusRequests
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -67,6 +67,8 @@ data class CompleteFlowUiState(
     val isFirstPebble: Boolean = false,
     /** The valence help sheet is up: opened by itself over a first pebble, or by the callout. */
     val valenceHelpOpen: Boolean = false,
+    /** The Life screen's RECENT row (D10): the ids this account last picked there, newest first. Read once at start. */
+    val recentDomainIds: List<String> = emptyList(),
 )
 
 /**
@@ -122,6 +124,7 @@ class CompleteFlowViewModel
         fun start(id: String) {
             if (momentId == id) return
             momentId = id
+            userId?.let { owner -> _uiState.update { it.copy(recentDomainIds = memory.recentDomainIds(owner)) } }
             viewModelScope.launch {
                 runCatchingCancellable { reads.loadMoment(id) }
                     .onSuccess { detail -> _uiState.update { it.copy(momentName = detail.name) } }
@@ -183,7 +186,11 @@ class CompleteFlowViewModel
             }
             val known =
                 if (refs.hasLoaded) {
-                    KnownDraftIds(soulIds = refs.souls.map { it.id }.toSet(), collectionIds = refs.collections.map { it.id }.toSet())
+                    KnownDraftIds(
+                        domainIds = refs.domains.map { it.id }.toSet(),
+                        soulIds = refs.souls.map { it.id }.toSet(),
+                        collectionIds = refs.collections.map { it.id }.toSet(),
+                    )
                 } else {
                     null
                 }
@@ -266,11 +273,17 @@ class CompleteFlowViewModel
                                     karma.notifyEarned(delta ?: 0, KarmaReason.PEBBLE_CREATED, presentsCapsule = false)
                                     achievements.fireCheck()
                                 }
+                                // A recents write must never stand between a made pebble and its end screen.
+                                userId?.let { owner ->
+                                    runCatchingCancellable { memory.recordDomains(answers.domainIds, owner) }
+                                        .onFailure { Log.w(TAG, "recording recent domains failed", it) }
+                                }
                                 model.succeed(CompleteResult(pebbleId, delta, glyph), quiet)
                             },
                             onFailure = {
                                 Log.e(TAG, "complete_pebble failed", it)
-                                model.fail(momentWriteErrorRes(it.toDataError()))
+                                // The moment is already saved: a failure without copy of its own says only that (D6).
+                                model.fail(momentWriteKnownErrorRes(it.toDataError()) ?: R.string.complete_partial_failure)
                                 // The debounce skipped saves while completing; keep the last
                                 // answers on the device in case the app dies on this error.
                                 flushNow()

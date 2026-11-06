@@ -143,7 +143,7 @@ class EditPebbleViewModel
                     // R13, iOS's method: `complete_pebble` records a row only when the total
                     // moves, so the newest row may be an older save's. The difference is this one's.
                     val karmaBefore = writes.karmaTotal(pebbleId)
-                    runCatchingCancellable { writes.completePebble(PebbleCompletePayload.from(momentId, state.draft.answers)) }
+                    runCatchingCancellable { writes.completePebble(PebbleCompletePayload.edit(momentId, state.draft)) }
                         .fold(
                             onSuccess = {
                                 val karmaAfter = writes.karmaTotal(pebbleId)

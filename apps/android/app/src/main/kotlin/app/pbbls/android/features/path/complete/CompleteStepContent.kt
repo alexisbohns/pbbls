@@ -4,18 +4,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.PebbleAnswers
-import app.pbbls.android.core.model.PebbleCollection
-import app.pbbls.android.features.path.flow.steps.RecordCollectionStep
-import app.pbbls.android.features.path.flow.steps.RecordDomainStep
+import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.features.path.flow.steps.RecordEmotionStep
-import app.pbbls.android.features.path.flow.steps.RecordPrivacyStep
-import app.pbbls.android.features.path.flow.steps.RecordSoulsStep
+import app.pbbls.android.features.path.flow.steps.RecordLifeStep
 import app.pbbls.android.features.path.flow.steps.RecordValenceStep
 
 /**
  * The body of a Complete step, on the shared stateless step bodies (`flow/steps`).
  * Reads come from [answers]; every write goes through [model] so it buzzes
  * (M58 D4). Exhaustive with no `else`, so a new step cannot render nothing.
+ *
+ * LIFE is not a scaffold body: it draws its own title and bar, so [CompleteFlowContent] calls this
+ * for it outside `RecordStepScaffold`.
  */
 @Composable
 fun CompleteStepContent(
@@ -23,9 +23,13 @@ fun CompleteStepContent(
     answers: PebbleAnswers,
     model: CompleteFlowModel,
     domains: List<Domain>,
-    collections: List<PebbleCollection>,
+    recent: List<Domain>,
+    souls: List<SoulWithGlyph>,
+    isSoulsLoaded: Boolean,
     error: String?,
+    isCompleting: Boolean,
     hapticsOn: Boolean,
+    onComplete: () -> Unit,
     modifier: Modifier = Modifier,
     isFirstPebble: Boolean = false,
     valenceHelpOpen: Boolean = false,
@@ -55,38 +59,22 @@ fun CompleteStepContent(
                 modifier = modifier,
             )
 
-        CompleteStep.DOMAIN ->
-            RecordDomainStep(
+        CompleteStep.LIFE ->
+            RecordLifeStep(
+                answers = answers,
                 domains = domains,
-                selectedId = answers.domainId,
-                onSelect = { model.selectDomain(it) },
-                modifier = modifier,
-            )
-
-        CompleteStep.SOULS ->
-            RecordSoulsStep(
-                selectedIds = answers.soulIds,
-                onToggle = { model.toggleSoul(it) },
-                onAdvance = model::advance,
+                recent = recent,
+                souls = souls,
+                isSoulsLoaded = isSoulsLoaded,
+                error = error,
+                isCompleting = isCompleting,
                 hapticsOn = hapticsOn,
+                onToggleDomain = model::toggleDomain,
+                onToggleSoul = model::toggleSoul,
+                onSetSouls = model::setSouls,
+                onComplete = onComplete,
                 modifier = modifier,
                 onAchievementCheck = onAchievementCheck,
-            )
-
-        CompleteStep.COLLECTION ->
-            RecordCollectionStep(
-                collections = collections,
-                selectedId = answers.collectionId,
-                onSelect = { model.selectCollection(it) },
-                modifier = modifier,
-            )
-
-        CompleteStep.PRIVACY ->
-            RecordPrivacyStep(
-                selected = answers.visibility,
-                onSelect = { model.selectVisibility(it) },
-                modifier = modifier,
-                publishError = error,
             )
 
         // Rendered by CompleteFlowContent outside the scaffold.

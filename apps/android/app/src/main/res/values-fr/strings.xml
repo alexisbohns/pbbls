@@ -409,6 +409,8 @@
     <string name="souls_empty_message">Les personnes et les êtres que vous associez à vos pebbles apparaîtront ici.</string>
     <string name="souls_load_error">Impossible de charger les âmes.</string>
     <string name="souls_who_was_there">Qui était là ?</string>
+    <string name="souls_more">Plus</string>
+    <string name="souls_add_people">Ajouter des gens</string>
     <string name="souls_search">Chercher une âme</string>
     <string name="souls_add_named">Ajouter %1$s</string>
     <string name="souls_add_caption">Le dessin peut attendre</string>
@@ -860,10 +862,10 @@
     <string name="record_photo_subtitle">Choisis-en une, ou écris de mémoire.</string>
     <string name="record_valence_title">Ça t\'a fait quoi ?</string>
     <string name="record_emotion_title">Tu as ressenti quoi ?</string>
-    <string name="record_domain_title">Quel domaine de ta vie ?</string>
-    <string name="record_souls_title">Il y avait quelqu\'un ?</string>
-    <string name="record_collection_title">Dans une collection ?</string>
-    <string name="record_privacy_title">Qui peut le voir ?</string>
+    <string name="record_life_title">Quel domaine de ta vie ?</string>
+    <string name="record_life_recent">RÉCENTS</string>
+    <string name="record_life_all">TOUS</string>
+    <string name="complete_partial_failure">Moment enregistré, pas encore de galet · Réessayer</string>
     <string name="record_success_title">Ton galet</string>
     <string name="record_action_skip">Ignorer</string>
     <string name="record_action_continue">Continuer</string>
@@ -873,7 +875,6 @@
     <string name="record_name_placeholder">Nom</string>
     <string name="record_name_remaining_a11y">Il reste %1$d caractères</string>
     <string name="record_photo_retry">Réessayer</string>
-    <string name="record_collection_empty">Tu n\'as pas encore de collection.</string>
     <string name="record_privacy_secret_explanation">Toi seul peux voir celui-ci.</string>
     <string name="record_privacy_private_explanation">Tes connexions mutuelles peuvent le voir.</string>
     <string name="record_privacy_public_explanation">Toute personne avec le lien peut le voir.</string>

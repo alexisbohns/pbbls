@@ -4,22 +4,19 @@ import androidx.annotation.StringRes
 import app.pbbls.android.R
 
 /**
- * The Complete flow (spec §6), in order. Valence before emotion keeps the
- * emotion categories ordered by the valence just chosen; privacy last sits
- * against the button that makes the pebble. No glyph step: the glyph is derived.
+ * The Complete flow (record-flow D1, D10), in order: a valence, an emotion, then Life, where domains,
+ * people and the button that makes the pebble share one page. Valence before emotion keeps the
+ * emotion categories ordered by the valence just chosen. No glyph step: the glyph is derived.
+ * Collection and visibility are not steps any more: they are what the end screen lets you add.
  */
 enum class CompleteStep(
     @StringRes val titleRes: Int,
-    val isOptional: Boolean = false,
     /** The body scrolls itself; the scaffold must not nest a second scroll. */
     val bringsOwnScroll: Boolean = false,
 ) {
     VALENCE(R.string.record_valence_title),
     EMOTION(R.string.record_emotion_title, bringsOwnScroll = true),
-    DOMAIN(R.string.record_domain_title),
-    SOULS(R.string.record_souls_title, isOptional = true, bringsOwnScroll = true),
-    COLLECTION(R.string.record_collection_title, isOptional = true),
-    PRIVACY(R.string.record_privacy_title),
+    LIFE(R.string.record_life_title, bringsOwnScroll = true),
     SUCCESS(R.string.record_success_title),
     ;
 

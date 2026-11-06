@@ -13,8 +13,11 @@ data class CompleteSnapshot(
     val positiveness: Int? = null,
     @SerialName("emotion_id")
     val emotionId: String? = null,
+    @SerialName("domain_ids")
+    val domainIds: List<String> = emptyList(),
+    /** Read-only: a snapshot stored before several domains (#1515) holds one. Never written. */
     @SerialName("domain_id")
-    val domainId: String? = null,
+    val legacyDomainId: String? = null,
     @SerialName("soul_ids")
     val soulIds: List<String> = emptyList(),
     @SerialName("collection_id")
@@ -30,7 +33,8 @@ data class CompleteSnapshot(
             positiveness == null &&
                 intensity == null &&
                 emotionId == null &&
-                domainId == null &&
+                domainIds.isEmpty() &&
+                legacyDomainId == null &&
                 soulIds.isEmpty() &&
                 collectionId == null
 
@@ -39,7 +43,10 @@ data class CompleteSnapshot(
         PebbleAnswers(
             valence = Valence.orNull(positiveness, intensity),
             emotionId = emotionId,
-            domainId = domainId,
+            domainIds =
+                domainIds
+                    .ifEmpty { listOfNotNull(legacyDomainId) }
+                    .filter { known == null || it in known.domainIds },
             soulIds = if (known == null) soulIds else soulIds.filter { it in known.soulIds },
             collectionId = collectionId?.takeIf { known == null || it in known.collectionIds },
             visibility = visibility ?: Visibility.SECRET,
@@ -51,7 +58,7 @@ data class CompleteSnapshot(
                 intensity = answers.valence?.intensity,
                 positiveness = answers.valence?.positiveness,
                 emotionId = answers.emotionId,
-                domainId = answers.domainId,
+                domainIds = answers.domainIds,
                 soulIds = answers.soulIds,
                 collectionId = answers.collectionId,
                 visibility = answers.visibility,

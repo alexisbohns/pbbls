@@ -4,6 +4,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
+import app.pbbls.android.core.model.DomainRef
 import app.pbbls.android.core.model.KarmaReason
 import app.pbbls.android.core.model.PebbleCompletePayload
 import app.pbbls.android.core.model.Visibility
@@ -78,7 +79,7 @@ class EditPebbleViewModelTest {
             h.viewModel.save()
             advanceUntilIdle()
             assertEquals(
-                PebbleCompletePayload("moment-1", UiFixtures.joy.id, 2, 1, Visibility.PUBLIC, listOf("domain-1"), emptyList(), emptyList()),
+                PebbleCompletePayload("moment-1", UiFixtures.joy.id, 2, 1, Visibility.PUBLIC, null, emptyList(), null),
                 h.writes.completed.single(),
             )
             assertTrue(h.writes.saved.isEmpty())
@@ -87,6 +88,44 @@ class EditPebbleViewModelTest {
             assertEquals(1, h.achievements.fireCheckCount)
             assertTrue(effects.values.contains(EditPebbleEffect.Saved))
             effects.stop()
+        }
+
+    @Test
+    fun `an edit of the emotion on a pebble with three domains omits domain_ids`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            val three = listOf("d-a", "d-b", "d-c").map { DomainRef(id = it, slug = "health", name = it) }
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = UiFixtures.momentPebble(domains = three)))
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            val state = h.viewModel.uiState.value as EditPebbleUiState.Content
+            h.viewModel.onDraftChange(state.draft.copy(emotionId = "e-other"))
+            h.viewModel.save()
+            advanceUntilIdle()
+            val sent = h.writes.completed.single()
+            assertNull(sent.domainIds)
+            assertNull(sent.collectionIds)
+            assertEquals("e-other", sent.emotionId)
+        }
+
+    @Test
+    fun `changing the domain sends the pick`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            val three = listOf("d-a", "d-b", "d-c").map { DomainRef(id = it, slug = "health", name = it) }
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = UiFixtures.momentPebble(domains = three)))
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            val state = h.viewModel.uiState.value as EditPebbleUiState.Content
+            h.viewModel.onDraftChange(state.draft.copy(domainId = "d-9"))
+            h.viewModel.save()
+            advanceUntilIdle()
+            assertEquals(
+                listOf("d-9"),
+                h.writes.completed
+                    .single()
+                    .domainIds,
+            )
         }
 
     @Test

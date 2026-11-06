@@ -76,10 +76,7 @@ class CompleteFlowViewModelTest {
             m.selectValence(valence)
             m.advance()
             m.selectEmotion("e-1")
-            m.selectDomain("d-1")
-            m.advance()
-            m.advance()
-            m.selectVisibility(Visibility.PRIVATE)
+            m.toggleDomain("d-1")
         }
     }
 
@@ -96,7 +93,7 @@ class CompleteFlowViewModelTest {
             advanceUntilIdle()
 
             assertEquals(
-                PebbleCompletePayload("m-1", "e-1", 2, -1, Visibility.PRIVATE, listOf("d-1"), emptyList(), emptyList()),
+                PebbleCompletePayload("m-1", "e-1", 2, -1, Visibility.SECRET, listOf("d-1"), emptyList(), emptyList()),
                 h.write.completed.single(),
             )
             assertTrue(h.snapshots.stored.isEmpty())
@@ -171,6 +168,49 @@ class CompleteFlowViewModelTest {
         }
 
     @Test
+    fun `a completion records its domains for the next RECENT row, and a refusal records none`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.memory.recordDomains(listOf("d-old"), "user-1")
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            assertEquals(listOf("d-old"), h.viewModel.uiState.value.recentDomainIds)
+            h.answerEverything()
+            h.viewModel.machine().toggleDomain("d-2")
+            h.write.failOnComplete = java.io.IOException("offline")
+            h.viewModel.complete()
+            advanceUntilIdle()
+            assertEquals(listOf("d-old"), h.memory.recentDomainIds("user-1"))
+
+            h.write.failOnComplete = null
+            h.viewModel.complete()
+            advanceUntilIdle()
+            assertEquals(listOf("d-1", "d-2", "d-old"), h.memory.recentDomainIds("user-1"))
+        }
+
+    @Test
+    fun `a failure without copy of its own says the moment is saved, and the button retries`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            h.answerEverything()
+            h.write.failOnComplete = java.io.IOException("offline")
+            h.viewModel.complete()
+            advanceUntilIdle()
+            val flow = h.viewModel.uiState.value.flow
+            assertEquals(CompleteStep.LIFE, flow.step)
+            assertEquals(R.string.complete_partial_failure, flow.errorRes)
+            assertFalse(flow.isCompleting)
+
+            h.write.failOnComplete = null
+            h.viewModel.complete()
+            advanceUntilIdle()
+            assertEquals(CompleteStep.SUCCESS, h.viewModel.uiState.value.flow.step)
+            assertNull(h.viewModel.uiState.value.flow.errorRes)
+        }
+
+    @Test
     fun `a missing glyph or karma row still reaches success`() =
         runTest {
             val h = Harness(backgroundScope)
@@ -185,7 +225,7 @@ class CompleteFlowViewModelTest {
         }
 
     @Test
-    fun `a refusal stays on privacy with its copy and keeps the autosave`() =
+    fun `a refusal stays on life with its copy and keeps the autosave`() =
         runTest {
             val h = Harness(backgroundScope)
             h.viewModel.start("m-1")
@@ -196,7 +236,7 @@ class CompleteFlowViewModelTest {
             h.viewModel.complete()
             advanceUntilIdle()
             val flow = h.viewModel.uiState.value.flow
-            assertEquals(CompleteStep.PRIVACY, flow.step)
+            assertEquals(CompleteStep.LIFE, flow.step)
             assertEquals(R.string.pebble_error_collection_gone, flow.errorRes)
             assertEquals(
                 "e-1",
@@ -214,8 +254,9 @@ class CompleteFlowViewModelTest {
             h.viewModel.start("m-1")
             advanceUntilIdle()
             h.answerEverything()
+            h.viewModel.machine().toggleSoul("s-9")
             // The write outlasts the debounce, which skips while completing, so
-            // the privacy pick is only in memory when the write fails.
+            // the last pick is only in memory when the write fails.
             val gate = CompletableDeferred<Unit>()
             h.write.gate = gate
             h.write.failOnComplete = postgrestException("collection_not_owned", sqlState = "42501", status = HttpStatusCode.Forbidden)
@@ -225,15 +266,15 @@ class CompleteFlowViewModelTest {
                 null,
                 h.snapshots.stored["m-1"]
                     ?.second
-                    ?.visibility,
+                    ?.soulIds,
             )
             gate.complete(Unit)
             advanceUntilIdle()
             assertEquals(
-                Visibility.PRIVATE,
+                listOf("s-9"),
                 h.snapshots.stored["m-1"]
                     ?.second
-                    ?.visibility,
+                    ?.soulIds,
             )
         }
 
@@ -266,7 +307,7 @@ class CompleteFlowViewModelTest {
             h.viewModel.start("m-1")
             advanceUntilIdle()
             val flow = h.viewModel.uiState.value.flow
-            assertEquals(CompleteStep.DOMAIN, flow.step)
+            assertEquals(CompleteStep.LIFE, flow.step)
             assertEquals(listOf("s-1"), flow.answers.soulIds)
         }
 

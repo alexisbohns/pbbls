@@ -56,33 +56,75 @@ class CompleteFlowModelTest {
     }
 
     @Test
-    fun `a tile pick commits and advances with one selection buzz`() {
+    fun `an emotion pick commits and advances with one selection buzz`() {
         model.goTo(CompleteStep.EMOTION)
         model.selectEmotion("e-1")
-        assertEquals(CompleteStep.DOMAIN, model.step)
-        model.selectDomain("d-1")
-        assertEquals(CompleteStep.SOULS, model.step)
-        assertEquals(listOf(TapHaptic.SELECTION, TapHaptic.SELECTION), haptics)
+        assertEquals(CompleteStep.LIFE, model.step)
+        assertEquals(listOf(TapHaptic.SELECTION), haptics)
     }
 
     @Test
-    fun `souls toggle without advancing and skip is allowed`() {
-        model.goTo(CompleteStep.SOULS)
+    fun `domains toggle in tap order and a tap on a chosen one removes it`() {
+        model.goTo(CompleteStep.LIFE)
+        model.toggleDomain("d-2")
+        model.toggleDomain("d-1")
+        model.toggleDomain("d-3")
+        assertEquals(listOf("d-2", "d-1", "d-3"), model.answers.domainIds)
+        model.toggleDomain("d-1")
+        assertEquals(listOf("d-2", "d-3"), model.answers.domainIds)
+        assertEquals(List(4) { TapHaptic.SELECTION }, haptics)
+        assertEquals(CompleteStep.LIFE, model.step)
+    }
+
+    @Test
+    fun `a fourth domain is refused with a warning and changes nothing`() {
+        model.goTo(CompleteStep.LIFE)
+        listOf("d-1", "d-2", "d-3").forEach(model::toggleDomain)
+        haptics.clear()
+        model.toggleDomain("d-4")
+        assertEquals(listOf("d-1", "d-2", "d-3"), model.answers.domainIds)
+        assertEquals(listOf(TapHaptic.WARNING), haptics)
+    }
+
+    @Test
+    fun `life is answered by one domain and advance never reaches success`() {
+        model.goTo(CompleteStep.LIFE)
+        model.advance()
+        assertEquals(listOf(TapHaptic.WARNING), haptics)
+        model.toggleDomain("d-1")
+        haptics.clear()
+        assertTrue(model.state.value.isAnswered)
+        model.advance()
+        assertEquals(CompleteStep.LIFE, model.step)
+        assertTrue(haptics.isEmpty())
+    }
+
+    @Test
+    fun `souls toggle without advancing`() {
+        model.goTo(CompleteStep.LIFE)
         model.toggleSoul("s-1")
         model.toggleSoul("s-2")
         model.toggleSoul("s-1")
         assertEquals(listOf("s-2"), model.answers.soulIds)
-        assertEquals(CompleteStep.SOULS, model.step)
-        model.advance()
-        assertEquals(CompleteStep.COLLECTION, model.step)
+        assertEquals(CompleteStep.LIFE, model.step)
+        assertEquals(List(3) { TapHaptic.SELECTION }, haptics)
     }
 
     @Test
-    fun `privacy selects without completing`() {
-        model.goTo(CompleteStep.PRIVACY)
-        model.selectVisibility(Visibility.PUBLIC)
-        assertEquals(CompleteStep.PRIVACY, model.step)
-        assertEquals(Visibility.PUBLIC, model.answers.visibility)
+    fun `the chooser's result replaces the souls silently and an equal one changes nothing`() {
+        model.goTo(CompleteStep.LIFE)
+        model.setSouls(listOf("s-2", "s-1"))
+        assertEquals(listOf("s-2", "s-1"), model.answers.soulIds)
+        model.setSouls(listOf("s-2", "s-1"))
+        model.setSouls(emptyList())
+        assertEquals(emptyList<String>(), model.answers.soulIds)
+        assertTrue(haptics.isEmpty())
+    }
+
+    @Test
+    fun `collection and visibility keep their defaults through the flow`() {
+        assertNull(model.answers.collectionId)
+        assertEquals(Visibility.SECRET, model.answers.visibility)
     }
 
     @Test
@@ -97,17 +139,19 @@ class CompleteFlowModelTest {
     @Test
     fun `a restored flow lands on its first gap`() {
         model.resume(PebbleAnswers(valence = Valence.LOWLIGHT_SMALL, emotionId = "e-1"))
-        assertEquals(CompleteStep.DOMAIN, model.step)
-        model.resume(PebbleAnswers(valence = Valence.LOWLIGHT_SMALL, emotionId = "e-1", domainId = "d-1"))
-        assertEquals(CompleteStep.PRIVACY, model.step)
+        assertEquals(CompleteStep.LIFE, model.step)
+        model.resume(PebbleAnswers(valence = Valence.LOWLIGHT_SMALL, emotionId = "e-1", domainIds = listOf("d-1")))
+        assertEquals(CompleteStep.LIFE, model.step)
+        model.resume(PebbleAnswers(valence = Valence.LOWLIGHT_SMALL, domainIds = listOf("d-1")))
+        assertEquals(CompleteStep.EMOTION, model.step)
     }
 
     @Test
     fun `success and failure buzz and move as decided`() {
-        model.goTo(CompleteStep.PRIVACY)
+        model.goTo(CompleteStep.LIFE)
         model.beginComplete()
         model.fail(R.string.pebble_error_soul_gone)
-        assertEquals(CompleteStep.PRIVACY, model.step)
+        assertEquals(CompleteStep.LIFE, model.step)
         assertFalse(model.isCompleting)
         model.beginComplete()
         model.succeed(CompleteResult(pebbleId = "p-1", karmaDelta = 5, glyph = null))
@@ -117,7 +161,7 @@ class CompleteFlowModelTest {
 
     @Test
     fun `a quiet success moves to success without the success buzz`() {
-        model.goTo(CompleteStep.PRIVACY)
+        model.goTo(CompleteStep.LIFE)
         model.beginComplete()
         model.fail(R.string.pebble_error_soul_gone)
         model.beginComplete()

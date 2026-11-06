@@ -21,10 +21,14 @@ data class PebbleDraft(
     val collectionId: String? = null,
     // Owner-only unless chosen (M51): 'private' now means connections-visible.
     val visibility: Visibility = Visibility.SECRET,
+    /** What [from] found on the pebble: [PebbleCompletePayload.edit] omits a set still equal to it. */
+    val prefillDomainId: String? = null,
+    val prefillCollectionId: String? = null,
+    val prefilled: Boolean = false,
 ) {
     /** The pebble half, for `complete_pebble`. */
     val answers: PebbleAnswers
-        get() = PebbleAnswers(valence, emotionId, domainId, soulIds, collectionId, visibility)
+        get() = PebbleAnswers(valence, emotionId, listOfNotNull(domainId), soulIds, collectionId, visibility)
 
     companion object {
         /**
@@ -43,6 +47,9 @@ data class PebbleDraft(
                 soulIds = pebble?.souls?.map { it.id }.orEmpty(),
                 collectionId = pebble?.collections?.firstOrNull()?.id,
                 visibility = pebble?.visibility ?: Visibility.SECRET,
+                prefillDomainId = pebble?.domains?.firstOrNull()?.id,
+                prefillCollectionId = pebble?.collections?.firstOrNull()?.id,
+                prefilled = pebble != null,
             )
         }
     }
