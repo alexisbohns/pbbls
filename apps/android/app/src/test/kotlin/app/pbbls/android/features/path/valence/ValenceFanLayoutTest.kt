@@ -40,6 +40,31 @@ class ValenceFanLayoutTest {
     }
 
     @Test
+    fun `the row labels clear every stone, even a chosen one`() {
+        ValenceSizeGroup.entries.forEach { size ->
+            val box = ValenceFanLayout.rowLabelBox(size)
+            assertTrue("$size label is off the canvas", box.left >= 0f && box.bottom <= ValenceFanLayout.REFERENCE_HEIGHT)
+            Valence.entries.forEach { valence ->
+                assertTrue(
+                    "$size label hits a chosen $valence",
+                    !box.intersects(ValenceFanLayout.selectedFrame(valence)),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `the labels are one per row, top to bottom`() {
+        val tops =
+            listOf(
+                ValenceSizeGroup.LARGE,
+                ValenceSizeGroup.MEDIUM,
+                ValenceSizeGroup.SMALL,
+            ).map { ValenceFanLayout.rowLabelBox(it).top }
+        assertTrue(tops == tops.sorted())
+    }
+
+    @Test
     fun `polarity orders the ring left to right`() {
         ValenceSizeGroup.entries.forEach { size ->
             val lowlight = ValenceFanLayout.centreX(valenceAt(ValencePolarity.LOWLIGHT, size))

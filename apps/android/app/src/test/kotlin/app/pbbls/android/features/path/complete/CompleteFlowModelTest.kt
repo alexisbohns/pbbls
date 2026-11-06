@@ -7,6 +7,7 @@ import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.Visibility
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -15,13 +16,35 @@ class CompleteFlowModelTest {
     private val model = CompleteFlowModel(haptic = { haptics += it })
 
     @Test
-    fun `valence arrives seeded and commits in place`() {
-        model.seedValenceIfNeeded()
-        assertEquals(Valence.NEUTRAL_MEDIUM, model.answers.valence)
+    fun `valence arrives empty and commits in place`() {
+        assertNull(model.answers.valence)
         assertTrue(haptics.isEmpty())
         model.selectValence(Valence.HIGHLIGHT_LARGE)
+        assertEquals(Valence.HIGHLIGHT_LARGE, model.answers.valence)
         assertEquals(CompleteStep.VALENCE, model.step)
         assertEquals(listOf(TapHaptic.SELECTION), haptics)
+    }
+
+    @Test
+    fun `nothing seeds a valence and Continue stays blocked until a pick`() {
+        assertEquals(CompleteStep.VALENCE, model.step)
+        assertNull(model.answers.valence)
+        assertFalse(model.state.value.isAnswered)
+        model.advance()
+        assertEquals(CompleteStep.VALENCE, model.step)
+        assertEquals(listOf(TapHaptic.WARNING), haptics)
+        model.selectValence(Valence.HIGHLIGHT_MEDIUM)
+        assertTrue(model.state.value.isAnswered)
+        model.advance()
+        assertEquals(CompleteStep.EMOTION, model.step)
+    }
+
+    @Test
+    fun `a restore without a valence lands on an empty valence step`() {
+        model.resume(PebbleAnswers(soulIds = listOf("s-1")))
+        assertEquals(CompleteStep.VALENCE, model.step)
+        assertNull(model.answers.valence)
+        assertEquals(listOf("s-1"), model.answers.soulIds)
     }
 
     @Test

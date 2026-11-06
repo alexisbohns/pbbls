@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsIcon
@@ -311,14 +312,20 @@ private fun BarePlace(
     }
 }
 
-/** The stone its card will carry, as a dashed outline: a medium river pebble, whatever comes. */
+/**
+ * The stone its card will carry, as a dashed outline: a medium river pebble, whatever comes. [width] is
+ * the page's 64 dp and [ink] the page's third ink unless a host (the valence step's empty slot) says otherwise.
+ */
 @Composable
-private fun GhostStone(modifier: Modifier = Modifier) {
-    val ink = PebblesTheme.spine.colors.ink3
+internal fun GhostStone(
+    modifier: Modifier = Modifier,
+    width: Dp = GHOST_WIDTH,
+    ink: Color = PebblesTheme.spine.colors.ink3,
+) {
     val outline = rememberStoneOutline(GHOST_SIZE, GHOST_POLARITY)
     val density = LocalDensity.current
     val dashes = remember(density) { ghostDashes(density) }
-    Canvas(modifier.stoneBox(GHOST_SIZE, width = GHOST_WIDTH)) { drawGhostStone(outline.path, size.width, ink, dashes) }
+    Canvas(modifier.stoneBox(GHOST_SIZE, width = width)) { drawGhostStone(outline.path, size.width, ink, dashes) }
 }
 
 /** The ghost's silhouette: a medium river pebble, the outline [drawGhostStone] takes. */

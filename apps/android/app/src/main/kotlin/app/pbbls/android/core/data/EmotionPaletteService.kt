@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.EmotionWithPaletteRow
@@ -34,31 +35,55 @@ class EmotionPaletteService
             private set
 
         /**
-         * Fetches the view once. Malformed rows (null column or unparseable hex —
+         * The last [load] failed and nothing has loaded since. The emotion picker draws Retry on it
+         * instead of waiting for a launch that will not come (D9). Cleared only by a success, so a
+         * retry cancelled mid-flight (the screen left) leaves it set and the next visit still offers Retry.
+         */
+        var loadFailed: Boolean by mutableStateOf(false)
+            private set
+
+        /** A [load] is in flight: the picker shows progress for it, and a second call returns at once. */
+        var isLoading: Boolean by mutableStateOf(false)
+            private set
+
+        /**
+         * Fetches the view; safe to call again, which is what Retry does. Malformed rows (null column or unparseable hex —
          * the palette columns are hand-entered) are logged and skipped rather than
-         * failing the whole load. A failed load logs and leaves the cache empty:
-         * no retry loop, the app recovers on next launch (mirrors iOS).
+         * failing the whole load. A failed load logs, sets [loadFailed] and leaves the cache as it
+         * was; there is no retry loop, the picker offers one button (mirrors iOS).
          */
         suspend fun load() {
+            if (isLoading) return
+            isLoading = true
             try {
+                fetch()
+            } finally {
+                isLoading = false
+            }
+        }
+
+        private suspend fun fetch() {
+            runCatchingCancellable {
                 val rows =
                     supabase.client
                         .from("v_emotions_with_palette")
                         .select()
                         .decodeList<EmotionWithPaletteRow>()
-                val valid =
-                    rows.mapNotNull { row ->
-                        val mapped = row.toEmotionWithPalette()
-                        if (mapped == null) {
-                            Log.w(TAG, "skipping malformed palette row (id=${row.id}, slug=${row.slug})")
-                        }
-                        mapped
+                rows.mapNotNull { row ->
+                    val mapped = row.toEmotionWithPalette()
+                    if (mapped == null) {
+                        Log.w(TAG, "skipping malformed palette row (id=${row.id}, slug=${row.slug})")
                     }
+                    mapped
+                }
+            }.onSuccess { valid ->
                 byEmotionId = valid.associateBy { it.id }
                 hasLoaded = true
+                loadFailed = false
                 Log.i(TAG, "loaded ${valid.size} palette rows")
-            } catch (e: Exception) {
-                Log.e(TAG, "palette load failed — pebbles fall back to accent until next launch", e)
+            }.onFailure {
+                loadFailed = true
+                Log.e(TAG, "palette load failed — pebbles fall back to accent until a retry or the next launch", it)
             }
         }
 

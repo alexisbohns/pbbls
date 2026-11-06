@@ -131,7 +131,16 @@ Part 5, for what follows:
 - The Library tile has three states from `uiState.isPicking` and `snap`: no photo; picking or uploading (photo under a scrim, spinner); settled (photo under a scrim, the disc and the word).
 - **Real picks and real saves on the device are the controller's.** A generated `Pictures/pbbls-test.jpg` (EXIF Nov 3, 13:10) is on the phone for that and comes off at the end.
 
-Follow-ups to file when the stack ships: Edit moment does not record a replaced saved photo's files for deletion (iOS appends to `detachedStoragePaths`); `seededFromPhoto` after a removal, both surfaces; the D6 snackbar and the D9 beat, both surfaces; People prompts on Android (`AC-people-starts-from-the-pebbles-you-have` is still `development` there); whether the moment page's fields read well under TalkBack, now that they carry a `contentDescription`; an Android embedded photo picker as a route to the 3-tap moment.
+Part 6, for what follows:
+
+- `RecordFlowMemorying` is bound and faked: `isValenceHelpSeen`, `markValenceHelpSeen`, `recentDomainIds`, `recordDomains`, `clearDomains` (on sign-out, beside `completeSnapshots.clearAll()`). Part 7 is the domains half's first caller.
+- `CompleteFlowScreen` takes `origin` from the key. `CompleteStep.subtitleRes` is gone; the valence subtitle is computed from the origin.
+- The D7 "one sentence" lockup is on neither surface: iOS's `spanWord` serves only a test. The lockup stays word over span. One finding for both.
+- `EmotionPaletteService` has `isLoading` and `loadFailed`, the latter cleared only on success. `EmotionPickerBody` takes `loadFailed`, `isRetrying` and `onRetry`.
+- A step composable can outlive its step for 280 ms inside `AnimatedContent`: anything it triggers is checked against `model.step` in the ViewModel.
+- A `clickable`-less fan is not inert: `clearAndSetSemantics {}` when `!interactive`.
+
+Follow-ups to file when the stack ships: the D7 sentence, both surfaces; Edit moment does not record a replaced saved photo's files for deletion (iOS appends to `detachedStoragePaths`); `seededFromPhoto` after a removal, both surfaces; the D6 snackbar and the D9 beat, both surfaces; People prompts on Android (`AC-people-starts-from-the-pebbles-you-have` is still `development` there); whether the moment page's fields read well under TalkBack, now that they carry a `contentDescription`; an Android embedded photo picker as a route to the 3-tap moment.
 
 ---
 

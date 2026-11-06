@@ -4,6 +4,7 @@ import app.pbbls.android.core.data.CompleteSnapshotStore
 import app.pbbls.android.core.data.OwnedCompleteSnapshot
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -32,8 +33,34 @@ class CompleteSnapshotTest {
     }
 
     @Test
-    fun `a seeded valence and the default grade are not input`() {
-        assertTrue(CompleteSnapshot.from(PebbleAnswers(valence = Valence.NEUTRAL_MEDIUM)).isEmpty)
+    fun `a valence alone is input, since nothing seeds it any more`() {
+        assertFalse(CompleteSnapshot.from(PebbleAnswers(valence = Valence.NEUTRAL_MEDIUM)).isEmpty)
+        assertFalse(CompleteSnapshot.from(PebbleAnswers(valence = Valence.LOWLIGHT_SMALL)).isEmpty)
+    }
+
+    @Test
+    fun `the default grade alone is not input`() {
+        assertTrue(CompleteSnapshot.from(PebbleAnswers()).isEmpty)
+    }
+
+    @Test
+    fun `a snapshot with a valence restores it and one without restores none`() {
+        val with = CompleteSnapshot.from(PebbleAnswers(valence = Valence.HIGHLIGHT_LARGE, emotionId = "e-1"))
+        assertEquals(Valence.HIGHLIGHT_LARGE, with.toAnswers(known = null).valence)
+        val without = CompleteSnapshot.from(PebbleAnswers(emotionId = "e-1"))
+        assertNull(without.toAnswers(known = null).valence)
+        assertEquals("e-1", without.toAnswers(known = null).emotionId)
+    }
+
+    @Test
+    fun `a valence alone survives the store's round trip`() {
+        val owned = OwnedCompleteSnapshot("user-1", CompleteSnapshot.from(PebbleAnswers(valence = Valence.HIGHLIGHT_MEDIUM)))
+        val decoded =
+            Json.decodeFromString(
+                OwnedCompleteSnapshot.serializer(),
+                Json.encodeToString(OwnedCompleteSnapshot.serializer(), owned),
+            )
+        assertEquals(Valence.HIGHLIGHT_MEDIUM, decoded.restorableFor("user-1")?.toAnswers(known = null)?.valence)
     }
 
     @Test

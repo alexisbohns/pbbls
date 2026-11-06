@@ -13,6 +13,7 @@ import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.data.ProfileServicing
+import app.pbbls.android.core.data.RecordFlowMemorying
 import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.WrapDiskCaching
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -96,6 +97,7 @@ class RootViewModel
         private val achievementNotify: AchievementNotificationService,
         private val completeSnapshots: CompleteSnapshotStoring,
         private val wrapCache: WrapDiskCaching,
+        private val recordFlowMemory: RecordFlowMemorying,
         private val haptics: HapticsPreference,
         private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
@@ -185,6 +187,8 @@ class RootViewModel
             if (!isInitializing && userId == null) {
                 completeSnapshots.clearAll()
                 wrapCache.clearAll()
+                // Which domains someone tagged is private journal content at rest too; the help flag is harmless and stays.
+                recordFlowMemory.clearDomains()
             }
             // Only a resolved status updates hasHadSession — Unresolved must
             // never be mistaken for a session, real or absent.

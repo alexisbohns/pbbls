@@ -16,6 +16,7 @@ import app.pbbls.android.core.data.OnboardingServicing
 import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.PathWrapServicing
 import app.pbbls.android.core.data.ProfileServicing
+import app.pbbls.android.core.data.RecordFlowMemorying
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SettingsLinksServicing
 import app.pbbls.android.core.data.SettingsStore
@@ -197,6 +198,9 @@ object FakeServicesModule {
     fun fakeCompleteSnapshotStore() = FakeCompleteSnapshotStore()
 
     @Provides @Singleton
+    fun fakeRecordFlowMemory() = FakeRecordFlowMemory()
+
+    @Provides @Singleton
     fun fakeSnapWrite() = FakeSnapWriteRepository()
 
     @Provides @Singleton
@@ -269,6 +273,9 @@ object FakeServicesModule {
 
     @Provides
     fun completeSnapshotStore(fake: FakeCompleteSnapshotStore): CompleteSnapshotStoring = fake
+
+    @Provides
+    fun recordFlowMemory(fake: FakeRecordFlowMemory): RecordFlowMemorying = fake
 
     @Provides
     fun snapWrite(fake: FakeSnapWriteRepository): SnapWriteRepositing = fake

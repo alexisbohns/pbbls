@@ -27,6 +27,11 @@ fun CompleteStepContent(
     error: String?,
     hapticsOn: Boolean,
     modifier: Modifier = Modifier,
+    isFirstPebble: Boolean = false,
+    valenceHelpOpen: Boolean = false,
+    onFirstPebbleHelp: () -> Unit = {},
+    onOpenValenceHelp: () -> Unit = {},
+    onCloseValenceHelp: () -> Unit = {},
     onAchievementCheck: () -> Unit = {},
 ) {
     when (step) {
@@ -34,7 +39,11 @@ fun CompleteStepContent(
             RecordValenceStep(
                 selected = answers.valence,
                 onSelect = { model.selectValence(it) },
-                onSeed = { model.seedValenceIfNeeded() },
+                isFirstPebble = isFirstPebble,
+                helpOpen = valenceHelpOpen,
+                onFirstPebbleHelp = onFirstPebbleHelp,
+                onOpenHelp = onOpenValenceHelp,
+                onCloseHelp = onCloseValenceHelp,
                 modifier = modifier,
             )
 

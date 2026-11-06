@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 
 /**
  * The Complete flow's state machine. Every public mutator buzzes except the
- * silent seed, restore and [goTo]. [haptic] has no default, so no caller can
+ * silent restore and [goTo]. The valence step arrives empty (D7): nothing seeds an answer. [haptic] has no default, so no caller can
  * forget it (M58 D4).
  */
 class CompleteFlowModel(
@@ -47,11 +47,6 @@ class CompleteFlowModel(
 
     /** Silent jump, for restore and tests. Never wired to a control. */
     fun goTo(target: CompleteStep) = _state.update { it.copy(step = target) }
-
-    fun seedValenceIfNeeded() {
-        if (answers.valence != null) return
-        _state.update { it.copy(answers = it.answers.copy(valence = Valence.NEUTRAL_MEDIUM)) }
-    }
 
     fun selectValence(valence: Valence) = select { it.copy(valence = valence) }
 

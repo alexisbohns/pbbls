@@ -11,6 +11,7 @@ import app.pbbls.android.core.model.Domain
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
+import app.pbbls.android.testing.FakeRecordFlowMemory
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeServicesModule
 import app.pbbls.android.testing.UiFixtures
@@ -38,13 +39,15 @@ class CompleteFlowTest : AppUiTest() {
 
     @Inject lateinit var refs: FakeReferenceDataService
 
+    @Inject lateinit var memory: FakeRecordFlowMemory
+
     @After
     fun clearCannedResponses() {
         FakeServicesModule.cannedResponses.clear()
     }
 
-    @Test
-    fun `a bare moment becomes a pebble from its read page`() {
+    /** A bare moment on this week's Path, opened into Complete from its read page. */
+    private fun openCompleteFromPath() {
         // Slugs with no catalog entry, so the tiles read the names below (D9 fallback).
         FakeServicesModule.cannedResponses["/v_emotions_with_palette"] =
             """
@@ -63,8 +66,30 @@ class CompleteFlowTest : AppUiTest() {
 
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performClick()
         onText(R.string.complete_cta).performClick()
+    }
+
+    @Test
+    fun `an account's first pebble opens the valence help once and marks it seen`() {
+        openCompleteFromPath()
 
         onText(R.string.record_valence_title).assertIsDisplayed()
+        onText(R.string.valence_help_line_1).assertIsDisplayed()
+        assertEquals(true, memory.isValenceHelpSeen("user-1"))
+    }
+
+    @Test
+    fun `a bare moment becomes a pebble from its read page`() {
+        // The account's first pebble would open the help sheet over the fan; the test above is that case.
+        memory.markValenceHelpSeen("user-1")
+        openCompleteFromPath()
+
+        onText(R.string.record_valence_title).assertIsDisplayed()
+        // The fan arrives empty and Continue waits for a stone (D7): pick one first.
+        compose.onNodeWithText(string(R.string.valence_ghost_prompt).uppercase()).assertIsDisplayed()
+        compose
+            .onNodeWithContentDescription(
+                "${string(R.string.valence_group_medium_name)}, ${string(R.string.valence_highlight)}",
+            ).performClick()
         onText(R.string.record_action_continue).performClick()
         compose.onNodeWithText("Calmish").performClick()
         compose.onNodeWithText("Testworld").performClick()
