@@ -125,9 +125,14 @@ struct OnboardingFlowView: View {
                 onChangeGlyph: model.openGlyphSheet,
                 onContinue: model.next
             )
-        // Part 4 replaces this with the pace step.
         case .pace:
-            placeholder("pace")
+            PaceStep(
+                selected: model.pace,
+                isCompleting: model.isCompleting,
+                failed: model.completeFailed,
+                onSelect: model.selectPace,
+                onFinish: model.next
+            )
         // The hand-off is the `complete_onboarding` call and Home: it never shows.
         case .handoff:
             EmptyView()
@@ -151,16 +156,6 @@ struct OnboardingFlowView: View {
                 onUse: { model.pickPersonGlyph(place.id, $0) },
                 onDraw: { model.drawForPerson(place.id) }
             )
-        }
-    }
-
-    /// Stands in until the step's own task lands; its name is never shipped, so it is not copy.
-    private func placeholder(_ name: String) -> some View {
-        OnboardingStepScaffold(title: LocalizedStringResource(stringLiteral: name)) {
-            EmptyView()
-        } footer: {
-            Button(action: model.next) { Text("Continue") }
-                .buttonStyle(PebblesPrimaryButtonStyle())
         }
     }
 }

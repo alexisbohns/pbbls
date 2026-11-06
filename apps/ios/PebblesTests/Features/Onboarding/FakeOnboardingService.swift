@@ -85,7 +85,15 @@ final class FakeOnboardingService: OnboardingServicing, @unchecked Sendable {
         }
     }
 
+    /// Runs before `complete` answers, so a test can hold the write in flight.
+    var onComplete: (@Sendable () async -> Void)? {
+        get { lock.withLock { _onComplete } }
+        set { lock.withLock { _onComplete = newValue } }
+    }
+    private var _onComplete: (@Sendable () async -> Void)?
+
     func complete(_ answers: OnboardingAnswers) async throws {
+        if let hook = lock.withLock({ _onComplete }) { await hook() }
         try lock.withLock {
             if let failure = _completeFailure { throw failure }
             _completeCalls.append(answers)
