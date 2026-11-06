@@ -246,13 +246,10 @@ private fun ClampedField(
     label: String,
 ) {
     val colors = MaterialTheme.colorScheme
+    // [text] only seeds the field. The model's value reaches here through a flow, so it lags the
+    // keyboard, and resyncing to it undid keystrokes when text came quickly (seen on a Pixel 8). A
+    // restored draft needs no resync: it is in place before the first frame, and nothing else writes.
     var field by remember { mutableStateOf(TextFieldValue(text = text, selection = TextRange(text.length))) }
-
-    // Resync if the model's value moves on its own (a restored or reset draft).
-    // A no-op while typing, since the model holds exactly what we just sent it.
-    LaunchedEffect(text) {
-        if (text != field.text) field = field.copy(text = text, selection = TextRange(text.length))
-    }
 
     Box(modifier = Modifier.fillMaxWidth()) {
         if (field.text.isEmpty()) {
