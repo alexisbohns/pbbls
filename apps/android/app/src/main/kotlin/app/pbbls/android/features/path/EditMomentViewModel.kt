@@ -144,8 +144,10 @@ class EditMomentViewModel
         fun onPhotoPicked(uri: Uri) {
             if (isSaving) return
             val id = userId ?: return
+            // At the tap, so a slower earlier pick never lands over a later one.
+            val generation = snaps.nextPickGeneration()
             viewModelScope.launch {
-                runCatchingCancellable { snaps.attach(media.process(uri), id) }
+                runCatchingCancellable { snaps.attach(media.process(uri), id, generation) }
                     .onFailure { Log.e(TAG, "photo pick processing failed", it) }
             }
         }
@@ -202,6 +204,8 @@ class EditMomentViewModel
             // Captured with the payload: only the files this save drops are deleted after it.
             val dropped = detachedSnap
             updateContent { it.copy(isSaving = true, saveErrorRes = null) }
+            // From here a pick still being read lands nowhere, and the attached photo is the one this save sends.
+            snaps.beginCommit()
             viewModelScope.launch {
                 // Popping the entry must not abort a write the server may have accepted (#852).
                 withContext(NonCancellable) {
@@ -217,6 +221,7 @@ class EditMomentViewModel
                         )
                     }.fold(
                         onSuccess = {
+                            snaps.markCommitted()
                             if (detachedSnap == dropped) detachedSnap = null
                             effectsOut.emit(EditMomentEffect.Saved)
                             // Best-effort, after the pop: the row is gone, the orphan sweep is the backstop.
@@ -225,6 +230,7 @@ class EditMomentViewModel
                         onFailure = { failure ->
                             Log.e(TAG, "save_moment failed", failure)
                             // Uploaded files stay for the retry; dismiss is the cleanup (A-3).
+                            snaps.abortCommit()
                             updateContent { it.copy(isSaving = false, saveErrorRes = momentWriteErrorRes(failure.toDataError())) }
                         },
                     )

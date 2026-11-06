@@ -35,6 +35,19 @@ class SnapUploadCoordinator(
     var formSnap: FormSnap? by mutableStateOf(initialSnap)
         private set
 
+    /** Where the form stands (iOS `lifecycle`). Plain fields: nothing in the UI reads them. */
+    private enum class Lifecycle { OPEN, COMMITTING, COMMITTED, CLOSED }
+
+    private var lifecycle = Lifecycle.OPEN
+
+    /** The pending snap a save sent: no cleanup ever deletes it. */
+    private var committedSnapId: String? = null
+
+    /** Bumped at every pick's tap: a pick applies only while it is still the latest (iOS `pickGeneration`). */
+    private var pickGeneration = 0
+
+    private val isCommitLocked: Boolean get() = lifecycle == Lifecycle.COMMITTING || lifecycle == Lifecycle.COMMITTED
+
     /**
      * Processed bytes kept around so a FAILED → user-tapped retry doesn't
      * re-decode + re-encode the pick. Cleared whenever [formSnap] clears.
@@ -81,27 +94,73 @@ class SnapUploadCoordinator(
      * #852 the entry clears it. It is NOT the
      * way to abandon an upload — that is [cancelAndCleanup], which also fires the
      * compensating delete. Calling this with a pending snap would leak the
-     * uploaded bytes, so the caller must have finished or cancelled first.
+     * uploaded bytes, so the caller must have finished or cancelled first. It keeps the lifecycle: a form whose
+     * save committed stays closed to a pick that lands late.
      */
     fun reset() {
         formSnap = null
         processedForRetry = null
     }
 
+    /** Called at a pick's tap, before it is read, and handed to [attach]: a later tap makes this one stale. */
+    fun nextPickGeneration(): Int {
+        pickGeneration += 1
+        return pickGeneration
+    }
+
     /**
-     * A processed pick enters the machine: pending-uploading, then [performUpload].
+     * Called right before the save's write. Until [markCommitted] or [abortCommit] a pick is refused and the
+     * attached photo can be neither removed, replaced nor cancelled away, so the save sends exactly what it read.
+     */
+    fun beginCommit() {
+        if (lifecycle != Lifecycle.OPEN) return
+        lifecycle = Lifecycle.COMMITTING
+        committedSnapId = (formSnap as? FormSnap.Pending)?.snap?.id
+    }
+
+    /** The save succeeded: the photo belongs to a saved moment; a pick that lands late neither replaces nor deletes it. */
+    fun markCommitted() {
+        if (lifecycle != Lifecycle.COMMITTING) committedSnapId = (formSnap as? FormSnap.Pending)?.snap?.id
+        lifecycle = Lifecycle.COMMITTED
+    }
+
+    /** The save failed: the form is open again and keeps its photo for the retry. */
+    fun abortCommit() {
+        if (lifecycle != Lifecycle.COMMITTING) return
+        lifecycle = Lifecycle.OPEN
+        committedSnapId = null
+    }
+
+    private fun accepts(generation: Int): Boolean =
+        when {
+            lifecycle != Lifecycle.OPEN -> {
+                onLog("pick ignored: form is $lifecycle", null)
+                false
+            }
+            generation != pickGeneration -> {
+                onLog("pick ignored: superseded by a later pick", null)
+                false
+            }
+            else -> true
+        }
+
+    /**
+     * A processed pick enters the machine: pending-uploading, then [performUpload]. [generation] is the one taken
+     * at the pick's tap; a pick applies only if the form is open and no later pick has been tapped, and otherwise
+     * touches nothing: it attaches, replaces and deletes nothing (iOS `accepts`).
      *
      * A pending snap it replaces takes its Storage files with it (iOS `ingest`): nobody else holds them. A saved
      * (existing) one is untouched, since it is the host's to detach. The replaced snap's own upload, cancelled by
      * the caller, may still land after that delete, and so may this one if it is removed or replaced while in
      * flight: when the upload ends (or is cancelled) and the form no longer holds this snap, its files are
-     * deleted again, uncancellable (iOS `deleteFilesUncancelled`). A snap a save sent is never here: it was
-     * UPLOADED, so this call had already returned.
+     * deleted again, uncancellable (iOS `deleteFilesUncancelled`), unless a save sent it ([committedSnapId]).
      */
     suspend fun attach(
         processed: ProcessedImage,
         userId: String,
+        generation: Int = nextPickGeneration(),
     ) {
+        if (!accepts(generation)) return
         val replaced = (formSnap as? FormSnap.Pending)?.snap
         val snapId = UUID.randomUUID().toString().lowercase()
         formSnap =
@@ -120,7 +179,7 @@ class SnapUploadCoordinator(
         try {
             performUpload(processed = processed, snapId = snapId, userId = userId)
         } finally {
-            if ((formSnap as? FormSnap.Pending)?.snap?.id != snapId) {
+            if ((formSnap as? FormSnap.Pending)?.snap?.id != snapId && snapId != committedSnapId) {
                 onLog("late upload: deleting orphaned $snapId", null)
                 withContext(NonCancellable) { repo.deleteFiles(snapId = snapId, userId = userId) }
             }
@@ -143,6 +202,7 @@ class SnapUploadCoordinator(
      * delete. Safe in any upload state; no-op when not pending.
      */
     suspend fun removePending(userId: String) {
+        if (isCommitLocked) return
         val pending = formSnap as? FormSnap.Pending ?: return
         formSnap = null
         processedForRetry = null
@@ -156,6 +216,7 @@ class SnapUploadCoordinator(
      * caller deletes the returned snap's files once that save succeeds (R6).
      */
     fun detachExisting(): FormSnap.Existing? {
+        if (isCommitLocked) return null
         val existing = formSnap as? FormSnap.Existing ?: return null
         formSnap = null
         return existing
@@ -167,10 +228,14 @@ class SnapUploadCoordinator(
      * thrown — Cancel must not be un-cancellable.
      */
     suspend fun cancelAndCleanup(userId: String) {
+        // A save that started owns the photo.
+        if (isCommitLocked) return
+        // A pick still being read must not land on a closed form.
+        lifecycle = Lifecycle.CLOSED
         val pending = formSnap as? FormSnap.Pending
         formSnap = null
         processedForRetry = null
-        if (pending != null) {
+        if (pending != null && pending.snap.id != committedSnapId) {
             repo.deleteFiles(snapId = pending.snap.id, userId = userId)
         }
     }

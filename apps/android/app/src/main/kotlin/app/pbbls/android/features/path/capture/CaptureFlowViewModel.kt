@@ -181,6 +181,9 @@ class CaptureFlowViewModel
          */
         private var persistsDraft = true
 
+        /** From a save's start to its answer: the draft's photo reference is out of saved state meanwhile. */
+        private var isCommitting = false
+
         private val _uiState =
             MutableStateFlow(
                 CaptureFlowUiState(flow = model.state.value, snap = restoredSnap, cameraAvailable = photos.isAvailable()),
@@ -240,7 +243,11 @@ class CaptureFlowViewModel
                     lastSnapId = id
                     // Only a photo already in Storage is worth keeping across a kill (iOS `savedSnap`):
                     // a pick still uploading is picked again after a restore.
-                    if (persistsDraft) savedState[KEY_SNAP_ID] = ((snap as? FormSnap.Pending)?.snap?.takeIf { it.state == UPLOADED })?.id
+                    if (persistsDraft &&
+                        !isCommitting
+                    ) {
+                        savedState[KEY_SNAP_ID] = ((snap as? FormSnap.Pending)?.snap?.takeIf { it.state == UPLOADED })?.id
+                    }
                     _uiState.update { it.copy(snap = snap, snapBlockedMessageRes = blockedBySnap()) }
                 }
             }
@@ -353,6 +360,8 @@ class CaptureFlowViewModel
                     return
                 }
             val previous = photoJob
+            // At the tap: a pick that is read more slowly than a later one never lands over it.
+            val generation = snaps.nextPickGeneration()
             pickCount += 1
             photoJob =
                 viewModelScope.launch(start = CoroutineStart.ATOMIC) {
@@ -360,7 +369,7 @@ class CaptureFlowViewModel
                         runCatchingCancellable {
                             val processed = prepare()
                             previous?.cancelAndJoin()
-                            snaps.attach(processed, id)
+                            snaps.attach(processed, id, generation)
                         }.onFailure { Log.e(TAG, "photo pick processing failed", it) }
                     } finally {
                         pickCount -= 1
@@ -407,6 +416,12 @@ class CaptureFlowViewModel
             val draft = model.draft
             val snap = snaps.pendingSnapForPayload()?.let { PebbleSnapPayload(it.id, it.storagePrefix(id), 0) }
             model.beginSave(thenComplete)
+            // Before the write: a kill after the server accepted it must not restore the saved moment's photo as a
+            // pending upload that Discard or Change photo would delete. Losing the reference beats deleting live files.
+            snaps.beginCommit()
+            isCommitting = true
+            val keptSnapId = savedState.get<String>(KEY_SNAP_ID)
+            savedState.remove<String>(KEY_SNAP_ID)
             viewModelScope.launch {
                 // Popping the entry must not abort a write the server may have accepted (#852).
                 withContext(NonCancellable) {
@@ -420,6 +435,7 @@ class CaptureFlowViewModel
                             clearDraft()
                             model.saved()
                             // The files now belong to the moment: forget them without deleting.
+                            snaps.markCommitted()
                             snaps.reset()
                             // Path shows the moment's week when it is next on screen (R14).
                             focusRequests.request(momentId)
@@ -429,7 +445,10 @@ class CaptureFlowViewModel
                         },
                         onFailure = {
                             Log.e(TAG, "save_moment failed", it)
-                            // Files stay for the retry; discarding is the cleanup (A-3).
+                            // Files stay for the retry; discarding is the cleanup (A-3). The form is open again.
+                            snaps.abortCommit()
+                            isCommitting = false
+                            if (persistsDraft && keptSnapId != null) savedState[KEY_SNAP_ID] = keptSnapId
                             model.fail(momentWriteErrorRes(it.toDataError()))
                         },
                     )

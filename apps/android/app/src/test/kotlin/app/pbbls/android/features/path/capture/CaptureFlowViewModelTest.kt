@@ -1072,4 +1072,74 @@ class CaptureFlowViewModelTest {
             advanceUntilIdle()
             assertEquals(0, h.viewModel.uiState.value.flow.draft.happenedAt.nano)
         }
+
+    @Test
+    fun `picks read out of order end on the last one tapped, deleting nothing of it`() =
+        runTest {
+            val h = Harness()
+            val a = CompletableDeferred<Unit>()
+            val b = CompletableDeferred<Unit>()
+            val c = CompletableDeferred<Unit>()
+            h.media.processGates.addAll(listOf(a, b, c))
+            h.viewModel.onPhotoPicked(pick)
+            h.viewModel.onPhotoPicked(pick)
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            c.complete(Unit)
+            advanceUntilIdle()
+            settle()
+            val landed = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id
+            a.complete(Unit)
+            b.complete(Unit)
+            advanceUntilIdle()
+            settle()
+            assertEquals(landed, (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id)
+            assertEquals(listOf(landed), h.snapRepo.uploaded)
+            assertTrue(h.snapRepo.deletedSnapIds.isEmpty())
+            assertFalse(h.viewModel.uiState.value.isPicking)
+        }
+
+    @Test
+    fun `a discard with several reads in flight leaves nothing attached`() =
+        runTest {
+            val h = Harness()
+            val gates = List(3) { CompletableDeferred<Unit>() }
+            h.media.processGates.addAll(gates)
+            repeat(3) { h.viewModel.onPhotoPicked(pick) }
+            settle()
+            h.viewModel.onCloseRequested()
+            h.viewModel.onDiscard()
+            advanceUntilIdle()
+            gates.forEach { it.complete(Unit) }
+            advanceUntilIdle()
+            settle()
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+            assertNull(h.viewModel.uiState.value.snap)
+        }
+
+    @Test
+    fun `a save takes the photo reference out of saved state, and a failure puts it back`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            val id = handle.get<String>("capture-snap-id")
+            assertTrue(id != null)
+            h.writes.failNext = postgrestException("media_quota_exceeded")
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
+            h.viewModel.save(thenComplete = false)
+            // Synchronously, before the write is answered: a kill now must not restore it.
+            assertNull(handle.get<String>("capture-snap-id"))
+            advanceUntilIdle()
+            settle()
+            assertEquals(id, handle.get<String>("capture-snap-id"))
+            // The retry works, and the files stay the moment's.
+            h.viewModel.save(thenComplete = false)
+            assertNull(handle.get<String>("capture-snap-id"))
+            advanceUntilIdle()
+            settle()
+            assertNull(handle.get<String>("capture-snap-id"))
+            assertTrue(h.snapRepo.deletedSnapIds.isEmpty())
+        }
 }

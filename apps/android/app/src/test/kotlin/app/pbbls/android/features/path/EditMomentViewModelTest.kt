@@ -1,8 +1,11 @@
 package app.pbbls.android.features.path
 
+import android.app.Application
+import android.net.Uri
 import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
 import app.pbbls.android.core.data.HapticsPreference
+import app.pbbls.android.core.data.ProcessedImage
 import app.pbbls.android.core.model.MomentSavePayload
 import app.pbbls.android.core.model.MomentSnap
 import app.pbbls.android.core.model.PebbleSnapPayload
@@ -26,10 +29,15 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.io.IOException
 import java.time.OffsetDateTime
 
-/** Edit moment (R5, R6): one `save_moment`, the photo removal riding it, and nothing else. */
+/** Edit moment (R5, R6): one `save_moment`, the photo removal riding it, and nothing else. Robolectric: a pick takes a `Uri`. */
+@RunWith(RobolectricTestRunner::class)
+@Config(application = Application::class)
 class EditMomentViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -305,4 +313,35 @@ class EditMomentViewModelTest {
         h.haptics.setOn(false)
         assertFalse(h.viewModel.hapticsOn)
     }
+
+    @Test
+    fun `a pick still being read when the save goes out never deletes the saved photo`() =
+        runTest {
+            val h = Harness()
+            h.media.processed = ProcessedImage(original = byteArrayOf(1), thumb = byteArrayOf(2))
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail())
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            val uri = Uri.parse("content://media/picked/1")
+            h.viewModel.onPhotoPicked(uri)
+            advanceUntilIdle()
+            val a = h.snapRepo.uploaded.single()
+            // Change photo: pick B, whose read is held, then Save.
+            val gate = CompletableDeferred<Unit>()
+            h.media.processGate = gate
+            h.viewModel.onPhotoPicked(uri)
+            runCurrent()
+            h.viewModel.save()
+            runCurrent()
+            gate.complete(Unit)
+            advanceUntilIdle()
+            assertEquals(
+                listOf(PebbleSnapPayload(a, "user-1/$a", 0)),
+                h.writes.saved
+                    .single()
+                    .snaps,
+            )
+            assertTrue("A's files were deleted under the saved moment", h.snapRepo.deletedSnapIds.isEmpty())
+            assertEquals(1, h.snapRepo.uploaded.size)
+        }
 }
