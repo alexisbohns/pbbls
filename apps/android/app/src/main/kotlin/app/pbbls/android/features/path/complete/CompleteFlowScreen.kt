@@ -57,8 +57,8 @@ import java.time.ZoneId
 private const val STEP_TRANSITION_MS = 280
 
 /**
- * The Complete flow (#1048): a moment becomes a pebble in six steps, then a
- * end screen. A full-screen modal entry (A-14). ✕ never asks (A-4); the
+ * The Complete flow (#1048): a moment becomes a pebble in three steps, then
+ * an end screen. A full-screen modal entry (A-14). ✕ never asks (A-4); the
  * answers stay in the per-moment autosave. [onDismiss] is every exit: ✕, back
  * on the first step, and the end screen's Done. [onAddWords] opens Edit moment and
  * [onRecordAnother] a fresh capture (null for a pebble made from the card).

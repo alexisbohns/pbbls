@@ -109,13 +109,12 @@ fun SoulChooserSheet(
             state = state,
             title = title,
             isLoaded = refs.hasLoaded,
-            // ReferenceDataServicing swallows its own failures and exposes no failed state (S7).
-            loadFailed = false,
+            loadFailed = refs.loadFailed,
             hapticsOn = hapticsOn,
             onBack = hide,
             onDone = { onConfirm(state.selection) },
             onCreate = onCreate,
-            onRetry = { scope.launch { refs.refreshSouls() } },
+            onRetry = { scope.launch { refs.load() } },
             modifier = if (startsPartial) Modifier.keepAboveScreenEdge(sheetState) else Modifier.fillMaxHeight(),
         )
     }

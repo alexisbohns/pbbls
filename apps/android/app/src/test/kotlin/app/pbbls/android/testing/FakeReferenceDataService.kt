@@ -29,6 +29,7 @@ class FakeReferenceDataService(
     override var souls: List<SoulWithGlyph> = emptyList(),
     override var collections: List<PebbleCollection> = emptyList(),
     override var hasLoaded: Boolean = false,
+    override var loadFailed: Boolean = false,
 ) : ReferenceDataServicing {
     /**
      * What [createSoul] returns, built from the requested name. **null is the
