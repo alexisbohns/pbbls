@@ -13,6 +13,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import app.pbbls.android.core.model.SoulWithGlyph
 
+/** Which of a usual soul's two places (S1) was long-pressed: it is a tile and a row. */
+enum class SoulChooserSlot { TILE, ROW }
+
 sealed interface SoulChooserMode {
     /** Tiles and rows toggle; the tray shows pills and a button. [allowsSkip]: "Skip" when empty (record flow), "Done" (edit sheet). */
     data class Pick(
@@ -123,6 +126,7 @@ class SoulChooserState(
 
     fun openSearch() {
         isSearching = true
+        createErrorRes = null
     }
 
     /** Closing the field clears the query (S3). */

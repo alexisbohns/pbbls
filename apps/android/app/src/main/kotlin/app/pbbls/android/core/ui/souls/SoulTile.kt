@@ -51,7 +51,7 @@ fun SoulTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null,
-    hapticsOn: Boolean = true,
+    hapticsOn: Boolean,
 ) {
     val colors = MaterialTheme.colorScheme
     val chosen = showsSelection && isSelected

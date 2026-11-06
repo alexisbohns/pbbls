@@ -47,7 +47,7 @@ private val EDGE_FADE = 16.dp
  * The tray and the top bar belong to the host. [isLoaded] guards every "nobody" branch: a read
  * before the session is live returns an empty list, which is not proof of emptiness. A pick tap
  * plays the selection haptic through [onHaptic]; hosts pass `rememberTapHaptics { hapticsOn }`.
- * [onLongClickSoul] buzzes by [hapticsOn]; [itemMenu] is drawn inside each tile and row, so a
+ * [onLongClickSoul] buzzes by [hapticsOn] (asked of every host); [itemMenu] is drawn inside each tile and row, so a
  * `DropdownMenu` there anchors on the item that was long-pressed (People's delete).
  */
 @Composable
@@ -59,10 +59,10 @@ fun SoulChooserBody(
     onOpenSoul: (SoulWithGlyph) -> Unit,
     onCreate: (String) -> Unit,
     onHaptic: (TapHaptic) -> Unit,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
-    onLongClickSoul: ((SoulWithGlyph) -> Unit)? = null,
-    hapticsOn: Boolean = true,
-    itemMenu: (@Composable (SoulWithGlyph) -> Unit)? = null,
+    onLongClickSoul: ((SoulWithGlyph, SoulChooserSlot) -> Unit)? = null,
+    itemMenu: (@Composable (SoulWithGlyph, SoulChooserSlot) -> Unit)? = null,
 ) {
     val browse = state.mode == SoulChooserMode.Browse
     val showsSelection = !browse
@@ -80,7 +80,7 @@ fun SoulChooserBody(
                 }
             }
         }
-    val longTap: ((SoulWithGlyph) -> Unit)? = onLongClickSoul
+    val longTap: ((SoulWithGlyph, SoulChooserSlot) -> Unit)? = onLongClickSoul
     val perRow = if (LocalDensity.current.fontScale >= LARGE_FONT_SCALE) 3 else 4
     val colors = MaterialTheme.colorScheme
 
@@ -134,9 +134,9 @@ private fun LazyListScope.searchItems(
     state: SoulChooserState,
     showsSelection: Boolean,
     tap: (SoulWithGlyph) -> Unit,
-    longTap: ((SoulWithGlyph) -> Unit)?,
+    longTap: ((SoulWithGlyph, SoulChooserSlot) -> Unit)?,
     hapticsOn: Boolean,
-    itemMenu: (@Composable (SoulWithGlyph) -> Unit)?,
+    itemMenu: (@Composable (SoulWithGlyph, SoulChooserSlot) -> Unit)?,
     onCreate: (String) -> Unit,
 ) {
     val results = state.results
@@ -149,10 +149,10 @@ private fun LazyListScope.searchItems(
                 showsSelection = showsSelection,
                 highlight = SoulRanking.matchRange(soul.name, state.query),
                 onClick = { tap(soul) },
-                onLongClick = longTap?.let { { it(soul) } },
+                onLongClick = longTap?.let { { it(soul, SoulChooserSlot.ROW) } },
                 hapticsOn = hapticsOn,
             )
-            itemMenu?.invoke(soul)
+            itemMenu?.invoke(soul, SoulChooserSlot.ROW)
         }
     }
     if (state.canAdd) {
@@ -165,9 +165,9 @@ private fun LazyListScope.browseItems(
     perRow: Int,
     showsSelection: Boolean,
     tap: (SoulWithGlyph) -> Unit,
-    longTap: ((SoulWithGlyph) -> Unit)?,
+    longTap: ((SoulWithGlyph, SoulChooserSlot) -> Unit)?,
     hapticsOn: Boolean,
-    itemMenu: (@Composable (SoulWithGlyph) -> Unit)?,
+    itemMenu: (@Composable (SoulWithGlyph, SoulChooserSlot) -> Unit)?,
 ) {
     val usual = state.usual
     usual.chunked(perRow).forEachIndexed { index, line ->
@@ -183,11 +183,11 @@ private fun LazyListScope.browseItems(
                             isSelected = state.isSelected(soul.id),
                             showsSelection = showsSelection,
                             onClick = { tap(soul) },
-                            onLongClick = longTap?.let { { it(soul) } },
+                            onLongClick = longTap?.let { { it(soul, SoulChooserSlot.TILE) } },
                             hapticsOn = hapticsOn,
                             modifier = Modifier.fillMaxWidth(),
                         )
-                        itemMenu?.invoke(soul)
+                        itemMenu?.invoke(soul, SoulChooserSlot.TILE)
                     }
                 }
                 repeat(perRow - line.size) { Spacer(Modifier.weight(1f)) }
@@ -217,10 +217,10 @@ private fun LazyListScope.browseItems(
                     showsSelection = showsSelection,
                     highlight = null,
                     onClick = { tap(soul) },
-                    onLongClick = longTap?.let { { it(soul) } },
+                    onLongClick = longTap?.let { { it(soul, SoulChooserSlot.ROW) } },
                     hapticsOn = hapticsOn,
                 )
-                itemMenu?.invoke(soul)
+                itemMenu?.invoke(soul, SoulChooserSlot.ROW)
             }
         }
     }

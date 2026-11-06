@@ -118,6 +118,7 @@ private fun ChooserFrame(
                         onOpenSoul = {},
                         onCreate = {},
                         onHaptic = {},
+                        hapticsOn = true,
                     )
                 }
                 SoulChooserTray(state = state, onDone = {}, onHaptic = {})

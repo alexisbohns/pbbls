@@ -217,4 +217,11 @@ class SoulChooserStateTest {
         chooser.clearQuery()
         assertNull(chooser.createErrorRes)
     }
+
+    @Test fun `opening the search drops a stale failed create line`() {
+        val chooser = state(SoulChooserMode.Pick(allowsSkip = true), emptyList())
+        chooser.createErrorRes = 1
+        chooser.openSearch()
+        assertNull(chooser.createErrorRes)
+    }
 }
