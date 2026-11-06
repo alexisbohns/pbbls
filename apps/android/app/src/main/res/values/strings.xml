@@ -925,12 +925,7 @@
     <string name="home_shortcut_camera">Camera</string>
     <string name="home_shortcut_quick">Quick moment</string>
     <string name="home_shortcut_pebble">New pebble</string>
-    <!-- Home's quick moment sheet (#1383 D7, iOS home.quick.*): a name and a time, then save_moment. -->
-    <string name="home_quick_title">Quick moment</string>
-    <string name="home_quick_name">What happened?</string>
-    <string name="home_quick_when">When</string>
-    <string name="home_quick_save_open">Save &amp; open</string>
-    <string name="home_quick_save_close">Save &amp; close</string>
+    <!-- The camera moment's refused save (the quick moment sheet that shared it is gone, record-flow D13). -->
     <string name="home_quick_error">Couldn\'t save the moment. Try again.</string>
     <!-- Home's camera moment (#1383 D7, iOS home.camera.*): the system camera, an upload, then save_moment. -->
     <string name="home_camera_saving">Saving your photo…</string>
@@ -939,7 +934,7 @@
     <string name="home_camera_upload_failed">The photo didn\'t upload. Nothing was saved.</string>
     <!-- The snackbar after a camera moment (#1383 D7, iOS home.toast.*): "Moment saved · 14:32", the time in the locale's short form. -->
     <string name="home_toast_saved">Moment saved · %1$s</string>
-    <string name="home_toast_name">Name it</string>
+    <string name="home_toast_name">Edit</string>
     <!-- Your first five on Home (#1383 D11, iOS home.firstFive.* and home.task.*.title/line). -->
     <string name="home_first_five_title">Your first five</string>
     <string name="home_first_five_done">Done</string>

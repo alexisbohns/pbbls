@@ -1,10 +1,10 @@
 package app.pbbls.android.features.home
 
 import androidx.lifecycle.SavedStateHandle
-import app.pbbls.android.R
 import app.pbbls.android.core.data.OnboardingHandoff
 import app.pbbls.android.core.data.OnboardingHandoffNote
 import app.pbbls.android.core.model.OnboardingReason
+import app.pbbls.android.core.ui.ONBOARDING_PROMPT_DEFAULT_SLUG
 import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakeCameraPhotos
 import app.pbbls.android.testing.FakeMomentWriteService
@@ -12,11 +12,11 @@ import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSnapWriteRepository
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.recordEffects
 import app.pbbls.android.testing.testSession
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 
@@ -41,32 +41,35 @@ class HomeMomentsViewModelTest {
         )
 
     @Test
-    fun `the first resume after the flow opens the composer with the prompt and refreshes the souls`() =
+    fun `the first resume after the flow opens the moment page with the reason's slug and refreshes the souls`() =
         runTest {
             handoff.leave(OnboardingHandoffNote(userId = "user-1", reason = OnboardingReason.GOOD_DAYS))
             val vm = viewModel()
+            val effects = recordEffects(vm.effects)
 
             vm.onResumed()
             advanceUntilIdle()
+            effects.stop()
 
-            assertEquals(R.string.onboarding_handoff_prompt_good_days, requireNotNull(vm.quick.sheet.value).promptRes)
+            assertEquals(listOf<HomeMomentEffect>(HomeMomentEffect.OpenMomentPage("good-days")), effects.values)
             assertEquals(1, reference.refreshSoulsCount)
         }
 
     @Test
-    fun `the note is taken once, and a resume with no note opens nothing`() =
+    fun `the note is taken once, a skipped reasons step travels as the default, and a resume with no note opens nothing`() =
         runTest {
             handoff.leave(OnboardingHandoffNote(userId = "user-1", reason = null))
             val vm = viewModel()
+            val effects = recordEffects(vm.effects)
 
             vm.onResumed()
             advanceUntilIdle()
-            assertEquals(R.string.onboarding_handoff_prompt_default, requireNotNull(vm.quick.sheet.value).promptRes)
+            assertEquals(listOf<HomeMomentEffect>(HomeMomentEffect.OpenMomentPage(ONBOARDING_PROMPT_DEFAULT_SLUG)), effects.values)
 
-            vm.quick.dismiss()
             vm.onResumed()
             advanceUntilIdle()
-            assertNull(vm.quick.sheet.value)
+            effects.stop()
+            assertEquals(1, effects.values.size)
             assertEquals(1, reference.refreshSoulsCount)
         }
 
@@ -76,13 +79,17 @@ class HomeMomentsViewModelTest {
             handoff.leave(OnboardingHandoffNote(userId = "user-1", reason = OnboardingReason.GOOD_DAYS))
 
             val other = viewModel(userId = "user-2")
+            val otherEffects = recordEffects(other.effects)
             other.onResumed()
             advanceUntilIdle()
-            assertNull(other.quick.sheet.value)
+            assertEquals(emptyList<HomeMomentEffect>(), otherEffects.values)
+            otherEffects.stop()
 
             val owner = viewModel(userId = "user-1")
+            val ownerEffects = recordEffects(owner.effects)
             owner.onResumed()
             advanceUntilIdle()
-            assertNull(owner.quick.sheet.value)
+            assertEquals(emptyList<HomeMomentEffect>(), ownerEffects.values)
+            ownerEffects.stop()
         }
 }

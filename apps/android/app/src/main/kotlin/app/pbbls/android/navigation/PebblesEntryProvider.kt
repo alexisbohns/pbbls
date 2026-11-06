@@ -78,12 +78,14 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 ) {
     entry<PebblesKey.Home>(metadata = NavTransitions.forKey(PebblesKey.Home)) {
         val reselected = remember(navigator) { navigator.reselectEvents.filter { it == PebblesKey.Home }.map {} }
-        // The camera and quick moments are Home's own; New pebble chains Capture into Complete (#1383 D7).
+        // The camera moment is Home's own; New pebble chains Capture into Complete (#1383 D7), and the
+        // quick moment is the moment page straight away (record-flow D13).
         HomeScreen(
             reselected = reselected,
             monthSlot = homeMonth,
             onOpenPath = { navigator.navigate(PebblesKey.Path) },
             onPebble = { navigator.navigate(PebblesKey.Capture(chainsComplete = true)) },
+            onQuickMoment = { reason -> navigator.navigate(PebblesKey.Capture(startsAtMomentPage = true, promptReason = reason)) },
             onOpenComplete = { navigator.navigate(PebblesKey.CompletePebble(it)) },
             onNameMoment = { navigator.navigate(PebblesKey.EditMoment(it)) },
             // The first five's tab tasks (D11): their intent is taken by the tab's root, so it opens there.

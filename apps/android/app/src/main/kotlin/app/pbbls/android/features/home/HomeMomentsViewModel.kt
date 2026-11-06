@@ -13,10 +13,8 @@ import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SnapUploadCoordinator
 import app.pbbls.android.core.data.SnapWriteRepositing
 import app.pbbls.android.core.data.SupabaseServicing
+import app.pbbls.android.core.ui.onboardingPromptSlug
 import app.pbbls.android.features.home.camera.CameraMoment
-import app.pbbls.android.features.home.quick.QuickMoment
-import app.pbbls.android.features.home.quick.QuickMomentExit
-import app.pbbls.android.features.home.quick.QuickMomentPrefill
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -25,10 +23,12 @@ import javax.inject.Inject
 
 /** What Home does once one of its own flows has written a moment (#1383 D7). */
 sealed interface HomeMomentEffect {
-    /** The quick moment saved: Home reloads, and opens Complete for [exit] [QuickMomentExit.OPEN]. */
-    data class QuickSaved(
-        val momentId: String,
-        val exit: QuickMomentExit,
+    /**
+     * The onboarding's hand-off: open the moment page, its NAME placeholder the prompt the reasons chose.
+     * [promptReason] is a stable slug (`onboardingPromptSlug`), because it rides on a navigation key.
+     */
+    data class OpenMomentPage(
+        val promptReason: String,
     ) : HomeMomentEffect
 
     /** The camera piece asked for a photo: the screen launches `TakePicture` into [uri]. */
@@ -47,19 +47,15 @@ sealed interface HomeMomentEffect {
 private const val KEY_CAMERA_SHOT = "home-camera-shot"
 
 /**
- * The writes Home starts itself (#1383 D7): the quick moment's sheet, and the camera moment. Scoped to
- * Home's entry like [HomeViewModel], beside it rather than inside it: [HomeViewModel] owns Home's reads
- * and keeps its constructor to them, this one owns the two flows' state holders and runs their writes
- * in its `viewModelScope`, so a save outlives the sheet that started it.
+ * The writes Home starts itself (#1383 D7): the camera moment. Scoped to Home's entry like
+ * [HomeViewModel], beside it rather than inside it: [HomeViewModel] owns Home's reads and keeps its
+ * constructor to them, this one owns [camera]'s state holder and runs its write in its `viewModelScope`
+ * ([CameraMoment]). After a save, Home reloads what it shows through [HomeViewModel.onMomentSaved];
+ * the Path re-reads on its own resume (#852). The quick moment is not here any more: its tile opens the
+ * moment page (record-flow D13).
  *
- * The sheet is not a navigation key (iOS presents it over Home, and Android draws it as a
- * `ModalBottomSheet` there), so there is no entry to scope a sheet-only ViewModel to: [quick] is a
- * plain holder, fresh each time the sheet opens; [camera] is the camera moment's ([CameraMoment]).
- * After any save, Home reloads what it shows through
- * [HomeViewModel.onMomentSaved]; the Path re-reads on its own resume (#852).
- *
- * The onboarding's hand-off (#1510 D9) lands here too: [onResumed] takes the flow's note once and
- * opens [quick] with the reasons' prompt as the placeholder.
+ * The onboarding's hand-off (#1510 D9) lands here: [onResumed] takes the flow's note once and asks Home
+ * to open the moment page with the reasons' prompt.
  */
 @HiltViewModel
 class HomeMomentsViewModel
@@ -76,14 +72,6 @@ class HomeMomentsViewModel
     ) : ViewModel() {
         private val effectsOut = UiEffects<HomeMomentEffect>(viewModelScope)
         val effects: Flow<HomeMomentEffect> = effectsOut.flow
-
-        val quick =
-            QuickMoment(
-                scope = viewModelScope,
-                writes = writes,
-                achievements = achievements,
-                onSaved = { id, exit -> effectsOut.emit(HomeMomentEffect.QuickSaved(id, exit)) },
-            )
 
         val camera =
             CameraMoment(
@@ -106,15 +94,16 @@ class HomeMomentsViewModel
         }
 
         /**
-         * The camera's resume, then the onboarding's note, once (#1510 D9): the composer opens with
-         * the prompt the first reason chose (the default one when step 3 was skipped), and the souls
-         * list is refreshed so the flow's new souls are in the Complete picker straight away. Nobody
-         * is pre-attached: souls attach to pebbles, and `save_moment` has no way to hold one.
+         * The camera's resume, then the onboarding's note, once (#1510 D9): the moment page opens with
+         * the prompt the first reason chose as its name placeholder (the default one when step 3 was
+         * skipped), and the souls list is refreshed so the flow's new souls are in the Complete picker
+         * straight away. Nobody is pre-attached: souls attach to pebbles, and `save_moment` has no way
+         * to hold one.
          */
         fun onResumed() {
             camera.onResumed()
             val note = handoff.take(supabase.session?.user?.id) ?: return
-            quick.open(QuickMomentPrefill(promptRes = onboardingHandoffPrompt(note.reason)))
+            effectsOut.emit(HomeMomentEffect.OpenMomentPage(onboardingPromptSlug(note.reason)))
             viewModelScope.launch { reference.refreshSouls() }
         }
     }

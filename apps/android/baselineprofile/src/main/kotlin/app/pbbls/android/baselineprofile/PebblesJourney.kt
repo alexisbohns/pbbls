@@ -114,6 +114,15 @@ internal fun MacrobenchmarkScope.ensureSignedIn(account: TestAccount?): Boolean 
         checkNotNull(device.wait(Until.findObject(By.res(HOME)), SIGN_IN_TIMEOUT_MS)) {
             "Finishing onboarding did not reach Home"
         }
+        // Home's resume then opens the moment page over it with the hand-off's prompt (record-flow D13,
+        // it was a sheet before): give it a beat to cover Home, then close it empty, which asks nothing.
+        device.waitForIdle()
+        if (!device.hasObject(By.res(HOME))) {
+            device.pressBack()
+            checkNotNull(device.wait(Until.findObject(By.res(HOME)), UI_TIMEOUT_MS)) {
+                "Closing the onboarding's moment page did not reach Home"
+            }
+        }
     }
     return true
 }

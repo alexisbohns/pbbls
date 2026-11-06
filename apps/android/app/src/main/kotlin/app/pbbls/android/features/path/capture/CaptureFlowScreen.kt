@@ -44,6 +44,7 @@ import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
+import app.pbbls.android.core.ui.onboardingPromptForSlug
 import app.pbbls.android.features.path.flow.RecordFlowChrome
 import app.pbbls.android.features.path.flow.RecordStepAction
 import app.pbbls.android.features.path.flow.RecordStepScaffold
@@ -248,6 +249,7 @@ fun CaptureFlowContent(
                             onChangePhoto = model::back,
                             onRetry = onRetryPhoto,
                             onRemove = onRemovePhoto,
+                            namePromptRes = onboardingPromptForSlug(uiState.promptReason),
                         )
                 }
             }
