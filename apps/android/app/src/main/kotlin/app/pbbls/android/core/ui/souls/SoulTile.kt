@@ -71,8 +71,12 @@ fun SoulTile(
                 .clip(shape)
                 .then(if (chosen) Modifier.background(colors.primary.copy(alpha = CHOSEN_ALPHA)) else Modifier)
                 .then(semanticsModifier)
-                .combinedClickable(role = if (showsSelection) null else Role.Button, onClick = onClick, onLongClick = onLongClick, hapticFeedbackEnabled = hapticsOn)
-                .heightIn(min = TILE_MIN_HEIGHT)
+                .combinedClickable(
+                    role = if (showsSelection) null else Role.Button,
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                    hapticFeedbackEnabled = hapticsOn,
+                ).heightIn(min = TILE_MIN_HEIGHT)
                 .padding(horizontal = PebblesTheme.spacing.xs, vertical = PebblesTheme.spacing.sm),
     ) {
         Column(

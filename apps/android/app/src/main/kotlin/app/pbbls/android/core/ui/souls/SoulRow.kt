@@ -3,6 +3,7 @@ package app.pbbls.android.core.ui.souls
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -100,37 +101,44 @@ fun SoulRow(
         } else {
             Modifier
         }
-    ListItem(
-        modifier =
-            modifier
-                .then(semanticsModifier)
-                .combinedClickable(role = if (showsSelection) null else Role.Button, onClick = onClick, onLongClick = onLongClick, hapticFeedbackEnabled = hapticsOn),
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        leadingContent = { SoulMark(glyph = soul.glyph, ink = colors.onSurface, modifier = Modifier.size(ROW_GLYPH)) },
-        headlineContent = {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = if (chosen) FontWeight.Bold else null,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        },
-        trailingContent = {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.md)) {
-                SoulCount(count = soul.pebblesCount)
-                if (showsSelection) {
-                    PbblsIconImage(
-                        icon = if (chosen) PbblsIcon.CHECK_CIRCLE else PbblsIcon.PLUS_CIRCLE,
-                        contentDescription = null,
-                        size = PbblsIconSize.TOOLBAR,
-                        tint = if (chosen) colors.primary else colors.onSurface,
-                    )
+    Column {
+        ListItem(
+            modifier =
+                modifier
+                    .then(semanticsModifier)
+                    .combinedClickable(
+                        role = if (showsSelection) null else Role.Button,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                        hapticFeedbackEnabled = hapticsOn,
+                    ),
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            leadingContent = { SoulMark(glyph = soul.glyph, ink = colors.onSurface, modifier = Modifier.size(ROW_GLYPH)) },
+            headlineContent = {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (chosen) FontWeight.Bold else null,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            trailingContent = {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.md)) {
+                    SoulCount(count = soul.pebblesCount)
+                    if (showsSelection) {
+                        PbblsIconImage(
+                            icon = if (chosen) PbblsIcon.CHECK_CIRCLE else PbblsIcon.PLUS_CIRCLE,
+                            contentDescription = null,
+                            size = PbblsIconSize.TOOLBAR,
+                            tint = if (chosen) colors.primary else colors.onSurface,
+                        )
+                    }
                 }
-            }
-        },
-    )
-    HorizontalDivider(modifier = Modifier.padding(horizontal = PebblesTheme.spacing.lg), color = colors.outlineVariant)
+            },
+        )
+        HorizontalDivider(modifier = Modifier.padding(horizontal = PebblesTheme.spacing.lg), color = colors.outlineVariant)
+    }
 }
 
 /** The Add row: first slot of the results while the query matches nobody exactly. */
@@ -142,28 +150,30 @@ fun SoulAddRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
-    ListItem(
-        modifier = modifier.combinedClickable(role = Role.Button, onClick = onClick),
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        leadingContent = { SoulMark(glyph = null, ink = colors.onSurface, modifier = Modifier.size(ROW_GLYPH)) },
-        headlineContent = {
-            Text(
-                text = stringResource(R.string.souls_add_named, name),
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        },
-        supportingContent = {
-            Text(
-                text = stringResource(R.string.souls_add_caption),
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.onSurfaceVariant,
-            )
-        },
-        trailingContent = {
-            PbblsIconImage(icon = PbblsIcon.PLUS_CIRCLE, contentDescription = null, size = PbblsIconSize.TOOLBAR, tint = colors.primary)
-        },
-    )
-    HorizontalDivider(modifier = Modifier.padding(horizontal = PebblesTheme.spacing.lg), color = colors.outlineVariant)
+    Column {
+        ListItem(
+            modifier = modifier.combinedClickable(role = Role.Button, onClick = onClick),
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            leadingContent = { SoulMark(glyph = null, ink = colors.onSurface, modifier = Modifier.size(ROW_GLYPH)) },
+            headlineContent = {
+                Text(
+                    text = stringResource(R.string.souls_add_named, name),
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            supportingContent = {
+                Text(
+                    text = stringResource(R.string.souls_add_caption),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant,
+                )
+            },
+            trailingContent = {
+                PbblsIconImage(icon = PbblsIcon.PLUS_CIRCLE, contentDescription = null, size = PbblsIconSize.TOOLBAR, tint = colors.primary)
+            },
+        )
+        HorizontalDivider(modifier = Modifier.padding(horizontal = PebblesTheme.spacing.lg), color = colors.outlineVariant)
+    }
 }

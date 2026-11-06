@@ -2,6 +2,7 @@ package app.pbbls.android.core.ui.souls
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,7 +29,8 @@ private const val TAG = "SoulChooserSearch"
 /**
  * The search field that replaces the top bar while looking someone up (mock 11): back closes and
  * clears, the cross clears the query. A failed create shows its line under the field with the
- * query kept (S4). Takes focus when it opens.
+ * query kept (S4). Takes focus when it opens. The stock bar's own status-bar inset is zeroed, so
+ * a host that puts the field at the top of a screen adds `statusBarsPadding()` itself.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +52,7 @@ fun SoulChooserSearchField(
     Column(modifier = modifier.padding(horizontal = PebblesTheme.spacing.lg)) {
         SearchBar(
             modifier = Modifier.fillMaxWidth(),
+            windowInsets = WindowInsets(0),
             expanded = false,
             onExpandedChange = {},
             inputField = {
