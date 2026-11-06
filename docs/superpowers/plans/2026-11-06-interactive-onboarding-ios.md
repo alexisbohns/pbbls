@@ -12,6 +12,8 @@
 
 ---
 
+> **Read with "Lessons learned" at the end.** The build departed from this text in several places, on review and on the device pass. The code and the 2026-11-06 decision log entry are the record.
+
 ## Read this first: what went wrong on Android
 
 The Android walk passed on logic while the design had drifted: "the implementation is contradicting the current implemented components or not complying with the approved designs." Plan text and two reviews never opened the mock. So:
@@ -956,3 +958,34 @@ Fresh throwaway account with an empty ledger on the simulator, then the maintain
 - [ ] Home greets by the new name, composer open with the prompt, the people appear in Complete.
 - [ ] A pre-flow account: no flow; a missing act still meets the gate. Parked invite waits for the end.
 - [ ] Dark, French, largest accessibility size, iPhone SE width.
+
+---
+
+## Lessons learned
+
+**What the device pass found that nothing else did.** Five parts, five reviews and 1,600 green tests never caught that an achievement card could not be dismissed, because no test taps through a real window and no reference render has a window at all. It took one real first carve. A pass on a real account against the mock is not a formality: book it before the stack is called done, and read the server back afterwards (`status`), because reasons order, pace and the ledger are invisible on screen.
+
+**Corrections to this plan's text, in the order they surfaced:**
+- `OnboardingFlowStep.ID` became `StepID`, for lint.
+- The model grew `sessionEnded()` and a loop that checks before every act, because an immutable `userId` does not stop a write loop: the next `record` goes out under whoever is signed in by then.
+- Consent's body line is upright body text, not the scaffold's italic lead. The mock, Android and this plan agreed; the first build still used the lead.
+- Cell heights follow the mock (112 and 84 for the glyph grid, 116 for people), not Android's 96, 72 and 104, which this plan had copied.
+- `Your name`'s French is shared with Settings ("Votre nom"), so the flow uses a dedicated `onboarding.you.name` ("Ton prénom"). Check each key before reusing it.
+- A case-insensitive duplicate person is refused at commit. The plan did not cover it, and `duplicate_soul` would have failed the whole send at step 6 with a message blaming the connection.
+- `OnboardingPresentation` and `ConsentLayerView` are new: `RootView` went over the lint limits, and the fail-closed layer is safer as a pure function tested on every combination.
+
+**SwiftUI facts that cost time:**
+- A modifier outside `pebblesFont` or `spineType` loses to the rank's own value: `.tracking` and `.lineSpacing` did nothing until they were set on the rank or inside it.
+- SwiftUI clamps negative `lineSpacing` to zero, so a rank's line height below the font's natural height never shows on iOS 17 APIs.
+- `ImageRenderer` draws a yellow no-entry placeholder for `Toggle`, which is why `drawsStaticSwitches` exists. Neither it nor a reference render proves the real control.
+- A `.frame(minHeight:)` outside a `Button` does not enlarge its target. The label owns the frame and the `contentShape`.
+- Removing a cover's presenting branch fires neither its `onDismiss` nor an `.onChange` inside it, so a host cannot be relied on to notice a sign-out.
+- SwiftUI content hits a `UIHostingController`'s root view, so a passthrough window cannot tell content from empty space by the hit view.
+
+**Reviewing.** The review that found the most was the last and most adversarial: it read the pinned SDK and turned "perhaps 60 s" into "about 4 minutes" of blank screen, because every GET is retried. Give the final reviewer sequences to trace, not a diff to read. A reviewer that opens the mock frames finds different things from one that reads the code.
+
+**Driving the simulator.** Instant synthetic clicks are dropped on native controls such as `Toggle`: press, wait about 0.12 s, release. Typing through a French Mac layout loses characters: put text on the simulator's pasteboard with `simctl pbcopy` and paste. Testing on a production backend means a throwaway account the maintainer creates and signs in to; the agent never types a password. `onboarding-verify-*@example.test` is already in the orphan sweep.
+
+**Pushing.** Holding the first push until after the device pass meant fixes landed in their owning layer with no force-push.
+
+**Owed:** #1566 (Android), #1567 (the gate's own read has no ceiling), #1568 (a parked invite survives sign-out), the once-per-device flag and its backfill, dark, French and small screens on a live build, a real iOS 17 run, and a dropped cover on a real Google sign-in, which has only unit tests.

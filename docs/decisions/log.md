@@ -1911,10 +1911,13 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - **Step 2 keeps a quiet Log out** while any act is missing, departing from the mock and from Android. It is the exit iOS's gate already offers: declining is logging out. The same step's sign-out leaves the device flag alone, so the flow restarts next time.
   - **A duplicate person is refused at commit, case-insensitively:** `complete_onboarding` raises `duplicate_soul` on two `lower(btrim(name))` that collide, which would fail the whole send at step 6 for a typo at step 5.
   - **D9 stays open.** The hand-off is prompt only: `save_moment` has no `soul_ids` and no moment-to-soul table exists, so the composer attaches nobody.
+  - **Nothing in the flow's way is unbounded or silent.** The flag read is one attempt with an 8 s ceiling, then the consent gate decides; the wait shows the logo, never an empty surface. A cover that does not come up within about 2 s is re-presented once, then the layer falls to the gate, which has the form and Log out.
+  - **Unlock cards wait until the flow is over:** held while the cover is up, released on the hand-off composer's first save or close, or when the flow ends without one. A card fired in the flow would otherwise land on top of it.
 - **Why:** A layer that fails closed by construction is safer next to a legal gate than a condition on each of the things beneath it, and a pure function can be tested for every combination. Binding the pass to the session's user and the note to its user keeps one account's state from ever opening anything for the next.
 - **Consequences:**
   - **Android owes the mirror of the step 2 Log out and of the duplicate refusal.** Neither is there yet.
   - The flag is once per device on both surfaces: a new account on a device that already finished the flow is not onboarded. Fixing that needs a backfill of pre-flow accounts first.
+  - **The unlock card's window now holds every touch while a moment is up** (`KarmaPassthroughWindow.capturesTouches`). SwiftUI content hits the hosting root itself, so a hit test on the root could not tell the card from an empty area, and the card could not be dismissed. The karma pastille has the same hit test and was not changed.
   - Web follows in its own plan, with this gate as the reference.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #1565, #1510, #1466, `docs/superpowers/specs/2026-11-04-interactive-onboarding-design.md`, `docs/superpowers/plans/2026-11-06-interactive-onboarding-ios.md`, the 2026-11-05 entry "The onboarding gate reads the profile, and consent moves into the flow on Android (#1510)".
