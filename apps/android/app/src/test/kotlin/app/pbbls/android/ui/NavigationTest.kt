@@ -186,13 +186,13 @@ class NavigationTest : AppUiTest() {
     }
 
     @Test
-    fun `People opens the soul form`() {
+    fun `People's plus opens the search field`() {
         signedIn()
         onTab(R.string.tab_people).performClick()
 
         onDescription(R.string.souls_add_a11y).performClick()
 
-        onText(R.string.create_soul_title).assertIsDisplayed()
+        onText(R.string.souls_search).assertIsDisplayed()
     }
 
     // ---- Collections ----

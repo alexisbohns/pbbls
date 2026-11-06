@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SoulsServicing
@@ -47,6 +48,15 @@ sealed interface SoulsListUiState {
     ) : SoulsListUiState
 }
 
+/** What an inline create came to (S4): the host closes the field or shows the failure line. */
+sealed interface SoulCreateOutcome {
+    data class Created(
+        val soul: SoulWithGlyph,
+    ) : SoulCreateOutcome
+
+    data object Failed : SoulCreateOutcome
+}
+
 /** The delete dialogs, which stack over the grid. */
 data class SoulsListCovers(
     val pendingDeletion: SoulWithGlyph? = null,
@@ -76,11 +86,19 @@ class SoulsListViewModel
         private val haptics: HapticsPreference,
         /** Home's "Add your first soul" leaves [TabIntent.CreateSoul] here (#1383 D11). */
         private val tabIntents: TabIntents,
+        private val achievements: AchievementsServicing,
     ) : ViewModel() {
         private val _createRequests = UiEffects<Unit>(viewModelScope)
 
         /** Open the create sheet: Home asked for it (once per intent). */
         val createRequests: Flow<Unit> = _createRequests.flow
+
+        private val _createOutcomes = UiEffects<SoulCreateOutcome>(viewModelScope)
+
+        /** The inline create's result, once per create (S4). */
+        val createOutcomes: Flow<SoulCreateOutcome> = _createOutcomes.flow
+
+        private var isCreating = false
 
         private var souls: List<SoulWithGlyph> = emptyList()
         private var hasFailed = false
@@ -169,6 +187,34 @@ class SoulsListViewModel
             tabIntents.take<TabIntent.CreateSoul>()?.let { _createRequests.emit(Unit) }
             resumeCount += 1
             if (resumeCount > 1) reload()
+        }
+
+        // MARK: - Create
+
+        /**
+         * Inline create from the chooser's search field (S4): a name-only soul with the default
+         * glyph, then a refresh, then the outcome. The host opens the new soul's page so its
+         * drawing can be picked. [ReferenceDataServicing.createSoul] swallows its own failure and
+         * returns null, which is what [SoulCreateOutcome.Failed] reports.
+         */
+        fun createSoul(name: String) {
+            if (isCreating) return
+            isCreating = true
+            viewModelScope.launch {
+                try {
+                    val created = refs.createSoul(name)
+                    if (created == null) {
+                        Log.e(TAG, "create soul failed")
+                        _createOutcomes.emit(SoulCreateOutcome.Failed)
+                    } else {
+                        achievements.fireCheck()
+                        reload()
+                        _createOutcomes.emit(SoulCreateOutcome.Created(created))
+                    }
+                } finally {
+                    isCreating = false
+                }
+            }
         }
 
         // MARK: - Delete

@@ -399,7 +399,6 @@
 
     <!-- ==== Souls management (M41 sub-project D). "Souls" is product vocabulary
          but localizes ("Âmes"), unlike "Pebbles". ==== -->
-    <string name="souls_title">Souls</string>
     <string name="souls_add_a11y">Add soul</string>
     <string name="people_circle_a11y">Circle</string>
     <string name="souls_empty_title">No souls yet</string>

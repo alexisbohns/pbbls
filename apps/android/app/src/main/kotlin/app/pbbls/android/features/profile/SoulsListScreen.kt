@@ -3,16 +3,12 @@ package app.pbbls.android.features.profile
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -25,14 +21,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
+import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.PbblsIcon
@@ -43,16 +41,20 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.model.SoulWithGlyph
-import app.pbbls.android.core.ui.SoulItem
-import app.pbbls.android.core.ui.SoulItemCase
+import app.pbbls.android.core.ui.souls.SoulChooserBody
+import app.pbbls.android.core.ui.souls.SoulChooserMode
+import app.pbbls.android.core.ui.souls.SoulChooserSearchButton
+import app.pbbls.android.core.ui.souls.SoulChooserSearchField
+import app.pbbls.android.core.ui.souls.SoulChooserState
+import app.pbbls.android.core.ui.souls.rememberSoulChooserState
 
 /**
- * The souls grid — ports iOS `SoulsListView.swift` as a NavHost push (D1):
- * adaptive-96 grid of shared [SoulItem] cells, "+" top-bar create, tap → the
- * detail route, long-press → delete menu + confirm (D7 unifies on the M39 D8
- * idiom over iOS's context menu). This function wires [SoulsListViewModel] —
- * the fetch, the delete and the reference-data refresh that keeps the
- * pebble-form picker in sync — and owns the delete dialogs; [SoulsListContent]
+ * The People tab (souls spec S10, mock 13): the souls chooser in browse mode — usual tiles, A–Z
+ * rows with a count, a lens and a plus that open the search field — under a "People" bar with the
+ * Circle button. Tap opens the soul's page (list-detail beside it on wide windows), long press
+ * opens the delete menu then its confirm (the M39 D8 idiom; D7). This function wires
+ * [SoulsListViewModel] — the fetch, the delete, the inline create and the reference-data refresh
+ * that keeps the pebble-form picker in sync — and owns the delete dialogs; [SoulsListContent]
  * renders (#940).
  *
  * @param onOpenCircle Opens Connections, the People tab's way to your circle
@@ -65,9 +67,7 @@ import app.pbbls.android.core.ui.SoulItemCase
  */
 @Composable
 fun SoulsListScreen(
-    onBack: () -> Unit,
     onOpenSoul: (SoulWithGlyph) -> Unit,
-    onCreateSoul: () -> Unit,
     onOpenCircle: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteConfirmed: (id: String) -> Unit = {},
@@ -75,6 +75,14 @@ fun SoulsListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
+    // `Content` means loaded: until then the list is a placeholder and must not prune anything.
+    val content = uiState as? SoulsListUiState.Content
+    val chooser =
+        rememberSoulChooserState(
+            mode = SoulChooserMode.Browse,
+            souls = content?.souls.orEmpty(),
+            isLoaded = content != null,
+        )
 
     // Returning from the detail must re-read the list: the ViewModel is
     // scoped to the back stack entry, which survives the round trip that
@@ -83,14 +91,25 @@ fun SoulsListScreen(
         viewModel.onResumed()
         onPauseOrDispose {}
     }
-    // Home's first five asked for it (#1383 D11), taken once by the ViewModel on resume.
-    ObserveUiEffects(viewModel.createRequests) { onCreateSoul() }
+    // Home's first five asked for it (#1383 D11), taken once by the ViewModel on resume: the
+    // plus with no query opens the field, so that is what the ask does.
+    ObserveUiEffects(viewModel.createRequests) { chooser.openSearch() }
+    ObserveUiEffects(viewModel.createOutcomes) { outcome ->
+        when (outcome) {
+            is SoulCreateOutcome.Created -> {
+                chooser.didCreate(outcome.soul)
+                // The drawing is picked on the soul's page.
+                onOpenSoul(outcome.soul)
+            }
+            SoulCreateOutcome.Failed -> chooser.createErrorRes = R.string.soul_save_error
+        }
+    }
 
     SoulsListContent(
         uiState = uiState,
-        onBack = onBack,
+        chooser = chooser,
         onOpenSoul = onOpenSoul,
-        onCreateSoul = onCreateSoul,
+        onCreate = viewModel::createSoul,
         onOpenCircle = onOpenCircle,
         onRetry = viewModel::retry,
         onDeleteSoul = viewModel::requestDelete,
@@ -114,17 +133,17 @@ fun SoulsListScreen(
 }
 
 /**
- * The souls grid without its ViewModel (#940): the top bar, the three states
- * and the grid. [SoulsListScreen] wires it; screenshots drive it directly.
- * [hapticsOn] is Pebbles' haptics switch (#1242 D23), for the cells' long press.
+ * The People tab without its ViewModel (#940): the top bar (or the search field), the three states
+ * and the chooser. [SoulsListScreen] wires it; screenshots drive it directly with their own
+ * [chooser]. [hapticsOn] is Pebbles' haptics switch (#1242 D23), for the long press and the taps.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoulsListContent(
     uiState: SoulsListUiState,
-    onBack: () -> Unit,
+    chooser: SoulChooserState,
     onOpenSoul: (SoulWithGlyph) -> Unit,
-    onCreateSoul: () -> Unit,
+    onCreate: (String) -> Unit,
     onOpenCircle: () -> Unit,
     onRetry: () -> Unit,
     onDeleteSoul: (SoulWithGlyph) -> Unit,
@@ -132,41 +151,39 @@ fun SoulsListContent(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
+    val buzz = rememberTapHaptics { hapticsOn }
+    // The soul whose delete menu is open: the menu is drawn inside that item, so it anchors there.
+    var menuFor by remember { mutableStateOf<String?>(null) }
+
+    // Back closes the open search field first, then leaves as usual.
+    val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+    NavigationBackHandler(state = backState, isBackEnabled = chooser.isSearching) { chooser.closeSearch() }
 
     PebblesScreen(
         modifier = modifier,
         topBar = {
-            PebblesTopBar(
-                title = stringResource(R.string.souls_title),
-                leading = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = colors.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
-                    IconButton(onClick = onOpenCircle) {
-                        PbblsIconImage(
-                            icon = PbblsIcon.PEOPLE,
-                            size = PbblsIconSize.TOOLBAR,
-                            contentDescription = stringResource(R.string.people_circle_a11y),
-                            tint = colors.onSurfaceVariant,
-                        )
-                    }
-                },
-                trailing = {
-                    IconButton(onClick = onCreateSoul) {
-                        PbblsIconImage(
-                            icon = PbblsIcon.PLUS_CIRCLE,
-                            size = PbblsIconSize.TOOLBAR,
-                            contentDescription = stringResource(R.string.souls_add_a11y),
-                            tint = colors.onSurfaceVariant,
-                        )
-                    }
-                },
-            )
+            if (chooser.isSearching) {
+                SoulChooserSearchField(
+                    state = chooser,
+                    onClose = chooser::closeSearch,
+                    modifier = Modifier.statusBarsPadding().padding(top = PebblesTheme.spacing.sm, bottom = PebblesTheme.spacing.sm),
+                )
+            } else {
+                PebblesTopBar(
+                    title = stringResource(R.string.tab_people),
+                    trailing = {
+                        SoulChooserSearchButton(state = chooser)
+                        IconButton(onClick = onOpenCircle) {
+                            PbblsIconImage(
+                                icon = PbblsIcon.PEOPLE,
+                                size = PbblsIconSize.TOOLBAR,
+                                contentDescription = stringResource(R.string.people_circle_a11y),
+                                tint = colors.onSurfaceVariant,
+                            )
+                        }
+                    },
+                )
+            }
         },
     ) {
         // Exhaustive with no `else`: a new SoulsListUiState case must be rendered.
@@ -197,73 +214,65 @@ fun SoulsListContent(
                 }
 
             is SoulsListUiState.Content ->
-                if (state.souls.isEmpty()) {
-                    ProfileEmptyState(
-                        title = stringResource(R.string.souls_empty_title),
-                        message = stringResource(R.string.souls_empty_message),
-                    )
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(96.dp),
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(PebblesTheme.spacing.lg),
-                        horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.lg),
-                        verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.lg),
-                    ) {
-                        items(state.souls, key = { it.id }) { soul ->
-                            SoulCell(
-                                soul = soul,
-                                onTap = { onOpenSoul(soul) },
-                                onDelete = { onDeleteSoul(soul) },
-                                hapticsOn = hapticsOn,
-                            )
-                        }
+                Box(Modifier.fillMaxSize()) {
+                    // Nobody yet: the empty state sits behind the chooser, whose plus still adds one.
+                    if (state.souls.isEmpty() && !chooser.isSearching) {
+                        ProfileEmptyState(
+                            title = stringResource(R.string.souls_empty_title),
+                            message = stringResource(R.string.souls_empty_message),
+                        )
                     }
+                    SoulChooserBody(
+                        state = chooser,
+                        isLoaded = true,
+                        loadFailed = false,
+                        onRetry = onRetry,
+                        onOpenSoul = onOpenSoul,
+                        onCreate = onCreate,
+                        onHaptic = buzz,
+                        onLongClickSoul = { menuFor = it.id },
+                        hapticsOn = hapticsOn,
+                        itemMenu = { soul ->
+                            DeleteMenu(
+                                expanded = menuFor == soul.id,
+                                onDismiss = { menuFor = null },
+                                onDelete = {
+                                    menuFor = null
+                                    onDeleteSoul(soul)
+                                },
+                            )
+                        },
+                    )
                 }
         }
     }
 }
 
-/** Grid cell wrapper anchoring the long-press delete menu — the PebbleRow menu idiom. */
+/** The long-press delete menu, anchored on the tile or row it is drawn in — the PebbleRow menu idiom. */
 @Composable
-private fun SoulCell(
-    soul: SoulWithGlyph,
-    onTap: () -> Unit,
+private fun DeleteMenu(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
     onDelete: () -> Unit,
-    hapticsOn: Boolean,
 ) {
-    var menuExpanded by remember { mutableStateOf(false) }
-    Box {
-        SoulItem(
-            case = SoulItemCase.DEFAULT,
-            soul = soul,
-            count = soul.pebblesCount,
-            onTap = onTap,
-            onLongPress = { menuExpanded = true },
-            hapticsOn = hapticsOn,
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        DropdownMenuItem(
+            text = {
+                Text(
+                    text = stringResource(R.string.pebble_delete),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            },
+            leadingIcon = {
+                PbblsIconImage(
+                    icon = PbblsIcon.TRASH,
+                    size = PbblsIconSize.ROW,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            },
+            onClick = onDelete,
         )
-        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = stringResource(R.string.pebble_delete),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                },
-                leadingIcon = {
-                    PbblsIconImage(
-                        icon = PbblsIcon.TRASH,
-                        size = PbblsIconSize.ROW,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                    )
-                },
-                onClick = {
-                    menuExpanded = false
-                    onDelete()
-                },
-            )
-        }
     }
 }

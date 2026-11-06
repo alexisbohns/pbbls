@@ -143,9 +143,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         metadata = NavTransitions.forKey(PebblesKey.People) + PanePairs.metadataFor(PebblesKey.People),
     ) {
         SoulsListScreen(
-            onBack = navigator::goBack,
             onOpenSoul = { navigator.navigateToDetail(PebblesKey.SoulDetail(it.id)) },
-            onCreateSoul = { navigator.navigate(PebblesKey.SoulForm()) },
             onOpenCircle = { navigator.navigate(PebblesKey.Connections) },
             onDeleteConfirmed = { navigator.closeDetail(PebblesKey.SoulDetail(it)) },
         )
