@@ -86,4 +86,17 @@ class RecordWhenChipTest {
         assertTrue(fr, fr.endsWith("10:30"))
         assertEquals("mar. 13 oct.", weekdayAndDate(ZonedDateTime.of(2026, 10, 13, 10, 30, 0, 0, zone), Locale.FRENCH))
     }
+
+    @Test
+    fun `Done with nothing changed writes nothing, and a change writes the picked moment`() {
+        val current = OffsetDateTime.parse("2026-10-13T10:30:45+02:00")
+        val dayMillis =
+            app.pbbls.android.features.path.create.WhenDateTime
+                .toUtcDateMillis(current, zone)
+        assertEquals(null, editedWhen(current, zone, dayMillis, 10, 30))
+        val later = editedWhen(current, zone, dayMillis, 11, 30)
+        assertEquals(OffsetDateTime.parse("2026-10-13T11:30:00+02:00"), later)
+        val nextDay = editedWhen(current, zone, dayMillis + 86_400_000L, 10, 30)
+        assertEquals(OffsetDateTime.parse("2026-10-14T10:30:00+02:00"), nextDay)
+    }
 }

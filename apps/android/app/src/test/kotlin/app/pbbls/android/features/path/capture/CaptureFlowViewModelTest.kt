@@ -627,4 +627,112 @@ class CaptureFlowViewModelTest {
             assertEquals(CaptureStep.MOMENT, h.viewModel.machine().step)
             effects.stop()
         }
+
+    @Test
+    fun `a quick moment sent back to the photo stays there after process death`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val first = Harness(handle)
+            first.viewModel.start(chainsComplete = false, startsAtMomentPage = true)
+            first.viewModel.machine().back()
+            advanceUntilIdle()
+            assertEquals(CaptureStep.PHOTO, first.viewModel.uiState.value.flow.step)
+
+            val second = Harness(handle)
+            second.viewModel.start(chainsComplete = false, startsAtMomentPage = true)
+            assertEquals(CaptureStep.PHOTO, second.viewModel.uiState.value.flow.step)
+            assertEquals(CaptureStep.PHOTO, second.viewModel.machine().step)
+        }
+
+    @Test
+    fun `a fresh quick moment goes to the page, once`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.start(chainsComplete = false, startsAtMomentPage = true)
+            assertEquals(CaptureStep.MOMENT, h.viewModel.uiState.value.flow.step)
+            h.viewModel.machine().back()
+            // A second start (the key's remember recomputed) must not drag it forward again.
+            h.viewModel.start(chainsComplete = false, startsAtMomentPage = true)
+            assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
+        }
+
+    @Test
+    fun `the name and the words never end on half an emoji`() =
+        runTest {
+            val h = Harness()
+            // A pair is two chars: 39 letters then the pair straddles the limit of 40.
+            h.viewModel.machine().setName("a".repeat(39) + "\uD83D\uDE00")
+            assertEquals(
+                "a".repeat(39),
+                h.viewModel
+                    .machine()
+                    .draft.name,
+            )
+            h.viewModel.machine().setDescription("b".repeat(279) + "\uD83D\uDE00")
+            assertEquals(
+                "b".repeat(279),
+                h.viewModel
+                    .machine()
+                    .draft.description,
+            )
+            h.viewModel.machine().setName("a".repeat(38) + "\uD83D\uDE00")
+            assertEquals(
+                40,
+                h.viewModel
+                    .machine()
+                    .draft.name.length,
+            )
+        }
+
+    @Test
+    fun `saving from a restored photo sends the original upload's storage path`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val first = Harness(handle)
+            first.viewModel.onPhotoPicked(pick)
+            settle()
+            val snapId = first.snapRepo.uploaded.single()
+
+            val second = Harness(handle)
+            second.viewModel.save(thenComplete = false)
+            advanceUntilIdle()
+            val sent =
+                second.writes.saved
+                    .single()
+                    .snaps
+            assertEquals(listOf(PebbleSnapPayload(snapId, "user-1/$snapId", 0)), sent)
+        }
+
+    @Test
+    fun `a failed save then a discard deletes the files and leaves no draft`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            h.viewModel.machine().setName("Walk")
+            h.writes.failNext = postgrestException("moment_empty")
+            h.viewModel.save(thenComplete = false)
+            advanceUntilIdle()
+            assertTrue(h.snapRepo.deletedSnapIds.isEmpty())
+            h.viewModel.onCloseRequested()
+            h.viewModel.onDiscard()
+            advanceUntilIdle()
+            settle()
+            assertEquals(1, h.snapRepo.deletedSnapIds.size)
+            assertNull(handle.get<String>("capture-snap-id"))
+            assertNull(handle.get<String>("capture-name"))
+        }
+
+    @Test
+    fun `once saved, the screen keeps the photo it showed`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            h.viewModel.save(thenComplete = false)
+            advanceUntilIdle()
+            settle()
+            assertTrue(h.viewModel.uiState.value.snap is FormSnap.Pending)
+        }
 }

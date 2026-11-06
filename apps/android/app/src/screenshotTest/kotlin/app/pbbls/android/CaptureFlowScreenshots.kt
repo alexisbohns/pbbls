@@ -133,7 +133,13 @@ fun Capture_MomentCounter() {
 @Composable
 fun Capture_MomentUploading() {
     PebblesTheme {
-        CapturePreview(CaptureStep.MOMENT, snap = pendingSnap(AttachedSnap.UploadState.UPLOADING), seededFromPhoto = true)
+        // The blocked state the app is in while a photo uploads: both saves disabled.
+        CapturePreview(
+            CaptureStep.MOMENT,
+            snap = pendingSnap(AttachedSnap.UploadState.UPLOADING),
+            seededFromPhoto = true,
+            blockedRes = R.string.pebble_save_error_photo_uploading,
+        )
     }
 }
 

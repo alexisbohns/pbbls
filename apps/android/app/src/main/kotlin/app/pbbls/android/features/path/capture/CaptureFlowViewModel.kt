@@ -113,6 +113,15 @@ class CaptureFlowViewModel
         /** Pebbles' haptics switch (#1242 D23): the screen asks it at each buzz, so Settings applies at once. */
         val hapticsOn: Boolean get() = haptics.isOn
 
+        /**
+         * Whether a step was saved before this ViewModel existed. Read here, before the collector in `init`
+         * starts: that collector writes the step at once, and would make every start look restored.
+         */
+        private val hasRestoredStep: Boolean = savedState.contains(KEY_STEP)
+
+        /** The key's step is applied once, and never over a restored one. */
+        private var hasAppliedKeyStep = false
+
         /** An uploaded photo's id from before the process died: its files are in Storage, its bytes are gone. */
         private val restoredSnap: FormSnap? =
             savedState.get<String>(KEY_SNAP_ID)?.let {
@@ -192,6 +201,9 @@ class CaptureFlowViewModel
             }
             viewModelScope.launch {
                 snapshotFlow { snaps.formSnap }.collect { snap ->
+                    // Once saved, `snaps.reset()` empties the coordinator; the screen keeps showing what it
+                    // showed through the exit animation instead of flipping to "Add a photo".
+                    if (model.state.value.isSaved) return@collect
                     model.hasSnap = snap != null
                     // Only a photo already in Storage is worth keeping across a kill (iOS `savedSnap`):
                     // a pick still uploading is picked again after a restore.
@@ -206,14 +218,15 @@ class CaptureFlowViewModel
 
         /**
          * The key's arguments, from the screen before its first frame. Idempotent. A quick moment
-         * (D13) lands on the page, and keeps a draft restored onto it as it is.
+         * (D13) lands on the page, unless a step was restored: then it stays where it was.
          */
         fun start(
             chainsComplete: Boolean,
             startsAtMomentPage: Boolean = false,
             promptReason: String? = null,
         ) {
-            if (startsAtMomentPage) model.goTo(CaptureStep.MOMENT)
+            if (startsAtMomentPage && !hasRestoredStep && !hasAppliedKeyStep) model.goTo(CaptureStep.MOMENT)
+            hasAppliedKeyStep = true
             // The flow too, now: its collector runs a beat later, and the first frame must already be the page.
             _uiState.update {
                 it.copy(

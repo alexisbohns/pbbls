@@ -46,6 +46,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.common.takeSafely
 import app.pbbls.android.core.designsystem.PbblsIcon
 import app.pbbls.android.core.designsystem.PbblsIconImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
@@ -94,7 +96,6 @@ fun RecordMomentStep(
     draft: CaptureDraft,
     whenSource: WhenSource,
     snap: FormSnap?,
-    @StringRes blockedMessageRes: Int?,
     @StringRes errorRes: Int?,
     onNameChange: (String) -> Unit,
     onWordsChange: (String) -> Unit,
@@ -118,10 +119,8 @@ fun RecordMomentStep(
         PhotoRow(snap = snap, onChangePhoto = onChangePhoto, onRetry = onRetry, onRemove = onRemove)
 
         // Under the photo, not at the foot of the page as on iOS: here the page scrolls under the
-        // keyboard, and a refused save must be seen without scrolling to the end.
-        blockedMessageRes?.let {
-            Text(text = stringResource(it), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
-        }
+        // keyboard, and a refused save must be seen without scrolling to the end. There is no line for a
+        // photo still uploading: the buttons are disabled and the photo row already says why.
         errorRes?.let {
             Text(text = stringResource(it), style = MaterialTheme.typography.bodyLarge, color = colors.error)
         }
@@ -140,6 +139,7 @@ fun RecordMomentStep(
                 focusRequester = nameFocus,
                 // A name is one line: a return key (a hardware keyboard sends one) moves on, as the IME's next does.
                 onNewline = { wordsFocus.requestFocus() },
+                label = stringResource(R.string.capture_field_name),
             )
         }
 
@@ -169,6 +169,7 @@ fun RecordMomentStep(
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Default),
                     keyboardActions = KeyboardActions.Default,
                     focusRequester = wordsFocus,
+                    label = stringResource(R.string.capture_field_words),
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     PbblsIconImage(
@@ -242,6 +243,7 @@ private fun ClampedField(
     keyboardActions: KeyboardActions,
     focusRequester: FocusRequester,
     onNewline: (() -> Unit)? = null,
+    label: String,
 ) {
     val colors = MaterialTheme.colorScheme
     var field by remember { mutableStateOf(TextFieldValue(text = text, selection = TextRange(text.length))) }
@@ -269,7 +271,7 @@ private fun ClampedField(
                     } else {
                         raw
                     }
-                val clamped = incoming.text.take(limit)
+                val clamped = incoming.text.takeSafely(limit)
                 // Assigning state (not just reporting upward) is what actually rewrites the visible field.
                 field =
                     if (clamped == incoming.text) {
@@ -286,7 +288,7 @@ private fun ClampedField(
             maxLines = maxLines,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
-            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester).semantics { contentDescription = label },
         )
     }
 }

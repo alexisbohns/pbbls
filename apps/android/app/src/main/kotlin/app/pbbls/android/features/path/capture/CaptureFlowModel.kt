@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path.capture
 
+import app.pbbls.android.core.common.takeSafely
 import app.pbbls.android.core.data.TapHaptic
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,11 +42,11 @@ class CaptureFlowModel(
     fun goTo(target: CaptureStep) = _state.update { it.copy(step = target) }
 
     /** Front-end clamp only (M58 D3); the server does not constrain names. */
-    fun setName(raw: String) = _state.update { it.copy(draft = it.draft.copy(name = raw.take(NAME_LIMIT)), errorRes = null) }
+    fun setName(raw: String) = _state.update { it.copy(draft = it.draft.copy(name = raw.takeSafely(NAME_LIMIT)), errorRes = null) }
 
     /** Front-end clamp only, like the name: three visible lines and a counter. */
     fun setDescription(raw: String) =
-        _state.update { it.copy(draft = it.draft.copy(description = raw.take(DESCRIPTION_LIMIT)), errorRes = null) }
+        _state.update { it.copy(draft = it.draft.copy(description = raw.takeSafely(DESCRIPTION_LIMIT)), errorRes = null) }
 
     /** The user's own edit of the when chip: from here a photo's date never overrides it (D4). */
     fun setHappenedAt(value: OffsetDateTime) = _state.update { it.copy(draft = it.draft.copy(happenedAt = value), hasEditedDate = true) }

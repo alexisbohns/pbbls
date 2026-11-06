@@ -185,6 +185,23 @@ internal fun whenLabel(
     return if (source == WhenSource.PHOTO) fromPhoto(whenText) else whenText
 }
 
+/**
+ * What Done writes: the picked date and time, or null when they are the ones already there. A write marks the
+ * date as the user's own and drops its seconds, so a Done with no change must not make one.
+ */
+internal fun editedWhen(
+    current: OffsetDateTime,
+    zone: ZoneId,
+    pickedUtcDateMillis: Long,
+    hour: Int,
+    minute: Int,
+): OffsetDateTime? {
+    val local = current.atZoneSameInstant(zone)
+    val unchanged =
+        pickedUtcDateMillis == WhenDateTime.toUtcDateMillis(current, zone) && hour == local.hour && minute == local.minute
+    return if (unchanged) null else WhenDateTime.combine(pickedUtcDateMillis, hour, minute, zone)
+}
+
 /** "Wed, Oct 14" in en, "mer. 14 oct." in fr: the platform's own best pattern for the weekday, day and month. */
 internal fun weekdayAndDate(
     moment: ZonedDateTime,
@@ -280,7 +297,8 @@ private fun RecordWhenSheet(
                 text = stringResource(R.string.souls_done),
                 onClick = {
                     val millis = dateState.selectedDateMillis ?: WhenDateTime.toUtcDateMillis(happenedAt, zone)
-                    onDone(WhenDateTime.combine(millis, hour, minute, zone))
+                    // Nothing changed: close without writing, so "From your photo" and the seconds stay.
+                    editedWhen(happenedAt, zone, millis, hour, minute)?.let(onDone) ?: onDismiss()
                 },
                 modifier = Modifier.padding(bottom = Spacing.lg),
             )

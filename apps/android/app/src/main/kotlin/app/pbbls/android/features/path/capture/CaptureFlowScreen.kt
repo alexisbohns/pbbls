@@ -196,7 +196,6 @@ fun CaptureFlowContent(
                             draft = flow.draft,
                             whenSource = flow.whenSource,
                             snap = uiState.snap,
-                            blockedMessageRes = uiState.snapBlockedMessageRes,
                             errorRes = flow.errorRes,
                             onNameChange = { model.setName(it) },
                             onWordsChange = { model.setDescription(it) },
