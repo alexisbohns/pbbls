@@ -80,6 +80,7 @@ private struct TabChrome: ViewModifier {
     let supabase = SupabaseService()
     return PebblesTabView()
         .environment(TabNavigation())
+        .environment(OnboardingHandoff())
         .environment(MomentsRevision())
         .environment(supabase)
         .environment(EmotionPaletteService(client: supabase.client))

@@ -21,6 +21,28 @@ struct HomeModelTests {
         #expect(model.hasLoadedOnce)
     }
 
+    /// A greeting loaded under the onboarding's cover is stale (#1510 D9).
+    @Test func reloadingTheNameReplacesIt() async {
+        let fake = FakeHomeService(answer: { "" })
+        let model = HomeModel()
+        model.service = fake
+        await model.load()
+        #expect(model.name == "")
+        fake.answer = { "Léa" }
+        await model.reloadName()
+        #expect(model.name == "Léa")
+    }
+
+    @Test func aFailedNameReloadKeepsTheLastOne() async {
+        let fake = FakeHomeService(answer: { "Léa" })
+        let model = HomeModel()
+        model.service = fake
+        await model.load()
+        fake.answer = { throw FakeHomeService.Failure() }
+        await model.reloadName()
+        #expect(model.name == "Léa")
+    }
+
     @Test func wrapsLoadAndKeepTheLastValueOnFailure() async throws {
         let fake = FakeHomeService(answer: { "A" })
         let wraps = try HomePayloads.wraps()

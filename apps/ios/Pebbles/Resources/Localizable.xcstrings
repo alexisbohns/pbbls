@@ -1262,6 +1262,57 @@
         }
       }
     },
+    "What did you feel today?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What did you feel today?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qu'as-tu ressenti aujourd'hui ?"
+          }
+        }
+      }
+    },
+    "What do you want to remember from today?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What do you want to remember from today?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que veux-tu retenir d'aujourd'hui ?"
+          }
+        }
+      }
+    },
+    "What happened today?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What happened today?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que s'est-il passé aujourd'hui ?"
+          }
+        }
+      }
+    },
     "What pace suits you?" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1275,6 +1326,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quel rythme te va ?"
+          }
+        }
+      }
+    },
+    "What was good today?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What was good today?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qu'est-ce qui a été bien aujourd'hui ?"
+          }
+        }
+      }
+    },
+    "What was hard today?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What was hard today?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qu'est-ce qui a été dur aujourd'hui ?"
           }
         }
       }
@@ -1309,6 +1394,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quand quelque chose en vaut la peine."
+          }
+        }
+      }
+    },
+    "Who were you with today?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who were you with today?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avec qui étais-tu aujourd'hui ?"
           }
         }
       }

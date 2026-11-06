@@ -146,6 +146,7 @@ struct RootView: View {
                         .environment(nav)
                         .environment(cardFrames)
                         .environment(heldCard)
+                        .environment(onboarding.handoff)
                         // Nothing under the held card or the consent gate is reachable (stack C §7's slot).
                         .accessibilityHidden(heldCard.request != nil || !consentPassed)
                         .environment(\.spineSnapSource, .signed(snapURLs))
