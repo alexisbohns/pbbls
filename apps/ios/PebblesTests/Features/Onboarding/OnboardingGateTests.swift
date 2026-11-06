@@ -112,4 +112,131 @@ struct OnboardingGateModelTests {
         #expect(!m.shouldPresent)
         #expect(!m.isPending)
     }
+
+    // MARK: superseded reads
+
+    /// Lets the model's task reach the service and suspend there.
+    private func waitForCalls(_ n: Int, _ service: FakeOnboardingService) async {
+        for _ in 0..<2000 where service.completedCalls < n { await Task.yield() }
+    }
+
+    @Test func aReadLandingForAPreviousUserIsIgnored() async throws {
+        let service = FakeOnboardingService()
+        let first = Latch()
+        let second = Latch()
+        service.onCompleted = { call in
+            await (call == 1 ? first : second).wait()
+            return call == 1
+        }
+        let m = try model(service)
+        m.start(userId: "a")
+        await waitForCalls(1, service)
+        let read1 = m.work
+        m.start(userId: "b")
+        await waitForCalls(2, service)
+        first.open()
+        await read1?.value
+        #expect(m.completed == nil)
+        #expect(m.isPending)
+        second.open()
+        await m.work?.value
+        #expect(m.completed == false)
+    }
+
+    @Test func signOutAndBackInKeepsTheSecondReadsAnswer() async throws {
+        let service = FakeOnboardingService()
+        let first = Latch()
+        let second = Latch()
+        service.onCompleted = { call in
+            if call == 1 {
+                await first.wait()
+                throw URLError(.cancelled)
+            }
+            await second.wait()
+            return false
+        }
+        let m = try model(service)
+        m.start(userId: "a")
+        await waitForCalls(1, service)
+        let read1 = m.work
+        m.start(userId: nil)
+        m.start(userId: "a")
+        await waitForCalls(2, service)
+        first.open()
+        await read1?.value
+        #expect(!m.readFailed)
+        #expect(m.isPending)
+        second.open()
+        await m.work?.value
+        #expect(!m.readFailed)
+        #expect(m.shouldPresent)
+    }
+
+    @Test func aStaleSuccessNeverOverwritesTheLatestRead() async throws {
+        let service = FakeOnboardingService()
+        let first = Latch()
+        let second = Latch()
+        service.onCompleted = { call in
+            await (call == 1 ? first : second).wait()
+            return call == 1
+        }
+        let m = try model(service)
+        m.start(userId: "a")
+        await waitForCalls(1, service)
+        let read1 = m.work
+        m.start(userId: nil)
+        m.start(userId: "a")
+        await waitForCalls(2, service)
+        second.open()
+        await m.work?.value
+        first.open()
+        await read1?.value
+        #expect(m.completed == false)
+        #expect(m.shouldPresent)
+    }
+
+    @Test func aThrownCancelledReadLeavesReadFailedFalse() async throws {
+        let service = FakeOnboardingService()
+        let first = Latch()
+        service.onCompleted = { _ in
+            await first.wait()
+            throw CancellationError()
+        }
+        let m = try model(service)
+        m.start(userId: "a")
+        await waitForCalls(1, service)
+        let read1 = m.work
+        m.start(userId: nil)
+        m.start(userId: "a")
+        first.open()
+        await read1?.value
+        #expect(!m.readFailed)
+        #expect(m.isPending)
+    }
+
+    @Test func finishDuringAReadStaysFinished() async throws {
+        let service = FakeOnboardingService()
+        let gate = Latch()
+        service.onCompleted = { _ in
+            await gate.wait()
+            return false
+        }
+        let m = try model(service)
+        m.start(userId: "a")
+        await waitForCalls(1, service)
+        m.finish()
+        gate.open()
+        await m.work?.value
+        #expect(m.completed == true)
+        #expect(m.hasSeen)
+        #expect(!m.shouldPresent)
+    }
+
+    @Test func startWithoutAServiceFailsTheRead() throws {
+        let m = OnboardingGateModel(defaults: try defaults())
+        m.start(userId: "a")
+        #expect(m.readFailed)
+        #expect(!m.isPending)
+        #expect(!m.shouldPresent)
+    }
 }

@@ -30,6 +30,9 @@ final class OnboardingGateModel {
     @ObservationIgnored private var userId: String?
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private(set) var work: Task<Void, Never>?
+    /// Bumped whenever the answer a read would deliver is no longer wanted (user change, `finish`).
+    /// A read lands only if its token is still current, on success and on failure alike.
+    @ObservationIgnored private var generation = 0
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "onboarding")
 
     static let hasSeenKey = "hasSeenOnboarding"
@@ -48,6 +51,7 @@ final class OnboardingGateModel {
     func start(userId: String?) {
         guard userId != self.userId else { return }
         work?.cancel()
+        generation += 1
         self.userId = userId
         completed = nil
         readFailed = false
@@ -61,14 +65,16 @@ final class OnboardingGateModel {
             readFailed = true
             return
         }
+        let token = generation
         work = Task {
             do {
                 let done = try await service.onboardingCompleted()
-                guard uid == userId else { return }
+                guard token == generation else { return }
                 completed = done
             } catch {
+                // A superseded or cancelled read logs nothing and changes nothing.
+                guard token == generation, !Task.isCancelled else { return }
                 logger.error("onboarding flag read failed: \(error.localizedDescription, privacy: .private)")
-                guard uid == userId else { return }
                 readFailed = true
             }
         }
@@ -76,6 +82,8 @@ final class OnboardingGateModel {
 
     /// The flow ended: this device never re-presents, whatever the profile says next.
     func finish() {
+        work?.cancel()
+        generation += 1
         hasSeen = true
         defaults.set(true, forKey: Self.hasSeenKey)
         completed = true
