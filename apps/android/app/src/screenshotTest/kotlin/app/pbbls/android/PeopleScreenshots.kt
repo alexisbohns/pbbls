@@ -2,12 +2,8 @@ package app.pbbls.android
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigationevent.NavigationEventDispatcher
-import androidx.navigationevent.NavigationEventDispatcherOwner
-import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
@@ -71,27 +67,17 @@ private fun People(
                 }
             }
         }
-    // The screen's back handler needs a dispatcher, which a preview has no activity to supply: without
-    // one every People render was a 1 x 1 failure.
-    val dispatcherOwner =
-        remember {
-            object : NavigationEventDispatcherOwner {
-                override val navigationEventDispatcher = NavigationEventDispatcher()
-            }
-        }
-    CompositionLocalProvider(LocalNavigationEventDispatcherOwner provides dispatcherOwner) {
-        PebblesTheme {
-            SoulsListContent(
-                uiState = uiState,
-                chooser = chooser,
-                onOpenSoul = {},
-                onCreate = {},
-                onOpenCircle = {},
-                onRetry = {},
-                onDeleteSoul = {},
-                hapticsOn = true,
-            )
-        }
+    PebblesTheme {
+        SoulsListContent(
+            uiState = uiState,
+            chooser = chooser,
+            onOpenSoul = {},
+            onCreate = {},
+            onOpenCircle = {},
+            onRetry = {},
+            onDeleteSoul = {},
+            hapticsOn = true,
+        )
     }
 }
 
