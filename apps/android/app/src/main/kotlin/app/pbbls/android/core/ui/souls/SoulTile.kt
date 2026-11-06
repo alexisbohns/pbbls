@@ -40,6 +40,7 @@ private const val CHOSEN_ALPHA = 0.20f
 /**
  * A soul as a tile: its glyph over its name. Chosen (pick mode) is a tinted fill, a tick badge and
  * a bold name (mock 10). [showsSelection] is false in browse, where a tap opens the person.
+ * [hapticsOn] is Pebbles' haptics switch, for the long press's buzz (#1242 D23).
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -50,6 +51,7 @@ fun SoulTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null,
+    hapticsOn: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
     val chosen = showsSelection && isSelected
@@ -69,7 +71,7 @@ fun SoulTile(
                 .clip(shape)
                 .then(if (chosen) Modifier.background(colors.primary.copy(alpha = CHOSEN_ALPHA)) else Modifier)
                 .then(semanticsModifier)
-                .combinedClickable(role = if (showsSelection) null else Role.Button, onClick = onClick, onLongClick = onLongClick)
+                .combinedClickable(role = if (showsSelection) null else Role.Button, onClick = onClick, onLongClick = onLongClick, hapticFeedbackEnabled = hapticsOn)
                 .heightIn(min = TILE_MIN_HEIGHT)
                 .padding(horizontal = PebblesTheme.spacing.xs, vertical = PebblesTheme.spacing.sm),
     ) {

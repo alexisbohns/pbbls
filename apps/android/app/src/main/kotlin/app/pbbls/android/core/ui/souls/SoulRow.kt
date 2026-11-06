@@ -63,7 +63,8 @@ private fun SoulCount(
 
 /**
  * A soul as a list row (mock 10, 11, 13). Pick mode trails the count then a plus or a check ring;
- * browse trails the count alone. [highlight] paints the matched letters (mock 11).
+ * browse trails the count alone. [highlight] paints the matched letters (mock 11). [hapticsOn] is
+ * Pebbles' haptics switch, for the long press's buzz (#1242 D23).
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -75,6 +76,7 @@ fun SoulRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null,
+    hapticsOn: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
     val chosen = showsSelection && isSelected
@@ -102,7 +104,7 @@ fun SoulRow(
         modifier =
             modifier
                 .then(semanticsModifier)
-                .combinedClickable(role = if (showsSelection) null else Role.Button, onClick = onClick, onLongClick = onLongClick),
+                .combinedClickable(role = if (showsSelection) null else Role.Button, onClick = onClick, onLongClick = onLongClick, hapticFeedbackEnabled = hapticsOn),
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         leadingContent = { SoulMark(glyph = soul.glyph, ink = colors.onSurface, modifier = Modifier.size(ROW_GLYPH)) },
         headlineContent = {
