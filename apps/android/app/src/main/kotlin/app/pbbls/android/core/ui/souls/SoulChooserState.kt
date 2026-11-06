@@ -4,9 +4,11 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import app.pbbls.android.core.model.SoulWithGlyph
@@ -37,6 +39,8 @@ class SoulChooserState(
     val mode: SoulChooserMode,
     souls: List<SoulWithGlyph>,
     selection: List<String> = emptyList(),
+    query: String = "",
+    isSearching: Boolean = false,
 ) {
     var souls: List<SoulWithGlyph> by mutableStateOf(souls)
         private set
@@ -44,17 +48,25 @@ class SoulChooserState(
     /** Ordered as chosen, so the pills keep their order. */
     var selection: List<String> by mutableStateOf(selection)
         private set
-    var query: String by mutableStateOf("")
-    var isSearching: Boolean by mutableStateOf(false)
+    var query: String by mutableStateOf(query)
+        private set
+    var isSearching: Boolean by mutableStateOf(isSearching)
+        private set
 
     /** The failed insert's line under the field (S4). */
     @get:StringRes
     var createErrorRes: Int? by mutableStateOf(null)
 
-    val usual: List<SoulWithGlyph> get() = SoulRanking.usual(souls)
-    val sections: List<SoulSection> get() = SoulRanking.sections(souls)
-    val results: List<SoulWithGlyph> get() = SoulRanking.results(souls, query)
-    val canAdd: Boolean get() = SoulRanking.canAdd(souls, query)
+    // Cached: a tap changes the selection only, and must not re-sort the whole list.
+    private val usualCache = derivedStateOf { SoulRanking.usual(this.souls) }
+    private val sectionsCache = derivedStateOf { SoulRanking.sections(this.souls) }
+    private val resultsCache = derivedStateOf { SoulRanking.results(this.souls, this.query) }
+    private val canAddCache = derivedStateOf { SoulRanking.canAdd(this.souls, this.query) }
+
+    val usual: List<SoulWithGlyph> get() = usualCache.value
+    val sections: List<SoulSection> get() = sectionsCache.value
+    val results: List<SoulWithGlyph> get() = resultsCache.value
+    val canAdd: Boolean get() = canAddCache.value
     val trimmedQuery: String get() = query.trim()
 
     fun isSelected(id: String): Boolean = id in selection
@@ -101,43 +113,64 @@ class SoulChooserState(
         closeSearch()
     }
 
+    /** Typing: a new query drops the previous failed create's line (S4). */
+    fun updateQuery(text: String) {
+        query = text
+        createErrorRes = null
+    }
+
+    fun clearQuery() = updateQuery("")
+
     fun openSearch() {
         isSearching = true
     }
 
     /** Closing the field clears the query (S3). */
     fun closeSearch() {
-        query = ""
+        clearQuery()
         isSearching = false
-        createErrorRes = null
+    }
+
+    companion object {
+        /**
+         * Saves what the host cannot refetch: the chosen ids in order, the query and the open
+         * field. [souls] come back from the host, so restore starts from [souls] and the first
+         * loaded fetch prunes the selection.
+         */
+        fun saver(
+            mode: SoulChooserMode,
+            souls: List<SoulWithGlyph>,
+        ): Saver<SoulChooserState, Any> =
+            listSaver(
+                save = { listOf(ArrayList(it.selection), it.query, it.isSearching) },
+                restore = { saved ->
+                    @Suppress("UNCHECKED_CAST")
+                    SoulChooserState(mode, souls, saved[0] as List<String>, saved[1] as String, saved[2] as Boolean)
+                },
+            )
     }
 }
 
 /**
- * Remembers a [SoulChooserState]; a rotation keeps the selection, the query and the open field.
+ * Remembers a [SoulChooserState]; a rotation keeps the selection, the query and the open field
+ * through [SoulChooserState.saver], and a different [mode] gets a fresh state. Nothing is written
+ * back during composition, so a tap does not recompose the host.
+ *
  * [souls] flowing in later (a refresh) goes through [SoulChooserState.replaceSoulsWhenLoaded]:
- * until [isLoaded] the list is only a placeholder and the selection is left alone.
+ * until [isLoaded] the list is only a placeholder and the selection is left alone. [isLoaded] has
+ * no default on purpose: a host that forgets it would defeat the guard.
  */
 @Composable
 fun rememberSoulChooserState(
     mode: SoulChooserMode,
     souls: List<SoulWithGlyph>,
+    isLoaded: Boolean,
     selection: List<String> = emptyList(),
-    isLoaded: Boolean = true,
 ): SoulChooserState {
-    var savedSelection by rememberSaveable { mutableStateOf(selection) }
-    var savedQuery by rememberSaveable { mutableStateOf("") }
-    var savedSearching by rememberSaveable { mutableStateOf(false) }
     val state =
-        remember {
-            SoulChooserState(mode, souls, savedSelection).also {
-                it.query = savedQuery
-                it.isSearching = savedSearching
-            }
+        rememberSaveable(mode, saver = SoulChooserState.saver(mode, souls)) {
+            SoulChooserState(mode, souls, selection)
         }
-    savedSelection = state.selection
-    savedQuery = state.query
-    savedSearching = state.isSearching
     LaunchedEffect(souls, isLoaded) { state.replaceSoulsWhenLoaded(souls, isLoaded) }
     return state
 }

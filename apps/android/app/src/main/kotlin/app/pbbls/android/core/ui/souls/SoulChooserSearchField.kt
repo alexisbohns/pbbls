@@ -1,5 +1,6 @@
 package app.pbbls.android.core.ui.souls
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +13,8 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -19,6 +22,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesTheme
+
+private const val TAG = "SoulChooserSearch"
 
 /**
  * The search field that replaces the top bar while looking someone up (mock 11): back closes and
@@ -31,9 +36,17 @@ fun SoulChooserSearchField(
     state: SoulChooserState,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
-    focusRequester: FocusRequester = FocusRequester(),
 ) {
-    LaunchedEffect(Unit) { runCatching { focusRequester.requestFocus() } }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        // After a frame the field is attached, so the request has a node to land on.
+        withFrameNanos { }
+        try {
+            focusRequester.requestFocus()
+        } catch (e: IllegalStateException) {
+            Log.w(TAG, "search field not attached when asked for focus", e)
+        }
+    }
     Column(modifier = modifier.padding(horizontal = PebblesTheme.spacing.lg)) {
         SearchBar(
             modifier = Modifier.fillMaxWidth(),
@@ -43,10 +56,7 @@ fun SoulChooserSearchField(
                 SearchBarDefaults.InputField(
                     modifier = Modifier.focusRequester(focusRequester),
                     query = state.query,
-                    onQueryChange = {
-                        state.query = it
-                        state.createErrorRes = null
-                    },
+                    onQueryChange = state::updateQuery,
                     onSearch = {},
                     expanded = false,
                     onExpandedChange = {},
@@ -61,7 +71,7 @@ fun SoulChooserSearchField(
                     },
                     trailingIcon = {
                         if (state.query.isNotEmpty()) {
-                            IconButton(onClick = { state.query = "" }) {
+                            IconButton(onClick = state::clearQuery) {
                                 Icon(
                                     painter = painterResource(R.drawable.ic_x_circle),
                                     contentDescription = stringResource(R.string.carve_clear),

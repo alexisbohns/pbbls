@@ -26,6 +26,7 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
@@ -105,7 +106,13 @@ fun SoulRow(
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         leadingContent = { SoulMark(glyph = soul.glyph, ink = colors.onSurface, modifier = Modifier.size(ROW_GLYPH)) },
         headlineContent = {
-            Text(text = name, style = MaterialTheme.typography.bodyLarge, fontWeight = if (chosen) FontWeight.Bold else null, maxLines = 1)
+            Text(
+                text = name,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (chosen) FontWeight.Bold else null,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         },
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.md)) {
@@ -142,6 +149,7 @@ fun SoulAddRow(
                 text = stringResource(R.string.souls_add_named, name),
                 style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         },
         supportingContent = {

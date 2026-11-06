@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -29,13 +30,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.ui.SoulMark
 
 private val FADE_WIDTH = 24.dp
+private val CHIP_MAX_WIDTH = 200.dp
 private val CHIP_GLYPH = 20.dp
 private val CLEAR_ICON = 18.dp
 private const val WRAP_FONT_SCALE = 1.5f
@@ -50,6 +54,7 @@ private const val WRAP_FONT_SCALE = 1.5f
 fun SoulChooserTray(
     state: SoulChooserState,
     onDone: () -> Unit,
+    onHaptic: (TapHaptic) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val button = state.button ?: return
@@ -58,10 +63,23 @@ fun SoulChooserTray(
     val wraps = LocalDensity.current.fontScale >= WRAP_FONT_SCALE
     val space = PebblesTheme.spacing
     val chips: @Composable () -> Unit = {
-        chosen.forEach { soul -> SoulChip(soul = soul, onRemove = { state.remove(soul.id) }) }
+        chosen.forEach { soul ->
+            SoulChip(
+                soul = soul,
+                onRemove = {
+                    onHaptic(TapHaptic.SELECTION)
+                    state.remove(soul.id)
+                },
+            )
+        }
     }
     val doneButton: @Composable () -> Unit = {
-        Button(onClick = onDone) {
+        Button(
+            onClick = {
+                onHaptic(TapHaptic.ADVANCE)
+                onDone()
+            },
+        ) {
             Text(
                 text =
                     when (button) {
@@ -130,7 +148,7 @@ private fun SoulChip(
     InputChip(
         selected = true,
         onClick = onRemove,
-        label = { Text(text = soul.name, style = MaterialTheme.typography.labelLarge, maxLines = 1) },
+        label = { Text(text = soul.name, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         avatar = { SoulMark(glyph = soul.glyph, ink = colors.onPrimaryContainer, modifier = Modifier.size(CHIP_GLYPH)) },
         trailingIcon = {
             Icon(
@@ -146,6 +164,6 @@ private fun SoulChip(
                 selectedTrailingIconColor = colors.onPrimaryContainer,
             ),
         border = null,
-        modifier = Modifier.semantics { contentDescription = removeLabel },
+        modifier = Modifier.widthIn(max = CHIP_MAX_WIDTH).semantics { contentDescription = removeLabel },
     )
 }

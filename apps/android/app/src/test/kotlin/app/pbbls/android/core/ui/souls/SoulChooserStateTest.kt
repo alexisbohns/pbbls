@@ -1,22 +1,38 @@
 package app.pbbls.android.core.ui.souls
 
+import androidx.compose.runtime.saveable.SaverScope
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.SoulWithGlyph
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
+import java.util.Locale
 
 /** Ported case for case from iOS `SoulChooserModelTests`: those lists are foreign vectors. */
 class SoulChooserStateTest {
     private val glyph = Glyph(id = "g", strokes = listOf(GlyphStroke(d = "M30,30 L170,170", width = 6.0)), viewBox = "0 0 200 200")
 
+    private var nextId = 0
+
+    private var previousLocale: Locale = Locale.getDefault()
+
+    @Before fun pinLocale() {
+        previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.ENGLISH)
+    }
+
+    @After fun restoreLocale() = Locale.setDefault(previousLocale)
+
+    // Ids rise with creation, so a tie on name keeps the order the vector lists (ties break on id).
     private fun soul(
         name: String,
         count: Int,
-    ) = SoulWithGlyph(id = "id-$name-$count", name = name, glyphId = "g", glyph = glyph, pebblesCount = count)
+    ) = SoulWithGlyph(id = "id-%03d".format(nextId++), name = name, glyphId = "g", glyph = glyph, pebblesCount = count)
 
     private fun names(souls: List<SoulWithGlyph>) = souls.map { it.name }
 
@@ -83,7 +99,7 @@ class SoulChooserStateTest {
         assertTrue(SoulRanking.canAdd(souls, "Mathilde"))
         assertFalse(SoulRanking.canAdd(souls, "   "))
         val chooser = state(SoulChooserMode.Browse, souls)
-        chooser.query = "Mathilde "
+        chooser.updateQuery("Mathilde ")
         assertEquals("Mathilde", chooser.trimmedQuery)
     }
 
@@ -92,6 +108,12 @@ class SoulChooserStateTest {
         assertEquals(1..2, SoulRanking.matchRange("Léa", "ea"))
         assertNull(SoulRanking.matchRange("Léa", "zz"))
         assertNull(SoulRanking.matchRange("Léa", " "))
+    }
+
+    @Test fun `match range survives a decomposed name and takes the first occurrence`() {
+        assertEquals(1..3, SoulRanking.matchRange("Le\u0301a", "ea"))
+        assertEquals(0..1, SoulRanking.matchRange("Mama", "ma"))
+        assertEquals(2..3, SoulRanking.matchRange("Anna", "na"))
     }
 
     @Test fun `selection toggles in order, the button counts and skips when empty and allowed`() {
@@ -119,7 +141,7 @@ class SoulChooserStateTest {
     @Test fun `a created soul lands in the list, chosen in pick mode, and the search closes`() {
         val chooser = state(SoulChooserMode.Pick(allowsSkip = true), listOf(soul("Ben", 0)))
         chooser.openSearch()
-        chooser.query = "Mathilde"
+        chooser.updateQuery("Mathilde")
         val created = soul("Mathilde", 0)
         chooser.didCreate(created)
         assertTrue(chooser.souls.any { it.name == "Mathilde" })
@@ -172,5 +194,27 @@ class SoulChooserStateTest {
         assertEquals(listOf(a.id), chooser.selection)
         chooser.replaceSoulsWhenLoaded(emptyList(), isLoaded = true)
         assertTrue(chooser.selection.isEmpty())
+    }
+
+    @Test fun `the saver round-trips selection order, query and the open field`() {
+        val a = soul("Ana", 1)
+        val b = soul("Ben", 1)
+        val mode = SoulChooserMode.Pick(allowsSkip = true)
+        val original = SoulChooserState(mode, listOf(a, b), listOf(b.id, a.id))
+        original.openSearch()
+        original.updateQuery("be")
+        val saver = SoulChooserState.saver(mode, listOf(a, b))
+        val saved = with(saver) { SaverScope { true }.save(original) }
+        val restored = saver.restore(requireNotNull(saved))
+        assertEquals(listOf(b.id, a.id), restored?.selection)
+        assertEquals("be", restored?.query)
+        assertEquals(true, restored?.isSearching)
+    }
+
+    @Test fun `clearing the query also clears the failed create line`() {
+        val chooser = state(SoulChooserMode.Pick(allowsSkip = true), emptyList())
+        chooser.createErrorRes = 1
+        chooser.clearQuery()
+        assertNull(chooser.createErrorRes)
     }
 }

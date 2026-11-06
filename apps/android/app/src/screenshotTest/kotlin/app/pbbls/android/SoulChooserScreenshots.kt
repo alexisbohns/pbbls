@@ -117,9 +117,10 @@ private fun ChooserFrame(
                         onRetry = {},
                         onOpenSoul = {},
                         onCreate = {},
+                        onHaptic = {},
                     )
                 }
-                SoulChooserTray(state = state, onDone = {})
+                SoulChooserTray(state = state, onDone = {}, onHaptic = {})
             }
         }
     }
@@ -155,7 +156,7 @@ fun SoulChooser_PickerEmpty() = ChooserFrame(picker(elevenSouls))
 fun SoulChooser_Search() {
     val searching = picker(searchSouls, listOf(searchSouls[0].id, searchSouls.last().id))
     searching.openSearch()
-    searching.query = "ma"
+    searching.updateQuery("ma")
     ChooserFrame(searching, title = null)
 }
 
@@ -174,7 +175,7 @@ fun SoulChooser_SearchEmpty() {
 fun SoulChooser_NoResult() {
     val state = picker(searchSouls)
     state.openSearch()
-    state.query = "Mathilde"
+    state.updateQuery("Mathilde")
     ChooserFrame(state, title = null)
 }
 

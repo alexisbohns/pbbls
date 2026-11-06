@@ -28,13 +28,17 @@ object SoulRanking {
 
     private fun collator(): Collator = Collator.getInstance(Locale.getDefault()).apply { strength = Collator.SECONDARY }
 
+    /** Name order by the locale's collator; equal names fall back to the id so a tie never reshuffles. */
+    private fun byName(names: Collator): Comparator<SoulWithGlyph> =
+        Comparator { a, b -> names.compare(a.name, b.name).takeIf { it != 0 } ?: a.id.compareTo(b.id) }
+
     fun folded(text: String): String = Normalizer.normalize(text, Normalizer.Form.NFD).replace(combiningMarks, "").lowercase(Locale.ROOT)
 
     fun usual(souls: List<SoulWithGlyph>): List<SoulWithGlyph> {
         val names = collator()
         return souls
             .filter { it.pebblesCount > 0 }
-            .sortedWith(compareByDescending<SoulWithGlyph> { it.pebblesCount }.thenComparator { a, b -> names.compare(a.name, b.name) })
+            .sortedWith(compareByDescending<SoulWithGlyph> { it.pebblesCount }.then(byName(names)))
             .take(USUAL_CAP)
     }
 
@@ -45,7 +49,7 @@ object SoulRanking {
 
     fun sections(souls: List<SoulWithGlyph>): List<SoulSection> {
         val names = collator()
-        val grouped = souls.sortedWith { a, b -> names.compare(a.name, b.name) }.groupBy { letter(it.name) }
+        val grouped = souls.sortedWith(byName(names)).groupBy { letter(it.name) }
         val letters = grouped.keys.filter { it != OTHER }.sortedWith { a, b -> names.compare(a, b) }
         return (if (OTHER in grouped) letters + OTHER else letters).map { SoulSection(it, grouped.getValue(it)) }
     }
@@ -57,7 +61,7 @@ object SoulRanking {
         val needle = folded(query.trim())
         if (needle.isEmpty()) return emptyList()
         val names = collator()
-        return souls.filter { folded(it.name).contains(needle) }.sortedWith { a, b -> names.compare(a.name, b.name) }
+        return souls.filter { folded(it.name).contains(needle) }.sortedWith(byName(names))
     }
 
     /** The Add row and the lit plus: a query nobody's folded name equals. */
