@@ -8,7 +8,10 @@ final class FakeOnboardingService: OnboardingServicing, @unchecked Sendable {
     private var _completedFailure: Error?
     private var _completedCalls = 0
     private var _letter: PromiseLetter?
+    private var _letterFailure: Error?
     private var _glyphs: [Glyph] = []
+    private var _glyphsFailure: Error?
+    private var _glyphCalls = 0
     private var _completeFailure: Error?
     private var _completeCalls: [OnboardingAnswers] = []
 
@@ -37,17 +40,38 @@ final class FakeOnboardingService: OnboardingServicing, @unchecked Sendable {
         get { lock.withLock { _letter } }
         set { lock.withLock { _letter = newValue } }
     }
+    var letterFailure: Error? {
+        get { lock.withLock { _letterFailure } }
+        set { lock.withLock { _letterFailure = newValue } }
+    }
     var glyphs: [Glyph] {
         get { lock.withLock { _glyphs } }
         set { lock.withLock { _glyphs = newValue } }
     }
+    var glyphsFailure: Error? {
+        get { lock.withLock { _glyphsFailure } }
+        set { lock.withLock { _glyphsFailure = newValue } }
+    }
+    var glyphCalls: Int { lock.withLock { _glyphCalls } }
     var completeFailure: Error? {
         get { lock.withLock { _completeFailure } }
         set { lock.withLock { _completeFailure = newValue } }
     }
 
-    func promiseLetter() async throws -> PromiseLetter? { letter }
-    func systemGlyphs() async throws -> [Glyph] { glyphs }
+    func promiseLetter() async throws -> PromiseLetter? {
+        try lock.withLock {
+            if let failure = _letterFailure { throw failure }
+            return _letter
+        }
+    }
+
+    func systemGlyphs() async throws -> [Glyph] {
+        try lock.withLock {
+            _glyphCalls += 1
+            if let failure = _glyphsFailure { throw failure }
+            return _glyphs
+        }
+    }
 
     func onboardingCompleted() async throws -> Bool {
         let (call, hook) = lock.withLock { () -> (Int, (@Sendable (Int) async throws -> Bool)?) in
@@ -73,13 +97,16 @@ final class FakeOnboardingService: OnboardingServicing, @unchecked Sendable {
 final class Latch: @unchecked Sendable {
     private let lock = NSLock()
     private var continuation: CheckedContinuation<Void, Never>?
-    private var isOpen = false
+    private var opened = false
+
+    /// Whether `open` has run, so a test can wait for it without hanging when it never comes.
+    var isOpen: Bool { lock.withLock { opened } }
 
     func wait() async {
         await withCheckedContinuation { (c: CheckedContinuation<Void, Never>) in
             let ready = lock.withLock { () -> Bool in
-                if !isOpen { continuation = c }
-                return isOpen
+                if !opened { continuation = c }
+                return opened
             }
             if ready { c.resume() }
         }
@@ -87,7 +114,7 @@ final class Latch: @unchecked Sendable {
 
     func open() {
         let c = lock.withLock { () -> CheckedContinuation<Void, Never>? in
-            isOpen = true
+            opened = true
             defer { continuation = nil }
             return continuation
         }
