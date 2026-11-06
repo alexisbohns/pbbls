@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import app.pbbls.android.R
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.AchievementsServicing
+import app.pbbls.android.core.data.CameraPhotos
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.SnapUploadCoordinator
 import app.pbbls.android.core.model.MomentSavePayload

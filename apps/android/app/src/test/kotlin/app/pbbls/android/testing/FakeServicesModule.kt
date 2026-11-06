@@ -1,6 +1,7 @@
 package app.pbbls.android.testing
 
 import app.pbbls.android.core.data.AchievementsServicing
+import app.pbbls.android.core.data.CameraPhotos
 import app.pbbls.android.core.data.CollectionsServicing
 import app.pbbls.android.core.data.CompleteSnapshotStoring
 import app.pbbls.android.core.data.ConnectionsServicing
@@ -30,7 +31,6 @@ import app.pbbls.android.di.IoApplicationScope
 import app.pbbls.android.di.ServiceBindings
 import app.pbbls.android.di.ServiceModule
 import app.pbbls.android.di.SupabaseModule
-import app.pbbls.android.features.home.camera.CameraPhotos
 import app.pbbls.android.features.path.ComposerMedia
 import dagger.Module
 import dagger.Provides
