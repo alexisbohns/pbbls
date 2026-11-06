@@ -43,9 +43,6 @@ packages:
   SVGView:
     url: https://github.com/exyte/SVGView
     exactVersion: "1.0.6"
-  RiveRuntime:
-    url: https://github.com/rive-app/rive-ios
-    exactVersion: "6.19.2"
 
 targets:
   Pebbles:
@@ -85,8 +82,6 @@ targets:
         product: Supabase
       - package: SVGView
         product: SVGView
-      - package: RiveRuntime
-        product: RiveRuntime
       - target: PebblesWidget
         embed: true
 

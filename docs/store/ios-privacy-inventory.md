@@ -90,7 +90,6 @@ Pebbles' code is Pebbles' declaration to make.
 |---|---|---|---|
 | `supabase-swift` | 2.43.1 | **No** | Sessions persist in Keychain, which is not a required-reason API. |
 | `SVGView` | 1.0.6 | **No** | Pure rendering; no storage, no network. |
-| `rive-ios` | 6.19.2 | Yes (1) | Animation runtime. |
 | `swift-crypto` | 4.3.1 | Yes (7) | Transitive via supabase-swift. |
 | `swift-asn1` | 1.6.0 | No | Transitive. |
 | `swift-http-types` | 1.5.1 | No | Transitive. |

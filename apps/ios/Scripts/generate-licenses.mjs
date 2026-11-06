@@ -14,7 +14,7 @@ const resolved = path.join(root, "Pebbles.xcodeproj/project.xcworkspace/xcshared
 const check = process.argv.includes("--check")
 
 const TITLES = { "InclusiveSans-OFL": "Inclusive Sans", "Ysabeau-OFL": "Ysabeau", "Caveat-OFL": "Caveat", "ReenieBeanie-OFL": "Reenie Beanie",
-  "supabase-swift": "Supabase Swift", "rive-ios": "Rive", svgview: "SVGView", "swift-crypto": "Swift Crypto", "swift-asn1": "Swift ASN.1",
+  "supabase-swift": "Supabase Swift", svgview: "SVGView", "swift-crypto": "Swift Crypto", "swift-asn1": "Swift ASN.1",
   "swift-http-types": "Swift HTTP Types", "swift-clocks": "Swift Clocks", "swift-concurrency-extras": "Swift Concurrency Extras",
   "xctest-dynamic-overlay": "XCTest Dynamic Overlay" }
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")

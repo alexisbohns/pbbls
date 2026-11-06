@@ -149,7 +149,7 @@ extension Color {
 }
 
 extension UIColor {
-    /// UIKit appearance proxies and Rive. Same roles, same assets.
+    /// UIKit appearance proxies. Same roles, same assets.
     static func pebbles(_ role: PebblesColorRole) -> UIColor {
         guard let color = UIColor(named: role.assetName) else {
             preconditionFailure("missing colorset \(role.assetName)")

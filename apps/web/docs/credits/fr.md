@@ -58,7 +58,6 @@ Les bibliothèques open source que les applications embarquent. Les noms de lice
 - **next-intl** · MIT — [github.com/amannn/next-intl](https://github.com/amannn/next-intl)
 - **Serwist** · MIT — [github.com/serwist/serwist](https://github.com/serwist/serwist)
 - **supabase-js** · MIT — [github.com/supabase/supabase-js](https://github.com/supabase/supabase-js)
-- **Rive React** · MIT — [github.com/rive-app/rive-react](https://github.com/rive-app/rive-react)
 - **Motion (framer-motion)** · MIT — [github.com/motiondivision/motion](https://github.com/motiondivision/motion)
 - **Lucide** · ISC — [lucide.dev](https://lucide.dev)
 - **date-fns** · MIT — [github.com/date-fns/date-fns](https://github.com/date-fns/date-fns)
@@ -68,7 +67,6 @@ Les bibliothèques open source que les applications embarquent. Les noms de lice
 
 **iOS**
 
-- **Rive** · MIT — [github.com/rive-app/rive-ios](https://github.com/rive-app/rive-ios)
 - **Supabase Swift** · MIT — [github.com/supabase/supabase-swift](https://github.com/supabase/supabase-swift)
 - **SVGView (Exyte)** · MIT — [github.com/exyte/SVGView](https://github.com/exyte/SVGView)
 - **Swift Clocks (Point-Free)** · MIT — [github.com/pointfreeco/swift-clocks](https://github.com/pointfreeco/swift-clocks)

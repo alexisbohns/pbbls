@@ -43,7 +43,7 @@ Pebbles/
   RootView.swift            Auth gate (session + splash) + root composition
   Features/<Feature>/       One folder per feature; matches web apps/web/components/<feature>/
   Services/                 Non-view code (Supabase, environment, palette/reference-data services)
-  Resources/                Info.plist, Assets.xcassets, fonts, Rive/SVG assets
+  Resources/                Info.plist, Assets.xcassets, fonts, SVG assets
 ```
 
 Features map to the four tabs: Path (the Spine: a week roll over a pager of Spine weeks, `Features/Path/Spine/`, its state in `PathModel`), People (Souls, Circle), Collections, You (Profile hub: Glyphs, Achievements, Lab). The authed root is a system `TabView`; each tab owns a `NavigationStack` driven by `TabNavigation` (`Features/Tabs/`). Sheets and full-screen covers do secondary navigation, except the pebble detail: every caller opens the held card through `HeldCardHostModel.open`, and `HeldCardHost` draws it as a full-screen layer above the tabs in `RootView` (`Features/Path/Card/`).
