@@ -4,7 +4,7 @@ locale: fr
 slug: terms
 version: 1.2.0
 effective_date: 2026-10-07
-last_updated: 2026-10-07
+last_updated: 2026-11-06
 ---
 
 # Conditions Générales d'Utilisation - Pebbles
@@ -16,7 +16,7 @@ Les présentes Conditions Générales d'Utilisation (« CGU ») régissent l'acc
 **Éditeur de la plateforme :**
 - Nom : Pebbles
 - Responsable : Alexis Bohn
-- Email : hello@bohns.design
+- Email : ciao@pbbls.app
 - Statut : Projet personnel / Éditeur indépendant
 
 **Hébergement :**
@@ -259,7 +259,7 @@ Pebbles fait des efforts raisonnables pour sauvegarder vos données, mais ne peu
 
 ### 10.1 Droit à la portabilité des données
 
-Vous avez le droit de recevoir vos données personnelles dans un format structuré, couramment utilisé et lisible par machine (JSON), conformément à l'article 20 du RGPD. Pebbles ne propose pas encore d'export en libre-service : adressez votre demande à hello@bohns.design et nous y répondrons dans un délai d'un mois.
+Vous avez le droit de recevoir vos données personnelles dans un format structuré, couramment utilisé et lisible par machine (JSON), conformément à l'article 20 du RGPD. Pebbles ne propose pas encore d'export en libre-service : adressez votre demande à ciao@pbbls.app et nous y répondrons dans un délai d'un mois.
 
 ### 10.2 Suppression de compte
 
@@ -341,7 +341,7 @@ Les présentes CGU sont régies par la loi française, indépendamment des princ
 
 ### 14.2 Résolution amiable
 
-Pebbles est un service gratuit et non commercial. Avant toute action en justice, merci d'adresser une description écrite du litige à hello@bohns.design. Pebbles vous répondra dans les 30 jours et recherchera avec vous une solution amiable.
+Pebbles est un service gratuit et non commercial. Avant toute action en justice, merci d'adresser une description écrite du litige à ciao@pbbls.app. Pebbles vous répondra dans les 30 jours et recherchera avec vous une solution amiable.
 
 ### 14.3 Juridiction compétente
 
@@ -373,8 +373,8 @@ Le défaut de Pebbles à exiger le respect d'une clause ne constitue pas une ren
 
 ---
 
-**Dernière mise à jour : 7 octobre 2026**
+**Dernière mise à jour : 6 novembre 2026**
 
 Ces Conditions Générales d'Utilisation s'appliquent à compter de la date d'entrée en vigueur indiquée ci-dessus. En utilisant Pebbles après cette date, vous acceptez les termes.
 
-Pour toute question, contactez : **hello@bohns.design**
+Pour toute question, contactez : **ciao@pbbls.app**

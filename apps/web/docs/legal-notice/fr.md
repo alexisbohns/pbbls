@@ -4,7 +4,7 @@ locale: fr
 slug: legal-notice
 version: 1.2.0
 effective_date: 2026-10-07
-last_updated: 2026-10-07
+last_updated: 2026-11-06
 ---
 
 # Mentions Légales
@@ -13,14 +13,14 @@ last_updated: 2026-10-07
 
 * Pebbles
 * Responsable de la publication : Alexis Bohn
-* Email : hello@bohns.design
+* Email : ciao@pbbls.app
 
-Pebbles est édité par une personne physique agissant à titre non professionnel. Conformément à l'article 6, III, 2 de la loi n° 2004-575 du 21 juin 2004 (LCEN), l'adresse postale et le numéro de téléphone personnels de l'éditeur ne sont pas publiés ; ses éléments d'identification ont été communiqués à l'hébergeur mentionné ci-dessous. L'éditeur peut être contacté à hello@bohns.design.
+Pebbles est édité par une personne physique agissant à titre non professionnel. Conformément à l'article 6, III, 2 de la loi n° 2004-575 du 21 juin 2004 (LCEN), l'adresse postale et le numéro de téléphone personnels de l'éditeur ne sont pas publiés ; ses éléments d'identification ont été communiqués à l'hébergeur mentionné ci-dessous. L'éditeur peut être contacté à ciao@pbbls.app.
 
 ## Directeur de la publication
 
 * Alexis Bohn
-* Email : hello@bohns.design
+* Email : ciao@pbbls.app
 
 ## Hébergeurs
 
@@ -49,7 +49,7 @@ Pour plus d'informations sur l'utilisation du code source, veuillez consulter le
 ## Contact
 
 Pour toute question ou réclamation, vous pouvez nous contacter à :
-* Email : hello@bohns.design
+* Email : ciao@pbbls.app
 
 ## Documents connexes
 
@@ -58,4 +58,4 @@ Pour toute question ou réclamation, vous pouvez nous contacter à :
 
 ---
 
-*Dernière mise à jour : 7 octobre 2026*
+*Dernière mise à jour : 6 novembre 2026*

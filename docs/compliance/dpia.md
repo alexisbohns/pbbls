@@ -43,7 +43,7 @@ From `apps/web/docs/legal-notice/en.md` and `apps/web/docs/privacy/en.md` §1:
 | Controller | Alexis Bohn, founder and developer of Pebbles |
 | Capacity | Data controller within the meaning of Art. 4(7) |
 | Location | France |
-| Email | hello@bohns.design |
+| Email | ciao@pbbls.app |
 | Postal address | **Not published** — an unfilled placeholder in every published document (Q1) |
 | Telephone | **Not published** — same (Q1) |
 | Publication director | Alexis Bohn |
@@ -334,7 +334,7 @@ exception to "everything is erased" and belongs in the policy too.
 | Right | Status | Where |
 |---|---|---|
 | Art. 13/14 information | **Partial** | `apps/web/docs/privacy/{en,fr}.md` is thorough, but the controller's postal address and telephone are unfilled placeholders (**Q1**, still open), and it describes three abandoned operations that do not exist (**Q2** — decided; removal tracked separately, not yet performed) |
-| Art. 15 access | **Manual only** | Policy §9.8: by email to hello@bohns.design. No in-product access-request path, and no export to satisfy it with (see Art. 20) |
+| Art. 15 access | **Manual only** | Policy §9.8: by email to ciao@pbbls.app. No in-product access-request path, and no export to satisfy it with (see Art. 20) |
 | Art. 16 rectification | **Met, self-service** | Every field is editable by its owner on every surface (§2.2) |
 | Art. 17 erasure | **Met, self-service and verified** | `delete-account` edge function + `purge_account`, proven by `verify-account-purge.ts`. Reachable from web settings (`DeleteAccountSection`) |
 | Art. 18 restriction | **Not implemented** | No mechanism exists to freeze processing short of deletion. The design spec records this as deliberate (D2): a read-only frozen account was rejected in favour of deletion |
