@@ -198,9 +198,16 @@ struct OnboardingGateModelTests {
     @Test func aThrownCancelledReadLeavesReadFailedFalse() async throws {
         let service = FakeOnboardingService()
         let first = Latch()
-        service.onCompleted = { _ in
-            await first.wait()
-            throw CancellationError()
+        let second = Latch()
+        // Only the first call is cancelled. A hook shared by both calls would let the live
+        // second read throw too, and a live read that throws is a real failure.
+        service.onCompleted = { call in
+            if call == 1 {
+                await first.wait()
+                throw CancellationError()
+            }
+            await second.wait()
+            return false
         }
         let m = try model(service)
         m.start(userId: "a")
@@ -208,10 +215,15 @@ struct OnboardingGateModelTests {
         let read1 = m.work
         m.start(userId: nil)
         m.start(userId: "a")
+        await waitForCalls(2, service)
         first.open()
         await read1?.value
         #expect(!m.readFailed)
         #expect(m.isPending)
+        second.open()
+        await m.work?.value
+        #expect(!m.readFailed)
+        #expect(m.shouldPresent)
     }
 
     @Test func finishDuringAReadStaysFinished() async throws {
