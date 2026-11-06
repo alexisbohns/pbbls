@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.CompleteSnapshotStoring
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.SnapAspectCache
+import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.delete
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.MomentDetail
@@ -39,6 +41,11 @@ sealed interface PebbleDetailUiState {
     data class Content(
         val detail: MomentDetail,
         val completing: Boolean = false,
+        /**
+         * A bare moment has Complete answers kept on this device (✕ from the flow keeps them): the page says
+         * "You started this" and offers Continue (record-flow D14). Read at each load and resume, never per frame.
+         */
+        val hasDraft: Boolean = false,
     ) : PebbleDetailUiState
 }
 
@@ -78,6 +85,8 @@ class PebbleDetailViewModel
     constructor(
         private val moments: MomentReadServicing,
         private val writes: MomentWriteServicing,
+        private val snapshots: CompleteSnapshotStoring,
+        private val supabase: SupabaseServicing,
         /**
          * The photo-ratio probe the card's recto reads (#1135), the same
          * process-wide cache the Spine fills, so a card opened from the Spine
@@ -99,6 +108,7 @@ class PebbleDetailViewModel
 
         private var momentId: String? = null
         private var detail: MomentDetail? = null
+        private var hasDraft = false
         private var hasFailed = false
         private var isLoaded = false
         private var loadJob: Job? = null
@@ -158,6 +168,12 @@ class PebbleDetailViewModel
                         // another id is a different moment.
                         val wasBare = detail?.let { before -> before.id == it.id && before.pebble == null } == true
                         detail = it
+                        // A snapshot with nothing in it loads as null, by design: only answers worth keeping count.
+                        hasDraft = it.pebble == null &&
+                            supabase.session
+                                ?.user
+                                ?.id
+                                ?.let { owner -> snapshots.load(it.id, owner) } != null
                         hasFailed = false
                         isLoaded = true
                         if (wasBare && it.pebble != null) completing = true
@@ -179,7 +195,7 @@ class PebbleDetailViewModel
                 when {
                     hasFailed -> PebbleDetailUiState.Error
                     !isLoaded || current == null -> PebbleDetailUiState.Loading
-                    else -> PebbleDetailUiState.Content(current, completing = completing)
+                    else -> PebbleDetailUiState.Content(current, completing = completing, hasDraft = hasDraft)
                 }
         }
 

@@ -445,10 +445,31 @@ fun BareMomentLargeFontFrench() {
     PebblesTheme { BareOnGround(PebbleCardFixtures.f4) }
 }
 
+/** The bare page of a moment whose Complete answers are kept on the device: "You started this", Continue (D14). */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 360)
+@Preview(name = "fr", showBackground = true, widthDp = 360, locale = "fr")
+@Composable
+fun BareMomentDraft() {
+    PebblesTheme { BareOnGround(PebbleCardFixtures.f4.copy(description = null), hasDraft = true) }
+}
+
+/** A moment with no words: "Add a few words" under the button (D14). */
+@PreviewTest
+@Preview(showBackground = true, widthDp = 360)
+@Preview(name = "dark", showBackground = true, widthDp = 360, uiMode = UI_MODE_NIGHT_YES)
+@PreviewLargeFont
+@Composable
+fun BareMomentWordsOffered() {
+    PebblesTheme { BareOnGround(PebbleCardFixtures.f4.copy(description = null), onAddWords = {}) }
+}
+
 @Composable
 private fun BareOnGround(
     detail: MomentDetail,
     ratio: Float? = null,
+    hasDraft: Boolean = false,
+    onAddWords: (() -> Unit)? = null,
 ) {
     val colors = PebblesTheme.spine.colors
     Box(Modifier.background(colors.ground).padding(vertical = 16.dp)) {
@@ -458,6 +479,8 @@ private fun BareOnGround(
             ratio = ratio,
             onComplete = {},
             zone = PebbleCardFixtures.zone,
+            hasDraft = hasDraft,
+            onAddWords = onAddWords,
         )
     }
 }

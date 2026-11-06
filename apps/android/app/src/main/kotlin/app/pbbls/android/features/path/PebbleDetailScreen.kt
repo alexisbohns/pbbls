@@ -406,6 +406,9 @@ internal fun PebbleDetailContent(
                                         // Mid-print the page is under the card: nothing on it acts.
                                         onComplete = if (print != null) ({}) else onComplete,
                                         zone = zone,
+                                        hasDraft = state.hasDraft,
+                                        // Edit moment, where the words go; the page offers it only while there are none.
+                                        onAddWords = if (print != null) null else onEditMoment,
                                         modifier = Modifier.padding(bottom = 24.dp),
                                         placeModifier = placeModifier,
                                         ghostModifier = ghostModifier,

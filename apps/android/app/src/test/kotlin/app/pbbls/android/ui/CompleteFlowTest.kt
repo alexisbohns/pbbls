@@ -4,16 +4,22 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.model.Domain
+import app.pbbls.android.core.model.PebbleCollection
+import app.pbbls.android.core.model.PebbleCompletePayload
+import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
@@ -54,6 +60,15 @@ class CompleteFlowTest : AppUiTest() {
 
     /** Two bare moments on this week's Path, the first opened into Complete from its read page. */
     private fun openCompleteFromPath() {
+        armFixtures()
+        skipOnboarding()
+        launch()
+        signIn()
+        openPath()
+        openFirstBareMoment()
+    }
+
+    private fun armFixtures() {
         // Slugs with no catalog entry, so the tiles read the names below (D9 fallback).
         FakeServicesModule.cannedResponses["/v_emotions_with_palette"] =
             """
@@ -81,11 +96,6 @@ class CompleteFlowTest : AppUiTest() {
                 "moment-1" to UiFixtures.momentDetail(id = "moment-1", name = "Swim", pebble = null),
                 "moment-2" to UiFixtures.momentDetail(id = "moment-2", name = "Hike", pebble = null),
             )
-        skipOnboarding()
-        launch()
-        signIn()
-        openPath()
-        openFirstBareMoment()
     }
 
     private fun openFirstBareMoment() {
@@ -196,5 +206,132 @@ class CompleteFlowTest : AppUiTest() {
         walkToLife()
         onText(R.string.record_life_recent).assertIsDisplayed()
         compose.onAllNodes(hasText("Otherland") and isToggleable()).assertCountEquals(2)
+    }
+
+    // ---- Make it richer: the end screen's rows edit the finished pebble (D12) ----
+
+    private fun completeFromLife() {
+        compose.onNodeWithText("Testworld").performClick()
+        onText(R.string.complete_cta).performClick()
+        onText(R.string.richer_done).assertIsDisplayed()
+    }
+
+    @Test
+    fun `the end screen shows its rows, a visibility change is one partial write, and Done lands on the read page`() {
+        memory.markValenceHelpSeen("user-1")
+        refs.collections = listOf(PebbleCollection(id = "c-1", name = "Wins"))
+        openCompleteFromPath()
+        walkToLife()
+        completeFromLife()
+
+        compose.onNodeWithContentDescription(string(R.string.record_karma_a11y, 4)).assertIsDisplayed()
+        onText(R.string.richer_section).assertIsDisplayed()
+        onText(R.string.richer_add_collection).assertIsDisplayed()
+        onText(R.string.richer_add_words).assertIsDisplayed()
+        // No chrome on the end screen: nothing to close but Done.
+        compose.onNodeWithContentDescription(string(R.string.action_close)).assertDoesNotExist()
+        // A moment from the Path offers no Record another.
+        onText(R.string.richer_record_another).assertDoesNotExist()
+
+        onText(R.string.richer_who_can_see).performClick()
+        onText(R.string.visibility_public).performClick()
+        compose.waitForIdle()
+
+        assertEquals(2, writes.completed.size)
+        assertEquals(PebbleCompletePayload("moment-1", visibility = Visibility.PUBLIC), writes.completed.last())
+        // The row now reads the new value, beside its title.
+        compose.onNode(hasText(string(R.string.richer_who_can_see)) and hasText(string(R.string.visibility_public))).assertExists()
+
+        onText(R.string.richer_done).performClick()
+        onText(R.string.richer_done).assertDoesNotExist()
+        compose.onNodeWithContentDescription(string(R.string.more_actions_a11y)).assertIsDisplayed()
+    }
+
+    @Test
+    fun `Add to a collection is absent when the account has none`() {
+        memory.markValenceHelpSeen("user-1")
+        openCompleteFromPath()
+        walkToLife()
+        completeFromLife()
+
+        onText(R.string.richer_who_can_see).assertIsDisplayed()
+        onText(R.string.richer_add_collection).assertDoesNotExist()
+    }
+
+    @Test
+    fun `back on the end screen leaves it, and nothing was lost`() {
+        memory.markValenceHelpSeen("user-1")
+        openCompleteFromPath()
+        walkToLife()
+        completeFromLife()
+
+        pressBack()
+
+        onText(R.string.richer_done).assertDoesNotExist()
+        compose.onNodeWithContentDescription(string(R.string.more_actions_a11y)).assertIsDisplayed()
+    }
+
+    @Test
+    fun `Record another from a capture opens a fresh photo step with nothing left over`() {
+        memory.markValenceHelpSeen("user-1")
+        armFixtures()
+        writes.nextMomentId = "moment-9"
+        moments.moments = moments.moments + ("moment-9" to UiFixtures.momentDetail(id = "moment-9", name = "Walk", pebble = null))
+        skipOnboarding()
+        launch()
+        signIn()
+        openPath()
+        compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).performClick()
+        onText(R.string.capture_just_write).performClick()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("Walk")
+        onText(R.string.capture_save_and_pebble).performClick()
+        walkToLife()
+        completeFromLife()
+
+        onText(R.string.richer_record_another).performClick()
+        compose.waitForIdle()
+
+        onText(R.string.record_photo_title).assertIsDisplayed()
+        onText(R.string.richer_done).assertDoesNotExist()
+        onText(R.string.capture_just_write).performClick()
+        // The first capture's name is gone: the save waits for one.
+        onText(R.string.capture_just_save).assertIsNotEnabled()
+        assertEquals(listOf("Walk"), writes.saved.map { it.name })
+    }
+
+    @Test
+    fun `a bare moment says You started this once Complete was closed with answers kept`() {
+        memory.markValenceHelpSeen("user-1")
+        openCompleteFromPath()
+        compose
+            .onNodeWithContentDescription(
+                "${string(R.string.valence_group_medium_name)}, ${string(R.string.valence_highlight)}",
+            ).performClick()
+        compose.onNodeWithContentDescription(string(R.string.action_close)).performClick()
+        compose.waitForIdle()
+
+        // Back on the bare page, which reads again on its next entry: leave it and open it afresh.
+        pressBack()
+        compose.onAllNodesWithTag(JourneyTags.PATH_PEBBLE_ROW)[0].performClick()
+
+        onText(R.string.bare_place_started).assertIsDisplayed()
+        onText(R.string.complete_cta).assertDoesNotExist()
+        // Continue resumes the kept answers: the valence is answered, so it lands on the emotion.
+        onText(R.string.record_action_continue).performClick()
+        onText(R.string.record_emotion_title).assertIsDisplayed()
+    }
+
+    @Test
+    fun `Add a few words on the bare page opens Edit moment`() {
+        armFixtures()
+        skipOnboarding()
+        launch()
+        signIn()
+        openPath()
+        compose.onAllNodesWithTag(JourneyTags.PATH_PEBBLE_ROW)[0].performClick()
+
+        onText(R.string.richer_add_words).performClick()
+
+        onText(R.string.edit_moment).assertIsDisplayed()
     }
 }
