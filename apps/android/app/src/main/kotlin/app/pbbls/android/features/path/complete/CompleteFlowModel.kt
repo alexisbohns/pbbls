@@ -88,6 +88,9 @@ class CompleteFlowModel(
 
     fun beginComplete() = _state.update { it.copy(isCompleting = true, errorRes = null) }
 
+    /** A completion that never went out (the moment turned out to be finished already): the button is live again, silently. */
+    fun cancelComplete() = _state.update { it.copy(isCompleting = false) }
+
     /** [quiet] (a high-distress pebble) completes without the success buzz. */
     fun succeed(
         result: CompleteResult,

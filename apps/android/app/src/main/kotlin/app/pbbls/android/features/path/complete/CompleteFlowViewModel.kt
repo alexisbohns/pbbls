@@ -29,6 +29,7 @@ import app.pbbls.android.core.ui.momentWriteKnownErrorRes
 import app.pbbls.android.features.path.ComposerMedia
 import app.pbbls.android.features.path.PathFocusRequests
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -124,6 +125,12 @@ class CompleteFlowViewModel
 
         private var momentId: String? = null
 
+        /** The moment's load: [complete] waits for its answer, whichever it is. */
+        private var momentLoad: Job? = null
+
+        /** The load found a pebble on a moment this flow did not complete: nothing here may write. */
+        private var isFinishedElsewhere = false
+
         private val userId: String?
             get() = supabase.session?.user?.id
 
@@ -142,19 +149,28 @@ class CompleteFlowViewModel
             if (momentId == id) return
             momentId = id
             userId?.let { owner -> _uiState.update { it.copy(recentDomainIds = memory.recentDomainIds(owner)) } }
-            viewModelScope.launch {
-                runCatchingCancellable { reads.loadMoment(id) }
-                    .onSuccess { detail ->
-                        _uiState.update {
-                            it.copy(
-                                momentName = detail.name,
-                                isMomentLoaded = true,
-                                happenedAt = detail.happenedAt,
-                                hasWords = detail.hasWords,
-                            )
-                        }
-                    }.onFailure { Log.w(TAG, "moment load failed; the end screen shows no name, week or words row", it) }
-            }
+            momentLoad =
+                viewModelScope.launch {
+                    runCatchingCancellable { reads.loadMoment(id) }
+                        .onSuccess { detail ->
+                            // A re-created entry (process death on the end screen, then back from Edit moment) finds a
+                            // pebble this VM never made: a blank valence step over it would let a full payload replace its
+                            // souls, collections and visibility with empties. Leave instead; the stack below is the origin.
+                            if (detail.pebble != null && model.completed == null) {
+                                isFinishedElsewhere = true
+                                effectsOut.emit(CompleteFlowEffect.Dismiss)
+                                return@onSuccess
+                            }
+                            _uiState.update {
+                                it.copy(
+                                    momentName = detail.name,
+                                    isMomentLoaded = true,
+                                    happenedAt = detail.happenedAt,
+                                    hasWords = detail.hasWords,
+                                )
+                            }
+                        }.onFailure { Log.w(TAG, "moment load failed; the end screen shows no name, week or words row", it) }
+                }
             viewModelScope.launch {
                 restore(id)
                 // After the restore, and on its own: a slow read must never hold a draft up.
@@ -332,6 +348,12 @@ class CompleteFlowViewModel
             model.beginComplete()
             viewModelScope.launch {
                 withContext(NonCancellable) {
+                    // Never before the load has answered; a failed load answers too, and must not block making a pebble.
+                    momentLoad?.join()
+                    if (isFinishedElsewhere) {
+                        model.cancelComplete()
+                        return@withContext
+                    }
                     runCatchingCancellable { writes.completePebble(PebbleCompletePayload.from(id, answers)) }
                         .fold(
                             onSuccess = { pebbleId ->

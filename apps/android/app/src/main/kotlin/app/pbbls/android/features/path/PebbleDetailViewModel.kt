@@ -141,8 +141,23 @@ class PebbleDetailViewModel
          */
         fun onResumed() {
             resumeCount += 1
-            if (resumeCount > 1) reload()
+            if (resumeCount > 1) {
+                // A local read, before the network one: a ✕ from Complete is on screen at once, and offline too.
+                detail?.let {
+                    hasDraft = draftFor(it)
+                    publish()
+                }
+                reload()
+            }
         }
+
+        /** A snapshot with nothing in it loads as null, by design: only answers worth keeping count. */
+        private fun draftFor(moment: MomentDetail): Boolean =
+            moment.pebble == null &&
+                supabase.session
+                    ?.user
+                    ?.id
+                    ?.let { owner -> snapshots.load(moment.id, owner) } != null
 
         private fun load() {
             val id = momentId ?: return

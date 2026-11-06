@@ -540,4 +540,25 @@ class PebbleDetailViewModelTest {
             advanceUntilIdle()
             assertFalse((vm.uiState.value as PebbleDetailUiState.Content).hasDraft)
         }
+
+    @Test
+    fun `a resume updates the draft from the device even when the load fails`() =
+        runTest {
+            val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = null)))
+            val snapshots = FakeCompleteSnapshotStore()
+            val vm = detailViewModel(service, snapshots)
+            vm.start("moment-1")
+            vm.onResumed()
+            advanceUntilIdle()
+            assertFalse((vm.uiState.value as PebbleDetailUiState.Content).hasDraft)
+
+            snapshots.save("moment-1", "user-1", CompleteSnapshot.from(PebbleAnswers(valence = Valence.HIGHLIGHT_MEDIUM)))
+            service.failNext = IOException("offline")
+            vm.onResumed()
+
+            // Before the network answers, and after it has failed: the kicker is already right.
+            assertTrue((vm.uiState.value as PebbleDetailUiState.Content).hasDraft)
+            advanceUntilIdle()
+            assertTrue((vm.uiState.value as PebbleDetailUiState.Content).hasDraft)
+        }
 }

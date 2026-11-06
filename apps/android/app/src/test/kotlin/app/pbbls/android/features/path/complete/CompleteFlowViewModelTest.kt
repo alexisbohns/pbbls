@@ -708,4 +708,110 @@ class CompleteFlowViewModelTest {
                     ?.quietSuccess,
             )
         }
+
+    // ---- A finished pebble never reopens ----
+
+    private val finishedMoment = UiFixtures.momentDetail(id = "m-1", name = "Swim")
+
+    @Test
+    fun `a re-created entry on a moment that already has a pebble dismisses and never writes`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.read.moments = mapOf("m-1" to finishedMoment)
+            val effects = recordEffects(h.viewModel.effects)
+
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            assertTrue(CompleteFlowEffect.Dismiss in effects.values)
+
+            h.answerEverything()
+            h.viewModel.complete()
+            advanceUntilIdle()
+            effects.stop()
+            assertTrue(h.write.completed.isEmpty())
+            assertEquals(false, h.viewModel.uiState.value.flow.isCompleting)
+        }
+
+    @Test
+    fun `a fresh entry on a bare moment does not dismiss`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            val effects = recordEffects(h.viewModel.effects)
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            effects.stop()
+            assertTrue(CompleteFlowEffect.Dismiss !in effects.values)
+        }
+
+    @Test
+    fun `after this flow's own completion a moment that now has a pebble does not dismiss`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            finished(h)
+            h.read.moments = mapOf("m-1" to finishedMoment)
+            val effects = recordEffects(h.viewModel.effects)
+
+            h.viewModel.start("m-1")
+            h.viewModel.onResumed()
+            advanceUntilIdle()
+            effects.stop()
+
+            assertTrue(CompleteFlowEffect.Dismiss !in effects.values)
+            assertEquals(CompleteStep.SUCCESS, h.viewModel.uiState.value.flow.step)
+        }
+
+    @Test
+    fun `a completion waits for the moment's load, and a finished moment then writes nothing`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.read.moments = mapOf("m-1" to finishedMoment)
+            val gate = CompletableDeferred<Unit>()
+            h.read.momentGate = gate
+            val effects = recordEffects(h.viewModel.effects)
+            h.viewModel.start("m-1")
+            h.answerEverything()
+
+            h.viewModel.complete()
+            advanceUntilIdle()
+            assertTrue(h.write.completed.isEmpty())
+
+            gate.complete(Unit)
+            advanceUntilIdle()
+            effects.stop()
+            assertTrue(h.write.completed.isEmpty())
+            assertTrue(CompleteFlowEffect.Dismiss in effects.values)
+        }
+
+    @Test
+    fun `a bare moment's completion waits for the load, then goes out`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            val gate = CompletableDeferred<Unit>()
+            h.read.momentGate = gate
+            h.viewModel.start("m-1")
+            h.answerEverything()
+
+            h.viewModel.complete()
+            advanceUntilIdle()
+            assertTrue(h.write.completed.isEmpty())
+
+            gate.complete(Unit)
+            advanceUntilIdle()
+            assertEquals(1, h.write.completed.size)
+        }
+
+    @Test
+    fun `a failed load does not block making a pebble`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.read.failNext = java.io.IOException("offline")
+            h.viewModel.start("m-1")
+            h.answerEverything()
+
+            h.viewModel.complete()
+            advanceUntilIdle()
+
+            assertEquals(1, h.write.completed.size)
+            assertEquals(CompleteStep.SUCCESS, h.viewModel.uiState.value.flow.step)
+        }
 }
