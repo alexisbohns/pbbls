@@ -13,17 +13,44 @@ struct CaptureFlowModelTests {
         return (CaptureFlowModel(haptic: { recorder.taps.append($0) }), recorder)
     }
 
-    @Test("photo and when always advance; name is the last step")
+    @Test("photo advances to the moment page, which is the last step")
     func advance() {
         let (model, recorder) = model()
-        #expect(model.optionalButtonIsSkip)
         model.advance()
-        #expect(model.step == .when)
+        #expect(model.step == .moment)
         model.advance()
-        #expect(model.step == .name)
-        model.advance()
-        #expect(model.step == .name)
-        #expect(recorder.taps == [.advance, .advance])
+        #expect(model.step == .moment)
+        #expect(recorder.taps == [.advance])
+    }
+
+    @Test("the words are clamped to the description limit")
+    func descriptionClamp() {
+        let (model, _) = model()
+        model.setDescription(String(repeating: "x", count: 300))
+        #expect(model.draft.description.count == CaptureFlowModel.descriptionLimit)
+    }
+
+    @Test("the when chip reads from the photo until the user edits it")
+    func whenChip() {
+        let (model, _) = model()
+        #expect(model.whenSource == .now)
+        model.applyCaptureDate(Date(timeIntervalSince1970: 1_700_000_000))
+        #expect(model.whenSource == .photo)
+        model.setHappenedAt(Date())
+        #expect(model.whenSource == .edited)
+    }
+
+    @Test("restore lands on the moment page with the saved fields")
+    func restore() {
+        let (model, _) = model()
+        var saved = CaptureDraft()
+        saved.name = "Lake"
+        saved.description = "Cold water"
+        saved.happenedAt = Date(timeIntervalSince1970: 1_700_000_000)
+        model.restore(saved, hasEditedDate: true)
+        #expect(model.step == .moment)
+        #expect(model.draft == saved)
+        #expect(model.whenSource == .edited)
     }
 
     @Test("savable with a name or a photo, not with neither (D3)")
@@ -70,7 +97,7 @@ struct CaptureFlowModelTests {
     @Test("save outcomes: success haptic, failure keeps the error and stays")
     func outcomes() {
         let (model, recorder) = model()
-        model.go(to: .name)
+        model.go(to: .moment)
         model.beginSaving()
         #expect(model.isSaving)
         model.fail("nope")

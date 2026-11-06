@@ -20,6 +20,16 @@ struct SaveMomentPayloadCaptureTests {
         #expect(payload.happenedAt == draft.happenedAt)
     }
 
+    @Test("the words go as description, trimmed, omitted when blank")
+    func description() {
+        var draft = CaptureDraft()
+        draft.name = "Lake"
+        draft.description = "  Cold water  "
+        #expect(SaveMomentPayload(capture: draft, formSnap: nil, userId: userId).description == "Cold water")
+        draft.description = "   "
+        #expect(SaveMomentPayload(capture: draft, formSnap: nil, userId: userId).description == nil)
+    }
+
     @Test("a photo-only capture omits the name and sends the snap")
     func photoOnly() {
         let snapId = UUID()

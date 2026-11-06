@@ -757,6 +757,23 @@
         }
       }
     },
+    "+1 karma as a pebble" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+1 karma as a pebble"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+1 karma en galet"
+          }
+        }
+      }
+    },
     "3 to 30 characters: lowercase letters, numbers, underscores. Leave empty to release your handle." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -791,6 +808,23 @@
         }
       }
     },
+    "A FEW WORDS" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A FEW WORDS"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QUELQUES MOTS"
+          }
+        }
+      }
+    },
     "A moment needs a name or a photo." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -804,23 +838,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Un moment a besoin d'un nom ou d'une photo."
-          }
-        }
-      }
-    },
-    "A name, a photo, or both." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A name, a photo, or both."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un nom, une photo, ou les deux."
           }
         }
       }
@@ -2328,6 +2345,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Graver un glyphe"
+          }
+        }
+      }
+    },
+    "Change photo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change photo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer la photo"
           }
         }
       }
@@ -4979,6 +5013,23 @@
         }
       }
     },
+    "From your photo · %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From your photo · %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D’après ta photo · %@"
+          }
+        }
+      }
+    },
     "Get a new link" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7356,6 +7407,40 @@
         }
       }
     },
+    "Just save" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just save"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juste enregistrer"
+          }
+        }
+      }
+    },
+    "Just write" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just write"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Juste écrire"
+          }
+        }
+      }
+    },
     "Karma" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7895,6 +7980,23 @@
         }
       }
     },
+    "NAME" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NAME"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NOM"
+          }
+        }
+      }
+    },
     "Name (optional)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8426,23 +8528,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Facultatif"
-          }
-        }
-      }
-    },
-    "Or skip it and write from memory." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Or skip it and write from memory."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ou passe et écris de mémoire."
           }
         }
       }
@@ -11666,6 +11751,23 @@
         }
       }
     },
+    "Pick one, or write it from memory." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick one, or write it from memory."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis-en une, ou écris de mémoire."
+          }
+        }
+      }
+    },
     "Please sign in again." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12174,6 +12276,23 @@
         }
       }
     },
+    "Save & make it a pebble" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save & make it a pebble"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer et en faire un galet"
+          }
+        }
+      }
+    },
     "Save as draft" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12656,23 +12775,6 @@
         }
       }
     },
-    "Taken from your photo" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Taken from your photo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Récupéré depuis ta photo"
-          }
-        }
-      }
-    },
     "Tap + to carve your first glyph." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13025,6 +13127,23 @@
         }
       }
     },
+    "Today" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aujourd’hui"
+          }
+        }
+      }
+    },
     "Track" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13282,19 +13401,19 @@
         }
       }
     },
-    "What do you call it?" : {
+    "What happened?" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "What do you call it?"
+            "value" : "What happened?"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu l'appelles comment ?"
+            "value" : "Que s’est-il passé ?"
           }
         }
       }
@@ -13329,6 +13448,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quand"
+          }
+        }
+      }
+    },
+    "WHEN" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WHEN"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QUAND"
           }
         }
       }
@@ -13380,6 +13516,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Qui était là ?"
+          }
+        }
+      }
+    },
+    "Yesterday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yesterday"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hier"
           }
         }
       }
@@ -13550,6 +13703,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ma vie est un chemin."
+          }
+        }
+      }
+    },
+    "Your moment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your moment"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton moment"
           }
         }
       }

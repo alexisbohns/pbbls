@@ -13,6 +13,7 @@ struct PebblesApp: App {
     @State private var achievementNotify: AchievementNotificationService
     @State private var achievements: AchievementsService
     @State private var completeDrafts: CompleteDraftStore
+    @State private var captureDrafts: CaptureDraftStore
     @State private var connections: ConnectionsService
     @State private var karmaOverlay = KarmaOverlayWindowController()
     @State private var momentsRevision = MomentsRevision()
@@ -36,6 +37,7 @@ struct PebblesApp: App {
         self._achievementNotify = State(initialValue: achievementNotify)
         self._achievements = State(initialValue: achievements)
         self._completeDrafts = State(initialValue: CompleteDraftStore())
+        self._captureDrafts = State(initialValue: CaptureDraftStore())
         self._connections = State(initialValue: ConnectionsService(supabase: supabase))
         Self.configureSegmentedControlAppearance()
         Self.configureNavigationBarAppearance()
@@ -55,6 +57,7 @@ struct PebblesApp: App {
                 .environment(achievementNotify)
                 .environment(achievements)
                 .environment(completeDrafts)
+                .environment(captureDrafts)
                 .environment(connections)
                 .environment(momentsRevision)
                 .onAppear { karmaOverlay.attachIfNeeded(service: karma, achievements: achievementNotify) }

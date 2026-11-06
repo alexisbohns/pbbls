@@ -3,12 +3,13 @@ import Testing
 
 @Suite("CaptureStep")
 struct CaptureStepTests {
-    @Test("photo · when · name, three dots, photo optional")
+    @Test("two counted steps: photo then the moment page")
     func order() {
-        #expect(CaptureStep.allCases == [.photo, .when, .name])
-        #expect(CaptureStep.allCases.map(\.dotIndex) == [0, 1, 2])
-        #expect(CaptureStep.allCases.filter(\.isOptional) == [.photo])
-        #expect(CaptureStep.name.next == nil)
-        #expect(CaptureStep.photo.previous == nil)
+        #expect(CaptureStep.allCases == [.photo, .moment])
+        #expect(CaptureStep.photo.next == .moment)
+        #expect(CaptureStep.moment.next == nil)
+        #expect(CaptureStep.moment.previous == .photo)
+        #expect(CaptureStep.photo.dotIndex == 0)
+        #expect(CaptureStep.moment.dotIndex == 1)
     }
 }

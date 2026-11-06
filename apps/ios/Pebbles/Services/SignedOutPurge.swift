@@ -19,6 +19,8 @@ import os
 struct SignedOutPurge {
     /// Half-finished Complete flows, one file per moment (A3).
     let completeDrafts: CompleteDraftStore
+    /// The unsaved moment page, one file per owner (record-flow D2).
+    let captureDrafts: CaptureDraftStore
     let refs: ReferenceDataService
     let stats: PathStatsService
     let snapURLs: SnapURLCache
@@ -32,6 +34,7 @@ struct SignedOutPurge {
 
     func run() {
         completeDrafts.clearAll()
+        captureDrafts.clearAll()
         refs.reset()
         stats.reset()
         snapURLs.invalidateAll()

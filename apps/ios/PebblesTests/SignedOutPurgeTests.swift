@@ -13,6 +13,7 @@ struct SignedOutPurgeTests {
         let purge: SignedOutPurge
         let completeDrafts: CompleteDraftStore
         let completeDraftsDirectory: URL
+        let captureDrafts: CaptureDraftStore
         let refs: ReferenceDataService
         let stats: PathStatsService
         let urlCache: URLCache
@@ -32,8 +33,11 @@ struct SignedOutPurgeTests {
         let urlCache = URLCache(memoryCapacity: 1_000_000, diskCapacity: 0)
         let wrapCache = WrapDiskCache(root: FileManager.default.temporaryDirectory
             .appendingPathComponent("signed-out-purge-wraps-\(UUID().uuidString)"))
+        let captureDrafts = CaptureDraftStore(directory: FileManager.default.temporaryDirectory
+            .appendingPathComponent("signed-out-purge-capture-\(UUID().uuidString)"))
         let purge = SignedOutPurge(
             completeDrafts: completeDrafts,
+            captureDrafts: captureDrafts,
             refs: refs,
             stats: stats,
             snapURLs: SnapURLCache(provider: FakeSignedURLProvider(), now: { Date() }),
@@ -43,7 +47,7 @@ struct SignedOutPurgeTests {
         return Fixture(
             purge: purge,
             completeDrafts: completeDrafts, completeDraftsDirectory: completeDraftsDirectory,
-            refs: refs, stats: stats, urlCache: urlCache, wrapCache: wrapCache
+            captureDrafts: captureDrafts, refs: refs, stats: stats, urlCache: urlCache, wrapCache: wrapCache
         )
     }
 
@@ -75,6 +79,24 @@ struct SignedOutPurgeTests {
 
         #expect(fixture.completeDrafts.load(momentId: moment, ownerId: owner) == nil)
         #expect(!FileManager.default.fileExists(atPath: fixture.completeDraftsDirectory.path))
+    }
+
+    @Test("Unsaved moment pages are deleted from disk, for every owner")
+    func clearsCaptureDrafts() {
+        let fixture = makeFixture()
+        let other = UUID()
+        var draft = CaptureDraft()
+        draft.name = "Coffee"
+        fixture.captureDrafts.save(.init(draft: draft, hasEditedDate: false, snap: nil), ownerId: owner)
+        draft.description = "A few words"
+        fixture.captureDrafts.save(.init(draft: draft, hasEditedDate: true, snap: nil), ownerId: other)
+        #expect(fixture.captureDrafts.load(ownerId: owner)?.draft.name == "Coffee")
+        #expect(fixture.captureDrafts.load(ownerId: other)?.hasEditedDate == true)
+
+        fixture.purge.run()
+
+        #expect(fixture.captureDrafts.load(ownerId: owner) == nil)
+        #expect(fixture.captureDrafts.load(ownerId: other) == nil)
     }
 
     @Test("Souls and collections are forgotten, shared domains are kept")
