@@ -41,6 +41,26 @@
         "fr": "Crédits"
       },
       "path": "docs/credits/"
+    },
+    {
+      "slug": "support",
+      "category": "support",
+      "order": 1,
+      "titles": {
+        "en": "Support",
+        "fr": "Assistance"
+      },
+      "path": "docs/support/"
+    },
+    {
+      "slug": "delete-account",
+      "category": "support",
+      "order": 2,
+      "titles": {
+        "en": "Delete your account",
+        "fr": "Supprimer votre compte"
+      },
+      "path": "docs/delete-account/"
     }
   ]
 }

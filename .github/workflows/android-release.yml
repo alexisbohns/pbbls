@@ -82,6 +82,11 @@ jobs:
           echo "::error::The ${{ inputs.track }} track only publishes from main (this run is on ${{ github.ref_name }})."
           exit 1
 
+      # Play's account-deletion policy needs this page public (#1443).
+      - name: Check the public account-deletion page
+        if: ${{ env.PLAY_TRACK != 'internal' }}
+        run: curl -fsS --retry 3 https://www.pbbls.app/docs/delete-account | grep -q 'ciao@pbbls.app'
+
       - name: Checkout
         uses: actions/checkout@v7
 
