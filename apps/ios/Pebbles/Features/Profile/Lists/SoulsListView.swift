@@ -7,10 +7,11 @@ struct SoulsListView: View {
     @Environment(TabNavigation.self) private var nav
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(MomentsRevision.self) private var revision
-    @State private var items: [SoulWithGlyph] = []
+    // The People tab is the chooser in browse mode (souls spec Summary): the
+    // Usual tiles, everyone A to Z, the lens and the plus at the bottom.
+    @State private var chooser = SoulChooserModel(mode: .browse, souls: [])
     @State private var isLoading = true
     @State private var loadError: String?
-    @State private var isPresentingCreate = false
     @State private var pendingDeletion: SoulWithGlyph?
     @State private var deleteError: String?
     @State private var promptError: String?
@@ -18,7 +19,6 @@ struct SoulsListView: View {
     // (D-plan-3); the device's "Not now" ends it.
     @AppStorage(PeopleOnboardingState.storageKey) private var promptsDismissed = false
     @State private var prompts: PeoplePrompts?
-    @State private var promptsFailed = false
     @State private var quickMoment = false
     @State private var editing: EditTarget?
 
@@ -30,8 +30,6 @@ struct SoulsListView: View {
     }
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.souls")
-
-    private let columns = [GridItem(.adaptive(minimum: 96), spacing: Spacing.lg)]
 
     var body: some View {
         content
@@ -45,17 +43,11 @@ struct SoulsListView: View {
                     }
                     .accessibilityLabel("Circle")
                 }
-                ToolbarItem(placement: .primaryAction) {
-                    PebbleToolbarButton(action: { isPresentingCreate = true }) {
-                        PbblsIconImage(.plusCircle, .toolbar)
-                    }
-                    .accessibilityLabel("Add soul")
-                }
             }
             .navigationDestination(for: PeopleRoute.self) { route in
                 switch route {
                 case .soul(let id):
-                    SoulRoute(id: id, known: items, onChanged: {
+                    SoulRoute(id: id, known: chooser.souls, onChanged: {
                         Task {
                             await load()
                             await refs.refreshSouls()
@@ -66,14 +58,6 @@ struct SoulsListView: View {
                 }
             }
             .task { await load() }
-            .sheet(isPresented: $isPresentingCreate) {
-                CreateSoulSheet(onCreated: { _ in
-                    Task {
-                        await load()
-                        await refs.refreshSouls()
-                    }
-                })
-            }
             .sheet(isPresented: $quickMoment) {
                 QuickMomentSheet(onSaved: { _, _ in
                     revision.bump(from: .people)
@@ -134,9 +118,10 @@ struct SoulsListView: View {
                 Text(message)
             }
             .pebblesScreen()
-            // Home's checklist sends the user here to add a first soul.
+            // Home's checklist sends the user here to add a first soul: the
+            // chooser's field opens, typing a new name offers the Add row.
             .onAppear {
-                if nav.takeIntent(for: .people) == .createSoul { isPresentingCreate = true }
+                if nav.takeIntent(for: .people) == .createSoul { chooser.isSearching = true }
             }
     }
 
@@ -144,65 +129,44 @@ struct SoulsListView: View {
     private var content: some View {
         // A tab root reloads on every return; keep the rows (and the scroll
         // position) on screen while it does.
-        if isLoading && items.isEmpty {
+        if isLoading && chooser.souls.isEmpty {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if let loadError {
-            ContentUnavailableView(
-                "Couldn't load souls",
-                systemImage: "exclamationmark.triangle",
-                description: Text(loadError)
-            )
-        } else if items.isEmpty {
-            if let prompts {
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        onboarding(prompts)
-                            .padding(Spacing.lg)
-                            .id(TabNavigation.scrollTopAnchor)
-                    }
-                    .onChange(of: nav.scrollToTop[.people, default: 0]) {
-                        withAnimation { proxy.scrollTo(TabNavigation.scrollTopAnchor, anchor: .top) }
-                    }
-                }
-            } else if promptsFailed || promptsDismissed {
-                // The prompts could not be read, or were dismissed before
-                // this read landed: never a blank tab, never a spinner.
-                ContentUnavailableView {
-                    Label { Text("No souls yet") } icon: { PbblsIconImage(.people, .hero) }
-                } description: {
-                    Text("People and beings you tag on your pebbles will appear here.")
-                }
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if let loadError, chooser.souls.isEmpty {
+            ContentUnavailableView {
+                Label { Text("Couldn't load souls") } icon: { PbblsIconImage(.people, .hero) }
+            } description: {
+                Text(loadError)
+            } actions: {
+                Button("Retry") { Task { await load() } }
             }
         } else {
             ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(spacing: 0) {
-                        LazyVGrid(columns: columns, spacing: Spacing.lg) {
-                            ForEach(items) { item in
-                                NavigationLink(value: PeopleRoute.soul(item.id)) {
-                                    SoulItem(case: .default, soul: item, count: item.pebblesCount)
-                                }
-                                .buttonStyle(.plain)
-                                .pebblesContextMenu([
-                                    .delete {
-                                        pendingDeletion = item
-                                    }
-                                ])
+                SoulChooser(
+                    model: chooser,
+                    title: nil,
+                    onOpen: { nav.people.append(.soul($0.id)) },
+                    onCreated: { nav.people.append(.soul($0.id)) },
+                    onDeleteRequest: { pendingDeletion = $0 },
+                    header: {
+                        let state = prompts.map { PeopleOnboardingState.make($0, dismissed: promptsDismissed) }
+                        if let state, state != .done {
+                            onboarding(state)
+                                .padding(.horizontal, Spacing.lg)
+                                .padding(.bottom, Spacing.md)
+                        } else if chooser.souls.isEmpty {
+                            // Nothing to draw and nothing to list (the prompts
+                            // failed, were dismissed, or are done): never a
+                            // blank tab, never a spinner.
+                            ContentUnavailableView {
+                                Label { Text("No souls yet") } icon: { PbblsIconImage(.people, .hero) }
+                            } description: {
+                                Text("People and beings you tag on your pebbles will appear here.")
                             }
                         }
-                        .padding(Spacing.lg)
-                        if let prompts {
-                            // Draws nothing unless the state is `.fewSouls`.
-                            onboarding(prompts)
-                                .padding(.horizontal, Spacing.lg)
-                        }
                     }
-                    .id(TabNavigation.scrollTopAnchor)
-                }
+                )
+                .id(TabNavigation.scrollTopAnchor)
                 .onChange(of: nav.scrollToTop[.people, default: 0]) {
                     withAnimation { proxy.scrollTo(TabNavigation.scrollTopAnchor, anchor: .top) }
                 }
@@ -210,9 +174,9 @@ struct SoulsListView: View {
         }
     }
 
-    private func onboarding(_ prompts: PeoplePrompts) -> some View {
+    private func onboarding(_ state: PeopleOnboardingState) -> some View {
         PeopleOnboardingView(
-            state: PeopleOnboardingState.make(prompts, dismissed: promptsDismissed),
+            state: state,
             palette: { id in id.flatMap { palettes.palette(for: $0) } },
             onRecord: { quickMoment = true },
             onWho: { prompt in Task { await openPebble(of: prompt) } },
@@ -223,6 +187,8 @@ struct SoulsListView: View {
     private func load() async {
         isLoading = true
         loadError = nil
+        // A warm tab shows the cache while its own fetch (with counts) lands.
+        if chooser.souls.isEmpty, !refs.souls.isEmpty { chooser.replaceSouls(refs.souls) }
         do {
             let result: [SoulWithGlyph] = try await supabase.client
                 .from("souls")
@@ -230,7 +196,7 @@ struct SoulsListView: View {
                 .order("name", ascending: true)
                 .execute()
                 .value
-            self.items = result
+            chooser.replaceSouls(result)
             // D-plan-3: a veteran's grid pays nothing for the onboarding.
             if result.count < 3 {
                 await loadPrompts()
@@ -249,13 +215,11 @@ struct SoulsListView: View {
     private func loadPrompts() async {
         do {
             prompts = try await PeopleService(client: supabase.client).prompts(limit: 3)
-            promptsFailed = false
         } catch {
             // Cancelled, not failed: `.task` reruns the read on reappear.
             guard !Task.isCancelled else { return }
             logger.error("people_prompts failed: \(error.localizedDescription, privacy: .private)")
-            // Keep the last prompts, if any; the grid or the fallback stands.
-            promptsFailed = true
+            // Keep the last prompts, if any; the list or the empty state stands.
         }
     }
 
@@ -303,5 +267,6 @@ struct SoulsListView: View {
             .environment(CompleteDraftStore())
             .environment(MomentsRevision())
             .environment(EmotionPaletteService(client: supabase.client))
+            .environment(AchievementsService(client: supabase.client))
     }
 }

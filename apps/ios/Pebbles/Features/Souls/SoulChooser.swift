@@ -20,6 +20,9 @@ struct SoulChooser<Header: View>: View {
     /// A soul was created inline; the host decides what follows (a picker
     /// selects it, the People tab opens it).
     var onCreated: (SoulWithGlyph) -> Void = { _ in }
+    /// Browse mode, when set: a long press on a tile or a row offers Delete
+    /// and the host confirms (the People tab owns the dialog and the delete).
+    var onDeleteRequest: ((SoulWithGlyph) -> Void)?
     /// Reference renders only: `ImageRenderer` draws neither ScrollView content nor TextFields.
     var scrolls = true
     @ViewBuilder var header: () -> Header
@@ -119,8 +122,11 @@ struct SoulChooser<Header: View>: View {
             sectionTitle(Text("Usual"))
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 4), spacing: 4) {
                 ForEach(people) { soul in
-                    SoulTile(soul: soul, isSelected: model.isSelected(soul.id), showsSelection: model.mode != .browse) {
-                        tapped(soul)
+                    deletable(soul) {
+                        SoulTile(soul: soul, isSelected: model.isSelected(soul.id),
+                                 showsSelection: model.mode != .browse) {
+                            tapped(soul)
+                        }
                     }
                 }
             }
@@ -159,8 +165,21 @@ struct SoulChooser<Header: View>: View {
     }
 
     private func row(_ soul: SoulWithGlyph) -> some View {
-        SoulRow(soul: soul, trailing: trailing(for: soul)) { tapped(soul) }
-            .overlay(alignment: .bottom) { Divider().overlay(Color.pebbles.rule) }
+        deletable(soul) {
+            SoulRow(soul: soul, trailing: trailing(for: soul)) { tapped(soul) }
+                .overlay(alignment: .bottom) { Divider().overlay(Color.pebbles.rule) }
+        }
+    }
+
+    /// The host's Delete on a long press, only when it asked for one.
+    @ViewBuilder
+    private func deletable<Content: View>(_ soul: SoulWithGlyph, @ViewBuilder content: () -> Content) -> some View {
+        if let onDeleteRequest {
+            content()
+                .pebblesContextMenu([.delete { onDeleteRequest(soul) }])
+        } else {
+            content()
+        }
     }
 
     private func trailing(for soul: SoulWithGlyph) -> SoulRow.Trailing {
@@ -216,9 +235,10 @@ extension SoulChooser where Header == EmptyView {
          onOpen: @escaping (SoulWithGlyph) -> Void = { _ in },
          onConfirm: @escaping () -> Void = {},
          onCreated: @escaping (SoulWithGlyph) -> Void = { _ in },
+         onDeleteRequest: ((SoulWithGlyph) -> Void)? = nil,
          scrolls: Bool = true) {
         self.init(model: model, title: title, onOpen: onOpen, onConfirm: onConfirm, onCreated: onCreated,
-                  scrolls: scrolls) {
+                  onDeleteRequest: onDeleteRequest, scrolls: scrolls) {
             EmptyView()
         }
     }
