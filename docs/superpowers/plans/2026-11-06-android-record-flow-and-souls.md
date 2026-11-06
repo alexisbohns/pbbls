@@ -91,6 +91,20 @@ From the Android onboarding drift (#1510):
 - **Check every control against the component the app already uses.** Android's Settings idiom is `ListGroup` + `SegmentedListItem` + native `Switch`. `connected*ButtonShapes` are horizontal.
 - **Copy, rows and shapes drifted while the logic passed.** The reviewer's first job is the side-by-side, not the diff.
 
+### Binding notes learned while building
+
+Part 1, for every host of the chooser:
+
+- `rememberSoulChooserState(mode, souls, isLoaded = refs.hasLoaded, selection)`: `isLoaded` is required, because an unloaded empty list must not prune a restored selection.
+- `SoulChooserBody` draws neither the tray, the top bar nor the lens. A host composes `SoulChooserTray`, `SoulChooserSearchButton` and `SoulChooserSearchField` itself (the preview's `ChooserFrame` shows how), and passes `onHaptic = rememberTapHaptics { hapticsOn }` to the body and the tray.
+- `SoulChooserBody` creates no soul. `onCreate(name)` is the host's: `state.didCreate(soul)` on success, `state.createErrorRes = …` on failure, logged. `onLongClickSoul` is how People attaches its delete dialog.
+- `query` and `isSearching` are private-set: `updateQuery`, `clearQuery`, `openSearch`, `closeSearch`.
+- The stock `SearchBar` may add its own status-bar inset: check the first host for a doubled top inset.
+- `souls_who_was_there` carries `tools:ignore="UnusedResources"` in `values/strings.xml`: remove it in the part that reads it from main code. Lint does not count the `screenshotTest` source set as a use.
+- Selection on a tile or row: `Role.Checkbox` with `toggleableState`, no `selected`; browse uses `Role.Button`.
+- Chosen names go bold on purpose (S2, mock 10), though `SoulItem`'s KDoc says "never weight" (#515).
+- Known edge, left: a `refreshSouls` already running when a soul is created can land without it and drop its pill.
+
 ---
 
 ## Copy (from iOS, verbatim)
