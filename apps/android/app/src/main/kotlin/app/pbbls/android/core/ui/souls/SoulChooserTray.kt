@@ -9,11 +9,16 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -47,7 +52,9 @@ private const val WRAP_FONT_SCALE = 1.5f
 /**
  * The pick-mode bar under the list: the chosen souls as chips (each removes itself), then the
  * button that confirms. At large font the chips wrap above the button (S8). Hosts decide the button
- * through [SoulChooserState.button]; a browse chooser draws no tray at all.
+ * through [SoulChooserState.button]; a browse chooser draws no tray at all. The tint runs to the
+ * bottom edge and the content sits above the gesture bar, unless a host already consumed that inset
+ * (then it adds nothing); a raised keyboard replaces the bar, so it is not counted twice.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -58,6 +65,7 @@ fun SoulChooserTray(
     modifier: Modifier = Modifier,
 ) {
     val button = state.button ?: return
+    val trayInsets = WindowInsets.navigationBars.exclude(WindowInsets.ime)
     val colors = MaterialTheme.colorScheme
     val chosen = state.selection.mapNotNull { id -> state.souls.firstOrNull { it.id == id } }
     val wraps = LocalDensity.current.fontScale >= WRAP_FONT_SCALE
@@ -92,7 +100,12 @@ fun SoulChooserTray(
     }
     if (wraps) {
         Column(
-            modifier = modifier.fillMaxWidth().background(colors.surfaceContainer).padding(space.lg),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .background(colors.surfaceContainer)
+                    .windowInsetsPadding(trayInsets)
+                    .padding(space.lg),
             verticalArrangement = Arrangement.spacedBy(space.sm),
         ) {
             if (chosen.isNotEmpty()) {
@@ -102,7 +115,12 @@ fun SoulChooserTray(
         }
     } else {
         Row(
-            modifier = modifier.fillMaxWidth().background(colors.surfaceContainer).padding(horizontal = space.lg, vertical = space.md),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .background(colors.surfaceContainer)
+                    .windowInsetsPadding(trayInsets)
+                    .padding(horizontal = space.lg, vertical = space.md),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(space.md),
         ) {
