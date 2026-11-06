@@ -140,7 +140,14 @@ Part 6, for what follows:
 - A step composable can outlive its step for 280 ms inside `AnimatedContent`: anything it triggers is checked against `model.step` in the ViewModel.
 - A `clickable`-less fan is not inert: `clearAndSetSemantics {}` when `!interactive`.
 
-Follow-ups to file when the stack ships: the D7 sentence, both surfaces; Edit moment does not record a replaced saved photo's files for deletion (iOS appends to `detachedStoragePaths`); `seededFromPhoto` after a removal, both surfaces; the D6 snackbar and the D9 beat, both surfaces; People prompts on Android (`AC-people-starts-from-the-pebbles-you-have` is still `development` there); whether the moment page's fields read well under TalkBack, now that they carry a `contentDescription`; an Android embedded photo picker as a route to the 3-tap moment.
+Part 7, for what follows:
+
+- `PebbleCompletePayload` fields are nullable: `from` sends every key, `edit` omits a set left as prefilled, and a partial one such as `PebbleCompletePayload(momentId, visibility = v)` sends only that key, which is how the end screen's rows edit. `complete_pebble` replaces a set only when its key is present; `[]` clears.
+- `CompleteFlowContent` gives top and side insets only: each step takes its own bottom. A tinted bar pads `navigationBars.exclude(ime)` inside its background.
+- The Life bar drops its caption at `fontScale >= 1.5`, keeping the description on each tile's click label: an Android deviation, recorded in the decision log by Part 9. `KnownDraftIds` prunes domains too, which iOS does not.
+- `CompleteStep.SUCCESS` still renders the old `RecordSuccessStep` until Part 8. `momentWriteKnownErrorRes(error): Int?` is the known half of `momentWriteErrorRes`.
+
+Follow-ups to file when the stack ships: iOS's strip names at large text; iOS does not prune a gone domain; the D7 sentence, both surfaces; Edit moment does not record a replaced saved photo's files for deletion (iOS appends to `detachedStoragePaths`); `seededFromPhoto` after a removal, both surfaces; the D6 snackbar and the D9 beat, both surfaces; People prompts on Android (`AC-people-starts-from-the-pebbles-you-have` is still `development` there); whether the moment page's fields read well under TalkBack, now that they carry a `contentDescription`; an Android embedded photo picker as a route to the 3-tap moment.
 
 ---
 
