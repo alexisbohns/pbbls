@@ -564,7 +564,7 @@
 
     <!-- ==== Create pebble (M39 sub-project C) ==== -->
     <!-- Shell + shared actions. -->
-    <string name="create_new_pebble">Nouveau pebble</string>
+    <string name="create_new_pebble">Nouveau galet</string>
     <string name="action_save">Enregistrer</string>
     <string name="action_done">Valider</string>
     <string name="action_next">Suivant</string>
@@ -881,7 +881,7 @@
     <string name="record_close_keep_going">Continuer l\'édition</string>
     <string name="record_close_discard">Abandonner</string>
     <string name="record_karma">+%1$d karma</string>
-    <string name="record_karma_a11y">%1$d karma gagné</string>
+    <string name="record_karma_a11y">%1$d karma gagnés</string>
     <string name="record_success_quiet">Merci d’avoir gardé ce moment. Si la journée est lourde, un soutien est à un geste.</string>
     <string name="record_success_get_support">Trouver du soutien</string>
     <string name="richer_section">Enrichis-le</string>

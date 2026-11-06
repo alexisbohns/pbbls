@@ -11,6 +11,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 /** Height of every full-width funnel action: the M3 Expressive medium button (56 dp). */
@@ -45,7 +46,8 @@ fun PebblesPrimaryButton(
         if (isLoading) {
             LoadingIndicator(color = LocalContentColor.current, modifier = Modifier.size(24.dp))
         } else {
-            Text(text = text, style = ButtonDefaults.textStyleFor(PebblesActionHeight))
+            // Centred, or a label wrapped by a large font scale sits against the left edge.
+            Text(text = text, style = ButtonDefaults.textStyleFor(PebblesActionHeight), textAlign = TextAlign.Center)
         }
     }
 }
