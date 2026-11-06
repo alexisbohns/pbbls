@@ -2,11 +2,23 @@ package app.pbbls.android
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Glyph
@@ -23,6 +35,10 @@ import app.pbbls.android.features.path.complete.CompleteFlowState
 import app.pbbls.android.features.path.complete.CompleteFlowUiState
 import app.pbbls.android.features.path.complete.CompleteResult
 import app.pbbls.android.features.path.complete.CompleteStep
+import app.pbbls.android.features.path.create.pickers.EmotionPickerBody
+import app.pbbls.android.features.path.flow.RecordStepScaffold
+import app.pbbls.android.features.path.valence.ValenceHelpContent
+import app.pbbls.android.navigation.CompleteOrigin
 import com.android.tools.screenshot.PreviewTest
 
 /**
@@ -91,6 +107,7 @@ private fun CompletePreview(
     @StringRes errorRes: Int? = null,
     completed: CompleteResult? = null,
     momentName: String? = "Swim at the lake",
+    origin: CompleteOrigin = CompleteOrigin.CARD,
 ) {
     val flow = CompleteFlowState(answers = answers, step = step, completed = completed, errorRes = errorRes)
     // Previews are not interactions: the machine is there for the callbacks only, so it never buzzes.
@@ -101,6 +118,7 @@ private fun CompletePreview(
     ) {
         CompleteFlowContent(
             uiState = CompleteFlowUiState(flow = flow, momentName = momentName),
+            origin = origin,
             model = model,
             domains = completeDomains,
             collections = completeCollections,
@@ -118,12 +136,86 @@ private fun success(
     glyph: PebbleGlyph?,
 ) = CompleteResult(pebbleId = "p-1", karmaDelta = karma, glyph = glyph)
 
+/** The empty step (D7): all nine stones, the labels, the ghost stone and its prompt, Continue off. */
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
 @PreviewLargeFontTall
 @Composable
 fun Complete_Valence() {
-    PebblesTheme { CompletePreview(CompleteStep.VALENCE, answers = PebbleAnswers(valence = Valence.NEUTRAL_MEDIUM)) }
+    PebblesTheme { CompletePreview(CompleteStep.VALENCE, answers = PebbleAnswers()) }
+}
+
+@PreviewTest
+@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@Composable
+fun Complete_ValenceFr() {
+    PebblesTheme { CompletePreview(CompleteStep.VALENCE, answers = PebbleAnswers()) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun Complete_ValenceDark() {
+    PebblesTheme { CompletePreview(CompleteStep.VALENCE, answers = PebbleAnswers()) }
+}
+
+/** A stone chosen, after a save: the roll under the fan, the "Moment saved" subtitle, Continue on. */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@Composable
+fun Complete_ValencePicked() {
+    PebblesTheme {
+        CompletePreview(
+            CompleteStep.VALENCE,
+            answers = PebbleAnswers(valence = Valence.HIGHLIGHT_MEDIUM),
+            origin = CompleteOrigin.CAPTURE,
+        )
+    }
+}
+
+/**
+ * The help sheet's content in a sheet's place, at the Pixel 8's height: a sheet cannot render in a
+ * preview, and its Got it must sit inside the content, not under the screen edge.
+ */
+@Composable
+private fun HelpInSheet() {
+    Box(
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f)),
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shape = MaterialTheme.shapes.extraLarge.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
+        ) {
+            ValenceHelpContent(onGotIt = {}, modifier = Modifier.padding(top = Spacing.lg))
+        }
+    }
+}
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = 915)
+@Preview(name = "fr", showBackground = true, heightDp = 915, locale = "fr")
+@Preview(name = "dark", showBackground = true, heightDp = 915, uiMode = UI_MODE_NIGHT_YES)
+@PreviewLargeFontTall
+@Composable
+fun Complete_ValenceHelp() {
+    PebblesTheme { HelpInSheet() }
+}
+
+/** The palette fetch failed and nothing is cached: the message and Retry in place of the grid (D9). */
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@Composable
+fun Complete_EmotionFailed() {
+    PebblesTheme {
+        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+            RecordStepScaffold(title = stringResource(R.string.record_emotion_title), contentScrolls = false) {
+                EmotionPickerBody(groups = emptyList(), stagedId = null, onToggle = {}, loadFailed = true, onRetry = {})
+            }
+        }
+    }
 }
 
 @PreviewTest

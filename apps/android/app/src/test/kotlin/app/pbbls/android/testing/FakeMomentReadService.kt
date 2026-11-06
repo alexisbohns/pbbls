@@ -24,8 +24,16 @@ class FakeMomentReadService(
             armed.next = value
         }
 
+    /** Fails every `loadPath` while set, whatever else is armed: the first-pebble read is not `loadMoment`. */
+    var failPath: Exception? = null
+
+    /** Parks `loadPath` until completed, to prove a slow read holds nothing up. */
+    var pathGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
     override suspend fun loadPath(): List<PathMoment> {
         loadPathCount += 1
+        pathGate?.await()
+        failPath?.let { throw it }
         armed.fire()
         return path
     }

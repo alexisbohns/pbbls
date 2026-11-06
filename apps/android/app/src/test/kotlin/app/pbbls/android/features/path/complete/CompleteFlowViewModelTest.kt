@@ -16,6 +16,7 @@ import app.pbbls.android.testing.FakeCompleteSnapshotStore
 import app.pbbls.android.testing.FakeComposerMedia
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
+import app.pbbls.android.testing.FakeRecordFlowMemory
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
@@ -31,6 +32,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -50,6 +52,7 @@ class CompleteFlowViewModelTest {
         val achievements = FakeAchievementsService()
         val supabase = FakeSupabaseService(session = testSession("user-1"))
         val focusRequests = PathFocusRequests()
+        val memory = FakeRecordFlowMemory()
         val viewModel =
             CompleteFlowViewModel(
                 reads = read,
@@ -62,11 +65,11 @@ class CompleteFlowViewModelTest {
                 media = FakeComposerMedia(),
                 focusRequests = focusRequests,
                 haptics = HapticsPreference(inMemorySettings()),
+                memory = memory,
             )
 
         fun answerEverything(valence: Valence = Valence.LOWLIGHT_MEDIUM) {
             val m = viewModel.machine()
-            m.seedValenceIfNeeded()
             m.selectValence(valence)
             m.advance()
             m.selectEmotion("e-1")
@@ -262,6 +265,137 @@ class CompleteFlowViewModelTest {
             val flow = h.viewModel.uiState.value.flow
             assertEquals(CompleteStep.DOMAIN, flow.step)
             assertEquals(listOf("s-1"), flow.answers.soulIds)
+        }
+
+    @Test
+    fun `a restore never lands over a pick made while it waited`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.snapshots.save("m-1", "user-1", CompleteSnapshot.from(PebbleAnswers(valence = Valence.HIGHLIGHT_SMALL, emotionId = "e-1")))
+            h.viewModel.start("m-1")
+            h.viewModel.machine().selectValence(Valence.LOWLIGHT_LARGE)
+            advanceUntilIdle()
+            assertEquals(Valence.LOWLIGHT_LARGE, h.viewModel.uiState.value.flow.answers.valence)
+            assertNull(h.viewModel.uiState.value.flow.answers.emotionId)
+        }
+
+    @Test
+    fun `a restored snapshot with a valence restores it, one without shows none`() =
+        runTest {
+            val withValence = Harness(backgroundScope)
+            withValence.snapshots.save("m-1", "user-1", CompleteSnapshot.from(PebbleAnswers(valence = Valence.HIGHLIGHT_SMALL)))
+            withValence.viewModel.start("m-1")
+            advanceUntilIdle()
+            assertEquals(Valence.HIGHLIGHT_SMALL, withValence.viewModel.uiState.value.flow.answers.valence)
+            assertEquals(CompleteStep.EMOTION, withValence.viewModel.uiState.value.flow.step)
+
+            val without = Harness(backgroundScope)
+            without.snapshots.save("m-1", "user-1", CompleteSnapshot.from(PebbleAnswers(soulIds = listOf("s-1"))))
+            without.refs.souls = listOf(UiFixtures.soul(id = "s-1"))
+            without.viewModel.start("m-1")
+            advanceUntilIdle()
+            assertNull(without.viewModel.uiState.value.flow.answers.valence)
+            assertEquals(CompleteStep.VALENCE, without.viewModel.uiState.value.flow.step)
+        }
+
+    @Test
+    fun `a first pebble opens the help once, marks it seen on open, and a back-out never reopens it`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.viewModel.start("m-1")
+            // Not yet: the read waits behind the restore, and nothing is open until the step asks.
+            assertFalse(h.viewModel.uiState.value.isFirstPebble)
+            advanceUntilIdle()
+            assertEquals(1, h.read.loadPathCount)
+            assertTrue(h.viewModel.uiState.value.isFirstPebble)
+            assertFalse(h.viewModel.uiState.value.valenceHelpOpen)
+            assertFalse(h.memory.isValenceHelpSeen("user-1"))
+
+            h.viewModel.showFirstPebbleHelp()
+            assertTrue(h.viewModel.uiState.value.valenceHelpOpen)
+            assertTrue(h.memory.isValenceHelpSeen("user-1"))
+
+            h.viewModel.closeValenceHelp()
+            h.viewModel.showFirstPebbleHelp()
+            assertFalse(h.viewModel.uiState.value.valenceHelpOpen)
+        }
+
+    @Test
+    fun `a completed pebble on the account keeps the help closed`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.read.path = listOf(UiFixtures.pathMoment(id = "old", name = "Old"))
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            assertFalse(h.viewModel.uiState.value.isFirstPebble)
+            h.viewModel.showFirstPebbleHelp()
+            assertFalse(h.viewModel.uiState.value.valenceHelpOpen)
+            assertFalse(h.memory.isValenceHelpSeen("user-1"))
+        }
+
+    @Test
+    fun `a failed read keeps the help closed and unmarked`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.read.failPath = java.io.IOException("offline")
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            assertFalse(h.viewModel.uiState.value.isFirstPebble)
+            h.viewModel.showFirstPebbleHelp()
+            assertFalse(h.viewModel.uiState.value.valenceHelpOpen)
+            assertFalse(h.memory.isValenceHelpSeen("user-1"))
+        }
+
+    @Test
+    fun `no session means no read and no help`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.supabase.session = null
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            assertEquals(0, h.read.loadPathCount)
+            assertFalse(h.viewModel.uiState.value.isFirstPebble)
+            h.viewModel.showFirstPebbleHelp()
+            assertFalse(h.viewModel.uiState.value.valenceHelpOpen)
+        }
+
+    @Test
+    fun `a seen flag means no read at all`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.memory.markValenceHelpSeen("user-1")
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            assertEquals(0, h.read.loadPathCount)
+            assertFalse(h.viewModel.uiState.value.isFirstPebble)
+        }
+
+    @Test
+    fun `a slow read never holds the restore up`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.snapshots.save("m-1", "user-1", CompleteSnapshot.from(PebbleAnswers(valence = Valence.HIGHLIGHT_SMALL)))
+            val gate = CompletableDeferred<Unit>()
+            h.read.pathGate = gate
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            // The read is parked, the draft is already back.
+            assertEquals(Valence.HIGHLIGHT_SMALL, h.viewModel.uiState.value.flow.answers.valence)
+            assertFalse(h.viewModel.uiState.value.isFirstPebble)
+            gate.complete(Unit)
+            advanceUntilIdle()
+            assertTrue(h.viewModel.uiState.value.isFirstPebble)
+        }
+
+    @Test
+    fun `the callout opens the help without touching the flag`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.viewModel.openValenceHelp()
+            assertTrue(h.viewModel.uiState.value.valenceHelpOpen)
+            assertFalse(h.memory.isValenceHelpSeen("user-1"))
+            h.viewModel.closeValenceHelp()
+            assertFalse(h.viewModel.uiState.value.valenceHelpOpen)
         }
 
     @Test

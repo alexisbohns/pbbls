@@ -33,6 +33,8 @@ import app.pbbls.android.core.data.PathWrapService
 import app.pbbls.android.core.data.PathWrapServicing
 import app.pbbls.android.core.data.ProfileService
 import app.pbbls.android.core.data.ProfileServicing
+import app.pbbls.android.core.data.RecordFlowMemory
+import app.pbbls.android.core.data.RecordFlowMemorying
 import app.pbbls.android.core.data.ReferenceDataService
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SettingsLinksService
@@ -152,6 +154,10 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindOnboardingServicing(impl: OnboardingService): OnboardingServicing
+
+    @Binds
+    @Singleton
+    fun bindRecordFlowMemorying(impl: RecordFlowMemory): RecordFlowMemorying
 
     @Binds
     @Singleton

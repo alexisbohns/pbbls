@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,12 +42,14 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.designsystem.PbblsIcon
 import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
 import app.pbbls.android.features.path.create.CategoryGroup
 import app.pbbls.android.features.path.create.EmotionPickerGrouping
+import kotlinx.coroutines.launch
 
 /**
  * The emotion picker (D5/D14) — ports iOS `EmotionPickerSheet`. Reads the
@@ -64,6 +67,7 @@ fun EmotionPickerSheet(
     onSelected: (String?) -> Unit,
 ) {
     val palettes = LocalEmotionPaletteService.current
+    val scope = rememberCoroutineScope()
     var staged by remember { mutableStateOf(currentEmotionId) }
     val groups =
         remember(palettes.byEmotionId, valence) {
@@ -83,6 +87,8 @@ fun EmotionPickerSheet(
                 groups = groups,
                 stagedId = staged,
                 onToggle = { id -> staged = if (staged == id) null else id },
+                loadFailed = palettes.loadFailed,
+                onRetry = { scope.launch { palettes.load() } },
             )
         }
     }
@@ -94,6 +100,8 @@ fun EmotionPickerBody(
     stagedId: String?,
     onToggle: (String) -> Unit,
     modifier: Modifier = Modifier,
+    loadFailed: Boolean = false,
+    onRetry: () -> Unit = {},
 ) {
     val colors = MaterialTheme.colorScheme
     // referenceName is @Composable — resolve every localized name up-front in a
@@ -110,6 +118,10 @@ fun EmotionPickerBody(
         modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
+        // Loaded and still empty means the fetch failed (D9). Before it settles the body draws nothing, as it always did.
+        if (groups.isEmpty() && loadFailed) {
+            EmotionLoadError(onRetry = onRetry)
+        }
         groups.forEach { group ->
             val header =
                 ReferenceStrings.referenceName(ReferenceType.EMOTION_CATEGORY, group.categorySlug, group.categoryName)
@@ -143,6 +155,23 @@ fun EmotionPickerBody(
                 }
             }
         }
+    }
+}
+
+/** "Couldn't load feelings" and its Retry (D9). */
+@Composable
+private fun EmotionLoadError(onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xl),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Text(
+            text = stringResource(R.string.emotion_load_error),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        TextButton(onClick = onRetry) { Text(stringResource(R.string.record_photo_retry)) }
     }
 }
 

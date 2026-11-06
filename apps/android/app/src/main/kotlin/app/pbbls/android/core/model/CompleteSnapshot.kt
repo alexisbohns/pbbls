@@ -21,9 +21,18 @@ data class CompleteSnapshot(
     val collectionId: String? = null,
     val visibility: Visibility? = null,
 ) {
-    /** Valence and grade never count: both arrive seeded, and counting them would save every flow merely opened. */
+    /**
+     * A valence counts: the step no longer preselects (D7), so one is always a pick. The grade never
+     * does, since it arrives at its default and counting it would save every flow merely opened.
+     */
     val isEmpty: Boolean
-        get() = emotionId == null && domainId == null && soulIds.isEmpty() && collectionId == null
+        get() =
+            positiveness == null &&
+                intensity == null &&
+                emotionId == null &&
+                domainId == null &&
+                soulIds.isEmpty() &&
+                collectionId == null
 
     /** [known] null means reference data has not loaded: keep the ids rather than drop every one. */
     fun toAnswers(known: KnownDraftIds?): PebbleAnswers =

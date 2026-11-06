@@ -606,10 +606,22 @@
     <string name="valence_group_small_desc">Ce moment a marqué ma journée</string>
     <string name="valence_group_medium_desc">Ce moment a marqué toute ma semaine</string>
     <string name="valence_group_large_desc">Ce moment a marqué tout mon mois</string>
-    <string name="valence_headline_neutral">Moment</string>
+    <string name="valence_headline_neutral">Neutre</string>
     <string name="valence_span_day">DE MA JOURNÉE</string>
     <string name="valence_span_week">DE MA SEMAINE</string>
     <string name="valence_span_month">DE MON MOIS</string>
+    <string name="valence_axis_month">Mois</string>
+    <string name="valence_axis_week">Semaine</string>
+    <string name="valence_axis_day">Jour</string>
+    <string name="valence_ghost_prompt">Glisse ou touche pour choisir</string>
+    <string name="valence_help_link">Comment lire ceci</string>
+    <string name="valence_help_line_1">Deux questions, un galet.</string>
+    <string name="valence_help_line_2">De gauche à droite : creux, neutre, temps fort.</string>
+    <string name="valence_help_line_3">De bas en haut : a-t-il rempli ta journée, ta semaine, ton mois ? Plus grand le moment, plus gros le galet.</string>
+    <string name="valence_help_line_4">Pas de mauvais galet. Tu pourras le changer.</string>
+    <string name="valence_help_got_it">Compris</string>
+    <string name="emotion_load_error">Impossible de charger les émotions</string>
+    <string name="complete_after_save">Moment enregistré · 3 questions pour en faire un galet</string>
     <!-- The held card (#1135) -->
     <string name="card_turn">Retourner</string>
     <string name="card_turn_to_pebble">Galet</string>
@@ -847,7 +859,6 @@
     <string name="record_photo_title">Commence par une photo</string>
     <string name="record_photo_subtitle">Choisis-en une, ou écris de mémoire.</string>
     <string name="record_valence_title">Ça t\'a fait quoi ?</string>
-    <string name="record_valence_subtitle">Ça a pris quelle place dans ta vie ?</string>
     <string name="record_emotion_title">Tu as ressenti quoi ?</string>
     <string name="record_domain_title">Quel domaine de ta vie ?</string>
     <string name="record_souls_title">Il y avait quelqu\'un ?</string>

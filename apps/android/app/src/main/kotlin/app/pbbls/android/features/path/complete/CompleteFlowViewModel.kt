@@ -12,6 +12,7 @@ import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
+import app.pbbls.android.core.data.RecordFlowMemorying
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.TapHaptic
@@ -19,6 +20,7 @@ import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.core.model.CompleteSnapshot
 import app.pbbls.android.core.model.KarmaReason
 import app.pbbls.android.core.model.KnownDraftIds
+import app.pbbls.android.core.model.PebbleAnswers
 import app.pbbls.android.core.model.PebbleCompletePayload
 import app.pbbls.android.core.ui.momentWriteErrorRes
 import app.pbbls.android.features.path.ComposerMedia
@@ -57,6 +59,14 @@ data class CompleteFlowUiState(
     val flow: CompleteFlowState = CompleteFlowState(),
     /** For the success screen. Null until loaded, and on a photo-only moment. */
     val momentName: String? = null,
+    /**
+     * No completed pebble on the account, read once after the restore (D8). False until that read
+     * settles, and false for good when there is no session, the flag says the sheet was seen, or the
+     * read failed: a quiet branch must never rest on an empty read (`200 []` under RLS).
+     */
+    val isFirstPebble: Boolean = false,
+    /** The valence help sheet is up: opened by itself over a first pebble, or by the callout. */
+    val valenceHelpOpen: Boolean = false,
 )
 
 /**
@@ -80,6 +90,7 @@ class CompleteFlowViewModel
         private val media: ComposerMedia,
         private val focusRequests: PathFocusRequests,
         private val haptics: HapticsPreference,
+        private val memory: RecordFlowMemorying,
     ) : ViewModel() {
         private val effectsOut = UiEffects<CompleteFlowEffect>(viewModelScope)
         val effects: Flow<CompleteFlowEffect> = effectsOut.flow
@@ -118,9 +129,40 @@ class CompleteFlowViewModel
             }
             viewModelScope.launch {
                 restore(id)
+                // After the restore, and on its own: a slow read must never hold a draft up.
+                launch { readFirstPebble() }
                 autosave(id)
             }
         }
+
+        /**
+         * Only for an account that has not seen the help yet, so most users never pay the read. No
+         * session means no read at all: it would answer `[]`, which reads as "nothing completed".
+         */
+        private suspend fun readFirstPebble() {
+            val owner = userId ?: return
+            if (memory.isValenceHelpSeen(owner)) return
+            runCatchingCancellable { reads.loadPath() }
+                .onSuccess { moments -> _uiState.update { it.copy(isFirstPebble = moments.none { m -> m.isCompleted }) } }
+                .onFailure { Log.w(TAG, "first-pebble read failed; the help stays closed", it) }
+        }
+
+        /**
+         * The valence step calls this when it is on screen and [CompleteFlowUiState.isFirstPebble] is
+         * true, so the sheet opens only on that step, also when the read lands after the step. Marking
+         * seen happens on open: a back-out, or a trip forward and back, never reopens it.
+         */
+        fun showFirstPebbleHelp() {
+            val owner = userId ?: return
+            if (!_uiState.value.isFirstPebble || memory.isValenceHelpSeen(owner)) return
+            memory.markValenceHelpSeen(owner)
+            _uiState.update { it.copy(valenceHelpOpen = true) }
+        }
+
+        /** The "How to read this" callout: always opens, marks nothing. */
+        fun openValenceHelp() = _uiState.update { it.copy(valenceHelpOpen = true) }
+
+        fun closeValenceHelp() = _uiState.update { it.copy(valenceHelpOpen = false) }
 
         /**
          * Silent restore (A-5). Souls and collections are sanitized only once
@@ -139,6 +181,8 @@ class CompleteFlowViewModel
                 } else {
                     null
                 }
+            // Checked after the wait on reference data: a pick made meanwhile must not be overwritten (as iOS).
+            if (model.step != CompleteStep.VALENCE || model.answers != PebbleAnswers()) return
             model.resume(snapshot.toAnswers(known))
         }
 

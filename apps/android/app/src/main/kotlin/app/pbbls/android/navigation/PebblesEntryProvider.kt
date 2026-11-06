@@ -360,6 +360,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         // Exit returns to whatever opened it: the read page (which reloads on resume) or Path after a capture (A-14).
         CompleteFlowScreen(
             momentId = key.momentId,
+            origin = key.origin,
             onDismiss = navigator::goBack,
             onOpenSupport = { navigator.navigate(PebblesKey.CrisisResources) },
         )

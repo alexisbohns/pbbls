@@ -113,6 +113,49 @@ object ValenceFanLayout {
         return REFERENCE_HEIGHT - (sideRise(size) + lift)
     }
 
+    /** How much a chosen stone grows; the row labels must clear that too. */
+    const val SELECTED_SCALE = 1.14f
+
+    /** A rectangle in reference space, origin top-left. */
+    data class Box(
+        val left: Float,
+        val top: Float,
+        val right: Float,
+        val bottom: Float,
+    ) {
+        val width: Float get() = right - left
+        val height: Float get() = bottom - top
+
+        fun intersects(other: Box): Boolean = left < other.right && other.left < right && top < other.bottom && other.top < bottom
+    }
+
+    /**
+     * The box each row label (Month, Week, Day; D7) draws in, reference space, up the left margin: one
+     * in the top gap above the large ring, one between the large and medium rings, one beside the small
+     * ring. Wide enough for the longest translated word in small caps, with slack. Ports iOS `rowLabelBox`.
+     */
+    fun rowLabelBox(size: ValenceSizeGroup): Box {
+        val centreY =
+            when (size) {
+                ValenceSizeGroup.LARGE -> 28f
+                ValenceSizeGroup.MEDIUM -> 166f
+                ValenceSizeGroup.SMALL -> 295f
+            }
+        return Box(left = 4f, top = centreY - 7f, right = 64f, bottom = centreY + 7f)
+    }
+
+    /** A stone's bounding box as it draws when chosen ([SELECTED_SCALE] about its centre). */
+    fun selectedFrame(valence: Valence): Box {
+        val halfWidth = stoneWidth(valence.sizeGroup) * SELECTED_SCALE / 2f
+        val halfHeight = stoneHeight(valence.sizeGroup) * SELECTED_SCALE / 2f
+        return Box(
+            left = centreX(valence) - halfWidth,
+            top = centreY(valence) - halfHeight,
+            right = centreX(valence) + halfWidth,
+            bottom = centreY(valence) + halfHeight,
+        )
+    }
+
     /** Left edge of a stone's bounding box in reference space. */
     fun left(valence: Valence): Float = centreX(valence) - stoneWidth(valence.sizeGroup) / 2f
 

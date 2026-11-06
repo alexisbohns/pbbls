@@ -94,9 +94,9 @@ internal fun ValenceWord(
 }
 
 /**
- * "Moment" rather than the picker's "Neutral" — the lockup reads as a phrase,
- * and nobody calls their afternoon a neutral. The other two reuse the polarity
- * labels, which are already the words the lockup wants.
+ * The neutral word is "Neutral" / "Neutre" (D7, 2026-11-05): "moment" now names the
+ * thing a pebble is made from. The three polarities read the same words as the fan's
+ * column labels.
  */
 internal fun valenceWordRes(polarity: ValencePolarity): Int =
     when (polarity) {

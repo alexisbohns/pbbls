@@ -34,3 +34,4 @@ Already briefed above, with the lucide names they also replace: 1 again (`Rotate
 19. colour world — the palette the app wears (`Palette`)
 20. bounce — regularity over the last 28 days, a rhythm kept (`CirclePile`, `Waves`)
 21. search — look a person up by name, a lens (Android `ic_search`, the souls chooser's search field and lens; iOS draws `magnifyingglass`)
+22. info — how to read this, an info mark: a small circle holding an i, set at caption size beside a line of text (Android `ic_info`, the valence step's callout; iOS draws `info.circle`); must read apart from 5, the error family

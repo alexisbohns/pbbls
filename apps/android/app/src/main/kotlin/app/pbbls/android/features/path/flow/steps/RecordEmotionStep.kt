@@ -2,11 +2,13 @@ package app.pbbls.android.features.path.flow.steps
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.create.EmotionPickerGrouping
 import app.pbbls.android.features.path.create.pickers.EmotionPickerBody
+import kotlinx.coroutines.launch
 
 /**
  * Step 4 — the emotion — ports iOS `RecordEmotionStep`. Categories arrive
@@ -28,10 +30,14 @@ fun RecordEmotionStep(
         remember(palettes.byEmotionId, valence) {
             EmotionPickerGrouping.groups(palettes.byEmotionId.values, valence)
         }
+    val scope = rememberCoroutineScope()
     EmotionPickerBody(
         groups = groups,
         stagedId = selectedId,
         onToggle = onSelect,
         modifier = modifier,
+        loadFailed = palettes.loadFailed,
+        // `load()` never resets `hasLoaded`, and the failed flag clears as it starts, so this is the whole retry state.
+        onRetry = { scope.launch { palettes.load() } },
     )
 }

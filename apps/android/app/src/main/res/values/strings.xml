@@ -609,11 +609,24 @@
     <!-- The lockup under the valence fan: the polarity word in the hand font over the span it covers.
          Two separate strings rather than one sentence because each line is typeset differently, and
          because a translator needs to move them independently. Lowlight and highlight reuse the
-         polarity labels above; neutral does not (nobody calls their afternoon a neutral). -->
-    <string name="valence_headline_neutral">Moment</string>
+         polarity labels above, and so does neutral since "moment" now names what a pebble is made from. -->
+    <string name="valence_headline_neutral">Neutral</string>
     <string name="valence_span_day">OF MY DAY</string>
     <string name="valence_span_week">OF MY WEEK</string>
     <string name="valence_span_month">OF MY MONTH</string>
+    <!-- The fan's margins (D7): rows up the left, columns under the fan (the polarity labels above). -->
+    <string name="valence_axis_month">Month</string>
+    <string name="valence_axis_week">Week</string>
+    <string name="valence_axis_day">Day</string>
+    <string name="valence_ghost_prompt">Swipe or tap to choose</string>
+    <string name="valence_help_link">How to read this</string>
+    <string name="valence_help_line_1">Two questions, one stone.</string>
+    <string name="valence_help_line_2">Left to right: lowlight, neutral, highlight.</string>
+    <string name="valence_help_line_3">Bottom to top: did it fill your day, your week, your month? Bigger moment, bigger stone.</string>
+    <string name="valence_help_line_4">No wrong stone. You can change it later.</string>
+    <string name="valence_help_got_it">Got it</string>
+    <string name="emotion_load_error">Couldn\'t load feelings</string>
+    <string name="complete_after_save">Moment saved · 3 questions to make it a pebble</string>
     <!-- The held card (#1135) -->
     <string name="card_turn">Turn</string>
     <string name="card_turn_to_pebble">Pebble</string>
@@ -850,7 +863,6 @@
     <string name="record_photo_title">Start with a picture</string>
     <string name="record_photo_subtitle">Pick one, or write it from memory.</string>
     <string name="record_valence_title">How did it land?</string>
-    <string name="record_valence_subtitle">How much of your life did this take up?</string>
     <string name="record_emotion_title">What did you feel?</string>
     <string name="record_domain_title">What part of life?</string>
     <string name="record_souls_title">Anyone in this one?</string>

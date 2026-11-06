@@ -10,12 +10,11 @@ import app.pbbls.android.R
  */
 enum class CompleteStep(
     @StringRes val titleRes: Int,
-    @StringRes val subtitleRes: Int? = null,
     val isOptional: Boolean = false,
     /** The body scrolls itself; the scaffold must not nest a second scroll. */
     val bringsOwnScroll: Boolean = false,
 ) {
-    VALENCE(R.string.record_valence_title, R.string.record_valence_subtitle),
+    VALENCE(R.string.record_valence_title),
     EMOTION(R.string.record_emotion_title, bringsOwnScroll = true),
     DOMAIN(R.string.record_domain_title),
     SOULS(R.string.record_souls_title, isOptional = true, bringsOwnScroll = true),

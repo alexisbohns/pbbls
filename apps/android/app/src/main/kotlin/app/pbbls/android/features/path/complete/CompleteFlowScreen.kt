@@ -42,6 +42,7 @@ import app.pbbls.android.features.path.flow.RecordFlowChrome
 import app.pbbls.android.features.path.flow.RecordStepAction
 import app.pbbls.android.features.path.flow.RecordStepScaffold
 import app.pbbls.android.features.path.flow.steps.RecordSuccessStep
+import app.pbbls.android.navigation.CompleteOrigin
 
 /** As the record flow: enough for the slide to read as one motion without holding the user up. */
 private const val STEP_TRANSITION_MS = 280
@@ -55,6 +56,7 @@ private const val STEP_TRANSITION_MS = 280
 @Composable
 fun CompleteFlowScreen(
     momentId: String,
+    origin: CompleteOrigin,
     onDismiss: () -> Unit,
     onOpenSupport: () -> Unit,
     modifier: Modifier = Modifier,
@@ -82,6 +84,7 @@ fun CompleteFlowScreen(
 
     CompleteFlowContent(
         uiState = uiState,
+        origin = origin,
         model = viewModel.machine(),
         domains = refs.domains,
         collections = refs.collections,
@@ -94,6 +97,9 @@ fun CompleteFlowScreen(
         onAchievementCheck = viewModel::onAchievementCheck,
         hapticsOn = viewModel.hapticsOn,
         onOpenSupport = onOpenSupport,
+        onFirstPebbleHelp = viewModel::showFirstPebbleHelp,
+        onOpenValenceHelp = viewModel::openValenceHelp,
+        onCloseValenceHelp = viewModel::closeValenceHelp,
         modifier = modifier,
     )
 }
@@ -102,6 +108,7 @@ fun CompleteFlowScreen(
 @Composable
 fun CompleteFlowContent(
     uiState: CompleteFlowUiState,
+    origin: CompleteOrigin,
     model: CompleteFlowModel,
     domains: List<Domain>,
     collections: List<PebbleCollection>,
@@ -113,6 +120,9 @@ fun CompleteFlowContent(
     modifier: Modifier = Modifier,
     onAchievementCheck: () -> Unit = {},
     onOpenSupport: () -> Unit = {},
+    onFirstPebbleHelp: () -> Unit = {},
+    onOpenValenceHelp: () -> Unit = {},
+    onCloseValenceHelp: () -> Unit = {},
 ) {
     val flow = uiState.flow
     val labels =
@@ -172,13 +182,24 @@ fun CompleteFlowContent(
             } else {
                 RecordStepScaffold(
                     title = stringResource(step.titleRes),
-                    subtitle = step.subtitleRes?.let { stringResource(it) },
+                    // Only the valence step, and only when the moment was saved a moment ago (D1).
+                    subtitle =
+                        if (step == CompleteStep.VALENCE && origin != CompleteOrigin.CARD) {
+                            stringResource(R.string.complete_after_save)
+                        } else {
+                            null
+                        },
                     action = actionFor(flow.copy(step = step), model, labels, onComplete),
                     contentScrolls = !step.bringsOwnScroll,
                 ) {
                     CompleteStepContent(
                         step = step,
                         answers = flow.answers,
+                        isFirstPebble = uiState.isFirstPebble,
+                        valenceHelpOpen = uiState.valenceHelpOpen,
+                        onFirstPebbleHelp = onFirstPebbleHelp,
+                        onOpenValenceHelp = onOpenValenceHelp,
+                        onCloseValenceHelp = onCloseValenceHelp,
                         model = model,
                         domains = domains,
                         collections = collections,
