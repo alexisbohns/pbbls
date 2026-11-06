@@ -108,6 +108,7 @@ private fun CompletePreview(
             onClose = {},
             onComplete = {},
             onExit = {},
+            hapticsOn = false,
         )
     }
 }

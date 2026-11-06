@@ -591,8 +591,6 @@
     <string name="glyph_banner_by">Par</string>
     <!-- Souls section + inline create. -->
     <string name="create_souls_header">Âmes</string>
-    <string name="create_souls_title">Choisir des âmes</string>
-    <string name="create_souls_empty">Ajoutez une première âme à relier à ce pebble</string>
     <string name="create_soul_add">Nouvelle âme</string>
     <string name="create_soul_title">Nouvelle âme</string>
     <string name="create_soul_name_placeholder">Nom</string>

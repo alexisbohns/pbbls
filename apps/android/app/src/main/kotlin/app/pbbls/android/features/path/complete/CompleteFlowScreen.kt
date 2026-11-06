@@ -92,6 +92,7 @@ fun CompleteFlowScreen(
         onComplete = viewModel::complete,
         onExit = viewModel::onExit,
         onAchievementCheck = viewModel::onAchievementCheck,
+        hapticsOn = viewModel.hapticsOn,
         onOpenSupport = onOpenSupport,
         modifier = modifier,
     )
@@ -108,6 +109,7 @@ fun CompleteFlowContent(
     onClose: () -> Unit,
     onComplete: () -> Unit,
     onExit: () -> Unit,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
     onAchievementCheck: () -> Unit = {},
     onOpenSupport: () -> Unit = {},
@@ -182,6 +184,7 @@ fun CompleteFlowContent(
                         collections = collections,
                         error = error,
                         onAchievementCheck = onAchievementCheck,
+                        hapticsOn = hapticsOn,
                     )
                 }
             }
@@ -209,9 +212,10 @@ private fun actionFor(
                 onClick = model::advance,
             )
 
-        CompleteStep.EMOTION, CompleteStep.DOMAIN, CompleteStep.SUCCESS -> null
+        // Souls hosts the chooser inline, whose tray carries the one button (Skip or Done).
+        CompleteStep.EMOTION, CompleteStep.DOMAIN, CompleteStep.SOULS, CompleteStep.SUCCESS -> null
 
-        CompleteStep.SOULS, CompleteStep.COLLECTION ->
+        CompleteStep.COLLECTION ->
             RecordStepAction.Text(
                 label = if (state.optionalButtonIsSkip) labels.skip else labels.done,
                 onClick = model::advance,

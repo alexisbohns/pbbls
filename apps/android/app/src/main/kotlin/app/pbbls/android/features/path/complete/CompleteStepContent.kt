@@ -25,6 +25,7 @@ fun CompleteStepContent(
     domains: List<Domain>,
     collections: List<PebbleCollection>,
     error: String?,
+    hapticsOn: Boolean,
     modifier: Modifier = Modifier,
     onAchievementCheck: () -> Unit = {},
 ) {
@@ -57,6 +58,8 @@ fun CompleteStepContent(
             RecordSoulsStep(
                 selectedIds = answers.soulIds,
                 onToggle = { model.toggleSoul(it) },
+                onAdvance = model::advance,
+                hapticsOn = hapticsOn,
                 modifier = modifier,
                 onAchievementCheck = onAchievementCheck,
             )

@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,14 +29,14 @@ import app.pbbls.android.core.ui.souls.SoulChooserBody
 import app.pbbls.android.core.ui.souls.SoulChooserMode
 import app.pbbls.android.core.ui.souls.SoulChooserSearchButton
 import app.pbbls.android.core.ui.souls.SoulChooserSearchField
+import app.pbbls.android.core.ui.souls.SoulChooserSheetContent
 import app.pbbls.android.core.ui.souls.SoulChooserState
-import app.pbbls.android.core.ui.souls.SoulChooserTray
 import com.android.tools.screenshot.PreviewTest
 
 /*
  * The souls chooser (#1519) against the approved Android mocks: screen 10 (picker), 11 (search)
- * and 13 (browse). The chooser is not hosted anywhere yet, so each preview frames the body the way
- * its host will: title bar or search field above, tray below in pick mode.
+ * and 13 (browse). Pick frames render the sheet's own content; browse frames the body the way
+ * the People tab does.
  */
 
 private val spiral = GlyphStroke(d = "M30,30 C60,10 140,10 170,30 S190,140 170,170 S60,190 30,170 S10,60 30,30", width = 6.0)
@@ -90,39 +92,65 @@ private fun ChooserFrame(
 ) {
     PebblesTheme {
         Surface(color = MaterialTheme.colorScheme.surface) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                when {
-                    state.isSearching ->
-                        SoulChooserSearchField(
-                            state = state,
-                            onClose = state::closeSearch,
-                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
-                        )
-                    title != null ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        ) {
-                            Icon(painter = painterResource(R.drawable.ic_arrow_back), contentDescription = null)
-                            Text(text = title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
-                            SoulChooserSearchButton(state = state)
-                        }
-                }
-                Box(modifier = Modifier.weight(1f)) {
-                    SoulChooserBody(
-                        state = state,
-                        isLoaded = isLoaded,
-                        loadFailed = loadFailed,
-                        onRetry = {},
-                        onOpenSoul = {},
-                        onCreate = {},
-                        onHaptic = {},
-                        hapticsOn = true,
-                    )
-                }
-                SoulChooserTray(state = state, onDone = {}, onHaptic = {})
+            if (state.mode is SoulChooserMode.Pick) {
+                // The real sheet content, so what is rendered is what the sheet draws.
+                SoulChooserSheetContent(
+                    state = state,
+                    title = title.orEmpty(),
+                    isLoaded = isLoaded,
+                    loadFailed = loadFailed,
+                    hapticsOn = true,
+                    onBack = {},
+                    onDone = {},
+                    onCreate = {},
+                    onRetry = {},
+                    onHaptic = {},
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                BrowseFrame(state, isLoaded, loadFailed, title)
             }
+        }
+    }
+}
+
+@Composable
+private fun BrowseFrame(
+    state: SoulChooserState,
+    isLoaded: Boolean,
+    loadFailed: Boolean,
+    title: String?,
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        when {
+            state.isSearching ->
+                SoulChooserSearchField(
+                    state = state,
+                    onClose = state::closeSearch,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                )
+            title != null ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Icon(painter = painterResource(R.drawable.ic_arrow_back), contentDescription = null)
+                    Text(text = title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                    SoulChooserSearchButton(state = state)
+                }
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            SoulChooserBody(
+                state = state,
+                isLoaded = isLoaded,
+                loadFailed = loadFailed,
+                onRetry = {},
+                onOpenSoul = {},
+                onCreate = {},
+                onHaptic = {},
+                hapticsOn = true,
+            )
         }
     }
 }
@@ -184,3 +212,36 @@ fun SoulChooser_NoResult() {
 @Preview(showBackground = true, heightDp = 720)
 @Composable
 fun SoulChooser_Browse() = ChooserFrame(SoulChooserState(SoulChooserMode.Browse, elevenSouls), title = "People")
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = 720)
+@Composable
+fun SoulChooserSheet_Full() = ChooserFrame(chosenTwo())
+
+/** Edit pebble's half sheet: the stock handle over the same content, at about half a phone's height. */
+@OptIn(ExperimentalMaterial3Api::class)
+@PreviewTest
+@Preview(showBackground = true, heightDp = 400)
+@Composable
+fun SoulChooserSheet_Partial() {
+    PebblesTheme {
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(Modifier.align(Alignment.CenterHorizontally)) { BottomSheetDefaults.DragHandle() }
+                SoulChooserSheetContent(
+                    state = chosenTwo(),
+                    title = "Dinner at Maman's",
+                    isLoaded = true,
+                    loadFailed = false,
+                    hapticsOn = true,
+                    onBack = {},
+                    onDone = {},
+                    onCreate = {},
+                    onRetry = {},
+                    onHaptic = {},
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+    }
+}
