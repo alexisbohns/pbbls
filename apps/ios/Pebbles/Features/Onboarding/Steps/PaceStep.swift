@@ -18,7 +18,8 @@ struct PaceStep: View {
     /// How far the chosen capsule reaches past the group on each side, as the mock draws it.
     private static let bleed: CGFloat = 6
     private static let gap: CGFloat = 4
-    private static let disc: CGFloat = 52
+    /// The icon disc grows with the text, so a larger icon never squeezes it.
+    @ScaledMetric(relativeTo: .body) private var disc: CGFloat = 52
 
     var body: some View {
         OnboardingStepScaffold(title: "What pace suits you?", scrolls: scrolls) {
@@ -52,7 +53,7 @@ struct PaceStep: View {
         return Button { onSelect(pace) } label: {
             HStack(spacing: Spacing.lg) {
                 PbblsIconImage(pace.icon, .tile, style: AnyShapeStyle(ink))
-                    .frame(width: Self.disc, height: Self.disc)
+                    .frame(width: disc, height: disc)
                     .background(Circle().fill(on ? Color.pebbles.onPrimary.opacity(0.18)
                                                  : Color.pebbles.surfaceContainerHighest))
                 VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -64,6 +65,7 @@ struct PaceStep: View {
                         .foregroundStyle(on ? Color.pebbles.onPrimary : Color.pebbles.onSurfaceVariant)
                 }
                 .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.horizontal, Spacing.lg)
