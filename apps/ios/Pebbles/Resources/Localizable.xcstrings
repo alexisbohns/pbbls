@@ -21,6 +21,40 @@
         }
       }
     },
+    "A promise" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A promise"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une promesse"
+          }
+        }
+      }
+    },
+    "a promise." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "a promise."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "une promesse."
+          }
+        }
+      }
+    },
     "Add %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -68,6 +102,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajoute d'abord un nom ou une photo."
+          }
+        }
+      }
+    },
+    "All four are needed to continue." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All four are needed to continue."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les quatre sont nécessaires pour continuer."
+          }
+        }
+      }
+    },
+    "Already on record" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Already on record"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà enregistré"
+          }
+        }
+      }
+    },
+    "Before anything else," : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before anything else,"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avant toute chose,"
           }
         }
       }
@@ -259,6 +344,159 @@
         }
       }
     },
+    "Get through a hard season" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get through a hard season"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traverser une période difficile"
+          }
+        }
+      }
+    },
+    "How Pebbles works and what we owe you." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How Pebbles works and what we owe you."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment Pebbles fonctionne et ce qu'on te doit."
+          }
+        }
+      }
+    },
+    "I am 16 or over" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I am 16 or over"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'ai 16 ans ou plus"
+          }
+        }
+      }
+    },
+    "I'll hold you to it" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I'll hold you to it"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je t'en tiendrai responsable"
+          }
+        }
+      }
+    },
+    "Keep a record for later" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep a record for later"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder une trace pour plus tard"
+          }
+        }
+      }
+    },
+    "Keep the people who matter" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep the people who matter"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder les gens qui comptent"
+          }
+        }
+      }
+    },
+    "Later" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Later"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus tard"
+          }
+        }
+      }
+    },
+    "Moods, emotions and what I write. Sensitive data under GDPR art. 9." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moods, emotions and what I write. Sensitive data under GDPR art. 9."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Humeurs, émotions et ce que j'écris. Données sensibles au sens de l'art. 9 du RGPD."
+          }
+        }
+      }
+    },
+    "Notice how I really feel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notice how I really feel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remarquer ce que je ressens vraiment"
+          }
+        }
+      }
+    },
     "One of those souls is gone. Remove it and try again." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -276,6 +514,40 @@
         }
       }
     },
+    "One switch for each thing you agree to." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One switch for each thing you agree to."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un interrupteur pour chaque chose que tu acceptes."
+          }
+        }
+      }
+    },
+    "Our promise could not load. It will be here in Settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Our promise could not load. It will be here in Settings."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notre promesse n'a pas pu se charger. Tu la retrouveras dans les réglages."
+          }
+        }
+      }
+    },
     "Pebbles in this collection carry its glyph." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -289,6 +561,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les galets de cette collection portent son glyphe."
+          }
+        }
+      }
+    },
+    "Pebbles is not made for younger people." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebbles is not made for younger people."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebbles n'est pas fait pour les plus jeunes."
           }
         }
       }
@@ -327,6 +616,23 @@
         }
       }
     },
+    "Pick all that fit." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick all that fit."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis tout ce qui te correspond."
+          }
+        }
+      }
+    },
     "Pick an emotion first." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -361,6 +667,57 @@
         }
       }
     },
+    "Read the policy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Read the policy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire la politique"
+          }
+        }
+      }
+    },
+    "Read the terms" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Read the terms"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire les conditions"
+          }
+        }
+      }
+    },
+    "Remember the good days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remember the good days"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me souvenir des bons jours"
+          }
+        }
+      }
+    },
     "Remove %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -391,6 +748,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chercher une âme"
+          }
+        }
+      }
+    },
+    "See my own patterns" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See my own patterns"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir mes propres schémas"
+          }
+        }
+      }
+    },
+    "Store how I feel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Store how I feel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder ce que je ressens"
           }
         }
       }
@@ -527,6 +918,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "On n'a pas pu confirmer que c'est toi. Réessaie."
+          }
+        }
+      }
+    },
+    "What brings you here?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What brings you here?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qu'est-ce qui t'amène ?"
+          }
+        }
+      }
+    },
+    "What we keep, where, and for how long." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What we keep, where, and for how long."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que l'on garde, où, et combien de temps."
+          }
+        }
+      }
+    },
+    "Your consent" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your consent"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton consentement"
+          }
+        }
+      }
+    },
+    "Your consent could not be saved. Check your connection and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your consent could not be saved. Check your connection and try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton consentement n'a pas pu être enregistré. Vérifie ta connexion et réessaie."
           }
         }
       }

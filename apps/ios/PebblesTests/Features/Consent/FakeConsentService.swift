@@ -17,7 +17,9 @@ final class FakeConsentService: ConsentServicing, @unchecked Sendable {
     private var _recordCalls: [Recorded] = []
     private var _activeFailure: Error?
     private var _recordFailure: Error?
+    private var _failingKinds: Set<ConsentKind> = []
     private var _beforeRecord: (@Sendable () async -> Void)?
+    private var _afterActiveRead: (@Sendable () async -> Void)?
 
     static func satisfied() -> [ActiveConsent] {
         ConsentGateLogic.required.map {
@@ -40,6 +42,12 @@ final class FakeConsentService: ConsentServicing, @unchecked Sendable {
         set { lock.withLock { _recordFailure = newValue } }
     }
 
+    /// These acts fail and the rest land, for a partial failure.
+    var failingKinds: Set<ConsentKind> {
+        get { lock.withLock { _failingKinds } }
+        set { lock.withLock { _failingKinds = newValue } }
+    }
+
     /// Awaited at the start of every `record`, before it lands: lets a test
     /// hold a record in flight.
     var beforeRecord: (@Sendable () async -> Void)? {
@@ -47,18 +55,28 @@ final class FakeConsentService: ConsentServicing, @unchecked Sendable {
         set { lock.withLock { _beforeRecord = newValue } }
     }
 
+    /// Awaited after `active` has read the ledger and before it answers: lets a
+    /// test land a stale read after a record.
+    var afterActiveRead: (@Sendable () async -> Void)? {
+        get { lock.withLock { _afterActiveRead } }
+        set { lock.withLock { _afterActiveRead = newValue } }
+    }
+
     func active() async throws -> [ActiveConsent] {
-        try lock.withLock {
+        let read = try lock.withLock { () throws -> [ActiveConsent] in
             _activeCalls += 1
             if let failure = _activeFailure { throw failure }
             return rows
         }
+        if let hold = afterActiveRead { await hold() }
+        return read
     }
 
     func record(kind: ConsentKind, documentVersion: String, source: String) async throws {
         if let hold = beforeRecord { await hold() }
         try lock.withLock {
             if let failure = _recordFailure { throw failure }
+            if _failingKinds.contains(kind) { throw URLError(.timedOut) }
             _recordCalls.append(Recorded(kind: kind, version: documentVersion, source: source))
             rows.removeAll { $0.kind == kind.rawValue }
             rows.append(ActiveConsent(kind: kind.rawValue, documentVersion: documentVersion))
