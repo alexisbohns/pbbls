@@ -122,6 +122,16 @@ Part 4, for the flow's later parts:
 - The moment page's strings reuse `photo_add`, `photo_state_ready`, `photo_state_failed`, `photo_remove_a11y`, `record_photo_retry`.
 - `seededFromPhoto` stays after the photo is removed, on both surfaces: left as is, one finding for both.
 - **Driving the device:** the page's two save buttons sit at y≈2100–2260 on this Pixel 8. Tap one coordinate at a time and check the screen between taps, or a tap meant for a closed sheet saves a moment.
+- **Never resync a text field from the model.** The model's value arrives through a flow and lags the keyboard, so a resync undoes keystrokes: `RecordNameStep`'s old pattern dropped letters from 26 typed quickly, on a Pixel 8, while a same-state field lost none. `ClampedField` only seeds from the model. A restore lands before the first frame.
+
+Part 5, for what follows:
+
+- `SnapUploadCoordinator` now has iOS's commit lock and pick generation: `beginCommit` before the write, `markCommitted` on success, `abortCommit` on failure, in every host's save; `nextPickGeneration()` at the tap, passed to `attach`. `attach` deletes a replaced pending snap's files, and a late upload's, never a committed one's. `capture-snap-id` leaves the `SavedStateHandle` when a save begins and returns on failure.
+- `CameraPhotos` is in `core/data`.
+- The Library tile has three states from `uiState.isPicking` and `snap`: no photo; picking or uploading (photo under a scrim, spinner); settled (photo under a scrim, the disc and the word).
+- **Real picks and real saves on the device are the controller's.** A generated `Pictures/pbbls-test.jpg` (EXIF Nov 3, 13:10) is on the phone for that and comes off at the end.
+
+Follow-ups to file when the stack ships: Edit moment does not record a replaced saved photo's files for deletion (iOS appends to `detachedStoragePaths`); `seededFromPhoto` after a removal, both surfaces; the D6 snackbar and the D9 beat, both surfaces; People prompts on Android (`AC-people-starts-from-the-pebbles-you-have` is still `development` there); whether the moment page's fields read well under TalkBack, now that they carry a `contentDescription`; an Android embedded photo picker as a route to the 3-tap moment.
 
 ---
 
