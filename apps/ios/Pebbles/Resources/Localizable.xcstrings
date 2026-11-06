@@ -21,6 +21,40 @@
         }
       }
     },
+    "A promise" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A promise"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une promesse"
+          }
+        }
+      }
+    },
+    "a promise." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "a promise."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "une promesse."
+          }
+        }
+      }
+    },
     "Add %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -68,6 +102,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajoute d'abord un nom ou une photo."
+          }
+        }
+      }
+    },
+    "Before anything else," : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before anything else,"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avant toute chose,"
           }
         }
       }
@@ -259,6 +310,108 @@
         }
       }
     },
+    "Get through a hard season" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get through a hard season"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traverser une période difficile"
+          }
+        }
+      }
+    },
+    "I'll hold you to it" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I'll hold you to it"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je t'en tiendrai responsable"
+          }
+        }
+      }
+    },
+    "Keep a record for later" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep a record for later"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder une trace pour plus tard"
+          }
+        }
+      }
+    },
+    "Keep the people who matter" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep the people who matter"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder les gens qui comptent"
+          }
+        }
+      }
+    },
+    "Later" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Later"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus tard"
+          }
+        }
+      }
+    },
+    "Notice how I really feel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notice how I really feel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remarquer ce que je ressens vraiment"
+          }
+        }
+      }
+    },
     "One of those souls is gone. Remove it and try again." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -272,6 +425,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Une de ces âmes n'existe plus. Retire-la et réessaie."
+          }
+        }
+      }
+    },
+    "Our promise could not load. It will be here in Settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Our promise could not load. It will be here in Settings."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notre promesse n'a pas pu se charger. Tu la retrouveras dans les réglages."
           }
         }
       }
@@ -327,6 +497,23 @@
         }
       }
     },
+    "Pick all that fit." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick all that fit."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis tout ce qui te correspond."
+          }
+        }
+      }
+    },
     "Pick an emotion first." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -361,6 +548,23 @@
         }
       }
     },
+    "Remember the good days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remember the good days"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me souvenir des bons jours"
+          }
+        }
+      }
+    },
     "Remove %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -391,6 +595,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chercher une âme"
+          }
+        }
+      }
+    },
+    "See my own patterns" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See my own patterns"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir mes propres schémas"
           }
         }
       }
@@ -527,6 +748,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "On n'a pas pu confirmer que c'est toi. Réessaie."
+          }
+        }
+      }
+    },
+    "What brings you here?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What brings you here?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qu'est-ce qui t'amène ?"
           }
         }
       }
