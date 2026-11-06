@@ -61,6 +61,16 @@
         "fr": "Supprimer votre compte"
       },
       "path": "docs/delete-account/"
+    },
+    {
+      "slug": "delete-data",
+      "category": "support",
+      "order": 3,
+      "titles": {
+        "en": "Delete some of your data",
+        "fr": "Supprimer une partie de vos données"
+      },
+      "path": "docs/delete-data/"
     }
   ]
 }
