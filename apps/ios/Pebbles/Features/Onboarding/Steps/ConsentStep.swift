@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Step 2 (#1510 D3): one switch per act, on the app's settings rows. A switch turns on and off
 /// freely and Continue records the lot, so nothing has to be taken back. An act already on record
-/// stays on and locked: withdrawing one is a Settings action, not a side effect of this step.
+/// stays on and locked: this step never withdraws one (iOS has no withdrawal until #1009).
 struct ConsentStep: View {
     let state: OnboardingConsentState
     let onToggle: (ConsentKind, Bool) -> Void
@@ -25,10 +25,15 @@ struct ConsentStep: View {
     var body: some View {
         OnboardingStepScaffold(
             title: "Your consent",
-            lead: "One switch for each thing you agree to.",
             scrolls: scrolls
         ) {
             VStack(alignment: .leading, spacing: Spacing.lg) {
+                // Upright body text, not the scaffold's italic lead. The negative padding takes back the
+                // scaffold's gap to its content, so the line sits under the title as a lead would.
+                Text("One switch for each thing you agree to.")
+                    .pebblesFont(.body)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    .padding(.top, -(Spacing.lg - Spacing.xs))
                 group
                 HStack(spacing: Spacing.sm) {
                     readButton("Read the terms", doc: .terms)
@@ -116,10 +121,10 @@ struct ConsentStep: View {
         Button { presentedLegalDoc = doc } label: {
             Text(title)
                 .pebblesFont(.callout)
-                .foregroundStyle(Color.pebbles.onSurface)
+                .foregroundStyle(Color.pebbles.primary)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity, minHeight: 44)
-                .overlay(Capsule().stroke(Color.pebbles.outlineVariant, lineWidth: 1))
+                .overlay(Capsule().stroke(Color.pebbles.outline, lineWidth: 1))
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)
