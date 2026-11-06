@@ -105,6 +105,14 @@ Part 1, for every host of the chooser:
 - Chosen names go bold on purpose (S2, mock 10), though `SoulItem`'s KDoc says "never weight" (#515).
 - Known edge, left: a `refreshSouls` already running when a soul is created can land without it and drop its pill.
 
+Part 3, for every sheet and every step after it:
+
+- **A `ModalBottomSheet` is its own window with its own back dispatcher, and Robolectric does not prove a sheet.** The stock back collapses an expanded half sheet before dismissing, and a handler around the sheet never fires. Put `NavigationBackHandler` inside the sheet's content, with `shouldDismissOnBackPress = false`. Anything about a sheet's height, keyboard or back is verified on the device.
+- A half sheet is laid out at full height and offset down, so what sits at its bottom is off screen unless the layout says otherwise: `KeepAboveScreenEdge` in `core/ui/souls/SoulChooserSheet.kt` reads the offset in the layout phase. A sheet's bottom inset can leave a band under a tinted bar: `contentWindowInsets` excludes the navigation bar, and the bar pads inside its own background.
+- `rememberSoulCreate(state, refs, onAchievementCheck)` is the one way to create a soul from a picker: in-flight guard, and the write survives leaving.
+- `hapticsOn` is required on `CompleteFlowContent`, `CompleteStepContent`: no defaults, so the compiler asks every host.
+- `RecordSoulsStep`'s replay into `model.toggleSoul` is interim and leaves in Part 7, where `model.setSouls` takes the chooser's result.
+
 ---
 
 ## Copy (from iOS, verbatim)
