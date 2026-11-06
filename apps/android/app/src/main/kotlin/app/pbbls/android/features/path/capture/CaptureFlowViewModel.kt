@@ -10,8 +10,10 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.CameraPhotos
 import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.MomentWriteServicing
+import app.pbbls.android.core.data.ProcessedImage
 import app.pbbls.android.core.data.SnapUploadCoordinator
 import app.pbbls.android.core.data.SnapWriteRepositing
 import app.pbbls.android.core.data.SupabaseServicing
@@ -26,9 +28,11 @@ import app.pbbls.android.core.ui.momentWriteErrorRes
 import app.pbbls.android.features.path.ComposerMedia
 import app.pbbls.android.features.path.PathFocusRequests
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +43,7 @@ import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 private const val TAG = "capture-flow"
@@ -49,6 +54,12 @@ private const val KEY_WHEN = "capture-when-epoch"
 private const val KEY_WHEN_EDITED = "capture-when-edited"
 private const val KEY_WHEN_SEEDED = "capture-when-seeded"
 private const val KEY_SNAP_ID = "capture-snap-id"
+
+/** The camera's file while the camera app is in front: the process may die there, so it is saved state. */
+private const val KEY_SHOT = "capture-shot"
+
+/** How long a pick stays visible on the photo screen before the page takes over (D3). */
+private const val PHOTO_ADVANCE_BEAT_MS = 400L
 
 sealed interface CaptureFlowEffect {
     data class Haptic(
@@ -81,6 +92,10 @@ data class CaptureFlowUiState(
     val startsAtMomentPage: Boolean = false,
     /** The onboarding hand-off's reason slug (#1510 D9); Part 8 reads it for the name field's prompt. */
     val promptReason: String? = null,
+    /** A pick is being read or handed over, over a photo or not: the library tile shows its busy state. */
+    val isPicking: Boolean = false,
+    /** Whether a camera app answers; false hides the camera button (D3). Read once, at construction. */
+    val cameraAvailable: Boolean = false,
 ) {
     /**
      * Both saves on the moment page: a trimmed name or an uploaded photo, and
@@ -106,6 +121,7 @@ class CaptureFlowViewModel
         private val focusRequests: PathFocusRequests,
         snapRepo: SnapWriteRepositing,
         private val haptics: HapticsPreference,
+        private val photos: CameraPhotos,
     ) : ViewModel() {
         private val effectsOut = UiEffects<CaptureFlowEffect>(viewModelScope)
         val effects: Flow<CaptureFlowEffect> = effectsOut.flow
@@ -165,7 +181,13 @@ class CaptureFlowViewModel
          */
         private var persistsDraft = true
 
-        private val _uiState = MutableStateFlow(CaptureFlowUiState(flow = model.state.value, snap = restoredSnap))
+        /** From a save's start to its answer: the draft's photo reference is out of saved state meanwhile. */
+        private var isCommitting = false
+
+        private val _uiState =
+            MutableStateFlow(
+                CaptureFlowUiState(flow = model.state.value, snap = restoredSnap, cameraAvailable = photos.isAvailable()),
+            )
         val uiState: StateFlow<CaptureFlowUiState> = _uiState.asStateFlow()
 
         private val userId: String?
@@ -174,20 +196,27 @@ class CaptureFlowViewModel
         /** The pick or retry in flight, held so a discard can stop it before cleaning up. */
         private var photoJob: Job? = null
 
+        /** The beat between a new pick and the page; held so leaving the step, or a discard, cancels it. */
+        private var advanceJob: Job? = null
+
         /**
          * A pick from the moment it is chosen until its upload settles. Before the
          * coordinator has a snap for it, this is the only sign of it: it counts as
          * something to keep (R2) and blocks the save like an upload (iOS).
          */
-        private var isPicking = false
+        private var pickCount = 0
             set(value) {
                 field = value
-                _uiState.update { it.copy(snapBlockedMessageRes = blockedBySnap()) }
+                _uiState.update { it.copy(isPicking = isPicking, snapBlockedMessageRes = blockedBySnap()) }
             }
+
+        private val isPicking: Boolean get() = pickCount > 0
 
         init {
             viewModelScope.launch {
                 model.state.collect { flow ->
+                    // Leaving the photo step by any road (Just write, back, a discard) cancels a pending advance.
+                    if (flow.step != CaptureStep.PHOTO || flow.isFrozen) advanceJob?.cancel()
                     if (persistsDraft) {
                         savedState[KEY_STEP] = flow.step.name
                         savedState[KEY_NAME] = flow.draft.name
@@ -199,15 +228,26 @@ class CaptureFlowViewModel
                     _uiState.update { it.copy(flow = flow) }
                 }
             }
+            // Seeded before the first collection: a restored photo is not a new pick, and never advances.
+            var lastSnapId: String? = (restoredSnap as? FormSnap.Pending)?.snap?.id
             viewModelScope.launch {
                 snapshotFlow { snaps.formSnap }.collect { snap ->
                     // Once saved, `snaps.reset()` empties the coordinator; the screen keeps showing what it
                     // showed through the exit animation instead of flipping to "Add a photo".
                     if (model.state.value.isSaved) return@collect
                     model.hasSnap = snap != null
+                    // Advance on a new snap id only: an upload state change (FAILED to UPLOADED after a retry) keeps
+                    // the same id, and must not bounce someone who came back through Change photo.
+                    val id = (snap as? FormSnap.Pending)?.snap?.id
+                    if (id != null && id != lastSnapId && model.step == CaptureStep.PHOTO) scheduleAdvance()
+                    lastSnapId = id
                     // Only a photo already in Storage is worth keeping across a kill (iOS `savedSnap`):
                     // a pick still uploading is picked again after a restore.
-                    if (persistsDraft) savedState[KEY_SNAP_ID] = ((snap as? FormSnap.Pending)?.snap?.takeIf { it.state == UPLOADED })?.id
+                    if (persistsDraft &&
+                        !isCommitting
+                    ) {
+                        savedState[KEY_SNAP_ID] = ((snap as? FormSnap.Pending)?.snap?.takeIf { it.state == UPLOADED })?.id
+                    }
                     _uiState.update { it.copy(snap = snap, snapBlockedMessageRes = blockedBySnap()) }
                 }
             }
@@ -240,21 +280,111 @@ class CaptureFlowViewModel
 
         fun onPhotoPicked(uri: Uri) {
             if (model.isFrozen) return
-            val id = userId ?: return
+            attachPhoto {
+                // EXIF first: the re-encode writes no metadata (M58 D7).
+                model.applyCaptureDate(media.captureDate(uri))
+                media.process(uri)
+            }
+        }
+
+        /**
+         * The camera button: the shot's content URI to launch the camera with, or null (frozen, no camera app, a
+         * shot already out, or no room for a file). The path is saved state, because the camera is another process
+         * and this one may die while it is in front.
+         */
+        fun onCameraRequested(): Uri? {
+            if (model.isFrozen || !photos.isAvailable() || savedState.contains(KEY_SHOT)) return null
+            val shot =
+                runCatchingCancellable { photos.newShot() }.getOrElse {
+                    Log.e(TAG, "no file for a camera shot", it)
+                    return null
+                }
+            val uri =
+                runCatchingCancellable { photos.uriFor(shot) }.getOrElse {
+                    Log.e(TAG, "no uri for a camera shot", it)
+                    photos.delete(shot)
+                    return null
+                }
+            savedState[KEY_SHOT] = shot
+            return uri
+        }
+
+        /** The system had no camera app after all (`ActivityNotFoundException`): the file is dropped, nothing breaks. */
+        fun onCameraLaunchFailed() {
+            Log.w(TAG, "the camera could not be launched")
+            dropShot()
+        }
+
+        /**
+         * The camera's answer, possibly to a new ViewModel after a process death: the shot comes from saved state.
+         * The shutter is when (until the user says otherwise), and the file is deleted in every branch.
+         */
+        fun onCameraResult(taken: Boolean) {
+            val shot = savedState.get<String>(KEY_SHOT) ?: return
+            savedState.remove<String>(KEY_SHOT)
+            if (!taken || model.isFrozen) {
+                photos.delete(shot)
+                return
+            }
+            attachPhoto(cleanup = { photos.delete(shot) }) {
+                model.applyCaptureDate(OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS))
+                photos.process(shot)
+            }
+        }
+
+        /** Back in front with a shot that never got its answer: it is dropped, so the camera is never locked out. */
+        fun onResumed() {
+            if (savedState.contains(KEY_SHOT)) Log.w(TAG, "a camera shot came back without a result; dropped")
+            dropShot()
+        }
+
+        private fun dropShot() {
+            savedState.get<String>(KEY_SHOT)?.let(photos::delete)
+            savedState.remove<String>(KEY_SHOT)
+        }
+
+        /**
+         * One pick, from the library or the camera: [prepare] reads it, and only once it has bytes does it cancel the pick
+         * before it and [SnapUploadCoordinator.attach] it, which deletes the photo it replaces. A pick that cannot be
+         * read therefore leaves the photo that was there exactly as it was, uploading or not. [cleanup] always runs.
+         * ATOMIC, so a job cancelled before it starts still reaches its `finally`, and a camera shot is never left behind.
+         */
+        private fun attachPhoto(
+            cleanup: () -> Unit = {},
+            prepare: suspend () -> ProcessedImage,
+        ) {
+            val id =
+                userId ?: run {
+                    Log.e(TAG, "photo pick dropped: no current user")
+                    cleanup()
+                    return
+                }
             val previous = photoJob
+            // At the tap: a pick that is read more slowly than a later one never lands over it.
+            val generation = snaps.nextPickGeneration()
+            pickCount += 1
             photoJob =
-                viewModelScope.launch {
-                    previous?.cancelAndJoin()
-                    isPicking = true
+                viewModelScope.launch(start = CoroutineStart.ATOMIC) {
                     try {
                         runCatchingCancellable {
-                            // EXIF first: the re-encode writes no metadata (M58 D7).
-                            model.applyCaptureDate(media.captureDate(uri))
-                            snaps.attach(media.process(uri), id)
+                            val processed = prepare()
+                            previous?.cancelAndJoin()
+                            snaps.attach(processed, id, generation)
                         }.onFailure { Log.e(TAG, "photo pick processing failed", it) }
                     } finally {
-                        isPicking = false
+                        pickCount -= 1
+                        cleanup()
                     }
+                }
+        }
+
+        private fun scheduleAdvance() {
+            advanceJob?.cancel()
+            advanceJob =
+                viewModelScope.launch {
+                    delay(PHOTO_ADVANCE_BEAT_MS)
+                    // The machine guards frozen itself; the step check is for a user who already left.
+                    if (model.step == CaptureStep.PHOTO) model.advance()
                 }
         }
 
@@ -286,6 +416,12 @@ class CaptureFlowViewModel
             val draft = model.draft
             val snap = snaps.pendingSnapForPayload()?.let { PebbleSnapPayload(it.id, it.storagePrefix(id), 0) }
             model.beginSave(thenComplete)
+            // Before the write: a kill after the server accepted it must not restore the saved moment's photo as a
+            // pending upload that Discard or Change photo would delete. Losing the reference beats deleting live files.
+            snaps.beginCommit()
+            isCommitting = true
+            val keptSnapId = savedState.get<String>(KEY_SNAP_ID)
+            savedState.remove<String>(KEY_SNAP_ID)
             viewModelScope.launch {
                 // Popping the entry must not abort a write the server may have accepted (#852).
                 withContext(NonCancellable) {
@@ -299,6 +435,7 @@ class CaptureFlowViewModel
                             clearDraft()
                             model.saved()
                             // The files now belong to the moment: forget them without deleting.
+                            snaps.markCommitted()
                             snaps.reset()
                             // Path shows the moment's week when it is next on screen (R14).
                             focusRequests.request(momentId)
@@ -308,7 +445,10 @@ class CaptureFlowViewModel
                         },
                         onFailure = {
                             Log.e(TAG, "save_moment failed", it)
-                            // Files stay for the retry; discarding is the cleanup (A-3).
+                            // Files stay for the retry; discarding is the cleanup (A-3). The form is open again.
+                            snaps.abortCommit()
+                            isCommitting = false
+                            if (persistsDraft && keptSnapId != null) savedState[KEY_SNAP_ID] = keptSnapId
                             model.fail(momentWriteErrorRes(it.toDataError()))
                         },
                     )
@@ -354,6 +494,8 @@ class CaptureFlowViewModel
 
         private fun discardAndClose() {
             // Before anything suspends: no collector may write the draft back after this point.
+            advanceJob?.cancel()
+            dropShot()
             clearDraft()
             viewModelScope.launch {
                 // An upload finishing after the cleanup would leave its files behind.

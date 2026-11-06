@@ -26,6 +26,9 @@ class FakeComposerMedia : ComposerMedia {
     /** Holds [process] until completed, for "a pick still being read" cases. */
     var processGate: CompletableDeferred<Unit>? = null
 
+    /** Gates taken one per [process] call, first come first served, before [processGate]: picks that finish out of order. */
+    val processGates = ArrayDeque<CompletableDeferred<Unit>>()
+
     /** What [captureDate] returns once [processed] is armed: the pick's EXIF date, or none. */
     var captureDateResult: OffsetDateTime? = null
 
@@ -34,7 +37,7 @@ class FakeComposerMedia : ComposerMedia {
 
     override suspend fun process(uri: Uri): ProcessedImage {
         val armed = processed ?: error("the photo path needs a real Uri — cover it under Robolectric (#857)")
-        processGate?.await()
+        (processGates.removeFirstOrNull() ?: processGate)?.await()
         return armed
     }
 

@@ -47,7 +47,7 @@ Pure logic is given as code and tests. **UI is not re-described in prose**: each
 | Step dots | dots in every mock | dots | `LinearWavyProgressIndicator` in `RecordFlowChrome` (#854), unchanged |
 | Photo grid (D3) | inline | inline `PhotosPicker` | modal `PickVisualMedia` + a Library tile (recorded exception) |
 
-**Tap counts on Android**, because of the modal: a photo moment is + · Library · pick · Just save = **4**, a words-only moment + · Just write · Just save = **3**, a full pebble with a photo **10** with the fan's Continue. Report them honestly; do not reach for an auto-opening picker, which would cost Just write users a dismiss and which the spec does not ask for.
+**Tap counts on Android**, because of the modal: a photo moment is + · Library · pick · Just save = **4**, a words-only moment + · Just write · Just save = **3**, a full pebble with a photo **10** with the fan's Continue. Add one to the photo counts where the system picker asks for Done after the pick, which it does on the Pixel 8 (Google Photos picker, seen 2026-11-06); the app does not control that. Report them honestly; do not reach for an auto-opening picker, which would cost Just write users a dismiss and which the spec does not ask for.
 
 ---
 
@@ -122,6 +122,16 @@ Part 4, for the flow's later parts:
 - The moment page's strings reuse `photo_add`, `photo_state_ready`, `photo_state_failed`, `photo_remove_a11y`, `record_photo_retry`.
 - `seededFromPhoto` stays after the photo is removed, on both surfaces: left as is, one finding for both.
 - **Driving the device:** the page's two save buttons sit at y≈2100–2260 on this Pixel 8. Tap one coordinate at a time and check the screen between taps, or a tap meant for a closed sheet saves a moment.
+- **Never resync a text field from the model.** The model's value arrives through a flow and lags the keyboard, so a resync undoes keystrokes: `RecordNameStep`'s old pattern dropped letters from 26 typed quickly, on a Pixel 8, while a same-state field lost none. `ClampedField` only seeds from the model. A restore lands before the first frame.
+
+Part 5, for what follows:
+
+- `SnapUploadCoordinator` now has iOS's commit lock and pick generation: `beginCommit` before the write, `markCommitted` on success, `abortCommit` on failure, in every host's save; `nextPickGeneration()` at the tap, passed to `attach`. `attach` deletes a replaced pending snap's files, and a late upload's, never a committed one's. `capture-snap-id` leaves the `SavedStateHandle` when a save begins and returns on failure.
+- `CameraPhotos` is in `core/data`.
+- The Library tile has three states from `uiState.isPicking` and `snap`: no photo; picking or uploading (photo under a scrim, spinner); settled (photo under a scrim, the disc and the word).
+- **Real picks and real saves on the device are the controller's.** A generated `Pictures/pbbls-test.jpg` (EXIF Nov 3, 13:10) is on the phone for that and comes off at the end.
+
+Follow-ups to file when the stack ships: Edit moment does not record a replaced saved photo's files for deletion (iOS appends to `detachedStoragePaths`); `seededFromPhoto` after a removal, both surfaces; the D6 snackbar and the D9 beat, both surfaces; People prompts on Android (`AC-people-starts-from-the-pebbles-you-have` is still `development` there); whether the moment page's fields read well under TalkBack, now that they carry a `contentDescription`; an Android embedded photo picker as a route to the 3-tap moment.
 
 ---
 

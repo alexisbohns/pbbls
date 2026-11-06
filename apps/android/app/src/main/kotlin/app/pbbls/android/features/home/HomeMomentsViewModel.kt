@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.data.AchievementsServicing
+import app.pbbls.android.core.data.CameraPhotos
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.OnboardingHandoff
 import app.pbbls.android.core.data.ReferenceDataServicing
@@ -13,7 +14,6 @@ import app.pbbls.android.core.data.SnapUploadCoordinator
 import app.pbbls.android.core.data.SnapWriteRepositing
 import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.features.home.camera.CameraMoment
-import app.pbbls.android.features.home.camera.CameraPhotos
 import app.pbbls.android.features.home.quick.QuickMoment
 import app.pbbls.android.features.home.quick.QuickMomentExit
 import app.pbbls.android.features.home.quick.QuickMomentPrefill

@@ -1,8 +1,8 @@
 package app.pbbls.android.testing
 
 import android.net.Uri
+import app.pbbls.android.core.data.CameraPhotos
 import app.pbbls.android.core.data.ProcessedImage
-import app.pbbls.android.features.home.camera.CameraPhotos
 import kotlinx.coroutines.CompletableDeferred
 
 /**

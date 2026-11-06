@@ -12,6 +12,7 @@ import app.pbbls.android.core.model.FormSnap
 import app.pbbls.android.core.model.MomentSavePayload
 import app.pbbls.android.core.model.PebbleSnapPayload
 import app.pbbls.android.features.path.PathFocusRequests
+import app.pbbls.android.testing.FakeCameraPhotos
 import app.pbbls.android.testing.FakeComposerMedia
 import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakeSnapWriteRepository
@@ -23,6 +24,7 @@ import app.pbbls.android.testing.recordEffects
 import app.pbbls.android.testing.testSession
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -54,6 +56,7 @@ class CaptureFlowViewModelTest {
         val snapRepo = FakeSnapWriteRepository()
         val media = FakeComposerMedia().apply { processed = ProcessedImage(original = byteArrayOf(1), thumb = byteArrayOf(2)) }
         val focusRequests = PathFocusRequests()
+        val photos = FakeCameraPhotos()
         val viewModel =
             CaptureFlowViewModel(
                 savedState = handle,
@@ -63,6 +66,7 @@ class CaptureFlowViewModelTest {
                 focusRequests = focusRequests,
                 snapRepo = snapRepo,
                 haptics = HapticsPreference(inMemorySettings()),
+                photos = photos,
             )
     }
 
@@ -734,5 +738,408 @@ class CaptureFlowViewModelTest {
             advanceUntilIdle()
             settle()
             assertTrue(h.viewModel.uiState.value.snap is FormSnap.Pending)
+        }
+
+    // ---- the photo step (#1515 D3): advance on a new snap id, and the camera ----
+
+    @Test
+    fun `a new pick advances to the page after the beat`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
+            advanceTimeBy(399)
+            runCurrent()
+            assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
+            advanceTimeBy(2)
+            runCurrent()
+            assertEquals(CaptureStep.MOMENT, h.viewModel.machine().step)
+        }
+
+    @Test
+    fun `an upload finishing during the beat is not a second advance`() =
+        runTest {
+            val h = Harness()
+            val gate = CompletableDeferred<Unit>()
+            h.snapRepo.uploadGate = gate
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            gate.complete(Unit)
+            settle()
+            advanceTimeBy(500)
+            runCurrent()
+            assertEquals(CaptureStep.MOMENT, h.viewModel.machine().step)
+        }
+
+    @Test
+    fun `a restored photo never advances`() =
+        runTest {
+            val handle = SavedStateHandle(mapOf("capture-snap-id" to "snap-restored", "capture-step" to "PHOTO"))
+            val h = Harness(handle)
+            h.viewModel.machine().goTo(CaptureStep.PHOTO)
+            settle()
+            advanceTimeBy(1_000)
+            runCurrent()
+            assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
+        }
+
+    @Test
+    fun `back on the photo step an upload state change stays put, and a new pick advances`() =
+        runTest {
+            val h = Harness()
+            h.snapRepo.failNext = RuntimeException("offline")
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            advanceUntilIdle()
+            settle()
+            // The first pick advanced (its upload then failed); Change photo comes back.
+            assertEquals(CaptureStep.MOMENT, h.viewModel.machine().step)
+            h.viewModel.machine().back()
+            settle()
+            h.viewModel.onRetryPhoto()
+            advanceUntilIdle()
+            settle()
+            advanceTimeBy(1_000)
+            runCurrent()
+            assertEquals("FAILED to UPLOADED is the same snap", CaptureStep.PHOTO, h.viewModel.machine().step)
+            val first = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id
+            h.viewModel.onPhotoPicked(pick)
+            advanceUntilIdle()
+            settle()
+            advanceTimeBy(1_000)
+            runCurrent()
+            assertEquals(CaptureStep.MOMENT, h.viewModel.machine().step)
+            // The replaced photo's files go, because attach only overwrites.
+            assertEquals(listOf(first), h.snapRepo.deletedSnapIds)
+        }
+
+    @Test
+    fun `leaving the step during the beat cancels the advance`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            h.viewModel.machine().advance() // Just write, within the beat
+            settle()
+            h.viewModel.machine().back()
+            settle()
+            advanceTimeBy(1_000)
+            runCurrent()
+            assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
+        }
+
+    @Test
+    fun `a frozen flow does not advance`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.machine().goTo(CaptureStep.PHOTO)
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            h.viewModel.machine().beginSave()
+            advanceTimeBy(1_000)
+            runCurrent()
+            assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
+        }
+
+    @Test
+    fun `discarding during the beat stays discarded`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            val effects = recordEffects(h.viewModel.effects)
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            h.viewModel.onCloseRequested()
+            h.viewModel.onDiscard()
+            advanceTimeBy(1_000)
+            runCurrent()
+            settle()
+            assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
+            assertNull(handle.get<String>("capture-step"))
+            assertEquals(1, h.snapRepo.deletedSnapIds.size)
+            assertTrue(CaptureFlowEffect.Dismiss in effects.values)
+            effects.stop()
+        }
+
+    @Test
+    fun `the camera hands out one shot, saved for a process death`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            assertTrue(h.viewModel.uiState.value.cameraAvailable)
+            assertEquals("content://app.pbbls.android.camera/camera/shot-1.jpg", h.viewModel.onCameraRequested().toString())
+            assertEquals("/cache/camera/shot-1.jpg", handle.get<String>("capture-shot"))
+            // A second tap while the camera is out launches nothing.
+            assertNull(h.viewModel.onCameraRequested())
+            assertEquals(1, h.photos.made)
+        }
+
+    @Test
+    fun `no camera app, no shot`() =
+        runTest {
+            val h = Harness()
+            h.photos.available = false
+            assertNull(h.viewModel.onCameraRequested())
+            assertEquals(0, h.photos.made)
+        }
+
+    @Test
+    fun `a shot taken is the date, an upload and an advance, and the file is deleted`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            h.viewModel.onCameraRequested()
+            h.viewModel.onCameraResult(taken = true)
+            advanceUntilIdle()
+            settle()
+            val state = h.viewModel.uiState.value
+            assertTrue(state.flow.hasSnap)
+            assertEquals(WhenSource.PHOTO, state.flow.whenSource)
+            assertEquals(1, h.snapRepo.uploaded.size)
+            assertEquals(listOf("/cache/camera/shot-1.jpg"), h.photos.deleted)
+            assertNull(handle.get<String>("capture-shot"))
+            assertEquals(CaptureStep.MOMENT, h.viewModel.machine().step)
+        }
+
+    @Test
+    fun `a shot cancelled is deleted and the step stays`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            h.viewModel.onCameraRequested()
+            h.viewModel.onCameraResult(taken = false)
+            advanceUntilIdle()
+            settle()
+            assertEquals(listOf("/cache/camera/shot-1.jpg"), h.photos.deleted)
+            assertNull(handle.get<String>("capture-shot"))
+            assertFalse(h.viewModel.uiState.value.flow.hasSnap)
+            assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
+        }
+
+    @Test
+    fun `a shot that cannot be read is deleted and nothing is attached`() =
+        runTest {
+            val h = Harness()
+            h.photos.processed = null
+            h.viewModel.onCameraRequested()
+            h.viewModel.onCameraResult(taken = true)
+            advanceUntilIdle()
+            settle()
+            assertEquals(listOf("/cache/camera/shot-1.jpg"), h.photos.deleted)
+            assertFalse(h.viewModel.uiState.value.flow.hasSnap)
+            assertFalse(h.viewModel.uiState.value.snapBlockedMessageRes != null)
+        }
+
+    @Test
+    fun `the camera's answer reaches a new view model after a process death`() =
+        runTest {
+            val handle = SavedStateHandle()
+            Harness(handle).viewModel.onCameraRequested()
+            // The process dies with the camera in front; the registry hands the answer to the new one.
+            val second = Harness(handle)
+            second.viewModel.onCameraResult(taken = true)
+            advanceUntilIdle()
+            settle()
+            assertTrue(second.viewModel.uiState.value.flow.hasSnap)
+            assertEquals(1, second.snapRepo.uploaded.size)
+            assertNull(handle.get<String>("capture-shot"))
+        }
+
+    @Test
+    fun `a camera result with no pending shot is ignored, and a shot never answered is dropped on resume`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            h.viewModel.onCameraResult(taken = true)
+            advanceUntilIdle()
+            assertFalse(h.viewModel.uiState.value.flow.hasSnap)
+            assertTrue(h.photos.deleted.isEmpty())
+            h.viewModel.onCameraRequested()
+            h.viewModel.onResumed()
+            assertEquals(listOf("/cache/camera/shot-1.jpg"), h.photos.deleted)
+            assertNull(handle.get<String>("capture-shot"))
+            // Not locked out: the camera can be asked for again.
+            assertTrue(h.viewModel.onCameraRequested() != null)
+        }
+
+    @Test
+    fun `a launch that finds no camera app drops the shot`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            h.viewModel.onCameraRequested()
+            h.viewModel.onCameraLaunchFailed()
+            assertEquals(listOf("/cache/camera/shot-1.jpg"), h.photos.deleted)
+            assertNull(handle.get<String>("capture-shot"))
+        }
+
+    @Test
+    fun `discarding while a shot is still being read deletes it and attaches nothing`() =
+        runTest {
+            val h = Harness()
+            val gate = CompletableDeferred<Unit>()
+            h.photos.processGate = gate
+            h.viewModel.onCameraRequested()
+            h.viewModel.onCameraResult(taken = true)
+            settle()
+            h.viewModel.onCloseRequested()
+            h.viewModel.onDiscard()
+            advanceUntilIdle()
+            gate.complete(Unit)
+            advanceUntilIdle()
+            settle()
+            assertEquals(listOf("/cache/camera/shot-1.jpg"), h.photos.deleted)
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+            assertFalse(h.viewModel.uiState.value.flow.hasSnap)
+        }
+
+    @Test
+    fun `a frozen flow takes no shot and deletes one that comes back`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.onCameraRequested()
+            h.viewModel.machine().beginSave()
+            h.viewModel.onCameraResult(taken = true)
+            advanceUntilIdle()
+            assertEquals(listOf("/cache/camera/shot-1.jpg"), h.photos.deleted)
+            assertNull(h.viewModel.onCameraRequested())
+        }
+
+    @Test
+    fun `a pick over a photo still uploading replaces it and deletes its files`() =
+        runTest {
+            val h = Harness()
+            val gate = CompletableDeferred<Unit>()
+            h.snapRepo.uploadGate = gate
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            val first = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id
+            h.snapRepo.uploadGate = null
+            h.viewModel.onPhotoPicked(pick)
+            advanceUntilIdle()
+            settle()
+            val now = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap
+            assertTrue(now.id != first)
+            assertEquals(AttachedSnap.UploadState.UPLOADED, now.state)
+            assertTrue(first in h.snapRepo.deletedSnapIds)
+            assertFalse(h.viewModel.uiState.value.isPicking)
+            assertNull(h.viewModel.uiState.value.snapBlockedMessageRes)
+        }
+
+    @Test
+    fun `a new pick that cannot be read leaves the old photo as it was, uploading`() =
+        runTest {
+            val h = Harness()
+            val gate = CompletableDeferred<Unit>()
+            h.snapRepo.uploadGate = gate
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            val first = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id
+            // The next pick is a corrupt image.
+            h.media.processed = null
+            h.viewModel.onPhotoPicked(pick)
+            advanceUntilIdle()
+            settle()
+            assertEquals(first, (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id)
+            assertTrue(h.snapRepo.deletedSnapIds.isEmpty())
+            // The old pick is still in flight, so the tile stays busy; the failed one added nothing.
+            assertTrue(h.viewModel.uiState.value.isPicking)
+            // Its upload was never cancelled: it lands, and Save is free.
+            gate.complete(Unit)
+            advanceUntilIdle()
+            settle()
+            assertFalse(h.viewModel.uiState.value.isPicking)
+            assertEquals(AttachedSnap.UploadState.UPLOADED, (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.state)
+            assertNull(h.viewModel.uiState.value.snapBlockedMessageRes)
+        }
+
+    @Test
+    fun `the picking state shows while a pick is read, and the shutter date is whole seconds`() =
+        runTest {
+            val h = Harness()
+            val read = CompletableDeferred<Unit>()
+            h.media.processGate = read
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            assertTrue(h.viewModel.uiState.value.isPicking)
+            read.complete(Unit)
+            advanceUntilIdle()
+            settle()
+            assertFalse(h.viewModel.uiState.value.isPicking)
+            h.viewModel.onCameraRequested()
+            h.viewModel.onCameraResult(taken = true)
+            advanceUntilIdle()
+            assertEquals(0, h.viewModel.uiState.value.flow.draft.happenedAt.nano)
+        }
+
+    @Test
+    fun `picks read out of order end on the last one tapped, deleting nothing of it`() =
+        runTest {
+            val h = Harness()
+            val a = CompletableDeferred<Unit>()
+            val b = CompletableDeferred<Unit>()
+            val c = CompletableDeferred<Unit>()
+            h.media.processGates.addAll(listOf(a, b, c))
+            h.viewModel.onPhotoPicked(pick)
+            h.viewModel.onPhotoPicked(pick)
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            c.complete(Unit)
+            advanceUntilIdle()
+            settle()
+            val landed = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id
+            a.complete(Unit)
+            b.complete(Unit)
+            advanceUntilIdle()
+            settle()
+            assertEquals(landed, (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id)
+            assertEquals(listOf(landed), h.snapRepo.uploaded)
+            assertTrue(h.snapRepo.deletedSnapIds.isEmpty())
+            assertFalse(h.viewModel.uiState.value.isPicking)
+        }
+
+    @Test
+    fun `a discard with several reads in flight leaves nothing attached`() =
+        runTest {
+            val h = Harness()
+            val gates = List(3) { CompletableDeferred<Unit>() }
+            h.media.processGates.addAll(gates)
+            repeat(3) { h.viewModel.onPhotoPicked(pick) }
+            settle()
+            h.viewModel.onCloseRequested()
+            h.viewModel.onDiscard()
+            advanceUntilIdle()
+            gates.forEach { it.complete(Unit) }
+            advanceUntilIdle()
+            settle()
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+            assertNull(h.viewModel.uiState.value.snap)
+        }
+
+    @Test
+    fun `a save takes the photo reference out of saved state, and a failure puts it back`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            val id = handle.get<String>("capture-snap-id")
+            assertTrue(id != null)
+            h.writes.failNext = postgrestException("media_quota_exceeded")
+            h.viewModel.machine().goTo(CaptureStep.MOMENT)
+            h.viewModel.save(thenComplete = false)
+            // Synchronously, before the write is answered: a kill now must not restore it.
+            assertNull(handle.get<String>("capture-snap-id"))
+            advanceUntilIdle()
+            settle()
+            assertEquals(id, handle.get<String>("capture-snap-id"))
+            // The retry works, and the files stay the moment's.
+            h.viewModel.save(thenComplete = false)
+            assertNull(handle.get<String>("capture-snap-id"))
+            advanceUntilIdle()
+            settle()
+            assertNull(handle.get<String>("capture-snap-id"))
+            assertTrue(h.snapRepo.deletedSnapIds.isEmpty())
         }
 }

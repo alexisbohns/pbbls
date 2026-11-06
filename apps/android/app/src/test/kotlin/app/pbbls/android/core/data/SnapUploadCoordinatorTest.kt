@@ -192,4 +192,147 @@ class SnapUploadCoordinatorTest {
         val snap = AttachedSnap(id = "ABC-DEF", localThumb = ByteArray(0), state = AttachedSnap.UploadState.UPLOADED)
         assertEquals("user-id/abc-def", snap.storagePrefix(userId = "USER-ID"))
     }
+
+    @Test
+    fun `a pending snap replaced by a new pick has its files deleted`() =
+        runTest {
+            val repo = FakeRepo()
+            val coordinator = coordinator(repo)
+            coordinator.attach(processed, userId)
+            val first = (coordinator.formSnap as FormSnap.Pending).snap.id
+            coordinator.attach(processed, userId)
+            val second = (coordinator.formSnap as FormSnap.Pending).snap.id
+            assertEquals(listOf(first), repo.deletedSnapIds)
+            assertTrue(first != second)
+            assertEquals(AttachedSnap.UploadState.UPLOADED, coordinator.pendingState())
+        }
+
+    @Test
+    fun `a saved snap replaced by a new pick is the host's to detach, so nothing is deleted`() =
+        runTest {
+            val repo = FakeRepo()
+            val coordinator = coordinator(repo, initial = FormSnap.Existing(id = "s", storagePath = "u/s"))
+            coordinator.attach(processed, userId)
+            assertTrue(repo.deletedSnapIds.isEmpty())
+            assertTrue(repo.deletedPrefixes.isEmpty())
+        }
+
+    @Test
+    fun `a pick over a snap still uploading deletes it once, and the late landing is cleaned up`() =
+        runTest {
+            val repo = FakeRepo()
+            val gate = CompletableDeferred<Unit>()
+            repo.uploadGate = gate
+            val coordinator = coordinator(repo)
+            val first = launch { coordinator.attach(processed, userId) }
+            runCurrent()
+            val firstId = (coordinator.formSnap as FormSnap.Pending).snap.id
+            // The caller cancels the first pick's job, then attaches the second.
+            first.cancel()
+            first.join()
+            repo.uploadGate = null
+            coordinator.attach(processed, userId)
+            assertTrue("the replaced snap's files were deleted", firstId in repo.deletedSnapIds)
+            assertEquals(AttachedSnap.UploadState.UPLOADED, coordinator.pendingState())
+            assertTrue((coordinator.formSnap as FormSnap.Pending).snap.id != firstId)
+        }
+
+    @Test
+    fun `an upload that lands after its removal is deleted again`() =
+        runTest {
+            val repo = FakeRepo()
+            val gate = CompletableDeferred<Unit>()
+            repo.uploadGate = gate
+            val coordinator = coordinator(repo)
+            val upload = launch { coordinator.attach(processed, userId) }
+            runCurrent()
+            val id = (coordinator.formSnap as FormSnap.Pending).snap.id
+            coordinator.removePending(userId)
+            gate.complete(Unit)
+            upload.join()
+            assertEquals(listOf(id, id), repo.deletedSnapIds)
+        }
+
+    @Test
+    fun `attach while committing is refused and deletes nothing`() =
+        runTest {
+            val repo = FakeRepo()
+            val coordinator = coordinator(repo)
+            coordinator.attach(processed, userId)
+            val first = (coordinator.formSnap as FormSnap.Pending).snap.id
+            coordinator.beginCommit()
+            coordinator.attach(processed, userId)
+            assertEquals(first, (coordinator.formSnap as FormSnap.Pending).snap.id)
+            assertTrue(repo.deletedSnapIds.isEmpty())
+            assertEquals(1, repo.uploadCount)
+        }
+
+    @Test
+    fun `while committing nothing is removed, detached or cleaned up, and committed stays shut`() =
+        runTest {
+            val repo = FakeRepo()
+            val coordinator = coordinator(repo)
+            coordinator.attach(processed, userId)
+            coordinator.beginCommit()
+            coordinator.removePending(userId)
+            coordinator.cancelAndCleanup(userId)
+            assertTrue(coordinator.formSnap is FormSnap.Pending)
+            assertTrue(repo.deletedSnapIds.isEmpty())
+            coordinator.markCommitted()
+            coordinator.attach(processed, userId)
+            coordinator.removePending(userId)
+            assertTrue(repo.deletedSnapIds.isEmpty())
+            assertEquals(1, repo.uploadCount)
+        }
+
+    @Test
+    fun `a failed save reopens the form, and a pick then replaces normally`() =
+        runTest {
+            val repo = FakeRepo()
+            val coordinator = coordinator(repo)
+            coordinator.attach(processed, userId)
+            val first = (coordinator.formSnap as FormSnap.Pending).snap.id
+            coordinator.beginCommit()
+            coordinator.abortCommit()
+            coordinator.attach(processed, userId)
+            assertEquals(listOf(first), repo.deletedSnapIds)
+            assertTrue((coordinator.formSnap as FormSnap.Pending).snap.id != first)
+        }
+
+    @Test
+    fun `a committed snap is never deleted by a late cleanup`() =
+        runTest {
+            val repo = FakeRepo()
+            val gate = CompletableDeferred<Unit>()
+            repo.uploadGate = gate
+            val coordinator = coordinator(repo)
+            val upload = launch { coordinator.attach(processed, userId) }
+            runCurrent()
+            val id = (coordinator.formSnap as FormSnap.Pending).snap.id
+            coordinator.beginCommit()
+            // The save sent it; the form then forgets it, and the upload lands.
+            coordinator.markCommitted()
+            coordinator.reset()
+            gate.complete(Unit)
+            upload.join()
+            assertTrue(id !in repo.deletedSnapIds)
+        }
+
+    @Test
+    fun `a stale pick applies nothing, and a closed form takes no pick`() =
+        runTest {
+            val repo = FakeRepo()
+            val coordinator = coordinator(repo)
+            val slow = coordinator.nextPickGeneration()
+            val fast = coordinator.nextPickGeneration()
+            coordinator.attach(processed, userId, fast)
+            val landed = (coordinator.formSnap as FormSnap.Pending).snap.id
+            coordinator.attach(processed, userId, slow)
+            assertEquals(landed, (coordinator.formSnap as FormSnap.Pending).snap.id)
+            assertTrue(repo.deletedSnapIds.isEmpty())
+            coordinator.cancelAndCleanup(userId)
+            coordinator.attach(processed, userId)
+            assertNull(coordinator.formSnap)
+            assertEquals(listOf(landed), repo.deletedSnapIds)
+        }
 }

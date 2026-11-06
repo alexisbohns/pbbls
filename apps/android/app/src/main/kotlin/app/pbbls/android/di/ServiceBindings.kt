@@ -2,6 +2,8 @@ package app.pbbls.android.di
 
 import app.pbbls.android.core.data.AchievementsService
 import app.pbbls.android.core.data.AchievementsServicing
+import app.pbbls.android.core.data.AndroidCameraPhotos
+import app.pbbls.android.core.data.CameraPhotos
 import app.pbbls.android.core.data.CoilSnapBoundsDecoder
 import app.pbbls.android.core.data.CollectionsService
 import app.pbbls.android.core.data.CollectionsServicing
@@ -42,8 +44,6 @@ import app.pbbls.android.core.data.SupabaseService
 import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.WrapDiskCache
 import app.pbbls.android.core.data.WrapDiskCaching
-import app.pbbls.android.features.home.camera.AndroidCameraPhotos
-import app.pbbls.android.features.home.camera.CameraPhotos
 import app.pbbls.android.features.path.AndroidComposerMedia
 import app.pbbls.android.features.path.ComposerMedia
 import dagger.Binds
