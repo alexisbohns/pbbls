@@ -1,6 +1,9 @@
 import Foundation
 import Observation
 import os
+#if DEBUG
+import Supabase
+#endif
 
 /// Pure gating for the flow (#1510 D10). `hasSeen` is the device flag the old slides already
 /// wrote (`hasSeenOnboarding`): accounts from before the flow never wrote `onboarding_completed`,
@@ -137,3 +140,42 @@ final class OnboardingGateModel {
         completed = true
     }
 }
+
+#if DEBUG
+extension OnboardingGateModel {
+    /// The Settings row: shows the flow again without a restart. `OnboardingServicing` stays as it is:
+    /// this is the one write the app makes to the flag outside `complete_onboarding`, and it only
+    /// exists in debug builds. `profiles.onboarding_completed` is still owner-writable.
+    func replay(client: SupabaseClient) async {
+        guard let userId else {
+            logger.error("onboarding replay without a user")
+            return
+        }
+        do {
+            try await client
+                .from("profiles")
+                .update(["onboarding_completed": false])
+                .eq("user_id", value: userId)
+                .execute()
+        } catch {
+            logger.error("onboarding replay failed: \(error.localizedDescription, privacy: .private)")
+            return
+        }
+        forgetForReplay()
+        await work?.value
+        if completed == true { logger.error("onboarding replay: the profile still says completed") }
+    }
+
+    /// The device's half: the flag and the last answer go, then the profile is read again.
+    func forgetForReplay() {
+        work?.cancel()
+        generation += 1
+        defaults.removeObject(forKey: Self.hasSeenKey)
+        hasSeen = false
+        completed = nil
+        readFailed = false
+        guard userId != nil else { return }
+        read(userId)
+    }
+}
+#endif

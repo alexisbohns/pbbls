@@ -147,6 +147,10 @@ struct RootView: View {
                         .environment(cardFrames)
                         .environment(heldCard)
                         .environment(onboarding.handoff)
+                        #if DEBUG
+                        // Settings' replay row.
+                        .environment(onboarding.gate)
+                        #endif
                         // Nothing under the held card or the consent gate is reachable (stack C §7's slot).
                         .accessibilityHidden(heldCard.request != nil || !consentPassed)
                         .environment(\.spineSnapSource, .signed(snapURLs))
