@@ -45,6 +45,7 @@ import app.pbbls.android.core.ui.souls.SoulChooserBody
 import app.pbbls.android.core.ui.souls.SoulChooserMode
 import app.pbbls.android.core.ui.souls.SoulChooserSearchButton
 import app.pbbls.android.core.ui.souls.SoulChooserSearchField
+import app.pbbls.android.core.ui.souls.SoulChooserSlot
 import app.pbbls.android.core.ui.souls.SoulChooserState
 import app.pbbls.android.core.ui.souls.rememberSoulChooserState
 
@@ -152,8 +153,9 @@ fun SoulsListContent(
 ) {
     val colors = MaterialTheme.colorScheme
     val buzz = rememberTapHaptics { hapticsOn }
-    // The soul whose delete menu is open: the menu is drawn inside that item, so it anchors there.
-    var menuFor by remember { mutableStateOf<String?>(null) }
+    // The soul and slot whose delete menu is open: a usual soul is a tile and a row, and only the
+    // one long-pressed opens. The menu is drawn inside that item, so it anchors there.
+    var menuFor by remember { mutableStateOf<Pair<String, SoulChooserSlot>?>(null) }
 
     // Back closes the open search field first, then leaves as usual.
     val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
@@ -230,11 +232,11 @@ fun SoulsListContent(
                         onOpenSoul = onOpenSoul,
                         onCreate = onCreate,
                         onHaptic = buzz,
-                        onLongClickSoul = { menuFor = it.id },
+                        onLongClickSoul = { soul, slot -> menuFor = soul.id to slot },
                         hapticsOn = hapticsOn,
-                        itemMenu = { soul ->
+                        itemMenu = { soul, slot ->
                             DeleteMenu(
-                                expanded = menuFor == soul.id,
+                                expanded = menuFor == (soul.id to slot),
                                 onDismiss = { menuFor = null },
                                 onDelete = {
                                     menuFor = null

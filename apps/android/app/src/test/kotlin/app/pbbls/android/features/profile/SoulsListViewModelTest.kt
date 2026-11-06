@@ -370,4 +370,18 @@ class SoulsListViewModelTest {
             assertEquals(listOf("a"), (viewModel.uiState.value as SoulsListUiState.Content).souls.map { it.id })
             outcomes.stop()
         }
+
+    @Test
+    fun `a second create before the first finishes is ignored`() =
+        runTest {
+            val refs = FakeReferenceDataService()
+            val viewModel = viewModel(refs = refs)
+            advanceUntilIdle()
+
+            viewModel.createSoul("Nour")
+            viewModel.createSoul("Nour")
+            advanceUntilIdle()
+
+            assertEquals(listOf("Nour"), refs.createSoulCalls)
+        }
 }
