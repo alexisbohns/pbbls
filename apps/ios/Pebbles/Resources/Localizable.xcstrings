@@ -4539,6 +4539,57 @@
         }
       }
     },
+    "Draw" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draw"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dessiner"
+          }
+        }
+      }
+    },
+    "Draw my own" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draw my own"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dessiner le mien"
+          }
+        }
+      }
+    },
+    "Draw one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Draw one"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En dessiner un"
+          }
+        }
+      }
+    },
     "Drawing canvas" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5639,6 +5690,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Glyphe"
+          }
+        }
+      }
+    },
+    "Glyph %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glyph %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glyphe %lld"
           }
         }
       }
