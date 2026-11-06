@@ -1896,3 +1896,25 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** A future animation on any surface is native (SwiftUI, Compose, or CSS and Motion on web). Bringing Rive back is a new decision, and its source assets are only in git history. Earlier specs and plans still mention Rive as a record of their time.
 - **Supersedes / Superseded-by:** Supersedes the "iOS and web still use Rive" consequence of the Android Rive removal entry and the `rive-android` clause of the native Android entry.
 - **Refs:** #1561.
+
+## 2026-11-06 — iOS onboarding gate and the Log out at step 2 (#1565)
+
+- **Status:** taken
+- **Scope:** ios, cross-surface contract (Android mirror owed)
+- **Context:** iOS showed four static slides behind a device flag, once the consent gate had passed. The seven-step flow (#1510) puts the promise first and collects the consent itself in step 2, so the gate that stood above everything has to stand down for it, without the tabs ever being reachable un-gated. Android took the same step on 2026-11-05 and its device pass corrected the spec in several places.
+- **Decision:**
+  - **The gate reads the profile and keeps the old device flag.** The flow presents when `onboarding_completed` is false and `hasSeenOnboarding` is unset. The flag is what keeps a pre-flow account from being re-onboarded on the same device. A failed read presents nothing that launch, and the consent gate decides.
+  - **The consent gate stands down while the flow is pending, about to present or presented, and something opaque stays underneath.** `OnboardingGate.consentLayer` chooses between open, the plain surface and `ConsentGateView`; only a pass for the session's user opens the tabs. A pre-flow account with a missing act still meets the gate, unchanged.
+  - **Consent is recorded on Continue, not per flip**, as Android's device pass decided. At the flow's end the gate re-checks before the cover closes: a pass recorded in step 2 opens in that same turn, so the gate does not flash, and anything else holds on the gate. A read still out from before step 2 cannot land over the answer.
+  - **What follows the flow waits for the cover's `onDismiss` and for a pass.** An earlier presentation would be dropped by the dismissal in progress, and a cover opened from Home draws above the consent layer.
+  - **A parked invite wins over the composer:** one presentation, and the note is dropped. D9 already says missing the composer is fine. Home re-reads the name either way, because the greeting it loaded under the cover is stale.
+  - **Step 2 keeps a quiet Log out** while any act is missing, departing from the mock and from Android. It is the exit iOS's gate already offers: declining is logging out. The same step's sign-out leaves the device flag alone, so the flow restarts next time.
+  - **A duplicate person is refused at commit, case-insensitively:** `complete_onboarding` raises `duplicate_soul` on two `lower(btrim(name))` that collide, which would fail the whole send at step 6 for a typo at step 5.
+  - **D9 stays open.** The hand-off is prompt only: `save_moment` has no `soul_ids` and no moment-to-soul table exists, so the composer attaches nobody.
+- **Why:** A layer that fails closed by construction is safer next to a legal gate than a condition on each of the things beneath it, and a pure function can be tested for every combination. Binding the pass to the session's user and the note to its user keeps one account's state from ever opening anything for the next.
+- **Consequences:**
+  - **Android owes the mirror of the step 2 Log out and of the duplicate refusal.** Neither is there yet.
+  - The flag is once per device on both surfaces: a new account on a device that already finished the flow is not onboarded. Fixing that needs a backfill of pre-flow accounts first.
+  - Web follows in its own plan, with this gate as the reference.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #1565, #1510, #1466, `docs/superpowers/specs/2026-11-04-interactive-onboarding-design.md`, `docs/superpowers/plans/2026-11-06-interactive-onboarding-ios.md`, the 2026-11-05 entry "The onboarding gate reads the profile, and consent moves into the flow on Android (#1510)".
