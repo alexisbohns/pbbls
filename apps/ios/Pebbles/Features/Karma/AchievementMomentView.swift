@@ -10,8 +10,8 @@ struct AchievementMomentView: View {
 
     var body: some View {
         ZStack {
-            // The scrim is a real subview, so the passthrough window lets it
-            // capture touches for as long as the moment is up.
+            // The passthrough window holds every touch for as long as the moment
+            // is up (`capturesTouches`), so this tap and the card's button land.
             Color.pebbles.scrim.opacity(0.55)
                 .ignoresSafeArea()
                 .contentShape(Rectangle())

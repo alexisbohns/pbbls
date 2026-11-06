@@ -120,11 +120,19 @@ struct KarmaOverlayRoot: View {
 /// overlay's own content is interactive. Lets the karma flash and the unlock
 /// moment float above presented sheets (create/edit/detail) — the composer
 /// dismisses itself on the very success that fires them, so presenting from the
-/// view tree would race that dismissal. The moment's full-screen scrim is a
-/// real subview, so it correctly captures touches while it is up.
+/// view tree would race that dismissal.
+///
+/// The moment covers the screen, so `capturesTouches` holds the whole window for
+/// as long as it is up. It cannot be read from the hit view: SwiftUI content such
+/// as its scrim hits the hosting root itself, the same view as the empty areas,
+/// which left the card untappable and sent its touches to the app beneath.
 final class KarmaPassthroughWindow: UIWindow {
+    /// True while something on the overlay must take every touch: the unlock moment.
+    var capturesTouches: @MainActor () -> Bool = { false }
+
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         guard let hit = super.hitTest(point, with: event) else { return nil }
+        if capturesTouches() { return hit }
         // Touches on the hosting controller's root view (the transparent
         // background) pass through; touches on the pastille's subviews don't.
         return hit == rootViewController?.view ? nil : hit
@@ -179,6 +187,7 @@ final class KarmaOverlayWindowController {
         let window = KarmaPassthroughWindow(windowScene: scene)
         window.windowLevel = .alert + 1  // above presented sheets
         window.backgroundColor = .clear
+        window.capturesTouches = { [weak achievements] in achievements?.currentCard != nil }
         let host = UIHostingController(
             rootView: KarmaOverlayRoot()
                 .environment(service)
