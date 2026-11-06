@@ -10,8 +10,14 @@ struct HomeView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(TabNavigation.self) private var nav
     @Environment(MomentsRevision.self) private var revision
+    @Environment(OnboardingHandoff.self) private var handoff
     @State private var model = HomeModel()
     @State private var showsQuick = false
+    /// The composer's first title after the onboarding (#1510 D9); gone when it closes.
+    @State private var quickPrompt: LocalizedStringResource?
+    /// The quick composer on screen is the hand-off's: the unlock cards the flow held come back
+    /// with its first save or its close (#1565). A later Quick moment leaves this false.
+    @State private var quickIsHandoff = false
     @State private var showsCapture = false
     @Environment(AchievementsService.self) private var achievements
     @State private var showsCamera = false
@@ -65,12 +71,18 @@ struct HomeView: View {
         .toolbar(.hidden, for: .navigationBar)
         // D13: the quick moment is the moment page itself, no photo screen; the
         // flow chains into Complete on its own.
-        .fullScreenCover(isPresented: $showsQuick) {
+        // The capture list reads the prompt in `body`, so the content never holds a stale one.
+        .fullScreenCover(isPresented: $showsQuick, onDismiss: {
+            quickPrompt = nil
+            if quickIsHandoff { handoff.composerClosed() }
+            quickIsHandoff = false
+        }, content: { [quickPrompt] in
             CaptureFlowView(onMomentChanged: { _ in
+                if quickIsHandoff { handoff.composerSaved() }
                 revision.bump(from: .home)
                 reloadChecklist()
-            }, startsAtMomentPage: true)
-        }
+            }, startsAtMomentPage: true, prompt: quickPrompt)
+        })
         .fullScreenCover(item: $completing) { target in
             CompleteFlowView(momentId: target.momentId, momentName: target.name,
                              onCompleted: { _ in
@@ -128,6 +140,19 @@ struct HomeView: View {
             switch route {
             case .guide(let slug): guideDestination(slug)
             }
+        }
+        // The onboarding ended (#1510 D9). `.task(id:)` also runs on first appearance, so a Home built
+        // late still sees it. The name reloads whatever `take` says: with no note (a parked invite took
+        // over, or the note was another user's) the greeting loaded under the cover is just as stale.
+        .task(id: handoff.revision) {
+            guard handoff.revision > 0 else { return }
+            attachService()
+            if let note = handoff.take(userId: OnboardingGate.userKey(userId)) {
+                quickPrompt = note.prompt
+                quickIsHandoff = true
+                showsQuick = true
+            }
+            await model.reloadName()
         }
         // The month's weeks (#1382 D8): again when the clock crosses into a new month…
         .task(id: liveMonth) {

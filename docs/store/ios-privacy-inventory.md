@@ -74,7 +74,7 @@ direction**.
 
 | Category | Trigger symbols | Verdict |
 |---|---|---|
-| `…UserDefaults` | `@AppStorage`, `UserDefaults` | **Declared, `CA92.1`.** One real use: `@AppStorage("hasSeenOnboarding")` at `RootView.swift:25`. |
+| `…UserDefaults` | `@AppStorage`, `UserDefaults` | **Declared, `CA92.1`.** Every use reads and writes the app's own standard defaults, with no app group and nothing sent off device: the `hasSeenOnboarding` flag through `UserDefaults` in `OnboardingGate.swift`, the consent gate's cached pass in `ConsentPreferences.swift`, and small on-device preferences, most of them through `@AppStorage`. |
 | `…FileTimestamp` | `creationDate`, `modificationDate`, `attributesOfItem`, `NSURLContentModificationDateKey`, `stat(`, `fstat` | Not used. The only `creationDate` hit is a doc comment at `ExifCaptureDate.swift:10`. |
 | `…SystemBootTime` | `systemUptime`, `mach_absolute_time` | Not used. |
 | `…DiskSpace` | `volumeAvailableCapacity`, `systemFreeSize` | Not used. |

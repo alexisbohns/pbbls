@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The seven-step flow's shell (#1510): a real `NavigationStack` whose toolbar carries Back, the
 /// progress stones and Skip or Later, over a surface the flow paints itself. Mirrors Android's
-/// `OnboardingScreen`. Nothing presents it yet; the root gate does in Part 5.
+/// `OnboardingScreen`. `OnboardingFlowHost` builds it, inside `RootView`'s cover.
 struct OnboardingFlowView: View {
     let model: OnboardingFlowModel
     let onLogOut: () -> Void
@@ -22,8 +22,8 @@ struct OnboardingFlowView: View {
                 .background(Color.pebbles.surface.ignoresSafeArea())
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { toolbar }
+                .pebblesScreen()
         }
-        .pebblesScreen()
         .animation(.snappy(duration: 0.28), value: model.step)
         .onChange(of: model.step) { old, new in
             let steps = OnboardingFlowSteps.all
@@ -49,7 +49,8 @@ struct OnboardingFlowView: View {
         }, content: {
             GlyphCarveSheet(onSaved: model.carved)
         })
-        .onChange(of: model.isDone) { _, done in
+        // `initial`: a cover asked for again (`OnboardingPresentation`) can find the write already landed.
+        .onChange(of: model.isDone, initial: true) { _, done in
             if done { onFinish() }
         }
         .task { await model.load() }

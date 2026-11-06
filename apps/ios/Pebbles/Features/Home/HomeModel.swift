@@ -54,6 +54,11 @@ enum HomeModelError: Error { case noService }
         }
     }
 
+    /// The name alone: the onboarding wrote it, and the greeting loaded under its cover is stale.
+    func reloadName() async {
+        await loadName()
+    }
+
     /// The live month: the device's copy first (a Path visit warms it), then
     /// the fetch, timed for spec D8's measurement. A failed fetch keeps the last
     /// month and logs; a new month replaces it once it lands.

@@ -18,6 +18,10 @@ struct CaptureFlowView: View {
     /// and no way back to it.
     var startsAtMomentPage = false
 
+    /// The onboarding's hand-off (#1510 D9): replaces the moment page's title and nothing else. It
+    /// attaches nobody: `save_moment` cannot hold a soul. "Record another" starts without it.
+    @State private var prompt: LocalizedStringResource?
+
     @Environment(SupabaseService.self) private var supabase
     @Environment(CaptureDraftStore.self) private var drafts
     @Environment(\.scenePhase) private var scenePhase
@@ -176,7 +180,7 @@ struct CaptureFlowView: View {
     @ViewBuilder
     private var stepBody: some View {
         RecordStepScaffold(
-            title: model.step.title,
+            title: model.step.title(prompt: prompt),
             subtitle: model.step.subtitle,
             action: action(for: model.step),
             // The grid runs to the bottom under the two controls; nothing floats.
@@ -276,18 +280,6 @@ struct CaptureFlowView: View {
 
     // MARK: - Save
 
-    /// "Record another" on the end screen (D12): the same cover, a fresh grid.
-    private func startAnother() {
-        completing = nil
-        model = CaptureFlowModel(startingAt: startsAtMomentPage ? .moment : .photo)
-        pickedPhoto = nil
-        snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
-        savingThenComplete = false
-        hasRestored = true
-        // The save cleared the autosave; the restore that re-enables it is skipped here.
-        autosaver?.enabled = true
-    }
-
     private func save(thenComplete: Bool) async {
         guard !model.isSaving else { return }
         guard let userId = currentUserId else {
@@ -336,6 +328,19 @@ struct CaptureFlowView: View {
 // MARK: - Draft (D2)
 
 extension CaptureFlowView {
+    /// "Record another" on the end screen (D12): the same cover, a fresh grid.
+    private func startAnother() {
+        prompt = nil
+        completing = nil
+        model = CaptureFlowModel(startingAt: startsAtMomentPage ? .moment : .photo)
+        pickedPhoto = nil
+        snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
+        savingThenComplete = false
+        hasRestored = true
+        // The save cleared the autosave; the restore that re-enables it is skipped here.
+        autosaver?.enabled = true
+    }
+
     private func scheduleAutosave() {
         guard let userId = currentUserId, completing == nil else { return }
         autosaver?.schedule(.init(
@@ -363,8 +368,14 @@ extension CaptureFlowView {
 }
 
 extension CaptureFlowView {
-    init(onMomentChanged: @escaping (UUID) -> Void, chainsComplete: Bool = false, startsAtMomentPage: Bool = false) {
+    init(
+        onMomentChanged: @escaping (UUID) -> Void,
+        chainsComplete: Bool = false,
+        startsAtMomentPage: Bool = false,
+        prompt: LocalizedStringResource? = nil
+    ) {
         self.onMomentChanged = onMomentChanged
+        _prompt = State(initialValue: prompt)
         self.chainsComplete = chainsComplete
         self.startsAtMomentPage = startsAtMomentPage
         _model = State(initialValue: CaptureFlowModel(startingAt: startsAtMomentPage ? .moment : .photo))

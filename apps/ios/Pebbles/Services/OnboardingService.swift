@@ -44,6 +44,10 @@ struct OnboardingService: OnboardingServicing {
             .from("profiles")
             .select("onboarding_completed")
             .single()
+            // One attempt: the app holds on this read, and the SDK's retries (three more, 60 s each)
+            // would outlast the gate's ceiling. Past that the consent gate decides, so there's no
+            // reason to keep asking.
+            .retry(enabled: false)
             .execute()
             .value
         return row.completed

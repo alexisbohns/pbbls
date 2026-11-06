@@ -78,14 +78,14 @@ extension References {
 
         // MARK: - Views
 
-        private static func momentPage() -> some View {
+        private static func momentPage(title: LocalizedStringResource = "Your moment") -> some View {
             let model = CaptureFlowModel(haptic: { _ in }, startingAt: .moment)
             model.draft.happenedAt = wednesday
             model.setName("Coffee with Léa")
             model.setDescription("We sat by the canal and talked until the light went.")
             return host(height: pageHeight) {
                 RecordStepScaffold(
-                    title: "Your moment",
+                    title: title,
                     action: .primary("Save & make it a pebble", enabled: true, loading: false) {},
                     secondaryAction: RecordStepSecondaryAction(label: "Just save", enabled: true) {},
                     scrolls: false
@@ -151,6 +151,14 @@ extension References {
         @Test(arguments: ReferenceScheme.allCases)
         func momentPage(scheme: ReferenceScheme) {
             ReferenceImage.assertMatches(Self.momentPage(), named: "momentPage", config: Self.config(scheme))
+        }
+
+        /// The first composer after the onboarding (#1510 D9): the same page under the prompt.
+        @Test(arguments: ReferenceScheme.allCases)
+        func momentPagePrompted(scheme: ReferenceScheme) {
+            let prompt = OnboardingHandoffNote(userId: "u", reason: .noticeFeelings).prompt
+            ReferenceImage.assertMatches(Self.momentPage(title: CaptureStep.moment.title(prompt: prompt)),
+                                         named: "momentPagePrompted", config: Self.config(scheme))
         }
 
         @Test(arguments: ReferenceScheme.allCases)

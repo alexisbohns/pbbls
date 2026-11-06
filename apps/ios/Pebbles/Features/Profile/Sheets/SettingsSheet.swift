@@ -41,6 +41,7 @@ struct SettingsSheet: View {
     @State private var isPresentingGlyphPicker = false
     @State private var isPresentingDeleteConfirm = false
     #if DEBUG
+    @Environment(OnboardingGateModel.self) private var onboardingGate
     @State private var isPresentingStoneLab = false
     @State private var isPresentingSpineLab = false
     @State private var isPresentingIconLab = false
@@ -579,9 +580,32 @@ struct SettingsSheet: View {
                 }
             }
             .buttonStyle(.plain)
+            .pebblesListRow(position: .middle)
+            Button {
+                replayOnboarding()
+            } label: {
+                Label {
+                    Text(verbatim: "Replay onboarding")
+                } icon: {
+                    PbblsIconImage(.pebbleRound, .row)
+                }
+            }
+            .buttonStyle(.plain)
             .pebblesListRow(position: .bottom)
         } header: {
             Text(verbatim: "Developer").pebblesSectionHeader()
+        }
+    }
+
+    /// Settings goes first: a cover can't present over a sheet still being dismissed, it is simply
+    /// dropped. So the replay waits the dismissal out, in a task that outlives the sheet.
+    private func replayOnboarding() {
+        let gate = onboardingGate
+        let client = supabase.client
+        dismiss()
+        Task {
+            try? await Task.sleep(for: .milliseconds(700))
+            await gate.replay(client: client)
         }
     }
     #endif
@@ -886,4 +910,5 @@ private struct UpdateProfileParams: Encodable {
         onSaved: { _, _, _, _ in }
     )
     .environment(SupabaseService())
+    .environment(OnboardingGateModel())
 }

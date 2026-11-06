@@ -129,3 +129,61 @@ final class Latch: @unchecked Sendable {
         c?.resume()
     }
 }
+
+/// Bounds that run out when the test says, in the order they were asked for. A bound told to run out
+/// before anything has asked for it runs out as soon as something does, and a cancelled one still
+/// answers: the code's own tokens are what has to ignore it. One nobody runs out goes by itself, late,
+/// so a test awaiting the wrong one fails instead of hanging the whole run.
+final class ManualBounds: @unchecked Sendable {
+    private let lock = NSLock()
+    private var latches: [Latch] = []
+    private var asked: [Duration] = []
+    private var cursor = 0
+
+    /// What was asked for, in order.
+    var durations: [Duration] { lock.withLock { asked } }
+
+    var wait: OnboardingWait {
+        { [self] duration in
+            let index = lock.withLock { () -> Int in
+                asked.append(duration)
+                return asked.count - 1
+            }
+            let latch = latch(index)
+            let expiry = Task {
+                try? await Task.sleep(for: .seconds(60))
+                latch.open()
+            }
+            await latch.wait()
+            expiry.cancel()
+        }
+    }
+
+    /// Until `count` bounds have been asked for. They hop off the main actor to ask, so a test telling
+    /// an earlier bound from a later one has to let the earlier one arrive first.
+    func reached(_ count: Int) async {
+        let deadline = ContinuousClock.now + .seconds(10)
+        while durations.count < count, ContinuousClock.now < deadline {
+            try? await Task.sleep(for: .milliseconds(1))
+        }
+    }
+
+    /// The bound asked for at `index`.
+    func runOut(_ index: Int) { latch(index).open() }
+
+    /// The next one nobody has run out yet.
+    func runOutNext() {
+        let index = lock.withLock { () -> Int in
+            defer { cursor += 1 }
+            return cursor
+        }
+        runOut(index)
+    }
+
+    private func latch(_ index: Int) -> Latch {
+        lock.withLock {
+            while latches.count <= index { latches.append(Latch()) }
+            return latches[index]
+        }
+    }
+}

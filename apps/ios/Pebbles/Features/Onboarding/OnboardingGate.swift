@@ -1,6 +1,9 @@
 import Foundation
 import Observation
 import os
+#if DEBUG
+import Supabase
+#endif
 
 /// Pure gating for the flow (#1510 D10). `hasSeen` is the device flag the old slides already
 /// wrote (`hasSeenOnboarding`): accounts from before the flow never wrote `onboarding_completed`,
@@ -16,6 +19,72 @@ enum OnboardingGate {
     static func isPending(userId: String?, hasSeen: Bool, completed: Bool?, readFailed: Bool) -> Bool {
         userId != nil && !hasSeen && completed == nil && !readFailed
     }
+
+    /// What stands above the tabs. Fails closed: anything but a pass leaves something opaque there.
+    /// The flow collects the consent itself, promise first (D2), so while it is in play nobody meets
+    /// the gate; everyone else's gate is unchanged.
+    static func consentLayer(
+        isPassed: Bool,
+        isPending: Bool,
+        shouldPresent: Bool,
+        isPresenting: Bool
+    ) -> OnboardingConsentLayer {
+        if isPassed { return .open }
+        return isPending || shouldPresent || isPresenting ? .surface : .gate
+    }
+
+    /// An invite waits for the flow's end, and past it until the cover is gone (`isClosing`): a sheet
+    /// presented while a cover is going is dropped.
+    static func invitesWait(isPending: Bool, shouldPresent: Bool, isPresenting: Bool, isClosing: Bool) -> Bool {
+        isPending || shouldPresent || isPresenting || isClosing
+    }
+
+    /// One presentation once everything is out of the way. A parked invite wins: missing the composer
+    /// is fine (D9), and an invite comes from someone who is waiting on it.
+    static func handOff(parkedInvite: String?, note: OnboardingHandoffNote?) -> OnboardingHandOff {
+        if let parkedInvite { return .invite(parkedInvite) }
+        if let note { return .composer(note) }
+        return .nothing
+    }
+
+    /// The one form a user id takes in the gates: the consent cache and the hand-off note are compared
+    /// by string, so every side has to build it the same way.
+    static func userKey(_ id: UUID?) -> String? { id?.uuidString.lowercased() }
+}
+
+/// What `OnboardingGate.consentLayer` chose.
+enum OnboardingConsentLayer: Equatable {
+    /// Consent is on record: nothing above the tabs.
+    case open
+    /// The loader on the plain surface, while the flow is pending, about to present or presenting.
+    case surface
+    /// `ConsentGateView`.
+    case gate
+}
+
+/// What `OnboardingGate.handOff` chose.
+enum OnboardingHandOff: Equatable {
+    case invite(String)
+    case composer(OnboardingHandoffNote)
+    case nothing
+}
+
+/// Waits out a bound, and throws if it is cancelled first. Injected, so the tests decide when a bound
+/// runs out and nothing here races a clock.
+typealias OnboardingWait = @Sendable (Duration) async throws -> Void
+
+/// The waits the first run can put a person through, so nobody sits in front of nothing for long.
+enum OnboardingBounds {
+    /// The flag read, on the same idea as `RootView`'s loader ceiling: past it, the read counts as
+    /// failed and the consent gate decides.
+    static let flagRead: Duration = .seconds(8)
+    /// The cover saying it is up, each of the two times it is asked for.
+    static let coverUp: Duration = .seconds(2)
+    /// From taking the cover down to asking again: SwiftUI has to see the `false`, and a dismissal in
+    /// progress has to end, or the next presentation is dropped as well.
+    static let coverRetry: Duration = .seconds(1)
+    /// From the flow's end to the cover's `onDismiss`. A dismissal takes about half a second.
+    static let closing: Duration = .seconds(2)
 }
 
 /// Owned by `RootView`, like `ConsentGateModel`.
@@ -30,15 +99,19 @@ final class OnboardingGateModel {
     @ObservationIgnored private var userId: String?
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private(set) var work: Task<Void, Never>?
-    /// Bumped whenever the answer a read would deliver is no longer wanted (user change, `finish`).
-    /// A read lands only if its token is still current, on success and on failure alike.
+    /// The read's bound, so tests can await it.
+    @ObservationIgnored private(set) var ceiling: Task<Void, Never>?
+    @ObservationIgnored private let wait: OnboardingWait
+    /// Bumped whenever a read is over (`endRead`). A read lands, and its ceiling runs out, only if its
+    /// token is still current, on success and on failure alike.
     @ObservationIgnored private var generation = 0
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "onboarding")
 
     static let hasSeenKey = "hasSeenOnboarding"
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, wait: @escaping OnboardingWait = { try await Task.sleep(for: $0) }) {
         self.defaults = defaults
+        self.wait = wait
         hasSeen = defaults.bool(forKey: Self.hasSeenKey)
     }
 
@@ -50,8 +123,7 @@ final class OnboardingGateModel {
     /// Idempotent for one user. A new id forgets the last user's answer.
     func start(userId: String?) {
         guard userId != self.userId else { return }
-        work?.cancel()
-        generation += 1
+        endRead()
         self.userId = userId
         completed = nil
         readFailed = false
@@ -70,22 +142,85 @@ final class OnboardingGateModel {
             do {
                 let done = try await service.onboardingCompleted()
                 guard token == generation else { return }
+                endRead()
                 completed = done
             } catch {
                 // A superseded or cancelled read logs nothing and changes nothing.
                 guard token == generation, !Task.isCancelled else { return }
+                endRead()
                 logger.error("onboarding flag read failed: \(error.localizedDescription, privacy: .private)")
                 readFailed = true
             }
         }
+        ceiling = Task { [wait] in
+            do { try await wait(OnboardingBounds.flagRead) } catch { return }
+            guard token == generation else { return }
+            logger.error("onboarding flag read passed its ceiling; the consent gate decides")
+            endRead()
+            readFailed = true
+        }
+    }
+
+    /// The read is over, whoever says so: an answer, its ceiling, or nobody wanting it any more. What
+    /// is still out, the read or the ceiling, can't land: the generation has moved on.
+    private func endRead() {
+        work?.cancel()
+        ceiling?.cancel()
+        generation += 1
+    }
+
+    /// The cover couldn't be kept up (`OnboardingPresentation`). From here it is a failed read: nothing
+    /// is presented this launch, and the consent gate decides, failing closed. The device flag stays
+    /// as it was, so the flow gets another go next launch.
+    func standDown() {
+        endRead()
+        completed = nil
+        readFailed = true
     }
 
     /// The flow ended: this device never re-presents, whatever the profile says next.
     func finish() {
-        work?.cancel()
-        generation += 1
+        endRead()
         hasSeen = true
         defaults.set(true, forKey: Self.hasSeenKey)
         completed = true
     }
 }
+
+#if DEBUG
+extension OnboardingGateModel {
+    /// The Settings row: shows the flow again without a restart. `OnboardingServicing` stays as it is:
+    /// this is the one write the app makes to the flag outside `complete_onboarding`, and it only
+    /// exists in debug builds. `profiles.onboarding_completed` is still owner-writable.
+    func replay(client: SupabaseClient) async {
+        guard let userId else {
+            logger.error("onboarding replay without a user")
+            return
+        }
+        do {
+            try await client
+                .from("profiles")
+                .update(["onboarding_completed": false])
+                .eq("user_id", value: userId)
+                .execute()
+        } catch {
+            logger.error("onboarding replay failed: \(error.localizedDescription, privacy: .private)")
+            return
+        }
+        forgetForReplay()
+        await work?.value
+        if completed == true { logger.error("onboarding replay: the profile still says completed") }
+    }
+
+    /// The device's half: the flag and the last answer go, then the profile is read again.
+    func forgetForReplay() {
+        endRead()
+        defaults.removeObject(forKey: Self.hasSeenKey)
+        hasSeen = false
+        completed = nil
+        readFailed = false
+        guard userId != nil else { return }
+        read(userId)
+    }
+}
+#endif

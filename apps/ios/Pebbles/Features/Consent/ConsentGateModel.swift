@@ -52,6 +52,8 @@ final class ConsentGateModel {
     /// The check or record in flight, so tests can await it.
     @ObservationIgnored private(set) var work: Task<Void, Never>?
     @ObservationIgnored private var userId: String?
+    /// Bumped by every check and `recheck`: an answer lands only if its token is still current.
+    @ObservationIgnored private var checkToken = 0
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "consent")
 
@@ -59,6 +61,13 @@ final class ConsentGateModel {
     var isPassed: Bool {
         guard let userId, case .satisfied(let passed) = state else { return false }
         return passed == userId
+    }
+
+    /// `isPassed`, for this user. The session can move before `start` has heard about it, and one
+    /// user's pass never opens the app for the next.
+    func isPassed(for userId: String?) -> Bool {
+        guard let userId else { return false }
+        return isPassed && userId == self.userId
     }
 
     /// Idempotent for the same user: a check already in flight, or a verdict
@@ -83,6 +92,21 @@ final class ConsentGateModel {
     func retry() {
         guard let userId else { return }
         check(userId)
+    }
+
+    /// The onboarding ended (Android's `restart`): its step 2 wrote the ledger behind this gate's
+    /// back, so unlike `start` this runs with a verdict already reached, and a read still out, which
+    /// holds the ledger from before step 2, must not land over the new answer. A cached pass opens
+    /// in this same turn, so the gate does not flash.
+    func recheck() {
+        guard let userId else { return }
+        work?.cancel()
+        checkToken += 1
+        if cache.isSatisfied(userId: userId, fingerprint: ConsentGateLogic.fingerprint()) {
+            state = .satisfied(userId: userId)
+        } else {
+            check(userId)
+        }
     }
 
     func toggle(_ kind: ConsentKind, _ checked: Bool) {
@@ -140,14 +164,17 @@ final class ConsentGateModel {
             state = .failed(.other)
             return
         }
+        checkToken += 1
+        let token = checkToken
         work = Task {
             do {
                 let active = try await service.active()
-                guard uid == userId else { return }
+                guard uid == userId, token == checkToken else { return }
                 resolve(uid, ConsentGateLogic.missing(active))
             } catch {
+                // A superseded read logs nothing and changes nothing.
+                guard uid == userId, token == checkToken else { return }
                 logger.error("consent check failed: \(error.localizedDescription, privacy: .private)")
-                guard uid == userId else { return }
                 state = .failed(Self.gateError(error))
             }
         }

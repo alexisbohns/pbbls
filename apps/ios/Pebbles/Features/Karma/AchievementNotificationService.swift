@@ -34,6 +34,12 @@ final class AchievementNotificationService {
     /// Counts feedback fires so tests can assert the guard without CoreHaptics.
     private(set) var hapticTrigger: Int = 0
 
+    /// The onboarding is up (#1565): `currentCard` is nil and `present` only queues.
+    private(set) var isHeld = false
+    /// A held queue was just released: a card fired next (the first pebble's) chains behind it
+    /// instead of replacing it. Ends with the queue.
+    private var chainsNext = false
+
     private let haptics: HapticsService
 
     init(haptics: HapticsService = HapticsService()) {
@@ -42,7 +48,7 @@ final class AchievementNotificationService {
 
     /// The card on screen, or nil when the moment is idle.
     var currentCard: AchievementMomentCard? {
-        guard index >= 0, index < cards.count else { return nil }
+        guard !isHeld, index >= 0, index < cards.count else { return nil }
         return cards[index]
     }
 
@@ -53,6 +59,15 @@ final class AchievementNotificationService {
     func present(cards: [AchievementMomentCard]) {
         guard !cards.isEmpty else { return }
 
+        if isHeld {
+            self.cards += cards
+            return
+        }
+        if chainsNext, !self.cards.isEmpty {
+            self.cards += cards
+            return
+        }
+
         // Reuses the karma-earned haptic: same reward register, and a second
         // bespoke waveform for a moment that often fires alongside the karma
         // flash would double-buzz.
@@ -61,6 +76,29 @@ final class AchievementNotificationService {
 
         self.cards = cards
         self.index = 0
+    }
+
+    /// Keeps the queue out of sight: the onboarding is up, and a card landing on top of it would
+    /// take the flow over (#1565). Whoever holds must release on every way out, since a hold left on
+    /// swallows every card in the app.
+    func hold() {
+        isHeld = true
+    }
+
+    /// Lets the queue show, if there is one. A no-op when nothing is held, so callers needn't ask.
+    func release() {
+        guard isHeld else { return }
+        isHeld = false
+        guard !cards.isEmpty else { return }
+        chainsNext = true
+        hapticTrigger &+= 1
+        haptics.playKarmaEarned()
+    }
+
+    /// Signed out: nothing queued for this account may show for the next, and no hold outlives it.
+    func reset() {
+        isHeld = false
+        dismiss()
     }
 
     /// Advances to the next card, ending the moment after the last one.
@@ -75,6 +113,7 @@ final class AchievementNotificationService {
     /// Ends the moment immediately — tapping outside or swiping down skips the
     /// rest of the queue. Dismissal is never blocking.
     func dismiss() {
+        chainsNext = false
         cards = []
         index = 0
     }

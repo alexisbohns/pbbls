@@ -212,7 +212,7 @@ private struct PersonNameField: View {
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .bottom)
             Rectangle().fill(Color.pebbles.primary).frame(height: 2)
         }
-        .task { focused = true }
+        .onAppear { focused = true }
         .onChange(of: focused) { _, isFocused in
             if isFocused {
                 wasFocused = true
