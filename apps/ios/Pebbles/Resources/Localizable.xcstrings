@@ -4,6 +4,40 @@
     "" : {
 
     },
+    "A drawing can wait" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A drawing can wait"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le dessin peut attendre"
+          }
+        }
+      }
+    },
+    "Add %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter %@"
+          }
+        }
+      }
+    },
     "Add a name or a photo first." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17,6 +51,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajoute d'abord un nom ou une photo."
+          }
+        }
+      }
+    },
+    "Close search" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close search"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer la recherche"
           }
         }
       }
@@ -123,6 +174,23 @@
         }
       }
     },
+    "Couldn't save the soul. Please try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save the soul. Please try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d'enregistrer l'âme. Réessaie."
+          }
+        }
+      }
+    },
     "Couldn't save. Please try again." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -136,6 +204,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible d'enregistrer. Réessaie."
+          }
+        }
+      }
+    },
+    "Done · %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done · %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK · %lld"
           }
         }
       }
@@ -259,6 +344,40 @@
         }
       }
     },
+    "Remove %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer %@"
+          }
+        }
+      }
+    },
+    "Search souls" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search souls"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chercher une âme"
+          }
+        }
+      }
+    },
     "That collection is gone. Pick another one." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -357,6 +476,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sans titre"
+          }
+        }
+      }
+    },
+    "Usual" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habituels"
           }
         }
       }
@@ -13278,6 +13414,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Qui peut le voir ?"
+          }
+        }
+      }
+    },
+    "Who was there?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who was there?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qui était là ?"
           }
         }
       }
