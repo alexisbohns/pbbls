@@ -33,7 +33,7 @@ struct SoulsListView: View {
 
     var body: some View {
         content
-            .pebblesToolbarTitle("Souls")
+            .pebblesToolbarTitle("People")
             .toolbar {
                 // People reaches Connections from here (#903 §2): the hub
                 // tile's icon and copy.

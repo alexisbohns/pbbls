@@ -2,7 +2,8 @@ import SwiftUI
 
 /// Pill-shaped, full-width primary button. Reads `\.isEnabled` from the
 /// environment to switch between the accent-filled enabled state and the
-/// muted-filled disabled state. Pass `isLoading: true` while a Task is in
+/// muted-filled disabled state (a 12 % on-surface wash, no outline: an
+/// outline reads far louder than a wash on the dark scheme). Pass `isLoading: true` while a Task is in
 /// flight to swap the label for a `ProgressView`; callers should also apply
 /// `.disabled(true)` so the press isn't re-fired.
 struct PebblesPrimaryButtonStyle: ButtonStyle {
@@ -24,13 +25,7 @@ struct PebblesPrimaryButtonStyle: ButtonStyle {
         .frame(maxWidth: .infinity)
         .frame(minHeight: minHeight)
         .background(
-            Capsule().fill(isEnabled ? Color.pebbles.primary : Color.clear)
-        )
-        .overlay(
-            Capsule().stroke(
-                isEnabled ? Color.clear : Color.pebbles.outline,
-                lineWidth: 1
-            )
+            Capsule().fill(isEnabled ? Color.pebbles.primary : Color.pebbles.onSurface.opacity(0.12))
         )
         .opacity(configuration.isPressed ? 0.85 : 1.0)
         .animation(.easeOut(duration: 0.1), value: configuration.isPressed)

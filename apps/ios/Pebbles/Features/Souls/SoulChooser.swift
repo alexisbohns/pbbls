@@ -30,6 +30,7 @@ struct SoulChooser<Header: View>: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(ReferenceDataService.self) private var refs
     @Environment(AchievementsService.self) private var achievements
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     @State private var addError: String?
     @State private var isAdding = false
@@ -120,7 +121,9 @@ struct SoulChooser<Header: View>: View {
         let people = model.usual
         if !people.isEmpty {
             sectionTitle(Text("Usual"))
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 4), spacing: 4) {
+            // Three across from the accessibility sizes so a name still fits its tile (S8).
+            let columns = typeSize.isAccessibilitySize ? 3 : 4
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: columns), spacing: 4) {
                 ForEach(people) { soul in
                     deletable(soul) {
                         SoulTile(soul: soul, isSelected: model.isSelected(soul.id),

@@ -2,7 +2,8 @@ import SwiftUI
 
 /// The chosen people as pills in one scrolling line (souls spec S2), each with
 /// a close that removes it, beside the Done / Skip button. The right-edge fade
-/// says there is more. Nothing is drawn in browse mode.
+/// says there is more. From the accessibility sizes the line sits above the
+/// button instead (S8). Nothing is drawn in browse mode.
 struct SoulPillTray: View {
     let selected: [SoulWithGlyph]
     let label: SoulChooserModel.ButtonLabel
@@ -11,31 +12,53 @@ struct SoulPillTray: View {
     /// Reference renders only: `ImageRenderer` draws neither ScrollView content nor TextFields.
     var scrolls = true
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
-        HStack(spacing: Spacing.sm) {
-            if selected.isEmpty {
-                Spacer(minLength: 0)
-            } else if scrolls {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    pills
+        if typeSize.isAccessibilitySize {
+            VStack(alignment: .trailing, spacing: Spacing.sm) {
+                if !selected.isEmpty {
+                    line.frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .contentMargins(.trailing, 28, for: .scrollContent)
-                .mask(
-                    LinearGradient(
-                        stops: [
-                            .init(color: Color.pebbles.onSurface, location: 0.86),
-                            .init(color: .clear, location: 1)
-                        ],
-                        startPoint: .leading, endPoint: .trailing
-                    )
+                button
+            }
+            .frame(minHeight: 48)
+        } else {
+            HStack(spacing: Spacing.sm) {
+                if selected.isEmpty {
+                    Spacer(minLength: 0)
+                } else {
+                    line
+                }
+                button
+            }
+            .frame(minHeight: 48)
+        }
+    }
+
+    /// The pills, scrolling under a trailing fade; laid out flat for the renders.
+    @ViewBuilder
+    private var line: some View {
+        if scrolls {
+            ScrollView(.horizontal, showsIndicators: false) {
+                pills
+            }
+            .contentMargins(.trailing, 28, for: .scrollContent)
+            .mask(
+                LinearGradient(
+                    stops: [
+                        .init(color: Color.pebbles.onSurface, location: 0.86),
+                        .init(color: .clear, location: 1)
+                    ],
+                    startPoint: .leading, endPoint: .trailing
                 )
-            } else {
+            )
+        } else {
+            HStack(spacing: 0) {
                 pills
                 Spacer(minLength: 0)
             }
-            button
         }
-        .frame(minHeight: 48)
     }
 
     private var pills: some View {

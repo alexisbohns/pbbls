@@ -1,7 +1,7 @@
 import Foundation
 
 /// The held card's own copy (#1146 §Strings). Dotted keys, as `domain.*.name`,
-/// because "Moment" and "Your pebble" are already literal keys with other uses.
+/// because plain words like "Moment" collide with literal keys that have other uses.
 /// Reused copy (`Visibility.label` / `explanation`, `Valence.headline`, "Edit
 /// moment", "Edit pebble", "Delete", "Make it a pebble", "Share", "Back",
 /// "More") keeps its own keys. New pattern, named in the E1a PR.

@@ -21,6 +21,7 @@ struct ValenceStoneView: View {
     var lean: Lean?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.stoneSweeps) private var stoneSweeps
     /// When the current sweep started; nil when the stone is still.
     @State private var sweepStart: Date?
 
@@ -36,7 +37,7 @@ struct ValenceStoneView: View {
         // the stone whether or not the timeline is running.
         .frame(width: height * PebbleOutlineGeometry.aspectRatio(for: valence.sizeGroup), height: height)
         .onChange(of: isSelected, initial: true) { _, selected in
-            guard selected, !reduceMotion else {
+            guard selected, !reduceMotion, stoneSweeps else {
                 sweepStart = nil
                 return
             }

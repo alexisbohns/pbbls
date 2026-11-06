@@ -11,6 +11,9 @@ struct RecordMomentStep: View {
     let onChangePhoto: () -> Void
     let onRetry: () -> Void
     let onRemove: () -> Void
+    /// Reference renders only: ImageRenderer draws neither ScrollView content
+    /// nor TextFields, so a static page draws each field's text as a `Text`.
+    var drawsStaticFields = false
 
     /// The fields own their text so the clamp can write back into them: a
     /// computed `Binding` that truncates in its setter leaves the extra
@@ -25,8 +28,10 @@ struct RecordMomentStep: View {
     private static let countdownFrom = 40
 
     init(model: CaptureFlowModel, snap: FormSnap?, blockedMessage: String?,
-         onChangePhoto: @escaping () -> Void, onRetry: @escaping () -> Void, onRemove: @escaping () -> Void) {
+         onChangePhoto: @escaping () -> Void, onRetry: @escaping () -> Void, onRemove: @escaping () -> Void,
+         drawsStaticFields: Bool = false) {
         self.model = model
+        self.drawsStaticFields = drawsStaticFields
         self.snap = snap
         self.blockedMessage = blockedMessage
         self.onChangePhoto = onChangePhoto
@@ -42,18 +47,22 @@ struct RecordMomentStep: View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
             photoRow
             field("NAME") {
-                TextField("Name", text: $name, axis: .vertical)
-                    .lineLimit(1...2)
-                    .pebblesFont(.nameInputHand)
-                    .focused($focus, equals: .name)
-                    .submitLabel(.next)
-                    .onSubmit { focus = .words }
-                    .onChange(of: name) { _, value in
-                        let clamped = String(value.prefix(CaptureFlowModel.nameLimit))
-                        if clamped != value { name = clamped }
-                        model.setName(clamped)
-                    }
-                    .onChange(of: model.draft.name) { _, value in if value != name { name = value } }
+                if drawsStaticFields {
+                    staticField(name, placeholder: "Name").pebblesFont(.nameInputHand)
+                } else {
+                    TextField("Name", text: $name, axis: .vertical)
+                        .lineLimit(1...2)
+                        .pebblesFont(.nameInputHand)
+                        .focused($focus, equals: .name)
+                        .submitLabel(.next)
+                        .onSubmit { focus = .words }
+                        .onChange(of: name) { _, value in
+                            let clamped = String(value.prefix(CaptureFlowModel.nameLimit))
+                            if clamped != value { name = clamped }
+                            model.setName(clamped)
+                        }
+                        .onChange(of: model.draft.name) { _, value in if value != name { name = value } }
+                }
             }
             field("WHEN") {
                 RecordWhenChip(
@@ -63,16 +72,20 @@ struct RecordMomentStep: View {
             }
             field("A FEW WORDS") {
                 VStack(alignment: .trailing, spacing: Spacing.xs) {
-                    TextField("What happened?", text: $words, axis: .vertical)
-                        .lineLimit(3...6)
-                        .pebblesFont(.body)
-                        .focused($focus, equals: .words)
-                        .onChange(of: words) { _, value in
-                            let clamped = String(value.prefix(CaptureFlowModel.descriptionLimit))
-                            if clamped != value { words = clamped }
-                            model.setDescription(clamped)
-                        }
-                        .onChange(of: model.draft.description) { _, value in if value != words { words = value } }
+                    if drawsStaticFields {
+                        staticField(words, placeholder: "What happened?").pebblesFont(.body)
+                    } else {
+                        TextField("What happened?", text: $words, axis: .vertical)
+                            .lineLimit(3...6)
+                            .pebblesFont(.body)
+                            .focused($focus, equals: .words)
+                            .onChange(of: words) { _, value in
+                                let clamped = String(value.prefix(CaptureFlowModel.descriptionLimit))
+                                if clamped != value { words = clamped }
+                                model.setDescription(clamped)
+                            }
+                            .onChange(of: model.draft.description) { _, value in if value != words { words = value } }
+                    }
                     HStack {
                         Label { Text("+1 karma as a pebble") } icon: {
                             PbblsIconImage(.karmaDot, size: 14, relativeTo: .caption,
@@ -103,6 +116,17 @@ struct RecordMomentStep: View {
             }
         }
         .onAppear { if snap == nil { focus = .name } }
+    }
+
+    /// The text a field holds, or its placeholder in the placeholder colour.
+    @ViewBuilder
+    private func staticField(_ text: String, placeholder: LocalizedStringResource) -> some View {
+        if text.isEmpty {
+            Text(placeholder).foregroundStyle(Color.pebbles.onSurfaceVariant)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            Text(verbatim: text).frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     private func field<Content: View>(_ label: LocalizedStringResource,

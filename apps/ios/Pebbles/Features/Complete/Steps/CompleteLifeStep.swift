@@ -1,23 +1,23 @@
 import SwiftUI
 
 /// What part of life (record-flow D10, Margin treatment): RECENT, then all
-/// 18 as a two-column list of glyph + name, the last tap's description in a
-/// caption bar, three at most. Beneath the list, sticky, "Who was there?"
-/// with the four most-tagged people and More.
+/// 18 as a two-column list of glyph + name. Beneath the list a tinted bar,
+/// pinned: the last tap's description once there is one, "Who was there?"
+/// with the four most-tagged people and More, then "Make it a pebble".
 struct CompleteLifeStep: View {
     let model: CompleteFlowModel
+    let onComplete: () -> Void
+    /// Reference renders only: ImageRenderer draws neither ScrollView content nor TextFields.
+    var scrolls = true
 
     @Environment(ReferenceDataService.self) private var refs
     @Environment(SupabaseService.self) private var supabase
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var lastTapped: Domain?
     @State private var showsPicker = false
 
-    /// The scaffold floats the "Make it a pebble" pill over the bottom of
-    /// this content, `Spacing.lg` off the edge; the strip keeps the pill's
-    /// height (scaled as `PebblesPrimaryButtonStyle` scales it) plus one more
-    /// gutter clear so the pill never covers a tile.
-    @ScaledMetric(relativeTo: .body) private var buttonHeight: CGFloat = 52
-    private var floatingActionClearance: CGFloat { buttonHeight + 2 * Spacing.lg }
+    /// How far the list dissolves into the bar instead of clipping at it.
+    private let edgeFade: CGFloat = Spacing.xl
 
     private var recent: [Domain] {
         guard let owner = supabase.session?.user.id else { return [] }
@@ -27,34 +27,17 @@ struct CompleteLifeStep: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.md) {
-                    if !recent.isEmpty {
-                        sectionLabel("RECENT")
-                        grid(recent)
-                    }
-                    sectionLabel("ALL")
-                    grid(refs.domains)
-                }
-                .padding(.bottom, Spacing.lg)
+            if scrolls {
+                ScrollView { domainsList }
+                    .contentMargins(.bottom, edgeFade, for: .scrollContent)
+                    .scrollBounceBehavior(.basedOnSize)
+                    .mask(fadeMask)
+            } else {
+                domainsList
+                    .padding(.bottom, edgeFade)
+                    .frame(maxHeight: .infinity, alignment: .top)
             }
-            .scrollBounceBehavior(.basedOnSize)
-            captionBar
-            VStack(spacing: 0) {
-                UsualSoulsStrip(souls: refs.souls, selection: model.draft.soulIds,
-                                onToggle: { model.toggleSoul($0) }, onMore: { showsPicker = true })
-                    .padding(.vertical, Spacing.sm)
-                if let error = model.completeError {
-                    Text(verbatim: error)
-                        .pebblesFont(.callout)
-                        .foregroundStyle(Color.pebbles.error)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                        .padding(.bottom, Spacing.sm)
-                }
-            }
-            .padding(.bottom, floatingActionClearance)
-            .background(Color.pebbles.surface)
+            bar
         }
         .task { await refs.refreshSouls() }
         .sheet(isPresented: $showsPicker) {
@@ -63,12 +46,34 @@ struct CompleteLifeStep: View {
         }
     }
 
+    private var fadeMask: some View {
+        VStack(spacing: 0) {
+            Color.pebbles.onSurface
+            LinearGradient(colors: [Color.pebbles.onSurface, .clear], startPoint: .top, endPoint: .bottom)
+                .frame(height: edgeFade)
+        }
+    }
+
+    private var domainsList: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            if !recent.isEmpty {
+                sectionLabel("RECENT")
+                grid(recent)
+            }
+            sectionLabel("ALL")
+            grid(refs.domains)
+        }
+        .padding(.horizontal, Spacing.lg)
+    }
+
     private func sectionLabel(_ text: LocalizedStringResource) -> some View {
         Text(text).pebblesFont(.meta).foregroundStyle(Color.pebbles.onSurfaceVariant)
     }
 
     private func grid(_ domains: [Domain]) -> some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: Spacing.sm), GridItem(.flexible(), spacing: Spacing.sm)],
+        // One column at accessibility sizes: a half-width tile truncates every name.
+        let columns = typeSize.isAccessibilitySize ? 1 : 2
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.sm), count: columns),
                   spacing: Spacing.sm) {
             ForEach(domains) { domain in
                 let isSelected = model.draft.domainIds.contains(domain.id)
@@ -77,7 +82,7 @@ struct CompleteLifeStep: View {
                     model.toggleDomain(domain.id)
                 } label: {
                     HStack(spacing: Spacing.sm) {
-                        GlyphView(case: isSelected ? .selected : .default, strokes: domain.strokes, side: 40)
+                        GlyphView(case: isSelected ? .selected : .default, strokes: domain.strokes, side: 28)
                             .accessibilityHidden(true)
                         Text(verbatim: domain.localizedName)
                             .pebblesFont(isSelected ? .bodyEmphasized : .body)
@@ -86,7 +91,7 @@ struct CompleteLifeStep: View {
                         Spacer(minLength: 0)
                     }
                     .padding(.horizontal, Spacing.sm)
-                    .frame(minHeight: 52)
+                    .frame(minHeight: 44)
                     .background(RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(isSelected ? Color.pebbles.primaryContainer : Color.pebbles.surfaceContainerLow))
                     .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -99,13 +104,42 @@ struct CompleteLifeStep: View {
         }
     }
 
-    /// The one-line description of the last tap; empty keeps the height.
-    private var captionBar: some View {
-        Text(verbatim: lastTapped?.localizedLabel ?? " ")
+    /// The pinned bar under the list. Its own tint and a hairline are what
+    /// make the list's end read as the list's end rather than a cut.
+    private var bar: some View {
+        VStack(spacing: Spacing.sm) {
+            if let lastTapped {
+                caption(lastTapped)
+            }
+            UsualSoulsStrip(souls: refs.souls, selection: model.draft.soulIds,
+                            onToggle: { model.toggleSoul($0) }, onMore: { showsPicker = true })
+            if let error = model.completeError {
+                Text(verbatim: error)
+                    .pebblesFont(.callout)
+                    .foregroundStyle(Color.pebbles.error)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+            }
+            Button("Make it a pebble", action: onComplete)
+                .buttonStyle(PebblesPrimaryButtonStyle(isLoading: model.isCompleting))
+                .disabled(!model.draft.isComplete || model.isCompleting)
+        }
+        .padding(.horizontal, Spacing.lg)
+        .padding(.top, Spacing.sm)
+        .padding(.bottom, Spacing.sm)
+        .background(Color.pebbles.surfaceContainerLow.ignoresSafeArea(edges: .bottom))
+        .overlay(alignment: .top) {
+            Rectangle().fill(Color.pebbles.outlineVariant).frame(height: 0.5)
+        }
+    }
+
+    /// The one-line description of the last tap. Absent until the first tap
+    /// rather than a blank line reserving its height: the bar is tall enough.
+    private func caption(_ domain: Domain) -> some View {
+        Text(verbatim: domain.localizedLabel)
             .pebblesFont(.subhead)
             .foregroundStyle(Color.pebbles.onSurfaceVariant)
             .lineLimit(1)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, Spacing.xs)
     }
 }
