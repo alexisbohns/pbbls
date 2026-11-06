@@ -186,7 +186,11 @@ class CompleteFlowViewModel
             }
             val known =
                 if (refs.hasLoaded) {
-                    KnownDraftIds(soulIds = refs.souls.map { it.id }.toSet(), collectionIds = refs.collections.map { it.id }.toSet())
+                    KnownDraftIds(
+                        domainIds = refs.domains.map { it.id }.toSet(),
+                        soulIds = refs.souls.map { it.id }.toSet(),
+                        collectionIds = refs.collections.map { it.id }.toSet(),
+                    )
                 } else {
                     null
                 }
@@ -249,7 +253,6 @@ class CompleteFlowViewModel
                         .fold(
                             onSuccess = { pebbleId ->
                                 snapshots.clear(id)
-                                userId?.let { memory.recordDomains(answers.domainIds, it) }
                                 // Path shows the moment's week when it is next on screen (R14).
                                 focusRequests.request(id)
                                 val (delta, glyph) =
@@ -269,6 +272,11 @@ class CompleteFlowViewModel
                                 if (!quiet) {
                                     karma.notifyEarned(delta ?: 0, KarmaReason.PEBBLE_CREATED, presentsCapsule = false)
                                     achievements.fireCheck()
+                                }
+                                // A recents write must never stand between a made pebble and its end screen.
+                                userId?.let { owner ->
+                                    runCatchingCancellable { memory.recordDomains(answers.domainIds, owner) }
+                                        .onFailure { Log.w(TAG, "recording recent domains failed", it) }
                                 }
                                 model.succeed(CompleteResult(pebbleId, delta, glyph), quiet)
                             },

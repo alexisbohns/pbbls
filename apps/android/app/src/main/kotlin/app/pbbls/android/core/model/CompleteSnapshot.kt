@@ -43,7 +43,10 @@ data class CompleteSnapshot(
         PebbleAnswers(
             valence = Valence.orNull(positiveness, intensity),
             emotionId = emotionId,
-            domainIds = domainIds.ifEmpty { listOfNotNull(legacyDomainId) },
+            domainIds =
+                domainIds
+                    .ifEmpty { listOfNotNull(legacyDomainId) }
+                    .filter { known == null || it in known.domainIds },
             soulIds = if (known == null) soulIds else soulIds.filter { it in known.soulIds },
             collectionId = collectionId?.takeIf { known == null || it in known.collectionIds },
             visibility = visibility ?: Visibility.SECRET,

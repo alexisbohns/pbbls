@@ -36,8 +36,34 @@ class CompleteSnapshotTest {
     }
 
     @Test
+    fun `a domain that is gone is dropped on restore, and unknown reference data keeps every id`() {
+        val known = KnownDraftIds(domainIds = setOf("d-2"), soulIds = emptySet(), collectionIds = emptySet())
+        assertEquals(listOf("d-2"), CompleteSnapshot.from(answers).toAnswers(known).domainIds)
+        assertEquals(listOf("d-1", "d-2"), CompleteSnapshot.from(answers).toAnswers(known = null).domainIds)
+    }
+
+    @Test
+    fun `a restored draft that loses its only domain is not complete`() {
+        val only = PebbleAnswers(valence = Valence.LOWLIGHT_SMALL, emotionId = "e-1", domainIds = listOf("d-gone"))
+        val known = KnownDraftIds(domainIds = setOf("d-1"), soulIds = emptySet(), collectionIds = emptySet())
+        val restored = CompleteSnapshot.from(only).toAnswers(known)
+        assertEquals(emptyList<String>(), restored.domainIds)
+        assertFalse(restored.isComplete)
+        val model =
+            app.pbbls.android.features.path.complete
+                .CompleteFlowModel(haptic = {})
+        model.resume(restored)
+        assertEquals(app.pbbls.android.features.path.complete.CompleteStep.LIFE, model.step)
+        assertFalse(model.state.value.isAnswered)
+    }
+
+    @Test
     fun `restoring drops souls and collections that no longer exist`() {
-        val restored = CompleteSnapshot.from(answers).toAnswers(KnownDraftIds(soulIds = setOf("s-1"), collectionIds = emptySet()))
+        val restored =
+            CompleteSnapshot
+                .from(
+                    answers,
+                ).toAnswers(KnownDraftIds(domainIds = setOf("d-1", "d-2"), soulIds = setOf("s-1"), collectionIds = emptySet()))
         assertEquals(listOf("s-1"), restored.soulIds)
         assertNull(restored.collectionId)
     }
