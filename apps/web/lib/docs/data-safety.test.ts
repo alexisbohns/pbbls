@@ -7,6 +7,8 @@ import { getAllLocaleContent, getDocsManifest } from "./load-docs"
 // change to what the app collects updates the form, this page and the privacy
 // policy together (CLAUDE.md, "Store privacy declarations").
 const CSV_PATH = join(__dirname, "../../../../docs/compliance/play-data-safety.csv")
+// The iOS privacy manifest, which the App Store privacy labels mirror.
+const MANIFEST_PATH = join(__dirname, "../../../ios/Pebbles/Resources/PrivacyInfo.xcprivacy")
 
 type Row = { question: string; response: string; value: string }
 
@@ -139,5 +141,87 @@ describe("the Data safety page", () => {
       expect(slugs).toContain(slug)
       for (const page of Object.values(pages)) expect(page.html).toContain(`href="/docs/${slug}"`)
     }
+  })
+})
+
+// Play's data types and purposes in Apple's vocabulary. A type or purpose Play
+// declares that is missing here fails the test below: map it, then declare it in
+// the manifest.
+const APPLE_TYPE: Record<string, string> = {
+  PSL_NAME: "Name",
+  PSL_EMAIL: "EmailAddress",
+  PSL_USER_ACCOUNT: "UserID",
+  PSL_PHOTOS: "PhotosorVideos",
+  PSL_VIDEOS: "PhotosorVideos",
+  PSL_AUDIO: "AudioData",
+  PSL_HEALTH: "Health",
+  PSL_FITNESS: "Fitness",
+  PSL_USER_INTERACTION: "ProductInteraction",
+  PSL_USER_GENERATED_CONTENT: "OtherUserContent",
+  PSL_OTHER_APP_ACTIVITY: "OtherDataTypes",
+  PSL_CRASH_LOGS: "CrashData",
+  PSL_PERFORMANCE_DIAGNOSTICS: "PerformanceData",
+  PSL_APPROX_LOCATION: "CoarseLocation",
+  PSL_PRECISE_LOCATION: "PreciseLocation",
+  PSL_CONTACTS: "Contacts",
+}
+
+const APPLE_PURPOSE: Record<string, string> = {
+  PSL_APP_FUNCTIONALITY: "AppFunctionality",
+  PSL_ACCOUNT_MANAGEMENT: "AppFunctionality",
+  PSL_ANALYTICS: "Analytics",
+  PSL_PERSONALIZATION: "ProductPersonalization",
+  PSL_ADVERTISING: "ThirdPartyAdvertising",
+  PSL_DEVELOPER_COMMUNICATIONS: "DeveloperAdvertising",
+}
+
+type AppleEntry = { type: string; linked: boolean; tracking: boolean; purposes: string[] }
+
+function readManifest(): { tracking: boolean; entries: AppleEntry[] } {
+  const xml = readFileSync(MANIFEST_PATH, "utf8").replace(/<!--[\s\S]*?-->/g, "")
+  const start = xml.indexOf("<key>NSPrivacyCollectedDataTypes</key>")
+  const body = xml.slice(start)
+  const entries = [...body.matchAll(/<dict>([\s\S]*?)<\/dict>/g)].map(([, dict = ""]) => ({
+    type: dict.match(/<string>NSPrivacyCollectedDataType(\w+)<\/string>/)?.[1] ?? "",
+    linked: /<key>NSPrivacyCollectedDataTypeLinked<\/key>\s*<true\/>/.test(dict),
+    tracking: /<key>NSPrivacyCollectedDataTypeTracking<\/key>\s*<true\/>/.test(dict),
+    purposes: [...dict.matchAll(/<string>NSPrivacyCollectedDataTypePurpose(\w+)<\/string>/g)].map(([, p = ""]) => p),
+  }))
+  return { tracking: /<key>NSPrivacyTracking<\/key>\s*<true\/>/.test(xml), entries }
+}
+
+describe("the App Store privacy labels (iOS privacy manifest)", () => {
+  const form = readForm()
+  const declared = form.filter((row) => row.question.startsWith("PSL_DATA_TYPES_") && row.value === "true").map((row) => row.response)
+  const manifest = readManifest()
+
+  it("declares no tracking, and every type as linked to the person", () => {
+    expect(manifest.tracking).toBe(false)
+    for (const entry of manifest.entries) {
+      expect(entry.tracking, `${entry.type} tracking`).toBe(false)
+      expect(entry.linked, `${entry.type} linked`).toBe(true)
+    }
+  })
+
+  it("declares the same data types as the Play form", () => {
+    for (const type of declared) expect(APPLE_TYPE[type], `${type} has no Apple data type in APPLE_TYPE`).toBeDefined()
+    const types = manifest.entries.map((entry) => entry.type)
+    expect(new Set(types).size).toBe(types.length)
+    expect(new Set(types)).toEqual(new Set(declared.map((type) => APPLE_TYPE[type])))
+  })
+
+  it("gives each type the purposes the Play form gives it", () => {
+    const expected = new Map<string, Set<string>>()
+    for (const type of declared) {
+      const purposes = form
+        .filter((row) => row.question === `PSL_DATA_USAGE_RESPONSES:${type}:DATA_USAGE_COLLECTION_PURPOSE` && row.value === "true")
+        .map((row) => row.response)
+      for (const purpose of purposes) expect(APPLE_PURPOSE[purpose], `${purpose} has no Apple purpose in APPLE_PURPOSE`).toBeDefined()
+      const apple = APPLE_TYPE[type] ?? ""
+      const set = expected.get(apple) ?? new Set<string>()
+      for (const purpose of purposes) set.add(APPLE_PURPOSE[purpose] ?? "")
+      expected.set(apple, set)
+    }
+    for (const entry of manifest.entries) expect(new Set(entry.purposes), entry.type).toEqual(expected.get(entry.type))
   })
 })

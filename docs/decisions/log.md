@@ -1954,3 +1954,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Every web, iOS and Android user meets the consent gate again for all four acts after their next update; older native builds keep recording 1.4.0 until they update. Removed photo files are cleaned up by the client on a best-effort basis (#322), so the policy does not promise that a removed photo's file is erased at once.
 - **Supersedes / Superseded-by:** none.
 - **Refs:** #1595, #1593, the 2026-11-02 and 2026-11-07 entries.
+
+## 2026-11-07 — The iOS privacy manifest is the source for the App Store privacy labels, and it must match the Play form
+
+- **Status:** taken
+- **Scope:** ios
+- **Context:** The Play Data safety answers live in the repo since #1593, but the App Store labels were filled by hand with nothing tying them to anything. The iOS manifest already declared collected data types in Apple's vocabulary, without the Analytics purpose of the internal statistics or the onboarding answers.
+- **Decision:** `apps/ios/Pebbles/Resources/PrivacyInfo.xcprivacy` is what the App Store labels mirror; App Store Connect has no import, so they are copied from it by hand. `lib/docs/data-safety.test.ts` maps Play's types and purposes to Apple's and fails unless the manifest declares exactly the mapped types with exactly the mapped purposes, linked and never tracking. The onboarding answers are `OtherDataTypes` (Play's "Other actions") with Product Personalization; Play's Account management folds into App Functionality, which Apple uses for authentication.
+- **Why:** The manifest ships in the bundle and Xcode builds the privacy report from it, so it is the one Apple-side declaration that changes in the same PR as the code; a test against the Play CSV keeps the two stores from telling different stories.
+- **Consequences:** The App Store labels must be updated by hand whenever the manifest's collected types change, before App Store submission (TestFlight internal testing does not need them). Apple has one Photos or Videos type, so declaring videos on Play changes nothing in the manifest's types.
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #1601, #1593.
