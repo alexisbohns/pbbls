@@ -1,39 +1,52 @@
 # iOS privacy inventory
 
-The bridge between three things that must agree and have no automatic link:
+The bridge between the things that must agree:
 
 1. **`PrivacyInfo.xcprivacy`** in each shippable bundle — Xcode aggregates these
-   into the archive's Privacy Report.
-2. **The App Store Connect privacy questionnaire** — filled in by hand, per release.
-3. **The published privacy policy** (`apps/web/docs/privacy/{en,fr}.md`) — the
-   promise users actually read.
+   into the archive's Privacy Report. It is the source for 2.
+2. **The App Store Connect privacy labels** (App Privacy) — copied from 1 by hand;
+   Apple has no import.
+3. **The Play Data safety form** (`docs/compliance/play-data-safety.csv`) — the
+   Android side of the same answers.
+4. **The published privacy policy** (`apps/web/docs/privacy/{en,fr}.md`) and the
+   plain-words page `/docs/data-safety`.
 
-`Scripts/verify-privacy-manifests.mjs` (CI, `ios.yml`) enforces 1 mechanically.
-Nothing enforces 2 or 3, which is what this file is for.
+`Scripts/verify-privacy-manifests.mjs` (CI, `ios.yml`) checks the required-reason
+half of 1 against the Swift sources. `apps/web/lib/docs/data-safety.test.ts` checks
+the collected-data half of 1 against 3: the same types and the same purposes,
+linked and never tracking. Nothing checks 2 (copied by hand) or the policy's
+wording, which is what this file and CLAUDE.md's "Store privacy declarations" are
+for.
 
-Verified at `main` on 2026-09-04.
+Verified at `main` on 2026-11-07. The App Store labels were published from the
+manifest the same day.
 
 ## 1. Declared collected data types
 
 Every row is `Linked = true` (tied to the account) and `Tracking = false`
-(nothing is shared with data brokers or used for cross-app advertising), with
-purpose `AppFunctionality`. The app has no advertising SDK, no IDFA, and no
-AppTrackingTransparency prompt.
+(nothing is shared with data brokers or used for cross-app advertising). The app
+has no advertising SDK, no IDFA, and no AppTrackingTransparency prompt.
 
-| `NSPrivacyCollectedDataType…` | What produces it | ASC form answer | Policy section |
-|---|---|---|---|
-| `…EmailAddress` | Account creation and sign-in (Supabase Auth, `auth.users`) | Contact Info → Email Address | §2.1 Account Data |
-| `…Name` | Profile full name and avatar; soul names the user types | Contact Info → Name | §2.1 Account Data, §2.1 Souls |
-| `…UserID` | `profiles.id` and the Supabase session subject | Identifiers → User ID | §2.3 Session Tokens |
-| `…PhotosorVideos` | Snaps attached to a pebble (`ImagePipeline` → Supabase Storage); profile avatar | User Content → Photos or Videos | §2.1 Account Data |
-| `…OtherUserContent` | Free-text CBT responses (situation, thoughts, reactions, learnings), whispers | User Content → Other User Content | §2.1 Events |
-| `…Health` | Moods: 7-point rating, up to 38 emotion labels, up to 18 life-domain associations, intensity and impact | Health & Fitness → Health | §2.1 Moods and Decisions, §3.2, §4 |
-| `…ProductInteraction` | Bounce karma, achievements and progress, cairns | Usage Data → Product Interaction | §2.2 |
+Analytics means the statistics counted from our own database for the admin
+(daily users, retention, pebble volume, emotion and domain shares, onboarding
+answers), seen only as totals, with no analytics SDK (policy §3.3, §11.3). Counts
+over moods and emotions rest on the Article 9 consent (§4.2).
+
+| `NSPrivacyCollectedDataType…` | What produces it | ASC form answer | Purposes | Policy section |
+|---|---|---|---|---|
+| `…EmailAddress` | Account creation and sign-in (Supabase Auth, `auth.users`), including Google and Apple sign-in | Contact Info → Email Address | App Functionality | §2.1 Account Data, §2.4 |
+| `…Name` | Profile full name and avatar; soul names the user types | Contact Info → Name | App Functionality | §2.1 Account Data, §2.1 Souls |
+| `…UserID` | `profiles.id` and the Supabase session subject | Identifiers → User ID | App Functionality, Analytics | §2.3 Session Tokens, §3.3 |
+| `…PhotosorVideos` | Snaps attached to a pebble (`ImagePipeline` → Supabase Storage); profile avatar | User Content → Photos or Videos | App Functionality | §2.1 Account Data, §2.1 Photos |
+| `…OtherUserContent` | What the user writes and makes: moments and their names, souls, collections, glyphs, Lab reactions | User Content → Other User Content | App Functionality, Analytics | §2.1 Events |
+| `…Health` | Moods: emotions, intensity, positiveness and life domains | Health & Fitness → Health | App Functionality, Analytics | §2.1 Moods, §3.2, §4 |
+| `…ProductInteraction` | Bounce karma, achievements and progress, when the app is used | Usage Data → Product Interaction | App Functionality, Analytics | §2.2 |
+| `…OtherDataTypes` | Onboarding answers: why the person came and how often they would like to record (`complete_onboarding`); they choose the first prompt | Other Data → Other Data Types | App Functionality, Analytics, Product Personalization | §2.1 Onboarding Answers |
 
 ### Why `Health`
 
 The published policy qualifies moods and emotion labels as **GDPR Art. 9 health
-data** (`privacy/en.md:94`, §4.1: "data concerning mental health and psychological
+data** (`privacy/en.md` §4.1: "data concerning mental health and psychological
 well-being"). Apple's `Health` type covers "any other user provided health or
 medical data" — it is **not** gated on using HealthKit, and the app currently
 uses none (no `com.apple.developer.healthkit` entitlement; no HealthKit symbol
@@ -48,10 +61,9 @@ Consequences, accepted deliberately:
   nothing in the current architecture conflicts.
 - The nutrition label will show **Health & Fitness → Health**, linked to identity.
 
-The domain taxonomy in `domains.ts` mirrors `HKStateOfMind.Association` and
-`credits/en.md:57` already claims `HKStateOfMind` compatibility, so if the
-`StateOfMind` write ships later, this declaration already covers it — only the
-entitlement and the two `NSHealth*UsageDescription` keys would be added.
+If a HealthKit `StateOfMind` write ships later, this declaration already covers
+it: only the entitlement and the two `NSHealth*UsageDescription` keys would be
+added (and Play's Health apps declaration would change).
 
 ## 2. Deliberately not declared
 
@@ -113,10 +125,13 @@ the verification script.
 ## 6. Standing update rule
 
 A new SPM dependency, a new storage bucket, a new table holding a new *class* of
-personal data, or a new required-reason API call updates **this file and the
-manifests in the same change**. The script catches the required-reason half; the
-collected-data half and the ASC form have no automatic gate, which is why the
-rule is written down here.
+personal data, a new purpose, or a new required-reason API call updates **this
+file and the manifests in the same change**, together with the Play CSV, the
+`/docs/data-safety` page and the privacy policy (CLAUDE.md, "Store privacy
+declarations"). The script catches the required-reason half and
+`data-safety.test.ts` catches a manifest that drifts from the Play form; the App
+Store Connect labels have no automatic gate, so they are updated by hand from the
+manifest before the next App Store submission.
 
 ## 7. What none of this proves
 
