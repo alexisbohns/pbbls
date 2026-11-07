@@ -7,7 +7,7 @@ last_updated: 2026-11-07
 
 # What Pebbles collects
 
-This is the plain version of what we declare to Google Play in its Data safety form. The [Privacy Policy](/docs/privacy) is the full version.
+This is the plain version of what we declare to Google Play in its Data safety form and to the App Store in its privacy labels. The [Privacy Policy](/docs/privacy) is the full version.
 
 ## In short
 
@@ -50,6 +50,6 @@ This is the plain version of what we declare to Google Play in its Data safety f
 
 ## When this changes
 
-If Pebbles starts collecting something new, this page and the Data safety form change in the same update, and the Privacy Policy says what changed.
+If Pebbles starts collecting something new, this page, the Data safety form and the App Store labels change in the same update, and the Privacy Policy says what changed.
 
 Questions? Write to [ciao@pbbls.app](mailto:ciao@pbbls.app).

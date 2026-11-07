@@ -7,7 +7,7 @@ last_updated: 2026-11-07
 
 # Ce que Pebbles collecte
 
-Voici, en clair, ce que nous déclarons à Google Play dans son formulaire sur la sécurité des données. La [Politique de confidentialité](/docs/privacy) en est la version complète.
+Voici, en clair, ce que nous déclarons à Google Play dans son formulaire sur la sécurité des données, et à l'App Store dans ses étiquettes de confidentialité. La [Politique de confidentialité](/docs/privacy) en est la version complète.
 
 ## En bref
 
@@ -50,6 +50,6 @@ Voici, en clair, ce que nous déclarons à Google Play dans son formulaire sur l
 
 ## Quand cela change
 
-Si Pebbles se met à collecter quelque chose de nouveau, cette page et le formulaire de Google Play changent dans la même mise à jour, et la Politique de confidentialité indique ce qui a changé.
+Si Pebbles se met à collecter quelque chose de nouveau, cette page, le formulaire de Google Play et les étiquettes de l'App Store changent dans la même mise à jour, et la Politique de confidentialité indique ce qui a changé.
 
 Une question ? Écrivez à [ciao@pbbls.app](mailto:ciao@pbbls.app).

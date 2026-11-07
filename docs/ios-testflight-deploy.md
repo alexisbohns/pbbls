@@ -126,6 +126,20 @@ should read the last commit's title.
 
 ---
 
+## App Store privacy labels
+
+The labels in **App Store Connect → App Privacy** mirror the app's privacy
+manifest, `apps/ios/Pebbles/Resources/PrivacyInfo.xcprivacy` (the widget
+collects nothing). Every type there is *linked to the user* and *not used for
+tracking*; give each the purposes the manifest lists. Xcode's **Organizer →
+Archives → Generate Privacy Report** prints the same table from a build.
+
+The manifest is checked against the Play Data safety form
+(`docs/compliance/play-data-safety.csv`) by `apps/web/lib/docs/data-safety.test.ts`,
+so when one changes the other has to. TestFlight internal testing does not need
+the labels; App Store review does, so update them before submitting a build whose
+manifest changed.
+
 ## Troubleshooting
 
 | Symptom | Cause / fix |
