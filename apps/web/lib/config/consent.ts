@@ -6,7 +6,7 @@
  * document the person actually read, so an older row citing an older version is
  * correct, not stale.
  */
-export const CONSENT_DOCUMENT_VERSION = "1.4.0"
+export const CONSENT_DOCUMENT_VERSION = "1.5.0"
 
 /**
  * The Terms of Service version a `terms` act is recorded against. Pinned to the

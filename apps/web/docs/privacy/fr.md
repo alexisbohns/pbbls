@@ -2,9 +2,9 @@
 title: Politique de confidentialité
 locale: fr
 slug: privacy
-version: 1.4.0
-effective_date: 2026-10-07
-last_updated: 2026-11-06
+version: 1.5.0
+effective_date: 2026-11-07
+last_updated: 2026-11-07
 ---
 
 # Politique de Confidentialité de Pebbles
@@ -31,10 +31,12 @@ Alexis Bohn agit en tant que responsable du traitement au sens de l'article 4(7)
 
 Lors de votre inscription et utilisation de Pebbles, vous nous fournissez volontairement les données suivantes :
 
-- **Données de compte :** Votre nom complet, votre adresse email et votre avatar (photo de profil).
+- **Données de compte :** Votre nom complet, votre adresse email et votre avatar (photo de profil). Si vous vous connectez avec Google ou Apple, votre nom et votre adresse email proviennent de ce compte (voir la section 2.4).
 - **Événements :** Vos réponses en texte libre à des questions structurées (situation, émotions, pensées, réactions, apprentissages, retours) inspirées de la thérapie cognitive-comportementale (TCC).
 - **Humeurs (moods) :** Le type d'humeur enregistrée (humeur quotidienne ou émotion momentanée), votre évaluation sur une échelle de 7 points, jusqu'à 38 étiquettes d'émotions, jusqu'à 18 associations aux domaines de vie, et les scores d'intensité et d'impact.
 - **Souls :** Les prénoms ou noms des personnes auxquelles vous associez vos événements (données de tiers entrées par vos soins).
+- **Photos :** Les photos que vous ajoutez à vos galets. Elles sont stockées de manière privée dans votre compte, et vous êtes la seule personne à pouvoir les voir.
+- **Réponses d'accueil :** Si vous y répondez à votre arrivée, ce qui vous amène sur Pebbles et à quelle fréquence vous souhaitez enregistrer. Elles déterminent la première invitation que l'application vous propose. Les deux sont facultatives.
 
 ### 2.2 Données Générées par Votre Utilisation
 
@@ -55,6 +57,7 @@ Pour fonctionner et assurer votre sécurité, nous traitons :
 ### 2.4 Traitement par Tiers
 
 - **Polices de caractères :** Nous utilisons des polices auto-hébergées (Ysabeau OFL et system-ui). Aucune requête externe n'est faite à des CDN de polices.
+- **Connexion avec Google ou Apple :** Si vous choisissez de vous connecter avec votre compte Google ou Apple, cette entreprise confirme votre identité et nous transmet votre nom et votre adresse email. Elle n'est pas informée de ce que vous enregistrez dans Pebbles. Sa propre politique de confidentialité régit le compte que vous détenez chez elle.
 
 ### 2.5 Données Personnelles de Tiers
 
@@ -86,7 +89,7 @@ Vous pouvez retirer l'une comme l'autre à tout moment. La section 4.3 explique 
 
 Nous utilisons vos données sur la base de notre intérêt légitime pour :
 - **Sécurité :** Prévention des fraudes, authentification et maintien de la sécurité (journaux d'authentification).
-- **Amélioration de produit :** Analyse des agrégats anonymisés pour améliorer l'expérience utilisateur.
+- **Amélioration de produit et statistiques :** Des décomptes calculés à partir de notre propre base de données, par exemple le nombre de personnes qui utilisent Pebbles chaque jour, combien reviennent, combien de galets sont enregistrés, quelles émotions et quels domaines de vie reviennent le plus, et comment les questions d'accueil sont répondues. Seul le responsable du traitement les consulte, uniquement sous forme de totaux, et aucun outil d'analytics tiers n'intervient. Les décomptes qui incluent vos humeurs et vos émotions reposent sur votre consentement explicite (section 4.2).
 
 ### 3.4 Obligation Légale (Art. 6(1)(c))
 
@@ -103,7 +106,7 @@ Les humeurs, émotions et réflexions TCC que vous enregistrez dans Pebbles peuv
 Ces données ne sont traitées que :
 - Sur la base de votre consentement explicite, obtenu lors de la création de votre compte ;
 - Avec votre contrôle total sur qui y accède ;
-- Uniquement à des fins d'amélioration personnelle et de collecte de souvenirs.
+- Uniquement à des fins d'amélioration personnelle et de collecte de souvenirs, et pour produire les statistiques agrégées décrites à la section 3.3, qui ne montrent jamais les humeurs ou les émotions d'une personne en particulier.
 
 ### 4.3 Droit de Retrait
 
@@ -154,8 +157,9 @@ Nos polices de caractères sont auto-hébergées : aucune requête n'est adress�
 
 - Conservées jusqu'à la suppression de votre compte.
 - Effacées immédiatement et définitivement lors de cette suppression. Il n'existe aucun délai de grâce : un compte supprimé ne peut pas être restauré.
+- Il en va de même pour vos réponses d'accueil.
 
-### 7.2 Événements, Humeurs et Réponses
+### 7.2 Événements, Humeurs, Réponses et Photos
 
 - Conservées jusqu'à ce que vous supprimiez le galet concerné ou votre compte, selon ce qui intervient en premier. Rien ne les supprime automatiquement avec le temps.
 - Effacées immédiatement lorsque vous les supprimez.
@@ -242,7 +246,7 @@ Si nous apprenons qu'un compte appartient à une personne de moins de 16 ans, no
 ### 10.1 Mesures Techniques
 
 - **Row-Level Security (RLS) :** Chaque utilisateur ne peut accéder qu'à ses propres données via des politiques de sécurité Supabase.
-- **Authentification :** Authentification sécurisée via Supabase Auth avec email et mot de passe.
+- **Authentification :** Authentification sécurisée via Supabase Auth, avec email et mot de passe ou avec votre compte Google ou Apple.
 - **Chiffrement en Transit :** Toutes les connexions utilisent HTTPS.
 - **Chiffrement au Repos :** Les données sont chiffrées au repos via l'infrastructure Supabase.
 
@@ -270,7 +274,7 @@ En vertu de la directive ePrivacy (Art. 5(3)) et des lignes directrices CNIL, le
 ### 11.3 Pas d'Analytics, Pas de Publicité
 
 Pebbles n'utilise :
-- Aucun outil d'analytics (pas de Google Analytics, Matomo, ou similaire).
+- Aucun outil d'analytics (pas de Google Analytics, Matomo, ou similaire). Les statistiques décrites à la section 3.3 sont calculées à partir de notre propre base de données.
 - Aucun pixel de tracking ou outil de suivi.
 - Aucun cookie de publicité ou de ciblage.
 - Aucun cookie tiers.
@@ -313,9 +317,9 @@ Pour toute question, demande ou préoccupation concernant cette politique de con
 
 ---
 
-- **Version :** 1.4.0
-- **Date d'entrée en vigueur :** 7 octobre 2026
-- **Dernière mise à jour :** 6 novembre 2026
+- **Version :** 1.5.0
+- **Date d'entrée en vigueur :** 7 novembre 2026
+- **Dernière mise à jour :** 7 novembre 2026
 
 ---
 

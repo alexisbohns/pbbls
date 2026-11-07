@@ -61,7 +61,7 @@ struct ConsentGateLogicTests {
     /// Byte-identical to Android's fingerprint for the same versions.
     @Test("the fingerprint changes when any version changes")
     func fingerprint() {
-        #expect(ConsentGateLogic.fingerprint() == "terms@1.2.0,privacy@1.4.0,health_data@1.4.0,age_assurance@1.4.0")
+        #expect(ConsentGateLogic.fingerprint() == "terms@1.2.0,privacy@1.5.0,health_data@1.5.0,age_assurance@1.5.0")
     }
 
     /// Decisions log 2026-10-07 (#1032): `ios_settings` whatever the account type.

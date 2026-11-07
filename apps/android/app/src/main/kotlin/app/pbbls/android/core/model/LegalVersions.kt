@@ -11,5 +11,5 @@ package app.pbbls.android.core.model
  */
 object LegalVersions {
     const val TERMS = "1.2.0"
-    const val PRIVACY = "1.4.0"
+    const val PRIVACY = "1.5.0"
 }

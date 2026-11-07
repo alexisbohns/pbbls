@@ -1943,3 +1943,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** The App Store privacy labels are not in the repo yet and are updated by hand. The privacy policy does not yet list pebble photos or onboarding answers, and its "no analytics tools" section does not mention the internal statistics; both are owed.
 - **Supersedes / Superseded-by:** none.
 - **Refs:** #1593, #1591, #1443.
+
+## 2026-11-07 — Privacy policy 1.5.0 names the photos, onboarding answers, Google and Apple sign-in, and the internal statistics
+
+- **Status:** taken
+- **Scope:** all
+- **Context:** The Data safety form (#1593) declares pebble photos, onboarding answers and statistics counted from our own database, and the app offers Google and Apple sign-in. Policy 1.4.0 named none of them, said "no analytics tools" without mentioning the statistics, and described email and password as the only way to sign in.
+- **Decision:** The policy names all four in both languages and moves to `1.5.0` on web (`CONSENT_DOCUMENT_VERSION`), iOS and Android (`LegalVersions`) in one change, so everyone is asked again once. The statistics are a legitimate interest (Art. 6(1)(f)) for counts that hold no health data, and counts that include moods and emotions (the admin's emotion and domain shares) are added to the purposes of the Article 9 consent, which the re-prompt collects. Google and Apple are described as identity providers the user chooses, not as sub-processors.
+- **Why:** This changes what is processed and why, which is the bar the 2026-11-02 entry set for a bump, and a consent given to a policy that did not name a purpose does not cover it. One bump before launch is cheaper than several after it.
+- **Consequences:** Every web, iOS and Android user meets the consent gate again for all four acts after their next update; older native builds keep recording 1.4.0 until they update. Removed photo files are cleaned up by the client on a best-effort basis (#322), so the policy does not promise that a removed photo's file is erased at once.
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #1595, #1593, the 2026-11-02 and 2026-11-07 entries.
