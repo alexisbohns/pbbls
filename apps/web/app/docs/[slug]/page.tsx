@@ -24,11 +24,11 @@ export default async function DocsSlugPage({ params }: { params: Promise<{ slug:
     <Suspense
       fallback={
         <div className="mx-auto max-w-prose px-4 py-6">
-          <DocsContent content={content} />
+          <DocsContent content={content} category={page.category} />
         </div>
       }
     >
-      <DocsEmbed content={content} pages={manifest.pages} />
+      <DocsEmbed content={content} page={page} pages={manifest.pages} />
     </Suspense>
   )
 }
