@@ -34,14 +34,14 @@ const current = (): ActiveConsent[] => [
  * is asked for terms and privacy.
  */
 const ANDROID_SIGNUP_ROWS: unknown = JSON.parse(
-  '[{"kind":"health_data","document_version":"1.4.0"},' +
-    '{"kind":"age_assurance","document_version":"1.4.0"},' +
+  '[{"kind":"health_data","document_version":"1.5.0"},' +
+    '{"kind":"age_assurance","document_version":"1.5.0"},' +
     '{"kind":"terms","document_version":"1.2.0"},' +
-    '{"kind":"privacy","document_version":"1.4.0"}]',
+    '{"kind":"privacy","document_version":"1.5.0"}]',
 )
 const IOS_SIGNUP_ROWS: unknown = JSON.parse(
-  '[{"kind":"health_data","document_version":"1.4.0"},' +
-    '{"kind":"age_assurance","document_version":"1.4.0"}]',
+  '[{"kind":"health_data","document_version":"1.5.0"},' +
+    '{"kind":"age_assurance","document_version":"1.5.0"}]',
 )
 /**
  * The same Android signup, recorded against the documents before #779/#781

@@ -9,5 +9,5 @@ import Foundation
 /// policy. Mirrors Android's `core/model/LegalVersions.kt`.
 enum LegalVersions {
     static let terms = "1.2.0"
-    static let privacy = "1.4.0"
+    static let privacy = "1.5.0"
 }

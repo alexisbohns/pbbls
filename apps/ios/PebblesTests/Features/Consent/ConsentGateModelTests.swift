@@ -84,7 +84,7 @@ struct ConsentGateModelTests {
         #expect(consents.recordCalls.map(\.kind) == ConsentGateLogic.required)
         #expect(consents.recordCalls.allSatisfy { $0.source == "ios_settings" })
         #expect(consents.recordCalls.first { $0.kind == .terms }?.version == "1.2.0")
-        #expect(consents.recordCalls.first { $0.kind == .healthData }?.version == "1.4.0")
+        #expect(consents.recordCalls.first { $0.kind == .healthData }?.version == "1.5.0")
     }
 
     @Test("continue does nothing until every shown box is ticked")
