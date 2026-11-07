@@ -71,6 +71,16 @@
         "fr": "Supprimer une partie de vos données"
       },
       "path": "docs/delete-data/"
+    },
+    {
+      "slug": "data-safety",
+      "category": "support",
+      "order": 4,
+      "titles": {
+        "en": "What Pebbles collects",
+        "fr": "Ce que Pebbles collecte"
+      },
+      "path": "docs/data-safety/"
     }
   ]
 }

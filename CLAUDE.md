@@ -94,6 +94,13 @@ The maintainer's journal account (a non-admin Pebbles account, their public blog
 - `--title` ≤ 50 chars; `--journal` first person, 1–3 short sentences in plain words a reader gets. No PR numbers, file names, finding ids, secrets or user data: it is published.
 - If it fails on sign-in, tell the maintainer to check the journal credentials in `.env.journal` (see the script header). Never fall back to an admin account or the service role.
 
+## Store privacy declarations — check before wrapping up every task
+
+What the app collects is declared publicly in three places that must agree: the Play Data safety form (`docs/compliance/play-data-safety.csv`, exported from Play Console), the page that explains it (`apps/web/docs/data-safety/{en,fr}.md`, at `/docs/data-safety`), and the privacy policy. **Before opening a PR, check whether the change does any of these:** collects a new kind of user data (videos, audio, location, contacts…), adds an Android permission or an iOS usage description, adds an SDK or service that sends user data off the device, uses existing data for a new purpose (analytics, personalisation, ads), or shares it with someone new.
+
+- **If none:** write `Data safety: no change` in the PR body.
+- **If any:** in the same PR, set the answers in the CSV's `Response value` column, update the page (`lib/docs/data-safety.test.ts` fails until every declared type is described and nothing declared is listed as not collected), and update the privacy policy — new data or a new purpose bumps its version (decision log 2026-11-02). Write `Data safety: changed` in the PR body and tell the maintainer to import the CSV in Play Console (**Policy → App content → Data safety → Import from CSV**) and update the App Store privacy labels before that build ships.
+
 ## Editing CLAUDE.md / AGENTS.md
 
 These files load into every agent context, so they are the most token-precious docs in the repo — they must hold only durable, action-guiding rules, not a junk drawer of observations.

@@ -215,6 +215,13 @@ The same *Run workflow* button takes a **track** input:
   in the Data safety form (#1443). `closed` and `production` runs fail early if
   that page stops answering. The contact website is
   `https://www.pbbls.app/support` (#1442).
+- **Data safety form.** The answers live in
+  `docs/compliance/play-data-safety.csv`, the export from Play Console, and the
+  public page `/docs/data-safety` explains them (#1593). When a PR changes the
+  CSV, import it in **Policy → App content → Data safety → Import from CSV**
+  before the build that collects the new data is released; Play reviews the form
+  with that release. If you edit the form in the Console instead, export it and
+  commit the CSV so the repo stays the source.
 - **A draft is cheap to discard.** If you change your mind, delete the draft in
   the Console; its `versionCode` stays consumed, so the next run is simply
   higher.
