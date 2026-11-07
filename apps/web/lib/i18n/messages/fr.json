@@ -309,8 +309,18 @@
     "title": "Documentation",
     "navAria": "Documentation",
     "back": "Retour à l'application",
-    "lastUpdated": "Dernière mise à jour",
-    "languageAria": "Langue"
+    "languageAria": "Langue",
+    "indexLead": "Les textes légaux, et de l'aide pour votre compte.",
+    "updated": "Mis à jour le {date}",
+    "version": "version {version}",
+    "categories": {
+      "legal": "Légal",
+      "support": "Assistance"
+    },
+    "onThisPage": "Sur cette page",
+    "tocAria": "Sur cette page",
+    "openMenu": "Ouvrir le menu de la documentation",
+    "closeMenu": "Fermer le menu"
   },
   "offline": {
     "title": "Vous êtes hors ligne",
