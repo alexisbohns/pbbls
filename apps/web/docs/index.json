@@ -6,9 +6,14 @@
       "slug": "legal-notice",
       "category": "legal",
       "order": 1,
+      "icon": "sign",
       "titles": {
         "en": "Legal Notice",
         "fr": "Mentions légales"
+      },
+      "summaries": {
+        "en": "Who publishes Pebbles, and where.",
+        "fr": "Qui publie Pebbles, et où."
       },
       "path": "docs/legal-notice/"
     },
@@ -16,9 +21,14 @@
       "slug": "terms",
       "category": "legal",
       "order": 2,
+      "icon": "scale",
       "titles": {
         "en": "Terms of Service",
         "fr": "Conditions générales d'utilisation"
+      },
+      "summaries": {
+        "en": "The rules of using Pebbles.",
+        "fr": "Les règles d'utilisation de Pebbles."
       },
       "path": "docs/terms/"
     },
@@ -26,9 +36,14 @@
       "slug": "privacy",
       "category": "legal",
       "order": 3,
+      "icon": "key",
       "titles": {
         "en": "Privacy Policy",
         "fr": "Politique de confidentialité"
+      },
+      "summaries": {
+        "en": "What we keep, why, and your rights.",
+        "fr": "Ce que nous gardons, pourquoi, et vos droits."
       },
       "path": "docs/privacy/"
     },
@@ -36,9 +51,14 @@
       "slug": "credits",
       "category": "legal",
       "order": 4,
+      "icon": "sparkles",
       "titles": {
         "en": "Credits",
         "fr": "Crédits"
+      },
+      "summaries": {
+        "en": "The work Pebbles is built on.",
+        "fr": "Le travail sur lequel Pebbles repose."
       },
       "path": "docs/credits/"
     },
@@ -46,9 +66,14 @@
       "slug": "support",
       "category": "support",
       "order": 1,
+      "icon": "hand",
       "titles": {
         "en": "Support",
         "fr": "Assistance"
+      },
+      "summaries": {
+        "en": "How to reach us when you need help.",
+        "fr": "Comment nous joindre quand vous avez besoin d'aide."
       },
       "path": "docs/support/"
     },
@@ -56,9 +81,14 @@
       "slug": "delete-account",
       "category": "support",
       "order": 2,
+      "icon": "trash",
       "titles": {
         "en": "Delete your account",
         "fr": "Supprimer votre compte"
+      },
+      "summaries": {
+        "en": "Close your account and erase it.",
+        "fr": "Fermer votre compte et l'effacer."
       },
       "path": "docs/delete-account/"
     },
@@ -66,9 +96,14 @@
       "slug": "delete-data",
       "category": "support",
       "order": 3,
+      "icon": "broom",
       "titles": {
         "en": "Delete some of your data",
         "fr": "Supprimer une partie de vos données"
+      },
+      "summaries": {
+        "en": "Erase some things, keep the account.",
+        "fr": "Effacer certaines choses, garder le compte."
       },
       "path": "docs/delete-data/"
     },
@@ -76,9 +111,14 @@
       "slug": "data-safety",
       "category": "support",
       "order": 4,
+      "icon": "umbrella",
       "titles": {
         "en": "What Pebbles collects",
         "fr": "Ce que Pebbles collecte"
+      },
+      "summaries": {
+        "en": "Every kind of data the app collects.",
+        "fr": "Chaque type de donnée que l'app collecte."
       },
       "path": "docs/data-safety/"
     }

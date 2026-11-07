@@ -5,14 +5,10 @@ import { unified } from "unified"
 import remarkParse from "remark-parse"
 import remarkRehype from "remark-rehype"
 import rehypeStringify from "rehype-stringify"
+import { rehypeOutline, type Outline } from "./outline"
 import type { DocsLocale, DocsManifest, DocsPageContent } from "./types"
 
 const docsDir = path.join(process.cwd(), "docs")
-
-const processor = unified()
-  .use(remarkParse)
-  .use(remarkRehype)
-  .use(rehypeStringify)
 
 export function getDocsManifest(): DocsManifest {
   const raw = fs.readFileSync(path.join(docsDir, "index.json"), "utf-8")
@@ -35,10 +31,21 @@ export function getDocPage(slug: string, locale: DocsLocale): DocsPageContent {
   const filePath = path.join(docsDir, slug, `${locale}.md`)
   const raw = fs.readFileSync(filePath, "utf-8")
   const { data, content } = matter(raw)
-  const result = processor.processSync(content)
+  const frontmatter = stringifyDates(data) as DocsPageContent["frontmatter"]
+  // The page's `#` heading becomes the header's title and leaves the body;
+  // every `##` gets an id and a line in the table of contents.
+  const outline: Outline = { title: null, toc: [] }
+  const result = unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    .use(rehypeOutline, outline)
+    .use(rehypeStringify)
+    .processSync(content)
 
   return {
-    frontmatter: stringifyDates(data) as DocsPageContent["frontmatter"],
+    frontmatter,
+    title: outline.title ?? frontmatter.title,
+    toc: outline.toc,
     html: String(result),
   }
 }
