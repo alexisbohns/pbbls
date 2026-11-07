@@ -1932,3 +1932,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** The D6 snackbar, the D9 0.3 s beat and the D7 one-sentence lockup are on neither surface; they are one finding for both. iOS lost its first-moment achievement check when Quick moment moved to the page and does not prune a gone domain.
 - **Supersedes / Superseded-by:** none.
 - **Refs:** #1515, #1519, `docs/superpowers/plans/2026-11-06-android-record-flow-and-souls.md`.
+
+## 2026-11-07 — The Play Data safety answers live in the repo, and every task checks them
+
+- **Status:** taken
+- **Scope:** all
+- **Context:** The Data safety form was filled in the Play Console for the first time (#1593). It will need changing whenever a feature collects something new (videos and voice recordings are expected), and the Console keeps no history of why an answer was given.
+- **Decision:** The form's export, `docs/compliance/play-data-safety.csv`, is the source; the Console is updated by importing it. The public page `/docs/data-safety` explains it in plain words, and `lib/docs/data-safety.test.ts` fails unless every data type the form asks about is either described as collected or listed as not collected, matching the CSV. Every task checks at wrap-up whether it adds data, a permission, an SDK, a purpose or a recipient (CLAUDE.md, "Store privacy declarations"), and the PR body says `Data safety: no change` or `changed`. Internal statistics read from our own database (admin analytics) are declared as the Analytics purpose, and the moods as Health info, matching the privacy policy's Article 9 wording.
+- **Why:** The form is public on the store listing, so it can live in a public repo; in the repo it changes in the same PR as the feature, the page and the privacy policy, and a reviewer sees it.
+- **Consequences:** The App Store privacy labels are not in the repo yet and are updated by hand. The privacy policy does not yet list pebble photos or onboarding answers, and its "no analytics tools" section does not mention the internal statistics; both are owed.
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #1593, #1591, #1443.
