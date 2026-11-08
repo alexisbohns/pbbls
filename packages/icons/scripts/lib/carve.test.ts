@@ -31,4 +31,14 @@ describe("carveSolid", () => {
     expect(d).not.toMatch(/\d\.\d{3}/)
     expect(d.trim().endsWith("Z")).toBe(true)
   })
+
+  it("fills an open C-shaped body through its implicit closure", () => {
+    const { area } = carveSolid(["M8 4 C2 4 2 20 8 20 L16 20 C22 20 22 4 16 4"], [])
+    expect(area).toBeGreaterThan(150)
+  })
+
+  it("fills a ring that overshoots its start", () => {
+    const { area } = carveSolid(["M12 4 C18 4 20 8 20 12 C20 16 16 20 12 20 C8 20 4 16 4 12 C4 8 8 4 14 4.2"], [])
+    expect(area).toBeGreaterThan(200)
+  })
 })

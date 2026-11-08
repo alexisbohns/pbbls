@@ -45,18 +45,23 @@ export type Carved = {
 }
 
 /**
- * The solid form (spec D3, D8): the body's closed subpaths unioned and grown
- * by half the stroke, minus every other path inside the body outlined at the
- * stroke width with round caps.
+ * The solid form (spec D3, D8), as SVG paints a path that is filled and stroked:
+ * the body's subpaths, each implicitly closed for the fill and unioned, plus
+ * their stroke band (a line offset by half the stroke), minus every other path
+ * inside the fill, outlined at the stroke width with round caps.
  */
 export function carveSolid(body: readonly string[], others: readonly string[]): Carved {
-  const rings = body.flatMap((d) => flattenPath(d)).filter(isClosed).map((s) => toInt(s.points))
-  const region = boolean(ClipperLib.ClipType.ctUnion, rings, [])
-  const grown = offset(region, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon, HALF_STROKE)
+  const subs = body.flatMap((d) => flattenPath(d)).filter((s) => s.points.length >= 3)
+  const fill = boolean(ClipperLib.ClipType.ctUnion, subs.map((s) => toInt(s.points)), [])
+  const band = subs.flatMap((s) => {
+    const end = isClosed(s) ? ClipperLib.EndType.etClosedLine : ClipperLib.EndType.etOpenRound
+    return offset([toInt(s.points)], ClipperLib.JoinType.jtRound, end, HALF_STROKE)
+  })
+  const base = boolean(ClipperLib.ClipType.ctUnion, fill, band)
   const keep: number[] = []
   const cutters: IntPath[] = []
   others.forEach((d, i) => {
-    if (!inside(d, region)) {
+    if (!inside(d, fill)) {
       keep.push(i)
       return
     }
@@ -65,7 +70,7 @@ export function carveSolid(body: readonly string[], others: readonly string[]): 
       cutters.push(...offset([toInt(sub.points)], ClipperLib.JoinType.jtRound, end, HALF_STROKE))
     }
   })
-  const result = cutters.length > 0 ? boolean(ClipperLib.ClipType.ctDifference, grown, cutters) : grown
+  const result = cutters.length > 0 ? boolean(ClipperLib.ClipType.ctDifference, base, cutters) : base
   const area = result.reduce((sum, ring) => sum + ClipperLib.Clipper.Area(ring), 0) / (SCALE * SCALE)
   const d = result
     .filter((ring) => ring.length > 2)
