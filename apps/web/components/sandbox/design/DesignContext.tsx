@@ -2,6 +2,7 @@
 
 import { createContext, useContext } from "react"
 import type { CanvasZoom, DeviceChoice } from "@/lib/design/devices"
+import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import type { DesignTheme } from "@/lib/theme/design-theme"
 
 export interface DesignContextValue {
@@ -12,6 +13,9 @@ export interface DesignContextValue {
   devices: DeviceChoice
   /** The directory's content width in page pixels, for "fit". */
   canvasWidth: number
+  /** The Icons page's search and drawing size, set from the toolbar. */
+  iconQuery: string
+  iconSize: PbblsIconSize
 }
 
 const DesignContext = createContext<DesignContextValue | null>(null)

@@ -1,0 +1,6626 @@
+[
+ {
+  "name": "again-backward",
+  "hand": "h31",
+  "source": "again-v1",
+  "figure": "again",
+  "meaning": "try once more, replay",
+  "hasActive": true
+ },
+ {
+  "name": "stone-loop",
+  "hand": "h31",
+  "source": "again-v2",
+  "figure": "again",
+  "meaning": "try once more, replay",
+  "hasActive": true
+ },
+ {
+  "name": "stones-back",
+  "hand": "h31",
+  "source": "again-v3",
+  "figure": "again",
+  "meaning": "try once more, replay",
+  "hasActive": true
+ },
+ {
+  "name": "hourglass-shake",
+  "hand": "h31",
+  "source": "again-v4",
+  "figure": "again",
+  "meaning": "try once more, replay",
+  "hasActive": true
+ },
+ {
+  "name": "stone-repeat",
+  "hand": "h32",
+  "source": "again-v2",
+  "figure": "again",
+  "meaning": "try once more, replay",
+  "hasActive": true
+ },
+ {
+  "name": "backward-chevrons",
+  "hand": "h32",
+  "source": "again-v3",
+  "figure": "again",
+  "meaning": "try once more, replay",
+  "hasActive": true
+ },
+ {
+  "name": "again-forward",
+  "hand": "h33",
+  "source": "again-v1",
+  "figure": "again",
+  "meaning": "try once more, replay",
+  "hasActive": true
+ },
+ {
+  "name": "backward",
+  "hand": "h33",
+  "source": "again-v3",
+  "figure": "again",
+  "meaning": "try once more, replay",
+  "hasActive": true
+ },
+ {
+  "name": "ellipse-forward",
+  "hand": "h33",
+  "source": "again-v5",
+  "figure": "again",
+  "meaning": "try once more, replay",
+  "hasActive": true
+ },
+ {
+  "name": "paste-square",
+  "hand": "h31",
+  "source": "swap-v3",
+  "figure": "swap",
+  "meaning": "trade one thing for another",
+  "hasActive": true
+ },
+ {
+  "name": "swing-double",
+  "hand": "h31",
+  "source": "swap-v4",
+  "figure": "swap",
+  "meaning": "trade one thing for another",
+  "hasActive": true
+ },
+ {
+  "name": "people-send",
+  "hand": "h31",
+  "source": "swap-v5",
+  "figure": "swap",
+  "meaning": "trade one thing for another",
+  "hasActive": true
+ },
+ {
+  "name": "exchange-md",
+  "hand": "h32",
+  "source": "swap-v1",
+  "figure": "swap",
+  "meaning": "trade one thing for another",
+  "hasActive": true
+ },
+ {
+  "name": "stones-swap",
+  "hand": "h32",
+  "source": "swap-v2",
+  "figure": "swap",
+  "meaning": "trade one thing for another",
+  "hasActive": true
+ },
+ {
+  "name": "dots-cross",
+  "hand": "h32",
+  "source": "swap-v3",
+  "figure": "swap",
+  "meaning": "trade one thing for another",
+  "hasActive": true
+ },
+ {
+  "name": "swing-single",
+  "hand": "h32",
+  "source": "swap-v4",
+  "figure": "swap",
+  "meaning": "trade one thing for another",
+  "hasActive": true
+ },
+ {
+  "name": "stones-loop",
+  "hand": "h32",
+  "source": "swap-v5",
+  "figure": "swap",
+  "meaning": "trade one thing for another",
+  "hasActive": true
+ },
+ {
+  "name": "exchange-lg",
+  "hand": "h33",
+  "source": "swap-v1",
+  "figure": "swap",
+  "meaning": "trade one thing for another",
+  "hasActive": true
+ },
+ {
+  "name": "cycle-stones",
+  "hand": "h33",
+  "source": "swap-v2",
+  "figure": "swap",
+  "meaning": "trade one thing for another",
+  "hasActive": true
+ },
+ {
+  "name": "cycle-link",
+  "hand": "h33",
+  "source": "swap-v5",
+  "figure": "swap",
+  "meaning": "trade one thing for another",
+  "hasActive": true
+ },
+ {
+  "name": "upload-box",
+  "hand": "h31",
+  "source": "upload-v1",
+  "figure": "upload",
+  "meaning": "a photo on its way up: a status, not a button",
+  "hasActive": true
+ },
+ {
+  "name": "picture-speed",
+  "hand": "h31",
+  "source": "upload-v2",
+  "figure": "upload",
+  "meaning": "a photo on its way up: a status, not a button",
+  "hasActive": true
+ },
+ {
+  "name": "upload-half-circle",
+  "hand": "h31",
+  "source": "upload-v3",
+  "figure": "upload",
+  "meaning": "a photo on its way up: a status, not a button",
+  "hasActive": true
+ },
+ {
+  "name": "cloud-upload",
+  "hand": "h31",
+  "source": "upload-v4",
+  "figure": "upload",
+  "meaning": "a photo on its way up: a status, not a button",
+  "hasActive": true
+ },
+ {
+  "name": "stone-speed",
+  "hand": "h32",
+  "source": "upload-v2",
+  "figure": "upload",
+  "meaning": "a photo on its way up: a status, not a button",
+  "hasActive": true
+ },
+ {
+  "name": "picture-upload",
+  "hand": "h33",
+  "source": "upload-v1",
+  "figure": "upload",
+  "meaning": "a photo on its way up: a status, not a button",
+  "hasActive": true
+ },
+ {
+  "name": "picture-kite",
+  "hand": "h33",
+  "source": "upload-v2",
+  "figure": "upload",
+  "meaning": "a photo on its way up: a status, not a button",
+  "hasActive": true
+ },
+ {
+  "name": "disk-angle-up",
+  "hand": "h33",
+  "source": "upload-v4",
+  "figure": "upload",
+  "meaning": "a photo on its way up: a status, not a button",
+  "hasActive": true
+ },
+ {
+  "name": "arrow-up-lg",
+  "hand": "h31",
+  "source": "upvote-v1",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "people-upvote",
+  "hand": "h31",
+  "source": "upvote-v2",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "cairn-angle-up",
+  "hand": "h31",
+  "source": "upvote-v3",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "circle-angle-up",
+  "hand": "h32",
+  "source": "upvote-v1",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "thumbs-up",
+  "hand": "h32",
+  "source": "upvote-v2",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "golf-flag",
+  "hand": "h32",
+  "source": "upvote-v4",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "chevron-up-underline",
+  "hand": "h32",
+  "source": "upvote-v5",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "triangle-up-underline",
+  "hand": "h33",
+  "source": "upvote-v1",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "stack-chevrons-up",
+  "hand": "h33",
+  "source": "upvote-v2",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "stone-bounce",
+  "hand": "h33",
+  "source": "upvote-v3",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "sprout",
+  "hand": "h33",
+  "source": "upvote-v4",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "plus-one",
+  "hand": "h33",
+  "source": "upvote-v5",
+  "figure": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "hasActive": true
+ },
+ {
+  "name": "x-circle",
+  "hand": "h31",
+  "source": "load-failed-v1",
+  "figure": "load-failed",
+  "meaning": "something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set)",
+  "hasActive": true
+ },
+ {
+  "name": "stones-fall",
+  "hand": "h31",
+  "source": "load-failed-v2",
+  "figure": "load-failed",
+  "meaning": "something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set)",
+  "hasActive": true
+ },
+ {
+  "name": "hook-fish",
+  "hand": "h31",
+  "source": "load-failed-v5",
+  "figure": "load-failed",
+  "meaning": "something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set)",
+  "hasActive": true
+ },
+ {
+  "name": "x-half-circle",
+  "hand": "h32",
+  "source": "load-failed-v1",
+  "figure": "load-failed",
+  "meaning": "something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set)",
+  "hasActive": true
+ },
+ {
+  "name": "circle-broken",
+  "hand": "h33",
+  "source": "load-failed-v1",
+  "figure": "load-failed",
+  "meaning": "something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set)",
+  "hasActive": true
+ },
+ {
+  "name": "arrow-down-cut",
+  "hand": "h33",
+  "source": "load-failed-v3",
+  "figure": "load-failed",
+  "meaning": "something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set)",
+  "hasActive": true
+ },
+ {
+  "name": "circle-dot-exclamation",
+  "hand": "h33",
+  "source": "load-failed-v4",
+  "figure": "load-failed",
+  "meaning": "something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set)",
+  "hasActive": true
+ },
+ {
+  "name": "link-broken",
+  "hand": "h31",
+  "source": "link-broken-v1",
+  "figure": "link-broken",
+  "meaning": "something went wrong: a link that broke (error family)",
+  "hasActive": true
+ },
+ {
+  "name": "link-broken-2",
+  "hand": "h33",
+  "source": "link-broken-v1",
+  "figure": "link-broken",
+  "meaning": "something went wrong: a link that broke (error family)",
+  "hasActive": true
+ },
+ {
+  "name": "link-exclamation",
+  "hand": "h33",
+  "source": "link-broken-v4",
+  "figure": "link-broken",
+  "meaning": "something went wrong: a link that broke (error family)",
+  "hasActive": true
+ },
+ {
+  "name": "paper-plane-trail",
+  "hand": "h31",
+  "source": "page-gone-v5",
+  "figure": "page-gone",
+  "meaning": "something went wrong: a page that is gone (error family)",
+  "hasActive": true
+ },
+ {
+  "name": "square-bounce",
+  "hand": "h32",
+  "source": "page-gone-v3",
+  "figure": "page-gone",
+  "meaning": "something went wrong: a page that is gone (error family)",
+  "hasActive": true
+ },
+ {
+  "name": "rectangle-dashed",
+  "hand": "h32",
+  "source": "page-gone-v4",
+  "figure": "page-gone",
+  "meaning": "something went wrong: a page that is gone (error family)",
+  "hasActive": true
+ },
+ {
+  "name": "scroll",
+  "hand": "h31",
+  "source": "document-v2",
+  "figure": "document",
+  "meaning": "terms, a policy, a text to read",
+  "hasActive": true
+ },
+ {
+  "name": "memorial",
+  "hand": "h31",
+  "source": "document-v3",
+  "figure": "document",
+  "meaning": "terms, a policy, a text to read",
+  "hasActive": true
+ },
+ {
+  "name": "clipboard",
+  "hand": "h31",
+  "source": "document-v4",
+  "figure": "document",
+  "meaning": "terms, a policy, a text to read",
+  "hasActive": true
+ },
+ {
+  "name": "brochure",
+  "hand": "h31",
+  "source": "document-v5",
+  "figure": "document",
+  "meaning": "terms, a policy, a text to read",
+  "hasActive": true
+ },
+ {
+  "name": "file",
+  "hand": "h32",
+  "source": "document-v1",
+  "figure": "document",
+  "meaning": "terms, a policy, a text to read",
+  "hasActive": true
+ },
+ {
+  "name": "milestone",
+  "hand": "h32",
+  "source": "document-v4",
+  "figure": "document",
+  "meaning": "terms, a policy, a text to read",
+  "hasActive": true
+ },
+ {
+  "name": "hand-dot",
+  "hand": "h32",
+  "source": "privacy-v1",
+  "figure": "privacy",
+  "meaning": "a hand held up: what we keep for ourselves",
+  "hasActive": true
+ },
+ {
+  "name": "shield",
+  "hand": "h32",
+  "source": "privacy-v3",
+  "figure": "privacy",
+  "meaning": "a hand held up: what we keep for ourselves",
+  "hasActive": true
+ },
+ {
+  "name": "user-circle-lg",
+  "hand": "h31",
+  "source": "secret-v1",
+  "figure": "secret",
+  "meaning": "visibility: only me (a trio with private and public, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "eye-closed",
+  "hand": "h31",
+  "source": "secret-v4",
+  "figure": "secret",
+  "meaning": "visibility: only me (a trio with private and public, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "pond",
+  "hand": "h31",
+  "source": "secret-v5",
+  "figure": "secret",
+  "meaning": "visibility: only me (a trio with private and public, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "user-circle-sm",
+  "hand": "h33",
+  "source": "secret-v1",
+  "figure": "secret",
+  "meaning": "visibility: only me (a trio with private and public, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "users-circle",
+  "hand": "h31",
+  "source": "private-v1",
+  "figure": "private",
+  "meaning": "visibility: me and my circle (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "farandole",
+  "hand": "h31",
+  "source": "private-v2",
+  "figure": "private",
+  "meaning": "visibility: me and my circle (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "fruit-basket",
+  "hand": "h31",
+  "source": "private-v5",
+  "figure": "private",
+  "meaning": "visibility: me and my circle (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "people-3",
+  "hand": "h32",
+  "source": "private-v1",
+  "figure": "private",
+  "meaning": "visibility: me and my circle (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "stones-double-circle-open",
+  "hand": "h32",
+  "source": "private-v4",
+  "figure": "private",
+  "meaning": "visibility: me and my circle (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "stones-triple-circle",
+  "hand": "h33",
+  "source": "private-v1",
+  "figure": "private",
+  "meaning": "visibility: me and my circle (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "chat-dots",
+  "hand": "h33",
+  "source": "private-v4",
+  "figure": "private",
+  "meaning": "visibility: me and my circle (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "world",
+  "hand": "h31",
+  "source": "public-v1",
+  "figure": "public",
+  "meaning": "visibility: anyone (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "stone-emmit",
+  "hand": "h31",
+  "source": "public-v2",
+  "figure": "public",
+  "meaning": "visibility: anyone (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "eye-open",
+  "hand": "h31",
+  "source": "public-v4",
+  "figure": "public",
+  "meaning": "visibility: anyone (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "stone-mountain-shine",
+  "hand": "h31",
+  "source": "public-v5",
+  "figure": "public",
+  "meaning": "visibility: anyone (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "stone-ripples",
+  "hand": "h32",
+  "source": "public-v4",
+  "figure": "public",
+  "meaning": "visibility: anyone (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "stones-triple-circle-open",
+  "hand": "h33",
+  "source": "public-v1",
+  "figure": "public",
+  "meaning": "visibility: anyone (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "e",
+  "hand": "h33",
+  "source": "public-v2",
+  "figure": "public",
+  "meaning": "visibility: anyone (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "arche-cairn",
+  "hand": "h33",
+  "source": "public-v3",
+  "figure": "public",
+  "meaning": "visibility: anyone (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "megaphone-2",
+  "hand": "h33",
+  "source": "public-v4",
+  "figure": "public",
+  "meaning": "visibility: anyone (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "user-shine",
+  "hand": "h33",
+  "source": "public-v5",
+  "figure": "public",
+  "meaning": "visibility: anyone (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "jail",
+  "hand": "h31",
+  "source": "locked-v3",
+  "figure": "locked",
+  "meaning": "an achievement not yet earned; must read apart from secret",
+  "hasActive": true
+ },
+ {
+  "name": "keyhole",
+  "hand": "h31",
+  "source": "locked-v4",
+  "figure": "locked",
+  "meaning": "an achievement not yet earned; must read apart from secret",
+  "hasActive": true
+ },
+ {
+  "name": "gift-circle",
+  "hand": "h31",
+  "source": "locked-v5",
+  "figure": "locked",
+  "meaning": "an achievement not yet earned; must read apart from secret",
+  "hasActive": true
+ },
+ {
+  "name": "lock-rounded",
+  "hand": "h32",
+  "source": "locked-v1",
+  "figure": "locked",
+  "meaning": "an achievement not yet earned; must read apart from secret",
+  "hasActive": true
+ },
+ {
+  "name": "keyhole-circle",
+  "hand": "h32",
+  "source": "locked-v3",
+  "figure": "locked",
+  "meaning": "an achievement not yet earned; must read apart from secret",
+  "hasActive": true
+ },
+ {
+  "name": "lock",
+  "hand": "h33",
+  "source": "locked-v1",
+  "figure": "locked",
+  "meaning": "an achievement not yet earned; must read apart from secret",
+  "hasActive": true
+ },
+ {
+  "name": "keyhole-dot",
+  "hand": "h33",
+  "source": "locked-v3",
+  "figure": "locked",
+  "meaning": "an achievement not yet earned; must read apart from secret",
+  "hasActive": true
+ },
+ {
+  "name": "star-dotted",
+  "hand": "h33",
+  "source": "locked-v4",
+  "figure": "locked",
+  "meaning": "an achievement not yet earned; must read apart from secret",
+  "hasActive": true
+ },
+ {
+  "name": "stones-hexagon-new",
+  "hand": "h31",
+  "source": "invite-v2",
+  "figure": "invite",
+  "meaning": "bring someone into the circle",
+  "hasActive": true
+ },
+ {
+  "name": "envelope",
+  "hand": "h31",
+  "source": "invite-v3",
+  "figure": "invite",
+  "meaning": "bring someone into the circle",
+  "hasActive": true
+ },
+ {
+  "name": "ticket",
+  "hand": "h31",
+  "source": "invite-v4",
+  "figure": "invite",
+  "meaning": "bring someone into the circle",
+  "hasActive": true
+ },
+ {
+  "name": "coffee-2",
+  "hand": "h31",
+  "source": "invite-v5",
+  "figure": "invite",
+  "meaning": "bring someone into the circle",
+  "hasActive": true
+ },
+ {
+  "name": "user-plus-rounded",
+  "hand": "h32",
+  "source": "invite-v1",
+  "figure": "invite",
+  "meaning": "bring someone into the circle",
+  "hasActive": true
+ },
+ {
+  "name": "stones-new",
+  "hand": "h32",
+  "source": "invite-v2",
+  "figure": "invite",
+  "meaning": "bring someone into the circle",
+  "hasActive": true
+ },
+ {
+  "name": "stone-circle-arrow-in",
+  "hand": "h32",
+  "source": "invite-v5",
+  "figure": "invite",
+  "meaning": "bring someone into the circle",
+  "hasActive": true
+ },
+ {
+  "name": "user-plus-curve",
+  "hand": "h33",
+  "source": "invite-v1",
+  "figure": "invite",
+  "meaning": "bring someone into the circle",
+  "hasActive": true
+ },
+ {
+  "name": "stones-circle-arrow-in-left",
+  "hand": "h33",
+  "source": "invite-v2",
+  "figure": "invite",
+  "meaning": "bring someone into the circle",
+  "hasActive": true
+ },
+ {
+  "name": "stone-spiral-outside",
+  "hand": "h33",
+  "source": "invite-v4",
+  "figure": "invite",
+  "meaning": "bring someone into the circle",
+  "hasActive": true
+ },
+ {
+  "name": "stone-spiral-inside",
+  "hand": "h33",
+  "source": "invite-v5",
+  "figure": "invite",
+  "meaning": "bring someone into the circle",
+  "hasActive": true
+ },
+ {
+  "name": "compass-vertical",
+  "hand": "h31",
+  "source": "life-domain-v1",
+  "figure": "life-domain",
+  "meaning": "a compass, a territory, an area of one's life",
+  "hasActive": true
+ },
+ {
+  "name": "egg-fried",
+  "hand": "h31",
+  "source": "life-domain-v2",
+  "figure": "life-domain",
+  "meaning": "a compass, a territory, an area of one's life",
+  "hasActive": true
+ },
+ {
+  "name": "signs-soil",
+  "hand": "h31",
+  "source": "life-domain-v3",
+  "figure": "life-domain",
+  "meaning": "a compass, a territory, an area of one's life",
+  "hasActive": true
+ },
+ {
+  "name": "circle-quarters",
+  "hand": "h31",
+  "source": "life-domain-v4",
+  "figure": "life-domain",
+  "meaning": "a compass, a territory, an area of one's life",
+  "hasActive": true
+ },
+ {
+  "name": "flag-hill",
+  "hand": "h31",
+  "source": "life-domain-v5",
+  "figure": "life-domain",
+  "meaning": "a compass, a territory, an area of one's life",
+  "hasActive": true
+ },
+ {
+  "name": "signs",
+  "hand": "h32",
+  "source": "life-domain-v5",
+  "figure": "life-domain",
+  "meaning": "a compass, a territory, an area of one's life",
+  "hasActive": true
+ },
+ {
+  "name": "compass",
+  "hand": "h33",
+  "source": "life-domain-v1",
+  "figure": "life-domain",
+  "meaning": "a compass, a territory, an area of one's life",
+  "hasActive": true
+ },
+ {
+  "name": "hexagon-text",
+  "hand": "h33",
+  "source": "life-domain-v2",
+  "figure": "life-domain",
+  "meaning": "a compass, a territory, an area of one's life",
+  "hasActive": true
+ },
+ {
+  "name": "stones-plus",
+  "hand": "h33",
+  "source": "life-domain-v3",
+  "figure": "life-domain",
+  "meaning": "a compass, a territory, an area of one's life",
+  "hasActive": true
+ },
+ {
+  "name": "shop-showcase",
+  "hand": "h31",
+  "source": "market-v1",
+  "figure": "market",
+  "meaning": "where glyphs are traded",
+  "hasActive": true
+ },
+ {
+  "name": "scale-half",
+  "hand": "h31",
+  "source": "market-v2",
+  "figure": "market",
+  "meaning": "where glyphs are traded",
+  "hasActive": true
+ },
+ {
+  "name": "label",
+  "hand": "h31",
+  "source": "market-v3",
+  "figure": "market",
+  "meaning": "where glyphs are traded",
+  "hasActive": true
+ },
+ {
+  "name": "flag-mountains",
+  "hand": "h31",
+  "source": "market-v4",
+  "figure": "market",
+  "meaning": "where glyphs are traded",
+  "hasActive": true
+ },
+ {
+  "name": "shop-stone-k",
+  "hand": "h32",
+  "source": "market-v1",
+  "figure": "market",
+  "meaning": "where glyphs are traded",
+  "hasActive": true
+ },
+ {
+  "name": "shop-stone",
+  "hand": "h33",
+  "source": "market-v1",
+  "figure": "market",
+  "meaning": "where glyphs are traded",
+  "hasActive": true
+ },
+ {
+  "name": "label-stone",
+  "hand": "h33",
+  "source": "market-v4",
+  "figure": "market",
+  "meaning": "where glyphs are traded",
+  "hasActive": true
+ },
+ {
+  "name": "cycle-stone",
+  "hand": "h33",
+  "source": "market-v5",
+  "figure": "market",
+  "meaning": "where glyphs are traded",
+  "hasActive": true
+ },
+ {
+  "name": "orbit",
+  "hand": "h31",
+  "source": "hour-v3",
+  "figure": "hour",
+  "meaning": "a time of day, beside a date",
+  "hasActive": true
+ },
+ {
+  "name": "candle",
+  "hand": "h31",
+  "source": "hour-v5",
+  "figure": "hour",
+  "meaning": "a time of day, beside a date",
+  "hasActive": true
+ },
+ {
+  "name": "sundial",
+  "hand": "h32",
+  "source": "hour-v3",
+  "figure": "hour",
+  "meaning": "a time of day, beside a date",
+  "hasActive": true
+ },
+ {
+  "name": "stopwatch",
+  "hand": "h32",
+  "source": "hour-v4",
+  "figure": "hour",
+  "meaning": "a time of day, beside a date",
+  "hasActive": true
+ },
+ {
+  "name": "hour",
+  "hand": "h33",
+  "source": "hour-v1",
+  "figure": "hour",
+  "meaning": "a time of day, beside a date",
+  "hasActive": true
+ },
+ {
+  "name": "gauge-zoom",
+  "hand": "h33",
+  "source": "hour-v5",
+  "figure": "hour",
+  "meaning": "a time of day, beside a date",
+  "hasActive": true
+ },
+ {
+  "name": "blocked",
+  "hand": "h31",
+  "source": "block-v1",
+  "figure": "block",
+  "meaning": "stop someone from reaching you",
+  "hasActive": true
+ },
+ {
+  "name": "stones-stack",
+  "hand": "h31",
+  "source": "block-v2",
+  "figure": "block",
+  "meaning": "stop someone from reaching you",
+  "hasActive": true
+ },
+ {
+  "name": "worksite",
+  "hand": "h31",
+  "source": "block-v3",
+  "figure": "block",
+  "meaning": "stop someone from reaching you",
+  "hasActive": true
+ },
+ {
+  "name": "user-blocked",
+  "hand": "h31",
+  "source": "block-v4",
+  "figure": "block",
+  "meaning": "stop someone from reaching you",
+  "hasActive": true
+ },
+ {
+  "name": "user-forbidden",
+  "hand": "h32",
+  "source": "block-v1",
+  "figure": "block",
+  "meaning": "stop someone from reaching you",
+  "hasActive": true
+ },
+ {
+  "name": "crane",
+  "hand": "h32",
+  "source": "block-v3",
+  "figure": "block",
+  "meaning": "stop someone from reaching you",
+  "hasActive": true
+ },
+ {
+  "name": "stones-cross",
+  "hand": "h32",
+  "source": "block-v4",
+  "figure": "block",
+  "meaning": "stop someone from reaching you",
+  "hasActive": true
+ },
+ {
+  "name": "stones-forbidden",
+  "hand": "h33",
+  "source": "block-v1",
+  "figure": "block",
+  "meaning": "stop someone from reaching you",
+  "hasActive": true
+ },
+ {
+  "name": "stones-vertical-arrow-in",
+  "hand": "h33",
+  "source": "block-v2",
+  "figure": "block",
+  "meaning": "stop someone from reaching you",
+  "hasActive": true
+ },
+ {
+  "name": "bubbles-a",
+  "hand": "h31",
+  "source": "language-v1",
+  "figure": "language",
+  "meaning": "the tongue the app speaks; must read apart from public",
+  "hasActive": true
+ },
+ {
+  "name": "translation-a",
+  "hand": "h31",
+  "source": "language-v2",
+  "figure": "language",
+  "meaning": "the tongue the app speaks; must read apart from public",
+  "hasActive": true
+ },
+ {
+  "name": "circle-a",
+  "hand": "h31",
+  "source": "language-v4",
+  "figure": "language",
+  "meaning": "the tongue the app speaks; must read apart from public",
+  "hasActive": true
+ },
+ {
+  "name": "cube-a",
+  "hand": "h31",
+  "source": "language-v5",
+  "figure": "language",
+  "meaning": "the tongue the app speaks; must read apart from public",
+  "hasActive": true
+ },
+ {
+  "name": "bubble-a",
+  "hand": "h32",
+  "source": "language-v1",
+  "figure": "language",
+  "meaning": "the tongue the app speaks; must read apart from public",
+  "hasActive": true
+ },
+ {
+  "name": "users-communication",
+  "hand": "h33",
+  "source": "language-v4",
+  "figure": "language",
+  "meaning": "the tongue the app speaks; must read apart from public",
+  "hasActive": true
+ },
+ {
+  "name": "sun-shine-lg",
+  "hand": "h31",
+  "source": "appearance-light-v1",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "stone-shine",
+  "hand": "h31",
+  "source": "appearance-light-v2",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "sun-shine-sea",
+  "hand": "h31",
+  "source": "appearance-light-v4",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "flower-daisy",
+  "hand": "h31",
+  "source": "appearance-light-v5",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "sunrise-shine",
+  "hand": "h32",
+  "source": "appearance-light-v2",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "stone-lg",
+  "hand": "h32",
+  "source": "appearance-light-v3",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "toggle-off-label",
+  "hand": "h32",
+  "source": "appearance-light-v4",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "sidebar",
+  "hand": "h32",
+  "source": "appearance-light-v5",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "sun-shine-md",
+  "hand": "h33",
+  "source": "appearance-light-v1",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "lightbulb-shine",
+  "hand": "h33",
+  "source": "appearance-light-v2",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "stone-star",
+  "hand": "h33",
+  "source": "appearance-light-v4",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "toggle-off-shine",
+  "hand": "h33",
+  "source": "appearance-light-v5",
+  "figure": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "hasActive": true
+ },
+ {
+  "name": "moon",
+  "hand": "h31",
+  "source": "appearance-dark-v1",
+  "figure": "appearance-dark",
+  "meaning": "appearance: dark (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "stone-moon",
+  "hand": "h31",
+  "source": "appearance-dark-v2",
+  "figure": "appearance-dark",
+  "meaning": "appearance: dark (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "game-board-moon",
+  "hand": "h31",
+  "source": "appearance-dark-v3",
+  "figure": "appearance-dark",
+  "meaning": "appearance: dark (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "moon-sea",
+  "hand": "h31",
+  "source": "appearance-dark-v4",
+  "figure": "appearance-dark",
+  "meaning": "appearance: dark (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "flower-tulip",
+  "hand": "h31",
+  "source": "appearance-dark-v5",
+  "figure": "appearance-dark",
+  "meaning": "appearance: dark (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "stone-facet",
+  "hand": "h32",
+  "source": "appearance-dark-v3",
+  "figure": "appearance-dark",
+  "meaning": "appearance: dark (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "toggle-on-label",
+  "hand": "h32",
+  "source": "appearance-dark-v4",
+  "figure": "appearance-dark",
+  "meaning": "appearance: dark (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "lightbulb-moon",
+  "hand": "h33",
+  "source": "appearance-dark-v2",
+  "figure": "appearance-dark",
+  "meaning": "appearance: dark (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "appearance-device",
+  "hand": "h31",
+  "source": "appearance-device-v1",
+  "figure": "appearance-device",
+  "meaning": "appearance: follow the device (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "stone-pill-shine",
+  "hand": "h31",
+  "source": "appearance-device-v2",
+  "figure": "appearance-device",
+  "meaning": "appearance: follow the device (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "appearance",
+  "hand": "h32",
+  "source": "appearance-device-v2",
+  "figure": "appearance-device",
+  "meaning": "appearance: follow the device (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "toggle-median",
+  "hand": "h32",
+  "source": "appearance-device-v4",
+  "figure": "appearance-device",
+  "meaning": "appearance: follow the device (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "appearance-half",
+  "hand": "h33",
+  "source": "appearance-device-v1",
+  "figure": "appearance-device",
+  "meaning": "appearance: follow the device (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "lightbulb-mark",
+  "hand": "h33",
+  "source": "appearance-device-v2",
+  "figure": "appearance-device",
+  "meaning": "appearance: follow the device (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "sunset-seaa",
+  "hand": "h33",
+  "source": "appearance-device-v3",
+  "figure": "appearance-device",
+  "meaning": "appearance: follow the device (trio)",
+  "hasActive": true
+ },
+ {
+  "name": "palette-1",
+  "hand": "h31",
+  "source": "palette-v1",
+  "figure": "palette",
+  "meaning": "the colour world the app wears",
+  "hasActive": true
+ },
+ {
+  "name": "circles-jointure",
+  "hand": "h31",
+  "source": "palette-v2",
+  "figure": "palette",
+  "meaning": "the colour world the app wears",
+  "hasActive": true
+ },
+ {
+  "name": "broomstick",
+  "hand": "h31",
+  "source": "palette-v3",
+  "figure": "palette",
+  "meaning": "the colour world the app wears",
+  "hasActive": true
+ },
+ {
+  "name": "flower-reed",
+  "hand": "h31",
+  "source": "palette-v5",
+  "figure": "palette",
+  "meaning": "the colour world the app wears",
+  "hasActive": true
+ },
+ {
+  "name": "circles-jointure-2",
+  "hand": "h32",
+  "source": "palette-v2",
+  "figure": "palette",
+  "meaning": "the colour world the app wears",
+  "hasActive": true
+ },
+ {
+  "name": "palette-3",
+  "hand": "h33",
+  "source": "palette-v1",
+  "figure": "palette",
+  "meaning": "the colour world the app wears",
+  "hasActive": true
+ },
+ {
+  "name": "prism",
+  "hand": "h33",
+  "source": "palette-v2",
+  "figure": "palette",
+  "meaning": "the colour world the app wears",
+  "hasActive": true
+ },
+ {
+  "name": "screwdriver",
+  "hand": "h33",
+  "source": "palette-v5",
+  "figure": "palette",
+  "meaning": "the colour world the app wears",
+  "hasActive": true
+ },
+ {
+  "name": "bounce-underline",
+  "hand": "h31",
+  "source": "bounce-v1",
+  "figure": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "hasActive": true
+ },
+ {
+  "name": "chart-stones",
+  "hand": "h31",
+  "source": "bounce-v2",
+  "figure": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "hasActive": true
+ },
+ {
+  "name": "signal-wave",
+  "hand": "h31",
+  "source": "bounce-v3",
+  "figure": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "hasActive": true
+ },
+ {
+  "name": "stone-spring",
+  "hand": "h31",
+  "source": "bounce-v4",
+  "figure": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "hasActive": true
+ },
+ {
+  "name": "stone-debounce",
+  "hand": "h32",
+  "source": "bounce-v1",
+  "figure": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "hasActive": true
+ },
+ {
+  "name": "signal-waveform-stone",
+  "hand": "h32",
+  "source": "bounce-v2",
+  "figure": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "hasActive": true
+ },
+ {
+  "name": "stones-line-chart",
+  "hand": "h32",
+  "source": "bounce-v5",
+  "figure": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "hasActive": true
+ },
+ {
+  "name": "stone-bounces",
+  "hand": "h33",
+  "source": "bounce-v1",
+  "figure": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "hasActive": true
+ },
+ {
+  "name": "signal-dots",
+  "hand": "h33",
+  "source": "bounce-v2",
+  "figure": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "hasActive": true
+ },
+ {
+  "name": "metronome",
+  "hand": "h33",
+  "source": "bounce-v3",
+  "figure": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "hasActive": true
+ },
+ {
+  "name": "stones-4-half",
+  "hand": "h33",
+  "source": "bounce-v4",
+  "figure": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "hasActive": true
+ },
+ {
+  "name": "binoculars",
+  "hand": "h31",
+  "source": "search-v3",
+  "figure": "search",
+  "meaning": "look something up by name, a lens",
+  "hasActive": true
+ },
+ {
+  "name": "text-stone",
+  "hand": "h31",
+  "source": "search-v4",
+  "figure": "search",
+  "meaning": "look something up by name, a lens",
+  "hasActive": true
+ },
+ {
+  "name": "magnifying-md",
+  "hand": "h32",
+  "source": "search-v1",
+  "figure": "search",
+  "meaning": "look something up by name, a lens",
+  "hasActive": true
+ },
+ {
+  "name": "magnifying-sm",
+  "hand": "h33",
+  "source": "search-v1",
+  "figure": "search",
+  "meaning": "look something up by name, a lens",
+  "hasActive": true
+ },
+ {
+  "name": "circle-info",
+  "hand": "h31",
+  "source": "info-v1",
+  "figure": "info",
+  "meaning": "how to read this: a small mark at caption size beside a line of text; must read apart from the error family",
+  "hasActive": true
+ },
+ {
+  "name": "parenthesis-info",
+  "hand": "h31",
+  "source": "info-v3",
+  "figure": "info",
+  "meaning": "how to read this: a small mark at caption size beside a line of text; must read apart from the error family",
+  "hasActive": true
+ },
+ {
+  "name": "asterisk",
+  "hand": "h31",
+  "source": "info-v4",
+  "figure": "info",
+  "meaning": "how to read this: a small mark at caption size beside a line of text; must read apart from the error family",
+  "hasActive": true
+ },
+ {
+  "name": "bubble-info",
+  "hand": "h31",
+  "source": "info-v5",
+  "figure": "info",
+  "meaning": "how to read this: a small mark at caption size beside a line of text; must read apart from the error family",
+  "hasActive": true
+ },
+ {
+  "name": "info-i",
+  "hand": "h32",
+  "source": "info-v2",
+  "figure": "info",
+  "meaning": "how to read this: a small mark at caption size beside a line of text; must read apart from the error family",
+  "hasActive": true
+ },
+ {
+  "name": "badge-info",
+  "hand": "h32",
+  "source": "info-v5",
+  "figure": "info",
+  "meaning": "how to read this: a small mark at caption size beside a line of text; must read apart from the error family",
+  "hasActive": true
+ },
+ {
+  "name": "sign-info",
+  "hand": "h33",
+  "source": "info-v2",
+  "figure": "info",
+  "meaning": "how to read this: a small mark at caption size beside a line of text; must read apart from the error family",
+  "hasActive": true
+ },
+ {
+  "name": "user-standing",
+  "hand": "h33",
+  "source": "info-v3",
+  "figure": "info",
+  "meaning": "how to read this: a small mark at caption size beside a line of text; must read apart from the error family",
+  "hasActive": true
+ },
+ {
+  "name": "paragraph-info",
+  "hand": "h33",
+  "source": "info-v4",
+  "figure": "info",
+  "meaning": "how to read this: a small mark at caption size beside a line of text; must read apart from the error family",
+  "hasActive": true
+ },
+ {
+  "name": "dolmen-soil",
+  "hand": "h31",
+  "source": "dolmen-v1",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "dolmen-fluffy",
+  "hand": "h31",
+  "source": "dolmen-v2",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "stone-gate-shine",
+  "hand": "h31",
+  "source": "dolmen-v3",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "stone-gate-sm",
+  "hand": "h31",
+  "source": "dolmen-v4",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "stone-board",
+  "hand": "h31",
+  "source": "dolmen-v5",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "dolmen-square",
+  "hand": "h32",
+  "source": "dolmen-v1",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "dolmen-square-stone",
+  "hand": "h32",
+  "source": "dolmen-v2",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "dolmen-square-pin",
+  "hand": "h32",
+  "source": "dolmen-v3",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "menhir",
+  "hand": "h32",
+  "source": "dolmen-v4",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "dolmen-2",
+  "hand": "h33",
+  "source": "dolmen-v1",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "gate-stone",
+  "hand": "h33",
+  "source": "dolmen-v2",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "dolmen-shine-sm",
+  "hand": "h33",
+  "source": "dolmen-v4",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "slide",
+  "hand": "h33",
+  "source": "dolmen-v5",
+  "figure": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "hasActive": true
+ },
+ {
+  "name": "karma-fossil",
+  "hand": "h31",
+  "source": "fossil-v1",
+  "figure": "fossil",
+  "meaning": "a life kept in stone",
+  "hasActive": true
+ },
+ {
+  "name": "circle-leaf",
+  "hand": "h31",
+  "source": "fossil-v2",
+  "figure": "fossil",
+  "meaning": "a life kept in stone",
+  "hasActive": true
+ },
+ {
+  "name": "fish-bones-2",
+  "hand": "h31",
+  "source": "fossil-v3",
+  "figure": "fossil",
+  "meaning": "a life kept in stone",
+  "hasActive": true
+ },
+ {
+  "name": "circle-karma",
+  "hand": "h32",
+  "source": "fossil-v1",
+  "figure": "fossil",
+  "meaning": "a life kept in stone",
+  "hasActive": true
+ },
+ {
+  "name": "fish-bones",
+  "hand": "h32",
+  "source": "fossil-v2",
+  "figure": "fossil",
+  "meaning": "a life kept in stone",
+  "hasActive": true
+ },
+ {
+  "name": "cocoon",
+  "hand": "h32",
+  "source": "fossil-v3",
+  "figure": "fossil",
+  "meaning": "a life kept in stone",
+  "hasActive": true
+ },
+ {
+  "name": "leaf",
+  "hand": "h32",
+  "source": "fossil-v5",
+  "figure": "fossil",
+  "meaning": "a life kept in stone",
+  "hasActive": true
+ },
+ {
+  "name": "circle-fossil",
+  "hand": "h33",
+  "source": "fossil-v1",
+  "figure": "fossil",
+  "meaning": "a life kept in stone",
+  "hasActive": true
+ },
+ {
+  "name": "trilobite",
+  "hand": "h33",
+  "source": "fossil-v4",
+  "figure": "fossil",
+  "meaning": "a life kept in stone",
+  "hasActive": true
+ },
+ {
+  "name": "stone-hair",
+  "hand": "h33",
+  "source": "fossil-v5",
+  "figure": "fossil",
+  "meaning": "a life kept in stone",
+  "hasActive": true
+ },
+ {
+  "name": "bookmark",
+  "hand": "h31",
+  "source": "bookmark-v1",
+  "figure": "bookmark",
+  "meaning": "keep my place, save for later",
+  "hasActive": true
+ },
+ {
+  "name": "book-stone",
+  "hand": "h31",
+  "source": "bookmark-v4",
+  "figure": "bookmark",
+  "meaning": "keep my place, save for later",
+  "hasActive": true
+ },
+ {
+  "name": "text-stone-margin",
+  "hand": "h32",
+  "source": "bookmark-v4",
+  "figure": "bookmark",
+  "meaning": "keep my place, save for later",
+  "hasActive": true
+ },
+ {
+  "name": "bookmark-stone",
+  "hand": "h33",
+  "source": "bookmark-v1",
+  "figure": "bookmark",
+  "meaning": "keep my place, save for later",
+  "hasActive": true
+ },
+ {
+  "name": "page-corner",
+  "hand": "h33",
+  "source": "bookmark-v3",
+  "figure": "bookmark",
+  "meaning": "keep my place, save for later",
+  "hasActive": true
+ },
+ {
+  "name": "text-stone-inline",
+  "hand": "h33",
+  "source": "bookmark-v4",
+  "figure": "bookmark",
+  "meaning": "keep my place, save for later",
+  "hasActive": true
+ },
+ {
+  "name": "pebble-gem",
+  "hand": "h31",
+  "source": "gem-v2",
+  "figure": "gem",
+  "meaning": "something precious, cut",
+  "hasActive": true
+ },
+ {
+  "name": "amethyst",
+  "hand": "h31",
+  "source": "gem-v4",
+  "figure": "gem",
+  "meaning": "something precious, cut",
+  "hasActive": true
+ },
+ {
+  "name": "gem-stone-1",
+  "hand": "h32",
+  "source": "gem-v1",
+  "figure": "gem",
+  "meaning": "something precious, cut",
+  "hasActive": true
+ },
+ {
+  "name": "gem-up",
+  "hand": "h32",
+  "source": "gem-v4",
+  "figure": "gem",
+  "meaning": "something precious, cut",
+  "hasActive": true
+ },
+ {
+  "name": "pebble-fire",
+  "hand": "h33",
+  "source": "gem-v2",
+  "figure": "gem",
+  "meaning": "something precious, cut",
+  "hasActive": true
+ },
+ {
+  "name": "target-arrow",
+  "hand": "h31",
+  "source": "target-v2",
+  "figure": "target",
+  "meaning": "an aim, a goal hit",
+  "hasActive": true
+ },
+ {
+  "name": "stone-ripple",
+  "hand": "h31",
+  "source": "target-v3",
+  "figure": "target",
+  "meaning": "an aim, a goal hit",
+  "hasActive": true
+ },
+ {
+  "name": "golf-flag-lg",
+  "hand": "h31",
+  "source": "target-v4",
+  "figure": "target",
+  "meaning": "an aim, a goal hit",
+  "hasActive": true
+ },
+ {
+  "name": "target-outside",
+  "hand": "h32",
+  "source": "target-v2",
+  "figure": "target",
+  "meaning": "an aim, a goal hit",
+  "hasActive": true
+ },
+ {
+  "name": "flag-mountain",
+  "hand": "h32",
+  "source": "target-v4",
+  "figure": "target",
+  "meaning": "an aim, a goal hit",
+  "hasActive": true
+ },
+ {
+  "name": "ripples",
+  "hand": "h32",
+  "source": "target-v5",
+  "figure": "target",
+  "meaning": "an aim, a goal hit",
+  "hasActive": true
+ },
+ {
+  "name": "stone-water",
+  "hand": "h33",
+  "source": "target-v3",
+  "figure": "target",
+  "meaning": "an aim, a goal hit",
+  "hasActive": true
+ },
+ {
+  "name": "golf-flag-sm",
+  "hand": "h33",
+  "source": "target-v4",
+  "figure": "target",
+  "meaning": "an aim, a goal hit",
+  "hasActive": true
+ },
+ {
+  "name": "stone-spark",
+  "hand": "h33",
+  "source": "target-v5",
+  "figure": "target",
+  "meaning": "an aim, a goal hit",
+  "hasActive": true
+ },
+ {
+  "name": "pencil",
+  "hand": "h31",
+  "source": "pen-v1",
+  "figure": "pen",
+  "meaning": "write, edit",
+  "hasActive": true
+ },
+ {
+  "name": "pen-fountain-up",
+  "hand": "h31",
+  "source": "pen-v2",
+  "figure": "pen",
+  "meaning": "write, edit",
+  "hasActive": true
+ },
+ {
+  "name": "feather-dot",
+  "hand": "h31",
+  "source": "pen-v3",
+  "figure": "pen",
+  "meaning": "write, edit",
+  "hasActive": true
+ },
+ {
+  "name": "pencil-write",
+  "hand": "h31",
+  "source": "pen-v4",
+  "figure": "pen",
+  "meaning": "write, edit",
+  "hasActive": true
+ },
+ {
+  "name": "pen-fountain-losange",
+  "hand": "h32",
+  "source": "pen-v2",
+  "figure": "pen",
+  "meaning": "write, edit",
+  "hasActive": true
+ },
+ {
+  "name": "eraser-write",
+  "hand": "h32",
+  "source": "pen-v3",
+  "figure": "pen",
+  "meaning": "write, edit",
+  "hasActive": true
+ },
+ {
+  "name": "feather-write",
+  "hand": "h33",
+  "source": "pen-v2",
+  "figure": "pen",
+  "meaning": "write, edit",
+  "hasActive": true
+ },
+ {
+  "name": "pen-fountain-down",
+  "hand": "h33",
+  "source": "pen-v3",
+  "figure": "pen",
+  "meaning": "write, edit",
+  "hasActive": true
+ },
+ {
+  "name": "pencil-draw",
+  "hand": "h33",
+  "source": "pen-v4",
+  "figure": "pen",
+  "meaning": "write, edit",
+  "hasActive": true
+ },
+ {
+  "name": "saucer-antenna",
+  "hand": "h31",
+  "source": "radar-v2",
+  "figure": "radar",
+  "meaning": "scanning around, what is near",
+  "hasActive": true
+ },
+ {
+  "name": "stone-signal",
+  "hand": "h31",
+  "source": "radar-v3",
+  "figure": "radar",
+  "meaning": "scanning around, what is near",
+  "hasActive": true
+ },
+ {
+  "name": "user-line",
+  "hand": "h31",
+  "source": "radar-v4",
+  "figure": "radar",
+  "meaning": "scanning around, what is near",
+  "hasActive": true
+ },
+ {
+  "name": "saucer-antenna-k",
+  "hand": "h32",
+  "source": "radar-v2",
+  "figure": "radar",
+  "meaning": "scanning around, what is near",
+  "hasActive": true
+ },
+ {
+  "name": "stone-wifi",
+  "hand": "h32",
+  "source": "radar-v3",
+  "figure": "radar",
+  "meaning": "scanning around, what is near",
+  "hasActive": true
+ },
+ {
+  "name": "saucer-antenna-sm",
+  "hand": "h33",
+  "source": "radar-v2",
+  "figure": "radar",
+  "meaning": "scanning around, what is near",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-radar",
+  "hand": "h33",
+  "source": "radar-v3",
+  "figure": "radar",
+  "meaning": "scanning around, what is near",
+  "hasActive": true
+ },
+ {
+  "name": "radar-quarter",
+  "hand": "h33",
+  "source": "radar-v4",
+  "figure": "radar",
+  "meaning": "scanning around, what is near",
+  "hasActive": true
+ },
+ {
+  "name": "arrow-forward-eye",
+  "hand": "h33",
+  "source": "radar-v5",
+  "figure": "radar",
+  "meaning": "scanning around, what is near",
+  "hasActive": true
+ },
+ {
+  "name": "pyramid",
+  "hand": "h31",
+  "source": "pyramid-v1",
+  "figure": "pyramid",
+  "meaning": "a built monument, a layered peak",
+  "hasActive": true
+ },
+ {
+  "name": "pebbles-stack-2",
+  "hand": "h31",
+  "source": "pyramid-v3",
+  "figure": "pyramid",
+  "meaning": "a built monument, a layered peak",
+  "hasActive": true
+ },
+ {
+  "name": "pyramids-sun",
+  "hand": "h31",
+  "source": "pyramid-v4",
+  "figure": "pyramid",
+  "meaning": "a built monument, a layered peak",
+  "hasActive": true
+ },
+ {
+  "name": "ziggurat",
+  "hand": "h32",
+  "source": "pyramid-v2",
+  "figure": "pyramid",
+  "meaning": "a built monument, a layered peak",
+  "hasActive": true
+ },
+ {
+  "name": "stones-stack-2",
+  "hand": "h32",
+  "source": "pyramid-v3",
+  "figure": "pyramid",
+  "meaning": "a built monument, a layered peak",
+  "hasActive": true
+ },
+ {
+  "name": "obelisk",
+  "hand": "h32",
+  "source": "pyramid-v5",
+  "figure": "pyramid",
+  "meaning": "a built monument, a layered peak",
+  "hasActive": true
+ },
+ {
+  "name": "pyramid-layers",
+  "hand": "h33",
+  "source": "pyramid-v1",
+  "figure": "pyramid",
+  "meaning": "a built monument, a layered peak",
+  "hasActive": true
+ },
+ {
+  "name": "stones-stack-plus",
+  "hand": "h33",
+  "source": "pyramid-v2",
+  "figure": "pyramid",
+  "meaning": "a built monument, a layered peak",
+  "hasActive": true
+ },
+ {
+  "name": "pyramid-sun",
+  "hand": "h33",
+  "source": "pyramid-v4",
+  "figure": "pyramid",
+  "meaning": "a built monument, a layered peak",
+  "hasActive": true
+ },
+ {
+  "name": "pyramid-inside",
+  "hand": "h33",
+  "source": "pyramid-v5",
+  "figure": "pyramid",
+  "meaning": "a built monument, a layered peak",
+  "hasActive": true
+ },
+ {
+  "name": "layout-sharp",
+  "hand": "h31",
+  "source": "layout-v3",
+  "figure": "layout",
+  "meaning": "how a page is arranged",
+  "hasActive": true
+ },
+ {
+  "name": "text-editorial",
+  "hand": "h31",
+  "source": "layout-v5",
+  "figure": "layout",
+  "meaning": "how a page is arranged",
+  "hasActive": true
+ },
+ {
+  "name": "layout-sidebar",
+  "hand": "h32",
+  "source": "layout-v3",
+  "figure": "layout",
+  "meaning": "how a page is arranged",
+  "hasActive": true
+ },
+ {
+  "name": "stones-layout",
+  "hand": "h32",
+  "source": "layout-v4",
+  "figure": "layout",
+  "meaning": "how a page is arranged",
+  "hasActive": true
+ },
+ {
+  "name": "layout",
+  "hand": "h32",
+  "source": "layout-v5",
+  "figure": "layout",
+  "meaning": "how a page is arranged",
+  "hasActive": true
+ },
+ {
+  "name": "set-square",
+  "hand": "h33",
+  "source": "layout-v5",
+  "figure": "layout",
+  "meaning": "how a page is arranged",
+  "hasActive": true
+ },
+ {
+  "name": "gauge",
+  "hand": "h31",
+  "source": "dashboard-v1",
+  "figure": "dashboard",
+  "meaning": "an overview of numbers at a glance",
+  "hasActive": true
+ },
+ {
+  "name": "scale-gauge",
+  "hand": "h31",
+  "source": "dashboard-v5",
+  "figure": "dashboard",
+  "meaning": "an overview of numbers at a glance",
+  "hasActive": true
+ },
+ {
+  "name": "gauge-simple",
+  "hand": "h32",
+  "source": "dashboard-v1",
+  "figure": "dashboard",
+  "meaning": "an overview of numbers at a glance",
+  "hasActive": true
+ },
+ {
+  "name": "square-chart-bars",
+  "hand": "h32",
+  "source": "dashboard-v5",
+  "figure": "dashboard",
+  "meaning": "an overview of numbers at a glance",
+  "hasActive": true
+ },
+ {
+  "name": "gauge-underline",
+  "hand": "h33",
+  "source": "dashboard-v1",
+  "figure": "dashboard",
+  "meaning": "an overview of numbers at a glance",
+  "hasActive": true
+ },
+ {
+  "name": "dashboard",
+  "hand": "h33",
+  "source": "dashboard-v2",
+  "figure": "dashboard",
+  "meaning": "an overview of numbers at a glance",
+  "hasActive": true
+ },
+ {
+  "name": "chart-stones-grow",
+  "hand": "h31",
+  "source": "chart-v3",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "chart-diagram",
+  "hand": "h31",
+  "source": "chart-v4",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "bullseye",
+  "hand": "h31",
+  "source": "chart-v5",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "chart-grow",
+  "hand": "h32",
+  "source": "chart-v1",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "chart-bars-fill",
+  "hand": "h32",
+  "source": "chart-v2",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "line-grow",
+  "hand": "h32",
+  "source": "chart-v3",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "chart-stones-4",
+  "hand": "h32",
+  "source": "chart-v4",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "chart-line-stone",
+  "hand": "h33",
+  "source": "chart-v1",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "chart-stones-grow-underline",
+  "hand": "h33",
+  "source": "chart-v2",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "chart-segments",
+  "hand": "h33",
+  "source": "chart-v3",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "chart-diagram-sm",
+  "hand": "h33",
+  "source": "chart-v4",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "chart-wires",
+  "hand": "h33",
+  "source": "chart-v5",
+  "figure": "chart",
+  "meaning": "figures over time",
+  "hasActive": true
+ },
+ {
+  "name": "board-wall-notes",
+  "hand": "h31",
+  "source": "board-v1",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "library",
+  "hand": "h31",
+  "source": "board-v2",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "game-stones",
+  "hand": "h31",
+  "source": "board-v3",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "board-chart",
+  "hand": "h31",
+  "source": "board-v4",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "memos-lace",
+  "hand": "h31",
+  "source": "board-v5",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "square-notes",
+  "hand": "h32",
+  "source": "board-v1",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "board-notes",
+  "hand": "h32",
+  "source": "board-v2",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "memo",
+  "hand": "h32",
+  "source": "board-v4",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "game-checkers",
+  "hand": "h32",
+  "source": "board-v5",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "board-layout",
+  "hand": "h33",
+  "source": "board-v1",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "board-lamp",
+  "hand": "h33",
+  "source": "board-v2",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "grid",
+  "hand": "h33",
+  "source": "board-v4",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "board",
+  "hand": "h33",
+  "source": "board-v5",
+  "figure": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "hasActive": true
+ },
+ {
+  "name": "copy-squares",
+  "hand": "h31",
+  "source": "copy-v1",
+  "figure": "copy",
+  "meaning": "make a second one",
+  "hasActive": true
+ },
+ {
+  "name": "copy-circles",
+  "hand": "h32",
+  "source": "copy-v2",
+  "figure": "copy",
+  "meaning": "make a second one",
+  "hasActive": true
+ },
+ {
+  "name": "layers-square",
+  "hand": "h33",
+  "source": "copy-v1",
+  "figure": "copy",
+  "meaning": "make a second one",
+  "hasActive": true
+ },
+ {
+  "name": "stone-sea",
+  "hand": "h33",
+  "source": "copy-v2",
+  "figure": "copy",
+  "meaning": "make a second one",
+  "hasActive": true
+ },
+ {
+  "name": "document-scan",
+  "hand": "h33",
+  "source": "copy-v5",
+  "figure": "copy",
+  "meaning": "make a second one",
+  "hasActive": true
+ },
+ {
+  "name": "clipboard-paste",
+  "hand": "h31",
+  "source": "paste-v1",
+  "figure": "paste",
+  "meaning": "put it here",
+  "hasActive": true
+ },
+ {
+  "name": "stone-down-tunnel",
+  "hand": "h31",
+  "source": "paste-v2",
+  "figure": "paste",
+  "meaning": "put it here",
+  "hasActive": true
+ },
+ {
+  "name": "arrow-bottom-box",
+  "hand": "h31",
+  "source": "paste-v3",
+  "figure": "paste",
+  "meaning": "put it here",
+  "hasActive": true
+ },
+ {
+  "name": "note-corner",
+  "hand": "h31",
+  "source": "paste-v4",
+  "figure": "paste",
+  "meaning": "put it here",
+  "hasActive": true
+ },
+ {
+  "name": "map-pin",
+  "hand": "h31",
+  "source": "paste-v5",
+  "figure": "paste",
+  "meaning": "put it here",
+  "hasActive": true
+ },
+ {
+  "name": "clipboard-arrow-down",
+  "hand": "h32",
+  "source": "paste-v1",
+  "figure": "paste",
+  "meaning": "put it here",
+  "hasActive": true
+ },
+ {
+  "name": "stone-box",
+  "hand": "h32",
+  "source": "paste-v2",
+  "figure": "paste",
+  "meaning": "put it here",
+  "hasActive": true
+ },
+ {
+  "name": "card-stone",
+  "hand": "h32",
+  "source": "paste-v3",
+  "figure": "paste",
+  "meaning": "put it here",
+  "hasActive": true
+ },
+ {
+  "name": "square-paste",
+  "hand": "h32",
+  "source": "paste-v5",
+  "figure": "paste",
+  "meaning": "put it here",
+  "hasActive": true
+ },
+ {
+  "name": "note-stone",
+  "hand": "h33",
+  "source": "paste-v3",
+  "figure": "paste",
+  "meaning": "put it here",
+  "hasActive": true
+ },
+ {
+  "name": "cursor",
+  "hand": "h31",
+  "source": "cursor-v1",
+  "figure": "cursor",
+  "meaning": "a pointer, here",
+  "hasActive": true
+ },
+ {
+  "name": "cursor-pointer",
+  "hand": "h32",
+  "source": "cursor-v2",
+  "figure": "cursor",
+  "meaning": "a pointer, here",
+  "hasActive": true
+ },
+ {
+  "name": "cursor-pointer-click",
+  "hand": "h33",
+  "source": "cursor-v4",
+  "figure": "cursor",
+  "meaning": "a pointer, here",
+  "hasActive": true
+ },
+ {
+  "name": "viewfinder",
+  "hand": "h33",
+  "source": "cursor-v5",
+  "figure": "cursor",
+  "meaning": "a pointer, here",
+  "hasActive": true
+ },
+ {
+  "name": "book-cover-stone",
+  "hand": "h31",
+  "source": "book-v1",
+  "figure": "book",
+  "meaning": "a book to read",
+  "hasActive": true
+ },
+ {
+  "name": "book-text-bookmark",
+  "hand": "h31",
+  "source": "book-v2",
+  "figure": "book",
+  "meaning": "a book to read",
+  "hasActive": true
+ },
+ {
+  "name": "books-shelve",
+  "hand": "h31",
+  "source": "book-v4",
+  "figure": "book",
+  "meaning": "a book to read",
+  "hasActive": true
+ },
+ {
+  "name": "book",
+  "hand": "h32",
+  "source": "book-v1",
+  "figure": "book",
+  "meaning": "a book to read",
+  "hasActive": true
+ },
+ {
+  "name": "bookbinding",
+  "hand": "h32",
+  "source": "book-v2",
+  "figure": "book",
+  "meaning": "a book to read",
+  "hasActive": true
+ },
+ {
+  "name": "books-stack",
+  "hand": "h33",
+  "source": "book-v2",
+  "figure": "book",
+  "meaning": "a book to read",
+  "hasActive": true
+ },
+ {
+  "name": "book-iso",
+  "hand": "h33",
+  "source": "book-v4",
+  "figure": "book",
+  "meaning": "a book to read",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-glow",
+  "hand": "h33",
+  "source": "book-v5",
+  "figure": "book",
+  "meaning": "a book to read",
+  "hasActive": true
+ },
+ {
+  "name": "text-period-stone",
+  "hand": "h31",
+  "source": "text-v1",
+  "figure": "text",
+  "meaning": "plain text, a paragraph",
+  "hasActive": true
+ },
+ {
+  "name": "text-aa",
+  "hand": "h31",
+  "source": "text-v3",
+  "figure": "text",
+  "meaning": "plain text, a paragraph",
+  "hasActive": true
+ },
+ {
+  "name": "text-quote",
+  "hand": "h31",
+  "source": "text-v4",
+  "figure": "text",
+  "meaning": "plain text, a paragraph",
+  "hasActive": true
+ },
+ {
+  "name": "curl",
+  "hand": "h31",
+  "source": "text-v5",
+  "figure": "text",
+  "meaning": "plain text, a paragraph",
+  "hasActive": true
+ },
+ {
+  "name": "text-initial-stone",
+  "hand": "h32",
+  "source": "text-v1",
+  "figure": "text",
+  "meaning": "plain text, a paragraph",
+  "hasActive": true
+ },
+ {
+  "name": "waves-period-stone",
+  "hand": "h32",
+  "source": "text-v5",
+  "figure": "text",
+  "meaning": "plain text, a paragraph",
+  "hasActive": true
+ },
+ {
+  "name": "text-period",
+  "hand": "h33",
+  "source": "text-v1",
+  "figure": "text",
+  "meaning": "plain text, a paragraph",
+  "hasActive": true
+ },
+ {
+  "name": "letter-t-dot",
+  "hand": "h33",
+  "source": "text-v2",
+  "figure": "text",
+  "meaning": "plain text, a paragraph",
+  "hasActive": true
+ },
+ {
+  "name": "text-underline-dot",
+  "hand": "h33",
+  "source": "text-v3",
+  "figure": "text",
+  "meaning": "plain text, a paragraph",
+  "hasActive": true
+ },
+ {
+  "name": "paragraph",
+  "hand": "h33",
+  "source": "text-v4",
+  "figure": "text",
+  "meaning": "plain text, a paragraph",
+  "hasActive": true
+ },
+ {
+  "name": "memo-text-corner",
+  "hand": "h31",
+  "source": "memo-v1",
+  "figure": "memo",
+  "meaning": "a short note",
+  "hasActive": true
+ },
+ {
+  "name": "memo-text-stone",
+  "hand": "h31",
+  "source": "memo-v2",
+  "figure": "memo",
+  "meaning": "a short note",
+  "hasActive": true
+ },
+ {
+  "name": "memo-text-torn",
+  "hand": "h31",
+  "source": "memo-v3",
+  "figure": "memo",
+  "meaning": "a short note",
+  "hasActive": true
+ },
+ {
+  "name": "memo-text-clip",
+  "hand": "h31",
+  "source": "memo-v4",
+  "figure": "memo",
+  "meaning": "a short note",
+  "hasActive": true
+ },
+ {
+  "name": "receipt",
+  "hand": "h32",
+  "source": "memo-v4",
+  "figure": "memo",
+  "meaning": "a short note",
+  "hasActive": true
+ },
+ {
+  "name": "paperplane",
+  "hand": "h33",
+  "source": "memo-v2",
+  "figure": "memo",
+  "meaning": "a short note",
+  "hasActive": true
+ },
+ {
+  "name": "memo-text-stone-sm",
+  "hand": "h33",
+  "source": "memo-v3",
+  "figure": "memo",
+  "meaning": "a short note",
+  "hasActive": true
+ },
+ {
+  "name": "bottle-message",
+  "hand": "h33",
+  "source": "memo-v4",
+  "figure": "memo",
+  "meaning": "a short note",
+  "hasActive": true
+ },
+ {
+  "name": "folder",
+  "hand": "h31",
+  "source": "folder-v1",
+  "figure": "folder",
+  "meaning": "a place that holds files",
+  "hasActive": true
+ },
+ {
+  "name": "folder-2",
+  "hand": "h32",
+  "source": "folder-v1",
+  "figure": "folder",
+  "meaning": "a place that holds files",
+  "hasActive": true
+ },
+ {
+  "name": "archive-box",
+  "hand": "h33",
+  "source": "folder-v3",
+  "figure": "folder",
+  "meaning": "a place that holds files",
+  "hasActive": true
+ },
+ {
+  "name": "trunk",
+  "hand": "h31",
+  "source": "trunk-v1",
+  "figure": "trunk",
+  "meaning": "a travel chest",
+  "hasActive": true
+ },
+ {
+  "name": "archive-box-iso",
+  "hand": "h31",
+  "source": "trunk-v2",
+  "figure": "trunk",
+  "meaning": "a travel chest",
+  "hasActive": true
+ },
+ {
+  "name": "toolbox",
+  "hand": "h32",
+  "source": "trunk-v2",
+  "figure": "trunk",
+  "meaning": "a travel chest",
+  "hasActive": true
+ },
+ {
+  "name": "metal-box",
+  "hand": "h32",
+  "source": "trunk-v3",
+  "figure": "trunk",
+  "meaning": "a travel chest",
+  "hasActive": true
+ },
+ {
+  "name": "suitcase",
+  "hand": "h33",
+  "source": "trunk-v3",
+  "figure": "trunk",
+  "meaning": "a travel chest",
+  "hasActive": true
+ },
+ {
+  "name": "medal",
+  "hand": "h31",
+  "source": "medal-v3",
+  "figure": "medal",
+  "meaning": "an honour hung on a ribbon",
+  "hasActive": true
+ },
+ {
+  "name": "laurel-stone",
+  "hand": "h31",
+  "source": "medal-v5",
+  "figure": "medal",
+  "meaning": "an honour hung on a ribbon",
+  "hasActive": true
+ },
+ {
+  "name": "medal-star",
+  "hand": "h32",
+  "source": "medal-v2",
+  "figure": "medal",
+  "meaning": "an honour hung on a ribbon",
+  "hasActive": true
+ },
+ {
+  "name": "podium-stone",
+  "hand": "h32",
+  "source": "medal-v5",
+  "figure": "medal",
+  "meaning": "an honour hung on a ribbon",
+  "hasActive": true
+ },
+ {
+  "name": "medal-stone",
+  "hand": "h33",
+  "source": "medal-v1",
+  "figure": "medal",
+  "meaning": "an honour hung on a ribbon",
+  "hasActive": true
+ },
+ {
+  "name": "medal-2",
+  "hand": "h33",
+  "source": "medal-v2",
+  "figure": "medal",
+  "meaning": "an honour hung on a ribbon",
+  "hasActive": true
+ },
+ {
+  "name": "medal-1",
+  "hand": "h33",
+  "source": "medal-v3",
+  "figure": "medal",
+  "meaning": "an honour hung on a ribbon",
+  "hasActive": true
+ },
+ {
+  "name": "laurel-user",
+  "hand": "h33",
+  "source": "medal-v4",
+  "figure": "medal",
+  "meaning": "an honour hung on a ribbon",
+  "hasActive": true
+ },
+ {
+  "name": "medal-grade",
+  "hand": "h33",
+  "source": "medal-v5",
+  "figure": "medal",
+  "meaning": "an honour hung on a ribbon",
+  "hasActive": true
+ },
+ {
+  "name": "trophy-lg",
+  "hand": "h32",
+  "source": "trophy-v1",
+  "figure": "trophy",
+  "meaning": "a cup for a win",
+  "hasActive": true
+ },
+ {
+  "name": "trophy",
+  "hand": "h33",
+  "source": "trophy-v1",
+  "figure": "trophy",
+  "meaning": "a cup for a win",
+  "hasActive": true
+ },
+ {
+  "name": "trophy-star",
+  "hand": "h33",
+  "source": "trophy-v5",
+  "figure": "trophy",
+  "meaning": "a cup for a win",
+  "hasActive": true
+ },
+ {
+  "name": "cave",
+  "hand": "h31",
+  "source": "cave-v1",
+  "figure": "cave",
+  "meaning": "a shelter in the rock",
+  "hasActive": true
+ },
+ {
+  "name": "stones-cave",
+  "hand": "h31",
+  "source": "cave-v5",
+  "figure": "cave",
+  "meaning": "a shelter in the rock",
+  "hasActive": true
+ },
+ {
+  "name": "moon-inverted",
+  "hand": "h31",
+  "source": "moon-v1",
+  "figure": "moon",
+  "meaning": "the moon, night",
+  "hasActive": true
+ },
+ {
+  "name": "cell",
+  "hand": "h32",
+  "source": "moon-v1",
+  "figure": "moon",
+  "meaning": "the moon, night",
+  "hasActive": true
+ },
+ {
+  "name": "hill-sun",
+  "hand": "h32",
+  "source": "moon-v3",
+  "figure": "moon",
+  "meaning": "the moon, night",
+  "hasActive": true
+ },
+ {
+  "name": "moon-z",
+  "hand": "h32",
+  "source": "moon-v5",
+  "figure": "moon",
+  "meaning": "the moon, night",
+  "hasActive": true
+ },
+ {
+  "name": "moon-crescent",
+  "hand": "h33",
+  "source": "moon-v1",
+  "figure": "moon",
+  "meaning": "the moon, night",
+  "hasActive": true
+ },
+ {
+  "name": "moon-sea-up",
+  "hand": "h33",
+  "source": "moon-v2",
+  "figure": "moon",
+  "meaning": "the moon, night",
+  "hasActive": true
+ },
+ {
+  "name": "moon-cloud",
+  "hand": "h33",
+  "source": "moon-v4",
+  "figure": "moon",
+  "meaning": "the moon, night",
+  "hasActive": true
+ },
+ {
+  "name": "shooting-star-lg",
+  "hand": "h31",
+  "source": "star-v4",
+  "figure": "star",
+  "meaning": "a star, a favourite",
+  "hasActive": true
+ },
+ {
+  "name": "star-stone",
+  "hand": "h31",
+  "source": "star-v5",
+  "figure": "star",
+  "meaning": "a star, a favourite",
+  "hasActive": true
+ },
+ {
+  "name": "circle-star",
+  "hand": "h32",
+  "source": "star-v4",
+  "figure": "star",
+  "meaning": "a star, a favourite",
+  "hasActive": true
+ },
+ {
+  "name": "constellation",
+  "hand": "h32",
+  "source": "star-v5",
+  "figure": "star",
+  "meaning": "a star, a favourite",
+  "hasActive": true
+ },
+ {
+  "name": "shooting-star",
+  "hand": "h33",
+  "source": "star-v2",
+  "figure": "star",
+  "meaning": "a star, a favourite",
+  "hasActive": true
+ },
+ {
+  "name": "star-dot",
+  "hand": "h33",
+  "source": "star-v4",
+  "figure": "star",
+  "meaning": "a star, a favourite",
+  "hasActive": true
+ },
+ {
+  "name": "weather",
+  "hand": "h31",
+  "source": "rainbow-v3",
+  "figure": "rainbow",
+  "meaning": "a rainbow after rain",
+  "hasActive": true
+ },
+ {
+  "name": "rainbow-reflect",
+  "hand": "h31",
+  "source": "rainbow-v5",
+  "figure": "rainbow",
+  "meaning": "a rainbow after rain",
+  "hasActive": true
+ },
+ {
+  "name": "stones-arc-5",
+  "hand": "h32",
+  "source": "rainbow-v5",
+  "figure": "rainbow",
+  "meaning": "a rainbow after rain",
+  "hasActive": true
+ },
+ {
+  "name": "rainbow",
+  "hand": "h33",
+  "source": "rainbow-v1",
+  "figure": "rainbow",
+  "meaning": "a rainbow after rain",
+  "hasActive": true
+ },
+ {
+  "name": "cloud-arrow-down-download",
+  "hand": "h31",
+  "source": "download-v2",
+  "figure": "download",
+  "meaning": "bring it down to the device",
+  "hasActive": true
+ },
+ {
+  "name": "half-circle-arrown-down-download",
+  "hand": "h31",
+  "source": "download-v3",
+  "figure": "download",
+  "meaning": "bring it down to the device",
+  "hasActive": true
+ },
+ {
+  "name": "download-picture",
+  "hand": "h32",
+  "source": "download-v4",
+  "figure": "download",
+  "meaning": "bring it down to the device",
+  "hasActive": true
+ },
+ {
+  "name": "filter-box",
+  "hand": "h33",
+  "source": "download-v3",
+  "figure": "download",
+  "meaning": "bring it down to the device",
+  "hasActive": true
+ },
+ {
+  "name": "device-arrow-down",
+  "hand": "h33",
+  "source": "download-v4",
+  "figure": "download",
+  "meaning": "bring it down to the device",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-bowl-pebbles",
+  "hand": "h33",
+  "source": "download-v5",
+  "figure": "download",
+  "meaning": "bring it down to the device",
+  "hasActive": true
+ },
+ {
+  "name": "stone-bowl",
+  "hand": "h31",
+  "source": "rock-v3",
+  "figure": "rock",
+  "meaning": "a rock, a solid stone",
+  "hasActive": true
+ },
+ {
+  "name": "rock-lg",
+  "hand": "h31",
+  "source": "rock-v4",
+  "figure": "rock",
+  "meaning": "a rock, a solid stone",
+  "hasActive": true
+ },
+ {
+  "name": "rock-iso",
+  "hand": "h32",
+  "source": "rock-v4",
+  "figure": "rock",
+  "meaning": "a rock, a solid stone",
+  "hasActive": true
+ },
+ {
+  "name": "rock",
+  "hand": "h33",
+  "source": "rock-v1",
+  "figure": "rock",
+  "meaning": "a rock, a solid stone",
+  "hasActive": true
+ },
+ {
+  "name": "stone-layers",
+  "hand": "h33",
+  "source": "rock-v3",
+  "figure": "rock",
+  "meaning": "a rock, a solid stone",
+  "hasActive": true
+ },
+ {
+  "name": "stone-layers-2",
+  "hand": "h32",
+  "source": "boulder-v4",
+  "figure": "boulder",
+  "meaning": "a great rock, too big to lift; must read apart from rock",
+  "hasActive": true
+ },
+ {
+  "name": "hill-path-pin",
+  "hand": "h31",
+  "source": "hill-v3",
+  "figure": "hill",
+  "meaning": "a gentle rise of land",
+  "hasActive": true
+ },
+ {
+  "name": "hill-sunset",
+  "hand": "h31",
+  "source": "hill-v5",
+  "figure": "hill",
+  "meaning": "a gentle rise of land",
+  "hasActive": true
+ },
+ {
+  "name": "hill-stone-path",
+  "hand": "h32",
+  "source": "hill-v3",
+  "figure": "hill",
+  "meaning": "a gentle rise of land",
+  "hasActive": true
+ },
+ {
+  "name": "hill-sunset-soil",
+  "hand": "h32",
+  "source": "hill-v5",
+  "figure": "hill",
+  "meaning": "a gentle rise of land",
+  "hasActive": true
+ },
+ {
+  "name": "hill-sun-k",
+  "hand": "h33",
+  "source": "hill-v1",
+  "figure": "hill",
+  "meaning": "a gentle rise of land",
+  "hasActive": true
+ },
+ {
+  "name": "hills",
+  "hand": "h33",
+  "source": "hill-v2",
+  "figure": "hill",
+  "meaning": "a gentle rise of land",
+  "hasActive": true
+ },
+ {
+  "name": "hill-stone-grass",
+  "hand": "h33",
+  "source": "hill-v4",
+  "figure": "hill",
+  "meaning": "a gentle rise of land",
+  "hasActive": true
+ },
+ {
+  "name": "mountains-summit",
+  "hand": "h31",
+  "source": "mountain-v1",
+  "figure": "mountain",
+  "meaning": "a high peak; must read apart from hill",
+  "hasActive": true
+ },
+ {
+  "name": "menhir-2",
+  "hand": "h31",
+  "source": "mountain-v2",
+  "figure": "mountain",
+  "meaning": "a high peak; must read apart from hill",
+  "hasActive": true
+ },
+ {
+  "name": "mountain-path-flag",
+  "hand": "h31",
+  "source": "mountain-v3",
+  "figure": "mountain",
+  "meaning": "a high peak; must read apart from hill",
+  "hasActive": true
+ },
+ {
+  "name": "mountains",
+  "hand": "h31",
+  "source": "mountain-v4",
+  "figure": "mountain",
+  "meaning": "a high peak; must read apart from hill",
+  "hasActive": true
+ },
+ {
+  "name": "mountain-forest",
+  "hand": "h31",
+  "source": "mountain-v5",
+  "figure": "mountain",
+  "meaning": "a high peak; must read apart from hill",
+  "hasActive": true
+ },
+ {
+  "name": "mountain-cut",
+  "hand": "h32",
+  "source": "mountain-v2",
+  "figure": "mountain",
+  "meaning": "a high peak; must read apart from hill",
+  "hasActive": true
+ },
+ {
+  "name": "mountain-path",
+  "hand": "h32",
+  "source": "mountain-v4",
+  "figure": "mountain",
+  "meaning": "a high peak; must read apart from hill",
+  "hasActive": true
+ },
+ {
+  "name": "mountain-waves",
+  "hand": "h32",
+  "source": "mountain-v5",
+  "figure": "mountain",
+  "meaning": "a high peak; must read apart from hill",
+  "hasActive": true
+ },
+ {
+  "name": "moutains-sea",
+  "hand": "h33",
+  "source": "mountain-v5",
+  "figure": "mountain",
+  "meaning": "a high peak; must read apart from hill",
+  "hasActive": true
+ },
+ {
+  "name": "pebble-zap",
+  "hand": "h31",
+  "source": "zap-v2",
+  "figure": "zap",
+  "meaning": "a jolt, energy, instant",
+  "hasActive": true
+ },
+ {
+  "name": "sun-shine-wave",
+  "hand": "h31",
+  "source": "zap-v3",
+  "figure": "zap",
+  "meaning": "a jolt, energy, instant",
+  "hasActive": true
+ },
+ {
+  "name": "sun-shine-bright-sm",
+  "hand": "h31",
+  "source": "zap-v5",
+  "figure": "zap",
+  "meaning": "a jolt, energy, instant",
+  "hasActive": true
+ },
+ {
+  "name": "sun-shine-bright",
+  "hand": "h32",
+  "source": "zap-v2",
+  "figure": "zap",
+  "meaning": "a jolt, energy, instant",
+  "hasActive": true
+ },
+ {
+  "name": "battery-zap",
+  "hand": "h32",
+  "source": "zap-v4",
+  "figure": "zap",
+  "meaning": "a jolt, energy, instant",
+  "hasActive": true
+ },
+ {
+  "name": "cloud-zap",
+  "hand": "h32",
+  "source": "zap-v5",
+  "figure": "zap",
+  "meaning": "a jolt, energy, instant",
+  "hasActive": true
+ },
+ {
+  "name": "zap",
+  "hand": "h33",
+  "source": "zap-v1",
+  "figure": "zap",
+  "meaning": "a jolt, energy, instant",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-zap",
+  "hand": "h33",
+  "source": "zap-v2",
+  "figure": "zap",
+  "meaning": "a jolt, energy, instant",
+  "hasActive": true
+ },
+ {
+  "name": "cloud",
+  "hand": "h31",
+  "source": "cloud-v1",
+  "figure": "cloud",
+  "meaning": "a cloud",
+  "hasActive": true
+ },
+ {
+  "name": "circles",
+  "hand": "h31",
+  "source": "cloud-v2",
+  "figure": "cloud",
+  "meaning": "a cloud",
+  "hasActive": true
+ },
+ {
+  "name": "wind",
+  "hand": "h31",
+  "source": "cloud-v4",
+  "figure": "cloud",
+  "meaning": "a cloud",
+  "hasActive": true
+ },
+ {
+  "name": "cloud-k",
+  "hand": "h32",
+  "source": "cloud-v1",
+  "figure": "cloud",
+  "meaning": "a cloud",
+  "hasActive": true
+ },
+ {
+  "name": "clouds",
+  "hand": "h32",
+  "source": "cloud-v5",
+  "figure": "cloud",
+  "meaning": "a cloud",
+  "hasActive": true
+ },
+ {
+  "name": "cloud-stone",
+  "hand": "h33",
+  "source": "cloud-v5",
+  "figure": "cloud",
+  "meaning": "a cloud",
+  "hasActive": true
+ },
+ {
+  "name": "pebble-speed",
+  "hand": "h31",
+  "source": "rain-v3",
+  "figure": "rain",
+  "meaning": "rain falling",
+  "hasActive": true
+ },
+ {
+  "name": "square-rain",
+  "hand": "h31",
+  "source": "rain-v4",
+  "figure": "rain",
+  "meaning": "rain falling",
+  "hasActive": true
+ },
+ {
+  "name": "cloud-rain",
+  "hand": "h32",
+  "source": "rain-v1",
+  "figure": "rain",
+  "meaning": "rain falling",
+  "hasActive": true
+ },
+ {
+  "name": "tint",
+  "hand": "h32",
+  "source": "rain-v2",
+  "figure": "rain",
+  "meaning": "rain falling",
+  "hasActive": true
+ },
+ {
+  "name": "cloud-rain-drop",
+  "hand": "h33",
+  "source": "rain-v1",
+  "figure": "rain",
+  "meaning": "rain falling",
+  "hasActive": true
+ },
+ {
+  "name": "square-rain-2",
+  "hand": "h33",
+  "source": "rain-v4",
+  "figure": "rain",
+  "meaning": "rain falling",
+  "hasActive": true
+ },
+ {
+  "name": "tint-2",
+  "hand": "h33",
+  "source": "rain-v5",
+  "figure": "rain",
+  "meaning": "rain falling",
+  "hasActive": true
+ },
+ {
+  "name": "postcard",
+  "hand": "h31",
+  "source": "envelope-v3",
+  "figure": "envelope",
+  "meaning": "a letter, a message",
+  "hasActive": true
+ },
+ {
+  "name": "envelope-2",
+  "hand": "h32",
+  "source": "envelope-v2",
+  "figure": "envelope",
+  "meaning": "a letter, a message",
+  "hasActive": true
+ },
+ {
+  "name": "bell",
+  "hand": "h31",
+  "source": "bell-v1",
+  "figure": "bell",
+  "meaning": "a bell",
+  "hasActive": true
+ },
+ {
+  "name": "bell-ring",
+  "hand": "h31",
+  "source": "bell-v2",
+  "figure": "bell",
+  "meaning": "a bell",
+  "hasActive": true
+ },
+ {
+  "name": "chimer",
+  "hand": "h31",
+  "source": "bell-v5",
+  "figure": "bell",
+  "meaning": "a bell",
+  "hasActive": true
+ },
+ {
+  "name": "bell-k",
+  "hand": "h32",
+  "source": "bell-v2",
+  "figure": "bell",
+  "meaning": "a bell",
+  "hasActive": true
+ },
+ {
+  "name": "bell-badge",
+  "hand": "h31",
+  "source": "notification-v1",
+  "figure": "notification",
+  "meaning": "something new arrived for you; must read apart from bell",
+  "hasActive": true
+ },
+ {
+  "name": "stone-bowl-shine",
+  "hand": "h31",
+  "source": "notification-v2",
+  "figure": "notification",
+  "meaning": "something new arrived for you; must read apart from bell",
+  "hasActive": true
+ },
+ {
+  "name": "bubble-badge",
+  "hand": "h31",
+  "source": "notification-v3",
+  "figure": "notification",
+  "meaning": "something new arrived for you; must read apart from bell",
+  "hasActive": true
+ },
+ {
+  "name": "server-dot",
+  "hand": "h31",
+  "source": "notification-v4",
+  "figure": "notification",
+  "meaning": "something new arrived for you; must read apart from bell",
+  "hasActive": true
+ },
+ {
+  "name": "door-ring",
+  "hand": "h31",
+  "source": "notification-v5",
+  "figure": "notification",
+  "meaning": "something new arrived for you; must read apart from bell",
+  "hasActive": true
+ },
+ {
+  "name": "envelope-badge",
+  "hand": "h32",
+  "source": "notification-v2",
+  "figure": "notification",
+  "meaning": "something new arrived for you; must read apart from bell",
+  "hasActive": true
+ },
+ {
+  "name": "server",
+  "hand": "h32",
+  "source": "notification-v3",
+  "figure": "notification",
+  "meaning": "something new arrived for you; must read apart from bell",
+  "hasActive": true
+ },
+ {
+  "name": "letterbox-up",
+  "hand": "h33",
+  "source": "notification-v2",
+  "figure": "notification",
+  "meaning": "something new arrived for you; must read apart from bell",
+  "hasActive": true
+ },
+ {
+  "name": "square-badge",
+  "hand": "h33",
+  "source": "notification-v3",
+  "figure": "notification",
+  "meaning": "something new arrived for you; must read apart from bell",
+  "hasActive": true
+ },
+ {
+  "name": "pebble-pound",
+  "hand": "h33",
+  "source": "notification-v4",
+  "figure": "notification",
+  "meaning": "something new arrived for you; must read apart from bell",
+  "hasActive": true
+ },
+ {
+  "name": "list-stones",
+  "hand": "h31",
+  "source": "list-v2",
+  "figure": "list",
+  "meaning": "a list of items",
+  "hasActive": true
+ },
+ {
+  "name": "receipt-2",
+  "hand": "h31",
+  "source": "list-v3",
+  "figure": "list",
+  "meaning": "a list of items",
+  "hasActive": true
+ },
+ {
+  "name": "list",
+  "hand": "h32",
+  "source": "list-v1",
+  "figure": "list",
+  "meaning": "a list of items",
+  "hasActive": true
+ },
+ {
+  "name": "list-dots",
+  "hand": "h33",
+  "source": "list-v1",
+  "figure": "list",
+  "meaning": "a list of items",
+  "hasActive": true
+ },
+ {
+  "name": "list-sort",
+  "hand": "h33",
+  "source": "list-v4",
+  "figure": "list",
+  "meaning": "a list of items",
+  "hasActive": true
+ },
+ {
+  "name": "minus",
+  "hand": "h31",
+  "source": "minus-v1",
+  "figure": "minus",
+  "meaning": "take one away",
+  "hasActive": true
+ },
+ {
+  "name": "minus-1",
+  "hand": "h31",
+  "source": "minus-v3",
+  "figure": "minus",
+  "meaning": "take one away",
+  "hasActive": true
+ },
+ {
+  "name": "eclipse",
+  "hand": "h31",
+  "source": "minus-v5",
+  "figure": "minus",
+  "meaning": "take one away",
+  "hasActive": true
+ },
+ {
+  "name": "cairn-drop",
+  "hand": "h32",
+  "source": "minus-v3",
+  "figure": "minus",
+  "meaning": "take one away",
+  "hasActive": true
+ },
+ {
+  "name": "stones-3-up",
+  "hand": "h33",
+  "source": "minus-v2",
+  "figure": "minus",
+  "meaning": "take one away",
+  "hasActive": true
+ },
+ {
+  "name": "circle-minus",
+  "hand": "h31",
+  "source": "remove-v1",
+  "figure": "remove",
+  "meaning": "take it out of this set (it still exists elsewhere)",
+  "hasActive": true
+ },
+ {
+  "name": "pebbles-intersection",
+  "hand": "h31",
+  "source": "remove-v3",
+  "figure": "remove",
+  "meaning": "take it out of this set (it still exists elsewhere)",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-stone-water",
+  "hand": "h31",
+  "source": "remove-v4",
+  "figure": "remove",
+  "meaning": "take it out of this set (it still exists elsewhere)",
+  "hasActive": true
+ },
+ {
+  "name": "items-indent",
+  "hand": "h32",
+  "source": "remove-v1",
+  "figure": "remove",
+  "meaning": "take it out of this set (it still exists elsewhere)",
+  "hasActive": true
+ },
+ {
+  "name": "stone-box-out",
+  "hand": "h32",
+  "source": "remove-v2",
+  "figure": "remove",
+  "meaning": "take it out of this set (it still exists elsewhere)",
+  "hasActive": true
+ },
+ {
+  "name": "square-outside-right",
+  "hand": "h32",
+  "source": "remove-v4",
+  "figure": "remove",
+  "meaning": "take it out of this set (it still exists elsewhere)",
+  "hasActive": true
+ },
+ {
+  "name": "stones-soil",
+  "hand": "h32",
+  "source": "remove-v5",
+  "figure": "remove",
+  "meaning": "take it out of this set (it still exists elsewhere)",
+  "hasActive": true
+ },
+ {
+  "name": "double-circle-outside",
+  "hand": "h33",
+  "source": "remove-v2",
+  "figure": "remove",
+  "meaning": "take it out of this set (it still exists elsewhere)",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-stone-water-2",
+  "hand": "h33",
+  "source": "remove-v3",
+  "figure": "remove",
+  "meaning": "take it out of this set (it still exists elsewhere)",
+  "hasActive": true
+ },
+ {
+  "name": "stones-rubble",
+  "hand": "h31",
+  "source": "delete-v2",
+  "figure": "delete",
+  "meaning": "destroy it for good",
+  "hasActive": true
+ },
+ {
+  "name": "destroy",
+  "hand": "h32",
+  "source": "delete-v1",
+  "figure": "delete",
+  "meaning": "destroy it for good",
+  "hasActive": true
+ },
+ {
+  "name": "squares-rubble",
+  "hand": "h33",
+  "source": "delete-v2",
+  "figure": "delete",
+  "meaning": "destroy it for good",
+  "hasActive": true
+ },
+ {
+  "name": "jellyfish",
+  "hand": "h31",
+  "source": "jellyfish-v1",
+  "figure": "jellyfish",
+  "meaning": "a jellyfish",
+  "hasActive": true
+ },
+ {
+  "name": "jellyfish-2",
+  "hand": "h31",
+  "source": "jellyfish-v2",
+  "figure": "jellyfish",
+  "meaning": "a jellyfish",
+  "hasActive": true
+ },
+ {
+  "name": "jellyfish-surface",
+  "hand": "h31",
+  "source": "jellyfish-v3",
+  "figure": "jellyfish",
+  "meaning": "a jellyfish",
+  "hasActive": true
+ },
+ {
+  "name": "jellyfish-pebble",
+  "hand": "h32",
+  "source": "jellyfish-v2",
+  "figure": "jellyfish",
+  "meaning": "a jellyfish",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-jellyfish",
+  "hand": "h32",
+  "source": "jellyfish-v4",
+  "figure": "jellyfish",
+  "meaning": "a jellyfish",
+  "hasActive": true
+ },
+ {
+  "name": "jellyfish-moving",
+  "hand": "h32",
+  "source": "jellyfish-v5",
+  "figure": "jellyfish",
+  "meaning": "a jellyfish",
+  "hasActive": true
+ },
+ {
+  "name": "jellyfish-2-dot",
+  "hand": "h33",
+  "source": "jellyfish-v1",
+  "figure": "jellyfish",
+  "meaning": "a jellyfish",
+  "hasActive": true
+ },
+ {
+  "name": "jellyfish-dots",
+  "hand": "h33",
+  "source": "jellyfish-v3",
+  "figure": "jellyfish",
+  "meaning": "a jellyfish",
+  "hasActive": true
+ },
+ {
+  "name": "waves-vertical",
+  "hand": "h33",
+  "source": "jellyfish-v5",
+  "figure": "jellyfish",
+  "meaning": "a jellyfish",
+  "hasActive": true
+ },
+ {
+  "name": "cat",
+  "hand": "h31",
+  "source": "cat-v1",
+  "figure": "cat",
+  "meaning": "a cat",
+  "hasActive": true
+ },
+ {
+  "name": "cat-back-2",
+  "hand": "h31",
+  "source": "cat-v2",
+  "figure": "cat",
+  "meaning": "a cat",
+  "hasActive": true
+ },
+ {
+  "name": "paw",
+  "hand": "h31",
+  "source": "cat-v5",
+  "figure": "cat",
+  "meaning": "a cat",
+  "hasActive": true
+ },
+ {
+  "name": "cat-2",
+  "hand": "h33",
+  "source": "cat-v1",
+  "figure": "cat",
+  "meaning": "a cat",
+  "hasActive": true
+ },
+ {
+  "name": "cat-back",
+  "hand": "h33",
+  "source": "cat-v2",
+  "figure": "cat",
+  "meaning": "a cat",
+  "hasActive": true
+ },
+ {
+  "name": "dog-profile",
+  "hand": "h31",
+  "source": "dog-v2",
+  "figure": "dog",
+  "meaning": "a dog",
+  "hasActive": true
+ },
+ {
+  "name": "doghouse",
+  "hand": "h31",
+  "source": "dog-v4",
+  "figure": "dog",
+  "meaning": "a dog",
+  "hasActive": true
+ },
+ {
+  "name": "piglet",
+  "hand": "h32",
+  "source": "dog-v1",
+  "figure": "dog",
+  "meaning": "a dog",
+  "hasActive": true
+ },
+ {
+  "name": "pig",
+  "hand": "h32",
+  "source": "dog-v2",
+  "figure": "dog",
+  "meaning": "a dog",
+  "hasActive": true
+ },
+ {
+  "name": "paw-sm",
+  "hand": "h32",
+  "source": "dog-v4",
+  "figure": "dog",
+  "meaning": "a dog",
+  "hasActive": true
+ },
+ {
+  "name": "dog",
+  "hand": "h33",
+  "source": "dog-v1",
+  "figure": "dog",
+  "meaning": "a dog",
+  "hasActive": true
+ },
+ {
+  "name": "chick-profile",
+  "hand": "h33",
+  "source": "dog-v2",
+  "figure": "dog",
+  "meaning": "a dog",
+  "hasActive": true
+ },
+ {
+  "name": "doghouse-empty",
+  "hand": "h33",
+  "source": "dog-v3",
+  "figure": "dog",
+  "meaning": "a dog",
+  "hasActive": true
+ },
+ {
+  "name": "bone-down",
+  "hand": "h31",
+  "source": "bone-v1",
+  "figure": "bone",
+  "meaning": "a bone",
+  "hasActive": true
+ },
+ {
+  "name": "bone",
+  "hand": "h31",
+  "source": "bone-v3",
+  "figure": "bone",
+  "meaning": "a bone",
+  "hasActive": true
+ },
+ {
+  "name": "diverge-2",
+  "hand": "h31",
+  "source": "bone-v5",
+  "figure": "bone",
+  "meaning": "a bone",
+  "hasActive": true
+ },
+ {
+  "name": "converge",
+  "hand": "h32",
+  "source": "bone-v5",
+  "figure": "bone",
+  "meaning": "a bone",
+  "hasActive": true
+ },
+ {
+  "name": "bone-up",
+  "hand": "h33",
+  "source": "bone-v1",
+  "figure": "bone",
+  "meaning": "a bone",
+  "hasActive": true
+ },
+ {
+  "name": "diverge",
+  "hand": "h33",
+  "source": "bone-v4",
+  "figure": "bone",
+  "meaning": "a bone",
+  "hasActive": true
+ },
+ {
+  "name": "lighthouse",
+  "hand": "h31",
+  "source": "lighthouse-v1",
+  "figure": "lighthouse",
+  "meaning": "a lighthouse, a guide in the dark",
+  "hasActive": true
+ },
+ {
+  "name": "lighthouse-right",
+  "hand": "h32",
+  "source": "lighthouse-v1",
+  "figure": "lighthouse",
+  "meaning": "a lighthouse, a guide in the dark",
+  "hasActive": true
+ },
+ {
+  "name": "cairn-shine",
+  "hand": "h32",
+  "source": "lighthouse-v5",
+  "figure": "lighthouse",
+  "meaning": "a lighthouse, a guide in the dark",
+  "hasActive": true
+ },
+ {
+  "name": "lighthouse-island",
+  "hand": "h33",
+  "source": "lighthouse-v3",
+  "figure": "lighthouse",
+  "meaning": "a lighthouse, a guide in the dark",
+  "hasActive": true
+ },
+ {
+  "name": "box",
+  "hand": "h31",
+  "source": "keyboard-v2",
+  "figure": "keyboard",
+  "meaning": "a keyboard",
+  "hasActive": true
+ },
+ {
+  "name": "laptop",
+  "hand": "h31",
+  "source": "keyboard-v4",
+  "figure": "keyboard",
+  "meaning": "a keyboard",
+  "hasActive": true
+ },
+ {
+  "name": "piano",
+  "hand": "h31",
+  "source": "keyboard-v5",
+  "figure": "keyboard",
+  "meaning": "a keyboard",
+  "hasActive": true
+ },
+ {
+  "name": "keyboard",
+  "hand": "h32",
+  "source": "keyboard-v5",
+  "figure": "keyboard",
+  "meaning": "a keyboard",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-ruby",
+  "hand": "h33",
+  "source": "keyboard-v2",
+  "figure": "keyboard",
+  "meaning": "a keyboard",
+  "hasActive": true
+ },
+ {
+  "name": "guitar",
+  "hand": "h31",
+  "source": "guitar-v1",
+  "figure": "guitar",
+  "meaning": "a guitar",
+  "hasActive": true
+ },
+ {
+  "name": "guitar-face",
+  "hand": "h31",
+  "source": "guitar-v2",
+  "figure": "guitar",
+  "meaning": "a guitar",
+  "hasActive": true
+ },
+ {
+  "name": "guitar-pick",
+  "hand": "h31",
+  "source": "guitar-v3",
+  "figure": "guitar",
+  "meaning": "a guitar",
+  "hasActive": true
+ },
+ {
+  "name": "guitar-chords",
+  "hand": "h32",
+  "source": "guitar-v5",
+  "figure": "guitar",
+  "meaning": "a guitar",
+  "hasActive": true
+ },
+ {
+  "name": "guitar-oud",
+  "hand": "h33",
+  "source": "guitar-v1",
+  "figure": "guitar",
+  "meaning": "a guitar",
+  "hasActive": true
+ },
+ {
+  "name": "guitar-tab",
+  "hand": "h33",
+  "source": "guitar-v3",
+  "figure": "guitar",
+  "meaning": "a guitar",
+  "hasActive": true
+ },
+ {
+  "name": "guitar-pick-chords",
+  "hand": "h33",
+  "source": "guitar-v4",
+  "figure": "guitar",
+  "meaning": "a guitar",
+  "hasActive": true
+ },
+ {
+  "name": "guitar-neck",
+  "hand": "h33",
+  "source": "guitar-v5",
+  "figure": "guitar",
+  "meaning": "a guitar",
+  "hasActive": true
+ },
+ {
+  "name": "music-treble-clef",
+  "hand": "h31",
+  "source": "music-v3",
+  "figure": "music",
+  "meaning": "music, a melody",
+  "hasActive": true
+ },
+ {
+  "name": "music-sheet-notes",
+  "hand": "h31",
+  "source": "music-v4",
+  "figure": "music",
+  "meaning": "music, a melody",
+  "hasActive": true
+ },
+ {
+  "name": "music-note-double-quaver",
+  "hand": "h32",
+  "source": "music-v1",
+  "figure": "music",
+  "meaning": "music, a melody",
+  "hasActive": true
+ },
+ {
+  "name": "music-quaver",
+  "hand": "h32",
+  "source": "music-v2",
+  "figure": "music",
+  "meaning": "music, a melody",
+  "hasActive": true
+ },
+ {
+  "name": "music-sheet-note",
+  "hand": "h32",
+  "source": "music-v3",
+  "figure": "music",
+  "meaning": "music, a melody",
+  "hasActive": true
+ },
+ {
+  "name": "music-sheet-note-2",
+  "hand": "h33",
+  "source": "music-v2",
+  "figure": "music",
+  "meaning": "music, a melody",
+  "hasActive": true
+ },
+ {
+  "name": "music-note",
+  "hand": "h33",
+  "source": "music-v5",
+  "figure": "music",
+  "meaning": "music, a melody",
+  "hasActive": true
+ },
+ {
+  "name": "face-baby",
+  "hand": "h31",
+  "source": "baby-v1",
+  "figure": "baby",
+  "meaning": "a baby, a newborn",
+  "hasActive": true
+ },
+ {
+  "name": "troller",
+  "hand": "h31",
+  "source": "baby-v4",
+  "figure": "baby",
+  "meaning": "a baby, a newborn",
+  "hasActive": true
+ },
+ {
+  "name": "face-child",
+  "hand": "h32",
+  "source": "baby-v1",
+  "figure": "baby",
+  "meaning": "a baby, a newborn",
+  "hasActive": true
+ },
+ {
+  "name": "mobile",
+  "hand": "h32",
+  "source": "baby-v5",
+  "figure": "baby",
+  "meaning": "a baby, a newborn",
+  "hasActive": true
+ },
+ {
+  "name": "cradle",
+  "hand": "h33",
+  "source": "baby-v2",
+  "figure": "baby",
+  "meaning": "a baby, a newborn",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-honey",
+  "hand": "h33",
+  "source": "baby-v5",
+  "figure": "baby",
+  "meaning": "a baby, a newborn",
+  "hasActive": true
+ },
+ {
+  "name": "milk-carton",
+  "hand": "h31",
+  "source": "milk-v1",
+  "figure": "milk",
+  "meaning": "milk",
+  "hasActive": true
+ },
+ {
+  "name": "milk-bottle-closed",
+  "hand": "h31",
+  "source": "milk-v3",
+  "figure": "milk",
+  "meaning": "milk",
+  "hasActive": true
+ },
+ {
+  "name": "drop-water",
+  "hand": "h31",
+  "source": "milk-v4",
+  "figure": "milk",
+  "meaning": "milk",
+  "hasActive": true
+ },
+ {
+  "name": "feeding-bottle",
+  "hand": "h32",
+  "source": "milk-v5",
+  "figure": "milk",
+  "meaning": "milk",
+  "hasActive": true
+ },
+ {
+  "name": "water-bottle",
+  "hand": "h33",
+  "source": "milk-v1",
+  "figure": "milk",
+  "meaning": "milk",
+  "hasActive": true
+ },
+ {
+  "name": "milk-bottle",
+  "hand": "h33",
+  "source": "milk-v4",
+  "figure": "milk",
+  "meaning": "milk",
+  "hasActive": true
+ },
+ {
+  "name": "car-front",
+  "hand": "h31",
+  "source": "car-v2",
+  "figure": "car",
+  "meaning": "a car",
+  "hasActive": true
+ },
+ {
+  "name": "car-wheel",
+  "hand": "h31",
+  "source": "car-v5",
+  "figure": "car",
+  "meaning": "a car",
+  "hasActive": true
+ },
+ {
+  "name": "car",
+  "hand": "h32",
+  "source": "car-v1",
+  "figure": "car",
+  "meaning": "a car",
+  "hasActive": true
+ },
+ {
+  "name": "radio",
+  "hand": "h32",
+  "source": "car-v2",
+  "figure": "car",
+  "meaning": "a car",
+  "hasActive": true
+ },
+ {
+  "name": "car-k",
+  "hand": "h32",
+  "source": "car-v4",
+  "figure": "car",
+  "meaning": "a car",
+  "hasActive": true
+ },
+ {
+  "name": "car-speed",
+  "hand": "h32",
+  "source": "car-v5",
+  "figure": "car",
+  "meaning": "a car",
+  "hasActive": true
+ },
+ {
+  "name": "car-2",
+  "hand": "h33",
+  "source": "car-v1",
+  "figure": "car",
+  "meaning": "a car",
+  "hasActive": true
+ },
+ {
+  "name": "car-above",
+  "hand": "h33",
+  "source": "car-v3",
+  "figure": "car",
+  "meaning": "a car",
+  "hasActive": true
+ },
+ {
+  "name": "bike",
+  "hand": "h31",
+  "source": "bike-v1",
+  "figure": "bike",
+  "meaning": "a bicycle",
+  "hasActive": true
+ },
+ {
+  "name": "bike-2",
+  "hand": "h31",
+  "source": "bike-v2",
+  "figure": "bike",
+  "meaning": "a bicycle",
+  "hasActive": true
+ },
+ {
+  "name": "house",
+  "hand": "h31",
+  "source": "house-v1",
+  "figure": "house",
+  "meaning": "a house, a building (not home, the place you land)",
+  "hasActive": true
+ },
+ {
+  "name": "dome",
+  "hand": "h31",
+  "source": "house-v2",
+  "figure": "house",
+  "meaning": "a house, a building (not home, the place you land)",
+  "hasActive": true
+ },
+ {
+  "name": "building",
+  "hand": "h31",
+  "source": "house-v3",
+  "figure": "house",
+  "meaning": "a house, a building (not home, the place you land)",
+  "hasActive": true
+ },
+ {
+  "name": "house-chemny",
+  "hand": "h31",
+  "source": "house-v4",
+  "figure": "house",
+  "meaning": "a house, a building (not home, the place you land)",
+  "hasActive": true
+ },
+ {
+  "name": "bird-house",
+  "hand": "h31",
+  "source": "house-v5",
+  "figure": "house",
+  "meaning": "a house, a building (not home, the place you land)",
+  "hasActive": true
+ },
+ {
+  "name": "farm",
+  "hand": "h32",
+  "source": "house-v3",
+  "figure": "house",
+  "meaning": "a house, a building (not home, the place you land)",
+  "hasActive": true
+ },
+ {
+  "name": "house-block",
+  "hand": "h32",
+  "source": "house-v5",
+  "figure": "house",
+  "meaning": "a house, a building (not home, the place you land)",
+  "hasActive": true
+ },
+ {
+  "name": "houses",
+  "hand": "h33",
+  "source": "house-v3",
+  "figure": "house",
+  "meaning": "a house, a building (not home, the place you land)",
+  "hasActive": true
+ },
+ {
+  "name": "window-roof",
+  "hand": "h33",
+  "source": "house-v5",
+  "figure": "house",
+  "meaning": "a house, a building (not home, the place you land)",
+  "hasActive": true
+ },
+ {
+  "name": "umbrella-empty",
+  "hand": "h31",
+  "source": "umbrella-v1",
+  "figure": "umbrella",
+  "meaning": "an umbrella",
+  "hasActive": true
+ },
+ {
+  "name": "umbrella-rain",
+  "hand": "h31",
+  "source": "umbrella-v3",
+  "figure": "umbrella",
+  "meaning": "an umbrella",
+  "hasActive": true
+ },
+ {
+  "name": "parasol",
+  "hand": "h31",
+  "source": "umbrella-v5",
+  "figure": "umbrella",
+  "meaning": "an umbrella",
+  "hasActive": true
+ },
+ {
+  "name": "umbrella",
+  "hand": "h33",
+  "source": "umbrella-v1",
+  "figure": "umbrella",
+  "meaning": "an umbrella",
+  "hasActive": true
+ },
+ {
+  "name": "umbrella-above",
+  "hand": "h33",
+  "source": "umbrella-v5",
+  "figure": "umbrella",
+  "meaning": "an umbrella",
+  "hasActive": true
+ },
+ {
+  "name": "bottle",
+  "hand": "h31",
+  "source": "ink-v2",
+  "figure": "ink",
+  "meaning": "ink, a drop of it",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-ink",
+  "hand": "h31",
+  "source": "ink-v5",
+  "figure": "ink",
+  "meaning": "ink, a drop of it",
+  "hasActive": true
+ },
+ {
+  "name": "ink-bottle",
+  "hand": "h32",
+  "source": "ink-v1",
+  "figure": "ink",
+  "meaning": "ink, a drop of it",
+  "hasActive": true
+ },
+ {
+  "name": "ink-pot",
+  "hand": "h33",
+  "source": "ink-v2",
+  "figure": "ink",
+  "meaning": "ink, a drop of it",
+  "hasActive": true
+ },
+ {
+  "name": "question-circle",
+  "hand": "h31",
+  "source": "question-v2",
+  "figure": "question",
+  "meaning": "a question, help",
+  "hasActive": true
+ },
+ {
+  "name": "question-bubble",
+  "hand": "h31",
+  "source": "question-v3",
+  "figure": "question",
+  "meaning": "a question, help",
+  "hasActive": true
+ },
+ {
+  "name": "life-ring",
+  "hand": "h31",
+  "source": "question-v4",
+  "figure": "question",
+  "meaning": "a question, help",
+  "hasActive": true
+ },
+ {
+  "name": "question-mark-dot",
+  "hand": "h32",
+  "source": "question-v2",
+  "figure": "question",
+  "meaning": "a question, help",
+  "hasActive": true
+ },
+ {
+  "name": "question-bubble-chat",
+  "hand": "h32",
+  "source": "question-v3",
+  "figure": "question",
+  "meaning": "a question, help",
+  "hasActive": true
+ },
+ {
+  "name": "question-mark",
+  "hand": "h33",
+  "source": "question-v1",
+  "figure": "question",
+  "meaning": "a question, help",
+  "hasActive": true
+ },
+ {
+  "name": "exclamation-circle",
+  "hand": "h31",
+  "source": "alert-v1",
+  "figure": "alert",
+  "meaning": "pay attention: something needs you (mildest of alert, warning, danger)",
+  "hasActive": true
+ },
+ {
+  "name": "pebble-exclamation",
+  "hand": "h31",
+  "source": "alert-v2",
+  "figure": "alert",
+  "meaning": "pay attention: something needs you (mildest of alert, warning, danger)",
+  "hasActive": true
+ },
+ {
+  "name": "gauge-low",
+  "hand": "h31",
+  "source": "alert-v4",
+  "figure": "alert",
+  "meaning": "pay attention: something needs you (mildest of alert, warning, danger)",
+  "hasActive": true
+ },
+ {
+  "name": "info-circle",
+  "hand": "h32",
+  "source": "alert-v1",
+  "figure": "alert",
+  "meaning": "pay attention: something needs you (mildest of alert, warning, danger)",
+  "hasActive": true
+ },
+ {
+  "name": "exclamation-bold",
+  "hand": "h32",
+  "source": "alert-v2",
+  "figure": "alert",
+  "meaning": "pay attention: something needs you (mildest of alert, warning, danger)",
+  "hasActive": true
+ },
+ {
+  "name": "info-sign",
+  "hand": "h32",
+  "source": "alert-v3",
+  "figure": "alert",
+  "meaning": "pay attention: something needs you (mildest of alert, warning, danger)",
+  "hasActive": true
+ },
+ {
+  "name": "drop-water-ripple",
+  "hand": "h33",
+  "source": "alert-v3",
+  "figure": "alert",
+  "meaning": "pay attention: something needs you (mildest of alert, warning, danger)",
+  "hasActive": true
+ },
+ {
+  "name": "alert-shine",
+  "hand": "h33",
+  "source": "alert-v4",
+  "figure": "alert",
+  "meaning": "pay attention: something needs you (mildest of alert, warning, danger)",
+  "hasActive": true
+ },
+ {
+  "name": "eye-open-1",
+  "hand": "h33",
+  "source": "alert-v5",
+  "figure": "alert",
+  "meaning": "pay attention: something needs you (mildest of alert, warning, danger)",
+  "hasActive": true
+ },
+ {
+  "name": "exclamation-triangle",
+  "hand": "h31",
+  "source": "warning-v1",
+  "figure": "warning",
+  "meaning": "careful: a risk ahead (middle)",
+  "hasActive": true
+ },
+ {
+  "name": "cloud-zap-2",
+  "hand": "h31",
+  "source": "warning-v5",
+  "figure": "warning",
+  "meaning": "careful: a risk ahead (middle)",
+  "hasActive": true
+ },
+ {
+  "name": "exclamation-double",
+  "hand": "h32",
+  "source": "warning-v5",
+  "figure": "warning",
+  "meaning": "careful: a risk ahead (middle)",
+  "hasActive": true
+ },
+ {
+  "name": "cairn-fall",
+  "hand": "h33",
+  "source": "warning-v2",
+  "figure": "warning",
+  "meaning": "careful: a risk ahead (middle)",
+  "hasActive": true
+ },
+ {
+  "name": "skull-x",
+  "hand": "h31",
+  "source": "danger-v1",
+  "figure": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-stone-movement",
+  "hand": "h31",
+  "source": "danger-v2",
+  "figure": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "hasActive": true
+ },
+ {
+  "name": "pebble-tear",
+  "hand": "h31",
+  "source": "danger-v3",
+  "figure": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "hasActive": true
+ },
+ {
+  "name": "pyramid-layers-reversed",
+  "hand": "h31",
+  "source": "danger-v5",
+  "figure": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "hasActive": true
+ },
+ {
+  "name": "exclamation-bold-lakshmi",
+  "hand": "h32",
+  "source": "danger-v2",
+  "figure": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "hasActive": true
+ },
+ {
+  "name": "x-sign",
+  "hand": "h32",
+  "source": "danger-v3",
+  "figure": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "hasActive": true
+ },
+ {
+  "name": "exclamation-triple",
+  "hand": "h32",
+  "source": "danger-v5",
+  "figure": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "hasActive": true
+ },
+ {
+  "name": "exclamation-double-lakshmi",
+  "hand": "h33",
+  "source": "danger-v1",
+  "figure": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "hasActive": true
+ },
+ {
+  "name": "karma-dot-2",
+  "hand": "h33",
+  "source": "danger-v3",
+  "figure": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "hasActive": true
+ },
+ {
+  "name": "flame",
+  "hand": "h33",
+  "source": "danger-v4",
+  "figure": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "hasActive": true
+ },
+ {
+  "name": "skull",
+  "hand": "h33",
+  "source": "danger-v5",
+  "figure": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "hasActive": true
+ },
+ {
+  "name": "stop-circle",
+  "hand": "h31",
+  "source": "stop-v2",
+  "figure": "stop",
+  "meaning": "stop, halt",
+  "hasActive": true
+ },
+ {
+  "name": "anchor",
+  "hand": "h31",
+  "source": "stop-v5",
+  "figure": "stop",
+  "meaning": "stop, halt",
+  "hasActive": true
+ },
+ {
+  "name": "minus-sign",
+  "hand": "h32",
+  "source": "stop-v3",
+  "figure": "stop",
+  "meaning": "stop, halt",
+  "hasActive": true
+ },
+ {
+  "name": "hand-palm",
+  "hand": "h32",
+  "source": "stop-v5",
+  "figure": "stop",
+  "meaning": "stop, halt",
+  "hasActive": true
+ },
+ {
+  "name": "hand-stone",
+  "hand": "h33",
+  "source": "stop-v2",
+  "figure": "stop",
+  "meaning": "stop, halt",
+  "hasActive": true
+ },
+ {
+  "name": "toggle-off",
+  "hand": "h31",
+  "source": "disabled-v1",
+  "figure": "disabled",
+  "meaning": "not available, turned off",
+  "hasActive": true
+ },
+ {
+  "name": "pebble-zz",
+  "hand": "h31",
+  "source": "disabled-v4",
+  "figure": "disabled",
+  "meaning": "not available, turned off",
+  "hasActive": true
+ },
+ {
+  "name": "power-off",
+  "hand": "h32",
+  "source": "disabled-v2",
+  "figure": "disabled",
+  "meaning": "not available, turned off",
+  "hasActive": true
+ },
+ {
+  "name": "exclamation-off",
+  "hand": "h33",
+  "source": "disabled-v2",
+  "figure": "disabled",
+  "meaning": "not available, turned off",
+  "hasActive": true
+ },
+ {
+  "name": "circle-dot",
+  "hand": "h33",
+  "source": "disabled-v4",
+  "figure": "disabled",
+  "meaning": "not available, turned off",
+  "hasActive": true
+ },
+ {
+  "name": "crab",
+  "hand": "h31",
+  "source": "crab-v1",
+  "figure": "crab",
+  "meaning": "a crab",
+  "hasActive": true
+ },
+ {
+  "name": "shell",
+  "hand": "h31",
+  "source": "crab-v3",
+  "figure": "crab",
+  "meaning": "a crab",
+  "hasActive": true
+ },
+ {
+  "name": "crab-2",
+  "hand": "h32",
+  "source": "crab-v1",
+  "figure": "crab",
+  "meaning": "a crab",
+  "hasActive": true
+ },
+ {
+  "name": "crab-bell",
+  "hand": "h32",
+  "source": "crab-v5",
+  "figure": "crab",
+  "meaning": "a crab",
+  "hasActive": true
+ },
+ {
+  "name": "crab-3",
+  "hand": "h33",
+  "source": "crab-v1",
+  "figure": "crab",
+  "meaning": "a crab",
+  "hasActive": true
+ },
+ {
+  "name": "crab-clamp",
+  "hand": "h33",
+  "source": "crab-v2",
+  "figure": "crab",
+  "meaning": "a crab",
+  "hasActive": true
+ },
+ {
+  "name": "crab-dots",
+  "hand": "h33",
+  "source": "crab-v3",
+  "figure": "crab",
+  "meaning": "a crab",
+  "hasActive": true
+ },
+ {
+  "name": "shrimp",
+  "hand": "h33",
+  "source": "crab-v5",
+  "figure": "crab",
+  "meaning": "a crab",
+  "hasActive": true
+ },
+ {
+  "name": "dot-ripple",
+  "hand": "h31",
+  "source": "ripple-v1",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "pin-ripple",
+  "hand": "h31",
+  "source": "ripple-v2",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "water-drop-up",
+  "hand": "h31",
+  "source": "ripple-v4",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "dot-wave",
+  "hand": "h31",
+  "source": "ripple-v5",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "ripple",
+  "hand": "h32",
+  "source": "ripple-v1",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "ripple-ring",
+  "hand": "h32",
+  "source": "ripple-v2",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "ripple-left",
+  "hand": "h32",
+  "source": "ripple-v3",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "stone-waves",
+  "hand": "h32",
+  "source": "ripple-v4",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "karma-center",
+  "hand": "h32",
+  "source": "ripple-v5",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "ripple-symmetry",
+  "hand": "h33",
+  "source": "ripple-v2",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "water-drop",
+  "hand": "h33",
+  "source": "ripple-v3",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "circles-dot",
+  "hand": "h33",
+  "source": "ripple-v4",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "wood",
+  "hand": "h33",
+  "source": "ripple-v5",
+  "figure": "ripple",
+  "meaning": "a ripple spreading on water",
+  "hasActive": true
+ },
+ {
+  "name": "stones-steps-sea",
+  "hand": "h31",
+  "source": "stepping-stone-v2",
+  "figure": "stepping-stone",
+  "meaning": "a stone you step on to cross",
+  "hasActive": true
+ },
+ {
+  "name": "stones-steps-3",
+  "hand": "h33",
+  "source": "stepping-stone-v1",
+  "figure": "stepping-stone",
+  "meaning": "a stone you step on to cross",
+  "hasActive": true
+ },
+ {
+  "name": "stone-sound-right-2",
+  "hand": "h31",
+  "source": "sound-v2",
+  "figure": "sound",
+  "meaning": "sound on, a speaker",
+  "hasActive": true
+ },
+ {
+  "name": "megaphone",
+  "hand": "h31",
+  "source": "sound-v3",
+  "figure": "sound",
+  "meaning": "sound on, a speaker",
+  "hasActive": true
+ },
+ {
+  "name": "ear",
+  "hand": "h31",
+  "source": "sound-v4",
+  "figure": "sound",
+  "meaning": "sound on, a speaker",
+  "hasActive": true
+ },
+ {
+  "name": "drums",
+  "hand": "h31",
+  "source": "sound-v5",
+  "figure": "sound",
+  "meaning": "sound on, a speaker",
+  "hasActive": true
+ },
+ {
+  "name": "speaker",
+  "hand": "h32",
+  "source": "sound-v5",
+  "figure": "sound",
+  "meaning": "sound on, a speaker",
+  "hasActive": true
+ },
+ {
+  "name": "sound-on",
+  "hand": "h33",
+  "source": "sound-v1",
+  "figure": "sound",
+  "meaning": "sound on, a speaker",
+  "hasActive": true
+ },
+ {
+  "name": "stone-sound-right-3",
+  "hand": "h33",
+  "source": "sound-v2",
+  "figure": "sound",
+  "meaning": "sound on, a speaker",
+  "hasActive": true
+ },
+ {
+  "name": "speaker-dot",
+  "hand": "h33",
+  "source": "sound-v4",
+  "figure": "sound",
+  "meaning": "sound on, a speaker",
+  "hasActive": true
+ },
+ {
+  "name": "microphone",
+  "hand": "h32",
+  "source": "microphone-v1",
+  "figure": "microphone",
+  "meaning": "a microphone, record your voice",
+  "hasActive": true
+ },
+ {
+  "name": "microphone-high",
+  "hand": "h32",
+  "source": "microphone-v5",
+  "figure": "microphone",
+  "meaning": "a microphone, record your voice",
+  "hasActive": true
+ },
+ {
+  "name": "microphone-arc",
+  "hand": "h33",
+  "source": "microphone-v1",
+  "figure": "microphone",
+  "meaning": "a microphone, record your voice",
+  "hasActive": true
+ },
+ {
+  "name": "microphone-wire",
+  "hand": "h33",
+  "source": "microphone-v5",
+  "figure": "microphone",
+  "meaning": "a microphone, record your voice",
+  "hasActive": true
+ },
+ {
+  "name": "file-audio",
+  "hand": "h31",
+  "source": "audio-v1",
+  "figure": "audio",
+  "meaning": "an audio file, a recording to play",
+  "hasActive": true
+ },
+ {
+  "name": "tape-audio",
+  "hand": "h31",
+  "source": "audio-v2",
+  "figure": "audio",
+  "meaning": "an audio file, a recording to play",
+  "hasActive": true
+ },
+ {
+  "name": "vinyl",
+  "hand": "h31",
+  "source": "audio-v4",
+  "figure": "audio",
+  "meaning": "an audio file, a recording to play",
+  "hasActive": true
+ },
+ {
+  "name": "headset",
+  "hand": "h31",
+  "source": "audio-v5",
+  "figure": "audio",
+  "meaning": "an audio file, a recording to play",
+  "hasActive": true
+ },
+ {
+  "name": "blaster",
+  "hand": "h32",
+  "source": "audio-v4",
+  "figure": "audio",
+  "meaning": "an audio file, a recording to play",
+  "hasActive": true
+ },
+ {
+  "name": "play-circle",
+  "hand": "h33",
+  "source": "audio-v4",
+  "figure": "audio",
+  "meaning": "an audio file, a recording to play",
+  "hasActive": true
+ },
+ {
+  "name": "waveform",
+  "hand": "h31",
+  "source": "waveform-v1",
+  "figure": "waveform",
+  "meaning": "the shape of a sound",
+  "hasActive": true
+ },
+ {
+  "name": "signal-dot",
+  "hand": "h31",
+  "source": "waveform-v2",
+  "figure": "waveform",
+  "meaning": "the shape of a sound",
+  "hasActive": true
+ },
+ {
+  "name": "waveform-bold-2",
+  "hand": "h31",
+  "source": "waveform-v3",
+  "figure": "waveform",
+  "meaning": "the shape of a sound",
+  "hasActive": true
+ },
+ {
+  "name": "mountains-underline",
+  "hand": "h31",
+  "source": "waveform-v5",
+  "figure": "waveform",
+  "meaning": "the shape of a sound",
+  "hasActive": true
+ },
+ {
+  "name": "sun-shine-bright-2",
+  "hand": "h32",
+  "source": "waveform-v4",
+  "figure": "waveform",
+  "meaning": "the shape of a sound",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-wave",
+  "hand": "h32",
+  "source": "waveform-v5",
+  "figure": "waveform",
+  "meaning": "the shape of a sound",
+  "hasActive": true
+ },
+ {
+  "name": "waveform-bold",
+  "hand": "h33",
+  "source": "waveform-v2",
+  "figure": "waveform",
+  "meaning": "the shape of a sound",
+  "hasActive": true
+ },
+ {
+  "name": "signal",
+  "hand": "h33",
+  "source": "waveform-v3",
+  "figure": "waveform",
+  "meaning": "the shape of a sound",
+  "hasActive": true
+ },
+ {
+  "name": "waveform-dots",
+  "hand": "h33",
+  "source": "waveform-v4",
+  "figure": "waveform",
+  "meaning": "the shape of a sound",
+  "hasActive": true
+ },
+ {
+  "name": "waveform-clip",
+  "hand": "h33",
+  "source": "waveform-v5",
+  "figure": "waveform",
+  "meaning": "the shape of a sound",
+  "hasActive": true
+ },
+ {
+  "name": "cairn-signal",
+  "hand": "h31",
+  "source": "signal-v5",
+  "figure": "signal",
+  "meaning": "signal strength, a connection",
+  "hasActive": true
+ },
+ {
+  "name": "radio-signal",
+  "hand": "h32",
+  "source": "signal-v2",
+  "figure": "signal",
+  "meaning": "signal strength, a connection",
+  "hasActive": true
+ },
+ {
+  "name": "code-morse",
+  "hand": "h32",
+  "source": "signal-v3",
+  "figure": "signal",
+  "meaning": "signal strength, a connection",
+  "hasActive": true
+ },
+ {
+  "name": "stones-step-up",
+  "hand": "h33",
+  "source": "signal-v5",
+  "figure": "signal",
+  "meaning": "signal strength, a connection",
+  "hasActive": true
+ },
+ {
+  "name": "sound-x",
+  "hand": "h31",
+  "source": "mute-v1",
+  "figure": "mute",
+  "meaning": "sound off",
+  "hasActive": true
+ },
+ {
+  "name": "pebble-off",
+  "hand": "h31",
+  "source": "mute-v2",
+  "figure": "mute",
+  "meaning": "sound off",
+  "hasActive": true
+ },
+ {
+  "name": "sound-off",
+  "hand": "h32",
+  "source": "mute-v2",
+  "figure": "mute",
+  "meaning": "sound off",
+  "hasActive": true
+ },
+ {
+  "name": "ear-off",
+  "hand": "h32",
+  "source": "mute-v3",
+  "figure": "mute",
+  "meaning": "sound off",
+  "hasActive": true
+ },
+ {
+  "name": "segment",
+  "hand": "h32",
+  "source": "mute-v4",
+  "figure": "mute",
+  "meaning": "sound off",
+  "hasActive": true
+ },
+ {
+  "name": "micro-off",
+  "hand": "h32",
+  "source": "mute-v5",
+  "figure": "mute",
+  "meaning": "sound off",
+  "hasActive": true
+ },
+ {
+  "name": "speaker-off",
+  "hand": "h33",
+  "source": "mute-v4",
+  "figure": "mute",
+  "meaning": "sound off",
+  "hasActive": true
+ },
+ {
+  "name": "faucet",
+  "hand": "h31",
+  "source": "water-v2",
+  "figure": "water",
+  "meaning": "water",
+  "hasActive": true
+ },
+ {
+  "name": "pound",
+  "hand": "h31",
+  "source": "water-v3",
+  "figure": "water",
+  "meaning": "water",
+  "hasActive": true
+ },
+ {
+  "name": "bottle-closed",
+  "hand": "h31",
+  "source": "water-v4",
+  "figure": "water",
+  "meaning": "water",
+  "hasActive": true
+ },
+ {
+  "name": "water-drop-wave",
+  "hand": "h32",
+  "source": "water-v1",
+  "figure": "water",
+  "meaning": "water",
+  "hasActive": true
+ },
+ {
+  "name": "water-well",
+  "hand": "h32",
+  "source": "water-v2",
+  "figure": "water",
+  "meaning": "water",
+  "hasActive": true
+ },
+ {
+  "name": "glass-stone",
+  "hand": "h33",
+  "source": "water-v2",
+  "figure": "water",
+  "meaning": "water",
+  "hasActive": true
+ },
+ {
+  "name": "waves-sun",
+  "hand": "h31",
+  "source": "wave-v2",
+  "figure": "wave",
+  "meaning": "a wave of the sea",
+  "hasActive": true
+ },
+ {
+  "name": "hand-wave",
+  "hand": "h31",
+  "source": "wave-v3",
+  "figure": "wave",
+  "meaning": "a wave of the sea",
+  "hasActive": true
+ },
+ {
+  "name": "stone-wave",
+  "hand": "h31",
+  "source": "wave-v5",
+  "figure": "wave",
+  "meaning": "a wave of the sea",
+  "hasActive": true
+ },
+ {
+  "name": "boat-wave",
+  "hand": "h32",
+  "source": "wave-v2",
+  "figure": "wave",
+  "meaning": "a wave of the sea",
+  "hasActive": true
+ },
+ {
+  "name": "wave-up",
+  "hand": "h33",
+  "source": "wave-v1",
+  "figure": "wave",
+  "meaning": "a wave of the sea",
+  "hasActive": true
+ },
+ {
+  "name": "seats",
+  "hand": "h33",
+  "source": "wave-v3",
+  "figure": "wave",
+  "meaning": "a wave of the sea",
+  "hasActive": true
+ },
+ {
+  "name": "wave-draw",
+  "hand": "h33",
+  "source": "wave-v5",
+  "figure": "wave",
+  "meaning": "a wave of the sea",
+  "hasActive": true
+ },
+ {
+  "name": "chip-label",
+  "hand": "h31",
+  "source": "url-v1",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "protocol",
+  "hand": "h31",
+  "source": "url-v2",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "sign",
+  "hand": "h31",
+  "source": "url-v3",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "stone-12",
+  "hand": "h31",
+  "source": "url-v4",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "web",
+  "hand": "h31",
+  "source": "url-v5",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "window",
+  "hand": "h32",
+  "source": "url-v2",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "globe",
+  "hand": "h32",
+  "source": "url-v3",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "at",
+  "hand": "h32",
+  "source": "url-v4",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "pills-cursor",
+  "hand": "h32",
+  "source": "url-v5",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "search-bar",
+  "hand": "h33",
+  "source": "url-v1",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "slash-slash-dot",
+  "hand": "h33",
+  "source": "url-v2",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "unset-input",
+  "hand": "h33",
+  "source": "url-v3",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "qr-code",
+  "hand": "h33",
+  "source": "url-v5",
+  "figure": "url",
+  "meaning": "a web address",
+  "hasActive": true
+ },
+ {
+  "name": "link",
+  "hand": "h31",
+  "source": "link-v1",
+  "figure": "link",
+  "meaning": "a link between two things",
+  "hasActive": true
+ },
+ {
+  "name": "bridge",
+  "hand": "h31",
+  "source": "link-v4",
+  "figure": "link",
+  "meaning": "a link between two things",
+  "hasActive": true
+ },
+ {
+  "name": "wave-connect",
+  "hand": "h32",
+  "source": "link-v3",
+  "figure": "link",
+  "meaning": "a link between two things",
+  "hasActive": true
+ },
+ {
+  "name": "link-k",
+  "hand": "h33",
+  "source": "link-v1",
+  "figure": "link",
+  "meaning": "a link between two things",
+  "hasActive": true
+ },
+ {
+  "name": "stones-link",
+  "hand": "h33",
+  "source": "link-v2",
+  "figure": "link",
+  "meaning": "a link between two things",
+  "hasActive": true
+ },
+ {
+  "name": "bridge-2",
+  "hand": "h33",
+  "source": "link-v3",
+  "figure": "link",
+  "meaning": "a link between two things",
+  "hasActive": true
+ },
+ {
+  "name": "circles-joined",
+  "hand": "h33",
+  "source": "link-v4",
+  "figure": "link",
+  "meaning": "a link between two things",
+  "hasActive": true
+ },
+ {
+  "name": "network",
+  "hand": "h33",
+  "source": "link-v5",
+  "figure": "link",
+  "meaning": "a link between two things",
+  "hasActive": true
+ },
+ {
+  "name": "soccer-ball",
+  "hand": "h31",
+  "source": "soccer-v1",
+  "figure": "soccer",
+  "meaning": "a football (soccer ball)",
+  "hasActive": true
+ },
+ {
+  "name": "stone-speed-right",
+  "hand": "h31",
+  "source": "soccer-v2",
+  "figure": "soccer",
+  "meaning": "a football (soccer ball)",
+  "hasActive": true
+ },
+ {
+  "name": "goal",
+  "hand": "h31",
+  "source": "soccer-v3",
+  "figure": "soccer",
+  "meaning": "a football (soccer ball)",
+  "hasActive": true
+ },
+ {
+  "name": "soccer-field",
+  "hand": "h32",
+  "source": "soccer-v4",
+  "figure": "soccer",
+  "meaning": "a football (soccer ball)",
+  "hasActive": true
+ },
+ {
+  "name": "dot-circle-line",
+  "hand": "h33",
+  "source": "soccer-v3",
+  "figure": "soccer",
+  "meaning": "a football (soccer ball)",
+  "hasActive": true
+ },
+ {
+  "name": "farandole-circle",
+  "hand": "h33",
+  "source": "soccer-v5",
+  "figure": "soccer",
+  "meaning": "a football (soccer ball)",
+  "hasActive": true
+ },
+ {
+  "name": "basketball-basket",
+  "hand": "h31",
+  "source": "basketball-v4",
+  "figure": "basketball",
+  "meaning": "a basketball",
+  "hasActive": true
+ },
+ {
+  "name": "basketball",
+  "hand": "h33",
+  "source": "basketball-v1",
+  "figure": "basketball",
+  "meaning": "a basketball",
+  "hasActive": true
+ },
+ {
+  "name": "play-screen",
+  "hand": "h31",
+  "source": "tv-v1",
+  "figure": "tv",
+  "meaning": "a television",
+  "hasActive": true
+ },
+ {
+  "name": "tv-dot",
+  "hand": "h31",
+  "source": "tv-v2",
+  "figure": "tv",
+  "meaning": "a television",
+  "hasActive": true
+ },
+ {
+  "name": "remote",
+  "hand": "h31",
+  "source": "tv-v3",
+  "figure": "tv",
+  "meaning": "a television",
+  "hasActive": true
+ },
+ {
+  "name": "presentation-stone",
+  "hand": "h31",
+  "source": "tv-v4",
+  "figure": "tv",
+  "meaning": "a television",
+  "hasActive": true
+ },
+ {
+  "name": "tv-dots",
+  "hand": "h32",
+  "source": "tv-v1",
+  "figure": "tv",
+  "meaning": "a television",
+  "hasActive": true
+ },
+ {
+  "name": "presentation-picture",
+  "hand": "h32",
+  "source": "tv-v3",
+  "figure": "tv",
+  "meaning": "a television",
+  "hasActive": true
+ },
+ {
+  "name": "presentation-text",
+  "hand": "h32",
+  "source": "tv-v5",
+  "figure": "tv",
+  "meaning": "a television",
+  "hasActive": true
+ },
+ {
+  "name": "tv",
+  "hand": "h33",
+  "source": "tv-v1",
+  "figure": "tv",
+  "meaning": "a television",
+  "hasActive": true
+ },
+ {
+  "name": "tv-picture",
+  "hand": "h33",
+  "source": "tv-v2",
+  "figure": "tv",
+  "meaning": "a television",
+  "hasActive": true
+ },
+ {
+  "name": "phone",
+  "hand": "h31",
+  "source": "phone-v2",
+  "figure": "phone",
+  "meaning": "a phone",
+  "hasActive": true
+ },
+ {
+  "name": "smartphone",
+  "hand": "h33",
+  "source": "phone-v1",
+  "figure": "phone",
+  "meaning": "a phone",
+  "hasActive": true
+ },
+ {
+  "name": "phone-ring",
+  "hand": "h33",
+  "source": "phone-v2",
+  "figure": "phone",
+  "meaning": "a phone",
+  "hasActive": true
+ },
+ {
+  "name": "android",
+  "hand": "h31",
+  "source": "android-v2",
+  "figure": "android",
+  "meaning": "the Android platform mark, its robot head, redrawn in the house hand",
+  "hasActive": true
+ },
+ {
+  "name": "android-head",
+  "hand": "h32",
+  "source": "android-v1",
+  "figure": "android",
+  "meaning": "the Android platform mark, its robot head, redrawn in the house hand",
+  "hasActive": true
+ },
+ {
+  "name": "android-head-2",
+  "hand": "h33",
+  "source": "android-v1",
+  "figure": "android",
+  "meaning": "the Android platform mark, its robot head, redrawn in the house hand",
+  "hasActive": true
+ },
+ {
+  "name": "robot-stones-arms-up",
+  "hand": "h31",
+  "source": "robot-v3",
+  "figure": "robot",
+  "meaning": "a robot",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-circle-line",
+  "hand": "h31",
+  "source": "robot-v4",
+  "figure": "robot",
+  "meaning": "a robot",
+  "hasActive": true
+ },
+ {
+  "name": "clamp",
+  "hand": "h31",
+  "source": "robot-v5",
+  "figure": "robot",
+  "meaning": "a robot",
+  "hasActive": true
+ },
+ {
+  "name": "robot",
+  "hand": "h32",
+  "source": "robot-v1",
+  "figure": "robot",
+  "meaning": "a robot",
+  "hasActive": true
+ },
+ {
+  "name": "robot-head",
+  "hand": "h33",
+  "source": "robot-v1",
+  "figure": "robot",
+  "meaning": "a robot",
+  "hasActive": true
+ },
+ {
+  "name": "robot-stones-arms-down",
+  "hand": "h33",
+  "source": "robot-v3",
+  "figure": "robot",
+  "meaning": "a robot",
+  "hasActive": true
+ },
+ {
+  "name": "robot-fun",
+  "hand": "h33",
+  "source": "robot-v4",
+  "figure": "robot",
+  "meaning": "a robot",
+  "hasActive": true
+ },
+ {
+  "name": "apple-leaf",
+  "hand": "h31",
+  "source": "apple-v1",
+  "figure": "apple",
+  "meaning": "an apple, the fruit",
+  "hasActive": true
+ },
+ {
+  "name": "apple-x",
+  "hand": "h31",
+  "source": "apple-v3",
+  "figure": "apple",
+  "meaning": "an apple, the fruit",
+  "hasActive": true
+ },
+ {
+  "name": "apple-branch",
+  "hand": "h31",
+  "source": "apple-v5",
+  "figure": "apple",
+  "meaning": "an apple, the fruit",
+  "hasActive": true
+ },
+ {
+  "name": "apple",
+  "hand": "h32",
+  "source": "apple-v1",
+  "figure": "apple",
+  "meaning": "an apple, the fruit",
+  "hasActive": true
+ },
+ {
+  "name": "hourglass-k",
+  "hand": "h32",
+  "source": "apple-v3",
+  "figure": "apple",
+  "meaning": "an apple, the fruit",
+  "hasActive": true
+ },
+ {
+  "name": "orange-2",
+  "hand": "h32",
+  "source": "apple-v4",
+  "figure": "apple",
+  "meaning": "an apple, the fruit",
+  "hasActive": true
+ },
+ {
+  "name": "apple-seeds",
+  "hand": "h33",
+  "source": "apple-v3",
+  "figure": "apple",
+  "meaning": "an apple, the fruit",
+  "hasActive": true
+ },
+ {
+  "name": "circles-dots",
+  "hand": "h31",
+  "source": "banana-v4",
+  "figure": "banana",
+  "meaning": "a banana",
+  "hasActive": true
+ },
+ {
+  "name": "boat-wave-2",
+  "hand": "h31",
+  "source": "banana-v5",
+  "figure": "banana",
+  "meaning": "a banana",
+  "hasActive": true
+ },
+ {
+  "name": "pineapple",
+  "hand": "h31",
+  "source": "pineapple-v1",
+  "figure": "pineapple",
+  "meaning": "a pineapple",
+  "hasActive": true
+ },
+ {
+  "name": "plant",
+  "hand": "h31",
+  "source": "pineapple-v4",
+  "figure": "pineapple",
+  "meaning": "a pineapple",
+  "hasActive": true
+ },
+ {
+  "name": "bomb",
+  "hand": "h32",
+  "source": "pineapple-v4",
+  "figure": "pineapple",
+  "meaning": "a pineapple",
+  "hasActive": true
+ },
+ {
+  "name": "v-slice",
+  "hand": "h32",
+  "source": "pineapple-v5",
+  "figure": "pineapple",
+  "meaning": "a pineapple",
+  "hasActive": true
+ },
+ {
+  "name": "wheel",
+  "hand": "h33",
+  "source": "pineapple-v2",
+  "figure": "pineapple",
+  "meaning": "a pineapple",
+  "hasActive": true
+ },
+ {
+  "name": "grenada",
+  "hand": "h33",
+  "source": "pineapple-v5",
+  "figure": "pineapple",
+  "meaning": "a pineapple",
+  "hasActive": true
+ },
+ {
+  "name": "fork-knife",
+  "hand": "h31",
+  "source": "food-v1",
+  "figure": "food",
+  "meaning": "food",
+  "hasActive": true
+ },
+ {
+  "name": "meal-hot-stone",
+  "hand": "h31",
+  "source": "food-v2",
+  "figure": "food",
+  "meaning": "food",
+  "hasActive": true
+ },
+ {
+  "name": "egg-fried-2",
+  "hand": "h31",
+  "source": "food-v3",
+  "figure": "food",
+  "meaning": "food",
+  "hasActive": true
+ },
+ {
+  "name": "meal-hot",
+  "hand": "h32",
+  "source": "food-v2",
+  "figure": "food",
+  "meaning": "food",
+  "hasActive": true
+ },
+ {
+  "name": "bread",
+  "hand": "h32",
+  "source": "food-v5",
+  "figure": "food",
+  "meaning": "food",
+  "hasActive": true
+ },
+ {
+  "name": "carrot",
+  "hand": "h33",
+  "source": "food-v3",
+  "figure": "food",
+  "meaning": "food",
+  "hasActive": true
+ },
+ {
+  "name": "plate-cutlery",
+  "hand": "h31",
+  "source": "meal-v1",
+  "figure": "meal",
+  "meaning": "a meal at the table",
+  "hasActive": true
+ },
+ {
+  "name": "meal-cloche",
+  "hand": "h31",
+  "source": "meal-v3",
+  "figure": "meal",
+  "meaning": "a meal at the table",
+  "hasActive": true
+ },
+ {
+  "name": "cooker",
+  "hand": "h31",
+  "source": "meal-v4",
+  "figure": "meal",
+  "meaning": "a meal at the table",
+  "hasActive": true
+ },
+ {
+  "name": "game-board",
+  "hand": "h31",
+  "source": "meal-v5",
+  "figure": "meal",
+  "meaning": "a meal at the table",
+  "hasActive": true
+ },
+ {
+  "name": "table-meal-hot",
+  "hand": "h32",
+  "source": "meal-v1",
+  "figure": "meal",
+  "meaning": "a meal at the table",
+  "hasActive": true
+ },
+ {
+  "name": "people-table",
+  "hand": "h32",
+  "source": "meal-v3",
+  "figure": "meal",
+  "meaning": "a meal at the table",
+  "hasActive": true
+ },
+ {
+  "name": "meal-sticks",
+  "hand": "h32",
+  "source": "meal-v4",
+  "figure": "meal",
+  "meaning": "a meal at the table",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-fork-dot",
+  "hand": "h32",
+  "source": "meal-v5",
+  "figure": "meal",
+  "meaning": "a meal at the table",
+  "hasActive": true
+ },
+ {
+  "name": "binoculars-row",
+  "hand": "h33",
+  "source": "meal-v2",
+  "figure": "meal",
+  "meaning": "a meal at the table",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-square-layer-dots",
+  "hand": "h33",
+  "source": "meal-v5",
+  "figure": "meal",
+  "meaning": "a meal at the table",
+  "hasActive": true
+ },
+ {
+  "name": "christmas-ball",
+  "hand": "h31",
+  "source": "christmas-v2",
+  "figure": "christmas",
+  "meaning": "Christmas",
+  "hasActive": true
+ },
+ {
+  "name": "sock",
+  "hand": "h31",
+  "source": "christmas-v4",
+  "figure": "christmas",
+  "meaning": "Christmas",
+  "hasActive": true
+ },
+ {
+  "name": "gift",
+  "hand": "h32",
+  "source": "christmas-v4",
+  "figure": "christmas",
+  "meaning": "Christmas",
+  "hasActive": true
+ },
+ {
+  "name": "christmas-tree",
+  "hand": "h33",
+  "source": "christmas-v1",
+  "figure": "christmas",
+  "meaning": "Christmas",
+  "hasActive": true
+ },
+ {
+  "name": "church",
+  "hand": "h33",
+  "source": "christmas-v5",
+  "figure": "christmas",
+  "meaning": "Christmas",
+  "hasActive": true
+ },
+ {
+  "name": "pine-lines",
+  "hand": "h31",
+  "source": "pine-v1",
+  "figure": "pine",
+  "meaning": "a pine tree",
+  "hasActive": true
+ },
+ {
+  "name": "pine-cone",
+  "hand": "h31",
+  "source": "pine-v2",
+  "figure": "pine",
+  "meaning": "a pine tree",
+  "hasActive": true
+ },
+ {
+  "name": "pines",
+  "hand": "h31",
+  "source": "pine-v4",
+  "figure": "pine",
+  "meaning": "a pine tree",
+  "hasActive": true
+ },
+ {
+  "name": "pine-chevrons",
+  "hand": "h32",
+  "source": "pine-v1",
+  "figure": "pine",
+  "meaning": "a pine tree",
+  "hasActive": true
+ },
+ {
+  "name": "pine-tree",
+  "hand": "h32",
+  "source": "pine-v4",
+  "figure": "pine",
+  "meaning": "a pine tree",
+  "hasActive": true
+ },
+ {
+  "name": "pine",
+  "hand": "h33",
+  "source": "pine-v1",
+  "figure": "pine",
+  "meaning": "a pine tree",
+  "hasActive": true
+ },
+ {
+  "name": "pine-stack",
+  "hand": "h33",
+  "source": "pine-v5",
+  "figure": "pine",
+  "meaning": "a pine tree",
+  "hasActive": true
+ },
+ {
+  "name": "tree",
+  "hand": "h31",
+  "source": "tree-v1",
+  "figure": "tree",
+  "meaning": "a broad-leaf tree",
+  "hasActive": true
+ },
+ {
+  "name": "tree-ball",
+  "hand": "h31",
+  "source": "tree-v2",
+  "figure": "tree",
+  "meaning": "a broad-leaf tree",
+  "hasActive": true
+ },
+ {
+  "name": "tree-branches",
+  "hand": "h31",
+  "source": "tree-v3",
+  "figure": "tree",
+  "meaning": "a broad-leaf tree",
+  "hasActive": true
+ },
+ {
+  "name": "acorn",
+  "hand": "h33",
+  "source": "tree-v4",
+  "figure": "tree",
+  "meaning": "a broad-leaf tree",
+  "hasActive": true
+ },
+ {
+  "name": "train-front",
+  "hand": "h31",
+  "source": "train-v1",
+  "figure": "train",
+  "meaning": "a train",
+  "hasActive": true
+ },
+ {
+  "name": "train",
+  "hand": "h32",
+  "source": "train-v2",
+  "figure": "train",
+  "meaning": "a train",
+  "hasActive": true
+ },
+ {
+  "name": "train-underline",
+  "hand": "h33",
+  "source": "train-v2",
+  "figure": "train",
+  "meaning": "a train",
+  "hasActive": true
+ },
+ {
+  "name": "train-ticket",
+  "hand": "h33",
+  "source": "train-v5",
+  "figure": "train",
+  "meaning": "a train",
+  "hasActive": true
+ },
+ {
+  "name": "flame-drop",
+  "hand": "h31",
+  "source": "fire-v2",
+  "figure": "fire",
+  "meaning": "fire, a flame",
+  "hasActive": true
+ },
+ {
+  "name": "fire",
+  "hand": "h32",
+  "source": "fire-v1",
+  "figure": "fire",
+  "meaning": "fire, a flame",
+  "hasActive": true
+ },
+ {
+  "name": "candle-simple",
+  "hand": "h32",
+  "source": "fire-v4",
+  "figure": "fire",
+  "meaning": "fire, a flame",
+  "hasActive": true
+ },
+ {
+  "name": "firecamp",
+  "hand": "h32",
+  "source": "fire-v5",
+  "figure": "fire",
+  "meaning": "fire, a flame",
+  "hasActive": true
+ },
+ {
+  "name": "firepit-h",
+  "hand": "h31",
+  "source": "firepit-v1",
+  "figure": "firepit",
+  "meaning": "a fire in a ring of stones",
+  "hasActive": true
+ },
+ {
+  "name": "farandole-fire",
+  "hand": "h31",
+  "source": "firepit-v2",
+  "figure": "firepit",
+  "meaning": "a fire in a ring of stones",
+  "hasActive": true
+ },
+ {
+  "name": "firepit-curve",
+  "hand": "h32",
+  "source": "firepit-v1",
+  "figure": "firepit",
+  "meaning": "a fire in a ring of stones",
+  "hasActive": true
+ },
+ {
+  "name": "firepit-above",
+  "hand": "h32",
+  "source": "firepit-v2",
+  "figure": "firepit",
+  "meaning": "a fire in a ring of stones",
+  "hasActive": true
+ },
+ {
+  "name": "firepit",
+  "hand": "h33",
+  "source": "firepit-v1",
+  "figure": "firepit",
+  "meaning": "a fire in a ring of stones",
+  "hasActive": true
+ },
+ {
+  "name": "sparkle-circle-dots",
+  "hand": "h33",
+  "source": "firepit-v2",
+  "figure": "firepit",
+  "meaning": "a fire in a ring of stones",
+  "hasActive": true
+ },
+ {
+  "name": "fishes-round",
+  "hand": "h31",
+  "source": "fish-v4",
+  "figure": "fish",
+  "meaning": "a fish",
+  "hasActive": true
+ },
+ {
+  "name": "fish-dive",
+  "hand": "h32",
+  "source": "fish-v2",
+  "figure": "fish",
+  "meaning": "a fish",
+  "hasActive": true
+ },
+ {
+  "name": "fish-2",
+  "hand": "h32",
+  "source": "fish-v4",
+  "figure": "fish",
+  "meaning": "a fish",
+  "hasActive": true
+ },
+ {
+  "name": "fish",
+  "hand": "h33",
+  "source": "fish-v1",
+  "figure": "fish",
+  "meaning": "a fish",
+  "hasActive": true
+ },
+ {
+  "name": "fish-jump",
+  "hand": "h33",
+  "source": "fish-v2",
+  "figure": "fish",
+  "meaning": "a fish",
+  "hasActive": true
+ },
+ {
+  "name": "fish-bowl",
+  "hand": "h33",
+  "source": "fish-v4",
+  "figure": "fish",
+  "meaning": "a fish",
+  "hasActive": true
+ },
+ {
+  "name": "fishes",
+  "hand": "h33",
+  "source": "fish-v5",
+  "figure": "fish",
+  "meaning": "a fish",
+  "hasActive": true
+ },
+ {
+  "name": "poo",
+  "hand": "h31",
+  "source": "poo-v1",
+  "figure": "poo",
+  "meaning": "poo",
+  "hasActive": true
+ },
+ {
+  "name": "poo-flies",
+  "hand": "h31",
+  "source": "poo-v3",
+  "figure": "poo",
+  "meaning": "poo",
+  "hasActive": true
+ },
+ {
+  "name": "toilet",
+  "hand": "h31",
+  "source": "poo-v4",
+  "figure": "poo",
+  "meaning": "poo",
+  "hasActive": true
+ },
+ {
+  "name": "hill-sprout",
+  "hand": "h31",
+  "source": "poo-v5",
+  "figure": "poo",
+  "meaning": "poo",
+  "hasActive": true
+ },
+ {
+  "name": "poo-smell",
+  "hand": "h33",
+  "source": "poo-v2",
+  "figure": "poo",
+  "meaning": "poo",
+  "hasActive": true
+ },
+ {
+  "name": "earth-sprout",
+  "hand": "h33",
+  "source": "poo-v5",
+  "figure": "poo",
+  "meaning": "poo",
+  "hasActive": true
+ },
+ {
+  "name": "map-marker",
+  "hand": "h31",
+  "source": "map-v3",
+  "figure": "map",
+  "meaning": "a map",
+  "hasActive": true
+ },
+ {
+  "name": "globe-spin",
+  "hand": "h31",
+  "source": "map-v5",
+  "figure": "map",
+  "meaning": "a map",
+  "hasActive": true
+ },
+ {
+  "name": "map-fold",
+  "hand": "h32",
+  "source": "map-v1",
+  "figure": "map",
+  "meaning": "a map",
+  "hasActive": true
+ },
+ {
+  "name": "grid-dot",
+  "hand": "h32",
+  "source": "map-v4",
+  "figure": "map",
+  "meaning": "a map",
+  "hasActive": true
+ },
+ {
+  "name": "map-fold-path",
+  "hand": "h33",
+  "source": "map-v1",
+  "figure": "map",
+  "meaning": "a map",
+  "hasActive": true
+ },
+ {
+  "name": "grid-sparks",
+  "hand": "h33",
+  "source": "map-v4",
+  "figure": "map",
+  "meaning": "a map",
+  "hasActive": true
+ },
+ {
+  "name": "store",
+  "hand": "h31",
+  "source": "store-v1",
+  "figure": "store",
+  "meaning": "a shop",
+  "hasActive": true
+ },
+ {
+  "name": "store-bell",
+  "hand": "h31",
+  "source": "store-v5",
+  "figure": "store",
+  "meaning": "a shop",
+  "hasActive": true
+ },
+ {
+  "name": "sale-sign",
+  "hand": "h32",
+  "source": "store-v2",
+  "figure": "store",
+  "meaning": "a shop",
+  "hasActive": true
+ },
+ {
+  "name": "factory",
+  "hand": "h33",
+  "source": "store-v3",
+  "figure": "store",
+  "meaning": "a shop",
+  "hasActive": true
+ },
+ {
+  "name": "store-shelve",
+  "hand": "h33",
+  "source": "store-v4",
+  "figure": "store",
+  "meaning": "a shop",
+  "hasActive": true
+ },
+ {
+  "name": "shopping-bag-dot",
+  "hand": "h31",
+  "source": "shopping-v1",
+  "figure": "shopping",
+  "meaning": "shopping, a bag or a cart",
+  "hasActive": true
+ },
+ {
+  "name": "shopping-basket",
+  "hand": "h31",
+  "source": "shopping-v3",
+  "figure": "shopping",
+  "meaning": "shopping, a bag or a cart",
+  "hasActive": true
+ },
+ {
+  "name": "bucket",
+  "hand": "h31",
+  "source": "shopping-v4",
+  "figure": "shopping",
+  "meaning": "shopping, a bag or a cart",
+  "hasActive": true
+ },
+ {
+  "name": "bath-bottles",
+  "hand": "h32",
+  "source": "shopping-v4",
+  "figure": "shopping",
+  "meaning": "shopping, a bag or a cart",
+  "hasActive": true
+ },
+ {
+  "name": "shopping-trolley",
+  "hand": "h32",
+  "source": "shopping-v5",
+  "figure": "shopping",
+  "meaning": "shopping, a bag or a cart",
+  "hasActive": true
+ },
+ {
+  "name": "shopping-cart",
+  "hand": "h33",
+  "source": "shopping-v2",
+  "figure": "shopping",
+  "meaning": "shopping, a bag or a cart",
+  "hasActive": true
+ },
+ {
+  "name": "basket",
+  "hand": "h33",
+  "source": "shopping-v3",
+  "figure": "shopping",
+  "meaning": "shopping, a bag or a cart",
+  "hasActive": true
+ },
+ {
+  "name": "abstract-stone-curve",
+  "hand": "h33",
+  "source": "shopping-v4",
+  "figure": "shopping",
+  "meaning": "shopping, a bag or a cart",
+  "hasActive": true
+ }
+]

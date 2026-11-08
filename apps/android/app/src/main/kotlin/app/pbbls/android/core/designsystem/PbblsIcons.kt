@@ -20,674 +20,5694 @@ import app.pbbls.android.R
  */
 enum class PbblsIcon(
     val manifestName: String,
-    @DrawableRes val drawableRes: Int,
 ) {
     /** Done: a tick with the pen's dot pressed just past its end. */
-    CHECKMARK_DOT("checkmark-dot", R.drawable.ic_pbbls_checkmark_dot),
+    CHECKMARK_DOT("checkmark-dot"),
 
     /** Done: a plain tick that hooks where the pen landed. */
-    CHECKMARK("checkmark", R.drawable.ic_pbbls_checkmark),
+    CHECKMARK("checkmark"),
 
     /** Done, inside the stone ring: a tick in a pebble. */
-    CHECK_CIRCLE("check-circle", R.drawable.ic_pbbls_check_circle),
+    CHECK_CIRCLE("check-circle"),
 
     /** Done, inside the stone ring, with a dot pressed on the rim. */
-    CHECK_CIRCLE_DOT("check-circle-dot", R.drawable.ic_pbbls_check_circle_dot),
+    CHECK_CIRCLE_DOT("check-circle-dot"),
 
     /** Create a pebble: a plus inside the stone ring, with a dot pressed on the rim. */
-    PLUS_CIRCLE_DOT("plus-circle-dot", R.drawable.ic_pbbls_plus_circle_dot),
+    PLUS_CIRCLE_DOT("plus-circle-dot"),
 
     /** Take one away: a minus inside the stone ring. */
-    REMOVE("remove", R.drawable.ic_pbbls_remove),
+    REMOVE("remove"),
 
     /** Create a pebble: a plus inside the stone ring. */
-    PLUS_CIRCLE("plus-circle", R.drawable.ic_pbbls_plus_circle),
+    PLUS_CIRCLE("plus-circle"),
 
     /** Not yet: an hourglass with its last grain falling through the neck. */
-    HOURGLASS_END("hourglass-end", R.drawable.ic_pbbls_hourglass_end),
+    HOURGLASS_END("hourglass-end"),
 
     /** Not yet: a weight hanging from a bar, still in mid-swing. */
-    PENDULUM("pendulum", R.drawable.ic_pbbls_pendulum),
+    PENDULUM("pendulum"),
 
     /** Not yet: a leaning stylus crossed by a loose cord. */
-    ABSTRACT_PEN("abstract-pen", R.drawable.ic_pbbls_abstract_pen),
+    ABSTRACT_PEN("abstract-pen"),
 
     /** Not yet: a stem with a curl of cord thrown around it. */
-    ABSTRACT_LEAF("abstract-leaf", R.drawable.ic_pbbls_abstract_leaf),
+    ABSTRACT_LEAF("abstract-leaf"),
 
     /** Take a photo now: a camera body with a stone for a lens and a dot for the flash. */
-    CAMERA("camera", R.drawable.ic_pbbls_camera),
+    CAMERA("camera"),
 
     /** Take a photo now: a boxy film camera with a round lens and a winder on top. */
-    CAMERA_ANALOGIC("camera-analogic", R.drawable.ic_pbbls_camera_analogic),
+    CAMERA_ANALOGIC("camera-analogic"),
 
     /** Take a photo now: a lens drawn as a loose spiral between two bracket strokes. */
-    CAMERA_FOCUS("camera-focus", R.drawable.ic_pbbls_camera_focus),
+    CAMERA_FOCUS("camera-focus"),
 
     /** Where you land: a tipi with crossed poles and an arched door. */
-    HOME("home", R.drawable.ic_pbbls_home),
+    HOME("home"),
 
     /** Where you land: a tipi with crossed poles and an arched door. (the `active` twin) */
-    HOME_ACTIVE("home.active", R.drawable.ic_pbbls_home_active),
+    HOME_ACTIVE("home.active"),
 
     /** Where you land: a domed hut of two lashed ribs over a low door. */
-    HOME_HIVE("home-hive", R.drawable.ic_pbbls_home_hive),
+    HOME_HIVE("home-hive"),
 
     /** Where you land: a domed hut of two lashed ribs over a low door. (the `active` twin) */
-    HOME_HIVE_ACTIVE("home-hive.active", R.drawable.ic_pbbls_home_hive_active),
+    HOME_HIVE_ACTIVE("home-hive.active"),
 
     /** Where you land: a doorway hung from a sagging lintel cord with a pull-string in the middle. */
-    GATE("gate", R.drawable.ic_pbbls_gate),
+    GATE("gate"),
 
     /** Where you land: a doorway hung from a sagging lintel cord with a pull-string in the middle. (the `active` twin) */
-    GATE_ACTIVE("gate.active", R.drawable.ic_pbbls_gate_active),
+    GATE_ACTIVE("gate.active"),
 
     /** Where you land: a boat-shed arch half-buried in the ground line. */
-    ABSTRACT_HOME("abstract-home", R.drawable.ic_pbbls_abstract_home),
+    ABSTRACT_HOME("abstract-home"),
 
     /** Where you land: a boat-shed arch half-buried in the ground line. (the `active` twin) */
-    ABSTRACT_HOME_ACTIVE("abstract-home.active", R.drawable.ic_pbbls_abstract_home_active),
+    ABSTRACT_HOME_ACTIVE("abstract-home.active"),
 
     /** Where you land: a cord coiled at rest on the ground. */
-    ABSTRACT_SPIRAL("abstract-spiral", R.drawable.ic_pbbls_abstract_spiral),
+    ABSTRACT_SPIRAL("abstract-spiral"),
 
     /** Where you land: a cord coiled at rest on the ground. (the `active` twin) */
-    ABSTRACT_SPIRAL_ACTIVE("abstract-spiral.active", R.drawable.ic_pbbls_abstract_spiral_active),
+    ABSTRACT_SPIRAL_ACTIVE("abstract-spiral.active"),
 
     /** Your months in order: three stepping stones climbing in a zigzag, smaller toward the far one. */
-    PATH("path", R.drawable.ic_pbbls_path),
+    PATH("path"),
 
     /** Your months in order: three stepping stones climbing in a zigzag, smaller toward the far one. (the `active` twin) */
-    PATH_ACTIVE("path.active", R.drawable.ic_pbbls_path_active),
+    PATH_ACTIVE("path.active"),
 
     /** Your months in order: three stepping stones climbing in a zigzag, smaller toward the far one. (the `lit-1` twin) */
-    PATH_LIT_1("path.lit-1", R.drawable.ic_pbbls_path_lit_1),
+    PATH_LIT_1("path.lit-1"),
 
     /** Your months in order: three stepping stones climbing in a zigzag, smaller toward the far one. (the `lit-2` twin) */
-    PATH_LIT_2("path.lit-2", R.drawable.ic_pbbls_path_lit_2),
+    PATH_LIT_2("path.lit-2"),
 
     /** Your months in order: three stepping stones climbing in a zigzag, smaller toward the far one. (the `lit-3` twin) */
-    PATH_LIT_3("path.lit-3", R.drawable.ic_pbbls_path_lit_3),
+    PATH_LIT_3("path.lit-3"),
 
     /** Your months in order: a ball of wound thread with its free end trailing out to now. */
-    YARN("yarn", R.drawable.ic_pbbls_yarn),
+    YARN("yarn"),
 
     /** Your months in order: a ball of wound thread with its free end trailing out to now. (the `active` twin) */
-    YARN_ACTIVE("yarn.active", R.drawable.ic_pbbls_yarn_active),
+    YARN_ACTIVE("yarn.active"),
 
     /** Your months in order: a ball of wound thread with its free end trailing out to now. (the `lit-1` twin) */
-    YARN_LIT_1("yarn.lit-1", R.drawable.ic_pbbls_yarn_lit_1),
+    YARN_LIT_1("yarn.lit-1"),
 
     /** Your months in order: a winding trail that leads up to one stone on the horizon. */
-    DESTINATION("destination", R.drawable.ic_pbbls_destination),
+    DESTINATION("destination"),
 
     /** Your months in order: a winding trail that leads up to one stone on the horizon. (the `active` twin) */
-    DESTINATION_ACTIVE("destination.active", R.drawable.ic_pbbls_destination_active),
+    DESTINATION_ACTIVE("destination.active"),
 
     /** Your months in order: a winding trail that leads up to one stone on the horizon. (the `lit-1` twin) */
-    DESTINATION_LIT_1("destination.lit-1", R.drawable.ic_pbbls_destination_lit_1),
+    DESTINATION_LIT_1("destination.lit-1"),
 
     /** Your months in order: a river line with three stones beside its bends. */
-    PATH_RIVER("path-river", R.drawable.ic_pbbls_path_river),
+    PATH_RIVER("path-river"),
 
     /** Your months in order: a river line with three stones beside its bends. (the `active` twin) */
-    PATH_RIVER_ACTIVE("path-river.active", R.drawable.ic_pbbls_path_river_active),
+    PATH_RIVER_ACTIVE("path-river.active"),
 
     /** Your months in order: a river line with three stones beside its bends. (the `lit-1` twin) */
-    PATH_RIVER_LIT_1("path-river.lit-1", R.drawable.ic_pbbls_path_river_lit_1),
+    PATH_RIVER_LIT_1("path-river.lit-1"),
 
     /** Your months in order: a river line with three stones beside its bends. (the `lit-2` twin) */
-    PATH_RIVER_LIT_2("path-river.lit-2", R.drawable.ic_pbbls_path_river_lit_2),
+    PATH_RIVER_LIT_2("path-river.lit-2"),
 
     /** Your months in order: a river line with three stones beside its bends. (the `lit-3` twin) */
-    PATH_RIVER_LIT_3("path-river.lit-3", R.drawable.ic_pbbls_path_river_lit_3),
+    PATH_RIVER_LIT_3("path-river.lit-3"),
 
     /** The souls in your life: two faceless figures, stone heads, one a step behind the other. */
-    PEOPLE("people", R.drawable.ic_pbbls_people),
+    PEOPLE("people"),
 
     /** The souls in your life: two faceless figures, stone heads, one a step behind the other. (the `active` twin) */
-    PEOPLE_ACTIVE("people.active", R.drawable.ic_pbbls_people_active),
+    PEOPLE_ACTIVE("people.active"),
 
     /** The souls in your life: two faceless figures, stone heads, one a step behind the other. (the `lit-1` twin) */
-    PEOPLE_LIT_1("people.lit-1", R.drawable.ic_pbbls_people_lit_1),
+    PEOPLE_LIT_1("people.lit-1"),
 
     /** The souls in your life: two faceless figures, stone heads, one a step behind the other. (the `lit-2` twin) */
-    PEOPLE_LIT_2("people.lit-2", R.drawable.ic_pbbls_people_lit_2),
+    PEOPLE_LIT_2("people.lit-2"),
 
     /** The souls in your life: two faceless figures, stone heads, one a step behind the other. (the `lit-3` twin) */
-    PEOPLE_LIT_3("people.lit-3", R.drawable.ic_pbbls_people_lit_3),
+    PEOPLE_LIT_3("people.lit-3"),
 
     /** The souls in your life: two faceless figures side by side, one half behind the other. */
-    USERS("users", R.drawable.ic_pbbls_users),
+    USERS("users"),
 
     /** The souls in your life: two faceless figures side by side, one half behind the other. (the `active` twin) */
-    USERS_ACTIVE("users.active", R.drawable.ic_pbbls_users_active),
+    USERS_ACTIVE("users.active"),
 
     /** The souls in your life: two faceless figures side by side, one half behind the other. (the `lit-1` twin) */
-    USERS_LIT_1("users.lit-1", R.drawable.ic_pbbls_users_lit_1),
+    USERS_LIT_1("users.lit-1"),
 
     /** The souls in your life: two faceless figures side by side, one half behind the other. (the `lit-2` twin) */
-    USERS_LIT_2("users.lit-2", R.drawable.ic_pbbls_users_lit_2),
+    USERS_LIT_2("users.lit-2"),
 
     /** The souls in your life: two faceless figures side by side, one half behind the other. (the `lit-3` twin) */
-    USERS_LIT_3("users.lit-3", R.drawable.ic_pbbls_users_lit_3),
+    USERS_LIT_3("users.lit-3"),
 
     /** The souls in your life: three strands from one tie, each looping into a head. */
-    ABSTRACT_CROWN("abstract-crown", R.drawable.ic_pbbls_abstract_crown),
+    ABSTRACT_CROWN("abstract-crown"),
 
     /** The souls in your life: three strands from one tie, each looping into a head. (the `active` twin) */
-    ABSTRACT_CROWN_ACTIVE("abstract-crown.active", R.drawable.ic_pbbls_abstract_crown_active),
+    ABSTRACT_CROWN_ACTIVE("abstract-crown.active"),
 
     /** The souls in your life: three figures of falling height bound by one thong. */
-    ABSTRACT_FENCE("abstract-fence", R.drawable.ic_pbbls_abstract_fence),
+    ABSTRACT_FENCE("abstract-fence"),
 
     /** The souls in your life: three figures of falling height bound by one thong. (the `active` twin) */
-    ABSTRACT_FENCE_ACTIVE("abstract-fence.active", R.drawable.ic_pbbls_abstract_fence_active),
+    ABSTRACT_FENCE_ACTIVE("abstract-fence.active"),
 
     /** The souls in your life: two coiled souls whose cords cross below into a heart. */
-    ABSTRACT_LOKI("abstract-loki", R.drawable.ic_pbbls_abstract_loki),
+    ABSTRACT_LOKI("abstract-loki"),
 
     /** The souls in your life: two coiled souls whose cords cross below into a heart. (the `active` twin) */
-    ABSTRACT_LOKI_ACTIVE("abstract-loki.active", R.drawable.ic_pbbls_abstract_loki_active),
+    ABSTRACT_LOKI_ACTIVE("abstract-loki.active"),
 
     /** The souls in your life: two hooks with lashing eyes, interlocked head to foot. */
-    EXCHANGE("exchange", R.drawable.ic_pbbls_exchange),
+    EXCHANGE("exchange"),
 
     /** The souls in your life: two hooks with lashing eyes, interlocked head to foot. (the `active` twin) */
-    EXCHANGE_ACTIVE("exchange.active", R.drawable.ic_pbbls_exchange_active),
+    EXCHANGE_ACTIVE("exchange.active"),
 
     /** The souls in your life: three loops of different sizes hitched onto one cord. */
-    DOLMEN("dolmen", R.drawable.ic_pbbls_dolmen),
+    DOLMEN("dolmen"),
 
     /** The souls in your life: three loops of different sizes hitched onto one cord. (the `active` twin) */
-    DOLMEN_ACTIVE("dolmen.active", R.drawable.ic_pbbls_dolmen_active),
+    DOLMEN_ACTIVE("dolmen.active"),
 
     /** The souls in your life: two strands plied around each other. */
-    DNA("dna", R.drawable.ic_pbbls_dna),
+    DNA("dna"),
 
     /** The souls in your life: two strands plied around each other. (the `active` twin) */
-    DNA_ACTIVE("dna.active", R.drawable.ic_pbbls_dna_active),
+    DNA_ACTIVE("dna.active"),
 
     /** Your pebbles gathered into sets: a shallow bowl holding three stones, one heaped on top. */
-    COLLECTION("collection", R.drawable.ic_pbbls_collection),
+    COLLECTION("collection"),
 
     /** Your pebbles gathered into sets: a shallow bowl holding three stones, one heaped on top. (the `active` twin) */
-    COLLECTION_ACTIVE("collection.active", R.drawable.ic_pbbls_collection_active),
+    COLLECTION_ACTIVE("collection.active"),
 
     /** Your pebbles gathered into sets: a main cord with three pendants hanging from it. */
-    PEARL("pearl", R.drawable.ic_pbbls_pearl),
+    PEARL("pearl"),
 
     /** Your pebbles gathered into sets: a main cord with three pendants hanging from it. (the `active` twin) */
-    PEARL_ACTIVE("pearl.active", R.drawable.ic_pbbls_pearl_active),
+    PEARL_ACTIVE("pearl.active"),
 
     /** Your pebbles gathered into sets: a net bag gathered at the neck by a drawstring. */
-    WATERMELON("watermelon", R.drawable.ic_pbbls_watermelon),
+    WATERMELON("watermelon"),
 
     /** Your pebbles gathered into sets: a net bag gathered at the neck by a drawstring. (the `active` twin) */
-    WATERMELON_ACTIVE("watermelon.active", R.drawable.ic_pbbls_watermelon_active),
+    WATERMELON_ACTIVE("watermelon.active"),
 
     /** Your pebbles gathered into sets: a fairy ring of five small caps. */
-    CROMLECH("cromlech", R.drawable.ic_pbbls_cromlech),
+    CROMLECH("cromlech"),
 
     /** Your pebbles gathered into sets: a fairy ring of five small caps. (the `active` twin) */
-    CROMLECH_ACTIVE("cromlech.active", R.drawable.ic_pbbls_cromlech_active),
+    CROMLECH_ACTIVE("cromlech.active"),
 
     /** Your pebbles gathered into sets: a hide pouch with a frilled mouth, cinched by a thong. */
-    POUCH_DOT("pouch-dot", R.drawable.ic_pbbls_pouch_dot),
+    POUCH_DOT("pouch-dot"),
 
     /** Your pebbles gathered into sets: a hide pouch with a frilled mouth, cinched by a thong. (the `active` twin) */
-    POUCH_DOT_ACTIVE("pouch-dot.active", R.drawable.ic_pbbls_pouch_dot_active),
+    POUCH_DOT_ACTIVE("pouch-dot.active"),
 
     /** Your pebbles gathered into sets: a hide pouch with a frilled mouth, cinched by a thong. (the `lit-1` twin) */
-    POUCH_DOT_LIT_1("pouch-dot.lit-1", R.drawable.ic_pbbls_pouch_dot_lit_1),
+    POUCH_DOT_LIT_1("pouch-dot.lit-1"),
 
     /** Your pebbles gathered into sets: a drawstring pouch, its string curled loose. */
-    POUCH("pouch", R.drawable.ic_pbbls_pouch),
+    POUCH("pouch"),
 
     /** Your pebbles gathered into sets: a drawstring pouch, its string curled loose. (the `active` twin) */
-    POUCH_ACTIVE("pouch.active", R.drawable.ic_pbbls_pouch_active),
+    POUCH_ACTIVE("pouch.active"),
 
     /** Your pebbles gathered into sets: a drawstring pouch, its string curled loose. (the `lit-1` twin) */
-    POUCH_LIT_1("pouch.lit-1", R.drawable.ic_pbbls_pouch_lit_1),
+    POUCH_LIT_1("pouch.lit-1"),
 
     /** A loose pile, no order: three stones, the top one resting on the pair. */
-    STACK("stack", R.drawable.ic_pbbls_stack),
+    STACK("stack"),
 
     /** A loose pile, no order: three stones, the top one resting on the pair. (the `lit-1` twin) */
-    STACK_LIT_1("stack.lit-1", R.drawable.ic_pbbls_stack_lit_1),
+    STACK_LIT_1("stack.lit-1"),
 
     /** A loose pile, no order: three stones, the top one resting on the pair. (the `lit-2` twin) */
-    STACK_LIT_2("stack.lit-2", R.drawable.ic_pbbls_stack_lit_2),
+    STACK_LIT_2("stack.lit-2"),
 
     /** A loose pile, no order: three stones, the top one resting on the pair. (the `lit-3` twin) */
-    STACK_LIT_3("stack.lit-3", R.drawable.ic_pbbls_stack_lit_3),
+    STACK_LIT_3("stack.lit-3"),
 
     /** A loose pile, no order: one open spiral of stone under a cap arch. */
-    ABSTRACT_CAIRN("abstract-cairn", R.drawable.ic_pbbls_abstract_cairn),
+    ABSTRACT_CAIRN("abstract-cairn"),
 
     /** A loose pile, no order: three faceted stones, two below and one tucked above. */
-    STACK_SHARP("stack-sharp", R.drawable.ic_pbbls_stack_sharp),
+    STACK_SHARP("stack-sharp"),
 
     /** A loose pile, no order: three faceted stones, two below and one tucked above. (the `lit-1` twin) */
-    STACK_SHARP_LIT_1("stack-sharp.lit-1", R.drawable.ic_pbbls_stack_sharp_lit_1),
+    STACK_SHARP_LIT_1("stack-sharp.lit-1"),
 
     /** A loose pile, no order: three faceted stones, two below and one tucked above. (the `lit-2` twin) */
-    STACK_SHARP_LIT_2("stack-sharp.lit-2", R.drawable.ic_pbbls_stack_sharp_lit_2),
+    STACK_SHARP_LIT_2("stack-sharp.lit-2"),
 
     /** A loose pile, no order: three faceted stones, two below and one tucked above. (the `lit-3` twin) */
-    STACK_SHARP_LIT_3("stack-sharp.lit-3", R.drawable.ic_pbbls_stack_sharp_lit_3),
+    STACK_SHARP_LIT_3("stack-sharp.lit-3"),
 
     /** A loose pile, no order: two bands of ash under an arc, a dot on top. */
-    ABSTRACT_STACK("abstract-stack", R.drawable.ic_pbbls_abstract_stack),
+    ABSTRACT_STACK("abstract-stack"),
 
     /** A loose pile, no order: ash strata pierced by one thread, a curl on the crest. */
-    ABSTRACT_LANDSCAPE("abstract-landscape", R.drawable.ic_pbbls_abstract_landscape),
+    ABSTRACT_LANDSCAPE("abstract-landscape"),
 
     /** A loose pile, no order: a slope with three stones tumbling off it. */
-    FALL("fall", R.drawable.ic_pbbls_fall),
+    FALL("fall"),
 
     /** A bound set that travels together: a tied pouch with a frilled mouth. */
-    POUCH_2("pouch-2", R.drawable.ic_pbbls_pouch_2),
+    POUCH_2("pouch-2"),
 
     /** A bound set that travels together: a tied pouch with a frilled mouth. (the `lit-1` twin) */
-    POUCH_2_LIT_1("pouch-2.lit-1", R.drawable.ic_pbbls_pouch_2_lit_1),
+    POUCH_2_LIT_1("pouch-2.lit-1"),
 
     /** A bound set that travels together: three beads strung on a loop of cord. */
-    NECHLACE("nechlace", R.drawable.ic_pbbls_nechlace),
+    NECHLACE("nechlace"),
 
     /** A bound set that travels together: a flap purse with a clasp. */
-    PURSE("purse", R.drawable.ic_pbbls_purse),
+    PURSE("purse"),
 
     /** A bound set that travels together: a flap purse with a clasp. (the `lit-1` twin) */
-    PURSE_LIT_1("purse.lit-1", R.drawable.ic_pbbls_purse_lit_1),
+    PURSE_LIT_1("purse.lit-1"),
 
     /** A bound set that travels together: a bundle tied to a stick. */
-    BALUCHON("baluchon", R.drawable.ic_pbbls_baluchon),
+    BALUCHON("baluchon"),
 
     /** A bound set that travels together: a bundle tied to a stick. (the `lit-1` twin) */
-    BALUCHON_LIT_1("baluchon.lit-1", R.drawable.ic_pbbls_baluchon_lit_1),
+    BALUCHON_LIT_1("baluchon.lit-1"),
 
     /** A bound set that travels together: a sack cinched by a gathered neck. */
-    BAG("bag", R.drawable.ic_pbbls_bag),
+    BAG("bag"),
 
     /** A bound set that travels together: a sack cinched by a gathered neck. (the `lit-1` twin) */
-    BAG_LIT_1("bag.lit-1", R.drawable.ic_pbbls_bag_lit_1),
+    BAG_LIT_1("bag.lit-1"),
 
     /** A bound set that travels together: a case with a handle, its lid in two halves. */
-    CASE("case", R.drawable.ic_pbbls_case),
+    CASE("case"),
 
     /** A bound set that travels together: a case with a handle, its lid in two halves. (the `lit-1` twin) */
-    CASE_LIT_1("case.lit-1", R.drawable.ic_pbbls_case_lit_1),
+    CASE_LIT_1("case.lit-1"),
 
     /** An ordered sequence: three stones climbing one after another. */
-    STONES_STAIR("stones-stair", R.drawable.ic_pbbls_stones_stair),
+    STONES_STAIR("stones-stair"),
 
     /** An ordered sequence: three stones climbing one after another. (the `lit-1` twin) */
-    STONES_STAIR_LIT_1("stones-stair.lit-1", R.drawable.ic_pbbls_stones_stair_lit_1),
+    STONES_STAIR_LIT_1("stones-stair.lit-1"),
 
     /** An ordered sequence: three stones climbing one after another. (the `lit-2` twin) */
-    STONES_STAIR_LIT_2("stones-stair.lit-2", R.drawable.ic_pbbls_stones_stair_lit_2),
+    STONES_STAIR_LIT_2("stones-stair.lit-2"),
 
     /** An ordered sequence: three stones climbing one after another. (the `lit-3` twin) */
-    STONES_STAIR_LIT_3("stones-stair.lit-3", R.drawable.ic_pbbls_stones_stair_lit_3),
+    STONES_STAIR_LIT_3("stones-stair.lit-3"),
 
     /** An ordered sequence: three stones on one leaning ground line. */
-    STONES_TRACK("stones-track", R.drawable.ic_pbbls_stones_track),
+    STONES_TRACK("stones-track"),
 
     /** An ordered sequence: three stones on one leaning ground line. (the `lit-1` twin) */
-    STONES_TRACK_LIT_1("stones-track.lit-1", R.drawable.ic_pbbls_stones_track_lit_1),
+    STONES_TRACK_LIT_1("stones-track.lit-1"),
 
     /** An ordered sequence: three stones on one leaning ground line. (the `lit-2` twin) */
-    STONES_TRACK_LIT_2("stones-track.lit-2", R.drawable.ic_pbbls_stones_track_lit_2),
+    STONES_TRACK_LIT_2("stones-track.lit-2"),
 
     /** An ordered sequence: three stones on one leaning ground line. (the `lit-3` twin) */
-    STONES_TRACK_LIT_3("stones-track.lit-3", R.drawable.ic_pbbls_stones_track_lit_3),
+    STONES_TRACK_LIT_3("stones-track.lit-3"),
 
     /** An ordered sequence: three stones in a row over an arrow pointing right. */
-    STONES_ARROW_RIGHT("stones-arrow-right", R.drawable.ic_pbbls_stones_arrow_right),
+    STONES_ARROW_RIGHT("stones-arrow-right"),
 
     /** An ordered sequence: three stones in a row over an arrow pointing right. (the `lit-1` twin) */
-    STONES_ARROW_RIGHT_LIT_1("stones-arrow-right.lit-1", R.drawable.ic_pbbls_stones_arrow_right_lit_1),
+    STONES_ARROW_RIGHT_LIT_1("stones-arrow-right.lit-1"),
 
     /** An ordered sequence: three stones in a row over an arrow pointing right. (the `lit-2` twin) */
-    STONES_ARROW_RIGHT_LIT_2("stones-arrow-right.lit-2", R.drawable.ic_pbbls_stones_arrow_right_lit_2),
+    STONES_ARROW_RIGHT_LIT_2("stones-arrow-right.lit-2"),
 
     /** An ordered sequence: three stones in a row over an arrow pointing right. (the `lit-3` twin) */
-    STONES_ARROW_RIGHT_LIT_3("stones-arrow-right.lit-3", R.drawable.ic_pbbls_stones_arrow_right_lit_3),
+    STONES_ARROW_RIGHT_LIT_3("stones-arrow-right.lit-3"),
 
     /** An ordered sequence: a line notched by rising ticks. */
-    CHART_DOUBLE_GROW("chart-double-grow", R.drawable.ic_pbbls_chart_double_grow),
+    CHART_DOUBLE_GROW("chart-double-grow"),
 
     /** An ordered sequence: pipes of falling length hung from one bar. */
-    PAN("pan", R.drawable.ic_pbbls_pan),
+    PAN("pan"),
 
     /** An ordered sequence: a rope ladder of four rungs. */
-    SCALE("scale", R.drawable.ic_pbbls_scale),
+    SCALE("scale"),
 
     /** An ordered sequence: three stones sitting on one ground line. */
-    STONES_ALIGNED_BOTTOM("stones-aligned-bottom", R.drawable.ic_pbbls_stones_aligned_bottom),
+    STONES_ALIGNED_BOTTOM("stones-aligned-bottom"),
 
     /** An ordered sequence: three stones sitting on one ground line. (the `lit-1` twin) */
-    STONES_ALIGNED_BOTTOM_LIT_1("stones-aligned-bottom.lit-1", R.drawable.ic_pbbls_stones_aligned_bottom_lit_1),
+    STONES_ALIGNED_BOTTOM_LIT_1("stones-aligned-bottom.lit-1"),
 
     /** An ordered sequence: three stones sitting on one ground line. (the `lit-2` twin) */
-    STONES_ALIGNED_BOTTOM_LIT_2("stones-aligned-bottom.lit-2", R.drawable.ic_pbbls_stones_aligned_bottom_lit_2),
+    STONES_ALIGNED_BOTTOM_LIT_2("stones-aligned-bottom.lit-2"),
 
     /** An ordered sequence: three stones sitting on one ground line. (the `lit-3` twin) */
-    STONES_ALIGNED_BOTTOM_LIT_3("stones-aligned-bottom.lit-3", R.drawable.ic_pbbls_stones_aligned_bottom_lit_3),
+    STONES_ALIGNED_BOTTOM_LIT_3("stones-aligned-bottom.lit-3"),
 
     /** You, your own account: a figure with lifted arms and a spiral for a head. */
-    PERSON("person", R.drawable.ic_pbbls_person),
+    PERSON("person"),
 
     /** You, your own account: a figure with lifted arms and a spiral for a head. (the `active` twin) */
-    PERSON_ACTIVE("person.active", R.drawable.ic_pbbls_person_active),
+    PERSON_ACTIVE("person.active"),
 
     /** You, your own account: a figure with lifted arms and a spiral for a head. (the `lit-1` twin) */
-    PERSON_LIT_1("person.lit-1", R.drawable.ic_pbbls_person_lit_1),
+    PERSON_LIT_1("person.lit-1"),
 
     /** You, your own account: one strand looping into a head, with a wrap below. */
-    BARBED_WIRE("barbed-wire", R.drawable.ic_pbbls_barbed_wire),
+    BARBED_WIRE("barbed-wire"),
 
     /** You, your own account: one strand looping into a head, with a wrap below. (the `active` twin) */
-    BARBED_WIRE_ACTIVE("barbed-wire.active", R.drawable.ic_pbbls_barbed_wire_active),
+    BARBED_WIRE_ACTIVE("barbed-wire.active"),
 
     /** You, your own account: a cord with an eye splice and its whipping. */
-    ABSTRACT_KEY("abstract-key", R.drawable.ic_pbbls_abstract_key),
+    ABSTRACT_KEY("abstract-key"),
 
     /** You, your own account: a cord with an eye splice and its whipping. (the `active` twin) */
-    ABSTRACT_KEY_ACTIVE("abstract-key.active", R.drawable.ic_pbbls_abstract_key_active),
+    ABSTRACT_KEY_ACTIVE("abstract-key.active"),
 
     /** You, your own account: a stone head over a shoulder arch, drawn with a heart's weight. */
-    USER_HEART("user-heart", R.drawable.ic_pbbls_user_heart),
+    USER_HEART("user-heart"),
 
     /** You, your own account: a stone head over a shoulder arch, drawn with a heart's weight. (the `active` twin) */
-    USER_HEART_ACTIVE("user-heart.active", R.drawable.ic_pbbls_user_heart_active),
+    USER_HEART_ACTIVE("user-heart.active"),
 
     /** You, your own account: a stone head over a shoulder arch, drawn with a heart's weight. (the `lit-1` twin) */
-    USER_HEART_LIT_1("user-heart.lit-1", R.drawable.ic_pbbls_user_heart_lit_1),
+    USER_HEART_LIT_1("user-heart.lit-1"),
 
     /** You, your own account: a stone head over a shoulder arch, drawn with a heart's weight. (the `lit-2` twin) */
-    USER_HEART_LIT_2("user-heart.lit-2", R.drawable.ic_pbbls_user_heart_lit_2),
+    USER_HEART_LIT_2("user-heart.lit-2"),
 
     /** You, your own account: a stone head over a shoulder arch. */
-    USER("user", R.drawable.ic_pbbls_user),
+    USER("user"),
 
     /** You, your own account: a stone head over a shoulder arch. (the `active` twin) */
-    USER_ACTIVE("user.active", R.drawable.ic_pbbls_user_active),
+    USER_ACTIVE("user.active"),
 
     /** You, your own account: a stone head over a shoulder arch. (the `lit-1` twin) */
-    USER_LIT_1("user.lit-1", R.drawable.ic_pbbls_user_lit_1),
+    USER_LIT_1("user.lit-1"),
 
     /** You, your own account: a stone head over a shoulder arch. (the `lit-2` twin) */
-    USER_LIT_2("user.lit-2", R.drawable.ic_pbbls_user_lit_2),
+    USER_LIT_2("user.lit-2"),
 
     /** Adjust things: two rails that stop at their stone knobs. */
-    SLIDER("slider", R.drawable.ic_pbbls_slider),
+    SLIDER("slider"),
 
     /** Adjust things: cords knotted at different heights, shelved one above the other. */
-    SHELVE("shelve", R.drawable.ic_pbbls_shelve),
+    SHELVE("shelve"),
 
     /** Adjust things: a bar crossed by rings, a signpost of cord. */
-    ABSTRACT_SIGN("abstract-sign", R.drawable.ic_pbbls_abstract_sign),
+    ABSTRACT_SIGN("abstract-sign"),
 
     /** Adjust things: a stone ring with four ticks and a dot at its centre. */
-    RADAR("radar", R.drawable.ic_pbbls_radar),
+    RADAR("radar"),
 
     /** Adjust things: an arrowhead over a bar, like a drill pumped by hand. */
-    ABSTRACT_UMBRELLA("abstract-umbrella", R.drawable.ic_pbbls_abstract_umbrella),
+    ABSTRACT_UMBRELLA("abstract-umbrella"),
 
     /** Adjust things: a stylus crossed by three rings of cord. */
-    ABSTRACT_SIGN_2("abstract-sign-2", R.drawable.ic_pbbls_abstract_sign_2),
+    ABSTRACT_SIGN_2("abstract-sign-2"),
 
     /** The marks a user scribbles on a stone: a dotted stone ring around a small scribble. */
-    PEBBLE_DOTTED_GLYPH("pebble-dotted-glyph", R.drawable.ic_pbbls_pebble_dotted_glyph),
+    PEBBLE_DOTTED_GLYPH("pebble-dotted-glyph"),
 
     /** The marks a user scribbles on a stone: a dotted stone ring around a small scribble. (the `lit-1` twin) */
-    PEBBLE_DOTTED_GLYPH_LIT_1("pebble-dotted-glyph.lit-1", R.drawable.ic_pbbls_pebble_dotted_glyph_lit_1),
+    PEBBLE_DOTTED_GLYPH_LIT_1("pebble-dotted-glyph.lit-1"),
 
     /** The marks a user scribbles on a stone: a dotted arc, a hooked stroke and a short tail. */
-    ABSTRACT_CURVES("abstract-curves", R.drawable.ic_pbbls_abstract_curves),
+    ABSTRACT_CURVES("abstract-curves"),
 
     /** The marks a user scribbles on a stone: a zigzag over a row of dots. */
-    ABSTRACT_LINES("abstract-lines", R.drawable.ic_pbbls_abstract_lines),
+    ABSTRACT_LINES("abstract-lines"),
 
     /** The marks a user scribbles on a stone: a zigzag and a bar over a dotted swell. */
-    ABSTRACT_MI("abstract-mi", R.drawable.ic_pbbls_abstract_mi),
+    ABSTRACT_MI("abstract-mi"),
 
     /** The marks a user scribbles on a stone: a dotted stone ring around a small scribble, the ring open on one side. */
-    PEBBLE_DOTTED_GLYPH_2("pebble-dotted-glyph-2", R.drawable.ic_pbbls_pebble_dotted_glyph_2),
+    PEBBLE_DOTTED_GLYPH_2("pebble-dotted-glyph-2"),
 
     /** The marks a user scribbles on a stone: a dotted stone ring around a small scribble, the ring open on one side. (the `lit-1` twin) */
-    PEBBLE_DOTTED_GLYPH_2_LIT_1("pebble-dotted-glyph-2.lit-1", R.drawable.ic_pbbls_pebble_dotted_glyph_2_lit_1),
+    PEBBLE_DOTTED_GLYPH_2_LIT_1("pebble-dotted-glyph-2.lit-1"),
 
     /** The marks a user scribbles on a stone: a scribble over a dotted line. */
-    GLYPH_UNDERLINED("glyph-underlined", R.drawable.ic_pbbls_glyph_underlined),
+    GLYPH_UNDERLINED("glyph-underlined"),
 
     /** The marks a user scribbles on a stone: a scribble that grows taller, over a dotted line. */
-    GLYPH_GROW_UNDERLINED("glyph-grow-underlined", R.drawable.ic_pbbls_glyph_grow_underlined),
+    GLYPH_GROW_UNDERLINED("glyph-grow-underlined"),
 
     /** The marks a user scribbles on a stone: a stylus leaving a dotted trail. */
-    DRAW_DOTTED("draw-dotted", R.drawable.ic_pbbls_draw_dotted),
+    DRAW_DOTTED("draw-dotted"),
 
     /** A recorded moment, the unit of the app: one round stone with a shine. */
-    PEBBLE_ROUND("pebble-round", R.drawable.ic_pbbls_pebble_round),
+    PEBBLE_ROUND("pebble-round"),
 
     /** A recorded moment, the unit of the app: one round stone with a shine. (the `lit-1` twin) */
-    PEBBLE_ROUND_LIT_1("pebble-round.lit-1", R.drawable.ic_pbbls_pebble_round_lit_1),
+    PEBBLE_ROUND_LIT_1("pebble-round.lit-1"),
 
     /** A recorded moment, the unit of the app: one flat stone with a shine. */
-    PEBBLE_FLAT("pebble-flat", R.drawable.ic_pbbls_pebble_flat),
+    PEBBLE_FLAT("pebble-flat"),
 
     /** A recorded moment, the unit of the app: one flat stone with a shine. (the `lit-1` twin) */
-    PEBBLE_FLAT_LIT_1("pebble-flat.lit-1", R.drawable.ic_pbbls_pebble_flat_lit_1),
+    PEBBLE_FLAT_LIT_1("pebble-flat.lit-1"),
 
     /** Good you gave, that comes back: a spiral with the pen's dot pressed past its end. */
-    KARMA_DOT("karma-dot", R.drawable.ic_pbbls_karma_dot),
+    KARMA_DOT("karma-dot"),
 
     /** Good you gave, that comes back: a petroglyph spiral. */
-    KARMA("karma", R.drawable.ic_pbbls_karma),
+    KARMA("karma"),
 
     /** Good you gave, that comes back: two curls hooked into each other. */
-    KARMA_DOUBLE("karma-double", R.drawable.ic_pbbls_karma_double),
+    KARMA_DOUBLE("karma-double"),
 
     /** Good you gave, that comes back: a swell that turns into a hook. */
-    WAVE("wave", R.drawable.ic_pbbls_wave),
+    WAVE("wave"),
 
     /** Good you gave, that comes back: a spiral wound inward. */
-    KARMA_2("karma-2", R.drawable.ic_pbbls_karma_2),
+    KARMA_2("karma-2"),
 
     /** Good you gave, that comes back: a spiral wound clockwise. */
-    KARMA_CLOCKWISE("karma-clockwise", R.drawable.ic_pbbls_karma_clockwise),
+    KARMA_CLOCKWISE("karma-clockwise"),
 
     /** A date, a day: a calendar page with hooked rings and a 1 on it. */
-    CALENDAR_DATE("calendar-date", R.drawable.ic_pbbls_calendar_date),
+    CALENDAR_DATE("calendar-date"),
 
     /** A date, a day: a calendar page with a dot pressed in its corner. */
-    CALENDAR_DOT("calendar-dot", R.drawable.ic_pbbls_calendar_dot),
+    CALENDAR_DOT("calendar-dot"),
 
     /** A date, a day: a grid of crossed cords with a stone at its centre. */
-    GAME("game", R.drawable.ic_pbbls_game),
+    GAME("game"),
 
     /** A date, a day: a bored disc hung on a cord between two posts. */
-    PEARL_JAW("pearl-jaw", R.drawable.ic_pbbls_pearl_jaw),
+    PEARL_JAW("pearl-jaw"),
 
     /** A date, a day: a calendar page with a stone ring for the day. */
-    CALENDAR_DAY("calendar-day", R.drawable.ic_pbbls_calendar_day),
+    CALENDAR_DAY("calendar-day"),
 
     /** A date, a day: a calendar page with a stone ring for the day. (the `lit-1` twin) */
-    CALENDAR_DAY_LIT_1("calendar-day.lit-1", R.drawable.ic_pbbls_calendar_day_lit_1),
+    CALENDAR_DAY_LIT_1("calendar-day.lit-1"),
 
     /** Remove: a bin with a curled knob, its body starting below the lid. */
-    TRASH("trash", R.drawable.ic_pbbls_trash),
+    TRASH("trash"),
 
     /** Remove: a bin with a lid and a curled knob. */
-    TRASH_2("trash-2", R.drawable.ic_pbbls_trash_2),
+    TRASH_2("trash-2"),
 
     /** Remove: a broom with a hooked handle. */
-    BROOM("broom", R.drawable.ic_pbbls_broom),
+    BROOM("broom"),
 
     /** Remove: a bin with a wax-cut zigzag on its side. */
-    SODA("soda", R.drawable.ic_pbbls_soda),
+    SODA("soda"),
 
     /** It worked: a stone with three rays of light rising from it. */
-    PEBBLE_GLOW_MD("pebble-glow-md", R.drawable.ic_pbbls_pebble_glow_md),
+    PEBBLE_GLOW_MD("pebble-glow-md"),
 
     /** It worked: a stone with three rays of light rising from it. (the `lit-1` twin) */
-    PEBBLE_GLOW_MD_LIT_1("pebble-glow-md.lit-1", R.drawable.ic_pbbls_pebble_glow_md_lit_1),
+    PEBBLE_GLOW_MD_LIT_1("pebble-glow-md.lit-1"),
 
     /** It worked: a low sun with rays over a ground line. */
-    SUNSHINE("sunshine", R.drawable.ic_pbbls_sunshine),
+    SUNSHINE("sunshine"),
 
     /** It worked: a sprout with two leaves rising from the ground. */
-    PLANT_SPROUT("plant-sprout", R.drawable.ic_pbbls_plant_sprout),
+    PLANT_SPROUT("plant-sprout"),
 
     /** It worked: a sprout with two leaves rising from the ground. (the `lit-1` twin) */
-    PLANT_SPROUT_LIT_1("plant-sprout.lit-1", R.drawable.ic_pbbls_plant_sprout_lit_1),
+    PLANT_SPROUT_LIT_1("plant-sprout.lit-1"),
 
     /** It worked: a sprout with two leaves rising from the ground. (the `lit-2` twin) */
-    PLANT_SPROUT_LIT_2("plant-sprout.lit-2", R.drawable.ic_pbbls_plant_sprout_lit_2),
+    PLANT_SPROUT_LIT_2("plant-sprout.lit-2"),
 
     /** It worked: a small stone with three rays rising from it. */
-    PEBBLE_GLOW_SM("pebble-glow-sm", R.drawable.ic_pbbls_pebble_glow_sm),
+    PEBBLE_GLOW_SM("pebble-glow-sm"),
 
     /** It worked: a small stone with three rays rising from it. (the `lit-1` twin) */
-    PEBBLE_GLOW_SM_LIT_1("pebble-glow-sm.lit-1", R.drawable.ic_pbbls_pebble_glow_sm_lit_1),
+    PEBBLE_GLOW_SM_LIT_1("pebble-glow-sm.lit-1"),
 
     /** It worked: a large stone with three rays rising from it. */
-    PEBBLE_GLOW_LG("pebble-glow-lg", R.drawable.ic_pbbls_pebble_glow_lg),
+    PEBBLE_GLOW_LG("pebble-glow-lg"),
 
     /** It worked: a large stone with three rays rising from it. (the `lit-1` twin) */
-    PEBBLE_GLOW_LG_LIT_1("pebble-glow-lg.lit-1", R.drawable.ic_pbbls_pebble_glow_lg_lit_1),
+    PEBBLE_GLOW_LG_LIT_1("pebble-glow-lg.lit-1"),
 
     /** It worked: a bow knot pulled tight, large loops. */
-    KNOT_LG("knot-lg", R.drawable.ic_pbbls_knot_lg),
+    KNOT_LG("knot-lg"),
 
     /** It worked: a bow knot pulled tight, large loops. (the `lit-1` twin) */
-    KNOT_LG_LIT_1("knot-lg.lit-1", R.drawable.ic_pbbls_knot_lg_lit_1),
+    KNOT_LG_LIT_1("knot-lg.lit-1"),
 
     /** It worked: a bow knot pulled tight, large loops. (the `lit-2` twin) */
-    KNOT_LG_LIT_2("knot-lg.lit-2", R.drawable.ic_pbbls_knot_lg_lit_2),
+    KNOT_LG_LIT_2("knot-lg.lit-2"),
 
     /** It worked: a bow knot pulled tight, small loops. */
-    KNOT_SM("knot-sm", R.drawable.ic_pbbls_knot_sm),
+    KNOT_SM("knot-sm"),
 
     /** It worked: a bow knot pulled tight, small loops. (the `lit-1` twin) */
-    KNOT_SM_LIT_1("knot-sm.lit-1", R.drawable.ic_pbbls_knot_sm_lit_1),
+    KNOT_SM_LIT_1("knot-sm.lit-1"),
 
     /** It worked: a bow knot pulled tight, small loops. (the `lit-2` twin) */
-    KNOT_SM_LIT_2("knot-sm.lit-2", R.drawable.ic_pbbls_knot_sm_lit_2),
+    KNOT_SM_LIT_2("knot-sm.lit-2"),
 
     /** It worked: a bell seen from below, ringing between two brackets. */
-    BELL_RINGING("bell-ringing", R.drawable.ic_pbbls_bell_ringing),
+    BELL_RINGING("bell-ringing"),
 
     /** It worked: a sunrise over a ground line. */
-    SUNRISE("sunrise", R.drawable.ic_pbbls_sunrise),
+    SUNRISE("sunrise"),
 
     /** A thought, a suggestion: a four-point star with the pen's dot beside it. */
-    SPARKLE("sparkle", R.drawable.ic_pbbls_sparkle),
+    SPARKLE("sparkle"),
 
     /** A thought, a suggestion: a spiral with three sparks flying off it. */
-    KARMA_SPARKLE("karma-sparkle", R.drawable.ic_pbbls_karma_sparkle),
+    KARMA_SPARKLE("karma-sparkle"),
 
     /** A thought, a suggestion: a seed with a sprout leaving a gap above it. */
-    PLANT_SEEDLING_GAP("plant-seedling-gap", R.drawable.ic_pbbls_plant_seedling_gap),
+    PLANT_SEEDLING_GAP("plant-seedling-gap"),
 
     /** A thought, a suggestion: a seed with a sprout leaving a gap above it. (the `lit-1` twin) */
-    PLANT_SEEDLING_GAP_LIT_1("plant-seedling-gap.lit-1", R.drawable.ic_pbbls_plant_seedling_gap_lit_1),
+    PLANT_SEEDLING_GAP_LIT_1("plant-seedling-gap.lit-1"),
 
     /** A thought, a suggestion: a seed with a sprout leaving a gap above it. (the `lit-2` twin) */
-    PLANT_SEEDLING_GAP_LIT_2("plant-seedling-gap.lit-2", R.drawable.ic_pbbls_plant_seedling_gap_lit_2),
+    PLANT_SEEDLING_GAP_LIT_2("plant-seedling-gap.lit-2"),
 
     /** A thought, a suggestion: a seed with a sprout leaving a gap above it. (the `lit-3` twin) */
-    PLANT_SEEDLING_GAP_LIT_3("plant-seedling-gap.lit-3", R.drawable.ic_pbbls_plant_seedling_gap_lit_3),
+    PLANT_SEEDLING_GAP_LIT_3("plant-seedling-gap.lit-3"),
 
     /** A thought, a suggestion: a wavy thread rising to a bead. */
-    ABSTRACT_DRIZZLE("abstract-drizzle", R.drawable.ic_pbbls_abstract_drizzle),
+    ABSTRACT_DRIZZLE("abstract-drizzle"),
 
     /** A thought, a suggestion: a bracket fungus crown on a short stem. */
-    ABSTRACT_TREE("abstract-tree", R.drawable.ic_pbbls_abstract_tree),
+    ABSTRACT_TREE("abstract-tree"),
 
     /** A thought, a suggestion: bubbles rising from a cord under a swell. */
-    ABSTRACT_UNDERWATER("abstract-underwater", R.drawable.ic_pbbls_abstract_underwater),
+    ABSTRACT_UNDERWATER("abstract-underwater"),
 
     /** A thought, a suggestion: a seed with a sprout growing from it. */
-    PLANT_SEEDLING("plant-seedling", R.drawable.ic_pbbls_plant_seedling),
+    PLANT_SEEDLING("plant-seedling"),
 
     /** A thought, a suggestion: a seed with a sprout growing from it. (the `lit-1` twin) */
-    PLANT_SEEDLING_LIT_1("plant-seedling.lit-1", R.drawable.ic_pbbls_plant_seedling_lit_1),
+    PLANT_SEEDLING_LIT_1("plant-seedling.lit-1"),
 
     /** A thought, a suggestion: a seed with a sprout growing from it. (the `lit-2` twin) */
-    PLANT_SEEDLING_LIT_2("plant-seedling.lit-2", R.drawable.ic_pbbls_plant_seedling_lit_2),
+    PLANT_SEEDLING_LIT_2("plant-seedling.lit-2"),
 
     /** A thought, a suggestion: a seed with a sprout growing from it. (the `lit-3` twin) */
-    PLANT_SEEDLING_LIT_3("plant-seedling.lit-3", R.drawable.ic_pbbls_plant_seedling_lit_3),
+    PLANT_SEEDLING_LIT_3("plant-seedling.lit-3"),
 
     /** A thought, a suggestion: a four-point star with a small plus beside it. */
-    SPARKLES("sparkles", R.drawable.ic_pbbls_sparkles),
+    SPARKLES("sparkles"),
 
     /** A thought, a suggestion: a needle threaded with a hooked cord. */
-    NEEDLE("needle", R.drawable.ic_pbbls_needle),
+    NEEDLE("needle"),
 
     /** A thought, a suggestion: a cord tied in one loose loop, a dot pressed past its end. */
-    LOOP("loop", R.drawable.ic_pbbls_loop),
+    LOOP("loop"),
 
     /** I liked this: a heart in two strokes that meet below. */
-    HEART("heart", R.drawable.ic_pbbls_heart),
+    HEART("heart"),
 
     /** I liked this: a heart in two strokes that meet below. (the `active` twin) */
-    HEART_ACTIVE("heart.active", R.drawable.ic_pbbls_heart_active),
+    HEART_ACTIVE("heart.active"),
 
     /** I liked this: a petroglyph handprint. */
-    HAND("hand", R.drawable.ic_pbbls_hand),
+    HAND("hand"),
 
     /** I liked this: a petroglyph handprint. (the `active` twin) */
-    HAND_ACTIVE("hand.active", R.drawable.ic_pbbls_hand_active),
+    HAND_ACTIVE("hand.active"),
 
     /** I liked this: two cords hooked into each other. */
-    NODE("node", R.drawable.ic_pbbls_node),
+    NODE("node"),
 
     /** I liked this: two cords hooked into each other. (the `active` twin) */
-    NODE_ACTIVE("node.active", R.drawable.ic_pbbls_node_active),
+    NODE_ACTIVE("node.active"),
 
     /** I liked this: a round fruit with a crossed stem. */
-    ORANGE("orange", R.drawable.ic_pbbls_orange),
+    ORANGE("orange"),
 
     /** I liked this: a round fruit with a crossed stem. (the `active` twin) */
-    ORANGE_ACTIVE("orange.active", R.drawable.ic_pbbls_orange_active),
+    ORANGE_ACTIVE("orange.active"),
 
     /** I liked this: a heart drawn in one stroke that almost meets. */
-    HEART_HEART("heart-heart", R.drawable.ic_pbbls_heart_heart),
+    HEART_HEART("heart-heart"),
 
     /** I liked this: a heart drawn in one stroke that almost meets. (the `active` twin) */
-    HEART_HEART_ACTIVE("heart-heart.active", R.drawable.ic_pbbls_heart_heart_active),
+    HEART_HEART_ACTIVE("heart-heart.active"),
 
     /** I liked this: a spiral inside a stone ring. */
-    PETROGLYPH("petroglyph", R.drawable.ic_pbbls_petroglyph),
+    PETROGLYPH("petroglyph"),
 
     /** I liked this: a spiral inside a stone ring. (the `active` twin) */
-    PETROGLYPH_ACTIVE("petroglyph.active", R.drawable.ic_pbbls_petroglyph_active),
+    PETROGLYPH_ACTIVE("petroglyph.active"),
 
     /** Ordered steps: a rail with two stone nodes. */
-    CONNECTION("connection", R.drawable.ic_pbbls_connection),
+    CONNECTION("connection"),
 
     /** Ordered steps: a tally strap with two notches. */
-    TIMELINE("timeline", R.drawable.ic_pbbls_timeline),
+    TIMELINE("timeline"),
 
     /** The marks a user scribbles on a stone: a stone ring around a small scribble. */
-    PEBBLE_OUTLINED_GLYPH("pebble-outlined-glyph", R.drawable.ic_pbbls_pebble_outlined_glyph),
+    PEBBLE_OUTLINED_GLYPH("pebble-outlined-glyph"),
 
     /** The marks a user scribbles on a stone: a stone ring around a small scribble. (the `lit-1` twin) */
-    PEBBLE_OUTLINED_GLYPH_LIT_1("pebble-outlined-glyph.lit-1", R.drawable.ic_pbbls_pebble_outlined_glyph_lit_1),
+    PEBBLE_OUTLINED_GLYPH_LIT_1("pebble-outlined-glyph.lit-1"),
 
     /** The marks a user scribbles on a stone: a stone ring around a small scribble, drawn with an open start. */
-    PEBBLE_OUTLINED_GLYPH_2("pebble-outlined-glyph-2", R.drawable.ic_pbbls_pebble_outlined_glyph_2),
+    PEBBLE_OUTLINED_GLYPH_2("pebble-outlined-glyph-2"),
 
     /** The marks a user scribbles on a stone: a stone ring around a small scribble, drawn with an open start. (the `lit-1` twin) */
-    PEBBLE_OUTLINED_GLYPH_2_LIT_1("pebble-outlined-glyph-2.lit-1", R.drawable.ic_pbbls_pebble_outlined_glyph_2_lit_1),
+    PEBBLE_OUTLINED_GLYPH_2_LIT_1("pebble-outlined-glyph-2.lit-1"),
 
     /** Join the community: a speech bubble with its tail at the lower left and a handset inside, the WhatsApp mark in the set's line. */
-    WHATSAPP("whatsapp", R.drawable.ic_pbbls_whatsapp),
+    WHATSAPP("whatsapp"),
+
+    /** Again: try once more, replay. */
+    AGAIN_BACKWARD("again-backward"),
+
+    /** Again: try once more, replay. (the `active` twin) */
+    AGAIN_BACKWARD_ACTIVE("again-backward.active"),
+
+    /** Again: try once more, replay. */
+    STONE_LOOP("stone-loop"),
+
+    /** Again: try once more, replay. (the `active` twin) */
+    STONE_LOOP_ACTIVE("stone-loop.active"),
+
+    /** Again: try once more, replay. */
+    STONES_BACK("stones-back"),
+
+    /** Again: try once more, replay. (the `active` twin) */
+    STONES_BACK_ACTIVE("stones-back.active"),
+
+    /** Again: try once more, replay. */
+    HOURGLASS_SHAKE("hourglass-shake"),
+
+    /** Again: try once more, replay. (the `active` twin) */
+    HOURGLASS_SHAKE_ACTIVE("hourglass-shake.active"),
+
+    /** Again: try once more, replay. */
+    STONE_REPEAT("stone-repeat"),
+
+    /** Again: try once more, replay. (the `active` twin) */
+    STONE_REPEAT_ACTIVE("stone-repeat.active"),
+
+    /** Again: try once more, replay. */
+    BACKWARD_CHEVRONS("backward-chevrons"),
+
+    /** Again: try once more, replay. (the `active` twin) */
+    BACKWARD_CHEVRONS_ACTIVE("backward-chevrons.active"),
+
+    /** Again: try once more, replay. */
+    AGAIN_FORWARD("again-forward"),
+
+    /** Again: try once more, replay. (the `active` twin) */
+    AGAIN_FORWARD_ACTIVE("again-forward.active"),
+
+    /** Again: try once more, replay. */
+    BACKWARD("backward"),
+
+    /** Again: try once more, replay. (the `active` twin) */
+    BACKWARD_ACTIVE("backward.active"),
+
+    /** Again: try once more, replay. */
+    ELLIPSE_FORWARD("ellipse-forward"),
+
+    /** Again: try once more, replay. (the `active` twin) */
+    ELLIPSE_FORWARD_ACTIVE("ellipse-forward.active"),
+
+    /** Swap: trade one thing for another. */
+    PASTE_SQUARE("paste-square"),
+
+    /** Swap: trade one thing for another. (the `active` twin) */
+    PASTE_SQUARE_ACTIVE("paste-square.active"),
+
+    /** Swap: trade one thing for another. */
+    SWING_DOUBLE("swing-double"),
+
+    /** Swap: trade one thing for another. (the `active` twin) */
+    SWING_DOUBLE_ACTIVE("swing-double.active"),
+
+    /** Swap: trade one thing for another. */
+    PEOPLE_SEND("people-send"),
+
+    /** Swap: trade one thing for another. (the `active` twin) */
+    PEOPLE_SEND_ACTIVE("people-send.active"),
+
+    /** Swap: trade one thing for another. */
+    EXCHANGE_MD("exchange-md"),
+
+    /** Swap: trade one thing for another. (the `active` twin) */
+    EXCHANGE_MD_ACTIVE("exchange-md.active"),
+
+    /** Swap: trade one thing for another. */
+    STONES_SWAP("stones-swap"),
+
+    /** Swap: trade one thing for another. (the `active` twin) */
+    STONES_SWAP_ACTIVE("stones-swap.active"),
+
+    /** Swap: trade one thing for another. */
+    DOTS_CROSS("dots-cross"),
+
+    /** Swap: trade one thing for another. (the `active` twin) */
+    DOTS_CROSS_ACTIVE("dots-cross.active"),
+
+    /** Swap: trade one thing for another. */
+    SWING_SINGLE("swing-single"),
+
+    /** Swap: trade one thing for another. (the `active` twin) */
+    SWING_SINGLE_ACTIVE("swing-single.active"),
+
+    /** Swap: trade one thing for another. */
+    STONES_LOOP("stones-loop"),
+
+    /** Swap: trade one thing for another. (the `active` twin) */
+    STONES_LOOP_ACTIVE("stones-loop.active"),
+
+    /** Swap: trade one thing for another. */
+    EXCHANGE_LG("exchange-lg"),
+
+    /** Swap: trade one thing for another. (the `active` twin) */
+    EXCHANGE_LG_ACTIVE("exchange-lg.active"),
+
+    /** Swap: trade one thing for another. */
+    CYCLE_STONES("cycle-stones"),
+
+    /** Swap: trade one thing for another. (the `active` twin) */
+    CYCLE_STONES_ACTIVE("cycle-stones.active"),
+
+    /** Swap: trade one thing for another. */
+    CYCLE_LINK("cycle-link"),
+
+    /** Swap: trade one thing for another. (the `active` twin) */
+    CYCLE_LINK_ACTIVE("cycle-link.active"),
+
+    /** Upload: a photo on its way up: a status, not a button. */
+    UPLOAD_BOX("upload-box"),
+
+    /** Upload: a photo on its way up: a status, not a button. (the `active` twin) */
+    UPLOAD_BOX_ACTIVE("upload-box.active"),
+
+    /** Upload: a photo on its way up: a status, not a button. */
+    PICTURE_SPEED("picture-speed"),
+
+    /** Upload: a photo on its way up: a status, not a button. (the `active` twin) */
+    PICTURE_SPEED_ACTIVE("picture-speed.active"),
+
+    /** Upload: a photo on its way up: a status, not a button. */
+    UPLOAD_HALF_CIRCLE("upload-half-circle"),
+
+    /** Upload: a photo on its way up: a status, not a button. (the `active` twin) */
+    UPLOAD_HALF_CIRCLE_ACTIVE("upload-half-circle.active"),
+
+    /** Upload: a photo on its way up: a status, not a button. */
+    CLOUD_UPLOAD("cloud-upload"),
+
+    /** Upload: a photo on its way up: a status, not a button. (the `active` twin) */
+    CLOUD_UPLOAD_ACTIVE("cloud-upload.active"),
+
+    /** Upload: a photo on its way up: a status, not a button. */
+    STONE_SPEED("stone-speed"),
+
+    /** Upload: a photo on its way up: a status, not a button. (the `active` twin) */
+    STONE_SPEED_ACTIVE("stone-speed.active"),
+
+    /** Upload: a photo on its way up: a status, not a button. */
+    PICTURE_UPLOAD("picture-upload"),
+
+    /** Upload: a photo on its way up: a status, not a button. (the `active` twin) */
+    PICTURE_UPLOAD_ACTIVE("picture-upload.active"),
+
+    /** Upload: a photo on its way up: a status, not a button. */
+    PICTURE_KITE("picture-kite"),
+
+    /** Upload: a photo on its way up: a status, not a button. (the `active` twin) */
+    PICTURE_KITE_ACTIVE("picture-kite.active"),
+
+    /** Upload: a photo on its way up: a status, not a button. */
+    DISK_ANGLE_UP("disk-angle-up"),
+
+    /** Upload: a photo on its way up: a status, not a button. (the `active` twin) */
+    DISK_ANGLE_UP_ACTIVE("disk-angle-up.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    ARROW_UP_LG("arrow-up-lg"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    ARROW_UP_LG_ACTIVE("arrow-up-lg.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    PEOPLE_UPVOTE("people-upvote"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    PEOPLE_UPVOTE_ACTIVE("people-upvote.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    CAIRN_ANGLE_UP("cairn-angle-up"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    CAIRN_ANGLE_UP_ACTIVE("cairn-angle-up.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    CIRCLE_ANGLE_UP("circle-angle-up"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    CIRCLE_ANGLE_UP_ACTIVE("circle-angle-up.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    THUMBS_UP("thumbs-up"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    THUMBS_UP_ACTIVE("thumbs-up.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    GOLF_FLAG("golf-flag"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    GOLF_FLAG_ACTIVE("golf-flag.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    CHEVRON_UP_UNDERLINE("chevron-up-underline"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    CHEVRON_UP_UNDERLINE_ACTIVE("chevron-up-underline.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    TRIANGLE_UP_UNDERLINE("triangle-up-underline"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    TRIANGLE_UP_UNDERLINE_ACTIVE("triangle-up-underline.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    STACK_CHEVRONS_UP("stack-chevrons-up"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    STACK_CHEVRONS_UP_ACTIVE("stack-chevrons-up.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    STONE_BOUNCE("stone-bounce"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    STONE_BOUNCE_ACTIVE("stone-bounce.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    SPROUT("sprout"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    SPROUT_ACTIVE("sprout.active"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. */
+    PLUS_ONE("plus-one"),
+
+    /** Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin) */
+    PLUS_ONE_ACTIVE("plus-one.active"),
+
+    /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
+    X_CIRCLE("x-circle"),
+
+    /**
+     * Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). (the `active`
+     * twin)
+     */
+    X_CIRCLE_ACTIVE("x-circle.active"),
+
+    /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
+    STONES_FALL("stones-fall"),
+
+    /**
+     * Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). (the `active`
+     * twin)
+     */
+    STONES_FALL_ACTIVE("stones-fall.active"),
+
+    /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
+    HOOK_FISH("hook-fish"),
+
+    /**
+     * Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). (the `active`
+     * twin)
+     */
+    HOOK_FISH_ACTIVE("hook-fish.active"),
+
+    /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
+    X_HALF_CIRCLE("x-half-circle"),
+
+    /**
+     * Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). (the `active`
+     * twin)
+     */
+    X_HALF_CIRCLE_ACTIVE("x-half-circle.active"),
+
+    /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
+    CIRCLE_BROKEN("circle-broken"),
+
+    /**
+     * Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). (the `active`
+     * twin)
+     */
+    CIRCLE_BROKEN_ACTIVE("circle-broken.active"),
+
+    /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
+    ARROW_DOWN_CUT("arrow-down-cut"),
+
+    /**
+     * Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). (the `active`
+     * twin)
+     */
+    ARROW_DOWN_CUT_ACTIVE("arrow-down-cut.active"),
+
+    /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
+    CIRCLE_DOT_EXCLAMATION("circle-dot-exclamation"),
+
+    /**
+     * Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). (the `active`
+     * twin)
+     */
+    CIRCLE_DOT_EXCLAMATION_ACTIVE("circle-dot-exclamation.active"),
+
+    /** Link broken: something went wrong: a link that broke (error family). */
+    LINK_BROKEN("link-broken"),
+
+    /** Link broken: something went wrong: a link that broke (error family). (the `active` twin) */
+    LINK_BROKEN_ACTIVE("link-broken.active"),
+
+    /** Link broken: something went wrong: a link that broke (error family). */
+    LINK_BROKEN_2("link-broken-2"),
+
+    /** Link broken: something went wrong: a link that broke (error family). (the `active` twin) */
+    LINK_BROKEN_2_ACTIVE("link-broken-2.active"),
+
+    /** Link broken: something went wrong: a link that broke (error family). */
+    LINK_EXCLAMATION("link-exclamation"),
+
+    /** Link broken: something went wrong: a link that broke (error family). (the `active` twin) */
+    LINK_EXCLAMATION_ACTIVE("link-exclamation.active"),
+
+    /** Page gone: something went wrong: a page that is gone (error family). */
+    PAPER_PLANE_TRAIL("paper-plane-trail"),
+
+    /** Page gone: something went wrong: a page that is gone (error family). (the `active` twin) */
+    PAPER_PLANE_TRAIL_ACTIVE("paper-plane-trail.active"),
+
+    /** Page gone: something went wrong: a page that is gone (error family). */
+    SQUARE_BOUNCE("square-bounce"),
+
+    /** Page gone: something went wrong: a page that is gone (error family). (the `active` twin) */
+    SQUARE_BOUNCE_ACTIVE("square-bounce.active"),
+
+    /** Page gone: something went wrong: a page that is gone (error family). */
+    RECTANGLE_DASHED("rectangle-dashed"),
+
+    /** Page gone: something went wrong: a page that is gone (error family). (the `active` twin) */
+    RECTANGLE_DASHED_ACTIVE("rectangle-dashed.active"),
+
+    /** Document: terms, a policy, a text to read. */
+    SCROLL("scroll"),
+
+    /** Document: terms, a policy, a text to read. (the `active` twin) */
+    SCROLL_ACTIVE("scroll.active"),
+
+    /** Document: terms, a policy, a text to read. */
+    MEMORIAL("memorial"),
+
+    /** Document: terms, a policy, a text to read. (the `active` twin) */
+    MEMORIAL_ACTIVE("memorial.active"),
+
+    /** Document: terms, a policy, a text to read. */
+    CLIPBOARD("clipboard"),
+
+    /** Document: terms, a policy, a text to read. (the `active` twin) */
+    CLIPBOARD_ACTIVE("clipboard.active"),
+
+    /** Document: terms, a policy, a text to read. */
+    BROCHURE("brochure"),
+
+    /** Document: terms, a policy, a text to read. (the `active` twin) */
+    BROCHURE_ACTIVE("brochure.active"),
+
+    /** Document: terms, a policy, a text to read. */
+    FILE("file"),
+
+    /** Document: terms, a policy, a text to read. (the `active` twin) */
+    FILE_ACTIVE("file.active"),
+
+    /** Document: terms, a policy, a text to read. */
+    MILESTONE("milestone"),
+
+    /** Document: terms, a policy, a text to read. (the `active` twin) */
+    MILESTONE_ACTIVE("milestone.active"),
+
+    /** Privacy: a hand held up: what we keep for ourselves. */
+    HAND_DOT("hand-dot"),
+
+    /** Privacy: a hand held up: what we keep for ourselves. (the `active` twin) */
+    HAND_DOT_ACTIVE("hand-dot.active"),
+
+    /** Privacy: a hand held up: what we keep for ourselves. */
+    SHIELD("shield"),
+
+    /** Privacy: a hand held up: what we keep for ourselves. (the `active` twin) */
+    SHIELD_ACTIVE("shield.active"),
+
+    /** Secret: visibility: only me (a trio with private and public, drawn together). */
+    USER_CIRCLE_LG("user-circle-lg"),
+
+    /** Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin) */
+    USER_CIRCLE_LG_ACTIVE("user-circle-lg.active"),
+
+    /** Secret: visibility: only me (a trio with private and public, drawn together). */
+    EYE_CLOSED("eye-closed"),
+
+    /** Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin) */
+    EYE_CLOSED_ACTIVE("eye-closed.active"),
+
+    /** Secret: visibility: only me (a trio with private and public, drawn together). */
+    POND("pond"),
+
+    /** Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin) */
+    POND_ACTIVE("pond.active"),
+
+    /** Secret: visibility: only me (a trio with private and public, drawn together). */
+    USER_CIRCLE_SM("user-circle-sm"),
+
+    /** Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin) */
+    USER_CIRCLE_SM_ACTIVE("user-circle-sm.active"),
+
+    /** Private: visibility: me and my circle (trio). */
+    USERS_CIRCLE("users-circle"),
+
+    /** Private: visibility: me and my circle (trio). (the `active` twin) */
+    USERS_CIRCLE_ACTIVE("users-circle.active"),
+
+    /** Private: visibility: me and my circle (trio). */
+    FARANDOLE("farandole"),
+
+    /** Private: visibility: me and my circle (trio). (the `active` twin) */
+    FARANDOLE_ACTIVE("farandole.active"),
+
+    /** Private: visibility: me and my circle (trio). */
+    FRUIT_BASKET("fruit-basket"),
+
+    /** Private: visibility: me and my circle (trio). (the `active` twin) */
+    FRUIT_BASKET_ACTIVE("fruit-basket.active"),
+
+    /** Private: visibility: me and my circle (trio). */
+    PEOPLE_3("people-3"),
+
+    /** Private: visibility: me and my circle (trio). (the `active` twin) */
+    PEOPLE_3_ACTIVE("people-3.active"),
+
+    /** Private: visibility: me and my circle (trio). */
+    STONES_DOUBLE_CIRCLE_OPEN("stones-double-circle-open"),
+
+    /** Private: visibility: me and my circle (trio). (the `active` twin) */
+    STONES_DOUBLE_CIRCLE_OPEN_ACTIVE("stones-double-circle-open.active"),
+
+    /** Private: visibility: me and my circle (trio). */
+    STONES_TRIPLE_CIRCLE("stones-triple-circle"),
+
+    /** Private: visibility: me and my circle (trio). (the `active` twin) */
+    STONES_TRIPLE_CIRCLE_ACTIVE("stones-triple-circle.active"),
+
+    /** Private: visibility: me and my circle (trio). */
+    CHAT_DOTS("chat-dots"),
+
+    /** Private: visibility: me and my circle (trio). (the `active` twin) */
+    CHAT_DOTS_ACTIVE("chat-dots.active"),
+
+    /** Public: visibility: anyone (trio). */
+    WORLD("world"),
+
+    /** Public: visibility: anyone (trio). (the `active` twin) */
+    WORLD_ACTIVE("world.active"),
+
+    /** Public: visibility: anyone (trio). */
+    STONE_EMMIT("stone-emmit"),
+
+    /** Public: visibility: anyone (trio). (the `active` twin) */
+    STONE_EMMIT_ACTIVE("stone-emmit.active"),
+
+    /** Public: visibility: anyone (trio). */
+    EYE_OPEN("eye-open"),
+
+    /** Public: visibility: anyone (trio). (the `active` twin) */
+    EYE_OPEN_ACTIVE("eye-open.active"),
+
+    /** Public: visibility: anyone (trio). */
+    STONE_MOUNTAIN_SHINE("stone-mountain-shine"),
+
+    /** Public: visibility: anyone (trio). (the `active` twin) */
+    STONE_MOUNTAIN_SHINE_ACTIVE("stone-mountain-shine.active"),
+
+    /** Public: visibility: anyone (trio). */
+    STONE_RIPPLES("stone-ripples"),
+
+    /** Public: visibility: anyone (trio). (the `active` twin) */
+    STONE_RIPPLES_ACTIVE("stone-ripples.active"),
+
+    /** Public: visibility: anyone (trio). */
+    STONES_TRIPLE_CIRCLE_OPEN("stones-triple-circle-open"),
+
+    /** Public: visibility: anyone (trio). (the `active` twin) */
+    STONES_TRIPLE_CIRCLE_OPEN_ACTIVE("stones-triple-circle-open.active"),
+
+    /** Public: visibility: anyone (trio). */
+    E("e"),
+
+    /** Public: visibility: anyone (trio). (the `active` twin) */
+    E_ACTIVE("e.active"),
+
+    /** Public: visibility: anyone (trio). */
+    ARCHE_CAIRN("arche-cairn"),
+
+    /** Public: visibility: anyone (trio). (the `active` twin) */
+    ARCHE_CAIRN_ACTIVE("arche-cairn.active"),
+
+    /** Public: visibility: anyone (trio). */
+    MEGAPHONE_2("megaphone-2"),
+
+    /** Public: visibility: anyone (trio). (the `active` twin) */
+    MEGAPHONE_2_ACTIVE("megaphone-2.active"),
+
+    /** Public: visibility: anyone (trio). */
+    USER_SHINE("user-shine"),
+
+    /** Public: visibility: anyone (trio). (the `active` twin) */
+    USER_SHINE_ACTIVE("user-shine.active"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. */
+    JAIL("jail"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. (the `active` twin) */
+    JAIL_ACTIVE("jail.active"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. */
+    KEYHOLE("keyhole"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. (the `active` twin) */
+    KEYHOLE_ACTIVE("keyhole.active"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. */
+    GIFT_CIRCLE("gift-circle"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. (the `active` twin) */
+    GIFT_CIRCLE_ACTIVE("gift-circle.active"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. */
+    LOCK_ROUNDED("lock-rounded"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. (the `active` twin) */
+    LOCK_ROUNDED_ACTIVE("lock-rounded.active"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. */
+    KEYHOLE_CIRCLE("keyhole-circle"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. (the `active` twin) */
+    KEYHOLE_CIRCLE_ACTIVE("keyhole-circle.active"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. */
+    LOCK("lock"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. (the `active` twin) */
+    LOCK_ACTIVE("lock.active"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. */
+    KEYHOLE_DOT("keyhole-dot"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. (the `active` twin) */
+    KEYHOLE_DOT_ACTIVE("keyhole-dot.active"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. */
+    STAR_DOTTED("star-dotted"),
+
+    /** Locked: an achievement not yet earned; must read apart from secret. (the `active` twin) */
+    STAR_DOTTED_ACTIVE("star-dotted.active"),
+
+    /** Invite: bring someone into the circle. */
+    STONES_HEXAGON_NEW("stones-hexagon-new"),
+
+    /** Invite: bring someone into the circle. (the `active` twin) */
+    STONES_HEXAGON_NEW_ACTIVE("stones-hexagon-new.active"),
+
+    /** Invite: bring someone into the circle. */
+    ENVELOPE("envelope"),
+
+    /** Invite: bring someone into the circle. (the `active` twin) */
+    ENVELOPE_ACTIVE("envelope.active"),
+
+    /** Invite: bring someone into the circle. */
+    TICKET("ticket"),
+
+    /** Invite: bring someone into the circle. (the `active` twin) */
+    TICKET_ACTIVE("ticket.active"),
+
+    /** Invite: bring someone into the circle. */
+    COFFEE_2("coffee-2"),
+
+    /** Invite: bring someone into the circle. (the `active` twin) */
+    COFFEE_2_ACTIVE("coffee-2.active"),
+
+    /** Invite: bring someone into the circle. */
+    USER_PLUS_ROUNDED("user-plus-rounded"),
+
+    /** Invite: bring someone into the circle. (the `active` twin) */
+    USER_PLUS_ROUNDED_ACTIVE("user-plus-rounded.active"),
+
+    /** Invite: bring someone into the circle. */
+    STONES_NEW("stones-new"),
+
+    /** Invite: bring someone into the circle. (the `active` twin) */
+    STONES_NEW_ACTIVE("stones-new.active"),
+
+    /** Invite: bring someone into the circle. */
+    STONE_CIRCLE_ARROW_IN("stone-circle-arrow-in"),
+
+    /** Invite: bring someone into the circle. (the `active` twin) */
+    STONE_CIRCLE_ARROW_IN_ACTIVE("stone-circle-arrow-in.active"),
+
+    /** Invite: bring someone into the circle. */
+    USER_PLUS_CURVE("user-plus-curve"),
+
+    /** Invite: bring someone into the circle. (the `active` twin) */
+    USER_PLUS_CURVE_ACTIVE("user-plus-curve.active"),
+
+    /** Invite: bring someone into the circle. */
+    STONES_CIRCLE_ARROW_IN_LEFT("stones-circle-arrow-in-left"),
+
+    /** Invite: bring someone into the circle. (the `active` twin) */
+    STONES_CIRCLE_ARROW_IN_LEFT_ACTIVE("stones-circle-arrow-in-left.active"),
+
+    /** Invite: bring someone into the circle. */
+    STONE_SPIRAL_OUTSIDE("stone-spiral-outside"),
+
+    /** Invite: bring someone into the circle. (the `active` twin) */
+    STONE_SPIRAL_OUTSIDE_ACTIVE("stone-spiral-outside.active"),
+
+    /** Invite: bring someone into the circle. */
+    STONE_SPIRAL_INSIDE("stone-spiral-inside"),
+
+    /** Invite: bring someone into the circle. (the `active` twin) */
+    STONE_SPIRAL_INSIDE_ACTIVE("stone-spiral-inside.active"),
+
+    /** Life domain: a compass, a territory, an area of one's life. */
+    COMPASS_VERTICAL("compass-vertical"),
+
+    /** Life domain: a compass, a territory, an area of one's life. (the `active` twin) */
+    COMPASS_VERTICAL_ACTIVE("compass-vertical.active"),
+
+    /** Life domain: a compass, a territory, an area of one's life. */
+    EGG_FRIED("egg-fried"),
+
+    /** Life domain: a compass, a territory, an area of one's life. (the `active` twin) */
+    EGG_FRIED_ACTIVE("egg-fried.active"),
+
+    /** Life domain: a compass, a territory, an area of one's life. */
+    SIGNS_SOIL("signs-soil"),
+
+    /** Life domain: a compass, a territory, an area of one's life. (the `active` twin) */
+    SIGNS_SOIL_ACTIVE("signs-soil.active"),
+
+    /** Life domain: a compass, a territory, an area of one's life. */
+    CIRCLE_QUARTERS("circle-quarters"),
+
+    /** Life domain: a compass, a territory, an area of one's life. (the `active` twin) */
+    CIRCLE_QUARTERS_ACTIVE("circle-quarters.active"),
+
+    /** Life domain: a compass, a territory, an area of one's life. */
+    FLAG_HILL("flag-hill"),
+
+    /** Life domain: a compass, a territory, an area of one's life. (the `active` twin) */
+    FLAG_HILL_ACTIVE("flag-hill.active"),
+
+    /** Life domain: a compass, a territory, an area of one's life. */
+    SIGNS("signs"),
+
+    /** Life domain: a compass, a territory, an area of one's life. (the `active` twin) */
+    SIGNS_ACTIVE("signs.active"),
+
+    /** Life domain: a compass, a territory, an area of one's life. */
+    COMPASS("compass"),
+
+    /** Life domain: a compass, a territory, an area of one's life. (the `active` twin) */
+    COMPASS_ACTIVE("compass.active"),
+
+    /** Life domain: a compass, a territory, an area of one's life. */
+    HEXAGON_TEXT("hexagon-text"),
+
+    /** Life domain: a compass, a territory, an area of one's life. (the `active` twin) */
+    HEXAGON_TEXT_ACTIVE("hexagon-text.active"),
+
+    /** Life domain: a compass, a territory, an area of one's life. */
+    STONES_PLUS("stones-plus"),
+
+    /** Life domain: a compass, a territory, an area of one's life. (the `active` twin) */
+    STONES_PLUS_ACTIVE("stones-plus.active"),
+
+    /** Market: where glyphs are traded. */
+    SHOP_SHOWCASE("shop-showcase"),
+
+    /** Market: where glyphs are traded. (the `active` twin) */
+    SHOP_SHOWCASE_ACTIVE("shop-showcase.active"),
+
+    /** Market: where glyphs are traded. */
+    SCALE_HALF("scale-half"),
+
+    /** Market: where glyphs are traded. (the `active` twin) */
+    SCALE_HALF_ACTIVE("scale-half.active"),
+
+    /** Market: where glyphs are traded. */
+    LABEL("label"),
+
+    /** Market: where glyphs are traded. (the `active` twin) */
+    LABEL_ACTIVE("label.active"),
+
+    /** Market: where glyphs are traded. */
+    FLAG_MOUNTAINS("flag-mountains"),
+
+    /** Market: where glyphs are traded. (the `active` twin) */
+    FLAG_MOUNTAINS_ACTIVE("flag-mountains.active"),
+
+    /** Market: where glyphs are traded. */
+    SHOP_STONE_K("shop-stone-k"),
+
+    /** Market: where glyphs are traded. (the `active` twin) */
+    SHOP_STONE_K_ACTIVE("shop-stone-k.active"),
+
+    /** Market: where glyphs are traded. */
+    SHOP_STONE("shop-stone"),
+
+    /** Market: where glyphs are traded. (the `active` twin) */
+    SHOP_STONE_ACTIVE("shop-stone.active"),
+
+    /** Market: where glyphs are traded. */
+    LABEL_STONE("label-stone"),
+
+    /** Market: where glyphs are traded. (the `active` twin) */
+    LABEL_STONE_ACTIVE("label-stone.active"),
+
+    /** Market: where glyphs are traded. */
+    CYCLE_STONE("cycle-stone"),
+
+    /** Market: where glyphs are traded. (the `active` twin) */
+    CYCLE_STONE_ACTIVE("cycle-stone.active"),
+
+    /** Hour: a time of day, beside a date. */
+    ORBIT("orbit"),
+
+    /** Hour: a time of day, beside a date. (the `active` twin) */
+    ORBIT_ACTIVE("orbit.active"),
+
+    /** Hour: a time of day, beside a date. */
+    CANDLE("candle"),
+
+    /** Hour: a time of day, beside a date. (the `active` twin) */
+    CANDLE_ACTIVE("candle.active"),
+
+    /** Hour: a time of day, beside a date. */
+    SUNDIAL("sundial"),
+
+    /** Hour: a time of day, beside a date. (the `active` twin) */
+    SUNDIAL_ACTIVE("sundial.active"),
+
+    /** Hour: a time of day, beside a date. */
+    STOPWATCH("stopwatch"),
+
+    /** Hour: a time of day, beside a date. (the `active` twin) */
+    STOPWATCH_ACTIVE("stopwatch.active"),
+
+    /** Hour: a time of day, beside a date. */
+    HOUR("hour"),
+
+    /** Hour: a time of day, beside a date. (the `active` twin) */
+    HOUR_ACTIVE("hour.active"),
+
+    /** Hour: a time of day, beside a date. */
+    GAUGE_ZOOM("gauge-zoom"),
+
+    /** Hour: a time of day, beside a date. (the `active` twin) */
+    GAUGE_ZOOM_ACTIVE("gauge-zoom.active"),
+
+    /** Block: stop someone from reaching you. */
+    BLOCKED("blocked"),
+
+    /** Block: stop someone from reaching you. (the `active` twin) */
+    BLOCKED_ACTIVE("blocked.active"),
+
+    /** Block: stop someone from reaching you. */
+    STONES_STACK("stones-stack"),
+
+    /** Block: stop someone from reaching you. (the `active` twin) */
+    STONES_STACK_ACTIVE("stones-stack.active"),
+
+    /** Block: stop someone from reaching you. */
+    WORKSITE("worksite"),
+
+    /** Block: stop someone from reaching you. (the `active` twin) */
+    WORKSITE_ACTIVE("worksite.active"),
+
+    /** Block: stop someone from reaching you. */
+    USER_BLOCKED("user-blocked"),
+
+    /** Block: stop someone from reaching you. (the `active` twin) */
+    USER_BLOCKED_ACTIVE("user-blocked.active"),
+
+    /** Block: stop someone from reaching you. */
+    USER_FORBIDDEN("user-forbidden"),
+
+    /** Block: stop someone from reaching you. (the `active` twin) */
+    USER_FORBIDDEN_ACTIVE("user-forbidden.active"),
+
+    /** Block: stop someone from reaching you. */
+    CRANE("crane"),
+
+    /** Block: stop someone from reaching you. (the `active` twin) */
+    CRANE_ACTIVE("crane.active"),
+
+    /** Block: stop someone from reaching you. */
+    STONES_CROSS("stones-cross"),
+
+    /** Block: stop someone from reaching you. (the `active` twin) */
+    STONES_CROSS_ACTIVE("stones-cross.active"),
+
+    /** Block: stop someone from reaching you. */
+    STONES_FORBIDDEN("stones-forbidden"),
+
+    /** Block: stop someone from reaching you. (the `active` twin) */
+    STONES_FORBIDDEN_ACTIVE("stones-forbidden.active"),
+
+    /** Block: stop someone from reaching you. */
+    STONES_VERTICAL_ARROW_IN("stones-vertical-arrow-in"),
+
+    /** Block: stop someone from reaching you. (the `active` twin) */
+    STONES_VERTICAL_ARROW_IN_ACTIVE("stones-vertical-arrow-in.active"),
+
+    /** Language: the tongue the app speaks; must read apart from public. */
+    BUBBLES_A("bubbles-a"),
+
+    /** Language: the tongue the app speaks; must read apart from public. (the `active` twin) */
+    BUBBLES_A_ACTIVE("bubbles-a.active"),
+
+    /** Language: the tongue the app speaks; must read apart from public. */
+    TRANSLATION_A("translation-a"),
+
+    /** Language: the tongue the app speaks; must read apart from public. (the `active` twin) */
+    TRANSLATION_A_ACTIVE("translation-a.active"),
+
+    /** Language: the tongue the app speaks; must read apart from public. */
+    CIRCLE_A("circle-a"),
+
+    /** Language: the tongue the app speaks; must read apart from public. (the `active` twin) */
+    CIRCLE_A_ACTIVE("circle-a.active"),
+
+    /** Language: the tongue the app speaks; must read apart from public. */
+    CUBE_A("cube-a"),
+
+    /** Language: the tongue the app speaks; must read apart from public. (the `active` twin) */
+    CUBE_A_ACTIVE("cube-a.active"),
+
+    /** Language: the tongue the app speaks; must read apart from public. */
+    BUBBLE_A("bubble-a"),
+
+    /** Language: the tongue the app speaks; must read apart from public. (the `active` twin) */
+    BUBBLE_A_ACTIVE("bubble-a.active"),
+
+    /** Language: the tongue the app speaks; must read apart from public. */
+    USERS_COMMUNICATION("users-communication"),
+
+    /** Language: the tongue the app speaks; must read apart from public. (the `active` twin) */
+    USERS_COMMUNICATION_ACTIVE("users-communication.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    SUN_SHINE_LG("sun-shine-lg"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    SUN_SHINE_LG_ACTIVE("sun-shine-lg.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    STONE_SHINE("stone-shine"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    STONE_SHINE_ACTIVE("stone-shine.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    SUN_SHINE_SEA("sun-shine-sea"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    SUN_SHINE_SEA_ACTIVE("sun-shine-sea.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    FLOWER_DAISY("flower-daisy"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    FLOWER_DAISY_ACTIVE("flower-daisy.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    SUNRISE_SHINE("sunrise-shine"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    SUNRISE_SHINE_ACTIVE("sunrise-shine.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    STONE_LG("stone-lg"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    STONE_LG_ACTIVE("stone-lg.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    TOGGLE_OFF_LABEL("toggle-off-label"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    TOGGLE_OFF_LABEL_ACTIVE("toggle-off-label.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    SIDEBAR("sidebar"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    SIDEBAR_ACTIVE("sidebar.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    SUN_SHINE_MD("sun-shine-md"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    SUN_SHINE_MD_ACTIVE("sun-shine-md.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    LIGHTBULB_SHINE("lightbulb-shine"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    LIGHTBULB_SHINE_ACTIVE("lightbulb-shine.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    STONE_STAR("stone-star"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    STONE_STAR_ACTIVE("stone-star.active"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). */
+    TOGGLE_OFF_SHINE("toggle-off-shine"),
+
+    /** Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the `active` twin) */
+    TOGGLE_OFF_SHINE_ACTIVE("toggle-off-shine.active"),
+
+    /** Appearance dark: appearance: dark (trio). */
+    MOON("moon"),
+
+    /** Appearance dark: appearance: dark (trio). (the `active` twin) */
+    MOON_ACTIVE("moon.active"),
+
+    /** Appearance dark: appearance: dark (trio). */
+    STONE_MOON("stone-moon"),
+
+    /** Appearance dark: appearance: dark (trio). (the `active` twin) */
+    STONE_MOON_ACTIVE("stone-moon.active"),
+
+    /** Appearance dark: appearance: dark (trio). */
+    GAME_BOARD_MOON("game-board-moon"),
+
+    /** Appearance dark: appearance: dark (trio). (the `active` twin) */
+    GAME_BOARD_MOON_ACTIVE("game-board-moon.active"),
+
+    /** Appearance dark: appearance: dark (trio). */
+    MOON_SEA("moon-sea"),
+
+    /** Appearance dark: appearance: dark (trio). (the `active` twin) */
+    MOON_SEA_ACTIVE("moon-sea.active"),
+
+    /** Appearance dark: appearance: dark (trio). */
+    FLOWER_TULIP("flower-tulip"),
+
+    /** Appearance dark: appearance: dark (trio). (the `active` twin) */
+    FLOWER_TULIP_ACTIVE("flower-tulip.active"),
+
+    /** Appearance dark: appearance: dark (trio). */
+    STONE_FACET("stone-facet"),
+
+    /** Appearance dark: appearance: dark (trio). (the `active` twin) */
+    STONE_FACET_ACTIVE("stone-facet.active"),
+
+    /** Appearance dark: appearance: dark (trio). */
+    TOGGLE_ON_LABEL("toggle-on-label"),
+
+    /** Appearance dark: appearance: dark (trio). (the `active` twin) */
+    TOGGLE_ON_LABEL_ACTIVE("toggle-on-label.active"),
+
+    /** Appearance dark: appearance: dark (trio). */
+    LIGHTBULB_MOON("lightbulb-moon"),
+
+    /** Appearance dark: appearance: dark (trio). (the `active` twin) */
+    LIGHTBULB_MOON_ACTIVE("lightbulb-moon.active"),
+
+    /** Appearance device: appearance: follow the device (trio). */
+    APPEARANCE_DEVICE("appearance-device"),
+
+    /** Appearance device: appearance: follow the device (trio). (the `active` twin) */
+    APPEARANCE_DEVICE_ACTIVE("appearance-device.active"),
+
+    /** Appearance device: appearance: follow the device (trio). */
+    STONE_PILL_SHINE("stone-pill-shine"),
+
+    /** Appearance device: appearance: follow the device (trio). (the `active` twin) */
+    STONE_PILL_SHINE_ACTIVE("stone-pill-shine.active"),
+
+    /** Appearance device: appearance: follow the device (trio). */
+    APPEARANCE("appearance"),
+
+    /** Appearance device: appearance: follow the device (trio). (the `active` twin) */
+    APPEARANCE_ACTIVE("appearance.active"),
+
+    /** Appearance device: appearance: follow the device (trio). */
+    TOGGLE_MEDIAN("toggle-median"),
+
+    /** Appearance device: appearance: follow the device (trio). (the `active` twin) */
+    TOGGLE_MEDIAN_ACTIVE("toggle-median.active"),
+
+    /** Appearance device: appearance: follow the device (trio). */
+    APPEARANCE_HALF("appearance-half"),
+
+    /** Appearance device: appearance: follow the device (trio). (the `active` twin) */
+    APPEARANCE_HALF_ACTIVE("appearance-half.active"),
+
+    /** Appearance device: appearance: follow the device (trio). */
+    LIGHTBULB_MARK("lightbulb-mark"),
+
+    /** Appearance device: appearance: follow the device (trio). (the `active` twin) */
+    LIGHTBULB_MARK_ACTIVE("lightbulb-mark.active"),
+
+    /** Appearance device: appearance: follow the device (trio). */
+    SUNSET_SEAA("sunset-seaa"),
+
+    /** Appearance device: appearance: follow the device (trio). (the `active` twin) */
+    SUNSET_SEAA_ACTIVE("sunset-seaa.active"),
+
+    /** Palette: the colour world the app wears. */
+    PALETTE_1("palette-1"),
+
+    /** Palette: the colour world the app wears. (the `active` twin) */
+    PALETTE_1_ACTIVE("palette-1.active"),
+
+    /** Palette: the colour world the app wears. */
+    CIRCLES_JOINTURE("circles-jointure"),
+
+    /** Palette: the colour world the app wears. (the `active` twin) */
+    CIRCLES_JOINTURE_ACTIVE("circles-jointure.active"),
+
+    /** Palette: the colour world the app wears. */
+    BROOMSTICK("broomstick"),
+
+    /** Palette: the colour world the app wears. (the `active` twin) */
+    BROOMSTICK_ACTIVE("broomstick.active"),
+
+    /** Palette: the colour world the app wears. */
+    FLOWER_REED("flower-reed"),
+
+    /** Palette: the colour world the app wears. (the `active` twin) */
+    FLOWER_REED_ACTIVE("flower-reed.active"),
+
+    /** Palette: the colour world the app wears. */
+    CIRCLES_JOINTURE_2("circles-jointure-2"),
+
+    /** Palette: the colour world the app wears. (the `active` twin) */
+    CIRCLES_JOINTURE_2_ACTIVE("circles-jointure-2.active"),
+
+    /** Palette: the colour world the app wears. */
+    PALETTE_3("palette-3"),
+
+    /** Palette: the colour world the app wears. (the `active` twin) */
+    PALETTE_3_ACTIVE("palette-3.active"),
+
+    /** Palette: the colour world the app wears. */
+    PRISM("prism"),
+
+    /** Palette: the colour world the app wears. (the `active` twin) */
+    PRISM_ACTIVE("prism.active"),
+
+    /** Palette: the colour world the app wears. */
+    SCREWDRIVER("screwdriver"),
+
+    /** Palette: the colour world the app wears. (the `active` twin) */
+    SCREWDRIVER_ACTIVE("screwdriver.active"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. */
+    BOUNCE_UNDERLINE("bounce-underline"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
+    BOUNCE_UNDERLINE_ACTIVE("bounce-underline.active"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. */
+    CHART_STONES("chart-stones"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
+    CHART_STONES_ACTIVE("chart-stones.active"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. */
+    SIGNAL_WAVE("signal-wave"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
+    SIGNAL_WAVE_ACTIVE("signal-wave.active"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. */
+    STONE_SPRING("stone-spring"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
+    STONE_SPRING_ACTIVE("stone-spring.active"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. */
+    STONE_DEBOUNCE("stone-debounce"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
+    STONE_DEBOUNCE_ACTIVE("stone-debounce.active"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. */
+    SIGNAL_WAVEFORM_STONE("signal-waveform-stone"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
+    SIGNAL_WAVEFORM_STONE_ACTIVE("signal-waveform-stone.active"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. */
+    STONES_LINE_CHART("stones-line-chart"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
+    STONES_LINE_CHART_ACTIVE("stones-line-chart.active"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. */
+    STONE_BOUNCES("stone-bounces"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
+    STONE_BOUNCES_ACTIVE("stone-bounces.active"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. */
+    SIGNAL_DOTS("signal-dots"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
+    SIGNAL_DOTS_ACTIVE("signal-dots.active"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. */
+    METRONOME("metronome"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
+    METRONOME_ACTIVE("metronome.active"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. */
+    STONES_4_HALF("stones-4-half"),
+
+    /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
+    STONES_4_HALF_ACTIVE("stones-4-half.active"),
+
+    /** Search: look something up by name, a lens. */
+    BINOCULARS("binoculars"),
+
+    /** Search: look something up by name, a lens. (the `active` twin) */
+    BINOCULARS_ACTIVE("binoculars.active"),
+
+    /** Search: look something up by name, a lens. */
+    TEXT_STONE("text-stone"),
+
+    /** Search: look something up by name, a lens. (the `active` twin) */
+    TEXT_STONE_ACTIVE("text-stone.active"),
+
+    /** Search: look something up by name, a lens. */
+    MAGNIFYING_MD("magnifying-md"),
+
+    /** Search: look something up by name, a lens. (the `active` twin) */
+    MAGNIFYING_MD_ACTIVE("magnifying-md.active"),
+
+    /** Search: look something up by name, a lens. */
+    MAGNIFYING_SM("magnifying-sm"),
+
+    /** Search: look something up by name, a lens. (the `active` twin) */
+    MAGNIFYING_SM_ACTIVE("magnifying-sm.active"),
+
+    /** Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. */
+    CIRCLE_INFO("circle-info"),
+
+    /**
+     * Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. (the `active`
+     * twin)
+     */
+    CIRCLE_INFO_ACTIVE("circle-info.active"),
+
+    /** Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. */
+    PARENTHESIS_INFO("parenthesis-info"),
+
+    /**
+     * Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. (the `active`
+     * twin)
+     */
+    PARENTHESIS_INFO_ACTIVE("parenthesis-info.active"),
+
+    /** Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. */
+    ASTERISK("asterisk"),
+
+    /**
+     * Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. (the `active`
+     * twin)
+     */
+    ASTERISK_ACTIVE("asterisk.active"),
+
+    /** Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. */
+    BUBBLE_INFO("bubble-info"),
+
+    /**
+     * Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. (the `active`
+     * twin)
+     */
+    BUBBLE_INFO_ACTIVE("bubble-info.active"),
+
+    /** Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. */
+    INFO_I("info-i"),
+
+    /**
+     * Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. (the `active`
+     * twin)
+     */
+    INFO_I_ACTIVE("info-i.active"),
+
+    /** Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. */
+    BADGE_INFO("badge-info"),
+
+    /**
+     * Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. (the `active`
+     * twin)
+     */
+    BADGE_INFO_ACTIVE("badge-info.active"),
+
+    /** Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. */
+    SIGN_INFO("sign-info"),
+
+    /**
+     * Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. (the `active`
+     * twin)
+     */
+    SIGN_INFO_ACTIVE("sign-info.active"),
+
+    /** Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. */
+    USER_STANDING("user-standing"),
+
+    /**
+     * Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. (the `active`
+     * twin)
+     */
+    USER_STANDING_ACTIVE("user-standing.active"),
+
+    /** Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. */
+    PARAGRAPH_INFO("paragraph-info"),
+
+    /**
+     * Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error family. (the `active`
+     * twin)
+     */
+    PARAGRAPH_INFO_ACTIVE("paragraph-info.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    DOLMEN_SOIL("dolmen-soil"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    DOLMEN_SOIL_ACTIVE("dolmen-soil.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    DOLMEN_FLUFFY("dolmen-fluffy"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    DOLMEN_FLUFFY_ACTIVE("dolmen-fluffy.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    STONE_GATE_SHINE("stone-gate-shine"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    STONE_GATE_SHINE_ACTIVE("stone-gate-shine.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    STONE_GATE_SM("stone-gate-sm"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    STONE_GATE_SM_ACTIVE("stone-gate-sm.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    STONE_BOARD("stone-board"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    STONE_BOARD_ACTIVE("stone-board.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    DOLMEN_SQUARE("dolmen-square"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    DOLMEN_SQUARE_ACTIVE("dolmen-square.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    DOLMEN_SQUARE_STONE("dolmen-square-stone"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    DOLMEN_SQUARE_STONE_ACTIVE("dolmen-square-stone.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    DOLMEN_SQUARE_PIN("dolmen-square-pin"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    DOLMEN_SQUARE_PIN_ACTIVE("dolmen-square-pin.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    MENHIR("menhir"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    MENHIR_ACTIVE("menhir.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    DOLMEN_2("dolmen-2"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    DOLMEN_2_ACTIVE("dolmen-2.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    GATE_STONE("gate-stone"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    GATE_STONE_ACTIVE("gate-stone.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    DOLMEN_SHINE_SM("dolmen-shine-sm"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    DOLMEN_SHINE_SM_ACTIVE("dolmen-shine-sm.active"),
+
+    /** Dolmen: the standing stone table, a monument. */
+    SLIDE("slide"),
+
+    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
+    SLIDE_ACTIVE("slide.active"),
+
+    /** Fossil: a life kept in stone. */
+    KARMA_FOSSIL("karma-fossil"),
+
+    /** Fossil: a life kept in stone. (the `active` twin) */
+    KARMA_FOSSIL_ACTIVE("karma-fossil.active"),
+
+    /** Fossil: a life kept in stone. */
+    CIRCLE_LEAF("circle-leaf"),
+
+    /** Fossil: a life kept in stone. (the `active` twin) */
+    CIRCLE_LEAF_ACTIVE("circle-leaf.active"),
+
+    /** Fossil: a life kept in stone. */
+    FISH_BONES_2("fish-bones-2"),
+
+    /** Fossil: a life kept in stone. (the `active` twin) */
+    FISH_BONES_2_ACTIVE("fish-bones-2.active"),
+
+    /** Fossil: a life kept in stone. */
+    CIRCLE_KARMA("circle-karma"),
+
+    /** Fossil: a life kept in stone. (the `active` twin) */
+    CIRCLE_KARMA_ACTIVE("circle-karma.active"),
+
+    /** Fossil: a life kept in stone. */
+    FISH_BONES("fish-bones"),
+
+    /** Fossil: a life kept in stone. (the `active` twin) */
+    FISH_BONES_ACTIVE("fish-bones.active"),
+
+    /** Fossil: a life kept in stone. */
+    COCOON("cocoon"),
+
+    /** Fossil: a life kept in stone. (the `active` twin) */
+    COCOON_ACTIVE("cocoon.active"),
+
+    /** Fossil: a life kept in stone. */
+    LEAF("leaf"),
+
+    /** Fossil: a life kept in stone. (the `active` twin) */
+    LEAF_ACTIVE("leaf.active"),
+
+    /** Fossil: a life kept in stone. */
+    CIRCLE_FOSSIL("circle-fossil"),
+
+    /** Fossil: a life kept in stone. (the `active` twin) */
+    CIRCLE_FOSSIL_ACTIVE("circle-fossil.active"),
+
+    /** Fossil: a life kept in stone. */
+    TRILOBITE("trilobite"),
+
+    /** Fossil: a life kept in stone. (the `active` twin) */
+    TRILOBITE_ACTIVE("trilobite.active"),
+
+    /** Fossil: a life kept in stone. */
+    STONE_HAIR("stone-hair"),
+
+    /** Fossil: a life kept in stone. (the `active` twin) */
+    STONE_HAIR_ACTIVE("stone-hair.active"),
+
+    /** Bookmark: keep my place, save for later. */
+    BOOKMARK("bookmark"),
+
+    /** Bookmark: keep my place, save for later. (the `active` twin) */
+    BOOKMARK_ACTIVE("bookmark.active"),
+
+    /** Bookmark: keep my place, save for later. */
+    BOOK_STONE("book-stone"),
+
+    /** Bookmark: keep my place, save for later. (the `active` twin) */
+    BOOK_STONE_ACTIVE("book-stone.active"),
+
+    /** Bookmark: keep my place, save for later. */
+    TEXT_STONE_MARGIN("text-stone-margin"),
+
+    /** Bookmark: keep my place, save for later. (the `active` twin) */
+    TEXT_STONE_MARGIN_ACTIVE("text-stone-margin.active"),
+
+    /** Bookmark: keep my place, save for later. */
+    BOOKMARK_STONE("bookmark-stone"),
+
+    /** Bookmark: keep my place, save for later. (the `active` twin) */
+    BOOKMARK_STONE_ACTIVE("bookmark-stone.active"),
+
+    /** Bookmark: keep my place, save for later. */
+    PAGE_CORNER("page-corner"),
+
+    /** Bookmark: keep my place, save for later. (the `active` twin) */
+    PAGE_CORNER_ACTIVE("page-corner.active"),
+
+    /** Bookmark: keep my place, save for later. */
+    TEXT_STONE_INLINE("text-stone-inline"),
+
+    /** Bookmark: keep my place, save for later. (the `active` twin) */
+    TEXT_STONE_INLINE_ACTIVE("text-stone-inline.active"),
+
+    /** Gem: something precious, cut. */
+    PEBBLE_GEM("pebble-gem"),
+
+    /** Gem: something precious, cut. (the `active` twin) */
+    PEBBLE_GEM_ACTIVE("pebble-gem.active"),
+
+    /** Gem: something precious, cut. */
+    AMETHYST("amethyst"),
+
+    /** Gem: something precious, cut. (the `active` twin) */
+    AMETHYST_ACTIVE("amethyst.active"),
+
+    /** Gem: something precious, cut. */
+    GEM_STONE_1("gem-stone-1"),
+
+    /** Gem: something precious, cut. (the `active` twin) */
+    GEM_STONE_1_ACTIVE("gem-stone-1.active"),
+
+    /** Gem: something precious, cut. */
+    GEM_UP("gem-up"),
+
+    /** Gem: something precious, cut. (the `active` twin) */
+    GEM_UP_ACTIVE("gem-up.active"),
+
+    /** Gem: something precious, cut. */
+    PEBBLE_FIRE("pebble-fire"),
+
+    /** Gem: something precious, cut. (the `active` twin) */
+    PEBBLE_FIRE_ACTIVE("pebble-fire.active"),
+
+    /** Target: an aim, a goal hit. */
+    TARGET_ARROW("target-arrow"),
+
+    /** Target: an aim, a goal hit. (the `active` twin) */
+    TARGET_ARROW_ACTIVE("target-arrow.active"),
+
+    /** Target: an aim, a goal hit. */
+    STONE_RIPPLE("stone-ripple"),
+
+    /** Target: an aim, a goal hit. (the `active` twin) */
+    STONE_RIPPLE_ACTIVE("stone-ripple.active"),
+
+    /** Target: an aim, a goal hit. */
+    GOLF_FLAG_LG("golf-flag-lg"),
+
+    /** Target: an aim, a goal hit. (the `active` twin) */
+    GOLF_FLAG_LG_ACTIVE("golf-flag-lg.active"),
+
+    /** Target: an aim, a goal hit. */
+    TARGET_OUTSIDE("target-outside"),
+
+    /** Target: an aim, a goal hit. (the `active` twin) */
+    TARGET_OUTSIDE_ACTIVE("target-outside.active"),
+
+    /** Target: an aim, a goal hit. */
+    FLAG_MOUNTAIN("flag-mountain"),
+
+    /** Target: an aim, a goal hit. (the `active` twin) */
+    FLAG_MOUNTAIN_ACTIVE("flag-mountain.active"),
+
+    /** Target: an aim, a goal hit. */
+    RIPPLES("ripples"),
+
+    /** Target: an aim, a goal hit. (the `active` twin) */
+    RIPPLES_ACTIVE("ripples.active"),
+
+    /** Target: an aim, a goal hit. */
+    STONE_WATER("stone-water"),
+
+    /** Target: an aim, a goal hit. (the `active` twin) */
+    STONE_WATER_ACTIVE("stone-water.active"),
+
+    /** Target: an aim, a goal hit. */
+    GOLF_FLAG_SM("golf-flag-sm"),
+
+    /** Target: an aim, a goal hit. (the `active` twin) */
+    GOLF_FLAG_SM_ACTIVE("golf-flag-sm.active"),
+
+    /** Target: an aim, a goal hit. */
+    STONE_SPARK("stone-spark"),
+
+    /** Target: an aim, a goal hit. (the `active` twin) */
+    STONE_SPARK_ACTIVE("stone-spark.active"),
+
+    /** Pen: write, edit. */
+    PENCIL("pencil"),
+
+    /** Pen: write, edit. (the `active` twin) */
+    PENCIL_ACTIVE("pencil.active"),
+
+    /** Pen: write, edit. */
+    PEN_FOUNTAIN_UP("pen-fountain-up"),
+
+    /** Pen: write, edit. (the `active` twin) */
+    PEN_FOUNTAIN_UP_ACTIVE("pen-fountain-up.active"),
+
+    /** Pen: write, edit. */
+    FEATHER_DOT("feather-dot"),
+
+    /** Pen: write, edit. (the `active` twin) */
+    FEATHER_DOT_ACTIVE("feather-dot.active"),
+
+    /** Pen: write, edit. */
+    PENCIL_WRITE("pencil-write"),
+
+    /** Pen: write, edit. (the `active` twin) */
+    PENCIL_WRITE_ACTIVE("pencil-write.active"),
+
+    /** Pen: write, edit. */
+    PEN_FOUNTAIN_LOSANGE("pen-fountain-losange"),
+
+    /** Pen: write, edit. (the `active` twin) */
+    PEN_FOUNTAIN_LOSANGE_ACTIVE("pen-fountain-losange.active"),
+
+    /** Pen: write, edit. */
+    ERASER_WRITE("eraser-write"),
+
+    /** Pen: write, edit. (the `active` twin) */
+    ERASER_WRITE_ACTIVE("eraser-write.active"),
+
+    /** Pen: write, edit. */
+    FEATHER_WRITE("feather-write"),
+
+    /** Pen: write, edit. (the `active` twin) */
+    FEATHER_WRITE_ACTIVE("feather-write.active"),
+
+    /** Pen: write, edit. */
+    PEN_FOUNTAIN_DOWN("pen-fountain-down"),
+
+    /** Pen: write, edit. (the `active` twin) */
+    PEN_FOUNTAIN_DOWN_ACTIVE("pen-fountain-down.active"),
+
+    /** Pen: write, edit. */
+    PENCIL_DRAW("pencil-draw"),
+
+    /** Pen: write, edit. (the `active` twin) */
+    PENCIL_DRAW_ACTIVE("pencil-draw.active"),
+
+    /** Radar: scanning around, what is near. */
+    SAUCER_ANTENNA("saucer-antenna"),
+
+    /** Radar: scanning around, what is near. (the `active` twin) */
+    SAUCER_ANTENNA_ACTIVE("saucer-antenna.active"),
+
+    /** Radar: scanning around, what is near. */
+    STONE_SIGNAL("stone-signal"),
+
+    /** Radar: scanning around, what is near. (the `active` twin) */
+    STONE_SIGNAL_ACTIVE("stone-signal.active"),
+
+    /** Radar: scanning around, what is near. */
+    USER_LINE("user-line"),
+
+    /** Radar: scanning around, what is near. (the `active` twin) */
+    USER_LINE_ACTIVE("user-line.active"),
+
+    /** Radar: scanning around, what is near. */
+    SAUCER_ANTENNA_K("saucer-antenna-k"),
+
+    /** Radar: scanning around, what is near. (the `active` twin) */
+    SAUCER_ANTENNA_K_ACTIVE("saucer-antenna-k.active"),
+
+    /** Radar: scanning around, what is near. */
+    STONE_WIFI("stone-wifi"),
+
+    /** Radar: scanning around, what is near. (the `active` twin) */
+    STONE_WIFI_ACTIVE("stone-wifi.active"),
+
+    /** Radar: scanning around, what is near. */
+    SAUCER_ANTENNA_SM("saucer-antenna-sm"),
+
+    /** Radar: scanning around, what is near. (the `active` twin) */
+    SAUCER_ANTENNA_SM_ACTIVE("saucer-antenna-sm.active"),
+
+    /** Radar: scanning around, what is near. */
+    ABSTRACT_RADAR("abstract-radar"),
+
+    /** Radar: scanning around, what is near. (the `active` twin) */
+    ABSTRACT_RADAR_ACTIVE("abstract-radar.active"),
+
+    /** Radar: scanning around, what is near. */
+    RADAR_QUARTER("radar-quarter"),
+
+    /** Radar: scanning around, what is near. (the `active` twin) */
+    RADAR_QUARTER_ACTIVE("radar-quarter.active"),
+
+    /** Radar: scanning around, what is near. */
+    ARROW_FORWARD_EYE("arrow-forward-eye"),
+
+    /** Radar: scanning around, what is near. (the `active` twin) */
+    ARROW_FORWARD_EYE_ACTIVE("arrow-forward-eye.active"),
+
+    /** Pyramid: a built monument, a layered peak. */
+    PYRAMID("pyramid"),
+
+    /** Pyramid: a built monument, a layered peak. (the `active` twin) */
+    PYRAMID_ACTIVE("pyramid.active"),
+
+    /** Pyramid: a built monument, a layered peak. */
+    PEBBLES_STACK_2("pebbles-stack-2"),
+
+    /** Pyramid: a built monument, a layered peak. (the `active` twin) */
+    PEBBLES_STACK_2_ACTIVE("pebbles-stack-2.active"),
+
+    /** Pyramid: a built monument, a layered peak. */
+    PYRAMIDS_SUN("pyramids-sun"),
+
+    /** Pyramid: a built monument, a layered peak. (the `active` twin) */
+    PYRAMIDS_SUN_ACTIVE("pyramids-sun.active"),
+
+    /** Pyramid: a built monument, a layered peak. */
+    ZIGGURAT("ziggurat"),
+
+    /** Pyramid: a built monument, a layered peak. (the `active` twin) */
+    ZIGGURAT_ACTIVE("ziggurat.active"),
+
+    /** Pyramid: a built monument, a layered peak. */
+    STONES_STACK_2("stones-stack-2"),
+
+    /** Pyramid: a built monument, a layered peak. (the `active` twin) */
+    STONES_STACK_2_ACTIVE("stones-stack-2.active"),
+
+    /** Pyramid: a built monument, a layered peak. */
+    OBELISK("obelisk"),
+
+    /** Pyramid: a built monument, a layered peak. (the `active` twin) */
+    OBELISK_ACTIVE("obelisk.active"),
+
+    /** Pyramid: a built monument, a layered peak. */
+    PYRAMID_LAYERS("pyramid-layers"),
+
+    /** Pyramid: a built monument, a layered peak. (the `active` twin) */
+    PYRAMID_LAYERS_ACTIVE("pyramid-layers.active"),
+
+    /** Pyramid: a built monument, a layered peak. */
+    STONES_STACK_PLUS("stones-stack-plus"),
+
+    /** Pyramid: a built monument, a layered peak. (the `active` twin) */
+    STONES_STACK_PLUS_ACTIVE("stones-stack-plus.active"),
+
+    /** Pyramid: a built monument, a layered peak. */
+    PYRAMID_SUN("pyramid-sun"),
+
+    /** Pyramid: a built monument, a layered peak. (the `active` twin) */
+    PYRAMID_SUN_ACTIVE("pyramid-sun.active"),
+
+    /** Pyramid: a built monument, a layered peak. */
+    PYRAMID_INSIDE("pyramid-inside"),
+
+    /** Pyramid: a built monument, a layered peak. (the `active` twin) */
+    PYRAMID_INSIDE_ACTIVE("pyramid-inside.active"),
+
+    /** Layout: how a page is arranged. */
+    LAYOUT_SHARP("layout-sharp"),
+
+    /** Layout: how a page is arranged. (the `active` twin) */
+    LAYOUT_SHARP_ACTIVE("layout-sharp.active"),
+
+    /** Layout: how a page is arranged. */
+    TEXT_EDITORIAL("text-editorial"),
+
+    /** Layout: how a page is arranged. (the `active` twin) */
+    TEXT_EDITORIAL_ACTIVE("text-editorial.active"),
+
+    /** Layout: how a page is arranged. */
+    LAYOUT_SIDEBAR("layout-sidebar"),
+
+    /** Layout: how a page is arranged. (the `active` twin) */
+    LAYOUT_SIDEBAR_ACTIVE("layout-sidebar.active"),
+
+    /** Layout: how a page is arranged. */
+    STONES_LAYOUT("stones-layout"),
+
+    /** Layout: how a page is arranged. (the `active` twin) */
+    STONES_LAYOUT_ACTIVE("stones-layout.active"),
+
+    /** Layout: how a page is arranged. */
+    LAYOUT("layout"),
+
+    /** Layout: how a page is arranged. (the `active` twin) */
+    LAYOUT_ACTIVE("layout.active"),
+
+    /** Layout: how a page is arranged. */
+    SET_SQUARE("set-square"),
+
+    /** Layout: how a page is arranged. (the `active` twin) */
+    SET_SQUARE_ACTIVE("set-square.active"),
+
+    /** Dashboard: an overview of numbers at a glance. */
+    GAUGE("gauge"),
+
+    /** Dashboard: an overview of numbers at a glance. (the `active` twin) */
+    GAUGE_ACTIVE("gauge.active"),
+
+    /** Dashboard: an overview of numbers at a glance. */
+    SCALE_GAUGE("scale-gauge"),
+
+    /** Dashboard: an overview of numbers at a glance. (the `active` twin) */
+    SCALE_GAUGE_ACTIVE("scale-gauge.active"),
+
+    /** Dashboard: an overview of numbers at a glance. */
+    GAUGE_SIMPLE("gauge-simple"),
+
+    /** Dashboard: an overview of numbers at a glance. (the `active` twin) */
+    GAUGE_SIMPLE_ACTIVE("gauge-simple.active"),
+
+    /** Dashboard: an overview of numbers at a glance. */
+    SQUARE_CHART_BARS("square-chart-bars"),
+
+    /** Dashboard: an overview of numbers at a glance. (the `active` twin) */
+    SQUARE_CHART_BARS_ACTIVE("square-chart-bars.active"),
+
+    /** Dashboard: an overview of numbers at a glance. */
+    GAUGE_UNDERLINE("gauge-underline"),
+
+    /** Dashboard: an overview of numbers at a glance. (the `active` twin) */
+    GAUGE_UNDERLINE_ACTIVE("gauge-underline.active"),
+
+    /** Dashboard: an overview of numbers at a glance. */
+    DASHBOARD("dashboard"),
+
+    /** Dashboard: an overview of numbers at a glance. (the `active` twin) */
+    DASHBOARD_ACTIVE("dashboard.active"),
+
+    /** Chart: figures over time. */
+    CHART_STONES_GROW("chart-stones-grow"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    CHART_STONES_GROW_ACTIVE("chart-stones-grow.active"),
+
+    /** Chart: figures over time. */
+    CHART_DIAGRAM("chart-diagram"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    CHART_DIAGRAM_ACTIVE("chart-diagram.active"),
+
+    /** Chart: figures over time. */
+    BULLSEYE("bullseye"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    BULLSEYE_ACTIVE("bullseye.active"),
+
+    /** Chart: figures over time. */
+    CHART_GROW("chart-grow"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    CHART_GROW_ACTIVE("chart-grow.active"),
+
+    /** Chart: figures over time. */
+    CHART_BARS_FILL("chart-bars-fill"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    CHART_BARS_FILL_ACTIVE("chart-bars-fill.active"),
+
+    /** Chart: figures over time. */
+    LINE_GROW("line-grow"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    LINE_GROW_ACTIVE("line-grow.active"),
+
+    /** Chart: figures over time. */
+    CHART_STONES_4("chart-stones-4"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    CHART_STONES_4_ACTIVE("chart-stones-4.active"),
+
+    /** Chart: figures over time. */
+    CHART_LINE_STONE("chart-line-stone"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    CHART_LINE_STONE_ACTIVE("chart-line-stone.active"),
+
+    /** Chart: figures over time. */
+    CHART_STONES_GROW_UNDERLINE("chart-stones-grow-underline"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    CHART_STONES_GROW_UNDERLINE_ACTIVE("chart-stones-grow-underline.active"),
+
+    /** Chart: figures over time. */
+    CHART_SEGMENTS("chart-segments"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    CHART_SEGMENTS_ACTIVE("chart-segments.active"),
+
+    /** Chart: figures over time. */
+    CHART_DIAGRAM_SM("chart-diagram-sm"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    CHART_DIAGRAM_SM_ACTIVE("chart-diagram-sm.active"),
+
+    /** Chart: figures over time. */
+    CHART_WIRES("chart-wires"),
+
+    /** Chart: figures over time. (the `active` twin) */
+    CHART_WIRES_ACTIVE("chart-wires.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    BOARD_WALL_NOTES("board-wall-notes"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    BOARD_WALL_NOTES_ACTIVE("board-wall-notes.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    LIBRARY("library"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    LIBRARY_ACTIVE("library.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    GAME_STONES("game-stones"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    GAME_STONES_ACTIVE("game-stones.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    BOARD_CHART("board-chart"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    BOARD_CHART_ACTIVE("board-chart.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    MEMOS_LACE("memos-lace"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    MEMOS_LACE_ACTIVE("memos-lace.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    SQUARE_NOTES("square-notes"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    SQUARE_NOTES_ACTIVE("square-notes.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    BOARD_NOTES("board-notes"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    BOARD_NOTES_ACTIVE("board-notes.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    MEMO("memo"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    MEMO_ACTIVE("memo.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    GAME_CHECKERS("game-checkers"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    GAME_CHECKERS_ACTIVE("game-checkers.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    BOARD_LAYOUT("board-layout"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    BOARD_LAYOUT_ACTIVE("board-layout.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    BOARD_LAMP("board-lamp"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    BOARD_LAMP_ACTIVE("board-lamp.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    GRID("grid"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    GRID_ACTIVE("grid.active"),
+
+    /** Board: a board where things are pinned or arranged. */
+    BOARD("board"),
+
+    /** Board: a board where things are pinned or arranged. (the `active` twin) */
+    BOARD_ACTIVE("board.active"),
+
+    /** Copy: make a second one. */
+    COPY_SQUARES("copy-squares"),
+
+    /** Copy: make a second one. (the `active` twin) */
+    COPY_SQUARES_ACTIVE("copy-squares.active"),
+
+    /** Copy: make a second one. */
+    COPY_CIRCLES("copy-circles"),
+
+    /** Copy: make a second one. (the `active` twin) */
+    COPY_CIRCLES_ACTIVE("copy-circles.active"),
+
+    /** Copy: make a second one. */
+    LAYERS_SQUARE("layers-square"),
+
+    /** Copy: make a second one. (the `active` twin) */
+    LAYERS_SQUARE_ACTIVE("layers-square.active"),
+
+    /** Copy: make a second one. */
+    STONE_SEA("stone-sea"),
+
+    /** Copy: make a second one. (the `active` twin) */
+    STONE_SEA_ACTIVE("stone-sea.active"),
+
+    /** Copy: make a second one. */
+    DOCUMENT_SCAN("document-scan"),
+
+    /** Copy: make a second one. (the `active` twin) */
+    DOCUMENT_SCAN_ACTIVE("document-scan.active"),
+
+    /** Paste: put it here. */
+    CLIPBOARD_PASTE("clipboard-paste"),
+
+    /** Paste: put it here. (the `active` twin) */
+    CLIPBOARD_PASTE_ACTIVE("clipboard-paste.active"),
+
+    /** Paste: put it here. */
+    STONE_DOWN_TUNNEL("stone-down-tunnel"),
+
+    /** Paste: put it here. (the `active` twin) */
+    STONE_DOWN_TUNNEL_ACTIVE("stone-down-tunnel.active"),
+
+    /** Paste: put it here. */
+    ARROW_BOTTOM_BOX("arrow-bottom-box"),
+
+    /** Paste: put it here. (the `active` twin) */
+    ARROW_BOTTOM_BOX_ACTIVE("arrow-bottom-box.active"),
+
+    /** Paste: put it here. */
+    NOTE_CORNER("note-corner"),
+
+    /** Paste: put it here. (the `active` twin) */
+    NOTE_CORNER_ACTIVE("note-corner.active"),
+
+    /** Paste: put it here. */
+    MAP_PIN("map-pin"),
+
+    /** Paste: put it here. (the `active` twin) */
+    MAP_PIN_ACTIVE("map-pin.active"),
+
+    /** Paste: put it here. */
+    CLIPBOARD_ARROW_DOWN("clipboard-arrow-down"),
+
+    /** Paste: put it here. (the `active` twin) */
+    CLIPBOARD_ARROW_DOWN_ACTIVE("clipboard-arrow-down.active"),
+
+    /** Paste: put it here. */
+    STONE_BOX("stone-box"),
+
+    /** Paste: put it here. (the `active` twin) */
+    STONE_BOX_ACTIVE("stone-box.active"),
+
+    /** Paste: put it here. */
+    CARD_STONE("card-stone"),
+
+    /** Paste: put it here. (the `active` twin) */
+    CARD_STONE_ACTIVE("card-stone.active"),
+
+    /** Paste: put it here. */
+    SQUARE_PASTE("square-paste"),
+
+    /** Paste: put it here. (the `active` twin) */
+    SQUARE_PASTE_ACTIVE("square-paste.active"),
+
+    /** Paste: put it here. */
+    NOTE_STONE("note-stone"),
+
+    /** Paste: put it here. (the `active` twin) */
+    NOTE_STONE_ACTIVE("note-stone.active"),
+
+    /** Cursor: a pointer, here. */
+    CURSOR("cursor"),
+
+    /** Cursor: a pointer, here. (the `active` twin) */
+    CURSOR_ACTIVE("cursor.active"),
+
+    /** Cursor: a pointer, here. */
+    CURSOR_POINTER("cursor-pointer"),
+
+    /** Cursor: a pointer, here. (the `active` twin) */
+    CURSOR_POINTER_ACTIVE("cursor-pointer.active"),
+
+    /** Cursor: a pointer, here. */
+    CURSOR_POINTER_CLICK("cursor-pointer-click"),
+
+    /** Cursor: a pointer, here. (the `active` twin) */
+    CURSOR_POINTER_CLICK_ACTIVE("cursor-pointer-click.active"),
+
+    /** Cursor: a pointer, here. */
+    VIEWFINDER("viewfinder"),
+
+    /** Cursor: a pointer, here. (the `active` twin) */
+    VIEWFINDER_ACTIVE("viewfinder.active"),
+
+    /** Book: a book to read. */
+    BOOK_COVER_STONE("book-cover-stone"),
+
+    /** Book: a book to read. (the `active` twin) */
+    BOOK_COVER_STONE_ACTIVE("book-cover-stone.active"),
+
+    /** Book: a book to read. */
+    BOOK_TEXT_BOOKMARK("book-text-bookmark"),
+
+    /** Book: a book to read. (the `active` twin) */
+    BOOK_TEXT_BOOKMARK_ACTIVE("book-text-bookmark.active"),
+
+    /** Book: a book to read. */
+    BOOKS_SHELVE("books-shelve"),
+
+    /** Book: a book to read. (the `active` twin) */
+    BOOKS_SHELVE_ACTIVE("books-shelve.active"),
+
+    /** Book: a book to read. */
+    BOOK("book"),
+
+    /** Book: a book to read. (the `active` twin) */
+    BOOK_ACTIVE("book.active"),
+
+    /** Book: a book to read. */
+    BOOKBINDING("bookbinding"),
+
+    /** Book: a book to read. (the `active` twin) */
+    BOOKBINDING_ACTIVE("bookbinding.active"),
+
+    /** Book: a book to read. */
+    BOOKS_STACK("books-stack"),
+
+    /** Book: a book to read. (the `active` twin) */
+    BOOKS_STACK_ACTIVE("books-stack.active"),
+
+    /** Book: a book to read. */
+    BOOK_ISO("book-iso"),
+
+    /** Book: a book to read. (the `active` twin) */
+    BOOK_ISO_ACTIVE("book-iso.active"),
+
+    /** Book: a book to read. */
+    ABSTRACT_GLOW("abstract-glow"),
+
+    /** Book: a book to read. (the `active` twin) */
+    ABSTRACT_GLOW_ACTIVE("abstract-glow.active"),
+
+    /** Text: plain text, a paragraph. */
+    TEXT_PERIOD_STONE("text-period-stone"),
+
+    /** Text: plain text, a paragraph. (the `active` twin) */
+    TEXT_PERIOD_STONE_ACTIVE("text-period-stone.active"),
+
+    /** Text: plain text, a paragraph. */
+    TEXT_AA("text-aa"),
+
+    /** Text: plain text, a paragraph. (the `active` twin) */
+    TEXT_AA_ACTIVE("text-aa.active"),
+
+    /** Text: plain text, a paragraph. */
+    TEXT_QUOTE("text-quote"),
+
+    /** Text: plain text, a paragraph. (the `active` twin) */
+    TEXT_QUOTE_ACTIVE("text-quote.active"),
+
+    /** Text: plain text, a paragraph. */
+    CURL("curl"),
+
+    /** Text: plain text, a paragraph. (the `active` twin) */
+    CURL_ACTIVE("curl.active"),
+
+    /** Text: plain text, a paragraph. */
+    TEXT_INITIAL_STONE("text-initial-stone"),
+
+    /** Text: plain text, a paragraph. (the `active` twin) */
+    TEXT_INITIAL_STONE_ACTIVE("text-initial-stone.active"),
+
+    /** Text: plain text, a paragraph. */
+    WAVES_PERIOD_STONE("waves-period-stone"),
+
+    /** Text: plain text, a paragraph. (the `active` twin) */
+    WAVES_PERIOD_STONE_ACTIVE("waves-period-stone.active"),
+
+    /** Text: plain text, a paragraph. */
+    TEXT_PERIOD("text-period"),
+
+    /** Text: plain text, a paragraph. (the `active` twin) */
+    TEXT_PERIOD_ACTIVE("text-period.active"),
+
+    /** Text: plain text, a paragraph. */
+    LETTER_T_DOT("letter-t-dot"),
+
+    /** Text: plain text, a paragraph. (the `active` twin) */
+    LETTER_T_DOT_ACTIVE("letter-t-dot.active"),
+
+    /** Text: plain text, a paragraph. */
+    TEXT_UNDERLINE_DOT("text-underline-dot"),
+
+    /** Text: plain text, a paragraph. (the `active` twin) */
+    TEXT_UNDERLINE_DOT_ACTIVE("text-underline-dot.active"),
+
+    /** Text: plain text, a paragraph. */
+    PARAGRAPH("paragraph"),
+
+    /** Text: plain text, a paragraph. (the `active` twin) */
+    PARAGRAPH_ACTIVE("paragraph.active"),
+
+    /** Memo: a short note. */
+    MEMO_TEXT_CORNER("memo-text-corner"),
+
+    /** Memo: a short note. (the `active` twin) */
+    MEMO_TEXT_CORNER_ACTIVE("memo-text-corner.active"),
+
+    /** Memo: a short note. */
+    MEMO_TEXT_STONE("memo-text-stone"),
+
+    /** Memo: a short note. (the `active` twin) */
+    MEMO_TEXT_STONE_ACTIVE("memo-text-stone.active"),
+
+    /** Memo: a short note. */
+    MEMO_TEXT_TORN("memo-text-torn"),
+
+    /** Memo: a short note. (the `active` twin) */
+    MEMO_TEXT_TORN_ACTIVE("memo-text-torn.active"),
+
+    /** Memo: a short note. */
+    MEMO_TEXT_CLIP("memo-text-clip"),
+
+    /** Memo: a short note. (the `active` twin) */
+    MEMO_TEXT_CLIP_ACTIVE("memo-text-clip.active"),
+
+    /** Memo: a short note. */
+    RECEIPT("receipt"),
+
+    /** Memo: a short note. (the `active` twin) */
+    RECEIPT_ACTIVE("receipt.active"),
+
+    /** Memo: a short note. */
+    PAPERPLANE("paperplane"),
+
+    /** Memo: a short note. (the `active` twin) */
+    PAPERPLANE_ACTIVE("paperplane.active"),
+
+    /** Memo: a short note. */
+    MEMO_TEXT_STONE_SM("memo-text-stone-sm"),
+
+    /** Memo: a short note. (the `active` twin) */
+    MEMO_TEXT_STONE_SM_ACTIVE("memo-text-stone-sm.active"),
+
+    /** Memo: a short note. */
+    BOTTLE_MESSAGE("bottle-message"),
+
+    /** Memo: a short note. (the `active` twin) */
+    BOTTLE_MESSAGE_ACTIVE("bottle-message.active"),
+
+    /** Folder: a place that holds files. */
+    FOLDER("folder"),
+
+    /** Folder: a place that holds files. (the `active` twin) */
+    FOLDER_ACTIVE("folder.active"),
+
+    /** Folder: a place that holds files. */
+    FOLDER_2("folder-2"),
+
+    /** Folder: a place that holds files. (the `active` twin) */
+    FOLDER_2_ACTIVE("folder-2.active"),
+
+    /** Folder: a place that holds files. */
+    ARCHIVE_BOX("archive-box"),
+
+    /** Folder: a place that holds files. (the `active` twin) */
+    ARCHIVE_BOX_ACTIVE("archive-box.active"),
+
+    /** Trunk: a travel chest. */
+    TRUNK("trunk"),
+
+    /** Trunk: a travel chest. (the `active` twin) */
+    TRUNK_ACTIVE("trunk.active"),
+
+    /** Trunk: a travel chest. */
+    ARCHIVE_BOX_ISO("archive-box-iso"),
+
+    /** Trunk: a travel chest. (the `active` twin) */
+    ARCHIVE_BOX_ISO_ACTIVE("archive-box-iso.active"),
+
+    /** Trunk: a travel chest. */
+    TOOLBOX("toolbox"),
+
+    /** Trunk: a travel chest. (the `active` twin) */
+    TOOLBOX_ACTIVE("toolbox.active"),
+
+    /** Trunk: a travel chest. */
+    METAL_BOX("metal-box"),
+
+    /** Trunk: a travel chest. (the `active` twin) */
+    METAL_BOX_ACTIVE("metal-box.active"),
+
+    /** Trunk: a travel chest. */
+    SUITCASE("suitcase"),
+
+    /** Trunk: a travel chest. (the `active` twin) */
+    SUITCASE_ACTIVE("suitcase.active"),
+
+    /** Medal: an honour hung on a ribbon. */
+    MEDAL("medal"),
+
+    /** Medal: an honour hung on a ribbon. (the `active` twin) */
+    MEDAL_ACTIVE("medal.active"),
+
+    /** Medal: an honour hung on a ribbon. */
+    LAUREL_STONE("laurel-stone"),
+
+    /** Medal: an honour hung on a ribbon. (the `active` twin) */
+    LAUREL_STONE_ACTIVE("laurel-stone.active"),
+
+    /** Medal: an honour hung on a ribbon. */
+    MEDAL_STAR("medal-star"),
+
+    /** Medal: an honour hung on a ribbon. (the `active` twin) */
+    MEDAL_STAR_ACTIVE("medal-star.active"),
+
+    /** Medal: an honour hung on a ribbon. */
+    PODIUM_STONE("podium-stone"),
+
+    /** Medal: an honour hung on a ribbon. (the `active` twin) */
+    PODIUM_STONE_ACTIVE("podium-stone.active"),
+
+    /** Medal: an honour hung on a ribbon. */
+    MEDAL_STONE("medal-stone"),
+
+    /** Medal: an honour hung on a ribbon. (the `active` twin) */
+    MEDAL_STONE_ACTIVE("medal-stone.active"),
+
+    /** Medal: an honour hung on a ribbon. */
+    MEDAL_2("medal-2"),
+
+    /** Medal: an honour hung on a ribbon. (the `active` twin) */
+    MEDAL_2_ACTIVE("medal-2.active"),
+
+    /** Medal: an honour hung on a ribbon. */
+    MEDAL_1("medal-1"),
+
+    /** Medal: an honour hung on a ribbon. (the `active` twin) */
+    MEDAL_1_ACTIVE("medal-1.active"),
+
+    /** Medal: an honour hung on a ribbon. */
+    LAUREL_USER("laurel-user"),
+
+    /** Medal: an honour hung on a ribbon. (the `active` twin) */
+    LAUREL_USER_ACTIVE("laurel-user.active"),
+
+    /** Medal: an honour hung on a ribbon. */
+    MEDAL_GRADE("medal-grade"),
+
+    /** Medal: an honour hung on a ribbon. (the `active` twin) */
+    MEDAL_GRADE_ACTIVE("medal-grade.active"),
+
+    /** Trophy: a cup for a win. */
+    TROPHY_LG("trophy-lg"),
+
+    /** Trophy: a cup for a win. (the `active` twin) */
+    TROPHY_LG_ACTIVE("trophy-lg.active"),
+
+    /** Trophy: a cup for a win. */
+    TROPHY("trophy"),
+
+    /** Trophy: a cup for a win. (the `active` twin) */
+    TROPHY_ACTIVE("trophy.active"),
+
+    /** Trophy: a cup for a win. */
+    TROPHY_STAR("trophy-star"),
+
+    /** Trophy: a cup for a win. (the `active` twin) */
+    TROPHY_STAR_ACTIVE("trophy-star.active"),
+
+    /** Cave: a shelter in the rock. */
+    CAVE("cave"),
+
+    /** Cave: a shelter in the rock. (the `active` twin) */
+    CAVE_ACTIVE("cave.active"),
+
+    /** Cave: a shelter in the rock. */
+    STONES_CAVE("stones-cave"),
+
+    /** Cave: a shelter in the rock. (the `active` twin) */
+    STONES_CAVE_ACTIVE("stones-cave.active"),
+
+    /** Moon: the moon, night. */
+    MOON_INVERTED("moon-inverted"),
+
+    /** Moon: the moon, night. (the `active` twin) */
+    MOON_INVERTED_ACTIVE("moon-inverted.active"),
+
+    /** Moon: the moon, night. */
+    CELL("cell"),
+
+    /** Moon: the moon, night. (the `active` twin) */
+    CELL_ACTIVE("cell.active"),
+
+    /** Moon: the moon, night. */
+    HILL_SUN("hill-sun"),
+
+    /** Moon: the moon, night. (the `active` twin) */
+    HILL_SUN_ACTIVE("hill-sun.active"),
+
+    /** Moon: the moon, night. */
+    MOON_Z("moon-z"),
+
+    /** Moon: the moon, night. (the `active` twin) */
+    MOON_Z_ACTIVE("moon-z.active"),
+
+    /** Moon: the moon, night. */
+    MOON_CRESCENT("moon-crescent"),
+
+    /** Moon: the moon, night. (the `active` twin) */
+    MOON_CRESCENT_ACTIVE("moon-crescent.active"),
+
+    /** Moon: the moon, night. */
+    MOON_SEA_UP("moon-sea-up"),
+
+    /** Moon: the moon, night. (the `active` twin) */
+    MOON_SEA_UP_ACTIVE("moon-sea-up.active"),
+
+    /** Moon: the moon, night. */
+    MOON_CLOUD("moon-cloud"),
+
+    /** Moon: the moon, night. (the `active` twin) */
+    MOON_CLOUD_ACTIVE("moon-cloud.active"),
+
+    /** Star: a star, a favourite. */
+    SHOOTING_STAR_LG("shooting-star-lg"),
+
+    /** Star: a star, a favourite. (the `active` twin) */
+    SHOOTING_STAR_LG_ACTIVE("shooting-star-lg.active"),
+
+    /** Star: a star, a favourite. */
+    STAR_STONE("star-stone"),
+
+    /** Star: a star, a favourite. (the `active` twin) */
+    STAR_STONE_ACTIVE("star-stone.active"),
+
+    /** Star: a star, a favourite. */
+    CIRCLE_STAR("circle-star"),
+
+    /** Star: a star, a favourite. (the `active` twin) */
+    CIRCLE_STAR_ACTIVE("circle-star.active"),
+
+    /** Star: a star, a favourite. */
+    CONSTELLATION("constellation"),
+
+    /** Star: a star, a favourite. (the `active` twin) */
+    CONSTELLATION_ACTIVE("constellation.active"),
+
+    /** Star: a star, a favourite. */
+    SHOOTING_STAR("shooting-star"),
+
+    /** Star: a star, a favourite. (the `active` twin) */
+    SHOOTING_STAR_ACTIVE("shooting-star.active"),
+
+    /** Star: a star, a favourite. */
+    STAR_DOT("star-dot"),
+
+    /** Star: a star, a favourite. (the `active` twin) */
+    STAR_DOT_ACTIVE("star-dot.active"),
+
+    /** Rainbow: a rainbow after rain. */
+    WEATHER("weather"),
+
+    /** Rainbow: a rainbow after rain. (the `active` twin) */
+    WEATHER_ACTIVE("weather.active"),
+
+    /** Rainbow: a rainbow after rain. */
+    RAINBOW_REFLECT("rainbow-reflect"),
+
+    /** Rainbow: a rainbow after rain. (the `active` twin) */
+    RAINBOW_REFLECT_ACTIVE("rainbow-reflect.active"),
+
+    /** Rainbow: a rainbow after rain. */
+    STONES_ARC_5("stones-arc-5"),
+
+    /** Rainbow: a rainbow after rain. (the `active` twin) */
+    STONES_ARC_5_ACTIVE("stones-arc-5.active"),
+
+    /** Rainbow: a rainbow after rain. */
+    RAINBOW("rainbow"),
+
+    /** Rainbow: a rainbow after rain. (the `active` twin) */
+    RAINBOW_ACTIVE("rainbow.active"),
+
+    /** Download: bring it down to the device. */
+    CLOUD_ARROW_DOWN_DOWNLOAD("cloud-arrow-down-download"),
+
+    /** Download: bring it down to the device. (the `active` twin) */
+    CLOUD_ARROW_DOWN_DOWNLOAD_ACTIVE("cloud-arrow-down-download.active"),
+
+    /** Download: bring it down to the device. */
+    HALF_CIRCLE_ARROWN_DOWN_DOWNLOAD("half-circle-arrown-down-download"),
+
+    /** Download: bring it down to the device. (the `active` twin) */
+    HALF_CIRCLE_ARROWN_DOWN_DOWNLOAD_ACTIVE("half-circle-arrown-down-download.active"),
+
+    /** Download: bring it down to the device. */
+    DOWNLOAD_PICTURE("download-picture"),
+
+    /** Download: bring it down to the device. (the `active` twin) */
+    DOWNLOAD_PICTURE_ACTIVE("download-picture.active"),
+
+    /** Download: bring it down to the device. */
+    FILTER_BOX("filter-box"),
+
+    /** Download: bring it down to the device. (the `active` twin) */
+    FILTER_BOX_ACTIVE("filter-box.active"),
+
+    /** Download: bring it down to the device. */
+    DEVICE_ARROW_DOWN("device-arrow-down"),
+
+    /** Download: bring it down to the device. (the `active` twin) */
+    DEVICE_ARROW_DOWN_ACTIVE("device-arrow-down.active"),
+
+    /** Download: bring it down to the device. */
+    ABSTRACT_BOWL_PEBBLES("abstract-bowl-pebbles"),
+
+    /** Download: bring it down to the device. (the `active` twin) */
+    ABSTRACT_BOWL_PEBBLES_ACTIVE("abstract-bowl-pebbles.active"),
+
+    /** Rock: a rock, a solid stone. */
+    STONE_BOWL("stone-bowl"),
+
+    /** Rock: a rock, a solid stone. (the `active` twin) */
+    STONE_BOWL_ACTIVE("stone-bowl.active"),
+
+    /** Rock: a rock, a solid stone. */
+    ROCK_LG("rock-lg"),
+
+    /** Rock: a rock, a solid stone. (the `active` twin) */
+    ROCK_LG_ACTIVE("rock-lg.active"),
+
+    /** Rock: a rock, a solid stone. */
+    ROCK_ISO("rock-iso"),
+
+    /** Rock: a rock, a solid stone. (the `active` twin) */
+    ROCK_ISO_ACTIVE("rock-iso.active"),
+
+    /** Rock: a rock, a solid stone. */
+    ROCK("rock"),
+
+    /** Rock: a rock, a solid stone. (the `active` twin) */
+    ROCK_ACTIVE("rock.active"),
+
+    /** Rock: a rock, a solid stone. */
+    STONE_LAYERS("stone-layers"),
+
+    /** Rock: a rock, a solid stone. (the `active` twin) */
+    STONE_LAYERS_ACTIVE("stone-layers.active"),
+
+    /** Boulder: a great rock, too big to lift; must read apart from rock. */
+    STONE_LAYERS_2("stone-layers-2"),
+
+    /** Boulder: a great rock, too big to lift; must read apart from rock. (the `active` twin) */
+    STONE_LAYERS_2_ACTIVE("stone-layers-2.active"),
+
+    /** Hill: a gentle rise of land. */
+    HILL_PATH_PIN("hill-path-pin"),
+
+    /** Hill: a gentle rise of land. (the `active` twin) */
+    HILL_PATH_PIN_ACTIVE("hill-path-pin.active"),
+
+    /** Hill: a gentle rise of land. */
+    HILL_SUNSET("hill-sunset"),
+
+    /** Hill: a gentle rise of land. (the `active` twin) */
+    HILL_SUNSET_ACTIVE("hill-sunset.active"),
+
+    /** Hill: a gentle rise of land. */
+    HILL_STONE_PATH("hill-stone-path"),
+
+    /** Hill: a gentle rise of land. (the `active` twin) */
+    HILL_STONE_PATH_ACTIVE("hill-stone-path.active"),
+
+    /** Hill: a gentle rise of land. */
+    HILL_SUNSET_SOIL("hill-sunset-soil"),
+
+    /** Hill: a gentle rise of land. (the `active` twin) */
+    HILL_SUNSET_SOIL_ACTIVE("hill-sunset-soil.active"),
+
+    /** Hill: a gentle rise of land. */
+    HILL_SUN_K("hill-sun-k"),
+
+    /** Hill: a gentle rise of land. (the `active` twin) */
+    HILL_SUN_K_ACTIVE("hill-sun-k.active"),
+
+    /** Hill: a gentle rise of land. */
+    HILLS("hills"),
+
+    /** Hill: a gentle rise of land. (the `active` twin) */
+    HILLS_ACTIVE("hills.active"),
+
+    /** Hill: a gentle rise of land. */
+    HILL_STONE_GRASS("hill-stone-grass"),
+
+    /** Hill: a gentle rise of land. (the `active` twin) */
+    HILL_STONE_GRASS_ACTIVE("hill-stone-grass.active"),
+
+    /** Mountain: a high peak; must read apart from hill. */
+    MOUNTAINS_SUMMIT("mountains-summit"),
+
+    /** Mountain: a high peak; must read apart from hill. (the `active` twin) */
+    MOUNTAINS_SUMMIT_ACTIVE("mountains-summit.active"),
+
+    /** Mountain: a high peak; must read apart from hill. */
+    MENHIR_2("menhir-2"),
+
+    /** Mountain: a high peak; must read apart from hill. (the `active` twin) */
+    MENHIR_2_ACTIVE("menhir-2.active"),
+
+    /** Mountain: a high peak; must read apart from hill. */
+    MOUNTAIN_PATH_FLAG("mountain-path-flag"),
+
+    /** Mountain: a high peak; must read apart from hill. (the `active` twin) */
+    MOUNTAIN_PATH_FLAG_ACTIVE("mountain-path-flag.active"),
+
+    /** Mountain: a high peak; must read apart from hill. */
+    MOUNTAINS("mountains"),
+
+    /** Mountain: a high peak; must read apart from hill. (the `active` twin) */
+    MOUNTAINS_ACTIVE("mountains.active"),
+
+    /** Mountain: a high peak; must read apart from hill. */
+    MOUNTAIN_FOREST("mountain-forest"),
+
+    /** Mountain: a high peak; must read apart from hill. (the `active` twin) */
+    MOUNTAIN_FOREST_ACTIVE("mountain-forest.active"),
+
+    /** Mountain: a high peak; must read apart from hill. */
+    MOUNTAIN_CUT("mountain-cut"),
+
+    /** Mountain: a high peak; must read apart from hill. (the `active` twin) */
+    MOUNTAIN_CUT_ACTIVE("mountain-cut.active"),
+
+    /** Mountain: a high peak; must read apart from hill. */
+    MOUNTAIN_PATH("mountain-path"),
+
+    /** Mountain: a high peak; must read apart from hill. (the `active` twin) */
+    MOUNTAIN_PATH_ACTIVE("mountain-path.active"),
+
+    /** Mountain: a high peak; must read apart from hill. */
+    MOUNTAIN_WAVES("mountain-waves"),
+
+    /** Mountain: a high peak; must read apart from hill. (the `active` twin) */
+    MOUNTAIN_WAVES_ACTIVE("mountain-waves.active"),
+
+    /** Mountain: a high peak; must read apart from hill. */
+    MOUTAINS_SEA("moutains-sea"),
+
+    /** Mountain: a high peak; must read apart from hill. (the `active` twin) */
+    MOUTAINS_SEA_ACTIVE("moutains-sea.active"),
+
+    /** Zap: a jolt, energy, instant. */
+    PEBBLE_ZAP("pebble-zap"),
+
+    /** Zap: a jolt, energy, instant. (the `active` twin) */
+    PEBBLE_ZAP_ACTIVE("pebble-zap.active"),
+
+    /** Zap: a jolt, energy, instant. */
+    SUN_SHINE_WAVE("sun-shine-wave"),
+
+    /** Zap: a jolt, energy, instant. (the `active` twin) */
+    SUN_SHINE_WAVE_ACTIVE("sun-shine-wave.active"),
+
+    /** Zap: a jolt, energy, instant. */
+    SUN_SHINE_BRIGHT_SM("sun-shine-bright-sm"),
+
+    /** Zap: a jolt, energy, instant. (the `active` twin) */
+    SUN_SHINE_BRIGHT_SM_ACTIVE("sun-shine-bright-sm.active"),
+
+    /** Zap: a jolt, energy, instant. */
+    SUN_SHINE_BRIGHT("sun-shine-bright"),
+
+    /** Zap: a jolt, energy, instant. (the `active` twin) */
+    SUN_SHINE_BRIGHT_ACTIVE("sun-shine-bright.active"),
+
+    /** Zap: a jolt, energy, instant. */
+    BATTERY_ZAP("battery-zap"),
+
+    /** Zap: a jolt, energy, instant. (the `active` twin) */
+    BATTERY_ZAP_ACTIVE("battery-zap.active"),
+
+    /** Zap: a jolt, energy, instant. */
+    CLOUD_ZAP("cloud-zap"),
+
+    /** Zap: a jolt, energy, instant. (the `active` twin) */
+    CLOUD_ZAP_ACTIVE("cloud-zap.active"),
+
+    /** Zap: a jolt, energy, instant. */
+    ZAP("zap"),
+
+    /** Zap: a jolt, energy, instant. (the `active` twin) */
+    ZAP_ACTIVE("zap.active"),
+
+    /** Zap: a jolt, energy, instant. */
+    ABSTRACT_ZAP("abstract-zap"),
+
+    /** Zap: a jolt, energy, instant. (the `active` twin) */
+    ABSTRACT_ZAP_ACTIVE("abstract-zap.active"),
+
+    /** Cloud: a cloud. */
+    CLOUD("cloud"),
+
+    /** Cloud: a cloud. (the `active` twin) */
+    CLOUD_ACTIVE("cloud.active"),
+
+    /** Cloud: a cloud. */
+    CIRCLES("circles"),
+
+    /** Cloud: a cloud. (the `active` twin) */
+    CIRCLES_ACTIVE("circles.active"),
+
+    /** Cloud: a cloud. */
+    WIND("wind"),
+
+    /** Cloud: a cloud. (the `active` twin) */
+    WIND_ACTIVE("wind.active"),
+
+    /** Cloud: a cloud. */
+    CLOUD_K("cloud-k"),
+
+    /** Cloud: a cloud. (the `active` twin) */
+    CLOUD_K_ACTIVE("cloud-k.active"),
+
+    /** Cloud: a cloud. */
+    CLOUDS("clouds"),
+
+    /** Cloud: a cloud. (the `active` twin) */
+    CLOUDS_ACTIVE("clouds.active"),
+
+    /** Cloud: a cloud. */
+    CLOUD_STONE("cloud-stone"),
+
+    /** Cloud: a cloud. (the `active` twin) */
+    CLOUD_STONE_ACTIVE("cloud-stone.active"),
+
+    /** Rain: rain falling. */
+    PEBBLE_SPEED("pebble-speed"),
+
+    /** Rain: rain falling. (the `active` twin) */
+    PEBBLE_SPEED_ACTIVE("pebble-speed.active"),
+
+    /** Rain: rain falling. */
+    SQUARE_RAIN("square-rain"),
+
+    /** Rain: rain falling. (the `active` twin) */
+    SQUARE_RAIN_ACTIVE("square-rain.active"),
+
+    /** Rain: rain falling. */
+    CLOUD_RAIN("cloud-rain"),
+
+    /** Rain: rain falling. (the `active` twin) */
+    CLOUD_RAIN_ACTIVE("cloud-rain.active"),
+
+    /** Rain: rain falling. */
+    TINT("tint"),
+
+    /** Rain: rain falling. (the `active` twin) */
+    TINT_ACTIVE("tint.active"),
+
+    /** Rain: rain falling. */
+    CLOUD_RAIN_DROP("cloud-rain-drop"),
+
+    /** Rain: rain falling. (the `active` twin) */
+    CLOUD_RAIN_DROP_ACTIVE("cloud-rain-drop.active"),
+
+    /** Rain: rain falling. */
+    SQUARE_RAIN_2("square-rain-2"),
+
+    /** Rain: rain falling. (the `active` twin) */
+    SQUARE_RAIN_2_ACTIVE("square-rain-2.active"),
+
+    /** Rain: rain falling. */
+    TINT_2("tint-2"),
+
+    /** Rain: rain falling. (the `active` twin) */
+    TINT_2_ACTIVE("tint-2.active"),
+
+    /** Envelope: a letter, a message. */
+    POSTCARD("postcard"),
+
+    /** Envelope: a letter, a message. (the `active` twin) */
+    POSTCARD_ACTIVE("postcard.active"),
+
+    /** Envelope: a letter, a message. */
+    ENVELOPE_2("envelope-2"),
+
+    /** Envelope: a letter, a message. (the `active` twin) */
+    ENVELOPE_2_ACTIVE("envelope-2.active"),
+
+    /** Bell: a bell. */
+    BELL("bell"),
+
+    /** Bell: a bell. (the `active` twin) */
+    BELL_ACTIVE("bell.active"),
+
+    /** Bell: a bell. */
+    BELL_RING("bell-ring"),
+
+    /** Bell: a bell. (the `active` twin) */
+    BELL_RING_ACTIVE("bell-ring.active"),
+
+    /** Bell: a bell. */
+    CHIMER("chimer"),
+
+    /** Bell: a bell. (the `active` twin) */
+    CHIMER_ACTIVE("chimer.active"),
+
+    /** Bell: a bell. */
+    BELL_K("bell-k"),
+
+    /** Bell: a bell. (the `active` twin) */
+    BELL_K_ACTIVE("bell-k.active"),
+
+    /** Notification: something new arrived for you; must read apart from bell. */
+    BELL_BADGE("bell-badge"),
+
+    /** Notification: something new arrived for you; must read apart from bell. (the `active` twin) */
+    BELL_BADGE_ACTIVE("bell-badge.active"),
+
+    /** Notification: something new arrived for you; must read apart from bell. */
+    STONE_BOWL_SHINE("stone-bowl-shine"),
+
+    /** Notification: something new arrived for you; must read apart from bell. (the `active` twin) */
+    STONE_BOWL_SHINE_ACTIVE("stone-bowl-shine.active"),
+
+    /** Notification: something new arrived for you; must read apart from bell. */
+    BUBBLE_BADGE("bubble-badge"),
+
+    /** Notification: something new arrived for you; must read apart from bell. (the `active` twin) */
+    BUBBLE_BADGE_ACTIVE("bubble-badge.active"),
+
+    /** Notification: something new arrived for you; must read apart from bell. */
+    SERVER_DOT("server-dot"),
+
+    /** Notification: something new arrived for you; must read apart from bell. (the `active` twin) */
+    SERVER_DOT_ACTIVE("server-dot.active"),
+
+    /** Notification: something new arrived for you; must read apart from bell. */
+    DOOR_RING("door-ring"),
+
+    /** Notification: something new arrived for you; must read apart from bell. (the `active` twin) */
+    DOOR_RING_ACTIVE("door-ring.active"),
+
+    /** Notification: something new arrived for you; must read apart from bell. */
+    ENVELOPE_BADGE("envelope-badge"),
+
+    /** Notification: something new arrived for you; must read apart from bell. (the `active` twin) */
+    ENVELOPE_BADGE_ACTIVE("envelope-badge.active"),
+
+    /** Notification: something new arrived for you; must read apart from bell. */
+    SERVER("server"),
+
+    /** Notification: something new arrived for you; must read apart from bell. (the `active` twin) */
+    SERVER_ACTIVE("server.active"),
+
+    /** Notification: something new arrived for you; must read apart from bell. */
+    LETTERBOX_UP("letterbox-up"),
+
+    /** Notification: something new arrived for you; must read apart from bell. (the `active` twin) */
+    LETTERBOX_UP_ACTIVE("letterbox-up.active"),
+
+    /** Notification: something new arrived for you; must read apart from bell. */
+    SQUARE_BADGE("square-badge"),
+
+    /** Notification: something new arrived for you; must read apart from bell. (the `active` twin) */
+    SQUARE_BADGE_ACTIVE("square-badge.active"),
+
+    /** Notification: something new arrived for you; must read apart from bell. */
+    PEBBLE_POUND("pebble-pound"),
+
+    /** Notification: something new arrived for you; must read apart from bell. (the `active` twin) */
+    PEBBLE_POUND_ACTIVE("pebble-pound.active"),
+
+    /** List: a list of items. */
+    LIST_STONES("list-stones"),
+
+    /** List: a list of items. (the `active` twin) */
+    LIST_STONES_ACTIVE("list-stones.active"),
+
+    /** List: a list of items. */
+    RECEIPT_2("receipt-2"),
+
+    /** List: a list of items. (the `active` twin) */
+    RECEIPT_2_ACTIVE("receipt-2.active"),
+
+    /** List: a list of items. */
+    LIST("list"),
+
+    /** List: a list of items. (the `active` twin) */
+    LIST_ACTIVE("list.active"),
+
+    /** List: a list of items. */
+    LIST_DOTS("list-dots"),
+
+    /** List: a list of items. (the `active` twin) */
+    LIST_DOTS_ACTIVE("list-dots.active"),
+
+    /** List: a list of items. */
+    LIST_SORT("list-sort"),
+
+    /** List: a list of items. (the `active` twin) */
+    LIST_SORT_ACTIVE("list-sort.active"),
+
+    /** Minus: take one away. */
+    MINUS("minus"),
+
+    /** Minus: take one away. (the `active` twin) */
+    MINUS_ACTIVE("minus.active"),
+
+    /** Minus: take one away. */
+    MINUS_1("minus-1"),
+
+    /** Minus: take one away. (the `active` twin) */
+    MINUS_1_ACTIVE("minus-1.active"),
+
+    /** Minus: take one away. */
+    ECLIPSE("eclipse"),
+
+    /** Minus: take one away. (the `active` twin) */
+    ECLIPSE_ACTIVE("eclipse.active"),
+
+    /** Minus: take one away. */
+    CAIRN_DROP("cairn-drop"),
+
+    /** Minus: take one away. (the `active` twin) */
+    CAIRN_DROP_ACTIVE("cairn-drop.active"),
+
+    /** Minus: take one away. */
+    STONES_3_UP("stones-3-up"),
+
+    /** Minus: take one away. (the `active` twin) */
+    STONES_3_UP_ACTIVE("stones-3-up.active"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). */
+    CIRCLE_MINUS("circle-minus"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). (the `active` twin) */
+    CIRCLE_MINUS_ACTIVE("circle-minus.active"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). */
+    PEBBLES_INTERSECTION("pebbles-intersection"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). (the `active` twin) */
+    PEBBLES_INTERSECTION_ACTIVE("pebbles-intersection.active"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). */
+    ABSTRACT_STONE_WATER("abstract-stone-water"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). (the `active` twin) */
+    ABSTRACT_STONE_WATER_ACTIVE("abstract-stone-water.active"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). */
+    ITEMS_INDENT("items-indent"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). (the `active` twin) */
+    ITEMS_INDENT_ACTIVE("items-indent.active"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). */
+    STONE_BOX_OUT("stone-box-out"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). (the `active` twin) */
+    STONE_BOX_OUT_ACTIVE("stone-box-out.active"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). */
+    SQUARE_OUTSIDE_RIGHT("square-outside-right"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). (the `active` twin) */
+    SQUARE_OUTSIDE_RIGHT_ACTIVE("square-outside-right.active"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). */
+    STONES_SOIL("stones-soil"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). (the `active` twin) */
+    STONES_SOIL_ACTIVE("stones-soil.active"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). */
+    DOUBLE_CIRCLE_OUTSIDE("double-circle-outside"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). (the `active` twin) */
+    DOUBLE_CIRCLE_OUTSIDE_ACTIVE("double-circle-outside.active"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). */
+    ABSTRACT_STONE_WATER_2("abstract-stone-water-2"),
+
+    /** Remove: take it out of this set (it still exists elsewhere). (the `active` twin) */
+    ABSTRACT_STONE_WATER_2_ACTIVE("abstract-stone-water-2.active"),
+
+    /** Delete: destroy it for good. */
+    STONES_RUBBLE("stones-rubble"),
+
+    /** Delete: destroy it for good. (the `active` twin) */
+    STONES_RUBBLE_ACTIVE("stones-rubble.active"),
+
+    /** Delete: destroy it for good. */
+    DESTROY("destroy"),
+
+    /** Delete: destroy it for good. (the `active` twin) */
+    DESTROY_ACTIVE("destroy.active"),
+
+    /** Delete: destroy it for good. */
+    SQUARES_RUBBLE("squares-rubble"),
+
+    /** Delete: destroy it for good. (the `active` twin) */
+    SQUARES_RUBBLE_ACTIVE("squares-rubble.active"),
+
+    /** Jellyfish: a jellyfish. */
+    JELLYFISH("jellyfish"),
+
+    /** Jellyfish: a jellyfish. (the `active` twin) */
+    JELLYFISH_ACTIVE("jellyfish.active"),
+
+    /** Jellyfish: a jellyfish. */
+    JELLYFISH_2("jellyfish-2"),
+
+    /** Jellyfish: a jellyfish. (the `active` twin) */
+    JELLYFISH_2_ACTIVE("jellyfish-2.active"),
+
+    /** Jellyfish: a jellyfish. */
+    JELLYFISH_SURFACE("jellyfish-surface"),
+
+    /** Jellyfish: a jellyfish. (the `active` twin) */
+    JELLYFISH_SURFACE_ACTIVE("jellyfish-surface.active"),
+
+    /** Jellyfish: a jellyfish. */
+    JELLYFISH_PEBBLE("jellyfish-pebble"),
+
+    /** Jellyfish: a jellyfish. (the `active` twin) */
+    JELLYFISH_PEBBLE_ACTIVE("jellyfish-pebble.active"),
+
+    /** Jellyfish: a jellyfish. */
+    ABSTRACT_JELLYFISH("abstract-jellyfish"),
+
+    /** Jellyfish: a jellyfish. (the `active` twin) */
+    ABSTRACT_JELLYFISH_ACTIVE("abstract-jellyfish.active"),
+
+    /** Jellyfish: a jellyfish. */
+    JELLYFISH_MOVING("jellyfish-moving"),
+
+    /** Jellyfish: a jellyfish. (the `active` twin) */
+    JELLYFISH_MOVING_ACTIVE("jellyfish-moving.active"),
+
+    /** Jellyfish: a jellyfish. */
+    JELLYFISH_2_DOT("jellyfish-2-dot"),
+
+    /** Jellyfish: a jellyfish. (the `active` twin) */
+    JELLYFISH_2_DOT_ACTIVE("jellyfish-2-dot.active"),
+
+    /** Jellyfish: a jellyfish. */
+    JELLYFISH_DOTS("jellyfish-dots"),
+
+    /** Jellyfish: a jellyfish. (the `active` twin) */
+    JELLYFISH_DOTS_ACTIVE("jellyfish-dots.active"),
+
+    /** Jellyfish: a jellyfish. */
+    WAVES_VERTICAL("waves-vertical"),
+
+    /** Jellyfish: a jellyfish. (the `active` twin) */
+    WAVES_VERTICAL_ACTIVE("waves-vertical.active"),
+
+    /** Cat: a cat. */
+    CAT("cat"),
+
+    /** Cat: a cat. (the `active` twin) */
+    CAT_ACTIVE("cat.active"),
+
+    /** Cat: a cat. */
+    CAT_BACK_2("cat-back-2"),
+
+    /** Cat: a cat. (the `active` twin) */
+    CAT_BACK_2_ACTIVE("cat-back-2.active"),
+
+    /** Cat: a cat. */
+    PAW("paw"),
+
+    /** Cat: a cat. (the `active` twin) */
+    PAW_ACTIVE("paw.active"),
+
+    /** Cat: a cat. */
+    CAT_2("cat-2"),
+
+    /** Cat: a cat. (the `active` twin) */
+    CAT_2_ACTIVE("cat-2.active"),
+
+    /** Cat: a cat. */
+    CAT_BACK("cat-back"),
+
+    /** Cat: a cat. (the `active` twin) */
+    CAT_BACK_ACTIVE("cat-back.active"),
+
+    /** Dog: a dog. */
+    DOG_PROFILE("dog-profile"),
+
+    /** Dog: a dog. (the `active` twin) */
+    DOG_PROFILE_ACTIVE("dog-profile.active"),
+
+    /** Dog: a dog. */
+    DOGHOUSE("doghouse"),
+
+    /** Dog: a dog. (the `active` twin) */
+    DOGHOUSE_ACTIVE("doghouse.active"),
+
+    /** Dog: a dog. */
+    PIGLET("piglet"),
+
+    /** Dog: a dog. (the `active` twin) */
+    PIGLET_ACTIVE("piglet.active"),
+
+    /** Dog: a dog. */
+    PIG("pig"),
+
+    /** Dog: a dog. (the `active` twin) */
+    PIG_ACTIVE("pig.active"),
+
+    /** Dog: a dog. */
+    PAW_SM("paw-sm"),
+
+    /** Dog: a dog. (the `active` twin) */
+    PAW_SM_ACTIVE("paw-sm.active"),
+
+    /** Dog: a dog. */
+    DOG("dog"),
+
+    /** Dog: a dog. (the `active` twin) */
+    DOG_ACTIVE("dog.active"),
+
+    /** Dog: a dog. */
+    CHICK_PROFILE("chick-profile"),
+
+    /** Dog: a dog. (the `active` twin) */
+    CHICK_PROFILE_ACTIVE("chick-profile.active"),
+
+    /** Dog: a dog. */
+    DOGHOUSE_EMPTY("doghouse-empty"),
+
+    /** Dog: a dog. (the `active` twin) */
+    DOGHOUSE_EMPTY_ACTIVE("doghouse-empty.active"),
+
+    /** Bone: a bone. */
+    BONE_DOWN("bone-down"),
+
+    /** Bone: a bone. (the `active` twin) */
+    BONE_DOWN_ACTIVE("bone-down.active"),
+
+    /** Bone: a bone. */
+    BONE("bone"),
+
+    /** Bone: a bone. (the `active` twin) */
+    BONE_ACTIVE("bone.active"),
+
+    /** Bone: a bone. */
+    DIVERGE_2("diverge-2"),
+
+    /** Bone: a bone. (the `active` twin) */
+    DIVERGE_2_ACTIVE("diverge-2.active"),
+
+    /** Bone: a bone. */
+    CONVERGE("converge"),
+
+    /** Bone: a bone. (the `active` twin) */
+    CONVERGE_ACTIVE("converge.active"),
+
+    /** Bone: a bone. */
+    BONE_UP("bone-up"),
+
+    /** Bone: a bone. (the `active` twin) */
+    BONE_UP_ACTIVE("bone-up.active"),
+
+    /** Bone: a bone. */
+    DIVERGE("diverge"),
+
+    /** Bone: a bone. (the `active` twin) */
+    DIVERGE_ACTIVE("diverge.active"),
+
+    /** Lighthouse: a lighthouse, a guide in the dark. */
+    LIGHTHOUSE("lighthouse"),
+
+    /** Lighthouse: a lighthouse, a guide in the dark. (the `active` twin) */
+    LIGHTHOUSE_ACTIVE("lighthouse.active"),
+
+    /** Lighthouse: a lighthouse, a guide in the dark. */
+    LIGHTHOUSE_RIGHT("lighthouse-right"),
+
+    /** Lighthouse: a lighthouse, a guide in the dark. (the `active` twin) */
+    LIGHTHOUSE_RIGHT_ACTIVE("lighthouse-right.active"),
+
+    /** Lighthouse: a lighthouse, a guide in the dark. */
+    CAIRN_SHINE("cairn-shine"),
+
+    /** Lighthouse: a lighthouse, a guide in the dark. (the `active` twin) */
+    CAIRN_SHINE_ACTIVE("cairn-shine.active"),
+
+    /** Lighthouse: a lighthouse, a guide in the dark. */
+    LIGHTHOUSE_ISLAND("lighthouse-island"),
+
+    /** Lighthouse: a lighthouse, a guide in the dark. (the `active` twin) */
+    LIGHTHOUSE_ISLAND_ACTIVE("lighthouse-island.active"),
+
+    /** Keyboard: a keyboard. */
+    BOX("box"),
+
+    /** Keyboard: a keyboard. (the `active` twin) */
+    BOX_ACTIVE("box.active"),
+
+    /** Keyboard: a keyboard. */
+    LAPTOP("laptop"),
+
+    /** Keyboard: a keyboard. (the `active` twin) */
+    LAPTOP_ACTIVE("laptop.active"),
+
+    /** Keyboard: a keyboard. */
+    PIANO("piano"),
+
+    /** Keyboard: a keyboard. (the `active` twin) */
+    PIANO_ACTIVE("piano.active"),
+
+    /** Keyboard: a keyboard. */
+    KEYBOARD("keyboard"),
+
+    /** Keyboard: a keyboard. (the `active` twin) */
+    KEYBOARD_ACTIVE("keyboard.active"),
+
+    /** Keyboard: a keyboard. */
+    ABSTRACT_RUBY("abstract-ruby"),
+
+    /** Keyboard: a keyboard. (the `active` twin) */
+    ABSTRACT_RUBY_ACTIVE("abstract-ruby.active"),
+
+    /** Guitar: a guitar. */
+    GUITAR("guitar"),
+
+    /** Guitar: a guitar. (the `active` twin) */
+    GUITAR_ACTIVE("guitar.active"),
+
+    /** Guitar: a guitar. */
+    GUITAR_FACE("guitar-face"),
+
+    /** Guitar: a guitar. (the `active` twin) */
+    GUITAR_FACE_ACTIVE("guitar-face.active"),
+
+    /** Guitar: a guitar. */
+    GUITAR_PICK("guitar-pick"),
+
+    /** Guitar: a guitar. (the `active` twin) */
+    GUITAR_PICK_ACTIVE("guitar-pick.active"),
+
+    /** Guitar: a guitar. */
+    GUITAR_CHORDS("guitar-chords"),
+
+    /** Guitar: a guitar. (the `active` twin) */
+    GUITAR_CHORDS_ACTIVE("guitar-chords.active"),
+
+    /** Guitar: a guitar. */
+    GUITAR_OUD("guitar-oud"),
+
+    /** Guitar: a guitar. (the `active` twin) */
+    GUITAR_OUD_ACTIVE("guitar-oud.active"),
+
+    /** Guitar: a guitar. */
+    GUITAR_TAB("guitar-tab"),
+
+    /** Guitar: a guitar. (the `active` twin) */
+    GUITAR_TAB_ACTIVE("guitar-tab.active"),
+
+    /** Guitar: a guitar. */
+    GUITAR_PICK_CHORDS("guitar-pick-chords"),
+
+    /** Guitar: a guitar. (the `active` twin) */
+    GUITAR_PICK_CHORDS_ACTIVE("guitar-pick-chords.active"),
+
+    /** Guitar: a guitar. */
+    GUITAR_NECK("guitar-neck"),
+
+    /** Guitar: a guitar. (the `active` twin) */
+    GUITAR_NECK_ACTIVE("guitar-neck.active"),
+
+    /** Music: music, a melody. */
+    MUSIC_TREBLE_CLEF("music-treble-clef"),
+
+    /** Music: music, a melody. (the `active` twin) */
+    MUSIC_TREBLE_CLEF_ACTIVE("music-treble-clef.active"),
+
+    /** Music: music, a melody. */
+    MUSIC_SHEET_NOTES("music-sheet-notes"),
+
+    /** Music: music, a melody. (the `active` twin) */
+    MUSIC_SHEET_NOTES_ACTIVE("music-sheet-notes.active"),
+
+    /** Music: music, a melody. */
+    MUSIC_NOTE_DOUBLE_QUAVER("music-note-double-quaver"),
+
+    /** Music: music, a melody. (the `active` twin) */
+    MUSIC_NOTE_DOUBLE_QUAVER_ACTIVE("music-note-double-quaver.active"),
+
+    /** Music: music, a melody. */
+    MUSIC_QUAVER("music-quaver"),
+
+    /** Music: music, a melody. (the `active` twin) */
+    MUSIC_QUAVER_ACTIVE("music-quaver.active"),
+
+    /** Music: music, a melody. */
+    MUSIC_SHEET_NOTE("music-sheet-note"),
+
+    /** Music: music, a melody. (the `active` twin) */
+    MUSIC_SHEET_NOTE_ACTIVE("music-sheet-note.active"),
+
+    /** Music: music, a melody. */
+    MUSIC_SHEET_NOTE_2("music-sheet-note-2"),
+
+    /** Music: music, a melody. (the `active` twin) */
+    MUSIC_SHEET_NOTE_2_ACTIVE("music-sheet-note-2.active"),
+
+    /** Music: music, a melody. */
+    MUSIC_NOTE("music-note"),
+
+    /** Music: music, a melody. (the `active` twin) */
+    MUSIC_NOTE_ACTIVE("music-note.active"),
+
+    /** Baby: a baby, a newborn. */
+    FACE_BABY("face-baby"),
+
+    /** Baby: a baby, a newborn. (the `active` twin) */
+    FACE_BABY_ACTIVE("face-baby.active"),
+
+    /** Baby: a baby, a newborn. */
+    TROLLER("troller"),
+
+    /** Baby: a baby, a newborn. (the `active` twin) */
+    TROLLER_ACTIVE("troller.active"),
+
+    /** Baby: a baby, a newborn. */
+    FACE_CHILD("face-child"),
+
+    /** Baby: a baby, a newborn. (the `active` twin) */
+    FACE_CHILD_ACTIVE("face-child.active"),
+
+    /** Baby: a baby, a newborn. */
+    MOBILE("mobile"),
+
+    /** Baby: a baby, a newborn. (the `active` twin) */
+    MOBILE_ACTIVE("mobile.active"),
+
+    /** Baby: a baby, a newborn. */
+    CRADLE("cradle"),
+
+    /** Baby: a baby, a newborn. (the `active` twin) */
+    CRADLE_ACTIVE("cradle.active"),
+
+    /** Baby: a baby, a newborn. */
+    ABSTRACT_HONEY("abstract-honey"),
+
+    /** Baby: a baby, a newborn. (the `active` twin) */
+    ABSTRACT_HONEY_ACTIVE("abstract-honey.active"),
+
+    /** Milk: milk. */
+    MILK_CARTON("milk-carton"),
+
+    /** Milk: milk. (the `active` twin) */
+    MILK_CARTON_ACTIVE("milk-carton.active"),
+
+    /** Milk: milk. */
+    MILK_BOTTLE_CLOSED("milk-bottle-closed"),
+
+    /** Milk: milk. (the `active` twin) */
+    MILK_BOTTLE_CLOSED_ACTIVE("milk-bottle-closed.active"),
+
+    /** Milk: milk. */
+    DROP_WATER("drop-water"),
+
+    /** Milk: milk. (the `active` twin) */
+    DROP_WATER_ACTIVE("drop-water.active"),
+
+    /** Milk: milk. */
+    FEEDING_BOTTLE("feeding-bottle"),
+
+    /** Milk: milk. (the `active` twin) */
+    FEEDING_BOTTLE_ACTIVE("feeding-bottle.active"),
+
+    /** Milk: milk. */
+    WATER_BOTTLE("water-bottle"),
+
+    /** Milk: milk. (the `active` twin) */
+    WATER_BOTTLE_ACTIVE("water-bottle.active"),
+
+    /** Milk: milk. */
+    MILK_BOTTLE("milk-bottle"),
+
+    /** Milk: milk. (the `active` twin) */
+    MILK_BOTTLE_ACTIVE("milk-bottle.active"),
+
+    /** Car: a car. */
+    CAR_FRONT("car-front"),
+
+    /** Car: a car. (the `active` twin) */
+    CAR_FRONT_ACTIVE("car-front.active"),
+
+    /** Car: a car. */
+    CAR_WHEEL("car-wheel"),
+
+    /** Car: a car. (the `active` twin) */
+    CAR_WHEEL_ACTIVE("car-wheel.active"),
+
+    /** Car: a car. */
+    CAR("car"),
+
+    /** Car: a car. (the `active` twin) */
+    CAR_ACTIVE("car.active"),
+
+    /** Car: a car. */
+    RADIO("radio"),
+
+    /** Car: a car. (the `active` twin) */
+    RADIO_ACTIVE("radio.active"),
+
+    /** Car: a car. */
+    CAR_K("car-k"),
+
+    /** Car: a car. (the `active` twin) */
+    CAR_K_ACTIVE("car-k.active"),
+
+    /** Car: a car. */
+    CAR_SPEED("car-speed"),
+
+    /** Car: a car. (the `active` twin) */
+    CAR_SPEED_ACTIVE("car-speed.active"),
+
+    /** Car: a car. */
+    CAR_2("car-2"),
+
+    /** Car: a car. (the `active` twin) */
+    CAR_2_ACTIVE("car-2.active"),
+
+    /** Car: a car. */
+    CAR_ABOVE("car-above"),
+
+    /** Car: a car. (the `active` twin) */
+    CAR_ABOVE_ACTIVE("car-above.active"),
+
+    /** Bike: a bicycle. */
+    BIKE("bike"),
+
+    /** Bike: a bicycle. (the `active` twin) */
+    BIKE_ACTIVE("bike.active"),
+
+    /** Bike: a bicycle. */
+    BIKE_2("bike-2"),
+
+    /** Bike: a bicycle. (the `active` twin) */
+    BIKE_2_ACTIVE("bike-2.active"),
+
+    /** House: a house, a building (not home, the place you land). */
+    HOUSE("house"),
+
+    /** House: a house, a building (not home, the place you land). (the `active` twin) */
+    HOUSE_ACTIVE("house.active"),
+
+    /** House: a house, a building (not home, the place you land). */
+    DOME("dome"),
+
+    /** House: a house, a building (not home, the place you land). (the `active` twin) */
+    DOME_ACTIVE("dome.active"),
+
+    /** House: a house, a building (not home, the place you land). */
+    BUILDING("building"),
+
+    /** House: a house, a building (not home, the place you land). (the `active` twin) */
+    BUILDING_ACTIVE("building.active"),
+
+    /** House: a house, a building (not home, the place you land). */
+    HOUSE_CHEMNY("house-chemny"),
+
+    /** House: a house, a building (not home, the place you land). (the `active` twin) */
+    HOUSE_CHEMNY_ACTIVE("house-chemny.active"),
+
+    /** House: a house, a building (not home, the place you land). */
+    BIRD_HOUSE("bird-house"),
+
+    /** House: a house, a building (not home, the place you land). (the `active` twin) */
+    BIRD_HOUSE_ACTIVE("bird-house.active"),
+
+    /** House: a house, a building (not home, the place you land). */
+    FARM("farm"),
+
+    /** House: a house, a building (not home, the place you land). (the `active` twin) */
+    FARM_ACTIVE("farm.active"),
+
+    /** House: a house, a building (not home, the place you land). */
+    HOUSE_BLOCK("house-block"),
+
+    /** House: a house, a building (not home, the place you land). (the `active` twin) */
+    HOUSE_BLOCK_ACTIVE("house-block.active"),
+
+    /** House: a house, a building (not home, the place you land). */
+    HOUSES("houses"),
+
+    /** House: a house, a building (not home, the place you land). (the `active` twin) */
+    HOUSES_ACTIVE("houses.active"),
+
+    /** House: a house, a building (not home, the place you land). */
+    WINDOW_ROOF("window-roof"),
+
+    /** House: a house, a building (not home, the place you land). (the `active` twin) */
+    WINDOW_ROOF_ACTIVE("window-roof.active"),
+
+    /** Umbrella: an umbrella. */
+    UMBRELLA_EMPTY("umbrella-empty"),
+
+    /** Umbrella: an umbrella. (the `active` twin) */
+    UMBRELLA_EMPTY_ACTIVE("umbrella-empty.active"),
+
+    /** Umbrella: an umbrella. */
+    UMBRELLA_RAIN("umbrella-rain"),
+
+    /** Umbrella: an umbrella. (the `active` twin) */
+    UMBRELLA_RAIN_ACTIVE("umbrella-rain.active"),
+
+    /** Umbrella: an umbrella. */
+    PARASOL("parasol"),
+
+    /** Umbrella: an umbrella. (the `active` twin) */
+    PARASOL_ACTIVE("parasol.active"),
+
+    /** Umbrella: an umbrella. */
+    UMBRELLA("umbrella"),
+
+    /** Umbrella: an umbrella. (the `active` twin) */
+    UMBRELLA_ACTIVE("umbrella.active"),
+
+    /** Umbrella: an umbrella. */
+    UMBRELLA_ABOVE("umbrella-above"),
+
+    /** Umbrella: an umbrella. (the `active` twin) */
+    UMBRELLA_ABOVE_ACTIVE("umbrella-above.active"),
+
+    /** Ink: ink, a drop of it. */
+    BOTTLE("bottle"),
+
+    /** Ink: ink, a drop of it. (the `active` twin) */
+    BOTTLE_ACTIVE("bottle.active"),
+
+    /** Ink: ink, a drop of it. */
+    ABSTRACT_INK("abstract-ink"),
+
+    /** Ink: ink, a drop of it. (the `active` twin) */
+    ABSTRACT_INK_ACTIVE("abstract-ink.active"),
+
+    /** Ink: ink, a drop of it. */
+    INK_BOTTLE("ink-bottle"),
+
+    /** Ink: ink, a drop of it. (the `active` twin) */
+    INK_BOTTLE_ACTIVE("ink-bottle.active"),
+
+    /** Ink: ink, a drop of it. */
+    INK_POT("ink-pot"),
+
+    /** Ink: ink, a drop of it. (the `active` twin) */
+    INK_POT_ACTIVE("ink-pot.active"),
+
+    /** Question: a question, help. */
+    QUESTION_CIRCLE("question-circle"),
+
+    /** Question: a question, help. (the `active` twin) */
+    QUESTION_CIRCLE_ACTIVE("question-circle.active"),
+
+    /** Question: a question, help. */
+    QUESTION_BUBBLE("question-bubble"),
+
+    /** Question: a question, help. (the `active` twin) */
+    QUESTION_BUBBLE_ACTIVE("question-bubble.active"),
+
+    /** Question: a question, help. */
+    LIFE_RING("life-ring"),
+
+    /** Question: a question, help. (the `active` twin) */
+    LIFE_RING_ACTIVE("life-ring.active"),
+
+    /** Question: a question, help. */
+    QUESTION_MARK_DOT("question-mark-dot"),
+
+    /** Question: a question, help. (the `active` twin) */
+    QUESTION_MARK_DOT_ACTIVE("question-mark-dot.active"),
+
+    /** Question: a question, help. */
+    QUESTION_BUBBLE_CHAT("question-bubble-chat"),
+
+    /** Question: a question, help. (the `active` twin) */
+    QUESTION_BUBBLE_CHAT_ACTIVE("question-bubble-chat.active"),
+
+    /** Question: a question, help. */
+    QUESTION_MARK("question-mark"),
+
+    /** Question: a question, help. (the `active` twin) */
+    QUESTION_MARK_ACTIVE("question-mark.active"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). */
+    EXCLAMATION_CIRCLE("exclamation-circle"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin) */
+    EXCLAMATION_CIRCLE_ACTIVE("exclamation-circle.active"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). */
+    PEBBLE_EXCLAMATION("pebble-exclamation"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin) */
+    PEBBLE_EXCLAMATION_ACTIVE("pebble-exclamation.active"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). */
+    GAUGE_LOW("gauge-low"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin) */
+    GAUGE_LOW_ACTIVE("gauge-low.active"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). */
+    INFO_CIRCLE("info-circle"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin) */
+    INFO_CIRCLE_ACTIVE("info-circle.active"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). */
+    EXCLAMATION_BOLD("exclamation-bold"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin) */
+    EXCLAMATION_BOLD_ACTIVE("exclamation-bold.active"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). */
+    INFO_SIGN("info-sign"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin) */
+    INFO_SIGN_ACTIVE("info-sign.active"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). */
+    DROP_WATER_RIPPLE("drop-water-ripple"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin) */
+    DROP_WATER_RIPPLE_ACTIVE("drop-water-ripple.active"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). */
+    ALERT_SHINE("alert-shine"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin) */
+    ALERT_SHINE_ACTIVE("alert-shine.active"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). */
+    EYE_OPEN_1("eye-open-1"),
+
+    /** Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin) */
+    EYE_OPEN_1_ACTIVE("eye-open-1.active"),
+
+    /** Warning: careful: a risk ahead (middle). */
+    EXCLAMATION_TRIANGLE("exclamation-triangle"),
+
+    /** Warning: careful: a risk ahead (middle). (the `active` twin) */
+    EXCLAMATION_TRIANGLE_ACTIVE("exclamation-triangle.active"),
+
+    /** Warning: careful: a risk ahead (middle). */
+    CLOUD_ZAP_2("cloud-zap-2"),
+
+    /** Warning: careful: a risk ahead (middle). (the `active` twin) */
+    CLOUD_ZAP_2_ACTIVE("cloud-zap-2.active"),
+
+    /** Warning: careful: a risk ahead (middle). */
+    EXCLAMATION_DOUBLE("exclamation-double"),
+
+    /** Warning: careful: a risk ahead (middle). (the `active` twin) */
+    EXCLAMATION_DOUBLE_ACTIVE("exclamation-double.active"),
+
+    /** Warning: careful: a risk ahead (middle). */
+    CAIRN_FALL("cairn-fall"),
+
+    /** Warning: careful: a risk ahead (middle). (the `active` twin) */
+    CAIRN_FALL_ACTIVE("cairn-fall.active"),
+
+    /** Danger: danger: serious harm (strongest). */
+    SKULL_X("skull-x"),
+
+    /** Danger: danger: serious harm (strongest). (the `active` twin) */
+    SKULL_X_ACTIVE("skull-x.active"),
+
+    /** Danger: danger: serious harm (strongest). */
+    ABSTRACT_STONE_MOVEMENT("abstract-stone-movement"),
+
+    /** Danger: danger: serious harm (strongest). (the `active` twin) */
+    ABSTRACT_STONE_MOVEMENT_ACTIVE("abstract-stone-movement.active"),
+
+    /** Danger: danger: serious harm (strongest). */
+    PEBBLE_TEAR("pebble-tear"),
+
+    /** Danger: danger: serious harm (strongest). (the `active` twin) */
+    PEBBLE_TEAR_ACTIVE("pebble-tear.active"),
+
+    /** Danger: danger: serious harm (strongest). */
+    PYRAMID_LAYERS_REVERSED("pyramid-layers-reversed"),
+
+    /** Danger: danger: serious harm (strongest). (the `active` twin) */
+    PYRAMID_LAYERS_REVERSED_ACTIVE("pyramid-layers-reversed.active"),
+
+    /** Danger: danger: serious harm (strongest). */
+    EXCLAMATION_BOLD_LAKSHMI("exclamation-bold-lakshmi"),
+
+    /** Danger: danger: serious harm (strongest). (the `active` twin) */
+    EXCLAMATION_BOLD_LAKSHMI_ACTIVE("exclamation-bold-lakshmi.active"),
+
+    /** Danger: danger: serious harm (strongest). */
+    X_SIGN("x-sign"),
+
+    /** Danger: danger: serious harm (strongest). (the `active` twin) */
+    X_SIGN_ACTIVE("x-sign.active"),
+
+    /** Danger: danger: serious harm (strongest). */
+    EXCLAMATION_TRIPLE("exclamation-triple"),
+
+    /** Danger: danger: serious harm (strongest). (the `active` twin) */
+    EXCLAMATION_TRIPLE_ACTIVE("exclamation-triple.active"),
+
+    /** Danger: danger: serious harm (strongest). */
+    EXCLAMATION_DOUBLE_LAKSHMI("exclamation-double-lakshmi"),
+
+    /** Danger: danger: serious harm (strongest). (the `active` twin) */
+    EXCLAMATION_DOUBLE_LAKSHMI_ACTIVE("exclamation-double-lakshmi.active"),
+
+    /** Danger: danger: serious harm (strongest). */
+    KARMA_DOT_2("karma-dot-2"),
+
+    /** Danger: danger: serious harm (strongest). (the `active` twin) */
+    KARMA_DOT_2_ACTIVE("karma-dot-2.active"),
+
+    /** Danger: danger: serious harm (strongest). */
+    FLAME("flame"),
+
+    /** Danger: danger: serious harm (strongest). (the `active` twin) */
+    FLAME_ACTIVE("flame.active"),
+
+    /** Danger: danger: serious harm (strongest). */
+    SKULL("skull"),
+
+    /** Danger: danger: serious harm (strongest). (the `active` twin) */
+    SKULL_ACTIVE("skull.active"),
+
+    /** Stop: stop, halt. */
+    STOP_CIRCLE("stop-circle"),
+
+    /** Stop: stop, halt. (the `active` twin) */
+    STOP_CIRCLE_ACTIVE("stop-circle.active"),
+
+    /** Stop: stop, halt. */
+    ANCHOR("anchor"),
+
+    /** Stop: stop, halt. (the `active` twin) */
+    ANCHOR_ACTIVE("anchor.active"),
+
+    /** Stop: stop, halt. */
+    MINUS_SIGN("minus-sign"),
+
+    /** Stop: stop, halt. (the `active` twin) */
+    MINUS_SIGN_ACTIVE("minus-sign.active"),
+
+    /** Stop: stop, halt. */
+    HAND_PALM("hand-palm"),
+
+    /** Stop: stop, halt. (the `active` twin) */
+    HAND_PALM_ACTIVE("hand-palm.active"),
+
+    /** Stop: stop, halt. */
+    HAND_STONE("hand-stone"),
+
+    /** Stop: stop, halt. (the `active` twin) */
+    HAND_STONE_ACTIVE("hand-stone.active"),
+
+    /** Disabled: not available, turned off. */
+    TOGGLE_OFF("toggle-off"),
+
+    /** Disabled: not available, turned off. (the `active` twin) */
+    TOGGLE_OFF_ACTIVE("toggle-off.active"),
+
+    /** Disabled: not available, turned off. */
+    PEBBLE_ZZ("pebble-zz"),
+
+    /** Disabled: not available, turned off. (the `active` twin) */
+    PEBBLE_ZZ_ACTIVE("pebble-zz.active"),
+
+    /** Disabled: not available, turned off. */
+    POWER_OFF("power-off"),
+
+    /** Disabled: not available, turned off. (the `active` twin) */
+    POWER_OFF_ACTIVE("power-off.active"),
+
+    /** Disabled: not available, turned off. */
+    EXCLAMATION_OFF("exclamation-off"),
+
+    /** Disabled: not available, turned off. (the `active` twin) */
+    EXCLAMATION_OFF_ACTIVE("exclamation-off.active"),
+
+    /** Disabled: not available, turned off. */
+    CIRCLE_DOT("circle-dot"),
+
+    /** Disabled: not available, turned off. (the `active` twin) */
+    CIRCLE_DOT_ACTIVE("circle-dot.active"),
+
+    /** Crab: a crab. */
+    CRAB("crab"),
+
+    /** Crab: a crab. (the `active` twin) */
+    CRAB_ACTIVE("crab.active"),
+
+    /** Crab: a crab. */
+    SHELL("shell"),
+
+    /** Crab: a crab. (the `active` twin) */
+    SHELL_ACTIVE("shell.active"),
+
+    /** Crab: a crab. */
+    CRAB_2("crab-2"),
+
+    /** Crab: a crab. (the `active` twin) */
+    CRAB_2_ACTIVE("crab-2.active"),
+
+    /** Crab: a crab. */
+    CRAB_BELL("crab-bell"),
+
+    /** Crab: a crab. (the `active` twin) */
+    CRAB_BELL_ACTIVE("crab-bell.active"),
+
+    /** Crab: a crab. */
+    CRAB_3("crab-3"),
+
+    /** Crab: a crab. (the `active` twin) */
+    CRAB_3_ACTIVE("crab-3.active"),
+
+    /** Crab: a crab. */
+    CRAB_CLAMP("crab-clamp"),
+
+    /** Crab: a crab. (the `active` twin) */
+    CRAB_CLAMP_ACTIVE("crab-clamp.active"),
+
+    /** Crab: a crab. */
+    CRAB_DOTS("crab-dots"),
+
+    /** Crab: a crab. (the `active` twin) */
+    CRAB_DOTS_ACTIVE("crab-dots.active"),
+
+    /** Crab: a crab. */
+    SHRIMP("shrimp"),
+
+    /** Crab: a crab. (the `active` twin) */
+    SHRIMP_ACTIVE("shrimp.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    DOT_RIPPLE("dot-ripple"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    DOT_RIPPLE_ACTIVE("dot-ripple.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    PIN_RIPPLE("pin-ripple"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    PIN_RIPPLE_ACTIVE("pin-ripple.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    WATER_DROP_UP("water-drop-up"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    WATER_DROP_UP_ACTIVE("water-drop-up.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    DOT_WAVE("dot-wave"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    DOT_WAVE_ACTIVE("dot-wave.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    RIPPLE("ripple"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    RIPPLE_ACTIVE("ripple.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    RIPPLE_RING("ripple-ring"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    RIPPLE_RING_ACTIVE("ripple-ring.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    RIPPLE_LEFT("ripple-left"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    RIPPLE_LEFT_ACTIVE("ripple-left.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    STONE_WAVES("stone-waves"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    STONE_WAVES_ACTIVE("stone-waves.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    KARMA_CENTER("karma-center"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    KARMA_CENTER_ACTIVE("karma-center.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    RIPPLE_SYMMETRY("ripple-symmetry"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    RIPPLE_SYMMETRY_ACTIVE("ripple-symmetry.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    WATER_DROP("water-drop"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    WATER_DROP_ACTIVE("water-drop.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    CIRCLES_DOT("circles-dot"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    CIRCLES_DOT_ACTIVE("circles-dot.active"),
+
+    /** Ripple: a ripple spreading on water. */
+    WOOD("wood"),
+
+    /** Ripple: a ripple spreading on water. (the `active` twin) */
+    WOOD_ACTIVE("wood.active"),
+
+    /** Stepping stone: a stone you step on to cross. */
+    STONES_STEPS_SEA("stones-steps-sea"),
+
+    /** Stepping stone: a stone you step on to cross. (the `active` twin) */
+    STONES_STEPS_SEA_ACTIVE("stones-steps-sea.active"),
+
+    /** Stepping stone: a stone you step on to cross. */
+    STONES_STEPS_3("stones-steps-3"),
+
+    /** Stepping stone: a stone you step on to cross. (the `active` twin) */
+    STONES_STEPS_3_ACTIVE("stones-steps-3.active"),
+
+    /** Sound: sound on, a speaker. */
+    STONE_SOUND_RIGHT_2("stone-sound-right-2"),
+
+    /** Sound: sound on, a speaker. (the `active` twin) */
+    STONE_SOUND_RIGHT_2_ACTIVE("stone-sound-right-2.active"),
+
+    /** Sound: sound on, a speaker. */
+    MEGAPHONE("megaphone"),
+
+    /** Sound: sound on, a speaker. (the `active` twin) */
+    MEGAPHONE_ACTIVE("megaphone.active"),
+
+    /** Sound: sound on, a speaker. */
+    EAR("ear"),
+
+    /** Sound: sound on, a speaker. (the `active` twin) */
+    EAR_ACTIVE("ear.active"),
+
+    /** Sound: sound on, a speaker. */
+    DRUMS("drums"),
+
+    /** Sound: sound on, a speaker. (the `active` twin) */
+    DRUMS_ACTIVE("drums.active"),
+
+    /** Sound: sound on, a speaker. */
+    SPEAKER("speaker"),
+
+    /** Sound: sound on, a speaker. (the `active` twin) */
+    SPEAKER_ACTIVE("speaker.active"),
+
+    /** Sound: sound on, a speaker. */
+    SOUND_ON("sound-on"),
+
+    /** Sound: sound on, a speaker. (the `active` twin) */
+    SOUND_ON_ACTIVE("sound-on.active"),
+
+    /** Sound: sound on, a speaker. */
+    STONE_SOUND_RIGHT_3("stone-sound-right-3"),
+
+    /** Sound: sound on, a speaker. (the `active` twin) */
+    STONE_SOUND_RIGHT_3_ACTIVE("stone-sound-right-3.active"),
+
+    /** Sound: sound on, a speaker. */
+    SPEAKER_DOT("speaker-dot"),
+
+    /** Sound: sound on, a speaker. (the `active` twin) */
+    SPEAKER_DOT_ACTIVE("speaker-dot.active"),
+
+    /** Microphone: a microphone, record your voice. */
+    MICROPHONE("microphone"),
+
+    /** Microphone: a microphone, record your voice. (the `active` twin) */
+    MICROPHONE_ACTIVE("microphone.active"),
+
+    /** Microphone: a microphone, record your voice. */
+    MICROPHONE_HIGH("microphone-high"),
+
+    /** Microphone: a microphone, record your voice. (the `active` twin) */
+    MICROPHONE_HIGH_ACTIVE("microphone-high.active"),
+
+    /** Microphone: a microphone, record your voice. */
+    MICROPHONE_ARC("microphone-arc"),
+
+    /** Microphone: a microphone, record your voice. (the `active` twin) */
+    MICROPHONE_ARC_ACTIVE("microphone-arc.active"),
+
+    /** Microphone: a microphone, record your voice. */
+    MICROPHONE_WIRE("microphone-wire"),
+
+    /** Microphone: a microphone, record your voice. (the `active` twin) */
+    MICROPHONE_WIRE_ACTIVE("microphone-wire.active"),
+
+    /** Audio: an audio file, a recording to play. */
+    FILE_AUDIO("file-audio"),
+
+    /** Audio: an audio file, a recording to play. (the `active` twin) */
+    FILE_AUDIO_ACTIVE("file-audio.active"),
+
+    /** Audio: an audio file, a recording to play. */
+    TAPE_AUDIO("tape-audio"),
+
+    /** Audio: an audio file, a recording to play. (the `active` twin) */
+    TAPE_AUDIO_ACTIVE("tape-audio.active"),
+
+    /** Audio: an audio file, a recording to play. */
+    VINYL("vinyl"),
+
+    /** Audio: an audio file, a recording to play. (the `active` twin) */
+    VINYL_ACTIVE("vinyl.active"),
+
+    /** Audio: an audio file, a recording to play. */
+    HEADSET("headset"),
+
+    /** Audio: an audio file, a recording to play. (the `active` twin) */
+    HEADSET_ACTIVE("headset.active"),
+
+    /** Audio: an audio file, a recording to play. */
+    BLASTER("blaster"),
+
+    /** Audio: an audio file, a recording to play. (the `active` twin) */
+    BLASTER_ACTIVE("blaster.active"),
+
+    /** Audio: an audio file, a recording to play. */
+    PLAY_CIRCLE("play-circle"),
+
+    /** Audio: an audio file, a recording to play. (the `active` twin) */
+    PLAY_CIRCLE_ACTIVE("play-circle.active"),
+
+    /** Waveform: the shape of a sound. */
+    WAVEFORM("waveform"),
+
+    /** Waveform: the shape of a sound. (the `active` twin) */
+    WAVEFORM_ACTIVE("waveform.active"),
+
+    /** Waveform: the shape of a sound. */
+    SIGNAL_DOT("signal-dot"),
+
+    /** Waveform: the shape of a sound. (the `active` twin) */
+    SIGNAL_DOT_ACTIVE("signal-dot.active"),
+
+    /** Waveform: the shape of a sound. */
+    WAVEFORM_BOLD_2("waveform-bold-2"),
+
+    /** Waveform: the shape of a sound. (the `active` twin) */
+    WAVEFORM_BOLD_2_ACTIVE("waveform-bold-2.active"),
+
+    /** Waveform: the shape of a sound. */
+    MOUNTAINS_UNDERLINE("mountains-underline"),
+
+    /** Waveform: the shape of a sound. (the `active` twin) */
+    MOUNTAINS_UNDERLINE_ACTIVE("mountains-underline.active"),
+
+    /** Waveform: the shape of a sound. */
+    SUN_SHINE_BRIGHT_2("sun-shine-bright-2"),
+
+    /** Waveform: the shape of a sound. (the `active` twin) */
+    SUN_SHINE_BRIGHT_2_ACTIVE("sun-shine-bright-2.active"),
+
+    /** Waveform: the shape of a sound. */
+    ABSTRACT_WAVE("abstract-wave"),
+
+    /** Waveform: the shape of a sound. (the `active` twin) */
+    ABSTRACT_WAVE_ACTIVE("abstract-wave.active"),
+
+    /** Waveform: the shape of a sound. */
+    WAVEFORM_BOLD("waveform-bold"),
+
+    /** Waveform: the shape of a sound. (the `active` twin) */
+    WAVEFORM_BOLD_ACTIVE("waveform-bold.active"),
+
+    /** Waveform: the shape of a sound. */
+    SIGNAL("signal"),
+
+    /** Waveform: the shape of a sound. (the `active` twin) */
+    SIGNAL_ACTIVE("signal.active"),
+
+    /** Waveform: the shape of a sound. */
+    WAVEFORM_DOTS("waveform-dots"),
+
+    /** Waveform: the shape of a sound. (the `active` twin) */
+    WAVEFORM_DOTS_ACTIVE("waveform-dots.active"),
+
+    /** Waveform: the shape of a sound. */
+    WAVEFORM_CLIP("waveform-clip"),
+
+    /** Waveform: the shape of a sound. (the `active` twin) */
+    WAVEFORM_CLIP_ACTIVE("waveform-clip.active"),
+
+    /** Signal: signal strength, a connection. */
+    CAIRN_SIGNAL("cairn-signal"),
+
+    /** Signal: signal strength, a connection. (the `active` twin) */
+    CAIRN_SIGNAL_ACTIVE("cairn-signal.active"),
+
+    /** Signal: signal strength, a connection. */
+    RADIO_SIGNAL("radio-signal"),
+
+    /** Signal: signal strength, a connection. (the `active` twin) */
+    RADIO_SIGNAL_ACTIVE("radio-signal.active"),
+
+    /** Signal: signal strength, a connection. */
+    CODE_MORSE("code-morse"),
+
+    /** Signal: signal strength, a connection. (the `active` twin) */
+    CODE_MORSE_ACTIVE("code-morse.active"),
+
+    /** Signal: signal strength, a connection. */
+    STONES_STEP_UP("stones-step-up"),
+
+    /** Signal: signal strength, a connection. (the `active` twin) */
+    STONES_STEP_UP_ACTIVE("stones-step-up.active"),
+
+    /** Mute: sound off. */
+    SOUND_X("sound-x"),
+
+    /** Mute: sound off. (the `active` twin) */
+    SOUND_X_ACTIVE("sound-x.active"),
+
+    /** Mute: sound off. */
+    PEBBLE_OFF("pebble-off"),
+
+    /** Mute: sound off. (the `active` twin) */
+    PEBBLE_OFF_ACTIVE("pebble-off.active"),
+
+    /** Mute: sound off. */
+    SOUND_OFF("sound-off"),
+
+    /** Mute: sound off. (the `active` twin) */
+    SOUND_OFF_ACTIVE("sound-off.active"),
+
+    /** Mute: sound off. */
+    EAR_OFF("ear-off"),
+
+    /** Mute: sound off. (the `active` twin) */
+    EAR_OFF_ACTIVE("ear-off.active"),
+
+    /** Mute: sound off. */
+    SEGMENT("segment"),
+
+    /** Mute: sound off. (the `active` twin) */
+    SEGMENT_ACTIVE("segment.active"),
+
+    /** Mute: sound off. */
+    MICRO_OFF("micro-off"),
+
+    /** Mute: sound off. (the `active` twin) */
+    MICRO_OFF_ACTIVE("micro-off.active"),
+
+    /** Mute: sound off. */
+    SPEAKER_OFF("speaker-off"),
+
+    /** Mute: sound off. (the `active` twin) */
+    SPEAKER_OFF_ACTIVE("speaker-off.active"),
+
+    /** Water: water. */
+    FAUCET("faucet"),
+
+    /** Water: water. (the `active` twin) */
+    FAUCET_ACTIVE("faucet.active"),
+
+    /** Water: water. */
+    POUND("pound"),
+
+    /** Water: water. (the `active` twin) */
+    POUND_ACTIVE("pound.active"),
+
+    /** Water: water. */
+    BOTTLE_CLOSED("bottle-closed"),
+
+    /** Water: water. (the `active` twin) */
+    BOTTLE_CLOSED_ACTIVE("bottle-closed.active"),
+
+    /** Water: water. */
+    WATER_DROP_WAVE("water-drop-wave"),
+
+    /** Water: water. (the `active` twin) */
+    WATER_DROP_WAVE_ACTIVE("water-drop-wave.active"),
+
+    /** Water: water. */
+    WATER_WELL("water-well"),
+
+    /** Water: water. (the `active` twin) */
+    WATER_WELL_ACTIVE("water-well.active"),
+
+    /** Water: water. */
+    GLASS_STONE("glass-stone"),
+
+    /** Water: water. (the `active` twin) */
+    GLASS_STONE_ACTIVE("glass-stone.active"),
+
+    /** Wave: a wave of the sea. */
+    WAVES_SUN("waves-sun"),
+
+    /** Wave: a wave of the sea. (the `active` twin) */
+    WAVES_SUN_ACTIVE("waves-sun.active"),
+
+    /** Wave: a wave of the sea. */
+    HAND_WAVE("hand-wave"),
+
+    /** Wave: a wave of the sea. (the `active` twin) */
+    HAND_WAVE_ACTIVE("hand-wave.active"),
+
+    /** Wave: a wave of the sea. */
+    STONE_WAVE("stone-wave"),
+
+    /** Wave: a wave of the sea. (the `active` twin) */
+    STONE_WAVE_ACTIVE("stone-wave.active"),
+
+    /** Wave: a wave of the sea. */
+    BOAT_WAVE("boat-wave"),
+
+    /** Wave: a wave of the sea. (the `active` twin) */
+    BOAT_WAVE_ACTIVE("boat-wave.active"),
+
+    /** Wave: a wave of the sea. */
+    WAVE_UP("wave-up"),
+
+    /** Wave: a wave of the sea. (the `active` twin) */
+    WAVE_UP_ACTIVE("wave-up.active"),
+
+    /** Wave: a wave of the sea. */
+    SEATS("seats"),
+
+    /** Wave: a wave of the sea. (the `active` twin) */
+    SEATS_ACTIVE("seats.active"),
+
+    /** Wave: a wave of the sea. */
+    WAVE_DRAW("wave-draw"),
+
+    /** Wave: a wave of the sea. (the `active` twin) */
+    WAVE_DRAW_ACTIVE("wave-draw.active"),
+
+    /** Url: a web address. */
+    CHIP_LABEL("chip-label"),
+
+    /** Url: a web address. (the `active` twin) */
+    CHIP_LABEL_ACTIVE("chip-label.active"),
+
+    /** Url: a web address. */
+    PROTOCOL("protocol"),
+
+    /** Url: a web address. (the `active` twin) */
+    PROTOCOL_ACTIVE("protocol.active"),
+
+    /** Url: a web address. */
+    SIGN("sign"),
+
+    /** Url: a web address. (the `active` twin) */
+    SIGN_ACTIVE("sign.active"),
+
+    /** Url: a web address. */
+    STONE_12("stone-12"),
+
+    /** Url: a web address. (the `active` twin) */
+    STONE_12_ACTIVE("stone-12.active"),
+
+    /** Url: a web address. */
+    WEB("web"),
+
+    /** Url: a web address. (the `active` twin) */
+    WEB_ACTIVE("web.active"),
+
+    /** Url: a web address. */
+    WINDOW("window"),
+
+    /** Url: a web address. (the `active` twin) */
+    WINDOW_ACTIVE("window.active"),
+
+    /** Url: a web address. */
+    GLOBE("globe"),
+
+    /** Url: a web address. (the `active` twin) */
+    GLOBE_ACTIVE("globe.active"),
+
+    /** Url: a web address. */
+    AT("at"),
+
+    /** Url: a web address. (the `active` twin) */
+    AT_ACTIVE("at.active"),
+
+    /** Url: a web address. */
+    PILLS_CURSOR("pills-cursor"),
+
+    /** Url: a web address. (the `active` twin) */
+    PILLS_CURSOR_ACTIVE("pills-cursor.active"),
+
+    /** Url: a web address. */
+    SEARCH_BAR("search-bar"),
+
+    /** Url: a web address. (the `active` twin) */
+    SEARCH_BAR_ACTIVE("search-bar.active"),
+
+    /** Url: a web address. */
+    SLASH_SLASH_DOT("slash-slash-dot"),
+
+    /** Url: a web address. (the `active` twin) */
+    SLASH_SLASH_DOT_ACTIVE("slash-slash-dot.active"),
+
+    /** Url: a web address. */
+    UNSET_INPUT("unset-input"),
+
+    /** Url: a web address. (the `active` twin) */
+    UNSET_INPUT_ACTIVE("unset-input.active"),
+
+    /** Url: a web address. */
+    QR_CODE("qr-code"),
+
+    /** Url: a web address. (the `active` twin) */
+    QR_CODE_ACTIVE("qr-code.active"),
+
+    /** Link: a link between two things. */
+    LINK("link"),
+
+    /** Link: a link between two things. (the `active` twin) */
+    LINK_ACTIVE("link.active"),
+
+    /** Link: a link between two things. */
+    BRIDGE("bridge"),
+
+    /** Link: a link between two things. (the `active` twin) */
+    BRIDGE_ACTIVE("bridge.active"),
+
+    /** Link: a link between two things. */
+    WAVE_CONNECT("wave-connect"),
+
+    /** Link: a link between two things. (the `active` twin) */
+    WAVE_CONNECT_ACTIVE("wave-connect.active"),
+
+    /** Link: a link between two things. */
+    LINK_K("link-k"),
+
+    /** Link: a link between two things. (the `active` twin) */
+    LINK_K_ACTIVE("link-k.active"),
+
+    /** Link: a link between two things. */
+    STONES_LINK("stones-link"),
+
+    /** Link: a link between two things. (the `active` twin) */
+    STONES_LINK_ACTIVE("stones-link.active"),
+
+    /** Link: a link between two things. */
+    BRIDGE_2("bridge-2"),
+
+    /** Link: a link between two things. (the `active` twin) */
+    BRIDGE_2_ACTIVE("bridge-2.active"),
+
+    /** Link: a link between two things. */
+    CIRCLES_JOINED("circles-joined"),
+
+    /** Link: a link between two things. (the `active` twin) */
+    CIRCLES_JOINED_ACTIVE("circles-joined.active"),
+
+    /** Link: a link between two things. */
+    NETWORK("network"),
+
+    /** Link: a link between two things. (the `active` twin) */
+    NETWORK_ACTIVE("network.active"),
+
+    /** Soccer: a football (soccer ball). */
+    SOCCER_BALL("soccer-ball"),
+
+    /** Soccer: a football (soccer ball). (the `active` twin) */
+    SOCCER_BALL_ACTIVE("soccer-ball.active"),
+
+    /** Soccer: a football (soccer ball). */
+    STONE_SPEED_RIGHT("stone-speed-right"),
+
+    /** Soccer: a football (soccer ball). (the `active` twin) */
+    STONE_SPEED_RIGHT_ACTIVE("stone-speed-right.active"),
+
+    /** Soccer: a football (soccer ball). */
+    GOAL("goal"),
+
+    /** Soccer: a football (soccer ball). (the `active` twin) */
+    GOAL_ACTIVE("goal.active"),
+
+    /** Soccer: a football (soccer ball). */
+    SOCCER_FIELD("soccer-field"),
+
+    /** Soccer: a football (soccer ball). (the `active` twin) */
+    SOCCER_FIELD_ACTIVE("soccer-field.active"),
+
+    /** Soccer: a football (soccer ball). */
+    DOT_CIRCLE_LINE("dot-circle-line"),
+
+    /** Soccer: a football (soccer ball). (the `active` twin) */
+    DOT_CIRCLE_LINE_ACTIVE("dot-circle-line.active"),
+
+    /** Soccer: a football (soccer ball). */
+    FARANDOLE_CIRCLE("farandole-circle"),
+
+    /** Soccer: a football (soccer ball). (the `active` twin) */
+    FARANDOLE_CIRCLE_ACTIVE("farandole-circle.active"),
+
+    /** Basketball: a basketball. */
+    BASKETBALL_BASKET("basketball-basket"),
+
+    /** Basketball: a basketball. (the `active` twin) */
+    BASKETBALL_BASKET_ACTIVE("basketball-basket.active"),
+
+    /** Basketball: a basketball. */
+    BASKETBALL("basketball"),
+
+    /** Basketball: a basketball. (the `active` twin) */
+    BASKETBALL_ACTIVE("basketball.active"),
+
+    /** Tv: a television. */
+    PLAY_SCREEN("play-screen"),
+
+    /** Tv: a television. (the `active` twin) */
+    PLAY_SCREEN_ACTIVE("play-screen.active"),
+
+    /** Tv: a television. */
+    TV_DOT("tv-dot"),
+
+    /** Tv: a television. (the `active` twin) */
+    TV_DOT_ACTIVE("tv-dot.active"),
+
+    /** Tv: a television. */
+    REMOTE("remote"),
+
+    /** Tv: a television. (the `active` twin) */
+    REMOTE_ACTIVE("remote.active"),
+
+    /** Tv: a television. */
+    PRESENTATION_STONE("presentation-stone"),
+
+    /** Tv: a television. (the `active` twin) */
+    PRESENTATION_STONE_ACTIVE("presentation-stone.active"),
+
+    /** Tv: a television. */
+    TV_DOTS("tv-dots"),
+
+    /** Tv: a television. (the `active` twin) */
+    TV_DOTS_ACTIVE("tv-dots.active"),
+
+    /** Tv: a television. */
+    PRESENTATION_PICTURE("presentation-picture"),
+
+    /** Tv: a television. (the `active` twin) */
+    PRESENTATION_PICTURE_ACTIVE("presentation-picture.active"),
+
+    /** Tv: a television. */
+    PRESENTATION_TEXT("presentation-text"),
+
+    /** Tv: a television. (the `active` twin) */
+    PRESENTATION_TEXT_ACTIVE("presentation-text.active"),
+
+    /** Tv: a television. */
+    TV("tv"),
+
+    /** Tv: a television. (the `active` twin) */
+    TV_ACTIVE("tv.active"),
+
+    /** Tv: a television. */
+    TV_PICTURE("tv-picture"),
+
+    /** Tv: a television. (the `active` twin) */
+    TV_PICTURE_ACTIVE("tv-picture.active"),
+
+    /** Phone: a phone. */
+    PHONE("phone"),
+
+    /** Phone: a phone. (the `active` twin) */
+    PHONE_ACTIVE("phone.active"),
+
+    /** Phone: a phone. */
+    SMARTPHONE("smartphone"),
+
+    /** Phone: a phone. (the `active` twin) */
+    SMARTPHONE_ACTIVE("smartphone.active"),
+
+    /** Phone: a phone. */
+    PHONE_RING("phone-ring"),
+
+    /** Phone: a phone. (the `active` twin) */
+    PHONE_RING_ACTIVE("phone-ring.active"),
+
+    /** Android: the Android platform mark, its robot head, redrawn in the house hand. */
+    ANDROID("android"),
+
+    /** Android: the Android platform mark, its robot head, redrawn in the house hand. (the `active` twin) */
+    ANDROID_ACTIVE("android.active"),
+
+    /** Android: the Android platform mark, its robot head, redrawn in the house hand. */
+    ANDROID_HEAD("android-head"),
+
+    /** Android: the Android platform mark, its robot head, redrawn in the house hand. (the `active` twin) */
+    ANDROID_HEAD_ACTIVE("android-head.active"),
+
+    /** Android: the Android platform mark, its robot head, redrawn in the house hand. */
+    ANDROID_HEAD_2("android-head-2"),
+
+    /** Android: the Android platform mark, its robot head, redrawn in the house hand. (the `active` twin) */
+    ANDROID_HEAD_2_ACTIVE("android-head-2.active"),
+
+    /** Robot: a robot. */
+    ROBOT_STONES_ARMS_UP("robot-stones-arms-up"),
+
+    /** Robot: a robot. (the `active` twin) */
+    ROBOT_STONES_ARMS_UP_ACTIVE("robot-stones-arms-up.active"),
+
+    /** Robot: a robot. */
+    ABSTRACT_CIRCLE_LINE("abstract-circle-line"),
+
+    /** Robot: a robot. (the `active` twin) */
+    ABSTRACT_CIRCLE_LINE_ACTIVE("abstract-circle-line.active"),
+
+    /** Robot: a robot. */
+    CLAMP("clamp"),
+
+    /** Robot: a robot. (the `active` twin) */
+    CLAMP_ACTIVE("clamp.active"),
+
+    /** Robot: a robot. */
+    ROBOT("robot"),
+
+    /** Robot: a robot. (the `active` twin) */
+    ROBOT_ACTIVE("robot.active"),
+
+    /** Robot: a robot. */
+    ROBOT_HEAD("robot-head"),
+
+    /** Robot: a robot. (the `active` twin) */
+    ROBOT_HEAD_ACTIVE("robot-head.active"),
+
+    /** Robot: a robot. */
+    ROBOT_STONES_ARMS_DOWN("robot-stones-arms-down"),
+
+    /** Robot: a robot. (the `active` twin) */
+    ROBOT_STONES_ARMS_DOWN_ACTIVE("robot-stones-arms-down.active"),
+
+    /** Robot: a robot. */
+    ROBOT_FUN("robot-fun"),
+
+    /** Robot: a robot. (the `active` twin) */
+    ROBOT_FUN_ACTIVE("robot-fun.active"),
+
+    /** Apple: an apple, the fruit. */
+    APPLE_LEAF("apple-leaf"),
+
+    /** Apple: an apple, the fruit. (the `active` twin) */
+    APPLE_LEAF_ACTIVE("apple-leaf.active"),
+
+    /** Apple: an apple, the fruit. */
+    APPLE_X("apple-x"),
+
+    /** Apple: an apple, the fruit. (the `active` twin) */
+    APPLE_X_ACTIVE("apple-x.active"),
+
+    /** Apple: an apple, the fruit. */
+    APPLE_BRANCH("apple-branch"),
+
+    /** Apple: an apple, the fruit. (the `active` twin) */
+    APPLE_BRANCH_ACTIVE("apple-branch.active"),
+
+    /** Apple: an apple, the fruit. */
+    APPLE("apple"),
+
+    /** Apple: an apple, the fruit. (the `active` twin) */
+    APPLE_ACTIVE("apple.active"),
+
+    /** Apple: an apple, the fruit. */
+    HOURGLASS_K("hourglass-k"),
+
+    /** Apple: an apple, the fruit. (the `active` twin) */
+    HOURGLASS_K_ACTIVE("hourglass-k.active"),
+
+    /** Apple: an apple, the fruit. */
+    ORANGE_2("orange-2"),
+
+    /** Apple: an apple, the fruit. (the `active` twin) */
+    ORANGE_2_ACTIVE("orange-2.active"),
+
+    /** Apple: an apple, the fruit. */
+    APPLE_SEEDS("apple-seeds"),
+
+    /** Apple: an apple, the fruit. (the `active` twin) */
+    APPLE_SEEDS_ACTIVE("apple-seeds.active"),
+
+    /** Banana: a banana. */
+    CIRCLES_DOTS("circles-dots"),
+
+    /** Banana: a banana. (the `active` twin) */
+    CIRCLES_DOTS_ACTIVE("circles-dots.active"),
+
+    /** Banana: a banana. */
+    BOAT_WAVE_2("boat-wave-2"),
+
+    /** Banana: a banana. (the `active` twin) */
+    BOAT_WAVE_2_ACTIVE("boat-wave-2.active"),
+
+    /** Pineapple: a pineapple. */
+    PINEAPPLE("pineapple"),
+
+    /** Pineapple: a pineapple. (the `active` twin) */
+    PINEAPPLE_ACTIVE("pineapple.active"),
+
+    /** Pineapple: a pineapple. */
+    PLANT("plant"),
+
+    /** Pineapple: a pineapple. (the `active` twin) */
+    PLANT_ACTIVE("plant.active"),
+
+    /** Pineapple: a pineapple. */
+    BOMB("bomb"),
+
+    /** Pineapple: a pineapple. (the `active` twin) */
+    BOMB_ACTIVE("bomb.active"),
+
+    /** Pineapple: a pineapple. */
+    V_SLICE("v-slice"),
+
+    /** Pineapple: a pineapple. (the `active` twin) */
+    V_SLICE_ACTIVE("v-slice.active"),
+
+    /** Pineapple: a pineapple. */
+    WHEEL("wheel"),
+
+    /** Pineapple: a pineapple. (the `active` twin) */
+    WHEEL_ACTIVE("wheel.active"),
+
+    /** Pineapple: a pineapple. */
+    GRENADA("grenada"),
+
+    /** Pineapple: a pineapple. (the `active` twin) */
+    GRENADA_ACTIVE("grenada.active"),
+
+    /** Food: food. */
+    FORK_KNIFE("fork-knife"),
+
+    /** Food: food. (the `active` twin) */
+    FORK_KNIFE_ACTIVE("fork-knife.active"),
+
+    /** Food: food. */
+    MEAL_HOT_STONE("meal-hot-stone"),
+
+    /** Food: food. (the `active` twin) */
+    MEAL_HOT_STONE_ACTIVE("meal-hot-stone.active"),
+
+    /** Food: food. */
+    EGG_FRIED_2("egg-fried-2"),
+
+    /** Food: food. (the `active` twin) */
+    EGG_FRIED_2_ACTIVE("egg-fried-2.active"),
+
+    /** Food: food. */
+    MEAL_HOT("meal-hot"),
+
+    /** Food: food. (the `active` twin) */
+    MEAL_HOT_ACTIVE("meal-hot.active"),
+
+    /** Food: food. */
+    BREAD("bread"),
+
+    /** Food: food. (the `active` twin) */
+    BREAD_ACTIVE("bread.active"),
+
+    /** Food: food. */
+    CARROT("carrot"),
+
+    /** Food: food. (the `active` twin) */
+    CARROT_ACTIVE("carrot.active"),
+
+    /** Meal: a meal at the table. */
+    PLATE_CUTLERY("plate-cutlery"),
+
+    /** Meal: a meal at the table. (the `active` twin) */
+    PLATE_CUTLERY_ACTIVE("plate-cutlery.active"),
+
+    /** Meal: a meal at the table. */
+    MEAL_CLOCHE("meal-cloche"),
+
+    /** Meal: a meal at the table. (the `active` twin) */
+    MEAL_CLOCHE_ACTIVE("meal-cloche.active"),
+
+    /** Meal: a meal at the table. */
+    COOKER("cooker"),
+
+    /** Meal: a meal at the table. (the `active` twin) */
+    COOKER_ACTIVE("cooker.active"),
+
+    /** Meal: a meal at the table. */
+    GAME_BOARD("game-board"),
+
+    /** Meal: a meal at the table. (the `active` twin) */
+    GAME_BOARD_ACTIVE("game-board.active"),
+
+    /** Meal: a meal at the table. */
+    TABLE_MEAL_HOT("table-meal-hot"),
+
+    /** Meal: a meal at the table. (the `active` twin) */
+    TABLE_MEAL_HOT_ACTIVE("table-meal-hot.active"),
+
+    /** Meal: a meal at the table. */
+    PEOPLE_TABLE("people-table"),
+
+    /** Meal: a meal at the table. (the `active` twin) */
+    PEOPLE_TABLE_ACTIVE("people-table.active"),
+
+    /** Meal: a meal at the table. */
+    MEAL_STICKS("meal-sticks"),
+
+    /** Meal: a meal at the table. (the `active` twin) */
+    MEAL_STICKS_ACTIVE("meal-sticks.active"),
+
+    /** Meal: a meal at the table. */
+    ABSTRACT_FORK_DOT("abstract-fork-dot"),
+
+    /** Meal: a meal at the table. (the `active` twin) */
+    ABSTRACT_FORK_DOT_ACTIVE("abstract-fork-dot.active"),
+
+    /** Meal: a meal at the table. */
+    BINOCULARS_ROW("binoculars-row"),
+
+    /** Meal: a meal at the table. (the `active` twin) */
+    BINOCULARS_ROW_ACTIVE("binoculars-row.active"),
+
+    /** Meal: a meal at the table. */
+    ABSTRACT_SQUARE_LAYER_DOTS("abstract-square-layer-dots"),
+
+    /** Meal: a meal at the table. (the `active` twin) */
+    ABSTRACT_SQUARE_LAYER_DOTS_ACTIVE("abstract-square-layer-dots.active"),
+
+    /** Christmas: Christmas. */
+    CHRISTMAS_BALL("christmas-ball"),
+
+    /** Christmas: Christmas. (the `active` twin) */
+    CHRISTMAS_BALL_ACTIVE("christmas-ball.active"),
+
+    /** Christmas: Christmas. */
+    SOCK("sock"),
+
+    /** Christmas: Christmas. (the `active` twin) */
+    SOCK_ACTIVE("sock.active"),
+
+    /** Christmas: Christmas. */
+    GIFT("gift"),
+
+    /** Christmas: Christmas. (the `active` twin) */
+    GIFT_ACTIVE("gift.active"),
+
+    /** Christmas: Christmas. */
+    CHRISTMAS_TREE("christmas-tree"),
+
+    /** Christmas: Christmas. (the `active` twin) */
+    CHRISTMAS_TREE_ACTIVE("christmas-tree.active"),
+
+    /** Christmas: Christmas. */
+    CHURCH("church"),
+
+    /** Christmas: Christmas. (the `active` twin) */
+    CHURCH_ACTIVE("church.active"),
+
+    /** Pine: a pine tree. */
+    PINE_LINES("pine-lines"),
+
+    /** Pine: a pine tree. (the `active` twin) */
+    PINE_LINES_ACTIVE("pine-lines.active"),
+
+    /** Pine: a pine tree. */
+    PINE_CONE("pine-cone"),
+
+    /** Pine: a pine tree. (the `active` twin) */
+    PINE_CONE_ACTIVE("pine-cone.active"),
+
+    /** Pine: a pine tree. */
+    PINES("pines"),
+
+    /** Pine: a pine tree. (the `active` twin) */
+    PINES_ACTIVE("pines.active"),
+
+    /** Pine: a pine tree. */
+    PINE_CHEVRONS("pine-chevrons"),
+
+    /** Pine: a pine tree. (the `active` twin) */
+    PINE_CHEVRONS_ACTIVE("pine-chevrons.active"),
+
+    /** Pine: a pine tree. */
+    PINE_TREE("pine-tree"),
+
+    /** Pine: a pine tree. (the `active` twin) */
+    PINE_TREE_ACTIVE("pine-tree.active"),
+
+    /** Pine: a pine tree. */
+    PINE("pine"),
+
+    /** Pine: a pine tree. (the `active` twin) */
+    PINE_ACTIVE("pine.active"),
+
+    /** Pine: a pine tree. */
+    PINE_STACK("pine-stack"),
+
+    /** Pine: a pine tree. (the `active` twin) */
+    PINE_STACK_ACTIVE("pine-stack.active"),
+
+    /** Tree: a broad-leaf tree. */
+    TREE("tree"),
+
+    /** Tree: a broad-leaf tree. (the `active` twin) */
+    TREE_ACTIVE("tree.active"),
+
+    /** Tree: a broad-leaf tree. */
+    TREE_BALL("tree-ball"),
+
+    /** Tree: a broad-leaf tree. (the `active` twin) */
+    TREE_BALL_ACTIVE("tree-ball.active"),
+
+    /** Tree: a broad-leaf tree. */
+    TREE_BRANCHES("tree-branches"),
+
+    /** Tree: a broad-leaf tree. (the `active` twin) */
+    TREE_BRANCHES_ACTIVE("tree-branches.active"),
+
+    /** Tree: a broad-leaf tree. */
+    ACORN("acorn"),
+
+    /** Tree: a broad-leaf tree. (the `active` twin) */
+    ACORN_ACTIVE("acorn.active"),
+
+    /** Train: a train. */
+    TRAIN_FRONT("train-front"),
+
+    /** Train: a train. (the `active` twin) */
+    TRAIN_FRONT_ACTIVE("train-front.active"),
+
+    /** Train: a train. */
+    TRAIN("train"),
+
+    /** Train: a train. (the `active` twin) */
+    TRAIN_ACTIVE("train.active"),
+
+    /** Train: a train. */
+    TRAIN_UNDERLINE("train-underline"),
+
+    /** Train: a train. (the `active` twin) */
+    TRAIN_UNDERLINE_ACTIVE("train-underline.active"),
+
+    /** Train: a train. */
+    TRAIN_TICKET("train-ticket"),
+
+    /** Train: a train. (the `active` twin) */
+    TRAIN_TICKET_ACTIVE("train-ticket.active"),
+
+    /** Fire: fire, a flame. */
+    FLAME_DROP("flame-drop"),
+
+    /** Fire: fire, a flame. (the `active` twin) */
+    FLAME_DROP_ACTIVE("flame-drop.active"),
+
+    /** Fire: fire, a flame. */
+    FIRE("fire"),
+
+    /** Fire: fire, a flame. (the `active` twin) */
+    FIRE_ACTIVE("fire.active"),
+
+    /** Fire: fire, a flame. */
+    CANDLE_SIMPLE("candle-simple"),
+
+    /** Fire: fire, a flame. (the `active` twin) */
+    CANDLE_SIMPLE_ACTIVE("candle-simple.active"),
+
+    /** Fire: fire, a flame. */
+    FIRECAMP("firecamp"),
+
+    /** Fire: fire, a flame. (the `active` twin) */
+    FIRECAMP_ACTIVE("firecamp.active"),
+
+    /** Firepit: a fire in a ring of stones. */
+    FIREPIT_H("firepit-h"),
+
+    /** Firepit: a fire in a ring of stones. (the `active` twin) */
+    FIREPIT_H_ACTIVE("firepit-h.active"),
+
+    /** Firepit: a fire in a ring of stones. */
+    FARANDOLE_FIRE("farandole-fire"),
+
+    /** Firepit: a fire in a ring of stones. (the `active` twin) */
+    FARANDOLE_FIRE_ACTIVE("farandole-fire.active"),
+
+    /** Firepit: a fire in a ring of stones. */
+    FIREPIT_CURVE("firepit-curve"),
+
+    /** Firepit: a fire in a ring of stones. (the `active` twin) */
+    FIREPIT_CURVE_ACTIVE("firepit-curve.active"),
+
+    /** Firepit: a fire in a ring of stones. */
+    FIREPIT_ABOVE("firepit-above"),
+
+    /** Firepit: a fire in a ring of stones. (the `active` twin) */
+    FIREPIT_ABOVE_ACTIVE("firepit-above.active"),
+
+    /** Firepit: a fire in a ring of stones. */
+    FIREPIT("firepit"),
+
+    /** Firepit: a fire in a ring of stones. (the `active` twin) */
+    FIREPIT_ACTIVE("firepit.active"),
+
+    /** Firepit: a fire in a ring of stones. */
+    SPARKLE_CIRCLE_DOTS("sparkle-circle-dots"),
+
+    /** Firepit: a fire in a ring of stones. (the `active` twin) */
+    SPARKLE_CIRCLE_DOTS_ACTIVE("sparkle-circle-dots.active"),
+
+    /** Fish: a fish. */
+    FISHES_ROUND("fishes-round"),
+
+    /** Fish: a fish. (the `active` twin) */
+    FISHES_ROUND_ACTIVE("fishes-round.active"),
+
+    /** Fish: a fish. */
+    FISH_DIVE("fish-dive"),
+
+    /** Fish: a fish. (the `active` twin) */
+    FISH_DIVE_ACTIVE("fish-dive.active"),
+
+    /** Fish: a fish. */
+    FISH_2("fish-2"),
+
+    /** Fish: a fish. (the `active` twin) */
+    FISH_2_ACTIVE("fish-2.active"),
+
+    /** Fish: a fish. */
+    FISH("fish"),
+
+    /** Fish: a fish. (the `active` twin) */
+    FISH_ACTIVE("fish.active"),
+
+    /** Fish: a fish. */
+    FISH_JUMP("fish-jump"),
+
+    /** Fish: a fish. (the `active` twin) */
+    FISH_JUMP_ACTIVE("fish-jump.active"),
+
+    /** Fish: a fish. */
+    FISH_BOWL("fish-bowl"),
+
+    /** Fish: a fish. (the `active` twin) */
+    FISH_BOWL_ACTIVE("fish-bowl.active"),
+
+    /** Fish: a fish. */
+    FISHES("fishes"),
+
+    /** Fish: a fish. (the `active` twin) */
+    FISHES_ACTIVE("fishes.active"),
+
+    /** Poo: poo. */
+    POO("poo"),
+
+    /** Poo: poo. (the `active` twin) */
+    POO_ACTIVE("poo.active"),
+
+    /** Poo: poo. */
+    POO_FLIES("poo-flies"),
+
+    /** Poo: poo. (the `active` twin) */
+    POO_FLIES_ACTIVE("poo-flies.active"),
+
+    /** Poo: poo. */
+    TOILET("toilet"),
+
+    /** Poo: poo. (the `active` twin) */
+    TOILET_ACTIVE("toilet.active"),
+
+    /** Poo: poo. */
+    HILL_SPROUT("hill-sprout"),
+
+    /** Poo: poo. (the `active` twin) */
+    HILL_SPROUT_ACTIVE("hill-sprout.active"),
+
+    /** Poo: poo. */
+    POO_SMELL("poo-smell"),
+
+    /** Poo: poo. (the `active` twin) */
+    POO_SMELL_ACTIVE("poo-smell.active"),
+
+    /** Poo: poo. */
+    EARTH_SPROUT("earth-sprout"),
+
+    /** Poo: poo. (the `active` twin) */
+    EARTH_SPROUT_ACTIVE("earth-sprout.active"),
+
+    /** Map: a map. */
+    MAP_MARKER("map-marker"),
+
+    /** Map: a map. (the `active` twin) */
+    MAP_MARKER_ACTIVE("map-marker.active"),
+
+    /** Map: a map. */
+    GLOBE_SPIN("globe-spin"),
+
+    /** Map: a map. (the `active` twin) */
+    GLOBE_SPIN_ACTIVE("globe-spin.active"),
+
+    /** Map: a map. */
+    MAP_FOLD("map-fold"),
+
+    /** Map: a map. (the `active` twin) */
+    MAP_FOLD_ACTIVE("map-fold.active"),
+
+    /** Map: a map. */
+    GRID_DOT("grid-dot"),
+
+    /** Map: a map. (the `active` twin) */
+    GRID_DOT_ACTIVE("grid-dot.active"),
+
+    /** Map: a map. */
+    MAP_FOLD_PATH("map-fold-path"),
+
+    /** Map: a map. (the `active` twin) */
+    MAP_FOLD_PATH_ACTIVE("map-fold-path.active"),
+
+    /** Map: a map. */
+    GRID_SPARKS("grid-sparks"),
+
+    /** Map: a map. (the `active` twin) */
+    GRID_SPARKS_ACTIVE("grid-sparks.active"),
+
+    /** Store: a shop. */
+    STORE("store"),
+
+    /** Store: a shop. (the `active` twin) */
+    STORE_ACTIVE("store.active"),
+
+    /** Store: a shop. */
+    STORE_BELL("store-bell"),
+
+    /** Store: a shop. (the `active` twin) */
+    STORE_BELL_ACTIVE("store-bell.active"),
+
+    /** Store: a shop. */
+    SALE_SIGN("sale-sign"),
+
+    /** Store: a shop. (the `active` twin) */
+    SALE_SIGN_ACTIVE("sale-sign.active"),
+
+    /** Store: a shop. */
+    FACTORY("factory"),
+
+    /** Store: a shop. (the `active` twin) */
+    FACTORY_ACTIVE("factory.active"),
+
+    /** Store: a shop. */
+    STORE_SHELVE("store-shelve"),
+
+    /** Store: a shop. (the `active` twin) */
+    STORE_SHELVE_ACTIVE("store-shelve.active"),
+
+    /** Shopping: shopping, a bag or a cart. */
+    SHOPPING_BAG_DOT("shopping-bag-dot"),
+
+    /** Shopping: shopping, a bag or a cart. (the `active` twin) */
+    SHOPPING_BAG_DOT_ACTIVE("shopping-bag-dot.active"),
+
+    /** Shopping: shopping, a bag or a cart. */
+    SHOPPING_BASKET("shopping-basket"),
+
+    /** Shopping: shopping, a bag or a cart. (the `active` twin) */
+    SHOPPING_BASKET_ACTIVE("shopping-basket.active"),
+
+    /** Shopping: shopping, a bag or a cart. */
+    BUCKET("bucket"),
+
+    /** Shopping: shopping, a bag or a cart. (the `active` twin) */
+    BUCKET_ACTIVE("bucket.active"),
+
+    /** Shopping: shopping, a bag or a cart. */
+    BATH_BOTTLES("bath-bottles"),
+
+    /** Shopping: shopping, a bag or a cart. (the `active` twin) */
+    BATH_BOTTLES_ACTIVE("bath-bottles.active"),
+
+    /** Shopping: shopping, a bag or a cart. */
+    SHOPPING_TROLLEY("shopping-trolley"),
+
+    /** Shopping: shopping, a bag or a cart. (the `active` twin) */
+    SHOPPING_TROLLEY_ACTIVE("shopping-trolley.active"),
+
+    /** Shopping: shopping, a bag or a cart. */
+    SHOPPING_CART("shopping-cart"),
+
+    /** Shopping: shopping, a bag or a cart. (the `active` twin) */
+    SHOPPING_CART_ACTIVE("shopping-cart.active"),
+
+    /** Shopping: shopping, a bag or a cart. */
+    BASKET("basket"),
+
+    /** Shopping: shopping, a bag or a cart. (the `active` twin) */
+    BASKET_ACTIVE("basket.active"),
+
+    /** Shopping: shopping, a bag or a cart. */
+    ABSTRACT_STONE_CURVE("abstract-stone-curve"),
+
+    /** Shopping: shopping, a bag or a cart. (the `active` twin) */
+    ABSTRACT_STONE_CURVE_ACTIVE("abstract-stone-curve.active"),
     ;
+
+    /** The entry's `VectorDrawable`, `R.drawable.ic_pbbls_*`. */
+    @get:DrawableRes
+    val drawableRes: Int
+        get() = drawableIds[ordinal]
 
     /** The manifest row this entry belongs to: its own name, or its base's for a twin. */
     val base: String
@@ -729,3 +5749,1900 @@ fun PbblsIconImage(
         modifier = modifier.size(size),
     )
 }
+
+/** Each entry's drawable, in entry order: read through [PbblsIcon.drawableRes]. */
+private val drawableIds: IntArray = intArrayOf(*drawableIds0(), *drawableIds1(), *drawableIds2(), *drawableIds3())
+
+private fun drawableIds0(): IntArray =
+    intArrayOf(
+        R.drawable.ic_pbbls_checkmark_dot,
+        R.drawable.ic_pbbls_checkmark,
+        R.drawable.ic_pbbls_check_circle,
+        R.drawable.ic_pbbls_check_circle_dot,
+        R.drawable.ic_pbbls_plus_circle_dot,
+        R.drawable.ic_pbbls_remove,
+        R.drawable.ic_pbbls_plus_circle,
+        R.drawable.ic_pbbls_hourglass_end,
+        R.drawable.ic_pbbls_pendulum,
+        R.drawable.ic_pbbls_abstract_pen,
+        R.drawable.ic_pbbls_abstract_leaf,
+        R.drawable.ic_pbbls_camera,
+        R.drawable.ic_pbbls_camera_analogic,
+        R.drawable.ic_pbbls_camera_focus,
+        R.drawable.ic_pbbls_home,
+        R.drawable.ic_pbbls_home_active,
+        R.drawable.ic_pbbls_home_hive,
+        R.drawable.ic_pbbls_home_hive_active,
+        R.drawable.ic_pbbls_gate,
+        R.drawable.ic_pbbls_gate_active,
+        R.drawable.ic_pbbls_abstract_home,
+        R.drawable.ic_pbbls_abstract_home_active,
+        R.drawable.ic_pbbls_abstract_spiral,
+        R.drawable.ic_pbbls_abstract_spiral_active,
+        R.drawable.ic_pbbls_path,
+        R.drawable.ic_pbbls_path_active,
+        R.drawable.ic_pbbls_path_lit_1,
+        R.drawable.ic_pbbls_path_lit_2,
+        R.drawable.ic_pbbls_path_lit_3,
+        R.drawable.ic_pbbls_yarn,
+        R.drawable.ic_pbbls_yarn_active,
+        R.drawable.ic_pbbls_yarn_lit_1,
+        R.drawable.ic_pbbls_destination,
+        R.drawable.ic_pbbls_destination_active,
+        R.drawable.ic_pbbls_destination_lit_1,
+        R.drawable.ic_pbbls_path_river,
+        R.drawable.ic_pbbls_path_river_active,
+        R.drawable.ic_pbbls_path_river_lit_1,
+        R.drawable.ic_pbbls_path_river_lit_2,
+        R.drawable.ic_pbbls_path_river_lit_3,
+        R.drawable.ic_pbbls_people,
+        R.drawable.ic_pbbls_people_active,
+        R.drawable.ic_pbbls_people_lit_1,
+        R.drawable.ic_pbbls_people_lit_2,
+        R.drawable.ic_pbbls_people_lit_3,
+        R.drawable.ic_pbbls_users,
+        R.drawable.ic_pbbls_users_active,
+        R.drawable.ic_pbbls_users_lit_1,
+        R.drawable.ic_pbbls_users_lit_2,
+        R.drawable.ic_pbbls_users_lit_3,
+        R.drawable.ic_pbbls_abstract_crown,
+        R.drawable.ic_pbbls_abstract_crown_active,
+        R.drawable.ic_pbbls_abstract_fence,
+        R.drawable.ic_pbbls_abstract_fence_active,
+        R.drawable.ic_pbbls_abstract_loki,
+        R.drawable.ic_pbbls_abstract_loki_active,
+        R.drawable.ic_pbbls_exchange,
+        R.drawable.ic_pbbls_exchange_active,
+        R.drawable.ic_pbbls_dolmen,
+        R.drawable.ic_pbbls_dolmen_active,
+        R.drawable.ic_pbbls_dna,
+        R.drawable.ic_pbbls_dna_active,
+        R.drawable.ic_pbbls_collection,
+        R.drawable.ic_pbbls_collection_active,
+        R.drawable.ic_pbbls_pearl,
+        R.drawable.ic_pbbls_pearl_active,
+        R.drawable.ic_pbbls_watermelon,
+        R.drawable.ic_pbbls_watermelon_active,
+        R.drawable.ic_pbbls_cromlech,
+        R.drawable.ic_pbbls_cromlech_active,
+        R.drawable.ic_pbbls_pouch_dot,
+        R.drawable.ic_pbbls_pouch_dot_active,
+        R.drawable.ic_pbbls_pouch_dot_lit_1,
+        R.drawable.ic_pbbls_pouch,
+        R.drawable.ic_pbbls_pouch_active,
+        R.drawable.ic_pbbls_pouch_lit_1,
+        R.drawable.ic_pbbls_stack,
+        R.drawable.ic_pbbls_stack_lit_1,
+        R.drawable.ic_pbbls_stack_lit_2,
+        R.drawable.ic_pbbls_stack_lit_3,
+        R.drawable.ic_pbbls_abstract_cairn,
+        R.drawable.ic_pbbls_stack_sharp,
+        R.drawable.ic_pbbls_stack_sharp_lit_1,
+        R.drawable.ic_pbbls_stack_sharp_lit_2,
+        R.drawable.ic_pbbls_stack_sharp_lit_3,
+        R.drawable.ic_pbbls_abstract_stack,
+        R.drawable.ic_pbbls_abstract_landscape,
+        R.drawable.ic_pbbls_fall,
+        R.drawable.ic_pbbls_pouch_2,
+        R.drawable.ic_pbbls_pouch_2_lit_1,
+        R.drawable.ic_pbbls_nechlace,
+        R.drawable.ic_pbbls_purse,
+        R.drawable.ic_pbbls_purse_lit_1,
+        R.drawable.ic_pbbls_baluchon,
+        R.drawable.ic_pbbls_baluchon_lit_1,
+        R.drawable.ic_pbbls_bag,
+        R.drawable.ic_pbbls_bag_lit_1,
+        R.drawable.ic_pbbls_case,
+        R.drawable.ic_pbbls_case_lit_1,
+        R.drawable.ic_pbbls_stones_stair,
+        R.drawable.ic_pbbls_stones_stair_lit_1,
+        R.drawable.ic_pbbls_stones_stair_lit_2,
+        R.drawable.ic_pbbls_stones_stair_lit_3,
+        R.drawable.ic_pbbls_stones_track,
+        R.drawable.ic_pbbls_stones_track_lit_1,
+        R.drawable.ic_pbbls_stones_track_lit_2,
+        R.drawable.ic_pbbls_stones_track_lit_3,
+        R.drawable.ic_pbbls_stones_arrow_right,
+        R.drawable.ic_pbbls_stones_arrow_right_lit_1,
+        R.drawable.ic_pbbls_stones_arrow_right_lit_2,
+        R.drawable.ic_pbbls_stones_arrow_right_lit_3,
+        R.drawable.ic_pbbls_chart_double_grow,
+        R.drawable.ic_pbbls_pan,
+        R.drawable.ic_pbbls_scale,
+        R.drawable.ic_pbbls_stones_aligned_bottom,
+        R.drawable.ic_pbbls_stones_aligned_bottom_lit_1,
+        R.drawable.ic_pbbls_stones_aligned_bottom_lit_2,
+        R.drawable.ic_pbbls_stones_aligned_bottom_lit_3,
+        R.drawable.ic_pbbls_person,
+        R.drawable.ic_pbbls_person_active,
+        R.drawable.ic_pbbls_person_lit_1,
+        R.drawable.ic_pbbls_barbed_wire,
+        R.drawable.ic_pbbls_barbed_wire_active,
+        R.drawable.ic_pbbls_abstract_key,
+        R.drawable.ic_pbbls_abstract_key_active,
+        R.drawable.ic_pbbls_user_heart,
+        R.drawable.ic_pbbls_user_heart_active,
+        R.drawable.ic_pbbls_user_heart_lit_1,
+        R.drawable.ic_pbbls_user_heart_lit_2,
+        R.drawable.ic_pbbls_user,
+        R.drawable.ic_pbbls_user_active,
+        R.drawable.ic_pbbls_user_lit_1,
+        R.drawable.ic_pbbls_user_lit_2,
+        R.drawable.ic_pbbls_slider,
+        R.drawable.ic_pbbls_shelve,
+        R.drawable.ic_pbbls_abstract_sign,
+        R.drawable.ic_pbbls_radar,
+        R.drawable.ic_pbbls_abstract_umbrella,
+        R.drawable.ic_pbbls_abstract_sign_2,
+        R.drawable.ic_pbbls_pebble_dotted_glyph,
+        R.drawable.ic_pbbls_pebble_dotted_glyph_lit_1,
+        R.drawable.ic_pbbls_abstract_curves,
+        R.drawable.ic_pbbls_abstract_lines,
+        R.drawable.ic_pbbls_abstract_mi,
+        R.drawable.ic_pbbls_pebble_dotted_glyph_2,
+        R.drawable.ic_pbbls_pebble_dotted_glyph_2_lit_1,
+        R.drawable.ic_pbbls_glyph_underlined,
+        R.drawable.ic_pbbls_glyph_grow_underlined,
+        R.drawable.ic_pbbls_draw_dotted,
+        R.drawable.ic_pbbls_pebble_round,
+        R.drawable.ic_pbbls_pebble_round_lit_1,
+        R.drawable.ic_pbbls_pebble_flat,
+        R.drawable.ic_pbbls_pebble_flat_lit_1,
+        R.drawable.ic_pbbls_karma_dot,
+        R.drawable.ic_pbbls_karma,
+        R.drawable.ic_pbbls_karma_double,
+        R.drawable.ic_pbbls_wave,
+        R.drawable.ic_pbbls_karma_2,
+        R.drawable.ic_pbbls_karma_clockwise,
+        R.drawable.ic_pbbls_calendar_date,
+        R.drawable.ic_pbbls_calendar_dot,
+        R.drawable.ic_pbbls_game,
+        R.drawable.ic_pbbls_pearl_jaw,
+        R.drawable.ic_pbbls_calendar_day,
+        R.drawable.ic_pbbls_calendar_day_lit_1,
+        R.drawable.ic_pbbls_trash,
+        R.drawable.ic_pbbls_trash_2,
+        R.drawable.ic_pbbls_broom,
+        R.drawable.ic_pbbls_soda,
+        R.drawable.ic_pbbls_pebble_glow_md,
+        R.drawable.ic_pbbls_pebble_glow_md_lit_1,
+        R.drawable.ic_pbbls_sunshine,
+        R.drawable.ic_pbbls_plant_sprout,
+        R.drawable.ic_pbbls_plant_sprout_lit_1,
+        R.drawable.ic_pbbls_plant_sprout_lit_2,
+        R.drawable.ic_pbbls_pebble_glow_sm,
+        R.drawable.ic_pbbls_pebble_glow_sm_lit_1,
+        R.drawable.ic_pbbls_pebble_glow_lg,
+        R.drawable.ic_pbbls_pebble_glow_lg_lit_1,
+        R.drawable.ic_pbbls_knot_lg,
+        R.drawable.ic_pbbls_knot_lg_lit_1,
+        R.drawable.ic_pbbls_knot_lg_lit_2,
+        R.drawable.ic_pbbls_knot_sm,
+        R.drawable.ic_pbbls_knot_sm_lit_1,
+        R.drawable.ic_pbbls_knot_sm_lit_2,
+        R.drawable.ic_pbbls_bell_ringing,
+        R.drawable.ic_pbbls_sunrise,
+        R.drawable.ic_pbbls_sparkle,
+        R.drawable.ic_pbbls_karma_sparkle,
+        R.drawable.ic_pbbls_plant_seedling_gap,
+        R.drawable.ic_pbbls_plant_seedling_gap_lit_1,
+        R.drawable.ic_pbbls_plant_seedling_gap_lit_2,
+        R.drawable.ic_pbbls_plant_seedling_gap_lit_3,
+        R.drawable.ic_pbbls_abstract_drizzle,
+        R.drawable.ic_pbbls_abstract_tree,
+        R.drawable.ic_pbbls_abstract_underwater,
+        R.drawable.ic_pbbls_plant_seedling,
+        R.drawable.ic_pbbls_plant_seedling_lit_1,
+        R.drawable.ic_pbbls_plant_seedling_lit_2,
+        R.drawable.ic_pbbls_plant_seedling_lit_3,
+        R.drawable.ic_pbbls_sparkles,
+        R.drawable.ic_pbbls_needle,
+        R.drawable.ic_pbbls_loop,
+        R.drawable.ic_pbbls_heart,
+        R.drawable.ic_pbbls_heart_active,
+        R.drawable.ic_pbbls_hand,
+        R.drawable.ic_pbbls_hand_active,
+        R.drawable.ic_pbbls_node,
+        R.drawable.ic_pbbls_node_active,
+        R.drawable.ic_pbbls_orange,
+        R.drawable.ic_pbbls_orange_active,
+        R.drawable.ic_pbbls_heart_heart,
+        R.drawable.ic_pbbls_heart_heart_active,
+        R.drawable.ic_pbbls_petroglyph,
+        R.drawable.ic_pbbls_petroglyph_active,
+        R.drawable.ic_pbbls_connection,
+        R.drawable.ic_pbbls_timeline,
+        R.drawable.ic_pbbls_pebble_outlined_glyph,
+        R.drawable.ic_pbbls_pebble_outlined_glyph_lit_1,
+        R.drawable.ic_pbbls_pebble_outlined_glyph_2,
+        R.drawable.ic_pbbls_pebble_outlined_glyph_2_lit_1,
+        R.drawable.ic_pbbls_whatsapp,
+        R.drawable.ic_pbbls_again_backward,
+        R.drawable.ic_pbbls_again_backward_active,
+        R.drawable.ic_pbbls_stone_loop,
+        R.drawable.ic_pbbls_stone_loop_active,
+        R.drawable.ic_pbbls_stones_back,
+        R.drawable.ic_pbbls_stones_back_active,
+        R.drawable.ic_pbbls_hourglass_shake,
+        R.drawable.ic_pbbls_hourglass_shake_active,
+        R.drawable.ic_pbbls_stone_repeat,
+        R.drawable.ic_pbbls_stone_repeat_active,
+        R.drawable.ic_pbbls_backward_chevrons,
+        R.drawable.ic_pbbls_backward_chevrons_active,
+        R.drawable.ic_pbbls_again_forward,
+        R.drawable.ic_pbbls_again_forward_active,
+        R.drawable.ic_pbbls_backward,
+        R.drawable.ic_pbbls_backward_active,
+        R.drawable.ic_pbbls_ellipse_forward,
+        R.drawable.ic_pbbls_ellipse_forward_active,
+        R.drawable.ic_pbbls_paste_square,
+        R.drawable.ic_pbbls_paste_square_active,
+        R.drawable.ic_pbbls_swing_double,
+        R.drawable.ic_pbbls_swing_double_active,
+        R.drawable.ic_pbbls_people_send,
+        R.drawable.ic_pbbls_people_send_active,
+        R.drawable.ic_pbbls_exchange_md,
+        R.drawable.ic_pbbls_exchange_md_active,
+        R.drawable.ic_pbbls_stones_swap,
+        R.drawable.ic_pbbls_stones_swap_active,
+        R.drawable.ic_pbbls_dots_cross,
+        R.drawable.ic_pbbls_dots_cross_active,
+        R.drawable.ic_pbbls_swing_single,
+        R.drawable.ic_pbbls_swing_single_active,
+        R.drawable.ic_pbbls_stones_loop,
+        R.drawable.ic_pbbls_stones_loop_active,
+        R.drawable.ic_pbbls_exchange_lg,
+        R.drawable.ic_pbbls_exchange_lg_active,
+        R.drawable.ic_pbbls_cycle_stones,
+        R.drawable.ic_pbbls_cycle_stones_active,
+        R.drawable.ic_pbbls_cycle_link,
+        R.drawable.ic_pbbls_cycle_link_active,
+        R.drawable.ic_pbbls_upload_box,
+        R.drawable.ic_pbbls_upload_box_active,
+        R.drawable.ic_pbbls_picture_speed,
+        R.drawable.ic_pbbls_picture_speed_active,
+        R.drawable.ic_pbbls_upload_half_circle,
+        R.drawable.ic_pbbls_upload_half_circle_active,
+        R.drawable.ic_pbbls_cloud_upload,
+        R.drawable.ic_pbbls_cloud_upload_active,
+        R.drawable.ic_pbbls_stone_speed,
+        R.drawable.ic_pbbls_stone_speed_active,
+        R.drawable.ic_pbbls_picture_upload,
+        R.drawable.ic_pbbls_picture_upload_active,
+        R.drawable.ic_pbbls_picture_kite,
+        R.drawable.ic_pbbls_picture_kite_active,
+        R.drawable.ic_pbbls_disk_angle_up,
+        R.drawable.ic_pbbls_disk_angle_up_active,
+        R.drawable.ic_pbbls_arrow_up_lg,
+        R.drawable.ic_pbbls_arrow_up_lg_active,
+        R.drawable.ic_pbbls_people_upvote,
+        R.drawable.ic_pbbls_people_upvote_active,
+        R.drawable.ic_pbbls_cairn_angle_up,
+        R.drawable.ic_pbbls_cairn_angle_up_active,
+        R.drawable.ic_pbbls_circle_angle_up,
+        R.drawable.ic_pbbls_circle_angle_up_active,
+        R.drawable.ic_pbbls_thumbs_up,
+        R.drawable.ic_pbbls_thumbs_up_active,
+        R.drawable.ic_pbbls_golf_flag,
+        R.drawable.ic_pbbls_golf_flag_active,
+        R.drawable.ic_pbbls_chevron_up_underline,
+        R.drawable.ic_pbbls_chevron_up_underline_active,
+        R.drawable.ic_pbbls_triangle_up_underline,
+        R.drawable.ic_pbbls_triangle_up_underline_active,
+        R.drawable.ic_pbbls_stack_chevrons_up,
+        R.drawable.ic_pbbls_stack_chevrons_up_active,
+        R.drawable.ic_pbbls_stone_bounce,
+        R.drawable.ic_pbbls_stone_bounce_active,
+        R.drawable.ic_pbbls_sprout,
+        R.drawable.ic_pbbls_sprout_active,
+        R.drawable.ic_pbbls_plus_one,
+        R.drawable.ic_pbbls_plus_one_active,
+        R.drawable.ic_pbbls_x_circle,
+        R.drawable.ic_pbbls_x_circle_active,
+        R.drawable.ic_pbbls_stones_fall,
+        R.drawable.ic_pbbls_stones_fall_active,
+        R.drawable.ic_pbbls_hook_fish,
+        R.drawable.ic_pbbls_hook_fish_active,
+        R.drawable.ic_pbbls_x_half_circle,
+        R.drawable.ic_pbbls_x_half_circle_active,
+        R.drawable.ic_pbbls_circle_broken,
+        R.drawable.ic_pbbls_circle_broken_active,
+        R.drawable.ic_pbbls_arrow_down_cut,
+        R.drawable.ic_pbbls_arrow_down_cut_active,
+        R.drawable.ic_pbbls_circle_dot_exclamation,
+        R.drawable.ic_pbbls_circle_dot_exclamation_active,
+        R.drawable.ic_pbbls_link_broken,
+        R.drawable.ic_pbbls_link_broken_active,
+        R.drawable.ic_pbbls_link_broken_2,
+        R.drawable.ic_pbbls_link_broken_2_active,
+        R.drawable.ic_pbbls_link_exclamation,
+        R.drawable.ic_pbbls_link_exclamation_active,
+        R.drawable.ic_pbbls_paper_plane_trail,
+        R.drawable.ic_pbbls_paper_plane_trail_active,
+        R.drawable.ic_pbbls_square_bounce,
+        R.drawable.ic_pbbls_square_bounce_active,
+        R.drawable.ic_pbbls_rectangle_dashed,
+        R.drawable.ic_pbbls_rectangle_dashed_active,
+        R.drawable.ic_pbbls_scroll,
+        R.drawable.ic_pbbls_scroll_active,
+        R.drawable.ic_pbbls_memorial,
+        R.drawable.ic_pbbls_memorial_active,
+        R.drawable.ic_pbbls_clipboard,
+        R.drawable.ic_pbbls_clipboard_active,
+        R.drawable.ic_pbbls_brochure,
+        R.drawable.ic_pbbls_brochure_active,
+        R.drawable.ic_pbbls_file,
+        R.drawable.ic_pbbls_file_active,
+        R.drawable.ic_pbbls_milestone,
+        R.drawable.ic_pbbls_milestone_active,
+        R.drawable.ic_pbbls_hand_dot,
+        R.drawable.ic_pbbls_hand_dot_active,
+        R.drawable.ic_pbbls_shield,
+        R.drawable.ic_pbbls_shield_active,
+        R.drawable.ic_pbbls_user_circle_lg,
+        R.drawable.ic_pbbls_user_circle_lg_active,
+        R.drawable.ic_pbbls_eye_closed,
+        R.drawable.ic_pbbls_eye_closed_active,
+        R.drawable.ic_pbbls_pond,
+        R.drawable.ic_pbbls_pond_active,
+        R.drawable.ic_pbbls_user_circle_sm,
+        R.drawable.ic_pbbls_user_circle_sm_active,
+        R.drawable.ic_pbbls_users_circle,
+        R.drawable.ic_pbbls_users_circle_active,
+        R.drawable.ic_pbbls_farandole,
+        R.drawable.ic_pbbls_farandole_active,
+        R.drawable.ic_pbbls_fruit_basket,
+        R.drawable.ic_pbbls_fruit_basket_active,
+        R.drawable.ic_pbbls_people_3,
+        R.drawable.ic_pbbls_people_3_active,
+        R.drawable.ic_pbbls_stones_double_circle_open,
+        R.drawable.ic_pbbls_stones_double_circle_open_active,
+        R.drawable.ic_pbbls_stones_triple_circle,
+        R.drawable.ic_pbbls_stones_triple_circle_active,
+        R.drawable.ic_pbbls_chat_dots,
+        R.drawable.ic_pbbls_chat_dots_active,
+        R.drawable.ic_pbbls_world,
+        R.drawable.ic_pbbls_world_active,
+        R.drawable.ic_pbbls_stone_emmit,
+        R.drawable.ic_pbbls_stone_emmit_active,
+        R.drawable.ic_pbbls_eye_open,
+        R.drawable.ic_pbbls_eye_open_active,
+        R.drawable.ic_pbbls_stone_mountain_shine,
+        R.drawable.ic_pbbls_stone_mountain_shine_active,
+        R.drawable.ic_pbbls_stone_ripples,
+        R.drawable.ic_pbbls_stone_ripples_active,
+        R.drawable.ic_pbbls_stones_triple_circle_open,
+        R.drawable.ic_pbbls_stones_triple_circle_open_active,
+        R.drawable.ic_pbbls_e,
+        R.drawable.ic_pbbls_e_active,
+        R.drawable.ic_pbbls_arche_cairn,
+        R.drawable.ic_pbbls_arche_cairn_active,
+        R.drawable.ic_pbbls_megaphone_2,
+        R.drawable.ic_pbbls_megaphone_2_active,
+        R.drawable.ic_pbbls_user_shine,
+        R.drawable.ic_pbbls_user_shine_active,
+        R.drawable.ic_pbbls_jail,
+        R.drawable.ic_pbbls_jail_active,
+        R.drawable.ic_pbbls_keyhole,
+        R.drawable.ic_pbbls_keyhole_active,
+        R.drawable.ic_pbbls_gift_circle,
+        R.drawable.ic_pbbls_gift_circle_active,
+        R.drawable.ic_pbbls_lock_rounded,
+        R.drawable.ic_pbbls_lock_rounded_active,
+        R.drawable.ic_pbbls_keyhole_circle,
+        R.drawable.ic_pbbls_keyhole_circle_active,
+        R.drawable.ic_pbbls_lock,
+        R.drawable.ic_pbbls_lock_active,
+        R.drawable.ic_pbbls_keyhole_dot,
+        R.drawable.ic_pbbls_keyhole_dot_active,
+        R.drawable.ic_pbbls_star_dotted,
+        R.drawable.ic_pbbls_star_dotted_active,
+        R.drawable.ic_pbbls_stones_hexagon_new,
+        R.drawable.ic_pbbls_stones_hexagon_new_active,
+        R.drawable.ic_pbbls_envelope,
+        R.drawable.ic_pbbls_envelope_active,
+        R.drawable.ic_pbbls_ticket,
+        R.drawable.ic_pbbls_ticket_active,
+        R.drawable.ic_pbbls_coffee_2,
+        R.drawable.ic_pbbls_coffee_2_active,
+        R.drawable.ic_pbbls_user_plus_rounded,
+        R.drawable.ic_pbbls_user_plus_rounded_active,
+        R.drawable.ic_pbbls_stones_new,
+        R.drawable.ic_pbbls_stones_new_active,
+        R.drawable.ic_pbbls_stone_circle_arrow_in,
+        R.drawable.ic_pbbls_stone_circle_arrow_in_active,
+        R.drawable.ic_pbbls_user_plus_curve,
+        R.drawable.ic_pbbls_user_plus_curve_active,
+        R.drawable.ic_pbbls_stones_circle_arrow_in_left,
+        R.drawable.ic_pbbls_stones_circle_arrow_in_left_active,
+        R.drawable.ic_pbbls_stone_spiral_outside,
+        R.drawable.ic_pbbls_stone_spiral_outside_active,
+        R.drawable.ic_pbbls_stone_spiral_inside,
+        R.drawable.ic_pbbls_stone_spiral_inside_active,
+        R.drawable.ic_pbbls_compass_vertical,
+        R.drawable.ic_pbbls_compass_vertical_active,
+        R.drawable.ic_pbbls_egg_fried,
+        R.drawable.ic_pbbls_egg_fried_active,
+        R.drawable.ic_pbbls_signs_soil,
+        R.drawable.ic_pbbls_signs_soil_active,
+        R.drawable.ic_pbbls_circle_quarters,
+        R.drawable.ic_pbbls_circle_quarters_active,
+        R.drawable.ic_pbbls_flag_hill,
+        R.drawable.ic_pbbls_flag_hill_active,
+        R.drawable.ic_pbbls_signs,
+        R.drawable.ic_pbbls_signs_active,
+        R.drawable.ic_pbbls_compass,
+        R.drawable.ic_pbbls_compass_active,
+        R.drawable.ic_pbbls_hexagon_text,
+        R.drawable.ic_pbbls_hexagon_text_active,
+        R.drawable.ic_pbbls_stones_plus,
+        R.drawable.ic_pbbls_stones_plus_active,
+        R.drawable.ic_pbbls_shop_showcase,
+        R.drawable.ic_pbbls_shop_showcase_active,
+        R.drawable.ic_pbbls_scale_half,
+        R.drawable.ic_pbbls_scale_half_active,
+        R.drawable.ic_pbbls_label,
+        R.drawable.ic_pbbls_label_active,
+        R.drawable.ic_pbbls_flag_mountains,
+        R.drawable.ic_pbbls_flag_mountains_active,
+        R.drawable.ic_pbbls_shop_stone_k,
+        R.drawable.ic_pbbls_shop_stone_k_active,
+        R.drawable.ic_pbbls_shop_stone,
+        R.drawable.ic_pbbls_shop_stone_active,
+        R.drawable.ic_pbbls_label_stone,
+        R.drawable.ic_pbbls_label_stone_active,
+        R.drawable.ic_pbbls_cycle_stone,
+        R.drawable.ic_pbbls_cycle_stone_active,
+        R.drawable.ic_pbbls_orbit,
+        R.drawable.ic_pbbls_orbit_active,
+        R.drawable.ic_pbbls_candle,
+        R.drawable.ic_pbbls_candle_active,
+        R.drawable.ic_pbbls_sundial,
+        R.drawable.ic_pbbls_sundial_active,
+        R.drawable.ic_pbbls_stopwatch,
+        R.drawable.ic_pbbls_stopwatch_active,
+        R.drawable.ic_pbbls_hour,
+        R.drawable.ic_pbbls_hour_active,
+        R.drawable.ic_pbbls_gauge_zoom,
+        R.drawable.ic_pbbls_gauge_zoom_active,
+        R.drawable.ic_pbbls_blocked,
+        R.drawable.ic_pbbls_blocked_active,
+        R.drawable.ic_pbbls_stones_stack,
+        R.drawable.ic_pbbls_stones_stack_active,
+        R.drawable.ic_pbbls_worksite,
+        R.drawable.ic_pbbls_worksite_active,
+        R.drawable.ic_pbbls_user_blocked,
+        R.drawable.ic_pbbls_user_blocked_active,
+        R.drawable.ic_pbbls_user_forbidden,
+        R.drawable.ic_pbbls_user_forbidden_active,
+        R.drawable.ic_pbbls_crane,
+        R.drawable.ic_pbbls_crane_active,
+        R.drawable.ic_pbbls_stones_cross,
+        R.drawable.ic_pbbls_stones_cross_active,
+        R.drawable.ic_pbbls_stones_forbidden,
+        R.drawable.ic_pbbls_stones_forbidden_active,
+        R.drawable.ic_pbbls_stones_vertical_arrow_in,
+        R.drawable.ic_pbbls_stones_vertical_arrow_in_active,
+        R.drawable.ic_pbbls_bubbles_a,
+        R.drawable.ic_pbbls_bubbles_a_active,
+        R.drawable.ic_pbbls_translation_a,
+        R.drawable.ic_pbbls_translation_a_active,
+        R.drawable.ic_pbbls_circle_a,
+        R.drawable.ic_pbbls_circle_a_active,
+        R.drawable.ic_pbbls_cube_a,
+        R.drawable.ic_pbbls_cube_a_active,
+        R.drawable.ic_pbbls_bubble_a,
+        R.drawable.ic_pbbls_bubble_a_active,
+        R.drawable.ic_pbbls_users_communication,
+        R.drawable.ic_pbbls_users_communication_active,
+    )
+
+private fun drawableIds1(): IntArray =
+    intArrayOf(
+        R.drawable.ic_pbbls_sun_shine_lg,
+        R.drawable.ic_pbbls_sun_shine_lg_active,
+        R.drawable.ic_pbbls_stone_shine,
+        R.drawable.ic_pbbls_stone_shine_active,
+        R.drawable.ic_pbbls_sun_shine_sea,
+        R.drawable.ic_pbbls_sun_shine_sea_active,
+        R.drawable.ic_pbbls_flower_daisy,
+        R.drawable.ic_pbbls_flower_daisy_active,
+        R.drawable.ic_pbbls_sunrise_shine,
+        R.drawable.ic_pbbls_sunrise_shine_active,
+        R.drawable.ic_pbbls_stone_lg,
+        R.drawable.ic_pbbls_stone_lg_active,
+        R.drawable.ic_pbbls_toggle_off_label,
+        R.drawable.ic_pbbls_toggle_off_label_active,
+        R.drawable.ic_pbbls_sidebar,
+        R.drawable.ic_pbbls_sidebar_active,
+        R.drawable.ic_pbbls_sun_shine_md,
+        R.drawable.ic_pbbls_sun_shine_md_active,
+        R.drawable.ic_pbbls_lightbulb_shine,
+        R.drawable.ic_pbbls_lightbulb_shine_active,
+        R.drawable.ic_pbbls_stone_star,
+        R.drawable.ic_pbbls_stone_star_active,
+        R.drawable.ic_pbbls_toggle_off_shine,
+        R.drawable.ic_pbbls_toggle_off_shine_active,
+        R.drawable.ic_pbbls_moon,
+        R.drawable.ic_pbbls_moon_active,
+        R.drawable.ic_pbbls_stone_moon,
+        R.drawable.ic_pbbls_stone_moon_active,
+        R.drawable.ic_pbbls_game_board_moon,
+        R.drawable.ic_pbbls_game_board_moon_active,
+        R.drawable.ic_pbbls_moon_sea,
+        R.drawable.ic_pbbls_moon_sea_active,
+        R.drawable.ic_pbbls_flower_tulip,
+        R.drawable.ic_pbbls_flower_tulip_active,
+        R.drawable.ic_pbbls_stone_facet,
+        R.drawable.ic_pbbls_stone_facet_active,
+        R.drawable.ic_pbbls_toggle_on_label,
+        R.drawable.ic_pbbls_toggle_on_label_active,
+        R.drawable.ic_pbbls_lightbulb_moon,
+        R.drawable.ic_pbbls_lightbulb_moon_active,
+        R.drawable.ic_pbbls_appearance_device,
+        R.drawable.ic_pbbls_appearance_device_active,
+        R.drawable.ic_pbbls_stone_pill_shine,
+        R.drawable.ic_pbbls_stone_pill_shine_active,
+        R.drawable.ic_pbbls_appearance,
+        R.drawable.ic_pbbls_appearance_active,
+        R.drawable.ic_pbbls_toggle_median,
+        R.drawable.ic_pbbls_toggle_median_active,
+        R.drawable.ic_pbbls_appearance_half,
+        R.drawable.ic_pbbls_appearance_half_active,
+        R.drawable.ic_pbbls_lightbulb_mark,
+        R.drawable.ic_pbbls_lightbulb_mark_active,
+        R.drawable.ic_pbbls_sunset_seaa,
+        R.drawable.ic_pbbls_sunset_seaa_active,
+        R.drawable.ic_pbbls_palette_1,
+        R.drawable.ic_pbbls_palette_1_active,
+        R.drawable.ic_pbbls_circles_jointure,
+        R.drawable.ic_pbbls_circles_jointure_active,
+        R.drawable.ic_pbbls_broomstick,
+        R.drawable.ic_pbbls_broomstick_active,
+        R.drawable.ic_pbbls_flower_reed,
+        R.drawable.ic_pbbls_flower_reed_active,
+        R.drawable.ic_pbbls_circles_jointure_2,
+        R.drawable.ic_pbbls_circles_jointure_2_active,
+        R.drawable.ic_pbbls_palette_3,
+        R.drawable.ic_pbbls_palette_3_active,
+        R.drawable.ic_pbbls_prism,
+        R.drawable.ic_pbbls_prism_active,
+        R.drawable.ic_pbbls_screwdriver,
+        R.drawable.ic_pbbls_screwdriver_active,
+        R.drawable.ic_pbbls_bounce_underline,
+        R.drawable.ic_pbbls_bounce_underline_active,
+        R.drawable.ic_pbbls_chart_stones,
+        R.drawable.ic_pbbls_chart_stones_active,
+        R.drawable.ic_pbbls_signal_wave,
+        R.drawable.ic_pbbls_signal_wave_active,
+        R.drawable.ic_pbbls_stone_spring,
+        R.drawable.ic_pbbls_stone_spring_active,
+        R.drawable.ic_pbbls_stone_debounce,
+        R.drawable.ic_pbbls_stone_debounce_active,
+        R.drawable.ic_pbbls_signal_waveform_stone,
+        R.drawable.ic_pbbls_signal_waveform_stone_active,
+        R.drawable.ic_pbbls_stones_line_chart,
+        R.drawable.ic_pbbls_stones_line_chart_active,
+        R.drawable.ic_pbbls_stone_bounces,
+        R.drawable.ic_pbbls_stone_bounces_active,
+        R.drawable.ic_pbbls_signal_dots,
+        R.drawable.ic_pbbls_signal_dots_active,
+        R.drawable.ic_pbbls_metronome,
+        R.drawable.ic_pbbls_metronome_active,
+        R.drawable.ic_pbbls_stones_4_half,
+        R.drawable.ic_pbbls_stones_4_half_active,
+        R.drawable.ic_pbbls_binoculars,
+        R.drawable.ic_pbbls_binoculars_active,
+        R.drawable.ic_pbbls_text_stone,
+        R.drawable.ic_pbbls_text_stone_active,
+        R.drawable.ic_pbbls_magnifying_md,
+        R.drawable.ic_pbbls_magnifying_md_active,
+        R.drawable.ic_pbbls_magnifying_sm,
+        R.drawable.ic_pbbls_magnifying_sm_active,
+        R.drawable.ic_pbbls_circle_info,
+        R.drawable.ic_pbbls_circle_info_active,
+        R.drawable.ic_pbbls_parenthesis_info,
+        R.drawable.ic_pbbls_parenthesis_info_active,
+        R.drawable.ic_pbbls_asterisk,
+        R.drawable.ic_pbbls_asterisk_active,
+        R.drawable.ic_pbbls_bubble_info,
+        R.drawable.ic_pbbls_bubble_info_active,
+        R.drawable.ic_pbbls_info_i,
+        R.drawable.ic_pbbls_info_i_active,
+        R.drawable.ic_pbbls_badge_info,
+        R.drawable.ic_pbbls_badge_info_active,
+        R.drawable.ic_pbbls_sign_info,
+        R.drawable.ic_pbbls_sign_info_active,
+        R.drawable.ic_pbbls_user_standing,
+        R.drawable.ic_pbbls_user_standing_active,
+        R.drawable.ic_pbbls_paragraph_info,
+        R.drawable.ic_pbbls_paragraph_info_active,
+        R.drawable.ic_pbbls_dolmen_soil,
+        R.drawable.ic_pbbls_dolmen_soil_active,
+        R.drawable.ic_pbbls_dolmen_fluffy,
+        R.drawable.ic_pbbls_dolmen_fluffy_active,
+        R.drawable.ic_pbbls_stone_gate_shine,
+        R.drawable.ic_pbbls_stone_gate_shine_active,
+        R.drawable.ic_pbbls_stone_gate_sm,
+        R.drawable.ic_pbbls_stone_gate_sm_active,
+        R.drawable.ic_pbbls_stone_board,
+        R.drawable.ic_pbbls_stone_board_active,
+        R.drawable.ic_pbbls_dolmen_square,
+        R.drawable.ic_pbbls_dolmen_square_active,
+        R.drawable.ic_pbbls_dolmen_square_stone,
+        R.drawable.ic_pbbls_dolmen_square_stone_active,
+        R.drawable.ic_pbbls_dolmen_square_pin,
+        R.drawable.ic_pbbls_dolmen_square_pin_active,
+        R.drawable.ic_pbbls_menhir,
+        R.drawable.ic_pbbls_menhir_active,
+        R.drawable.ic_pbbls_dolmen_2,
+        R.drawable.ic_pbbls_dolmen_2_active,
+        R.drawable.ic_pbbls_gate_stone,
+        R.drawable.ic_pbbls_gate_stone_active,
+        R.drawable.ic_pbbls_dolmen_shine_sm,
+        R.drawable.ic_pbbls_dolmen_shine_sm_active,
+        R.drawable.ic_pbbls_slide,
+        R.drawable.ic_pbbls_slide_active,
+        R.drawable.ic_pbbls_karma_fossil,
+        R.drawable.ic_pbbls_karma_fossil_active,
+        R.drawable.ic_pbbls_circle_leaf,
+        R.drawable.ic_pbbls_circle_leaf_active,
+        R.drawable.ic_pbbls_fish_bones_2,
+        R.drawable.ic_pbbls_fish_bones_2_active,
+        R.drawable.ic_pbbls_circle_karma,
+        R.drawable.ic_pbbls_circle_karma_active,
+        R.drawable.ic_pbbls_fish_bones,
+        R.drawable.ic_pbbls_fish_bones_active,
+        R.drawable.ic_pbbls_cocoon,
+        R.drawable.ic_pbbls_cocoon_active,
+        R.drawable.ic_pbbls_leaf,
+        R.drawable.ic_pbbls_leaf_active,
+        R.drawable.ic_pbbls_circle_fossil,
+        R.drawable.ic_pbbls_circle_fossil_active,
+        R.drawable.ic_pbbls_trilobite,
+        R.drawable.ic_pbbls_trilobite_active,
+        R.drawable.ic_pbbls_stone_hair,
+        R.drawable.ic_pbbls_stone_hair_active,
+        R.drawable.ic_pbbls_bookmark,
+        R.drawable.ic_pbbls_bookmark_active,
+        R.drawable.ic_pbbls_book_stone,
+        R.drawable.ic_pbbls_book_stone_active,
+        R.drawable.ic_pbbls_text_stone_margin,
+        R.drawable.ic_pbbls_text_stone_margin_active,
+        R.drawable.ic_pbbls_bookmark_stone,
+        R.drawable.ic_pbbls_bookmark_stone_active,
+        R.drawable.ic_pbbls_page_corner,
+        R.drawable.ic_pbbls_page_corner_active,
+        R.drawable.ic_pbbls_text_stone_inline,
+        R.drawable.ic_pbbls_text_stone_inline_active,
+        R.drawable.ic_pbbls_pebble_gem,
+        R.drawable.ic_pbbls_pebble_gem_active,
+        R.drawable.ic_pbbls_amethyst,
+        R.drawable.ic_pbbls_amethyst_active,
+        R.drawable.ic_pbbls_gem_stone_1,
+        R.drawable.ic_pbbls_gem_stone_1_active,
+        R.drawable.ic_pbbls_gem_up,
+        R.drawable.ic_pbbls_gem_up_active,
+        R.drawable.ic_pbbls_pebble_fire,
+        R.drawable.ic_pbbls_pebble_fire_active,
+        R.drawable.ic_pbbls_target_arrow,
+        R.drawable.ic_pbbls_target_arrow_active,
+        R.drawable.ic_pbbls_stone_ripple,
+        R.drawable.ic_pbbls_stone_ripple_active,
+        R.drawable.ic_pbbls_golf_flag_lg,
+        R.drawable.ic_pbbls_golf_flag_lg_active,
+        R.drawable.ic_pbbls_target_outside,
+        R.drawable.ic_pbbls_target_outside_active,
+        R.drawable.ic_pbbls_flag_mountain,
+        R.drawable.ic_pbbls_flag_mountain_active,
+        R.drawable.ic_pbbls_ripples,
+        R.drawable.ic_pbbls_ripples_active,
+        R.drawable.ic_pbbls_stone_water,
+        R.drawable.ic_pbbls_stone_water_active,
+        R.drawable.ic_pbbls_golf_flag_sm,
+        R.drawable.ic_pbbls_golf_flag_sm_active,
+        R.drawable.ic_pbbls_stone_spark,
+        R.drawable.ic_pbbls_stone_spark_active,
+        R.drawable.ic_pbbls_pencil,
+        R.drawable.ic_pbbls_pencil_active,
+        R.drawable.ic_pbbls_pen_fountain_up,
+        R.drawable.ic_pbbls_pen_fountain_up_active,
+        R.drawable.ic_pbbls_feather_dot,
+        R.drawable.ic_pbbls_feather_dot_active,
+        R.drawable.ic_pbbls_pencil_write,
+        R.drawable.ic_pbbls_pencil_write_active,
+        R.drawable.ic_pbbls_pen_fountain_losange,
+        R.drawable.ic_pbbls_pen_fountain_losange_active,
+        R.drawable.ic_pbbls_eraser_write,
+        R.drawable.ic_pbbls_eraser_write_active,
+        R.drawable.ic_pbbls_feather_write,
+        R.drawable.ic_pbbls_feather_write_active,
+        R.drawable.ic_pbbls_pen_fountain_down,
+        R.drawable.ic_pbbls_pen_fountain_down_active,
+        R.drawable.ic_pbbls_pencil_draw,
+        R.drawable.ic_pbbls_pencil_draw_active,
+        R.drawable.ic_pbbls_saucer_antenna,
+        R.drawable.ic_pbbls_saucer_antenna_active,
+        R.drawable.ic_pbbls_stone_signal,
+        R.drawable.ic_pbbls_stone_signal_active,
+        R.drawable.ic_pbbls_user_line,
+        R.drawable.ic_pbbls_user_line_active,
+        R.drawable.ic_pbbls_saucer_antenna_k,
+        R.drawable.ic_pbbls_saucer_antenna_k_active,
+        R.drawable.ic_pbbls_stone_wifi,
+        R.drawable.ic_pbbls_stone_wifi_active,
+        R.drawable.ic_pbbls_saucer_antenna_sm,
+        R.drawable.ic_pbbls_saucer_antenna_sm_active,
+        R.drawable.ic_pbbls_abstract_radar,
+        R.drawable.ic_pbbls_abstract_radar_active,
+        R.drawable.ic_pbbls_radar_quarter,
+        R.drawable.ic_pbbls_radar_quarter_active,
+        R.drawable.ic_pbbls_arrow_forward_eye,
+        R.drawable.ic_pbbls_arrow_forward_eye_active,
+        R.drawable.ic_pbbls_pyramid,
+        R.drawable.ic_pbbls_pyramid_active,
+        R.drawable.ic_pbbls_pebbles_stack_2,
+        R.drawable.ic_pbbls_pebbles_stack_2_active,
+        R.drawable.ic_pbbls_pyramids_sun,
+        R.drawable.ic_pbbls_pyramids_sun_active,
+        R.drawable.ic_pbbls_ziggurat,
+        R.drawable.ic_pbbls_ziggurat_active,
+        R.drawable.ic_pbbls_stones_stack_2,
+        R.drawable.ic_pbbls_stones_stack_2_active,
+        R.drawable.ic_pbbls_obelisk,
+        R.drawable.ic_pbbls_obelisk_active,
+        R.drawable.ic_pbbls_pyramid_layers,
+        R.drawable.ic_pbbls_pyramid_layers_active,
+        R.drawable.ic_pbbls_stones_stack_plus,
+        R.drawable.ic_pbbls_stones_stack_plus_active,
+        R.drawable.ic_pbbls_pyramid_sun,
+        R.drawable.ic_pbbls_pyramid_sun_active,
+        R.drawable.ic_pbbls_pyramid_inside,
+        R.drawable.ic_pbbls_pyramid_inside_active,
+        R.drawable.ic_pbbls_layout_sharp,
+        R.drawable.ic_pbbls_layout_sharp_active,
+        R.drawable.ic_pbbls_text_editorial,
+        R.drawable.ic_pbbls_text_editorial_active,
+        R.drawable.ic_pbbls_layout_sidebar,
+        R.drawable.ic_pbbls_layout_sidebar_active,
+        R.drawable.ic_pbbls_stones_layout,
+        R.drawable.ic_pbbls_stones_layout_active,
+        R.drawable.ic_pbbls_layout,
+        R.drawable.ic_pbbls_layout_active,
+        R.drawable.ic_pbbls_set_square,
+        R.drawable.ic_pbbls_set_square_active,
+        R.drawable.ic_pbbls_gauge,
+        R.drawable.ic_pbbls_gauge_active,
+        R.drawable.ic_pbbls_scale_gauge,
+        R.drawable.ic_pbbls_scale_gauge_active,
+        R.drawable.ic_pbbls_gauge_simple,
+        R.drawable.ic_pbbls_gauge_simple_active,
+        R.drawable.ic_pbbls_square_chart_bars,
+        R.drawable.ic_pbbls_square_chart_bars_active,
+        R.drawable.ic_pbbls_gauge_underline,
+        R.drawable.ic_pbbls_gauge_underline_active,
+        R.drawable.ic_pbbls_dashboard,
+        R.drawable.ic_pbbls_dashboard_active,
+        R.drawable.ic_pbbls_chart_stones_grow,
+        R.drawable.ic_pbbls_chart_stones_grow_active,
+        R.drawable.ic_pbbls_chart_diagram,
+        R.drawable.ic_pbbls_chart_diagram_active,
+        R.drawable.ic_pbbls_bullseye,
+        R.drawable.ic_pbbls_bullseye_active,
+        R.drawable.ic_pbbls_chart_grow,
+        R.drawable.ic_pbbls_chart_grow_active,
+        R.drawable.ic_pbbls_chart_bars_fill,
+        R.drawable.ic_pbbls_chart_bars_fill_active,
+        R.drawable.ic_pbbls_line_grow,
+        R.drawable.ic_pbbls_line_grow_active,
+        R.drawable.ic_pbbls_chart_stones_4,
+        R.drawable.ic_pbbls_chart_stones_4_active,
+        R.drawable.ic_pbbls_chart_line_stone,
+        R.drawable.ic_pbbls_chart_line_stone_active,
+        R.drawable.ic_pbbls_chart_stones_grow_underline,
+        R.drawable.ic_pbbls_chart_stones_grow_underline_active,
+        R.drawable.ic_pbbls_chart_segments,
+        R.drawable.ic_pbbls_chart_segments_active,
+        R.drawable.ic_pbbls_chart_diagram_sm,
+        R.drawable.ic_pbbls_chart_diagram_sm_active,
+        R.drawable.ic_pbbls_chart_wires,
+        R.drawable.ic_pbbls_chart_wires_active,
+        R.drawable.ic_pbbls_board_wall_notes,
+        R.drawable.ic_pbbls_board_wall_notes_active,
+        R.drawable.ic_pbbls_library,
+        R.drawable.ic_pbbls_library_active,
+        R.drawable.ic_pbbls_game_stones,
+        R.drawable.ic_pbbls_game_stones_active,
+        R.drawable.ic_pbbls_board_chart,
+        R.drawable.ic_pbbls_board_chart_active,
+        R.drawable.ic_pbbls_memos_lace,
+        R.drawable.ic_pbbls_memos_lace_active,
+        R.drawable.ic_pbbls_square_notes,
+        R.drawable.ic_pbbls_square_notes_active,
+        R.drawable.ic_pbbls_board_notes,
+        R.drawable.ic_pbbls_board_notes_active,
+        R.drawable.ic_pbbls_memo,
+        R.drawable.ic_pbbls_memo_active,
+        R.drawable.ic_pbbls_game_checkers,
+        R.drawable.ic_pbbls_game_checkers_active,
+        R.drawable.ic_pbbls_board_layout,
+        R.drawable.ic_pbbls_board_layout_active,
+        R.drawable.ic_pbbls_board_lamp,
+        R.drawable.ic_pbbls_board_lamp_active,
+        R.drawable.ic_pbbls_grid,
+        R.drawable.ic_pbbls_grid_active,
+        R.drawable.ic_pbbls_board,
+        R.drawable.ic_pbbls_board_active,
+        R.drawable.ic_pbbls_copy_squares,
+        R.drawable.ic_pbbls_copy_squares_active,
+        R.drawable.ic_pbbls_copy_circles,
+        R.drawable.ic_pbbls_copy_circles_active,
+        R.drawable.ic_pbbls_layers_square,
+        R.drawable.ic_pbbls_layers_square_active,
+        R.drawable.ic_pbbls_stone_sea,
+        R.drawable.ic_pbbls_stone_sea_active,
+        R.drawable.ic_pbbls_document_scan,
+        R.drawable.ic_pbbls_document_scan_active,
+        R.drawable.ic_pbbls_clipboard_paste,
+        R.drawable.ic_pbbls_clipboard_paste_active,
+        R.drawable.ic_pbbls_stone_down_tunnel,
+        R.drawable.ic_pbbls_stone_down_tunnel_active,
+        R.drawable.ic_pbbls_arrow_bottom_box,
+        R.drawable.ic_pbbls_arrow_bottom_box_active,
+        R.drawable.ic_pbbls_note_corner,
+        R.drawable.ic_pbbls_note_corner_active,
+        R.drawable.ic_pbbls_map_pin,
+        R.drawable.ic_pbbls_map_pin_active,
+        R.drawable.ic_pbbls_clipboard_arrow_down,
+        R.drawable.ic_pbbls_clipboard_arrow_down_active,
+        R.drawable.ic_pbbls_stone_box,
+        R.drawable.ic_pbbls_stone_box_active,
+        R.drawable.ic_pbbls_card_stone,
+        R.drawable.ic_pbbls_card_stone_active,
+        R.drawable.ic_pbbls_square_paste,
+        R.drawable.ic_pbbls_square_paste_active,
+        R.drawable.ic_pbbls_note_stone,
+        R.drawable.ic_pbbls_note_stone_active,
+        R.drawable.ic_pbbls_cursor,
+        R.drawable.ic_pbbls_cursor_active,
+        R.drawable.ic_pbbls_cursor_pointer,
+        R.drawable.ic_pbbls_cursor_pointer_active,
+        R.drawable.ic_pbbls_cursor_pointer_click,
+        R.drawable.ic_pbbls_cursor_pointer_click_active,
+        R.drawable.ic_pbbls_viewfinder,
+        R.drawable.ic_pbbls_viewfinder_active,
+        R.drawable.ic_pbbls_book_cover_stone,
+        R.drawable.ic_pbbls_book_cover_stone_active,
+        R.drawable.ic_pbbls_book_text_bookmark,
+        R.drawable.ic_pbbls_book_text_bookmark_active,
+        R.drawable.ic_pbbls_books_shelve,
+        R.drawable.ic_pbbls_books_shelve_active,
+        R.drawable.ic_pbbls_book,
+        R.drawable.ic_pbbls_book_active,
+        R.drawable.ic_pbbls_bookbinding,
+        R.drawable.ic_pbbls_bookbinding_active,
+        R.drawable.ic_pbbls_books_stack,
+        R.drawable.ic_pbbls_books_stack_active,
+        R.drawable.ic_pbbls_book_iso,
+        R.drawable.ic_pbbls_book_iso_active,
+        R.drawable.ic_pbbls_abstract_glow,
+        R.drawable.ic_pbbls_abstract_glow_active,
+        R.drawable.ic_pbbls_text_period_stone,
+        R.drawable.ic_pbbls_text_period_stone_active,
+        R.drawable.ic_pbbls_text_aa,
+        R.drawable.ic_pbbls_text_aa_active,
+        R.drawable.ic_pbbls_text_quote,
+        R.drawable.ic_pbbls_text_quote_active,
+        R.drawable.ic_pbbls_curl,
+        R.drawable.ic_pbbls_curl_active,
+        R.drawable.ic_pbbls_text_initial_stone,
+        R.drawable.ic_pbbls_text_initial_stone_active,
+        R.drawable.ic_pbbls_waves_period_stone,
+        R.drawable.ic_pbbls_waves_period_stone_active,
+        R.drawable.ic_pbbls_text_period,
+        R.drawable.ic_pbbls_text_period_active,
+        R.drawable.ic_pbbls_letter_t_dot,
+        R.drawable.ic_pbbls_letter_t_dot_active,
+        R.drawable.ic_pbbls_text_underline_dot,
+        R.drawable.ic_pbbls_text_underline_dot_active,
+        R.drawable.ic_pbbls_paragraph,
+        R.drawable.ic_pbbls_paragraph_active,
+        R.drawable.ic_pbbls_memo_text_corner,
+        R.drawable.ic_pbbls_memo_text_corner_active,
+        R.drawable.ic_pbbls_memo_text_stone,
+        R.drawable.ic_pbbls_memo_text_stone_active,
+        R.drawable.ic_pbbls_memo_text_torn,
+        R.drawable.ic_pbbls_memo_text_torn_active,
+        R.drawable.ic_pbbls_memo_text_clip,
+        R.drawable.ic_pbbls_memo_text_clip_active,
+        R.drawable.ic_pbbls_receipt,
+        R.drawable.ic_pbbls_receipt_active,
+        R.drawable.ic_pbbls_paperplane,
+        R.drawable.ic_pbbls_paperplane_active,
+        R.drawable.ic_pbbls_memo_text_stone_sm,
+        R.drawable.ic_pbbls_memo_text_stone_sm_active,
+        R.drawable.ic_pbbls_bottle_message,
+        R.drawable.ic_pbbls_bottle_message_active,
+        R.drawable.ic_pbbls_folder,
+        R.drawable.ic_pbbls_folder_active,
+        R.drawable.ic_pbbls_folder_2,
+        R.drawable.ic_pbbls_folder_2_active,
+        R.drawable.ic_pbbls_archive_box,
+        R.drawable.ic_pbbls_archive_box_active,
+        R.drawable.ic_pbbls_trunk,
+        R.drawable.ic_pbbls_trunk_active,
+        R.drawable.ic_pbbls_archive_box_iso,
+        R.drawable.ic_pbbls_archive_box_iso_active,
+        R.drawable.ic_pbbls_toolbox,
+        R.drawable.ic_pbbls_toolbox_active,
+        R.drawable.ic_pbbls_metal_box,
+        R.drawable.ic_pbbls_metal_box_active,
+        R.drawable.ic_pbbls_suitcase,
+        R.drawable.ic_pbbls_suitcase_active,
+        R.drawable.ic_pbbls_medal,
+        R.drawable.ic_pbbls_medal_active,
+        R.drawable.ic_pbbls_laurel_stone,
+        R.drawable.ic_pbbls_laurel_stone_active,
+        R.drawable.ic_pbbls_medal_star,
+        R.drawable.ic_pbbls_medal_star_active,
+        R.drawable.ic_pbbls_podium_stone,
+        R.drawable.ic_pbbls_podium_stone_active,
+        R.drawable.ic_pbbls_medal_stone,
+        R.drawable.ic_pbbls_medal_stone_active,
+        R.drawable.ic_pbbls_medal_2,
+        R.drawable.ic_pbbls_medal_2_active,
+        R.drawable.ic_pbbls_medal_1,
+        R.drawable.ic_pbbls_medal_1_active,
+        R.drawable.ic_pbbls_laurel_user,
+        R.drawable.ic_pbbls_laurel_user_active,
+        R.drawable.ic_pbbls_medal_grade,
+        R.drawable.ic_pbbls_medal_grade_active,
+        R.drawable.ic_pbbls_trophy_lg,
+        R.drawable.ic_pbbls_trophy_lg_active,
+        R.drawable.ic_pbbls_trophy,
+        R.drawable.ic_pbbls_trophy_active,
+        R.drawable.ic_pbbls_trophy_star,
+        R.drawable.ic_pbbls_trophy_star_active,
+        R.drawable.ic_pbbls_cave,
+        R.drawable.ic_pbbls_cave_active,
+        R.drawable.ic_pbbls_stones_cave,
+        R.drawable.ic_pbbls_stones_cave_active,
+        R.drawable.ic_pbbls_moon_inverted,
+        R.drawable.ic_pbbls_moon_inverted_active,
+        R.drawable.ic_pbbls_cell,
+        R.drawable.ic_pbbls_cell_active,
+        R.drawable.ic_pbbls_hill_sun,
+        R.drawable.ic_pbbls_hill_sun_active,
+        R.drawable.ic_pbbls_moon_z,
+        R.drawable.ic_pbbls_moon_z_active,
+        R.drawable.ic_pbbls_moon_crescent,
+        R.drawable.ic_pbbls_moon_crescent_active,
+        R.drawable.ic_pbbls_moon_sea_up,
+        R.drawable.ic_pbbls_moon_sea_up_active,
+        R.drawable.ic_pbbls_moon_cloud,
+        R.drawable.ic_pbbls_moon_cloud_active,
+        R.drawable.ic_pbbls_shooting_star_lg,
+        R.drawable.ic_pbbls_shooting_star_lg_active,
+        R.drawable.ic_pbbls_star_stone,
+        R.drawable.ic_pbbls_star_stone_active,
+        R.drawable.ic_pbbls_circle_star,
+        R.drawable.ic_pbbls_circle_star_active,
+        R.drawable.ic_pbbls_constellation,
+        R.drawable.ic_pbbls_constellation_active,
+        R.drawable.ic_pbbls_shooting_star,
+        R.drawable.ic_pbbls_shooting_star_active,
+        R.drawable.ic_pbbls_star_dot,
+        R.drawable.ic_pbbls_star_dot_active,
+        R.drawable.ic_pbbls_weather,
+        R.drawable.ic_pbbls_weather_active,
+        R.drawable.ic_pbbls_rainbow_reflect,
+        R.drawable.ic_pbbls_rainbow_reflect_active,
+        R.drawable.ic_pbbls_stones_arc_5,
+        R.drawable.ic_pbbls_stones_arc_5_active,
+    )
+
+private fun drawableIds2(): IntArray =
+    intArrayOf(
+        R.drawable.ic_pbbls_rainbow,
+        R.drawable.ic_pbbls_rainbow_active,
+        R.drawable.ic_pbbls_cloud_arrow_down_download,
+        R.drawable.ic_pbbls_cloud_arrow_down_download_active,
+        R.drawable.ic_pbbls_half_circle_arrown_down_download,
+        R.drawable.ic_pbbls_half_circle_arrown_down_download_active,
+        R.drawable.ic_pbbls_download_picture,
+        R.drawable.ic_pbbls_download_picture_active,
+        R.drawable.ic_pbbls_filter_box,
+        R.drawable.ic_pbbls_filter_box_active,
+        R.drawable.ic_pbbls_device_arrow_down,
+        R.drawable.ic_pbbls_device_arrow_down_active,
+        R.drawable.ic_pbbls_abstract_bowl_pebbles,
+        R.drawable.ic_pbbls_abstract_bowl_pebbles_active,
+        R.drawable.ic_pbbls_stone_bowl,
+        R.drawable.ic_pbbls_stone_bowl_active,
+        R.drawable.ic_pbbls_rock_lg,
+        R.drawable.ic_pbbls_rock_lg_active,
+        R.drawable.ic_pbbls_rock_iso,
+        R.drawable.ic_pbbls_rock_iso_active,
+        R.drawable.ic_pbbls_rock,
+        R.drawable.ic_pbbls_rock_active,
+        R.drawable.ic_pbbls_stone_layers,
+        R.drawable.ic_pbbls_stone_layers_active,
+        R.drawable.ic_pbbls_stone_layers_2,
+        R.drawable.ic_pbbls_stone_layers_2_active,
+        R.drawable.ic_pbbls_hill_path_pin,
+        R.drawable.ic_pbbls_hill_path_pin_active,
+        R.drawable.ic_pbbls_hill_sunset,
+        R.drawable.ic_pbbls_hill_sunset_active,
+        R.drawable.ic_pbbls_hill_stone_path,
+        R.drawable.ic_pbbls_hill_stone_path_active,
+        R.drawable.ic_pbbls_hill_sunset_soil,
+        R.drawable.ic_pbbls_hill_sunset_soil_active,
+        R.drawable.ic_pbbls_hill_sun_k,
+        R.drawable.ic_pbbls_hill_sun_k_active,
+        R.drawable.ic_pbbls_hills,
+        R.drawable.ic_pbbls_hills_active,
+        R.drawable.ic_pbbls_hill_stone_grass,
+        R.drawable.ic_pbbls_hill_stone_grass_active,
+        R.drawable.ic_pbbls_mountains_summit,
+        R.drawable.ic_pbbls_mountains_summit_active,
+        R.drawable.ic_pbbls_menhir_2,
+        R.drawable.ic_pbbls_menhir_2_active,
+        R.drawable.ic_pbbls_mountain_path_flag,
+        R.drawable.ic_pbbls_mountain_path_flag_active,
+        R.drawable.ic_pbbls_mountains,
+        R.drawable.ic_pbbls_mountains_active,
+        R.drawable.ic_pbbls_mountain_forest,
+        R.drawable.ic_pbbls_mountain_forest_active,
+        R.drawable.ic_pbbls_mountain_cut,
+        R.drawable.ic_pbbls_mountain_cut_active,
+        R.drawable.ic_pbbls_mountain_path,
+        R.drawable.ic_pbbls_mountain_path_active,
+        R.drawable.ic_pbbls_mountain_waves,
+        R.drawable.ic_pbbls_mountain_waves_active,
+        R.drawable.ic_pbbls_moutains_sea,
+        R.drawable.ic_pbbls_moutains_sea_active,
+        R.drawable.ic_pbbls_pebble_zap,
+        R.drawable.ic_pbbls_pebble_zap_active,
+        R.drawable.ic_pbbls_sun_shine_wave,
+        R.drawable.ic_pbbls_sun_shine_wave_active,
+        R.drawable.ic_pbbls_sun_shine_bright_sm,
+        R.drawable.ic_pbbls_sun_shine_bright_sm_active,
+        R.drawable.ic_pbbls_sun_shine_bright,
+        R.drawable.ic_pbbls_sun_shine_bright_active,
+        R.drawable.ic_pbbls_battery_zap,
+        R.drawable.ic_pbbls_battery_zap_active,
+        R.drawable.ic_pbbls_cloud_zap,
+        R.drawable.ic_pbbls_cloud_zap_active,
+        R.drawable.ic_pbbls_zap,
+        R.drawable.ic_pbbls_zap_active,
+        R.drawable.ic_pbbls_abstract_zap,
+        R.drawable.ic_pbbls_abstract_zap_active,
+        R.drawable.ic_pbbls_cloud,
+        R.drawable.ic_pbbls_cloud_active,
+        R.drawable.ic_pbbls_circles,
+        R.drawable.ic_pbbls_circles_active,
+        R.drawable.ic_pbbls_wind,
+        R.drawable.ic_pbbls_wind_active,
+        R.drawable.ic_pbbls_cloud_k,
+        R.drawable.ic_pbbls_cloud_k_active,
+        R.drawable.ic_pbbls_clouds,
+        R.drawable.ic_pbbls_clouds_active,
+        R.drawable.ic_pbbls_cloud_stone,
+        R.drawable.ic_pbbls_cloud_stone_active,
+        R.drawable.ic_pbbls_pebble_speed,
+        R.drawable.ic_pbbls_pebble_speed_active,
+        R.drawable.ic_pbbls_square_rain,
+        R.drawable.ic_pbbls_square_rain_active,
+        R.drawable.ic_pbbls_cloud_rain,
+        R.drawable.ic_pbbls_cloud_rain_active,
+        R.drawable.ic_pbbls_tint,
+        R.drawable.ic_pbbls_tint_active,
+        R.drawable.ic_pbbls_cloud_rain_drop,
+        R.drawable.ic_pbbls_cloud_rain_drop_active,
+        R.drawable.ic_pbbls_square_rain_2,
+        R.drawable.ic_pbbls_square_rain_2_active,
+        R.drawable.ic_pbbls_tint_2,
+        R.drawable.ic_pbbls_tint_2_active,
+        R.drawable.ic_pbbls_postcard,
+        R.drawable.ic_pbbls_postcard_active,
+        R.drawable.ic_pbbls_envelope_2,
+        R.drawable.ic_pbbls_envelope_2_active,
+        R.drawable.ic_pbbls_bell,
+        R.drawable.ic_pbbls_bell_active,
+        R.drawable.ic_pbbls_bell_ring,
+        R.drawable.ic_pbbls_bell_ring_active,
+        R.drawable.ic_pbbls_chimer,
+        R.drawable.ic_pbbls_chimer_active,
+        R.drawable.ic_pbbls_bell_k,
+        R.drawable.ic_pbbls_bell_k_active,
+        R.drawable.ic_pbbls_bell_badge,
+        R.drawable.ic_pbbls_bell_badge_active,
+        R.drawable.ic_pbbls_stone_bowl_shine,
+        R.drawable.ic_pbbls_stone_bowl_shine_active,
+        R.drawable.ic_pbbls_bubble_badge,
+        R.drawable.ic_pbbls_bubble_badge_active,
+        R.drawable.ic_pbbls_server_dot,
+        R.drawable.ic_pbbls_server_dot_active,
+        R.drawable.ic_pbbls_door_ring,
+        R.drawable.ic_pbbls_door_ring_active,
+        R.drawable.ic_pbbls_envelope_badge,
+        R.drawable.ic_pbbls_envelope_badge_active,
+        R.drawable.ic_pbbls_server,
+        R.drawable.ic_pbbls_server_active,
+        R.drawable.ic_pbbls_letterbox_up,
+        R.drawable.ic_pbbls_letterbox_up_active,
+        R.drawable.ic_pbbls_square_badge,
+        R.drawable.ic_pbbls_square_badge_active,
+        R.drawable.ic_pbbls_pebble_pound,
+        R.drawable.ic_pbbls_pebble_pound_active,
+        R.drawable.ic_pbbls_list_stones,
+        R.drawable.ic_pbbls_list_stones_active,
+        R.drawable.ic_pbbls_receipt_2,
+        R.drawable.ic_pbbls_receipt_2_active,
+        R.drawable.ic_pbbls_list,
+        R.drawable.ic_pbbls_list_active,
+        R.drawable.ic_pbbls_list_dots,
+        R.drawable.ic_pbbls_list_dots_active,
+        R.drawable.ic_pbbls_list_sort,
+        R.drawable.ic_pbbls_list_sort_active,
+        R.drawable.ic_pbbls_minus,
+        R.drawable.ic_pbbls_minus_active,
+        R.drawable.ic_pbbls_minus_1,
+        R.drawable.ic_pbbls_minus_1_active,
+        R.drawable.ic_pbbls_eclipse,
+        R.drawable.ic_pbbls_eclipse_active,
+        R.drawable.ic_pbbls_cairn_drop,
+        R.drawable.ic_pbbls_cairn_drop_active,
+        R.drawable.ic_pbbls_stones_3_up,
+        R.drawable.ic_pbbls_stones_3_up_active,
+        R.drawable.ic_pbbls_circle_minus,
+        R.drawable.ic_pbbls_circle_minus_active,
+        R.drawable.ic_pbbls_pebbles_intersection,
+        R.drawable.ic_pbbls_pebbles_intersection_active,
+        R.drawable.ic_pbbls_abstract_stone_water,
+        R.drawable.ic_pbbls_abstract_stone_water_active,
+        R.drawable.ic_pbbls_items_indent,
+        R.drawable.ic_pbbls_items_indent_active,
+        R.drawable.ic_pbbls_stone_box_out,
+        R.drawable.ic_pbbls_stone_box_out_active,
+        R.drawable.ic_pbbls_square_outside_right,
+        R.drawable.ic_pbbls_square_outside_right_active,
+        R.drawable.ic_pbbls_stones_soil,
+        R.drawable.ic_pbbls_stones_soil_active,
+        R.drawable.ic_pbbls_double_circle_outside,
+        R.drawable.ic_pbbls_double_circle_outside_active,
+        R.drawable.ic_pbbls_abstract_stone_water_2,
+        R.drawable.ic_pbbls_abstract_stone_water_2_active,
+        R.drawable.ic_pbbls_stones_rubble,
+        R.drawable.ic_pbbls_stones_rubble_active,
+        R.drawable.ic_pbbls_destroy,
+        R.drawable.ic_pbbls_destroy_active,
+        R.drawable.ic_pbbls_squares_rubble,
+        R.drawable.ic_pbbls_squares_rubble_active,
+        R.drawable.ic_pbbls_jellyfish,
+        R.drawable.ic_pbbls_jellyfish_active,
+        R.drawable.ic_pbbls_jellyfish_2,
+        R.drawable.ic_pbbls_jellyfish_2_active,
+        R.drawable.ic_pbbls_jellyfish_surface,
+        R.drawable.ic_pbbls_jellyfish_surface_active,
+        R.drawable.ic_pbbls_jellyfish_pebble,
+        R.drawable.ic_pbbls_jellyfish_pebble_active,
+        R.drawable.ic_pbbls_abstract_jellyfish,
+        R.drawable.ic_pbbls_abstract_jellyfish_active,
+        R.drawable.ic_pbbls_jellyfish_moving,
+        R.drawable.ic_pbbls_jellyfish_moving_active,
+        R.drawable.ic_pbbls_jellyfish_2_dot,
+        R.drawable.ic_pbbls_jellyfish_2_dot_active,
+        R.drawable.ic_pbbls_jellyfish_dots,
+        R.drawable.ic_pbbls_jellyfish_dots_active,
+        R.drawable.ic_pbbls_waves_vertical,
+        R.drawable.ic_pbbls_waves_vertical_active,
+        R.drawable.ic_pbbls_cat,
+        R.drawable.ic_pbbls_cat_active,
+        R.drawable.ic_pbbls_cat_back_2,
+        R.drawable.ic_pbbls_cat_back_2_active,
+        R.drawable.ic_pbbls_paw,
+        R.drawable.ic_pbbls_paw_active,
+        R.drawable.ic_pbbls_cat_2,
+        R.drawable.ic_pbbls_cat_2_active,
+        R.drawable.ic_pbbls_cat_back,
+        R.drawable.ic_pbbls_cat_back_active,
+        R.drawable.ic_pbbls_dog_profile,
+        R.drawable.ic_pbbls_dog_profile_active,
+        R.drawable.ic_pbbls_doghouse,
+        R.drawable.ic_pbbls_doghouse_active,
+        R.drawable.ic_pbbls_piglet,
+        R.drawable.ic_pbbls_piglet_active,
+        R.drawable.ic_pbbls_pig,
+        R.drawable.ic_pbbls_pig_active,
+        R.drawable.ic_pbbls_paw_sm,
+        R.drawable.ic_pbbls_paw_sm_active,
+        R.drawable.ic_pbbls_dog,
+        R.drawable.ic_pbbls_dog_active,
+        R.drawable.ic_pbbls_chick_profile,
+        R.drawable.ic_pbbls_chick_profile_active,
+        R.drawable.ic_pbbls_doghouse_empty,
+        R.drawable.ic_pbbls_doghouse_empty_active,
+        R.drawable.ic_pbbls_bone_down,
+        R.drawable.ic_pbbls_bone_down_active,
+        R.drawable.ic_pbbls_bone,
+        R.drawable.ic_pbbls_bone_active,
+        R.drawable.ic_pbbls_diverge_2,
+        R.drawable.ic_pbbls_diverge_2_active,
+        R.drawable.ic_pbbls_converge,
+        R.drawable.ic_pbbls_converge_active,
+        R.drawable.ic_pbbls_bone_up,
+        R.drawable.ic_pbbls_bone_up_active,
+        R.drawable.ic_pbbls_diverge,
+        R.drawable.ic_pbbls_diverge_active,
+        R.drawable.ic_pbbls_lighthouse,
+        R.drawable.ic_pbbls_lighthouse_active,
+        R.drawable.ic_pbbls_lighthouse_right,
+        R.drawable.ic_pbbls_lighthouse_right_active,
+        R.drawable.ic_pbbls_cairn_shine,
+        R.drawable.ic_pbbls_cairn_shine_active,
+        R.drawable.ic_pbbls_lighthouse_island,
+        R.drawable.ic_pbbls_lighthouse_island_active,
+        R.drawable.ic_pbbls_box,
+        R.drawable.ic_pbbls_box_active,
+        R.drawable.ic_pbbls_laptop,
+        R.drawable.ic_pbbls_laptop_active,
+        R.drawable.ic_pbbls_piano,
+        R.drawable.ic_pbbls_piano_active,
+        R.drawable.ic_pbbls_keyboard,
+        R.drawable.ic_pbbls_keyboard_active,
+        R.drawable.ic_pbbls_abstract_ruby,
+        R.drawable.ic_pbbls_abstract_ruby_active,
+        R.drawable.ic_pbbls_guitar,
+        R.drawable.ic_pbbls_guitar_active,
+        R.drawable.ic_pbbls_guitar_face,
+        R.drawable.ic_pbbls_guitar_face_active,
+        R.drawable.ic_pbbls_guitar_pick,
+        R.drawable.ic_pbbls_guitar_pick_active,
+        R.drawable.ic_pbbls_guitar_chords,
+        R.drawable.ic_pbbls_guitar_chords_active,
+        R.drawable.ic_pbbls_guitar_oud,
+        R.drawable.ic_pbbls_guitar_oud_active,
+        R.drawable.ic_pbbls_guitar_tab,
+        R.drawable.ic_pbbls_guitar_tab_active,
+        R.drawable.ic_pbbls_guitar_pick_chords,
+        R.drawable.ic_pbbls_guitar_pick_chords_active,
+        R.drawable.ic_pbbls_guitar_neck,
+        R.drawable.ic_pbbls_guitar_neck_active,
+        R.drawable.ic_pbbls_music_treble_clef,
+        R.drawable.ic_pbbls_music_treble_clef_active,
+        R.drawable.ic_pbbls_music_sheet_notes,
+        R.drawable.ic_pbbls_music_sheet_notes_active,
+        R.drawable.ic_pbbls_music_note_double_quaver,
+        R.drawable.ic_pbbls_music_note_double_quaver_active,
+        R.drawable.ic_pbbls_music_quaver,
+        R.drawable.ic_pbbls_music_quaver_active,
+        R.drawable.ic_pbbls_music_sheet_note,
+        R.drawable.ic_pbbls_music_sheet_note_active,
+        R.drawable.ic_pbbls_music_sheet_note_2,
+        R.drawable.ic_pbbls_music_sheet_note_2_active,
+        R.drawable.ic_pbbls_music_note,
+        R.drawable.ic_pbbls_music_note_active,
+        R.drawable.ic_pbbls_face_baby,
+        R.drawable.ic_pbbls_face_baby_active,
+        R.drawable.ic_pbbls_troller,
+        R.drawable.ic_pbbls_troller_active,
+        R.drawable.ic_pbbls_face_child,
+        R.drawable.ic_pbbls_face_child_active,
+        R.drawable.ic_pbbls_mobile,
+        R.drawable.ic_pbbls_mobile_active,
+        R.drawable.ic_pbbls_cradle,
+        R.drawable.ic_pbbls_cradle_active,
+        R.drawable.ic_pbbls_abstract_honey,
+        R.drawable.ic_pbbls_abstract_honey_active,
+        R.drawable.ic_pbbls_milk_carton,
+        R.drawable.ic_pbbls_milk_carton_active,
+        R.drawable.ic_pbbls_milk_bottle_closed,
+        R.drawable.ic_pbbls_milk_bottle_closed_active,
+        R.drawable.ic_pbbls_drop_water,
+        R.drawable.ic_pbbls_drop_water_active,
+        R.drawable.ic_pbbls_feeding_bottle,
+        R.drawable.ic_pbbls_feeding_bottle_active,
+        R.drawable.ic_pbbls_water_bottle,
+        R.drawable.ic_pbbls_water_bottle_active,
+        R.drawable.ic_pbbls_milk_bottle,
+        R.drawable.ic_pbbls_milk_bottle_active,
+        R.drawable.ic_pbbls_car_front,
+        R.drawable.ic_pbbls_car_front_active,
+        R.drawable.ic_pbbls_car_wheel,
+        R.drawable.ic_pbbls_car_wheel_active,
+        R.drawable.ic_pbbls_car,
+        R.drawable.ic_pbbls_car_active,
+        R.drawable.ic_pbbls_radio,
+        R.drawable.ic_pbbls_radio_active,
+        R.drawable.ic_pbbls_car_k,
+        R.drawable.ic_pbbls_car_k_active,
+        R.drawable.ic_pbbls_car_speed,
+        R.drawable.ic_pbbls_car_speed_active,
+        R.drawable.ic_pbbls_car_2,
+        R.drawable.ic_pbbls_car_2_active,
+        R.drawable.ic_pbbls_car_above,
+        R.drawable.ic_pbbls_car_above_active,
+        R.drawable.ic_pbbls_bike,
+        R.drawable.ic_pbbls_bike_active,
+        R.drawable.ic_pbbls_bike_2,
+        R.drawable.ic_pbbls_bike_2_active,
+        R.drawable.ic_pbbls_house,
+        R.drawable.ic_pbbls_house_active,
+        R.drawable.ic_pbbls_dome,
+        R.drawable.ic_pbbls_dome_active,
+        R.drawable.ic_pbbls_building,
+        R.drawable.ic_pbbls_building_active,
+        R.drawable.ic_pbbls_house_chemny,
+        R.drawable.ic_pbbls_house_chemny_active,
+        R.drawable.ic_pbbls_bird_house,
+        R.drawable.ic_pbbls_bird_house_active,
+        R.drawable.ic_pbbls_farm,
+        R.drawable.ic_pbbls_farm_active,
+        R.drawable.ic_pbbls_house_block,
+        R.drawable.ic_pbbls_house_block_active,
+        R.drawable.ic_pbbls_houses,
+        R.drawable.ic_pbbls_houses_active,
+        R.drawable.ic_pbbls_window_roof,
+        R.drawable.ic_pbbls_window_roof_active,
+        R.drawable.ic_pbbls_umbrella_empty,
+        R.drawable.ic_pbbls_umbrella_empty_active,
+        R.drawable.ic_pbbls_umbrella_rain,
+        R.drawable.ic_pbbls_umbrella_rain_active,
+        R.drawable.ic_pbbls_parasol,
+        R.drawable.ic_pbbls_parasol_active,
+        R.drawable.ic_pbbls_umbrella,
+        R.drawable.ic_pbbls_umbrella_active,
+        R.drawable.ic_pbbls_umbrella_above,
+        R.drawable.ic_pbbls_umbrella_above_active,
+        R.drawable.ic_pbbls_bottle,
+        R.drawable.ic_pbbls_bottle_active,
+        R.drawable.ic_pbbls_abstract_ink,
+        R.drawable.ic_pbbls_abstract_ink_active,
+        R.drawable.ic_pbbls_ink_bottle,
+        R.drawable.ic_pbbls_ink_bottle_active,
+        R.drawable.ic_pbbls_ink_pot,
+        R.drawable.ic_pbbls_ink_pot_active,
+        R.drawable.ic_pbbls_question_circle,
+        R.drawable.ic_pbbls_question_circle_active,
+        R.drawable.ic_pbbls_question_bubble,
+        R.drawable.ic_pbbls_question_bubble_active,
+        R.drawable.ic_pbbls_life_ring,
+        R.drawable.ic_pbbls_life_ring_active,
+        R.drawable.ic_pbbls_question_mark_dot,
+        R.drawable.ic_pbbls_question_mark_dot_active,
+        R.drawable.ic_pbbls_question_bubble_chat,
+        R.drawable.ic_pbbls_question_bubble_chat_active,
+        R.drawable.ic_pbbls_question_mark,
+        R.drawable.ic_pbbls_question_mark_active,
+        R.drawable.ic_pbbls_exclamation_circle,
+        R.drawable.ic_pbbls_exclamation_circle_active,
+        R.drawable.ic_pbbls_pebble_exclamation,
+        R.drawable.ic_pbbls_pebble_exclamation_active,
+        R.drawable.ic_pbbls_gauge_low,
+        R.drawable.ic_pbbls_gauge_low_active,
+        R.drawable.ic_pbbls_info_circle,
+        R.drawable.ic_pbbls_info_circle_active,
+        R.drawable.ic_pbbls_exclamation_bold,
+        R.drawable.ic_pbbls_exclamation_bold_active,
+        R.drawable.ic_pbbls_info_sign,
+        R.drawable.ic_pbbls_info_sign_active,
+        R.drawable.ic_pbbls_drop_water_ripple,
+        R.drawable.ic_pbbls_drop_water_ripple_active,
+        R.drawable.ic_pbbls_alert_shine,
+        R.drawable.ic_pbbls_alert_shine_active,
+        R.drawable.ic_pbbls_eye_open_1,
+        R.drawable.ic_pbbls_eye_open_1_active,
+        R.drawable.ic_pbbls_exclamation_triangle,
+        R.drawable.ic_pbbls_exclamation_triangle_active,
+        R.drawable.ic_pbbls_cloud_zap_2,
+        R.drawable.ic_pbbls_cloud_zap_2_active,
+        R.drawable.ic_pbbls_exclamation_double,
+        R.drawable.ic_pbbls_exclamation_double_active,
+        R.drawable.ic_pbbls_cairn_fall,
+        R.drawable.ic_pbbls_cairn_fall_active,
+        R.drawable.ic_pbbls_skull_x,
+        R.drawable.ic_pbbls_skull_x_active,
+        R.drawable.ic_pbbls_abstract_stone_movement,
+        R.drawable.ic_pbbls_abstract_stone_movement_active,
+        R.drawable.ic_pbbls_pebble_tear,
+        R.drawable.ic_pbbls_pebble_tear_active,
+        R.drawable.ic_pbbls_pyramid_layers_reversed,
+        R.drawable.ic_pbbls_pyramid_layers_reversed_active,
+        R.drawable.ic_pbbls_exclamation_bold_lakshmi,
+        R.drawable.ic_pbbls_exclamation_bold_lakshmi_active,
+        R.drawable.ic_pbbls_x_sign,
+        R.drawable.ic_pbbls_x_sign_active,
+        R.drawable.ic_pbbls_exclamation_triple,
+        R.drawable.ic_pbbls_exclamation_triple_active,
+        R.drawable.ic_pbbls_exclamation_double_lakshmi,
+        R.drawable.ic_pbbls_exclamation_double_lakshmi_active,
+        R.drawable.ic_pbbls_karma_dot_2,
+        R.drawable.ic_pbbls_karma_dot_2_active,
+        R.drawable.ic_pbbls_flame,
+        R.drawable.ic_pbbls_flame_active,
+        R.drawable.ic_pbbls_skull,
+        R.drawable.ic_pbbls_skull_active,
+        R.drawable.ic_pbbls_stop_circle,
+        R.drawable.ic_pbbls_stop_circle_active,
+        R.drawable.ic_pbbls_anchor,
+        R.drawable.ic_pbbls_anchor_active,
+        R.drawable.ic_pbbls_minus_sign,
+        R.drawable.ic_pbbls_minus_sign_active,
+        R.drawable.ic_pbbls_hand_palm,
+        R.drawable.ic_pbbls_hand_palm_active,
+        R.drawable.ic_pbbls_hand_stone,
+        R.drawable.ic_pbbls_hand_stone_active,
+        R.drawable.ic_pbbls_toggle_off,
+        R.drawable.ic_pbbls_toggle_off_active,
+        R.drawable.ic_pbbls_pebble_zz,
+        R.drawable.ic_pbbls_pebble_zz_active,
+        R.drawable.ic_pbbls_power_off,
+        R.drawable.ic_pbbls_power_off_active,
+        R.drawable.ic_pbbls_exclamation_off,
+        R.drawable.ic_pbbls_exclamation_off_active,
+        R.drawable.ic_pbbls_circle_dot,
+        R.drawable.ic_pbbls_circle_dot_active,
+        R.drawable.ic_pbbls_crab,
+        R.drawable.ic_pbbls_crab_active,
+        R.drawable.ic_pbbls_shell,
+        R.drawable.ic_pbbls_shell_active,
+        R.drawable.ic_pbbls_crab_2,
+        R.drawable.ic_pbbls_crab_2_active,
+        R.drawable.ic_pbbls_crab_bell,
+        R.drawable.ic_pbbls_crab_bell_active,
+        R.drawable.ic_pbbls_crab_3,
+        R.drawable.ic_pbbls_crab_3_active,
+        R.drawable.ic_pbbls_crab_clamp,
+        R.drawable.ic_pbbls_crab_clamp_active,
+        R.drawable.ic_pbbls_crab_dots,
+        R.drawable.ic_pbbls_crab_dots_active,
+        R.drawable.ic_pbbls_shrimp,
+        R.drawable.ic_pbbls_shrimp_active,
+        R.drawable.ic_pbbls_dot_ripple,
+        R.drawable.ic_pbbls_dot_ripple_active,
+        R.drawable.ic_pbbls_pin_ripple,
+        R.drawable.ic_pbbls_pin_ripple_active,
+        R.drawable.ic_pbbls_water_drop_up,
+        R.drawable.ic_pbbls_water_drop_up_active,
+        R.drawable.ic_pbbls_dot_wave,
+        R.drawable.ic_pbbls_dot_wave_active,
+        R.drawable.ic_pbbls_ripple,
+        R.drawable.ic_pbbls_ripple_active,
+        R.drawable.ic_pbbls_ripple_ring,
+        R.drawable.ic_pbbls_ripple_ring_active,
+        R.drawable.ic_pbbls_ripple_left,
+        R.drawable.ic_pbbls_ripple_left_active,
+        R.drawable.ic_pbbls_stone_waves,
+        R.drawable.ic_pbbls_stone_waves_active,
+        R.drawable.ic_pbbls_karma_center,
+        R.drawable.ic_pbbls_karma_center_active,
+        R.drawable.ic_pbbls_ripple_symmetry,
+        R.drawable.ic_pbbls_ripple_symmetry_active,
+        R.drawable.ic_pbbls_water_drop,
+        R.drawable.ic_pbbls_water_drop_active,
+        R.drawable.ic_pbbls_circles_dot,
+        R.drawable.ic_pbbls_circles_dot_active,
+        R.drawable.ic_pbbls_wood,
+        R.drawable.ic_pbbls_wood_active,
+        R.drawable.ic_pbbls_stones_steps_sea,
+        R.drawable.ic_pbbls_stones_steps_sea_active,
+        R.drawable.ic_pbbls_stones_steps_3,
+        R.drawable.ic_pbbls_stones_steps_3_active,
+        R.drawable.ic_pbbls_stone_sound_right_2,
+        R.drawable.ic_pbbls_stone_sound_right_2_active,
+        R.drawable.ic_pbbls_megaphone,
+        R.drawable.ic_pbbls_megaphone_active,
+        R.drawable.ic_pbbls_ear,
+        R.drawable.ic_pbbls_ear_active,
+        R.drawable.ic_pbbls_drums,
+        R.drawable.ic_pbbls_drums_active,
+        R.drawable.ic_pbbls_speaker,
+        R.drawable.ic_pbbls_speaker_active,
+        R.drawable.ic_pbbls_sound_on,
+        R.drawable.ic_pbbls_sound_on_active,
+        R.drawable.ic_pbbls_stone_sound_right_3,
+        R.drawable.ic_pbbls_stone_sound_right_3_active,
+    )
+
+private fun drawableIds3(): IntArray =
+    intArrayOf(
+        R.drawable.ic_pbbls_speaker_dot,
+        R.drawable.ic_pbbls_speaker_dot_active,
+        R.drawable.ic_pbbls_microphone,
+        R.drawable.ic_pbbls_microphone_active,
+        R.drawable.ic_pbbls_microphone_high,
+        R.drawable.ic_pbbls_microphone_high_active,
+        R.drawable.ic_pbbls_microphone_arc,
+        R.drawable.ic_pbbls_microphone_arc_active,
+        R.drawable.ic_pbbls_microphone_wire,
+        R.drawable.ic_pbbls_microphone_wire_active,
+        R.drawable.ic_pbbls_file_audio,
+        R.drawable.ic_pbbls_file_audio_active,
+        R.drawable.ic_pbbls_tape_audio,
+        R.drawable.ic_pbbls_tape_audio_active,
+        R.drawable.ic_pbbls_vinyl,
+        R.drawable.ic_pbbls_vinyl_active,
+        R.drawable.ic_pbbls_headset,
+        R.drawable.ic_pbbls_headset_active,
+        R.drawable.ic_pbbls_blaster,
+        R.drawable.ic_pbbls_blaster_active,
+        R.drawable.ic_pbbls_play_circle,
+        R.drawable.ic_pbbls_play_circle_active,
+        R.drawable.ic_pbbls_waveform,
+        R.drawable.ic_pbbls_waveform_active,
+        R.drawable.ic_pbbls_signal_dot,
+        R.drawable.ic_pbbls_signal_dot_active,
+        R.drawable.ic_pbbls_waveform_bold_2,
+        R.drawable.ic_pbbls_waveform_bold_2_active,
+        R.drawable.ic_pbbls_mountains_underline,
+        R.drawable.ic_pbbls_mountains_underline_active,
+        R.drawable.ic_pbbls_sun_shine_bright_2,
+        R.drawable.ic_pbbls_sun_shine_bright_2_active,
+        R.drawable.ic_pbbls_abstract_wave,
+        R.drawable.ic_pbbls_abstract_wave_active,
+        R.drawable.ic_pbbls_waveform_bold,
+        R.drawable.ic_pbbls_waveform_bold_active,
+        R.drawable.ic_pbbls_signal,
+        R.drawable.ic_pbbls_signal_active,
+        R.drawable.ic_pbbls_waveform_dots,
+        R.drawable.ic_pbbls_waveform_dots_active,
+        R.drawable.ic_pbbls_waveform_clip,
+        R.drawable.ic_pbbls_waveform_clip_active,
+        R.drawable.ic_pbbls_cairn_signal,
+        R.drawable.ic_pbbls_cairn_signal_active,
+        R.drawable.ic_pbbls_radio_signal,
+        R.drawable.ic_pbbls_radio_signal_active,
+        R.drawable.ic_pbbls_code_morse,
+        R.drawable.ic_pbbls_code_morse_active,
+        R.drawable.ic_pbbls_stones_step_up,
+        R.drawable.ic_pbbls_stones_step_up_active,
+        R.drawable.ic_pbbls_sound_x,
+        R.drawable.ic_pbbls_sound_x_active,
+        R.drawable.ic_pbbls_pebble_off,
+        R.drawable.ic_pbbls_pebble_off_active,
+        R.drawable.ic_pbbls_sound_off,
+        R.drawable.ic_pbbls_sound_off_active,
+        R.drawable.ic_pbbls_ear_off,
+        R.drawable.ic_pbbls_ear_off_active,
+        R.drawable.ic_pbbls_segment,
+        R.drawable.ic_pbbls_segment_active,
+        R.drawable.ic_pbbls_micro_off,
+        R.drawable.ic_pbbls_micro_off_active,
+        R.drawable.ic_pbbls_speaker_off,
+        R.drawable.ic_pbbls_speaker_off_active,
+        R.drawable.ic_pbbls_faucet,
+        R.drawable.ic_pbbls_faucet_active,
+        R.drawable.ic_pbbls_pound,
+        R.drawable.ic_pbbls_pound_active,
+        R.drawable.ic_pbbls_bottle_closed,
+        R.drawable.ic_pbbls_bottle_closed_active,
+        R.drawable.ic_pbbls_water_drop_wave,
+        R.drawable.ic_pbbls_water_drop_wave_active,
+        R.drawable.ic_pbbls_water_well,
+        R.drawable.ic_pbbls_water_well_active,
+        R.drawable.ic_pbbls_glass_stone,
+        R.drawable.ic_pbbls_glass_stone_active,
+        R.drawable.ic_pbbls_waves_sun,
+        R.drawable.ic_pbbls_waves_sun_active,
+        R.drawable.ic_pbbls_hand_wave,
+        R.drawable.ic_pbbls_hand_wave_active,
+        R.drawable.ic_pbbls_stone_wave,
+        R.drawable.ic_pbbls_stone_wave_active,
+        R.drawable.ic_pbbls_boat_wave,
+        R.drawable.ic_pbbls_boat_wave_active,
+        R.drawable.ic_pbbls_wave_up,
+        R.drawable.ic_pbbls_wave_up_active,
+        R.drawable.ic_pbbls_seats,
+        R.drawable.ic_pbbls_seats_active,
+        R.drawable.ic_pbbls_wave_draw,
+        R.drawable.ic_pbbls_wave_draw_active,
+        R.drawable.ic_pbbls_chip_label,
+        R.drawable.ic_pbbls_chip_label_active,
+        R.drawable.ic_pbbls_protocol,
+        R.drawable.ic_pbbls_protocol_active,
+        R.drawable.ic_pbbls_sign,
+        R.drawable.ic_pbbls_sign_active,
+        R.drawable.ic_pbbls_stone_12,
+        R.drawable.ic_pbbls_stone_12_active,
+        R.drawable.ic_pbbls_web,
+        R.drawable.ic_pbbls_web_active,
+        R.drawable.ic_pbbls_window,
+        R.drawable.ic_pbbls_window_active,
+        R.drawable.ic_pbbls_globe,
+        R.drawable.ic_pbbls_globe_active,
+        R.drawable.ic_pbbls_at,
+        R.drawable.ic_pbbls_at_active,
+        R.drawable.ic_pbbls_pills_cursor,
+        R.drawable.ic_pbbls_pills_cursor_active,
+        R.drawable.ic_pbbls_search_bar,
+        R.drawable.ic_pbbls_search_bar_active,
+        R.drawable.ic_pbbls_slash_slash_dot,
+        R.drawable.ic_pbbls_slash_slash_dot_active,
+        R.drawable.ic_pbbls_unset_input,
+        R.drawable.ic_pbbls_unset_input_active,
+        R.drawable.ic_pbbls_qr_code,
+        R.drawable.ic_pbbls_qr_code_active,
+        R.drawable.ic_pbbls_link,
+        R.drawable.ic_pbbls_link_active,
+        R.drawable.ic_pbbls_bridge,
+        R.drawable.ic_pbbls_bridge_active,
+        R.drawable.ic_pbbls_wave_connect,
+        R.drawable.ic_pbbls_wave_connect_active,
+        R.drawable.ic_pbbls_link_k,
+        R.drawable.ic_pbbls_link_k_active,
+        R.drawable.ic_pbbls_stones_link,
+        R.drawable.ic_pbbls_stones_link_active,
+        R.drawable.ic_pbbls_bridge_2,
+        R.drawable.ic_pbbls_bridge_2_active,
+        R.drawable.ic_pbbls_circles_joined,
+        R.drawable.ic_pbbls_circles_joined_active,
+        R.drawable.ic_pbbls_network,
+        R.drawable.ic_pbbls_network_active,
+        R.drawable.ic_pbbls_soccer_ball,
+        R.drawable.ic_pbbls_soccer_ball_active,
+        R.drawable.ic_pbbls_stone_speed_right,
+        R.drawable.ic_pbbls_stone_speed_right_active,
+        R.drawable.ic_pbbls_goal,
+        R.drawable.ic_pbbls_goal_active,
+        R.drawable.ic_pbbls_soccer_field,
+        R.drawable.ic_pbbls_soccer_field_active,
+        R.drawable.ic_pbbls_dot_circle_line,
+        R.drawable.ic_pbbls_dot_circle_line_active,
+        R.drawable.ic_pbbls_farandole_circle,
+        R.drawable.ic_pbbls_farandole_circle_active,
+        R.drawable.ic_pbbls_basketball_basket,
+        R.drawable.ic_pbbls_basketball_basket_active,
+        R.drawable.ic_pbbls_basketball,
+        R.drawable.ic_pbbls_basketball_active,
+        R.drawable.ic_pbbls_play_screen,
+        R.drawable.ic_pbbls_play_screen_active,
+        R.drawable.ic_pbbls_tv_dot,
+        R.drawable.ic_pbbls_tv_dot_active,
+        R.drawable.ic_pbbls_remote,
+        R.drawable.ic_pbbls_remote_active,
+        R.drawable.ic_pbbls_presentation_stone,
+        R.drawable.ic_pbbls_presentation_stone_active,
+        R.drawable.ic_pbbls_tv_dots,
+        R.drawable.ic_pbbls_tv_dots_active,
+        R.drawable.ic_pbbls_presentation_picture,
+        R.drawable.ic_pbbls_presentation_picture_active,
+        R.drawable.ic_pbbls_presentation_text,
+        R.drawable.ic_pbbls_presentation_text_active,
+        R.drawable.ic_pbbls_tv,
+        R.drawable.ic_pbbls_tv_active,
+        R.drawable.ic_pbbls_tv_picture,
+        R.drawable.ic_pbbls_tv_picture_active,
+        R.drawable.ic_pbbls_phone,
+        R.drawable.ic_pbbls_phone_active,
+        R.drawable.ic_pbbls_smartphone,
+        R.drawable.ic_pbbls_smartphone_active,
+        R.drawable.ic_pbbls_phone_ring,
+        R.drawable.ic_pbbls_phone_ring_active,
+        R.drawable.ic_pbbls_android,
+        R.drawable.ic_pbbls_android_active,
+        R.drawable.ic_pbbls_android_head,
+        R.drawable.ic_pbbls_android_head_active,
+        R.drawable.ic_pbbls_android_head_2,
+        R.drawable.ic_pbbls_android_head_2_active,
+        R.drawable.ic_pbbls_robot_stones_arms_up,
+        R.drawable.ic_pbbls_robot_stones_arms_up_active,
+        R.drawable.ic_pbbls_abstract_circle_line,
+        R.drawable.ic_pbbls_abstract_circle_line_active,
+        R.drawable.ic_pbbls_clamp,
+        R.drawable.ic_pbbls_clamp_active,
+        R.drawable.ic_pbbls_robot,
+        R.drawable.ic_pbbls_robot_active,
+        R.drawable.ic_pbbls_robot_head,
+        R.drawable.ic_pbbls_robot_head_active,
+        R.drawable.ic_pbbls_robot_stones_arms_down,
+        R.drawable.ic_pbbls_robot_stones_arms_down_active,
+        R.drawable.ic_pbbls_robot_fun,
+        R.drawable.ic_pbbls_robot_fun_active,
+        R.drawable.ic_pbbls_apple_leaf,
+        R.drawable.ic_pbbls_apple_leaf_active,
+        R.drawable.ic_pbbls_apple_x,
+        R.drawable.ic_pbbls_apple_x_active,
+        R.drawable.ic_pbbls_apple_branch,
+        R.drawable.ic_pbbls_apple_branch_active,
+        R.drawable.ic_pbbls_apple,
+        R.drawable.ic_pbbls_apple_active,
+        R.drawable.ic_pbbls_hourglass_k,
+        R.drawable.ic_pbbls_hourglass_k_active,
+        R.drawable.ic_pbbls_orange_2,
+        R.drawable.ic_pbbls_orange_2_active,
+        R.drawable.ic_pbbls_apple_seeds,
+        R.drawable.ic_pbbls_apple_seeds_active,
+        R.drawable.ic_pbbls_circles_dots,
+        R.drawable.ic_pbbls_circles_dots_active,
+        R.drawable.ic_pbbls_boat_wave_2,
+        R.drawable.ic_pbbls_boat_wave_2_active,
+        R.drawable.ic_pbbls_pineapple,
+        R.drawable.ic_pbbls_pineapple_active,
+        R.drawable.ic_pbbls_plant,
+        R.drawable.ic_pbbls_plant_active,
+        R.drawable.ic_pbbls_bomb,
+        R.drawable.ic_pbbls_bomb_active,
+        R.drawable.ic_pbbls_v_slice,
+        R.drawable.ic_pbbls_v_slice_active,
+        R.drawable.ic_pbbls_wheel,
+        R.drawable.ic_pbbls_wheel_active,
+        R.drawable.ic_pbbls_grenada,
+        R.drawable.ic_pbbls_grenada_active,
+        R.drawable.ic_pbbls_fork_knife,
+        R.drawable.ic_pbbls_fork_knife_active,
+        R.drawable.ic_pbbls_meal_hot_stone,
+        R.drawable.ic_pbbls_meal_hot_stone_active,
+        R.drawable.ic_pbbls_egg_fried_2,
+        R.drawable.ic_pbbls_egg_fried_2_active,
+        R.drawable.ic_pbbls_meal_hot,
+        R.drawable.ic_pbbls_meal_hot_active,
+        R.drawable.ic_pbbls_bread,
+        R.drawable.ic_pbbls_bread_active,
+        R.drawable.ic_pbbls_carrot,
+        R.drawable.ic_pbbls_carrot_active,
+        R.drawable.ic_pbbls_plate_cutlery,
+        R.drawable.ic_pbbls_plate_cutlery_active,
+        R.drawable.ic_pbbls_meal_cloche,
+        R.drawable.ic_pbbls_meal_cloche_active,
+        R.drawable.ic_pbbls_cooker,
+        R.drawable.ic_pbbls_cooker_active,
+        R.drawable.ic_pbbls_game_board,
+        R.drawable.ic_pbbls_game_board_active,
+        R.drawable.ic_pbbls_table_meal_hot,
+        R.drawable.ic_pbbls_table_meal_hot_active,
+        R.drawable.ic_pbbls_people_table,
+        R.drawable.ic_pbbls_people_table_active,
+        R.drawable.ic_pbbls_meal_sticks,
+        R.drawable.ic_pbbls_meal_sticks_active,
+        R.drawable.ic_pbbls_abstract_fork_dot,
+        R.drawable.ic_pbbls_abstract_fork_dot_active,
+        R.drawable.ic_pbbls_binoculars_row,
+        R.drawable.ic_pbbls_binoculars_row_active,
+        R.drawable.ic_pbbls_abstract_square_layer_dots,
+        R.drawable.ic_pbbls_abstract_square_layer_dots_active,
+        R.drawable.ic_pbbls_christmas_ball,
+        R.drawable.ic_pbbls_christmas_ball_active,
+        R.drawable.ic_pbbls_sock,
+        R.drawable.ic_pbbls_sock_active,
+        R.drawable.ic_pbbls_gift,
+        R.drawable.ic_pbbls_gift_active,
+        R.drawable.ic_pbbls_christmas_tree,
+        R.drawable.ic_pbbls_christmas_tree_active,
+        R.drawable.ic_pbbls_church,
+        R.drawable.ic_pbbls_church_active,
+        R.drawable.ic_pbbls_pine_lines,
+        R.drawable.ic_pbbls_pine_lines_active,
+        R.drawable.ic_pbbls_pine_cone,
+        R.drawable.ic_pbbls_pine_cone_active,
+        R.drawable.ic_pbbls_pines,
+        R.drawable.ic_pbbls_pines_active,
+        R.drawable.ic_pbbls_pine_chevrons,
+        R.drawable.ic_pbbls_pine_chevrons_active,
+        R.drawable.ic_pbbls_pine_tree,
+        R.drawable.ic_pbbls_pine_tree_active,
+        R.drawable.ic_pbbls_pine,
+        R.drawable.ic_pbbls_pine_active,
+        R.drawable.ic_pbbls_pine_stack,
+        R.drawable.ic_pbbls_pine_stack_active,
+        R.drawable.ic_pbbls_tree,
+        R.drawable.ic_pbbls_tree_active,
+        R.drawable.ic_pbbls_tree_ball,
+        R.drawable.ic_pbbls_tree_ball_active,
+        R.drawable.ic_pbbls_tree_branches,
+        R.drawable.ic_pbbls_tree_branches_active,
+        R.drawable.ic_pbbls_acorn,
+        R.drawable.ic_pbbls_acorn_active,
+        R.drawable.ic_pbbls_train_front,
+        R.drawable.ic_pbbls_train_front_active,
+        R.drawable.ic_pbbls_train,
+        R.drawable.ic_pbbls_train_active,
+        R.drawable.ic_pbbls_train_underline,
+        R.drawable.ic_pbbls_train_underline_active,
+        R.drawable.ic_pbbls_train_ticket,
+        R.drawable.ic_pbbls_train_ticket_active,
+        R.drawable.ic_pbbls_flame_drop,
+        R.drawable.ic_pbbls_flame_drop_active,
+        R.drawable.ic_pbbls_fire,
+        R.drawable.ic_pbbls_fire_active,
+        R.drawable.ic_pbbls_candle_simple,
+        R.drawable.ic_pbbls_candle_simple_active,
+        R.drawable.ic_pbbls_firecamp,
+        R.drawable.ic_pbbls_firecamp_active,
+        R.drawable.ic_pbbls_firepit_h,
+        R.drawable.ic_pbbls_firepit_h_active,
+        R.drawable.ic_pbbls_farandole_fire,
+        R.drawable.ic_pbbls_farandole_fire_active,
+        R.drawable.ic_pbbls_firepit_curve,
+        R.drawable.ic_pbbls_firepit_curve_active,
+        R.drawable.ic_pbbls_firepit_above,
+        R.drawable.ic_pbbls_firepit_above_active,
+        R.drawable.ic_pbbls_firepit,
+        R.drawable.ic_pbbls_firepit_active,
+        R.drawable.ic_pbbls_sparkle_circle_dots,
+        R.drawable.ic_pbbls_sparkle_circle_dots_active,
+        R.drawable.ic_pbbls_fishes_round,
+        R.drawable.ic_pbbls_fishes_round_active,
+        R.drawable.ic_pbbls_fish_dive,
+        R.drawable.ic_pbbls_fish_dive_active,
+        R.drawable.ic_pbbls_fish_2,
+        R.drawable.ic_pbbls_fish_2_active,
+        R.drawable.ic_pbbls_fish,
+        R.drawable.ic_pbbls_fish_active,
+        R.drawable.ic_pbbls_fish_jump,
+        R.drawable.ic_pbbls_fish_jump_active,
+        R.drawable.ic_pbbls_fish_bowl,
+        R.drawable.ic_pbbls_fish_bowl_active,
+        R.drawable.ic_pbbls_fishes,
+        R.drawable.ic_pbbls_fishes_active,
+        R.drawable.ic_pbbls_poo,
+        R.drawable.ic_pbbls_poo_active,
+        R.drawable.ic_pbbls_poo_flies,
+        R.drawable.ic_pbbls_poo_flies_active,
+        R.drawable.ic_pbbls_toilet,
+        R.drawable.ic_pbbls_toilet_active,
+        R.drawable.ic_pbbls_hill_sprout,
+        R.drawable.ic_pbbls_hill_sprout_active,
+        R.drawable.ic_pbbls_poo_smell,
+        R.drawable.ic_pbbls_poo_smell_active,
+        R.drawable.ic_pbbls_earth_sprout,
+        R.drawable.ic_pbbls_earth_sprout_active,
+        R.drawable.ic_pbbls_map_marker,
+        R.drawable.ic_pbbls_map_marker_active,
+        R.drawable.ic_pbbls_globe_spin,
+        R.drawable.ic_pbbls_globe_spin_active,
+        R.drawable.ic_pbbls_map_fold,
+        R.drawable.ic_pbbls_map_fold_active,
+        R.drawable.ic_pbbls_grid_dot,
+        R.drawable.ic_pbbls_grid_dot_active,
+        R.drawable.ic_pbbls_map_fold_path,
+        R.drawable.ic_pbbls_map_fold_path_active,
+        R.drawable.ic_pbbls_grid_sparks,
+        R.drawable.ic_pbbls_grid_sparks_active,
+        R.drawable.ic_pbbls_store,
+        R.drawable.ic_pbbls_store_active,
+        R.drawable.ic_pbbls_store_bell,
+        R.drawable.ic_pbbls_store_bell_active,
+        R.drawable.ic_pbbls_sale_sign,
+        R.drawable.ic_pbbls_sale_sign_active,
+        R.drawable.ic_pbbls_factory,
+        R.drawable.ic_pbbls_factory_active,
+        R.drawable.ic_pbbls_store_shelve,
+        R.drawable.ic_pbbls_store_shelve_active,
+        R.drawable.ic_pbbls_shopping_bag_dot,
+        R.drawable.ic_pbbls_shopping_bag_dot_active,
+        R.drawable.ic_pbbls_shopping_basket,
+        R.drawable.ic_pbbls_shopping_basket_active,
+        R.drawable.ic_pbbls_bucket,
+        R.drawable.ic_pbbls_bucket_active,
+        R.drawable.ic_pbbls_bath_bottles,
+        R.drawable.ic_pbbls_bath_bottles_active,
+        R.drawable.ic_pbbls_shopping_trolley,
+        R.drawable.ic_pbbls_shopping_trolley_active,
+        R.drawable.ic_pbbls_shopping_cart,
+        R.drawable.ic_pbbls_shopping_cart_active,
+        R.drawable.ic_pbbls_basket,
+        R.drawable.ic_pbbls_basket_active,
+        R.drawable.ic_pbbls_abstract_stone_curve,
+        R.drawable.ic_pbbls_abstract_stone_curve_active,
+    )

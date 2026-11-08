@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { type EmittedIcon } from "./emit"
-import { androidEmitter, kdocLines, xmlComment } from "./emit-android"
+import { androidEmitter, kdocLines, kotlinFile, xmlComment } from "./emit-android"
 
 const stroke = (d: string) => ({ d, filled: false, evenOdd: false, unstroked: false, attrs: { d } })
 
@@ -91,17 +91,21 @@ import app.pbbls.android.R
  */
 enum class PbblsIcon(
     val manifestName: String,
-    @DrawableRes val drawableRes: Int,
 ) {
     /** Home: a roof over a door. */
-    HOME("home", R.drawable.ic_pbbls_home),
+    HOME("home"),
 
     /** Home: a roof over a door. (the \`active\` twin) */
-    HOME_ACTIVE("home.active", R.drawable.ic_pbbls_home_active),
+    HOME_ACTIVE("home.active"),
 
     /** Delete: a bin. */
-    TRASH("trash", R.drawable.ic_pbbls_trash),
+    TRASH("trash"),
     ;
+
+    /** The entry's \`VectorDrawable\`, \`R.drawable.ic_pbbls_*\`. */
+    @get:DrawableRes
+    val drawableRes: Int
+        get() = drawableIds[ordinal]
 
     /** The manifest row this entry belongs to: its own name, or its base's for a twin. */
     val base: String
@@ -143,6 +147,16 @@ fun PbblsIconImage(
         modifier = modifier.size(size),
     )
 }
+
+/** Each entry's drawable, in entry order: read through [PbblsIcon.drawableRes]. */
+private val drawableIds: IntArray = intArrayOf(*drawableIds0())
+
+private fun drawableIds0(): IntArray =
+    intArrayOf(
+        R.drawable.ic_pbbls_home,
+        R.drawable.ic_pbbls_home_active,
+        R.drawable.ic_pbbls_trash,
+    )
 `
 
 describe("androidEmitter", () => {
@@ -215,6 +229,23 @@ describe("androidEmitter", () => {
     for (const line of lines) expect(line.length).toBeLessThanOrEqual(140)
     expect(lines.slice(1, -1).map((l) => l.slice(7)).join(" ")).toBe(long)
     expect(kdocLines("short")).toEqual(["    /** short */"])
+  })
+
+  it("keeps the drawable ids out of the enum, in chunks of 500, under 140 columns", () => {
+    const many: EmittedIcon[] = Array.from({ length: 1001 }, (_, i) => ({
+      name: `half-circle-arrow-down-download-from-the-cloud-${i}`,
+      base: `half-circle-arrow-down-download-from-the-cloud-${i}`,
+      variant: null,
+      meaning: "Download.",
+      paths: [stroke("M3 3 L4 4")],
+    }))
+    const kotlin = kotlinFile(many)
+    expect(kotlin).toContain('    HALF_CIRCLE_ARROW_DOWN_DOWNLOAD_FROM_THE_CLOUD_7("half-circle-arrow-down-download-from-the-cloud-7"),')
+    expect(kotlin).toContain("private val drawableIds: IntArray = intArrayOf(*drawableIds0(), *drawableIds1(), *drawableIds2())")
+    expect(kotlin).toContain("private fun drawableIds2(): IntArray =\n    intArrayOf(\n        R.drawable.ic_pbbls_half_circle_arrow_down_download_from_the_cloud_1000,\n    )")
+    const enumBody = kotlin.slice(kotlin.indexOf("enum class PbblsIcon"), kotlin.indexOf("    ;"))
+    expect(enumBody).not.toContain("R.drawable")
+    for (const line of kotlin.split("\n")) expect(line.length).toBeLessThanOrEqual(140)
   })
 
   it("is deterministic", () => {

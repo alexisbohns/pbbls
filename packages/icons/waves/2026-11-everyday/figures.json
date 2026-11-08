@@ -1,0 +1,622 @@
+[
+ {
+  "name": "again",
+  "meaning": "try once more, replay",
+  "batch": "01"
+ },
+ {
+  "name": "swap",
+  "meaning": "trade one thing for another",
+  "batch": "01"
+ },
+ {
+  "name": "upload",
+  "meaning": "a photo on its way up: a status, not a button",
+  "batch": "01"
+ },
+ {
+  "name": "upvote",
+  "meaning": "I want this, in the Lab's backlog; must read apart from upload",
+  "batch": "01"
+ },
+ {
+  "name": "load-failed",
+  "meaning": "something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set)",
+  "batch": "01"
+ },
+ {
+  "name": "link-broken",
+  "meaning": "something went wrong: a link that broke (error family)",
+  "batch": "01"
+ },
+ {
+  "name": "page-gone",
+  "meaning": "something went wrong: a page that is gone (error family)",
+  "batch": "01"
+ },
+ {
+  "name": "document",
+  "meaning": "terms, a policy, a text to read",
+  "batch": "01"
+ },
+ {
+  "name": "privacy",
+  "meaning": "a hand held up: what we keep for ourselves",
+  "batch": "01"
+ },
+ {
+  "name": "secret",
+  "meaning": "visibility: only me (a trio with private and public, drawn together)",
+  "batch": "01"
+ },
+ {
+  "name": "private",
+  "meaning": "visibility: me and my circle (trio)",
+  "batch": "02"
+ },
+ {
+  "name": "public",
+  "meaning": "visibility: anyone (trio)",
+  "batch": "02"
+ },
+ {
+  "name": "locked",
+  "meaning": "an achievement not yet earned; must read apart from secret",
+  "batch": "02"
+ },
+ {
+  "name": "invite",
+  "meaning": "bring someone into the circle",
+  "batch": "02"
+ },
+ {
+  "name": "life-domain",
+  "meaning": "a compass, a territory, an area of one's life",
+  "batch": "02"
+ },
+ {
+  "name": "market",
+  "meaning": "where glyphs are traded",
+  "batch": "02"
+ },
+ {
+  "name": "hour",
+  "meaning": "a time of day, beside a date",
+  "batch": "02"
+ },
+ {
+  "name": "block",
+  "meaning": "stop someone from reaching you",
+  "batch": "02"
+ },
+ {
+  "name": "language",
+  "meaning": "the tongue the app speaks; must read apart from public",
+  "batch": "02"
+ },
+ {
+  "name": "appearance-light",
+  "meaning": "appearance: light (a trio with appearance-dark and appearance-device, drawn together)",
+  "batch": "02"
+ },
+ {
+  "name": "appearance-dark",
+  "meaning": "appearance: dark (trio)",
+  "batch": "03"
+ },
+ {
+  "name": "appearance-device",
+  "meaning": "appearance: follow the device (trio)",
+  "batch": "03"
+ },
+ {
+  "name": "palette",
+  "meaning": "the colour world the app wears",
+  "batch": "03"
+ },
+ {
+  "name": "bounce",
+  "meaning": "regularity over the last 28 days, a rhythm kept",
+  "batch": "03"
+ },
+ {
+  "name": "search",
+  "meaning": "look something up by name, a lens",
+  "batch": "03"
+ },
+ {
+  "name": "info",
+  "meaning": "how to read this: a small mark at caption size beside a line of text; must read apart from the error family",
+  "batch": "03"
+ },
+ {
+  "name": "dolmen",
+  "meaning": "the standing stone table, a monument",
+  "batch": "03"
+ },
+ {
+  "name": "fossil",
+  "meaning": "a life kept in stone",
+  "batch": "03"
+ },
+ {
+  "name": "bookmark",
+  "meaning": "keep my place, save for later",
+  "batch": "03"
+ },
+ {
+  "name": "gem",
+  "meaning": "something precious, cut",
+  "batch": "03"
+ },
+ {
+  "name": "target",
+  "meaning": "an aim, a goal hit",
+  "batch": "04"
+ },
+ {
+  "name": "pen",
+  "meaning": "write, edit",
+  "batch": "04"
+ },
+ {
+  "name": "radar",
+  "meaning": "scanning around, what is near",
+  "batch": "04"
+ },
+ {
+  "name": "pyramid",
+  "meaning": "a built monument, a layered peak",
+  "batch": "04"
+ },
+ {
+  "name": "layout",
+  "meaning": "how a page is arranged",
+  "batch": "04"
+ },
+ {
+  "name": "dashboard",
+  "meaning": "an overview of numbers at a glance",
+  "batch": "04"
+ },
+ {
+  "name": "chart",
+  "meaning": "figures over time",
+  "batch": "04"
+ },
+ {
+  "name": "board",
+  "meaning": "a board where things are pinned or arranged",
+  "batch": "04"
+ },
+ {
+  "name": "copy",
+  "meaning": "make a second one",
+  "batch": "04"
+ },
+ {
+  "name": "paste",
+  "meaning": "put it here",
+  "batch": "04"
+ },
+ {
+  "name": "cursor",
+  "meaning": "a pointer, here",
+  "batch": "05"
+ },
+ {
+  "name": "book",
+  "meaning": "a book to read",
+  "batch": "05"
+ },
+ {
+  "name": "text",
+  "meaning": "plain text, a paragraph",
+  "batch": "05"
+ },
+ {
+  "name": "memo",
+  "meaning": "a short note",
+  "batch": "05"
+ },
+ {
+  "name": "folder",
+  "meaning": "a place that holds files",
+  "batch": "05"
+ },
+ {
+  "name": "trunk",
+  "meaning": "a travel chest",
+  "batch": "05"
+ },
+ {
+  "name": "treasure",
+  "meaning": "a treasure chest found",
+  "batch": "05"
+ },
+ {
+  "name": "medal",
+  "meaning": "an honour hung on a ribbon",
+  "batch": "05"
+ },
+ {
+  "name": "trophy",
+  "meaning": "a cup for a win",
+  "batch": "05"
+ },
+ {
+  "name": "cave",
+  "meaning": "a shelter in the rock",
+  "batch": "05"
+ },
+ {
+  "name": "moon",
+  "meaning": "the moon, night",
+  "batch": "06"
+ },
+ {
+  "name": "star",
+  "meaning": "a star, a favourite",
+  "batch": "06"
+ },
+ {
+  "name": "rainbow",
+  "meaning": "a rainbow after rain",
+  "batch": "06"
+ },
+ {
+  "name": "download",
+  "meaning": "bring it down to the device",
+  "batch": "06"
+ },
+ {
+  "name": "rock",
+  "meaning": "a rock, a solid stone",
+  "batch": "06"
+ },
+ {
+  "name": "boulder",
+  "meaning": "a great rock, too big to lift; must read apart from rock",
+  "batch": "06"
+ },
+ {
+  "name": "hill",
+  "meaning": "a gentle rise of land",
+  "batch": "06"
+ },
+ {
+  "name": "mountain",
+  "meaning": "a high peak; must read apart from hill",
+  "batch": "06"
+ },
+ {
+  "name": "zap",
+  "meaning": "a jolt, energy, instant",
+  "batch": "06"
+ },
+ {
+  "name": "cloud",
+  "meaning": "a cloud",
+  "batch": "06"
+ },
+ {
+  "name": "rain",
+  "meaning": "rain falling",
+  "batch": "07"
+ },
+ {
+  "name": "envelope",
+  "meaning": "a letter, a message",
+  "batch": "07"
+ },
+ {
+  "name": "bell",
+  "meaning": "a bell",
+  "batch": "07"
+ },
+ {
+  "name": "notification",
+  "meaning": "something new arrived for you; must read apart from bell",
+  "batch": "07"
+ },
+ {
+  "name": "list",
+  "meaning": "a list of items",
+  "batch": "07"
+ },
+ {
+  "name": "minus",
+  "meaning": "take one away",
+  "batch": "07"
+ },
+ {
+  "name": "remove",
+  "meaning": "take it out of this set (it still exists elsewhere)",
+  "batch": "07"
+ },
+ {
+  "name": "delete",
+  "meaning": "destroy it for good",
+  "batch": "07"
+ },
+ {
+  "name": "jellyfish",
+  "meaning": "a jellyfish",
+  "batch": "07"
+ },
+ {
+  "name": "cat",
+  "meaning": "a cat",
+  "batch": "07"
+ },
+ {
+  "name": "dog",
+  "meaning": "a dog",
+  "batch": "08"
+ },
+ {
+  "name": "bone",
+  "meaning": "a bone",
+  "batch": "08"
+ },
+ {
+  "name": "lighthouse",
+  "meaning": "a lighthouse, a guide in the dark",
+  "batch": "08"
+ },
+ {
+  "name": "keyboard",
+  "meaning": "a keyboard",
+  "batch": "08"
+ },
+ {
+  "name": "guitar",
+  "meaning": "a guitar",
+  "batch": "08"
+ },
+ {
+  "name": "music",
+  "meaning": "music, a melody",
+  "batch": "08"
+ },
+ {
+  "name": "baby",
+  "meaning": "a baby, a newborn",
+  "batch": "08"
+ },
+ {
+  "name": "milk",
+  "meaning": "milk",
+  "batch": "08"
+ },
+ {
+  "name": "car",
+  "meaning": "a car",
+  "batch": "08"
+ },
+ {
+  "name": "bike",
+  "meaning": "a bicycle",
+  "batch": "08"
+ },
+ {
+  "name": "house",
+  "meaning": "a house, a building (not home, the place you land)",
+  "batch": "09"
+ },
+ {
+  "name": "umbrella",
+  "meaning": "an umbrella",
+  "batch": "09"
+ },
+ {
+  "name": "ink",
+  "meaning": "ink, a drop of it",
+  "batch": "09"
+ },
+ {
+  "name": "question",
+  "meaning": "a question, help",
+  "batch": "09"
+ },
+ {
+  "name": "alert",
+  "meaning": "pay attention: something needs you (mildest of alert, warning, danger)",
+  "batch": "09"
+ },
+ {
+  "name": "warning",
+  "meaning": "careful: a risk ahead (middle)",
+  "batch": "09"
+ },
+ {
+  "name": "danger",
+  "meaning": "danger: serious harm (strongest)",
+  "batch": "09"
+ },
+ {
+  "name": "stop",
+  "meaning": "stop, halt",
+  "batch": "09"
+ },
+ {
+  "name": "disabled",
+  "meaning": "not available, turned off",
+  "batch": "09"
+ },
+ {
+  "name": "crab",
+  "meaning": "a crab",
+  "batch": "09"
+ },
+ {
+  "name": "ripple",
+  "meaning": "a ripple spreading on water",
+  "batch": "10"
+ },
+ {
+  "name": "stepping-stone",
+  "meaning": "a stone you step on to cross",
+  "batch": "10"
+ },
+ {
+  "name": "sound",
+  "meaning": "sound on, a speaker",
+  "batch": "10"
+ },
+ {
+  "name": "microphone",
+  "meaning": "a microphone, record your voice",
+  "batch": "10"
+ },
+ {
+  "name": "audio",
+  "meaning": "an audio file, a recording to play",
+  "batch": "10"
+ },
+ {
+  "name": "waveform",
+  "meaning": "the shape of a sound",
+  "batch": "10"
+ },
+ {
+  "name": "signal",
+  "meaning": "signal strength, a connection",
+  "batch": "10"
+ },
+ {
+  "name": "mute",
+  "meaning": "sound off",
+  "batch": "10"
+ },
+ {
+  "name": "water",
+  "meaning": "water",
+  "batch": "10"
+ },
+ {
+  "name": "wave",
+  "meaning": "a wave of the sea",
+  "batch": "10"
+ },
+ {
+  "name": "url",
+  "meaning": "a web address",
+  "batch": "11"
+ },
+ {
+  "name": "link",
+  "meaning": "a link between two things",
+  "batch": "11"
+ },
+ {
+  "name": "soccer",
+  "meaning": "a football (soccer ball)",
+  "batch": "11"
+ },
+ {
+  "name": "basketball",
+  "meaning": "a basketball",
+  "batch": "11"
+ },
+ {
+  "name": "tv",
+  "meaning": "a television",
+  "batch": "11"
+ },
+ {
+  "name": "phone",
+  "meaning": "a phone",
+  "batch": "11"
+ },
+ {
+  "name": "android",
+  "meaning": "the Android platform mark, its robot head, redrawn in the house hand",
+  "batch": "11"
+ },
+ {
+  "name": "robot",
+  "meaning": "a robot",
+  "batch": "11"
+ },
+ {
+  "name": "apple",
+  "meaning": "an apple, the fruit",
+  "batch": "11"
+ },
+ {
+  "name": "banana",
+  "meaning": "a banana",
+  "batch": "11"
+ },
+ {
+  "name": "pineapple",
+  "meaning": "a pineapple",
+  "batch": "12"
+ },
+ {
+  "name": "food",
+  "meaning": "food",
+  "batch": "12"
+ },
+ {
+  "name": "meal",
+  "meaning": "a meal at the table",
+  "batch": "12"
+ },
+ {
+  "name": "christmas",
+  "meaning": "Christmas",
+  "batch": "12"
+ },
+ {
+  "name": "pine",
+  "meaning": "a pine tree",
+  "batch": "12"
+ },
+ {
+  "name": "tree",
+  "meaning": "a broad-leaf tree",
+  "batch": "12"
+ },
+ {
+  "name": "train",
+  "meaning": "a train",
+  "batch": "12"
+ },
+ {
+  "name": "fire",
+  "meaning": "fire, a flame",
+  "batch": "12"
+ },
+ {
+  "name": "firepit",
+  "meaning": "a fire in a ring of stones",
+  "batch": "12"
+ },
+ {
+  "name": "fish",
+  "meaning": "a fish",
+  "batch": "12"
+ },
+ {
+  "name": "poo",
+  "meaning": "poo",
+  "batch": "13"
+ },
+ {
+  "name": "map",
+  "meaning": "a map",
+  "batch": "13"
+ },
+ {
+  "name": "store",
+  "meaning": "a shop",
+  "batch": "13"
+ },
+ {
+  "name": "shopping",
+  "meaning": "shopping, a bag or a cart",
+  "batch": "13"
+ }
+]

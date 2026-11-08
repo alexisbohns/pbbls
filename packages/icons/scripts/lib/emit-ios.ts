@@ -98,7 +98,7 @@ function caseLines(icon: EmittedIcon): string {
 
 export function swiftFile(icons: EmittedIcon[]): string {
   return `// ${GENERATED_NOTICE}
-// swiftlint:disable file_length
+// swiftlint:disable file_length type_body_length
 import SwiftUI
 
 /// The hand-drawn Pebbles icon set (\`packages/icons\`): one case per emitted

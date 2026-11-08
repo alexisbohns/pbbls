@@ -1,77 +1,38 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { COLOR_WORLDS } from "@/lib/config/color-worlds"
-import { CANVAS_ZOOMS, type CanvasZoom, type DeviceChoice } from "@/lib/design/devices"
 import { tuningProgress } from "@/lib/design/specimens"
-import type { ColorWorld } from "@/lib/types"
-import type { DesignContrast, DesignMode, DesignTheme, DesignThemeName } from "@/lib/theme/design-theme"
-import { DesignSelect, type SelectOption } from "./DesignSelect"
+import { DesignTools, type DesignToolsState } from "./DesignTools"
 import { currentPage } from "./directory-pages"
 
-const THEME_OPTIONS: SelectOption<DesignThemeName>[] = [
-  { value: "current", label: "Current" },
-  { value: "m3", label: "M3" },
-]
-const MODE_OPTIONS: SelectOption<DesignMode>[] = [
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-]
-const CONTRAST_OPTIONS: SelectOption<DesignContrast>[] = [
-  { value: "standard", label: "Standard" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-]
-const DEVICE_OPTIONS: SelectOption<DeviceChoice>[] = [
-  { value: "both", label: "Both" },
-  { value: "mobile", label: "Mobile" },
-  { value: "desktop", label: "Desktop" },
-]
-const WORLD_OPTIONS: SelectOption<ColorWorld>[] = COLOR_WORLDS.map((w) => ({ value: w.id, label: w.label }))
-const ZOOM_OPTIONS: SelectOption<CanvasZoom>[] = CANVAS_ZOOMS.map((z) => ({
-  value: z,
-  label: z === "fit" ? "Fit" : `${z * 100}%`,
-}))
-
-type DesignToolbarProps = {
-  theme: DesignTheme
-  onChange: (patch: Partial<DesignTheme>) => void
-  zoom: CanvasZoom
-  onZoom: (zoom: CanvasZoom) => void
-  devices: DeviceChoice
-  onDevices: (devices: DeviceChoice) => void
-}
-
-export function DesignToolbar({ theme, onChange, zoom, onZoom, devices, onDevices }: DesignToolbarProps) {
-  const pathname = usePathname()
+/**
+ * The directory's second area: the page's header and its tools. From 1024 px
+ * it is a column of its own between the rail and the page (the app's
+ * two-area layout), held in place while the page scrolls. From 600 px it is a
+ * sticky header over the page. Below 600 px the mobile bar takes its place.
+ */
+export function DesignToolbar(state: DesignToolsState) {
+  const page = currentPage(usePathname())
   const { tuned, total } = tuningProgress()
-  const current = currentPage(pathname)
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="flex flex-col gap-2 px-4 py-3">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <h1 className="font-heading text-lg">
-            Pebbles design system{current && <span className="text-muted-foreground"> · {current.label}</span>}
+    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur max-rail:hidden lg:h-dvh lg:w-md lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-b-0 lg:bg-background lg:backdrop-blur-none">
+      <div className="flex flex-col gap-2 px-4 py-3 lg:gap-6 lg:px-6 lg:pt-8 lg:pb-10">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 lg:flex-col lg:items-start lg:gap-3">
+          <h1 className="font-heading text-lg lg:flex lg:flex-col lg:gap-1">
+            <span className="lg:text-sm lg:text-muted-foreground">Pebbles design system</span>
+            {page && (
+              <span className="text-muted-foreground lg:text-4xl lg:text-foreground">
+                <span className="lg:hidden"> · </span>
+                {page.label}
+              </span>
+            )}
           </h1>
+          {page && <p className="hidden max-w-sm text-sm text-muted-foreground lg:block">{page.summary}</p>}
           <span className="text-xs text-muted-foreground">
             {tuned}/{total} tuned · <kbd>T</kbd> theme · <kbd>D</kbd> mode
           </span>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <DesignSelect label="Theme" options={THEME_OPTIONS} value={theme.theme} onChange={(v) => onChange({ theme: v })} />
-          {theme.theme === "current" ? (
-            <DesignSelect label="World" options={WORLD_OPTIONS} value={theme.world} onChange={(v) => onChange({ world: v })} />
-          ) : (
-            <DesignSelect label="Contrast" options={CONTRAST_OPTIONS} value={theme.contrast} onChange={(v) => onChange({ contrast: v })} />
-          )}
-          <DesignSelect label="Mode" options={MODE_OPTIONS} value={theme.mode} onChange={(v) => onChange({ mode: v })} />
-          {current?.canvas && (
-            <>
-              <DesignSelect label="Screens" options={DEVICE_OPTIONS} value={devices} onChange={onDevices} />
-              <DesignSelect label="Zoom" options={ZOOM_OPTIONS} value={zoom} onChange={onZoom} />
-            </>
-          )}
-        </div>
+        <DesignTools page={page} layout="row" {...state} />
       </div>
     </header>
   )

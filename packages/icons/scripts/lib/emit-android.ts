@@ -50,7 +50,7 @@ ${icon.paths.map(pathElement).join("\n")}
 `
 }
 
-/** ktlint's stock `max-line-length` for a generated KDoc line. */
+/** ktlint's stock `max-line-length` for a generated KDoc or entry line. */
 const LINE_WIDTH = 140
 const INDENT = "    "
 const BODY_PREFIX = `${INDENT} * `
@@ -76,9 +76,39 @@ export function kdocLines(text: string): string[] {
 
 function entryLines(icon: EmittedIcon): string {
   const twin = icon.variant === null ? "" : ` (the \`${icon.variant}\` twin)`
+  return [...kdocLines(icon.meaning + twin), ...callLines(INDENT, constantName(icon.name), [`"${icon.name}"`], ",")].join("\n")
+}
+
+/** `name(a, b)` on one line when it fits ktlint's max-line-length, else one argument per line with a trailing comma. */
+function callLines(indent: string, name: string, args: string[], end: string): string[] {
+  const single = `${indent}${name}(${args.join(", ")})${end}`
+  if (single.length <= LINE_WIDTH) return [single]
+  return [`${indent}${name}(`, ...args.map((a) => `${indent}${INDENT}${a},`), `${indent})${end}`]
+}
+
+/**
+ * Drawable ids per function. The ids are read in these small functions, never
+ * in the enum's initializer: with 1,878 entries each reading \`R.drawable\`
+ * there, the initializer passed the JVM's 64 KB method limit once layoutlib
+ * (the screenshot previews) rewrote its bytecode, and every preview drawing an
+ * icon failed to render. A chunk of 500 compiles to about 4 KB.
+ */
+const DRAWABLE_CHUNK = 500
+
+function drawableLines(icons: EmittedIcon[]): string {
+  const chunks: EmittedIcon[][] = []
+  for (let i = 0; i < icons.length; i += DRAWABLE_CHUNK) chunks.push(icons.slice(i, i + DRAWABLE_CHUNK))
+  const spread = chunks.map((_, i) => `*drawableIds${i}()`)
   return [
-    ...kdocLines(icon.meaning + twin),
-    `${INDENT}${constantName(icon.name)}("${icon.name}", R.drawable.${drawableName(icon.name)}),`,
+    "/** Each entry's drawable, in entry order: read through [PbblsIcon.drawableRes]. */",
+    ...callLines("", "private val drawableIds: IntArray = intArrayOf", spread, ""),
+    ...chunks.flatMap((chunk, i) => [
+      "",
+      `private fun drawableIds${i}(): IntArray =`,
+      `${INDENT}intArrayOf(`,
+      ...chunk.map((icon) => `${INDENT}${INDENT}R.drawable.${drawableName(icon.name)},`),
+      `${INDENT})`,
+    ]),
   ].join("\n")
 }
 
@@ -105,10 +135,14 @@ import app.pbbls.android.R
  */
 enum class PbblsIcon(
     val manifestName: String,
-    @DrawableRes val drawableRes: Int,
 ) {
 ${icons.map(entryLines).join("\n\n")}
     ;
+
+    /** The entry's \`VectorDrawable\`, \`R.drawable.ic_pbbls_*\`. */
+    @get:DrawableRes
+    val drawableRes: Int
+        get() = drawableIds[ordinal]
 
     /** The manifest row this entry belongs to: its own name, or its base's for a twin. */
     val base: String
@@ -150,6 +184,8 @@ fun PbblsIconImage(
         modifier = modifier.size(size),
     )
 }
+
+${drawableLines(icons)}
 `
 }
 
