@@ -1,0 +1,63 @@
+import type { Tags } from "./manifest"
+
+/** One path of a glyph in `glyphs.json`: normalised data and its role. */
+export type GlyphPath = { d: string; role?: "body" | "mark" | "focus"; mark?: number }
+
+/** A path as a form draws it. */
+export type RenderedPath = { d: string; fill: boolean; evenOdd: boolean; stroke: boolean }
+
+/** A glyph as `glyphs.json` stores it (spec §2): the contract every surface reads. */
+export type GlyphData = {
+  name: string
+  meaning: string
+  family: string | null
+  tags: Tags
+  paths: GlyphPath[]
+  /** The number of marks, n of progress(k). */
+  marks: number
+  /** The carved solid and the paths kept stroked on top, or null without a body. */
+  solid: { d: string; keep: number[] } | null
+  /** Hand-drawn replacements, keyed by form (`half`, `solid`, `progress-2`). */
+  overrides: Record<string, RenderedPath[]>
+}
+
+export type Form = { kind: "regular" } | { kind: "half" } | { kind: "solid" } | { kind: "progress"; k: number }
+
+export function formKey(form: Form): string {
+  return form.kind === "progress" ? `progress-${form.k}` : form.kind
+}
+
+/** The forms a glyph has, in a stable order (spec D3). */
+export function formsOf(glyph: GlyphData): string[] {
+  const forms = ["regular"]
+  if (glyph.paths.some((p) => p.role === "focus")) forms.push("half")
+  if (glyph.solid) forms.push("solid")
+  for (let k = 1; k <= glyph.marks; k += 1) forms.push(`progress-${k}`)
+  return forms
+}
+
+const stroked = (d: string): RenderedPath => ({ d, fill: false, evenOdd: false, stroke: true })
+const filled = (d: string): RenderedPath => ({ d, fill: true, evenOdd: false, stroke: true })
+
+/** The paths a form draws, overrides first (spec D3, D4). `progress(0)` is regular. */
+export function renderForm(glyph: GlyphData, form: Form): RenderedPath[] {
+  if (form.kind === "progress" && form.k === 0) return renderForm(glyph, { kind: "regular" })
+  const key = formKey(form)
+  if (!formsOf(glyph).includes(key)) throw new Error(`${glyph.name} has no ${key} form`)
+  const override = glyph.overrides[key]
+  if (override) return override
+  switch (form.kind) {
+    case "regular":
+      return glyph.paths.map((p) => stroked(p.d))
+    case "half":
+      return glyph.paths.map((p) => (p.role === "focus" ? filled(p.d) : stroked(p.d)))
+    case "progress":
+      return glyph.paths.map((p) => (p.role === "mark" && (p.mark ?? 0) <= form.k ? filled(p.d) : stroked(p.d)))
+    case "solid": {
+      const solid = glyph.solid
+      if (!solid) throw new Error(`${glyph.name} has no solid form`)
+      const others = glyph.paths.filter((p) => p.role !== "body")
+      return [{ d: solid.d, fill: true, evenOdd: true, stroke: false }, ...solid.keep.flatMap((i) => (others[i] ? [stroked(others[i].d)] : []))]
+    }
+  }
+}
