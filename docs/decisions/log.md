@@ -1965,3 +1965,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** The App Store labels must be updated by hand whenever the manifest's collected types change, before App Store submission (TestFlight internal testing does not need them). Apple has one Photos or Videos type, so declaring videos on Play changes nothing in the manifest's types.
 - **Supersedes / Superseded-by:** none.
 - **Refs:** #1601, #1593.
+
+## 2026-11-08 — Icons are drawings with roles; forms are worked out, states are tokens
+
+- **Status:** taken
+- **Scope:** all
+- **Context:** The icon package named states, not drawings: `<name>.active` covered anything from one lit dot to a solid body, `<name>.lit-N` did not say out of how many, and the only generic consumer was the tab bar's `activeTwin`. The 2026-11 everyday wave brought 828 more `.active` twins, and the set reached 1,878 emitted glyphs.
+- **Decision:** A glyph is one drawing named for what it shows. Its paths carry roles (`body`, numbered `mark`s, `focus`); the generator works out the forms regular, half, solid (carved at build time) and progress k of n; an override file may replace a worked-out form. Interaction states map to forms through shared state tokens (`states.json`), read by components on every surface. The apps draw glyphs from generated data (`glyphs.json`) instead of the iOS asset catalog and Android VectorDrawables, so form changes can animate. Tags in the manifest make the set searchable.
+- **Why:** A name that says what is drawn and a form that says how much is filled keep the set consistent as it grows; state is a component's concern. Drawing from data removes the per-glyph enum initializer that hit the JVM's 64 KB limit in the screenshot previews.
+- **Consequences:** Every call site on web, iOS and Android moves (parts 4–6 of the stack); the twin files, asset catalog, VectorDrawables and old enums go in part 7. Until then the generator emits both models.
+- **Supersedes / Superseded-by:** supersedes D5 and D9 of `docs/superpowers/specs/2026-10-28-icon-package-design.md` (twin names, `activeTwin`, `lit(n)`).
+- **Refs:** #1607, #1606, `docs/superpowers/specs/2026-11-08-icon-forms-design.md`.
