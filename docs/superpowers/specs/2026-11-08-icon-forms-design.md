@@ -42,7 +42,7 @@ The twin model names states, not drawings. `.active` covers anything from one li
 | `mark` with `data-mark="1"…"n"` | 0…n (a number may span several paths) | the countable parts, in fill order |
 | `focus` | 0 or 1 role (one or more paths) | the part that carries the meaning |
 
-An untagged path is a plain line. A glyph with no roles has only the regular form.
+An untagged path is a plain line. A glyph with no roles has only the regular form. A `mark` or `focus` path may also carry `data-rest="hidden"`: it is not drawn at rest and appears filled when its role fills. This is the DNA's lit stone, a dot that the regular drawing does not have (`cromlech` at `progress(1)` shows its centre dot). The 2026-11 role guess found 181 of them in the old `.active` and `.lit-N` twins, which add new filled geometry rather than filling existing strokes.
 
 **D3. Forms are worked out from roles.**
 
