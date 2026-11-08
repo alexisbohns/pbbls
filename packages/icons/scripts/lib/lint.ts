@@ -1,8 +1,10 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { join } from "node:path"
 import { formatSvg, ROOT_ATTRIBUTES } from "./format"
-import { loadManifest, STATUSES, VARIANTS, type IconRow, type Manifest } from "./manifest"
+import { carveSolid } from "./carve"
+import { isOverrideForm, loadManifest, STATUSES, VARIANTS, type IconRow, type Manifest } from "./manifest"
 import { parseSvg, type ParsedPath, type ParsedSvg } from "./parse"
+import { readRoles } from "./roles"
 
 /**
  * The canvas and manifest rules of `DNA.md`, machine-checked. Every issue names
@@ -22,9 +24,13 @@ export const RANGE: readonly [number, number] = [1.5, 22.5]
 export const MAX_FILLED = 3
 /** A lit shape above this area (square units) is a warning: it is probably the whole icon. */
 export const WARN_AREA = 64
+/** A carved solid must keep at least this much filled area (square units). */
+export const MIN_CARVED_AREA = 4
+/** A name's last segment may not be one of these (spec D1). */
+const FORM_WORDS = ["regular", "half", "solid", "of"]
 
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/
-const PATH_ATTRIBUTES = new Set(["d", "fill", "fill-rule", "stroke"])
+const PATH_ATTRIBUTES = new Set(["d", "fill", "fill-rule", "stroke", "data-role", "data-mark"])
 const COMMANDS = new Set(["M", "L", "C", "Q", "A", "Z"])
 /** Coordinates per command, after the arc's radii, rotation and flags. */
 const ARITY: Record<string, number> = { M: 2, L: 2, C: 6, Q: 4, A: 7, Z: 0 }
@@ -200,6 +206,21 @@ function lintSource(root: string, file: string, isTwin: boolean, result: LintRes
   lintRoot(parsed, file, result.errors)
   if (parsed.paths.length === 0) result.errors.push({ file, rule: "elements", message: "no <path>" })
   parsed.paths.forEach((path, i) => lintPath(path, i, file, isTwin, result))
+  if (!isTwin) {
+    const { roles, issues } = readRoles(parsed.paths)
+    for (const message of issues) result.errors.push({ file, rule: "roles", message })
+    if (roles.body.length > 0) {
+      const bodyD = roles.body.flatMap((i) => (parsed.paths[i] ? [parsed.paths[i].d] : []))
+      // A body is filled as SVG fills it: an open path closes with a straight segment.
+      // A straight line encloses nothing, so its fill area is 0.
+      if (bodyD.reduce((sum, d) => sum + filledArea(d, false), 0) < 1) result.errors.push({ file, rule: "roles", message: "the body encloses no area" })
+      else {
+        const others = parsed.paths.filter((_, i) => !roles.body.includes(i)).map((p) => p.d)
+        const { area } = carveSolid(bodyD, others)
+        if (area < MIN_CARVED_AREA) result.errors.push({ file, rule: "roles", message: `the carved solid keeps ${area.toFixed(1)} square units, under ${MIN_CARVED_AREA}` })
+      }
+    }
+  }
   const filled = parsed.paths.filter((p) => p.filled).length
   if (filled > MAX_FILLED) result.errors.push({ file, rule: "fill", message: `${filled} filled paths; a twin lights at most ${MAX_FILLED}` })
   let canonical: string
@@ -212,13 +233,32 @@ function lintSource(root: string, file: string, isTwin: boolean, result: LintRes
   if (canonical !== text) result.errors.push({ file, rule: "canonical", message: "not in canonical form; run npm run format --workspace=@pbbls/icons" })
 }
 
-function lintManifest(root: string, manifest: Manifest, files: string[], errors: LintIssue[]): void {
+/** Whether the base's roles allow the override's form (spec D4). */
+function overrideAllowed(root: string, base: string, form: string): boolean {
+  let parsed: ParsedSvg
+  try {
+    parsed = parseSvg(readFileSync(join(root, SRC_DIR, `${base}.svg`), "utf8"), `${base}.svg`)
+  } catch {
+    return false
+  }
+  const { roles } = readRoles(parsed.paths)
+  if (form === "half") return roles.focus.length > 0
+  if (form === "solid") return roles.body.length > 0
+  const k = Number(form.replace("progress-", ""))
+  return k >= 1 && k <= roles.marks.length
+}
+
+function lintManifest(root: string, manifest: Manifest, files: string[], result: LintResult): void {
+  const { errors } = result
   const file = "icons.json"
   const rows = new Map<string, IconRow>()
   for (const row of manifest.icons) {
     if (!KEBAB.test(row.name)) errors.push({ file, rule: "manifest", message: `"${row.name}" is not a kebab-case name` })
     if (rows.has(row.name)) errors.push({ file, rule: "manifest", message: `"${row.name}" is listed twice` })
     rows.set(row.name, row)
+    const last = row.name.split("-").at(-1) ?? ""
+    // error once part 3 renames the three -half names (#1607)
+    if (FORM_WORDS.includes(last)) result.warnings.push({ file, rule: "manifest", message: `"${row.name}" ends in a form word (${FORM_WORDS.join(", ")})` })
     if (!(STATUSES as readonly string[]).includes(row.status)) errors.push({ file, rule: "manifest", message: `${row.name}: unknown status "${row.status}"` })
     const wave = join(root, WAVES_DIR, row.wave)
     if (!existsSync(wave) || !statSync(wave).isDirectory()) errors.push({ file, rule: "manifest", message: `${row.name}: no folder ${WAVES_DIR}/${row.wave}/` })
@@ -239,6 +279,11 @@ function lintManifest(root: string, manifest: Manifest, files: string[], errors:
       if (!base) errors.push({ file: f, rule: "manifest", message: `no row "${split.base}" in ${file}` })
       continue
     }
+    if (isOverrideForm(split.variant)) {
+      if (!base) errors.push({ file: f, rule: "manifest", message: `override without its base: no row "${split.base}"` })
+      else if (!overrideAllowed(root, split.base, split.variant)) errors.push({ file: f, rule: "manifest", message: `override "${split.variant}" for a form ${split.base} does not have` })
+      continue
+    }
     if (!(VARIANTS as readonly string[]).includes(split.variant)) errors.push({ file: f, rule: "manifest", message: `variant "${split.variant}" is not one of ${VARIANTS.join(", ")}` })
     if (!base) errors.push({ file: f, rule: "manifest", message: `twin without its base: no row "${split.base}"` })
     else if (!base.variants.includes(split.variant)) errors.push({ file: f, rule: "manifest", message: `not listed in the variants of "${split.base}"` })
@@ -256,7 +301,7 @@ export function lint(root: string): LintResult {
   } catch (e) {
     result.errors.push({ file: "icons.json", rule: "manifest", message: e instanceof Error ? e.message : String(e) })
   }
-  if (manifest) lintManifest(root, manifest, files, result.errors)
+  if (manifest) lintManifest(root, manifest, files, result)
   for (const f of files) {
     const split = splitSourceName(f)
     lintSource(root, f, split?.variant !== null && split?.variant !== undefined, result)
