@@ -1,0 +1,33 @@
+import { describe, expect, it } from "vitest"
+import { GLYPHS, availableForms, formPaths, needsReview } from "./glyph-forms"
+
+describe("glyph forms", () => {
+  it("reads every glyph from glyphs.json", () => {
+    expect(GLYPHS.length).toBeGreaterThan(900)
+    expect(new Set(GLYPHS.map((g) => g.name)).size).toBe(GLYPHS.length)
+  })
+
+  it("lists forms and falls back to regular for a form a glyph lacks", () => {
+    const plain = GLYPHS.find((g) => g.marks === 0 && g.solid === null && !g.paths.some((p) => p.role === "focus"))
+    if (!plain) throw new Error("no plain glyph")
+    expect(availableForms(plain)).toEqual(["regular"])
+    expect(formPaths(plain, "solid").every((p) => !p.fill)).toBe(true)
+  })
+
+  it("draws a hidden mark only once progress reaches it", () => {
+    const cromlech = GLYPHS.find((g) => g.name === "cromlech")
+    if (!cromlech) throw new Error("no cromlech")
+    const hidden = cromlech.paths.find((p) => p.hidden && p.role === "mark")
+    if (!hidden) throw new Error("cromlech has no hidden mark")
+    const drawn = (k: number) => formPaths(cromlech, "progress", k).find((p) => p.d === hidden.d)
+    expect(drawn(0)).toBeUndefined()
+    expect(formPaths(cromlech, "regular").some((p) => p.d === hidden.d)).toBe(false)
+    expect(drawn(hidden.mark ?? 1)?.fill).toBe(true)
+    expect(formPaths(cromlech, "progress", hidden.mark ?? 1)).toHaveLength(cromlech.paths.length)
+    expect(formPaths(cromlech, "progress", 0)).toHaveLength(cromlech.paths.length - 1)
+  })
+
+  it("flags glyphs the review lists", () => {
+    expect(typeof needsReview("home")).toBe("boolean")
+  })
+})

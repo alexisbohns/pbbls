@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react"
 import type { CanvasZoom, DeviceChoice } from "@/lib/design/devices"
+import type { FormChoice } from "@/lib/design/glyph-forms"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { DesignContextProvider, type DesignContextValue } from "./DesignContext"
 import { DesignMobileBar } from "./DesignMobileBar"
@@ -44,6 +45,9 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
   const [devices, setDevices] = useState<DeviceChoice>("both")
   const [iconQuery, setIconQuery] = useState("")
   const [iconSize, setIconSize] = useState<PbblsIconSize>("tile")
+  const [glyphForm, setGlyphForm] = useState<FormChoice>("regular")
+  const [glyphProgress, setGlyphProgress] = useState(1)
+  const [reviewOnly, setReviewOnly] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
   const canvasWidth = useWidth(contentRef)
 
@@ -59,8 +63,8 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
   }, [theme, setTheme])
 
   const value = useMemo<DesignContextValue>(
-    () => ({ theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize }),
-    [theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize],
+    () => ({ theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphForm, glyphProgress, reviewOnly }),
+    [theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphForm, glyphProgress, reviewOnly],
   )
 
   const tools: DesignToolsState = {
@@ -74,6 +78,12 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
     onIconQuery: setIconQuery,
     iconSize,
     onIconSize: setIconSize,
+    glyphForm,
+    onGlyphForm: setGlyphForm,
+    glyphProgress,
+    onGlyphProgress: setGlyphProgress,
+    reviewOnly,
+    onReviewOnly: setReviewOnly,
   }
 
   // Three areas, like the app (#1384): the rail, the page's header and tools,

@@ -9,7 +9,8 @@
   "exports": {
     ".": "./react/index.ts",
     "./icons.json": "./icons.json",
-    "./glyphs.json": "./glyphs/glyphs.json"
+    "./glyphs.json": "./glyphs/glyphs.json",
+    "./review.json": "./waves/2026-11-forms/review.json"
   },
   "scripts": {
     "generate": "tsx scripts/build.ts",

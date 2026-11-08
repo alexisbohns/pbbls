@@ -3,12 +3,14 @@
 import { Fragment, useMemo } from "react"
 import { Android, Apple, Globe } from "@pbbls/icons"
 import type { FindingGroup } from "@/lib/design/audit"
-import { ICON_GLYPHS, ICON_ROWS, glyphMatches, replacementsFor, type IconGlyph, type IconSurface } from "@/lib/design/icon-catalog"
+import { GLYPHS, glyphMatchesQuery, hasForm, needsReview, type FormChoice, type Glyph } from "@/lib/design/glyph-forms"
+import { ICON_ROWS, replacementsFor, type IconSurface } from "@/lib/design/icon-catalog"
 import { PBBLS_ICON_SIZE, type PbblsIconComponent, type PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { cn } from "@/lib/utils"
 import { useDesign } from "../DesignContext"
 import { DesignSection } from "../DesignSection"
 import { FindingList } from "../FindingList"
+import { GlyphFormView } from "../GlyphFormView"
 
 /** Each surface drawn with the set's own glyph: the web's globe, Apple's apple, Android's head. */
 const SURFACES: readonly { surface: IconSurface; label: string; Icon: PbblsIconComponent }[] = [
@@ -17,9 +19,11 @@ const SURFACES: readonly { surface: IconSurface; label: string; Icon: PbblsIconC
   { surface: "android", label: "Android", Icon: Android },
 ]
 
+const MIGRATED: ReadonlyMap<string, readonly string[]> = new Map(ICON_ROWS.map((row) => [row.name, row.migrated]))
+
 /** Where the glyph's row has migrated, as an accessible sentence. */
-function migrationSentence(glyph: IconGlyph): string {
-  const on = SURFACES.filter((s) => glyph.row.migrated.includes(s.surface)).map((s) => s.label)
+function migrationSentence(migrated: readonly string[]): string {
+  const on = SURFACES.filter((s) => migrated.includes(s.surface)).map((s) => s.label)
   return on.length === 0 ? "Not migrated on any surface." : `Migrated on ${on.join(", ")}.`
 }
 
@@ -37,28 +41,32 @@ function GlyphName({ name }: { name: string }) {
   ))
 }
 
-function GlyphTile({ glyph, size }: { glyph: IconGlyph; size: PbblsIconSize }) {
-  const { Icon } = glyph
+function GlyphTile({ glyph, size, form, k }: { glyph: Glyph; size: PbblsIconSize; form: FormChoice; k: number }) {
+  const migrated = MIGRATED.get(glyph.name) ?? []
   return (
-    <li title={glyph.row.meaning} className="group relative flex aspect-square flex-col items-center gap-2 rounded-2xl bg-card px-3 pt-6 pb-3 text-card-foreground transition-colors hover:bg-muted motion-reduce:transition-none">
+    <li
+      title={glyph.meaning}
+      className={cn(
+        "group relative flex aspect-square flex-col items-center gap-2 rounded-2xl bg-card px-3 pt-6 pb-3 text-card-foreground transition-colors hover:bg-muted motion-reduce:transition-none",
+        !hasForm(glyph, form) && "opacity-40",
+      )}
+    >
+      {needsReview(glyph.name) && <span aria-label="Needs review" className="absolute top-2.5 left-2.5 size-2 rounded-full bg-primary" />}
       <span className="flex min-h-12 flex-1 items-center justify-center">
-        {Icon ? <Icon className={PBBLS_ICON_SIZE[size]} /> : <span className="text-xs text-destructive">missing</span>}
+        <GlyphFormView glyph={glyph} form={form} k={k} className={PBBLS_ICON_SIZE[size]} />
       </span>
       {/* Two fixed lines, so every icon in a row sits at one height; breaks at a dash or a dot. */}
       <code className="line-clamp-2 h-8 max-w-full text-center text-xs leading-4 break-words text-muted-foreground">
         <GlyphName name={glyph.name} />
       </code>
-      <span className="sr-only">{migrationSentence(glyph)}</span>
+      <span className="sr-only">{migrationSentence(migrated)}</span>
       {/* Migration per surface, on hover: lit where the surface draws it, dimmed where it does not. */}
       <span
         aria-hidden
         className="pointer-events-none absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 motion-reduce:transition-none"
       >
         {SURFACES.map(({ surface, Icon: Mark }) => (
-          <Mark
-            key={surface}
-            className={cn(PBBLS_ICON_SIZE.inline, glyph.row.migrated.includes(surface) ? "text-primary" : "text-muted-foreground/35")}
-          />
+          <Mark key={surface} className={cn(PBBLS_ICON_SIZE.inline, migrated.includes(surface) ? "text-primary" : "text-muted-foreground/35")} />
         ))}
       </span>
     </li>
@@ -67,12 +75,15 @@ function GlyphTile({ glyph, size }: { glyph: IconGlyph; size: PbblsIconSize }) {
 
 /**
  * The hand-drawn set at its real sizes (rem, so 1:1 with the app): one tile per
- * glyph, base and twin alike, searched, counted and sized from the side area. Hovering a
+ * glyph, base and twin alike, drawn in the chosen form, searched, counted and sized from the side area. Hovering a
  * tile shows where its row has migrated. Then what web still draws with Lucide.
  */
 export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
-  const { iconQuery, iconSize } = useDesign()
-  const glyphs = useMemo(() => ICON_GLYPHS.filter((glyph) => glyphMatches(glyph, iconQuery)), [iconQuery])
+  const { iconQuery, iconSize, glyphForm, glyphProgress, reviewOnly } = useDesign()
+  const glyphs = useMemo(
+    () => GLYPHS.filter((g) => glyphMatchesQuery(g, iconQuery) && (!reviewOnly || needsReview(g.name))),
+    [iconQuery, reviewOnly],
+  )
   const webPending = ICON_ROWS.filter((row) => row.replacesWeb.length > 0 && !row.migrated.includes("web"))
   const lucideUses = lucide.reduce((n, g) => n + g.count, 0)
 
@@ -87,7 +98,7 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
         ) : (
           <ul className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-2">
             {glyphs.map((glyph) => (
-              <GlyphTile key={glyph.name} glyph={glyph} size={iconSize} />
+              <GlyphTile key={glyph.name} glyph={glyph} size={iconSize} form={glyphForm} k={glyphProgress} />
             ))}
           </ul>
         )}
