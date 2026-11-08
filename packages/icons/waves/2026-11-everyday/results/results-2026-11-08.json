@@ -1,0 +1,4586 @@
+{
+ "answered": 159,
+ "app": "everyday-icon-pick",
+ "complete": false,
+ "createdAt": "2026-11-08T02:15:42.978Z",
+ "exportedAt": "2026-11-08T10:35:52.464Z",
+ "figures": {
+  "again": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v2",
+    "h32.v3",
+    "h33.v3",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h32.v1",
+    "h33.v1"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "alert": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v2",
+    "h32.v3",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h32.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "android": {
+   "liked": [
+    "h31.v2",
+    "h33.v1"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v2",
+    "h33.v1",
+    "h32.v1"
+   ],
+   "round2": null,
+   "winner": "h31.v2"
+  },
+  "appearance-dark": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v3",
+    "h32.v4",
+    "h33.v2",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h31.v4",
+    "h33.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "appearance-device": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h32.v4",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 6
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v3",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 1
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v2",
+    "h33.v2"
+   ],
+   "round2": [
+    "h33.v1",
+    "h33.v3",
+    "h32.v2"
+   ],
+   "winner": "h33.v1"
+  },
+  "appearance-light": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v4",
+    "h31.v5",
+    "h32.v3",
+    "h32.v4",
+    "h32.v5",
+    "h33.v2",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v2",
+     "likes": 2,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 1
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v2",
+    "h32.v2",
+    "h31.v2"
+   ],
+   "round2": [
+    "h31.v1",
+    "h33.v1",
+    "h32.v1"
+   ],
+   "winner": "h33.v2"
+  },
+  "apple": {
+   "liked": [
+    "h31.v3",
+    "h31.v5",
+    "h32.v1",
+    "h32.v3",
+    "h32.v4",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 6
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 4
+    },
+    {
+     "cand": "h31.v5",
+     "likes": 2,
+     "points": 1
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h31.v5"
+   ],
+   "round2": [
+    "h31.v1",
+    "h33.v1",
+    "h32.v1"
+   ],
+   "winner": "h31.v1"
+  },
+  "audio": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v4",
+    "h31.v5",
+    "h32.v4",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v4",
+    "h31.v1",
+    "h31.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v4"
+  },
+  "baby": {
+   "liked": [
+    "h31.v1",
+    "h31.v4",
+    "h32.v1",
+    "h32.v5",
+    "h33.v2",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v4",
+     "likes": 2,
+     "points": 6
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 2,
+     "points": 3
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v4",
+    "h33.v2",
+    "h31.v1"
+   ],
+   "round2": [
+    "h31.v4",
+    "h32.v1",
+    "h33.v2"
+   ],
+   "winner": "h31.v4"
+  },
+  "banana": {
+   "liked": [
+    "h31.v4",
+    "h31.v5"
+   ],
+   "ranking": [],
+   "round1": null,
+   "round2": null,
+   "winner": null
+  },
+  "basketball": {
+   "liked": [
+    "h31.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 5
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 4
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 2,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v4",
+    "h32.v1"
+   ],
+   "round2": [
+    "h32.v1",
+    "h33.v1",
+    "h31.v1"
+   ],
+   "winner": "h33.v1"
+  },
+  "bell": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v5",
+    "h32.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v2",
+    "h31.v2",
+    "h31.v1"
+   ],
+   "round2": null,
+   "winner": "h32.v2"
+  },
+  "bike": {
+   "liked": [
+    "h31.v1"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h32.v1",
+    "h31.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "block": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v1",
+    "h32.v3",
+    "h32.v4",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 2,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h32.v1"
+   ],
+   "round2": [
+    "h32.v1",
+    "h31.v4",
+    "h33.v1"
+   ],
+   "winner": "h32.v1"
+  },
+  "board": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v2",
+    "h32.v4",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 2,
+     "points": 6
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 2,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h32.v2",
+    "h31.v1"
+   ],
+   "round2": [
+    "h33.v1",
+    "h31.v4",
+    "h32.v2"
+   ],
+   "winner": "h33.v1"
+  },
+  "bone": {
+   "liked": [
+    "h31.v1",
+    "h31.v5",
+    "h32.v5",
+    "h33.v1",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v3",
+    "h31.v1"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "book": {
+   "liked": [
+    "h31.v2",
+    "h31.v4",
+    "h32.v2",
+    "h33.v1",
+    "h33.v2",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 6
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 2,
+     "points": 1
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v1",
+    "h31.v2"
+   ],
+   "round2": [
+    "h33.v1",
+    "h32.v1",
+    "h31.v4"
+   ],
+   "winner": "h33.v1"
+  },
+  "bookmark": {
+   "liked": [
+    "h31.v1",
+    "h31.v4",
+    "h32.v4",
+    "h33.v1",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v3",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v3",
+    "h31.v4"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "boulder": {
+   "liked": [
+    "h32.v4"
+   ],
+   "ranking": [],
+   "round1": null,
+   "round2": null,
+   "winner": null
+  },
+  "bounce": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v1",
+    "h32.v2",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 6
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 2,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h31.v4",
+    "h33.v1"
+   ],
+   "round2": [
+    "h31.v1",
+    "h33.v1",
+    "h31.v4"
+   ],
+   "winner": "h31.v1"
+  },
+  "car": {
+   "liked": [
+    "h31.v2",
+    "h31.v5",
+    "h32.v1",
+    "h32.v2",
+    "h32.v4",
+    "h32.v5",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 6
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 4
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 1,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h33.v1",
+    "h32.v5"
+   ],
+   "round2": [
+    "h32.v1",
+    "h33.v1",
+    "h32.v5"
+   ],
+   "winner": "h32.v1"
+  },
+  "cat": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v5",
+    "h33.v1",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h33.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "cave": {
+   "liked": [
+    "h31.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h33.v1",
+    "h31.v1"
+   ],
+   "round2": null,
+   "winner": "h32.v1"
+  },
+  "chart": {
+   "liked": [
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v2",
+    "h32.v3",
+    "h32.v4",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 2,
+     "points": 6
+    },
+    {
+     "cand": "h33.v5",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h32.v3",
+     "likes": 2,
+     "points": 1
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h33.v5",
+    "h32.v3"
+   ],
+   "round2": [
+    "h32.v1",
+    "h33.v5",
+    "h31.v4"
+   ],
+   "winner": "h32.v1"
+  },
+  "christmas": {
+   "liked": [
+    "h31.v2",
+    "h31.v4",
+    "h32.v4",
+    "h33.v1",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h32.v4",
+    "h31.v4"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "cloud": {
+   "liked": [
+    "h31.v2",
+    "h31.v4",
+    "h32.v1",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h31.v1",
+    "h32.v5"
+   ],
+   "round2": null,
+   "winner": "h32.v1"
+  },
+  "copy": {
+   "liked": [
+    "h31.v1",
+    "h32.v2",
+    "h33.v1",
+    "h33.v2",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v2",
+    "h33.v1",
+    "h31.v1"
+   ],
+   "round2": null,
+   "winner": "h32.v2"
+  },
+  "crab": {
+   "liked": [
+    "h31.v1",
+    "h31.v3",
+    "h32.v1",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 2,
+     "points": 4
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h33.v1",
+    "h31.v1"
+   ],
+   "round2": [
+    "h31.v1",
+    "h33.v1",
+    "h32.v1"
+   ],
+   "winner": "h31.v1"
+  },
+  "cursor": {
+   "liked": [
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v4",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v4",
+    "h31.v1",
+    "h32.v2"
+   ],
+   "round2": null,
+   "winner": "h33.v4"
+  },
+  "danger": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v2",
+    "h32.v3",
+    "h32.v5",
+    "h33.v1",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h32.v5",
+    "h32.v2"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "dashboard": {
+   "liked": [
+    "h31.v5",
+    "h32.v5",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 5
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 2,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h32.v5"
+   ],
+   "round2": [
+    "h32.v1",
+    "h31.v1",
+    "h33.v1"
+   ],
+   "winner": "h31.v1"
+  },
+  "delete": {
+   "liked": [
+    "h31.v2",
+    "h32.v1",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h32.v1",
+    "h33.v1"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "disabled": {
+   "liked": [
+    "h31.v4",
+    "h32.v2",
+    "h33.v1",
+    "h33.v2",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v1",
+    "h33.v2"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "document": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h31.v1",
+    "h33.v1"
+   ],
+   "round2": null,
+   "winner": "h32.v1"
+  },
+  "dog": {
+   "liked": [
+    "h31.v2",
+    "h31.v4",
+    "h32.v1",
+    "h32.v2",
+    "h32.v4",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v2",
+    "h33.v1",
+    "h32.v4"
+   ],
+   "round2": null,
+   "winner": "h31.v2"
+  },
+  "dolmen": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v2",
+    "h32.v3",
+    "h32.v4",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 5
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 2,
+     "points": 5
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v1",
+    "h31.v2"
+   ],
+   "round2": [
+    "h31.v1",
+    "h33.v1",
+    "h31.v2"
+   ],
+   "winner": "h31.v1"
+  },
+  "download": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v4",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v3",
+    "h33.v4",
+    "h31.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v3"
+  },
+  "envelope": {
+   "liked": [
+    "h31.v3",
+    "h32.v2",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v2",
+    "h31.v3",
+    "h32.v2"
+   ],
+   "round2": null,
+   "winner": "h33.v2"
+  },
+  "fire": {
+   "liked": [
+    "h31.v2",
+    "h32.v1",
+    "h32.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v4",
+     "likes": 0,
+     "points": 5
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 0,
+     "points": 4
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 3
+    }
+   ],
+   "round1": [
+    "h32.v5",
+    "h33.v4",
+    "h32.v1"
+   ],
+   "round2": [
+    "h33.v4",
+    "h32.v1",
+    "h32.v5"
+   ],
+   "winner": "h33.v4"
+  },
+  "firepit": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h32.v1",
+    "h32.v2",
+    "h33.v1",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h32.v1",
+    "h33.v1"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "fish": {
+   "liked": [
+    "h31.v4",
+    "h32.v2",
+    "h32.v4",
+    "h33.v1",
+    "h33.v2",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h32.v4",
+    "h33.v4"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "folder": {
+   "liked": [
+    "h31.v1",
+    "h32.v1",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v3",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h32.v1",
+    "h33.v3"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "food": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h32.v2",
+    "h32.v5",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v3",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v3",
+    "h32.v5"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "fossil": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h32.v1",
+    "h32.v2",
+    "h32.v3",
+    "h32.v5",
+    "h33.v1",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h33.v4",
+    "h32.v2"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "gem": {
+   "liked": [
+    "h31.v2",
+    "h31.v4",
+    "h32.v4",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v4",
+    "h33.v1",
+    "h32.v1"
+   ],
+   "round2": null,
+   "winner": "h32.v4"
+  },
+  "guitar": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h32.v5",
+    "h33.v1",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 2,
+     "points": 6
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 2
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 2,
+     "points": 2
+    },
+    {
+     "cand": "h33.v5",
+     "likes": 2,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v2",
+    "h33.v5"
+   ],
+   "round2": [
+    "h33.v1",
+    "h31.v1",
+    "h33.v5"
+   ],
+   "winner": "h33.v1"
+  },
+  "hill": {
+   "liked": [
+    "h31.v3",
+    "h31.v5",
+    "h32.v3",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v5",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v5",
+    "h32.v5",
+    "h33.v1"
+   ],
+   "round2": null,
+   "winner": "h31.v5"
+  },
+  "hour": {
+   "liked": [
+    "h31.v3",
+    "h31.v5",
+    "h32.v3",
+    "h32.v4",
+    "h33.v1",
+    "h33.v3",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 6
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 4
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h32.v1"
+   ],
+   "round2": [
+    "h31.v1",
+    "h33.v1",
+    "h32.v1"
+   ],
+   "winner": "h31.v1"
+  },
+  "house": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v3",
+    "h32.v4",
+    "h32.v5",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v4",
+    "h31.v2",
+    "h31.v1"
+   ],
+   "round2": null,
+   "winner": "h32.v4"
+  },
+  "info": {
+   "liked": [
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v2",
+    "h32.v5",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v5",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v5",
+    "h31.v1",
+    "h33.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v5"
+  },
+  "ink": {
+   "liked": [
+    "h31.v2",
+    "h31.v5",
+    "h32.v1",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v5",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h33.v2",
+    "h31.v5"
+   ],
+   "round2": null,
+   "winner": "h32.v1"
+  },
+  "invite": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v2",
+    "h32.v3",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h33.v1",
+    "h31.v4"
+   ],
+   "round2": null,
+   "winner": "h32.v1"
+  },
+  "jellyfish": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h32.v4",
+    "h32.v5",
+    "h33.v3",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 5
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v2",
+    "h31.v1"
+   ],
+   "round2": [
+    "h31.v2",
+    "h31.v1",
+    "h32.v2"
+   ],
+   "winner": "h31.v2"
+  },
+  "keyboard": {
+   "liked": [
+    "h31.v2",
+    "h31.v4",
+    "h31.v5",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h32.v5",
+    "h31.v4"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "language": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h31.v2",
+    "h32.v1"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "layout": {
+   "liked": [
+    "h31.v5",
+    "h32.v2",
+    "h32.v3",
+    "h32.v4",
+    "h32.v5",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v5",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v5",
+    "h32.v4",
+    "h31.v3"
+   ],
+   "round2": null,
+   "winner": "h32.v5"
+  },
+  "life-domain": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v3",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v4",
+    "h33.v3"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "lighthouse": {
+   "liked": [
+    "h31.v1",
+    "h32.v1",
+    "h32.v3",
+    "h32.v5",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 6
+    },
+    {
+     "cand": "h33.v3",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 1
+    },
+    {
+     "cand": "h32.v3",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v3",
+    "h32.v1"
+   ],
+   "round2": [
+    "h31.v1",
+    "h33.v3",
+    "h32.v3"
+   ],
+   "winner": "h31.v1"
+  },
+  "link": {
+   "liked": [
+    "h31.v1",
+    "h31.v4",
+    "h32.v3",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v4",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v4",
+    "h31.v1",
+    "h33.v1"
+   ],
+   "round2": null,
+   "winner": "h33.v4"
+  },
+  "link-broken": {
+   "liked": [
+    "h31.v1",
+    "h33.v1",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h33.v4"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "list": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h32.v1",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h31.v2",
+    "h33.v1"
+   ],
+   "round2": null,
+   "winner": "h32.v1"
+  },
+  "load-failed": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v5",
+    "h32.v1",
+    "h33.v1",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v4",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h33.v3",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h33.v4",
+    "h33.v3"
+   ],
+   "round2": null,
+   "winner": "h32.v1"
+  },
+  "locked": {
+   "liked": [
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v3",
+    "h33.v1",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v5",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v3",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v5",
+    "h31.v4",
+    "h32.v3"
+   ],
+   "round2": null,
+   "winner": "h31.v5"
+  },
+  "map": {
+   "liked": [
+    "h31.v3",
+    "h31.v5",
+    "h32.v4",
+    "h33.v1",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v3",
+    "h32.v1"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "market": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v1",
+    "h33.v1",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 2,
+     "points": 6
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v1",
+    "h32.v1"
+   ],
+   "round2": [
+    "h33.v1",
+    "h31.v1",
+    "h32.v1"
+   ],
+   "winner": "h33.v1"
+  },
+  "meal": {
+   "liked": [
+    "h31.v1",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v3",
+    "h32.v4",
+    "h32.v5",
+    "h33.v2",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v3",
+    "h31.v4",
+    "h32.v4"
+   ],
+   "round2": null,
+   "winner": "h31.v3"
+  },
+  "medal": {
+   "liked": [
+    "h31.v3",
+    "h31.v5",
+    "h32.v2",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v5",
+     "likes": 2,
+     "points": 5
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 2,
+     "points": 3
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 2,
+     "points": 2
+    },
+    {
+     "cand": "h33.v3",
+     "likes": 1,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h31.v3",
+    "h33.v5",
+    "h33.v2"
+   ],
+   "round2": [
+    "h33.v5",
+    "h33.v3",
+    "h33.v2"
+   ],
+   "winner": "h33.v5"
+  },
+  "memo": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v4",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 6
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 2,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3"
+   ],
+   "round2": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3"
+   ],
+   "winner": "h31.v1"
+  },
+  "microphone": {
+   "liked": [
+    "h32.v1",
+    "h32.v5",
+    "h33.v1",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h32.v1",
+    "h32.v5"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "milk": {
+   "liked": [
+    "h31.v1",
+    "h31.v3",
+    "h31.v4",
+    "h32.v5",
+    "h33.v1",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v4",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v4",
+    "h31.v1",
+    "h31.v3"
+   ],
+   "round2": null,
+   "winner": "h33.v4"
+  },
+  "minus": {
+   "liked": [
+    "h31.v5",
+    "h32.v3",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v1",
+    "h31.v3"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "moon": {
+   "liked": [
+    "h31.v4",
+    "h32.v1",
+    "h32.v3",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 5
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 2,
+     "points": 3
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v4",
+     "likes": 2,
+     "points": 1
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v4",
+    "h33.v4"
+   ],
+   "round2": [
+    "h32.v5",
+    "h33.v1",
+    "h31.v1"
+   ],
+   "winner": "h33.v1"
+  },
+  "mountain": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v2",
+    "h32.v5",
+    "h33.v1",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v4",
+     "likes": 2,
+     "points": 5
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h33.v5",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h31.v4",
+    "h31.v1",
+    "h33.v5"
+   ],
+   "round2": [
+    "h32.v4",
+    "h31.v4",
+    "h33.v5"
+   ],
+   "winner": "h31.v4"
+  },
+  "music": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v1",
+    "h32.v2",
+    "h32.v3",
+    "h33.v2",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v3",
+    "h32.v1",
+    "h32.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v3"
+  },
+  "mute": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h32.v2",
+    "h32.v3",
+    "h32.v4",
+    "h32.v5",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 6
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h32.v3",
+     "likes": 2,
+     "points": 1
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 2,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v2",
+    "h32.v1",
+    "h32.v5"
+   ],
+   "round2": [
+    "h32.v2",
+    "h31.v1",
+    "h32.v3"
+   ],
+   "winner": "h32.v2"
+  },
+  "notification": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v2",
+    "h32.v3",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 5
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 5
+    },
+    {
+     "cand": "h33.v3",
+     "likes": 2,
+     "points": 1
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v2",
+    "h31.v1",
+    "h31.v3"
+   ],
+   "round2": [
+    "h31.v1",
+    "h33.v2",
+    "h33.v3"
+   ],
+   "winner": "h31.v1"
+  },
+  "page-gone": {
+   "liked": [
+    "h31.v5",
+    "h32.v3",
+    "h32.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v5",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v3",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v5",
+    "h32.v4",
+    "h32.v3"
+   ],
+   "round2": null,
+   "winner": "h31.v5"
+  },
+  "palette": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v5",
+    "h32.v2",
+    "h33.v1",
+    "h33.v2",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 6
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 4
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v1",
+    "h32.v1"
+   ],
+   "round2": [
+    "h33.v1",
+    "h31.v1",
+    "h32.v1"
+   ],
+   "winner": "h33.v1"
+  },
+  "paste": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v2",
+    "h32.v3",
+    "h32.v5",
+    "h33.v1",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h32.v5",
+    "h32.v1"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "pen": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v2",
+    "h32.v3",
+    "h32.v4",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h31.v3",
+    "h33.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "phone": {
+   "liked": [
+    "h31.v2",
+    "h33.v1",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v2",
+    "h33.v1",
+    "h31.v2"
+   ],
+   "round2": null,
+   "winner": "h33.v2"
+  },
+  "pine": {
+   "liked": [
+    "h31.v2",
+    "h31.v4",
+    "h32.v1",
+    "h32.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 6
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 4
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 1
+    },
+    {
+     "cand": "h33.v5",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h33.v5"
+   ],
+   "round2": [
+    "h31.v1",
+    "h33.v1",
+    "h31.v4"
+   ],
+   "winner": "h31.v1"
+  },
+  "pineapple": {
+   "liked": [
+    "h31.v1",
+    "h31.v4",
+    "h32.v4",
+    "h32.v5",
+    "h33.v2",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v5",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v5",
+    "h32.v4"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "poo": {
+   "liked": [
+    "h31.v4",
+    "h31.v5",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v2",
+    "h31.v3"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "privacy": {
+   "liked": [
+    "h32.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v3",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v3",
+    "h31.v4",
+    "h32.v1"
+   ],
+   "round2": null,
+   "winner": "h32.v3"
+  },
+  "private": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v5",
+    "h32.v1",
+    "h32.v4",
+    "h33.v1",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v1",
+    "h32.v4"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "public": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v4",
+    "h31.v5",
+    "h32.v4",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v5",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v4",
+    "h33.v5",
+    "h32.v4"
+   ],
+   "round2": null,
+   "winner": "h31.v4"
+  },
+  "pyramid": {
+   "liked": [
+    "h31.v1",
+    "h31.v3",
+    "h31.v4",
+    "h32.v2",
+    "h32.v3",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v4",
+    "h32.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "question": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v2",
+    "h32.v3",
+    "h33.v1",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v2",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v2",
+    "h31.v3",
+    "h32.v2"
+   ],
+   "round2": [
+    "h31.v4",
+    "h31.v3",
+    "h31.v2"
+   ],
+   "winner": "h31.v2"
+  },
+  "radar": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v2",
+    "h32.v3",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v2",
+    "h33.v2",
+    "h32.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v2"
+  },
+  "rain": {
+   "liked": [
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v2",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h31.v1",
+    "h33.v1"
+   ],
+   "round2": null,
+   "winner": "h32.v1"
+  },
+  "rainbow": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v5",
+    "h33.v1",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h31.v3"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "remove": {
+   "liked": [
+    "h31.v3",
+    "h31.v4",
+    "h32.v1",
+    "h32.v2",
+    "h32.v4",
+    "h32.v5",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h33.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "ripple": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v2",
+    "h32.v3",
+    "h32.v4",
+    "h32.v5",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 2,
+     "points": 3
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 2,
+     "points": 3
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 2,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h31.v4",
+    "h31.v1",
+    "h32.v4"
+   ],
+   "round2": [
+    "h31.v2",
+    "h31.v1",
+    "h32.v4"
+   ],
+   "winner": "h31.v1"
+  },
+  "robot": {
+   "liked": [
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h33.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h33.v1",
+    "h33.v4"
+   ],
+   "round2": null,
+   "winner": "h32.v1"
+  },
+  "rock": {
+   "liked": [
+    "h31.v3",
+    "h31.v4",
+    "h32.v4",
+    "h33.v1",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v4",
+    "h32.v4"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "search": {
+   "liked": [
+    "h31.v3",
+    "h31.v4",
+    "h33.v1"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v3",
+    "h32.v1"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "secret": {
+   "liked": [
+    "h31.v1",
+    "h31.v4",
+    "h31.v5",
+    "h33.v1"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v4",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v4",
+    "h31.v1",
+    "h33.v1"
+   ],
+   "round2": null,
+   "winner": "h31.v4"
+  },
+  "shopping": {
+   "liked": [
+    "h31.v1",
+    "h31.v3",
+    "h31.v4",
+    "h32.v4",
+    "h32.v5",
+    "h33.v1",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v3",
+    "h33.v2",
+    "h32.v5"
+   ],
+   "round2": null,
+   "winner": "h31.v3"
+  },
+  "signal": {
+   "liked": [
+    "h31.v5",
+    "h32.v3",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v2",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h31.v5",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v2",
+    "h32.v2",
+    "h31.v5"
+   ],
+   "round2": null,
+   "winner": "h33.v2"
+  },
+  "soccer": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h32.v4",
+    "h33.v3",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v4",
+    "h32.v1",
+    "h31.v1"
+   ],
+   "round2": null,
+   "winner": "h32.v4"
+  },
+  "sound": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v2",
+    "h32.v5",
+    "h33.v2",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 3
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h31.v3"
+   ],
+   "round2": [
+    "h32.v2",
+    "h31.v3",
+    "h33.v1"
+   ],
+   "winner": "h31.v3"
+  },
+  "star": {
+   "liked": [
+    "h31.v4",
+    "h31.v5",
+    "h32.v4",
+    "h32.v5",
+    "h33.v2",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v4",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v5",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v4",
+    "h31.v5",
+    "h32.v4"
+   ],
+   "round2": null,
+   "winner": "h33.v4"
+  },
+  "stepping-stone": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h33.v1"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h31.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "stop": {
+   "liked": [
+    "h31.v2",
+    "h31.v5",
+    "h32.v5",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 5
+    },
+    {
+     "cand": "h32.v3",
+     "likes": 0,
+     "points": 5
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 2,
+     "points": 1
+    },
+    {
+     "cand": "h33.v4",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v2",
+    "h32.v3",
+    "h33.v4"
+   ],
+   "round2": [
+    "h32.v3",
+    "h31.v2",
+    "h33.v2"
+   ],
+   "winner": "h31.v2"
+  },
+  "store": {
+   "liked": [
+    "h31.v1",
+    "h31.v5",
+    "h32.v2",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h32.v1"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "swap": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v2",
+    "h32.v3",
+    "h32.v4",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v2",
+    "h31.v2",
+    "h31.v3"
+   ],
+   "round2": null,
+   "winner": "h33.v2"
+  },
+  "target": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v2",
+    "h32.v4",
+    "h32.v5",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v4",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v2",
+    "h33.v4",
+    "h32.v5"
+   ],
+   "round2": null,
+   "winner": "h31.v2"
+  },
+  "text": {
+   "liked": [
+    "h31.v1",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h33.v2",
+    "h31.v3"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "train": {
+   "liked": [
+    "h31.v1",
+    "h32.v2",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v2",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v2",
+    "h31.v1",
+    "h33.v2"
+   ],
+   "round2": null,
+   "winner": "h32.v2"
+  },
+  "treasure": {
+   "liked": [],
+   "ranking": [],
+   "round1": null,
+   "round2": null,
+   "winner": null
+  },
+  "tree": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "trophy": {
+   "liked": [
+    "h32.v1",
+    "h33.v1"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v5",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h32.v1",
+    "h33.v5"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "trunk": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h32.v2",
+    "h32.v3",
+    "h33.v1",
+    "h33.v3"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v1",
+    "h33.v1",
+    "h31.v2"
+   ],
+   "round2": null,
+   "winner": "h31.v1"
+  },
+  "tv": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v1",
+    "h32.v3",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v1",
+     "likes": 1,
+     "points": 6
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 1
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h33.v1",
+    "h31.v2"
+   ],
+   "round2": [
+    "h32.v1",
+    "h33.v1",
+    "h31.v1"
+   ],
+   "winner": "h32.v1"
+  },
+  "umbrella": {
+   "liked": [
+    "h31.v5",
+    "h33.v1",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v3",
+    "h31.v1"
+   ],
+   "round2": null,
+   "winner": "h33.v1"
+  },
+  "upload": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v1",
+    "h32.v2",
+    "h33.v1",
+    "h33.v2",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v1",
+     "likes": 2,
+     "points": 6
+    },
+    {
+     "cand": "h31.v2",
+     "likes": 2,
+     "points": 2
+    },
+    {
+     "cand": "h31.v3",
+     "likes": 2,
+     "points": 2
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 2,
+     "points": 1
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 2,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v1",
+    "h31.v2",
+    "h33.v2"
+   ],
+   "round2": [
+    "h33.v1",
+    "h31.v3",
+    "h31.v4"
+   ],
+   "winner": "h33.v1"
+  },
+  "upvote": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h32.v1",
+    "h32.v2",
+    "h32.v4",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v2",
+     "likes": 2,
+     "points": 5
+    },
+    {
+     "cand": "h32.v2",
+     "likes": 2,
+     "points": 5
+    },
+    {
+     "cand": "h33.v5",
+     "likes": 2,
+     "points": 1
+    },
+    {
+     "cand": "h31.v4",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v2",
+    "h31.v2",
+    "h31.v4"
+   ],
+   "round2": [
+    "h31.v2",
+    "h32.v2",
+    "h33.v5"
+   ],
+   "winner": "h31.v2"
+  },
+  "url": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h31.v5",
+    "h32.v1",
+    "h32.v2",
+    "h32.v3",
+    "h32.v4",
+    "h32.v5",
+    "h33.v1",
+    "h33.v2",
+    "h33.v3",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v3",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h32.v5",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h32.v4",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v3",
+    "h32.v5",
+    "h32.v4"
+   ],
+   "round2": null,
+   "winner": "h32.v3"
+  },
+  "warning": {
+   "liked": [
+    "h31.v5",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h32.v5",
+     "likes": 0,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 2
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h32.v5",
+    "h31.v1",
+    "h33.v1"
+   ],
+   "round2": null,
+   "winner": "h32.v5"
+  },
+  "water": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v4",
+    "h32.v1",
+    "h32.v2",
+    "h33.v2",
+    "h33.v4"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v4",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 2,
+     "points": 4
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v4",
+     "likes": 1,
+     "points": 2
+    }
+   ],
+   "round1": [
+    "h31.v4",
+    "h33.v2",
+    "h32.v1"
+   ],
+   "round2": [
+    "h32.v1",
+    "h33.v4",
+    "h31.v4"
+   ],
+   "winner": "h31.v4"
+  },
+  "wave": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v5",
+    "h32.v2",
+    "h33.v1",
+    "h33.v3",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v2",
+     "likes": 2,
+     "points": 6
+    },
+    {
+     "cand": "h33.v5",
+     "likes": 2,
+     "points": 3
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 2,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h31.v2",
+    "h33.v5",
+    "h31.v1"
+   ],
+   "round2": [
+    "h31.v2",
+    "h33.v1",
+    "h33.v5"
+   ],
+   "winner": "h31.v2"
+  },
+  "waveform": {
+   "liked": [
+    "h31.v1",
+    "h31.v2",
+    "h31.v3",
+    "h31.v5",
+    "h32.v4",
+    "h32.v5",
+    "h33.v2",
+    "h33.v3",
+    "h33.v4",
+    "h33.v5"
+   ],
+   "ranking": [
+    {
+     "cand": "h33.v3",
+     "likes": 1,
+     "points": 3
+    },
+    {
+     "cand": "h31.v1",
+     "likes": 1,
+     "points": 2
+    },
+    {
+     "cand": "h33.v2",
+     "likes": 1,
+     "points": 1
+    }
+   ],
+   "round1": [
+    "h33.v3",
+    "h31.v1",
+    "h33.v2"
+   ],
+   "round2": null,
+   "winner": "h33.v3"
+  },
+  "zap": {
+   "liked": [
+    "h31.v2",
+    "h31.v3",
+    "h31.v5",
+    "h32.v2",
+    "h32.v4",
+    "h32.v5",
+    "h33.v2"
+   ],
+   "ranking": [
+    {
+     "cand": "h31.v1",
+     "likes": 0,
+     "points": 4
+    },
+    {
+     "cand": "h32.v1",
+     "likes": 0,
+     "points": 4
+    },
+    {
+     "cand": "h33.v1",
+     "likes": 0,
+     "points": 4
+    }
+   ],
+   "round1": [
+    "h32.v1",
+    "h33.v1",
+    "h31.v1"
+   ],
+   "round2": [
+    "h31.v1",
+    "h33.v1",
+    "h32.v1"
+   ],
+   "winner": "h31.v1"
+  }
+ },
+ "hands": {
+  "h31": {
+   "firsts": 73,
+   "likes": 380,
+   "points": 405,
+   "r1": 312,
+   "r2": 93
+  },
+  "h32": {
+   "firsts": 39,
+   "likes": 262,
+   "points": 231,
+   "r1": 172,
+   "r2": 59
+  },
+  "h33": {
+   "firsts": 47,
+   "likes": 316,
+   "points": 318,
+   "r1": 242,
+   "r2": 76
+  }
+ },
+ "likes": 958,
+ "scoring": {
+  "candidate": "hand.version, symbol <hand>-<figure>-<version>[-active]",
+  "likes": "counted apart, never added to points",
+  "points": [
+   3,
+   2,
+   1
+  ]
+ },
+ "seed": 3067258660,
+ "skipped": 3,
+ "totalSteps": 248,
+ "version": 1
+}
