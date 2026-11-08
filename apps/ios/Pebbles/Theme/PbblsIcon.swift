@@ -454,6 +454,3362 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// Join the community: a speech bubble with its tail at the lower left and a handset inside, the WhatsApp mark in
     /// the set's line.
     case whatsapp = "whatsapp"
+    /// Again: try once more, replay.
+    case againBackward = "again-backward"
+    /// Again: try once more, replay. (the `active` twin)
+    case againBackwardActive = "again-backward.active"
+    /// Again: try once more, replay.
+    case stoneLoop = "stone-loop"
+    /// Again: try once more, replay. (the `active` twin)
+    case stoneLoopActive = "stone-loop.active"
+    /// Again: try once more, replay.
+    case stonesBack = "stones-back"
+    /// Again: try once more, replay. (the `active` twin)
+    case stonesBackActive = "stones-back.active"
+    /// Again: try once more, replay.
+    case hourglassShake = "hourglass-shake"
+    /// Again: try once more, replay. (the `active` twin)
+    case hourglassShakeActive = "hourglass-shake.active"
+    /// Again: try once more, replay.
+    case stoneRepeat = "stone-repeat"
+    /// Again: try once more, replay. (the `active` twin)
+    case stoneRepeatActive = "stone-repeat.active"
+    /// Again: try once more, replay.
+    case backwardChevrons = "backward-chevrons"
+    /// Again: try once more, replay. (the `active` twin)
+    case backwardChevronsActive = "backward-chevrons.active"
+    /// Again: try once more, replay.
+    case againForward = "again-forward"
+    /// Again: try once more, replay. (the `active` twin)
+    case againForwardActive = "again-forward.active"
+    /// Again: try once more, replay.
+    case backward = "backward"
+    /// Again: try once more, replay. (the `active` twin)
+    case backwardActive = "backward.active"
+    /// Again: try once more, replay.
+    case ellipseForward = "ellipse-forward"
+    /// Again: try once more, replay. (the `active` twin)
+    case ellipseForwardActive = "ellipse-forward.active"
+    /// Swap: trade one thing for another.
+    case pasteSquare = "paste-square"
+    /// Swap: trade one thing for another. (the `active` twin)
+    case pasteSquareActive = "paste-square.active"
+    /// Swap: trade one thing for another.
+    case swingDouble = "swing-double"
+    /// Swap: trade one thing for another. (the `active` twin)
+    case swingDoubleActive = "swing-double.active"
+    /// Swap: trade one thing for another.
+    case peopleSend = "people-send"
+    /// Swap: trade one thing for another. (the `active` twin)
+    case peopleSendActive = "people-send.active"
+    /// Swap: trade one thing for another.
+    case exchangeMd = "exchange-md"
+    /// Swap: trade one thing for another. (the `active` twin)
+    case exchangeMdActive = "exchange-md.active"
+    /// Swap: trade one thing for another.
+    case stonesSwap = "stones-swap"
+    /// Swap: trade one thing for another. (the `active` twin)
+    case stonesSwapActive = "stones-swap.active"
+    /// Swap: trade one thing for another.
+    case dotsCross = "dots-cross"
+    /// Swap: trade one thing for another. (the `active` twin)
+    case dotsCrossActive = "dots-cross.active"
+    /// Swap: trade one thing for another.
+    case swingSingle = "swing-single"
+    /// Swap: trade one thing for another. (the `active` twin)
+    case swingSingleActive = "swing-single.active"
+    /// Swap: trade one thing for another.
+    case stonesLoop = "stones-loop"
+    /// Swap: trade one thing for another. (the `active` twin)
+    case stonesLoopActive = "stones-loop.active"
+    /// Swap: trade one thing for another.
+    case exchangeLg = "exchange-lg"
+    /// Swap: trade one thing for another. (the `active` twin)
+    case exchangeLgActive = "exchange-lg.active"
+    /// Swap: trade one thing for another.
+    case cycleStones = "cycle-stones"
+    /// Swap: trade one thing for another. (the `active` twin)
+    case cycleStonesActive = "cycle-stones.active"
+    /// Swap: trade one thing for another.
+    case cycleLink = "cycle-link"
+    /// Swap: trade one thing for another. (the `active` twin)
+    case cycleLinkActive = "cycle-link.active"
+    /// Upload: a photo on its way up: a status, not a button.
+    case uploadBox = "upload-box"
+    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
+    case uploadBoxActive = "upload-box.active"
+    /// Upload: a photo on its way up: a status, not a button.
+    case pictureSpeed = "picture-speed"
+    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
+    case pictureSpeedActive = "picture-speed.active"
+    /// Upload: a photo on its way up: a status, not a button.
+    case uploadHalfCircle = "upload-half-circle"
+    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
+    case uploadHalfCircleActive = "upload-half-circle.active"
+    /// Upload: a photo on its way up: a status, not a button.
+    case cloudUpload = "cloud-upload"
+    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
+    case cloudUploadActive = "cloud-upload.active"
+    /// Upload: a photo on its way up: a status, not a button.
+    case stoneSpeed = "stone-speed"
+    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
+    case stoneSpeedActive = "stone-speed.active"
+    /// Upload: a photo on its way up: a status, not a button.
+    case pictureUpload = "picture-upload"
+    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
+    case pictureUploadActive = "picture-upload.active"
+    /// Upload: a photo on its way up: a status, not a button.
+    case pictureKite = "picture-kite"
+    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
+    case pictureKiteActive = "picture-kite.active"
+    /// Upload: a photo on its way up: a status, not a button.
+    case diskAngleUp = "disk-angle-up"
+    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
+    case diskAngleUpActive = "disk-angle-up.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case arrowUpLg = "arrow-up-lg"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case arrowUpLgActive = "arrow-up-lg.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case peopleUpvote = "people-upvote"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case peopleUpvoteActive = "people-upvote.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case cairnAngleUp = "cairn-angle-up"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case cairnAngleUpActive = "cairn-angle-up.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case circleAngleUp = "circle-angle-up"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case circleAngleUpActive = "circle-angle-up.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case thumbsUp = "thumbs-up"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case thumbsUpActive = "thumbs-up.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case golfFlag = "golf-flag"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case golfFlagActive = "golf-flag.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case chevronUpUnderline = "chevron-up-underline"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case chevronUpUnderlineActive = "chevron-up-underline.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case triangleUpUnderline = "triangle-up-underline"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case triangleUpUnderlineActive = "triangle-up-underline.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case stackChevronsUp = "stack-chevrons-up"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case stackChevronsUpActive = "stack-chevrons-up.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case stoneBounce = "stone-bounce"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case stoneBounceActive = "stone-bounce.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case sprout = "sprout"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case sproutActive = "sprout.active"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload.
+    case plusOne = "plus-one"
+    /// Upvote: I want this, in the Lab's backlog; must read apart from upload. (the `active` twin)
+    case plusOneActive = "plus-one.active"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set).
+    case xCircle = "x-circle"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set). (the `active` twin)
+    case xCircleActive = "x-circle.active"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set).
+    case stonesFall = "stones-fall"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set). (the `active` twin)
+    case stonesFallActive = "stones-fall.active"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set).
+    case hookFish = "hook-fish"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set). (the `active` twin)
+    case hookFishActive = "hook-fish.active"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set).
+    case xHalfCircle = "x-half-circle"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set). (the `active` twin)
+    case xHalfCircleActive = "x-half-circle.active"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set).
+    case circleBroken = "circle-broken"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set). (the `active` twin)
+    case circleBrokenActive = "circle-broken.active"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set).
+    case arrowDownCut = "arrow-down-cut"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set). (the `active` twin)
+    case arrowDownCutActive = "arrow-down-cut.active"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set).
+    case circleDotExclamation = "circle-dot-exclamation"
+    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
+    /// set). (the `active` twin)
+    case circleDotExclamationActive = "circle-dot-exclamation.active"
+    /// Link broken: something went wrong: a link that broke (error family).
+    case linkBroken = "link-broken"
+    /// Link broken: something went wrong: a link that broke (error family). (the `active` twin)
+    case linkBrokenActive = "link-broken.active"
+    /// Link broken: something went wrong: a link that broke (error family).
+    case linkBroken2 = "link-broken-2"
+    /// Link broken: something went wrong: a link that broke (error family). (the `active` twin)
+    case linkBroken2Active = "link-broken-2.active"
+    /// Link broken: something went wrong: a link that broke (error family).
+    case linkExclamation = "link-exclamation"
+    /// Link broken: something went wrong: a link that broke (error family). (the `active` twin)
+    case linkExclamationActive = "link-exclamation.active"
+    /// Page gone: something went wrong: a page that is gone (error family).
+    case paperPlaneTrail = "paper-plane-trail"
+    /// Page gone: something went wrong: a page that is gone (error family). (the `active` twin)
+    case paperPlaneTrailActive = "paper-plane-trail.active"
+    /// Page gone: something went wrong: a page that is gone (error family).
+    case squareBounce = "square-bounce"
+    /// Page gone: something went wrong: a page that is gone (error family). (the `active` twin)
+    case squareBounceActive = "square-bounce.active"
+    /// Page gone: something went wrong: a page that is gone (error family).
+    case rectangleDashed = "rectangle-dashed"
+    /// Page gone: something went wrong: a page that is gone (error family). (the `active` twin)
+    case rectangleDashedActive = "rectangle-dashed.active"
+    /// Document: terms, a policy, a text to read.
+    case scroll = "scroll"
+    /// Document: terms, a policy, a text to read. (the `active` twin)
+    case scrollActive = "scroll.active"
+    /// Document: terms, a policy, a text to read.
+    case memorial = "memorial"
+    /// Document: terms, a policy, a text to read. (the `active` twin)
+    case memorialActive = "memorial.active"
+    /// Document: terms, a policy, a text to read.
+    case clipboard = "clipboard"
+    /// Document: terms, a policy, a text to read. (the `active` twin)
+    case clipboardActive = "clipboard.active"
+    /// Document: terms, a policy, a text to read.
+    case brochure = "brochure"
+    /// Document: terms, a policy, a text to read. (the `active` twin)
+    case brochureActive = "brochure.active"
+    /// Document: terms, a policy, a text to read.
+    case file = "file"
+    /// Document: terms, a policy, a text to read. (the `active` twin)
+    case fileActive = "file.active"
+    /// Document: terms, a policy, a text to read.
+    case milestone = "milestone"
+    /// Document: terms, a policy, a text to read. (the `active` twin)
+    case milestoneActive = "milestone.active"
+    /// Privacy: a hand held up: what we keep for ourselves.
+    case handDot = "hand-dot"
+    /// Privacy: a hand held up: what we keep for ourselves. (the `active` twin)
+    case handDotActive = "hand-dot.active"
+    /// Privacy: a hand held up: what we keep for ourselves.
+    case shield = "shield"
+    /// Privacy: a hand held up: what we keep for ourselves. (the `active` twin)
+    case shieldActive = "shield.active"
+    /// Secret: visibility: only me (a trio with private and public, drawn together).
+    case userCircleLg = "user-circle-lg"
+    /// Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin)
+    case userCircleLgActive = "user-circle-lg.active"
+    /// Secret: visibility: only me (a trio with private and public, drawn together).
+    case eyeClosed = "eye-closed"
+    /// Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin)
+    case eyeClosedActive = "eye-closed.active"
+    /// Secret: visibility: only me (a trio with private and public, drawn together).
+    case pond = "pond"
+    /// Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin)
+    case pondActive = "pond.active"
+    /// Secret: visibility: only me (a trio with private and public, drawn together).
+    case userCircleSm = "user-circle-sm"
+    /// Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin)
+    case userCircleSmActive = "user-circle-sm.active"
+    /// Private: visibility: me and my circle (trio).
+    case usersCircle = "users-circle"
+    /// Private: visibility: me and my circle (trio). (the `active` twin)
+    case usersCircleActive = "users-circle.active"
+    /// Private: visibility: me and my circle (trio).
+    case farandole = "farandole"
+    /// Private: visibility: me and my circle (trio). (the `active` twin)
+    case farandoleActive = "farandole.active"
+    /// Private: visibility: me and my circle (trio).
+    case fruitBasket = "fruit-basket"
+    /// Private: visibility: me and my circle (trio). (the `active` twin)
+    case fruitBasketActive = "fruit-basket.active"
+    /// Private: visibility: me and my circle (trio).
+    case people3 = "people-3"
+    /// Private: visibility: me and my circle (trio). (the `active` twin)
+    case people3Active = "people-3.active"
+    /// Private: visibility: me and my circle (trio).
+    case stonesDoubleCircleOpen = "stones-double-circle-open"
+    /// Private: visibility: me and my circle (trio). (the `active` twin)
+    case stonesDoubleCircleOpenActive = "stones-double-circle-open.active"
+    /// Private: visibility: me and my circle (trio).
+    case stonesTripleCircle = "stones-triple-circle"
+    /// Private: visibility: me and my circle (trio). (the `active` twin)
+    case stonesTripleCircleActive = "stones-triple-circle.active"
+    /// Private: visibility: me and my circle (trio).
+    case chatDots = "chat-dots"
+    /// Private: visibility: me and my circle (trio). (the `active` twin)
+    case chatDotsActive = "chat-dots.active"
+    /// Public: visibility: anyone (trio).
+    case world = "world"
+    /// Public: visibility: anyone (trio). (the `active` twin)
+    case worldActive = "world.active"
+    /// Public: visibility: anyone (trio).
+    case stoneEmmit = "stone-emmit"
+    /// Public: visibility: anyone (trio). (the `active` twin)
+    case stoneEmmitActive = "stone-emmit.active"
+    /// Public: visibility: anyone (trio).
+    case eyeOpen = "eye-open"
+    /// Public: visibility: anyone (trio). (the `active` twin)
+    case eyeOpenActive = "eye-open.active"
+    /// Public: visibility: anyone (trio).
+    case stoneMountainShine = "stone-mountain-shine"
+    /// Public: visibility: anyone (trio). (the `active` twin)
+    case stoneMountainShineActive = "stone-mountain-shine.active"
+    /// Public: visibility: anyone (trio).
+    case stoneRipples = "stone-ripples"
+    /// Public: visibility: anyone (trio). (the `active` twin)
+    case stoneRipplesActive = "stone-ripples.active"
+    /// Public: visibility: anyone (trio).
+    case stonesTripleCircleOpen = "stones-triple-circle-open"
+    /// Public: visibility: anyone (trio). (the `active` twin)
+    case stonesTripleCircleOpenActive = "stones-triple-circle-open.active"
+    /// Public: visibility: anyone (trio).
+    case e = "e"
+    /// Public: visibility: anyone (trio). (the `active` twin)
+    case eActive = "e.active"
+    /// Public: visibility: anyone (trio).
+    case archeCairn = "arche-cairn"
+    /// Public: visibility: anyone (trio). (the `active` twin)
+    case archeCairnActive = "arche-cairn.active"
+    /// Public: visibility: anyone (trio).
+    case megaphone2 = "megaphone-2"
+    /// Public: visibility: anyone (trio). (the `active` twin)
+    case megaphone2Active = "megaphone-2.active"
+    /// Public: visibility: anyone (trio).
+    case userShine = "user-shine"
+    /// Public: visibility: anyone (trio). (the `active` twin)
+    case userShineActive = "user-shine.active"
+    /// Locked: an achievement not yet earned; must read apart from secret.
+    case jail = "jail"
+    /// Locked: an achievement not yet earned; must read apart from secret. (the `active` twin)
+    case jailActive = "jail.active"
+    /// Locked: an achievement not yet earned; must read apart from secret.
+    case keyhole = "keyhole"
+    /// Locked: an achievement not yet earned; must read apart from secret. (the `active` twin)
+    case keyholeActive = "keyhole.active"
+    /// Locked: an achievement not yet earned; must read apart from secret.
+    case giftCircle = "gift-circle"
+    /// Locked: an achievement not yet earned; must read apart from secret. (the `active` twin)
+    case giftCircleActive = "gift-circle.active"
+    /// Locked: an achievement not yet earned; must read apart from secret.
+    case lockRounded = "lock-rounded"
+    /// Locked: an achievement not yet earned; must read apart from secret. (the `active` twin)
+    case lockRoundedActive = "lock-rounded.active"
+    /// Locked: an achievement not yet earned; must read apart from secret.
+    case keyholeCircle = "keyhole-circle"
+    /// Locked: an achievement not yet earned; must read apart from secret. (the `active` twin)
+    case keyholeCircleActive = "keyhole-circle.active"
+    /// Locked: an achievement not yet earned; must read apart from secret.
+    case lock = "lock"
+    /// Locked: an achievement not yet earned; must read apart from secret. (the `active` twin)
+    case lockActive = "lock.active"
+    /// Locked: an achievement not yet earned; must read apart from secret.
+    case keyholeDot = "keyhole-dot"
+    /// Locked: an achievement not yet earned; must read apart from secret. (the `active` twin)
+    case keyholeDotActive = "keyhole-dot.active"
+    /// Locked: an achievement not yet earned; must read apart from secret.
+    case starDotted = "star-dotted"
+    /// Locked: an achievement not yet earned; must read apart from secret. (the `active` twin)
+    case starDottedActive = "star-dotted.active"
+    /// Invite: bring someone into the circle.
+    case stonesHexagonNew = "stones-hexagon-new"
+    /// Invite: bring someone into the circle. (the `active` twin)
+    case stonesHexagonNewActive = "stones-hexagon-new.active"
+    /// Invite: bring someone into the circle.
+    case envelope = "envelope"
+    /// Invite: bring someone into the circle. (the `active` twin)
+    case envelopeActive = "envelope.active"
+    /// Invite: bring someone into the circle.
+    case ticket = "ticket"
+    /// Invite: bring someone into the circle. (the `active` twin)
+    case ticketActive = "ticket.active"
+    /// Invite: bring someone into the circle.
+    case coffee2 = "coffee-2"
+    /// Invite: bring someone into the circle. (the `active` twin)
+    case coffee2Active = "coffee-2.active"
+    /// Invite: bring someone into the circle.
+    case userPlusRounded = "user-plus-rounded"
+    /// Invite: bring someone into the circle. (the `active` twin)
+    case userPlusRoundedActive = "user-plus-rounded.active"
+    /// Invite: bring someone into the circle.
+    case stonesNew = "stones-new"
+    /// Invite: bring someone into the circle. (the `active` twin)
+    case stonesNewActive = "stones-new.active"
+    /// Invite: bring someone into the circle.
+    case stoneCircleArrowIn = "stone-circle-arrow-in"
+    /// Invite: bring someone into the circle. (the `active` twin)
+    case stoneCircleArrowInActive = "stone-circle-arrow-in.active"
+    /// Invite: bring someone into the circle.
+    case userPlusCurve = "user-plus-curve"
+    /// Invite: bring someone into the circle. (the `active` twin)
+    case userPlusCurveActive = "user-plus-curve.active"
+    /// Invite: bring someone into the circle.
+    case stonesCircleArrowInLeft = "stones-circle-arrow-in-left"
+    /// Invite: bring someone into the circle. (the `active` twin)
+    case stonesCircleArrowInLeftActive = "stones-circle-arrow-in-left.active"
+    /// Invite: bring someone into the circle.
+    case stoneSpiralOutside = "stone-spiral-outside"
+    /// Invite: bring someone into the circle. (the `active` twin)
+    case stoneSpiralOutsideActive = "stone-spiral-outside.active"
+    /// Invite: bring someone into the circle.
+    case stoneSpiralInside = "stone-spiral-inside"
+    /// Invite: bring someone into the circle. (the `active` twin)
+    case stoneSpiralInsideActive = "stone-spiral-inside.active"
+    /// Life domain: a compass, a territory, an area of one's life.
+    case compassVertical = "compass-vertical"
+    /// Life domain: a compass, a territory, an area of one's life. (the `active` twin)
+    case compassVerticalActive = "compass-vertical.active"
+    /// Life domain: a compass, a territory, an area of one's life.
+    case eggFried = "egg-fried"
+    /// Life domain: a compass, a territory, an area of one's life. (the `active` twin)
+    case eggFriedActive = "egg-fried.active"
+    /// Life domain: a compass, a territory, an area of one's life.
+    case signsSoil = "signs-soil"
+    /// Life domain: a compass, a territory, an area of one's life. (the `active` twin)
+    case signsSoilActive = "signs-soil.active"
+    /// Life domain: a compass, a territory, an area of one's life.
+    case circleQuarters = "circle-quarters"
+    /// Life domain: a compass, a territory, an area of one's life. (the `active` twin)
+    case circleQuartersActive = "circle-quarters.active"
+    /// Life domain: a compass, a territory, an area of one's life.
+    case flagHill = "flag-hill"
+    /// Life domain: a compass, a territory, an area of one's life. (the `active` twin)
+    case flagHillActive = "flag-hill.active"
+    /// Life domain: a compass, a territory, an area of one's life.
+    case signs = "signs"
+    /// Life domain: a compass, a territory, an area of one's life. (the `active` twin)
+    case signsActive = "signs.active"
+    /// Life domain: a compass, a territory, an area of one's life.
+    case compass = "compass"
+    /// Life domain: a compass, a territory, an area of one's life. (the `active` twin)
+    case compassActive = "compass.active"
+    /// Life domain: a compass, a territory, an area of one's life.
+    case hexagonText = "hexagon-text"
+    /// Life domain: a compass, a territory, an area of one's life. (the `active` twin)
+    case hexagonTextActive = "hexagon-text.active"
+    /// Life domain: a compass, a territory, an area of one's life.
+    case stonesPlus = "stones-plus"
+    /// Life domain: a compass, a territory, an area of one's life. (the `active` twin)
+    case stonesPlusActive = "stones-plus.active"
+    /// Market: where glyphs are traded.
+    case shopShowcase = "shop-showcase"
+    /// Market: where glyphs are traded. (the `active` twin)
+    case shopShowcaseActive = "shop-showcase.active"
+    /// Market: where glyphs are traded.
+    case scaleHalf = "scale-half"
+    /// Market: where glyphs are traded. (the `active` twin)
+    case scaleHalfActive = "scale-half.active"
+    /// Market: where glyphs are traded.
+    case label = "label"
+    /// Market: where glyphs are traded. (the `active` twin)
+    case labelActive = "label.active"
+    /// Market: where glyphs are traded.
+    case flagMountains = "flag-mountains"
+    /// Market: where glyphs are traded. (the `active` twin)
+    case flagMountainsActive = "flag-mountains.active"
+    /// Market: where glyphs are traded.
+    case shopStoneK = "shop-stone-k"
+    /// Market: where glyphs are traded. (the `active` twin)
+    case shopStoneKActive = "shop-stone-k.active"
+    /// Market: where glyphs are traded.
+    case shopStone = "shop-stone"
+    /// Market: where glyphs are traded. (the `active` twin)
+    case shopStoneActive = "shop-stone.active"
+    /// Market: where glyphs are traded.
+    case labelStone = "label-stone"
+    /// Market: where glyphs are traded. (the `active` twin)
+    case labelStoneActive = "label-stone.active"
+    /// Market: where glyphs are traded.
+    case cycleStone = "cycle-stone"
+    /// Market: where glyphs are traded. (the `active` twin)
+    case cycleStoneActive = "cycle-stone.active"
+    /// Hour: a time of day, beside a date.
+    case orbit = "orbit"
+    /// Hour: a time of day, beside a date. (the `active` twin)
+    case orbitActive = "orbit.active"
+    /// Hour: a time of day, beside a date.
+    case candle = "candle"
+    /// Hour: a time of day, beside a date. (the `active` twin)
+    case candleActive = "candle.active"
+    /// Hour: a time of day, beside a date.
+    case sundial = "sundial"
+    /// Hour: a time of day, beside a date. (the `active` twin)
+    case sundialActive = "sundial.active"
+    /// Hour: a time of day, beside a date.
+    case stopwatch = "stopwatch"
+    /// Hour: a time of day, beside a date. (the `active` twin)
+    case stopwatchActive = "stopwatch.active"
+    /// Hour: a time of day, beside a date.
+    case hour = "hour"
+    /// Hour: a time of day, beside a date. (the `active` twin)
+    case hourActive = "hour.active"
+    /// Hour: a time of day, beside a date.
+    case gaugeZoom = "gauge-zoom"
+    /// Hour: a time of day, beside a date. (the `active` twin)
+    case gaugeZoomActive = "gauge-zoom.active"
+    /// Block: stop someone from reaching you.
+    case blocked = "blocked"
+    /// Block: stop someone from reaching you. (the `active` twin)
+    case blockedActive = "blocked.active"
+    /// Block: stop someone from reaching you.
+    case stonesStack = "stones-stack"
+    /// Block: stop someone from reaching you. (the `active` twin)
+    case stonesStackActive = "stones-stack.active"
+    /// Block: stop someone from reaching you.
+    case worksite = "worksite"
+    /// Block: stop someone from reaching you. (the `active` twin)
+    case worksiteActive = "worksite.active"
+    /// Block: stop someone from reaching you.
+    case userBlocked = "user-blocked"
+    /// Block: stop someone from reaching you. (the `active` twin)
+    case userBlockedActive = "user-blocked.active"
+    /// Block: stop someone from reaching you.
+    case userForbidden = "user-forbidden"
+    /// Block: stop someone from reaching you. (the `active` twin)
+    case userForbiddenActive = "user-forbidden.active"
+    /// Block: stop someone from reaching you.
+    case crane = "crane"
+    /// Block: stop someone from reaching you. (the `active` twin)
+    case craneActive = "crane.active"
+    /// Block: stop someone from reaching you.
+    case stonesCross = "stones-cross"
+    /// Block: stop someone from reaching you. (the `active` twin)
+    case stonesCrossActive = "stones-cross.active"
+    /// Block: stop someone from reaching you.
+    case stonesForbidden = "stones-forbidden"
+    /// Block: stop someone from reaching you. (the `active` twin)
+    case stonesForbiddenActive = "stones-forbidden.active"
+    /// Block: stop someone from reaching you.
+    case stonesVerticalArrowIn = "stones-vertical-arrow-in"
+    /// Block: stop someone from reaching you. (the `active` twin)
+    case stonesVerticalArrowInActive = "stones-vertical-arrow-in.active"
+    /// Language: the tongue the app speaks; must read apart from public.
+    case bubblesA = "bubbles-a"
+    /// Language: the tongue the app speaks; must read apart from public. (the `active` twin)
+    case bubblesAActive = "bubbles-a.active"
+    /// Language: the tongue the app speaks; must read apart from public.
+    case translationA = "translation-a"
+    /// Language: the tongue the app speaks; must read apart from public. (the `active` twin)
+    case translationAActive = "translation-a.active"
+    /// Language: the tongue the app speaks; must read apart from public.
+    case circleA = "circle-a"
+    /// Language: the tongue the app speaks; must read apart from public. (the `active` twin)
+    case circleAActive = "circle-a.active"
+    /// Language: the tongue the app speaks; must read apart from public.
+    case cubeA = "cube-a"
+    /// Language: the tongue the app speaks; must read apart from public. (the `active` twin)
+    case cubeAActive = "cube-a.active"
+    /// Language: the tongue the app speaks; must read apart from public.
+    case bubbleA = "bubble-a"
+    /// Language: the tongue the app speaks; must read apart from public. (the `active` twin)
+    case bubbleAActive = "bubble-a.active"
+    /// Language: the tongue the app speaks; must read apart from public.
+    case usersCommunication = "users-communication"
+    /// Language: the tongue the app speaks; must read apart from public. (the `active` twin)
+    case usersCommunicationActive = "users-communication.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case sunShineLg = "sun-shine-lg"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case sunShineLgActive = "sun-shine-lg.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case stoneShine = "stone-shine"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case stoneShineActive = "stone-shine.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case sunShineSea = "sun-shine-sea"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case sunShineSeaActive = "sun-shine-sea.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case flowerDaisy = "flower-daisy"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case flowerDaisyActive = "flower-daisy.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case sunriseShine = "sunrise-shine"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case sunriseShineActive = "sunrise-shine.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case stoneLg = "stone-lg"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case stoneLgActive = "stone-lg.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case toggleOffLabel = "toggle-off-label"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case toggleOffLabelActive = "toggle-off-label.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case sidebar = "sidebar"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case sidebarActive = "sidebar.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case sunShineMd = "sun-shine-md"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case sunShineMdActive = "sun-shine-md.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case lightbulbShine = "lightbulb-shine"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case lightbulbShineActive = "lightbulb-shine.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case stoneStar = "stone-star"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case stoneStarActive = "stone-star.active"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together).
+    case toggleOffShine = "toggle-off-shine"
+    /// Appearance light: appearance: light (a trio with appearance-dark and appearance-device, drawn together). (the
+    /// `active` twin)
+    case toggleOffShineActive = "toggle-off-shine.active"
+    /// Appearance dark: appearance: dark (trio).
+    case moon = "moon"
+    /// Appearance dark: appearance: dark (trio). (the `active` twin)
+    case moonActive = "moon.active"
+    /// Appearance dark: appearance: dark (trio).
+    case stoneMoon = "stone-moon"
+    /// Appearance dark: appearance: dark (trio). (the `active` twin)
+    case stoneMoonActive = "stone-moon.active"
+    /// Appearance dark: appearance: dark (trio).
+    case gameBoardMoon = "game-board-moon"
+    /// Appearance dark: appearance: dark (trio). (the `active` twin)
+    case gameBoardMoonActive = "game-board-moon.active"
+    /// Appearance dark: appearance: dark (trio).
+    case moonSea = "moon-sea"
+    /// Appearance dark: appearance: dark (trio). (the `active` twin)
+    case moonSeaActive = "moon-sea.active"
+    /// Appearance dark: appearance: dark (trio).
+    case flowerTulip = "flower-tulip"
+    /// Appearance dark: appearance: dark (trio). (the `active` twin)
+    case flowerTulipActive = "flower-tulip.active"
+    /// Appearance dark: appearance: dark (trio).
+    case stoneFacet = "stone-facet"
+    /// Appearance dark: appearance: dark (trio). (the `active` twin)
+    case stoneFacetActive = "stone-facet.active"
+    /// Appearance dark: appearance: dark (trio).
+    case toggleOnLabel = "toggle-on-label"
+    /// Appearance dark: appearance: dark (trio). (the `active` twin)
+    case toggleOnLabelActive = "toggle-on-label.active"
+    /// Appearance dark: appearance: dark (trio).
+    case lightbulbMoon = "lightbulb-moon"
+    /// Appearance dark: appearance: dark (trio). (the `active` twin)
+    case lightbulbMoonActive = "lightbulb-moon.active"
+    /// Appearance device: appearance: follow the device (trio).
+    case appearanceDevice = "appearance-device"
+    /// Appearance device: appearance: follow the device (trio). (the `active` twin)
+    case appearanceDeviceActive = "appearance-device.active"
+    /// Appearance device: appearance: follow the device (trio).
+    case stonePillShine = "stone-pill-shine"
+    /// Appearance device: appearance: follow the device (trio). (the `active` twin)
+    case stonePillShineActive = "stone-pill-shine.active"
+    /// Appearance device: appearance: follow the device (trio).
+    case appearance = "appearance"
+    /// Appearance device: appearance: follow the device (trio). (the `active` twin)
+    case appearanceActive = "appearance.active"
+    /// Appearance device: appearance: follow the device (trio).
+    case toggleMedian = "toggle-median"
+    /// Appearance device: appearance: follow the device (trio). (the `active` twin)
+    case toggleMedianActive = "toggle-median.active"
+    /// Appearance device: appearance: follow the device (trio).
+    case appearanceHalf = "appearance-half"
+    /// Appearance device: appearance: follow the device (trio). (the `active` twin)
+    case appearanceHalfActive = "appearance-half.active"
+    /// Appearance device: appearance: follow the device (trio).
+    case lightbulbMark = "lightbulb-mark"
+    /// Appearance device: appearance: follow the device (trio). (the `active` twin)
+    case lightbulbMarkActive = "lightbulb-mark.active"
+    /// Appearance device: appearance: follow the device (trio).
+    case sunsetSeaa = "sunset-seaa"
+    /// Appearance device: appearance: follow the device (trio). (the `active` twin)
+    case sunsetSeaaActive = "sunset-seaa.active"
+    /// Palette: the colour world the app wears.
+    case palette1 = "palette-1"
+    /// Palette: the colour world the app wears. (the `active` twin)
+    case palette1Active = "palette-1.active"
+    /// Palette: the colour world the app wears.
+    case circlesJointure = "circles-jointure"
+    /// Palette: the colour world the app wears. (the `active` twin)
+    case circlesJointureActive = "circles-jointure.active"
+    /// Palette: the colour world the app wears.
+    case broomstick = "broomstick"
+    /// Palette: the colour world the app wears. (the `active` twin)
+    case broomstickActive = "broomstick.active"
+    /// Palette: the colour world the app wears.
+    case flowerReed = "flower-reed"
+    /// Palette: the colour world the app wears. (the `active` twin)
+    case flowerReedActive = "flower-reed.active"
+    /// Palette: the colour world the app wears.
+    case circlesJointure2 = "circles-jointure-2"
+    /// Palette: the colour world the app wears. (the `active` twin)
+    case circlesJointure2Active = "circles-jointure-2.active"
+    /// Palette: the colour world the app wears.
+    case palette3 = "palette-3"
+    /// Palette: the colour world the app wears. (the `active` twin)
+    case palette3Active = "palette-3.active"
+    /// Palette: the colour world the app wears.
+    case prism = "prism"
+    /// Palette: the colour world the app wears. (the `active` twin)
+    case prismActive = "prism.active"
+    /// Palette: the colour world the app wears.
+    case screwdriver = "screwdriver"
+    /// Palette: the colour world the app wears. (the `active` twin)
+    case screwdriverActive = "screwdriver.active"
+    /// Bounce: regularity over the last 28 days, a rhythm kept.
+    case bounceUnderline = "bounce-underline"
+    /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
+    case bounceUnderlineActive = "bounce-underline.active"
+    /// Bounce: regularity over the last 28 days, a rhythm kept.
+    case chartStones = "chart-stones"
+    /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
+    case chartStonesActive = "chart-stones.active"
+    /// Bounce: regularity over the last 28 days, a rhythm kept.
+    case signalWave = "signal-wave"
+    /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
+    case signalWaveActive = "signal-wave.active"
+    /// Bounce: regularity over the last 28 days, a rhythm kept.
+    case stoneSpring = "stone-spring"
+    /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
+    case stoneSpringActive = "stone-spring.active"
+    /// Bounce: regularity over the last 28 days, a rhythm kept.
+    case stoneDebounce = "stone-debounce"
+    /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
+    case stoneDebounceActive = "stone-debounce.active"
+    /// Bounce: regularity over the last 28 days, a rhythm kept.
+    case signalWaveformStone = "signal-waveform-stone"
+    /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
+    case signalWaveformStoneActive = "signal-waveform-stone.active"
+    /// Bounce: regularity over the last 28 days, a rhythm kept.
+    case stonesLineChart = "stones-line-chart"
+    /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
+    case stonesLineChartActive = "stones-line-chart.active"
+    /// Bounce: regularity over the last 28 days, a rhythm kept.
+    case stoneBounces = "stone-bounces"
+    /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
+    case stoneBouncesActive = "stone-bounces.active"
+    /// Bounce: regularity over the last 28 days, a rhythm kept.
+    case signalDots = "signal-dots"
+    /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
+    case signalDotsActive = "signal-dots.active"
+    /// Bounce: regularity over the last 28 days, a rhythm kept.
+    case metronome = "metronome"
+    /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
+    case metronomeActive = "metronome.active"
+    /// Bounce: regularity over the last 28 days, a rhythm kept.
+    case stones4Half = "stones-4-half"
+    /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
+    case stones4HalfActive = "stones-4-half.active"
+    /// Search: look something up by name, a lens.
+    case binoculars = "binoculars"
+    /// Search: look something up by name, a lens. (the `active` twin)
+    case binocularsActive = "binoculars.active"
+    /// Search: look something up by name, a lens.
+    case textStone = "text-stone"
+    /// Search: look something up by name, a lens. (the `active` twin)
+    case textStoneActive = "text-stone.active"
+    /// Search: look something up by name, a lens.
+    case magnifyingMd = "magnifying-md"
+    /// Search: look something up by name, a lens. (the `active` twin)
+    case magnifyingMdActive = "magnifying-md.active"
+    /// Search: look something up by name, a lens.
+    case magnifyingSm = "magnifying-sm"
+    /// Search: look something up by name, a lens. (the `active` twin)
+    case magnifyingSmActive = "magnifying-sm.active"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family.
+    case circleInfo = "circle-info"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family. (the `active` twin)
+    case circleInfoActive = "circle-info.active"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family.
+    case parenthesisInfo = "parenthesis-info"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family. (the `active` twin)
+    case parenthesisInfoActive = "parenthesis-info.active"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family.
+    case asterisk = "asterisk"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family. (the `active` twin)
+    case asteriskActive = "asterisk.active"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family.
+    case bubbleInfo = "bubble-info"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family. (the `active` twin)
+    case bubbleInfoActive = "bubble-info.active"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family.
+    case infoI = "info-i"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family. (the `active` twin)
+    case infoIActive = "info-i.active"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family.
+    case badgeInfo = "badge-info"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family. (the `active` twin)
+    case badgeInfoActive = "badge-info.active"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family.
+    case signInfo = "sign-info"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family. (the `active` twin)
+    case signInfoActive = "sign-info.active"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family.
+    case userStanding = "user-standing"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family. (the `active` twin)
+    case userStandingActive = "user-standing.active"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family.
+    case paragraphInfo = "paragraph-info"
+    /// Info: how to read this: a small mark at caption size beside a line of text; must read apart from the error
+    /// family. (the `active` twin)
+    case paragraphInfoActive = "paragraph-info.active"
+    /// Dolmen: the standing stone table, a monument.
+    case dolmenSoil = "dolmen-soil"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case dolmenSoilActive = "dolmen-soil.active"
+    /// Dolmen: the standing stone table, a monument.
+    case dolmenFluffy = "dolmen-fluffy"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case dolmenFluffyActive = "dolmen-fluffy.active"
+    /// Dolmen: the standing stone table, a monument.
+    case stoneGateShine = "stone-gate-shine"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case stoneGateShineActive = "stone-gate-shine.active"
+    /// Dolmen: the standing stone table, a monument.
+    case stoneGateSm = "stone-gate-sm"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case stoneGateSmActive = "stone-gate-sm.active"
+    /// Dolmen: the standing stone table, a monument.
+    case stoneBoard = "stone-board"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case stoneBoardActive = "stone-board.active"
+    /// Dolmen: the standing stone table, a monument.
+    case dolmenSquare = "dolmen-square"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case dolmenSquareActive = "dolmen-square.active"
+    /// Dolmen: the standing stone table, a monument.
+    case dolmenSquareStone = "dolmen-square-stone"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case dolmenSquareStoneActive = "dolmen-square-stone.active"
+    /// Dolmen: the standing stone table, a monument.
+    case dolmenSquarePin = "dolmen-square-pin"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case dolmenSquarePinActive = "dolmen-square-pin.active"
+    /// Dolmen: the standing stone table, a monument.
+    case menhir = "menhir"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case menhirActive = "menhir.active"
+    /// Dolmen: the standing stone table, a monument.
+    case dolmen2 = "dolmen-2"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case dolmen2Active = "dolmen-2.active"
+    /// Dolmen: the standing stone table, a monument.
+    case gateStone = "gate-stone"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case gateStoneActive = "gate-stone.active"
+    /// Dolmen: the standing stone table, a monument.
+    case dolmenShineSm = "dolmen-shine-sm"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case dolmenShineSmActive = "dolmen-shine-sm.active"
+    /// Dolmen: the standing stone table, a monument.
+    case slide = "slide"
+    /// Dolmen: the standing stone table, a monument. (the `active` twin)
+    case slideActive = "slide.active"
+    /// Fossil: a life kept in stone.
+    case karmaFossil = "karma-fossil"
+    /// Fossil: a life kept in stone. (the `active` twin)
+    case karmaFossilActive = "karma-fossil.active"
+    /// Fossil: a life kept in stone.
+    case circleLeaf = "circle-leaf"
+    /// Fossil: a life kept in stone. (the `active` twin)
+    case circleLeafActive = "circle-leaf.active"
+    /// Fossil: a life kept in stone.
+    case fishBones2 = "fish-bones-2"
+    /// Fossil: a life kept in stone. (the `active` twin)
+    case fishBones2Active = "fish-bones-2.active"
+    /// Fossil: a life kept in stone.
+    case circleKarma = "circle-karma"
+    /// Fossil: a life kept in stone. (the `active` twin)
+    case circleKarmaActive = "circle-karma.active"
+    /// Fossil: a life kept in stone.
+    case fishBones = "fish-bones"
+    /// Fossil: a life kept in stone. (the `active` twin)
+    case fishBonesActive = "fish-bones.active"
+    /// Fossil: a life kept in stone.
+    case cocoon = "cocoon"
+    /// Fossil: a life kept in stone. (the `active` twin)
+    case cocoonActive = "cocoon.active"
+    /// Fossil: a life kept in stone.
+    case leaf = "leaf"
+    /// Fossil: a life kept in stone. (the `active` twin)
+    case leafActive = "leaf.active"
+    /// Fossil: a life kept in stone.
+    case circleFossil = "circle-fossil"
+    /// Fossil: a life kept in stone. (the `active` twin)
+    case circleFossilActive = "circle-fossil.active"
+    /// Fossil: a life kept in stone.
+    case trilobite = "trilobite"
+    /// Fossil: a life kept in stone. (the `active` twin)
+    case trilobiteActive = "trilobite.active"
+    /// Fossil: a life kept in stone.
+    case stoneHair = "stone-hair"
+    /// Fossil: a life kept in stone. (the `active` twin)
+    case stoneHairActive = "stone-hair.active"
+    /// Bookmark: keep my place, save for later.
+    case bookmark = "bookmark"
+    /// Bookmark: keep my place, save for later. (the `active` twin)
+    case bookmarkActive = "bookmark.active"
+    /// Bookmark: keep my place, save for later.
+    case bookStone = "book-stone"
+    /// Bookmark: keep my place, save for later. (the `active` twin)
+    case bookStoneActive = "book-stone.active"
+    /// Bookmark: keep my place, save for later.
+    case textStoneMargin = "text-stone-margin"
+    /// Bookmark: keep my place, save for later. (the `active` twin)
+    case textStoneMarginActive = "text-stone-margin.active"
+    /// Bookmark: keep my place, save for later.
+    case bookmarkStone = "bookmark-stone"
+    /// Bookmark: keep my place, save for later. (the `active` twin)
+    case bookmarkStoneActive = "bookmark-stone.active"
+    /// Bookmark: keep my place, save for later.
+    case pageCorner = "page-corner"
+    /// Bookmark: keep my place, save for later. (the `active` twin)
+    case pageCornerActive = "page-corner.active"
+    /// Bookmark: keep my place, save for later.
+    case textStoneInline = "text-stone-inline"
+    /// Bookmark: keep my place, save for later. (the `active` twin)
+    case textStoneInlineActive = "text-stone-inline.active"
+    /// Gem: something precious, cut.
+    case pebbleGem = "pebble-gem"
+    /// Gem: something precious, cut. (the `active` twin)
+    case pebbleGemActive = "pebble-gem.active"
+    /// Gem: something precious, cut.
+    case amethyst = "amethyst"
+    /// Gem: something precious, cut. (the `active` twin)
+    case amethystActive = "amethyst.active"
+    /// Gem: something precious, cut.
+    case gemStone1 = "gem-stone-1"
+    /// Gem: something precious, cut. (the `active` twin)
+    case gemStone1Active = "gem-stone-1.active"
+    /// Gem: something precious, cut.
+    case gemUp = "gem-up"
+    /// Gem: something precious, cut. (the `active` twin)
+    case gemUpActive = "gem-up.active"
+    /// Gem: something precious, cut.
+    case pebbleFire = "pebble-fire"
+    /// Gem: something precious, cut. (the `active` twin)
+    case pebbleFireActive = "pebble-fire.active"
+    /// Target: an aim, a goal hit.
+    case targetArrow = "target-arrow"
+    /// Target: an aim, a goal hit. (the `active` twin)
+    case targetArrowActive = "target-arrow.active"
+    /// Target: an aim, a goal hit.
+    case stoneRipple = "stone-ripple"
+    /// Target: an aim, a goal hit. (the `active` twin)
+    case stoneRippleActive = "stone-ripple.active"
+    /// Target: an aim, a goal hit.
+    case golfFlagLg = "golf-flag-lg"
+    /// Target: an aim, a goal hit. (the `active` twin)
+    case golfFlagLgActive = "golf-flag-lg.active"
+    /// Target: an aim, a goal hit.
+    case targetOutside = "target-outside"
+    /// Target: an aim, a goal hit. (the `active` twin)
+    case targetOutsideActive = "target-outside.active"
+    /// Target: an aim, a goal hit.
+    case flagMountain = "flag-mountain"
+    /// Target: an aim, a goal hit. (the `active` twin)
+    case flagMountainActive = "flag-mountain.active"
+    /// Target: an aim, a goal hit.
+    case ripples = "ripples"
+    /// Target: an aim, a goal hit. (the `active` twin)
+    case ripplesActive = "ripples.active"
+    /// Target: an aim, a goal hit.
+    case stoneWater = "stone-water"
+    /// Target: an aim, a goal hit. (the `active` twin)
+    case stoneWaterActive = "stone-water.active"
+    /// Target: an aim, a goal hit.
+    case golfFlagSm = "golf-flag-sm"
+    /// Target: an aim, a goal hit. (the `active` twin)
+    case golfFlagSmActive = "golf-flag-sm.active"
+    /// Target: an aim, a goal hit.
+    case stoneSpark = "stone-spark"
+    /// Target: an aim, a goal hit. (the `active` twin)
+    case stoneSparkActive = "stone-spark.active"
+    /// Pen: write, edit.
+    case pencil = "pencil"
+    /// Pen: write, edit. (the `active` twin)
+    case pencilActive = "pencil.active"
+    /// Pen: write, edit.
+    case penFountainUp = "pen-fountain-up"
+    /// Pen: write, edit. (the `active` twin)
+    case penFountainUpActive = "pen-fountain-up.active"
+    /// Pen: write, edit.
+    case featherDot = "feather-dot"
+    /// Pen: write, edit. (the `active` twin)
+    case featherDotActive = "feather-dot.active"
+    /// Pen: write, edit.
+    case pencilWrite = "pencil-write"
+    /// Pen: write, edit. (the `active` twin)
+    case pencilWriteActive = "pencil-write.active"
+    /// Pen: write, edit.
+    case penFountainLosange = "pen-fountain-losange"
+    /// Pen: write, edit. (the `active` twin)
+    case penFountainLosangeActive = "pen-fountain-losange.active"
+    /// Pen: write, edit.
+    case eraserWrite = "eraser-write"
+    /// Pen: write, edit. (the `active` twin)
+    case eraserWriteActive = "eraser-write.active"
+    /// Pen: write, edit.
+    case featherWrite = "feather-write"
+    /// Pen: write, edit. (the `active` twin)
+    case featherWriteActive = "feather-write.active"
+    /// Pen: write, edit.
+    case penFountainDown = "pen-fountain-down"
+    /// Pen: write, edit. (the `active` twin)
+    case penFountainDownActive = "pen-fountain-down.active"
+    /// Pen: write, edit.
+    case pencilDraw = "pencil-draw"
+    /// Pen: write, edit. (the `active` twin)
+    case pencilDrawActive = "pencil-draw.active"
+    /// Radar: scanning around, what is near.
+    case saucerAntenna = "saucer-antenna"
+    /// Radar: scanning around, what is near. (the `active` twin)
+    case saucerAntennaActive = "saucer-antenna.active"
+    /// Radar: scanning around, what is near.
+    case stoneSignal = "stone-signal"
+    /// Radar: scanning around, what is near. (the `active` twin)
+    case stoneSignalActive = "stone-signal.active"
+    /// Radar: scanning around, what is near.
+    case userLine = "user-line"
+    /// Radar: scanning around, what is near. (the `active` twin)
+    case userLineActive = "user-line.active"
+    /// Radar: scanning around, what is near.
+    case saucerAntennaK = "saucer-antenna-k"
+    /// Radar: scanning around, what is near. (the `active` twin)
+    case saucerAntennaKActive = "saucer-antenna-k.active"
+    /// Radar: scanning around, what is near.
+    case stoneWifi = "stone-wifi"
+    /// Radar: scanning around, what is near. (the `active` twin)
+    case stoneWifiActive = "stone-wifi.active"
+    /// Radar: scanning around, what is near.
+    case saucerAntennaSm = "saucer-antenna-sm"
+    /// Radar: scanning around, what is near. (the `active` twin)
+    case saucerAntennaSmActive = "saucer-antenna-sm.active"
+    /// Radar: scanning around, what is near.
+    case abstractRadar = "abstract-radar"
+    /// Radar: scanning around, what is near. (the `active` twin)
+    case abstractRadarActive = "abstract-radar.active"
+    /// Radar: scanning around, what is near.
+    case radarQuarter = "radar-quarter"
+    /// Radar: scanning around, what is near. (the `active` twin)
+    case radarQuarterActive = "radar-quarter.active"
+    /// Radar: scanning around, what is near.
+    case arrowForwardEye = "arrow-forward-eye"
+    /// Radar: scanning around, what is near. (the `active` twin)
+    case arrowForwardEyeActive = "arrow-forward-eye.active"
+    /// Pyramid: a built monument, a layered peak.
+    case pyramid = "pyramid"
+    /// Pyramid: a built monument, a layered peak. (the `active` twin)
+    case pyramidActive = "pyramid.active"
+    /// Pyramid: a built monument, a layered peak.
+    case pebblesStack2 = "pebbles-stack-2"
+    /// Pyramid: a built monument, a layered peak. (the `active` twin)
+    case pebblesStack2Active = "pebbles-stack-2.active"
+    /// Pyramid: a built monument, a layered peak.
+    case pyramidsSun = "pyramids-sun"
+    /// Pyramid: a built monument, a layered peak. (the `active` twin)
+    case pyramidsSunActive = "pyramids-sun.active"
+    /// Pyramid: a built monument, a layered peak.
+    case ziggurat = "ziggurat"
+    /// Pyramid: a built monument, a layered peak. (the `active` twin)
+    case zigguratActive = "ziggurat.active"
+    /// Pyramid: a built monument, a layered peak.
+    case stonesStack2 = "stones-stack-2"
+    /// Pyramid: a built monument, a layered peak. (the `active` twin)
+    case stonesStack2Active = "stones-stack-2.active"
+    /// Pyramid: a built monument, a layered peak.
+    case obelisk = "obelisk"
+    /// Pyramid: a built monument, a layered peak. (the `active` twin)
+    case obeliskActive = "obelisk.active"
+    /// Pyramid: a built monument, a layered peak.
+    case pyramidLayers = "pyramid-layers"
+    /// Pyramid: a built monument, a layered peak. (the `active` twin)
+    case pyramidLayersActive = "pyramid-layers.active"
+    /// Pyramid: a built monument, a layered peak.
+    case stonesStackPlus = "stones-stack-plus"
+    /// Pyramid: a built monument, a layered peak. (the `active` twin)
+    case stonesStackPlusActive = "stones-stack-plus.active"
+    /// Pyramid: a built monument, a layered peak.
+    case pyramidSun = "pyramid-sun"
+    /// Pyramid: a built monument, a layered peak. (the `active` twin)
+    case pyramidSunActive = "pyramid-sun.active"
+    /// Pyramid: a built monument, a layered peak.
+    case pyramidInside = "pyramid-inside"
+    /// Pyramid: a built monument, a layered peak. (the `active` twin)
+    case pyramidInsideActive = "pyramid-inside.active"
+    /// Layout: how a page is arranged.
+    case layoutSharp = "layout-sharp"
+    /// Layout: how a page is arranged. (the `active` twin)
+    case layoutSharpActive = "layout-sharp.active"
+    /// Layout: how a page is arranged.
+    case textEditorial = "text-editorial"
+    /// Layout: how a page is arranged. (the `active` twin)
+    case textEditorialActive = "text-editorial.active"
+    /// Layout: how a page is arranged.
+    case layoutSidebar = "layout-sidebar"
+    /// Layout: how a page is arranged. (the `active` twin)
+    case layoutSidebarActive = "layout-sidebar.active"
+    /// Layout: how a page is arranged.
+    case stonesLayout = "stones-layout"
+    /// Layout: how a page is arranged. (the `active` twin)
+    case stonesLayoutActive = "stones-layout.active"
+    /// Layout: how a page is arranged.
+    case layout = "layout"
+    /// Layout: how a page is arranged. (the `active` twin)
+    case layoutActive = "layout.active"
+    /// Layout: how a page is arranged.
+    case setSquare = "set-square"
+    /// Layout: how a page is arranged. (the `active` twin)
+    case setSquareActive = "set-square.active"
+    /// Dashboard: an overview of numbers at a glance.
+    case gauge = "gauge"
+    /// Dashboard: an overview of numbers at a glance. (the `active` twin)
+    case gaugeActive = "gauge.active"
+    /// Dashboard: an overview of numbers at a glance.
+    case scaleGauge = "scale-gauge"
+    /// Dashboard: an overview of numbers at a glance. (the `active` twin)
+    case scaleGaugeActive = "scale-gauge.active"
+    /// Dashboard: an overview of numbers at a glance.
+    case gaugeSimple = "gauge-simple"
+    /// Dashboard: an overview of numbers at a glance. (the `active` twin)
+    case gaugeSimpleActive = "gauge-simple.active"
+    /// Dashboard: an overview of numbers at a glance.
+    case squareChartBars = "square-chart-bars"
+    /// Dashboard: an overview of numbers at a glance. (the `active` twin)
+    case squareChartBarsActive = "square-chart-bars.active"
+    /// Dashboard: an overview of numbers at a glance.
+    case gaugeUnderline = "gauge-underline"
+    /// Dashboard: an overview of numbers at a glance. (the `active` twin)
+    case gaugeUnderlineActive = "gauge-underline.active"
+    /// Dashboard: an overview of numbers at a glance.
+    case dashboard = "dashboard"
+    /// Dashboard: an overview of numbers at a glance. (the `active` twin)
+    case dashboardActive = "dashboard.active"
+    /// Chart: figures over time.
+    case chartStonesGrow = "chart-stones-grow"
+    /// Chart: figures over time. (the `active` twin)
+    case chartStonesGrowActive = "chart-stones-grow.active"
+    /// Chart: figures over time.
+    case chartDiagram = "chart-diagram"
+    /// Chart: figures over time. (the `active` twin)
+    case chartDiagramActive = "chart-diagram.active"
+    /// Chart: figures over time.
+    case bullseye = "bullseye"
+    /// Chart: figures over time. (the `active` twin)
+    case bullseyeActive = "bullseye.active"
+    /// Chart: figures over time.
+    case chartGrow = "chart-grow"
+    /// Chart: figures over time. (the `active` twin)
+    case chartGrowActive = "chart-grow.active"
+    /// Chart: figures over time.
+    case chartBarsFill = "chart-bars-fill"
+    /// Chart: figures over time. (the `active` twin)
+    case chartBarsFillActive = "chart-bars-fill.active"
+    /// Chart: figures over time.
+    case lineGrow = "line-grow"
+    /// Chart: figures over time. (the `active` twin)
+    case lineGrowActive = "line-grow.active"
+    /// Chart: figures over time.
+    case chartStones4 = "chart-stones-4"
+    /// Chart: figures over time. (the `active` twin)
+    case chartStones4Active = "chart-stones-4.active"
+    /// Chart: figures over time.
+    case chartLineStone = "chart-line-stone"
+    /// Chart: figures over time. (the `active` twin)
+    case chartLineStoneActive = "chart-line-stone.active"
+    /// Chart: figures over time.
+    case chartStonesGrowUnderline = "chart-stones-grow-underline"
+    /// Chart: figures over time. (the `active` twin)
+    case chartStonesGrowUnderlineActive = "chart-stones-grow-underline.active"
+    /// Chart: figures over time.
+    case chartSegments = "chart-segments"
+    /// Chart: figures over time. (the `active` twin)
+    case chartSegmentsActive = "chart-segments.active"
+    /// Chart: figures over time.
+    case chartDiagramSm = "chart-diagram-sm"
+    /// Chart: figures over time. (the `active` twin)
+    case chartDiagramSmActive = "chart-diagram-sm.active"
+    /// Chart: figures over time.
+    case chartWires = "chart-wires"
+    /// Chart: figures over time. (the `active` twin)
+    case chartWiresActive = "chart-wires.active"
+    /// Board: a board where things are pinned or arranged.
+    case boardWallNotes = "board-wall-notes"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case boardWallNotesActive = "board-wall-notes.active"
+    /// Board: a board where things are pinned or arranged.
+    case library = "library"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case libraryActive = "library.active"
+    /// Board: a board where things are pinned or arranged.
+    case gameStones = "game-stones"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case gameStonesActive = "game-stones.active"
+    /// Board: a board where things are pinned or arranged.
+    case boardChart = "board-chart"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case boardChartActive = "board-chart.active"
+    /// Board: a board where things are pinned or arranged.
+    case memosLace = "memos-lace"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case memosLaceActive = "memos-lace.active"
+    /// Board: a board where things are pinned or arranged.
+    case squareNotes = "square-notes"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case squareNotesActive = "square-notes.active"
+    /// Board: a board where things are pinned or arranged.
+    case boardNotes = "board-notes"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case boardNotesActive = "board-notes.active"
+    /// Board: a board where things are pinned or arranged.
+    case memo = "memo"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case memoActive = "memo.active"
+    /// Board: a board where things are pinned or arranged.
+    case gameCheckers = "game-checkers"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case gameCheckersActive = "game-checkers.active"
+    /// Board: a board where things are pinned or arranged.
+    case boardLayout = "board-layout"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case boardLayoutActive = "board-layout.active"
+    /// Board: a board where things are pinned or arranged.
+    case boardLamp = "board-lamp"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case boardLampActive = "board-lamp.active"
+    /// Board: a board where things are pinned or arranged.
+    case grid = "grid"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case gridActive = "grid.active"
+    /// Board: a board where things are pinned or arranged.
+    case board = "board"
+    /// Board: a board where things are pinned or arranged. (the `active` twin)
+    case boardActive = "board.active"
+    /// Copy: make a second one.
+    case copySquares = "copy-squares"
+    /// Copy: make a second one. (the `active` twin)
+    case copySquaresActive = "copy-squares.active"
+    /// Copy: make a second one.
+    case copyCircles = "copy-circles"
+    /// Copy: make a second one. (the `active` twin)
+    case copyCirclesActive = "copy-circles.active"
+    /// Copy: make a second one.
+    case layersSquare = "layers-square"
+    /// Copy: make a second one. (the `active` twin)
+    case layersSquareActive = "layers-square.active"
+    /// Copy: make a second one.
+    case stoneSea = "stone-sea"
+    /// Copy: make a second one. (the `active` twin)
+    case stoneSeaActive = "stone-sea.active"
+    /// Copy: make a second one.
+    case documentScan = "document-scan"
+    /// Copy: make a second one. (the `active` twin)
+    case documentScanActive = "document-scan.active"
+    /// Paste: put it here.
+    case clipboardPaste = "clipboard-paste"
+    /// Paste: put it here. (the `active` twin)
+    case clipboardPasteActive = "clipboard-paste.active"
+    /// Paste: put it here.
+    case stoneDownTunnel = "stone-down-tunnel"
+    /// Paste: put it here. (the `active` twin)
+    case stoneDownTunnelActive = "stone-down-tunnel.active"
+    /// Paste: put it here.
+    case arrowBottomBox = "arrow-bottom-box"
+    /// Paste: put it here. (the `active` twin)
+    case arrowBottomBoxActive = "arrow-bottom-box.active"
+    /// Paste: put it here.
+    case noteCorner = "note-corner"
+    /// Paste: put it here. (the `active` twin)
+    case noteCornerActive = "note-corner.active"
+    /// Paste: put it here.
+    case mapPin = "map-pin"
+    /// Paste: put it here. (the `active` twin)
+    case mapPinActive = "map-pin.active"
+    /// Paste: put it here.
+    case clipboardArrowDown = "clipboard-arrow-down"
+    /// Paste: put it here. (the `active` twin)
+    case clipboardArrowDownActive = "clipboard-arrow-down.active"
+    /// Paste: put it here.
+    case stoneBox = "stone-box"
+    /// Paste: put it here. (the `active` twin)
+    case stoneBoxActive = "stone-box.active"
+    /// Paste: put it here.
+    case cardStone = "card-stone"
+    /// Paste: put it here. (the `active` twin)
+    case cardStoneActive = "card-stone.active"
+    /// Paste: put it here.
+    case squarePaste = "square-paste"
+    /// Paste: put it here. (the `active` twin)
+    case squarePasteActive = "square-paste.active"
+    /// Paste: put it here.
+    case noteStone = "note-stone"
+    /// Paste: put it here. (the `active` twin)
+    case noteStoneActive = "note-stone.active"
+    /// Cursor: a pointer, here.
+    case cursor = "cursor"
+    /// Cursor: a pointer, here. (the `active` twin)
+    case cursorActive = "cursor.active"
+    /// Cursor: a pointer, here.
+    case cursorPointer = "cursor-pointer"
+    /// Cursor: a pointer, here. (the `active` twin)
+    case cursorPointerActive = "cursor-pointer.active"
+    /// Cursor: a pointer, here.
+    case cursorPointerClick = "cursor-pointer-click"
+    /// Cursor: a pointer, here. (the `active` twin)
+    case cursorPointerClickActive = "cursor-pointer-click.active"
+    /// Cursor: a pointer, here.
+    case viewfinder = "viewfinder"
+    /// Cursor: a pointer, here. (the `active` twin)
+    case viewfinderActive = "viewfinder.active"
+    /// Book: a book to read.
+    case bookCoverStone = "book-cover-stone"
+    /// Book: a book to read. (the `active` twin)
+    case bookCoverStoneActive = "book-cover-stone.active"
+    /// Book: a book to read.
+    case bookTextBookmark = "book-text-bookmark"
+    /// Book: a book to read. (the `active` twin)
+    case bookTextBookmarkActive = "book-text-bookmark.active"
+    /// Book: a book to read.
+    case booksShelve = "books-shelve"
+    /// Book: a book to read. (the `active` twin)
+    case booksShelveActive = "books-shelve.active"
+    /// Book: a book to read.
+    case book = "book"
+    /// Book: a book to read. (the `active` twin)
+    case bookActive = "book.active"
+    /// Book: a book to read.
+    case bookbinding = "bookbinding"
+    /// Book: a book to read. (the `active` twin)
+    case bookbindingActive = "bookbinding.active"
+    /// Book: a book to read.
+    case booksStack = "books-stack"
+    /// Book: a book to read. (the `active` twin)
+    case booksStackActive = "books-stack.active"
+    /// Book: a book to read.
+    case bookIso = "book-iso"
+    /// Book: a book to read. (the `active` twin)
+    case bookIsoActive = "book-iso.active"
+    /// Book: a book to read.
+    case abstractGlow = "abstract-glow"
+    /// Book: a book to read. (the `active` twin)
+    case abstractGlowActive = "abstract-glow.active"
+    /// Text: plain text, a paragraph.
+    case textPeriodStone = "text-period-stone"
+    /// Text: plain text, a paragraph. (the `active` twin)
+    case textPeriodStoneActive = "text-period-stone.active"
+    /// Text: plain text, a paragraph.
+    case textAa = "text-aa"
+    /// Text: plain text, a paragraph. (the `active` twin)
+    case textAaActive = "text-aa.active"
+    /// Text: plain text, a paragraph.
+    case textQuote = "text-quote"
+    /// Text: plain text, a paragraph. (the `active` twin)
+    case textQuoteActive = "text-quote.active"
+    /// Text: plain text, a paragraph.
+    case curl = "curl"
+    /// Text: plain text, a paragraph. (the `active` twin)
+    case curlActive = "curl.active"
+    /// Text: plain text, a paragraph.
+    case textInitialStone = "text-initial-stone"
+    /// Text: plain text, a paragraph. (the `active` twin)
+    case textInitialStoneActive = "text-initial-stone.active"
+    /// Text: plain text, a paragraph.
+    case wavesPeriodStone = "waves-period-stone"
+    /// Text: plain text, a paragraph. (the `active` twin)
+    case wavesPeriodStoneActive = "waves-period-stone.active"
+    /// Text: plain text, a paragraph.
+    case textPeriod = "text-period"
+    /// Text: plain text, a paragraph. (the `active` twin)
+    case textPeriodActive = "text-period.active"
+    /// Text: plain text, a paragraph.
+    case letterTDot = "letter-t-dot"
+    /// Text: plain text, a paragraph. (the `active` twin)
+    case letterTDotActive = "letter-t-dot.active"
+    /// Text: plain text, a paragraph.
+    case textUnderlineDot = "text-underline-dot"
+    /// Text: plain text, a paragraph. (the `active` twin)
+    case textUnderlineDotActive = "text-underline-dot.active"
+    /// Text: plain text, a paragraph.
+    case paragraph = "paragraph"
+    /// Text: plain text, a paragraph. (the `active` twin)
+    case paragraphActive = "paragraph.active"
+    /// Memo: a short note.
+    case memoTextCorner = "memo-text-corner"
+    /// Memo: a short note. (the `active` twin)
+    case memoTextCornerActive = "memo-text-corner.active"
+    /// Memo: a short note.
+    case memoTextStone = "memo-text-stone"
+    /// Memo: a short note. (the `active` twin)
+    case memoTextStoneActive = "memo-text-stone.active"
+    /// Memo: a short note.
+    case memoTextTorn = "memo-text-torn"
+    /// Memo: a short note. (the `active` twin)
+    case memoTextTornActive = "memo-text-torn.active"
+    /// Memo: a short note.
+    case memoTextClip = "memo-text-clip"
+    /// Memo: a short note. (the `active` twin)
+    case memoTextClipActive = "memo-text-clip.active"
+    /// Memo: a short note.
+    case receipt = "receipt"
+    /// Memo: a short note. (the `active` twin)
+    case receiptActive = "receipt.active"
+    /// Memo: a short note.
+    case paperplane = "paperplane"
+    /// Memo: a short note. (the `active` twin)
+    case paperplaneActive = "paperplane.active"
+    /// Memo: a short note.
+    case memoTextStoneSm = "memo-text-stone-sm"
+    /// Memo: a short note. (the `active` twin)
+    case memoTextStoneSmActive = "memo-text-stone-sm.active"
+    /// Memo: a short note.
+    case bottleMessage = "bottle-message"
+    /// Memo: a short note. (the `active` twin)
+    case bottleMessageActive = "bottle-message.active"
+    /// Folder: a place that holds files.
+    case folder = "folder"
+    /// Folder: a place that holds files. (the `active` twin)
+    case folderActive = "folder.active"
+    /// Folder: a place that holds files.
+    case folder2 = "folder-2"
+    /// Folder: a place that holds files. (the `active` twin)
+    case folder2Active = "folder-2.active"
+    /// Folder: a place that holds files.
+    case archiveBox = "archive-box"
+    /// Folder: a place that holds files. (the `active` twin)
+    case archiveBoxActive = "archive-box.active"
+    /// Trunk: a travel chest.
+    case trunk = "trunk"
+    /// Trunk: a travel chest. (the `active` twin)
+    case trunkActive = "trunk.active"
+    /// Trunk: a travel chest.
+    case archiveBoxIso = "archive-box-iso"
+    /// Trunk: a travel chest. (the `active` twin)
+    case archiveBoxIsoActive = "archive-box-iso.active"
+    /// Trunk: a travel chest.
+    case toolbox = "toolbox"
+    /// Trunk: a travel chest. (the `active` twin)
+    case toolboxActive = "toolbox.active"
+    /// Trunk: a travel chest.
+    case metalBox = "metal-box"
+    /// Trunk: a travel chest. (the `active` twin)
+    case metalBoxActive = "metal-box.active"
+    /// Trunk: a travel chest.
+    case suitcase = "suitcase"
+    /// Trunk: a travel chest. (the `active` twin)
+    case suitcaseActive = "suitcase.active"
+    /// Medal: an honour hung on a ribbon.
+    case medal = "medal"
+    /// Medal: an honour hung on a ribbon. (the `active` twin)
+    case medalActive = "medal.active"
+    /// Medal: an honour hung on a ribbon.
+    case laurelStone = "laurel-stone"
+    /// Medal: an honour hung on a ribbon. (the `active` twin)
+    case laurelStoneActive = "laurel-stone.active"
+    /// Medal: an honour hung on a ribbon.
+    case medalStar = "medal-star"
+    /// Medal: an honour hung on a ribbon. (the `active` twin)
+    case medalStarActive = "medal-star.active"
+    /// Medal: an honour hung on a ribbon.
+    case podiumStone = "podium-stone"
+    /// Medal: an honour hung on a ribbon. (the `active` twin)
+    case podiumStoneActive = "podium-stone.active"
+    /// Medal: an honour hung on a ribbon.
+    case medalStone = "medal-stone"
+    /// Medal: an honour hung on a ribbon. (the `active` twin)
+    case medalStoneActive = "medal-stone.active"
+    /// Medal: an honour hung on a ribbon.
+    case medal2 = "medal-2"
+    /// Medal: an honour hung on a ribbon. (the `active` twin)
+    case medal2Active = "medal-2.active"
+    /// Medal: an honour hung on a ribbon.
+    case medal1 = "medal-1"
+    /// Medal: an honour hung on a ribbon. (the `active` twin)
+    case medal1Active = "medal-1.active"
+    /// Medal: an honour hung on a ribbon.
+    case laurelUser = "laurel-user"
+    /// Medal: an honour hung on a ribbon. (the `active` twin)
+    case laurelUserActive = "laurel-user.active"
+    /// Medal: an honour hung on a ribbon.
+    case medalGrade = "medal-grade"
+    /// Medal: an honour hung on a ribbon. (the `active` twin)
+    case medalGradeActive = "medal-grade.active"
+    /// Trophy: a cup for a win.
+    case trophyLg = "trophy-lg"
+    /// Trophy: a cup for a win. (the `active` twin)
+    case trophyLgActive = "trophy-lg.active"
+    /// Trophy: a cup for a win.
+    case trophy = "trophy"
+    /// Trophy: a cup for a win. (the `active` twin)
+    case trophyActive = "trophy.active"
+    /// Trophy: a cup for a win.
+    case trophyStar = "trophy-star"
+    /// Trophy: a cup for a win. (the `active` twin)
+    case trophyStarActive = "trophy-star.active"
+    /// Cave: a shelter in the rock.
+    case cave = "cave"
+    /// Cave: a shelter in the rock. (the `active` twin)
+    case caveActive = "cave.active"
+    /// Cave: a shelter in the rock.
+    case stonesCave = "stones-cave"
+    /// Cave: a shelter in the rock. (the `active` twin)
+    case stonesCaveActive = "stones-cave.active"
+    /// Moon: the moon, night.
+    case moonInverted = "moon-inverted"
+    /// Moon: the moon, night. (the `active` twin)
+    case moonInvertedActive = "moon-inverted.active"
+    /// Moon: the moon, night.
+    case cell = "cell"
+    /// Moon: the moon, night. (the `active` twin)
+    case cellActive = "cell.active"
+    /// Moon: the moon, night.
+    case hillSun = "hill-sun"
+    /// Moon: the moon, night. (the `active` twin)
+    case hillSunActive = "hill-sun.active"
+    /// Moon: the moon, night.
+    case moonZ = "moon-z"
+    /// Moon: the moon, night. (the `active` twin)
+    case moonZActive = "moon-z.active"
+    /// Moon: the moon, night.
+    case moonCrescent = "moon-crescent"
+    /// Moon: the moon, night. (the `active` twin)
+    case moonCrescentActive = "moon-crescent.active"
+    /// Moon: the moon, night.
+    case moonSeaUp = "moon-sea-up"
+    /// Moon: the moon, night. (the `active` twin)
+    case moonSeaUpActive = "moon-sea-up.active"
+    /// Moon: the moon, night.
+    case moonCloud = "moon-cloud"
+    /// Moon: the moon, night. (the `active` twin)
+    case moonCloudActive = "moon-cloud.active"
+    /// Star: a star, a favourite.
+    case shootingStarLg = "shooting-star-lg"
+    /// Star: a star, a favourite. (the `active` twin)
+    case shootingStarLgActive = "shooting-star-lg.active"
+    /// Star: a star, a favourite.
+    case starStone = "star-stone"
+    /// Star: a star, a favourite. (the `active` twin)
+    case starStoneActive = "star-stone.active"
+    /// Star: a star, a favourite.
+    case circleStar = "circle-star"
+    /// Star: a star, a favourite. (the `active` twin)
+    case circleStarActive = "circle-star.active"
+    /// Star: a star, a favourite.
+    case constellation = "constellation"
+    /// Star: a star, a favourite. (the `active` twin)
+    case constellationActive = "constellation.active"
+    /// Star: a star, a favourite.
+    case shootingStar = "shooting-star"
+    /// Star: a star, a favourite. (the `active` twin)
+    case shootingStarActive = "shooting-star.active"
+    /// Star: a star, a favourite.
+    case starDot = "star-dot"
+    /// Star: a star, a favourite. (the `active` twin)
+    case starDotActive = "star-dot.active"
+    /// Rainbow: a rainbow after rain.
+    case weather = "weather"
+    /// Rainbow: a rainbow after rain. (the `active` twin)
+    case weatherActive = "weather.active"
+    /// Rainbow: a rainbow after rain.
+    case rainbowReflect = "rainbow-reflect"
+    /// Rainbow: a rainbow after rain. (the `active` twin)
+    case rainbowReflectActive = "rainbow-reflect.active"
+    /// Rainbow: a rainbow after rain.
+    case stonesArc5 = "stones-arc-5"
+    /// Rainbow: a rainbow after rain. (the `active` twin)
+    case stonesArc5Active = "stones-arc-5.active"
+    /// Rainbow: a rainbow after rain.
+    case rainbow = "rainbow"
+    /// Rainbow: a rainbow after rain. (the `active` twin)
+    case rainbowActive = "rainbow.active"
+    /// Download: bring it down to the device.
+    case cloudArrowDownDownload = "cloud-arrow-down-download"
+    /// Download: bring it down to the device. (the `active` twin)
+    case cloudArrowDownDownloadActive = "cloud-arrow-down-download.active"
+    /// Download: bring it down to the device.
+    case halfCircleArrownDownDownload = "half-circle-arrown-down-download"
+    /// Download: bring it down to the device. (the `active` twin)
+    case halfCircleArrownDownDownloadActive = "half-circle-arrown-down-download.active"
+    /// Download: bring it down to the device.
+    case downloadPicture = "download-picture"
+    /// Download: bring it down to the device. (the `active` twin)
+    case downloadPictureActive = "download-picture.active"
+    /// Download: bring it down to the device.
+    case filterBox = "filter-box"
+    /// Download: bring it down to the device. (the `active` twin)
+    case filterBoxActive = "filter-box.active"
+    /// Download: bring it down to the device.
+    case deviceArrowDown = "device-arrow-down"
+    /// Download: bring it down to the device. (the `active` twin)
+    case deviceArrowDownActive = "device-arrow-down.active"
+    /// Download: bring it down to the device.
+    case abstractBowlPebbles = "abstract-bowl-pebbles"
+    /// Download: bring it down to the device. (the `active` twin)
+    case abstractBowlPebblesActive = "abstract-bowl-pebbles.active"
+    /// Rock: a rock, a solid stone.
+    case stoneBowl = "stone-bowl"
+    /// Rock: a rock, a solid stone. (the `active` twin)
+    case stoneBowlActive = "stone-bowl.active"
+    /// Rock: a rock, a solid stone.
+    case rockLg = "rock-lg"
+    /// Rock: a rock, a solid stone. (the `active` twin)
+    case rockLgActive = "rock-lg.active"
+    /// Rock: a rock, a solid stone.
+    case rockIso = "rock-iso"
+    /// Rock: a rock, a solid stone. (the `active` twin)
+    case rockIsoActive = "rock-iso.active"
+    /// Rock: a rock, a solid stone.
+    case rock = "rock"
+    /// Rock: a rock, a solid stone. (the `active` twin)
+    case rockActive = "rock.active"
+    /// Rock: a rock, a solid stone.
+    case stoneLayers = "stone-layers"
+    /// Rock: a rock, a solid stone. (the `active` twin)
+    case stoneLayersActive = "stone-layers.active"
+    /// Boulder: a great rock, too big to lift; must read apart from rock.
+    case stoneLayers2 = "stone-layers-2"
+    /// Boulder: a great rock, too big to lift; must read apart from rock. (the `active` twin)
+    case stoneLayers2Active = "stone-layers-2.active"
+    /// Hill: a gentle rise of land.
+    case hillPathPin = "hill-path-pin"
+    /// Hill: a gentle rise of land. (the `active` twin)
+    case hillPathPinActive = "hill-path-pin.active"
+    /// Hill: a gentle rise of land.
+    case hillSunset = "hill-sunset"
+    /// Hill: a gentle rise of land. (the `active` twin)
+    case hillSunsetActive = "hill-sunset.active"
+    /// Hill: a gentle rise of land.
+    case hillStonePath = "hill-stone-path"
+    /// Hill: a gentle rise of land. (the `active` twin)
+    case hillStonePathActive = "hill-stone-path.active"
+    /// Hill: a gentle rise of land.
+    case hillSunsetSoil = "hill-sunset-soil"
+    /// Hill: a gentle rise of land. (the `active` twin)
+    case hillSunsetSoilActive = "hill-sunset-soil.active"
+    /// Hill: a gentle rise of land.
+    case hillSunK = "hill-sun-k"
+    /// Hill: a gentle rise of land. (the `active` twin)
+    case hillSunKActive = "hill-sun-k.active"
+    /// Hill: a gentle rise of land.
+    case hills = "hills"
+    /// Hill: a gentle rise of land. (the `active` twin)
+    case hillsActive = "hills.active"
+    /// Hill: a gentle rise of land.
+    case hillStoneGrass = "hill-stone-grass"
+    /// Hill: a gentle rise of land. (the `active` twin)
+    case hillStoneGrassActive = "hill-stone-grass.active"
+    /// Mountain: a high peak; must read apart from hill.
+    case mountainsSummit = "mountains-summit"
+    /// Mountain: a high peak; must read apart from hill. (the `active` twin)
+    case mountainsSummitActive = "mountains-summit.active"
+    /// Mountain: a high peak; must read apart from hill.
+    case menhir2 = "menhir-2"
+    /// Mountain: a high peak; must read apart from hill. (the `active` twin)
+    case menhir2Active = "menhir-2.active"
+    /// Mountain: a high peak; must read apart from hill.
+    case mountainPathFlag = "mountain-path-flag"
+    /// Mountain: a high peak; must read apart from hill. (the `active` twin)
+    case mountainPathFlagActive = "mountain-path-flag.active"
+    /// Mountain: a high peak; must read apart from hill.
+    case mountains = "mountains"
+    /// Mountain: a high peak; must read apart from hill. (the `active` twin)
+    case mountainsActive = "mountains.active"
+    /// Mountain: a high peak; must read apart from hill.
+    case mountainForest = "mountain-forest"
+    /// Mountain: a high peak; must read apart from hill. (the `active` twin)
+    case mountainForestActive = "mountain-forest.active"
+    /// Mountain: a high peak; must read apart from hill.
+    case mountainCut = "mountain-cut"
+    /// Mountain: a high peak; must read apart from hill. (the `active` twin)
+    case mountainCutActive = "mountain-cut.active"
+    /// Mountain: a high peak; must read apart from hill.
+    case mountainPath = "mountain-path"
+    /// Mountain: a high peak; must read apart from hill. (the `active` twin)
+    case mountainPathActive = "mountain-path.active"
+    /// Mountain: a high peak; must read apart from hill.
+    case mountainWaves = "mountain-waves"
+    /// Mountain: a high peak; must read apart from hill. (the `active` twin)
+    case mountainWavesActive = "mountain-waves.active"
+    /// Mountain: a high peak; must read apart from hill.
+    case moutainsSea = "moutains-sea"
+    /// Mountain: a high peak; must read apart from hill. (the `active` twin)
+    case moutainsSeaActive = "moutains-sea.active"
+    /// Zap: a jolt, energy, instant.
+    case pebbleZap = "pebble-zap"
+    /// Zap: a jolt, energy, instant. (the `active` twin)
+    case pebbleZapActive = "pebble-zap.active"
+    /// Zap: a jolt, energy, instant.
+    case sunShineWave = "sun-shine-wave"
+    /// Zap: a jolt, energy, instant. (the `active` twin)
+    case sunShineWaveActive = "sun-shine-wave.active"
+    /// Zap: a jolt, energy, instant.
+    case sunShineBrightSm = "sun-shine-bright-sm"
+    /// Zap: a jolt, energy, instant. (the `active` twin)
+    case sunShineBrightSmActive = "sun-shine-bright-sm.active"
+    /// Zap: a jolt, energy, instant.
+    case sunShineBright = "sun-shine-bright"
+    /// Zap: a jolt, energy, instant. (the `active` twin)
+    case sunShineBrightActive = "sun-shine-bright.active"
+    /// Zap: a jolt, energy, instant.
+    case batteryZap = "battery-zap"
+    /// Zap: a jolt, energy, instant. (the `active` twin)
+    case batteryZapActive = "battery-zap.active"
+    /// Zap: a jolt, energy, instant.
+    case cloudZap = "cloud-zap"
+    /// Zap: a jolt, energy, instant. (the `active` twin)
+    case cloudZapActive = "cloud-zap.active"
+    /// Zap: a jolt, energy, instant.
+    case zap = "zap"
+    /// Zap: a jolt, energy, instant. (the `active` twin)
+    case zapActive = "zap.active"
+    /// Zap: a jolt, energy, instant.
+    case abstractZap = "abstract-zap"
+    /// Zap: a jolt, energy, instant. (the `active` twin)
+    case abstractZapActive = "abstract-zap.active"
+    /// Cloud: a cloud.
+    case cloud = "cloud"
+    /// Cloud: a cloud. (the `active` twin)
+    case cloudActive = "cloud.active"
+    /// Cloud: a cloud.
+    case circles = "circles"
+    /// Cloud: a cloud. (the `active` twin)
+    case circlesActive = "circles.active"
+    /// Cloud: a cloud.
+    case wind = "wind"
+    /// Cloud: a cloud. (the `active` twin)
+    case windActive = "wind.active"
+    /// Cloud: a cloud.
+    case cloudK = "cloud-k"
+    /// Cloud: a cloud. (the `active` twin)
+    case cloudKActive = "cloud-k.active"
+    /// Cloud: a cloud.
+    case clouds = "clouds"
+    /// Cloud: a cloud. (the `active` twin)
+    case cloudsActive = "clouds.active"
+    /// Cloud: a cloud.
+    case cloudStone = "cloud-stone"
+    /// Cloud: a cloud. (the `active` twin)
+    case cloudStoneActive = "cloud-stone.active"
+    /// Rain: rain falling.
+    case pebbleSpeed = "pebble-speed"
+    /// Rain: rain falling. (the `active` twin)
+    case pebbleSpeedActive = "pebble-speed.active"
+    /// Rain: rain falling.
+    case squareRain = "square-rain"
+    /// Rain: rain falling. (the `active` twin)
+    case squareRainActive = "square-rain.active"
+    /// Rain: rain falling.
+    case cloudRain = "cloud-rain"
+    /// Rain: rain falling. (the `active` twin)
+    case cloudRainActive = "cloud-rain.active"
+    /// Rain: rain falling.
+    case tint = "tint"
+    /// Rain: rain falling. (the `active` twin)
+    case tintActive = "tint.active"
+    /// Rain: rain falling.
+    case cloudRainDrop = "cloud-rain-drop"
+    /// Rain: rain falling. (the `active` twin)
+    case cloudRainDropActive = "cloud-rain-drop.active"
+    /// Rain: rain falling.
+    case squareRain2 = "square-rain-2"
+    /// Rain: rain falling. (the `active` twin)
+    case squareRain2Active = "square-rain-2.active"
+    /// Rain: rain falling.
+    case tint2 = "tint-2"
+    /// Rain: rain falling. (the `active` twin)
+    case tint2Active = "tint-2.active"
+    /// Envelope: a letter, a message.
+    case postcard = "postcard"
+    /// Envelope: a letter, a message. (the `active` twin)
+    case postcardActive = "postcard.active"
+    /// Envelope: a letter, a message.
+    case envelope2 = "envelope-2"
+    /// Envelope: a letter, a message. (the `active` twin)
+    case envelope2Active = "envelope-2.active"
+    /// Bell: a bell.
+    case bell = "bell"
+    /// Bell: a bell. (the `active` twin)
+    case bellActive = "bell.active"
+    /// Bell: a bell.
+    case bellRing = "bell-ring"
+    /// Bell: a bell. (the `active` twin)
+    case bellRingActive = "bell-ring.active"
+    /// Bell: a bell.
+    case chimer = "chimer"
+    /// Bell: a bell. (the `active` twin)
+    case chimerActive = "chimer.active"
+    /// Bell: a bell.
+    case bellK = "bell-k"
+    /// Bell: a bell. (the `active` twin)
+    case bellKActive = "bell-k.active"
+    /// Notification: something new arrived for you; must read apart from bell.
+    case bellBadge = "bell-badge"
+    /// Notification: something new arrived for you; must read apart from bell. (the `active` twin)
+    case bellBadgeActive = "bell-badge.active"
+    /// Notification: something new arrived for you; must read apart from bell.
+    case stoneBowlShine = "stone-bowl-shine"
+    /// Notification: something new arrived for you; must read apart from bell. (the `active` twin)
+    case stoneBowlShineActive = "stone-bowl-shine.active"
+    /// Notification: something new arrived for you; must read apart from bell.
+    case bubbleBadge = "bubble-badge"
+    /// Notification: something new arrived for you; must read apart from bell. (the `active` twin)
+    case bubbleBadgeActive = "bubble-badge.active"
+    /// Notification: something new arrived for you; must read apart from bell.
+    case serverDot = "server-dot"
+    /// Notification: something new arrived for you; must read apart from bell. (the `active` twin)
+    case serverDotActive = "server-dot.active"
+    /// Notification: something new arrived for you; must read apart from bell.
+    case doorRing = "door-ring"
+    /// Notification: something new arrived for you; must read apart from bell. (the `active` twin)
+    case doorRingActive = "door-ring.active"
+    /// Notification: something new arrived for you; must read apart from bell.
+    case envelopeBadge = "envelope-badge"
+    /// Notification: something new arrived for you; must read apart from bell. (the `active` twin)
+    case envelopeBadgeActive = "envelope-badge.active"
+    /// Notification: something new arrived for you; must read apart from bell.
+    case server = "server"
+    /// Notification: something new arrived for you; must read apart from bell. (the `active` twin)
+    case serverActive = "server.active"
+    /// Notification: something new arrived for you; must read apart from bell.
+    case letterboxUp = "letterbox-up"
+    /// Notification: something new arrived for you; must read apart from bell. (the `active` twin)
+    case letterboxUpActive = "letterbox-up.active"
+    /// Notification: something new arrived for you; must read apart from bell.
+    case squareBadge = "square-badge"
+    /// Notification: something new arrived for you; must read apart from bell. (the `active` twin)
+    case squareBadgeActive = "square-badge.active"
+    /// Notification: something new arrived for you; must read apart from bell.
+    case pebblePound = "pebble-pound"
+    /// Notification: something new arrived for you; must read apart from bell. (the `active` twin)
+    case pebblePoundActive = "pebble-pound.active"
+    /// List: a list of items.
+    case listStones = "list-stones"
+    /// List: a list of items. (the `active` twin)
+    case listStonesActive = "list-stones.active"
+    /// List: a list of items.
+    case receipt2 = "receipt-2"
+    /// List: a list of items. (the `active` twin)
+    case receipt2Active = "receipt-2.active"
+    /// List: a list of items.
+    case list = "list"
+    /// List: a list of items. (the `active` twin)
+    case listActive = "list.active"
+    /// List: a list of items.
+    case listDots = "list-dots"
+    /// List: a list of items. (the `active` twin)
+    case listDotsActive = "list-dots.active"
+    /// List: a list of items.
+    case listSort = "list-sort"
+    /// List: a list of items. (the `active` twin)
+    case listSortActive = "list-sort.active"
+    /// Minus: take one away.
+    case minus = "minus"
+    /// Minus: take one away. (the `active` twin)
+    case minusActive = "minus.active"
+    /// Minus: take one away.
+    case minus1 = "minus-1"
+    /// Minus: take one away. (the `active` twin)
+    case minus1Active = "minus-1.active"
+    /// Minus: take one away.
+    case eclipse = "eclipse"
+    /// Minus: take one away. (the `active` twin)
+    case eclipseActive = "eclipse.active"
+    /// Minus: take one away.
+    case cairnDrop = "cairn-drop"
+    /// Minus: take one away. (the `active` twin)
+    case cairnDropActive = "cairn-drop.active"
+    /// Minus: take one away.
+    case stones3Up = "stones-3-up"
+    /// Minus: take one away. (the `active` twin)
+    case stones3UpActive = "stones-3-up.active"
+    /// Remove: take it out of this set (it still exists elsewhere).
+    case circleMinus = "circle-minus"
+    /// Remove: take it out of this set (it still exists elsewhere). (the `active` twin)
+    case circleMinusActive = "circle-minus.active"
+    /// Remove: take it out of this set (it still exists elsewhere).
+    case pebblesIntersection = "pebbles-intersection"
+    /// Remove: take it out of this set (it still exists elsewhere). (the `active` twin)
+    case pebblesIntersectionActive = "pebbles-intersection.active"
+    /// Remove: take it out of this set (it still exists elsewhere).
+    case abstractStoneWater = "abstract-stone-water"
+    /// Remove: take it out of this set (it still exists elsewhere). (the `active` twin)
+    case abstractStoneWaterActive = "abstract-stone-water.active"
+    /// Remove: take it out of this set (it still exists elsewhere).
+    case itemsIndent = "items-indent"
+    /// Remove: take it out of this set (it still exists elsewhere). (the `active` twin)
+    case itemsIndentActive = "items-indent.active"
+    /// Remove: take it out of this set (it still exists elsewhere).
+    case stoneBoxOut = "stone-box-out"
+    /// Remove: take it out of this set (it still exists elsewhere). (the `active` twin)
+    case stoneBoxOutActive = "stone-box-out.active"
+    /// Remove: take it out of this set (it still exists elsewhere).
+    case squareOutsideRight = "square-outside-right"
+    /// Remove: take it out of this set (it still exists elsewhere). (the `active` twin)
+    case squareOutsideRightActive = "square-outside-right.active"
+    /// Remove: take it out of this set (it still exists elsewhere).
+    case stonesSoil = "stones-soil"
+    /// Remove: take it out of this set (it still exists elsewhere). (the `active` twin)
+    case stonesSoilActive = "stones-soil.active"
+    /// Remove: take it out of this set (it still exists elsewhere).
+    case doubleCircleOutside = "double-circle-outside"
+    /// Remove: take it out of this set (it still exists elsewhere). (the `active` twin)
+    case doubleCircleOutsideActive = "double-circle-outside.active"
+    /// Remove: take it out of this set (it still exists elsewhere).
+    case abstractStoneWater2 = "abstract-stone-water-2"
+    /// Remove: take it out of this set (it still exists elsewhere). (the `active` twin)
+    case abstractStoneWater2Active = "abstract-stone-water-2.active"
+    /// Delete: destroy it for good.
+    case stonesRubble = "stones-rubble"
+    /// Delete: destroy it for good. (the `active` twin)
+    case stonesRubbleActive = "stones-rubble.active"
+    /// Delete: destroy it for good.
+    case destroy = "destroy"
+    /// Delete: destroy it for good. (the `active` twin)
+    case destroyActive = "destroy.active"
+    /// Delete: destroy it for good.
+    case squaresRubble = "squares-rubble"
+    /// Delete: destroy it for good. (the `active` twin)
+    case squaresRubbleActive = "squares-rubble.active"
+    /// Jellyfish: a jellyfish.
+    case jellyfish = "jellyfish"
+    /// Jellyfish: a jellyfish. (the `active` twin)
+    case jellyfishActive = "jellyfish.active"
+    /// Jellyfish: a jellyfish.
+    case jellyfish2 = "jellyfish-2"
+    /// Jellyfish: a jellyfish. (the `active` twin)
+    case jellyfish2Active = "jellyfish-2.active"
+    /// Jellyfish: a jellyfish.
+    case jellyfishSurface = "jellyfish-surface"
+    /// Jellyfish: a jellyfish. (the `active` twin)
+    case jellyfishSurfaceActive = "jellyfish-surface.active"
+    /// Jellyfish: a jellyfish.
+    case jellyfishPebble = "jellyfish-pebble"
+    /// Jellyfish: a jellyfish. (the `active` twin)
+    case jellyfishPebbleActive = "jellyfish-pebble.active"
+    /// Jellyfish: a jellyfish.
+    case abstractJellyfish = "abstract-jellyfish"
+    /// Jellyfish: a jellyfish. (the `active` twin)
+    case abstractJellyfishActive = "abstract-jellyfish.active"
+    /// Jellyfish: a jellyfish.
+    case jellyfishMoving = "jellyfish-moving"
+    /// Jellyfish: a jellyfish. (the `active` twin)
+    case jellyfishMovingActive = "jellyfish-moving.active"
+    /// Jellyfish: a jellyfish.
+    case jellyfish2Dot = "jellyfish-2-dot"
+    /// Jellyfish: a jellyfish. (the `active` twin)
+    case jellyfish2DotActive = "jellyfish-2-dot.active"
+    /// Jellyfish: a jellyfish.
+    case jellyfishDots = "jellyfish-dots"
+    /// Jellyfish: a jellyfish. (the `active` twin)
+    case jellyfishDotsActive = "jellyfish-dots.active"
+    /// Jellyfish: a jellyfish.
+    case wavesVertical = "waves-vertical"
+    /// Jellyfish: a jellyfish. (the `active` twin)
+    case wavesVerticalActive = "waves-vertical.active"
+    /// Cat: a cat.
+    case cat = "cat"
+    /// Cat: a cat. (the `active` twin)
+    case catActive = "cat.active"
+    /// Cat: a cat.
+    case catBack2 = "cat-back-2"
+    /// Cat: a cat. (the `active` twin)
+    case catBack2Active = "cat-back-2.active"
+    /// Cat: a cat.
+    case paw = "paw"
+    /// Cat: a cat. (the `active` twin)
+    case pawActive = "paw.active"
+    /// Cat: a cat.
+    case cat2 = "cat-2"
+    /// Cat: a cat. (the `active` twin)
+    case cat2Active = "cat-2.active"
+    /// Cat: a cat.
+    case catBack = "cat-back"
+    /// Cat: a cat. (the `active` twin)
+    case catBackActive = "cat-back.active"
+    /// Dog: a dog.
+    case dogProfile = "dog-profile"
+    /// Dog: a dog. (the `active` twin)
+    case dogProfileActive = "dog-profile.active"
+    /// Dog: a dog.
+    case doghouse = "doghouse"
+    /// Dog: a dog. (the `active` twin)
+    case doghouseActive = "doghouse.active"
+    /// Dog: a dog.
+    case piglet = "piglet"
+    /// Dog: a dog. (the `active` twin)
+    case pigletActive = "piglet.active"
+    /// Dog: a dog.
+    case pig = "pig"
+    /// Dog: a dog. (the `active` twin)
+    case pigActive = "pig.active"
+    /// Dog: a dog.
+    case pawSm = "paw-sm"
+    /// Dog: a dog. (the `active` twin)
+    case pawSmActive = "paw-sm.active"
+    /// Dog: a dog.
+    case dog = "dog"
+    /// Dog: a dog. (the `active` twin)
+    case dogActive = "dog.active"
+    /// Dog: a dog.
+    case chickProfile = "chick-profile"
+    /// Dog: a dog. (the `active` twin)
+    case chickProfileActive = "chick-profile.active"
+    /// Dog: a dog.
+    case doghouseEmpty = "doghouse-empty"
+    /// Dog: a dog. (the `active` twin)
+    case doghouseEmptyActive = "doghouse-empty.active"
+    /// Bone: a bone.
+    case boneDown = "bone-down"
+    /// Bone: a bone. (the `active` twin)
+    case boneDownActive = "bone-down.active"
+    /// Bone: a bone.
+    case bone = "bone"
+    /// Bone: a bone. (the `active` twin)
+    case boneActive = "bone.active"
+    /// Bone: a bone.
+    case diverge2 = "diverge-2"
+    /// Bone: a bone. (the `active` twin)
+    case diverge2Active = "diverge-2.active"
+    /// Bone: a bone.
+    case converge = "converge"
+    /// Bone: a bone. (the `active` twin)
+    case convergeActive = "converge.active"
+    /// Bone: a bone.
+    case boneUp = "bone-up"
+    /// Bone: a bone. (the `active` twin)
+    case boneUpActive = "bone-up.active"
+    /// Bone: a bone.
+    case diverge = "diverge"
+    /// Bone: a bone. (the `active` twin)
+    case divergeActive = "diverge.active"
+    /// Lighthouse: a lighthouse, a guide in the dark.
+    case lighthouse = "lighthouse"
+    /// Lighthouse: a lighthouse, a guide in the dark. (the `active` twin)
+    case lighthouseActive = "lighthouse.active"
+    /// Lighthouse: a lighthouse, a guide in the dark.
+    case lighthouseRight = "lighthouse-right"
+    /// Lighthouse: a lighthouse, a guide in the dark. (the `active` twin)
+    case lighthouseRightActive = "lighthouse-right.active"
+    /// Lighthouse: a lighthouse, a guide in the dark.
+    case cairnShine = "cairn-shine"
+    /// Lighthouse: a lighthouse, a guide in the dark. (the `active` twin)
+    case cairnShineActive = "cairn-shine.active"
+    /// Lighthouse: a lighthouse, a guide in the dark.
+    case lighthouseIsland = "lighthouse-island"
+    /// Lighthouse: a lighthouse, a guide in the dark. (the `active` twin)
+    case lighthouseIslandActive = "lighthouse-island.active"
+    /// Keyboard: a keyboard.
+    case box = "box"
+    /// Keyboard: a keyboard. (the `active` twin)
+    case boxActive = "box.active"
+    /// Keyboard: a keyboard.
+    case laptop = "laptop"
+    /// Keyboard: a keyboard. (the `active` twin)
+    case laptopActive = "laptop.active"
+    /// Keyboard: a keyboard.
+    case piano = "piano"
+    /// Keyboard: a keyboard. (the `active` twin)
+    case pianoActive = "piano.active"
+    /// Keyboard: a keyboard.
+    case keyboard = "keyboard"
+    /// Keyboard: a keyboard. (the `active` twin)
+    case keyboardActive = "keyboard.active"
+    /// Keyboard: a keyboard.
+    case abstractRuby = "abstract-ruby"
+    /// Keyboard: a keyboard. (the `active` twin)
+    case abstractRubyActive = "abstract-ruby.active"
+    /// Guitar: a guitar.
+    case guitar = "guitar"
+    /// Guitar: a guitar. (the `active` twin)
+    case guitarActive = "guitar.active"
+    /// Guitar: a guitar.
+    case guitarFace = "guitar-face"
+    /// Guitar: a guitar. (the `active` twin)
+    case guitarFaceActive = "guitar-face.active"
+    /// Guitar: a guitar.
+    case guitarPick = "guitar-pick"
+    /// Guitar: a guitar. (the `active` twin)
+    case guitarPickActive = "guitar-pick.active"
+    /// Guitar: a guitar.
+    case guitarChords = "guitar-chords"
+    /// Guitar: a guitar. (the `active` twin)
+    case guitarChordsActive = "guitar-chords.active"
+    /// Guitar: a guitar.
+    case guitarOud = "guitar-oud"
+    /// Guitar: a guitar. (the `active` twin)
+    case guitarOudActive = "guitar-oud.active"
+    /// Guitar: a guitar.
+    case guitarTab = "guitar-tab"
+    /// Guitar: a guitar. (the `active` twin)
+    case guitarTabActive = "guitar-tab.active"
+    /// Guitar: a guitar.
+    case guitarPickChords = "guitar-pick-chords"
+    /// Guitar: a guitar. (the `active` twin)
+    case guitarPickChordsActive = "guitar-pick-chords.active"
+    /// Guitar: a guitar.
+    case guitarNeck = "guitar-neck"
+    /// Guitar: a guitar. (the `active` twin)
+    case guitarNeckActive = "guitar-neck.active"
+    /// Music: music, a melody.
+    case musicTrebleClef = "music-treble-clef"
+    /// Music: music, a melody. (the `active` twin)
+    case musicTrebleClefActive = "music-treble-clef.active"
+    /// Music: music, a melody.
+    case musicSheetNotes = "music-sheet-notes"
+    /// Music: music, a melody. (the `active` twin)
+    case musicSheetNotesActive = "music-sheet-notes.active"
+    /// Music: music, a melody.
+    case musicNoteDoubleQuaver = "music-note-double-quaver"
+    /// Music: music, a melody. (the `active` twin)
+    case musicNoteDoubleQuaverActive = "music-note-double-quaver.active"
+    /// Music: music, a melody.
+    case musicQuaver = "music-quaver"
+    /// Music: music, a melody. (the `active` twin)
+    case musicQuaverActive = "music-quaver.active"
+    /// Music: music, a melody.
+    case musicSheetNote = "music-sheet-note"
+    /// Music: music, a melody. (the `active` twin)
+    case musicSheetNoteActive = "music-sheet-note.active"
+    /// Music: music, a melody.
+    case musicSheetNote2 = "music-sheet-note-2"
+    /// Music: music, a melody. (the `active` twin)
+    case musicSheetNote2Active = "music-sheet-note-2.active"
+    /// Music: music, a melody.
+    case musicNote = "music-note"
+    /// Music: music, a melody. (the `active` twin)
+    case musicNoteActive = "music-note.active"
+    /// Baby: a baby, a newborn.
+    case faceBaby = "face-baby"
+    /// Baby: a baby, a newborn. (the `active` twin)
+    case faceBabyActive = "face-baby.active"
+    /// Baby: a baby, a newborn.
+    case troller = "troller"
+    /// Baby: a baby, a newborn. (the `active` twin)
+    case trollerActive = "troller.active"
+    /// Baby: a baby, a newborn.
+    case faceChild = "face-child"
+    /// Baby: a baby, a newborn. (the `active` twin)
+    case faceChildActive = "face-child.active"
+    /// Baby: a baby, a newborn.
+    case mobile = "mobile"
+    /// Baby: a baby, a newborn. (the `active` twin)
+    case mobileActive = "mobile.active"
+    /// Baby: a baby, a newborn.
+    case cradle = "cradle"
+    /// Baby: a baby, a newborn. (the `active` twin)
+    case cradleActive = "cradle.active"
+    /// Baby: a baby, a newborn.
+    case abstractHoney = "abstract-honey"
+    /// Baby: a baby, a newborn. (the `active` twin)
+    case abstractHoneyActive = "abstract-honey.active"
+    /// Milk: milk.
+    case milkCarton = "milk-carton"
+    /// Milk: milk. (the `active` twin)
+    case milkCartonActive = "milk-carton.active"
+    /// Milk: milk.
+    case milkBottleClosed = "milk-bottle-closed"
+    /// Milk: milk. (the `active` twin)
+    case milkBottleClosedActive = "milk-bottle-closed.active"
+    /// Milk: milk.
+    case dropWater = "drop-water"
+    /// Milk: milk. (the `active` twin)
+    case dropWaterActive = "drop-water.active"
+    /// Milk: milk.
+    case feedingBottle = "feeding-bottle"
+    /// Milk: milk. (the `active` twin)
+    case feedingBottleActive = "feeding-bottle.active"
+    /// Milk: milk.
+    case waterBottle = "water-bottle"
+    /// Milk: milk. (the `active` twin)
+    case waterBottleActive = "water-bottle.active"
+    /// Milk: milk.
+    case milkBottle = "milk-bottle"
+    /// Milk: milk. (the `active` twin)
+    case milkBottleActive = "milk-bottle.active"
+    /// Car: a car.
+    case carFront = "car-front"
+    /// Car: a car. (the `active` twin)
+    case carFrontActive = "car-front.active"
+    /// Car: a car.
+    case carWheel = "car-wheel"
+    /// Car: a car. (the `active` twin)
+    case carWheelActive = "car-wheel.active"
+    /// Car: a car.
+    case car = "car"
+    /// Car: a car. (the `active` twin)
+    case carActive = "car.active"
+    /// Car: a car.
+    case radio = "radio"
+    /// Car: a car. (the `active` twin)
+    case radioActive = "radio.active"
+    /// Car: a car.
+    case carK = "car-k"
+    /// Car: a car. (the `active` twin)
+    case carKActive = "car-k.active"
+    /// Car: a car.
+    case carSpeed = "car-speed"
+    /// Car: a car. (the `active` twin)
+    case carSpeedActive = "car-speed.active"
+    /// Car: a car.
+    case car2 = "car-2"
+    /// Car: a car. (the `active` twin)
+    case car2Active = "car-2.active"
+    /// Car: a car.
+    case carAbove = "car-above"
+    /// Car: a car. (the `active` twin)
+    case carAboveActive = "car-above.active"
+    /// Bike: a bicycle.
+    case bike = "bike"
+    /// Bike: a bicycle. (the `active` twin)
+    case bikeActive = "bike.active"
+    /// Bike: a bicycle.
+    case bike2 = "bike-2"
+    /// Bike: a bicycle. (the `active` twin)
+    case bike2Active = "bike-2.active"
+    /// House: a house, a building (not home, the place you land).
+    case house = "house"
+    /// House: a house, a building (not home, the place you land). (the `active` twin)
+    case houseActive = "house.active"
+    /// House: a house, a building (not home, the place you land).
+    case dome = "dome"
+    /// House: a house, a building (not home, the place you land). (the `active` twin)
+    case domeActive = "dome.active"
+    /// House: a house, a building (not home, the place you land).
+    case building = "building"
+    /// House: a house, a building (not home, the place you land). (the `active` twin)
+    case buildingActive = "building.active"
+    /// House: a house, a building (not home, the place you land).
+    case houseChemny = "house-chemny"
+    /// House: a house, a building (not home, the place you land). (the `active` twin)
+    case houseChemnyActive = "house-chemny.active"
+    /// House: a house, a building (not home, the place you land).
+    case birdHouse = "bird-house"
+    /// House: a house, a building (not home, the place you land). (the `active` twin)
+    case birdHouseActive = "bird-house.active"
+    /// House: a house, a building (not home, the place you land).
+    case farm = "farm"
+    /// House: a house, a building (not home, the place you land). (the `active` twin)
+    case farmActive = "farm.active"
+    /// House: a house, a building (not home, the place you land).
+    case houseBlock = "house-block"
+    /// House: a house, a building (not home, the place you land). (the `active` twin)
+    case houseBlockActive = "house-block.active"
+    /// House: a house, a building (not home, the place you land).
+    case houses = "houses"
+    /// House: a house, a building (not home, the place you land). (the `active` twin)
+    case housesActive = "houses.active"
+    /// House: a house, a building (not home, the place you land).
+    case windowRoof = "window-roof"
+    /// House: a house, a building (not home, the place you land). (the `active` twin)
+    case windowRoofActive = "window-roof.active"
+    /// Umbrella: an umbrella.
+    case umbrellaEmpty = "umbrella-empty"
+    /// Umbrella: an umbrella. (the `active` twin)
+    case umbrellaEmptyActive = "umbrella-empty.active"
+    /// Umbrella: an umbrella.
+    case umbrellaRain = "umbrella-rain"
+    /// Umbrella: an umbrella. (the `active` twin)
+    case umbrellaRainActive = "umbrella-rain.active"
+    /// Umbrella: an umbrella.
+    case parasol = "parasol"
+    /// Umbrella: an umbrella. (the `active` twin)
+    case parasolActive = "parasol.active"
+    /// Umbrella: an umbrella.
+    case umbrella = "umbrella"
+    /// Umbrella: an umbrella. (the `active` twin)
+    case umbrellaActive = "umbrella.active"
+    /// Umbrella: an umbrella.
+    case umbrellaAbove = "umbrella-above"
+    /// Umbrella: an umbrella. (the `active` twin)
+    case umbrellaAboveActive = "umbrella-above.active"
+    /// Ink: ink, a drop of it.
+    case bottle = "bottle"
+    /// Ink: ink, a drop of it. (the `active` twin)
+    case bottleActive = "bottle.active"
+    /// Ink: ink, a drop of it.
+    case abstractInk = "abstract-ink"
+    /// Ink: ink, a drop of it. (the `active` twin)
+    case abstractInkActive = "abstract-ink.active"
+    /// Ink: ink, a drop of it.
+    case inkBottle = "ink-bottle"
+    /// Ink: ink, a drop of it. (the `active` twin)
+    case inkBottleActive = "ink-bottle.active"
+    /// Ink: ink, a drop of it.
+    case inkPot = "ink-pot"
+    /// Ink: ink, a drop of it. (the `active` twin)
+    case inkPotActive = "ink-pot.active"
+    /// Question: a question, help.
+    case questionCircle = "question-circle"
+    /// Question: a question, help. (the `active` twin)
+    case questionCircleActive = "question-circle.active"
+    /// Question: a question, help.
+    case questionBubble = "question-bubble"
+    /// Question: a question, help. (the `active` twin)
+    case questionBubbleActive = "question-bubble.active"
+    /// Question: a question, help.
+    case lifeRing = "life-ring"
+    /// Question: a question, help. (the `active` twin)
+    case lifeRingActive = "life-ring.active"
+    /// Question: a question, help.
+    case questionMarkDot = "question-mark-dot"
+    /// Question: a question, help. (the `active` twin)
+    case questionMarkDotActive = "question-mark-dot.active"
+    /// Question: a question, help.
+    case questionBubbleChat = "question-bubble-chat"
+    /// Question: a question, help. (the `active` twin)
+    case questionBubbleChatActive = "question-bubble-chat.active"
+    /// Question: a question, help.
+    case questionMark = "question-mark"
+    /// Question: a question, help. (the `active` twin)
+    case questionMarkActive = "question-mark.active"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger).
+    case exclamationCircle = "exclamation-circle"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin)
+    case exclamationCircleActive = "exclamation-circle.active"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger).
+    case pebbleExclamation = "pebble-exclamation"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin)
+    case pebbleExclamationActive = "pebble-exclamation.active"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger).
+    case gaugeLow = "gauge-low"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin)
+    case gaugeLowActive = "gauge-low.active"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger).
+    case infoCircle = "info-circle"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin)
+    case infoCircleActive = "info-circle.active"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger).
+    case exclamationBold = "exclamation-bold"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin)
+    case exclamationBoldActive = "exclamation-bold.active"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger).
+    case infoSign = "info-sign"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin)
+    case infoSignActive = "info-sign.active"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger).
+    case dropWaterRipple = "drop-water-ripple"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin)
+    case dropWaterRippleActive = "drop-water-ripple.active"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger).
+    case alertShine = "alert-shine"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin)
+    case alertShineActive = "alert-shine.active"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger).
+    case eyeOpen1 = "eye-open-1"
+    /// Alert: pay attention: something needs you (mildest of alert, warning, danger). (the `active` twin)
+    case eyeOpen1Active = "eye-open-1.active"
+    /// Warning: careful: a risk ahead (middle).
+    case exclamationTriangle = "exclamation-triangle"
+    /// Warning: careful: a risk ahead (middle). (the `active` twin)
+    case exclamationTriangleActive = "exclamation-triangle.active"
+    /// Warning: careful: a risk ahead (middle).
+    case cloudZap2 = "cloud-zap-2"
+    /// Warning: careful: a risk ahead (middle). (the `active` twin)
+    case cloudZap2Active = "cloud-zap-2.active"
+    /// Warning: careful: a risk ahead (middle).
+    case exclamationDouble = "exclamation-double"
+    /// Warning: careful: a risk ahead (middle). (the `active` twin)
+    case exclamationDoubleActive = "exclamation-double.active"
+    /// Warning: careful: a risk ahead (middle).
+    case cairnFall = "cairn-fall"
+    /// Warning: careful: a risk ahead (middle). (the `active` twin)
+    case cairnFallActive = "cairn-fall.active"
+    /// Danger: danger: serious harm (strongest).
+    case skullX = "skull-x"
+    /// Danger: danger: serious harm (strongest). (the `active` twin)
+    case skullXActive = "skull-x.active"
+    /// Danger: danger: serious harm (strongest).
+    case abstractStoneMovement = "abstract-stone-movement"
+    /// Danger: danger: serious harm (strongest). (the `active` twin)
+    case abstractStoneMovementActive = "abstract-stone-movement.active"
+    /// Danger: danger: serious harm (strongest).
+    case pebbleTear = "pebble-tear"
+    /// Danger: danger: serious harm (strongest). (the `active` twin)
+    case pebbleTearActive = "pebble-tear.active"
+    /// Danger: danger: serious harm (strongest).
+    case pyramidLayersReversed = "pyramid-layers-reversed"
+    /// Danger: danger: serious harm (strongest). (the `active` twin)
+    case pyramidLayersReversedActive = "pyramid-layers-reversed.active"
+    /// Danger: danger: serious harm (strongest).
+    case exclamationBoldLakshmi = "exclamation-bold-lakshmi"
+    /// Danger: danger: serious harm (strongest). (the `active` twin)
+    case exclamationBoldLakshmiActive = "exclamation-bold-lakshmi.active"
+    /// Danger: danger: serious harm (strongest).
+    case xSign = "x-sign"
+    /// Danger: danger: serious harm (strongest). (the `active` twin)
+    case xSignActive = "x-sign.active"
+    /// Danger: danger: serious harm (strongest).
+    case exclamationTriple = "exclamation-triple"
+    /// Danger: danger: serious harm (strongest). (the `active` twin)
+    case exclamationTripleActive = "exclamation-triple.active"
+    /// Danger: danger: serious harm (strongest).
+    case exclamationDoubleLakshmi = "exclamation-double-lakshmi"
+    /// Danger: danger: serious harm (strongest). (the `active` twin)
+    case exclamationDoubleLakshmiActive = "exclamation-double-lakshmi.active"
+    /// Danger: danger: serious harm (strongest).
+    case karmaDot2 = "karma-dot-2"
+    /// Danger: danger: serious harm (strongest). (the `active` twin)
+    case karmaDot2Active = "karma-dot-2.active"
+    /// Danger: danger: serious harm (strongest).
+    case flame = "flame"
+    /// Danger: danger: serious harm (strongest). (the `active` twin)
+    case flameActive = "flame.active"
+    /// Danger: danger: serious harm (strongest).
+    case skull = "skull"
+    /// Danger: danger: serious harm (strongest). (the `active` twin)
+    case skullActive = "skull.active"
+    /// Stop: stop, halt.
+    case stopCircle = "stop-circle"
+    /// Stop: stop, halt. (the `active` twin)
+    case stopCircleActive = "stop-circle.active"
+    /// Stop: stop, halt.
+    case anchor = "anchor"
+    /// Stop: stop, halt. (the `active` twin)
+    case anchorActive = "anchor.active"
+    /// Stop: stop, halt.
+    case minusSign = "minus-sign"
+    /// Stop: stop, halt. (the `active` twin)
+    case minusSignActive = "minus-sign.active"
+    /// Stop: stop, halt.
+    case handPalm = "hand-palm"
+    /// Stop: stop, halt. (the `active` twin)
+    case handPalmActive = "hand-palm.active"
+    /// Stop: stop, halt.
+    case handStone = "hand-stone"
+    /// Stop: stop, halt. (the `active` twin)
+    case handStoneActive = "hand-stone.active"
+    /// Disabled: not available, turned off.
+    case toggleOff = "toggle-off"
+    /// Disabled: not available, turned off. (the `active` twin)
+    case toggleOffActive = "toggle-off.active"
+    /// Disabled: not available, turned off.
+    case pebbleZz = "pebble-zz"
+    /// Disabled: not available, turned off. (the `active` twin)
+    case pebbleZzActive = "pebble-zz.active"
+    /// Disabled: not available, turned off.
+    case powerOff = "power-off"
+    /// Disabled: not available, turned off. (the `active` twin)
+    case powerOffActive = "power-off.active"
+    /// Disabled: not available, turned off.
+    case exclamationOff = "exclamation-off"
+    /// Disabled: not available, turned off. (the `active` twin)
+    case exclamationOffActive = "exclamation-off.active"
+    /// Disabled: not available, turned off.
+    case circleDot = "circle-dot"
+    /// Disabled: not available, turned off. (the `active` twin)
+    case circleDotActive = "circle-dot.active"
+    /// Crab: a crab.
+    case crab = "crab"
+    /// Crab: a crab. (the `active` twin)
+    case crabActive = "crab.active"
+    /// Crab: a crab.
+    case shell = "shell"
+    /// Crab: a crab. (the `active` twin)
+    case shellActive = "shell.active"
+    /// Crab: a crab.
+    case crab2 = "crab-2"
+    /// Crab: a crab. (the `active` twin)
+    case crab2Active = "crab-2.active"
+    /// Crab: a crab.
+    case crabBell = "crab-bell"
+    /// Crab: a crab. (the `active` twin)
+    case crabBellActive = "crab-bell.active"
+    /// Crab: a crab.
+    case crab3 = "crab-3"
+    /// Crab: a crab. (the `active` twin)
+    case crab3Active = "crab-3.active"
+    /// Crab: a crab.
+    case crabClamp = "crab-clamp"
+    /// Crab: a crab. (the `active` twin)
+    case crabClampActive = "crab-clamp.active"
+    /// Crab: a crab.
+    case crabDots = "crab-dots"
+    /// Crab: a crab. (the `active` twin)
+    case crabDotsActive = "crab-dots.active"
+    /// Crab: a crab.
+    case shrimp = "shrimp"
+    /// Crab: a crab. (the `active` twin)
+    case shrimpActive = "shrimp.active"
+    /// Ripple: a ripple spreading on water.
+    case dotRipple = "dot-ripple"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case dotRippleActive = "dot-ripple.active"
+    /// Ripple: a ripple spreading on water.
+    case pinRipple = "pin-ripple"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case pinRippleActive = "pin-ripple.active"
+    /// Ripple: a ripple spreading on water.
+    case waterDropUp = "water-drop-up"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case waterDropUpActive = "water-drop-up.active"
+    /// Ripple: a ripple spreading on water.
+    case dotWave = "dot-wave"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case dotWaveActive = "dot-wave.active"
+    /// Ripple: a ripple spreading on water.
+    case ripple = "ripple"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case rippleActive = "ripple.active"
+    /// Ripple: a ripple spreading on water.
+    case rippleRing = "ripple-ring"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case rippleRingActive = "ripple-ring.active"
+    /// Ripple: a ripple spreading on water.
+    case rippleLeft = "ripple-left"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case rippleLeftActive = "ripple-left.active"
+    /// Ripple: a ripple spreading on water.
+    case stoneWaves = "stone-waves"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case stoneWavesActive = "stone-waves.active"
+    /// Ripple: a ripple spreading on water.
+    case karmaCenter = "karma-center"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case karmaCenterActive = "karma-center.active"
+    /// Ripple: a ripple spreading on water.
+    case rippleSymmetry = "ripple-symmetry"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case rippleSymmetryActive = "ripple-symmetry.active"
+    /// Ripple: a ripple spreading on water.
+    case waterDrop = "water-drop"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case waterDropActive = "water-drop.active"
+    /// Ripple: a ripple spreading on water.
+    case circlesDot = "circles-dot"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case circlesDotActive = "circles-dot.active"
+    /// Ripple: a ripple spreading on water.
+    case wood = "wood"
+    /// Ripple: a ripple spreading on water. (the `active` twin)
+    case woodActive = "wood.active"
+    /// Stepping stone: a stone you step on to cross.
+    case stonesStepsSea = "stones-steps-sea"
+    /// Stepping stone: a stone you step on to cross. (the `active` twin)
+    case stonesStepsSeaActive = "stones-steps-sea.active"
+    /// Stepping stone: a stone you step on to cross.
+    case stonesSteps3 = "stones-steps-3"
+    /// Stepping stone: a stone you step on to cross. (the `active` twin)
+    case stonesSteps3Active = "stones-steps-3.active"
+    /// Sound: sound on, a speaker.
+    case stoneSoundRight2 = "stone-sound-right-2"
+    /// Sound: sound on, a speaker. (the `active` twin)
+    case stoneSoundRight2Active = "stone-sound-right-2.active"
+    /// Sound: sound on, a speaker.
+    case megaphone = "megaphone"
+    /// Sound: sound on, a speaker. (the `active` twin)
+    case megaphoneActive = "megaphone.active"
+    /// Sound: sound on, a speaker.
+    case ear = "ear"
+    /// Sound: sound on, a speaker. (the `active` twin)
+    case earActive = "ear.active"
+    /// Sound: sound on, a speaker.
+    case drums = "drums"
+    /// Sound: sound on, a speaker. (the `active` twin)
+    case drumsActive = "drums.active"
+    /// Sound: sound on, a speaker.
+    case speaker = "speaker"
+    /// Sound: sound on, a speaker. (the `active` twin)
+    case speakerActive = "speaker.active"
+    /// Sound: sound on, a speaker.
+    case soundOn = "sound-on"
+    /// Sound: sound on, a speaker. (the `active` twin)
+    case soundOnActive = "sound-on.active"
+    /// Sound: sound on, a speaker.
+    case stoneSoundRight3 = "stone-sound-right-3"
+    /// Sound: sound on, a speaker. (the `active` twin)
+    case stoneSoundRight3Active = "stone-sound-right-3.active"
+    /// Sound: sound on, a speaker.
+    case speakerDot = "speaker-dot"
+    /// Sound: sound on, a speaker. (the `active` twin)
+    case speakerDotActive = "speaker-dot.active"
+    /// Microphone: a microphone, record your voice.
+    case microphone = "microphone"
+    /// Microphone: a microphone, record your voice. (the `active` twin)
+    case microphoneActive = "microphone.active"
+    /// Microphone: a microphone, record your voice.
+    case microphoneHigh = "microphone-high"
+    /// Microphone: a microphone, record your voice. (the `active` twin)
+    case microphoneHighActive = "microphone-high.active"
+    /// Microphone: a microphone, record your voice.
+    case microphoneArc = "microphone-arc"
+    /// Microphone: a microphone, record your voice. (the `active` twin)
+    case microphoneArcActive = "microphone-arc.active"
+    /// Microphone: a microphone, record your voice.
+    case microphoneWire = "microphone-wire"
+    /// Microphone: a microphone, record your voice. (the `active` twin)
+    case microphoneWireActive = "microphone-wire.active"
+    /// Audio: an audio file, a recording to play.
+    case fileAudio = "file-audio"
+    /// Audio: an audio file, a recording to play. (the `active` twin)
+    case fileAudioActive = "file-audio.active"
+    /// Audio: an audio file, a recording to play.
+    case tapeAudio = "tape-audio"
+    /// Audio: an audio file, a recording to play. (the `active` twin)
+    case tapeAudioActive = "tape-audio.active"
+    /// Audio: an audio file, a recording to play.
+    case vinyl = "vinyl"
+    /// Audio: an audio file, a recording to play. (the `active` twin)
+    case vinylActive = "vinyl.active"
+    /// Audio: an audio file, a recording to play.
+    case headset = "headset"
+    /// Audio: an audio file, a recording to play. (the `active` twin)
+    case headsetActive = "headset.active"
+    /// Audio: an audio file, a recording to play.
+    case blaster = "blaster"
+    /// Audio: an audio file, a recording to play. (the `active` twin)
+    case blasterActive = "blaster.active"
+    /// Audio: an audio file, a recording to play.
+    case playCircle = "play-circle"
+    /// Audio: an audio file, a recording to play. (the `active` twin)
+    case playCircleActive = "play-circle.active"
+    /// Waveform: the shape of a sound.
+    case waveform = "waveform"
+    /// Waveform: the shape of a sound. (the `active` twin)
+    case waveformActive = "waveform.active"
+    /// Waveform: the shape of a sound.
+    case signalDot = "signal-dot"
+    /// Waveform: the shape of a sound. (the `active` twin)
+    case signalDotActive = "signal-dot.active"
+    /// Waveform: the shape of a sound.
+    case waveformBold2 = "waveform-bold-2"
+    /// Waveform: the shape of a sound. (the `active` twin)
+    case waveformBold2Active = "waveform-bold-2.active"
+    /// Waveform: the shape of a sound.
+    case mountainsUnderline = "mountains-underline"
+    /// Waveform: the shape of a sound. (the `active` twin)
+    case mountainsUnderlineActive = "mountains-underline.active"
+    /// Waveform: the shape of a sound.
+    case sunShineBright2 = "sun-shine-bright-2"
+    /// Waveform: the shape of a sound. (the `active` twin)
+    case sunShineBright2Active = "sun-shine-bright-2.active"
+    /// Waveform: the shape of a sound.
+    case abstractWave = "abstract-wave"
+    /// Waveform: the shape of a sound. (the `active` twin)
+    case abstractWaveActive = "abstract-wave.active"
+    /// Waveform: the shape of a sound.
+    case waveformBold = "waveform-bold"
+    /// Waveform: the shape of a sound. (the `active` twin)
+    case waveformBoldActive = "waveform-bold.active"
+    /// Waveform: the shape of a sound.
+    case signal = "signal"
+    /// Waveform: the shape of a sound. (the `active` twin)
+    case signalActive = "signal.active"
+    /// Waveform: the shape of a sound.
+    case waveformDots = "waveform-dots"
+    /// Waveform: the shape of a sound. (the `active` twin)
+    case waveformDotsActive = "waveform-dots.active"
+    /// Waveform: the shape of a sound.
+    case waveformClip = "waveform-clip"
+    /// Waveform: the shape of a sound. (the `active` twin)
+    case waveformClipActive = "waveform-clip.active"
+    /// Signal: signal strength, a connection.
+    case cairnSignal = "cairn-signal"
+    /// Signal: signal strength, a connection. (the `active` twin)
+    case cairnSignalActive = "cairn-signal.active"
+    /// Signal: signal strength, a connection.
+    case radioSignal = "radio-signal"
+    /// Signal: signal strength, a connection. (the `active` twin)
+    case radioSignalActive = "radio-signal.active"
+    /// Signal: signal strength, a connection.
+    case codeMorse = "code-morse"
+    /// Signal: signal strength, a connection. (the `active` twin)
+    case codeMorseActive = "code-morse.active"
+    /// Signal: signal strength, a connection.
+    case stonesStepUp = "stones-step-up"
+    /// Signal: signal strength, a connection. (the `active` twin)
+    case stonesStepUpActive = "stones-step-up.active"
+    /// Mute: sound off.
+    case soundX = "sound-x"
+    /// Mute: sound off. (the `active` twin)
+    case soundXActive = "sound-x.active"
+    /// Mute: sound off.
+    case pebbleOff = "pebble-off"
+    /// Mute: sound off. (the `active` twin)
+    case pebbleOffActive = "pebble-off.active"
+    /// Mute: sound off.
+    case soundOff = "sound-off"
+    /// Mute: sound off. (the `active` twin)
+    case soundOffActive = "sound-off.active"
+    /// Mute: sound off.
+    case earOff = "ear-off"
+    /// Mute: sound off. (the `active` twin)
+    case earOffActive = "ear-off.active"
+    /// Mute: sound off.
+    case segment = "segment"
+    /// Mute: sound off. (the `active` twin)
+    case segmentActive = "segment.active"
+    /// Mute: sound off.
+    case microOff = "micro-off"
+    /// Mute: sound off. (the `active` twin)
+    case microOffActive = "micro-off.active"
+    /// Mute: sound off.
+    case speakerOff = "speaker-off"
+    /// Mute: sound off. (the `active` twin)
+    case speakerOffActive = "speaker-off.active"
+    /// Water: water.
+    case faucet = "faucet"
+    /// Water: water. (the `active` twin)
+    case faucetActive = "faucet.active"
+    /// Water: water.
+    case pound = "pound"
+    /// Water: water. (the `active` twin)
+    case poundActive = "pound.active"
+    /// Water: water.
+    case bottleClosed = "bottle-closed"
+    /// Water: water. (the `active` twin)
+    case bottleClosedActive = "bottle-closed.active"
+    /// Water: water.
+    case waterDropWave = "water-drop-wave"
+    /// Water: water. (the `active` twin)
+    case waterDropWaveActive = "water-drop-wave.active"
+    /// Water: water.
+    case waterWell = "water-well"
+    /// Water: water. (the `active` twin)
+    case waterWellActive = "water-well.active"
+    /// Water: water.
+    case glassStone = "glass-stone"
+    /// Water: water. (the `active` twin)
+    case glassStoneActive = "glass-stone.active"
+    /// Wave: a wave of the sea.
+    case wavesSun = "waves-sun"
+    /// Wave: a wave of the sea. (the `active` twin)
+    case wavesSunActive = "waves-sun.active"
+    /// Wave: a wave of the sea.
+    case handWave = "hand-wave"
+    /// Wave: a wave of the sea. (the `active` twin)
+    case handWaveActive = "hand-wave.active"
+    /// Wave: a wave of the sea.
+    case stoneWave = "stone-wave"
+    /// Wave: a wave of the sea. (the `active` twin)
+    case stoneWaveActive = "stone-wave.active"
+    /// Wave: a wave of the sea.
+    case boatWave = "boat-wave"
+    /// Wave: a wave of the sea. (the `active` twin)
+    case boatWaveActive = "boat-wave.active"
+    /// Wave: a wave of the sea.
+    case waveUp = "wave-up"
+    /// Wave: a wave of the sea. (the `active` twin)
+    case waveUpActive = "wave-up.active"
+    /// Wave: a wave of the sea.
+    case seats = "seats"
+    /// Wave: a wave of the sea. (the `active` twin)
+    case seatsActive = "seats.active"
+    /// Wave: a wave of the sea.
+    case waveDraw = "wave-draw"
+    /// Wave: a wave of the sea. (the `active` twin)
+    case waveDrawActive = "wave-draw.active"
+    /// Url: a web address.
+    case chipLabel = "chip-label"
+    /// Url: a web address. (the `active` twin)
+    case chipLabelActive = "chip-label.active"
+    /// Url: a web address.
+    case `protocol` = "protocol"
+    /// Url: a web address. (the `active` twin)
+    case protocolActive = "protocol.active"
+    /// Url: a web address.
+    case sign = "sign"
+    /// Url: a web address. (the `active` twin)
+    case signActive = "sign.active"
+    /// Url: a web address.
+    case stone12 = "stone-12"
+    /// Url: a web address. (the `active` twin)
+    case stone12Active = "stone-12.active"
+    /// Url: a web address.
+    case web = "web"
+    /// Url: a web address. (the `active` twin)
+    case webActive = "web.active"
+    /// Url: a web address.
+    case window = "window"
+    /// Url: a web address. (the `active` twin)
+    case windowActive = "window.active"
+    /// Url: a web address.
+    case globe = "globe"
+    /// Url: a web address. (the `active` twin)
+    case globeActive = "globe.active"
+    /// Url: a web address.
+    case at = "at"
+    /// Url: a web address. (the `active` twin)
+    case atActive = "at.active"
+    /// Url: a web address.
+    case pillsCursor = "pills-cursor"
+    /// Url: a web address. (the `active` twin)
+    case pillsCursorActive = "pills-cursor.active"
+    /// Url: a web address.
+    case searchBar = "search-bar"
+    /// Url: a web address. (the `active` twin)
+    case searchBarActive = "search-bar.active"
+    /// Url: a web address.
+    case slashSlashDot = "slash-slash-dot"
+    /// Url: a web address. (the `active` twin)
+    case slashSlashDotActive = "slash-slash-dot.active"
+    /// Url: a web address.
+    case unsetInput = "unset-input"
+    /// Url: a web address. (the `active` twin)
+    case unsetInputActive = "unset-input.active"
+    /// Url: a web address.
+    case qrCode = "qr-code"
+    /// Url: a web address. (the `active` twin)
+    case qrCodeActive = "qr-code.active"
+    /// Link: a link between two things.
+    case link = "link"
+    /// Link: a link between two things. (the `active` twin)
+    case linkActive = "link.active"
+    /// Link: a link between two things.
+    case bridge = "bridge"
+    /// Link: a link between two things. (the `active` twin)
+    case bridgeActive = "bridge.active"
+    /// Link: a link between two things.
+    case waveConnect = "wave-connect"
+    /// Link: a link between two things. (the `active` twin)
+    case waveConnectActive = "wave-connect.active"
+    /// Link: a link between two things.
+    case linkK = "link-k"
+    /// Link: a link between two things. (the `active` twin)
+    case linkKActive = "link-k.active"
+    /// Link: a link between two things.
+    case stonesLink = "stones-link"
+    /// Link: a link between two things. (the `active` twin)
+    case stonesLinkActive = "stones-link.active"
+    /// Link: a link between two things.
+    case bridge2 = "bridge-2"
+    /// Link: a link between two things. (the `active` twin)
+    case bridge2Active = "bridge-2.active"
+    /// Link: a link between two things.
+    case circlesJoined = "circles-joined"
+    /// Link: a link between two things. (the `active` twin)
+    case circlesJoinedActive = "circles-joined.active"
+    /// Link: a link between two things.
+    case network = "network"
+    /// Link: a link between two things. (the `active` twin)
+    case networkActive = "network.active"
+    /// Soccer: a football (soccer ball).
+    case soccerBall = "soccer-ball"
+    /// Soccer: a football (soccer ball). (the `active` twin)
+    case soccerBallActive = "soccer-ball.active"
+    /// Soccer: a football (soccer ball).
+    case stoneSpeedRight = "stone-speed-right"
+    /// Soccer: a football (soccer ball). (the `active` twin)
+    case stoneSpeedRightActive = "stone-speed-right.active"
+    /// Soccer: a football (soccer ball).
+    case goal = "goal"
+    /// Soccer: a football (soccer ball). (the `active` twin)
+    case goalActive = "goal.active"
+    /// Soccer: a football (soccer ball).
+    case soccerField = "soccer-field"
+    /// Soccer: a football (soccer ball). (the `active` twin)
+    case soccerFieldActive = "soccer-field.active"
+    /// Soccer: a football (soccer ball).
+    case dotCircleLine = "dot-circle-line"
+    /// Soccer: a football (soccer ball). (the `active` twin)
+    case dotCircleLineActive = "dot-circle-line.active"
+    /// Soccer: a football (soccer ball).
+    case farandoleCircle = "farandole-circle"
+    /// Soccer: a football (soccer ball). (the `active` twin)
+    case farandoleCircleActive = "farandole-circle.active"
+    /// Basketball: a basketball.
+    case basketballBasket = "basketball-basket"
+    /// Basketball: a basketball. (the `active` twin)
+    case basketballBasketActive = "basketball-basket.active"
+    /// Basketball: a basketball.
+    case basketball = "basketball"
+    /// Basketball: a basketball. (the `active` twin)
+    case basketballActive = "basketball.active"
+    /// Tv: a television.
+    case playScreen = "play-screen"
+    /// Tv: a television. (the `active` twin)
+    case playScreenActive = "play-screen.active"
+    /// Tv: a television.
+    case tvDot = "tv-dot"
+    /// Tv: a television. (the `active` twin)
+    case tvDotActive = "tv-dot.active"
+    /// Tv: a television.
+    case remote = "remote"
+    /// Tv: a television. (the `active` twin)
+    case remoteActive = "remote.active"
+    /// Tv: a television.
+    case presentationStone = "presentation-stone"
+    /// Tv: a television. (the `active` twin)
+    case presentationStoneActive = "presentation-stone.active"
+    /// Tv: a television.
+    case tvDots = "tv-dots"
+    /// Tv: a television. (the `active` twin)
+    case tvDotsActive = "tv-dots.active"
+    /// Tv: a television.
+    case presentationPicture = "presentation-picture"
+    /// Tv: a television. (the `active` twin)
+    case presentationPictureActive = "presentation-picture.active"
+    /// Tv: a television.
+    case presentationText = "presentation-text"
+    /// Tv: a television. (the `active` twin)
+    case presentationTextActive = "presentation-text.active"
+    /// Tv: a television.
+    case tv = "tv"
+    /// Tv: a television. (the `active` twin)
+    case tvActive = "tv.active"
+    /// Tv: a television.
+    case tvPicture = "tv-picture"
+    /// Tv: a television. (the `active` twin)
+    case tvPictureActive = "tv-picture.active"
+    /// Phone: a phone.
+    case phone = "phone"
+    /// Phone: a phone. (the `active` twin)
+    case phoneActive = "phone.active"
+    /// Phone: a phone.
+    case smartphone = "smartphone"
+    /// Phone: a phone. (the `active` twin)
+    case smartphoneActive = "smartphone.active"
+    /// Phone: a phone.
+    case phoneRing = "phone-ring"
+    /// Phone: a phone. (the `active` twin)
+    case phoneRingActive = "phone-ring.active"
+    /// Android: the Android platform mark, its robot head, redrawn in the house hand.
+    case android = "android"
+    /// Android: the Android platform mark, its robot head, redrawn in the house hand. (the `active` twin)
+    case androidActive = "android.active"
+    /// Android: the Android platform mark, its robot head, redrawn in the house hand.
+    case androidHead = "android-head"
+    /// Android: the Android platform mark, its robot head, redrawn in the house hand. (the `active` twin)
+    case androidHeadActive = "android-head.active"
+    /// Android: the Android platform mark, its robot head, redrawn in the house hand.
+    case androidHead2 = "android-head-2"
+    /// Android: the Android platform mark, its robot head, redrawn in the house hand. (the `active` twin)
+    case androidHead2Active = "android-head-2.active"
+    /// Robot: a robot.
+    case robotStonesArmsUp = "robot-stones-arms-up"
+    /// Robot: a robot. (the `active` twin)
+    case robotStonesArmsUpActive = "robot-stones-arms-up.active"
+    /// Robot: a robot.
+    case abstractCircleLine = "abstract-circle-line"
+    /// Robot: a robot. (the `active` twin)
+    case abstractCircleLineActive = "abstract-circle-line.active"
+    /// Robot: a robot.
+    case clamp = "clamp"
+    /// Robot: a robot. (the `active` twin)
+    case clampActive = "clamp.active"
+    /// Robot: a robot.
+    case robot = "robot"
+    /// Robot: a robot. (the `active` twin)
+    case robotActive = "robot.active"
+    /// Robot: a robot.
+    case robotHead = "robot-head"
+    /// Robot: a robot. (the `active` twin)
+    case robotHeadActive = "robot-head.active"
+    /// Robot: a robot.
+    case robotStonesArmsDown = "robot-stones-arms-down"
+    /// Robot: a robot. (the `active` twin)
+    case robotStonesArmsDownActive = "robot-stones-arms-down.active"
+    /// Robot: a robot.
+    case robotFun = "robot-fun"
+    /// Robot: a robot. (the `active` twin)
+    case robotFunActive = "robot-fun.active"
+    /// Apple: an apple, the fruit.
+    case appleLeaf = "apple-leaf"
+    /// Apple: an apple, the fruit. (the `active` twin)
+    case appleLeafActive = "apple-leaf.active"
+    /// Apple: an apple, the fruit.
+    case appleX = "apple-x"
+    /// Apple: an apple, the fruit. (the `active` twin)
+    case appleXActive = "apple-x.active"
+    /// Apple: an apple, the fruit.
+    case appleBranch = "apple-branch"
+    /// Apple: an apple, the fruit. (the `active` twin)
+    case appleBranchActive = "apple-branch.active"
+    /// Apple: an apple, the fruit.
+    case apple = "apple"
+    /// Apple: an apple, the fruit. (the `active` twin)
+    case appleActive = "apple.active"
+    /// Apple: an apple, the fruit.
+    case hourglassK = "hourglass-k"
+    /// Apple: an apple, the fruit. (the `active` twin)
+    case hourglassKActive = "hourglass-k.active"
+    /// Apple: an apple, the fruit.
+    case orange2 = "orange-2"
+    /// Apple: an apple, the fruit. (the `active` twin)
+    case orange2Active = "orange-2.active"
+    /// Apple: an apple, the fruit.
+    case appleSeeds = "apple-seeds"
+    /// Apple: an apple, the fruit. (the `active` twin)
+    case appleSeedsActive = "apple-seeds.active"
+    /// Banana: a banana.
+    case circlesDots = "circles-dots"
+    /// Banana: a banana. (the `active` twin)
+    case circlesDotsActive = "circles-dots.active"
+    /// Banana: a banana.
+    case boatWave2 = "boat-wave-2"
+    /// Banana: a banana. (the `active` twin)
+    case boatWave2Active = "boat-wave-2.active"
+    /// Pineapple: a pineapple.
+    case pineapple = "pineapple"
+    /// Pineapple: a pineapple. (the `active` twin)
+    case pineappleActive = "pineapple.active"
+    /// Pineapple: a pineapple.
+    case plant = "plant"
+    /// Pineapple: a pineapple. (the `active` twin)
+    case plantActive = "plant.active"
+    /// Pineapple: a pineapple.
+    case bomb = "bomb"
+    /// Pineapple: a pineapple. (the `active` twin)
+    case bombActive = "bomb.active"
+    /// Pineapple: a pineapple.
+    case vSlice = "v-slice"
+    /// Pineapple: a pineapple. (the `active` twin)
+    case vSliceActive = "v-slice.active"
+    /// Pineapple: a pineapple.
+    case wheel = "wheel"
+    /// Pineapple: a pineapple. (the `active` twin)
+    case wheelActive = "wheel.active"
+    /// Pineapple: a pineapple.
+    case grenada = "grenada"
+    /// Pineapple: a pineapple. (the `active` twin)
+    case grenadaActive = "grenada.active"
+    /// Food: food.
+    case forkKnife = "fork-knife"
+    /// Food: food. (the `active` twin)
+    case forkKnifeActive = "fork-knife.active"
+    /// Food: food.
+    case mealHotStone = "meal-hot-stone"
+    /// Food: food. (the `active` twin)
+    case mealHotStoneActive = "meal-hot-stone.active"
+    /// Food: food.
+    case eggFried2 = "egg-fried-2"
+    /// Food: food. (the `active` twin)
+    case eggFried2Active = "egg-fried-2.active"
+    /// Food: food.
+    case mealHot = "meal-hot"
+    /// Food: food. (the `active` twin)
+    case mealHotActive = "meal-hot.active"
+    /// Food: food.
+    case bread = "bread"
+    /// Food: food. (the `active` twin)
+    case breadActive = "bread.active"
+    /// Food: food.
+    case carrot = "carrot"
+    /// Food: food. (the `active` twin)
+    case carrotActive = "carrot.active"
+    /// Meal: a meal at the table.
+    case plateCutlery = "plate-cutlery"
+    /// Meal: a meal at the table. (the `active` twin)
+    case plateCutleryActive = "plate-cutlery.active"
+    /// Meal: a meal at the table.
+    case mealCloche = "meal-cloche"
+    /// Meal: a meal at the table. (the `active` twin)
+    case mealClocheActive = "meal-cloche.active"
+    /// Meal: a meal at the table.
+    case cooker = "cooker"
+    /// Meal: a meal at the table. (the `active` twin)
+    case cookerActive = "cooker.active"
+    /// Meal: a meal at the table.
+    case gameBoard = "game-board"
+    /// Meal: a meal at the table. (the `active` twin)
+    case gameBoardActive = "game-board.active"
+    /// Meal: a meal at the table.
+    case tableMealHot = "table-meal-hot"
+    /// Meal: a meal at the table. (the `active` twin)
+    case tableMealHotActive = "table-meal-hot.active"
+    /// Meal: a meal at the table.
+    case peopleTable = "people-table"
+    /// Meal: a meal at the table. (the `active` twin)
+    case peopleTableActive = "people-table.active"
+    /// Meal: a meal at the table.
+    case mealSticks = "meal-sticks"
+    /// Meal: a meal at the table. (the `active` twin)
+    case mealSticksActive = "meal-sticks.active"
+    /// Meal: a meal at the table.
+    case abstractForkDot = "abstract-fork-dot"
+    /// Meal: a meal at the table. (the `active` twin)
+    case abstractForkDotActive = "abstract-fork-dot.active"
+    /// Meal: a meal at the table.
+    case binocularsRow = "binoculars-row"
+    /// Meal: a meal at the table. (the `active` twin)
+    case binocularsRowActive = "binoculars-row.active"
+    /// Meal: a meal at the table.
+    case abstractSquareLayerDots = "abstract-square-layer-dots"
+    /// Meal: a meal at the table. (the `active` twin)
+    case abstractSquareLayerDotsActive = "abstract-square-layer-dots.active"
+    /// Christmas: Christmas.
+    case christmasBall = "christmas-ball"
+    /// Christmas: Christmas. (the `active` twin)
+    case christmasBallActive = "christmas-ball.active"
+    /// Christmas: Christmas.
+    case sock = "sock"
+    /// Christmas: Christmas. (the `active` twin)
+    case sockActive = "sock.active"
+    /// Christmas: Christmas.
+    case gift = "gift"
+    /// Christmas: Christmas. (the `active` twin)
+    case giftActive = "gift.active"
+    /// Christmas: Christmas.
+    case christmasTree = "christmas-tree"
+    /// Christmas: Christmas. (the `active` twin)
+    case christmasTreeActive = "christmas-tree.active"
+    /// Christmas: Christmas.
+    case church = "church"
+    /// Christmas: Christmas. (the `active` twin)
+    case churchActive = "church.active"
+    /// Pine: a pine tree.
+    case pineLines = "pine-lines"
+    /// Pine: a pine tree. (the `active` twin)
+    case pineLinesActive = "pine-lines.active"
+    /// Pine: a pine tree.
+    case pineCone = "pine-cone"
+    /// Pine: a pine tree. (the `active` twin)
+    case pineConeActive = "pine-cone.active"
+    /// Pine: a pine tree.
+    case pines = "pines"
+    /// Pine: a pine tree. (the `active` twin)
+    case pinesActive = "pines.active"
+    /// Pine: a pine tree.
+    case pineChevrons = "pine-chevrons"
+    /// Pine: a pine tree. (the `active` twin)
+    case pineChevronsActive = "pine-chevrons.active"
+    /// Pine: a pine tree.
+    case pineTree = "pine-tree"
+    /// Pine: a pine tree. (the `active` twin)
+    case pineTreeActive = "pine-tree.active"
+    /// Pine: a pine tree.
+    case pine = "pine"
+    /// Pine: a pine tree. (the `active` twin)
+    case pineActive = "pine.active"
+    /// Pine: a pine tree.
+    case pineStack = "pine-stack"
+    /// Pine: a pine tree. (the `active` twin)
+    case pineStackActive = "pine-stack.active"
+    /// Tree: a broad-leaf tree.
+    case tree = "tree"
+    /// Tree: a broad-leaf tree. (the `active` twin)
+    case treeActive = "tree.active"
+    /// Tree: a broad-leaf tree.
+    case treeBall = "tree-ball"
+    /// Tree: a broad-leaf tree. (the `active` twin)
+    case treeBallActive = "tree-ball.active"
+    /// Tree: a broad-leaf tree.
+    case treeBranches = "tree-branches"
+    /// Tree: a broad-leaf tree. (the `active` twin)
+    case treeBranchesActive = "tree-branches.active"
+    /// Tree: a broad-leaf tree.
+    case acorn = "acorn"
+    /// Tree: a broad-leaf tree. (the `active` twin)
+    case acornActive = "acorn.active"
+    /// Train: a train.
+    case trainFront = "train-front"
+    /// Train: a train. (the `active` twin)
+    case trainFrontActive = "train-front.active"
+    /// Train: a train.
+    case train = "train"
+    /// Train: a train. (the `active` twin)
+    case trainActive = "train.active"
+    /// Train: a train.
+    case trainUnderline = "train-underline"
+    /// Train: a train. (the `active` twin)
+    case trainUnderlineActive = "train-underline.active"
+    /// Train: a train.
+    case trainTicket = "train-ticket"
+    /// Train: a train. (the `active` twin)
+    case trainTicketActive = "train-ticket.active"
+    /// Fire: fire, a flame.
+    case flameDrop = "flame-drop"
+    /// Fire: fire, a flame. (the `active` twin)
+    case flameDropActive = "flame-drop.active"
+    /// Fire: fire, a flame.
+    case fire = "fire"
+    /// Fire: fire, a flame. (the `active` twin)
+    case fireActive = "fire.active"
+    /// Fire: fire, a flame.
+    case candleSimple = "candle-simple"
+    /// Fire: fire, a flame. (the `active` twin)
+    case candleSimpleActive = "candle-simple.active"
+    /// Fire: fire, a flame.
+    case firecamp = "firecamp"
+    /// Fire: fire, a flame. (the `active` twin)
+    case firecampActive = "firecamp.active"
+    /// Firepit: a fire in a ring of stones.
+    case firepitH = "firepit-h"
+    /// Firepit: a fire in a ring of stones. (the `active` twin)
+    case firepitHActive = "firepit-h.active"
+    /// Firepit: a fire in a ring of stones.
+    case farandoleFire = "farandole-fire"
+    /// Firepit: a fire in a ring of stones. (the `active` twin)
+    case farandoleFireActive = "farandole-fire.active"
+    /// Firepit: a fire in a ring of stones.
+    case firepitCurve = "firepit-curve"
+    /// Firepit: a fire in a ring of stones. (the `active` twin)
+    case firepitCurveActive = "firepit-curve.active"
+    /// Firepit: a fire in a ring of stones.
+    case firepitAbove = "firepit-above"
+    /// Firepit: a fire in a ring of stones. (the `active` twin)
+    case firepitAboveActive = "firepit-above.active"
+    /// Firepit: a fire in a ring of stones.
+    case firepit = "firepit"
+    /// Firepit: a fire in a ring of stones. (the `active` twin)
+    case firepitActive = "firepit.active"
+    /// Firepit: a fire in a ring of stones.
+    case sparkleCircleDots = "sparkle-circle-dots"
+    /// Firepit: a fire in a ring of stones. (the `active` twin)
+    case sparkleCircleDotsActive = "sparkle-circle-dots.active"
+    /// Fish: a fish.
+    case fishesRound = "fishes-round"
+    /// Fish: a fish. (the `active` twin)
+    case fishesRoundActive = "fishes-round.active"
+    /// Fish: a fish.
+    case fishDive = "fish-dive"
+    /// Fish: a fish. (the `active` twin)
+    case fishDiveActive = "fish-dive.active"
+    /// Fish: a fish.
+    case fish2 = "fish-2"
+    /// Fish: a fish. (the `active` twin)
+    case fish2Active = "fish-2.active"
+    /// Fish: a fish.
+    case fish = "fish"
+    /// Fish: a fish. (the `active` twin)
+    case fishActive = "fish.active"
+    /// Fish: a fish.
+    case fishJump = "fish-jump"
+    /// Fish: a fish. (the `active` twin)
+    case fishJumpActive = "fish-jump.active"
+    /// Fish: a fish.
+    case fishBowl = "fish-bowl"
+    /// Fish: a fish. (the `active` twin)
+    case fishBowlActive = "fish-bowl.active"
+    /// Fish: a fish.
+    case fishes = "fishes"
+    /// Fish: a fish. (the `active` twin)
+    case fishesActive = "fishes.active"
+    /// Poo: poo.
+    case poo = "poo"
+    /// Poo: poo. (the `active` twin)
+    case pooActive = "poo.active"
+    /// Poo: poo.
+    case pooFlies = "poo-flies"
+    /// Poo: poo. (the `active` twin)
+    case pooFliesActive = "poo-flies.active"
+    /// Poo: poo.
+    case toilet = "toilet"
+    /// Poo: poo. (the `active` twin)
+    case toiletActive = "toilet.active"
+    /// Poo: poo.
+    case hillSprout = "hill-sprout"
+    /// Poo: poo. (the `active` twin)
+    case hillSproutActive = "hill-sprout.active"
+    /// Poo: poo.
+    case pooSmell = "poo-smell"
+    /// Poo: poo. (the `active` twin)
+    case pooSmellActive = "poo-smell.active"
+    /// Poo: poo.
+    case earthSprout = "earth-sprout"
+    /// Poo: poo. (the `active` twin)
+    case earthSproutActive = "earth-sprout.active"
+    /// Map: a map.
+    case mapMarker = "map-marker"
+    /// Map: a map. (the `active` twin)
+    case mapMarkerActive = "map-marker.active"
+    /// Map: a map.
+    case globeSpin = "globe-spin"
+    /// Map: a map. (the `active` twin)
+    case globeSpinActive = "globe-spin.active"
+    /// Map: a map.
+    case mapFold = "map-fold"
+    /// Map: a map. (the `active` twin)
+    case mapFoldActive = "map-fold.active"
+    /// Map: a map.
+    case gridDot = "grid-dot"
+    /// Map: a map. (the `active` twin)
+    case gridDotActive = "grid-dot.active"
+    /// Map: a map.
+    case mapFoldPath = "map-fold-path"
+    /// Map: a map. (the `active` twin)
+    case mapFoldPathActive = "map-fold-path.active"
+    /// Map: a map.
+    case gridSparks = "grid-sparks"
+    /// Map: a map. (the `active` twin)
+    case gridSparksActive = "grid-sparks.active"
+    /// Store: a shop.
+    case store = "store"
+    /// Store: a shop. (the `active` twin)
+    case storeActive = "store.active"
+    /// Store: a shop.
+    case storeBell = "store-bell"
+    /// Store: a shop. (the `active` twin)
+    case storeBellActive = "store-bell.active"
+    /// Store: a shop.
+    case saleSign = "sale-sign"
+    /// Store: a shop. (the `active` twin)
+    case saleSignActive = "sale-sign.active"
+    /// Store: a shop.
+    case factory = "factory"
+    /// Store: a shop. (the `active` twin)
+    case factoryActive = "factory.active"
+    /// Store: a shop.
+    case storeShelve = "store-shelve"
+    /// Store: a shop. (the `active` twin)
+    case storeShelveActive = "store-shelve.active"
+    /// Shopping: shopping, a bag or a cart.
+    case shoppingBagDot = "shopping-bag-dot"
+    /// Shopping: shopping, a bag or a cart. (the `active` twin)
+    case shoppingBagDotActive = "shopping-bag-dot.active"
+    /// Shopping: shopping, a bag or a cart.
+    case shoppingBasket = "shopping-basket"
+    /// Shopping: shopping, a bag or a cart. (the `active` twin)
+    case shoppingBasketActive = "shopping-basket.active"
+    /// Shopping: shopping, a bag or a cart.
+    case bucket = "bucket"
+    /// Shopping: shopping, a bag or a cart. (the `active` twin)
+    case bucketActive = "bucket.active"
+    /// Shopping: shopping, a bag or a cart.
+    case bathBottles = "bath-bottles"
+    /// Shopping: shopping, a bag or a cart. (the `active` twin)
+    case bathBottlesActive = "bath-bottles.active"
+    /// Shopping: shopping, a bag or a cart.
+    case shoppingTrolley = "shopping-trolley"
+    /// Shopping: shopping, a bag or a cart. (the `active` twin)
+    case shoppingTrolleyActive = "shopping-trolley.active"
+    /// Shopping: shopping, a bag or a cart.
+    case shoppingCart = "shopping-cart"
+    /// Shopping: shopping, a bag or a cart. (the `active` twin)
+    case shoppingCartActive = "shopping-cart.active"
+    /// Shopping: shopping, a bag or a cart.
+    case basket = "basket"
+    /// Shopping: shopping, a bag or a cart. (the `active` twin)
+    case basketActive = "basket.active"
+    /// Shopping: shopping, a bag or a cart.
+    case abstractStoneCurve = "abstract-stone-curve"
+    /// Shopping: shopping, a bag or a cart. (the `active` twin)
+    case abstractStoneCurveActive = "abstract-stone-curve.active"
 
     /// The image's name in `Icons.xcassets`: `pbbls-<name>-<variant>`.
     var assetName: String {
