@@ -96,3 +96,47 @@ const FLAGGED: ReadonlySet<string> = new Set((review as { name: string; flags: u
 export function needsReview(name: string): boolean {
   return FLAGGED.has(name)
 }
+
+/** What the role pass (scripts/explore/roles.py) flagged on a glyph, from review.json. */
+export type ReviewFlag =
+  | { kind: "added-dot"; from: string; path: number; area: number }
+  | { kind: "redrawn"; from: string; area: number }
+  | { kind: "conflict"; path: number; was: string; wanted: string }
+  /** A twin's new geometry matched nothing, after another twin had already added a dot. */
+  | { kind: "conflict"; from: string; was: string; area: number }
+
+const FLAGS: ReadonlyMap<string, readonly ReviewFlag[]> = new Map(
+  (review as { name: string; flags: ReviewFlag[] }[]).filter((r) => r.flags.length > 0).map((r) => [r.name, r.flags]),
+)
+
+export function reviewFlags(name: string): readonly ReviewFlag[] {
+  return FLAGS.get(name) ?? []
+}
+
+/** A flag in plain words; paths are numbered from 1, as the roles map labels them. */
+export function describeFlag(flag: ReviewFlag): string {
+  switch (flag.kind) {
+    case "added-dot":
+      return `Path ${flag.path + 1} was added from the ${flag.from} twin as a hidden mark (area ${flag.area}): it is not drawn at rest, only lit.`
+    case "redrawn":
+      return `The ${flag.from} twin redraws the glyph (${flag.area} units of new area): its state cannot be derived from roles, so it needs an override or a redrawing.`
+    case "conflict":
+      return "path" in flag
+        ? `Path ${flag.path + 1} is ${flag.was}, but another twin wanted it as ${flag.wanted}.`
+        : `The ${flag.from} twin adds ${flag.area} units of its own, after another twin already took the ${flag.was} slot: one of the two is lost.`
+  }
+}
+
+/** The flagged paths' indices, to pick them out in the roles map. */
+export function flaggedPaths(name: string): Set<number> {
+  return new Set(reviewFlags(name).flatMap((f) => ("path" in f ? [f.path] : [])))
+}
+
+/** Every form the glyph has (the order of `availableForms`), as the review dialog lays them out. */
+export function formChoices(glyph: Glyph): { label: string; form: FormChoice; k: number; override: boolean }[] {
+  const choices: { label: string; form: FormChoice; k: number }[] = [{ label: "regular", form: "regular", k: 0 }]
+  if (glyph.paths.some((p) => p.role === "focus")) choices.push({ label: "half", form: "half", k: 0 })
+  if (glyph.solid) choices.push({ label: "solid", form: "solid", k: 0 })
+  for (let k = 1; k <= glyph.marks; k += 1) choices.push({ label: `progress-${k}`, form: "progress", k })
+  return choices.map((c) => ({ ...c, override: c.label in glyph.overrides }))
+}

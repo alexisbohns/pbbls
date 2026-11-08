@@ -78,8 +78,17 @@ export function useReviewVerdicts() {
     },
     [verdicts],
   )
+  const set = useCallback(
+    (name: string, verdict: Verdict | undefined) => {
+      const next = { ...verdicts }
+      if (verdict) next[name] = verdict
+      else delete next[name]
+      write(next)
+    },
+    [verdicts],
+  )
   const copy = useCallback(async () => {
     await navigator.clipboard.writeText(JSON.stringify({ verdicts, copiedAt: new Date().toISOString() }, null, 1))
   }, [verdicts])
-  return { verdicts, cycle, copy }
+  return { verdicts, cycle, set, copy }
 }

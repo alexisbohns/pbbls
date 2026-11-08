@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useMemo } from "react"
+import { Fragment, useMemo, useState } from "react"
 import { Android, Apple, Globe } from "@pbbls/icons"
 import type { FindingGroup } from "@/lib/design/audit"
 import { GLYPHS, glyphMatchesQuery, hasForm, needsReview, type FormChoice, type Glyph } from "@/lib/design/glyph-forms"
@@ -13,6 +13,7 @@ import { useDesign } from "../DesignContext"
 import { DesignSection } from "../DesignSection"
 import { FindingList } from "../FindingList"
 import { GlyphFormView } from "../GlyphFormView"
+import { GlyphReviewDialog } from "../GlyphReviewDialog"
 
 /** Each surface drawn with the set's own glyph: the web's globe, Apple's apple, Android's head. */
 const SURFACES: readonly { surface: IconSurface; label: string; Icon: PbblsIconComponent }[] = [
@@ -50,9 +51,10 @@ type GlyphTileProps = {
   k: number
   verdict?: Verdict
   onVerdict: () => void
+  onOpen: () => void
 }
 
-function GlyphTile({ glyph, size, form, k, verdict, onVerdict }: GlyphTileProps) {
+function GlyphTile({ glyph, size, form, k, verdict, onVerdict, onOpen }: GlyphTileProps) {
   const migrated = MIGRATED.get(glyph.name) ?? []
   return (
     <li
@@ -62,6 +64,13 @@ function GlyphTile({ glyph, size, form, k, verdict, onVerdict }: GlyphTileProps)
         !hasForm(glyph, form) && "opacity-40",
       )}
     >
+      {/* The whole tile opens the review dialog; the verdict pill sits above it. */}
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={`Open ${glyph.name}: every form, its twins and its roles`}
+        className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
       {needsReview(glyph.name) && (
         <button
           type="button"
@@ -69,7 +78,7 @@ function GlyphTile({ glyph, size, form, k, verdict, onVerdict }: GlyphTileProps)
           aria-label={`Review ${glyph.name}: ${verdict ?? "no verdict"}`}
           // px-1.5 keeps the longest label ("drop-twin") clear of the hover platform marks at the 8.5rem tile.
           className={cn(
-            "absolute top-2 left-2 rounded-full px-1.5 py-0.5 text-[10px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "absolute top-2 left-2 z-10 rounded-full px-1.5 py-0.5 text-[10px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
             verdict === "ok" && "bg-primary text-primary-foreground",
             verdict === "fix" && "bg-secondary text-secondary-foreground",
             verdict === "drop-twin" && "bg-muted text-muted-foreground line-through",
@@ -107,11 +116,17 @@ function GlyphTile({ glyph, size, form, k, verdict, onVerdict }: GlyphTileProps)
  */
 export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
   const { iconQuery, iconSize, glyphForm, glyphProgress, reviewOnly } = useDesign()
-  const { verdicts, cycle, copy } = useReviewVerdicts()
+  const { verdicts, cycle, set, copy } = useReviewVerdicts()
+  const [openName, setOpenName] = useState<string | null>(null)
   const glyphs = useMemo(
     () => GLYPHS.filter((g) => glyphMatchesQuery(g, iconQuery) && (!reviewOnly || needsReview(g.name))),
     [iconQuery, reviewOnly],
   )
+  const openIndex = openName === null ? -1 : glyphs.findIndex((g) => g.name === openName)
+  const step = (by: number) => {
+    if (openIndex < 0 || glyphs.length === 0) return
+    setOpenName(glyphs[(openIndex + by + glyphs.length) % glyphs.length].name)
+  }
   const reviewed = glyphs.filter((g) => verdicts[g.name] !== undefined).length
   const webPending = ICON_ROWS.filter((row) => row.replacesWeb.length > 0 && !row.migrated.includes("web"))
   const lucideUses = lucide.reduce((n, g) => n + g.count, 0)
@@ -123,7 +138,7 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
         {reviewOnly && (
           <div className="mb-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
             <span>
-              {reviewed} of {glyphs.length} reviewed · tap a tile&apos;s label: ok, fix, drop-twin
+              {reviewed} of {glyphs.length} reviewed · open a tile to see its forms and twins, or tap its label: ok, fix, drop-twin
             </span>
             <Button size="sm" variant="secondary" onClick={() => void copy()}>
               Copy verdicts
@@ -145,10 +160,20 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
                 k={glyphProgress}
                 verdict={verdicts[glyph.name]}
                 onVerdict={() => cycle(glyph.name)}
+                onOpen={() => setOpenName(glyph.name)}
               />
             ))}
           </ul>
         )}
+        <GlyphReviewDialog
+          glyph={openIndex >= 0 ? glyphs[openIndex] : null}
+          position={`${openIndex + 1} of ${glyphs.length}`}
+          verdict={openName ? verdicts[openName] : undefined}
+          onVerdict={(v) => openName && set(openName, v)}
+          onPrev={() => step(-1)}
+          onNext={() => step(1)}
+          onClose={() => setOpenName(null)}
+        />
       </section>
 
       <DesignSection
