@@ -10,9 +10,19 @@ export const VARIANTS: readonly Variant[] = ["active", "lit-1", "lit-2", "lit-3"
 export type Surface = "ios" | "android" | "web"
 export const SURFACES: readonly Surface[] = ["ios", "android", "web"]
 
+/** The tag keys a row may carry (spec D5). Tags help search; code never reads them. */
+export const TAG_KEYS = ["subject", "wrapper", "number", "side", "direction", "size", "keywords"] as const
+export type TagKey = (typeof TAG_KEYS)[number]
+export type Tags = Partial<Record<TagKey, string[]>>
+
+const isTagKey = (v: string): v is TagKey => (TAG_KEYS as readonly string[]).includes(v)
+
 export type IconRow = {
   name: string
   meaning: string
+  /** Groups versions of one idea (`knot` for `knot-sm` and `knot-lg`); null when alone. */
+  family: string | null
+  tags: Tags
   variants: string[]
   wave: string
   status: string
@@ -45,7 +55,7 @@ const isSurface = (v: string): v is Surface => (SURFACES as readonly string[]).i
 function rowFrom(value: unknown, index: number): IconRow {
   const where = `${MANIFEST_FILE}: icons[${index}]`
   if (!isRecord(value)) throw new Error(`${where} is not an object`)
-  const { name, meaning, variants, wave, status, migrated, replaces } = value
+  const { name, meaning, variants, wave, status, migrated, replaces, family, tags } = value
   if (typeof name !== "string") throw new Error(`${where}.name is not a string`)
   if (typeof meaning !== "string") throw new Error(`${where} (${name}).meaning is not a string`)
   if (!isStringArray(variants)) throw new Error(`${where} (${name}).variants is not a string array`)
@@ -69,7 +79,17 @@ function rowFrom(value: unknown, index: number): IconRow {
     if (!isStringArray(list)) throw new Error(`${where} (${name}).replaces.${surface} is not a string array`)
     lists[surface] = list
   }
-  return { name, meaning, variants, wave, status, migrated: migratedSurfaces, replaces: lists }
+  if (family !== undefined && family !== null && typeof family !== "string") throw new Error(`${where} (${name}).family is not a string`)
+  const tagRecord: Tags = {}
+  if (tags !== undefined) {
+    if (!isRecord(tags)) throw new Error(`${where} (${name}).tags is not an object`)
+    for (const [key, list] of Object.entries(tags)) {
+      if (!isTagKey(key)) throw new Error(`${where} (${name}).tags.${key} is not a tag key (${TAG_KEYS.join(", ")})`)
+      if (!isStringArray(list)) throw new Error(`${where} (${name}).tags.${key} is not a string array`)
+      tagRecord[key] = list
+    }
+  }
+  return { name, meaning, family: typeof family === "string" ? family : null, tags: tagRecord, variants, wave, status, migrated: migratedSurfaces, replaces: lists }
 }
 
 /** Shape-checks a parsed `icons.json`; every failure names the row. */
