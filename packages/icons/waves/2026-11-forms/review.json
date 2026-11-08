@@ -86,15 +86,14 @@
  {
   "name": "home",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 1.0
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 1.0
    }
   ]
@@ -102,12 +101,15 @@
  {
   "name": "home-hive",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 7.0
+    "path": 5,
+    "area": 7.1
    }
   ]
  },
@@ -119,34 +121,36 @@
    {
     "kind": "redrawn",
     "from": "active",
-    "area": 6.4
+    "area": 6.5
    }
   ]
  },
  {
   "name": "abstract-home",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 0.0
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 0.0
+    "path": 4,
+    "area": 4.9
    }
   ]
  },
  {
   "name": "abstract-spiral",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 4.8
    }
   ]
@@ -155,36 +159,31 @@
   "name": "path",
   "wave": "2026-10-foundation",
   "roles": {
-   "3": "focus"
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
   },
   "flags": [
    {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
+    "kind": "conflict",
+    "path": 3,
+    "was": "mark 3",
+    "wanted": "focus"
    }
   ]
  },
  {
   "name": "yarn",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "1": "mark 1"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "conflict",
     "from": "active",
-    "area": 5.6
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
+    "was": "added-dot",
+    "area": 5.7
    }
   ]
  },
@@ -192,82 +191,64 @@
   "name": "destination",
   "wave": "2026-10-foundation",
   "roles": {
-   "2": "body"
+   "2": "mark 1"
   },
   "flags": [
    {
-    "kind": "redrawn",
-    "from": "lit-1"
+    "kind": "conflict",
+    "path": 2,
+    "was": "mark 1",
+    "wanted": "body"
    }
   ]
  },
  {
   "name": "path-river",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "2": "mark 1",
+   "3": "mark 2",
+   "4": "mark 3"
+  },
   "flags": [
    {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 15.1
+    "kind": "conflict",
+    "path": 2,
+    "was": "mark 1",
+    "wanted": "focus"
    },
    {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 14.5
+    "kind": "conflict",
+    "path": 3,
+    "was": "mark 2",
+    "wanted": "focus"
    },
    {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 12.6
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
+    "kind": "conflict",
+    "path": 4,
+    "was": "mark 3",
+    "wanted": "focus"
    }
   ]
  },
  {
   "name": "people",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 3",
+   "3": "mark 2"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 3.0
+    "kind": "redrawn",
+    "from": "lit-3",
+    "area": 36.2
    },
    {
     "kind": "redrawn",
     "from": "active",
     "area": 3.0
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
    }
   ]
  },
@@ -275,35 +256,36 @@
   "name": "users",
   "wave": "2026-10-foundation",
   "roles": {
-   "1": "focus",
+   "1": "mark 3",
+   "2": "mark 1",
    "3": "focus"
   },
   "flags": [
    {
     "kind": "redrawn",
-    "from": "lit-1"
+    "from": "lit-2",
+    "area": 20.4
    },
    {
     "kind": "redrawn",
-    "from": "lit-2"
+    "from": "lit-3",
+    "area": 20.4
    },
    {
-    "kind": "redrawn",
-    "from": "lit-3"
+    "kind": "conflict",
+    "path": 1,
+    "was": "mark 3",
+    "wanted": "focus"
    }
   ]
  },
  {
   "name": "abstract-crown",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 8.2
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "abstract-fence",
@@ -311,28 +293,23 @@
   "roles": {},
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 0.0
-   },
-   {
     "kind": "redrawn",
     "from": "active",
-    "area": 0.0
+    "area": 1.0
    }
   ]
  },
  {
   "name": "abstract-loki",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.5
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 2.5
    }
   ]
@@ -340,15 +317,14 @@
  {
   "name": "exchange",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 1.3
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 1.3
    }
   ]
@@ -356,11 +332,14 @@
  {
   "name": "dolmen",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 6.5
    }
   ]
@@ -388,14 +367,10 @@
  {
   "name": "pearl",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 5.5
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "watermelon",
@@ -405,7 +380,7 @@
    {
     "kind": "redrawn",
     "from": "active",
-    "area": 6.8
+    "area": 6.9
    }
   ]
  },
@@ -415,74 +390,51 @@
   "roles": {},
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 0.0
-   },
-   {
     "kind": "redrawn",
     "from": "active",
-    "area": 0.0
+    "area": 5.2
    }
   ]
  },
  {
   "name": "pouch-dot",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "1": "mark 1"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 0.0
-   },
-   {
-    "kind": "redrawn",
+    "kind": "conflict",
     "from": "active",
-    "area": 0.0
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
+    "was": "added-dot",
+    "area": 1.0
    }
   ]
  },
  {
   "name": "pouch",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "1": "mark 1"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.2
-   },
-   {
-    "kind": "redrawn",
+    "kind": "conflict",
     "from": "active",
+    "was": "added-dot",
     "area": 2.2
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
    }
   ]
  },
  {
   "name": "stack",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
-   }
-  ]
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
  },
  {
   "name": "abstract-cairn",
@@ -493,21 +445,12 @@
  {
   "name": "stack-sharp",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
-   }
-  ]
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
  },
  {
   "name": "abstract-stack",
@@ -530,13 +473,10 @@
  {
   "name": "pouch-2",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "nechlace",
@@ -547,103 +487,71 @@
  {
   "name": "purse",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
-    "from": "lit-1"
+    "kind": "added-dot",
+    "from": "lit-1",
+    "path": 5,
+    "area": 0.0
    }
   ]
  },
  {
   "name": "baluchon",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "2": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "bag",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "case",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "2": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "stones-stair",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
-   }
-  ]
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
  },
  {
   "name": "stones-track",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
-   }
-  ]
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
  },
  {
   "name": "stones-arrow-right",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
-   }
-  ]
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
  },
  {
   "name": "chart-double-grow",
@@ -666,51 +574,40 @@
  {
   "name": "stones-aligned-bottom",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
-   }
-  ]
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
  },
  {
   "name": "person",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "1": "mark 1"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.2
-   },
-   {
-    "kind": "redrawn",
+    "kind": "conflict",
     "from": "active",
+    "was": "added-dot",
     "area": 2.2
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
    }
   ]
  },
  {
   "name": "barbed-wire",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 7.0
+    "path": 3,
+    "area": 7.1
    }
   ]
  },
@@ -729,20 +626,16 @@
  {
   "name": "user-heart",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "1": "mark 2",
+   "2": "mark 1"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "conflict",
     "from": "active",
+    "was": "added-dot",
     "area": 5.6
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
    }
   ]
  },
@@ -750,16 +643,15 @@
   "name": "user",
   "wave": "2026-10-foundation",
   "roles": {
-   "1": "body"
+   "1": "mark 2",
+   "2": "mark 1"
   },
   "flags": [
    {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
+    "kind": "conflict",
+    "path": 1,
+    "was": "mark 2",
+    "wanted": "body"
    }
   ]
  },
@@ -806,7 +698,8 @@
   "flags": [
    {
     "kind": "redrawn",
-    "from": "lit-1"
+    "from": "lit-1",
+    "area": 244.8
    }
   ]
  },
@@ -835,7 +728,8 @@
   "flags": [
    {
     "kind": "redrawn",
-    "from": "lit-1"
+    "from": "lit-1",
+    "area": 220.9
    }
   ]
  },
@@ -860,24 +754,18 @@
  {
   "name": "pebble-round",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "pebble-flat",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "karma-dot",
@@ -942,13 +830,10 @@
  {
   "name": "calendar-day",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "4": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "trash",
@@ -977,13 +862,10 @@
  {
   "name": "pebble-glow-md",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "sunshine",
@@ -994,69 +876,45 @@
  {
   "name": "plant-sprout",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   }
-  ]
+  "roles": {
+   "3": "mark 1",
+   "4": "mark 2"
+  },
+  "flags": []
  },
  {
   "name": "pebble-glow-sm",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "pebble-glow-lg",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "knot-lg",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   }
-  ]
+  "roles": {
+   "2": "mark 1",
+   "3": "mark 2"
+  },
+  "flags": []
  },
  {
   "name": "knot-sm",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   }
-  ]
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2"
+  },
+  "flags": []
  },
  {
   "name": "bell-ringing",
@@ -1085,21 +943,12 @@
  {
   "name": "plant-seedling-gap",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
-   }
-  ]
+  "roles": {
+   "1": "mark 1",
+   "3": "mark 2",
+   "4": "mark 3"
+  },
+  "flags": []
  },
  {
   "name": "abstract-drizzle",
@@ -1122,21 +971,12 @@
  {
   "name": "plant-seedling",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-2"
-   },
-   {
-    "kind": "redrawn",
-    "from": "lit-3"
-   }
-  ]
+  "roles": {
+   "1": "mark 1",
+   "3": "mark 2",
+   "4": "mark 3"
+  },
+  "flags": []
  },
  {
   "name": "sparkles",
@@ -1171,12 +1011,15 @@
  {
   "name": "hand",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "6": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 5.9
+    "path": 6,
+    "area": 6.0
    }
   ]
  },
@@ -1195,11 +1038,14 @@
  {
   "name": "orange",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 5.0
    }
   ]
@@ -1219,15 +1065,14 @@
  {
   "name": "petroglyph",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 1.9
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 1.9
    }
   ]
@@ -1247,24 +1092,18 @@
  {
   "name": "pebble-outlined-glyph",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "pebble-outlined-glyph-2",
   "wave": "2026-10-foundation",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "lit-1"
-   }
-  ]
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
  },
  {
   "name": "whatsapp",
@@ -1275,11 +1114,14 @@
  {
   "name": "again-backward",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 8.6
    }
   ]
@@ -1311,40 +1153,31 @@
  {
   "name": "stone-repeat",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 14.4
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "backward-chevrons",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 24.9
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 24.9
-   }
-  ]
+  "roles": {
+   "1": "body",
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "again-forward",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 6.6
    }
   ]
@@ -1352,23 +1185,22 @@
  {
   "name": "backward",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 32.5
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "ellipse-forward",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 6.6
    }
   ]
@@ -1376,11 +1208,14 @@
  {
   "name": "paste-square",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 8.0
    }
   ]
@@ -1404,87 +1239,51 @@
  {
   "name": "exchange-md",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 3.8
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 3.8
-   }
-  ]
+  "roles": {
+   "1": "focus",
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stones-swap",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 22.7
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "dots-cross",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.7
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.7
-   }
-  ]
+  "roles": {
+   "3": "focus",
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "swing-single",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 16.5
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stones-loop",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 23.0
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 21.3
-   }
-  ]
+  "roles": {
+   "1": "focus",
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "exchange-lg",
   "wave": "2026-11-everyday",
   "roles": {},
   "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   },
    {
     "kind": "redrawn",
     "from": "active",
@@ -1548,14 +1347,10 @@
  {
   "name": "stone-speed",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 43.6
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "picture-upload",
@@ -1576,11 +1371,14 @@
  {
   "name": "disk-angle-up",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 45.2
    }
   ]
@@ -1588,11 +1386,14 @@
  {
   "name": "arrow-up-lg",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "2": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 2,
     "area": 8.4
    }
   ]
@@ -1616,62 +1417,42 @@
  {
   "name": "circle-angle-up",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 228.6
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "thumbs-up",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 30.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "golf-flag",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 39.5
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "chevron-up-underline",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 53.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "triangle-up-underline",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 87.3
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "stack-chevrons-up",
@@ -1692,14 +1473,10 @@
  {
   "name": "sprout",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 15.9
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "plus-one",
@@ -1740,14 +1517,10 @@
  {
   "name": "x-half-circle",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 154.1
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "circle-broken",
@@ -1770,10 +1543,6 @@
   "wave": "2026-11-everyday",
   "roles": {},
   "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   },
    {
     "kind": "redrawn",
     "from": "active",
@@ -1799,10 +1568,6 @@
   "roles": {},
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.0
-   },
-   {
     "kind": "redrawn",
     "from": "active",
     "area": 2.0
@@ -1815,10 +1580,6 @@
   "roles": {},
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.0
-   },
-   {
     "kind": "redrawn",
     "from": "active",
     "area": 2.0
@@ -1828,11 +1589,14 @@
  {
   "name": "paper-plane-trail",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 41.9
    }
   ]
@@ -1840,14 +1604,10 @@
  {
   "name": "square-bounce",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 43.3
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "rectangle-dashed",
@@ -1896,11 +1656,14 @@
  {
   "name": "file",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 5.9
    }
   ]
@@ -1908,14 +1671,10 @@
  {
   "name": "milestone",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 130.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "hand-dot",
@@ -1932,14 +1691,10 @@
  {
   "name": "shield",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 15.6
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "user-circle-lg",
@@ -2000,26 +1755,18 @@
  {
   "name": "people-3",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 24.2
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "stones-double-circle-open",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 18.0
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stones-triple-circle",
@@ -2032,16 +1779,21 @@
  {
   "name": "chat-dots",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden",
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 2.0
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.0
    }
   ]
@@ -2081,14 +1833,10 @@
  {
   "name": "stone-ripples",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 28.1
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "stones-triple-circle-open",
@@ -2117,11 +1865,14 @@
  {
   "name": "megaphone-2",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 14.4
    }
   ]
@@ -2156,54 +1907,36 @@
   "roles": {
    "3": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 0.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "lock-rounded",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 125.6
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "keyhole-circle",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 9.8
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 13.0
-   }
-  ]
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "lock",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.5
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.5
    }
   ]
@@ -2211,11 +1944,14 @@
  {
   "name": "keyhole-dot",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 3.3
    }
   ]
@@ -2267,38 +2003,26 @@
  {
   "name": "user-plus-rounded",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 29.1
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "stones-new",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 16.7
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stone-circle-arrow-in",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 13.8
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "user-plus-curve",
@@ -2359,12 +2083,15 @@
  {
   "name": "circle-quarters",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 43.2
+    "path": 3,
+    "area": 43.3
    }
   ]
  },
@@ -2379,26 +2106,18 @@
  {
   "name": "signs",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 21.1
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "compass",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 5.6
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "hexagon-text",
@@ -2451,14 +2170,10 @@
  {
   "name": "shop-stone-k",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.5
-   }
-  ]
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
  },
  {
   "name": "shop-stone",
@@ -2479,14 +2194,10 @@
  {
   "name": "cycle-stone",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 61.8
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "orbit",
@@ -2507,39 +2218,30 @@
  {
   "name": "sundial",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 12.6
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stopwatch",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 6.9
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "hour",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.5
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 2.5
    }
   ]
@@ -2555,12 +2257,15 @@
  {
   "name": "blocked",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 65.2
+    "path": 3,
+    "area": 65.4
    }
   ]
  },
@@ -2591,38 +2296,26 @@
  {
   "name": "user-forbidden",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 15.8
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "crane",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 65.1
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "stones-cross",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 19.9
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stones-forbidden",
@@ -2651,11 +2344,14 @@
  {
   "name": "translation-a",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 9.0
    }
   ]
@@ -2663,11 +2359,14 @@
  {
   "name": "circle-a",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 7.6
    }
   ]
@@ -2683,14 +2382,10 @@
  {
   "name": "bubble-a",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 171.6
-   }
-  ]
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "users-communication",
@@ -2736,47 +2431,38 @@
  {
   "name": "sunrise-shine",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 30.8
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "stone-lg",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 158.0
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "toggle-off-label",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 14.8
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "sidebar",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 102.4
    }
   ]
@@ -2856,11 +2542,14 @@
  {
   "name": "stone-facet",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 47.6
    }
   ]
@@ -2868,23 +2557,22 @@
  {
   "name": "toggle-on-label",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 118.1
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "lightbulb-moon",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 8.1
    }
   ]
@@ -2892,11 +2580,14 @@
  {
   "name": "appearance-device",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 15.8
    }
   ]
@@ -2904,68 +2595,47 @@
  {
   "name": "stone-pill-shine",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 27.6
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "appearance",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 15.4
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 25.9
-   }
-  ]
+  "roles": {
+   "2": "focus",
+   "4": "body"
+  },
+  "flags": []
  },
  {
   "name": "toggle-median",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 14.3
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "appearance-half",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 39.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "lightbulb-mark",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.0
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.0
    }
   ]
@@ -2973,23 +2643,22 @@
  {
   "name": "sunset-seaa",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 33.6
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "palette-1",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 4.8
    }
   ]
@@ -3021,33 +2690,36 @@
  {
   "name": "circles-jointure-2",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 87.9
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "palette-3",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden",
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 2.0
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.0
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 2.0
    }
   ]
@@ -3055,14 +2727,10 @@
  {
   "name": "prism",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 50.0
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "screwdriver",
@@ -3111,43 +2779,27 @@
  {
   "name": "stone-debounce",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 14.7
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "signal-waveform-stone",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 6.8
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stones-line-chart",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.0
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.0
-   }
-  ]
+  "roles": {
+   "4": "focus",
+   "5": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stone-bounces",
@@ -3162,10 +2814,6 @@
   "wave": "2026-11-everyday",
   "roles": {},
   "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.5
-   },
    {
     "kind": "redrawn",
     "from": "active",
@@ -3208,23 +2856,22 @@
  {
   "name": "magnifying-md",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 135.9
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "magnifying-sm",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.3
    }
   ]
@@ -3232,11 +2879,14 @@
  {
   "name": "circle-info",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.7
    }
   ]
@@ -3268,11 +2918,14 @@
  {
   "name": "bubble-info",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.2
    }
   ]
@@ -3280,39 +2933,30 @@
  {
   "name": "info-i",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 8.0
-   }
-  ]
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
  },
  {
   "name": "badge-info",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 157.5
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "sign-info",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 1.3
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 1.3
    }
   ]
@@ -3330,10 +2974,6 @@
   "wave": "2026-11-everyday",
   "roles": {},
   "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   },
    {
     "kind": "redrawn",
     "from": "active",
@@ -3384,50 +3024,34 @@
  {
   "name": "dolmen-square",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 38.6
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "dolmen-square-stone",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 15.0
-   }
-  ]
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
  },
  {
   "name": "dolmen-square-pin",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 6.3
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "menhir",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 104.9
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "dolmen-2",
@@ -3460,23 +3084,22 @@
  {
   "name": "slide",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 30.7
-   }
-  ]
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "karma-fossil",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 5.7
    }
   ]
@@ -3500,11 +3123,14 @@
  {
   "name": "circle-karma",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 9.0
    }
   ]
@@ -3512,23 +3138,22 @@
  {
   "name": "fish-bones",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 14.2
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "cocoon",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 19.9
    }
   ]
@@ -3536,27 +3161,22 @@
  {
   "name": "leaf",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 92.9
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "circle-fossil",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.2
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 2.2
    }
   ]
@@ -3564,12 +3184,15 @@
  {
   "name": "trilobite",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 53.2
+    "path": 5,
+    "area": 53.4
    }
   ]
  },
@@ -3584,11 +3207,14 @@
  {
   "name": "bookmark",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "2": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 2,
     "area": 9.6
    }
   ]
@@ -3604,14 +3230,10 @@
  {
   "name": "text-stone-margin",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 9.1
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "bookmark-stone",
@@ -3624,14 +3246,10 @@
  {
   "name": "page-corner",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 21.0
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "text-stone-inline",
@@ -3660,11 +3278,14 @@
  {
   "name": "gem-stone-1",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 30.2
    }
   ]
@@ -3672,35 +3293,30 @@
  {
   "name": "gem-up",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 45.9
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "pebble-fire",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 43.3
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "target-arrow",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 4.4
    }
   ]
@@ -3724,23 +3340,22 @@
  {
   "name": "target-outside",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 14.2
-   }
-  ]
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
  },
  {
   "name": "flag-mountain",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 4.6
    }
   ]
@@ -3748,11 +3363,14 @@
  {
   "name": "ripples",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 14.3
    }
   ]
@@ -3763,24 +3381,15 @@
   "roles": {
    "3": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "golf-flag-sm",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 15.4
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stone-spark",
@@ -3793,11 +3402,14 @@
  {
   "name": "pencil",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 15.2
    }
   ]
@@ -3829,26 +3441,18 @@
  {
   "name": "pen-fountain-losange",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 31.8
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "eraser-write",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 38.0
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "feather-write",
@@ -3858,7 +3462,7 @@
    {
     "kind": "redrawn",
     "from": "active",
-    "area": 42.9
+    "area": 43.1
    }
   ]
  },
@@ -3868,24 +3472,15 @@
   "roles": {
    "3": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "pencil-draw",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 13.4
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "saucer-antenna",
@@ -3914,26 +3509,18 @@
  {
   "name": "saucer-antenna-k",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 34.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "stone-wifi",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 7.6
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "saucer-antenna-sm",
@@ -3941,12 +3528,7 @@
   "roles": {
    "3": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "abstract-radar",
@@ -3954,12 +3536,7 @@
   "roles": {
    "4": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "radar-quarter",
@@ -3972,15 +3549,14 @@
  {
   "name": "arrow-forward-eye",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.0
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.0
    }
   ]
@@ -3988,11 +3564,14 @@
  {
   "name": "pyramid",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 48.4
    }
   ]
@@ -4016,11 +3595,14 @@
  {
   "name": "ziggurat",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 9.0
    }
   ]
@@ -4028,23 +3610,22 @@
  {
   "name": "stones-stack-2",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 12.8
-   }
-  ]
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
  },
  {
   "name": "obelisk",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 3.2
    }
   ]
@@ -4052,11 +3633,14 @@
  {
   "name": "pyramid-layers",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 36.1
    }
   ]
@@ -4072,11 +3656,14 @@
  {
   "name": "pyramid-sun",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 29.7
    }
   ]
@@ -4084,12 +3671,15 @@
  {
   "name": "pyramid-inside",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 4.1
+    "path": 4,
+    "area": 4.2
    }
   ]
  },
@@ -4112,11 +3702,14 @@
  {
   "name": "layout-sidebar",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 62.2
    }
   ]
@@ -4124,38 +3717,26 @@
  {
   "name": "stones-layout",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 28.9
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "layout",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 57.7
-   }
-  ]
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "set-square",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 12.5
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "gauge",
@@ -4176,36 +3757,20 @@
  {
   "name": "gauge-simple",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 73.2
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "square-chart-bars",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.7
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 22.1
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 15.9
-   }
-  ]
+  "roles": {
+   "2": "focus",
+   "3": "focus",
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "gauge-underline",
@@ -4218,15 +3783,14 @@
  {
   "name": "dashboard",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "7": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.0
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 7,
     "area": 2.0
    }
   ]
@@ -4270,38 +3834,26 @@
  {
   "name": "chart-bars-fill",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 46.7
-   }
-  ]
+  "roles": {
+   "4": "body"
+  },
+  "flags": []
  },
  {
   "name": "line-grow",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 121.7
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "chart-stones-4",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 21.2
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "chart-line-stone",
@@ -4322,26 +3874,18 @@
  {
   "name": "chart-segments",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 10.1
-   }
-  ]
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
  },
  {
   "name": "chart-diagram-sm",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 33.9
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "chart-wires",
@@ -4349,12 +3893,7 @@
   "roles": {
    "6": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "board-wall-notes",
@@ -4367,11 +3906,14 @@
  {
   "name": "library",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 73.0
    }
   ]
@@ -4387,11 +3929,14 @@
  {
   "name": "board-chart",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.9
    }
   ]
@@ -4407,74 +3952,50 @@
  {
   "name": "square-notes",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 28.2
-   }
-  ]
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "board-notes",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 7.7
-   }
-  ]
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
  },
  {
   "name": "memo",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 9.5
-   }
-  ]
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
  },
  {
   "name": "game-checkers",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 5.7
-   }
-  ]
+  "roles": {
+   "7": "focus"
+  },
+  "flags": []
  },
  {
   "name": "board-layout",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 25.0
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "board-lamp",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 36.6
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "grid",
@@ -4496,11 +4017,14 @@
  {
   "name": "copy-squares",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 8.1
    }
   ]
@@ -4508,14 +4032,10 @@
  {
   "name": "copy-circles",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 91.3
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "layers-square",
@@ -4536,11 +4056,14 @@
  {
   "name": "document-scan",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 47.0
    }
   ]
@@ -4588,47 +4111,38 @@
  {
   "name": "clipboard-arrow-down",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 16.4
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stone-box",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 28.4
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "card-stone",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 9.4
-   }
-  ]
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
  },
  {
   "name": "square-paste",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 3.8
    }
   ]
@@ -4636,14 +4150,10 @@
  {
   "name": "note-stone",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 23.1
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "cursor",
@@ -4656,11 +4166,14 @@
  {
   "name": "cursor-pointer",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "2": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 2,
     "area": 4.9
    }
   ]
@@ -4668,11 +4181,14 @@
  {
   "name": "cursor-pointer-click",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 17.7
    }
   ]
@@ -4712,11 +4228,14 @@
  {
   "name": "book",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "2": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 2,
     "area": 85.1
    }
   ]
@@ -4724,11 +4243,14 @@
  {
   "name": "bookbinding",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 38.5
    }
   ]
@@ -4744,14 +4266,10 @@
  {
   "name": "book-iso",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 55.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "abstract-glow",
@@ -4796,36 +4314,24 @@
  {
   "name": "text-initial-stone",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.6
-   }
-  ]
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
  },
  {
   "name": "waves-period-stone",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 8.9
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "text-period",
   "wave": "2026-11-everyday",
   "roles": {},
   "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.5
-   },
    {
     "kind": "redrawn",
     "from": "active",
@@ -4851,10 +4357,6 @@
   "roles": {},
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.5
-   },
-   {
     "kind": "redrawn",
     "from": "active",
     "area": 2.5
@@ -4864,14 +4366,10 @@
  {
   "name": "paragraph",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 52.5
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "memo-text-corner",
@@ -4900,11 +4398,14 @@
  {
   "name": "memo-text-clip",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 37.0
    }
   ]
@@ -4912,23 +4413,22 @@
  {
   "name": "receipt",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 149.3
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "paperplane",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 44.8
    }
   ]
@@ -4944,14 +4444,10 @@
  {
   "name": "bottle-message",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 10.4
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "folder",
@@ -4968,26 +4464,18 @@
  {
   "name": "folder-2",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 123.2
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "archive-box",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 20.5
-   }
-  ]
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "trunk",
@@ -5008,16 +4496,21 @@
  {
   "name": "toolbox",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 5.9
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 5.8
    }
   ]
@@ -5025,11 +4518,14 @@
  {
   "name": "metal-box",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "8": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 8,
     "area": 57.6
    }
   ]
@@ -5062,26 +4558,18 @@
  {
   "name": "medal-star",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 24.6
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "podium-stone",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 20.2
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "medal-stone",
@@ -5102,14 +4590,10 @@
  {
   "name": "medal-1",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 47.7
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "laurel-user",
@@ -5130,38 +4614,26 @@
  {
   "name": "trophy-lg",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 47.6
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "trophy",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 68.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "trophy-star",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 88.9
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "cave",
@@ -5190,38 +4662,26 @@
  {
   "name": "cell",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 206.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "hill-sun",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 36.5
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "moon-z",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 83.0
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "moon-crescent",
@@ -5231,7 +4691,7 @@
    {
     "kind": "redrawn",
     "from": "active",
-    "area": 99.6
+    "area": 99.8
    }
   ]
  },
@@ -5251,7 +4711,7 @@
    {
     "kind": "redrawn",
     "from": "active",
-    "area": 41.8
+    "area": 41.9
    }
   ]
  },
@@ -5274,47 +4734,38 @@
  {
   "name": "circle-star",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 304.7
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "constellation",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.0
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "shooting-star",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 19.6
-   }
-  ]
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
  },
  {
   "name": "star-dot",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 6.6
    }
   ]
@@ -5338,26 +4789,18 @@
  {
   "name": "stones-arc-5",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 8.6
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "rainbow",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 16.0
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "cloud-arrow-down-download",
@@ -5382,11 +4825,14 @@
  {
   "name": "download-picture",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 5.6
    }
   ]
@@ -5394,11 +4840,14 @@
  {
   "name": "filter-box",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 13.4
    }
   ]
@@ -5406,15 +4855,14 @@
  {
   "name": "device-arrow-down",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.5
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.5
    }
   ]
@@ -5438,23 +4886,22 @@
  {
   "name": "rock-lg",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 36.4
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "rock-iso",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 47.8
    }
   ]
@@ -5462,23 +4909,22 @@
  {
   "name": "rock",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 32.6
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stone-layers",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 4.5
    }
   ]
@@ -5486,11 +4932,14 @@
  {
   "name": "stone-layers-2",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 69.0
    }
   ]
@@ -5514,26 +4963,18 @@
  {
   "name": "hill-stone-path",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 6.0
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "hill-sunset-soil",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 12.9
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "hill-sun-k",
@@ -5546,11 +4987,14 @@
  {
   "name": "hills",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 3.2
    }
   ]
@@ -5566,11 +5010,14 @@
  {
   "name": "mountains-summit",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 9.3
    }
   ]
@@ -5589,12 +5036,7 @@
   "roles": {
    "3": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 1.9
-   }
-  ]
+  "flags": []
  },
  {
   "name": "mountains",
@@ -5615,11 +5057,14 @@
  {
   "name": "mountain-cut",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 33.5
    }
   ]
@@ -5627,11 +5072,14 @@
  {
   "name": "mountain-path",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 48.6
    }
   ]
@@ -5639,26 +5087,18 @@
  {
   "name": "mountain-waves",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 50.3
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "moutains-sea",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 73.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "pebble-zap",
@@ -5687,54 +5127,34 @@
  {
   "name": "sun-shine-bright",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 19.9
-   }
-  ]
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
  },
  {
   "name": "battery-zap",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 76.0
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "cloud-zap",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 1.4
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 1.4
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "zap",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 61.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "abstract-zap",
@@ -5771,26 +5191,18 @@
  {
   "name": "cloud-k",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 116.9
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "clouds",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 72.5
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "cloud-stone",
@@ -5819,55 +5231,35 @@
  {
   "name": "cloud-rain",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 93.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "tint",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 107.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "cloud-rain-drop",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 8.6
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "square-rain-2",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 4.1
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 4.1
-   }
-  ]
+  "roles": {
+   "4": "focus",
+   "5": "focus"
+  },
+  "flags": []
  },
  {
   "name": "tint-2",
@@ -5888,14 +5280,10 @@
  {
   "name": "envelope-2",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 10.8
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "bell",
@@ -5924,14 +5312,10 @@
  {
   "name": "bell-k",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 59.3
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "bell-badge",
@@ -5976,42 +5360,26 @@
  {
   "name": "envelope-badge",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 17.5
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "server",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 22.5
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "letterbox-up",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.7
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 2.7
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "square-badge",
@@ -6048,24 +5416,12 @@
  {
   "name": "list",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 5.7
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 5.4
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 5.8
-   }
-  ]
+  "roles": {
+   "1": "focus",
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "list-dots",
@@ -6124,26 +5480,18 @@
  {
   "name": "eclipse",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 143.1
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "cairn-drop",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 13.2
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stones-3-up",
@@ -6156,11 +5504,14 @@
  {
   "name": "circle-minus",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 19.2
    }
   ]
@@ -6184,50 +5535,34 @@
  {
   "name": "items-indent",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 54.3
-   }
-  ]
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "stone-box-out",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 26.6
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "square-outside-right",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 3.8
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "stones-soil",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 19.1
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "double-circle-outside",
@@ -6256,14 +5591,10 @@
  {
   "name": "destroy",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 59.6
-   }
-  ]
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "squares-rubble",
@@ -6302,38 +5633,26 @@
  {
   "name": "jellyfish-pebble",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 93.3
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "abstract-jellyfish",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 33.6
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "jellyfish-moving",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 29.7
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "jellyfish-2-dot",
@@ -6346,14 +5665,10 @@
  {
   "name": "jellyfish-dots",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 61.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "waves-vertical",
@@ -6369,12 +5684,7 @@
   "roles": {
    "3": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 1.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "cat-back-2",
@@ -6395,16 +5705,21 @@
  {
   "name": "cat-2",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden",
+   "6": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 3.4
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 6,
     "area": 3.4
    }
   ]
@@ -6412,16 +5727,21 @@
  {
   "name": "cat-back",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden",
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 4.1
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 4.1
    }
   ]
@@ -6445,48 +5765,41 @@
  {
   "name": "piglet",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "6": "focus",
+   "7": "mark 1 hidden",
+   "8": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 7,
     "area": 8.2
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 8,
     "area": 8.2
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 4.8
    }
   ]
  },
  {
   "name": "pig",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 91.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "paw-sm",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 49.3
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "dog",
@@ -6499,11 +5812,14 @@
  {
   "name": "chick-profile",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.6
    }
   ]
@@ -6511,14 +5827,10 @@
  {
   "name": "doghouse-empty",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 31.7
-   }
-  ]
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "bone-down",
@@ -6547,31 +5859,19 @@
  {
   "name": "converge",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 8.3
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 8.6
-   }
-  ]
+  "roles": {
+   "4": "focus",
+   "5": "focus"
+  },
+  "flags": []
  },
  {
   "name": "bone-up",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 83.5
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "diverge",
@@ -6592,38 +5892,26 @@
  {
   "name": "lighthouse-right",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 12.1
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "cairn-shine",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 13.0
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "lighthouse-island",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 5.0
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "box",
@@ -6636,14 +5924,10 @@
  {
   "name": "laptop",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 101.7
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "piano",
@@ -6656,14 +5940,10 @@
  {
   "name": "keyboard",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 258.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "abstract-ruby",
@@ -6700,11 +5980,14 @@
  {
   "name": "guitar-chords",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 14.3
    }
   ]
@@ -6728,23 +6011,22 @@
  {
   "name": "guitar-pick-chords",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 55.6
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "guitar-neck",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 5.3
    }
   ]
@@ -6772,43 +6054,27 @@
  {
   "name": "music-note-double-quaver",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 15.8
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 16.1
-   }
-  ]
+  "roles": {
+   "1": "focus",
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "music-quaver",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 22.2
-   }
-  ]
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
  },
  {
   "name": "music-sheet-note",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 14.5
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "music-sheet-note-2",
@@ -6845,26 +6111,18 @@
  {
   "name": "face-child",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 133.5
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "mobile",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 14.8
-   }
-  ]
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
  },
  {
   "name": "cradle",
@@ -6909,11 +6167,14 @@
  {
   "name": "feeding-bottle",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 34.5
    }
   ]
@@ -6921,23 +6182,22 @@
  {
   "name": "water-bottle",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.1
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "milk-bottle",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 53.8
    }
   ]
@@ -6961,60 +6221,36 @@
  {
   "name": "car",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 16.8
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 16.5
-   }
-  ]
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "radio",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 5.7
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 5.8
-   }
-  ]
+  "roles": {
+   "3": "focus",
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "car-k",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 95.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "car-speed",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 59.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "car-2",
@@ -7028,14 +6264,10 @@
  {
   "name": "car-above",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 27.3
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "bike",
@@ -7079,12 +6311,7 @@
   "roles": {
    "4": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.6
-   }
-  ]
+  "flags": []
  },
  {
   "name": "house-chemny",
@@ -7105,26 +6332,18 @@
  {
   "name": "farm",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 47.4
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "house-block",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 81.8
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "houses",
@@ -7132,21 +6351,19 @@
   "roles": {
    "4": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "window-roof",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 9.5
    }
   ]
@@ -7178,11 +6395,14 @@
  {
   "name": "umbrella",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 36.3
    }
   ]
@@ -7190,11 +6410,14 @@
  {
   "name": "umbrella-above",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 25.8
    }
   ]
@@ -7202,12 +6425,15 @@
  {
   "name": "bottle",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 68.9
+    "path": 3,
+    "area": 69.0
    }
   ]
  },
@@ -7222,11 +6448,14 @@
  {
   "name": "ink-bottle",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 54.7
    }
   ]
@@ -7234,11 +6463,14 @@
  {
   "name": "ink-pot",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 49.3
    }
   ]
@@ -7246,11 +6478,14 @@
  {
   "name": "question-circle",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 4.4
    }
   ]
@@ -7258,11 +6493,14 @@
  {
   "name": "question-bubble",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.3
    }
   ]
@@ -7270,42 +6508,26 @@
  {
   "name": "life-ring",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 0.0
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 0.0
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "question-mark-dot",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 10.8
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "question-bubble-chat",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 177.7
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "question-mark",
@@ -7322,11 +6544,14 @@
  {
   "name": "exclamation-circle",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.7
    }
   ]
@@ -7342,55 +6567,42 @@
  {
   "name": "gauge-low",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 37.2
+    "path": 5,
+    "area": 37.3
    }
   ]
  },
  {
   "name": "info-circle",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 265.1
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "exclamation-bold",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 34.1
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 6.4
-   }
-  ]
+  "roles": {
+   "1": "body",
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "info-sign",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 106.7
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "drop-water-ripple",
@@ -7398,24 +6610,15 @@
   "roles": {
    "3": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "alert-shine",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 35.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "eye-open-1",
@@ -7428,11 +6631,14 @@
  {
   "name": "exclamation-triangle",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.7
    }
   ]
@@ -7510,36 +6716,19 @@
  {
   "name": "exclamation-bold-lakshmi",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 12.7
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 3.5
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 159.8
-   }
-  ]
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "x-sign",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 66.0
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "exclamation-triple",
@@ -7566,16 +6755,21 @@
  {
   "name": "exclamation-double-lakshmi",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.5
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 2.5
    }
   ]
@@ -7586,24 +6780,15 @@
   "roles": {
    "2": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "flame",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 16.8
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "skull",
@@ -7633,23 +6818,22 @@
  {
   "name": "minus-sign",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 96.7
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "hand-palm",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "2": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 2,
     "area": 17.9
    }
   ]
@@ -7681,14 +6865,10 @@
  {
   "name": "power-off",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 155.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "exclamation-off",
@@ -7729,50 +6909,34 @@
  {
   "name": "crab-2",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 63.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "crab-bell",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 80.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "crab-3",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 58.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "crab-clamp",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 24.7
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "crab-dots",
@@ -7789,12 +6953,7 @@
   "roles": {
    "5": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "dot-ripple",
@@ -7831,59 +6990,46 @@
  {
   "name": "ripple",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 5.6
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "ripple-ring",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 17.5
-   }
-  ]
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
  },
  {
   "name": "ripple-left",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 26.3
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "stone-waves",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 23.7
-   }
-  ]
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
  },
  {
   "name": "karma-center",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 9.8
    }
   ]
@@ -7899,28 +7045,29 @@
  {
   "name": "water-drop",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 8.6
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "circles-dot",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.5
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 2.5
    }
   ]
@@ -7968,11 +7115,14 @@
  {
   "name": "ear",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 4.5
    }
   ]
@@ -7988,26 +7138,18 @@
  {
   "name": "speaker",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 48.1
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "sound-on",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 59.2
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "stone-sound-right-3",
@@ -8020,11 +7162,14 @@
  {
   "name": "speaker-dot",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 6.6
    }
   ]
@@ -8032,38 +7177,26 @@
  {
   "name": "microphone",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 42.0
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "microphone-high",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 24.0
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "microphone-arc",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 47.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "microphone-wire",
@@ -8109,31 +7242,19 @@
  {
   "name": "blaster",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 16.2
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 17.7
-   }
-  ]
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "play-circle",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 25.6
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "waveform",
@@ -8174,26 +7295,18 @@
  {
   "name": "sun-shine-bright-2",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 28.1
-   }
-  ]
+  "roles": {
+   "13": "body"
+  },
+  "flags": []
  },
  {
   "name": "abstract-wave",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 124.6
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "waveform-bold",
@@ -8208,10 +7321,6 @@
   "wave": "2026-11-everyday",
   "roles": {},
   "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.5
-   },
    {
     "kind": "redrawn",
     "from": "active",
@@ -8237,12 +7346,7 @@
   "roles": {
    "4": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "cairn-signal",
@@ -8255,14 +7359,10 @@
  {
   "name": "radio-signal",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 7.6
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "code-morse",
@@ -8313,67 +7413,43 @@
  {
   "name": "sound-off",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 44.0
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "ear-off",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 107.3
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "segment",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 6.7
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 6.6
-   }
-  ]
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "micro-off",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 42.0
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "speaker-off",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 4.3
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "faucet",
@@ -8386,12 +7462,15 @@
  {
   "name": "pound",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 23.5
+    "path": 5,
+    "area": 23.6
    }
   ]
  },
@@ -8406,26 +7485,25 @@
  {
   "name": "water-drop-wave",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 55.9
+    "path": 3,
+    "area": 56.0
    }
   ]
  },
  {
   "name": "water-well",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 8.6
-   }
-  ]
+  "roles": {
+   "9": "focus"
+  },
+  "flags": []
  },
  {
   "name": "glass-stone",
@@ -8446,11 +7524,14 @@
  {
   "name": "hand-wave",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 5.4
    }
   ]
@@ -8458,63 +7539,67 @@
  {
   "name": "stone-wave",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 86.9
+    "path": 3,
+    "area": 87.1
    }
   ]
  },
  {
   "name": "boat-wave",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.4
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "wave-up",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 9.4
+    "path": 3,
+    "area": 9.5
    }
   ]
  },
  {
   "name": "seats",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 12.6
+    "path": 4,
+    "area": 12.7
    }
   ]
  },
  {
   "name": "wave-draw",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "2": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.4
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 2,
     "area": 2.4
    }
   ]
@@ -8547,12 +7632,15 @@
  {
   "name": "stone-12",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 17.7
+    "path": 3,
+    "area": 17.8
    }
   ]
  },
@@ -8567,11 +7655,14 @@
  {
   "name": "window",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 57.8
    }
   ]
@@ -8579,35 +7670,30 @@
  {
   "name": "globe",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 86.8
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "at",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 33.6
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "pills-cursor",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 8.2
    }
   ]
@@ -8615,15 +7701,14 @@
  {
   "name": "search-bar",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.5
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 2.5
    }
   ]
@@ -8639,16 +7724,21 @@
  {
   "name": "unset-input",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.0
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 2.0
    }
   ]
@@ -8656,21 +7746,28 @@
  {
   "name": "qr-code",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden",
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 3.2
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.2
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 3.2
    }
   ]
@@ -8678,11 +7775,14 @@
  {
   "name": "link",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 4.4
    }
   ]
@@ -8698,14 +7798,10 @@
  {
   "name": "wave-connect",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 17.5
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "link-k",
@@ -8746,11 +7842,14 @@
  {
   "name": "circles-joined",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 4.1
    }
   ]
@@ -8790,23 +7889,22 @@
  {
   "name": "soccer-field",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 28.1
-   }
-  ]
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "dot-circle-line",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 6.6
    }
   ]
@@ -8830,11 +7928,14 @@
  {
   "name": "basketball",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.8
    }
   ]
@@ -8874,38 +7975,26 @@
  {
   "name": "tv-dots",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 62.8
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "presentation-picture",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 8.6
-   }
-  ]
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
  },
  {
   "name": "presentation-text",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 246.0
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "tv",
@@ -8913,12 +8002,7 @@
   "roles": {
    "3": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "tv-picture",
@@ -8926,12 +8010,7 @@
   "roles": {
    "3": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "phone",
@@ -8944,15 +8023,14 @@
  {
   "name": "smartphone",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.5
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.5
    }
   ]
@@ -8965,47 +8043,44 @@
    {
     "kind": "redrawn",
     "from": "active",
-    "area": 62.0
+    "area": 62.1
    }
   ]
  },
  {
   "name": "android",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 64.3
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "android-head",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 62.7
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "android-head-2",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.4
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 3.4
    }
   ]
@@ -9037,28 +8112,23 @@
  {
   "name": "robot",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 76.0
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "robot-head",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "focus",
+   "7": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 2.0
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
+    "path": 7,
     "area": 2.0
    }
   ]
@@ -9066,23 +8136,29 @@
  {
   "name": "robot-stones-arms-down",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "7": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 3.7
+    "path": 7,
+    "area": 3.8
    }
   ]
  },
  {
   "name": "robot-fun",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "6": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 6,
     "area": 11.2
    }
   ]
@@ -9101,12 +8177,7 @@
   "roles": {
    "3": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 0.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "apple-branch",
@@ -9119,56 +8190,39 @@
  {
   "name": "apple",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 162.0
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "hourglass-k",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 7.4
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 7.8
-   }
-  ]
+  "roles": {
+   "5": "focus",
+   "6": "focus"
+  },
+  "flags": []
  },
  {
   "name": "orange-2",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 152.1
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "apple-seeds",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "near-duplicate",
-    "area": 2.3
-   },
-   {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.3
    }
   ]
@@ -9176,14 +8230,10 @@
  {
   "name": "circles-dots",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 23.4
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "boat-wave-2",
@@ -9212,26 +8262,18 @@
  {
   "name": "bomb",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 61.9
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "v-slice",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 60.7
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "wheel",
@@ -9244,14 +8286,10 @@
  {
   "name": "grenada",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 3.7
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "fork-knife",
@@ -9280,38 +8318,26 @@
  {
   "name": "meal-hot",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 80.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "bread",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 106.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "carrot",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 51.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "plate-cutlery",
@@ -9348,65 +8374,41 @@
  {
   "name": "table-meal-hot",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 14.8
-   }
-  ]
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
  },
  {
   "name": "people-table",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.5
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 12.1
-   }
-  ]
+  "roles": {
+   "1": "focus",
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "meal-sticks",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 80.4
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "abstract-fork-dot",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 7.0
-   }
-  ]
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
  },
  {
   "name": "binoculars-row",
   "wave": "2026-11-everyday",
   "roles": {},
   "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.5
-   },
    {
     "kind": "redrawn",
     "from": "active",
@@ -9425,12 +8427,15 @@
  {
   "name": "christmas-ball",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 49.1
+    "path": 5,
+    "area": 49.2
    }
   ]
  },
@@ -9445,19 +8450,11 @@
  {
   "name": "gift",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 12.8
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 13.0
-   }
-  ]
+  "roles": {
+   "4": "focus",
+   "5": "focus"
+  },
+  "flags": []
  },
  {
   "name": "christmas-tree",
@@ -9486,12 +8483,15 @@
  {
   "name": "pine-cone",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 28.5
+    "path": 4,
+    "area": 28.6
    }
   ]
  },
@@ -9506,45 +8506,32 @@
  {
   "name": "pine-chevrons",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 21.2
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 28.0
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 29.8
-   }
-  ]
+  "roles": {
+   "1": "body",
+   "2": "body",
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "pine-tree",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 104.2
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "pine",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 29.4
    }
   ]
@@ -9555,12 +8542,7 @@
   "roles": {
    "5": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "tree",
@@ -9593,14 +8575,10 @@
  {
   "name": "acorn",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 48.5
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "train-front",
@@ -9613,24 +8591,12 @@
  {
   "name": "train",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 12.0
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 12.2
-   },
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.7
-   }
-  ]
+  "roles": {
+   "5": "focus",
+   "6": "focus",
+   "7": "focus"
+  },
+  "flags": []
  },
  {
   "name": "train-underline",
@@ -9647,12 +8613,7 @@
   "roles": {
    "3": "focus"
   },
-  "flags": [
-   {
-    "kind": "near-duplicate",
-    "area": 2.0
-   }
-  ]
+  "flags": []
  },
  {
   "name": "flame-drop",
@@ -9665,38 +8626,33 @@
  {
   "name": "fire",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 15.7
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "candle-simple",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 6.7
+    "path": 4,
+    "area": 6.8
    }
   ]
  },
  {
   "name": "firecamp",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 30.1
-   }
-  ]
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "firepit-h",
@@ -9717,38 +8673,26 @@
  {
   "name": "firepit-curve",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 46.3
-   }
-  ]
+  "roles": {
+   "5": "body"
+  },
+  "flags": []
  },
  {
   "name": "firepit-above",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 15.6
-   }
-  ]
+  "roles": {
+   "9": "focus"
+  },
+  "flags": []
  },
  {
   "name": "firepit",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 26.7
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "sparkle-circle-dots",
@@ -9769,62 +8713,42 @@
  {
   "name": "fish-dive",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 52.7
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "fish-2",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 113.7
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "fish",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 10.2
-   }
-  ]
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
  },
  {
   "name": "fish-jump",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 38.8
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "fish-bowl",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.7
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "fishes",
@@ -9871,11 +8795,14 @@
  {
   "name": "poo-smell",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 11.4
    }
   ]
@@ -9883,14 +8810,10 @@
  {
   "name": "earth-sprout",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 9.3
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "map-marker",
@@ -9903,23 +8826,29 @@
  {
   "name": "globe-spin",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
-    "area": 54.4
+    "path": 5,
+    "area": 54.5
    }
   ]
  },
  {
   "name": "map-fold",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 58.2
    }
   ]
@@ -9927,23 +8856,22 @@
  {
   "name": "grid-dot",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.1
-   }
-  ]
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
  },
  {
   "name": "map-fold-path",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 3.1
    }
   ]
@@ -9975,26 +8903,18 @@
  {
   "name": "sale-sign",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 97.5
-   }
-  ]
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
  },
  {
   "name": "factory",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 24.0
-   }
-  ]
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
  },
  {
   "name": "store-shelve",
@@ -10015,14 +8935,10 @@
  {
   "name": "shopping-basket",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 11.5
-   }
-  ]
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
  },
  {
   "name": "bucket",
@@ -10035,26 +8951,18 @@
  {
   "name": "bath-bottles",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 126.7
-   }
-  ]
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
  },
  {
   "name": "shopping-trolley",
   "wave": "2026-11-everyday",
-  "roles": {},
-  "flags": [
-   {
-    "kind": "redrawn",
-    "from": "active",
-    "area": 94.1
-   }
-  ]
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
  },
  {
   "name": "shopping-cart",

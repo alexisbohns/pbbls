@@ -3,4 +3,5 @@
   <path d="M2.8 17.2 C9 17.5 15 17 21.2 17.3"/>
   <path d="M12 16.6 L7.6 12.6"/>
   <path d="M6 11.6 L7 12.4 M12 9.6 L12 10.8 M18 11.6 L17 12.4"/>
+  <path d="M3.8 16.8 C3.8 13.4 5.4 10.6 7.6 9.2 L12 16.8" data-role="mark" data-mark="1" data-rest="hidden"/>
 </svg>
