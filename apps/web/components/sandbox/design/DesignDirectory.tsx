@@ -4,8 +4,10 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } 
 import type { CanvasZoom, DeviceChoice } from "@/lib/design/devices"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { DesignContextProvider, type DesignContextValue } from "./DesignContext"
+import { DesignMobileBar } from "./DesignMobileBar"
 import { DesignRail } from "./DesignRail"
 import { DesignToolbar } from "./DesignToolbar"
+import type { DesignToolsState } from "./DesignTools"
 import { blockLinkNavigation } from "./link-guard"
 import { useDesignTheme } from "./useDesignTheme"
 
@@ -61,25 +63,30 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
     [theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize],
   )
 
+  const tools: DesignToolsState = {
+    theme,
+    onChange: setTheme,
+    zoom,
+    onZoom: setZoom,
+    devices,
+    onDevices: setDevices,
+    iconQuery,
+    onIconQuery: setIconQuery,
+    iconSize,
+    onIconSize: setIconSize,
+  }
+
+  // Three areas, like the app (#1384): the rail, the page's header and tools,
+  // the page. From 1024 px side by side; from 600 px the header stacks over
+  // the page; below 600 px one sticky bar replaces the rail and the header.
   return (
     <DesignContextProvider value={value}>
       <div className="flex min-h-dvh bg-background text-foreground">
         <DesignRail themeKey={themeKey} />
-        {/* Below the rail breakpoint the rail is a bar over the foot: leave it room. */}
-        <div className="min-w-0 flex-1 pb-20 rail:pb-0">
-          <DesignToolbar
-            theme={theme}
-            onChange={setTheme}
-            zoom={zoom}
-            onZoom={setZoom}
-            devices={devices}
-            onDevices={setDevices}
-            iconQuery={iconQuery}
-            onIconQuery={setIconQuery}
-            iconSize={iconSize}
-            onIconSize={setIconSize}
-          />
-          <div className="mx-auto max-w-[1600px] px-4 py-10">
+        <div className="min-w-0 flex-1 lg:flex lg:items-start">
+          <DesignMobileBar themeKey={themeKey} {...tools} />
+          <DesignToolbar {...tools} />
+          <div className="mx-auto max-w-[1600px] px-4 py-10 lg:min-w-0 lg:flex-1 lg:px-8">
             <div ref={contentRef} data-theme-key={themeKey} onClickCapture={blockLinkNavigation} className="flex flex-col gap-16">
               {children}
             </div>

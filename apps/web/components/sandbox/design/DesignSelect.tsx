@@ -18,7 +18,7 @@ type DesignSelectProps<T extends string | number> = {
 }
 
 /** The menu's caret, drawn in the set's 1.75 line (the hand-drawn set has no chevron yet). */
-function Caret() {
+export function Caret() {
   return (
     <svg
       aria-hidden

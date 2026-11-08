@@ -9,19 +9,24 @@ type DesignSearchFieldProps = {
   placeholder: string
   value: string
   onChange: (next: string) => void
+  className?: string
 }
 
 /**
  * An M3 search bar for the directory's chrome: a full pill on
  * `surfaceContainerHigh`, the glass leading and a clear button trailing once
- * there is text. It sits beside the `DesignSelect`s at their 48 px height.
+ * there is text. It sits beside the `DesignSelect`s at their 48 px height;
+ * the parent sets its width.
  * Chrome, so it wears the M3 roles (`.m3`) whatever theme the page shows.
  */
-export function DesignSearchField({ label, placeholder, value, onChange }: DesignSearchFieldProps) {
+export function DesignSearchField({ label, placeholder, value, onChange, className }: DesignSearchFieldProps) {
   return (
     <div
       role="search"
-      className="m3 flex h-12 w-full min-w-60 items-center gap-3 rounded-full bg-m3-surface-container-high pr-1.5 pl-4 text-m3-on-surface transition-colors focus-within:ring-2 focus-within:ring-m3-primary hover:bg-m3-surface-container-highest motion-reduce:transition-none sm:w-auto sm:flex-1 sm:basis-80 sm:max-w-xl"
+      className={cn(
+        "m3 flex h-12 w-full min-w-0 items-center gap-3 rounded-full bg-m3-surface-container-high pr-1.5 pl-4 text-m3-on-surface transition-colors focus-within:ring-2 focus-within:ring-m3-primary hover:bg-m3-surface-container-highest motion-reduce:transition-none",
+        className,
+      )}
     >
       <MagnifyingMd className={cn(PBBLS_ICON_SIZE.row, "shrink-0 text-m3-on-surface-variant")} />
       <input

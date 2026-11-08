@@ -17,8 +17,6 @@ const SURFACES: readonly { surface: IconSurface; label: string; Icon: PbblsIconC
   { surface: "android", label: "Android", Icon: Android },
 ]
 
-const count = new Intl.NumberFormat("en")
-
 /** Where the glyph's row has migrated, as an accessible sentence. */
 function migrationSentence(glyph: IconGlyph): string {
   const on = SURFACES.filter((s) => glyph.row.migrated.includes(s.surface)).map((s) => s.label)
@@ -69,40 +67,31 @@ function GlyphTile({ glyph, size }: { glyph: IconGlyph; size: PbblsIconSize }) {
 
 /**
  * The hand-drawn set at its real sizes (rem, so 1:1 with the app): one tile per
- * glyph, base and twin alike, searched and sized from the toolbar. Hovering a
+ * glyph, base and twin alike, searched, counted and sized from the side area. Hovering a
  * tile shows where its row has migrated. Then what web still draws with Lucide.
  */
 export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
   const { iconQuery, iconSize } = useDesign()
   const glyphs = useMemo(() => ICON_GLYPHS.filter((glyph) => glyphMatches(glyph, iconQuery)), [iconQuery])
-  const twins = ICON_GLYPHS.length - ICON_ROWS.length
   const webPending = ICON_ROWS.filter((row) => row.replacesWeb.length > 0 && !row.migrated.includes("web"))
   const lucideUses = lucide.reduce((n, g) => n + g.count, 0)
 
   return (
     <>
-      <DesignSection
-        id="icons"
-        title="Icons"
-        description={`${count.format(ICON_GLYPHS.length)} glyphs from @pbbls/icons: ${count.format(ICON_ROWS.length)} drawings and ${count.format(twins)} twins (active, lit), each a glyph of its own. Drawn at the PBBLS_ICON_SIZE classes (rem: real size, not scaled). Hover a tile for where it has migrated: web, iOS, Android.`}
-      >
-        <div className="flex flex-col gap-3">
-          <p aria-live="polite" className="text-right text-xs text-muted-foreground tabular-nums">
-            {iconQuery.trim() ? `${count.format(glyphs.length)} of ${count.format(ICON_GLYPHS.length)}` : count.format(ICON_GLYPHS.length)}
+      {/* The page's title, its counts and its tools live in the side area (DesignToolbar). */}
+      <section id="icons" aria-label="Icons" className="scroll-mt-32">
+        {glyphs.length === 0 ? (
+          <p className="rounded-2xl bg-card px-4 py-10 text-center text-sm text-muted-foreground">
+            No glyph matches “{iconQuery.trim()}”.
           </p>
-          {glyphs.length === 0 ? (
-            <p className="rounded-xl border border-border px-4 py-10 text-center text-sm text-muted-foreground">
-              No glyph matches “{iconQuery.trim()}”.
-            </p>
-          ) : (
-            <ul className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-2">
-              {glyphs.map((glyph) => (
-                <GlyphTile key={glyph.name} glyph={glyph} size={iconSize} />
-              ))}
-            </ul>
-          )}
-        </div>
-      </DesignSection>
+        ) : (
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-2">
+            {glyphs.map((glyph) => (
+              <GlyphTile key={glyph.name} glyph={glyph} size={iconSize} />
+            ))}
+          </ul>
+        )}
+      </section>
 
       <DesignSection
         id="lucide"
