@@ -8,7 +8,8 @@
   "types": "./react/index.ts",
   "exports": {
     ".": "./react/index.ts",
-    "./icons.json": "./icons.json"
+    "./icons.json": "./icons.json",
+    "./glyphs.json": "./glyphs/glyphs.json"
   },
   "scripts": {
     "generate": "tsx scripts/build.ts",
