@@ -83,12 +83,12 @@ fun achievementFamilyIcon(family: String): PbblsIcon =
         "pebble_count" -> PbblsIcon.STACK
         "emotion_first" -> PbblsIcon.HEART
         "first_collection" -> PbblsIcon.COLLECTION
-        "first_glyph" -> PbblsIcon.PEBBLE_DOTTED_GLYPH
+        "first_glyph" -> PbblsIcon.PEBBLE_GLYPH_DOTTED
         "first_soul" -> PbblsIcon.PEOPLE
         "first_moment" -> PbblsIcon.PEBBLE_FLAT
         "first_pebble" -> PbblsIcon.PEBBLE_ROUND
         "first_five" -> PbblsIcon.STACK_LIT_3
-        "glyph_count" -> PbblsIcon.PEBBLE_DOTTED_GLYPH
+        "glyph_count" -> PbblsIcon.PEBBLE_GLYPH_DOTTED
         else -> PbblsIcon.PEBBLE_GLOW_MD
     }
 

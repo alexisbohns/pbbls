@@ -1,6 +1,6 @@
 "use client"
 
-import { PebbleDottedGlyph } from "@pbbls/icons"
+import { PebbleGlyphDotted } from "@pbbls/icons"
 import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
@@ -29,7 +29,7 @@ export function ProfileBanner({ displayName, memberSince, glyph }: ProfileBanner
         <GlyphPreview mark={glyph} className="size-24" />
       ) : (
         <div className="flex size-24 items-center justify-center rounded-2xl border border-dashed border-border">
-          <PebbleDottedGlyph className={cn(PBBLS_ICON_SIZE.hero, "text-muted-foreground")} />
+          <PebbleGlyphDotted className={cn(PBBLS_ICON_SIZE.hero, "text-muted-foreground")} />
         </div>
       )}
 

@@ -170,4 +170,4 @@ internal fun CollectionsPlaceholder() =
 
 @Composable
 internal fun GlyphsPlaceholder() =
-    DetailPlaceholder(icon = PbblsIcon.PEBBLE_DOTTED_GLYPH, text = stringResource(R.string.glyphs_detail_placeholder))
+    DetailPlaceholder(icon = PbblsIcon.PEBBLE_GLYPH_DOTTED, text = stringResource(R.string.glyphs_detail_placeholder))

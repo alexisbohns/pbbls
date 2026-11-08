@@ -1,6 +1,6 @@
 "use client"
 
-import { CalendarDate, Camera, KarmaDot, PebbleDottedGlyph, PebbleFlat, PebbleRound, PlusCircle, Slider, StonesAlignedBottom } from "@pbbls/icons"
+import { CalendarDate, Camera, KarmaDot, PebbleGlyphDotted, PebbleFlat, PebbleRound, PlusCircle, Slider, StonesAlignedBottom } from "@pbbls/icons"
 import { M3Island } from "@/components/layout/M3Island"
 import { Pentagon } from "@/components/stones/Pentagon"
 import { SplitStone } from "@/components/stones/SplitStone"
@@ -78,7 +78,7 @@ export function StonesSpecimen() {
               <Slider className="size-[22px] text-m3-on-surface" />
             </Stone>
             <Pentagon>
-              <PebbleDottedGlyph className="size-[58px]" />
+              <PebbleGlyphDotted className="size-[58px]" />
             </Pentagon>
           </div>
           <SplitStone

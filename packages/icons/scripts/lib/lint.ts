@@ -262,8 +262,7 @@ function lintManifest(root: string, manifest: Manifest, files: string[], result:
     if (rows.has(row.name)) errors.push({ file, rule: "manifest", message: `"${row.name}" is listed twice` })
     rows.set(row.name, row)
     const last = row.name.split("-").at(-1) ?? ""
-    // error once part 3 renames the three -half names (#1607)
-    if (FORM_WORDS.includes(last)) result.warnings.push({ file, rule: "manifest", message: `"${row.name}" ends in a form word (${FORM_WORDS.join(", ")})` })
+    if (FORM_WORDS.includes(last)) errors.push({ file, rule: "manifest", message: `"${row.name}" ends in a form word (${FORM_WORDS.join(", ")})` })
     if (!(STATUSES as readonly string[]).includes(row.status)) errors.push({ file, rule: "manifest", message: `${row.name}: unknown status "${row.status}"` })
     const wave = join(root, WAVES_DIR, row.wave)
     if (!existsSync(wave) || !statSync(wave).isDirectory()) errors.push({ file, rule: "manifest", message: `${row.name}: no folder ${WAVES_DIR}/${row.wave}/` })

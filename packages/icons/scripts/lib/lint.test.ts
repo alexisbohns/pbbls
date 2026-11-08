@@ -187,8 +187,7 @@ describe("roles and overrides", () => {
   })
 
   it("refuses a name ending in a form word", () => {
-    // a warning until part 3 renames the three -half names (#1607), an error after
-    const messages = run({ manifest: { icons: [row("scale-half")] }, files: { "scale-half.svg": svg('<path d="M4 4 L20 20"/>') } }).warnings.map((e) => e.message)
+    const messages = run({ manifest: { icons: [row("scale-half")] }, files: { "scale-half.svg": svg('<path d="M4 4 L20 20"/>') } }).errors.map((e) => e.message)
     expect(messages).toContain('"scale-half" ends in a form word (regular, half, solid, of)')
   })
 })

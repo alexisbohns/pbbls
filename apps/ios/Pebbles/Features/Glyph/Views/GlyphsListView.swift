@@ -112,7 +112,7 @@ struct GlyphsListView: View {
         switch tab {
         case .mine:
             return ContentUnavailableView {
-                Label { Text("No glyphs yet") } icon: { PbblsIconImage(.pebbleDottedGlyph, .hero) }
+                Label { Text("No glyphs yet") } icon: { PbblsIconImage(.pebbleGlyphDotted, .hero) }
             } description: {
                 Text("Tap + to carve your first glyph.")
             }

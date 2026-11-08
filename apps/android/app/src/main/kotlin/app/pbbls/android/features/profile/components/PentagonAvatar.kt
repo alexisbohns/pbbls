@@ -50,7 +50,7 @@ internal fun PentagonAvatar(
         val glyph = Modifier.padding(top = GLYPH_DROP).size(GLYPH)
         if (glyphStrokes.isNullOrEmpty()) {
             PbblsIconImage(
-                icon = PbblsIcon.PEBBLE_DOTTED_GLYPH,
+                icon = PbblsIcon.PEBBLE_GLYPH_DOTTED,
                 contentDescription = null,
                 size = GLYPH,
                 tint = colors.onPrimaryContainer,

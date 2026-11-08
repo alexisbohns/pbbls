@@ -18,7 +18,7 @@ class GuideIconTest {
                 GuideIllustration.DOMAINS to PbblsIcon.ABSTRACT_LANDSCAPE,
                 GuideIllustration.COLLECTIONS to PbblsIcon.COLLECTION,
                 GuideIllustration.SOULS to PbblsIcon.PEOPLE,
-                GuideIllustration.GLYPHS to PbblsIcon.PEBBLE_DOTTED_GLYPH,
+                GuideIllustration.GLYPHS to PbblsIcon.PEBBLE_GLYPH_DOTTED,
                 GuideIllustration.KARMA to PbblsIcon.KARMA_DOT,
             )
 

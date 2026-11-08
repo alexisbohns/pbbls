@@ -16,12 +16,12 @@ class AchievementFamilyIconTest {
                 "pebble_count" to PbblsIcon.STACK,
                 "emotion_first" to PbblsIcon.HEART,
                 "first_collection" to PbblsIcon.COLLECTION,
-                "first_glyph" to PbblsIcon.PEBBLE_DOTTED_GLYPH,
+                "first_glyph" to PbblsIcon.PEBBLE_GLYPH_DOTTED,
                 "first_soul" to PbblsIcon.PEOPLE,
                 "first_moment" to PbblsIcon.PEBBLE_FLAT,
                 "first_pebble" to PbblsIcon.PEBBLE_ROUND,
                 "first_five" to PbblsIcon.STACK_LIT_3,
-                "glyph_count" to PbblsIcon.PEBBLE_DOTTED_GLYPH,
+                "glyph_count" to PbblsIcon.PEBBLE_GLYPH_DOTTED,
             )
         ios.forEach { (family, icon) -> assertEquals(family, icon, achievementFamilyIcon(family)) }
     }

@@ -711,7 +711,7 @@
   "flags": []
  },
  {
-  "name": "pebble-dotted-glyph",
+  "name": "pebble-glyph-dotted",
   "wave": "2026-10-foundation",
   "roles": {},
   "flags": [
@@ -741,7 +741,7 @@
   "flags": []
  },
  {
-  "name": "pebble-dotted-glyph-2",
+  "name": "pebble-glyph-dotted-open",
   "wave": "2026-10-foundation",
   "roles": {},
   "flags": [
@@ -1112,7 +1112,7 @@
   "flags": []
  },
  {
-  "name": "pebble-outlined-glyph",
+  "name": "pebble-glyph",
   "wave": "2026-10-foundation",
   "roles": {
    "1": "mark 1"
@@ -1120,7 +1120,7 @@
   "flags": []
  },
  {
-  "name": "pebble-outlined-glyph-2",
+  "name": "pebble-glyph-open",
   "wave": "2026-10-foundation",
   "roles": {
    "1": "mark 1"
@@ -2190,7 +2190,7 @@
   "flags": []
  },
  {
-  "name": "scale-half",
+  "name": "scale-balanced",
   "wave": "2026-11-everyday",
   "roles": {
    "6": "focus"
@@ -2664,7 +2664,7 @@
   "flags": []
  },
  {
-  "name": "appearance-half",
+  "name": "appearance-split",
   "wave": "2026-11-everyday",
   "roles": {
    "1": "body"
@@ -2882,7 +2882,7 @@
   "flags": []
  },
  {
-  "name": "stones-4-half",
+  "name": "stones-4-halved",
   "wave": "2026-11-everyday",
   "roles": {
    "3": "body"

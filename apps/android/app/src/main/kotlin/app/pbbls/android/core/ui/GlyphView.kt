@@ -89,7 +89,7 @@ fun GlyphView(
     ) {
         when (case) {
             GlyphViewCase.CARVE ->
-                PlaceholderIcon(PbblsIcon.PEBBLE_DOTTED_GLYPH, side, tint = colors.onSurfaceVariant)
+                PlaceholderIcon(PbblsIcon.PEBBLE_GLYPH_DOTTED, side, tint = colors.onSurfaceVariant)
             GlyphViewCase.CREATE ->
                 PlaceholderIcon(PbblsIcon.PLUS_CIRCLE, side, tint = colors.outline)
             GlyphViewCase.PROFILE, GlyphViewCase.SELECTED ->

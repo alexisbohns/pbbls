@@ -119,7 +119,7 @@ private fun StoneGallery() {
                 contentAlignment = Alignment.Center,
             ) {
                 PbblsIconImage(
-                    PbblsIcon.PEBBLE_DOTTED_GLYPH,
+                    PbblsIcon.PEBBLE_GLYPH_DOTTED,
                     PbblsIconSize.HERO,
                     contentDescription = null,
                     tint = colors.onPrimaryContainer,
