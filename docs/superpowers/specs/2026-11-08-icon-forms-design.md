@@ -38,7 +38,7 @@ The twin model names states, not drawings. `.active` covers anything from one li
 
 | Role | Count | Meaning |
 |---|---|---|
-| `body` | 0 or 1 role (one or more paths, unioned) | the main closed shape |
+| `body` | 0 or 1 role (one or more paths, unioned) | the main shape, filled the way SVG fills a path: an open path closes with a straight segment (hand-drawn bodies rarely close) |
 | `mark` with `data-mark="1"…"n"` | 0…n (a number may span several paths) | the countable parts, in fill order |
 | `focus` | 0 or 1 role (one or more paths) | the part that carries the meaning |
 
@@ -50,7 +50,7 @@ An untagged path is a plain line. A glyph with no roles has only the regular for
 |---|---|---|
 | `regular` | always | every path stroked, nothing filled |
 | `half` | the glyph has a focus | the focus filled (fill + its stroke) |
-| `solid` | the glyph has a body | the body filled; every other path inside the body outlined at the 1.75 stroke with round caps and subtracted even-odd, so it shows through in the surface colour; paths outside the body stay stroked |
+| `solid` | the glyph has a body | the body's fill (SVG-style) plus its stroke band; every other path inside the fill outlined at the 1.75 stroke with round caps and subtracted even-odd, so it shows through in the surface colour; paths outside it stay stroked |
 | `progress(k)`, 0 ≤ k ≤ n | the glyph has n ≥ 1 marks | marks 1…k filled; `progress(0)` is `regular` |
 
 The old `dot` is `progress(1)`. A dotted line is a separate glyph (`pebble-glyph-dotted`), never a form.
@@ -87,7 +87,7 @@ The lint adds:
 
 - `data-role` outside `body`, `mark`, `focus`; `data-mark` without `data-role="mark"`, or a mark without a number;
 - mark numbers that do not run 1…n without gaps;
-- a body that is not closed, or a carve that leaves less than 4 square units of filled area;
+- a body that encloses no area (a straight line), or a carve that leaves less than 4 square units of filled area;
 - an override for a form the glyph does not have, or with a different viewBox;
 - a name whose last segment is a form word;
 - tag keys outside D5.

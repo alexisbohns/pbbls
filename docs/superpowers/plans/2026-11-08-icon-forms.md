@@ -1068,7 +1068,7 @@ describe("roles and overrides", () => {
     const root = fixture([row("ring")], { "ring.svg": svg('  <path d="M4 4 L20 4" data-role="body"/>\n  <path d="M8 12 L16 12" data-role="mark" data-mark="2"/>') })
     const messages = lint(root).errors.map((e) => e.message)
     expect(messages).toContain("marks must run 1…n without gaps; found 2")
-    expect(messages).toContain("the body has no closed subpath")
+    expect(messages).toContain("the body encloses no area")
   })
 
   it("accepts an override for a form the glyph has and refuses one it lacks", () => {
@@ -1107,7 +1107,6 @@ export const isOverrideForm = (v: string): boolean => OVERRIDE_FORM.test(v)
 
 ```ts
 import { carveSolid } from "./carve"
-import { flattenPath, isClosed } from "./geometry"
 import { readRoles } from "./roles"
 ```
 
@@ -1134,7 +1133,9 @@ const FORM_WORDS = ["regular", "half", "solid", "of"]
     for (const message of issues) result.errors.push({ file, rule: "roles", message })
     if (roles.body.length > 0) {
       const bodyD = roles.body.flatMap((i) => (parsed.paths[i] ? [parsed.paths[i].d] : []))
-      if (!bodyD.flatMap((d) => flattenPath(d)).some(isClosed)) result.errors.push({ file, rule: "roles", message: "the body has no closed subpath" })
+      // A body is filled as SVG fills it: an open path closes with a straight segment.
+      // A straight line encloses nothing, so its fill area is 0.
+      if (bodyD.reduce((sum, d) => sum + filledArea(d, false), 0) < 1) result.errors.push({ file, rule: "roles", message: "the body encloses no area" })
       else {
         const others = parsed.paths.filter((_, i) => !roles.body.includes(i)).map((p) => p.d)
         const { area } = carveSolid(bodyD, others)
@@ -1582,7 +1583,7 @@ npm run format --workspace=@pbbls/icons
 npm run lint --workspace=@pbbls/icons
 ```
 
-Expected: a summary line (about 950 glyphs, roughly 890 with roles); format rewrites the touched files into canonical order; lint passes with no `roles` errors. If a glyph fails "the body has no closed subpath" or the carve threshold, change that path's `data-role="body"` to `data-role="focus"` in its source and add `{"kind": "body-to-focus"}` to its `review.json` flags by hand; rerun lint.
+Expected: a summary line (about 950 glyphs, roughly 890 with roles); format rewrites the touched files into canonical order; lint passes with no `roles` errors. If a glyph fails "the body encloses no area" or the carve threshold, change that path's `data-role="body"` to `data-role="focus"` in its source and add `{"kind": "body-to-focus"}` to its `review.json` flags by hand; rerun lint.
 
 - [ ] **Step 4: Generate and commit**
 
@@ -1710,7 +1711,7 @@ Expected: the summary line; `git diff --stat -- apps` lists only call sites of t
 
 - [ ] **Step 4: Make the form-word rule an error again**
 
-In `lint.ts`, move the form-word push back from `warnings` to `errors` and delete the `// error once part 3 …` comment. Run `npm run lint --workspace=@pbbls/icons`: expected 0 errors.
+In `lint.ts`, move the form-word push back from `warnings` to `errors` and delete the `// error once part 3 …` comment. Run `npm run lint --workspace=@pbbls/icons`: expected 0 errors. In `lint.test.ts`, the test "refuses a name ending in a form word" reads `.warnings` until now: switch it back to `.errors` and drop its comment about part 3. Run `npx vitest run scripts/lib/lint.test.ts`: expected pass.
 
 - [ ] **Step 5: Commit**
 
