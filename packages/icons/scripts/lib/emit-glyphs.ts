@@ -24,6 +24,15 @@ export function buildGlyph(row: IconRow, source: string, overrides: Record<strin
     const mark = roles.marks.findIndex((group) => group.includes(i))
     return mark >= 0 ? { d, role: "mark", mark: mark + 1, ...hidden } : { d }
   })
+  // A mark or focus with lines inside it would paint over them: store it carved like the solid.
+  paths.forEach((p, i) => {
+    if (p.role !== "mark" && p.role !== "focus") return
+    const inner = paths.flatMap((q, j) => (j !== i && !q.hidden ? [j] : []))
+    const carved = carveSolid([p.d], inner.map((j) => paths[j]?.d ?? ""))
+    if (carved.keep.length === inner.length) return
+    p.fill = carved.d
+    p.cuts = inner.filter((_, n) => !carved.keep.includes(n))
+  })
   const body = paths.filter((p) => p.role === "body").map((p) => p.d)
   // A hidden path is neither cut from the solid nor kept on it; `keep` indexes what is left.
   const others = paths.filter((p) => p.role !== "body" && !p.hidden).map((p) => p.d)

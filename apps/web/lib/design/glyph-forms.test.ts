@@ -27,6 +27,17 @@ describe("glyph forms", () => {
     expect(formPaths(cromlech, "progress", 0)).toHaveLength(cromlech.paths.length - 1)
   })
 
+  it("carves a filled mark through the lines inside it", () => {
+    const pouch = GLYPHS.find((g) => g.name === "pouch")
+    if (!pouch) throw new Error("no pouch")
+    const carved = pouch.paths.flatMap((p) => (p.fill !== undefined && p.cuts ? [p] : []))
+    expect(carved.length).toBeGreaterThan(0)
+    const drawn = formPaths(pouch, "progress", pouch.marks)
+    expect(drawn.some((p) => p.fill && p.evenOdd && !p.stroke)).toBe(true)
+    for (const c of carved) for (const i of c.cuts ?? []) expect(drawn.some((p) => p.d === pouch.paths[i]?.d)).toBe(false)
+    expect(formPaths(pouch, "regular")).toHaveLength(pouch.paths.length)
+  })
+
   it("flags glyphs the review lists", () => {
     expect(typeof needsReview("home")).toBe("boolean")
   })

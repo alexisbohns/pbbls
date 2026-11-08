@@ -1,7 +1,16 @@
 import type { Tags } from "./manifest"
 
 /** One path of a glyph in `glyphs.json`: normalised data and its role. A hidden path (mark or focus) is not drawn until its role fills. */
-export type GlyphPath = { d: string; role?: "body" | "mark" | "focus"; mark?: number; hidden?: true }
+export type GlyphPath = {
+  d: string
+  role?: "body" | "mark" | "focus"
+  mark?: number
+  hidden?: true
+  /** Mark or focus with other lines inside it: the path filled and stroked, minus those lines outlined at the stroke (even-odd, unstroked). */
+  fill?: string
+  /** Indices into `paths` of the lines `fill` is carved through; they are not drawn when this path is filled. */
+  cuts?: number[]
+}
 
 /** A path as a form draws it. */
 export type RenderedPath = { d: string; fill: boolean; evenOdd: boolean; stroke: boolean }
@@ -47,12 +56,16 @@ export function renderForm(glyph: GlyphData, form: Form): RenderedPath[] {
   const override = glyph.overrides[key]
   if (override) return override
   // A hidden path is drawn only when its role fills it; everything else is stroked.
-  const draw = (fills: (p: GlyphPath) => boolean): RenderedPath[] =>
-    glyph.paths.flatMap((p) => {
+  // A filled path with a carved `fill` draws that instead, and the lines it is carved through are left out.
+  const draw = (fills: (p: GlyphPath) => boolean): RenderedPath[] => {
+    const cut = new Set(glyph.paths.flatMap((p) => (fills(p) && p.fill !== undefined ? (p.cuts ?? []) : [])))
+    return glyph.paths.flatMap((p, i) => {
       const on = fills(p)
-      if (p.hidden && !on) return []
+      if ((p.hidden && !on) || cut.has(i)) return []
+      if (on && p.fill !== undefined) return [{ d: p.fill, fill: true, evenOdd: true, stroke: false }]
       return [on ? filled(p.d) : stroked(p.d)]
     })
+  }
   switch (form.kind) {
     case "regular":
       return draw(() => false)

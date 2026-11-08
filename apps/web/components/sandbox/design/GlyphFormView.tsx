@@ -1,6 +1,6 @@
 "use client"
 
-import { formPaths, isLit, type FormChoice, type Glyph } from "@/lib/design/glyph-forms"
+import { cutIndices, formPaths, isLit, type FormChoice, type Glyph } from "@/lib/design/glyph-forms"
 import { cn } from "@/lib/utils"
 
 const FADE = "transition-[fill-opacity,opacity] duration-300 ease-out motion-reduce:transition-none"
@@ -15,6 +15,7 @@ const FADE = "transition-[fill-opacity,opacity] duration-300 ease-out motion-red
 export function GlyphFormView({ glyph, form, k, className }: { glyph: Glyph; form: FormChoice; k: number; className?: string }) {
   const key = form === "progress" ? `progress-${Math.min(k, glyph.marks)}` : form
   const override = form === "regular" ? undefined : glyph.overrides[key]
+  const cut = cutIndices(glyph, form, k)
   const showSolid = form === "solid" && glyph.solid !== null && !override
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden className={className}>
@@ -27,16 +28,19 @@ export function GlyphFormView({ glyph, form, k, className }: { glyph: Glyph; for
           <g className={cn(FADE, showSolid ? "opacity-0" : "opacity-100")}>
             {glyph.paths.map((p, i) => {
               const lit = isLit(p, form, k)
-              const shown = lit || !p.hidden
+              const shown = (lit || !p.hidden) && !cut.has(i)
+              const carved = p.fill !== undefined
               return (
-                <path
-                  key={i}
-                  d={p.d}
-                  fill="currentColor"
-                  fillOpacity={lit ? 1 : 0}
-                  stroke={shown ? undefined : "none"}
-                  className={cn(FADE, shown ? "opacity-100" : "opacity-0")}
-                />
+                <g key={i}>
+                  <path
+                    d={p.d}
+                    fill="currentColor"
+                    fillOpacity={lit && !carved ? 1 : 0}
+                    stroke={shown ? undefined : "none"}
+                    className={cn(FADE, shown ? "opacity-100" : "opacity-0")}
+                  />
+                  {carved && <path d={p.fill} fill="currentColor" fillRule="evenodd" stroke="none" className={cn(FADE, lit ? "opacity-100" : "opacity-0")} />}
+                </g>
               )
             })}
           </g>

@@ -54,6 +54,31 @@ describe("hidden paths", () => {
   })
 })
 
+describe("carved fills", () => {
+  const square = "M4 4 L20 4 L20 20 L4 20 Z"
+  it("gives a mark with a line inside a carved fill and the line's index as a cut", () => {
+    const g = buildGlyph(row, source(`  <path d="${square}" data-role="mark" data-mark="1"/>\n  <path d="M8 12 L16 12"/>`), {})
+    expect(g.paths[0]?.cuts).toEqual([1])
+    expect(g.paths[0]?.fill).toMatch(/^M/)
+    expect(g.paths[1]).not.toHaveProperty("fill")
+    const out = renderForm(g, { kind: "progress", k: 1 })
+    expect(out).toEqual([{ d: g.paths[0]?.fill, fill: true, evenOdd: true, stroke: false }])
+    expect(renderForm(g, { kind: "regular" }).map((p) => p.d)).toEqual([square, "M8 12 L16 12"])
+  })
+
+  it("stores nothing on a mark with nothing inside", () => {
+    const g = buildGlyph(row, source(`  <path d="${square}" data-role="mark" data-mark="1"/>\n  <path d="M2 22 L3 22"/>`), {})
+    expect(g.paths[0]).toEqual({ d: square, role: "mark", mark: 1 })
+    expect(renderForm(g, { kind: "progress", k: 1 }).map((p) => [p.d, p.fill, p.evenOdd])).toEqual([[square, true, false], ["M2 22 L3 22", false, false]])
+  })
+
+  it("carves a hidden focus too", () => {
+    const g = buildGlyph(row, source(`  <path d="${square}" data-role="focus" data-rest="hidden"/>\n  <path d="M8 12 L16 12"/>`), {})
+    expect(g.paths[0]?.cuts).toEqual([1])
+    expect(renderForm(g, { kind: "half" }).map((p) => p.d)).toEqual([g.paths[0]?.fill])
+  })
+})
+
 describe("loadGlyphs", () => {
   it("attaches override files to their base and skips exploring rows", () => {
     const root = mkdtempSync(join(tmpdir(), "icons-glyphs-"))

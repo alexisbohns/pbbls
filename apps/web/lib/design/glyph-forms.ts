@@ -9,7 +9,16 @@ import review from "@pbbls/icons/review.json"
  */
 
 /** A hidden path (mark or focus) is not drawn at rest; it appears filled when its role fills. */
-export type GlyphPath = { d: string; role?: "body" | "mark" | "focus"; mark?: number; hidden?: true }
+export type GlyphPath = {
+  d: string
+  role?: "body" | "mark" | "focus"
+  mark?: number
+  hidden?: true
+  /** Mark or focus with lines inside it: filled and stroked minus those lines, even-odd and unstroked. */
+  fill?: string
+  /** Indices into `paths` of the lines `fill` is carved through; not drawn once this path is filled. */
+  cuts?: number[]
+}
 export type RenderedPath = { d: string; fill: boolean; evenOdd: boolean; stroke: boolean }
 export type Glyph = {
   name: string
@@ -55,11 +64,18 @@ export function formPaths(glyph: Glyph, choice: FormChoice, k = 0): RenderedPath
     return [{ d: glyph.solid.d, fill: true, evenOdd: true, stroke: false }, ...glyph.solid.keep.flatMap((i) => (others[i] ? [stroked(others[i].d)] : []))]
   }
   const form: FormChoice = effective === "half" && !glyph.paths.some((p) => p.role === "focus") ? "regular" : effective === "progress" && glyph.marks === 0 ? "regular" : effective
-  return glyph.paths.flatMap((p) => {
+  const cut = cutIndices(glyph, form, k)
+  return glyph.paths.flatMap((p, i) => {
     const on = isLit(p, form, k)
-    if (p.hidden && !on) return []
+    if ((p.hidden && !on) || cut.has(i)) return []
+    if (on && p.fill !== undefined) return [{ d: p.fill, fill: true, evenOdd: true, stroke: false }]
     return [on ? filledPath(p.d) : stroked(p.d)]
   })
+}
+
+/** The paths a lit, carved path is cut through: they are not drawn. */
+export function cutIndices(glyph: Glyph, choice: FormChoice, k: number): Set<number> {
+  return new Set(glyph.paths.flatMap((p) => (isLit(p, choice, k) && p.fill !== undefined ? (p.cuts ?? []) : [])))
 }
 
 export function hasForm(glyph: Glyph, choice: FormChoice): boolean {

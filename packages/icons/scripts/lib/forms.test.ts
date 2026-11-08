@@ -51,6 +51,17 @@ describe("forms", () => {
     expect(() => renderForm(glyph, { kind: "progress", k: 3 })).toThrow(/path-river has no progress-3 form/)
   })
 
+  it("draws a carved fill instead of the plain path and omits its cuts", () => {
+    const carved: GlyphData = {
+      ...glyph,
+      paths: [{ d: "M4 4 L20 4 L20 20 L4 20 Z", role: "mark", mark: 1, fill: "M0 0 L1 1 Z", cuts: [1] }, { d: "M8 12 L16 12" }, { d: "M2 2 L3 3" }],
+      marks: 1,
+      solid: null,
+    }
+    expect(renderForm(carved, { kind: "progress", k: 1 })).toEqual([{ d: "M0 0 L1 1 Z", fill: true, evenOdd: true, stroke: false }, { d: "M2 2 L3 3", fill: false, evenOdd: false, stroke: true }])
+    expect(renderForm(carved, { kind: "regular" }).map((p) => p.d)).toHaveLength(3)
+  })
+
   describe("a hidden path", () => {
     const dotted: GlyphData = {
       ...glyph,
