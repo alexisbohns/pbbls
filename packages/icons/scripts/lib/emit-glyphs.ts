@@ -18,13 +18,15 @@ export function buildGlyph(row: IconRow, source: string, overrides: Record<strin
   const { roles } = readRoles(parsed)
   const paths: GlyphPath[] = parsed.map((p, i) => {
     const d = normalizePath(p.d)
+    const hidden = roles.hidden.includes(i) ? { hidden: true as const } : {}
     if (roles.body.includes(i)) return { d, role: "body" }
-    if (roles.focus.includes(i)) return { d, role: "focus" }
+    if (roles.focus.includes(i)) return { d, role: "focus", ...hidden }
     const mark = roles.marks.findIndex((group) => group.includes(i))
-    return mark >= 0 ? { d, role: "mark", mark: mark + 1 } : { d }
+    return mark >= 0 ? { d, role: "mark", mark: mark + 1, ...hidden } : { d }
   })
   const body = paths.filter((p) => p.role === "body").map((p) => p.d)
-  const others = paths.filter((p) => p.role !== "body").map((p) => p.d)
+  // A hidden path is neither cut from the solid nor kept on it; `keep` indexes what is left.
+  const others = paths.filter((p) => p.role !== "body" && !p.hidden).map((p) => p.d)
   const carved = body.length > 0 ? carveSolid(body, others) : null
   const rendered: Record<string, RenderedPath[]> = {}
   for (const [form, text] of Object.entries(overrides)) {

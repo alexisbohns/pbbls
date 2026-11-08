@@ -30,7 +30,7 @@ export const MIN_CARVED_AREA = 4
 const FORM_WORDS = ["regular", "half", "solid", "of"]
 
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/
-const PATH_ATTRIBUTES = new Set(["d", "fill", "fill-rule", "stroke", "data-role", "data-mark"])
+const PATH_ATTRIBUTES = new Set(["d", "fill", "fill-rule", "stroke", "data-role", "data-mark", "data-rest"])
 const COMMANDS = new Set(["M", "L", "C", "Q", "A", "Z"])
 /** Coordinates per command, after the arc's radii, rotation and flags. */
 const ARITY: Record<string, number> = { M: 2, L: 2, C: 6, Q: 4, A: 7, Z: 0 }
@@ -216,7 +216,7 @@ function lintSource(root: string, file: string, isTwin: boolean, isOverride: boo
       // A straight line encloses nothing, so its fill area is 0.
       if (bodyD.reduce((sum, d) => sum + filledArea(d, false), 0) < 1) result.errors.push({ file, rule: "roles", message: "the body encloses no area" })
       else {
-        const others = parsed.paths.filter((_, i) => !roles.body.includes(i)).map((p) => p.d)
+        const others = parsed.paths.filter((_, i) => !roles.body.includes(i) && !roles.hidden.includes(i)).map((p) => p.d)
         try {
           const { area } = carveSolid(bodyD, others)
           if (area < MIN_CARVED_AREA) result.errors.push({ file, rule: "roles", message: `the carved solid keeps ${area.toFixed(1)} square units, under ${MIN_CARVED_AREA}` })

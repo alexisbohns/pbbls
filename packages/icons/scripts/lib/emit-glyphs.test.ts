@@ -31,6 +31,29 @@ describe("buildGlyph", () => {
   })
 })
 
+describe("hidden paths", () => {
+  const hidden = '  <path d="M10 10 L11 11" data-role="mark" data-mark="1" data-rest="hidden"/>'
+  const body = '  <path d="M4 4 L20 4 L20 20 L4 20 Z" data-role="body"/>\n  <path d="M8 12 L16 12"/>'
+
+  it("writes hidden: true and leaves the path out of the carve", () => {
+    const g = buildGlyph(row, source(`${body}\n${hidden}`), {})
+    expect(g.paths[2]).toEqual({ d: "M10 10 L11 11", role: "mark", mark: 1, hidden: true })
+    expect(g.paths[0]).not.toHaveProperty("hidden")
+    // keep indexes the non-body, non-hidden paths: the line is 0, the dot is not counted
+    expect(g.solid?.keep).toEqual([])
+    const withoutDot = buildGlyph(row, source(body), {})
+    expect(g.solid?.d).toBe(withoutDot.solid?.d)
+  })
+
+  it("keeps keep consistent with renderForm when a hidden path comes before a kept line", () => {
+    const g = buildGlyph(row, source(`${body.split("\n")[0]}\n${hidden}\n  <path d="M2 22 L4 22"/>`), {})
+    expect(g.solid?.keep).toEqual([0])
+    expect(renderForm(g, { kind: "solid" }).map((p) => p.d).slice(1)).toEqual(["M2 22 L4 22"])
+    expect(renderForm(g, { kind: "progress", k: 1 }).filter((p) => p.fill).map((p) => p.d)).toEqual(["M10 10 L11 11"])
+    expect(renderForm(g, { kind: "regular" }).map((p) => p.d)).not.toContain("M10 10 L11 11")
+  })
+})
+
 describe("loadGlyphs", () => {
   it("attaches override files to their base and skips exploring rows", () => {
     const root = mkdtempSync(join(tmpdir(), "icons-glyphs-"))

@@ -1,7 +1,7 @@
 import type { Tags } from "./manifest"
 
-/** One path of a glyph in `glyphs.json`: normalised data and its role. */
-export type GlyphPath = { d: string; role?: "body" | "mark" | "focus"; mark?: number }
+/** One path of a glyph in `glyphs.json`: normalised data and its role. A hidden path (mark or focus) is not drawn until its role fills. */
+export type GlyphPath = { d: string; role?: "body" | "mark" | "focus"; mark?: number; hidden?: true }
 
 /** A path as a form draws it. */
 export type RenderedPath = { d: string; fill: boolean; evenOdd: boolean; stroke: boolean }
@@ -15,7 +15,7 @@ export type GlyphData = {
   paths: GlyphPath[]
   /** The number of marks, n of progress(k). */
   marks: number
-  /** The carved solid and the paths kept stroked on top, or null without a body. */
+  /** The carved solid and the paths kept stroked on top (`keep` indexes the non-body, non-hidden paths), or null without a body. */
   solid: { d: string; keep: number[] } | null
   /** Hand-drawn replacements, keyed by form (`half`, `solid`, `progress-2`). */
   overrides: Record<string, RenderedPath[]>
@@ -46,17 +46,24 @@ export function renderForm(glyph: GlyphData, form: Form): RenderedPath[] {
   if (!formsOf(glyph).includes(key)) throw new Error(`${glyph.name} has no ${key} form`)
   const override = glyph.overrides[key]
   if (override) return override
+  // A hidden path is drawn only when its role fills it; everything else is stroked.
+  const draw = (fills: (p: GlyphPath) => boolean): RenderedPath[] =>
+    glyph.paths.flatMap((p) => {
+      const on = fills(p)
+      if (p.hidden && !on) return []
+      return [on ? filled(p.d) : stroked(p.d)]
+    })
   switch (form.kind) {
     case "regular":
-      return glyph.paths.map((p) => stroked(p.d))
+      return draw(() => false)
     case "half":
-      return glyph.paths.map((p) => (p.role === "focus" ? filled(p.d) : stroked(p.d)))
+      return draw((p) => p.role === "focus")
     case "progress":
-      return glyph.paths.map((p) => (p.role === "mark" && (p.mark ?? 0) <= form.k ? filled(p.d) : stroked(p.d)))
+      return draw((p) => p.role === "mark" && (p.mark ?? 0) <= form.k)
     case "solid": {
       const solid = glyph.solid
       if (!solid) throw new Error(`${glyph.name} has no solid form`)
-      const others = glyph.paths.filter((p) => p.role !== "body")
+      const others = glyph.paths.filter((p) => p.role !== "body" && !p.hidden)
       return [{ d: solid.d, fill: true, evenOdd: true, stroke: false }, ...solid.keep.flatMap((i) => (others[i] ? [stroked(others[i].d)] : []))]
     }
   }

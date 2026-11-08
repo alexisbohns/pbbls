@@ -50,4 +50,43 @@ describe("forms", () => {
     expect(() => renderForm({ ...glyph, solid: null }, { kind: "solid" })).toThrow(/path-river has no solid form/)
     expect(() => renderForm(glyph, { kind: "progress", k: 3 })).toThrow(/path-river has no progress-3 form/)
   })
+
+  describe("a hidden path", () => {
+    const dotted: GlyphData = {
+      ...glyph,
+      paths: [
+        { d: "M4 4 L20 4 L20 20 L4 20 Z", role: "body" },
+        { d: "M8 12 L16 12" },
+        { d: "M6 6 L7 7", role: "mark", mark: 1, hidden: true },
+        { d: "M9 9 L10 10", role: "mark", mark: 2 },
+        { d: "M12 12 L13 13", role: "focus", hidden: true },
+      ],
+      solid: { d: "M1 1 L2 2 Z", keep: [0] },
+    }
+
+    it("is omitted in regular and drawn filled once its role fills", () => {
+      expect(renderForm(dotted, { kind: "regular" }).map((p) => p.d)).toEqual(["M4 4 L20 4 L20 20 L4 20 Z", "M8 12 L16 12", "M9 9 L10 10"])
+      expect(renderForm(dotted, { kind: "progress", k: 1 }).map((p) => [p.d, p.fill])).toEqual([
+        ["M4 4 L20 4 L20 20 L4 20 Z", false],
+        ["M8 12 L16 12", false],
+        ["M6 6 L7 7", true],
+        ["M9 9 L10 10", false],
+      ])
+      expect(renderForm(dotted, { kind: "progress", k: 2 }).map((p) => p.fill)).toEqual([false, false, true, true])
+    })
+
+    it("draws a hidden focus filled in half and omits a hidden mark there", () => {
+      expect(renderForm(dotted, { kind: "half" }).map((p) => [p.d, p.fill])).toEqual([
+        ["M4 4 L20 4 L20 20 L4 20 Z", false],
+        ["M8 12 L16 12", false],
+        ["M9 9 L10 10", false],
+        ["M12 12 L13 13", true],
+      ])
+    })
+
+    it("is left out of solid, whose keep indexes the visible non-body paths", () => {
+      const out = renderForm(dotted, { kind: "solid" })
+      expect(out.map((p) => p.d)).toEqual(["M1 1 L2 2 Z", "M8 12 L16 12"])
+    })
+  })
 })
