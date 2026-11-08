@@ -76,4 +76,30 @@ describe("icons.json replaces", () => {
       }
     }
   })
+
+  it("reads an optional family and tags", () => {
+    const row = {
+      name: "knot-sm", meaning: "m", variants: [], wave: "w", status: "candidate", migrated: [],
+      replaces: { ios: [], android: [], web: [] },
+      family: "knot",
+      tags: { subject: ["knot"], size: ["sm"], keywords: ["done", "tied"] },
+    }
+    const parsed = parseManifest({ icons: [row] }).icons[0]
+    expect(parsed?.family).toBe("knot")
+    expect(parsed?.tags).toEqual({ subject: ["knot"], size: ["sm"], keywords: ["done", "tied"] })
+  })
+
+  it("defaults family to null and tags to empty", () => {
+    const row = { name: "a", meaning: "m", variants: [], wave: "w", status: "candidate", migrated: [], replaces: { ios: [], android: [], web: [] } }
+    const parsed = parseManifest({ icons: [row] }).icons[0]
+    expect(parsed?.family).toBeNull()
+    expect(parsed?.tags).toEqual({})
+  })
+
+  it("refuses an unknown tag key or a non-array tag", () => {
+    const base = { name: "a", meaning: "m", variants: [], wave: "w", status: "candidate", migrated: [], replaces: { ios: [], android: [], web: [] } }
+    expect(() => parseManifest({ icons: [{ ...base, tags: { colour: ["red"] } }] })).toThrow(/tags\.colour is not a tag key/)
+    expect(() => parseManifest({ icons: [{ ...base, tags: { size: "sm" } }] })).toThrow(/tags\.size is not a string array/)
+    expect(() => parseManifest({ icons: [{ ...base, family: 3 }] })).toThrow(/family is not a string/)
+  })
 })

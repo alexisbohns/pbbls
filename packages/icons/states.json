@@ -1,0 +1,11 @@
+{
+  "states": {
+    "rest": ["regular"],
+    "hover": ["half", "regular"],
+    "pressed": ["half", "regular"],
+    "selected": ["solid", "progress-n", "half", "regular"],
+    "disabled": ["regular"],
+    "progress": ["progress-k", "regular"],
+    "done": ["progress-n", "solid", "regular"]
+  }
+}

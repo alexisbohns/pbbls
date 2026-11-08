@@ -28,3 +28,7 @@ A twin (`<name>.active`) is the base drawing with one small stone lit inside it,
 | Manifest | a row without `src/<name>.svg`; an `.svg` without a row; a listed variant without `src/<name>.<variant>.svg` or a twin file not listed in `variants`; a twin without its base; a variant outside `active`, `lit-1`, `lit-2`, `lit-3`; a duplicate or non-kebab name; a `wave` with no `waves/<wave>/` folder; an unknown `status` | `icons.json` is the order and the inventory every surface emits from; a drawing without a row, or a row without a drawing, is a silent gap on one surface |
 
 Every error names the file and, for geometry, the offending number: a fix is a nudge to the drawing, never a relaxed rule.
+
+## Roles and forms (2026-11, #1607)
+
+A path may carry `data-role="body"` (the main shape, filled the way SVG fills a path: an open path closes with a straight segment), `data-role="mark" data-mark="1…n"` (the countable parts, in fill order) or `data-role="focus"` (the part that carries the meaning). The generator works out the forms: regular, half (focus filled), solid (body filled, inner lines carved out at the stroke width) and progress k of n (marks 1…k filled). A source is never filled; `src/<name>.<form>.svg` (`half`, `solid`, `progress-<k>`) overrides a worked-out form that looks wrong. A name never ends in a form word (regular, half, solid, of).

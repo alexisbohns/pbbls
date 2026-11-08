@@ -8,7 +8,8 @@
   "types": "./react/index.ts",
   "exports": {
     ".": "./react/index.ts",
-    "./icons.json": "./icons.json"
+    "./icons.json": "./icons.json",
+    "./glyphs.json": "./glyphs/glyphs.json"
   },
   "scripts": {
     "generate": "tsx scripts/build.ts",
@@ -23,9 +24,11 @@
     "react": ">=19"
   },
   "devDependencies": {
+    "@types/clipper-lib": "6.4.0",
     "@types/node": "^26.6.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "clipper-lib": "6.4.2",
     "react": "^19",
     "react-dom": "^19",
     "svgo": "4.1.0",
