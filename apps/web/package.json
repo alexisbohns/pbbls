@@ -49,18 +49,18 @@
     "unified": "^11.0.5"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^26.6.5",
+    "@tailwindcss/postcss": "^4.3.4",
+    "@types/node": "^26.6.6",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.4.3",
-    "shadcn": "^4.22.1",
+    "eslint-config-next": "16.4.5",
+    "shadcn": "^4.23.0",
     "sharp": "^0.35.5",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^7",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   }
 }
