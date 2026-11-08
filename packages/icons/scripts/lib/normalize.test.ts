@@ -17,4 +17,13 @@ describe("normalizePath", () => {
   it("draws a zero-radius arc as a line", () => {
     expect(normalizePath("M4 4 A0 0 0 0 1 8 8")).toBe("M4 4 L8 8")
   })
+
+  it("keeps the implicit lineto of an M with more than one pair", () => {
+    expect(normalizePath("M2 2 5 5 L8 2 Z")).toBe("M2 2 L5 5 L8 2 Z")
+  })
+
+  it("refuses a command whose numbers are not a multiple of its arity", () => {
+    expect(() => normalizePath("M4 4 A8 8 0 0116 12")).toThrow("normalizePath: A has 5 numbers, not a multiple of 7")
+    expect(() => normalizePath("M4 4 L8")).toThrow("normalizePath: L has 1 numbers, not a multiple of 2")
+  })
 })

@@ -35,7 +35,7 @@ export function resolveState(table: StateTable, forms: readonly string[], state:
     if (word === "regular") return { kind: "regular" }
     if ((word === "half" || word === "solid") && forms.includes(word)) return { kind: word }
     if (word === "progress-n" && n > 0) return { kind: "progress", k: n }
-    if (word === "progress-k" && n > 0) return { kind: "progress", k: Math.max(0, Math.min(k, n)) }
+    if (word === "progress-k" && n > 0) return { kind: "progress", k: Math.max(0, Math.min(Number.isInteger(k) ? k : 0, n)) }
   }
   return { kind: "regular" }
 }

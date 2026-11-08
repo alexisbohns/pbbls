@@ -161,6 +161,24 @@ describe("roles and overrides", () => {
     expect(messages).toContain('override "half" for a form ring does not have')
   })
 
+  it("reports a body with a relative command or H/V instead of crashing", () => {
+    for (const d of ["M4 4 h16 v16 h-16 Z", "M4 4 H20 V20 L4 20 Z"]) {
+      const files = { "ring.svg": svg(`<path d="${d}" data-role="body"/>`) }
+      const result = run({ manifest: { icons: [row("ring")] }, files })
+      expect(result.errors.some((e) => e.rule === "commands")).toBe(true)
+    }
+  })
+
+  it("does not apply the twin fill limits to override files", () => {
+    const marks = [0, 1, 2, 3, 4].map((i) => `<path d="M${4 + i * 3} 12 L${5 + i * 3} 12" data-role="mark" data-mark="${i + 1}"/>`)
+    const base = svg(BODY, ...marks)
+    const filled = [0, 1, 2, 3, 4].map((i) => `<path d="M${4 + i * 3} 12 L${5 + i * 3} 12 L${5 + i * 3} 13 Z" fill="currentColor" stroke="none"/>`)
+    const big = svg('<path d="M2 2 L22 2 L22 22 L2 22 Z" fill="currentColor" stroke="none"/>')
+    const result = run({ manifest: { icons: [row("ring")] }, files: { "ring.svg": base, "ring.progress-5.svg": svg(...filled), "ring.solid.svg": big } })
+    expect(result.errors).toEqual([])
+    expect(result.warnings).toEqual([])
+  })
+
   it("refuses a name ending in a form word", () => {
     // a warning until part 3 renames the three -half names (#1607), an error after
     const messages = run({ manifest: { icons: [row("scale-half")] }, files: { "scale-half.svg": svg('<path d="M4 4 L20 20"/>') } }).warnings.map((e) => e.message)

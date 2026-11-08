@@ -28,11 +28,23 @@ function boolean(type: number, subject: IntPath[], clip: IntPath[]): IntPath[] {
   return out
 }
 
-/** True when every sampled point of `d` lies inside (or on) the region. */
+/**
+ * True when every sampled point of `d` lies inside (or on the edge of) the region.
+ * The region's rings nest (an outer ring, its holes, an island in a hole), so a point
+ * is inside when an odd number of rings contain it; on a ring's edge counts as inside.
+ */
 function inside(d: string, region: IntPath[]): boolean {
   return flattenPath(d)
     .flatMap((s) => toInt(s.points))
-    .every((pt) => region.some((ring) => ClipperLib.Clipper.PointInPolygon(pt, ring) !== 0))
+    .every((pt) => {
+      let containing = 0
+      for (const ring of region) {
+        const where = ClipperLib.Clipper.PointInPolygon(pt, ring)
+        if (where === -1) return true
+        if (where === 1) containing += 1
+      }
+      return containing % 2 === 1
+    })
 }
 
 export type Carved = {
@@ -51,8 +63,14 @@ export type Carved = {
  * inside the fill, outlined at the stroke width with round caps.
  */
 export function carveSolid(body: readonly string[], others: readonly string[]): Carved {
-  const subs = body.flatMap((d) => flattenPath(d)).filter((s) => s.points.length >= 3)
-  const fill = boolean(ClipperLib.ClipType.ctUnion, subs.map((s) => toInt(s.points)), [])
+  const bodySubs = body.map((d) => flattenPath(d).filter((s) => s.points.length >= 3))
+  const subs = bodySubs.flat()
+  // SVG fills each path on its own (non-zero over that path's subpaths), so two paths
+  // wound in opposite directions must not cancel: fill per path, then union the regions.
+  // Clipper returns outer rings and holes with opposite, normalised orientations, so the
+  // final non-zero union keeps a hole open unless another path covers it.
+  const regions = bodySubs.flatMap((paths) => boolean(ClipperLib.ClipType.ctUnion, paths.map((s) => toInt(s.points)), []))
+  const fill = boolean(ClipperLib.ClipType.ctUnion, regions, [])
   const band = subs.flatMap((s) => {
     const end = isClosed(s) ? ClipperLib.EndType.etClosedLine : ClipperLib.EndType.etOpenRound
     return offset([toInt(s.points)], ClipperLib.JoinType.jtRound, end, HALF_STROKE)

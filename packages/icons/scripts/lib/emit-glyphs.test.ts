@@ -1,5 +1,8 @@
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import { describe, expect, it } from "vitest"
-import { buildGlyph } from "./emit-glyphs"
+import { buildGlyph, loadGlyphs } from "./emit-glyphs"
 import { formsOf, renderForm } from "./forms"
 import type { IconRow } from "./manifest"
 
@@ -25,5 +28,19 @@ describe("buildGlyph", () => {
       solid: source('  <path d="M4 4 L20 4 L20 20 L4 20 Z" fill="currentColor" stroke="none"/>'),
     })
     expect(renderForm(g, { kind: "solid" })).toEqual([{ d: "M4 4 L20 4 L20 20 L4 20 Z", fill: true, evenOdd: false, stroke: false }])
+  })
+})
+
+describe("loadGlyphs", () => {
+  it("attaches override files to their base and skips exploring rows", () => {
+    const root = mkdtempSync(join(tmpdir(), "icons-glyphs-"))
+    mkdirSync(join(root, "src"))
+    const body = '  <path d="M4 4 L20 4 L20 20 L4 20 Z" data-role="body"/>'
+    const files: Record<string, string> = { "ring.svg": source(body), "ring.solid.svg": source('  <path d="M4 4 L20 4 L20 20 L4 20 Z" fill="currentColor" stroke="none"/>'), "wip.svg": source(body) }
+    for (const [name, text] of Object.entries(files)) writeFileSync(join(root, "src", name), text)
+    writeFileSync(join(root, "icons.json"), JSON.stringify({ icons: [{ ...row, variants: [] }, { ...row, name: "wip", status: "exploring" }] }))
+    const glyphs = loadGlyphs(root)
+    expect(glyphs.map((g) => g.name)).toEqual(["ring"])
+    expect(Object.keys(glyphs[0]?.overrides ?? {})).toEqual(["solid"])
   })
 })

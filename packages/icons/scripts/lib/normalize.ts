@@ -77,9 +77,16 @@ export function normalizePath(d: string): string {
     }
     const arity = { M: 2, L: 2, C: 6, Q: 4, A: 7 }[command]
     if (arity === undefined) throw new Error(`normalizePath: ${command} is outside M L C Q A Z`)
+    if (numbers.length % arity !== 0) throw new Error(`normalizePath: ${command} has ${numbers.length} numbers, not a multiple of ${arity}`)
     for (let i = 0; i + arity <= numbers.length; i += arity) {
       const g = numbers.slice(i, i + arity)
       const at = (j: number): number => g[j] ?? 0
+      // Pairs after the first of an M are implicit linetos (SVG 9.3.3).
+      if (command === "M" && i > 0) {
+        parts.push(`L${g.map(fmt).join(" ")}`)
+        cursor = [at(0), at(1)]
+        continue
+      }
       if (command === "A") {
         const to: Pt = [at(5), at(6)]
         const cubics = arcToCubics(cursor, at(0), at(1), at(2), at(3) !== 0, at(4) !== 0, to)

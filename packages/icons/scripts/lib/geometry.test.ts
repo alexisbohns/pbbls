@@ -10,6 +10,11 @@ describe("flattenPath", () => {
     expect(subs[1]?.closed).toBe(false)
   })
 
+  it("reads the extra pairs of an M as line points", () => {
+    const [sub] = flattenPath("M2 2 5 5 L8 2 Z")
+    expect(sub?.points).toEqual([[2, 2], [5, 5], [8, 2]])
+  })
+
   it("samples a cubic finely enough for the hero size", () => {
     const [sub] = flattenPath("M2 12 C2 2 22 2 22 12")
     expect(sub?.points.length).toBeGreaterThan(40)

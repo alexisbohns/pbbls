@@ -18,6 +18,12 @@ describe("states", () => {
     expect(resolveState(table, ["regular"], "progress", 2)).toEqual({ kind: "regular" })
   })
 
+  it("treats a fractional or NaN k as 0", () => {
+    const forms = ["regular", "progress-1", "progress-2", "progress-3"]
+    expect(resolveState(table, forms, "progress", 1.5)).toEqual({ kind: "progress", k: 0 })
+    expect(resolveState(table, forms, "progress", Number.NaN)).toEqual({ kind: "progress", k: 0 })
+  })
+
   it("refuses a table whose state does not end in regular, or an unknown form", () => {
     expect(() => parseStates({ states: { rest: ["solid"] } })).toThrow(/rest must end with regular/)
     expect(() => parseStates({ states: { rest: ["glow", "regular"] } })).toThrow(/rest: unknown form glow/)

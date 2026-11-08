@@ -153,7 +153,7 @@ function lintRoot(parsed: ParsedSvg, file: string, errors: LintIssue[]): void {
   }
 }
 
-function lintPath(path: ParsedPath, index: number, file: string, isTwin: boolean, result: LintResult): void {
+function lintPath(path: ParsedPath, index: number, file: string, isTwin: boolean, isOverride: boolean, result: LintResult): void {
   const where = `path ${index + 1}`
   const { errors, warnings } = result
   for (const key of Object.keys(path.attrs)) {
@@ -190,11 +190,11 @@ function lintPath(path: ParsedPath, index: number, file: string, isTwin: boolean
   }
   if (path.filled && tokens.every((t) => COMMANDS.has(t.command))) {
     const area = filledArea(path.d, path.evenOdd)
-    if (area > WARN_AREA) warnings.push({ file, rule: "fill", message: `${where} fills ${area.toFixed(1)} square units, above ${WARN_AREA}: is the whole icon lit?` })
+    if (area > WARN_AREA && !isOverride) warnings.push({ file, rule: "fill", message: `${where} fills ${area.toFixed(1)} square units, above ${WARN_AREA}: is the whole icon lit?` })
   }
 }
 
-function lintSource(root: string, file: string, isTwin: boolean, result: LintResult): void {
+function lintSource(root: string, file: string, isTwin: boolean, isOverride: boolean, result: LintResult): void {
   const text = readFileSync(join(root, SRC_DIR, file), "utf8")
   let parsed: ParsedSvg
   try {
@@ -205,8 +205,9 @@ function lintSource(root: string, file: string, isTwin: boolean, result: LintRes
   }
   lintRoot(parsed, file, result.errors)
   if (parsed.paths.length === 0) result.errors.push({ file, rule: "elements", message: "no <path>" })
-  parsed.paths.forEach((path, i) => lintPath(path, i, file, isTwin, result))
-  if (!isTwin) {
+  parsed.paths.forEach((path, i) => lintPath(path, i, file, isTwin, isOverride, result))
+  // Path data outside the grammar cannot be measured or carved: its commands error already says so.
+  if (!isTwin && !result.errors.some((e) => e.file === file && e.rule === "commands")) {
     const { roles, issues } = readRoles(parsed.paths)
     for (const message of issues) result.errors.push({ file, rule: "roles", message })
     if (roles.body.length > 0) {
@@ -216,13 +217,17 @@ function lintSource(root: string, file: string, isTwin: boolean, result: LintRes
       if (bodyD.reduce((sum, d) => sum + filledArea(d, false), 0) < 1) result.errors.push({ file, rule: "roles", message: "the body encloses no area" })
       else {
         const others = parsed.paths.filter((_, i) => !roles.body.includes(i)).map((p) => p.d)
-        const { area } = carveSolid(bodyD, others)
-        if (area < MIN_CARVED_AREA) result.errors.push({ file, rule: "roles", message: `the carved solid keeps ${area.toFixed(1)} square units, under ${MIN_CARVED_AREA}` })
+        try {
+          const { area } = carveSolid(bodyD, others)
+          if (area < MIN_CARVED_AREA) result.errors.push({ file, rule: "roles", message: `the carved solid keeps ${area.toFixed(1)} square units, under ${MIN_CARVED_AREA}` })
+        } catch (e) {
+          result.errors.push({ file, rule: "roles", message: `cannot carve: ${e instanceof Error ? e.message : String(e)}` })
+        }
       }
     }
   }
   const filled = parsed.paths.filter((p) => p.filled).length
-  if (filled > MAX_FILLED) result.errors.push({ file, rule: "fill", message: `${filled} filled paths; a twin lights at most ${MAX_FILLED}` })
+  if (filled > MAX_FILLED && !isOverride) result.errors.push({ file, rule: "fill", message: `${filled} filled paths; a twin lights at most ${MAX_FILLED}` })
   let canonical: string
   try {
     canonical = formatSvg(text)
@@ -304,7 +309,8 @@ export function lint(root: string): LintResult {
   if (manifest) lintManifest(root, manifest, files, result)
   for (const f of files) {
     const split = splitSourceName(f)
-    lintSource(root, f, split?.variant !== null && split?.variant !== undefined, result)
+    const variant = split?.variant ?? null
+    lintSource(root, f, variant !== null, variant !== null && isOverrideForm(variant), result)
   }
   return result
 }

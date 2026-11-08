@@ -41,4 +41,21 @@ describe("carveSolid", () => {
     const { area } = carveSolid(["M12 4 C18 4 20 8 20 12 C20 16 16 20 12 20 C8 20 4 16 4 12 C4 8 8 4 14 4.2"], [])
     expect(area).toBeGreaterThan(200)
   })
+
+  it("does not let two body paths wound in opposite directions cancel", () => {
+    const cw = "M2 2 L12 2 L12 12 L2 12 Z"
+    const ccwOverlap = "M7 7 L7 17 L17 17 L17 7 Z"
+    const cwOverlap = "M7 7 L17 7 L17 17 L7 17 Z"
+    const same = carveSolid([cw, cwOverlap], []).area
+    const opposite = carveSolid([cw, ccwOverlap], []).area
+    expect(opposite).toBeCloseTo(same, 1)
+  })
+
+  it("keeps a line that sits in the hole of a ring-shaped body", () => {
+    const ring = "M2 2 L22 2 L22 22 L2 22 Z M7 7 L7 17 L17 17 L17 7 Z"
+    const inHole = "M10 12 L14 12"
+    const inBand = "M3 12 L5 12"
+    const { keep } = carveSolid([ring], [inHole, inBand])
+    expect(keep).toEqual([0])
+  })
 })
