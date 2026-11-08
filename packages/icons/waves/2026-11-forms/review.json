@@ -116,11 +116,14 @@
  {
   "name": "gate",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 6.5
    }
   ]
@@ -246,8 +249,9 @@
     "area": 36.2
    },
    {
-    "kind": "redrawn",
+    "kind": "conflict",
     "from": "active",
+    "was": "added-dot",
     "area": 3.0
    }
   ]
@@ -290,11 +294,14 @@
  {
   "name": "abstract-fence",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "8": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 8,
     "area": 1.0
    }
   ]
@@ -347,11 +354,14 @@
  {
   "name": "dna",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 7.3
    }
   ]
@@ -375,11 +385,14 @@
  {
   "name": "watermelon",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 6.9
    }
   ]
@@ -387,11 +400,14 @@
  {
   "name": "cromlech",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "6": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 6,
     "area": 5.2
    }
   ]
@@ -614,11 +630,14 @@
  {
   "name": "abstract-key",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 3.6
    }
   ]
@@ -999,11 +1018,14 @@
  {
   "name": "heart",
   "wave": "2026-10-foundation",
-  "roles": {},
+  "roles": {
+   "2": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 2,
     "area": 6.2
    }
   ]
@@ -1282,11 +1304,14 @@
  {
   "name": "exchange-lg",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 2.0
    }
   ]
@@ -1327,11 +1352,14 @@
  {
   "name": "upload-half-circle",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 4.5
    }
   ]
@@ -1489,11 +1517,14 @@
  {
   "name": "x-circle",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 5.7
    }
   ]
@@ -1541,11 +1572,14 @@
  {
   "name": "circle-dot-exclamation",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.0
    }
   ]
@@ -1553,11 +1587,14 @@
  {
   "name": "link-broken",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 3.6
    }
   ]
@@ -1565,11 +1602,14 @@
  {
   "name": "link-broken-2",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 2.0
    }
   ]
@@ -1577,11 +1617,14 @@
  {
   "name": "link-exclamation",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 2.0
    }
   ]
@@ -1959,11 +2002,14 @@
  {
   "name": "star-dotted",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 6.6
    }
   ]
@@ -2759,11 +2805,14 @@
  {
   "name": "signal-wave",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "2": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 2,
     "area": 4.5
    }
   ]
@@ -2812,11 +2861,14 @@
  {
   "name": "signal-dots",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 2.5
    }
   ]
@@ -2894,11 +2946,14 @@
  {
   "name": "parenthesis-info",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.7
    }
   ]
@@ -2906,11 +2961,14 @@
  {
   "name": "asterisk",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.7
    }
   ]
@@ -2972,11 +3030,14 @@
  {
   "name": "paragraph-info",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.0
    }
   ]
@@ -3056,11 +3117,14 @@
  {
   "name": "dolmen-2",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 3.3
    }
   ]
@@ -4330,11 +4394,14 @@
  {
   "name": "text-period",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 2.5
    }
   ]
@@ -4342,11 +4409,14 @@
  {
   "name": "letter-t-dot",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.1
    }
   ]
@@ -4354,11 +4424,14 @@
  {
   "name": "text-underline-dot",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.5
    }
   ]
@@ -4813,11 +4886,14 @@
  {
   "name": "half-circle-arrown-down-download",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 4.5
    }
   ]
@@ -5426,21 +5502,28 @@
  {
   "name": "list-dots",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden",
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 2.5
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 2.5
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 2.5
    }
   ]
@@ -6034,11 +6117,14 @@
  {
   "name": "music-treble-clef",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.4
    }
   ]
@@ -6272,11 +6358,14 @@
  {
   "name": "bike",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 4.4
    }
   ]
@@ -6532,11 +6621,14 @@
  {
   "name": "question-mark",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 3.1
    }
   ]
@@ -6654,16 +6746,21 @@
  {
   "name": "exclamation-double",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden",
+   "6": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 6.7
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 6,
     "area": 6.8
    }
   ]
@@ -6733,21 +6830,28 @@
  {
   "name": "exclamation-triple",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "7": "mark 1 hidden",
+   "8": "mark 1 hidden",
+   "9": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 7,
     "area": 6.6
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 8,
     "area": 6.4
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 9,
     "area": 6.8
    }
   ]
@@ -6881,11 +6985,14 @@
  {
   "name": "circle-dot",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "2": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 2,
     "area": 6.6
    }
   ]
@@ -7319,11 +7426,14 @@
  {
   "name": "signal",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 2.5
    }
   ]
@@ -7331,11 +7441,14 @@
  {
   "name": "waveform-dots",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "3": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 3,
     "area": 3.1
    }
   ]
@@ -7367,21 +7480,28 @@
  {
   "name": "code-morse",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "12": "mark 1 hidden",
+   "13": "mark 1 hidden",
+   "14": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 12,
     "area": 3.4
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 13,
     "area": 3.6
    },
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 14,
     "area": 3.7
    }
   ]
@@ -7806,11 +7926,14 @@
  {
   "name": "link-k",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.1
    }
   ]
@@ -7818,11 +7941,14 @@
  {
   "name": "stones-link",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 3.1
    }
   ]
@@ -7830,11 +7956,14 @@
  {
   "name": "bridge-2",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 3.6
    }
   ]
@@ -8407,11 +8536,14 @@
  {
   "name": "binoculars-row",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "5": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 5,
     "area": 2.5
    }
   ]
@@ -8563,11 +8695,14 @@
  {
   "name": "tree-branches",
   "wave": "2026-11-everyday",
-  "roles": {},
+  "roles": {
+   "4": "mark 1 hidden"
+  },
   "flags": [
    {
-    "kind": "redrawn",
+    "kind": "added-dot",
     "from": "active",
+    "path": 4,
     "area": 7.5
    }
   ]

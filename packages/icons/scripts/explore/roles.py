@@ -12,7 +12,9 @@ is matched to the base:
   appended to the base file as a new path with only d, data-role, data-mark (when a
   mark) and data-rest="hidden", and flagged `added-dot`. An even-odd F is never
   appended: it is flagged `redrawn`;
-- no container and no equal path: flagged `redrawn` (keep as an override or drop).
+- no container and no equal path: a small fill (under DOT_MAX square units, not even-odd)
+  is an added dot too (a lit dot in free space); a larger one is flagged `redrawn` (keep
+  as an override or drop).
 Roles from matches. The lit series first, lit-1..lit-N in order: what is newly filled
 at step k (compared with step k-1, by match) becomes mark k. Then `.active`: a matched
 P becomes `body` when its fill area is at least FOCUS_MAX square units, else `focus`;
@@ -30,6 +32,7 @@ from pathlib import Path
 
 FOCUS_MAX = 24.0
 FILL_RATIO = 0.5
+DOT_MAX = 8.0
 PATH = re.compile(r"<path\b([^>]*?)/>")
 ATTR = re.compile(r'([\w:-]+)="([^"]*)"')
 TOKEN = re.compile(r"([MLCQAZ])|(-?(?:\d+\.?\d*|\.\d+))")
@@ -208,9 +211,9 @@ class Glyph:
                     best = i
             if best is not None and fa / self.areas[best] >= FILL_RATIO:
                 return ("base", best)
-            if best is None:
-                return ("redrawn", None)
             if f.get("fill-rule") == "evenodd":
+                return ("redrawn", None)
+            if best is None and fa >= DOT_MAX:
                 return ("redrawn", None)
             return ("newdot", fa)
         return ("redrawn", None)
