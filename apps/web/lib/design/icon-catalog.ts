@@ -49,6 +49,34 @@ export const ICON_ROWS: readonly IconRow[] = manifest.icons.map((row) => ({
   replacesWeb: row.replaces.web,
 }))
 
+/**
+ * One drawing on its own: a base (`home`) or a twin (`home.active`, `path.lit-3`),
+ * named like its source file. The page lists glyphs, not rows: a twin is the
+ * base run through a state, but it is drawn, shipped and used on its own.
+ */
+export interface IconGlyph {
+  readonly name: string
+  readonly variant: string | null
+  readonly Icon: PbblsIconComponent | null
+  readonly row: IconRow
+}
+
+export const ICON_GLYPHS: readonly IconGlyph[] = ICON_ROWS.flatMap((row) => [
+  { name: row.name, variant: null, Icon: row.Icon, row },
+  ...row.twins.map((twin) => ({ name: `${row.name}.${twin.variant}`, variant: twin.variant, Icon: twin.Icon, row })),
+])
+
+/** A glyph matches on its name, its row's meaning, or a Lucide name its row replaces on web. */
+export function glyphMatches(glyph: IconGlyph, query: string): boolean {
+  const q = query.trim().toLowerCase()
+  if (!q) return true
+  return (
+    glyph.name.includes(q) ||
+    glyph.row.meaning.toLowerCase().includes(q) ||
+    glyph.row.replacesWeb.some((r) => r.toLowerCase().includes(q))
+  )
+}
+
 /** `Trash2Icon`, `LucideTrash2` and `Trash2` are one drawing. */
 export function lucideBaseName(name: string): string {
   return name.replace(/^Lucide(?=[A-Z])/, "").replace(/(?<=.)Icon$/, "")

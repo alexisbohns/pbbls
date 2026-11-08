@@ -1,64 +1,81 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Fragment, useMemo } from "react"
+import { Android, Apple, Globe } from "@pbbls/icons"
 import type { FindingGroup } from "@/lib/design/audit"
-import { ICON_ROWS, replacementsFor, type IconRow, type IconSurface } from "@/lib/design/icon-catalog"
-import { PBBLS_ICON_SIZE, type PbblsIconSize } from "@/lib/icons/pbbls-icon"
+import { ICON_GLYPHS, ICON_ROWS, glyphMatches, replacementsFor, type IconGlyph, type IconSurface } from "@/lib/design/icon-catalog"
+import { PBBLS_ICON_SIZE, type PbblsIconComponent, type PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { cn } from "@/lib/utils"
+import { useDesign } from "../DesignContext"
 import { DesignSection } from "../DesignSection"
 import { FindingList } from "../FindingList"
 
-const SIZES: readonly PbblsIconSize[] = ["inline", "row", "toolbar", "tile", "hero"]
-const SURFACES: readonly IconSurface[] = ["web", "ios", "android"]
+/** Each surface drawn with the set's own glyph: the web's globe, Apple's apple, Android's head. */
+const SURFACES: readonly { surface: IconSurface; label: string; Icon: PbblsIconComponent }[] = [
+  { surface: "web", label: "Web", Icon: Globe },
+  { surface: "ios", label: "iOS", Icon: Apple },
+  { surface: "android", label: "Android", Icon: Android },
+]
 
-function matches(row: IconRow, query: string): boolean {
-  const q = query.trim().toLowerCase()
-  return !q || row.name.includes(q) || row.meaning.toLowerCase().includes(q) || row.replacesWeb.some((r) => r.toLowerCase().includes(q))
+const count = new Intl.NumberFormat("en")
+
+/** Where the glyph's row has migrated, as an accessible sentence. */
+function migrationSentence(glyph: IconGlyph): string {
+  const on = SURFACES.filter((s) => glyph.row.migrated.includes(s.surface)).map((s) => s.label)
+  return on.length === 0 ? "Not migrated on any surface." : `Migrated on ${on.join(", ")}.`
 }
 
-function IconTile({ row, size }: { row: IconRow; size: PbblsIconSize }) {
-  const { Icon } = row
+/** The name with a break opportunity before each dot (a browser already breaks after a dash). */
+function GlyphName({ name }: { name: string }) {
+  return name.split(".").map((part, i) => (
+    <Fragment key={i}>
+      {i > 0 && (
+        <>
+          <wbr />.
+        </>
+      )}
+      {part}
+    </Fragment>
+  ))
+}
+
+function GlyphTile({ glyph, size }: { glyph: IconGlyph; size: PbblsIconSize }) {
+  const { Icon } = glyph
   return (
-    <li className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 text-card-foreground">
-      <div className="flex min-h-14 flex-wrap items-center gap-3">
+    <li title={glyph.row.meaning} className="group relative flex aspect-square flex-col items-center gap-2 border-r border-b border-border bg-card px-3 pt-6 pb-3 text-card-foreground">
+      <span className="flex min-h-12 flex-1 items-center justify-center">
         {Icon ? <Icon className={PBBLS_ICON_SIZE[size]} /> : <span className="text-xs text-destructive">missing</span>}
-        {row.twins.map(({ variant, Icon: Twin }) =>
-          Twin ? <Twin key={variant} className={cn(PBBLS_ICON_SIZE[size], "text-primary")} aria-label={`${row.name}.${variant}`} /> : null,
-        )}
-      </div>
-      <div className="flex flex-col gap-0.5">
-        <code className="text-xs">{row.name}</code>
-        {row.twins.length > 0 && (
-          <span className="font-mono text-[11px] text-muted-foreground">+ {row.twins.map((t) => t.variant).join(", ")}</span>
-        )}
-        <p className="line-clamp-2 text-xs text-muted-foreground" title={row.meaning}>
-          {row.meaning}
-        </p>
-      </div>
-      <div className="mt-auto flex flex-wrap gap-1">
-        {SURFACES.map((surface) => (
-          <Badge key={surface} variant={row.migrated.includes(surface) ? "secondary" : "outline"} title={row.migrated.includes(surface) ? `${surface}: migrated` : `${surface}: not migrated`}>
-            {row.migrated.includes(surface) ? "✓ " : ""}
-            {surface}
-          </Badge>
+      </span>
+      {/* Two fixed lines, so every icon in a row sits at one height; breaks at a dash or a dot. */}
+      <code className="line-clamp-2 h-8 max-w-full text-center text-xs leading-4 break-words text-muted-foreground">
+        <GlyphName name={glyph.name} />
+      </code>
+      <span className="sr-only">{migrationSentence(glyph)}</span>
+      {/* Migration per surface, on hover: lit where the surface draws it, dimmed where it does not. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 motion-reduce:transition-none"
+      >
+        {SURFACES.map(({ surface, Icon: Mark }) => (
+          <Mark
+            key={surface}
+            className={cn(PBBLS_ICON_SIZE.inline, glyph.row.migrated.includes(surface) ? "text-primary" : "text-muted-foreground/35")}
+          />
         ))}
-      </div>
+      </span>
     </li>
   )
 }
 
 /**
- * The hand-drawn set at its real sizes (rem, so 1:1 with the app), with each
- * drawing's migration per surface, then what web still draws with Lucide.
+ * The hand-drawn set at its real sizes (rem, so 1:1 with the app): one tile per
+ * glyph, base and twin alike, searched and sized from the toolbar. Hovering a
+ * tile shows where its row has migrated. Then what web still draws with Lucide.
  */
 export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
-  const [query, setQuery] = useState("")
-  const [size, setSize] = useState<PbblsIconSize>("tile")
-  const rows = useMemo(() => ICON_ROWS.filter((row) => matches(row, query)), [query])
-  const twins = ICON_ROWS.reduce((n, row) => n + row.twins.length, 0)
+  const { iconQuery, iconSize } = useDesign()
+  const glyphs = useMemo(() => ICON_GLYPHS.filter((glyph) => glyphMatches(glyph, iconQuery)), [iconQuery])
+  const twins = ICON_GLYPHS.length - ICON_ROWS.length
   const webPending = ICON_ROWS.filter((row) => row.replacesWeb.length > 0 && !row.migrated.includes("web"))
   const lucideUses = lucide.reduce((n, g) => n + g.count, 0)
 
@@ -67,34 +84,24 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
       <DesignSection
         id="icons"
         title="Icons"
-        description={`${ICON_ROWS.length} hand-drawn drawings and ${twins} twins from @pbbls/icons, drawn at the PBBLS_ICON_SIZE classes (rem: real size, not scaled). Twins (active, lit) are tinted primary. The chips say which surfaces have migrated to the drawing.`}
+        description={`${count.format(ICON_GLYPHS.length)} glyphs from @pbbls/icons: ${count.format(ICON_ROWS.length)} drawings and ${count.format(twins)} twins (active, lit), each a glyph of its own. Drawn at the PBBLS_ICON_SIZE classes (rem: real size, not scaled). Hover a tile for where it has migrated: web, iOS, Android.`}
       >
-        <div className="flex flex-wrap items-center gap-4">
-          <Input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search a name, a meaning or a Lucide name"
-            aria-label="Search icons"
-            className="w-80 max-w-full"
-          />
-          <div role="group" aria-label="Size" className="flex items-center gap-1">
-            <span className="mr-1 text-xs text-muted-foreground">Size</span>
-            {SIZES.map((s) => (
-              <Button key={s} size="xs" variant={s === size ? "default" : "outline"} aria-pressed={s === size} onClick={() => setSize(s)}>
-                {s}
-              </Button>
-            ))}
-          </div>
-          <span className="text-xs text-muted-foreground">
-            {rows.length} of {ICON_ROWS.length}
-          </span>
+        <div className="flex flex-col gap-3">
+          <p aria-live="polite" className="text-right text-xs text-muted-foreground tabular-nums">
+            {iconQuery.trim() ? `${count.format(glyphs.length)} of ${count.format(ICON_GLYPHS.length)}` : count.format(ICON_GLYPHS.length)}
+          </p>
+          {glyphs.length === 0 ? (
+            <p className="rounded-xl border border-border px-4 py-10 text-center text-sm text-muted-foreground">
+              No glyph matches “{iconQuery.trim()}”.
+            </p>
+          ) : (
+            <ul className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] overflow-hidden rounded-xl border-t border-l border-border">
+              {glyphs.map((glyph) => (
+                <GlyphTile key={glyph.name} glyph={glyph} size={iconSize} />
+              ))}
+            </ul>
+          )}
         </div>
-        <ul className="grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-3">
-          {rows.map((row) => (
-            <IconTile key={row.name} row={row} size={size} />
-          ))}
-        </ul>
       </DesignSection>
 
       <DesignSection

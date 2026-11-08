@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react"
 import type { CanvasZoom, DeviceChoice } from "@/lib/design/devices"
+import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { DesignContextProvider, type DesignContextValue } from "./DesignContext"
 import { DesignRail } from "./DesignRail"
 import { DesignToolbar } from "./DesignToolbar"
@@ -39,6 +40,8 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
   const { theme, themeKey, setTheme } = useDesignTheme()
   const [zoom, setZoom] = useState<CanvasZoom>("fit")
   const [devices, setDevices] = useState<DeviceChoice>("both")
+  const [iconQuery, setIconQuery] = useState("")
+  const [iconSize, setIconSize] = useState<PbblsIconSize>("tile")
   const contentRef = useRef<HTMLDivElement>(null)
   const canvasWidth = useWidth(contentRef)
 
@@ -54,8 +57,8 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
   }, [theme, setTheme])
 
   const value = useMemo<DesignContextValue>(
-    () => ({ theme, themeKey, zoom, devices, canvasWidth }),
-    [theme, themeKey, zoom, devices, canvasWidth],
+    () => ({ theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize }),
+    [theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize],
   )
 
   return (
@@ -71,6 +74,10 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
             onZoom={setZoom}
             devices={devices}
             onDevices={setDevices}
+            iconQuery={iconQuery}
+            onIconQuery={setIconQuery}
+            iconSize={iconSize}
+            onIconSize={setIconSize}
           />
           <div className="mx-auto max-w-[1600px] px-4 py-10">
             <div ref={contentRef} data-theme-key={themeKey} onClickCapture={blockLinkNavigation} className="flex flex-col gap-16">
