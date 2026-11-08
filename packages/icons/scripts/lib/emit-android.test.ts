@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { type EmittedIcon } from "./emit"
-import { androidEmitter, kdocLines, xmlComment } from "./emit-android"
+import { androidEmitter, kdocLines, kotlinFile, xmlComment } from "./emit-android"
 
 const stroke = (d: string) => ({ d, filled: false, evenOdd: false, unstroked: false, attrs: { d } })
 
@@ -215,6 +215,20 @@ describe("androidEmitter", () => {
     for (const line of lines) expect(line.length).toBeLessThanOrEqual(140)
     expect(lines.slice(1, -1).map((l) => l.slice(7)).join(" ")).toBe(long)
     expect(kdocLines("short")).toEqual(["    /** short */"])
+  })
+
+  it("puts one argument per line when an entry passes 140 columns", () => {
+    const name = "half-circle-arrow-down-download-from-the-cloud.active"
+    const kotlin = kotlinFile([{ name, base: "half-circle-arrow-down-download-from-the-cloud", variant: "active", meaning: "Download.", paths: [stroke("M3 3 L4 4")] }])
+    expect(kotlin).toContain(
+      [
+        "    HALF_CIRCLE_ARROW_DOWN_DOWNLOAD_FROM_THE_CLOUD_ACTIVE(",
+        `        "${name}",`,
+        "        R.drawable.ic_pbbls_half_circle_arrow_down_download_from_the_cloud_active,",
+        "    ),",
+      ].join("\n"),
+    )
+    for (const line of kotlin.split("\n")) expect(line.length).toBeLessThanOrEqual(140)
   })
 
   it("is deterministic", () => {

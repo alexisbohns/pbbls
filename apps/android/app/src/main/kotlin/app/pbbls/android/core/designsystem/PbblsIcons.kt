@@ -3086,7 +3086,10 @@ enum class PbblsIcon(
     HALF_CIRCLE_ARROWN_DOWN_DOWNLOAD("half-circle-arrown-down-download", R.drawable.ic_pbbls_half_circle_arrown_down_download),
 
     /** Download: bring it down to the device. (the `active` twin) */
-    HALF_CIRCLE_ARROWN_DOWN_DOWNLOAD_ACTIVE("half-circle-arrown-down-download.active", R.drawable.ic_pbbls_half_circle_arrown_down_download_active),
+    HALF_CIRCLE_ARROWN_DOWN_DOWNLOAD_ACTIVE(
+        "half-circle-arrown-down-download.active",
+        R.drawable.ic_pbbls_half_circle_arrown_down_download_active,
+    ),
 
     /** Download: bring it down to the device. */
     DOWNLOAD_PICTURE("download-picture", R.drawable.ic_pbbls_download_picture),

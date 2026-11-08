@@ -50,7 +50,7 @@ ${icon.paths.map(pathElement).join("\n")}
 `
 }
 
-/** ktlint's stock `max-line-length` for a generated KDoc line. */
+/** ktlint's stock `max-line-length` for a generated KDoc or entry line. */
 const LINE_WIDTH = 140
 const INDENT = "    "
 const BODY_PREFIX = `${INDENT} * `
@@ -76,10 +76,13 @@ export function kdocLines(text: string): string[] {
 
 function entryLines(icon: EmittedIcon): string {
   const twin = icon.variant === null ? "" : ` (the \`${icon.variant}\` twin)`
-  return [
-    ...kdocLines(icon.meaning + twin),
-    `${INDENT}${constantName(icon.name)}("${icon.name}", R.drawable.${drawableName(icon.name)}),`,
-  ].join("\n")
+  const name = constantName(icon.name)
+  const args = [`"${icon.name}"`, `R.drawable.${drawableName(icon.name)}`]
+  const single = `${INDENT}${name}(${args.join(", ")}),`
+  // ktlint's max-line-length: past it, one argument per line with a trailing comma.
+  const entry =
+    single.length <= LINE_WIDTH ? [single] : [`${INDENT}${name}(`, ...args.map((a) => `${INDENT}${INDENT}${a},`), `${INDENT}),`]
+  return [...kdocLines(icon.meaning + twin), ...entry].join("\n")
 }
 
 export function kotlinFile(icons: EmittedIcon[]): string {
