@@ -53,7 +53,7 @@ An untagged path is a plain line. A glyph with no roles has only the regular for
 | `solid` | the glyph has a body | the body's fill (SVG-style) plus its stroke band; every other path inside the fill outlined at the 1.75 stroke with round caps and subtracted even-odd, so it shows through in the surface colour; paths outside it stay stroked |
 | `progress(k)`, 0 ≤ k ≤ n | the glyph has n ≥ 1 marks | marks 1…k filled; `progress(0)` is `regular` |
 
-The old `dot` is `progress(1)`. A dotted line is a separate glyph (`pebble-glyph-dotted`), never a form.
+A filled mark or focus is carved like the solid: the lines inside it are outlined at the stroke and cut out, so the pouch's neck and the pebble's shine still show when they fill (the generator stores the carved fill and the paths it cuts per role path). The old `dot` is `progress(1)`. A dotted line is a separate glyph (`pebble-glyph-dotted`), never a form.
 
 **D4. Overrides.** `src/<name>.<form>.svg` (`half`, `solid` or `progress-<k>`) replaces a worked-out form whose result looks wrong. It must keep the base's viewBox and the DNA rules, and may exist only for a form the glyph has. The design page flags every override.
 
