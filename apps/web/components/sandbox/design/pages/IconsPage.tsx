@@ -6,7 +6,9 @@ import type { FindingGroup } from "@/lib/design/audit"
 import { GLYPHS, glyphMatchesQuery, hasForm, needsReview, type FormChoice, type Glyph } from "@/lib/design/glyph-forms"
 import { ICON_ROWS, replacementsFor, type IconSurface } from "@/lib/design/icon-catalog"
 import { PBBLS_ICON_SIZE, type PbblsIconComponent, type PbblsIconSize } from "@/lib/icons/pbbls-icon"
+import { useReviewVerdicts, type Verdict } from "@/lib/design/useReviewVerdicts"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import { useDesign } from "../DesignContext"
 import { DesignSection } from "../DesignSection"
 import { FindingList } from "../FindingList"
@@ -41,7 +43,16 @@ function GlyphName({ name }: { name: string }) {
   ))
 }
 
-function GlyphTile({ glyph, size, form, k }: { glyph: Glyph; size: PbblsIconSize; form: FormChoice; k: number }) {
+type GlyphTileProps = {
+  glyph: Glyph
+  size: PbblsIconSize
+  form: FormChoice
+  k: number
+  verdict?: Verdict
+  onVerdict: () => void
+}
+
+function GlyphTile({ glyph, size, form, k, verdict, onVerdict }: GlyphTileProps) {
   const migrated = MIGRATED.get(glyph.name) ?? []
   return (
     <li
@@ -51,7 +62,23 @@ function GlyphTile({ glyph, size, form, k }: { glyph: Glyph; size: PbblsIconSize
         !hasForm(glyph, form) && "opacity-40",
       )}
     >
-      {needsReview(glyph.name) && <span aria-label="Needs review" className="absolute top-2.5 left-2.5 size-2 rounded-full bg-primary" />}
+      {needsReview(glyph.name) && (
+        <button
+          type="button"
+          onClick={onVerdict}
+          aria-label={`Review ${glyph.name}: ${verdict ?? "no verdict"}`}
+          // px-1.5 keeps the longest label ("drop-twin") clear of the hover platform marks at the 8.5rem tile.
+          className={cn(
+            "absolute top-2 left-2 rounded-full px-1.5 py-0.5 text-[10px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            verdict === "ok" && "bg-primary text-primary-foreground",
+            verdict === "fix" && "bg-secondary text-secondary-foreground",
+            verdict === "drop-twin" && "bg-muted text-muted-foreground line-through",
+            verdict === undefined && "bg-primary/15 text-primary",
+          )}
+        >
+          {verdict ?? "review"}
+        </button>
+      )}
       <span className="flex min-h-12 flex-1 items-center justify-center">
         <GlyphFormView glyph={glyph} form={form} k={k} className={PBBLS_ICON_SIZE[size]} />
       </span>
@@ -80,10 +107,12 @@ function GlyphTile({ glyph, size, form, k }: { glyph: Glyph; size: PbblsIconSize
  */
 export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
   const { iconQuery, iconSize, glyphForm, glyphProgress, reviewOnly } = useDesign()
+  const { verdicts, cycle, copy } = useReviewVerdicts()
   const glyphs = useMemo(
     () => GLYPHS.filter((g) => glyphMatchesQuery(g, iconQuery) && (!reviewOnly || needsReview(g.name))),
     [iconQuery, reviewOnly],
   )
+  const reviewed = glyphs.filter((g) => verdicts[g.name] !== undefined).length
   const webPending = ICON_ROWS.filter((row) => row.replacesWeb.length > 0 && !row.migrated.includes("web"))
   const lucideUses = lucide.reduce((n, g) => n + g.count, 0)
 
@@ -91,6 +120,16 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
     <>
       {/* The page's title, its counts and its tools live in the side area (DesignToolbar). */}
       <section id="icons" aria-label="Icons" className="scroll-mt-32">
+        {reviewOnly && (
+          <div className="mb-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
+            <span>
+              {reviewed} of {glyphs.length} reviewed · tap a tile&apos;s label: ok, fix, drop-twin
+            </span>
+            <Button size="sm" variant="secondary" onClick={() => void copy()}>
+              Copy verdicts
+            </Button>
+          </div>
+        )}
         {glyphs.length === 0 ? (
           <p className="rounded-2xl bg-card px-4 py-10 text-center text-sm text-muted-foreground">
             No glyph matches “{iconQuery.trim()}”.
@@ -98,7 +137,15 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
         ) : (
           <ul className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-2">
             {glyphs.map((glyph) => (
-              <GlyphTile key={glyph.name} glyph={glyph} size={iconSize} form={glyphForm} k={glyphProgress} />
+              <GlyphTile
+                key={glyph.name}
+                glyph={glyph}
+                size={iconSize}
+                form={glyphForm}
+                k={glyphProgress}
+                verdict={verdicts[glyph.name]}
+                onVerdict={() => cycle(glyph.name)}
+              />
             ))}
           </ul>
         )}
