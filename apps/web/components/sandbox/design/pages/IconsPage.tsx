@@ -42,7 +42,7 @@ function GlyphName({ name }: { name: string }) {
 function GlyphTile({ glyph, size }: { glyph: IconGlyph; size: PbblsIconSize }) {
   const { Icon } = glyph
   return (
-    <li title={glyph.row.meaning} className="group relative flex aspect-square flex-col items-center gap-2 border-r border-b border-border bg-card px-3 pt-6 pb-3 text-card-foreground">
+    <li title={glyph.row.meaning} className="group relative flex aspect-square flex-col items-center gap-2 rounded-2xl bg-card px-3 pt-6 pb-3 text-card-foreground transition-colors hover:bg-muted motion-reduce:transition-none">
       <span className="flex min-h-12 flex-1 items-center justify-center">
         {Icon ? <Icon className={PBBLS_ICON_SIZE[size]} /> : <span className="text-xs text-destructive">missing</span>}
       </span>
@@ -95,7 +95,7 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
               No glyph matches “{iconQuery.trim()}”.
             </p>
           ) : (
-            <ul className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] overflow-hidden rounded-xl border-t border-l border-border">
+            <ul className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-2">
               {glyphs.map((glyph) => (
                 <GlyphTile key={glyph.name} glyph={glyph} size={iconSize} />
               ))}
