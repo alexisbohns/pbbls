@@ -101,6 +101,15 @@ describe("carved role fills", () => {
     ])
   })
 
+  it("does not carve a mark through another path of the mark", () => {
+    const g = buildGlyph(row, source(`  <path d="${square}" data-role="mark" data-rest="hidden"/>\n  <path d="M12 12 L12.01 12" data-role="mark"/>`), {})
+    expect(g.paths[0]).not.toHaveProperty("fill")
+    expect(renderForm(g, { fill: { kind: "regular" }, marked: true }).map((p) => [p.d, p.fill])).toEqual([
+      [square, true],
+      ["M12 12 L12.01 12", true],
+    ])
+  })
+
   it("carves a hidden mark too", () => {
     const g = buildGlyph(row, source(`  <path d="${square}" data-role="mark" data-rest="hidden"/>\n  <path d="M8 12 L16 12"/>`), {})
     expect(g.paths[0]?.cuts).toEqual([1])
