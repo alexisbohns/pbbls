@@ -58,4 +58,27 @@ describe("carveSolid", () => {
     const { keep } = carveSolid([ring], [inHole, inBand])
     expect(keep).toEqual([0])
   })
+
+  it("cuts a line standing on the body's edge", () => {
+    // A door whose feet stand on the bottom edge (y = 20).
+    const { keep } = carveSolid([SQUARE], ["M10 20 L10 15 L14 15 L14 20"])
+    expect(keep).toEqual([])
+  })
+
+  it("keeps a line further than half a stroke from the body", () => {
+    // x = 2 is 2 units left of the edge at x = 4.
+    const { keep } = carveSolid([SQUARE], ["M2 4 L2 20"])
+    expect(keep).toEqual([0])
+  })
+
+  it("cuts a hole as a filled shape and reports a hole outside the body", () => {
+    const dot = "M11 11 L13 11 L13 13 L11 13 Z"
+    const whole = carveSolid([SQUARE], []).area
+    const { area, outside, keep } = carveSolid([SQUARE], [], [dot, "M1.6 1.6 L2 2 L1.6 2 Z"])
+    // A 2×2 square grown by half a stroke, round corners: 2² + 4·2·0.875 + π·0.875².
+    const cut = 4 + 8 * 0.875 + Math.PI * 0.875 * 0.875
+    expect(whole - area).toBeCloseTo(cut, 0)
+    expect(outside).toEqual([1])
+    expect(keep).toEqual([])
+  })
 })

@@ -52,17 +52,32 @@ export type Carved = {
   d: string
   /** Indices (into `others`) of the paths outside the body: drawn stroked on top. */
   keep: number[]
+  /** Indices (into `holes`) of the holes outside the body: not cut, drawn filled on top. */
+  outside: number[]
   /** Filled area in square glyph units. */
   area: number
+}
+
+/** A path as SVG paints it filled and stroked: its fill (each subpath implicitly closed) plus its stroke band. */
+function paintedRegion(d: string): IntPath[] {
+  const subs = flattenPath(d)
+  const fill = boolean(ClipperLib.ClipType.ctUnion, subs.filter((s) => s.points.length >= 3).map((s) => toInt(s.points)), [])
+  const band = subs.flatMap((s) => {
+    const end = isClosed(s) ? ClipperLib.EndType.etClosedLine : ClipperLib.EndType.etOpenRound
+    return offset([toInt(s.points)], ClipperLib.JoinType.jtRound, end, HALF_STROKE)
+  })
+  return boolean(ClipperLib.ClipType.ctUnion, fill, band)
 }
 
 /**
  * The solid form (spec D3, D8), as SVG paints a path that is filled and stroked:
  * the body's subpaths, each implicitly closed for the fill and unioned, plus
  * their stroke band (a line offset by half the stroke), minus every other path
- * inside the fill, outlined at the stroke width with round caps.
+ * lying within half a stroke of the fill (a door standing on the ground line
+ * counts), outlined at the stroke width with round caps, and minus every hole
+ * there (the mark of a marked solid) as it is painted, fill and stroke.
  */
-export function carveSolid(body: readonly string[], others: readonly string[]): Carved {
+export function carveSolid(body: readonly string[], others: readonly string[], holes: readonly string[] = []): Carved {
   const bodySubs = body.map((d) => flattenPath(d).filter((s) => s.points.length >= 3))
   const subs = bodySubs.flat()
   // SVG fills each path on its own (non-zero over that path's subpaths), so two paths
@@ -76,10 +91,12 @@ export function carveSolid(body: readonly string[], others: readonly string[]): 
     return offset([toInt(s.points)], ClipperLib.JoinType.jtRound, end, HALF_STROKE)
   })
   const base = boolean(ClipperLib.ClipType.ctUnion, fill, band)
+  // A line counts as inside when it lies within half a stroke of the fill.
+  const reach = offset(fill, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon, HALF_STROKE)
   const keep: number[] = []
   const cutters: IntPath[] = []
   others.forEach((d, i) => {
-    if (!inside(d, fill)) {
+    if (!inside(d, reach)) {
       keep.push(i)
       return
     }
@@ -88,11 +105,16 @@ export function carveSolid(body: readonly string[], others: readonly string[]): 
       cutters.push(...offset([toInt(sub.points)], ClipperLib.JoinType.jtRound, end, HALF_STROKE))
     }
   })
-  const result = cutters.length > 0 ? boolean(ClipperLib.ClipType.ctDifference, base, cutters) : base
+  const outside: number[] = []
+  holes.forEach((d, i) => {
+    if (!inside(d, reach)) outside.push(i)
+    else cutters.push(...paintedRegion(d))
+  })
+  const result = cutters.length > 0 ? boolean(ClipperLib.ClipType.ctDifference, base, boolean(ClipperLib.ClipType.ctUnion, cutters, [])) : base
   const area = result.reduce((sum, ring) => sum + ClipperLib.Clipper.Area(ring), 0) / (SCALE * SCALE)
   const d = result
     .filter((ring) => ring.length > 2)
     .map((ring) => ring.map((pt, i) => `${i === 0 ? "M" : "L"}${fmt(pt.X)} ${fmt(pt.Y)}`).join(" ") + " Z")
     .join(" ")
-  return { d, keep, area: Math.abs(area) }
+  return { d, keep, outside, area: Math.abs(area) }
 }
