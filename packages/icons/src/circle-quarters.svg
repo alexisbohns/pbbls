@@ -1,5 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M11.4 4.8 C16.8 4.7 19.8 7.8 19.8 12 C19.8 16.4 16.4 19.4 12 19.4 C7.4 19.4 4.2 16.4 4.2 12 C4.2 7.8 7.4 4.8 13.4 4.9"/>
+  <path d="M11.4 4.8 C16.8 4.7 19.8 7.8 19.8 12 C19.8 16.4 16.4 19.4 12 19.4 C7.4 19.4 4.2 16.4 4.2 12 C4.2 7.8 7.4 4.8 13.4 4.9" data-role="body"/>
   <path d="M12.1 5.4 C11.6 9.6 12.4 14.6 12 18.8 M4.6 12.2 C8.8 11.6 15.4 12.4 19.4 11.8"/>
-  <path d="M12.1 4.9 C16.4 4.9 19.6 7.6 19.6 11.8 C16.6 12.2 14.2 12 12 12.1 C12.2 9.8 11.9 7.4 12.1 4.9" data-role="mark" data-rest="hidden"/>
+  <path d="M12.1 4.9 C16.4 4.9 19.6 7.6 19.6 11.8 C16.6 12.2 14.2 12 12 12.1 C12.2 9.8 11.9 7.4 12.1 4.9" data-role="step" data-step="1" data-rest="hidden"/>
+  <path d="M19.6 12.2 C19.4 16.4 16.4 19.2 12.1 19.2 C12 16.8 12.3 14.4 12 12.1 C14.2 12.3 16.6 12 19.6 12.2" data-role="step" data-step="2" data-rest="hidden"/>
+  <path d="M12.1 19.2 C7.8 19.2 4.6 16.6 4.6 12.2 C7.6 11.9 9.8 12.1 12 12.1 C11.9 14.4 12.2 16.8 12.1 19.2" data-role="step" data-step="3" data-rest="hidden"/>
+  <path d="M4.6 12.2 C4.6 7.8 7.8 4.9 12.1 4.9 C11.9 7.4 12.2 9.8 12 12.1 C9.6 12 7.4 12.3 4.6 12.2" data-role="step" data-step="4" data-rest="hidden"/>
 </svg>
