@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react"
 import type { CanvasZoom, DeviceChoice } from "@/lib/design/devices"
-import type { FormChoice } from "@/lib/design/glyph-forms"
+import type { FormChoice, GlyphShow } from "@/lib/design/glyph-forms"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { DesignContextProvider, type DesignContextValue } from "./DesignContext"
 import { DesignMobileBar } from "./DesignMobileBar"
@@ -47,13 +47,14 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
   const [iconSize, setIconSize] = useState<PbblsIconSize>("tile")
   const [glyphForm, setGlyphForm] = useState<FormChoice>("regular")
   const [glyphProgress, setGlyphProgress] = useState(1)
-  const [reviewOnly, setReviewOnly] = useState(false)
+  const [glyphShow, setGlyphShow] = useState<GlyphShow>("all")
   const contentRef = useRef<HTMLDivElement>(null)
   const canvasWidth = useWidth(contentRef)
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return
+      // A dialog that handles a key itself (the glyph review) marks it handled.
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return
       const key = e.key.toLowerCase()
       if (key === "t") setTheme({ theme: theme.theme === "m3" ? "current" : "m3" })
       if (key === "d") setTheme({ mode: theme.mode === "dark" ? "light" : "dark" })
@@ -63,8 +64,8 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
   }, [theme, setTheme])
 
   const value = useMemo<DesignContextValue>(
-    () => ({ theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphForm, glyphProgress, reviewOnly }),
-    [theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphForm, glyphProgress, reviewOnly],
+    () => ({ theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphForm, glyphProgress, glyphShow }),
+    [theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphForm, glyphProgress, glyphShow],
   )
 
   const tools: DesignToolsState = {
@@ -82,8 +83,8 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
     onGlyphForm: setGlyphForm,
     glyphProgress,
     onGlyphProgress: setGlyphProgress,
-    reviewOnly,
-    onReviewOnly: setReviewOnly,
+    glyphShow,
+    onGlyphShow: setGlyphShow,
   }
 
   // Three areas, like the app (#1384): the rail, the page's header and tools,

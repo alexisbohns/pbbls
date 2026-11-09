@@ -97,6 +97,15 @@ export function needsReview(name: string): boolean {
   return FLAGGED.has(name)
 }
 
+/** Which glyphs the Icons page lists: every one, those the role pass flagged, or those the review marked fix. */
+export type GlyphShow = "all" | "review" | "fix"
+
+export function showsGlyph(name: string, show: GlyphShow, verdicts: Readonly<Record<string, string>>): boolean {
+  if (show === "review") return FLAGGED.has(name)
+  if (show === "fix") return verdicts[name] === "fix"
+  return true
+}
+
 /** What the role pass (scripts/explore/roles.py) flagged on a glyph, from review.json. */
 export type ReviewFlag =
   | { kind: "added-dot"; from: string; path: number; area: number }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { GLYPHS, availableForms, formPaths, needsReview } from "./glyph-forms"
+import { GLYPHS, availableForms, formPaths, needsReview, showsGlyph } from "./glyph-forms"
 
 describe("glyph forms", () => {
   it("reads every glyph from glyphs.json", () => {
@@ -40,5 +40,17 @@ describe("glyph forms", () => {
 
   it("flags glyphs the review lists", () => {
     expect(typeof needsReview("home")).toBe("boolean")
+  })
+})
+
+describe("showsGlyph", () => {
+  const flagged = GLYPHS.find((g) => needsReview(g.name))?.name ?? ""
+  const unflagged = GLYPHS.find((g) => !needsReview(g.name))?.name ?? ""
+  it("lists every glyph, the flagged ones, or those marked fix", () => {
+    expect(showsGlyph(unflagged, "all", {})).toBe(true)
+    expect(showsGlyph(flagged, "review", {})).toBe(true)
+    expect(showsGlyph(unflagged, "review", {})).toBe(false)
+    expect(showsGlyph(unflagged, "fix", { [unflagged]: "fix" })).toBe(true)
+    expect(showsGlyph(flagged, "fix", { [flagged]: "ok" })).toBe(false)
   })
 })

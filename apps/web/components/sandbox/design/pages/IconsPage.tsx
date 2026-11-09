@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useState } from "react"
 import { Android, Apple, Globe } from "@pbbls/icons"
 import type { FindingGroup } from "@/lib/design/audit"
-import { GLYPHS, glyphMatchesQuery, hasForm, needsReview, type FormChoice, type Glyph } from "@/lib/design/glyph-forms"
+import { GLYPHS, glyphMatchesQuery, hasForm, needsReview, showsGlyph, type FormChoice, type Glyph } from "@/lib/design/glyph-forms"
 import { ICON_ROWS, replacementsFor, type IconSurface } from "@/lib/design/icon-catalog"
 import { PBBLS_ICON_SIZE, type PbblsIconComponent, type PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { useReviewVerdicts, type Verdict } from "@/lib/design/useReviewVerdicts"
@@ -50,11 +50,13 @@ type GlyphTileProps = {
   form: FormChoice
   k: number
   verdict?: Verdict
+  /** Whether a fix verdict carries a note yet. */
+  noted: boolean
   onVerdict: () => void
   onOpen: () => void
 }
 
-function GlyphTile({ glyph, size, form, k, verdict, onVerdict, onOpen }: GlyphTileProps) {
+function GlyphTile({ glyph, size, form, k, verdict, noted, onVerdict, onOpen }: GlyphTileProps) {
   const migrated = MIGRATED.get(glyph.name) ?? []
   return (
     <li
@@ -75,7 +77,7 @@ function GlyphTile({ glyph, size, form, k, verdict, onVerdict, onOpen }: GlyphTi
         <button
           type="button"
           onClick={onVerdict}
-          aria-label={`Review ${glyph.name}: ${verdict ?? "no verdict"}`}
+          aria-label={`Review ${glyph.name}: ${verdict ?? "no verdict"}${verdict === "fix" && !noted ? ", no note yet" : ""}`}
           // px-1.5 keeps the longest label ("drop-twin") clear of the hover platform marks at the 8.5rem tile.
           className={cn(
             "absolute top-2 left-2 z-10 rounded-full px-1.5 py-0.5 text-[10px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -86,6 +88,7 @@ function GlyphTile({ glyph, size, form, k, verdict, onVerdict, onOpen }: GlyphTi
           )}
         >
           {verdict ?? "review"}
+          {verdict === "fix" && (noted ? " ✎" : " · no note")}
         </button>
       )}
       <span className="flex min-h-12 flex-1 items-center justify-center">
@@ -115,12 +118,14 @@ function GlyphTile({ glyph, size, form, k, verdict, onVerdict, onOpen }: GlyphTi
  * tile shows where its row has migrated. Then what web still draws with Lucide.
  */
 export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
-  const { iconQuery, iconSize, glyphForm, glyphProgress, reviewOnly } = useDesign()
-  const { verdicts, cycle, set, copy } = useReviewVerdicts()
+  const { iconQuery, iconSize, glyphForm, glyphProgress, glyphShow } = useDesign()
+  const { verdicts, notes, cycle, set, setNote, draft, copy } = useReviewVerdicts()
   const [openName, setOpenName] = useState<string | null>(null)
   const glyphs = useMemo(
-    () => GLYPHS.filter((g) => glyphMatchesQuery(g, iconQuery) && (!reviewOnly || needsReview(g.name))),
-    [iconQuery, reviewOnly],
+    () => GLYPHS.filter((g) => glyphMatchesQuery(g, iconQuery) && showsGlyph(g.name, glyphShow, verdicts)),
+    // Verdicts are read once per list: changing one in the dialog must not drop the glyph from a "Marked fix" walk.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [iconQuery, glyphShow],
   )
   const openIndex = openName === null ? -1 : glyphs.findIndex((g) => g.name === openName)
   const step = (by: number) => {
@@ -128,6 +133,8 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
     setOpenName(glyphs[(openIndex + by + glyphs.length) % glyphs.length].name)
   }
   const reviewed = glyphs.filter((g) => verdicts[g.name] !== undefined).length
+  const fixes = glyphs.filter((g) => verdicts[g.name] === "fix")
+  const noted = fixes.filter((g) => notes[g.name] !== undefined).length
   const webPending = ICON_ROWS.filter((row) => row.replacesWeb.length > 0 && !row.migrated.includes("web"))
   const lucideUses = lucide.reduce((n, g) => n + g.count, 0)
 
@@ -135,10 +142,10 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
     <>
       {/* The page's title, its counts and its tools live in the side area (DesignToolbar). */}
       <section id="icons" aria-label="Icons" className="scroll-mt-32">
-        {reviewOnly && (
+        {glyphShow !== "all" && (
           <div className="mb-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
             <span>
-              {reviewed} of {glyphs.length} reviewed · open a tile to see its forms and twins, or tap its label: ok, fix, drop-twin
+              {reviewed} of {glyphs.length} reviewed · {noted} of {fixes.length} fixes noted · open a tile to see its forms and twins, set the verdict and say what a fix needs
             </span>
             <Button size="sm" variant="secondary" onClick={() => void copy()}>
               Copy verdicts
@@ -159,6 +166,7 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
                 form={glyphForm}
                 k={glyphProgress}
                 verdict={verdicts[glyph.name]}
+                noted={notes[glyph.name] !== undefined}
                 onVerdict={() => cycle(glyph.name)}
                 onOpen={() => setOpenName(glyph.name)}
               />
@@ -170,6 +178,8 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
           position={`${openIndex + 1} of ${glyphs.length}`}
           verdict={openName ? verdicts[openName] : undefined}
           onVerdict={(v) => openName && set(openName, v)}
+          note={openName ? draft(openName) : ""}
+          onNote={(text) => openName && setNote(openName, text)}
           onPrev={() => step(-1)}
           onNext={() => step(1)}
           onClose={() => setOpenName(null)}

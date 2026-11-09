@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react"
 import type { CanvasZoom, DeviceChoice } from "@/lib/design/devices"
-import type { FormChoice } from "@/lib/design/glyph-forms"
+import type { FormChoice, GlyphShow } from "@/lib/design/glyph-forms"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import type { DesignTheme } from "@/lib/theme/design-theme"
 
@@ -20,7 +20,8 @@ export interface DesignContextValue {
   /** The Icons page's form and progress (#1607 review). */
   glyphForm: FormChoice
   glyphProgress: number
-  reviewOnly: boolean
+  /** Which glyphs the Icons page lists: all, the flagged ones, or those marked fix. */
+  glyphShow: GlyphShow
 }
 
 const DesignContext = createContext<DesignContextValue | null>(null)

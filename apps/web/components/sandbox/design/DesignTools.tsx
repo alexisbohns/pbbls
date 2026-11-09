@@ -3,7 +3,8 @@
 import { useMemo } from "react"
 import { COLOR_WORLDS } from "@/lib/config/color-worlds"
 import { CANVAS_ZOOMS, type CanvasZoom, type DeviceChoice } from "@/lib/design/devices"
-import { GLYPHS, glyphMatchesQuery, needsReview, type FormChoice } from "@/lib/design/glyph-forms"
+import { GLYPHS, glyphMatchesQuery, showsGlyph, type FormChoice, type GlyphShow } from "@/lib/design/glyph-forms"
+import { useReviewVerdicts } from "@/lib/design/useReviewVerdicts"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import type { ColorWorld } from "@/lib/types"
 import type { DesignContrast, DesignMode, DesignTheme, DesignThemeName } from "@/lib/theme/design-theme"
@@ -51,9 +52,10 @@ const FORM_OPTIONS: SelectOption<FormChoice>[] = [
   { value: "progress", label: "Progress" },
 ]
 const PROGRESS_OPTIONS: SelectOption<number>[] = [0, 1, 2, 3, 4, 5].map((k) => ({ value: k, label: String(k) }))
-const SHOW_OPTIONS: SelectOption<"all" | "review">[] = [
+const SHOW_OPTIONS: SelectOption<GlyphShow>[] = [
   { value: "all", label: "All glyphs" },
   { value: "review", label: "Needs review" },
+  { value: "fix", label: "Marked fix" },
 ]
 
 const count = new Intl.NumberFormat("en")
@@ -74,8 +76,8 @@ export type DesignToolsState = {
   onGlyphForm: (form: FormChoice) => void
   glyphProgress: number
   onGlyphProgress: (k: number) => void
-  reviewOnly: boolean
-  onReviewOnly: (on: boolean) => void
+  glyphShow: GlyphShow
+  onGlyphShow: (show: GlyphShow) => void
 }
 
 type DesignToolsProps = DesignToolsState & {
@@ -95,9 +97,13 @@ type DesignToolsProps = DesignToolsState & {
 export function DesignTools({ page, layout, ...s }: DesignToolsProps) {
   const icons = page?.path === "/icons"
   const wide = layout === "row" ? "lg:col-span-2" : "col-span-2"
+  const { verdicts } = useReviewVerdicts()
   const matching = useMemo(
-    () => (icons && (s.iconQuery.trim() || s.reviewOnly) ? GLYPHS.filter((g) => glyphMatchesQuery(g, s.iconQuery) && (!s.reviewOnly || needsReview(g.name))).length : null),
-    [icons, s.iconQuery, s.reviewOnly],
+    () =>
+      icons && (s.iconQuery.trim() || s.glyphShow !== "all")
+        ? GLYPHS.filter((g) => glyphMatchesQuery(g, s.iconQuery) && showsGlyph(g.name, s.glyphShow, verdicts)).length
+        : null,
+    [icons, s.iconQuery, s.glyphShow, verdicts],
   )
 
   return (
@@ -123,7 +129,7 @@ export function DesignTools({ page, layout, ...s }: DesignToolsProps) {
       {icons && s.glyphForm === "progress" && (
         <DesignSelect label="Marks lit" options={PROGRESS_OPTIONS} value={s.glyphProgress} onChange={s.onGlyphProgress} />
       )}
-      {icons && <DesignSelect label="Show" options={SHOW_OPTIONS} value={s.reviewOnly ? "review" : "all"} onChange={(v) => s.onReviewOnly(v === "review")} />}
+      {icons && <DesignSelect label="Show" options={SHOW_OPTIONS} value={s.glyphShow} onChange={s.onGlyphShow} />}
       {page?.canvas && (
         <>
           <DesignSelect label="Screens" options={DEVICE_OPTIONS} value={s.devices} onChange={s.onDevices} />

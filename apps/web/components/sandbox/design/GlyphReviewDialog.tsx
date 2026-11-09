@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { describeFlag, flaggedPaths, formChoices, reviewFlags, type Glyph, type GlyphPath } from "@/lib/design/glyph-forms"
@@ -89,6 +89,9 @@ type GlyphReviewDialogProps = {
   position: string
   verdict?: Verdict
   onVerdict: (verdict: Verdict | undefined) => void
+  /** What a fix needs, in the maintainer's words; asked for only under a fix verdict. */
+  note: string
+  onNote: (text: string) => void
   onPrev: () => void
   onNext: () => void
   onClose: () => void
@@ -99,21 +102,43 @@ type GlyphReviewDialogProps = {
  * generator works out next to the twins drawn by hand today, and the roles
  * path by path. ← → walk the list; O, F, D set the verdict.
  */
-export function GlyphReviewDialog({ glyph, position, verdict, onVerdict, onPrev, onNext, onClose }: GlyphReviewDialogProps) {
+export function GlyphReviewDialog({ glyph, position, verdict, onVerdict, note, onNote, onPrev, onNext, onClose }: GlyphReviewDialogProps) {
+  // Choosing fix from the keyboard or a button moves straight to the note, which mounts with that verdict.
+  const focusNote = useRef(false)
+
+  function choose(v: Verdict) {
+    const next = verdict === v ? undefined : v
+    onVerdict(next)
+    focusNote.current = next === "fix"
+  }
+
   const row = glyph ? ROWS.get(glyph.name) : undefined
   const flags = glyph ? reviewFlags(glyph.name) : []
 
   function onKeyDown(e: React.KeyboardEvent) {
-    if (e.target instanceof HTMLInputElement || e.metaKey || e.ctrlKey || e.altKey) return
+    const typing = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement
+    if (typing || e.metaKey || e.ctrlKey || e.altKey) return
     if (e.key === "ArrowLeft") onPrev()
     else if (e.key === "ArrowRight") onNext()
-    else if (VERDICT_KEYS[e.key]) onVerdict(VERDICT_KEYS[e.key] === verdict ? undefined : VERDICT_KEYS[e.key])
+    else if (VERDICT_KEYS[e.key]) choose(VERDICT_KEYS[e.key])
     else return
     e.preventDefault()
   }
 
   return (
-    <Dialog open={glyph !== null} onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={glyph !== null}
+      onOpenChange={(open, details) => {
+        // Escape in the note leaves the note, for ← → and the verdict keys; a second Escape closes.
+        const active = document.activeElement
+        if (!open && details.reason === "escape-key" && active instanceof HTMLTextAreaElement) {
+          details.cancel()
+          active.blur()
+          return
+        }
+        if (!open) onClose()
+      }}
+    >
       <DialogContent onKeyDown={onKeyDown} className="max-h-[90dvh] max-w-[calc(100%-2rem)] overflow-y-auto p-5 sm:max-w-3xl">
         {glyph && (
           <>
@@ -169,6 +194,26 @@ export function GlyphReviewDialog({ glyph, position, verdict, onVerdict, onPrev,
               <RolesMap key={glyph.name} glyph={glyph} />
             </section>
 
+            {verdict === "fix" && (
+              <label className="flex flex-col gap-1.5 text-sm font-medium">
+                What the fix needs
+                <textarea
+                  ref={(el) => {
+                    if (el && focusNote.current) {
+                      el.focus()
+                      focusNote.current = false
+                    }
+                  }}
+                  value={note}
+                  onChange={(e) => onNote(e.target.value)}
+                  rows={3}
+                  placeholder="e.g. tag the moon as focus; redraw lit-3 so both figures fill; drop the added dot"
+                  className="resize-y rounded-xl border border-input bg-card px-3 py-2 text-sm font-normal outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                />
+                <span className="text-xs font-normal text-muted-foreground">Saved as you type. Esc leaves the note; ← → then walk the list.</span>
+              </label>
+            )}
+
             <footer className="-mx-5 -mb-5 flex flex-wrap items-center justify-between gap-2 border-t border-border bg-muted/50 px-5 py-3">
               <div className="flex gap-1">
                 <Button size="sm" variant="ghost" onClick={onPrev} aria-label="Previous glyph">
@@ -185,7 +230,7 @@ export function GlyphReviewDialog({ glyph, position, verdict, onVerdict, onPrev,
                     size="sm"
                     variant={verdict === v ? "default" : "outline"}
                     aria-pressed={verdict === v}
-                    onClick={() => onVerdict(verdict === v ? undefined : v)}
+                    onClick={() => choose(v)}
                   >
                     {v}
                   </Button>
