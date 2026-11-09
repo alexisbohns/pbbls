@@ -18,7 +18,7 @@ export type Surface = "ios" | "android" | "web"
 export const SURFACES: readonly Surface[] = ["ios", "android", "web"]
 
 /** The tag keys a row may carry (spec D5). Tags help search; code never reads them. */
-export const TAG_KEYS = ["subject", "wrapper", "number", "side", "direction", "size", "keywords"] as const
+export const TAG_KEYS = ["subject", "wrapper", "number", "side", "direction", "size", "keywords", "category"] as const
 export type TagKey = (typeof TAG_KEYS)[number]
 export type Tags = Partial<Record<TagKey, string[]>>
 

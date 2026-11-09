@@ -1,0 +1,179 @@
+{
+  "categories": [
+    {
+      "id": "stones",
+      "label": "Stones, rocks & gems",
+      "description": "The stone itself: pebbles, rocks, boulders, cut gems, fossils and the shaded stone faces that carry the app's visual language."
+    },
+    {
+      "id": "cairns",
+      "label": "Cairns, dolmens & monuments",
+      "description": "Things built from stones: piles, cairns, dolmens, menhirs, pyramids, ziggurats, gates of standing stone."
+    },
+    {
+      "id": "paths",
+      "label": "Paths & journeys",
+      "description": "Ordered ways forward: paths, rivers of stones, stepping stones, stairs, timelines, destinations."
+    },
+    {
+      "id": "souls",
+      "label": "Souls & people",
+      "description": "The people in a life: you, two or three souls, family, babies, invitations, blocked people."
+    },
+    {
+      "id": "collections",
+      "label": "Collections & containers",
+      "description": "Gathered sets and things that hold them: bowls, pouches, bags, cases, folders, trunks, archive boxes."
+    },
+    {
+      "id": "glyphs",
+      "label": "Glyphs, karma & marks",
+      "description": "What a hand scribbles on a stone, plus the karma spirals and petroglyph marks."
+    },
+    {
+      "id": "body",
+      "label": "Feelings, hands & body",
+      "description": "Hearts, hands, eyes, ears, thumbs, tears and other body signs of how something felt."
+    },
+    {
+      "id": "time",
+      "label": "Time & dates",
+      "description": "Calendars, days, hours, hourglasses, clocks and anything that measures time."
+    },
+    {
+      "id": "sky",
+      "label": "Sky, sun, moon & weather",
+      "description": "Sun, moon, stars, clouds, rain, wind, rainbows, umbrellas and the sky's changing light."
+    },
+    {
+      "id": "plants",
+      "label": "Plants & trees",
+      "description": "Trees, pines, flowers, leaves, sprouts and seedlings."
+    },
+    {
+      "id": "animals",
+      "label": "Animals",
+      "description": "Pets, farm animals, fish, jellyfish, crabs and shells, bones and paws."
+    },
+    {
+      "id": "water",
+      "label": "Water, waves & ripples",
+      "description": "Drops, ripples, waves, wells, bottles of water and stones dropped on a surface."
+    },
+    {
+      "id": "fire",
+      "label": "Fire, light & sparks",
+      "description": "Flames, firepits, candles, bulbs, sparkles and zaps: warmth, ideas and sudden energy."
+    },
+    {
+      "id": "awards",
+      "label": "Awards & celebration",
+      "description": "Medals, trophies, laurels, gifts, Christmas, and the glow of something that worked."
+    },
+    {
+      "id": "actions",
+      "label": "Add, remove & confirm",
+      "description": "Checks, pluses, minuses, deleting, removing from a set and on/off switches."
+    },
+    {
+      "id": "alerts",
+      "label": "Alerts, warnings & errors",
+      "description": "Exclamations, danger, stop signs, failed loads, broken links and pages that are gone."
+    },
+    {
+      "id": "info",
+      "label": "Info & help",
+      "description": "Information marks, question marks, help rings and hints."
+    },
+    {
+      "id": "arrows",
+      "label": "Arrows & motion",
+      "description": "Up, again, swap and cycle: arrows, chevrons, loops and anything that points or turns."
+    },
+    {
+      "id": "transfer",
+      "label": "Copy, paste & transfer",
+      "description": "Upload, download, copy, paste and moving things in or out of the device."
+    },
+    {
+      "id": "writing",
+      "label": "Pens, ink & text",
+      "description": "Pens, pencils, feathers, ink, erasers and typographic marks for text."
+    },
+    {
+      "id": "documents",
+      "label": "Documents, notes & books",
+      "description": "Files, memos, clipboards, scrolls, books, bookmarks and libraries."
+    },
+    {
+      "id": "charts",
+      "label": "Charts, boards & layouts",
+      "description": "Charts, gauges, dashboards, boards, layouts, grids and lists."
+    },
+    {
+      "id": "devices",
+      "label": "Cameras, screens & devices",
+      "description": "Cameras, TVs, phones, keyboards, servers, robots and the Android mark."
+    },
+    {
+      "id": "sound",
+      "label": "Sound & music",
+      "description": "Speakers, microphones, waveforms, audio files, mute, instruments and musical notes."
+    },
+    {
+      "id": "web",
+      "label": "Web, links & signals",
+      "description": "URLs, links, networks, radar and signal strength."
+    },
+    {
+      "id": "places",
+      "label": "Places, buildings & transport",
+      "description": "Houses, shelters, lighthouses, cars, bikes, trains, boats and bridges."
+    },
+    {
+      "id": "land",
+      "label": "Landscapes & terrain",
+      "description": "Hills, mountains, summits, fields and the shape of the land."
+    },
+    {
+      "id": "maps",
+      "label": "Maps, compass & search",
+      "description": "Maps, compasses, signposts, life-domain markers, magnifiers, binoculars and pointers."
+    },
+    {
+      "id": "play",
+      "label": "Sports, games & goals",
+      "description": "Balls, goals, board games, targets, bullseyes and flags planted on a goal."
+    },
+    {
+      "id": "food",
+      "label": "Food & drink",
+      "description": "Fruit, meals, bread, milk, cutlery and cooking."
+    },
+    {
+      "id": "shopping",
+      "label": "Shopping & market",
+      "description": "Shops, stalls, labels, baskets and carts."
+    },
+    {
+      "id": "tools",
+      "label": "Tools, crafts & settings",
+      "description": "Cords, knots, needles, sliders, wrenches and things that adjust or mend."
+    },
+    {
+      "id": "privacy",
+      "label": "Privacy, visibility & locks",
+      "description": "Locks, keyholes, shields, closed and open eyes, and the private, circle and public visibility levels."
+    },
+    {
+      "id": "appearance",
+      "label": "Appearance & themes",
+      "description": "Light, dark and follow-device modes, toggles, palettes and the colour world of the app."
+    },
+    {
+      "id": "notifications",
+      "label": "Messages & notifications",
+      "description": "Bells, envelopes, chat bubbles, language marks and anything that tells you something arrived."
+    }
+  ]
+}

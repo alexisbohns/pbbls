@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { join } from "node:path"
+import { loadCategories, MAX_CATEGORIES } from "./categories"
 import { formatSvg, ROOT_ATTRIBUTES } from "./format"
 import { carveSolid } from "./carve"
 import { formKeysOf } from "./forms"
@@ -252,6 +253,32 @@ function overrideAllowed(root: string, base: string, form: string): boolean {
   return formKeysOf(shape).includes(form)
 }
 
+/** Every row the generator emits has 1 to 3 distinct, known category ids (spec D5). */
+function lintCategories(root: string, manifest: Manifest, result: LintResult): void {
+  const { errors } = result
+  const file = "icons.json"
+  let known: Set<string>
+  try {
+    known = new Set(loadCategories(root).map((c) => c.id))
+  } catch (e) {
+    errors.push({ file: "categories.json", rule: "category", message: e instanceof Error ? e.message : String(e) })
+    return
+  }
+  for (const row of manifest.icons) {
+    if (row.status === "exploring") continue
+    const list = row.tags.category ?? []
+    if (list.length === 0) {
+      errors.push({ file, rule: "category", message: `${row.name}: no tags.category (1 to ${MAX_CATEGORIES} ids from categories.json)` })
+      continue
+    }
+    if (list.length > MAX_CATEGORIES) errors.push({ file, rule: "category", message: `${row.name}: ${list.length} categories, at most ${MAX_CATEGORIES}` })
+    list.forEach((id, i) => {
+      if (!known.has(id)) errors.push({ file, rule: "category", message: `${row.name}: unknown category "${id}"` })
+      else if (list.indexOf(id) !== i) errors.push({ file, rule: "category", message: `${row.name}: category "${id}" twice` })
+    })
+  }
+}
+
 function lintManifest(root: string, manifest: Manifest, files: string[], result: LintResult): void {
   const { errors } = result
   const file = "icons.json"
@@ -322,7 +349,10 @@ export function lint(root: string): LintResult {
   } catch (e) {
     result.errors.push({ file: "icons.json", rule: "manifest", message: e instanceof Error ? e.message : String(e) })
   }
-  if (manifest) lintManifest(root, manifest, files, result)
+  if (manifest) {
+    lintManifest(root, manifest, files, result)
+    lintCategories(root, manifest, result)
+  }
   for (const f of files) {
     const split = splitSourceName(f)
     const variant = split?.variant ?? null
