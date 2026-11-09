@@ -14,6 +14,8 @@
 
 **Prerequisite:** PR #1606 is merged into `main`. Every branch below starts from an updated `main`.
 
+**Amended 2026-11-09:** the maintainer's review changed the model (spec D1–D4, D6). `focus` is now `mark` and the form `half` is `marked`; the numbered `mark` is now `step` (`data-step`); a body may split into parts; marked combines with every fill; dotted is a drawn form. Part 3 finishes with `docs/superpowers/plans/2026-11-09-icon-forms-amendment.md`; the drawings follow in part 3b. Read "half", "focus" and "mark N" below in those terms; parts 4–7 are planned against the amended spec.
+
 ---
 
 ## Part 1 — docs (branch `docs/1607-icon-forms`, already holds the spec)

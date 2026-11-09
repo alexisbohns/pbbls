@@ -32,7 +32,7 @@ The twin model names states, not drawings. `.active` covers anything from one li
 
 ## Decisions
 
-**D1. A glyph is one drawing; its name is free kebab words for what it shows.** `path-river`, `pouch`, `users-circle`, `knot-sm`, `pebble-glyph-open`. Size is part of the name because sizes are different drawings. The last segment of a name is never a form word (`regular`, `marked`, `solid`, `dotted`, `parts`, `of`), so a name can't be mistaken for a form. No variants, no twins; a dotted line is a form of the solid-line glyph (D3), not a glyph of its own.
+**D1. A glyph is one drawing; its name is free kebab words for what it shows.** `path-river`, `pouch`, `users-circle`, `knot-sm`, `pebble-glyph-open`. Size is part of the name because sizes are different drawings. The last segment of a name is never a form word (`regular`, `marked`, `solid`, `parts`, `of`), so a name can't be mistaken for a form. `dotted` may end the name of a drawing that is dotted and has no solid-line sibling (`star-dotted`, `draw-dotted`). No variants, no twins; a dotted line is a form of the solid-line glyph (D3), not a glyph of its own.
 
 **D2. Roles.** A path in a source may carry `data-role`:
 
