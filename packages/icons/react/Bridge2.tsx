@@ -20,9 +20,8 @@ export function Bridge2({ size = 24, ...props }: PbblsIconProps) {
       focusable="false"
       {...props}
     >
-      <path d="M2.6 10 L6 10 L6 20 M21.4 10 L18 10 L18 20" />
-      <path d="M6 10 L18 10" />
-      <path d="M6 18 C8 12.6 16 12.6 18 18" />
+      <path d="M2.6 10 L6 10 M6 18 L6 20 M21.4 10 L18 10 M18 18 L18 20" />
+      <path d="M6 10 L18 10 L18 18 C16 12.6 8 12.6 6 18 L6 10" />
       <path d="M12 8.4 L12.01 8.4" />
     </svg>
   )

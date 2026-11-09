@@ -20,11 +20,11 @@ export function ExclamationTriple({ size = 24, ...props }: PbblsIconProps) {
       focusable="false"
       {...props}
     >
-      <path d="M 5.6 4.6 L 5.6 13.4" />
+      <path d="M5.35 4.6 L5.85 4.6 L5.7 13.4 L5.5 13.4 Z" />
       <path d="M 5.6 18.4 L 5.61 18.4" />
-      <path d="M 12 4.6 L 12 13.4" />
+      <path d="M11.75 4.6 L12.25 4.6 L12.1 13.4 L11.9 13.4 Z" />
       <path d="M 12 18.4 L 12.01 18.4" />
-      <path d="M 18.4 4.6 L 18.4 13.4" />
+      <path d="M18.15 4.6 L18.65 4.6 L18.5 13.4 L18.3 13.4 Z" />
       <path d="M 18.4 18.4 L 18.41 18.4" />
     </svg>
   )

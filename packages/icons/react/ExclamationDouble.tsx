@@ -20,9 +20,9 @@ export function ExclamationDouble({ size = 24, ...props }: PbblsIconProps) {
       focusable="false"
       {...props}
     >
-      <path d="M 8.4 5.4 L 8.4 13.6" />
+      <path d="M8.15 5.4 L8.65 5.4 L8.5 13.6 L8.3 13.6 Z" />
       <path d="M 8.4 18.4 L 8.41 18.4" />
-      <path d="M 15.6 5.4 L 15.6 13.6" />
+      <path d="M15.35 5.4 L15.85 5.4 L15.7 13.6 L15.5 13.6 Z" />
       <path d="M 15.6 18.4 L 15.61 18.4" />
     </svg>
   )
