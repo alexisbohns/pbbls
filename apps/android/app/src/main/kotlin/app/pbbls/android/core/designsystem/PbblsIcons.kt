@@ -741,9 +741,6 @@ enum class PbblsIcon(
     /** Swap: trade one thing for another. */
     EXCHANGE_MD("exchange-md"),
 
-    /** Swap: trade one thing for another. (the `active` twin) */
-    EXCHANGE_MD_ACTIVE("exchange-md.active"),
-
     /** Swap: trade one thing for another. */
     STONES_SWAP("stones-swap"),
 
@@ -789,9 +786,6 @@ enum class PbblsIcon(
     /** Upload: a photo on its way up: a status, not a button. */
     UPLOAD_BOX("upload-box"),
 
-    /** Upload: a photo on its way up: a status, not a button. (the `active` twin) */
-    UPLOAD_BOX_ACTIVE("upload-box.active"),
-
     /** Upload: a photo on its way up: a status, not a button. */
     PICTURE_SPEED("picture-speed"),
 
@@ -806,9 +800,6 @@ enum class PbblsIcon(
 
     /** Upload: a photo on its way up: a status, not a button. */
     CLOUD_UPLOAD("cloud-upload"),
-
-    /** Upload: a photo on its way up: a status, not a button. (the `active` twin) */
-    CLOUD_UPLOAD_ACTIVE("cloud-upload.active"),
 
     /** Upload: a photo on its way up: a status, not a button. */
     STONE_SPEED("stone-speed"),
@@ -927,20 +918,8 @@ enum class PbblsIcon(
     /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
     HOOK_FISH("hook-fish"),
 
-    /**
-     * Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). (the `active`
-     * twin)
-     */
-    HOOK_FISH_ACTIVE("hook-fish.active"),
-
     /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
     X_HALF_CIRCLE("x-half-circle"),
-
-    /**
-     * Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). (the `active`
-     * twin)
-     */
-    X_HALF_CIRCLE_ACTIVE("x-half-circle.active"),
 
     /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
     CIRCLE_BROKEN("circle-broken"),
@@ -953,12 +932,6 @@ enum class PbblsIcon(
 
     /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
     ARROW_DOWN_CUT("arrow-down-cut"),
-
-    /**
-     * Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). (the `active`
-     * twin)
-     */
-    ARROW_DOWN_CUT_ACTIVE("arrow-down-cut.active"),
 
     /** Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set). */
     CIRCLE_DOT_EXCLAMATION("circle-dot-exclamation"),
@@ -1061,9 +1034,6 @@ enum class PbblsIcon(
 
     /** Secret: visibility: only me (a trio with private and public, drawn together). */
     EYE_CLOSED("eye-closed"),
-
-    /** Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin) */
-    EYE_CLOSED_ACTIVE("eye-closed.active"),
 
     /** Secret: visibility: only me (a trio with private and public, drawn together). */
     POND("pond"),
@@ -5953,7 +5923,6 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_people_send,
         R.drawable.ic_pbbls_people_send_active,
         R.drawable.ic_pbbls_exchange_md,
-        R.drawable.ic_pbbls_exchange_md_active,
         R.drawable.ic_pbbls_stones_swap,
         R.drawable.ic_pbbls_stones_swap_active,
         R.drawable.ic_pbbls_dots_cross,
@@ -5969,13 +5938,11 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_cycle_link,
         R.drawable.ic_pbbls_cycle_link_active,
         R.drawable.ic_pbbls_upload_box,
-        R.drawable.ic_pbbls_upload_box_active,
         R.drawable.ic_pbbls_picture_speed,
         R.drawable.ic_pbbls_picture_speed_active,
         R.drawable.ic_pbbls_upload_half_circle,
         R.drawable.ic_pbbls_upload_half_circle_active,
         R.drawable.ic_pbbls_cloud_upload,
-        R.drawable.ic_pbbls_cloud_upload_active,
         R.drawable.ic_pbbls_stone_speed,
         R.drawable.ic_pbbls_stone_speed_active,
         R.drawable.ic_pbbls_picture_upload,
@@ -6013,13 +5980,10 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_stones_fall,
         R.drawable.ic_pbbls_stones_fall_active,
         R.drawable.ic_pbbls_hook_fish,
-        R.drawable.ic_pbbls_hook_fish_active,
         R.drawable.ic_pbbls_x_half_circle,
-        R.drawable.ic_pbbls_x_half_circle_active,
         R.drawable.ic_pbbls_circle_broken,
         R.drawable.ic_pbbls_circle_broken_active,
         R.drawable.ic_pbbls_arrow_down_cut,
-        R.drawable.ic_pbbls_arrow_down_cut_active,
         R.drawable.ic_pbbls_circle_dot_exclamation,
         R.drawable.ic_pbbls_circle_dot_exclamation_active,
         R.drawable.ic_pbbls_link_broken,
@@ -6053,7 +6017,6 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_user_circle_lg,
         R.drawable.ic_pbbls_user_circle_lg_active,
         R.drawable.ic_pbbls_eye_closed,
-        R.drawable.ic_pbbls_eye_closed_active,
         R.drawable.ic_pbbls_pond,
         R.drawable.ic_pbbls_pond_active,
         R.drawable.ic_pbbls_user_circle_sm,
@@ -6213,10 +6176,6 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_sun_shine_sea_active,
         R.drawable.ic_pbbls_flower_daisy,
         R.drawable.ic_pbbls_flower_daisy_active,
-    )
-
-private fun drawableIds1(): IntArray =
-    intArrayOf(
         R.drawable.ic_pbbls_sunrise_shine,
         R.drawable.ic_pbbls_sunrise_shine_active,
         R.drawable.ic_pbbls_stone_lg,
@@ -6224,6 +6183,10 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_toggle_off_label,
         R.drawable.ic_pbbls_toggle_off_label_active,
         R.drawable.ic_pbbls_sidebar,
+    )
+
+private fun drawableIds1(): IntArray =
+    intArrayOf(
         R.drawable.ic_pbbls_sidebar_active,
         R.drawable.ic_pbbls_sun_shine_md,
         R.drawable.ic_pbbls_sun_shine_md_active,
@@ -6717,10 +6680,6 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_download_picture_active,
         R.drawable.ic_pbbls_filter_box,
         R.drawable.ic_pbbls_filter_box_active,
-    )
-
-private fun drawableIds2(): IntArray =
-    intArrayOf(
         R.drawable.ic_pbbls_device_arrow_down,
         R.drawable.ic_pbbls_device_arrow_down_active,
         R.drawable.ic_pbbls_abstract_bowl_pebbles,
@@ -6728,6 +6687,10 @@ private fun drawableIds2(): IntArray =
         R.drawable.ic_pbbls_stone_bowl,
         R.drawable.ic_pbbls_stone_bowl_active,
         R.drawable.ic_pbbls_rock_lg,
+    )
+
+private fun drawableIds2(): IntArray =
+    intArrayOf(
         R.drawable.ic_pbbls_rock_lg_active,
         R.drawable.ic_pbbls_rock_iso,
         R.drawable.ic_pbbls_rock_iso_active,
@@ -7221,10 +7184,6 @@ private fun drawableIds2(): IntArray =
         R.drawable.ic_pbbls_microphone_wire,
         R.drawable.ic_pbbls_microphone_wire_active,
         R.drawable.ic_pbbls_file_audio,
-    )
-
-private fun drawableIds3(): IntArray =
-    intArrayOf(
         R.drawable.ic_pbbls_file_audio_active,
         R.drawable.ic_pbbls_tape_audio,
         R.drawable.ic_pbbls_tape_audio_active,
@@ -7232,6 +7191,10 @@ private fun drawableIds3(): IntArray =
         R.drawable.ic_pbbls_vinyl_active,
         R.drawable.ic_pbbls_headset,
         R.drawable.ic_pbbls_headset_active,
+    )
+
+private fun drawableIds3(): IntArray =
+    intArrayOf(
         R.drawable.ic_pbbls_blaster,
         R.drawable.ic_pbbls_blaster_active,
         R.drawable.ic_pbbls_play_circle,

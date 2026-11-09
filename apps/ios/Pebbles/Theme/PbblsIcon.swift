@@ -490,8 +490,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case peopleSendActive = "people-send.active"
     /// Swap: trade one thing for another.
     case exchangeMd = "exchange-md"
-    /// Swap: trade one thing for another. (the `active` twin)
-    case exchangeMdActive = "exchange-md.active"
     /// Swap: trade one thing for another.
     case stonesSwap = "stones-swap"
     /// Swap: trade one thing for another. (the `active` twin)
@@ -522,8 +520,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case cycleLinkActive = "cycle-link.active"
     /// Upload: a photo on its way up: a status, not a button.
     case uploadBox = "upload-box"
-    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
-    case uploadBoxActive = "upload-box.active"
     /// Upload: a photo on its way up: a status, not a button.
     case pictureSpeed = "picture-speed"
     /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
@@ -534,8 +530,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case uploadHalfCircleActive = "upload-half-circle.active"
     /// Upload: a photo on its way up: a status, not a button.
     case cloudUpload = "cloud-upload"
-    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
-    case cloudUploadActive = "cloud-upload.active"
     /// Upload: a photo on its way up: a status, not a button.
     case stoneSpeed = "stone-speed"
     /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
@@ -616,14 +610,8 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// set).
     case hookFish = "hook-fish"
     /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
-    /// set). (the `active` twin)
-    case hookFishActive = "hook-fish.active"
-    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
     /// set).
     case xHalfCircle = "x-half-circle"
-    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
-    /// set). (the `active` twin)
-    case xHalfCircleActive = "x-half-circle.active"
     /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
     /// set).
     case circleBroken = "circle-broken"
@@ -633,9 +621,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
     /// set).
     case arrowDownCut = "arrow-down-cut"
-    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
-    /// set). (the `active` twin)
-    case arrowDownCutActive = "arrow-down-cut.active"
     /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
     /// set).
     case circleDotExclamation = "circle-dot-exclamation"
@@ -704,8 +689,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case userCircleLgActive = "user-circle-lg.active"
     /// Secret: visibility: only me (a trio with private and public, drawn together).
     case eyeClosed = "eye-closed"
-    /// Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin)
-    case eyeClosedActive = "eye-closed.active"
     /// Secret: visibility: only me (a trio with private and public, drawn together).
     case pond = "pond"
     /// Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin)
