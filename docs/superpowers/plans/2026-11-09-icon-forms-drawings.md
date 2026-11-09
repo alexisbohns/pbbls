@@ -339,3 +339,12 @@ In `IconsPage.tsx`, the review header shows when `glyphShow !== "all"` as today;
 | R6 solids (b) and drops | `shield`, `user-circle-lg`, `user-circle-sm`, `users-circle`, `fruit-basket`, `eye-open`, `arche-cairn`, `megaphone-2`, `user-shine`, `jail`, `gift-circle`, `lock-rounded`, `keyhole-circle`, `envelope`, `ticket`, `user-plus-curve`, `compass-vertical`, `egg-fried`, `compass`, `hexagon-text`, `label`, `label-stone`, `stopwatch`, `user-forbidden`, `users-communication`, `flower-daisy`, `toggle-off-label`; drop-twin: `exchange-md`, `upload-box`, `cloud-upload`, `hook-fish`, `x-half-circle`, `arrow-down-cut`, `eye-closed` |
 
 Each task commits on `chore/1607-icon-drawings` (`chore(ui): round 2 — <task>`), regenerated outputs included. The maintainer re-reviews through Show → Marked fix: the glyphs keep their round 2 `fix` verdict until he changes it.
+
+### Round 2, second export (2026-11-10)
+
+`verdicts-round2.json` now holds both exports (`exports[1]` is the second). 98 of the first export's 107 fixes came back ok. `stones-back`, `user-shine` and `toggle-off-label` kept their first notes, which the current drawings already answer: left as they are, reported to the maintainer.
+
+| Task | Glyphs |
+|---|---|
+| R7 re-fixes | `home-hive` (widen the door so its hole reads empty in the solid; the mark just above the door, in marked and solid · marked), `baluchon` (mark at the centre of the circle), `broom` (solid fully filled, no white line), `paper-plane-trail` (no mark; today's marked becomes progress 1 of 2 steps, the whole plane step 2; a solid that reads), `megaphone-2` (solid · marked broken), `jail` (regular without the mark: hide it; redo the solids), `binoculars` (solid incorrect), `circle-leaf`, `leaf` (solid not ok), `obelisk` (solid · marked incorrect), `gem-stone-1` (no mark), `metronome`, `abstract-radar` (drop the mark, add a solid); drop-twin `slide` |
+| R8 solids and steps | solids: `stone-star`, `toggle-off-shine`, `screwdriver`, `stone-debounce`, `user-standing`, `book-stone`, `bookmark-stone`, `check-circle`, `plus-circle`, `hourglass-end`, `pendulum`, `abstract-pen`, `camera`, `camera-analogic`; steps: `circles-jointure`, `circles-jointure-2`, `chart-stones` |
