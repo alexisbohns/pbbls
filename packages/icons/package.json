@@ -18,6 +18,7 @@
     "check": "tsx scripts/build.ts --check",
     "lint:replaces": "tsx scripts/lint-replaces.ts",
     "format": "tsx scripts/build.ts --format",
+    "sheet": "tsx scripts/sheet.ts",
     "build": "tsc --noEmit",
     "test": "vitest run"
   },
