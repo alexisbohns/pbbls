@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { DEFAULT_VIEW, GLYPHS, describeSigns, formChoices, formKey, formPaths, glyphForms, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Glyph } from "./glyph-forms"
+import { DEFAULT_VIEW, GLYPHS, describeSigns, firstReview, formChoices, formKey, formPaths, glyphForms, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Glyph } from "./glyph-forms"
 
 const find = (test: (g: Glyph) => boolean, what: string): Glyph => {
   const g = GLYPHS.find(test)
@@ -92,5 +92,15 @@ describe("showsGlyph", () => {
     expect(showsGlyph(unflagged, "review", {})).toBe(false)
     expect(showsGlyph(unflagged, "fix", { [unflagged]: "fix" })).toBe(true)
     expect(showsGlyph(flagged, "fix", { [flagged]: "ok" })).toBe(false)
+  })
+})
+
+describe("round 2", () => {
+  it("lists the glyphs touched since the first review and keeps their first verdict and note", () => {
+    const touched = GLYPHS.find((g) => showsGlyph(g.name, "round2", {}))
+    if (!touched) throw new Error("no glyph in round2.json")
+    expect(showsGlyph(touched.name, "round2", {})).toBe(true)
+    expect(firstReview("home")).toEqual({ verdict: "fix", note: expect.stringContaining("solid") })
+    expect(firstReview("path")).toEqual({ verdict: "ok", note: undefined })
   })
 })

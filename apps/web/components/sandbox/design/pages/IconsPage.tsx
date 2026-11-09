@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useState } from "react"
 import { Android, Apple, Globe } from "@pbbls/icons"
 import type { FindingGroup } from "@/lib/design/audit"
-import { GLYPHS, describeSigns, glyphMatchesQuery, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Form, type Glyph, type GlyphView } from "@/lib/design/glyph-forms"
+import { GLYPHS, describeSigns, glyphMatchesQuery, inRound2, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Form, type Glyph, type GlyphView } from "@/lib/design/glyph-forms"
 import { ICON_ROWS, replacementsFor, type IconSurface } from "@/lib/design/icon-catalog"
 import { PBBLS_ICON_SIZE, type PbblsIconComponent, type PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { useReviewVerdicts, type Verdict } from "@/lib/design/useReviewVerdicts"
@@ -74,7 +74,7 @@ function GlyphTile({ glyph, size, form, view, verdict, noted, onVerdict, onOpen 
         aria-label={`Open ${glyph.name} (${describeSigns(signs)}): every form, its twins and its roles`}
         className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
-      {needsReview(glyph.name) && (
+      {(needsReview(glyph.name) || inRound2(glyph.name)) && (
         <button
           type="button"
           onClick={onVerdict}

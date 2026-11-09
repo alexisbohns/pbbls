@@ -10,7 +10,9 @@
     ".": "./react/index.ts",
     "./icons.json": "./icons.json",
     "./glyphs.json": "./glyphs/glyphs.json",
-    "./review.json": "./waves/2026-11-forms/review.json"
+    "./review.json": "./waves/2026-11-forms/review.json",
+    "./verdicts.json": "./waves/2026-11-forms/verdicts.json",
+    "./round2.json": "./waves/2026-11-forms/round2.json"
   },
   "scripts": {
     "generate": "tsx scripts/build.ts",

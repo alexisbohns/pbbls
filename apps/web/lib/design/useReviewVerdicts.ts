@@ -74,8 +74,8 @@ function localStore(key: string) {
   }
 }
 
-const VERDICTS = localStore("pbbls-glyph-review-v1")
-const NOTES = localStore("pbbls-glyph-review-notes-v1")
+const VERDICTS = localStore("pbbls-glyph-review-v2")
+const NOTES = localStore("pbbls-glyph-review-notes-v2")
 const serverSnapshot = () => null
 
 /**
@@ -115,7 +115,7 @@ export function useReviewVerdicts() {
   )
   const copy = useCallback(async () => {
     const fixNotes = Object.fromEntries(Object.entries(notes).filter(([name]) => verdicts[name] === "fix"))
-    await navigator.clipboard.writeText(JSON.stringify({ verdicts, notes: fixNotes, copiedAt: new Date().toISOString() }, null, 1))
+    await navigator.clipboard.writeText(JSON.stringify({ round: 2, verdicts, notes: fixNotes, copiedAt: new Date().toISOString() }, null, 1))
   }, [verdicts, notes])
   return { verdicts, notes, set, cycle, setNote, draft, copy }
 }

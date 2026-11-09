@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { describeFlag, flaggedPaths, formChoices, reviewFlags, type Glyph, type GlyphPath } from "@/lib/design/glyph-forms"
+import { describeFlag, flaggedPaths, firstReview, formChoices, reviewFlags, type Glyph, type GlyphPath } from "@/lib/design/glyph-forms"
 import { ICON_ROWS, type IconRow } from "@/lib/design/icon-catalog"
 import type { Verdict } from "@/lib/design/useReviewVerdicts"
 import { cn } from "@/lib/utils"
@@ -119,6 +119,7 @@ export function GlyphReviewDialog({ glyph, position, verdict, onVerdict, note, o
 
   const row = glyph ? ROWS.get(glyph.name) : undefined
   const flags = glyph ? reviewFlags(glyph.name) : []
+  const first = glyph ? firstReview(glyph.name) : null
 
   function onKeyDown(e: React.KeyboardEvent) {
     const typing = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement
@@ -161,6 +162,13 @@ export function GlyphReviewDialog({ glyph, position, verdict, onVerdict, note, o
                   </li>
                 ))}
               </ul>
+            )}
+
+            {first?.verdict && (
+              <p className="rounded-2xl bg-muted px-4 py-3 text-sm">
+                <span className="font-medium">Round 1 · {first.verdict}</span>
+                {first.note && <> · {first.note}</>}
+              </p>
             )}
 
             <section className="flex flex-col gap-2">

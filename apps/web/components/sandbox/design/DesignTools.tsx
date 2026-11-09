@@ -65,6 +65,7 @@ const STEPS_OPTIONS: SelectOption<number>[] = [0, 1, 2, 3, 4, 5, 6, 7].map((k) =
 const SHOW_OPTIONS: SelectOption<GlyphShow>[] = [
   { value: "all", label: "All glyphs" },
   { value: "review", label: "Needs review" },
+  { value: "round2", label: "Round 2" },
   { value: "fix", label: "Marked fix" },
 ]
 
