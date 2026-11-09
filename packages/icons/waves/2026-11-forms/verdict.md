@@ -42,7 +42,7 @@ The set now: 950 glyphs, 360 with a solid, 560 with a mark, 7 with parts, 29 wit
 
 ## Round 2, first pass (2026-11-09)
 
-The maintainer reviewed part of the round 2 list (`verdicts-round2.json`, `partial: true`): of 268 verdicts, 131 fix (each with a note), 7 drop-twin, the rest ok. All of them are applied:
+The maintainer reviewed part of the round 2 list (`verdicts-round2.json`, `partial: true`): of 255 verdicts, 107 fix (each with a note), 7 drop-twin, 141 ok. All of them are applied:
 
 - **A hole** is a subpath of the body drawn the other way: `home`, `home-hive` and `keyhole-circle` keep their door or keyhole open in the solid, with the mark black inside it.
 - R1, 20 retags and fixes (marked that was really the solid, solids that were really marks, `users`' right body, `case`'s handle, `dolmen` without a mark…); R2, 16 glyphs in parts (`dots-cross` in four, `stones-plus` in four, `scale-balanced` with empty pans at rest…); R3, 10 sequences; R4, 8 marks; R5–R6, 53 solids; 7 more twins dropped.
