@@ -316,3 +316,26 @@ In `IconsPage.tsx`, the review header shows when `glyphShow !== "all"` as today;
 - [ ] Full checks: icons `lint`, `build`, `test`, `check`, `lint:replaces`; web `lint`, `tsc`, `test`.
 - [ ] Push and open the PR against `chore/1607-icon-roles` (stacked): title `chore(ui): draw the forms the glyph review asked for`, body `Part of #1607 (part 3b of 7)`, labels `chore`, `ui`, `no-lab-note`, milestone `M66 · Brand icons`, `Data safety: no change`. Before #1611 merges, retarget this PR to `main`.
 - [ ] Watch the Android and iOS checks (generated outputs move with redrawn sources); re-baseline Android with the `rebaseline-screenshots` label if the screenshot gate turns red.
+
+---
+
+## Round 2 fixes (partial review, 2026-11-09)
+
+**Input:** `packages/icons/waves/2026-11-forms/verdicts-round2.json` — the maintainer's round 2 so far (`partial: true`; more may follow). Each `fix` has a note: **the note is the requirement.** Same rules as "How to fix one glyph", plus:
+
+- **A hole** (a door, a window, a keyhole that should be empty in the solid, not a carved line): make it a subpath of the body path, drawn in the opposite direction to the outline. SVG's non-zero fill then leaves it open, the regular drawing is unchanged (the hole is still stroked), and a mark inside it is drawn filled in black in `solid · marked`. `home` is the worked example (its door).
+- **"Marked is actually the solid"**: the path becomes the body (or the body grows to include it); **"this is marked, not solid"**: the filled thing becomes the mark and a real body is drawn.
+- **"An alternative version I like"** (`thumbs-up`, `clipboard`): keep today's partial fill as the mark, and add a real solid (the whole silhouette filled).
+- **Parts named in the note** (left/right/top/bottom/center/up): use those part names. Combinations the note lists (e.g. `dots-cross`: start = both left, end = both right, first = top-left + bottom-right, second = bottom-left + top-right) come from four parts named as one lowercase word each (`topleft`, `topright`, `bottomleft`, `bottomright`); every combination is worked out, the components pick the named ones.
+- **drop-twin** in round 2 means the same as round 1: remove the roles the twin gave, delete the twin if no app uses it.
+
+| Task | Glyphs |
+|---|---|
+| R1 retags and fixes | `home` (done in the plan commit: door is a hole), `home-hive`, `abstract-home`, `users`, `dolmen`, `collection`, `case`, `cycle-link`, `stone-bounce`, `people-3`, `picture-speed`, `thumbs-up`, `clipboard`, `scroll`, `bubble-a`, `shop-showcase`, `cycle-stone`, `exchange`, `heart`, `abstract-key` |
+| R2 parts | `stones-back`, `swing-double`, `people-send`, `stones-swap`, `dots-cross`, `cycle-stones`, `sprout`, `stones-double-circle-open`, `coffee-2`, `signs-soil`, `signs`, `stones-plus`, `scale-balanced`, `disk-angle-up`, `abstract-crown`, `watermelon` |
+| R3 steps | `nechlace`, `slider`, `shelve`, `connection`, `timeline`, `hourglass-shake` (also correct the arrow's movement), `cairn-angle-up`, `stones-triple-circle`, `circle-quarters`, `stones-stack` |
+| R4 marks | `dna`, `baluchon`, `bag`, `karma-dot`, `calendar-dot`, `sunshine`, `rectangle-dashed`, `keyhole` |
+| R5 solids (a) | `abstract-sign`, `radar`, `abstract-umbrella`, `abstract-sign-2`, `calendar-date`, `game`, `calendar-day`, `trash`, `trash-2`, `broom`, `bell-ringing`, `sunrise`, `sparkle`, `sparkles`, `petroglyph`, `whatsapp`, `ellipse-forward`, `paste-square`, `picture-upload`, `picture-kite`, `arrow-up-lg`, `circle-angle-up`, `stones-fall`, `paper-plane-trail`, `memorial`, `brochure` |
+| R6 solids (b) and drops | `shield`, `user-circle-lg`, `user-circle-sm`, `users-circle`, `fruit-basket`, `eye-open`, `arche-cairn`, `megaphone-2`, `user-shine`, `jail`, `gift-circle`, `lock-rounded`, `keyhole-circle`, `envelope`, `ticket`, `user-plus-curve`, `compass-vertical`, `egg-fried`, `compass`, `hexagon-text`, `label`, `label-stone`, `stopwatch`, `user-forbidden`, `users-communication`, `flower-daisy`, `toggle-off-label`; drop-twin: `exchange-md`, `upload-box`, `cloud-upload`, `hook-fish`, `x-half-circle`, `arrow-down-cut`, `eye-closed` |
+
+Each task commits on `chore/1607-icon-drawings` (`chore(ui): round 2 — <task>`), regenerated outputs included. The maintainer re-reviews through Show → Marked fix: the glyphs keep their round 2 `fix` verdict until he changes it.
