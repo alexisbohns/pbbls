@@ -37,15 +37,20 @@ describe("readRoles", () => {
     ])
   })
 
+  it("reports a single step: it is the mark or the body, not a sequence", () => {
+    expect(readRoles([p({ "data-role": "step", "data-step": "1" })]).issues).toEqual(["one step is not a sequence: make it the mark, or the body when it is the whole shape"])
+  })
+
   it("collects the hidden mark and step paths", () => {
     const { roles, issues } = readRoles([
       p({ "data-role": "body" }),
       p({ "data-role": "step", "data-step": "1", "data-rest": "hidden" }),
       p({ "data-role": "mark", "data-rest": "hidden" }),
+      p({ "data-role": "step", "data-step": "2" }),
     ])
     expect(issues).toEqual([])
     expect(roles.hidden).toEqual([1, 2])
-    expect(roles.steps).toEqual([[1]])
+    expect(roles.steps).toEqual([[1], [3]])
     expect(roles.mark).toEqual([2])
   })
 

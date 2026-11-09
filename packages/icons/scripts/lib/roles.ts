@@ -67,6 +67,7 @@ export function readRoles(paths: readonly ParsedPath[]): { roles: GlyphRoles; is
   if (parts.length > MAX_PARTS) issues.push(`${parts.length} parts; a body has at most ${MAX_PARTS}`)
   const numbers = [...bySteps.keys()].sort((a, b) => a - b)
   if (numbers.some((n, i) => n !== i + 1)) issues.push(`steps must run 1…n without gaps; found ${numbers.join(", ")}`)
+  else if (numbers.length === 1) issues.push("one step is not a sequence: make it the mark, or the body when it is the whole shape")
   const steps = numbers.map((n) => bySteps.get(n) ?? [])
   return { roles: { body, parts: parts.length >= 2 ? parts : [], mark, steps, hidden }, issues }
 }

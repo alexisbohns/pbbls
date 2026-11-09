@@ -38,7 +38,7 @@ Write sheets and PNGs to the scratchpad `/private/tmp/claude-503/-Users-alexis-c
    - **Details that must show in the solid** (a fold, a door, eyes, the `i` of info) stay separate untagged paths inside the body: the generator cuts them out at the stroke width. A detail drawn *on* the outline stays stroked.
    - **Mark:** the one accent, `data-role="mark"`; add `data-rest="hidden"` when the regular drawing does not show it (a lit dot). In a solid, the mark inside the body is cut out (`solid · marked`).
    - **A dot that lights with the mark** (a lock's keyhole dot inside the lit blob): tag the dot `data-role="mark"` too. Paths of one role never carve each other, so marked shows one solid dot, and the solid still carves the dot.
-   - **Steps:** a real sequence only, `data-role="step" data-step="1…n"` in fill order; hidden when the regular drawing does not show them.
+   - **Steps:** two or more (the lint refuses a single step), a real sequence only, `data-role="step" data-step="1…n"` in fill order; hidden when the regular drawing does not show them.
    - **Parts:** `data-role="body" data-part="<word>"` on every body path (one lowercase word: `left`, `middle`, `right`, `top`, `moon`, `cloud`, `candle`, `flame`). Every combination is worked out.
    - Remove a role the note calls irrelevant ("progress-1 is not relevant" → that path loses its step role; a hidden step that only existed for that form is deleted).
    - An override (`src/<name>.<form>.svg`) is the last resort, when a redraw cannot make the worked-out form right. Say so in the report.
