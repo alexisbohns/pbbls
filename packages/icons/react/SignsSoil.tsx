@@ -21,8 +21,8 @@ export function SignsSoil({ size = 24, ...props }: PbblsIconProps) {
       {...props}
     >
       <path d="M12 3.4 C12.1 9.2 11.9 14.8 12 20.6" />
-      <path d="M12 5.4 L18.4 5.4 L20 7 L18.4 8.6 L12.4 8.6" />
       <path d="M12 11 L5.6 11 L4 12.6 L5.6 14.2 L11.6 14.2" />
+      <path d="M12 5.4 L18.4 5.4 L20 7 L18.4 8.6 L12.4 8.6" />
       <path d="M8 20.6 C10.6 20.8 13.4 20.5 16 20.7" />
     </svg>
   )
