@@ -13,15 +13,19 @@ const ROWS: ReadonlyMap<string, IconRow> = new Map(ICON_ROWS.map((row) => [row.n
 const VERDICTS: readonly Verdict[] = ["ok", "fix", "drop-twin"]
 const VERDICT_KEYS: Readonly<Record<string, Verdict>> = { o: "ok", f: "fix", d: "drop-twin" }
 
+/** Parts take the three chart hues after the step and mark ones, in source order. */
+const PART_COLOURS = ["text-chart-3", "text-chart-4", "text-chart-5"] as const
+
 function roleLabel(p: GlyphPath): string {
-  const role = p.role === "step" ? `step ${p.step ?? "?"}` : (p.role ?? "line")
+  const role = p.role === "step" ? `step ${p.step ?? "?"}` : p.role === "body" && p.part ? `body · ${p.part}` : (p.role ?? "line")
   return p.hidden ? `${role}, hidden` : role
 }
 
-/** Body in ink, steps and the mark in two chart hues; a line without a role stays muted. */
-function roleColour(p: GlyphPath): string {
+/** Steps and the mark in two chart hues, each part in its own, a whole body in ink; a line without a role stays muted. */
+function roleColour(p: GlyphPath, parts: readonly string[]): string {
   if (p.role === "step") return "text-chart-1"
   if (p.role === "mark") return "text-chart-2"
+  if (p.role === "body" && p.part !== undefined) return PART_COLOURS[Math.max(0, parts.indexOf(p.part)) % PART_COLOURS.length] ?? "text-foreground"
   if (p.role === "body") return "text-foreground"
   return "text-muted-foreground"
 }
@@ -56,7 +60,7 @@ function RolesMap({ glyph }: { glyph: Glyph }) {
             stroke="currentColor"
             strokeWidth={strong(i) ? 2.6 : 1.75}
             strokeDasharray={p.hidden ? "1.2 1.6" : undefined}
-            className={cn(roleColour(p), hover !== null && hover !== i && "opacity-25")}
+            className={cn(roleColour(p, glyph.parts), hover !== null && hover !== i && "opacity-25")}
           />
         ))}
       </svg>
@@ -71,7 +75,7 @@ function RolesMap({ glyph }: { glyph: Glyph }) {
               onBlur={() => setHover(null)}
               className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <span aria-hidden className={cn("size-2.5 rounded-full bg-current", roleColour(p))} />
+              <span aria-hidden className={cn("size-2.5 rounded-full bg-current", roleColour(p, glyph.parts))} />
               <span className="tabular-nums text-muted-foreground">{i + 1}</span>
               <span>{roleLabel(p)}</span>
               {p.fill !== undefined && <span className="text-muted-foreground">carved</span>}
@@ -99,8 +103,9 @@ type GlyphReviewDialogProps = {
 
 /**
  * One glyph laid out for review: what the role pass flagged, every form the
- * generator works out next to the twins drawn by hand today, and the roles
- * path by path. ← → walk the list; O, F, D set the verdict.
+ * generator works out (the forms grid lists every fill with and without the
+ * mark, every part combination and the dotted drawing) next to the twins drawn
+ * by hand today, and the roles path by path. ← → walk the list; O, F, D set the verdict.
  */
 export function GlyphReviewDialog({ glyph, position, verdict, onVerdict, note, onNote, onPrev, onNext, onClose }: GlyphReviewDialogProps) {
   // Choosing fix from the keyboard or a button moves straight to the note, which mounts with that verdict.
