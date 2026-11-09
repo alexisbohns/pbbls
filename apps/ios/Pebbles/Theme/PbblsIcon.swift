@@ -109,16 +109,10 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case usersLit3 = "users.lit-3"
     /// The souls in your life: three strands from one tie, each looping into a head.
     case abstractCrown = "abstract-crown"
-    /// The souls in your life: three strands from one tie, each looping into a head. (the `active` twin)
-    case abstractCrownActive = "abstract-crown.active"
     /// The souls in your life: three figures of falling height bound by one thong.
     case abstractFence = "abstract-fence"
-    /// The souls in your life: three figures of falling height bound by one thong. (the `active` twin)
-    case abstractFenceActive = "abstract-fence.active"
     /// The souls in your life: two coiled souls whose cords cross below into a heart.
     case abstractLoki = "abstract-loki"
-    /// The souls in your life: two coiled souls whose cords cross below into a heart. (the `active` twin)
-    case abstractLokiActive = "abstract-loki.active"
     /// The souls in your life: two hooks with lashing eyes, interlocked head to foot.
     case exchange = "exchange"
     /// The souls in your life: two hooks with lashing eyes, interlocked head to foot. (the `active` twin)
@@ -129,20 +123,14 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case dolmenActive = "dolmen.active"
     /// The souls in your life: two strands plied around each other.
     case dna = "dna"
-    /// The souls in your life: two strands plied around each other. (the `active` twin)
-    case dnaActive = "dna.active"
     /// Your pebbles gathered into sets: a shallow bowl holding three stones, one heaped on top.
     case collection = "collection"
     /// Your pebbles gathered into sets: a shallow bowl holding three stones, one heaped on top. (the `active` twin)
     case collectionActive = "collection.active"
     /// Your pebbles gathered into sets: a main cord with three pendants hanging from it.
     case pearl = "pearl"
-    /// Your pebbles gathered into sets: a main cord with three pendants hanging from it. (the `active` twin)
-    case pearlActive = "pearl.active"
     /// Your pebbles gathered into sets: a net bag gathered at the neck by a drawstring.
     case watermelon = "watermelon"
-    /// Your pebbles gathered into sets: a net bag gathered at the neck by a drawstring. (the `active` twin)
-    case watermelonActive = "watermelon.active"
     /// Your pebbles gathered into sets: a fairy ring of five small caps.
     case cromlech = "cromlech"
     /// Your pebbles gathered into sets: a fairy ring of five small caps. (the `active` twin)
@@ -255,8 +243,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case barbedWireActive = "barbed-wire.active"
     /// You, your own account: a cord with an eye splice and its whipping.
     case abstractKey = "abstract-key"
-    /// You, your own account: a cord with an eye splice and its whipping. (the `active` twin)
-    case abstractKeyActive = "abstract-key.active"
     /// You, your own account: a stone head over a shoulder arch, drawn with a heart's weight.
     case userHeart = "user-heart"
     /// You, your own account: a stone head over a shoulder arch, drawn with a heart's weight. (the `active` twin)
@@ -1006,8 +992,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case bubblesAActive = "bubbles-a.active"
     /// Language: the tongue the app speaks; must read apart from public.
     case translationA = "translation-a"
-    /// Language: the tongue the app speaks; must read apart from public. (the `active` twin)
-    case translationAActive = "translation-a.active"
     /// Language: the tongue the app speaks; must read apart from public.
     case circleA = "circle-a"
     /// Language: the tongue the app speaks; must read apart from public. (the `active` twin)
@@ -1106,8 +1090,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case flowerTulipActive = "flower-tulip.active"
     /// Appearance dark: appearance: dark (trio).
     case stoneFacet = "stone-facet"
-    /// Appearance dark: appearance: dark (trio). (the `active` twin)
-    case stoneFacetActive = "stone-facet.active"
     /// Appearance dark: appearance: dark (trio).
     case toggleOnLabel = "toggle-on-label"
     /// Appearance dark: appearance: dark (trio). (the `active` twin)
@@ -1776,8 +1758,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case cardStoneActive = "card-stone.active"
     /// Paste: put it here.
     case squarePaste = "square-paste"
-    /// Paste: put it here. (the `active` twin)
-    case squarePasteActive = "square-paste.active"
     /// Paste: put it here.
     case noteStone = "note-stone"
     /// Paste: put it here. (the `active` twin)
@@ -2128,8 +2108,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case hillSunKActive = "hill-sun-k.active"
     /// Hill: a gentle rise of land.
     case hills = "hills"
-    /// Hill: a gentle rise of land. (the `active` twin)
-    case hillsActive = "hills.active"
     /// Hill: a gentle rise of land.
     case hillStoneGrass = "hill-stone-grass"
     /// Hill: a gentle rise of land. (the `active` twin)
@@ -3128,8 +3106,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case waveformBoldActive = "waveform-bold.active"
     /// Waveform: the shape of a sound.
     case signal = "signal"
-    /// Waveform: the shape of a sound. (the `active` twin)
-    case signalActive = "signal.active"
     /// Waveform: the shape of a sound.
     case waveformDots = "waveform-dots"
     /// Waveform: the shape of a sound. (the `active` twin)
@@ -3280,8 +3256,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case slashSlashDotActive = "slash-slash-dot.active"
     /// Url: a web address.
     case unsetInput = "unset-input"
-    /// Url: a web address. (the `active` twin)
-    case unsetInputActive = "unset-input.active"
     /// Url: a web address.
     case qrCode = "qr-code"
     /// Url: a web address. (the `active` twin)
@@ -3620,8 +3594,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case treeBallActive = "tree-ball.active"
     /// Tree: a broad-leaf tree.
     case treeBranches = "tree-branches"
-    /// Tree: a broad-leaf tree. (the `active` twin)
-    case treeBranchesActive = "tree-branches.active"
     /// Tree: a broad-leaf tree.
     case acorn = "acorn"
     /// Tree: a broad-leaf tree. (the `active` twin)

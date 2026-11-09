@@ -174,20 +174,11 @@ enum class PbblsIcon(
     /** The souls in your life: three strands from one tie, each looping into a head. */
     ABSTRACT_CROWN("abstract-crown"),
 
-    /** The souls in your life: three strands from one tie, each looping into a head. (the `active` twin) */
-    ABSTRACT_CROWN_ACTIVE("abstract-crown.active"),
-
     /** The souls in your life: three figures of falling height bound by one thong. */
     ABSTRACT_FENCE("abstract-fence"),
 
-    /** The souls in your life: three figures of falling height bound by one thong. (the `active` twin) */
-    ABSTRACT_FENCE_ACTIVE("abstract-fence.active"),
-
     /** The souls in your life: two coiled souls whose cords cross below into a heart. */
     ABSTRACT_LOKI("abstract-loki"),
-
-    /** The souls in your life: two coiled souls whose cords cross below into a heart. (the `active` twin) */
-    ABSTRACT_LOKI_ACTIVE("abstract-loki.active"),
 
     /** The souls in your life: two hooks with lashing eyes, interlocked head to foot. */
     EXCHANGE("exchange"),
@@ -204,9 +195,6 @@ enum class PbblsIcon(
     /** The souls in your life: two strands plied around each other. */
     DNA("dna"),
 
-    /** The souls in your life: two strands plied around each other. (the `active` twin) */
-    DNA_ACTIVE("dna.active"),
-
     /** Your pebbles gathered into sets: a shallow bowl holding three stones, one heaped on top. */
     COLLECTION("collection"),
 
@@ -216,14 +204,8 @@ enum class PbblsIcon(
     /** Your pebbles gathered into sets: a main cord with three pendants hanging from it. */
     PEARL("pearl"),
 
-    /** Your pebbles gathered into sets: a main cord with three pendants hanging from it. (the `active` twin) */
-    PEARL_ACTIVE("pearl.active"),
-
     /** Your pebbles gathered into sets: a net bag gathered at the neck by a drawstring. */
     WATERMELON("watermelon"),
-
-    /** Your pebbles gathered into sets: a net bag gathered at the neck by a drawstring. (the `active` twin) */
-    WATERMELON_ACTIVE("watermelon.active"),
 
     /** Your pebbles gathered into sets: a fairy ring of five small caps. */
     CROMLECH("cromlech"),
@@ -392,9 +374,6 @@ enum class PbblsIcon(
 
     /** You, your own account: a cord with an eye splice and its whipping. */
     ABSTRACT_KEY("abstract-key"),
-
-    /** You, your own account: a cord with an eye splice and its whipping. (the `active` twin) */
-    ABSTRACT_KEY_ACTIVE("abstract-key.active"),
 
     /** You, your own account: a stone head over a shoulder arch, drawn with a heart's weight. */
     USER_HEART("user-heart"),
@@ -1515,9 +1494,6 @@ enum class PbblsIcon(
     /** Language: the tongue the app speaks; must read apart from public. */
     TRANSLATION_A("translation-a"),
 
-    /** Language: the tongue the app speaks; must read apart from public. (the `active` twin) */
-    TRANSLATION_A_ACTIVE("translation-a.active"),
-
     /** Language: the tongue the app speaks; must read apart from public. */
     CIRCLE_A("circle-a"),
 
@@ -1646,9 +1622,6 @@ enum class PbblsIcon(
 
     /** Appearance dark: appearance: dark (trio). */
     STONE_FACET("stone-facet"),
-
-    /** Appearance dark: appearance: dark (trio). (the `active` twin) */
-    STONE_FACET_ACTIVE("stone-facet.active"),
 
     /** Appearance dark: appearance: dark (trio). */
     TOGGLE_ON_LABEL("toggle-on-label"),
@@ -2652,9 +2625,6 @@ enum class PbblsIcon(
     /** Paste: put it here. */
     SQUARE_PASTE("square-paste"),
 
-    /** Paste: put it here. (the `active` twin) */
-    SQUARE_PASTE_ACTIVE("square-paste.active"),
-
     /** Paste: put it here. */
     NOTE_STONE("note-stone"),
 
@@ -3179,9 +3149,6 @@ enum class PbblsIcon(
 
     /** Hill: a gentle rise of land. */
     HILLS("hills"),
-
-    /** Hill: a gentle rise of land. (the `active` twin) */
-    HILLS_ACTIVE("hills.active"),
 
     /** Hill: a gentle rise of land. */
     HILL_STONE_GRASS("hill-stone-grass"),
@@ -4680,9 +4647,6 @@ enum class PbblsIcon(
     /** Waveform: the shape of a sound. */
     SIGNAL("signal"),
 
-    /** Waveform: the shape of a sound. (the `active` twin) */
-    SIGNAL_ACTIVE("signal.active"),
-
     /** Waveform: the shape of a sound. */
     WAVEFORM_DOTS("waveform-dots"),
 
@@ -4907,9 +4871,6 @@ enum class PbblsIcon(
 
     /** Url: a web address. */
     UNSET_INPUT("unset-input"),
-
-    /** Url: a web address. (the `active` twin) */
-    UNSET_INPUT_ACTIVE("unset-input.active"),
 
     /** Url: a web address. */
     QR_CODE("qr-code"),
@@ -5418,9 +5379,6 @@ enum class PbblsIcon(
     /** Tree: a broad-leaf tree. */
     TREE_BRANCHES("tree-branches"),
 
-    /** Tree: a broad-leaf tree. (the `active` twin) */
-    TREE_BRANCHES_ACTIVE("tree-branches.active"),
-
     /** Tree: a broad-leaf tree. */
     ACORN("acorn"),
 
@@ -5806,23 +5764,17 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_users_lit_2,
         R.drawable.ic_pbbls_users_lit_3,
         R.drawable.ic_pbbls_abstract_crown,
-        R.drawable.ic_pbbls_abstract_crown_active,
         R.drawable.ic_pbbls_abstract_fence,
-        R.drawable.ic_pbbls_abstract_fence_active,
         R.drawable.ic_pbbls_abstract_loki,
-        R.drawable.ic_pbbls_abstract_loki_active,
         R.drawable.ic_pbbls_exchange,
         R.drawable.ic_pbbls_exchange_active,
         R.drawable.ic_pbbls_dolmen,
         R.drawable.ic_pbbls_dolmen_active,
         R.drawable.ic_pbbls_dna,
-        R.drawable.ic_pbbls_dna_active,
         R.drawable.ic_pbbls_collection,
         R.drawable.ic_pbbls_collection_active,
         R.drawable.ic_pbbls_pearl,
-        R.drawable.ic_pbbls_pearl_active,
         R.drawable.ic_pbbls_watermelon,
-        R.drawable.ic_pbbls_watermelon_active,
         R.drawable.ic_pbbls_cromlech,
         R.drawable.ic_pbbls_cromlech_active,
         R.drawable.ic_pbbls_pouch_dot,
@@ -5879,7 +5831,6 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_barbed_wire,
         R.drawable.ic_pbbls_barbed_wire_active,
         R.drawable.ic_pbbls_abstract_key,
-        R.drawable.ic_pbbls_abstract_key_active,
         R.drawable.ic_pbbls_user_heart,
         R.drawable.ic_pbbls_user_heart_active,
         R.drawable.ic_pbbls_user_heart_lit_1,
@@ -6246,7 +6197,6 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_bubbles_a,
         R.drawable.ic_pbbls_bubbles_a_active,
         R.drawable.ic_pbbls_translation_a,
-        R.drawable.ic_pbbls_translation_a_active,
         R.drawable.ic_pbbls_circle_a,
         R.drawable.ic_pbbls_circle_a_active,
         R.drawable.ic_pbbls_cube_a,
@@ -6255,10 +6205,6 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_bubble_a_active,
         R.drawable.ic_pbbls_users_communication,
         R.drawable.ic_pbbls_users_communication_active,
-    )
-
-private fun drawableIds1(): IntArray =
-    intArrayOf(
         R.drawable.ic_pbbls_sun_shine_lg,
         R.drawable.ic_pbbls_sun_shine_lg_active,
         R.drawable.ic_pbbls_stone_shine,
@@ -6267,6 +6213,10 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_sun_shine_sea_active,
         R.drawable.ic_pbbls_flower_daisy,
         R.drawable.ic_pbbls_flower_daisy_active,
+    )
+
+private fun drawableIds1(): IntArray =
+    intArrayOf(
         R.drawable.ic_pbbls_sunrise_shine,
         R.drawable.ic_pbbls_sunrise_shine_active,
         R.drawable.ic_pbbls_stone_lg,
@@ -6294,7 +6244,6 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_flower_tulip,
         R.drawable.ic_pbbls_flower_tulip_active,
         R.drawable.ic_pbbls_stone_facet,
-        R.drawable.ic_pbbls_stone_facet_active,
         R.drawable.ic_pbbls_toggle_on_label,
         R.drawable.ic_pbbls_toggle_on_label_active,
         R.drawable.ic_pbbls_lightbulb_moon,
@@ -6620,7 +6569,6 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_card_stone,
         R.drawable.ic_pbbls_card_stone_active,
         R.drawable.ic_pbbls_square_paste,
-        R.drawable.ic_pbbls_square_paste_active,
         R.drawable.ic_pbbls_note_stone,
         R.drawable.ic_pbbls_note_stone_active,
         R.drawable.ic_pbbls_cursor,
@@ -6759,10 +6707,6 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_rainbow_reflect_active,
         R.drawable.ic_pbbls_stones_arc_5,
         R.drawable.ic_pbbls_stones_arc_5_active,
-    )
-
-private fun drawableIds2(): IntArray =
-    intArrayOf(
         R.drawable.ic_pbbls_rainbow,
         R.drawable.ic_pbbls_rainbow_active,
         R.drawable.ic_pbbls_cloud_arrow_down_download,
@@ -6773,6 +6717,10 @@ private fun drawableIds2(): IntArray =
         R.drawable.ic_pbbls_download_picture_active,
         R.drawable.ic_pbbls_filter_box,
         R.drawable.ic_pbbls_filter_box_active,
+    )
+
+private fun drawableIds2(): IntArray =
+    intArrayOf(
         R.drawable.ic_pbbls_device_arrow_down,
         R.drawable.ic_pbbls_device_arrow_down_active,
         R.drawable.ic_pbbls_abstract_bowl_pebbles,
@@ -6800,7 +6748,6 @@ private fun drawableIds2(): IntArray =
         R.drawable.ic_pbbls_hill_sun_k,
         R.drawable.ic_pbbls_hill_sun_k_active,
         R.drawable.ic_pbbls_hills,
-        R.drawable.ic_pbbls_hills_active,
         R.drawable.ic_pbbls_hill_stone_grass,
         R.drawable.ic_pbbls_hill_stone_grass_active,
         R.drawable.ic_pbbls_mountains_summit,
@@ -7263,10 +7210,6 @@ private fun drawableIds2(): IntArray =
         R.drawable.ic_pbbls_sound_on_active,
         R.drawable.ic_pbbls_stone_sound_right_3,
         R.drawable.ic_pbbls_stone_sound_right_3_active,
-    )
-
-private fun drawableIds3(): IntArray =
-    intArrayOf(
         R.drawable.ic_pbbls_speaker_dot,
         R.drawable.ic_pbbls_speaker_dot_active,
         R.drawable.ic_pbbls_microphone,
@@ -7278,6 +7221,10 @@ private fun drawableIds3(): IntArray =
         R.drawable.ic_pbbls_microphone_wire,
         R.drawable.ic_pbbls_microphone_wire_active,
         R.drawable.ic_pbbls_file_audio,
+    )
+
+private fun drawableIds3(): IntArray =
+    intArrayOf(
         R.drawable.ic_pbbls_file_audio_active,
         R.drawable.ic_pbbls_tape_audio,
         R.drawable.ic_pbbls_tape_audio_active,
@@ -7304,7 +7251,6 @@ private fun drawableIds3(): IntArray =
         R.drawable.ic_pbbls_waveform_bold,
         R.drawable.ic_pbbls_waveform_bold_active,
         R.drawable.ic_pbbls_signal,
-        R.drawable.ic_pbbls_signal_active,
         R.drawable.ic_pbbls_waveform_dots,
         R.drawable.ic_pbbls_waveform_dots_active,
         R.drawable.ic_pbbls_waveform_clip,
@@ -7380,7 +7326,6 @@ private fun drawableIds3(): IntArray =
         R.drawable.ic_pbbls_slash_slash_dot,
         R.drawable.ic_pbbls_slash_slash_dot_active,
         R.drawable.ic_pbbls_unset_input,
-        R.drawable.ic_pbbls_unset_input_active,
         R.drawable.ic_pbbls_qr_code,
         R.drawable.ic_pbbls_qr_code_active,
         R.drawable.ic_pbbls_link,
@@ -7550,7 +7495,6 @@ private fun drawableIds3(): IntArray =
         R.drawable.ic_pbbls_tree_ball,
         R.drawable.ic_pbbls_tree_ball_active,
         R.drawable.ic_pbbls_tree_branches,
-        R.drawable.ic_pbbls_tree_branches_active,
         R.drawable.ic_pbbls_acorn,
         R.drawable.ic_pbbls_acorn_active,
         R.drawable.ic_pbbls_train_front,
