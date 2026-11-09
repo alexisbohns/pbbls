@@ -36,7 +36,18 @@ export type Glyph = {
   overrides: Record<string, RenderedPath[]>
 }
 
-export const GLYPHS: readonly Glyph[] = data.glyphs as Glyph[]
+/**
+ * The generator writes every glyph in this shape (packages/icons/scripts/lib/forms.ts); TypeScript infers the JSON's
+ * literal keys per glyph (`parts-middle` on some, not others), which no cast can reconcile, so check the shape instead.
+ */
+function isGlyph(g: unknown): g is Glyph {
+  return (
+    typeof g === "object" && g !== null && "name" in g && typeof g.name === "string" && "paths" in g && Array.isArray(g.paths) && "carved" in g && typeof g.carved === "object"
+  )
+}
+
+const rawGlyphs: readonly unknown[] = data.glyphs
+export const GLYPHS: readonly Glyph[] = rawGlyphs.filter(isGlyph)
 
 export type Fill = { kind: "regular" } | { kind: "solid" } | { kind: "parts"; parts: string[] } | { kind: "progress"; k: number } | { kind: "dotted" }
 /** A form (spec D3): a fill, plus the mark when the glyph has one. */
