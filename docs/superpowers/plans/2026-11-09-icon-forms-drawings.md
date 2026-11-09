@@ -42,7 +42,7 @@ Write sheets and PNGs to the scratchpad `/private/tmp/claude-503/-Users-alexis-c
    - Remove a role the note calls irrelevant ("progress-1 is not relevant" → that path loses its step role; a hidden step that only existed for that form is deleted).
    - An override (`src/<name>.<form>.svg`) is the last resort, when a redraw cannot make the worked-out form right. Say so in the report.
 3. `npm run format --workspace=@pbbls/icons` then `npm run lint --workspace=@pbbls/icons`: fix every error **in the drawing**.
-4. After the batch: render the sheet of the batch's glyphs, look at the PNG yourself (Read it), fix what looks wrong (a body that fills a sliver, a detail lost, a regular that moved), and only then `npm run generate --workspace=@pbbls/icons`, `npm run check --workspace=@pbbls/icons`, `npm run test --workspace=@pbbls/icons`, commit (`git add packages/icons/src packages/icons/glyphs` only).
+4. After the batch: render the sheet of the batch's glyphs, look at the PNG yourself (Read it), fix what looks wrong (a body that fills a sliver, a detail lost, a regular that moved), and only then `npm run generate --workspace=@pbbls/icons`, `npm run check --workspace=@pbbls/icons`, `npm run test --workspace=@pbbls/icons`, commit (`git add packages/icons/src packages/icons/glyphs packages/icons/react apps/ios/Pebbles/Resources/Icons.xcassets apps/android/app/src/main/res/drawable`: a redrawn source also moves the old emitters' outputs; `git status --short` must show nothing else but `apps/web/AGENTS.md` afterwards).
 5. Report: the PNG path, one line per glyph (what you changed, which forms it now has), anything you could not do and why.
 
 ---
