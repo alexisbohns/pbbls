@@ -1976,3 +1976,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Every call site on web, iOS and Android moves (parts 4–6 of the stack); the twin files, asset catalog, VectorDrawables and old enums go in part 7. Until then the generator emits both models.
 - **Supersedes / Superseded-by:** supersedes D5 and D9 of `docs/superpowers/specs/2026-10-28-icon-package-design.md` (twin names, `activeTwin`, `lit(n)`).
 - **Refs:** #1607, #1606, `docs/superpowers/specs/2026-11-08-icon-forms-design.md`.
+
+## 2026-11-09 — Icon forms: a fill plus a mark; steps, parts and dotted are their own
+
+- **Status:** taken
+- **Scope:** all
+- **Context:** The maintainer reviewed the 208 glyphs the role guess flagged. The guess had folded three different things into numbered marks: real sequences (`stack`), pieces that fill in any combination (`dolmen`'s stones, `moon-cloud`), and a single accent (`home`'s door dot). The form called `half` was in fact that accent, and it is wanted on the solid as well as the outline. Separate dotted glyphs (`pebble-glyph-dotted`) duplicated their solid-line twin.
+- **Decision:** Roles become `body` (optionally split into 2–4 named `data-part`s), `mark` (the accent, was `focus`) and `step` (`data-step` 1…n, was the numbered `mark`). A form is a fill (`regular`, `solid`, `parts(…)`, `progress(k)`, or a drawn `dotted`) plus `marked` when the glyph has a mark; in a solid the mark is cut out. `src/<name>.dotted.svg` creates the dotted form, reversing "a dotted line is never a form". The solid also carves lines standing within half a stroke of the body's edge.
+- **Why:** One word per idea keeps the forms predictable: a sequence counts, parts combine, the mark lights. Nothing read `glyphs.json` yet, so renaming the roles cost no call site.
+- **Consequences:** `half` is `marked` in `states.json` and every API; the native data carries parts and steps; merged glyphs (`pebble-glyph-dotted` into `pebble-glyph`, `palette-1` and `palette-3` into `palette`) go through `replaces`.
+- **Supersedes / Superseded-by:** amends the 2026-11-08 entry above (its roles and its "dotted is never a form").
+- **Refs:** #1607, `docs/superpowers/specs/2026-11-08-icon-forms-design.md`.
