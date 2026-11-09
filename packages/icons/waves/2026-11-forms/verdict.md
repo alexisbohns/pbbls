@@ -40,6 +40,16 @@ The set now: 950 glyphs, 360 with a solid, 560 with a mark, 7 with parts, 29 wit
 - `umbrella-above`: the drawing has no drops; six panels light one by one, step 7 fills the canopy (one spoke gap stays carved).
 - `cromlech`, `pouch` (round 1 ok): unchanged drawings, their lit form is now `marked` and `solid` instead of `progress-1`.
 
+## Round 2, first pass (2026-11-09)
+
+The maintainer reviewed part of the round 2 list (`verdicts-round2.json`, `partial: true`): of 268 verdicts, 131 fix (each with a note), 7 drop-twin, the rest ok. All of them are applied:
+
+- **A hole** is a subpath of the body drawn the other way: `home`, `home-hive` and `keyhole-circle` keep their door or keyhole open in the solid, with the mark black inside it.
+- R1, 20 retags and fixes (marked that was really the solid, solids that were really marks, `users`' right body, `case`'s handle, `dolmen` without a mark…); R2, 16 glyphs in parts (`dots-cross` in four, `stones-plus` in four, `scale-balanced` with empty pans at rest…); R3, 10 sequences; R4, 8 marks; R5–R6, 53 solids; 7 more twins dropped.
+- Overrides for the three solids no worked-out form could match: `collection`, `people-3`, `thumbs-up`.
+
+Rough spots to look at: `circle-quarters` at progress 4 is a plain disc (the cross lies on the steps' edges); glyphs that are both a solid and a sequence (`slider`, `shelve`, `connection`, `stones-stack`) carry a hidden copy of each stone as the step, since a path has one role (a body path that may also carry `data-step` would remove the copies); `baluchon`'s knot and `karma-dot`'s dot read faintly when marked; `abstract-umbrella` and `abstract-sign` solids do not show the pole crossing them.
+
 ## For part 7
 
 - `pebble-glyph-dotted`, `pebble-glyph-dotted-open`: now the dotted forms of `pebble-glyph`, `pebble-glyph-open`; their rows go when the web call sites move.
