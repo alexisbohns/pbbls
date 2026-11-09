@@ -8,6 +8,9 @@ export const STATUSES: readonly Status[] = ["exploring", "candidate", "shipped"]
 export type Variant = "active" | "lit-1" | "lit-2" | "lit-3"
 export const VARIANTS: readonly Variant[] = ["active", "lit-1", "lit-2", "lit-3"]
 
+/** `src/<name>.dotted.svg`: the drawn dotted form (spec D3, D4), not an override. */
+export const DOTTED_FORM = "dotted"
+
 /** An override file's form (spec D4): any form key but `regular` and `dotted`. */
 export const isOverrideForm = (v: string): boolean => v !== "regular" && v !== "dotted" && parseFormKey(v) !== null
 

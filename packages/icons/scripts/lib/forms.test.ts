@@ -37,7 +37,7 @@ describe("form keys", () => {
       const form = parseFormKey(key)
       expect(form && formKey(form)).toBe(key)
     }
-    for (const key of ["half", "regular-marked", "marked-marked", "dotted-marked", "parts-", "parts-Moon", "solid-half", "active", "lit-1"]) expect(parseFormKey(key)).toBeNull()
+    for (const key of ["half", "regular-marked", "marked-marked", "dotted-marked", "parts-", "parts-Moon", "solid-half", "active", "lit-1", "progress-0", "progress-01"]) expect(parseFormKey(key)).toBeNull()
   })
 
   it("lists each fill then the same fill marked, dotted after regular", () => {

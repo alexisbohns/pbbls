@@ -3,7 +3,7 @@ import { join } from "node:path"
 import { formatSvg, ROOT_ATTRIBUTES } from "./format"
 import { carveSolid } from "./carve"
 import { formKeysOf } from "./forms"
-import { isOverrideForm, loadManifest, STATUSES, VARIANTS, type IconRow, type Manifest } from "./manifest"
+import { DOTTED_FORM, isOverrideForm, loadManifest, STATUSES, VARIANTS, type IconRow, type Manifest } from "./manifest"
 import { parseSvg, type ParsedPath, type ParsedSvg } from "./parse"
 import { readRoles } from "./roles"
 
@@ -282,6 +282,10 @@ function lintManifest(root: string, manifest: Manifest, files: string[], result:
       if (!base) errors.push({ file: f, rule: "manifest", message: `no row "${split.base}" in ${file}` })
       continue
     }
+    if (split.variant === DOTTED_FORM) {
+      if (!base) errors.push({ file: f, rule: "manifest", message: `dotted drawing without its base: no row "${split.base}"` })
+      continue
+    }
     if (isOverrideForm(split.variant)) {
       if (!base) errors.push({ file: f, rule: "manifest", message: `override without its base: no row "${split.base}"` })
       else if (!overrideAllowed(root, split.base, split.variant)) errors.push({ file: f, rule: "manifest", message: `override "${split.variant}" for a form ${split.base} does not have` })
@@ -291,6 +295,20 @@ function lintManifest(root: string, manifest: Manifest, files: string[], result:
     if (!base) errors.push({ file: f, rule: "manifest", message: `twin without its base: no row "${split.base}"` })
     else if (!base.variants.includes(split.variant)) errors.push({ file: f, rule: "manifest", message: `not listed in the variants of "${split.base}"` })
   }
+}
+
+/** A dotted drawing (spec D4) is a plain line drawing: no role, no fill. */
+function lintDotted(root: string, file: string, result: LintResult): void {
+  let parsed: ParsedSvg
+  try {
+    parsed = parseSvg(readFileSync(join(root, SRC_DIR, file), "utf8"), file)
+  } catch {
+    return // lintSource has reported it
+  }
+  parsed.paths.forEach((p, i) => {
+    if (p.attrs["data-role"] !== undefined) result.errors.push({ file, rule: "dotted", message: `path ${i + 1}: a dotted drawing carries no role` })
+    if (p.filled) result.errors.push({ file, rule: "dotted", message: `path ${i + 1}: a dotted drawing is never filled` })
+  })
 }
 
 /** Lints the package at `root` (the directory holding `icons.json`, `src/` and `waves/`). */
@@ -309,6 +327,7 @@ export function lint(root: string): LintResult {
     const split = splitSourceName(f)
     const variant = split?.variant ?? null
     lintSource(root, f, variant !== null, variant !== null && isOverrideForm(variant), result)
+    if (variant === DOTTED_FORM) lintDotted(root, f, result)
   }
   return result
 }

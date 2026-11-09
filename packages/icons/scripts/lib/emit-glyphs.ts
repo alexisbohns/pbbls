@@ -4,7 +4,7 @@ import { carveSolid } from "./carve"
 import { GENERATED_NOTICE, type Emitter } from "./emit"
 import { formKey, type CarvedFill, type Fill, type GlyphData, type GlyphPath, type RenderedPath } from "./forms"
 import { SRC_DIR, splitSourceName } from "./lint"
-import { isOverrideForm, loadManifest, type IconRow } from "./manifest"
+import { DOTTED_FORM, isOverrideForm, loadManifest, type IconRow } from "./manifest"
 import { normalizePath } from "./normalize"
 import { parseSvg } from "./parse"
 import { partCombinations, readRoles } from "./roles"
@@ -103,11 +103,14 @@ export function loadGlyphs(packageRoot: string): GlyphData[] {
     .icons.filter((row) => row.status !== "exploring")
     .map((row) => {
       const overrides: Record<string, string> = {}
+      let dotted: string | null = null
       for (const f of files) {
         const split = splitSourceName(f)
-        if (split?.base === row.name && split.variant !== null && isOverrideForm(split.variant)) overrides[split.variant] = readFileSync(join(dir, f), "utf8")
+        if (split?.base !== row.name || split.variant === null) continue
+        if (split.variant === DOTTED_FORM) dotted = readFileSync(join(dir, f), "utf8")
+        else if (isOverrideForm(split.variant)) overrides[split.variant] = readFileSync(join(dir, f), "utf8")
       }
-      return buildGlyph(row, readFileSync(join(dir, `${row.name}.svg`), "utf8"), overrides)
+      return buildGlyph(row, readFileSync(join(dir, `${row.name}.svg`), "utf8"), overrides, dotted)
     })
 }
 

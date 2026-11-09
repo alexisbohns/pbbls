@@ -199,4 +199,15 @@ describe("roles and overrides", () => {
     const messages = run({ manifest: { icons: [row("scale-marked")] }, files: { "scale-marked.svg": svg('<path d="M4 4 L20 20"/>') } }).errors.map((e) => e.message)
     expect(messages).toContain('"scale-marked" ends in a form word (regular, marked, solid, parts, of)')
   })
+  it("accepts a dotted drawing beside its base and refuses one with a role, a fill, or no base", () => {
+    const dotted = svg('<path d="M4 12 L5 12 M7 12 L8 12"/>')
+    const manifest = { icons: [row("ring")] }
+    expect(run({ manifest, files: { "ring.svg": svg(BODY), "ring.dotted.svg": dotted } }).errors).toEqual([])
+    const roled = run({ manifest, files: { "ring.svg": svg(BODY), "ring.dotted.svg": svg('<path d="M4 12 L5 12" data-role="mark"/>') } }).errors.map((e) => e.message)
+    expect(roled).toContain("path 1: a dotted drawing carries no role")
+    const filled = run({ manifest, files: { "ring.svg": svg(BODY), "ring.dotted.svg": svg('<path d="M4 4 L8 4 L8 8 Z" fill="currentColor"/>') } }).errors.map((e) => e.message)
+    expect(filled).toContain("path 1: a dotted drawing is never filled")
+    const orphan = run({ manifest, files: { "ring.svg": svg(BODY), "knot.dotted.svg": dotted } }).errors.map((e) => e.message)
+    expect(orphan).toContain('dotted drawing without its base: no row "knot"')
+  })
 })

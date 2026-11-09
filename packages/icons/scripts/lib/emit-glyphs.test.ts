@@ -120,4 +120,17 @@ describe("loadGlyphs", () => {
     expect(glyphs.map((g) => g.name)).toEqual(["ring"])
     expect(Object.keys(glyphs[0]?.overrides ?? {})).toEqual(["solid"])
   })
+
+  it("attaches a dotted drawing as the dotted form", () => {
+    const root = mkdtempSync(join(tmpdir(), "icons-glyphs-"))
+    mkdirSync(join(root, "src"))
+    writeFileSync(join(root, "src", "ring.svg"), source('  <path d="M4 4 L20 4 L20 20 L4 20 Z"/>'))
+    writeFileSync(join(root, "src", "ring.dotted.svg"), source('  <path d="M4 4 L5 4 M7 4 L8 4"/>'))
+    writeFileSync(join(root, "icons.json"), JSON.stringify({ icons: [{ ...row, variants: [] }] }))
+    const [ring] = loadGlyphs(root)
+    expect(ring?.dotted).toEqual([{ d: "M4 4 L5 4 M7 4 L8 4", fill: false, evenOdd: false, stroke: true }])
+    expect(ring ? formsOf(ring) : []).toEqual(["regular", "dotted"])
+    expect(ring ? renderForm(ring, { fill: { kind: "dotted" } }) : []).toEqual(ring?.dotted)
+    expect(Object.keys(ring?.overrides ?? {})).toEqual([])
+  })
 })

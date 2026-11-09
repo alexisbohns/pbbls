@@ -73,7 +73,7 @@ export function formKey(form: Form): string {
   return fill === "regular" ? "marked" : `${fill}-marked`
 }
 
-const KEY = /^(regular|marked|dotted|solid|parts-([a-z]+(?:\+[a-z]+)*)|progress-(\d+))(-marked)?$/
+const KEY = /^(regular|marked|dotted|solid|parts-([a-z]+(?:\+[a-z]+)*)|progress-([1-9]\d*))(-marked)?$/
 
 /** The form a key names, or null when it is not a form key. */
 export function parseFormKey(key: string): Form | null {
