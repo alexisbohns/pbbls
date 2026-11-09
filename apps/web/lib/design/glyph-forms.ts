@@ -1,3 +1,4 @@
+import categoriesData from "@pbbls/icons/categories.json"
 import data from "@pbbls/icons/glyphs.json"
 import review from "@pbbls/icons/review.json"
 import round1 from "@pbbls/icons/verdicts.json"
@@ -214,11 +215,36 @@ export function describeSigns(s: GlyphSignSet): string {
   return words.length === 0 ? "regular only" : words.join(", ")
 }
 
-/** The Icons page's search: the name, the meaning and every tag value. */
+/** A shelf of the set (packages/icons/categories.json); a glyph's `tags.category` lists up to three ids, the first the main one. */
+export type Category = { id: string; label: string; description: string }
+
+const isCategory = (c: unknown): c is Category =>
+  typeof c === "object" && c !== null && "id" in c && typeof c.id === "string" && "label" in c && typeof c.label === "string" && "description" in c && typeof c.description === "string"
+
+const rawCategories: unknown = categoriesData
+/** The categories in the file's reading order (Pebbles' own world first, then everyday UI). */
+export const CATEGORIES: readonly Category[] =
+  typeof rawCategories === "object" && rawCategories !== null && "categories" in rawCategories && Array.isArray(rawCategories.categories) ? rawCategories.categories.filter(isCategory) : []
+
+const CATEGORY_LABELS: ReadonlyMap<string, string> = new Map(CATEGORIES.map((c) => [c.id, c.label.toLowerCase()]))
+
+/** The Icons page's Category picker: `all`, or one category id. */
+export type CategoryFilter = string
+
+export function glyphInCategory(glyph: Glyph, category: CategoryFilter): boolean {
+  return category === "all" || (glyph.tags.category ?? []).includes(category)
+}
+
+/** The Icons page's search: the name, the meaning, every tag value and the labels of the glyph's categories. */
 export function glyphMatchesQuery(glyph: Glyph, query: string): boolean {
   const q = query.trim().toLowerCase()
   if (!q) return true
-  return glyph.name.includes(q) || glyph.meaning.toLowerCase().includes(q) || Object.values(glyph.tags).some((list) => list.some((v) => v.toLowerCase().includes(q)))
+  return (
+    glyph.name.includes(q) ||
+    glyph.meaning.toLowerCase().includes(q) ||
+    Object.values(glyph.tags).some((list) => list.some((v) => v.toLowerCase().includes(q))) ||
+    (glyph.tags.category ?? []).some((id) => CATEGORY_LABELS.get(id)?.includes(q))
+  )
 }
 
 const FLAGGED: ReadonlySet<string> = new Set((review as { name: string; flags: unknown[] }[]).filter((r) => r.flags.length > 0).map((r) => r.name))

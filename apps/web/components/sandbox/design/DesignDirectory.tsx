@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react"
 import type { CanvasZoom, DeviceChoice } from "@/lib/design/devices"
-import { DEFAULT_VIEW, type GlyphShow, type GlyphView } from "@/lib/design/glyph-forms"
+import { DEFAULT_VIEW, type CategoryFilter, type GlyphShow, type GlyphView } from "@/lib/design/glyph-forms"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { DesignContextProvider, type DesignContextValue } from "./DesignContext"
 import { DesignMobileBar } from "./DesignMobileBar"
@@ -47,6 +47,7 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
   const [iconSize, setIconSize] = useState<PbblsIconSize>("tile")
   const [glyphView, setGlyphView] = useState<GlyphView>(DEFAULT_VIEW)
   const [glyphShow, setGlyphShow] = useState<GlyphShow>("all")
+  const [glyphCategory, setGlyphCategory] = useState<CategoryFilter>("all")
   const contentRef = useRef<HTMLDivElement>(null)
   const canvasWidth = useWidth(contentRef)
 
@@ -63,8 +64,8 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
   }, [theme, setTheme])
 
   const value = useMemo<DesignContextValue>(
-    () => ({ theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphView, glyphShow }),
-    [theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphView, glyphShow],
+    () => ({ theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphView, glyphShow, glyphCategory }),
+    [theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphView, glyphShow, glyphCategory],
   )
 
   const tools: DesignToolsState = {
@@ -82,6 +83,8 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
     onGlyphView: setGlyphView,
     glyphShow,
     onGlyphShow: setGlyphShow,
+    glyphCategory,
+    onGlyphCategory: setGlyphCategory,
   }
 
   // Three areas, like the app (#1384): the rail, the page's header and tools,

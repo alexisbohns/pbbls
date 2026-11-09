@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useState } from "react"
 import { Android, Apple, Globe } from "@pbbls/icons"
 import type { FindingGroup } from "@/lib/design/audit"
-import { GLYPHS, describeSigns, glyphMatchesQuery, inRound2, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Form, type Glyph, type GlyphView } from "@/lib/design/glyph-forms"
+import { GLYPHS, describeSigns, glyphInCategory, glyphMatchesQuery, inRound2, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Form, type Glyph, type GlyphView } from "@/lib/design/glyph-forms"
 import { ICON_ROWS, replacementsFor, type IconSurface } from "@/lib/design/icon-catalog"
 import { PBBLS_ICON_SIZE, type PbblsIconComponent, type PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { useReviewVerdicts, type Verdict } from "@/lib/design/useReviewVerdicts"
@@ -120,14 +120,14 @@ function GlyphTile({ glyph, size, form, view, verdict, noted, onVerdict, onOpen 
  * tile shows where its row has migrated. Then what web still draws with Lucide.
  */
 export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
-  const { iconQuery, iconSize, glyphView, glyphShow } = useDesign()
+  const { iconQuery, iconSize, glyphView, glyphShow, glyphCategory } = useDesign()
   const { verdicts, notes, cycle, set, setNote, draft, copy } = useReviewVerdicts()
   const [openName, setOpenName] = useState<string | null>(null)
   const glyphs = useMemo(
-    () => GLYPHS.filter((g) => glyphMatchesQuery(g, iconQuery) && showsGlyph(g.name, glyphShow, verdicts) && viewMatches(g, glyphView)),
+    () => GLYPHS.filter((g) => glyphMatchesQuery(g, iconQuery) && showsGlyph(g.name, glyphShow, verdicts) && glyphInCategory(g, glyphCategory) && viewMatches(g, glyphView)),
     // Verdicts are read once per list: changing one in the dialog must not drop the glyph from a "Marked fix" walk.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [iconQuery, glyphShow, glyphView],
+    [iconQuery, glyphShow, glyphCategory, glyphView],
   )
   const openIndex = openName === null ? -1 : glyphs.findIndex((g) => g.name === openName)
   const step = (by: number) => {

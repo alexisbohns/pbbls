@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 import { COLOR_WORLDS } from "@/lib/config/color-worlds"
 import { CANVAS_ZOOMS, type CanvasZoom, type DeviceChoice } from "@/lib/design/devices"
-import { GLYPHS, glyphMatchesQuery, isDefaultView, showsGlyph, viewMatches, type FillFilter, type GlyphShow, type GlyphView, type MarkFilter } from "@/lib/design/glyph-forms"
+import { CATEGORIES, GLYPHS, glyphInCategory, glyphMatchesQuery, isDefaultView, showsGlyph, viewMatches, type CategoryFilter, type FillFilter, type GlyphShow, type GlyphView, type MarkFilter } from "@/lib/design/glyph-forms"
 import { useReviewVerdicts } from "@/lib/design/useReviewVerdicts"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import type { ColorWorld } from "@/lib/types"
@@ -69,6 +69,8 @@ const SHOW_OPTIONS: SelectOption<GlyphShow>[] = [
   { value: "fix", label: "Marked fix" },
 ]
 
+const CATEGORY_OPTIONS: SelectOption<CategoryFilter>[] = [{ value: "all", label: "All" }, ...CATEGORIES.map((c) => ({ value: c.id, label: c.label }))]
+
 const count = new Intl.NumberFormat("en")
 
 /** Everything the toolbar and the mobile bar can set, and how. */
@@ -87,6 +89,8 @@ export type DesignToolsState = {
   onGlyphView: (view: GlyphView) => void
   glyphShow: GlyphShow
   onGlyphShow: (show: GlyphShow) => void
+  glyphCategory: CategoryFilter
+  onGlyphCategory: (category: CategoryFilter) => void
 }
 
 type DesignToolsProps = DesignToolsState & {
@@ -107,12 +111,12 @@ export function DesignTools({ page, layout, ...s }: DesignToolsProps) {
   const icons = page?.path === "/icons"
   const wide = layout === "row" ? "lg:col-span-2" : "col-span-2"
   const { verdicts } = useReviewVerdicts()
-  const filtering = icons && (s.iconQuery.trim() !== "" || s.glyphShow !== "all" || !isDefaultView(s.glyphView))
+  const filtering = icons && (s.iconQuery.trim() !== "" || s.glyphShow !== "all" || s.glyphCategory !== "all" || !isDefaultView(s.glyphView))
   const matching = useMemo(() => {
     if (!filtering) return null
-    const list = GLYPHS.filter((g) => glyphMatchesQuery(g, s.iconQuery) && showsGlyph(g.name, s.glyphShow, verdicts) && viewMatches(g, s.glyphView))
+    const list = GLYPHS.filter((g) => glyphMatchesQuery(g, s.iconQuery) && showsGlyph(g.name, s.glyphShow, verdicts) && glyphInCategory(g, s.glyphCategory) && viewMatches(g, s.glyphView))
     return { count: list.length, fixes: list.filter((g) => verdicts[g.name] === "fix").length }
-  }, [filtering, s.iconQuery, s.glyphShow, s.glyphView, verdicts])
+  }, [filtering, s.iconQuery, s.glyphShow, s.glyphCategory, s.glyphView, verdicts])
 
   return (
     <div className={cn(layout === "row" ? "flex flex-wrap items-center gap-2 lg:grid lg:grid-cols-2" : "grid grid-cols-2 gap-2")}>
@@ -147,6 +151,7 @@ export function DesignTools({ page, layout, ...s }: DesignToolsProps) {
         <DesignSelect label="Steps lit" options={STEPS_OPTIONS} value={s.glyphView.k} onChange={(k) => s.onGlyphView({ ...s.glyphView, k })} />
       )}
       {icons && <DesignSelect label="Show" options={SHOW_OPTIONS} value={s.glyphShow} onChange={s.onGlyphShow} />}
+      {icons && <DesignSelect label="Category" options={CATEGORY_OPTIONS} value={s.glyphCategory} onChange={s.onGlyphCategory} />}
       {page?.canvas && (
         <>
           <DesignSelect label="Screens" options={DEVICE_OPTIONS} value={s.devices} onChange={s.onDevices} />
