@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useState } from "react"
 import { Android, Apple, Globe } from "@pbbls/icons"
 import type { FindingGroup } from "@/lib/design/audit"
-import { GLYPHS, glyphMatchesQuery, hasForm, needsReview, showsGlyph, type FormChoice, type Glyph } from "@/lib/design/glyph-forms"
+import { GLYPHS, glyphMatchesQuery, needsReview, showsGlyph, viewForm, viewMatches, type Form, type Glyph } from "@/lib/design/glyph-forms"
 import { ICON_ROWS, replacementsFor, type IconSurface } from "@/lib/design/icon-catalog"
 import { PBBLS_ICON_SIZE, type PbblsIconComponent, type PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { useReviewVerdicts, type Verdict } from "@/lib/design/useReviewVerdicts"
@@ -47,8 +47,7 @@ function GlyphName({ name }: { name: string }) {
 type GlyphTileProps = {
   glyph: Glyph
   size: PbblsIconSize
-  form: FormChoice
-  k: number
+  form: Form
   verdict?: Verdict
   /** Whether a fix verdict carries a note yet. */
   noted: boolean
@@ -56,14 +55,13 @@ type GlyphTileProps = {
   onOpen: () => void
 }
 
-function GlyphTile({ glyph, size, form, k, verdict, noted, onVerdict, onOpen }: GlyphTileProps) {
+function GlyphTile({ glyph, size, form, verdict, noted, onVerdict, onOpen }: GlyphTileProps) {
   const migrated = MIGRATED.get(glyph.name) ?? []
   return (
     <li
       title={glyph.meaning}
       className={cn(
         "group relative flex aspect-square flex-col items-center gap-2 rounded-2xl bg-card px-3 pt-6 pb-3 text-card-foreground transition-colors hover:bg-muted motion-reduce:transition-none",
-        !hasForm(glyph, form) && "opacity-40",
       )}
     >
       {/* The whole tile opens the review dialog; the verdict pill sits above it. */}
@@ -92,7 +90,7 @@ function GlyphTile({ glyph, size, form, k, verdict, noted, onVerdict, onOpen }: 
         </button>
       )}
       <span className="flex min-h-12 flex-1 items-center justify-center">
-        <GlyphFormView glyph={glyph} form={form} k={k} className={PBBLS_ICON_SIZE[size]} />
+        <GlyphFormView glyph={glyph} form={form} className={PBBLS_ICON_SIZE[size]} />
       </span>
       {/* Two fixed lines, so every icon in a row sits at one height; breaks at a dash or a dot. */}
       <code className="line-clamp-2 h-8 max-w-full text-center text-xs leading-4 break-words text-muted-foreground">
@@ -118,14 +116,14 @@ function GlyphTile({ glyph, size, form, k, verdict, noted, onVerdict, onOpen }: 
  * tile shows where its row has migrated. Then what web still draws with Lucide.
  */
 export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
-  const { iconQuery, iconSize, glyphForm, glyphProgress, glyphShow } = useDesign()
+  const { iconQuery, iconSize, glyphView, glyphShow } = useDesign()
   const { verdicts, notes, cycle, set, setNote, draft, copy } = useReviewVerdicts()
   const [openName, setOpenName] = useState<string | null>(null)
   const glyphs = useMemo(
-    () => GLYPHS.filter((g) => glyphMatchesQuery(g, iconQuery) && showsGlyph(g.name, glyphShow, verdicts)),
+    () => GLYPHS.filter((g) => glyphMatchesQuery(g, iconQuery) && showsGlyph(g.name, glyphShow, verdicts) && viewMatches(g, glyphView)),
     // Verdicts are read once per list: changing one in the dialog must not drop the glyph from a "Marked fix" walk.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [iconQuery, glyphShow],
+    [iconQuery, glyphShow, glyphView],
   )
   const openIndex = openName === null ? -1 : glyphs.findIndex((g) => g.name === openName)
   const step = (by: number) => {
@@ -163,8 +161,7 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
                 key={glyph.name}
                 glyph={glyph}
                 size={iconSize}
-                form={glyphForm}
-                k={glyphProgress}
+                form={viewForm(glyph, glyphView)}
                 verdict={verdicts[glyph.name]}
                 noted={notes[glyph.name] !== undefined}
                 onVerdict={() => cycle(glyph.name)}

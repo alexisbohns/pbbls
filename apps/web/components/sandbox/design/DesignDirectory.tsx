@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react"
 import type { CanvasZoom, DeviceChoice } from "@/lib/design/devices"
-import type { FormChoice, GlyphShow } from "@/lib/design/glyph-forms"
+import { DEFAULT_VIEW, type GlyphShow, type GlyphView } from "@/lib/design/glyph-forms"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { DesignContextProvider, type DesignContextValue } from "./DesignContext"
 import { DesignMobileBar } from "./DesignMobileBar"
@@ -45,8 +45,7 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
   const [devices, setDevices] = useState<DeviceChoice>("both")
   const [iconQuery, setIconQuery] = useState("")
   const [iconSize, setIconSize] = useState<PbblsIconSize>("tile")
-  const [glyphForm, setGlyphForm] = useState<FormChoice>("regular")
-  const [glyphProgress, setGlyphProgress] = useState(1)
+  const [glyphView, setGlyphView] = useState<GlyphView>(DEFAULT_VIEW)
   const [glyphShow, setGlyphShow] = useState<GlyphShow>("all")
   const contentRef = useRef<HTMLDivElement>(null)
   const canvasWidth = useWidth(contentRef)
@@ -64,8 +63,8 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
   }, [theme, setTheme])
 
   const value = useMemo<DesignContextValue>(
-    () => ({ theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphForm, glyphProgress, glyphShow }),
-    [theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphForm, glyphProgress, glyphShow],
+    () => ({ theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphView, glyphShow }),
+    [theme, themeKey, zoom, devices, canvasWidth, iconQuery, iconSize, glyphView, glyphShow],
   )
 
   const tools: DesignToolsState = {
@@ -79,10 +78,8 @@ export function DesignDirectory({ children }: { children: ReactNode }) {
     onIconQuery: setIconQuery,
     iconSize,
     onIconSize: setIconSize,
-    glyphForm,
-    onGlyphForm: setGlyphForm,
-    glyphProgress,
-    onGlyphProgress: setGlyphProgress,
+    glyphView,
+    onGlyphView: setGlyphView,
     glyphShow,
     onGlyphShow: setGlyphShow,
   }

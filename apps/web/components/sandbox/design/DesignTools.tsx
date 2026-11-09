@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 import { COLOR_WORLDS } from "@/lib/config/color-worlds"
 import { CANVAS_ZOOMS, type CanvasZoom, type DeviceChoice } from "@/lib/design/devices"
-import { GLYPHS, glyphMatchesQuery, showsGlyph, type FormChoice, type GlyphShow } from "@/lib/design/glyph-forms"
+import { GLYPHS, glyphMatchesQuery, isDefaultView, showsGlyph, viewMatches, type FillFilter, type GlyphShow, type GlyphView, type MarkFilter } from "@/lib/design/glyph-forms"
 import { useReviewVerdicts } from "@/lib/design/useReviewVerdicts"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import type { ColorWorld } from "@/lib/types"
@@ -45,13 +45,23 @@ const ZOOM_OPTIONS: SelectOption<CanvasZoom>[] = CANVAS_ZOOMS.map((z) => ({
   label: z === "fit" ? "Fit" : `${z * 100}%`,
 }))
 
-const FORM_OPTIONS: SelectOption<FormChoice>[] = [
-  { value: "regular", label: "Regular" },
-  { value: "marked", label: "Marked" },
+const FILL_OPTIONS: SelectOption<FillFilter>[] = [
+  { value: "all", label: "All" },
+  { value: "regular", label: "Regular only" },
+  { value: "dotted", label: "Dotted" },
   { value: "solid", label: "Solid" },
-  { value: "progress", label: "Progress" },
+  { value: "parts", label: "Parts" },
 ]
-const PROGRESS_OPTIONS: SelectOption<number>[] = [0, 1, 2, 3, 4, 5].map((k) => ({ value: k, label: String(k) }))
+const MARK_OPTIONS: SelectOption<MarkFilter>[] = [
+  { value: "any", label: "Any" },
+  { value: "marked", label: "Marked" },
+  { value: "unmarked", label: "Unmarked" },
+]
+const PROGRESS_OPTIONS: SelectOption<"off" | "on">[] = [
+  { value: "off", label: "Off" },
+  { value: "on", label: "Steps" },
+]
+const STEPS_OPTIONS: SelectOption<number>[] = [0, 1, 2, 3, 4, 5, 6, 7].map((k) => ({ value: k, label: String(k) }))
 const SHOW_OPTIONS: SelectOption<GlyphShow>[] = [
   { value: "all", label: "All glyphs" },
   { value: "review", label: "Needs review" },
@@ -72,10 +82,8 @@ export type DesignToolsState = {
   onIconQuery: (query: string) => void
   iconSize: PbblsIconSize
   onIconSize: (size: PbblsIconSize) => void
-  glyphForm: FormChoice
-  onGlyphForm: (form: FormChoice) => void
-  glyphProgress: number
-  onGlyphProgress: (k: number) => void
+  glyphView: GlyphView
+  onGlyphView: (view: GlyphView) => void
   glyphShow: GlyphShow
   onGlyphShow: (show: GlyphShow) => void
 }
@@ -98,13 +106,12 @@ export function DesignTools({ page, layout, ...s }: DesignToolsProps) {
   const icons = page?.path === "/icons"
   const wide = layout === "row" ? "lg:col-span-2" : "col-span-2"
   const { verdicts } = useReviewVerdicts()
-  const matching = useMemo(
-    () =>
-      icons && (s.iconQuery.trim() || s.glyphShow !== "all")
-        ? GLYPHS.filter((g) => glyphMatchesQuery(g, s.iconQuery) && showsGlyph(g.name, s.glyphShow, verdicts)).length
-        : null,
-    [icons, s.iconQuery, s.glyphShow, verdicts],
-  )
+  const filtering = icons && (s.iconQuery.trim() !== "" || s.glyphShow !== "all" || !isDefaultView(s.glyphView))
+  const matching = useMemo(() => {
+    if (!filtering) return null
+    const list = GLYPHS.filter((g) => glyphMatchesQuery(g, s.iconQuery) && showsGlyph(g.name, s.glyphShow, verdicts) && viewMatches(g, s.glyphView))
+    return { count: list.length, fixes: list.filter((g) => verdicts[g.name] === "fix").length }
+  }, [filtering, s.iconQuery, s.glyphShow, s.glyphView, verdicts])
 
   return (
     <div className={cn(layout === "row" ? "flex flex-wrap items-center gap-2 lg:grid lg:grid-cols-2" : "grid grid-cols-2 gap-2")}>
@@ -125,9 +132,18 @@ export function DesignTools({ page, layout, ...s }: DesignToolsProps) {
       )}
       <DesignSelect label="Mode" options={MODE_OPTIONS} value={s.theme.mode} onChange={(v) => s.onChange({ mode: v })} />
       {icons && <DesignSelect label="Size" options={SIZE_OPTIONS} value={s.iconSize} onChange={s.onIconSize} />}
-      {icons && <DesignSelect label="Form" options={FORM_OPTIONS} value={s.glyphForm} onChange={s.onGlyphForm} />}
-      {icons && s.glyphForm === "progress" && (
-        <DesignSelect label="Steps lit" options={PROGRESS_OPTIONS} value={s.glyphProgress} onChange={s.onGlyphProgress} />
+      {icons && <DesignSelect label="Fill" options={FILL_OPTIONS} value={s.glyphView.fill} onChange={(fill) => s.onGlyphView({ ...s.glyphView, fill })} />}
+      {icons && <DesignSelect label="Mark" options={MARK_OPTIONS} value={s.glyphView.mark} onChange={(mark) => s.onGlyphView({ ...s.glyphView, mark })} />}
+      {icons && (
+        <DesignSelect
+          label="Progress"
+          options={PROGRESS_OPTIONS}
+          value={s.glyphView.progress ? "on" : "off"}
+          onChange={(v) => s.onGlyphView({ ...s.glyphView, progress: v === "on" })}
+        />
+      )}
+      {icons && s.glyphView.progress && (
+        <DesignSelect label="Steps lit" options={STEPS_OPTIONS} value={s.glyphView.k} onChange={(k) => s.onGlyphView({ ...s.glyphView, k })} />
       )}
       {icons && <DesignSelect label="Show" options={SHOW_OPTIONS} value={s.glyphShow} onChange={s.onGlyphShow} />}
       {page?.canvas && (
@@ -140,7 +156,7 @@ export function DesignTools({ page, layout, ...s }: DesignToolsProps) {
         <p aria-live="polite" className={cn(wide, "px-1 text-xs text-muted-foreground tabular-nums")}>
           {matching === null
             ? `${count.format(GLYPHS.length)} glyphs`
-            : `${count.format(matching)} of ${count.format(GLYPHS.length)} glyphs`}
+            : `${count.format(matching.count)} of ${count.format(GLYPHS.length)} glyphs${matching.fixes > 0 ? ` · ${count.format(matching.fixes)} marked fix` : ""}`}
         </p>
       )}
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { cutIndices, formPaths, isLit, type FormChoice, type Glyph } from "@/lib/design/glyph-forms"
+import { cutIndices, drawnForm, formKey, formPaths, isLit, type Form, type Glyph } from "@/lib/design/glyph-forms"
 import { cn } from "@/lib/utils"
 
 const FADE = "transition-[fill-opacity,opacity] duration-300 ease-out motion-reduce:transition-none"
@@ -12,11 +12,11 @@ const FADE = "transition-[fill-opacity,opacity] duration-300 ease-out motion-red
  * fills; the carved solid sits in its own layer and crossfades over the
  * strokes. An override is drawn as it is, without a transition.
  */
-export function GlyphFormView({ glyph, form, k, className }: { glyph: Glyph; form: FormChoice; k: number; className?: string }) {
-  const key = form === "progress" ? `progress-${Math.min(k, glyph.steps)}` : form
-  const override = form === "regular" ? undefined : glyph.overrides[key]
-  const cut = cutIndices(glyph, form, k)
-  const showSolid = form === "solid" && glyph.carved.solid !== undefined && !override
+export function GlyphFormView({ glyph, form, className }: { glyph: Glyph; form: Form; className?: string }) {
+  const drawn = drawnForm(glyph, form)
+  const override = formKey(drawn) === "regular" ? undefined : glyph.overrides[formKey(drawn)]
+  const cut = cutIndices(glyph, drawn)
+  const showSolid = drawn.fill.kind === "solid" && !override
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden className={className}>
       {override ? (
@@ -27,7 +27,7 @@ export function GlyphFormView({ glyph, form, k, className }: { glyph: Glyph; for
         <>
           <g className={cn(FADE, showSolid ? "opacity-0" : "opacity-100")}>
             {glyph.paths.map((p, i) => {
-              const lit = isLit(p, form, k)
+              const lit = isLit(p, drawn)
               const shown = (lit || !p.hidden) && !cut.has(i)
               const carved = p.fill !== undefined
               return (
@@ -46,7 +46,7 @@ export function GlyphFormView({ glyph, form, k, className }: { glyph: Glyph; for
           </g>
           {glyph.carved.solid && (
             <g className={cn(FADE, showSolid ? "opacity-100" : "opacity-0")}>
-              {formPaths(glyph, "solid").map((p, i) => (
+              {formPaths(glyph, { fill: { kind: "solid" } }).map((p, i) => (
                 <path key={i} d={p.d} fill={p.fill ? "currentColor" : "none"} fillRule={p.evenOdd ? "evenodd" : undefined} stroke={p.stroke ? "currentColor" : "none"} />
               ))}
             </g>

@@ -162,8 +162,8 @@ export function GlyphReviewDialog({ glyph, position, verdict, onVerdict, note, o
               <h3 className="text-sm font-medium">Forms, worked out</h3>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-2">
                 {formChoices(glyph).map((c) => (
-                  <Cell key={c.label} label={c.label} note={c.override ? "override" : undefined}>
-                    <GlyphFormView glyph={glyph} form={c.form} k={c.k} className="size-16" />
+                  <Cell key={c.key} label={c.label} note={c.override ? "override" : undefined}>
+                    <GlyphFormView glyph={glyph} form={c.form} className="size-16" />
                   </Cell>
                 ))}
               </div>
