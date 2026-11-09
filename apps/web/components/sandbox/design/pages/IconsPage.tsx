@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useState } from "react"
 import { Android, Apple, Globe } from "@pbbls/icons"
 import type { FindingGroup } from "@/lib/design/audit"
-import { GLYPHS, glyphMatchesQuery, needsReview, showsGlyph, viewForm, viewMatches, type Form, type Glyph } from "@/lib/design/glyph-forms"
+import { GLYPHS, describeSigns, glyphMatchesQuery, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Form, type Glyph, type GlyphView } from "@/lib/design/glyph-forms"
 import { ICON_ROWS, replacementsFor, type IconSurface } from "@/lib/design/icon-catalog"
 import { PBBLS_ICON_SIZE, type PbblsIconComponent, type PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import { useReviewVerdicts, type Verdict } from "@/lib/design/useReviewVerdicts"
@@ -14,6 +14,7 @@ import { DesignSection } from "../DesignSection"
 import { FindingList } from "../FindingList"
 import { GlyphFormView } from "../GlyphFormView"
 import { GlyphReviewDialog } from "../GlyphReviewDialog"
+import { GlyphSigns } from "../GlyphSigns"
 
 /** Each surface drawn with the set's own glyph: the web's globe, Apple's apple, Android's head. */
 const SURFACES: readonly { surface: IconSurface; label: string; Icon: PbblsIconComponent }[] = [
@@ -48,6 +49,7 @@ type GlyphTileProps = {
   glyph: Glyph
   size: PbblsIconSize
   form: Form
+  view: GlyphView
   verdict?: Verdict
   /** Whether a fix verdict carries a note yet. */
   noted: boolean
@@ -55,20 +57,21 @@ type GlyphTileProps = {
   onOpen: () => void
 }
 
-function GlyphTile({ glyph, size, form, verdict, noted, onVerdict, onOpen }: GlyphTileProps) {
+function GlyphTile({ glyph, size, form, view, verdict, noted, onVerdict, onOpen }: GlyphTileProps) {
   const migrated = MIGRATED.get(glyph.name) ?? []
+  const signs = signsOf(glyph)
   return (
     <li
       title={glyph.meaning}
       className={cn(
-        "group relative flex aspect-square flex-col items-center gap-2 rounded-2xl bg-card px-3 pt-6 pb-3 text-card-foreground transition-colors hover:bg-muted motion-reduce:transition-none",
+        "group relative flex aspect-square flex-col items-center gap-2 rounded-2xl bg-card px-3 pt-6 pb-5 text-card-foreground transition-colors hover:bg-muted motion-reduce:transition-none",
       )}
     >
       {/* The whole tile opens the review dialog; the verdict pill sits above it. */}
       <button
         type="button"
         onClick={onOpen}
-        aria-label={`Open ${glyph.name}: every form, its twins and its roles`}
+        aria-label={`Open ${glyph.name} (${describeSigns(signs)}): every form, its twins and its roles`}
         className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
       {needsReview(glyph.name) && (
@@ -106,6 +109,7 @@ function GlyphTile({ glyph, size, form, verdict, noted, onVerdict, onOpen }: Gly
           <Mark key={surface} className={cn(PBBLS_ICON_SIZE.inline, migrated.includes(surface) ? "text-primary" : "text-muted-foreground/35")} />
         ))}
       </span>
+      <GlyphSigns signs={signs} view={view} />
     </li>
   )
 }
@@ -162,6 +166,7 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
                 glyph={glyph}
                 size={iconSize}
                 form={viewForm(glyph, glyphView)}
+                view={glyphView}
                 verdict={verdicts[glyph.name]}
                 noted={notes[glyph.name] !== undefined}
                 onVerdict={() => cycle(glyph.name)}
