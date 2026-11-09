@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { join } from "node:path"
 import { formatSvg, ROOT_ATTRIBUTES } from "./format"
 import { carveSolid } from "./carve"
+import { formKeysOf } from "./forms"
 import { isOverrideForm, loadManifest, STATUSES, VARIANTS, type IconRow, type Manifest } from "./manifest"
 import { parseSvg, type ParsedPath, type ParsedSvg } from "./parse"
 import { readRoles } from "./roles"
@@ -27,10 +28,10 @@ export const WARN_AREA = 64
 /** A carved solid must keep at least this much filled area (square units). */
 export const MIN_CARVED_AREA = 4
 /** A name's last segment may not be one of these (spec D1). */
-const FORM_WORDS = ["regular", "half", "solid", "of"]
+const FORM_WORDS = ["regular", "marked", "solid", "parts", "of"]
 
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/
-const PATH_ATTRIBUTES = new Set(["d", "fill", "fill-rule", "stroke", "data-role", "data-mark", "data-rest"])
+const PATH_ATTRIBUTES = new Set(["d", "fill", "fill-rule", "stroke", "data-role", "data-part", "data-step", "data-rest"])
 const COMMANDS = new Set(["M", "L", "C", "Q", "A", "Z"])
 /** Coordinates per command, after the arc's radii, rotation and flags. */
 const ARITY: Record<string, number> = { M: 2, L: 2, C: 6, Q: 4, A: 7, Z: 0 }
@@ -247,10 +248,8 @@ function overrideAllowed(root: string, base: string, form: string): boolean {
     return false
   }
   const { roles } = readRoles(parsed.paths)
-  if (form === "half") return roles.focus.length > 0
-  if (form === "solid") return roles.body.length > 0
-  const k = Number(form.replace("progress-", ""))
-  return k >= 1 && k <= roles.marks.length
+  const shape = { mark: roles.mark.length > 0, body: roles.body.length > 0, parts: roles.parts.map((p) => p.name), steps: roles.steps.length, dotted: false }
+  return formKeysOf(shape).includes(form)
 }
 
 function lintManifest(root: string, manifest: Manifest, files: string[], result: LintResult): void {

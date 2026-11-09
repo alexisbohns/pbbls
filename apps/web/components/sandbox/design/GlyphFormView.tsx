@@ -13,10 +13,10 @@ const FADE = "transition-[fill-opacity,opacity] duration-300 ease-out motion-red
  * strokes. An override is drawn as it is, without a transition.
  */
 export function GlyphFormView({ glyph, form, k, className }: { glyph: Glyph; form: FormChoice; k: number; className?: string }) {
-  const key = form === "progress" ? `progress-${Math.min(k, glyph.marks)}` : form
+  const key = form === "progress" ? `progress-${Math.min(k, glyph.steps)}` : form
   const override = form === "regular" ? undefined : glyph.overrides[key]
   const cut = cutIndices(glyph, form, k)
-  const showSolid = form === "solid" && glyph.solid !== null && !override
+  const showSolid = form === "solid" && glyph.carved.solid !== undefined && !override
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden className={className}>
       {override ? (
@@ -44,7 +44,7 @@ export function GlyphFormView({ glyph, form, k, className }: { glyph: Glyph; for
               )
             })}
           </g>
-          {glyph.solid && (
+          {glyph.carved.solid && (
             <g className={cn(FADE, showSolid ? "opacity-100" : "opacity-0")}>
               {formPaths(glyph, "solid").map((p, i) => (
                 <path key={i} d={p.d} fill={p.fill ? "currentColor" : "none"} fillRule={p.evenOdd ? "evenodd" : undefined} stroke={p.stroke ? "currentColor" : "none"} />

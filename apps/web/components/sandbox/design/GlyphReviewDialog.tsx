@@ -14,14 +14,14 @@ const VERDICTS: readonly Verdict[] = ["ok", "fix", "drop-twin"]
 const VERDICT_KEYS: Readonly<Record<string, Verdict>> = { o: "ok", f: "fix", d: "drop-twin" }
 
 function roleLabel(p: GlyphPath): string {
-  const role = p.role === "mark" ? `mark ${p.mark ?? "?"}` : (p.role ?? "line")
+  const role = p.role === "step" ? `step ${p.step ?? "?"}` : (p.role ?? "line")
   return p.hidden ? `${role}, hidden` : role
 }
 
-/** Body in ink, marks and focus in two chart hues; a line without a role stays muted. */
+/** Body in ink, steps and the mark in two chart hues; a line without a role stays muted. */
 function roleColour(p: GlyphPath): string {
-  if (p.role === "mark") return "text-chart-1"
-  if (p.role === "focus") return "text-chart-2"
+  if (p.role === "step") return "text-chart-1"
+  if (p.role === "mark") return "text-chart-2"
   if (p.role === "body") return "text-foreground"
   return "text-muted-foreground"
 }
@@ -207,7 +207,7 @@ export function GlyphReviewDialog({ glyph, position, verdict, onVerdict, note, o
                   value={note}
                   onChange={(e) => onNote(e.target.value)}
                   rows={3}
-                  placeholder="e.g. tag the moon as focus; redraw lit-3 so both figures fill; drop the added dot"
+                  placeholder="e.g. tag the moon as mark; redraw lit-3 so both figures fill; drop the added dot"
                   className="resize-y rounded-xl border border-input bg-card px-3 py-2 text-sm font-normal outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                 />
                 <span className="text-xs font-normal text-muted-foreground">Saved as you type. Esc leaves the note; ← → then walk the list.</span>

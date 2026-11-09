@@ -8,7 +8,7 @@ describe("glyph forms", () => {
   })
 
   it("lists forms and falls back to regular for a form a glyph lacks", () => {
-    const plain = GLYPHS.find((g) => g.marks === 0 && g.solid === null && !g.paths.some((p) => p.role === "focus"))
+    const plain = GLYPHS.find((g) => g.steps === 0 && g.carved.solid === undefined && !g.paths.some((p) => p.role === "mark"))
     if (!plain) throw new Error("no plain glyph")
     expect(availableForms(plain)).toEqual(["regular"])
     expect(formPaths(plain, "solid").every((p) => !p.fill)).toBe(true)
@@ -17,13 +17,13 @@ describe("glyph forms", () => {
   it("draws a hidden mark only once progress reaches it", () => {
     const cromlech = GLYPHS.find((g) => g.name === "cromlech")
     if (!cromlech) throw new Error("no cromlech")
-    const hidden = cromlech.paths.find((p) => p.hidden && p.role === "mark")
+    const hidden = cromlech.paths.find((p) => p.hidden && p.role === "step")
     if (!hidden) throw new Error("cromlech has no hidden mark")
     const drawn = (k: number) => formPaths(cromlech, "progress", k).find((p) => p.d === hidden.d)
     expect(drawn(0)).toBeUndefined()
     expect(formPaths(cromlech, "regular").some((p) => p.d === hidden.d)).toBe(false)
-    expect(drawn(hidden.mark ?? 1)?.fill).toBe(true)
-    expect(formPaths(cromlech, "progress", hidden.mark ?? 1)).toHaveLength(cromlech.paths.length)
+    expect(drawn(hidden.step ?? 1)?.fill).toBe(true)
+    expect(formPaths(cromlech, "progress", hidden.step ?? 1)).toHaveLength(cromlech.paths.length)
     expect(formPaths(cromlech, "progress", 0)).toHaveLength(cromlech.paths.length - 1)
   })
 
@@ -32,7 +32,7 @@ describe("glyph forms", () => {
     if (!pouch) throw new Error("no pouch")
     const carved = pouch.paths.flatMap((p) => (p.fill !== undefined && p.cuts ? [p] : []))
     expect(carved.length).toBeGreaterThan(0)
-    const drawn = formPaths(pouch, "progress", pouch.marks)
+    const drawn = formPaths(pouch, "progress", pouch.steps)
     expect(drawn.some((p) => p.fill && p.evenOdd && !p.stroke)).toBe(true)
     for (const c of carved) for (const i of c.cuts ?? []) expect(drawn.some((p) => p.d === pouch.paths[i]?.d)).toBe(false)
     expect(formPaths(pouch, "regular")).toHaveLength(pouch.paths.length)

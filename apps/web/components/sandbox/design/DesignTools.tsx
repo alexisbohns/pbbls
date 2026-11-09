@@ -47,7 +47,7 @@ const ZOOM_OPTIONS: SelectOption<CanvasZoom>[] = CANVAS_ZOOMS.map((z) => ({
 
 const FORM_OPTIONS: SelectOption<FormChoice>[] = [
   { value: "regular", label: "Regular" },
-  { value: "half", label: "Half" },
+  { value: "marked", label: "Marked" },
   { value: "solid", label: "Solid" },
   { value: "progress", label: "Progress" },
 ]
@@ -127,7 +127,7 @@ export function DesignTools({ page, layout, ...s }: DesignToolsProps) {
       {icons && <DesignSelect label="Size" options={SIZE_OPTIONS} value={s.iconSize} onChange={s.onIconSize} />}
       {icons && <DesignSelect label="Form" options={FORM_OPTIONS} value={s.glyphForm} onChange={s.onGlyphForm} />}
       {icons && s.glyphForm === "progress" && (
-        <DesignSelect label="Marks lit" options={PROGRESS_OPTIONS} value={s.glyphProgress} onChange={s.onGlyphProgress} />
+        <DesignSelect label="Steps lit" options={PROGRESS_OPTIONS} value={s.glyphProgress} onChange={s.onGlyphProgress} />
       )}
       {icons && <DesignSelect label="Show" options={SHOW_OPTIONS} value={s.glyphShow} onChange={s.onGlyphShow} />}
       {page?.canvas && (

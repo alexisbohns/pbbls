@@ -6,7 +6,7 @@ import type { Form } from "./forms"
 export type StateTable = Record<string, string[]>
 
 export const STATES_FILE = "states.json"
-const FORM_WORDS = new Set(["regular", "half", "solid", "progress-n", "progress-k"])
+const FORM_WORDS = new Set(["regular", "marked", "solid", "progress-n", "progress-k"])
 
 export function parseStates(json: unknown): StateTable {
   if (typeof json !== "object" || json === null || !("states" in json)) throw new Error(`${STATES_FILE}: expected { "states": {...} }`)
@@ -30,12 +30,13 @@ export function loadStates(packageRoot: string): StateTable {
 export function resolveState(table: StateTable, forms: readonly string[], state: string, k = 0): Form {
   const list = table[state]
   if (!list) throw new Error(`unknown state ${state}`)
-  const n = forms.filter((f) => f.startsWith("progress-")).length
+  const n = forms.filter((f) => /^progress-\d+$/.test(f)).length
   for (const word of list) {
-    if (word === "regular") return { kind: "regular" }
-    if ((word === "half" || word === "solid") && forms.includes(word)) return { kind: word }
-    if (word === "progress-n" && n > 0) return { kind: "progress", k: n }
-    if (word === "progress-k" && n > 0) return { kind: "progress", k: Math.max(0, Math.min(Number.isInteger(k) ? k : 0, n)) }
+    if (word === "regular") return { fill: { kind: "regular" } }
+    if (word === "marked" && forms.includes("marked")) return { fill: { kind: "regular" }, marked: true }
+    if (word === "solid" && forms.includes("solid")) return { fill: { kind: "solid" } }
+    if (word === "progress-n" && n > 0) return { fill: { kind: "progress", k: n } }
+    if (word === "progress-k" && n > 0) return { fill: { kind: "progress", k: Math.max(0, Math.min(Number.isInteger(k) ? k : 0, n)) } }
   }
-  return { kind: "regular" }
+  return { fill: { kind: "regular" } }
 }

@@ -8,13 +8,14 @@ import review from "@pbbls/icons/review.json"
  * components.
  */
 
-/** A hidden path (mark or focus) is not drawn at rest; it appears filled when its role fills. */
+/** A hidden path (mark or step) is not drawn at rest; it appears filled when its role fills. */
 export type GlyphPath = {
   d: string
-  role?: "body" | "mark" | "focus"
-  mark?: number
+  role?: "body" | "mark" | "step"
+  step?: number
+  part?: string
   hidden?: true
-  /** Mark or focus with lines inside it: filled and stroked minus those lines, even-odd and unstroked. */
+  /** Mark or step with lines inside it: filled and stroked minus those lines, even-odd and unstroked. */
   fill?: string
   /** Indices into `paths` of the lines `fill` is carved through; not drawn once this path is filled. */
   cuts?: number[]
@@ -26,22 +27,24 @@ export type Glyph = {
   family: string | null
   tags: Record<string, string[]>
   paths: GlyphPath[]
-  marks: number
-  /** `keep` indexes the glyph's non-body, non-hidden paths. */
-  solid: { d: string; keep: number[] } | null
+  parts: string[]
+  steps: number
+  /** `keep` and `lit` index `paths`. */
+  carved: Record<string, { d: string; keep: number[]; lit: number[] }>
+  dotted: RenderedPath[] | null
   overrides: Record<string, RenderedPath[]>
 }
 
 export const GLYPHS: readonly Glyph[] = data.glyphs as Glyph[]
 
 /** The page's form choice: a form name, `progress` meaning k from the slider. */
-export type FormChoice = "regular" | "half" | "solid" | "progress"
+export type FormChoice = "regular" | "marked" | "solid" | "progress"
 
 export function availableForms(glyph: Glyph): string[] {
   const forms = ["regular"]
-  if (glyph.paths.some((p) => p.role === "focus")) forms.push("half")
-  if (glyph.solid) forms.push("solid")
-  for (let k = 1; k <= glyph.marks; k += 1) forms.push(`progress-${k}`)
+  if (glyph.paths.some((p) => p.role === "mark")) forms.push("marked")
+  if (glyph.carved.solid) forms.push("solid")
+  for (let k = 1; k <= glyph.steps; k += 1) forms.push(`progress-${k}`)
   return forms
 }
 
@@ -50,20 +53,26 @@ const filledPath = (d: string): RenderedPath => ({ d, fill: true, evenOdd: false
 
 /** Whether a form's role fills this path (a hidden path is drawn only then). */
 export function isLit(p: GlyphPath, choice: FormChoice, k: number): boolean {
-  return (choice === "half" && p.role === "focus") || (choice === "progress" && p.role === "mark" && (p.mark ?? 0) <= k)
+  return (choice === "marked" && p.role === "mark") || (choice === "progress" && p.role === "step" && (p.step ?? 0) <= k)
 }
 
 /** The paths a form draws; a form the glyph lacks draws regular (the page dims it). */
 export function formPaths(glyph: Glyph, choice: FormChoice, k = 0): RenderedPath[] {
   const effective = choice === "progress" && k === 0 ? "regular" : choice
-  const key = effective === "progress" ? `progress-${Math.min(k, glyph.marks)}` : effective
+  const key = effective === "progress" ? `progress-${Math.min(k, glyph.steps)}` : effective
   const override = glyph.overrides[key]
   if (override) return override
-  if (effective === "solid" && glyph.solid) {
-    const others = glyph.paths.filter((p) => p.role !== "body" && !p.hidden)
-    return [{ d: glyph.solid.d, fill: true, evenOdd: true, stroke: false }, ...glyph.solid.keep.flatMap((i) => (others[i] ? [stroked(others[i].d)] : []))]
+  const solid = glyph.carved.solid
+  if (effective === "solid" && solid) {
+    return [
+      { d: solid.d, fill: true, evenOdd: true, stroke: false },
+      ...solid.keep.flatMap((i) => {
+        const p = glyph.paths[i]
+        return p ? [stroked(p.d)] : []
+      }),
+    ]
   }
-  const form: FormChoice = effective === "half" && !glyph.paths.some((p) => p.role === "focus") ? "regular" : effective === "progress" && glyph.marks === 0 ? "regular" : effective
+  const form: FormChoice = effective === "marked" && !glyph.paths.some((p) => p.role === "mark") ? "regular" : effective === "progress" && glyph.steps === 0 ? "regular" : effective
   const cut = cutIndices(glyph, form, k)
   return glyph.paths.flatMap((p, i) => {
     const on = isLit(p, form, k)
@@ -80,7 +89,7 @@ export function cutIndices(glyph: Glyph, choice: FormChoice, k: number): Set<num
 
 export function hasForm(glyph: Glyph, choice: FormChoice): boolean {
   if (choice === "regular") return true
-  if (choice === "progress") return glyph.marks > 0
+  if (choice === "progress") return glyph.steps > 0
   return availableForms(glyph).includes(choice)
 }
 
@@ -144,8 +153,8 @@ export function flaggedPaths(name: string): Set<number> {
 /** Every form the glyph has (the order of `availableForms`), as the review dialog lays them out. */
 export function formChoices(glyph: Glyph): { label: string; form: FormChoice; k: number; override: boolean }[] {
   const choices: { label: string; form: FormChoice; k: number }[] = [{ label: "regular", form: "regular", k: 0 }]
-  if (glyph.paths.some((p) => p.role === "focus")) choices.push({ label: "half", form: "half", k: 0 })
-  if (glyph.solid) choices.push({ label: "solid", form: "solid", k: 0 })
-  for (let k = 1; k <= glyph.marks; k += 1) choices.push({ label: `progress-${k}`, form: "progress", k })
+  if (glyph.paths.some((p) => p.role === "mark")) choices.push({ label: "marked", form: "marked", k: 0 })
+  if (glyph.carved.solid) choices.push({ label: "solid", form: "solid", k: 0 })
+  for (let k = 1; k <= glyph.steps; k += 1) choices.push({ label: `progress-${k}`, form: "progress", k })
   return choices.map((c) => ({ ...c, override: c.label in glyph.overrides }))
 }

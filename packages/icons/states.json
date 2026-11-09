@@ -1,9 +1,9 @@
 {
   "states": {
     "rest": ["regular"],
-    "hover": ["half", "regular"],
-    "pressed": ["half", "regular"],
-    "selected": ["solid", "progress-n", "half", "regular"],
+    "hover": ["marked", "regular"],
+    "pressed": ["marked", "regular"],
+    "selected": ["solid", "progress-n", "marked", "regular"],
     "disabled": ["regular"],
     "progress": ["progress-k", "regular"],
     "done": ["progress-n", "solid", "regular"]

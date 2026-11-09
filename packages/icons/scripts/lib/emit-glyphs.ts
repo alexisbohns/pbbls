@@ -2,59 +2,96 @@ import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { carveSolid } from "./carve"
 import { GENERATED_NOTICE, type Emitter } from "./emit"
-import type { GlyphData, GlyphPath, RenderedPath } from "./forms"
+import { formKey, type CarvedFill, type Fill, type GlyphData, type GlyphPath, type RenderedPath } from "./forms"
 import { SRC_DIR, splitSourceName } from "./lint"
 import { isOverrideForm, loadManifest, type IconRow } from "./manifest"
 import { normalizePath } from "./normalize"
 import { parseSvg } from "./parse"
-import { readRoles } from "./roles"
+import { partCombinations, readRoles } from "./roles"
 import { loadStates } from "./states"
 
 export const GLYPHS_FILE = "packages/icons/glyphs/glyphs.json"
 
+/** `list[n]` for each n, skipping any out of range. */
+const at = (list: readonly number[], ns: readonly number[]): number[] =>
+  ns.flatMap((n) => {
+    const i = list[n]
+    return i === undefined ? [] : [i]
+  })
+
+/**
+ * A solid or parts fill (spec D3): the chosen body paths filled and carved by
+ * every other drawn path. Under `marked` the mark is cut out where it lies
+ * inside the fill and drawn filled (`lit`) where it does not.
+ */
+function carveFill(paths: readonly GlyphPath[], body: readonly number[], marked: boolean): CarvedFill {
+  const isMark = (p: GlyphPath) => p.role === "mark"
+  const lines = paths.flatMap((p, i) => (!body.includes(i) && !p.hidden && !(marked && isMark(p)) ? [i] : []))
+  const holes = marked ? paths.flatMap((p, i) => (isMark(p) ? [i] : [])) : []
+  const d = (i: number) => paths[i]?.d ?? ""
+  const carved = carveSolid(body.map(d), lines.map(d), holes.map(d))
+  const lit = at(holes, carved.outside)
+  // A lit mark that is carved itself leaves out the lines it is cut through.
+  const cut = new Set(lit.flatMap((i) => (paths[i]?.fill !== undefined ? (paths[i]?.cuts ?? []) : [])))
+  return { d: carved.d, keep: at(lines, carved.keep).filter((i) => !cut.has(i)), lit }
+}
+
+function rendered(text: string, file: string): RenderedPath[] {
+  return parseSvg(text, file).paths.map((p) => ({ d: normalizePath(p.d), fill: p.filled, evenOdd: p.evenOdd, stroke: !p.unstroked }))
+}
+
 /** One manifest row and its sources as `glyphs.json` stores them (spec §2). */
-export function buildGlyph(row: IconRow, source: string, overrides: Record<string, string>): GlyphData {
+export function buildGlyph(row: IconRow, source: string, overrides: Record<string, string>, dotted: string | null = null): GlyphData {
   const { paths: parsed } = parseSvg(source, `${row.name}.svg`)
   const { roles } = readRoles(parsed)
+  const partOf = new Map(roles.parts.flatMap((part) => part.paths.map((i): [number, string] => [i, part.name])))
   const paths: GlyphPath[] = parsed.map((p, i) => {
     const d = normalizePath(p.d)
     const hidden = roles.hidden.includes(i) ? { hidden: true as const } : {}
-    if (roles.body.includes(i)) return { d, role: "body" }
-    if (roles.focus.includes(i)) return { d, role: "focus", ...hidden }
-    const mark = roles.marks.findIndex((group) => group.includes(i))
-    return mark >= 0 ? { d, role: "mark", mark: mark + 1, ...hidden } : { d }
+    if (roles.body.includes(i)) {
+      const part = partOf.get(i)
+      return part === undefined ? { d, role: "body" } : { d, role: "body", part }
+    }
+    if (roles.mark.includes(i)) return { d, role: "mark", ...hidden }
+    const step = roles.steps.findIndex((group) => group.includes(i))
+    return step >= 0 ? { d, role: "step", step: step + 1, ...hidden } : { d }
   })
-  // A mark or focus with lines inside it would paint over them: store it carved like the solid.
+  // A mark or step with lines inside it would paint over them: store it carved like the solid.
   paths.forEach((p, i) => {
-    if (p.role !== "mark" && p.role !== "focus") return
+    if (p.role !== "mark" && p.role !== "step") return
     const inner = paths.flatMap((q, j) => (j !== i && !q.hidden ? [j] : []))
     const carved = carveSolid([p.d], inner.map((j) => paths[j]?.d ?? ""))
     if (carved.keep.length === inner.length) return
     p.fill = carved.d
     p.cuts = inner.filter((_, n) => !carved.keep.includes(n))
   })
-  const body = paths.filter((p) => p.role === "body").map((p) => p.d)
-  // A hidden path is neither cut from the solid nor kept on it; `keep` indexes what is left.
-  const others = paths.filter((p) => p.role !== "body" && !p.hidden).map((p) => p.d)
-  const carved = body.length > 0 ? carveSolid(body, others) : null
-  const rendered: Record<string, RenderedPath[]> = {}
-  for (const [form, text] of Object.entries(overrides)) {
-    rendered[form] = parseSvg(text, `${row.name}.${form}.svg`).paths.map((p) => ({
-      d: normalizePath(p.d),
-      fill: p.filled,
-      evenOdd: p.evenOdd,
-      stroke: !p.unstroked,
-    }))
+  const carved: Record<string, CarvedFill> = {}
+  if (roles.body.length > 0) {
+    const fills: { fill: Fill; body: number[] }[] = [
+      { fill: { kind: "solid" }, body: roles.body },
+      ...partCombinations(roles.parts.map((p) => p.name)).map((names) => ({
+        fill: { kind: "parts" as const, parts: names },
+        body: roles.parts.filter((p) => names.includes(p.name)).flatMap((p) => p.paths),
+      })),
+    ]
+    for (const { fill, body } of fills) {
+      carved[formKey({ fill })] = carveFill(paths, body, false)
+      if (roles.mark.length > 0) carved[formKey({ fill, marked: true })] = carveFill(paths, body, true)
+    }
   }
+  const drawn: Record<string, RenderedPath[]> = {}
+  for (const [form, text] of Object.entries(overrides)) drawn[form] = rendered(text, `${row.name}.${form}.svg`)
   return {
     name: row.name,
     meaning: row.meaning,
     family: row.family,
     tags: row.tags,
     paths,
-    marks: roles.marks.length,
-    solid: carved ? { d: carved.d, keep: carved.keep } : null,
-    overrides: rendered,
+    parts: roles.parts.map((p) => p.name),
+    steps: roles.steps.length,
+    carved,
+    dotted: dotted === null ? null : rendered(dotted, `${row.name}.dotted.svg`),
+    overrides: drawn,
   }
 }
 

@@ -3,5 +3,5 @@
   <path d="M 10.15 6.04 L 13.71 5.93 Q 14.31 5.91 14.31 6.51 L 14.32 8.98 Q 14.33 9.58 13.73 9.58 L 10.27 9.55 Q 9.67 9.55 9.65 8.95 L 9.57 6.66 Q 9.55 6.06 10.15 6.04 L 11.55 6"/>
   <path d="M 9.2 5.6 L 14.8 5.6"/>
   <path d="M 8 14.2 L 16 14"/>
-  <path d="M 6.6 14.6 L 17.4 14.4 L 17.4 18 L 16 19.8 L 8 19.8 L 6.6 18 Z" data-role="mark" data-mark="1" data-rest="hidden"/>
+  <path d="M 6.6 14.6 L 17.4 14.4 L 17.4 18 L 16 19.8 L 8 19.8 L 6.6 18 Z" data-role="step" data-step="1" data-rest="hidden"/>
 </svg>
