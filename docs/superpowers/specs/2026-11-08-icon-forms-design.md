@@ -52,7 +52,7 @@ Steps are for sequences only. Pieces that fill in any combination are parts; a s
 | Fill | Exists when | Drawn as |
 |---|---|---|
 | `regular` | always | every path stroked, nothing filled |
-| `solid` | the glyph has a body | the body's fill (SVG-style) plus its stroke band; every other path inside the fill, or within half a stroke of it, outlined at the 1.75 stroke with round caps and subtracted even-odd, so it shows through in the surface colour; paths outside it stay stroked |
+| `solid` | the glyph has a body | the body's fill (SVG-style) plus its stroke band; every other path inside the fill, or standing on its edge (within half a stroke of it, at least half of it deeper inside: a door on the ground line, not a rim traced along the outline), outlined at the 1.75 stroke with round caps and subtracted even-odd, so it shows through in the surface colour; paths outside it stay stroked |
 | `parts(…)` | the body has parts | the named parts filled and carved like the solid, the other parts stroked. Every non-empty combination short of all of them exists (all of them is `solid`), named in the parts' source order: `parts-left`, `parts-left+middle`, … |
 | `progress(k)`, 0 ≤ k ≤ n | the glyph has n ≥ 1 steps | steps 1…k filled; `progress(0)` is `regular` |
 | `dotted` | `src/<name>.dotted.svg` is drawn | that drawing, as it is: a dotted line cannot be worked out from a solid one |

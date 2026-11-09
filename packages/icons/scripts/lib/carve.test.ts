@@ -65,6 +65,12 @@ describe("carveSolid", () => {
     expect(keep).toEqual([])
   })
 
+  it("keeps a line traced along the body's outline", () => {
+    // A hand-drawn rim wavering over the top edge, as a bowl's lip: partly outside the fill, never deep inside.
+    const { keep } = carveSolid([SQUARE], ["M4 3.6 L12 4.4 L20 3.6"])
+    expect(keep).toEqual([0])
+  })
+
   it("keeps a line further than half a stroke from the body", () => {
     // x = 2 is 2 units left of the edge at x = 4.
     const { keep } = carveSolid([SQUARE], ["M2 4 L2 20"])

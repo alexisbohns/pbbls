@@ -28,24 +28,36 @@ function boolean(type: number, subject: IntPath[], clip: IntPath[]): IntPath[] {
   return out
 }
 
-/**
- * True when every sampled point of `d` lies inside (or on the edge of) the region.
- * The region's rings nest (an outer ring, its holes, an island in a hole), so a point
- * is inside when an odd number of rings contain it; on a ring's edge counts as inside.
- */
-function inside(d: string, region: IntPath[]): boolean {
-  return flattenPath(d)
-    .flatMap((s) => toInt(s.points))
-    .every((pt) => {
-      let containing = 0
-      for (const ring of region) {
-        const where = ClipperLib.Clipper.PointInPolygon(pt, ring)
-        if (where === -1) return true
-        if (where === 1) containing += 1
-      }
-      return containing % 2 === 1
-    })
+/** Whether a point lies inside the region: its rings nest (an outer ring, its holes, an island in a hole), so an odd count; on an edge counts as inside. */
+function contains(region: IntPath[], pt: { X: number; Y: number }): boolean {
+  let containing = 0
+  for (const ring of region) {
+    const where = ClipperLib.Clipper.PointInPolygon(pt, ring)
+    if (where === -1) return true
+    if (where === 1) containing += 1
+  }
+  return containing % 2 === 1
 }
+
+/** Points along `d`, one at least every half unit, so a long straight segment weighs as much as a curve. */
+function samples(d: string): { X: number; Y: number }[] {
+  return flattenPath(d).flatMap((s) =>
+    s.points.flatMap(([x, y], i) => {
+      const prev = s.points[i - 1]
+      if (!prev) return toInt([[x, y]])
+      const steps = Math.max(1, Math.ceil(Math.hypot(x - prev[0], y - prev[1]) / 0.5))
+      return toInt(Array.from({ length: steps }, (_, n): Pt => [prev[0] + ((x - prev[0]) * (n + 1)) / steps, prev[1] + ((y - prev[1]) * (n + 1)) / steps]))
+    }),
+  )
+}
+
+/** The share of `d`'s sampled points inside the region. */
+function shareInside(d: string, region: IntPath[]): number {
+  const pts = samples(d)
+  return pts.length === 0 ? 0 : pts.filter((pt) => contains(region, pt)).length / pts.length
+}
+
+const inside = (d: string, region: IntPath[]): boolean => shareInside(d, region) === 1
 
 export type Carved = {
   /** One compound path, filled even-odd with no stroke. */
@@ -73,8 +85,8 @@ function paintedRegion(d: string): IntPath[] {
  * The solid form (spec D3, D8), as SVG paints a path that is filled and stroked:
  * the body's subpaths, each implicitly closed for the fill and unioned, plus
  * their stroke band (a line offset by half the stroke), minus every other path
- * lying within half a stroke of the fill (a door standing on the ground line
- * counts), outlined at the stroke width with round caps, and minus every hole
+ * inside the fill or standing on its edge (a door on the ground line, not a
+ * rim traced along the outline), outlined at the stroke width with round caps, and minus every hole
  * there (the mark of a marked solid) as it is painted, fill and stroke.
  */
 export function carveSolid(body: readonly string[], others: readonly string[], holes: readonly string[] = []): Carved {
@@ -91,12 +103,16 @@ export function carveSolid(body: readonly string[], others: readonly string[], h
     return offset([toInt(s.points)], ClipperLib.JoinType.jtRound, end, HALF_STROKE)
   })
   const base = boolean(ClipperLib.ClipType.ctUnion, fill, band)
-  // A line counts as inside when it lies within half a stroke of the fill.
+  // A line inside the fill is cut. So is one standing on its edge (a door on the ground line):
+  // within half a stroke of the fill, with at least half of it deeper than half a stroke inside.
+  // A line traced along the outline (a bowl's rim) is mostly on the edge, so it stays stroked.
   const reach = offset(fill, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon, HALF_STROKE)
+  const core = offset(fill, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon, -HALF_STROKE)
+  const carves = (d: string) => inside(d, fill) || (inside(d, reach) && shareInside(d, core) >= 0.5)
   const keep: number[] = []
   const cutters: IntPath[] = []
   others.forEach((d, i) => {
-    if (!inside(d, reach)) {
+    if (!carves(d)) {
       keep.push(i)
       return
     }
