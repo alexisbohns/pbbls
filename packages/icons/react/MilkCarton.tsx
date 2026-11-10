@@ -20,8 +20,8 @@ export function MilkCarton({ size = 24, ...props }: PbblsIconProps) {
       focusable="false"
       {...props}
     >
-      <path d="M7 9.6 L7 19.4 C7 20 7.4 20.4 8 20.4 L16 20.4 C16.6 20.4 17 20 17 19.4 L17 9.6" />
-      <path d="M7 9.6 L9.4 5.6 L14.6 5.6 L17 9.6 L7.6 9.6" />
+      <path d="M7 9.6 L9.4 5.6 L14.6 5.6 L17 9.6 L17 19.4 C17 20 16.6 20.4 16 20.4 L8 20.4 C7.4 20.4 7 20 7 19.4 L7 9.6" />
+      <path d="M7 9.6 L17 9.6" />
       <path d="M9.4 5.4 L9.4 3.4 L14.6 3.4 L14.6 5.4" />
       <path d="M12 9.8 L12 20.2" />
     </svg>

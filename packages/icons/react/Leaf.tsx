@@ -21,8 +21,8 @@ export function Leaf({ size = 24, ...props }: PbblsIconProps) {
       {...props}
     >
       <path d="M 5 19 C 4.6 11 10 5.4 19.6 4.6 C 19.6 13 13.6 19.4 5 19" />
-      <path d="M 5.4 19 L 16.2 8" />
-      <path d="M 9.8 14.6 L 9.8 10.6 M 12.6 11.8 L 14.6 12.2 M 8 16.6 L 5.8 14.4" />
+      <path d="M 7 17.4 L 16.2 8" />
+      <path d="M 9.8 14.6 L 9.8 10.6 M 12.6 11.8 L 14.6 12.2 M 8.4 16.2 L 7 14.6" />
     </svg>
   )
 }
