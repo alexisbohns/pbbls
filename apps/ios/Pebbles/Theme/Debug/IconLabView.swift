@@ -2,24 +2,40 @@
 import SwiftUI
 
 /// The icon lab (#1311), Settings → Developer, beside the stone and Spine
-/// labs: every base icon of `packages/icons` at a chosen size, with its
-/// twins (`active`, `lit-1…3`) beside it on a tap. Verbatim text throughout,
-/// so nothing reaches the string catalogue.
+/// labs: every glyph of `packages/icons` at a chosen size, in the form a
+/// picker chooses (regular, the `selected` or `done` token, marked), with all
+/// of its forms beside it on a tap. Verbatim text throughout, so nothing
+/// reaches the string catalogue.
 struct IconLabView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var side: CGFloat = 28
     @State private var query = ""
     @State private var onPrimary = false
-    @State private var picked: PbblsIcon?
+    @State private var picked: PbblsGlyph?
+    @State private var shows: Shown = .regular
 
-    /// One case per manifest row: the bases, in manifest order.
-    private var bases: [PbblsIcon] {
-        PbblsIcon.allCases.filter { !$0.rawValue.contains(".") }
+    /// What the grid draws for each glyph.
+    private enum Shown: String, CaseIterable, Identifiable {
+        case regular = "Regular", selected = "Selected", done = "Done", marked = "Marked"
+        var id: String { rawValue }
     }
 
-    private var shown: [PbblsIcon] {
+    private var glyphs: [PbblsGlyph] { PbblsGlyph.allCases }
+
+    private var shown: [PbblsGlyph] {
         let q = query.trimmingCharacters(in: .whitespaces).lowercased()
-        return q.isEmpty ? bases : bases.filter { $0.rawValue.contains(q) }
+        return q.isEmpty ? glyphs : glyphs.filter { $0.rawValue.contains(q) }
+    }
+
+    /// The form a glyph takes under the picker: the state tokens resolve per glyph,
+    /// and `Marked` falls back to regular when the glyph has no mark.
+    private func shownForm(_ glyph: PbblsGlyph) -> GlyphForm {
+        switch shows {
+        case .regular: .regular
+        case .selected: glyph.form(for: .selected)
+        case .done: glyph.form(for: .done)
+        case .marked: glyph.forms.contains(.marked) ? .marked : .regular
+        }
     }
 
     private var ink: Color { onPrimary ? Color.pebbles.onPrimary : Color.pebbles.onSurface }
@@ -33,7 +49,7 @@ struct IconLabView: View {
                     ForEach(shown, id: \.self) { icon in
                         Button { picked = icon } label: {
                             VStack(spacing: 4) {
-                                PbblsIconImage(icon, size: side)
+                                PbblsGlyphView(icon, size: side, form: shownForm(icon))
                                     .foregroundStyle(ink)
                                     .frame(width: side + 16, height: side + 16)
                                     .background(paper, in: RoundedRectangle(cornerRadius: 8))
@@ -59,6 +75,10 @@ struct IconLabView: View {
                             .frame(width: 44, alignment: .leading)
                         Slider(value: $side, in: 16...72, step: 2)
                     }
+                    Picker(selection: $shows) {
+                        ForEach(Shown.allCases) { Text(verbatim: $0.rawValue).tag($0) }
+                    } label: { Text(verbatim: "Form") }
+                    .pickerStyle(.segmented)
                     HStack(spacing: Spacing.xs) {
                         ForEach(PbblsIconSize.allCases, id: \.rawValue) { size in
                             Button {
@@ -81,7 +101,7 @@ struct IconLabView: View {
                 .padding(.vertical, Spacing.xs)
                 .background(.bar)
             }
-            .navigationTitle(Text(verbatim: "Icon lab · \(shown.count)/\(bases.count)"))
+            .navigationTitle(Text(verbatim: "Icon lab · \(shown.count)/\(glyphs.count)"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -89,32 +109,31 @@ struct IconLabView: View {
                 }
             }
             .sheet(item: $picked) { icon in
-                twins(of: icon)
+                forms(of: icon)
                     .presentationDetents([.medium])
             }
         }
     }
 
-    /// The base and its twins at 48pt, each labelled, on paper and on primary.
-    private func twins(of icon: PbblsIcon) -> some View {
-        let family: [(String, PbblsIcon)] = [("base", icon)]
-            + (icon.activeTwin.map { [("active", $0)] } ?? [])
-            + (1...3).compactMap { n in icon.lit(n).map { ("lit-\(n)", $0) } }
-        return VStack(spacing: Spacing.md) {
-            Text(verbatim: icon.rawValue).font(.headline)
+    /// Every form the glyph has at 48pt, each captioned with its key, on paper and on primary.
+    private func forms(of glyph: PbblsGlyph) -> some View {
+        VStack(spacing: Spacing.md) {
+            Text(verbatim: glyph.rawValue).font(.headline)
             ForEach([false, true], id: \.self) { primary in
-                HStack(spacing: Spacing.md) {
-                    ForEach(family, id: \.1) { label, twin in
-                        VStack(spacing: 4) {
-                            PbblsIconImage(twin, size: 48)
-                                .foregroundStyle(primary ? Color.pebbles.onPrimary : Color.pebbles.onSurface)
-                            Text(verbatim: label).font(.system(size: 10))
-                                .foregroundStyle(primary ? Color.pebbles.onPrimary : Color.pebbles.onSurfaceVariant)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: Spacing.md) {
+                        ForEach(glyph.forms, id: \.key) { form in
+                            VStack(spacing: 4) {
+                                PbblsGlyphView(glyph, size: 48, form: form)
+                                    .foregroundStyle(primary ? Color.pebbles.onPrimary : Color.pebbles.onSurface)
+                                Text(verbatim: form.key).font(.system(size: 10))
+                                    .foregroundStyle(primary ? Color.pebbles.onPrimary : Color.pebbles.onSurfaceVariant)
+                            }
                         }
                     }
+                    .padding(Spacing.md)
+                    .frame(minWidth: 0)
                 }
-                .padding(Spacing.md)
-                .frame(maxWidth: .infinity)
                 .background(
                     primary ? Color.pebbles.primary : Color.pebbles.surface,
                     in: RoundedRectangle(cornerRadius: 12)
@@ -127,7 +146,7 @@ struct IconLabView: View {
     }
 }
 
-extension PbblsIcon: Identifiable {
+extension PbblsGlyph: Identifiable {
     var id: String { rawValue }
 }
 #endif
