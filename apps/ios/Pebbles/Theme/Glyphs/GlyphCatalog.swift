@@ -1,5 +1,6 @@
 import Foundation
 import os
+import UIKit
 
 /// `pbbls-glyphs.json`, loaded once (spec §2): off the main thread by
 /// `prewarm()` at launch, or synchronously under the lock by the first read
@@ -30,6 +31,18 @@ final class GlyphCatalog: @unchecked Sendable {
             return .empty
         }
         return data
+    }
+
+    private let images = NSCache<NSString, UIImage>()
+
+    /// A form drawn at `side` points (rounded up to a whole point), cached.
+    func image(_ glyph: PbblsGlyph, form: GlyphForm, side: CGFloat) -> UIImage {
+        let points = max(1, side.rounded(.up))
+        let key = "\(glyph.rawValue)|\(form.key)|\(Int(points))" as NSString
+        if let cached = images.object(forKey: key) { return cached }
+        let image = GlyphRenderer.draw(GlyphRenderer.render(self.glyph(glyph), form), side: points)
+        images.setObject(image, forKey: key)
+        return image
     }
 
     private func loaded() -> GlyphFile {

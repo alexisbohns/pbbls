@@ -1,3 +1,5 @@
+import UIKit
+
 /// `renderForm` and `resolveState` from `packages/icons/scripts/lib`, in Swift.
 /// The forms contract (`GlyphFormsContractTests`) holds them equal.
 enum GlyphRenderer {
@@ -62,5 +64,37 @@ enum GlyphRenderer {
             }
         }
         return .regular
+    }
+}
+
+extension GlyphRenderer {
+    /// Draws paths on the 24-unit square, scaled to `side` points at 3×, as a
+    /// template image: fill then stroke per path, in order, as SVG paints them,
+    /// with the 1.75 stroke, round caps and joins.
+    static func draw(_ paths: [RenderedPathData], side: CGFloat) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 3
+        format.opaque = false
+        let image = UIGraphicsImageRenderer(size: CGSize(width: side, height: side), format: format).image { context in
+            let cg = context.cgContext
+            cg.scaleBy(x: side / 24, y: side / 24)
+            cg.setFillColor(UIColor.black.cgColor)
+            cg.setStrokeColor(UIColor.black.cgColor)
+            cg.setLineWidth(1.75)
+            cg.setLineCap(.round)
+            cg.setLineJoin(.round)
+            for path in paths {
+                let shape = GlyphPathParser.cgPath(path.d)
+                if path.fill {
+                    cg.addPath(shape)
+                    cg.fillPath(using: path.evenOdd ? .evenOdd : .winding)
+                }
+                if path.stroke {
+                    cg.addPath(shape)
+                    cg.strokePath()
+                }
+            }
+        }
+        return image.withRenderingMode(.alwaysTemplate)
     }
 }

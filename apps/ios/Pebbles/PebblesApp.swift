@@ -19,6 +19,7 @@ struct PebblesApp: App {
     @State private var momentsRevision = MomentsRevision()
 
     init() {
+        GlyphCatalog.shared.prewarm()
         let supabase = SupabaseService()
         let palettes = EmotionPaletteService(client: supabase.client)
         let refs = ReferenceDataService(client: supabase.client)
