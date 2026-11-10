@@ -71,3 +71,58 @@ export function isClosed(sub: Subpath): boolean {
   if (!first || !last || sub.points.length < 3) return false
   return Math.hypot(first[0] - last[0], first[1] - last[1]) <= CLOSE_GAP
 }
+
+function distanceToSegment(p: Pt, a: Pt, b: Pt): number {
+  const dx = b[0] - a[0]
+  const dy = b[1] - a[1]
+  const len2 = dx * dx + dy * dy
+  if (len2 === 0) return Math.hypot(p[0] - a[0], p[1] - a[1])
+  const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2))
+  return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy))
+}
+
+/** Douglas–Peucker on an open chain: its ends always stay. */
+function douglasPeucker(points: readonly Pt[], tolerance: number): Pt[] {
+  const first = points[0]
+  const last = points[points.length - 1]
+  if (first === undefined || last === undefined || points.length < 3) return [...points]
+  let index = -1
+  let max = 0
+  for (let i = 1; i < points.length - 1; i += 1) {
+    const p = points[i]
+    if (p === undefined) continue
+    const d = distanceToSegment(p, first, last)
+    if (d > max) {
+      max = d
+      index = i
+    }
+  }
+  if (index < 0 || max <= tolerance) return [first, last]
+  const left = douglasPeucker(points.slice(0, index + 1), tolerance)
+  const right = douglasPeucker(points.slice(index), tolerance)
+  return [...left.slice(0, -1), ...right]
+}
+
+/**
+ * A closed ring with every point dropped that lies within `tolerance` of the
+ * outline the remaining points draw: Douglas–Peucker on the two chains between
+ * its first point and the point farthest from it. A ring of four points or
+ * fewer, or one that would fall under three, is returned as it is.
+ */
+export function simplifyRing(ring: readonly Pt[], tolerance: number): Pt[] {
+  const start = ring[0]
+  if (start === undefined || ring.length <= 4) return [...ring]
+  let far = 0
+  let max = -1
+  ring.forEach((p, i) => {
+    const d = Math.hypot(p[0] - start[0], p[1] - start[1])
+    if (d > max) {
+      max = d
+      far = i
+    }
+  })
+  const a = douglasPeucker(ring.slice(0, far + 1), tolerance)
+  const b = douglasPeucker([...ring.slice(far), start], tolerance)
+  const out = [...a.slice(0, -1), ...b.slice(0, -1)]
+  return out.length >= 3 ? out : [...ring]
+}
