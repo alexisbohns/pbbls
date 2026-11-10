@@ -3,10 +3,10 @@
 import { Fragment, useMemo, useState } from "react"
 import { Android, Apple, Globe } from "@pbbls/icons"
 import type { FindingGroup } from "@/lib/design/audit"
-import { GLYPHS, describeSigns, glyphMatchesQuery, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Form, type Glyph, type GlyphView } from "@/lib/design/glyph-forms"
+import { GLYPHS, describeSigns, glyphMatchesQuery, inRound2, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Form, type Glyph, type GlyphView } from "@/lib/design/glyph-forms"
 import { ICON_ROWS, replacementsFor, type IconSurface } from "@/lib/design/icon-catalog"
 import { PBBLS_ICON_SIZE, type PbblsIconComponent, type PbblsIconSize } from "@/lib/icons/pbbls-icon"
-import { useReviewVerdicts, type Verdict } from "@/lib/design/useReviewVerdicts"
+import { needsWork, useReviewVerdicts, verdictLabel, type Verdict } from "@/lib/design/useReviewVerdicts"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useDesign } from "../DesignContext"
@@ -74,21 +74,21 @@ function GlyphTile({ glyph, size, form, view, verdict, noted, onVerdict, onOpen 
         aria-label={`Open ${glyph.name} (${describeSigns(signs)}): every form, its twins and its roles`}
         className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
-      {needsReview(glyph.name) && (
+      {(needsReview(glyph.name) || inRound2(glyph.name)) && (
         <button
           type="button"
           onClick={onVerdict}
-          aria-label={`Review ${glyph.name}: ${verdict ?? "no verdict"}${verdict === "fix" && !noted ? ", no note yet" : ""}`}
-          // px-1.5 keeps the longest label ("drop-twin") clear of the hover platform marks at the 8.5rem tile.
+          aria-label={`Review ${glyph.name}: ${verdict ? verdictLabel(verdict) : "no verdict"}${verdict === "fix" && !noted ? ", no note yet" : ""}`}
+          // px-1.5 keeps the longest label ("needs progress") clear of the hover platform marks at the 8.5rem tile.
           className={cn(
             "absolute top-2 left-2 z-10 rounded-full px-1.5 py-0.5 text-[10px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
             verdict === "ok" && "bg-primary text-primary-foreground",
-            verdict === "fix" && "bg-secondary text-secondary-foreground",
+            verdict !== undefined && verdict !== "ok" && verdict !== "drop-twin" && "bg-secondary text-secondary-foreground",
             verdict === "drop-twin" && "bg-muted text-muted-foreground line-through",
             verdict === undefined && "bg-primary/15 text-primary",
           )}
         >
-          {verdict ?? "review"}
+          {verdict ? verdictLabel(verdict) : "review"}
           {verdict === "fix" && (noted ? " ✎" : " · no note")}
         </button>
       )}
@@ -135,8 +135,8 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
     setOpenName(glyphs[(openIndex + by + glyphs.length) % glyphs.length].name)
   }
   const reviewed = glyphs.filter((g) => verdicts[g.name] !== undefined).length
-  const fixes = glyphs.filter((g) => verdicts[g.name] === "fix")
-  const noted = fixes.filter((g) => notes[g.name] !== undefined).length
+  const work = glyphs.filter((g) => needsWork(verdicts[g.name])).length
+  const noted = glyphs.filter((g) => needsWork(verdicts[g.name]) && notes[g.name] !== undefined).length
   const webPending = ICON_ROWS.filter((row) => row.replacesWeb.length > 0 && !row.migrated.includes("web"))
   const lucideUses = lucide.reduce((n, g) => n + g.count, 0)
 
@@ -147,7 +147,7 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
         {glyphShow !== "all" && (
           <div className="mb-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
             <span>
-              {reviewed} of {glyphs.length} reviewed · {noted} of {fixes.length} fixes noted · open a tile to see its forms and twins, set the verdict and say what a fix needs
+              {reviewed} of {glyphs.length} judged · {work} need work · {noted} fixes noted · open a tile to see its forms and twins, judge it with one key and say what a fix needs
             </span>
             <Button size="sm" variant="secondary" onClick={() => void copy()}>
               Copy verdicts

@@ -109,16 +109,10 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case usersLit3 = "users.lit-3"
     /// The souls in your life: three strands from one tie, each looping into a head.
     case abstractCrown = "abstract-crown"
-    /// The souls in your life: three strands from one tie, each looping into a head. (the `active` twin)
-    case abstractCrownActive = "abstract-crown.active"
     /// The souls in your life: three figures of falling height bound by one thong.
     case abstractFence = "abstract-fence"
-    /// The souls in your life: three figures of falling height bound by one thong. (the `active` twin)
-    case abstractFenceActive = "abstract-fence.active"
     /// The souls in your life: two coiled souls whose cords cross below into a heart.
     case abstractLoki = "abstract-loki"
-    /// The souls in your life: two coiled souls whose cords cross below into a heart. (the `active` twin)
-    case abstractLokiActive = "abstract-loki.active"
     /// The souls in your life: two hooks with lashing eyes, interlocked head to foot.
     case exchange = "exchange"
     /// The souls in your life: two hooks with lashing eyes, interlocked head to foot. (the `active` twin)
@@ -129,20 +123,14 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case dolmenActive = "dolmen.active"
     /// The souls in your life: two strands plied around each other.
     case dna = "dna"
-    /// The souls in your life: two strands plied around each other. (the `active` twin)
-    case dnaActive = "dna.active"
     /// Your pebbles gathered into sets: a shallow bowl holding three stones, one heaped on top.
     case collection = "collection"
     /// Your pebbles gathered into sets: a shallow bowl holding three stones, one heaped on top. (the `active` twin)
     case collectionActive = "collection.active"
     /// Your pebbles gathered into sets: a main cord with three pendants hanging from it.
     case pearl = "pearl"
-    /// Your pebbles gathered into sets: a main cord with three pendants hanging from it. (the `active` twin)
-    case pearlActive = "pearl.active"
     /// Your pebbles gathered into sets: a net bag gathered at the neck by a drawstring.
     case watermelon = "watermelon"
-    /// Your pebbles gathered into sets: a net bag gathered at the neck by a drawstring. (the `active` twin)
-    case watermelonActive = "watermelon.active"
     /// Your pebbles gathered into sets: a fairy ring of five small caps.
     case cromlech = "cromlech"
     /// Your pebbles gathered into sets: a fairy ring of five small caps. (the `active` twin)
@@ -255,8 +243,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case barbedWireActive = "barbed-wire.active"
     /// You, your own account: a cord with an eye splice and its whipping.
     case abstractKey = "abstract-key"
-    /// You, your own account: a cord with an eye splice and its whipping. (the `active` twin)
-    case abstractKeyActive = "abstract-key.active"
     /// You, your own account: a stone head over a shoulder arch, drawn with a heart's weight.
     case userHeart = "user-heart"
     /// You, your own account: a stone head over a shoulder arch, drawn with a heart's weight. (the `active` twin)
@@ -504,8 +490,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case peopleSendActive = "people-send.active"
     /// Swap: trade one thing for another.
     case exchangeMd = "exchange-md"
-    /// Swap: trade one thing for another. (the `active` twin)
-    case exchangeMdActive = "exchange-md.active"
     /// Swap: trade one thing for another.
     case stonesSwap = "stones-swap"
     /// Swap: trade one thing for another. (the `active` twin)
@@ -536,8 +520,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case cycleLinkActive = "cycle-link.active"
     /// Upload: a photo on its way up: a status, not a button.
     case uploadBox = "upload-box"
-    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
-    case uploadBoxActive = "upload-box.active"
     /// Upload: a photo on its way up: a status, not a button.
     case pictureSpeed = "picture-speed"
     /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
@@ -548,8 +530,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case uploadHalfCircleActive = "upload-half-circle.active"
     /// Upload: a photo on its way up: a status, not a button.
     case cloudUpload = "cloud-upload"
-    /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
-    case cloudUploadActive = "cloud-upload.active"
     /// Upload: a photo on its way up: a status, not a button.
     case stoneSpeed = "stone-speed"
     /// Upload: a photo on its way up: a status, not a button. (the `active` twin)
@@ -630,14 +610,8 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// set).
     case hookFish = "hook-fish"
     /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
-    /// set). (the `active` twin)
-    case hookFishActive = "hook-fish.active"
-    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
     /// set).
     case xHalfCircle = "x-half-circle"
-    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
-    /// set). (the `active` twin)
-    case xHalfCircleActive = "x-half-circle.active"
     /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
     /// set).
     case circleBroken = "circle-broken"
@@ -647,9 +621,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
     /// set).
     case arrowDownCut = "arrow-down-cut"
-    /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
-    /// set). (the `active` twin)
-    case arrowDownCutActive = "arrow-down-cut.active"
     /// Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one
     /// set).
     case circleDotExclamation = "circle-dot-exclamation"
@@ -718,8 +689,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case userCircleLgActive = "user-circle-lg.active"
     /// Secret: visibility: only me (a trio with private and public, drawn together).
     case eyeClosed = "eye-closed"
-    /// Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin)
-    case eyeClosedActive = "eye-closed.active"
     /// Secret: visibility: only me (a trio with private and public, drawn together).
     case pond = "pond"
     /// Secret: visibility: only me (a trio with private and public, drawn together). (the `active` twin)
@@ -1006,8 +975,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case bubblesAActive = "bubbles-a.active"
     /// Language: the tongue the app speaks; must read apart from public.
     case translationA = "translation-a"
-    /// Language: the tongue the app speaks; must read apart from public. (the `active` twin)
-    case translationAActive = "translation-a.active"
     /// Language: the tongue the app speaks; must read apart from public.
     case circleA = "circle-a"
     /// Language: the tongue the app speaks; must read apart from public. (the `active` twin)
@@ -1106,8 +1073,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case flowerTulipActive = "flower-tulip.active"
     /// Appearance dark: appearance: dark (trio).
     case stoneFacet = "stone-facet"
-    /// Appearance dark: appearance: dark (trio). (the `active` twin)
-    case stoneFacetActive = "stone-facet.active"
     /// Appearance dark: appearance: dark (trio).
     case toggleOnLabel = "toggle-on-label"
     /// Appearance dark: appearance: dark (trio). (the `active` twin)
@@ -1340,8 +1305,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case dolmenShineSmActive = "dolmen-shine-sm.active"
     /// Dolmen: the standing stone table, a monument.
     case slide = "slide"
-    /// Dolmen: the standing stone table, a monument. (the `active` twin)
-    case slideActive = "slide.active"
     /// Fossil: a life kept in stone.
     case karmaFossil = "karma-fossil"
     /// Fossil: a life kept in stone. (the `active` twin)
@@ -1600,8 +1563,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case setSquareActive = "set-square.active"
     /// Dashboard: an overview of numbers at a glance.
     case gauge = "gauge"
-    /// Dashboard: an overview of numbers at a glance. (the `active` twin)
-    case gaugeActive = "gauge.active"
     /// Dashboard: an overview of numbers at a glance.
     case scaleGauge = "scale-gauge"
     /// Dashboard: an overview of numbers at a glance. (the `active` twin)
@@ -1776,8 +1737,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case cardStoneActive = "card-stone.active"
     /// Paste: put it here.
     case squarePaste = "square-paste"
-    /// Paste: put it here. (the `active` twin)
-    case squarePasteActive = "square-paste.active"
     /// Paste: put it here.
     case noteStone = "note-stone"
     /// Paste: put it here. (the `active` twin)
@@ -2128,8 +2087,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case hillSunKActive = "hill-sun-k.active"
     /// Hill: a gentle rise of land.
     case hills = "hills"
-    /// Hill: a gentle rise of land. (the `active` twin)
-    case hillsActive = "hills.active"
     /// Hill: a gentle rise of land.
     case hillStoneGrass = "hill-stone-grass"
     /// Hill: a gentle rise of land. (the `active` twin)
@@ -3128,8 +3085,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case waveformBoldActive = "waveform-bold.active"
     /// Waveform: the shape of a sound.
     case signal = "signal"
-    /// Waveform: the shape of a sound. (the `active` twin)
-    case signalActive = "signal.active"
     /// Waveform: the shape of a sound.
     case waveformDots = "waveform-dots"
     /// Waveform: the shape of a sound. (the `active` twin)
@@ -3280,8 +3235,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case slashSlashDotActive = "slash-slash-dot.active"
     /// Url: a web address.
     case unsetInput = "unset-input"
-    /// Url: a web address. (the `active` twin)
-    case unsetInputActive = "unset-input.active"
     /// Url: a web address.
     case qrCode = "qr-code"
     /// Url: a web address. (the `active` twin)
@@ -3620,8 +3573,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case treeBallActive = "tree-ball.active"
     /// Tree: a broad-leaf tree.
     case treeBranches = "tree-branches"
-    /// Tree: a broad-leaf tree. (the `active` twin)
-    case treeBranchesActive = "tree-branches.active"
     /// Tree: a broad-leaf tree.
     case acorn = "acorn"
     /// Tree: a broad-leaf tree. (the `active` twin)

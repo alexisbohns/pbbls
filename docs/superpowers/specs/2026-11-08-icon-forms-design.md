@@ -41,11 +41,11 @@ The twin model names states, not drawings. `.active` covers anything from one li
 | `body` | 0 or 1 role (one or more paths, unioned) | the main shape, filled the way SVG fills a path: an open path closes with a straight segment (hand-drawn bodies rarely close) |
 | `body` with `data-part="<word>"` | 0, or 2…4 distinct parts | named pieces of the body that fill on their own (`dolmen`'s three stones, `moon-cloud`'s moon and cloud, `candle-simple`'s candle and flame). When one body path names a part, every body path does. A part is one lowercase word |
 | `mark` | 0 or 1 role (one or more paths) | the one accent that carries the meaning: `home`'s door dot, the bookmark's notch |
-| `step` with `data-step="1"…"n"` | 0…n (a number may span several paths) | a real sequence, in fill order: `stack`'s stones, `signal-dots`, `umbrella-above`'s drops |
+| `step` with `data-step="1"…"n"` | 0, or 2…n (a number may span several paths) | a real sequence, in fill order: `stack`'s stones, `signal-dots`, `umbrella-above`'s drops |
 
 An untagged path is a plain line. A glyph with no roles has only the regular form. A `mark` or `step` path may also carry `data-rest="hidden"`: it is not drawn at rest and appears filled when its role fills. This is the DNA's lit stone, a dot that the regular drawing does not have (`cromlech` at `progress(1)` shows its centre dot).
 
-Steps are for sequences only. Pieces that fill in any combination are parts; a single accent is the mark. The 2026-11 review found the guessed roles mixing the three (`circle-minus` at `progress(1)` read as a stop sign, `dolmen`'s stones lit in an order that means nothing), which is why they are separate roles.
+Steps are for sequences only, so a glyph never has a single step: one lit accent is the mark, one filled whole is the body (2026-11-09: the 166 single steps of the guess became 154 marks and 12 bodies). Pieces that fill in any combination are parts; a single accent is the mark. The 2026-11 review found the guessed roles mixing the three (`circle-minus` at `progress(1)` read as a stop sign, `dolmen`'s stones lit in an order that means nothing), which is why they are separate roles.
 
 **D3. Forms are worked out from roles.** A form is a fill, plus the mark when the glyph has one.
 

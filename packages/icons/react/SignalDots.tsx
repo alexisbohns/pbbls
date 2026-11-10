@@ -21,7 +21,6 @@ export function SignalDots({ size = 24, ...props }: PbblsIconProps) {
       {...props}
     >
       <path d="M2.6 14 L6 14 L7.4 9.4 L9 17.6 L10.4 14 L13.4 14 L14.8 9.4 L16.4 17.6 L17.8 14 L21.4 14" />
-      <path d="M7.4 5.6 L7.41 5.6 M14.8 5.6 L14.81 5.6" />
     </svg>
   )
 }

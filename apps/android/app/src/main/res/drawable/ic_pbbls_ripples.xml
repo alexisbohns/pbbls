@@ -13,14 +13,7 @@
         android:strokeLineJoin="round"
         android:fillColor="#00000000" />
     <path
-        android:pathData="M 14.57 7.55 C 14.94 7.93 16.32 8.92 16.77 9.83 C 17.21 10.75 17.45 12.05 17.24 13.03 C 17.03 14.01 16.28 15.04 15.52 15.73 C 14.77 16.43 13.71 17.05 12.71 17.21 C 11.71 17.37 10.44 17.17 9.52 16.7 C 8.61 16.23 7.67 15.32 7.22 14.4 C 6.77 13.48 6.66 12.22 6.82 11.19 C 6.97 10.16 7.45 8.98 8.16 8.23 C 8.86 7.48 10.58 6.93 11.06 6.67"
-        android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="1.75"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:fillColor="#00000000" />
-    <path
-        android:pathData="M 12 12 L 12.01 12"
+        android:pathData="M 14.57 7.55 C 14.94 7.93 16.32 8.92 16.77 9.83 C 17.21 10.75 17.45 12.05 17.24 13.03 C 17.03 14.01 16.28 15.04 15.52 15.73 C 14.77 16.43 13.71 17.05 12.71 17.21 C 11.71 17.37 10.44 17.17 9.52 16.7 C 8.61 16.23 7.67 15.32 7.22 14.4 C 6.77 13.48 6.66 12.22 6.82 11.19 C 6.97 10.16 7.45 8.98 8.16 8.23 C 8.86 7.48 10.58 6.93 11.06 6.67 M 12 12 L 12.01 12"
         android:strokeColor="#FFFFFFFF"
         android:strokeWidth="1.75"
         android:strokeLineCap="round"

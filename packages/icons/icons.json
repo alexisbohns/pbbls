@@ -228,7 +228,7 @@
     {
       "name": "abstract-crown",
       "meaning": "The souls in your life: three strands from one tie, each looping into a head.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
@@ -237,7 +237,7 @@
     {
       "name": "abstract-fence",
       "meaning": "The souls in your life: three figures of falling height bound by one thong.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
@@ -246,7 +246,7 @@
     {
       "name": "abstract-loki",
       "meaning": "The souls in your life: two coiled souls whose cords cross below into a heart.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
@@ -273,7 +273,7 @@
     {
       "name": "dna",
       "meaning": "The souls in your life: two strands plied around each other.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
@@ -291,7 +291,7 @@
     {
       "name": "pearl",
       "meaning": "Your pebbles gathered into sets: a main cord with three pendants hanging from it.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
@@ -300,7 +300,7 @@
     {
       "name": "watermelon",
       "meaning": "Your pebbles gathered into sets: a net bag gathered at the neck by a drawstring.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
@@ -525,7 +525,7 @@
     {
       "name": "abstract-key",
       "meaning": "You, your own account: a cord with an eye splice and its whipping.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-10-foundation",
       "status": "candidate",
       "migrated": [],
@@ -1209,7 +1209,7 @@
     {
       "name": "exchange-md",
       "meaning": "Swap: trade one thing for another.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -1281,7 +1281,7 @@
     {
       "name": "upload-box",
       "meaning": "Upload: a photo on its way up: a status, not a button.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -1308,7 +1308,7 @@
     {
       "name": "cloud-upload",
       "meaning": "Upload: a photo on its way up: a status, not a button.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -1479,7 +1479,7 @@
     {
       "name": "hook-fish",
       "meaning": "Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set).",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -1488,7 +1488,7 @@
     {
       "name": "x-half-circle",
       "meaning": "Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set).",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -1506,7 +1506,7 @@
     {
       "name": "arrow-down-cut",
       "meaning": "Load failed: something went wrong: a load that failed (error family, drawn with link-broken and page-gone as one set).",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -1659,7 +1659,7 @@
     {
       "name": "eye-closed",
       "meaning": "Secret: visibility: only me (a trio with private and public, drawn together).",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -2307,7 +2307,7 @@
     {
       "name": "translation-a",
       "meaning": "Language: the tongue the app speaks; must read apart from public.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -2505,7 +2505,7 @@
     {
       "name": "stone-facet",
       "meaning": "Appearance dark: appearance: dark (trio).",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -2991,7 +2991,7 @@
     {
       "name": "slide",
       "meaning": "Dolmen: the standing stone table, a monument.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -3576,7 +3576,7 @@
     {
       "name": "gauge",
       "meaning": "Dashboard: an overview of numbers at a glance.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -3972,7 +3972,7 @@
     {
       "name": "square-paste",
       "meaning": "Paste: put it here.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -4764,7 +4764,7 @@
     {
       "name": "hills",
       "meaning": "Hill: a gentle rise of land.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -7014,7 +7014,7 @@
     {
       "name": "signal",
       "meaning": "Waveform: the shape of a sound.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -7356,7 +7356,7 @@
     {
       "name": "unset-input",
       "meaning": "Url: a web address.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],
@@ -8121,7 +8121,7 @@
     {
       "name": "tree-branches",
       "meaning": "Tree: a broad-leaf tree.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],

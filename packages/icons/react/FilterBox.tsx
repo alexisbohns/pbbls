@@ -20,8 +20,7 @@ export function FilterBox({ size = 24, ...props }: PbblsIconProps) {
       focusable="false"
       {...props}
     >
-      <path d="M5 3.6 L19 3.6 L13.4 9.6 L13.4 12.4 M10.6 12.4 L10.6 9.6 L5.6 4.2" />
-      <path d="M7 13.6 L7 20.4 L17 20.4 L17 13.6" />
+      <path d="M5 3.6 L19 3.6 L13.4 9.6 L13.4 13.6 L17 13.6 L17 20.4 L7 20.4 L7 13.6 L10.6 13.6 L10.6 9.6 L5.6 4.2" />
       <path d="M7.2 17.4 C10.4 17.2 13.6 17.6 16.8 17.4" />
     </svg>
   )

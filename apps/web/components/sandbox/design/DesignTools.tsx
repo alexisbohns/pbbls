@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { COLOR_WORLDS } from "@/lib/config/color-worlds"
 import { CANVAS_ZOOMS, type CanvasZoom, type DeviceChoice } from "@/lib/design/devices"
 import { GLYPHS, glyphMatchesQuery, isDefaultView, showsGlyph, viewMatches, type FillFilter, type GlyphShow, type GlyphView, type MarkFilter } from "@/lib/design/glyph-forms"
-import { useReviewVerdicts } from "@/lib/design/useReviewVerdicts"
+import { needsWork, useReviewVerdicts } from "@/lib/design/useReviewVerdicts"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import type { ColorWorld } from "@/lib/types"
 import type { DesignContrast, DesignMode, DesignTheme, DesignThemeName } from "@/lib/theme/design-theme"
@@ -65,7 +65,8 @@ const STEPS_OPTIONS: SelectOption<number>[] = [0, 1, 2, 3, 4, 5, 6, 7].map((k) =
 const SHOW_OPTIONS: SelectOption<GlyphShow>[] = [
   { value: "all", label: "All glyphs" },
   { value: "review", label: "Needs review" },
-  { value: "fix", label: "Marked fix" },
+  { value: "round2", label: "Round 2" },
+  { value: "fix", label: "Needs work" },
 ]
 
 const count = new Intl.NumberFormat("en")
@@ -110,7 +111,7 @@ export function DesignTools({ page, layout, ...s }: DesignToolsProps) {
   const matching = useMemo(() => {
     if (!filtering) return null
     const list = GLYPHS.filter((g) => glyphMatchesQuery(g, s.iconQuery) && showsGlyph(g.name, s.glyphShow, verdicts) && viewMatches(g, s.glyphView))
-    return { count: list.length, fixes: list.filter((g) => verdicts[g.name] === "fix").length }
+    return { count: list.length, work: list.filter((g) => needsWork(verdicts[g.name])).length }
   }, [filtering, s.iconQuery, s.glyphShow, s.glyphView, verdicts])
 
   return (
@@ -156,7 +157,7 @@ export function DesignTools({ page, layout, ...s }: DesignToolsProps) {
         <p aria-live="polite" className={cn(wide, "px-1 text-xs text-muted-foreground tabular-nums")}>
           {matching === null
             ? `${count.format(GLYPHS.length)} glyphs`
-            : `${count.format(matching.count)} of ${count.format(GLYPHS.length)} glyphs${matching.fixes > 0 ? ` · ${count.format(matching.fixes)} marked fix` : ""}`}
+            : `${count.format(matching.count)} of ${count.format(GLYPHS.length)} glyphs${matching.work > 0 ? ` · ${count.format(matching.work)} need work` : ""}`}
         </p>
       )}
     </div>

@@ -20,10 +20,8 @@ export function Destroy({ size = 24, ...props }: PbblsIconProps) {
       focusable="false"
       {...props}
     >
-      <path d="M 11.4 3.8 L 5.6 5 L 5.8 19 L 11.4 20.4" />
-      <path d="M 11.4 3.8 L 9.8 8 L 12.2 11.4 L 10 15.4 L 11.4 20.4" />
-      <path d="M 13.8 4 L 19 4.6 L 19.2 18.8 L 14.2 20" />
-      <path d="M 13.8 4 L 12.8 8.2 L 15 11.6 L 13 15.6 L 14.2 20" />
+      <path d="M 11.4 3.8 L 5.6 5 L 5.8 19 L 11.4 20.4 L 10 15.4 L 12.2 11.4 L 9.8 8 L 11.4 3.8" />
+      <path d="M 13.8 4 L 19 4.6 L 19.2 18.8 L 14.2 20 L 13 15.6 L 15 11.6 L 12.8 8.2 L 13.8 4" />
     </svg>
   )
 }

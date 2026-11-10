@@ -1,5 +1,8 @@
 import data from "@pbbls/icons/glyphs.json"
 import review from "@pbbls/icons/review.json"
+import round1 from "@pbbls/icons/verdicts.json"
+import round2 from "@pbbls/icons/round2.json"
+import { isVerdict, needsWork } from "./useReviewVerdicts"
 
 /**
  * The forms data the design page reviews (#1607, part 3): every glyph from the
@@ -36,7 +39,18 @@ export type Glyph = {
   overrides: Record<string, RenderedPath[]>
 }
 
-export const GLYPHS: readonly Glyph[] = data.glyphs as Glyph[]
+/**
+ * The generator writes every glyph in this shape (packages/icons/scripts/lib/forms.ts); TypeScript infers the JSON's
+ * literal keys per glyph (`parts-middle` on some, not others), which no cast can reconcile, so check the shape instead.
+ */
+function isGlyph(g: unknown): g is Glyph {
+  return (
+    typeof g === "object" && g !== null && "name" in g && typeof g.name === "string" && "paths" in g && Array.isArray(g.paths) && "carved" in g && typeof g.carved === "object"
+  )
+}
+
+const rawGlyphs: readonly unknown[] = data.glyphs
+export const GLYPHS: readonly Glyph[] = rawGlyphs.filter(isGlyph)
 
 export type Fill = { kind: "regular" } | { kind: "solid" } | { kind: "parts"; parts: string[] } | { kind: "progress"; k: number } | { kind: "dotted" }
 /** A form (spec D3): a fill, plus the mark when the glyph has one. */
@@ -214,12 +228,45 @@ export function needsReview(name: string): boolean {
   return FLAGGED.has(name)
 }
 
-/** Which glyphs the Icons page lists: every one, those the role pass flagged, or those the review marked fix. */
-export type GlyphShow = "all" | "review" | "fix"
+/** Which glyphs the Icons page lists: every one, those the role pass flagged, those redrawn since the first review, or those the review marked fix. */
+export type GlyphShow = "all" | "review" | "round2" | "fix"
+
+/** JSON imports carry a precise inferred type that no cast to ours can reconcile; read them as unknown and narrow. */
+const isStringRecord = (v: unknown): v is Record<string, string> => typeof v === "object" && v !== null && Object.values(v).every((x) => typeof x === "string")
+const rawRound2: unknown = round2
+const rawRound1: unknown = round1
+
+const ROUND2: ReadonlySet<string> = new Set(
+  typeof rawRound2 === "object" && rawRound2 !== null && "names" in rawRound2 && Array.isArray(rawRound2.names) ? rawRound2.names.filter((n): n is string => typeof n === "string") : [],
+)
+
+function round1Record(key: "verdicts" | "notes"): Readonly<Record<string, string>> {
+  if (typeof rawRound1 !== "object" || rawRound1 === null) return {}
+  const record: unknown = Reflect.get(rawRound1, key)
+  return isStringRecord(record) ? record : {}
+}
+
+const ROUND1_VERDICTS = round1Record("verdicts")
+const ROUND1_NOTES = round1Record("notes")
+
+/** The first review (2026-11-09): its verdict and, for a fix, what the maintainer asked for. */
+export function firstReview(name: string): { verdict: string | undefined; note: string | undefined } {
+  return { verdict: ROUND1_VERDICTS[name], note: ROUND1_NOTES[name] }
+}
+
+/** Glyphs redrawn since the first review, handed back for a second one. */
+export function inRound2(name: string): boolean {
+  return ROUND2.has(name)
+}
 
 export function showsGlyph(name: string, show: GlyphShow, verdicts: Readonly<Record<string, string>>): boolean {
   if (show === "review") return FLAGGED.has(name)
-  if (show === "fix") return verdicts[name] === "fix"
+  if (show === "round2") return ROUND2.has(name)
+  if (show === "fix") {
+    // The "fix" option lists every glyph whose verdict asks for work, whatever the verdict.
+    const v = verdicts[name]
+    return isVerdict(v) && needsWork(v)
+  }
   return true
 }
 

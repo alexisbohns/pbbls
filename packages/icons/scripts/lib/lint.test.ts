@@ -142,12 +142,12 @@ describe("roles and overrides", () => {
   const BODY = '<path d="M4 4 L20 4 L20 20 L4 20 Z" data-role="body"/>'
 
   it("accepts role attributes", () => {
-    const files = { "ring.svg": svg(BODY, '<path d="M8 12 L16 12" data-role="step" data-step="1"/>') }
+    const files = { "ring.svg": svg(BODY, '<path d="M8 12 L16 12" data-role="step" data-step="1"/>', '<path d="M8 15 L16 15" data-role="step" data-step="2"/>') }
     expect(run({ manifest: { icons: [row("ring")] }, files }).errors).toEqual([])
   })
 
   it("accepts a hidden mark and reports a misplaced data-rest", () => {
-    const hidden = '<path d="M10 10 L11 11" data-role="step" data-step="1" data-rest="hidden"/>'
+    const hidden = '<path d="M10 10 L11 11" data-role="mark" data-rest="hidden"/>'
     expect(run({ manifest: { icons: [row("ring")] }, files: { "ring.svg": svg(BODY, hidden) } }).errors).toEqual([])
     const bad = run({ manifest: { icons: [row("ring")] }, files: { "ring.svg": svg('<path d="M4 4 L20 4 L20 20 L4 20 Z" data-role="body" data-rest="hidden"/>') } }).errors.map((e) => e.message)
     expect(bad).toContain("path 1: data-rest is only allowed on a mark or step")

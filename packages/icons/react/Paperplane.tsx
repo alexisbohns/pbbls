@@ -21,7 +21,7 @@ export function Paperplane({ size = 24, ...props }: PbblsIconProps) {
       {...props}
     >
       <path d="M3 11.4 L21 4 L14.4 20 L11.6 13.2 L3.8 11.6" />
-      <path d="M11.6 13.2 L21 4" />
+      <path d="M11.6 13.2 L19 6" />
     </svg>
   )
 }

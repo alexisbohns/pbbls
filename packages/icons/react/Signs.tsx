@@ -21,8 +21,8 @@ export function Signs({ size = 24, ...props }: PbblsIconProps) {
       {...props}
     >
       <path d="M 12 21 L 12 3.8" />
-      <path d="M 12 6.2 L 18.4 6.2 L 20.6 8.2 L 18.4 10.2 L 12 10.2" />
       <path d="M 12 12.4 L 5.6 12.4 L 3.4 14.4 L 5.6 16.4 L 12 16.4" />
+      <path d="M 12 6.2 L 18.4 6.2 L 20.6 8.2 L 18.4 10.2 L 12 10.2" />
     </svg>
   )
 }

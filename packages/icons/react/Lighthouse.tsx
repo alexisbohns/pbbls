@@ -20,9 +20,9 @@ export function Lighthouse({ size = 24, ...props }: PbblsIconProps) {
       focusable="false"
       {...props}
     >
-      <path d="M8.6 20.4 L10 9.4 L14 9.4 L15.4 20.4" />
-      <path d="M9.4 9.2 L9.6 5.6 L14.4 5.6 L14.6 9.2" />
-      <path d="M10.4 5.4 L12 3 L13.6 5.4" />
+      <path d="M8.6 20.4 L10 9.4 L9.4 9.2 L9.6 5.6 L10.4 5.4 L12 3 L13.6 5.4 L14.4 5.6 L14.6 9.2 L14 9.4 L15.4 20.4" />
+      <path d="M10 9.4 L14 9.4 M9.6 5.6 L14.4 5.6" />
+      <path d="M12 7.5 L12.01 7.5" />
       <path d="M6.4 20.6 C10 20.8 14 20.5 17.6 20.7" />
       <path d="M3 5.4 L7 6.8 M3 9.6 L7 8.6 M21 5.4 L17 6.8 M21 9.6 L17 8.6" />
     </svg>

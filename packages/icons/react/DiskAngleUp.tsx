@@ -20,8 +20,8 @@ export function DiskAngleUp({ size = 24, ...props }: PbblsIconProps) {
       focusable="false"
       {...props}
     >
-      <path d="M5 4.6 L19 4.4 L19.4 19.6 L4.8 19.8 L4.9 5.6" />
-      <path d="M5.2 15.4 C9.6 15.1 14.4 15.6 19.1 15.2" />
+      <path d="M5.1 15.4 L4.9 5.6 L5 4.6 L19 4.4 L19.1 15.2 C14.4 15.6 9.6 15.1 5.1 15.4" />
+      <path d="M5.1 15.4 C9.6 15.1 14.4 15.6 19.1 15.2 L19.4 19.6 L4.8 19.8 L5.1 15.4" />
       <path d="M9.4 10.6 L12 8 L14.6 10.6" />
     </svg>
   )

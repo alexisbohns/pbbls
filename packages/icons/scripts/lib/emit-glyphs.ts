@@ -59,7 +59,9 @@ export function buildGlyph(row: IconRow, source: string, overrides: Record<strin
   // A mark or step with lines inside it would paint over them: store it carved like the solid.
   paths.forEach((p, i) => {
     if (p.role !== "mark" && p.role !== "step") return
-    const inner = paths.flatMap((q, j) => (j !== i && !q.hidden ? [j] : []))
+    // Paths of the same role fill together, so they never carve each other (a mark's dot inside its lit blob).
+    const together = (q: GlyphPath) => q.role === p.role && (p.role === "mark" || q.step === p.step)
+    const inner = paths.flatMap((q, j) => (j !== i && !q.hidden && !together(q) ? [j] : []))
     const carved = carveSolid([p.d], inner.map((j) => paths[j]?.d ?? ""))
     if (carved.keep.length === inner.length) return
     p.fill = carved.d
