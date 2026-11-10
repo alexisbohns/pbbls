@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { DEFAULT_VIEW, GLYPHS, describeSigns, firstReview, formChoices, formKey, formPaths, glyphForms, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Glyph } from "./glyph-forms"
+import { CATEGORIES, DEFAULT_VIEW, GLYPHS, describeSigns, firstReview, formChoices, formKey, formPaths, glyphForms, glyphInCategory, glyphMatchesQuery, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Glyph } from "./glyph-forms"
 
 const find = (test: (g: Glyph) => boolean, what: string): Glyph => {
   const g = GLYPHS.find(test)
@@ -104,5 +104,40 @@ describe("round 2", () => {
     expect(showsGlyph(touched.name, "round2", {})).toBe(true)
     expect(firstReview("home")).toEqual({ verdict: "fix", note: expect.stringContaining("solid") })
     expect(firstReview("path")).toEqual({ verdict: "ok", note: undefined })
+  })
+})
+
+describe("categories", () => {
+  it("reads the 35 categories in order, and every glyph sits in one to three known ones", () => {
+    expect(CATEGORIES).toHaveLength(35)
+    expect(CATEGORIES[0]?.id).toBe("stones")
+    const ids = new Set(CATEGORIES.map((c) => c.id))
+    expect(ids.size).toBe(CATEGORIES.length)
+    for (const g of GLYPHS) {
+      const list = g.tags.category ?? []
+      expect(list.length, g.name).toBeGreaterThanOrEqual(1)
+      expect(list.length, g.name).toBeLessThanOrEqual(3)
+      for (const id of list) expect(ids.has(id), `${g.name}: ${id}`).toBe(true)
+    }
+  })
+
+  it("filters to the glyphs whose categories include the one picked", () => {
+    const sky = GLYPHS.filter((g) => glyphInCategory(g, "sky"))
+    expect(sky.length).toBeGreaterThan(40)
+    expect(sky.every((g) => g.tags.category?.includes("sky"))).toBe(true)
+    expect(GLYPHS.every((g) => glyphInCategory(g, "all"))).toBe(true)
+    const pointer = GLYPHS.find((g) => g.name === "cursor-pointer")
+    expect(pointer && glyphInCategory(pointer, "devices")).toBe(true)
+    expect(pointer && glyphInCategory(pointer, "sky")).toBe(false)
+  })
+
+  it("searches category labels too: weather finds sky glyphs", () => {
+    const sun = GLYPHS.find((g) => g.tags.category?.[0] === "sky")
+    if (!sun) throw new Error("no sky glyph")
+    expect(glyphMatchesQuery(sun, "weather")).toBe(true)
+    expect(glyphMatchesQuery(sun, "WEATHER")).toBe(true)
+    expect(GLYPHS.filter((g) => glyphMatchesQuery(g, "weather")).length).toBeGreaterThanOrEqual(GLYPHS.filter((g) => g.tags.category?.includes("sky")).length)
+    const plant = GLYPHS.find((g) => g.tags.category?.[0] === "plants")
+    expect(plant && glyphMatchesQuery(plant, "weather")).toBe(false)
   })
 })

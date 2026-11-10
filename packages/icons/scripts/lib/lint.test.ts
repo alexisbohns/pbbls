@@ -11,6 +11,7 @@ const row = (name: string, variants: string[] = [], extra: Record<string, unknow
   name,
   meaning: `${name}.`,
   variants,
+  tags: { category: ["sky"] },
   wave: WAVE,
   status: "candidate",
   migrated: [],
@@ -27,14 +28,17 @@ const CARVED = '<path d="M4 4 L20 4 L20 20 L4 20 Z M10 10 L14 10 L14 14 L10 14 Z
 const BASE = svg(STROKE)
 const TWIN = svg(STROKE, STONE)
 
-type Fixture = { manifest?: unknown; files?: Record<string, string>; wave?: boolean }
+const CATEGORIES = { categories: [{ id: "sky", label: "Sky", description: "The sky." }, { id: "water", label: "Water", description: "Water." }] }
 
-function run({ manifest, files, wave = true }: Fixture): LintResult {
+type Fixture = { manifest?: unknown; files?: Record<string, string>; wave?: boolean; categories?: unknown }
+
+function run({ manifest, files, wave = true, categories = CATEGORIES }: Fixture): LintResult {
   const root = mkdtempSync(join(tmpdir(), "icons-lint-"))
   mkdirSync(join(root, "src"))
   if (wave) mkdirSync(join(root, "waves", WAVE), { recursive: true })
   const json = manifest ?? { icons: [row("home", ["active"]), row("trash")] }
   writeFileSync(join(root, "icons.json"), JSON.stringify(json))
+  if (categories !== null) writeFileSync(join(root, "categories.json"), typeof categories === "string" ? categories : JSON.stringify(categories))
   const sources = files ?? { "home.svg": BASE, "home.active.svg": TWIN, "trash.svg": BASE }
   for (const [name, text] of Object.entries(sources)) writeFileSync(join(root, "src", name), text)
   return lint(root)
@@ -123,6 +127,30 @@ describe("lint", () => {
     it("an unknown status", () => {
       const r = run({ manifest: { icons: [row("home", ["active"]), row("trash", [], { status: "done" })] } })
       expect(r.errors.map((e) => e.message)).toEqual(['trash: unknown status "done"'])
+    })
+    it("a row without a category", () => {
+      const r = run({ manifest: { icons: [row("home", ["active"]), row("trash", [], { tags: {} })] } })
+      expect(r.errors).toEqual([{ file: "icons.json", rule: "category", message: "trash: no tags.category (1 to 3 ids from categories.json)" }])
+    })
+    it("an unknown category", () => {
+      const r = run({ manifest: { icons: [row("home", ["active"]), row("trash", [], { tags: { category: ["sky", "weather"] } })] } })
+      expect(r.errors.map((e) => e.message)).toEqual(['trash: unknown category "weather"'])
+    })
+    it("more than three, or repeated, categories", () => {
+      const four = { tags: { category: ["sky", "water", "sky", "water"] } }
+      const r = run({ manifest: { icons: [row("home", ["active"]), row("trash", [], four)] } })
+      expect(r.errors.map((e) => e.message)).toEqual(["trash: 4 categories, at most 3", 'trash: category "sky" twice', 'trash: category "water" twice'])
+    })
+    it("an exploring row needs no category", () => {
+      const r = run({ manifest: { icons: [row("home", ["active"]), row("trash", [], { status: "exploring", tags: {} })] } })
+      expect(r.errors).toEqual([])
+    })
+    it("a missing or malformed categories.json", () => {
+      expect(run({ categories: null }).errors.map((e) => e.message)).toEqual([expect.stringContaining("categories.json")])
+      expect(run({ categories: "{" }).errors[0]?.rule).toBe("category")
+      expect(run({ categories: { categories: [{ id: "sky", label: "Sky" }] } }).errors[0]?.message).toContain("description")
+      const dup = { categories: [{ id: "sky", label: "A", description: "a" }, { id: "sky", label: "B", description: "b" }] }
+      expect(run({ categories: dup }).errors[0]?.message).toContain('"sky" is listed twice')
     })
     it("a malformed manifest, once", () => {
       const r = run({ manifest: { icons: [{ name: 3 }] } })

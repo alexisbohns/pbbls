@@ -67,7 +67,7 @@ A filled mark or step is carved like the solid: the lines inside it are outlined
 
 **D4. Overrides.** `src/<name>.<form>.svg`, `<form>` being a form key from D3 other than `regular` and `dotted`, replaces a worked-out form whose result looks wrong. It must keep the base's viewBox and the DNA rules, and may exist only for a form the glyph has. The design page flags every override. `src/<name>.dotted.svg` is not an override: it creates the `dotted` form. It follows the DNA and carries no role and no fill.
 
-**D5. Manifest.** `icons.json` rows: `name`, `meaning`, `family` (optional: groups versions of one idea, e.g. `knot` for `knot-sm` and `knot-lg`), `tags`, `wave`, `status`, `migrated`, `replaces`. `variants` is removed. `tags` is an object of optional arrays: `subject`, `wrapper`, `number`, `side`, `direction`, `size`, `keywords`. Code never reads `family` or `tags`; the design page searches and filters by them.
+**D5. Manifest.** `icons.json` rows: `name`, `meaning`, `family` (optional: groups versions of one idea, e.g. `knot` for `knot-sm` and `knot-lg`), `tags`, `wave`, `status`, `migrated`, `replaces`. `variants` is removed. `tags` is an object of optional arrays: `subject`, `wrapper`, `number`, `side`, `direction`, `size`, `keywords`, `category` (1–3 ids from `packages/icons/categories.json`, the first the main one). Code never reads `family` or `tags`; the design page searches and filters by them.
 
 **D6. State tokens.** `packages/icons/states.json` maps interaction states to an ordered list of forms; a surface takes the first form the glyph has:
 

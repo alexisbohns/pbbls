@@ -96,6 +96,11 @@ describe("icons.json replaces", () => {
     expect(parsed?.tags).toEqual({})
   })
 
+  it("reads a category tag", () => {
+    const row = { name: "a", meaning: "m", variants: [], wave: "w", status: "candidate", migrated: [], replaces: { ios: [], android: [], web: [] }, tags: { category: ["sky", "water"] } }
+    expect(parseManifest({ icons: [row] }).icons[0]?.tags).toEqual({ category: ["sky", "water"] })
+  })
+
   it("refuses an unknown tag key or a non-array tag", () => {
     const base = { name: "a", meaning: "m", variants: [], wave: "w", status: "candidate", migrated: [], replaces: { ios: [], android: [], web: [] } }
     expect(() => parseManifest({ icons: [{ ...base, tags: { colour: ["red"] } }] })).toThrow(/tags\.colour is not a tag key/)

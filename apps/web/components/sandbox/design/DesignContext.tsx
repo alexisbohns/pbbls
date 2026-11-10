@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react"
 import type { CanvasZoom, DeviceChoice } from "@/lib/design/devices"
-import type { GlyphShow, GlyphView } from "@/lib/design/glyph-forms"
+import type { CategoryFilter, GlyphShow, GlyphView } from "@/lib/design/glyph-forms"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import type { DesignTheme } from "@/lib/theme/design-theme"
 
@@ -21,6 +21,8 @@ export interface DesignContextValue {
   glyphView: GlyphView
   /** Which glyphs the Icons page lists: all, the flagged ones, or those marked fix. */
   glyphShow: GlyphShow
+  /** The Icons page's Category picker: `all` or a category id from packages/icons/categories.json. */
+  glyphCategory: CategoryFilter
 }
 
 const DesignContext = createContext<DesignContextValue | null>(null)
