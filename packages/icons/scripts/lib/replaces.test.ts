@@ -42,7 +42,7 @@ describe("lintReplaces · ios", () => {
     ],
   })
 
-  it("hits every bare literal form and skips the generated file and unmigrated rows", () => {
+  it("hits every bare literal form and skips the generated enums and unmigrated rows", () => {
     const root = repo({
       "apps/ios/Pebbles/A.swift": 'Image(systemName: "trash")\n',
       "apps/ios/Pebbles/B.swift": 'let x = done ? "trash" : "circle"\n',
@@ -51,6 +51,7 @@ describe("lintReplaces · ios", () => {
       "apps/ios/Pebbles/E.swift": '// the old "trash" symbol\n',
       "apps/ios/Pebbles/F.swift": 'Image(systemName: "house")\nImage(systemName: "trash.fill")\n',
       "apps/ios/Pebbles/Theme/PbblsIcon.swift": 'case trash = "trash"\n',
+      "apps/ios/Pebbles/Theme/PbblsGlyph.swift": 'case trash = "trash"\n',
       "apps/ios/PebblesTests/T.swift": 'let s = "trash"\n',
     })
     expect(where(lintReplaces(root, manifest))).toEqual([

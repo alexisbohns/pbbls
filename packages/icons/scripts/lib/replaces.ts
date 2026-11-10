@@ -42,7 +42,8 @@ export const TREES: Record<Surface, Tree> = {
     // Only the app target: `apps/ios/PebblesWidget` stays on SF Symbols for now.
     roots: ["apps/ios/Pebbles"],
     extensions: [".swift"],
-    skip: ["apps/ios/Pebbles/Theme/PbblsIcon.swift"],
+    // The generated enums: their raw values are glyph names, not SF Symbol literals.
+    skip: ["apps/ios/Pebbles/Theme/PbblsIcon.swift", "apps/ios/Pebbles/Theme/PbblsGlyph.swift"],
     read: { kind: "literal", pattern: (n: string) => new RegExp(`"${n}"`) },
   },
   android: {
