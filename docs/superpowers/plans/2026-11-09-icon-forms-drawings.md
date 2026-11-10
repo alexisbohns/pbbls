@@ -348,3 +348,20 @@ Each task commits on `chore/1607-icon-drawings` (`chore(ui): round 2 — <task>`
 |---|---|
 | R7 re-fixes | `home-hive` (widen the door so its hole reads empty in the solid; the mark just above the door, in marked and solid · marked), `baluchon` (mark at the centre of the circle), `broom` (solid fully filled, no white line), `paper-plane-trail` (no mark; today's marked becomes progress 1 of 2 steps, the whole plane step 2; a solid that reads), `megaphone-2` (solid · marked broken), `jail` (regular without the mark: hide it; redo the solids), `binoculars` (solid incorrect), `circle-leaf`, `leaf` (solid not ok), `obelisk` (solid · marked incorrect), `gem-stone-1` (no mark), `metronome`, `abstract-radar` (drop the mark, add a solid); drop-twin `slide` |
 | R8 solids and steps | solids: `stone-star`, `toggle-off-shine`, `screwdriver`, `stone-debounce`, `user-standing`, `book-stone`, `bookmark-stone`, `check-circle`, `plus-circle`, `hourglass-end`, `pendulum`, `abstract-pen`, `camera`, `camera-analogic`; steps: `circles-jointure`, `circles-jointure-2`, `chart-stones` |
+
+### Round 2, third export (2026-11-10): parallel batches
+
+`verdicts-round2.json` → `exports[2]`: the first export made with the keyboard verdicts (no comments). 248 glyphs need work: 185 `solid` (42 of them already have a solid that does not read as one: redraw the body so the whole silhouette fills), 36 `progress` (a real sequence of ≥2 steps), 26 `incorrect` (look at every form and find what is wrong: a solid that fills a sliver or blots out the drawing, a mark that breaks solid · marked, a step order that means nothing, a regular drawing that changed), 1 `drop-twin` (`gauge`).
+
+These run as parallel batches. Each batch edits only its own glyphs' sources, so the rules change:
+
+- edit only `packages/icons/src/<name>.svg` (and `<name>.<form>.svg` overrides) for the glyphs of your batch;
+- never run `generate`, `check`, `format`, or any git command that writes (no add, commit, stash, checkout, restore): the controller formats, generates and commits once all batches are back;
+- `npm run lint --workspace=@pbbls/icons` is shared: read only the lines naming your files, and ignore their `canonical` rule (the controller formats);
+- render your sheets under names prefixed with your batch id.
+
+| Batch | Glyphs |
+|---|---|
+| X1 incorrect | the 26 `incorrect` names in `exports[2]` |
+| X2 progress | the 36 `progress` names |
+| X3–X8 solids | the 185 `solid` names in `exports[2]` order, split in six slices of 31 (X8 has 30) |
