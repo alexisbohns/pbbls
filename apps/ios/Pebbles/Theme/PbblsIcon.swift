@@ -1305,8 +1305,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case dolmenShineSmActive = "dolmen-shine-sm.active"
     /// Dolmen: the standing stone table, a monument.
     case slide = "slide"
-    /// Dolmen: the standing stone table, a monument. (the `active` twin)
-    case slideActive = "slide.active"
     /// Fossil: a life kept in stone.
     case karmaFossil = "karma-fossil"
     /// Fossil: a life kept in stone. (the `active` twin)

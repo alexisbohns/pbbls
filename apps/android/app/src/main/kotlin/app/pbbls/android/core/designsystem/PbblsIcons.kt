@@ -1941,9 +1941,6 @@ enum class PbblsIcon(
     /** Dolmen: the standing stone table, a monument. */
     SLIDE("slide"),
 
-    /** Dolmen: the standing stone table, a monument. (the `active` twin) */
-    SLIDE_ACTIVE("slide.active"),
-
     /** Fossil: a life kept in stone. */
     KARMA_FOSSIL("karma-fossil"),
 
@@ -6314,7 +6311,6 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_dolmen_shine_sm,
         R.drawable.ic_pbbls_dolmen_shine_sm_active,
         R.drawable.ic_pbbls_slide,
-        R.drawable.ic_pbbls_slide_active,
         R.drawable.ic_pbbls_karma_fossil,
         R.drawable.ic_pbbls_karma_fossil_active,
         R.drawable.ic_pbbls_circle_leaf,
@@ -6687,11 +6683,11 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_stone_bowl,
         R.drawable.ic_pbbls_stone_bowl_active,
         R.drawable.ic_pbbls_rock_lg,
+        R.drawable.ic_pbbls_rock_lg_active,
     )
 
 private fun drawableIds2(): IntArray =
     intArrayOf(
-        R.drawable.ic_pbbls_rock_lg_active,
         R.drawable.ic_pbbls_rock_iso,
         R.drawable.ic_pbbls_rock_iso_active,
         R.drawable.ic_pbbls_rock,
@@ -7191,11 +7187,11 @@ private fun drawableIds2(): IntArray =
         R.drawable.ic_pbbls_vinyl_active,
         R.drawable.ic_pbbls_headset,
         R.drawable.ic_pbbls_headset_active,
+        R.drawable.ic_pbbls_blaster,
     )
 
 private fun drawableIds3(): IntArray =
     intArrayOf(
-        R.drawable.ic_pbbls_blaster,
         R.drawable.ic_pbbls_blaster_active,
         R.drawable.ic_pbbls_play_circle,
         R.drawable.ic_pbbls_play_circle_active,
