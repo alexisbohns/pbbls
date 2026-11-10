@@ -1372,11 +1372,11 @@ Read each site before editing; if one draws something other than what the table 
 - [ ] **Step 4: Prove nothing is left.** From `apps/ios`:
 
 ```bash
-grep -rnE '\bPbblsIcon\b|PbblsIconImage|activeTwin|\.lit\(|assetName' --include='*.swift' Pebbles PebblesTests \
-  | grep -vE 'Theme/PbblsIcon\.swift|Theme/Icon\+Pebbles\.swift|Theme/Debug/IconLabView\.swift|PbblsIcon(Size)?Tests\.swift|IconSheetReferences\.swift|PebblesColors\.swift'
+grep -rnE '\bPbblsIcon\b|PbblsIconImage|activeTwin|icon\.assetName|\.lit\([0-9]' --include='*.swift' Pebbles PebblesTests \
+  | grep -vE 'Theme/PbblsIcon\.swift|Theme/Icon\+Pebbles\.swift|Theme/Debug/IconLabView\.swift|PbblsIcon(Size)?Tests\.swift|IconSheetReferences\.swift'
 ```
 
-Expected: no output. Then `swiftlint`, the full unit suite except references: `xcodebuild test … -skip-testing:PebblesTests/References` — PASS (references are Task 10, on CI).
+Expected: no output. (`Valence.assetName`, the colour roles' `assetName` and `GuideSeals.lit(_:_:)` are not icons; the pattern leaves them out.) Then `swiftlint`, the full unit suite except references: `xcodebuild test … -skip-testing:PebblesTests/References` — PASS (references are Task 10, on CI).
 
 - [ ] **Step 5: Look at it.** Build and run on the simulator (`xcrun simctl` install/launch as in the iOS device-deploy memory, or Xcode): sign-in screen, then with the maintainer's throwaway account if one is open — the tab bar (each tab selected once), Collections' swipe-to-delete (the trash icon must show in the swipe action), onboarding's promise and reasons steps if reachable. Screenshot the tab bar with each tab selected. If the swipe action shows no icon, stop and report.
 
