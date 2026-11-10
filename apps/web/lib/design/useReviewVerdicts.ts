@@ -2,18 +2,40 @@
 
 import { useCallback, useMemo, useSyncExternalStore } from "react"
 
-/** The maintainer's verdict on a flagged glyph (#1607 review). */
-export type Verdict = "ok" | "fix" | "drop-twin"
+/** The maintainer's verdict on a glyph (#1607 review), in the order the dialog's footer lists them. */
+export const VERDICTS = ["ok", "progress", "solid", "mark", "drop-twin", "incorrect", "fix"] as const
+export type Verdict = (typeof VERDICTS)[number]
 
-const ORDER: readonly Verdict[] = ["ok", "fix", "drop-twin"]
+/** One key per verdict in the review dialog; every key but F moves on to the next glyph. */
+export const VERDICT_KEYS: Readonly<Record<string, Verdict>> = { " ": "ok", p: "progress", s: "solid", m: "mark", d: "drop-twin", i: "incorrect", f: "fix" }
 
-export function nextVerdict(current: Verdict | undefined): Verdict | undefined {
-  if (current === undefined) return ORDER[0]
-  return ORDER[ORDER.indexOf(current) + 1]
+const LABELS: Readonly<Record<Verdict, string>> = {
+  ok: "ok",
+  progress: "needs progress",
+  solid: "needs a solid",
+  mark: "add a mark",
+  "drop-twin": "drop twin",
+  incorrect: "incorrect",
+  fix: "fix",
 }
 
-function isVerdict(v: unknown): v is Verdict {
-  return v === "ok" || v === "fix" || v === "drop-twin"
+export function verdictLabel(v: Verdict): string {
+  return LABELS[v]
+}
+
+export function isVerdict(v: unknown): v is Verdict {
+  return typeof v === "string" && (VERDICTS as readonly string[]).includes(v)
+}
+
+/** Every verdict but ok asks for a change. */
+export function needsWork(v: Verdict | undefined): boolean {
+  return v !== undefined && v !== "ok"
+}
+
+/** The tile pill cycles: none → ok → … → fix → none. */
+export function nextVerdict(current: Verdict | undefined): Verdict | undefined {
+  if (current === undefined) return VERDICTS[0]
+  return VERDICTS[VERDICTS.indexOf(current) + 1]
 }
 
 /** A JSON object of `name → T` read back from storage, dropping any entry `keep` refuses. */
@@ -74,17 +96,17 @@ function localStore(key: string) {
   }
 }
 
-const VERDICTS = localStore("pbbls-glyph-review-v2")
+const VERDICT_STORE = localStore("pbbls-glyph-review-v2")
 const NOTES = localStore("pbbls-glyph-review-notes-v2")
 const serverSnapshot = () => null
 
 /**
  * Verdicts, and a note per glyph saying what a fix needs, kept in this browser
- * only; `copy` puts both on the clipboard as JSON (notes only for glyphs still
- * marked fix).
+ * only; `copy` puts both on the clipboard as JSON (notes only for glyphs that
+ * still need work).
  */
 export function useReviewVerdicts() {
-  const rawVerdicts = useSyncExternalStore(VERDICTS.subscribe, VERDICTS.getSnapshot, serverSnapshot)
+  const rawVerdicts = useSyncExternalStore(VERDICT_STORE.subscribe, VERDICT_STORE.getSnapshot, serverSnapshot)
   const rawNotes = useSyncExternalStore(NOTES.subscribe, NOTES.getSnapshot, serverSnapshot)
   const verdicts = useMemo(() => parseRecord(rawVerdicts, isVerdict), [rawVerdicts])
   // A note being typed may be blank for a moment, so the store keeps any string; readers see the non-blank ones.
@@ -95,7 +117,7 @@ export function useReviewVerdicts() {
       const next = { ...verdicts }
       if (verdict) next[name] = verdict
       else delete next[name]
-      VERDICTS.write(next)
+      VERDICT_STORE.write(next)
     },
     [verdicts],
   )
@@ -114,8 +136,8 @@ export function useReviewVerdicts() {
     [rawNotes],
   )
   const copy = useCallback(async () => {
-    const fixNotes = Object.fromEntries(Object.entries(notes).filter(([name]) => verdicts[name] === "fix"))
-    await navigator.clipboard.writeText(JSON.stringify({ round: 2, verdicts, notes: fixNotes, copiedAt: new Date().toISOString() }, null, 1))
+    const workNotes = Object.fromEntries(Object.entries(notes).filter(([name]) => needsWork(verdicts[name])))
+    await navigator.clipboard.writeText(JSON.stringify({ round: 2, verdicts, notes: workNotes, copiedAt: new Date().toISOString() }, null, 1))
   }, [verdicts, notes])
   return { verdicts, notes, set, cycle, setNote, draft, copy }
 }
