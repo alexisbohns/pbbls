@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { describe, expect, it } from "vitest"
-import { buildGlyph, loadGlyphs } from "./emit-glyphs"
+import { buildGlyph, CONTRACT_GLYPHS, formsContract, loadGlyphs } from "./emit-glyphs"
 import { formsOf, renderForm } from "./forms"
 import { filledArea } from "./lint"
 import type { IconRow } from "./manifest"
@@ -141,5 +141,34 @@ describe("loadGlyphs", () => {
     expect(ring ? formsOf(ring) : []).toEqual(["regular", "dotted"])
     expect(ring ? renderForm(ring, { fill: { kind: "dotted" } }) : []).toEqual(ring?.dotted)
     expect(Object.keys(ring?.overrides ?? {})).toEqual([])
+  })
+})
+
+describe("formsContract", () => {
+  const states = { rest: ["regular"], selected: ["solid", "progress-n", "marked", "regular"], progress: ["progress-k", "regular"] }
+  const home = buildGlyph(
+    { ...row, name: "home" },
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 20 L12 4 L20 20" data-role="body"/>
+  <path d="M11 17 L13 17" data-role="mark"/>
+</svg>`,
+    {},
+  )
+
+  it("lists each glyph's forms, renders every one and resolves every state", () => {
+    const contract = formsContract([home], states, ["home"])
+    const entry = contract.glyphs.home
+    expect(entry?.forms).toEqual(["regular", "marked", "solid", "solid-marked"])
+    expect(Object.keys(entry?.rendered ?? {})).toEqual(entry?.forms)
+    expect(entry?.rendered.solid?.[0]).toMatchObject({ fill: true, evenOdd: true, stroke: false })
+    expect(entry?.states).toEqual({ rest: "regular", selected: "solid", "progress@0": "regular", "progress@1": "regular" })
+  })
+
+  it("names a missing glyph", () => {
+    expect(() => formsContract([home], states, ["nope"])).toThrow(/nope/)
+  })
+
+  it("samples glyphs that exist in the set", () => {
+    expect(CONTRACT_GLYPHS.length).toBeGreaterThanOrEqual(10)
   })
 })
