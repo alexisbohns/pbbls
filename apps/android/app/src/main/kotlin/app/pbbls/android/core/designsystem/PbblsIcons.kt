@@ -2328,9 +2328,6 @@ enum class PbblsIcon(
     /** Dashboard: an overview of numbers at a glance. */
     GAUGE("gauge"),
 
-    /** Dashboard: an overview of numbers at a glance. (the `active` twin) */
-    GAUGE_ACTIVE("gauge.active"),
-
     /** Dashboard: an overview of numbers at a glance. */
     SCALE_GAUGE("scale-gauge"),
 
@@ -6440,7 +6437,6 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_set_square,
         R.drawable.ic_pbbls_set_square_active,
         R.drawable.ic_pbbls_gauge,
-        R.drawable.ic_pbbls_gauge_active,
         R.drawable.ic_pbbls_scale_gauge,
         R.drawable.ic_pbbls_scale_gauge_active,
         R.drawable.ic_pbbls_gauge_simple,
@@ -6684,11 +6680,11 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_stone_bowl_active,
         R.drawable.ic_pbbls_rock_lg,
         R.drawable.ic_pbbls_rock_lg_active,
+        R.drawable.ic_pbbls_rock_iso,
     )
 
 private fun drawableIds2(): IntArray =
     intArrayOf(
-        R.drawable.ic_pbbls_rock_iso,
         R.drawable.ic_pbbls_rock_iso_active,
         R.drawable.ic_pbbls_rock,
         R.drawable.ic_pbbls_rock_active,
@@ -7188,11 +7184,11 @@ private fun drawableIds2(): IntArray =
         R.drawable.ic_pbbls_headset,
         R.drawable.ic_pbbls_headset_active,
         R.drawable.ic_pbbls_blaster,
+        R.drawable.ic_pbbls_blaster_active,
     )
 
 private fun drawableIds3(): IntArray =
     intArrayOf(
-        R.drawable.ic_pbbls_blaster_active,
         R.drawable.ic_pbbls_play_circle,
         R.drawable.ic_pbbls_play_circle_active,
         R.drawable.ic_pbbls_waveform,

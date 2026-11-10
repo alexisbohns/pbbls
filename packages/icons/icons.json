@@ -3576,7 +3576,7 @@
     {
       "name": "gauge",
       "meaning": "Dashboard: an overview of numbers at a glance.",
-      "variants": ["active"],
+      "variants": [],
       "wave": "2026-11-everyday",
       "status": "candidate",
       "migrated": [],

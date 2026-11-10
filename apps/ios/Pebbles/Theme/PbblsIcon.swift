@@ -1563,8 +1563,6 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     case setSquareActive = "set-square.active"
     /// Dashboard: an overview of numbers at a glance.
     case gauge = "gauge"
-    /// Dashboard: an overview of numbers at a glance. (the `active` twin)
-    case gaugeActive = "gauge.active"
     /// Dashboard: an overview of numbers at a glance.
     case scaleGauge = "scale-gauge"
     /// Dashboard: an overview of numbers at a glance. (the `active` twin)

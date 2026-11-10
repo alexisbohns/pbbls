@@ -20,9 +20,7 @@ export function DoghouseEmpty({ size = 24, ...props }: PbblsIconProps) {
       focusable="false"
       {...props}
     >
-      <path d="M3 11 L12 4 L21 11" />
-      <path d="M5 10 L5 20 L19 20 L19 10" />
-      <path d="M9 20 C9 15.6 10.4 13.4 12 13.4 C13.6 13.4 15 15.6 15 20" />
+      <path d="M19 9.44 L21 11 L12 4 L3 11 L5 9.44 L5 20 L19 20 L19 9.44 M9 20 C9 15.6 10.4 13.4 12 13.4 C13.6 13.4 15 15.6 15 20" />
     </svg>
   )
 }
