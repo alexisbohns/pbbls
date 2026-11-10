@@ -30,7 +30,7 @@ struct SoulChooserBottomBar: View {
                 } else {
                     Spacer(minLength: 0)
                     orb(label: "Search souls", lit: false, action: { model.isSearching = true }, glyph: {
-                        Image(systemName: "magnifyingglass").font(.system(size: 22, weight: .medium))
+                        PbblsGlyphView(.magnifyingMd, size: 26)
                     })
                 }
                 orb(label: "Add a soul", lit: model.canAdd, action: { plusTapped() }, glyph: {
@@ -46,7 +46,7 @@ struct SoulChooserBottomBar: View {
 
     private var field: some View {
         HStack(spacing: Spacing.sm) {
-            Image(systemName: "magnifyingglass")
+            PbblsGlyphView(.magnifyingSm, size: 20)
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .accessibilityHidden(true)
             if rendersStatic {

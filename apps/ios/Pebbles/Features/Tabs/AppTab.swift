@@ -17,4 +17,13 @@ extension AppTab {
         case .you: .person
         }
     }
+
+    /// The form the bar draws when the tab is selected: the `selected` token's
+    /// form, except People, which keeps its mark lit on the solid.
+    var selectedForm: GlyphForm {
+        switch self {
+        case .people: GlyphForm(.solid, marked: true)
+        default: icon.form(for: .selected)
+        }
+    }
 }

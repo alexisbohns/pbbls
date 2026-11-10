@@ -492,7 +492,7 @@ struct SettingsSheet: View {
             Button {
                 showsCrisisResources = true
             } label: {
-                Label("Get support", systemImage: "lifepreserver")
+                Label { Text("Get support") } icon: { PbblsGlyphView(.lifeRing, .row) }
             }
             .buttonStyle(.plain)
             .pebblesListRow(position: .only)
@@ -513,7 +513,11 @@ struct SettingsSheet: View {
                             openURL(link.url)
                         }
                     } label: {
-                        Label(link.title(for: locale), systemImage: Self.icon(for: group.section))
+                        Label {
+                            Text(verbatim: link.title(for: locale))
+                        } icon: {
+                            PbblsGlyphView(Self.icon(for: group.section), .row)
+                        }
                     }
                     .buttonStyle(.plain)
                     .pebblesListRow(position: pebblesRowPosition(index: index, count: group.links.count))
@@ -532,11 +536,11 @@ struct SettingsSheet: View {
         }
     }
 
-    private static func icon(for section: SettingsLink.Section) -> String {
+    private static func icon(for section: SettingsLink.Section) -> PbblsGlyph {
         switch section {
-        case .legal: return "doc.text"
-        case .about: return "info.circle"
-        case .support: return "lifepreserver"
+        case .legal: return .scroll
+        case .about: return .circleInfo
+        case .support: return .lifeRing
         }
     }
 
