@@ -71,7 +71,7 @@ struct InviteSheet: View {
                                 Text(didCopy ? "Copied" : "Copy link")
                             } icon: {
                                 if didCopy {
-                                    PbblsIconImage(.checkmarkDot, .row)
+                                    PbblsGlyphView(.checkmarkDot, .row)
                                 } else {
                                     Image(systemName: "doc.on.doc")
                                 }

@@ -4,13 +4,13 @@ import SwiftUI
 /// items inline, so a stored `UUID` would change on every parent redraw.
 struct PebblesMenuItem {
     let title: LocalizedStringResource
-    let icon: PbblsIcon
+    let icon: PbblsGlyph
     let isDestructive: Bool
     let action: () -> Void
 
     init(
         title: LocalizedStringResource,
-        icon: PbblsIcon,
+        icon: PbblsGlyph,
         isDestructive: Bool = false,
         action: @escaping () -> Void
     ) {
@@ -95,7 +95,7 @@ private struct PebblesMenuList: View {
                     chosen = item.action
                     dismiss()
                 } label: {
-                    Label { Text(item.title) } icon: { PbblsIconImage(item.icon, .row).frame(width: iconWidth) }
+                    Label { Text(item.title) } icon: { PbblsGlyphView(item.icon, .row).frame(width: iconWidth) }
                         .labelStyle(.titleAndIcon)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, Spacing.lg)

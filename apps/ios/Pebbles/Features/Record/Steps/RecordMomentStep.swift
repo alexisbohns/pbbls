@@ -88,7 +88,7 @@ struct RecordMomentStep: View {
                     }
                     HStack {
                         Label { Text("+1 karma as a pebble") } icon: {
-                            PbblsIconImage(.karmaDot, size: 14, relativeTo: .caption,
+                            PbblsGlyphView(.karmaDot, size: 14, relativeTo: .caption,
                                            style: AnyShapeStyle(Color.pebbles.primary))
                         }
                         .pebblesFont(.captionEmphasized)
@@ -177,7 +177,7 @@ struct RecordMomentStep: View {
             EmptyView()
         case .none:
             Button(action: onChangePhoto) {
-                Label { Text("Add a photo") } icon: { PbblsIconImage(.camera, size: 20, relativeTo: .subheadline) }
+                Label { Text("Add a photo") } icon: { PbblsGlyphView(.camera, size: 20, relativeTo: .subheadline) }
                     .pebblesFont(.subheadEmphasized)
                     .foregroundStyle(Color.pebbles.primary)
             }

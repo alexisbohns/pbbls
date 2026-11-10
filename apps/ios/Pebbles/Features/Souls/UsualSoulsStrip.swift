@@ -48,7 +48,7 @@ struct UsualSoulsStrip: View {
     private func moreTile(label: LocalizedStringResource) -> some View {
         Button(action: onMore) {
             VStack(spacing: Spacing.xs + 2) {
-                PbblsIconImage(.plusCircle, size: 44, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
+                PbblsGlyphView(.plusCircle, size: 44, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
                 Text(label)
                     .pebblesFont(.subhead)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)

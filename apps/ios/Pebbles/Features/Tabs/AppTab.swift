@@ -7,8 +7,8 @@ enum AppTab: String, Codable, CaseIterable, Hashable {
 }
 
 extension AppTab {
-    /// The tab's drawing; the bar lights its `activeTwin` when selected (spec D5).
-    var icon: PbblsIcon {
+    /// The tab's drawing; the bar draws its `selected` form when selected (spec D6).
+    var icon: PbblsGlyph {
         switch self {
         case .home: .home
         case .path: .path

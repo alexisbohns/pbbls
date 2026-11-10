@@ -53,7 +53,8 @@ struct HomeChecklistView: View {
         Button(action: onClaim) {
             // The blue pebble's mark, in the button's own ink: the capsule is the primary fill.
             HStack(spacing: Spacing.sm) {
-                PbblsIconImage(.pebbleRoundLit1, .row, style: AnyShapeStyle(Color.pebbles.onPrimary))
+                PbblsGlyphView(.pebbleRound, .row, form: PbblsGlyph.pebbleRound.form(for: .selected),
+                                   style: AnyShapeStyle(Color.pebbles.onPrimary))
                     .frame(width: 22, height: 22)
                 Text("home.firstFive.claim")
                     .spineType(.checklistTitle)
@@ -75,7 +76,7 @@ private struct ChecklistTaskRow: View {
     var body: some View {
         Button(action: action) {
             HStack(alignment: .center, spacing: 12) {
-                PbblsIconImage(row.isDone ? .checkCircle : .pebbleRound, .row,
+                PbblsGlyphView(row.isDone ? .checkCircle : .pebbleRound, .row,
                                style: AnyShapeStyle(row.isDone ? Color.pebbles.primary : Color.pebbles.outline))
                     .frame(width: 22, height: 22)
                 VStack(alignment: .leading, spacing: 2) {

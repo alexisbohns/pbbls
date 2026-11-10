@@ -59,7 +59,7 @@ struct PebblesCheckbox: View {
             RoundedRectangle(cornerRadius: cornerRadius)
                 .stroke(isChecked ? Color.pebbles.primary : Color.pebbles.outline, lineWidth: 1)
 
-            PbblsIconImage(isChecked ? .checkCircle : .pebbleRound, .tile,
+            PbblsGlyphView(isChecked ? .checkCircle : .pebbleRound, .tile,
                            style: AnyShapeStyle(isChecked ? Color.pebbles.onPrimary : Color.pebbles.onSurfaceVariant))
         }
         .frame(width: boxSize, height: boxSize)

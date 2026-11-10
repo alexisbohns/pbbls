@@ -164,7 +164,7 @@ private struct BarePlace: View {
                     .padding(.horizontal, 24)
                 Button(action: onComplete) {
                     Label { Text(hasDraft ? "Continue" : "Make it a pebble") } icon: {
-                        PbblsIconImage(.plusCircle, .row)
+                        PbblsGlyphView(.plusCircle, .row)
                     }
                 }
                 .buttonStyle(PebblesPrimaryButtonStyle())
@@ -173,7 +173,7 @@ private struct BarePlace: View {
                 if let onAddWords {
                     Button(action: onAddWords) {
                         Label { Text("Add a few words") } icon: {
-                            PbblsIconImage(.abstractPen, size: 20, relativeTo: .subheadline)
+                            PbblsGlyphView(.abstractPen, size: 20, relativeTo: .subheadline)
                         }
                     }
                     .pebblesFont(.subheadEmphasized)

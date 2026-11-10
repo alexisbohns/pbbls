@@ -47,9 +47,10 @@ struct ReasonsStep: View {
         return Button { onToggle(reason) } label: {
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 HStack(alignment: .top) {
-                    PbblsIconImage(reason.icon, .tile, style: AnyShapeStyle(ink))
+                    PbblsGlyphView(reason.icon, .tile, style: AnyShapeStyle(ink))
                     Spacer(minLength: 0)
-                    PbblsIconImage(on ? .pebbleRoundLit1 : .pebbleRound, .row,
+                    PbblsGlyphView(.pebbleRound, .row,
+                                   form: on ? PbblsGlyph.pebbleRound.form(for: .selected) : .regular,
                                    style: AnyShapeStyle(on ? Color.pebbles.primary : Color.pebbles.outline))
                 }
                 Text(reason.label)

@@ -34,7 +34,7 @@ struct SoulChooserBottomBar: View {
                     })
                 }
                 orb(label: "Add a soul", lit: model.canAdd, action: { plusTapped() }, glyph: {
-                    PbblsIconImage(.plusCircle, size: 26)
+                    PbblsGlyphView(.plusCircle, size: 26)
                 })
                     .accessibilityValue(Text(verbatim: model.canAdd ? model.trimmedQuery : ""))
             }
@@ -127,7 +127,7 @@ struct SoulAddRow: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: Spacing.md) {
-                PbblsIconImage(.plusCircle, size: 32, style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
+                PbblsGlyphView(.plusCircle, size: 32, style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Add \(name)")
                         .pebblesFont(.bodyEmphasized)

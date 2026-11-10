@@ -9,7 +9,7 @@ struct YouCounters: View {
 
     private struct Counter {
         let value: Int?
-        let icon: PbblsIcon
+        let icon: PbblsGlyph
         let label: LocalizedStringKey
     }
 
@@ -40,7 +40,7 @@ struct YouCounters: View {
             .minimumScaleFactor(0.7)
             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             HStack(alignment: .center, spacing: 6) {
-                PbblsIconImage(counter.icon, size: 18, style: AnyShapeStyle(Color.pebbles.primary))
+                PbblsGlyphView(counter.icon, size: 18, style: AnyShapeStyle(Color.pebbles.primary))
                 Text(counter.label)
                     .spineType(.rowLine)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)

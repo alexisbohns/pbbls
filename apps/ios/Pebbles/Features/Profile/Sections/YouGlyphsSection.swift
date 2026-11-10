@@ -30,7 +30,7 @@ struct YouGlyphsSection: View {
         return SpineStrings.format("\(prefix).line", locale: locale, count)
     }
 
-    private func row(_ tab: GlyphTab, title: String, line: String, icon: PbblsIcon) -> some View {
+    private func row(_ tab: GlyphTab, title: String, line: String, icon: PbblsGlyph) -> some View {
         NavigationLink(value: YouRoute.glyphTab(tab)) {
             PebblesLinkRow(title: SpineStrings.string(title, locale: locale), line: line, chip: .icon(icon))
         }

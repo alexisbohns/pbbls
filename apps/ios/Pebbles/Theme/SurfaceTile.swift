@@ -12,7 +12,7 @@ import SwiftUI
 /// `muted` still wins for the icon/label so an empty placeholder reads muted
 /// even on a tinted background.
 struct SurfaceTile<Label: View>: View {
-    let icon: PbblsIcon
+    let icon: PbblsGlyph
     var muted: Bool = false
     var backgroundColor: Color? = nil
     var iconTint: Color? = nil
@@ -21,7 +21,7 @@ struct SurfaceTile<Label: View>: View {
 
     var body: some View {
         VStack(spacing: Spacing.xs) {
-            PbblsIconImage(
+            PbblsGlyphView(
                 icon, .tile,
                 style: AnyShapeStyle(muted ? Color.pebbles.outline : (iconTint ?? Color.pebbles.onPrimaryContainer))
             )

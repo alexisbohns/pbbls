@@ -8,7 +8,7 @@ import SwiftUI
 struct PebblesLinkRow: View {
     enum Chip {
         /// A Pebbles icon at 26 in `primary`.
-        case icon(PbblsIcon)
+        case icon(PbblsGlyph)
         /// Any mark the data chooses (a guide's own illustration).
         case view(AnyView)
     }
@@ -54,7 +54,7 @@ struct PebblesLinkRow: View {
     private var chipMark: some View {
         switch chip {
         case .icon(let icon):
-            PbblsIconImage(icon, size: 26, style: AnyShapeStyle(Color.pebbles.primary))
+            PbblsGlyphView(icon, size: 26, style: AnyShapeStyle(Color.pebbles.primary))
         case .view(let view):
             view.accessibilityHidden(true)
         }

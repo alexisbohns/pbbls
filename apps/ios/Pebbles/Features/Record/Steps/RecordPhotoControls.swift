@@ -13,7 +13,7 @@ struct RecordPhotoControls: View {
                 .buttonStyle(PebblesTonalButtonStyle())
             if CameraPicker.isAvailable {
                 Button(action: onCamera) {
-                    PbblsIconImage(.camera, size: 22, style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
+                    PbblsGlyphView(.camera, size: 22, style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
                         .frame(width: 48, height: 48)
                         .background(Circle().fill(Color.pebbles.primaryContainer))
                 }

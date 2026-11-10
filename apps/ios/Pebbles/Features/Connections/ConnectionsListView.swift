@@ -80,7 +80,7 @@ struct ConnectionsListView: View {
             }
         } else if rows.isEmpty {
             ContentUnavailableView {
-                Label { Text("No connections yet") } icon: { PbblsIconImage(.people, .hero) }
+                Label { Text("No connections yet") } icon: { PbblsGlyphView(.people, .hero) }
             } description: {
                 Text("Share your invite link and whoever accepts shows up here.")
             }
@@ -145,7 +145,7 @@ private struct ConnectionRow: View {
                         strokeColor: Color.pebbles.primary
                     )
                 } else {
-                    PbblsIconImage(.person, .row, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
+                    PbblsGlyphView(.person, .row, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
                 }
             }
             .frame(width: 32, height: 32)

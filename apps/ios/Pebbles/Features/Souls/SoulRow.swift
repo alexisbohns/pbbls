@@ -22,7 +22,7 @@ struct SoulRow: View {
                     .truncationMode(.tail)
                 Spacer(minLength: Spacing.sm)
                 HStack(spacing: Spacing.xs) {
-                    PbblsIconImage(.pebbleRound, size: 13, relativeTo: .footnote,
+                    PbblsGlyphView(.pebbleRound, size: 13, relativeTo: .footnote,
                                    style: AnyShapeStyle(Color.pebbles.outline))
                     Text(verbatim: "\(soul.pebblesCount)")
                         .pebblesFont(.subhead)
@@ -45,9 +45,9 @@ struct SoulRow: View {
     private var control: some View {
         switch trailing {
         case .plus:
-            PbblsIconImage(.plusCircle, size: 26, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
+            PbblsGlyphView(.plusCircle, size: 26, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
         case .tick:
-            PbblsIconImage(.checkCircle, size: 26, style: AnyShapeStyle(Color.pebbles.primary))
+            PbblsGlyphView(.checkCircle, size: 26, style: AnyShapeStyle(Color.pebbles.primary))
         case .chevron:
             Image(systemName: "chevron.right")
                 .font(.footnote.weight(.semibold))

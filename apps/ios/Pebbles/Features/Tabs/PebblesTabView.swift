@@ -54,12 +54,13 @@ struct PebblesTabView: View {
         .tint(Color.pebbles.primary)
     }
 
-    /// The selected tab draws the lit seal (D5). UIKit renders a tab image as a
-    /// template and never scales it; the asset is 24×24 with its vector kept,
-    /// so no frame and no rendering mode are set here.
+    /// The selected tab shows the `selected` token's form (spec D6): home,
+    /// people and collection their solid, path its last step, you its mark.
+    /// UIKit renders a tab image as a template and never scales it; the image
+    /// is drawn at 24×24 points, so no frame and no rendering mode are set here.
     private func tabImage(_ tab: AppTab) -> Image {
-        let icon = nav.selected == tab ? (tab.icon.activeTwin ?? tab.icon) : tab.icon
-        return Image(icon.assetName)
+        let form = nav.selected == tab ? tab.icon.form(for: .selected) : .regular
+        return Image(uiImage: GlyphCatalog.shared.image(tab.icon, form: form, side: 24))
     }
 }
 

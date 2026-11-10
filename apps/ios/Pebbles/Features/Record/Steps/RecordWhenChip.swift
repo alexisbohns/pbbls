@@ -14,7 +14,7 @@ struct RecordWhenChip: View {
     var body: some View {
         Button { isPresented = true } label: {
             HStack(spacing: Spacing.xs + 2) {
-                PbblsIconImage(source == .photo ? .sparkle : .calendarDay, size: 16, relativeTo: .subheadline,
+                PbblsGlyphView(source == .photo ? .sparkle : .calendarDay, size: 16, relativeTo: .subheadline,
                                style: AnyShapeStyle(Color.pebbles.onSecondaryContainer))
                 Text(verbatim: label)
                     .pebblesFont(.subheadEmphasized)

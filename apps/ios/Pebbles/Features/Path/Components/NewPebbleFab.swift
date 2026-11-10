@@ -14,7 +14,7 @@ struct NewPebbleFab: View {
 
     var body: some View {
         Button(action: onTap) {
-            PbblsIconImage(.plusCircle, .tile, style: AnyShapeStyle(Color.pebbles.onPrimary))
+            PbblsGlyphView(.plusCircle, .tile, style: AnyShapeStyle(Color.pebbles.onPrimary))
                 .frame(width: Self.side, height: Self.side)
                 .contentShape(Circle())
         }

@@ -105,7 +105,7 @@ struct PeopleStep: View {
             .accessibilityHidden(true)
         } else {
             Button(action: onAdd) {
-                PbblsIconImage(.plusCircle, .tile, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
+                PbblsGlyphView(.plusCircle, .tile, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .contentShape(Rectangle())
             }

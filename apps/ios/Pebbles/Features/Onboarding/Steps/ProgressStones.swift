@@ -24,7 +24,8 @@ struct ProgressStones: View {
         } else {
             colour = lit ? Color.pebbles.onSurfaceVariant : Color.pebbles.outline
         }
-        return PbblsIconImage(lit ? .pebbleRoundLit1 : .pebbleRound, size: index == current ? 24 : 16,
+        return PbblsGlyphView(.pebbleRound, size: index == current ? 24 : 16,
+                              form: lit ? PbblsGlyph.pebbleRound.form(for: .selected) : .regular,
                               style: AnyShapeStyle(colour))
     }
 }

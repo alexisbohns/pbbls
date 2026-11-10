@@ -80,7 +80,7 @@ struct LogTimeline<Trailing: View>: View {
             Rectangle()
                 .fill(isFirst ? Color.clear : Color.pebbles.rule)
                 .frame(width: 1, height: 12)
-            PbblsIconImage(icon, .inline, relativeTo: .footnote, style: AnyShapeStyle(iconColor))
+            PbblsGlyphView(icon, .inline, form: iconForm, relativeTo: .footnote, style: AnyShapeStyle(iconColor))
             if !isLast {
                 Rectangle()
                     .fill(Color.pebbles.rule)
@@ -92,12 +92,17 @@ struct LogTimeline<Trailing: View>: View {
         .frame(width: 16)
     }
 
-    private var icon: PbblsIcon {
+    private var icon: PbblsGlyph {
         switch mode {
         case .changelog:  .checkCircle
-        case .inProgress: .pebbleRoundLit1
+        case .inProgress: .pebbleRound
         case .backlog:    .pebbleRound
         }
+    }
+
+    /// The in-progress row lights its pebble with the `selected` form.
+    private var iconForm: GlyphForm {
+        mode == .inProgress ? PbblsGlyph.pebbleRound.form(for: .selected) : .regular
     }
 
     private var iconColor: Color {

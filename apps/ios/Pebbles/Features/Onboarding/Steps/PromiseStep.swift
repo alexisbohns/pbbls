@@ -87,7 +87,8 @@ struct PromiseStep: View {
                 .foregroundStyle(Color.pebbles.onSurface)
                 Rectangle().fill(Color.pebbles.outlineVariant).frame(height: 1)
                 HStack(spacing: Spacing.md) {
-                    PbblsIconImage(.pebbleRoundLit1, .tile, style: AnyShapeStyle(Color.pebbles.primary))
+                    PbblsGlyphView(.pebbleRound, .tile, form: PbblsGlyph.pebbleRound.form(for: .selected),
+                                   style: AnyShapeStyle(Color.pebbles.primary))
                         .accessibilityHidden(true)
                     Text(letter.signedBy(french: french))
                         .spineType(.communityTitle)

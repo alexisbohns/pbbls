@@ -50,7 +50,7 @@ enum OnboardingReason: String, CaseIterable, Sendable {
         }
     }
 
-    var icon: PbblsIcon {
+    var icon: PbblsGlyph {
         switch self {
         case .noticeFeelings: return .heart
         case .keepPeople: return .people
@@ -84,7 +84,7 @@ enum OnboardingPace: String, CaseIterable, Sendable {
         }
     }
 
-    var icon: PbblsIcon {
+    var icon: PbblsGlyph {
         switch self {
         case .daily: return .sunshine
         case .fewAWeek: return .path

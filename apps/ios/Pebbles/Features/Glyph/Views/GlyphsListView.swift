@@ -37,7 +37,7 @@ struct GlyphsListView: View {
                 ToolbarItem(placement: .primaryAction) {
                     PebbleToolbarButton(
                         action: { showCarveSheet = true },
-                        label: { PbblsIconImage(.plusCircle, .toolbar) }
+                        label: { PbblsGlyphView(.plusCircle, .toolbar) }
                     )
                     .accessibilityLabel("Carve new glyph")
                 }
@@ -112,19 +112,19 @@ struct GlyphsListView: View {
         switch tab {
         case .mine:
             return ContentUnavailableView {
-                Label { Text("No glyphs yet") } icon: { PbblsIconImage(.pebbleGlyphDotted, .hero) }
+                Label { Text("No glyphs yet") } icon: { PbblsGlyphView(.pebbleGlyph, .hero, form: .dotted) }
             } description: {
                 Text("Tap + to carve your first glyph.")
             }
         case .owned:
             return ContentUnavailableView {
-                Label { Text("Nothing owned yet") } icon: { PbblsIconImage(.checkCircleDot, .hero) }
+                Label { Text("Nothing owned yet") } icon: { PbblsGlyphView(.checkCircleDot, .hero) }
             } description: {
                 Text("Swap a community glyph to see it here.")
             }
         case .commu:
             return ContentUnavailableView {
-                Label { Text("No community glyphs") } icon: { PbblsIconImage(.people, .hero) }
+                Label { Text("No community glyphs") } icon: { PbblsGlyphView(.people, .hero) }
             } description: {
                 Text("Check back soon.")
             }
@@ -150,7 +150,7 @@ struct GlyphsListView: View {
                 }
                 if item.price > 0 {
                     HStack(spacing: 2) {
-                        PbblsIconImage(.karmaDot, .inline, relativeTo: .caption2)
+                        PbblsGlyphView(.karmaDot, .inline, relativeTo: .caption2)
                         Text("\(item.price)")
                     }
                     .font(.caption2)

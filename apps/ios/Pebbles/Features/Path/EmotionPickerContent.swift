@@ -114,7 +114,7 @@ struct EmotionPickerContent: View {
     @ViewBuilder
     private func header(for category: EmotionCategory) -> some View {
         HStack(spacing: 6) {
-            PbblsIconImage(.heart, .row, style: AnyShapeStyle(category.palette.primary))
+            PbblsGlyphView(.heart, .row, style: AnyShapeStyle(category.palette.primary))
             Text(category.localizedName)
                 .font(.caption2)
                 .fontWeight(.semibold)

@@ -1,15 +1,15 @@
 import Testing
 @testable import Pebbles
 
-/// #1314 D5: each tab draws a pebbles icon and the bar lights its active twin.
+/// #1314 D5: each tab draws a pebbles icon and the bar draws its `selected` form.
 @Suite("AppTab icons")
 struct AppTabTests {
-    @Test("every tab has a distinct icon with an active twin (spec D5)")
+    @Test("every tab has a distinct icon and a selected form that differs from regular (spec D6)")
     func icons() {
         let icons = AppTab.allCases.map(\.icon)
         #expect(Set(icons).count == AppTab.allCases.count)
         for tab in AppTab.allCases {
-            #expect(tab.icon.activeTwin != nil, "\(tab) has no active twin")
+            #expect(tab.icon.form(for: .selected) != .regular, "\(tab) has no selected form")
         }
         #expect(AppTab.home.icon == .home)
         #expect(AppTab.path.icon == .path)

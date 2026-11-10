@@ -31,7 +31,7 @@ struct AchievementMomentView: View {
     @ViewBuilder
     private func cardBody(_ card: AchievementMomentCard) -> some View {
         VStack(spacing: Spacing.lg) {
-            PbblsIconImage(.pebbleGlowLg, .hero, style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
+            PbblsGlyphView(.pebbleGlowLg, .hero, style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
                 .padding(Spacing.lg)
                 .background(Circle().fill(Color.pebbles.primaryContainer))
 
