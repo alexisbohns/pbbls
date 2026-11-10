@@ -2,6 +2,7 @@ import data from "@pbbls/icons/glyphs.json"
 import review from "@pbbls/icons/review.json"
 import round1 from "@pbbls/icons/verdicts.json"
 import round2 from "@pbbls/icons/round2.json"
+import { isVerdict, needsWork } from "./useReviewVerdicts"
 
 /**
  * The forms data the design page reviews (#1607, part 3): every glyph from the
@@ -261,7 +262,11 @@ export function inRound2(name: string): boolean {
 export function showsGlyph(name: string, show: GlyphShow, verdicts: Readonly<Record<string, string>>): boolean {
   if (show === "review") return FLAGGED.has(name)
   if (show === "round2") return ROUND2.has(name)
-  if (show === "fix") return verdicts[name] === "fix"
+  if (show === "fix") {
+    // The "fix" option lists every glyph whose verdict asks for work, whatever the verdict.
+    const v = verdicts[name]
+    return isVerdict(v) && needsWork(v)
+  }
   return true
 }
 

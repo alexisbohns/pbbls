@@ -86,12 +86,14 @@ describe("the page's view", () => {
 describe("showsGlyph", () => {
   const flagged = GLYPHS.find((g) => needsReview(g.name))?.name ?? ""
   const unflagged = GLYPHS.find((g) => !needsReview(g.name))?.name ?? ""
-  it("lists every glyph, the flagged ones, or those marked fix", () => {
+  it("lists every glyph, the flagged ones, or those that need work", () => {
     expect(showsGlyph(unflagged, "all", {})).toBe(true)
     expect(showsGlyph(flagged, "review", {})).toBe(true)
     expect(showsGlyph(unflagged, "review", {})).toBe(false)
     expect(showsGlyph(unflagged, "fix", { [unflagged]: "fix" })).toBe(true)
     expect(showsGlyph(flagged, "fix", { [flagged]: "ok" })).toBe(false)
+    expect(showsGlyph(unflagged, "fix", { [unflagged]: "solid" })).toBe(true)
+    expect(showsGlyph(unflagged, "fix", {})).toBe(false)
   })
 })
 
