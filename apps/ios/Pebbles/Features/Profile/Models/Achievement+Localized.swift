@@ -111,12 +111,12 @@ extension AchievementRecord {
         case "pebble_count":     .stack
         case "emotion_first":    .heart
         case "first_collection": .collection
-        case "first_glyph":      .pebbleDottedGlyph
+        case "first_glyph":      .pebbleGlyphDotted
         case "first_soul":       .people
         case "first_moment":     .pebbleFlat
         case "first_pebble":     .pebbleRound
         case "first_five":       .stackLit3
-        case "glyph_count":      .pebbleDottedGlyph
+        case "glyph_count":      .pebbleGlyphDotted
         default:                 .pebbleGlowMd
         }
     }

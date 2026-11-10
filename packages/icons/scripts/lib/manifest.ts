@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
+import { parseFormKey } from "./forms"
 
 export type Status = "exploring" | "candidate" | "shipped"
 export const STATUSES: readonly Status[] = ["exploring", "candidate", "shipped"]
@@ -7,9 +8,11 @@ export const STATUSES: readonly Status[] = ["exploring", "candidate", "shipped"]
 export type Variant = "active" | "lit-1" | "lit-2" | "lit-3"
 export const VARIANTS: readonly Variant[] = ["active", "lit-1", "lit-2", "lit-3"]
 
-/** An override file's form (spec D4): `half`, `solid` or `progress-<k>`. */
-export const OVERRIDE_FORM = /^(half|solid|progress-[1-9]\d*)$/
-export const isOverrideForm = (v: string): boolean => OVERRIDE_FORM.test(v)
+/** `src/<name>.dotted.svg`: the drawn dotted form (spec D3, D4), not an override. */
+export const DOTTED_FORM = "dotted"
+
+/** An override file's form (spec D4): any form key but `regular` and `dotted`. */
+export const isOverrideForm = (v: string): boolean => v !== "regular" && v !== "dotted" && parseFormKey(v) !== null
 
 export type Surface = "ios" | "android" | "web"
 export const SURFACES: readonly Surface[] = ["ios", "android", "web"]

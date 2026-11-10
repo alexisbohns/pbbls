@@ -74,6 +74,7 @@ export function DesignSelect<T extends string | number>({ label, options, value,
             <DropdownMenuRadioItem
               key={option.value}
               value={String(option.value)}
+              closeOnClick
               className="h-11 rounded-m3-medium pr-4 pl-9 text-sm font-medium data-checked:bg-m3-secondary-container data-checked:text-m3-on-secondary-container data-highlighted:bg-m3-on-surface/8 data-highlighted:text-m3-on-surface data-checked:data-highlighted:bg-m3-secondary-container"
             >
               {option.label}

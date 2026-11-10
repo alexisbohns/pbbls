@@ -1,0 +1,9127 @@
+[
+ {
+  "name": "checkmark-dot",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "checkmark",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "check-circle",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "check-circle-dot",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "plus-circle-dot",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "remove",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "plus-circle",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "hourglass-end",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "pendulum",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "abstract-pen",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "abstract-leaf",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "camera",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "camera-analogic",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "camera-focus",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "home",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 1.0
+   }
+  ]
+ },
+ {
+  "name": "home-hive",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 7.1
+   }
+  ]
+ },
+ {
+  "name": "gate",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 6.5
+   }
+  ]
+ },
+ {
+  "name": "abstract-home",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 4.9
+   }
+  ]
+ },
+ {
+  "name": "abstract-spiral",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 4.8
+   }
+  ]
+ },
+ {
+  "name": "path",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": [
+   {
+    "kind": "conflict",
+    "path": 3,
+    "was": "mark 3",
+    "wanted": "focus"
+   }
+  ]
+ },
+ {
+  "name": "yarn",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": [
+   {
+    "kind": "conflict",
+    "from": "active",
+    "was": "added-dot",
+    "area": 5.7
+   }
+  ]
+ },
+ {
+  "name": "destination",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "2": "mark 1"
+  },
+  "flags": [
+   {
+    "kind": "conflict",
+    "path": 2,
+    "was": "mark 1",
+    "wanted": "body"
+   }
+  ]
+ },
+ {
+  "name": "path-river",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "2": "mark 1",
+   "3": "mark 2",
+   "4": "mark 3"
+  },
+  "flags": [
+   {
+    "kind": "conflict",
+    "path": 2,
+    "was": "mark 1",
+    "wanted": "focus"
+   },
+   {
+    "kind": "conflict",
+    "path": 3,
+    "was": "mark 2",
+    "wanted": "focus"
+   },
+   {
+    "kind": "conflict",
+    "path": 4,
+    "was": "mark 3",
+    "wanted": "focus"
+   }
+  ]
+ },
+ {
+  "name": "people",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 3",
+   "3": "mark 2"
+  },
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "lit-3",
+    "area": 36.2
+   },
+   {
+    "kind": "conflict",
+    "from": "active",
+    "was": "added-dot",
+    "area": 3.0
+   }
+  ]
+ },
+ {
+  "name": "users",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 3",
+   "2": "mark 1",
+   "3": "focus"
+  },
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "lit-2",
+    "area": 20.4
+   },
+   {
+    "kind": "redrawn",
+    "from": "lit-3",
+    "area": 20.4
+   },
+   {
+    "kind": "conflict",
+    "path": 1,
+    "was": "mark 3",
+    "wanted": "focus"
+   }
+  ]
+ },
+ {
+  "name": "abstract-crown",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-fence",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "8": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 8,
+    "area": 1.0
+   }
+  ]
+ },
+ {
+  "name": "abstract-loki",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "exchange",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 1.3
+   }
+  ]
+ },
+ {
+  "name": "dolmen",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 6.5
+   }
+  ]
+ },
+ {
+  "name": "dna",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 7.3
+   }
+  ]
+ },
+ {
+  "name": "collection",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pearl",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "watermelon",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 6.9
+   }
+  ]
+ },
+ {
+  "name": "cromlech",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "6": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 6,
+    "area": 5.2
+   }
+  ]
+ },
+ {
+  "name": "pouch-dot",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": [
+   {
+    "kind": "conflict",
+    "from": "active",
+    "was": "added-dot",
+    "area": 1.0
+   }
+  ]
+ },
+ {
+  "name": "pouch",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": [
+   {
+    "kind": "conflict",
+    "from": "active",
+    "was": "added-dot",
+    "area": 2.2
+   }
+  ]
+ },
+ {
+  "name": "stack",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-cairn",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "stack-sharp",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-stack",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "abstract-landscape",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "fall",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "pouch-2",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "nechlace",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "purse",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "lit-1",
+    "path": 5,
+    "area": 0.0
+   }
+  ]
+ },
+ {
+  "name": "baluchon",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "2": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "bag",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "case",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "2": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-stair",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-track",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-arrow-right",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
+ },
+ {
+  "name": "chart-double-grow",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "pan",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "scale",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "stones-aligned-bottom",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2",
+   "3": "mark 3"
+  },
+  "flags": []
+ },
+ {
+  "name": "person",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": [
+   {
+    "kind": "conflict",
+    "from": "active",
+    "was": "added-dot",
+    "area": 2.2
+   }
+  ]
+ },
+ {
+  "name": "barbed-wire",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 7.1
+   }
+  ]
+ },
+ {
+  "name": "abstract-key",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 3.6
+   }
+  ]
+ },
+ {
+  "name": "user-heart",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 2",
+   "2": "mark 1"
+  },
+  "flags": [
+   {
+    "kind": "conflict",
+    "from": "active",
+    "was": "added-dot",
+    "area": 5.6
+   }
+  ]
+ },
+ {
+  "name": "user",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 2",
+   "2": "mark 1"
+  },
+  "flags": [
+   {
+    "kind": "conflict",
+    "path": 1,
+    "was": "mark 2",
+    "wanted": "body"
+   }
+  ]
+ },
+ {
+  "name": "slider",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "shelve",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "abstract-sign",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "radar",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "abstract-umbrella",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "abstract-sign-2",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "pebble-glyph-dotted",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "lit-1",
+    "area": 244.8
+   }
+  ]
+ },
+ {
+  "name": "abstract-curves",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "abstract-lines",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "abstract-mi",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "pebble-glyph-dotted-open",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "lit-1",
+    "area": 220.9
+   }
+  ]
+ },
+ {
+  "name": "glyph-underlined",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "glyph-grow-underlined",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "draw-dotted",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "pebble-round",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-flat",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "karma-dot",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "karma",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "karma-double",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "wave",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "karma-2",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "karma-clockwise",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "calendar-date",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "calendar-dot",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "game",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "pearl-jaw",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "calendar-day",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "4": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "trash",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "trash-2",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "broom",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "soda",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "pebble-glow-md",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "sunshine",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "plant-sprout",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "3": "mark 1",
+   "4": "mark 2"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-glow-sm",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-glow-lg",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "knot-lg",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "2": "mark 1",
+   "3": "mark 2"
+  },
+  "flags": []
+ },
+ {
+  "name": "knot-sm",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1",
+   "2": "mark 2"
+  },
+  "flags": []
+ },
+ {
+  "name": "bell-ringing",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "sunrise",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "sparkle",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "karma-sparkle",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "plant-seedling-gap",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1",
+   "3": "mark 2",
+   "4": "mark 3"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-drizzle",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "abstract-tree",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "abstract-underwater",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "plant-seedling",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1",
+   "3": "mark 2",
+   "4": "mark 3"
+  },
+  "flags": []
+ },
+ {
+  "name": "sparkles",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "needle",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "loop",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "heart",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "2": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 2,
+    "area": 6.2
+   }
+  ]
+ },
+ {
+  "name": "hand",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "6": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 6,
+    "area": 6.0
+   }
+  ]
+ },
+ {
+  "name": "node",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 9.3
+   }
+  ]
+ },
+ {
+  "name": "orange",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 5.0
+   }
+  ]
+ },
+ {
+  "name": "heart-heart",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 12.7
+   }
+  ]
+ },
+ {
+  "name": "petroglyph",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 1.9
+   }
+  ]
+ },
+ {
+  "name": "connection",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "timeline",
+  "wave": "2026-10-foundation",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "pebble-glyph",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-glyph-open",
+  "wave": "2026-10-foundation",
+  "roles": {
+   "1": "mark 1"
+  },
+  "flags": []
+ },
+ {
+  "name": "whatsapp",
+  "wave": "2026-10-community",
+  "roles": {},
+  "flags": []
+ },
+ {
+  "name": "again-backward",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 8.6
+   }
+  ]
+ },
+ {
+  "name": "stone-loop",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-back",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "hourglass-shake",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-repeat",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "backward-chevrons",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body",
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "again-forward",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 6.6
+   }
+  ]
+ },
+ {
+  "name": "backward",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "ellipse-forward",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 6.6
+   }
+  ]
+ },
+ {
+  "name": "paste-square",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 8.0
+   }
+  ]
+ },
+ {
+  "name": "swing-double",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "people-send",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "exchange-md",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus",
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-swap",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "dots-cross",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus",
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "swing-single",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-loop",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus",
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "exchange-lg",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "cycle-stones",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cycle-link",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "upload-box",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "picture-speed",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "upload-half-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 4.5
+   }
+  ]
+ },
+ {
+  "name": "cloud-upload",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-speed",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "picture-upload",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "picture-kite",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "disk-angle-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 45.2
+   }
+  ]
+ },
+ {
+  "name": "arrow-up-lg",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 2,
+    "area": 8.4
+   }
+  ]
+ },
+ {
+  "name": "people-upvote",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cairn-angle-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "circle-angle-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "thumbs-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "golf-flag",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "chevron-up-underline",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "triangle-up-underline",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stack-chevrons-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-bounce",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "sprout",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "plus-one",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "x-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 5.7
+   }
+  ]
+ },
+ {
+  "name": "stones-fall",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "hook-fish",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "x-half-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "circle-broken",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "arrow-down-cut",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "circle-dot-exclamation",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "link-broken",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 3.6
+   }
+  ]
+ },
+ {
+  "name": "link-broken-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "link-exclamation",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "paper-plane-trail",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 41.9
+   }
+  ]
+ },
+ {
+  "name": "square-bounce",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "rectangle-dashed",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 14.3
+   }
+  ]
+ },
+ {
+  "name": "scroll",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "memorial",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "clipboard",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "brochure",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "file",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 5.9
+   }
+  ]
+ },
+ {
+  "name": "milestone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "hand-dot",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 15.2
+   }
+  ]
+ },
+ {
+  "name": "shield",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "user-circle-lg",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "eye-closed",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pond",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "user-circle-sm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "users-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "farandole",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "fruit-basket",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "people-3",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-double-circle-open",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-triple-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "chat-dots",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden",
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 2.0
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "world",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-emmit",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "eye-open",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-mountain-shine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-ripples",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-triple-circle-open",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "e",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "arche-cairn",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "megaphone-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 14.4
+   }
+  ]
+ },
+ {
+  "name": "user-shine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "jail",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "keyhole",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "gift-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "lock-rounded",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "keyhole-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "lock",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "keyhole-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 3.3
+   }
+  ]
+ },
+ {
+  "name": "star-dotted",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 6.6
+   }
+  ]
+ },
+ {
+  "name": "stones-hexagon-new",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "envelope",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "ticket",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "coffee-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "user-plus-rounded",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-new",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-circle-arrow-in",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "user-plus-curve",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-circle-arrow-in-left",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-spiral-outside",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-spiral-inside",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "compass-vertical",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "egg-fried",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "signs-soil",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "circle-quarters",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 43.3
+   }
+  ]
+ },
+ {
+  "name": "flag-hill",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "signs",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "compass",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "hexagon-text",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-plus",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "shop-showcase",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "scale-balanced",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "label",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "flag-mountains",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "shop-stone-k",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "shop-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "label-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cycle-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "orbit",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "candle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "sundial",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stopwatch",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "hour",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "gauge-zoom",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "blocked",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 65.4
+   }
+  ]
+ },
+ {
+  "name": "stones-stack",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "worksite",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "user-blocked",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "user-forbidden",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "crane",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-cross",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-forbidden",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-vertical-arrow-in",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bubbles-a",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "translation-a",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 9.0
+   }
+  ]
+ },
+ {
+  "name": "circle-a",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 7.6
+   }
+  ]
+ },
+ {
+  "name": "cube-a",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "bubble-a",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "users-communication",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus",
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "sun-shine-lg",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-shine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "sun-shine-sea",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "flower-daisy",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "sunrise-shine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-lg",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "toggle-off-label",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "sidebar",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 102.4
+   }
+  ]
+ },
+ {
+  "name": "sun-shine-md",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "lightbulb-shine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-star",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "toggle-off-shine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "moon",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-moon",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "game-board-moon",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "moon-sea",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "flower-tulip",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-facet",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 47.6
+   }
+  ]
+ },
+ {
+  "name": "toggle-on-label",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "lightbulb-moon",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 8.1
+   }
+  ]
+ },
+ {
+  "name": "appearance-device",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 15.8
+   }
+  ]
+ },
+ {
+  "name": "stone-pill-shine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "appearance",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "4": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "toggle-median",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "appearance-split",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "lightbulb-mark",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "sunset-seaa",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "palette-1",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 4.8
+   }
+  ]
+ },
+ {
+  "name": "circles-jointure",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "broomstick",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "flower-reed",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "circles-jointure-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "palette-3",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden",
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 2.0
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.0
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "prism",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "screwdriver",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bounce-underline",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "chart-stones",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "signal-wave",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 2,
+    "area": 4.5
+   }
+  ]
+ },
+ {
+  "name": "stone-spring",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-debounce",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "signal-waveform-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-line-chart",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus",
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-bounces",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "signal-dots",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "metronome",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-4-halved",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "binoculars",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "text-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "magnifying-md",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "magnifying-sm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.3
+   }
+  ]
+ },
+ {
+  "name": "circle-info",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.7
+   }
+  ]
+ },
+ {
+  "name": "parenthesis-info",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.7
+   }
+  ]
+ },
+ {
+  "name": "asterisk",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.7
+   }
+  ]
+ },
+ {
+  "name": "bubble-info",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.2
+   }
+  ]
+ },
+ {
+  "name": "info-i",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "badge-info",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "sign-info",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 1.3
+   }
+  ]
+ },
+ {
+  "name": "user-standing",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "paragraph-info",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "dolmen-soil",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "dolmen-fluffy",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-gate-shine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-gate-sm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-board",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "dolmen-square",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "dolmen-square-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "dolmen-square-pin",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "menhir",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "dolmen-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 3.3
+   }
+  ]
+ },
+ {
+  "name": "gate-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "dolmen-shine-sm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "slide",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "karma-fossil",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 5.7
+   }
+  ]
+ },
+ {
+  "name": "circle-leaf",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "fish-bones-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "circle-karma",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 9.0
+   }
+  ]
+ },
+ {
+  "name": "fish-bones",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cocoon",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 19.9
+   }
+  ]
+ },
+ {
+  "name": "leaf",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "circle-fossil",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 2.2
+   }
+  ]
+ },
+ {
+  "name": "trilobite",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 53.4
+   }
+  ]
+ },
+ {
+  "name": "stone-hair",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bookmark",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 2,
+    "area": 9.6
+   }
+  ]
+ },
+ {
+  "name": "book-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "text-stone-margin",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bookmark-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "page-corner",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "text-stone-inline",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-gem",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "amethyst",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "gem-stone-1",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 30.2
+   }
+  ]
+ },
+ {
+  "name": "gem-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-fire",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "target-arrow",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 4.4
+   }
+  ]
+ },
+ {
+  "name": "stone-ripple",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "golf-flag-lg",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "target-outside",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "flag-mountain",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 4.6
+   }
+  ]
+ },
+ {
+  "name": "ripples",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 14.3
+   }
+  ]
+ },
+ {
+  "name": "stone-water",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "golf-flag-sm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-spark",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pencil",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 15.2
+   }
+  ]
+ },
+ {
+  "name": "pen-fountain-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "feather-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "pencil-write",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "pen-fountain-losange",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "eraser-write",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "feather-write",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 43.1
+   }
+  ]
+ },
+ {
+  "name": "pen-fountain-down",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pencil-draw",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "saucer-antenna",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-signal",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "user-line",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "saucer-antenna-k",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-wifi",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "saucer-antenna-sm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-radar",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "radar-quarter",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "arrow-forward-eye",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "pyramid",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 48.4
+   }
+  ]
+ },
+ {
+  "name": "pebbles-stack-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pyramids-sun",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "ziggurat",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 9.0
+   }
+  ]
+ },
+ {
+  "name": "stones-stack-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "obelisk",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 3.2
+   }
+  ]
+ },
+ {
+  "name": "pyramid-layers",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 36.1
+   }
+  ]
+ },
+ {
+  "name": "stones-stack-plus",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pyramid-sun",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 29.7
+   }
+  ]
+ },
+ {
+  "name": "pyramid-inside",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 4.2
+   }
+  ]
+ },
+ {
+  "name": "layout-sharp",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "text-editorial",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "layout-sidebar",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 62.2
+   }
+  ]
+ },
+ {
+  "name": "stones-layout",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "layout",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "set-square",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "gauge",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "scale-gauge",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "gauge-simple",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "square-chart-bars",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "3": "focus",
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "gauge-underline",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "dashboard",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "7": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 7,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "chart-stones-grow",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "chart-diagram",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "bullseye",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "chart-grow",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 8.5
+   }
+  ]
+ },
+ {
+  "name": "chart-bars-fill",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "line-grow",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "chart-stones-4",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "chart-line-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "chart-stones-grow-underline",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "8": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "chart-segments",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "chart-diagram-sm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "chart-wires",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "board-wall-notes",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "library",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 73.0
+   }
+  ]
+ },
+ {
+  "name": "game-stones",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "board-chart",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.9
+   }
+  ]
+ },
+ {
+  "name": "memos-lace",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "square-notes",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "board-notes",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "memo",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "game-checkers",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "7": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "board-layout",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "board-lamp",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "grid",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "board",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "copy-squares",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 8.1
+   }
+  ]
+ },
+ {
+  "name": "copy-circles",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "layers-square",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-sea",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "document-scan",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 47.0
+   }
+  ]
+ },
+ {
+  "name": "clipboard-paste",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-down-tunnel",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "arrow-bottom-box",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "note-corner",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "map-pin",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "clipboard-arrow-down",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-box",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "card-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "square-paste",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 3.8
+   }
+  ]
+ },
+ {
+  "name": "note-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cursor",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "cursor-pointer",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 2,
+    "area": 4.9
+   }
+  ]
+ },
+ {
+  "name": "cursor-pointer-click",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 17.7
+   }
+  ]
+ },
+ {
+  "name": "viewfinder",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "book-cover-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "book-text-bookmark",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "books-shelve",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "book",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 2,
+    "area": 85.1
+   }
+  ]
+ },
+ {
+  "name": "bookbinding",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 38.5
+   }
+  ]
+ },
+ {
+  "name": "books-stack",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "book-iso",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-glow",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "text-period-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "text-aa",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "text-quote",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "curl",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "text-initial-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "waves-period-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "text-period",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "letter-t-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.1
+   }
+  ]
+ },
+ {
+  "name": "text-underline-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "paragraph",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "memo-text-corner",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "memo-text-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "memo-text-torn",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "memo-text-clip",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 37.0
+   }
+  ]
+ },
+ {
+  "name": "receipt",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "paperplane",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 44.8
+   }
+  ]
+ },
+ {
+  "name": "memo-text-stone-sm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bottle-message",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "folder",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 47.5
+   }
+  ]
+ },
+ {
+  "name": "folder-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "archive-box",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "trunk",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "archive-box-iso",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "toolbox",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 5.9
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 5.8
+   }
+  ]
+ },
+ {
+  "name": "metal-box",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "8": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 8,
+    "area": 57.6
+   }
+  ]
+ },
+ {
+  "name": "suitcase",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus",
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "medal",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "laurel-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "medal-star",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "podium-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "medal-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "medal-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "medal-1",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "laurel-user",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "medal-grade",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "trophy-lg",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "trophy",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "trophy-star",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "cave",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-cave",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "moon-inverted",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "cell",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "hill-sun",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "moon-z",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "moon-crescent",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 99.8
+   }
+  ]
+ },
+ {
+  "name": "moon-sea-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "moon-cloud",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 41.9
+   }
+  ]
+ },
+ {
+  "name": "shooting-star-lg",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "star-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "circle-star",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "constellation",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "shooting-star",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "star-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 6.6
+   }
+  ]
+ },
+ {
+  "name": "weather",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "rainbow-reflect",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-arc-5",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "rainbow",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cloud-arrow-down-download",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "half-circle-arrown-down-download",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 4.5
+   }
+  ]
+ },
+ {
+  "name": "download-picture",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 5.6
+   }
+  ]
+ },
+ {
+  "name": "filter-box",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 13.4
+   }
+  ]
+ },
+ {
+  "name": "device-arrow-down",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "abstract-bowl-pebbles",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-bowl",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "rock-lg",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "rock-iso",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 47.8
+   }
+  ]
+ },
+ {
+  "name": "rock",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-layers",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 4.5
+   }
+  ]
+ },
+ {
+  "name": "stone-layers-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 69.0
+   }
+  ]
+ },
+ {
+  "name": "hill-path-pin",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "hill-sunset",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "hill-stone-path",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "hill-sunset-soil",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "hill-sun-k",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "hills",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 3.2
+   }
+  ]
+ },
+ {
+  "name": "hill-stone-grass",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "mountains-summit",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 9.3
+   }
+  ]
+ },
+ {
+  "name": "menhir-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "mountain-path-flag",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "mountains",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "mountain-forest",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "mountain-cut",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 33.5
+   }
+  ]
+ },
+ {
+  "name": "mountain-path",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 48.6
+   }
+  ]
+ },
+ {
+  "name": "mountain-waves",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "moutains-sea",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-zap",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "sun-shine-wave",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "sun-shine-bright-sm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "sun-shine-bright",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "battery-zap",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cloud-zap",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "zap",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-zap",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cloud",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "circles",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "wind",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cloud-k",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "clouds",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "cloud-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-speed",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "square-rain",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cloud-rain",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "tint",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "cloud-rain-drop",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "square-rain-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus",
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "tint-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "postcard",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "envelope-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bell",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bell-ring",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "chimer",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bell-k",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "bell-badge",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-bowl-shine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bubble-badge",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "server-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "door-ring",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "envelope-badge",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "server",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "letterbox-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "square-badge",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-pound",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "list-stones",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "receipt-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "list",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus",
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "list-dots",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden",
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 2.5
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.5
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "list-sort",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "minus",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 36.5
+   }
+  ]
+ },
+ {
+  "name": "minus-1",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 15.8
+   }
+  ]
+ },
+ {
+  "name": "eclipse",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "cairn-drop",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-3-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "circle-minus",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 19.2
+   }
+  ]
+ },
+ {
+  "name": "pebbles-intersection",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-stone-water",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "items-indent",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-box-out",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "square-outside-right",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-soil",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "double-circle-outside",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-stone-water-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-rubble",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "destroy",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "squares-rubble",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus",
+   "2": "focus",
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "jellyfish",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "jellyfish-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "jellyfish-surface",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "jellyfish-pebble",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-jellyfish",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "jellyfish-moving",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "jellyfish-2-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "jellyfish-dots",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "waves-vertical",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cat",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cat-back-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "paw",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "cat-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden",
+   "6": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 3.4
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 6,
+    "area": 3.4
+   }
+  ]
+ },
+ {
+  "name": "cat-back",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden",
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 4.1
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 4.1
+   }
+  ]
+ },
+ {
+  "name": "dog-profile",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "doghouse",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "piglet",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "6": "focus",
+   "7": "mark 1 hidden",
+   "8": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 7,
+    "area": 8.2
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 8,
+    "area": 8.2
+   }
+  ]
+ },
+ {
+  "name": "pig",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "paw-sm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "dog",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "chick-profile",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.6
+   }
+  ]
+ },
+ {
+  "name": "doghouse-empty",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "bone-down",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "bone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "diverge-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "converge",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus",
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bone-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "diverge",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "lighthouse",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "lighthouse-right",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cairn-shine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "lighthouse-island",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "box",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "laptop",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "piano",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "keyboard",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-ruby",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "guitar",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "guitar-face",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "guitar-pick",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "guitar-chords",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 14.3
+   }
+  ]
+ },
+ {
+  "name": "guitar-oud",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "guitar-tab",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "guitar-pick-chords",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "guitar-neck",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 5.3
+   }
+  ]
+ },
+ {
+  "name": "music-treble-clef",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.4
+   }
+  ]
+ },
+ {
+  "name": "music-sheet-notes",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "music-note-double-quaver",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus",
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "music-quaver",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "music-sheet-note",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "music-sheet-note-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "music-note",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "face-baby",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "troller",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "face-child",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "mobile",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cradle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-honey",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "milk-carton",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "milk-bottle-closed",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "drop-water",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "feeding-bottle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 34.5
+   }
+  ]
+ },
+ {
+  "name": "water-bottle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "milk-bottle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 53.8
+   }
+  ]
+ },
+ {
+  "name": "car-front",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "car-wheel",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "car",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "radio",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus",
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "car-k",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "car-speed",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "car-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus",
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "car-above",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "bike",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 4.4
+   }
+  ]
+ },
+ {
+  "name": "bike-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "house",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "dome",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "building",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "house-chemny",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bird-house",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "farm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "house-block",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "houses",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "window-roof",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 9.5
+   }
+  ]
+ },
+ {
+  "name": "umbrella-empty",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "umbrella-rain",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "parasol",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "umbrella",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 36.3
+   }
+  ]
+ },
+ {
+  "name": "umbrella-above",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 25.8
+   }
+  ]
+ },
+ {
+  "name": "bottle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 69.0
+   }
+  ]
+ },
+ {
+  "name": "abstract-ink",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "ink-bottle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 54.7
+   }
+  ]
+ },
+ {
+  "name": "ink-pot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 49.3
+   }
+  ]
+ },
+ {
+  "name": "question-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 4.4
+   }
+  ]
+ },
+ {
+  "name": "question-bubble",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.3
+   }
+  ]
+ },
+ {
+  "name": "life-ring",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "question-mark-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "question-bubble-chat",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "question-mark",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 3.1
+   }
+  ]
+ },
+ {
+  "name": "exclamation-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.7
+   }
+  ]
+ },
+ {
+  "name": "pebble-exclamation",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "gauge-low",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 37.3
+   }
+  ]
+ },
+ {
+  "name": "info-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "exclamation-bold",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body",
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "info-sign",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "drop-water-ripple",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "alert-shine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "eye-open-1",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "exclamation-triangle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.7
+   }
+  ]
+ },
+ {
+  "name": "cloud-zap-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "exclamation-double",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden",
+   "6": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 6.7
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 6,
+    "area": 6.8
+   }
+  ]
+ },
+ {
+  "name": "cairn-fall",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "skull-x",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-stone-movement",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-tear",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "pyramid-layers-reversed",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 111.6
+   }
+  ]
+ },
+ {
+  "name": "exclamation-bold-lakshmi",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "x-sign",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "exclamation-triple",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "7": "mark 1 hidden",
+   "8": "mark 1 hidden",
+   "9": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 7,
+    "area": 6.6
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 8,
+    "area": 6.4
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 9,
+    "area": 6.8
+   }
+  ]
+ },
+ {
+  "name": "exclamation-double-lakshmi",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.5
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "karma-dot-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "flame",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "skull",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stop-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "anchor",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "minus-sign",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "hand-palm",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 2,
+    "area": 17.9
+   }
+  ]
+ },
+ {
+  "name": "hand-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "toggle-off",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-zz",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "power-off",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "exclamation-off",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "circle-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 2,
+    "area": 6.6
+   }
+  ]
+ },
+ {
+  "name": "crab",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "shell",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "crab-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "crab-bell",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "crab-3",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "crab-clamp",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "crab-dots",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "shrimp",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "dot-ripple",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pin-ripple",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "water-drop-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "dot-wave",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "ripple",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "ripple-ring",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "ripple-left",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-waves",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "karma-center",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 9.8
+   }
+  ]
+ },
+ {
+  "name": "ripple-symmetry",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "water-drop",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "circles-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.5
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "wood",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-steps-sea",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stones-steps-3",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-sound-right-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "megaphone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "ear",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 4.5
+   }
+  ]
+ },
+ {
+  "name": "drums",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "speaker",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "sound-on",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-sound-right-3",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "speaker-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 6.6
+   }
+  ]
+ },
+ {
+  "name": "microphone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "microphone-high",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "microphone-arc",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "microphone-wire",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "file-audio",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "tape-audio",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "vinyl",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "headset",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "blaster",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "play-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "waveform",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 33.6
+   }
+  ]
+ },
+ {
+  "name": "signal-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "waveform-bold-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "mountains-underline",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "sun-shine-bright-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "13": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-wave",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "waveform-bold",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "signal",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "waveform-dots",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 3.1
+   }
+  ]
+ },
+ {
+  "name": "waveform-clip",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cairn-signal",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "radio-signal",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "code-morse",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "12": "mark 1 hidden",
+   "13": "mark 1 hidden",
+   "14": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 12,
+    "area": 3.4
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 13,
+    "area": 3.6
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 14,
+    "area": 3.7
+   }
+  ]
+ },
+ {
+  "name": "stones-step-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "sound-x",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "pebble-off",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "sound-off",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "ear-off",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "segment",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus",
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "micro-off",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "speaker-off",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "faucet",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pound",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 23.6
+   }
+  ]
+ },
+ {
+  "name": "bottle-closed",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "water-drop-wave",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 56.0
+   }
+  ]
+ },
+ {
+  "name": "water-well",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "9": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "glass-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "waves-sun",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "hand-wave",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 5.4
+   }
+  ]
+ },
+ {
+  "name": "stone-wave",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 87.1
+   }
+  ]
+ },
+ {
+  "name": "boat-wave",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "wave-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 9.5
+   }
+  ]
+ },
+ {
+  "name": "seats",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 12.7
+   }
+  ]
+ },
+ {
+  "name": "wave-draw",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 2,
+    "area": 2.4
+   }
+  ]
+ },
+ {
+  "name": "chip-label",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "protocol",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus",
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "sign",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-12",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 17.8
+   }
+  ]
+ },
+ {
+  "name": "web",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "window",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 57.8
+   }
+  ]
+ },
+ {
+  "name": "globe",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "at",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "pills-cursor",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 8.2
+   }
+  ]
+ },
+ {
+  "name": "search-bar",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "slash-slash-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "unset-input",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.0
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "qr-code",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden",
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 3.2
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.2
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 3.2
+   }
+  ]
+ },
+ {
+  "name": "link",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 4.4
+   }
+  ]
+ },
+ {
+  "name": "bridge",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "wave-connect",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "link-k",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.1
+   }
+  ]
+ },
+ {
+  "name": "stones-link",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.1
+   }
+  ]
+ },
+ {
+  "name": "bridge-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 3.6
+   }
+  ]
+ },
+ {
+  "name": "circles-joined",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 4.1
+   }
+  ]
+ },
+ {
+  "name": "network",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "soccer-ball",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "stone-speed-right",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "goal",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "soccer-field",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "dot-circle-line",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 6.6
+   }
+  ]
+ },
+ {
+  "name": "farandole-circle",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "basketball-basket",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "basketball",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.8
+   }
+  ]
+ },
+ {
+  "name": "play-screen",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "tv-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "remote",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "presentation-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "tv-dots",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "presentation-picture",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "presentation-text",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "tv",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "tv-picture",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "phone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "smartphone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "phone-ring",
+  "wave": "2026-11-everyday",
+  "roles": {},
+  "flags": [
+   {
+    "kind": "redrawn",
+    "from": "active",
+    "area": 62.1
+   }
+  ]
+ },
+ {
+  "name": "android",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "android-head",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "android-head-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden",
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 3.4
+   },
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 3.4
+   }
+  ]
+ },
+ {
+  "name": "robot-stones-arms-up",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-circle-line",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "clamp",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "robot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "robot-head",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus",
+   "7": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 7,
+    "area": 2.0
+   }
+  ]
+ },
+ {
+  "name": "robot-stones-arms-down",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "7": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 7,
+    "area": 3.8
+   }
+  ]
+ },
+ {
+  "name": "robot-fun",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "6": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 6,
+    "area": 11.2
+   }
+  ]
+ },
+ {
+  "name": "apple-leaf",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "apple-x",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "apple-branch",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "apple",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "hourglass-k",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus",
+   "6": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "orange-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "apple-seeds",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 2.3
+   }
+  ]
+ },
+ {
+  "name": "circles-dots",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "boat-wave-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pineapple",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "plant",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "bomb",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "v-slice",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "wheel",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "grenada",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "fork-knife",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "meal-hot-stone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "egg-fried-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "meal-hot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "bread",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "carrot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "plate-cutlery",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "meal-cloche",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "cooker",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "game-board",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "table-meal-hot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "people-table",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus",
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "meal-sticks",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-fork-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "binoculars-row",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 2.5
+   }
+  ]
+ },
+ {
+  "name": "abstract-square-layer-dots",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "christmas-ball",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 49.2
+   }
+  ]
+ },
+ {
+  "name": "sock",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "gift",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus",
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "christmas-tree",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "church",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pine-lines",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "pine-cone",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 28.6
+   }
+  ]
+ },
+ {
+  "name": "pines",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "pine-chevrons",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body",
+   "2": "body",
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "pine-tree",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "pine",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 29.4
+   }
+  ]
+ },
+ {
+  "name": "pine-stack",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "tree",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "tree-ball",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "tree-branches",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 7.5
+   }
+  ]
+ },
+ {
+  "name": "acorn",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "train-front",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "train",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus",
+   "6": "focus",
+   "7": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "train-underline",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "6": "focus",
+   "7": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "train-ticket",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "flame-drop",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "fire",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "candle-simple",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 6.8
+   }
+  ]
+ },
+ {
+  "name": "firecamp",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "firepit-h",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "farandole-fire",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "firepit-curve",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "firepit-above",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "9": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "firepit",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "sparkle-circle-dots",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "fishes-round",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "fish-dive",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "fish-2",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "fish",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "fish-jump",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "fish-bowl",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "fishes",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "poo",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "poo-flies",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body",
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "toilet",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "hill-sprout",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus",
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "poo-smell",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 3,
+    "area": 11.4
+   }
+  ]
+ },
+ {
+  "name": "earth-sprout",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "map-marker",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "globe-spin",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 54.5
+   }
+  ]
+ },
+ {
+  "name": "map-fold",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 4,
+    "area": 58.2
+   }
+  ]
+ },
+ {
+  "name": "grid-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "map-fold-path",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "5": "mark 1 hidden"
+  },
+  "flags": [
+   {
+    "kind": "added-dot",
+    "from": "active",
+    "path": 5,
+    "area": 3.1
+   }
+  ]
+ },
+ {
+  "name": "grid-sparks",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "store",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "store-bell",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "sale-sign",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "6": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "factory",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "2": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "store-shelve",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "shopping-bag-dot",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "shopping-basket",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bucket",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "bath-bottles",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "shopping-trolley",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "1": "body"
+  },
+  "flags": []
+ },
+ {
+  "name": "shopping-cart",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus",
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "basket",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "4": "focus"
+  },
+  "flags": []
+ },
+ {
+  "name": "abstract-stone-curve",
+  "wave": "2026-11-everyday",
+  "roles": {
+   "3": "focus"
+  },
+  "flags": []
+ }
+]

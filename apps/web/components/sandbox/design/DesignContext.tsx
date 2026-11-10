@@ -2,6 +2,7 @@
 
 import { createContext, useContext } from "react"
 import type { CanvasZoom, DeviceChoice } from "@/lib/design/devices"
+import type { GlyphShow, GlyphView } from "@/lib/design/glyph-forms"
 import type { PbblsIconSize } from "@/lib/icons/pbbls-icon"
 import type { DesignTheme } from "@/lib/theme/design-theme"
 
@@ -16,6 +17,10 @@ export interface DesignContextValue {
   /** The Icons page's search and drawing size, set from the toolbar. */
   iconQuery: string
   iconSize: PbblsIconSize
+  /** The Icons page's Fill, Mark and Progress pickers (#1607 review): what is listed and how it is drawn. */
+  glyphView: GlyphView
+  /** Which glyphs the Icons page lists: all, the flagged ones, or those marked fix. */
+  glyphShow: GlyphShow
 }
 
 const DesignContext = createContext<DesignContextValue | null>(null)

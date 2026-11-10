@@ -20,12 +20,12 @@ The generator owns these paths outright and clears them before writing. Fix the 
 - `packages/icons/react/` (`<Name>.tsx` per icon, `types.ts`, `index.ts`)
 - `apps/ios/Pebbles/Resources/Icons.xcassets/`, `apps/ios/Pebbles/Theme/PbblsIcon.swift`
 - `apps/android/app/src/main/res/drawable/ic_pbbls_*.xml`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsIcons.kt`
-- `packages/icons/glyphs/glyphs.json` (the forms data: every glyph's paths with roles, its carved solid and overrides, and the state tokens)
+- `packages/icons/glyphs/glyphs.json` (the forms data: every glyph's paths with roles, its carved solid and parts fills with and without the mark, its dotted drawing and overrides, and the state tokens)
 
 ## Adding or redrawing an icon
 
 1. Draw it on the 24-unit square in the DNA's line (`DNA.md`): paths only, absolute `M L C Q A Z`, every point inside `1.5..22.5`, no dashes, no transforms.
-2. Save it as `src/<kebab-name>.svg`; a twin as `src/<name>.active.svg` or `src/<name>.lit-N.svg`. Tag its paths with `data-role` (see DNA.md, Roles and forms).
+2. Save it as `src/<kebab-name>.svg`; a twin as `src/<name>.active.svg` or `src/<name>.lit-N.svg`. Tag its paths with `data-role` (`body`, optionally `data-part`; `mark`; `step` with `data-step`; see DNA.md, Roles and forms); a dotted version goes in `src/<name>.dotted.svg`.
 3. Add (or edit) its row in `icons.json`: `name`, one-sentence `meaning`, `variants`, `wave`, `status` (`exploring` is linted but not emitted; `candidate` is emitted everywhere; `shipped` means every surface is in `migrated`, and the validator refuses it otherwise), `migrated` (the surfaces whose code no longer names the row's symbols; a surface is added in the same commit that deletes its last literal, so `lint:replaces` goes live with the code it polices) and `replaces` per surface (from the code, never from memory; one primary row per symbol, the per-site choice lives in the surface's migration spec).
 4. `npm run format --workspace=@pbbls/icons && npm run lint --workspace=@pbbls/icons`, then fix every error **in the drawing**, never in the rule.
 5. `npm run generate --workspace=@pbbls/icons` and commit the sources with the outputs.

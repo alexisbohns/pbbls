@@ -32,6 +32,14 @@ describe("loadIcons", () => {
     expect(icons[1]?.paths[1]).toMatchObject({ d: "M4 4 L8 8 Z", filled: true, evenOdd: true, unstroked: true })
   })
 
+  it("leaves a hidden role path out of the static icon", () => {
+    const root = mkdtempSync(join(tmpdir(), "icons-emit-"))
+    mkdirSync(join(root, "src"))
+    writeFileSync(join(root, "icons.json"), JSON.stringify({ icons: [row("home", [])] }))
+    writeFileSync(join(root, "src", "home.svg"), SVG('  <path d="M2 2 L22 22"/>\n  <path d="M4 4 L5 5" data-role="mark" data-mark="1" data-rest="hidden"/>'))
+    expect(loadIcons(root)[0]?.paths.map((p) => p.d)).toEqual(["M2 2 L22 22"])
+  })
+
   it("names the missing source", () => {
     const root = mkdtempSync(join(tmpdir(), "icons-emit-"))
     mkdirSync(join(root, "src"))

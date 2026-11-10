@@ -61,7 +61,7 @@ struct GlyphView: View {
     private var content: some View {
         switch `case` {
         case .carve:
-            mark(.pebbleDottedGlyph, Color.pebbles.onSurfaceVariant)
+            mark(.pebbleGlyphDotted, Color.pebbles.onSurfaceVariant)
         case .create:
             mark(.plusCircle, Color.pebbles.outline)
         case .profile, .selected:

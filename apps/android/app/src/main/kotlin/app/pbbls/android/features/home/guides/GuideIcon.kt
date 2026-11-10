@@ -19,6 +19,6 @@ internal fun GuideIllustration?.chipIcon(): PbblsIcon =
         GuideIllustration.DOMAINS -> PbblsIcon.ABSTRACT_LANDSCAPE
         GuideIllustration.COLLECTIONS -> PbblsIcon.COLLECTION
         GuideIllustration.SOULS -> PbblsIcon.PEOPLE
-        GuideIllustration.GLYPHS -> PbblsIcon.PEBBLE_DOTTED_GLYPH
+        GuideIllustration.GLYPHS -> PbblsIcon.PEBBLE_GLYPH_DOTTED
         GuideIllustration.KARMA -> PbblsIcon.KARMA_DOT
     }

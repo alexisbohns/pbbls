@@ -439,10 +439,10 @@ enum class PbblsIcon(
     ABSTRACT_SIGN_2("abstract-sign-2"),
 
     /** The marks a user scribbles on a stone: a dotted stone ring around a small scribble. */
-    PEBBLE_DOTTED_GLYPH("pebble-dotted-glyph"),
+    PEBBLE_GLYPH_DOTTED("pebble-glyph-dotted"),
 
     /** The marks a user scribbles on a stone: a dotted stone ring around a small scribble. (the `lit-1` twin) */
-    PEBBLE_DOTTED_GLYPH_LIT_1("pebble-dotted-glyph.lit-1"),
+    PEBBLE_GLYPH_DOTTED_LIT_1("pebble-glyph-dotted.lit-1"),
 
     /** The marks a user scribbles on a stone: a dotted arc, a hooked stroke and a short tail. */
     ABSTRACT_CURVES("abstract-curves"),
@@ -454,10 +454,10 @@ enum class PbblsIcon(
     ABSTRACT_MI("abstract-mi"),
 
     /** The marks a user scribbles on a stone: a dotted stone ring around a small scribble, the ring open on one side. */
-    PEBBLE_DOTTED_GLYPH_2("pebble-dotted-glyph-2"),
+    PEBBLE_GLYPH_DOTTED_OPEN("pebble-glyph-dotted-open"),
 
     /** The marks a user scribbles on a stone: a dotted stone ring around a small scribble, the ring open on one side. (the `lit-1` twin) */
-    PEBBLE_DOTTED_GLYPH_2_LIT_1("pebble-dotted-glyph-2.lit-1"),
+    PEBBLE_GLYPH_DOTTED_OPEN_LIT_1("pebble-glyph-dotted-open.lit-1"),
 
     /** The marks a user scribbles on a stone: a scribble over a dotted line. */
     GLYPH_UNDERLINED("glyph-underlined"),
@@ -673,16 +673,16 @@ enum class PbblsIcon(
     TIMELINE("timeline"),
 
     /** The marks a user scribbles on a stone: a stone ring around a small scribble. */
-    PEBBLE_OUTLINED_GLYPH("pebble-outlined-glyph"),
+    PEBBLE_GLYPH("pebble-glyph"),
 
     /** The marks a user scribbles on a stone: a stone ring around a small scribble. (the `lit-1` twin) */
-    PEBBLE_OUTLINED_GLYPH_LIT_1("pebble-outlined-glyph.lit-1"),
+    PEBBLE_GLYPH_LIT_1("pebble-glyph.lit-1"),
 
     /** The marks a user scribbles on a stone: a stone ring around a small scribble, drawn with an open start. */
-    PEBBLE_OUTLINED_GLYPH_2("pebble-outlined-glyph-2"),
+    PEBBLE_GLYPH_OPEN("pebble-glyph-open"),
 
     /** The marks a user scribbles on a stone: a stone ring around a small scribble, drawn with an open start. (the `lit-1` twin) */
-    PEBBLE_OUTLINED_GLYPH_2_LIT_1("pebble-outlined-glyph-2.lit-1"),
+    PEBBLE_GLYPH_OPEN_LIT_1("pebble-glyph-open.lit-1"),
 
     /** Join the community: a speech bubble with its tail at the lower left and a handset inside, the WhatsApp mark in the set's line. */
     WHATSAPP("whatsapp"),
@@ -1375,10 +1375,10 @@ enum class PbblsIcon(
     SHOP_SHOWCASE_ACTIVE("shop-showcase.active"),
 
     /** Market: where glyphs are traded. */
-    SCALE_HALF("scale-half"),
+    SCALE_BALANCED("scale-balanced"),
 
     /** Market: where glyphs are traded. (the `active` twin) */
-    SCALE_HALF_ACTIVE("scale-half.active"),
+    SCALE_BALANCED_ACTIVE("scale-balanced.active"),
 
     /** Market: where glyphs are traded. */
     LABEL("label"),
@@ -1687,10 +1687,10 @@ enum class PbblsIcon(
     TOGGLE_MEDIAN_ACTIVE("toggle-median.active"),
 
     /** Appearance device: appearance: follow the device (trio). */
-    APPEARANCE_HALF("appearance-half"),
+    APPEARANCE_SPLIT("appearance-split"),
 
     /** Appearance device: appearance: follow the device (trio). (the `active` twin) */
-    APPEARANCE_HALF_ACTIVE("appearance-half.active"),
+    APPEARANCE_SPLIT_ACTIVE("appearance-split.active"),
 
     /** Appearance device: appearance: follow the device (trio). */
     LIGHTBULB_MARK("lightbulb-mark"),
@@ -1813,10 +1813,10 @@ enum class PbblsIcon(
     METRONOME_ACTIVE("metronome.active"),
 
     /** Bounce: regularity over the last 28 days, a rhythm kept. */
-    STONES_4_HALF("stones-4-half"),
+    STONES_4_HALVED("stones-4-halved"),
 
     /** Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin) */
-    STONES_4_HALF_ACTIVE("stones-4-half.active"),
+    STONES_4_HALVED_ACTIVE("stones-4-halved.active"),
 
     /** Search: look something up by name, a lens. */
     BINOCULARS("binoculars"),
@@ -5894,13 +5894,13 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_radar,
         R.drawable.ic_pbbls_abstract_umbrella,
         R.drawable.ic_pbbls_abstract_sign_2,
-        R.drawable.ic_pbbls_pebble_dotted_glyph,
-        R.drawable.ic_pbbls_pebble_dotted_glyph_lit_1,
+        R.drawable.ic_pbbls_pebble_glyph_dotted,
+        R.drawable.ic_pbbls_pebble_glyph_dotted_lit_1,
         R.drawable.ic_pbbls_abstract_curves,
         R.drawable.ic_pbbls_abstract_lines,
         R.drawable.ic_pbbls_abstract_mi,
-        R.drawable.ic_pbbls_pebble_dotted_glyph_2,
-        R.drawable.ic_pbbls_pebble_dotted_glyph_2_lit_1,
+        R.drawable.ic_pbbls_pebble_glyph_dotted_open,
+        R.drawable.ic_pbbls_pebble_glyph_dotted_open_lit_1,
         R.drawable.ic_pbbls_glyph_underlined,
         R.drawable.ic_pbbls_glyph_grow_underlined,
         R.drawable.ic_pbbls_draw_dotted,
@@ -5972,10 +5972,10 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_petroglyph_active,
         R.drawable.ic_pbbls_connection,
         R.drawable.ic_pbbls_timeline,
-        R.drawable.ic_pbbls_pebble_outlined_glyph,
-        R.drawable.ic_pbbls_pebble_outlined_glyph_lit_1,
-        R.drawable.ic_pbbls_pebble_outlined_glyph_2,
-        R.drawable.ic_pbbls_pebble_outlined_glyph_2_lit_1,
+        R.drawable.ic_pbbls_pebble_glyph,
+        R.drawable.ic_pbbls_pebble_glyph_lit_1,
+        R.drawable.ic_pbbls_pebble_glyph_open,
+        R.drawable.ic_pbbls_pebble_glyph_open_lit_1,
         R.drawable.ic_pbbls_whatsapp,
         R.drawable.ic_pbbls_again_backward,
         R.drawable.ic_pbbls_again_backward_active,
@@ -6199,8 +6199,8 @@ private fun drawableIds0(): IntArray =
         R.drawable.ic_pbbls_stones_plus_active,
         R.drawable.ic_pbbls_shop_showcase,
         R.drawable.ic_pbbls_shop_showcase_active,
-        R.drawable.ic_pbbls_scale_half,
-        R.drawable.ic_pbbls_scale_half_active,
+        R.drawable.ic_pbbls_scale_balanced,
+        R.drawable.ic_pbbls_scale_balanced_active,
         R.drawable.ic_pbbls_label,
         R.drawable.ic_pbbls_label_active,
         R.drawable.ic_pbbls_flag_mountains,
@@ -6307,8 +6307,8 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_appearance_active,
         R.drawable.ic_pbbls_toggle_median,
         R.drawable.ic_pbbls_toggle_median_active,
-        R.drawable.ic_pbbls_appearance_half,
-        R.drawable.ic_pbbls_appearance_half_active,
+        R.drawable.ic_pbbls_appearance_split,
+        R.drawable.ic_pbbls_appearance_split_active,
         R.drawable.ic_pbbls_lightbulb_mark,
         R.drawable.ic_pbbls_lightbulb_mark_active,
         R.drawable.ic_pbbls_sunset_seaa,
@@ -6349,8 +6349,8 @@ private fun drawableIds1(): IntArray =
         R.drawable.ic_pbbls_signal_dots_active,
         R.drawable.ic_pbbls_metronome,
         R.drawable.ic_pbbls_metronome_active,
-        R.drawable.ic_pbbls_stones_4_half,
-        R.drawable.ic_pbbls_stones_4_half_active,
+        R.drawable.ic_pbbls_stones_4_halved,
+        R.drawable.ic_pbbls_stones_4_halved_active,
         R.drawable.ic_pbbls_binoculars,
         R.drawable.ic_pbbls_binoculars_active,
         R.drawable.ic_pbbls_text_stone,

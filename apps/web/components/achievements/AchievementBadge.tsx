@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { Lock } from "lucide-react"
-import { Collection, Heart, PebbleDottedGlyph, PebbleGlowMd, People, Stack } from "@pbbls/icons"
+import { Collection, Heart, PebbleGlyphDotted, PebbleGlowMd, People, Stack } from "@pbbls/icons"
 import { PBBLS_ICON_SIZE, type PbblsIconComponent } from "@/lib/icons/pbbls-icon"
 import { cn } from "@/lib/utils"
 import { useFormatDate } from "@/lib/i18n"
@@ -19,9 +19,9 @@ export const FAMILY_ICONS: Record<AchievementFamily, PbblsIconComponent> = {
   emotion_first: Heart,
   domain_first: PebbleGlowMd,
   first_collection: Collection,
-  first_glyph: PebbleDottedGlyph,
+  first_glyph: PebbleGlyphDotted,
   first_soul: People,
-  glyph_count: PebbleDottedGlyph,
+  glyph_count: PebbleGlyphDotted,
   glyph_sales: PebbleGlowMd,
 }
 

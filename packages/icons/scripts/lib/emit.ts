@@ -50,7 +50,8 @@ export function loadIcons(packageRoot: string): EmittedIcon[] {
     } catch {
       throw new Error(`${row.name}: cannot read ${SRC_DIR}/${file}`)
     }
-    const { paths } = parseSvg(text, `${SRC_DIR}/${file}`)
+    // A hidden role path is drawn only by the form that fills it, never by the static icon.
+    const paths = parseSvg(text, `${SRC_DIR}/${file}`).paths.filter((p) => p.attrs["data-rest"] !== "hidden")
     return { name: row.name, base: row.base, variant: row.variant, meaning: row.meaning, paths }
   })
 }

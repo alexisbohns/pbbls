@@ -57,7 +57,7 @@ extension References {
                     .fill(Color.pebbles.primaryContainer)
                     .frame(width: 128, height: 122)
                     .overlay {
-                        PbblsIconImage(.pebbleDottedGlyph, size: 58,
+                        PbblsIconImage(.pebbleGlyphDotted, size: 58,
                                        style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
                             .offset(y: 4)
                     }

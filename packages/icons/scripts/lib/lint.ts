@@ -2,7 +2,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { join } from "node:path"
 import { formatSvg, ROOT_ATTRIBUTES } from "./format"
 import { carveSolid } from "./carve"
-import { isOverrideForm, loadManifest, STATUSES, VARIANTS, type IconRow, type Manifest } from "./manifest"
+import { formKeysOf } from "./forms"
+import { DOTTED_FORM, isOverrideForm, loadManifest, STATUSES, VARIANTS, type IconRow, type Manifest } from "./manifest"
 import { parseSvg, type ParsedPath, type ParsedSvg } from "./parse"
 import { readRoles } from "./roles"
 
@@ -27,10 +28,10 @@ export const WARN_AREA = 64
 /** A carved solid must keep at least this much filled area (square units). */
 export const MIN_CARVED_AREA = 4
 /** A name's last segment may not be one of these (spec D1). */
-const FORM_WORDS = ["regular", "half", "solid", "of"]
+const FORM_WORDS = ["regular", "marked", "solid", "parts", "of"]
 
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/
-const PATH_ATTRIBUTES = new Set(["d", "fill", "fill-rule", "stroke", "data-role", "data-mark"])
+const PATH_ATTRIBUTES = new Set(["d", "fill", "fill-rule", "stroke", "data-role", "data-part", "data-step", "data-rest"])
 const COMMANDS = new Set(["M", "L", "C", "Q", "A", "Z"])
 /** Coordinates per command, after the arc's radii, rotation and flags. */
 const ARITY: Record<string, number> = { M: 2, L: 2, C: 6, Q: 4, A: 7, Z: 0 }
@@ -216,7 +217,7 @@ function lintSource(root: string, file: string, isTwin: boolean, isOverride: boo
       // A straight line encloses nothing, so its fill area is 0.
       if (bodyD.reduce((sum, d) => sum + filledArea(d, false), 0) < 1) result.errors.push({ file, rule: "roles", message: "the body encloses no area" })
       else {
-        const others = parsed.paths.filter((_, i) => !roles.body.includes(i)).map((p) => p.d)
+        const others = parsed.paths.filter((_, i) => !roles.body.includes(i) && !roles.hidden.includes(i)).map((p) => p.d)
         try {
           const { area } = carveSolid(bodyD, others)
           if (area < MIN_CARVED_AREA) result.errors.push({ file, rule: "roles", message: `the carved solid keeps ${area.toFixed(1)} square units, under ${MIN_CARVED_AREA}` })
@@ -247,10 +248,8 @@ function overrideAllowed(root: string, base: string, form: string): boolean {
     return false
   }
   const { roles } = readRoles(parsed.paths)
-  if (form === "half") return roles.focus.length > 0
-  if (form === "solid") return roles.body.length > 0
-  const k = Number(form.replace("progress-", ""))
-  return k >= 1 && k <= roles.marks.length
+  const shape = { mark: roles.mark.length > 0, body: roles.body.length > 0, parts: roles.parts.map((p) => p.name), steps: roles.steps.length, dotted: false }
+  return formKeysOf(shape).includes(form)
 }
 
 function lintManifest(root: string, manifest: Manifest, files: string[], result: LintResult): void {
@@ -262,8 +261,7 @@ function lintManifest(root: string, manifest: Manifest, files: string[], result:
     if (rows.has(row.name)) errors.push({ file, rule: "manifest", message: `"${row.name}" is listed twice` })
     rows.set(row.name, row)
     const last = row.name.split("-").at(-1) ?? ""
-    // error once part 3 renames the three -half names (#1607)
-    if (FORM_WORDS.includes(last)) result.warnings.push({ file, rule: "manifest", message: `"${row.name}" ends in a form word (${FORM_WORDS.join(", ")})` })
+    if (FORM_WORDS.includes(last)) errors.push({ file, rule: "manifest", message: `"${row.name}" ends in a form word (${FORM_WORDS.join(", ")})` })
     if (!(STATUSES as readonly string[]).includes(row.status)) errors.push({ file, rule: "manifest", message: `${row.name}: unknown status "${row.status}"` })
     const wave = join(root, WAVES_DIR, row.wave)
     if (!existsSync(wave) || !statSync(wave).isDirectory()) errors.push({ file, rule: "manifest", message: `${row.name}: no folder ${WAVES_DIR}/${row.wave}/` })
@@ -284,6 +282,10 @@ function lintManifest(root: string, manifest: Manifest, files: string[], result:
       if (!base) errors.push({ file: f, rule: "manifest", message: `no row "${split.base}" in ${file}` })
       continue
     }
+    if (split.variant === DOTTED_FORM) {
+      if (!base) errors.push({ file: f, rule: "manifest", message: `dotted drawing without its base: no row "${split.base}"` })
+      continue
+    }
     if (isOverrideForm(split.variant)) {
       if (!base) errors.push({ file: f, rule: "manifest", message: `override without its base: no row "${split.base}"` })
       else if (!overrideAllowed(root, split.base, split.variant)) errors.push({ file: f, rule: "manifest", message: `override "${split.variant}" for a form ${split.base} does not have` })
@@ -293,6 +295,20 @@ function lintManifest(root: string, manifest: Manifest, files: string[], result:
     if (!base) errors.push({ file: f, rule: "manifest", message: `twin without its base: no row "${split.base}"` })
     else if (!base.variants.includes(split.variant)) errors.push({ file: f, rule: "manifest", message: `not listed in the variants of "${split.base}"` })
   }
+}
+
+/** A dotted drawing (spec D4) is a plain line drawing: no role, no fill. */
+function lintDotted(root: string, file: string, result: LintResult): void {
+  let parsed: ParsedSvg
+  try {
+    parsed = parseSvg(readFileSync(join(root, SRC_DIR, file), "utf8"), file)
+  } catch {
+    return // lintSource has reported it
+  }
+  parsed.paths.forEach((p, i) => {
+    if (p.attrs["data-role"] !== undefined) result.errors.push({ file, rule: "dotted", message: `path ${i + 1}: a dotted drawing carries no role` })
+    if (p.filled) result.errors.push({ file, rule: "dotted", message: `path ${i + 1}: a dotted drawing is never filled` })
+  })
 }
 
 /** Lints the package at `root` (the directory holding `icons.json`, `src/` and `waves/`). */
@@ -311,6 +327,7 @@ export function lint(root: string): LintResult {
     const split = splitSourceName(f)
     const variant = split?.variant ?? null
     lintSource(root, f, variant !== null, variant !== null && isOverrideForm(variant), result)
+    if (variant === DOTTED_FORM) lintDotted(root, f, result)
   }
   return result
 }

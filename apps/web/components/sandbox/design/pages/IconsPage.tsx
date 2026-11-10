@@ -1,14 +1,20 @@
 "use client"
 
-import { Fragment, useMemo } from "react"
+import { Fragment, useMemo, useState } from "react"
 import { Android, Apple, Globe } from "@pbbls/icons"
 import type { FindingGroup } from "@/lib/design/audit"
-import { ICON_GLYPHS, ICON_ROWS, glyphMatches, replacementsFor, type IconGlyph, type IconSurface } from "@/lib/design/icon-catalog"
+import { GLYPHS, describeSigns, glyphMatchesQuery, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Form, type Glyph, type GlyphView } from "@/lib/design/glyph-forms"
+import { ICON_ROWS, replacementsFor, type IconSurface } from "@/lib/design/icon-catalog"
 import { PBBLS_ICON_SIZE, type PbblsIconComponent, type PbblsIconSize } from "@/lib/icons/pbbls-icon"
+import { useReviewVerdicts, type Verdict } from "@/lib/design/useReviewVerdicts"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import { useDesign } from "../DesignContext"
 import { DesignSection } from "../DesignSection"
 import { FindingList } from "../FindingList"
+import { GlyphFormView } from "../GlyphFormView"
+import { GlyphReviewDialog } from "../GlyphReviewDialog"
+import { GlyphSigns } from "../GlyphSigns"
 
 /** Each surface drawn with the set's own glyph: the web's globe, Apple's apple, Android's head. */
 const SURFACES: readonly { surface: IconSurface; label: string; Icon: PbblsIconComponent }[] = [
@@ -17,9 +23,11 @@ const SURFACES: readonly { surface: IconSurface; label: string; Icon: PbblsIconC
   { surface: "android", label: "Android", Icon: Android },
 ]
 
+const MIGRATED: ReadonlyMap<string, readonly string[]> = new Map(ICON_ROWS.map((row) => [row.name, row.migrated]))
+
 /** Where the glyph's row has migrated, as an accessible sentence. */
-function migrationSentence(glyph: IconGlyph): string {
-  const on = SURFACES.filter((s) => glyph.row.migrated.includes(s.surface)).map((s) => s.label)
+function migrationSentence(migrated: readonly string[]): string {
+  const on = SURFACES.filter((s) => migrated.includes(s.surface)).map((s) => s.label)
   return on.length === 0 ? "Not migrated on any surface." : `Migrated on ${on.join(", ")}.`
 }
 
@@ -37,42 +45,98 @@ function GlyphName({ name }: { name: string }) {
   ))
 }
 
-function GlyphTile({ glyph, size }: { glyph: IconGlyph; size: PbblsIconSize }) {
-  const { Icon } = glyph
+type GlyphTileProps = {
+  glyph: Glyph
+  size: PbblsIconSize
+  form: Form
+  view: GlyphView
+  verdict?: Verdict
+  /** Whether a fix verdict carries a note yet. */
+  noted: boolean
+  onVerdict: () => void
+  onOpen: () => void
+}
+
+function GlyphTile({ glyph, size, form, view, verdict, noted, onVerdict, onOpen }: GlyphTileProps) {
+  const migrated = MIGRATED.get(glyph.name) ?? []
+  const signs = signsOf(glyph)
   return (
-    <li title={glyph.row.meaning} className="group relative flex aspect-square flex-col items-center gap-2 rounded-2xl bg-card px-3 pt-6 pb-3 text-card-foreground transition-colors hover:bg-muted motion-reduce:transition-none">
+    <li
+      title={glyph.meaning}
+      className={cn(
+        "group relative flex aspect-square flex-col items-center gap-2 rounded-2xl bg-card px-3 pt-6 pb-5 text-card-foreground transition-colors hover:bg-muted motion-reduce:transition-none",
+      )}
+    >
+      {/* The whole tile opens the review dialog; the verdict pill sits above it. */}
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={`Open ${glyph.name} (${describeSigns(signs)}): every form, its twins and its roles`}
+        className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
+      {needsReview(glyph.name) && (
+        <button
+          type="button"
+          onClick={onVerdict}
+          aria-label={`Review ${glyph.name}: ${verdict ?? "no verdict"}${verdict === "fix" && !noted ? ", no note yet" : ""}`}
+          // px-1.5 keeps the longest label ("drop-twin") clear of the hover platform marks at the 8.5rem tile.
+          className={cn(
+            "absolute top-2 left-2 z-10 rounded-full px-1.5 py-0.5 text-[10px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            verdict === "ok" && "bg-primary text-primary-foreground",
+            verdict === "fix" && "bg-secondary text-secondary-foreground",
+            verdict === "drop-twin" && "bg-muted text-muted-foreground line-through",
+            verdict === undefined && "bg-primary/15 text-primary",
+          )}
+        >
+          {verdict ?? "review"}
+          {verdict === "fix" && (noted ? " ✎" : " · no note")}
+        </button>
+      )}
       <span className="flex min-h-12 flex-1 items-center justify-center">
-        {Icon ? <Icon className={PBBLS_ICON_SIZE[size]} /> : <span className="text-xs text-destructive">missing</span>}
+        <GlyphFormView glyph={glyph} form={form} className={PBBLS_ICON_SIZE[size]} />
       </span>
       {/* Two fixed lines, so every icon in a row sits at one height; breaks at a dash or a dot. */}
       <code className="line-clamp-2 h-8 max-w-full text-center text-xs leading-4 break-words text-muted-foreground">
         <GlyphName name={glyph.name} />
       </code>
-      <span className="sr-only">{migrationSentence(glyph)}</span>
+      <span className="sr-only">{migrationSentence(migrated)}</span>
       {/* Migration per surface, on hover: lit where the surface draws it, dimmed where it does not. */}
       <span
         aria-hidden
         className="pointer-events-none absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 motion-reduce:transition-none"
       >
         {SURFACES.map(({ surface, Icon: Mark }) => (
-          <Mark
-            key={surface}
-            className={cn(PBBLS_ICON_SIZE.inline, glyph.row.migrated.includes(surface) ? "text-primary" : "text-muted-foreground/35")}
-          />
+          <Mark key={surface} className={cn(PBBLS_ICON_SIZE.inline, migrated.includes(surface) ? "text-primary" : "text-muted-foreground/35")} />
         ))}
       </span>
+      <GlyphSigns signs={signs} view={view} />
     </li>
   )
 }
 
 /**
  * The hand-drawn set at its real sizes (rem, so 1:1 with the app): one tile per
- * glyph, base and twin alike, searched, counted and sized from the side area. Hovering a
+ * glyph, base and twin alike, drawn in the chosen form, searched, counted and sized from the side area. Hovering a
  * tile shows where its row has migrated. Then what web still draws with Lucide.
  */
 export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
-  const { iconQuery, iconSize } = useDesign()
-  const glyphs = useMemo(() => ICON_GLYPHS.filter((glyph) => glyphMatches(glyph, iconQuery)), [iconQuery])
+  const { iconQuery, iconSize, glyphView, glyphShow } = useDesign()
+  const { verdicts, notes, cycle, set, setNote, draft, copy } = useReviewVerdicts()
+  const [openName, setOpenName] = useState<string | null>(null)
+  const glyphs = useMemo(
+    () => GLYPHS.filter((g) => glyphMatchesQuery(g, iconQuery) && showsGlyph(g.name, glyphShow, verdicts) && viewMatches(g, glyphView)),
+    // Verdicts are read once per list: changing one in the dialog must not drop the glyph from a "Marked fix" walk.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [iconQuery, glyphShow, glyphView],
+  )
+  const openIndex = openName === null ? -1 : glyphs.findIndex((g) => g.name === openName)
+  const step = (by: number) => {
+    if (openIndex < 0 || glyphs.length === 0) return
+    setOpenName(glyphs[(openIndex + by + glyphs.length) % glyphs.length].name)
+  }
+  const reviewed = glyphs.filter((g) => verdicts[g.name] !== undefined).length
+  const fixes = glyphs.filter((g) => verdicts[g.name] === "fix")
+  const noted = fixes.filter((g) => notes[g.name] !== undefined).length
   const webPending = ICON_ROWS.filter((row) => row.replacesWeb.length > 0 && !row.migrated.includes("web"))
   const lucideUses = lucide.reduce((n, g) => n + g.count, 0)
 
@@ -80,6 +144,16 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
     <>
       {/* The page's title, its counts and its tools live in the side area (DesignToolbar). */}
       <section id="icons" aria-label="Icons" className="scroll-mt-32">
+        {glyphShow !== "all" && (
+          <div className="mb-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
+            <span>
+              {reviewed} of {glyphs.length} reviewed · {noted} of {fixes.length} fixes noted · open a tile to see its forms and twins, set the verdict and say what a fix needs
+            </span>
+            <Button size="sm" variant="secondary" onClick={() => void copy()}>
+              Copy verdicts
+            </Button>
+          </div>
+        )}
         {glyphs.length === 0 ? (
           <p className="rounded-2xl bg-card px-4 py-10 text-center text-sm text-muted-foreground">
             No glyph matches “{iconQuery.trim()}”.
@@ -87,10 +161,31 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
         ) : (
           <ul className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-2">
             {glyphs.map((glyph) => (
-              <GlyphTile key={glyph.name} glyph={glyph} size={iconSize} />
+              <GlyphTile
+                key={glyph.name}
+                glyph={glyph}
+                size={iconSize}
+                form={viewForm(glyph, glyphView)}
+                view={glyphView}
+                verdict={verdicts[glyph.name]}
+                noted={notes[glyph.name] !== undefined}
+                onVerdict={() => cycle(glyph.name)}
+                onOpen={() => setOpenName(glyph.name)}
+              />
             ))}
           </ul>
         )}
+        <GlyphReviewDialog
+          glyph={openIndex >= 0 ? glyphs[openIndex] : null}
+          position={`${openIndex + 1} of ${glyphs.length}`}
+          verdict={openName ? verdicts[openName] : undefined}
+          onVerdict={(v) => openName && set(openName, v)}
+          note={openName ? draft(openName) : ""}
+          onNote={(text) => openName && setNote(openName, text)}
+          onPrev={() => step(-1)}
+          onNext={() => step(1)}
+          onClose={() => setOpenName(null)}
+        />
       </section>
 
       <DesignSection

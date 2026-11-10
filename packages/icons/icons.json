@@ -604,7 +604,7 @@
       "replaces": { "ios": [], "android": [], "web": [] }
     },
     {
-      "name": "pebble-dotted-glyph",
+      "name": "pebble-glyph-dotted",
       "meaning": "The marks a user scribbles on a stone: a dotted stone ring around a small scribble.",
       "variants": ["lit-1"],
       "wave": "2026-10-foundation",
@@ -640,7 +640,7 @@
       "replaces": { "ios": [], "android": [], "web": [] }
     },
     {
-      "name": "pebble-dotted-glyph-2",
+      "name": "pebble-glyph-dotted-open",
       "meaning": "The marks a user scribbles on a stone: a dotted stone ring around a small scribble, the ring open on one side.",
       "variants": ["lit-1"],
       "wave": "2026-10-foundation",
@@ -1072,7 +1072,7 @@
       "replaces": { "ios": [], "android": [], "web": [] }
     },
     {
-      "name": "pebble-outlined-glyph",
+      "name": "pebble-glyph",
       "meaning": "The marks a user scribbles on a stone: a stone ring around a small scribble.",
       "variants": ["lit-1"],
       "wave": "2026-10-foundation",
@@ -1081,7 +1081,7 @@
       "replaces": { "ios": [], "android": [], "web": [] }
     },
     {
-      "name": "pebble-outlined-glyph-2",
+      "name": "pebble-glyph-open",
       "meaning": "The marks a user scribbles on a stone: a stone ring around a small scribble, drawn with an open start.",
       "variants": ["lit-1"],
       "wave": "2026-10-foundation",
@@ -2098,7 +2098,7 @@
       "replaces": { "ios": [], "android": [], "web": [] }
     },
     {
-      "name": "scale-half",
+      "name": "scale-balanced",
       "meaning": "Market: where glyphs are traded.",
       "variants": ["active"],
       "wave": "2026-11-everyday",
@@ -2566,7 +2566,7 @@
       "replaces": { "ios": [], "android": [], "web": [] }
     },
     {
-      "name": "appearance-half",
+      "name": "appearance-split",
       "meaning": "Appearance device: appearance: follow the device (trio).",
       "variants": ["active"],
       "wave": "2026-11-everyday",
@@ -2755,7 +2755,7 @@
       "replaces": { "ios": [], "android": [], "web": [] }
     },
     {
-      "name": "stones-4-half",
+      "name": "stones-4-halved",
       "meaning": "Bounce: regularity over the last 28 days, a rhythm kept.",
       "variants": ["active"],
       "wave": "2026-11-everyday",

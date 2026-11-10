@@ -286,9 +286,9 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// Adjust things: a stylus crossed by three rings of cord.
     case abstractSign2 = "abstract-sign-2"
     /// The marks a user scribbles on a stone: a dotted stone ring around a small scribble.
-    case pebbleDottedGlyph = "pebble-dotted-glyph"
+    case pebbleGlyphDotted = "pebble-glyph-dotted"
     /// The marks a user scribbles on a stone: a dotted stone ring around a small scribble. (the `lit-1` twin)
-    case pebbleDottedGlyphLit1 = "pebble-dotted-glyph.lit-1"
+    case pebbleGlyphDottedLit1 = "pebble-glyph-dotted.lit-1"
     /// The marks a user scribbles on a stone: a dotted arc, a hooked stroke and a short tail.
     case abstractCurves = "abstract-curves"
     /// The marks a user scribbles on a stone: a zigzag over a row of dots.
@@ -296,10 +296,10 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// The marks a user scribbles on a stone: a zigzag and a bar over a dotted swell.
     case abstractMi = "abstract-mi"
     /// The marks a user scribbles on a stone: a dotted stone ring around a small scribble, the ring open on one side.
-    case pebbleDottedGlyph2 = "pebble-dotted-glyph-2"
+    case pebbleGlyphDottedOpen = "pebble-glyph-dotted-open"
     /// The marks a user scribbles on a stone: a dotted stone ring around a small scribble, the ring open on one side.
     /// (the `lit-1` twin)
-    case pebbleDottedGlyph2Lit1 = "pebble-dotted-glyph-2.lit-1"
+    case pebbleGlyphDottedOpenLit1 = "pebble-glyph-dotted-open.lit-1"
     /// The marks a user scribbles on a stone: a scribble over a dotted line.
     case glyphUnderlined = "glyph-underlined"
     /// The marks a user scribbles on a stone: a scribble that grows taller, over a dotted line.
@@ -443,14 +443,14 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// Ordered steps: a tally strap with two notches.
     case timeline = "timeline"
     /// The marks a user scribbles on a stone: a stone ring around a small scribble.
-    case pebbleOutlinedGlyph = "pebble-outlined-glyph"
+    case pebbleGlyph = "pebble-glyph"
     /// The marks a user scribbles on a stone: a stone ring around a small scribble. (the `lit-1` twin)
-    case pebbleOutlinedGlyphLit1 = "pebble-outlined-glyph.lit-1"
+    case pebbleGlyphLit1 = "pebble-glyph.lit-1"
     /// The marks a user scribbles on a stone: a stone ring around a small scribble, drawn with an open start.
-    case pebbleOutlinedGlyph2 = "pebble-outlined-glyph-2"
+    case pebbleGlyphOpen = "pebble-glyph-open"
     /// The marks a user scribbles on a stone: a stone ring around a small scribble, drawn with an open start. (the
     /// `lit-1` twin)
-    case pebbleOutlinedGlyph2Lit1 = "pebble-outlined-glyph-2.lit-1"
+    case pebbleGlyphOpenLit1 = "pebble-glyph-open.lit-1"
     /// Join the community: a speech bubble with its tail at the lower left and a handset inside, the WhatsApp mark in
     /// the set's line.
     case whatsapp = "whatsapp"
@@ -913,9 +913,9 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// Market: where glyphs are traded. (the `active` twin)
     case shopShowcaseActive = "shop-showcase.active"
     /// Market: where glyphs are traded.
-    case scaleHalf = "scale-half"
+    case scaleBalanced = "scale-balanced"
     /// Market: where glyphs are traded. (the `active` twin)
-    case scaleHalfActive = "scale-half.active"
+    case scaleBalancedActive = "scale-balanced.active"
     /// Market: where glyphs are traded.
     case label = "label"
     /// Market: where glyphs are traded. (the `active` twin)
@@ -1133,9 +1133,9 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// Appearance device: appearance: follow the device (trio). (the `active` twin)
     case toggleMedianActive = "toggle-median.active"
     /// Appearance device: appearance: follow the device (trio).
-    case appearanceHalf = "appearance-half"
+    case appearanceSplit = "appearance-split"
     /// Appearance device: appearance: follow the device (trio). (the `active` twin)
-    case appearanceHalfActive = "appearance-half.active"
+    case appearanceSplitActive = "appearance-split.active"
     /// Appearance device: appearance: follow the device (trio).
     case lightbulbMark = "lightbulb-mark"
     /// Appearance device: appearance: follow the device (trio). (the `active` twin)
@@ -1217,9 +1217,9 @@ enum PbblsIcon: String, CaseIterable, Sendable {
     /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
     case metronomeActive = "metronome.active"
     /// Bounce: regularity over the last 28 days, a rhythm kept.
-    case stones4Half = "stones-4-half"
+    case stones4Halved = "stones-4-halved"
     /// Bounce: regularity over the last 28 days, a rhythm kept. (the `active` twin)
-    case stones4HalfActive = "stones-4-half.active"
+    case stones4HalvedActive = "stones-4-halved.active"
     /// Search: look something up by name, a lens.
     case binoculars = "binoculars"
     /// Search: look something up by name, a lens. (the `active` twin)
