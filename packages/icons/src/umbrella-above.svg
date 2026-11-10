@@ -7,5 +7,5 @@
   <path d="M12 12 L18 18 L12 20.6 Z" data-role="step" data-rest="hidden" data-step="4"/>
   <path d="M12 12 L12 20.6 L6 18 Z" data-role="step" data-rest="hidden" data-step="5"/>
   <path d="M12 12 L6 18 L3.4 12 Z" data-role="step" data-rest="hidden" data-step="6"/>
-  <path d="M12 3.4 L18 6 L20.6 12 L18 18 L12 20.6 L6 18 L3.4 12 L6 6 Z" data-role="step" data-rest="hidden" data-step="7"/>
+  <path d="M12 12 L3.4 12 L6 6 L12 3.4 Z" data-role="step" data-rest="hidden" data-step="7"/>
 </svg>
