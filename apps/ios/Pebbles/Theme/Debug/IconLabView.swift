@@ -80,7 +80,7 @@ struct IconLabView: View {
                     } label: { Text(verbatim: "Form") }
                     .pickerStyle(.segmented)
                     HStack(spacing: Spacing.xs) {
-                        ForEach(PbblsIconSize.allCases, id: \.rawValue) { size in
+                        ForEach(PbblsGlyphSize.allCases, id: \.rawValue) { size in
                             Button {
                                 side = size.rawValue
                             } label: {

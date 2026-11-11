@@ -13,8 +13,9 @@ from pathlib import Path
 
 GENERATED = (
     "packages/icons/react/",
-    "apps/ios/Pebbles/Resources/Icons.xcassets/",
-    "apps/ios/Pebbles/Theme/PbblsIcon.swift",
+    "apps/ios/Pebbles/Resources/pbbls-glyphs.json",
+    "apps/ios/Pebbles/Theme/PbblsGlyph.swift",
+    "apps/ios/Pebbles/Theme/PbblsGlyphState.swift",
     "apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsIcons.kt",
 )
 SUFFIXES = ("", ".active", ".lit-1", ".lit-2", ".lit-3")
