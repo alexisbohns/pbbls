@@ -2,6 +2,7 @@ package app.pbbls.android
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,6 +16,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.AppearancePreferences
 import app.pbbls.android.core.data.EmotionPaletteService
 import app.pbbls.android.core.data.LocalEmotionPaletteService
@@ -28,8 +30,11 @@ import app.pbbls.android.core.data.SupabaseService
 import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.parseInviteToken
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.glyph.GlyphCatalog
+import app.pbbls.android.di.IoApplicationScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.auth.handleDeeplinks
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -88,6 +93,11 @@ class MainActivity : ComponentActivity() {
     @Inject
     internal lateinit var settings: SettingsStore
 
+    /** Process-lifetime scope on IO, for the glyph data's load at launch. */
+    @Inject
+    @IoApplicationScope
+    internal lateinit var ioScope: CoroutineScope
+
     /**
      * The same instance `RootScreen` reads via `hiltViewModel()` (#852):
      * `RootScreen` calls it above `PebblesNavDisplay`, outside any `NavEntry`, so
@@ -125,6 +135,13 @@ class MainActivity : ComponentActivity() {
             // may have nothing else invalidating; ask for one explicitly so the
             // ceiling always dismisses the splash.
             findViewById<View>(android.R.id.content).invalidate()
+        }
+        // Index the glyph data off the main thread, so the first glyph on screen finds it ready
+        // (one that is drawn first waits for the same load rather than starting its own).
+        val appContext = applicationContext
+        ioScope.launch {
+            runCatchingCancellable { GlyphCatalog.load(appContext) }
+                .onFailure { Log.e("PbblsGlyphs", "glyph catalog did not load", it) }
         }
         enableEdgeToEdge()
         supabaseClientOwner.client.handleDeeplinks(intent)

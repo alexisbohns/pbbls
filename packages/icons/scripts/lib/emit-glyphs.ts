@@ -156,6 +156,13 @@ export function formsContract(glyphs: readonly GlyphData[], states: StateTable, 
 
 const built = new Map<string, GlyphData[]>()
 
+/** The forms data the native apps bundle (spec §2): keyed by name, without meaning, tags or family. */
+export function nativeGlyphData(glyphs: readonly GlyphData[], states: StateTable): string {
+  const byName: Record<string, Omit<GlyphData, "name" | "meaning" | "family" | "tags">> = {}
+  for (const { name, meaning: _m, family: _f, tags: _t, ...forms } of glyphs) byName[name] = forms
+  return JSON.stringify({ notice: GENERATED_NOTICE, version: 1, states, glyphs: byName }) + "\n"
+}
+
 /** `loadGlyphs`, computed once per package root and process: every emitter of one generate run reads the same glyphs. */
 export function loadGlyphsOnce(packageRoot: string): GlyphData[] {
   const cached = built.get(packageRoot)

@@ -23,6 +23,7 @@ The generator owns these paths outright and clears them before writing. Fix the 
 - `packages/icons/glyphs/glyphs.json` (the forms data: every glyph's paths with roles, its carved solid and parts fills with and without the mark, its dotted drawing and overrides, and the state tokens)
 - `packages/icons/glyphs/forms-contract.json` (what `formsOf`, `renderForm` and `resolveState` say for a sample of glyphs; every native renderer's tests read it)
 - `apps/ios/Pebbles/Resources/pbbls-glyphs.json`, `apps/ios/Pebbles/Theme/PbblsGlyph.swift`, `apps/ios/Pebbles/Theme/PbblsGlyphState.swift` (the iOS forms data, names and state tokens)
+- `apps/android/app/src/main/res/raw/pbbls_glyphs.json`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsGlyph.kt`, `PbblsGlyphState.kt` (the Android forms data, byte-identical to iOS's, names and state tokens)
 
 `fixtures/path-contract.json` is hand-written: the segments every surface's path parser must read. Add a case when a parser bug is found; never edit an expectation to make a parser pass.
 

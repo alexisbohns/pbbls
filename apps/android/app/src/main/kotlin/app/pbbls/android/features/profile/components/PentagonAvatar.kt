@@ -9,8 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
+import app.pbbls.android.core.designsystem.glyph.GlyphForm
 import app.pbbls.android.core.designsystem.stone.SquirclePentagonShape
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.ui.render.GlyphImage
@@ -49,9 +50,10 @@ internal fun PentagonAvatar(
     ) {
         val glyph = Modifier.padding(top = GLYPH_DROP).size(GLYPH)
         if (glyphStrokes.isNullOrEmpty()) {
-            PbblsIconImage(
-                icon = PbblsIcon.PEBBLE_GLYPH_DOTTED,
+            PbblsGlyphImage(
+                glyph = PbblsGlyph.PEBBLE_GLYPH,
                 contentDescription = null,
+                form = GlyphForm.DOTTED,
                 size = GLYPH,
                 tint = colors.onPrimaryContainer,
                 modifier = Modifier.padding(top = GLYPH_DROP),

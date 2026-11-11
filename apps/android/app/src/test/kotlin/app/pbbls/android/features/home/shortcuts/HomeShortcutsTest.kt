@@ -2,7 +2,7 @@ package app.pbbls.android.features.home.shortcuts
 
 import app.pbbls.android.R
 import app.pbbls.android.core.data.HomeShortcut
-import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsGlyph
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -31,9 +31,9 @@ class HomeShortcutsTest {
 
     @Test
     fun `each shortcut draws the ios icon`() {
-        assertEquals(PbblsIcon.CAMERA, HomeShortcut.CAMERA.icon)
-        assertEquals(PbblsIcon.PEBBLE_FLAT, HomeShortcut.QUICK.icon)
-        assertEquals(PbblsIcon.PLUS_CIRCLE, HomeShortcut.PEBBLE.icon)
+        assertEquals(PbblsGlyph.CAMERA, HomeShortcut.CAMERA.icon)
+        assertEquals(PbblsGlyph.PEBBLE_FLAT, HomeShortcut.QUICK.icon)
+        assertEquals(PbblsGlyph.PLUS_CIRCLE, HomeShortcut.PEBBLE.icon)
     }
 
     @Test

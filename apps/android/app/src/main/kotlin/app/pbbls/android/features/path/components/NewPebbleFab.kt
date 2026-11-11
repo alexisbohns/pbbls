@@ -14,8 +14,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 
 /**
  * The Path tab's create affordance, now a Path-only FAB (#852, D3) — the bar
@@ -43,8 +43,8 @@ fun NewPebbleFab(
         contentAlignment = Alignment.Center,
     ) {
         // The FAB's 24dp icon slot: the generated default (spec D6).
-        PbblsIconImage(
-            icon = PbblsIcon.PLUS_CIRCLE,
+        PbblsGlyphImage(
+            glyph = PbblsGlyph.PLUS_CIRCLE,
             contentDescription = label,
             tint = colors.onPrimary,
         )

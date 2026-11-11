@@ -55,8 +55,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.common.takeSafely
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.Spacing
@@ -174,8 +174,8 @@ fun RecordMomentStep(
                     label = stringResource(R.string.capture_field_words),
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    PbblsIconImage(
-                        icon = PbblsIcon.KARMA_DOT,
+                    PbblsGlyphImage(
+                        glyph = PbblsGlyph.KARMA_DOT,
                         size = PbblsIconSize.INLINE,
                         contentDescription = null,
                         tint = colors.primary,
@@ -339,8 +339,8 @@ private fun PhotoRow(
         is FormSnap.Existing -> Unit
         null ->
             TextButton(onClick = onChangePhoto, modifier = Modifier.heightIn(min = MinTarget), contentPadding = FlushStart) {
-                PbblsIconImage(
-                    icon = PbblsIcon.CAMERA,
+                PbblsGlyphImage(
+                    glyph = PbblsGlyph.CAMERA,
                     size = PbblsIconSize.ROW,
                     contentDescription = null,
                     tint = colors.primary,

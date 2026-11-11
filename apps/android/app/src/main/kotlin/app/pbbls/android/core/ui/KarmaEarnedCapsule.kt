@@ -47,8 +47,8 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.KarmaReason
@@ -145,8 +145,8 @@ fun KarmaEarnedCapsule(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 11.dp),
         ) {
-            PbblsIconImage(
-                icon = PbblsIcon.KARMA_DOT,
+            PbblsGlyphImage(
+                glyph = PbblsGlyph.KARMA_DOT,
                 size = PbblsIconSize.INLINE,
                 contentDescription = null,
                 tint = colors.primary,

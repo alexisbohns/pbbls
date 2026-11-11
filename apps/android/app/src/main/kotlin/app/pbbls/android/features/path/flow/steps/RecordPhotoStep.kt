@@ -26,8 +26,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.AttachedSnap
@@ -118,8 +118,8 @@ private fun LibraryInvitation(
             contentAlignment = Alignment.Center,
             modifier = Modifier.size(96.dp).background(colors.primaryContainer, CircleShape),
         ) {
-            PbblsIconImage(
-                icon = PbblsIcon.CAMERA_FOCUS,
+            PbblsGlyphImage(
+                glyph = PbblsGlyph.CAMERA_FOCUS,
                 size = PbblsIconSize.HERO,
                 contentDescription = null,
                 tint = colors.onPrimaryContainer,

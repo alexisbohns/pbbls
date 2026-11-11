@@ -35,8 +35,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.DashedPlaceholder
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Domain
@@ -281,8 +281,8 @@ private fun AddPhotoRow(onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        PbblsIconImage(
-            icon = PbblsIcon.CAMERA,
+        PbblsGlyphImage(
+            glyph = PbblsGlyph.CAMERA,
             size = PbblsIconSize.ROW,
             contentDescription = null,
             tint = colors.primary,
@@ -407,8 +407,8 @@ private fun CollectionRow(
     Box {
         FormRow(
             leading = {
-                PbblsIconImage(
-                    icon = PbblsIcon.COLLECTION,
+                PbblsGlyphImage(
+                    glyph = PbblsGlyph.COLLECTION,
                     size = PbblsIconSize.TILE,
                     contentDescription = null,
                     tint = colors.primary,

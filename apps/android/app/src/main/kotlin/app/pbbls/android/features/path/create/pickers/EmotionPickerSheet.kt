@@ -42,8 +42,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.Valence
@@ -212,8 +212,8 @@ private fun EmotionChip(
         trailingIcon =
             if (selected) {
                 {
-                    PbblsIconImage(
-                        icon = PbblsIcon.CHECKMARK_DOT,
+                    PbblsGlyphImage(
+                        glyph = PbblsGlyph.CHECKMARK_DOT,
                         contentDescription = null,
                         size = FilterChipDefaults.IconSize,
                     )

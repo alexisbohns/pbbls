@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.model.GlyphShelf
@@ -78,8 +78,8 @@ fun ProfileContent(
                 title = {},
                 actions = {
                     IconButton(onClick = onOpenSettings) {
-                        PbblsIconImage(
-                            icon = PbblsIcon.SLIDER,
+                        PbblsGlyphImage(
+                            glyph = PbblsGlyph.SLIDER,
                             size = PbblsIconSize.TOOLBAR,
                             contentDescription = stringResource(R.string.settings_title),
                         )

@@ -25,8 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.ui.SoulMark
@@ -105,7 +105,7 @@ fun SoulTile(
                         .background(colors.primary),
                 contentAlignment = Alignment.Center,
             ) {
-                PbblsIconImage(icon = PbblsIcon.CHECKMARK_DOT, contentDescription = null, size = BADGE_ICON, tint = colors.onPrimary)
+                PbblsGlyphImage(glyph = PbblsGlyph.CHECKMARK_DOT, contentDescription = null, size = BADGE_ICON, tint = colors.onPrimary)
             }
         }
     }

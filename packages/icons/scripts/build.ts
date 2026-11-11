@@ -9,6 +9,7 @@ import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { loadIcons, unionOwned, type Emitter } from "./lib/emit"
 import { androidEmitter } from "./lib/emit-android"
+import { androidGlyphsEmitter } from "./lib/emit-android-glyphs"
 import { glyphsEmitter } from "./lib/emit-glyphs"
 import { iosEmitter } from "./lib/emit-ios"
 import { iosGlyphsEmitter } from "./lib/emit-ios-glyphs"
@@ -23,7 +24,7 @@ export const REPO_ROOT = fileURLToPath(new URL("../../..", import.meta.url))
 export const PACKAGE_ROOT = fileURLToPath(new URL("..", import.meta.url))
 
 /** Every surface the generator emits, in the order they are written. */
-const EMITTERS: readonly Emitter[] = [reactEmitter, iosEmitter, androidEmitter, glyphsEmitter(PACKAGE_ROOT), iosGlyphsEmitter(PACKAGE_ROOT)]
+const EMITTERS: readonly Emitter[] = [reactEmitter, iosEmitter, androidEmitter, glyphsEmitter(PACKAGE_ROOT), iosGlyphsEmitter(PACKAGE_ROOT), androidGlyphsEmitter(PACKAGE_ROOT)]
 
 const FIX = "run npm run generate --workspace=@pbbls/icons and commit the result"
 

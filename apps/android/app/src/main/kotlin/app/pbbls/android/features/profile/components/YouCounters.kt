@@ -22,8 +22,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.stone.SplitStone
@@ -53,7 +53,7 @@ private const val PLACEHOLDER = "—"
 
 private data class Counter(
     val value: Int?,
-    val icon: PbblsIcon,
+    val icon: PbblsGlyph,
     @StringRes val label: Int,
     @PluralsRes val spoken: Int,
 )
@@ -78,9 +78,9 @@ internal fun YouCounters(
     val format = remember(locale) { NumberFormat.getIntegerInstance(locale) }
     val counters =
         listOf(
-            Counter(daysPracticed, PbblsIcon.CALENDAR_DATE, R.string.profile_counter_days, R.plurals.you_counter_days_a11y),
-            Counter(pebbles, PbblsIcon.PEBBLE_ROUND, R.string.profile_counter_pebbles, R.plurals.you_counter_pebbles_a11y),
-            Counter(karma, PbblsIcon.KARMA_DOT, R.string.profile_counter_karma, R.plurals.you_counter_karma_a11y),
+            Counter(daysPracticed, PbblsGlyph.CALENDAR_DATE, R.string.profile_counter_days, R.plurals.you_counter_days_a11y),
+            Counter(pebbles, PbblsGlyph.PEBBLE_ROUND, R.string.profile_counter_pebbles, R.plurals.you_counter_pebbles_a11y),
+            Counter(karma, PbblsGlyph.KARMA_DOT, R.string.profile_counter_karma, R.plurals.you_counter_karma_a11y),
         )
     SplitStone(
         n = counters.size,
@@ -124,7 +124,7 @@ internal fun YouCounters(
                 horizontalArrangement = Arrangement.spacedBy(LABEL_GAP),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                PbblsIconImage(counter.icon, PbblsIconSize.INLINE, contentDescription = null, tint = colors.primary)
+                PbblsGlyphImage(counter.icon, PbblsIconSize.INLINE, contentDescription = null, tint = colors.primary)
                 Text(text = label, style = PebblesTheme.page.counterLabel, color = colors.onSurfaceVariant)
             }
         }

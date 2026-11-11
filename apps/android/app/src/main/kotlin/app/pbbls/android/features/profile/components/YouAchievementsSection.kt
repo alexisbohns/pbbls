@@ -25,12 +25,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesCard
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SectionHead
+import app.pbbls.android.core.ui.achievementFamilyForm
 import app.pbbls.android.core.ui.achievementFamilyIcon
 import app.pbbls.android.core.ui.achievementTitle
 
@@ -118,10 +119,11 @@ private fun BadgeCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(LABEL_GAP),
         ) {
-            PbblsIconImage(
-                icon = achievementFamilyIcon(record.family),
+            PbblsGlyphImage(
+                glyph = achievementFamilyIcon(record.family),
                 size = PbblsIconSize.TILE,
                 contentDescription = null,
+                form = achievementFamilyForm(record.family),
                 tint = colors.primary,
             )
             Text(
@@ -147,8 +149,8 @@ private fun InviteCard(onOpen: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(LABEL_GAP),
         ) {
-            PbblsIconImage(
-                icon = PbblsIcon.PEBBLE_GLOW_MD,
+            PbblsGlyphImage(
+                glyph = PbblsGlyph.PEBBLE_GLOW_MD,
                 size = PbblsIconSize.TILE,
                 contentDescription = null,
                 tint = colors.primary,

@@ -11,8 +11,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
+import app.pbbls.android.core.designsystem.PbblsGlyphState
+import app.pbbls.android.core.designsystem.glyph.GlyphForm
+import app.pbbls.android.core.designsystem.glyph.form
 
 /**
  * The stones in the top bar (#1510 §1): passed stones lit, the current one lit and larger, the ones
@@ -33,9 +36,10 @@ fun ProgressStones(
     ) {
         repeat(count) { index ->
             val lit = index <= current
-            PbblsIconImage(
-                icon = if (lit) PbblsIcon.PEBBLE_ROUND_LIT_1 else PbblsIcon.PEBBLE_ROUND,
+            PbblsGlyphImage(
+                glyph = PbblsGlyph.PEBBLE_ROUND,
                 contentDescription = null,
+                form = if (lit) PbblsGlyph.PEBBLE_ROUND.form(PbblsGlyphState.SELECTED) else GlyphForm.REGULAR,
                 size = if (index == current) 18.dp else 12.dp,
                 tint = if (lit) colors.primary else colors.outline,
             )

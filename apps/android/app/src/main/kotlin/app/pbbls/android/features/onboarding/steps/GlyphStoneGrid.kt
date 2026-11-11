@@ -29,8 +29,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.stone.StoneGridLayout
@@ -141,8 +141,8 @@ fun GlyphStoneGrid(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterVertically),
                     ) {
-                        PbblsIconImage(
-                            PbblsIcon.PLUS_CIRCLE,
+                        PbblsGlyphImage(
+                            PbblsGlyph.PLUS_CIRCLE,
                             if (folded) PbblsIconSize.ROW else PbblsIconSize.TILE,
                             contentDescription = null,
                             tint = colors.onSurfaceVariant,

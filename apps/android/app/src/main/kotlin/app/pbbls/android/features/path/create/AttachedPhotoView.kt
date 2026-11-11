@@ -24,15 +24,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.rememberPbblsGlyphPainter
 import app.pbbls.android.core.designsystem.toDp
 import app.pbbls.android.core.model.AttachedSnap
 
@@ -75,19 +77,19 @@ fun AttachedPhotoView(
             when (snap.state) {
                 AttachedSnap.UploadState.UPLOADING ->
                     MediaStateLabel(
-                        iconRes = R.drawable.ic_arrow_up_circle,
+                        icon = painterResource(R.drawable.ic_arrow_up_circle),
                         text = stringResource(R.string.photo_state_uploading),
                         color = colors.onSurfaceVariant,
                     )
                 AttachedSnap.UploadState.UPLOADED ->
                     MediaStateLabel(
-                        iconRes = PbblsIcon.CHECK_CIRCLE.drawableRes,
+                        icon = rememberPbblsGlyphPainter(PbblsGlyph.CHECK_CIRCLE),
                         text = stringResource(R.string.photo_state_ready),
                         color = colors.tertiary,
                     )
                 AttachedSnap.UploadState.FAILED ->
                     MediaStateLabel(
-                        iconRes = R.drawable.ic_warning,
+                        icon = painterResource(R.drawable.ic_warning),
                         text = stringResource(R.string.photo_state_failed),
                         color = colors.error,
                     )
@@ -147,14 +149,14 @@ internal fun MediaThumbPlaceholder() {
 }
 
 /**
- * Icon + caption state line (the iOS `Label` analog). [iconRes] is a kept
- * tracing (upload, failed) or a pebbles icon's `drawableRes` (ready, saved);
+ * Icon + caption state line (the iOS `Label` analog). [icon] is a kept
+ * tracing (upload, failed) or a glyph's painter (ready, saved);
  * all draw at INLINE, the helper's one size (Android icon migration spec D6).
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun MediaStateLabel(
-    iconRes: Int,
+    icon: Painter,
     text: String,
     color: Color,
 ) {
@@ -163,7 +165,7 @@ internal fun MediaStateLabel(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            painter = painterResource(iconRes),
+            painter = icon,
             contentDescription = null,
             tint = color,
             modifier = Modifier.size(PbblsIconSize.INLINE.toDp(LocalDensity.current)),
@@ -180,8 +182,8 @@ internal fun MediaStateLabel(
 @Composable
 internal fun RemovePhotoButton(onRemove: () -> Unit) {
     IconButton(onClick = onRemove) {
-        PbblsIconImage(
-            icon = PbblsIcon.REMOVE,
+        PbblsGlyphImage(
+            glyph = PbblsGlyph.REMOVE,
             size = PbblsIconSize.TOOLBAR,
             contentDescription = stringResource(R.string.photo_remove_a11y),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,

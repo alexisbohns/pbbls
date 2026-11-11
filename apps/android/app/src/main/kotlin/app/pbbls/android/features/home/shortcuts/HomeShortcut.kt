@@ -3,15 +3,15 @@ package app.pbbls.android.features.home.shortcuts
 import androidx.annotation.StringRes
 import app.pbbls.android.R
 import app.pbbls.android.core.data.HomeShortcut
-import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsGlyph
 
 /** What each Home shortcut draws (iOS `HomeShortcut.icon`). The enum itself lives in `core/data`. */
-val HomeShortcut.icon: PbblsIcon
+val HomeShortcut.icon: PbblsGlyph
     get() =
         when (this) {
-            HomeShortcut.CAMERA -> PbblsIcon.CAMERA
-            HomeShortcut.QUICK -> PbblsIcon.PEBBLE_FLAT
-            HomeShortcut.PEBBLE -> PbblsIcon.PLUS_CIRCLE
+            HomeShortcut.CAMERA -> PbblsGlyph.CAMERA
+            HomeShortcut.QUICK -> PbblsGlyph.PEBBLE_FLAT
+            HomeShortcut.PEBBLE -> PbblsGlyph.PLUS_CIRCLE
         }
 
 /** Each shortcut's label, also its button's spoken name (iOS `HomeShortcut.title`). */

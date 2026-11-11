@@ -21,8 +21,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -54,8 +54,8 @@ fun WhenRow(
 
     FormRow(
         leading = {
-            PbblsIconImage(
-                icon = PbblsIcon.CALENDAR_DATE,
+            PbblsGlyphImage(
+                glyph = PbblsGlyph.CALENDAR_DATE,
                 size = PbblsIconSize.TILE,
                 contentDescription = null,
                 tint = colors.primary,

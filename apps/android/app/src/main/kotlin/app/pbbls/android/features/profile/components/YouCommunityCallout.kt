@@ -27,8 +27,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.stone.StoneShape
 import app.pbbls.android.core.model.LabConfig
@@ -74,8 +74,8 @@ internal fun YouCommunityCallout(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(GAP),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        PbblsIconImage(
-            icon = PbblsIcon.WHATSAPP,
+        PbblsGlyphImage(
+            glyph = PbblsGlyph.WHATSAPP,
             contentDescription = null,
             size = ICON,
             tint = colors.onTertiaryContainer,

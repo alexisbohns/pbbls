@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.glyph.GlyphForm
 import app.pbbls.android.core.designsystem.stone.SplitStone
 import app.pbbls.android.core.designsystem.stone.SquirclePentagonShape
 import app.pbbls.android.core.designsystem.stone.StoneGeometry
@@ -46,9 +47,9 @@ private fun StoneGallery() {
     ) {
         val actions =
             listOf(
-                PbblsIcon.CAMERA to "Camera moment",
-                PbblsIcon.PEBBLE_FLAT to "Quick moment",
-                PbblsIcon.PLUS_CIRCLE to "New pebble",
+                PbblsGlyph.CAMERA to "Camera moment",
+                PbblsGlyph.PEBBLE_FLAT to "Quick moment",
+                PbblsGlyph.PLUS_CIRCLE to "New pebble",
             )
         SplitStone(
             n = 3,
@@ -66,7 +67,7 @@ private fun StoneGallery() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(spacing.xs, Alignment.CenterVertically),
             ) {
-                PbblsIconImage(actions[k].first, PbblsIconSize.TILE, contentDescription = null, tint = colors.onPrimaryContainer)
+                PbblsGlyphImage(actions[k].first, PbblsIconSize.TILE, contentDescription = null, tint = colors.onPrimaryContainer)
                 Text(actions[k].second, style = type.labelLarge, color = colors.onPrimaryContainer, textAlign = TextAlign.Center)
             }
         }
@@ -109,7 +110,7 @@ private fun StoneGallery() {
                         .background(colors.surfaceContainer, StoneShape("chip-0", 16.dp)),
                 contentAlignment = Alignment.Center,
             ) {
-                PbblsIconImage(PbblsIcon.PEBBLE_FLAT, PbblsIconSize.ROW, contentDescription = null, tint = colors.onSurface)
+                PbblsGlyphImage(PbblsGlyph.PEBBLE_FLAT, PbblsIconSize.ROW, contentDescription = null, tint = colors.onSurface)
             }
             Box(
                 modifier =
@@ -118,10 +119,11 @@ private fun StoneGallery() {
                         .background(colors.primaryContainer, SquirclePentagonShape),
                 contentAlignment = Alignment.Center,
             ) {
-                PbblsIconImage(
-                    PbblsIcon.PEBBLE_GLYPH_DOTTED,
+                PbblsGlyphImage(
+                    PbblsGlyph.PEBBLE_GLYPH,
                     PbblsIconSize.HERO,
                     contentDescription = null,
+                    form = GlyphForm.DOTTED,
                     tint = colors.onPrimaryContainer,
                 )
             }
