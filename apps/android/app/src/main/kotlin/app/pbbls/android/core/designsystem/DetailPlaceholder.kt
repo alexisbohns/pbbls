@@ -35,7 +35,7 @@ fun DetailPlaceholder(
     ) {
         PbblsGlyphImage(
             glyph = icon,
-            size = PbblsIconSize.HERO,
+            size = PbblsGlyphSize.HERO,
             contentDescription = null,
             form = form,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,

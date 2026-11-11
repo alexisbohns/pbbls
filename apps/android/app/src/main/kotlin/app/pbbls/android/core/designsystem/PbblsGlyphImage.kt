@@ -90,7 +90,7 @@ fun PbblsGlyphImage(
 @Composable
 fun PbblsGlyphImage(
     glyph: PbblsGlyph,
-    size: PbblsIconSize,
+    size: PbblsGlyphSize,
     contentDescription: String?,
     modifier: Modifier = Modifier,
     form: GlyphForm = GlyphForm.REGULAR,

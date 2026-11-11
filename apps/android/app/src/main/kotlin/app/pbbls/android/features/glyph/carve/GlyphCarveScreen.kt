@@ -57,7 +57,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.designsystem.PbblsGlyph
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
@@ -346,7 +346,7 @@ private fun CarvePillButton(
             painter = icon,
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(PbblsIconSize.ROW.toDp(LocalDensity.current)),
+            modifier = Modifier.size(PbblsGlyphSize.ROW.toDp(LocalDensity.current)),
         )
         Text(
             text = label,

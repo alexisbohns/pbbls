@@ -42,7 +42,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PageTypography
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.OnboardingPace
@@ -137,7 +137,7 @@ fun PaceStep(
                     ) {
                         PbblsGlyphImage(
                             pace.icon,
-                            PbblsIconSize.TILE,
+                            PbblsGlyphSize.TILE,
                             contentDescription = null,
                             tint = if (isSelected) colors.onPrimary else colors.onSurface,
                         )

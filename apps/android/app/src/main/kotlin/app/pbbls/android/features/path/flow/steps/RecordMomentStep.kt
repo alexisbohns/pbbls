@@ -57,7 +57,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.takeSafely
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.AttachedSnap
@@ -176,7 +176,7 @@ fun RecordMomentStep(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     PbblsGlyphImage(
                         glyph = PbblsGlyph.KARMA_DOT,
-                        size = PbblsIconSize.INLINE,
+                        size = PbblsGlyphSize.INLINE,
                         contentDescription = null,
                         tint = colors.primary,
                     )
@@ -341,7 +341,7 @@ private fun PhotoRow(
             TextButton(onClick = onChangePhoto, modifier = Modifier.heightIn(min = MinTarget), contentPadding = FlushStart) {
                 PbblsGlyphImage(
                     glyph = PbblsGlyph.CAMERA,
-                    size = PbblsIconSize.ROW,
+                    size = PbblsGlyphSize.ROW,
                     contentDescription = null,
                     tint = colors.primary,
                 )

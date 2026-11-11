@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.ui.SoulMark
@@ -55,7 +55,7 @@ private fun SoulCount(
         PbblsGlyphImage(
             glyph = PbblsGlyph.PEBBLE_ROUND,
             contentDescription = null,
-            size = PbblsIconSize.INLINE,
+            size = PbblsGlyphSize.INLINE,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(text = count.toString(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -130,7 +130,7 @@ fun SoulRow(
                         PbblsGlyphImage(
                             glyph = if (chosen) PbblsGlyph.CHECK_CIRCLE else PbblsGlyph.PLUS_CIRCLE,
                             contentDescription = null,
-                            size = PbblsIconSize.TOOLBAR,
+                            size = PbblsGlyphSize.TOOLBAR,
                             tint = if (chosen) colors.primary else colors.onSurface,
                         )
                     }
@@ -174,7 +174,7 @@ fun SoulAddRow(
                 PbblsGlyphImage(
                     glyph = PbblsGlyph.PLUS_CIRCLE,
                     contentDescription = null,
-                    size = PbblsIconSize.TOOLBAR,
+                    size = PbblsGlyphSize.TOOLBAR,
                     tint = colors.primary,
                 )
             },

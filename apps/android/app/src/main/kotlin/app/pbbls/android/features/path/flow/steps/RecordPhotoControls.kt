@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.Spacing
 
 /**
@@ -67,7 +67,7 @@ fun RecordPhotoControls(
             ) {
                 PbblsGlyphImage(
                     glyph = PbblsGlyph.CAMERA,
-                    size = PbblsIconSize.TOOLBAR,
+                    size = PbblsGlyphSize.TOOLBAR,
                     contentDescription = stringResource(R.string.capture_take_photo_a11y),
                 )
             }

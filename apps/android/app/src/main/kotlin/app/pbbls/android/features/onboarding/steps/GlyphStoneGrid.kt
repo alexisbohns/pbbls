@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.stone.StoneGridLayout
 import app.pbbls.android.core.model.Glyph
@@ -143,7 +143,7 @@ fun GlyphStoneGrid(
                     ) {
                         PbblsGlyphImage(
                             PbblsGlyph.PLUS_CIRCLE,
-                            if (folded) PbblsIconSize.ROW else PbblsIconSize.TILE,
+                            if (folded) PbblsGlyphSize.ROW else PbblsGlyphSize.TILE,
                             contentDescription = null,
                             tint = colors.onSurfaceVariant,
                         )

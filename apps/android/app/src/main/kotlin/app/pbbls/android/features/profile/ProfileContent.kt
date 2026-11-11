@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.model.GlyphShelf
 import app.pbbls.android.features.profile.components.YouAchievementsSection
@@ -80,7 +80,7 @@ fun ProfileContent(
                     IconButton(onClick = onOpenSettings) {
                         PbblsGlyphImage(
                             glyph = PbblsGlyph.SLIDER,
-                            size = PbblsIconSize.TOOLBAR,
+                            size = PbblsGlyphSize.TOOLBAR,
                             contentDescription = stringResource(R.string.settings_title),
                         )
                     }

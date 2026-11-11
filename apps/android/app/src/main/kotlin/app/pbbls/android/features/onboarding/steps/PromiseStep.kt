@@ -37,8 +37,8 @@ import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PageTypography
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PbblsGlyphState
-import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.glyph.form
@@ -116,7 +116,7 @@ fun PromiseStep(
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
                         PbblsGlyphImage(
                             PbblsGlyph.PEBBLE_ROUND,
-                            PbblsIconSize.TILE,
+                            PbblsGlyphSize.TILE,
                             contentDescription = null,
                             form = PbblsGlyph.PEBBLE_ROUND.form(PbblsGlyphState.SELECTED),
                             tint = colors.primary,

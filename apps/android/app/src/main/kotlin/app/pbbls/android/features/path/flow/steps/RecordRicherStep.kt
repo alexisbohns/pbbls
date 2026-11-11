@@ -38,7 +38,7 @@ import app.pbbls.android.core.designsystem.ListGroup
 import app.pbbls.android.core.designsystem.ListGroupItemScope
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.EmotionPalette
@@ -140,7 +140,7 @@ fun RecordRicherStep(
                 ) {
                     PbblsGlyphImage(
                         glyph = PbblsGlyph.KARMA_DOT,
-                        size = PbblsIconSize.INLINE,
+                        size = PbblsGlyphSize.INLINE,
                         contentDescription = null,
                         tint = colors.primary,
                     )
@@ -324,7 +324,7 @@ private fun CheckedMenuItem(
                 {
                     PbblsGlyphImage(
                         glyph = PbblsGlyph.CHECKMARK_DOT,
-                        size = PbblsIconSize.INLINE,
+                        size = PbblsGlyphSize.INLINE,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface,
                     )
@@ -354,7 +354,7 @@ private fun ListGroupItemScope.RicherRow(
         leadingContent = {
             PbblsGlyphImage(
                 glyph = icon,
-                size = PbblsIconSize.ROW,
+                size = PbblsGlyphSize.ROW,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )

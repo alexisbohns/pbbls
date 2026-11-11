@@ -44,7 +44,7 @@ import app.pbbls.android.core.data.AchievementMomentCard
 import app.pbbls.android.core.data.AchievementNotificationService
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.rememberReduceMotion
@@ -173,7 +173,7 @@ private fun MomentCard(
             ) {
                 PbblsGlyphImage(
                     glyph = PbblsGlyph.PEBBLE_GLOW_LG,
-                    size = PbblsIconSize.HERO,
+                    size = PbblsGlyphSize.HERO,
                     contentDescription = null,
                     tint = colors.onPrimaryContainer,
                 )

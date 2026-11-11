@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.ui.render.PebbleThumbnail
@@ -114,7 +114,7 @@ fun PebbleRow(
                 leadingIcon = {
                     PbblsGlyphImage(
                         glyph = PbblsGlyph.TRASH,
-                        size = PbblsIconSize.ROW,
+                        size = PbblsGlyphSize.ROW,
                         contentDescription = null,
                         tint = colors.error,
                     )

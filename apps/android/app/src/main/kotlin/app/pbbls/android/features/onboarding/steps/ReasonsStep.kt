@@ -30,8 +30,8 @@ import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PageTypography
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PbblsGlyphState
-import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.glyph.GlyphForm
@@ -90,10 +90,10 @@ fun ReasonsStep(
                             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                         ) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                PbblsGlyphImage(reason.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
+                                PbblsGlyphImage(reason.icon, PbblsGlyphSize.TILE, contentDescription = null, tint = ink)
                                 PbblsGlyphImage(
                                     PbblsGlyph.PEBBLE_ROUND,
-                                    PbblsIconSize.ROW,
+                                    PbblsGlyphSize.ROW,
                                     contentDescription = null,
                                     form = if (on) PbblsGlyph.PEBBLE_ROUND.form(PbblsGlyphState.SELECTED) else GlyphForm.REGULAR,
                                     tint = if (on) colors.primary else colors.outline,

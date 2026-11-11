@@ -47,7 +47,7 @@ import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.PageShapes
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.stone.SplitStone
 import app.pbbls.android.core.designsystem.stone.StoneGeometry
@@ -222,7 +222,7 @@ private fun RowCell(
         modifier.padding(start = if (first) 16.dp else 20.dp, top = 15.dp, end = 12.dp, bottom = 14.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        PbblsGlyphImage(shortcut.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
+        PbblsGlyphImage(shortcut.icon, PbblsGlyphSize.TILE, contentDescription = null, tint = ink)
         Spacer(Modifier.height(6.dp))
         Label(shortcut, ink, TextAlign.Start)
     }
@@ -239,7 +239,7 @@ private fun StackedCell(
         modifier.padding(start = 16.dp, top = 14.dp, end = 12.dp, bottom = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        PbblsGlyphImage(shortcut.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
+        PbblsGlyphImage(shortcut.icon, PbblsGlyphSize.TILE, contentDescription = null, tint = ink)
         Spacer(Modifier.width(12.dp))
         Label(shortcut, ink, TextAlign.Start)
     }
@@ -353,7 +353,7 @@ private fun PairCell(
         modifier.padding(start = 18.dp, top = 10.dp, end = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        PbblsGlyphImage(shortcut.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
+        PbblsGlyphImage(shortcut.icon, PbblsGlyphSize.TILE, contentDescription = null, tint = ink)
         Spacer(Modifier.width(10.dp))
         Label(shortcut, ink, TextAlign.Start)
     }

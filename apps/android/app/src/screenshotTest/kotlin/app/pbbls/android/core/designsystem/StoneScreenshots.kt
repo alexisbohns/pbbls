@@ -67,7 +67,7 @@ private fun StoneGallery() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(spacing.xs, Alignment.CenterVertically),
             ) {
-                PbblsGlyphImage(actions[k].first, PbblsIconSize.TILE, contentDescription = null, tint = colors.onPrimaryContainer)
+                PbblsGlyphImage(actions[k].first, PbblsGlyphSize.TILE, contentDescription = null, tint = colors.onPrimaryContainer)
                 Text(actions[k].second, style = type.labelLarge, color = colors.onPrimaryContainer, textAlign = TextAlign.Center)
             }
         }
@@ -110,7 +110,7 @@ private fun StoneGallery() {
                         .background(colors.surfaceContainer, StoneShape("chip-0", 16.dp)),
                 contentAlignment = Alignment.Center,
             ) {
-                PbblsGlyphImage(PbblsGlyph.PEBBLE_FLAT, PbblsIconSize.ROW, contentDescription = null, tint = colors.onSurface)
+                PbblsGlyphImage(PbblsGlyph.PEBBLE_FLAT, PbblsGlyphSize.ROW, contentDescription = null, tint = colors.onSurface)
             }
             Box(
                 modifier =
@@ -121,7 +121,7 @@ private fun StoneGallery() {
             ) {
                 PbblsGlyphImage(
                     PbblsGlyph.PEBBLE_GLYPH,
-                    PbblsIconSize.HERO,
+                    PbblsGlyphSize.HERO,
                     contentDescription = null,
                     form = GlyphForm.DOTTED,
                     tint = colors.onPrimaryContainer,
