@@ -7,7 +7,7 @@ import { formsOf, renderForm } from "./forms"
 import { filledArea } from "./lint"
 import type { IconRow } from "./manifest"
 
-const row: IconRow = { name: "ring", meaning: "A ring.", family: "ring", tags: { wrapper: ["circle"] }, variants: [], wave: "w", status: "candidate", migrated: [], replaces: { ios: [], android: [], web: [] } }
+const row: IconRow = { name: "ring", meaning: "A ring.", family: "ring", tags: { wrapper: ["circle"] }, wave: "w", status: "candidate", migrated: [], replaces: { ios: [], android: [], web: [] } }
 const source = (paths: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">\n${paths}\n</svg>\n`
 
@@ -124,7 +124,7 @@ describe("loadGlyphs", () => {
     const body = '  <path d="M4 4 L20 4 L20 20 L4 20 Z" data-role="body"/>'
     const files: Record<string, string> = { "ring.svg": source(body), "ring.solid.svg": source('  <path d="M4 4 L20 4 L20 20 L4 20 Z" fill="currentColor" stroke="none"/>'), "wip.svg": source(body) }
     for (const [name, text] of Object.entries(files)) writeFileSync(join(root, "src", name), text)
-    writeFileSync(join(root, "icons.json"), JSON.stringify({ icons: [{ ...row, variants: [] }, { ...row, name: "wip", status: "exploring" }] }))
+    writeFileSync(join(root, "icons.json"), JSON.stringify({ icons: [row, { ...row, name: "wip", status: "exploring" }] }))
     const glyphs = loadGlyphs(root)
     expect(glyphs.map((g) => g.name)).toEqual(["ring"])
     expect(Object.keys(glyphs[0]?.overrides ?? {})).toEqual(["solid"])
@@ -135,7 +135,7 @@ describe("loadGlyphs", () => {
     mkdirSync(join(root, "src"))
     writeFileSync(join(root, "src", "ring.svg"), source('  <path d="M4 4 L20 4 L20 20 L4 20 Z"/>'))
     writeFileSync(join(root, "src", "ring.dotted.svg"), source('  <path d="M4 4 L5 4 M7 4 L8 4"/>'))
-    writeFileSync(join(root, "icons.json"), JSON.stringify({ icons: [{ ...row, variants: [] }] }))
+    writeFileSync(join(root, "icons.json"), JSON.stringify({ icons: [row] }))
     const [ring] = loadGlyphs(root)
     expect(ring?.dotted).toEqual([{ d: "M4 4 L5 4 M7 4 L8 4", fill: false, evenOdd: false, stroke: true }])
     expect(ring ? formsOf(ring) : []).toEqual(["regular", "dotted"])

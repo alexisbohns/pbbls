@@ -7,10 +7,9 @@ import { filledArea, lint, type LintResult } from "./lint"
 
 const WAVE = "2026-10-test"
 
-const row = (name: string, variants: string[] = [], extra: Record<string, unknown> = {}) => ({
+const row = (name: string, extra: Record<string, unknown> = {}) => ({
   name,
   meaning: `${name}.`,
-  variants,
   tags: { category: ["sky"] },
   wave: WAVE,
   status: "candidate",
@@ -23,10 +22,8 @@ const svg = (...paths: string[]) => `${CANONICAL_ROOT}\n${paths.map((p) => `  ${
 
 const STROKE = '<path d="M4.5 13 C6.1 14.3 7.7 15.9 9.5 18.1 C11.9 13.5 14.6 9.8 17.9 6.8"/>'
 const STONE = '<path d="M11.9 18.1 C12.3 18 12.6 18.3 12.6 18.6 C12.6 19 12.2 19.2 11.9 19.2 C11.6 19.1 11.4 18.9 11.4 18.6 C11.4 18.2 11.7 18.1 12.2 18.1 Z" fill="currentColor" stroke="none"/>'
-const CARVED = '<path d="M4 4 L20 4 L20 20 L4 20 Z M10 10 L14 10 L14 14 L10 14 Z" fill="currentColor" fill-rule="evenodd" stroke="none"/>'
 
 const BASE = svg(STROKE)
-const TWIN = svg(STROKE, STONE)
 
 const CATEGORIES = { categories: [{ id: "sky", label: "Sky", description: "The sky." }, { id: "water", label: "Water", description: "Water." }] }
 
@@ -36,10 +33,10 @@ function run({ manifest, files, wave = true, categories = CATEGORIES }: Fixture)
   const root = mkdtempSync(join(tmpdir(), "icons-lint-"))
   mkdirSync(join(root, "src"))
   if (wave) mkdirSync(join(root, "waves", WAVE), { recursive: true })
-  const json = manifest ?? { icons: [row("home", ["active"]), row("trash")] }
+  const json = manifest ?? { icons: [row("home"), row("trash")] }
   writeFileSync(join(root, "icons.json"), JSON.stringify(json))
   if (categories !== null) writeFileSync(join(root, "categories.json"), typeof categories === "string" ? categories : JSON.stringify(categories))
-  const sources = files ?? { "home.svg": BASE, "home.active.svg": TWIN, "trash.svg": BASE }
+  const sources = files ?? { "home.svg": BASE, "trash.svg": BASE }
   for (const [name, text] of Object.entries(sources)) writeFileSync(join(root, "src", name), text)
   return lint(root)
 }
@@ -47,18 +44,10 @@ function run({ manifest, files, wave = true, categories = CATEGORIES }: Fixture)
 const rules = (r: LintResult) => r.errors.map((e) => e.rule)
 
 describe("lint", () => {
-  it("passes a base and its twin", () => {
+  it("passes two bases", () => {
     const r = run({})
     expect(r.errors).toEqual([])
     expect(r.warnings).toEqual([])
-  })
-
-  it("passes a carved stone and warns above 64 square units", () => {
-    const r = run({ files: { "home.svg": BASE, "home.active.svg": svg(STROKE, CARVED), "trash.svg": BASE } })
-    expect(r.errors).toEqual([])
-    expect(r.warnings).toHaveLength(1)
-    expect(r.warnings[0]).toMatchObject({ file: "home.active.svg", rule: "fill" })
-    expect(r.warnings[0]?.message).toContain("240.0")
   })
 
   describe("rejects", () => {
@@ -76,12 +65,9 @@ describe("lint", () => {
       ["a stroke=none on an unfilled path", { "trash.svg": svg('<path d="M4 4 L5 5" stroke="none"/>') }, "fill", "unfilled"],
       ["a stroke-dasharray", { "trash.svg": svg('<path d="M4 4 L5 5" stroke-dasharray="2 3"/>') }, "dash", "stroke-dasharray"],
       ["a non-canonical file", { "trash.svg": BASE.replace("</svg>\n", "</svg>") }, "canonical", "canonical"],
-      ["a fill-rule other than evenodd", { "home.active.svg": svg(STROKE, STONE.replace('fill="currentColor"', 'fill="currentColor" fill-rule="nonzero"')) }, "fill", "nonzero"],
-      ["a fill other than currentColor", { "home.active.svg": svg(STROKE, STONE.replace("currentColor", "#000")) }, "fill", "#000"],
-      ["four filled paths in a twin", { "home.active.svg": svg(STROKE, STONE, STONE, STONE, STONE) }, "fill", "4 filled paths"],
     ]
     it.each(cases)("%s", (_what, files, rule, fragment) => {
-      const all = { "home.svg": BASE, "home.active.svg": TWIN, "trash.svg": BASE, ...files }
+      const all = { "home.svg": BASE, "trash.svg": BASE, ...files }
       const r = run({ files: all })
       const hit = r.errors.filter((e) => e.rule === rule)
       expect(hit.length, JSON.stringify(r.errors)).toBeGreaterThan(0)
@@ -92,32 +78,21 @@ describe("lint", () => {
 
   describe("manifest", () => {
     it("a row without its file", () => {
-      const r = run({ manifest: { icons: [row("home", ["active"]), row("trash"), row("ghost")] } })
+      const r = run({ manifest: { icons: [row("home"), row("trash"), row("ghost")] } })
       expect(r.errors).toEqual([{ file: "icons.json", rule: "manifest", message: "ghost: no src/ghost.svg" }])
     })
     it("a file without a row", () => {
-      const r = run({ files: { "home.svg": BASE, "home.active.svg": TWIN, "trash.svg": BASE, "stray.svg": BASE } })
+      const r = run({ files: { "home.svg": BASE, "trash.svg": BASE, "stray.svg": BASE } })
       expect(r.errors).toEqual([{ file: "stray.svg", rule: "manifest", message: 'no row "stray" in icons.json' }])
     })
-    it("a listed variant without its file", () => {
-      const r = run({ manifest: { icons: [row("home", ["active", "lit-1"]), row("trash")] } })
-      expect(r.errors.map((e) => e.message)).toEqual(["home: no src/home.lit-1.svg for variant \"lit-1\""])
-    })
-    it("a twin file not listed in variants", () => {
-      const r = run({ files: { "home.svg": BASE, "home.active.svg": TWIN, "trash.svg": BASE, "trash.active.svg": TWIN } })
-      expect(r.errors).toEqual([{ file: "trash.active.svg", rule: "manifest", message: 'not listed in the variants of "trash"' }])
-    })
-    it("a variant outside the four", () => {
-      const r = run({ manifest: { icons: [row("home", ["active", "glow"]), row("trash")] }, files: { "home.svg": BASE, "home.active.svg": TWIN, "trash.svg": BASE, "home.glow.svg": TWIN } })
-      expect(rules(r)).toEqual(["manifest", "manifest"])
-      expect(r.errors.map((e) => e.message).join("\n")).toContain('variant "glow" is not one of active, lit-1, lit-2, lit-3')
-    })
-    it("a twin without its base", () => {
-      const r = run({ files: { "home.svg": BASE, "home.active.svg": TWIN, "trash.svg": BASE, "path.active.svg": TWIN } })
-      expect(r.errors.map((e) => e.message)).toEqual(['twin without its base: no row "path"'])
+    it("refuses a source that is neither the base, its dotted drawing nor an override", () => {
+      const r = run({ manifest: { icons: [row("home")] }, files: { "home.svg": BASE, "home.active.svg": BASE } })
+      expect(r.errors).toContainEqual(
+        expect.objectContaining({ file: "home.active.svg", rule: "manifest", message: '"active" is not a form: a source is <name>.svg, <name>.dotted.svg or <name>.<form>.svg' }),
+      )
     })
     it("a duplicate and a non-kebab name", () => {
-      const r = run({ manifest: { icons: [row("home", ["active"]), row("trash"), row("trash"), row("Bad_Name")] }, files: { "home.svg": BASE, "home.active.svg": TWIN, "trash.svg": BASE, "Bad_Name.svg": BASE } })
+      const r = run({ manifest: { icons: [row("home"), row("trash"), row("trash"), row("Bad_Name")] }, files: { "home.svg": BASE, "trash.svg": BASE, "Bad_Name.svg": BASE } })
       expect(r.errors.map((e) => e.message)).toEqual(['"trash" is listed twice', '"Bad_Name" is not a kebab-case name'])
     })
     it("a missing wave folder", () => {
@@ -125,24 +100,24 @@ describe("lint", () => {
       expect(r.errors.map((e) => e.message)).toEqual([`home: no folder waves/${WAVE}/`, `trash: no folder waves/${WAVE}/`])
     })
     it("an unknown status", () => {
-      const r = run({ manifest: { icons: [row("home", ["active"]), row("trash", [], { status: "done" })] } })
+      const r = run({ manifest: { icons: [row("home"), row("trash", { status: "done" })] } })
       expect(r.errors.map((e) => e.message)).toEqual(['trash: unknown status "done"'])
     })
     it("a row without a category", () => {
-      const r = run({ manifest: { icons: [row("home", ["active"]), row("trash", [], { tags: {} })] } })
+      const r = run({ manifest: { icons: [row("home"), row("trash", { tags: {} })] } })
       expect(r.errors).toEqual([{ file: "icons.json", rule: "category", message: "trash: no tags.category (1 to 3 ids from categories.json)" }])
     })
     it("an unknown category", () => {
-      const r = run({ manifest: { icons: [row("home", ["active"]), row("trash", [], { tags: { category: ["sky", "weather"] } })] } })
+      const r = run({ manifest: { icons: [row("home"), row("trash", { tags: { category: ["sky", "weather"] } })] } })
       expect(r.errors.map((e) => e.message)).toEqual(['trash: unknown category "weather"'])
     })
     it("more than three, or repeated, categories", () => {
       const four = { tags: { category: ["sky", "water", "sky", "water"] } }
-      const r = run({ manifest: { icons: [row("home", ["active"]), row("trash", [], four)] } })
+      const r = run({ manifest: { icons: [row("home"), row("trash", four)] } })
       expect(r.errors.map((e) => e.message)).toEqual(["trash: 4 categories, at most 3", 'trash: category "sky" twice', 'trash: category "water" twice'])
     })
     it("an exploring row needs no category", () => {
-      const r = run({ manifest: { icons: [row("home", ["active"]), row("trash", [], { status: "exploring", tags: {} })] } })
+      const r = run({ manifest: { icons: [row("home"), row("trash", { status: "exploring", tags: {} })] } })
       expect(r.errors).toEqual([])
     })
     it("a missing or malformed categories.json", () => {
@@ -213,7 +188,7 @@ describe("roles and overrides", () => {
     }
   })
 
-  it("does not apply the twin fill limits to override files", () => {
+  it("does not limit what an override fills", () => {
     const marks = [0, 1, 2, 3, 4].map((i) => `<path d="M${4 + i * 3} 12 L${5 + i * 3} 12" data-role="step" data-step="${i + 1}"/>`)
     const base = svg(BODY, ...marks)
     const filled = [0, 1, 2, 3, 4].map((i) => `<path d="M${4 + i * 3} 12 L${5 + i * 3} 12 L${5 + i * 3} 13 Z" fill="currentColor" stroke="none"/>`)
@@ -221,6 +196,15 @@ describe("roles and overrides", () => {
     const result = run({ manifest: { icons: [row("ring")] }, files: { "ring.svg": base, "ring.progress-5.svg": svg(...filled), "ring.solid.svg": big } })
     expect(result.errors).toEqual([])
     expect(result.warnings).toEqual([])
+  })
+
+  it("refuses a fill-rule other than evenodd and a fill other than currentColor, in an override too", () => {
+    const manifest = { icons: [row("ring")] }
+    const solid = (attrs: string) => svg(`<path d="M4 4 L20 4 L20 20 L4 20 Z" ${attrs}/>`)
+    const rule = run({ manifest, files: { "ring.svg": svg(BODY), "ring.solid.svg": solid('fill="currentColor" fill-rule="nonzero"') } }).errors.map((e) => e.message)
+    expect(rule).toContain('path 1 has fill-rule="nonzero", only evenodd is allowed')
+    const colour = run({ manifest, files: { "ring.svg": svg(BODY), "ring.solid.svg": solid('fill="#000"') } }).errors.map((e) => e.message)
+    expect(colour).toContain('path 1 has fill="#000", only currentColor is allowed')
   })
 
   it("refuses a name ending in a form word", () => {

@@ -108,9 +108,9 @@ export function loadGlyphs(packageRoot: string): GlyphData[] {
       let dotted: string | null = null
       for (const f of files) {
         const split = splitSourceName(f)
-        if (split?.base !== row.name || split.variant === null) continue
-        if (split.variant === DOTTED_FORM) dotted = readFileSync(join(dir, f), "utf8")
-        else if (isOverrideForm(split.variant)) overrides[split.variant] = readFileSync(join(dir, f), "utf8")
+        if (split?.base !== row.name || split.form === null) continue
+        if (split.form === DOTTED_FORM) dotted = readFileSync(join(dir, f), "utf8")
+        else if (isOverrideForm(split.form)) overrides[split.form] = readFileSync(join(dir, f), "utf8")
       }
       return buildGlyph(row, readFileSync(join(dir, `${row.name}.svg`), "utf8"), overrides, dotted)
     })

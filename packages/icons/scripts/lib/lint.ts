@@ -4,7 +4,7 @@ import { loadCategories, MAX_CATEGORIES } from "./categories"
 import { formatSvg, ROOT_ATTRIBUTES } from "./format"
 import { carveSolid } from "./carve"
 import { formKeysOf } from "./forms"
-import { DOTTED_FORM, isOverrideForm, loadManifest, STATUSES, VARIANTS, type IconRow, type Manifest } from "./manifest"
+import { DOTTED_FORM, isOverrideForm, loadManifest, STATUSES, type IconRow, type Manifest } from "./manifest"
 import { parseSvg, type ParsedPath, type ParsedSvg } from "./parse"
 import { readRoles } from "./roles"
 
@@ -22,10 +22,6 @@ export const WAVES_DIR = "waves"
 
 /** Every coordinate sits inside this closed range (the 1.75 stroke's margin). */
 export const RANGE: readonly [number, number] = [1.5, 22.5]
-/** A twin lights at most this many stones. */
-export const MAX_FILLED = 3
-/** A lit shape above this area (square units) is a warning: it is probably the whole icon. */
-export const WARN_AREA = 64
 /** A carved solid must keep at least this much filled area (square units). */
 export const MIN_CARVED_AREA = 4
 /** A name's last segment may not be one of these (spec D1). */
@@ -37,11 +33,11 @@ const COMMANDS = new Set(["M", "L", "C", "Q", "A", "Z"])
 /** Coordinates per command, after the arc's radii, rotation and flags. */
 const ARITY: Record<string, number> = { M: 2, L: 2, C: 6, Q: 4, A: 7, Z: 0 }
 
-/** `home.svg` → base `home`; `home.active.svg` → base `home`, variant `active`. */
-export function splitSourceName(file: string): { base: string; variant: string | null } | null {
+/** `home.svg` → base `home`; `home.solid.svg` → base `home`, form `solid`. */
+export function splitSourceName(file: string): { base: string; form: string | null } | null {
   const m = /^([^.]+)(?:\.([^.]+))?\.svg$/.exec(file)
   if (!m || m[1] === undefined) return null
-  return { base: m[1], variant: m[2] ?? null }
+  return { base: m[1], form: m[2] ?? null }
 }
 
 type Token = { command: string; numbers: number[] }
@@ -155,16 +151,16 @@ function lintRoot(parsed: ParsedSvg, file: string, errors: LintIssue[]): void {
   }
 }
 
-function lintPath(path: ParsedPath, index: number, file: string, isTwin: boolean, isOverride: boolean, result: LintResult): void {
+function lintPath(path: ParsedPath, index: number, file: string, isBase: boolean, result: LintResult): void {
   const where = `path ${index + 1}`
-  const { errors, warnings } = result
+  const { errors } = result
   for (const key of Object.keys(path.attrs)) {
     if (key === "stroke-dasharray") errors.push({ file, rule: "dash", message: `${where} has stroke-dasharray="${path.attrs[key] ?? ""}" (draw the dashes as short strokes)` })
     else if (!PATH_ATTRIBUTES.has(key)) errors.push({ file, rule: "elements", message: `${where} carries ${key}="${path.attrs[key] ?? ""}", which is not allowed` })
   }
   const fill = path.attrs.fill
   if (fill !== undefined && fill !== "currentColor") errors.push({ file, rule: "fill", message: `${where} has fill="${fill}", only currentColor is allowed` })
-  if (path.filled && !isTwin) errors.push({ file, rule: "fill", message: `${where} is filled in a base file; only a twin lights a stone` })
+  if (path.filled && isBase) errors.push({ file, rule: "fill", message: `${where} is filled in a base file; only an override carries a fill` })
   const rule = path.attrs["fill-rule"]
   if (rule !== undefined) {
     if (!path.filled) errors.push({ file, rule: "fill", message: `${where} has fill-rule on an unfilled path` })
@@ -190,13 +186,9 @@ function lintPath(path: ParsedPath, index: number, file: string, isTwin: boolean
       if (n < RANGE[0] || n > RANGE[1]) errors.push({ file, rule: "range", message: `${where}: ${n} (in ${command}) is outside ${RANGE[0]}..${RANGE[1]}` })
     }
   }
-  if (path.filled && tokens.every((t) => COMMANDS.has(t.command))) {
-    const area = filledArea(path.d, path.evenOdd)
-    if (area > WARN_AREA && !isOverride) warnings.push({ file, rule: "fill", message: `${where} fills ${area.toFixed(1)} square units, above ${WARN_AREA}: is the whole icon lit?` })
-  }
 }
 
-function lintSource(root: string, file: string, isTwin: boolean, isOverride: boolean, result: LintResult): void {
+function lintSource(root: string, file: string, isBase: boolean, result: LintResult): void {
   const text = readFileSync(join(root, SRC_DIR, file), "utf8")
   let parsed: ParsedSvg
   try {
@@ -207,9 +199,9 @@ function lintSource(root: string, file: string, isTwin: boolean, isOverride: boo
   }
   lintRoot(parsed, file, result.errors)
   if (parsed.paths.length === 0) result.errors.push({ file, rule: "elements", message: "no <path>" })
-  parsed.paths.forEach((path, i) => lintPath(path, i, file, isTwin, isOverride, result))
+  parsed.paths.forEach((path, i) => lintPath(path, i, file, isBase, result))
   // Path data outside the grammar cannot be measured or carved: its commands error already says so.
-  if (!isTwin && !result.errors.some((e) => e.file === file && e.rule === "commands")) {
+  if (isBase && !result.errors.some((e) => e.file === file && e.rule === "commands")) {
     const { roles, issues } = readRoles(parsed.paths)
     for (const message of issues) result.errors.push({ file, rule: "roles", message })
     if (roles.body.length > 0) {
@@ -228,8 +220,6 @@ function lintSource(root: string, file: string, isTwin: boolean, isOverride: boo
       }
     }
   }
-  const filled = parsed.paths.filter((p) => p.filled).length
-  if (filled > MAX_FILLED && !isOverride) result.errors.push({ file, rule: "fill", message: `${filled} filled paths; a twin lights at most ${MAX_FILLED}` })
   let canonical: string
   try {
     canonical = formatSvg(text)
@@ -293,34 +283,28 @@ function lintManifest(root: string, manifest: Manifest, files: string[], result:
     const wave = join(root, WAVES_DIR, row.wave)
     if (!existsSync(wave) || !statSync(wave).isDirectory()) errors.push({ file, rule: "manifest", message: `${row.name}: no folder ${WAVES_DIR}/${row.wave}/` })
     if (!files.includes(`${row.name}.svg`)) errors.push({ file, rule: "manifest", message: `${row.name}: no ${SRC_DIR}/${row.name}.svg` })
-    for (const variant of row.variants) {
-      if (!(VARIANTS as readonly string[]).includes(variant)) errors.push({ file, rule: "manifest", message: `${row.name}: variant "${variant}" is not one of ${VARIANTS.join(", ")}` })
-      else if (!files.includes(`${row.name}.${variant}.svg`)) errors.push({ file, rule: "manifest", message: `${row.name}: no ${SRC_DIR}/${row.name}.${variant}.svg for variant "${variant}"` })
-    }
   }
   for (const f of files) {
     const split = splitSourceName(f)
     if (!split) {
-      errors.push({ file: f, rule: "manifest", message: "not a <name>.svg or <name>.<variant>.svg file" })
+      errors.push({ file: f, rule: "manifest", message: "not a <name>.svg or <name>.<form>.svg file" })
       continue
     }
     const base = rows.get(split.base)
-    if (split.variant === null) {
+    if (split.form === null) {
       if (!base) errors.push({ file: f, rule: "manifest", message: `no row "${split.base}" in ${file}` })
       continue
     }
-    if (split.variant === DOTTED_FORM) {
+    if (split.form === DOTTED_FORM) {
       if (!base) errors.push({ file: f, rule: "manifest", message: `dotted drawing without its base: no row "${split.base}"` })
       continue
     }
-    if (isOverrideForm(split.variant)) {
+    if (isOverrideForm(split.form)) {
       if (!base) errors.push({ file: f, rule: "manifest", message: `override without its base: no row "${split.base}"` })
-      else if (!overrideAllowed(root, split.base, split.variant)) errors.push({ file: f, rule: "manifest", message: `override "${split.variant}" for a form ${split.base} does not have` })
+      else if (!overrideAllowed(root, split.base, split.form)) errors.push({ file: f, rule: "manifest", message: `override "${split.form}" for a form ${split.base} does not have` })
       continue
     }
-    if (!(VARIANTS as readonly string[]).includes(split.variant)) errors.push({ file: f, rule: "manifest", message: `variant "${split.variant}" is not one of ${VARIANTS.join(", ")}` })
-    if (!base) errors.push({ file: f, rule: "manifest", message: `twin without its base: no row "${split.base}"` })
-    else if (!base.variants.includes(split.variant)) errors.push({ file: f, rule: "manifest", message: `not listed in the variants of "${split.base}"` })
+    errors.push({ file: f, rule: "manifest", message: `"${split.form}" is not a form: a source is <name>.svg, <name>.dotted.svg or <name>.<form>.svg` })
   }
 }
 
@@ -355,9 +339,9 @@ export function lint(root: string): LintResult {
   }
   for (const f of files) {
     const split = splitSourceName(f)
-    const variant = split?.variant ?? null
-    lintSource(root, f, variant !== null, variant !== null && isOverrideForm(variant), result)
-    if (variant === DOTTED_FORM) lintDotted(root, f, result)
+    const form = split?.form ?? null
+    lintSource(root, f, form === null, result)
+    if (form === DOTTED_FORM) lintDotted(root, f, result)
   }
   return result
 }

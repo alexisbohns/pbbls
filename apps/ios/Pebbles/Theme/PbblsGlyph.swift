@@ -139,16 +139,12 @@ enum PbblsGlyph: String, CaseIterable, Sendable {
     case abstractUmbrella = "abstract-umbrella"
     /// Adjust things: a stylus crossed by three rings of cord.
     case abstractSign2 = "abstract-sign-2"
-    /// The marks a user scribbles on a stone: a dotted stone ring around a small scribble.
-    case pebbleGlyphDotted = "pebble-glyph-dotted"
     /// The marks a user scribbles on a stone: a dotted arc, a hooked stroke and a short tail.
     case abstractCurves = "abstract-curves"
     /// The marks a user scribbles on a stone: a zigzag over a row of dots.
     case abstractLines = "abstract-lines"
     /// The marks a user scribbles on a stone: a zigzag and a bar over a dotted swell.
     case abstractMi = "abstract-mi"
-    /// The marks a user scribbles on a stone: a dotted stone ring around a small scribble, the ring open on one side.
-    case pebbleGlyphDottedOpen = "pebble-glyph-dotted-open"
     /// The marks a user scribbles on a stone: a scribble over a dotted line.
     case glyphUnderlined = "glyph-underlined"
     /// The marks a user scribbles on a stone: a scribble that grows taller, over a dotted line.
@@ -590,8 +586,6 @@ enum PbblsGlyph: String, CaseIterable, Sendable {
     /// Appearance device: appearance: follow the device (trio).
     case sunsetSeaa = "sunset-seaa"
     /// Palette: the colour world the app wears.
-    case palette1 = "palette-1"
-    /// Palette: the colour world the app wears.
     case circlesJointure = "circles-jointure"
     /// Palette: the colour world the app wears.
     case broomstick = "broomstick"
@@ -600,7 +594,7 @@ enum PbblsGlyph: String, CaseIterable, Sendable {
     /// Palette: the colour world the app wears.
     case circlesJointure2 = "circles-jointure-2"
     /// Palette: the colour world the app wears.
-    case palette3 = "palette-3"
+    case palette = "palette"
     /// Palette: the colour world the app wears.
     case prism = "prism"
     /// Palette: the colour world the app wears.
