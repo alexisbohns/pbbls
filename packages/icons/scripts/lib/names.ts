@@ -24,8 +24,3 @@ export function camelName(name: string): string {
 export function constantName(name: string): string {
   return words(name).map((w) => w.toUpperCase()).join("_")
 }
-
-/** `home` → `home.svg` (the source file). */
-export function sourceFile(name: string): string {
-  return `${name}.svg`
-}

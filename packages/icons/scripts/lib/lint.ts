@@ -151,7 +151,7 @@ function lintRoot(parsed: ParsedSvg, file: string, errors: LintIssue[]): void {
   }
 }
 
-function lintPath(path: ParsedPath, index: number, file: string, isBase: boolean, isOverride: boolean, result: LintResult): void {
+function lintPath(path: ParsedPath, index: number, file: string, isBase: boolean, result: LintResult): void {
   const where = `path ${index + 1}`
   const { errors } = result
   for (const key of Object.keys(path.attrs)) {
@@ -188,7 +188,7 @@ function lintPath(path: ParsedPath, index: number, file: string, isBase: boolean
   }
 }
 
-function lintSource(root: string, file: string, isBase: boolean, isOverride: boolean, result: LintResult): void {
+function lintSource(root: string, file: string, isBase: boolean, result: LintResult): void {
   const text = readFileSync(join(root, SRC_DIR, file), "utf8")
   let parsed: ParsedSvg
   try {
@@ -199,7 +199,7 @@ function lintSource(root: string, file: string, isBase: boolean, isOverride: boo
   }
   lintRoot(parsed, file, result.errors)
   if (parsed.paths.length === 0) result.errors.push({ file, rule: "elements", message: "no <path>" })
-  parsed.paths.forEach((path, i) => lintPath(path, i, file, isBase, isOverride, result))
+  parsed.paths.forEach((path, i) => lintPath(path, i, file, isBase, result))
   // Path data outside the grammar cannot be measured or carved: its commands error already says so.
   if (isBase && !result.errors.some((e) => e.file === file && e.rule === "commands")) {
     const { roles, issues } = readRoles(parsed.paths)
@@ -340,7 +340,7 @@ export function lint(root: string): LintResult {
   for (const f of files) {
     const split = splitSourceName(f)
     const form = split?.form ?? null
-    lintSource(root, f, form === null, form !== null && isOverrideForm(form), result)
+    lintSource(root, f, form === null, result)
     if (form === DOTTED_FORM) lintDotted(root, f, result)
   }
   return result
