@@ -87,9 +87,9 @@ class GlyphFormsContractTest {
     @Test
     fun loadsTheWholeSetQuickly() {
         val start = System.nanoTime()
-        GlyphCatalog.read { GlyphTestData.resource.inputStream() }
+        GlyphCatalog.readIndex { GlyphTestData.resource.inputStream() }
         val ms = (System.nanoTime() - start) / 1_000_000
-        println("pbbls_glyphs.json decoded in $ms ms on the JVM")
+        println("pbbls_glyphs.json indexed in $ms ms on the JVM")
         assertTrue("$ms ms", ms < 2_000)
     }
 }

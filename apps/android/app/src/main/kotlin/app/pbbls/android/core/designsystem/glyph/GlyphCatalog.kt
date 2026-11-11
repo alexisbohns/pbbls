@@ -6,28 +6,26 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphState
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
 import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.concurrent.thread
 
 /**
- * `res/raw/pbbls_glyphs.json`, loaded once (spec §2; iOS `GlyphCatalog`):
- * `PebblesApp` installs and prewarms it off the main thread at launch;
- * `PbblsGlyphImage` installs it from its context if nothing did (previews,
+ * `res/raw/pbbls_glyphs.json`, indexed once and decoded a glyph at a time (spec
+ * §2; iOS `GlyphCatalog`): [load] scans the file into a [GlyphIndex], and a
+ * glyph's data is decoded and cached the first time it is asked for.
+ * `MainActivity` calls [load] off the main thread at launch; `PebblesTheme` and
+ * `PbblsGlyphImage` [install] it from their context if nothing did (previews,
  * Robolectric); plain JUnit installs the repository's file. A read before any
  * install gets empty data and is not cached, so a later install still loads.
  */
 object GlyphCatalog {
     private const val TAG = "PbblsGlyphs"
-    private val json = Json { ignoreUnknownKeys = true }
     private val lock = Any()
 
     @Volatile private var source: (() -> InputStream)? = null
 
-    @Volatile private var loaded: GlyphFile? = null
+    @Volatile private var index: GlyphIndex? = null
+    private val glyphs = ConcurrentHashMap<String, GlyphData>()
     private val vectors = ConcurrentHashMap<String, ImageVector>()
 
     /** Points the catalog at the app's raw resource, once. */
@@ -37,17 +35,18 @@ object GlyphCatalog {
         installSourceIfAbsent { resources.openRawResource(R.raw.pbbls_glyphs) }
     }
 
-    /** Loads the data on a background thread so the first glyph on screen does not wait for it. */
-    fun prewarm(context: Context) {
+    /** Installs the app's resource and indexes it, blocking until it is done (call it off the main thread). */
+    fun load(context: Context) {
         install(context)
-        thread(name = "pbbls-glyphs", isDaemon = true) { file() }
+        index()
     }
 
     /** Replaces the source and drops what was loaded from the previous one (tests). */
     fun installSource(open: () -> InputStream) =
         synchronized(lock) {
             source = open
-            loaded = null
+            index = null
+            glyphs.clear()
             vectors.clear()
         }
 
@@ -56,12 +55,22 @@ object GlyphCatalog {
             if (source == null) source = open
         }
 
-    val states: Map<String, List<String>> get() = file().states
+    val states: Map<String, List<String>> get() = index().states
 
-    fun glyph(glyph: PbblsGlyph): GlyphData =
-        file().glyphs[glyph.manifestName] ?: GlyphData.EMPTY.also {
-            if (loaded != null) Log.e(TAG, "no data for glyph ${glyph.manifestName}")
+    fun glyph(glyph: PbblsGlyph): GlyphData {
+        val name = glyph.manifestName
+        glyphs[name]?.let { return it }
+        val indexed = index()
+        val decoded =
+            runCatching { indexed.decode(name) }
+                .onFailure { Log.e(TAG, "glyph $name did not decode", it) }
+                .getOrNull()
+        if (decoded == null) {
+            if (indexed !== GlyphIndex.EMPTY) Log.e(TAG, "no data for glyph $name")
+            return GlyphData.EMPTY
         }
+        return glyphs.putIfAbsent(name, decoded) ?: decoded
+    }
 
     /** A form as a vector, cached per glyph and form (a vector scales: no size in the key). */
     fun vector(
@@ -72,28 +81,28 @@ object GlyphCatalog {
         vectors[key]?.let { return it }
         val built = GlyphRenderer.vector(key, GlyphRenderer.render(glyph(glyph), form))
         // Only cache once the data is there: a vector built before the install is empty.
-        return if (loaded != null) vectors.putIfAbsent(key, built) ?: built else built
+        return if (index != null) vectors.putIfAbsent(key, built) ?: built else built
     }
 
-    private fun file(): GlyphFile {
-        loaded?.let { return it }
+    private fun index(): GlyphIndex {
+        index?.let { return it }
         synchronized(lock) {
-            loaded?.let { return it }
-            val open = source ?: return GlyphFile.EMPTY.also { Log.w(TAG, "read before install") }
+            index?.let { return it }
+            val open = source ?: return GlyphIndex.EMPTY.also { Log.w(TAG, "read before install") }
             val start = System.nanoTime()
-            val read = read(open)
-            Log.i(TAG, "pbbls_glyphs.json loaded in ${(System.nanoTime() - start) / 1_000_000} ms")
-            loaded = read
+            val read = readIndex(open)
+            Log.i(TAG, "pbbls_glyphs.json indexed in ${(System.nanoTime() - start) / 1_000_000} ms (${read.size} glyphs)")
+            index = read
             return read
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    fun read(open: () -> InputStream): GlyphFile =
-        runCatching { open().use { json.decodeFromStream<GlyphFile>(it) } }
+    /** Reads and indexes the file; a file that cannot be read or scanned is logged and indexes as empty. */
+    fun readIndex(open: () -> InputStream): GlyphIndex =
+        runCatching { GlyphIndex.parse(open().bufferedReader(Charsets.UTF_8).use { it.readText() }) }
             .getOrElse { error ->
-                Log.e(TAG, "pbbls_glyphs.json did not decode", error)
-                GlyphFile.EMPTY
+                Log.e(TAG, "pbbls_glyphs.json did not index", error)
+                GlyphIndex.EMPTY
             }
 }
 

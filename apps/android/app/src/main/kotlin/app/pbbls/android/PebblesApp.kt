@@ -1,7 +1,6 @@
 package app.pbbls.android
 
 import android.app.Application
-import app.pbbls.android.core.designsystem.glyph.GlyphCatalog
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -14,8 +13,7 @@ import dagger.hilt.android.HiltAndroidApp
  * and supplies Coil's image loader; it does no other work at launch. It used to
  * call `Rive.init` here, a native-library load on every cold start for one
  * Welcome animation — Rive is gone since #856. Work added to an `onCreate`
- * here runs on the main thread before the first frame of every launch; the one
- * call there only starts the thread that decodes the glyph data.
+ * here runs on the main thread before the first frame of every launch.
  *
  * It no longer constructs services. Since #848 (which supersedes M38 D4) the
  * graph is Hilt's: `di/SupabaseModule` builds the client from `AppEnvironment`,
@@ -27,12 +25,6 @@ import dagger.hilt.android.HiltAndroidApp
 class PebblesApp :
     Application(),
     SingletonImageLoader.Factory {
-    override fun onCreate() {
-        super.onCreate()
-        // Decode the glyph data off the main thread before the first screen asks for it.
-        GlyphCatalog.prewarm(this)
-    }
-
     /**
      * Coil's singleton loader (used by AsyncImage) — the OkHttp network
      * fetcher is registered explicitly rather than via service-loader
