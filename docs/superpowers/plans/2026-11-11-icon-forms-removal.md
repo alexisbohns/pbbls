@@ -355,4 +355,8 @@ Expected: no output (true on 2026-11-11). If a site appears, move it to `PebbleG
 
 ## Lessons learned
 
-(Filled in after the PRs merge.)
+- **Removing an emitter removes nothing on disk.** `generate` clears only what a registered emitter owns, so the old catalog, drawables and enums had to be `git rm`'d in the same commit. The plan said so up front and both native parts landed with zero stray files.
+- **Parallel parts that edit the same lines: resolve once, let rerere replay it.** 7a and 7b both rewrote `EMITTERS`, the generated-files list, `GENERATED` in `rename.py` and `names.ts`. Building 7c on a branch that merged both recorded one resolution; when 7a squash-merged, merging `main` into 7b replayed it on all five files without a hand edit.
+- **The twins were already dead weight.** Deleting 905 sources left `glyphs.json`, both native resources and `forms-contract.json` byte-identical, which proves the forms never read a twin. A "this must not move" gate is a cheap way to make a deletion PR self-verifying.
+- **A removal leaves dead code one level down.** After the twins went, `lintPath`'s `isOverride`, `names.ts`'s `sourceFile` and `loadIcons`' source read had no reader left. Finish every removal with a sweep for parameters and helpers that lost their last caller.
+- **Plan fix:** `node scripts/arkaik/android-shots-manifest.mjs --check` runs from the repository root, not from `apps/android` (7b.2 Step 4 said otherwise).
