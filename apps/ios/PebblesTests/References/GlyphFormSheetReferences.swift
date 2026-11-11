@@ -20,8 +20,8 @@ extension References {
     /// The glyph set in its forms (icon forms spec §4): regular, solid, marked,
     /// and one family for the rest (each stepped glyph done, each parted
     /// glyph's first parts form, each dotted drawing), at 24 pt in manifest
-    /// order. Pages of at most 240 glyphs, as `IconSheetReferences` draws them:
-    /// a taller sheet comes back empty from `ImageRenderer`.
+    /// order. Pages of at most 240 glyphs: a taller sheet comes back empty from
+    /// `ImageRenderer`.
     @Suite("Glyph form sheet references") @MainActor
     struct GlyphFormSheetReferences {
         nonisolated static let perRow = 12

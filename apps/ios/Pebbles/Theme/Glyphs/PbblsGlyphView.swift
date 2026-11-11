@@ -26,7 +26,7 @@ struct PbblsGlyphView: View {
     }
 
     /// `PbblsGlyphView(.home, .tile)`: at a named size.
-    init(_ glyph: PbblsGlyph, _ size: PbblsIconSize, form: GlyphForm = .regular,
+    init(_ glyph: PbblsGlyph, _ size: PbblsGlyphSize, form: GlyphForm = .regular,
          relativeTo textStyle: Font.TextStyle = .body,
          style: AnyShapeStyle? = nil, label: LocalizedStringResource? = nil) {
         self.init(glyph, size: size.rawValue, form: form, relativeTo: textStyle, style: style, label: label)
