@@ -1,6 +1,6 @@
 # @pbbls/icons
 
-The hand-drawn Pebbles icon set and its generator. `src/<name>.svg` (and `<name>.<variant>.svg` twins: `active`, `lit-1`, `lit-2`, `lit-3`) plus the manifest `icons.json` are the single source of truth; the generator lints them and emits native outputs that are **committed** into each surface (the `packages/supabase/types/database.ts` precedent: Xcode Cloud and Gradle never run node). Design: `docs/superpowers/specs/2026-10-28-icon-package-design.md`; style rules: `DNA.md`.
+The hand-drawn Pebbles icon set and its generator. `src/<name>.svg` (with an optional `<name>.dotted.svg` and `<name>.<form>.svg` overrides) plus the manifest `icons.json` are the single source of truth; the generator lints them and emits native outputs that are **committed** into each surface (the `packages/supabase/types/database.ts` precedent: Xcode Cloud and Gradle never run node). Design: `docs/superpowers/specs/2026-10-28-icon-package-design.md`; style rules: `DNA.md`.
 
 ## Commands
 
@@ -30,8 +30,8 @@ The generator owns these paths outright and clears them before writing. Fix the 
 ## Adding or redrawing an icon
 
 1. Draw it on the 24-unit square in the DNA's line (`DNA.md`): paths only, absolute `M L C Q A Z`, every point inside `1.5..22.5`, no dashes, no transforms.
-2. Save it as `src/<kebab-name>.svg`; a twin as `src/<name>.active.svg` or `src/<name>.lit-N.svg`. Tag its paths with `data-role` (`body`, optionally `data-part`; `mark`; `step` with `data-step`; see DNA.md, Roles and forms); a dotted version goes in `src/<name>.dotted.svg`.
-3. Add (or edit) its row in `icons.json`: `name`, one-sentence `meaning`, `variants`, `wave`, `status` (`exploring` is linted but not emitted; `candidate` is emitted everywhere; `shipped` means every surface is in `migrated`, and the validator refuses it otherwise), `migrated` (the surfaces whose code no longer names the row's symbols; a surface is added in the same commit that deletes its last literal, so `lint:replaces` goes live with the code it polices) and `replaces` per surface (from the code, never from memory; one primary row per symbol, the per-site choice lives in the surface's migration spec).
+2. Save it as `src/<kebab-name>.svg`. Tag its paths with `data-role` (`body`, optionally `data-part`; `mark`; `step` with `data-step`; see DNA.md, Roles and forms); a dotted version goes in `src/<name>.dotted.svg`.
+3. Add (or edit) its row in `icons.json`: `name`, one-sentence `meaning`, `wave`, `status` (`exploring` is linted but not emitted; `candidate` is emitted everywhere; `shipped` means every surface is in `migrated`, and the validator refuses it otherwise), `migrated` (the surfaces whose code no longer names the row's symbols; a surface is added in the same commit that deletes its last literal, so `lint:replaces` goes live with the code it polices) and `replaces` per surface (from the code, never from memory; one primary row per symbol, the per-site choice lives in the surface's migration spec).
 4. `npm run format --workspace=@pbbls/icons && npm run lint --workspace=@pbbls/icons`, then fix every error **in the drawing**, never in the rule.
 5. `npm run generate --workspace=@pbbls/icons` and commit the sources with the outputs.
 
@@ -41,8 +41,8 @@ A wave (`waves/<yyyy-mm-slug>/`) records how a set was chosen: briefs, seed, eac
 
 - `build.py <wave>` builds the hub (`<wave>/gallery/index.html`, per-hand pages, the library and the lit series); `game-build.py <wave>` the blind pick-three game; `pick3-build.py <wave>` the round-3 picker; `rename-build.py <wave>` the rename sheet. `gallery/` is gitignored; share a hub as a private artifact.
 - `tally.py <wave>` prints a Borda count (3/2/1) of `results-picks.json` per id and context: an input to the verdict, never a substitute for it.
-- `extract.py <wave> [--only name,…]` writes `src/<name>.svg` and the twins from the wave's `library.svg` with the canonical root; run `format` after it.
+- `extract.py <wave> [--only name,…]` writes `src/<name>.svg` from the wave's `library.svg` with the canonical root; run `format` after it.
 
 ## When `Icons` is red
 
-`.github/workflows/icons.yml` runs lint, typecheck, Vitest, `check` and `lint:replaces` on every PR. A red `fresh` step means a committed output no longer matches its source: run `npm run generate --workspace=@pbbls/icons` and commit the result. Never edit the workflow or a generated file by hand to make it pass. A red `replaces` step names a file and line that still draws a replaced symbol: on iOS migrate the call site to `PbblsIcon`, or rename the string if it is not a symbol at all; never widen the pattern. On web the line is an import specifier: import the Pebbles component from `@pbbls/icons` instead and size it with `PBBLS_ICON_SIZE` (`apps/web/lib/icons/pbbls-icon.ts`); never edit the import scan to let it through.
+`.github/workflows/icons.yml` runs lint, typecheck, Vitest, `check` and `lint:replaces` on every PR. A red `fresh` step means a committed output no longer matches its source: run `npm run generate --workspace=@pbbls/icons` and commit the result. Never edit the workflow or a generated file by hand to make it pass. A red `replaces` step names a file and line that still draws a replaced symbol: migrate the call site to the glyph (`PbblsGlyph` on iOS and Android, the `@pbbls/icons` component on web), or rename the string if it is not a symbol at all; never widen the pattern. On web the line is an import specifier: import the Pebbles component from `@pbbls/icons` instead and size it with `PBBLS_ICON_SIZE` (`apps/web/lib/icons/pbbls-icon.ts`); never edit the import scan to let it through.

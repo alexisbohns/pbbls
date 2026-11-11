@@ -2,8 +2,7 @@
 """Write the package sources from a wave's library: python3 -I extract.py <wave> [--only name,...]
 
 For every entry of <wave>/library.json, copies the <name> symbol of <wave>/library.svg to
-src/<name>.svg, the <name>-active symbol to src/<name>.active.svg when hasActive, and each
-<name>-lit-N symbol to src/<name>.lit-N.svg, under the canonical root. Path attributes are
+src/<name>.svg under the canonical root. Path attributes are
 written in the canonical order (d, fill, fill-rule, stroke, then anything else verbatim)
 and path data passes through untouched; run `npm run format --workspace=@pbbls/icons` and
 `npm run lint` afterwards. A symbol holding anything but <path> children is refused.
@@ -61,23 +60,16 @@ def main() -> None:
     src.mkdir(exist_ok=True)
     library = json.loads((wave / "library.json").read_text(encoding="utf-8"))
     symbols = {m.group(1): m.group(2) for m in SYMBOL.finditer((wave / "library.svg").read_text(encoding="utf-8"))}
-    counts = {"base": 0, "active": 0, "lit": 0}
+    written = 0
     for entry in library:
         name = entry["name"]
         if only is not None and name not in only:
             continue
-        wanted = [(name, f"{name}.svg", "base")]
-        if entry.get("hasActive"):
-            wanted.append((f"{name}-active", f"{name}.active.svg", "active"))
-        for lit in entry.get("lit", []):
-            n = lit.rsplit("-lit-", 1)[1]
-            wanted.append((lit, f"{name}.lit-{n}.svg", "lit"))
-        for sid, filename, kind in wanted:
-            if sid not in symbols:
-                raise SystemExit(f"{name}: no symbol {sid} in library.svg")
-            (src / filename).write_text(symbol_file(sid, symbols[sid]), encoding="utf-8")
-            counts[kind] += 1
-    print(f"wrote {counts['base']} bases, {counts['active']} active twins, {counts['lit']} lit twins to {src}")
+        if name not in symbols:
+            raise SystemExit(f"{name}: no symbol {name} in library.svg")
+        (src / f"{name}.svg").write_text(symbol_file(name, symbols[name]), encoding="utf-8")
+        written += 1
+    print(f"wrote {written} drawings to {src}")
 
 
 if __name__ == "__main__":

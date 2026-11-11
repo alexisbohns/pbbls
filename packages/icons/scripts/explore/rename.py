@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Rename glyphs everywhere: python3 -I rename.py <repo root> <renames.json>
 
-Moves src/<old>.svg and every src/<old>.<variant>.svg, renames the icons.json
+Moves src/<old>.svg and its dotted drawing and overrides, renames the icons.json
 row, and rewrites hand-written call sites under apps/ in each surface's
 spelling (React PascalCase, Swift camelCase, Kotlin CONSTANT, the kebab name in
-strings), twins included. Generated files are left alone: run generate after.
+strings). Generated files are left alone: run generate after.
 """
 import json
 import re
@@ -20,7 +20,6 @@ GENERATED = (
     "apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsGlyph.kt",
     "apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsGlyphState.kt",
 )
-SUFFIXES = ("", ".active", ".lit-1", ".lit-2", ".lit-3")
 
 
 def words(name):
@@ -45,11 +44,12 @@ def main():
     manifest = manifest_file.read_text(encoding="utf-8")
     pairs = []
     for old, new in renames.items():
-        for suffix in SUFFIXES:
-            f = src / f"{old}{suffix}.svg"
+        sources = [src / f"{old}.svg"] + sorted(src.glob(f"{old}.*.svg"))
+        for f in sources:
             if f.exists():
+                suffix = f.name[len(old) : -len(".svg")]
                 f.rename(src / f"{new}{suffix}.svg")
-            pairs.append((old + suffix, new + suffix))
+        pairs.append((old, new))
         manifest = manifest.replace(f'"name": "{old}"', f'"name": "{new}"')
     manifest_file.write_text(manifest, encoding="utf-8")
     subs = []
